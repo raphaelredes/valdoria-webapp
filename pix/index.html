@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PIX - Lendas de Valdoria</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --bg2: #16213e;
+            --bg-card: #1e2a45;
+            --gold: #d4af37;
+            --gold-light: #f5d97e;
+            --green: #2ecc71;
+            --text: #e0e0e0;
+            --text-dim: #8899aa;
+            --parchment: #f5f0e0;
+            --qr-dark: #1a1a2e;
+            --border: rgba(212, 175, 55, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow-y: auto;
+        }
+
+        .header {
+            width: 100%;
+            padding: 14px 16px 10px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg2), transparent);
+        }
+        .header h1 {
+            font-size: 16px;
+            color: var(--gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .header .subtitle {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 360px;
+            padding: 0 16px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* QR Code Container */
+        .qr-wrapper {
+            background: var(--parchment);
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+        #qr-container {
+            width: 220px;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #qr-container img, #qr-container canvas {
+            display: block !important;
+            width: 220px !important;
+            height: 220px !important;
+        }
+
+        /* Amount Display */
+        .amount-display {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gold);
+            text-align: center;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Info Card */
+        .info-card {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .info-row + .info-row {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .info-label {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+        .info-value {
+            font-size: 13px;
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Copy Section */
+        .copy-section {
+            width: 100%;
+        }
+        .copy-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-align: center;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .code-box {
+            width: 100%;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            word-break: break-all;
+            line-height: 1.4;
+            max-height: 80px;
+            overflow-y: auto;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-copy {
+            background: linear-gradient(135deg, var(--gold), #c4a035);
+            color: var(--bg);
+        }
+        .btn-copy:active {
+            transform: scale(0.97);
+        }
+        .btn-copy.copied {
+            background: linear-gradient(135deg, var(--green), #27ae60);
+            color: #fff;
+        }
+        .btn-close {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+        .btn-close:active {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Error State */
+        .error-msg {
+            text-align: center;
+            color: #e74c3c;
+            font-size: 14px;
+            padding: 40px 20px;
+        }
+
+        /* Scan instruction */
+        .scan-hint {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-align: center;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Pagamento PIX</h1>
+        <div class="subtitle">Lendas de Valdoria</div>
+    </div>
+
+    <div class="content" id="main-content">
+        <!-- Populated by JavaScript -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        // Telegram WebApp SDK
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const brcode = params.get('code');
+        const amount = params.get('amount') || '';
+        const txid = params.get('txid') || '';
+        const keyDisplay = params.get('key') || '';
+        const keyType = params.get('key_type') || '';
+
+        const content = document.getElementById('main-content');
+
+        if (!brcode) {
+            content.innerHTML = '<div class="error-msg">Nenhum codigo PIX recebido.<br>Volte e tente novamente.</div>' +
+                '<button class="btn btn-close" onclick="closePage()">Fechar</button>';
+            return;
+        }
+
+        // Build UI
+        let html = '';
+
+        // QR Code
+        html += '<div class="qr-wrapper"><div id="qr-container"></div></div>';
+
+        // Scan hint
+        html += '<div class="scan-hint">Aponte a camera do app do banco para o QR acima</div>';
+
+        // Amount
+        if (amount) {
+            html += '<div class="amount-display">' + escapeHtml(amount) + '</div>';
+        }
+
+        // Info card
+        html += '<div class="info-card">';
+        if (keyType && keyDisplay) {
+            html += '<div class="info-row"><span class="info-label">Chave PIX (' +
+                escapeHtml(keyType) + ')</span><span class="info-value">' +
+                escapeHtml(keyDisplay) + '</span></div>';
+        }
+        if (txid) {
+            html += '<div class="info-row"><span class="info-label">Referencia</span>' +
+                '<span class="info-value">' + escapeHtml(txid) + '</span></div>';
+        }
+        html += '</div>';
+
+        // Copy section
+        html += '<div class="copy-section">' +
+            '<div class="copy-label">Codigo Pix Copia e Cola</div>' +
+            '<div class="code-box" id="code-text">' + escapeHtml(brcode) + '</div>' +
+            '</div>';
+
+        // Buttons
+        html += '<button class="btn btn-copy" id="btn-copy" onclick="copyCode()">Copiar Codigo PIX</button>';
+        html += '<button class="btn btn-close" onclick="closePage()">Fechar</button>';
+
+        content.innerHTML = html;
+
+        // Generate QR Code
+        try {
+            new QRCode(document.getElementById('qr-container'), {
+                text: brcode,
+                width: 220,
+                height: 220,
+                colorDark: '#1a1a2e',
+                colorLight: '#f5f0e0',
+                correctLevel: QRCode.CorrectLevel.M,
+            });
+        } catch (e) {
+            document.getElementById('qr-container').innerHTML =
+                '<div style="color:#e74c3c;font-size:12px;text-align:center;padding:20px;">' +
+                'Erro ao gerar QR Code.<br>Use o codigo abaixo.</div>';
+        }
+
+        // Copy to clipboard
+        window.copyCode = function() {
+            var btn = document.getElementById('btn-copy');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(brcode).then(function() {
+                    showCopied(btn);
+                }).catch(function() {
+                    fallbackCopy(btn);
+                });
+            } else {
+                fallbackCopy(btn);
+            }
+        };
+
+        function fallbackCopy(btn) {
+            var textarea = document.createElement('textarea');
+            textarea.value = brcode;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showCopied(btn);
+            } catch (e) {
+                btn.textContent = 'Erro ao copiar';
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showCopied(btn) {
+            btn.textContent = 'Copiado!';
+            btn.classList.add('copied');
+            setTimeout(function() {
+                btn.textContent = 'Copiar Codigo PIX';
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+
+        window.closePage = function() {
+            if (tg) {
+                tg.close();
+            } else {
+                window.close();
+            }
+        };
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    })();
+    </script>
+</body>
+</html>
