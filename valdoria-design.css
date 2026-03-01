@@ -1,33 +1,33 @@
 /* ═══════════════════════════════════════════════════════════════
-   VALDORIA DESIGN SYSTEM v2.0
+   VALDORIA DESIGN SYSTEM v3.0
    Design language for all Lendas de Valdoria webapps.
-   Derived from the project logo: gold, crimson, silver on dark navy.
-   RPG / D&D fantasy aesthetic with depth, glow, and atmosphere.
+   Derived from the project logo: bronze gold, burgundy, steel
+   on warm dark charcoal. Medieval fantasy aesthetic.
    ═══════════════════════════════════════════════════════════════ */
 
 /* ─── COLOR TOKENS ─── */
 :root {
-    /* Backgrounds — dark navy/indigo hierarchy */
-    --v-bg:            #0e0e1a;
-    --v-bg-raised:     #141428;
-    --v-bg-accent:     #0f3460;
-    --v-bg-card:       #17172e;
-    --v-bg-card-hover: #1e1e3a;
+    /* Backgrounds — warm dark charcoal (from logo background) */
+    --v-bg:            #2b2830;
+    --v-bg-raised:     #332f38;
+    --v-bg-accent:     #4a2020;
+    --v-bg-card:       #302c35;
+    --v-bg-card-hover: #3a3540;
 
-    /* Gold — primary brand */
-    --v-gold:          #d4af37;
-    --v-gold-dim:      #a6882b;
-    --v-gold-light:    #f5d97e;
-    --v-gold-glow:     rgba(212, 175, 55, 0.4);
+    /* Gold — primary brand (bronze/antique gold from shield ornaments) */
+    --v-gold:          #c4953a;
+    --v-gold-dim:      #9a7530;
+    --v-gold-light:    #dbb668;
+    --v-gold-glow:     rgba(196, 149, 58, 0.4);
 
-    /* Crimson — secondary brand */
-    --v-crimson:       #8b2232;
-    --v-crimson-light: #c0392b;
-    --v-crimson-glow:  rgba(139, 34, 50, 0.35);
+    /* Crimson — secondary brand (burgundy from shield & "Valdória" text) */
+    --v-crimson:       #7b2020;
+    --v-crimson-light: #a03030;
+    --v-crimson-glow:  rgba(123, 32, 32, 0.35);
 
-    /* Silver — tertiary brand */
-    --v-silver:        #b8c4d0;
-    --v-silver-dim:    #6b7b8d;
+    /* Silver — tertiary brand (steel gray from sword blade) */
+    --v-silver:        #b0b8c0;
+    --v-silver-dim:    #707880;
 
     /* Text — warm parchment tones */
     --v-text:          #e0d6c8;
@@ -48,8 +48,8 @@
     --v-rarity-legendary: #ff9800;
 
     /* Structural */
-    --v-border:        #2a2a4a;
-    --v-border-gold:   rgba(212, 175, 55, 0.25);
+    --v-border:        #3e3845;
+    --v-border-gold:   rgba(196, 149, 58, 0.25);
     --v-radius:        10px;
     --v-radius-sm:     6px;
     --v-radius-lg:     14px;
@@ -62,8 +62,8 @@
     /* Shadows */
     --v-shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.4);
     --v-shadow-md:     0 4px 16px rgba(0, 0, 0, 0.5);
-    --v-shadow-gold:   0 0 12px rgba(212, 175, 55, 0.25);
-    --v-shadow-glow:   0 0 20px rgba(212, 175, 55, 0.15);
+    --v-shadow-gold:   0 0 12px rgba(196, 149, 58, 0.25);
+    --v-shadow-glow:   0 0 20px rgba(196, 149, 58, 0.15);
 
     /* Transitions */
     --v-transition:      0.2s ease;
@@ -87,7 +87,7 @@ body {
     user-select: none;
     -webkit-user-select: none;
     /* Atmospheric radial gradient — depth */
-    background: radial-gradient(ellipse at 50% 0%, #1a1a3a 0%, var(--v-bg) 70%);
+    background: radial-gradient(ellipse at 50% 0%, #352f38 0%, var(--v-bg) 70%);
     background-attachment: fixed;
 }
 
@@ -108,14 +108,14 @@ body::after {
     color: var(--v-gold);
     letter-spacing: 2px;
     text-transform: uppercase;
-    text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    text-shadow: 0 0 10px rgba(196, 149, 58, 0.3);
 }
 
 .v-title {
     font-size: 16px;
     font-weight: 700;
     color: var(--v-gold);
-    text-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+    text-shadow: 0 0 8px rgba(196, 149, 58, 0.2);
 }
 
 .v-title-sm {
@@ -123,7 +123,7 @@ body::after {
     font-weight: 600;
     color: var(--v-gold);
     margin-bottom: 4px;
-    text-shadow: 0 0 6px rgba(212, 175, 55, 0.15);
+    text-shadow: 0 0 6px rgba(196, 149, 58, 0.15);
 }
 
 .v-subtitle {
@@ -152,7 +152,7 @@ body::after {
 
 /* ─── HEADER ─── */
 .v-header {
-    background: linear-gradient(180deg, #1a1a38 0%, #0e0e22 100%);
+    background: linear-gradient(180deg, #352f38 0%, #252228 100%);
     padding: 16px 16px 12px;
     text-align: center;
     border-bottom: 1px solid var(--v-border-gold);
@@ -179,7 +179,7 @@ body::after {
     letter-spacing: 3px;
     text-transform: uppercase;
     margin-bottom: 8px;
-    text-shadow: 0 0 15px rgba(212, 175, 55, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 0 15px rgba(196, 149, 58, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
     font-weight: 800;
 }
 
@@ -195,13 +195,13 @@ body::after {
     width: 28px;
     height: 4px;
     border-radius: 2px;
-    background: rgba(42, 42, 74, 0.8);
+    background: rgba(62, 56, 69, 0.8);
     transition: all 0.4s ease;
 }
 
 .v-progress-dot.active {
     background: var(--v-gold);
-    box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+    box-shadow: 0 0 8px rgba(196, 149, 58, 0.5);
 }
 
 .v-progress-dot.done {
@@ -218,7 +218,7 @@ body::after {
 
 /* ─── CARDS ─── */
 .v-card {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #12122a 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     padding: 12px;
@@ -246,8 +246,8 @@ body::after {
 
 .v-card.selected {
     border-color: var(--v-gold);
-    background: linear-gradient(165deg, #1e1e3a 0%, #14142e 100%);
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2), 0 0 4px rgba(212, 175, 55, 0.15), inset 0 1px 0 rgba(212, 175, 55, 0.1);
+    background: linear-gradient(165deg, #38333f 0%, #2d2932 100%);
+    box-shadow: 0 0 15px rgba(196, 149, 58, 0.2), 0 0 4px rgba(196, 149, 58, 0.15), inset 0 1px 0 rgba(196, 149, 58, 0.1);
 }
 
 .v-card-icon {
@@ -274,7 +274,7 @@ body::after {
     font-size: 11px;
     color: var(--v-gold);
     margin-top: 3px;
-    text-shadow: 0 0 8px rgba(212, 175, 55, 0.15);
+    text-shadow: 0 0 8px rgba(196, 149, 58, 0.15);
 }
 
 /* Card grid — 2 columns default */
@@ -304,18 +304,18 @@ body::after {
 
 .v-btn-primary {
     background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
-    color: #0e0e1a;
+    color: #2b2830;
     padding: 12px 20px;
     border-radius: var(--v-radius);
     font-weight: 700;
     letter-spacing: 0.5px;
-    box-shadow: 0 3px 12px rgba(212, 175, 55, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    box-shadow: 0 3px 12px rgba(196, 149, 58, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .v-btn-primary:active {
     background: var(--v-gold-dim);
-    box-shadow: 0 1px 6px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 1px 6px rgba(196, 149, 58, 0.2);
 }
 
 .v-btn-secondary {
@@ -331,7 +331,7 @@ body::after {
 }
 
 .v-btn-danger {
-    background: linear-gradient(135deg, var(--v-crimson), #6b1a28);
+    background: linear-gradient(135deg, var(--v-crimson), #5a1818);
     color: var(--v-text);
     padding: 10px 20px;
     border-radius: var(--v-radius);
@@ -347,7 +347,7 @@ body::after {
 }
 
 .v-toggle-item {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #12122a 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     padding: 10px 12px;
@@ -362,8 +362,8 @@ body::after {
 
 .v-toggle-item.selected {
     border-color: var(--v-gold);
-    background: linear-gradient(165deg, #1e1e3a 0%, #14142e 100%);
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+    background: linear-gradient(165deg, #38333f 0%, #2d2932 100%);
+    box-shadow: 0 0 10px rgba(196, 149, 58, 0.15);
 }
 
 .v-toggle-item.disabled {
@@ -388,7 +388,7 @@ body::after {
     border-color: var(--v-gold);
     background: var(--v-gold);
     color: #000;
-    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 0 8px rgba(196, 149, 58, 0.4);
 }
 
 .v-toggle-label {
@@ -401,7 +401,7 @@ body::after {
     color: var(--v-gold);
     margin-bottom: 10px;
     font-weight: 600;
-    text-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+    text-shadow: 0 0 8px rgba(196, 149, 58, 0.2);
 }
 
 /* ─── INPUTS ─── */
@@ -420,7 +420,7 @@ body::after {
 
 .v-input:focus {
     border-color: var(--v-gold);
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+    box-shadow: 0 0 10px rgba(196, 149, 58, 0.15);
 }
 
 .v-input::placeholder {
@@ -443,7 +443,7 @@ body::after {
 
 .v-select:focus {
     border-color: var(--v-gold);
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+    box-shadow: 0 0 10px rgba(196, 149, 58, 0.15);
 }
 
 /* ─── BADGES ─── */
@@ -461,7 +461,7 @@ body::after {
 }
 
 .v-badge-mp {
-    background: #1a1a3a;
+    background: #1a2a3a;
     color: #6b9bff;
 }
 
@@ -520,7 +520,7 @@ body::after {
 
 /* ─── SUMMARY SECTION ─── */
 .v-summary {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #12122a 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
     border: 1px solid var(--v-border-gold);
     border-radius: var(--v-radius);
     padding: 14px;
@@ -533,7 +533,7 @@ body::after {
     color: var(--v-gold);
     font-weight: 600;
     margin-bottom: 8px;
-    text-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+    text-shadow: 0 0 8px rgba(196, 149, 58, 0.2);
 }
 
 .v-summary-line {
@@ -548,12 +548,12 @@ body::after {
 
 /* ─── STAT PREVIEW ─── */
 .v-stat-preview {
-    background: linear-gradient(165deg, var(--v-bg-raised) 0%, #0c0c1e 100%);
+    background: linear-gradient(165deg, var(--v-bg-raised) 0%, #252228 100%);
     border: 1px solid var(--v-border-gold);
     border-radius: var(--v-radius);
     padding: 12px;
     margin-top: 12px;
-    box-shadow: inset 0 1px 0 rgba(212, 175, 55, 0.05);
+    box-shadow: inset 0 1px 0 rgba(196, 149, 58, 0.05);
 }
 
 .v-stat-row {
@@ -576,7 +576,7 @@ body::after {
 .v-stat-bonus {
     color: var(--v-gold);
     font-size: 11px;
-    text-shadow: 0 0 6px rgba(212, 175, 55, 0.2);
+    text-shadow: 0 0 6px rgba(196, 149, 58, 0.2);
 }
 
 .v-stat-mod {
@@ -611,8 +611,8 @@ body::after {
 }
 
 @keyframes v-goldPulse {
-    0%, 100% { box-shadow: 0 0 12px rgba(212, 175, 55, 0.25); }
-    50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.45), 0 0 40px rgba(212, 175, 55, 0.15); }
+    0%, 100% { box-shadow: 0 0 12px rgba(196, 149, 58, 0.25); }
+    50% { box-shadow: 0 0 20px rgba(196, 149, 58, 0.45), 0 0 40px rgba(196, 149, 58, 0.15); }
 }
 
 /* ─── SCROLLBAR (webkit) ─── */

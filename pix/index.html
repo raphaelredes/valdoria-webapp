@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PIX - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="../valdoria-design.css?v=2">
+    <link rel="stylesheet" href="../valdoria-design.css?v=3">
     <style>
         body {
             display: flex;
@@ -33,7 +33,7 @@
             color: var(--v-gold);
             letter-spacing: 2px;
             text-transform: uppercase;
-            text-shadow: 0 0 15px rgba(212, 175, 55, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 0 15px rgba(196, 149, 58, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         .header .subtitle {
             font-size: 12px;
@@ -78,7 +78,7 @@
             font-weight: 700;
             color: var(--v-gold);
             text-align: center;
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            text-shadow: 0 0 10px rgba(196, 149, 58, 0.3);
         }
 
         /* Info Card */
@@ -198,7 +198,7 @@
         'use strict';
 
         const tg = window.Telegram && window.Telegram.WebApp;
-        const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#1a1a2e';
+        const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
         if (tg) {
             tg.ready();
             tg.expand();
@@ -249,7 +249,7 @@
 
         try {
             var cs = getComputedStyle(document.documentElement);
-            var qrDark = cs.getPropertyValue('--v-bg').trim() || '#1a1a2e';
+            var qrDark = cs.getPropertyValue('--v-bg').trim() || '#2b2830';
             var qrLight = cs.getPropertyValue('--v-parchment').trim() || '#f5f0e0';
             new QRCode(document.getElementById('qr-container'), {
                 text: brcode,
