@@ -5,31 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PIX - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../valdoria-design.css?v=2">
     <style>
-        :root {
-            --bg: #1a1a2e;
-            --bg2: #16213e;
-            --bg-card: #1e2a45;
-            --gold: #d4af37;
-            --gold-light: #f5d97e;
-            --green: #2ecc71;
-            --text: #e0e0e0;
-            --text-dim: #8899aa;
-            --parchment: #f5f0e0;
-            --qr-dark: #1a1a2e;
-            --border: rgba(212, 175, 55, 0.3);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            user-select: none;
-            -webkit-user-select: none;
             overflow-y: auto;
         }
 
@@ -37,17 +18,26 @@
             width: 100%;
             padding: 14px 16px 10px;
             text-align: center;
-            background: linear-gradient(180deg, var(--bg2), transparent);
+            background: linear-gradient(180deg, var(--v-bg-raised), transparent);
+            position: relative;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
         }
         .header h1 {
             font-size: 16px;
-            color: var(--gold);
+            color: var(--v-gold);
             letter-spacing: 2px;
             text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         .header .subtitle {
             font-size: 12px;
-            color: var(--text-dim);
+            color: var(--v-text-dim);
             margin-top: 4px;
         }
 
@@ -63,11 +53,11 @@
 
         /* QR Code Container */
         .qr-wrapper {
-            background: var(--parchment);
-            border: 2px solid var(--gold);
+            background: var(--v-parchment);
+            border: 2px solid var(--v-gold);
             border-radius: 12px;
             padding: 16px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            box-shadow: var(--v-shadow-glow);
         }
         #qr-container {
             width: 220px;
@@ -86,7 +76,7 @@
         .amount-display {
             font-size: 28px;
             font-weight: 700;
-            color: var(--gold);
+            color: var(--v-gold);
             text-align: center;
             text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
         }
@@ -94,8 +84,8 @@
         /* Info Card */
         .info-card {
             width: 100%;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            background: var(--v-bg-card);
+            border: 1px solid var(--v-border-gold);
             border-radius: 8px;
             padding: 12px;
         }
@@ -110,21 +100,19 @@
         }
         .info-label {
             font-size: 12px;
-            color: var(--text-dim);
+            color: var(--v-text-dim);
         }
         .info-value {
             font-size: 13px;
-            color: var(--text);
-            font-family: 'Courier New', monospace;
+            color: var(--v-text);
+            font-family: var(--v-font-mono);
         }
 
         /* Copy Section */
-        .copy-section {
-            width: 100%;
-        }
+        .copy-section { width: 100%; }
         .copy-label {
             font-size: 11px;
-            color: var(--text-dim);
+            color: var(--v-text-dim);
             text-align: center;
             margin-bottom: 6px;
             text-transform: uppercase;
@@ -132,13 +120,13 @@
         }
         .code-box {
             width: 100%;
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            background: var(--v-bg-raised);
+            border: 1px solid var(--v-border-gold);
+            border-radius: var(--v-radius-sm);
             padding: 10px;
-            font-family: 'Courier New', monospace;
+            font-family: var(--v-font-mono);
             font-size: 10px;
-            color: var(--text-dim);
+            color: var(--v-text-dim);
             word-break: break-all;
             line-height: 1.4;
             max-height: 80px;
@@ -160,20 +148,18 @@
             -webkit-tap-highlight-color: transparent;
         }
         .btn-copy {
-            background: linear-gradient(135deg, var(--gold), #c4a035);
-            color: var(--bg);
+            background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
+            color: var(--v-bg);
         }
-        .btn-copy:active {
-            transform: scale(0.97);
-        }
+        .btn-copy:active { transform: scale(0.97); }
         .btn-copy.copied {
-            background: linear-gradient(135deg, var(--green), #27ae60);
+            background: linear-gradient(135deg, var(--v-success), #27ae60);
             color: #fff;
         }
         .btn-close {
             background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-dim);
+            border: 1px solid var(--v-border-gold);
+            color: var(--v-text-dim);
         }
         .btn-close:active {
             background: rgba(255, 255, 255, 0.05);
@@ -182,7 +168,7 @@
         /* Error State */
         .error-msg {
             text-align: center;
-            color: #e74c3c;
+            color: var(--v-danger);
             font-size: 14px;
             padding: 40px 20px;
         }
@@ -190,7 +176,7 @@
         /* Scan instruction */
         .scan-hint {
             font-size: 12px;
-            color: var(--text-dim);
+            color: var(--v-text-dim);
             text-align: center;
             font-style: italic;
         }
@@ -211,11 +197,13 @@
     (function() {
         'use strict';
 
-        // Telegram WebApp SDK
         const tg = window.Telegram && window.Telegram.WebApp;
+        const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#1a1a2e';
         if (tg) {
             tg.ready();
             tg.expand();
+            tg.setHeaderColor(_vBg);
+            tg.setBackgroundColor(_vBg);
         }
 
         const params = new URLSearchParams(window.location.search);
@@ -233,21 +221,12 @@
             return;
         }
 
-        // Build UI
         let html = '';
-
-        // QR Code
         html += '<div class="qr-wrapper"><div id="qr-container"></div></div>';
-
-        // Scan hint
         html += '<div class="scan-hint">Aponte a camera do app do banco para o QR acima</div>';
-
-        // Amount
         if (amount) {
             html += '<div class="amount-display">' + escapeHtml(amount) + '</div>';
         }
-
-        // Info card
         html += '<div class="info-card">';
         if (keyType && keyDisplay) {
             html += '<div class="info-row"><span class="info-label">Chave PIX (' +
@@ -259,36 +238,33 @@
                 '<span class="info-value">' + escapeHtml(txid) + '</span></div>';
         }
         html += '</div>';
-
-        // Copy section
         html += '<div class="copy-section">' +
             '<div class="copy-label">Codigo Pix Copia e Cola</div>' +
             '<div class="code-box" id="code-text">' + escapeHtml(brcode) + '</div>' +
             '</div>';
-
-        // Buttons
         html += '<button class="btn btn-copy" id="btn-copy" onclick="copyCode()">Copiar Codigo PIX</button>';
         html += '<button class="btn btn-close" onclick="closePage()">Fechar</button>';
 
         content.innerHTML = html;
 
-        // Generate QR Code
         try {
+            var cs = getComputedStyle(document.documentElement);
+            var qrDark = cs.getPropertyValue('--v-bg').trim() || '#1a1a2e';
+            var qrLight = cs.getPropertyValue('--v-parchment').trim() || '#f5f0e0';
             new QRCode(document.getElementById('qr-container'), {
                 text: brcode,
                 width: 220,
                 height: 220,
-                colorDark: '#1a1a2e',
-                colorLight: '#f5f0e0',
+                colorDark: qrDark,
+                colorLight: qrLight,
                 correctLevel: QRCode.CorrectLevel.M,
             });
         } catch (e) {
             document.getElementById('qr-container').innerHTML =
-                '<div style="color:#e74c3c;font-size:12px;text-align:center;padding:20px;">' +
+                '<div style="color:var(--v-danger);font-size:12px;text-align:center;padding:20px;">' +
                 'Erro ao gerar QR Code.<br>Use o codigo abaixo.</div>';
         }
 
-        // Copy to clipboard
         window.copyCode = function() {
             var btn = document.getElementById('btn-copy');
             if (navigator.clipboard && navigator.clipboard.writeText) {

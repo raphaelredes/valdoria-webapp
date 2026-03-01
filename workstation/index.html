@@ -5,83 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Oficina de Artesanato - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../valdoria-design.css?v=2">
     <style>
-        :root {
-            --bg: #1a1a2e;
-            --bg2: #16213e;
-            --bg3: #0f3460;
-            --gold: #d4af37;
-            --gold-dim: #a6882b;
-            --text: #e0d6c8;
-            --text-dim: #9a918a;
-            --success: #4caf50;
-            --danger: #e74c3c;
-            --border: #2a2a4a;
-            --card: #1e1e3a;
-            --card-hover: #252550;
-            --radius: 10px;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-            padding-bottom: 80px;
-        }
+        body { padding-bottom: 80px; }
         .header {
-            background: linear-gradient(135deg, var(--bg2), var(--bg3));
+            background: linear-gradient(135deg, var(--v-bg-raised), var(--v-bg-accent));
             padding: 16px;
             text-align: center;
-            border-bottom: 2px solid var(--gold-dim);
+            border-bottom: 2px solid var(--v-gold-dim);
             position: sticky;
             top: 0;
             z-index: 100;
         }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
+        }
         .header h1 {
             font-size: 18px;
-            color: var(--gold);
+            color: var(--v-gold);
             margin-bottom: 4px;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         .header .stats {
             font-size: 12px;
-            color: var(--text-dim);
+            color: var(--v-text-dim);
         }
         .tabs {
             display: flex;
             overflow-x: auto;
             gap: 4px;
             padding: 10px 12px;
-            background: var(--bg2);
-            border-bottom: 1px solid var(--border);
+            background: var(--v-bg-raised);
+            border-bottom: 1px solid var(--v-border);
             -webkit-overflow-scrolling: touch;
         }
         .tabs::-webkit-scrollbar { display: none; }
         .tab {
             flex-shrink: 0;
             padding: 8px 14px;
-            border-radius: 20px;
+            border-radius: var(--v-radius-pill);
             font-size: 13px;
-            border: 1px solid var(--border);
-            background: var(--card);
-            color: var(--text-dim);
+            border: 1px solid var(--v-border);
+            background: var(--v-bg-card);
+            color: var(--v-text-dim);
             cursor: pointer;
             transition: all 0.2s;
             white-space: nowrap;
         }
         .tab.active {
-            background: var(--gold-dim);
+            background: var(--v-gold-dim);
             color: #fff;
-            border-color: var(--gold);
+            border-color: var(--v-gold);
         }
         .content { padding: 12px; }
 
         /* Recipe cards */
         .recipe-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
+            background: var(--v-bg-card);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius);
             padding: 12px;
             margin-bottom: 10px;
             cursor: pointer;
@@ -89,11 +75,11 @@
         }
         .recipe-card:active { transform: scale(0.98); }
         .recipe-card.selected {
-            border-color: var(--gold);
-            box-shadow: 0 0 12px rgba(212,175,55,0.2);
+            border-color: var(--v-gold);
+            box-shadow: var(--v-shadow-gold);
         }
-        .recipe-card.craftable { border-left: 3px solid var(--success); }
-        .recipe-card.missing { border-left: 3px solid var(--danger); }
+        .recipe-card.craftable { border-left: 3px solid var(--v-success); }
+        .recipe-card.missing { border-left: 3px solid var(--v-danger); }
         .recipe-header {
             display: flex;
             justify-content: space-between;
@@ -103,7 +89,7 @@
         .recipe-name {
             font-size: 15px;
             font-weight: 600;
-            color: var(--text);
+            color: var(--v-text);
         }
         .recipe-badge {
             font-size: 11px;
@@ -111,11 +97,11 @@
             border-radius: 12px;
             font-weight: 600;
         }
-        .badge-ready { background: var(--success); color: #fff; }
-        .badge-missing { background: var(--danger); color: #fff; }
+        .badge-ready { background: var(--v-success); color: #fff; }
+        .badge-missing { background: var(--v-danger); color: #fff; }
         .recipe-meta {
             font-size: 12px;
-            color: var(--text-dim);
+            color: var(--v-text-dim);
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
@@ -123,9 +109,9 @@
 
         /* Recipe detail panel */
         .detail-panel {
-            background: var(--bg2);
-            border: 1px solid var(--gold-dim);
-            border-radius: var(--radius);
+            background: var(--v-bg-raised);
+            border: 1px solid var(--v-gold-dim);
+            border-radius: var(--v-radius);
             padding: 14px;
             margin-top: 12px;
             display: none;
@@ -134,7 +120,7 @@
         .detail-title {
             font-size: 16px;
             font-weight: 700;
-            color: var(--gold);
+            color: var(--v-gold);
             margin-bottom: 10px;
         }
         .ingredient-row {
@@ -142,7 +128,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 6px 0;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--v-border);
             font-size: 13px;
         }
         .ingredient-row:last-child { border-bottom: none; }
@@ -153,12 +139,12 @@
             padding: 8px 0;
             font-size: 14px;
             font-weight: 600;
-            color: var(--gold);
+            color: var(--v-gold);
         }
         .output-row {
             padding: 10px 0;
             font-size: 14px;
-            color: var(--success);
+            color: var(--v-success);
             font-weight: 600;
         }
 
@@ -169,27 +155,27 @@
             left: 0;
             right: 0;
             padding: 12px 16px;
-            background: linear-gradient(transparent, var(--bg) 30%);
+            background: linear-gradient(transparent, var(--v-bg) 30%);
             z-index: 100;
         }
         .craft-btn {
             width: 100%;
             padding: 14px;
             border: none;
-            border-radius: var(--radius);
+            border-radius: var(--v-radius);
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
         }
         .craft-btn.enabled {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-            color: #1a1a2e;
+            background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
+            color: var(--v-bg);
         }
         .craft-btn.enabled:active { transform: scale(0.98); }
         .craft-btn.disabled {
-            background: var(--border);
-            color: var(--text-dim);
+            background: var(--v-border);
+            color: var(--v-text-dim);
             cursor: not-allowed;
         }
 
@@ -199,13 +185,13 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 12px;
-            background: var(--card);
+            background: var(--v-bg-card);
             border-radius: 8px;
             margin-bottom: 6px;
             font-size: 14px;
         }
         .material-qty {
-            color: var(--gold);
+            color: var(--v-gold);
             font-weight: 600;
         }
 
@@ -213,20 +199,14 @@
         .empty-state {
             text-align: center;
             padding: 40px 20px;
-            color: var(--text-dim);
+            color: var(--v-text-dim);
         }
         .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
 
-        /* Rarity colors */
-        .rarity-common { color: #b0b0b0; }
-        .rarity-uncommon { color: #4caf50; }
-        .rarity-rare { color: #2196f3; }
-        .rarity-very_rare { color: #9c27b0; }
-        .rarity-legendary { color: #ff9800; }
+        /* Rarity colors: use .v-rarity-* from valdoria-design.css */
 
         /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeIn 0.3s ease; }
+        .fade-in { animation: v-fadeIn 0.3s ease; }
     </style>
 </head>
 <body>
@@ -242,11 +222,12 @@
 
     <script>
     const tg = window.Telegram?.WebApp;
+    const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#1a1a2e';
     if (tg) {
         tg.ready();
         tg.expand();
-        tg.setHeaderColor('#1a1a2e');
-        tg.setBackgroundColor('#1a1a2e');
+        tg.setHeaderColor(_vBg);
+        tg.setBackgroundColor(_vBg);
     }
 
     let PAYLOAD = null;
@@ -297,7 +278,6 @@
         container.innerHTML = '';
         const toolKeys = Object.keys(PAYLOAD.tools);
 
-        // Materials tab always present
         toolKeys.forEach((tk, i) => {
             const t = PAYLOAD.tools[tk];
             const tab = document.createElement('div');
@@ -307,14 +287,12 @@
             container.appendChild(tab);
         });
 
-        // Add materials tab
         const matTab = document.createElement('div');
         matTab.className = 'tab';
         matTab.textContent = '📦 Materiais';
         matTab.onclick = () => selectTab('_materials', matTab);
         container.appendChild(matTab);
 
-        // Auto-select first
         if (toolKeys.length > 0) {
             selectTab(toolKeys[0], container.children[0]);
         } else {
@@ -369,7 +347,7 @@
                     <span>Lv.${r.min_level}</span>
                     <span>DC ${r.dc}</span>
                     <span>💰 ${r.cost_gp} GP</span>
-                    <span class="rarity-${r.rarity}">${RARITY_LABELS[r.rarity] || r.rarity}</span>
+                    <span class="v-rarity-${r.rarity}">${RARITY_LABELS[r.rarity] || r.rarity}</span>
                 </div>
             </div>
             <div class="detail-panel" id="detail-${r.id}">
@@ -397,10 +375,10 @@
 
         return `
             <div class="detail-title">📋 ${recipe.name}</div>
-            <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">
+            <div style="font-size:13px;color:var(--v-text-dim);margin-bottom:8px;">
                 Resultado: <b>${recipe.output_qty}× ${recipe.output}</b>
             </div>
-            <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">
+            <div style="font-size:12px;color:var(--v-text-dim);margin-bottom:10px;">
                 <b>Ingredientes:</b>
             </div>
             ${ingHTML}
@@ -412,26 +390,22 @@
     }
 
     function selectRecipeCard(recipeId) {
-        // Toggle selection
         if (selectedRecipe === recipeId) {
             selectedRecipe = null;
         } else {
             selectedRecipe = recipeId;
         }
 
-        // Update card visuals
         document.querySelectorAll('.recipe-card').forEach(c => {
             c.classList.toggle('selected', c.dataset.id === selectedRecipe);
         });
 
-        // Toggle detail panels
         document.querySelectorAll('.detail-panel').forEach(p => {
             p.classList.toggle('visible', p.id === `detail-${selectedRecipe}`);
         });
 
         updateCraftButton();
 
-        // Scroll detail into view
         if (selectedRecipe) {
             const detail = document.getElementById(`detail-${selectedRecipe}`);
             if (detail) {

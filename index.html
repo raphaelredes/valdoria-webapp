@@ -6,41 +6,32 @@
     <title>Mesa de Dados - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <link rel="stylesheet" href="./valdoria-design.css?v=2">
     <style>
-        :root {
-            --bg: #1a1a2e;
-            --bg2: #16213e;
-            --gold: #d4af37;
-            --gold-light: #f5d97e;
-            --red: #e74c3c;
-            --green: #2ecc71;
-            --text: #e0e0e0;
-            --text-dim: #8899aa;
-            --glow: rgba(212, 175, 55, 0.4);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
         }
 
         .header {
             width: 100%;
             padding: 12px 16px;
             text-align: center;
-            background: linear-gradient(180deg, var(--bg2), transparent);
+            background: linear-gradient(180deg, var(--v-bg-raised), transparent);
+            position: relative;
         }
-        .header h1 { font-size: 16px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
-        .header .label { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
-        .header .formula-display { font-size: 14px; color: var(--gold-light); font-family: 'Courier New', monospace; margin-top: 4px; }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
+        }
+        .header h1 { font-size: 16px; color: var(--v-gold); letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 15px rgba(212, 175, 55, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5); }
+        .header .label { font-size: 13px; color: var(--v-text-dim); margin-top: 4px; }
+        .header .formula-display { font-size: 14px; color: var(--v-gold-light); font-family: 'Courier New', monospace; margin-top: 4px; }
 
         /* ─── ARENA ─── */
         .arena {
@@ -66,7 +57,7 @@
             margin-top: 2px;
             font-size: 13px;
             font-weight: 700;
-            color: var(--text-dim);
+            color: var(--v-text-dim);
             letter-spacing: 1px;
             text-align: center;
         }
@@ -74,7 +65,7 @@
         .tap-hint {
             margin-top: 10px;
             font-size: 15px;
-            color: var(--text-dim);
+            color: var(--v-text-dim);
             animation: fade-pulse 2s ease-in-out infinite;
             text-align: center;
         }
@@ -93,7 +84,7 @@
         .impact-ring {
             position: absolute;
             border-radius: 50%;
-            border: 2px solid var(--gold);
+            border: 2px solid var(--v-gold);
             pointer-events: none;
             opacity: 0;
         }
@@ -116,13 +107,13 @@
             transition: opacity 0.4s ease, transform 0.4s ease;
         }
         .result-panel.visible { opacity: 1; transform: translateY(0); }
-        .result-total { font-size: 28px; font-weight: 900; color: var(--gold); }
-        .result-breakdown { font-size: 13px; color: var(--text-dim); margin-top: 4px; font-family: 'Courier New', monospace; }
+        .result-total { font-size: 28px; font-weight: 900; color: var(--v-gold); }
+        .result-breakdown { font-size: 13px; color: var(--v-text-dim); margin-top: 4px; font-family: 'Courier New', monospace; }
         .result-label { font-size: 16px; font-weight: 700; margin-top: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .result-label.success { color: var(--green); }
-        .result-label.failure { color: var(--red); }
-        .result-label.critical { color: var(--green); font-size: 20px; }
-        .result-label.crit-fail { color: var(--red); font-size: 20px; }
+        .result-label.success { color: var(--v-success); }
+        .result-label.failure { color: var(--v-danger); }
+        .result-label.critical { color: var(--v-success); font-size: 20px; }
+        .result-label.crit-fail { color: var(--v-danger); font-size: 20px; }
 
         /* ─── BOTTOM BAR ─── */
         .bottom-bar { width: 100%; padding: 10px 16px 20px; display: flex; gap: 8px; }
@@ -133,20 +124,20 @@
             -webkit-tap-highlight-color: transparent;
         }
         .btn:active { transform: scale(0.96); }
-        .btn-primary { background: linear-gradient(135deg, var(--gold), #c4a032); color: #1a1a2e; }
-        .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid rgba(255,255,255,0.15); }
+        .btn-primary { background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim)); color: var(--v-bg); }
+        .btn-secondary { background: rgba(255,255,255,0.08); color: var(--v-text); border: 1px solid rgba(255,255,255,0.15); }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
         /* ─── DICE SELECTOR ─── */
         .dice-selector { display: flex; gap: 8px; padding: 8px 16px; overflow-x: auto; width: 100%; justify-content: center; }
         .dice-chip {
             padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 700;
-            background: rgba(255,255,255,0.06); color: var(--text-dim);
+            background: rgba(255,255,255,0.06); color: var(--v-text-dim);
             border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
             transition: all 0.2s ease; white-space: nowrap;
             -webkit-tap-highlight-color: transparent;
         }
-        .dice-chip.active { background: rgba(212,175,55,0.15); color: var(--gold); border-color: var(--gold); }
+        .dice-chip.active { background: rgba(212,175,55,0.15); color: var(--v-gold); border-color: var(--v-gold); }
         .dice-chip:active { transform: scale(0.95); }
 
         /* ─── MODIFIER ─── */
@@ -154,19 +145,19 @@
         .mod-btn {
             width: 36px; height: 36px; border-radius: 50%;
             border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06);
-            color: var(--text); font-size: 20px; font-weight: 700; cursor: pointer;
+            color: var(--v-text); font-size: 20px; font-weight: 700; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             -webkit-tap-highlight-color: transparent;
         }
         .mod-btn:active { background: rgba(255,255,255,0.12); }
-        .mod-value { font-size: 18px; font-weight: 700; color: var(--gold); min-width: 40px; text-align: center; font-family: 'Courier New', monospace; }
+        .mod-value { font-size: 18px; font-weight: 700; color: var(--v-gold); min-width: 40px; text-align: center; font-family: 'Courier New', monospace; }
 
         /* ─── HISTORY ─── */
         .history { width: 100%; padding: 0 16px; max-height: 100px; overflow-y: auto; }
-        .history-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; color: var(--text-dim); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .history-item .h-result { color: var(--gold); font-weight: 700; }
-        .history-item .h-crit { color: var(--green); }
-        .history-item .h-fail { color: var(--red); }
+        .history-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; color: var(--v-text-dim); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .history-item .h-result { color: var(--v-gold); font-weight: 700; }
+        .history-item .h-crit { color: var(--v-success); }
+        .history-item .h-fail { color: var(--v-danger); }
 
         /* Hidden in game mode */
         .game-mode .dice-selector, .game-mode .mod-row, .game-mode .history { display: none; }
@@ -190,7 +181,7 @@
     </div>
 
     <div class="mod-row" id="modRow">
-        <span style="font-size:13px;color:var(--text-dim)">Modificador:</span>
+        <span style="font-size:13px;color:var(--v-text-dim)">Modificador:</span>
         <button class="mod-btn" onclick="changeMod(-1)">-</button>
         <span class="mod-value" id="modValue">+0</span>
         <button class="mod-btn" onclick="changeMod(1)">+</button>
@@ -222,7 +213,8 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     const tg = window.Telegram && window.Telegram.WebApp;
-    if (tg) { tg.ready(); tg.expand(); document.body.style.background = tg.themeParams.bg_color || '#1a1a2e'; }
+    const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#1a1a2e';
+    if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg); }
 
     const params = new URLSearchParams(window.location.search);
     const MODE = params.get('mode') || 'free';
@@ -291,10 +283,15 @@
     let animFrame = null;
     let rollAnim = null; // { startTime, duration, phases, onDone }
 
-    // ─── Color palette ───
+    // ─── Color palette (CSS → JS) ───
+    const _cs = getComputedStyle(document.documentElement);
+    const _cssVar = (v) => _cs.getPropertyValue(v).trim();
+    const V_GOLD_HEX = _cssVar('--v-gold') || '#d4af37';
+    const V_SUCCESS_HEX = _cssVar('--v-success') || '#4caf50';
+    const V_DANGER_HEX = _cssVar('--v-danger') || '#e74c3c';
     const FACE_COLOR = 0x2a2a52;
-    const EDGE_COLOR = 0xd4af37;
-    const NUM_COLOR = '#d4af37';
+    const EDGE_COLOR = parseInt(V_GOLD_HEX.replace('#',''), 16);
+    const NUM_COLOR = V_GOLD_HEX;
     const FACE_COLOR_HEX = '#2a2a52';
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -947,26 +944,27 @@
             void document.body.offsetWidth;
             document.body.classList.add('screen-shake');
             setTimeout(() => document.body.classList.remove('screen-shake'), 450);
-            spawnRing(isCrit ? '#2ecc71' : '#e74c3c');
-            spawnParticles(isCrit ? '#2ecc71' : '#e74c3c', 40);
+            spawnRing(isCrit ? V_SUCCESS_HEX : V_DANGER_HEX);
+            spawnParticles(isCrit ? V_SUCCESS_HEX : V_DANGER_HEX, 40);
 
             // Glow the die
             if (dieMesh) {
-                const glowColor = isCrit ? 0x2ecc71 : 0xe74c3c;
+                const mesh = dieMesh; // capture local ref for closure
+                const glowColor = parseInt((isCrit ? V_SUCCESS_HEX : V_DANGER_HEX).replace('#',''), 16);
                 const glow = new THREE.PointLight(glowColor, 1.5, 4);
                 glow.position.set(0, 0.5, 1);
-                dieMesh.add(glow);
+                mesh.add(glow);
                 // Fade glow
                 let intensity = 1.5;
                 const fadeGlow = setInterval(() => {
                     intensity -= 0.05;
-                    if (intensity <= 0) { dieMesh.remove(glow); clearInterval(fadeGlow); }
+                    if (intensity <= 0) { mesh.remove(glow); clearInterval(fadeGlow); }
                     else glow.intensity = intensity;
                 }, 50);
             }
         } else {
             haptic('heavy');
-            spawnParticles('#d4af37', 20);
+            spawnParticles(V_GOLD_HEX, 20);
         }
 
         document.getElementById('resultTotal').textContent = total;
@@ -990,7 +988,7 @@
         panel.classList.add('visible');
 
         if (MODE !== 'game') {
-            rollHistory.unshift({ die: currentDie, raw: rawRolls[0], total, isCrit, isFail });
+            rollHistory.unshift({ die: currentDie, raw: rawRolls[0], mod: currentMod, total, isCrit, isFail });
             renderHistory();
         }
 
@@ -1078,7 +1076,8 @@
     function renderHistory() {
         document.getElementById('history').innerHTML = rollHistory.slice(0, 10).map(h => {
             const cls = h.isCrit ? 'h-crit' : h.isFail ? 'h-fail' : 'h-result';
-            return `<div class="history-item"><span>${h.die}${currentMod ? (currentMod > 0 ? '+' + currentMod : currentMod) : ''}</span><span class="${cls}">${h.total}</span></div>`;
+            const modStr = h.mod ? (h.mod > 0 ? '+' + h.mod : '' + h.mod) : '';
+            return `<div class="history-item"><span>${h.die}${modStr}</span><span class="${cls}">${h.total}</span></div>`;
         }).join('');
     }
 
