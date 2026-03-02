@@ -56,13 +56,14 @@ function showChoices(poi) {
         let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
         html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
 
-        // Stat check display
+        // Stat check display (D&D 5e skill with proficiency indicator)
         if (ch.k) {
-            const statName = STAT_NAMES[ch.k.s] || ch.k.s.toUpperCase();
+            const statShort = STAT_SHORT[ch.k.s] || ch.k.s.toUpperCase();
+            const proficient = S.charData && S.charData.sp && S.charData.sp.includes(ch.k.s);
+            const profMark = proficient ? '★' : '';
             const mod = ch.k.m || 0;
-            // Calculate chance: (21 - DC + mod) / 20 * 100
             const chance = Math.max(5, Math.min(95, Math.round(((21 - ch.k.dc + mod) / 20) * 100)));
-            html += `<span class="choice-check">${statName} ${chance}%</span>`;
+            html += `<span class="choice-check">${statShort}${profMark} ${chance}%</span>`;
         }
 
         btn.innerHTML = html;
@@ -110,13 +111,15 @@ function performStatCheck(poi, choice) {
     const resultEl = document.getElementById('check-result');
 
     const statName = STAT_NAMES[check.s] || check.s;
+    const proficient = S.charData && S.charData.sp && S.charData.sp.includes(check.s);
+    const profMark = proficient ? '★' : '';
 
     diceEl.textContent = '🎲';
     diceEl.style.animation = 'none';
     void diceEl.offsetHeight; // trigger reflow
     diceEl.style.animation = 'diceRoll 0.7s ease';
 
-    formulaEl.innerHTML = `<b>${roll}</b> + ${mod} (${statName}) = <b>${total}</b> vs DC <b>${dc}</b>`;
+    formulaEl.innerHTML = `<b>${roll}</b> + ${mod} (${statName}${profMark}) = <b>${total}</b> vs DC <b>${dc}</b>`;
 
     overlay.classList.add('active');
 
@@ -169,10 +172,12 @@ function showStage2(poi, stage2) {
             let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
             html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
             if (ch.k) {
-                const statName = STAT_NAMES[ch.k.s] || ch.k.s.toUpperCase();
+                const statShort = STAT_SHORT[ch.k.s] || ch.k.s.toUpperCase();
+                const proficient = S.charData && S.charData.sp && S.charData.sp.includes(ch.k.s);
+                const profMark = proficient ? '★' : '';
                 const mod = ch.k.m || 0;
                 const chance = Math.max(5, Math.min(95, Math.round(((21 - ch.k.dc + mod) / 20) * 100)));
-                html += `<span class="choice-check">${statName} ${chance}%</span>`;
+                html += `<span class="choice-check">${statShort}${profMark} ${chance}%</span>`;
             }
             btn.innerHTML = html;
             btn.addEventListener('click', () => {
@@ -335,14 +340,16 @@ function showRandomEncounter(enc) {
             btn.className = 'dm-choice-btn';
 
             // All encounter choices MUST have a stat check (dice roll required)
-            const check = ch.k || { s: 'dex', dc: 10, m: 0 };
-            const statName = STAT_NAMES[check.s] || check.s.toUpperCase();
+            const check = ch.k || { s: 'acr', dc: 10, m: 0 };
+            const statShort = STAT_SHORT[check.s] || check.s.toUpperCase();
+            const proficient = S.charData && S.charData.sp && S.charData.sp.includes(check.s);
+            const profMark = proficient ? '★' : '';
             const mod = check.m || 0;
             const chance = Math.max(5, Math.min(95, Math.round(((21 - check.dc + mod) / 20) * 100)));
 
             let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
             html += `<span class="choice-label">${ch.t || ch.l || 'Agir'}</span>`;
-            html += `<span class="choice-check">${statName} ${chance}%</span>`;
+            html += `<span class="choice-check">${statShort}${profMark} ${chance}%</span>`;
 
             btn.innerHTML = html;
             btn.addEventListener('click', () => {

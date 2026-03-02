@@ -372,7 +372,7 @@ function onMoveComplete(col, row) {
 
     updateStepCounter();
     saveState();
-    scrollCanvasToPlayer();
+    scrollCanvasToPlayer(true);
 
     // Check POI
     const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.has(p.id));
@@ -395,8 +395,24 @@ function onMoveComplete(col, row) {
     }
 }
 
-// No-op — canvas now fills viewport, no scrolling needed
-function scrollCanvasToPlayer() {}
+// Scroll viewport to center on the player's current hex position
+function scrollCanvasToPlayer(smooth) {
+    const viewport = document.getElementById('map-viewport');
+    if (!viewport) return;
+    const center = hexToScreen(S.playerCol, S.playerRow);
+    const tile = S.grid[S.playerRow] && S.grid[S.playerRow][S.playerCol] ? S.grid[S.playerRow][S.playerCol] : '.';
+    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+
+    const targetX = center.x - viewport.clientWidth / 2;
+    const targetY = (center.y - h) - viewport.clientHeight / 2;
+
+    viewport.scrollTo({
+        left: Math.max(0, targetX),
+        top: Math.max(0, targetY),
+        behavior: smooth ? 'smooth' : 'instant',
+    });
+}
 
 // Mark static cache as dirty (forces redraw)
 function invalidateStatic() {

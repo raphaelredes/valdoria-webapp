@@ -25,28 +25,30 @@ const TILE_HEIGHT = {
     '@': 1,   'E': 1,
 };
 
-// Calculate hex dimensions to fit viewport width (no horizontal scroll)
-function calcHexSizeForViewport(viewportW, viewportH, cols, rows) {
-    const padX = 4;
+// Scale multiplier — 1.5x makes hexes ~50px wide on a 390px viewport
+const MAP_SCALE = 1.5;
 
-    // Fit all columns within viewport width
-    const maxHexW = (viewportW - padX * 2) / (cols + 0.5);
-    HEX_W = Math.floor(maxHexW);
+// Calculate hex dimensions scaled up from viewport-fit baseline
+function calcHexSizeForViewport(viewportW, viewportH, cols, rows) {
+    const padX = 8;
+
+    // Base hex width to fit viewport, then scale up
+    const baseHexW = (viewportW - padX * 2) / (cols + 0.5);
+    HEX_W = Math.floor(baseHexW * MAP_SCALE);
     HEX_H = Math.round(HEX_W * 0.6);
     UNIT_PX = Math.max(4, Math.round(HEX_W * 0.16));
     ROW_STEP = HEX_H * 0.75;
 
-    // Calculate map dimensions
-    const mapW = cols * HEX_W + HEX_W / 2 + padX * 2;
+    // Calculate map dimensions (canvas is larger than viewport)
     const maxTileH = Math.max(...Object.values(TILE_HEIGHT)) * UNIT_PX;
+    const mapW = cols * HEX_W + HEX_W / 2 + padX * 2;
     const mapH = (rows - 1) * ROW_STEP + HEX_H + maxTileH + 20;
 
-    // Canvas fills the viewport; hex grid centered within it
-    const canvasW = viewportW;
+    const canvasW = Math.max(mapW, viewportW);
     const canvasH = Math.max(mapH, viewportH);
 
     MAP_OFFSET_X = Math.max(padX, (canvasW - (cols * HEX_W + HEX_W / 2)) / 2);
-    MAP_OFFSET_Y = Math.max(10, (canvasH - mapH) / 2 + maxTileH);
+    MAP_OFFSET_Y = Math.max(10, maxTileH + 10);
 
     return { w: canvasW, h: canvasH };
 }

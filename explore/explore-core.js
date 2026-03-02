@@ -8,8 +8,22 @@ const IMPASSABLE = new Set(['W','M','L','#']);
 const EVEN_OFFSETS = [[-1,-1],[0,-1],[-1,0],[1,0],[-1,1],[0,1]];
 const ODD_OFFSETS  = [[0,-1],[1,-1],[-1,0],[1,0],[0,1],[1,1]];
 
-const STAT_NAMES = {str:'FOR',dex:'DES',con:'CON',int:'INT',wis:'SAB',cha:'CAR',
-    strength:'FOR',dexterity:'DES',constitution:'CON',intelligence:'INT',wisdom:'SAB',charisma:'CAR'};
+// Full Portuguese names for dice animation display
+const STAT_NAMES = {
+    str:'Força',dex:'Destreza',con:'Constituição',int:'Inteligência',wis:'Sabedoria',cha:'Carisma',
+    atl:'Atletismo',acr:'Acrobacia',slh:'Prestidigitação',stl:'Furtividade',
+    arc:'Arcanismo',his:'História',inv:'Investigação',nat:'Natureza',rel:'Religião',
+    anh:'Lid. Animais',ins:'Intuição',med:'Medicina',
+    per:'Percepção',sur:'Sobrevivência',dec:'Enganação',
+    itm:'Intimidação',prf:'Atuação',prs:'Persuasão',
+};
+// Compact 3-letter codes for button badges
+const STAT_SHORT = {
+    str:'FOR',dex:'DES',con:'CON',int:'INT',wis:'SAB',cha:'CAR',
+    atl:'ATL',acr:'ACR',slh:'PRE',stl:'FUR',arc:'ARC',his:'HIS',
+    inv:'INV',nat:'NAT',rel:'REL',anh:'ANI',ins:'ITU',med:'MED',
+    per:'PER',sur:'SOB',dec:'ENG',itm:'ITM',prf:'ATU',prs:'PRS',
+};
 
 const POI_TYPE_LABELS = {dis:'Descoberta',sea:'Busca',dan:'Perigo',mys:'Mistério',npc:'Encontro'};
 
