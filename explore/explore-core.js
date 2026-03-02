@@ -53,6 +53,7 @@ let S = {
     randomEncounters: [],
     conditions: [],          // Active conditions: [{type, stepsLeft}]
     _hazardsTriggered: new Set(),  // Hexes that already triggered hazards
+    _flavorSteps: 0,         // Steps since last flavor event
 };
 
 let tg = null;
@@ -333,6 +334,115 @@ function updateConditionHUD() {
         tag.textContent = `${icons[c.type] || '⚠️'} ${labels[c.type] || c.type} (${c.stepsLeft})`;
         bar.appendChild(tag);
     }
+}
+
+// ═══════════════════════════════════════════════════════
+// FLAVOR EVENTS (biome-specific ambient mini-events)
+// ═══════════════════════════════════════════════════════
+const FLAVOR_TEXTS = {
+    forest: [
+        '🐦 Pássaros cantam nas copas distantes.',
+        '🍃 Uma brisa agita as folhas ao seu redor.',
+        '🌿 Raízes retorcidas formam padrões curiosos no chão.',
+        '🍄 Cogumelos brilhantes crescem na base de um tronco.',
+        '🦌 Algo se move entre as árvores — e desaparece.',
+        '🕸️ Uma teia de aranha reluz com gotas de orvalho.',
+        '🌲 O aroma de pinheiro e terra úmida envolve o ar.',
+        '🐿️ Um esquilo observa você de um galho alto.',
+    ],
+    plains: [
+        '🌾 O vento faz ondas suaves no capim alto.',
+        '🦅 Uma ave de rapina circula lentamente no céu.',
+        '🌻 Flores silvestres colorem o campo ao longe.',
+        '💨 Uma rajada de vento traz o cheiro de terra seca.',
+        '🦗 O canto dos grilos ecoa ritmicamente.',
+        '☁️ Nuvens projetam sombras que cruzam o campo.',
+        '🐾 Rastros de animais marcam o solo batido.',
+        '🌅 A luz dourada ilumina a paisagem aberta.',
+    ],
+    swamp: [
+        '🫧 Bolhas sobem lentamente da água turva.',
+        '🐸 Um coaxar grave ecoa entre os troncos retorcidos.',
+        '🦟 Nuvens de insetos pairam sobre a água parada.',
+        '💀 Um cheiro pútrido sobe da lama escura.',
+        '🌫️ Névoa densa se agarra ao solo encharcado.',
+        '🐊 Algo se move sob a superfície da água.',
+        '🪵 Troncos apodrecidos formam pontes naturais instáveis.',
+        '🕯️ Luzes pálidas piscam ao longe — fogos-fátuos.',
+    ],
+    cave: [
+        '💧 Gotas de água ecoam nas paredes distantes.',
+        '🦇 Asas agitam-se na escuridão acima.',
+        '💎 Cristais refletem a luz fracamente nas paredes.',
+        '🕳️ Uma corrente de ar frio vem de um túnel lateral.',
+        '🪨 Estalagmites projetam sombras alongadas.',
+        '🕷️ Teias abandonadas pendem do teto rochoso.',
+        '🔊 Seus passos ecoam várias vezes antes de silenciar.',
+        '⛏️ Marcas de picareta antigas cobrem a parede.',
+    ],
+    desert: [
+        '🏜️ O calor distorce o horizonte em miragens.',
+        '🦂 Um escorpião desliza rapidamente entre as pedras.',
+        '💨 Uma rajada de areia agita-se em espiral.',
+        '☀️ O sol implacável castiga a areia sem fim.',
+        '🦎 Um lagarto observa imóvel sobre uma rocha quente.',
+        '🏺 Restos de cerâmica antiga emergem da areia.',
+        '🌵 Um cacto solitário projeta uma sombra minúscula.',
+        '💀 Ossos esbranquiçados pontilham a paisagem árida.',
+    ],
+    mountain: [
+        '🏔️ O vento uiva entre as rochas expostas.',
+        '🦅 Uma águia plana majestosamente nas correntes de ar.',
+        '⛰️ Pedras soltas rolam pelo declive abaixo.',
+        '❄️ A temperatura cai visivelmente a cada passo.',
+        '🐐 Uma cabra montanhesa observa de um penhasco.',
+        '🪨 Formações rochosas formam arcos naturais.',
+        '☁️ Nuvens baixas envolvem os picos ao redor.',
+        '💎 Veios minerais brilham na rocha cortada.',
+    ],
+    snow: [
+        '❄️ Flocos de neve dançam silenciosamente ao seu redor.',
+        '🐾 Pegadas no gelo se perdem na nevasca.',
+        '🌬️ O vento gélido corta como uma lâmina.',
+        '🏔️ Estalactites de gelo pendem das rochas acima.',
+        '🐺 Um uivo distante ecoa pelo ermo gelado.',
+        '❄️ O gelo sob seus pés range a cada passo.',
+        '🌀 Uma nevasca se forma no horizonte distante.',
+        '🦌 Rastros de um animal grande cruzam a neve fresca.',
+    ],
+    volcanic: [
+        '🔥 O ar quente tremula sobre fissuras incandescentes.',
+        '🌋 Um tremor sutil faz o chão vibrar.',
+        '💨 Jatos de vapor escapam de fendas na rocha.',
+        '🪨 Rocha derretida brilha em veios alaranjados.',
+        '☠️ O cheiro de enxofre arde nas narinas.',
+        '🔥 Cinzas flutuam no ar como neve negra.',
+        '🌡️ O calor intenso faz a pele arder.',
+        '💎 Obsidiana negra reluz entre as rochas vulcânicas.',
+    ],
+    graveyard: [
+        '🪦 Lápides tortas emergem da névoa rasteira.',
+        '🦉 Uma coruja pia sombriamente ao longe.',
+        '💀 O vento agita galhos secos como dedos esqueléticos.',
+        '🕯️ Uma vela bruxuleante arde sobre um túmulo antigo.',
+        '🌫️ Névoa fria se agarra às suas botas.',
+        '🦇 Morcegos irrompem de uma cripta entreaberta.',
+        '⚰️ Uma lápide rachada revela inscrições ilegíveis.',
+        '👻 Você sente um arrepio inexplicável na nuca.',
+    ],
+};
+
+// Check and trigger a flavor event (called every step)
+function checkFlavorEvent() {
+    S._flavorSteps++;
+    // Trigger every 3-4 steps (random threshold)
+    const threshold = 3 + Math.floor(Math.random() * 2); // 3 or 4
+    if (S._flavorSteps < threshold) return;
+    S._flavorSteps = 0;
+
+    const pool = FLAVOR_TEXTS[S.biome] || FLAVOR_TEXTS.forest;
+    const text = pool[Math.floor(Math.random() * pool.length)];
+    showTerrainToast(text, 'flavor');
 }
 
 // ═══════════════════════════════════════════════════════

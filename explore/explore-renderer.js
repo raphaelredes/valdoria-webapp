@@ -439,6 +439,12 @@ function onMoveComplete(col, row) {
     if (Math.random() < encChance && S.randomEncounters.length > 0) {
         const enc = S.randomEncounters.shift();
         setTimeout(() => showRandomEncounter(enc), 300);
+        return;
+    }
+
+    // Flavor event (ambient mini-event between POIs)
+    if (typeof checkFlavorEvent === 'function') {
+        checkFlavorEvent();
     }
 }
 

@@ -467,24 +467,31 @@ function showDMIntro(text) {
 // TERRAIN TOAST & ENVIRONMENTAL HAZARDS (D&D 5e Phase 2)
 // ═══════════════════════════════════════════════════════
 
+// Terrain toast color themes
+const TOAST_STYLES = {
+    difficult: 'background:rgba(220,160,40,0.2);border:1px solid rgba(220,160,40,0.4);color:#dca028',
+    ranger:    'background:rgba(68,170,100,0.2);border:1px solid rgba(68,170,100,0.4);color:#4aa664',
+    damage:    'background:rgba(200,60,60,0.25);border:1px solid rgba(200,60,60,0.5);color:#c44',
+    condition: 'background:rgba(170,68,68,0.2);border:1px solid rgba(170,68,68,0.4);color:#c88',
+    flavor:    'background:rgba(50,44,58,0.95);border:1px solid rgba(196,149,58,0.4);color:#ddd4c6;font-style:italic;font-size:12px;letter-spacing:0.3px;box-shadow:0 2px 12px rgba(0,0,0,0.5)',
+};
+
 // Compact toast notification for terrain effects
 function showTerrainToast(message, type) {
-    const existing = document.querySelector('.terrain-toast');
+    const existing = document.getElementById('terrain-toast-el');
     if (existing) existing.remove();
 
+    const theme = TOAST_STYLES[type] || TOAST_STYLES.difficult;
     const toast = document.createElement('div');
-    toast.className = `terrain-toast ${type}`;
+    toast.id = 'terrain-toast-el';
     toast.textContent = message;
-    const viewport = document.getElementById('map-viewport');
-    if (viewport) viewport.appendChild(toast);
+    toast.style.cssText = 'position:fixed;top:50px;left:50px;right:50px;' +
+        'padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;' +
+        'pointer-events:none;z-index:99999;text-align:center;' + theme;
+    document.body.appendChild(toast);
 
-    requestAnimationFrame(() => {
-        toast.classList.add('visible');
-        setTimeout(() => {
-            toast.classList.remove('visible');
-            setTimeout(() => toast.remove(), 300);
-        }, 1500);
-    });
+    const duration = type === 'flavor' ? 2500 : 1500;
+    setTimeout(() => toast.remove(), duration);
 }
 
 // Full-screen color flash for hazard damage
