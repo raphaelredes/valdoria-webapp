@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2b2830">
+    <title>Mapa do Mundo - Lendas de Valdoria</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            touch-action: none;
+        }
+
+        /* ═══ LOADING ═══ */
+        #loading {
+            position: fixed; inset: 0;
+            background: var(--v-bg, #2b2830);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 200;
+            transition: opacity 0.4s ease;
+        }
+        #loading.hidden { opacity: 0; pointer-events: none; }
+        .loading-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(196,149,58,0.2);
+            border-top-color: var(--v-gold, #c4953a);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .loading-text {
+            margin-top: 12px;
+            color: var(--v-gold, #c4953a);
+            font-size: 13px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ═══ HUD (top bar) ═══ */
+        #hud {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: linear-gradient(180deg, #352f38 0%, var(--v-bg, #2b2830) 100%);
+            border-bottom: 1px solid var(--v-border, #3e3845);
+            z-index: 50;
+            flex-shrink: 0;
+        }
+        .hud-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--v-gold, #c4953a);
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .hud-level {
+            font-size: 11px;
+            color: var(--v-text-dim, #8a8090);
+            margin-right: auto;
+        }
+        .hud-bar-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .hud-bar {
+            width: 50px;
+            height: 7px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+        .hud-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+        .hp-fill { background: linear-gradient(90deg, #7b2020, #a03030); }
+        .mp-fill { background: linear-gradient(90deg, #204080, #3060b0); }
+        .hud-bar-label {
+            font-size: 10px;
+            color: var(--v-text-dim, #8a8090);
+            min-width: 16px;
+        }
+
+        /* ═══ MAP VIEWPORT ═══ */
+        #map-viewport {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            background: #1e1b22;
+        }
+        #map-wrapper {
+            position: absolute;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+        #map-svg {
+            display: block;
+        }
+
+        /* ═══ LOCATION INFO PANEL ═══ */
+        #info-panel {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            max-width: 430px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #352f38, #2b2830);
+            border-top: 2px solid var(--v-gold, #c4953a);
+            border-radius: 16px 16px 0 0;
+            padding: 16px 16px 12px;
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        #info-panel.open { transform: translateY(0); }
+        .info-handle {
+            width: 36px; height: 4px;
+            background: rgba(196,149,58,0.3);
+            border-radius: 2px;
+            margin: 0 auto 12px;
+        }
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .info-icon { font-size: 24px; }
+        .info-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--v-gold, #c4953a);
+        }
+        .info-danger {
+            margin-left: auto;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            background: rgba(123,32,32,0.3);
+            border: 1px solid rgba(123,32,32,0.5);
+            color: #e0a0a0;
+        }
+        .info-biome {
+            font-size: 12px;
+            color: var(--v-text-dim, #8a8090);
+            margin-bottom: 8px;
+        }
+        .info-desc {
+            font-size: 13px;
+            color: var(--v-text, #e0d6c8);
+            line-height: 1.4;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        .info-stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: var(--v-text-dim, #8a8090);
+        }
+        .info-quests, .info-dungeons {
+            font-size: 12px;
+            color: var(--v-text-dim, #8a8090);
+            margin-bottom: 8px;
+        }
+        .info-quests span, .info-dungeons span {
+            color: var(--v-text, #e0d6c8);
+        }
+        .info-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .info-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 10px 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #fff;
+            text-align: center;
+        }
+        .info-btn-travel {
+            background: linear-gradient(135deg, #c4953a, #a07828);
+        }
+        .info-btn-explore {
+            background: linear-gradient(135deg, #2a6a2a, #1a4a1a);
+        }
+        .info-btn-camp {
+            background: linear-gradient(135deg, #5a4a30, #3a3020);
+        }
+        .info-btn-close {
+            background: rgba(255,255,255,0.1);
+            flex: 0;
+            min-width: 44px;
+        }
+        .info-btn:active { opacity: 0.8; transform: scale(0.97); }
+
+        /* ═══ BOTTOM BAR ═══ */
+        #bottom-bar {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px;
+            background: linear-gradient(0deg, #352f38, var(--v-bg, #2b2830));
+            border-top: 1px solid var(--v-border, #3e3845);
+            z-index: 60;
+            flex-shrink: 0;
+        }
+        .bar-btn {
+            flex: 1;
+            padding: 10px 4px;
+            border: 1px solid var(--v-border, #3e3845);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: var(--v-text, #e0d6c8);
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+        }
+        .bar-btn:active { opacity: 0.7; }
+        .bar-btn-return {
+            border-color: rgba(196,149,58,0.3);
+            color: var(--v-gold, #c4953a);
+        }
+
+        /* ═══ MAP ELEMENTS ═══ */
+        .loc-hex {
+            cursor: pointer;
+            transition: filter 0.2s ease;
+        }
+        .loc-hex:hover { filter: brightness(1.2); }
+        .loc-hex.current { filter: drop-shadow(0 0 8px rgba(196,149,58,0.6)); }
+        .loc-hex.dim { opacity: 0.35; }
+        .loc-hex.hidden { display: none; }
+
+        .loc-label {
+            font-size: 8px;
+            fill: var(--v-text, #e0d6c8);
+            text-anchor: middle;
+            pointer-events: none;
+            font-family: sans-serif;
+        }
+        .loc-icon {
+            font-size: 14px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
+
+        .path-line {
+            stroke: rgba(176, 184, 192, 0.25);
+            stroke-width: 2;
+            stroke-dasharray: 6 4;
+            stroke-linecap: round;
+        }
+        .path-line.active {
+            stroke: rgba(196, 149, 58, 0.5);
+            stroke-width: 2.5;
+        }
+
+        .terrain-hex {
+            pointer-events: none;
+        }
+
+        @keyframes playerPulse {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(196,149,58,0.4)); }
+            50% { filter: drop-shadow(0 0 14px rgba(196,149,58,0.8)); }
+        }
+        .player-marker {
+            animation: playerPulse 2s ease-in-out infinite;
+        }
+
+        /* ═══ CURRENT LOCATION BADGE ═══ */
+        #current-loc-badge {
+            position: absolute;
+            top: 8px; left: 12px; right: 12px;
+            background: rgba(43, 40, 48, 0.9);
+            border: 1px solid var(--v-border, #3e3845);
+            border-radius: 8px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--v-text, #e0d6c8);
+            z-index: 40;
+            pointer-events: none;
+        }
+        #current-loc-badge .badge-icon { font-size: 16px; }
+        #current-loc-badge .badge-name {
+            font-weight: 600;
+            color: var(--v-gold, #c4953a);
+        }
+        #current-loc-badge .badge-info {
+            margin-left: auto;
+            font-size: 11px;
+            color: var(--v-text-dim, #8a8090);
+        }
+
+        /* ═══ LEGEND ═══ */
+        #legend {
+            position: absolute;
+            bottom: 8px; right: 8px;
+            background: rgba(43, 40, 48, 0.85);
+            border: 1px solid var(--v-border, #3e3845);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 10px;
+            color: var(--v-text-dim, #8a8090);
+            z-index: 40;
+            display: flex;
+            gap: 8px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 3px; }
+        .legend-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* ═══ ERROR TOAST ═══ */
+        .v-toast-error {
+            position: fixed;
+            bottom: 80px;
+            left: 50%; transform: translateX(-50%);
+            background: #7b2020;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 300;
+            animation: fadeInUp 0.3s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate(-50%, 10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Carregando mapa...</div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+        <span class="hud-name" id="hud-name">Heroi</span>
+        <span class="hud-level" id="hud-level">Nv.1</span>
+        <div class="hud-bar-group">
+            <span class="hud-bar-label">HP</span>
+            <div class="hud-bar"><div class="hud-bar-fill hp-fill" id="hud-hp"></div></div>
+        </div>
+        <div class="hud-bar-group">
+            <span class="hud-bar-label">MP</span>
+            <div class="hud-bar"><div class="hud-bar-fill mp-fill" id="hud-mp"></div></div>
+        </div>
+    </div>
+
+    <!-- Map Viewport -->
+    <div id="map-viewport">
+        <div id="map-wrapper">
+            <svg id="map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div id="current-loc-badge">
+            <span class="badge-icon" id="badge-icon"></span>
+            <span class="badge-name" id="badge-name"></span>
+            <span class="badge-info" id="badge-info"></span>
+        </div>
+        <div id="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#c4953a"></span> Atual</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#6a8a5a"></span> Seguro</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#8a6a3a"></span> Alerta</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#8a3a3a"></span> Perigo</div>
+        </div>
+    </div>
+
+    <!-- Location Info Panel -->
+    <div id="info-panel">
+        <div class="info-handle"></div>
+        <div class="info-header">
+            <span class="info-icon" id="info-icon"></span>
+            <span class="info-title" id="info-title"></span>
+            <span class="info-danger" id="info-danger"></span>
+        </div>
+        <div class="info-biome" id="info-biome"></div>
+        <div class="info-desc" id="info-desc"></div>
+        <div class="info-stats" id="info-stats"></div>
+        <div class="info-quests" id="info-quests"></div>
+        <div class="info-dungeons" id="info-dungeons"></div>
+        <div class="info-actions" id="info-actions"></div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div id="bottom-bar">
+        <button class="bar-btn bar-btn-return" id="btn-return" onclick="handleReturn()">
+            🏃 Retornar a Eldoria
+        </button>
+        <button class="bar-btn" id="btn-close" onclick="handleClose()">
+            ❌ Fechar
+        </button>
+    </div>
+
+    <script src="map-layout.js"></script>
+    <script src="navigate-core.js"></script>
+    <script src="navigate-map.js"></script>
+    <script src="navigate-ui.js"></script>
+</body>
+</html>
