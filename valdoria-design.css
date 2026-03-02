@@ -678,22 +678,14 @@ body::after {
     100% { background-position: 200% 0; }
 }
 
-/* ─── SCROLLBAR (webkit) ─── */
-::-webkit-scrollbar {
-    width: 4px;
+/* ─── SCROLLBAR: HIDDEN GLOBALLY ─── */
+/* RULE: No visible scrollbars in ANY webapp. Scroll behavior kept via overflow-y/auto. */
+* {
+    scrollbar-width: none;           /* Firefox */
+    -ms-overflow-style: none;        /* IE / Edge */
 }
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--v-border);
-    border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--v-gold-dim);
+*::-webkit-scrollbar {
+    display: none;                   /* Chrome / Safari / Opera */
 }
 
 /* ─── REDUCED MOTION ─── */

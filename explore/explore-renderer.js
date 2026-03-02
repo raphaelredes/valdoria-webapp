@@ -90,8 +90,8 @@ function renderLoop(timestamp) {
 function renderFrame(timestamp) {
     _ctx.clearRect(0, 0, _canvasLogicalW, _canvasLogicalH);
 
-    // 1. Background
-    _ctx.fillStyle = '#2b2830';
+    // 1. Background (matches #map-viewport CSS)
+    _ctx.fillStyle = '#1a1520';
     _ctx.fillRect(0, 0, _canvasLogicalW, _canvasLogicalH);
 
     // 2. Draw static tiles (cached unless dirty)

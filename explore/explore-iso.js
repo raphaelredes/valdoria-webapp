@@ -25,21 +25,19 @@ const TILE_HEIGHT = {
     '@': 1,   'E': 1,
 };
 
-// Scale multiplier — 1.5x makes hexes ~50px wide on a 390px viewport
-const MAP_SCALE = 1.5;
-
-// Calculate hex dimensions scaled up from viewport-fit baseline
+// Calculate hex dimensions — top-down view, scrollable canvas
 function calcHexSizeForViewport(viewportW, viewportH, cols, rows) {
-    const padX = 8;
+    const padX = 6;
 
-    // Base hex width to fit viewport, then scale up
+    // Top-down hex: ~0.86 aspect ratio (nearly circular, slight iso tilt)
+    // Scale: 1.85x from viewport-fit baseline → hexes ~61px wide
     const baseHexW = (viewportW - padX * 2) / (cols + 0.5);
-    HEX_W = Math.floor(baseHexW * MAP_SCALE);
-    HEX_H = Math.round(HEX_W * 0.6);
-    UNIT_PX = Math.max(4, Math.round(HEX_W * 0.16));
+    HEX_W = Math.floor(baseHexW * 1.85);
+    HEX_H = Math.round(HEX_W * 0.86);
+    UNIT_PX = Math.max(3, Math.round(HEX_W * 0.07));
     ROW_STEP = HEX_H * 0.75;
 
-    // Calculate map dimensions (canvas is larger than viewport)
+    // Map dimensions (canvas larger than viewport — viewport scrolls)
     const maxTileH = Math.max(...Object.values(TILE_HEIGHT)) * UNIT_PX;
     const mapW = cols * HEX_W + HEX_W / 2 + padX * 2;
     const mapH = (rows - 1) * ROW_STEP + HEX_H + maxTileH + 20;

@@ -174,27 +174,29 @@ function drawEffects(ctx) {
     }
 }
 
-// Draw 2.5D player miniature (tabletop RPG style)
+// Draw player miniature — scaled proportional to hex size
 function drawPlayerToken(ctx, timestamp) {
     const t = (timestamp || 0) * 0.001;
-    const breathe = Math.sin(t * 2.5) * 1.5; // Subtle breathing animation
+    const breathe = Math.sin(t * 2.5) * 2;
     const px = playerScreenX;
     const py = playerScreenY + breathe;
+    // Scale factor based on hex width (designed at HEX_W=55 baseline)
+    const s = HEX_W / 55;
 
     ctx.save();
 
-    // Ground shadow (ellipse)
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    // Ground shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
     ctx.beginPath();
-    ctx.ellipse(px, py + 2, 10, 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(px, py + 3 * s, 14 * s, 7 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // ── Cylindrical base (disc) ──
-    const baseW = 9;  // Half-width of base ellipse
-    const baseH = 4;  // Half-height of base ellipse (iso foreshortening)
-    const baseDepth = 3; // Side depth of the base cylinder
+    const baseW = 13 * s;
+    const baseH = 7 * s;
+    const baseDepth = 4 * s;
 
-    // Base cylinder side (darker)
+    // Base cylinder side
     ctx.fillStyle = '#8a6d2a';
     ctx.beginPath();
     ctx.ellipse(px, py + baseDepth, baseW, baseH, 0, 0, Math.PI);
@@ -209,93 +211,93 @@ function drawPlayerToken(ctx, timestamp) {
     ctx.ellipse(px, py, baseW, baseH, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#a07828';
-    ctx.lineWidth = 0.8;
+    ctx.lineWidth = 1 * s;
     ctx.stroke();
 
-    // ── Character body (simple humanoid silhouette) ──
-    const bodyBase = py - 1;
+    // ── Character body ──
+    const bodyBase = py - 2 * s;
 
-    // Legs (two small trapezoids)
+    // Legs
     ctx.fillStyle = '#3a3040';
     ctx.beginPath();
-    ctx.moveTo(px - 3, bodyBase);
-    ctx.lineTo(px - 4, bodyBase - 6);
-    ctx.lineTo(px - 1.5, bodyBase - 6);
-    ctx.lineTo(px - 1, bodyBase);
+    ctx.moveTo(px - 4 * s, bodyBase);
+    ctx.lineTo(px - 5.5 * s, bodyBase - 9 * s);
+    ctx.lineTo(px - 2 * s, bodyBase - 9 * s);
+    ctx.lineTo(px - 1.5 * s, bodyBase);
     ctx.fill();
     ctx.beginPath();
-    ctx.moveTo(px + 1, bodyBase);
-    ctx.lineTo(px + 1.5, bodyBase - 6);
-    ctx.lineTo(px + 4, bodyBase - 6);
-    ctx.lineTo(px + 3, bodyBase);
+    ctx.moveTo(px + 1.5 * s, bodyBase);
+    ctx.lineTo(px + 2 * s, bodyBase - 9 * s);
+    ctx.lineTo(px + 5.5 * s, bodyBase - 9 * s);
+    ctx.lineTo(px + 4 * s, bodyBase);
     ctx.fill();
 
-    // Torso (tapered rectangle)
-    const torsoTop = bodyBase - 14;
+    // Torso
+    const torsoTop = bodyBase - 20 * s;
     ctx.fillStyle = '#4a3a50';
     ctx.beginPath();
-    ctx.moveTo(px - 4.5, bodyBase - 6);
-    ctx.lineTo(px - 5, torsoTop + 2);
-    ctx.lineTo(px + 5, torsoTop + 2);
-    ctx.lineTo(px + 4.5, bodyBase - 6);
+    ctx.moveTo(px - 6 * s, bodyBase - 9 * s);
+    ctx.lineTo(px - 7 * s, torsoTop + 3 * s);
+    ctx.lineTo(px + 7 * s, torsoTop + 3 * s);
+    ctx.lineTo(px + 6 * s, bodyBase - 9 * s);
     ctx.closePath();
     ctx.fill();
 
-    // Armor/clothing highlight
+    // Armor highlight
     ctx.fillStyle = '#5a4a60';
     ctx.beginPath();
-    ctx.moveTo(px - 3, bodyBase - 6);
-    ctx.lineTo(px - 3.5, torsoTop + 4);
-    ctx.lineTo(px + 3.5, torsoTop + 4);
-    ctx.lineTo(px + 3, bodyBase - 6);
+    ctx.moveTo(px - 4 * s, bodyBase - 9 * s);
+    ctx.lineTo(px - 5 * s, torsoTop + 5 * s);
+    ctx.lineTo(px + 5 * s, torsoTop + 5 * s);
+    ctx.lineTo(px + 4 * s, bodyBase - 9 * s);
     ctx.closePath();
     ctx.fill();
 
-    // Shoulders (wider rectangles)
+    // Shoulders
     ctx.fillStyle = '#4a3a50';
-    ctx.fillRect(px - 6.5, torsoTop + 1, 13, 3);
+    ctx.fillRect(px - 9 * s, torsoTop + 1 * s, 18 * s, 4 * s);
 
-    // Arms (small lines down from shoulders)
+    // Arms
     ctx.strokeStyle = '#3a3040';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3 * s;
     ctx.beginPath();
-    ctx.moveTo(px - 6, torsoTop + 3);
-    ctx.lineTo(px - 5.5, bodyBase - 4);
+    ctx.moveTo(px - 8.5 * s, torsoTop + 4 * s);
+    ctx.lineTo(px - 7.5 * s, bodyBase - 5 * s);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(px + 6, torsoTop + 3);
-    ctx.lineTo(px + 5.5, bodyBase - 4);
+    ctx.moveTo(px + 8.5 * s, torsoTop + 4 * s);
+    ctx.lineTo(px + 7.5 * s, bodyBase - 5 * s);
     ctx.stroke();
 
-    // Head (circle)
-    const headY = torsoTop - 1;
-    ctx.fillStyle = '#d4b896'; // Skin tone
+    // Head
+    const headY = torsoTop - 2 * s;
+    ctx.fillStyle = '#d4b896';
     ctx.beginPath();
-    ctx.arc(px, headY, 4, 0, Math.PI * 2);
+    ctx.arc(px, headY, 6 * s, 0, Math.PI * 2);
     ctx.fill();
 
-    // Hair/helmet (top half of head)
+    // Hair/helmet
     ctx.fillStyle = '#3a2a20';
     ctx.beginPath();
-    ctx.arc(px, headY - 0.5, 4.2, Math.PI, 0);
+    ctx.arc(px, headY - 1 * s, 6.5 * s, Math.PI, 0);
     ctx.closePath();
     ctx.fill();
 
-    // ── Gold highlight ring around base ──
+    // ── Gold ring around base ──
     const glowPulse = 1 + Math.sin(t * 3) * 0.15;
-    ctx.strokeStyle = `rgba(196,149,58,${0.4 + Math.sin(t * 3) * 0.15})`;
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = `rgba(196,149,58,${(0.4 + Math.sin(t * 3) * 0.15).toFixed(2)})`;
+    ctx.lineWidth = 2 * s;
     ctx.beginPath();
-    ctx.ellipse(px, py + 1, baseW + 2 * glowPulse, (baseH + 1) * glowPulse, 0, 0, Math.PI * 2);
+    ctx.ellipse(px, py + 1, (baseW + 3) * glowPulse, (baseH + 2) * glowPulse, 0, 0, Math.PI * 2);
     ctx.stroke();
 
-    // ── Class icon floating above head ──
+    // ── Class icon above head ──
     const icon = (S.charData && S.charData.ci) ? S.charData.ci : '⚔️';
-    const iconFloat = Math.sin(t * 2) * 1.5;
-    ctx.font = '10px system-ui';
+    const iconFloat = Math.sin(t * 2) * 2;
+    ctx.font = `${Math.round(14 * s)}px system-ui`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(icon, px, headY - 9 + iconFloat);
+    ctx.fillText(icon, px, headY - 12 * s + iconFloat);
 
     ctx.restore();
 }

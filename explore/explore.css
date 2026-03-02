@@ -4,7 +4,8 @@
    ═══════════════════════════════════════════════════════════ */
 
 /* --- LAYOUT --- */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; }
 body {
     overflow: hidden;
     display: flex;
@@ -83,8 +84,9 @@ body {
     flex: 1;
     overflow: auto;
     position: relative;
-    background: #000;
+    background: #1a1520;
     -webkit-overflow-scrolling: touch;
+    /* Scrollbars hidden globally via valdoria-design.css */
 }
 #iso-map {
     display: block;
