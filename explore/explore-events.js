@@ -2,6 +2,13 @@
 // POI INTERACTION
 // ═══════════════════════════════════════════════════════
 function showPOI(poi) {
+    // POI discovery flash on hex
+    const poiHex = getHexEl(poi.col, poi.row);
+    if (poiHex) {
+        poiHex.classList.add('poi-discovered');
+        setTimeout(() => poiHex.classList.remove('poi-discovered'), 700);
+    }
+
     const overlay = document.getElementById('dm-overlay');
     document.getElementById('dm-icon').textContent = poi.icon || '📜';
     document.getElementById('dm-title').textContent = poi.title || 'Evento';
@@ -107,7 +114,7 @@ function performStatCheck(poi, choice) {
     diceEl.textContent = '🎲';
     diceEl.style.animation = 'none';
     void diceEl.offsetHeight; // trigger reflow
-    diceEl.style.animation = 'diceRoll 0.6s ease';
+    diceEl.style.animation = 'diceRoll 0.7s ease';
 
     formulaEl.innerHTML = `<b>${roll}</b> + ${mod} (${statName}) = <b>${total}</b> vs DC <b>${dc}</b>`;
 
@@ -237,6 +244,8 @@ function addRewardBadge(container, text, type) {
     const badge = document.createElement('div');
     badge.className = 'outcome-reward ' + type;
     badge.textContent = text;
+    const idx = container.children.length;
+    badge.style.animationDelay = (idx * 120) + 'ms';
     container.appendChild(badge);
 }
 
@@ -294,11 +303,18 @@ function showPortalOverlay() {
 // RANDOM ENCOUNTERS
 // ═══════════════════════════════════════════════════════
 function showRandomEncounter(enc) {
-    // Flash effect
+    // Screen shake on map viewport
+    const viewport = document.getElementById('map-viewport');
+    if (viewport) {
+        viewport.classList.add('screen-shake');
+        setTimeout(() => viewport.classList.remove('screen-shake'), 500);
+    }
+
+    // Double flash effect
     const flash = document.createElement('div');
     flash.className = 'encounter-flash';
     document.body.appendChild(flash);
-    setTimeout(() => flash.remove(), 500);
+    setTimeout(() => flash.remove(), 700);
 
     try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) {}
 

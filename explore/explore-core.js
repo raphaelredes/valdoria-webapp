@@ -213,6 +213,12 @@ function loadMapData(data) {
     };
     document.getElementById('location-info').textContent = biomeNames[S.biome] || S.biome;
 
+    // Initialize bottom bar (step counter + danger pips)
+    initBottomBar();
+
+    // Biome ambient particles
+    if (typeof initBiomeParticles === 'function') initBiomeParticles(S.biome);
+
     // Show DM intro only on fresh start
     if (S.dmIntro && !restored) {
         setTimeout(() => showDMIntro(S.dmIntro), 400);
@@ -232,7 +238,10 @@ function setupHUD() {
 
 function updateHP(current, max) {
     const pct = Math.max(0, Math.min(100, (current / max) * 100));
-    document.getElementById('hp-fill').style.width = pct + '%';
+    const fill = document.getElementById('hp-fill');
+    fill.style.width = pct + '%';
+    fill.classList.remove('hp-high', 'hp-mid', 'hp-low');
+    fill.classList.add(pct > 60 ? 'hp-high' : pct > 25 ? 'hp-mid' : 'hp-low');
     document.getElementById('hp-text').textContent = current + '/' + max;
 }
 
@@ -241,10 +250,30 @@ function updateRewards() {
     const goldBadge = document.getElementById('badge-gold');
     xpBadge.textContent = '✨ ' + S.xpEarned;
     goldBadge.textContent = '💰 ' + S.goldEarned;
-    // Pop animation
-    xpBadge.classList.add('pop');
-    goldBadge.classList.add('pop');
-    setTimeout(() => { xpBadge.classList.remove('pop'); goldBadge.classList.remove('pop'); }, 300);
+    // Spring bounce animation
+    [xpBadge, goldBadge].forEach(b => {
+        b.classList.remove('pop');
+        void b.offsetHeight;
+        b.classList.add('pop');
+    });
+    setTimeout(() => { xpBadge.classList.remove('pop'); goldBadge.classList.remove('pop'); }, 450);
+    updateStepCounter();
+}
+
+function updateStepCounter() {
+    const el = document.getElementById('step-counter');
+    if (el) el.textContent = '⬡ ' + S.visited.size;
+}
+
+function initBottomBar() {
+    updateStepCounter();
+    const pips = document.querySelectorAll('.danger-pips .pip');
+    pips.forEach((pip, i) => {
+        if (i < S.dangerLevel) {
+            pip.classList.add('filled');
+            if (i === S.dangerLevel - 1) pip.classList.add('pulse');
+        }
+    });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -306,7 +335,7 @@ function renderMap() {
 // ═══════════════════════════════════════════════════════
 // FOG OF WAR
 // ═══════════════════════════════════════════════════════
-function revealFog(cx, cy) {
+function revealFog(cx, cy, animate) {
     const radius = S.visibility;
     for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
@@ -319,17 +348,22 @@ function revealFog(cx, cy) {
             }
         }
     }
-    applyFog();
+    applyFog(animate);
 }
 
-function applyFog() {
+function applyFog(animate) {
     document.querySelectorAll('.hex').forEach(hex => {
         const c = parseInt(hex.dataset.col);
         const r = parseInt(hex.dataset.row);
         const key = `${c},${r}`;
         const state = S.fogState[key] || 'hidden';
-        hex.classList.remove('fog-hidden', 'fog-dim', 'fog-visible');
+        const wasHidden = hex.classList.contains('fog-hidden') || hex.classList.contains('fog-dim');
+        hex.classList.remove('fog-hidden', 'fog-dim', 'fog-visible', 'fog-revealing');
         hex.classList.add('fog-' + state);
+        if (animate && wasHidden && state === 'visible') {
+            hex.classList.add('fog-revealing');
+            setTimeout(() => hex.classList.remove('fog-revealing'), 460);
+        }
     });
 }
 
@@ -426,15 +460,17 @@ function movePlayer(col, row) {
         newHex.classList.add('player');
     }
 
-    // Spawn dust particles
-    spawnDust(newHex);
+    // Spawn directional dust + arrival ripple
+    spawnDust(newHex, oldHex);
+    spawnArrivalRipple(newHex);
 
     // After animation settles, reveal fog and check events
     setTimeout(() => {
         _moveAnimating = false;
-        revealFog(col, row);
+        revealFog(col, row, true);
         highlightAdjacent();
         scrollToPlayer();
+        updateStepCounter();
         saveState();
 
         // Check POI first
@@ -459,17 +495,49 @@ function movePlayer(col, row) {
     }, 260);
 }
 
-function spawnDust(hex) {
+function spawnDust(hex, fromHex) {
     if (!hex) return;
     const container = document.getElementById('map-container');
-    for (let i = 0; i < 3; i++) {
+    const cx = hex.offsetLeft + hex.offsetWidth / 2;
+    const cy = hex.offsetTop + hex.offsetHeight / 2;
+    const colors = ['rgba(196,149,58,0.6)', 'rgba(224,214,200,0.4)'];
+    let dx = 0, dy = 1;
+    if (fromHex) {
+        dx = fromHex.offsetLeft - hex.offsetLeft;
+        dy = fromHex.offsetTop - hex.offsetTop;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        dx /= len; dy /= len;
+    }
+    for (let i = 0; i < 6; i++) {
         const p = document.createElement('div');
         p.className = 'dust-particle';
-        p.style.left = (hex.offsetLeft + 8 + Math.random() * 14) + 'px';
-        p.style.top = (hex.offsetTop + 16 + Math.random() * 10) + 'px';
+        const size = 2 + Math.random() * 4;
+        const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 1.5;
+        const dist = 8 + Math.random() * 16;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = (cx - size / 2) + 'px';
+        p.style.top = (cy - size / 2) + 'px';
+        p.style.background = colors[i % 2];
+        p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+        p.style.animationDelay = (i * 30) + 'ms';
         container.appendChild(p);
-        setTimeout(() => p.remove(), 600);
+        setTimeout(() => p.remove(), 700);
     }
+}
+
+function spawnArrivalRipple(hex) {
+    if (!hex) return;
+    const container = document.getElementById('map-container');
+    const ripple = document.createElement('div');
+    ripple.className = 'arrival-ripple';
+    ripple.style.left = (hex.offsetLeft - 4) + 'px';
+    ripple.style.top = (hex.offsetTop - 4) + 'px';
+    ripple.style.width = (hex.offsetWidth + 8) + 'px';
+    ripple.style.height = (hex.offsetHeight + 8) + 'px';
+    container.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
 }
 
 function positionPlayerToken() {
@@ -483,7 +551,7 @@ function positionPlayerToken() {
         token.style.display = 'flex';
         // Re-enable transition after positioning
         requestAnimationFrame(() => {
-            token.style.transition = 'left 0.25s ease-out, top 0.25s ease-out';
+            token.style.transition = 'left 0.28s cubic-bezier(0.34,1.4,0.64,1), top 0.28s cubic-bezier(0.34,1.4,0.64,1)';
         });
     }
 }
