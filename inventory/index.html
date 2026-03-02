@@ -319,6 +319,16 @@
             background: linear-gradient(135deg, #ffa726, #ef6c00);
             color: #fff;
         }
+        .btn-discard {
+            background: linear-gradient(135deg, #ef5350, #b71c1c);
+            color: #fff;
+        }
+        .btn-sell-junk {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: var(--v-radius); border: 1px solid var(--v-warning);
+            background: rgba(255,152,0,0.1); color: var(--v-warning); font-size: 11px;
+            cursor: pointer; white-space: nowrap;
+        }
         .btn-disabled {
             background: var(--v-border) !important; color: var(--v-text-dim) !important;
             cursor: not-allowed !important;
@@ -755,6 +765,19 @@
         });
         html += '</div>';
 
+        // Quick action: Sell Junk
+        const junkCount = getJunkItems().reduce((sum, j) => sum + j.q, 0);
+        if (junkCount > 0 && !searchQuery) {
+            let junkGP = 0;
+            getJunkItems().forEach(inv => {
+                const jit = getItemData(inv.n);
+                junkGP += Math.max(1, Math.floor((jit.v || 1) * 0.6)) * inv.q;
+            });
+            html += `<div style="text-align:right;margin-bottom:6px;">
+                <span class="btn-sell-junk" onclick="doSellJunk()">💰 Vender Lixo (${junkCount}) · ${junkGP}gp</span>
+            </div>`;
+        }
+
         // Potion counter card (basic potions, separate from inventory)
         if (localPotions > 0 && (activeFilter === 'all' || activeFilter === 'use')
             && (!searchQuery || 'poção de cura'.includes(searchQuery))) {
@@ -1186,6 +1209,9 @@
             const sellPrice = Math.max(1, Math.floor((it.v || 1) * 0.5));
             html += `<button class="btn-sell" onclick="doSell('${esc(name)}',${sellPrice})">💰 ${sellPrice}gp</button>`;
         }
+        if (canDiscard(it, tags) && qty > 0 && !isEquippedAnywhere(name)) {
+            html += `<button class="btn-discard" onclick="doDiscard('${esc(name)}')" style="flex:0 0 44px;padding:10px;">🗑️</button>`;
+        }
         html += '</div>';
 
         showModal(html);
@@ -1238,12 +1264,18 @@
                             title="${gem || 'Vazio'}">${icon}</div>`;
                     }
                     html += '</div>';
-                    // Show gem names below sockets
+                    // Show gem names below sockets + extract all button
                     const gemsInSlot = localGems[slot] || [];
                     const gemNames = gemsInSlot.filter(Boolean);
                     if (gemNames.length) {
                         html += `<div style="text-align:center;font-size:11px;color:var(--v-text-dim);margin-top:4px;">
                             ${gemNames.join(' · ')}</div>`;
+                    }
+                    if (gemNames.length > 1) {
+                        html += `<div style="text-align:center;margin-top:6px;">
+                            <button class="btn-unequip" style="font-size:11px;padding:4px 12px;"
+                                onclick="doExtractAllGems('${slot}')">💎 Extrair Todas (${gemNames.length})</button>
+                        </div>`;
                     }
                 }
 
@@ -1587,6 +1619,105 @@
         closeModal();
         haptic('medium');
         toast(`💰 ${name} vendido por ${price} GP`, 'ok');
+        animateStat('hs-gold');
+        updateHeader();
+        renderTab();
+        updateBottomBar();
+    }
+
+    function canDiscard(it, tags) {
+        return !tags.some(t => SELL_PROTECTED.has(t));
+    }
+
+    function doDiscard(name) {
+        addOp({t:'discard', item: name});
+        removeFromLocalInv(name);
+        closeModal();
+        haptic('heavy');
+        toast(`🗑️ ${name} descartado`, 'warn');
+        updateHeader();
+        renderTab();
+        updateBottomBar();
+    }
+
+    function doExtractAllGems(slot) {
+        const gems = localGems[slot] || [];
+        let count = 0;
+        for (let i = 0; i < gems.length; i++) {
+            if (gems[i]) {
+                addOp({t:'gem_remove', slot, idx: i});
+                addToLocalInv(gems[i]);
+                count++;
+            }
+        }
+        localGems[slot] = gems.map(() => null);
+        closeModal();
+        haptic('medium');
+        toast(`💎 ${count} gema(s) extraída(s)`, 'ok');
+        renderTab();
+        updateBottomBar();
+    }
+
+    const JUNK_TAGS = new Set(['junk', 'monster_part']);
+    function getJunkItems() {
+        return localInv.filter(inv => {
+            if (inv.q <= 0) return false;
+            const it = getItemData(inv.n);
+            const tags = it.t || [];
+            if (!tags.some(t => JUNK_TAGS.has(t))) return false;
+            if (isEquippedAnywhere(inv.n)) return false;
+            if (isFav(inv.n)) return false;
+            if (tags.some(t => SELL_PROTECTED.has(t))) return false;
+            return true;
+        });
+    }
+
+    function doSellJunk() {
+        const junk = getJunkItems();
+        if (!junk.length) { toast('Nenhum lixo para vender.', 'warn'); return; }
+        let totalGP = 0;
+        let totalItems = 0;
+        junk.forEach(inv => {
+            const it = getItemData(inv.n);
+            const price = Math.max(1, Math.floor((it.v || 1) * 0.6));
+            totalGP += price * inv.q;
+            totalItems += inv.q;
+        });
+        // Confirm modal
+        let html = '<div style="text-align:center;padding:12px;">';
+        html += '<div style="font-size:20px;margin-bottom:8px;">💰 Vender Lixo</div>';
+        html += `<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
+            Vender <b>${totalItems}</b> itens de despojos por <b>${totalGP} GP</b>? (60% do valor)</div>`;
+        html += '<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';
+        junk.forEach(inv => {
+            const it = getItemData(inv.n);
+            html += `${it.e||'📦'} ${inv.n} x${inv.q}<br>`;
+        });
+        html += '</div>';
+        html += `<div class="detail-actions">
+            <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+            <button class="btn-sell" onclick="confirmSellJunk()">💰 Vender ${totalGP} GP</button>
+        </div>`;
+        html += '</div>';
+        showModal(html);
+    }
+
+    function confirmSellJunk() {
+        addOp({t:'sell_junk'});
+        const junk = getJunkItems();
+        let totalGP = 0;
+        junk.forEach(inv => {
+            const it = getItemData(inv.n);
+            const price = Math.max(1, Math.floor((it.v || 1) * 0.6));
+            totalGP += price * inv.q;
+        });
+        // Remove all junk from local inventory
+        const junkNames = new Set(junk.map(j => j.n));
+        localInv = localInv.filter(inv => !junkNames.has(inv.n));
+        localGold += totalGP;
+        closeModal();
+        haptic('medium');
+        toast(`💰 Lixo vendido: +${totalGP} GP`, 'ok');
         animateStat('hs-gold');
         updateHeader();
         renderTab();
