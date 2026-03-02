@@ -199,6 +199,93 @@
             50% { transform: translateY(-3px); }
         }
 
+        /* Floating player token (animates between hexes) */
+        #player-token {
+            position: absolute;
+            width: 30px;
+            height: 34px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            z-index: 15;
+            pointer-events: none;
+            transition: left 0.25s ease-out, top 0.25s ease-out;
+            filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.7));
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+        }
+
+        /* Dust particles on movement */
+        .dust-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(196, 149, 58, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 14;
+            animation: dustFade 0.5s ease-out forwards;
+        }
+        @keyframes dustFade {
+            0% { opacity: 1; transform: scale(1) translateY(0); }
+            100% { opacity: 0; transform: scale(0.3) translateY(-10px); }
+        }
+
+        /* Portal overlay */
+        .portal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 40, 30, 0.96);
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .portal-overlay.active { opacity: 1; pointer-events: all; }
+        .portal-icon { font-size: 64px; animation: portalGlow 1.5s ease infinite; }
+        .portal-title { font-size: 18px; font-weight: 700; color: #4ad680; letter-spacing: 1px; }
+        .portal-summary { text-align: center; color: var(--v-text, #e0d6c8); font-size: 13px; line-height: 1.8; }
+        .portal-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
+        @keyframes portalGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(74, 214, 128, 0.4)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 24px rgba(74, 214, 128, 0.8)); transform: scale(1.05); }
+        }
+
+        /* Random encounter overlay (alarm theme) */
+        .encounter-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 250;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .encounter-overlay.active { opacity: 1; pointer-events: all; }
+        .encounter-overlay .dm-card {
+            border-color: rgba(180, 50, 50, 0.5);
+            box-shadow: 0 0 30px rgba(180, 50, 50, 0.15), 0 8px 32px rgba(0,0,0,0.5);
+        }
+        .encounter-flash {
+            position: fixed; inset: 0;
+            background: rgba(200, 60, 60, 0.3);
+            z-index: 249;
+            animation: encounterFlash 0.4s ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes encounterFlash {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
         /* ═══════════════════════════════════════════
            BOTTOM BAR
            ═══════════════════════════════════════════ */
@@ -541,7 +628,9 @@
 
 <!-- Map Viewport -->
 <div id="map-viewport">
-    <div id="map-container"></div>
+    <div id="map-container">
+        <div id="player-token"></div>
+    </div>
 </div>
 
 <!-- Bottom Bar -->
@@ -588,686 +677,29 @@
     <div class="combat-text" id="combat-text"></div>
 </div>
 
-<script>
-// ═══════════════════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════════════════
-const COLS = 11, ROWS = 13;
-const IMPASSABLE = new Set(['W','M','L','#']);
-
-// Hex neighbors (odd-r offset)
-const EVEN_OFFSETS = [[-1,-1],[0,-1],[-1,0],[1,0],[-1,1],[0,1]];
-const ODD_OFFSETS  = [[0,-1],[1,-1],[-1,0],[1,0],[0,1],[1,1]];
-
-// Biome emoji mapping
-const BIOME_EMOJI = {
-    forest:   {'.':'🟫','T':'🌲','g':'🌿','w':'💧','r':'🪨','R':'🏛️','p':'🟫','#':'🌲','W':'🌊','M':'⛰️','b':'💀','s':'🟫','m':'🟤','i':'🧊','v':'🟧','L':'🔥'},
-    plains:   {'.':'🟫','T':'🌳','g':'🌾','w':'💧','r':'🪨','R':'🏚️','p':'🟫','#':'🪨','W':'🌊','M':'⛰️','b':'💀','s':'🟫','m':'🟤','i':'🧊','v':'🟧','L':'🔥'},
-    swamp:    {'.':'🟫','T':'🌴','g':'🌿','w':'💧','r':'🪨','R':'🏛️','p':'🟫','#':'🌴','W':'🌊','M':'⛰️','b':'💀','s':'🟫','m':'🟤','i':'🧊','v':'🟧','L':'🔥'},
-    cave:     {'.':'⬛','T':'🪨','g':'⬛','w':'💧','r':'🪨','R':'🏛️','p':'⬛','#':'🧱','W':'🌊','M':'🧱','b':'💀','s':'⬛','m':'⬛','i':'🧊','v':'🟧','L':'🔥'},
-    desert:   {'.':'🟨','T':'🌵','g':'🟨','w':'💧','r':'🪨','R':'🏛️','p':'🟨','#':'🪨','W':'🌊','M':'⛰️','b':'💀','s':'🏜️','m':'🟤','i':'🧊','v':'🟧','L':'🔥'},
-    mountain: {'.':'🟫','T':'🌲','g':'🌿','w':'💧','r':'🪨','R':'🏛️','p':'🟫','#':'⛰️','W':'🌊','M':'🏔️','b':'💀','s':'🟫','m':'🟤','i':'🧊','v':'🟧','L':'🔥'},
-    snow:     {'.':'⬜','T':'🌲','g':'⬜','w':'💧','r':'🪨','R':'🏛️','p':'⬜','#':'🧊','W':'🌊','M':'🏔️','b':'💀','s':'⬜','m':'🟤','i':'🧊','v':'🟧','L':'🔥'},
-    volcanic: {'.':'🟫','T':'🪨','g':'🟫','w':'💧','r':'🪨','R':'🏛️','p':'🟫','#':'🪨','W':'🌊','M':'⛰️','b':'💀','s':'🟫','m':'🟤','i':'🧊','v':'🟧','L':'🔥'},
-    graveyard:{'.':'🟫','T':'🌲','g':'🌿','w':'💧','r':'🪨','R':'🏛️','p':'🟫','#':'🪨','W':'🌊','M':'⛰️','b':'⚰️','s':'🟫','m':'🟤','i':'🧊','v':'🟧','L':'🔥'},
-};
-
-const BIOME_COLORS = {
-    forest:   {'.':'#5a3d2b','T':'#1a4a1a','g':'#2d5a2d','w':'#2a5a8a','r':'#5a5a5a','R':'#6a5a4a','p':'#6a5040','#':'#0d2e0d','W':'#1a3a6a','M':'#4a4a4a'},
-    plains:   {'.':'#5a4a30','T':'#3a6a2a','g':'#6a8a3a','w':'#2a5a8a','r':'#6a6a5a','R':'#5a4a3a','p':'#6a5a40','#':'#5a5a4a','W':'#1a3a6a','M':'#4a4a4a'},
-    swamp:    {'.':'#3a3a2a','T':'#2a4a2a','g':'#3a5a2a','w':'#2a4a5a','r':'#4a4a3a','R':'#5a4a3a','p':'#4a3a2a','#':'#1a3a1a','W':'#1a3a4a','M':'#3a3a3a','m':'#3a2a1a'},
-    cave:     {'.':'#1a1a2a','T':'#2a2a2a','g':'#1a1a1a','w':'#1a2a4a','r':'#3a3a3a','R':'#4a3a2a','p':'#2a2a2a','#':'#0a0a0a','W':'#0a1a3a','M':'#1a1a1a'},
-    desert:   {'.':'#8a7a4a','T':'#4a6a2a','g':'#8a7a50','w':'#2a5a8a','r':'#7a6a5a','R':'#6a5a4a','p':'#8a7a50','#':'#6a5a4a','W':'#1a3a6a','M':'#5a4a3a','s':'#9a8a5a'},
-    mountain: {'.':'#5a4a3a','T':'#2a4a2a','g':'#3a5a3a','w':'#2a5a8a','r':'#6a6a6a','R':'#5a4a3a','p':'#5a4a3a','#':'#3a3a3a','W':'#1a3a6a','M':'#4a4a5a'},
-    snow:     {'.':'#c0c8d0','T':'#2a5a3a','g':'#b0b8c0','w':'#3a6a9a','r':'#7a7a8a','R':'#6a6a7a','p':'#b0b0b8','#':'#8a8a9a','W':'#2a4a7a','M':'#6a6a7a','i':'#9ab0c0'},
-    volcanic: {'.':'#3a2a1a','T':'#2a2a2a','g':'#3a2a1a','w':'#2a3a5a','r':'#4a3a2a','R':'#5a3a2a','p':'#3a2a1a','#':'#2a1a0a','W':'#1a2a4a','M':'#3a2a1a','v':'#6a3a1a','L':'#8a2a0a'},
-    graveyard:{'.':'#3a3a3a','T':'#1a3a1a','g':'#2a3a2a','w':'#2a3a5a','r':'#4a4a4a','R':'#4a3a3a','p':'#3a3a3a','#':'#2a2a2a','W':'#1a2a4a','M':'#3a3a3a','b':'#4a3a3a'},
-};
-
-const STAT_NAMES = {str:'FOR',dex:'DES',con:'CON',int:'INT',wis:'SAB',cha:'CAR',
-    strength:'FOR',dexterity:'DES',constitution:'CON',intelligence:'INT',wisdom:'SAB',charisma:'CAR'};
-
-const POI_TYPE_LABELS = {dis:'Descoberta',sea:'Busca',dan:'Perigo',mys:'Mistério',npc:'Encontro'};
-
-// ═══════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════
-let S = {
-    grid: [],         // 2D array [row][col]
-    pois: [],         // POI data
-    biome: 'forest',
-    playerCol: 0, playerRow: 0,
-    exitCol: 0, exitRow: 0,
-    visibility: 3,
-    visited: new Set(),
-    fogState: {},     // "col,row" -> 'hidden'|'dim'|'visible'
-    xpEarned: 0,
-    goldEarned: 0,
-    hpChange: 0,
-    itemsFound: [],
-    poisResolved: new Set(),
-    checksPerformed: [],
-    combatTrigger: null,
-    charData: null,
-    token: '',
-    dmIntro: '',
-};
-
-let tg = null;
-
-function loadMapData(data) {
-    // Parse grid
-    const gridStr = data.g || '';
-    S.grid = [];
-    for (let r = 0; r < ROWS; r++) {
-        const row = [];
-        for (let c = 0; c < COLS; c++) {
-            const idx = r * COLS + c;
-            row.push(idx < gridStr.length ? gridStr[idx] : '.');
-        }
-        S.grid.push(row);
-    }
-
-    S.biome = data.b || 'forest';
-    S.playerCol = data.s ? data.s[0] : 5;
-    S.playerRow = data.s ? data.s[1] : 12;
-    S.exitCol = data.e ? data.e[0] : 5;
-    S.exitRow = data.e ? data.e[1] : 0;
-    S.visibility = data.v || 3;
-    S.dmIntro = data.i || '';
-    S.charData = data.c || null;
-
-    // Parse POIs
-    S.pois = (data.p || []).map(p => ({
-        id: p.i, col: p.q, row: p.r,
-        type: p.y, icon: p.ic, title: p.tt,
-        narration: p.n, choices: p.ch || [],
-        combat: p.cb || null,
-    }));
-
-    // Setup HUD
-    setupHUD();
-
-    // Render map
-    renderMap();
-
-    // Initial fog
-    S.visited.add(`${S.playerCol},${S.playerRow}`);
-    revealFog(S.playerCol, S.playerRow);
-    highlightAdjacent();
-
-    // Scroll to player
-    scrollToPlayer();
-
-    // Hide loading
-    document.getElementById('loading').classList.add('hidden');
-
-    // Location info
-    const biomeNames = {
-        forest:'Floresta',plains:'Campos',swamp:'Pântano',cave:'Caverna',
-        desert:'Deserto',mountain:'Montanha',snow:'Ermo Gelado',
-        volcanic:'Vulcão',graveyard:'Cemitério'
-    };
-    document.getElementById('location-info').textContent = biomeNames[S.biome] || S.biome;
-
-    // Show DM intro
-    if (S.dmIntro) {
-        setTimeout(() => showDMIntro(S.dmIntro), 400);
-    }
-}
-
-// ═══════════════════════════════════════════════════════
-// HUD
-// ═══════════════════════════════════════════════════════
-function setupHUD() {
-    const c = S.charData;
-    if (!c) return;
-    document.getElementById('hud-name').textContent = (c.ci||'⚔️') + ' ' + (c.nm||'Herói');
-    updateHP(c.hp || 10, c.mh || 10);
-    updateRewards();
-}
-
-function updateHP(current, max) {
-    const pct = Math.max(0, Math.min(100, (current / max) * 100));
-    document.getElementById('hp-fill').style.width = pct + '%';
-    document.getElementById('hp-text').textContent = current + '/' + max;
-}
-
-function updateRewards() {
-    const xpBadge = document.getElementById('badge-xp');
-    const goldBadge = document.getElementById('badge-gold');
-    xpBadge.textContent = '✨ ' + S.xpEarned;
-    goldBadge.textContent = '💰 ' + S.goldEarned;
-    // Pop animation
-    xpBadge.classList.add('pop');
-    goldBadge.classList.add('pop');
-    setTimeout(() => { xpBadge.classList.remove('pop'); goldBadge.classList.remove('pop'); }, 300);
-}
-
-// ═══════════════════════════════════════════════════════
-// MAP RENDERING
-// ═══════════════════════════════════════════════════════
-function renderMap() {
-    const container = document.getElementById('map-container');
-    container.innerHTML = '';
-    const emojiMap = BIOME_EMOJI[S.biome] || BIOME_EMOJI.forest;
-    const colorMap = BIOME_COLORS[S.biome] || BIOME_COLORS.forest;
-
-    for (let r = 0; r < ROWS; r++) {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'hex-row' + (r % 2 === 1 ? ' odd' : '');
-
-        for (let c = 0; c < COLS; c++) {
-            const tile = S.grid[r][c];
-            const hex = document.createElement('div');
-            hex.className = 'hex fog-hidden';
-            hex.dataset.col = c;
-            hex.dataset.row = r;
-
-            // Background color
-            const baseTile = tile.match(/[0-9]/) ? '.' : tile === '@' ? '.' : tile === 'E' ? '.' : tile;
-            hex.style.backgroundColor = colorMap[baseTile] || colorMap['.'] || '#2b2830';
-
-            // Emoji content
-            if (c === S.playerCol && r === S.playerRow) {
-                hex.textContent = S.charData ? (S.charData.ci || '⚔️') : '⚔️';
-                hex.classList.add('player');
-            } else {
-                const poi = S.pois.find(p => p.col === c && p.row === r);
-                if (poi) {
-                    hex.textContent = poi.icon || '❓';
-                    hex.classList.add('poi');
-                    hex.dataset.poiId = poi.id;
-                } else if (tile === 'E') {
-                    hex.textContent = '🚪';
-                    hex.classList.add('exit-tile');
-                } else {
-                    hex.textContent = emojiMap[baseTile] || emojiMap['.'] || '·';
-                }
-            }
-
-            // Impassable
-            if (IMPASSABLE.has(tile)) {
-                hex.classList.add('blocked');
-            }
-
-            // Click handler
-            hex.addEventListener('click', () => handleHexClick(c, r));
-
-            rowDiv.appendChild(hex);
-        }
-        container.appendChild(rowDiv);
-    }
-}
-
-// ═══════════════════════════════════════════════════════
-// FOG OF WAR
-// ═══════════════════════════════════════════════════════
-function revealFog(cx, cy) {
-    const radius = S.visibility;
-    for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-            const dist = hexDist(c, r, cx, cy);
-            const key = `${c},${r}`;
-            if (dist <= radius) {
-                S.fogState[key] = 'visible';
-            } else if (dist <= radius + 1.5 && S.fogState[key] !== 'visible') {
-                S.fogState[key] = 'dim';
-            }
-        }
-    }
-    applyFog();
-}
-
-function applyFog() {
-    document.querySelectorAll('.hex').forEach(hex => {
-        const c = parseInt(hex.dataset.col);
-        const r = parseInt(hex.dataset.row);
-        const key = `${c},${r}`;
-        const state = S.fogState[key] || 'hidden';
-        hex.classList.remove('fog-hidden', 'fog-dim', 'fog-visible');
-        hex.classList.add('fog-' + state);
-    });
-}
-
-function hexDist(c1, r1, c2, r2) {
-    // Convert odd-r to cube
-    function toCube(col, row) {
-        const x = col - (row - (row & 1)) / 2;
-        const z = row;
-        const y = -x - z;
-        return [x, y, z];
-    }
-    const [x1,y1,z1] = toCube(c1,r1);
-    const [x2,y2,z2] = toCube(c2,r2);
-    return Math.max(Math.abs(x1-x2), Math.abs(y1-y2), Math.abs(z1-z2));
-}
-
-// ═══════════════════════════════════════════════════════
-// MOVEMENT
-// ═══════════════════════════════════════════════════════
-function getNeighbors(col, row) {
-    const offsets = row % 2 === 0 ? EVEN_OFFSETS : ODD_OFFSETS;
-    return offsets
-        .map(([dc,dr]) => [col+dc, row+dr])
-        .filter(([c,r]) => c >= 0 && c < COLS && r >= 0 && r < ROWS);
-}
-
-function isAdjacent(c1, r1, c2, r2) {
-    return getNeighbors(c1, r1).some(([c,r]) => c === c2 && r === r2);
-}
-
-function highlightAdjacent() {
-    document.querySelectorAll('.hex.adjacent').forEach(h => h.classList.remove('adjacent'));
-    getNeighbors(S.playerCol, S.playerRow).forEach(([c,r]) => {
-        const tile = S.grid[r][c];
-        if (!IMPASSABLE.has(tile)) {
-            const hex = getHexEl(c, r);
-            if (hex && S.fogState[`${c},${r}`] !== 'hidden') {
-                hex.classList.add('adjacent');
-            }
-        }
-    });
-}
-
-function handleHexClick(col, row) {
-    if (!isAdjacent(S.playerCol, S.playerRow, col, row)) return;
-    const tile = S.grid[row][col];
-    if (IMPASSABLE.has(tile)) return;
-
-    movePlayer(col, row);
-}
-
-function movePlayer(col, row) {
-    // Remove player from old hex
-    const oldHex = getHexEl(S.playerCol, S.playerRow);
-    if (oldHex) {
-        oldHex.classList.remove('player');
-        const oldTile = S.grid[S.playerRow][S.playerCol];
-        const emojiMap = BIOME_EMOJI[S.biome] || BIOME_EMOJI.forest;
-        const baseTile = oldTile === '@' ? '.' : oldTile === 'E' ? '.' : oldTile.match(/[0-9]/) ? '.' : oldTile;
-        // Check if it's a resolved POI
-        const oldPoi = S.pois.find(p => p.col === S.playerCol && p.row === S.playerRow);
-        if (oldPoi && S.poisResolved.has(oldPoi.id)) {
-            oldHex.textContent = emojiMap[baseTile] || '·';
-            oldHex.classList.remove('poi');
-            oldHex.classList.add('poi-resolved');
-        } else if (oldPoi) {
-            oldHex.textContent = oldPoi.icon || '❓';
-        } else if (oldTile === 'E') {
-            oldHex.textContent = '🚪';
-        } else {
-            oldHex.textContent = emojiMap[baseTile] || '·';
-        }
-    }
-
-    // Update state
-    S.playerCol = col;
-    S.playerRow = row;
-    S.visited.add(`${col},${row}`);
-
-    // Place player on new hex
-    const newHex = getHexEl(col, row);
-    if (newHex) {
-        newHex.classList.add('player');
-        newHex.textContent = S.charData ? (S.charData.ci || '⚔️') : '⚔️';
-    }
-
-    // Reveal fog
-    revealFog(col, row);
-    highlightAdjacent();
-
-    // Scroll to player
-    scrollToPlayer();
-
-    // Check POI
-    const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.has(p.id));
-    if (poi) {
-        setTimeout(() => showPOI(poi), 200);
-        return;
-    }
-
-    // Check exit
-    if (col === S.exitCol && row === S.exitRow) {
-        setTimeout(() => finishExploration('finished'), 300);
-    }
-}
-
-function getHexEl(col, row) {
-    return document.querySelector(`.hex[data-col="${col}"][data-row="${row}"]`);
-}
-
-function scrollToPlayer() {
-    const hex = getHexEl(S.playerCol, S.playerRow);
-    if (hex) {
-        hex.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-    }
-}
-
-// ═══════════════════════════════════════════════════════
-// POI INTERACTION
-// ═══════════════════════════════════════════════════════
-function showPOI(poi) {
-    const overlay = document.getElementById('dm-overlay');
-    document.getElementById('dm-icon').textContent = poi.icon || '📜';
-    document.getElementById('dm-title').textContent = poi.title || 'Evento';
-    document.getElementById('dm-type').textContent = POI_TYPE_LABELS[poi.type] || poi.type;
-
-    // Typewriter narration
-    const narrEl = document.getElementById('dm-narration');
-    narrEl.innerHTML = '<span class="cursor"></span>';
-    typewriter(narrEl, poi.narration || '', () => {
-        showChoices(poi);
-    });
-
-    overlay.classList.add('active');
-}
-
-function typewriter(el, text, onDone) {
-    let i = 0;
-    el.innerHTML = '';
-    const span = document.createElement('span');
-    el.appendChild(span);
-    const cursor = document.createElement('span');
-    cursor.className = 'cursor';
-    el.appendChild(cursor);
-
-    const iv = setInterval(() => {
-        if (i >= text.length) {
-            clearInterval(iv);
-            cursor.remove();
-            if (onDone) onDone();
-            return;
-        }
-        span.textContent += text[i];
-        i++;
-    }, 20);
-}
-
-function showChoices(poi) {
-    const choicesEl = document.getElementById('dm-choices');
-    choicesEl.innerHTML = '';
-
-    (poi.choices || []).forEach((ch, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'dm-choice-btn';
-
-        let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
-        html += `<span class="choice-label">${ch.l || 'Escolher'}</span>`;
-
-        // Stat check display
-        if (ch.k) {
-            const statName = STAT_NAMES[ch.k.s] || ch.k.s.toUpperCase();
-            const mod = ch.k.m || 0;
-            // Calculate chance: (21 - DC + mod) / 20 * 100
-            const chance = Math.max(5, Math.min(95, Math.round(((21 - ch.k.dc + mod) / 20) * 100)));
-            html += `<span class="choice-check">${statName} ${chance}%</span>`;
-        }
-
-        btn.innerHTML = html;
-        btn.addEventListener('click', () => handleChoice(poi, ch, idx));
-        choicesEl.appendChild(btn);
-    });
-}
-
-function handleChoice(poi, choice, idx) {
-    document.getElementById('dm-overlay').classList.remove('active');
-    S.poisResolved.add(poi.id);
-
-    if (choice.k) {
-        // Stat check
-        performStatCheck(poi, choice);
-    } else {
-        // Direct outcome
-        applyOutcome(poi, choice.o || {}, choice);
-    }
-}
-
-// ═══════════════════════════════════════════════════════
-// STAT CHECK
-// ═══════════════════════════════════════════════════════
-function performStatCheck(poi, choice) {
-    const check = choice.k;
-    const roll = Math.floor(Math.random() * 20) + 1;
-    const mod = check.m || 0;
-    const total = roll + mod;
-    const dc = check.dc || 10;
-    const success = total >= dc;
-
-    // Record check
-    S.checksPerformed.push({
-        stat: check.s, dc: dc, roll: roll, mod: mod, ok: success,
-    });
-
-    // Show check overlay
-    const overlay = document.getElementById('check-overlay');
-    const diceEl = document.getElementById('dice-display');
-    const formulaEl = document.getElementById('check-formula');
-    const resultEl = document.getElementById('check-result');
-
-    const statName = STAT_NAMES[check.s] || check.s;
-
-    diceEl.textContent = '🎲';
-    diceEl.style.animation = 'none';
-    void diceEl.offsetHeight; // trigger reflow
-    diceEl.style.animation = 'diceRoll 0.6s ease';
-
-    formulaEl.innerHTML = `<b>${roll}</b> + ${mod} (${statName}) = <b>${total}</b> vs DC <b>${dc}</b>`;
-
-    overlay.classList.add('active');
-
-    setTimeout(() => {
-        diceEl.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
-        resultEl.textContent = success ? '✅ Sucesso!' : '❌ Falha!';
-        resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
-
-        setTimeout(() => {
-            overlay.classList.remove('active');
-            const outcome = success ? (choice.o || {}) : (choice.f || choice.o || {});
-            applyOutcome(poi, outcome, choice);
-        }, 1200);
-    }, 700);
-}
-
-// ═══════════════════════════════════════════════════════
-// OUTCOME
-// ═══════════════════════════════════════════════════════
-function applyOutcome(poi, outcome, choice) {
-    // Check if danger POI and player chose to fight
-    if (poi.combat && poi.type === 'dan' && choice.l && choice.l.includes('Lutar')) {
-        triggerCombat(poi);
-        return;
-    }
-
-    const overlay = document.getElementById('outcome-overlay');
-    const textEl = document.getElementById('outcome-text');
-    const rewardsEl = document.getElementById('outcome-rewards');
-
-    textEl.textContent = outcome.t || 'Você continua sua jornada.';
-    rewardsEl.innerHTML = '';
-
-    // Apply and display rewards
-    if (outcome.x) {
-        S.xpEarned += outcome.x;
-        addRewardBadge(rewardsEl, `✨ +${outcome.x} XP`, 'xp');
-    }
-    if (outcome.g) {
-        S.goldEarned += outcome.g;
-        addRewardBadge(rewardsEl, `💰 +${outcome.g} Ouro`, 'gold');
-    }
-    if (outcome.h && outcome.h > 0) {
-        S.hpChange += outcome.h;
-        addRewardBadge(rewardsEl, `❤️ +${outcome.h} HP`, 'heal');
-        if (S.charData) {
-            const newHP = Math.min(S.charData.mh, (S.charData.hp + S.hpChange));
-            updateHP(newHP, S.charData.mh);
-        }
-    }
-    if (outcome.d && outcome.d > 0) {
-        S.hpChange -= outcome.d;
-        addRewardBadge(rewardsEl, `💔 -${outcome.d} HP`, 'damage');
-        if (S.charData) {
-            const newHP = Math.max(1, S.charData.hp + S.hpChange);
-            updateHP(newHP, S.charData.mh);
-        }
-    }
-    if (outcome.i) {
-        S.itemsFound.push(outcome.i);
-        addRewardBadge(rewardsEl, `🎒 ${outcome.i}`, 'item');
-    }
-
-    updateRewards();
-    overlay.classList.add('active');
-}
-
-function addRewardBadge(container, text, type) {
-    const badge = document.createElement('div');
-    badge.className = 'outcome-reward ' + type;
-    badge.textContent = text;
-    container.appendChild(badge);
-}
-
-function closeOutcome() {
-    document.getElementById('outcome-overlay').classList.remove('active');
-}
-
-// ═══════════════════════════════════════════════════════
-// COMBAT
-// ═══════════════════════════════════════════════════════
-function triggerCombat(poi) {
-    const combat = poi.combat;
-    S.combatTrigger = combat;
-
-    const overlay = document.getElementById('combat-overlay');
-    document.getElementById('combat-icon').textContent = combat.ei || '⚔️';
-    document.getElementById('combat-enemy').textContent = combat.en || 'Inimigo';
-    document.getElementById('combat-text').textContent = 'Preparando combate...';
-
-    overlay.classList.add('active');
-
-    setTimeout(() => {
-        finishExploration('combat');
-    }, 2000);
-}
-
-// ═══════════════════════════════════════════════════════
-// DM INTRO
-// ═══════════════════════════════════════════════════════
-function showDMIntro(text) {
-    const overlay = document.getElementById('dm-overlay');
-    document.getElementById('dm-icon').textContent = '📜';
-    document.getElementById('dm-title').textContent = 'Mestre';
-    document.getElementById('dm-type').textContent = 'Narração';
-
-    const narrEl = document.getElementById('dm-narration');
-    const choicesEl = document.getElementById('dm-choices');
-    choicesEl.innerHTML = '';
-
-    typewriter(narrEl, text, () => {
-        const btn = document.createElement('button');
-        btn.className = 'dm-choice-btn';
-        btn.innerHTML = '<span class="choice-icon">🗺️</span><span class="choice-label">Explorar</span>';
-        btn.addEventListener('click', () => overlay.classList.remove('active'));
-        choicesEl.appendChild(btn);
-    });
-
-    overlay.classList.add('active');
-}
-
-// ═══════════════════════════════════════════════════════
-// FINISH
-// ═══════════════════════════════════════════════════════
-function finishExploration(reason) {
-    const payload = {
-        action: 'exploration_complete',
-        token: S.token,
-        reason: reason,
-        results: {
-            xp: S.xpEarned,
-            gold: S.goldEarned,
-            items: S.itemsFound,
-            hp_change: S.hpChange,
-            pois_resolved: Array.from(S.poisResolved),
-            hexes_explored: S.visited.size,
-            checks: S.checksPerformed,
-        },
-        combat: S.combatTrigger,
-    };
-
-    if (tg && tg.sendData) {
-        tg.sendData(JSON.stringify(payload));
-    } else {
-        console.log('sendData payload:', JSON.stringify(payload, null, 2));
-        alert('Exploração concluída! (dev mode)\n\nXP: ' + S.xpEarned + ' | Gold: ' + S.goldEarned);
-    }
-}
-
-// ═══════════════════════════════════════════════════════
-// ZLIB INFLATE — DecompressionStream('deflate') handles zlib format (RFC 1950)
-// ═══════════════════════════════════════════════════════
-async function zlibInflate(data) {
-    if (typeof DecompressionStream === 'undefined') {
-        throw new Error('DecompressionStream not supported');
-    }
-    // 'deflate' mode handles zlib-wrapped data (header+payload+checksum) directly
-    const ds = new DecompressionStream('deflate');
-    const writer = ds.writable.getWriter();
-    writer.write(data);
-    writer.close();
-    const reader = ds.readable.getReader();
-    const chunks = [];
-    while (true) {
-        const {done, value} = await reader.read();
-        if (done) break;
-        chunks.push(value);
-    }
-    const totalLen = chunks.reduce((a, c) => a + c.length, 0);
-    const result = new Uint8Array(totalLen);
-    let offset = 0;
-    for (const chunk of chunks) {
-        result.set(chunk, offset);
-        offset += chunk.length;
-    }
-    return result;
-}
-
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
-async function initAsync() {
-    tg = window.Telegram && window.Telegram.WebApp;
-    if (tg) {
-        tg.ready();
-        tg.expand();
-        try { tg.disableVerticalSwipes(); } catch(e) { console.warn('[EXPLORE] disableVerticalSwipes not supported'); }
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    S.token = params.get('token') || '';
-    const dataB64 = params.get('data') || '';
-
-    if (!dataB64) {
-        document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:20px">Dados do mapa não encontrados.<br>Volte ao bot e tente novamente.</div>';
-        return;
-    }
-
-    try {
-        const binary = atob(dataB64.replace(/-/g,'+').replace(/_/g,'/'));
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-
-        const inflated = await zlibInflate(bytes);
-        const json = new TextDecoder().decode(inflated);
-        const data = JSON.parse(json);
-        loadMapData(data);
-    } catch(e) {
-        console.error('Failed to parse map data:', e);
-        document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:20px">Erro ao carregar mapa.<br>'+e.message+'</div>';
-    }
-}
-
-// Start
-document.addEventListener('DOMContentLoaded', () => initAsync());
-</script>
+<!-- Portal Overlay (exit transition) -->
+<div class="portal-overlay" id="portal-overlay">
+    <div class="portal-icon">🚪</div>
+    <div class="portal-title">EXPLORAÇÃO CONCLUÍDA</div>
+    <div class="portal-summary" id="portal-summary"></div>
+</div>
+
+<!-- Random Encounter Overlay -->
+<div class="encounter-overlay" id="encounter-overlay">
+    <div class="dm-card">
+        <div class="dm-header">
+            <span class="dm-icon" id="enc-icon">⚠️</span>
+            <div>
+                <div class="dm-title" id="enc-title">Encontro!</div>
+                <div class="dm-type-badge" style="background:rgba(180,50,50,0.2);color:#c44" id="enc-type">surpresa</div>
+            </div>
+        </div>
+        <div class="dm-narration" id="enc-narration"></div>
+        <div class="dm-choices" id="enc-choices"></div>
+    </div>
+</div>
+
+<script src="explore-core.js"></script>
+<script src="explore-events.js"></script>
 </body>
 </html>
