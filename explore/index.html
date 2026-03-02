@@ -7,7 +7,7 @@
     <title>Explorar - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../valdoria-design.css?v=6">
-    <link rel="stylesheet" href="explore.css?v=11">
+    <link rel="stylesheet" href="explore.css?v=12">
 </head>
 <body>
 
@@ -44,7 +44,7 @@
 
 <!-- Bottom Bar -->
 <div id="bottom-bar">
-    <button class="btn-return" id="btn-return" onclick="showExitConfirm()">⬅️ Retornar</button>
+    <button class="btn-return" id="btn-return" onclick="showExitRiskAssessment()">⬅️ Retornar</button>
     <div class="bar-center">
         <span class="step-counter" id="step-counter">⬡ 0</span>
         <div class="danger-pips" id="danger-pips">
@@ -121,16 +121,55 @@
     </div>
 </div>
 
-<!-- Exit Confirmation Overlay -->
-<div class="confirm-overlay" id="confirm-overlay">
+<!-- Exit Risk Assessment Overlay -->
+<div class="exit-risk-overlay" id="exit-risk-overlay">
     <div class="dm-card">
-        <div class="confirm-icon">⚠️</div>
-        <div class="confirm-title">Abandonar Exploração?</div>
-        <div class="confirm-text">Todo progresso será enviado ao retornar.</div>
-        <div class="confirm-buttons">
-            <button class="btn-cancel" onclick="closeExitConfirm()">Cancelar</button>
-            <button class="btn-confirm" onclick="finishExploration('exit')">Sair</button>
+        <div class="exit-risk-header">
+            <span class="exit-risk-icon">⚠️</span>
+            <div class="exit-risk-title">Avaliação de Retorno</div>
         </div>
+        <div class="exit-hp-row" id="exit-hp-row"></div>
+        <div class="exit-info-row" id="exit-info-row"></div>
+        <div class="exit-options" id="exit-options"></div>
+    </div>
+</div>
+
+<!-- Camp Overlay (food selection) -->
+<div class="camp-overlay" id="camp-overlay">
+    <div class="dm-card">
+        <div class="dm-header">
+            <span class="dm-icon">🏕️</span>
+            <div>
+                <div class="dm-title">Montar Acampamento</div>
+                <div class="dm-type-badge" style="background:rgba(68,170,100,0.2);color:#4a8">descanso curto</div>
+            </div>
+        </div>
+        <div class="camp-desc">Escolha uma refeição para acompanhar o descanso curto (1d8 + CON).</div>
+        <div class="camp-food-list" id="camp-food-list"></div>
+        <button class="btn-cancel camp-cancel" onclick="closeCampOverlay()">Voltar</button>
+    </div>
+</div>
+
+<!-- Camp Result Overlay -->
+<div class="camp-result-overlay" id="camp-result-overlay">
+    <div class="dm-card">
+        <div class="camp-result-icon">🏕️</div>
+        <div class="camp-result-text" id="camp-result-text"></div>
+        <div class="camp-result-detail" id="camp-result-detail"></div>
+        <button class="btn-continue" onclick="closeCampResult()">Continuar</button>
+    </div>
+</div>
+
+<!-- Low HP Alert Overlay -->
+<div class="lowhp-overlay" id="lowhp-overlay">
+    <div class="dm-card">
+        <div class="lowhp-header">
+            <span class="lowhp-icon">💔</span>
+            <div class="lowhp-title">Vida Baixa!</div>
+        </div>
+        <div class="lowhp-hp-row" id="lowhp-hp-row"></div>
+        <div class="lowhp-desc">Seus ferimentos são graves. O que deseja fazer?</div>
+        <div class="lowhp-options" id="lowhp-options"></div>
     </div>
 </div>
 

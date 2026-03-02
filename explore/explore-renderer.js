@@ -438,7 +438,6 @@ function onMoveComplete(col, row) {
 
     updateStepCounter();
     tickConditions();
-    saveState();
     scrollCanvasToPlayer(true);
 
     // Environmental hazard check (priority over POI/exit)
@@ -483,6 +482,10 @@ function onMoveComplete(col, row) {
     if (typeof checkFlavorEvent === 'function') {
         checkFlavorEvent();
     }
+
+    // Log base move (no special event on this hex)
+    logMoveEvent([{type:'move'}]);
+    saveState();
 }
 
 // Scroll viewport to center on the player's current hex position

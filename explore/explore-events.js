@@ -1,4 +1,20 @@
 // ═══════════════════════════════════════════════════════
+// MOVEMENT LOG (internal — sent to backend)
+// ═══════════════════════════════════════════════════════
+function logMoveEvent(events) {
+    S.moveLog.push({
+        s: ++S._stepCount,
+        h: [S.playerCol, S.playerRow],
+        t: (S.grid[S.playerRow] && S.grid[S.playerRow][S.playerCol]) || '.',
+        ts: Date.now(),
+        ev: events || [],
+        hp: getCurrentHP(),
+    });
+    // Keep only last 50 entries to limit payload size
+    if (S.moveLog.length > 50) S.moveLog.shift();
+}
+
+// ═══════════════════════════════════════════════════════
 // POI INTERACTION
 // ═══════════════════════════════════════════════════════
 function showPOI(poi) {
@@ -316,6 +332,15 @@ function applyOutcome(poi, outcome, choice) {
         addRewardBadge(rewardsEl, `🎒 ${outcome.i}`, 'item');
     }
 
+    // Log the outcome event
+    const logEvents = [];
+    if (outcome.x) logEvents.push({type:'xp', val:outcome.x});
+    if (outcome.g) logEvents.push({type:'gold', val:outcome.g});
+    if (outcome.h && outcome.h > 0) logEvents.push({type:'heal', val:outcome.h});
+    if (outcome.d && outcome.d > 0) logEvents.push({type:'dmg', val:outcome.d});
+    if (outcome.i) logEvents.push({type:'item', val:outcome.i});
+    if (logEvents.length) logMoveEvent(logEvents);
+
     updateRewards();
     overlay.classList.add('active');
 }
@@ -332,6 +357,7 @@ function addRewardBadge(container, text, type) {
 function closeOutcome() {
     document.getElementById('outcome-overlay').classList.remove('active');
     if (checkDeath()) return;
+    if (checkLowHP()) { saveState(); return; }
     saveState();
 }
 
@@ -341,6 +367,7 @@ function closeOutcome() {
 function triggerCombat(poi) {
     const combat = poi.combat;
     S.combatTrigger = combat;
+    logMoveEvent([{type:'combat', enemy:combat.en || 'unknown'}]);
 
     const overlay = document.getElementById('combat-overlay');
     document.getElementById('combat-icon').textContent = combat.ei || '⚔️';
@@ -384,7 +411,7 @@ function showPortalOverlay() {
     if (S.hpChange > 0) html += `<div class="reward-line">❤️ +${S.hpChange} HP</div>`;
     else if (S.hpChange < 0) html += `<div class="reward-line">💔 ${S.hpChange} HP</div>`;
     if (S.itemsFound.length > 0) html += `<div class="reward-line">🎒 ${S.itemsFound.length} itens</div>`;
-    html += `<div style="margin-top:8px;color:#8a8090">⬡ ${S.visited.size} hexes explorados</div>`;
+    html += `<div style="margin-top:8px;color:#8a8090">⬡ ${S.visited.size} turnos</div>`;
 
     summary.innerHTML = html;
     overlay.classList.add('active');
@@ -464,6 +491,7 @@ function showRandomEncounter(enc) {
             btn.innerHTML = html;
             btn.addEventListener('click', () => {
                 overlay.classList.remove('active');
+                logMoveEvent([{type:'encounter', enc_type:enc.type, choice:idx}]);
                 // Build enhanced choice with guaranteed stat check + fail outcome
                 const enhanced = Object.assign({}, ch, { k: check });
                 if (!enhanced.f) {
@@ -659,6 +687,7 @@ function showHazardCheck(hazard) {
             if (!success) {
                 applyHazardEffect(hazard);
                 if (checkDeath()) return;
+                if (checkLowHP()) { saveState(); return; }
             }
             saveState();
         };
@@ -696,16 +725,287 @@ function applyHazardEffect(hazard) {
     }
     updateConditionHUD();
     updateRewards();
+    logMoveEvent([{type:'hazard', effect:hazard.failEffect, source:hazard.type}]);
 }
 
 // ═══════════════════════════════════════════════════════
-// EXIT CONFIRMATION
+// INVENTORY USAGE (potions, consumables, food)
 // ═══════════════════════════════════════════════════════
-function showExitConfirm() {
-    document.getElementById('confirm-overlay').classList.add('active');
+function useInventoryItem(item) {
+    if (!item || item.q <= 0) return 0;
+    // Decrement local copy
+    item.q--;
+    // Roll healing (if any)
+    let heal = 0;
+    if (item.h && item.h !== '0') {
+        heal = rollDiceFormula(item.h);
+    }
+    if (heal > 0) {
+        S.hpChange += heal;
+        if (S.charData) {
+            const newHP = Math.min(S.charData.mh, S.charData.hp + S.hpChange);
+            updateHP(newHP, S.charData.mh);
+        }
+    }
+    // Track consumption for backend
+    const existing = S.inventoryUsed.find(u => u.name === item.n);
+    if (existing) { existing.qty++; }
+    else { S.inventoryUsed.push({ name: item.n, type: item.t, qty: 1 }); }
+    // Log
+    logMoveEvent([{ type: 'use_item', item: item.n, heal: heal }]);
+    updateRewards();
+    saveState();
+    return heal;
 }
-function closeExitConfirm() {
-    document.getElementById('confirm-overlay').classList.remove('active');
+
+// Get available healing items (potions + consumables with h > 0)
+function getHealingItems() {
+    return S.inventory.filter(i => i.q > 0 && i.h && i.h !== '0');
+}
+
+// Get available food items (for camping)
+function getFoodItems() {
+    return S.inventory.filter(i => i.q > 0 && i.t === 'food');
+}
+
+// ═══════════════════════════════════════════════════════
+// EXIT RISK ASSESSMENT (replaces simple exit confirm)
+// ═══════════════════════════════════════════════════════
+function showExitRiskAssessment() {
+    const overlay = document.getElementById('exit-risk-overlay');
+    const hpRow = document.getElementById('exit-hp-row');
+    const infoRow = document.getElementById('exit-info-row');
+    const optionsEl = document.getElementById('exit-options');
+
+    const currentHP = getCurrentHP();
+    const maxHP = getMaxHP();
+    const hpPct = getHPPercent();
+    const distance = bfsDistanceToExit(S.playerCol, S.playerRow);
+    const risk = calculateExitRisk(distance);
+
+    // HP bar
+    const hpColor = hpPct > 60 ? '#4a8' : hpPct > 25 ? '#dca028' : '#c44';
+    hpRow.innerHTML = `<span>❤️</span>` +
+        `<div class="exit-hp-bar"><div class="exit-hp-fill" style="width:${Math.max(2, hpPct)}%;background:${hpColor}"></div></div>` +
+        `<span>${currentHP}/${maxHP}</span>`;
+
+    // Info: distance + risk
+    const distText = distance >= 0 ? `${distance} turnos` : '???';
+    infoRow.innerHTML = `<span>📏 ${distText} até a saída</span>` +
+        `<span style="color:${risk.color}">⚔️ Risco: ${risk.label} (${risk.chance}%)</span>`;
+
+    // Build options
+    optionsEl.innerHTML = '';
+
+    // Option 1: Return to city (always available)
+    addExitOption(optionsEl, '🏰', 'Retornar à Cidade',
+        distance >= 0 ? `Jornada de ${distance} turnos, ${risk.chance}% risco` : 'Rota desconhecida',
+        risk.color, () => {
+            overlay.classList.remove('active');
+            finishExploration('exit');
+        });
+
+    // Option 2: Use healing potion (if available and HP < 100%)
+    const healItems = getHealingItems();
+    if (healItems.length > 0 && hpPct < 100) {
+        const best = healItems[0];
+        addExitOption(optionsEl, best.e || '🧪', `Usar ${best.n} (${best.q}x)`,
+            `Restaura ${best.h} HP`, '#4a8', () => {
+                const heal = useInventoryItem(best);
+                showTerrainToast(`${best.e || '🧪'} +${heal} HP`, 'ranger');
+                // Refresh the overlay with new HP values
+                overlay.classList.remove('active');
+                setTimeout(() => showExitRiskAssessment(), 300);
+            });
+    }
+
+    // Option 3: Camp (if has food items)
+    const foodItems = getFoodItems();
+    if (foodItems.length > 0) {
+        addExitOption(optionsEl, '🏕️', 'Montar Acampamento',
+            'Descanso Curto: 1d8 + CON', '#4a8', () => {
+                overlay.classList.remove('active');
+                showCampOverlay();
+            });
+    }
+
+    // Option 4: Continue exploring (always)
+    addExitOption(optionsEl, '🗺️', 'Continuar Explorando',
+        'Voltar ao mapa', '#8a8090', () => {
+            overlay.classList.remove('active');
+        });
+
+    overlay.classList.add('active');
+}
+
+function addExitOption(container, icon, title, desc, color, onClick) {
+    const btn = document.createElement('button');
+    btn.className = 'exit-option-btn';
+    btn.innerHTML = `<span class="exit-option-icon">${icon}</span>` +
+        `<div class="exit-option-info">` +
+        `<div class="exit-option-title">${title}</div>` +
+        `<div class="exit-option-desc" style="color:${color}">${desc}</div>` +
+        `</div>`;
+    btn.addEventListener('click', onClick);
+    container.appendChild(btn);
+}
+
+// ═══════════════════════════════════════════════════════
+// CAMP SYSTEM (Short Rest with food)
+// ═══════════════════════════════════════════════════════
+function showCampOverlay() {
+    const overlay = document.getElementById('camp-overlay');
+    const foodList = document.getElementById('camp-food-list');
+    foodList.innerHTML = '';
+
+    const foodItems = getFoodItems();
+    for (const food of foodItems) {
+        const btn = document.createElement('button');
+        btn.className = 'camp-food-btn';
+        const healText = food.h && food.h !== '0' ? ` (+${food.h} HP)` : '';
+        btn.innerHTML = `<span style="font-size:20px">${food.e || '🍞'}</span>` +
+            `<div style="flex:1"><div style="font-weight:600">${food.n} (${food.q}x)</div>` +
+            `<div style="font-size:11px;color:#8a8090">Refeição${healText}</div></div>`;
+        btn.addEventListener('click', () => {
+            overlay.classList.remove('active');
+            doCampRest(food);
+        });
+        foodList.appendChild(btn);
+    }
+
+    // Option to rest without food
+    const noFoodBtn = document.createElement('button');
+    noFoodBtn.className = 'camp-food-btn';
+    noFoodBtn.innerHTML = `<span style="font-size:20px">💤</span>` +
+        `<div style="flex:1"><div style="font-weight:600">Descansar sem comer</div>` +
+        `<div style="font-size:11px;color:#8a8090">Apenas 1d8 + CON</div></div>`;
+    noFoodBtn.addEventListener('click', () => {
+        overlay.classList.remove('active');
+        doCampRest(null);
+    });
+    foodList.appendChild(noFoodBtn);
+
+    overlay.classList.add('active');
+}
+
+function closeCampOverlay() {
+    document.getElementById('camp-overlay').classList.remove('active');
+}
+
+function doCampRest(food) {
+    // D&D 5e Short Rest: 1d8 hit die + CON modifier
+    const hitDie = rollDiceFormula('1d8');
+    const conMod = getAbilityMod('cn');
+    const baseHeal = Math.max(1, hitDie + conMod);
+
+    // Food bonus
+    let foodBonus = 0;
+    let foodName = 'sem refeição';
+    if (food) {
+        foodName = food.n;
+        if (food.h && food.h !== '0') {
+            foodBonus = rollDiceFormula(food.h);
+        }
+        // Consume the food
+        useInventoryItem(food);
+    }
+
+    const totalHeal = baseHeal + foodBonus;
+    S.hpChange += totalHeal;
+    if (S.charData) {
+        const newHP = Math.min(S.charData.mh, S.charData.hp + S.hpChange);
+        updateHP(newHP, S.charData.mh);
+    }
+
+    logMoveEvent([{ type: 'camp', heal: totalHeal, food: foodName }]);
+    updateRewards();
+    saveState();
+
+    showCampResultOverlay(hitDie, conMod, foodBonus, totalHeal, foodName);
+}
+
+function showCampResultOverlay(roll, conMod, bonus, total, foodName) {
+    const overlay = document.getElementById('camp-result-overlay');
+    document.getElementById('camp-result-text').textContent = `+${total} HP Restaurados`;
+
+    const sign = conMod >= 0 ? '+' : '';
+    let detail = `🎲 1d8 = ${roll} ${sign} ${conMod} (CON) = ${roll + conMod}`;
+    if (bonus > 0) {
+        detail += `\n🍽️ ${foodName}: +${bonus} HP`;
+    }
+    detail += `\n\n❤️ HP: ${getCurrentHP()}/${getMaxHP()}`;
+    document.getElementById('camp-result-detail').textContent = detail;
+
+    overlay.classList.add('active');
+    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+}
+
+function closeCampResult() {
+    document.getElementById('camp-result-overlay').classList.remove('active');
+    // Reset low HP alert flag so it can trigger again after camp
+    S._lowHPAlertShown = false;
+}
+
+// ═══════════════════════════════════════════════════════
+// LOW HP ALERT (HP <= 25%)
+// ═══════════════════════════════════════════════════════
+function checkLowHP() {
+    const pct = getHPPercent();
+    if (pct > 25 || pct <= 0) return false;
+    if (S._lowHPAlertShown) return false;
+    S._lowHPAlertShown = true;
+    showLowHPOverlay();
+    return true;
+}
+
+function showLowHPOverlay() {
+    const overlay = document.getElementById('lowhp-overlay');
+    const hpRow = document.getElementById('lowhp-hp-row');
+    const optionsEl = document.getElementById('lowhp-options');
+
+    const currentHP = getCurrentHP();
+    const maxHP = getMaxHP();
+    const hpPct = getHPPercent();
+    const distance = bfsDistanceToExit(S.playerCol, S.playerRow);
+    const risk = calculateExitRisk(distance);
+
+    // HP bar (red tint)
+    hpRow.innerHTML = `<span>❤️</span>` +
+        `<div class="exit-hp-bar"><div class="exit-hp-fill" style="width:${Math.max(2, hpPct)}%;background:#c44"></div></div>` +
+        `<span style="color:#c44">${currentHP}/${maxHP}</span>`;
+
+    // Build options
+    optionsEl.innerHTML = '';
+
+    // Option 1: Use healing potion (priority)
+    const healItems = getHealingItems();
+    for (const item of healItems.slice(0, 2)) {
+        addExitOption(optionsEl, item.e || '🧪', `Usar ${item.n} (${item.q}x)`,
+            `Restaura ${item.h} HP`, '#4a8', () => {
+                const heal = useInventoryItem(item);
+                showTerrainToast(`${item.e || '🧪'} +${heal} HP`, 'ranger');
+                overlay.classList.remove('active');
+                // Allow alert to show again if still low after heal
+                S._lowHPAlertShown = false;
+            });
+    }
+
+    // Option 2: Return to city
+    const distText = distance >= 0 ? `${distance} turnos` : '???';
+    addExitOption(optionsEl, '🏰', `Retornar (${distText})`,
+        `Risco: ${risk.label} (${risk.chance}%)`, risk.color, () => {
+            overlay.classList.remove('active');
+            finishExploration('exit');
+        });
+
+    // Option 3: Continue exploring
+    addExitOption(optionsEl, '⚔️', 'Continuar Explorando',
+        'Arriscar seguir adiante', '#8a8090', () => {
+            overlay.classList.remove('active');
+        });
+
+    overlay.classList.add('active');
+    try { if (tg) tg.HapticFeedback.notificationOccurred('warning'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -729,7 +1029,7 @@ function showDeathOverlay() {
     if (S.xpEarned > 0) html += `<div class="reward-line">✨ +${S.xpEarned} XP</div>`;
     if (S.goldEarned > 0) html += `<div class="reward-line">💰 +${S.goldEarned} Ouro</div>`;
     html += `<div class="reward-line">💀 HP reduzido a 0</div>`;
-    html += `<div style="margin-top:8px;color:#8a8090">⬡ ${S.visited.size} hexes explorados</div>`;
+    html += `<div style="margin-top:8px;color:#8a8090">⬡ ${S.visited.size} turnos</div>`;
 
     summary.innerHTML = html;
     overlay.classList.add('active');
@@ -779,6 +1079,9 @@ function finishExploration(reason) {
     // Clean up session storage
     try { sessionStorage.removeItem(STORAGE_KEY); } catch(e) { console.warn('[EXPLORE] sessionStorage:', e); }
 
+    // Log the exit event
+    logMoveEvent([{type:'exit', reason: reason}]);
+
     const payload = {
         action: 'exploration_complete',
         token: S.token,
@@ -791,6 +1094,8 @@ function finishExploration(reason) {
             pois_resolved: Array.from(S.poisResolved),
             hexes_explored: S.visited.size,
             checks: S.checksPerformed,
+            log: S.moveLog.slice(-50),
+            inventory_used: S.inventoryUsed,
         },
         combat: S.combatTrigger,
     };

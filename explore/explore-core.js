@@ -54,6 +54,13 @@ let S = {
     conditions: [],          // Active conditions: [{type, stepsLeft}]
     _hazardsTriggered: new Set(),  // Hexes that already triggered hazards
     _flavorSteps: 0,         // Steps since last flavor event
+
+    // Movement log (internal, sent to backend)
+    moveLog: [],             // Array of log entries per step
+    _stepCount: 0,           // Sequential step counter
+    inventory: [],           // Consumables from payload (local copy)
+    inventoryUsed: [],       // Items consumed: [{name, type, qty}]
+    _lowHPAlertShown: false, // Prevent repeated low HP alerts
 };
 
 let tg = null;
@@ -78,6 +85,10 @@ function saveState() {
             re: S.randomEncounters,
             cd: S.conditions,
             hz: Array.from(S._hazardsTriggered || new Set()),
+            ml: S.moveLog,
+            sc: S._stepCount,
+            inv: S.inventory,
+            iu: S.inventoryUsed,
             ts: Date.now(),
         };
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
@@ -107,6 +118,10 @@ function restoreState() {
         S.randomEncounters = snap.re || [];
         S.conditions = snap.cd || [];
         S._hazardsTriggered = new Set(snap.hz || []);
+        S.moveLog = snap.ml || [];
+        S._stepCount = snap.sc || 0;
+        S.inventory = snap.inv || [];
+        S.inventoryUsed = snap.iu || [];
         return true;
     } catch(e) {
         console.warn('[EXPLORE] restoreState:', e);
@@ -136,6 +151,8 @@ function loadMapData(data) {
     S.dmIntro = data.i || '';
     S.charData = data.c || null;
     S.dangerLevel = data.dl || 1;
+    // Clone consumable inventory from payload
+    S.inventory = (data.c && data.c.inv) ? JSON.parse(JSON.stringify(data.c.inv)) : [];
     S.randomEncounters = (data.re || []).map(re => ({
         type: re.y, icon: re.ic || '⚠️', title: re.tt || 'Evento',
         narration: re.n || '', choices: re.ch || [],
@@ -435,7 +452,7 @@ const FLAVOR_TEXTS = {
 // Check and trigger a flavor event (called every step)
 function checkFlavorEvent() {
     // Don't trigger while any overlay is active
-    const overlayIds = ['dm-overlay','check-overlay','outcome-overlay','combat-overlay','portal-overlay','encounter-overlay','confirm-overlay','death-overlay'];
+    const overlayIds = ['dm-overlay','check-overlay','outcome-overlay','combat-overlay','portal-overlay','encounter-overlay','exit-risk-overlay','death-overlay','camp-overlay','camp-result-overlay','lowhp-overlay'];
     for (const id of overlayIds) {
         if (document.getElementById(id)?.classList.contains('active')) return;
     }
@@ -474,6 +491,61 @@ function hexDist(c1, r1, c2, r2) {
     const [x1,y1,z1] = toCube(c1,r1);
     const [x2,y2,z2] = toCube(c2,r2);
     return Math.max(Math.abs(x1-x2), Math.abs(y1-y2), Math.abs(z1-z2));
+}
+
+// ═══════════════════════════════════════════════════════
+// HP HELPERS
+// ═══════════════════════════════════════════════════════
+function getCurrentHP() { return S.charData ? S.charData.hp + S.hpChange : 0; }
+function getMaxHP() { return S.charData ? S.charData.mh : 1; }
+function getHPPercent() { return (getCurrentHP() / getMaxHP()) * 100; }
+
+// Roll a dice formula string like "2d4+2" → number
+function rollDiceFormula(formula) {
+    if (typeof formula === 'number') return formula;
+    if (!formula || formula === '0') return 0;
+    const match = formula.match(/^(\d+)d(\d+)([+-]\d+)?$/);
+    if (!match) return parseInt(formula, 10) || 0;
+    const [, count, sides, bonus] = match;
+    let total = 0;
+    for (let i = 0; i < parseInt(count); i++) {
+        total += Math.floor(Math.random() * parseInt(sides)) + 1;
+    }
+    return total + (parseInt(bonus) || 0);
+}
+
+// BFS distance from (fromCol, fromRow) to exit hex, respecting IMPASSABLE
+function bfsDistanceToExit(fromCol, fromRow) {
+    const target = `${S.exitCol},${S.exitRow}`;
+    const start = `${fromCol},${fromRow}`;
+    if (start === target) return 0;
+
+    const visited = new Set([start]);
+    const queue = [[fromCol, fromRow, 0]];
+    while (queue.length > 0) {
+        const [col, row, dist] = queue.shift();
+        const neighbors = getNeighbors(col, row);
+        for (const [nc, nr] of neighbors) {
+            const key = `${nc},${nr}`;
+            if (visited.has(key)) continue;
+            visited.add(key);
+            const tile = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
+            if (IMPASSABLE.has(tile)) continue;
+            if (key === target) return dist + 1;
+            queue.push([nc, nr, dist + 1]);
+        }
+    }
+    return -1; // Unreachable
+}
+
+// Calculate exit risk based on BFS distance + danger level
+function calculateExitRisk(distance) {
+    if (distance <= 0) return { chance: 5, label: 'Seguro', color: '#4a8' };
+    const chance = Math.min(80, 15 + distance * 6 + S.dangerLevel * 4);
+    if (chance <= 25) return { chance, label: 'Baixo', color: '#4a8' };
+    if (chance <= 50) return { chance, label: 'Moderado', color: '#dca028' };
+    if (chance <= 65) return { chance, label: 'Alto', color: '#c44' };
+    return { chance, label: 'Perigoso', color: '#a22' };
 }
 
 // POI discovery flash — canvas-based golden pulse
