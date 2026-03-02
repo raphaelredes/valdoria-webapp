@@ -449,11 +449,13 @@
 
         /* ── Toast ── */
         .toast {
-            position: fixed; bottom: 90px; left: 50%;
+            position: fixed; left: 50%;
             transform: translateX(-50%); padding: 8px 18px;
             border-radius: var(--v-radius-pill); font-size: 13px;
             z-index: 300; animation: v-fadeSlideUp 0.25s ease;
             pointer-events: none; color: #fff;
+            /* Dynamic bottom: set via JS based on bottom bar height */
+            bottom: 90px;
         }
         .toast-warn { background: var(--v-warning); }
         .toast-err { background: var(--v-danger); }
@@ -515,6 +517,9 @@
     let localGold = 0;
     let localHP = 0;
     let localMP = 0;
+    let localPotions = 0;       // Basic potion counter
+    let localFavs = [];         // Local favorites list
+    let localAC = 0;            // Dynamic AC (recalculated on equip/unequip)
     let activeTarget = 'player'; // 'player' or npc_id
 
     const SLOT_NAMES = {
@@ -595,6 +600,8 @@
         localGold = D.p.g || 0;
         localHP = D.p.hp || 0;
         localMP = D.p.mp || 0;
+        localPotions = D.p.pot || 0;
+        localFavs = D.fav ? [...D.fav] : [];
         localGems = {};
         if (D.gems) {
             for (const [k,v] of Object.entries(D.gems))
@@ -631,14 +638,46 @@
     }
 
     // ── Header ──
+    function calcLocalAC() {
+        // Base AC from server (includes DEX, class features, unarmored defense)
+        // We adjust by calculating the delta between original equipment bonuses and current
+        let origEqAC = 0;
+        for (const item of Object.values(D.eq || {})) {
+            if (!item) continue;
+            const it = getItemData(item);
+            origEqAC += it.ac || 0;
+            // Original gem bonuses
+            const origGems = (D.gems || {})[getSlotForItem(item, D.eq)] || [];
+            origGems.forEach(g => { if (g) { const gd = getItemData(g); origEqAC += gd.gb?.ac_bonus || 0; } });
+        }
+        let newEqAC = 0;
+        for (const [slot, item] of Object.entries(localEq)) {
+            if (!item) continue;
+            const it = getItemData(item);
+            newEqAC += it.ac || 0;
+            const gems = localGems[slot] || [];
+            gems.forEach(g => { if (g) { const gd = getItemData(g); newEqAC += gd.gb?.ac_bonus || 0; } });
+        }
+        localAC = D.p.ac + (newEqAC - origEqAC);
+        return localAC;
+    }
+
+    function getSlotForItem(itemName, eq) {
+        for (const [slot, name] of Object.entries(eq || {})) { if (name === itemName) return slot; }
+        return '';
+    }
+
     function updateHeader() {
+        calcLocalAC();
         const s = document.getElementById('headerStats');
+        const potStr = localPotions > 0 ? `<span class="hs-hp">🧪 ${localPotions}</span>` : '';
         s.innerHTML = `
             <span>${D.p.n}</span>
             <span class="hs-hp">❤️ ${localHP}/${D.p.mhp}</span>
             <span class="hs-mp">🔮 ${localMP}/${D.p.mmp}</span>
             <span class="hs-gold">💰 ${localGold}</span>
-            <span class="hs-ac">🛡️ ${D.p.ac}</span>
+            <span class="hs-ac">🛡️ ${localAC}</span>
+            ${potStr}
         `;
     }
 
@@ -711,11 +750,27 @@
         });
         html += '</div>';
 
+        // Potion counter card (basic potions, separate from inventory)
+        if (localPotions > 0 && (activeFilter === 'all' || activeFilter === 'use')
+            && (!searchQuery || 'poção de cura'.includes(searchQuery))) {
+            html += `<div style="margin-bottom:10px;"><div class="item-grid">
+                <div class="item-card rarity-common fade-in" onclick="doUsePotion()" style="grid-column: span 2;
+                    display:flex;align-items:center;gap:12px;padding:12px;">
+                    <span style="font-size:28px;">🧪</span>
+                    <div style="flex:1;">
+                        <div class="ic-name" style="font-size:14px;">Poção de Cura</div>
+                        <div class="ic-meta">Cura 2d4+2 HP</div>
+                    </div>
+                    <span class="ic-qty" style="font-size:13px;">x${localPotions}</span>
+                </div>
+            </div></div>`;
+        }
+
         const items = getSortedFilteredItems();
-        if (!items.length) {
+        if (!items.length && localPotions <= 0) {
             const emptyMsg = searchQuery ? 'Nenhum item encontrado para a busca.' : 'Nenhum item encontrado.';
             html += `<div class="empty-state"><div class="icon">📦</div><p>${emptyMsg}</p></div>`;
-        } else {
+        } else if (items.length) {
             html += '<div class="item-grid">';
             items.forEach(inv => {
                 const it = getItemData(inv.n);
@@ -1074,6 +1129,9 @@
 
         // Action buttons
         html += '<div class="detail-actions">';
+        const favIcon = isFav(name) ? '⭐' : '☆';
+        html += `<button class="btn-unequip" onclick="doToggleFav('${esc(name)}');openItemDetail('${esc(name)}')"
+            style="flex:0 0 44px;padding:10px;">${favIcon}</button>`;
         if (it.s && !isProtected(tags)) {
             const canEquip = checkProficiency(it, activeTarget);
             if (canEquip) {
@@ -1344,11 +1402,11 @@
 
         const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
 
-        // Two-handed logic
+        // Two-handed logic — auto-unequip conflicting slot (Fix 5: clear gems/runes too)
         if ((it.t||[]).includes('two_handed') && targetSlot === 'main_hand') {
             if (eq.off_hand) {
-                addOp({t:'unequip', slot:'off_hand', tgt: activeTarget});
                 addToLocalInv(eq.off_hand);
+                if (activeTarget === 'player') { returnLocalGems('off_hand'); delete localRunes['off_hand']; }
                 eq.off_hand = null;
             }
         } else if (targetSlot === 'off_hand') {
@@ -1356,24 +1414,23 @@
             if (mh) {
                 const mhData = getItemData(mh);
                 if ((mhData?.t||[]).includes('two_handed')) {
-                    addOp({t:'unequip', slot:'main_hand', tgt: activeTarget});
                     addToLocalInv(mh);
+                    if (activeTarget === 'player') { returnLocalGems('main_hand'); delete localRunes['main_hand']; }
                     eq.main_hand = null;
                 }
             }
         }
 
-        // Unequip old
+        // Local state: return old item (Fix 3: backend handles unequip internally)
         const old = eq[targetSlot];
         if (old) {
-            addOp({t:'unequip', slot: targetSlot, tgt: activeTarget});
             addToLocalInv(old);
+            if (activeTarget === 'player') { returnLocalGems(targetSlot); delete localRunes[targetSlot]; }
         }
 
-        // Equip new
+        // Single equip op — backend handles unequip of old item + gems/runes
         addOp({t:'equip', item: name, slot: targetSlot, tgt: activeTarget});
         eq[targetSlot] = name;
-        removeFromLocalInv(name);
 
         closeModal();
         haptic('medium');
@@ -1384,6 +1441,12 @@
         updateBottomBar();
     }
 
+    function returnLocalGems(slot) {
+        const gems = localGems[slot] || [];
+        gems.forEach(g => { if (g) addToLocalInv(g); });
+        delete localGems[slot];
+    }
+
     function doUnequip(slot) {
         const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
         const item = eq[slot];
@@ -1391,19 +1454,11 @@
 
         addOp({t:'unequip', slot, tgt: activeTarget});
 
-        // Return gems & destroy rune (player only)
+        // Return gems & destroy rune locally (player only)
+        // Fix 4: No explicit gem_remove ops — backend handles gems in unequip
         if (activeTarget === 'player') {
-            const gems = localGems[slot] || [];
-            gems.forEach((g, i) => {
-                if (g) {
-                    addToLocalInv(g);
-                    addOp({t:'gem_remove', slot, idx: i});
-                }
-            });
-            delete localGems[slot];
-            if (localRunes[slot]) {
-                delete localRunes[slot];
-            }
+            returnLocalGems(slot);
+            delete localRunes[slot];
         }
 
         eq[slot] = null;
@@ -1447,6 +1502,34 @@
         }
     }
 
+    function doUsePotion() {
+        if (localPotions <= 0) return;
+        addOp({t:'use', item: 'potion', tgt: 'player'});
+        localPotions--;
+        haptic('medium');
+        toast('🧪 Poção de Cura usada', 'ok');
+        animateStat('hs-hp');
+        updateHeader();
+        renderTab();
+        updateBottomBar();
+    }
+
+    function doToggleFav(name) {
+        const idx = localFavs.indexOf(name);
+        if (idx >= 0) {
+            localFavs.splice(idx, 1);
+            addOp({t:'toggle_fav', item: name, val: false});
+            toast(`☆ ${name} removido dos favoritos`, 'ok');
+        } else {
+            localFavs.push(name);
+            addOp({t:'toggle_fav', item: name, val: true});
+            toast(`⭐ ${name} favoritado`, 'ok');
+        }
+        haptic('light');
+        renderTab();
+        updateBottomBar();
+    }
+
     // ══════════════════════════════════════════════════════════
     //  CONFIRM & SEND
     // ══════════════════════════════════════════════════════════
@@ -1477,12 +1560,20 @@
             case 'gem_insert': return `💎 Encaixar ${op.gem} em ${SLOT_NAMES[op.slot]||op.slot}`;
             case 'gem_remove': return `💎 Remover gema de ${SLOT_NAMES[op.slot]||op.slot}`;
             case 'rune_inscribe': return `🔮 Inscrever ${op.rune} em ${SLOT_NAMES[op.slot]||op.slot}`;
+            case 'toggle_fav': return `${op.val ? '⭐' : '☆'} ${op.val ? 'Favoritar' : 'Desfavoritar'} ${op.item}`;
             default: return `❓ ${op.t}`;
         }
     }
 
     function sendOps() {
         if (!pendingOps.length) return;
+
+        // Show loading overlay (Fix 10)
+        closeModal();
+        const overlay = document.getElementById('loadingOverlay');
+        overlay.querySelector('.loading-text').textContent = 'Aplicando alterações...';
+        overlay.classList.remove('hidden');
+
         const params = new URLSearchParams(location.search);
         const token = params.get('token') || '';
 
@@ -1496,6 +1587,7 @@
             tg.sendData(JSON.stringify(data));
         } else {
             console.log('sendData:', data);
+            overlay.classList.add('hidden');
             toast('Dados enviados (dev)', 'ok');
         }
     }
@@ -1526,7 +1618,7 @@
         return false;
     }
 
-    function isFav(name) { return (D.fav || []).includes(name); }
+    function isFav(name) { return localFavs.includes(name); }
 
     function isProtected(tags) {
         const prot = ['quest','mission_item','key','map','map_fragment','no_sell','no_discard','story_item','unique'];
@@ -1756,14 +1848,18 @@
         const el = document.createElement('div');
         el.className = `toast toast-${type||'ok'}`;
         el.textContent = msg;
+        // Dynamic position above bottom bar (Fix 12)
+        const bar = document.getElementById('bottomBar');
+        const barH = bar ? bar.offsetHeight : 80;
+        el.style.bottom = (barH + 12) + 'px';
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 2000);
     }
 
     // ── Escape for onclick attributes & HTML context ──
     function esc(s) {
-        return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-            .replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        return (s||'').replace(/\\/g, '\\\\').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
 
     // ── Start ──
