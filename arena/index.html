@@ -566,6 +566,7 @@ if (!rawData) {
         const state = JSON.parse(b64Decode(rawData));
         renderArena(state);
     } catch(e) {
+        console.error('[ARENA] Dados de combate corrompidos', e);
         document.getElementById('app').innerHTML = '<div class="no-data"><h2>Erro</h2><p>Dados de combate corrompidos.</p></div>';
     }
 }

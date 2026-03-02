@@ -260,6 +260,7 @@
             const json = atob(dataB64);
             PAYLOAD = JSON.parse(json);
         } catch (e) {
+            console.error('[WORKSTATION] Erro ao decodificar dados', e);
             showError('Erro ao decodificar dados.');
             return;
         }
@@ -269,6 +270,7 @@
     }
 
     function showError(msg) {
+        console.error('[WORKSTATION]', msg);
         document.getElementById('mainContent').innerHTML =
             `<div class="empty-state"><div class="icon">⚠️</div><p>${msg}</p></div>`;
     }

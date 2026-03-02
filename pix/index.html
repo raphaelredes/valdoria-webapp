@@ -267,6 +267,7 @@
                 correctLevel: QRCode.CorrectLevel.M,
             });
         } catch (e) {
+            console.error('[PIX] Erro ao gerar QR Code', e);
             document.getElementById('qr-container').innerHTML =
                 '<div style="color:var(--v-danger);font-size:12px;text-align:center;padding:20px;">' +
                 'Erro ao gerar QR Code.<br>Use o codigo abaixo.</div>';
@@ -277,7 +278,8 @@
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(brcode).then(function() {
                     showCopied(btn);
-                }).catch(function() {
+                }).catch(function(err) {
+                    console.warn('[PIX] Clipboard API failed, using fallback', err);
                     fallbackCopy(btn);
                 });
             } else {
@@ -296,6 +298,7 @@
                 document.execCommand('copy');
                 showCopied(btn);
             } catch (e) {
+                console.error('[PIX] Erro ao copiar', e);
                 btn.textContent = 'Erro ao copiar';
             }
             document.body.removeChild(textarea);

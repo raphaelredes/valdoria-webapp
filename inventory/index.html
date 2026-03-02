@@ -560,7 +560,7 @@
         try {
             const raw = b64.replace(/-/g,'+').replace(/_/g,'/');
             D = JSON.parse(atob(raw));
-        } catch(e) { hideLoading(); showError('Erro ao decodificar dados.'); return; }
+        } catch(e) { console.error('[INVENTORY] Erro ao decodificar dados', e); hideLoading(); showError('Erro ao decodificar dados.'); return; }
 
         // Init local state from payload
         localEq = Object.assign({}, D.eq || {});
@@ -593,6 +593,7 @@
     }
 
     function showError(msg) {
+        console.error('[INVENTORY]', msg);
         document.getElementById('mainContent').innerHTML =
             `<div class="empty-state"><div class="icon">⚠️</div><p>${msg}</p></div>`;
     }

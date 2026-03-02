@@ -1239,7 +1239,7 @@ async function initAsync() {
     if (tg) {
         tg.ready();
         tg.expand();
-        try { tg.disableVerticalSwipes(); } catch(e) {}
+        try { tg.disableVerticalSwipes(); } catch(e) { console.warn('[EXPLORE] disableVerticalSwipes not supported'); }
     }
 
     const params = new URLSearchParams(window.location.search);

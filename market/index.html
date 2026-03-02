@@ -433,7 +433,7 @@
         try {
             const raw = b64.replace(/-/g,'+').replace(/_/g,'/');
             D = JSON.parse(atob(raw));
-        } catch(e) { showError('Erro ao decodificar dados.'); return; }
+        } catch(e) { console.error('[MARKET] Erro ao decodificar dados', e); showError('Erro ao decodificar dados.'); return; }
 
         localGold = D.p.g || 0;
         if (D.npcs && D.npcs.length > 0) {
@@ -446,6 +446,7 @@
     }
 
     function showError(msg) {
+        console.error('[MARKET]', msg);
         document.getElementById('mainContent').innerHTML =
             `<div class="empty-state"><div class="icon">⚠️</div><p>${esc(msg)}</p></div>`;
     }

@@ -744,7 +744,7 @@ if (tg) {
     const params = new URLSearchParams(location.search);
     token = params.get('token') || '';
     charId = params.get('char_id') || '';
-    try { existingNames = JSON.parse(atob(params.get('names') || 'W10=')); } catch(e) { existingNames = []; }
+    try { existingNames = JSON.parse(atob(params.get('names') || 'W10=')); } catch(e) { console.warn('[CHAR_CREATOR] Failed to decode existing names', e); existingNames = []; }
     buildProgressBar();
     buildDmBubbles();
     buildRaceGrid();
@@ -995,7 +995,8 @@ function validateCurrentScreen() {
     return null;
 }
 
-function showError(msg) {
+function showError(msg, err = null) {
+    console.error('[CHAR_CREATOR]', msg, err || '');
     if (currentScreen === 7) {
         const el = document.getElementById('nameError');
         el.textContent = msg; el.style.display = 'block';
@@ -2504,7 +2505,7 @@ function submitCharacter() {
             alert('Personagem criado! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
         }
     } catch (e) {
-        showError('Erro ao enviar dados. Tente novamente.');
+        showError('Erro ao enviar dados. Tente novamente.', e);
     }
 }
 </script>

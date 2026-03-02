@@ -564,7 +564,7 @@ let isTransitioning = false;
         const raw = params.get('p') || '';
         P = JSON.parse(atob(raw.replace(/-/g,'+').replace(/_/g,'/')));
     } catch(e) {
-        showFatalError('Dados invalidos'); return;
+        showFatalError('Dados invalidos', e); return;
     }
     if (!P || !P.hero_class || !P.stats || typeof P.level !== 'number') {
         showFatalError('Dados do personagem incompletos'); return;
@@ -751,7 +751,8 @@ function getAvailableSkills() {
     return result;
 }
 
-function showError(msg) {
+function showError(msg, err = null) {
+    console.error('[LEVELUP]', msg, err || '');
     hapticNotify('error');
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -759,7 +760,8 @@ function showError(msg) {
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function showFatalError(msg) {
+function showFatalError(msg, err = null) {
+    console.error('[LEVELUP][FATAL]', msg, err || '');
     const el = document.getElementById('fatalError');
     document.getElementById('fatalMsg').textContent = msg;
     el.classList.add('active');
@@ -1344,7 +1346,7 @@ function submit() {
     } catch (e) {
         document.getElementById('loadingOverlay').classList.remove('active');
         btn.disabled = false;
-        showError('Erro ao enviar dados. Tente novamente.');
+        showError('Erro ao enviar dados. Tente novamente.', e);
     }
 }
 </script>
