@@ -43,26 +43,26 @@ function handleLocationTap(locId) {
     // Description
     document.getElementById('info-desc').textContent = locData.ds || '';
 
-    // Stats (distance, connections)
-    const statsEl = document.getElementById('info-stats');
+    // Tags (distance, connections, danger hint)
+    const tagsEl = document.getElementById('info-stats');
     const dist = bfsDistance(S.currentLoc, locId, connectionGraph);
     const connCount = (locData.c || []).length;
 
-    let statsHtml = '';
-    if (!isCurrent) {
-        statsHtml += `<span>📏 ${dist >= 0 ? dist + ' etapa' + (dist !== 1 ? 's' : '') : '???'}</span>`;
+    let tagsHtml = '';
+    if (!isCurrent && dist >= 0) {
+        tagsHtml += `<span class="info-tag">📏 ${dist} etapa${dist !== 1 ? 's' : ''}</span>`;
     }
-    statsHtml += `<span>🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}</span>`;
+    tagsHtml += `<span class="info-tag">🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}</span>`;
 
-    // Mysterious danger hint (no explicit numbers)
+    // Mysterious danger hint
     const playerLv = S.charData?.lv || 1;
     if (danger > playerLv + 2) {
-        statsHtml += `<span style="color:#aa4444">💀 Um arrepio percorre sua espinha...</span>`;
+        tagsHtml += `<span class="info-tag info-tag-danger">💀 Um arrepio percorre sua espinha...</span>`;
     } else if (danger > playerLv) {
-        statsHtml += `<span style="color:#aa8833">⚠️ Algo inquietante paira no ar</span>`;
+        tagsHtml += `<span class="info-tag info-tag-warn">⚠️ Algo inquietante paira no ar</span>`;
     }
 
-    statsEl.innerHTML = statsHtml;
+    tagsEl.innerHTML = tagsHtml;
 
     // Quests at this location
     const questsEl = document.getElementById('info-quests');
@@ -92,10 +92,13 @@ function handleLocationTap(locId) {
     const actionsEl = document.getElementById('info-actions');
     actionsEl.innerHTML = '';
 
+    // Note area (for non-connected locations)
+    const noteEl = document.getElementById('info-note');
+
     if (isCurrent) {
-        // At current location: Explore + Camp
+        noteEl.style.display = 'none';
         const exploreBtn = createActionBtn(
-            `🔍 Explorar ${locData.s ? '' : locData.n.split(' ')[0]}`,
+            '🔍 Explorar',
             'info-btn-explore',
             () => finishNavigation('explore')
         );
@@ -110,27 +113,23 @@ function handleLocationTap(locId) {
             actionsEl.appendChild(campBtn);
         }
     } else if (connected) {
-        // Connected location: Travel
+        noteEl.style.display = 'none';
         const travelBtn = createActionBtn(
-            `🚶 Viajar (${dist} etapa${dist !== 1 ? 's' : ''})`,
+            '🚶 Viajar para ' + (locData.n || 'lá'),
             'info-btn-travel',
             () => finishNavigation('travel', locId)
         );
         actionsEl.appendChild(travelBtn);
     } else if (dist > 0) {
-        // Not directly connected but reachable
-        const infoBtn = createActionBtn(
-            `📏 ${dist} etapas de distância`,
-            'info-btn-close',
-            null
-        );
-        infoBtn.style.opacity = '0.6';
-        infoBtn.style.cursor = 'default';
-        actionsEl.appendChild(infoBtn);
+        noteEl.textContent = `⛔ Não há caminho direto — ${dist} etapa${dist !== 1 ? 's' : ''} de distância`;
+        noteEl.style.display = 'block';
+    } else {
+        noteEl.textContent = '⛔ Local inacessível';
+        noteEl.style.display = 'block';
     }
 
-    // Close button
-    const closeBtn = createActionBtn('✕', 'info-btn-close', closeInfoPanel);
+    // Close button (always last)
+    const closeBtn = createActionBtn('Fechar', 'info-btn-close', closeInfoPanel);
     actionsEl.appendChild(closeBtn);
 
     // Open panel
@@ -164,16 +163,13 @@ function closeInfoPanel() {
 
 // ── Highlight selected location ──
 function highlightSelected(locId) {
-    // Clear previous highlights
     clearHighlight();
 
-    // Add highlight class to selected hex group
     const svg = document.getElementById('map-svg');
     const groups = svg.querySelectorAll('.loc-hex');
     for (const g of groups) {
         if (g.getAttribute('data-loc') === locId) {
             g.classList.add('selected');
-            // Add selection ring
             const coords = LOCATION_COORDS[locId];
             if (coords) {
                 const { x, y } = hexToPixel(coords.col, coords.row);
@@ -191,7 +187,7 @@ function highlightSelected(locId) {
         }
     }
 
-    // Highlight the path from current to selected
+    // Highlight path from current to selected
     if (locId !== S.currentLoc) {
         highlightPath(S.currentLoc, locId);
     }
@@ -200,13 +196,8 @@ function highlightSelected(locId) {
 // ── Clear all highlights ──
 function clearHighlight() {
     const svg = document.getElementById('map-svg');
-    // Remove selection rings
-    const rings = svg.querySelectorAll('.selection-ring');
-    rings.forEach(r => r.remove());
-
-    // Remove path highlights
-    const highlights = svg.querySelectorAll('.path-highlight');
-    highlights.forEach(h => h.remove());
+    svg.querySelectorAll('.selection-ring').forEach(r => r.remove());
+    svg.querySelectorAll('.path-highlight').forEach(h => h.remove());
 }
 
 // ── Highlight BFS path between two locations ──

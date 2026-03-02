@@ -211,16 +211,16 @@ function renderLocationNodes(group, fogState) {
         // Icon
         if (isKnown) {
             const iconEl = createSVG('text', {
-                x: x, y: y - 2,
+                x: x, y: y - 3,
                 class: 'loc-icon',
             });
             iconEl.textContent = icon;
             nodeGroup.appendChild(iconEl);
 
             // Label (name below hex)
-            const shortName = name.length > 14 ? name.slice(0, 12) + '..' : name;
+            const shortName = name.length > 16 ? name.slice(0, 14) + '..' : name;
             const label = createSVG('text', {
-                x: x, y: y + hexRadius + 10,
+                x: x, y: y + hexRadius + 12,
                 class: 'loc-label',
             });
             label.textContent = shortName;
@@ -228,9 +228,9 @@ function renderLocationNodes(group, fogState) {
         } else {
             // Dim: show question mark
             const qmark = createSVG('text', {
-                x: x, y: y + 1,
+                x: x, y: y,
                 class: 'loc-icon',
-                'fill-opacity': 0.4,
+                'fill-opacity': 0.35,
             });
             qmark.textContent = '❓';
             nodeGroup.appendChild(qmark);
@@ -259,10 +259,10 @@ function renderPlayerMarker(svg) {
 
     // Outer glow ring
     const glow = createSVG('circle', {
-        cx: x, cy: y, r: HEX_RADIUS + 6,
+        cx: x, cy: y, r: HEX_RADIUS + 7,
         fill: 'none',
-        stroke: 'rgba(196, 149, 58, 0.3)',
-        'stroke-width': 2,
+        stroke: 'rgba(196, 149, 58, 0.25)',
+        'stroke-width': 2.5,
     });
     marker.appendChild(glow);
 

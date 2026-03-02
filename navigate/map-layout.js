@@ -3,18 +3,18 @@
 // ═══════════════════════════════════════════════════════
 
 // Hex geometry (flat-top orientation)
-const HEX_RADIUS = 20;
-const HEX_W = HEX_RADIUS * Math.sqrt(3);  // ~34.6
-const HEX_H = HEX_RADIUS * 2;             // 40
-const ROW_H = HEX_H * 0.75;               // 30
+const HEX_RADIUS = 26;
+const HEX_W = HEX_RADIUS * Math.sqrt(3);  // ~45
+const HEX_H = HEX_RADIUS * 2;             // 52
+const ROW_H = HEX_H * 0.75;               // 39
 
 // Grid dimensions
 const GRID_COLS = 14;
 const GRID_ROWS = 16;
 
 // SVG margins
-const MAP_PAD_X = 30;
-const MAP_PAD_Y = 25;
+const MAP_PAD_X = 40;
+const MAP_PAD_Y = 35;
 
 // Total SVG size
 const SVG_W = MAP_PAD_X * 2 + GRID_COLS * HEX_W + HEX_W / 2;
