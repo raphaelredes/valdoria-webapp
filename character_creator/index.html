@@ -3,11 +3,20 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2b2830">
+    <meta name="description" content="Criador de Personagens D&D 5e - Lendas de Valdoria">
+    <meta property="og:title" content="Forjar Personagem - Lendas de Valdoria">
+    <meta property="og:description" content="Crie seu heroi com racas, classes e habilidades do D&D 5e">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="manifest" href="../manifest.json">
     <title>Forjar Personagem - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="../valdoria-design.css?v=3">
+    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <script src="data.js"></script>
+    <script src="personality_data.js"></script>
     <style>
-        /* ─── Screen transition system (page-specific) ─── */
+        /* ─── Screen transition system ─── */
         .screen-viewport {
             position: relative;
             width: 100vw;
@@ -28,15 +37,20 @@
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
+        /* Prevent parent scrolling when sub-screen is open */
+        .screen.sub-open {
+            overflow: hidden !important;
+        }
         .screen-content {
             padding: 12px;
-            padding-bottom: 100px;
+            padding-bottom: 20px;
         }
 
-        /* Sub-screen overlay (slides from right) */
+        /* Sub-screen overlay */
         .sub-screen {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0; width: 100%;
+            height: 100%;
             background: var(--v-bg);
             transform: translateX(100%);
             transition: transform 300ms ease-out;
@@ -45,22 +59,133 @@
             z-index: 10;
         }
         .sub-screen.active { transform: translateX(0); }
-        .sub-screen .screen-content { padding-top: 8px; }
+        .sub-screen .screen-content { padding-top: 8px; padding-bottom: 16px; }
 
-        /* Card expanded details */
-        .card-details {
-            display: none; margin-top: 8px; padding-top: 8px;
-            border-top: 1px solid var(--v-border);
+        /* ─── Detail sub-screen styles ─── */
+        .detail-header {
+            text-align: center;
+            padding: 4px 0 16px;
         }
-        .v-card.selected .card-details { display: block; }
-        .detail-line { font-size: 11px; color: var(--v-text-dim); margin-bottom: 2px; }
-        .detail-line b { color: var(--v-text); }
+        .detail-icon { font-size: 48px; line-height: 1.2; }
+        .detail-title {
+            font-size: 22px; font-weight: 700;
+            color: var(--v-gold); margin-top: 4px;
+            text-shadow: 0 0 12px rgba(196,149,58,0.3);
+        }
+        .detail-subtitle {
+            font-size: 13px; color: var(--v-text-dim); margin-top: 4px;
+        }
+        .detail-section {
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius);
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .detail-section-title {
+            font-size: 13px; font-weight: 600;
+            color: var(--v-gold); margin-bottom: 8px;
+            text-shadow: 0 0 6px rgba(196,149,58,0.15);
+        }
+        .detail-row {
+            font-size: 12px; color: var(--v-text);
+            margin-bottom: 4px; line-height: 1.4;
+        }
+        .detail-row b { color: var(--v-text-bright); }
+        .detail-text {
+            font-size: 12px; color: var(--v-text); line-height: 1.5;
+        }
+        .detail-highlight {
+            border-color: rgba(196,149,58,0.3);
+            background: linear-gradient(165deg, rgba(196,149,58,0.08) 0%, rgba(196,149,58,0.03) 100%);
+        }
 
-        /* Half-elf selects */
-        .halfelf-selects { display: flex; gap: 8px; margin-top: 8px; }
-        .halfelf-selects select {
-            flex: 1; padding: 10px; background: var(--v-bg-card); border: 1px solid var(--v-border);
-            border-radius: var(--v-radius); color: var(--v-text); font-size: 13px;
+        /* Attribute bonus chips */
+        .bonus-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .bonus-chip {
+            background: rgba(196,149,58,0.12);
+            border: 1px solid rgba(196,149,58,0.35);
+            border-radius: 12px; padding: 3px 10px;
+            font-size: 12px; font-weight: 600; color: var(--v-gold);
+        }
+
+        /* Trait items */
+        .trait-item { margin-bottom: 8px; }
+        .trait-name { font-size: 12px; font-weight: 600; color: var(--v-text-bright); }
+        .trait-desc {
+            font-size: 11px; color: var(--v-text-dim);
+            margin-top: 2px; padding-left: 18px; line-height: 1.4;
+        }
+
+        /* Subrace/ancestry option within detail */
+        .detail-option-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;
+        }
+        .detail-option-grid.single-col { grid-template-columns: 1fr; }
+        .detail-option {
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius); padding: 10px; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .detail-option:active { transform: scale(0.97); }
+        .detail-option.selected {
+            border-color: var(--v-gold);
+            box-shadow: 0 0 12px rgba(196,149,58,0.2);
+            background: linear-gradient(165deg, #38333f 0%, #2d2932 100%);
+        }
+        .detail-option-name { font-size: 13px; font-weight: 600; color: var(--v-text-bright); }
+        .detail-option-desc { font-size: 11px; color: var(--v-text-dim); margin-top: 2px; line-height: 1.3; }
+        .detail-option-bonus { font-size: 11px; color: var(--v-gold); margin-top: 4px; font-weight: 600; }
+
+        /* Confirm button — sticky so it's always visible */
+        .confirm-btn {
+            position: sticky; bottom: 8px; z-index: 5;
+            margin-top: 16px; margin-bottom: 8px;
+            width: 100%; padding: 14px;
+            font-size: 15px; font-weight: 700;
+        }
+        .confirm-btn:disabled {
+            opacity: 0.4; pointer-events: none;
+        }
+
+        /* Half-Elf selects in detail */
+        .detail-selects { display: flex; gap: 8px; margin-top: 8px; }
+        .detail-selects select {
+            flex: 1; padding: 10px; background: var(--v-bg-card);
+            border: 1px solid var(--v-border); border-radius: var(--v-radius);
+            color: var(--v-text); font-size: 13px;
+        }
+
+        /* Language picker — compact chips */
+        .lang-grid {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+        }
+        .lang-option {
+            background: var(--v-bg-card); border: 1px solid var(--v-border);
+            border-radius: 20px; padding: 6px 14px; cursor: pointer;
+            transition: all 0.2s ease; font-size: 12px; font-weight: 600;
+            color: var(--v-text-bright);
+        }
+        .lang-option:active { transform: scale(0.97); }
+        .lang-option.selected {
+            border-color: var(--v-gold); color: var(--v-gold);
+            background: linear-gradient(165deg, #38333f 0%, #2d2932 100%);
+        }
+        .lang-selected-desc {
+            font-size: 11px; color: var(--v-text-dim); margin-top: 6px;
+            padding: 0 2px;
+        }
+
+        /* Enhanced toggle items */
+        .v-toggle-info {
+            display: flex; flex-direction: column; flex: 1;
+        }
+        .v-toggle-attr {
+            font-size: 10px; color: var(--v-gold); font-weight: 600;
+        }
+        .v-toggle-desc {
+            font-size: 10px; color: var(--v-text-dim); margin-top: 2px; line-height: 1.3;
         }
 
         /* Gender grid */
@@ -76,17 +201,343 @@
             margin-bottom: 10px;
         }
 
-        /* Utility classes */
+        /* Stat bar visual */
+        .stat-bar-container {
+            display: flex; align-items: center; gap: 8px; width: 100%;
+        }
+        .stat-bar-track {
+            flex: 1; height: 6px; background: rgba(62,56,69,0.6);
+            border-radius: 3px; overflow: hidden;
+        }
+        .stat-bar-fill {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, var(--v-gold-dim), var(--v-gold));
+            transition: width 0.3s ease;
+        }
+
+        /* Stat assignment action buttons */
+        .stat-actions {
+            display: flex; gap: 8px; margin-top: 12px;
+        }
+        .v-btn-suggest {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(196,149,58,0.15), rgba(196,149,58,0.08));
+            border: 1px solid var(--v-gold-dim);
+            color: var(--v-gold);
+            padding: 10px 12px;
+            border-radius: var(--v-radius);
+            font-weight: 600;
+        }
+        .v-btn-suggest:hover { background: rgba(196,149,58,0.2); }
+        .v-btn-clear {
+            flex: 0 0 auto;
+            min-width: 90px;
+        }
+
+        /* Utility */
         .section-label { font-size: 13px; margin-top: 8px; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .btn-block { margin-top: 16px; width: 100%; }
+        .btn-sticky { position: sticky; bottom: 12px; z-index: 5; margin-top: 16px; width: 100%; }
         .hidden { display: none; }
 
-        /* Confirmed card pulse — auto-advance feedback */
+        /* Collapsible sections */
+        .section-toggle { cursor: pointer; -webkit-user-select: none; user-select: none; display: flex; align-items: center; justify-content: space-between; }
+        .toggle-arrow { font-size: 11px; color: var(--v-text-dim); transition: transform 0.2s ease; flex-shrink: 0; margin-left: 8px; }
+        .collapsed .toggle-arrow { transform: rotate(-90deg); }
+        .collapsed .section-body { display: none; }
+        .collapsed { padding-bottom: 4px; }
+        .section-summary { font-size: 11px; color: var(--v-text-dim); font-weight: 400; }
+
         .v-card.confirmed {
             border-color: var(--v-gold) !important;
             animation: v-goldPulse 0.6s ease;
             box-shadow: 0 0 18px rgba(196, 149, 58, 0.35), 0 0 40px rgba(196, 149, 58, 0.1);
+        }
+
+        /* DM Narration bubble */
+        .dm-bubble {
+            position: relative;
+            background: linear-gradient(165deg, rgba(196,149,58,0.08) 0%, rgba(196,149,58,0.02) 100%);
+            border-left: 3px solid var(--v-gold);
+            border-radius: 0 var(--v-radius) var(--v-radius) 0;
+            padding: 8px 12px 8px 14px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--v-text);
+            font-style: italic;
+        }
+        .dm-bubble::before {
+            content: '🎲 Mestre';
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--v-gold);
+            font-style: normal;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Class features & spells in detail */
+        .spell-tag {
+            display: inline-block;
+            background: rgba(196,149,58,0.12);
+            border: 1px solid rgba(196,149,58,0.25);
+            border-radius: 8px;
+            padding: 1px 7px;
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--v-gold);
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        /* Synergy tip */
+        .synergy-tip {
+            background: linear-gradient(165deg, rgba(80,200,120,0.08) 0%, rgba(80,200,120,0.02) 100%);
+            border-left: 3px solid var(--v-success);
+            border-radius: 0 var(--v-radius) var(--v-radius) 0;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--v-text);
+        }
+        .synergy-tip-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--v-success);
+            margin-bottom: 4px;
+        }
+
+        /* Character sheet summary — NO scroll on main screen */
+        #screen-summary {
+            overflow-y: hidden !important;
+        }
+        #screen-summary .screen-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        #summaryContent {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+        #summarySections {
+            flex: 1;
+            min-height: 0; /* critical: allows flex child to shrink */
+            overflow-y: auto;
+        }
+        #summaryContent .section-body {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .sheet-header {
+            text-align: center;
+            padding: 8px 0 12px;
+        }
+        .sheet-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--v-gold);
+            text-shadow: 0 0 12px rgba(196,149,58,0.3);
+        }
+        .sheet-subtitle {
+            font-size: 12px;
+            color: var(--v-text-dim);
+            margin-top: 4px;
+        }
+        .combat-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .combat-stat-box {
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius);
+            padding: 8px 4px;
+            text-align: center;
+        }
+        .combat-stat-label {
+            font-size: 9px;
+            color: var(--v-text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .combat-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--v-text-bright);
+            margin-top: 2px;
+        }
+        .combat-stat-detail {
+            font-size: 9px;
+            color: var(--v-text-dim);
+            margin-top: 1px;
+        }
+        .attr-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .attr-box {
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius);
+            padding: 6px 4px;
+            text-align: center;
+        }
+        .attr-box-label {
+            font-size: 9px;
+            color: var(--v-text-dim);
+            text-transform: uppercase;
+        }
+        .attr-box-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--v-text-bright);
+        }
+        .attr-box-mod {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: -2px;
+        }
+        .save-list, .skill-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .save-row, .skill-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--v-text);
+            padding: 2px 0;
+        }
+        .prof-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            border: 1px solid var(--v-border);
+            flex-shrink: 0;
+        }
+        .prof-dot.active {
+            background: var(--v-gold);
+            border-color: var(--v-gold);
+            box-shadow: 0 0 4px rgba(196,149,58,0.4);
+        }
+        .skill-mod {
+            margin-left: auto;
+            font-weight: 600;
+            min-width: 24px;
+            text-align: right;
+        }
+        .skill-attr-tag {
+            font-size: 9px;
+            color: var(--v-text-dim);
+        }
+
+        /* ─── Help modal system ─── */
+        .help-tip {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(196,149,58,0.15); color: var(--v-gold);
+            font-size: 12px; font-weight: 700; cursor: pointer;
+            margin-left: 6px; border: 1px solid rgba(196,149,58,0.3);
+            transition: all 0.2s ease; vertical-align: middle;
+            text-decoration: none; line-height: 1;
+        }
+        .help-tip:active { transform: scale(0.9); background: rgba(196,149,58,0.3); }
+        .help-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .help-overlay.active { opacity: 1; pointer-events: auto; }
+        .help-card {
+            background: var(--v-bg-card); border: 1px solid var(--v-gold);
+            border-radius: var(--v-radius); padding: 20px; max-width: 340px;
+            width: 100%; max-height: 80vh; overflow-y: auto;
+            box-shadow: 0 0 30px rgba(196,149,58,0.2);
+        }
+        .help-title {
+            font-size: 16px; font-weight: 700; color: var(--v-gold);
+            margin-bottom: 12px; text-align: center;
+        }
+        .help-body {
+            font-size: 13px; color: var(--v-text); line-height: 1.6;
+            white-space: pre-line;
+        }
+        .help-close {
+            margin-top: 16px; width: 100%; padding: 10px;
+            background: rgba(196,149,58,0.15); border: 1px solid rgba(196,149,58,0.3);
+            border-radius: var(--v-radius); color: var(--v-gold);
+            font-size: 14px; font-weight: 600; cursor: pointer;
+        }
+        .help-close:active { background: rgba(196,149,58,0.3); }
+
+        /* ─── Alignment grid ─── */
+        .align-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+        }
+        .align-option {
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius); padding: 10px 6px;
+            text-align: center; cursor: pointer; transition: all 0.2s ease;
+        }
+        .align-option:active { transform: scale(0.97); }
+        .align-option.selected {
+            border-color: var(--v-gold);
+            box-shadow: 0 0 12px rgba(196,149,58,0.2);
+        }
+        .align-icon { font-size: 20px; }
+        .align-name { font-size: 11px; font-weight: 600; color: var(--v-text-bright); margin-top: 4px; }
+        .align-desc { font-size: 9px; color: var(--v-text-dim); margin-top: 2px; line-height: 1.3; }
+
+        /* ─── Stat assignment ─── */
+        .stat-slot {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--v-bg-card); border: 1px solid var(--v-border);
+            border-radius: var(--v-radius); padding: 10px 12px;
+            margin-bottom: 6px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .stat-slot:active { transform: scale(0.98); }
+        .stat-slot.assigned { border-color: var(--v-gold); }
+        .stat-slot-name { font-size: 13px; font-weight: 600; color: var(--v-text-bright); min-width: 40px; }
+        .stat-slot-value {
+            font-size: 18px; font-weight: 700; color: var(--v-gold);
+            min-width: 28px; text-align: center;
+        }
+        .stat-slot-bonus { font-size: 11px; color: #50c878; margin-left: 4px; }
+        .stat-slot-total { font-size: 14px; font-weight: 700; color: var(--v-text-bright); margin-left: auto; }
+        .stat-pool {
+            display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0;
+        }
+        .stat-pool-chip {
+            background: rgba(196,149,58,0.12); border: 1px solid rgba(196,149,58,0.35);
+            border-radius: 12px; padding: 6px 14px;
+            font-size: 15px; font-weight: 700; color: var(--v-gold);
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .stat-pool-chip:active { transform: scale(0.95); }
+        .stat-pool-chip.used { opacity: 0.3; pointer-events: none; }
+
+        /* ─── Language selection (compact chips) ─── */
+        .lang-option.fixed {
+            opacity: 0.5; pointer-events: none;
+            border-color: rgba(196,149,58,0.2);
         }
     </style>
 </head>
@@ -95,7 +546,7 @@
 <div class="v-header">
     <h1 id="headerTitle">FORJAR PERSONAGEM</h1>
     <div class="v-progress-bar" id="progressBar"></div>
-    <div class="v-progress-label" id="progressLabel">1/7 - Raça</div>
+    <div class="v-progress-label" id="progressLabel">1/9 - Raça</div>
 </div>
 
 <div class="screen-viewport" id="screenViewport">
@@ -104,92 +555,112 @@
         <!-- ═══ SCREEN 0: RACE ═══ -->
         <div class="screen" id="screen-race">
             <div class="screen-content">
-                <div class="v-title-sm">Escolha sua Raça</div>
-                <div class="v-caption">Cada raça possui bônus e traços únicos.</div>
+                <div class="dm-bubble" id="dm-0"></div>
+                <div class="v-title-sm">Escolha sua Raça <span class="help-tip" onclick="showHelp('race')">?</span></div>
+                <div class="v-caption">Cada raça possui bônus e traços únicos. Toque para ver detalhes.</div>
                 <div class="v-card-grid" id="raceGrid"></div>
             </div>
-
-            <!-- Sub-screen: Subrace (Dwarf, Elf, Halfling, Gnome) -->
-            <div class="sub-screen" id="sub-subrace">
-                <div class="screen-content">
-                    <button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeSubScreen('sub-subrace')">← Voltar</button>
-                    <div class="v-title-sm" id="subraceTitle">Sub-raça</div>
-                    <div class="v-caption" id="subraceDesc">Escolha uma sub-raça.</div>
-                    <div class="v-card-grid" id="subraceGrid"></div>
-                </div>
-            </div>
-
-            <!-- Sub-screen: Dragonborn Ancestry -->
-            <div class="sub-screen" id="sub-ancestry">
-                <div class="screen-content">
-                    <button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeSubScreen('sub-ancestry')">← Voltar</button>
-                    <div class="v-title-sm">Ancestralidade Dracônica</div>
-                    <div class="v-caption">Escolha o tipo de dragão ancestral.</div>
-                    <div class="v-card-grid single-col" id="ancestryGrid"></div>
-                </div>
-            </div>
-
-            <!-- Sub-screen: Half-Elf Bonus -->
-            <div class="sub-screen" id="sub-halfelf">
-                <div class="screen-content">
-                    <button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeSubScreen('sub-halfelf')">← Voltar</button>
-                    <div class="v-title-sm">Bônus de Atributo (+1 cada)</div>
-                    <div class="v-caption">Meio-Elfos escolhem 2 atributos para receber +1.</div>
-                    <div class="halfelf-selects">
-                        <select id="heBonus1"><option value="">Atributo 1</option></select>
-                        <select id="heBonus2"><option value="">Atributo 2</option></select>
-                    </div>
-                    <div class="v-error-msg" id="halfelfError"></div>
-                    <button class="v-btn v-btn-primary btn-block" onclick="confirmHalfElf()">Confirmar Bônus</button>
-                </div>
+            <div class="sub-screen" id="sub-race-detail">
+                <div class="screen-content" id="raceDetailContent"></div>
             </div>
         </div>
 
         <!-- ═══ SCREEN 1: CLASS ═══ -->
         <div class="screen" id="screen-class">
             <div class="screen-content">
-                <div class="v-title-sm">Escolha sua Classe</div>
-                <div class="v-caption">Defina seu estilo de combate e habilidades.</div>
+                <div class="dm-bubble" id="dm-1"></div>
+                <div class="v-title-sm">Escolha sua Classe <span class="help-tip" onclick="showHelp('class')">?</span></div>
+                <div class="v-caption">Defina seu estilo de combate e habilidades. Toque para ver detalhes.</div>
                 <div class="v-card-grid" id="classGrid"></div>
-                <div class="v-stat-preview hidden" id="statPreview"></div>
+            </div>
+            <div class="sub-screen" id="sub-class-detail">
+                <div class="screen-content" id="classDetailContent"></div>
+            </div>
+            <div class="sub-screen" id="sub-subclass-select">
+                <div class="screen-content" id="subclassSelectContent"></div>
+            </div>
+            <div class="sub-screen" id="sub-fstyle-select">
+                <div class="screen-content" id="fstyleSelectContent"></div>
+            </div>
+            <div class="sub-screen" id="sub-equip-select">
+                <div class="screen-content" id="equipSelectContent"></div>
             </div>
         </div>
 
-        <!-- ═══ SCREEN 2: BACKGROUND ═══ -->
+        <!-- ═══ SCREEN 2: STATS ═══ -->
+        <div class="screen" id="screen-stats">
+            <div class="screen-content">
+                <div class="dm-bubble" id="dm-2"></div>
+                <div class="v-title-sm">Distribua seus Atributos <span class="help-tip" onclick="showHelp('stats')">?</span></div>
+                <div class="v-caption">Distribua os valores 15, 14, 13, 12, 10, 8 nos 6 atributos. Toque num valor, depois no atributo.</div>
+                <div class="stat-pool" id="statPool"></div>
+                <div id="statSlots"></div>
+                <div class="stat-actions">
+                    <button class="v-btn v-btn-suggest" onclick="suggestStats()">🎯 Sugestão da Classe</button>
+                    <button class="v-btn v-btn-secondary v-btn-clear" onclick="clearStats()">🔄 Limpar</button>
+                </div>
+                <button class="v-btn v-btn-primary btn-block hidden" id="statsConfirm" onclick="goScreen(3)">✓ Confirmar Atributos</button>
+            </div>
+        </div>
+
+        <!-- ═══ SCREEN 3: BACKGROUND ═══ -->
         <div class="screen" id="screen-bg">
             <div class="screen-content">
-                <div class="v-title-sm">Escolha seu Antecedente</div>
-                <div class="v-caption">Seu passado define perícias e recursos iniciais.</div>
-                <div class="v-card-grid single-col" id="bgGrid"></div>
+                <div class="dm-bubble" id="dm-3"></div>
+                <div class="v-title-sm">Escolha seu Antecedente <span class="help-tip" onclick="showHelp('background')">?</span></div>
+                <div class="v-caption">Seu passado define perícias e recursos iniciais. Toque para ver detalhes.</div>
+                <div class="v-card-grid" id="bgGrid"></div>
+            </div>
+            <div class="sub-screen" id="sub-bg-detail">
+                <div class="screen-content" id="bgDetailContent"></div>
+            </div>
+            <div class="sub-screen" id="sub-personality">
+                <div class="screen-content" id="personalityContent"></div>
             </div>
         </div>
 
-        <!-- ═══ SCREEN 3: SKILLS ═══ -->
+        <!-- ═══ SCREEN 4: ALIGNMENT ═══ -->
+        <div class="screen" id="screen-alignment">
+            <div class="screen-content">
+                <div class="dm-bubble" id="dm-4"></div>
+                <div class="v-title-sm">Alinhamento <span class="help-tip" onclick="showHelp('alignment')">?</span></div>
+                <div class="v-caption">A bússola moral do seu personagem. Opcional — toque para escolher ou pule.</div>
+                <div class="align-grid" id="alignGrid"></div>
+                <button class="v-btn v-btn-secondary btn-block" style="margin-top:12px" onclick="sel.alignment=''; goScreen(5)">⏭️ Pular</button>
+                <button class="v-btn v-btn-primary btn-block hidden" id="alignConfirm" onclick="goScreen(5)">✓ Confirmar Alinhamento</button>
+            </div>
+        </div>
+
+        <!-- ═══ SCREEN 5: SKILLS ═══ -->
         <div class="screen" id="screen-skills">
             <div class="screen-content">
-                <div class="v-title-sm">Perícias de Classe</div>
+                <div class="dm-bubble" id="dm-5"></div>
+                <div class="v-title-sm">Perícias de Classe <span class="help-tip" onclick="showHelp('proficiency')">?</span></div>
                 <div class="v-caption" id="skillDesc">Escolha suas perícias.</div>
                 <div class="v-toggle-count" id="skillCount">0/2</div>
+                <div id="skillBgInfo"></div>
                 <div class="v-toggle-grid" id="skillGrid"></div>
-                <button class="v-btn v-btn-primary btn-block hidden" id="skillConfirm" onclick="goScreen(4)">Confirmar Perícias</button>
+                <button class="v-btn v-btn-primary btn-sticky hidden" id="skillConfirm" onclick="goScreen(6)">✓ Confirmar Perícias</button>
             </div>
         </div>
 
-        <!-- ═══ SCREEN 4: TOOLS ═══ -->
+        <!-- ═══ SCREEN 6: TOOLS ═══ -->
         <div class="screen" id="screen-tools">
             <div class="screen-content">
-                <div class="v-title-sm">Ferramentas Artesanais</div>
+                <div class="dm-bubble" id="dm-6"></div>
+                <div class="v-title-sm">Ferramentas Artesanais <span class="help-tip" onclick="showHelp('tools')">?</span></div>
                 <div class="v-caption" id="toolDesc">Escolha suas ferramentas.</div>
                 <div class="v-toggle-count" id="toolCount">0/1</div>
                 <div class="v-toggle-grid" id="toolGrid"></div>
-                <button class="v-btn v-btn-primary btn-block hidden" id="toolConfirm" onclick="goScreen(5)">Confirmar Ferramentas</button>
+                <button class="v-btn v-btn-primary btn-sticky hidden" id="toolConfirm" onclick="goScreen(7)">✓ Confirmar Ferramentas</button>
             </div>
         </div>
 
-        <!-- ═══ SCREEN 5: IDENTITY ═══ -->
+        <!-- ═══ SCREEN 7: IDENTITY ═══ -->
         <div class="screen" id="screen-identity">
             <div class="screen-content">
-                <div class="v-title-sm">Identidade</div>
+                <div class="dm-bubble" id="dm-7"></div>
+                <div class="v-title-sm">Identidade <span class="help-tip" onclick="showHelp('gender')">?</span></div>
                 <div class="v-caption">Defina quem é seu personagem.</div>
 
                 <div class="v-title-sm section-label">Gênero</div>
@@ -214,15 +685,13 @@
                 </div>
 
                 <div class="v-error-msg" id="nameError"></div>
-                <button class="v-btn v-btn-primary btn-block" onclick="goScreen(6)">Continuar</button>
+                <button class="v-btn v-btn-primary btn-block" onclick="goScreen(8)">Continuar</button>
             </div>
         </div>
 
-        <!-- ═══ SCREEN 6: SUMMARY ═══ -->
+        <!-- ═══ SCREEN 8: SUMMARY ═══ -->
         <div class="screen" id="screen-summary">
-            <div class="screen-content">
-                <div class="v-title-sm">Resumo do Personagem</div>
-                <div class="v-caption">Revise suas escolhas antes de confirmar.</div>
+            <div class="screen-content" style="padding-bottom:8px">
                 <div id="summaryContent"></div>
             </div>
         </div>
@@ -230,146 +699,27 @@
     </div>
 </div>
 
+<!-- Help modal overlay -->
+<div class="help-overlay" id="helpOverlay" onclick="closeHelp(event)">
+    <div class="help-card" onclick="event.stopPropagation()">
+        <div class="help-title" id="helpTitle"></div>
+        <div class="help-body" id="helpBody"></div>
+        <button class="help-close" onclick="closeHelp()">✕ Fechar</button>
+    </div>
+</div>
+
 <script>
-// ═══════════════════════════════════════════════
-// GAME DATA
-// ═══════════════════════════════════════════════
-
-const ATTR_PT = {strength:'Força',dexterity:'Destreza',constitution:'Constituição',intelligence:'Inteligência',wisdom:'Sabedoria',charisma:'Carisma'};
-const ATTR_ABBR = {strength:'FOR',dexterity:'DES',constitution:'CON',intelligence:'INT',wisdom:'SAB',charisma:'CAR'};
-const SKILL_PT = {athletics:'Atletismo',acrobatics:'Acrobacia',sleight_of_hand:'Prestidigitação',stealth:'Furtividade',arcana:'Arcanismo',history:'História',investigation:'Investigação',nature:'Natureza',religion:'Religião',animal_handling:'Lidar com Animais',insight:'Intuição',medicine:'Medicina',perception:'Percepção',survival:'Sobrevivência',deception:'Enganação',intimidation:'Intimidação',performance:'Atuação',persuasion:'Persuasão'};
-const ARMOR_PT = {light_armor:'Leve',medium_armor:'Média',heavy_armor:'Pesada',shield:'Escudo'};
-const WEAPON_PT = {simple_weapon:'Simples',martial_weapon:'Marciais'};
-const SAVE_PT = ATTR_PT;
-const RECOVERY_PT = {full:'Recupera tudo',half:'Recupera 50%',third:'Recupera 33%',none:'Sem recuperação'};
-
-const RACES = {
-    Human:{name:'Humano',icon:'👤',desc:'+1 em todos os atributos',speed:30,size:'Médio',langs:['Comum','+1'],
-        bonuses:{strength:1,dexterity:1,constitution:1,intelligence:1,wisdom:1,charisma:1},subraces:null,
-        traits:['Idioma Extra: Aprende um idioma adicional']},
-    Dwarf:{name:'Anão',icon:'🧱',desc:'+2 Constituição',speed:25,size:'Médio',langs:['Comum','Anão'],
-        bonuses:{constitution:2},subraces:{hill:{name:'Anão da Colina',desc:'Intuição aguçada e resistência notável.',bonuses:{wisdom:1}},mountain:{name:'Anão da Montanha',desc:'Forte e resistente.',bonuses:{strength:2}}},
-        traits:['Visão no Escuro (18m)','Resiliência Anã: Vant. saves veneno','Treinamento Anão: Prof. machados/martelos','Conhecimento da Pedra'],toolChoice:1},
-    Elf:{name:'Elfo',icon:'⚡',desc:'+2 Destreza',speed:30,size:'Médio',langs:['Comum','Élfico'],
-        bonuses:{dexterity:2},subraces:{high:{name:'Alto Elfo',desc:'Mente afiada e afinidade arcana.',bonuses:{intelligence:1}},wood:{name:'Elfo da Floresta',desc:'Rápido e furtivo.',bonuses:{wisdom:1},speed:35}},
-        traits:['Visão no Escuro (18m)','Sentidos Aguçados: Prof. Percepção','Ancestralidade Feérica: Vant. vs encantamento','Transe: Meditação de 4h']},
-    Halfling:{name:'Halfling',icon:'🦶',desc:'+2 Destreza',speed:25,size:'Pequeno',langs:['Comum','Halfling'],
-        bonuses:{dexterity:2},subraces:{lightfoot:{name:'Pés-Leves',desc:'Naturalmente furtivo e carismático.',bonuses:{charisma:1}},stout:{name:'Robusto',desc:'Resistente e difícil de envenenar.',bonuses:{constitution:1}}},
-        traits:['Sortudo: Re-rola 1 natural','Bravura: Vant. saves medo','Agilidade Pequenina']},
-    Gnome:{name:'Gnomo',icon:'🧪',desc:'+2 Inteligência',speed:25,size:'Pequeno',langs:['Comum','Gnômico'],
-        bonuses:{intelligence:2},subraces:{rock:{name:'Gnomo da Rocha',desc:'Inventor nato.',bonuses:{constitution:1},tools:['tinker_tools']},forest:{name:'Gnomo da Floresta',desc:'Ágil e conectado à natureza.',bonuses:{dexterity:1}}},
-        traits:['Visão no Escuro (18m)','Astúcia Gnômica: Vant. saves INT/SAB/CAR vs magia']},
-    HalfElf:{name:'Meio-Elfo',icon:'🧝',desc:'+2 Carisma, +1×2 à escolha',speed:30,size:'Médio',langs:['Comum','Élfico','+1'],
-        bonuses:{charisma:2},subraces:null,halfelf:true,
-        traits:['Visão no Escuro (18m)','Ancestralidade Feérica: Vant. vs encantamento','Versatilidade em Perícias']},
-    Tiefling:{name:'Tiefling',icon:'😈',desc:'+2 Carisma, +1 Inteligência',speed:30,size:'Médio',langs:['Comum','Infernal'],
-        bonuses:{charisma:2,intelligence:1},subraces:null,
-        traits:['Visão no Escuro (18m)','Resistência Infernal: Res. dano fogo','Legado Infernal: Taumaturgia + magias']},
-    Dragonborn:{name:'Dragonborn',icon:'🐉',desc:'+2 Força, +1 Carisma',speed:30,size:'Médio',langs:['Comum','Dracônico'],
-        bonuses:{strength:2,charisma:1},
-        subraces:{
-            red:{name:'Draconato Vermelho',desc:'Sopro de fogo (cone)',bonuses:{}},
-            blue:{name:'Draconato Azul',desc:'Sopro elétrico (linha)',bonuses:{}},
-            white:{name:'Draconato Branco',desc:'Sopro gélido (cone)',bonuses:{}},
-            black:{name:'Draconato Negro',desc:'Sopro ácido (linha)',bonuses:{}},
-            green:{name:'Draconato Verde',desc:'Sopro venenoso (cone)',bonuses:{}},
-            gold:{name:'Draconato Dourado',desc:'Sopro de fogo (cone)',bonuses:{}},
-            silver:{name:'Draconato Prateado',desc:'Sopro gélido (cone)',bonuses:{}},
-            bronze:{name:'Draconato Bronze',desc:'Sopro elétrico (linha)',bonuses:{}},
-            copper:{name:'Draconato Cobre',desc:'Sopro ácido (linha)',bonuses:{}},
-            brass:{name:'Draconato Latão',desc:'Sopro de fogo (linha)',bonuses:{}}
-        },
-        traits:['Sopro Dracônico: 2d6 dano elemental','Resistência Dracônica: Res. ao tipo do sopro']},
-    HalfOrc:{name:'Meio-Orc',icon:'🪓',desc:'+2 Força, +1 Constituição',speed:30,size:'Médio',langs:['Comum','Orc'],
-        bonuses:{strength:2,constitution:1},subraces:null,
-        traits:['Visão no Escuro (18m)','Resistência Implacável: 1 PV ao cair a 0','Ataques Selvagens: Dado extra em crit','Ameaçador: Prof. Intimidação']}
-};
-
-const CLASSES = {
-    class_warrior:{name:'Guerreiro',icon:'🛡️',role:'Tanque / DPS',hit_die:'1d10',res:'Vigor',
-        stats:[15,13,14,8,12,10],armor:['light_armor','medium_armor','heavy_armor','shield'],weapons:['simple_weapon','martial_weapon'],saves:['strength','constitution'],tools:[],
-        equip:['Espada de Treino','Escudo de Madeira','Cota de Malha'],skills:{count:2,opts:['acrobatics','animal_handling','athletics','history','insight','intimidation','perception','survival']},rec:'half',mp:{base:14,attr:'strength',mult:2}},
-    class_mage:{name:'Mago',icon:'🔥',role:'DPS Arcano / Controle',hit_die:'1d6',res:'Mana',
-        stats:[8,13,14,15,12,10],armor:[],weapons:['simple_weapon'],saves:['intelligence','wisdom'],tools:[],
-        equip:['Cajado de Salgueiro','Capuz de Tecido'],skills:{count:2,opts:['arcana','history','insight','investigation','medicine','religion']},rec:'half',mp:{base:20,attr:'intelligence',mult:2}},
-    class_rogue:{name:'Ladino',icon:'🗡️',role:'DPS Furtivo / Perícia',hit_die:'1d8',res:'Energia',
-        stats:[8,15,13,14,10,12],armor:['light_armor'],weapons:['simple_weapon'],saves:['dexterity','intelligence'],tools:[],
-        equip:['Adaga Balanceada','Peitoral de Couro'],skills:{count:4,opts:['acrobatics','athletics','deception','insight','intimidation','investigation','perception','performance','persuasion','sleight_of_hand','stealth']},rec:'half',mp:{base:12,attr:'dexterity',mult:2}},
-    class_cleric:{name:'Clérigo',icon:'🙏',role:'Curador / Suporte',hit_die:'1d8',res:'Mana',
-        stats:[13,8,14,10,15,12],armor:['light_armor','medium_armor','shield'],weapons:['simple_weapon'],saves:['wisdom','charisma'],tools:[],
-        equip:['Maça de Estrela','Escudo de Madeira','Cota de Escamas'],skills:{count:2,opts:['history','insight','medicine','persuasion','religion']},rec:'none',mp:{base:18,attr:'wisdom',mult:2}},
-    class_paladin:{name:'Paladino',icon:'⚡',role:'Tanque / Curador',hit_die:'1d10',res:'Mana',
-        stats:[15,10,13,8,12,14],armor:['light_armor','medium_armor','heavy_armor','shield'],weapons:['simple_weapon','martial_weapon'],saves:['wisdom','charisma'],tools:[],
-        equip:['Martelo de Guerra','Escudo de Madeira','Cota de Malha'],skills:{count:2,opts:['athletics','insight','intimidation','medicine','persuasion','religion']},rec:'none',mp:{base:14,attr:'charisma',mult:2}},
-    class_ranger:{name:'Patrulheiro',icon:'🏹',role:'DPS à Distância',hit_die:'1d10',res:'Mana',
-        stats:[12,15,13,10,14,8],armor:['light_armor','medium_armor','shield'],weapons:['simple_weapon','martial_weapon'],saves:['strength','dexterity'],tools:[],
-        equip:['Arco de Caça','Peitoral de Couro'],skills:{count:3,opts:['animal_handling','athletics','insight','investigation','nature','perception','stealth','survival']},rec:'none',mp:{base:15,attr:'wisdom',mult:2}},
-    class_barbarian:{name:'Bárbaro',icon:'😡',role:'Tanque / DPS Brutal',hit_die:'1d12',res:'Fúria',
-        stats:[15,13,14,8,12,10],armor:['light_armor','medium_armor','shield'],weapons:['simple_weapon','martial_weapon'],saves:['strength','constitution'],tools:[],
-        equip:['Machado de Batalha','Giboia de Pele'],skills:{count:2,opts:['animal_handling','athletics','intimidation','nature','perception','survival']},rec:'half',mp:{base:12,attr:'constitution',mult:2}},
-    class_bard:{name:'Bardo',icon:'🎶',role:'Suporte / Versátil',hit_die:'1d8',res:'Inspiração',
-        stats:[8,14,13,12,10,15],armor:['light_armor'],weapons:['simple_weapon'],saves:['dexterity','charisma'],tools:[],
-        equip:['Rapieira','Peitoral de Couro'],skills:{count:3,opts:['athletics','acrobatics','sleight_of_hand','stealth','arcana','history','investigation','nature','religion','animal_handling','insight','medicine','perception','survival','deception','intimidation','performance','persuasion']},rec:'half',mp:{base:15,attr:'charisma',mult:2}},
-    class_druid:{name:'Druida',icon:'🌲',role:'Caster / Transformação',hit_die:'1d8',res:'Mana',
-        stats:[8,13,14,12,15,10],armor:['light_armor','medium_armor','shield'],weapons:['simple_weapon'],saves:['intelligence','wisdom'],tools:['herbalism_kit'],
-        equip:['Foice','Escudo de Madeira','Giboia de Pele'],skills:{count:2,opts:['arcana','animal_handling','insight','medicine','nature','perception','religion','survival']},rec:'none',mp:{base:15,attr:'wisdom',mult:2}},
-    class_monk:{name:'Monge',icon:'👊',role:'DPS / Mobilidade',hit_die:'1d8',res:'Ki',
-        stats:[12,15,13,10,14,8],armor:[],weapons:['simple_weapon'],saves:['strength','dexterity'],tools:['_choice_1'],
-        equip:['Cajado de Salgueiro'],skills:{count:2,opts:['acrobatics','athletics','history','insight','religion','stealth']},rec:'full',mp:{base:8,attrs:[{a:'dexterity',m:1},{a:'wisdom',m:2}]}},
-    class_sorcerer:{name:'Feiticeiro',icon:'🔮',role:'DPS Arcano / Metamagia',hit_die:'1d6',res:'Mana',
-        stats:[8,13,14,10,12,15],armor:[],weapons:['simple_weapon'],saves:['constitution','charisma'],tools:[],
-        equip:['Cajado de Salgueiro','Capuz de Tecido'],skills:{count:2,opts:['arcana','deception','insight','intimidation','persuasion','religion']},rec:'third',mp:{base:18,attr:'charisma',mult:2}},
-    class_warlock:{name:'Bruxo',icon:'👁️',role:'DPS Arcano / Pacto',hit_die:'1d8',res:'Pacto',
-        stats:[8,13,14,10,12,15],armor:['light_armor'],weapons:['simple_weapon'],saves:['wisdom','charisma'],tools:[],
-        equip:['Adaga Enferrujada','Peitoral de Couro'],skills:{count:2,opts:['arcana','deception','history','intimidation','investigation','nature','religion']},rec:'full',mp:{base:10,attr:'charisma',mult:2}}
-};
-
-const BACKGROUNDS = {
-    soldier:{name:'Soldado',desc:'Disciplina do campo de batalha.',skills:['athletics','intimidation'],gold:10},
-    sage:{name:'Sábio',desc:'Anos em bibliotecas e academias.',skills:['arcana','history'],gold:10},
-    criminal:{name:'Criminal',desc:'Passado nas sombras do submundo.',skills:['stealth','deception'],gold:15},
-    acolyte:{name:'Acólito',desc:'Vida dedicada a um templo sagrado.',skills:['insight','religion'],gold:15},
-    noble:{name:'Nobre',desc:'Família de prestígio e influência.',skills:['history','persuasion'],gold:25},
-    guild_artisan:{name:'Artesão de Guilda',desc:'Membro de guilda respeitada.',skills:['insight','persuasion'],gold:15,toolChoice:1},
-    outlander:{name:'Forasteiro',desc:'Cresceu nas terras selvagens.',skills:['athletics','survival'],gold:10},
-    charlatan:{name:'Charlatão',desc:'Trapaças, disfarces e identidades.',skills:['deception','sleight_of_hand'],gold:15},
-    hermit:{name:'Eremita',desc:'Reclusão e iluminação espiritual.',skills:['medicine','religion'],gold:5,tools:['herbalism_kit']},
-    entertainer:{name:'Artista',desc:'Encanta multidões com arte.',skills:['acrobatics','performance'],gold:15}
-};
-
-const ARTISAN_TOOLS = {
-    smith_tools:{name:'Ferramentas de Ferreiro',icon:'⚒️'},
-    leatherworker_tools:{name:'Ferramentas de Coureiro',icon:'🧵'},
-    woodcarver_tools:{name:'Ferramentas de Entalhador',icon:'🪓'},
-    jeweler_tools:{name:'Ferramentas de Joalheiro',icon:'💎'},
-    alchemist_supplies:{name:'Suprimentos de Alquimista',icon:'⚗️'},
-    herbalism_kit:{name:'Kit de Herbalismo',icon:'🌿'},
-    cook_utensils:{name:'Utensílios de Cozinheiro',icon:'🍳'},
-    tinker_tools:{name:'Ferramentas de Funileiro',icon:'🔧'}
-};
-
-const GENDERS = [
-    {key:'Male',icon:'🚹',name:'Masculino'},{key:'Female',icon:'🚺',name:'Feminino'},
-    {key:'Non-Binary',icon:'🌈',name:'Não-Binário'},{key:'Fluid',icon:'🌊',name:'Fluido'},
-    {key:'Agender',icon:'⚪',name:'Agênero'}
-];
-
-const NAMES_DATA = {
-    pre:["Aer","Ael","Al","An","Ar","Bel","Bor","Bal","Bran","Cal","Cor","Cael","Cyr","Da","Del","Dor","Dra","El","Eom","Er","Fa","Fae","Fel","Fer","Gal","Gen","Gil","Gor","Hal","Hor","Hel","Hrod","Ian","Ith","Ir","Jar","Jen","Jor","Kal","Kel","Kor","Kyr","La","Lel","Lor","Ly","Mai","Mal","Mor","Myr","Na","Nel","Nor","Ny","Ol","Or","Oth","Pa","Per","Pol","Ra","Ren","Ror","Ry","Sa","Sel","Sol","Syl","Ta","Tel","Tor","Ty","Ul","Ur","Va","Val","Vor","Vy","Wa","Wil","Wor","Xa","Xer","Ya","Yl","Za","Zor"],
-    inf:["a","e","i","o","u","ae","ai","ea","ia","io","ua","y","aa","ee","oo"],
-    suf:["bar","bor","can","cen","dan","den","din","don","fan","fen","fin","gan","gen","gin","gon","han","hen","hin","hon","jan","jen","kan","ken","kin","kon","lan","len","lin","lon","man","men","min","mon","nan","nen","nin","pan","pen","ran","ren","rin","ron","san","sen","sin","son","tan","ten","tin","ton","van","ven","vin","wan","wen","zan","zen","zin"],
-    suf_f:["ra","ria","na","nia","la","lia","ara","ira","ina","ena","ala","ela","isa","iel","ael","wen","ith","yra","ynn","essa","aia","eira","ari","ani","ili","eri","ori","alis","elis","ora","ura","riel","niel","liel","dia","sia","via","mia","fia","dra","tra","gra","nna","lla","wyn","lyn","ryn","lis","nis","ris"],
-    titles:["o Bravo","o Sábio","o Forte","o Rápido","o Cruel","o Justo","o Grande","o Pequeno","o Místico","o Sombrio","da Luz","o Protetor","o Vingador","o Imortal","o Eterno","Lâmina","Punho","Coração","o Caçador","o Arcano","o Divino","o Eleito"]
-};
-
 // ═══════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════
-const SCREENS = ['screen-race','screen-class','screen-bg','screen-skills','screen-tools','screen-identity','screen-summary'];
-const SCREEN_NAMES = ['Raça','Classe','Antecedente','Perícias','Ferramentas','Identidade','Resumo'];
+const SCREENS = ['screen-race','screen-class','screen-stats','screen-bg','screen-alignment','screen-skills','screen-tools','screen-identity','screen-summary'];
+const SCREEN_NAMES = ['Raça','Classe','Atributos','Antecedente','Alinhamento','Perícias','Ferramentas','Identidade','Resumo'];
 let currentScreen = 0;
 let isTransitioning = false;
-let sel = { race:null, subrace:'', classKey:null, bg:null, skillProfs:[], toolProfs:[], gender:null, name:'', surname:'' };
+let sel = { race:null, subrace:'', classKey:null, subclass:'', fightingStyle:'', equipmentChoice:'A', bg:null, personalityTrait:'', ideal:'', bond:'', flaw:'', alignment:'', skillProfs:[], toolProfs:[], gender:null, name:'', surname:'', languages:[], statAssignment:{} };
+let pendingSubrace = '';
+let pendingLanguage = null;
+let currentRaceDetailKey = '';
 let existingNames = [];
 let token = '', charId = '';
 
@@ -384,7 +734,6 @@ if (tg) {
     tg.MainButton.hide();
     tg.setHeaderColor(_vBg);
     tg.setBackgroundColor(_vBg);
-    // Set viewport height CSS variable
     document.documentElement.style.setProperty('--tg-viewport-height', tg.viewportHeight + 'px');
     tg.onEvent('viewportChanged', () => {
         document.documentElement.style.setProperty('--tg-viewport-height', tg.viewportHeight + 'px');
@@ -397,23 +746,67 @@ if (tg) {
     charId = params.get('char_id') || '';
     try { existingNames = JSON.parse(atob(params.get('names') || 'W10=')); } catch(e) { existingNames = []; }
     buildProgressBar();
+    buildDmBubbles();
     buildRaceGrid();
     buildClassGrid();
     buildBgGrid();
+    buildAlignGrid();
     buildGenderGrid();
     document.getElementById('nameInput').addEventListener('input', e => { sel.name = e.target.value.trim(); document.getElementById('nameLimit').textContent = `${e.target.value.length}/15`; });
     document.getElementById('surnameInput').addEventListener('input', e => { sel.surname = e.target.value.trim(); document.getElementById('surnameLimit').textContent = `${e.target.value.length}/15`; });
-    document.getElementById('heBonus1').addEventListener('change', updateHalfElfBonus);
-    document.getElementById('heBonus2').addEventListener('change', updateHalfElfBonus);
     setupBackButton();
 })();
 
 function haptic() { try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){} }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function mod(v) { return Math.floor((v - 10) / 2); }
+function toggleSection(el) { haptic(); el.closest('.detail-section').classList.toggle('collapsed'); }
+
+function buildDmBubbles() {
+    for (let i = 0; i <= 8; i++) {
+        const el = document.getElementById('dm-' + i);
+        if (el && DM_NARRATION[i]) el.textContent = DM_NARRATION[i];
+    }
+}
+
+function calcAC(classKey, stats) {
+    const info = CLASS_LV1[classKey];
+    if (!info) return {ac: 10, detail: '10'};
+    const ac = info.ac;
+    let baseAC, detail;
+    if (ac.unarmored === 'barbarian') {
+        baseAC = 10 + mod(stats.dexterity) + mod(stats.constitution);
+        detail = `${baseAC} (10 + DES ${mod(stats.dexterity)} + CON ${mod(stats.constitution)})`;
+    } else if (ac.unarmored === 'monk') {
+        baseAC = 10 + mod(stats.dexterity) + mod(stats.wisdom);
+        detail = `${baseAC} (10 + DES ${mod(stats.dexterity)} + SAB ${mod(stats.wisdom)})`;
+    } else if (ac.base === 13 && classKey === 'class_sorcerer') {
+        baseAC = 13 + mod(stats.dexterity);
+        detail = `${baseAC} (Escamas 13 + DES ${mod(stats.dexterity)})`;
+    } else if (ac.base <= 11 && ac.base >= 10) {
+        const dexMod = mod(stats.dexterity);
+        if (ac.base === 10) {
+            baseAC = 10 + dexMod;
+            detail = `${baseAC} (Sem armadura)`;
+        } else {
+            baseAC = ac.base + dexMod;
+            detail = `${baseAC} (Couro + DES)`;
+        }
+    } else if (ac.base === 14) {
+        const dexCap = Math.min(mod(stats.dexterity), 2);
+        baseAC = ac.base + dexCap;
+        detail = `${baseAC} (Escamas 14 + DES ${dexCap})`;
+    } else {
+        baseAC = ac.base;
+        detail = `${baseAC} (${ac.detail.split('(')[0].trim()})`;
+    }
+    const totalAC = baseAC + ac.shield;
+    if (ac.shield > 0) detail = `${totalAC} — ${detail} + Escudo (+${ac.shield})`;
+    return {ac: totalAC, detail};
+}
 
 // ═══════════════════════════════════════════════
-// NAVIGATION — Screen transitions
+// NAVIGATION
 // ═══════════════════════════════════════════════
 function buildProgressBar() {
     const bar = document.getElementById('progressBar');
@@ -428,18 +821,16 @@ function buildProgressBar() {
 
 function goScreen(idx) {
     if (isTransitioning) return;
-
-    // Validate before advancing
     if (idx > currentScreen) {
         const err = validateCurrentScreen();
         if (err) { showError(err); return; }
     }
-
     isTransitioning = true;
     setTimeout(() => { isTransitioning = false; }, 350);
 
-    // Skip panels if not needed
-    if (idx === 3) { // skills
+    if (idx === 2) buildStatSlots();
+    if (idx === 4) buildAlignGrid();
+    if (idx === 5) {
         const cls = CLASSES[sel.classKey];
         const bg = BACKGROUNDS[sel.bg];
         const bgSkills = bg ? bg.skills : [];
@@ -447,41 +838,35 @@ function goScreen(idx) {
         const needed = Math.min(cls.skills.count, available.length);
         if (needed === 0) {
             sel.skillProfs = [];
+            isTransitioning = false;
             skipToScreen(idx + (idx > currentScreen ? 1 : -1));
             return;
         }
         buildSkillGrid();
     }
-    if (idx === 4) { // tools
+    if (idx === 6) {
         const tc = getToolChoiceCount();
         if (tc === 0) {
+            isTransitioning = false;
             skipToScreen(idx + (idx > currentScreen ? 1 : -1));
             return;
         }
         buildToolGrid();
     }
-    if (idx === 6) buildSummary();
+    if (idx === 8) buildSummary();
 
     closeAllSubScreens();
     currentScreen = idx;
-
-    // Slide the track
     document.getElementById('screenTrack').style.transform = `translateX(${-100 * idx}vw)`;
-
-    // Update progress
     SCREENS.forEach((s, i) => {
         const dot = document.getElementById('pdot-' + i);
         dot.className = 'v-progress-dot' + (i < idx ? ' done' : i === idx ? ' active' : '');
     });
     document.getElementById('progressLabel').textContent = `${idx + 1}/${SCREENS.length} - ${SCREEN_NAMES[idx]}`;
-
-    // Scroll target screen to top
     document.getElementById(SCREENS[idx]).scrollTop = 0;
-
-    // Telegram MainButton
     if (tg) {
         tg.MainButton.offClick(submitCharacter);
-        if (idx === 6) {
+        if (idx === 8) {
             tg.MainButton.setText('⚔️ CONFIRMAR PERSONAGEM');
             tg.MainButton.show();
             tg.MainButton.onClick(submitCharacter);
@@ -489,17 +874,15 @@ function goScreen(idx) {
             tg.MainButton.hide();
         }
     }
-
     updateBackButton();
     haptic();
 }
 
-// Skip screen without visible animation
 function skipToScreen(idx) {
     const track = document.getElementById('screenTrack');
     track.style.transition = 'none';
     track.style.transform = `translateX(${-100 * currentScreen}vw)`;
-    track.offsetHeight; // force reflow
+    track.offsetHeight;
     track.style.transition = 'transform 300ms ease-out';
     goScreen(idx);
 }
@@ -513,6 +896,9 @@ function openSubScreen(subId) {
     if (sub) {
         isTransitioning = true;
         sub.classList.add('active');
+        // Lock parent screen scroll to prevent bleed-through
+        const parentScreen = sub.closest('.screen');
+        if (parentScreen) { parentScreen.scrollTop = 0; parentScreen.classList.add('sub-open'); }
         sub.scrollTop = 0;
         updateBackButton();
         haptic();
@@ -522,12 +908,24 @@ function openSubScreen(subId) {
 
 function closeSubScreen(subId) {
     const sub = document.getElementById(subId);
-    if (sub) sub.classList.remove('active');
+    if (sub) {
+        sub.classList.remove('active');
+        // Unlock parent screen scroll
+        const parentScreen = sub.closest('.screen');
+        if (parentScreen && !parentScreen.querySelector('.sub-screen.active')) {
+            parentScreen.classList.remove('sub-open');
+        }
+    }
+    if (subId === 'sub-race-detail') currentRaceDetailKey = '';
     updateBackButton();
 }
 
 function closeAllSubScreens() {
-    document.querySelectorAll('.sub-screen.active').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sub-screen.active').forEach(s => {
+        s.classList.remove('active');
+        const parentScreen = s.closest('.screen');
+        if (parentScreen) parentScreen.classList.remove('sub-open');
+    });
 }
 
 // ═══════════════════════════════════════════════
@@ -538,23 +936,23 @@ function setupBackButton() {
     tg.BackButton.onClick(() => {
         const openSub = document.querySelector('.sub-screen.active');
         if (openSub) {
+            // If in race selection Phase 2, go back to Phase 1 instead of closing
+            if (openSub.id === 'sub-race-detail' && currentRaceDetailKey && isRaceSelectionPhase()) {
+                buildRaceDetail(currentRaceDetailKey);
+                return;
+            }
             closeSubScreen(openSub.id);
             return;
         }
-        if (currentScreen > 0) {
-            goScreen(currentScreen - 1);
-        }
+        if (currentScreen > 0) goScreen(currentScreen - 1);
     });
 }
 
 function updateBackButton() {
     if (!tg || !tg.BackButton) return;
     const hasOpenSub = document.querySelector('.sub-screen.active');
-    if (currentScreen > 0 || hasOpenSub) {
-        tg.BackButton.show();
-    } else {
-        tg.BackButton.hide();
-    }
+    if (currentScreen > 0 || hasOpenSub) tg.BackButton.show();
+    else tg.BackButton.hide();
 }
 
 // ═══════════════════════════════════════════════
@@ -565,17 +963,17 @@ function validateCurrentScreen() {
         if (!sel.race) return 'Selecione uma raça.';
         const r = RACES[sel.race];
         if (r.subraces && !sel.subrace) return 'Selecione uma sub-raça.';
-        if (r.halfelf) {
-            const b1 = document.getElementById('heBonus1').value;
-            const b2 = document.getElementById('heBonus2').value;
-            if (!b1 || !b2) return 'Selecione os 2 bônus de atributo.';
-            if (b1 === b2) return 'Selecione atributos diferentes.';
-            sel.subrace = b1 + '_' + b2;
-        }
+        if (r.halfelf && !sel.subrace) return 'Selecione os 2 bônus de atributo.';
     }
     if (currentScreen === 1 && !sel.classKey) return 'Selecione uma classe.';
-    if (currentScreen === 2 && !sel.bg) return 'Selecione um antecedente.';
-    if (currentScreen === 3) {
+    if (currentScreen === 2) {
+        const attrs = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
+        const assigned = attrs.filter(a => sel.statAssignment[a]);
+        if (assigned.length < 6) return 'Distribua todos os 6 atributos.';
+    }
+    if (currentScreen === 3 && !sel.bg) return 'Selecione um antecedente.';
+    // Screen 4 (alignment) — optional, no validation
+    if (currentScreen === 5) {
         const cls = CLASSES[sel.classKey];
         const bg = BACKGROUNDS[sel.bg];
         const bgSkills = bg ? bg.skills : [];
@@ -583,11 +981,11 @@ function validateCurrentScreen() {
         const needed = Math.min(cls.skills.count, available.length);
         if (sel.skillProfs.length !== needed) return `Selecione ${needed} perícia(s).`;
     }
-    if (currentScreen === 4) {
+    if (currentScreen === 6) {
         const tc = getToolChoiceCount();
         if (sel.toolProfs.length !== tc) return `Selecione ${tc} ferramenta(s).`;
     }
-    if (currentScreen === 5) {
+    if (currentScreen === 7) {
         if (!sel.gender) return 'Selecione um gênero.';
         if (!sel.name || sel.name.length > 15) return 'Nome deve ter 1-15 caracteres.';
         if (sel.surname.length > 15) return 'Sobrenome máximo 15 caracteres.';
@@ -598,13 +996,11 @@ function validateCurrentScreen() {
 }
 
 function showError(msg) {
-    // Inline error for identity screen
-    if (currentScreen === 5) {
+    if (currentScreen === 7) {
         const el = document.getElementById('nameError');
         el.textContent = msg; el.style.display = 'block';
         setTimeout(() => { el.style.display = 'none'; }, 3000);
     } else {
-        // Toast notification
         const toast = document.createElement('div');
         toast.className = 'v-toast v-toast-error';
         toast.textContent = msg;
@@ -615,26 +1011,59 @@ function showError(msg) {
 }
 
 // ═══════════════════════════════════════════════
+// HELP MODAL
+// ═══════════════════════════════════════════════
+function showHelp(ctx) {
+    const data = HELP_TEXTS[ctx];
+    if (!data) return;
+    document.getElementById('helpTitle').textContent = data.title;
+    document.getElementById('helpBody').textContent = data.text;
+    document.getElementById('helpOverlay').classList.add('active');
+    haptic();
+}
+
+function closeHelp(event) {
+    if (event && event.target !== document.getElementById('helpOverlay') && event.type === 'click') return;
+    document.getElementById('helpOverlay').classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════
 // STAT CALCULATION
 // ═══════════════════════════════════════════════
-function calcStats() {
-    const cls = CLASSES[sel.classKey];
+const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
+const STAT_ATTRS = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
+const STAT_ICONS = {strength:'💪',dexterity:'🏃',constitution:'🛡️',intelligence:'📚',wisdom:'🙏',charisma:'✨'};
+let selectedPoolValue = null;
+
+function calcStatsFor(raceKey, subraceKey, classKey) {
+    const cls = CLASSES[classKey];
     if (!cls) return null;
-    const base = {strength:cls.stats[0],dexterity:cls.stats[1],constitution:cls.stats[2],intelligence:cls.stats[3],wisdom:cls.stats[4],charisma:cls.stats[5]};
-    const race = RACES[sel.race];
+    // Use custom stat assignment if available, otherwise use class defaults
+    let base;
+    if (Object.keys(sel.statAssignment).length === 6) {
+        base = {...sel.statAssignment};
+    } else {
+        base = {strength:cls.stats[0],dexterity:cls.stats[1],constitution:cls.stats[2],intelligence:cls.stats[3],wisdom:cls.stats[4],charisma:cls.stats[5]};
+    }
+    const race = RACES[raceKey];
     if (race) {
-        for (const [a,v] of Object.entries(race.bonuses)) base[a] += v;
-        if (sel.subrace && race.subraces && race.subraces[sel.subrace]) {
-            for (const [a,v] of Object.entries(race.subraces[sel.subrace].bonuses)) base[a] += v;
+        // Variant Human: skip +1 all, apply only 2 chosen bonuses
+        if (raceKey === 'Human' && subraceKey === 'variant') {
+            (sel.variantBonuses || []).forEach(a => { if (base[a] !== undefined) base[a] += 1; });
+        } else {
+            for (const [a,v] of Object.entries(race.bonuses)) base[a] += v;
+            if (subraceKey && race.subraces && race.subraces[subraceKey]) {
+                for (const [a,v] of Object.entries(race.subraces[subraceKey].bonuses)) base[a] += v;
+            }
         }
-        if (race.halfelf && sel.subrace && sel.subrace.includes('_')) {
-            sel.subrace.split('_').forEach(a => { if (base[a] !== undefined && a !== 'charisma') base[a] += 1; });
+        if (race.halfelf && subraceKey && subraceKey.includes('_')) {
+            subraceKey.split('_').forEach(a => { if (base[a] !== undefined && a !== 'charisma') base[a] += 1; });
         }
     }
     const hitDie = parseInt(cls.hit_die.split('d')[1]);
     const hp = hitDie + mod(base.constitution);
     let mp;
-    if (cls.mp.attrs) { // Monk special
+    if (cls.mp.attrs) {
         mp = cls.mp.base;
         cls.mp.attrs.forEach(x => { mp += mod(base[x.a]) * x.m; });
     } else {
@@ -643,114 +1072,368 @@ function calcStats() {
     return { ...base, hp, mp, hitDie };
 }
 
+function calcStats() {
+    return calcStatsFor(sel.race, sel.subrace, sel.classKey);
+}
+
 // ═══════════════════════════════════════════════
-// RACE — Grid + Sub-screens
+// STAT ASSIGNMENT (Standard Array)
+// ═══════════════════════════════════════════════
+function getRaceBonuses() {
+    const bonuses = {};
+    const race = RACES[sel.race];
+    if (!race) return bonuses;
+    // Variant Human: only 2 chosen attributes get +1
+    if (sel.race === 'Human' && sel.subrace === 'variant') {
+        (sel.variantBonuses || []).forEach(a => { bonuses[a] = (bonuses[a]||0) + 1; });
+        return bonuses;
+    }
+    for (const [a,v] of Object.entries(race.bonuses)) bonuses[a] = (bonuses[a]||0) + v;
+    if (sel.subrace && race.subraces && race.subraces[sel.subrace]) {
+        for (const [a,v] of Object.entries(race.subraces[sel.subrace].bonuses)) bonuses[a] = (bonuses[a]||0) + v;
+    }
+    if (race.halfelf && sel.subrace && sel.subrace.includes('_')) {
+        sel.subrace.split('_').forEach(a => { if (a !== 'charisma') bonuses[a] = (bonuses[a]||0) + 1; });
+    }
+    return bonuses;
+}
+
+function buildStatSlots() {
+    const raceBonuses = getRaceBonuses();
+    const usedValues = Object.values(sel.statAssignment);
+
+    // Build pool chips
+    const poolEl = document.getElementById('statPool');
+    poolEl.innerHTML = '<div style="font-size:12px;color:var(--v-text-dim);width:100%;margin-bottom:4px">Toque num valor, depois num atributo:</div>';
+    STANDARD_ARRAY.forEach(v => {
+        const timesInArray = STANDARD_ARRAY.filter(x => x === v).length;
+        const timesUsed = usedValues.filter(x => x === v).length;
+        const isUsed = timesUsed >= timesInArray;
+        const chip = document.createElement('div');
+        chip.className = 'stat-pool-chip' + (isUsed ? ' used' : '') + (selectedPoolValue === v && !isUsed ? ' selected' : '');
+        chip.textContent = v;
+        if (!isUsed) {
+            chip.onclick = () => { haptic(); selectedPoolValue = v; buildStatSlots(); };
+        }
+        if (selectedPoolValue === v && !isUsed) {
+            chip.style.borderColor = 'var(--v-gold)';
+            chip.style.background = 'rgba(196,149,58,0.25)';
+        }
+        poolEl.appendChild(chip);
+    });
+
+    // Build attribute slots
+    const slotsEl = document.getElementById('statSlots');
+    slotsEl.innerHTML = '';
+    STAT_ATTRS.forEach(a => {
+        const assigned = sel.statAssignment[a] || null;
+        const bonus = raceBonuses[a] || 0;
+        const total = assigned ? assigned + bonus : null;
+        const slot = document.createElement('div');
+        slot.className = 'stat-slot' + (assigned ? ' assigned' : '');
+        let inner = `<span style="font-size:18px">${STAT_ICONS[a]}</span>`;
+        inner += `<span class="stat-slot-name">${ATTR_ABBR[a]}</span>`;
+        inner += `<span class="stat-slot-value">${assigned || '—'}</span>`;
+        if (bonus > 0) inner += `<span class="stat-slot-bonus">+${bonus} raça</span>`;
+        if (total) {
+            const m = mod(total);
+            const sign = m >= 0 ? '+' : '';
+            inner += `<span class="stat-slot-total">= ${total} <span style="font-size:11px;color:${m >= 0 ? 'var(--v-success)' : 'var(--v-danger)'}">(${sign}${m})</span></span>`;
+        }
+        slot.innerHTML = inner;
+        slot.onclick = () => {
+            haptic();
+            if (assigned) {
+                // Remove assignment
+                delete sel.statAssignment[a];
+                buildStatSlots();
+            } else if (selectedPoolValue !== null) {
+                // Assign selected value
+                sel.statAssignment[a] = selectedPoolValue;
+                selectedPoolValue = null;
+                buildStatSlots();
+            }
+        };
+        slotsEl.appendChild(slot);
+    });
+
+    // Show/hide confirm button
+    const allAssigned = Object.keys(sel.statAssignment).length === 6;
+    document.getElementById('statsConfirm').classList.toggle('hidden', !allAssigned);
+}
+
+function suggestStats() {
+    haptic();
+    const cls = CLASSES[sel.classKey];
+    if (!cls) return;
+    sel.statAssignment = {
+        strength: cls.stats[0], dexterity: cls.stats[1], constitution: cls.stats[2],
+        intelligence: cls.stats[3], wisdom: cls.stats[4], charisma: cls.stats[5]
+    };
+    selectedPoolValue = null;
+    buildStatSlots();
+}
+
+function clearStats() {
+    haptic();
+    sel.statAssignment = {};
+    selectedPoolValue = null;
+    buildStatSlots();
+}
+
+// ═══════════════════════════════════════════════
+// ALIGNMENT
+// ═══════════════════════════════════════════════
+function buildAlignGrid() {
+    const grid = document.getElementById('alignGrid');
+    grid.innerHTML = '';
+    const keys = Object.keys(ALIGNMENTS);
+    keys.forEach(key => {
+        const al = ALIGNMENTS[key];
+        const opt = document.createElement('div');
+        opt.className = 'align-option' + (sel.alignment === key ? ' selected' : '');
+        opt.innerHTML = `<div class="align-icon">${al.icon}</div><div class="align-name">${al.name}</div><div class="align-desc">${al.desc}</div>`;
+        opt.onclick = () => {
+            haptic();
+            sel.alignment = key;
+            grid.querySelectorAll('.align-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            document.getElementById('alignConfirm').classList.remove('hidden');
+        };
+        grid.appendChild(opt);
+    });
+}
+
+// ═══════════════════════════════════════════════
+// RACE — Grid + Detail sub-screen
 // ═══════════════════════════════════════════════
 function buildRaceGrid() {
     const grid = document.getElementById('raceGrid');
     grid.innerHTML = '';
     for (const [key, r] of Object.entries(RACES)) {
         const card = document.createElement('div');
-        card.className = 'v-card';
-        card.innerHTML = `<div class="v-card-icon">${r.icon}</div><div class="v-card-name">${r.name}</div><div class="v-card-bonus">${r.desc}</div><div class="card-details"><div class="detail-line">🏃 ${r.speed * 0.3}m | 📏 ${r.size}</div><div class="detail-line">🗣️ ${r.langs.join(', ')}</div>${r.traits.map(t => `<div class="detail-line">🔹 ${t}</div>`).join('')}</div>`;
-        card.onclick = () => selectRace(key, card);
+        const isConfirmed = sel.race === key;
+        card.className = 'v-card' + (isConfirmed ? ' selected' : '');
+        card.innerHTML = `<div class="v-card-icon">${r.icon}</div><div class="v-card-name">${r.name}</div><div class="v-card-bonus">${r.desc}</div>`;
+        card.onclick = () => { haptic(); buildRaceDetail(key); openSubScreen('sub-race-detail'); };
         grid.appendChild(card);
     }
 }
 
-function selectRace(key, card) {
+function buildRaceDetail(key) {
+    currentRaceDetailKey = key;
+    const r = RACES[key];
+    const traits = RACE_TRAITS[key] || [];
+    const speed_m = (r.speed * 0.3).toFixed(1).replace('.0', '');
+
+    let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeSubScreen('sub-race-detail')">← Voltar</button>`;
+    html += `<div class="detail-header"><div class="detail-icon">${r.icon}</div><div class="detail-title">${r.name}</div><div class="detail-subtitle">${r.desc}</div></div>`;
+
+    // Attribute bonuses
+    html += `<div class="detail-section"><div class="detail-section-title">📊 Bônus de Atributos</div><div class="bonus-chips">`;
+    for (const [a, v] of Object.entries(r.bonuses)) {
+        html += `<span class="bonus-chip">+${v} ${ATTR_PT[a]}</span>`;
+    }
+    if (r.halfelf) html += `<span class="bonus-chip">+1 ×2 à escolha</span>`;
+    html += `</div></div>`;
+
+    // Characteristics
+    html += `<div class="detail-section"><div class="detail-section-title">📋 Características</div>`;
+    html += `<div class="detail-row"><b>🏃 Velocidade:</b> ${speed_m}m (${r.speed} ft)</div>`;
+    html += `<div class="detail-row"><b>📏 Tamanho:</b> ${r.size}</div>`;
+    html += `<div class="detail-row"><b>🗣️ Idiomas:</b> ${r.langs.join(', ')}</div></div>`;
+
+    // Racial traits (collapsed — tap to expand)
+    html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">✨ Traços Raciais <span class="section-summary">(${traits.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
+    traits.forEach(t => {
+        html += `<div class="trait-item"><div class="trait-name">🔹 ${t.name}</div><div class="trait-desc">${t.desc}</div></div>`;
+    });
+    html += `</div></div>`;
+
+    // Gameplay impact
+    html += `<div class="detail-section detail-highlight"><div class="detail-section-title">🎯 Impacto na Jornada</div><div class="detail-text">${RACE_IMPACT[key]}</div></div>`;
+
+    // Phase 1 bottom button — proceed to selection or confirm directly
+    if (r.halfelf) {
+        html += `<button class="v-btn v-btn-primary confirm-btn" onclick="buildRaceSelection('${key}')">ESCOLHER BÔNUS ▸</button>`;
+    } else if (r.variant) {
+        html += `<button class="v-btn v-btn-primary confirm-btn" onclick="buildRaceSelection('${key}')">ESCOLHER TIPO ▸</button>`;
+    } else if (r.subraces && key === 'Dragonborn') {
+        html += `<button class="v-btn v-btn-primary confirm-btn" onclick="buildRaceSelection('${key}')">ESCOLHER ANCESTRALIDADE ▸</button>`;
+    } else if (r.subraces) {
+        html += `<button class="v-btn v-btn-primary confirm-btn" onclick="buildRaceSelection('${key}')">ESCOLHER SUB-RAÇA ▸</button>`;
+    } else {
+        // No subrace needed (Tiefling, Half-Orc) — confirm directly
+        if (raceNeedsLangChoice(key, '')) {
+            html += buildLanguagePicker(key);
+            html += `<button class="v-btn v-btn-primary confirm-btn" id="raceConfirmBtn" disabled onclick="confirmRaceWithLang('${key}','')">✓ CONFIRMAR ${r.name.toUpperCase()}</button>`;
+        } else {
+            html += `<button class="v-btn v-btn-primary confirm-btn" onclick="confirmRace('${key}','')">✓ CONFIRMAR ${r.name.toUpperCase()}</button>`;
+        }
+    }
+
+    document.getElementById('raceDetailContent').innerHTML = html;
+    // Reset scroll to top
+    const sub = document.getElementById('sub-race-detail');
+    if (sub) sub.scrollTop = 0;
+}
+
+// Phase 2 — Selection UI (sub-race, ancestry, bonuses, or human type)
+function buildRaceSelection(key) {
     haptic();
-    sel.race = key;
-    sel.subrace = '';
-
-    document.querySelectorAll('#raceGrid .v-card').forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-
+    currentRaceDetailKey = key;
     const r = RACES[key];
 
+    // Back button goes to Phase 1 (not grid)
+    let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="buildRaceDetail('${key}')">← Voltar</button>`;
+    // Compact header for context
+    html += `<div class="detail-header" style="padding-bottom:8px"><div class="detail-icon" style="font-size:32px">${r.icon}</div><div class="detail-title" style="font-size:16px">${r.name}</div></div>`;
+
+    // Selection content (reuse existing builders)
     if (r.halfelf) {
-        buildHalfElfSelects();
-        openSubScreen('sub-halfelf');
+        html += buildHalfElfDetailSection(key);
+    } else if (r.variant) {
+        html += buildVariantHumanSection(key, r);
+    } else if (r.subraces && key === 'Dragonborn') {
+        html += buildAncestryDetailSection(key, r);
     } else if (r.subraces) {
-        if (key === 'Dragonborn') {
-            buildAncestryGrid(r);
-            openSubScreen('sub-ancestry');
-        } else {
-            buildSubraceGrid(r, key);
-            openSubScreen('sub-subrace');
-        }
+        html += buildSubraceDetailSection(key, r);
+    }
+
+    document.getElementById('raceDetailContent').innerHTML = html;
+    const sub = document.getElementById('sub-race-detail');
+    if (sub) sub.scrollTop = 0;
+}
+
+// Detect if race sub-screen is showing Phase 2 (for BackButton handling)
+function isRaceSelectionPhase() {
+    const backBtn = document.querySelector('#sub-race-detail .sub-back');
+    if (!backBtn) return false;
+    const onclick = backBtn.getAttribute('onclick') || '';
+    return onclick.includes('buildRaceDetail');
+}
+
+function buildSubraceDetailSection(raceKey, race) {
+    const details = SUBRACE_DETAILS[raceKey] || {};
+    let html = `<div class="detail-section"><div class="detail-section-title">🔀 Escolha a Sub-raça</div>`;
+    html += `<div class="detail-option-grid" id="subraceOptions">`;
+    for (const [sk, sr] of Object.entries(race.subraces)) {
+        const bonusTxt = Object.entries(sr.bonuses).map(([a,v]) => `+${v} ${ATTR_ABBR[a]}`).join(', ');
+        html += `<div class="detail-option" onclick="selectSubraceOption('${raceKey}','${sk}',this)">`;
+        html += `<div class="detail-option-name">${sr.name}</div>`;
+        html += `<div class="detail-option-desc">${sr.desc}</div>`;
+        if (bonusTxt) html += `<div class="detail-option-bonus">${bonusTxt}</div>`;
+        html += `</div>`;
+    }
+    html += `</div></div>`;
+
+    // Impact area (filled on subrace select)
+    html += `<div class="detail-section detail-highlight hidden" id="subraceImpact"></div>`;
+
+    // Language picker placeholder (shown when subrace with lang choice is selected)
+    html += `<div id="subraceLangPicker" class="hidden"></div>`;
+
+    // Confirm button (disabled until subrace selected)
+    html += `<button class="v-btn v-btn-primary confirm-btn" id="raceConfirmBtn" disabled onclick="confirmSubraceWithLang('${raceKey}')">✓ CONFIRMAR SUB-RAÇA</button>`;
+    return html;
+}
+
+function selectSubraceOption(raceKey, subraceKey, el) {
+    haptic();
+    pendingSubrace = subraceKey;
+    pendingLanguage = null;
+    document.querySelectorAll('#subraceOptions .detail-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+
+    const race = RACES[raceKey];
+    const sr = race.subraces[subraceKey];
+    const details = SUBRACE_DETAILS[raceKey];
+
+    // Show impact
+    const impactEl = document.getElementById('subraceImpact');
+    if (details && details[subraceKey]) {
+        impactEl.innerHTML = `<div class="detail-section-title">🎯 ${sr.name}</div><div class="detail-text">${details[subraceKey].impact}</div>`;
+        impactEl.classList.remove('hidden');
     } else {
-        // No sub-selection needed, auto-advance to class
-        card.classList.add('confirmed');
-        setTimeout(() => goScreen(1), 400);
+        impactEl.classList.add('hidden');
     }
+
+    // Language picker for subraces that grant +1 language (e.g. High Elf)
+    const langPickerEl = document.getElementById('subraceLangPicker');
+    if (langPickerEl && raceNeedsLangChoice(raceKey, subraceKey)) {
+        langPickerEl.innerHTML = buildLanguagePicker(raceKey, subraceKey);
+        langPickerEl.classList.remove('hidden');
+    } else if (langPickerEl) {
+        langPickerEl.innerHTML = '';
+        langPickerEl.classList.add('hidden');
+    }
+
+    // Enable confirm (if no lang choice needed, or lang already selected)
+    const needsLang = raceNeedsLangChoice(raceKey, subraceKey);
+    const btn = document.getElementById('raceConfirmBtn');
+    btn.disabled = needsLang; // Will be enabled by selectLanguage if needed
+    if (!needsLang) btn.disabled = false;
+    btn.textContent = `✓ CONFIRMAR ${sr.name.toUpperCase()}`;
 }
 
-function buildSubraceGrid(race, raceKey) {
-    document.getElementById('subraceTitle').textContent = 'Sub-raça';
-    document.getElementById('subraceDesc').textContent = `Escolha a sub-raça de ${race.name}.`;
-    const grid = document.getElementById('subraceGrid');
-    grid.innerHTML = '';
-    grid.classList.remove('single-col');
-
+function buildAncestryDetailSection(raceKey, race) {
+    let html = `<div class="detail-section"><div class="detail-section-title">🐉 Ancestralidade Dracônica</div>`;
+    html += `<div class="v-caption" style="margin-bottom:8px">Escolha o tipo de dragão ancestral. Define o elemento do sopro e resistência.</div>`;
+    html += `<div class="detail-option-grid" id="ancestryOptions">`;
     for (const [sk, sr] of Object.entries(race.subraces)) {
-        const sc = document.createElement('div');
-        sc.className = 'v-card';
-        const bonusTxt = Object.entries(sr.bonuses).map(([a,v]) => `+${v} ${ATTR_ABBR[a]}`).join(', ') || sr.desc;
-        sc.innerHTML = `<div class="v-card-name">${sr.name}</div><div class="v-card-desc">${sr.desc}</div>${bonusTxt !== sr.desc ? `<div class="v-card-bonus">${bonusTxt}</div>` : ''}`;
-        sc.onclick = () => {
-            haptic();
-            sel.subrace = sk;
-            document.querySelectorAll('#subraceGrid .v-card').forEach(c => { c.classList.remove('selected'); c.classList.remove('confirmed'); });
-            sc.classList.add('selected', 'confirmed');
-            setTimeout(() => {
-                closeSubScreen('sub-subrace');
-                setTimeout(() => goScreen(1), 150);
-            }, 250);
-        };
-        grid.appendChild(sc);
+        const info = ANCESTRY_DETAILS[sk];
+        html += `<div class="detail-option" onclick="selectAncestryOption('${raceKey}','${sk}',this)">`;
+        html += `<div class="detail-option-name">${sr.name}</div>`;
+        html += `<div class="detail-option-desc">${info.element} | ${info.shape}</div>`;
+        html += `<div class="detail-option-bonus">Save: ${info.save} | Res: ${info.element}</div>`;
+        html += `</div>`;
     }
+    html += `</div></div>`;
+    html += `<button class="v-btn v-btn-primary confirm-btn" id="raceConfirmBtn" disabled onclick="confirmRace('${raceKey}', pendingSubrace)">✓ CONFIRMAR ANCESTRALIDADE</button>`;
+    return html;
 }
 
-function buildAncestryGrid(race) {
-    const grid = document.getElementById('ancestryGrid');
-    grid.innerHTML = '';
-    for (const [sk, sr] of Object.entries(race.subraces)) {
-        const sc = document.createElement('div');
-        sc.className = 'v-card';
-        sc.innerHTML = `<div class="v-card-name">${sr.name}</div><div class="v-card-desc">${sr.desc}</div>`;
-        sc.onclick = () => {
-            haptic();
-            sel.subrace = sk;
-            document.querySelectorAll('#ancestryGrid .v-card').forEach(c => { c.classList.remove('selected'); c.classList.remove('confirmed'); });
-            sc.classList.add('selected', 'confirmed');
-            setTimeout(() => {
-                closeSubScreen('sub-ancestry');
-                setTimeout(() => goScreen(1), 150);
-            }, 250);
-        };
-        grid.appendChild(sc);
-    }
+function selectAncestryOption(raceKey, subraceKey, el) {
+    haptic();
+    pendingSubrace = subraceKey;
+    document.querySelectorAll('#ancestryOptions .detail-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+
+    const sr = RACES[raceKey].subraces[subraceKey];
+    const btn = document.getElementById('raceConfirmBtn');
+    btn.disabled = false;
+    btn.textContent = `✓ CONFIRMAR DRACONATO ${sr.name.toUpperCase()}`;
 }
 
-function buildHalfElfSelects() {
+function buildHalfElfDetailSection(raceKey) {
     const attrs = ['strength','dexterity','constitution','intelligence','wisdom'];
-    ['heBonus1','heBonus2'].forEach(id => {
-        const sel_el = document.getElementById(id);
-        sel_el.innerHTML = '<option value="">Escolha...</option>';
-        attrs.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = ATTR_PT[a]; sel_el.appendChild(o); });
-    });
+    let opts = '<option value="">Escolha...</option>';
+    attrs.forEach(a => { opts += `<option value="${a}">${ATTR_PT[a]}</option>`; });
+
+    let html = `<div class="detail-section"><div class="detail-section-title">🎲 Bônus de Atributo (+1 cada)</div>`;
+    html += `<div class="v-caption" style="margin-bottom:4px">Meio-Elfos escolhem 2 atributos diferentes para receber +1 (além do +2 Carisma).</div>`;
+    html += `<div class="detail-selects"><select id="heBonus1" onchange="updateHalfElfDetail('${raceKey}')">${opts}</select>`;
+    html += `<select id="heBonus2" onchange="updateHalfElfDetail('${raceKey}')">${opts}</select></div>`;
+    html += `<div class="v-error-msg" id="halfelfError"></div></div>`;
+    html += buildLanguagePicker(raceKey);
+    html += `<button class="v-btn v-btn-primary confirm-btn" id="raceConfirmBtn" disabled onclick="confirmHalfElf('${raceKey}')">✓ CONFIRMAR MEIO-ELFO</button>`;
+    return html;
 }
 
-function updateHalfElfBonus() {
+function updateHalfElfDetail(raceKey) {
     const b1 = document.getElementById('heBonus1').value;
     const b2 = document.getElementById('heBonus2').value;
+    // Disable selected options in opposite dropdown
     document.querySelectorAll('#heBonus1 option, #heBonus2 option').forEach(o => o.disabled = false);
     if (b1) document.querySelector(`#heBonus2 option[value="${b1}"]`)?.setAttribute('disabled','');
     if (b2) document.querySelector(`#heBonus1 option[value="${b2}"]`)?.setAttribute('disabled','');
+    // Enable confirm if both selected, different, AND language chosen
+    const langOk = !raceNeedsLangChoice('HalfElf', '') || !!pendingLanguage;
+    const btn = document.getElementById('raceConfirmBtn');
+    btn.disabled = !(b1 && b2 && b1 !== b2 && langOk);
 }
 
-function confirmHalfElf() {
+function confirmHalfElf(raceKey) {
     const b1 = document.getElementById('heBonus1').value;
     const b2 = document.getElementById('heBonus2').value;
     if (!b1 || !b2) {
@@ -765,79 +1448,687 @@ function confirmHalfElf() {
         setTimeout(() => { el.style.display = 'none'; }, 2500);
         return;
     }
-    sel.subrace = b1 + '_' + b2;
-    closeSubScreen('sub-halfelf');
-    setTimeout(() => goScreen(1), 150);
+    if (raceNeedsLangChoice(raceKey, '') && pendingLanguage) {
+        sel.languages = [pendingLanguage];
+    }
+    confirmRace(raceKey, b1 + '_' + b2);
 }
 
 // ═══════════════════════════════════════════════
-// CLASS
+// VARIANT HUMAN (D&D 5e PHB p.31)
+// ═══════════════════════════════════════════════
+let variantMode = false; // true = variant, false = standard
+let variantBonuses = []; // 2 chosen attrs
+let variantSkill = '';
+let variantFeat = '';
+
+function buildVariantHumanSection(raceKey, race) {
+    let html = `<div class="detail-section"><div class="detail-section-title">🔀 Tipo de Humano</div>`;
+    html += `<div class="v-caption" style="margin-bottom:8px">Escolha entre o Humano padrão (+1 em tudo) ou o Variante (mais especializado).</div>`;
+    html += `<div class="detail-option-grid" id="humanTypeOptions">`;
+    html += `<div class="detail-option" onclick="selectHumanType(false,this)"><div class="detail-option-name">Humano Padrão</div><div class="detail-option-desc">+1 em todos os 6 atributos</div></div>`;
+    html += `<div class="detail-option" onclick="selectHumanType(true,this)"><div class="detail-option-name">Humano Variante</div><div class="detail-option-desc">+1 em 2 atributos + 1 perícia + 1 feat</div></div>`;
+    html += `</div></div>`;
+
+    // Variant selections (hidden until variant chosen)
+    html += `<div id="variantSelections" class="hidden">`;
+
+    // 2 attribute bonuses
+    const attrs = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
+    let opts = '<option value="">Escolha...</option>';
+    attrs.forEach(a => { opts += `<option value="${a}">${ATTR_PT[a]}</option>`; });
+    html += `<div class="detail-section"><div class="detail-section-title">📊 Bônus +1 em 2 Atributos</div>`;
+    html += `<div class="detail-selects"><select id="vhBonus1" onchange="updateVariantHuman()">${opts}</select>`;
+    html += `<select id="vhBonus2" onchange="updateVariantHuman()">${opts}</select></div></div>`;
+
+    // 1 skill proficiency (any of 18) — collapsible
+    html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">📋 Perícia Extra <span class="section-summary" id="vhSkillStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
+    html += `<div class="section-body">`;
+    html += `<div class="lang-grid" id="vhSkillOptions">`;
+    const allSkills = Object.keys(SKILL_PT);
+    allSkills.forEach(sk => {
+        const attr = SKILL_ATTR[sk];
+        html += `<div class="lang-option" onclick="selectVariantSkill('${sk}',this)">${SKILL_PT[sk]}</div>`;
+    });
+    html += `</div></div></div>`;
+
+    // 1 feat — collapsible
+    html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🌟 Feat <span class="section-summary" id="vhFeatStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
+    html += `<div class="section-body">`;
+    html += `<div class="detail-option-grid single-col" id="vhFeatOptions">`;
+    for (const [fid, f] of Object.entries(CREATION_FEATS)) {
+        html += `<div class="detail-option" style="padding:8px 10px" onclick="selectVariantFeat('${fid}',this)">`;
+        html += `<div class="detail-option-name">${f.name}</div>`;
+        html += `<div class="detail-option-desc">${f.desc}</div></div>`;
+    }
+    html += `</div></div></div>`;
+
+    html += `</div>`; // close variantSelections
+
+    // Language picker (always shown for Human)
+    html += buildLanguagePicker(raceKey);
+
+    // Confirm button
+    html += `<button class="v-btn v-btn-primary confirm-btn" id="raceConfirmBtn" disabled onclick="confirmVariantHuman('${raceKey}')">✓ CONFIRMAR HUMANO</button>`;
+    return html;
+}
+
+function selectHumanType(isVariant, el) {
+    haptic();
+    variantMode = isVariant;
+    variantBonuses = []; variantSkill = ''; variantFeat = '';
+    document.querySelectorAll('#humanTypeOptions .detail-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+
+    const varSel = document.getElementById('variantSelections');
+    if (isVariant) {
+        varSel.classList.remove('hidden');
+    } else {
+        varSel.classList.add('hidden');
+    }
+    updateVariantConfirm();
+}
+
+function updateVariantHuman() {
+    const b1 = document.getElementById('vhBonus1')?.value || '';
+    const b2 = document.getElementById('vhBonus2')?.value || '';
+    // Disable selected in opposite dropdown
+    document.querySelectorAll('#vhBonus1 option, #vhBonus2 option').forEach(o => o.disabled = false);
+    if (b1) document.querySelector(`#vhBonus2 option[value="${b1}"]`)?.setAttribute('disabled','');
+    if (b2) document.querySelector(`#vhBonus1 option[value="${b2}"]`)?.setAttribute('disabled','');
+    variantBonuses = [b1, b2].filter(Boolean);
+    updateVariantConfirm();
+}
+
+function selectVariantSkill(sk, el) {
+    haptic();
+    variantSkill = sk;
+    document.querySelectorAll('#vhSkillOptions .lang-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    const s = document.getElementById('vhSkillStatus');
+    if (s) { s.textContent = SKILL_PT[sk]; s.style.color = 'var(--v-gold)'; }
+    updateVariantConfirm();
+}
+
+function selectVariantFeat(fid, el) {
+    haptic();
+    variantFeat = fid;
+    document.querySelectorAll('#vhFeatOptions .detail-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    const s = document.getElementById('vhFeatStatus');
+    if (s) { s.textContent = CREATION_FEATS[fid].name; s.style.color = 'var(--v-gold)'; }
+    updateVariantConfirm();
+}
+
+function updateVariantConfirm() {
+    const btn = document.getElementById('raceConfirmBtn');
+    if (!btn) return;
+    const langOk = !raceNeedsLangChoice('Human', '') || !!pendingLanguage;
+    if (variantMode) {
+        const ok = variantBonuses.length === 2 && variantBonuses[0] !== variantBonuses[1]
+            && variantSkill && variantFeat && langOk;
+        btn.disabled = !ok;
+        btn.textContent = '✓ CONFIRMAR HUMANO VARIANTE';
+    } else {
+        btn.disabled = !langOk;
+        btn.textContent = '✓ CONFIRMAR HUMANO';
+    }
+}
+
+function confirmVariantHuman(raceKey) {
+    haptic();
+    if (pendingLanguage) sel.languages = [pendingLanguage];
+    if (variantMode) {
+        sel.variantBonuses = [...variantBonuses];
+        sel.variantSkill = variantSkill;
+        sel.variantFeat = variantFeat;
+        confirmRace(raceKey, 'variant');
+    } else {
+        confirmRace(raceKey, 'standard');
+    }
+}
+
+// ═══════════════════════════════════════════════
+// LANGUAGE SELECTION (D&D 5e PHB p.123)
+// ═══════════════════════════════════════════════
+function raceNeedsLangChoice(raceKey, subraceKey) {
+    const race = RACES[raceKey];
+    if (!race) return false;
+    // Human & Half-Elf have "+1 à escolha" in langs
+    if (race.langs.includes('+1 à escolha')) return true;
+    // High Elf subrace grants +1 language
+    if (raceKey === 'Elf' && subraceKey === 'high') return true;
+    return false;
+}
+
+function getRaceKnownLangs(raceKey, subraceKey) {
+    const race = RACES[raceKey];
+    if (!race) return [];
+    const known = race.langs.filter(l => l !== '+1 à escolha');
+    // Subraces don't add extra known languages by default
+    return known;
+}
+
+function buildLanguagePicker(raceKey, subraceKey) {
+    const known = getRaceKnownLangs(raceKey, subraceKey || '');
+    const allLangs = [...LANGUAGES.standard, ...LANGUAGES.exotic];
+    const available = allLangs.filter(l => !known.includes(l.key));
+
+    let html = `<div class="detail-section collapsed" id="langSection"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🗣️ Idioma Adicional <span class="section-summary" id="langStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
+    html += `<div class="section-body">`;
+    html += `<div class="v-caption" style="margin-bottom:8px">Escolha 1 idioma extra além de: ${known.join(', ')}.</div>`;
+    html += `<div class="lang-grid" id="langOptions">`;
+    available.forEach(l => {
+        html += `<div class="lang-option" data-desc="${l.desc}" onclick="selectLanguage('${l.key}',this)">${l.name}</div>`;
+    });
+    html += `</div>`;
+    html += `<div class="lang-selected-desc" id="langDesc"></div>`;
+    html += `</div></div>`;
+    return html;
+}
+
+function selectLanguage(langKey, el) {
+    haptic();
+    pendingLanguage = langKey;
+    document.querySelectorAll('#langOptions .lang-option, #subraceLangPicker .lang-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    // Show description of selected language
+    const descEl = document.getElementById('langDesc');
+    if (descEl) descEl.textContent = el.dataset.desc || '';
+    // Update section summary
+    const statusEl = document.getElementById('langStatus');
+    if (statusEl) { statusEl.textContent = el.textContent; statusEl.style.color = 'var(--v-gold)'; }
+    // Enable the confirm button
+    const btn = document.getElementById('raceConfirmBtn');
+    if (btn) btn.disabled = false;
+    // For Half-Elf, also check bonus selections
+    if (document.getElementById('heBonus1')) {
+        const b1 = document.getElementById('heBonus1').value;
+        const b2 = document.getElementById('heBonus2').value;
+        if (btn) btn.disabled = !(b1 && b2 && b1 !== b2);
+    }
+}
+
+function confirmRaceWithLang(raceKey, subraceKey) {
+    if (pendingLanguage) sel.languages = [pendingLanguage];
+    confirmRace(raceKey, subraceKey);
+}
+
+function confirmSubraceWithLang(raceKey) {
+    if (pendingLanguage) sel.languages = [pendingLanguage];
+    confirmRace(raceKey, pendingSubrace);
+}
+
+function confirmRace(raceKey, subraceKey) {
+    haptic();
+    sel.race = raceKey;
+    sel.subrace = subraceKey;
+    pendingLanguage = null;
+    currentRaceDetailKey = '';
+    closeSubScreen('sub-race-detail');
+    buildRaceGrid();
+    setTimeout(() => goScreen(1), 200);
+}
+
+// ═══════════════════════════════════════════════
+// CLASS — Grid + Detail sub-screen
 // ═══════════════════════════════════════════════
 function buildClassGrid() {
     const grid = document.getElementById('classGrid');
     grid.innerHTML = '';
     for (const [key, c] of Object.entries(CLASSES)) {
         const card = document.createElement('div');
-        card.className = 'v-card';
-        card.innerHTML = `<div class="v-card-icon">${c.icon}</div><div class="v-card-name">${c.name}</div><div class="v-card-desc">${c.role}</div><div class="card-details"><div class="detail-line"><span class="v-badge v-badge-hp">❤️ ${c.hit_die}</span> <span class="v-badge v-badge-mp">🔮 ${c.res}</span> <span class="v-badge v-badge-rec">♻️ ${RECOVERY_PT[c.rec]}</span></div><div class="detail-line">🛡️ ${c.armor.map(a=>ARMOR_PT[a]||a).join(', ')||'Nenhuma'}</div><div class="detail-line">⚔️ ${c.weapons.map(w=>WEAPON_PT[w]||w).join(', ')}</div><div class="detail-line">💾 ${c.saves.map(s=>SAVE_PT[s]).join(', ')}</div><div class="detail-line">🎒 ${c.equip.join(', ')}</div></div>`;
-        card.onclick = () => selectClass(key, card);
+        const isConfirmed = sel.classKey === key;
+        card.className = 'v-card' + (isConfirmed ? ' selected' : '');
+        card.innerHTML = `<div class="v-card-icon">${c.icon}</div><div class="v-card-name">${c.name}</div><div class="v-card-desc">${c.role}</div>`;
+        card.onclick = () => { haptic(); buildClassDetail(key); openSubScreen('sub-class-detail'); };
         grid.appendChild(card);
     }
 }
 
-function selectClass(key, card) {
-    haptic();
-    sel.classKey = key; sel.skillProfs = [];
-    document.querySelectorAll('#classGrid .v-card').forEach(c => { c.classList.remove('selected'); c.classList.remove('confirmed'); });
-    card.classList.add('selected', 'confirmed');
-    updateStatPreview();
-    // Auto-advance after showing stats preview briefly
-    setTimeout(() => goScreen(2), 400);
+function buildClassDetail(key) {
+    const c = CLASSES[key];
+    const attrs = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
+
+    // Calc stats with current race
+    const stats = sel.race ? calcStatsFor(sel.race, sel.subrace, key) : null;
+    const baseStats = {strength:c.stats[0],dexterity:c.stats[1],constitution:c.stats[2],intelligence:c.stats[3],wisdom:c.stats[4],charisma:c.stats[5]};
+
+    let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeSubScreen('sub-class-detail')">← Voltar</button>`;
+    html += `<div class="detail-header"><div class="detail-icon">${c.icon}</div><div class="detail-title">${c.name}</div><div class="detail-subtitle">${c.role}</div></div>`;
+
+    // Synergy tip (race + class)
+    if (sel.race) {
+        const tipKey = sel.race + '_' + key;
+        const tip = RACE_CLASS_TIPS[tipKey];
+        if (tip) {
+            html += `<div class="synergy-tip"><div class="synergy-tip-title">💡 Dica do Mestre — ${RACES[sel.race].name} ${c.name}</div>${tip}</div>`;
+        }
+    }
+
+    // Description
+    html += `<div class="detail-section"><div class="detail-section-title">💡 O que faz</div><div class="detail-text">${CLASS_DESC[key]}</div></div>`;
+
+    // HP, Resource & AC
+    html += `<div class="detail-section"><div class="detail-section-title">❤️ Vida, Recurso & Defesa</div>`;
+    if (stats) {
+        html += `<div class="detail-row"><b>Dado de Vida:</b> ${c.hit_die}</div>`;
+        html += `<div class="detail-row"><b>HP Nível 1:</b> ${stats.hp} <span style="color:var(--v-text-dim);font-size:10px">(${c.hit_die} + mod CON ${mod(stats.constitution) >= 0 ? '+' : ''}${mod(stats.constitution)})</span></div>`;
+        html += `<div class="detail-row"><b>🔮 ${c.res}:</b> ${stats.mp} <span style="color:var(--v-text-dim);font-size:10px">${RES_DESC[c.res] ? '— ' + RES_DESC[c.res] : ''}</span></div>`;
+        const acInfo = calcAC(key, stats);
+        html += `<div class="detail-row"><b>🛡️ CA:</b> ${acInfo.detail}</div>`;
+    } else {
+        html += `<div class="detail-row"><b>Dado de Vida:</b> ${c.hit_die}</div>`;
+        html += `<div class="detail-row"><b>🔮 ${c.res}</b> <span style="color:var(--v-text-dim);font-size:10px">${RES_DESC[c.res] ? '— ' + RES_DESC[c.res] : ''}</span></div>`;
+    }
+    html += `<div class="detail-row"><b>♻️ Descanso Curto:</b> ${RECOVERY_PT[c.rec]}</div></div>`;
+
+    // Attributes with bars (collapsed)
+    if (stats) {
+        html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">📊 Atributos${sel.race ? ' (com bônus de ' + RACES[sel.race].name + ')' : ''}<span class="toggle-arrow">▾</span></div><div class="section-body">`;
+        attrs.forEach(a => {
+            const v = stats[a];
+            const m = mod(v);
+            const sign = m >= 0 ? '+' : '';
+            const baseV = baseStats[a];
+            const raceBonus = v - baseV;
+            const pct = Math.min(100, (v / 20) * 100);
+            html += `<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px"><span style="color:var(--v-text-dim)">${ATTR_PT[a]}</span><span><b style="color:var(--v-text-bright)">${v}</b> <span style="color:${m >= 0 ? 'var(--v-success)' : 'var(--v-danger)'}; font-size:11px">(${sign}${m})</span>${raceBonus > 0 ? ` <span style="color:var(--v-gold);font-size:10px">+${raceBonus} raça</span>` : ''}</span></div>`;
+            html += `<div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%"></div></div></div>`;
+        });
+        html += `</div></div>`;
+    }
+
+    // Proficiencies (collapsed)
+    html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🛡️ Proficiências<span class="toggle-arrow">▾</span></div><div class="section-body">`;
+    html += `<div class="detail-row"><b>Armaduras:</b> ${c.armor.map(a => ARMOR_PT[a] || a).join(', ') || 'Nenhuma'}</div>`;
+    html += `<div class="detail-row"><b>Armas:</b> ${c.weapons.map(w => WEAPON_PT[w] || w).join(', ')}</div>`;
+    html += `<div class="detail-row"><b>Salvaguardas:</b> ${c.saves.map(s => SAVE_PT[s]).join(', ')}</div></div></div>`;
+
+    // Equipment (collapsed)
+    html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🎒 Equipamento Inicial <span class="section-summary">(${c.equip.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
+    c.equip.forEach(e => { html += `<div class="detail-row">• ${e}</div>`; });
+    html += `</div></div>`;
+
+    // Level 1 Features (collapsed)
+    const lv1 = CLASS_LV1[key];
+    if (lv1) {
+        html += `<div class="detail-section detail-highlight collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">⚔️ Habilidades Nível 1 <span class="section-summary">(${lv1.features.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
+        lv1.features.forEach(f => {
+            html += `<div class="trait-item"><div class="trait-name">🔹 ${f.name}</div><div class="trait-desc">${f.desc}</div></div>`;
+        });
+        html += `</div></div>`;
+
+        // Spells (collapsed)
+        if (lv1.spells.length > 0) {
+            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">✨ Magias Iniciais <span class="section-summary">(${lv1.spells.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
+            lv1.spells.forEach(sp => {
+                html += `<div class="trait-item"><div class="trait-name"><span class="spell-tag">${sp.type}</span> ${sp.name}</div><div class="trait-desc">${sp.desc}</div></div>`;
+            });
+            html += `</div></div>`;
+        }
+    }
+
+    // Available skills (collapsed)
+    html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">📋 Perícias Disponíveis <span class="section-summary">(${c.skills.count} de ${c.skills.opts.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
+    html += `<div class="detail-row" style="color:var(--v-gold);margin-bottom:6px">Escolha <b>${c.skills.count}</b> de ${c.skills.opts.length} perícias:</div>`;
+    c.skills.opts.forEach(s => {
+        const attr = SKILL_ATTR[s];
+        html += `<div class="detail-row">• ${SKILL_PT[s]} <span style="color:var(--v-gold);font-size:10px">(${ATTR_ABBR[attr]})</span></div>`;
+    });
+    html += `</div></div>`;
+
+    // Confirm
+    html += `<button class="v-btn v-btn-primary confirm-btn" onclick="confirmClass('${key}')">✓ CONFIRMAR ${c.name.toUpperCase()}</button>`;
+
+    document.getElementById('classDetailContent').innerHTML = html;
 }
 
-function updateStatPreview() {
-    const stats = calcStats();
-    if (!stats) { document.getElementById('statPreview').classList.add('hidden'); return; }
-    const preview = document.getElementById('statPreview');
-    preview.classList.remove('hidden');
-    const cls = CLASSES[sel.classKey];
-    const attrs = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
-    let html = `<div class="section-label" style="color:var(--v-gold);font-weight:600;margin-bottom:8px">📊 Preview de Atributos</div>`;
-    attrs.forEach(a => {
-        const v = stats[a]; const m = mod(v); const sign = m >= 0 ? '+' : '';
-        html += `<div class="v-stat-row"><span class="v-stat-label">${ATTR_PT[a]}</span><span><span class="v-stat-val">${v}</span> <span class="v-stat-mod">(${sign}${m})</span></span></div>`;
-    });
-    html += `<div style="margin-top:8px;border-top:1px solid var(--v-border);padding-top:8px"><div class="v-stat-row"><span class="v-stat-label">❤️ Vida (HP)</span><span class="v-stat-val">${stats.hp}</span></div>`;
-    html += `<div class="v-stat-row"><span class="v-stat-label">🔮 ${cls.res} (MP)</span><span class="v-stat-val">${stats.mp}</span></div></div>`;
-    preview.innerHTML = html;
+function confirmClass(classKey) {
+    haptic();
+    sel.classKey = classKey;
+    sel.subclass = '';
+    sel.fightingStyle = '';
+    sel.equipmentChoice = 'A';
+    sel.skillProfs = [];
+    closeSubScreen('sub-class-detail');
+    // L1 Subclass (Cleric/Sorcerer/Warlock — D&D 5e PHB)
+    if (L1_SUBCLASS_CLASSES.includes(classKey)) {
+        buildSubclassSelect(classKey);
+        openSubScreen('sub-subclass-select');
+        return;
+    }
+    // Fighting Style (Warrior — D&D 5e PHB p.72)
+    if (classKey === 'class_warrior') {
+        buildFightingStyleSelect();
+        openSubScreen('sub-fstyle-select');
+        return;
+    }
+    // Equipment choice (all classes)
+    showEquipmentSelect();
 }
 
 // ═══════════════════════════════════════════════
-// BACKGROUND
+// L1 SUBCLASS — Sub-screen (Cleric/Sorcerer/Warlock)
+// ═══════════════════════════════════════════════
+function buildSubclassSelect(classKey) {
+    const subs = SUBCLASS_DATA[classKey];
+    if (!subs) return;
+    const cls = CLASSES[classKey];
+    let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelSubclass()">← Voltar</button>`;
+    html += `<div class="detail-header"><div class="detail-title">Escolha sua Subclasse</div>`;
+    html += `<div class="detail-subtitle">${cls.name} — escolha uma especialização de nível 1.</div></div>`;
+    for (const [scId, sc] of Object.entries(subs)) {
+        const sel_class = sel.subclass === scId ? ' selected' : '';
+        html += `<div class="v-card${sel_class}" onclick="selectSubclass('${scId}')">`;
+        html += `<div class="v-card-name">${sc.icon} ${sc.name}</div>`;
+        html += `<div class="v-card-desc">${sc.desc}</div>`;
+        html += `<div class="v-card-bonus">Nv.1: ${sc.l1.name} — ${sc.l1.desc}</div>`;
+        html += `</div>`;
+    }
+    document.getElementById('subclassSelectContent').innerHTML = html;
+}
+
+function selectSubclass(scId) {
+    haptic();
+    sel.subclass = scId;
+    buildSubclassSelect(sel.classKey);
+    // Auto-confirm after short delay for feedback
+    setTimeout(() => confirmSubclass(), 250);
+}
+
+function confirmSubclass() {
+    if (!sel.subclass) return;
+    closeSubScreen('sub-subclass-select');
+    showEquipmentSelect();
+}
+
+function cancelSubclass() {
+    haptic();
+    sel.classKey = null;
+    sel.subclass = '';
+    closeSubScreen('sub-subclass-select');
+    buildClassGrid();
+}
+
+// ═══════════════════════════════════════════════
+// FIGHTING STYLE — Sub-screen (Warrior)
+// ═══════════════════════════════════════════════
+function buildFightingStyleSelect() {
+    let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFightingStyle()">← Voltar</button>`;
+    html += `<div class="detail-header"><div class="detail-title">Escolha seu Estilo de Combate</div>`;
+    html += `<div class="detail-subtitle">Guerreiro — escolha uma especialização marcial.</div></div>`;
+    for (const [fsId, fs] of Object.entries(FIGHTING_STYLES)) {
+        const sel_class = sel.fightingStyle === fsId ? ' selected' : '';
+        html += `<div class="v-card${sel_class}" onclick="selectFightingStyle('${fsId}')">`;
+        html += `<div class="v-card-name">${fs.icon} ${fs.name}</div>`;
+        html += `<div class="v-card-desc">${fs.desc}</div>`;
+        html += `</div>`;
+    }
+    document.getElementById('fstyleSelectContent').innerHTML = html;
+}
+
+function selectFightingStyle(fsId) {
+    haptic();
+    sel.fightingStyle = fsId;
+    buildFightingStyleSelect();
+    setTimeout(() => confirmFightingStyle(), 250);
+}
+
+function confirmFightingStyle() {
+    if (!sel.fightingStyle) return;
+    closeSubScreen('sub-fstyle-select');
+    showEquipmentSelect();
+}
+
+function cancelFightingStyle() {
+    haptic();
+    sel.classKey = null;
+    sel.fightingStyle = '';
+    closeSubScreen('sub-fstyle-select');
+    buildClassGrid();
+}
+
+// ═══════════════════════════════════════════════
+// EQUIPMENT — Sub-screen (all classes)
+// ═══════════════════════════════════════════════
+function showEquipmentSelect() {
+    buildEquipmentSelect(sel.classKey);
+    openSubScreen('sub-equip-select');
+}
+
+function buildEquipmentSelect(classKey) {
+    const pkgs = EQUIPMENT_PACKAGES[classKey];
+    if (!pkgs) { finishClassScreen(); return; }
+    const cls = CLASSES[classKey];
+    let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelEquipment()">← Voltar</button>`;
+    html += `<div class="detail-header"><div class="detail-title">Equipamento Inicial</div>`;
+    html += `<div class="detail-subtitle">${cls.name} — escolha seu kit de partida.</div></div>`;
+    for (const [pkgId, pkg] of Object.entries(pkgs)) {
+        const sel_class = sel.equipmentChoice === pkgId ? ' selected' : '';
+        html += `<div class="v-card${sel_class}" onclick="selectEquipment('${pkgId}')">`;
+        html += `<div class="v-card-name">${pkg.icon} ${pkg.name}</div>`;
+        html += `<div class="v-card-desc">${pkg.desc}</div>`;
+        html += `<div class="v-card-bonus">${pkg.items.map(i => '• ' + i).join('<br>')}</div>`;
+        html += `</div>`;
+    }
+    document.getElementById('equipSelectContent').innerHTML = html;
+}
+
+function selectEquipment(pkgId) {
+    haptic();
+    sel.equipmentChoice = pkgId;
+    buildEquipmentSelect(sel.classKey);
+    setTimeout(() => confirmEquipment(), 250);
+}
+
+function confirmEquipment() {
+    closeSubScreen('sub-equip-select');
+    finishClassScreen();
+}
+
+function cancelEquipment() {
+    haptic();
+    sel.equipmentChoice = 'A';
+    closeSubScreen('sub-equip-select');
+    // Go back to the previous step based on class
+    if (sel.fightingStyle) {
+        sel.fightingStyle = '';
+        buildFightingStyleSelect();
+        openSubScreen('sub-fstyle-select');
+    } else if (sel.subclass) {
+        sel.subclass = '';
+        buildSubclassSelect(sel.classKey);
+        openSubScreen('sub-subclass-select');
+    } else {
+        sel.classKey = null;
+        buildClassGrid();
+    }
+}
+
+function finishClassScreen() {
+    buildClassGrid();
+    setTimeout(() => goScreen(2), 200);
+}
+
+// ═══════════════════════════════════════════════
+// BACKGROUND — Grid + Detail sub-screen
 // ═══════════════════════════════════════════════
 function buildBgGrid() {
     const grid = document.getElementById('bgGrid');
     grid.innerHTML = '';
     for (const [key, bg] of Object.entries(BACKGROUNDS)) {
         const card = document.createElement('div');
-        card.className = 'v-card';
+        const isConfirmed = sel.bg === key;
         const skillNames = bg.skills.map(s => SKILL_PT[s]).join(', ');
-        const toolTxt = bg.toolChoice ? ' | 🔧 1 ferramenta' : (bg.tools ? ` | 🔧 ${bg.tools.map(t=>ARTISAN_TOOLS[t]?.name||t).join(', ')}` : '');
-        card.innerHTML = `<div class="flex-between" style="align-items:start"><div><div class="v-card-name">${bg.name}</div><div class="v-card-desc">${bg.desc}</div></div><div style="font-size:11px;color:var(--v-gold);white-space:nowrap">+${bg.gold}g</div></div><div class="v-card-bonus">📋 ${skillNames}${toolTxt}</div>`;
-        card.onclick = () => {
-            haptic();
-            sel.bg = key; sel.skillProfs = [];
-            document.querySelectorAll('#bgGrid .v-card').forEach(c => { c.classList.remove('selected'); c.classList.remove('confirmed'); });
-            card.classList.add('selected', 'confirmed');
-            // Auto-advance
-            setTimeout(() => goScreen(3), 400);
-        };
+        card.className = 'v-card' + (isConfirmed ? ' selected' : '');
+        card.innerHTML = `<div class="v-card-name">${bg.name} <span style="font-size:10px;color:var(--v-gold);font-weight:400">+${bg.gold}g</span></div><div class="v-card-bonus" style="font-size:10px">${skillNames}</div>`;
+        card.onclick = () => { haptic(); buildBgDetail(key); openSubScreen('sub-bg-detail'); };
         grid.appendChild(card);
     }
 }
 
+function buildBgDetail(key) {
+    const bg = BACKGROUNDS[key];
+
+    let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeSubScreen('sub-bg-detail')">← Voltar</button>`;
+    html += `<div class="detail-header"><div class="detail-title">${bg.name}</div><div class="detail-subtitle">${bg.desc}</div></div>`;
+
+    // Granted skills — show names inline, details collapsible
+    html += `<div class="detail-section"><div class="detail-section-title">📋 Perícias Concedidas</div>`;
+    html += `<div class="bonus-chips" style="margin-bottom:6px">`;
+    bg.skills.forEach(s => {
+        const attr = SKILL_ATTR[s];
+        html += `<span class="bonus-chip">${SKILL_PT[s]} (${ATTR_ABBR[attr]})</span>`;
+    });
+    html += `</div>`;
+    html += `<div class="detail-row" style="color:var(--v-text-dim);font-size:10px">Adicionadas automaticamente — não contam nas escolhas de classe.</div></div>`;
+
+    // Gold
+    html += `<div class="detail-section"><div class="detail-section-title">💰 Recursos Iniciais</div>`;
+    html += `<div class="detail-row"><b>Ouro adicional:</b> ${bg.gold}g</div>`;
+    if (bg.gold >= 20) html += `<div class="detail-row" style="color:var(--v-text-dim);font-size:10px">Bônus acima da média — mais opções de compra no início.</div>`;
+    else if (bg.gold <= 5) html += `<div class="detail-row" style="color:var(--v-text-dim);font-size:10px">Bônus baixo — compense com escolhas de equipamento inteligentes.</div>`;
+    html += `</div>`;
+
+    // Tools (collapsed)
+    if (bg.toolChoice || bg.tools) {
+        html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🔧 Ferramentas<span class="toggle-arrow">▾</span></div><div class="section-body">`;
+        if (bg.tools) {
+            bg.tools.forEach(t => {
+                const tool = ARTISAN_TOOLS[t];
+                const desc = TOOL_DESC[t] || '';
+                html += `<div class="detail-row"><b>${tool ? tool.icon + ' ' + tool.name : t}</b></div>`;
+                if (desc) html += `<div class="detail-row" style="color:var(--v-text-dim);font-size:10px;padding-left:18px">${desc}</div>`;
+            });
+        }
+        if (bg.toolChoice) {
+            html += `<div class="detail-row">Escolha ${bg.toolChoice} ferramenta(s) artesanais (seleção na próxima etapa)</div>`;
+        }
+        html += `</div></div>`;
+    }
+
+    // Background Feature (collapsed)
+    const bgFeat = BG_FEATURES[key];
+    if (bgFeat) {
+        html += `<div class="detail-section detail-highlight collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🏷️ Traço: ${bgFeat.name}<span class="toggle-arrow">▾</span></div><div class="section-body">`;
+        html += `<div class="detail-text">${bgFeat.desc}</div></div></div>`;
+    }
+
+    // Synergy info
+    if (sel.classKey) {
+        const cls = CLASSES[sel.classKey];
+        const overlap = bg.skills.filter(s => cls.skills.opts.includes(s));
+        if (overlap.length > 0) {
+            html += `<div class="detail-section"><div class="detail-section-title">🎯 Sinergia com ${cls.name}</div>`;
+            html += `<div class="detail-text">Perícias do antecedente (${overlap.map(s => SKILL_PT[s]).join(', ')}) sobrepõem opções da classe. Você terá ${cls.skills.opts.filter(s => !bg.skills.includes(s)).length} perícias disponíveis para escolher (de ${cls.skills.count} necessárias).</div></div>`;
+        }
+    }
+
+    // Confirm
+    html += `<button class="v-btn v-btn-primary confirm-btn" onclick="confirmBg('${key}')">✓ CONFIRMAR ${bg.name.toUpperCase()}</button>`;
+
+    document.getElementById('bgDetailContent').innerHTML = html;
+}
+
+function confirmBg(bgKey) {
+    haptic();
+    sel.bg = bgKey;
+    sel.skillProfs = [];
+    closeSubScreen('sub-bg-detail');
+    buildBgGrid();
+    // Open personality sub-screen (optional step)
+    setTimeout(() => {
+        buildPersonalitySelect(bgKey);
+        openSubScreen('sub-personality');
+    }, 250);
+}
+
 // ═══════════════════════════════════════════════
-// SKILLS
+// PERSONALITY — D&D 5e PHB Chapter 4
+// ═══════════════════════════════════════════════
+function buildPersonalitySelect(bgKey) {
+    const data = PERSONALITY_DATA[bgKey];
+    if (!data) { skipPersonality(); return; }
+    sel.personalityTrait = ''; sel.ideal = ''; sel.bond = ''; sel.flaw = '';
+    const cats = [
+        {key:'personalityTrait', label:'Traço de Personalidade', icon:'🎭', items:data.traits},
+        {key:'ideal', label:'Ideal', icon:'⚖️', items:data.ideals},
+        {key:'bond', label:'Vínculo', icon:'🔗', items:data.bonds},
+        {key:'flaw', label:'Defeito', icon:'💔', items:data.flaws}
+    ];
+    let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="skipPersonality()">← Pular</button>`;
+    html += `<div class="v-title-sm" style="margin-top:8px">Personalidade</div>`;
+    html += `<div class="v-caption">Defina a personalidade do seu personagem. Opcional — toque para escolher ou pule.</div>`;
+    html += `<button class="v-btn v-btn-secondary btn-block" style="margin:8px 0" onclick="randomizePersonality()">🎲 Aleatório</button>`;
+    cats.forEach(cat => {
+        html += `<div class="detail-section" style="margin-top:10px"><div class="detail-section-title">${cat.icon} ${cat.label}</div>`;
+        cat.items.forEach((text, i) => {
+            html += `<button class="v-toggle-btn" id="pers_${cat.key}_${i}" onclick="selectPersonalityOption('${cat.key}',${i},'${cat.icon}')" style="text-align:left;white-space:normal;padding:8px 10px;margin:3px 0;width:100%">`;
+            html += `<span class="toggle-check">⬜</span> ${text}</button>`;
+        });
+        html += `</div>`;
+    });
+    html += `<button class="v-btn v-btn-primary btn-block" id="persConfirmBtn" style="margin-top:12px" onclick="confirmPersonality()">✓ Confirmar Personalidade</button>`;
+    document.getElementById('personalityContent').innerHTML = html;
+}
+
+function selectPersonalityOption(catKey, idx, icon) {
+    haptic();
+    const bgKey = sel.bg;
+    const data = PERSONALITY_DATA[bgKey];
+    if (!data) return;
+    const catMap = {personalityTrait:'traits', ideal:'ideals', bond:'bonds', flaw:'flaws'};
+    const items = data[catMap[catKey]];
+    // Deselect previous in same category
+    items.forEach((_, i) => {
+        const btn = document.getElementById(`pers_${catKey}_${i}`);
+        if (btn) btn.querySelector('.toggle-check').textContent = '⬜';
+    });
+    // Select this one
+    sel[catKey] = items[idx];
+    const btn = document.getElementById(`pers_${catKey}_${idx}`);
+    if (btn) btn.querySelector('.toggle-check').textContent = '✅';
+}
+
+function randomizePersonality() {
+    haptic();
+    const data = PERSONALITY_DATA[sel.bg];
+    if (!data) return;
+    const cats = [
+        {key:'personalityTrait', items:data.traits},
+        {key:'ideal', items:data.ideals},
+        {key:'bond', items:data.bonds},
+        {key:'flaw', items:data.flaws}
+    ];
+    cats.forEach(cat => {
+        const idx = Math.floor(Math.random() * cat.items.length);
+        // Clear all
+        cat.items.forEach((_, i) => {
+            const btn = document.getElementById(`pers_${cat.key}_${i}`);
+            if (btn) btn.querySelector('.toggle-check').textContent = '⬜';
+        });
+        sel[cat.key] = cat.items[idx];
+        const btn = document.getElementById(`pers_${cat.key}_${idx}`);
+        if (btn) btn.querySelector('.toggle-check').textContent = '✅';
+    });
+}
+
+function confirmPersonality() {
+    haptic();
+    closeSubScreen('sub-personality');
+    setTimeout(() => goScreen(4), 200);
+}
+
+function skipPersonality() {
+    haptic();
+    sel.personalityTrait = ''; sel.ideal = ''; sel.bond = ''; sel.flaw = '';
+    closeSubScreen('sub-personality');
+    setTimeout(() => goScreen(4), 200);
+}
+
+// ═══════════════════════════════════════════════
+// SKILLS — Enhanced with descriptions
 // ═══════════════════════════════════════════════
 function buildSkillGrid() {
     const cls = CLASSES[sel.classKey];
@@ -846,10 +2137,15 @@ function buildSkillGrid() {
     const available = cls.skills.opts.filter(s => !bgSkills.includes(s));
     const needed = Math.min(cls.skills.count, available.length);
     sel.skillProfs = sel.skillProfs.filter(s => available.includes(s));
-    document.getElementById('skillDesc').textContent = `Escolha ${needed} perícia(s) de classe. Perícias do antecedente (${bg.name}) já incluídas.`;
+    document.getElementById('skillDesc').textContent = `Escolha ${needed} perícia(s) de classe.`;
     document.getElementById('skillCount').textContent = `${sel.skillProfs.length}/${needed}`;
 
-    // Show/hide confirm button
+    // Show background granted skills
+    const bgInfo = document.getElementById('skillBgInfo');
+    if (bgSkills.length > 0) {
+        bgInfo.innerHTML = `<div class="detail-section" style="margin-bottom:12px"><div class="detail-section-title" style="font-size:12px">✅ Já incluídas pelo antecedente (${bg.name})</div>${bgSkills.map(s => `<div class="detail-row" style="color:var(--v-success);font-size:11px">• ${SKILL_PT[s]} (${ATTR_ABBR[SKILL_ATTR[s]]})</div>`).join('')}</div>`;
+    }
+
     const confirmBtn = document.getElementById('skillConfirm');
     confirmBtn.classList.toggle('hidden', sel.skillProfs.length !== needed);
 
@@ -859,8 +2155,10 @@ function buildSkillGrid() {
         const item = document.createElement('div');
         const isSel = sel.skillProfs.includes(s);
         const isFull = sel.skillProfs.length >= needed && !isSel;
+        const attr = SKILL_ATTR[s];
+        const desc = SKILL_DESC[s] || '';
         item.className = 'v-toggle-item' + (isSel ? ' selected' : '') + (isFull ? ' disabled' : '');
-        item.innerHTML = `<div class="v-toggle-check">${isSel ? '✓' : ''}</div><div class="v-toggle-label">${SKILL_PT[s]}</div>`;
+        item.innerHTML = `<div class="v-toggle-check">${isSel ? '✓' : ''}</div><div class="v-toggle-info"><div><span class="v-toggle-label">${SKILL_PT[s]}</span> <span class="v-toggle-attr">(${ATTR_ABBR[attr]})</span></div><div class="v-toggle-desc">${desc}</div></div>`;
         item.onclick = () => { haptic(); toggleSkill(s, needed); };
         grid.appendChild(item);
     });
@@ -874,7 +2172,7 @@ function toggleSkill(s, max) {
 }
 
 // ═══════════════════════════════════════════════
-// TOOLS
+// TOOLS — Enhanced with descriptions
 // ═══════════════════════════════════════════════
 function getToolChoiceCount() {
     let count = 0;
@@ -899,24 +2197,42 @@ function buildToolGrid() {
     document.getElementById('toolDesc').textContent = `Escolha ${tc} ferramenta(s) artesanais.`;
     document.getElementById('toolCount').textContent = `${sel.toolProfs.length}/${tc}`;
 
-    // Show/hide confirm button
     const confirmBtn = document.getElementById('toolConfirm');
     confirmBtn.classList.toggle('hidden', sel.toolProfs.length !== tc);
 
     const grid = document.getElementById('toolGrid');
     grid.innerHTML = '';
+
+    // Show granted tools first
+    if (granted.length > 0) {
+        const grantedInfo = document.createElement('div');
+        grantedInfo.className = 'detail-section';
+        grantedInfo.style.marginBottom = '12px';
+        let gHtml = `<div class="detail-section-title" style="font-size:12px">✅ Já concedidas</div>`;
+        granted.forEach(t => {
+            const tool = ARTISAN_TOOLS[t];
+            if (tool) gHtml += `<div class="detail-row" style="color:var(--v-success);font-size:11px">${tool.icon} ${tool.name}</div>`;
+        });
+        grantedInfo.innerHTML = gHtml;
+        grid.parentNode.insertBefore(grantedInfo, grid);
+    }
+
     for (const [key, tool] of Object.entries(ARTISAN_TOOLS)) {
         if (granted.includes(key)) continue;
         const item = document.createElement('div');
         const isSel = sel.toolProfs.includes(key);
         const isFull = sel.toolProfs.length >= tc && !isSel;
+        const desc = TOOL_DESC[key] || '';
         item.className = 'v-toggle-item' + (isSel ? ' selected' : '') + (isFull ? ' disabled' : '');
-        item.innerHTML = `<div class="v-toggle-check">${isSel ? '✓' : ''}</div><div class="v-toggle-label">${tool.icon} ${tool.name}</div>`;
+        item.innerHTML = `<div class="v-toggle-check">${isSel ? '✓' : ''}</div><div class="v-toggle-info"><div class="v-toggle-label">${tool.icon} ${tool.name}</div><div class="v-toggle-desc">${desc}</div></div>`;
         item.onclick = () => {
             haptic();
             const idx = sel.toolProfs.indexOf(key);
             if (idx >= 0) sel.toolProfs.splice(idx, 1);
             else if (sel.toolProfs.length < tc) sel.toolProfs.push(key);
+            // Remove old granted info before rebuild
+            const oldInfo = grid.parentNode.querySelector('.detail-section');
+            if (oldInfo) oldInfo.remove();
             buildToolGrid();
         };
         grid.appendChild(item);
@@ -933,7 +2249,7 @@ function buildGenderGrid() {
         const card = document.createElement('div');
         card.className = 'v-card';
         card.innerHTML = `<div class="v-card-icon">${g.icon}</div><div class="v-card-name">${g.name}</div>`;
-        card.onclick = () => { haptic(); sel.gender = g.key; document.querySelectorAll('#genderGrid .v-card').forEach(c=>c.classList.remove('selected')); card.classList.add('selected'); };
+        card.onclick = () => { haptic(); sel.gender = g.key; document.querySelectorAll('#genderGrid .v-card').forEach(c => c.classList.remove('selected')); card.classList.add('selected'); };
         grid.appendChild(card);
     });
 }
@@ -966,7 +2282,7 @@ function generateSurname() {
 }
 
 // ═══════════════════════════════════════════════
-// SUMMARY
+// SUMMARY — Enhanced
 // ═══════════════════════════════════════════════
 function buildSummary() {
     const stats = calcStats();
@@ -974,9 +2290,15 @@ function buildSummary() {
     const cls = CLASSES[sel.classKey];
     const bg = BACKGROUNDS[sel.bg];
     const g = GENDERS.find(g => g.key === sel.gender);
+    const attrs = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
+    const allSkillKeys = Object.keys(SKILL_PT);
+    const profBonus = 2; // Level 1
 
     let raceName = race.name;
-    if (sel.subrace && race.subraces && race.subraces[sel.subrace]) {
+    if (sel.race === 'Human' && sel.subrace === 'variant') {
+        const bonusAbbrs = (sel.variantBonuses || []).map(a => ATTR_ABBR[a]).filter(Boolean);
+        raceName = `Humano Variante (+1 ${bonusAbbrs.join(', +1 ')})`;
+    } else if (sel.subrace && race.subraces && race.subraces[sel.subrace]) {
         raceName = race.subraces[sel.subrace].name;
     } else if (race.halfelf && sel.subrace) {
         const parts = sel.subrace.split('_');
@@ -984,33 +2306,154 @@ function buildSummary() {
     }
 
     const fullName = `${sel.name} ${sel.surname}`.trim();
-    const allSkills = [...(bg ? bg.skills : []), ...sel.skillProfs];
-    const attrs = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
+    const allProfs = [...(bg ? bg.skills : []), ...sel.skillProfs];
+    // Variant Human extra skill
+    if (sel.variantSkill && !allProfs.includes(sel.variantSkill)) allProfs.push(sel.variantSkill);
+    const acInfo = calcAC(sel.classKey, stats);
+    const speed = race.speed;
+    const speed_m = (speed * 0.3).toFixed(1).replace('.0','');
+
+    // Helper: collapsible section wrapper
+    function cSec(icon, title, count, bodyHtml) {
+        const c = count ? ` <span class="section-summary" style="color:var(--v-text-dim)">(${count})</span>` : '';
+        return `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">${icon} ${title}${c}<span class="toggle-arrow">▾</span></div><div class="section-body">${bodyHtml}</div></div>`;
+    }
 
     let html = '';
-    html += `<div class="v-summary"><div class="v-summary-title">✒️ ${fullName}</div>`;
-    html += `<div class="v-summary-line">${g ? g.icon : ''} ${g ? g.name : ''} | ${race.icon} ${raceName} | ${cls.icon} ${cls.name}</div>`;
-    html += `<div class="v-summary-line">📖 ${bg.name} | 💰 +${bg.gold}g bônus</div></div>`;
 
-    html += `<div class="v-summary"><div class="v-summary-title">📊 Atributos</div>`;
+    // --- Header (always visible) ---
+    const alignText = sel.alignment && ALIGNMENTS[sel.alignment] ? ` | ${ALIGNMENTS[sel.alignment].icon} ${ALIGNMENTS[sel.alignment].abbr}` : '';
+    html += `<div class="sheet-header" style="padding:4px 0 8px"><div class="sheet-name" style="font-size:20px">${fullName}</div>`;
+    html += `<div class="sheet-subtitle">${race.icon} ${raceName} | ${cls.icon} ${cls.name} | 📖 ${bg.name}${alignText}</div>`;
+    html += `<div class="sheet-subtitle">${g ? g.icon + ' ' + g.name : ''} | Nível 1 | 💰 +${bg.gold}g</div></div>`;
+
+    // --- Combat Stats Grid (always visible) ---
+    html += `<div class="combat-stats" style="margin-bottom:8px">`;
+    html += `<div class="combat-stat-box"><div class="combat-stat-label">CA</div><div class="combat-stat-value">${acInfo.ac}</div><div class="combat-stat-detail">Defesa</div></div>`;
+    html += `<div class="combat-stat-box"><div class="combat-stat-label">Iniciativa</div><div class="combat-stat-value">${mod(stats.dexterity) >= 0 ? '+' : ''}${mod(stats.dexterity)}</div><div class="combat-stat-detail">mod DES</div></div>`;
+    html += `<div class="combat-stat-box"><div class="combat-stat-label">Velocidade</div><div class="combat-stat-value">${speed_m}m</div><div class="combat-stat-detail">${speed} ft</div></div>`;
+    html += `<div class="combat-stat-box"><div class="combat-stat-label">Prof.</div><div class="combat-stat-value">+${profBonus}</div><div class="combat-stat-detail">Bônus</div></div>`;
+    html += `</div>`;
+
+    // --- Attribute Grid (always visible) ---
+    html += `<div class="attr-grid" style="margin-bottom:8px">`;
     attrs.forEach(a => {
-        const v = stats[a]; const m = mod(v); const sign = m >= 0 ? '+' : '';
-        html += `<div class="v-summary-line"><b>${ATTR_ABBR[a]}</b> ${v} (${sign}${m})</div>`;
+        const v = stats[a];
+        const m = mod(v);
+        const sign = m >= 0 ? '+' : '';
+        const color = m >= 0 ? 'var(--v-success)' : 'var(--v-danger)';
+        html += `<div class="attr-box"><div class="attr-box-label">${ATTR_ABBR[a]}</div><div class="attr-box-value">${v}</div><div class="attr-box-mod" style="color:${color}">${sign}${m}</div></div>`;
     });
-    html += `<div style="margin-top:6px"><div class="v-summary-line"><b>❤️ HP:</b> ${stats.hp} | <b>🔮 ${cls.res}:</b> ${stats.mp}</div>`;
-    html += `<div class="v-summary-line"><b>♻️</b> ${RECOVERY_PT[cls.rec]} (Desc. Curto)</div></div></div>`;
+    html += `</div>`;
 
-    html += `<div class="v-summary"><div class="v-summary-title">📋 Perícias</div>`;
-    html += allSkills.map(s => `<div class="v-summary-line">• ${SKILL_PT[s]}</div>`).join('');
-    if (sel.toolProfs.length > 0) {
-        html += `<div style="margin-top:6px"><b style="font-size:12px">🔧 Ferramentas:</b></div>`;
-        html += sel.toolProfs.map(t => `<div class="v-summary-line">• ${ARTISAN_TOOLS[t]?.name || t}</div>`).join('');
+    // --- Scrollable sections zone ---
+    html += `<div id="summarySections">`;
+
+    // --- 1. HP & Resource (collapsible) ---
+    let hpBody = '';
+    hpBody += `<div class="detail-row"><b>HP:</b> ${stats.hp} <span style="color:var(--v-text-dim);font-size:10px">(${cls.hit_die} + mod CON)</span></div>`;
+    hpBody += `<div class="detail-row"><b>🔮 ${cls.res}:</b> ${stats.mp} <span style="color:var(--v-text-dim);font-size:10px">${RES_DESC[cls.res] ? '— ' + RES_DESC[cls.res] : ''}</span></div>`;
+    hpBody += `<div class="detail-row"><b>♻️</b> ${RECOVERY_PT[cls.rec]}</div>`;
+    html += cSec('❤️', 'Vida & Recurso', '', hpBody);
+
+    // --- 2. Saves (collapsible) ---
+    let saveBody = '<div class="save-list">';
+    attrs.forEach(a => {
+        const isProf = cls.saves.includes(a);
+        const sv = mod(stats[a]) + (isProf ? profBonus : 0);
+        const sign = sv >= 0 ? '+' : '';
+        saveBody += `<div class="save-row"><span class="prof-dot${isProf ? ' active' : ''}"></span><span>${sign}${sv}</span><span>${ATTR_PT[a]}</span></div>`;
+    });
+    saveBody += '</div>';
+    html += cSec('🎯', 'Salvaguardas', '6', saveBody);
+
+    // --- 3. Skills (collapsible) ---
+    let skillBody = '<div class="skill-list">';
+    allSkillKeys.forEach(s => {
+        const isProf = allProfs.includes(s);
+        const attr = SKILL_ATTR[s];
+        const sv = mod(stats[attr]) + (isProf ? profBonus : 0);
+        const sign = sv >= 0 ? '+' : '';
+        skillBody += `<div class="skill-row"><span class="prof-dot${isProf ? ' active' : ''}"></span><span>${SKILL_PT[s]}</span><span class="skill-attr-tag">${ATTR_ABBR[attr]}</span><span class="skill-mod" style="color:${isProf ? 'var(--v-gold)' : 'var(--v-text-dim)'}">${sign}${sv}</span></div>`;
+    });
+    skillBody += '</div>';
+    html += cSec('📋', 'Perícias', allProfs.length + ' treinadas', skillBody);
+
+    // --- 4. Combat — class features + subclass + fighting style + spells (collapsible) ---
+    let combatBody = '';
+    const lv1 = CLASS_LV1[sel.classKey];
+    if (lv1 && lv1.features.length > 0) {
+        lv1.features.forEach(f => {
+            combatBody += `<div class="trait-item"><div class="trait-name">🔹 ${f.name}</div><div class="trait-desc">${f.desc}</div></div>`;
+        });
     }
-    html += `</div>`;
+    if (sel.subclass && SUBCLASS_DATA[sel.classKey]) {
+        const sc = SUBCLASS_DATA[sel.classKey][sel.subclass];
+        if (sc) combatBody += `<div class="trait-item"><div class="trait-name">🔹 ${sc.l1.name} <span style="color:var(--v-text-dim);font-size:10px">(${sc.name})</span></div><div class="trait-desc">${sc.l1.desc}</div></div>`;
+    }
+    if (sel.fightingStyle && FIGHTING_STYLES[sel.fightingStyle]) {
+        const fs = FIGHTING_STYLES[sel.fightingStyle];
+        combatBody += `<div class="trait-item"><div class="trait-name">${fs.icon} Estilo: ${fs.name}</div><div class="trait-desc">${fs.desc}</div></div>`;
+    }
+    if (lv1 && lv1.spells.length > 0) {
+        lv1.spells.forEach(sp => {
+            combatBody += `<div class="trait-item"><div class="trait-name"><span class="spell-tag">${sp.type}</span> ${sp.name}</div><div class="trait-desc">${sp.desc}</div></div>`;
+        });
+    }
+    if (combatBody) html += cSec('⚔️', `Habilidades de ${cls.name}`, '', combatBody);
 
-    html += `<div class="v-summary"><div class="v-summary-title">🎒 Equipamento</div>`;
-    html += cls.equip.map(e => `<div class="v-summary-line">• ${e}</div>`).join('');
-    html += `</div>`;
+    // --- 5. Race & Background traits (collapsible) ---
+    let traitBody = '';
+    const traits = RACE_TRAITS[sel.race] || [];
+    if (traits.length > 0) {
+        traits.forEach(t => {
+            traitBody += `<div class="trait-item"><div class="trait-name">🔹 ${t.name}</div><div class="trait-desc">${t.desc}</div></div>`;
+        });
+    }
+    if (sel.variantFeat && CREATION_FEATS[sel.variantFeat]) {
+        const feat = CREATION_FEATS[sel.variantFeat];
+        traitBody += `<div class="trait-item"><div class="trait-name">🏅 ${feat.name}</div><div class="trait-desc">${feat.desc}</div></div>`;
+    }
+    const bgFeat = BG_FEATURES[sel.bg];
+    if (bgFeat) {
+        traitBody += `<div class="trait-item"><div class="trait-name">🏷️ ${bgFeat.name}</div><div class="trait-desc">${bgFeat.desc}</div></div>`;
+    }
+    if (traitBody) html += cSec(`${race.icon}`, 'Traços & Antecedente', '', traitBody);
+
+    // --- 6. Personality (collapsible, if present) ---
+    if (sel.personalityTrait || sel.ideal || sel.bond || sel.flaw) {
+        let persBody = '';
+        if (sel.personalityTrait) persBody += `<div class="detail-row"><b>Traço:</b> ${sel.personalityTrait}</div>`;
+        if (sel.ideal) persBody += `<div class="detail-row"><b>Ideal:</b> ${sel.ideal}</div>`;
+        if (sel.bond) persBody += `<div class="detail-row"><b>Vínculo:</b> ${sel.bond}</div>`;
+        if (sel.flaw) persBody += `<div class="detail-row"><b>Defeito:</b> ${sel.flaw}</div>`;
+        html += cSec('🎭', 'Personalidade', '', persBody);
+    }
+
+    // --- 7. Equipment & Proficiencies (collapsible) ---
+    let equipBody = '';
+    const eqPkgs = EQUIPMENT_PACKAGES[sel.classKey];
+    const eqPkg = eqPkgs ? eqPkgs[sel.equipmentChoice || 'A'] : null;
+    if (eqPkg) {
+        eqPkg.items.forEach(e => { equipBody += `<div class="detail-row">• ${e}</div>`; });
+    } else {
+        cls.equip.forEach(e => { equipBody += `<div class="detail-row">• ${e}</div>`; });
+    }
+    if (sel.toolProfs.length > 0) {
+        equipBody += `<div style="margin-top:6px;font-size:11px;color:var(--v-text-dim)"><b>🔧 Ferramentas:</b></div>`;
+        sel.toolProfs.forEach(t => {
+            equipBody += `<div class="detail-row">• ${ARTISAN_TOOLS[t]?.icon || ''} ${ARTISAN_TOOLS[t]?.name || t}</div>`;
+        });
+    }
+    equipBody += `<div style="margin-top:6px;font-size:11px;color:var(--v-text-dim)"><b>Armaduras:</b> ${cls.armor.map(a => ARMOR_PT[a]).join(', ') || 'Nenhuma'}</div>`;
+    equipBody += `<div class="detail-row"><b>Armas:</b> ${cls.weapons.map(w => WEAPON_PT[w]).join(', ')}</div>`;
+    const langList = race.langs.map(l => {
+        if (l === '+1 à escolha' && sel.languages.length > 0) return sel.languages[0];
+        return l;
+    });
+    equipBody += `<div class="detail-row"><b>Idiomas:</b> ${langList.join(', ')}</div>`;
+    html += cSec('🎒', 'Equipamento & Proficiências', '', equipBody);
+    html += `</div>`; // close #summarySections
 
     document.getElementById('summaryContent').innerHTML = html;
 }
@@ -1032,12 +2475,25 @@ function submitCharacter() {
         race: sel.race,
         subrace: sel.subrace,
         class_key: sel.classKey,
+        subclass: sel.subclass || '',
+        fighting_style: sel.fightingStyle || '',
+        equipment_choice: sel.equipmentChoice || 'A',
         background: sel.bg,
         skill_proficiencies: [...bgSkills, ...sel.skillProfs],
         tool_proficiencies: sel.toolProfs,
         gender: sel.gender,
         name: sel.name,
-        surname: sel.surname
+        surname: sel.surname,
+        personality_trait: sel.personalityTrait || '',
+        ideal: sel.ideal || '',
+        bond: sel.bond || '',
+        flaw: sel.flaw || '',
+        alignment: sel.alignment || '',
+        stat_assignment: sel.statAssignment,
+        languages: sel.languages || [],
+        variant_bonuses: sel.variantBonuses || [],
+        variant_skill: sel.variantSkill || '',
+        variant_feat: sel.variantFeat || ''
     };
 
     try {
@@ -1052,5 +2508,6 @@ function submitCharacter() {
     }
 }
 </script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(()=>{})}</script>
 </body>
 </html>

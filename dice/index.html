@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2b2830">
+    <meta name="description" content="Mesa de Dados 3D interativa - Lendas de Valdoria RPG">
+    <meta property="og:title" content="Mesa de Dados - Lendas de Valdoria">
+    <meta property="og:description" content="Role dados 3D interativos para seu RPG medieval de fantasia">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="manifest" href="../manifest.json">
+    <title>Mesa de Dados - Lendas de Valdoria</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ─── HEADER (extends .v-header from design system) ─── */
+        .formula-display {
+            font-size: 13px;
+            color: var(--v-gold-light);
+            font-family: var(--v-font-mono);
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
+
+        /* ─── DICE SELECTOR ─── */
+        .dice-selector {
+            display: flex;
+            gap: 8px;
+            padding: 10px 16px 6px;
+            overflow-x: auto;
+            width: 100%;
+            justify-content: center;
+        }
+        .dice-chip {
+            padding: 8px 16px;
+            border-radius: var(--v-radius-sm);
+            font-size: 14px;
+            font-weight: 700;
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            color: var(--v-text-dim);
+            border: 1px solid var(--v-border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: var(--v-shadow-sm);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .dice-chip.active {
+            background: linear-gradient(165deg, #38333f 0%, #2d2932 100%);
+            color: var(--v-gold);
+            border-color: var(--v-gold);
+            box-shadow: 0 0 12px rgba(196, 149, 58, 0.2), 0 0 4px rgba(196, 149, 58, 0.15);
+            text-shadow: 0 0 8px rgba(196, 149, 58, 0.3);
+        }
+        .dice-chip:active { transform: scale(0.95); }
+
+        /* ─── MODIFIER ─── */
+        .controls-panel {
+            width: 100%;
+            padding: 0 16px;
+        }
+        .mod-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 10px 16px;
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius);
+            margin-top: 6px;
+        }
+        .mod-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .mod-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--v-border);
+            background: linear-gradient(165deg, var(--v-bg-raised) 0%, #252228 100%);
+            color: var(--v-text);
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.2s ease;
+            box-shadow: var(--v-shadow-sm);
+        }
+        .mod-btn:active {
+            background: var(--v-bg-card-hover);
+            border-color: var(--v-gold-dim);
+            transform: scale(0.92);
+        }
+        .mod-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--v-gold);
+            min-width: 44px;
+            text-align: center;
+            font-family: var(--v-font-mono);
+            text-shadow: 0 0 10px rgba(196, 149, 58, 0.3);
+        }
+
+        /* ─── ARENA ─── */
+        .arena {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+            padding: 10px;
+        }
+        .arena::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(196, 149, 58, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+            border-radius: 50%;
+        }
+        .canvas-container {
+            width: 260px;
+            height: 260px;
+            position: relative;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .canvas-container::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 1px solid rgba(196, 149, 58, 0.08);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .canvas-container canvas { display: block; width: 100%; height: 100%; }
+
+        .die-badge {
+            margin-top: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--v-gold-dim);
+            letter-spacing: 2px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .tap-hint {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--v-text-dim);
+            animation: fade-pulse 2s ease-in-out infinite;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        @keyframes fade-pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .particles {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .particle { position: absolute; border-radius: 50%; opacity: 0; }
+        .impact-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid var(--v-gold);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* Screen shake */
+        @keyframes screen-shake {
+            0%, 100% { transform: translate(0,0); }
+            10% { transform: translate(-5px, 3px); }
+            20% { transform: translate(4px, -3px); }
+            30% { transform: translate(-3px, 4px); }
+            40% { transform: translate(3px, -2px); }
+            50% { transform: translate(-2px, 2px); }
+        }
+        body.screen-shake { animation: screen-shake 0.4s ease-out; }
+
+        /* ─── RESULT PANEL ─── */
+        .result-panel {
+            width: 100%;
+            padding: 0 16px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .result-panel.visible { opacity: 1; transform: translateY(0); }
+        .result-card {
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            border: 1px solid var(--v-border-gold);
+            border-radius: var(--v-radius);
+            padding: 14px;
+            box-shadow: var(--v-shadow-md);
+            position: relative;
+        }
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(196, 149, 58, 0.2), transparent);
+            border-radius: 1px;
+        }
+        .result-total {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--v-gold);
+            text-shadow: 0 0 20px rgba(196, 149, 58, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+        .result-breakdown {
+            font-size: 13px;
+            color: var(--v-text-dim);
+            margin-top: 4px;
+            font-family: var(--v-font-mono);
+            letter-spacing: 0.5px;
+        }
+        .result-label {
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .result-label.success {
+            color: var(--v-success);
+            text-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+        }
+        .result-label.failure {
+            color: var(--v-danger);
+            text-shadow: 0 0 12px rgba(231, 76, 60, 0.3);
+        }
+        .result-label.critical {
+            color: var(--v-success);
+            font-size: 22px;
+            text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+            animation: v-goldPulse 1.5s ease-in-out infinite;
+        }
+        .result-label.crit-fail {
+            color: var(--v-danger);
+            font-size: 22px;
+            text-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+        }
+
+        /* ─── BOTTOM BAR ─── */
+        .bottom-bar {
+            width: 100%;
+            padding: 10px 16px 20px;
+            display: flex;
+            gap: 8px;
+        }
+        .bottom-btn {
+            flex: 1;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border-radius: var(--v-radius);
+        }
+        .bottom-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ─── HISTORY ─── */
+        .history-section {
+            width: 100%;
+            padding: 0 16px;
+            margin-bottom: 8px;
+        }
+        .history-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--v-gold-dim);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .history {
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius);
+            padding: 8px 12px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 12px;
+            color: var(--v-text-dim);
+            border-bottom: 1px solid rgba(62, 56, 69, 0.6);
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-item .h-result { color: var(--v-gold); font-weight: 700; }
+        .history-item .h-crit { color: var(--v-success); font-weight: 700; }
+        .history-item .h-fail { color: var(--v-danger); font-weight: 700; }
+
+        /* ─── GAME MODE ─── */
+        .game-mode .dice-selector,
+        .game-mode .controls-panel,
+        .game-mode .history-section { display: none; }
+        .game-mode .v-btn-secondary.bottom-btn { display: none; }
+    </style>
+</head>
+<body>
+    <div class="v-loading-overlay" id="loadingOverlay">
+        <div class="v-loading-spinner"></div>
+        <div class="v-loading-text">Preparando a mesa...</div>
+    </div>
+    <div class="v-header">
+        <h1 id="headerTitle">Mesa de Dados</h1>
+        <div class="v-progress-label" id="headerLabel"></div>
+        <div class="formula-display" id="headerFormula"></div>
+    </div>
+
+    <div class="dice-selector" id="diceSelector">
+        <div class="dice-chip" data-die="d4">d4</div>
+        <div class="dice-chip" data-die="d6">d6</div>
+        <div class="dice-chip" data-die="d8">d8</div>
+        <div class="dice-chip" data-die="d10">d10</div>
+        <div class="dice-chip" data-die="d12">d12</div>
+        <div class="dice-chip active" data-die="d20">d20</div>
+    </div>
+
+    <div class="controls-panel" id="modRow">
+        <div class="mod-row">
+            <span class="v-caption" style="margin-bottom:0">Modificador</span>
+            <div class="mod-controls">
+                <button class="mod-btn" onclick="changeMod(-1)">-</button>
+                <span class="mod-value" id="modValue">+0</span>
+                <button class="mod-btn" onclick="changeMod(1)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="arena" id="arena">
+        <div class="particles" id="particles"></div>
+        <div class="canvas-container" id="canvasContainer" onclick="onDieTap()"></div>
+        <div class="die-badge" id="dieBadge">d20</div>
+        <div class="tap-hint" id="tapHint">Toque para rolar</div>
+    </div>
+
+    <div class="result-panel" id="resultPanel">
+        <div class="result-card">
+            <div class="result-total" id="resultTotal"></div>
+            <div class="result-breakdown" id="resultBreakdown"></div>
+            <div class="result-label" id="resultLabel"></div>
+        </div>
+    </div>
+
+    <div class="history-section" id="historySection" style="display:none">
+        <div class="history-title">Historico</div>
+        <div class="history" id="history"></div>
+    </div>
+
+    <div class="bottom-bar" id="bottomBar">
+        <button class="v-btn v-btn-primary bottom-btn" id="btnAction" onclick="onDieTap()">Rolar Dados</button>
+        <button class="v-btn v-btn-secondary bottom-btn" id="btnReroll" onclick="resetRoll()" style="display:none">Rolar Novamente</button>
+    </div>
+
+    <script>
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  LENDAS DE VALDORIA — THREE.JS 3D DICE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
+    if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg); }
+
+    const params = new URLSearchParams(window.location.search);
+    const MODE = params.get('mode') || 'free';
+    const GAME_FORMULA = params.get('formula');
+    const GAME_RESULT = params.get('r') ? parseInt(atob(params.get('r'))) : null;
+    const GAME_RAW = params.get('raw') ? JSON.parse(atob(params.get('raw'))) : null;
+    const GAME_LABEL = params.get('label') ? decodeURIComponent(params.get('label')) : '';
+    const GAME_TYPE = params.get('type') || '';
+    const GAME_DC = params.get('dc') ? parseInt(params.get('dc')) : null;
+    const GAME_TOKEN = params.get('token') || '';
+
+    let currentDie = 'd20';
+    let currentMod = 0;
+    let isRolling = false;
+    let showingResult = false;
+    let rollHistory = [];
+
+    // ─── Three.js setup ───
+    const container = document.getElementById('canvasContainer');
+    const W = 260, H = 260;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 100);
+    camera.position.set(0, 3.5, 6);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(W, H);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // Lighting
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambient);
+    const keyLight = new THREE.DirectionalLight(0xfff5e0, 1.2);
+    keyLight.position.set(3, 6, 4);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(512, 512);
+    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.far = 20;
+    keyLight.shadow.camera.left = -3;
+    keyLight.shadow.camera.right = 3;
+    keyLight.shadow.camera.top = 3;
+    keyLight.shadow.camera.bottom = -3;
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0xc8d8ff, 0.3);
+    fillLight.position.set(-3, 2, -2);
+    scene.add(fillLight);
+    const rimLight = new THREE.PointLight(0xd4af37, 0.4, 10);
+    rimLight.position.set(0, 1, -4);
+    scene.add(rimLight);
+
+    // Ground plane (receives shadow)
+    const groundGeo = new THREE.PlaneGeometry(10, 10);
+    const groundMat = new THREE.ShadowMaterial({ opacity: 0.35 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -1.5;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // ─── Dice mesh holder ───
+    let dieMesh = null;
+    let idleTime = 0;
+    let animFrame = null;
+    let rollAnim = null; // { startTime, duration, phases, onDone }
+
+    // ─── Color palette (CSS → JS) ───
+    const _cs = getComputedStyle(document.documentElement);
+    const _cssVar = (v) => _cs.getPropertyValue(v).trim();
+    const V_GOLD_HEX = _cssVar('--v-gold') || '#c4953a';
+    const V_SUCCESS_HEX = _cssVar('--v-success') || '#4caf50';
+    const V_DANGER_HEX = _cssVar('--v-danger') || '#e74c3c';
+    const FACE_COLOR = 0x2a2a52;
+    const EDGE_COLOR = parseInt(V_GOLD_HEX.replace('#',''), 16);
+    const NUM_COLOR = V_GOLD_HEX;
+    const FACE_COLOR_HEX = '#2a2a52';
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  GEOMETRY BUILDERS PER DIE TYPE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    function createDieMesh(dieType) {
+        if (dieMesh) { scene.remove(dieMesh); dieMesh = null; }
+
+        const builders = { d4: buildD4, d6: buildD6, d8: buildD8, d10: buildD10, d12: buildD12, d20: buildD20 };
+        const builder = builders[dieType] || builders.d20;
+        dieMesh = builder();
+        dieMesh.castShadow = true;
+        dieMesh.position.set(0, 0, 0);
+        scene.add(dieMesh);
+        return dieMesh;
+    }
+
+    // ─── Number texture helper ───
+    function makeNumberTexture(num, shape, size, fontScale) {
+        size = size || 256;
+        fontScale = fontScale || 1.0;
+        const c = document.createElement('canvas');
+        c.width = size; c.height = size;
+        const ctx = c.getContext('2d');
+
+        // Dark face background
+        ctx.fillStyle = FACE_COLOR_HEX;
+        ctx.fillRect(0, 0, size, size);
+
+        // Subtle gradient overlay
+        const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+        grad.addColorStop(0, 'rgba(60,60,100,0.3)');
+        grad.addColorStop(1, 'rgba(20,20,40,0.3)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, size, size);
+
+        // Number — always centered at (0.5, 0.5) which maps to face centroid via UV
+        const text = String(num);
+        const fontSize = (text.length > 1 ? size * 0.32 : size * 0.42) * fontScale;
+        ctx.font = `bold ${fontSize}px "Segoe UI", Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Gold glow
+        ctx.shadowColor = 'rgba(212,175,55,0.6)';
+        ctx.shadowBlur = size * 0.08;
+        ctx.fillStyle = NUM_COLOR;
+
+        ctx.fillText(text, size / 2, size / 2);
+
+        // Underline 6 and 9
+        if (num === 6 || num === 9) {
+            const w = ctx.measureText(text).width;
+            ctx.fillRect(size/2 - w/2, size/2 + fontSize*0.38, w, fontSize * 0.06);
+        }
+
+        const tex = new THREE.CanvasTexture(c);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        return tex;
+    }
+
+    function makeFaceMaterial(num, shape, fontScale) {
+        return new THREE.MeshStandardMaterial({
+            map: makeNumberTexture(num, shape, undefined, fontScale),
+            metalness: 0.15,
+            roughness: 0.55,
+            side: THREE.DoubleSide,
+        });
+    }
+
+    // ─── EDGE WIREFRAME ───
+    function addEdges(mesh, geo, threshold) {
+        const edges = new THREE.EdgesGeometry(geo, threshold !== undefined ? threshold : 15);
+        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity: 0.35 }));
+        mesh.add(line);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  PER-FACE UV MAPPING (critical for numbers)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Three.js polyhedron UVs use spherical projection — useless for per-face textures.
+    // This function projects each face's vertices into a local 2D plane and maps to [0,1].
+
+    function computePerFaceUVs(geo, vertsPerFace) {
+        const pos = geo.attributes.position;
+        const totalVerts = pos.count;
+        const faceCount = totalVerts / vertsPerFace;
+        const uvs = new Float32Array(totalVerts * 2);
+
+        for (let f = 0; f < faceCount; f++) {
+            const base = f * vertsPerFace;
+
+            // Collect vertices + compute center
+            const verts = [];
+            const center = new THREE.Vector3();
+            for (let j = 0; j < vertsPerFace; j++) {
+                const v = new THREE.Vector3().fromBufferAttribute(pos, base + j);
+                verts.push(v);
+                center.add(v);
+            }
+            center.divideScalar(vertsPerFace);
+
+            // Face normal from first triangle
+            const ab = new THREE.Vector3().subVectors(verts[1], verts[0]);
+            const ac = new THREE.Vector3().subVectors(verts[2], verts[0]);
+            const normal = new THREE.Vector3().crossVectors(ab, ac).normalize();
+
+            // Tangent: from center toward first vertex, projected onto face plane
+            const tangent = new THREE.Vector3().subVectors(verts[0], center);
+            tangent.sub(normal.clone().multiplyScalar(tangent.dot(normal)));
+            tangent.normalize();
+
+            // Bitangent
+            const bitangent = new THREE.Vector3().crossVectors(normal, tangent).normalize();
+
+            // Project all vertices to 2D face-local coords
+            // Origin (0,0) = face centroid (from 'center' above)
+            const proj = verts.map(v => {
+                const d = new THREE.Vector3().subVectors(v, center);
+                return { u: d.dot(tangent), v: d.dot(bitangent) };
+            });
+
+            // Find max extent from origin (= centroid) in any direction
+            let maxExt = 0;
+            for (const p of proj) {
+                maxExt = Math.max(maxExt, Math.abs(p.u), Math.abs(p.v));
+            }
+            maxExt = maxExt || 1;
+
+            // Scale so the centroid maps to UV (0.5, 0.5) and face fits [0.08, 0.92]
+            const halfRange = 0.42;
+            const scale = halfRange / maxExt;
+
+            for (let j = 0; j < vertsPerFace; j++) {
+                uvs[(base + j) * 2]     = 0.5 + proj[j].u * scale;
+                uvs[(base + j) * 2 + 1] = 0.5 + proj[j].v * scale;
+            }
+        }
+
+        geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  Helper: build any polyhedron with UVs
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    function buildPolyhedron(geo, faceCount, vertsPerFace, numbers, shapeHint, fontScale) {
+        const nonIndexed = geo.toNonIndexed();
+
+        // Assign material groups
+        nonIndexed.clearGroups();
+        for (let i = 0; i < faceCount; i++) {
+            nonIndexed.addGroup(i * vertsPerFace, vertsPerFace, i);
+        }
+
+        // Compute per-face UVs (replaces broken spherical UVs)
+        computePerFaceUVs(nonIndexed, vertsPerFace);
+
+        // Compute face normals for landing orientation
+        const pos = nonIndexed.attributes.position;
+        const normals = [];
+        for (let i = 0; i < faceCount; i++) {
+            const base = i * vertsPerFace;
+            const a = new THREE.Vector3().fromBufferAttribute(pos, base);
+            const b = new THREE.Vector3().fromBufferAttribute(pos, base + 1);
+            const c = new THREE.Vector3().fromBufferAttribute(pos, base + 2);
+            const ab = new THREE.Vector3().subVectors(b, a);
+            const ac = new THREE.Vector3().subVectors(c, a);
+            normals.push(new THREE.Vector3().crossVectors(ab, ac).normalize());
+        }
+
+        // Materials — one per face
+        const mats = numbers.map((n, i) => {
+            let hint = shapeHint;
+            if (hint === 'tri-auto') hint = normals[i].y > 0 ? 'tri-up' : 'tri-down';
+            return makeFaceMaterial(n, hint, fontScale);
+        });
+
+        const mesh = new THREE.Mesh(nonIndexed, mats);
+        addEdges(mesh, nonIndexed);
+        mesh.userData = { type: null, numbers, normals };
+        return mesh;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━
+    //  D6 — CUBE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━
+
+    const D6_NUMBERS = [3, 4, 1, 6, 2, 5]; // +X, -X, +Y, -Y, +Z, -Z
+    const D6_NORMALS = [
+        new THREE.Vector3(1, 0, 0), new THREE.Vector3(-1, 0, 0),
+        new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, -1, 0),
+        new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -1),
+    ];
+
+    function buildD6() {
+        // BoxGeometry already has correct per-face UVs
+        const geo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+        const mats = D6_NUMBERS.map(n => makeFaceMaterial(n, 'square'));
+        const mesh = new THREE.Mesh(geo, mats);
+        addEdges(mesh, geo);
+        mesh.userData = { type: 'd6', numbers: D6_NUMBERS, normals: D6_NORMALS };
+        return mesh;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━
+    //  D4 — TETRAHEDRON
+    // ━━━━━━━━━━━━━━━━━━━━━━━━
+
+    function buildD4() {
+        const geo = new THREE.TetrahedronGeometry(1.0);
+        const numbers = [1, 2, 3, 4];
+        const mesh = buildPolyhedron(geo, 4, 3, numbers, 'tri-auto', 0.65);
+        mesh.userData.type = 'd4';
+        return mesh;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━
+    //  D8 — OCTAHEDRON
+    // ━━━━━━━━━━━━━━━━━━━━━━━━
+
+    function buildD8() {
+        const geo = new THREE.OctahedronGeometry(1.0);
+        const numbers = [1, 2, 3, 4, 5, 6, 7, 8];
+        const mesh = buildPolyhedron(geo, 8, 3, numbers, 'tri-auto');
+        mesh.userData.type = 'd8';
+        return mesh;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━
+    //  D20 — ICOSAHEDRON
+    // ━━━━━━━━━━━━━━━━━━━━━━━━
+
+    function buildD20() {
+        const geo = new THREE.IcosahedronGeometry(1.0);
+        const numbers = [];
+        for (let i = 1; i <= 20; i++) numbers.push(i);
+        const mesh = buildPolyhedron(geo, 20, 3, numbers, 'tri-auto');
+        mesh.userData.type = 'd20';
+        return mesh;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━
+    //  D12 — DODECAHEDRON
+    // ━━━━━━━━━━━━━━━━━━━━━━━━
+
+    function buildD12() {
+        const geo = new THREE.DodecahedronGeometry(1.0);
+        // Each pentagon = 3 triangles = 9 vertices per face
+        const numbers = [];
+        for (let i = 1; i <= 12; i++) numbers.push(i);
+        const mesh = buildPolyhedron(geo, 12, 9, numbers, 'penta');
+        mesh.userData.type = 'd12';
+        return mesh;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  D10 — PENTAGONAL TRAPEZOHEDRON
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    function buildD10() {
+        // Proven d10 geometry (Natarov/byWulf approach):
+        // 10 equatorial vertices in zigzag pattern + 2 poles, all normalized
+        // to unit sphere then scaled. This produces the correct gem/diamond shape.
+        const scale = 1.15;
+        const step = Math.PI * 2 / 10; // 36° between equatorial verts
+        const hOff = 0.105;             // zigzag height ≈ tan(6°)
+
+        // 12 raw vertices: 10 equatorial (zigzag) + 2 poles
+        const rawVerts = [];
+        for (let i = 0; i < 10; i++) {
+            const angle = i * step;
+            rawVerts.push(new THREE.Vector3(
+                Math.cos(angle),
+                Math.sin(angle),
+                hOff * (i % 2 ? 1 : -1)
+            ).normalize().multiplyScalar(scale));
+        }
+        rawVerts.push(new THREE.Vector3(0, 0, -1).multiplyScalar(scale)); // 10: bottom pole
+        rawVerts.push(new THREE.Vector3(0, 0,  1).multiplyScalar(scale)); // 11: top pole
+
+        // 10 kite faces (from proven Natarov face table):
+        // Each entry: [equatA, equatB, pole, numberShown]
+        // Odd numbers connect to bottom pole (10), even to top pole (11)
+        const kiteFaces = [
+            [5, 7, 11, 0], [4, 2, 10, 1], [1, 3, 11, 2], [0, 8, 10, 3],
+            [7, 9, 11, 4], [8, 6, 10, 5], [9, 1, 11, 6], [2, 0, 10, 7],
+            [3, 5, 11, 8], [6, 4, 10, 9],
+        ];
+
+        // 10 equatorial infill triangles (thin strips between kite faces)
+        const equatTris = [
+            [1,0,2],[1,2,3],[3,2,4],[3,4,5],[5,4,6],
+            [5,6,7],[7,6,8],[7,8,9],[9,8,0],[9,0,1],
+        ];
+
+        // Build geometry
+        const positions = [], uvArr = [], normArr = [];
+        const groups = [];
+        let offset = 0;
+
+        // UV for kite faces: use the Natarov circular-polygon UV approach
+        // For a kite (4-vertex quad fan-triangulated into 2 tris),
+        // af = π*6/5 (angular offset for upright numbers)
+        const af = Math.PI * 6 / 5;
+        const kiteVerts = 4; // quad
+        const kiteAngleStep = Math.PI * 2 / kiteVerts;
+
+        // Helper: compute UV for vertex index j in a regular polygon
+        function polyUV(j) {
+            const angle = kiteAngleStep * j + af;
+            return [(Math.cos(angle) + 1) / 2, (Math.sin(angle) + 1) / 2];
+        }
+
+        // Kite face UVs (fan from vertex 0): tri0=(v0,v1,v2), tri1=(v0,v2,v3)
+        const kUV0 = polyUV(0), kUV1 = polyUV(1), kUV2 = polyUV(2), kUV3 = polyUV(3);
+
+        const faceNormals = [];
+        const faceNumbers = [];
+
+        kiteFaces.forEach((face, fi) => {
+            const [a, b, pole, num] = face;
+            // Quad vertices in fan order: a, b, pole — but Natarov defines
+            // quads as [eqA, eqB, pole] which fan-triangulates to:
+            // The kite quad is actually [eqA, next_eq_between, eqB, pole]
+            // For the proven approach, each kite = 2 triangles sharing the pole:
+            // tri0 = (eqA, eqB, pole) — this IS the whole visible kite triangle.
+            // But a kite has 4 vertices. Let me look at it differently:
+            // Natarov's face [5,7,11] is actually a QUAD defined by vertices 5,7,11
+            // that gets fan-triangulated as: (5,7,11) — only 3 unique verts = 1 triangle.
+            //
+            // The KITE shape comes from the quad being [eqA, midEq, eqB, pole]:
+            // For face [5,7,11]: vertices 5,6,7,11 form the kite (6 is between 5 and 7).
+            // But Natarov only lists [5,7,11] because vertex 6 is implied by the
+            // equatorial strip triangle [5,6,7].
+            //
+            // For our rendering: each kite = 1 large triangle (eqA, eqB, pole)
+            // + 1 equatorial infill triangle. Together they form the kite visually.
+            // So each numbered face is actually just ONE triangle.
+
+            const va = rawVerts[a], vb = rawVerts[b], vc = rawVerts[pole];
+
+            positions.push(va.x, va.y, va.z, vb.x, vb.y, vb.z, vc.x, vc.y, vc.z);
+
+            // Face normal
+            const e1 = new THREE.Vector3().subVectors(vb, va);
+            const e2 = new THREE.Vector3().subVectors(vc, va);
+            const n = new THREE.Vector3().crossVectors(e1, e2).normalize();
+            // Ensure outward
+            const center = new THREE.Vector3().addVectors(va, vb).add(vc).divideScalar(3);
+            if (n.dot(center) < 0) n.negate();
+            normArr.push(n.x, n.y, n.z, n.x, n.y, n.z, n.x, n.y, n.z);
+
+            // UVs: triangle inscribed in circle, rotated by af for upright numbers
+            // 3-vertex polygon: equilateral triangle UVs
+            const triAngle = Math.PI * 2 / 3;
+            for (let j = 0; j < 3; j++) {
+                const ang = triAngle * j + af;
+                uvArr.push((Math.cos(ang) + 1) / 2, (Math.sin(ang) + 1) / 2);
+            }
+
+            // Material group: this face gets material index = fi (for number)
+            groups.push({ start: offset, count: 3, materialIndex: fi });
+            offset += 3;
+
+            faceNormals.push(n);
+            faceNumbers.push(num);
+        });
+
+        // Equatorial infill triangles (blank dark faces, no number)
+        equatTris.forEach(tri => {
+            const [a, b, c] = tri;
+            const va = rawVerts[a], vb = rawVerts[b], vc = rawVerts[c];
+            positions.push(va.x, va.y, va.z, vb.x, vb.y, vb.z, vc.x, vc.y, vc.z);
+
+            const e1 = new THREE.Vector3().subVectors(vb, va);
+            const e2 = new THREE.Vector3().subVectors(vc, va);
+            const n = new THREE.Vector3().crossVectors(e1, e2).normalize();
+            const center = new THREE.Vector3().addVectors(va, vb).add(vc).divideScalar(3);
+            if (n.dot(center) < 0) n.negate();
+            normArr.push(n.x, n.y, n.z, n.x, n.y, n.z, n.x, n.y, n.z);
+
+            uvArr.push(0, 0, 1, 0, 0.5, 1); // doesn't matter, blank face
+            groups.push({ start: offset, count: 3, materialIndex: 10 }); // blank material
+            offset += 3;
+        });
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geo.setAttribute('normal', new THREE.Float32BufferAttribute(normArr, 3));
+        geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvArr, 2));
+        groups.forEach(g => geo.addGroup(g.start, g.count, g.materialIndex));
+
+        // Materials: 10 numbered + 1 blank for equatorial strips
+        const mats = faceNumbers.map(n => makeFaceMaterial(n, 'kite', 0.8));
+        // Add blank material for equatorial infill (index 10)
+        mats.push(new THREE.MeshStandardMaterial({
+            color: FACE_COLOR, metalness: 0.15, roughness: 0.55, side: THREE.DoubleSide
+        }));
+
+        const mesh = new THREE.Mesh(geo, mats);
+        addEdges(mesh, geo, 20);
+        mesh.userData = { type: 'd10', numbers: faceNumbers, normals: faceNormals };
+        return mesh;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  LANDING — orient result face UP
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    function getTargetQuaternion(mesh, resultValue) {
+        const { numbers, normals } = mesh.userData;
+
+        // For d10, resultValue is the raw number (0-9 or 1-10 depending on context).
+        // Find the face index whose number matches
+        let faceIdx = numbers.indexOf(resultValue);
+        if (faceIdx === -1) faceIdx = 0;
+
+        // We want this face's normal pointing UP (+Y)
+        // For the player to READ the number, the face should face the CAMERA, not straight up
+        // Compromise: tilt so the result face is ~30° toward camera
+        const faceNormal = normals[faceIdx].clone();
+
+        // Target: faceNormal should map to (0, 0.87, 0.5) (tilted slightly toward camera)
+        const targetDir = new THREE.Vector3(0, 0.85, 0.52).normalize();
+
+        const quat = new THREE.Quaternion();
+        quat.setFromUnitVectors(faceNormal, targetDir);
+
+        return quat;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━
+    //  ANIMATION
+    // ━━━━━━━━━━━━━━━━━━━━━━
+
+    function animate(time) {
+        animFrame = requestAnimationFrame(animate);
+
+        if (rollAnim) {
+            updateRollAnimation(time);
+        } else if (showingResult) {
+            // After roll: die stays completely still at result orientation
+        } else if (dieMesh) {
+            // Idle: gentle float and rotate
+            idleTime += 0.012;
+            dieMesh.rotation.y = idleTime * 0.3;
+            dieMesh.rotation.x = Math.sin(idleTime * 0.5) * 0.12 - 0.2;
+            dieMesh.position.y = Math.sin(idleTime * 0.8) * 0.08;
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    function updateRollAnimation(time) {
+        const elapsed = time - rollAnim.startTime;
+        const dur = rollAnim.duration;
+        const t = Math.min(elapsed / dur, 1);
+
+        const mesh = dieMesh;
+        if (!mesh) return;
+        const ra = rollAnim;
+        const elapsedSec = elapsed / 1000;
+
+        // Unified spin quaternion for all airborne phases
+        function computeSpinQ(tSec) {
+            const sa = (ra.initialSpin / ra.spinDecay) * (1 - Math.exp(-ra.spinDecay * tSec));
+            const pq = new THREE.Quaternion().setFromEuler(new THREE.Euler(
+                ra.spinDirX * ra.spinScaleX * sa,
+                ra.spinDirY * ra.spinScaleY * sa * 1.1,
+                ra.spinDirZ * ra.spinScaleZ * sa * 0.8
+            ));
+            const tsa = (ra.tumbleSpeed / ra.tumbleDecay) * (1 - Math.exp(-ra.tumbleDecay * tSec));
+            const pa = tSec * ra.precessionSpeed;
+            const cta = ra.tumbleAxis.clone().applyAxisAngle(ra.precessionAxis, pa);
+            const tq = new THREE.Quaternion().setFromAxisAngle(cta, tsa);
+            return pq.multiply(tq);
+        }
+
+        if (elapsedSec < ra.tThrowEnd) {
+            // Phase 1: Throw — gravity parabola
+            const tl = elapsedSec;
+            const y = ra.v0_throw * tl - 0.5 * ra.G * tl * tl;
+            const x = ra.vx0 * tl;
+            const z = ra.vz0 * tl;
+            mesh.position.set(clampPos(x), Math.max(0, y), clampPos(z));
+            mesh.quaternion.copy(computeSpinQ(elapsedSec));
+
+        } else if (elapsedSec < ra.tB1End) {
+            // Phase 2: Bounce 1 — gravity parabola (smaller)
+            const tl = elapsedSec - ra.tThrowEnd;
+            const y = ra.v0_b1 * tl - 0.5 * ra.G * tl * tl;
+            const x = ra.x_at_b1 + ra.vx1 * tl;
+            const z = ra.z_at_b1 + ra.vz1 * tl;
+            mesh.position.set(clampPos(x), Math.max(0, y), clampPos(z));
+            mesh.quaternion.copy(computeSpinQ(elapsedSec));
+            if (!ra.bounce1Haptic) { ra.bounce1Haptic = true; haptic('light'); }
+
+        } else if (elapsedSec < ra.tB2End) {
+            // Phase 3: Bounce 2 — gravity parabola (smallest)
+            const tl = elapsedSec - ra.tB1End;
+            const y = ra.v0_b2 * tl - 0.5 * ra.G * tl * tl;
+            const x = ra.x_at_b2 + ra.vx2 * tl;
+            const z = ra.z_at_b2 + ra.vz2 * tl;
+            mesh.position.set(clampPos(x), Math.max(0, y), clampPos(z));
+            mesh.quaternion.copy(computeSpinQ(elapsedSec));
+            if (!ra.bounce2Haptic) { ra.bounce2Haptic = true; haptic('light'); }
+
+        } else {
+            // Phase 4: Settle — SLERP + wobble + micro-bounce
+            const tl = elapsedSec - ra.tB2End;
+            const p = Math.min(tl / ra.settleTime, 1);
+            const slerpT = Math.min(1, p * 1.5);
+            const easeSlerpT = 1 - Math.pow(1 - slerpT, 3);
+
+            // Position damps to origin
+            const posEase = 1 - Math.pow(1 - p, 3);
+            const x = ra.x_at_settle * (1 - posEase);
+            const z = ra.z_at_settle * (1 - posEase);
+
+            // Micro-bounce: tiny vertical oscillation
+            let y = 0;
+            if (p < 0.4) {
+                y = 0.08 * Math.exp(-10 * p) * Math.abs(Math.sin(p * Math.PI * 4));
+            }
+            mesh.position.set(x, y, z);
+
+            // SLERP rotation to target
+            const currentQ = ra.settleStartQ.clone().slerp(ra.targetQ, easeSlerpT);
+
+            // Wobble: damped oscillation on two axes
+            if (p > 0.15 && p < 0.95) {
+                const wt = p - 0.15;
+                const env = Math.exp(-ra.wobbleDamp * wt);
+                const w1 = ra.wobbleAmp * env * Math.sin(ra.wobbleFreq * wt * Math.PI * 2);
+                const w2 = ra.wobbleAmp * 0.6 * env * Math.sin(ra.wobbleFreq * 1.3 * wt * Math.PI * 2 + 0.7);
+                currentQ.multiply(new THREE.Quaternion().setFromAxisAngle(ra.wobbleAxis1, w1));
+                currentQ.multiply(new THREE.Quaternion().setFromAxisAngle(ra.wobbleAxis2, w2));
+            }
+            mesh.quaternion.copy(currentQ);
+        }
+
+        // Shadow: height-based (unified for all phases)
+        const normH = Math.max(0, mesh.position.y) / 2.5;
+        ground.material.opacity = 0.35 - 0.25 * normH;
+
+        if (t >= 1) {
+            mesh.position.set(0, 0, 0);
+            mesh.quaternion.copy(ra.targetQ);
+            ground.material.opacity = 0.35;
+            const onDone = ra.onDone;
+            rollAnim = null;
+            if (onDone) onDone();
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━
+    //  ROLL LOGIC
+    // ━━━━━━━━━━━━━━━━━━━━━━
+
+    function dieMax(d) { return parseInt(d.replace('d', '')); }
+    function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+    function haptic(s) { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(s); }
+    function clampPos(v) { return Math.max(-1.8, Math.min(1.8, v)); }
+
+    function onDieTap() {
+        if (isRolling) return;
+        isRolling = true;
+        showingResult = false;
+
+        document.getElementById('tapHint').style.display = 'none';
+        document.getElementById('btnAction').disabled = true;
+        document.getElementById('resultPanel').classList.remove('visible');
+
+        const max = dieMax(currentDie);
+        let finalRaw, finalTotal;
+
+        if (MODE === 'game' && GAME_RESULT !== null) {
+            finalTotal = GAME_RESULT;
+            if (GAME_RAW) finalRaw = GAME_RAW;
+            else {
+                const mm = GAME_FORMULA ? GAME_FORMULA.match(/[+-]\d+$/) : null;
+                finalRaw = [Math.max(1, Math.min(max, finalTotal - (mm ? parseInt(mm[0]) : 0)))];
+            }
+        } else {
+            finalRaw = [randInt(1, max)];
+            finalTotal = finalRaw[0] + currentMod;
+        }
+
+        haptic('medium');
+
+        // For d10, face numbers are 0-9 but result is 1-10
+        let resultFaceValue = finalRaw[0];
+        if (currentDie === 'd10') {
+            resultFaceValue = (finalRaw[0] - 1) % 10; // 1→0, 2→1, ..., 10→9
+        }
+
+        // Create fresh mesh for this die type
+        createDieMesh(currentDie);
+
+        const targetQ = getTargetQuaternion(dieMesh, resultFaceValue);
+
+        // --- Physics-based roll parameters ---
+        const G = 40; // gravity (units/s²)
+        const throwH = 2.2 + Math.random() * 0.6; // throw height 2.2-2.8
+        const v0_throw = Math.sqrt(2 * G * throwH);
+        const t_throw = 2 * v0_throw / G;
+
+        const e1 = 0.55 + Math.random() * 0.15; // restitution bounce 1
+        const v0_b1 = e1 * v0_throw;
+        const t_b1 = 2 * v0_b1 / G;
+
+        const e2 = 0.50 + Math.random() * 0.15; // restitution bounce 2
+        const v0_b2 = e2 * v0_b1;
+        const t_b2 = 2 * v0_b2 / G;
+
+        const totalAirborne = t_throw + t_b1 + t_b2;
+        const settleTime = 0.42;
+        const duration = (totalAirborne + settleTime) * 1000;
+
+        // Phase boundary times (seconds)
+        const tThrowEnd = t_throw;
+        const tB1End = t_throw + t_b1;
+        const tB2End = totalAirborne;
+
+        // Horizontal motion with friction
+        const vx0 = (Math.random() - 0.5) * 6.0;
+        const vz0 = (Math.random() - 0.5) * 2.0;
+        const hFric = 0.5 + Math.random() * 0.2;
+
+        const x_at_b1 = clampPos(vx0 * t_throw);
+        const z_at_b1 = clampPos(vz0 * t_throw);
+        const vx1 = vx0 * hFric + (Math.random() - 0.5) * 0.5;
+        const vz1 = vz0 * hFric + (Math.random() - 0.5) * 0.3;
+
+        const x_at_b2 = clampPos(x_at_b1 + vx1 * t_b1);
+        const z_at_b2 = clampPos(z_at_b1 + vz1 * t_b1);
+        const vx2 = vx1 * hFric + (Math.random() - 0.5) * 0.3;
+        const vz2 = vz1 * hFric + (Math.random() - 0.5) * 0.2;
+
+        const x_at_settle = clampPos(x_at_b2 + vx2 * t_b2);
+        const z_at_settle = clampPos(z_at_b2 + vz2 * t_b2);
+
+        // Spin — die-type multiplier (lighter dice spin less)
+        const dieMult = { d4: 0.7, d6: 0.85, d8: 0.95, d10: 1.0, d12: 1.05, d20: 1.1 }[currentDie] || 1.0;
+        const initialSpin = (10 + Math.random() * 4) * dieMult;
+        const spinDecay = 2.0 + Math.random() * 0.5;
+        const spinDirX = Math.random() > 0.5 ? 1 : -1;
+        const spinDirY = Math.random() > 0.5 ? 1 : -1;
+        const spinDirZ = Math.random() > 0.5 ? 1 : -1;
+        const spinScaleX = 0.8 + Math.random() * 0.4;
+        const spinScaleY = 0.8 + Math.random() * 0.4;
+        const spinScaleZ = 0.5 + Math.random() * 0.4;
+
+        // Tumble — secondary axis with precession
+        const tumbleAxis = new THREE.Vector3(
+            Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5
+        ).normalize();
+        const tumbleSpeed = 3 + Math.random() * 4;
+        const tumbleDecay = 1.5 + Math.random() * 1.0;
+        const precessionSpeed = 1.5 + Math.random() * 2.0;
+        const precessionAxis = new THREE.Vector3(0, 1, 0);
+
+        // Wobble on landing
+        const wobbleAmp = 0.06 + Math.random() * 0.06;
+        const wobbleFreq = 14 + Math.random() * 6;
+        const wobbleDamp = 6 + Math.random() * 2;
+        const wobbleAxis1 = new THREE.Vector3(1, 0, 0);
+        const wobbleAxis2 = new THREE.Vector3(0, 0, 1);
+
+        rollAnim = {
+            startTime: performance.now(), duration, targetQ, G,
+            v0_throw, v0_b1, v0_b2,
+            tThrowEnd, tB1End, tB2End, settleTime,
+            vx0, vz0, vx1, vz1, vx2, vz2,
+            x_at_b1, z_at_b1, x_at_b2, z_at_b2, x_at_settle, z_at_settle,
+            initialSpin, spinDecay,
+            spinDirX, spinDirY, spinDirZ,
+            spinScaleX, spinScaleY, spinScaleZ,
+            tumbleAxis, tumbleSpeed, tumbleDecay,
+            precessionSpeed, precessionAxis,
+            wobbleAmp, wobbleFreq, wobbleDamp, wobbleAxis1, wobbleAxis2,
+            bounce1Haptic: false, bounce2Haptic: false,
+            settleStartQ: null,
+            onDone: () => finishRoll(finalRaw, finalTotal, max),
+        };
+
+        // Pre-compute settleStartQ from spin+tumble at totalAirborne
+        function computeSettleQ(tSec) {
+            const ra = rollAnim;
+            const sa = (ra.initialSpin / ra.spinDecay) * (1 - Math.exp(-ra.spinDecay * tSec));
+            const pq = new THREE.Quaternion().setFromEuler(new THREE.Euler(
+                ra.spinDirX * ra.spinScaleX * sa,
+                ra.spinDirY * ra.spinScaleY * sa * 1.1,
+                ra.spinDirZ * ra.spinScaleZ * sa * 0.8
+            ));
+            const tsa = (ra.tumbleSpeed / ra.tumbleDecay) * (1 - Math.exp(-ra.tumbleDecay * tSec));
+            const pa = tSec * ra.precessionSpeed;
+            const cta = ra.tumbleAxis.clone().applyAxisAngle(ra.precessionAxis, pa);
+            const tq = new THREE.Quaternion().setFromAxisAngle(cta, tsa);
+            return pq.multiply(tq);
+        }
+        rollAnim.settleStartQ = computeSettleQ(totalAirborne);
+    }
+
+    function finishRoll(rawRolls, total, max) {
+        const panel = document.getElementById('resultPanel');
+        const btnAction = document.getElementById('btnAction');
+        const btnReroll = document.getElementById('btnReroll');
+
+        showingResult = true;
+
+        const isCrit = currentDie === 'd20' && rawRolls[0] === 20;
+        const isFail = currentDie === 'd20' && rawRolls[0] === 1;
+
+        // Visual effects
+        if (isCrit || isFail) {
+            haptic('heavy');
+            document.body.classList.remove('screen-shake');
+            void document.body.offsetWidth;
+            document.body.classList.add('screen-shake');
+            setTimeout(() => document.body.classList.remove('screen-shake'), 450);
+            spawnRing(isCrit ? V_SUCCESS_HEX : V_DANGER_HEX);
+            spawnParticles(isCrit ? V_SUCCESS_HEX : V_DANGER_HEX, 40);
+
+            // Glow the die
+            if (dieMesh) {
+                const mesh = dieMesh; // capture local ref for closure
+                const glowColor = parseInt((isCrit ? V_SUCCESS_HEX : V_DANGER_HEX).replace('#',''), 16);
+                const glow = new THREE.PointLight(glowColor, 1.5, 4);
+                glow.position.set(0, 0.5, 1);
+                mesh.add(glow);
+                // Fade glow
+                let intensity = 1.5;
+                const fadeGlow = setInterval(() => {
+                    intensity -= 0.05;
+                    if (intensity <= 0) { mesh.remove(glow); clearInterval(fadeGlow); }
+                    else glow.intensity = intensity;
+                }, 50);
+            }
+        } else {
+            haptic('heavy');
+            spawnParticles(V_GOLD_HEX, 20);
+        }
+
+        document.getElementById('resultTotal').textContent = total;
+
+        const mod = MODE === 'game'
+            ? (GAME_FORMULA ? GAME_FORMULA.replace(/^\d*d\d+/, '') : '')
+            : (currentMod !== 0 ? (currentMod > 0 ? '+' + currentMod : '' + currentMod) : '');
+        const rollStr = rawRolls.join(' + ');
+        document.getElementById('resultBreakdown').textContent =
+            rawRolls.length > 1 ? `[${rollStr}]${mod} = ${total}` :
+            mod ? `${rawRolls[0]}${mod} = ${total}` : '';
+
+        const lbl = document.getElementById('resultLabel');
+        if (isCrit) { lbl.textContent = 'ACERTO CRITICO!'; lbl.className = 'result-label critical'; }
+        else if (isFail) { lbl.textContent = 'FALHA CRITICA!'; lbl.className = 'result-label crit-fail'; }
+        else if (MODE === 'game' && GAME_DC !== null) {
+            if (total >= GAME_DC) { lbl.textContent = 'SUCESSO!'; lbl.className = 'result-label success'; }
+            else { lbl.textContent = 'FALHA'; lbl.className = 'result-label failure'; }
+        } else { lbl.textContent = ''; lbl.className = 'result-label'; }
+
+        panel.classList.add('visible');
+
+        if (MODE !== 'game') {
+            rollHistory.unshift({ die: currentDie, raw: rawRolls[0], mod: currentMod, total, isCrit, isFail });
+            renderHistory();
+        }
+
+        isRolling = false;
+        if (MODE === 'game') {
+            btnAction.textContent = 'Confirmar';
+            btnAction.disabled = false;
+            btnAction.onclick = confirmGameRoll;
+        } else {
+            btnAction.style.display = 'none';
+            btnReroll.style.display = '';
+        }
+    }
+
+    // ─── Effects ───
+
+    function spawnRing(color) {
+        const c = document.getElementById('particles');
+        const cx = c.offsetWidth / 2, cy = c.offsetHeight / 2;
+        const r = document.createElement('div');
+        r.className = 'impact-ring'; r.style.borderColor = color;
+        r.style.left = cx + 'px'; r.style.top = cy + 'px';
+        r.animate([
+            { width: '0', height: '0', marginLeft: '0', marginTop: '0', opacity: 0.8, borderWidth: '3px' },
+            { width: '220px', height: '220px', marginLeft: '-110px', marginTop: '-110px', opacity: 0, borderWidth: '1px' }
+        ], { duration: 550, easing: 'ease-out' });
+        c.appendChild(r); setTimeout(() => r.remove(), 550);
+    }
+
+    function spawnParticles(color, n) {
+        const c = document.getElementById('particles');
+        const cx = c.offsetWidth / 2, cy = c.offsetHeight / 2;
+        for (let i = 0; i < n; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle'; p.style.background = color;
+            const s = 2 + Math.random() * 5;
+            p.style.width = s + 'px'; p.style.height = s + 'px';
+            p.style.left = cx + 'px'; p.style.top = cy + 'px';
+            const a = (Math.PI * 2 * i) / n + (Math.random() - 0.5) * 0.6;
+            const dist = 50 + Math.random() * 130;
+            const dx = Math.cos(a) * dist, dy = Math.sin(a) * dist;
+            const dur = 450 + Math.random() * 550;
+            const sp = Math.random() > 0.65;
+            p.animate([
+                { opacity: 0.9, transform: 'translate(0,0) scale(1)' },
+                { opacity: sp ? 1 : 0.6, transform: `translate(${dx*0.4}px,${dy*0.4}px) scale(${sp?1.6:1})`, offset: 0.25 },
+                { opacity: 0, transform: `translate(${dx}px,${dy}px) scale(0)` }
+            ], { duration: dur, easing: 'cubic-bezier(0,0.3,0.5,1)' });
+            c.appendChild(p); setTimeout(() => p.remove(), dur);
+        }
+    }
+
+    // ─── Helpers ───
+
+    function confirmGameRoll() {
+        if (tg) tg.sendData(JSON.stringify({ action: 'roll_complete', result: GAME_RESULT, formula: GAME_FORMULA, token: GAME_TOKEN, type: GAME_TYPE }));
+    }
+
+    function resetRoll() {
+        isRolling = false;
+        showingResult = false;
+        rollAnim = null;
+        createDieMesh(currentDie);
+        idleTime = 0;
+        document.getElementById('resultPanel').classList.remove('visible');
+        document.getElementById('tapHint').style.display = '';
+        const btn = document.getElementById('btnAction');
+        btn.textContent = 'Rolar Dados'; btn.disabled = false; btn.onclick = onDieTap; btn.style.display = '';
+        document.getElementById('btnReroll').style.display = 'none';
+    }
+
+    function updateDieType(d) {
+        document.getElementById('dieBadge').textContent = d;
+        document.querySelectorAll('.dice-chip').forEach(c => {
+            c.classList.toggle('active', c.dataset.die === d);
+        });
+    }
+
+    function changeMod(delta) {
+        if (isRolling) return;
+        currentMod = Math.max(-10, Math.min(20, currentMod + delta));
+        document.getElementById('modValue').textContent = currentMod >= 0 ? '+' + currentMod : '' + currentMod;
+    }
+
+    function renderHistory() {
+        const section = document.getElementById('historySection');
+        if (rollHistory.length > 0 && section) section.style.display = '';
+        document.getElementById('history').innerHTML = rollHistory.slice(0, 10).map(h => {
+            const cls = h.isCrit ? 'h-crit' : h.isFail ? 'h-fail' : 'h-result';
+            const modStr = h.mod ? (h.mod > 0 ? '+' + h.mod : '' + h.mod) : '';
+            return `<div class="history-item"><span>${h.die}${modStr}</span><span class="${cls}">${h.total}</span></div>`;
+        }).join('');
+    }
+
+    // ─── INIT ───
+
+    function init() {
+        if (MODE === 'game') {
+            document.body.classList.add('game-mode');
+            if (GAME_LABEL) document.getElementById('headerLabel').textContent = GAME_LABEL;
+            if (GAME_FORMULA) {
+                document.getElementById('headerFormula').textContent = GAME_FORMULA;
+                const m = GAME_FORMULA.match(/d(\d+)/);
+                if (m) currentDie = 'd' + m[1];
+            }
+            const titles = { attack: 'Ataque', skill: 'Teste de Habilidade', damage: 'Dano', save: 'Salvaguarda', initiative: 'Iniciativa', death_save: 'Salvaguarda contra Morte' };
+            if (titles[GAME_TYPE]) document.getElementById('headerTitle').textContent = titles[GAME_TYPE];
+        }
+
+        updateDieType(currentDie);
+        document.querySelectorAll('.dice-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                if (isRolling) return;
+                document.querySelectorAll('.dice-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                currentDie = chip.dataset.die;
+                updateDieType(currentDie);
+                resetRoll();
+            });
+        });
+
+        createDieMesh(currentDie);
+
+        animate(performance.now());
+    }
+
+    init();
+    // Dismiss loading overlay once 3D scene is ready
+    var lo = document.getElementById('loadingOverlay');
+    if (lo) { lo.classList.add('v-hidden'); setTimeout(function() { lo.remove(); }, 500); }
+    </script>
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(()=>{})}</script>
+</body>
+</html>

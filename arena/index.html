@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2b2830">
+    <meta name="description" content="Arena de Combate Interativa - Lendas de Valdoria RPG">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <title>Arena de Combate - Lendas de Valdoria</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <style>
+        /* ─── FIXED VIEWPORT — NO SCROLL ─── */
+        body {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 0;
+        }
+        #app {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* ─── ARENA HEADER ─── */
+        .arena-header {
+            text-align: center;
+            padding: 6px 10px 4px;
+            border-bottom: 1px solid var(--v-border-gold);
+            flex-shrink: 0;
+        }
+        .arena-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--v-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(196,149,58,0.3);
+        }
+        .arena-subtitle {
+            font-size: 10px;
+            color: var(--v-text-dim);
+            margin-top: 1px;
+        }
+
+        /* ─── ZONE SECTIONS ─── */
+        .zone {
+            padding: 0 8px;
+            flex-shrink: 0;
+        }
+        .zone-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--v-gold-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 4px 4px 2px;
+        }
+
+        /* ─── ENTITY (COMPACT + EXPANDABLE) ─── */
+        .entity {
+            margin: 2px 0;
+            background: var(--v-bg-card);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius-sm);
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .entity.enemy { border-left: 3px solid var(--v-crimson); }
+        .entity.player { border-left: 3px solid var(--v-gold); cursor: default; }
+        .entity.ally { border-left: 3px solid var(--v-silver); }
+        .entity.active-turn {
+            border-color: var(--v-gold);
+            box-shadow: 0 0 8px rgba(196,149,58,0.15);
+        }
+        .entity.active-turn.enemy { border-left-color: var(--v-gold); }
+
+        /* Compact header row (always visible) */
+        .entity-header {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+        }
+        .entity-icon { font-size: 15px; flex-shrink: 0; line-height: 1; }
+        .compact-name {
+            flex: 1;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--v-text-bright);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+        }
+        .hp-mini {
+            width: 48px;
+            height: 5px;
+            background: #1a1720;
+            border-radius: 3px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .hp-mini-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        .hp-mini-fill.hp-high { background: linear-gradient(90deg, #388e3c, #4caf50); }
+        .hp-mini-fill.hp-mid { background: linear-gradient(90deg, #e65100, #f9a825); }
+        .hp-mini-fill.hp-low { background: linear-gradient(90deg, #b71c1c, #e53935); }
+        .hp-text-compact {
+            font-size: 10px;
+            color: var(--v-text-dim);
+            white-space: nowrap;
+            min-width: 32px;
+            text-align: right;
+        }
+        .status-icons-compact {
+            font-size: 10px;
+            white-space: nowrap;
+            max-width: 48px;
+            overflow: hidden;
+        }
+        .expand-arrow {
+            font-size: 9px;
+            color: var(--v-text-dim);
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+        .entity.expanded .expand-arrow { transform: rotate(90deg); }
+
+        /* Expanded details (hidden by default) */
+        .entity-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+            padding: 0 8px;
+        }
+        .entity.expanded .entity-details {
+            max-height: 160px;
+            padding: 0 8px 5px;
+        }
+
+        /* ─── PLAYER CARD (always shows bars) ─── */
+        .player-bars {
+            padding: 1px 8px 4px;
+        }
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin: 2px 0;
+        }
+        .bar-icon { font-size: 11px; flex-shrink: 0; width: 14px; text-align: center; }
+        .bar-track {
+            flex: 1;
+            height: 7px;
+            background: #1a1720;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #3a3540;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        .bar-fill.hp-high { background: linear-gradient(90deg, #388e3c, #4caf50); }
+        .bar-fill.hp-mid { background: linear-gradient(90deg, #e65100, #f9a825); }
+        .bar-fill.hp-low { background: linear-gradient(90deg, #b71c1c, #e53935); }
+        .bar-fill.mp { background: linear-gradient(90deg, #1565c0, #42a5f5); }
+        .bar-fill.ki { background: linear-gradient(90deg, #e65100, #ffa726); }
+        .bar-fill.fury { background: linear-gradient(90deg, #bf360c, #ff5722); }
+        .bar-fill.vigor { background: linear-gradient(90deg, #546e7a, #90a4ae); }
+        .bar-fill.inspiration { background: linear-gradient(90deg, #6a1b9a, #ab47bc); }
+        .bar-fill.pact { background: linear-gradient(90deg, #4a148c, #7b1fa2); }
+        .bar-fill.energy { background: linear-gradient(90deg, #827717, #cddc39); }
+        .bar-val {
+            font-size: 10px;
+            color: var(--v-text-dim);
+            min-width: 36px;
+            text-align: right;
+            white-space: nowrap;
+        }
+        .player-quick-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 1px 0;
+            font-size: 10px;
+            color: var(--v-text-dim);
+        }
+        .player-quick-stats .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+        }
+        .player-badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            padding: 2px 0;
+        }
+        .mini-badge {
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+        .mini-badge.status { background: rgba(196,149,58,0.15); border: 1px solid rgba(196,149,58,0.25); color: var(--v-gold-light); }
+        .mini-badge.cover { background: rgba(56,142,60,0.2); border: 1px solid rgba(56,142,60,0.35); color: #81c784; }
+        .mini-badge.conc { background: rgba(106,27,154,0.2); border: 1px solid rgba(106,27,154,0.35); color: #ce93d8; }
+
+        /* ─── EXPANDED ENTITY DETAILS (shared) ─── */
+        .bar-container { margin: 2px 0; }
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--v-text-dim);
+            margin-bottom: 1px;
+        }
+        .stats-row {
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+            color: var(--v-text-dim);
+            flex-wrap: wrap;
+            margin-top: 3px;
+        }
+        .stat-item { display: flex; align-items: center; gap: 2px; }
+        .status-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin-top: 3px;
+        }
+        .status-pill {
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 10px;
+            background: rgba(123,32,32,0.3);
+            color: var(--v-text);
+            border: 1px solid rgba(123,32,32,0.5);
+            white-space: nowrap;
+        }
+        .legendary-row {
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+            color: var(--v-gold-dim);
+            margin-top: 3px;
+        }
+        .entity-badge-sm {
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 10px;
+            background: var(--v-bg-raised);
+            color: var(--v-text-dim);
+            border: 1px solid var(--v-border);
+            white-space: nowrap;
+        }
+
+        /* ─── BATTLEFIELD (flexible, takes remaining space) ─── */
+        .battlefield {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 2px 8px;
+            gap: 2px;
+            border-top: 1px solid var(--v-border);
+            border-bottom: 1px solid var(--v-border);
+            background: linear-gradient(180deg, rgba(43,40,48,0.6) 0%, rgba(30,27,35,0.8) 100%);
+        }
+        .bf-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--v-gold-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 2px 4px 0;
+        }
+
+        /* Turn timeline */
+        .turn-timeline {
+            display: flex;
+            gap: 3px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+            padding: 2px 0;
+            align-items: center;
+        }
+        .turn-timeline::-webkit-scrollbar { display: none; }
+        .turn-entry {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 44px;
+            padding: 3px 6px;
+            border-radius: var(--v-radius-sm);
+            background: var(--v-bg-card);
+            border: 1px solid var(--v-border);
+            font-size: 10px;
+            color: var(--v-text-dim);
+        }
+        .turn-entry.active {
+            border-color: var(--v-gold);
+            box-shadow: 0 0 6px rgba(196,149,58,0.2);
+            color: var(--v-gold);
+        }
+        .turn-val { font-size: 11px; font-weight: 700; color: var(--v-text-bright); display: block; }
+        .turn-name {
+            max-width: 52px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            font-size: 9px;
+        }
+        .turn-arrow { color: var(--v-text-dim); font-size: 8px; flex-shrink: 0; }
+
+        /* Turn timeline colors */
+        .turn-entry.t-player { border-color: var(--v-gold); }
+        .turn-entry.t-player .turn-name { color: var(--v-gold); }
+        .turn-entry.t-enemy { border-color: var(--v-crimson); }
+        .turn-entry.t-enemy .turn-name { color: var(--v-crimson); }
+        .turn-entry.t-ally { border-color: var(--v-silver); }
+        .turn-entry.t-ally .turn-name { color: var(--v-silver); }
+
+        /* Dice area (compact) */
+        @keyframes diceRoll {
+            0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); opacity: 1; }
+        }
+        @keyframes dicePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+        .dice-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-shrink: 0;
+            padding: 2px 0;
+        }
+        .dice-box-compact {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .dice-emoji {
+            font-size: 28px;
+            line-height: 1;
+            animation: dicePulse 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 4px rgba(196,149,58,0.2));
+        }
+        .dice-emoji.rolling { animation: diceRoll 0.6s ease !important; }
+        .dice-result {
+            font-size: 16px;
+            font-weight: 800;
+            font-family: var(--v-font-mono, monospace);
+            color: var(--v-gold);
+            text-shadow: 0 0 6px rgba(196,149,58,0.3);
+            min-height: 18px;
+        }
+        .dice-result.crit { color: #ff9800; text-shadow: 0 0 10px rgba(255,152,0,0.5); }
+        .dice-result.miss { color: var(--v-danger, #e53935); }
+        .dice-result.hit { color: var(--v-gold-light); }
+        .dice-label {
+            font-size: 9px;
+            color: var(--v-text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .dice-label.crit { color: #ff9800; }
+        .dice-label.miss { color: var(--v-danger, #e53935); }
+        .dice-label.hit { color: var(--v-success, #4caf50); }
+
+        /* Combat feed */
+        .combat-feed {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .feed-entry {
+            font-size: 10px;
+            color: var(--v-text-dim);
+            padding: 1px 0;
+            border-bottom: 1px solid rgba(62,56,69,0.3);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .feed-entry:last-child { color: var(--v-text); font-weight: 500; border-bottom: none; }
+
+        /* ─── ACTION BAR (flex item at bottom, not fixed) ─── */
+        .action-bar {
+            flex-shrink: 0;
+            background: linear-gradient(180deg, var(--v-bg-raised) 0%, var(--v-bg) 100%);
+            border-top: 1px solid var(--v-border-gold);
+            padding: 5px 10px max(5px, env(safe-area-inset-bottom)) 10px;
+        }
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+        }
+        .action-btn {
+            padding: 8px 6px;
+            border-radius: var(--v-radius-sm);
+            border: 1px solid var(--v-border);
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            color: var(--v-text);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+        .action-btn:active { transform: scale(0.96); background: var(--v-bg-raised); }
+        .action-btn.primary { border-color: var(--v-gold-dim); color: var(--v-gold-light); }
+        .action-btn.danger { border-color: rgba(123,32,32,0.5); color: #e08080; }
+        .action-btn.full-width { grid-column: 1 / -1; }
+        .action-btn .action-chance { font-size: 10px; opacity: 0.7; }
+        .action-btn.disabled { opacity: 0.4; pointer-events: none; }
+
+        /* ─── SKILL/TARGET OVERLAYS ─── */
+        .skill-overlay, .target-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .skill-overlay.active, .target-overlay.active { display: flex; }
+        .skill-panel, .target-panel {
+            background: var(--v-bg);
+            border-top: 1px solid var(--v-border-gold);
+            border-radius: var(--v-radius-lg) var(--v-radius-lg) 0 0;
+            padding: 12px 16px max(12px, env(safe-area-inset-bottom)) 16px;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        .skill-panel-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--v-gold);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .skill-item, .target-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: var(--v-radius-sm);
+            background: var(--v-bg-card);
+            border: 1px solid var(--v-border);
+            cursor: pointer;
+        }
+        .skill-item:active, .target-item:active { background: var(--v-bg-raised); }
+        .skill-name { font-size: 13px; color: var(--v-text); font-weight: 600; }
+        .skill-meta { font-size: 11px; color: var(--v-text-dim); }
+        .skill-close {
+            text-align: center;
+            padding: 10px;
+            color: var(--v-text-dim);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        /* ─── BIOME THEMES ─── */
+        .biome-forest .battlefield { background: linear-gradient(180deg, rgba(27,94,32,0.12) 0%, rgba(30,27,35,0.8) 100%); }
+        .biome-forest .arena-header { border-bottom-color: rgba(27,94,32,0.3); }
+        .biome-cave .battlefield { background: linear-gradient(180deg, rgba(20,18,25,0.9) 0%, rgba(15,13,18,0.95) 100%); }
+        .biome-cave .arena-header { border-bottom-color: rgba(80,70,90,0.3); }
+        .biome-volcanic .battlefield { background: linear-gradient(180deg, rgba(191,54,12,0.12) 0%, rgba(30,27,35,0.8) 100%); }
+        .biome-volcanic .arena-header { border-bottom-color: rgba(191,54,12,0.3); }
+        .biome-snow .battlefield { background: linear-gradient(180deg, rgba(200,220,240,0.10) 0%, rgba(30,27,35,0.8) 100%); }
+        .biome-snow .arena-header { border-bottom-color: rgba(200,220,240,0.3); }
+        .biome-desert .battlefield { background: linear-gradient(180deg, rgba(230,190,100,0.10) 0%, rgba(30,27,35,0.8) 100%); }
+        .biome-desert .arena-header { border-bottom-color: rgba(230,190,100,0.3); }
+        .biome-swamp .battlefield { background: linear-gradient(180deg, rgba(56,142,60,0.08) 0%, rgba(30,27,35,0.85) 100%); }
+        .biome-swamp .arena-header { border-bottom-color: rgba(56,142,60,0.3); }
+        .biome-graveyard .battlefield { background: linear-gradient(180deg, rgba(100,80,120,0.10) 0%, rgba(20,18,25,0.9) 100%); }
+        .biome-graveyard .arena-header { border-bottom-color: rgba(100,80,120,0.3); }
+        .biome-plains .battlefield { background: linear-gradient(180deg, rgba(160,180,80,0.08) 0%, rgba(30,27,35,0.8) 100%); }
+        .biome-plains .arena-header { border-bottom-color: rgba(160,180,80,0.3); }
+        .biome-mountain .battlefield { background: linear-gradient(180deg, rgba(120,120,140,0.10) 0%, rgba(30,27,35,0.85) 100%); }
+        .biome-mountain .arena-header { border-bottom-color: rgba(120,120,140,0.3); }
+        .biome-dungeon .battlefield { background: linear-gradient(180deg, rgba(40,35,50,0.9) 0%, rgba(15,13,18,0.95) 100%); }
+        .biome-dungeon .arena-header { border-bottom-color: rgba(80,60,100,0.3); }
+        .biome-ruins .battlefield { background: linear-gradient(180deg, rgba(140,120,100,0.08) 0%, rgba(30,27,35,0.85) 100%); }
+        .biome-ruins .arena-header { border-bottom-color: rgba(140,120,100,0.3); }
+
+        /* ─── NO DATA STATE ─── */
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--v-text-dim);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .no-data h2 { color: var(--v-gold); margin-bottom: 10px; }
+
+        /* ─── REDUCED MOTION ─── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <div class="skill-overlay" id="skillOverlay">
+        <div class="skill-panel" id="skillPanel"></div>
+    </div>
+    <div class="target-overlay" id="targetOverlay">
+        <div class="target-panel" id="targetPanel"></div>
+    </div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   ARENA DE COMBATE - Lendas de Valdoria
+   Fixed-viewport combat webapp with compact UI
+   ═══════════════════════════════════════════════ */
+
+// ─── INIT ───
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+const params = new URLSearchParams(window.location.search);
+const token = params.get('token') || '';
+const rawData = params.get('data');
+
+function b64Decode(str) {
+    const std = str.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = std.length % 4;
+    const padded = pad ? std + '='.repeat(4 - pad) : std;
+    return atob(padded);
+}
+
+if (!rawData) {
+    document.getElementById('app').innerHTML = '<div class="no-data"><h2>Arena de Combate</h2><p>Nenhum dado de combate recebido.</p></div>';
+} else {
+    try {
+        const state = JSON.parse(b64Decode(rawData));
+        renderArena(state);
+    } catch(e) {
+        document.getElementById('app').innerHTML = '<div class="no-data"><h2>Erro</h2><p>Dados de combate corrompidos.</p></div>';
+    }
+}
+
+// ─── CONSTANTS ───
+const BIOME_NAMES = {
+    forest:'Floresta', cave:'Caverna', graveyard:'Cemiterio', swamp:'Pantano',
+    volcanic:'Vulcanico', snow:'Neve', desert:'Deserto', mountain:'Montanha',
+    plains:'Planicie', dungeon:'Masmorra', city:'Cidade', ruins:'Ruinas',
+};
+
+const STATUS_ICONS = {
+    poisoned:'🧪', blinded:'🌑', paralyzed:'⚡', prone:'🦶', restrained:'🕸️',
+    frightened:'😱', stunned:'💫', grappled:'👐', petrified:'🪨', exhausted:'😫',
+    marked:'🎯', blessed:'✨', hexed:'👁️', burning:'🔥', frozen:'❄️',
+    sleeping:'💤', charmed:'💖', deafened:'🔇', incapacitated:'🚫',
+    invisible:'👻', surprised:'❗', exposed:'🎯', inspired:'🎵',
+    concentrated:'🔮', raging:'💢', wild_shaped:'🐾',
+};
+
+const DMG_ICONS = {
+    slashing:'🗡️', piercing:'🏹', bludgeoning:'🔨', fire:'🔥', cold:'❄️',
+    lightning:'⚡', necrotic:'💀', radiant:'✨', psychic:'🧠', thunder:'💥',
+    poison:'🧪', acid:'🟢', force:'💠',
+};
+
+const ATK_TYPE_LABELS = { melee:'Corpo a corpo', ranged:'A distancia', magic:'Magico' };
+
+const RES_CLASS_MAP = {
+    'Mana':'mp', 'Ki':'ki', 'Fúria':'fury', 'Vigor':'vigor',
+    'Inspiração':'inspiration', 'Pacto':'pact', 'Energia':'energy',
+};
+
+const RES_ICON_MAP = {
+    'Mana':'💧', 'Ki':'⚡', 'Fúria':'💢', 'Vigor':'💪',
+    'Inspiração':'🎵', 'Pacto':'👁️', 'Energia':'⚡',
+};
+
+// ─── MAIN RENDER ───
+function renderArena(s) {
+    const app = document.getElementById('app');
+    document.body.classList.add('biome-' + (s.bio || 'forest'));
+
+    const biomeName = BIOME_NAMES[s.bio] || s.bio || 'Desconhecido';
+    const weatherStr = s.w ? `${s.w.ico} ${s.w.l}` : '☀️ Limpo';
+
+    // Determine active turn entity
+    const activeTurn = s.to && s.to[0] ? s.to[0] : null;
+
+    let html = '';
+
+    // Header
+    html += `<div class="arena-header">
+        <div class="arena-title">Arena de Combate</div>
+        <div class="arena-subtitle">Rodada ${s.rn || 1} · ${biomeName} · ${weatherStr}</div>
+    </div>`;
+
+    // Enemy Zone (compact rows, expandable)
+    html += '<div class="zone"><div class="zone-label">Inimigos</div>';
+    if (s.e && s.e.length > 0) {
+        s.e.forEach((e, i) => {
+            const isActive = activeTurn && activeTurn.t === 'e' && activeTurn.n === e.n;
+            html += renderEntity(e, 'enemy', i, isActive);
+        });
+    }
+    html += '</div>';
+
+    // Player Zone (always shows HP + resource bars)
+    html += '<div class="zone"><div class="zone-label">Seu Personagem</div>';
+    html += renderPlayerCard(s.p);
+    html += '</div>';
+
+    // Allies Zone (compact rows, expandable)
+    if (s.a && s.a.length > 0) {
+        html += '<div class="zone"><div class="zone-label">Aliados</div>';
+        s.a.forEach((a, i) => {
+            const isActive = activeTurn && activeTurn.t === 'a' && activeTurn.n === a.n;
+            html += renderEntity(a, 'ally', i, isActive);
+        });
+        html += '</div>';
+    }
+
+    // Battlefield (flexible — takes remaining space)
+    html += '<div class="battlefield">';
+    html += '<div class="bf-label">Campo de Batalha</div>';
+    html += renderTurnTimeline(s.to);
+    html += `<div class="dice-row">
+        <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>
+        <div class="dice-box-compact"><div class="dice-emoji" id="dice2">🎲</div><div><div class="dice-result" id="diceResult2"></div><div class="dice-label" id="diceLabel2">dano</div></div></div>
+    </div>`;
+    if (s.feed && s.feed.length > 0) {
+        const recentFeed = s.feed.slice(-3);
+        html += '<div class="combat-feed">';
+        recentFeed.forEach(f => { html += `<div class="feed-entry">${escHtml(f)}</div>`; });
+        html += '</div>';
+    }
+    html += '</div>';
+
+    // Action Bar (flex item at bottom — NOT fixed position)
+    if (s.ph === 'active') {
+        html += renderActionBar(s.acts, s.e, s.p);
+    } else {
+        html += `<div class="action-bar"><div style="text-align:center;color:var(--v-text-dim);font-size:12px;padding:8px">${s.ph === 'init' ? '⚔️ Aguardando inicio do combate...' : '🎲 Encontro detectado — Role iniciativa no Telegram'}</div></div>`;
+    }
+
+    app.innerHTML = html;
+
+    // Init dice animation
+    initDice(s.lr);
+
+    // Bind action button events
+    bindActions(s);
+
+    // Bind expand/collapse on entity cards
+    bindExpandCollapse();
+
+    // Auto-expand active turn entity (if not player)
+    if (activeTurn && activeTurn.t !== 'p') {
+        const activeEl = document.querySelector('.entity.active-turn');
+        if (activeEl) activeEl.classList.add('expanded');
+    }
+}
+
+// ─── ENTITY CARD (COMPACT + EXPANDABLE) ───
+function renderEntity(e, type, idx, isActiveTurn) {
+    const pct = e.mhp > 0 ? (e.hp / e.mhp) : 0;
+    const hpClass = pct > 0.75 ? 'hp-high' : pct > 0.40 ? 'hp-mid' : 'hp-low';
+
+    // Compact status icons
+    let statusIcons = '';
+    if (e.se && e.se.length > 0) {
+        statusIcons = e.se.map(s => STATUS_ICONS[s] || '').join('');
+    }
+
+    // Build expanded details
+    let detailsHtml = '';
+    if (type === 'enemy') {
+        const atkLabel = ATK_TYPE_LABELS[e.at] || e.at || '';
+        const dmgIcon = DMG_ICONS[e.dt] || '';
+
+        detailsHtml += `<div class="bar-container">
+            <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
+            <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct*100}%"></div></div>
+        </div>`;
+        detailsHtml += `<div class="stats-row">
+            <span class="stat-item">🛡️ CA ${e.ac}</span>
+            <span class="stat-item">⚔️ +${e.atk}</span>
+            <span class="stat-item">${dmgIcon} ${e.dmg}</span>
+            <span class="entity-badge-sm">${atkLabel}</span>
+        </div>`;
+
+        if (e.leg) {
+            detailsHtml += '<div class="legendary-row">';
+            detailsHtml += '<span>👑 Boss</span>';
+            if (e.leg.lrm > 0) detailsHtml += `<span>🛡️ Resist. ${e.leg.lr}/${e.leg.lrm}</span>`;
+            if (e.leg.lam > 0) detailsHtml += `<span>⚡ Ações ${e.leg.la}/${e.leg.lam}</span>`;
+            detailsHtml += '</div>';
+        }
+
+        if (e.se && e.se.length > 0) {
+            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill">${STATUS_ICONS[s]||''} ${s}</span>`).join('') + '</div>';
+        }
+    } else {
+        // Ally expanded
+        detailsHtml += `<div class="bar-container">
+            <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
+            <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct*100}%"></div></div>
+        </div>`;
+        if (e.ac) {
+            detailsHtml += `<div class="stats-row"><span class="stat-item">🛡️ CA ${e.ac}</span></div>`;
+        }
+        if (e.se && e.se.length > 0) {
+            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill">${STATUS_ICONS[s]||''} ${s}</span>`).join('') + '</div>';
+        }
+    }
+
+    const activeClass = isActiveTurn ? ' active-turn' : '';
+    const dataAttr = type === 'enemy' ? ` data-enemy-idx="${idx}"` : '';
+
+    return `<div class="entity ${type}${activeClass}"${dataAttr}>
+        <div class="entity-header">
+            <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
+            <span class="compact-name">${escHtml(e.n)}</span>
+            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct*100}%"></div></div>
+            <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
+            ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
+            <span class="expand-arrow">▸</span>
+        </div>
+        <div class="entity-details">${detailsHtml}</div>
+    </div>`;
+}
+
+// ─── PLAYER CARD (always shows HP + resource bars) ───
+function renderPlayerCard(p) {
+    const hpPct = p.mhp > 0 ? (p.hp / p.mhp) : 0;
+    const hpClass = hpPct > 0.75 ? 'hp-high' : hpPct > 0.40 ? 'hp-mid' : 'hp-low';
+    const mpPct = p.mmp > 0 ? (p.mp / p.mmp) : 0;
+    const resClass = RES_CLASS_MAP[p.res] || 'mp';
+    const resIcon = RES_ICON_MAP[p.res] || '💧';
+
+    // Compact badges for status, cover, concentration
+    const badges = [];
+    if (p.se && p.se.length > 0) {
+        p.se.forEach(s => badges.push(`<span class="mini-badge status">${STATUS_ICONS[s]||''} ${s}</span>`));
+    }
+    if (p.cov) {
+        badges.push(`<span class="mini-badge cover">${p.cov.ico} +${p.cov.ac} CA</span>`);
+    }
+    if (p.conc) {
+        badges.push(`<span class="mini-badge conc">🔮 ${escHtml(p.conc)}</span>`);
+    }
+    const badgesHtml = badges.length > 0 ? `<div class="player-badge-row">${badges.join('')}</div>` : '';
+
+    return `<div class="entity player">
+        <div class="entity-header">
+            <span class="entity-icon">${p.ico||'👤'}</span>
+            <span class="compact-name">${escHtml(p.n)}</span>
+            <span class="hp-text-compact" style="color:var(--v-gold-dim);font-size:10px">${escHtml(p.c)} Lv.${p.l}</span>
+        </div>
+        <div class="player-bars">
+            <div class="bar-row">
+                <span class="bar-icon">❤️</span>
+                <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${hpPct*100}%"></div></div>
+                <span class="bar-val">${p.hp}/${p.mhp}</span>
+            </div>
+            <div class="bar-row">
+                <span class="bar-icon">${resIcon}</span>
+                <div class="bar-track"><div class="bar-fill ${resClass}" style="width:${mpPct*100}%"></div></div>
+                <span class="bar-val">${p.mp}/${p.mmp}</span>
+            </div>
+            <div class="player-quick-stats">
+                <span class="stat-item">🛡️${p.ac}</span>
+                <span class="stat-item">⚔️+${p.atk}</span>
+                <span class="stat-item">🗡️${p.dmg}</span>
+            </div>
+            ${badgesHtml}
+        </div>
+    </div>`;
+}
+
+// ─── TURN TIMELINE ───
+function renderTurnTimeline(to) {
+    if (!to || to.length === 0) return '';
+    let html = '<div class="turn-timeline">';
+    to.forEach((entry, i) => {
+        const isFirst = i === 0;
+        const tCls = entry.t === 'p' ? 't-player' : entry.t === 'a' ? 't-ally' : 't-enemy';
+        if (i > 0) html += '<div class="turn-arrow">▸</div>';
+        html += `<div class="turn-entry ${isFirst?'active':''} ${tCls}">
+            <span class="turn-val">${entry.v}</span>
+            <span class="turn-name">${escHtml(entry.n)}</span>
+        </div>`;
+    });
+    html += '</div>';
+    return html;
+}
+
+// ─── ACTION BAR ───
+function renderActionBar(acts, enemies, player) {
+    if (!acts) return '';
+    const hitChance = acts.hit || 50;
+    const fleeChance = acts.flee || 50;
+    const hasSkills = acts.skills && acts.skills.length > 0;
+    const itemCount = acts.items || 0;
+
+    let skillBtnText = '🧠 Habilidade';
+    if (hasSkills && acts.skills.length === 1) {
+        const sk = acts.skills[0];
+        skillBtnText = `🧠 ${sk.n} (${sk.ch}%)`;
+    } else if (!hasSkills) {
+        skillBtnText = `🚫 Sem ${player.res || 'Mana'}`;
+    }
+
+    return `<div class="action-bar"><div class="action-grid">
+        <button class="action-btn primary" data-action="attack">⚔️ Atacar <span class="action-chance">${hitChance}%</span></button>
+        <button class="action-btn ${hasSkills?'':'disabled'}" data-action="skill">${skillBtnText}</button>
+        <button class="action-btn" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
+        <button class="action-btn danger" data-action="flee">🏃 Fugir <span class="action-chance">${fleeChance}%</span></button>
+        <button class="action-btn full-width" data-action="pass">⏭️ Passar Turno</button>
+    </div></div>`;
+}
+
+// ─── EXPAND / COLLAPSE (accordion) ───
+function bindExpandCollapse() {
+    document.querySelectorAll('.entity:not(.player)').forEach(el => {
+        el.addEventListener('click', (ev) => {
+            // Don't toggle if clicking inside action bar overlay buttons
+            if (ev.target.closest('.action-btn')) return;
+            const wasExpanded = el.classList.contains('expanded');
+            // Collapse all other entities
+            document.querySelectorAll('.entity.expanded').forEach(e => e.classList.remove('expanded'));
+            // Toggle clicked entity
+            if (!wasExpanded) el.classList.add('expanded');
+        });
+    });
+}
+
+// ─── BIND ACTIONS ───
+function bindActions(state) {
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.dataset.action;
+            if (btn.classList.contains('disabled')) return;
+
+            const enemies = state.e || [];
+            const skills = state.acts?.skills || [];
+
+            if (action === 'attack') {
+                if (enemies.length > 1) {
+                    showTargetPicker(enemies, 'attack');
+                } else {
+                    sendAction({ type: 'attack', target: 0 });
+                }
+            } else if (action === 'skill') {
+                if (skills.length === 1) {
+                    if (enemies.length > 1) {
+                        showTargetPicker(enemies, 'skill', skills[0].id);
+                    } else {
+                        sendAction({ type: 'skill', skill_id: skills[0].id, target: 0 });
+                    }
+                } else if (skills.length > 1) {
+                    showSkillPicker(skills, enemies);
+                }
+            } else if (action === 'flee') {
+                sendAction({ type: 'flee' });
+            } else if (action === 'pass') {
+                sendAction({ type: 'pass' });
+            } else if (action === 'items') {
+                sendAction({ type: 'items' });
+            }
+        });
+    });
+}
+
+// ─── SEND ACTION ───
+let _actionSent = false;
+function sendAction(actionData) {
+    if (_actionSent) return;
+    _actionSent = true;
+    document.querySelectorAll('.action-btn').forEach(b => b.classList.add('disabled'));
+
+    if (!tg) { console.log('No Telegram WebApp', actionData); _actionSent = false; return; }
+    const payload = {
+        action: 'combat_action',
+        token: token,
+        ...actionData,
+    };
+    tg.sendData(JSON.stringify(payload));
+    setTimeout(() => { try { tg.close(); } catch(e) {} }, 300);
+}
+
+// ─── SKILL PICKER ───
+function showSkillPicker(skills, enemies) {
+    const panel = document.getElementById('skillPanel');
+    const overlay = document.getElementById('skillOverlay');
+    let html = '<div class="skill-panel-title">Habilidades</div>';
+    skills.forEach(sk => {
+        html += `<div class="skill-item" data-skill-id="${sk.id}">
+            <div><div class="skill-name">${escHtml(sk.n)}</div><div class="skill-meta">Custo: ${sk.c} · Chance: ${sk.ch}%</div></div>
+        </div>`;
+    });
+    html += '<div class="skill-close" id="skillClose">Cancelar</div>';
+    panel.innerHTML = html;
+    overlay.classList.add('active');
+
+    panel.querySelectorAll('.skill-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const skillId = item.dataset.skillId;
+            overlay.classList.remove('active');
+            if (enemies.length > 1) {
+                showTargetPicker(enemies, 'skill', skillId);
+            } else {
+                sendAction({ type: 'skill', skill_id: skillId, target: 0 });
+            }
+        });
+    });
+    document.getElementById('skillClose').addEventListener('click', () => {
+        overlay.classList.remove('active');
+    });
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('active');
+    });
+}
+
+// ─── TARGET PICKER ───
+function showTargetPicker(enemies, actionType, skillId) {
+    const panel = document.getElementById('targetPanel');
+    const overlay = document.getElementById('targetOverlay');
+    let html = '<div class="skill-panel-title">Escolher Alvo</div>';
+    enemies.forEach((e, i) => {
+        const pct = e.mhp > 0 ? Math.round((e.hp/e.mhp)*100) : 0;
+        html += `<div class="target-item" data-target="${i}">
+            <div><span>${e.ico||'👹'}</span> <b>${escHtml(e.n)}</b></div>
+            <div class="skill-meta">${e.hp}/${e.mhp} HP (${pct}%)</div>
+        </div>`;
+    });
+    html += '<div class="skill-close" id="targetClose">Cancelar</div>';
+    panel.innerHTML = html;
+    overlay.classList.add('active');
+
+    panel.querySelectorAll('.target-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const target = parseInt(item.dataset.target);
+            overlay.classList.remove('active');
+            if (actionType === 'skill') {
+                sendAction({ type: 'skill', skill_id: skillId, target: target });
+            } else {
+                sendAction({ type: 'attack', target: target });
+            }
+        });
+    });
+    document.getElementById('targetClose').addEventListener('click', () => {
+        overlay.classList.remove('active');
+    });
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('active');
+    });
+}
+
+// ─── DICE ANIMATION ───
+function initDice(lastRoll) {
+    const d1 = document.getElementById('dice1');
+    const d2 = document.getElementById('dice2');
+    if (!d1 || !d2) return;
+
+    if (lastRoll && lastRoll.r) {
+        d1.style.animation = 'none';
+        void d1.offsetHeight;
+        d1.classList.add('rolling');
+        setTimeout(() => {
+            d1.classList.remove('rolling');
+            d1.textContent = lastRoll.r === 20 ? '🌟' : lastRoll.r === 1 ? '💀' : '🎲';
+            const r1 = document.getElementById('diceResult1');
+            const l1 = document.getElementById('diceLabel1');
+            r1.textContent = lastRoll.r;
+            if (lastRoll.r === 20) {
+                r1.classList.add('crit');
+                l1.textContent = 'CRÍTICO!';
+                l1.classList.add('crit');
+            } else if (lastRoll.r === 1) {
+                r1.classList.add('miss');
+                l1.textContent = 'FALHA!';
+                l1.classList.add('miss');
+            } else {
+                l1.textContent = lastRoll.t === 'skill' ? 'habilidade' : 'ataque';
+                l1.classList.add('hit');
+            }
+        }, 700);
+
+        if (lastRoll.d) {
+            d2.style.animation = 'none';
+            void d2.offsetHeight;
+            setTimeout(() => {
+                d2.classList.add('rolling');
+                setTimeout(() => {
+                    d2.classList.remove('rolling');
+                    d2.textContent = lastRoll.d > 0 ? '⚔️' : '🛡️';
+                    document.getElementById('diceResult2').textContent = lastRoll.d;
+                    document.getElementById('diceLabel2').textContent = 'dano';
+                }, 700);
+            }, 300);
+        }
+    }
+}
+
+// ─── UTILS ───
+function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

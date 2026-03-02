@@ -1,0 +1,66 @@
+name: Validate Webapps
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check file sizes
+        run: |
+          echo "=== File Size Report ==="
+          status=0
+          for f in $(find . -name "*.html" -o -name "*.css" -o -name "*.js" | grep -v node_modules | grep -v .git | sort); do
+            size=$(wc -c < "$f")
+            size_kb=$((size / 1024))
+            if [ "$size" -gt 100000 ]; then
+              echo "WARNING: $f — ${size_kb}KB (>100KB)"
+              status=1
+            else
+              echo "  OK: $f — ${size_kb}KB"
+            fi
+          done
+          exit $status
+
+      - name: Validate HTML structure
+        run: |
+          echo "=== HTML Structure Check ==="
+          for f in $(find . -name "*.html" | grep -v node_modules | grep -v .git); do
+            echo "Checking $f..."
+            # Check for DOCTYPE
+            if ! head -1 "$f" | grep -qi "doctype"; then
+              echo "  ERROR: Missing DOCTYPE in $f"
+              exit 1
+            fi
+            # Check for charset
+            if ! grep -q 'charset="utf-8"' "$f" && ! grep -q "charset=utf-8" "$f"; then
+              echo "  ERROR: Missing charset in $f"
+              exit 1
+            fi
+            # Check for viewport meta
+            if ! grep -q 'viewport' "$f"; then
+              echo "  WARNING: Missing viewport meta in $f"
+            fi
+            echo "  OK"
+          done
+
+      - name: Validate CSS syntax
+        run: |
+          echo "=== CSS Syntax Check ==="
+          for f in $(find . -name "*.css" | grep -v node_modules | grep -v .git); do
+            echo "Checking $f..."
+            # Check for unmatched braces
+            opens=$(grep -o '{' "$f" | wc -l)
+            closes=$(grep -o '}' "$f" | wc -l)
+            if [ "$opens" != "$closes" ]; then
+              echo "  ERROR: Unmatched braces in $f (opens=$opens, closes=$closes)"
+              exit 1
+            fi
+            echo "  OK (balanced braces: $opens)"
+          done

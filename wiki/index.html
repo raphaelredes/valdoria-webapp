@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2b2830">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <title>Wiki Dev — Lendas de Valdoria</title>
+    <style>
+        body { display:flex; flex-direction:column; }
+
+        /* ─── Auth Gate ─── */
+        .gate { display:flex; flex-direction:column; align-items:center; justify-content:center;
+                min-height:80vh; text-align:center; padding:32px 24px; animation:v-fadeIn .5s ease; }
+        .gate-icon { font-size:64px; margin-bottom:16px; }
+        .gate-title { font-size:18px; color:var(--v-gold); font-weight:700; letter-spacing:1px; margin-bottom:8px; }
+        .gate-text  { font-size:13px; color:var(--v-text-dim); line-height:1.5; max-width:280px; }
+
+        /* ─── Header ─── */
+        .wiki-header { padding:20px 16px 12px; text-align:center;
+                       background:linear-gradient(180deg,#352f38 0%,var(--v-bg) 100%); position:relative; }
+        .wiki-header::before { content:''; position:absolute; top:0; left:0; right:0; height:2px;
+                               background:linear-gradient(90deg,transparent,var(--v-crimson),var(--v-gold),var(--v-crimson),transparent); }
+        .wiki-header h1 { font-size:18px; color:var(--v-gold); letter-spacing:3px; text-transform:uppercase;
+                          text-shadow:0 0 16px rgba(196,149,58,.4); font-weight:900; margin-bottom:4px; }
+        .wiki-header .sub { font-size:11px; color:var(--v-text-dim); letter-spacing:1px; }
+
+        /* ─── Search ─── */
+        .search-wrap { padding:12px 16px 4px; }
+        .search-wrap input { width:100%; padding:10px 14px; background:var(--v-bg-card); border:1px solid var(--v-border);
+                             border-radius:var(--v-radius); color:var(--v-text); font-size:13px; outline:none; }
+        .search-wrap input:focus { border-color:var(--v-gold-dim); }
+        .search-wrap input::placeholder { color:var(--v-text-dim); }
+
+        /* ─── Topic Grid ─── */
+        .topics { padding:8px 16px 24px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .topic-card { display:flex; flex-direction:column; align-items:center; text-align:center;
+                      padding:18px 10px 14px; background:linear-gradient(165deg,var(--v-bg-card) 0%,#282430 100%);
+                      border:1px solid var(--v-border); border-radius:var(--v-radius); cursor:pointer;
+                      transition:all .25s ease; box-shadow:0 2px 8px rgba(0,0,0,.3); }
+        .topic-card:active { transform:scale(.96); }
+        .topic-card:hover  { border-color:var(--v-gold-dim); box-shadow:0 0 12px rgba(196,149,58,.12); }
+        .topic-card.hidden { display:none; }
+        .tc-icon { font-size:28px; margin-bottom:6px; }
+        .tc-name { font-size:13px; font-weight:700; color:var(--v-text-bright); margin-bottom:3px; }
+        .tc-desc { font-size:10px; color:var(--v-text-dim); line-height:1.3; }
+
+        /* ─── Article View ─── */
+        .article { display:none; padding:16px; animation:v-fadeIn .35s ease; }
+        .article.active { display:block; }
+        .article h2 { font-size:16px; color:var(--v-gold); margin:20px 0 8px; border-bottom:1px solid var(--v-border); padding-bottom:4px; }
+        .article h2:first-child { margin-top:0; }
+        .article h3 { font-size:14px; color:var(--v-silver); margin:14px 0 6px; }
+        .article p  { font-size:13px; color:var(--v-text); line-height:1.6; margin:0 0 10px; }
+        .article ul { margin:0 0 10px 18px; padding:0; }
+        .article li { font-size:13px; color:var(--v-text); line-height:1.5; margin-bottom:4px; }
+        .article code { background:var(--v-bg-accent); color:var(--v-gold); padding:1px 5px; border-radius:3px; font-size:12px; }
+        .article pre { background:var(--v-bg-accent); border:1px solid var(--v-border); border-radius:var(--v-radius);
+                       padding:12px; overflow-x:auto; margin:0 0 12px; }
+        .article pre code { background:none; padding:0; color:var(--v-text); font-size:11px; line-height:1.5; }
+        .article table { width:100%; border-collapse:collapse; margin:0 0 12px; font-size:12px; }
+        .article th { background:var(--v-bg-accent); color:var(--v-gold); padding:6px 8px; text-align:left; border:1px solid var(--v-border); }
+        .article td { padding:6px 8px; border:1px solid var(--v-border); color:var(--v-text); }
+        .article .tag { display:inline-block; background:var(--v-bg-accent); color:var(--v-gold-dim); padding:2px 8px;
+                        border-radius:10px; font-size:10px; margin:0 4px 4px 0; }
+
+        /* ─── Back Button ─── */
+        .back-bar { padding:12px 16px; }
+        .back-btn { width:100%; padding:11px; background:var(--v-bg-card); border:1px solid var(--v-border);
+                    border-radius:var(--v-radius); color:var(--v-text-bright); font-size:13px; font-weight:600;
+                    cursor:pointer; transition:all .2s; }
+        .back-btn:hover { border-color:var(--v-gold-dim); }
+    </style>
+</head>
+<body>
+
+<!-- Auth Gate (shown when not authorized) -->
+<div id="gate-blocked" class="gate" style="display:none">
+    <div class="gate-icon">🔒</div>
+    <div class="gate-title">Acesso Restrito</div>
+    <div class="gate-text">Esta wiki e exclusiva para desenvolvedores autorizados do projeto Lendas de Valdoria.</div>
+</div>
+<div id="gate-no-tg" class="gate" style="display:none">
+    <div class="gate-icon">📱</div>
+    <div class="gate-title">Acesse via Telegram</div>
+    <div class="gate-text">Abra esta pagina atraves do bot Lendas de Valdoria no Telegram para autenticar.</div>
+</div>
+
+<!-- Wiki Content (shown when authorized) -->
+<div id="wiki-app" style="display:none">
+    <!-- Main View -->
+    <div id="main-view">
+        <div class="wiki-header">
+            <h1>Wiki Dev</h1>
+            <div class="sub">Documentacao Tecnica Interna</div>
+        </div>
+        <div class="search-wrap">
+            <input type="text" id="search" placeholder="Buscar topico..." oninput="filterTopics(this.value)">
+        </div>
+        <div class="topics" id="topics-grid"></div>
+    </div>
+
+    <!-- Article View -->
+    <div id="article-view" style="display:none">
+        <div class="wiki-header">
+            <h1 id="article-title"></h1>
+        </div>
+        <div class="article active" id="article-body"></div>
+        <div class="back-bar">
+            <button class="back-btn" onclick="showMain()">&#8592; Voltar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   AUTH — Telegram WebApp user verification
+   ═══════════════════════════════════════════════════════════════════ */
+const AUTHORIZED_IDS = [842486022];
+
+const tg = window.Telegram?.WebApp;
+const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
+
+function initAuth() {
+    if (!tg || !tg.initDataUnsafe?.user) {
+        document.getElementById('gate-no-tg').style.display = 'flex';
+        return false;
+    }
+    tg.ready(); tg.expand();
+    tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg);
+    const uid = tg.initDataUnsafe.user.id;
+    if (!AUTHORIZED_IDS.includes(uid)) {
+        document.getElementById('gate-blocked').style.display = 'flex';
+        return false;
+    }
+    document.getElementById('wiki-app').style.display = 'block';
+    return true;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   WIKI TOPICS — Technical documentation content
+   ═══════════════════════════════════════════════════════════════════ */
+const TOPICS = [
+{
+    id: 'arch', icon: '🏗️', name: 'Arquitetura Geral', desc: 'GSIA, modulos e fluxo de requests',
+    body: `<h2>Graph-Based Semantic Interaction Architecture (GSIA)</h2>
+<p>O jogo implementa uma arquitetura baseada em grafos para navegacao, dialogos e gerenciamento de estado.</p>
+<h3>Fluxo de Request</h3>
+<pre><code>Telegram → bot.py → GameEngine.process_callback()
+  → priority routing → ActionHandlers.handle()
+  → domain-specific handlers (actions/*.py)</code></pre>
+<h3>GameEngine</h3>
+<p>Classe central em <code>game/core/game.py</code>. Inicializa e conecta todos os subsistemas:</p>
+<ul>
+<li><code>CombatManager</code> — ciclo de vida de combate</li>
+<li><code>CharacterManager</code> — CRUD de personagens</li>
+<li><code>NarrativeManager</code> — dialogos, eventos, diplomacia</li>
+<li><code>QuestManager</code> — rastreamento de quests</li>
+<li><code>PersistenceManager</code> — save/load via DB</li>
+<li><code>NavigationManager</code> — estado de navegacao UI</li>
+<li><code>EventDispatcher</code> — pub/sub de eventos</li>
+<li><code>SessionManager</code> — sessoes por usuario</li>
+</ul>`
+},
+{
+    id: 'bot', icon: '🤖', name: 'Bot Transport', desc: 'Modulos bot_*.py e handlers',
+    body: `<h2>Camada de Transporte</h2>
+<p>O bot e dividido em modulos especializados para manter cada arquivo abaixo de ~400 linhas:</p>
+<table><tr><th>Modulo</th><th>Responsabilidade</th></tr>
+<tr><td><code>bot_state.py</code></td><td>Globals compartilhados (engine, broker, timers)</td></tr>
+<tr><td><code>bot_commands.py</code></td><td>/start, /restart, /ticket</td></tr>
+<tr><td><code>bot_callbacks.py</code></td><td>Dispatcher de callbacks com ui_updater</td></tr>
+<tr><td><code>bot_messages.py</code></td><td>Texto, WebApp data, reacoes</td></tr>
+<tr><td><code>bot_timers.py</code></td><td>Timers de reacao (10s) e decisao (30s)</td></tr>
+<tr><td><code>bot_response.py</code></td><td>send_or_edit_response() com cache de imagem</td></tr>
+<tr><td><code>bot_webhook.py</code></td><td>Modo webhook para Cloud Run</td></tr>
+<tr><td><code>bot_maintenance.py</code></td><td>Modo manutencao, UI, notificacoes</td></tr></table>
+<h3>Padrao de Import</h3>
+<p>Todos os modulos fazem <code>import src.bot_state as state</code> e acessam <code>state.engine</code>, <code>state.broker</code>. O <code>bot_state</code> so importa de <code>src/game/*</code>, evitando imports circulares.</p>`
+},
+{
+    id: 'db', icon: '🗄️', name: 'Banco de Dados', desc: 'Schema, storage per-character, SQLite/PG',
+    body: `<h2>Arquitetura de Dados</h2>
+<h3>Tabelas Principais</h3>
+<table><tr><th>Tabela</th><th>Conteudo</th></tr>
+<tr><td><code>players</code></td><td>Metadados da conta: active_char_id, username</td></tr>
+<tr><td><code>player_characters</code></td><td>Uma linha por personagem: user_id, char_id, data (JSON), deleted_at</td></tr>
+<tr><td><code>combats</code></td><td>Estado transiente de combate</td></tr>
+<tr><td><code>player_backups</code></td><td>Auto-backup antes de ops destrutivas</td></tr></table>
+<h3>Backends</h3>
+<ul>
+<li><strong>SQLite</strong> (local): <code>src/database.py</code> via aiosqlite, modo WAL</li>
+<li><strong>PostgreSQL</strong> (cloud): <code>src/database_postgres.py</code> via asyncpg</li>
+<li><strong>Factory</strong>: <code>src/database_factory.py</code> seleciona backend via <code>DATABASE_TYPE</code></li>
+</ul>
+<h3>Persistencia por Personagem</h3>
+<p><code>save_player_state()</code> grava apenas UMA linha de personagem via <code>db.save_character()</code>. Nunca toca outros personagens. Soft delete via coluna <code>deleted_at</code>.</p>`
+},
+{
+    id: 'combat', icon: '⚔️', name: 'Motor de Combate', desc: 'CombatManager, Engine, Turn, Actions',
+    body: `<h2>Pipeline de Combate</h2>
+<pre><code>CombatManager → CombatEngine → CombatTurn → CombatActions
+  → CombatResultUI + CombatUI (renderizacao)</code></pre>
+<h3>Timers (IMUTAVEIS)</h3>
+<table><tr><th>Contexto</th><th>Duracao</th><th>Timeout</th></tr>
+<tr><td>Turno de Combate</td><td>30s</td><td>Auto-skip com penalidade</td></tr>
+<tr><td>Eventos de Exploracao</td><td>30s</td><td>Auto-ignorar, voltar a explorar</td></tr>
+<tr><td>Reacao a Armadilha</td><td>10s</td><td>Auto-falha, toma dano</td></tr></table>
+<h3>Recursos por Classe</h3>
+<p><span class="tag">Mana</span> <span class="tag">Ki</span> <span class="tag">Furia</span> <span class="tag">Inspiracao</span> <span class="tag">Pacto</span> <span class="tag">Vigor</span> <span class="tag">Energia</span></p>
+<p>Todos seguem a nomenclatura D&D 5e. Nunca inventar nomes alternativos.</p>`
+},
+{
+    id: 'broker', icon: '📨', name: 'MessageBroker', desc: 'Circuit breaker, rate limiter, handles',
+    body: `<h2>Entrega Centralizada de Mensagens</h2>
+<p>Arquivo: <code>src/game/system/message_broker.py</code></p>
+<h3>Classificacao de Erros</h3>
+<table><tr><th>Tipo</th><th>Acao</th></tr>
+<tr><td><code>TRANSIENT</code></td><td>Retry com backoff</td></tr>
+<tr><td><code>PERMANENT</code></td><td>Desiste imediatamente</td></tr>
+<tr><td><code>NOT_MODIFIED</code></td><td>Ignora (mensagem ja atualizada)</td></tr>
+<tr><td><code>RATE_LIMITED</code></td><td>Aguarda e retenta</td></tr>
+<tr><td><code>FATAL</code></td><td>Abre circuit breaker</td></tr></table>
+<h3>Circuit Breaker</h3>
+<p>5 falhas transientes em 10s abre o circuito (pausa 15s). Apos HALF_OPEN, testa uma mensagem. Se OK, volta a CLOSED.</p>
+<h3>Rate Limiter</h3>
+<p><code>asyncio.Semaphore(25)</code> global + intervalo minimo de 0.35s por usuario.</p>
+<h3>MessageHandle</h3>
+<p>Rastreia estado da mensagem por usuario: <code>alive</code> | <code>gone</code> | <code>unknown</code>. Impede timers de editar mensagens deletadas.</p>`
+},
+{
+    id: 'nav', icon: '🧭', name: 'Navegacao & Telas', desc: 'Screen registry, nav manager, routing',
+    body: `<h2>Screen Registry</h2>
+<p>Arquivo: <code>game/core/screen_registry.py</code></p>
+<p>Cada tela e registrada com ID hierarquico (<code>zone.screen.sub</code>), callback, parent_id, zone, tags e flag restorable.</p>
+<h3>Zones</h3>
+<p><span class="tag">city</span> <span class="tag">explore</span> <span class="tag">combat</span> <span class="tag">char</span> <span class="tag">meta</span> <span class="tag">prologue</span></p>
+<p>Zones estruturais (city, explore, meta) disparam pruning da nav_stack em transicoes cross-zone.</p>
+<h3>Navigation Manager</h3>
+<p>Implementa Perfect Stack (undo/back com deteccao de loop), HFSM zone pruning e edge weighting adaptativo.</p>
+<p>Estado em <code>player.metadata['nav_stack']</code> e <code>player.metadata['edge_weights']</code>.</p>
+<h3>Regra de Callback</h3>
+<p>NUNCA extrair IDs com <code>split("_")[N]</code>. Sempre usar <code>data.replace("prefix_", "", 1)</code> porque IDs contem underscores (ex: <code>npc_4889</code>).</p>`
+},
+{
+    id: 'persist', icon: '💾', name: 'Persistencia', desc: 'Save/load, multi-char, soft delete',
+    body: `<h2>PersistenceManager</h2>
+<p>Arquivo: <code>game/system/persistence.py</code></p>
+<h3>Storage por Personagem</h3>
+<ul>
+<li><code>player_characters</code>: cada personagem e sua propria linha <code>(user_id, char_id, data, deleted_at)</code></li>
+<li><code>players</code>: apenas metadados da conta <code>{active_char_id, username}</code></li>
+<li><code>save_player_state()</code>: grava somente UM personagem por vez</li>
+</ul>
+<h3>Migracao</h3>
+<p><code>_ensure_migrated()</code> auto-migra formato blob legado no primeiro acesso por usuario.</p>
+<h3>Soft Delete</h3>
+<p><code>db.soft_delete_character()</code> seta <code>deleted_at</code>. <code>db.undelete_character()</code> limpa.</p>
+<h3>Backup</h3>
+<p><code>create_full_backup()</code> monta dados de todas as linhas de personagem + meta antes de criar backup JSON.</p>`
+},
+{
+    id: 'deploy', icon: '☁️', name: 'Deploy & Infra', desc: 'DEV/PROD local, Cloud Run, CI/CD',
+    body: `<h2>Ambientes Locais</h2>
+<pre><code>environments/
+├── dev/   (.env, data/, logs/, src/ → junction)
+└── prod/  (.env, data/, logs/, src/ → copia staged)</code></pre>
+<p>Bot CWD e sempre <code>environments/&lt;env&gt;/</code>. DEV usa junction para src/, PROD tem copia independente.</p>
+<h3>Cloud (Google Cloud Run)</h3>
+<ul>
+<li><strong>Regiao</strong>: southamerica-east1 (Sao Paulo)</li>
+<li><strong>DB</strong>: Cloud SQL PostgreSQL 16</li>
+<li><strong>Secrets</strong>: Secret Manager (TELEGRAM_BOT_TOKENS, GEMINI_API_KEY)</li>
+<li><strong>Webhook</strong>: aiohttp na porta 8080, hash-based routing</li>
+</ul>
+<h3>Deploy DEV→PROD</h3>
+<p>DEVE sincronizar TODOS os arquivos de codigo. Hash SHA-256, verificacao pos-copia, limpeza de __pycache__.</p>
+<h3>Deploy Cloud</h3>
+<pre><code>gcloud run deploy lendas-bot --source . --region southamerica-east1</code></pre>`
+},
+{
+    id: 'tests', icon: '🧪', name: 'Testes', desc: 'Coverage, unit, preflight',
+    body: `<h2>Suite de Testes (3 niveis)</h2>
+<p>Executar na ordem: Unit → Coverage → Preflight</p>
+<h3>1. Testes Unitarios</h3>
+<pre><code>scripts\\test_unit.bat
+# ou: python -m pytest src/tests/unit/ -v --tb=short</code></pre>
+<p>Valida formulas D&D 5e, modelos Player, Stats, efeitos de status, XP thresholds.</p>
+<h3>2. Testes de Cobertura</h3>
+<pre><code>scripts\\test_coverage.bat
+# ou: python -m src.tests.coverage.test_explorer</code></pre>
+<p>BFS traversal de 900+ callbacks. Alvo: 100% cobertura, 0 crashes, 0 deadends, &lt;30s.</p>
+<h3>3. Preflight</h3>
+<pre><code>python -m src.scripts.preflight</code></pre>
+<p>9 checks CRITICAL + 16 WARNING + 14 INFO. Mesmo que roda no startup do bot. TODOS os findings devem ser corrigidos.</p>`
+},
+{
+    id: 'contrib', icon: '📝', name: 'Guia de Contribuicao', desc: 'Como adicionar telas, skills, itens',
+    body: `<h2>Adicionando uma Nova Tela</h2>
+<ol>
+<li>Registrar em <code>screen_data_*.py</code> com ID hierarquico, callback, parent_id, zone, tags</li>
+<li>Criar handler no arquivo de actions apropriado</li>
+<li>Adicionar rota no <code>ActionHandlers</code></li>
+<li>Rodar coverage test para validar navegacao</li>
+</ol>
+<h2>Adicionando um Item</h2>
+<ol>
+<li>Adicionar entrada no <code>ITEMS_DB</code> (<code>item_registry_data.py</code>)</li>
+<li>Campos obrigatorios: value, tags, emoji</li>
+<li>Rodar script de verificacao de itens</li>
+</ol>
+<h2>Regras Obrigatorias</h2>
+<ul>
+<li>Arquivos Python: maximo ~450 linhas</li>
+<li>Botoes: 2 por linha (ButtonFactory.grid)</li>
+<li>Nomes: D&D 5e oficial, nunca inventar</li>
+<li>Itens: DEVEM existir no ITEMS_DB</li>
+<li>Testes: rodar unit + coverage + preflight apos cada mudanca</li>
+</ul>`
+},
+{
+    id: 'npc-ai', icon: '🧠', name: 'NPC Intelligence Engine', desc: 'Motor emocional, memoria, LLM, rede social',
+    body: `<h2>Visao Geral</h2>
+<p>O NPC Intelligence Engine eleva todos os NPCs do jogo com inteligencia adaptativa, inspirado em NVIDIA ACE, Inworld AI, Utility AI e GOAP. Composto por 8 componentes integrados.</p>
+
+<h2>Arquitetura — 8 Componentes</h2>
+
+<h3>1. Motor Emocional (Emotion Engine)</h3>
+<p>Modelo emocional de 6 dimensoes baseado na Roda de Plutchik simplificada.</p>
+<ul>
+<li>Dimensoes: <code>joy, trust, fear, surprise, anger, anticipation</code></li>
+<li>Gatilhos automaticos: presente bom → joy+0.2/trust+0.15, quest completa → joy+0.3/trust+0.2</li>
+<li><code>derive_mood()</code> converte vetor emocional em mood string (backward compatible)</li>
+<li><code>decay_emotions()</code> — todas emocoes tendem ao baseline com o tempo</li>
+</ul>
+<p>Arquivo: <code>src/game/narrative/npc_emotions.py</code></p>
+
+<h3>2. Memoria Episodica + Semantica</h3>
+<p>Memoria de dois niveis inspirada no modelo Inworld AI.</p>
+<ul>
+<li><b>Episodica</b>: Grava CADA interacao — tipo, resumo, emocao, topicos (FIFO, max 10-20 por NPC)</li>
+<li><b>Semantica</b>: Sintese automatica via LLM ou rule-based — resumo de relacionamento, fatos conhecidos, baseline emocional</li>
+<li>Sintese automatica no descanso para NPCs com 5+ episodios nao-sintetizados</li>
+</ul>
+<p>Arquivos: <code>npc_memory.py</code>, <code>npc_memory_synthesis.py</code></p>
+
+<h3>3. Comportamento por Personalidade (Utility AI)</h3>
+<p>Sistema de scoring inspirado em Utility AI (The Sims).</p>
+<ul>
+<li>8 traits por personalidade: curiosity, sociability, commerce, adventure, faith, knowledge, combat_interest, gossip_tendency</li>
+<li>34 personalidades definidas com pesos 0.0-1.0</li>
+<li><code>score_topic()</code> pontua interesse do NPC em cada topico baseado em personalidade + emocoes + memoria</li>
+<li><code>select_best_topic()</code> weighted random dos top 3 topicos</li>
+</ul>
+<p>Arquivos: <code>npc_personality_traits.py</code>, <code>npc_behavior_scoring.py</code></p>
+
+<h3>4. Camada de Contexto (Context Awareness)</h3>
+<p>Funcao que agrega todo o estado relevante on-the-fly para cada interacao.</p>
+<ul>
+<li>Tempo: periodo, hora, clima, temperatura, estacao</li>
+<li>Player: nome, classe, nivel, %HP, ouro, raca, alinhamento</li>
+<li>Relacionamento: afinidade, paciencia, emocoes, tier, encontros</li>
+<li>Memoria: 3 episodios recentes, memoria semantica, topicos</li>
+<li>Social: opinioes de outros NPCs sobre o jogador</li>
+</ul>
+<p>Arquivo: <code>npc_context.py</code></p>
+
+<h3>5. Integracao LLM (Gemini Flash)</h3>
+<p>Motor central de dialogo via Gemini 2.0 Flash com estrategia de 3 niveis:</p>
+<table>
+<tr><th>Nivel</th><th>Quando</th><th>Metodo</th><th>Custo</th></tr>
+<tr><td>Estatico</td><td>Default (strangers)</td><td>Pool existente pick_line()</td><td>$0</td></tr>
+<tr><td>Template</td><td>NPCs conhecidos</td><td>Template com variaveis</td><td>$0</td></tr>
+<tr><td>LLM</td><td>Interacoes de alto valor</td><td>Gemini 2.0 Flash</td><td>~$0.003/chamada</td></tr>
+</table>
+<p>Gatilhos para LLM: pico emocional (>0.7), tier amigo, 3+ episodios nao resolvidos, apos sintese semantica, 15-60% aleatorio por tier.</p>
+<p>Controle: Cache LRU 128 entradas (10min TTL), 15 chamadas/min, cap diario 500 chamadas (~$0.05/dia).</p>
+<p>Arquivos: <code>npc_dialogue_ai.py</code>, <code>npc_dialogue_prompts.py</code></p>
+
+<h3>6. Rede Social de NPCs</h3>
+<p>Grafo social onde NPCs proximos recebem informacao sobre acoes do jogador.</p>
+<ul>
+<li><code>propagate_npc_info()</code> espalha info para NPCs co-localizados ou com gossip_tendency > 0.5</li>
+<li>Reputation modifier acumulativo: quest +3, presente +2, hostilidade -5</li>
+<li>Efeito: modifier > 5 → NPC comeca mais amigavel ("Ouvi boas coisas...")</li>
+<li>Rumores ouvidos alimentam o prompt do Gemini</li>
+</ul>
+<p>Arquivo: <code>npc_social_network.py</code></p>
+
+<h3>7. Tiers de Inteligencia</h3>
+<p>5 tiers de inteligencia com feature-gating por tipo de NPC:</p>
+<table>
+<tr><th>Tier</th><th>NPCs</th><th>Sistemas Ativos</th></tr>
+<tr><td>0.5 Reativo</td><td>Cidadaos genericos</td><td>Selecao de fala por contexto</td></tr>
+<tr><td>1.0 Consciente</td><td>NPCs unicos da praca</td><td>+ Emocoes basicas (joy/anger)</td></tr>
+<tr><td>1.5 Personalidade</td><td>Mercenarios/Exploradores</td><td>+ Traits, memoria basica (3 episodios)</td></tr>
+<tr><td>2.0 Aprimorado</td><td>Mercado + Wandering NPCs</td><td>+ Emocoes completas, memoria total, LLM 15-30%</td></tr>
+<tr><td>3.0 IA Completa</td><td>Martha, Elara, Tavira, Aldric</td><td>+ LLM 50-70%, topicos proativos, continuidade</td></tr>
+</table>
+<p>Arquivo: <code>npc_intelligence_tiers.py</code></p>
+
+<h3>8. Personalidade para NPCs de Guilda</h3>
+<p>Mercenarios e exploradores ganham personalidade na geracao + falas de combate contextuais.</p>
+<ul>
+<li>Personalidade atribuida por classe via <code>assign_personality()</code></li>
+<li>9 personalidades de combate: stoic, jovial, scholarly, devout, mysterious, aggressive, cautious, mercantile, adventurous</li>
+<li>5 eventos de combate: ataque certeiro, erro, aliado com HP baixo, vitoria, derrota</li>
+<li>Memoria de aventura durante contrato + despedida contextual</li>
+</ul>
+<p>Arquivos: <code>guild_npc_personality.py</code>, <code>guild_npc_combat_lines.py</code></p>
+
+<h2>Dados no NarrativeState</h2>
+<pre><code>npc_emotions: Dict[str, Dict[str, float]]   # npc_id → {joy:0.3, trust:0.3, ...}
+episodic_memory: Dict[str, List[Dict]]       # npc_id → [{turn, type, summary, emotion, topics}]
+semantic_memory: Dict[str, Dict]             # npc_id → {relationship_summary, known_facts, ...}</code></pre>
+
+<h2>Custo Estimado (Gemini Flash)</h2>
+<ul>
+<li>Chamadas LLM por sessao: 2-4 (apenas momentos de alto valor)</li>
+<li>Custo medio por chamada: ~$0.003</li>
+<li>Com cache: ~$0.15/jogador/mes</li>
+<li>Cap diario: 500 chamadas = ~$0.05/dia</li>
+</ul>
+
+<h2>Arquivos do Sistema</h2>
+<table>
+<tr><th>Arquivo</th><th>Local</th><th>Funcao</th></tr>
+<tr><td>npc_emotions.py</td><td>narrative/</td><td>Motor Emocional</td></tr>
+<tr><td>npc_context.py</td><td>narrative/</td><td>Montagem de Contexto</td></tr>
+<tr><td>npc_intelligence_tiers.py</td><td>narrative/</td><td>Feature Gating por Tier</td></tr>
+<tr><td>npc_memory.py</td><td>narrative/</td><td>Memoria Episodica</td></tr>
+<tr><td>npc_memory_synthesis.py</td><td>narrative/</td><td>Sintese Semantica</td></tr>
+<tr><td>npc_personality_traits.py</td><td>narrative/</td><td>Traits de Personalidade</td></tr>
+<tr><td>npc_behavior_scoring.py</td><td>narrative/</td><td>Utility AI Scoring</td></tr>
+<tr><td>npc_dialogue_ai.py</td><td>narrative/</td><td>Motor LLM Central</td></tr>
+<tr><td>npc_dialogue_prompts.py</td><td>narrative/</td><td>Templates de Prompt</td></tr>
+<tr><td>npc_social_network.py</td><td>narrative/</td><td>Rede Social</td></tr>
+<tr><td>guild_npc_personality.py</td><td>system/guild/</td><td>Personalidade de Guilda</td></tr>
+<tr><td>guild_npc_combat_lines.py</td><td>system/guild/</td><td>Falas de Combate</td></tr>
+</table>`
+},
+{
+    id: 'explore-webapp',
+    icon: '🗺️',
+    name: 'Exploration WebApp',
+    desc: 'Mapa hexagonal interativo para exploração',
+    body: `<h2>🗺️ Exploration WebApp</h2>
+<p>Sistema de exploração visual via Telegram WebApp. O jogador navega um mapa hexagonal 11×13, interage com POIs (Points of Interest), realiza stat checks, e acumula recompensas — tudo com narração imersiva no estilo de Mestre de D&D.</p>
+
+<h3>Arquitetura</h3>
+<p>Toda lógica de jogo é <b>pré-computada no servidor</b> e embutida no payload. O webapp é a camada visual.</p>
+<pre><code>Bot (Python)                          WebApp (GitHub Pages)
+┌─────────────────┐                   ┌──────────────────────┐
+│ MapGenerator     │──── base64 ────►│ explore/index.html    │
+│ gera hex grid    │    via URL       │ Renderiza mapa hex   │
+│ + POIs           │                  │ CSS + fog of war     │
+│ pré-computa      │                  │ Toque para mover     │
+│ outcomes         │                  │ Narração DM overlay  │
+│                  │                  │                      │
+│ exploration_     │◄── sendData() ──│ Acumula resultados   │
+│ webapp_apply.py  │    resultados    │ d20 stat checks      │
+└─────────────────┘                   └──────────────────────┘</code></pre>
+
+<h3>Sistema de Coordenadas</h3>
+<p>Grid hexagonal <b>odd-r offset</b> — linhas ímpares deslocadas à direita. 11 colunas × 13 linhas = 143 hexes.</p>
+<ul>
+<li><b>Adjacência</b>: 6 vizinhos por hex (NW, NE, W, E, SW, SE)</li>
+<li><b>Distância</b>: Calculada via conversão cube coordinates</li>
+<li><b>Fog of War</b>: Raio 2-4 hexes (conforme danger_level), 3 estados: hidden/dim/visible</li>
+</ul>
+
+<h3>Tipos de Terreno (1 char = 1 hex)</h3>
+<table>
+<tr><th>Char</th><th>Tipo</th><th>Passável</th></tr>
+<tr><td><code>.</code></td><td>Caminho/Chão</td><td>✅</td></tr>
+<tr><td><code>T</code></td><td>Árvores/Floresta</td><td>✅</td></tr>
+<tr><td><code>g</code></td><td>Grama/Vegetação</td><td>✅</td></tr>
+<tr><td><code>w</code></td><td>Água Rasa</td><td>✅</td></tr>
+<tr><td><code>r</code></td><td>Rochas</td><td>✅</td></tr>
+<tr><td><code>W</code></td><td>Água Profunda</td><td>❌</td></tr>
+<tr><td><code>M</code></td><td>Montanha Sólida</td><td>❌</td></tr>
+<tr><td><code>#</code></td><td>Parede/Penhasco</td><td>❌</td></tr>
+<tr><td><code>@</code></td><td>Spawn Jogador</td><td>✅</td></tr>
+<tr><td><code>E</code></td><td>Saída</td><td>✅</td></tr>
+<tr><td><code>1-9</code></td><td>Marcadores de POI</td><td>✅</td></tr>
+</table>
+
+<h3>POI Types</h3>
+<table>
+<tr><th>Tipo</th><th>Ícone</th><th>Descrição</th></tr>
+<tr><td>discovery</td><td>🌿</td><td>Exploração passiva — XP, ouro, cura</td></tr>
+<tr><td>search</td><td>🔎</td><td>Stat check — sucesso/falha com recompensas</td></tr>
+<tr><td>danger</td><td>⚔️</td><td>Combate — envia sendData para iniciar combat webapp</td></tr>
+<tr><td>mystery</td><td>❓</td><td>Mistério com stat check e outcomes únicos</td></tr>
+<tr><td>npc</td><td>👤</td><td>Encontro NPC — diálogo com escolhas</td></tr>
+</table>
+
+<h3>Payload (URL Compacta)</h3>
+<p>JSON → <code>zlib.compress(9)</code> → <code>base64.urlsafe_b64encode</code> → parâmetro <code>?data=</code> na URL.</p>
+<p>Chaves compactas: <code>g</code>=grid, <code>p</code>=pois, <code>s</code>=start, <code>e</code>=exit, <code>b</code>=biome, <code>v</code>=visibility, <code>c</code>=char.</p>
+<p>Limite: URL total &lt; 2048 chars. Fallback: trunca textos se &gt; 1800 chars encoded.</p>
+
+<h3>Fluxo Completo</h3>
+<ol>
+<li>Jogador seleciona dificuldade → "🗺️ Mapa Interativo"</li>
+<li><code>MapGenerator.generate()</code> → grid hex + <code>MapPOIGenerator.generate_pois()</code></li>
+<li><code>build_payload()</code> → zlib → base64 → URL</li>
+<li>WebApp: descomprime, renderiza hex grid com fog of war</li>
+<li>Jogador move por toque → fog revela → POIs descobertos</li>
+<li>POI: overlay DM com typewriter + escolhas + stat check d20</li>
+<li>Recompensas acumulam no HUD</li>
+<li>Retornar ou Combate → <code>sendData()</code> → bot aplica rewards</li>
+</ol>
+
+<h3>Biomas Suportados</h3>
+<p>9 biomas com templates, paletas de emoji, e cores CSS: <span class="tag">forest</span> <span class="tag">plains</span> <span class="tag">swamp</span> <span class="tag">cave</span> <span class="tag">desert</span> <span class="tag">mountain</span> <span class="tag">snow</span> <span class="tag">volcanic</span> <span class="tag">graveyard</span></p>
+
+<h3>Arquivos</h3>
+<table>
+<tr><th>Arquivo</th><th>Path</th><th>Responsabilidade</th></tr>
+<tr><td>map_hex_templates.py</td><td>exploration_webapp/</td><td>Templates 11×13 por bioma + emoji/cores</td></tr>
+<tr><td>map_generator.py</td><td>exploration_webapp/</td><td>Geração hex + BFS conectividade</td></tr>
+<tr><td>map_poi_generator.py</td><td>exploration_webapp/</td><td>5 tipos de POI com outcomes pré-computados</td></tr>
+<tr><td>map_poi_data.py</td><td>exploration_webapp/</td><td>Títulos, NPCs, inimigos por bioma</td></tr>
+<tr><td>map_payload.py</td><td>exploration_webapp/</td><td>Compressão zlib+base64 para URL</td></tr>
+<tr><td>exploration_webapp.py</td><td>exploration_webapp/</td><td>Token management (TTL 600s)</td></tr>
+<tr><td>exploration_webapp_apply.py</td><td>exploration_webapp/</td><td>Processa sendData — aplica rewards</td></tr>
+<tr><td>explore/index.html</td><td>valdoria-webapp/</td><td>WebApp completo (1280 linhas)</td></tr>
+</table>`
+}
+];
+
+/* ═══════════════════════════════════════════════════════════════════
+   NAVIGATION — Render topics grid and article views
+   ═══════════════════════════════════════════════════════════════════ */
+const $grid = document.getElementById('topics-grid');
+const $mainView = document.getElementById('main-view');
+const $articleView = document.getElementById('article-view');
+const $articleTitle = document.getElementById('article-title');
+const $articleBody = document.getElementById('article-body');
+
+function renderGrid() {
+    $grid.innerHTML = TOPICS.map(t =>
+        `<div class="topic-card" data-id="${t.id}" data-search="${t.name.toLowerCase()} ${t.desc.toLowerCase()}" onclick="openTopic('${t.id}')">
+            <div class="tc-icon">${t.icon}</div>
+            <div class="tc-name">${t.name}</div>
+            <div class="tc-desc">${t.desc}</div>
+        </div>`
+    ).join('');
+}
+
+function filterTopics(query) {
+    const q = query.toLowerCase().trim();
+    document.querySelectorAll('.topic-card').forEach(card => {
+        card.classList.toggle('hidden', q && !card.dataset.search.includes(q));
+    });
+}
+
+function openTopic(id) {
+    const topic = TOPICS.find(t => t.id === id);
+    if (!topic) return;
+    $articleTitle.textContent = topic.icon + ' ' + topic.name;
+    $articleBody.innerHTML = topic.body;
+    $mainView.style.display = 'none';
+    $articleView.style.display = 'block';
+    window.scrollTo(0, 0);
+    if (tg) tg.BackButton.show();
+}
+
+function showMain() {
+    $articleView.style.display = 'none';
+    $mainView.style.display = 'block';
+    window.scrollTo(0, 0);
+    if (tg) tg.BackButton.hide();
+}
+
+// Telegram back button integration
+if (tg) tg.BackButton.onClick(() => {
+    if ($articleView.style.display !== 'none') showMain();
+});
+
+// ─── Init ───
+if (initAuth()) renderGrid();
+</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(()=>{})}</script>
+</body>
+</html>

@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2b2830">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <title>Mochila - Lendas de Valdoria</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <style>
+        body { padding-bottom: 80px; }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg, var(--v-bg-raised), var(--v-bg-accent));
+            padding: 14px 16px 10px;
+            text-align: center;
+            border-bottom: 2px solid var(--v-gold-dim);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
+        }
+        .header h1 { font-size: 17px; color: var(--v-gold); margin-bottom: 4px;
+            text-shadow: 0 0 15px rgba(196,149,58,0.4), 0 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 2px; text-transform: uppercase; }
+        .header-stats {
+            font-size: 12px; color: var(--v-text-dim);
+            display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+        }
+        .header-stats .hs-hp { color: var(--v-danger); }
+        .header-stats .hs-mp { color: var(--v-info); }
+        .header-stats .hs-gold { color: var(--v-gold); }
+        .header-stats .hs-ac { color: var(--v-silver); }
+        .stat-pop { animation: statPop 0.3s ease; }
+        @keyframes statPop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex; gap: 4px; padding: 10px 12px;
+            background: var(--v-bg-raised);
+            border-bottom: 1px solid var(--v-border);
+        }
+        .tab {
+            flex: 1; text-align: center;
+            padding: 8px 10px; border-radius: var(--v-radius-pill);
+            font-size: 13px; border: 1px solid var(--v-border);
+            background: var(--v-bg-card); color: var(--v-text-dim);
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .tab.active {
+            background: var(--v-gold-dim); color: #fff;
+            border-color: var(--v-gold);
+        }
+
+        /* ── Content ── */
+        .content { padding: 12px; }
+
+        /* ── Search Bar ── */
+        .search-bar {
+            display: flex; gap: 6px; margin-bottom: 8px; align-items: center;
+        }
+        .search-bar input {
+            flex: 1; padding: 8px 12px; border-radius: var(--v-radius-pill);
+            border: 1px solid var(--v-border); background: var(--v-bg-card);
+            color: var(--v-text-bright); font-size: 13px; font-family: var(--v-font);
+            outline: none; transition: border-color 0.2s;
+        }
+        .search-bar input:focus { border-color: var(--v-gold-dim); }
+        .search-bar input::placeholder { color: var(--v-text-dim); }
+        .sort-btn {
+            padding: 8px 10px; border-radius: var(--v-radius-pill);
+            border: 1px solid var(--v-border); background: var(--v-bg-card);
+            color: var(--v-text-dim); font-size: 13px; cursor: pointer;
+            white-space: nowrap; transition: all 0.2s;
+        }
+        .sort-btn.active { border-color: var(--v-gold-dim); color: var(--v-gold); }
+
+        /* ── Filters ── */
+        .filters {
+            display: flex; gap: 6px; margin-bottom: 12px;
+            overflow-x: auto; padding-bottom: 4px;
+            -webkit-mask-image: linear-gradient(to right, #000 90%, transparent);
+            mask-image: linear-gradient(to right, #000 90%, transparent);
+        }
+        .filters::-webkit-scrollbar { display: none; }
+        .filter-btn {
+            flex-shrink: 0; padding: 6px 12px;
+            border-radius: var(--v-radius-pill);
+            font-size: 12px; border: 1px solid var(--v-border);
+            background: var(--v-bg-card); color: var(--v-text-dim);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .filter-btn.active {
+            background: var(--v-gold-dim); color: #fff;
+            border-color: var(--v-gold);
+        }
+        .filter-count {
+            font-size: 10px; opacity: 0.7; margin-left: 2px;
+        }
+
+        /* ── Item Cards Grid ── */
+        .item-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .item-card {
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, var(--v-bg-raised) 100%);
+            border: 1px solid var(--v-border); border-radius: var(--v-radius);
+            padding: 10px; cursor: pointer; transition: all 0.2s;
+            position: relative; overflow: hidden;
+            border-left: 3px solid var(--v-border);
+        }
+        .item-card:active { transform: scale(0.97); }
+        .item-card.rarity-uncommon { border-left-color: var(--v-rarity-uncommon); }
+        .item-card.rarity-rare { border-left-color: var(--v-rarity-rare); }
+        .item-card.rarity-very_rare { border-left-color: var(--v-rarity-very-rare); }
+        .item-card.rarity-legendary { border-left-color: var(--v-rarity-legendary);
+            box-shadow: 0 0 8px rgba(255,152,0,0.15); }
+        .item-card.equipped-marker {
+            border-color: var(--v-gold-dim);
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, rgba(196,149,58,0.08) 100%);
+        }
+        .item-card .ic-emoji { font-size: 24px; }
+        .item-card .ic-name {
+            font-size: 12px; font-weight: 600; color: var(--v-text-bright);
+            margin-top: 2px; line-height: 1.3;
+            overflow: hidden; text-overflow: ellipsis;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        }
+        .item-card .ic-meta {
+            font-size: 11px; color: var(--v-text-dim); margin-top: 3px;
+        }
+        .item-card .ic-badges {
+            position: absolute; top: 5px; right: 6px;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+        }
+        .item-card .ic-qty {
+            font-size: 10px; color: var(--v-gold); font-weight: 700;
+            background: rgba(196,149,58,0.15); padding: 1px 6px;
+            border-radius: 8px;
+        }
+        .item-card .ic-eq-badge {
+            font-size: 9px; color: var(--v-gold); font-weight: 600;
+            background: rgba(196,149,58,0.12); padding: 1px 5px;
+            border-radius: 8px; letter-spacing: 0.3px;
+        }
+        .item-card .ic-set-badge {
+            font-size: 9px; color: var(--v-info); font-weight: 600;
+            background: rgba(91,155,213,0.12); padding: 1px 5px;
+            border-radius: 8px;
+        }
+        .item-card .ic-fav {
+            position: absolute; bottom: 6px; right: 8px;
+            font-size: 10px;
+        }
+
+        /* ── Equipment Slot Grid (Paper-Doll) ── */
+        .equip-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            max-width: 380px;
+            margin: 0 auto;
+        }
+        .equip-slot {
+            background: var(--v-bg-card); border: 1px solid var(--v-border);
+            border-radius: var(--v-radius); padding: 10px;
+            text-align: center; cursor: pointer; transition: all 0.2s;
+            min-height: 60px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .equip-slot:active { transform: scale(0.97); }
+        .equip-slot.filled {
+            border-color: var(--v-gold-dim);
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, rgba(196,149,58,0.06) 100%);
+        }
+        .equip-slot .es-label {
+            font-size: 10px; color: var(--v-text-dim);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .equip-slot .es-icon { font-size: 18px; margin: 2px 0; }
+        .equip-slot .es-item {
+            font-size: 11px; color: var(--v-text-bright);
+            font-weight: 600; line-height: 1.2;
+            overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; max-width: 100%;
+        }
+        .equip-slot .es-badges {
+            display: flex; gap: 3px; margin-top: 2px;
+        }
+        .es-gem-dot { width: 8px; height: 8px; border-radius: 50%;
+            background: var(--v-border); border: 1px solid var(--v-text-dim); }
+        .es-gem-dot.filled { background: var(--v-gold); border-color: var(--v-gold); }
+        .es-rune-dot { font-size: 8px; color: var(--v-info); }
+
+        /* ── Stats Summary Bar ── */
+        .stats-summary {
+            display: flex; gap: 6px; margin-bottom: 12px; padding: 10px;
+            background: var(--v-bg-card); border-radius: var(--v-radius);
+            border: 1px solid var(--v-border); justify-content: center; flex-wrap: wrap;
+        }
+        .ss-item {
+            font-size: 12px; padding: 3px 8px; border-radius: var(--v-radius-pill);
+            background: rgba(196,149,58,0.08); color: var(--v-text-dim);
+        }
+        .ss-item b { color: var(--v-text-bright); }
+
+        /* ── Set Progress ── */
+        .set-progress {
+            background: var(--v-bg-card); border: 1px solid var(--v-border);
+            border-radius: var(--v-radius); padding: 10px; margin-bottom: 10px;
+        }
+        .set-title { font-size: 13px; font-weight: 600; color: var(--v-gold); margin-bottom: 4px; }
+        .set-pieces { font-size: 11px; color: var(--v-text-dim); }
+        .set-piece { margin: 2px 0; }
+        .set-piece.owned { color: var(--v-success); }
+        .set-piece.missing { color: var(--v-text-dim); opacity: 0.5; }
+        .set-bonus { font-size: 11px; margin-top: 4px; padding: 4px 8px;
+            border-radius: var(--v-radius-sm); }
+        .set-bonus.active { background: rgba(76,175,80,0.12); color: var(--v-success); }
+        .set-bonus.inactive { background: rgba(255,255,255,0.04); color: var(--v-text-dim); opacity: 0.6; }
+
+        /* ── Ally Cards ── */
+        .ally-card {
+            background: var(--v-bg-card); border: 1px solid var(--v-border);
+            border-radius: var(--v-radius); padding: 12px;
+            margin-bottom: 8px; cursor: pointer; transition: all 0.2s;
+        }
+        .ally-card:active { transform: scale(0.97); }
+        .ally-header {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .ally-name { font-size: 14px; font-weight: 600; color: var(--v-text-bright); }
+        .ally-class { font-size: 12px; color: var(--v-text-dim); }
+        .ally-stats {
+            display: flex; gap: 10px; margin-top: 4px; font-size: 12px;
+        }
+        .ally-hp { color: var(--v-danger); }
+        .ally-ac { color: var(--v-silver); }
+
+        /* ── Modal Overlay ── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.7);
+            display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .modal {
+            background: var(--v-bg-raised); border-radius: 16px 16px 0 0;
+            width: 100%; max-width: 480px; max-height: 85vh;
+            overflow-y: auto; padding: 16px 16px 24px;
+            transform: translateY(100%); transition: transform 0.3s ease-out;
+            touch-action: pan-y;
+        }
+        .modal-overlay.visible .modal { transform: translateY(0); }
+        .modal-handle {
+            width: 36px; height: 4px; border-radius: 2px;
+            background: var(--v-border); margin: 0 auto 12px;
+            cursor: grab;
+        }
+        .modal-title {
+            font-size: 16px; font-weight: 700; color: var(--v-gold);
+            margin-bottom: 12px; text-align: center;
+        }
+
+        /* ── Modal: Item Detail ── */
+        .detail-row {
+            display: flex; justify-content: space-between;
+            padding: 4px 0; font-size: 13px;
+        }
+        .detail-label { color: var(--v-text-dim); }
+        .detail-val { color: var(--v-text-bright); font-weight: 600; }
+        .detail-val.bonus { color: var(--v-success); }
+        .detail-val.penalty { color: var(--v-danger); }
+        .detail-rarity-badge {
+            display: inline-block; padding: 2px 10px; border-radius: var(--v-radius-pill);
+            font-size: 11px; font-weight: 600; margin-bottom: 8px;
+        }
+        .detail-desc {
+            font-size: 12px; color: var(--v-text-dim);
+            font-style: italic; margin: 8px 0; line-height: 1.4;
+        }
+        .detail-tags {
+            display: flex; gap: 4px; flex-wrap: wrap; margin: 8px 0;
+        }
+        .detail-tag {
+            font-size: 10px; padding: 2px 8px; border-radius: 10px;
+            background: var(--v-bg-card); color: var(--v-text-dim);
+            border: 1px solid var(--v-border);
+        }
+        .detail-actions {
+            display: flex; gap: 8px; margin-top: 12px;
+        }
+        .detail-actions button {
+            flex: 1; padding: 10px; border: none; border-radius: var(--v-radius);
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            font-family: var(--v-font); transition: all 0.2s;
+        }
+        .detail-actions button:active { transform: scale(0.96); }
+        .btn-equip {
+            background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
+            color: var(--v-bg);
+        }
+        .btn-use {
+            background: linear-gradient(135deg, var(--v-success), #388e3c);
+            color: #fff;
+        }
+        .btn-unequip {
+            background: var(--v-bg-card); border: 1px solid var(--v-border) !important;
+            color: var(--v-text-dim);
+        }
+        .btn-disabled {
+            background: var(--v-border) !important; color: var(--v-text-dim) !important;
+            cursor: not-allowed !important;
+        }
+
+        /* ── Gem / Rune Section in Slot Modal ── */
+        .gem-grid {
+            display: flex; gap: 8px; margin: 8px 0;
+            justify-content: center;
+        }
+        .gem-socket {
+            width: 42px; height: 42px; border-radius: 50%;
+            border: 2px dashed var(--v-border); display: flex;
+            align-items: center; justify-content: center;
+            font-size: 18px; cursor: pointer; transition: all 0.2s;
+            background: var(--v-bg-card);
+        }
+        .gem-socket.filled {
+            border-style: solid; border-color: var(--v-gold);
+            background: linear-gradient(135deg, var(--v-bg-card), rgba(196,149,58,0.08));
+        }
+        .gem-socket:active { transform: scale(0.9); }
+        .rune-slot {
+            background: var(--v-bg-card); border: 1px dashed var(--v-border);
+            border-radius: var(--v-radius); padding: 10px;
+            text-align: center; cursor: pointer; transition: all 0.2s;
+            margin: 8px 0;
+        }
+        .rune-slot.filled {
+            border-style: solid; border-color: var(--v-info);
+        }
+
+        /* ── Compatible Items List ── */
+        .compat-list { margin-top: 10px; }
+        .compat-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px; background: var(--v-bg-card);
+            border-radius: var(--v-radius-sm); margin-bottom: 4px;
+            cursor: pointer; font-size: 13px; transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .compat-item:active { transform: scale(0.98); }
+        .compat-item.better { border-color: rgba(76,175,80,0.4);
+            background: linear-gradient(135deg, var(--v-bg-card), rgba(76,175,80,0.06)); }
+        .compat-item.worse { border-color: rgba(231,76,60,0.3);
+            background: linear-gradient(135deg, var(--v-bg-card), rgba(231,76,60,0.04)); }
+        .compat-emoji { font-size: 18px; flex-shrink: 0; }
+        .compat-info { flex: 1; overflow: hidden; }
+        .compat-name { font-size: 12px; font-weight: 600; color: var(--v-text-bright);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .compat-stats { font-size: 11px; color: var(--v-text-dim); }
+        .compat-delta {
+            font-size: 11px; font-weight: 600; flex-shrink: 0;
+            padding: 2px 6px; border-radius: 8px;
+        }
+        .compat-delta.up { color: var(--v-success); background: rgba(76,175,80,0.12); }
+        .compat-delta.down { color: var(--v-danger); background: rgba(231,76,60,0.1); }
+
+        /* ── Gem/Rune Select List ── */
+        .select-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px; background: var(--v-bg-card);
+            border-radius: var(--v-radius); margin-bottom: 6px;
+            cursor: pointer; transition: all 0.2s;
+            border: 1px solid var(--v-border);
+        }
+        .select-item:active { transform: scale(0.98); }
+        .select-item .si-emoji { font-size: 20px; }
+        .select-item .si-name { font-size: 13px; color: var(--v-text-bright); font-weight: 600; }
+        .select-item .si-desc { font-size: 11px; color: var(--v-text-dim); }
+
+        /* ── Bottom Bar ── */
+        .bottom-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            padding: 10px 16px; z-index: 150;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            background: linear-gradient(transparent, var(--v-bg) 30%);
+        }
+        .bottom-bar .ops-count {
+            text-align: center; font-size: 12px;
+            color: var(--v-text-dim); margin-bottom: 6px;
+        }
+        .confirm-btn {
+            width: 100%; padding: 14px; border: none;
+            border-radius: var(--v-radius); font-size: 15px;
+            font-weight: 700; cursor: pointer; transition: all 0.2s;
+            font-family: var(--v-font);
+            background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
+            color: var(--v-bg);
+            box-shadow: 0 3px 12px rgba(196,149,58,0.3);
+        }
+        .confirm-btn:active { transform: scale(0.98); }
+        .confirm-btn.hidden { display: none; }
+
+        /* ── Confirm Modal ── */
+        .confirm-ops-list {
+            max-height: 300px; overflow-y: auto; margin: 8px 0;
+        }
+        .confirm-op {
+            padding: 6px 0; border-bottom: 1px solid var(--v-border);
+            font-size: 13px; color: var(--v-text);
+        }
+        .confirm-op:last-child { border-bottom: none; }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center; padding: 40px 20px; color: var(--v-text-dim);
+        }
+        .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+        .empty-state p { line-height: 1.5; }
+
+        /* ── Section Title ── */
+        .section-title {
+            font-size: 13px; font-weight: 600; color: var(--v-gold);
+            margin: 12px 0 8px; padding-bottom: 4px;
+            border-bottom: 1px solid var(--v-border);
+        }
+
+        /* ── Loading Overlay ── */
+        .loading-overlay {
+            position: fixed; inset: 0; z-index: 999;
+            background: var(--v-bg); display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.3s;
+        }
+        .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+        .loading-spinner { font-size: 36px; animation: v-spin 1.5s linear infinite; }
+        .loading-text { font-size: 14px; color: var(--v-text-dim); margin-top: 12px; }
+
+        /* ── Animations ── */
+        .fade-in { animation: v-fadeIn 0.3s ease; }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed; bottom: 90px; left: 50%;
+            transform: translateX(-50%); padding: 8px 18px;
+            border-radius: var(--v-radius-pill); font-size: 13px;
+            z-index: 300; animation: v-fadeSlideUp 0.25s ease;
+            pointer-events: none; color: #fff;
+        }
+        .toast-warn { background: var(--v-warning); }
+        .toast-err { background: var(--v-danger); }
+        .toast-ok { background: var(--v-success); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in, .stat-pop, .toast { animation: none !important; }
+            .modal, .modal-overlay { transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">⚔️</div>
+        <div class="loading-text">Carregando mochila...</div>
+    </div>
+
+    <div class="header">
+        <h1>🎒 MOCHILA</h1>
+        <div class="header-stats" id="headerStats"></div>
+    </div>
+    <div class="tabs" id="tabsBar"></div>
+    <div class="content" id="mainContent"></div>
+    <div class="bottom-bar" id="bottomBar">
+        <div class="ops-count" id="opsCount"></div>
+        <button class="confirm-btn hidden" id="confirmBtn" onclick="showConfirmModal()">
+            ✅ Confirmar Alterações
+        </button>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+        <div class="modal" id="modalContent"></div>
+    </div>
+
+    <script>
+    /* ═══════════════════════════════════════════════════════════
+       INVENTORY WEBAPP — Lendas de Valdoria v2
+       ═══════════════════════════════════════════════════════════ */
+
+    const tg = window.Telegram?.WebApp;
+    const _vBg = getComputedStyle(document.documentElement)
+        .getPropertyValue('--v-bg').trim() || '#2b2830';
+    if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg); }
+
+    // ── State ──
+    let D = null;           // Decoded payload
+    let activeTab = 'items';
+    let activeFilter = 'all';
+    let searchQuery = '';
+    let sortMode = 'default'; // default, name, rarity, value
+    let pendingOps = [];    // Batch operations to send
+    let localEq = {};       // Local copy of equipment (player)
+    let localInv = [];      // Local copy of inventory [{n,q,id}]
+    let localAllyEq = {};   // npc_id → {slot: item}
+    let localGems = {};     // slot → [gem|null, ...]
+    let localRunes = {};    // slot → rune_name|null
+    let localGold = 0;
+    let localHP = 0;
+    let localMP = 0;
+    let activeTarget = 'player'; // 'player' or npc_id
+
+    const SLOT_NAMES = {
+        head: '👑 Cabeça', chest: '🛡️ Tronco', shoulders: '🪖 Ombros',
+        main_hand: '⚔️ M.Principal', off_hand: '🛡️ M.Secundária',
+        hands: '🧤 Mãos', legs: '👖 Pernas', feet: '👢 Botas',
+        cloak: '🧥 Capa', belt: '⛓️ Cinto',
+        ring_1: '💍 Anel 1', ring_2: '💍 Anel 2',
+        necklace: '📿 Pescoço', map: '🗺️ Mapa',
+    };
+    const SLOT_ORDER = [
+        'head', 'necklace', 'shoulders', 'cloak',
+        'chest', 'main_hand', 'off_hand', 'belt',
+        'hands', 'ring_1', 'legs', 'ring_2',
+        'feet', 'map',
+    ];
+    const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2, very_rare: 3, legendary: 4 };
+    const RARITY_FALLBACK = {
+        common:    { l: 'Comum',      c: '#9e9e9e' },
+        uncommon:  { l: 'Incomum',    c: '#4caf50' },
+        rare:      { l: 'Raro',       c: '#2196f3' },
+        very_rare: { l: 'Muito Raro', c: '#9c27b0' },
+        legendary: { l: 'Lendário',   c: '#ff9800' },
+    };
+    const RUNE_ELIGIBLE = new Set([
+        'main_hand','off_hand','chest','head','hands','feet','legs','cloak','necklace'
+    ]);
+    const SORT_LABELS = {
+        default: '📋 Padrão', name: '🔤 Nome', rarity: '✨ Raridade', value: '💰 Valor',
+    };
+    const SORT_CYCLE = ['default','name','rarity','value'];
+
+    // ── Rarity config (from payload or fallback) ──
+    function getRarityConfig() { return D?.ref?.rar || RARITY_FALLBACK; }
+    function getRarityLabel(r) { return (getRarityConfig()[r] || RARITY_FALLBACK.common).l; }
+    function getRarityColor(r) { return (getRarityConfig()[r] || RARITY_FALLBACK.common).c; }
+
+    // ── Init ──
+    function init() {
+        const params = new URLSearchParams(location.search);
+        const b64 = params.get('data');
+        if (!b64) { hideLoading(); showError('Dados não encontrados.'); return; }
+        try {
+            const raw = b64.replace(/-/g,'+').replace(/_/g,'/');
+            D = JSON.parse(atob(raw));
+        } catch(e) { hideLoading(); showError('Erro ao decodificar dados.'); return; }
+
+        // Init local state from payload
+        localEq = Object.assign({}, D.eq || {});
+        localInv = (D.inv || []).map(i => ({...i}));
+        localGold = D.p.g || 0;
+        localHP = D.p.hp || 0;
+        localMP = D.p.mp || 0;
+        localGems = {};
+        if (D.gems) {
+            for (const [k,v] of Object.entries(D.gems))
+                localGems[k] = [...v];
+        }
+        localRunes = D.runes ? {...D.runes} : {};
+        localAllyEq = {};
+        if (D.allies) {
+            for (const a of D.allies)
+                localAllyEq[a.id] = Object.assign({}, a.eq || {});
+        }
+
+        hideLoading();
+        updateHeader();
+        buildTabs();
+        renderTab();
+        initSwipeToDismiss();
+        initBackButton();
+    }
+
+    function hideLoading() {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+
+    function showError(msg) {
+        document.getElementById('mainContent').innerHTML =
+            `<div class="empty-state"><div class="icon">⚠️</div><p>${msg}</p></div>`;
+    }
+
+    // ── Haptic feedback ──
+    function haptic(type) {
+        try { tg?.HapticFeedback?.impactOccurred?.(type || 'light'); } catch(e) {}
+    }
+
+    // ── Header ──
+    function updateHeader() {
+        const s = document.getElementById('headerStats');
+        s.innerHTML = `
+            <span>${D.p.n}</span>
+            <span class="hs-hp">❤️ ${localHP}/${D.p.mhp}</span>
+            <span class="hs-mp">🔮 ${localMP}/${D.p.mmp}</span>
+            <span class="hs-gold">💰 ${localGold}</span>
+            <span class="hs-ac">🛡️ ${D.p.ac}</span>
+        `;
+    }
+
+    function animateStat(cls) {
+        const el = document.querySelector(`.${cls}`);
+        if (el) { el.classList.remove('stat-pop');
+            void el.offsetWidth; el.classList.add('stat-pop'); }
+    }
+
+    // ── Tabs ──
+    function buildTabs() {
+        const bar = document.getElementById('tabsBar');
+        const tabs = [
+            {id:'items', label:'📦 Itens'},
+            {id:'equip', label:'🛡️ Equipamento'},
+        ];
+        if (D.allies && D.allies.length > 0) tabs.push({id:'allies', label:'👥 Aliados'});
+        bar.innerHTML = tabs.map(t =>
+            `<div class="tab ${t.id===activeTab?'active':''}" onclick="switchTab('${t.id}')">${t.label}</div>`
+        ).join('');
+    }
+
+    function switchTab(id) {
+        activeTab = id;
+        activeTarget = 'player';
+        // Don't reset filter/search when switching tabs
+        buildTabs();
+        renderTab();
+        haptic('light');
+    }
+
+    function renderTab() {
+        const c = document.getElementById('mainContent');
+        if (activeTab === 'items') renderItemsTab(c);
+        else if (activeTab === 'equip') renderEquipTab(c);
+        else if (activeTab === 'allies') renderAlliesTab(c);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  TAB 1: ITEMS
+    // ══════════════════════════════════════════════════════════
+    function renderItemsTab(c) {
+        const counts = getFilterCounts();
+        const filters = [
+            {id:'all', label:'Todos', cnt: counts.all},
+            {id:'equip', label:'⚔️ Equip', cnt: counts.equip},
+            {id:'use', label:'🧪 Consumíveis', cnt: counts.use},
+            {id:'gem', label:'💎 Gemas', cnt: counts.gem},
+            {id:'rune', label:'🔮 Runas', cnt: counts.rune},
+            {id:'misc', label:'📦 Outros', cnt: counts.misc},
+        ];
+
+        let html = '';
+
+        // Search bar + sort
+        html += `<div class="search-bar">
+            <input type="text" placeholder="Buscar item..." value="${esc(searchQuery)}"
+                oninput="onSearch(this.value)" id="searchInput">
+            <div class="sort-btn ${sortMode!=='default'?'active':''}" onclick="cycleSort()">
+                ${SORT_LABELS[sortMode]}
+            </div>
+        </div>`;
+
+        // Filters with counts
+        html += '<div class="filters">';
+        filters.forEach(f => {
+            const cntBadge = f.cnt > 0 ? `<span class="filter-count">(${f.cnt})</span>` : '';
+            html += `<div class="filter-btn ${f.id===activeFilter?'active':''}"
+                onclick="setFilter('${f.id}')">${f.label}${cntBadge}</div>`;
+        });
+        html += '</div>';
+
+        const items = getSortedFilteredItems();
+        if (!items.length) {
+            const emptyMsg = searchQuery ? 'Nenhum item encontrado para a busca.' : 'Nenhum item encontrado.';
+            html += `<div class="empty-state"><div class="icon">📦</div><p>${emptyMsg}</p></div>`;
+        } else {
+            html += '<div class="item-grid">';
+            items.forEach(inv => {
+                const it = getItemData(inv.n);
+                const rarity = it.r || 'common';
+                const equipped = isEquippedAnywhere(inv.n);
+                const setId = it.si || '';
+                html += `<div class="item-card rarity-${rarity} ${equipped?'equipped-marker':''} fade-in"
+                    onclick="openItemDetail('${esc(inv.n)}')">
+                    <div class="ic-badges">
+                        ${inv.q > 1 ? `<span class="ic-qty">x${inv.q}</span>` : ''}
+                        ${equipped ? '<span class="ic-eq-badge">Equipado</span>' : ''}
+                        ${setId ? `<span class="ic-set-badge">${getSetIcon(setId)}</span>` : ''}
+                    </div>
+                    ${isFav(inv.n) ? '<span class="ic-fav">⭐</span>' : ''}
+                    <div class="ic-emoji">${it.e||'📦'}</div>
+                    <div class="ic-name v-rarity-${rarity}">${inv.n}</div>
+                    <div class="ic-meta">${getItemShortDesc(inv.n, it)}</div>
+                </div>`;
+            });
+            html += '</div>';
+        }
+        c.innerHTML = html;
+    }
+
+    function onSearch(val) {
+        searchQuery = val.toLowerCase().trim();
+        renderTab();
+        // Re-focus the search input after re-render
+        const inp = document.getElementById('searchInput');
+        if (inp) { inp.focus(); inp.selectionStart = inp.selectionEnd = inp.value.length; }
+    }
+
+    function cycleSort() {
+        const idx = SORT_CYCLE.indexOf(sortMode);
+        sortMode = SORT_CYCLE[(idx + 1) % SORT_CYCLE.length];
+        haptic('light');
+        renderTab();
+    }
+
+    function setFilter(f) {
+        activeFilter = f;
+        renderTab();
+    }
+
+    function getFilterCounts() {
+        const all = localInv.filter(i => i.q > 0);
+        const counts = { all: all.length, equip: 0, use: 0, gem: 0, rune: 0, misc: 0 };
+        all.forEach(inv => {
+            const it = getItemData(inv.n);
+            const tags = it.t || [];
+            if (it.s) counts.equip++;
+            if (tags.includes('consumable') || tags.includes('food') || tags.includes('potion')) counts.use++;
+            if (tags.includes('gem') || tags.includes('socketable')) counts.gem++;
+            if (tags.includes('rune')) counts.rune++;
+            if (!it.s && !tags.includes('consumable') && !tags.includes('food')
+                && !tags.includes('potion') && !tags.includes('gem')
+                && !tags.includes('socketable') && !tags.includes('rune')) counts.misc++;
+        });
+        return counts;
+    }
+
+    function getSortedFilteredItems() {
+        let items = getFilteredItems();
+        // Search
+        if (searchQuery) {
+            items = items.filter(inv => inv.n.toLowerCase().includes(searchQuery));
+        }
+        // Sort
+        if (sortMode === 'name') {
+            items.sort((a, b) => a.n.localeCompare(b.n));
+        } else if (sortMode === 'rarity') {
+            items.sort((a, b) => {
+                const ra = RARITY_ORDER[getItemData(a.n).r || 'common'] || 0;
+                const rb = RARITY_ORDER[getItemData(b.n).r || 'common'] || 0;
+                return rb - ra; // Higher rarity first
+            });
+        } else if (sortMode === 'value') {
+            items.sort((a, b) => (getItemData(b.n).v || 0) - (getItemData(a.n).v || 0));
+        }
+        return items;
+    }
+
+    function getFilteredItems() {
+        let items = localInv.filter(i => i.q > 0);
+        if (activeFilter === 'all') return items;
+        return items.filter(inv => {
+            const it = getItemData(inv.n);
+            const tags = it.t || [];
+            if (activeFilter === 'equip') return !!it.s;
+            if (activeFilter === 'use') return tags.includes('consumable') || tags.includes('food') || tags.includes('potion');
+            if (activeFilter === 'gem') return tags.includes('gem') || tags.includes('socketable');
+            if (activeFilter === 'rune') return tags.includes('rune');
+            if (activeFilter === 'misc') return !it.s && !tags.includes('consumable') && !tags.includes('food')
+                && !tags.includes('potion') && !tags.includes('gem') && !tags.includes('socketable') && !tags.includes('rune');
+            return true;
+        });
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  TAB 2: EQUIPMENT
+    // ══════════════════════════════════════════════════════════
+    function renderEquipTab(c) {
+        let html = '';
+
+        // Stats summary
+        if (activeTarget === 'player') {
+            html += buildStatsSummary();
+            html += buildSetProgress();
+        }
+
+        html += '<div class="equip-grid">';
+        const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+
+        SLOT_ORDER.forEach(slot => {
+            const item = eq[slot] || null;
+            const it = item ? getItemData(item) : null;
+            const filled = item ? 'filled' : '';
+            const icon = item ? (it?.e || '📦') : getSlotEmptyIcon(slot);
+            const label = SLOT_NAMES[slot] || slot;
+            const nameDisplay = item ? item : '—';
+            const rarity = item ? (it?.r || 'common') : '';
+
+            // Gem/Rune badges for player slots
+            let badges = '';
+            if (activeTarget === 'player' && item) {
+                const sockets = it?.sk || 0;
+                const gems = localGems[slot] || [];
+                const rune = localRunes[slot];
+                if (sockets > 0) {
+                    badges += '<div class="es-badges">';
+                    for (let i = 0; i < sockets; i++) {
+                        const gFilled = gems[i] ? 'filled' : '';
+                        badges += `<div class="es-gem-dot ${gFilled}"></div>`;
+                    }
+                    if (rune) badges += '<span class="es-rune-dot">🔮</span>';
+                    badges += '</div>';
+                } else if (rune) {
+                    badges += '<div class="es-badges"><span class="es-rune-dot">🔮</span></div>';
+                }
+            }
+
+            html += `<div class="equip-slot ${filled}" onclick="openSlotModal('${slot}')"
+                ${rarity && item ? `style="border-left:3px solid ${getRarityColor(rarity)}"` : ''}>
+                <div class="es-label">${label}</div>
+                <div class="es-icon">${icon}</div>
+                <div class="es-item">${nameDisplay}</div>
+                ${badges}
+            </div>`;
+        });
+        html += '</div>';
+        c.innerHTML = html;
+    }
+
+    function buildStatsSummary() {
+        let totalAC = 0, totalHP = 0, totalMP = 0, totalATK = 0;
+        for (const [slot, item] of Object.entries(localEq)) {
+            if (!item) continue;
+            const it = getItemData(item);
+            totalAC += it.ac || 0;
+            totalHP += it.hb || 0;
+            totalMP += it.mb || 0;
+            totalATK += it.b || 0;
+            // Gem bonuses
+            const gems = localGems[slot] || [];
+            gems.forEach(g => {
+                if (!g) return;
+                const gd = getItemData(g);
+                if (gd.gb) {
+                    totalHP += gd.gb.hp_bonus || 0;
+                    totalMP += gd.gb.mp_bonus || 0;
+                    totalAC += gd.gb.ac_bonus || 0;
+                }
+            });
+        }
+        const parts = [];
+        if (totalAC) parts.push(`🛡️ CA <b>+${totalAC}</b>`);
+        if (totalATK) parts.push(`⚔️ ATK <b>+${totalATK}</b>`);
+        if (totalHP) parts.push(`❤️ HP <b>+${totalHP}</b>`);
+        if (totalMP) parts.push(`🔮 MP <b>+${totalMP}</b>`);
+        if (!parts.length) return '';
+        return `<div class="stats-summary">${parts.map(p => `<div class="ss-item">${p}</div>`).join('')}</div>`;
+    }
+
+    function buildSetProgress() {
+        if (!D.sets) return '';
+        const owned = new Set();
+        // Player equipped + inventory
+        for (const item of Object.values(localEq)) { if (item) owned.add(item); }
+        localInv.forEach(i => { if (i.q > 0) owned.add(i.n); });
+
+        let html = '';
+        for (const [sid, sdef] of Object.entries(D.sets)) {
+            const count = sdef.pcs.filter(p => owned.has(p)).length;
+            if (count === 0) continue;
+
+            html += `<div class="set-progress fade-in">
+                <div class="set-title">${sdef.i} ${sdef.n} (${count}/${sdef.pcs.length})</div>
+                <div class="set-pieces">`;
+            sdef.pcs.forEach(p => {
+                const cls = owned.has(p) ? 'owned' : 'missing';
+                const icon = owned.has(p) ? '✅' : '⬜';
+                html += `<div class="set-piece ${cls}">${icon} ${p}</div>`;
+            });
+            html += '</div>';
+            // Thresholds
+            for (const [th, label] of Object.entries(sdef.th)) {
+                const active = count >= parseInt(th);
+                html += `<div class="set-bonus ${active?'active':'inactive'}">${active?'✨':'🔒'} ${th}/${sdef.pcs.length}: ${label}</div>`;
+            }
+            html += '</div>';
+        }
+        return html;
+    }
+
+    function getSlotEmptyIcon(slot) {
+        const map = {
+            head:'👑', chest:'🛡️', shoulders:'🪖', main_hand:'⚔️',
+            off_hand:'🛡️', hands:'🧤', legs:'👖', feet:'👢',
+            cloak:'🧥', belt:'⛓️', ring_1:'💍', ring_2:'💍',
+            necklace:'📿', map:'🗺️',
+        };
+        return map[slot] || '📦';
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  TAB 3: ALLIES
+    // ══════════════════════════════════════════════════════════
+    function renderAlliesTab(c) {
+        if (!D.allies || !D.allies.length) {
+            c.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>Nenhum aliado no grupo.</p></div>';
+            return;
+        }
+        let html = '';
+        D.allies.forEach(a => {
+            html += `<div class="ally-card fade-in" onclick="openAllyEquip('${esc(a.id)}')">
+                <div class="ally-header">
+                    <span class="ally-name">${a.n}</span>
+                    <span class="ally-class">${a.c || 'Aliado'}</span>
+                </div>
+                <div class="ally-stats">
+                    <span class="ally-hp">❤️ ${a.hp}/${a.mhp}</span>
+                    <span class="ally-ac">🛡️ ${a.ac}</span>
+                </div>
+            </div>`;
+        });
+        c.innerHTML = html;
+    }
+
+    function openAllyEquip(npcId) {
+        activeTarget = npcId;
+        activeTab = 'equip';
+        buildTabs();
+        renderTab();
+        // Show back button to allies
+        const c = document.getElementById('mainContent');
+        const ally = D.allies.find(a => a.id === npcId);
+        const allyName = ally ? ally.n : npcId;
+        c.innerHTML = `<div style="margin-bottom:10px;">
+            <span style="font-size:13px;color:var(--v-text-dim);cursor:pointer;"
+                onclick="switchTab('allies')">← Aliados</span>
+            <span style="font-size:14px;color:var(--v-gold);margin-left:8px;font-weight:600;">
+                ${allyName}
+            </span>
+        </div>` + c.innerHTML;
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  ITEM DETAIL MODAL
+    // ══════════════════════════════════════════════════════════
+    function openItemDetail(name) {
+        const it = getItemData(name);
+        const inv = localInv.find(i => i.n === name);
+        const qty = inv ? inv.q : 0;
+        const rarity = it.r || 'common';
+        const tags = it.t || [];
+        const rarColor = getRarityColor(rarity);
+
+        let html = '<div class="modal-handle"></div>';
+        html += `<div class="modal-title">${it.e||'📦'} ${name}</div>`;
+        html += `<div style="text-align:center;margin-bottom:10px;">
+            <span class="detail-rarity-badge" style="background:${rarColor}22;color:${rarColor};border:1px solid ${rarColor}44;">
+                ${getRarityLabel(rarity)}
+            </span></div>`;
+
+        if (it.desc) html += `<div class="detail-desc">"${it.desc}"</div>`;
+
+        // Stats
+        if (it.s) html += detailRow('Slot', SLOT_NAMES[it.s] || it.s);
+        if (it.dd) {
+            let dmgStr = it.dd + (it.b ? ` +${it.b}` : '');
+            if (it.dt) dmgStr += ` (${it.dt})`;
+            html += detailRow('Dano', dmgStr, it.b ? 'bonus' : '');
+        }
+        if (it.vd) html += detailRow('Versátil', it.vd);
+        if (it.ac) html += detailRow('CA', `+${it.ac}`, 'bonus');
+        if (it.hb) html += detailRow('HP Bônus', `+${it.hb}`, 'bonus');
+        if (it.mb) html += detailRow('MP Bônus', `+${it.mb}`, 'bonus');
+        if (it.ib) html += detailRow('INT Bônus', `+${it.ib}`, 'bonus');
+        if (it.sb) html += detailRow('Save Bônus', `+${it.sb}`, 'bonus');
+        if (it.sk) html += detailRow('Sockets', `${it.sk} 💎`);
+        if (it.sr) html += detailRow('Força Req.', it.sr);
+        if (it.th) html += detailRow('Duas Mãos', '🤲 Sim');
+        if (it.heal) html += detailRow('Cura', it.heal);
+        if (it.v) html += detailRow('Valor', `${it.v} GP`);
+        if (qty > 1) html += detailRow('Quantidade', `x${qty}`);
+
+        // Gem bonus
+        if (it.gb) {
+            let parts = [];
+            if (it.gb.hp_bonus) parts.push(`+${it.gb.hp_bonus} HP`);
+            if (it.gb.mp_bonus) parts.push(`+${it.gb.mp_bonus} MP`);
+            if (it.gb.ac_bonus) parts.push(`+${it.gb.ac_bonus} CA`);
+            if (it.gb.save_bonus) parts.push(`+${it.gb.save_bonus} Save`);
+            if (parts.length) html += detailRow('Bônus Gema', parts.join(', '), 'bonus');
+        }
+
+        // Rune effect
+        if (it.re) {
+            html += detailRow('Runa', `${it.re.tr}: ${it.re.ch}% ${it.re.ef}`);
+        }
+
+        // Set info
+        if (it.si && D.sets && D.sets[it.si]) {
+            const sdef = D.sets[it.si];
+            const owned = sdef.pcs.filter(p =>
+                Object.values(localEq).includes(p) || localInv.some(i => i.n === p && i.q > 0)
+            ).length;
+            html += detailRow('Conjunto', `${sdef.i} ${sdef.n} (${owned}/${sdef.pcs.length})`);
+        }
+
+        // Tags
+        if (tags.length) {
+            html += '<div class="detail-tags">';
+            tags.slice(0, 8).forEach(t => { html += `<span class="detail-tag">${t}</span>`; });
+            html += '</div>';
+        }
+
+        // Comparison with equipped (if equippable)
+        if (it.s) {
+            const slot = resolveSlot(it);
+            const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+            const currentItem = eq[slot];
+            if (currentItem && currentItem !== name) {
+                const currentIt = getItemData(currentItem);
+                const delta = getStatDelta(it, currentIt, slot);
+                if (delta) {
+                    html += `<div style="margin-top:8px;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;">
+                        <span style="color:var(--v-text-dim);">vs ${currentItem}:</span> ${delta}
+                    </div>`;
+                }
+            }
+        }
+
+        // Action buttons
+        html += '<div class="detail-actions">';
+        if (it.s && !isProtected(tags)) {
+            const canEquip = checkProficiency(it, activeTarget);
+            if (canEquip) {
+                html += `<button class="btn-equip" onclick="doEquip('${esc(name)}')">⚔️ Equipar</button>`;
+            } else {
+                html += `<button class="btn-disabled" disabled>🚫 Sem proficiência</button>`;
+            }
+        }
+        if (isConsumable(tags) && qty > 0) {
+            html += `<button class="btn-use" onclick="doUse('${esc(name)}')">🧪 Usar</button>`;
+        }
+        html += '</div>';
+
+        showModal(html);
+    }
+
+    function detailRow(label, val, cls) {
+        const valClass = cls ? `detail-val ${cls}` : 'detail-val';
+        return `<div class="detail-row"><span class="detail-label">${label}</span><span class="${valClass}">${val}</span></div>`;
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  SLOT MODAL (Equipment detail + gem/rune + compatible items)
+    // ══════════════════════════════════════════════════════════
+    function openSlotModal(slot) {
+        const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+        const item = eq[slot] || null;
+        const it = item ? getItemData(item) : null;
+
+        let html = '<div class="modal-handle"></div>';
+        html += `<div class="modal-title">${SLOT_NAMES[slot] || slot}</div>`;
+
+        if (item) {
+            const rarity = it?.r || 'common';
+            const rarColor = getRarityColor(rarity);
+            // Current equipped item info
+            html += `<div style="text-align:center;font-size:18px;margin-bottom:4px;">${it?.e||'📦'}</div>`;
+            html += `<div style="text-align:center;font-size:14px;font-weight:600;margin-bottom:2px;" class="v-rarity-${rarity}">${item}</div>`;
+            html += `<div style="text-align:center;margin-bottom:6px;">
+                <span class="detail-rarity-badge" style="background:${rarColor}22;color:${rarColor};border:1px solid ${rarColor}44;font-size:10px;">
+                    ${getRarityLabel(rarity)}
+                </span></div>`;
+            if (it?.dd) html += `<div style="text-align:center;font-size:12px;color:var(--v-text-dim);">Dano: ${it.dd}${it.b ? ' +'+it.b : ''}</div>`;
+            if (it?.ac) html += `<div style="text-align:center;font-size:12px;color:var(--v-text-dim);">CA: +${it.ac}</div>`;
+            if (it?.hb) html += `<div style="text-align:center;font-size:12px;color:var(--v-text-dim);">HP: +${it.hb}</div>`;
+            if (it?.mb) html += `<div style="text-align:center;font-size:12px;color:var(--v-text-dim);">MP: +${it.mb}</div>`;
+
+            // Gems section (player only)
+            if (activeTarget === 'player') {
+                const sockets = it?.sk || 0;
+                if (sockets > 0) {
+                    html += '<div class="section-title">💎 Gemas</div>';
+                    html += '<div class="gem-grid">';
+                    const gems = localGems[slot] || [];
+                    for (let i = 0; i < sockets; i++) {
+                        const gem = gems[i] || null;
+                        const gemData = gem ? getItemData(gem) : null;
+                        const filled = gem ? 'filled' : '';
+                        const icon = gem ? (gemData?.e || '💎') : '+';
+                        html += `<div class="gem-socket ${filled}" onclick="gemAction('${slot}',${i},'${esc(gem||'')}')"
+                            title="${gem || 'Vazio'}">${icon}</div>`;
+                    }
+                    html += '</div>';
+                    // Show gem names below sockets
+                    const gemsInSlot = localGems[slot] || [];
+                    const gemNames = gemsInSlot.filter(Boolean);
+                    if (gemNames.length) {
+                        html += `<div style="text-align:center;font-size:11px;color:var(--v-text-dim);margin-top:4px;">
+                            ${gemNames.join(' · ')}</div>`;
+                    }
+                }
+
+                // Rune section
+                if (RUNE_ELIGIBLE.has(slot)) {
+                    html += '<div class="section-title">🔮 Runa</div>';
+                    const rune = localRunes[slot] || null;
+                    if (rune) {
+                        const runeData = getItemData(rune);
+                        html += `<div class="rune-slot filled" onclick="runeAction('${slot}')">
+                            <div style="font-size:16px;">${runeData?.e||'🔮'} ${rune}</div>
+                            <div style="font-size:11px;color:var(--v-text-dim);margin-top:2px;">Toque para substituir</div>
+                        </div>`;
+                    } else {
+                        html += `<div class="rune-slot" onclick="runeAction('${slot}')">
+                            <div style="font-size:14px;color:var(--v-text-dim);">+ Inscrever Runa</div>
+                        </div>`;
+                    }
+                }
+            }
+
+            // Unequip button
+            html += `<div class="detail-actions" style="margin-top:14px;">
+                <button class="btn-unequip" onclick="doUnequip('${slot}')">📦 Desequipar</button>
+            </div>`;
+        } else {
+            html += '<div style="text-align:center;color:var(--v-text-dim);padding:12px;">Slot vazio</div>';
+        }
+
+        // Compatible items from inventory
+        html += '<div class="section-title">📦 Itens Compatíveis</div>';
+        const compatItems = getCompatibleItems(slot);
+        if (compatItems.length === 0) {
+            html += '<div style="font-size:12px;color:var(--v-text-dim);text-align:center;">Nenhum item compatível no inventário.</div>';
+        } else {
+            html += '<div class="compat-list">';
+            compatItems.forEach(ci => {
+                const cit = getItemData(ci.name);
+                const { cls: compCls, delta } = compareItemsDetailed(cit, it, slot);
+                html += `<div class="compat-item ${compCls}" onclick="doEquip('${esc(ci.name)}','${slot}')">
+                    <span class="compat-emoji">${cit?.e||'📦'}</span>
+                    <div class="compat-info">
+                        <div class="compat-name v-rarity-${cit?.r||'common'}">${ci.name}</div>
+                        <div class="compat-stats">${getItemShortDesc(ci.name, cit)}</div>
+                    </div>
+                    ${delta}
+                </div>`;
+            });
+            html += '</div>';
+        }
+
+        showModal(html);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  GEM & RUNE ACTIONS
+    // ══════════════════════════════════════════════════════════
+    function gemAction(slot, idx, currentGem) {
+        if (currentGem) {
+            // Confirm before removing gem
+            const confirmHtml = `<div class="modal-handle"></div>
+                <div class="modal-title">💎 Remover Gema?</div>
+                <div style="text-align:center;font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
+                    Remover <b style="color:var(--v-text-bright)">${currentGem}</b> do socket?
+                </div>
+                <div class="detail-actions">
+                    <button class="btn-unequip" onclick="openSlotModal('${slot}')">Cancelar</button>
+                    <button class="btn-equip" onclick="doGemRemove('${slot}',${idx},'${esc(currentGem)}')">Remover</button>
+                </div>`;
+            showModal(confirmHtml);
+        } else {
+            showGemSelect(slot, idx);
+        }
+    }
+
+    function doGemRemove(slot, idx, gemName) {
+        addOp({t:'gem_remove', slot, idx});
+        const gems = localGems[slot] || [];
+        gems[idx] = null;
+        localGems[slot] = gems;
+        addToLocalInv(gemName);
+        haptic('medium');
+        toast(`💎 ${gemName} removida`, 'ok');
+        openSlotModal(slot);
+    }
+
+    function showGemSelect(slot, idx) {
+        const gems = localInv.filter(i => {
+            const it = getItemData(i.n);
+            return it && (it.t||[]).some(t => t === 'gem' || t === 'socketable');
+        });
+
+        let html = '<div class="modal-handle"></div>';
+        html += '<div class="modal-title">💎 Selecionar Gema</div>';
+        if (!gems.length) {
+            html += '<div style="text-align:center;color:var(--v-text-dim);">Nenhuma gema disponível.</div>';
+        } else {
+            gems.forEach(g => {
+                const it = getItemData(g.n);
+                let desc = '';
+                if (it.gb) {
+                    let parts = [];
+                    if (it.gb.hp_bonus) parts.push(`+${it.gb.hp_bonus} HP`);
+                    if (it.gb.mp_bonus) parts.push(`+${it.gb.mp_bonus} MP`);
+                    if (it.gb.ac_bonus) parts.push(`+${it.gb.ac_bonus} CA`);
+                    if (it.gb.save_bonus) parts.push(`+${it.gb.save_bonus} Save`);
+                    desc = parts.join(' · ');
+                }
+                const tierBadge = it.gt ? `<span style="font-size:10px;color:var(--v-text-dim);"> T${it.gt}</span>` : '';
+                html += `<div class="select-item" onclick="doGemInsert('${slot}',${idx},'${esc(g.n)}')">
+                    <span class="si-emoji">${it.e||'💎'}</span>
+                    <div><div class="si-name">${g.n}${tierBadge}</div>
+                    <div class="si-desc">${desc}</div></div>
+                </div>`;
+            });
+        }
+        html += `<div class="detail-actions" style="margin-top:12px;">
+            <button class="btn-unequip" onclick="openSlotModal('${slot}')">← Voltar</button>
+        </div>`;
+        showModal(html);
+    }
+
+    function doGemInsert(slot, idx, gemName) {
+        addOp({t:'gem_insert', slot, gem: gemName, idx});
+        const sockets = (getItemData(localEq[slot]) || {}).sk || 0;
+        if (!localGems[slot]) localGems[slot] = Array(sockets).fill(null);
+        localGems[slot][idx] = gemName;
+        removeFromLocalInv(gemName);
+        haptic('medium');
+        toast(`💎 ${gemName} encaixada`, 'ok');
+        openSlotModal(slot);
+    }
+
+    function runeAction(slot) {
+        showRuneSelect(slot);
+    }
+
+    function showRuneSelect(slot) {
+        const currentRune = localRunes[slot] || null;
+        const runes = localInv.filter(i => {
+            const it = getItemData(i.n);
+            return it && (it.t||[]).includes('rune');
+        });
+
+        let html = '<div class="modal-handle"></div>';
+        html += '<div class="modal-title">🔮 Inscrever Runa</div>';
+
+        if (currentRune) {
+            html += `<div style="background:var(--v-bg-card);border:1px solid var(--v-warning);border-radius:var(--v-radius);padding:10px;margin-bottom:10px;font-size:12px;color:var(--v-warning);text-align:center;">
+                ⚠️ Runa atual (${currentRune}) será <b>destruída</b> ao inscrever outra.
+            </div>`;
+        }
+
+        if (!runes.length) {
+            html += '<div style="text-align:center;color:var(--v-text-dim);">Nenhuma runa disponível.</div>';
+        } else {
+            runes.forEach(r => {
+                const it = getItemData(r.n);
+                let desc = '';
+                if (it.re) desc = `${it.re.tr}: ${it.re.ch}% ${it.re.ef}`;
+                const tierBadge = it.rt ? `<span style="font-size:10px;color:var(--v-text-dim);"> T${it.rt}</span>` : '';
+                html += `<div class="select-item" onclick="doRuneInscribe('${slot}','${esc(r.n)}')">
+                    <span class="si-emoji">${it.e||'🔮'}</span>
+                    <div><div class="si-name">${r.n}${tierBadge}</div>
+                    <div class="si-desc">${desc}</div></div>
+                </div>`;
+            });
+        }
+        html += `<div class="detail-actions" style="margin-top:12px;">
+            <button class="btn-unequip" onclick="openSlotModal('${slot}')">← Voltar</button>
+        </div>`;
+        showModal(html);
+    }
+
+    function doRuneInscribe(slot, runeName) {
+        addOp({t:'rune_inscribe', slot, rune: runeName});
+        localRunes[slot] = runeName;
+        removeFromLocalInv(runeName);
+        haptic('heavy');
+        toast(`🔮 ${runeName} inscrita`, 'ok');
+        openSlotModal(slot);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  ACTIONS: Equip / Unequip / Use
+    // ══════════════════════════════════════════════════════════
+    function doEquip(name, slot) {
+        const it = getItemData(name);
+        if (!it || !it.s) return;
+
+        const targetSlot = slot || resolveSlot(it);
+        if (!targetSlot) return;
+
+        // Check proficiency
+        if (!checkProficiency(it, activeTarget)) {
+            toast('🚫 Sem proficiência', 'err');
+            return;
+        }
+
+        const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+
+        // Two-handed logic
+        if ((it.t||[]).includes('two_handed') && targetSlot === 'main_hand') {
+            if (eq.off_hand) {
+                addOp({t:'unequip', slot:'off_hand', tgt: activeTarget});
+                addToLocalInv(eq.off_hand);
+                eq.off_hand = null;
+            }
+        } else if (targetSlot === 'off_hand') {
+            const mh = eq.main_hand;
+            if (mh) {
+                const mhData = getItemData(mh);
+                if ((mhData?.t||[]).includes('two_handed')) {
+                    addOp({t:'unequip', slot:'main_hand', tgt: activeTarget});
+                    addToLocalInv(mh);
+                    eq.main_hand = null;
+                }
+            }
+        }
+
+        // Unequip old
+        const old = eq[targetSlot];
+        if (old) {
+            addOp({t:'unequip', slot: targetSlot, tgt: activeTarget});
+            addToLocalInv(old);
+        }
+
+        // Equip new
+        addOp({t:'equip', item: name, slot: targetSlot, tgt: activeTarget});
+        eq[targetSlot] = name;
+        removeFromLocalInv(name);
+
+        closeModal();
+        haptic('medium');
+        toast(`⚔️ ${name} equipado`, 'ok');
+        updateHeader();
+        animateStat('hs-ac');
+        renderTab();
+        updateBottomBar();
+    }
+
+    function doUnequip(slot) {
+        const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+        const item = eq[slot];
+        if (!item) return;
+
+        addOp({t:'unequip', slot, tgt: activeTarget});
+
+        // Return gems & destroy rune (player only)
+        if (activeTarget === 'player') {
+            const gems = localGems[slot] || [];
+            gems.forEach((g, i) => {
+                if (g) {
+                    addToLocalInv(g);
+                    addOp({t:'gem_remove', slot, idx: i});
+                }
+            });
+            delete localGems[slot];
+            if (localRunes[slot]) {
+                delete localRunes[slot];
+            }
+        }
+
+        eq[slot] = null;
+        addToLocalInv(item);
+
+        closeModal();
+        haptic('light');
+        toast(`📦 ${item} desequipado`, 'ok');
+        updateHeader();
+        renderTab();
+        updateBottomBar();
+    }
+
+    function doUse(name) {
+        const it = getItemData(name);
+        const tags = it?.t || [];
+
+        // Basic potion
+        if (name === 'potion' || tags.includes('potion')) {
+            addOp({t:'use', item: name, tgt: activeTarget});
+            removeFromLocalInv(name);
+            closeModal();
+            haptic('medium');
+            toast(`🧪 ${name} usado`, 'ok');
+            animateStat('hs-hp');
+            renderTab();
+            updateBottomBar();
+            return;
+        }
+
+        // Other consumable/food
+        if (tags.includes('consumable') || tags.includes('food')) {
+            addOp({t:'use', item: name, tgt: activeTarget});
+            removeFromLocalInv(name);
+            closeModal();
+            haptic('medium');
+            toast(`🍖 ${name} usado`, 'ok');
+            renderTab();
+            updateBottomBar();
+            return;
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  CONFIRM & SEND
+    // ══════════════════════════════════════════════════════════
+    function showConfirmModal() {
+        if (!pendingOps.length) return;
+
+        let html = '<div class="modal-handle"></div>';
+        html += '<div class="modal-title">📋 Confirmar Alterações</div>';
+        html += `<div style="font-size:12px;color:var(--v-text-dim);text-align:center;margin-bottom:8px;">${pendingOps.length} operação(ões)</div>`;
+        html += '<div class="confirm-ops-list">';
+        pendingOps.forEach(op => {
+            html += `<div class="confirm-op">${formatOp(op)}</div>`;
+        });
+        html += '</div>';
+        html += `<div class="detail-actions" style="margin-top:12px;">
+            <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+            <button class="btn-equip" onclick="sendOps()">✅ Confirmar</button>
+        </div>`;
+        showModal(html);
+    }
+
+    function formatOp(op) {
+        const tgtLabel = op.tgt && op.tgt !== 'player' ? ` → ${getAllyName(op.tgt)}` : '';
+        switch(op.t) {
+            case 'equip': return `⚔️ Equipar ${op.item}${tgtLabel}`;
+            case 'unequip': return `📦 Desequipar ${SLOT_NAMES[op.slot]||op.slot}${tgtLabel}`;
+            case 'use': return `🧪 Usar ${op.item}${tgtLabel}`;
+            case 'gem_insert': return `💎 Encaixar ${op.gem} em ${SLOT_NAMES[op.slot]||op.slot}`;
+            case 'gem_remove': return `💎 Remover gema de ${SLOT_NAMES[op.slot]||op.slot}`;
+            case 'rune_inscribe': return `🔮 Inscrever ${op.rune} em ${SLOT_NAMES[op.slot]||op.slot}`;
+            default: return `❓ ${op.t}`;
+        }
+    }
+
+    function sendOps() {
+        if (!pendingOps.length) return;
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token') || '';
+
+        const data = {
+            action: 'inventory_batch',
+            token: token,
+            ops: pendingOps,
+        };
+
+        if (tg) {
+            tg.sendData(JSON.stringify(data));
+        } else {
+            console.log('sendData:', data);
+            toast('Dados enviados (dev)', 'ok');
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  HELPERS
+    // ══════════════════════════════════════════════════════════
+    function getItemData(name) { return (D.items || {})[name] || {}; }
+
+    function getItemShortDesc(name, it) {
+        let parts = [];
+        if (it.dd) parts.push(it.dd + (it.b ? `+${it.b}` : ''));
+        if (it.ac) parts.push(`CA+${it.ac}`);
+        if (it.hb) parts.push(`HP+${it.hb}`);
+        if (it.mb) parts.push(`MP+${it.mb}`);
+        if (it.ib) parts.push(`INT+${it.ib}`);
+        if (it.sb) parts.push(`Save+${it.sb}`);
+        if (it.heal) parts.push(it.heal);
+        if (!parts.length && it.v) parts.push(`${it.v}gp`);
+        return parts.join(' · ');
+    }
+
+    function isEquippedAnywhere(name) {
+        for (const v of Object.values(localEq)) { if (v === name) return true; }
+        for (const aeq of Object.values(localAllyEq)) {
+            for (const v of Object.values(aeq)) { if (v === name) return true; }
+        }
+        return false;
+    }
+
+    function isFav(name) { return (D.fav || []).includes(name); }
+
+    function isProtected(tags) {
+        const prot = ['quest','mission_item','key','map','map_fragment','no_sell','no_discard','story_item','unique'];
+        return tags.some(t => prot.includes(t));
+    }
+
+    function isConsumable(tags) {
+        return tags.some(t => ['consumable','food','potion'].includes(t));
+    }
+
+    function checkProficiency(it, target) {
+        const tags = it.t || [];
+        if (tags.includes('clothing')) return true;
+        if (!tags.includes('armor') && !tags.includes('weapon')) return true;
+
+        let profs = [];
+        if (target === 'player') {
+            profs = D.p.prof || [];
+        } else {
+            const ally = (D.allies || []).find(a => a.id === target);
+            profs = ally ? (ally.prof || []) : [];
+        }
+        return tags.some(t => profs.includes(t));
+    }
+
+    function resolveSlot(it) {
+        const slot = it.s;
+        if (!slot) return null;
+        if (slot === 'ring') {
+            const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+            if (!eq.ring_1) return 'ring_1';
+            if (!eq.ring_2) return 'ring_2';
+            return 'ring_1';
+        }
+        return slot;
+    }
+
+    function getCompatibleItems(slot) {
+        const result = [];
+        const targetProfs = activeTarget === 'player'
+            ? (D.p.prof || [])
+            : ((D.allies || []).find(a => a.id === activeTarget)?.prof || []);
+
+        localInv.forEach(inv => {
+            if (inv.q <= 0) return;
+            const it = getItemData(inv.n);
+            if (!it.s) return;
+
+            // Slot match
+            let slotMatch = false;
+            if (it.s === 'ring' && (slot === 'ring_1' || slot === 'ring_2')) slotMatch = true;
+            else if (it.s === slot) slotMatch = true;
+            if (!slotMatch) return;
+
+            // Proficiency
+            const tags = it.t || [];
+            if (tags.includes('clothing')) { result.push({name: inv.n}); return; }
+            if (!tags.includes('armor') && !tags.includes('weapon')) { result.push({name: inv.n}); return; }
+            if (tags.some(t => targetProfs.includes(t))) result.push({name: inv.n});
+        });
+        return result;
+    }
+
+    function compareItemsDetailed(newIt, oldIt, slot) {
+        if (!oldIt || !newIt) return { cls: '', delta: '' };
+
+        // Calculate stat differences
+        const diffs = [];
+        const acDiff = (newIt.ac||0) - (oldIt.ac||0);
+        const atkDiff = (newIt.b||0) - (oldIt.b||0);
+        const hpDiff = (newIt.hb||0) - (oldIt.hb||0);
+        const mpDiff = (newIt.mb||0) - (oldIt.mb||0);
+
+        if (acDiff !== 0) diffs.push({ label: 'CA', val: acDiff });
+        if (atkDiff !== 0) diffs.push({ label: 'ATK', val: atkDiff });
+        if (hpDiff !== 0) diffs.push({ label: 'HP', val: hpDiff });
+        if (mpDiff !== 0) diffs.push({ label: 'MP', val: mpDiff });
+
+        if (!diffs.length) return { cls: '', delta: '' };
+
+        // Overall assessment: sum of positive and negative
+        const totalVal = diffs.reduce((s, d) => s + d.val, 0);
+        const cls = totalVal > 0 ? 'better' : totalVal < 0 ? 'worse' : '';
+
+        // Build delta badge
+        const deltaHtml = diffs.map(d => {
+            const sign = d.val > 0 ? '+' : '';
+            const dcls = d.val > 0 ? 'up' : 'down';
+            return `<span class="compat-delta ${dcls}">${sign}${d.val} ${d.label}</span>`;
+        }).join(' ');
+
+        return { cls, delta: `<div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;">${deltaHtml}</div>` };
+    }
+
+    function getStatDelta(newIt, oldIt, slot) {
+        const diffs = [];
+        const check = (label, nv, ov) => { if (nv !== ov) diffs.push({ label, val: nv - ov }); };
+        check('CA', newIt.ac||0, oldIt.ac||0);
+        check('ATK', newIt.b||0, oldIt.b||0);
+        check('HP', newIt.hb||0, oldIt.hb||0);
+        check('MP', newIt.mb||0, oldIt.mb||0);
+        if (!diffs.length) return '';
+        return diffs.map(d => {
+            const sign = d.val > 0 ? '+' : '';
+            const color = d.val > 0 ? 'var(--v-success)' : 'var(--v-danger)';
+            return `<span style="color:${color};font-weight:600;">${sign}${d.val} ${d.label}</span>`;
+        }).join(' ');
+    }
+
+    function getSetIcon(setId) {
+        if (D.sets && D.sets[setId]) return D.sets[setId].i;
+        return '🔗';
+    }
+
+    function getAllyName(npcId) {
+        const ally = (D.allies || []).find(a => a.id === npcId);
+        return ally ? ally.n : npcId;
+    }
+
+    // ── Local inventory management ──
+    function addToLocalInv(name) {
+        const existing = localInv.find(i => i.n === name);
+        if (existing) { existing.q++; }
+        else { localInv.push({n: name, q: 1, id: 'new'}); }
+    }
+
+    function removeFromLocalInv(name) {
+        const existing = localInv.find(i => i.n === name);
+        if (existing) {
+            existing.q--;
+            if (existing.q <= 0) {
+                localInv = localInv.filter(i => i.n !== name);
+            }
+        }
+    }
+
+    // ── Operations ──
+    function addOp(op) {
+        pendingOps.push(op);
+        updateBottomBar();
+    }
+
+    function updateBottomBar() {
+        const count = document.getElementById('opsCount');
+        const btn = document.getElementById('confirmBtn');
+        if (pendingOps.length > 0) {
+            count.textContent = `📝 ${pendingOps.length} alteração(ões) pendente(s)`;
+            btn.classList.remove('hidden');
+        } else {
+            count.textContent = '';
+            btn.classList.add('hidden');
+        }
+    }
+
+    // ── Modal ──
+    function showModal(html) {
+        document.getElementById('modalContent').innerHTML = html;
+        document.getElementById('modalOverlay').classList.add('visible');
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('visible');
+    }
+
+    function closeModalOutside(e) {
+        if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    // ── Swipe to dismiss ──
+    function initSwipeToDismiss() {
+        const modal = document.getElementById('modalContent');
+        let startY = 0, currentY = 0, isDragging = false;
+
+        modal.addEventListener('touchstart', e => {
+            const handle = modal.querySelector('.modal-handle');
+            if (!handle) return;
+            // Only activate if touching near the top (handle area)
+            const rect = modal.getBoundingClientRect();
+            const touchY = e.touches[0].clientY - rect.top;
+            if (touchY > 40) return;
+            startY = e.touches[0].clientY;
+            isDragging = true;
+            modal.style.transition = 'none';
+        }, { passive: true });
+
+        modal.addEventListener('touchmove', e => {
+            if (!isDragging) return;
+            currentY = e.touches[0].clientY;
+            const diff = currentY - startY;
+            if (diff > 0) {
+                modal.style.transform = `translateY(${diff}px)`;
+            }
+        }, { passive: true });
+
+        modal.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            modal.style.transition = 'transform 0.3s ease-out';
+            const diff = currentY - startY;
+            if (diff > 100) {
+                closeModal();
+            }
+            modal.style.transform = '';
+        }, { passive: true });
+    }
+
+    // ── Back button (Telegram) ──
+    function initBackButton() {
+        if (tg?.BackButton) {
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => {
+                const overlay = document.getElementById('modalOverlay');
+                if (overlay.classList.contains('visible')) {
+                    closeModal();
+                } else {
+                    tg.close();
+                }
+            });
+        }
+    }
+
+    // ── Toast ──
+    function toast(msg, type) {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+        const el = document.createElement('div');
+        el.className = `toast toast-${type||'ok'}`;
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 2000);
+    }
+
+    // ── Escape for onclick attributes & HTML context ──
+    function esc(s) {
+        return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    // ── Start ──
+    init();
+    </script>
+</body>
+</html>

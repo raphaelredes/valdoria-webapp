@@ -3,9 +3,16 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2b2830">
+    <meta name="description" content="Oficina de Artesanato - Lendas de Valdoria">
+    <meta property="og:title" content="Oficina de Artesanato - Lendas de Valdoria">
+    <meta property="og:description" content="Fabrique itens e equipamentos no RPG medieval">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="manifest" href="../manifest.json">
     <title>Oficina de Artesanato - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="../valdoria-design.css?v=3">
+    <link rel="stylesheet" href="../valdoria-design.css?v=4">
     <style>
         body { padding-bottom: 80px; }
         .header {
@@ -491,5 +498,6 @@
     // ── Boot ──
     init();
     </script>
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(()=>{})}</script>
 </body>
 </html>
