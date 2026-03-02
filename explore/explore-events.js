@@ -54,7 +54,7 @@ function showChoices(poi) {
         btn.className = 'dm-choice-btn';
 
         let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
-        html += `<span class="choice-label">${ch.l || 'Escolher'}</span>`;
+        html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
 
         // Stat check display
         if (ch.k) {
@@ -167,7 +167,7 @@ function showStage2(poi, stage2) {
             const btn = document.createElement('button');
             btn.className = 'dm-choice-btn';
             let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
-            html += `<span class="choice-label">${ch.l || 'Escolher'}</span>`;
+            html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
             if (ch.k) {
                 const statName = STAT_NAMES[ch.k.s] || ch.k.s.toUpperCase();
                 const mod = ch.k.m || 0;
@@ -333,22 +333,29 @@ function showRandomEncounter(enc) {
         (enc.choices || []).forEach((ch, idx) => {
             const btn = document.createElement('button');
             btn.className = 'dm-choice-btn';
+
+            // All encounter choices MUST have a stat check (dice roll required)
+            const check = ch.k || { s: 'dex', dc: 10, m: 0 };
+            const statName = STAT_NAMES[check.s] || check.s.toUpperCase();
+            const mod = check.m || 0;
+            const chance = Math.max(5, Math.min(95, Math.round(((21 - check.dc + mod) / 20) * 100)));
+
             let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
-            html += `<span class="choice-label">${ch.l || 'Agir'}</span>`;
-            if (ch.k) {
-                const statName = STAT_NAMES[ch.k.s] || ch.k.s.toUpperCase();
-                const mod = ch.k.m || 0;
-                const chance = Math.max(5, Math.min(95, Math.round(((21 - ch.k.dc + mod) / 20) * 100)));
-                html += `<span class="choice-check">${statName} ${chance}%</span>`;
-            }
+            html += `<span class="choice-label">${ch.t || ch.l || 'Agir'}</span>`;
+            html += `<span class="choice-check">${statName} ${chance}%</span>`;
+
             btn.innerHTML = html;
             btn.addEventListener('click', () => {
                 overlay.classList.remove('active');
-                if (ch.k) {
-                    performStatCheck({id: -1, choices: [], combat: null, type: 'enc'}, ch);
-                } else {
-                    applyOutcome({id: -1, choices: [], combat: null, type: 'enc'}, ch.o || {}, ch);
+                // Build enhanced choice with guaranteed stat check + fail outcome
+                const enhanced = Object.assign({}, ch, { k: check });
+                if (!enhanced.f) {
+                    enhanced.f = {
+                        t: 'A tentativa falhou!',
+                        d: Math.max(1, Math.ceil(S.dangerLevel * 1.5)),
+                    };
                 }
+                performStatCheck({id: -1, choices: [], combat: null, type: 'enc'}, enhanced);
             });
             choicesEl.appendChild(btn);
         });
