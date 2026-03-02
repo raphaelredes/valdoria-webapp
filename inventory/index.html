@@ -685,13 +685,19 @@
         calcLocalAC();
         const s = document.getElementById('headerStats');
         const potStr = localPotions > 0 ? `<span class="hs-hp">🧪 ${localPotions}</span>` : '';
+        let buffsStr = '';
+        if (D.buffs && D.buffs.length > 0) {
+            buffsStr = D.buffs.map(b =>
+                `<span style="font-size:10px;opacity:0.8;">${b.i}${b.c}</span>`
+            ).join('');
+        }
         s.innerHTML = `
             <span>${D.p.n}</span>
             <span class="hs-hp">❤️ ${localHP}/${D.p.mhp}</span>
             <span class="hs-mp">🔮 ${localMP}/${D.p.mmp}</span>
             <span class="hs-gold">💰 ${localGold}</span>
             <span class="hs-ac">🛡️ ${localAC}</span>
-            ${potStr}
+            ${potStr}${buffsStr}
         `;
     }
 
@@ -1203,7 +1209,13 @@
             }
         }
         if (isConsumable(tags) && qty > 0) {
-            html += `<button class="btn-use" onclick="doUse('${esc(name)}')">🧪 Usar</button>`;
+            const isFood = tags.includes('food');
+            const hasAllies = D.allies && D.allies.length > 0;
+            if (isFood && hasAllies) {
+                html += `<button class="btn-use" onclick="showTargetPicker('${esc(name)}')">🧪 Usar ▸</button>`;
+            } else {
+                html += `<button class="btn-use" onclick="doUse('${esc(name)}')">🧪 Usar</button>`;
+            }
         }
         if (canSell(it, tags) && qty > 0 && !isEquippedAnywhere(name)) {
             const sellPrice = Math.max(1, Math.floor((it.v || 1) * 0.5));
@@ -1247,6 +1259,7 @@
             if (it?.ac) html += `<div style="text-align:center;font-size:12px;color:var(--v-text-dim);">CA: +${it.ac}</div>`;
             if (it?.hb) html += `<div style="text-align:center;font-size:12px;color:var(--v-text-dim);">HP: +${it.hb}</div>`;
             if (it?.mb) html += `<div style="text-align:center;font-size:12px;color:var(--v-text-dim);">MP: +${it.mb}</div>`;
+            if (it?.sp) html += `<div style="text-align:center;font-size:11px;color:#ef5350;">⚠️ Desvantagem em Furtividade</div>`;
 
             // Gems section (player only)
             if (activeTarget === 'player') {
@@ -1573,14 +1586,36 @@
         if (tags.includes('consumable') || tags.includes('food')) {
             addOp({t:'use', item: name, tgt: activeTarget});
             removeFromLocalInv(name);
+            let tgtLabel = '';
+            if (activeTarget !== 'player' && D.allies) {
+                const ally = D.allies.find(a => a.id === activeTarget);
+                if (ally) tgtLabel = ` → ${ally.n}`;
+            }
             closeModal();
             haptic('medium');
-            toast(`🍖 ${name} usado`, 'ok');
+            toast(`🍖 ${name} usado${tgtLabel}`, 'ok');
             updateHeader();
             renderTab();
             updateBottomBar();
             return;
         }
+    }
+
+    function showTargetPicker(name) {
+        let html = `<div class="modal-title">🎯 Alvo</div>`;
+        html += `<div style="font-size:12px;color:var(--v-text-muted);text-align:center;margin-bottom:8px;">Quem vai consumir ${name}?</div>`;
+        const hpPct = Math.round(localHP / D.p.mhp * 100);
+        html += `<button class="btn-use" style="width:100%;margin-bottom:6px;" onclick="activeTarget='player';doUse('${esc(name)}')">
+            🧑 ${D.p.n} <span style="opacity:0.7;font-size:11px;">❤️ ${localHP}/${D.p.mhp} (${hpPct}%)</span></button>`;
+        (D.allies || []).forEach(a => {
+            const aHp = a.hp, aMhp = a.mhp;
+            const aPct = Math.round(aHp / aMhp * 100);
+            const injured = aHp < aMhp ? '' : 'opacity:0.5;';
+            html += `<button class="btn-use" style="width:100%;margin-bottom:6px;${injured}" onclick="activeTarget='${esc(a.id)}';doUse('${esc(name)}')">
+                👤 ${a.n} <span style="opacity:0.7;font-size:11px;">❤️ ${aHp}/${aMhp} (${aPct}%)</span></button>`;
+        });
+        html += `<button class="btn-unequip" style="width:100%;margin-top:4px;" onclick="closeModal()">Cancelar</button>`;
+        showModal(html);
     }
 
     function doUsePotion() {
@@ -1812,6 +1847,7 @@
         if (it.mb) parts.push(`MP+${it.mb}`);
         if (it.ib) parts.push(`INT+${it.ib}`);
         if (it.sb) parts.push(`Salv.+${it.sb}`);
+        if (it.sp) parts.push('Furt⚠️');
         if (it.heal) parts.push(it.heal);
         if (!parts.length && it.v) parts.push(`${it.v}gp`);
         return parts.join(' · ');
