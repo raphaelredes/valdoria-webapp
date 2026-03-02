@@ -766,6 +766,13 @@
             </div></div>`;
         }
 
+        // Truncation warning
+        if (D.trunc) {
+            html += `<div style="background:rgba(255,152,0,0.1);border:1px solid var(--v-warning);border-radius:var(--v-radius);padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--v-warning);text-align:center;">
+                ⚠️ Mostrando 40 de ${D.trunc} itens. Use o bot para gerenciar os demais.
+            </div>`;
+        }
+
         const items = getSortedFilteredItems();
         if (!items.length && localPotions <= 0) {
             const emptyMsg = searchQuery ? 'Nenhum item encontrado para a busca.' : 'Nenhum item encontrado.';
@@ -795,12 +802,15 @@
         c.innerHTML = html;
     }
 
+    let _searchTimer = null;
     function onSearch(val) {
-        searchQuery = val.toLowerCase().trim();
-        renderTab();
-        // Re-focus the search input after re-render
-        const inp = document.getElementById('searchInput');
-        if (inp) { inp.focus(); inp.selectionStart = inp.selectionEnd = inp.value.length; }
+        clearTimeout(_searchTimer);
+        _searchTimer = setTimeout(() => {
+            searchQuery = val.toLowerCase().trim();
+            renderTab();
+            const inp = document.getElementById('searchInput');
+            if (inp) { inp.focus(); inp.selectionStart = inp.selectionEnd = inp.value.length; }
+        }, 150);
     }
 
     function cycleSort() {
@@ -1133,7 +1143,7 @@
         html += `<button class="btn-unequip" onclick="doToggleFav('${esc(name)}');openItemDetail('${esc(name)}')"
             style="flex:0 0 44px;padding:10px;">${favIcon}</button>`;
         if (it.s && !isProtected(tags)) {
-            const canEquip = checkProficiency(it, activeTarget);
+            const canEquip = checkProficiency(it, activeTarget, name);
             if (canEquip) {
                 html += `<button class="btn-equip" onclick="doEquip('${esc(name)}')">⚔️ Equipar</button>`;
             } else {
@@ -1395,7 +1405,7 @@
         if (!targetSlot) return;
 
         // Check proficiency
-        if (!checkProficiency(it, activeTarget)) {
+        if (!checkProficiency(it, activeTarget, name)) {
             toast('🚫 Sem proficiência', 'err');
             return;
         }
@@ -1476,14 +1486,19 @@
         const it = getItemData(name);
         const tags = it?.t || [];
 
-        // Basic potion
+        // Named potion or potion tag
         if (name === 'potion' || tags.includes('potion')) {
             addOp({t:'use', item: name, tgt: activeTarget});
             removeFromLocalInv(name);
+            const estHeal = it.heal ? avgDice(it.heal) : 7;
+            if (activeTarget === 'player') {
+                localHP = Math.min(D.p.mhp, localHP + estHeal);
+            }
             closeModal();
             haptic('medium');
-            toast(`🧪 ${name} usado`, 'ok');
+            toast(`🧪 ${name} (~+${estHeal} HP)`, 'ok');
             animateStat('hs-hp');
+            updateHeader();
             renderTab();
             updateBottomBar();
             return;
@@ -1496,6 +1511,7 @@
             closeModal();
             haptic('medium');
             toast(`🍖 ${name} usado`, 'ok');
+            updateHeader();
             renderTab();
             updateBottomBar();
             return;
@@ -1506,8 +1522,9 @@
         if (localPotions <= 0) return;
         addOp({t:'use', item: 'potion', tgt: 'player'});
         localPotions--;
+        localHP = Math.min(D.p.mhp, localHP + 7);
         haptic('medium');
-        toast('🧪 Poção de Cura usada', 'ok');
+        toast('🧪 Poção de Cura usada (~+7 HP)', 'ok');
         animateStat('hs-hp');
         updateHeader();
         renderTab();
@@ -1584,7 +1601,13 @@
         };
 
         if (tg) {
-            tg.sendData(JSON.stringify(data));
+            try {
+                tg.sendData(JSON.stringify(data));
+            } catch(e) {
+                console.error('[INVENTORY] sendData failed', e);
+                overlay.classList.add('hidden');
+                toast('Erro ao enviar. Tente novamente.', 'err');
+            }
         } else {
             console.log('sendData:', data);
             overlay.classList.add('hidden');
@@ -1596,6 +1619,12 @@
     //  HELPERS
     // ══════════════════════════════════════════════════════════
     function getItemData(name) { return (D.items || {})[name] || {}; }
+
+    function avgDice(formula) {
+        const m = (formula || '').match(/(\d+)d(\d+)\+?(\d+)?/);
+        if (!m) return 4;
+        return Math.round(parseInt(m[1]) * (parseInt(m[2]) + 1) / 2 + parseInt(m[3] || 0));
+    }
 
     function getItemShortDesc(name, it) {
         let parts = [];
@@ -1629,7 +1658,7 @@
         return tags.some(t => ['consumable','food','potion'].includes(t));
     }
 
-    function checkProficiency(it, target) {
+    function checkProficiency(it, target, itemName) {
         const tags = it.t || [];
         if (tags.includes('clothing')) return true;
         if (!tags.includes('armor') && !tags.includes('weapon')) return true;
@@ -1641,7 +1670,8 @@
             const ally = (D.allies || []).find(a => a.id === target);
             profs = ally ? (ally.prof || []) : [];
         }
-        return tags.some(t => profs.includes(t));
+        // Match tag (category) OR specific weapon/item name
+        return tags.some(t => profs.includes(t)) || (itemName && profs.includes(itemName));
     }
 
     function resolveSlot(it) {
@@ -1693,6 +1723,9 @@
         const hpDiff = (newIt.hb||0) - (oldIt.hb||0);
         const mpDiff = (newIt.mb||0) - (oldIt.mb||0);
 
+        const dmgDiff = (newIt.dd ? avgDice(newIt.dd) : 0) - (oldIt.dd ? avgDice(oldIt.dd) : 0);
+
+        if (dmgDiff !== 0) diffs.push({ label: 'Dano', val: dmgDiff });
         if (acDiff !== 0) diffs.push({ label: 'CA', val: acDiff });
         if (atkDiff !== 0) diffs.push({ label: 'ATK', val: atkDiff });
         if (hpDiff !== 0) diffs.push({ label: 'HP', val: hpDiff });
@@ -1717,6 +1750,7 @@
     function getStatDelta(newIt, oldIt, slot) {
         const diffs = [];
         const check = (label, nv, ov) => { if (nv !== ov) diffs.push({ label, val: nv - ov }); };
+        check('Dano', newIt.dd ? avgDice(newIt.dd) : 0, oldIt.dd ? avgDice(oldIt.dd) : 0);
         check('CA', newIt.ac||0, oldIt.ac||0);
         check('ATK', newIt.b||0, oldIt.b||0);
         check('HP', newIt.hb||0, oldIt.hb||0);
@@ -1766,12 +1800,40 @@
         const count = document.getElementById('opsCount');
         const btn = document.getElementById('confirmBtn');
         if (pendingOps.length > 0) {
-            count.textContent = `📝 ${pendingOps.length} alteração(ões) pendente(s)`;
+            count.innerHTML = `📝 ${pendingOps.length} alteração(ões) · <span style="color:var(--v-text-dim);cursor:pointer;text-decoration:underline;" onclick="resetAllOps()">descartar</span>`;
             btn.classList.remove('hidden');
         } else {
             count.textContent = '';
             btn.classList.add('hidden');
         }
+    }
+
+    function resetAllOps() {
+        pendingOps = [];
+        localEq = Object.assign({}, D.eq || {});
+        localInv = (D.inv || []).map(i => ({...i}));
+        localGold = D.p.g || 0;
+        localHP = D.p.hp || 0;
+        localMP = D.p.mp || 0;
+        localPotions = D.p.pot || 0;
+        localFavs = D.fav ? [...D.fav] : [];
+        localGems = {};
+        if (D.gems) {
+            for (const [k,v] of Object.entries(D.gems))
+                localGems[k] = [...v];
+        }
+        localRunes = D.runes ? {...D.runes} : {};
+        localAllyEq = {};
+        if (D.allies) {
+            for (const a of D.allies)
+                localAllyEq[a.id] = Object.assign({}, a.eq || {});
+        }
+        closeModal();
+        updateHeader();
+        renderTab();
+        updateBottomBar();
+        haptic('light');
+        toast('🔄 Alterações descartadas', 'warn');
     }
 
     // ── Modal ──
