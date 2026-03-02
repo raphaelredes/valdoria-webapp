@@ -314,15 +314,12 @@ function handleCanvasClick(e) {
     if (isMoving()) return;
 
     const rect = _canvas.getBoundingClientRect();
-    const viewport = document.getElementById('map-viewport');
-    const scrollLeft = viewport ? viewport.scrollLeft : 0;
-    const scrollTop = viewport ? viewport.scrollTop : 0;
 
-    // Convert click to canvas logical coordinates
-    const sx = (e.clientX - rect.left) + scrollLeft * (rect.width / _canvas.offsetWidth);
-    const sy = (e.clientY - rect.top) + scrollTop * (rect.height / _canvas.offsetHeight);
+    // getBoundingClientRect() already accounts for parent scroll position
+    const sx = e.clientX - rect.left;
+    const sy = e.clientY - rect.top;
 
-    // Adjust for DPR if canvas CSS size differs from logical
+    // Scale from CSS pixels to canvas logical coordinates
     const scaleX = _canvasLogicalW / rect.width;
     const scaleY = _canvasLogicalH / rect.height;
     const canvasX = sx * scaleX;
