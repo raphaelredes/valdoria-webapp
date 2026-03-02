@@ -94,14 +94,14 @@ async function loadCombatState() {
 function showCombatEnded() {
     stopAllIntervals();
     document.getElementById('app').innerHTML = '<div class="no-data"><h2>Combate Encerrado</h2><p>Este combate já foi finalizado.</p></div>';
-    setTimeout(() => { try { if (tg) tg.close(); } catch(e) {} }, 2000);
+    setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
 }
 
 function closeCombat(result) {
     stopAllIntervals();
     if (tg) {
         tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: result }));
-        setTimeout(() => { try { tg.close(); } catch(e) {} }, 300);
+        setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
     }
 }
 
@@ -155,6 +155,8 @@ const RES_ICON_MAP = {
 // ─── MAIN RENDER ───
 function renderArena(s) {
     const app = document.getElementById('app');
+    // Clear previous biome classes before applying new one
+    document.body.className = document.body.className.replace(/\bbiome-\S+/g, '').trim();
     document.body.classList.add('biome-' + (s.bio || 'forest'));
 
     const biomeName = BIOME_NAMES[s.bio] || s.bio || 'Desconhecido';
@@ -660,7 +662,7 @@ async function sendAction(actionData) {
             ...actionData,
         };
         tg.sendData(JSON.stringify(payload));
-        setTimeout(() => { try { tg.close(); } catch(e) {} }, 300);
+        setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
     }
 }
 
@@ -692,9 +694,10 @@ function showSkillPicker(skills, enemies) {
     document.getElementById('skillClose').addEventListener('click', () => {
         overlay.classList.remove('active');
     });
-    overlay.addEventListener('click', (e) => {
+    // Use onclick to avoid accumulating duplicate listeners on persistent overlay
+    overlay.onclick = (e) => {
         if (e.target === overlay) overlay.classList.remove('active');
-    });
+    };
 }
 
 // ─── TARGET PICKER ───
@@ -727,9 +730,10 @@ function showTargetPicker(enemies, actionType, skillId) {
     document.getElementById('targetClose').addEventListener('click', () => {
         overlay.classList.remove('active');
     });
-    overlay.addEventListener('click', (e) => {
+    // Use onclick to avoid accumulating duplicate listeners on persistent overlay
+    overlay.onclick = (e) => {
         if (e.target === overlay) overlay.classList.remove('active');
-    });
+    };
 }
 
 // ─── DICE ANIMATION ───
