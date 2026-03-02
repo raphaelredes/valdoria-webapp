@@ -2,8 +2,9 @@
 // POI INTERACTION
 // ═══════════════════════════════════════════════════════
 function showPOI(poi) {
-    // POI discovery flash on hex (canvas-based golden pulse)
-    flashHex(poi.col, poi.row);
+    // POI discovery flash on hex (canvas-based golden pulse, only if visible)
+    const poiKey = `${poi.col},${poi.row}`;
+    if (S.fogState[poiKey] !== 'hidden') flashHex(poi.col, poi.row);
 
     const overlay = document.getElementById('dm-overlay');
     document.getElementById('dm-icon').textContent = poi.icon || '📜';
@@ -306,7 +307,7 @@ function applyOutcome(poi, outcome, choice) {
         S.hpChange -= outcome.d;
         addRewardBadge(rewardsEl, `💔 -${outcome.d} HP`, 'damage');
         if (S.charData) {
-            const newHP = Math.max(1, S.charData.hp + S.hpChange);
+            const newHP = Math.max(0, S.charData.hp + S.hpChange);
             updateHP(newHP, S.charData.mh);
         }
     }
@@ -330,6 +331,7 @@ function addRewardBadge(container, text, type) {
 
 function closeOutcome() {
     document.getElementById('outcome-overlay').classList.remove('active');
+    if (checkDeath()) return;
     saveState();
 }
 
@@ -656,6 +658,7 @@ function showHazardCheck(hazard) {
             overlay.classList.remove('active');
             if (!success) {
                 applyHazardEffect(hazard);
+                if (checkDeath()) return;
             }
             saveState();
         };
@@ -677,7 +680,7 @@ function applyHazardEffect(hazard) {
         const dmg = Math.floor(Math.random() * 4) + 1; // 1d4
         S.hpChange -= dmg;
         if (S.charData) {
-            const newHP = Math.max(1, S.charData.hp + S.hpChange);
+            const newHP = Math.max(0, S.charData.hp + S.hpChange);
             updateHP(newHP, S.charData.mh);
         }
         flashScreen('rgba(200,60,60,0.3)');
@@ -693,6 +696,65 @@ function applyHazardEffect(hazard) {
     }
     updateConditionHUD();
     updateRewards();
+}
+
+// ═══════════════════════════════════════════════════════
+// EXIT CONFIRMATION
+// ═══════════════════════════════════════════════════════
+function showExitConfirm() {
+    document.getElementById('confirm-overlay').classList.add('active');
+}
+function closeExitConfirm() {
+    document.getElementById('confirm-overlay').classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// DEATH OVERLAY (HP <= 0)
+// ═══════════════════════════════════════════════════════
+function checkDeath() {
+    if (!S.charData) return false;
+    const currentHP = S.charData.hp + S.hpChange;
+    if (currentHP <= 0) {
+        showDeathOverlay();
+        return true;
+    }
+    return false;
+}
+
+function showDeathOverlay() {
+    const overlay = document.getElementById('death-overlay');
+    const summary = document.getElementById('death-summary');
+
+    let html = '';
+    if (S.xpEarned > 0) html += `<div class="reward-line">✨ +${S.xpEarned} XP</div>`;
+    if (S.goldEarned > 0) html += `<div class="reward-line">💰 +${S.goldEarned} Ouro</div>`;
+    html += `<div class="reward-line">💀 HP reduzido a 0</div>`;
+    html += `<div style="margin-top:8px;color:#8a8090">⬡ ${S.visited.size} hexes explorados</div>`;
+
+    summary.innerHTML = html;
+    overlay.classList.add('active');
+
+    try { if (tg) tg.HapticFeedback.notificationOccurred('error'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+
+    // Skip button + 2500ms auto-advance
+    let _deathDone = false;
+    const skipBtn = document.getElementById('death-skip-btn');
+
+    const finishDeath = () => {
+        if (_deathDone) return;
+        _deathDone = true;
+        if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+        finishExploration('death');
+    };
+
+    setTimeout(() => {
+        if (!_deathDone && skipBtn) {
+            skipBtn.classList.add('visible');
+            skipBtn.onclick = finishDeath;
+        }
+    }, 500);
+
+    setTimeout(finishDeath, 2500);
 }
 
 // ═══════════════════════════════════════════════════════

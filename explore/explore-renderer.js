@@ -469,6 +469,16 @@ function onMoveComplete(col, row) {
         return;
     }
 
+    // Check if player is surrounded (no valid moves)
+    const neighbors = getNeighbors(col, row);
+    const hasValidMove = neighbors.some(([c, r]) => {
+        const t = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
+        return !IMPASSABLE.has(t);
+    });
+    if (!hasValidMove) {
+        showTerrainToast('🚫 Sem caminhos disponíveis!', 'damage');
+    }
+
     // Flavor event (ambient mini-event between POIs)
     if (typeof checkFlavorEvent === 'function') {
         checkFlavorEvent();

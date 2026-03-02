@@ -513,6 +513,85 @@ body {
 }
 
 /* ═══════════════════════════════════════════
+   EXIT CONFIRMATION OVERLAY
+   ═══════════════════════════════════════════ */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(43, 40, 48, 0.95);
+    z-index: 350;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.confirm-overlay.active { opacity: 1; pointer-events: all; }
+.confirm-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
+.confirm-title { font-size: 18px; font-weight: 700; color: var(--v-gold, #c4953a); text-align: center; margin-bottom: 8px; }
+.confirm-text { font-size: 13px; color: var(--v-text-dim, #8a8090); text-align: center; margin-bottom: 20px; }
+.confirm-buttons { display: flex; gap: 12px; }
+.btn-cancel {
+    flex: 1;
+    padding: 12px;
+    min-height: 44px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--v-border, #3e3845);
+    color: var(--v-text-dim, #8a8090);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-cancel:active { transform: scale(0.96); }
+.btn-confirm {
+    flex: 1;
+    padding: 12px;
+    min-height: 44px;
+    background: linear-gradient(180deg, rgba(123,32,32,0.3), rgba(123,32,32,0.15));
+    border: 1px solid rgba(170, 68, 68, 0.5);
+    color: #c88;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.btn-confirm:active { transform: scale(0.96); }
+
+/* ═══════════════════════════════════════════
+   DEATH OVERLAY
+   ═══════════════════════════════════════════ */
+.death-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(80, 20, 20, 0.96);
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+.death-overlay.active { opacity: 1; pointer-events: all; }
+.death-icon { font-size: 64px; animation: combatShake 0.5s ease; }
+.death-title { font-size: 22px; font-weight: 900; color: #c44; letter-spacing: 2px; }
+.death-summary { text-align: center; color: var(--v-text, #e0d6c8); font-size: 13px; line-height: 1.8; }
+.death-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
+.death-overlay .v-skip-btn {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #f0ebe4;
+    background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+}
+.death-overlay .v-skip-btn:active {
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08));
+}
+
+/* ═══════════════════════════════════════════
    RANDOM ENCOUNTER OVERLAY
    ═══════════════════════════════════════════ */
 .encounter-overlay {

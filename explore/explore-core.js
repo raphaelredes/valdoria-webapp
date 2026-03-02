@@ -434,6 +434,11 @@ const FLAVOR_TEXTS = {
 
 // Check and trigger a flavor event (called every step)
 function checkFlavorEvent() {
+    // Don't trigger while any overlay is active
+    const overlayIds = ['dm-overlay','check-overlay','outcome-overlay','combat-overlay','portal-overlay','encounter-overlay','confirm-overlay','death-overlay'];
+    for (const id of overlayIds) {
+        if (document.getElementById(id)?.classList.contains('active')) return;
+    }
     S._flavorSteps++;
     // Trigger every 3-4 steps (random threshold)
     const threshold = 3 + Math.floor(Math.random() * 2); // 3 or 4

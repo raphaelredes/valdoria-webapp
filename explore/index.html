@@ -44,7 +44,7 @@
 
 <!-- Bottom Bar -->
 <div id="bottom-bar">
-    <button class="btn-return" id="btn-return" onclick="finishExploration('exit')">⬅️ Retornar</button>
+    <button class="btn-return" id="btn-return" onclick="showExitConfirm()">⬅️ Retornar</button>
     <div class="bar-center">
         <span class="step-counter" id="step-counter">⬡ 0</span>
         <div class="danger-pips" id="danger-pips">
@@ -119,6 +119,27 @@
         <div class="dm-narration" id="enc-narration"></div>
         <div class="dm-choices" id="enc-choices"></div>
     </div>
+</div>
+
+<!-- Exit Confirmation Overlay -->
+<div class="confirm-overlay" id="confirm-overlay">
+    <div class="dm-card">
+        <div class="confirm-icon">⚠️</div>
+        <div class="confirm-title">Abandonar Exploração?</div>
+        <div class="confirm-text">Todo progresso será enviado ao retornar.</div>
+        <div class="confirm-buttons">
+            <button class="btn-cancel" onclick="closeExitConfirm()">Cancelar</button>
+            <button class="btn-confirm" onclick="finishExploration('exit')">Sair</button>
+        </div>
+    </div>
+</div>
+
+<!-- Death Overlay -->
+<div class="death-overlay" id="death-overlay">
+    <div class="death-icon">💀</div>
+    <div class="death-title">DERROTADO</div>
+    <div class="death-summary" id="death-summary"></div>
+    <button class="v-skip-btn" id="death-skip-btn">Retornar >></button>
 </div>
 
 <script src="explore-iso.js"></script>
