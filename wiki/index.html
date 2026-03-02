@@ -245,7 +245,7 @@ const TOPICS = [
 <p>NUNCA extrair IDs com <code>split("_")[N]</code>. Sempre usar <code>data.replace("prefix_", "", 1)</code> porque IDs contem underscores (ex: <code>npc_4889</code>).</p>`
 },
 {
-    id: 'persist', icon: '💾', name: 'Persistencia', desc: 'Save/load, multi-char, soft delete',
+    id: 'persist', icon: '💾', name: 'Persistencia', desc: 'Salvar/carregar, multi-personagem, exclusão leve',
     body: `<h2>PersistenceManager</h2>
 <p>Arquivo: <code>game/system/persistence.py</code></p>
 <h3>Storage por Personagem</h3>
@@ -287,7 +287,7 @@ const TOPICS = [
 <h3>1. Testes Unitarios</h3>
 <pre><code>scripts\\test_unit.bat
 # ou: python -m pytest src/tests/unit/ -v --tb=short</code></pre>
-<p>Valida formulas D&D 5e, modelos Player, Stats, efeitos de status, XP thresholds.</p>
+<p>Valida fórmulas D&D 5e, modelos Player, Stats, efeitos de status, limiares de XP.</p>
 <h3>2. Testes de Cobertura</h3>
 <pre><code>scripts\\test_coverage.bat
 # ou: python -m src.tests.coverage.test_explorer</code></pre>
@@ -321,7 +321,7 @@ const TOPICS = [
 </ul>`
 },
 {
-    id: 'npc-ai', icon: '🧠', name: 'NPC Intelligence Engine', desc: 'Motor emocional, memoria, LLM, rede social',
+    id: 'npc-ai', icon: '🧠', name: 'Motor de Inteligência NPC', desc: 'Motor emocional, memória, LLM, rede social',
     body: `<h2>Visao Geral</h2>
 <p>O NPC Intelligence Engine eleva todos os NPCs do jogo com inteligencia adaptativa, inspirado em NVIDIA ACE, Inworld AI, Utility AI e GOAP. Composto por 8 componentes integrados.</p>
 

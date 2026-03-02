@@ -518,10 +518,10 @@
     let activeTarget = 'player'; // 'player' or npc_id
 
     const SLOT_NAMES = {
-        head: '👑 Cabeça', chest: '🛡️ Tronco', shoulders: '🪖 Ombros',
+        head: '👑 Cabeça', chest: '🛡️ Tronco', shoulders: '⛑️ Ombros',
         main_hand: '⚔️ M.Principal', off_hand: '🛡️ M.Secundária',
-        hands: '🧤 Mãos', legs: '👖 Pernas', feet: '👢 Botas',
-        cloak: '🧥 Capa', belt: '⛓️ Cinto',
+        hands: '✋ Mãos', legs: '👖 Pernas', feet: '👢 Botas',
+        cloak: '👘 Capa', belt: '⛓️ Cinto',
         ring_1: '💍 Anel 1', ring_2: '💍 Anel 2',
         necklace: '📿 Pescoço', map: '🗺️ Mapa',
     };
@@ -542,6 +542,25 @@
     const RUNE_ELIGIBLE = new Set([
         'main_hand','off_hand','chest','head','hands','feet','legs','cloak','necklace'
     ]);
+    const TAG_LABELS = {
+        weapon:'Arma', simple_weapon:'Arma Simples', martial_weapon:'Arma Marcial',
+        armor:'Armadura', shield:'Escudo', clothing:'Vestimenta',
+        light_armor:'Armadura Leve', medium_armor:'Armadura Média', heavy_armor:'Armadura Pesada',
+        consumable:'Consumível', potion:'Poção', food:'Alimento',
+        gem:'Gema', socketable:'Encaixável', rune:'Runa',
+        tool:'Ferramenta', camping:'Acampamento',
+        junk:'Sucata', bone:'Osso', monster_part:'Despojo', trophy:'Troféu',
+        valuable:'Tesouro', material:'Material', metal:'Metal', leather:'Couro',
+        alchemy:'Alquimia', accessory:'Acessório',
+        quest:'Missão', mission_item:'Item de Missão', key:'Chave',
+        map:'Mapa', map_fragment:'Fragmento de Mapa',
+        no_sell:'Invendável', no_discard:'Indescartável',
+        story_item:'Item de História', unique:'Único',
+        two_handed:'Duas Mãos', versatile:'Versátil', finesse:'Acuidade',
+        ranged:'À Distância', thrown:'Arremesso', ammunition:'Munição',
+        melee:'Corpo a Corpo', reach:'Alcance', loading:'Recarga',
+        light:'Leve', heavy:'Pesada',
+    };
     const SORT_LABELS = {
         default: '📋 Padrão', name: '🔤 Nome', rarity: '✨ Raridade', value: '💰 Valor',
     };
@@ -913,9 +932,9 @@
 
     function getSlotEmptyIcon(slot) {
         const map = {
-            head:'👑', chest:'🛡️', shoulders:'🪖', main_hand:'⚔️',
-            off_hand:'🛡️', hands:'🧤', legs:'👖', feet:'👢',
-            cloak:'🧥', belt:'⛓️', ring_1:'💍', ring_2:'💍',
+            head:'👑', chest:'🛡️', shoulders:'⛑️', main_hand:'⚔️',
+            off_hand:'🛡️', hands:'✋', legs:'👖', feet:'👢',
+            cloak:'👘', belt:'⛓️', ring_1:'💍', ring_2:'💍',
             necklace:'📿', map:'🗺️',
         };
         return map[slot] || '📦';
@@ -995,8 +1014,8 @@
         if (it.hb) html += detailRow('HP Bônus', `+${it.hb}`, 'bonus');
         if (it.mb) html += detailRow('MP Bônus', `+${it.mb}`, 'bonus');
         if (it.ib) html += detailRow('INT Bônus', `+${it.ib}`, 'bonus');
-        if (it.sb) html += detailRow('Save Bônus', `+${it.sb}`, 'bonus');
-        if (it.sk) html += detailRow('Sockets', `${it.sk} 💎`);
+        if (it.sb) html += detailRow('Bônus de Salvaguarda', `+${it.sb}`, 'bonus');
+        if (it.sk) html += detailRow('Engastes', `${it.sk} 💎`);
         if (it.sr) html += detailRow('Força Req.', it.sr);
         if (it.th) html += detailRow('Duas Mãos', '🤲 Sim');
         if (it.heal) html += detailRow('Cura', it.heal);
@@ -1009,7 +1028,7 @@
             if (it.gb.hp_bonus) parts.push(`+${it.gb.hp_bonus} HP`);
             if (it.gb.mp_bonus) parts.push(`+${it.gb.mp_bonus} MP`);
             if (it.gb.ac_bonus) parts.push(`+${it.gb.ac_bonus} CA`);
-            if (it.gb.save_bonus) parts.push(`+${it.gb.save_bonus} Save`);
+            if (it.gb.save_bonus) parts.push(`+${it.gb.save_bonus} Salv.`);
             if (parts.length) html += detailRow('Bônus Gema', parts.join(', '), 'bonus');
         }
 
@@ -1030,23 +1049,26 @@
         // Tags
         if (tags.length) {
             html += '<div class="detail-tags">';
-            tags.slice(0, 8).forEach(t => { html += `<span class="detail-tag">${t}</span>`; });
+            tags.slice(0, 8).forEach(t => { html += `<span class="detail-tag">${TAG_LABELS[t] || t}</span>`; });
             html += '</div>';
         }
 
-        // Comparison with equipped (if equippable)
+        // Comparison with equipped (if equippable) — always show
         if (it.s) {
             const slot = resolveSlot(it);
             const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
             const currentItem = eq[slot];
-            if (currentItem && currentItem !== name) {
-                const currentIt = getItemData(currentItem);
+            if (currentItem === name) {
+                html += `<div style="margin-top:8px;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;text-align:center;">
+                    <span style="color:var(--v-success);">✅ Equipado neste slot</span>
+                </div>`;
+            } else {
+                const currentIt = currentItem ? getItemData(currentItem) : {ac:0,b:0,hb:0,mb:0};
+                const vsLabel = currentItem || 'Nenhum equipado';
                 const delta = getStatDelta(it, currentIt, slot);
-                if (delta) {
-                    html += `<div style="margin-top:8px;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;">
-                        <span style="color:var(--v-text-dim);">vs ${currentItem}:</span> ${delta}
-                    </div>`;
-                }
+                html += `<div style="margin-top:8px;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;">
+                    <span style="color:var(--v-text-dim);">vs ${vsLabel}:</span> ${delta || '<span style="color:var(--v-text-dim);">sem diferença</span>'}
+                </div>`;
             }
         }
 
@@ -1226,7 +1248,7 @@
                     if (it.gb.hp_bonus) parts.push(`+${it.gb.hp_bonus} HP`);
                     if (it.gb.mp_bonus) parts.push(`+${it.gb.mp_bonus} MP`);
                     if (it.gb.ac_bonus) parts.push(`+${it.gb.ac_bonus} CA`);
-                    if (it.gb.save_bonus) parts.push(`+${it.gb.save_bonus} Save`);
+                    if (it.gb.save_bonus) parts.push(`+${it.gb.save_bonus} Salv.`);
                     desc = parts.join(' · ');
                 }
                 const tierBadge = it.gt ? `<span style="font-size:10px;color:var(--v-text-dim);"> T${it.gt}</span>` : '';
@@ -1490,7 +1512,7 @@
         if (it.hb) parts.push(`HP+${it.hb}`);
         if (it.mb) parts.push(`MP+${it.mb}`);
         if (it.ib) parts.push(`INT+${it.ib}`);
-        if (it.sb) parts.push(`Save+${it.sb}`);
+        if (it.sb) parts.push(`Salv.+${it.sb}`);
         if (it.heal) parts.push(it.heal);
         if (!parts.length && it.v) parts.push(`${it.v}gp`);
         return parts.join(' · ');
@@ -1569,7 +1591,8 @@
     }
 
     function compareItemsDetailed(newIt, oldIt, slot) {
-        if (!oldIt || !newIt) return { cls: '', delta: '' };
+        if (!newIt) return { cls: '', delta: '' };
+        if (!oldIt) oldIt = {ac:0,b:0,hb:0,mb:0};
 
         // Calculate stat differences
         const diffs = [];
