@@ -315,6 +315,10 @@
             background: var(--v-bg-card); border: 1px solid var(--v-border) !important;
             color: var(--v-text-dim);
         }
+        .btn-sell {
+            background: linear-gradient(135deg, #ffa726, #ef6c00);
+            color: #fff;
+        }
         .btn-disabled {
             background: var(--v-border) !important; color: var(--v-text-dim) !important;
             cursor: not-allowed !important;
@@ -723,6 +727,7 @@
         const counts = getFilterCounts();
         const filters = [
             {id:'all', label:'Todos', cnt: counts.all},
+            {id:'fav', label:'⭐ Favoritos', cnt: counts.fav},
             {id:'equip', label:'⚔️ Equip', cnt: counts.equip},
             {id:'use', label:'🧪 Consumíveis', cnt: counts.use},
             {id:'gem', label:'💎 Gemas', cnt: counts.gem},
@@ -827,10 +832,11 @@
 
     function getFilterCounts() {
         const all = localInv.filter(i => i.q > 0);
-        const counts = { all: all.length, equip: 0, use: 0, gem: 0, rune: 0, misc: 0 };
+        const counts = { all: all.length, fav: 0, equip: 0, use: 0, gem: 0, rune: 0, misc: 0 };
         all.forEach(inv => {
             const it = getItemData(inv.n);
             const tags = it.t || [];
+            if (isFav(inv.n)) counts.fav++;
             if (it.s) counts.equip++;
             if (tags.includes('consumable') || tags.includes('food') || tags.includes('potion')) counts.use++;
             if (tags.includes('gem') || tags.includes('socketable')) counts.gem++;
@@ -869,6 +875,7 @@
         return items.filter(inv => {
             const it = getItemData(inv.n);
             const tags = it.t || [];
+            if (activeFilter === 'fav') return isFav(inv.n);
             if (activeFilter === 'equip') return !!it.s;
             if (activeFilter === 'use') return tags.includes('consumable') || tags.includes('food') || tags.includes('potion');
             if (activeFilter === 'gem') return tags.includes('gem') || tags.includes('socketable');
@@ -922,8 +929,22 @@
                 }
             }
 
+            // Upgrade available indicator
+            let upgradeBadge = '';
+            if (activeTarget === 'player') {
+                const compat = getCompatibleItems(slot);
+                const hasUpgrade = compat.some(ci => {
+                    const cit = getItemData(ci.name);
+                    if (ci.name === item) return false;
+                    const { cls } = compareItemsDetailed(cit, it || {ac:0,b:0,hb:0,mb:0}, slot);
+                    return cls === 'better';
+                });
+                if (hasUpgrade) upgradeBadge = '<span style="position:absolute;top:4px;right:6px;font-size:10px;color:var(--v-success);font-weight:700;background:rgba(76,175,80,0.15);padding:1px 5px;border-radius:8px;">⬆</span>';
+            }
+
             html += `<div class="equip-slot ${filled}" onclick="openSlotModal('${slot}')"
-                ${rarity && item ? `style="border-left:3px solid ${getRarityColor(rarity)}"` : ''}>
+                style="position:relative;${rarity && item ? `border-left:3px solid ${getRarityColor(rarity)}` : ''}">
+                ${upgradeBadge}
                 <div class="es-label">${label}</div>
                 <div class="es-icon">${icon}</div>
                 <div class="es-item">${nameDisplay}</div>
@@ -1083,7 +1104,15 @@
         if (it.sk) html += detailRow('Engastes', `${it.sk} 💎`);
         if (it.sr) html += detailRow('Força Req.', it.sr);
         if (it.th) html += detailRow('Duas Mãos', '🤲 Sim');
-        if (it.heal) html += detailRow('Cura', it.heal);
+        if (it.heal) {
+            const avg = avgDice(it.heal);
+            const m = (it.heal || '').match(/(\d+)d(\d+)\+?(\d+)?/);
+            const lo = m ? parseInt(m[1]) + parseInt(m[3] || 0) : avg;
+            const hi = m ? parseInt(m[1]) * parseInt(m[2]) + parseInt(m[3] || 0) : avg;
+            const preview = Math.min(D.p.mhp, localHP + avg) - localHP;
+            html += detailRow('Cura', `${it.heal} (${lo}–${hi})`);
+            if (preview > 0) html += detailRow('Preview', `❤️ ${localHP} → ~${localHP + preview}`, 'bonus');
+        }
         if (it.v) html += detailRow('Valor', `${it.v} GP`);
         if (qty > 1) html += detailRow('Quantidade', `x${qty}`);
 
@@ -1152,6 +1181,10 @@
         }
         if (isConsumable(tags) && qty > 0) {
             html += `<button class="btn-use" onclick="doUse('${esc(name)}')">🧪 Usar</button>`;
+        }
+        if (canSell(it, tags) && qty > 0 && !isEquippedAnywhere(name)) {
+            const sellPrice = Math.max(1, Math.floor((it.v || 1) * 0.5));
+            html += `<button class="btn-sell" onclick="doSell('${esc(name)}',${sellPrice})">💰 ${sellPrice}gp</button>`;
         }
         html += '</div>';
 
@@ -1547,6 +1580,19 @@
         updateBottomBar();
     }
 
+    function doSell(name, price) {
+        addOp({t:'sell', item: name});
+        removeFromLocalInv(name);
+        localGold += price;
+        closeModal();
+        haptic('medium');
+        toast(`💰 ${name} vendido por ${price} GP`, 'ok');
+        animateStat('hs-gold');
+        updateHeader();
+        renderTab();
+        updateBottomBar();
+    }
+
     // ══════════════════════════════════════════════════════════
     //  CONFIRM & SEND
     // ══════════════════════════════════════════════════════════
@@ -1577,6 +1623,7 @@
             case 'gem_insert': return `💎 Encaixar ${op.gem} em ${SLOT_NAMES[op.slot]||op.slot}`;
             case 'gem_remove': return `💎 Remover gema de ${SLOT_NAMES[op.slot]||op.slot}`;
             case 'rune_inscribe': return `🔮 Inscrever ${op.rune} em ${SLOT_NAMES[op.slot]||op.slot}`;
+            case 'sell': return `💰 Vender ${op.item}`;
             case 'toggle_fav': return `${op.val ? '⭐' : '☆'} ${op.val ? 'Favoritar' : 'Desfavoritar'} ${op.item}`;
             default: return `❓ ${op.t}`;
         }
@@ -1656,6 +1703,15 @@
 
     function isConsumable(tags) {
         return tags.some(t => ['consumable','food','potion'].includes(t));
+    }
+
+    const SELL_PROTECTED = new Set([
+        'quest','mission_item','key','map','map_fragment',
+        'no_sell','no_discard','story_item','unique'
+    ]);
+    function canSell(it, tags) {
+        if (!it.v || it.v <= 0) return false;
+        return !tags.some(t => SELL_PROTECTED.has(t));
     }
 
     function checkProficiency(it, target, itemName) {
