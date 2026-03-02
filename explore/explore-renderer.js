@@ -73,7 +73,8 @@ function renderLoop(timestamp) {
     const fogActive = updateFogAnimations(dt);
     const particlesActive = typeof updateParticles === 'function' ? updateParticles(dt) : false;
 
-    const hasAnimations = movingActive || effectsActive || fogActive || particlesActive;
+    const flashActive = _hexFlashes.length > 0;
+    const hasAnimations = movingActive || effectsActive || fogActive || particlesActive || flashActive;
 
     if (_needsRender || hasAnimations) {
         renderFrame(timestamp);
@@ -116,6 +117,9 @@ function renderFrame(timestamp) {
 
     // 7. Effects (dust, ripples)
     drawEffects(_ctx);
+
+    // 7.5 POI discovery flash
+    drawHexFlashes(_ctx, timestamp);
 
     // 8. Player token
     drawPlayerToken(_ctx, timestamp);
@@ -323,6 +327,29 @@ function drawExitPortalGlow(ctx, timestamp) {
     drawExitDecoration(ctx, center.x, center.y - h, timestamp);
 }
 
+// Draw hex flash effects (POI discovery golden pulse)
+function drawHexFlashes(ctx, timestamp) {
+    for (let idx = _hexFlashes.length - 1; idx >= 0; idx--) {
+        const f = _hexFlashes[idx];
+        const elapsed = timestamp - f.start;
+        if (elapsed > f.duration) { _hexFlashes.splice(idx, 1); continue; }
+        const alpha = 0.4 * (1 - elapsed / f.duration);
+        const center = hexToScreen(f.col, f.row);
+        const tile = S.grid[f.row] && S.grid[f.row][f.col] ? S.grid[f.row][f.col] : '.';
+        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+        const topVerts = hexTopVertices(center.x, center.y - h);
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(topVerts[0].x, topVerts[0].y);
+        for (let v = 1; v < topVerts.length; v++) ctx.lineTo(topVerts[v].x, topVerts[v].y);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(196, 149, 58, ${alpha})`;
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
 // Handle canvas click
 function handleCanvasClick(e) {
     if (isMoving()) return;
@@ -390,7 +417,7 @@ function movePlayerCanvas(col, row) {
     }
 
     // Haptic
-    try { if (tg) tg.HapticFeedback.impactOccurred('light'); } catch(e) {}
+    try { if (tg) tg.HapticFeedback.impactOccurred('light'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
 
     // Start rendering
     scheduleRender();

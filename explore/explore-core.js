@@ -471,5 +471,9 @@ function hexDist(c1, r1, c2, r2) {
     return Math.max(Math.abs(x1-x2), Math.abs(y1-y2), Math.abs(z1-z2));
 }
 
-// Stub for explore-events.js compatibility (it calls getHexEl for POI flash)
-function getHexEl() { return null; }
+// POI discovery flash — canvas-based golden pulse
+let _hexFlashes = [];
+function flashHex(col, row) {
+    _hexFlashes.push({ col, row, start: performance.now(), duration: 700 });
+    scheduleRender();
+}

@@ -2,12 +2,8 @@
 // POI INTERACTION
 // ═══════════════════════════════════════════════════════
 function showPOI(poi) {
-    // POI discovery flash on hex
-    const poiHex = getHexEl(poi.col, poi.row);
-    if (poiHex) {
-        poiHex.classList.add('poi-discovered');
-        setTimeout(() => poiHex.classList.remove('poi-discovered'), 700);
-    }
+    // POI discovery flash on hex (canvas-based golden pulse)
+    flashHex(poi.col, poi.row);
 
     const overlay = document.getElementById('dm-overlay');
     document.getElementById('dm-icon').textContent = poi.icon || '📜';
@@ -164,7 +160,7 @@ function performStatCheck(poi, choice) {
     });
 
     // Haptic on dice roll
-    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
+    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
 
     // Show check overlay
     const overlay = document.getElementById('check-overlay');
@@ -195,7 +191,7 @@ function performStatCheck(poi, choice) {
 
         try {
             if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
-        } catch(e) {}
+        } catch(e) { console.warn('[EXPLORE] haptic:', e); }
 
         // Phase 2: Result reading time (2000ms with skip button)
         let _checkDone = false;
@@ -350,7 +346,7 @@ function triggerCombat(poi) {
     document.getElementById('combat-text').textContent = 'Preparando combate...';
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) {}
+    try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
 
     // Skip button + 2000ms auto-advance
     let _combatDone = false;
@@ -391,7 +387,7 @@ function showPortalOverlay() {
     summary.innerHTML = html;
     overlay.classList.add('active');
 
-    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
+    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
 
     // Skip button + 2500ms auto-advance
     let _portalDone = false;
@@ -431,7 +427,7 @@ function showRandomEncounter(enc) {
     document.body.appendChild(flash);
     setTimeout(() => flash.remove(), 700);
 
-    try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) {}
+    try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
 
     const overlay = document.getElementById('encounter-overlay');
     document.getElementById('enc-icon').textContent = enc.icon || '⚠️';
@@ -612,7 +608,7 @@ function showHazardCheck(hazard) {
         stat: hazard.stat, dc: hazard.dc, roll: roll, mod: mod, ok: success, mode: mode,
     });
 
-    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
+    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
 
     const overlay = document.getElementById('check-overlay');
     const diceEl = document.getElementById('dice-display');
@@ -647,7 +643,7 @@ function showHazardCheck(hazard) {
 
         try {
             if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
-        } catch(e) {}
+        } catch(e) { console.warn('[EXPLORE] haptic:', e); }
 
         // Phase 2: Result reading time (2000ms with skip button)
         let _hazDone = false;
@@ -716,10 +712,10 @@ function finishExploration(reason) {
     }
 
     // Haptic feedback
-    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
+    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
 
     // Clean up session storage
-    try { sessionStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch(e) { console.warn('[EXPLORE] sessionStorage:', e); }
 
     const payload = {
         action: 'exploration_complete',
