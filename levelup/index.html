@@ -62,11 +62,12 @@
 
         /* ─── Progress bar ─── */
         .progress-bar {
-            display: flex; gap: 4px;
+            display: none; gap: 4px;
             padding: 8px 12px;
             background: var(--v-bg);
             position: sticky; top: 0; z-index: 20;
         }
+        .progress-bar.visible { display: flex; }
         .progress-step {
             flex: 1; height: 4px; border-radius: 2px;
             background: var(--v-border);
@@ -400,6 +401,20 @@
         }
         .toast.show { transform: translateY(0); }
 
+        /* ─── Fatal error (full screen) ─── */
+        .fatal-error {
+            display: none;
+            position: fixed; inset: 0; z-index: 300;
+            background: var(--v-bg);
+            flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 12px; text-align: center; padding: 24px;
+        }
+        .fatal-error.active { display: flex; }
+        .fatal-error .err-icon { font-size: 40px; opacity: 0.6; }
+        .fatal-error .err-msg { font-size: 14px; color: var(--v-text-dim); }
+        .fatal-error .err-hint { font-size: 12px; color: var(--v-text-dim); opacity: 0.6; }
+
         /* ─── Misc ─── */
         .section-title {
             font-size: 13px; font-weight: 700;
@@ -485,6 +500,11 @@
 </head>
 <body>
 <div id="toast" class="toast"></div>
+<div id="fatalError" class="fatal-error">
+    <div class="err-icon">⚠️</div>
+    <div class="err-msg" id="fatalMsg">Dados invalidos</div>
+    <div class="err-hint">Volte ao bot e tente novamente.</div>
+</div>
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner"></div>
     <div class="loading-text">Confirmando evolucao...</div>
@@ -544,18 +564,18 @@ let isTransitioning = false;
         const raw = params.get('p') || '';
         P = JSON.parse(atob(raw.replace(/-/g,'+').replace(/_/g,'/')));
     } catch(e) {
-        showError('Dados invalidos'); return;
+        showFatalError('Dados invalidos'); return;
     }
     if (!P || !P.hero_class || !P.stats || typeof P.level !== 'number') {
-        showError('Dados do personagem incompletos'); return;
+        showFatalError('Dados do personagem incompletos'); return;
     }
     for (const [k, v] of Object.entries(P.stats)) {
         if (typeof v !== 'number' || v < 1 || v > 20) {
-            showError('Atributos invalidos'); return;
+            showFatalError('Atributos invalidos'); return;
         }
     }
     if (typeof CLASS_SKILLS === 'undefined' || typeof FEATS === 'undefined') {
-        showError('Dados do jogo nao carregaram'); return;
+        showFatalError('Dados do jogo nao carregaram'); return;
     }
     buildScreens();
 })();
@@ -616,6 +636,10 @@ function goTo(idx) {
     closeAllSubScreens();
     cur = idx;
     document.getElementById('screenTrack').style.transform = `translateX(-${idx * 100}vw)`;
+    // Show progress bar only after the summary screen
+    const bar = document.getElementById('progressBar');
+    if (idx > 0) bar.classList.add('visible');
+    else bar.classList.remove('visible');
     updateProgress();
     updateNavBtn();
     if (screens[cur].id === 'review') {
@@ -733,6 +757,12 @@ function showError(msg) {
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function showFatalError(msg) {
+    const el = document.getElementById('fatalError');
+    document.getElementById('fatalMsg').textContent = msg;
+    el.classList.add('active');
 }
 
 function calcDmgRange(effect) {
