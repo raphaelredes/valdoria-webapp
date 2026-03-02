@@ -425,14 +425,22 @@
         { key:'misc', icon:'📦', label:'Outros', tags:[] },
     ];
 
+    // ── UTF-8 Base64 Decode ──
+    function decodeBase64Utf8(b64) {
+        const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
+        const binary = atob(raw);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return new TextDecoder().decode(bytes);
+    }
+
     // ── Init ──
     function init() {
         const params = new URLSearchParams(location.search);
         const b64 = params.get('data');
         if (!b64) { showError('Dados não encontrados.'); return; }
         try {
-            const raw = b64.replace(/-/g,'+').replace(/_/g,'/');
-            D = JSON.parse(atob(raw));
+            D = JSON.parse(decodeBase64Utf8(b64));
         } catch(e) { console.error('[MARKET] Erro ao decodificar dados', e); showError('Erro ao decodificar dados.'); return; }
 
         localGold = D.p.g || 0;

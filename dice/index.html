@@ -405,11 +405,19 @@
     const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
     if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg); }
 
+    function decodeBase64Utf8(b64) {
+        const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
+        const binary = atob(raw);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return new TextDecoder().decode(bytes);
+    }
+
     const params = new URLSearchParams(window.location.search);
     const MODE = params.get('mode') || 'free';
     const GAME_FORMULA = params.get('formula');
-    const GAME_RESULT = params.get('r') ? parseInt(atob(params.get('r'))) : null;
-    const GAME_RAW = params.get('raw') ? JSON.parse(atob(params.get('raw'))) : null;
+    const GAME_RESULT = params.get('r') ? parseInt(decodeBase64Utf8(params.get('r'))) : null;
+    const GAME_RAW = params.get('raw') ? JSON.parse(decodeBase64Utf8(params.get('raw'))) : null;
     const GAME_LABEL = params.get('label') ? decodeURIComponent(params.get('label')) : '';
     const GAME_TYPE = params.get('type') || '';
     const GAME_DC = params.get('dc') ? parseInt(params.get('dc')) : null;

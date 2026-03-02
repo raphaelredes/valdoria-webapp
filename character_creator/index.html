@@ -740,11 +740,19 @@ if (tg) {
     });
 }
 
+function decodeBase64Utf8(b64) {
+    const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
+    const binary = atob(raw);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+}
+
 (function init() {
     const params = new URLSearchParams(location.search);
     token = params.get('token') || '';
     charId = params.get('char_id') || '';
-    try { existingNames = JSON.parse(atob(params.get('names') || 'W10=')); } catch(e) { console.warn('[CHAR_CREATOR] Failed to decode existing names', e); existingNames = []; }
+    try { existingNames = JSON.parse(decodeBase64Utf8(params.get('names') || 'W10=')); } catch(e) { console.warn('[CHAR_CREATOR] Failed to decode existing names', e); existingNames = []; }
     buildProgressBar();
     buildDmBubbles();
     buildRaceGrid();
