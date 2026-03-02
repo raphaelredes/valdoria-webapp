@@ -36,7 +36,12 @@ class CombatAPI {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
             body: JSON.stringify({ user_id: this.userId }),
         });
-        if (!r.ok) throw new Error(`API ${r.status}`);
+        if (!r.ok) {
+            const body = await r.json().catch(() => ({}));
+            const err = new Error(body.error || `API ${r.status}`);
+            err.status = r.status;
+            throw err;
+        }
         return r.json();
     }
     async sendAction(data) {
@@ -45,7 +50,12 @@ class CombatAPI {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
             body: JSON.stringify({ user_id: this.userId, ...data }),
         });
-        if (!r.ok) throw new Error(`API ${r.status}`);
+        if (!r.ok) {
+            const body = await r.json().catch(() => ({}));
+            const err = new Error(body.error || `API ${r.status}`);
+            err.status = r.status;
+            throw err;
+        }
         return r.json();
     }
 }
@@ -569,7 +579,7 @@ function renderActionBar(acts, enemies, player) {
     return `<div class="action-bar"><div class="action-grid">
         <button class="action-btn primary" data-action="attack">⚔️ Atacar <span class="action-chance">${hitChance}%</span></button>
         <button class="action-btn ${hasSkills?'':'disabled'}" data-action="skill">${skillBtnText}</button>
-        <button class="action-btn" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
+        <button class="action-btn ${itemCount>0?'':'disabled'}" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
         <button class="action-btn danger" data-action="flee">🏃 Fugir <span class="action-chance">${fleeChance}%</span></button>
         <button class="action-btn full-width" data-action="pass">⏭️ Passar Turno</button>
     </div></div>`;
@@ -618,7 +628,10 @@ function bindActions(state) {
             } else if (action === 'pass') {
                 sendAction({ type: 'pass' });
             } else if (action === 'items') {
-                sendAction({ type: 'items' });
+                const items = state.acts?.item_list || [];
+                if (items.length > 0) {
+                    showItemPicker(items, enemies, state.a || []);
+                }
             } else if (action === 'initiative') {
                 sendAction({ type: 'initiative' });
             } else if (action === 'proceed') {
@@ -628,18 +641,38 @@ function bindActions(state) {
     });
 }
 
+// ─── LOADING INDICATOR ───
+function _showActionLoading(show) {
+    let el = document.getElementById('actionLoading');
+    if (show) {
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'actionLoading';
+            el.className = 'action-loading';
+            el.innerHTML = '<div class="loading-spinner"></div><span>Enviando...</span>';
+            const bar = document.querySelector('.action-bar');
+            if (bar) bar.prepend(el);
+        }
+        el.style.display = 'flex';
+    } else if (el) {
+        el.remove();
+    }
+}
+
 // ─── SEND ACTION ───
 let _actionSent = false;
 async function sendAction(actionData) {
     if (_actionSent) return;
     _actionSent = true;
     document.querySelectorAll('.action-btn').forEach(b => b.classList.add('disabled'));
+    _showActionLoading(true);
     stopTimer();
     stopPolling();
 
     if (isApiMode && api) {
         try {
             const result = await api.sendAction(actionData);
+            _showActionLoading(false);
             _actionSent = false;
             if (!result) { showError('Sem resposta do servidor.'); return; }
             if (result.phase === 'victory' || result.phase === 'defeat' || result.phase === 'ended') {
@@ -649,9 +682,11 @@ async function sendAction(actionData) {
             currentState = result;
             renderArena(result);
         } catch(e) {
+            _showActionLoading(false);
             _actionSent = false;
             console.error('[ARENA] API sendAction error', e);
-            showError('Erro de conexão. Tente novamente.');
+            const msg = e.status === 401 ? 'Sessão expirada.' : 'Erro de conexão. Tente novamente.';
+            showError(msg);
             startPolling();
         }
     } else {
@@ -672,8 +707,18 @@ function showSkillPicker(skills, enemies) {
     const overlay = document.getElementById('skillOverlay');
     let html = '<div class="skill-panel-title">Habilidades</div>';
     skills.forEach(sk => {
-        html += `<div class="skill-item" data-skill-id="${sk.id}">
-            <div><div class="skill-name">${escHtml(sk.n)}</div><div class="skill-meta">Custo: ${sk.c} · Chance: ${sk.ch}%</div></div>
+        const typeBadge = sk.tp === 'saving_throw' ? ' · <span class="sk-type">ST</span>' :
+                          sk.tp === 'auto' ? ' · <span class="sk-type">Auto</span>' :
+                          sk.tp === 'heal' ? ' · <span class="sk-type">Cura</span>' : '';
+        const tgtBadge = sk.tg === 'all' ? ' · <span class="sk-aoe">AOE</span>' :
+                         sk.tg === 'self' ? ' · <span class="sk-aoe">Self</span>' : '';
+        const effLine = sk.eff ? `<div class="skill-effect">${escHtml(sk.eff)}</div>` : '';
+        html += `<div class="skill-item" data-skill-id="${sk.id}" data-tg="${sk.tg||'single'}">
+            <div>
+                <div class="skill-name">${escHtml(sk.n)}</div>
+                ${effLine}
+                <div class="skill-meta">Custo: ${sk.c} · Chance: ${sk.ch}%${typeBadge}${tgtBadge}</div>
+            </div>
         </div>`;
     });
     html += '<div class="skill-close" id="skillClose">Cancelar</div>';
@@ -683,8 +728,12 @@ function showSkillPicker(skills, enemies) {
     panel.querySelectorAll('.skill-item').forEach(item => {
         item.addEventListener('click', () => {
             const skillId = item.dataset.skillId;
+            const tg = item.dataset.tg || 'single';
             overlay.classList.remove('active');
-            if (enemies.length > 1) {
+            // AOE/self skills skip target picker
+            if (tg === 'all' || tg === 'self') {
+                sendAction({ type: 'skill', skill_id: skillId, target: 0 });
+            } else if (enemies.length > 1) {
                 showTargetPicker(enemies, 'skill', skillId);
             } else {
                 sendAction({ type: 'skill', skill_id: skillId, target: 0 });
@@ -731,6 +780,48 @@ function showTargetPicker(enemies, actionType, skillId) {
         overlay.classList.remove('active');
     });
     // Use onclick to avoid accumulating duplicate listeners on persistent overlay
+    overlay.onclick = (e) => {
+        if (e.target === overlay) overlay.classList.remove('active');
+    };
+}
+
+// ─── ITEM PICKER ───
+function showItemPicker(items, enemies, allies) {
+    const panel = document.getElementById('itemPanel');
+    const overlay = document.getElementById('itemOverlay');
+    let html = '<div class="skill-panel-title">🎒 Itens de Combate</div>';
+    items.forEach(it => {
+        const isThrown = !!it.tdmg;
+        const effText = isThrown ? `${it.tdmg} ${it.ttype||''}` : (it.heal ? `Cura ${it.heal}` : '');
+        const typeBadge = isThrown ? '<span class="sk-aoe">Arremesso</span>' : '<span class="sk-type">Cura</span>';
+        html += `<div class="skill-item item-entry" data-item="${escHtml(it.n)}" data-thrown="${isThrown}">
+            <div>
+                <div class="skill-name">${it.ico} ${escHtml(it.n)} <span class="action-chance">x${it.q}</span></div>
+                <div class="skill-meta">${effText} · ${typeBadge}</div>
+            </div>
+        </div>`;
+    });
+    html += '<div class="skill-close" id="itemClose">Cancelar</div>';
+    panel.innerHTML = html;
+    overlay.classList.add('active');
+
+    panel.querySelectorAll('.item-entry').forEach(el => {
+        el.addEventListener('click', () => {
+            const itemName = el.dataset.item;
+            const isThrown = el.dataset.thrown === 'true';
+            overlay.classList.remove('active');
+            if (isThrown) {
+                // Thrown items always target enemy — target -2 means first enemy
+                sendAction({ type: 'use_item', item_key: itemName, item_target: -2 });
+            } else {
+                // Healing items: target self (-1) directly
+                sendAction({ type: 'use_item', item_key: itemName, item_target: -1 });
+            }
+        });
+    });
+    document.getElementById('itemClose').addEventListener('click', () => {
+        overlay.classList.remove('active');
+    });
     overlay.onclick = (e) => {
         if (e.target === overlay) overlay.classList.remove('active');
     };
