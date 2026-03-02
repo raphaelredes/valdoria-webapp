@@ -450,6 +450,23 @@
         /* ── SVG Icons ── */
         .vi { display: inline-block; vertical-align: -0.15em; flex-shrink: 0; }
 
+        /* ── Selection Mode ── */
+        .selection-bar {
+            position: fixed; bottom: 56px; left: 0; right: 0;
+            max-width: 430px; margin: 0 auto; z-index: 90;
+            background: var(--v-card); border-top: 1px solid var(--v-border);
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 12px;
+        }
+        .selection-bar .sel-count { flex: 1; font-size: 12px; color: var(--v-text-muted); }
+        .sel-check {
+            position: absolute; top: 4px; right: 4px; width: 20px; height: 20px;
+            border-radius: 4px; border: 1.5px solid var(--v-text-dim);
+            display: flex; align-items: center; justify-content: center;
+            background: transparent; transition: all 0.15s;
+        }
+        .sel-check.active { border-color: var(--v-gold); background: var(--v-gold); }
+
         /* ── Loading Overlay ── */
         .loading-overlay {
             position: fixed; inset: 0; z-index: 999;
@@ -497,6 +514,7 @@
     </div>
     <div class="tabs" id="tabsBar"></div>
     <div class="content" id="mainContent"></div>
+    <div class="selection-bar hidden" id="selectionBar"></div>
     <div class="bottom-bar" id="bottomBar">
         <div class="ops-count" id="opsCount"></div>
         <button class="confirm-btn hidden" id="confirmBtn" onclick="showConfirmModal()">
@@ -538,6 +556,8 @@
     let localFavs = [];         // Local favorites list
     let localAC = 0;            // Dynamic AC (recalculated on equip/unequip)
     let activeTarget = 'player'; // 'player' or npc_id
+    let selectionMode = false;
+    let selectedItems = new Set(); // item names selected for batch ops
 
     // ── SVG Icon System (medieval line art) ──
     const _IC = {
@@ -585,6 +605,7 @@
         quill:'<path d="M18 3c-3 1-6 5-8 10l-2 6 6-2c5-2 9-5 10-8"/><path d="M8 13l3 3"/>',
         food:'<circle cx="10" cy="10" r="5"/><path d="M14 14l6 6"/><line x1="14" y1="7" x2="17" y2="7"/>',
         stealth:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/><line x1="4" y1="20" x2="20" y2="4" stroke-width="2"/>',
+        tent:'<path d="M3 20L12 4l9 16z"/><line x1="12" y1="4" x2="12" y2="20"/><path d="M8 20c0-2 2-4 4-4s4 2 4 4"/>',
     };
     function vi(name, sz) {
         const p = _IC[name]; if (!p) return '';
@@ -793,7 +814,7 @@
     function switchTab(id) {
         activeTab = id;
         activeTarget = 'player';
-        // Don't reset filter/search when switching tabs
+        if (selectionMode) { selectionMode = false; selectedItems.clear(); updateSelectionBar(); }
         buildTabs();
         renderTab();
         haptic('light');
@@ -828,6 +849,9 @@
         html += `<div class="search-bar">
             <input type="text" placeholder="Buscar item..." value="${esc(searchQuery)}"
                 oninput="onSearch(this.value)" id="searchInput">
+            <div class="sort-btn ${selectionMode?'active':''}" onclick="toggleSelectionMode()" title="Modo seleção">
+                ${selectionMode ? vi_f('check',14) : vi('check',14)}
+            </div>
             <div class="sort-btn ${sortMode!=='default'?'active':''}" onclick="cycleSort()">
                 ${SORT_LABELS[sortMode]}
             </div>
@@ -889,14 +913,21 @@
                 const rarity = it.r || 'common';
                 const equipped = isEquippedAnywhere(inv.n);
                 const setId = it.si || '';
+                const tags = it.t || [];
+                const canSelect = selectionMode && !equipped && !isProtected(tags);
+                const isSelected = selectedItems.has(inv.n);
+                const clickAction = canSelect
+                    ? `toggleSelectItem('${esc(inv.n)}')`
+                    : (selectionMode ? '' : `openItemDetail('${esc(inv.n)}')`);
                 html += `<div class="item-card rarity-${rarity} ${equipped?'equipped-marker':''} fade-in"
-                    onclick="openItemDetail('${esc(inv.n)}')">
+                    onclick="${clickAction}" ${selectionMode && !canSelect ? 'style="opacity:0.4;"' : ''}>
+                    ${selectionMode ? `<div class="sel-check ${isSelected?'active':''}">${isSelected ? vi_f('check',12) : ''}</div>` : ''}
                     <div class="ic-badges">
                         ${inv.q > 1 ? `<span class="ic-qty">x${inv.q}</span>` : ''}
                         ${equipped ? '<span class="ic-eq-badge">Equipado</span>' : ''}
                         ${setId ? `<span class="ic-set-badge">${getSetIcon(setId)}</span>` : ''}
                     </div>
-                    ${isFav(inv.n) ? `<span class="ic-fav">${vi_f('star',14)}</span>` : ''}
+                    ${!selectionMode && isFav(inv.n) ? `<span class="ic-fav">${vi_f('star',14)}</span>` : ''}
                     <div class="ic-emoji">${it.e||'📦'}</div>
                     <div class="ic-name v-rarity-${rarity}">${inv.n}</div>
                     <div class="ic-meta">${getItemShortDesc(inv.n, it)}</div>
@@ -1176,7 +1207,10 @@
         let html = '<div style="display:flex;gap:4px;margin:6px 0;flex-wrap:wrap;align-items:center;">';
         html += `<span class="btn-sell-junk" onclick="promptSaveLoadout()" style="border-color:var(--v-gold);">${vi('save',13)} Salvar</span>`;
         names.forEach(n => {
-            html += `<span class="btn-sell-junk" onclick="doLoadLoadout('${esc(n)}')" style="border-color:var(--v-text-dim);">${vi('sword',13)} ${n}</span>`;
+            html += `<span class="btn-sell-junk" style="border-color:var(--v-text-dim);display:inline-flex;align-items:center;gap:2px;">
+                <span onclick="doLoadLoadout('${esc(n)}')" style="cursor:pointer;">${vi('sword',13)} ${n}</span>
+                <span onclick="event.stopPropagation();doDeleteLoadout('${esc(n)}')" style="cursor:pointer;color:var(--v-danger);opacity:0.6;font-size:14px;padding:0 2px;">×</span>
+            </span>`;
         });
         html += '</div>';
         return names.length > 0 || true ? html : '';
@@ -1212,6 +1246,16 @@
         haptic('medium');
         toast(`${vi('sword',13)} Loadout '${esc(name)}' aplicado`, 'ok');
         updateHeader();
+        renderTab();
+        updateBottomBar();
+    }
+
+    function doDeleteLoadout(name) {
+        if (!D.ldout || !D.ldout[name]) return;
+        delete D.ldout[name];
+        addOp({t:'delete_loadout', name});
+        haptic('medium');
+        toast(`${vi('trash',13)} Loadout '${esc(name)}' removido`, 'ok');
         renderTab();
         updateBottomBar();
     }
@@ -1363,9 +1407,13 @@
             }
         }
         if (isConsumable(tags) && qty > 0) {
+            const isCamping = tags.includes('camping');
             const isFood = tags.includes('food');
+            const isPotion = tags.includes('potion');
             const hasAllies = D.allies && D.allies.length > 0;
-            if (isFood && hasAllies) {
+            if (isCamping) {
+                html += `<button class="btn-use" onclick="showCampConfirm('${esc(name)}')">${vi('tent',13)} Acampar ▸</button>`;
+            } else if ((isFood || isPotion) && hasAllies) {
                 html += `<button class="btn-use" onclick="showTargetPicker('${esc(name)}')">${vi('flask',13)} Usar ▸</button>`;
             } else {
                 html += `<button class="btn-use" onclick="doUse('${esc(name)}')">${vi('flask',13)} Usar</button>`;
@@ -1847,6 +1895,63 @@
         updateBottomBar();
     }
 
+    function showCampConfirm(name) {
+        const isTent = name === 'Barraca';
+        const tentUses = D.p.tu || 0;
+        const hpGain = D.p.mhp - localHP;
+        const mpGain = D.p.mmp - localMP;
+        const maxHD = D.p.mhd || D.p.l || 1;
+        const curHD = D.p.hd || 0;
+        const hdGain = Math.min(maxHD - curHD, Math.max(1, Math.floor((maxHD + 1) / 2)));
+
+        let html = '<div style="text-align:center;padding:12px;">';
+        html += `<div style="font-size:20px;margin-bottom:8px;">${vi('tent',18)} Descanso Longo</div>`;
+        if (isTent && tentUses > 0) {
+            const bars = Array.from({length: 5}, (_, i) =>
+                `<span style="color:${i < tentUses ? 'var(--v-success)' : 'var(--v-text-dim)'}">${i < tentUses ? '■' : '□'}</span>`
+            ).join('');
+            html += `<div style="font-size:13px;margin-bottom:8px;">Barraca: ${bars} <span style="opacity:0.7">${tentUses}/5 usos</span></div>`;
+        }
+        html += '<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">';
+        html += `Recuperação estimada:<br>`;
+        html += `${vi('heart',12)} +${hpGain} HP &nbsp; ${vi('orb',12)} +${mpGain} MP`;
+        if (hdGain > 0) html += ` &nbsp; 🎲 +${hdGain} HD`;
+        html += '</div>';
+        html += `<div class="detail-actions">
+            <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+            <button class="btn-use" onclick="doCamp('${esc(name)}')">${vi('tent',13)} Acampar</button>
+        </div>`;
+        html += '</div>';
+        showModal(html);
+    }
+
+    function doCamp(name) {
+        addOp({t:'use', item: name, tgt: 'player'});
+        const hpGain = D.p.mhp - localHP;
+        const mpGain = D.p.mmp - localMP;
+        localHP = D.p.mhp;
+        localMP = D.p.mmp;
+        // Tent durability
+        if (name === 'Barraca' && D.p.tu != null) {
+            D.p.tu--;
+            if (D.p.tu <= 0) {
+                removeFromLocalInv(name);
+                // Check for another tent
+                const another = localInv.find(i => i.n === 'Barraca' && i.q > 0);
+                D.p.tu = another ? 5 : null;
+            }
+        }
+        closeModal();
+        haptic('heavy');
+        let msg = `${vi('tent',13)} Descanso Longo: +${hpGain} HP, +${mpGain} MP`;
+        toast(msg, 'ok');
+        animateStat('hs-hp');
+        animateStat('hs-mp');
+        updateHeader();
+        renderTab();
+        updateBottomBar();
+    }
+
     function doToggleFav(name) {
         const idx = localFavs.indexOf(name);
         if (idx >= 0) {
@@ -1886,6 +1991,147 @@
         closeModal();
         haptic('heavy');
         toast(`${vi('trash',13)} ${esc(name)} descartado`, 'warn');
+        updateHeader();
+        renderTab();
+        updateBottomBar();
+    }
+
+    // ── Selection Mode (batch discard/sell) ──
+    function toggleSelectionMode() {
+        selectionMode = !selectionMode;
+        selectedItems.clear();
+        updateSelectionBar();
+        renderTab();
+    }
+
+    function toggleSelectItem(name) {
+        if (selectedItems.has(name)) selectedItems.delete(name);
+        else selectedItems.add(name);
+        haptic('light');
+        updateSelectionBar();
+        renderTab();
+    }
+
+    function updateSelectionBar() {
+        const bar = document.getElementById('selectionBar');
+        if (!bar) return;
+        if (selectionMode && selectedItems.size > 0) {
+            bar.classList.remove('hidden');
+            bar.innerHTML = `
+                <span class="sel-count">${selectedItems.size} selecionado(s)</span>
+                <button class="btn-sell" style="padding:6px 10px;font-size:12px;" onclick="sellSelected()">${vi('coin',12)} Vender</button>
+                <button style="padding:6px 10px;font-size:12px;background:var(--v-danger);color:#fff;border:none;border-radius:6px;cursor:pointer;" onclick="discardSelected()">${vi('trash',12)} Descartar</button>`;
+        } else {
+            bar.classList.add('hidden');
+            bar.innerHTML = '';
+        }
+    }
+
+    function sellSelected() {
+        const names = [...selectedItems];
+        let totalGP = 0;
+        const sellable = [];
+        names.forEach(name => {
+            const it = getItemData(name);
+            const tags = it.t || [];
+            if (isProtected(tags)) return;
+            const inv = localInv.find(i => i.n === name);
+            if (!inv || inv.q <= 0) return;
+            const price = Math.max(1, Math.floor((it.v || 1) * 0.5));
+            sellable.push({name, price, qty: 1});
+            totalGP += price;
+        });
+        if (!sellable.length) { toast(`${vi('warn',13)} Nenhum item vendível`, 'warn'); return; }
+        let html = '<div style="text-align:center;padding:12px;">';
+        html += `<div style="font-size:20px;margin-bottom:8px;">${vi('coin',18)} Vender Selecionados</div>`;
+        html += `<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
+            Vender <b>${sellable.length}</b> item(ns) por <b>${totalGP} GP</b>? (50% do valor)</div>`;
+        html += '<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';
+        sellable.forEach(s => {
+            const it = getItemData(s.name);
+            html += `${it.e||'📦'} ${s.name} → ${s.price} GP<br>`;
+        });
+        html += '</div>';
+        html += `<div class="detail-actions">
+            <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+            <button class="btn-sell" onclick="confirmSellSelected()">${vi('coin',13)} Vender ${totalGP} GP</button>
+        </div></div>`;
+        showModal(html);
+    }
+
+    function confirmSellSelected() {
+        let totalGP = 0;
+        [...selectedItems].forEach(name => {
+            const it = getItemData(name);
+            const tags = it.t || [];
+            if (isProtected(tags)) return;
+            const inv = localInv.find(i => i.n === name);
+            if (!inv || inv.q <= 0) return;
+            const price = Math.max(1, Math.floor((it.v || 1) * 0.5));
+            addOp({t:'sell', item: name});
+            removeFromLocalInv(name);
+            totalGP += price;
+            localGold += price;
+        });
+        selectedItems.clear();
+        selectionMode = false;
+        closeModal();
+        updateSelectionBar();
+        haptic('medium');
+        toast(`${vi('coin',13)} Vendidos: +${totalGP} GP`, 'ok');
+        animateStat('hs-gold');
+        updateHeader();
+        renderTab();
+        updateBottomBar();
+    }
+
+    function discardSelected() {
+        const names = [...selectedItems];
+        const discardable = [];
+        names.forEach(name => {
+            const it = getItemData(name);
+            const tags = it.t || [];
+            if (isProtected(tags)) return;
+            const inv = localInv.find(i => i.n === name);
+            if (!inv || inv.q <= 0) return;
+            discardable.push(name);
+        });
+        if (!discardable.length) { toast(`${vi('warn',13)} Nenhum item descartável`, 'warn'); return; }
+        let html = '<div style="text-align:center;padding:12px;">';
+        html += `<div style="font-size:20px;margin-bottom:8px;">${vi('trash',18)} Descartar Selecionados</div>`;
+        html += `<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
+            Descartar <b>${discardable.length}</b> item(ns)? <b>Ação irreversível!</b></div>`;
+        html += '<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';
+        discardable.forEach(name => {
+            const it = getItemData(name);
+            html += `${it.e||'📦'} ${name}<br>`;
+        });
+        html += '</div>';
+        html += `<div class="detail-actions">
+            <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+            <button style="padding:10px 16px;font-size:13px;background:var(--v-danger);color:#fff;border:none;border-radius:8px;cursor:pointer;" onclick="confirmDiscardSelected()">${vi('trash',13)} Descartar</button>
+        </div></div>`;
+        showModal(html);
+    }
+
+    function confirmDiscardSelected() {
+        let count = 0;
+        [...selectedItems].forEach(name => {
+            const it = getItemData(name);
+            const tags = it.t || [];
+            if (isProtected(tags)) return;
+            const inv = localInv.find(i => i.n === name);
+            if (!inv || inv.q <= 0) return;
+            addOp({t:'discard', item: name});
+            removeFromLocalInv(name);
+            count++;
+        });
+        selectedItems.clear();
+        selectionMode = false;
+        closeModal();
+        updateSelectionBar();
+        haptic('heavy');
+        toast(`${vi('trash',13)} ${count} item(ns) descartado(s)`, 'warn');
         updateHeader();
         renderTab();
         updateBottomBar();
@@ -2006,6 +2252,12 @@
             case 'gem_remove': return `${vi('gem',13)} Remover gema de ${SLOT_NAMES[op.slot]||op.slot}`;
             case 'rune_inscribe': return `${vi('orb',13)} Inscrever ${op.rune} em ${SLOT_NAMES[op.slot]||op.slot}`;
             case 'sell': return `${vi('coin',13)} Vender ${op.item}`;
+            case 'discard': return `${vi('trash',13)} Descartar ${op.item}`;
+            case 'sell_junk': return `${vi('coin',13)} Vender lixo`;
+            case 'save_loadout': return `${vi('save',13)} Salvar loadout '${op.name}'`;
+            case 'load_loadout': return `${vi('sword',13)} Carregar loadout '${op.name}'`;
+            case 'delete_loadout': return `${vi('trash',13)} Deletar loadout '${op.name}'`;
+            case 'rune_craft': return `${vi('hammer',13)} Forjar runa T${op.tier}`;
             case 'toggle_fav': return `${op.val ? vi_f('star',13) : vi('star',13)} ${op.val ? 'Favoritar' : 'Desfavoritar'} ${op.item}`;
             default: return `? ${op.t}`;
         }
@@ -2085,7 +2337,7 @@
     }
 
     function isConsumable(tags) {
-        return tags.some(t => ['consumable','food','potion'].includes(t));
+        return tags.some(t => ['consumable','food','potion','camping'].includes(t));
     }
 
     const SELL_PROTECTED = new Set([
