@@ -469,6 +469,15 @@ body {
     font-weight: 900;
     color: var(--v-gold, #c4953a);
 }
+/* Skip button override for burgundy background */
+.combat-overlay .v-skip-btn {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #f0ebe4;
+    background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+}
+.combat-overlay .v-skip-btn:active {
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08));
+}
 
 /* ═══════════════════════════════════════════
    PORTAL OVERLAY (exit transition)
@@ -492,6 +501,15 @@ body {
 .portal-title { font-size: 18px; font-weight: 700; color: #4ad680; letter-spacing: 1px; }
 .portal-summary { text-align: center; color: var(--v-text, #e0d6c8); font-size: 13px; line-height: 1.8; }
 .portal-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
+/* Skip button override for dark green background */
+.portal-overlay .v-skip-btn {
+    border-color: rgba(74, 214, 128, 0.4);
+    color: #4ad680;
+    background: linear-gradient(180deg, rgba(74,214,128,0.12), rgba(74,214,128,0.04));
+}
+.portal-overlay .v-skip-btn:active {
+    background: linear-gradient(180deg, rgba(74,214,128,0.2), rgba(74,214,128,0.1));
+}
 
 /* ═══════════════════════════════════════════
    RANDOM ENCOUNTER OVERLAY

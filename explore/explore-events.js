@@ -197,24 +197,36 @@ function performStatCheck(poi, choice) {
             if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
         } catch(e) {}
 
-        setTimeout(() => {
+        // Phase 2: Result reading time (2000ms with skip button)
+        let _checkDone = false;
+        const skipBtn = document.getElementById('check-skip-btn');
+
+        const finishCheck = () => {
+            if (_checkDone) return;
+            _checkDone = true;
+            if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
             overlay.classList.remove('active');
             const outcome = success ? (choice.o || {}) : (choice.f || choice.o || {});
 
-            // Handle combat-on-fail for danger POIs (Intimidar/Esgueirar failed)
             if (!success && choice.cmb_on_fail && poi.combat) {
                 triggerCombat(poi);
                 return;
             }
-
-            // Handle multi-step events (stage 2)
             if (success && choice.s2) {
                 showStage2(poi, choice.s2);
                 return;
             }
-
             applyOutcome(poi, outcome, choice);
-        }, 1200);
+        };
+
+        setTimeout(() => {
+            if (!_checkDone && skipBtn) {
+                skipBtn.classList.add('visible');
+                skipBtn.onclick = finishCheck;
+            }
+        }, 500);
+
+        setTimeout(finishCheck, 2000);
     }, 700);
 }
 
@@ -340,9 +352,25 @@ function triggerCombat(poi) {
     overlay.classList.add('active');
     try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) {}
 
-    setTimeout(() => {
+    // Skip button + 2000ms auto-advance
+    let _combatDone = false;
+    const skipBtn = document.getElementById('combat-skip-btn');
+
+    const finishCombat = () => {
+        if (_combatDone) return;
+        _combatDone = true;
+        if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         finishExploration('combat');
-    }, 2000);
+    };
+
+    setTimeout(() => {
+        if (!_combatDone && skipBtn) {
+            skipBtn.classList.add('visible');
+            skipBtn.onclick = finishCombat;
+        }
+    }, 500);
+
+    setTimeout(finishCombat, 2000);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -365,9 +393,25 @@ function showPortalOverlay() {
 
     try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
 
-    setTimeout(() => {
+    // Skip button + 2500ms auto-advance
+    let _portalDone = false;
+    const skipBtn = document.getElementById('portal-skip-btn');
+
+    const finishPortal = () => {
+        if (_portalDone) return;
+        _portalDone = true;
+        if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         finishExploration('finished');
-    }, 2500);
+    };
+
+    setTimeout(() => {
+        if (!_portalDone && skipBtn) {
+            skipBtn.classList.add('visible');
+            skipBtn.onclick = finishPortal;
+        }
+    }, 500);
+
+    setTimeout(finishPortal, 2500);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -605,13 +649,29 @@ function showHazardCheck(hazard) {
             if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
         } catch(e) {}
 
-        setTimeout(() => {
+        // Phase 2: Result reading time (2000ms with skip button)
+        let _hazDone = false;
+        const skipBtn = document.getElementById('check-skip-btn');
+
+        const finishHazard = () => {
+            if (_hazDone) return;
+            _hazDone = true;
+            if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
             overlay.classList.remove('active');
             if (!success) {
                 applyHazardEffect(hazard);
             }
             saveState();
-        }, 1200);
+        };
+
+        setTimeout(() => {
+            if (!_hazDone && skipBtn) {
+                skipBtn.classList.add('visible');
+                skipBtn.onclick = finishHazard;
+            }
+        }, 500);
+
+        setTimeout(finishHazard, 2000);
     }, 700);
 }
 

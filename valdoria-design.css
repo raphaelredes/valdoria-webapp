@@ -688,6 +688,40 @@ body::after {
     display: none;                   /* Chrome / Safari / Opera */
 }
 
+/* ─── TIMED TRANSITION SKIP BUTTON ─── */
+/* MANDATORY: All blocking timed overlays must include a .v-skip-btn.
+   Appears after 500ms delay, auto-advances after full duration.
+   Used in: explore (stat checks, hazards, combat, portal), arena (future). */
+.v-skip-btn {
+    position: absolute;
+    bottom: 40px;
+    left: 20px;
+    right: 20px;
+    padding: 14px 24px;
+    background: linear-gradient(180deg, rgba(196,149,58,0.15), rgba(196,149,58,0.05));
+    border: 1px solid rgba(196, 149, 58, 0.4);
+    color: var(--v-gold, #c4953a);
+    border-radius: var(--v-radius, 8px);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+    min-height: 48px;
+    letter-spacing: 0.5px;
+}
+.v-skip-btn.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+.v-skip-btn:active {
+    transform: scale(0.96);
+    background: linear-gradient(180deg, rgba(196,149,58,0.25), rgba(196,149,58,0.12));
+}
+
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
