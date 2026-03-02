@@ -202,17 +202,24 @@
         /* Floating player token (animates between hexes) */
         #player-token {
             position: absolute;
-            width: 30px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             display: none;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 20px;
             z-index: 15;
             pointer-events: none;
             transition: left 0.25s ease-out, top 0.25s ease-out;
-            filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.7));
-            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            background: radial-gradient(circle, rgba(196,149,58,0.3) 0%, transparent 70%);
+            border: 2px solid var(--v-gold, #c4953a);
+            border-radius: 50%;
+            filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.8));
+            animation: tokenPulse 2s infinite;
+        }
+        @keyframes tokenPulse {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.6)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 14px rgba(196, 149, 58, 1.0)); transform: scale(1.08); }
         }
 
         /* Dust particles on movement */

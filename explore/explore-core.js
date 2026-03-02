@@ -412,8 +412,8 @@ function movePlayer(col, row) {
     const token = document.getElementById('player-token');
     const newHex = getHexEl(col, row);
     if (token && newHex) {
-        token.style.left = (newHex.offsetLeft + newHex.offsetWidth / 2 - 15) + 'px';
-        token.style.top = (newHex.offsetTop + newHex.offsetHeight / 2 - 17) + 'px';
+        token.style.left = (newHex.offsetLeft + newHex.offsetWidth / 2 - 18) + 'px';
+        token.style.top = (newHex.offsetTop + newHex.offsetHeight / 2 - 18) + 'px';
     }
 
     // Update state
@@ -478,8 +478,8 @@ function positionPlayerToken() {
     if (token && hex) {
         token.textContent = S.charData ? (S.charData.ci || '⚔️') : '⚔️';
         token.style.transition = 'none';
-        token.style.left = (hex.offsetLeft + hex.offsetWidth / 2 - 15) + 'px';
-        token.style.top = (hex.offsetTop + hex.offsetHeight / 2 - 17) + 'px';
+        token.style.left = (hex.offsetLeft + hex.offsetWidth / 2 - 18) + 'px';
+        token.style.top = (hex.offsetTop + hex.offsetHeight / 2 - 18) + 'px';
         token.style.display = 'flex';
         // Re-enable transition after positioning
         requestAnimationFrame(() => {
