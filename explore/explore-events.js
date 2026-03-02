@@ -56,14 +56,16 @@ function showChoices(poi) {
         let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
         html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
 
-        // Stat check display (D&D 5e skill with proficiency indicator)
+        // Stat check display (D&D 5e skill with proficiency + adv/dis indicator)
         if (ch.k) {
             const statShort = STAT_SHORT[ch.k.s] || ch.k.s.toUpperCase();
             const proficient = S.charData && S.charData.sp && S.charData.sp.includes(ch.k.s);
             const profMark = proficient ? '★' : '';
+            const mode = getRollMode(ch.k);
+            const modeMark = mode === 'advantage' ? ' ▲' : mode === 'disadvantage' ? ' ▼' : '';
             const mod = ch.k.m || 0;
             const chance = Math.max(5, Math.min(95, Math.round(((21 - ch.k.dc + mod) / 20) * 100)));
-            html += `<span class="choice-check">${statShort}${profMark} ${chance}%</span>`;
+            html += `<span class="choice-check${mode !== 'normal' ? ' ' + mode : ''}">${statShort}${profMark}${modeMark} ${chance}%</span>`;
         }
 
         btn.innerHTML = html;
@@ -86,23 +88,79 @@ function handleChoice(poi, choice, idx) {
 }
 
 // ═══════════════════════════════════════════════════════
+// ADVANTAGE / DISADVANTAGE (D&D 5e)
+// ═══════════════════════════════════════════════════════
+
+// Determine roll mode: 'normal', 'advantage', or 'disadvantage'
+function getRollMode(check) {
+    const hasAdv = !!(check && check.adv);
+    const hasDis = hasCondition('poisoned') || !!(check && check.dis);
+    // D&D 5e: advantage + disadvantage cancel out
+    if (hasAdv && hasDis) return 'normal';
+    if (hasAdv) return 'advantage';
+    if (hasDis) return 'disadvantage';
+    return 'normal';
+}
+
+// Roll with advantage/disadvantage
+function rollD20(mode) {
+    const r1 = Math.floor(Math.random() * 20) + 1;
+    if (mode === 'normal') return { roll: r1, r1: r1, r2: null };
+    const r2 = Math.floor(Math.random() * 20) + 1;
+    const kept = mode === 'advantage' ? Math.max(r1, r2) : Math.min(r1, r2);
+    return { roll: kept, r1: r1, r2: r2 };
+}
+
+// Build dice display HTML for the check overlay
+function buildDiceHTML(r1, r2, mode) {
+    if (!r2) return `<span class="dice-single">🎲</span>`;
+    const isAdv = mode === 'advantage';
+    const kept = isAdv ? Math.max(r1, r2) : Math.min(r1, r2);
+    const label = isAdv ? 'VANTAGEM' : 'DESVANTAGEM';
+    const cls = isAdv ? 'adv' : 'dis';
+    const c1 = r1 === kept ? 'kept' : 'dropped';
+    const c2 = r2 === kept ? 'kept' : 'dropped';
+    return `<span class="roll-mode-label ${cls}">${label}</span>` +
+           `<span class="dice-pair">` +
+           `<span class="die ${c1}">${r1}</span>` +
+           `<span class="die ${c2}">${r2}</span>` +
+           `</span>`;
+}
+
+// Build formula string for check overlay
+function buildFormula(roll, mod, statName, profMark, dc, total, r1, r2, mode) {
+    let rollPart;
+    if (r2 !== null) {
+        const isAdv = mode === 'advantage';
+        const kept = isAdv ? Math.max(r1, r2) : Math.min(r1, r2);
+        const other = kept === r1 ? r2 : r1;
+        const keptColor = isAdv ? '#4a8' : '#a44';
+        rollPart = `<span style="color:${keptColor}"><b>${kept}</b></span> / <span style="opacity:0.4">${other}</span>`;
+    } else {
+        rollPart = `<b>${roll}</b>`;
+    }
+    const sign = mod >= 0 ? '+' : '';
+    return `${rollPart} ${sign} ${mod} (${statName}${profMark}) = <b>${total}</b> vs DC <b>${dc}</b>`;
+}
+
+// ═══════════════════════════════════════════════════════
 // STAT CHECK
 // ═══════════════════════════════════════════════════════
 function performStatCheck(poi, choice) {
     const check = choice.k;
-    const roll = Math.floor(Math.random() * 20) + 1;
     const mod = check.m || 0;
-
-    // Condition penalties (D&D 5e — Poisoned: disadvantage on ability checks)
-    const condPenalty = hasCondition('poisoned') ? -2 : 0;
-    const effectiveMod = mod + condPenalty;
-    const total = roll + effectiveMod;
     const dc = check.dc || 10;
+
+    // D&D 5e advantage/disadvantage
+    const mode = getRollMode(check);
+    const { roll, r1, r2 } = rollD20(mode);
+
+    const total = roll + mod;
     const success = total >= dc;
 
     // Record check
     S.checksPerformed.push({
-        stat: check.s, dc: dc, roll: roll, mod: effectiveMod, ok: success,
+        stat: check.s, dc: dc, roll: roll, mod: mod, ok: success, mode: mode,
     });
 
     // Haptic on dice roll
@@ -117,23 +175,24 @@ function performStatCheck(poi, choice) {
     const statName = STAT_NAMES[check.s] || check.s;
     const proficient = S.charData && S.charData.sp && S.charData.sp.includes(check.s);
     const profMark = proficient ? '★' : '';
-    const condText = condPenalty ? ` <span style="color:#a44">${condPenalty} ☠️</span>` : '';
 
-    diceEl.textContent = '🎲';
+    // Dice animation
+    diceEl.innerHTML = r2 !== null ? buildDiceHTML(r1, r2, mode) : '🎲';
     diceEl.style.animation = 'none';
-    void diceEl.offsetHeight; // trigger reflow
+    void diceEl.offsetHeight;
     diceEl.style.animation = 'diceRoll 0.7s ease';
 
-    formulaEl.innerHTML = `<b>${roll}</b> + ${mod}${condText} (${statName}${profMark}) = <b>${total}</b> vs DC <b>${dc}</b>`;
+    formulaEl.innerHTML = buildFormula(roll, mod, statName, profMark, dc, total, r1, r2, mode);
 
     overlay.classList.add('active');
 
     setTimeout(() => {
-        diceEl.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
+        if (r2 === null) {
+            diceEl.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
+        }
         resultEl.textContent = success ? '✅ Sucesso!' : '❌ Falha!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
-        // Haptic on result
         try {
             if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
         } catch(e) {}
@@ -180,9 +239,11 @@ function showStage2(poi, stage2) {
                 const statShort = STAT_SHORT[ch.k.s] || ch.k.s.toUpperCase();
                 const proficient = S.charData && S.charData.sp && S.charData.sp.includes(ch.k.s);
                 const profMark = proficient ? '★' : '';
+                const mode = getRollMode(ch.k);
+                const modeMark = mode === 'advantage' ? ' ▲' : mode === 'disadvantage' ? ' ▼' : '';
                 const mod = ch.k.m || 0;
                 const chance = Math.max(5, Math.min(95, Math.round(((21 - ch.k.dc + mod) / 20) * 100)));
-                html += `<span class="choice-check">${statShort}${profMark} ${chance}%</span>`;
+                html += `<span class="choice-check${mode !== 'normal' ? ' ' + mode : ''}">${statShort}${profMark}${modeMark} ${chance}%</span>`;
             }
             btn.innerHTML = html;
             btn.addEventListener('click', () => {
@@ -349,12 +410,14 @@ function showRandomEncounter(enc) {
             const statShort = STAT_SHORT[check.s] || check.s.toUpperCase();
             const proficient = S.charData && S.charData.sp && S.charData.sp.includes(check.s);
             const profMark = proficient ? '★' : '';
+            const mode = getRollMode(check);
+            const modeMark = mode === 'advantage' ? ' ▲' : mode === 'disadvantage' ? ' ▼' : '';
             const mod = check.m || 0;
             const chance = Math.max(5, Math.min(95, Math.round(((21 - check.dc + mod) / 20) * 100)));
 
             let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
             html += `<span class="choice-label">${ch.t || ch.l || 'Agir'}</span>`;
-            html += `<span class="choice-check">${statShort}${profMark} ${chance}%</span>`;
+            html += `<span class="choice-check${mode !== 'normal' ? ' ' + mode : ''}">${statShort}${profMark}${modeMark} ${chance}%</span>`;
 
             btn.innerHTML = html;
             btn.addEventListener('click', () => {
@@ -486,14 +549,16 @@ function checkHazard(col, row) {
 // Automatic saving throw for environmental hazards
 function showHazardCheck(hazard) {
     const mod = getAbilityMod(hazard.stat);
-    const condPenalty = hasCondition('poisoned') ? -2 : 0;
-    const effectiveMod = mod + condPenalty;
-    const roll = Math.floor(Math.random() * 20) + 1;
-    const total = roll + effectiveMod;
+
+    // D&D 5e: poisoned gives disadvantage on ability checks (saves too)
+    const mode = hasCondition('poisoned') ? 'disadvantage' : 'normal';
+    const { roll, r1, r2 } = rollD20(mode);
+
+    const total = roll + mod;
     const success = total >= hazard.dc;
 
     S.checksPerformed.push({
-        stat: hazard.stat, dc: hazard.dc, roll: roll, mod: effectiveMod, ok: success,
+        stat: hazard.stat, dc: hazard.dc, roll: roll, mod: mod, ok: success, mode: mode,
     });
 
     try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
@@ -504,22 +569,28 @@ function showHazardCheck(hazard) {
     const resultEl = document.getElementById('check-result');
 
     const statName = STAT_NAMES[hazard.stat] || hazard.stat;
-    const condText = condPenalty ? ` <span style="color:#a44">${condPenalty} ☠️</span>` : '';
 
-    diceEl.textContent = hazard.label.split(' ')[0]; // Hazard icon
+    // Dice animation (show hazard icon or dual dice for disadvantage)
+    if (r2 !== null) {
+        diceEl.innerHTML = buildDiceHTML(r1, r2, mode);
+    } else {
+        diceEl.textContent = hazard.label.split(' ')[0];
+    }
     diceEl.style.animation = 'none';
     void diceEl.offsetHeight;
     diceEl.style.animation = 'diceRoll 0.7s ease';
 
+    const formulaStr = buildFormula(roll, mod, statName, '', hazard.dc, total, r1, r2, mode);
     formulaEl.innerHTML =
-        `<span style="color:var(--v-gold);font-size:14px">${hazard.label}</span><br>` +
-        `<b>${roll}</b> + ${mod}${condText} (${statName}) = <b>${total}</b> vs DC <b>${hazard.dc}</b>`;
+        `<span style="color:var(--v-gold);font-size:14px">${hazard.label}</span><br>` + formulaStr;
 
     resultEl.textContent = '';
     overlay.classList.add('active');
 
     setTimeout(() => {
-        diceEl.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
+        if (r2 === null) {
+            diceEl.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
+        }
         resultEl.textContent = success ? '✅ Resistiu!' : '❌ Falhou!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 

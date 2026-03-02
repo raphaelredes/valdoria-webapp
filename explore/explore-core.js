@@ -140,13 +140,24 @@ function loadMapData(data) {
         narration: re.n || '', choices: re.ch || [],
     }));
 
-    // Parse POIs
-    S.pois = (data.p || []).map(p => ({
+    // Parse POIs (with Passive Perception filter for hidden POIs)
+    const allPois = (data.p || []).map(p => ({
         id: p.i, col: p.q, row: p.r,
         type: p.y, icon: p.ic, title: p.tt,
         narration: p.n, choices: p.ch || [],
         combat: p.cb || null,
+        hidden: !!p.h, hiddenDC: p.hd || 0,
     }));
+
+    const pp = getPassivePerception();
+    let hiddenDetected = 0;
+    S.pois = allPois.filter(p => {
+        if (!p.hidden) return true;
+        if (pp >= p.hiddenDC) { hiddenDetected++; return true; }
+        return false; // PP too low — player misses this POI
+    });
+    S._passivePerception = pp;
+    S._hiddenDetected = hiddenDetected;
 
     // Try to restore saved session
     const restored = restoreState();
@@ -195,6 +206,16 @@ function loadMapData(data) {
     // Show DM intro only on fresh start
     if (S.dmIntro && !restored) {
         setTimeout(() => showDMIntro(S.dmIntro), 400);
+    }
+
+    // Passive Perception notification (after DM intro dismisses)
+    if (S._hiddenDetected > 0 && !restored) {
+        const delay = S.dmIntro ? 2000 : 600;
+        setTimeout(() => {
+            if (typeof showTerrainToast === 'function') {
+                showTerrainToast(`👁️ Percepção Passiva (${S._passivePerception})`, 'ranger');
+            }
+        }, delay);
     }
 }
 
@@ -274,6 +295,15 @@ function getAbilityMod(statKey) {
 // Check for active condition
 function hasCondition(type) {
     return S.conditions.some(c => c.type === type);
+}
+
+// D&D 5e Passive Perception = 10 + WIS mod + proficiency (if proficient in Perception)
+function getPassivePerception() {
+    if (!S.charData) return 10;
+    const wisMod = getAbilityMod('ws');
+    const profInPerception = S.charData.sp && S.charData.sp.includes('per');
+    const profBonus = profInPerception ? (S.charData.pb || 2) : 0;
+    return 10 + wisMod + profBonus;
 }
 
 // Tick conditions down after each step
