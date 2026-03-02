@@ -715,6 +715,7 @@
             {id:'equip', label:'🛡️ Equipamento'},
         ];
         if (D.allies && D.allies.length > 0) tabs.push({id:'allies', label:'👥 Aliados'});
+        if (D.bank) tabs.push({id:'bank', label:'🏦 Cofre'});
         bar.innerHTML = tabs.map(t =>
             `<div class="tab ${t.id===activeTab?'active':''}" onclick="switchTab('${t.id}')">${t.label}</div>`
         ).join('');
@@ -734,6 +735,7 @@
         if (activeTab === 'items') renderItemsTab(c);
         else if (activeTab === 'equip') renderEquipTab(c);
         else if (activeTab === 'allies') renderAlliesTab(c);
+        else if (activeTab === 'bank') renderBankTab(c);
     }
 
     // ══════════════════════════════════════════════════════════
@@ -925,6 +927,7 @@
         if (activeTarget === 'player') {
             html += buildStatsSummary();
             html += buildSetProgress();
+            html += buildLoadoutBar();
         }
 
         html += '<div class="equip-grid">';
@@ -1040,6 +1043,12 @@
                 const active = count >= parseInt(th);
                 html += `<div class="set-bonus ${active?'active':'inactive'}">${active?'✨':'🔒'} ${th}/${sdef.pcs.length}: ${label}</div>`;
             }
+            // Equip set button — only if player has unequipped pieces
+            const equipped = new Set(Object.values(localEq).filter(Boolean));
+            const canEquipPieces = sdef.pcs.filter(p => owned.has(p) && !equipped.has(p));
+            if (canEquipPieces.length > 0) {
+                html += `<button class="btn-equip" style="width:100%;margin-top:6px;font-size:11px;padding:6px;" onclick="doEquipSet('${esc(sid)}')">⚔️ Equipar Set (${canEquipPieces.length})</button>`;
+            }
             html += '</div>';
         }
         return html;
@@ -1095,6 +1104,88 @@
                 ${allyName}
             </span>
         </div>` + c.innerHTML;
+    }
+
+    // ── Loadouts ──
+    function buildLoadoutBar() {
+        const ldout = D.ldout || {};
+        const names = Object.keys(ldout);
+        let html = '<div style="display:flex;gap:4px;margin:6px 0;flex-wrap:wrap;align-items:center;">';
+        html += `<span class="btn-sell-junk" onclick="promptSaveLoadout()" style="border-color:var(--v-gold);">💾 Salvar</span>`;
+        names.forEach(n => {
+            html += `<span class="btn-sell-junk" onclick="doLoadLoadout('${esc(n)}')" style="border-color:var(--v-text-dim);">⚔️ ${n}</span>`;
+        });
+        html += '</div>';
+        return names.length > 0 || true ? html : '';
+    }
+
+    function promptSaveLoadout() {
+        const name = prompt('Nome do loadout (max 20 chars):');
+        if (!name || !name.trim()) return;
+        const ldout = D.ldout = D.ldout || {};
+        if (Object.keys(ldout).length >= 5) { toast('⚠️ Máximo 5 loadouts', 'err'); return; }
+        ldout[name.trim().slice(0,20)] = Object.assign({}, localEq);
+        addOp({t:'save_loadout', name: name.trim().slice(0,20)});
+        haptic('medium');
+        toast(`💾 '${name.trim().slice(0,20)}' salvo`, 'ok');
+        renderTab();
+        updateBottomBar();
+    }
+
+    function doLoadLoadout(name) {
+        const ldout = (D.ldout || {})[name];
+        if (!ldout) return;
+        for (const [slot, itemName] of Object.entries(ldout)) {
+            if (!itemName) continue;
+            const inv = localInv.find(i => i.n === itemName && i.q > 0);
+            if (!inv) continue;
+            const it = getItemData(itemName);
+            if (!it?.s) continue;
+            if (!checkProficiency(it, 'player', itemName)) continue;
+            addOp({t:'equip', item: itemName, slot, tgt: 'player'});
+            localEq[slot] = itemName;
+        }
+        closeModal();
+        haptic('medium');
+        toast(`⚔️ Loadout '${name}' aplicado`, 'ok');
+        updateHeader();
+        renderTab();
+        updateBottomBar();
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  TAB 4: BANK (read-only)
+    // ══════════════════════════════════════════════════════════
+    function renderBankTab(c) {
+        if (!D.bank) {
+            c.innerHTML = '<div class="empty-state"><div class="icon">🏦</div><p>Cofre vazio.</p></div>';
+            return;
+        }
+        let html = `<div style="text-align:center;margin:12px 0;">
+            <span style="font-size:18px;font-weight:bold;color:var(--v-gold);">💰 ${D.bank.g || 0} GP</span>
+            <div style="font-size:11px;color:var(--v-text-dim);margin-top:2px;">Ouro guardado no cofre</div>
+        </div>`;
+        const items = D.bank.i || [];
+        if (items.length > 0) {
+            html += '<div class="section-title">📦 Itens Guardados</div>';
+            html += '<div class="items-grid">';
+            items.forEach(bi => {
+                const it = getItemData(bi.n);
+                const emoji = it?.e || '📦';
+                const rarity = it?.r || 'common';
+                const rarColor = getRarityColor(rarity);
+                html += `<div class="item-card fade-in" style="border-left:3px solid ${rarColor};">
+                    <span class="ic-emoji">${emoji}</span>
+                    <div class="ic-info"><div class="ic-name">${bi.n}</div>
+                    <div class="ic-meta">${getItemShortDesc(bi.n, it || {})}</div></div>
+                    ${bi.q > 1 ? `<span class="ic-qty">x${bi.q}</span>` : ''}
+                </div>`;
+            });
+            html += '</div>';
+        } else if (!D.bank.g) {
+            html += '<div class="empty-state"><div class="icon">🏦</div><p>Cofre vazio.</p></div>';
+        }
+        c.innerHTML = html;
     }
 
     // ══════════════════════════════════════════════════════════
@@ -1457,10 +1548,43 @@
                 </div>`;
             });
         }
+        // Fragment crafting section
+        if (D.frags) {
+            const tierNames = {1:'Menor', 2:'Maior', 3:'Ancestral'};
+            let hasFrags = false;
+            for (const [t, cnt] of Object.entries(D.frags)) {
+                if (cnt >= 3) { hasFrags = true; break; }
+            }
+            if (hasFrags) {
+                html += '<div class="section-title" style="margin-top:10px;">🔨 Forjar Runa</div>';
+                for (const [t, cnt] of Object.entries(D.frags)) {
+                    if (cnt >= 3) {
+                        html += `<button class="btn-equip" style="width:100%;margin-bottom:4px;font-size:11px;padding:6px;" onclick="doRuneCraft(${t},'${slot}')">🔨 Forjar T${t} ${tierNames[t]||''} (${cnt}/3)</button>`;
+                    } else if (cnt > 0) {
+                        html += `<div style="font-size:11px;color:var(--v-text-dim);text-align:center;margin-bottom:4px;">T${t} ${tierNames[t]||''}: ${cnt}/3 fragmentos</div>`;
+                    }
+                }
+            }
+        }
         html += `<div class="detail-actions" style="margin-top:12px;">
             <button class="btn-unequip" onclick="openSlotModal('${slot}')">← Voltar</button>
         </div>`;
         showModal(html);
+    }
+
+    function doRuneCraft(tier, slot) {
+        addOp({t:'rune_craft', tier: tier});
+        // Decrement local fragment count
+        if (D.frags && D.frags[String(tier)]) {
+            D.frags[String(tier)] -= 3;
+            if (D.frags[String(tier)] <= 0) delete D.frags[String(tier)];
+        }
+        closeModal();
+        haptic('heavy');
+        toast('🔨 Runa forjada! Confirme para aplicar.', 'ok');
+        updateHeader();
+        renderTab();
+        updateBottomBar();
     }
 
     function doRuneInscribe(slot, runeName) {
@@ -1558,6 +1682,35 @@
         updateHeader();
         renderTab();
         updateBottomBar();
+    }
+
+    function doEquipSet(sid) {
+        const sdef = D.sets?.[sid];
+        if (!sdef) return;
+        const equipped = new Set(Object.values(localEq).filter(Boolean));
+        const owned = new Set();
+        localInv.forEach(i => { if (i.q > 0) owned.add(i.n); });
+        let count = 0;
+        activeTarget = 'player';
+        for (const pieceName of sdef.pcs) {
+            if (owned.has(pieceName) && !equipped.has(pieceName)) {
+                const pit = getItemData(pieceName);
+                if (!pit?.s) continue;
+                if (!checkProficiency(pit, 'player', pieceName)) continue;
+                const targetSlot = pit.s === 'ring' ? (!localEq.ring_1 ? 'ring_1' : 'ring_2') : pit.s;
+                addOp({t:'equip', item: pieceName, slot: targetSlot, tgt: 'player'});
+                localEq[targetSlot] = pieceName;
+                count++;
+            }
+        }
+        if (count > 0) {
+            closeModal();
+            haptic('medium');
+            toast(`⚔️ ${count} peça(s) de ${sdef.n} equipada(s)`, 'ok');
+            updateHeader();
+            renderTab();
+            updateBottomBar();
+        }
     }
 
     function doUse(name) {
