@@ -247,7 +247,7 @@ function drawAnimatedTiles(ctx, timestamp) {
     }
 }
 
-// Draw golden highlight on valid adjacent hexes
+// Draw highlight on valid adjacent hexes (gold=normal, amber=difficult, red=hazard)
 function drawAdjacentHighlights(ctx) {
     const neighbors = getNeighbors(S.playerCol, S.playerRow);
     for (const [c, r] of neighbors) {
@@ -261,7 +261,22 @@ function drawAdjacentHighlights(ctx) {
         const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         const topVerts = hexTopVertices(center.x, center.y - h);
 
-        // Gold glow on top face
+        // Determine highlight color by terrain type
+        const difficult = isDifficultTerrain(baseTile, S.biome);
+        const nearLava = getNeighbors(c, r).some(([nc, nr]) => {
+            const t = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
+            return t === 'L';
+        });
+
+        let glowR, glowG, glowB;
+        if (nearLava) {
+            glowR = 200; glowG = 60; glowB = 40;   // Red — hazard
+        } else if (difficult && !isRanger()) {
+            glowR = 220; glowG = 160; glowB = 40;   // Amber — difficult
+        } else {
+            glowR = 196; glowG = 149; glowB = 58;   // Gold — normal
+        }
+
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(topVerts[0].x, topVerts[0].y);
@@ -269,13 +284,12 @@ function drawAdjacentHighlights(ctx) {
         ctx.closePath();
 
         const grad = ctx.createRadialGradient(center.x, center.y - h, 0, center.x, center.y - h, HEX_W * 0.5);
-        grad.addColorStop(0, 'rgba(196,149,58,0.18)');
-        grad.addColorStop(1, 'rgba(196,149,58,0)');
+        grad.addColorStop(0, `rgba(${glowR},${glowG},${glowB},0.18)`);
+        grad.addColorStop(1, `rgba(${glowR},${glowG},${glowB},0)`);
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // Gold border
-        ctx.strokeStyle = 'rgba(196,149,58,0.35)';
+        ctx.strokeStyle = `rgba(${glowR},${glowG},${glowB},0.35)`;
         ctx.lineWidth = 1.2;
         ctx.stroke();
         ctx.restore();
@@ -339,6 +353,20 @@ function handleCanvasClick(e) {
 
 // Move player via canvas system
 function movePlayerCanvas(col, row) {
+    const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+
+    // Difficult terrain check (D&D 5e)
+    const difficult = isDifficultTerrain(baseTile, S.biome);
+    const ranger = isRanger();
+    const isProne = hasCondition('prone');
+
+    if ((difficult && !ranger) || isProne) {
+        setMoveDuration(MOVE_DURATION_DIFFICULT);
+    } else {
+        setMoveDuration(MOVE_DURATION_NORMAL);
+    }
+
     startMovement(S.playerCol, S.playerRow, col, row);
 
     // Update state
@@ -346,12 +374,26 @@ function movePlayerCanvas(col, row) {
     S.playerRow = row;
     S.visited.add(`${col},${row}`);
 
+    // Clear prone after movement (consumes the condition)
+    if (isProne) {
+        S.conditions = S.conditions.filter(c => c.type !== 'prone');
+        updateConditionHUD();
+    }
+
+    // Terrain toast feedback
+    if (difficult) {
+        if (ranger) {
+            showTerrainToast('🏹 Terreno Natural', 'ranger');
+        } else {
+            showTerrainToast('🥾 Terreno Difícil', 'difficult');
+        }
+    }
+
     // Haptic
     try { if (tg) tg.HapticFeedback.impactOccurred('light'); } catch(e) {}
 
     // Start rendering
     scheduleRender();
-    // Keep the animation loop going during movement
     if (!_rafId) {
         _rafId = requestAnimationFrame(renderLoop);
     }
@@ -361,15 +403,23 @@ function movePlayerCanvas(col, row) {
 function onMoveComplete(col, row) {
     // Reveal fog
     revealFogAt(col, row, S.visibility, S.fogState, S.grid, true);
-    _staticDirty = true; // Redraw statics if needed
+    _staticDirty = true;
     scheduleRender();
     if (!_rafId) {
         _rafId = requestAnimationFrame(renderLoop);
     }
 
     updateStepCounter();
+    tickConditions();
     saveState();
     scrollCanvasToPlayer(true);
+
+    // Environmental hazard check (priority over POI/exit)
+    const hazard = checkHazard(col, row);
+    if (hazard) {
+        setTimeout(() => showHazardCheck(hazard), 200);
+        return;
+    }
 
     // Check POI
     const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.has(p.id));

@@ -92,13 +92,17 @@ function performStatCheck(poi, choice) {
     const check = choice.k;
     const roll = Math.floor(Math.random() * 20) + 1;
     const mod = check.m || 0;
-    const total = roll + mod;
+
+    // Condition penalties (D&D 5e — Poisoned: disadvantage on ability checks)
+    const condPenalty = hasCondition('poisoned') ? -2 : 0;
+    const effectiveMod = mod + condPenalty;
+    const total = roll + effectiveMod;
     const dc = check.dc || 10;
     const success = total >= dc;
 
     // Record check
     S.checksPerformed.push({
-        stat: check.s, dc: dc, roll: roll, mod: mod, ok: success,
+        stat: check.s, dc: dc, roll: roll, mod: effectiveMod, ok: success,
     });
 
     // Haptic on dice roll
@@ -113,13 +117,14 @@ function performStatCheck(poi, choice) {
     const statName = STAT_NAMES[check.s] || check.s;
     const proficient = S.charData && S.charData.sp && S.charData.sp.includes(check.s);
     const profMark = proficient ? '★' : '';
+    const condText = condPenalty ? ` <span style="color:#a44">${condPenalty} ☠️</span>` : '';
 
     diceEl.textContent = '🎲';
     diceEl.style.animation = 'none';
     void diceEl.offsetHeight; // trigger reflow
     diceEl.style.animation = 'diceRoll 0.7s ease';
 
-    formulaEl.innerHTML = `<b>${roll}</b> + ${mod} (${statName}${profMark}) = <b>${total}</b> vs DC <b>${dc}</b>`;
+    formulaEl.innerHTML = `<b>${roll}</b> + ${mod}${condText} (${statName}${profMark}) = <b>${total}</b> vs DC <b>${dc}</b>`;
 
     overlay.classList.add('active');
 
@@ -393,6 +398,167 @@ function showDMIntro(text) {
     });
 
     overlay.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// TERRAIN TOAST & ENVIRONMENTAL HAZARDS (D&D 5e Phase 2)
+// ═══════════════════════════════════════════════════════
+
+// Compact toast notification for terrain effects
+function showTerrainToast(message, type) {
+    const existing = document.querySelector('.terrain-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = `terrain-toast ${type}`;
+    toast.textContent = message;
+    const viewport = document.getElementById('map-viewport');
+    if (viewport) viewport.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.add('visible');
+        setTimeout(() => {
+            toast.classList.remove('visible');
+            setTimeout(() => toast.remove(), 300);
+        }, 1500);
+    });
+}
+
+// Full-screen color flash for hazard damage
+function flashScreen(color) {
+    const flash = document.createElement('div');
+    flash.style.cssText = `position:fixed;inset:0;background:${color};z-index:199;pointer-events:none;`;
+    flash.style.animation = 'encounterFlash 0.6s ease-out forwards';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 700);
+}
+
+// Check if current hex has an environmental hazard
+function checkHazard(col, row) {
+    if (!S._hazardsTriggered) S._hazardsTriggered = new Set();
+    const key = `${col},${row}`;
+    if (S._hazardsTriggered.has(key)) return null;
+
+    const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+
+    // Lava adjacency — CON save DC 12, 1d4 fire damage
+    const neighbors = getNeighbors(col, row);
+    const nearLava = neighbors.some(([c, r]) => {
+        const t = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
+        return t === 'L';
+    });
+    if (nearLava) {
+        S._hazardsTriggered.add(key);
+        return {
+            type: 'lava', stat: 'cn', dc: 12,
+            label: '🔥 Calor Intenso',
+            desc: 'O calor abrasador da lava próxima queima sua pele.',
+            failEffect: 'fire_damage',
+        };
+    }
+
+    // Swamp mud — CON save DC 10, poisoned 3 steps
+    if (baseTile === 'm' && S.biome === 'swamp') {
+        S._hazardsTriggered.add(key);
+        return {
+            type: 'swamp', stat: 'cn', dc: 10,
+            label: '☠️ Miasma Tóxico',
+            desc: 'Vapores tóxicos emanam do pântano.',
+            failEffect: 'poisoned',
+        };
+    }
+
+    // Ice — DEX save DC 11, prone (next move slow)
+    if (baseTile === 'i') {
+        S._hazardsTriggered.add(key);
+        return {
+            type: 'ice', stat: 'dx', dc: 11,
+            label: '🧊 Gelo Escorregadio',
+            desc: 'O chão congelado ameaça fazê-lo escorregar.',
+            failEffect: 'prone',
+        };
+    }
+
+    return null;
+}
+
+// Automatic saving throw for environmental hazards
+function showHazardCheck(hazard) {
+    const mod = getAbilityMod(hazard.stat);
+    const condPenalty = hasCondition('poisoned') ? -2 : 0;
+    const effectiveMod = mod + condPenalty;
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const total = roll + effectiveMod;
+    const success = total >= hazard.dc;
+
+    S.checksPerformed.push({
+        stat: hazard.stat, dc: hazard.dc, roll: roll, mod: effectiveMod, ok: success,
+    });
+
+    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
+
+    const overlay = document.getElementById('check-overlay');
+    const diceEl = document.getElementById('dice-display');
+    const formulaEl = document.getElementById('check-formula');
+    const resultEl = document.getElementById('check-result');
+
+    const statName = STAT_NAMES[hazard.stat] || hazard.stat;
+    const condText = condPenalty ? ` <span style="color:#a44">${condPenalty} ☠️</span>` : '';
+
+    diceEl.textContent = hazard.label.split(' ')[0]; // Hazard icon
+    diceEl.style.animation = 'none';
+    void diceEl.offsetHeight;
+    diceEl.style.animation = 'diceRoll 0.7s ease';
+
+    formulaEl.innerHTML =
+        `<span style="color:var(--v-gold);font-size:14px">${hazard.label}</span><br>` +
+        `<b>${roll}</b> + ${mod}${condText} (${statName}) = <b>${total}</b> vs DC <b>${hazard.dc}</b>`;
+
+    resultEl.textContent = '';
+    overlay.classList.add('active');
+
+    setTimeout(() => {
+        diceEl.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
+        resultEl.textContent = success ? '✅ Resistiu!' : '❌ Falhou!';
+        resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
+
+        try {
+            if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
+        } catch(e) {}
+
+        setTimeout(() => {
+            overlay.classList.remove('active');
+            if (!success) {
+                applyHazardEffect(hazard);
+            }
+            saveState();
+        }, 1200);
+    }, 700);
+}
+
+// Apply hazard consequences on failed save
+function applyHazardEffect(hazard) {
+    if (hazard.failEffect === 'fire_damage') {
+        const dmg = Math.floor(Math.random() * 4) + 1; // 1d4
+        S.hpChange -= dmg;
+        if (S.charData) {
+            const newHP = Math.max(1, S.charData.hp + S.hpChange);
+            updateHP(newHP, S.charData.mh);
+        }
+        flashScreen('rgba(200,60,60,0.3)');
+        showTerrainToast(`💔 -${dmg} HP (fogo)`, 'damage');
+    }
+    if (hazard.failEffect === 'poisoned') {
+        S.conditions.push({ type: 'poisoned', stepsLeft: 3 });
+        showTerrainToast('☠️ Envenenado! (3 turnos)', 'condition');
+    }
+    if (hazard.failEffect === 'prone') {
+        S.conditions.push({ type: 'prone', stepsLeft: 1 });
+        showTerrainToast('🧊 Escorregou!', 'condition');
+    }
+    updateConditionHUD();
+    updateRewards();
 }
 
 // ═══════════════════════════════════════════════════════

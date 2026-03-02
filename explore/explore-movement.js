@@ -4,7 +4,11 @@
 
 let _moving = false;
 let _moveStart = 0;
-const MOVE_DURATION = 280;
+let _moveDuration = 280;
+const MOVE_DURATION_NORMAL = 280;
+const MOVE_DURATION_DIFFICULT = 500;
+
+function setMoveDuration(ms) { _moveDuration = ms; }
 
 let _moveFrom = { x: 0, y: 0 };
 let _moveTo = { x: 0, y: 0 };
@@ -52,7 +56,7 @@ function updateMovement(timestamp) {
     if (!_moving) return false;
 
     const elapsed = timestamp - _moveStart;
-    let t = Math.min(1, elapsed / MOVE_DURATION);
+    let t = Math.min(1, elapsed / _moveDuration);
 
     // Cubic-bezier approximation (spring overshoot)
     const ease = cubicBezierApprox(t);

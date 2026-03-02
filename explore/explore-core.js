@@ -51,6 +51,8 @@ let S = {
     dmIntro: '',
     dangerLevel: 1,
     randomEncounters: [],
+    conditions: [],          // Active conditions: [{type, stepsLeft}]
+    _hazardsTriggered: new Set(),  // Hexes that already triggered hazards
 };
 
 let tg = null;
@@ -73,6 +75,8 @@ function saveState() {
             ck: S.checksPerformed,
             ct: S.combatTrigger,
             re: S.randomEncounters,
+            cd: S.conditions,
+            hz: Array.from(S._hazardsTriggered || new Set()),
             ts: Date.now(),
         };
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
@@ -100,6 +104,8 @@ function restoreState() {
         S.checksPerformed = snap.ck || [];
         S.combatTrigger = snap.ct || null;
         S.randomEncounters = snap.re || [];
+        S.conditions = snap.cd || [];
+        S._hazardsTriggered = new Set(snap.hz || []);
         return true;
     } catch(e) {
         console.warn('[EXPLORE] restoreState:', e);
@@ -241,6 +247,62 @@ function initBottomBar() {
             if (i === S.dangerLevel - 1) pip.classList.add('pulse');
         }
     });
+}
+
+// ═══════════════════════════════════════════════════════
+// TERRAIN & CONDITIONS (D&D 5e)
+// ═══════════════════════════════════════════════════════
+
+// Difficult terrain: mud always, sand in desert, ice always
+function isDifficultTerrain(tile, biome) {
+    if (tile === 'm' || tile === 'i') return true;
+    if (tile === 's' && biome === 'desert') return true;
+    return false;
+}
+
+// Ranger (Patrulheiro) ignores difficult terrain — Natural Explorer
+function isRanger() {
+    return S.charData && S.charData.ci === '🏹';
+}
+
+// D&D ability modifier from compact stat key
+function getAbilityMod(statKey) {
+    const val = (S.charData && S.charData[statKey]) || 10;
+    return Math.floor((val - 10) / 2);
+}
+
+// Check for active condition
+function hasCondition(type) {
+    return S.conditions.some(c => c.type === type);
+}
+
+// Tick conditions down after each step
+function tickConditions() {
+    S.conditions = S.conditions.filter(c => {
+        c.stepsLeft--;
+        return c.stepsLeft > 0;
+    });
+    updateConditionHUD();
+}
+
+// Update condition icons in HUD
+function updateConditionHUD() {
+    const bar = document.getElementById('condition-bar');
+    if (!bar) return;
+    bar.innerHTML = '';
+    if (!S.conditions.length) {
+        bar.style.display = 'none';
+        return;
+    }
+    bar.style.display = 'flex';
+    const icons = { poisoned: '☠️', prone: '🧊', frightened: '😨', exhaustion: '😩' };
+    const labels = { poisoned: 'Envenenado', prone: 'Caído', frightened: 'Amedrontado', exhaustion: 'Exaustão' };
+    for (const c of S.conditions) {
+        const tag = document.createElement('span');
+        tag.className = 'condition-tag';
+        tag.textContent = `${icons[c.type] || '⚠️'} ${labels[c.type] || c.type} (${c.stepsLeft})`;
+        bar.appendChild(tag);
+    }
 }
 
 // ═══════════════════════════════════════════════════════
