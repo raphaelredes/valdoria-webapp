@@ -21,12 +21,18 @@ function handleLocationTap(locId) {
     document.getElementById('info-icon').textContent = locData.i || '📍';
     document.getElementById('info-title').textContent = locData.n || 'Desconhecido';
 
-    // Danger badge
+    // Danger badge (mysterious — no numeric levels)
     const dangerEl = document.getElementById('info-danger');
     const danger = locData.d || 0;
-    dangerEl.textContent = `${getDangerLabel(danger)} (Nv.${danger})`;
-    dangerEl.style.borderColor = getDangerColor(danger);
-    dangerEl.style.color = getDangerColor(danger);
+    const dangerSymbols = getDangerLabel(danger);
+    if (dangerSymbols) {
+        dangerEl.textContent = dangerSymbols;
+        dangerEl.style.borderColor = getDangerColor(danger);
+        dangerEl.style.color = getDangerColor(danger);
+        dangerEl.style.display = '';
+    } else {
+        dangerEl.style.display = 'none';
+    }
 
     // Biome
     const biomeInfo = BIOME_INFO[locData.b] || BIOME_INFO.plains;
@@ -48,12 +54,12 @@ function handleLocationTap(locId) {
     }
     statsHtml += `<span>🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}</span>`;
 
-    // Danger comparison with player level
+    // Mysterious danger hint (no explicit numbers)
     const playerLv = S.charData?.lv || 1;
     if (danger > playerLv + 2) {
-        statsHtml += `<span style="color:#aa4444">💀 Muito acima do nível</span>`;
+        statsHtml += `<span style="color:#aa4444">💀 Um arrepio percorre sua espinha...</span>`;
     } else if (danger > playerLv) {
-        statsHtml += `<span style="color:#aa8833">⚠️ Acima do nível</span>`;
+        statsHtml += `<span style="color:#aa8833">⚠️ Algo inquietante paira no ar</span>`;
     }
 
     statsEl.innerHTML = statsHtml;

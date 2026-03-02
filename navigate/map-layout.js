@@ -105,11 +105,13 @@ function getDangerColor(level) {
 }
 
 function getDangerLabel(level) {
-    if (level <= 1) return 'Seguro';
-    if (level <= 3) return 'Moderado';
-    if (level <= 5) return 'Perigoso';
-    if (level <= 7) return 'Muito Perigoso';
-    return 'Extremo';
+    if (level === 0) return '';           // Settlement / safe
+    if (level <= 1) return '⚠️';
+    if (level <= 2) return '⚠️⚠️';
+    if (level <= 3) return '⚠️⚠️⚠️';
+    if (level <= 5) return '☠️';
+    if (level <= 7) return '☠️☠️';
+    return '☠️☠️☠️';
 }
 
 // ── Terrain fill hexes (decorative, between locations) ──
