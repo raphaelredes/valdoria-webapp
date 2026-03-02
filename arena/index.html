@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#2b2830">
     <meta name="description" content="Arena de Combate Interativa - Lendas de Valdoria RPG">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-    <title>Arena de Combate - Lendas de Valdoria</title>
+    <title>Combate - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../valdoria-design.css?v=4">
     <style>
@@ -540,8 +540,9 @@
 
 <script>
 /* ═══════════════════════════════════════════════
-   ARENA DE COMBATE - Lendas de Valdoria
+   COMBATE - Lendas de Valdoria
    Fixed-viewport combat webapp with compact UI
+   Supports API mode (persistent) and sendData fallback
    ═══════════════════════════════════════════════ */
 
 // ─── INIT ───
@@ -550,7 +551,39 @@ if (tg) { tg.ready(); tg.expand(); }
 
 const params = new URLSearchParams(window.location.search);
 const token = params.get('token') || '';
+const apiBase = params.get('api') || '';
+const userId = parseInt(params.get('uid') || '0');
 const rawData = params.get('data');
+const isApiMode = !!apiBase;
+let currentState = null;
+
+// ─── COMBAT API (persistent fetch mode) ───
+class CombatAPI {
+    constructor(base, tok, uid) {
+        this.base = base.replace(/\/$/, '');
+        this.token = tok;
+        this.userId = uid;
+    }
+    async getState() {
+        const r = await fetch(`${this.base}/api/combat/state`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+            body: JSON.stringify({ user_id: this.userId }),
+        });
+        if (!r.ok) throw new Error(`API ${r.status}`);
+        return r.json();
+    }
+    async sendAction(data) {
+        const r = await fetch(`${this.base}/api/combat/action`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+            body: JSON.stringify({ user_id: this.userId, ...data }),
+        });
+        if (!r.ok) throw new Error(`API ${r.status}`);
+        return r.json();
+    }
+}
+const api = isApiMode ? new CombatAPI(apiBase, token, userId) : null;
 
 function b64Decode(str) {
     const std = str.replace(/-/g, '+').replace(/_/g, '/');
@@ -562,16 +595,57 @@ function b64Decode(str) {
     return new TextDecoder().decode(bytes);
 }
 
-if (!rawData) {
-    document.getElementById('app').innerHTML = '<div class="no-data"><h2>Arena de Combate</h2><p>Nenhum dado de combate recebido.</p></div>';
-} else {
+// ─── STARTUP ───
+if (isApiMode) {
+    loadCombatState();
+} else if (rawData) {
     try {
         const state = JSON.parse(b64Decode(rawData));
+        currentState = state;
         renderArena(state);
     } catch(e) {
-        console.error('[ARENA] Dados de combate corrompidos', e);
+        console.error('[COMBAT]', 'Dados corrompidos', e);
         document.getElementById('app').innerHTML = '<div class="no-data"><h2>Erro</h2><p>Dados de combate corrompidos.</p></div>';
     }
+} else {
+    document.getElementById('app').innerHTML = '<div class="no-data"><h2>Combate</h2><p>Nenhum dado recebido.</p></div>';
+}
+
+async function loadCombatState() {
+    try {
+        const state = await api.getState();
+        if (state.error === 'no_combat' || state.phase === 'ended') { showCombatEnded(); return; }
+        currentState = state;
+        if (state.phase && !state.ph) state.ph = state.phase;
+        renderArena(state);
+    } catch(e) {
+        console.error('[COMBAT]', 'Erro ao carregar', e);
+        document.getElementById('app').innerHTML = '<div class="no-data"><h2>Erro de Conexão</h2><p>Não foi possível carregar o combate.</p></div>';
+    }
+}
+
+function showCombatEnded() {
+    document.getElementById('app').innerHTML = '<div class="no-data"><h2>Combate Encerrado</h2><p>Este combate já foi finalizado.</p></div>';
+    setTimeout(() => { try { if (tg) tg.close(); } catch(e) {} }, 2000);
+}
+
+function closeCombat(result) {
+    if (tg) {
+        tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: result }));
+        setTimeout(() => { try { tg.close(); } catch(e) {} }, 300);
+    }
+}
+
+function renderResolution(state) {
+    const isVictory = state.phase === 'victory';
+    const app = document.getElementById('app');
+    app.innerHTML = `<div class="no-data" style="padding:20px">
+        <h2 style="font-size:24px;margin-bottom:16px">${isVictory ? '🏆 VITÓRIA!' : '💀 DERROTA'}</h2>
+        <p style="color:var(--v-text);font-size:13px;margin-bottom:20px;white-space:pre-line">${escHtml(state.result_text || state.action_result_text || '')}</p>
+        <button class="action-btn primary" style="padding:14px 24px;font-size:14px;width:100%;max-width:280px" onclick="closeCombat('${state.phase}')">
+            ${isVictory ? '🏕️ Continuar' : '💫 Continuar'}
+        </button>
+    </div>`;
 }
 
 // ─── CONSTANTS ───
@@ -621,9 +695,13 @@ function renderArena(s) {
 
     let html = '';
 
-    // Header
+    // Header (dynamic title based on biome)
+    const biomeTitle = s.bio === 'arena' ? 'Arena de Combate' :
+                       s.bio === 'dungeon' ? 'Combate na Masmorra' :
+                       s.bio === 'cave' ? 'Combate na Caverna' :
+                       s.bio === 'city' ? 'Combate na Cidade' : 'Combate';
     html += `<div class="arena-header">
-        <div class="arena-title">Arena de Combate</div>
+        <div class="arena-title">${biomeTitle}</div>
         <div class="arena-subtitle">Rodada ${s.rn || 1} · ${biomeName} · ${weatherStr}</div>
     </div>`;
 
@@ -668,11 +746,24 @@ function renderArena(s) {
     }
     html += '</div>';
 
-    // Action Bar (flex item at bottom — NOT fixed position)
-    if (s.ph === 'active') {
+    // Action Bar — phase-dependent
+    const ph = s.ph || s.phase || 'intro';
+    if (ph === 'active') {
         html += renderActionBar(s.acts, s.e, s.p);
+    } else if (ph === 'intro' && isApiMode) {
+        // API mode: interactive initiative button
+        html += `<div class="action-bar"><button class="action-btn primary full-width" data-action="initiative" style="font-size:14px;padding:12px">⚔️ ROLAR INICIATIVA</button></div>`;
+    } else if (ph === 'init') {
+        // Initiative rolled — show results + proceed button
+        html += renderInitiativeResults(s);
+        if (isApiMode) {
+            html += `<div class="action-bar"><button class="action-btn primary full-width" data-action="proceed" style="font-size:14px;padding:12px">⚔️ Prosseguir para o Combate</button></div>`;
+        } else {
+            html += `<div class="action-bar"><div style="text-align:center;color:var(--v-text-dim);font-size:12px;padding:8px">⚔️ Aguardando inicio do combate...</div></div>`;
+        }
     } else {
-        html += `<div class="action-bar"><div style="text-align:center;color:var(--v-text-dim);font-size:12px;padding:8px">${s.ph === 'init' ? '⚔️ Aguardando inicio do combate...' : '🎲 Encontro detectado — Role iniciativa no Telegram'}</div></div>`;
+        // Legacy intro or unknown phase
+        html += `<div class="action-bar"><div style="text-align:center;color:var(--v-text-dim);font-size:12px;padding:8px">🎲 Role iniciativa no Telegram</div></div>`;
     }
 
     app.innerHTML = html;
@@ -827,6 +918,26 @@ function renderTurnTimeline(to) {
     return html;
 }
 
+// ─── INITIATIVE RESULTS (shown in 'init' phase) ───
+function renderInitiativeResults(s) {
+    if (!s.to || s.to.length === 0) return '';
+    const init = s.initiative || {};
+    let html = '<div style="padding:4px 10px;font-size:11px;color:var(--v-text-dim)">';
+    html += '<div style="font-weight:700;color:var(--v-gold);font-size:12px;margin-bottom:4px">📜 ORDEM DE COMBATE</div>';
+    s.to.forEach((entry, i) => {
+        const tColor = entry.t === 'p' ? 'var(--v-gold)' : entry.t === 'a' ? 'var(--v-silver)' : 'var(--v-crimson)';
+        const icon = entry.ico || (entry.t === 'p' ? '👤' : entry.t === 'a' ? '🛡️' : '👹');
+        const formula = entry.f ? ` (${entry.f})` : '';
+        html += `<div style="padding:2px 0;color:${tColor}">
+            ${i+1}. ${icon} <b>${escHtml(entry.n)}</b>: ${entry.v}${formula}
+        </div>`;
+    });
+    if (init.player_surprised) html += '<div style="color:var(--v-crimson);margin-top:4px">❗ Você foi pego desprevenido!</div>';
+    if (init.enemies_surprised) html += '<div style="color:var(--v-gold);margin-top:4px">✨ Inimigos surpreendidos!</div>';
+    html += '</div>';
+    return html;
+}
+
 // ─── ACTION BAR ───
 function renderActionBar(acts, enemies, player) {
     if (!acts) return '';
@@ -899,6 +1010,10 @@ function bindActions(state) {
                 sendAction({ type: 'pass' });
             } else if (action === 'items') {
                 sendAction({ type: 'items' });
+            } else if (action === 'initiative') {
+                sendAction({ type: 'initiative' });
+            } else if (action === 'proceed') {
+                sendAction({ type: 'proceed' });
             }
         });
     });
@@ -906,19 +1021,40 @@ function bindActions(state) {
 
 // ─── SEND ACTION ───
 let _actionSent = false;
-function sendAction(actionData) {
+async function sendAction(actionData) {
     if (_actionSent) return;
     _actionSent = true;
     document.querySelectorAll('.action-btn').forEach(b => b.classList.add('disabled'));
 
-    if (!tg) { console.log('No Telegram WebApp', actionData); _actionSent = false; return; }
-    const payload = {
-        action: 'combat_action',
-        token: token,
-        ...actionData,
-    };
-    tg.sendData(JSON.stringify(payload));
-    setTimeout(() => { try { tg.close(); } catch(e) {} }, 300);
+    if (isApiMode && api) {
+        // Persistent API mode — fetch, re-render, stay open
+        try {
+            const result = await api.sendAction(actionData);
+            _actionSent = false;
+            if (!result) { showError('Sem resposta do servidor.'); return; }
+            if (result.phase === 'victory' || result.phase === 'defeat' || result.phase === 'ended') {
+                renderResolution(result);
+                return;
+            }
+            // Re-render the arena with updated state
+            currentState = result;
+            renderArena(result);
+        } catch(e) {
+            _actionSent = false;
+            console.error('[ARENA] API sendAction error', e);
+            showError('Erro de conexão. Tente novamente.');
+        }
+    } else {
+        // Legacy sendData one-shot mode
+        if (!tg) { console.log('No Telegram WebApp', actionData); _actionSent = false; return; }
+        const payload = {
+            action: 'combat_action',
+            token: token,
+            ...actionData,
+        };
+        tg.sendData(JSON.stringify(payload));
+        setTimeout(() => { try { tg.close(); } catch(e) {} }, 300);
+    }
 }
 
 // ─── SKILL PICKER ───
@@ -1036,6 +1172,21 @@ function initDice(lastRoll) {
 }
 
 // ─── UTILS ───
+// ─── ERROR DISPLAY ───
+function showError(msg, err = null) {
+    console.error('[ARENA]', msg, err || '');
+    const app = document.getElementById('app');
+    if (!app) return;
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:#7b2020;color:#fff;padding:10px 20px;border-radius:8px;z-index:999;font-size:13px;text-align:center;max-width:90%;';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+    // Re-enable buttons after error
+    _actionSent = false;
+    document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('disabled'));
+}
+
 function escHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
