@@ -49,9 +49,16 @@ function init() {
         }
     });
 
-    // Always fetch current state — handles both first-time and reconnection.
-    // The server defaults to city hub if no prior state exists.
-    fetchState(false);
+    // Check if returning from another WebApp (arena, explore, etc.)
+    const isReturn = params.get('return') === 'game';
+
+    if (isReturn) {
+        // Returning from specialized WebApp — refresh state
+        returnFromWebApp();
+    } else {
+        // Normal launch — fetch current state (handles first-time and reconnection)
+        fetchState(false);
+    }
 }
 
 // ─── API Methods ───
