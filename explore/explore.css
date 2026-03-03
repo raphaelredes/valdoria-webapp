@@ -1037,6 +1037,58 @@ body {
 }
 
 /* ═══════════════════════════════════════════
+   ATMOSPHERE — Day/Night + Weather
+   ═══════════════════════════════════════════ */
+.atmosphere-badge { font-size: 11px; min-width: 24px; padding: 2px 4px; }
+
+/* Weather overlay (covers map viewport, pointer-events: none) */
+.weather-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 5; transition: opacity 0.5s;
+}
+.weather-rain {
+    background: repeating-linear-gradient(
+        100deg, transparent, transparent 3px,
+        rgba(120,160,200,0.08) 3px, rgba(120,160,200,0.08) 4px
+    );
+    animation: rain-fall 0.4s linear infinite;
+}
+.weather-fog {
+    background: radial-gradient(ellipse at center, rgba(180,180,200,0.12) 0%, transparent 70%);
+}
+.weather-storm {
+    background: repeating-linear-gradient(
+        105deg, transparent, transparent 2px,
+        rgba(100,140,180,0.12) 2px, rgba(100,140,180,0.12) 3px
+    );
+    animation: rain-fall 0.25s linear infinite;
+}
+@keyframes rain-fall {
+    from { background-position-y: 0; }
+    to { background-position-y: 20px; }
+}
+
+/* Day/Night filters on map viewport canvas */
+#map-viewport.phase-dawn canvas { filter: brightness(0.92) sepia(0.08); }
+#map-viewport.phase-day canvas { filter: none; }
+#map-viewport.phase-dusk canvas { filter: brightness(0.82) sepia(0.15) hue-rotate(-8deg); }
+#map-viewport.phase-night canvas { filter: brightness(0.55) contrast(1.05) saturate(0.7); }
+
+/* Storm lightning flash */
+@keyframes storm-flash {
+    0%, 95% { opacity: 0; }
+    96% { opacity: 0.15; }
+    98% { opacity: 0; }
+    99% { opacity: 0.1; }
+    100% { opacity: 0; }
+}
+.weather-storm::after {
+    content: ''; position: absolute; inset: 0;
+    background: white; animation: storm-flash 4s ease infinite;
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════
    REDUCED MOTION
    ═══════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {

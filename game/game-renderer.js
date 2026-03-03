@@ -29,7 +29,8 @@ function renderScreen(screen) {
     const bannerEl = document.getElementById('banner');
     const bannerImg = document.getElementById('banner-img');
     if (screen.image_url) {
-        bannerImg.src = screen.image_url.startsWith('/') ? S.apiBase + screen.image_url : screen.image_url;
+        const imgUrl = screen.image_url.startsWith('/') ? S.apiBase + screen.image_url : screen.image_url;
+        bannerImg.src = imgUrl;
         bannerImg.onerror = () => { bannerEl.style.display = 'none'; };
         bannerEl.style.display = '';
     } else {
@@ -46,7 +47,7 @@ function renderScreen(screen) {
     renderButtons(buttonsEl, screen.buttons || []);
 
     // Footer
-    if (screen.footer) {
+    if (screen.footer && (screen.footer.quick || screen.footer.nav)) {
         footerEl.style.display = '';
         renderFooter(screen.footer);
         // Show Telegram back button when there's navigation
@@ -59,6 +60,9 @@ function renderScreen(screen) {
             Telegram.WebApp.BackButton.hide();
         }
     }
+
+    // Hide error overlay if visible
+    hideError();
 }
 
 /**
@@ -74,7 +78,7 @@ function renderButtons(container, rows) {
 
         // Determine columns
         const hasLong = row.some(b => (b.text || '').length > LONG_BTN_THRESHOLD);
-        const isHero = row.length === 1 && HERO_KEYWORDS.some(k => (b => (b.text || '').toUpperCase().includes(k))(row[0]));
+        const isHeroRow = row.length === 1 && HERO_KEYWORDS.some(k => (row[0].text || '').toUpperCase().includes(k));
 
         if (row.length === 1 || hasLong) {
             rowEl.classList.add('cols-1');
@@ -85,7 +89,7 @@ function renderButtons(container, rows) {
         }
 
         for (const btn of row) {
-            const el = createButton(btn, isHero && row.length === 1);
+            const el = createButton(btn, isHeroRow);
             rowEl.appendChild(el);
         }
 
@@ -113,12 +117,10 @@ function createButton(btn, forceHero = false) {
 
     // URL button (external link)
     if (btn.url) {
-        const el = document.createElement('a');
-        el.className = 'btn-link';
+        const el = document.createElement('button');
+        el.className = 'btn-action btn-link';
         el.textContent = btn.text || '';
-        el.href = '#';
-        el.onclick = (e) => {
-            e.preventDefault();
+        el.onclick = () => {
             if (window.Telegram && Telegram.WebApp) {
                 Telegram.WebApp.openLink(btn.url);
             } else {
@@ -133,7 +135,9 @@ function createButton(btn, forceHero = false) {
     const isHero = forceHero || HERO_KEYWORDS.some(k => (btn.text || '').toUpperCase().includes(k));
     el.className = isHero ? 'btn-hero' : 'btn-action';
     el.textContent = btn.text || '';
-    el.onclick = () => doAction(btn.cb);
+    if (btn.cb) {
+        el.onclick = () => doAction(btn.cb);
+    }
     return el;
 }
 
@@ -151,13 +155,16 @@ function renderFooter(footer) {
         quickEl.style.display = '';
         for (const btn of footer.quick) {
             const el = document.createElement('button');
-            el.className = 'btn-action';
+            el.className = 'btn-footer';
             el.textContent = btn.text || '';
-            if (btn.cb) el.onclick = () => doAction(btn.cb);
-            if (btn.url) el.onclick = () => {
-                if (window.Telegram && Telegram.WebApp) Telegram.WebApp.openLink(btn.url);
-                else window.open(btn.url, '_blank');
-            };
+            if (btn.cb) {
+                el.onclick = () => doAction(btn.cb);
+            } else if (btn.url) {
+                el.onclick = () => {
+                    if (window.Telegram && Telegram.WebApp) Telegram.WebApp.openLink(btn.url);
+                    else window.open(btn.url, '_blank');
+                };
+            }
             quickEl.appendChild(el);
         }
     } else {
@@ -168,9 +175,11 @@ function renderFooter(footer) {
         navEl.style.display = '';
         for (const btn of footer.nav) {
             const el = document.createElement('button');
-            el.className = 'btn-action';
+            el.className = 'btn-footer';
             el.textContent = btn.text || '';
-            if (btn.cb) el.onclick = () => doAction(btn.cb);
+            if (btn.cb) {
+                el.onclick = () => doAction(btn.cb);
+            }
             navEl.appendChild(el);
         }
     } else {

@@ -439,6 +439,7 @@ function onMoveComplete(col, row) {
     updateStepCounter();
     if (typeof updateLocationInfo === 'function') updateLocationInfo();
     tickConditions();
+    updateAtmosphere();
     scrollCanvasToPlayer(true);
 
     // Environmental hazard check (priority over POI/exit)
@@ -461,8 +462,8 @@ function onMoveComplete(col, row) {
         return;
     }
 
-    // Random encounter
-    const encChance = 0.08 + (S.dangerLevel * 0.03);
+    // Random encounter (night + storm increase chance)
+    const encChance = 0.08 + (S.dangerLevel * 0.03) + (S._nightEncounterBonus || 0) + (S._weatherEncounterMod || 0);
     if (Math.random() < encChance && S.randomEncounters.length > 0) {
         const enc = S.randomEncounters.shift();
         setTimeout(() => showRandomEncounter(enc), 300);
@@ -512,4 +513,65 @@ function scrollCanvasToPlayer(smooth) {
 function invalidateStatic() {
     _staticDirty = true;
     scheduleRender();
+}
+
+// ═══════════════════════════════════════════════════════
+// ATMOSPHERE — Day/Night Cycle + Weather Effects
+// ═══════════════════════════════════════════════════════
+const _DAY_PHASES = {
+    dawn:  { icon: '🌅', label: 'Amanhecer' },
+    day:   { icon: '☀️', label: 'Dia' },
+    dusk:  { icon: '🌅', label: 'Entardecer' },
+    night: { icon: '🌙', label: 'Noite' },
+};
+const _WEATHER_INFO = {
+    s: { icon: '☀️', label: 'Limpo' },
+    r: { icon: '🌧️', label: 'Chuva', css: 'weather-rain' },
+    f: { icon: '🌫️', label: 'Névoa', css: 'weather-fog' },
+    t: { icon: '⛈️', label: 'Tempestade', css: 'weather-storm' },
+};
+
+function getCurrentHour() {
+    const moves = S.visited ? S.visited.size : 0;
+    return ((S.startHour || 8) + Math.floor(moves / 15)) % 24;
+}
+
+function getDayPhase() {
+    const h = getCurrentHour();
+    if (h >= 6 && h < 10) return 'dawn';
+    if (h >= 10 && h < 17) return 'day';
+    if (h >= 17 && h < 20) return 'dusk';
+    return 'night';
+}
+
+function updateAtmosphere() {
+    const phase = getDayPhase();
+    const phaseInfo = _DAY_PHASES[phase];
+    const wCode = S.weather || 's';
+    const wInfo = _WEATHER_INFO[wCode] || _WEATHER_INFO.s;
+
+    // Update HUD badges
+    const timeBadge = document.getElementById('badge-time');
+    const weatherBadge = document.getElementById('badge-weather');
+    if (timeBadge) timeBadge.textContent = phaseInfo.icon;
+    if (weatherBadge) weatherBadge.textContent = wInfo.icon;
+
+    // Apply day/night CSS class to viewport
+    const vp = document.getElementById('map-viewport');
+    if (vp) {
+        vp.classList.remove('phase-dawn', 'phase-day', 'phase-dusk', 'phase-night');
+        vp.classList.add('phase-' + phase);
+    }
+
+    // Apply weather overlay CSS
+    const wo = document.getElementById('weather-overlay');
+    if (wo) {
+        wo.classList.remove('weather-rain', 'weather-fog', 'weather-storm');
+        if (wInfo.css) wo.classList.add(wInfo.css);
+    }
+
+    // Mechanical effects: night → encounter chance + fog radius
+    S._nightEncounterBonus = phase === 'night' ? 0.10 : 0;
+    S._weatherVisibilityMod = wCode === 'f' ? -1 : 0;
+    S._weatherEncounterMod = wCode === 't' ? 0.05 : 0;
 }

@@ -411,6 +411,19 @@ function triggerCombat(poi) {
     setTimeout(finishCombat, 2000);
 }
 
+// Post-combat narrative (brief toast after returning from arena)
+function showPostCombatNarrative() {
+    const lines = [
+        'A poeira assenta. Você respira fundo e segue adiante.',
+        'O silêncio retorna ao redor. Você recupera o fôlego.',
+        'A ameaça foi neutralizada. A trilha está livre.',
+        'Com a vitória, sua confiança cresce.',
+        'Após a batalha, você examina os arredores com cautela.',
+    ];
+    const text = lines[Math.floor(Math.random() * lines.length)];
+    showTerrainToast(`⚔️ ${text}`, 'ranger');
+}
+
 // ═══════════════════════════════════════════════════════
 // WEBAPP TRANSITIONS (same-origin navigation)
 // ═══════════════════════════════════════════════════════
@@ -505,9 +518,86 @@ async function transitionToInventory() {
 }
 
 // ═══════════════════════════════════════════════════════
-// PORTAL OVERLAY (exit transition)
+// PORTAL OVERLAY (exit transition) + EXIT BOSS
 // ═══════════════════════════════════════════════════════
 function showPortalOverlay() {
+    // Boss guardian check — must defeat or bypass before exiting
+    if (S.bossData && !S._bossDefeated) {
+        showBossEncounter();
+        return;
+    }
+    _showPortalSummary();
+}
+
+function showBossEncounter() {
+    const boss = S.bossData;
+    const overlay = document.getElementById('event-overlay');
+    if (!overlay) { _showPortalSummary(); return; }
+
+    const stealthMod = S.charData ? getSkillMod('stealth') : 0;
+    const stealthDC = 12 + S.dangerLevel;
+    const stealthChance = Math.min(95, Math.max(5, (stealthMod + 10.5 - stealthDC) / 20 * 100));
+
+    overlay.innerHTML = `
+        <div class="event-content" style="text-align:center">
+            <div style="font-size:40px;margin:12px 0">${boss.ei || '⚔️'}</div>
+            <div style="font-size:18px;font-weight:bold;color:#c4953a;margin-bottom:8px">${boss.en || 'Guardião'}</div>
+            <div style="font-size:13px;color:#b0b8c0;margin-bottom:16px;line-height:1.4">${boss.n || 'Um guardião bloqueia a saída!'}</div>
+            <div id="boss-choices" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>`;
+
+    const choicesDiv = overlay.querySelector('#boss-choices');
+    // Fight (direct combat)
+    const fightBtn = document.createElement('button');
+    fightBtn.className = 'v-btn v-btn-primary';
+    fightBtn.innerHTML = '⚔️ Lutar';
+    fightBtn.onclick = () => {
+        overlay.classList.remove('active');
+        triggerCombat({ combat: { en: boss.en, ei: boss.ei, b: boss.b || S.biome, d: boss.d || S.dangerLevel } });
+        S._bossDefeated = true; saveState();
+    };
+    choicesDiv.appendChild(fightBtn);
+
+    // Stealth bypass (skill check)
+    const stealthBtn = document.createElement('button');
+    stealthBtn.className = 'v-btn';
+    stealthBtn.innerHTML = `🤫 Esgueirar <span style="font-size:11px;opacity:0.7">(${Math.round(stealthChance)}%)</span>`;
+    stealthBtn.onclick = () => {
+        const roll = rollD20('normal');
+        const total = roll + stealthMod;
+        if (total >= stealthDC) {
+            overlay.innerHTML = `<div class="event-content" style="text-align:center">
+                <div style="font-size:28px;margin:20px 0;color:#6a8">🤫 ${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
+                <div style="color:#6a8;font-size:16px">Você passa sem ser notado!</div></div>`;
+            S._bossDefeated = true; saveState();
+            S.xpEarned += 10;
+            setTimeout(() => { overlay.classList.remove('active'); _showPortalSummary(); }, 2000);
+        } else {
+            overlay.innerHTML = `<div class="event-content" style="text-align:center">
+                <div style="font-size:28px;margin:20px 0;color:#a66">🤫 ${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
+                <div style="color:#a66;font-size:16px">Detectado! O guardião ataca!</div></div>`;
+            S._bossDefeated = true; saveState();
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                triggerCombat({ combat: { en: boss.en, ei: boss.ei, b: boss.b || S.biome, d: boss.d || S.dangerLevel } });
+            }, 2000);
+        }
+    };
+    choicesDiv.appendChild(stealthBtn);
+
+    // Retreat (go back to map)
+    const retreatBtn = document.createElement('button');
+    retreatBtn.className = 'v-btn';
+    retreatBtn.style.opacity = '0.7';
+    retreatBtn.innerHTML = '🏃 Recuar';
+    retreatBtn.onclick = () => { overlay.classList.remove('active'); };
+    choicesDiv.appendChild(retreatBtn);
+
+    overlay.classList.add('active');
+    try { if (tg) tg.HapticFeedback.notificationOccurred('warning'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+}
+
+function _showPortalSummary() {
     const overlay = document.getElementById('portal-overlay');
     const summary = document.getElementById('portal-summary');
 
@@ -521,27 +611,16 @@ function showPortalOverlay() {
 
     summary.innerHTML = html;
     overlay.classList.add('active');
-
     try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
-    // Skip button + 2500ms auto-advance
     let _portalDone = false;
     const skipBtn = document.getElementById('portal-skip-btn');
-
     const finishPortal = () => {
-        if (_portalDone) return;
-        _portalDone = true;
+        if (_portalDone) return; _portalDone = true;
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         finishExploration('finished');
     };
-
-    setTimeout(() => {
-        if (!_portalDone && skipBtn) {
-            skipBtn.classList.add('visible');
-            skipBtn.onclick = finishPortal;
-        }
-    }, 500);
-
+    setTimeout(() => { if (!_portalDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishPortal; } }, 500);
     setTimeout(finishPortal, 2500);
 }
 
@@ -810,6 +889,7 @@ function showHazardCheck(hazard) {
                 applyHazardEffect(hazard);
                 if (checkDeath()) return;
                 if (checkLowHP()) { saveState(); return; }
+                if (checkHazardCombat()) { saveState(); return; }
             }
             saveState();
         };
@@ -848,6 +928,23 @@ function applyHazardEffect(hazard) {
     updateConditionHUD();
     updateRewards();
     logMoveEvent([{ type: 'hazard', effect: hazard.failEffect, source: hazard.type }]);
+
+    // 25% chance: hazard noise attracts nearby creatures
+    if (Math.random() < 0.25 && S.encounters && S.encounters.length > 0) {
+        const enc = S.encounters.pop();
+        const combat = enc.cb || { en: 'Criatura', ei: '⚔️', b: S.biome, d: S.dangerLevel };
+        S._hazardCombatPending = { combat };
+    }
+}
+
+// Called after hazard overlay closes to trigger attracted combat
+function checkHazardCombat() {
+    if (!S._hazardCombatPending) return false;
+    const data = S._hazardCombatPending;
+    S._hazardCombatPending = null;
+    showTerrainToast('⚠️ O barulho atraiu criaturas!', 'danger');
+    setTimeout(() => triggerCombat({ combat: data.combat }), 1500);
+    return true;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1070,6 +1167,16 @@ function closeCampResult() {
     document.getElementById('camp-result-overlay').classList.remove('active');
     // Reset low HP alert flag so it can trigger again after camp
     S._lowHPAlertShown = false;
+
+    // Night ambush check — triggers after rest overlay closes
+    if (S.campAmbush && !S._campAmbushUsed) {
+        S._campAmbushUsed = true;
+        saveState();
+        showTerrainToast('⚠️ Algo ataca durante seu descanso!', 'danger');
+        setTimeout(() => {
+            triggerCombat({ combat: S.campAmbush });
+        }, 1500);
+    }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1135,51 +1242,124 @@ function showLowHPOverlay() {
 }
 
 // ═══════════════════════════════════════════════════════
-// DEATH OVERLAY (HP <= 0)
+// D&D 5e DEATH SAVING THROWS (PHB p.197)
 // ═══════════════════════════════════════════════════════
 function checkDeath() {
     if (!S.charData) return false;
     const currentHP = S.charData.hp + S.hpChange;
     if (currentHP <= 0) {
-        showDeathOverlay();
+        showDeathSaves();
         return true;
     }
     return false;
 }
 
-function showDeathOverlay() {
+function showDeathSaves() {
     const overlay = document.getElementById('death-overlay');
     const summary = document.getElementById('death-summary');
+    overlay.classList.add('active');
+    try { if (tg) tg.HapticFeedback.notificationOccurred('error'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
+    let successes = 0, failures = 0, rollNum = 0;
+    let _done = false;
+
+    function renderState(roll, isResult) {
+        const sMarks = '●'.repeat(successes) + '○'.repeat(3 - successes);
+        const fMarks = '●'.repeat(failures) + '○'.repeat(3 - failures);
+        let html = `<div style="text-align:center;margin-bottom:12px">
+            <div style="font-size:20px;margin-bottom:8px">💀 Salvaguardas contra Morte</div>
+            <div style="font-size:14px;color:#6a8">✓ ${sMarks}</div>
+            <div style="font-size:14px;color:#a66">✗ ${fMarks}</div>
+        </div>`;
+        if (roll !== null) {
+            const color = roll === 20 ? '#ffd700' : roll === 1 ? '#ff3333' : roll >= 10 ? '#6a8' : '#a66';
+            html += `<div style="text-align:center;margin:12px 0">
+                <div class="dice-result" style="font-size:28px;color:${color}">${roll}</div>
+                <div style="font-size:12px;color:#8a8090;margin-top:4px">Rolagem ${rollNum}</div>
+            </div>`;
+        }
+        if (isResult) {
+            if (successes >= 3) {
+                html += `<div style="text-align:center;color:#6a8;font-size:16px;margin-top:12px">
+                    🛡️ Estabilizado! Você acorda com 1 HP.</div>`;
+            } else if (failures >= 3) {
+                html += `<div style="text-align:center;color:#a66;font-size:16px;margin-top:12px">
+                    💀 Você sucumbe aos ferimentos...</div>`;
+            } else if (roll === 20) {
+                html += `<div style="text-align:center;color:#ffd700;font-size:16px;margin-top:12px">
+                    ⭐ Crítico Natural! Você se levanta com 1 HP!</div>`;
+            }
+        }
+        summary.innerHTML = html;
+    }
+
+    function rollDeathSave() {
+        if (_done) return;
+        rollNum++;
+        const roll = Math.floor(Math.random() * 20) + 1;
+
+        if (roll === 20) {
+            // Nat 20: regain 1 HP, continue exploring
+            successes = 3;
+            renderState(roll, true);
+            setTimeout(() => {
+                if (_done) return; _done = true;
+                overlay.classList.remove('active');
+                S.hpChange = -(S.charData.hp - 1); // Set to exactly 1 HP
+                updateHP(1);
+                saveState();
+            }, 2500);
+            return;
+        }
+        if (roll === 1) { failures += 2; } // Nat 1 = 2 failures (PHB p.197)
+        else if (roll >= 10) { successes++; }
+        else { failures++; }
+
+        renderState(roll, successes >= 3 || failures >= 3);
+
+        if (successes >= 3) {
+            // Stabilized: wake with 1 HP
+            setTimeout(() => {
+                if (_done) return; _done = true;
+                overlay.classList.remove('active');
+                S.hpChange = -(S.charData.hp - 1);
+                updateHP(1);
+                saveState();
+            }, 2500);
+        } else if (failures >= 3) {
+            // Dead: temple rescue
+            setTimeout(() => {
+                if (_done) return; _done = true;
+                finishExploration('death');
+            }, 2500);
+        } else {
+            // Continue rolling after delay
+            setTimeout(rollDeathSave, 1500);
+        }
+    }
+
+    renderState(null, false);
+    setTimeout(rollDeathSave, 1000);
+}
+
+function showDeathOverlay() {
+    // Legacy fallback — immediate death without saves
+    const overlay = document.getElementById('death-overlay');
+    const summary = document.getElementById('death-summary');
     let html = '';
     if (S.xpEarned > 0) html += `<div class="reward-line">✨ +${S.xpEarned} XP</div>`;
     if (S.goldEarned > 0) html += `<div class="reward-line">💰 +${S.goldEarned} Ouro</div>`;
     html += `<div class="reward-line">💀 HP reduzido a 0</div>`;
-    html += `<div style="margin-top:8px;color:#8a8090">⬡ ${S.visited.size} turnos</div>`;
-
     summary.innerHTML = html;
     overlay.classList.add('active');
-
-    try { if (tg) tg.HapticFeedback.notificationOccurred('error'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
-
-    // Skip button + 2500ms auto-advance
     let _deathDone = false;
     const skipBtn = document.getElementById('death-skip-btn');
-
     const finishDeath = () => {
-        if (_deathDone) return;
-        _deathDone = true;
+        if (_deathDone) return; _deathDone = true;
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         finishExploration('death');
     };
-
-    setTimeout(() => {
-        if (!_deathDone && skipBtn) {
-            skipBtn.classList.add('visible');
-            skipBtn.onclick = finishDeath;
-        }
-    }, 500);
-
+    setTimeout(() => { if (!_deathDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishDeath; } }, 500);
     setTimeout(finishDeath, 2500);
 }
 
@@ -1355,6 +1535,11 @@ async function initAsync() {
         }
 
         loadMapData(data);
+
+        // Post-combat narrative when returning from arena
+        if (isRestore) {
+            setTimeout(() => showPostCombatNarrative(), 600);
+        }
 
         // Show inventory button when API mode is available (transitions supported)
         if (S.apiBase) {

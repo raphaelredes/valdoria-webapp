@@ -171,6 +171,14 @@ function loadMapData(data) {
         combat: re.cb || null,
     }));
 
+    // Boss guardian at exit, camp ambush, weather, day cycle
+    S.bossData = data.bo || null;
+    S.campAmbush = data.ca || null;
+    S.weather = data.w || 's';
+    S.startHour = data.hr || 8;
+    S._bossDefeated = false;
+    S._campAmbushUsed = false;
+
     // Parse POIs (with Passive Perception filter for hidden POIs)
     const allPois = (data.p || []).map(p => ({
         id: p.i, col: p.q, row: p.r,
@@ -221,6 +229,9 @@ function loadMapData(data) {
 
     // Initialize bottom bar
     initBottomBar();
+
+    // Initialize atmosphere (day/night + weather)
+    if (typeof updateAtmosphere === 'function') updateAtmosphere();
 
     // Location info
     updateLocationInfo();

@@ -33,7 +33,7 @@ function init() {
     if (window.Telegram && Telegram.WebApp) {
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
-        Telegram.WebApp.disableVerticalSwipes();
+        try { Telegram.WebApp.disableVerticalSwipes(); } catch (e) { /* older clients */ }
 
         // Back button integration
         Telegram.WebApp.BackButton.onClick(() => {
@@ -49,13 +49,9 @@ function init() {
         }
     });
 
-    // Check if returning from another WebApp
-    const returnParam = params.get('return');
-    if (returnParam === 'game') {
-        fetchState(false);
-    } else {
-        startGame();
-    }
+    // Always fetch current state — handles both first-time and reconnection.
+    // The server defaults to city hub if no prior state exists.
+    fetchState(false);
 }
 
 // ─── API Methods ───
@@ -69,9 +65,9 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
             const resp = await fetch(url, {
-                method: 'POST',
+                method: endpoint.includes('/image/') ? 'GET' : 'POST',
                 headers,
-                body: JSON.stringify({ user_id: S.uid, ...body }),
+                body: endpoint.includes('/image/') ? undefined : JSON.stringify({ user_id: S.uid, ...body }),
             });
 
             if (resp.status === 429) {
@@ -87,13 +83,16 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
 
             const data = await resp.json();
 
-            if (resp.ok || resp.status === 200) {
+            if (resp.ok) {
                 return data;
             }
 
             console.error('[GAME] API error:', resp.status, data);
             if (attempt === retries) {
-                showError('Erro no servidor. Tente novamente.');
+                const msg = data && data.error === 'player_not_found'
+                    ? 'Personagem não encontrado. Feche e selecione novamente.'
+                    : 'Erro no servidor. Tente novamente.';
+                showError(msg);
                 return null;
             }
         } catch (e) {
@@ -114,8 +113,12 @@ async function startGame() {
     hideLoading();
     if (data && !data.error) {
         renderScreen(data);
-    } else if (data && data.error === 'invalid_session') {
-        showError('Sessão expirada. Feche e toque em JOGAR novamente.');
+    } else if (data && data.error) {
+        // apiCall already shows error for null; handle known server errors
+        if (data.error === 'invalid_session') {
+            showError('Sessão expirada. Feche e toque em JOGAR novamente.');
+        }
+        // Other errors already handled by apiCall
     }
 }
 
@@ -123,6 +126,7 @@ async function fetchState(silent) {
     if (!silent) showLoading();
     const data = await apiCall('/api/game/state');
     if (!silent) hideLoading();
+
     if (data && !data.error) {
         // Check for transition (player is in combat/explore)
         if (data.transition) {
@@ -130,6 +134,9 @@ async function fetchState(silent) {
         } else {
             renderScreen(data);
         }
+    } else if (!silent && !data) {
+        // First time or server unreachable — apiCall already showed error
+        // Nothing to do, error overlay has retry button
     }
 }
 
@@ -164,8 +171,10 @@ async function doAction(callbackData) {
         showTimerOverlay(data.timer);
     }
 
-    // Render the new screen
-    animateScreenTransition(() => renderScreen(data));
+    // Render the new screen (only if there's content to render)
+    if (data.text || data.buttons) {
+        animateScreenTransition(() => renderScreen(data));
+    }
 }
 
 async function doText(text) {
@@ -185,7 +194,7 @@ function haptic(style) {
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.impactOccurred(style);
         }
-    } catch (e) { /* ignore */ }
+    } catch (e) { console.warn('[GAME] haptic failed:', e); }
 }
 
 function sleep(ms) {
