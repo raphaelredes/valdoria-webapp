@@ -117,6 +117,18 @@ body {
     cursor: pointer;
 }
 .btn-return:active { transform: scale(0.95); }
+.btn-inventory {
+    padding: 12px 14px;
+    min-height: 44px;
+    min-width: 44px;
+    border: 1px solid var(--v-gold-dim, #9a7530);
+    background: linear-gradient(180deg, rgba(196,149,58,0.15) 0%, rgba(196,149,58,0.05) 100%);
+    color: var(--v-gold, #c4953a);
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.btn-inventory:active { transform: scale(0.95); }
 .bar-center {
     display: flex;
     align-items: center;

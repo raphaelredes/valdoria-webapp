@@ -385,7 +385,12 @@ function triggerCombat(poi) {
         if (_combatDone) return;
         _combatDone = true;
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
-        finishExploration('combat');
+        // Use transition API if available (stays in same WebView)
+        if (S.apiBase) {
+            transitionToArena();
+        } else {
+            finishExploration('combat');
+        }
     };
 
     setTimeout(() => {
@@ -396,6 +401,95 @@ function triggerCombat(poi) {
     }, 500);
 
     setTimeout(finishCombat, 2000);
+}
+
+// ═══════════════════════════════════════════════════════
+// WEBAPP TRANSITIONS (same-origin navigation)
+// ═══════════════════════════════════════════════════════
+
+async function transitionToArena() {
+    saveState();
+
+    const params = new URLSearchParams(window.location.search);
+    const mapData = params.get('data') || '';
+
+    const body = {
+        from: 'explore', to: 'arena',
+        user_id: parseInt(S.uid),
+        payload: {
+            results: {
+                xp: S.xpEarned, gold: S.goldEarned,
+                hp_change: S.hpChange, items: S.itemsFound,
+                pois_resolved: Array.from(S.poisResolved),
+                hexes_explored: S.visited.size,
+                checks: S.checksPerformed,
+                log: S.moveLog.slice(-50),
+                inventory_used: S.inventoryUsed,
+            },
+            combat: S.combatTrigger,
+            map_data: mapData,
+        }
+    };
+
+    try {
+        const resp = await fetch(`${S.apiBase}/api/webapp/transition`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${S.token}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.url) {
+                window.location.href = data.url;
+                return;
+            }
+        }
+        console.error('[EXPLORE] Transition to arena failed, using fallback');
+    } catch (e) {
+        console.error('[EXPLORE] Transition to arena error:', e);
+    }
+
+    // Fallback: old sendData + close behavior
+    finishExploration('combat');
+}
+
+async function transitionToInventory() {
+    saveState();
+
+    const params = new URLSearchParams(window.location.search);
+    const mapData = params.get('data') || '';
+
+    const body = {
+        from: 'explore', to: 'inventory',
+        user_id: parseInt(S.uid),
+        payload: { map_data: mapData }
+    };
+
+    try {
+        const resp = await fetch(`${S.apiBase}/api/webapp/transition`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${S.token}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.url) {
+                window.location.href = data.url;
+                return;
+            }
+        }
+        console.error('[EXPLORE] Transition to inventory failed:', await resp.text());
+    } catch (e) {
+        console.error('[EXPLORE] Transition to inventory error:', e);
+    }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1166,6 +1260,7 @@ async function initAsync() {
     S.apiBase = params.get('api') || '';
     S.uid = params.get('uid') || '';
     const dataB64 = params.get('data') || '';
+    const isRestore = params.get('restore') === '1';
 
     if (!dataB64) {
         document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:20px">Dados do mapa não encontrados.<br>Volte ao bot e tente novamente.</div>';
@@ -1192,6 +1287,19 @@ async function initAsync() {
                 if (resp.ok) {
                     const rData = await resp.json();
                     if (rData && rData.state) {
+                        // On restore (returning from combat/inventory), update token
+                        // and timestamp so restoreState() accepts the state
+                        if (isRestore) {
+                            rData.state.tk = S.token;
+                            rData.state.ts = Date.now();
+                            // Reset reward counters — already applied by transition API
+                            rData.state.xp = 0;
+                            rData.state.gp = 0;
+                            rData.state.hp = 0;
+                            rData.state.it = [];
+                            rData.state.iu = [];
+                            rData.state.ct = null;
+                        }
                         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(rData.state));
                     }
                 }
@@ -1201,6 +1309,12 @@ async function initAsync() {
         }
 
         loadMapData(data);
+
+        // Show inventory button when API mode is available (transitions supported)
+        if (S.apiBase) {
+            const invBtn = document.getElementById('btn-inventory');
+            if (invBtn) invBtn.style.display = '';
+        }
     } catch (e) {
         console.error('Failed to parse map data:', e);
         document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:20px">Erro ao carregar mapa.<br>' + e.message + '</div>';

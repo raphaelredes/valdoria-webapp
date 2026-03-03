@@ -13,6 +13,7 @@ const token = params.get('token') || '';
 const apiBase = params.get('api') || '';
 const userId = parseInt(params.get('uid') || '0');
 const rawData = params.get('data');
+const originApp = params.get('origin') || '';
 const isApiMode = !!apiBase;
 let currentState = null;
 let _lastAnimatedRoll = null; // Dedup: prevents replaying same dice animation on re-render
@@ -134,12 +135,78 @@ function showCombatEnded() {
 
 function closeCombat(result) {
     stopAllIntervals();
-    if (isApiMode) {
-        // API mode: session cleaned server-side via end_combat() — just close WebApp
+    if (isApiMode && originApp) {
+        // Transition back to origin webapp (same WebView)
+        transitionFromArena(result);
+    } else if (isApiMode) {
+        // API mode, no origin: just close
         setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 200);
     } else if (tg) {
         tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: result }));
         setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
+    }
+}
+
+async function transitionFromArena(result) {
+    const body = {
+        from: 'arena', to: originApp,
+        user_id: userId,
+        payload: { result: result }
+    };
+
+    try {
+        const resp = await fetch(`${apiBase}/api/webapp/transition`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.url) {
+                window.location.href = data.url;
+                return;
+            }
+        }
+        console.error('[ARENA] Transition back failed, closing');
+    } catch (e) {
+        console.error('[ARENA] Transition error:', e);
+    }
+
+    // Fallback: close WebApp
+    setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 200);
+}
+
+async function transitionToInventoryFromArena() {
+    const body = {
+        from: 'arena', to: 'inventory',
+        user_id: userId,
+        payload: {}
+    };
+
+    try {
+        const resp = await fetch(`${apiBase}/api/webapp/transition`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.url) {
+                window.location.href = data.url;
+                return;
+            }
+        }
+        console.error('[ARENA] Transition to inventory failed');
+    } catch (e) {
+        console.error('[ARENA] Transition to inventory error:', e);
     }
 }
 
@@ -1061,6 +1128,10 @@ function showItemPicker(items, enemies, allies) {
             </div>
         </div>`;
     });
+    // Full inventory access via transition (API mode only)
+    if (isApiMode) {
+        html += '<div class="skill-item" id="itemFullInventory" style="text-align:center;color:var(--v-gold);font-size:12px;padding:10px;cursor:pointer;opacity:0.8">📦 Ver Mochila Completa</div>';
+    }
     html += '<div class="skill-close" id="itemClose">Cancelar</div>';
     panel.innerHTML = html;
     overlay.classList.add('active');
@@ -1079,6 +1150,13 @@ function showItemPicker(items, enemies, allies) {
             }
         });
     });
+    const fullInvBtn = document.getElementById('itemFullInventory');
+    if (fullInvBtn) {
+        fullInvBtn.addEventListener('click', () => {
+            overlay.classList.remove('active');
+            transitionToInventoryFromArena();
+        });
+    }
     document.getElementById('itemClose').addEventListener('click', () => {
         overlay.classList.remove('active');
     });

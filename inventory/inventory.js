@@ -262,8 +262,10 @@
                 `<span style="font-size:10px;opacity:0.8;">${b.i}${b.c}</span>`
             ).join('');
         }
+        const combatBadge = _combatMode ? '<span style="font-size:10px;color:#e44;font-weight:700">⚔️ COMBATE</span>' : '';
         s.innerHTML = `
             <span>${D.p.n}</span>
+            ${combatBadge}
             <span class="hs-hp">${vi('heart',12)} ${localHP}/${D.p.mhp}</span>
             <span class="hs-mp">${vi('orb',12)} ${localMP}/${D.p.mmp}</span>
             <span class="hs-gold">${vi('coin',12)} ${localGold}</span>
@@ -1843,6 +1845,40 @@
     const _apiBase = _urlParams.get('api') || '';
     const _apiToken = _urlParams.get('token') || '';
     const _apiUid = _urlParams.get('uid') || '';
+    const _returnTo = _urlParams.get('return') || '';  // 'explore' or 'arena'
+    const _combatMode = _urlParams.get('combat') === '1';
+
+    async function _navigateBack() {
+        // If opened from explore/arena via transition, navigate back
+        if (_returnTo && _apiBase) {
+            try {
+                const resp = await fetch(_apiBase + '/api/webapp/transition', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + _apiToken,
+                    },
+                    body: JSON.stringify({
+                        from: 'inventory', to: _returnTo,
+                        user_id: parseInt(_apiUid),
+                        payload: {}
+                    }),
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.url) {
+                        window.location.href = data.url;
+                        return;
+                    }
+                }
+                console.error('[INVENTORY] Transition back failed');
+            } catch (e) {
+                console.error('[INVENTORY] Transition error:', e);
+            }
+        }
+        // Fallback: close webapp
+        try { if (tg) tg.close(); } catch(e) { console.warn('[INVENTORY] tg.close:', e); }
+    }
 
     let _sendRetries = 0;
     function sendOps() {
@@ -1883,8 +1919,8 @@
                 if (result.summary) toast(result.summary, 'ok');
                 else toast(`${vi('check',13)} Alterações salvas!`, 'ok');
                 updateBottomBar();
-                // Close webapp after brief delay so user sees the toast
-                setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[INVENTORY] tg.close:', e); } }, 800);
+                // Navigate back or close after brief delay
+                setTimeout(() => _navigateBack(), 800);
             } else {
                 console.error('[INVENTORY] API error:', result.error || resp.status);
                 overlay.classList.add('hidden');
@@ -2238,7 +2274,7 @@
                     _modalOpen = false;
                     document.getElementById('modalOverlay').classList.remove('visible');
                 } else {
-                    tg.close();
+                    _navigateBack();
                 }
             });
         }
