@@ -2361,6 +2361,12 @@
         }
     }
 
+    // ── API communication (fetch mode) ──
+    const _urlParams = new URLSearchParams(location.search);
+    const _apiBase = _urlParams.get('api') || '';
+    const _apiToken = _urlParams.get('token') || '';
+    const _apiUid = _urlParams.get('uid') || '';
+
     let _sendRetries = 0;
     function sendOps() {
         if (!pendingOps.length) return;
@@ -2370,35 +2376,80 @@
         overlay.querySelector('.loading-text').textContent = 'Aplicando alterações...';
         overlay.classList.remove('hidden');
 
-        const params = new URLSearchParams(location.search);
-        const token = params.get('token') || '';
+        if (_apiBase) {
+            // API mode: send via fetch() — reliable
+            _sendViaAPI(overlay);
+        } else if (tg) {
+            // Legacy mode: sendData (may not work from inline buttons)
+            _sendViaSendData(overlay);
+        } else {
+            console.warn('[INVENTORY] sendData (dev mode):', JSON.stringify({ops: pendingOps}).slice(0, 200));
+            overlay.classList.add('hidden');
+            toast('Dados enviados (dev)', 'ok');
+        }
+    }
 
+    async function _sendViaAPI(overlay) {
+        try {
+            const resp = await fetch(_apiBase + '/api/inventory/apply', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + _apiToken,
+                },
+                body: JSON.stringify({user_id: _apiUid, ops: pendingOps}),
+            });
+            const result = await resp.json();
+            if (resp.ok && result.ok) {
+                pendingOps = [];
+                overlay.classList.add('hidden');
+                if (result.summary) toast(result.summary, 'ok');
+                else toast(`${vi('check',13)} Alterações salvas!`, 'ok');
+                updateBottomBar();
+                // Close webapp after brief delay so user sees the toast
+                setTimeout(() => { try { tg.close(); } catch(_) {} }, 800);
+            } else {
+                console.error('[INVENTORY] API error:', result.error || resp.status);
+                overlay.classList.add('hidden');
+                toast(`${vi('warn',13)} Erro: ${result.error || 'falha no servidor'}`, 'err');
+            }
+        } catch(e) {
+            console.error('[INVENTORY] fetch failed:', e);
+            overlay.classList.add('hidden');
+            toast(`${vi('warn',13)} Sem conexão. Tente novamente.`, 'err');
+        }
+    }
+
+    function _sendViaSendData(overlay) {
+        const token = _urlParams.get('token') || '';
         const data = {
             action: 'inventory_batch',
             token: token,
             ops: pendingOps,
         };
-
-        if (tg) {
-            try {
-                tg.sendData(JSON.stringify(data));
-                _sendRetries = 0;
-                // Safety: close webapp if sendData didn't auto-close (inline button launch)
-                setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
-            } catch(e) {
-                console.error('[INVENTORY] sendData failed (attempt ' + (_sendRetries+1) + ')', e);
-                overlay.classList.add('hidden');
-                _sendRetries++;
-                if (_sendRetries >= 3) {
-                    toast(`${vi('warn',13)} Falha ao enviar. Feche e reabra a mochila.`, 'err');
-                } else {
-                    toast(`${vi('warn',13)} Erro ao enviar. Toque em Confirmar para tentar novamente.`, 'err');
+        try {
+            tg.sendData(JSON.stringify(data));
+            _sendRetries = 0;
+            // Safety: close webapp if sendData didn't auto-close
+            setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
+            // Extra safety: if still open after 2s, hide overlay and inform user
+            setTimeout(() => {
+                if (document.visibilityState !== 'hidden') {
+                    overlay.classList.add('hidden');
+                    pendingOps = [];
+                    updateBottomBar();
+                    toast(`${vi('check',13)} Enviado! Feche a mochila.`, 'ok');
                 }
-            }
-        } else {
-            console.warn('[INVENTORY] sendData (dev mode):', JSON.stringify(data).slice(0, 200));
+            }, 2000);
+        } catch(e) {
+            console.error('[INVENTORY] sendData failed (attempt ' + (_sendRetries+1) + ')', e);
             overlay.classList.add('hidden');
-            toast('Dados enviados (dev)', 'ok');
+            _sendRetries++;
+            if (_sendRetries >= 3) {
+                toast(`${vi('warn',13)} Falha ao enviar. Feche e reabra a mochila.`, 'err');
+            } else {
+                toast(`${vi('warn',13)} Erro ao enviar. Toque em Confirmar para tentar novamente.`, 'err');
+            }
         }
     }
 
