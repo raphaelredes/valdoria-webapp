@@ -243,8 +243,8 @@ function renderArena(s) {
         <div class="arena-subtitle">Rodada ${s.rn || 1} · ${biomeName} · ${weatherStr}</div>
     </div>`;
 
-    // Enemy Zone (compact rows, expandable)
-    html += '<div class="zone"><div class="zone-label">Inimigos</div>';
+    // Enemy Zone — TOP (opponents on the far side of the arena)
+    html += '<div class="zone zone-enemies"><div class="zone-label">Inimigos</div>';
     if (s.e && s.e.length > 0) {
         s.e.forEach((e, i) => {
             const isActive = activeTurn && activeTurn.t === 'e' && activeTurn.n === e.n;
@@ -253,24 +253,8 @@ function renderArena(s) {
     }
     html += '</div>';
 
-    // Player Zone (always shows HP + resource bars)
-    html += '<div class="zone"><div class="zone-label">Seu Personagem</div>';
-    html += renderPlayerCard(s.p);
-    html += '</div>';
-
-    // Allies Zone (compact rows, expandable)
-    if (s.a && s.a.length > 0) {
-        html += '<div class="zone"><div class="zone-label">Aliados</div>';
-        s.a.forEach((a, i) => {
-            const isActive = activeTurn && activeTurn.t === 'a' && activeTurn.n === a.n;
-            html += renderEntity(a, 'ally', i, isActive);
-        });
-        html += '</div>';
-    }
-
-    // Battlefield (flexible — takes remaining space)
+    // Battlefield — CENTER (arena where dice roll between combatants)
     html += '<div class="battlefield">';
-    html += '<div class="bf-label">Campo de Batalha</div>';
     html += renderTurnTimeline(s.to);
     html += `<div class="dice-row">
         <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>
@@ -282,7 +266,6 @@ function renderArena(s) {
         const recentFeed = s.feed.slice(-3);
         html += '<div class="combat-feed" id="combatFeed">';
         if (total > 3) {
-            // Hidden older entries — shown on expand
             const older = s.feed.slice(0, -3);
             older.forEach(f => { html += `<div class="feed-entry feed-hidden">${escHtml(f)}</div>`; });
         }
@@ -293,6 +276,21 @@ function renderArena(s) {
         html += '</div>';
     }
     html += '</div>';
+
+    // Player Zone — BOTTOM (your side of the arena)
+    html += '<div class="zone zone-player"><div class="zone-label">Seu Personagem</div>';
+    html += renderPlayerCard(s.p);
+    html += '</div>';
+
+    // Allies Zone — BOTTOM (beside you)
+    if (s.a && s.a.length > 0) {
+        html += '<div class="zone zone-allies"><div class="zone-label">Aliados</div>';
+        s.a.forEach((a, i) => {
+            const isActive = activeTurn && activeTurn.t === 'a' && activeTurn.n === a.n;
+            html += renderEntity(a, 'ally', i, isActive);
+        });
+        html += '</div>';
+    }
 
     // Action Bar — phase-dependent (with D&D 5e sub-phase support)
     const ph = s.ph || s.phase || 'intro';
