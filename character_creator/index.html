@@ -725,7 +725,7 @@ let pendingSubrace = '';
 let pendingLanguage = null;
 let currentRaceDetailKey = '';
 let existingNames = [];
-let token = '', charId = '';
+let token = '', charId = '', apiBase = '', userId = '';
 
 // ═══════════════════════════════════════════════
 // INIT
@@ -756,6 +756,8 @@ function decodeBase64Utf8(b64) {
     const params = new URLSearchParams(location.search);
     token = params.get('token') || '';
     charId = params.get('char_id') || '';
+    apiBase = params.get('api_base') || '';
+    userId = params.get('user_id') || '';
     try { existingNames = JSON.parse(decodeBase64Utf8(params.get('names') || 'W10=')); } catch(e) { console.warn('[CHAR_CREATOR] Failed to decode existing names', e); existingNames = []; }
     buildProgressBar();
     buildDmBubbles();
@@ -2515,7 +2517,7 @@ function buildSummary() {
 // ═══════════════════════════════════════════════
 // SUBMIT
 // ═══════════════════════════════════════════════
-function submitCharacter() {
+async function submitCharacter() {
     const err = validateCurrentScreen();
     if (err) { showError(err); return; }
 
@@ -2526,6 +2528,7 @@ function submitCharacter() {
         action: 'character_creation_complete',
         token: token,
         char_id: charId,
+        user_id: userId,
         race: sel.race,
         subrace: sel.subrace,
         class_key: sel.classKey,
@@ -2550,10 +2553,32 @@ function submitCharacter() {
         variant_feat: sel.variantFeat || ''
     };
 
+    // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)
+    if (apiBase && token && userId) {
+        try {
+            const resp = await fetch(`${apiBase}/api/character/apply`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+            if (resp.ok) {
+                console.log('[CHAR_CREATOR] Character submitted via API');
+                setTimeout(() => { try { tg?.close(); } catch(e) {} }, 300);
+                return;
+            }
+            console.warn('[CHAR_CREATOR] API returned', resp.status, '— falling back to sendData');
+        } catch (e) {
+            console.warn('[CHAR_CREATOR] API fetch failed — falling back to sendData', e);
+        }
+    }
+
+    // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
     try {
         if (tg && tg.sendData) {
             tg.sendData(JSON.stringify(payload));
-            // Safety: close webapp if sendData didn't auto-close
             setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[CHAR_CREATOR] tg.close:', e); } }, 300);
         } else {
             console.log('WebApp payload:', JSON.stringify(payload, null, 2));
