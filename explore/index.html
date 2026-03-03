@@ -14,6 +14,12 @@
 <!-- Toast container (outside overflow:hidden body flow) -->
 <div id="toast-layer"></div>
 
+<!-- Travel Animation Overlay -->
+<div id="travel-overlay">
+    <canvas id="travel-canvas"></canvas>
+    <button class="v-skip-btn" id="travel-skip-btn">Pular >></button>
+</div>
+
 <!-- Loading Screen -->
 <div id="loading">
     <div class="loading-icon">🗺️</div>
@@ -185,6 +191,7 @@
 <script src="explore-iso.js"></script>
 <script src="explore-tiles.js"></script>
 <script src="explore-fog.js"></script>
+<script src="explore-travel.js"></script>
 <script src="explore-movement.js"></script>
 <script src="explore-renderer.js"></script>
 <script src="explore-core.js"></script>

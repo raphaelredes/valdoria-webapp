@@ -1308,6 +1308,15 @@ async function initAsync() {
             }
         }
 
+        // Travel animation (only on fresh start, not restore)
+        const regionName = data.rn || '';
+        if (!isRestore && regionName && typeof playTravelAnimation === 'function') {
+            document.getElementById('loading').classList.add('hidden');
+            await new Promise(resolve => {
+                playTravelAnimation(data.b || 'forest', regionName, resolve);
+            });
+        }
+
         loadMapData(data);
 
         // Show inventory button when API mode is available (transitions supported)

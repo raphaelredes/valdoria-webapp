@@ -687,6 +687,23 @@ body {
 .loading-text { color: var(--v-text-dim, #8a8090); font-size: 14px; }
 
 /* ═══════════════════════════════════════════
+   TRAVEL ANIMATION
+   ═══════════════════════════════════════════ */
+#travel-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    display: none;
+    background: #1a1520;
+}
+#travel-overlay.active { display: block; }
+#travel-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ═══════════════════════════════════════════
    EXIT RISK OVERLAY
    ═══════════════════════════════════════════ */
 .exit-risk-overlay {
