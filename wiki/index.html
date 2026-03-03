@@ -450,7 +450,7 @@ semantic_memory: Dict[str, Dict]             # npc_id → {relationship_summary,
     icon: '🗺️',
     name: 'Exploration WebApp',
     desc: 'Mapa hexagonal interativo para exploração',
-    body: `<h2>🗺️ Exploration WebApp</h2>
+    body: `<h2>Exploration WebApp</h2>
 <p>Sistema de exploração visual via Telegram WebApp. O jogador navega um mapa hexagonal 11×13, interage com POIs (Points of Interest), realiza stat checks, e acumula recompensas — tudo com narração imersiva no estilo de Mestre de D&D.</p>
 
 <h3>Arquitetura</h3>
@@ -532,6 +532,144 @@ semantic_memory: Dict[str, Dict]             # npc_id → {relationship_summary,
 <tr><td>exploration_webapp.py</td><td>exploration_webapp/</td><td>Token management (TTL 600s)</td></tr>
 <tr><td>exploration_webapp_apply.py</td><td>exploration_webapp/</td><td>Processa sendData — aplica rewards</td></tr>
 <tr><td>explore/index.html</td><td>valdoria-webapp/</td><td>WebApp completo (1280 linhas)</td></tr>
+</table>`
+},
+{
+    id: 'game-hub',
+    icon: '🎮',
+    name: 'Game Hub WebApp',
+    desc: 'Renderizador universal — todo o jogo no WebApp',
+    body: `<h2>Game Hub WebApp</h2>
+<p>WebApp universal que substitui os botoes inline do Telegram para TODA a experiencia de jogo. Apos selecionar/criar personagem no Telegram, o jogador clica "JOGAR" e todo o restante roda no WebApp — cidade, NPCs, quests, combate, inventario, mercado, level up, exploraçao.</p>
+
+<h3>Principio Chave</h3>
+<p>Zero duplicaçao de logica. O <code>process_callback()</code> ja retorna dados estruturados <code>{text, reply_markup, image_path, timers}</code>. O Game Hub apenas serializa <code>InlineKeyboardMarkup</code> para JSON e renderiza no WebApp.</p>
+
+<h3>Arquitetura</h3>
+<pre><code>Telegram (apenas):                    WebApp (todo o jogo):
+┌─────────────────────┐              ┌──────────────────────────────┐
+│ /start               │              │  Game Hub WebApp              │
+│ Seleçao de conta     │  ──JOGAR──▶ │  (renderizador universal)     │
+│ Gestao de chars      │              │                              │
+│ Menu inicial         │              │  ┌──────────────────────┐   │
+└─────────────────────┘              │  │ Cidade, NPCs, Quests │   │
+                                      │  │ Status, Settings     │   │
+                                      │  └──────────┬───────────┘   │
+                                      │             │ transiçao     │
+                                      │  ┌──────────▼───────────┐   │
+                                      │  │ WebApps Especializados│   │
+                                      │  │ Arena, Explore, Inv   │   │
+                                      │  │ Market, Levelup, Nav  │   │
+                                      │  └──────────────────────┘   │
+                                      └──────────────────────────────┘</code></pre>
+
+<h3>Fluxo de Dados</h3>
+<pre><code>Jogador toca botao no WebApp
+  → POST /api/game/action {cb: "action_market"}
+  → game_api_routes.py valida sessao + rate limit
+  → engine.process_callback(user_id, "action_market")  [INALTERADO]
+  → game_api_serializer.py converte resposta → JSON
+  → WebApp renderiza nova tela</code></pre>
+
+<h3>API Endpoints</h3>
+<table>
+<tr><th>Endpoint</th><th>Metodo</th><th>Funçao</th></tr>
+<tr><td><code>/api/game/start</code></td><td>POST</td><td>Cria sessao, retorna tela inicial (city hub)</td></tr>
+<tr><td><code>/api/game/action</code></td><td>POST</td><td>Processa callback → retorna nova tela JSON</td></tr>
+<tr><td><code>/api/game/text</code></td><td>POST</td><td>Processa input de texto (NPC chat, tickets)</td></tr>
+<tr><td><code>/api/game/state</code></td><td>POST</td><td>Reconexao — retorna tela atual do player</td></tr>
+<tr><td><code>/api/game/image/{hash}</code></td><td>GET</td><td>Serve imagens locais de assets</td></tr>
+<tr><td><code>/api/game/health</code></td><td>GET</td><td>Health check do engine</td></tr>
+</table>
+
+<h3>Formato JSON de Resposta</h3>
+<pre><code>{
+  "screen_id": "city.hub",
+  "text": "&lt;b&gt;Cidade&lt;/b&gt;\\n...",
+  "image_url": "https://telegra.ph/file/...",
+  "buttons": [[{"text": "Mercado", "cb": "action_market"}, ...]],
+  "footer": {
+    "nav": [{"text": "🔙", "cb": "universal_back"}, ...],
+    "quick": [{"text": "🎒 Mochila", "cb": "action_inventory"}, ...]
+  },
+  "timer": {"type": "decision", "seconds": 30, "timeout_cb": "..."},
+  "transition": {"to": "arena", "url": "..."},
+  "toast": "Mensagem rapida",
+  "alert": null
+}</code></pre>
+
+<h3>Serializaçao (game_api_serializer.py)</h3>
+<ul>
+<li><b>Botoes</b>: <code>InlineKeyboardMarkup</code> → array de arrays <code>[[{text, cb}, ...]]</code></li>
+<li><b>Footer</b>: Detecta ultimas 2 rows com botoes curtos via heuristica automatica</li>
+<li><b>Imagens</b>: URLs Telegraph passam direto; paths locais viram <code>/api/game/image/{hash}</code></li>
+<li><b>Transiçoes</b>: Botoes <code>web_app=WebAppInfo(url)</code> → <code>{transition: {to, url}}</code></li>
+<li><b>Timers</b>: <code>reaction_timer</code>/<code>decision_timer</code> → <code>{timer: {type, seconds, timeout_cb}}</code></li>
+<li><b>Side effects</b>: <code>_pix_admin_notify</code>, <code>ticket_message</code> → processados server-side, nunca vao pro JSON</li>
+</ul>
+
+<h3>Sessoes (game_api_session.py)</h3>
+<ul>
+<li>TTL de 4 horas (sessao longa de jogo, vs 30min do combate)</li>
+<li>Refresh automatico no uso — TTL reinicia a cada request validado</li>
+<li>Um token ativo por usuario — nova sessao invalida a anterior</li>
+<li>Auto-cleanup de sessoes expiradas (throttled 1x/min)</li>
+<li>Padrao identico ao <code>combat_api_session.py</code></li>
+</ul>
+
+<h3>Transiçoes Cross-WebApp</h3>
+<p>12 novas transiçoes em <code>webapp_transition.py</code>:</p>
+<table>
+<tr><th>De</th><th>Para</th><th>Descriçao</th></tr>
+<tr><td>game</td><td>explore</td><td>Iniciar exploraçao</td></tr>
+<tr><td>game</td><td>arena</td><td>Entrar em combate</td></tr>
+<tr><td>game</td><td>inventory</td><td>Abrir inventario</td></tr>
+<tr><td>game</td><td>levelup</td><td>Subir de nivel</td></tr>
+<tr><td>game</td><td>market</td><td>Entrar no mercado</td></tr>
+<tr><td>game</td><td>navigate</td><td>Abrir mapa mundo</td></tr>
+<tr><td>explore/arena/inv/...</td><td>game</td><td>Voltar ao Game Hub</td></tr>
+</table>
+<p>Cada transiçao: valida sessao source → cria/reutiliza sessao target → retorna URL. Redirect via <code>window.location.href</code> (same-origin no GitHub Pages).</p>
+
+<h3>WebApp Client (6 arquivos)</h3>
+<table>
+<tr><th>Arquivo</th><th>Funçao</th></tr>
+<tr><td><code>game/index.html</code></td><td>Shell HTML com Telegram SDK + containers</td></tr>
+<tr><td><code>game/game-core.js</code></td><td>API client, state, debounce 200ms, retry com backoff</td></tr>
+<tr><td><code>game/game-renderer.js</code></td><td>Renderizador universal: imagem, texto HTML, grid de botoes, footer</td></tr>
+<tr><td><code>game/game-ui.js</code></td><td>Loading, toast, error, timer overlay (min 2000ms + skip)</td></tr>
+<tr><td><code>game/game-transitions.js</code></td><td>Redirect para WebApps especializados + retorno</td></tr>
+<tr><td><code>game/game.css</code></td><td>Layout smartphone-first, grid 2 colunas, footer fixo</td></tr>
+</table>
+
+<h3>Feature Flag</h3>
+<p><code>GAME_HUB_WEBAPP=true</code> no <code>.env</code>. Quando ativado, apos selecionar personagem aparece botao "▶️ JOGAR" que abre o WebApp. Quando desativado, fluxo antigo (inline buttons) continua funcionando — zero risco.</p>
+
+<h3>Reconexao</h3>
+<ul>
+<li>Page reload → <code>POST /api/game/state</code> → restaura ultima tela</li>
+<li>Sessao expirada → mostra erro + fechar WebApp → usuario clica JOGAR novamente</li>
+<li><code>visibilitychange</code> → refresh state ao retornar ao WebApp</li>
+<li>Se jogador em combate → retorna <code>transition</code> para arena automaticamente</li>
+</ul>
+
+<h3>Segurança</h3>
+<ul>
+<li>CORS: apenas <code>raphaelredes.github.io</code> + localhost</li>
+<li>Auth: Bearer token no header Authorization</li>
+<li>Rate limit: 20 req/10s por usuario (sliding window)</li>
+<li>Side effects server-side: tickets, notificaçoes admin nunca vao pro JSON</li>
+</ul>
+
+<h3>Arquivos Server-Side</h3>
+<table>
+<tr><th>Arquivo</th><th>Path</th><th>Responsabilidade</th></tr>
+<tr><td>game_api_session.py</td><td>game/core/</td><td>Sessoes de jogo (token lifecycle, 4h TTL)</td></tr>
+<tr><td>game_api_serializer.py</td><td>game/core/</td><td>InlineKeyboardMarkup → JSON</td></tr>
+<tr><td>game_api_routes.py</td><td>game/core/</td><td>Endpoints HTTP aiohttp</td></tr>
+<tr><td>webapp_transition.py</td><td>game/</td><td>Transiçoes cross-WebApp (orchestrador)</td></tr>
+<tr><td>webapp_transition_game.py</td><td>game/</td><td>Handlers de transiçao game ↔ *</td></tr>
+<tr><td>webapp_transition_urls.py</td><td>game/</td><td>URL builders compartilhados</td></tr>
 </table>`
 }
 ];
