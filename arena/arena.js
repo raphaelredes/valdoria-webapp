@@ -184,8 +184,9 @@ async function transitionFromArena(result) {
         console.error('[ARENA] Transition error:', e);
     }
 
-    // Fallback: close WebApp
-    setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 200);
+    // Fallback: show error toast, then close after delay
+    showError('Erro na transição. Fechando...');
+    setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
 }
 
 async function transitionToLevelup() {
@@ -585,8 +586,17 @@ function startPolling() {
             const oldRn = currentState ? (currentState.rn || 0) : 0;
             const newTc = state.tc || 0;
             const oldTc = currentState ? (currentState.tc || 0) : 0;
+            // Also detect HP changes (biome risk, persistent effects mid-turn)
+            const hpHash = (s) => {
+                if (!s) return '';
+                const ph = s.p ? s.p.hp : 0;
+                const eh = (s.e || []).map(e => e.hp).join(',');
+                return `${ph}:${eh}`;
+            };
+            const newHp = hpHash(state);
+            const oldHp = hpHash(currentState);
 
-            if (newPh !== oldPh || newRn !== oldRn || newTc !== oldTc) {
+            if (newPh !== oldPh || newRn !== oldRn || newTc !== oldTc || newHp !== oldHp) {
                 _showPollUpdateIndicator();
                 currentState = state;
                 if (newPh === 'victory' || newPh === 'defeat' || newPh === 'ended') {
