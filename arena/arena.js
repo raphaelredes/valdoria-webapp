@@ -180,6 +180,39 @@ async function transitionFromArena(result) {
     setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 200);
 }
 
+async function transitionToLevelup() {
+    const body = {
+        from: 'arena', to: 'levelup',
+        user_id: userId,
+        payload: {}
+    };
+
+    try {
+        const resp = await fetch(`${apiBase}/api/webapp/transition`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.url) {
+                window.location.href = data.url;
+                return;
+            }
+        }
+        console.error('[ARENA] Transition to levelup failed');
+    } catch (e) {
+        console.error('[ARENA] Transition to levelup error:', e);
+    }
+
+    // Fallback: continue normally (close or go back to explore)
+    closeCombat('victory');
+}
+
 async function transitionToInventoryFromArena() {
     const body = {
         from: 'arena', to: 'inventory',
@@ -246,15 +279,26 @@ function renderResolution(state) {
         ? `<div class="res-rewards">${rewardsHtml}</div>`
         : '';
 
+    // Level-up transition button (when player leveled up with pending choices)
+    const hasLevelUp = isVictory && state.leveled_up && isApiMode;
+    const buttonsHtml = hasLevelUp
+        ? `<button class="action-btn primary res-continue res-levelup-btn" onclick="transitionToLevelup()">
+               ⬆️ Distribuir Pontos!
+           </button>
+           <button class="action-btn secondary res-continue" onclick="closeCombat('${state.phase}')" style="margin-top:8px;opacity:0.7">
+               🏕️ Pular
+           </button>`
+        : `<button class="action-btn primary res-continue" onclick="closeCombat('${state.phase}')">
+               ${isVictory ? '🏕️ Continuar Aventura' : '💫 Continuar'}
+           </button>`;
+
     app.innerHTML = `<div class="resolution-screen">
         <div class="res-header ${isVictory ? 'victory' : 'defeat'}">
             <div class="res-title">${isVictory ? '🏆 VITÓRIA!' : '💀 DERROTA'}</div>
         </div>
         ${narrativeHtml}
         ${rewardsBlock}
-        <button class="action-btn primary res-continue" onclick="closeCombat('${state.phase}')">
-            ${isVictory ? '🏕️ Continuar Aventura' : '💫 Continuar'}
-        </button>
+        ${buttonsHtml}
     </div>`;
 }
 

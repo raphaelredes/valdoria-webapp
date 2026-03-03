@@ -893,6 +893,7 @@
         let P = null; // player data
         let apiFallback = '';
         let userId = '';
+        let returnTo = ''; // webapp to return to after levelup (e.g., 'explore')
         const sel = { asi: {}, feat: '', featStat: '', skills: [], subclass: '' };
 
         // Haptic feedback helper
@@ -924,6 +925,7 @@
             token = params.get('token') || '';
             apiFallback = params.get('api') || '';
             userId = params.get('uid') || '';
+            returnTo = params.get('return') || '';
             try {
                 const raw = params.get('p') || '';
                 P = JSON.parse(decodeBase64Utf8(raw));
@@ -1709,8 +1711,14 @@
                     }).then(res => res.json())
                         .then(data => {
                             if (data.status === 'saved' || data.ok) {
-                                if (tg && tg.close) tg.close();
-                                else alert('Evolucao confirmada!');
+                                // Navigate to return URL if provided (webapp transition)
+                                if (data.return_url) {
+                                    window.location.href = data.return_url;
+                                } else if (tg && tg.close) {
+                                    tg.close();
+                                } else {
+                                    alert('Evolucao confirmada!');
+                                }
                             } else {
                                 document.getElementById('loadingOverlay').classList.remove('active');
                                 btn.disabled = false;
