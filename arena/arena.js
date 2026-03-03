@@ -135,11 +135,19 @@ function showCombatEnded() {
 
 function closeCombat(result) {
     stopAllIntervals();
+    if (result === 'defeat') {
+        // Defeat: ALWAYS close via sendData — bot sends temple/inn screen with debt
+        // Game engine already applied: HP=1, gold loss, exhaustion, temple_debt
+        if (tg) {
+            tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: 'defeat' }));
+        }
+        setTimeout(() => { try { if (tg) tg.close(); } catch(e) {} }, 300);
+        return;
+    }
+    // Victory: transition back to origin webapp (explore/inventory)
     if (isApiMode && originApp) {
-        // Transition back to origin webapp (same WebView)
         transitionFromArena(result);
     } else if (isApiMode) {
-        // API mode, no origin: just close
         setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 200);
     } else if (tg) {
         tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: result }));

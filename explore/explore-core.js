@@ -168,6 +168,7 @@ function loadMapData(data) {
     S.randomEncounters = (data.re || []).map(re => ({
         type: re.y, icon: re.ic || '⚠️', title: re.tt || 'Evento',
         narration: re.n || '', choices: re.ch || [],
+        combat: re.cb || null,
     }));
 
     // Parse POIs (with Passive Perception filter for hidden POIs)

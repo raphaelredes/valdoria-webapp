@@ -568,33 +568,49 @@ function showRandomEncounter(enc) {
             const btn = document.createElement('button');
             btn.className = 'dm-choice-btn';
 
-            // All encounter choices MUST have a stat check (dice roll required)
-            const check = ch.k || { s: 'acr', dc: 10, m: 0 };
-            const statShort = STAT_SHORT[check.s] || check.s.toUpperCase();
-            const proficient = S.charData && S.charData.sp && S.charData.sp.includes(check.s);
-            const profMark = proficient ? '★' : '';
-            const mode = getRollMode(check);
-            const modeMark = mode === 'advantage' ? ' ▲' : mode === 'disadvantage' ? ' ▼' : '';
-            const mod = check.m || 0;
-            const chance = Math.max(5, Math.min(95, Math.round(((21 - check.dc + mod) / 20) * 100)));
-
             let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
             html += `<span class="choice-label">${ch.t || ch.l || 'Agir'}</span>`;
-            html += `<span class="choice-check${mode !== 'normal' ? ' ' + mode : ''}">${statShort}${profMark}${modeMark} ${chance}%</span>`;
+
+            // cmb_direct choices (e.g., "Atacar") — no stat check, trigger combat
+            // No-check safe choices (e.g., "Preparar Defesa") — direct outcome
+            if (ch.cmb_direct || !ch.k) {
+                // No stat check display for direct actions
+            } else {
+                const check = ch.k;
+                const statShort = STAT_SHORT[check.s] || check.s.toUpperCase();
+                const proficient = S.charData && S.charData.sp && S.charData.sp.includes(check.s);
+                const profMark = proficient ? '★' : '';
+                const mode = getRollMode(check);
+                const modeMark = mode === 'advantage' ? ' ▲' : mode === 'disadvantage' ? ' ▼' : '';
+                const mod = check.m || 0;
+                const chance = Math.max(5, Math.min(95, Math.round(((21 - check.dc + mod) / 20) * 100)));
+                html += `<span class="choice-check${mode !== 'normal' ? ' ' + mode : ''}">${statShort}${profMark}${modeMark} ${chance}%</span>`;
+            }
 
             btn.innerHTML = html;
             btn.addEventListener('click', () => {
                 overlay.classList.remove('active');
                 logMoveEvent([{ type: 'encounter', enc_type: enc.type, choice: idx }]);
-                // Build enhanced choice with guaranteed stat check + fail outcome
-                const enhanced = Object.assign({}, ch, { k: check });
-                if (!enhanced.f) {
-                    enhanced.f = {
-                        t: 'A tentativa falhou!',
-                        d: Math.max(1, Math.ceil(S.dangerLevel * 1.5)),
-                    };
+
+                const encPoi = { id: -1, choices: [], combat: enc.combat || null, type: 'enc' };
+
+                if (ch.cmb_direct && enc.combat) {
+                    // Direct combat — skip stat check entirely
+                    triggerCombat(encPoi);
+                } else if (ch.k) {
+                    // Stat check with possible cmb_on_fail escalation
+                    const enhanced = Object.assign({}, ch);
+                    if (!enhanced.f) {
+                        enhanced.f = {
+                            t: 'A tentativa falhou!',
+                            d: Math.max(1, Math.ceil(S.dangerLevel * 1.5)),
+                        };
+                    }
+                    performStatCheck(encPoi, enhanced);
+                } else {
+                    // Safe choice — apply outcome directly
+                    applyOutcome(encPoi, ch.o || {}, ch);
                 }
-                performStatCheck({ id: -1, choices: [], combat: null, type: 'enc' }, enhanced);
             });
             choicesEl.appendChild(btn);
         });
@@ -1176,6 +1192,10 @@ function finishExploration(reason) {
     // Log the exit event
     logMoveEvent([{ type: 'exit', reason: reason }]);
 
+    // Include map_data so backend can save it for combat return trip
+    const params = new URLSearchParams(window.location.search);
+    const mapDataPayload = params.get('data') || '';
+
     const payload = {
         action: 'exploration_complete',
         token: S.token,
@@ -1192,6 +1212,7 @@ function finishExploration(reason) {
             inventory_used: S.inventoryUsed,
         },
         combat: S.combatTrigger,
+        map_data: mapDataPayload,
     };
 
     try {
