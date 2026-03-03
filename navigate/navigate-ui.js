@@ -136,9 +136,11 @@ function handleLocationTap(locId) {
     } else if (dist > 0) {
         noteEl.textContent = `⛔ Não há caminho direto — ${dist} etapa${dist !== 1 ? 's' : ''} de distância`;
         noteEl.style.display = 'block';
+        noteEl.style.color = '';
     } else {
         noteEl.textContent = '⛔ Local inacessível';
         noteEl.style.display = 'block';
+        noteEl.style.color = '';
     }
 
     // Close button (always last)
