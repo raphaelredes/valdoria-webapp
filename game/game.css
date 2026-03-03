@@ -1,0 +1,350 @@
+/* ═══════════════════════════════════════════════════════════════
+   GAME HUB — Universal Screen Renderer Styles
+   Extends valdoria-design.css v4
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── No Scrollbars (redundancy per mandatory rule) ─── */
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; }
+
+/* ─── Screen Layout ─── */
+.screen {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 14px;
+    padding-bottom: 110px; /* space for fixed footer */
+    min-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ─── Banner Image ─── */
+.screen-banner {
+    width: 100%;
+    border-radius: var(--v-radius);
+    overflow: hidden;
+    margin-bottom: 10px;
+    box-shadow: var(--v-shadow-sm);
+}
+
+.screen-banner img {
+    width: 100%;
+    height: auto;
+    max-height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+/* ─── Content Area ─── */
+.screen-content {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--v-text);
+    margin-bottom: 14px;
+    word-wrap: break-word;
+}
+
+.screen-content b, .screen-content strong {
+    color: var(--v-gold);
+}
+
+.screen-content i, .screen-content em {
+    color: var(--v-text-dim);
+}
+
+.screen-content code {
+    font-family: var(--v-font-mono);
+    background: var(--v-bg-raised);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* ─── Button Grid ─── */
+.screen-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.btn-row {
+    display: grid;
+    gap: 6px;
+}
+
+.btn-row.cols-1 { grid-template-columns: 1fr; }
+.btn-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.btn-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* ─── Action Button ─── */
+.btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 8px;
+    min-height: 44px;
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    background: linear-gradient(165deg, var(--v-bg-raised) 0%, var(--v-bg-card) 100%);
+    color: var(--v-text);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--v-transition);
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-action:active {
+    transform: scale(0.96);
+    background: var(--v-bg-card-hover);
+    border-color: var(--v-gold-dim);
+}
+
+/* ─── Hero Button (full-width CTA) ─── */
+.btn-hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 12px;
+    min-height: 50px;
+    border: 1px solid var(--v-gold-dim);
+    border-radius: var(--v-radius);
+    background: linear-gradient(165deg, var(--v-bg-accent) 0%, #3a1515 100%);
+    color: var(--v-gold-light);
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--v-transition);
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: var(--v-shadow-gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-hero:active {
+    transform: scale(0.97);
+    box-shadow: 0 0 24px rgba(196, 149, 58, 0.4);
+}
+
+/* ─── URL Link Button ─── */
+.btn-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 8px;
+    min-height: 44px;
+    border: 1px solid var(--v-info);
+    border-radius: var(--v-radius-sm);
+    background: transparent;
+    color: var(--v-info);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--v-transition);
+}
+
+/* ─── Fixed Footer ─── */
+.screen-footer {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: var(--v-bg);
+    border-top: 1px solid var(--v-border);
+    padding: 6px 10px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.footer-row {
+    display: flex;
+    gap: 4px;
+}
+
+.footer-row .btn-action {
+    flex: 1;
+    padding: 8px 4px;
+    min-height: 38px;
+    font-size: 12px;
+}
+
+.footer-nav .btn-action {
+    font-size: 14px; /* icon buttons */
+    padding: 6px;
+    min-height: 34px;
+}
+
+/* ─── Loading Overlay ─── */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--v-bg);
+    z-index: 1000;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--v-border);
+    border-top-color: var(--v-gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+    margin-top: 14px;
+    color: var(--v-text-dim);
+    font-size: 14px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Toast Notification ─── */
+.toast {
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 380px;
+    padding: 10px 18px;
+    background: var(--v-bg-raised);
+    border: 1px solid var(--v-gold-dim);
+    border-radius: var(--v-radius-pill);
+    color: var(--v-text);
+    font-size: 13px;
+    text-align: center;
+    z-index: 200;
+    animation: toastIn 0.3s ease-out;
+    box-shadow: var(--v-shadow-md);
+}
+
+.toast.hiding { animation: toastOut 0.3s ease-in forwards; }
+
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+
+/* ─── Timer Overlay ─── */
+.timer-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 300;
+    backdrop-filter: blur(4px);
+}
+
+.timer-ring {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.timer-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.timer-bg { fill: none; stroke: var(--v-border); stroke-width: 4; }
+.timer-arc {
+    fill: none;
+    stroke: var(--v-gold);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 226.19;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear;
+}
+
+.timer-seconds {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--v-gold);
+}
+
+.timer-label {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--v-text-dim);
+}
+
+/* ─── Error Overlay ─── */
+.error-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 500;
+}
+
+.error-content {
+    text-align: center;
+    padding: 24px;
+    max-width: 320px;
+}
+
+.error-icon { font-size: 40px; margin-bottom: 12px; }
+.error-msg { color: var(--v-text); font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+
+/* ─── Transition Overlay ─── */
+.transition-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--v-bg);
+    z-index: 400;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+}
+
+.transition-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ─── Screen fade transition ─── */
+.screen.fade-out { opacity: 0; transition: opacity 0.15s ease; }
+.screen.fade-in { opacity: 1; transition: opacity 0.2s ease; }
+
+/* ─── Skip Button (mandatory timed overlay rule) ─── */
+.v-skip-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 28px);
+    max-width: 400px;
+    padding: 12px;
+    background: var(--v-bg-raised);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius);
+    color: var(--v-text-dim);
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 350;
+}
+
+.v-skip-btn.visible { opacity: 1; }
