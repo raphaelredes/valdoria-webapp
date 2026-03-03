@@ -109,7 +109,10 @@ function showCombatEnded() {
 
 function closeCombat(result) {
     stopAllIntervals();
-    if (tg) {
+    if (isApiMode) {
+        // API mode: session cleaned server-side via end_combat() — just close WebApp
+        setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 200);
+    } else if (tg) {
         tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: result }));
         setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
     }
@@ -118,12 +121,47 @@ function closeCombat(result) {
 function renderResolution(state) {
     stopAllIntervals();
     const isVictory = state.phase === 'victory';
+    const rawText = state.result_text || state.action_result_text || '';
     const app = document.getElementById('app');
-    app.innerHTML = `<div class="no-data" style="padding:20px">
-        <h2 style="font-size:24px;margin-bottom:16px">${isVictory ? '🏆 VITÓRIA!' : '💀 DERROTA'}</h2>
-        <p style="color:var(--v-text);font-size:13px;margin-bottom:20px;white-space:pre-line">${escHtml(state.result_text || state.action_result_text || '')}</p>
-        <button class="action-btn primary" style="padding:14px 24px;font-size:14px;width:100%;max-width:280px" onclick="closeCombat('${state.phase}')">
-            ${isVictory ? '🏕️ Continuar' : '💫 Continuar'}
+
+    // Parse reward lines from result text
+    const lines = rawText.split('\n').filter(l => l.trim());
+    let rewardsHtml = '';
+    let narrativeLines = [];
+
+    lines.forEach(line => {
+        const trimmed = line.trim();
+        // Detect reward patterns: XP, gold, item, level up
+        if (/\+\d+\s*(XP|xp|EXP)/i.test(trimmed)) {
+            const match = trimmed.match(/\+?(\d+)\s*(XP|xp|EXP)/i);
+            rewardsHtml += `<div class="res-reward"><span class="res-icon">⭐</span><span>${match[1]} XP</span></div>`;
+        } else if (/\d+\s*(GP|gp|gold|ouro)/i.test(trimmed)) {
+            const match = trimmed.match(/(\d+)\s*(GP|gp|gold|ouro)/i);
+            rewardsHtml += `<div class="res-reward"><span class="res-icon">🪙</span><span>${match[1]} GP</span></div>`;
+        } else if (/nível|level.*up|subiu/i.test(trimmed)) {
+            rewardsHtml += `<div class="res-reward res-levelup"><span class="res-icon">🎉</span><span>${escHtml(trimmed)}</span></div>`;
+        } else if (/ganhou|obteve|recebeu|encontrou|drop/i.test(trimmed)) {
+            rewardsHtml += `<div class="res-reward"><span class="res-icon">🎁</span><span>${escHtml(trimmed)}</span></div>`;
+        } else {
+            narrativeLines.push(trimmed);
+        }
+    });
+
+    const narrativeHtml = narrativeLines.length > 0
+        ? `<div class="res-narrative">${narrativeLines.map(l => escHtml(l)).join('<br>')}</div>`
+        : '';
+    const rewardsBlock = rewardsHtml
+        ? `<div class="res-rewards">${rewardsHtml}</div>`
+        : '';
+
+    app.innerHTML = `<div class="resolution-screen">
+        <div class="res-header ${isVictory ? 'victory' : 'defeat'}">
+            <div class="res-title">${isVictory ? '🏆 VITÓRIA!' : '💀 DERROTA'}</div>
+        </div>
+        ${narrativeHtml}
+        ${rewardsBlock}
+        <button class="action-btn primary res-continue" onclick="closeCombat('${state.phase}')">
+            ${isVictory ? '🏕️ Continuar Aventura' : '💫 Continuar'}
         </button>
     </div>`;
 }
@@ -221,9 +259,18 @@ function renderArena(s) {
         <div class="dice-box-compact"><div class="dice-emoji" id="dice2">🎲</div><div><div class="dice-result" id="diceResult2"></div><div class="dice-label" id="diceLabel2">dano</div></div></div>
     </div>`;
     if (s.feed && s.feed.length > 0) {
+        const total = s.feed.length;
         const recentFeed = s.feed.slice(-3);
-        html += '<div class="combat-feed">';
+        html += '<div class="combat-feed" id="combatFeed">';
+        if (total > 3) {
+            // Hidden older entries — shown on expand
+            const older = s.feed.slice(0, -3);
+            older.forEach(f => { html += `<div class="feed-entry feed-hidden">${escHtml(f)}</div>`; });
+        }
         recentFeed.forEach(f => { html += `<div class="feed-entry">${escHtml(f)}</div>`; });
+        if (total > 3) {
+            html += `<div class="feed-toggle" id="feedToggle">▲ Mostrar +${total - 3} anteriores</div>`;
+        }
         html += '</div>';
     }
     html += '</div>';
@@ -256,7 +303,11 @@ function renderArena(s) {
         html += `<div class="action-bar"><div style="text-align:center;color:var(--v-text-dim);font-size:12px;padding:8px">🎲 Role iniciativa no Telegram</div></div>`;
     }
 
+    // Fade transition on state change
+    app.classList.remove('fade-in');
     app.innerHTML = html;
+    void app.offsetWidth; // force reflow
+    app.classList.add('fade-in');
 
     // Init dice animation
     initDice(s.lr);
@@ -266,6 +317,7 @@ function renderArena(s) {
 
     // Bind expand/collapse on entity cards
     bindExpandCollapse();
+    bindFeedToggle();
 
     // Auto-expand active turn entity (if not player)
     if (activeTurn && activeTurn.t !== 'p') {
@@ -311,8 +363,10 @@ function startTimer(seconds) {
 
         if (_timerRemaining <= 0) {
             bar.style.width = '0%';
-            text.textContent = '⏳';
+            text.textContent = '⏳ Turno perdido';
             bar.classList.add('critical');
+            // Show toast feedback
+            _showTimerExpiredToast();
             stopTimer();
             return;
         }
@@ -332,6 +386,15 @@ function stopTimer() {
         clearInterval(_timerInterval);
         _timerInterval = null;
     }
+}
+
+function _showTimerExpiredToast() {
+    const el = document.createElement('div');
+    el.className = 'timer-toast';
+    el.textContent = '⏳ Tempo esgotado — turno perdido!';
+    document.body.appendChild(el);
+    setTimeout(() => el.classList.add('visible'), 50);
+    setTimeout(() => { el.classList.remove('visible'); setTimeout(() => el.remove(), 300); }, 2500);
 }
 
 // ─── STATE POLLING ───
@@ -652,6 +715,19 @@ function bindExpandCollapse() {
             if (!wasExpanded) el.classList.add('expanded');
         });
     });
+}
+
+// ─── FEED TOGGLE ───
+function bindFeedToggle() {
+    const toggle = document.getElementById('feedToggle');
+    if (!toggle) return;
+    toggle.addEventListener('click', () => {
+        const feed = document.getElementById('combatFeed');
+        if (!feed) return;
+        const expanded = feed.classList.toggle('feed-expanded');
+        toggle.textContent = expanded ? '▼ Recolher' : toggle.dataset.label || '▲ Mostrar mais';
+    });
+    toggle.dataset.label = toggle.textContent;
 }
 
 // ─── BIND ACTIONS ───
