@@ -250,7 +250,12 @@ function updateBottomBar() {
 // ═══════════════════════════════════════════════════════
 
 function finishNavigation(type, target) {
-    if (_navSent) return;
+    console.log('[NAVIGATE][DEBUG] finishNavigation called:', { type, target, _navSent, hasTg: !!tg, hasSendData: !!(tg && tg.sendData) });
+
+    if (_navSent) {
+        console.warn('[NAVIGATE][DEBUG] BLOCKED: _navSent already true (double-fire)');
+        return;
+    }
     _navSent = true;
 
     // Disable all action buttons immediately
@@ -270,20 +275,29 @@ function finishNavigation(type, target) {
         payload.noMap = true;
     }
 
+    const payloadStr = JSON.stringify(payload);
+    console.log('[NAVIGATE][DEBUG] payload:', payloadStr);
+    console.log('[NAVIGATE][DEBUG] payload size:', payloadStr.length, 'bytes');
+    console.log('[NAVIGATE][DEBUG] token:', S.token ? S.token.substring(0, 8) + '...' : 'EMPTY');
+
     try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e) { console.warn('[NAVIGATE] haptic:', e); }
 
     try {
         if (tg && tg.sendData) {
-            tg.sendData(JSON.stringify(payload));
+            console.log('[NAVIGATE][DEBUG] calling tg.sendData()...');
+            tg.sendData(payloadStr);
+            console.log('[NAVIGATE][DEBUG] tg.sendData() returned (no error)');
         } else {
-            console.log('[NAVIGATE] sendData payload:', JSON.stringify(payload, null, 2));
+            console.warn('[NAVIGATE][DEBUG] NO tg.sendData available! tg=', tg, 'tg.sendData=', tg?.sendData);
+            console.log('[NAVIGATE][DEBUG] sendData payload (not sent):', JSON.stringify(payload, null, 2));
         }
     } catch(e) {
-        console.error('[NAVIGATE] sendData failed:', e);
+        console.error('[NAVIGATE][DEBUG] sendData THREW:', e.name, e.message, e);
     }
 
     // Close after brief delay
     setTimeout(() => {
+        console.log('[NAVIGATE][DEBUG] closing webapp after 500ms delay');
         try { tg?.close(); } catch(e) {
             console.warn('[NAVIGATE] tg.close fallback failed:', e);
         }
