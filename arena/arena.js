@@ -228,9 +228,16 @@ function renderArena(s) {
     }
     html += '</div>';
 
-    // Action Bar — phase-dependent
+    // Action Bar — phase-dependent (with D&D 5e sub-phase support)
     const ph = s.ph || s.phase || 'intro';
-    if (ph === 'active') {
+    const subPh = s.sub_phase || '';
+    if (ph === 'active' && subPh === 'bonus_action') {
+        html += renderTimerBar(s);
+        html += renderBonusActionBar(s.acts, s.e, s.p);
+    } else if (ph === 'active' && subPh === 'reaction') {
+        html += renderTimerBar(s);
+        html += renderReactionBar(s.acts, s.p);
+    } else if (ph === 'active') {
         html += renderTimerBar(s);
         html += renderActionBar(s.acts, s.e, s.p);
     } else if (ph === 'intro' && isApiMode) {
@@ -585,6 +592,56 @@ function renderActionBar(acts, enemies, player) {
     </div></div>`;
 }
 
+// ─── BONUS ACTION BAR (D&D 5e PHB p.189) ───
+function renderBonusActionBar(acts, enemies, player) {
+    if (!acts) return '';
+    const hasSkills = acts.skills && acts.skills.length > 0;
+    const resName = player.res || 'Mana';
+
+    let skillsHtml = '';
+    if (hasSkills) {
+        if (acts.skills.length === 1) {
+            const sk = acts.skills[0];
+            skillsHtml = `<button class="action-btn ba-btn" data-action="bonus_use_single" data-skill-id="${sk.id}" data-tg="${sk.tg||'single'}">⚡ ${escHtml(sk.n)} <span class="action-chance">${sk.c} ${resName} · ${sk.ch}%</span></button>`;
+        } else {
+            skillsHtml = `<button class="action-btn ba-btn" data-action="bonus_skill_pick">⚡ Habilidade Bonus <span class="action-chance">(${acts.skills.length})</span></button>`;
+        }
+    }
+
+    return `<div class="action-bar"><div class="ba-header">
+        <div class="ba-label">⚡ AÇÃO BÔNUS</div>
+        <div class="ba-hint">Use uma habilidade bônus ou pule.</div>
+    </div><div class="action-grid">
+        ${skillsHtml}
+        <button class="action-btn" data-action="bonus_skip">⏭️ Pular</button>
+    </div></div>`;
+}
+
+// ─── REACTION BAR (D&D 5e PHB p.190) ───
+function renderReactionBar(acts, player) {
+    if (!acts) return '';
+    const hasSkills = acts.skills && acts.skills.length > 0;
+    const dmg = acts.damage_taken || 0;
+    const resName = player.res || 'Mana';
+
+    let skillsHtml = '';
+    if (hasSkills) {
+        acts.skills.forEach(sk => {
+            const ico = sk.ico || '⚡';
+            const effText = sk.eff ? ` · ${escHtml(sk.eff)}` : '';
+            skillsHtml += `<button class="action-btn reaction-btn" data-action="reaction_use" data-skill-id="${sk.id}">${ico} ${escHtml(sk.n)} <span class="action-chance">${sk.c} ${resName}${effText}</span></button>`;
+        });
+    }
+
+    return `<div class="action-bar"><div class="ba-header reaction-header">
+        <div class="ba-label">⚡ REAÇÃO</div>
+        <div class="ba-hint">Você recebeu ${dmg} de dano. Reagir?</div>
+    </div><div class="action-grid">
+        ${skillsHtml}
+        <button class="action-btn" data-action="reaction_skip">⏭️ Não reagir</button>
+    </div></div>`;
+}
+
 // ─── EXPAND / COLLAPSE (accordion) ───
 function bindExpandCollapse() {
     document.querySelectorAll('.entity:not(.player)').forEach(el => {
@@ -621,7 +678,7 @@ function bindActions(state) {
                         sendAction({ type: 'skill', skill_id: skills[0].id, target: 0 });
                     }
                 } else if (skills.length > 1) {
-                    showSkillPicker(skills, enemies);
+                    showSkillPicker(skills, enemies, 'skill');
                 }
             } else if (action === 'flee') {
                 sendAction({ type: 'flee' });
@@ -636,6 +693,29 @@ function bindActions(state) {
                 sendAction({ type: 'initiative' });
             } else if (action === 'proceed') {
                 sendAction({ type: 'proceed' });
+            }
+            // D&D 5e: Bonus Action actions
+            else if (action === 'bonus_skip') {
+                sendAction({ type: 'bonus_skip' });
+            } else if (action === 'bonus_use_single') {
+                const skillId = btn.dataset.skillId;
+                const tg = btn.dataset.tg || 'single';
+                if (tg === 'all' || tg === 'self') {
+                    sendAction({ type: 'bonus_use', skill_id: skillId, target: 0 });
+                } else if (enemies.length > 1) {
+                    showTargetPicker(enemies, 'bonus_use', skillId);
+                } else {
+                    sendAction({ type: 'bonus_use', skill_id: skillId, target: 0 });
+                }
+            } else if (action === 'bonus_skill_pick') {
+                showSkillPicker(skills, enemies, 'bonus_use');
+            }
+            // D&D 5e: Reaction actions
+            else if (action === 'reaction_skip') {
+                sendAction({ type: 'reaction_skip' });
+            } else if (action === 'reaction_use') {
+                const skillId = btn.dataset.skillId;
+                sendAction({ type: 'reaction_use', skill_id: skillId });
             }
         });
     });
@@ -702,10 +782,12 @@ async function sendAction(actionData) {
 }
 
 // ─── SKILL PICKER ───
-function showSkillPicker(skills, enemies) {
+function showSkillPicker(skills, enemies, actionType) {
+    actionType = actionType || 'skill';
     const panel = document.getElementById('skillPanel');
     const overlay = document.getElementById('skillOverlay');
-    let html = '<div class="skill-panel-title">Habilidades</div>';
+    const title = actionType === 'bonus_use' ? '⚡ Ação Bônus' : 'Habilidades';
+    let html = `<div class="skill-panel-title">${title}</div>`;
     skills.forEach(sk => {
         const typeBadge = sk.tp === 'saving_throw' ? ' · <span class="sk-type">ST</span>' :
                           sk.tp === 'auto' ? ' · <span class="sk-type">Auto</span>' :
@@ -732,11 +814,11 @@ function showSkillPicker(skills, enemies) {
             overlay.classList.remove('active');
             // AOE/self skills skip target picker
             if (tg === 'all' || tg === 'self') {
-                sendAction({ type: 'skill', skill_id: skillId, target: 0 });
+                sendAction({ type: actionType, skill_id: skillId, target: 0 });
             } else if (enemies.length > 1) {
-                showTargetPicker(enemies, 'skill', skillId);
+                showTargetPicker(enemies, actionType, skillId);
             } else {
-                sendAction({ type: 'skill', skill_id: skillId, target: 0 });
+                sendAction({ type: actionType, skill_id: skillId, target: 0 });
             }
         });
     });
@@ -769,8 +851,8 @@ function showTargetPicker(enemies, actionType, skillId) {
         item.addEventListener('click', () => {
             const target = parseInt(item.dataset.target);
             overlay.classList.remove('active');
-            if (actionType === 'skill') {
-                sendAction({ type: 'skill', skill_id: skillId, target: target });
+            if (actionType === 'skill' || actionType === 'bonus_use') {
+                sendAction({ type: actionType, skill_id: skillId, target: target });
             } else {
                 sendAction({ type: 'attack', target: target });
             }

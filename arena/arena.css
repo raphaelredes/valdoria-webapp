@@ -464,6 +464,37 @@ body {
 .action-btn .action-chance { font-size: 10px; opacity: 0.7; }
 .action-btn.disabled { opacity: 0.4; pointer-events: none; }
 
+/* ─── BONUS ACTION / REACTION HEADER ─── */
+.ba-header {
+    text-align: center;
+    padding: 4px 0 6px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid rgba(196,149,58,0.2);
+}
+.ba-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--v-gold-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.ba-hint {
+    font-size: 10px;
+    color: var(--v-text-dim);
+    margin-top: 2px;
+}
+.ba-btn {
+    border-color: rgba(196,149,58,0.4);
+    color: var(--v-gold-light);
+    background: linear-gradient(165deg, #2d2838 0%, #342c3a 100%);
+}
+.reaction-header .ba-label { color: #e08080; }
+.reaction-btn {
+    border-color: rgba(123,32,32,0.5);
+    color: #f0a0a0;
+    background: linear-gradient(165deg, #2d2530 0%, #342830 100%);
+}
+
 /* ─── LOADING INDICATOR ─── */
 .action-loading {
     display: flex;
