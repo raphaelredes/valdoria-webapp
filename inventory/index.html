@@ -63,19 +63,32 @@
         .search-bar {
             display: flex; gap: 6px; margin-bottom: 8px; align-items: center;
         }
+        .search-wrap {
+            flex: 1; position: relative;
+        }
         .search-bar input {
-            flex: 1; padding: 8px 12px; border-radius: var(--v-radius-pill);
+            width: 100%; box-sizing: border-box; padding: 8px 32px 8px 12px; border-radius: var(--v-radius-pill);
             border: 1px solid var(--v-border); background: var(--v-bg-card);
             color: var(--v-text-bright); font-size: 13px; font-family: var(--v-font);
             outline: none; transition: border-color 0.2s;
         }
         .search-bar input:focus { border-color: var(--v-gold-dim); }
         .search-bar input::placeholder { color: var(--v-text-dim); }
+        .search-clear {
+            position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+            width: 22px; height: 22px; border-radius: 50%; border: none;
+            background: var(--v-border); color: var(--v-text-bright); font-size: 14px;
+            cursor: pointer; display: none; align-items: center; justify-content: center;
+            padding: 0; line-height: 1;
+        }
+        .search-clear.visible { display: flex; }
         .sort-btn {
             padding: 8px 10px; border-radius: var(--v-radius-pill);
             border: 1px solid var(--v-border); background: var(--v-bg-card);
             color: var(--v-text-dim); font-size: 13px; cursor: pointer;
             white-space: nowrap; transition: all 0.2s;
+            min-height: 44px; min-width: 44px;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
         }
         .sort-btn.active { border-color: var(--v-gold-dim); color: var(--v-gold); }
 
@@ -340,7 +353,7 @@
             justify-content: center;
         }
         .gem-socket {
-            width: 42px; height: 42px; border-radius: 50%;
+            width: 44px; height: 44px; border-radius: 50%;
             border: 2px dashed var(--v-border); display: flex;
             align-items: center; justify-content: center;
             font-size: 18px; cursor: pointer; transition: all 0.2s;
@@ -460,10 +473,11 @@
         }
         .selection-bar .sel-count { flex: 1; font-size: 12px; color: var(--v-text-muted); }
         .sel-check {
-            position: absolute; top: 4px; right: 4px; width: 20px; height: 20px;
+            position: absolute; top: -2px; right: -2px; width: 20px; height: 20px;
             border-radius: 4px; border: 1.5px solid var(--v-text-dim);
             display: flex; align-items: center; justify-content: center;
             background: transparent; transition: all 0.15s;
+            padding: 10px; margin: -10px;
         }
         .sel-check.active { border-color: var(--v-gold); background: var(--v-gold); }
 
@@ -740,9 +754,14 @@
     function haptic(type) {
         try { tg?.HapticFeedback?.impactOccurred?.(type || 'light'); } catch(e) {}
     }
+    function hapticNotify(type) {
+        try { tg?.HapticFeedback?.notificationOccurred?.(type || 'error'); } catch(e) {}
+    }
 
     // ── Header ──
+    let _acDirty = true, _acCached = 0;
     function calcLocalAC() {
+        if (!_acDirty) return _acCached;
         // Base AC from server (includes DEX, class features, unarmored defense)
         // We adjust by calculating the delta between original equipment bonuses and current
         let origEqAC = 0;
@@ -763,6 +782,8 @@
             gems.forEach(g => { if (g) { const gd = getItemData(g); newEqAC += gd.gb?.ac_bonus || 0; } });
         }
         localAC = D.p.ac + (newEqAC - origEqAC);
+        _acCached = localAC;
+        _acDirty = false;
         return localAC;
     }
 
@@ -847,8 +868,11 @@
 
         // Search bar + sort
         html += `<div class="search-bar">
-            <input type="text" placeholder="Buscar item..." value="${esc(searchQuery)}"
-                oninput="onSearch(this.value)" id="searchInput">
+            <div class="search-wrap">
+                <input type="text" placeholder="Buscar item..." value="${esc(searchQuery)}"
+                    oninput="onSearch(this.value)" id="searchInput">
+                <button class="search-clear ${searchQuery?'visible':''}" onclick="clearSearch()" id="searchClear">&times;</button>
+            </div>
             <div class="sort-btn ${selectionMode?'active':''}" onclick="toggleSelectionMode()" title="Modo seleção">
                 ${selectionMode ? vi_f('check',14) : vi('check',14)}
             </div>
@@ -941,12 +965,21 @@
     let _searchTimer = null;
     function onSearch(val) {
         clearTimeout(_searchTimer);
+        const clearBtn = document.getElementById('searchClear');
+        if (clearBtn) clearBtn.classList.toggle('visible', val.trim().length > 0);
         _searchTimer = setTimeout(() => {
             searchQuery = val.toLowerCase().trim();
             renderTab();
             const inp = document.getElementById('searchInput');
             if (inp) { inp.focus(); inp.selectionStart = inp.selectionEnd = inp.value.length; }
         }, 150);
+    }
+
+    function clearSearch() {
+        searchQuery = '';
+        renderTab();
+        const inp = document.getElementById('searchInput');
+        if (inp) { inp.focus(); }
     }
 
     function cycleSort() {
@@ -1217,21 +1250,49 @@
     }
 
     function promptSaveLoadout() {
-        const name = prompt('Nome do loadout (max 20 chars):');
-        if (!name || !name.trim()) return;
         const ldout = D.ldout = D.ldout || {};
         if (Object.keys(ldout).length >= 5) { toast(`${vi('warn',13)} Máximo 5 loadouts`, 'err'); return; }
-        ldout[name.trim().slice(0,20)] = Object.assign({}, localEq);
-        addOp({t:'save_loadout', name: name.trim().slice(0,20)});
-        haptic('medium');
-        toast(`${vi('save',13)} '${esc(name.trim().slice(0,20))}' salvo`, 'ok');
-        renderTab();
-        updateBottomBar();
+        showInputModal('Salvar Loadout', 'Nome do loadout', 20, (name) => {
+            ldout[name] = Object.assign({}, localEq);
+            addOp({t:'save_loadout', name});
+            haptic('medium');
+            toast(`${vi('save',13)} '${esc(name)}' salvo`, 'ok');
+            renderTab();
+            updateBottomBar();
+        });
+    }
+
+    function showInputModal(title, placeholder, maxLen, onConfirm) {
+        const html = `<div class="modal-handle"></div>
+            <div class="modal-title">${vi('save',16)} ${title}</div>
+            <div style="padding:0 4px;">
+                <input type="text" id="inputModalField" placeholder="${placeholder}" maxlength="${maxLen}"
+                    style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--v-border);border-radius:var(--v-radius);
+                    background:var(--v-bg-card);color:var(--v-text-bright);font-size:14px;outline:none;"
+                    oninput="document.getElementById('inputModalCount').textContent=this.value.length+'/${maxLen}'">
+                <div id="inputModalCount" style="text-align:right;font-size:11px;color:var(--v-text-dim);margin-top:4px;">0/${maxLen}</div>
+            </div>
+            <div class="detail-actions" style="margin-top:8px;">
+                <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+                <button class="btn-equip" id="inputModalConfirm">Confirmar</button>
+            </div>`;
+        showModal(html);
+        const field = document.getElementById('inputModalField');
+        const btn = document.getElementById('inputModalConfirm');
+        setTimeout(() => field.focus(), 100);
+        btn.onclick = () => {
+            const val = field.value.trim().slice(0, maxLen);
+            if (!val) { hapticNotify('error'); return; }
+            closeModal();
+            onConfirm(val);
+        };
+        field.onkeydown = (e) => { if (e.key === 'Enter') btn.click(); };
     }
 
     function doLoadLoadout(name) {
         const ldout = (D.ldout || {})[name];
         if (!ldout) return;
+        _acDirty = true;
         for (const [slot, itemName] of Object.entries(ldout)) {
             if (!itemName) continue;
             const inv = localInv.find(i => i.n === itemName && i.q > 0);
@@ -1385,11 +1446,16 @@
                 </div>`;
             } else {
                 const currentIt = currentItem ? getItemData(currentItem) : {ac:0,b:0,hb:0,mb:0};
-                const vsLabel = currentItem || 'Nenhum equipado';
                 const delta = getStatDelta(it, currentIt, slot);
-                html += `<div style="margin-top:8px;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;">
-                    <span style="color:var(--v-text-dim);">vs ${vsLabel}:</span> ${delta || '<span style="color:var(--v-text-dim);">sem diferença</span>'}
-                </div>`;
+                if (currentItem) {
+                    html += `<div style="margin-top:8px;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;">
+                        <span style="color:var(--v-text-dim);">vs ${currentItem}:</span> ${delta || '<span style="color:var(--v-text-dim);">sem diferença</span>'}
+                    </div>`;
+                } else if (delta) {
+                    html += `<div style="margin-top:8px;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;">
+                        <span style="color:var(--v-success);">${vi('sword',12)} Slot vazio — equipar dá:</span> ${delta}
+                    </div>`;
+                }
             }
         }
 
@@ -1520,16 +1586,22 @@
             html += '<div style="text-align:center;color:var(--v-text-dim);padding:12px;">Slot vazio</div>';
         }
 
-        // Compatible items from inventory
+        // Compatible items from inventory — sorted by stat delta (upgrades first)
         html += `<div class="section-title">${vi('bag',14)} Itens Compatíveis</div>`;
         const compatItems = getCompatibleItems(slot);
         if (compatItems.length === 0) {
             html += '<div style="font-size:12px;color:var(--v-text-dim);text-align:center;">Nenhum item compatível no inventário.</div>';
         } else {
-            html += '<div class="compat-list">';
-            compatItems.forEach(ci => {
+            // Pre-compute deltas for sorting
+            const withDelta = compatItems.map(ci => {
                 const cit = getItemData(ci.name);
-                const { cls: compCls, delta } = compareItemsDetailed(cit, it, slot);
+                const { cls: compCls, delta, score } = compareItemsDetailed(cit, it, slot);
+                return { ci, cit, compCls, delta, score: score || 0 };
+            });
+            withDelta.sort((a, b) => b.score - a.score);
+
+            html += '<div class="compat-list">';
+            withDelta.forEach(({ ci, cit, compCls, delta }) => {
                 html += `<div class="compat-item ${compCls}" onclick="doEquip('${esc(ci.name)}','${slot}')">
                     <span class="compat-emoji">${cit?.e||'📦'}</span>
                     <div class="compat-info">
@@ -1567,6 +1639,7 @@
     }
 
     function doGemRemove(slot, idx, gemName) {
+        _acDirty = true;
         addOp({t:'gem_remove', slot, idx});
         const gems = localGems[slot] || [];
         gems[idx] = null;
@@ -1614,6 +1687,7 @@
     }
 
     function doGemInsert(slot, idx, gemName) {
+        _acDirty = true;
         addOp({t:'gem_insert', slot, gem: gemName, idx});
         const sockets = (getItemData(localEq[slot]) || {}).sk || 0;
         if (!localGems[slot]) localGems[slot] = Array(sockets).fill(null);
@@ -1699,6 +1773,27 @@
     }
 
     function doRuneInscribe(slot, runeName) {
+        const oldRune = localRunes[slot];
+        if (oldRune) {
+            // Confirm overwrite — old rune is destroyed
+            const html = `<div class="modal-handle"></div>
+                <div class="modal-title">${vi('warn',16)} Substituir Runa?</div>
+                <div style="text-align:center;padding:8px;font-size:13px;color:var(--v-warning);">
+                    <b>${esc(oldRune)}</b> será <b>destruída</b> permanentemente.
+                </div>
+                <div class="detail-actions">
+                    <button class="btn-unequip" onclick="showRuneSelect('${slot}')">Cancelar</button>
+                    <button class="btn-equip" onclick="_confirmRuneInscribe('${slot}','${esc(runeName)}')">${vi('orb',13)} Inscrever</button>
+                </div>`;
+            showModal(html);
+            hapticNotify('warning');
+            return;
+        }
+        _confirmRuneInscribe(slot, runeName);
+    }
+
+    function _confirmRuneInscribe(slot, runeName) {
+        _acDirty = true;
         addOp({t:'rune_inscribe', slot, rune: runeName});
         localRunes[slot] = runeName;
         removeFromLocalInv(runeName);
@@ -1712,10 +1807,10 @@
     // ══════════════════════════════════════════════════════════
     function doEquip(name, slot) {
         const it = getItemData(name);
-        if (!it || !it.s) return;
+        if (!it || !it.s) { console.warn('[INVENTORY] doEquip: invalid item or no slot', name); return; }
 
         const targetSlot = slot || resolveSlot(it);
-        if (!targetSlot) return;
+        if (!targetSlot) { console.warn('[INVENTORY] doEquip: could not resolve slot', name); return; }
 
         // Check proficiency
         if (!checkProficiency(it, activeTarget, name)) {
@@ -1756,6 +1851,7 @@
         eq[targetSlot] = name;
 
         closeModal();
+        _acDirty = true;
         haptic('medium');
         toast(`${vi('sword',13)} ${esc(name)} equipado`, 'ok');
         updateHeader();
@@ -1773,7 +1869,7 @@
     function doUnequip(slot) {
         const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
         const item = eq[slot];
-        if (!item) return;
+        if (!item) { console.warn('[INVENTORY] doUnequip: slot empty', slot); return; }
 
         addOp({t:'unequip', slot, tgt: activeTarget});
 
@@ -1788,6 +1884,7 @@
         addToLocalInv(item);
 
         closeModal();
+        _acDirty = true;
         haptic('light');
         toast(`${vi('bag',13)} ${esc(item)} desequipado`, 'ok');
         updateHeader();
@@ -1798,6 +1895,7 @@
     function doEquipSet(sid) {
         const sdef = D.sets?.[sid];
         if (!sdef) return;
+        _acDirty = true;
         const equipped = new Set(Object.values(localEq).filter(Boolean));
         const owned = new Set();
         localInv.forEach(i => { if (i.q > 0) owned.add(i.n); });
@@ -2263,10 +2361,10 @@
         }
     }
 
+    let _sendRetries = 0;
     function sendOps() {
         if (!pendingOps.length) return;
 
-        // Show loading overlay (Fix 10)
         closeModal();
         const overlay = document.getElementById('loadingOverlay');
         overlay.querySelector('.loading-text').textContent = 'Aplicando alterações...';
@@ -2284,13 +2382,19 @@
         if (tg) {
             try {
                 tg.sendData(JSON.stringify(data));
+                _sendRetries = 0;
             } catch(e) {
-                console.error('[INVENTORY] sendData failed', e);
+                console.error('[INVENTORY] sendData failed (attempt ' + (_sendRetries+1) + ')', e);
                 overlay.classList.add('hidden');
-                toast('Erro ao enviar. Tente novamente.', 'err');
+                _sendRetries++;
+                if (_sendRetries >= 3) {
+                    toast(`${vi('warn',13)} Falha ao enviar. Feche e reabra a mochila.`, 'err');
+                } else {
+                    toast(`${vi('warn',13)} Erro ao enviar. Toque em Confirmar para tentar novamente.`, 'err');
+                }
             }
         } else {
-            console.log('sendData:', data);
+            console.warn('[INVENTORY] sendData (dev mode):', JSON.stringify(data).slice(0, 200));
             overlay.classList.add('hidden');
             toast('Dados enviados (dev)', 'ok');
         }
@@ -2299,7 +2403,11 @@
     // ══════════════════════════════════════════════════════════
     //  HELPERS
     // ══════════════════════════════════════════════════════════
-    function getItemData(name) { return (D.items || {})[name] || {}; }
+    function getItemData(name) {
+        const d = (D.items || {})[name];
+        if (!d && name) console.warn('[INVENTORY] Item not in DB:', name);
+        return d || {};
+    }
 
     function avgDice(formula) {
         const m = (formula || '').match(/(\d+)d(\d+)\+?(\d+)?/);
@@ -2404,7 +2512,7 @@
     }
 
     function compareItemsDetailed(newIt, oldIt, slot) {
-        if (!newIt) return { cls: '', delta: '' };
+        if (!newIt) return { cls: '', delta: '', score: 0 };
         if (!oldIt) oldIt = {ac:0,b:0,hb:0,mb:0};
 
         // Calculate stat differences
@@ -2422,7 +2530,7 @@
         if (hpDiff !== 0) diffs.push({ label: 'HP', val: hpDiff });
         if (mpDiff !== 0) diffs.push({ label: 'MP', val: mpDiff });
 
-        if (!diffs.length) return { cls: '', delta: '' };
+        if (!diffs.length) return { cls: '', delta: '', score: 0 };
 
         // Overall assessment: sum of positive and negative
         const totalVal = diffs.reduce((s, d) => s + d.val, 0);
@@ -2435,7 +2543,7 @@
             return `<span class="compat-delta ${dcls}">${sign}${d.val} ${d.label}</span>`;
         }).join(' ');
 
-        return { cls, delta: `<div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;">${deltaHtml}</div>` };
+        return { cls, delta: `<div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;">${deltaHtml}</div>`, score: totalVal };
     }
 
     function getStatDelta(newIt, oldIt, slot) {
@@ -2478,6 +2586,8 @@
             if (existing.q <= 0) {
                 localInv = localInv.filter(i => i.n !== name);
             }
+        } else {
+            console.warn('[INVENTORY] removeFromLocalInv: not found:', name);
         }
     }
 
@@ -2528,13 +2638,23 @@
     }
 
     // ── Modal ──
+    let _modalOpen = false;
     function showModal(html) {
         document.getElementById('modalContent').innerHTML = html;
         document.getElementById('modalOverlay').classList.add('visible');
+        if (!_modalOpen) {
+            _modalOpen = true;
+            history.pushState({modal: true}, '');
+        }
     }
 
     function closeModal() {
         document.getElementById('modalOverlay').classList.remove('visible');
+        if (_modalOpen) {
+            _modalOpen = false;
+            // Pop the modal state we pushed, without triggering popstate handler
+            try { history.back(); } catch(e) {}
+        }
     }
 
     function closeModalOutside(e) {
@@ -2579,25 +2699,34 @@
         }, { passive: true });
     }
 
-    // ── Back button (Telegram) ──
+    // ── Back button (Telegram + Android native) ──
     function initBackButton() {
         if (tg?.BackButton) {
             tg.BackButton.show();
             tg.BackButton.onClick(() => {
-                const overlay = document.getElementById('modalOverlay');
-                if (overlay.classList.contains('visible')) {
-                    closeModal();
+                if (_modalOpen) {
+                    _modalOpen = false;
+                    document.getElementById('modalOverlay').classList.remove('visible');
                 } else {
                     tg.close();
                 }
             });
         }
+        // Android native back (popstate)
+        window.addEventListener('popstate', (e) => {
+            if (_modalOpen) {
+                _modalOpen = false;
+                document.getElementById('modalOverlay').classList.remove('visible');
+            }
+        });
     }
 
     // ── Toast ──
     function toast(msg, type) {
         const existing = document.querySelector('.toast');
         if (existing) existing.remove();
+        if (type === 'err') hapticNotify('error');
+        else if (type === 'warn') hapticNotify('warning');
         const el = document.createElement('div');
         el.className = `toast toast-${type||'ok'}`;
         el.innerHTML = msg;

@@ -329,15 +329,39 @@ body {
 .turn-entry.t-ally { border-color: var(--v-silver); }
 .turn-entry.t-ally .turn-name { color: var(--v-silver); }
 
-/* Dice area (compact) */
-@keyframes diceRoll {
-    0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
-    50% { transform: rotate(180deg) scale(1.2); }
-    100% { transform: rotate(360deg) scale(1); opacity: 1; }
-}
+/* Dice area — cinematic multi-phase animation */
 @keyframes dicePulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.06); }
+}
+@keyframes diceShake {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    20% { transform: translateX(-3px) rotate(-8deg); }
+    40% { transform: translateX(2px) rotate(6deg); }
+    60% { transform: translateX(-2px) rotate(-4deg); }
+    80% { transform: translateX(3px) rotate(8deg); }
+}
+@keyframes diceSlam {
+    0% { transform: scale(1.6); opacity: 0.3; }
+    60% { transform: scale(0.85); }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes critGlow {
+    0% { filter: drop-shadow(0 0 0 rgba(255,152,0,0)); }
+    50% { filter: drop-shadow(0 0 12px rgba(255,152,0,0.8)); }
+    100% { filter: drop-shadow(0 0 0 rgba(255,152,0,0)); }
+}
+@keyframes screenShake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-4px); }
+    30% { transform: translateX(4px); }
+    45% { transform: translateX(-3px); }
+    60% { transform: translateX(2px); }
+    75% { transform: translateX(-1px); }
+}
+@keyframes dmgFlash {
+    0% { background-color: rgba(229,57,53,0.35); }
+    100% { background-color: transparent; }
 }
 .dice-row {
     display: flex;
@@ -358,7 +382,11 @@ body {
     animation: dicePulse 3s ease-in-out infinite;
     filter: drop-shadow(0 0 4px rgba(196,149,58,0.2));
 }
-.dice-emoji.rolling { animation: diceRoll 0.6s ease !important; }
+.dice-emoji.shaking { animation: diceShake 0.12s linear infinite !important; }
+.dice-emoji.slamming { animation: diceSlam 0.3s ease-out !important; }
+.dice-emoji.crit-glow { animation: critGlow 0.6s ease-out !important; }
+#app.screen-shake { animation: screenShake 0.4s ease-out; }
+.entity.dmg-flash { animation: dmgFlash 0.4s ease-out; }
 .dice-result {
     font-size: 16px;
     font-weight: 800;
@@ -366,7 +394,9 @@ body {
     color: var(--v-gold);
     text-shadow: 0 0 6px rgba(196,149,58,0.3);
     min-height: 18px;
+    transition: color 0.2s;
 }
+.dice-result.cycling { color: var(--v-text-dim); opacity: 0.6; font-size: 14px; }
 .dice-result.crit { color: #ff9800; text-shadow: 0 0 10px rgba(255,152,0,0.5); }
 .dice-result.miss { color: var(--v-danger, #e53935); }
 .dice-result.hit { color: var(--v-gold-light); }
@@ -376,9 +406,25 @@ body {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+.dice-label.rolling-label { color: var(--v-gold-light); animation: dicePulse 0.8s ease-in-out infinite; }
 .dice-label.crit { color: #ff9800; }
 .dice-label.miss { color: var(--v-danger, #e53935); }
 .dice-label.hit { color: var(--v-success, #4caf50); }
+.dice-formula {
+    font-size: 10px;
+    text-align: center;
+    color: var(--v-text-dim);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    font-family: var(--v-font-mono, monospace);
+    min-height: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.dice-formula.visible { opacity: 1; }
+.dice-formula.hit { color: var(--v-success, #4caf50); }
+.dice-formula.miss { color: var(--v-danger, #e53935); }
+.dice-formula.crit { color: #ff9800; text-shadow: 0 0 8px rgba(255,152,0,0.3); }
 
 /* Combat feed */
 .combat-feed {
@@ -696,6 +742,26 @@ body {
     max-width: 280px;
     margin-top: 8px;
 }
+
+/* ─── POLL UPDATE INDICATOR ─── */
+.poll-update-indicator {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    background: rgba(44,40,48,0.92);
+    color: var(--v-gold-dim);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--v-border-gold);
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.25s, transform 0.25s;
+    z-index: 900;
+    pointer-events: none;
+}
+.poll-update-indicator.visible { opacity: 1; transform: translateY(0); }
 
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {

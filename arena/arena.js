@@ -15,6 +15,7 @@ const userId = parseInt(params.get('uid') || '0');
 const rawData = params.get('data');
 const isApiMode = !!apiBase;
 let currentState = null;
+let _lastAnimatedRoll = null; // Dedup: prevents replaying same dice animation on re-render
 
 // ─── TIMER / POLLING / HEARTBEAT STATE ───
 let _timerInterval = null;
@@ -43,6 +44,15 @@ class CombatAPI {
             throw err;
         }
         return r.json();
+    }
+    async checkHealth() {
+        try {
+            const r = await fetch(`${this.base}/api/combat/health`, { method: 'GET' });
+            if (!r.ok) return { status: 'unreachable' };
+            return r.json();
+        } catch(e) {
+            return { status: 'unreachable' };
+        }
     }
     async sendAction(data) {
         const r = await fetch(`${this.base}/api/combat/action`, {
@@ -97,7 +107,15 @@ async function loadCombatState() {
         startHeartbeat();
     } catch(e) {
         console.error('[COMBAT]', 'Erro ao carregar', e);
-        document.getElementById('app').innerHTML = '<div class="no-data"><h2>Erro de Conexão</h2><p>Não foi possível carregar o combate.</p></div>';
+        // Distinguish "server down" from "session invalid" via health check
+        const health = await api.checkHealth();
+        if (health.status === 'unreachable') {
+            document.getElementById('app').innerHTML = '<div class="no-data"><h2>Servidor Indisponível</h2><p>O servidor de combate não está respondendo. Tente novamente em alguns segundos.</p></div>';
+        } else if (e.status === 401) {
+            document.getElementById('app').innerHTML = '<div class="no-data"><h2>Sessão Expirada</h2><p>Feche esta janela e reabra o combate no Telegram.</p></div>';
+        } else {
+            document.getElementById('app').innerHTML = '<div class="no-data"><h2>Erro de Conexão</h2><p>Não foi possível carregar o combate.</p></div>';
+        }
     }
 }
 
@@ -257,7 +275,8 @@ function renderArena(s) {
     html += `<div class="dice-row">
         <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>
         <div class="dice-box-compact"><div class="dice-emoji" id="dice2">🎲</div><div><div class="dice-result" id="diceResult2"></div><div class="dice-label" id="diceLabel2">dano</div></div></div>
-    </div>`;
+    </div>
+    <div class="dice-formula" id="diceFormula"></div>`;
     if (s.feed && s.feed.length > 0) {
         const total = s.feed.length;
         const recentFeed = s.feed.slice(-3);
@@ -288,8 +307,12 @@ function renderArena(s) {
         html += renderTimerBar(s);
         html += renderActionBar(s.acts, s.e, s.p);
     } else if (ph === 'intro' && isApiMode) {
-        // API mode: interactive initiative button
-        html += `<div class="action-bar"><button class="action-btn primary full-width" data-action="initiative" style="font-size:14px;padding:12px">⚔️ ROLAR INICIATIVA</button></div>`;
+        // API mode: interactive initiative button (with restore option if available)
+        html += `<div class="action-bar">`;
+        if (s.can_restore) {
+            html += `<button class="action-btn primary full-width" data-action="restore" style="font-size:14px;padding:12px">🔄 Restaurar Combate</button>`;
+        }
+        html += `<button class="action-btn primary full-width" data-action="initiative" style="font-size:14px;padding:12px">⚔️ ROLAR INICIATIVA</button></div>`;
     } else if (ph === 'init') {
         // Initiative rolled — show results + proceed button
         html += renderInitiativeResults(s);
@@ -397,18 +420,25 @@ function _showTimerExpiredToast() {
     setTimeout(() => { el.classList.remove('visible'); setTimeout(() => el.remove(), 300); }, 2500);
 }
 
-// ─── STATE POLLING ───
+// ─── STATE POLLING (adaptive interval) ───
+function _getPollInterval() {
+    // Faster polling when it's NOT the player's turn (waiting for server to advance)
+    if (!currentState || !currentState.active_turn) return 5000;
+    return currentState.active_turn.type === 'player' ? 8000 : 2000;
+}
+
 function startPolling() {
     stopPolling();
     if (!isApiMode || !api) return;
 
-    _pollInterval = setInterval(async () => {
+    const poll = async () => {
         try {
             const state = await api.getState();
             if (!state || state.error) {
                 if (state && (state.error === 'no_combat' || state.phase === 'ended')) {
                     showCombatEnded();
                 }
+                _pollInterval = setTimeout(poll, _getPollInterval());
                 return;
             }
 
@@ -421,6 +451,7 @@ function startPolling() {
             const oldTc = currentState ? (currentState.tc || 0) : 0;
 
             if (newPh !== oldPh || newRn !== oldRn || newTc !== oldTc) {
+                _showPollUpdateIndicator();
                 currentState = state;
                 if (newPh === 'victory' || newPh === 'defeat' || newPh === 'ended') {
                     renderResolution(state);
@@ -432,14 +463,27 @@ function startPolling() {
             // Silently ignore poll errors — don't spam user with toasts
             console.warn('[ARENA] Poll error (silent)', e.message);
         }
-    }, 5000);
+        _pollInterval = setTimeout(poll, _getPollInterval());
+    };
+
+    _pollInterval = setTimeout(poll, _getPollInterval());
 }
 
 function stopPolling() {
     if (_pollInterval) {
-        clearInterval(_pollInterval);
+        clearTimeout(_pollInterval);
         _pollInterval = null;
     }
+}
+
+// ─── POLL UPDATE INDICATOR (U5) ───
+function _showPollUpdateIndicator() {
+    const el = document.createElement('div');
+    el.className = 'poll-update-indicator';
+    el.textContent = '🔄 Estado atualizado';
+    document.body.appendChild(el);
+    setTimeout(() => el.classList.add('visible'), 20);
+    setTimeout(() => { el.classList.remove('visible'); setTimeout(() => el.remove(), 300); }, 1500);
 }
 
 // ─── SESSION HEARTBEAT ───
@@ -769,6 +813,8 @@ function bindActions(state) {
                 sendAction({ type: 'initiative' });
             } else if (action === 'proceed') {
                 sendAction({ type: 'proceed' });
+            } else if (action === 'restore') {
+                sendAction({ type: 'restore' });
             }
             // D&D 5e: Bonus Action actions
             else if (action === 'bonus_skip') {
@@ -820,6 +866,7 @@ let _actionSent = false;
 async function sendAction(actionData) {
     if (_actionSent) return;
     _actionSent = true;
+    _lastAnimatedRoll = null; // Reset dedup — next render will animate dice
     document.querySelectorAll('.action-btn').forEach(b => b.classList.add('disabled'));
     _showActionLoading(true);
     stopTimer();
@@ -841,7 +888,9 @@ async function sendAction(actionData) {
             _showActionLoading(false);
             _actionSent = false;
             console.error('[ARENA] API sendAction error', e);
-            const msg = e.status === 401 ? 'Sessão expirada.' : 'Erro de conexão. Tente novamente.';
+            const msg = e.status === 401 ? 'Sessão expirada.'
+                      : e.status === 429 ? 'Muitas ações. Aguarde um momento.'
+                      : 'Erro de conexão. Tente novamente.';
             showError(msg);
             startPolling();
         }
@@ -985,49 +1034,159 @@ function showItemPicker(items, enemies, allies) {
     };
 }
 
-// ─── DICE ANIMATION ───
-function initDice(lastRoll) {
+// ─── DICE ANIMATION — Cinematic multi-phase ───
+function initDice(lr) {
+    if (!lr || !lr.r) return;
+
+    // Dedup — don't replay the same roll on polling re-renders
+    const sig = `${lr.r}-${lr.d}-${lr.t}-${lr.crit||0}-${lr.miss||0}`;
+    if (sig === _lastAnimatedRoll) { _showDiceStatic(lr); return; }
+    _lastAnimatedRoll = sig;
+
     const d1 = document.getElementById('dice1');
     const d2 = document.getElementById('dice2');
-    if (!d1 || !d2) return;
+    const r1 = document.getElementById('diceResult1');
+    const l1 = document.getElementById('diceLabel1');
+    const r2 = document.getElementById('diceResult2');
+    const l2 = document.getElementById('diceLabel2');
+    const formula = document.getElementById('diceFormula');
+    if (!d1 || !r1) return;
 
-    if (lastRoll && lastRoll.r) {
-        d1.style.animation = 'none';
-        void d1.offsetHeight;
-        d1.classList.add('rolling');
+    // ── Phase 1: D20 Rolling (0→900ms) ──
+    d1.textContent = '🎲';
+    d1.classList.add('shaking');
+    r1.className = 'dice-result cycling';
+    l1.textContent = 'rolando...';
+    l1.className = 'dice-label rolling-label';
+    const d20Cycle = setInterval(() => {
+        r1.textContent = Math.floor(Math.random() * 19) + 2;
+    }, 80);
+
+    // ── Phase 2: D20 Reveal (at 900ms) ──
+    setTimeout(() => {
+        clearInterval(d20Cycle);
+        d1.classList.remove('shaking');
+        r1.className = 'dice-result';
+        r1.textContent = lr.r;
+        d1.classList.add('slamming');
+        setTimeout(() => d1.classList.remove('slamming'), 300);
+
+        if (lr.crit || lr.r === 20) {
+            d1.textContent = '🌟';
+            r1.classList.add('crit');
+            l1.textContent = 'CRÍTICO!';
+            l1.className = 'dice-label crit';
+            d1.classList.add('crit-glow');
+            const app = document.getElementById('app');
+            if (app) app.classList.add('screen-shake');
+            setTimeout(() => {
+                if (app) app.classList.remove('screen-shake');
+                d1.classList.remove('crit-glow');
+            }, 500);
+        } else if (lr.r === 1) {
+            d1.textContent = '💀';
+            r1.classList.add('miss');
+            l1.textContent = 'FALHA CRÍTICA!';
+            l1.className = 'dice-label miss';
+        } else if (lr.miss) {
+            r1.classList.add('miss');
+            l1.textContent = 'errou';
+            l1.className = 'dice-label miss';
+        } else {
+            r1.classList.add('hit');
+            l1.textContent = lr.t === 'skill' ? 'habilidade' : 'acerto';
+            l1.className = 'dice-label hit';
+        }
+
+        // Formula: "25 vs CA 16"
+        if (formula && lr.ac) {
+            const total = lr.total || lr.r;
+            formula.textContent = `${total} vs CA ${lr.ac}`;
+            formula.className = 'dice-formula visible ' + (lr.crit ? 'crit' : lr.miss ? 'miss' : 'hit');
+        }
+    }, 900);
+
+    // ── Phase 3: Miss/no-damage → shield on damage die ──
+    if (lr.miss || lr.d <= 0) {
         setTimeout(() => {
-            d1.classList.remove('rolling');
-            d1.textContent = lastRoll.r === 20 ? '🌟' : lastRoll.r === 1 ? '💀' : '🎲';
-            const r1 = document.getElementById('diceResult1');
-            const l1 = document.getElementById('diceLabel1');
-            r1.textContent = lastRoll.r;
-            if (lastRoll.r === 20) {
-                r1.classList.add('crit');
-                l1.textContent = 'CRÍTICO!';
-                l1.classList.add('crit');
-            } else if (lastRoll.r === 1) {
-                r1.classList.add('miss');
-                l1.textContent = 'FALHA!';
-                l1.classList.add('miss');
-            } else {
-                l1.textContent = lastRoll.t === 'skill' ? 'habilidade' : 'ataque';
-                l1.classList.add('hit');
+            if (d2) d2.textContent = '🛡️';
+            if (r2) { r2.textContent = '—'; r2.className = 'dice-result miss'; }
+            if (l2) { l2.textContent = 'bloqueado'; l2.className = 'dice-label miss'; }
+        }, 1100);
+        return;
+    }
+
+    // ── Phase 4: Damage Rolling (1200→1900ms) ──
+    setTimeout(() => {
+        if (!d2 || !r2) return;
+        d2.textContent = '🎲';
+        d2.classList.add('shaking');
+        r2.className = 'dice-result cycling';
+        l2.textContent = 'rolando...';
+        l2.className = 'dice-label rolling-label';
+        const maxCycle = Math.max(lr.d, 6);
+        const dmgCycle = setInterval(() => {
+            r2.textContent = Math.floor(Math.random() * maxCycle) + 1;
+        }, 80);
+
+        // ── Phase 5: Damage Reveal (700ms later) ──
+        setTimeout(() => {
+            clearInterval(dmgCycle);
+            d2.classList.remove('shaking');
+            d2.textContent = '⚔️';
+            r2.textContent = lr.d;
+            r2.className = 'dice-result hit';
+            d2.classList.add('slamming');
+            setTimeout(() => d2.classList.remove('slamming'), 300);
+            l2.textContent = lr.df || 'dano';
+            l2.className = 'dice-label hit';
+
+            // Flash enemy card on damage
+            const enemies = document.querySelectorAll('.entity.t-enemy');
+            if (enemies.length > 0) {
+                enemies[0].classList.add('dmg-flash');
+                setTimeout(() => enemies[0].classList.remove('dmg-flash'), 400);
             }
         }, 700);
+    }, 1200);
+}
 
-        if (lastRoll.d) {
-            d2.style.animation = 'none';
-            void d2.offsetHeight;
-            setTimeout(() => {
-                d2.classList.add('rolling');
-                setTimeout(() => {
-                    d2.classList.remove('rolling');
-                    d2.textContent = lastRoll.d > 0 ? '⚔️' : '🛡️';
-                    document.getElementById('diceResult2').textContent = lastRoll.d;
-                    document.getElementById('diceLabel2').textContent = 'dano';
-                }, 700);
-            }, 300);
-        }
+// Static dice display (for polling re-renders — no animation)
+function _showDiceStatic(lr) {
+    const d1 = document.getElementById('dice1');
+    const r1 = document.getElementById('diceResult1');
+    const l1 = document.getElementById('diceLabel1');
+    const d2 = document.getElementById('dice2');
+    const r2 = document.getElementById('diceResult2');
+    const l2 = document.getElementById('diceLabel2');
+    const formula = document.getElementById('diceFormula');
+    if (!d1 || !r1) return;
+
+    const isCrit = lr.crit || lr.r === 20;
+    const isFail = lr.r === 1;
+    const isMiss = lr.miss || lr.d <= 0;
+    const cls = isCrit ? 'crit' : isMiss ? 'miss' : 'hit';
+
+    d1.textContent = isCrit ? '🌟' : isFail ? '💀' : '🎲';
+    r1.textContent = lr.r;
+    r1.className = 'dice-result ' + cls;
+    l1.textContent = isCrit ? 'CRÍTICO!' : isFail ? 'FALHA CRÍTICA!' : isMiss ? 'errou' : (lr.t === 'skill' ? 'habilidade' : 'acerto');
+    l1.className = 'dice-label ' + cls;
+
+    if (lr.d > 0) {
+        if (d2) d2.textContent = '⚔️';
+        if (r2) { r2.textContent = lr.d; r2.className = 'dice-result hit'; }
+        if (l2) { l2.textContent = lr.df || 'dano'; l2.className = 'dice-label hit'; }
+    } else {
+        if (d2) d2.textContent = '🛡️';
+        if (r2) { r2.textContent = '—'; r2.className = 'dice-result miss'; }
+        if (l2) { l2.textContent = 'bloqueado'; l2.className = 'dice-label miss'; }
+    }
+
+    if (formula && lr.ac) {
+        const total = lr.total || lr.r;
+        formula.textContent = `${total} vs CA ${lr.ac}`;
+        formula.className = 'dice-formula visible ' + (isCrit ? 'crit' : isMiss ? 'miss' : 'hit');
     }
 }
 
