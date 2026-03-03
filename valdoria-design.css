@@ -722,6 +722,98 @@ body::after {
     background: linear-gradient(180deg, rgba(196,149,58,0.25), rgba(196,149,58,0.12));
 }
 
+/* ─── ACCORDION (collapsible sections) ─── */
+/* Reusable pattern for grouped options that can be expanded/collapsed.
+   Used in: character_creator (personality), levelup (future feat groups).
+   Structure: .v-accordion > .v-accordion-section[.collapsed] >
+              (.v-accordion-header + .v-accordion-body) */
+.v-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.v-accordion-section {
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius);
+    overflow: hidden;
+    transition: border-color var(--v-transition);
+}
+
+.v-accordion-section.has-selection {
+    border-color: rgba(196, 149, 58, 0.3);
+}
+
+.v-accordion-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: background var(--v-transition);
+}
+
+.v-accordion-header:active {
+    background: rgba(196, 149, 58, 0.06);
+}
+
+.v-accordion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.v-accordion-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--v-gold);
+    flex: 1;
+    text-shadow: 0 0 6px rgba(196, 149, 58, 0.15);
+}
+
+.v-accordion-badge {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color var(--v-transition);
+}
+
+.v-accordion-section.has-selection .v-accordion-badge {
+    color: var(--v-success);
+}
+
+.v-accordion-arrow {
+    font-size: 10px;
+    color: var(--v-text-dim);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.v-accordion-body {
+    padding: 0 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Collapsed state */
+.v-accordion-section.collapsed .v-accordion-arrow {
+    transform: rotate(-90deg);
+}
+
+.v-accordion-section.collapsed .v-accordion-body {
+    display: none;
+}
+
+.v-accordion-section.collapsed {
+    padding-bottom: 0;
+}
+
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {

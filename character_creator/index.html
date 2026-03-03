@@ -2072,36 +2072,72 @@ function buildPersonalitySelect(bgKey) {
     ];
     let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="skipPersonality()">← Pular</button>`;
     html += `<div class="v-title-sm" style="margin-top:8px">Personalidade</div>`;
-    html += `<div class="v-caption">Defina a personalidade do seu personagem. Opcional — toque para escolher ou pule.</div>`;
-    html += `<button class="v-btn v-btn-secondary btn-block" style="margin:8px 0" onclick="randomizePersonality()">🎲 Aleatório</button>`;
+    html += `<div class="v-caption">Defina a personalidade do seu personagem. Opcional — toque em cada categoria para expandir.</div>`;
+    html += `<button class="v-btn v-btn-secondary btn-block" style="margin:0 0 10px" onclick="randomizePersonality()">🎲 Aleatório</button>`;
+    html += `<div class="v-accordion">`;
     cats.forEach(cat => {
-        html += `<div class="detail-section" style="margin-top:10px"><div class="detail-section-title">${cat.icon} ${cat.label}</div>`;
-        cat.items.forEach((text, i) => {
-            html += `<button class="v-toggle-btn" id="pers_${cat.key}_${i}" onclick="selectPersonalityOption('${cat.key}',${i},'${cat.icon}')" style="text-align:left;white-space:normal;padding:8px 10px;margin:3px 0;width:100%">`;
-            html += `<span class="toggle-check">⬜</span> ${text}</button>`;
-        });
+        html += `<div class="v-accordion-section collapsed" id="persSection_${cat.key}">`;
+        html += `<div class="v-accordion-header" onclick="togglePersonalitySection('${cat.key}')">`;
+        html += `<span class="v-accordion-icon">${cat.icon}</span>`;
+        html += `<span class="v-accordion-title">${cat.label}</span>`;
+        html += `<span class="v-accordion-badge" id="persBadge_${cat.key}">Toque para escolher</span>`;
+        html += `<span class="v-accordion-arrow">▼</span>`;
         html += `</div>`;
+        html += `<div class="v-accordion-body">`;
+        cat.items.forEach((text, i) => {
+            html += `<div class="v-toggle-item" id="pers_${cat.key}_${i}" onclick="selectPersonalityOption('${cat.key}',${i})">`;
+            html += `<div class="v-toggle-check"></div>`;
+            html += `<div class="v-toggle-label">${text}</div>`;
+            html += `</div>`;
+        });
+        html += `</div></div>`;
     });
+    html += `</div>`;
     html += `<button class="v-btn v-btn-primary btn-block" id="persConfirmBtn" style="margin-top:12px" onclick="confirmPersonality()">✓ Confirmar Personalidade</button>`;
     document.getElementById('personalityContent').innerHTML = html;
 }
 
-function selectPersonalityOption(catKey, idx, icon) {
+function togglePersonalitySection(catKey) {
     haptic();
-    const bgKey = sel.bg;
-    const data = PERSONALITY_DATA[bgKey];
+    const section = document.getElementById(`persSection_${catKey}`);
+    if (!section) return;
+    const wasCollapsed = section.classList.contains('collapsed');
+    // Collapse all sections first (accordion behavior)
+    document.querySelectorAll('.v-accordion-section').forEach(s => s.classList.add('collapsed'));
+    // Toggle the clicked one
+    if (wasCollapsed) section.classList.remove('collapsed');
+}
+
+function selectPersonalityOption(catKey, idx) {
+    haptic();
+    const data = PERSONALITY_DATA[sel.bg];
     if (!data) return;
     const catMap = {personalityTrait:'traits', ideal:'ideals', bond:'bonds', flaw:'flaws'};
     const items = data[catMap[catKey]];
     // Deselect previous in same category
     items.forEach((_, i) => {
-        const btn = document.getElementById(`pers_${catKey}_${i}`);
-        if (btn) btn.querySelector('.toggle-check').textContent = '⬜';
+        const el = document.getElementById(`pers_${catKey}_${i}`);
+        if (el) { el.classList.remove('selected'); el.querySelector('.v-toggle-check').textContent = ''; }
     });
     // Select this one
     sel[catKey] = items[idx];
-    const btn = document.getElementById(`pers_${catKey}_${idx}`);
-    if (btn) btn.querySelector('.toggle-check').textContent = '✅';
+    const el = document.getElementById(`pers_${catKey}_${idx}`);
+    if (el) { el.classList.add('selected'); el.querySelector('.v-toggle-check').textContent = '✓'; }
+    // Update badge and section state
+    const badge = document.getElementById(`persBadge_${catKey}`);
+    const section = document.getElementById(`persSection_${catKey}`);
+    if (badge) { badge.textContent = items[idx].length > 30 ? items[idx].slice(0, 28) + '…' : items[idx]; }
+    if (section) section.classList.add('has-selection');
+    // Auto-collapse after selection and open next empty category
+    setTimeout(() => {
+        if (section) section.classList.add('collapsed');
+        const order = ['personalityTrait', 'ideal', 'bond', 'flaw'];
+        const nextEmpty = order.find(k => !sel[k]);
+        if (nextEmpty) {
+            const nextSection = document.getElementById(`persSection_${nextEmpty}`);
+            if (nextSection) nextSection.classList.remove('collapsed');
+        }
+    }, 250);
 }
 
 function randomizePersonality() {
@@ -2118,12 +2154,17 @@ function randomizePersonality() {
         const idx = Math.floor(Math.random() * cat.items.length);
         // Clear all
         cat.items.forEach((_, i) => {
-            const btn = document.getElementById(`pers_${cat.key}_${i}`);
-            if (btn) btn.querySelector('.toggle-check').textContent = '⬜';
+            const el = document.getElementById(`pers_${cat.key}_${i}`);
+            if (el) { el.classList.remove('selected'); el.querySelector('.v-toggle-check').textContent = ''; }
         });
         sel[cat.key] = cat.items[idx];
-        const btn = document.getElementById(`pers_${cat.key}_${idx}`);
-        if (btn) btn.querySelector('.toggle-check').textContent = '✅';
+        const el = document.getElementById(`pers_${cat.key}_${idx}`);
+        if (el) { el.classList.add('selected'); el.querySelector('.v-toggle-check').textContent = '✓'; }
+        // Update badge and section state
+        const badge = document.getElementById(`persBadge_${cat.key}`);
+        const section = document.getElementById(`persSection_${cat.key}`);
+        if (badge) { badge.textContent = cat.items[idx].length > 30 ? cat.items[idx].slice(0, 28) + '…' : cat.items[idx]; }
+        if (section) { section.classList.add('has-selection', 'collapsed'); }
     });
 }
 
