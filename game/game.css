@@ -42,6 +42,7 @@
     color: var(--v-text);
     margin-bottom: 14px;
     word-wrap: break-word;
+    white-space: pre-line; /* \n from server HTML renders as line breaks */
 }
 
 .screen-content b, .screen-content strong {
@@ -249,6 +250,7 @@
     justify-content: center;
     background: rgba(0, 0, 0, 0.6);
     z-index: 300;
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
 }
 
