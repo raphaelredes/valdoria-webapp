@@ -6,7 +6,7 @@
     <title>Lendas de Valdoria</title>
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../valdoria-design.css?v=4">
-    <link rel="stylesheet" href="game.css?v=1">
+    <link rel="stylesheet" href="game.css?v=2">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -28,6 +28,12 @@
 
         <!-- Action buttons -->
         <div id="buttons" class="screen-buttons"></div>
+
+        <!-- Text input (bank amounts, NPC AI chat, tickets) -->
+        <div id="text-input-wrap" class="text-input-wrap" style="display:none">
+            <input id="text-input" type="text" class="text-input" placeholder="Digite aqui..." autocomplete="off">
+            <button id="text-send" class="text-send-btn">➤</button>
+        </div>
     </div>
 
     <!-- Footer (fixed bottom) -->
@@ -61,9 +67,9 @@
     <!-- Transition animation overlay -->
     <div id="transition-overlay" class="transition-overlay" style="display:none"></div>
 
-    <script src="game-core.js?v=1"></script>
-    <script src="game-renderer.js?v=1"></script>
-    <script src="game-ui.js?v=1"></script>
-    <script src="game-transitions.js?v=1"></script>
+    <script src="game-core.js?v=2"></script>
+    <script src="game-renderer.js?v=2"></script>
+    <script src="game-ui.js?v=2"></script>
+    <script src="game-transitions.js?v=2"></script>
 </body>
 </html>

@@ -10,7 +10,8 @@ const HERO_KEYWORDS = ['PARTIR', 'JOGAR', 'AVENTURA', 'CONFIRMAR', 'INICIAR'];
 
 /**
  * Render a screen JSON object from the server.
- * @param {Object} screen - {text, buttons, footer, image_url, timer, transition, toast, alert}
+ * @param {Object} screen - {text, buttons, footer, image_url, timer, transition,
+ *                           toast, alert, waiting_for_text, text_placeholder}
  */
 function renderScreen(screen) {
     if (!screen) return;
@@ -45,6 +46,9 @@ function renderScreen(screen) {
     const buttonsEl = document.getElementById('buttons');
     buttonsEl.innerHTML = '';
     renderButtons(buttonsEl, screen.buttons || []);
+
+    // Text input field (bank amounts, NPC AI chat, tickets)
+    renderTextInput(screen);
 
     // Footer
     if (screen.footer && (screen.footer.quick || screen.footer.nav)) {
@@ -101,17 +105,21 @@ function renderButtons(container, rows) {
  * Create a single button element.
  */
 function createButton(btn, forceHero = false) {
-    // Transition button (opens another WebApp)
+    // Transition button (opens another WebApp via transition API)
     if (btn.transition) {
         const el = document.createElement('button');
         el.className = 'btn-hero';
         el.textContent = btn.text || '';
-        el.onclick = () => {
-            const screen = S.currentScreen;
-            if (screen && screen.transition) {
-                handleTransition(screen.transition);
-            }
-        };
+        const target = typeof btn.transition === 'string' ? btn.transition : btn.transition.to;
+        if (target) {
+            el.onclick = () => requestTransition(target);
+        } else {
+            // Legacy fallback: screen-level transition
+            el.onclick = () => {
+                const screen = S.currentScreen;
+                if (screen && screen.transition) handleTransition(screen.transition);
+            };
+        }
         return el;
     }
 
@@ -130,6 +138,19 @@ function createButton(btn, forceHero = false) {
         return el;
     }
 
+    // Main menu button — close WebApp and return to Telegram
+    if (btn.cb === 'main_menu') {
+        const el = document.createElement('button');
+        el.className = 'btn-action';
+        el.textContent = btn.text || '';
+        el.onclick = () => {
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.close();
+            }
+        };
+        return el;
+    }
+
     // Regular callback button
     const el = document.createElement('button');
     const isHero = forceHero || HERO_KEYWORDS.some(k => (btn.text || '').toUpperCase().includes(k));
@@ -139,6 +160,43 @@ function createButton(btn, forceHero = false) {
         el.onclick = () => doAction(btn.cb);
     }
     return el;
+}
+
+/**
+ * Show or hide the text input field based on server signal.
+ */
+function renderTextInput(screen) {
+    const wrap = document.getElementById('text-input-wrap');
+    const inputEl = document.getElementById('text-input');
+    const sendBtn = document.getElementById('text-send');
+    if (!wrap) return;
+
+    if (!screen.waiting_for_text) {
+        wrap.style.display = 'none';
+        return;
+    }
+
+    wrap.style.display = '';
+    inputEl.placeholder = screen.text_placeholder || 'Digite aqui...';
+    inputEl.value = '';
+
+    const submitText = () => {
+        const val = inputEl.value.trim();
+        if (!val) return;
+        wrap.style.display = 'none';
+        doText(val);
+    };
+
+    sendBtn.onclick = submitText;
+    inputEl.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitText();
+        }
+    };
+
+    // Focus after a short delay (mobile keyboard)
+    setTimeout(() => inputEl.focus(), 150);
 }
 
 /**

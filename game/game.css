@@ -327,6 +327,53 @@
 .screen.fade-out { opacity: 0; transition: opacity 0.15s ease; }
 .screen.fade-in { opacity: 1; transition: opacity 0.2s ease; }
 
+/* ─── Text Input (bank amounts, NPC AI chat, tickets) ─── */
+.text-input-wrap {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.text-input {
+    flex: 1;
+    padding: 11px 12px;
+    min-height: 44px;
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    background: var(--v-bg-raised);
+    color: var(--v-text);
+    font-size: 14px;
+    font-family: var(--v-font);
+    outline: none;
+    transition: border-color var(--v-transition);
+    -webkit-appearance: none;
+}
+
+.text-input:focus {
+    border-color: var(--v-gold-dim);
+}
+
+.text-input::placeholder {
+    color: var(--v-text-dim);
+}
+
+.text-send-btn {
+    width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--v-gold-dim);
+    border-radius: var(--v-radius-sm);
+    background: linear-gradient(165deg, var(--v-bg-accent) 0%, #3a1515 100%);
+    color: var(--v-gold-light);
+    font-size: 18px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all var(--v-transition);
+}
+
+.text-send-btn:active {
+    transform: scale(0.95);
+}
+
 /* ─── Skip Button (mandatory timed overlay rule) ─── */
 .v-skip-btn {
     position: fixed;
