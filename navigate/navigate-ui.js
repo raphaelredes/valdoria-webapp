@@ -46,7 +46,7 @@ function handleLocationTap(locId) {
     // Tags (distance, connections, danger hint)
     const tagsEl = document.getElementById('info-stats');
     const dist = bfsDistance(S.currentLoc, locId, connectionGraph);
-    const connCount = (locData.c || []).length;
+    const connCount = (connectionGraph[locId] || []).length;
 
     let tagsHtml = '';
     if (!isCurrent && dist >= 0) {

@@ -2,30 +2,30 @@
 // CONSTANTS
 // ═══════════════════════════════════════════════════════
 const COLS = 11, ROWS = 13;
-const IMPASSABLE = new Set(['W','M','L','#']);
+const IMPASSABLE = new Set(['W', 'M', 'L', '#']);
 
 // Hex neighbors (odd-r offset)
-const EVEN_OFFSETS = [[-1,-1],[0,-1],[-1,0],[1,0],[-1,1],[0,1]];
-const ODD_OFFSETS  = [[0,-1],[1,-1],[-1,0],[1,0],[0,1],[1,1]];
+const EVEN_OFFSETS = [[-1, -1], [0, -1], [-1, 0], [1, 0], [-1, 1], [0, 1]];
+const ODD_OFFSETS = [[0, -1], [1, -1], [-1, 0], [1, 0], [0, 1], [1, 1]];
 
 // Full Portuguese names for dice animation display
 const STAT_NAMES = {
-    str:'Força',dex:'Destreza',con:'Constituição',int:'Inteligência',wis:'Sabedoria',cha:'Carisma',
-    atl:'Atletismo',acr:'Acrobacia',slh:'Prestidigitação',stl:'Furtividade',
-    arc:'Arcanismo',his:'História',inv:'Investigação',nat:'Natureza',rel:'Religião',
-    anh:'Lid. Animais',ins:'Intuição',med:'Medicina',
-    per:'Percepção',sur:'Sobrevivência',dec:'Enganação',
-    itm:'Intimidação',prf:'Atuação',prs:'Persuasão',
+    str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma',
+    atl: 'Atletismo', acr: 'Acrobacia', slh: 'Prestidigitação', stl: 'Furtividade',
+    arc: 'Arcanismo', his: 'História', inv: 'Investigação', nat: 'Natureza', rel: 'Religião',
+    anh: 'Lid. Animais', ins: 'Intuição', med: 'Medicina',
+    per: 'Percepção', sur: 'Sobrevivência', dec: 'Enganação',
+    itm: 'Intimidação', prf: 'Atuação', prs: 'Persuasão',
 };
 // Compact 3-letter codes for button badges
 const STAT_SHORT = {
-    str:'FOR',dex:'DES',con:'CON',int:'INT',wis:'SAB',cha:'CAR',
-    atl:'ATL',acr:'ACR',slh:'PRE',stl:'FUR',arc:'ARC',his:'HIS',
-    inv:'INV',nat:'NAT',rel:'REL',anh:'ANI',ins:'ITU',med:'MED',
-    per:'PER',sur:'SOB',dec:'ENG',itm:'ITM',prf:'ATU',prs:'PRS',
+    str: 'FOR', dex: 'DES', con: 'CON', int: 'INT', wis: 'SAB', cha: 'CAR',
+    atl: 'ATL', acr: 'ACR', slh: 'PRE', stl: 'FUR', arc: 'ARC', his: 'HIS',
+    inv: 'INV', nat: 'NAT', rel: 'REL', anh: 'ANI', ins: 'ITU', med: 'MED',
+    per: 'PER', sur: 'SOB', dec: 'ENG', itm: 'ITM', prf: 'ATU', prs: 'PRS',
 };
 
-const POI_TYPE_LABELS = {dis:'Descoberta',sea:'Busca',dan:'Perigo',mys:'Mistério',npc:'Encontro'};
+const POI_TYPE_LABELS = { dis: 'Descoberta', sea: 'Busca', dan: 'Perigo', mys: 'Mistério', npc: 'Encontro' };
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -92,7 +92,19 @@ function saveState() {
             ts: Date.now(),
         };
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
-    } catch(e) { console.warn('[EXPLORE] saveState:', e); }
+
+        // POST to backend API if enabled
+        if (typeof S !== 'undefined' && S.apiBase && S.uid && S.token) {
+            fetch(`${S.apiBase}/api/explore/save?user_id=${S.uid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${S.token}`
+                },
+                body: JSON.stringify(snap)
+            }).catch(e => console.warn('[EXPLORE] API save error:', e));
+        }
+    } catch (e) { console.warn('[EXPLORE] saveState:', e); }
 }
 
 function restoreState() {
@@ -123,7 +135,7 @@ function restoreState() {
         S.inventory = snap.inv || [];
         S.inventoryUsed = snap.iu || [];
         return true;
-    } catch(e) {
+    } catch (e) {
         console.warn('[EXPLORE] restoreState:', e);
         return false;
     }
@@ -206,9 +218,9 @@ function loadMapData(data) {
 
     // Location info
     const biomeNames = {
-        forest:'Floresta',plains:'Campos',swamp:'Pântano',cave:'Caverna',
-        desert:'Deserto',mountain:'Montanha',snow:'Ermo Gelado',
-        volcanic:'Vulcão',graveyard:'Cemitério'
+        forest: 'Floresta', plains: 'Campos', swamp: 'Pântano', cave: 'Caverna',
+        desert: 'Deserto', mountain: 'Montanha', snow: 'Ermo Gelado',
+        volcanic: 'Vulcão', graveyard: 'Cemitério'
     };
     document.getElementById('location-info').textContent = biomeNames[S.biome] || S.biome;
 
@@ -243,7 +255,7 @@ function loadMapData(data) {
 function setupHUD() {
     const c = S.charData;
     if (!c) return;
-    document.getElementById('hud-name').textContent = (c.ci||'⚔️') + ' ' + (c.nm||'Herói');
+    document.getElementById('hud-name').textContent = (c.ci || '⚔️') + ' ' + (c.nm || 'Herói');
     updateHP(c.hp || 10, c.mh || 10);
     updateRewards();
 }
@@ -452,7 +464,7 @@ const FLAVOR_TEXTS = {
 // Check and trigger a flavor event (called every step)
 function checkFlavorEvent() {
     // Don't trigger while any overlay is active
-    const overlayIds = ['dm-overlay','check-overlay','outcome-overlay','combat-overlay','portal-overlay','encounter-overlay','exit-risk-overlay','death-overlay','camp-overlay','camp-result-overlay','lowhp-overlay'];
+    const overlayIds = ['dm-overlay', 'check-overlay', 'outcome-overlay', 'combat-overlay', 'portal-overlay', 'encounter-overlay', 'exit-risk-overlay', 'death-overlay', 'camp-overlay', 'camp-result-overlay', 'lowhp-overlay'];
     for (const id of overlayIds) {
         if (document.getElementById(id)?.classList.contains('active')) return;
     }
@@ -473,12 +485,12 @@ function checkFlavorEvent() {
 function getNeighbors(col, row) {
     const offsets = row % 2 === 0 ? EVEN_OFFSETS : ODD_OFFSETS;
     return offsets
-        .map(([dc,dr]) => [col+dc, row+dr])
-        .filter(([c,r]) => c >= 0 && c < COLS && r >= 0 && r < ROWS);
+        .map(([dc, dr]) => [col + dc, row + dr])
+        .filter(([c, r]) => c >= 0 && c < COLS && r >= 0 && r < ROWS);
 }
 
 function isAdjacent(c1, r1, c2, r2) {
-    return getNeighbors(c1, r1).some(([c,r]) => c === c2 && r === r2);
+    return getNeighbors(c1, r1).some(([c, r]) => c === c2 && r === r2);
 }
 
 function hexDist(c1, r1, c2, r2) {
@@ -488,9 +500,9 @@ function hexDist(c1, r1, c2, r2) {
         const y = -x - z;
         return [x, y, z];
     }
-    const [x1,y1,z1] = toCube(c1,r1);
-    const [x2,y2,z2] = toCube(c2,r2);
-    return Math.max(Math.abs(x1-x2), Math.abs(y1-y2), Math.abs(z1-z2));
+    const [x1, y1, z1] = toCube(c1, r1);
+    const [x2, y2, z2] = toCube(c2, r2);
+    return Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2), Math.abs(z1 - z2));
 }
 
 // ═══════════════════════════════════════════════════════

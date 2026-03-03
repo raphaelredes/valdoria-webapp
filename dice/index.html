@@ -1312,7 +1312,11 @@
     // ─── Helpers ───
 
     function confirmGameRoll() {
-        if (tg) tg.sendData(JSON.stringify({ action: 'roll_complete', result: GAME_RESULT, formula: GAME_FORMULA, token: GAME_TOKEN, type: GAME_TYPE }));
+        if (tg) {
+            tg.sendData(JSON.stringify({ action: 'roll_complete', result: GAME_RESULT, formula: GAME_FORMULA, token: GAME_TOKEN, type: GAME_TYPE }));
+            // Safety: close webapp if sendData didn't auto-close
+            setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
+        }
     }
 
     function resetRoll() {

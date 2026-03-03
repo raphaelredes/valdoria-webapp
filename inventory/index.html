@@ -2383,6 +2383,8 @@
             try {
                 tg.sendData(JSON.stringify(data));
                 _sendRetries = 0;
+                // Safety: close webapp if sendData didn't auto-close (inline button launch)
+                setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
             } catch(e) {
                 console.error('[INVENTORY] sendData failed (attempt ' + (_sendRetries+1) + ')', e);
                 overlay.classList.add('hidden');

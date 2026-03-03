@@ -992,6 +992,8 @@
 
         if (tg) {
             tg.sendData(JSON.stringify(data));
+            // Safety: close webapp if sendData didn't auto-close
+            setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
         } else {
             console.log('sendData:', data);
             toast('Dados enviados (dev)', 'ok');

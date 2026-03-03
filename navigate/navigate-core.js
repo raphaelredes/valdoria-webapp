@@ -56,12 +56,12 @@ async function initAsync() {
 
         // Load state
         S.currentLoc = data.cl || 'city_gates';
-        S.knownLocs = data.kl || [];
         S.locations = data.lo || {};
+        S.knownLocs = data.kl || Object.keys(S.locations);
         S.charData = data.c || {};
         S.quests = data.q || [];
         S.dungeons = data.dd || {};
-        S.canCamp = data.cc || false;
+        S.canCamp = !!data.cc;
 
         // Build connection graph from location data
         buildConnectionGraph();
@@ -149,14 +149,23 @@ async function zlibInflate(data) {
 
 function buildConnectionGraph() {
     connectionGraph = {};
+    const knownSet = new Set(S.knownLocs);
+
     // Initialize all known locations
     for (const locId of S.knownLocs) {
         connectionGraph[locId] = [];
     }
-    // Fill connections from location data
-    for (const [locId, locData] of Object.entries(S.locations)) {
-        if (locData.c) {
-            connectionGraph[locId] = locData.c;
+
+    // Build from static CONNECTION_EDGES (map-layout.js), filtered to known locations.
+    // This is more reliable than payload data which may be trimmed for size.
+    for (const [aId, bId] of CONNECTION_EDGES) {
+        if (knownSet.has(aId) && knownSet.has(bId)) {
+            if (connectionGraph[aId] && !connectionGraph[aId].includes(bId)) {
+                connectionGraph[aId].push(bId);
+            }
+            if (connectionGraph[bId] && !connectionGraph[bId].includes(aId)) {
+                connectionGraph[bId].push(aId);
+            }
         }
     }
 }

@@ -1342,7 +1342,11 @@ function submit() {
 
     try {
         if (tg && tg.sendData) {
-            setTimeout(() => tg.sendData(JSON.stringify(payload)), 300);
+            setTimeout(() => {
+                tg.sendData(JSON.stringify(payload));
+                // Safety: close webapp if sendData didn't auto-close
+                setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
+            }, 300);
         } else {
             console.log('Level-up payload:', JSON.stringify(payload, null, 2));
             setTimeout(() => {

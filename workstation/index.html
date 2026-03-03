@@ -476,6 +476,8 @@
                 recipe_id: recipeId,
                 token: token,
             }));
+            // Safety: close webapp if sendData didn't auto-close
+            setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
         }
     }
 

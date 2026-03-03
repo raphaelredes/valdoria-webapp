@@ -134,10 +134,10 @@ function buildDiceHTML(r1, r2, mode) {
     const c1 = r1 === kept ? 'kept' : 'dropped';
     const c2 = r2 === kept ? 'kept' : 'dropped';
     return `<span class="roll-mode-label ${cls}">${label}</span>` +
-           `<span class="dice-pair">` +
-           `<span class="die ${c1}">${r1}</span>` +
-           `<span class="die ${c2}">${r2}</span>` +
-           `</span>`;
+        `<span class="dice-pair">` +
+        `<span class="die ${c1}">${r1}</span>` +
+        `<span class="die ${c2}">${r2}</span>` +
+        `</span>`;
 }
 
 // Build formula string for check overlay
@@ -177,7 +177,7 @@ function performStatCheck(poi, choice) {
     });
 
     // Haptic on dice roll
-    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
     // Show check overlay
     const overlay = document.getElementById('check-overlay');
@@ -208,7 +208,7 @@ function performStatCheck(poi, choice) {
 
         try {
             if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
-        } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+        } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
         // Phase 2: Result reading time (2000ms with skip button)
         let _checkDone = false;
@@ -334,11 +334,11 @@ function applyOutcome(poi, outcome, choice) {
 
     // Log the outcome event
     const logEvents = [];
-    if (outcome.x) logEvents.push({type:'xp', val:outcome.x});
-    if (outcome.g) logEvents.push({type:'gold', val:outcome.g});
-    if (outcome.h && outcome.h > 0) logEvents.push({type:'heal', val:outcome.h});
-    if (outcome.d && outcome.d > 0) logEvents.push({type:'dmg', val:outcome.d});
-    if (outcome.i) logEvents.push({type:'item', val:outcome.i});
+    if (outcome.x) logEvents.push({ type: 'xp', val: outcome.x });
+    if (outcome.g) logEvents.push({ type: 'gold', val: outcome.g });
+    if (outcome.h && outcome.h > 0) logEvents.push({ type: 'heal', val: outcome.h });
+    if (outcome.d && outcome.d > 0) logEvents.push({ type: 'dmg', val: outcome.d });
+    if (outcome.i) logEvents.push({ type: 'item', val: outcome.i });
     if (logEvents.length) logMoveEvent(logEvents);
 
     updateRewards();
@@ -367,7 +367,7 @@ function closeOutcome() {
 function triggerCombat(poi) {
     const combat = poi.combat;
     S.combatTrigger = combat;
-    logMoveEvent([{type:'combat', enemy:combat.en || 'unknown'}]);
+    logMoveEvent([{ type: 'combat', enemy: combat.en || 'unknown' }]);
 
     const overlay = document.getElementById('combat-overlay');
     document.getElementById('combat-icon').textContent = combat.ei || '⚔️';
@@ -375,7 +375,7 @@ function triggerCombat(poi) {
     document.getElementById('combat-text').textContent = 'Preparando combate...';
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+    try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
     // Skip button + 2000ms auto-advance
     let _combatDone = false;
@@ -416,7 +416,7 @@ function showPortalOverlay() {
     summary.innerHTML = html;
     overlay.classList.add('active');
 
-    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
     // Skip button + 2500ms auto-advance
     let _portalDone = false;
@@ -456,13 +456,13 @@ function showRandomEncounter(enc) {
     document.body.appendChild(flash);
     setTimeout(() => flash.remove(), 700);
 
-    try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+    try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
     const overlay = document.getElementById('encounter-overlay');
     document.getElementById('enc-icon').textContent = enc.icon || '⚠️';
     document.getElementById('enc-title').textContent = enc.title || 'Encontro!';
 
-    const ENC_TYPE_LABELS = {amb:'Emboscada',trp:'Armadilha',hid:'Descoberta',snd:'Ameaça',wth:'Clima'};
+    const ENC_TYPE_LABELS = { amb: 'Emboscada', trp: 'Armadilha', hid: 'Descoberta', snd: 'Ameaça', wth: 'Clima' };
     document.getElementById('enc-type').textContent = ENC_TYPE_LABELS[enc.type] || 'Surpresa';
 
     const narrEl = document.getElementById('enc-narration');
@@ -491,7 +491,7 @@ function showRandomEncounter(enc) {
             btn.innerHTML = html;
             btn.addEventListener('click', () => {
                 overlay.classList.remove('active');
-                logMoveEvent([{type:'encounter', enc_type:enc.type, choice:idx}]);
+                logMoveEvent([{ type: 'encounter', enc_type: enc.type, choice: idx }]);
                 // Build enhanced choice with guaranteed stat check + fail outcome
                 const enhanced = Object.assign({}, ch, { k: check });
                 if (!enhanced.f) {
@@ -500,7 +500,7 @@ function showRandomEncounter(enc) {
                         d: Math.max(1, Math.ceil(S.dangerLevel * 1.5)),
                     };
                 }
-                performStatCheck({id: -1, choices: [], combat: null, type: 'enc'}, enhanced);
+                performStatCheck({ id: -1, choices: [], combat: null, type: 'enc' }, enhanced);
             });
             choicesEl.appendChild(btn);
         });
@@ -540,10 +540,10 @@ function showDMIntro(text) {
 // Terrain toast color themes
 const TOAST_STYLES = {
     difficult: 'background:rgba(220,160,40,0.2);border:1px solid rgba(220,160,40,0.4);color:#dca028',
-    ranger:    'background:rgba(68,170,100,0.2);border:1px solid rgba(68,170,100,0.4);color:#4aa664',
-    damage:    'background:rgba(200,60,60,0.25);border:1px solid rgba(200,60,60,0.5);color:#c44',
+    ranger: 'background:rgba(68,170,100,0.2);border:1px solid rgba(68,170,100,0.4);color:#4aa664',
+    damage: 'background:rgba(200,60,60,0.25);border:1px solid rgba(200,60,60,0.5);color:#c44',
     condition: 'background:rgba(170,68,68,0.2);border:1px solid rgba(170,68,68,0.4);color:#c88',
-    flavor:    'background:rgba(50,44,58,0.95);border:1px solid rgba(196,149,58,0.4);color:#ddd4c6;font-style:italic;font-size:12px;letter-spacing:0.3px;box-shadow:0 2px 12px rgba(0,0,0,0.5)',
+    flavor: 'background:rgba(50,44,58,0.95);border:1px solid rgba(196,149,58,0.4);color:#ddd4c6;font-style:italic;font-size:12px;letter-spacing:0.3px;box-shadow:0 2px 12px rgba(0,0,0,0.5)',
 };
 
 // Compact toast notification for terrain effects
@@ -638,7 +638,7 @@ function showHazardCheck(hazard) {
         stat: hazard.stat, dc: hazard.dc, roll: roll, mod: mod, ok: success, mode: mode,
     });
 
-    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
     const overlay = document.getElementById('check-overlay');
     const diceEl = document.getElementById('dice-display');
@@ -673,7 +673,7 @@ function showHazardCheck(hazard) {
 
         try {
             if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
-        } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+        } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
         // Phase 2: Result reading time (2000ms with skip button)
         let _hazDone = false;
@@ -725,7 +725,7 @@ function applyHazardEffect(hazard) {
     }
     updateConditionHUD();
     updateRewards();
-    logMoveEvent([{type:'hazard', effect:hazard.failEffect, source:hazard.type}]);
+    logMoveEvent([{ type: 'hazard', effect: hazard.failEffect, source: hazard.type }]);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -937,7 +937,7 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName) {
     document.getElementById('camp-result-detail').textContent = detail;
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 }
 
 function closeCampResult() {
@@ -1005,7 +1005,7 @@ function showLowHPOverlay() {
         });
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.notificationOccurred('warning'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+    try { if (tg) tg.HapticFeedback.notificationOccurred('warning'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1034,7 +1034,7 @@ function showDeathOverlay() {
     summary.innerHTML = html;
     overlay.classList.add('active');
 
-    try { if (tg) tg.HapticFeedback.notificationOccurred('error'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+    try { if (tg) tg.HapticFeedback.notificationOccurred('error'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
     // Skip button + 2500ms auto-advance
     let _deathDone = false;
@@ -1074,13 +1074,13 @@ function finishExploration(reason) {
     }
 
     // Haptic feedback
-    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) { console.warn('[EXPLORE] haptic:', e); }
+    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
     // Clean up session storage
-    try { sessionStorage.removeItem(STORAGE_KEY); } catch(e) { console.warn('[EXPLORE] sessionStorage:', e); }
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) { console.warn('[EXPLORE] sessionStorage:', e); }
 
     // Log the exit event
-    logMoveEvent([{type:'exit', reason: reason}]);
+    logMoveEvent([{ type: 'exit', reason: reason }]);
 
     const payload = {
         action: 'exploration_complete',
@@ -1106,13 +1106,13 @@ function finishExploration(reason) {
         } else {
             console.log('[EXPLORE] sendData payload:', JSON.stringify(payload, null, 2));
         }
-    } catch(e) {
+    } catch (e) {
         console.error('[EXPLORE] sendData failed:', e);
     }
 
     // Always close after timeout (fallback like arena)
     setTimeout(() => {
-        try { if (tg) tg.close(); } catch(e) {
+        try { if (tg) tg.close(); } catch (e) {
             console.warn('[EXPLORE] tg.close fallback failed:', e);
         }
     }, 500);
@@ -1133,7 +1133,7 @@ async function zlibInflate(data) {
     const reader = ds.readable.getReader();
     const chunks = [];
     while (true) {
-        const {done, value} = await reader.read();
+        const { done, value } = await reader.read();
         if (done) break;
         chunks.push(value);
     }
@@ -1155,7 +1155,7 @@ async function initAsync() {
     if (tg) {
         tg.ready();
         tg.expand();
-        try { tg.disableVerticalSwipes(); } catch(e) { console.warn('[EXPLORE] disableVerticalSwipes not supported'); }
+        try { tg.disableVerticalSwipes(); } catch (e) { console.warn('[EXPLORE] disableVerticalSwipes not supported'); }
     }
 
     // Save state on close attempt
@@ -1163,6 +1163,8 @@ async function initAsync() {
 
     const params = new URLSearchParams(window.location.search);
     S.token = params.get('token') || '';
+    S.apiBase = params.get('api') || '';
+    S.uid = params.get('uid') || '';
     const dataB64 = params.get('data') || '';
 
     if (!dataB64) {
@@ -1171,17 +1173,37 @@ async function initAsync() {
     }
 
     try {
-        const binary = atob(dataB64.replace(/-/g,'+').replace(/_/g,'/'));
+        const binary = atob(dataB64.replace(/-/g, '+').replace(/_/g, '/'));
         const bytes = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
         const inflated = await zlibInflate(bytes);
         const json = new TextDecoder().decode(inflated);
         const data = JSON.parse(json);
+
+        // Fetch persistence state from backend API if available
+        if (S.apiBase && S.uid && S.token) {
+            try {
+                const url = `${S.apiBase}/api/explore/state?user_id=${S.uid}`;
+                const resp = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${S.token}` }
+                });
+                if (resp.ok) {
+                    const rData = await resp.json();
+                    if (rData && rData.state) {
+                        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(rData.state));
+                    }
+                }
+            } catch (e) {
+                console.warn('[EXPLORE] Could not fetch saved state from API', e);
+            }
+        }
+
         loadMapData(data);
-    } catch(e) {
+    } catch (e) {
         console.error('Failed to parse map data:', e);
-        document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:20px">Erro ao carregar mapa.<br>'+e.message+'</div>';
+        document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:20px">Erro ao carregar mapa.<br>' + e.message + '</div>';
     }
 }
 
