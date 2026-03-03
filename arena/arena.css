@@ -66,11 +66,43 @@ body {
 .entity.enemy { border-left: 3px solid var(--v-crimson); }
 .entity.player { border-left: 3px solid var(--v-gold); cursor: default; }
 .entity.ally { border-left: 3px solid var(--v-silver); }
+/* Feature 5: Enhanced active turn glow */
+@keyframes turnGlowPlayer {
+    0%, 100% { box-shadow: 0 0 8px rgba(196,149,58,0.15); }
+    50% { box-shadow: 0 0 18px rgba(196,149,58,0.55), 0 0 4px rgba(196,149,58,0.2) inset; }
+}
+@keyframes turnGlowEnemy {
+    0%, 100% { box-shadow: 0 0 8px rgba(229,57,53,0.15); }
+    50% { box-shadow: 0 0 18px rgba(229,57,53,0.50), 0 0 4px rgba(229,57,53,0.15) inset; }
+}
+@keyframes turnGlowAlly {
+    0%, 100% { box-shadow: 0 0 8px rgba(176,184,192,0.12); }
+    50% { box-shadow: 0 0 14px rgba(176,184,192,0.40); }
+}
 .entity.active-turn {
     border-color: var(--v-gold);
-    box-shadow: 0 0 8px rgba(196,149,58,0.15);
+    animation: turnGlowPlayer 1.8s ease-in-out infinite;
 }
-.entity.active-turn.enemy { border-left-color: var(--v-gold); }
+.entity.active-turn.enemy {
+    border-color: var(--v-crimson);
+    border-left-color: var(--v-crimson);
+    animation: turnGlowEnemy 1.8s ease-in-out infinite;
+}
+.entity.active-turn.ally {
+    border-color: var(--v-silver);
+    animation: turnGlowAlly 1.8s ease-in-out infinite;
+}
+.entity.active-turn .entity-header::before {
+    content: '⚔';
+    font-size: 9px;
+    color: var(--v-gold);
+    margin-right: 2px;
+    flex-shrink: 0;
+}
+.entity.active-turn.enemy .entity-header::before {
+    content: '🎯';
+    color: var(--v-crimson);
+}
 
 /* Compact header row (always visible) */
 .entity-header {
@@ -758,6 +790,74 @@ body {
     pointer-events: none;
 }
 .poll-update-indicator.visible { opacity: 1; transform: translateY(0); }
+
+/* ─── FEATURE 2: PLAYER SHAKE ON DAMAGE ─── */
+@keyframes playerShake {
+    0%   { transform: translateX(0); }
+    15%  { transform: translateX(-6px); }
+    30%  { transform: translateX(5px); }
+    45%  { transform: translateX(-4px); }
+    60%  { transform: translateX(3px); }
+    80%  { transform: translateX(-2px); }
+    100% { transform: translateX(0); }
+}
+.entity.player.dmg-shake { animation: playerShake 0.45s ease-out; }
+
+/* ─── FEATURE 3: HIT PARTICLES ─── */
+.hit-particle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 500;
+    opacity: 1;
+    animation: particleFly var(--p-dur, 0.6s) ease-out forwards;
+}
+@keyframes particleFly {
+    0%   { transform: translate(0, 0) scale(1);   opacity: 1; }
+    100% { transform: translate(var(--p-tx), var(--p-ty)) scale(0); opacity: 0; }
+}
+
+/* ─── FEATURE 6: TARGET PREVIEW ─── */
+.target-preview {
+    font-size: 10px;
+    color: var(--v-gold-dim);
+    margin-top: 2px;
+}
+.target-preview .prev-hit  { color: var(--v-success, #4caf50); }
+.target-preview .prev-miss { color: var(--v-danger, #e53935); }
+
+/* ─── FEATURE 7: DM NARRATION ─── */
+.dice-narration {
+    font-size: 11px;
+    font-style: italic;
+    text-align: center;
+    color: var(--v-text-dim);
+    margin-top: 3px;
+    min-height: 14px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    letter-spacing: 0.3px;
+    padding: 0 8px;
+}
+.dice-narration.visible { opacity: 1; }
+.dice-narration.crit    { color: #ff9800; font-style: normal; font-weight: 600; }
+.dice-narration.nat1    { color: var(--v-danger, #e53935); }
+
+/* ─── FEATURE 9: POSITION BADGES ─── */
+.pos-badge {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 10px;
+    background: rgba(43,40,48,0.8);
+    border: 1px solid var(--v-border);
+    color: var(--v-text-dim);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.pos-badge.near  { border-color: rgba(229,57,53,0.4); color: #e08080; }
+.pos-badge.far   { border-color: rgba(176,184,192,0.3); color: var(--v-silver-dim, #8a9199); }
 
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {

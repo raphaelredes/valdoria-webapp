@@ -17,6 +17,13 @@ const isApiMode = !!apiBase;
 let currentState = null;
 let _lastAnimatedRoll = null; // Dedup: prevents replaying same dice animation on re-render
 
+// ─── IMMERSION FEATURES STATE ───
+const _prevHpState = new Map(); // Feature 1: HP bar animation tracking
+let _prevPlayerHp = 0;          // Feature 2: detect player damage for shake
+let _audioCtx = null;           // Feature 8: Web Audio (lazy init)
+let _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
+let _currentPositions = null;   // Feature 9: combat positions
+
 // ─── TIMER / POLLING / HEARTBEAT STATE ───
 let _timerInterval = null;
 let _timerRemaining = 0;
@@ -230,6 +237,7 @@ function renderArena(s) {
 
     // Determine active turn entity
     const activeTurn = s.to && s.to[0] ? s.to[0] : null;
+    _currentPositions = s.positions || null; // Feature 9
 
     let html = '';
 
@@ -260,7 +268,8 @@ function renderArena(s) {
         <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>
         <div class="dice-box-compact"><div class="dice-emoji" id="dice2">🎲</div><div><div class="dice-result" id="diceResult2"></div><div class="dice-label" id="diceLabel2">dano</div></div></div>
     </div>
-    <div class="dice-formula" id="diceFormula"></div>`;
+    <div class="dice-formula" id="diceFormula"></div>
+    <div class="dice-narration" id="diceNarration"></div>`;
     if (s.feed && s.feed.length > 0) {
         const total = s.feed.length;
         const recentFeed = s.feed.slice(-3);
@@ -339,6 +348,10 @@ function renderArena(s) {
     // Bind expand/collapse on entity cards
     bindExpandCollapse();
     bindFeedToggle();
+
+    // Immersion features: HP bar animation + player shake detection
+    _animateHpBars(s);
+    _checkPlayerDamage(s);
 
     // Auto-expand active turn entity (if not player)
     if (activeTurn && activeTurn.t !== 'p') {
@@ -574,6 +587,18 @@ function renderEntity(e, type, idx, isActiveTurn) {
     const activeClass = isActiveTurn ? ' active-turn' : '';
     const dataAttr = type === 'enemy' ? ` data-enemy-idx="${idx}"` : '';
 
+    // Feature 9: Position badge
+    let posBadge = '';
+    if (type === 'enemy' && _currentPositions) {
+        const pPos = _currentPositions['player'];
+        const ePos = _currentPositions[`enemy_${idx}`];
+        if (pPos && ePos) {
+            const dx = (pPos.x||0) - (ePos.x||0), dy = (pPos.y||0) - (ePos.y||0);
+            const near = Math.sqrt(dx*dx + dy*dy) <= 1.5;
+            posBadge = `<span class="pos-badge ${near?'near':'far'}">${near?'⚔ Perto':'🏹 Longe'}</span>`;
+        }
+    }
+
     return `<div class="entity ${type}${activeClass}"${dataAttr}>
         <div class="entity-header">
             <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
@@ -581,6 +606,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
             <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct*100}%"></div></div>
             <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
             ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
+            ${posBadge}
             <span class="expand-arrow">▸</span>
         </div>
         <div class="entity-details">${detailsHtml}</div>
@@ -776,6 +802,12 @@ function bindFeedToggle() {
 function bindActions(state) {
     document.querySelectorAll('.action-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+            // Feature 4+8: Haptic + audio unlock on user gesture
+            hapticSelect();
+            if (!_audioUnlocked) {
+                _audioUnlocked = true;
+                if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume().catch(() => {});
+            }
             const action = btn.dataset.action;
             if (btn.classList.contains('disabled')) return;
 
@@ -961,8 +993,25 @@ function showTargetPicker(enemies, actionType, skillId) {
     let html = '<div class="skill-panel-title">Escolher Alvo</div>';
     enemies.forEach((e, i) => {
         const pct = e.mhp > 0 ? Math.round((e.hp/e.mhp)*100) : 0;
+        // Feature 6: Damage preview
+        let previewHtml = '';
+        const acts = currentState && currentState.acts;
+        if (acts) {
+            let chText = '', dmgText = '';
+            if (actionType === 'attack') {
+                chText = `${acts.hit || '?'}%`;
+                dmgText = currentState.p ? currentState.p.dmg : '';
+            } else if ((actionType === 'skill' || actionType === 'bonus_use') && skillId && acts.skills) {
+                const sk = acts.skills.find(s => s.id === skillId);
+                if (sk) { chText = `${sk.ch}%`; dmgText = sk.eff || ''; }
+            }
+            if (chText) {
+                const good = parseInt(chText) >= 60;
+                previewHtml = `<div class="target-preview"><span class="${good ? 'prev-hit' : 'prev-miss'}">${chText} chance</span>${dmgText ? ` · ${escHtml(dmgText)}` : ''}</div>`;
+            }
+        }
         html += `<div class="target-item" data-target="${i}">
-            <div><span>${e.ico||'👹'}</span> <b>${escHtml(e.n)}</b></div>
+            <div><span>${e.ico||'👹'}</span> <b>${escHtml(e.n)}</b>${previewHtml}</div>
             <div class="skill-meta">${e.hp}/${e.mhp} HP (${pct}%)</div>
         </div>`;
     });
@@ -1056,6 +1105,7 @@ function initDice(lr) {
     r1.className = 'dice-result cycling';
     l1.textContent = 'rolando...';
     l1.className = 'dice-label rolling-label';
+    haptic('light'); sfxDiceRoll(); // Feature 4+8
     const d20Cycle = setInterval(() => {
         r1.textContent = Math.floor(Math.random() * 19) + 2;
     }, 80);
@@ -1081,19 +1131,26 @@ function initDice(lr) {
                 if (app) app.classList.remove('screen-shake');
                 d1.classList.remove('crit-glow');
             }, 500);
+            haptic('heavy'); hapticNotify('success'); sfxCrit(); // Feature 4+8
+            showNarration(_pick(_NARR_CRIT), 'crit'); // Feature 7
         } else if (lr.r === 1) {
             d1.textContent = '💀';
             r1.classList.add('miss');
             l1.textContent = 'FALHA CRÍTICA!';
             l1.className = 'dice-label miss';
+            hapticNotify('error'); // Feature 4
+            showNarration(_pick(_NARR_NAT1), 'nat1'); // Feature 7
         } else if (lr.miss) {
             r1.classList.add('miss');
             l1.textContent = 'errou';
             l1.className = 'dice-label miss';
+            haptic('light'); sfxMiss(); // Feature 4+8
+            showNarration(_pick(_NARR_MISS), 'miss'); // Feature 7
         } else {
             r1.classList.add('hit');
             l1.textContent = lr.t === 'skill' ? 'habilidade' : 'acerto';
             l1.className = 'dice-label hit';
+            haptic('medium'); sfxHit(); // Feature 4+8
         }
 
         // Formula: "25 vs CA 16"
@@ -1140,10 +1197,19 @@ function initDice(lr) {
             l2.className = 'dice-label hit';
 
             // Flash enemy card on damage
-            const enemies = document.querySelectorAll('.entity.t-enemy');
+            const enemies = document.querySelectorAll('.entity.enemy');
             if (enemies.length > 0) {
                 enemies[0].classList.add('dmg-flash');
                 setTimeout(() => enemies[0].classList.remove('dmg-flash'), 400);
+            }
+
+            // Feature 3: Particles on damage impact
+            spawnParticles(lr.crit, lr.dt || 'slashing');
+            haptic('medium'); // Feature 4
+
+            // Feature 7: Kill narration
+            if (lr.kill) {
+                showNarration(_pick(_NARR_KILL), 'crit');
             }
         }, 700);
     }, 1200);
@@ -1206,4 +1272,215 @@ function showError(msg, err = null) {
 function escHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════
+// ─── IMMERSION FEATURES ───
+// ═══════════════════════════════════════════════════
+
+// ─── FEATURE 4: HAPTIC FEEDBACK ───
+function haptic(type) { try { tg?.HapticFeedback?.impactOccurred(type || 'light'); } catch(e) {} }
+function hapticNotify(type) { try { tg?.HapticFeedback?.notificationOccurred(type || 'success'); } catch(e) {} }
+function hapticSelect() { try { tg?.HapticFeedback?.selectionChanged(); } catch(e) {} }
+
+// ─── FEATURE 8: PROCEDURAL SFX (Web Audio API) ───
+function _ensureAudio() {
+    if (_audioCtx) return _audioCtx;
+    try {
+        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        return _audioCtx;
+    } catch(e) { console.warn('[ARENA] AudioContext unavailable', e); return null; }
+}
+
+function _sfxNoise(dur, vol) {
+    const ctx = _ensureAudio();
+    if (!ctx || !_audioUnlocked) return;
+    try {
+        const bufSize = ctx.sampleRate * dur;
+        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(vol, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+        src.connect(gain); gain.connect(ctx.destination);
+        src.start(); src.stop(ctx.currentTime + dur);
+    } catch(e) { console.warn('[ARENA] sfxNoise', e); }
+}
+
+function _sfxTone(freq, dur, vol, type) {
+    const ctx = _ensureAudio();
+    if (!ctx || !_audioUnlocked) return;
+    try {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, ctx.currentTime + dur);
+        gain.gain.setValueAtTime(vol, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + dur);
+    } catch(e) { console.warn('[ARENA] sfxTone', e); }
+}
+
+function sfxDiceRoll()  { _sfxNoise(0.15, 0.08); }
+function sfxHit()       { _sfxTone(120, 0.25, 0.12, 'sawtooth'); }
+function sfxCrit()      { _sfxTone(220, 0.4, 0.18, 'sawtooth'); setTimeout(() => _sfxTone(330, 0.3, 0.12, 'sine'), 80); }
+function sfxMiss()      { _sfxTone(300, 0.2, 0.06, 'sine'); }
+function sfxPlayerHit() { _sfxTone(80, 0.3, 0.15, 'sawtooth'); }
+
+// ─── FEATURE 3: PARTICLE EFFECTS ───
+const _PARTICLE_COLORS = {
+    slashing:    ['#e0e0e0', '#d4c060'],
+    piercing:    ['#b0c8e0', '#d4c060'],
+    bludgeoning: ['#c0b080', '#e0d080'],
+    fire:        ['#ff6020', '#ff9020', '#ffd040'],
+    cold:        ['#80c0ff', '#c0e8ff'],
+    lightning:   ['#e0e060', '#ffffff'],
+    necrotic:    ['#9040c0', '#604080'],
+    radiant:     ['#ffe080', '#ffffff'],
+    psychic:     ['#e080ff', '#c060d0'],
+    thunder:     ['#a0a0e0', '#ffffff'],
+    poison:      ['#60c040', '#80e040'],
+    acid:        ['#60d040', '#c0ff40'],
+    force:       ['#60c0ff', '#a0e0ff'],
+    magic:       ['#c060ff', '#60c0ff'],
+};
+
+function spawnParticles(isCrit, damageType) {
+    const colors = _PARTICLE_COLORS[damageType] || _PARTICLE_COLORS['slashing'];
+    const count = isCrit ? 12 : 7;
+    const anchor = document.getElementById('dice2');
+    if (!anchor) return;
+    const rect = anchor.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'hit-particle';
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.8;
+        const dist = 30 + Math.random() * (isCrit ? 60 : 40);
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist - 20;
+        const dur = 0.4 + Math.random() * 0.3;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = isCrit ? 8 : 5;
+        p.style.cssText = `left:${cx}px;top:${cy}px;background:${color};--p-tx:${tx}px;--p-ty:${ty}px;--p-dur:${dur}s;width:${size}px;height:${size}px;`;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), dur * 1000 + 100);
+    }
+}
+
+// ─── FEATURE 7: DM NARRATION ───
+const _NARR_CRIT = [
+    'A lâmina encontra uma brecha mortal!',
+    'Golpe devastador! O inimigo recua.',
+    'Perfeito! Um acerto certeiro e brutal.',
+    'A armadura não resiste ao impacto!',
+    'Um golpe magistral! Impressionante.',
+    'Com precisão letal, o golpe atinge em cheio!',
+    'Nenhum escudo poderia parar esse golpe.',
+    'O inimigo não tinha como evitar.',
+    'Atingido com força avassaladora!',
+    'Vulnerabilidade exposta — golpe crítico!',
+];
+const _NARR_NAT1 = [
+    'O golpe passa vergonhosamente longe!',
+    'Tropeça e perde o equilíbrio por um instante.',
+    'A arma escorrega da mão por um segundo.',
+    'Uma distração fatal arruína o ataque.',
+    'O inimigo se esquiva com facilidade.',
+    'Um erro de julgamento custoso.',
+    'O golpe raspa o ar sem causar dano.',
+    'Uma falha imperdoável no momento crucial.',
+    'O peso da arma desequilibra o atacante.',
+    'Nem perto — o inimigo mal precisou se mover.',
+];
+const _NARR_MISS = [
+    'O inimigo desvia no último instante.',
+    'O ataque é bloqueado pela armadura.',
+    'Rápido demais — o golpe não conecta.',
+    'A defesa do inimigo resiste.',
+    'Sem efeito — o inimigo esquiva com destreza.',
+];
+const _NARR_KILL = [
+    'O inimigo tomba derrotado!',
+    'Sem mais vida — o adversário cai.',
+    'O golpe final sela o combate.',
+    'Derrota inevitável — o inimigo sucumbe.',
+    'Vitória! O inimigo não se levanta mais.',
+];
+
+function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function showNarration(text, cssClass) {
+    const el = document.getElementById('diceNarration');
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'dice-narration ' + (cssClass || '');
+    void el.offsetWidth;
+    el.classList.add('visible');
+}
+
+// ─── FEATURE 1: HP BAR ANIMATED TRANSITION ───
+function _animateHpBars(state) {
+    const current = new Map();
+    if (state.p) current.set('player', { hp: state.p.hp, mhp: state.p.mhp });
+    (state.e || []).forEach((e, i) => current.set(`e${i}_${e.n}`, { hp: e.hp, mhp: e.mhp }));
+    (state.a || []).forEach((a, i) => current.set(`a${i}_${a.n}`, { hp: a.hp, mhp: a.mhp }));
+
+    current.forEach((cur, key) => {
+        const prev = _prevHpState.get(key);
+        if (!prev || prev.hp === cur.hp) return;
+
+        const oldPct = prev.mhp > 0 ? (prev.hp / prev.mhp) * 100 : 0;
+        const newPct = cur.mhp > 0 ? (cur.hp / cur.mhp) * 100 : 0;
+
+        let fillEl = null;
+        if (key === 'player') {
+            fillEl = document.querySelector('.zone-player .bar-fill');
+        } else if (key.startsWith('e')) {
+            const idx = parseInt(key.charAt(1));
+            const els = document.querySelectorAll('.zone-enemies .hp-mini-fill');
+            if (els[idx]) fillEl = els[idx];
+        } else if (key.startsWith('a')) {
+            const idx = parseInt(key.charAt(1));
+            const els = document.querySelectorAll('.zone-allies .hp-mini-fill');
+            if (els[idx]) fillEl = els[idx];
+        }
+        if (!fillEl) return;
+
+        fillEl.style.transition = 'none';
+        fillEl.style.width = oldPct + '%';
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                fillEl.style.transition = 'width 0.65s ease-out';
+                fillEl.style.width = newPct + '%';
+            });
+        });
+    });
+
+    current.forEach((v, k) => _prevHpState.set(k, v));
+}
+
+// ─── FEATURE 2: PLAYER SHAKE ON DAMAGE ───
+function _checkPlayerDamage(state) {
+    if (!state.p) return;
+    const curHp = state.p.hp;
+    if (_prevPlayerHp > 0 && curHp < _prevPlayerHp) {
+        const playerEl = document.querySelector('.entity.player');
+        if (playerEl) {
+            playerEl.classList.remove('dmg-shake');
+            void playerEl.offsetWidth;
+            playerEl.classList.add('dmg-shake');
+            setTimeout(() => playerEl.classList.remove('dmg-shake'), 500);
+            haptic('heavy');
+            sfxPlayerHit();
+        }
+    }
+    _prevPlayerHp = curHp;
 }
