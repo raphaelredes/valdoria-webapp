@@ -16,22 +16,43 @@ function handleLocationTap(locId) {
     const panel = document.getElementById('info-panel');
     const isCurrent = locId === S.currentLoc;
     const connected = isConnected(S.currentLoc, locId);
+    const discoveredSet = new Set(S.discoveredLocs || []);
+    const isExplored = discoveredSet.has(locId);
+    const isKnownOnly = !isExplored; // Known but never visited
 
     // Header
     document.getElementById('info-icon').textContent = locData.i || '📍';
     document.getElementById('info-title').textContent = locData.n || 'Desconhecido';
 
-    // Danger badge (mysterious — no numeric levels)
+    // Danger badge
     const dangerEl = document.getElementById('info-danger');
     const danger = locData.d || 0;
-    const dangerSymbols = getDangerLabel(danger);
-    if (dangerSymbols) {
-        dangerEl.textContent = dangerSymbols;
-        dangerEl.style.borderColor = getDangerColor(danger);
-        dangerEl.style.color = getDangerColor(danger);
-        dangerEl.style.display = '';
+    if (isExplored) {
+        // Explored: show danger symbols
+        const dangerSymbols = getDangerLabel(danger);
+        if (dangerSymbols) {
+            dangerEl.textContent = dangerSymbols;
+            dangerEl.style.borderColor = getDangerColor(danger);
+            dangerEl.style.color = getDangerColor(danger);
+            dangerEl.style.display = '';
+        } else {
+            dangerEl.style.display = 'none';
+        }
     } else {
-        dangerEl.style.display = 'none';
+        // Known but unvisited: mysterious danger hint
+        if (danger >= 5) {
+            dangerEl.textContent = '💀 ???';
+            dangerEl.style.borderColor = '#8a4a3a';
+            dangerEl.style.color = '#8a4a3a';
+            dangerEl.style.display = '';
+        } else if (danger >= 3) {
+            dangerEl.textContent = '⚠️ ???';
+            dangerEl.style.borderColor = '#8a6a3a';
+            dangerEl.style.color = '#8a6a3a';
+            dangerEl.style.display = '';
+        } else {
+            dangerEl.style.display = 'none';
+        }
     }
 
     // Biome
@@ -40,51 +61,67 @@ function handleLocationTap(locId) {
     document.getElementById('info-biome').textContent =
         `${locData.s ? '🏘️ Assentamento' : '🌍 Região'} — ${biomeLabel}`;
 
-    // Description
-    document.getElementById('info-desc').textContent = locData.ds || '';
+    // Description — mysterious for unvisited locations
+    if (isExplored) {
+        document.getElementById('info-desc').textContent = locData.ds || '';
+    } else {
+        document.getElementById('info-desc').textContent =
+            'Você ouviu relatos sobre este lugar, mas nunca esteve lá...';
+    }
 
-    // Tags (distance, connections, danger hint)
+    // Tags (weighted distance, connections, danger hint)
     const tagsEl = document.getElementById('info-stats');
-    const dist = bfsDistance(S.currentLoc, locId, connectionGraph);
+    const wDist = weightedDistance(S.currentLoc, locId, connectionGraph);
     const connCount = (connectionGraph[locId] || []).length;
 
     let tagsHtml = '';
-    if (!isCurrent && dist >= 0) {
-        tagsHtml += `<span class="info-tag">📏 ${dist} etapa${dist !== 1 ? 's' : ''}</span>`;
+    if (!isCurrent && wDist >= 0) {
+        tagsHtml += `<span class="info-tag">🕐 ${wDist} turno${wDist !== 1 ? 's' : ''}</span>`;
     }
-    tagsHtml += `<span class="info-tag">🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}</span>`;
+    if (isExplored) {
+        tagsHtml += `<span class="info-tag">🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}</span>`;
+    }
 
-    // Mysterious danger hint
-    const playerLv = S.charData?.lv || 1;
-    if (danger > playerLv + 2) {
-        tagsHtml += `<span class="info-tag info-tag-danger">💀 Um arrepio percorre sua espinha...</span>`;
-    } else if (danger > playerLv) {
-        tagsHtml += `<span class="info-tag info-tag-warn">⚠️ Algo inquietante paira no ar</span>`;
+    // Mysterious danger hints (only for explored locations or extreme danger)
+    if (isExplored) {
+        const playerLv = S.charData?.lv || 1;
+        if (danger > playerLv + 2) {
+            tagsHtml += `<span class="info-tag info-tag-danger">💀 Um arrepio percorre sua espinha...</span>`;
+        } else if (danger > playerLv) {
+            tagsHtml += `<span class="info-tag info-tag-warn">⚠️ Algo inquietante paira no ar</span>`;
+        }
+    } else {
+        tagsHtml += `<span class="info-tag">🌫️ Inexplorado</span>`;
     }
 
     tagsEl.innerHTML = tagsHtml;
 
-    // Quests at this location
+    // Quests/Dungeons — only show for explored locations
     const questsEl = document.getElementById('info-quests');
-    const locQuests = S.quests.filter(q => q.loc === locId);
-    if (locQuests.length > 0) {
-        questsEl.innerHTML = '📜 <b>Missões:</b> ' +
-            locQuests.map(q => `<span>${q.t}</span>`).join(', ');
-        questsEl.style.display = '';
+    const dungeonsEl = document.getElementById('info-dungeons');
+
+    if (isExplored) {
+        const locQuests = S.quests.filter(q => q.loc === locId);
+        if (locQuests.length > 0) {
+            questsEl.innerHTML = '📜 <b>Missões:</b> ' +
+                locQuests.map(q => `<span>${q.t}</span>`).join(', ');
+            questsEl.style.display = '';
+        } else {
+            questsEl.style.display = 'none';
+        }
+
+        const locDungeons = S.dungeons[locId] || [];
+        if (locDungeons.length > 0) {
+            dungeonsEl.innerHTML = '🏰 <b>Masmorras:</b> ' +
+                locDungeons.map(d =>
+                    `<span>${d.done ? '✅' : '⭐'} ${d.n}</span>`
+                ).join(', ');
+            dungeonsEl.style.display = '';
+        } else {
+            dungeonsEl.style.display = 'none';
+        }
     } else {
         questsEl.style.display = 'none';
-    }
-
-    // Dungeons at this location
-    const dungeonsEl = document.getElementById('info-dungeons');
-    const locDungeons = S.dungeons[locId] || [];
-    if (locDungeons.length > 0) {
-        dungeonsEl.innerHTML = '🏰 <b>Masmorras:</b> ' +
-            locDungeons.map(d =>
-                `<span>${d.done ? '✅' : '⭐'} ${d.n}</span>`
-            ).join(', ');
-        dungeonsEl.style.display = '';
-    } else {
         dungeonsEl.style.display = 'none';
     }
 
@@ -113,28 +150,30 @@ function handleLocationTap(locId) {
             actionsEl.appendChild(campBtn);
         }
     } else if (connected) {
-        // Risk warning when traveling without a map
+        const edgeDist = getConnectionDistance(S.currentLoc, locId);
         if (S.hasMap === 0) {
-            noteEl.innerHTML = '⚠️ <b>Sem Mapa</b> — chance de se perder na viagem';
+            noteEl.innerHTML = `⚠️ <b>Sem Mapa</b> — ${edgeDist} turno${edgeDist !== 1 ? 's' : ''} de viagem, chance de se perder`;
             noteEl.style.display = 'block';
             noteEl.style.color = '#c4953a';
             const travelBtn = createActionBtn(
-                '🚶 Viajar (Sem Mapa) ⚠️',
+                `🚶 Viajar (${edgeDist}🕐 Sem Mapa) ⚠️`,
                 'info-btn-travel info-btn-risky',
                 () => finishNavigation('travel', locId)
             );
             actionsEl.appendChild(travelBtn);
         } else {
-            noteEl.style.display = 'none';
+            noteEl.innerHTML = `🕐 <b>${edgeDist} turno${edgeDist !== 1 ? 's' : ''}</b> de viagem`;
+            noteEl.style.display = 'block';
+            noteEl.style.color = '';
             const travelBtn = createActionBtn(
-                '🚶 Viajar para ' + (locData.n || 'lá'),
+                `🚶 Viajar para ${locData.n || 'lá'} (${edgeDist}🕐)`,
                 'info-btn-travel',
                 () => finishNavigation('travel', locId)
             );
             actionsEl.appendChild(travelBtn);
         }
-    } else if (dist > 0) {
-        noteEl.textContent = `⛔ Não há caminho direto — ${dist} etapa${dist !== 1 ? 's' : ''} de distância`;
+    } else if (wDist > 0) {
+        noteEl.textContent = `⛔ Não há caminho direto — ${wDist} turno${wDist !== 1 ? 's' : ''} de distância`;
         noteEl.style.display = 'block';
         noteEl.style.color = '';
     } else {

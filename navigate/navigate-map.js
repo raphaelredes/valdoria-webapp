@@ -6,10 +6,15 @@
 const NS = 'http://www.w3.org/2000/svg';
 
 // ── Fog state for each location ──
-// 'visible' | 'dim' | 'hidden'
+// 'explored' | 'known' | 'frontier' | 'hidden'
+// explored = visited (known + discovered) → full render
+// known = knows it exists but never visited → fog + icon
+// frontier = adjacent to known but not in known_locations → ❓ + heavy fog
+// hidden = completely unknown → invisible
 function computeFogState() {
     const fog = {};
     const knownSet = new Set(S.knownLocs);
+    const discoveredSet = new Set(S.discoveredLocs || []);
 
     // Build adjacency from LOCATION_COORDS + CONNECTION_EDGES
     const adj = {};
@@ -23,12 +28,11 @@ function computeFogState() {
 
     for (const locId of Object.keys(LOCATION_COORDS)) {
         if (knownSet.has(locId)) {
-            fog[locId] = 'visible';
+            fog[locId] = discoveredSet.has(locId) ? 'explored' : 'known';
         } else {
-            // Check if adjacent to any known location
             const neighbors = adj[locId] || [];
             const hasKnownNeighbor = neighbors.some(n => knownSet.has(n));
-            fog[locId] = hasKnownNeighbor ? 'dim' : 'hidden';
+            fog[locId] = hasKnownNeighbor ? 'frontier' : 'hidden';
         }
     }
     return fog;
@@ -47,12 +51,23 @@ function renderMap() {
 
     const fogState = computeFogState();
 
-    // Layer 1: Background gradient
+    // Layer 1: Background gradient + SVG filters
     const defs = createSVG('defs');
     const grad = createSVG('radialGradient', { id: 'bg-grad', cx: '50%', cy: '50%', r: '60%' });
     grad.appendChild(createSVG('stop', { offset: '0%', 'stop-color': '#2a2630' }));
     grad.appendChild(createSVG('stop', { offset: '100%', 'stop-color': '#1a181e' }));
     defs.appendChild(grad);
+
+    // Fog filter — light (known locations: have map info but never visited)
+    const fogLight = createSVG('filter', { id: 'fog-light', x: '-50%', y: '-50%', width: '200%', height: '200%' });
+    fogLight.appendChild(createSVG('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '2' }));
+    defs.appendChild(fogLight);
+
+    // Fog filter — heavy (frontier: adjacent unknown)
+    const fogHeavy = createSVG('filter', { id: 'fog-heavy', x: '-50%', y: '-50%', width: '200%', height: '200%' });
+    fogHeavy.appendChild(createSVG('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '4' }));
+    defs.appendChild(fogHeavy);
+
     svg.appendChild(defs);
 
     const bg = createSVG('rect', {
@@ -79,6 +94,9 @@ function renderMap() {
     // Layer 5: Player marker
     renderPlayerMarker(svg);
 
+    // Layer 6: Fog particles (animated mist over known/frontier locations)
+    renderFogParticles(svg, fogState);
+
     // Setup pan/zoom
     setupPanZoom();
 }
@@ -86,6 +104,7 @@ function renderMap() {
 // ── Terrain hexes ──
 function renderTerrainHexes(group, fogState) {
     const knownSet = new Set(S.knownLocs);
+    const discoveredSet = new Set(S.discoveredLocs || []);
 
     for (const [col, row, biome] of TERRAIN_HEXES) {
         const { x, y } = hexToPixel(col, row);
@@ -93,6 +112,7 @@ function renderTerrainHexes(group, fogState) {
 
         // Determine visibility based on proximity to known locations
         let opacity = 0;
+        let nearExplored = false;
         for (const locId of knownSet) {
             const coords = LOCATION_COORDS[locId];
             if (!coords) continue;
@@ -100,10 +120,14 @@ function renderTerrainHexes(group, fogState) {
             const dist = Math.abs(col - lx) + Math.abs(row - ly);
             if (dist <= 3) {
                 opacity = Math.max(opacity, dist <= 1 ? 0.4 : 0.2);
+                if (discoveredSet.has(locId)) nearExplored = true;
             }
         }
 
         if (opacity <= 0) continue;
+
+        // Reduce opacity for terrain near unvisited-but-known locations
+        if (!nearExplored) opacity *= 0.5;
 
         const hex = createSVG('polygon', {
             points: hexPoints(x, y, HEX_RADIUS * 0.7),
@@ -122,7 +146,7 @@ function renderConnectionPaths(group, fogState) {
         const aFog = fogState[aId];
         const bFog = fogState[bId];
 
-        // Only draw if at least one end is visible
+        // Only draw if at least one end is not hidden
         if (aFog === 'hidden' && bFog === 'hidden') continue;
 
         const aCoords = LOCATION_COORDS[aId];
@@ -132,14 +156,16 @@ function renderConnectionPaths(group, fogState) {
         const aPx = hexToPixel(aCoords.col, aCoords.row);
         const bPx = hexToPixel(bCoords.col, bCoords.row);
 
-        // Is this a path from current location?
-        const isActive = (aId === S.currentLoc || bId === S.currentLoc) &&
-                         aFog === 'visible' && bFog === 'visible';
+        const bothExplored = aFog === 'explored' && bFog === 'explored';
+        const anyExplored = aFog === 'explored' || bFog === 'explored';
+        const isActive = (aId === S.currentLoc || bId === S.currentLoc) && bothExplored;
 
-        let lineOpacity = 0.2;
-        if (aFog === 'visible' && bFog === 'visible') lineOpacity = 0.35;
+        let lineOpacity = 0.1;
+        if (bothExplored) lineOpacity = 0.35;
+        else if (anyExplored) lineOpacity = 0.2;
         if (isActive) lineOpacity = 0.6;
-        if (aFog === 'dim' || bFog === 'dim') lineOpacity = 0.12;
+        if (aFog === 'frontier' || bFog === 'frontier') lineOpacity = 0.08;
+        if (aFog === 'known' || bFog === 'known') lineOpacity = Math.max(lineOpacity, 0.12);
 
         const line = createSVG('line', {
             x1: aPx.x, y1: aPx.y,
@@ -148,6 +174,34 @@ function renderConnectionPaths(group, fogState) {
             'stroke-opacity': lineOpacity,
         });
         group.appendChild(line);
+
+        // Distance badge on path midpoint (only if at least one end is explored)
+        if (anyExplored) {
+            const dist = getConnectionDistance(aId, bId);
+            const mx = (aPx.x + bPx.x) / 2;
+            const my = (aPx.y + bPx.y) / 2;
+
+            const badgeBg = createSVG('circle', {
+                cx: mx, cy: my, r: 9,
+                fill: '#2a2630',
+                'fill-opacity': 0.85,
+                stroke: bothExplored ? '#555' : '#3a3540',
+                'stroke-width': 0.8,
+            });
+            group.appendChild(badgeBg);
+
+            const badgeTxt = createSVG('text', {
+                x: mx, y: my + 3.5,
+                'text-anchor': 'middle',
+                'font-size': '9px',
+                'font-weight': '600',
+                'font-family': '-apple-system, BlinkMacSystemFont, sans-serif',
+                fill: bothExplored ? '#8a8090' : '#5a5560',
+                'pointer-events': 'none',
+            });
+            badgeTxt.textContent = dist;
+            group.appendChild(badgeTxt);
+        }
     }
 }
 
@@ -160,7 +214,9 @@ function renderLocationNodes(group, fogState) {
         const { x, y } = hexToPixel(coords.col, coords.row);
         const locData = S.locations[locId];
         const isCurrent = locId === S.currentLoc;
-        const isKnown = fog === 'visible';
+        const isExplored = fog === 'explored';
+        const isKnown = fog === 'known';
+        const isFrontier = fog === 'frontier';
 
         // Get biome info
         const biome = locData?.b || 'plains';
@@ -178,25 +234,38 @@ function renderLocationNodes(group, fogState) {
 
         // Hex background
         const hexRadius = isCurrent ? HEX_RADIUS + 2 : HEX_RADIUS;
-        let fillColor;
+        let fillColor, strokeColor, strokeWidth;
+
         if (isCurrent) {
             fillColor = '#3a3530';
-        } else if (isKnown) {
+            strokeColor = '#c4953a';
+            strokeWidth = 2.5;
+        } else if (isExplored) {
             fillColor = biomeInfo.hexFill;
+            strokeColor = getDangerColor(danger);
+            strokeWidth = 1.5;
+        } else if (isKnown) {
+            // Known but never visited — muted biome color
+            fillColor = biomeInfo.hexFill;
+            strokeColor = '#3e3845';
+            strokeWidth = 1.2;
         } else {
+            // Frontier — dark, mysterious
             fillColor = '#2a2630';
+            strokeColor = '#3e3845';
+            strokeWidth = 1;
         }
 
         const hexPoly = createSVG('polygon', {
-            points: hexPoints(x, y, hexRadius),
+            points: hexPoints(x, y, isFrontier ? HEX_RADIUS * 0.85 : hexRadius),
             fill: fillColor,
-            stroke: isCurrent ? '#c4953a' : (isKnown ? getDangerColor(danger) : '#3e3845'),
-            'stroke-width': isCurrent ? 2.5 : 1.5,
+            stroke: strokeColor,
+            'stroke-width': strokeWidth,
         });
         nodeGroup.appendChild(hexPoly);
 
-        // Settlement indicator (inner ring)
-        if (isSettlement && isKnown) {
+        // Settlement indicator (inner ring) — only on explored settlements
+        if (isSettlement && isExplored) {
             const ring = createSVG('polygon', {
                 points: hexPoints(x, y, hexRadius - 4),
                 fill: 'none',
@@ -208,8 +277,8 @@ function renderLocationNodes(group, fogState) {
             nodeGroup.appendChild(ring);
         }
 
-        // Icon
-        if (isKnown) {
+        if (isExplored || isCurrent) {
+            // Explored: full icon + name
             const iconEl = createSVG('text', {
                 x: x, y: y - 3,
                 class: 'loc-icon',
@@ -217,7 +286,6 @@ function renderLocationNodes(group, fogState) {
             iconEl.textContent = icon;
             nodeGroup.appendChild(iconEl);
 
-            // Label (name below hex)
             const shortName = name.length > 16 ? name.slice(0, 14) + '..' : name;
             const label = createSVG('text', {
                 x: x, y: y + hexRadius + 12,
@@ -225,8 +293,32 @@ function renderLocationNodes(group, fogState) {
             });
             label.textContent = shortName;
             nodeGroup.appendChild(label);
+        } else if (isKnown) {
+            // Known: icon visible through fog, name dimmed
+            nodeGroup.setAttribute('filter', 'url(#fog-light)');
+            nodeGroup.setAttribute('opacity', '0.7');
+
+            const iconEl = createSVG('text', {
+                x: x, y: y - 3,
+                class: 'loc-icon',
+                'fill-opacity': 0.7,
+            });
+            iconEl.textContent = icon;
+            nodeGroup.appendChild(iconEl);
+
+            const shortName = name.length > 16 ? name.slice(0, 14) + '..' : name;
+            const label = createSVG('text', {
+                x: x, y: y + hexRadius + 12,
+                class: 'loc-label',
+                'fill-opacity': 0.5,
+            });
+            label.textContent = shortName;
+            nodeGroup.appendChild(label);
         } else {
-            // Dim: show question mark
+            // Frontier: question mark through heavy fog
+            nodeGroup.setAttribute('filter', 'url(#fog-heavy)');
+            nodeGroup.setAttribute('opacity', '0.4');
+
             const qmark = createSVG('text', {
                 x: x, y: y,
                 class: 'loc-icon',
@@ -236,8 +328,8 @@ function renderLocationNodes(group, fogState) {
             nodeGroup.appendChild(qmark);
         }
 
-        // Click handler
-        if (isKnown) {
+        // Click handler — explored and known locations are clickable
+        if (isExplored || isKnown) {
             nodeGroup.addEventListener('click', (e) => {
                 e.stopPropagation();
                 handleLocationTap(locId);
@@ -267,6 +359,40 @@ function renderPlayerMarker(svg) {
     marker.appendChild(glow);
 
     svg.appendChild(marker);
+}
+
+// ── Fog particles (animated mist) ──
+function renderFogParticles(svg, fogState) {
+    const fogGroup = createSVG('g', { class: 'fog-particles', 'pointer-events': 'none' });
+
+    for (const [locId, state] of Object.entries(fogState)) {
+        if (state !== 'known' && state !== 'frontier') continue;
+        const coords = LOCATION_COORDS[locId];
+        if (!coords) continue;
+        const { x, y } = hexToPixel(coords.col, coords.row);
+
+        const isKnown = state === 'known';
+        const count = isKnown ? 3 : 4;
+        const baseOpacity = isKnown ? 0.06 : 0.10;
+        const fillColor = isKnown ? '#8a8a9a' : '#5a5a6a';
+
+        for (let i = 0; i < count; i++) {
+            const ox = (Math.random() - 0.5) * HEX_RADIUS * 1.8;
+            const oy = (Math.random() - 0.5) * HEX_RADIUS * 1.2;
+            const cloud = createSVG('ellipse', {
+                cx: x + ox, cy: y + oy,
+                rx: HEX_RADIUS * (0.5 + Math.random() * 0.5),
+                ry: HEX_RADIUS * (0.25 + Math.random() * 0.25),
+                fill: fillColor,
+                'fill-opacity': baseOpacity + Math.random() * 0.05,
+                class: 'fog-cloud',
+            });
+            cloud.style.animationDelay = `${(Math.random() * 6).toFixed(1)}s`;
+            cloud.style.animationDuration = `${(6 + Math.random() * 4).toFixed(1)}s`;
+            fogGroup.appendChild(cloud);
+        }
+    }
+    svg.appendChild(fogGroup);
 }
 
 // ═══════════════════════════════════════════════════════

@@ -95,6 +95,77 @@ const BIOME_INFO = {
     volcanic: { label: 'Vulcânico',       color: '#6a3a1a', hexFill: '#5a2a1a' },
 };
 
+// ── Connection distances (turns to travel) ──
+// Mirrors Python CONNECTION_DISTANCES in map_data.py (scale 2-6)
+const CONNECTION_DISTANCES = {
+    'city_gates|green_fields': 2,
+    'city_gates|whispering_woods': 2,
+    'city_gates|misty_marshes': 3,
+    'city_gates|golden_sands': 3,
+    'city_gates|underground_passage': 2,
+    'green_fields|orc_tribe': 2,
+    'green_fields|stone_peaks': 3,
+    'green_fields|bandit_fortress': 3,
+    'whispering_woods|goblin_nest': 2,
+    'whispering_woods|elven_ruins': 3,
+    'whispering_woods|frozen_waste': 5,
+    'elven_ruins|frozen_waste': 3,
+    'misty_marshes|ancient_cemetery': 2,
+    'misty_marshes|deep_swamp': 3,
+    'underground_passage|ancient_cemetery': 2,
+    'underground_passage|korthag': 4,
+    'stone_peaks|troll_cave': 2,
+    'stone_peaks|frozen_waste': 5,
+    'stone_peaks|dragon_pass': 4,
+    'stone_peaks|korthag': 2,
+    'dragon_pass|burning_crater': 4,
+    'dragon_pass|valkrest': 2,
+    'golden_sands|bandit_fortress': 3,
+    'golden_sands|burning_crater': 6,
+    'deep_swamp|burning_crater': 5,
+    'burning_crater|valkrest': 2,
+};
+
+function getConnectionDistance(fromId, toId) {
+    return CONNECTION_DISTANCES[`${fromId}|${toId}`]
+        || CONNECTION_DISTANCES[`${toId}|${fromId}`]
+        || 2;
+}
+
+/**
+ * Dijkstra shortest weighted distance between two locations.
+ * Returns total turns of travel, or -1 if unreachable.
+ */
+function weightedDistance(fromId, toId, connections) {
+    if (fromId === toId) return 0;
+    const dist = {};
+    const visited = new Set();
+    const queue = []; // min-heap approximation via sorted inserts
+
+    dist[fromId] = 0;
+    queue.push([0, fromId]);
+
+    while (queue.length > 0) {
+        queue.sort((a, b) => a[0] - b[0]);
+        const [d, current] = queue.shift();
+        if (current === toId) return d;
+        if (visited.has(current)) continue;
+        visited.add(current);
+
+        const neighbors = connections[current] || [];
+        for (const nb of neighbors) {
+            if (visited.has(nb)) continue;
+            const edgeW = getConnectionDistance(current, nb);
+            const newDist = d + edgeW;
+            if (dist[nb] === undefined || newDist < dist[nb]) {
+                dist[nb] = newDist;
+                queue.push([newDist, nb]);
+            }
+        }
+    }
+    return -1;
+}
+
 // Danger level color mapping
 function getDangerColor(level) {
     if (level <= 1) return '#6a8a5a';  // Safe green

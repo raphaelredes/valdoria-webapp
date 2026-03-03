@@ -282,7 +282,7 @@
         }
         .loc-hex:hover { filter: brightness(1.15); }
         .loc-hex.current { filter: drop-shadow(0 0 10px rgba(196,149,58,0.6)); }
-        .loc-hex.dim { opacity: 0.3; }
+        .loc-hex.frontier { opacity: 0.4; }
         .loc-hex.hidden { display: none; }
 
         .loc-label {
@@ -388,6 +388,16 @@
             from { opacity: 0; transform: translate(-50%, 10px); }
             to { opacity: 1; transform: translate(-50%, 0); }
         }
+
+        /* ═══ FOG PARTICLES ═══ */
+        .fog-cloud {
+            animation: fogDrift 8s ease-in-out infinite alternate;
+        }
+        @keyframes fogDrift {
+            0% { transform: translate(-5px, -2px); opacity: 0.05; }
+            50% { opacity: 0.11; }
+            100% { transform: translate(5px, 2px); opacity: 0.05; }
+        }
     </style>
 </head>
 <body>
@@ -423,7 +433,9 @@
         </div>
         <div id="legend">
             <span>📍 Atual</span>
-            <span>❓ Inexplorado</span>
+            <span>✅ Explorado</span>
+            <span>🌫️ Conhecido</span>
+            <span>❓ Fronteira</span>
         </div>
     </div>
 

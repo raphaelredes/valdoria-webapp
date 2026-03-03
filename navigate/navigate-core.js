@@ -10,6 +10,7 @@ let S = {
     token: '',
     currentLoc: 'city_gates',
     knownLocs: [],
+    discoveredLocs: [],  // locations actually visited (for fog state)
     locations: {},       // loc_id → {n, b, i, d, s, c, ds}
     charData: null,      // {nm, lv, hp, mh, mp, mm, ci}
     quests: [],          // [{id, t, loc?}]
@@ -59,6 +60,7 @@ async function initAsync() {
         S.currentLoc = data.cl || 'city_gates';
         S.locations = data.lo || {};
         S.knownLocs = data.kl || Object.keys(S.locations);
+        S.discoveredLocs = data.dl || [];
         S.charData = data.c || {};
         S.quests = data.q || [];
         S.dungeons = data.dd || {};
