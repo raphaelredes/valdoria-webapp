@@ -353,10 +353,16 @@ function renderArena(s) {
     _animateHpBars(s);
     _checkPlayerDamage(s);
 
-    // Auto-expand active turn entity (if not player)
-    if (activeTurn && activeTurn.t !== 'p') {
-        const activeEl = document.querySelector('.entity.active-turn');
-        if (activeEl) activeEl.classList.add('expanded');
+    // Auto-expand enemy cards:
+    // - When it's an enemy's turn: expand that specific enemy
+    // - When it's the player's turn: expand all enemies (target info)
+    if (activeTurn) {
+        if (activeTurn.t === 'p') {
+            document.querySelectorAll('.entity.enemy').forEach(el => el.classList.add('expanded'));
+        } else {
+            const activeEl = document.querySelector('.entity.active-turn');
+            if (activeEl) activeEl.classList.add('expanded');
+        }
     }
 
     // Start timer countdown if active phase
