@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,8 +11,14 @@
     <script src="data.js"></script>
     <style>
         /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
-        * { scrollbar-width: none; -ms-overflow-style: none; }
-        *::-webkit-scrollbar { display: none; }
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        *::-webkit-scrollbar {
+            display: none;
+        }
 
         /* ─── Screen transition system ─── */
         .screen-viewport {
@@ -20,12 +27,14 @@
             height: calc(var(--tg-viewport-height, 100vh) - 60px);
             overflow: hidden;
         }
+
         .screen-track {
             display: flex;
             height: 100%;
             transition: transform 300ms ease-out;
             will-change: transform;
         }
+
         .screen {
             position: relative;
             flex: 0 0 100vw;
@@ -34,7 +43,11 @@
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
         }
-        .screen.sub-open { overflow: hidden !important; }
+
+        .screen.sub-open {
+            overflow: hidden !important;
+        }
+
         .screen-content {
             padding: 12px;
             padding-bottom: 70px;
@@ -43,7 +56,9 @@
         /* Sub-screen overlay (CAN scroll) */
         .sub-screen {
             position: absolute;
-            top: 0; left: 0; width: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
             background: var(--v-bg);
             transform: translateX(100%);
@@ -52,94 +67,173 @@
             -webkit-overflow-scrolling: touch;
             z-index: 10;
         }
-        .sub-screen.active { transform: translateX(0); }
-        .sub-screen .screen-content { padding-top: 8px; }
+
+        .sub-screen.active {
+            transform: translateX(0);
+        }
+
+        .sub-screen .screen-content {
+            padding-top: 8px;
+        }
+
         .sub-back-btn {
-            display: flex; align-items: center; gap: 6px;
-            background: var(--v-bg); border: none;
-            color: var(--v-gold); font-size: 14px; font-weight: 600;
-            cursor: pointer; padding: 12px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--v-bg);
+            border: none;
+            color: var(--v-gold);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 12px 0 8px;
             margin-bottom: 8px;
-            position: sticky; top: 0; z-index: 5;
+            position: sticky;
+            top: 0;
+            z-index: 5;
             -webkit-tap-highlight-color: transparent;
         }
 
         /* ─── Progress bar ─── */
         .progress-bar {
-            display: none; gap: 4px;
+            display: none;
+            gap: 4px;
             padding: 8px 12px;
             background: var(--v-bg);
-            position: sticky; top: 0; z-index: 20;
+            position: sticky;
+            top: 0;
+            z-index: 20;
         }
-        .progress-bar.visible { display: flex; }
+
+        .progress-bar.visible {
+            display: flex;
+        }
+
         .progress-step {
-            flex: 1; height: 4px; border-radius: 2px;
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
             background: var(--v-border);
             transition: background 300ms;
         }
-        .progress-step.active { background: var(--v-gold); }
-        .progress-step.done { background: #4a9; }
+
+        .progress-step.active {
+            background: var(--v-gold);
+        }
+
+        .progress-step.done {
+            background: #4a9;
+        }
 
         /* ─── Level up banner ─── */
         .lvl-banner {
             text-align: center;
             padding: 16px 12px 12px;
-            background: linear-gradient(180deg, rgba(196,149,58,0.15) 0%, transparent 100%);
+            background: linear-gradient(180deg, rgba(196, 149, 58, 0.15) 0%, transparent 100%);
             border-bottom: 1px solid var(--v-border);
             margin-bottom: 10px;
         }
+
         .lvl-banner-level {
-            font-size: 42px; font-weight: 800;
+            font-size: 42px;
+            font-weight: 800;
             color: var(--v-gold);
-            text-shadow: 0 0 20px rgba(196,149,58,0.4);
+            text-shadow: 0 0 20px rgba(196, 149, 58, 0.4);
             line-height: 1;
         }
+
         .lvl-banner-title {
-            font-size: 14px; font-weight: 700;
-            color: var(--v-text); margin-top: 4px;
-            text-transform: uppercase; letter-spacing: 1px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--v-text);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
+
         .lvl-banner-class {
-            font-size: 12px; color: var(--v-text-dim); margin-top: 2px;
+            font-size: 12px;
+            color: var(--v-text-dim);
+            margin-top: 2px;
         }
+
         .lvl-gains {
-            display: flex; justify-content: center; gap: 16px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
             margin-top: 8px;
         }
+
         .lvl-gain {
-            display: flex; align-items: center; gap: 4px;
-            font-size: 13px; font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            font-weight: 600;
         }
-        .lvl-gain.hp { color: #e45; }
-        .lvl-gain.mp { color: #4af; }
+
+        .lvl-gain.hp {
+            color: #e45;
+        }
+
+        .lvl-gain.mp {
+            color: #4af;
+        }
 
         /* ─── Pending choices summary ─── */
         .pending-list {
-            display: flex; flex-direction: column; gap: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
             margin: 12px 0;
         }
+
         .pending-item {
-            display: flex; align-items: center; gap: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             padding: 8px 12px;
             background: var(--v-bg-card);
             border: 1px solid var(--v-border);
             border-radius: 8px;
         }
-        .pending-icon { font-size: 20px; }
-        .pending-text { flex: 1; }
-        .pending-text b { color: var(--v-text); font-size: 13px; }
-        .pending-text small { color: var(--v-text-dim); font-size: 11px; display: block; }
+
+        .pending-icon {
+            font-size: 20px;
+        }
+
+        .pending-text {
+            flex: 1;
+        }
+
+        .pending-text b {
+            color: var(--v-text);
+            font-size: 13px;
+        }
+
+        .pending-text small {
+            color: var(--v-text-dim);
+            font-size: 11px;
+            display: block;
+        }
+
         .pending-badge {
-            background: var(--v-gold); color: #1a1a1a;
-            font-size: 11px; font-weight: 700;
-            padding: 2px 7px; border-radius: 10px;
+            background: var(--v-gold);
+            color: #1a1a1a;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 10px;
         }
 
         /* ─── ASI cards (compact) ─── */
         .asi-grid {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 6px; margin: 8px 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin: 8px 0;
         }
+
         .asi-card {
             background: var(--v-bg-card);
             border: 1px solid var(--v-border);
@@ -150,71 +244,128 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-        .asi-card.maxed { opacity: 0.4; pointer-events: none; }
-        .asi-card .asi-icon { font-size: 18px; }
+
+        .asi-card.maxed {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .asi-card .asi-icon {
+            font-size: 18px;
+        }
+
         .asi-card .asi-name {
-            font-size: 11px; font-weight: 600;
-            color: var(--v-text-dim); text-transform: uppercase;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--v-text-dim);
+            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .asi-card .asi-value {
-            font-size: 22px; font-weight: 800;
-            color: var(--v-text); line-height: 1.1;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--v-text);
+            line-height: 1.1;
         }
+
         .asi-card .asi-mod {
-            font-size: 11px; color: var(--v-text-dim);
+            font-size: 11px;
+            color: var(--v-text-dim);
         }
+
         .asi-card .asi-boost {
-            font-size: 12px; font-weight: 700;
+            font-size: 12px;
+            font-weight: 700;
             color: var(--v-gold);
             min-height: 14px;
         }
+
         .asi-controls {
-            display: flex; justify-content: center;
-            gap: 8px; margin-top: 2px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 2px;
         }
+
         .asi-btn {
-            width: 30px; height: 30px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             border: 2px solid var(--v-border);
             background: var(--v-bg);
             color: var(--v-text);
-            font-size: 15px; font-weight: 700;
-            display: flex; align-items: center; justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             transition: all 150ms;
             -webkit-tap-highlight-color: transparent;
         }
-        .asi-btn:active { transform: scale(0.9); }
-        .asi-btn.plus { border-color: var(--v-gold); color: var(--v-gold); }
-        .asi-btn.plus:disabled { border-color: var(--v-border); color: var(--v-border); opacity: 0.4; }
-        .asi-btn.minus { border-color: #e45; color: #e45; }
-        .asi-btn.minus:disabled { border-color: var(--v-border); color: var(--v-border); opacity: 0.4; }
+
+        .asi-btn:active {
+            transform: scale(0.9);
+        }
+
+        .asi-btn.plus {
+            border-color: var(--v-gold);
+            color: var(--v-gold);
+        }
+
+        .asi-btn.plus:disabled {
+            border-color: var(--v-border);
+            color: var(--v-border);
+            opacity: 0.4;
+        }
+
+        .asi-btn.minus {
+            border-color: #e45;
+            color: #e45;
+        }
+
+        .asi-btn.minus:disabled {
+            border-color: var(--v-border);
+            color: var(--v-border);
+            opacity: 0.4;
+        }
 
         .asi-counter {
             text-align: center;
-            font-size: 13px; color: var(--v-text-dim);
+            font-size: 13px;
+            color: var(--v-text-dim);
             margin: 6px 0;
         }
-        .asi-counter b { color: var(--v-gold); }
+
+        .asi-counter b {
+            color: var(--v-gold);
+        }
 
         /* ─── Feat/ASI mode toggle ─── */
         .mode-toggle {
-            display: flex; gap: 0;
-            border-radius: 8px; overflow: hidden;
+            display: flex;
+            gap: 0;
+            border-radius: 8px;
+            overflow: hidden;
             border: 1px solid var(--v-border);
             margin-bottom: 8px;
         }
+
         .mode-toggle-btn {
-            flex: 1; padding: 8px;
+            flex: 1;
+            padding: 8px;
             text-align: center;
-            font-size: 13px; font-weight: 600;
+            font-size: 13px;
+            font-weight: 600;
             color: var(--v-text-dim);
             background: var(--v-bg-card);
-            border: none; cursor: pointer;
+            border: none;
+            cursor: pointer;
             transition: all 200ms;
             -webkit-tap-highlight-color: transparent;
         }
+
         .mode-toggle-btn.active {
             background: var(--v-gold);
             color: #1a1a1a;
@@ -231,49 +382,90 @@
             transition: all 200ms;
             -webkit-tap-highlight-color: transparent;
         }
-        .choice-card:active { transform: scale(0.98); }
+
+        .choice-card:active {
+            transform: scale(0.98);
+        }
+
         .choice-card.selected {
             border-color: var(--v-gold);
-            box-shadow: 0 0 18px rgba(196,149,58,0.35);
+            box-shadow: 0 0 18px rgba(196, 149, 58, 0.35);
             animation: v-goldPulse 0.6s ease;
         }
+
         .choice-card-header {
-            display: flex; align-items: center; gap: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .choice-card-icon { font-size: 18px; }
+
+        .choice-card-icon {
+            font-size: 18px;
+        }
+
         .choice-card-name {
-            font-size: 13px; font-weight: 700;
-            color: var(--v-text); flex: 1;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--v-text);
+            flex: 1;
         }
+
         .choice-card-badge {
-            font-size: 10px; padding: 2px 7px;
-            border-radius: 10px; font-weight: 600;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 600;
         }
-        .badge-cost { background: rgba(68,170,255,0.15); color: #4af; }
-        .badge-level { background: rgba(196,149,58,0.15); color: var(--v-gold); }
-        .badge-passive { background: rgba(74,170,153,0.15); color: #4a9; }
+
+        .badge-cost {
+            background: rgba(68, 170, 255, 0.15);
+            color: #4af;
+        }
+
+        .badge-level {
+            background: rgba(196, 149, 58, 0.15);
+            color: var(--v-gold);
+        }
+
+        .badge-passive {
+            background: rgba(74, 170, 153, 0.15);
+            color: #4a9;
+        }
+
         .choice-card-desc {
-            font-size: 11px; color: var(--v-text-dim);
-            margin-top: 4px; line-height: 1.3;
+            font-size: 11px;
+            color: var(--v-text-dim);
+            margin-top: 4px;
+            line-height: 1.3;
         }
+
         .choice-card-effect {
-            font-size: 12px; color: var(--v-text);
+            font-size: 12px;
+            color: var(--v-text);
             margin-top: 4px;
         }
+
         .choice-card-tech {
-            font-size: 11px; color: var(--v-text-dim);
-            margin-top: 4px; line-height: 1.3;
+            font-size: 11px;
+            color: var(--v-text-dim);
+            margin-top: 4px;
+            line-height: 1.3;
             font-style: italic;
         }
+
         .choice-card-check {
-            width: 22px; height: 22px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             border: 2px solid var(--v-border);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 12px;
             transition: all 200ms;
             flex-shrink: 0;
         }
+
         .choice-card.selected .choice-card-check {
             border-color: var(--v-gold);
             background: var(--v-gold);
@@ -282,59 +474,92 @@
 
         /* ─── Detail link ─── */
         .detail-link {
-            font-size: 12px; color: var(--v-gold);
-            margin-top: 4px; cursor: pointer;
+            font-size: 12px;
+            color: var(--v-gold);
+            margin-top: 4px;
+            cursor: pointer;
             display: inline-block;
         }
-        .detail-link:active { opacity: 0.7; }
+
+        .detail-link:active {
+            opacity: 0.7;
+        }
 
         /* ─── Info button ─── */
         .info-btn {
-            width: 26px; height: 26px; border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
             border: 1px solid var(--v-border);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; color: var(--v-text-dim);
-            flex-shrink: 0; cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: var(--v-text-dim);
+            flex-shrink: 0;
+            cursor: pointer;
             background: transparent;
             -webkit-tap-highlight-color: transparent;
         }
-        .info-btn:active { background: var(--v-border); }
+
+        .info-btn:active {
+            background: var(--v-border);
+        }
 
         /* ─── Compact skill row ─── */
         .skill-compact {
-            display: flex; align-items: center; gap: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             padding: 8px 12px;
             background: var(--v-bg-card);
             border: 1px solid var(--v-border);
             border-radius: 8px;
             margin-bottom: 5px;
-            cursor: pointer; min-height: 44px;
+            cursor: pointer;
+            min-height: 44px;
             transition: all 200ms;
             -webkit-tap-highlight-color: transparent;
         }
-        .skill-compact:active { transform: scale(0.98); }
+
+        .skill-compact:active {
+            transform: scale(0.98);
+        }
+
         .skill-compact.selected {
             border-color: var(--v-gold);
-            box-shadow: 0 0 12px rgba(196,149,58,0.25);
+            box-shadow: 0 0 12px rgba(196, 149, 58, 0.25);
             animation: v-goldPulse 0.6s ease;
         }
+
         .skill-compact-check {
-            width: 20px; height: 20px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             border: 2px solid var(--v-border);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 10px;
             transition: all 200ms;
             flex-shrink: 0;
         }
+
         .skill-compact.selected .skill-compact-check {
             border-color: var(--v-gold);
             background: var(--v-gold);
             color: #1a1a1a;
         }
-        .skill-compact-icon { font-size: 16px; flex-shrink: 0; }
+
+        .skill-compact-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
         .skill-compact-name {
-            flex: 1; font-size: 13px; font-weight: 600;
+            flex: 1;
+            font-size: 13px;
+            font-weight: 600;
             color: var(--v-text);
         }
 
@@ -350,13 +575,29 @@
             padding: 8px 0;
             border-bottom: 1px solid var(--v-border);
         }
-        .sc-feature:last-child { border-bottom: none; }
-        .sc-feature-level {
-            font-size: 12px; font-weight: 700;
-            color: var(--v-gold); margin-bottom: 2px;
+
+        .sc-feature:last-child {
+            border-bottom: none;
         }
-        .sc-feature-name { font-size: 14px; font-weight: 600; color: var(--v-text); }
-        .sc-feature-desc { font-size: 12px; color: var(--v-text-dim); margin-top: 2px; }
+
+        .sc-feature-level {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--v-gold);
+            margin-bottom: 2px;
+        }
+
+        .sc-feature-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--v-text);
+        }
+
+        .sc-feature-desc {
+            font-size: 12px;
+            color: var(--v-text-dim);
+            margin-top: 2px;
+        }
 
         /* ─── Review section ─── */
         .review-section {
@@ -366,433 +607,544 @@
             padding: 10px 12px;
             margin-bottom: 8px;
         }
+
         .review-section-title {
-            font-size: 12px; font-weight: 700;
-            color: var(--v-gold); text-transform: uppercase;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--v-gold);
+            text-transform: uppercase;
             margin-bottom: 6px;
         }
+
         .review-row {
-            display: flex; justify-content: space-between;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
             padding: 3px 0;
             font-size: 12px;
         }
-        .review-label { color: var(--v-text-dim); }
-        .review-value { color: var(--v-text); font-weight: 600; }
+
+        .review-label {
+            color: var(--v-text-dim);
+        }
+
+        .review-value {
+            color: var(--v-text);
+            font-weight: 600;
+        }
 
         /* ─── Navigation ─── */
         .nav-bar {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            max-width: 430px; margin: 0 auto;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 430px;
+            margin: 0 auto;
             padding: 12px;
             background: linear-gradient(to bottom, transparent, var(--v-bg) 30%);
             z-index: 30;
             transition: opacity 200ms;
         }
-        .nav-bar.hidden { opacity: 0; pointer-events: none; }
-        .nav-bar .v-btn { width: 100%; }
+
+        .nav-bar.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .nav-bar .v-btn {
+            width: 100%;
+        }
 
         /* ─── Toast ─── */
         .toast {
-            position: fixed; top: 12px; left: 12px; right: 12px;
-            max-width: 406px; margin: 0 auto;
-            background: #c33; color: #fff;
-            padding: 10px 16px; border-radius: 8px;
-            font-size: 13px; font-weight: 600;
-            text-align: center; z-index: 100;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            max-width: 406px;
+            margin: 0 auto;
+            background: #c33;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            z-index: 100;
             transform: translateY(-120%);
             transition: transform 300ms;
         }
-        .toast.show { transform: translateY(0); }
+
+        .toast.show {
+            transform: translateY(0);
+        }
 
         /* ─── Fatal error (full screen) ─── */
         .fatal-error {
             display: none;
-            position: fixed; inset: 0; z-index: 300;
+            position: fixed;
+            inset: 0;
+            z-index: 300;
             background: var(--v-bg);
             flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: 12px; text-align: center; padding: 24px;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-align: center;
+            padding: 24px;
         }
-        .fatal-error.active { display: flex; }
-        .fatal-error .err-icon { font-size: 40px; opacity: 0.6; }
-        .fatal-error .err-msg { font-size: 14px; color: var(--v-text-dim); }
-        .fatal-error .err-hint { font-size: 12px; color: var(--v-text-dim); opacity: 0.6; }
+
+        .fatal-error.active {
+            display: flex;
+        }
+
+        .fatal-error .err-icon {
+            font-size: 40px;
+            opacity: 0.6;
+        }
+
+        .fatal-error .err-msg {
+            font-size: 14px;
+            color: var(--v-text-dim);
+        }
+
+        .fatal-error .err-hint {
+            font-size: 12px;
+            color: var(--v-text-dim);
+            opacity: 0.6;
+        }
 
         /* ─── Misc ─── */
         .section-title {
-            font-size: 13px; font-weight: 700;
-            color: var(--v-gold); text-transform: uppercase;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--v-gold);
+            text-transform: uppercase;
             letter-spacing: 0.5px;
             margin: 12px 0 6px;
         }
+
         .hint {
-            font-size: 11px; color: var(--v-text-dim);
-            text-align: center; margin: 6px 0;
+            font-size: 11px;
+            color: var(--v-text-dim);
+            text-align: center;
+            margin: 6px 0;
             font-style: italic;
         }
+
         .empty-msg {
-            text-align: center; padding: 24px;
-            color: var(--v-text-dim); font-size: 13px;
+            text-align: center;
+            padding: 24px;
+            color: var(--v-text-dim);
+            font-size: 13px;
         }
 
         /* ─── Sub-screen backdrop ─── */
         .screen.sub-open::after {
             content: '';
-            position: absolute; inset: 0;
-            background: rgba(0,0,0,0.3);
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
             z-index: 5;
             animation: v-fadeIn 200ms ease forwards;
         }
 
         /* ─── Content fade-in ─── */
-        .screen-content { animation: v-fadeIn 300ms ease; }
+        .screen-content {
+            animation: v-fadeIn 300ms ease;
+        }
 
         /* ─── ASI boost animation ─── */
-        .asi-card .asi-boost { transition: transform 150ms ease; }
-        .asi-card .asi-value { transition: transform 150ms ease; }
+        .asi-card .asi-boost {
+            transition: transform 150ms ease;
+        }
+
+        .asi-card .asi-value {
+            transition: transform 150ms ease;
+        }
 
         /* ─── DM narration bubble ─── */
         .dm-bubble {
             position: relative;
-            background: linear-gradient(165deg, rgba(196,149,58,0.08) 0%, rgba(196,149,58,0.02) 100%);
+            background: linear-gradient(165deg, rgba(196, 149, 58, 0.08) 0%, rgba(196, 149, 58, 0.02) 100%);
             border-left: 3px solid var(--v-gold);
             border-radius: 0 8px 8px 0;
             padding: 10px 12px 10px 14px;
-            font-size: 12px; color: var(--v-text); font-style: italic;
-            margin-bottom: 10px; line-height: 1.4;
+            font-size: 12px;
+            color: var(--v-text);
+            font-style: italic;
+            margin-bottom: 10px;
+            line-height: 1.4;
         }
+
         .dm-bubble::before {
-            content: '\1F3B2 Mestre'; display: block;
-            font-size: 10px; font-weight: 700; color: var(--v-gold);
-            margin-bottom: 4px; font-style: normal; text-transform: uppercase;
+            content: '\1F3B2 Mestre';
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--v-gold);
+            margin-bottom: 4px;
+            font-style: normal;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         /* ─── Loading overlay ─── */
         .loading-overlay {
-            position: fixed; inset: 0; z-index: 200;
-            background: rgba(43,40,48,0.85);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(43, 40, 48, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
             transition: opacity 300ms;
         }
-        .loading-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         .loading-spinner {
-            width: 40px; height: 40px;
+            width: 40px;
+            height: 40px;
             border: 3px solid var(--v-border);
             border-top-color: var(--v-gold);
             border-radius: 50%;
             animation: v-spin 0.8s linear infinite;
         }
+
         .loading-text {
-            margin-top: 12px; font-size: 14px;
-            color: var(--v-gold); font-weight: 600;
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--v-gold);
+            font-weight: 600;
         }
 
         /* ─── Review visual diff ─── */
-        .review-value .arrow { color: var(--v-text-dim); margin: 0 4px; }
-        .review-value .changed { color: var(--v-gold); font-weight: 700; }
+        .review-value .arrow {
+            color: var(--v-text-dim);
+            margin: 0 4px;
+        }
+
+        .review-value .changed {
+            color: var(--v-gold);
+            font-weight: 700;
+        }
+
         .review-value .new-badge {
-            font-size: 9px; background: rgba(196,149,58,0.2);
-            color: var(--v-gold); padding: 1px 5px;
-            border-radius: 8px; margin-left: 6px;
-            font-weight: 700; text-transform: uppercase;
+            font-size: 9px;
+            background: rgba(196, 149, 58, 0.2);
+            color: var(--v-gold);
+            padding: 1px 5px;
+            border-radius: 8px;
+            margin-left: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
         }
     </style>
 </head>
+
 <body>
-<div id="toast" class="toast"></div>
-<div id="fatalError" class="fatal-error">
-    <div class="err-icon">⚠️</div>
-    <div class="err-msg" id="fatalMsg">Dados invalidos</div>
-    <div class="err-hint">Volte ao bot e tente novamente.</div>
-</div>
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Confirmando evolucao...</div>
-</div>
-
-<div id="progressBar" class="progress-bar"></div>
-
-<div class="screen-viewport">
-    <div id="screenTrack" class="screen-track">
-        <!-- Screens are built dynamically -->
+    <div id="toast" class="toast"></div>
+    <div id="fatalError" class="fatal-error">
+        <div class="err-icon">⚠️</div>
+        <div class="err-msg" id="fatalMsg">Dados invalidos</div>
+        <div class="err-hint">Volte ao bot e tente novamente.</div>
     </div>
-</div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Confirmando evolucao...</div>
+    </div>
 
-<div class="nav-bar">
-    <button id="btnNext" class="v-btn v-btn-primary" onclick="goNext()">Continuar</button>
-</div>
+    <div id="progressBar" class="progress-bar"></div>
 
-<script>
-// ═══════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════
-const _vBg = '#2b2830';
-const tg = window.Telegram?.WebApp;
-if (tg) {
-    tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg);
-    if (tg.onEvent) {
-        tg.onEvent('viewportChanged', () => {
-            document.documentElement.style.setProperty('--tg-viewport-height', tg.viewportHeight + 'px');
-        });
-    }
-}
+    <div class="screen-viewport">
+        <div id="screenTrack" class="screen-track">
+            <!-- Screens are built dynamically -->
+        </div>
+    </div>
 
-let token = '';
-let P = null; // player data
-const sel = { asi: {}, feat: '', featStat: '', skills: [], subclass: '' };
+    <div class="nav-bar">
+        <button id="btnNext" class="v-btn v-btn-primary" onclick="goNext()">Continuar</button>
+    </div>
 
-// Haptic feedback helper
-function haptic(type = 'light') {
-    try { tg?.HapticFeedback?.impactOccurred(type); } catch(e) { console.warn('[LEVELUP] haptic:', e); }
-}
-function hapticNotify(type = 'error') {
-    try { tg?.HapticFeedback?.notificationOccurred(type); } catch(e) { console.warn('[LEVELUP] haptic:', e); }
-}
-
-// ═══════════════════════════════════════════════
-// SCREEN MANAGEMENT
-// ═══════════════════════════════════════════════
-const screens = [];
-let cur = 0;
-let asiMode = 'asi'; // 'asi' or 'feat'
-let isTransitioning = false;
-
-function decodeBase64Utf8(b64) {
-    const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
-    const binary = atob(raw);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return new TextDecoder().decode(bytes);
-}
-
-(function init() {
-    const params = new URLSearchParams(location.search);
-    token = params.get('token') || '';
-    try {
-        const raw = params.get('p') || '';
-        P = JSON.parse(decodeBase64Utf8(raw));
-    } catch(e) {
-        showFatalError('Dados invalidos', e); return;
-    }
-    if (!P || !P.hero_class || !P.stats || typeof P.level !== 'number') {
-        showFatalError('Dados do personagem incompletos'); return;
-    }
-    for (const [k, v] of Object.entries(P.stats)) {
-        if (typeof v !== 'number' || v < 1 || v > 20) {
-            showFatalError('Atributos invalidos'); return;
-        }
-    }
-    if (typeof CLASS_SKILLS === 'undefined' || typeof FEATS === 'undefined') {
-        showFatalError('Dados do jogo nao carregaram'); return;
-    }
-    buildScreens();
-})();
-
-function buildScreens() {
-    screens.length = 0;
-    screens.push({ id: 'summary', build: buildSummary, validate: () => null });
-
-    if (P.needs_subclass) {
-        screens.push({ id: 'subclass', build: buildSubclass, validate: validateSubclass, hasSub: true });
-    }
-    if (P.pending_asi > 0) {
-        screens.push({ id: 'asi', build: buildASI, validate: validateASI, hasSub: true });
-    }
-    if (P.pending_skills > 0) {
-        const skills = getAvailableSkills();
-        if (skills.length > 0) {
-            screens.push({ id: 'skills', build: buildSkills, validate: validateSkills, hasSub: true });
-        }
-    }
-    screens.push({ id: 'review', build: buildReview, validate: () => null });
-
-    buildProgress();
-    renderAllScreens();
-    goTo(0);
-}
-
-function buildProgress() {
-    const bar = document.getElementById('progressBar');
-    bar.innerHTML = screens.map((s, i) =>
-        `<div class="progress-step" id="pstep_${i}"></div>`
-    ).join('');
-}
-
-function updateProgress() {
-    screens.forEach((_, i) => {
-        const el = document.getElementById('pstep_' + i);
-        if (!el) return;
-        el.className = 'progress-step' + (i < cur ? ' done' : i === cur ? ' active' : '');
-    });
-}
-
-function renderAllScreens() {
-    const track = document.getElementById('screenTrack');
-    track.innerHTML = screens.map((s, i) => {
-        let subHtml = '';
-        if (s.hasSub) {
-            subHtml = `<div class="sub-screen" id="sub_${s.id}"><div class="screen-content" id="sub_content_${s.id}"></div></div>`;
-        }
-        return `<div class="screen" id="screen_${i}"><div class="screen-content" id="content_${i}"></div>${subHtml}</div>`;
-    }).join('');
-    screens.forEach((s, i) => s.build(document.getElementById('content_' + i)));
-}
-
-function goTo(idx) {
-    if (idx < 0 || idx >= screens.length) return;
-    haptic('light');
-    closeAllSubScreens();
-    cur = idx;
-    document.getElementById('screenTrack').style.transform = `translateX(-${idx * 100}vw)`;
-    // Show progress bar only after the summary screen
-    const bar = document.getElementById('progressBar');
-    if (idx > 0) bar.classList.add('visible');
-    else bar.classList.remove('visible');
-    updateProgress();
-    updateNavBtn();
-    if (screens[cur].id === 'review') {
-        screens[cur].build(document.getElementById('content_' + cur));
-    }
-}
-
-function goNext() {
-    const err = screens[cur].validate();
-    if (err) { showError(err); return; }
-    if (cur === screens.length - 1) {
-        submit();
-    } else {
-        goTo(cur + 1);
-    }
-}
-
-function goBack() {
-    if (cur > 0) goTo(cur - 1);
-}
-
-function updateNavBtn() {
-    const btn = document.getElementById('btnNext');
-    if (cur === screens.length - 1) {
-        btn.textContent = '\u2694\ufe0f Confirmar Evolucao';
-        btn.className = 'v-btn v-btn-primary';
-    } else {
-        btn.textContent = 'Continuar \u25b6';
-        btn.className = 'v-btn v-btn-primary';
-    }
-    if (tg && tg.BackButton) {
-        const hasOpenSub = document.querySelector('.sub-screen.active');
-        if (cur > 0 || hasOpenSub) { tg.BackButton.show(); } else { tg.BackButton.hide(); }
-    }
-}
-
-// ═══════════════════════════════════════════════
-// SUB-SCREEN MANAGEMENT
-// ═══════════════════════════════════════════════
-function openSubScreen(subId) {
-    if (isTransitioning) return;
-    const sub = document.getElementById(subId);
-    if (!sub) return;
-    isTransitioning = true;
-    sub.classList.add('active');
-    const parentScreen = sub.closest('.screen');
-    if (parentScreen) { parentScreen.scrollTop = 0; parentScreen.classList.add('sub-open'); }
-    sub.scrollTop = 0;
-    document.querySelector('.nav-bar').classList.add('hidden');
-    updateNavBtn();
-    setTimeout(() => { isTransitioning = false; }, 350);
-}
-
-function closeSubScreen(subId) {
-    const sub = document.getElementById(subId);
-    if (!sub) return;
-    sub.classList.remove('active');
-    const parentScreen = sub.closest('.screen');
-    if (parentScreen && !parentScreen.querySelector('.sub-screen.active')) {
-        parentScreen.classList.remove('sub-open');
-    }
-    if (!document.querySelector('.sub-screen.active')) {
-        document.querySelector('.nav-bar').classList.remove('hidden');
-    }
-    updateNavBtn();
-}
-
-function closeAllSubScreens() {
-    document.querySelectorAll('.sub-screen.active').forEach(s => {
-        s.classList.remove('active');
-        const parentScreen = s.closest('.screen');
-        if (parentScreen) parentScreen.classList.remove('sub-open');
-    });
-}
-
-// ═══════════════════════════════════════════════
-// TELEGRAM BACK BUTTON
-// ═══════════════════════════════════════════════
-if (tg && tg.BackButton) {
-    tg.BackButton.onClick(() => {
-        const openSub = document.querySelector('.sub-screen.active');
-        if (openSub) { closeSubScreen(openSub.id); return; }
-        goBack();
-    });
-}
-
-// ═══════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════
-function getMod(val) {
-    return Math.floor((val - 10) / 2);
-}
-function fmtMod(val) {
-    const m = getMod(val);
-    return m >= 0 ? '+' + m : '' + m;
-}
-function getAvailableSkills() {
-    const pool = CLASS_SKILLS[P.hero_class] || {};
-    const result = [];
-    for (const [lv, skills] of Object.entries(pool)) {
-        if (parseInt(lv) <= P.level) {
-            for (const s of skills) {
-                if (!P.acquired_skills.includes(s.id)) {
-                    result.push({ ...s, level: parseInt(lv) });
-                }
+    <script>
+        // ═══════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════
+        const _vBg = '#2b2830';
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg);
+            if (tg.onEvent) {
+                tg.onEvent('viewportChanged', () => {
+                    document.documentElement.style.setProperty('--tg-viewport-height', tg.viewportHeight + 'px');
+                });
             }
         }
-    }
-    return result;
-}
 
-function showError(msg, err = null) {
-    console.error('[LEVELUP]', msg, err || '');
-    hapticNotify('error');
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-}
+        let token = '';
+        let P = null; // player data
+        let apiFallback = '';
+        let userId = '';
+        const sel = { asi: {}, feat: '', featStat: '', skills: [], subclass: '' };
 
-function showFatalError(msg, err = null) {
-    console.error('[LEVELUP][FATAL]', msg, err || '');
-    const el = document.getElementById('fatalError');
-    document.getElementById('fatalMsg').textContent = msg;
-    el.classList.add('active');
-}
+        // Haptic feedback helper
+        function haptic(type = 'light') {
+            try { tg?.HapticFeedback?.impactOccurred(type); } catch (e) { console.warn('[LEVELUP] haptic:', e); }
+        }
+        function hapticNotify(type = 'error') {
+            try { tg?.HapticFeedback?.notificationOccurred(type); } catch (e) { console.warn('[LEVELUP] haptic:', e); }
+        }
 
-function calcDmgRange(effect) {
-    if (!effect) return '';
-    const m = effect.match(/(\d+)d(\d+)(?:\s*\+\s*(\d+))?/);
-    if (!m) return '';
-    const n = parseInt(m[1]), d = parseInt(m[2]), b = m[3] ? parseInt(m[3]) : 0;
-    return `${n + b}~${n * d + b}`;
-}
+        // ═══════════════════════════════════════════════
+        // SCREEN MANAGEMENT
+        // ═══════════════════════════════════════════════
+        const screens = [];
+        let cur = 0;
+        let asiMode = 'asi'; // 'asi' or 'feat'
+        let isTransitioning = false;
 
-// ═══════════════════════════════════════════════
-// SCREEN: SUMMARY
-// ═══════════════════════════════════════════════
-function buildSummary(el) {
-    const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
-    let html = `
+        function decodeBase64Utf8(b64) {
+            const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
+            const binary = atob(raw);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return new TextDecoder().decode(bytes);
+        }
+
+        (function init() {
+            const params = new URLSearchParams(location.search);
+            token = params.get('token') || '';
+            apiFallback = params.get('api') || '';
+            userId = params.get('uid') || '';
+            try {
+                const raw = params.get('p') || '';
+                P = JSON.parse(decodeBase64Utf8(raw));
+            } catch (e) {
+                showFatalError('Dados invalidos', e); return;
+            }
+            if (!P || !P.hero_class || !P.stats || typeof P.level !== 'number') {
+                showFatalError('Dados do personagem incompletos'); return;
+            }
+            for (const [k, v] of Object.entries(P.stats)) {
+                if (typeof v !== 'number' || v < 1 || v > 20) {
+                    showFatalError('Atributos invalidos'); return;
+                }
+            }
+            if (typeof CLASS_SKILLS === 'undefined' || typeof FEATS === 'undefined') {
+                showFatalError('Dados do jogo nao carregaram'); return;
+            }
+            buildScreens();
+        })();
+
+        function buildScreens() {
+            screens.length = 0;
+            screens.push({ id: 'summary', build: buildSummary, validate: () => null });
+
+            if (P.needs_subclass) {
+                screens.push({ id: 'subclass', build: buildSubclass, validate: validateSubclass, hasSub: true });
+            }
+            if (P.pending_asi > 0) {
+                screens.push({ id: 'asi', build: buildASI, validate: validateASI, hasSub: true });
+            }
+            if (P.pending_skills > 0) {
+                const skills = getAvailableSkills();
+                if (skills.length > 0) {
+                    screens.push({ id: 'skills', build: buildSkills, validate: validateSkills, hasSub: true });
+                }
+            }
+            screens.push({ id: 'review', build: buildReview, validate: () => null });
+
+            buildProgress();
+            renderAllScreens();
+            goTo(0);
+        }
+
+        function buildProgress() {
+            const bar = document.getElementById('progressBar');
+            bar.innerHTML = screens.map((s, i) =>
+                `<div class="progress-step" id="pstep_${i}"></div>`
+            ).join('');
+        }
+
+        function updateProgress() {
+            screens.forEach((_, i) => {
+                const el = document.getElementById('pstep_' + i);
+                if (!el) return;
+                el.className = 'progress-step' + (i < cur ? ' done' : i === cur ? ' active' : '');
+            });
+        }
+
+        function renderAllScreens() {
+            const track = document.getElementById('screenTrack');
+            track.innerHTML = screens.map((s, i) => {
+                let subHtml = '';
+                if (s.hasSub) {
+                    subHtml = `<div class="sub-screen" id="sub_${s.id}"><div class="screen-content" id="sub_content_${s.id}"></div></div>`;
+                }
+                return `<div class="screen" id="screen_${i}"><div class="screen-content" id="content_${i}"></div>${subHtml}</div>`;
+            }).join('');
+            screens.forEach((s, i) => s.build(document.getElementById('content_' + i)));
+        }
+
+        function goTo(idx) {
+            if (idx < 0 || idx >= screens.length) return;
+            haptic('light');
+            closeAllSubScreens();
+            cur = idx;
+            document.getElementById('screenTrack').style.transform = `translateX(-${idx * 100}vw)`;
+            // Show progress bar only after the summary screen
+            const bar = document.getElementById('progressBar');
+            if (idx > 0) bar.classList.add('visible');
+            else bar.classList.remove('visible');
+            updateProgress();
+            updateNavBtn();
+            if (screens[cur].id === 'review') {
+                screens[cur].build(document.getElementById('content_' + cur));
+            }
+        }
+
+        function goNext() {
+            const err = screens[cur].validate();
+            if (err) { showError(err); return; }
+            if (cur === screens.length - 1) {
+                submit();
+            } else {
+                goTo(cur + 1);
+            }
+        }
+
+        function goBack() {
+            if (cur > 0) goTo(cur - 1);
+        }
+
+        function updateNavBtn() {
+            const btn = document.getElementById('btnNext');
+            if (cur === screens.length - 1) {
+                btn.textContent = '\u2694\ufe0f Confirmar Evolucao';
+                btn.className = 'v-btn v-btn-primary';
+            } else {
+                btn.textContent = 'Continuar \u25b6';
+                btn.className = 'v-btn v-btn-primary';
+            }
+            if (tg && tg.BackButton) {
+                const hasOpenSub = document.querySelector('.sub-screen.active');
+                if (cur > 0 || hasOpenSub) { tg.BackButton.show(); } else { tg.BackButton.hide(); }
+            }
+        }
+
+        // ═══════════════════════════════════════════════
+        // SUB-SCREEN MANAGEMENT
+        // ═══════════════════════════════════════════════
+        function openSubScreen(subId) {
+            if (isTransitioning) return;
+            const sub = document.getElementById(subId);
+            if (!sub) return;
+            isTransitioning = true;
+            sub.classList.add('active');
+            const parentScreen = sub.closest('.screen');
+            if (parentScreen) { parentScreen.scrollTop = 0; parentScreen.classList.add('sub-open'); }
+            sub.scrollTop = 0;
+            document.querySelector('.nav-bar').classList.add('hidden');
+            updateNavBtn();
+            setTimeout(() => { isTransitioning = false; }, 350);
+        }
+
+        function closeSubScreen(subId) {
+            const sub = document.getElementById(subId);
+            if (!sub) return;
+            sub.classList.remove('active');
+            const parentScreen = sub.closest('.screen');
+            if (parentScreen && !parentScreen.querySelector('.sub-screen.active')) {
+                parentScreen.classList.remove('sub-open');
+            }
+            if (!document.querySelector('.sub-screen.active')) {
+                document.querySelector('.nav-bar').classList.remove('hidden');
+            }
+            updateNavBtn();
+        }
+
+        function closeAllSubScreens() {
+            document.querySelectorAll('.sub-screen.active').forEach(s => {
+                s.classList.remove('active');
+                const parentScreen = s.closest('.screen');
+                if (parentScreen) parentScreen.classList.remove('sub-open');
+            });
+        }
+
+        // ═══════════════════════════════════════════════
+        // TELEGRAM BACK BUTTON
+        // ═══════════════════════════════════════════════
+        if (tg && tg.BackButton) {
+            tg.BackButton.onClick(() => {
+                const openSub = document.querySelector('.sub-screen.active');
+                if (openSub) { closeSubScreen(openSub.id); return; }
+                goBack();
+            });
+        }
+
+        // ═══════════════════════════════════════════════
+        // HELPERS
+        // ═══════════════════════════════════════════════
+        function getMod(val) {
+            return Math.floor((val - 10) / 2);
+        }
+        function fmtMod(val) {
+            const m = getMod(val);
+            return m >= 0 ? '+' + m : '' + m;
+        }
+        function getAvailableSkills() {
+            const pool = CLASS_SKILLS[P.hero_class] || {};
+            const result = [];
+            for (const [lv, skills] of Object.entries(pool)) {
+                if (parseInt(lv) <= P.level) {
+                    for (const s of skills) {
+                        if (!P.acquired_skills.includes(s.id)) {
+                            result.push({ ...s, level: parseInt(lv) });
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        function showError(msg, err = null) {
+            console.error('[LEVELUP]', msg, err || '');
+            hapticNotify('error');
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function showFatalError(msg, err = null) {
+            console.error('[LEVELUP][FATAL]', msg, err || '');
+            const el = document.getElementById('fatalError');
+            document.getElementById('fatalMsg').textContent = msg;
+            el.classList.add('active');
+        }
+
+        function calcDmgRange(effect) {
+            if (!effect) return '';
+            const m = effect.match(/(\d+)d(\d+)(?:\s*\+\s*(\d+))?/);
+            if (!m) return '';
+            const n = parseInt(m[1]), d = parseInt(m[2]), b = m[3] ? parseInt(m[3]) : 0;
+            return `${n + b}~${n * d + b}`;
+        }
+
+        // ═══════════════════════════════════════════════
+        // SCREEN: SUMMARY
+        // ═══════════════════════════════════════════════
+        function buildSummary(el) {
+            const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
+            let html = `
         <div class="dm-bubble">${P.name}, a energia do seu crescimento se manifesta. Voce sente o poder fluindo...</div>
         <div class="lvl-banner">
             <div class="lvl-banner-level">${P.level}</div>
@@ -807,51 +1159,51 @@ function buildSummary(el) {
         <div class="pending-list">
     `;
 
-    if (P.needs_subclass) {
-        html += `<div class="pending-item">
+            if (P.needs_subclass) {
+                html += `<div class="pending-item">
             <div class="pending-icon">\ud83c\udff0</div>
             <div class="pending-text"><b>Subclasse</b><small>Escolha obrigatoria no nivel 3+</small></div>
             <div class="pending-badge">1</div>
         </div>`;
-    }
-    if (P.pending_asi > 0) {
-        html += `<div class="pending-item">
+            }
+            if (P.pending_asi > 0) {
+                html += `<div class="pending-item">
             <div class="pending-icon">\ud83d\udcaa</div>
             <div class="pending-text"><b>Pontos de Atributo</b><small>Distribua entre seus atributos</small></div>
             <div class="pending-badge">${P.pending_asi}</div>
         </div>`;
-    }
-    if (P.pending_skills > 0) {
-        html += `<div class="pending-item">
+            }
+            if (P.pending_skills > 0) {
+                html += `<div class="pending-item">
             <div class="pending-icon">\u26a1</div>
             <div class="pending-text"><b>Novas Habilidades</b><small>Escolha do pool da sua classe</small></div>
             <div class="pending-badge">${P.pending_skills}</div>
         </div>`;
-    }
+            }
 
-    html += '</div><div class="hint">Prossiga para fazer suas escolhas</div>';
-    el.innerHTML = html;
-}
+            html += '</div><div class="hint">Prossiga para fazer suas escolhas</div>';
+            el.innerHTML = html;
+        }
 
-// ═══════════════════════════════════════════════
-// SCREEN: SUBCLASS (compact cards)
-// ═══════════════════════════════════════════════
-function buildSubclass(el) {
-    const subs = SUBCLASSES[P.hero_class] || {};
-    const info = CLASS_INFO[P.hero_class] || { name: 'Classe' };
+        // ═══════════════════════════════════════════════
+        // SCREEN: SUBCLASS (compact cards)
+        // ═══════════════════════════════════════════════
+        function buildSubclass(el) {
+            const subs = SUBCLASSES[P.hero_class] || {};
+            const info = CLASS_INFO[P.hero_class] || { name: 'Classe' };
 
-    let html = `<div class="dm-bubble">Chegou a hora de definir seu caminho. Cada especializacao oferece poderes unicos...</div>
+            let html = `<div class="dm-bubble">Chegou a hora de definir seu caminho. Cada especializacao oferece poderes unicos...</div>
         <div class="section-title">\ud83c\udff0 Subclasse: ${info.name}</div>
         <div class="hint">Escolha sua especializacao</div>
         <div id="subclassList">`;
 
-    const subEntries = Object.entries(subs);
-    if (subEntries.length === 0) {
-        html += '<div class="empty-msg">Subclasses nao disponiveis para este nivel.</div>';
-    } else {
-        for (const [scId, sc] of subEntries) {
-            const isSel = sel.subclass === scId;
-            html += `<div class="choice-card${isSel ? ' selected' : ''}" onclick="selectSubclass('${scId}')">
+            const subEntries = Object.entries(subs);
+            if (subEntries.length === 0) {
+                html += '<div class="empty-msg">Subclasses nao disponiveis para este nivel.</div>';
+            } else {
+                for (const [scId, sc] of subEntries) {
+                    const isSel = sel.subclass === scId;
+                    html += `<div class="choice-card${isSel ? ' selected' : ''}" onclick="selectSubclass('${scId}')">
                 <div class="choice-card-header">
                     <div class="choice-card-icon">\ud83c\udff0</div>
                     <div class="choice-card-name">${sc.name}</div>
@@ -860,110 +1212,110 @@ function buildSubclass(el) {
                 <div class="choice-card-desc">${sc.desc}</div>
                 <div class="detail-link" onclick="event.stopPropagation(); openSubclassDetail('${scId}')">Ver habilidades \u25b8</div>
             </div>`;
+                }
+            }
+
+            html += '</div>';
+            el.innerHTML = html;
         }
-    }
 
-    html += '</div>';
-    el.innerHTML = html;
-}
+        function openSubclassDetail(scId) {
+            const subs = SUBCLASSES[P.hero_class] || {};
+            const sc = subs[scId];
+            if (!sc) return;
 
-function openSubclassDetail(scId) {
-    const subs = SUBCLASSES[P.hero_class] || {};
-    const sc = subs[scId];
-    if (!sc) return;
+            const container = document.getElementById('sub_content_subclass');
+            if (!container) return;
 
-    const container = document.getElementById('sub_content_subclass');
-    if (!container) return;
+            let html = `<button class="sub-back-btn" onclick="closeSubScreen('sub_subclass')">\u25c0 Voltar</button>`;
+            html += `<div class="section-title">\ud83c\udff0 ${sc.name}</div>`;
+            html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:12px;line-height:1.4">${sc.desc}</div>`;
 
-    let html = `<button class="sub-back-btn" onclick="closeSubScreen('sub_subclass')">\u25c0 Voltar</button>`;
-    html += `<div class="section-title">\ud83c\udff0 ${sc.name}</div>`;
-    html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:12px;line-height:1.4">${sc.desc}</div>`;
-
-    const feats = sc.features || {};
-    const levels = Object.keys(feats).sort((a,b) => parseInt(a) - parseInt(b));
-    if (levels.length > 0) {
-        html += '<div class="section-title">Habilidades por Nivel</div>';
-        for (const lv of levels) {
-            const f = feats[lv];
-            html += `<div class="sc-feature">
+            const feats = sc.features || {};
+            const levels = Object.keys(feats).sort((a, b) => parseInt(a) - parseInt(b));
+            if (levels.length > 0) {
+                html += '<div class="section-title">Habilidades por Nivel</div>';
+                for (const lv of levels) {
+                    const f = feats[lv];
+                    html += `<div class="sc-feature">
                 <div class="sc-feature-level">Nivel ${lv}</div>
                 <div class="sc-feature-name">${f.name}</div>
                 ${f.desc ? `<div class="sc-feature-desc">${f.desc}</div>` : ''}
             </div>`;
-        }
-    }
+                }
+            }
 
-    const isSel = sel.subclass === scId;
-    html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%;margin-top:16px"
+            const isSel = sel.subclass === scId;
+            html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%;margin-top:16px"
         onclick="selectSubclass('${scId}'); closeSubScreen('sub_subclass')">
         ${isSel ? '\u2713 Selecionada' : `Selecionar ${sc.name}`}
     </button>`;
 
-    container.innerHTML = html;
-    openSubScreen('sub_subclass');
-}
+            container.innerHTML = html;
+            openSubScreen('sub_subclass');
+        }
 
-function selectSubclass(scId) {
-    haptic('light');
-    sel.subclass = sel.subclass === scId ? '' : scId;
-    const screen = screens.findIndex(s => s.id === 'subclass');
-    if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
-}
+        function selectSubclass(scId) {
+            haptic('light');
+            sel.subclass = sel.subclass === scId ? '' : scId;
+            const screen = screens.findIndex(s => s.id === 'subclass');
+            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+        }
 
-function validateSubclass() {
-    if (!sel.subclass) return 'Escolha uma subclasse';
-    return null;
-}
+        function validateSubclass() {
+            if (!sel.subclass) return 'Escolha uma subclasse';
+            return null;
+        }
 
-// ═══════════════════════════════════════════════
-// SCREEN: ASI + FEATS (compact)
-// ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════
+        // SCREEN: ASI + FEATS (compact)
+        // ═══════════════════════════════════════════════
 
-function buildASI(el) {
-    const totalPts = P.pending_asi;
-    const featCost = sel.feat ? 2 : 0;
-    const asiPts = totalPts - featCost;
-    const allocated = Object.values(sel.asi).reduce((a, b) => a + b, 0);
-    const remaining = asiPts - allocated;
+        function buildASI(el) {
+            const totalPts = P.pending_asi;
+            const featCost = sel.feat ? 2 : 0;
+            const asiPts = totalPts - featCost;
+            const allocated = Object.values(sel.asi).reduce((a, b) => a + b, 0);
+            const remaining = asiPts - allocated;
 
-    const availableFeats = getAvailableFeats();
-    const hasFeats = Object.keys(availableFeats).length > 0 && totalPts >= 2;
+            const availableFeats = getAvailableFeats();
+            const hasFeats = Object.keys(availableFeats).length > 0 && totalPts >= 2;
 
-    let html = '<div class="dm-bubble">Distribua sua experiencia adquirida para fortalecer seus atributos — ou escolha um talento especial.</div>';
+            let html = '<div class="dm-bubble">Distribua sua experiencia adquirida para fortalecer seus atributos — ou escolha um talento especial.</div>';
 
-    if (hasFeats) {
-        html += `<div class="mode-toggle">
+            if (hasFeats) {
+                html += `<div class="mode-toggle">
             <button class="mode-toggle-btn${asiMode === 'asi' ? ' active' : ''}" onclick="setAsiMode('asi')">\ud83d\udcaa Atributos</button>
             <button class="mode-toggle-btn${asiMode === 'feat' ? ' active' : ''}" onclick="setAsiMode('feat')">\ud83c\udf96\ufe0f Talento</button>
         </div>`;
-    }
+            }
 
-    if (asiMode === 'asi') {
-        html += buildASIPanel(asiPts, allocated, remaining);
-    } else {
-        html += buildFeatPanel(availableFeats);
-    }
+            if (asiMode === 'asi') {
+                html += buildASIPanel(asiPts, allocated, remaining);
+            } else {
+                html += buildFeatPanel(availableFeats);
+            }
 
-    el.innerHTML = html;
-}
+            el.innerHTML = html;
+        }
 
-function buildASIPanel(asiPts, allocated, remaining) {
-    let html = `<div class="asi-counter">Pontos: <b>${allocated}</b> / <b>${asiPts}</b> distribuidos</div>`;
+        function buildASIPanel(asiPts, allocated, remaining) {
+            let html = `<div class="asi-counter">Pontos: <b>${allocated}</b> / <b>${asiPts}</b> distribuidos</div>`;
 
-    if (asiPts <= 0) {
-        html += `<div class="empty-msg">Todos os pontos foram usados no talento selecionado.</div>`;
-        return html;
-    }
+            if (asiPts <= 0) {
+                html += `<div class="empty-msg">Todos os pontos foram usados no talento selecionado.</div>`;
+                return html;
+            }
 
-    html += '<div class="asi-grid">';
-    const attrs = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
-    for (const attr of attrs) {
-        const base = P.stats[attr];
-        const boost = sel.asi[attr] || 0;
-        const val = base + boost;
-        const maxed = val >= 20;
+            html += '<div class="asi-grid">';
+            const attrs = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
+            for (const attr of attrs) {
+                const base = P.stats[attr];
+                const boost = sel.asi[attr] || 0;
+                const val = base + boost;
+                const maxed = val >= 20;
 
-        html += `<div class="asi-card${maxed && boost === 0 ? ' maxed' : ''}">
+                html += `<div class="asi-card${maxed && boost === 0 ? ' maxed' : ''}">
             <div class="asi-icon">${ATTR_ICONS[attr]}</div>
             <div class="asi-name">${ATTR_ABBR[attr]}</div>
             <div class="asi-value">${val}</div>
@@ -974,18 +1326,18 @@ function buildASIPanel(asiPts, allocated, remaining) {
                 <button class="asi-btn plus" onclick="asiChange('${attr}',1)" ${(remaining <= 0 || val >= 20) ? 'disabled' : ''}>+</button>
             </div>
         </div>`;
-    }
-    html += '</div>';
-    return html;
-}
+            }
+            html += '</div>';
+            return html;
+        }
 
-function buildFeatPanel(availableFeats) {
-    let html = '<div class="section-title">\ud83c\udf96\ufe0f Talentos</div>';
-    html += '<div class="hint">Escolher um talento consome 2 pontos de atributo</div>';
+        function buildFeatPanel(availableFeats) {
+            let html = '<div class="section-title">\ud83c\udf96\ufe0f Talentos</div>';
+            html += '<div class="hint">Escolher um talento consome 2 pontos de atributo</div>';
 
-    if (sel.feat) {
-        const f = FEATS[sel.feat];
-        html += `<div class="choice-card selected" onclick="selectFeat('')">
+            if (sel.feat) {
+                const f = FEATS[sel.feat];
+                html += `<div class="choice-card selected" onclick="selectFeat('')">
             <div class="choice-card-header">
                 <div class="choice-card-icon">\ud83c\udf96\ufe0f</div>
                 <div class="choice-card-name">${f.name}</div>
@@ -994,32 +1346,32 @@ function buildFeatPanel(availableFeats) {
             </div>
         </div>`;
 
-        if (f.stat_choice) {
-            html += '<div class="section-title">Escolha do Atributo</div>';
-            for (const attr of f.stat_choice) {
-                const curVal = P.stats[attr];
-                const amt = f.stat_amount || 1;
-                if (curVal + amt > 20) continue;
-                const isSel = sel.featStat === attr;
-                html += `<div class="choice-card${isSel ? ' selected' : ''}" onclick="selectFeatStat('${attr}')">
+                if (f.stat_choice) {
+                    html += '<div class="section-title">Escolha do Atributo</div>';
+                    for (const attr of f.stat_choice) {
+                        const curVal = P.stats[attr];
+                        const amt = f.stat_amount || 1;
+                        if (curVal + amt > 20) continue;
+                        const isSel = sel.featStat === attr;
+                        html += `<div class="choice-card${isSel ? ' selected' : ''}" onclick="selectFeatStat('${attr}')">
                     <div class="choice-card-header">
                         <div class="choice-card-icon">${ATTR_ICONS[attr]}</div>
                         <div class="choice-card-name">${ATTR_PT[attr]} (${curVal} \u2192 ${curVal + amt})</div>
                         <div class="choice-card-check">${isSel ? '\u2713' : ''}</div>
                     </div>
                 </div>`;
-            }
-        }
+                    }
+                }
 
-        html += `<button class="v-btn v-btn-secondary" style="width:100%;margin-top:12px" onclick="selectFeat('')">Remover Talento</button>`;
-    } else {
-        const featEntries = Object.entries(availableFeats);
-        if (featEntries.length === 0) {
-            html += '<div class="empty-msg">Nenhum talento disponivel para sua classe.</div>';
-        } else {
-            html += '<div class="feat-scroll-list">';
-            for (const [fid, f] of featEntries) {
-                html += `<div class="choice-card" onclick="selectFeat('${fid}')">
+                html += `<button class="v-btn v-btn-secondary" style="width:100%;margin-top:12px" onclick="selectFeat('')">Remover Talento</button>`;
+            } else {
+                const featEntries = Object.entries(availableFeats);
+                if (featEntries.length === 0) {
+                    html += '<div class="empty-msg">Nenhum talento disponivel para sua classe.</div>';
+                } else {
+                    html += '<div class="feat-scroll-list">';
+                    for (const [fid, f] of featEntries) {
+                        html += `<div class="choice-card" onclick="selectFeat('${fid}')">
                     <div class="choice-card-header">
                         <div class="choice-card-icon">\ud83c\udf96\ufe0f</div>
                         <div class="choice-card-name">${f.name}</div>
@@ -1027,353 +1379,381 @@ function buildFeatPanel(availableFeats) {
                         <button class="info-btn" onclick="event.stopPropagation(); openFeatDetail('${fid}')">i</button>
                     </div>
                 </div>`;
+                    }
+                    html += '</div>';
+                }
             }
-            html += '</div>';
+
+            return html;
         }
-    }
 
-    return html;
-}
+        function openFeatDetail(fid) {
+            const f = FEATS[fid];
+            if (!f) return;
 
-function openFeatDetail(fid) {
-    const f = FEATS[fid];
-    if (!f) return;
+            const container = document.getElementById('sub_content_asi');
+            if (!container) return;
 
-    const container = document.getElementById('sub_content_asi');
-    if (!container) return;
+            let html = `<button class="sub-back-btn" onclick="closeSubScreen('sub_asi')">\u25c0 Voltar</button>`;
+            html += `<div class="section-title">\ud83c\udf96\ufe0f ${f.name}</div>`;
+            html += `<div style="font-size:13px;color:var(--v-text);margin-bottom:8px;line-height:1.4">${f.desc}</div>`;
 
-    let html = `<button class="sub-back-btn" onclick="closeSubScreen('sub_asi')">\u25c0 Voltar</button>`;
-    html += `<div class="section-title">\ud83c\udf96\ufe0f ${f.name}</div>`;
-    html += `<div style="font-size:13px;color:var(--v-text);margin-bottom:8px;line-height:1.4">${f.desc}</div>`;
+            if (f.effect) {
+                html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:8px;line-height:1.3"><b>Efeito:</b> ${f.effect}</div>`;
+            }
+            if (f.stat_choice) {
+                html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:8px"><b>Bônus:</b> +${f.stat_amount || 1} em ${f.stat_choice.map(a => ATTR_PT[a]).join(' ou ')}</div>`;
+            }
+            if (f.req_spellcaster) {
+                html += `<div style="font-size:12px;color:#e45;margin-bottom:8px"><b>Requisito:</b> Classe conjuradora</div>`;
+            }
 
-    if (f.effect) {
-        html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:8px;line-height:1.3"><b>Efeito:</b> ${f.effect}</div>`;
-    }
-    if (f.stat_choice) {
-        html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:8px"><b>Bônus:</b> +${f.stat_amount || 1} em ${f.stat_choice.map(a => ATTR_PT[a]).join(' ou ')}</div>`;
-    }
-    if (f.req_spellcaster) {
-        html += `<div style="font-size:12px;color:#e45;margin-bottom:8px"><b>Requisito:</b> Classe conjuradora</div>`;
-    }
+            html += `<div style="font-size:11px;color:var(--v-text-dim);margin-top:4px">Custo: 2 pontos de atributo</div>`;
 
-    html += `<div style="font-size:11px;color:var(--v-text-dim);margin-top:4px">Custo: 2 pontos de atributo</div>`;
-
-    html += `<button class="v-btn v-btn-primary" style="width:100%;margin-top:16px"
+            html += `<button class="v-btn v-btn-primary" style="width:100%;margin-top:16px"
         onclick="selectFeat('${fid}'); closeSubScreen('sub_asi')">Selecionar ${f.name}</button>`;
 
-    container.innerHTML = html;
-    openSubScreen('sub_asi');
-}
-
-function getAvailableFeats() {
-    const result = {};
-    const nonCasters = ['WARRIOR', 'ROGUE', 'BARBARIAN'];
-    for (const [fid, f] of Object.entries(FEATS)) {
-        if (P.feats.includes(fid)) continue;
-        if (f.req_spellcaster && nonCasters.includes(P.hero_class)) continue;
-        result[fid] = f;
-    }
-    return result;
-}
-
-function setAsiMode(mode) {
-    asiMode = mode;
-    const screen = screens.findIndex(s => s.id === 'asi');
-    if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
-}
-
-function asiChange(attr, delta) {
-    haptic('light');
-    const boost = (sel.asi[attr] || 0) + delta;
-    const val = P.stats[attr] + boost;
-    if (boost < 0 || val > 20) return;
-
-    const featCost = sel.feat ? 2 : 0;
-    const asiPts = P.pending_asi - featCost;
-    const totalAllocated = Object.values(sel.asi).reduce((a, b) => a + b, 0) + delta;
-    if (totalAllocated > asiPts || totalAllocated < 0) return;
-
-    if (boost === 0) { delete sel.asi[attr]; } else { sel.asi[attr] = boost; }
-
-    const screen = screens.findIndex(s => s.id === 'asi');
-    if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
-}
-
-function selectFeat(fid) {
-    haptic('medium');
-    if (sel.feat === fid) {
-        sel.feat = ''; sel.featStat = '';
-    } else {
-        sel.feat = fid; sel.featStat = '';
-        const featCost = fid ? 2 : 0;
-        const asiPts = P.pending_asi - featCost;
-        const allocated = Object.values(sel.asi).reduce((a, b) => a + b, 0);
-        if (allocated > asiPts) { sel.asi = {}; }
-    }
-    const screen = screens.findIndex(s => s.id === 'asi');
-    if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
-}
-
-function selectFeatStat(attr) {
-    haptic('light');
-    sel.featStat = sel.featStat === attr ? '' : attr;
-    const screen = screens.findIndex(s => s.id === 'asi');
-    if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
-}
-
-function validateASI() {
-    const featCost = sel.feat ? 2 : 0;
-    const asiPts = P.pending_asi - featCost;
-    const allocated = Object.values(sel.asi).reduce((a, b) => a + b, 0);
-
-    if (sel.feat) {
-        const f = FEATS[sel.feat];
-        if (f && f.stat_choice && !sel.featStat) {
-            return 'Escolha o atributo para o talento';
+            container.innerHTML = html;
+            openSubScreen('sub_asi');
         }
-    }
 
-    if (allocated !== asiPts) {
-        return `Distribua todos os ${asiPts} pontos de atributo (faltam ${asiPts - allocated})`;
-    }
-    return null;
-}
+        function getAvailableFeats() {
+            const result = {};
+            const nonCasters = ['WARRIOR', 'ROGUE', 'BARBARIAN'];
+            for (const [fid, f] of Object.entries(FEATS)) {
+                if (P.feats.includes(fid)) continue;
+                if (f.req_spellcaster && nonCasters.includes(P.hero_class)) continue;
+                result[fid] = f;
+            }
+            return result;
+        }
 
-// ═══════════════════════════════════════════════
-// SCREEN: SKILLS (compact rows)
-// ═══════════════════════════════════════════════
-function buildSkills(el) {
-    const available = getAvailableSkills();
-    const needed = Math.min(P.pending_skills, available.length);
-    const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
+        function setAsiMode(mode) {
+            asiMode = mode;
+            const screen = screens.findIndex(s => s.id === 'asi');
+            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+        }
 
-    let html = `<div class="dm-bubble">Novas tecnicas de combate estao ao seu alcance. Escolha com sabedoria.</div>`;
-    html += `<div class="section-title">\u26a1 Habilidades</div>`;
-    html += `<div class="asi-counter">Selecionadas: <b>${sel.skills.length}</b> / <b>${needed}</b></div>`;
+        function asiChange(attr, delta) {
+            haptic('light');
+            const boost = (sel.asi[attr] || 0) + delta;
+            const val = P.stats[attr] + boost;
+            if (boost < 0 || val > 20) return;
 
-    for (const s of available) {
-        const isSel = sel.skills.includes(s.id);
-        html += `<div class="skill-compact${isSel ? ' selected' : ''}" onclick="toggleSkill('${s.id}')">
+            const featCost = sel.feat ? 2 : 0;
+            const asiPts = P.pending_asi - featCost;
+            const totalAllocated = Object.values(sel.asi).reduce((a, b) => a + b, 0) + delta;
+            if (totalAllocated > asiPts || totalAllocated < 0) return;
+
+            if (boost === 0) { delete sel.asi[attr]; } else { sel.asi[attr] = boost; }
+
+            const screen = screens.findIndex(s => s.id === 'asi');
+            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+        }
+
+        function selectFeat(fid) {
+            haptic('medium');
+            if (sel.feat === fid) {
+                sel.feat = ''; sel.featStat = '';
+            } else {
+                sel.feat = fid; sel.featStat = '';
+                const featCost = fid ? 2 : 0;
+                const asiPts = P.pending_asi - featCost;
+                const allocated = Object.values(sel.asi).reduce((a, b) => a + b, 0);
+                if (allocated > asiPts) { sel.asi = {}; }
+            }
+            const screen = screens.findIndex(s => s.id === 'asi');
+            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+        }
+
+        function selectFeatStat(attr) {
+            haptic('light');
+            sel.featStat = sel.featStat === attr ? '' : attr;
+            const screen = screens.findIndex(s => s.id === 'asi');
+            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+        }
+
+        function validateASI() {
+            const featCost = sel.feat ? 2 : 0;
+            const asiPts = P.pending_asi - featCost;
+            const allocated = Object.values(sel.asi).reduce((a, b) => a + b, 0);
+
+            if (sel.feat) {
+                const f = FEATS[sel.feat];
+                if (f && f.stat_choice && !sel.featStat) {
+                    return 'Escolha o atributo para o talento';
+                }
+            }
+
+            if (allocated !== asiPts) {
+                return `Distribua todos os ${asiPts} pontos de atributo (faltam ${asiPts - allocated})`;
+            }
+            return null;
+        }
+
+        // ═══════════════════════════════════════════════
+        // SCREEN: SKILLS (compact rows)
+        // ═══════════════════════════════════════════════
+        function buildSkills(el) {
+            const available = getAvailableSkills();
+            const needed = Math.min(P.pending_skills, available.length);
+            const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
+
+            let html = `<div class="dm-bubble">Novas tecnicas de combate estao ao seu alcance. Escolha com sabedoria.</div>`;
+            html += `<div class="section-title">\u26a1 Habilidades</div>`;
+            html += `<div class="asi-counter">Selecionadas: <b>${sel.skills.length}</b> / <b>${needed}</b></div>`;
+
+            for (const s of available) {
+                const isSel = sel.skills.includes(s.id);
+                html += `<div class="skill-compact${isSel ? ' selected' : ''}" onclick="toggleSkill('${s.id}')">
             <div class="skill-compact-check">${isSel ? '\u2713' : ''}</div>
             <span class="skill-compact-icon">\u26a1</span>
             <span class="skill-compact-name">${s.name}</span>
             ${s.passive ? '<span class="choice-card-badge badge-passive">Passiva</span>' :
-                `<span class="choice-card-badge badge-cost">${s.cost} ${info.resource}</span>`}
+                        `<span class="choice-card-badge badge-cost">${s.cost} ${info.resource}</span>`}
             <button class="info-btn" onclick="event.stopPropagation(); openSkillDetail('${s.id}')">i</button>
         </div>`;
-    }
+            }
 
-    if (available.length === 0) {
-        html += '<div class="empty-msg">Nenhuma habilidade disponivel para escolher.</div>';
-    }
+            if (available.length === 0) {
+                html += '<div class="empty-msg">Nenhuma habilidade disponivel para escolher.</div>';
+            }
 
-    el.innerHTML = html;
-}
+            el.innerHTML = html;
+        }
 
-function openSkillDetail(sid) {
-    const available = getAvailableSkills();
-    const s = available.find(sk => sk.id === sid);
-    if (!s) return;
-    const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
+        function openSkillDetail(sid) {
+            const available = getAvailableSkills();
+            const s = available.find(sk => sk.id === sid);
+            if (!s) return;
+            const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
 
-    const container = document.getElementById('sub_content_skills');
-    if (!container) return;
+            const container = document.getElementById('sub_content_skills');
+            if (!container) return;
 
-    const dmg = calcDmgRange(s.effect);
-    let html = `<button class="sub-back-btn" onclick="closeSubScreen('sub_skills')">\u25c0 Voltar</button>`;
-    html += `<div class="section-title">\u26a1 ${s.name}</div>`;
+            const dmg = calcDmgRange(s.effect);
+            let html = `<button class="sub-back-btn" onclick="closeSubScreen('sub_skills')">\u25c0 Voltar</button>`;
+            html += `<div class="section-title">\u26a1 ${s.name}</div>`;
 
-    html += `<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">`;
-    if (s.passive) {
-        html += '<span class="choice-card-badge badge-passive">Passiva</span>';
-    } else {
-        html += `<span class="choice-card-badge badge-cost">${s.cost} ${info.resource}</span>`;
-    }
-    html += `<span class="choice-card-badge badge-level">Nivel ${s.level}</span>`;
-    if (dmg) html += `<span class="choice-card-badge" style="background:rgba(228,68,85,0.15);color:#e45">${dmg} dano</span>`;
-    html += '</div>';
+            html += `<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">`;
+            if (s.passive) {
+                html += '<span class="choice-card-badge badge-passive">Passiva</span>';
+            } else {
+                html += `<span class="choice-card-badge badge-cost">${s.cost} ${info.resource}</span>`;
+            }
+            html += `<span class="choice-card-badge badge-level">Nivel ${s.level}</span>`;
+            if (dmg) html += `<span class="choice-card-badge" style="background:rgba(228,68,85,0.15);color:#e45">${dmg} dano</span>`;
+            html += '</div>';
 
-    if (s.effect) html += `<div style="font-size:13px;color:var(--v-text);margin-bottom:8px">\u2728 ${s.effect}</div>`;
-    if (s.desc) html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:8px;line-height:1.4">${s.desc}</div>`;
-    if (s.tech) html += `<div style="font-size:11px;color:var(--v-text-dim);font-style:italic;line-height:1.3">${s.tech}</div>`;
+            if (s.effect) html += `<div style="font-size:13px;color:var(--v-text);margin-bottom:8px">\u2728 ${s.effect}</div>`;
+            if (s.desc) html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:8px;line-height:1.4">${s.desc}</div>`;
+            if (s.tech) html += `<div style="font-size:11px;color:var(--v-text-dim);font-style:italic;line-height:1.3">${s.tech}</div>`;
 
-    const isSel = sel.skills.includes(sid);
-    html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%;margin-top:16px"
+            const isSel = sel.skills.includes(sid);
+            html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%;margin-top:16px"
         onclick="toggleSkill('${sid}'); closeSubScreen('sub_skills')">
         ${isSel ? '\u2713 Selecionada' : 'Selecionar Habilidade'}
     </button>`;
 
-    container.innerHTML = html;
-    openSubScreen('sub_skills');
-}
-
-function toggleSkill(sid) {
-    haptic('light');
-    const idx = sel.skills.indexOf(sid);
-    const available = getAvailableSkills();
-    const needed = Math.min(P.pending_skills, available.length);
-
-    if (idx >= 0) {
-        sel.skills.splice(idx, 1);
-    } else {
-        if (sel.skills.length >= needed) {
-            showError(`Voce so pode escolher ${needed} habilidade(s)`);
-            return;
+            container.innerHTML = html;
+            openSubScreen('sub_skills');
         }
-        sel.skills.push(sid);
-    }
 
-    const screen = screens.findIndex(s => s.id === 'skills');
-    if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
-}
+        function toggleSkill(sid) {
+            haptic('light');
+            const idx = sel.skills.indexOf(sid);
+            const available = getAvailableSkills();
+            const needed = Math.min(P.pending_skills, available.length);
 
-function validateSkills() {
-    const available = getAvailableSkills();
-    const needed = Math.min(P.pending_skills, available.length);
-    if (sel.skills.length !== needed) {
-        return `Escolha ${needed} habilidade(s) (faltam ${needed - sel.skills.length})`;
-    }
-    return null;
-}
+            if (idx >= 0) {
+                sel.skills.splice(idx, 1);
+            } else {
+                if (sel.skills.length >= needed) {
+                    showError(`Voce so pode escolher ${needed} habilidade(s)`);
+                    return;
+                }
+                sel.skills.push(sid);
+            }
 
-// ═══════════════════════════════════════════════
-// SCREEN: REVIEW
-// ═══════════════════════════════════════════════
-function buildReview(el) {
-    const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
-    let html = `<div class="dm-bubble">Revise suas escolhas antes de confirmar. Uma vez feitas, nao ha como voltar.</div>`;
-    html += `<div class="section-title">\ud83d\udcdc Resumo da Evolucao</div>`;
+            const screen = screens.findIndex(s => s.id === 'skills');
+            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+        }
 
-    // HP/MP gains
-    html += `<div class="review-section">
+        function validateSkills() {
+            const available = getAvailableSkills();
+            const needed = Math.min(P.pending_skills, available.length);
+            if (sel.skills.length !== needed) {
+                return `Escolha ${needed} habilidade(s) (faltam ${needed - sel.skills.length})`;
+            }
+            return null;
+        }
+
+        // ═══════════════════════════════════════════════
+        // SCREEN: REVIEW
+        // ═══════════════════════════════════════════════
+        function buildReview(el) {
+            const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
+            let html = `<div class="dm-bubble">Revise suas escolhas antes de confirmar. Uma vez feitas, nao ha como voltar.</div>`;
+            html += `<div class="section-title">\ud83d\udcdc Resumo da Evolucao</div>`;
+
+            // HP/MP gains
+            html += `<div class="review-section">
         <div class="review-section-title">\u2764\ufe0f Vitalidade</div>`;
-    if (P.hp_gain) {
-        html += `<div class="review-row"><span class="review-label">HP</span>
+            if (P.hp_gain) {
+                html += `<div class="review-row"><span class="review-label">HP</span>
         <span class="review-value">${P.max_hp - P.hp_gain} <span class="arrow">\u2192</span> <span class="changed">${P.max_hp}</span></span></div>`;
-    }
-    if (P.mp_gain) {
-        html += `<div class="review-row"><span class="review-label">${info.resource}</span>
+            }
+            if (P.mp_gain) {
+                html += `<div class="review-row"><span class="review-label">${info.resource}</span>
         <span class="review-value">${P.max_mp - P.mp_gain} <span class="arrow">\u2192</span> <span class="changed">${P.max_mp}</span></span></div>`;
-    }
-    html += '</div>';
+            }
+            html += '</div>';
 
-    if (P.needs_subclass && sel.subclass) {
-        const subs = SUBCLASSES[P.hero_class] || {};
-        const sc = subs[sel.subclass];
-        html += `<div class="review-section">
+            if (P.needs_subclass && sel.subclass) {
+                const subs = SUBCLASSES[P.hero_class] || {};
+                const sc = subs[sel.subclass];
+                html += `<div class="review-section">
             <div class="review-section-title">\ud83c\udff0 Subclasse</div>
             <div class="review-row"><span class="review-label">Escolha:</span>
             <span class="review-value"><span class="changed">${sc ? sc.name : sel.subclass}</span> <span class="new-badge">Novo</span></span></div>
         </div>`;
-    }
+            }
 
-    if (sel.feat) {
-        const f = FEATS[sel.feat];
-        html += `<div class="review-section">
+            if (sel.feat) {
+                const f = FEATS[sel.feat];
+                html += `<div class="review-section">
             <div class="review-section-title">\ud83c\udf96\ufe0f Talento</div>
             <div class="review-row"><span class="review-label">Escolha:</span>
             <span class="review-value"><span class="changed">${f ? f.name : sel.feat}</span> <span class="new-badge">Novo</span></span></div>`;
-        if (sel.featStat) {
-            const amt = f?.stat_amount || 1;
-            html += `<div class="review-row"><span class="review-label">Bonus:</span>
+                if (sel.featStat) {
+                    const amt = f?.stat_amount || 1;
+                    html += `<div class="review-row"><span class="review-label">Bonus:</span>
             <span class="review-value"><span class="changed">+${amt} ${ATTR_PT[sel.featStat]}</span></span></div>`;
-        }
-        html += `<div class="review-row"><span class="review-label">Custo:</span>
+                }
+                html += `<div class="review-row"><span class="review-label">Custo:</span>
             <span class="review-value" style="color:#e45">-2 pontos de atributo</span></div>
         </div>`;
-    }
+            }
 
-    const asiEntries = Object.entries(sel.asi).filter(([_, v]) => v > 0);
-    if (asiEntries.length > 0) {
-        html += `<div class="review-section">
+            const asiEntries = Object.entries(sel.asi).filter(([_, v]) => v > 0);
+            if (asiEntries.length > 0) {
+                html += `<div class="review-section">
             <div class="review-section-title">\ud83d\udcaa Atributos</div>`;
-        for (const [attr, boost] of asiEntries) {
-            const before = P.stats[attr];
-            const after = before + boost;
-            html += `<div class="review-row">
+                for (const [attr, boost] of asiEntries) {
+                    const before = P.stats[attr];
+                    const after = before + boost;
+                    html += `<div class="review-row">
                 <span class="review-label">${ATTR_ICONS[attr]} ${ATTR_PT[attr]}</span>
                 <span class="review-value">${before} <span class="arrow">\u2192</span> <span class="changed">${after}</span> (${fmtMod(after)})</span>
             </div>`;
-        }
-        html += '</div>';
-    }
-
-    if (sel.skills.length > 0) {
-        html += `<div class="review-section">
-            <div class="review-section-title">\u26a1 Habilidades</div>`;
-        const pool = CLASS_SKILLS[P.hero_class] || {};
-        for (const sid of sel.skills) {
-            let sName = sid;
-            for (const skills of Object.values(pool)) {
-                const found = skills.find(s => s.id === sid);
-                if (found) { sName = found.name; break; }
-            }
-            html += `<div class="review-row"><span class="review-label">\u26a1</span>
-            <span class="review-value"><span class="changed">${sName}</span> <span class="new-badge">Novo</span></span></div>`;
-        }
-        html += '</div>';
-    }
-
-    html += '<div class="hint" style="margin-top:12px">Confirme suas escolhas para finalizar a evolucao</div>';
-    el.innerHTML = html;
-}
-
-// ═══════════════════════════════════════════════
-// SUBMIT
-// ═══════════════════════════════════════════════
-function submit() {
-    haptic('medium');
-    const asiChoices = [];
-    for (const [attr, count] of Object.entries(sel.asi)) {
-        for (let i = 0; i < count; i++) asiChoices.push(attr);
-    }
-
-    const payload = {
-        action: 'levelup_complete',
-        token: token,
-        asi_choices: asiChoices,
-        skill_choices: sel.skills,
-        subclass: sel.subclass,
-        feat: sel.feat,
-        feat_stat: sel.featStat,
-    };
-
-    // Show loading overlay
-    const btn = document.getElementById('btnNext');
-    btn.disabled = true;
-    btn.textContent = 'Enviando...';
-    document.getElementById('loadingOverlay').classList.add('active');
-
-    try {
-        if (tg && tg.sendData) {
-            setTimeout(() => {
-                tg.sendData(JSON.stringify(payload));
-                // Safety: close webapp if sendData didn't auto-close
-                setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[LEVELUP] tg.close:', e); } }, 300);
-            }, 300);
-            // Safety timeout: if webapp is still open after 5s, recover UI
-            setTimeout(() => {
-                if (document.visibilityState !== 'hidden') {
-                    document.getElementById('loadingOverlay').classList.remove('active');
-                    btn.disabled = false;
-                    btn.textContent = 'Confirmar';
                 }
-            }, 5000);
-        } else {
-            console.log('Level-up payload:', JSON.stringify(payload, null, 2));
-            setTimeout(() => {
+                html += '</div>';
+            }
+
+            if (sel.skills.length > 0) {
+                html += `<div class="review-section">
+            <div class="review-section-title">\u26a1 Habilidades</div>`;
+                const pool = CLASS_SKILLS[P.hero_class] || {};
+                for (const sid of sel.skills) {
+                    let sName = sid;
+                    for (const skills of Object.values(pool)) {
+                        const found = skills.find(s => s.id === sid);
+                        if (found) { sName = found.name; break; }
+                    }
+                    html += `<div class="review-row"><span class="review-label">\u26a1</span>
+            <span class="review-value"><span class="changed">${sName}</span> <span class="new-badge">Novo</span></span></div>`;
+                }
+                html += '</div>';
+            }
+
+            html += '<div class="hint" style="margin-top:12px">Confirme suas escolhas para finalizar a evolucao</div>';
+            el.innerHTML = html;
+        }
+
+        // ═══════════════════════════════════════════════
+        // SUBMIT
+        // ═══════════════════════════════════════════════
+        function submit() {
+            haptic('medium');
+            const asiChoices = [];
+            for (const [attr, count] of Object.entries(sel.asi)) {
+                for (let i = 0; i < count; i++) asiChoices.push(attr);
+            }
+
+            const payload = {
+                action: 'levelup_complete',
+                token: token,
+                asi_choices: asiChoices,
+                skill_choices: sel.skills,
+                subclass: sel.subclass,
+                feat: sel.feat,
+                feat_stat: sel.featStat,
+            };
+
+            // Show loading overlay
+            const btn = document.getElementById('btnNext');
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+            document.getElementById('loadingOverlay').classList.add('active');
+
+            try {
+                if (apiFallback) {
+                    payload.user_id = parseInt(userId);
+                    fetch(apiFallback + '/api/levelup/apply', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify(payload)
+                    }).then(res => res.json())
+                        .then(data => {
+                            if (data.status === 'saved' || data.ok) {
+                                if (tg && tg.close) tg.close();
+                                else alert('Evolucao confirmada!');
+                            } else {
+                                document.getElementById('loadingOverlay').classList.remove('active');
+                                btn.disabled = false;
+                                btn.textContent = 'Confirmar';
+                                showError('Erro ao aplicar evolucao: ' + (data.error || 'Desconhecido'));
+                            }
+                        }).catch(e => {
+                            document.getElementById('loadingOverlay').classList.remove('active');
+                            btn.disabled = false;
+                            btn.textContent = 'Confirmar';
+                            showError('Erro de conexao com servidor.', e);
+                        });
+                }
+                else if (tg && tg.sendData) {
+                    setTimeout(() => {
+                        tg.sendData(JSON.stringify(payload));
+                        // Safety: close webapp if sendData didn't auto-close
+                        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[LEVELUP] tg.close:', e); } }, 300);
+                    }, 300);
+                    // Safety timeout: if webapp is still open after 5s, recover UI
+                    setTimeout(() => {
+                        if (document.visibilityState !== 'hidden') {
+                            document.getElementById('loadingOverlay').classList.remove('active');
+                            btn.disabled = false;
+                            btn.textContent = 'Confirmar';
+                        }
+                    }, 5000);
+                } else {
+                    console.log('Level-up payload:', JSON.stringify(payload, null, 2));
+                    setTimeout(() => {
+                        document.getElementById('loadingOverlay').classList.remove('active');
+                        btn.disabled = false;
+                        alert('Evolucao confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
+                    }, 800);
+                }
+            } catch (e) {
                 document.getElementById('loadingOverlay').classList.remove('active');
                 btn.disabled = false;
-                alert('Evolucao confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
-            }, 800);
+                showError('Erro ao enviar dados. Tente novamente.', e);
+            }
         }
-    } catch (e) {
-        document.getElementById('loadingOverlay').classList.remove('active');
-        btn.disabled = false;
-        showError('Erro ao enviar dados. Tente novamente.', e);
-    }
-}
-</script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(e => console.warn('[LEVELUP] SW registration failed:', e))}</script>
+    </script>
+    <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('../sw.js').catch(e => console.warn('[LEVELUP] SW registration failed:', e)) }</script>
 </body>
+
 </html>
