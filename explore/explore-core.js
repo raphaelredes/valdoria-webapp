@@ -208,6 +208,11 @@ function loadMapData(data) {
         revealFogAt(S.playerCol, S.playerRow, S.visibility, S.fogState, S.grid, false);
     }
 
+    // Restore condition HUD if session had active conditions
+    if (restored && S.conditions.length) {
+        updateConditionHUD();
+    }
+
     // Initialize canvas renderer
     initRenderer();
 
@@ -218,12 +223,7 @@ function loadMapData(data) {
     initBottomBar();
 
     // Location info
-    const biomeNames = {
-        forest: 'Floresta', plains: 'Campos', swamp: 'Pântano', cave: 'Caverna',
-        desert: 'Deserto', mountain: 'Montanha', snow: 'Ermo Gelado',
-        volcanic: 'Vulcão', graveyard: 'Cemitério'
-    };
-    document.getElementById('location-info').textContent = biomeNames[S.biome] || S.biome;
+    updateLocationInfo();
 
     // Initialize ambient particles
     if (typeof initBiomeParticles === 'function') initBiomeParticles(S.biome);
@@ -281,7 +281,7 @@ function updateRewards() {
         void b.offsetHeight;
         b.classList.add('pop');
     });
-    setTimeout(() => { xpBadge.classList.remove('pop'); goldBadge.classList.remove('pop'); }, 450);
+    setTimeout(() => { xpBadge.classList.remove('pop'); goldBadge.classList.remove('pop'); }, 800);
     updateStepCounter();
 }
 
@@ -364,6 +364,30 @@ function updateConditionHUD() {
         tag.textContent = `${icons[c.type] || '⚠️'} ${labels[c.type] || c.type} (${c.stepsLeft})`;
         bar.appendChild(tag);
     }
+}
+
+// ═══════════════════════════════════════════════════════
+// LOCATION INFO (bottom bar — biome + tile type)
+// ═══════════════════════════════════════════════════════
+const _BIOME_NAMES = {
+    forest: 'Floresta', plains: 'Campos', swamp: 'Pântano', cave: 'Caverna',
+    desert: 'Deserto', mountain: 'Montanha', snow: 'Ermo Gelado',
+    volcanic: 'Vulcão', graveyard: 'Cemitério'
+};
+const _TILE_NAMES = {
+    T: 'Árvores', g: 'Grama', w: 'Água', r: 'Rochedo', R: 'Ruínas',
+    p: 'Trilha', s: 'Areia', m: 'Lama', i: 'Gelo', v: 'Cinzas',
+    b: 'Ponte', L: 'Lava',
+};
+
+function updateLocationInfo() {
+    const el = document.getElementById('location-info');
+    if (!el) return;
+    const baseBiome = (S.biome || '').replace(/^dungeon_/, '');
+    const biomeName = _BIOME_NAMES[baseBiome] || S.biome || '';
+    const tile = S.grid && S.grid[S.playerRow] ? (S.grid[S.playerRow][S.playerCol] || '.') : '.';
+    const tileName = _TILE_NAMES[tile] || '';
+    el.textContent = tileName ? `${biomeName} \u2022 ${tileName}` : biomeName;
 }
 
 // ═══════════════════════════════════════════════════════

@@ -153,7 +153,9 @@ function buildFormula(roll, mod, statName, profMark, dc, total, r1, r2, mode) {
         rollPart = `<b>${roll}</b>`;
     }
     const sign = mod >= 0 ? '+' : '';
-    return `${rollPart} ${sign} ${mod} (${statName}${profMark}) = <b>${total}</b> vs DC <b>${dc}</b>`;
+    const profLabel = profMark ? ' ★' : '';
+    const modeLabel = r2 !== null ? (mode === 'advantage' ? ' <span style="color:#4a8;font-size:0.85em">Vant.</span>' : ' <span style="color:#a44;font-size:0.85em">Desv.</span>') : '';
+    return `${rollPart} ${sign} ${mod} (${statName}${profLabel}) = <b>${total}</b> vs DC <b>${dc}</b>${modeLabel}`;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -341,6 +343,12 @@ function applyOutcome(poi, outcome, choice) {
     if (outcome.i) logEvents.push({ type: 'item', val: outcome.i });
     if (logEvents.length) logMoveEvent(logEvents);
 
+    // Haptic feedback on positive rewards
+    const hasReward = outcome.x || outcome.g || (outcome.h && outcome.h > 0) || outcome.i;
+    if (hasReward) {
+        try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch (e) { /* ignore */ }
+    }
+
     updateRewards();
     overlay.classList.add('active');
 }
@@ -449,8 +457,10 @@ async function transitionToArena() {
             }
         }
         console.error('[EXPLORE] Transition to arena failed, using fallback');
+        if (typeof showTerrainToast === 'function') showTerrainToast('⚠️ Erro na transição. Usando fallback...', 'damage');
     } catch (e) {
         console.error('[EXPLORE] Transition to arena error:', e);
+        if (typeof showTerrainToast === 'function') showTerrainToast('⚠️ Erro na transição. Usando fallback...', 'damage');
     }
 
     // Fallback: old sendData + close behavior
@@ -486,9 +496,11 @@ async function transitionToInventory() {
                 return;
             }
         }
-        console.error('[EXPLORE] Transition to inventory failed:', await resp.text());
+        console.error('[EXPLORE] Transition to inventory failed');
+        if (typeof showTerrainToast === 'function') showTerrainToast('⚠️ Erro ao abrir mochila. Tente novamente.', 'damage');
     } catch (e) {
         console.error('[EXPLORE] Transition to inventory error:', e);
+        if (typeof showTerrainToast === 'function') showTerrainToast('⚠️ Erro ao abrir mochila. Tente novamente.', 'damage');
     }
 }
 
@@ -899,10 +911,14 @@ function showExitRiskAssessment() {
         `<div class="exit-hp-bar"><div class="exit-hp-fill" style="width:${Math.max(2, hpPct)}%;background:${hpColor}"></div></div>` +
         `<span>${currentHP}/${maxHP}</span>`;
 
-    // Info: distance + risk
+    // Info: distance + risk + estimated encounters
     const distText = distance >= 0 ? `${distance} turnos` : '???';
+    const dangerLvl = S.dangerLevel || 1;
+    const estEnc = distance > 0 ? Math.max(1, Math.round(distance * dangerLvl * 0.04)) : 0;
+    const encText = estEnc > 0 ? `<span>🎲 ~${estEnc} encontro${estEnc > 1 ? 's' : ''}</span>` : '';
     infoRow.innerHTML = `<span>📏 ${distText} até a saída</span>` +
-        `<span style="color:${risk.color}">⚔️ Risco: ${risk.label} (${risk.chance}%)</span>`;
+        `<span style="color:${risk.color}">⚔️ Risco: ${risk.label} (${risk.chance}%)</span>` +
+        encText;
 
     // Build options
     optionsEl.innerHTML = '';

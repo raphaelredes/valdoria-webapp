@@ -437,6 +437,7 @@ function onMoveComplete(col, row) {
     }
 
     updateStepCounter();
+    if (typeof updateLocationInfo === 'function') updateLocationInfo();
     tickConditions();
     scrollCanvasToPlayer(true);
 
