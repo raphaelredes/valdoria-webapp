@@ -15,6 +15,7 @@ let S = {
     quests: [],          // [{id, t, loc?}]
     dungeons: {},        // loc_id → [{n, done}]
     canCamp: false,
+    hasMap: 0,           // 0=no map, 1=regional/fragment, 2=full map
     selectedLoc: null,   // currently tapped location ID
     // Pan/zoom state
     panX: 0, panY: 0,
@@ -62,6 +63,7 @@ async function initAsync() {
         S.quests = data.q || [];
         S.dungeons = data.dd || {};
         S.canCamp = !!data.cc;
+        S.hasMap = data.hm || 0;
 
         // Build connection graph from location data
         buildConnectionGraph();
@@ -251,6 +253,10 @@ function finishNavigation(type, target) {
         type: type,
     };
     if (target) payload.target = target;
+    // Signal no-map travel for risky navigation
+    if (type === 'travel' && S.hasMap === 0) {
+        payload.noMap = true;
+    }
 
     try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e) {}
 

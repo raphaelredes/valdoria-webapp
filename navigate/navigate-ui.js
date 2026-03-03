@@ -113,13 +113,26 @@ function handleLocationTap(locId) {
             actionsEl.appendChild(campBtn);
         }
     } else if (connected) {
-        noteEl.style.display = 'none';
-        const travelBtn = createActionBtn(
-            '🚶 Viajar para ' + (locData.n || 'lá'),
-            'info-btn-travel',
-            () => finishNavigation('travel', locId)
-        );
-        actionsEl.appendChild(travelBtn);
+        // Risk warning when traveling without a map
+        if (S.hasMap === 0) {
+            noteEl.innerHTML = '⚠️ <b>Sem Mapa</b> — chance de se perder na viagem';
+            noteEl.style.display = 'block';
+            noteEl.style.color = '#c4953a';
+            const travelBtn = createActionBtn(
+                '🚶 Viajar (Sem Mapa) ⚠️',
+                'info-btn-travel info-btn-risky',
+                () => finishNavigation('travel', locId)
+            );
+            actionsEl.appendChild(travelBtn);
+        } else {
+            noteEl.style.display = 'none';
+            const travelBtn = createActionBtn(
+                '🚶 Viajar para ' + (locData.n || 'lá'),
+                'info-btn-travel',
+                () => finishNavigation('travel', locId)
+            );
+            actionsEl.appendChild(travelBtn);
+        }
     } else if (dist > 0) {
         noteEl.textContent = `⛔ Não há caminho direto — ${dist} etapa${dist !== 1 ? 's' : ''} de distância`;
         noteEl.style.display = 'block';
