@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2b2830">
+    <title>Prologo - Lendas de Valdoria</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <link rel="stylesheet" href="prologue.css?v=1">
+</head>
+<body>
+    <!-- Main viewport with horizontal slide transitions -->
+    <div id="viewport">
+        <div id="track"></div>
+    </div>
+
+    <!-- Sub-screen overlay for long lore text -->
+    <div class="sub-screen" id="loreOverlay">
+        <div class="sub-screen-header">
+            <button class="v-btn v-btn-secondary v-btn-pill" onclick="closeLoreOverlay()">← Voltar</button>
+        </div>
+        <div class="sub-screen-body" id="loreOverlayBody"></div>
+    </div>
+
+    <!-- Dice overlay for distract skill check -->
+    <div class="dice-overlay" id="diceOverlay">
+        <div class="dice-content">
+            <div class="dice-title" id="diceTitle">TESTE DE SOBREVIVÊNCIA</div>
+            <div class="dice-container">
+                <div class="dice-d20" id="diceD20">?</div>
+            </div>
+            <div class="dice-breakdown" id="diceBreakdown"></div>
+            <div class="dice-result-label" id="diceResultLabel"></div>
+            <div class="dice-narrative" id="diceNarrative"></div>
+            <div class="dice-actions" id="diceActions"></div>
+        </div>
+    </div>
+
+    <!-- Result overlay for gate/lore interaction -->
+    <div class="result-overlay" id="resultOverlay">
+        <div class="result-content">
+            <div class="result-text" id="resultText"></div>
+            <div class="result-effects" id="resultEffects"></div>
+            <button class="v-skip-btn" id="resultSkip">Pular ▸</button>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="v-loading-overlay" id="loading">
+        <div class="v-loading-spinner"></div>
+        <p>Carregando prólogo...</p>
+    </div>
+
+    <!-- Error overlay -->
+    <div class="error-overlay" id="errorOverlay" style="display:none">
+        <p class="error-msg" id="errorMsg"></p>
+        <button class="v-btn v-btn-secondary" onclick="location.reload()">Tentar Novamente</button>
+        <button class="v-btn v-btn-secondary" style="margin-top:8px" onclick="tg.close()">Fechar</button>
+    </div>
+
+    <script src="prologue.js?v=1"></script>
+</body>
+</html>
