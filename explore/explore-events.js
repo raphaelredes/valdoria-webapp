@@ -1196,7 +1196,7 @@ async function initAsync() {
                     }
                 }
             } catch (e) {
-                console.warn('[EXPLORE] Could not fetch saved state from API', e);
+                console.error('[EXPLORE] Could not fetch saved state from API', e);
             }
         }
 

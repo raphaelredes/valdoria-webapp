@@ -1285,9 +1285,9 @@ function escHtml(str) {
 // ═══════════════════════════════════════════════════
 
 // ─── FEATURE 4: HAPTIC FEEDBACK ───
-function haptic(type) { try { tg?.HapticFeedback?.impactOccurred(type || 'light'); } catch(e) {} }
-function hapticNotify(type) { try { tg?.HapticFeedback?.notificationOccurred(type || 'success'); } catch(e) {} }
-function hapticSelect() { try { tg?.HapticFeedback?.selectionChanged(); } catch(e) {} }
+function haptic(type) { try { tg?.HapticFeedback?.impactOccurred(type || 'light'); } catch(e) { console.warn('[ARENA] haptic:', e); } }
+function hapticNotify(type) { try { tg?.HapticFeedback?.notificationOccurred(type || 'success'); } catch(e) { console.warn('[ARENA] haptic:', e); } }
+function hapticSelect() { try { tg?.HapticFeedback?.selectionChanged(); } catch(e) { console.warn('[ARENA] haptic:', e); } }
 
 // ─── FEATURE 8: PROCEDURAL SFX (Web Audio API) ───
 function _ensureAudio() {

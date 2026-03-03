@@ -4,7 +4,7 @@
 
 // ── Location tap handler ──
 function handleLocationTap(locId) {
-    try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e) {}
+    try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e) { console.warn('[NAVIGATE] haptic:', e); }
 
     S.selectedLoc = locId;
     const locData = S.locations[locId];

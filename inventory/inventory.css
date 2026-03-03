@@ -2,6 +2,10 @@
    INVENTORY CSS — Lendas de Valdoria
    ═══════════════════════════════════════════════════════════ */
 
+/* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; }
+
 body { padding-bottom: 80px; }
 
 /* ── Header ── */

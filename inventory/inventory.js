@@ -212,10 +212,10 @@
 
     // ── Haptic feedback ──
     function haptic(type) {
-        try { tg?.HapticFeedback?.impactOccurred?.(type || 'light'); } catch(e) {}
+        try { tg?.HapticFeedback?.impactOccurred?.(type || 'light'); } catch(e) { console.warn('[INVENTORY] haptic:', e); }
     }
     function hapticNotify(type) {
-        try { tg?.HapticFeedback?.notificationOccurred?.(type || 'error'); } catch(e) {}
+        try { tg?.HapticFeedback?.notificationOccurred?.(type || 'error'); } catch(e) { console.warn('[INVENTORY] haptic:', e); }
     }
 
     // ── Header ──
@@ -1884,7 +1884,7 @@
                 else toast(`${vi('check',13)} Alterações salvas!`, 'ok');
                 updateBottomBar();
                 // Close webapp after brief delay so user sees the toast
-                setTimeout(() => { try { tg.close(); } catch(_) {} }, 800);
+                setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[INVENTORY] tg.close:', e); } }, 800);
             } else {
                 console.error('[INVENTORY] API error:', result.error || resp.status);
                 overlay.classList.add('hidden');
@@ -1908,7 +1908,7 @@
             tg.sendData(JSON.stringify(data));
             _sendRetries = 0;
             // Safety: close webapp if sendData didn't auto-close
-            setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
+            setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[INVENTORY] tg.close:', e); } }, 300);
             // Extra safety: if still open after 2s, hide overlay and inform user
             setTimeout(() => {
                 if (document.visibilityState !== 'hidden') {
@@ -2183,7 +2183,7 @@
         if (_modalOpen) {
             _modalOpen = false;
             // Pop the modal state we pushed, without triggering popstate handler
-            try { history.back(); } catch(e) {}
+            try { history.back(); } catch(e) { console.warn('[INVENTORY] history.back:', e); }
         }
     }
 

@@ -3,6 +3,10 @@
    Separated from index.html for maintainability
    ═══════════════════════════════════════════════ */
 
+/* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; }
+
 /* ─── FIXED VIEWPORT — NO SCROLL ─── */
 body {
     display: flex;

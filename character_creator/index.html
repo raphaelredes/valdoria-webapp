@@ -16,6 +16,10 @@
     <script src="data.js"></script>
     <script src="personality_data.js"></script>
     <style>
+        /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; }
+
         /* ─── Screen transition system ─── */
         .screen-viewport {
             position: relative;
@@ -760,12 +764,12 @@ function decodeBase64Utf8(b64) {
     buildBgGrid();
     buildAlignGrid();
     buildGenderGrid();
-    document.getElementById('nameInput').addEventListener('input', e => { sel.name = e.target.value.trim(); document.getElementById('nameLimit').textContent = `${e.target.value.length}/15`; });
-    document.getElementById('surnameInput').addEventListener('input', e => { sel.surname = e.target.value.trim(); document.getElementById('surnameLimit').textContent = `${e.target.value.length}/15`; });
+    document.getElementById('nameInput').addEventListener('input', e => { sel.name = e.target.value.trim(); document.getElementById('nameLimit').textContent = `${sel.name.length}/15`; });
+    document.getElementById('surnameInput').addEventListener('input', e => { sel.surname = e.target.value.trim(); document.getElementById('surnameLimit').textContent = `${sel.surname.length}/15`; });
     setupBackButton();
 })();
 
-function haptic() { try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){} }
+function haptic() { try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e) { console.warn('[CHAR_CREATOR] haptic:', e); } }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function mod(v) { return Math.floor((v - 10) / 2); }
 function toggleSection(el) { haptic(); el.closest('.detail-section').classList.toggle('collapsed'); }
@@ -1623,12 +1627,12 @@ function buildLanguagePicker(raceKey, subraceKey) {
     const allLangs = [...LANGUAGES.standard, ...LANGUAGES.exotic];
     const available = allLangs.filter(l => !known.includes(l.key));
 
-    let html = `<div class="detail-section collapsed" id="langSection"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🗣️ Idioma Adicional <span class="section-summary" id="langStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
+    let html = `<div class="detail-section" id="langSection"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🗣️ Idioma Adicional <span class="section-summary" id="langStatus">Escolha abaixo</span><span class="toggle-arrow">▾</span></div>`;
     html += `<div class="section-body">`;
     html += `<div class="v-caption" style="margin-bottom:8px">Escolha 1 idioma extra além de: ${known.join(', ')}.</div>`;
     html += `<div class="lang-grid" id="langOptions">`;
     available.forEach(l => {
-        html += `<div class="lang-option" data-desc="${l.desc}" onclick="selectLanguage('${l.key}',this)">${l.name}</div>`;
+        html += `<div class="lang-option" data-desc="${(l.desc || '').replace(/"/g, '&quot;')}" onclick="selectLanguage('${l.key}',this)">${l.name}</div>`;
     });
     html += `</div>`;
     html += `<div class="lang-selected-desc" id="langDesc"></div>`;
@@ -2509,7 +2513,7 @@ function submitCharacter() {
         if (tg && tg.sendData) {
             tg.sendData(JSON.stringify(payload));
             // Safety: close webapp if sendData didn't auto-close
-            setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
+            setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[CHAR_CREATOR] tg.close:', e); } }, 300);
         } else {
             console.log('WebApp payload:', JSON.stringify(payload, null, 2));
             alert('Personagem criado! (modo teste)\n\n' + JSON.stringify(payload, null, 2));

@@ -15,6 +15,10 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <link rel="stylesheet" href="../valdoria-design.css?v=4">
     <style>
+        /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; }
+
         body {
             display: flex;
             flex-direction: column;
@@ -1315,7 +1319,7 @@
         if (tg) {
             tg.sendData(JSON.stringify({ action: 'roll_complete', result: GAME_RESULT, formula: GAME_FORMULA, token: GAME_TOKEN, type: GAME_TYPE }));
             // Safety: close webapp if sendData didn't auto-close
-            setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
+            setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[DICE] tg.close:', e); } }, 300);
         }
     }
 

@@ -102,9 +102,9 @@ function saveState() {
                     'Authorization': `Bearer ${S.token}`
                 },
                 body: JSON.stringify(snap)
-            }).catch(e => console.warn('[EXPLORE] API save error:', e));
+            }).catch(e => console.error('[EXPLORE] API save error:', e));
         }
-    } catch (e) { console.warn('[EXPLORE] saveState:', e); }
+    } catch (e) { console.error('[EXPLORE] saveState:', e); }
 }
 
 function restoreState() {
@@ -136,7 +136,7 @@ function restoreState() {
         S.inventoryUsed = snap.iu || [];
         return true;
     } catch (e) {
-        console.warn('[EXPLORE] restoreState:', e);
+        console.error('[EXPLORE] restoreState:', e);
         return false;
     }
 }

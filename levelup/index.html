@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="../valdoria-design.css?v=4">
     <script src="data.js"></script>
     <style>
+        /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; }
+
         /* ─── Screen transition system ─── */
         .screen-viewport {
             position: relative;
@@ -543,10 +547,10 @@ const sel = { asi: {}, feat: '', featStat: '', skills: [], subclass: '' };
 
 // Haptic feedback helper
 function haptic(type = 'light') {
-    try { tg?.HapticFeedback?.impactOccurred(type); } catch(e) {}
+    try { tg?.HapticFeedback?.impactOccurred(type); } catch(e) { console.warn('[LEVELUP] haptic:', e); }
 }
 function hapticNotify(type = 'error') {
-    try { tg?.HapticFeedback?.notificationOccurred(type); } catch(e) {}
+    try { tg?.HapticFeedback?.notificationOccurred(type); } catch(e) { console.warn('[LEVELUP] haptic:', e); }
 }
 
 // ═══════════════════════════════════════════════
@@ -1345,8 +1349,16 @@ function submit() {
             setTimeout(() => {
                 tg.sendData(JSON.stringify(payload));
                 // Safety: close webapp if sendData didn't auto-close
-                setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
+                setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[LEVELUP] tg.close:', e); } }, 300);
             }, 300);
+            // Safety timeout: if webapp is still open after 5s, recover UI
+            setTimeout(() => {
+                if (document.visibilityState !== 'hidden') {
+                    document.getElementById('loadingOverlay').classList.remove('active');
+                    btn.disabled = false;
+                    btn.textContent = 'Confirmar';
+                }
+            }, 5000);
         } else {
             console.log('Level-up payload:', JSON.stringify(payload, null, 2));
             setTimeout(() => {
@@ -1362,6 +1374,6 @@ function submit() {
     }
 }
 </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(()=>{})}</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(e => console.warn('[LEVELUP] SW registration failed:', e))}</script>
 </body>
 </html>

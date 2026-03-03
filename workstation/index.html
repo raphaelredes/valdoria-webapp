@@ -14,6 +14,10 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../valdoria-design.css?v=4">
     <style>
+        /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; }
+
         body { padding-bottom: 80px; }
         .header {
             background: linear-gradient(135deg, var(--v-bg-raised), var(--v-bg-accent));
@@ -477,7 +481,7 @@
                 token: token,
             }));
             // Safety: close webapp if sendData didn't auto-close
-            setTimeout(() => { try { tg.close(); } catch(_) {} }, 300);
+            setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[WORKSTATION] tg.close:', e); } }, 300);
         }
     }
 
