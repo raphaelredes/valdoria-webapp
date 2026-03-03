@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════
 
 let tg = null;
+let _navSent = false;  // Double-fire guard (matches explore _finishSent pattern)
 const STORAGE_KEY = 'valdoria_navigate_state';
 
 // Global state
@@ -36,7 +37,7 @@ async function initAsync() {
         if (tg) {
             tg.ready();
             tg.expand();
-            try { tg.disableVerticalSwipes(); } catch(e) {}
+            try { tg.disableVerticalSwipes(); } catch(e) { console.warn('[NAVIGATE] disableVerticalSwipes:', e); }
         }
 
         // Parse URL params
@@ -191,7 +192,7 @@ function saveViewport() {
             zm: S.zoom,
             ts: Date.now(),
         }));
-    } catch(e) {}
+    } catch(e) { console.warn('[NAVIGATE] saveViewport:', e); }
 }
 
 function restoreViewport() {
@@ -203,7 +204,7 @@ function restoreViewport() {
         S.panX = snap.px || 0;
         S.panY = snap.py || 0;
         S.zoom = snap.zm || 1.0;
-    } catch(e) {}
+    } catch(e) { console.warn('[NAVIGATE] restoreViewport:', e); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -249,6 +250,15 @@ function updateBottomBar() {
 // ═══════════════════════════════════════════════════════
 
 function finishNavigation(type, target) {
+    if (_navSent) return;
+    _navSent = true;
+
+    // Disable all action buttons immediately
+    document.querySelectorAll('.info-btn').forEach(btn => {
+        btn.style.pointerEvents = 'none';
+        btn.style.opacity = '0.5';
+    });
+
     const payload = {
         action: 'navigate_action',
         token: S.token,
@@ -260,16 +270,24 @@ function finishNavigation(type, target) {
         payload.noMap = true;
     }
 
-    try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e) {}
+    try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e) { console.warn('[NAVIGATE] haptic:', e); }
 
-    if (tg && tg.sendData) {
-        tg.sendData(JSON.stringify(payload));
+    try {
+        if (tg && tg.sendData) {
+            tg.sendData(JSON.stringify(payload));
+        } else {
+            console.log('[NAVIGATE] sendData payload:', JSON.stringify(payload, null, 2));
+        }
+    } catch(e) {
+        console.error('[NAVIGATE] sendData failed:', e);
     }
 
     // Close after brief delay
     setTimeout(() => {
-        try { tg?.close(); } catch(e) {}
-    }, 400);
+        try { tg?.close(); } catch(e) {
+            console.warn('[NAVIGATE] tg.close fallback failed:', e);
+        }
+    }, 500);
 }
 
 function handleReturn() {
@@ -277,7 +295,7 @@ function handleReturn() {
 }
 
 function handleClose() {
-    try { tg?.close(); } catch(e) {}
+    try { tg?.close(); } catch(e) { console.warn('[NAVIGATE] tg.close:', e); }
 }
 
 // ═══════════════════════════════════════════════════════
