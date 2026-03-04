@@ -465,7 +465,7 @@
         }
     }
 
-    function executeCraft(recipeId) {
+    async function executeCraft(recipeId) {
         const btn = document.getElementById('craftBtn');
         btn.disabled = true;
         btn.textContent = '⏳ Fabricando...';
@@ -473,14 +473,35 @@
 
         const params = new URLSearchParams(window.location.search);
         const token = params.get('token') || '';
+        const _apiBase = params.get('api') || '';
+        const _apiUid = params.get('uid') || '';
 
+        const payload = { action: 'craft_complete', recipe_id: recipeId, token: token };
+
+        // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)
+        if (_apiBase && token && _apiUid) {
+            try {
+                const _ch = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+                if (tg?.initData) _ch['X-Telegram-Init-Data'] = tg.initData;
+                _ch['X-Idempotency-Key'] = crypto.randomUUID();
+                const resp = await fetch(`${_apiBase}/api/craft/apply`, {
+                    method: 'POST', headers: _ch,
+                    body: JSON.stringify({ user_id: parseInt(_apiUid), token, recipe_id: recipeId })
+                });
+                if (resp.ok) {
+                    console.log('[WORKSTATION] Craft submitted via API');
+                    setTimeout(() => { try { tg?.close(); } catch(e) {} }, 300);
+                    return;
+                }
+                console.warn('[WORKSTATION] API returned', resp.status, '— falling back to sendData');
+            } catch (e) {
+                console.warn('[WORKSTATION] API fetch failed — falling back to sendData', e);
+            }
+        }
+
+        // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
         if (tg) {
-            tg.sendData(JSON.stringify({
-                action: 'craft_complete',
-                recipe_id: recipeId,
-                token: token,
-            }));
-            // Safety: close webapp if sendData didn't auto-close
+            tg.sendData(JSON.stringify(payload));
             setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[WORKSTATION] tg.close:', e); } }, 300);
         }
     }

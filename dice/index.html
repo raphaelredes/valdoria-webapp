@@ -1315,10 +1315,35 @@
 
     // ─── Helpers ───
 
-    function confirmGameRoll() {
+    const _apiBase = params.get('api') || '';
+    const _apiUid = params.get('uid') || '';
+
+    async function confirmGameRoll() {
+        const payload = { action: 'roll_complete', result: GAME_RESULT, formula: GAME_FORMULA, token: GAME_TOKEN, type: GAME_TYPE };
+
+        // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)
+        if (_apiBase && GAME_TOKEN && _apiUid) {
+            try {
+                const _ch = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GAME_TOKEN}` };
+                if (tg?.initData) _ch['X-Telegram-Init-Data'] = tg.initData;
+                const resp = await fetch(`${_apiBase}/api/dice/apply`, {
+                    method: 'POST', headers: _ch,
+                    body: JSON.stringify({ user_id: parseInt(_apiUid), token: GAME_TOKEN, result: GAME_RESULT, formula: GAME_FORMULA, type: GAME_TYPE })
+                });
+                if (resp.ok) {
+                    console.log('[DICE] Roll confirmed via API');
+                    setTimeout(() => { try { tg?.close(); } catch(e) {} }, 300);
+                    return;
+                }
+                console.warn('[DICE] API returned', resp.status, '— falling back to sendData');
+            } catch (e) {
+                console.warn('[DICE] API fetch failed — falling back to sendData', e);
+            }
+        }
+
+        // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
         if (tg) {
-            tg.sendData(JSON.stringify({ action: 'roll_complete', result: GAME_RESULT, formula: GAME_FORMULA, token: GAME_TOKEN, type: GAME_TYPE }));
-            // Safety: close webapp if sendData didn't auto-close
+            tg.sendData(JSON.stringify(payload));
             setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[DICE] tg.close:', e); } }, 300);
         }
     }

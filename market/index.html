@@ -971,7 +971,7 @@
         showModal(html);
     }
 
-    function sendTransaction() {
+    async function sendTransaction() {
         const ops = [];
 
         // Sells first
@@ -987,6 +987,8 @@
 
         const params = new URLSearchParams(location.search);
         const token = params.get('token') || '';
+        const _apiBase = params.get('api') || '';
+        const _apiUid = params.get('uid') || '';
 
         const data = {
             action: 'market_transaction',
@@ -994,9 +996,30 @@
             ops: ops,
         };
 
+        // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)
+        if (_apiBase && token && _apiUid) {
+            try {
+                const _ch = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+                if (tg?.initData) _ch['X-Telegram-Init-Data'] = tg.initData;
+                _ch['X-Idempotency-Key'] = crypto.randomUUID();
+                const resp = await fetch(`${_apiBase}/api/market/apply`, {
+                    method: 'POST', headers: _ch,
+                    body: JSON.stringify({ user_id: parseInt(_apiUid), token, ops })
+                });
+                if (resp.ok) {
+                    console.log('[MARKET] Transaction submitted via API');
+                    setTimeout(() => { try { tg?.close(); } catch(e) {} }, 300);
+                    return;
+                }
+                console.warn('[MARKET] API returned', resp.status, '— falling back to sendData');
+            } catch (e) {
+                console.warn('[MARKET] API fetch failed — falling back to sendData', e);
+            }
+        }
+
+        // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
         if (tg) {
             tg.sendData(JSON.stringify(data));
-            // Safety: close webapp if sendData didn't auto-close
             setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[MARKET] tg.close:', e); } }, 300);
         } else {
             console.log('sendData:', data);
