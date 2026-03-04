@@ -589,6 +589,9 @@
             <div class="sub-screen" id="sub-equip-select">
                 <div class="screen-content" id="equipSelectContent"></div>
             </div>
+            <div class="sub-screen" id="sub-l1skill-select">
+                <div class="screen-content" id="l1skillSelectContent"></div>
+            </div>
         </div>
 
         <!-- ═══ SCREEN 2: STATS ═══ -->
@@ -720,7 +723,8 @@ const SCREENS = ['screen-race','screen-class','screen-stats','screen-bg','screen
 const SCREEN_NAMES = ['Raça','Classe','Atributos','Antecedente','Alinhamento','Perícias','Ferramentas','Identidade','Resumo'];
 let currentScreen = 0;
 let isTransitioning = false;
-let sel = { race:null, subrace:'', classKey:null, subclass:'', fightingStyle:'', equipmentChoice:'A', bg:null, personalityTrait:'', ideal:'', bond:'', flaw:'', alignment:'', skillProfs:[], toolProfs:[], gender:null, name:'', surname:'', languages:[], statAssignment:{} };
+let sel = { race:null, subrace:'', classKey:null, subclass:'', fightingStyle:'', equipmentChoice:'A', selectedL1Skill:'', bg:null, personalityTrait:'', ideal:'', bond:'', flaw:'', alignment:'', skillProfs:[], toolProfs:[], gender:null, name:'', surname:'', languages:[], statAssignment:{} };
+let _l1SkillsCache = {}; // Cache API responses per class
 let pendingSubrace = '';
 let pendingLanguage = null;
 let currentRaceDetailKey = '';
@@ -1805,6 +1809,7 @@ function confirmClass(classKey) {
     sel.subclass = '';
     sel.fightingStyle = '';
     sel.equipmentChoice = 'A';
+    sel.selectedL1Skill = '';
     sel.skillProfs = [];
     closeSubScreen('sub-class-detail');
     // L1 Subclass (Cleric/Sorcerer/Warlock — D&D 5e PHB)
@@ -1939,7 +1944,8 @@ function selectEquipment(pkgId) {
 
 function confirmEquipment() {
     closeSubScreen('sub-equip-select');
-    finishClassScreen();
+    // Check if class has L1 skill choices before finishing
+    checkAndShowL1Skills();
 }
 
 function cancelEquipment() {
@@ -1959,6 +1965,88 @@ function cancelEquipment() {
         sel.classKey = null;
         buildClassGrid();
     }
+}
+
+// ═══════════════════════════════════════════════
+// L1 SKILL SELECTION — Sub-screen (casters)
+// ═══════════════════════════════════════════════
+async function checkAndShowL1Skills() {
+    if (!sel.classKey || !apiBase) { finishClassScreen(); return; }
+
+    // Use cache if available
+    if (_l1SkillsCache[sel.classKey]) {
+        const data = _l1SkillsCache[sel.classKey];
+        if (data.skills && data.skills.length > 0) {
+            buildL1SkillSelect(data);
+            openSubScreen('sub-l1skill-select');
+            return;
+        }
+        finishClassScreen();
+        return;
+    }
+
+    // Fetch from API
+    try {
+        const resp = await fetch(`${apiBase}/api/character/l1-skills?class=${sel.classKey}`, {
+            headers: { 'ngrok-skip-browser-warning': '1' },
+        });
+        if (!resp.ok) { finishClassScreen(); return; }
+        const data = await resp.json();
+        _l1SkillsCache[sel.classKey] = data;
+
+        if (data.skills && data.skills.length > 0) {
+            buildL1SkillSelect(data);
+            openSubScreen('sub-l1skill-select');
+            return;
+        }
+    } catch (e) {
+        console.warn('[CHAR_CREATOR] L1 skills fetch failed', e);
+    }
+    finishClassScreen();
+}
+
+function buildL1SkillSelect(data) {
+    const defaultSkill = data.default || '';
+    // Filter out the default skill — it's auto-granted
+    const choices = data.skills.filter(s => !s.is_default);
+
+    let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelL1Skill()">\u2190 Voltar</button>`;
+    html += `<div class="detail-header"><div class="detail-title">\u2728 Escolha uma Habilidade</div>`;
+    html += `<div class="detail-subtitle">Sua classe começa com <b>${data.skills.find(s => s.is_default)?.name || 'habilidade padrão'}</b>. Escolha mais uma:</div></div>`;
+
+    for (const skill of choices) {
+        const selected = sel.selectedL1Skill === skill.id ? ' selected' : '';
+        const costText = skill.cost > 0 ? ` \u2022 ${skill.cost} MP` : '';
+        html += `<div class="v-card${selected}" onclick="selectL1Skill('${skill.id}')">`;
+        html += `<div class="v-card-name">${skill.effect || ''} ${skill.name}</div>`;
+        html += `<div class="v-card-desc">${skill.description}${costText}</div>`;
+        html += `</div>`;
+    }
+
+    document.getElementById('l1skillSelectContent').innerHTML = html;
+}
+
+function selectL1Skill(skillId) {
+    haptic();
+    sel.selectedL1Skill = skillId;
+    const data = _l1SkillsCache[sel.classKey];
+    if (data) buildL1SkillSelect(data);
+    setTimeout(() => confirmL1Skill(), 250);
+}
+
+function confirmL1Skill() {
+    if (!sel.selectedL1Skill) return;
+    closeSubScreen('sub-l1skill-select');
+    finishClassScreen();
+}
+
+function cancelL1Skill() {
+    haptic();
+    sel.selectedL1Skill = '';
+    closeSubScreen('sub-l1skill-select');
+    // Go back to equipment
+    sel.equipmentChoice = 'A';
+    showEquipmentSelect();
 }
 
 function finishClassScreen() {
@@ -2456,7 +2544,13 @@ function buildSummary() {
             combatBody += `<div class="trait-item"><div class="trait-name"><span class="spell-tag">${sp.type}</span> ${sp.name}</div><div class="trait-desc">${sp.desc}</div></div>`;
         });
     }
-    if (combatBody) html += cSec('⚔️', `Habilidades de ${cls.name}`, '', combatBody);
+    if (sel.selectedL1Skill && _l1SkillsCache[sel.classKey]) {
+        const skillData = _l1SkillsCache[sel.classKey].skills.find(s => s.id === sel.selectedL1Skill);
+        if (skillData) {
+            combatBody += `<div class="trait-item"><div class="trait-name">${skillData.effect || '\u2728'} ${skillData.name} <span style="color:var(--v-text-dim);font-size:10px">(escolhida)</span></div><div class="trait-desc">${skillData.description}</div></div>`;
+        }
+    }
+    if (combatBody) html += cSec('\u2694\ufe0f', `Habilidades de ${cls.name}`, '', combatBody);
 
     // --- 5. Race & Background traits (collapsible) ---
     let traitBody = '';
@@ -2550,7 +2644,8 @@ async function submitCharacter() {
         languages: sel.languages || [],
         variant_bonuses: sel.variantBonuses || [],
         variant_skill: sel.variantSkill || '',
-        variant_feat: sel.variantFeat || ''
+        variant_feat: sel.variantFeat || '',
+        selected_l1_skill: sel.selectedL1Skill || ''
     };
 
     // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)

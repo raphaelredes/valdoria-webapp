@@ -17,6 +17,7 @@ const originApp = params.get('origin') || '';
 const isApiMode = !!apiBase;
 let currentState = null;
 let _lastAnimatedRoll = null; // Dedup: prevents replaying same dice animation on re-render
+let _initDiceAnimated = false; // Dedup: prevents replaying initiative dice on poll re-render
 
 // ─── IMMERSION FEATURES STATE ───
 const _prevHpState = new Map(); // Feature 1: HP bar animation tracking
@@ -454,10 +455,10 @@ function renderArena(s) {
         }
         html += `<button class="action-btn primary full-width" data-action="initiative" style="font-size:14px;padding:12px">⚔️ ROLAR INICIATIVA</button></div>`;
     } else if (ph === 'init') {
-        // Initiative rolled — show results + proceed button
-        html += renderInitiativeResults(s);
+        // Initiative rolled — animated dice + proceed button
+        html += '<div id="init-dice-area"></div>';
         if (isApiMode) {
-            html += `<div class="action-bar"><button class="action-btn primary full-width" data-action="proceed" style="font-size:14px;padding:12px">⚔️ Prosseguir para o Combate</button></div>`;
+            html += `<div class="action-bar" id="init-proceed-bar" style="display:none"><button class="action-btn primary full-width" data-action="proceed" style="font-size:14px;padding:12px">⚔️ Prosseguir para o Combate</button></div>`;
         } else {
             html += `<div class="action-bar"><div style="text-align:center;color:var(--v-text-dim);font-size:12px;padding:8px">⚔️ Aguardando inicio do combate...</div></div>`;
         }
@@ -472,8 +473,11 @@ function renderArena(s) {
     void app.offsetWidth; // force reflow
     app.classList.add('fade-in');
 
-    // Init dice animation
+    // Init dice animation (combat attack rolls)
     initDice(s.lr);
+
+    // Initiative dice animation (DiceRoller component)
+    _triggerInitiativeDice(s);
 
     // Bind action button events
     bindActions(s);
@@ -585,6 +589,11 @@ function startPolling() {
         try {
             const state = await api.getState();
             if (!state || state.error) {
+                if (state && state.error === 'invalid_session') {
+                    showError('Sessão expirada — feche e reabra o combate');
+                    stopPolling();
+                    return;
+                }
                 if (state && (state.error === 'no_combat' || state.phase === 'ended')) {
                     showCombatEnded();
                 }
@@ -619,7 +628,12 @@ function startPolling() {
                 }
             }
         } catch(e) {
-            // Silently ignore poll errors — don't spam user with toasts
+            if (e.status === 401 || (e.message && e.message.includes('401'))) {
+                showError('Sessão expirada — feche e reabra o combate');
+                stopPolling();
+                return;
+            }
+            // Silently ignore other poll errors — don't spam user with toasts
             console.warn('[ARENA] Poll error (silent)', e.message);
         }
         _pollInterval = setTimeout(poll, _getPollInterval());
@@ -826,24 +840,101 @@ function renderTurnTimeline(to) {
     return html;
 }
 
-// ─── INITIATIVE RESULTS (shown in 'init' phase) ───
-function renderInitiativeResults(s) {
-    if (!s.to || s.to.length === 0) return '';
+// ─── INITIATIVE DICE ANIMATION (uses shared DiceRoller component) ───
+function _triggerInitiativeDice(s) {
+    const area = document.getElementById('init-dice-area');
+    if (!area || !s.to || s.to.length === 0) return;
+
+    const ph = s.ph || s.phase || '';
+    if (ph !== 'init') return;
+
+    // Build items for DiceRoller
+    const items = s.to.map(entry => ({
+        sides: 20,
+        result: entry.v,
+        label: entry.n,
+        type: entry.t === 'p' ? 'player' : entry.t === 'a' ? 'ally' : 'enemy',
+        icon: entry.ico || (entry.t === 'p' ? '\u{1F464}' : entry.t === 'a' ? '\u{1F6E1}' : '\u{1F479}'),
+        formula: entry.f || '',
+    }));
+
     const init = s.initiative || {};
+
+    if (_initDiceAnimated) {
+        // Already animated — show static results (on poll re-render)
+        _showInitiativeStatic(area, items, init);
+        _showProceedBar();
+        return;
+    }
+
+    // First render: animate!
+    _initDiceAnimated = true;
+    if (typeof DiceRoller !== 'undefined') {
+        DiceRoller.rollSequence(items, {
+            container: area,
+            title: '\u{1F4DC} ORDEM DE COMBATE',
+            onComplete: () => {
+                _appendSurpriseInfo(area, init);
+                _showProceedBar();
+            },
+        });
+
+        // Skip button
+        setTimeout(() => {
+            const bar = document.getElementById('init-proceed-bar');
+            if (bar && bar.style.display === 'none') {
+                const skipBtn = document.createElement('button');
+                skipBtn.className = 'v-skip-btn visible';
+                skipBtn.textContent = 'Pular \u{25B8}';
+                skipBtn.style.cssText = 'margin:8px auto;display:block;padding:6px 16px;font-size:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#aaa;cursor:pointer';
+                skipBtn.onclick = () => {
+                    // Skip triggers immediate reveal via DiceRoller internals (safety net)
+                    _showInitiativeStatic(area, items, init);
+                    _showProceedBar();
+                    skipBtn.remove();
+                };
+                area.appendChild(skipBtn);
+            }
+        }, 800);
+    } else {
+        // Fallback: no DiceRoller loaded — show static
+        _showInitiativeStatic(area, items, init);
+        _showProceedBar();
+    }
+}
+
+function _showInitiativeStatic(area, items, init) {
     let html = '<div style="padding:4px 10px;font-size:11px;color:var(--v-text-dim)">';
-    html += '<div style="font-weight:700;color:var(--v-gold);font-size:12px;margin-bottom:4px">📜 ORDEM DE COMBATE</div>';
-    s.to.forEach((entry, i) => {
-        const tColor = entry.t === 'p' ? 'var(--v-gold)' : entry.t === 'a' ? 'var(--v-silver)' : 'var(--v-crimson)';
-        const icon = entry.ico || (entry.t === 'p' ? '👤' : entry.t === 'a' ? '🛡️' : '👹');
-        const formula = entry.f ? ` (${entry.f})` : '';
+    html += '<div style="font-weight:700;color:var(--v-gold);font-size:12px;margin-bottom:4px">\u{1F4DC} ORDEM DE COMBATE</div>';
+    items.forEach((entry, i) => {
+        const tColor = entry.type === 'player' ? 'var(--v-gold)' : entry.type === 'ally' ? 'var(--v-silver)' : 'var(--v-crimson)';
+        const formula = entry.formula ? ` (${entry.formula})` : '';
         html += `<div style="padding:2px 0;color:${tColor}">
-            ${i+1}. ${icon} <b>${escHtml(entry.n)}</b>: ${entry.v}${formula}
+            ${i+1}. ${entry.icon} <b>${escHtml(entry.label)}</b>: ${entry.result}${formula}
         </div>`;
     });
-    if (init.player_surprised) html += '<div style="color:var(--v-crimson);margin-top:4px">❗ Você foi pego desprevenido!</div>';
-    if (init.enemies_surprised) html += '<div style="color:var(--v-gold);margin-top:4px">✨ Inimigos surpreendidos!</div>';
+    _appendSurpriseHtml(html, init);
     html += '</div>';
-    return html;
+    area.innerHTML = html;
+}
+
+function _appendSurpriseInfo(area, init) {
+    if (!init.player_surprised && !init.enemies_surprised) return;
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:0 10px;font-size:11px';
+    if (init.player_surprised) div.innerHTML += '<div style="color:var(--v-crimson);margin-top:4px">\u2757 Você foi pego desprevenido!</div>';
+    if (init.enemies_surprised) div.innerHTML += '<div style="color:var(--v-gold);margin-top:4px">\u2728 Inimigos surpreendidos!</div>';
+    area.appendChild(div);
+}
+
+function _appendSurpriseHtml(html, init) {
+    if (init.player_surprised) html += '<div style="color:var(--v-crimson);margin-top:4px">\u2757 Você foi pego desprevenido!</div>';
+    if (init.enemies_surprised) html += '<div style="color:var(--v-gold);margin-top:4px">\u2728 Inimigos surpreendidos!</div>';
+}
+
+function _showProceedBar() {
+    const bar = document.getElementById('init-proceed-bar');
+    if (bar) bar.style.display = '';
 }
 
 // ─── ACTION BAR ───
@@ -1045,6 +1136,7 @@ async function sendAction(actionData) {
     if (_actionSent) return;
     _actionSent = true;
     _lastAnimatedRoll = null; // Reset dedup — next render will animate dice
+    _initDiceAnimated = false; // Reset initiative dice animation for new combat
     document.querySelectorAll('.action-btn').forEach(b => b.classList.add('disabled'));
     _showActionLoading(true);
     stopTimer();
