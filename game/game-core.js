@@ -39,7 +39,7 @@ function init() {
 
         // Back button integration
         Telegram.WebApp.BackButton.onClick(() => {
-            doAction('universal_back');
+            doAction('action_universal_back');
         });
     }
 
