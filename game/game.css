@@ -686,6 +686,78 @@
     height: 4px;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   IMMERSIVE MODE — Collapsible Bottom Panel
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Toggle handle — fixed above bottom panel */
+.immersive-toggle {
+    position: fixed;
+    bottom: var(--bottom-panel-h, 120px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
+    height: 22px;
+    border: 1px solid var(--v-border);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    background: var(--v-bg);
+    color: var(--v-text-dim);
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 101;
+    -webkit-tap-highlight-color: transparent;
+    transition: bottom 0.3s ease, background var(--v-transition), color var(--v-transition);
+}
+
+.immersive-toggle:active {
+    background: var(--v-bg-raised);
+    color: var(--v-gold-dim);
+}
+
+/* Restore pill — fixed at bottom when panel is collapsed */
+.immersive-restore {
+    position: fixed;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 18px;
+    border: 1px solid var(--v-border-gold);
+    border-radius: var(--v-radius-pill);
+    background: var(--v-bg-raised);
+    color: var(--v-gold-dim);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    z-index: 101;
+    box-shadow: var(--v-shadow-sm);
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0.9;
+    transition: opacity var(--v-transition), transform 0.2s ease;
+}
+
+.immersive-restore:active {
+    opacity: 1;
+    transform: translateX(-50%) scale(0.95);
+}
+
+/* Bottom panel collapse animation */
+.bottom-panel.immersive-collapsed {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.2s ease;
+}
+
+/* Screen padding override when collapsed */
+.screen.immersive-full {
+    padding-bottom: 48px !important;
+}
+
 /* ── Ensure screen-content doesn't add pre-line to enhanced blocks ── */
 .screen-content .v-location-header,
 .screen-content .v-char-card,
@@ -696,4 +768,161 @@
 .screen-content .v-stat-row,
 .screen-content .v-resource-row {
     white-space: normal;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DIALOGUE ANIMATION SYSTEM — Immersive NPC Speech
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Dialogue Card ── */
+.dlg-card {
+    background: var(--v-bg-card);
+    border-radius: var(--v-radius, 8px);
+    padding: 14px 16px;
+    margin: 4px 0;
+    border-left: 3px solid rgba(196, 149, 58, 0.4);
+    position: relative;
+    overflow: hidden;
+    animation: dlgCardAppear 0.35s ease-out;
+}
+
+@keyframes dlgCardAppear {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Speaker Header ── */
+.dlg-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(196, 149, 58, 0.15);
+}
+
+.dlg-mood-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.dlg-speaker {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--v-gold);
+    letter-spacing: 0.5px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dlg-mood-label {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    font-style: italic;
+    flex-shrink: 0;
+}
+
+/* ── Speech Body ── */
+.dlg-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--v-text);
+    min-height: 40px;
+    white-space: pre-line;
+}
+
+/* ── Typewriter Cursor ── */
+.dlg-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 14px;
+    background: var(--v-gold);
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: dlgBlink 0.6s step-end infinite;
+}
+
+@keyframes dlgBlink {
+    0%, 50%  { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* ── Skip Hint ── */
+.dlg-skip-hint {
+    position: absolute;
+    bottom: 6px;
+    right: 10px;
+    font-size: 11px;
+    color: var(--v-text-dim);
+    opacity: 0;
+    animation: dlgSkipFadeIn 0.3s ease 0.8s forwards;
+    pointer-events: none;
+}
+
+@keyframes dlgSkipFadeIn {
+    to { opacity: 0.5; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOOD-SPECIFIC VISUAL EFFECTS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Happy — warm golden glow ── */
+.dlg-mood-happy {
+    border-left-color: var(--v-gold);
+    box-shadow: inset 0 0 30px rgba(196, 149, 58, 0.08),
+                0 0 15px rgba(196, 149, 58, 0.1);
+}
+.dlg-mood-happy .dlg-speaker { color: var(--v-gold-light); }
+.dlg-mood-happy .dlg-mood-icon { animation: dlgPulse 2s ease infinite; }
+
+@keyframes dlgPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.15); }
+}
+
+/* ── Angry — crimson accents ── */
+.dlg-mood-angry {
+    border-left-color: var(--v-crimson);
+    box-shadow: inset 0 0 30px rgba(123, 32, 32, 0.1),
+                0 0 15px rgba(123, 32, 32, 0.12);
+    background: linear-gradient(180deg, var(--v-bg-card) 0%, rgba(123, 32, 32, 0.06) 100%);
+}
+.dlg-mood-angry .dlg-speaker { color: var(--v-crimson-light); }
+.dlg-mood-angry .dlg-cursor { background: var(--v-crimson-light); }
+.dlg-mood-angry .dlg-mood-icon { animation: dlgShake 0.4s ease 0s 2; }
+
+@keyframes dlgShake {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-2px); }
+    75%      { transform: translateX(2px); }
+}
+
+/* ── Sad — muted, desaturated ── */
+.dlg-mood-sad {
+    border-left-color: var(--v-silver-dim, #707880);
+    box-shadow: inset 0 0 30px rgba(112, 120, 128, 0.06);
+    opacity: 0.92;
+}
+.dlg-mood-sad .dlg-speaker { color: var(--v-silver); }
+.dlg-mood-sad .dlg-body { color: var(--v-text-dim); }
+.dlg-mood-sad .dlg-cursor {
+    background: var(--v-silver-dim, #707880);
+    animation: dlgBlink 1.2s step-end infinite;
+}
+
+/* ── Busy — minimal ── */
+.dlg-mood-busy {
+    border-left-color: var(--v-border, #3e3845);
+}
+.dlg-mood-busy .dlg-speaker { color: var(--v-text); }
+
+/* ── Neutral — subtle gold hint ── */
+.dlg-mood-neutral {
+    border-left-color: rgba(196, 149, 58, 0.4);
+    box-shadow: 0 0 8px rgba(196, 149, 58, 0.05);
 }

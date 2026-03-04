@@ -20,9 +20,16 @@ function updateBottomPadding() {
     if (!screenEl || !panelEl) return;
 
     requestAnimationFrame(() => {
+        // Skip if panel is collapsed (immersive mode handles padding)
+        if (panelEl.classList.contains('immersive-collapsed')) return;
+
         const h = panelEl.offsetHeight;
         screenEl.style.paddingBottom = (h + 8) + 'px';
         document.documentElement.style.setProperty('--bottom-panel-h', h + 'px');
+
+        // Position immersive toggle above the panel
+        const toggle = document.getElementById('immersive-toggle');
+        if (toggle) toggle.style.bottom = h + 'px';
     });
 }
 
@@ -71,7 +78,12 @@ function renderScreen(screen) {
 
     // Text content (server sends trusted HTML, enhanced client-side)
     const contentEl = document.getElementById('content');
-    contentEl.innerHTML = enhanceContent(screen.text || '');
+    if (screen.dialogue && typeof renderDialogue === 'function') {
+        renderDialogue(screen);
+    } else {
+        if (typeof clearMoodAmbient === 'function') clearMoodAmbient();
+        contentEl.innerHTML = enhanceContent(screen.text || '');
+    }
 
     // Buttons (rendered into #buttons inside #bottom-panel)
     const buttonsEl = document.getElementById('buttons');
@@ -114,6 +126,11 @@ function renderScreen(screen) {
     // Dynamic padding + overflow check
     checkButtonOverflow();
     updateBottomPadding();
+
+    // Immersive mode eligibility
+    if (typeof updateImmersiveEligibility === 'function') {
+        updateImmersiveEligibility(screen);
+    }
 }
 
 /**
