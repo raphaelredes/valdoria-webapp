@@ -219,6 +219,8 @@ async function doText(text) {
 // ─── Screen Cache (sessionStorage) ───
 function cacheScreen(screen) {
     try {
+        // Don't cache screens with active text input or timers — stale state on reload
+        if (screen && (screen.waiting_for_text || screen.timer)) return;
         sessionStorage.setItem(SCREEN_CACHE_KEY, JSON.stringify({
             token: S.token, ts: Date.now(), screen,
         }));
