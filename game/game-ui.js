@@ -34,13 +34,14 @@ function showToast(text, duration = 2000) {
 }
 
 // ─── Error Overlay ───
+let _errorAutoRetryTimer = null;
+
 function showError(msg, err = null) {
     console.error('[GAME]', msg, err || '');
 
     const overlay = document.getElementById('error-overlay');
     const msgEl = document.getElementById('error-msg');
     const retryBtn = document.getElementById('error-retry');
-    const fallbackBtn = document.getElementById('error-fallback');
 
     if (!overlay || !msgEl) return;
 
@@ -50,9 +51,19 @@ function showError(msg, err = null) {
     // Hide loading
     hideLoading();
 
-    retryBtn.onclick = () => {
+    // Clear previous auto-retry timer
+    if (_errorAutoRetryTimer) {
+        clearInterval(_errorAutoRetryTimer);
+        _errorAutoRetryTimer = null;
+    }
+
+    const doRetry = () => {
+        if (_errorAutoRetryTimer) {
+            clearInterval(_errorAutoRetryTimer);
+            _errorAutoRetryTimer = null;
+        }
         overlay.style.display = 'none';
-        // Try to reconnect
+        retryBtn.textContent = 'Tentar Novamente';
         if (S.currentScreen) {
             fetchState(false);
         } else {
@@ -60,22 +71,21 @@ function showError(msg, err = null) {
         }
     };
 
-    // Show "Jogar pelo Chat" fallback for connection errors
-    if (fallbackBtn) {
-        const isConnectionError = msg.includes('Sem conexão') || msg.includes('Erro no servidor');
-        fallbackBtn.style.display = isConnectionError ? '' : 'none';
-        fallbackBtn.onclick = isConnectionError ? () => {
-            fallbackBtn.disabled = true;
-            try {
-                Telegram.WebApp.sendData(JSON.stringify({
-                    action: 'game_hub_fallback',
-                    char_id: S.charId || '',
-                }));
-            } catch (e) {
-                console.error('[GAME] sendData fallback failed:', e);
-                Telegram.WebApp.close();
+    retryBtn.onclick = doRetry;
+
+    // Auto-retry for connection errors after 5 seconds with countdown
+    const isConnectionError = msg.includes('Sem conexão') || msg.includes('Erro no servidor');
+    if (isConnectionError) {
+        let countdown = 5;
+        retryBtn.textContent = `Tentando novamente em ${countdown}s...`;
+        _errorAutoRetryTimer = setInterval(() => {
+            countdown--;
+            if (countdown <= 0) {
+                doRetry();
+            } else {
+                retryBtn.textContent = `Tentando novamente em ${countdown}s...`;
             }
-        } : null;
+        }, 1000);
     }
 }
 

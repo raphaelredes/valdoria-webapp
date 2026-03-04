@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="game.css?v=6">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
+
 <body>
     <!-- Loading overlay -->
     <div id="loading" class="loading-overlay">
@@ -28,7 +30,8 @@
     </div>
 
     <!-- Immersive mode: collapse toggle (above bottom panel) -->
-    <button id="immersive-toggle" class="immersive-toggle" style="display:none" aria-label="Recolher menu">&#9662;</button>
+    <button id="immersive-toggle" class="immersive-toggle" style="display:none"
+        aria-label="Recolher menu">&#9662;</button>
 
     <!-- Fixed bottom panel (action buttons + text input + footer) -->
     <div id="bottom-panel" class="bottom-panel" style="display:none">
@@ -51,7 +54,10 @@
     <!-- Timer overlay -->
     <div id="timer-overlay" class="timer-overlay" style="display:none">
         <div class="timer-ring">
-            <svg viewBox="0 0 80 80"><circle class="timer-bg" cx="40" cy="40" r="36"/><circle id="timer-arc" class="timer-arc" cx="40" cy="40" r="36"/></svg>
+            <svg viewBox="0 0 80 80">
+                <circle class="timer-bg" cx="40" cy="40" r="36" />
+                <circle id="timer-arc" class="timer-arc" cx="40" cy="40" r="36" />
+            </svg>
             <div id="timer-seconds" class="timer-seconds">30</div>
         </div>
         <div id="timer-label" class="timer-label">Sua vez!</div>
@@ -64,7 +70,6 @@
             <div class="error-icon">⚠️</div>
             <div id="error-msg" class="error-msg"></div>
             <button id="error-retry" class="btn-action">Tentar Novamente</button>
-            <button id="error-fallback" class="btn-action" style="display:none; margin-top:8px; opacity:0.85">💬 Jogar pelo Chat</button>
         </div>
     </div>
 
@@ -75,7 +80,8 @@
     <script src="game-core.js?v=4"></script>
     <script src="game-renderer.js?v=6"></script>
     <script src="game-dialogue.js?v=1"></script>
-    <script src="game-ui.js?v=5"></script>
+    <script src="game-ui.js?v=6"></script>
     <script src="game-transitions.js?v=3"></script>
 </body>
+
 </html>
