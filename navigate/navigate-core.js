@@ -20,6 +20,7 @@ let S = {
                 dungeons: {},        // loc_id -> [{n, done}]
                 canCamp: false,
                 hasMap: 0,           // 0=no map, 1=regional/fragment, 2=full map
+                mapCoverage: new Set(), // set of loc_ids with map coverage (for fog silhouette)
                 selectedLoc: null,   // currently tapped location ID
                 // Pan/zoom state
                 panX: 0, panY: 0,
@@ -71,6 +72,7 @@ async function initAsync() {
                                             S.dungeons = data.dd || {};
                                             S.canCamp = !!data.cc;
                                             S.hasMap = data.hm || 0;
+                                            S.mapCoverage = new Set(data.mc || []);
 
                     // Build connection graph from location data
                     buildConnectionGraph();
@@ -252,8 +254,8 @@ function updateBottomBar() {
 // ACTIONS (send to bot via fetch API)
 // -----------------------------------------------------------
 
-function finishNavigation(type, target) {
-            console.log('[NAVIGATE][DEBUG] finishNavigation called:', { type, target, _navSent, api: S.api, uid: S.uid });
+function finishNavigation(type, target, flags) {
+            console.log('[NAVIGATE][DEBUG] finishNavigation called:', { type, target, flags, _navSent, api: S.api, uid: S.uid });
 
     if (_navSent) {
                     console.warn('[NAVIGATE][DEBUG] BLOCKED: double-fire');
@@ -274,7 +276,9 @@ function finishNavigation(type, target) {
                     type: type,
     };
             if (target) payload.target = target;
-            if (type === 'travel' && S.hasMap === 0) payload.noMap = true;
+            // Map and visit flags for travel risk calculation
+            if (flags?.noMap || (type === 'travel' && S.hasMap === 0)) payload.noMap = true;
+            if (flags?.firstVisit) payload.firstVisit = true;
 
     try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e) {}
 

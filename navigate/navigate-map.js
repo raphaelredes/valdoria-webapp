@@ -6,11 +6,11 @@
 const NS = 'http://www.w3.org/2000/svg';
 
 // ── Fog state for each location ──
-// 'explored' | 'known' | 'frontier' | 'hidden'
-// explored = visited (known + discovered) → full render
-// known = knows it exists but never visited → fog + icon
-// frontier = adjacent to known but not in known_locations → ❓ + heavy fog
-// hidden = completely unknown → invisible
+// 'explored'       = visited + has map → full render (persistent)
+// 'known_mapped'   = known + has map, not visited → fog with silhouette (icon visible)
+// 'known_unmapped' = known + no map → fog without silhouette (no icon, heavy fog)
+// 'frontier'       = adjacent to known but not in known_locations → ❓ + heavy fog
+// 'hidden'         = completely unknown → invisible
 function computeFogState() {
     const fog = {};
     const knownSet = new Set(S.knownLocs);
@@ -28,7 +28,13 @@ function computeFogState() {
 
     for (const locId of Object.keys(LOCATION_COORDS)) {
         if (knownSet.has(locId)) {
-            fog[locId] = discoveredSet.has(locId) ? 'explored' : 'known';
+            if (discoveredSet.has(locId)) {
+                fog[locId] = 'explored';
+            } else if (S.mapCoverage.has(locId)) {
+                fog[locId] = 'known_mapped';
+            } else {
+                fog[locId] = 'known_unmapped';
+            }
         } else {
             const neighbors = adj[locId] || [];
             const hasKnownNeighbor = neighbors.some(n => knownSet.has(n));
@@ -113,6 +119,7 @@ function renderTerrainHexes(group, fogState) {
         // Determine visibility based on proximity to known locations
         let opacity = 0;
         let nearExplored = false;
+        let nearUnmapped = false;
         for (const locId of knownSet) {
             const coords = LOCATION_COORDS[locId];
             if (!coords) continue;
@@ -121,6 +128,7 @@ function renderTerrainHexes(group, fogState) {
             if (dist <= 3) {
                 opacity = Math.max(opacity, dist <= 1 ? 0.4 : 0.2);
                 if (discoveredSet.has(locId)) nearExplored = true;
+                if (fogState[locId] === 'known_unmapped') nearUnmapped = true;
             }
         }
 
@@ -128,6 +136,8 @@ function renderTerrainHexes(group, fogState) {
 
         // Reduce opacity for terrain near unvisited-but-known locations
         if (!nearExplored) opacity *= 0.5;
+        // Further reduce for terrain near unmapped locations (no silhouette)
+        if (nearUnmapped && !nearExplored) opacity *= 0.4;
 
         const hex = createSVG('polygon', {
             points: hexPoints(x, y, HEX_RADIUS * 0.7),
@@ -165,7 +175,8 @@ function renderConnectionPaths(group, fogState) {
         else if (anyExplored) lineOpacity = 0.2;
         if (isActive) lineOpacity = 0.6;
         if (aFog === 'frontier' || bFog === 'frontier') lineOpacity = 0.08;
-        if (aFog === 'known' || bFog === 'known') lineOpacity = Math.max(lineOpacity, 0.12);
+        if (aFog === 'known_unmapped' || bFog === 'known_unmapped') lineOpacity = 0.05;
+        else if (aFog === 'known_mapped' || bFog === 'known_mapped') lineOpacity = Math.max(lineOpacity, 0.12);
 
         const line = createSVG('line', {
             x1: aPx.x, y1: aPx.y,
@@ -207,6 +218,13 @@ function renderConnectionPaths(group, fogState) {
 
 // ── Location nodes ──
 function renderLocationNodes(group, fogState) {
+    // Build adjacency for known_unmapped clickability check
+    const currentAdj = new Set();
+    for (const [a, b] of CONNECTION_EDGES) {
+        if (a === S.currentLoc) currentAdj.add(b);
+        if (b === S.currentLoc) currentAdj.add(a);
+    }
+
     for (const [locId, coords] of Object.entries(LOCATION_COORDS)) {
         const fog = fogState[locId];
         if (fog === 'hidden') continue;
@@ -215,7 +233,8 @@ function renderLocationNodes(group, fogState) {
         const locData = S.locations[locId];
         const isCurrent = locId === S.currentLoc;
         const isExplored = fog === 'explored';
-        const isKnown = fog === 'known';
+        const isKnownMapped = fog === 'known_mapped';
+        const isKnownUnmapped = fog === 'known_unmapped';
         const isFrontier = fog === 'frontier';
 
         // Get biome info
@@ -244,11 +263,16 @@ function renderLocationNodes(group, fogState) {
             fillColor = biomeInfo.hexFill;
             strokeColor = getDangerColor(danger);
             strokeWidth = 1.5;
-        } else if (isKnown) {
-            // Known but never visited — muted biome color
+        } else if (isKnownMapped) {
+            // Has map — silhouette visible: muted biome color
             fillColor = biomeInfo.hexFill;
             strokeColor = '#3e3845';
             strokeWidth = 1.2;
+        } else if (isKnownUnmapped) {
+            // No map — no silhouette: dark neutral hex
+            fillColor = '#2a2630';
+            strokeColor = '#332e3a';
+            strokeWidth = 1;
         } else {
             // Frontier — dark, mysterious
             fillColor = '#2a2630';
@@ -257,7 +281,7 @@ function renderLocationNodes(group, fogState) {
         }
 
         const hexPoly = createSVG('polygon', {
-            points: hexPoints(x, y, isFrontier ? HEX_RADIUS * 0.85 : hexRadius),
+            points: hexPoints(x, y, (isFrontier || isKnownUnmapped) ? HEX_RADIUS * 0.85 : hexRadius),
             fill: fillColor,
             stroke: strokeColor,
             'stroke-width': strokeWidth,
@@ -293,8 +317,8 @@ function renderLocationNodes(group, fogState) {
             });
             label.textContent = shortName;
             nodeGroup.appendChild(label);
-        } else if (isKnown) {
-            // Known: icon visible through fog, name dimmed
+        } else if (isKnownMapped) {
+            // Known + has map: silhouette — icon visible through fog, name dimmed
             nodeGroup.setAttribute('filter', 'url(#fog-light)');
             nodeGroup.setAttribute('opacity', '0.7');
 
@@ -314,6 +338,19 @@ function renderLocationNodes(group, fogState) {
             });
             label.textContent = shortName;
             nodeGroup.appendChild(label);
+        } else if (isKnownUnmapped) {
+            // Known + NO map: fog without silhouette — no icon, no name
+            nodeGroup.setAttribute('filter', 'url(#fog-heavy)');
+            nodeGroup.setAttribute('opacity', '0.45');
+
+            // Just a faint question mark to indicate something exists
+            const qmark = createSVG('text', {
+                x: x, y: y,
+                class: 'loc-icon',
+                'fill-opacity': 0.2,
+            });
+            qmark.textContent = '🌫️';
+            nodeGroup.appendChild(qmark);
         } else {
             // Frontier: question mark through heavy fog
             nodeGroup.setAttribute('filter', 'url(#fog-heavy)');
@@ -328,8 +365,16 @@ function renderLocationNodes(group, fogState) {
             nodeGroup.appendChild(qmark);
         }
 
-        // Click handler — explored and known locations are clickable
-        if (isExplored || isKnown) {
+        // Click handler
+        // Explored + known_mapped: always clickable
+        // Known_unmapped: clickable only if adjacent to current location
+        if (isExplored || isKnownMapped) {
+            nodeGroup.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleLocationTap(locId);
+            });
+        } else if (isKnownUnmapped && currentAdj.has(locId)) {
+            nodeGroup.style.cursor = 'pointer';
             nodeGroup.addEventListener('click', (e) => {
                 e.stopPropagation();
                 handleLocationTap(locId);
@@ -366,15 +411,27 @@ function renderFogParticles(svg, fogState) {
     const fogGroup = createSVG('g', { class: 'fog-particles', 'pointer-events': 'none' });
 
     for (const [locId, state] of Object.entries(fogState)) {
-        if (state !== 'known' && state !== 'frontier') continue;
+        if (state !== 'known_mapped' && state !== 'known_unmapped' && state !== 'frontier') continue;
         const coords = LOCATION_COORDS[locId];
         if (!coords) continue;
         const { x, y } = hexToPixel(coords.col, coords.row);
 
-        const isKnown = state === 'known';
-        const count = isKnown ? 3 : 4;
-        const baseOpacity = isKnown ? 0.06 : 0.10;
-        const fillColor = isKnown ? '#8a8a9a' : '#5a5a6a';
+        // Denser fog for unmapped, lighter for mapped, medium for frontier
+        let count, baseOpacity, fillColor;
+        if (state === 'known_unmapped') {
+            count = 5;
+            baseOpacity = 0.12;
+            fillColor = '#4a4a5a';
+        } else if (state === 'known_mapped') {
+            count = 3;
+            baseOpacity = 0.06;
+            fillColor = '#8a8a9a';
+        } else {
+            // frontier
+            count = 4;
+            baseOpacity = 0.10;
+            fillColor = '#5a5a6a';
+        }
 
         for (let i = 0; i < count; i++) {
             const ox = (Math.random() - 0.5) * HEX_RADIUS * 1.8;

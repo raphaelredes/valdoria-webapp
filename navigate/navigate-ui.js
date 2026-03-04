@@ -18,11 +18,18 @@ function handleLocationTap(locId) {
     const connected = isConnected(S.currentLoc, locId);
     const discoveredSet = new Set(S.discoveredLocs || []);
     const isExplored = discoveredSet.has(locId);
-    const isKnownOnly = !isExplored; // Known but never visited
+    const hasMapCoverage = S.mapCoverage.has(locId);
+    const isKnownMapped = !isExplored && hasMapCoverage;
+    const isKnownUnmapped = !isExplored && !hasMapCoverage;
 
-    // Header
-    document.getElementById('info-icon').textContent = locData.i || '📍';
-    document.getElementById('info-title').textContent = locData.n || 'Desconhecido';
+    // Header — unmapped locations show ??? instead of name
+    if (isKnownUnmapped) {
+        document.getElementById('info-icon').textContent = '🌫️';
+        document.getElementById('info-title').textContent = '???';
+    } else {
+        document.getElementById('info-icon').textContent = locData.i || '📍';
+        document.getElementById('info-title').textContent = locData.n || 'Desconhecido';
+    }
 
     // Danger badge
     const dangerEl = document.getElementById('info-danger');
@@ -38,8 +45,8 @@ function handleLocationTap(locId) {
         } else {
             dangerEl.style.display = 'none';
         }
-    } else {
-        // Known but unvisited: mysterious danger hint
+    } else if (isKnownMapped) {
+        // Known with map: mysterious danger hint
         if (danger >= 5) {
             dangerEl.textContent = '💀 ???';
             dangerEl.style.borderColor = '#8a4a3a';
@@ -53,20 +60,30 @@ function handleLocationTap(locId) {
         } else {
             dangerEl.style.display = 'none';
         }
+    } else {
+        // Unmapped: no danger info
+        dangerEl.style.display = 'none';
     }
 
     // Biome
     const biomeInfo = BIOME_INFO[locData.b] || BIOME_INFO.plains;
     const biomeLabel = biomeInfo.label || locData.b;
-    document.getElementById('info-biome').textContent =
-        `${locData.s ? '🏘️ Assentamento' : '🌍 Região'} — ${biomeLabel}`;
+    if (isKnownUnmapped) {
+        document.getElementById('info-biome').textContent = '🌫️ Região Desconhecida';
+    } else {
+        document.getElementById('info-biome').textContent =
+            `${locData.s ? '🏘️ Assentamento' : '🌍 Região'} — ${biomeLabel}`;
+    }
 
-    // Description — mysterious for unvisited locations
+    // Description
     if (isExplored) {
         document.getElementById('info-desc').textContent = locData.ds || '';
-    } else {
+    } else if (isKnownMapped) {
         document.getElementById('info-desc').textContent =
             'Você ouviu relatos sobre este lugar, mas nunca esteve lá...';
+    } else {
+        document.getElementById('info-desc').textContent =
+            'Névoa densa... Sem um mapa, é impossível distinguir o que há aqui.';
     }
 
     // Tags (weighted distance, connections, danger hint)
@@ -82,7 +99,7 @@ function handleLocationTap(locId) {
         tagsHtml += `<span class="info-tag">🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}</span>`;
     }
 
-    // Mysterious danger hints (only for explored locations or extreme danger)
+    // Mysterious danger hints
     if (isExplored) {
         const playerLv = S.charData?.lv || 1;
         if (danger > playerLv + 2) {
@@ -90,8 +107,10 @@ function handleLocationTap(locId) {
         } else if (danger > playerLv) {
             tagsHtml += `<span class="info-tag info-tag-warn">⚠️ Algo inquietante paira no ar</span>`;
         }
-    } else {
+    } else if (isKnownMapped) {
         tagsHtml += `<span class="info-tag">🌫️ Inexplorado</span>`;
+    } else {
+        tagsHtml += `<span class="info-tag">🌫️ Sem Mapa</span>`;
     }
 
     tagsEl.innerHTML = tagsHtml;
@@ -129,7 +148,7 @@ function handleLocationTap(locId) {
     const actionsEl = document.getElementById('info-actions');
     actionsEl.innerHTML = '';
 
-    // Note area (for non-connected locations)
+    // Note area
     const noteEl = document.getElementById('info-note');
 
     if (isCurrent) {
@@ -151,17 +170,9 @@ function handleLocationTap(locId) {
         }
     } else if (connected) {
         const edgeDist = getConnectionDistance(S.currentLoc, locId);
-        if (S.hasMap === 0) {
-            noteEl.innerHTML = `⚠️ <b>Sem Mapa</b> — ${edgeDist} turno${edgeDist !== 1 ? 's' : ''} de viagem, chance de se perder`;
-            noteEl.style.display = 'block';
-            noteEl.style.color = '#c4953a';
-            const travelBtn = createActionBtn(
-                `🚶 Viajar (${edgeDist}🕐 Sem Mapa) ⚠️`,
-                'info-btn-travel info-btn-risky',
-                () => finishNavigation('travel', locId)
-            );
-            actionsEl.appendChild(travelBtn);
-        } else {
+
+        if (isExplored) {
+            // Explored + has map: safe direct travel
             noteEl.innerHTML = `🕐 <b>${edgeDist} turno${edgeDist !== 1 ? 's' : ''}</b> de viagem`;
             noteEl.style.display = 'block';
             noteEl.style.color = '';
@@ -169,6 +180,28 @@ function handleLocationTap(locId) {
                 `🚶 Viajar para ${locData.n || 'lá'} (${edgeDist}🕐)`,
                 'info-btn-travel',
                 () => finishNavigation('travel', locId)
+            );
+            actionsEl.appendChild(travelBtn);
+        } else if (isKnownMapped) {
+            // Has map but never visited: expedition with map
+            noteEl.innerHTML = `⚠️ <b>Primeira Expedição</b> — ${edgeDist} turno${edgeDist !== 1 ? 's' : ''}, encontros e riscos no caminho`;
+            noteEl.style.display = 'block';
+            noteEl.style.color = '#c4953a';
+            const travelBtn = createActionBtn(
+                `🧭 Expedição para ${locData.n || 'lá'} (${edgeDist}🕐) ⚠️`,
+                'info-btn-travel info-btn-risky',
+                () => finishNavigation('travel', locId, { firstVisit: true })
+            );
+            actionsEl.appendChild(travelBtn);
+        } else {
+            // No map, never visited: blind expedition
+            noteEl.innerHTML = `⚠️ <b>Expedição às Cegas</b> — ${edgeDist} turno${edgeDist !== 1 ? 's' : ''}, sem mapa, alta chance de se perder`;
+            noteEl.style.display = 'block';
+            noteEl.style.color = '#c4953a';
+            const travelBtn = createActionBtn(
+                `🧭 Expedição (${edgeDist}🕐 Sem Mapa) ⚠️⚠️`,
+                'info-btn-travel info-btn-risky',
+                () => finishNavigation('travel', locId, { noMap: true, firstVisit: true })
             );
             actionsEl.appendChild(travelBtn);
         }
