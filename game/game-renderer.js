@@ -2,11 +2,38 @@
    GAME HUB — Universal Screen Renderer
    Converts server JSON screen data into DOM elements.
    Supports text (HTML), buttons (2-per-row grid), images,
-   footer navigation, and transition detection.
+   fixed bottom panel (buttons + text input + footer), and
+   transition detection.
    ═══════════════════════════════════════════════════════════════ */
 
 const LONG_BTN_THRESHOLD = 24; // chars — buttons longer get full width
 const HERO_KEYWORDS = ['PARTIR', 'JOGAR', 'AVENTURA', 'CONFIRMAR', 'INICIAR'];
+
+/**
+ * Update #screen padding-bottom to match the current height of #bottom-panel.
+ * Also sets --bottom-panel-h CSS variable for toast positioning.
+ * Must be called after any change to bottom-panel contents.
+ */
+function updateBottomPadding() {
+    const screenEl = document.getElementById('screen');
+    const panelEl = document.getElementById('bottom-panel');
+    if (!screenEl || !panelEl) return;
+
+    requestAnimationFrame(() => {
+        const h = panelEl.offsetHeight;
+        screenEl.style.paddingBottom = (h + 8) + 'px';
+        document.documentElement.style.setProperty('--bottom-panel-h', h + 'px');
+    });
+}
+
+/**
+ * Check if the button area overflows its max-height and toggle overflow class.
+ */
+function checkButtonOverflow() {
+    const el = document.getElementById('buttons');
+    if (!el) return;
+    el.classList.toggle('has-overflow', el.scrollHeight > el.clientHeight);
+}
 
 /**
  * Render a screen JSON object from the server.
@@ -21,11 +48,14 @@ function renderScreen(screen) {
 
     const screenEl = document.getElementById('screen');
     const loadingEl = document.getElementById('loading');
-    const footerEl = document.getElementById('footer');
+    const panelEl = document.getElementById('bottom-panel');
 
     // Hide loading, show screen
     loadingEl.style.display = 'none';
     screenEl.style.display = '';
+
+    // Reset scroll position to top
+    screenEl.scrollTop = 0;
 
     // Banner image
     const bannerEl = document.getElementById('banner');
@@ -43,7 +73,7 @@ function renderScreen(screen) {
     const contentEl = document.getElementById('content');
     contentEl.innerHTML = enhanceContent(screen.text || '');
 
-    // Buttons
+    // Buttons (rendered into #buttons inside #bottom-panel)
     const buttonsEl = document.getElementById('buttons');
     buttonsEl.innerHTML = '';
     renderButtons(buttonsEl, screen.buttons || []);
@@ -51,23 +81,39 @@ function renderScreen(screen) {
     // Text input field (bank amounts, NPC AI chat, tickets)
     renderTextInput(screen);
 
-    // Footer
-    if (screen.footer && (screen.footer.quick || screen.footer.nav)) {
-        footerEl.style.display = '';
+    // Footer rows (quick + nav)
+    const hasFooter = screen.footer && (screen.footer.quick || screen.footer.nav);
+    const quickEl = document.getElementById('footer-quick');
+    const navEl = document.getElementById('footer-nav');
+
+    if (hasFooter) {
         renderFooter(screen.footer);
-        // Show Telegram back button when there's navigation
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.BackButton.show();
         }
     } else {
-        footerEl.style.display = 'none';
+        if (quickEl) quickEl.style.display = 'none';
+        if (navEl) navEl.style.display = 'none';
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.BackButton.hide();
         }
     }
 
+    // Show bottom panel if there's ANY bottom content
+    const hasButtons = (screen.buttons || []).length > 0;
+    const hasTextInput = !!screen.waiting_for_text;
+    if (hasButtons || hasTextInput || hasFooter) {
+        panelEl.style.display = '';
+    } else {
+        panelEl.style.display = 'none';
+    }
+
     // Hide error overlay if visible
     hideError();
+
+    // Dynamic padding + overflow check
+    checkButtonOverflow();
+    updateBottomPadding();
 }
 
 /**
@@ -235,10 +281,13 @@ function renderTextInput(screen) {
 
     // Focus after a short delay (mobile keyboard)
     setTimeout(() => inputEl.focus(), 150);
+
+    // Recalculate padding after showing text input (changes panel height)
+    updateBottomPadding();
 }
 
 /**
- * Render the fixed footer (nav row + quick access row).
+ * Render the footer rows (quick access + nav) inside #bottom-panel.
  */
 function renderFooter(footer) {
     const quickEl = document.getElementById('footer-quick');

@@ -7,12 +7,12 @@
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { display: none; }
 
-/* ─── Screen Layout ─── */
+/* ─── Screen Layout (scrollable content only) ─── */
 .screen {
     display: flex;
     flex-direction: column;
     padding: 12px 14px;
-    padding-bottom: 110px; /* space for fixed footer */
+    padding-bottom: 120px; /* fallback — JS adjusts dynamically via updateBottomPadding() */
     min-height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
@@ -151,8 +151,8 @@
     transition: all var(--v-transition);
 }
 
-/* ─── Fixed Footer ─── */
-.screen-footer {
+/* ─── Fixed Bottom Panel (action buttons + text input + footer) ─── */
+.bottom-panel {
     position: fixed;
     bottom: 0;
     left: 50%;
@@ -167,6 +167,17 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+/* Safety net: limit button area height for screens with many buttons */
+.bottom-panel .screen-buttons {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+/* Text input inside bottom panel */
+.bottom-panel .text-input-wrap {
+    margin-top: 2px;
 }
 
 .footer-row {
@@ -219,7 +230,7 @@
 /* ─── Toast Notification ─── */
 .toast {
     position: fixed;
-    bottom: 120px;
+    bottom: calc(var(--bottom-panel-h, 120px) + 10px);
     left: 50%;
     transform: translateX(-50%);
     max-width: 380px;

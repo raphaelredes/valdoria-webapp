@@ -68,14 +68,29 @@ function hideError() {
 // ─── Screen Transition Animation ───
 function animateScreenTransition(renderFn) {
     const screenEl = document.getElementById('screen');
+    const panelEl = document.getElementById('bottom-panel');
     if (!screenEl) { renderFn(); return; }
 
+    // Content fades out fully
     screenEl.classList.add('fade-out');
+    // Bottom panel dims subtly (stays present, acknowledges change)
+    if (panelEl) {
+        panelEl.style.opacity = '0.5';
+        panelEl.style.transition = 'opacity 0.1s ease';
+    }
+
     setTimeout(() => {
         renderFn();
         screenEl.classList.remove('fade-out');
         screenEl.classList.add('fade-in');
-        setTimeout(() => screenEl.classList.remove('fade-in'), 200);
+        if (panelEl) {
+            panelEl.style.opacity = '1';
+            panelEl.style.transition = 'opacity 0.15s ease';
+        }
+        setTimeout(() => {
+            screenEl.classList.remove('fade-in');
+            if (panelEl) panelEl.style.transition = '';
+        }, 200);
     }, 150);
 }
 
