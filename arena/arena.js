@@ -192,14 +192,10 @@ async function transitionFromArena(result) {
         console.error('[ARENA] Transition error:', e);
     }
 
-    // Fallback: redirect to Game Hub directly (same origin, sibling folder)
-    if (isApiMode) {
-        const base = window.location.href.replace(/\/arena\/.*/, '');
-        window.location.href = `${base}/game/?token=${token}&api=${encodeURIComponent(apiBase)}&uid=${userId}&return=game&v=1`;
-    } else {
-        showError('Erro na transição. Fechando...');
-        setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
-    }
+    // Fallback: close WebApp and let user tap JOGAR from Telegram
+    // (combat token is not valid for Game Hub sessions)
+    showError('Erro na transição. Fechando...');
+    setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
 }
 
 async function transitionToLevelup() {

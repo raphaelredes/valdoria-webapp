@@ -1453,9 +1453,9 @@ async function _transitionToGameFromExplore(payload) {
         const d = await r.json();
         if (d.url) { window.location.href = d.url; return; }
     } catch(e) { console.error('[EXPLORE] transition error:', e); }
-    // Fallback: redirect to game hub directly
-    const base = window.location.href.replace(/\/explore\/.*/, '');
-    window.location.href = `${base}/game/?token=${S.token}&api=${encodeURIComponent(S.apiBase)}&uid=${S.uid}&return=game&v=1`;
+    // Fallback: close WebApp and let user tap JOGAR from Telegram
+    // (explore token is not valid for Game Hub sessions)
+    if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.close(); }
 }
 
 // ═══════════════════════════════════════════════════════
