@@ -16,6 +16,8 @@ const S = {
 const DEBOUNCE_MS = 200;
 const RETRY_MAX = 3;
 const RETRY_BASE_MS = 1000;
+const SCREEN_CACHE_KEY = 'valdoria_game_screen';
+const SCREEN_CACHE_TTL = 300000; // 5 minutes
 
 // ─── Initialization ───
 function init() {
@@ -56,8 +58,14 @@ function init() {
         // Returning from specialized WebApp — refresh state
         returnFromWebApp();
     } else {
-        // Normal launch — fetch current state (handles first-time and reconnection)
-        fetchState(false);
+        // Try cached screen for instant render, then refresh from server
+        const cached = loadCachedScreen();
+        if (cached) {
+            renderScreen(cached);
+            fetchState(true); // silent refresh in background
+        } else {
+            fetchState(false);
+        }
     }
 }
 
@@ -200,6 +208,28 @@ async function doText(text) {
     if (data && !data.error) {
         animateScreenTransition(() => renderScreen(data));
     }
+}
+
+// ─── Screen Cache (sessionStorage) ───
+function cacheScreen(screen) {
+    try {
+        sessionStorage.setItem(SCREEN_CACHE_KEY, JSON.stringify({
+            token: S.token, ts: Date.now(), screen,
+        }));
+    } catch (e) { /* quota exceeded — ignore */ }
+}
+
+function loadCachedScreen() {
+    try {
+        const raw = sessionStorage.getItem(SCREEN_CACHE_KEY);
+        if (!raw) return null;
+        const { token, ts, screen } = JSON.parse(raw);
+        if (token !== S.token || Date.now() - ts > SCREEN_CACHE_TTL) {
+            sessionStorage.removeItem(SCREEN_CACHE_KEY);
+            return null;
+        }
+        return screen;
+    } catch (e) { return null; }
 }
 
 // ─── Helpers ───

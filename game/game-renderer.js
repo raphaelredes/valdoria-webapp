@@ -17,6 +17,7 @@ function renderScreen(screen) {
     if (!screen) return;
 
     S.currentScreen = screen;
+    if (typeof cacheScreen === 'function') cacheScreen(screen);
 
     const screenEl = document.getElementById('screen');
     const loadingEl = document.getElementById('loading');
