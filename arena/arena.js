@@ -44,6 +44,7 @@ class CombatAPI {
         if (window.Telegram?.WebApp?.initData) {
             h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
         }
+        h['ngrok-skip-browser-warning'] = '1';
         return h;
     }
     async getState() {
@@ -172,6 +173,7 @@ async function transitionFromArena(result) {
     };
     const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
     if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _th['ngrok-skip-browser-warning'] = '1';
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
@@ -206,6 +208,7 @@ async function transitionToLevelup() {
     };
     const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
     if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _th['ngrok-skip-browser-warning'] = '1';
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
@@ -239,6 +242,7 @@ async function transitionToInventoryFromArena() {
     };
     const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
     if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _th['ngrok-skip-browser-warning'] = '1';
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {

@@ -1857,6 +1857,7 @@
                     'Authorization': 'Bearer ' + _apiToken,
                 };
                 if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+                _th['ngrok-skip-browser-warning'] = '1';
                 _th['X-Idempotency-Key'] = crypto.randomUUID();
                 const resp = await fetch(_apiBase + '/api/webapp/transition', {
                     method: 'POST',
@@ -1912,6 +1913,7 @@
                 'Authorization': 'Bearer ' + _apiToken,
             };
             if (window.Telegram?.WebApp?.initData) { _ah['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+            _ah['ngrok-skip-browser-warning'] = '1';
             _ah['X-Idempotency-Key'] = crypto.randomUUID();
             const resp = await fetch(_apiBase + '/api/inventory/apply', {
                 method: 'POST',

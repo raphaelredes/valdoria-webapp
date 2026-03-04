@@ -1706,6 +1706,7 @@
                         'Authorization': 'Bearer ' + token
                     };
                     if (window.Telegram?.WebApp?.initData) { _lh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+                    _lh['ngrok-skip-browser-warning'] = '1';
                     _lh['X-Idempotency-Key'] = crypto.randomUUID();
                     fetch(apiFallback + '/api/levelup/apply', {
                         method: 'POST',

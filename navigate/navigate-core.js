@@ -299,6 +299,7 @@ function finishNavigation(type, target) {
 
     const _nh = { 'Content-Type': 'application/json' };
     if (window.Telegram?.WebApp?.initData) { _nh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _nh['ngrok-skip-browser-warning'] = '1';
     fetch(apiUrl, {
                     method: 'POST',
                     headers: _nh,

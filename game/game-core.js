@@ -79,6 +79,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
     if (window.Telegram?.WebApp?.initData) {
         headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
     }
+    headers['ngrok-skip-browser-warning'] = '1';
     // Idempotency key for mutating endpoints — generated ONCE, shared across retries
     if (endpoint.includes('/action') || endpoint.includes('/text') || endpoint.includes('/transition')) {
         headers['X-Idempotency-Key'] = crypto.randomUUID();

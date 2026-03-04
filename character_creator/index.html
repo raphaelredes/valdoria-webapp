@@ -2561,6 +2561,7 @@ async function submitCharacter() {
                 'Authorization': `Bearer ${token}`
             };
             if (window.Telegram?.WebApp?.initData) { _ch['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+            _ch['ngrok-skip-browser-warning'] = '1';
             _ch['X-Idempotency-Key'] = crypto.randomUUID();
             const resp = await fetch(`${apiBase}/api/character/apply`, {
                 method: 'POST',

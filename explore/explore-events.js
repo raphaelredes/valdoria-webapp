@@ -453,6 +453,7 @@ async function transitionToArena() {
     };
     const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${S.token}` };
     if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _th['ngrok-skip-browser-warning'] = '1';
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
@@ -493,6 +494,7 @@ async function transitionToInventory() {
     };
     const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${S.token}` };
     if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _th['ngrok-skip-browser-warning'] = '1';
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
@@ -1499,6 +1501,7 @@ async function initAsync() {
                 const url = `${S.apiBase}/api/explore/state?user_id=${S.uid}`;
                 const _sh = { 'Authorization': `Bearer ${S.token}` };
                 if (window.Telegram?.WebApp?.initData) { _sh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+                _sh['ngrok-skip-browser-warning'] = '1';
                 const resp = await fetch(url, {
                     method: 'GET',
                     headers: _sh
