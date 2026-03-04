@@ -436,9 +436,11 @@ async function onEnterCity() {
         if (result && result.game_url) {
             window.location.href = result.game_url;
         } else {
-            // Fallback: redirect to game hub directly
-            const base = window.location.href.replace(/\/prologue\/.*/, '');
-            window.location.href = `${base}/game/?token=${TOKEN}&api=${encodeURIComponent(API_BASE)}&uid=${USER_ID}&return=game&v=1`;
+            // Fallback: close WebApp and let user tap JOGAR from Telegram
+            // (prologue token is not valid for Game Hub sessions)
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.close();
+            }
         }
     } catch (e) {
         showError('Erro ao entrar na cidade.', e);
