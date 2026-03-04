@@ -312,8 +312,8 @@ function finishNavigation(type, target) {
             })
             .then(d => {
                             console.log('[NAVIGATE][DEBUG] fetch ok:', d);
-                            // Success: close webapp so Telegram shows the updated message
-                          setTimeout(() => { try { tg?.close(); } catch(e) {} }, 300);
+                            // Success: transition to Game Hub
+                          _transitionToGame();
             })
             .catch(e => {
                             console.error('[NAVIGATE][DEBUG] fetch error:', e);
@@ -333,7 +333,26 @@ function handleReturn() {
 }
 
 function handleClose() {
-                try { tg?.close(); } catch(e) { console.warn('[NAVIGATE] tg.close:', e); }
+                _transitionToGame();
+}
+
+async function _transitionToGame() {
+    if (!S.api || !S.token) { try { tg?.close(); } catch(e) {} return; }
+    const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token };
+    if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    h['ngrok-skip-browser-warning'] = '1';
+    h['X-Idempotency-Key'] = crypto.randomUUID();
+    try {
+        const r = await fetch(S.api + '/api/webapp/transition', {
+            method: 'POST', headers: h,
+            body: JSON.stringify({ from: 'navigate', to: 'game', user_id: S.uid, payload: {} })
+        });
+        const d = await r.json();
+        if (d.url) { window.location.href = d.url; return; }
+    } catch(e) { console.error('[NAVIGATE] transition error:', e); }
+    // Fallback: redirect to game hub directly
+    const base = window.location.href.replace(/\/navigate\/.*/, '');
+    window.location.href = `${base}/game/?token=${S.token}&api=${encodeURIComponent(S.api)}&uid=${S.uid}&return=game&v=1`;
 }
 
 // -----------------------------------------------------------

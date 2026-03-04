@@ -13,7 +13,7 @@ const token = params.get('token') || '';
 const apiBase = params.get('api') || '';
 const userId = parseInt(params.get('uid') || '0');
 const rawData = params.get('data');
-const originApp = params.get('origin') || '';
+const originApp = params.get('origin') || (apiBase ? 'game' : '');
 const isApiMode = !!apiBase;
 let currentState = null;
 let _lastAnimatedRoll = null; // Dedup: prevents replaying same dice animation on re-render
@@ -141,26 +141,22 @@ async function loadCombatState() {
 function showCombatEnded() {
     stopAllIntervals();
     document.getElementById('app').innerHTML = '<div class="no-data"><h2>Combate Encerrado</h2><p>Este combate já foi finalizado.</p></div>';
-    setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
+    if (isApiMode && originApp) {
+        setTimeout(() => transitionFromArena('ended'), 1500);
+    } else {
+        setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
+    }
 }
 
 function closeCombat(result) {
     stopAllIntervals();
-    if (result === 'defeat') {
-        // Defeat: ALWAYS close via sendData — bot sends temple/inn screen with debt
-        // Game engine already applied: HP=1, gold loss, exhaustion, temple_debt
-        if (tg) {
-            tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: 'defeat' }));
-        }
-        setTimeout(() => { try { if (tg) tg.close(); } catch(e) {} }, 300);
-        return;
-    }
-    // Victory: transition back to origin webapp (explore/inventory)
+    // API mode: always transition (originApp defaults to 'game' when empty)
     if (isApiMode && originApp) {
         transitionFromArena(result);
-    } else if (isApiMode) {
-        setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 200);
-    } else if (tg) {
+        return;
+    }
+    // sendData fallback (non-API mode)
+    if (tg) {
         tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: result }));
         setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
     }
@@ -196,9 +192,14 @@ async function transitionFromArena(result) {
         console.error('[ARENA] Transition error:', e);
     }
 
-    // Fallback: show error toast, then close after delay
-    showError('Erro na transição. Fechando...');
-    setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
+    // Fallback: redirect to Game Hub directly (same origin, sibling folder)
+    if (isApiMode) {
+        const base = window.location.href.replace(/\/arena\/.*/, '');
+        window.location.href = `${base}/game/?token=${token}&api=${encodeURIComponent(apiBase)}&uid=${userId}&return=game&v=1`;
+    } else {
+        showError('Erro na transição. Fechando...');
+        setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
+    }
 }
 
 async function transitionToLevelup() {

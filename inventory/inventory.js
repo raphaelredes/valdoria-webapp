@@ -1845,7 +1845,7 @@
     const _apiBase = _urlParams.get('api') || '';
     const _apiToken = _urlParams.get('token') || '';
     const _apiUid = _urlParams.get('uid') || '';
-    const _returnTo = _urlParams.get('return') || '';  // 'explore' or 'arena'
+    const _returnTo = _urlParams.get('return') || (_apiBase ? 'game' : '');  // 'explore', 'arena', or default 'game'
     const _combatMode = _urlParams.get('combat') === '1';
 
     async function _navigateBack() {

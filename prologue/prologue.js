@@ -430,10 +430,16 @@ async function onEnterCity() {
             body.distract = choices.distract;
         }
 
-        await apiCall('/api/prologue/complete', body);
+        const result = await apiCall('/api/prologue/complete', body);
 
-        // Close WebApp — bot sends city screen via Telegram
-        setTimeout(() => { tg?.close(); }, 500);
+        // Redirect to Game Hub (stays in WebApp)
+        if (result && result.game_url) {
+            window.location.href = result.game_url;
+        } else {
+            // Fallback: redirect to game hub directly
+            const base = window.location.href.replace(/\/prologue\/.*/, '');
+            window.location.href = `${base}/game/?token=${TOKEN}&api=${encodeURIComponent(API_BASE)}&uid=${USER_ID}&return=game&v=1`;
+        }
     } catch (e) {
         showError('Erro ao entrar na cidade.', e);
     }

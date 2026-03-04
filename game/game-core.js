@@ -25,6 +25,7 @@ function init() {
     S.token = params.get('token') || '';
     S.apiBase = (params.get('api') || '').replace(/\/$/, '');
     S.uid = parseInt(params.get('uid') || '0', 10);
+    S.charId = params.get('char') || '';  // Character ID from menu (for char switch)
 
     if (!S.token || !S.uid || !S.apiBase) {
         showError('Parâmetros de sessão inválidos. Feche e toque em JOGAR novamente.');
@@ -57,6 +58,9 @@ function init() {
     if (isReturn) {
         // Returning from specialized WebApp — refresh state
         returnFromWebApp();
+    } else if (S.charId) {
+        // Opening from character selection — use /start to activate char
+        startGame();
     } else {
         // Try cached screen for instant render, then refresh from server
         const cached = loadCachedScreen();
@@ -132,7 +136,8 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
 
 async function startGame() {
     showLoading();
-    const data = await apiCall('/api/game/start');
+    const startBody = S.charId ? { char_id: S.charId } : {};
+    const data = await apiCall('/api/game/start', startBody);
     hideLoading();
     if (data && !data.error) {
         renderScreen(data);

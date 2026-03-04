@@ -1413,6 +1413,13 @@ function finishExploration(reason) {
         map_data: mapDataPayload,
     };
 
+    // API mode: transition to Game Hub (stays in WebApp)
+    if (S.apiBase && S.token && S.uid) {
+        _transitionToGameFromExplore(payload);
+        return;
+    }
+
+    // Fallback: sendData + close (non-API mode)
     try {
         if (tg && tg.sendData) {
             tg.sendData(JSON.stringify(payload));
@@ -1422,13 +1429,33 @@ function finishExploration(reason) {
     } catch (e) {
         console.error('[EXPLORE] sendData failed:', e);
     }
-
-    // Always close after timeout (fallback like arena)
     setTimeout(() => {
         try { if (tg) tg.close(); } catch (e) {
             console.warn('[EXPLORE] tg.close fallback failed:', e);
         }
     }, 500);
+}
+
+async function _transitionToGameFromExplore(payload) {
+    const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token };
+    if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    h['ngrok-skip-browser-warning'] = '1';
+    h['X-Idempotency-Key'] = crypto.randomUUID();
+    try {
+        const r = await fetch(S.apiBase + '/api/webapp/transition', {
+            method: 'POST', headers: h,
+            body: JSON.stringify({
+                from: 'explore', to: 'game',
+                user_id: parseInt(S.uid),
+                payload: { results: payload.results }
+            })
+        });
+        const d = await r.json();
+        if (d.url) { window.location.href = d.url; return; }
+    } catch(e) { console.error('[EXPLORE] transition error:', e); }
+    // Fallback: redirect to game hub directly
+    const base = window.location.href.replace(/\/explore\/.*/, '');
+    window.location.href = `${base}/game/?token=${S.token}&api=${encodeURIComponent(S.apiBase)}&uid=${S.uid}&return=game&v=1`;
 }
 
 // ═══════════════════════════════════════════════════════
