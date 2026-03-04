@@ -39,9 +39,9 @@ function renderScreen(screen) {
         bannerEl.style.display = 'none';
     }
 
-    // Text content (server sends trusted HTML)
+    // Text content (server sends trusted HTML, enhanced client-side)
     const contentEl = document.getElementById('content');
-    contentEl.innerHTML = screen.text || '';
+    contentEl.innerHTML = enhanceContent(screen.text || '');
 
     // Buttons
     const buttonsEl = document.getElementById('buttons');
@@ -214,7 +214,7 @@ function renderFooter(footer) {
         quickEl.style.display = '';
         for (const btn of footer.quick) {
             const el = document.createElement('button');
-            el.className = 'btn-footer';
+            el.className = 'btn-action';
             el.textContent = btn.text || '';
             if (btn.cb) {
                 el.onclick = () => doAction(btn.cb);
@@ -234,7 +234,7 @@ function renderFooter(footer) {
         navEl.style.display = '';
         for (const btn of footer.nav) {
             const el = document.createElement('button');
-            el.className = 'btn-footer';
+            el.className = 'btn-action';
             el.textContent = btn.text || '';
             if (btn.cb) {
                 el.onclick = () => doAction(btn.cb);

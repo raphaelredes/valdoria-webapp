@@ -397,3 +397,139 @@
 }
 
 .v-skip-btn.visible { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ENHANCED CONTENT COMPONENTS (game-enhancer.js)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Decorative Dividers ─── */
+.v-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+    margin: 2px 0;
+}
+
+.v-divider::before,
+.v-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--v-gold-dim), transparent);
+}
+
+.v-divider span {
+    font-size: 11px;
+    color: var(--v-gold-dim);
+    flex-shrink: 0;
+}
+
+.v-divider-sm {
+    padding: 4px 0;
+    margin: 4px 0;
+}
+
+.v-divider-sm::before,
+.v-divider-sm::after {
+    background: linear-gradient(90deg, transparent, var(--v-border), transparent);
+}
+
+/* ─── Progress Bars (HP, MP, XP, HD) ─── */
+.v-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+}
+
+.v-bar-icon {
+    font-size: 13px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.v-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--v-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--v-border);
+}
+
+.v-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+/* HP bar colors (health-based) */
+.v-bar-fill.hp      { background: linear-gradient(90deg, #2d8f2d, #4caf50); }
+.v-bar-fill.hp-warn  { background: linear-gradient(90deg, #d4a017, #f5c800); }
+.v-bar-fill.hp-crit  { background: linear-gradient(90deg, #c62828, #e74c3c); }
+
+/* Resource bar colors */
+.v-bar-fill.mp { background: linear-gradient(90deg, #1565c0, #42a5f5); }
+.v-bar-fill.xp { background: linear-gradient(90deg, #7b1fa2, #ab47bc); }
+.v-bar-fill.hd { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
+
+.v-bar-label {
+    font-size: 11px;
+    font-family: var(--v-font-mono);
+    color: var(--v-text-dim);
+    min-width: 50px;
+    text-align: right;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.v-bar-extra {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    padding-left: 26px;
+}
+
+/* ─── Stat Badges (AC, ATK, DMG) ─── */
+.v-stat-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    padding: 3px 0;
+}
+
+.v-stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 8px;
+    background: var(--v-bg-raised);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    font-size: 12px;
+    font-family: var(--v-font-mono);
+    color: var(--v-text);
+    white-space: nowrap;
+}
+
+/* ─── Resource Badges (Gold, Items) ─── */
+.v-resource-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 3px 0;
+}
+
+.v-resource-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 10px;
+    background: var(--v-bg-card);
+    border: 1px solid var(--v-border-gold);
+    border-radius: var(--v-radius-pill);
+    font-size: 12px;
+    color: var(--v-gold-light);
+    white-space: nowrap;
+}
