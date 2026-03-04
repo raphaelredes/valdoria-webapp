@@ -170,6 +170,7 @@ function renderTextInput(screen) {
     const wrap = document.getElementById('text-input-wrap');
     const inputEl = document.getElementById('text-input');
     const sendBtn = document.getElementById('text-send');
+    const maxLabel = document.getElementById('text-input-max');
     if (!wrap) return;
 
     if (!screen.waiting_for_text) {
@@ -181,9 +182,45 @@ function renderTextInput(screen) {
     inputEl.placeholder = screen.text_placeholder || 'Digite aqui...';
     inputEl.value = '';
 
+    const isNumeric = screen.text_input_type === 'numeric';
+    const maxVal = screen.text_max_value;
+
+    // Configure input mode
+    if (isNumeric) {
+        inputEl.inputMode = 'numeric';
+        inputEl.pattern = '[0-9]*';
+        inputEl.oninput = () => {
+            inputEl.value = inputEl.value.replace(/\D/g, '');
+            if (maxVal != null && inputEl.value !== '') {
+                const n = parseInt(inputEl.value, 10);
+                if (n > maxVal) inputEl.value = String(maxVal);
+            }
+        };
+    } else {
+        inputEl.inputMode = '';
+        inputEl.pattern = '';
+        inputEl.oninput = null;
+    }
+
+    // Max value label
+    if (maxLabel) {
+        if (isNumeric && maxVal != null) {
+            maxLabel.textContent = `Máx: ${maxVal.toLocaleString('pt-BR')} GP`;
+            maxLabel.style.display = '';
+        } else {
+            maxLabel.textContent = '';
+            maxLabel.style.display = 'none';
+        }
+    }
+
     const submitText = () => {
         const val = inputEl.value.trim();
         if (!val) return;
+        if (isNumeric) {
+            const n = parseInt(val, 10);
+            if (isNaN(n) || n <= 0) return;
+            if (maxVal != null && n > maxVal) return;
+        }
         wrap.style.display = 'none';
         doText(val);
     };

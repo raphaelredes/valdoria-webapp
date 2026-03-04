@@ -329,11 +329,20 @@
 .screen.fade-out { opacity: 0; transition: opacity 0.15s ease; }
 .screen.fade-in { opacity: 1; transition: opacity 0.2s ease; }
 
-/* ─── Text Input (bank amounts, NPC AI chat, tickets) ─── */
+/* ─── Text Input (bank amounts, chat, tickets) ─── */
 .text-input-wrap {
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
     margin-top: 10px;
+}
+
+.text-input-max {
+    width: 100%;
+    font-size: 11px;
+    color: var(--v-gold-dim);
+    text-align: right;
+    margin-top: -2px;
 }
 
 .text-input {
@@ -532,4 +541,148 @@
     font-size: 12px;
     color: var(--v-gold-light);
     white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SEMANTIC BLOCK COMPONENTS (v2 enhancer)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Location Header ── */
+.v-location-header {
+    text-align: center;
+    padding: 14px 16px 12px;
+    margin: 0 -12px 8px;
+    background: linear-gradient(180deg, rgba(196,149,58,0.1) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(196,149,58,0.15);
+}
+.v-time-bar {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+}
+.v-location-header h2 {
+    font-size: 16px;
+    color: var(--v-gold);
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(196,149,58,0.3);
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* ── Character Identity Card ── */
+.v-char-card {
+    padding: 10px 12px;
+    margin: 8px 0;
+    background: var(--v-bg-card);
+    border-radius: var(--v-radius);
+    border-left: 3px solid var(--v-gold);
+}
+.v-char-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--v-text-bright, #f0e6d6);
+    line-height: 1.4;
+}
+.v-char-meta {
+    font-size: 12px;
+    color: var(--v-text-dim);
+    font-style: italic;
+    margin-top: 2px;
+}
+
+/* ── Flavor Text ── */
+.v-flavor {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--v-text-dim);
+    padding: 8px 12px;
+    margin: 8px 0;
+    border-left: 2px solid var(--v-crimson, #7b2020);
+    line-height: 1.55;
+}
+
+/* ── Party / Group Block ── */
+.v-party-block {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: var(--v-bg-card);
+    border-radius: var(--v-radius);
+}
+.v-party-header {
+    font-size: 11px;
+    color: var(--v-gold);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(196,149,58,0.15);
+}
+.v-ally-row {
+    font-size: 12px;
+    padding: 3px 0;
+    color: var(--v-text);
+    line-height: 1.4;
+}
+
+/* ── Notification Badge ── */
+.v-notification {
+    padding: 10px 12px;
+    margin: 8px 0;
+    background: var(--v-bg-card);
+    border-radius: var(--v-radius);
+    border-left: 3px solid var(--v-gold);
+}
+.v-notif-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--v-gold);
+}
+.v-notif-body {
+    font-size: 12px;
+    color: var(--v-text-dim);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* ── Social Pulse ── */
+.v-social-pulse {
+    font-size: 12px;
+    color: var(--v-text-dim);
+    padding: 4px 0;
+}
+
+/* ── Departure Notice ── */
+.v-departure {
+    font-size: 12px;
+    color: var(--v-text-dim);
+    padding: 3px 0;
+    font-style: italic;
+}
+
+/* ── Generic Text Section ── */
+.v-section {
+    padding: 4px 0;
+    line-height: 1.5;
+    font-size: 13px;
+}
+
+/* ── Spacer (replaces multiple blank lines) ── */
+.v-spacer {
+    height: 8px;
+}
+
+/* ── Ensure screen-content doesn't add pre-line to enhanced blocks ── */
+.screen-content .v-location-header,
+.screen-content .v-char-card,
+.screen-content .v-flavor,
+.screen-content .v-party-block,
+.screen-content .v-notification,
+.screen-content .v-bar,
+.screen-content .v-stat-row,
+.screen-content .v-resource-row {
+    white-space: normal;
 }
