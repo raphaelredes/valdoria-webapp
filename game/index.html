@@ -27,6 +27,9 @@
         <div id="content" class="screen-content"></div>
     </div>
 
+    <!-- Immersive mode: collapse toggle (above bottom panel) -->
+    <button id="immersive-toggle" class="immersive-toggle" style="display:none" aria-label="Recolher menu">&#9662;</button>
+
     <!-- Fixed bottom panel (action buttons + text input + footer) -->
     <div id="bottom-panel" class="bottom-panel" style="display:none">
         <div id="buttons" class="screen-buttons"></div>
@@ -38,6 +41,9 @@
         <div id="footer-quick" class="footer-row footer-quick"></div>
         <div id="footer-nav" class="footer-row footer-nav"></div>
     </div>
+
+    <!-- Immersive mode: restore pill (when panel is collapsed) -->
+    <button id="immersive-restore" class="immersive-restore" style="display:none">&#9652; Menu</button>
 
     <!-- Toast notification -->
     <div id="toast" class="toast" style="display:none"></div>
@@ -58,6 +64,7 @@
             <div class="error-icon">⚠️</div>
             <div id="error-msg" class="error-msg"></div>
             <button id="error-retry" class="btn-action">Tentar Novamente</button>
+            <button id="error-fallback" class="btn-action" style="display:none; margin-top:8px; opacity:0.85">💬 Jogar pelo Chat</button>
         </div>
     </div>
 

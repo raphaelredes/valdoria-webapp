@@ -40,6 +40,7 @@ function showError(msg, err = null) {
     const overlay = document.getElementById('error-overlay');
     const msgEl = document.getElementById('error-msg');
     const retryBtn = document.getElementById('error-retry');
+    const fallbackBtn = document.getElementById('error-fallback');
 
     if (!overlay || !msgEl) return;
 
@@ -58,6 +59,24 @@ function showError(msg, err = null) {
             startGame();
         }
     };
+
+    // Show "Jogar pelo Chat" fallback for connection errors
+    if (fallbackBtn) {
+        const isConnectionError = msg.includes('Sem conexão') || msg.includes('Erro no servidor');
+        fallbackBtn.style.display = isConnectionError ? '' : 'none';
+        fallbackBtn.onclick = isConnectionError ? () => {
+            fallbackBtn.disabled = true;
+            try {
+                Telegram.WebApp.sendData(JSON.stringify({
+                    action: 'game_hub_fallback',
+                    char_id: S.charId || '',
+                }));
+            } catch (e) {
+                console.error('[GAME] sendData fallback failed:', e);
+                Telegram.WebApp.close();
+            }
+        } : null;
+    }
 }
 
 function hideError() {
