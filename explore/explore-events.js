@@ -1413,9 +1413,15 @@ function finishExploration(reason) {
         map_data: mapDataPayload,
     };
 
-    // API mode: transition to Game Hub (stays in WebApp)
+    // API mode: transition to Game Hub or Navigate (stays in WebApp)
     if (S.apiBase && S.token && S.uid) {
-        _transitionToGameFromExplore(payload);
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnTo = urlParams.get('return') || 'game';
+        if (returnTo === 'navigate') {
+            _transitionToNavigateFromExplore(payload);
+        } else {
+            _transitionToGameFromExplore(payload);
+        }
         return;
     }
 
@@ -1455,6 +1461,27 @@ async function _transitionToGameFromExplore(payload) {
     } catch(e) { console.error('[EXPLORE] transition error:', e); }
     // Fallback: close WebApp and let user tap JOGAR from Telegram
     // (explore token is not valid for Game Hub sessions)
+    if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.close(); }
+}
+
+async function _transitionToNavigateFromExplore(payload) {
+    const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token };
+    if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    h['ngrok-skip-browser-warning'] = '1';
+    h['X-Idempotency-Key'] = crypto.randomUUID();
+    try {
+        const r = await fetch(S.apiBase + '/api/webapp/transition', {
+            method: 'POST', headers: h,
+            body: JSON.stringify({
+                from: 'explore', to: 'navigate',
+                user_id: parseInt(S.uid),
+                payload: { results: payload.results }
+            })
+        });
+        const d = await r.json();
+        if (d.url) { window.location.href = d.url; return; }
+    } catch(e) { console.error('[EXPLORE] navigate transition error:', e); }
+    // Fallback: close WebApp
     if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.close(); }
 }
 

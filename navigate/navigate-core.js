@@ -311,9 +311,15 @@ function finishNavigation(type, target) {
                             return r.json();
             })
             .then(d => {
-                            console.log('[NAVIGATE][DEBUG] fetch ok:', d);
-                            // Success: transition to Game Hub
-                          _transitionToGame();
+                console.log('[NAVIGATE][DEBUG] fetch ok:', d);
+                // Travel: backend returns explore URL -> redirect to explore
+                if (d.url && type === 'travel') {
+                    console.log('[NAVIGATE][DEBUG] travel -> explore:', d.url);
+                    window.location.href = d.url;
+                    return;
+                }
+                // Other actions (camp, return, explore): go to Game Hub
+                _transitionToGame();
             })
             .catch(e => {
                             console.error('[NAVIGATE][DEBUG] fetch error:', e);
