@@ -165,14 +165,19 @@ function loadMapData(data) {
     S.exitCol = data.e ? data.e[0] : 5;
     S.exitRow = data.e ? data.e[1] : 0;
     S.visibility = data.v || 3;
-    S.dmIntro = data.i || '';
+    // DM intro: generated client-side from biome + danger level (no longer in payload)
+    S.dmIntro = data.i || (typeof getDMIntro === 'function' ? getDMIntro(S.biome, data.dl || 1) : '');
     S.charData = data.c || null;
     S.dangerLevel = data.dl || 1;
     // Clone consumable inventory from payload
     S.inventory = (data.c && data.c.inv) ? JSON.parse(JSON.stringify(data.c.inv)) : [];
     S.randomEncounters = (data.re || []).map(re => ({
         type: re.y, icon: re.ic || '⚠️', title: re.tt || 'Evento',
-        narration: re.n || '', choices: re.ch || [],
+        // Narration: resolve from index (ni) via local pool, fallback to text (n)
+        narration: (re.ni != null && typeof lookupEncNarr === 'function')
+            ? (lookupEncNarr(re.y, S.biome, re.ni) || re.n || '')
+            : (re.n || ''),
+        choices: re.ch || [],
         combat: re.cb || null,
     }));
 
@@ -188,7 +193,11 @@ function loadMapData(data) {
     const allPois = (data.p || []).map(p => ({
         id: p.i, col: p.q, row: p.r,
         type: p.y, icon: p.ic, title: p.tt,
-        narration: p.n, choices: p.ch || [],
+        // Narration: resolve from index (ni) via local pool, fallback to text (n)
+        narration: (p.ni != null && typeof lookupPOINarr === 'function')
+            ? (lookupPOINarr(p.y, S.biome, p.ni) || p.n || '')
+            : (p.n || ''),
+        choices: p.ch || [],
         combat: p.cb || null,
         hidden: !!p.h, hiddenDC: p.hd || 0,
     }));
