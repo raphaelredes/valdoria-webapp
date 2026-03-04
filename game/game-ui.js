@@ -181,3 +181,77 @@ function hideTimerOverlay() {
     const overlay = document.getElementById('timer-overlay');
     if (overlay) overlay.style.display = 'none';
 }
+
+// ─── Immersive Mode (collapsible bottom panel) ───
+let _immersiveCollapsed = false;
+let _immersiveEligible = false;
+const IMMERSIVE_KEY = 'valdoria_immersive';
+
+function initImmersive() {
+    try {
+        _immersiveCollapsed = localStorage.getItem(IMMERSIVE_KEY) === '1';
+    } catch (e) { _immersiveCollapsed = false; }
+
+    const toggleBtn = document.getElementById('immersive-toggle');
+    const restoreBtn = document.getElementById('immersive-restore');
+
+    if (toggleBtn) {
+        toggleBtn.onclick = () => {
+            haptic('light');
+            _setImmersive(true);
+        };
+    }
+    if (restoreBtn) {
+        restoreBtn.onclick = () => {
+            haptic('light');
+            _setImmersive(false);
+        };
+    }
+}
+
+function _setImmersive(collapsed) {
+    _immersiveCollapsed = collapsed;
+    try { localStorage.setItem(IMMERSIVE_KEY, collapsed ? '1' : '0'); } catch (e) { /* */ }
+    _applyImmersive();
+}
+
+function _applyImmersive() {
+    const toggle = document.getElementById('immersive-toggle');
+    const restore = document.getElementById('immersive-restore');
+    const panel = document.getElementById('bottom-panel');
+    const screen = document.getElementById('screen');
+
+    if (!_immersiveEligible) {
+        // Not immersive — hide controls, ensure panel visible
+        if (toggle) toggle.style.display = 'none';
+        if (restore) restore.style.display = 'none';
+        if (panel) panel.classList.remove('immersive-collapsed');
+        if (screen) screen.classList.remove('immersive-full');
+        updateBottomPadding();
+        return;
+    }
+
+    if (_immersiveCollapsed) {
+        if (toggle) toggle.style.display = 'none';
+        if (panel) panel.classList.add('immersive-collapsed');
+        if (restore) restore.style.display = '';
+        if (screen) screen.classList.add('immersive-full');
+    } else {
+        if (panel) panel.classList.remove('immersive-collapsed');
+        if (toggle) toggle.style.display = '';
+        if (restore) restore.style.display = 'none';
+        if (screen) screen.classList.remove('immersive-full');
+        updateBottomPadding();
+    }
+}
+
+function updateImmersiveEligibility(screen) {
+    _immersiveEligible = !!(screen && screen.immersive);
+
+    // Auto-expand if text input is active (need to see input field)
+    if (screen && screen.waiting_for_text && _immersiveCollapsed && _immersiveEligible) {
+        _immersiveCollapsed = false;
+    }
+
+    _applyImmersive();
+}

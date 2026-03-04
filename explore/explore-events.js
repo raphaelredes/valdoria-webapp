@@ -37,7 +37,51 @@ function showPOI(poi) {
     overlay.classList.add('active');
 }
 
+// --- Paginated Typewriter ---
+// Splits text on '|' delimiter into pages. If no delimiter, auto-splits
+// long text at sentence boundaries to keep each page readable.
+// Shows a "Continuar..." button between pages, then calls onDone after the last.
+const _NARR_PAGE_MAX = 90; // Max chars per auto-page (fits dm-card on 390px)
+
+function _splitNarrationPages(text) {
+    if (!text) return [''];
+    // Explicit page breaks via '|'
+    if (text.includes('|')) {
+        return text.split('|').map(p => p.trim()).filter(Boolean);
+    }
+    // Short text — single page
+    if (text.length <= _NARR_PAGE_MAX) return [text];
+    // Auto-split at sentence boundary ('. ')
+    const pages = [];
+    let remaining = text;
+    while (remaining.length > _NARR_PAGE_MAX) {
+        let cut = remaining.lastIndexOf('. ', _NARR_PAGE_MAX);
+        if (cut < _NARR_PAGE_MAX * 0.4) {
+            // No good sentence break — try comma
+            cut = remaining.lastIndexOf(', ', _NARR_PAGE_MAX);
+        }
+        if (cut < _NARR_PAGE_MAX * 0.4) {
+            // Hard break at space
+            cut = remaining.lastIndexOf(' ', _NARR_PAGE_MAX);
+        }
+        if (cut <= 0) cut = _NARR_PAGE_MAX;
+        else cut += 1; // Include the '.' or ','
+        pages.push(remaining.slice(0, cut).trim());
+        remaining = remaining.slice(cut).trim();
+    }
+    if (remaining) pages.push(remaining);
+    return pages;
+}
+
 function typewriter(el, text, onDone) {
+    const pages = _splitNarrationPages(text);
+    _typewriterPage(el, pages, 0, onDone);
+}
+
+function _typewriterPage(el, pages, pageIdx, onDone) {
+    const text = pages[pageIdx] || '';
+    const isLast = pageIdx >= pages.length - 1;
+    const totalPages = pages.length;
     let i = 0;
     el.innerHTML = '';
     const span = document.createElement('span');
@@ -50,7 +94,24 @@ function typewriter(el, text, onDone) {
         if (i >= text.length) {
             clearInterval(iv);
             cursor.remove();
-            if (onDone) onDone();
+            if (isLast) {
+                if (onDone) onDone();
+            } else {
+                // Show page indicator + continue button
+                if (totalPages > 1) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'dm-page-indicator';
+                    indicator.textContent = `${pageIdx + 1} / ${totalPages}`;
+                    el.appendChild(indicator);
+                }
+                const contBtn = document.createElement('button');
+                contBtn.className = 'dm-continue-btn';
+                contBtn.innerHTML = '<span>Continuar…</span> <span style="font-size:16px">▸</span>';
+                contBtn.addEventListener('click', () => {
+                    _typewriterPage(el, pages, pageIdx + 1, onDone);
+                });
+                el.appendChild(contBtn);
+            }
             return;
         }
         span.textContent += text[i];

@@ -27,6 +27,9 @@ function init() {
     S.uid = parseInt(params.get('uid') || '0', 10);
     S.charId = params.get('char') || '';  // Character ID from menu (for char switch)
 
+    // Immersive mode (collapsible bottom panel) — init before auth check
+    if (typeof initImmersive === 'function') initImmersive();
+
     if (!S.token || !S.uid || !S.apiBase) {
         showError('Parâmetros de sessão inválidos. Feche e toque em JOGAR novamente.');
         return;

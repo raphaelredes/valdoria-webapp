@@ -67,7 +67,7 @@ class CombatAPI {
             const r = await fetch(`${this.base}/api/combat/health`, { method: 'GET' });
             if (!r.ok) return { status: 'unreachable' };
             return r.json();
-        } catch(e) {
+        } catch (e) {
             return { status: 'unreachable' };
         }
     }
@@ -108,7 +108,7 @@ if (isApiMode) {
         const state = JSON.parse(b64Decode(rawData));
         currentState = state;
         renderArena(state);
-    } catch(e) {
+    } catch (e) {
         console.error('[COMBAT]', 'Dados corrompidos', e);
         document.getElementById('app').innerHTML = '<div class="no-data"><h2>Erro</h2><p>Dados de combate corrompidos.</p></div>';
     }
@@ -124,7 +124,7 @@ async function loadCombatState() {
         if (state.phase && !state.ph) state.ph = state.phase;
         renderArena(state);
         startHeartbeat();
-    } catch(e) {
+    } catch (e) {
         console.error('[COMBAT]', 'Erro ao carregar', e);
         // Distinguish "server down" from "session invalid" via health check
         const health = await api.checkHealth();
@@ -144,7 +144,7 @@ function showCombatEnded() {
     if (isApiMode && originApp) {
         setTimeout(() => transitionFromArena('ended'), 1500);
     } else {
-        setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
+        setTimeout(() => { try { if (tg) tg.close(); } catch (e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
     }
 }
 
@@ -158,7 +158,7 @@ function closeCombat(result) {
     // sendData fallback (non-API mode)
     if (tg) {
         tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: result }));
-        setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
+        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
     }
 }
 
@@ -195,7 +195,7 @@ async function transitionFromArena(result) {
     // Fallback: close WebApp and let user tap JOGAR from Telegram
     // (combat token is not valid for Game Hub sessions)
     showError('Erro na transição. Fechando...');
-    setTimeout(() => { try { if (tg) tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
+    setTimeout(() => { try { if (tg) tg.close(); } catch (e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
 }
 
 async function transitionToLevelup() {
@@ -324,36 +324,36 @@ function renderResolution(state) {
 
 // ─── CONSTANTS ───
 const BIOME_NAMES = {
-    forest:'Floresta', cave:'Caverna', graveyard:'Cemiterio', swamp:'Pantano',
-    volcanic:'Vulcanico', snow:'Neve', desert:'Deserto', mountain:'Montanha',
-    plains:'Planicie', dungeon:'Masmorra', city:'Cidade', ruins:'Ruinas',
+    forest: 'Floresta', cave: 'Caverna', graveyard: 'Cemiterio', swamp: 'Pantano',
+    volcanic: 'Vulcanico', snow: 'Neve', desert: 'Deserto', mountain: 'Montanha',
+    plains: 'Planicie', dungeon: 'Masmorra', city: 'Cidade', ruins: 'Ruinas',
 };
 
 const STATUS_ICONS = {
-    poisoned:'🧪', blinded:'🌑', paralyzed:'⚡', prone:'🦶', restrained:'🕸️',
-    frightened:'😱', stunned:'💫', grappled:'👐', petrified:'🪨', exhausted:'😫',
-    marked:'🎯', blessed:'✨', hexed:'👁️', burning:'🔥', frozen:'❄️',
-    sleeping:'💤', charmed:'💖', deafened:'🔇', incapacitated:'🚫',
-    invisible:'👻', surprised:'❗', exposed:'🎯', inspired:'🎵',
-    concentrated:'🔮', raging:'💢', wild_shaped:'🐾',
+    poisoned: '🧪', blinded: '🌑', paralyzed: '⚡', prone: '🦶', restrained: '🕸️',
+    frightened: '😱', stunned: '💫', grappled: '👐', petrified: '🪨', exhausted: '😫',
+    marked: '🎯', blessed: '✨', hexed: '👁️', burning: '🔥', frozen: '❄️',
+    sleeping: '💤', charmed: '💖', deafened: '🔇', incapacitated: '🚫',
+    invisible: '👻', surprised: '❗', exposed: '🎯', inspired: '🎵',
+    concentrated: '🔮', raging: '💢', wild_shaped: '🐾',
 };
 
 const DMG_ICONS = {
-    slashing:'🗡️', piercing:'🏹', bludgeoning:'🔨', fire:'🔥', cold:'❄️',
-    lightning:'⚡', necrotic:'💀', radiant:'✨', psychic:'🧠', thunder:'💥',
-    poison:'🧪', acid:'🟢', force:'💠',
+    slashing: '🗡️', piercing: '🏹', bludgeoning: '🔨', fire: '🔥', cold: '❄️',
+    lightning: '⚡', necrotic: '💀', radiant: '✨', psychic: '🧠', thunder: '💥',
+    poison: '🧪', acid: '🟢', force: '💠',
 };
 
-const ATK_TYPE_LABELS = { melee:'Corpo a corpo', ranged:'A distancia', magic:'Magico' };
+const ATK_TYPE_LABELS = { melee: 'Corpo a corpo', ranged: 'A distancia', magic: 'Magico' };
 
 const RES_CLASS_MAP = {
-    'Mana':'mp', 'Ki':'ki', 'Fúria':'fury', 'Vigor':'vigor',
-    'Inspiração':'inspiration', 'Pacto':'pact', 'Energia':'energy',
+    'Mana': 'mp', 'Ki': 'ki', 'Fúria': 'fury', 'Vigor': 'vigor',
+    'Inspiração': 'inspiration', 'Pacto': 'pact', 'Energia': 'energy',
 };
 
 const RES_ICON_MAP = {
-    'Mana':'💧', 'Ki':'⚡', 'Fúria':'💢', 'Vigor':'💪',
-    'Inspiração':'🎵', 'Pacto':'👁️', 'Energia':'⚡',
+    'Mana': '💧', 'Ki': '⚡', 'Fúria': '💢', 'Vigor': '💪',
+    'Inspiração': '🎵', 'Pacto': '👁️', 'Energia': '⚡',
 };
 
 // ─── MAIN RENDER ───
@@ -366,17 +366,18 @@ function renderArena(s) {
     const biomeName = BIOME_NAMES[s.bio] || s.bio || 'Desconhecido';
     const weatherStr = s.w ? `${s.w.ico} ${s.w.l}` : '☀️ Limpo';
 
-    // Determine active turn entity
     const activeTurn = s.to && s.to[0] ? s.to[0] : null;
     _currentPositions = s.positions || null; // Feature 9
+
+    const ph = s.ph || s.phase || 'intro';
 
     let html = '';
 
     // Header (dynamic title based on biome)
     const biomeTitle = s.bio === 'arena' ? 'Arena de Combate' :
-                       s.bio === 'dungeon' ? 'Combate na Masmorra' :
-                       s.bio === 'cave' ? 'Combate na Caverna' :
-                       s.bio === 'city' ? 'Combate na Cidade' : 'Combate';
+        s.bio === 'dungeon' ? 'Combate na Masmorra' :
+            s.bio === 'cave' ? 'Combate na Caverna' :
+                s.bio === 'city' ? 'Combate na Cidade' : 'Combate';
     html += `<div class="arena-header">
         <div class="arena-title">${biomeTitle}</div>
         <div class="arena-subtitle">Rodada ${s.rn || 1} · ${biomeName} · ${weatherStr}</div>
@@ -395,12 +396,13 @@ function renderArena(s) {
     // Battlefield — CENTER (arena where dice roll between combatants)
     html += '<div class="battlefield">';
     html += renderTurnTimeline(s.to);
-    html += `<div class="dice-row">
+    const diceDisplay = (ph === 'init' || ph === 'intro') ? 'display:none;' : '';
+    html += `<div class="dice-row" style="${diceDisplay}">
         <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>
         <div class="dice-box-compact"><div class="dice-emoji" id="dice2">🎲</div><div><div class="dice-result" id="diceResult2"></div><div class="dice-label" id="diceLabel2">dano</div></div></div>
     </div>
-    <div class="dice-formula" id="diceFormula"></div>
-    <div class="dice-narration" id="diceNarration"></div>`;
+    <div class="dice-formula" id="diceFormula" style="${diceDisplay}"></div>
+    <div class="dice-narration" id="diceNarration" style="${diceDisplay}"></div>`;
     if (s.feed && s.feed.length > 0) {
         const total = s.feed.length;
         const recentFeed = s.feed.slice(-3);
@@ -419,7 +421,7 @@ function renderArena(s) {
 
     // Player Zone — BOTTOM (your side of the arena)
     html += '<div class="zone zone-player"><div class="zone-label">Seu Personagem</div>';
-    html += renderPlayerCard(s.p);
+    html += renderPlayerCard(s.p, ph === 'init' || ph === 'intro');
     html += '</div>';
 
     // Allies Zone — BOTTOM (beside you)
@@ -433,7 +435,6 @@ function renderArena(s) {
     }
 
     // Action Bar — phase-dependent (with D&D 5e sub-phase support)
-    const ph = s.ph || s.phase || 'intro';
     const subPh = s.sub_phase || '';
     if (ph === 'active' && subPh === 'bonus_action') {
         html += renderTimerBar(s);
@@ -490,7 +491,7 @@ function renderArena(s) {
     // Auto-expand enemy cards:
     // - When it's an enemy's turn: expand that specific enemy
     // - When it's the player's turn: expand all enemies (target info)
-    if (activeTurn) {
+    if (activeTurn && ph !== 'init' && ph !== 'intro') {
         if (activeTurn.t === 'p') {
             document.querySelectorAll('.entity.enemy').forEach(el => el.classList.add('expanded'));
         } else {
@@ -624,7 +625,7 @@ function startPolling() {
                     renderArena(state);
                 }
             }
-        } catch(e) {
+        } catch (e) {
             if (e.status === 401 || (e.message && e.message.includes('401'))) {
                 showError('Sessão expirada — feche e reabra o combate');
                 stopPolling();
@@ -668,7 +669,7 @@ function startHeartbeat() {
                 showError('Sessão expirada — feche e reabra o combate');
                 stopHeartbeat();
             }
-        } catch(e) {
+        } catch (e) {
             if (e.message && e.message.includes('401')) {
                 showError('Sessão expirada — feche e reabra o combate');
                 stopHeartbeat();
@@ -709,7 +710,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
 
         detailsHtml += `<div class="bar-container">
             <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
-            <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct*100}%"></div></div>
+            <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
         </div>`;
         detailsHtml += `<div class="stats-row">
             <span class="stat-item">🛡️ CA ${e.ac}</span>
@@ -727,19 +728,19 @@ function renderEntity(e, type, idx, isActiveTurn) {
         }
 
         if (e.se && e.se.length > 0) {
-            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill">${STATUS_ICONS[s]||''} ${s}</span>`).join('') + '</div>';
+            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill">${STATUS_ICONS[s] || ''} ${s}</span>`).join('') + '</div>';
         }
     } else {
         // Ally expanded
         detailsHtml += `<div class="bar-container">
             <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
-            <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct*100}%"></div></div>
+            <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
         </div>`;
         if (e.ac) {
             detailsHtml += `<div class="stats-row"><span class="stat-item">🛡️ CA ${e.ac}</span></div>`;
         }
         if (e.se && e.se.length > 0) {
-            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill">${STATUS_ICONS[s]||''} ${s}</span>`).join('') + '</div>';
+            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill">${STATUS_ICONS[s] || ''} ${s}</span>`).join('') + '</div>';
         }
     }
 
@@ -752,9 +753,9 @@ function renderEntity(e, type, idx, isActiveTurn) {
         const pPos = _currentPositions['player'];
         const ePos = _currentPositions[`enemy_${idx}`];
         if (pPos && ePos) {
-            const dx = (pPos.x||0) - (ePos.x||0), dy = (pPos.y||0) - (ePos.y||0);
-            const near = Math.sqrt(dx*dx + dy*dy) <= 1.5;
-            posBadge = `<span class="pos-badge ${near?'near':'far'}">${near?'⚔ Perto':'🏹 Longe'}</span>`;
+            const dx = (pPos.x || 0) - (ePos.x || 0), dy = (pPos.y || 0) - (ePos.y || 0);
+            const near = Math.sqrt(dx * dx + dy * dy) <= 1.5;
+            posBadge = `<span class="pos-badge ${near ? 'near' : 'far'}">${near ? '⚔ Perto' : '🏹 Longe'}</span>`;
         }
     }
 
@@ -762,7 +763,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
         <div class="entity-header">
             <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
             <span class="compact-name">${escHtml(e.n)}</span>
-            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct*100}%"></div></div>
+            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
             <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
             ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
             ${posBadge}
@@ -772,8 +773,8 @@ function renderEntity(e, type, idx, isActiveTurn) {
     </div>`;
 }
 
-// ─── PLAYER CARD (always shows HP + resource bars) ───
-function renderPlayerCard(p) {
+// ─── PLAYER CARD (always shows HP + resource bars unless compact) ───
+function renderPlayerCard(p, isCompact = false) {
     const hpPct = p.mhp > 0 ? (p.hp / p.mhp) : 0;
     const hpClass = hpPct > 0.75 ? 'hp-high' : hpPct > 0.40 ? 'hp-mid' : 'hp-low';
     const mpPct = p.mmp > 0 ? (p.mp / p.mmp) : 0;
@@ -783,7 +784,7 @@ function renderPlayerCard(p) {
     // Compact badges for status, cover, concentration
     const badges = [];
     if (p.se && p.se.length > 0) {
-        p.se.forEach(s => badges.push(`<span class="mini-badge status">${STATUS_ICONS[s]||''} ${s}</span>`));
+        p.se.forEach(s => badges.push(`<span class="mini-badge status">${STATUS_ICONS[s] || ''} ${s}</span>`));
     }
     if (p.cov) {
         badges.push(`<span class="mini-badge cover">${p.cov.ico} +${p.cov.ac} CA</span>`);
@@ -795,19 +796,19 @@ function renderPlayerCard(p) {
 
     return `<div class="entity player">
         <div class="entity-header">
-            <span class="entity-icon">${p.ico||'👤'}</span>
+            <span class="entity-icon">${p.ico || '👤'}</span>
             <span class="compact-name">${escHtml(p.n)}</span>
             <span class="hp-text-compact" style="color:var(--v-gold-dim);font-size:10px">${escHtml(p.c)} Lv.${p.l}</span>
         </div>
-        <div class="player-bars">
+        <div class="player-bars" style="${isCompact ? 'display:none;' : ''}">
             <div class="bar-row">
                 <span class="bar-icon">❤️</span>
-                <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${hpPct*100}%"></div></div>
+                <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${hpPct * 100}%"></div></div>
                 <span class="bar-val">${p.hp}/${p.mhp}</span>
             </div>
             <div class="bar-row">
                 <span class="bar-icon">${resIcon}</span>
-                <div class="bar-track"><div class="bar-fill ${resClass}" style="width:${mpPct*100}%"></div></div>
+                <div class="bar-track"><div class="bar-fill ${resClass}" style="width:${mpPct * 100}%"></div></div>
                 <span class="bar-val">${p.mp}/${p.mmp}</span>
             </div>
             <div class="player-quick-stats">
@@ -828,7 +829,7 @@ function renderTurnTimeline(to) {
         const isFirst = i === 0;
         const tCls = entry.t === 'p' ? 't-player' : entry.t === 'a' ? 't-ally' : 't-enemy';
         if (i > 0) html += '<div class="turn-arrow">▸</div>';
-        html += `<div class="turn-entry ${isFirst?'active':''} ${tCls}">
+        html += `<div class="turn-entry ${isFirst ? 'active' : ''} ${tCls}">
             <span class="turn-val">${entry.v}</span>
             <span class="turn-name">${escHtml(entry.n)}</span>
         </div>`;
@@ -883,7 +884,7 @@ function _triggerInitiativeDice(s) {
                 const skipBtn = document.createElement('button');
                 skipBtn.className = 'v-skip-btn visible';
                 skipBtn.textContent = 'Pular \u{25B8}';
-                skipBtn.style.cssText = 'margin:8px auto;display:block;padding:6px 16px;font-size:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#aaa;cursor:pointer';
+                skipBtn.style.cssText = 'position:relative; z-index:10; margin:8px auto;display:block;padding:6px 16px;font-size:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#aaa;cursor:pointer; clear:both;';
                 skipBtn.onclick = () => {
                     // Skip triggers immediate reveal via DiceRoller internals (safety net)
                     _showInitiativeStatic(area, items, init);
@@ -907,7 +908,7 @@ function _showInitiativeStatic(area, items, init) {
         const tColor = entry.type === 'player' ? 'var(--v-gold)' : entry.type === 'ally' ? 'var(--v-silver)' : 'var(--v-crimson)';
         const formula = entry.formula ? ` (${entry.formula})` : '';
         html += `<div style="padding:2px 0;color:${tColor}">
-            ${i+1}. ${entry.icon} <b>${escHtml(entry.label)}</b>: ${entry.result}${formula}
+            ${i + 1}. ${entry.icon} <b>${escHtml(entry.label)}</b>: ${entry.result}${formula}
         </div>`;
     });
     _appendSurpriseHtml(html, init);
@@ -952,8 +953,8 @@ function renderActionBar(acts, enemies, player) {
 
     return `<div class="action-bar"><div class="action-grid">
         <button class="action-btn primary" data-action="attack">⚔️ Atacar <span class="action-chance">${hitChance}%</span></button>
-        <button class="action-btn ${hasSkills?'':'disabled'}" data-action="skill">${skillBtnText}</button>
-        <button class="action-btn ${itemCount>0?'':'disabled'}" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
+        <button class="action-btn ${hasSkills ? '' : 'disabled'}" data-action="skill">${skillBtnText}</button>
+        <button class="action-btn ${itemCount > 0 ? '' : 'disabled'}" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
         <button class="action-btn danger" data-action="flee">🏃 Fugir <span class="action-chance">${fleeChance}%</span></button>
         <button class="action-btn full-width" data-action="pass">⏭️ Passar Turno</button>
     </div></div>`;
@@ -969,7 +970,7 @@ function renderBonusActionBar(acts, enemies, player) {
     if (hasSkills) {
         if (acts.skills.length === 1) {
             const sk = acts.skills[0];
-            skillsHtml = `<button class="action-btn ba-btn" data-action="bonus_use_single" data-skill-id="${sk.id}" data-tg="${sk.tg||'single'}">⚡ ${escHtml(sk.n)} <span class="action-chance">${sk.c} ${resName} · ${sk.ch}%</span></button>`;
+            skillsHtml = `<button class="action-btn ba-btn" data-action="bonus_use_single" data-skill-id="${sk.id}" data-tg="${sk.tg || 'single'}">⚡ ${escHtml(sk.n)} <span class="action-chance">${sk.c} ${resName} · ${sk.ch}%</span></button>`;
         } else {
             skillsHtml = `<button class="action-btn ba-btn" data-action="bonus_skill_pick">⚡ Habilidade Bonus <span class="action-chance">(${acts.skills.length})</span></button>`;
         }
@@ -1042,7 +1043,7 @@ function bindActions(state) {
             hapticSelect();
             if (!_audioUnlocked) {
                 _audioUnlocked = true;
-                if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume().catch(() => {});
+                if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume().catch(() => { });
             }
             const action = btn.dataset.action;
             if (btn.classList.contains('disabled')) return;
@@ -1151,13 +1152,13 @@ async function sendAction(actionData) {
             }
             currentState = result;
             renderArena(result);
-        } catch(e) {
+        } catch (e) {
             _showActionLoading(false);
             _actionSent = false;
             console.error('[ARENA] API sendAction error', e);
             const msg = e.status === 401 ? 'Sessão expirada.'
-                      : e.status === 429 ? 'Muitas ações. Aguarde um momento.'
-                      : 'Erro de conexão. Tente novamente.';
+                : e.status === 429 ? 'Muitas ações. Aguarde um momento.'
+                    : 'Erro de conexão. Tente novamente.';
             showError(msg);
             startPolling();
         }
@@ -1169,7 +1170,7 @@ async function sendAction(actionData) {
             ...actionData,
         };
         tg.sendData(JSON.stringify(payload));
-        setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
+        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
     }
 }
 
@@ -1182,12 +1183,12 @@ function showSkillPicker(skills, enemies, actionType) {
     let html = `<div class="skill-panel-title">${title}</div>`;
     skills.forEach(sk => {
         const typeBadge = sk.tp === 'saving_throw' ? ' · <span class="sk-type">ST</span>' :
-                          sk.tp === 'auto' ? ' · <span class="sk-type">Auto</span>' :
-                          sk.tp === 'heal' ? ' · <span class="sk-type">Cura</span>' : '';
+            sk.tp === 'auto' ? ' · <span class="sk-type">Auto</span>' :
+                sk.tp === 'heal' ? ' · <span class="sk-type">Cura</span>' : '';
         const tgtBadge = sk.tg === 'all' ? ' · <span class="sk-aoe">AOE</span>' :
-                         sk.tg === 'self' ? ' · <span class="sk-aoe">Self</span>' : '';
+            sk.tg === 'self' ? ' · <span class="sk-aoe">Self</span>' : '';
         const effLine = sk.eff ? `<div class="skill-effect">${escHtml(sk.eff)}</div>` : '';
-        html += `<div class="skill-item" data-skill-id="${sk.id}" data-tg="${sk.tg||'single'}">
+        html += `<div class="skill-item" data-skill-id="${sk.id}" data-tg="${sk.tg || 'single'}">
             <div>
                 <div class="skill-name">${escHtml(sk.n)}</div>
                 ${effLine}
@@ -1229,7 +1230,7 @@ function showTargetPicker(enemies, actionType, skillId) {
     const overlay = document.getElementById('targetOverlay');
     let html = '<div class="skill-panel-title">Escolher Alvo</div>';
     enemies.forEach((e, i) => {
-        const pct = e.mhp > 0 ? Math.round((e.hp/e.mhp)*100) : 0;
+        const pct = e.mhp > 0 ? Math.round((e.hp / e.mhp) * 100) : 0;
         // Feature 6: Damage preview
         let previewHtml = '';
         const acts = currentState && currentState.acts;
@@ -1248,7 +1249,7 @@ function showTargetPicker(enemies, actionType, skillId) {
             }
         }
         html += `<div class="target-item" data-target="${i}">
-            <div><span>${e.ico||'👹'}</span> <b>${escHtml(e.n)}</b>${previewHtml}</div>
+            <div><span>${e.ico || '👹'}</span> <b>${escHtml(e.n)}</b>${previewHtml}</div>
             <div class="skill-meta">${e.hp}/${e.mhp} HP (${pct}%)</div>
         </div>`;
     });
@@ -1283,7 +1284,7 @@ function showItemPicker(items, enemies, allies) {
     let html = '<div class="skill-panel-title">🎒 Itens de Combate</div>';
     items.forEach(it => {
         const isThrown = !!it.tdmg;
-        const effText = isThrown ? `${it.tdmg} ${it.ttype||''}` : (it.heal ? `Cura ${it.heal}` : '');
+        const effText = isThrown ? `${it.tdmg} ${it.ttype || ''}` : (it.heal ? `Cura ${it.heal}` : '');
         const typeBadge = isThrown ? '<span class="sk-aoe">Arremesso</span>' : '<span class="sk-type">Cura</span>';
         html += `<div class="skill-item item-entry" data-item="${escHtml(it.n)}" data-thrown="${isThrown}">
             <div>
@@ -1334,7 +1335,7 @@ function initDice(lr) {
     if (!lr || !lr.r) return;
 
     // Dedup — don't replay the same roll on polling re-renders
-    const sig = `${lr.r}-${lr.d}-${lr.t}-${lr.crit||0}-${lr.miss||0}`;
+    const sig = `${lr.r}-${lr.d}-${lr.t}-${lr.crit || 0}-${lr.miss || 0}`;
     if (sig === _lastAnimatedRoll) { _showDiceStatic(lr); return; }
     _lastAnimatedRoll = sig;
 
@@ -1519,7 +1520,7 @@ function showError(msg, err = null) {
 
 function escHtml(str) {
     if (!str) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ═══════════════════════════════════════════════════
@@ -1527,9 +1528,9 @@ function escHtml(str) {
 // ═══════════════════════════════════════════════════
 
 // ─── FEATURE 4: HAPTIC FEEDBACK ───
-function haptic(type) { try { tg?.HapticFeedback?.impactOccurred(type || 'light'); } catch(e) { console.warn('[ARENA] haptic:', e); } }
-function hapticNotify(type) { try { tg?.HapticFeedback?.notificationOccurred(type || 'success'); } catch(e) { console.warn('[ARENA] haptic:', e); } }
-function hapticSelect() { try { tg?.HapticFeedback?.selectionChanged(); } catch(e) { console.warn('[ARENA] haptic:', e); } }
+function haptic(type) { try { tg?.HapticFeedback?.impactOccurred(type || 'light'); } catch (e) { console.warn('[ARENA] haptic:', e); } }
+function hapticNotify(type) { try { tg?.HapticFeedback?.notificationOccurred(type || 'success'); } catch (e) { console.warn('[ARENA] haptic:', e); } }
+function hapticSelect() { try { tg?.HapticFeedback?.selectionChanged(); } catch (e) { console.warn('[ARENA] haptic:', e); } }
 
 // ─── FEATURE 8: PROCEDURAL SFX (Web Audio API) ───
 function _ensureAudio() {
@@ -1537,7 +1538,7 @@ function _ensureAudio() {
     try {
         _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         return _audioCtx;
-    } catch(e) { console.warn('[ARENA] AudioContext unavailable', e); return null; }
+    } catch (e) { console.warn('[ARENA] AudioContext unavailable', e); return null; }
 }
 
 function _sfxNoise(dur, vol) {
@@ -1555,7 +1556,7 @@ function _sfxNoise(dur, vol) {
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
         src.connect(gain); gain.connect(ctx.destination);
         src.start(); src.stop(ctx.currentTime + dur);
-    } catch(e) { console.warn('[ARENA] sfxNoise', e); }
+    } catch (e) { console.warn('[ARENA] sfxNoise', e); }
 }
 
 function _sfxTone(freq, dur, vol, type) {
@@ -1571,31 +1572,31 @@ function _sfxTone(freq, dur, vol, type) {
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
         osc.connect(gain); gain.connect(ctx.destination);
         osc.start(); osc.stop(ctx.currentTime + dur);
-    } catch(e) { console.warn('[ARENA] sfxTone', e); }
+    } catch (e) { console.warn('[ARENA] sfxTone', e); }
 }
 
-function sfxDiceRoll()  { _sfxNoise(0.15, 0.08); }
-function sfxHit()       { _sfxTone(120, 0.25, 0.12, 'sawtooth'); }
-function sfxCrit()      { _sfxTone(220, 0.4, 0.18, 'sawtooth'); setTimeout(() => _sfxTone(330, 0.3, 0.12, 'sine'), 80); }
-function sfxMiss()      { _sfxTone(300, 0.2, 0.06, 'sine'); }
+function sfxDiceRoll() { _sfxNoise(0.15, 0.08); }
+function sfxHit() { _sfxTone(120, 0.25, 0.12, 'sawtooth'); }
+function sfxCrit() { _sfxTone(220, 0.4, 0.18, 'sawtooth'); setTimeout(() => _sfxTone(330, 0.3, 0.12, 'sine'), 80); }
+function sfxMiss() { _sfxTone(300, 0.2, 0.06, 'sine'); }
 function sfxPlayerHit() { _sfxTone(80, 0.3, 0.15, 'sawtooth'); }
 
 // ─── FEATURE 3: PARTICLE EFFECTS ───
 const _PARTICLE_COLORS = {
-    slashing:    ['#e0e0e0', '#d4c060'],
-    piercing:    ['#b0c8e0', '#d4c060'],
+    slashing: ['#e0e0e0', '#d4c060'],
+    piercing: ['#b0c8e0', '#d4c060'],
     bludgeoning: ['#c0b080', '#e0d080'],
-    fire:        ['#ff6020', '#ff9020', '#ffd040'],
-    cold:        ['#80c0ff', '#c0e8ff'],
-    lightning:   ['#e0e060', '#ffffff'],
-    necrotic:    ['#9040c0', '#604080'],
-    radiant:     ['#ffe080', '#ffffff'],
-    psychic:     ['#e080ff', '#c060d0'],
-    thunder:     ['#a0a0e0', '#ffffff'],
-    poison:      ['#60c040', '#80e040'],
-    acid:        ['#60d040', '#c0ff40'],
-    force:       ['#60c0ff', '#a0e0ff'],
-    magic:       ['#c060ff', '#60c0ff'],
+    fire: ['#ff6020', '#ff9020', '#ffd040'],
+    cold: ['#80c0ff', '#c0e8ff'],
+    lightning: ['#e0e060', '#ffffff'],
+    necrotic: ['#9040c0', '#604080'],
+    radiant: ['#ffe080', '#ffffff'],
+    psychic: ['#e080ff', '#c060d0'],
+    thunder: ['#a0a0e0', '#ffffff'],
+    poison: ['#60c040', '#80e040'],
+    acid: ['#60d040', '#c0ff40'],
+    force: ['#60c0ff', '#a0e0ff'],
+    magic: ['#c060ff', '#60c0ff'],
 };
 
 function spawnParticles(isCrit, damageType) {
