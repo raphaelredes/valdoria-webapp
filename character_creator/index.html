@@ -2569,7 +2569,15 @@ async function submitCharacter() {
                 body: JSON.stringify(payload)
             });
             if (resp.ok) {
+                const result = await resp.json().catch(() => ({}));
                 console.log('[CHAR_CREATOR] Character submitted via API');
+                // Redirect to prologue WebApp if server provided URL
+                if (result.redirect) {
+                    console.log('[CHAR_CREATOR] Redirecting to prologue:', result.redirect);
+                    window.location.href = result.redirect;
+                    return;
+                }
+                // No redirect — close the WebApp (legacy fallback)
                 setTimeout(() => { try { tg?.close(); } catch(e) {} }, 300);
                 return;
             }
