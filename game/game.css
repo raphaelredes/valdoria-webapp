@@ -550,15 +550,15 @@
 /* ── Location Header ── */
 .v-location-header {
     text-align: center;
-    padding: 14px 16px 12px;
-    margin: 0 -12px 8px;
+    padding: 10px 16px 8px;
+    margin: 0 -12px 4px;
     background: linear-gradient(180deg, rgba(196,149,58,0.1) 0%, transparent 100%);
     border-bottom: 1px solid rgba(196,149,58,0.15);
 }
 .v-time-bar {
     font-size: 11px;
     color: var(--v-text-dim);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     letter-spacing: 0.3px;
 }
 .v-location-header h2 {
@@ -574,8 +574,8 @@
 
 /* ── Character Identity Card ── */
 .v-char-card {
-    padding: 10px 12px;
-    margin: 8px 0;
+    padding: 8px 12px;
+    margin: 4px 0;
     background: var(--v-bg-card);
     border-radius: var(--v-radius);
     border-left: 3px solid var(--v-gold);
@@ -598,16 +598,16 @@
     font-size: 13px;
     font-style: italic;
     color: var(--v-text-dim);
-    padding: 8px 12px;
-    margin: 8px 0;
+    padding: 6px 12px;
+    margin: 4px 0;
     border-left: 2px solid var(--v-crimson, #7b2020);
-    line-height: 1.55;
+    line-height: 1.45;
 }
 
 /* ── Party / Group Block ── */
 .v-party-block {
-    margin: 8px 0;
-    padding: 8px 12px;
+    margin: 4px 0;
+    padding: 6px 12px;
     background: var(--v-bg-card);
     border-radius: var(--v-radius);
 }
@@ -630,8 +630,8 @@
 
 /* ── Notification Badge ── */
 .v-notification {
-    padding: 10px 12px;
-    margin: 8px 0;
+    padding: 8px 12px;
+    margin: 4px 0;
     background: var(--v-bg-card);
     border-radius: var(--v-radius);
     border-left: 3px solid var(--v-gold);
@@ -672,7 +672,7 @@
 
 /* ── Spacer (replaces multiple blank lines) ── */
 .v-spacer {
-    height: 8px;
+    height: 4px;
 }
 
 /* ── Ensure screen-content doesn't add pre-line to enhanced blocks ── */
