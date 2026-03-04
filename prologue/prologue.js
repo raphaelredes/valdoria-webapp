@@ -29,12 +29,20 @@ function haptic(type) {
 // ═══════════════════════════════════════════════════════
 
 async function apiCall(endpoint, body = {}) {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+    };
+    if (window.Telegram?.WebApp?.initData) {
+        headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    }
+    // Idempotency key for mutating endpoints
+    if (endpoint.includes('/reroll') || endpoint.includes('/fight') || endpoint.includes('/complete') || endpoint.includes('/distract')) {
+        headers['X-Idempotency-Key'] = crypto.randomUUID();
+    }
     const resp = await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${TOKEN}`,
-        },
+        headers,
         body: JSON.stringify({ user_id: USER_ID, ...body }),
     });
     if (!resp.ok) {

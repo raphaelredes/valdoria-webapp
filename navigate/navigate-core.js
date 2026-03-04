@@ -297,9 +297,11 @@ function finishNavigation(type, target) {
     const btn = document.getElementById('btn-travel') || document.querySelector('.info-btn.primary');
             if (btn) btn.textContent = 'Enviando...';
 
+    const _nh = { 'Content-Type': 'application/json' };
+    if (window.Telegram?.WebApp?.initData) { _nh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
     fetch(apiUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: _nh,
                     body: JSON.stringify(payload),
     })
             .then(r => {

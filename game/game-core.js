@@ -68,6 +68,13 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${S.token}`,
     };
+    if (window.Telegram?.WebApp?.initData) {
+        headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    }
+    // Idempotency key for mutating endpoints — generated ONCE, shared across retries
+    if (endpoint.includes('/action') || endpoint.includes('/text') || endpoint.includes('/transition')) {
+        headers['X-Idempotency-Key'] = crypto.randomUUID();
+    }
 
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {

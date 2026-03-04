@@ -39,10 +39,17 @@ class CombatAPI {
         this.token = tok;
         this.userId = uid;
     }
+    _baseHeaders() {
+        const h = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` };
+        if (window.Telegram?.WebApp?.initData) {
+            h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+        }
+        return h;
+    }
     async getState() {
         const r = await fetch(`${this.base}/api/combat/state`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+            headers: this._baseHeaders(),
             body: JSON.stringify({ user_id: this.userId }),
         });
         if (!r.ok) {
@@ -63,9 +70,11 @@ class CombatAPI {
         }
     }
     async sendAction(data) {
+        const h = this._baseHeaders();
+        h['X-Idempotency-Key'] = crypto.randomUUID();
         const r = await fetch(`${this.base}/api/combat/action`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
+            headers: h,
             body: JSON.stringify({ user_id: this.userId, ...data }),
         });
         if (!r.ok) {
@@ -161,14 +170,14 @@ async function transitionFromArena(result) {
         user_id: userId,
         payload: { result: result }
     };
+    const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+    if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
         const resp = await fetch(`${apiBase}/api/webapp/transition`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: _th,
             body: JSON.stringify(body)
         });
 
@@ -195,14 +204,14 @@ async function transitionToLevelup() {
         user_id: userId,
         payload: {}
     };
+    const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+    if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
         const resp = await fetch(`${apiBase}/api/webapp/transition`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: _th,
             body: JSON.stringify(body)
         });
 
@@ -228,14 +237,14 @@ async function transitionToInventoryFromArena() {
         user_id: userId,
         payload: {}
     };
+    const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+    if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
         const resp = await fetch(`${apiBase}/api/webapp/transition`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: _th,
             body: JSON.stringify(body)
         });
 

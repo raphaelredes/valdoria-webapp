@@ -95,12 +95,16 @@ function saveState() {
 
         // POST to backend API if enabled
         if (typeof S !== 'undefined' && S.apiBase && S.uid && S.token) {
+            const _sh = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${S.token}`
+            };
+            if (window.Telegram?.WebApp?.initData) {
+                _sh['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+            }
             fetch(`${S.apiBase}/api/explore/save?user_id=${S.uid}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${S.token}`
-                },
+                headers: _sh,
                 body: JSON.stringify(snap)
             }).catch(e => console.error('[EXPLORE] API save error:', e));
         }

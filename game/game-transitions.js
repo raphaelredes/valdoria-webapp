@@ -77,13 +77,18 @@ async function requestTransition(toApp, payload = {}) {
     S.transitioning = true;
 
     const url = `${S.apiBase}/api/webapp/transition`;
+    const _headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${S.token}`,
+    };
+    if (window.Telegram?.WebApp?.initData) {
+        _headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    }
+    _headers['X-Idempotency-Key'] = crypto.randomUUID();
     try {
         const resp = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${S.token}`,
-            },
+            headers: _headers,
             body: JSON.stringify({
                 from: 'game',
                 to: toApp,

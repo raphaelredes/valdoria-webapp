@@ -1852,12 +1852,15 @@
         // If opened from explore/arena via transition, navigate back
         if (_returnTo && _apiBase) {
             try {
+                const _th = {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + _apiToken,
+                };
+                if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+                _th['X-Idempotency-Key'] = crypto.randomUUID();
                 const resp = await fetch(_apiBase + '/api/webapp/transition', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + _apiToken,
-                    },
+                    headers: _th,
                     body: JSON.stringify({
                         from: 'inventory', to: _returnTo,
                         user_id: parseInt(_apiUid),
@@ -1904,12 +1907,15 @@
 
     async function _sendViaAPI(overlay) {
         try {
+            const _ah = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + _apiToken,
+            };
+            if (window.Telegram?.WebApp?.initData) { _ah['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+            _ah['X-Idempotency-Key'] = crypto.randomUUID();
             const resp = await fetch(_apiBase + '/api/inventory/apply', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + _apiToken,
-                },
+                headers: _ah,
                 body: JSON.stringify({user_id: _apiUid, ops: pendingOps}),
             });
             const result = await resp.json();

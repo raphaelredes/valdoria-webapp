@@ -451,14 +451,14 @@ async function transitionToArena() {
             map_data: mapData,
         }
     };
+    const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${S.token}` };
+    if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
         const resp = await fetch(`${S.apiBase}/api/webapp/transition`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${S.token}`
-            },
+            headers: _th,
             body: JSON.stringify(body)
         });
 
@@ -491,14 +491,14 @@ async function transitionToInventory() {
         user_id: parseInt(S.uid),
         payload: { map_data: mapData }
     };
+    const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${S.token}` };
+    if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+    _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
         const resp = await fetch(`${S.apiBase}/api/webapp/transition`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${S.token}`
-            },
+            headers: _th,
             body: JSON.stringify(body)
         });
 
@@ -1497,9 +1497,11 @@ async function initAsync() {
         if (S.apiBase && S.uid && S.token) {
             try {
                 const url = `${S.apiBase}/api/explore/state?user_id=${S.uid}`;
+                const _sh = { 'Authorization': `Bearer ${S.token}` };
+                if (window.Telegram?.WebApp?.initData) { _sh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
                 const resp = await fetch(url, {
                     method: 'GET',
-                    headers: { 'Authorization': `Bearer ${S.token}` }
+                    headers: _sh
                 });
                 if (resp.ok) {
                     const rData = await resp.json();

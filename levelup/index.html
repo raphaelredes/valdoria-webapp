@@ -1701,12 +1701,15 @@
             try {
                 if (apiFallback) {
                     payload.user_id = parseInt(userId);
+                    const _lh = {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    };
+                    if (window.Telegram?.WebApp?.initData) { _lh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+                    _lh['X-Idempotency-Key'] = crypto.randomUUID();
                     fetch(apiFallback + '/api/levelup/apply', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + token
-                        },
+                        headers: _lh,
                         body: JSON.stringify(payload)
                     }).then(res => res.json())
                         .then(data => {

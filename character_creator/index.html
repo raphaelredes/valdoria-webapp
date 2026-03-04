@@ -2556,12 +2556,15 @@ async function submitCharacter() {
     // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)
     if (apiBase && token && userId) {
         try {
+            const _ch = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+            if (window.Telegram?.WebApp?.initData) { _ch['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+            _ch['X-Idempotency-Key'] = crypto.randomUUID();
             const resp = await fetch(`${apiBase}/api/character/apply`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: _ch,
                 body: JSON.stringify(payload)
             });
             if (resp.ok) {
