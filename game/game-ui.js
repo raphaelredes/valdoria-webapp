@@ -158,13 +158,15 @@ function showError(msg, err = null) {
         doRetry();
     };
 
-    // Recovery button triggers deep link back to bot to clear messages and restart session
+    // Recovery button: close the WebApp and return to Telegram chat
+    // The user can then re-select a character and tap JOGAR again
     if (recoverBtn) {
         recoverBtn.onclick = () => {
-            const botUrl = window.Telegram?.WebApp?.initDataUnsafe?.chat?.username
-                ? `https://t.me/${window.Telegram.WebApp.initDataUnsafe.chat.username}?start=recovery`
-                : 'https://t.me/LendasDeValdoriaBOT?start=recovery';
-            window.Telegram?.WebApp?.openTelegramLink(botUrl);
+            if (window.Telegram?.WebApp?.close) {
+                Telegram.WebApp.close();
+            } else {
+                window.close();
+            }
         };
     }
 
