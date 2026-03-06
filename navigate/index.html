@@ -4,15 +4,18 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#2b2830">
+    <meta name="theme-color" content="#2a2420">
     <title>Mapa do Mundo - Lendas de Valdoria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cinzel+Decorative:wght@700&family=MedievalSharp&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
     </script>
     <style>
-        /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
+        /* --- SCROLLBAR HIDING (redundancy for valdoria-design.css) --- */
         * {
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -33,19 +36,20 @@
             display: flex;
             flex-direction: column;
             touch-action: none;
+            font-family: 'MedievalSharp', 'Cinzel', serif;
         }
 
-        /* ═══ LOADING ═══ */
+        /* ═══ LOADING (compass spinner) ═══ */
         #loading {
             position: fixed;
             inset: 0;
-            background: var(--v-bg, #2b2830);
+            background: #2a2420;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 200;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.6s ease;
         }
 
         #loading.hidden {
@@ -53,25 +57,26 @@
             pointer-events: none;
         }
 
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(196, 149, 58, 0.2);
-            border-top-color: var(--v-gold, #c4953a);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        .loading-compass {
+            width: 48px;
+            height: 48px;
+            animation: compassSpin 2.5s ease-in-out infinite;
         }
 
         .loading-text {
-            margin-top: 12px;
-            color: var(--v-gold, #c4953a);
-            font-size: 13px;
+            margin-top: 14px;
+            color: #c4953a;
+            font-size: 14px;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        @keyframes compassSpin {
+            0% { transform: rotate(-8deg); }
+            25% { transform: rotate(12deg); }
+            50% { transform: rotate(-5deg); }
+            75% { transform: rotate(8deg); }
+            100% { transform: rotate(-8deg); }
         }
 
         /* ═══ HUD (top bar) ═══ */
@@ -80,8 +85,8 @@
             align-items: center;
             gap: 8px;
             padding: 8px 12px;
-            background: linear-gradient(180deg, #352f38 0%, var(--v-bg, #2b2830) 100%);
-            border-bottom: 1px solid var(--v-border, #3e3845);
+            background: linear-gradient(180deg, #3a3028 0%, #2a2420 100%);
+            border-bottom: 1px solid rgba(112, 66, 20, 0.4);
             z-index: 50;
             flex-shrink: 0;
         }
@@ -89,17 +94,19 @@
         .hud-name {
             font-size: 13px;
             font-weight: 700;
-            color: var(--v-gold, #c4953a);
+            color: #c4953a;
             max-width: 90px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-family: 'Cinzel', serif;
         }
 
         .hud-level {
             font-size: 11px;
-            color: var(--v-text-dim, #8a8090);
+            color: #8a7060;
             margin-right: auto;
+            font-family: 'Cinzel', serif;
         }
 
         .hud-bar-group {
@@ -111,15 +118,15 @@
         .hud-bar {
             width: 50px;
             height: 7px;
-            background: #1a1a1a;
-            border-radius: 4px;
+            background: #1a1510;
+            border-radius: 2px;
             overflow: hidden;
-            border: 1px solid #333;
+            border: 1px solid #3a3028;
         }
 
         .hud-bar-fill {
             height: 100%;
-            border-radius: 4px;
+            border-radius: 2px;
             transition: width 0.4s ease;
         }
 
@@ -133,8 +140,9 @@
 
         .hud-bar-label {
             font-size: 10px;
-            color: var(--v-text-dim, #8a8090);
+            color: #8a7060;
             min-width: 16px;
+            font-family: 'Cinzel', serif;
         }
 
         /* ═══ MAP VIEWPORT ═══ */
@@ -142,7 +150,20 @@
             flex: 1;
             overflow: hidden;
             position: relative;
-            background: #1e1b22;
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(58, 48, 40, 0.6), transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(42, 36, 32, 0.6), transparent 60%),
+                linear-gradient(135deg, #2a2420 0%, #3a3028 40%, #2a2420 100%);
+        }
+
+        /* Parchment vignette overlay */
+        #map-viewport::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 80px 30px rgba(10, 8, 5, 0.7);
+            pointer-events: none;
+            z-index: 30;
         }
 
         #map-wrapper {
@@ -155,7 +176,7 @@
             display: block;
         }
 
-        /* ═══ LOCATION INFO PANEL ═══ */
+        /* ═══ LOCATION INFO PANEL (parchment scroll) ═══ */
         #info-panel {
             position: fixed;
             bottom: 0;
@@ -163,26 +184,43 @@
             right: 0;
             max-width: 430px;
             margin: 0 auto;
-            background: linear-gradient(180deg, #3a343e 0%, #2b2830 100%);
-            border-top: 2px solid var(--v-gold, #c4953a);
-            border-radius: 16px 16px 0 0;
+            background: linear-gradient(180deg, #3a3028 0%, #2a2420 100%);
+            border-top: 2px solid #704214;
+            border-radius: 4px 4px 0 0;
             padding: 12px 16px 14px;
             z-index: 100;
             transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.35s ease-out;
             max-height: 55vh;
             overflow-y: auto;
+            /* Parchment inner shadow (aged scroll edges) */
+            box-shadow:
+                inset 0 4px 16px rgba(40, 30, 15, 0.5),
+                inset 0 -2px 8px rgba(40, 30, 15, 0.3),
+                0 -4px 20px rgba(0, 0, 0, 0.4);
         }
 
         #info-panel.open {
             transform: translateY(0);
         }
 
+        /* Scroll roll top edge */
+        #info-panel::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 10px;
+            right: 10px;
+            height: 6px;
+            background: radial-gradient(ellipse at center, #4a3a28 0%, #3a3028 50%, transparent 100%);
+            border-radius: 50%;
+        }
+
         .info-handle {
             width: 36px;
-            height: 4px;
-            background: rgba(196, 149, 58, 0.3);
-            border-radius: 2px;
+            height: 3px;
+            background: rgba(112, 66, 20, 0.4);
+            border-radius: 1px;
             margin: 0 auto 10px;
         }
 
@@ -201,15 +239,16 @@
         .info-title {
             font-size: 17px;
             font-weight: 700;
-            color: var(--v-gold, #c4953a);
+            color: #c4953a;
             flex: 1;
+            font-family: 'Cinzel Decorative', 'Cinzel', serif;
         }
 
         .info-danger {
             font-size: 14px;
             padding: 3px 10px;
-            border-radius: 10px;
-            background: rgba(60, 40, 40, 0.6);
+            border-radius: 3px;
+            background: rgba(60, 30, 20, 0.6);
             border: 1px solid rgba(123, 32, 32, 0.4);
             color: #e0a0a0;
             white-space: nowrap;
@@ -219,17 +258,19 @@
 
         .info-biome {
             font-size: 12px;
-            color: var(--v-text-dim, #8a8090);
+            color: #8a7060;
             margin-bottom: 6px;
+            font-family: 'MedievalSharp', serif;
         }
 
         .info-desc {
             font-size: 13px;
-            color: var(--v-text, #e0d6c8);
+            color: #d4c8b0;
             line-height: 1.4;
             margin-bottom: 8px;
             font-style: italic;
             opacity: 0.85;
+            font-family: 'MedievalSharp', serif;
         }
 
         .info-tags {
@@ -241,11 +282,12 @@
 
         .info-tag {
             font-size: 11px;
-            color: var(--v-text-dim, #8a8090);
-            background: rgba(255, 255, 255, 0.06);
+            color: #8a7060;
+            background: rgba(112, 66, 20, 0.12);
             padding: 3px 8px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+            border: 1px solid rgba(112, 66, 20, 0.15);
+            font-family: 'MedievalSharp', serif;
         }
 
         .info-tag-warn {
@@ -263,22 +305,24 @@
         .info-quests,
         .info-dungeons {
             font-size: 12px;
-            color: var(--v-text-dim, #8a8090);
+            color: #8a7060;
             margin-bottom: 6px;
+            font-family: 'MedievalSharp', serif;
         }
 
         .info-quests span,
         .info-dungeons span {
-            color: var(--v-text, #e0d6c8);
+            color: #d4c8b0;
         }
 
         .info-note {
             display: none;
             font-size: 12px;
-            color: var(--v-text-dim, #8a8090);
+            color: #8a7060;
             text-align: center;
             padding: 6px 0;
             font-style: italic;
+            font-family: 'MedievalSharp', serif;
         }
 
         .info-actions {
@@ -292,38 +336,48 @@
             width: 100%;
             padding: 12px 16px;
             border: none;
-            border-radius: 10px;
+            border-radius: 4px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             color: #fff;
             text-align: center;
             transition: opacity 0.15s, transform 0.15s;
+            font-family: 'Cinzel', serif;
         }
 
+        /* Leather-textured travel button */
         .info-btn-travel {
-            background: linear-gradient(135deg, #c4953a, #a07828);
+            background: linear-gradient(135deg, #704214 0%, #5a3210 50%, #6a3a12 100%);
+            border: 1px solid #8a5a2a;
+            box-shadow: inset 0 1px 0 rgba(255, 200, 100, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
         }
 
         .info-btn-risky {
-            background: linear-gradient(135deg, #8a5a1a, #6a3a0a);
-            border: 1px solid #c4953a;
+            background: linear-gradient(135deg, #5a2a0a 0%, #4a1a00 50%, #5a2a0a 100%);
+            border: 1px solid #8a4a1a;
+            box-shadow: inset 0 1px 0 rgba(255, 150, 50, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
         }
 
         .info-btn-explore {
-            background: linear-gradient(135deg, #2a7a2a, #1a5a1a);
+            background: linear-gradient(135deg, #2a5a1a 0%, #1a4a10 50%, #2a5a1a 100%);
+            border: 1px solid #4a7a3a;
+            box-shadow: inset 0 1px 0 rgba(100, 200, 100, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
         }
 
         .info-btn-camp {
-            background: linear-gradient(135deg, #6a5a30, #4a3a20);
+            background: linear-gradient(135deg, #5a4a20 0%, #4a3a18 50%, #5a4a20 100%);
+            border: 1px solid #7a6a3a;
+            box-shadow: inset 0 1px 0 rgba(200, 180, 100, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
         }
 
         .info-btn-close {
-            background: rgba(255, 255, 255, 0.07);
-            color: var(--v-text-dim, #8a8090);
+            background: rgba(112, 66, 20, 0.15);
+            color: #8a7060;
             font-weight: 500;
             font-size: 13px;
             padding: 10px 16px;
+            border: 1px solid rgba(112, 66, 20, 0.2);
         }
 
         .info-btn:active {
@@ -336,8 +390,8 @@
             display: flex;
             gap: 8px;
             padding: 8px 12px;
-            background: linear-gradient(0deg, #352f38, var(--v-bg, #2b2830));
-            border-top: 1px solid var(--v-border, #3e3845);
+            background: linear-gradient(0deg, #2a2420, #3a3028);
+            border-top: 1px solid rgba(112, 66, 20, 0.3);
             z-index: 60;
             flex-shrink: 0;
         }
@@ -345,14 +399,15 @@
         .bar-btn {
             flex: 1;
             padding: 10px 4px;
-            border: 1px solid var(--v-border, #3e3845);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--v-text, #e0d6c8);
+            border: 1px solid rgba(112, 66, 20, 0.3);
+            border-radius: 4px;
+            background: rgba(112, 66, 20, 0.1);
+            color: #d4c8b0;
             font-size: 12px;
             font-weight: 600;
             text-align: center;
             cursor: pointer;
+            font-family: 'Cinzel', serif;
         }
 
         .bar-btn:active {
@@ -361,7 +416,7 @@
 
         .bar-btn-return {
             border-color: rgba(196, 149, 58, 0.3);
-            color: var(--v-gold, #c4953a);
+            color: #c4953a;
         }
 
         /* ═══ MAP ELEMENTS ═══ */
@@ -388,11 +443,11 @@
 
         .loc-label {
             font-size: 9.5px;
-            fill: var(--v-text, #e0d6c8);
+            fill: #d4c8b0;
             fill-opacity: 0.85;
             text-anchor: middle;
             pointer-events: none;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Cinzel', serif;
             font-weight: 500;
         }
 
@@ -403,15 +458,16 @@
             pointer-events: none;
         }
 
+        /* Sepia connection paths */
         .path-line {
-            stroke: rgba(176, 184, 192, 0.2);
+            stroke: #704214;
             stroke-width: 1.5;
             stroke-dasharray: 8 5;
             stroke-linecap: round;
         }
 
         .path-line.active {
-            stroke: rgba(196, 149, 58, 0.45);
+            stroke: #c4953a;
             stroke-width: 2;
         }
 
@@ -441,19 +497,19 @@
             top: 8px;
             left: 12px;
             right: 12px;
-            background: rgba(43, 40, 48, 0.92);
-            -webkit-backdrop-filter: blur(4px);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(196, 149, 58, 0.2);
-            border-radius: 10px;
+            background: rgba(42, 36, 32, 0.92);
+            border: 1px solid rgba(112, 66, 20, 0.3);
+            border-radius: 4px;
             padding: 8px 12px;
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 12px;
-            color: var(--v-text, #e0d6c8);
+            color: #d4c8b0;
             z-index: 40;
             pointer-events: none;
+            font-family: 'Cinzel', serif;
+            box-shadow: inset 0 1px 4px rgba(40, 30, 15, 0.3);
         }
 
         #current-loc-badge .badge-icon {
@@ -461,33 +517,47 @@
         }
 
         #current-loc-badge .badge-name {
-            font-weight: 600;
-            color: var(--v-gold, #c4953a);
+            font-weight: 700;
+            color: #c4953a;
             font-size: 13px;
+            font-family: 'Cinzel Decorative', 'Cinzel', serif;
         }
 
         #current-loc-badge .badge-info {
             margin-left: auto;
             font-size: 11px;
-            color: var(--v-text-dim, #8a8090);
+            color: #8a7060;
         }
 
-        /* ═══ LEGEND ═══ */
+        /* ═══ LEGEND (cartographic style) ═══ */
         #legend {
             position: absolute;
             bottom: 8px;
             right: 8px;
-            background: rgba(43, 40, 48, 0.85);
-            -webkit-backdrop-filter: blur(4px);
-            backdrop-filter: blur(4px);
-            border: 1px solid var(--v-border, #3e3845);
-            border-radius: 8px;
+            background: rgba(42, 36, 32, 0.88);
+            border: 1px solid rgba(112, 66, 20, 0.25);
+            border-radius: 3px;
             padding: 5px 10px;
             font-size: 10px;
-            color: var(--v-text-dim, #8a8090);
+            color: #8a7060;
             z-index: 40;
             display: flex;
             gap: 10px;
+            font-family: 'MedievalSharp', serif;
+            box-shadow: inset 0 1px 3px rgba(40, 30, 15, 0.3);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .legend-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 1px;
+            display: inline-block;
         }
 
         /* ═══ ERROR TOAST ═══ */
@@ -499,10 +569,11 @@
             background: #7b2020;
             color: #fff;
             padding: 8px 16px;
-            border-radius: 8px;
+            border-radius: 4px;
             font-size: 13px;
             z-index: 300;
             animation: fadeInUp 0.3s ease;
+            font-family: 'MedievalSharp', serif;
         }
 
         @keyframes fadeInUp {
@@ -537,14 +608,53 @@
                 opacity: 0.05;
             }
         }
+
+        /* ═══ DECORATIVE MAP TEXT ═══ */
+        .map-deco-text {
+            font-family: 'MedievalSharp', serif;
+            fill: #704214;
+            fill-opacity: 0.12;
+            text-anchor: middle;
+            pointer-events: none;
+            font-style: italic;
+        }
+
+        /* ═══ COMPASS ROSE ═══ */
+        .compass-rose {
+            pointer-events: none;
+        }
+
+        @keyframes compassTremble {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+
+        .compass-needle {
+            animation: compassTremble 4s ease-in-out infinite;
+            transform-origin: center;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Loading Screen -->
+    <!-- Loading Screen (compass) -->
     <div id="loading">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Carregando mapa...</div>
+        <svg class="loading-compass" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Compass circle -->
+            <circle cx="24" cy="24" r="22" stroke="#704214" stroke-width="1.5" fill="none" opacity="0.4"/>
+            <circle cx="24" cy="24" r="18" stroke="#704214" stroke-width="0.5" fill="none" opacity="0.2"/>
+            <!-- North needle (gold) -->
+            <path d="M24 4 L26 22 L24 24 L22 22 Z" fill="#c4953a"/>
+            <!-- South needle (dark) -->
+            <path d="M24 44 L22 26 L24 24 L26 26 Z" fill="#5a4020" opacity="0.6"/>
+            <!-- East -->
+            <path d="M44 24 L26 26 L24 24 L26 22 Z" fill="#8a6a3a" opacity="0.4"/>
+            <!-- West -->
+            <path d="M4 24 L22 22 L24 24 L22 26 Z" fill="#8a6a3a" opacity="0.4"/>
+            <!-- Center dot -->
+            <circle cx="24" cy="24" r="2" fill="#c4953a"/>
+        </svg>
+        <div class="loading-text">Desenrolando o mapa...</div>
     </div>
 
     <!-- HUD -->
@@ -576,10 +686,10 @@
             <span class="badge-info" id="badge-info"></span>
         </div>
         <div id="legend">
-            <span>📍 Atual</span>
-            <span>✅ Explorado</span>
-            <span>🗺️ Com Mapa</span>
-            <span>🌫️ Sem Mapa</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#c4953a"></span> Atual</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#6a8a5a"></span> Explorado</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#5a5060"></span> Mapeado</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#3a3530"></span> Incognito</span>
         </div>
     </div>
 
@@ -603,10 +713,10 @@
     <!-- Bottom Bar -->
     <div id="bottom-bar">
         <button type="button" class="bar-btn bar-btn-return" id="btn-return" onclick="handleReturn()">
-            🏃 Retornar a Eldoria
+            Retornar a Eldoria
         </button>
         <button type="button" class="bar-btn" id="btn-close" onclick="handleClose()">
-            ❌ Fechar
+            Fechar Mapa
         </button>
     </div>
 
