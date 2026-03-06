@@ -219,8 +219,37 @@ function showError(msg, err = null) {
             }
         }, 1000);
     } else if (isConnectionError) {
-        retryBtn.textContent = 'Tentar Novamente';
+        // All retries exhausted — auto-close and notify bot to refresh session
+        _autoReconnect(overlay, msgEl, retryBtn);
     }
+}
+
+function _autoReconnect(overlay, msgEl, retryBtn) {
+    // All retries failed — inform user and auto-close WebApp
+    // sendData notifies the bot to refresh the Telegram message (like /start)
+    console.warn('[GAME] Auto-reconnect: all retries exhausted, closing WebApp');
+    msgEl.textContent = 'Reconectando... O mini app sera fechado automaticamente.';
+    retryBtn.style.display = 'none';
+    const recoverBtn = document.getElementById('error-recover');
+    if (recoverBtn) recoverBtn.style.display = 'none';
+
+    setTimeout(() => {
+        try {
+            if (window.Telegram?.WebApp?.sendData) {
+                Telegram.WebApp.sendData(JSON.stringify({ action: 'reconnect' }));
+                // sendData closes the WebApp automatically
+                return;
+            }
+        } catch (e) {
+            console.error('[GAME] sendData failed:', e);
+        }
+        // Fallback: just close
+        if (window.Telegram?.WebApp?.close) {
+            Telegram.WebApp.close();
+        } else {
+            window.close();
+        }
+    }, 2000);
 }
 
 function hideError() {
