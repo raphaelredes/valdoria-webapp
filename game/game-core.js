@@ -17,7 +17,9 @@ const DEBOUNCE_MS = 200;
 const RETRY_MAX = 4;
 const RETRY_BASE_MS = 1000;
 const FETCH_TIMEOUT_MS = 12000; // 12s per fetch attempt (AbortController)
-const HEALTH_TIMEOUT_MS = 5000; // 5s for health check
+const HEALTH_TIMEOUT_MS = 8000; // 8s for health check (ngrok can be slow)
+const HEALTH_RETRIES = 3;       // retry health check up to 3 times
+const HEALTH_RETRY_MS = 2000;   // 2s between health retries
 const LOADING_TIMEOUT_MS = 25000; // 25s max loading screen before auto-error
 const SCREEN_CACHE_KEY = 'valdoria_game_screen';
 const SCREEN_CACHE_TTL = 300000; // 5 minutes
@@ -106,35 +108,45 @@ async function init() {
     }
 }
 
-// ─── Health Check ───
+// ─── Health Check (with retries) ───
 async function checkHealth() {
     const url = `${S.apiBase}/api/game/health`;
-    console.log('[GAME] checkHealth() url:', url);
-    try {
-        const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
-        const resp = await fetch(url, {
-            method: 'GET',
-            headers: { 'ngrok-skip-browser-warning': '1' },
-            signal: controller.signal,
-        });
-        clearTimeout(tid);
-        console.log('[GAME] Health response status:', resp.status);
-        if (!resp.ok) {
-            console.error('[GAME] Health check failed:', resp.status, resp.statusText);
-            return false;
+
+    for (let attempt = 0; attempt <= HEALTH_RETRIES; attempt++) {
+        if (attempt > 0) {
+            console.log('[GAME] Health retry', attempt, '/', HEALTH_RETRIES, '- waiting', HEALTH_RETRY_MS + 'ms');
+            await sleep(HEALTH_RETRY_MS);
         }
-        const data = await resp.json();
-        console.log('[GAME] Health data:', JSON.stringify(data));
-        if (data.status === 'ok' && data.engine) {
-            return true;
+        console.log('[GAME] checkHealth() attempt', attempt, 'url:', url);
+        try {
+            const controller = new AbortController();
+            const tid = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
+            const resp = await fetch(url, {
+                method: 'GET',
+                headers: { 'ngrok-skip-browser-warning': '1' },
+                signal: controller.signal,
+            });
+            clearTimeout(tid);
+            console.log('[GAME] Health response status:', resp.status);
+            if (!resp.ok) {
+                console.error('[GAME] Health check failed:', resp.status, resp.statusText);
+                continue; // retry
+            }
+            const data = await resp.json();
+            console.log('[GAME] Health data:', JSON.stringify(data));
+            if (data.status === 'ok' && data.engine) {
+                return true;
+            }
+            // Engine starting — worth retrying
+            console.warn('[GAME] Engine not ready:', data);
+            continue;
+        } catch (e) {
+            console.error('[GAME] Health check error:', e.name, e.message);
+            // continue to next retry
         }
-        console.warn('[GAME] Engine not ready:', data);
-        return false;
-    } catch (e) {
-        console.error('[GAME] Health check unreachable:', e.name, e.message);
-        return false;
     }
+    console.error('[GAME] Health check failed after', HEALTH_RETRIES + 1, 'attempts');
+    return false;
 }
 
 // ─── API Methods ───

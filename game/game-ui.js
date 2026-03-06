@@ -162,13 +162,21 @@ function showError(msg, err = null) {
         _errorAutoRetryTimer = null;
     }
 
-    const doRetry = () => {
+    const doRetry = async () => {
         if (_errorAutoRetryTimer) {
             clearInterval(_errorAutoRetryTimer);
             _errorAutoRetryTimer = null;
         }
         overlay.style.display = 'none';
         retryBtn.textContent = 'Tentar Novamente';
+
+        // Always re-check health before retrying — server may have restarted
+        const healthy = await checkHealth();
+        if (!healthy) {
+            showError('Servidor indisponível. Tente novamente em alguns segundos.');
+            return;
+        }
+
         if (S.currentScreen) {
             fetchState(false);
         } else {
@@ -194,7 +202,8 @@ function showError(msg, err = null) {
     }
 
     // Auto-retry with exponential backoff for connection errors
-    const isConnectionError = msg.includes('Sem conexão') || msg.includes('Erro no servidor');
+    const isConnectionError = msg.includes('Sem conexão') || msg.includes('Erro no servidor')
+        || msg.includes('indisponível') || msg.includes('não respondeu');
     if (isConnectionError && _errorRetryAttempt < _ERROR_RETRY_MAX) {
         _errorRetryAttempt++;
         // Exponential backoff: 5s, 10s, 20s, 40s, 40s, 40s...
