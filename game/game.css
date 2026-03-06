@@ -198,7 +198,7 @@
     min-height: 34px;
 }
 
-/* ─── Loading Overlay (Epic Medieval) ─── */
+/* ─── Loading Overlay (Magic Summoning Circle) ─── */
 .loading-overlay {
     position: fixed;
     inset: 0;
@@ -206,120 +206,187 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(ellipse at 50% 40%, #352028 0%, #1a1520 50%, #0d0a10 100%);
+    background: radial-gradient(ellipse at 50% 38%, #30202a 0%, #1a1520 45%, #0a0810 100%);
     z-index: 1000;
     overflow: hidden;
 }
-
-/* ── Floating Particles ── */
-.loading-particles {
+/* Vignette */
+.loading-overlay::before {
+    content: '';
     position: absolute;
     inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%);
     pointer-events: none;
 }
 
-.particle {
-    position: absolute;
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
+/* ── Particles (Embers + Sparks + Motes) ── */
+.loading-particles { position: absolute; inset: 0; pointer-events: none; }
+.particle { position: absolute; border-radius: 50%; opacity: 0; }
+
+.particle.ember {
+    width: 3px; height: 3px;
     background: var(--v-gold);
-    opacity: 0;
-    animation: particleFloat 6s ease-in-out infinite;
+    box-shadow: 0 0 4px rgba(196,149,58,0.6);
+    animation: emberFloat 6s ease-in-out infinite;
 }
+.p1 { left: 12%; bottom: -3%; animation-delay: 0s; animation-duration: 5.5s; }
+.p2 { left: 28%; bottom: -3%; animation-delay: 1s; animation-duration: 6.5s; }
+.p3 { left: 48%; bottom: -3%; animation-delay: 2s; animation-duration: 5s; }
+.p4 { left: 65%; bottom: -3%; animation-delay: 0.5s; animation-duration: 7s; }
+.p5 { left: 82%; bottom: -3%; animation-delay: 2.5s; animation-duration: 6s; }
+.p6 { left: 38%; bottom: -3%; animation-delay: 3.5s; animation-duration: 5.8s; }
 
-.p1 { left: 15%; bottom: -5%; animation-delay: 0s; animation-duration: 5s; }
-.p2 { left: 30%; bottom: -5%; animation-delay: 0.8s; animation-duration: 6.5s; }
-.p3 { left: 50%; bottom: -5%; animation-delay: 1.6s; animation-duration: 5.5s; }
-.p4 { left: 70%; bottom: -5%; animation-delay: 0.4s; animation-duration: 7s; }
-.p5 { left: 85%; bottom: -5%; animation-delay: 2s; animation-duration: 6s; }
-.p6 { left: 22%; bottom: -5%; animation-delay: 2.5s; animation-duration: 5.8s; }
-.p7 { left: 60%; bottom: -5%; animation-delay: 1.2s; animation-duration: 6.2s; }
-.p8 { left: 42%; bottom: -5%; animation-delay: 3s; animation-duration: 5.3s; }
-
-@keyframes particleFloat {
+@keyframes emberFloat {
     0%   { transform: translateY(0) scale(0); opacity: 0; }
-    10%  { opacity: 0.7; transform: translateY(-80px) scale(1); }
-    50%  { opacity: 0.4; }
-    100% { transform: translateY(-700px) scale(0); opacity: 0; }
+    8%   { opacity: 0.8; transform: translateY(-60px) scale(1); }
+    40%  { opacity: 0.5; transform: translateY(-300px) scale(0.8); }
+    100% { transform: translateY(-750px) scale(0); opacity: 0; }
 }
 
-/* ── Emblem with Epic Aura ── */
-.loading-logo-wrap {
+.particle.spark {
+    width: 2px; height: 2px;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(255,255,255,0.8), 0 0 12px rgba(196,149,58,0.5);
+    animation: sparkRise 3s ease-out infinite;
+}
+.s1 { left: 20%; bottom: 30%; animation-delay: 0.5s; }
+.s2 { left: 55%; bottom: 25%; animation-delay: 1.8s; animation-duration: 2.5s; }
+.s3 { left: 75%; bottom: 35%; animation-delay: 3s; animation-duration: 3.5s; }
+.s4 { left: 40%; bottom: 20%; animation-delay: 0s; animation-duration: 2.8s; }
+
+@keyframes sparkRise {
+    0%   { transform: translateY(0) scale(0); opacity: 0; }
+    5%   { opacity: 1; transform: translateY(0) scale(1.2); }
+    15%  { opacity: 0.8; }
+    100% { transform: translateY(-200px) translateX(20px) scale(0); opacity: 0; }
+}
+
+.particle.mote {
+    width: 2px; height: 2px;
+    background: var(--v-crimson-light);
+    box-shadow: 0 0 6px rgba(123,32,32,0.6);
+    animation: moteDrift 8s ease-in-out infinite;
+}
+.m1 { left: 10%; top: 40%; }
+.m2 { right: 10%; top: 55%; animation-delay: 4s; animation-duration: 9s; }
+
+@keyframes moteDrift {
+    0%   { transform: translate(0,0) scale(0); opacity: 0; }
+    10%  { opacity: 0.6; transform: translate(10px,-10px) scale(1); }
+    50%  { opacity: 0.3; transform: translate(60px,-30px) scale(0.8); }
+    100% { transform: translate(120px,-60px) scale(0); opacity: 0; }
+}
+
+/* ── Magic Summoning Circle ── */
+.magic-circle {
     position: relative;
-    width: 180px;
-    height: 180px;
-    margin-bottom: 16px;
-    animation: logoEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    width: 260px;
+    height: 260px;
+    margin-bottom: 14px;
+    animation: circleEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes circleEntrance {
+    0%   { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 
-@keyframes logoEntrance {
-    0%   { opacity: 0; transform: scale(0.5) translateY(30px); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* SVG Emblem */
-.loading-emblem {
+/* Aura layers */
+.mc-aura {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 130px;
-    height: 145px;
+    top: 50%; left: 50%;
+    width: 240px; height: 240px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,149,58,0.12) 0%, rgba(196,149,58,0.04) 40%, transparent 70%);
+    animation: mcAuraPulse 3s ease-in-out infinite;
+}
+.mc-aura-2 {
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(123,32,32,0.08) 0%, transparent 60%);
+    animation-delay: 1.5s;
+}
+@keyframes mcAuraPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
+}
+
+/* Shared ring styles */
+.mc-ring { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+/* Outer rune ring — CW slowly */
+.mc-outer {
+    animation: spinCW 28s linear infinite;
+    filter: drop-shadow(0 0 3px rgba(196,149,58,0.3));
+}
+.mc-rune-text { font-size: 13px; letter-spacing: 3px; font-family: serif; }
+
+/* Mid energy ring — CCW */
+.mc-mid { animation: spinCCW 14s linear infinite; }
+
+.mc-energy-arc {
+    stroke-dasharray: 50 590;
+    stroke-linecap: round;
+    animation: energyFlow 3s linear infinite;
+    filter: drop-shadow(0 0 4px rgba(196,149,58,0.5));
+}
+.mc-arc-1 { stroke-dasharray: 60 580; }
+.mc-arc-2 { stroke-dasharray: 40 563; animation-duration: 4s; animation-direction: reverse; filter: drop-shadow(0 0 4px rgba(123,32,32,0.4)); }
+
+@keyframes energyFlow { to { stroke-dashoffset: -640; } }
+
+/* Inner text ring — CW faster */
+.mc-inner {
+    animation: spinCW 18s linear infinite;
+    filter: drop-shadow(0 0 2px rgba(196,149,58,0.2));
+}
+.mc-inner-text { font-size: 9.5px; letter-spacing: 5px; font-family: serif; }
+
+@keyframes spinCW  { to { transform: rotate(360deg); } }
+@keyframes spinCCW { to { transform: rotate(-360deg); } }
+
+/* Magic pulse */
+.mc-pulse {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 20px; height: 20px;
+    transform: translate(-50%, -50%) scale(0.5);
+    border-radius: 50%;
+    border: 1px solid rgba(196,149,58,0.4);
+    box-shadow: 0 0 10px rgba(196,149,58,0.2);
+    opacity: 0;
+    animation: magicPulse 4s ease-out infinite 1.5s;
+}
+.mc-pulse-2 { animation-delay: 3.5s; border-color: rgba(123,32,32,0.3); box-shadow: 0 0 10px rgba(123,32,32,0.15); }
+
+@keyframes magicPulse {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(12); opacity: 0; }
+}
+
+/* Central emblem */
+.mc-emblem {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 115px; height: 128px;
     transform: translate(-50%, -50%);
     z-index: 3;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.6));
 }
 
-/* Shield draw-in animation */
-.emblem-shield-border {
-    stroke-dasharray: 500;
-    stroke-dashoffset: 500;
-    animation: shieldDrawIn 1.8s ease forwards 0.2s;
-}
+/* Shield draw-in */
+.emblem-shield-border { stroke-dasharray: 500; stroke-dashoffset: 500; animation: shieldDrawIn 1.8s ease forwards 0.4s; }
+@keyframes shieldDrawIn { to { stroke-dashoffset: 0; } }
+.emblem-shield-fill { opacity: 0; animation: fadeIn 0.8s ease forwards 0.8s; }
+@keyframes fadeIn { to { opacity: 1; } }
+.emblem-rivets { opacity: 0; animation: fadeIn 0.6s ease forwards 1.2s; }
 
-@keyframes shieldDrawIn {
-    to { stroke-dashoffset: 0; }
-}
+/* Star */
+.emblem-star { opacity: 0; animation: starEntrance 0.8s ease forwards 1s; }
+@keyframes starEntrance { 0% { opacity: 0; transform: scale(0.6); } 100% { opacity: 1; transform: scale(1); } }
 
-.emblem-shield-fill {
-    opacity: 0;
-    animation: shieldFillIn 0.8s ease forwards 0.6s;
-}
-
-@keyframes shieldFillIn {
-    to { opacity: 1; }
-}
-
-/* Rivets fade in */
-.emblem-rivets {
-    opacity: 0;
-    animation: shieldFillIn 0.6s ease forwards 1s;
-}
-
-/* Golden star entrance + pulse */
-.emblem-star {
-    opacity: 0;
-    animation: starEntrance 0.8s ease forwards 0.8s, starPulse 3s ease-in-out infinite 1.6s;
-}
-
-@keyframes starEntrance {
-    0%   { opacity: 0; transform: scale(0.7); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes starPulse {
-    0%, 100% { filter: url(#eg-glow); }
-    50% { filter: url(#eg-glow-lg); }
-}
-
-/* Sword gleam traveling up the blade */
-.sword-gleam {
-    stroke-dasharray: 30 250;
-    stroke-dashoffset: 280;
-    opacity: 0;
-    animation: swordGleam 4s ease-in-out infinite 1.5s;
-}
-
+/* Sword */
+.emblem-sword { opacity: 0; animation: fadeIn 0.6s ease forwards 0.6s; }
+.sword-gleam { stroke-dasharray: 30 250; stroke-dashoffset: 280; opacity: 0; animation: swordGleam 4s ease-in-out infinite 2s; }
 @keyframes swordGleam {
     0%   { stroke-dashoffset: 280; opacity: 0; }
     10%  { opacity: 0.8; }
@@ -327,12 +394,7 @@
     60%  { opacity: 0; }
     100% { opacity: 0; stroke-dashoffset: -30; }
 }
-
-/* Sword tip sparkle */
-.sword-tip-sparkle {
-    animation: tipSparkle 4s ease-in-out infinite 1.5s;
-}
-
+.sword-tip-sparkle { animation: tipSparkle 4s ease-in-out infinite 2s; }
 @keyframes tipSparkle {
     0%, 45% { opacity: 0; r: 2; }
     50% { opacity: 0.9; r: 5; }
@@ -340,211 +402,69 @@
     100% { opacity: 0; }
 }
 
-/* Sword entrance */
-.emblem-sword {
-    opacity: 0;
-    animation: shieldFillIn 0.6s ease forwards 0.4s;
-}
-
-/* Dragon curves draw-in */
-.emblem-dragon {
-    stroke-dasharray: 200;
-    stroke-dashoffset: 200;
-    animation: dragonDraw 2s ease forwards 0.5s;
-}
-
-.dragon-r {
-    animation-delay: 0.7s;
-}
-
-@keyframes dragonDraw {
-    to { stroke-dashoffset: 0; }
-}
-
-/* Dragon heads */
-.emblem-dragon-head {
-    opacity: 0;
-    animation: shieldFillIn 0.5s ease forwards 1.2s;
-}
-
-.dragon-head-r {
-    animation-delay: 1.4s;
-}
-
-/* Aura glow behind logo */
-.loading-aura {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 140px;
-    height: 140px;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(196, 149, 58, 0.15) 0%, transparent 70%);
-    z-index: 1;
-    animation: auraPulse 3s ease-in-out infinite;
-}
-
-.loading-aura-2 {
-    width: 180px;
-    height: 180px;
-    background: radial-gradient(circle, rgba(123, 32, 32, 0.1) 0%, transparent 70%);
-    animation-delay: 1.5s;
-}
-
-@keyframes auraPulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
-}
-
-/* Rotating rune ring around logo */
-.loading-rune-ring {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    animation: v-fadeIn 0.8s ease 0.3s both;
-}
-
-.loading-rune-ring svg {
-    width: 100%;
-    height: 100%;
-}
-
-.rune-track {
-    fill: none;
-    stroke: rgba(196, 149, 58, 0.08);
-    stroke-width: 1;
-}
-
-.rune-arc {
-    fill: none;
-    stroke: var(--v-gold);
-    stroke-width: 1.5;
-    stroke-linecap: round;
-    stroke-dasharray: 40 520;
-    animation: runeOrbit 3s linear infinite;
-    filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.6));
-}
-
-.rune-arc-2 {
-    stroke: var(--v-crimson-light);
-    stroke-dasharray: 30 486;
-    animation-direction: reverse;
-    animation-duration: 4s;
-    filter: drop-shadow(0 0 4px rgba(123, 32, 32, 0.5));
-}
-
-@keyframes runeOrbit {
-    to { stroke-dashoffset: -565; }
-}
+/* Dragon */
+.emblem-dragon { stroke-dasharray: 200; stroke-dashoffset: 200; animation: dragonDraw 2s ease forwards 0.7s; }
+.dragon-r { animation-delay: 0.9s; }
+@keyframes dragonDraw { to { stroke-dashoffset: 0; } }
+.emblem-dragon-head { opacity: 0; animation: fadeIn 0.5s ease forwards 1.4s; }
+.dragon-head-r { animation-delay: 1.6s; }
 
 /* ── Brand Section ── */
-.loading-brand {
-    text-align: center;
-    animation: v-fadeIn 0.7s ease 0.4s both;
-}
+.loading-brand { text-align: center; animation: v-fadeIn 0.7s ease 0.6s both; }
 
 .loading-title {
     font-size: 18px;
     font-weight: 900;
     color: var(--v-gold);
     letter-spacing: 6px;
-    text-shadow:
-        0 0 20px rgba(196, 149, 58, 0.4),
-        0 0 40px rgba(196, 149, 58, 0.2),
-        0 2px 4px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 0 20px rgba(196,149,58,0.4), 0 0 40px rgba(196,149,58,0.2), 0 2px 4px rgba(0,0,0,0.8);
     animation: titleShimmer 3s ease-in-out infinite;
 }
-
 @keyframes titleShimmer {
-    0%, 100% { text-shadow: 0 0 20px rgba(196, 149, 58, 0.4), 0 0 40px rgba(196, 149, 58, 0.2), 0 2px 4px rgba(0, 0, 0, 0.8); }
-    50% { text-shadow: 0 0 30px rgba(196, 149, 58, 0.6), 0 0 60px rgba(196, 149, 58, 0.3), 0 2px 4px rgba(0, 0, 0, 0.8); }
+    0%, 100% { text-shadow: 0 0 20px rgba(196,149,58,0.4), 0 0 40px rgba(196,149,58,0.2), 0 2px 4px rgba(0,0,0,0.8); }
+    50% { text-shadow: 0 0 30px rgba(196,149,58,0.6), 0 0 60px rgba(196,149,58,0.3), 0 2px 4px rgba(0,0,0,0.8); }
 }
 
 .loading-divider {
-    width: 160px;
-    height: 1px;
+    width: 160px; height: 1px;
     background: linear-gradient(90deg, transparent, var(--v-gold-dim), var(--v-gold), var(--v-gold-dim), transparent);
-    margin: 10px auto 0;
-    position: relative;
-    animation: v-fadeIn 0.5s ease 0.6s both;
-}
-
-.divider-rune {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 8px;
-    color: var(--v-gold);
-    background: #1a1520;
-    padding: 0 12px;
-    animation: runePulse 2s ease-in-out infinite;
-}
-
-@keyframes runePulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
-}
-
-/* ── Progress Bar ── */
-.loading-progress-wrap {
-    margin: 22px 0 18px;
-    width: 200px;
-    animation: v-fadeIn 0.5s ease 0.7s both;
-}
-
-.loading-progress-track {
-    width: 100%;
-    height: 3px;
-    background: rgba(196, 149, 58, 0.1);
-    border-radius: 2px;
-    overflow: hidden;
-    position: relative;
-}
-
-.loading-progress-fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 2px;
-    background: linear-gradient(90deg, var(--v-crimson), var(--v-gold), var(--v-gold-light));
-    box-shadow: 0 0 8px rgba(196, 149, 58, 0.5);
-    transition: width 0.3s ease;
-    position: relative;
-}
-
-.loading-progress-fill::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: -2px;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--v-gold-light);
-    box-shadow: 0 0 10px var(--v-gold), 0 0 20px rgba(196, 149, 58, 0.4);
-}
-
-/* ── Tips Area ── */
-.loading-tip-area {
-    min-height: 20px;
+    margin: 10px auto 0; position: relative;
     animation: v-fadeIn 0.5s ease 0.8s both;
 }
+.divider-rune {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px; color: var(--v-gold);
+    background: #1a1520; padding: 0 12px;
+    animation: runePulse 2s ease-in-out infinite;
+}
+@keyframes runePulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
+/* ── Progress Bar ── */
+.loading-progress-wrap { margin: 20px 0 16px; width: 200px; animation: v-fadeIn 0.5s ease 0.9s both; }
+.loading-progress-track { width: 100%; height: 3px; background: rgba(196,149,58,0.08); border-radius: 2px; overflow: hidden; position: relative; }
+.loading-progress-fill {
+    height: 100%; width: 0%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--v-crimson), var(--v-gold), var(--v-gold-light));
+    box-shadow: 0 0 8px rgba(196,149,58,0.5);
+    transition: width 0.3s ease; position: relative;
+}
+.loading-progress-fill::after {
+    content: ''; position: absolute; right: 0; top: -2px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--v-gold-light);
+    box-shadow: 0 0 10px var(--v-gold), 0 0 20px rgba(196,149,58,0.4);
+}
+
+/* ── Tips ── */
+.loading-tip-area { min-height: 20px; animation: v-fadeIn 0.5s ease 1s both; }
 .loading-tip {
-    font-size: 12px;
-    color: var(--v-text-dim);
-    text-align: center;
-    max-width: 280px;
-    line-height: 1.4;
-    font-style: italic;
+    font-size: 12px; color: var(--v-text-dim);
+    text-align: center; max-width: 280px;
+    line-height: 1.4; font-style: italic;
     animation: tipFade 4s ease-in-out infinite;
 }
-
-@keyframes tipFade {
-    0%, 100% { opacity: 0.4; }
-    30%, 70% { opacity: 0.9; }
-}
+@keyframes tipFade { 0%, 100% { opacity: 0.4; } 30%, 70% { opacity: 0.9; } }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 

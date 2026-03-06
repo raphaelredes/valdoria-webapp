@@ -17,32 +17,32 @@
 <body>
     <!-- Loading overlay -->
     <div id="loading" class="loading-overlay">
-        <!-- Floating particles -->
+        <!-- Floating particles (embers + sparks) -->
         <div class="loading-particles">
-            <div class="particle p1"></div>
-            <div class="particle p2"></div>
-            <div class="particle p3"></div>
-            <div class="particle p4"></div>
-            <div class="particle p5"></div>
-            <div class="particle p6"></div>
-            <div class="particle p7"></div>
-            <div class="particle p8"></div>
+            <div class="particle ember p1"></div>
+            <div class="particle ember p2"></div>
+            <div class="particle ember p3"></div>
+            <div class="particle ember p4"></div>
+            <div class="particle ember p5"></div>
+            <div class="particle ember p6"></div>
+            <div class="particle spark s1"></div>
+            <div class="particle spark s2"></div>
+            <div class="particle spark s3"></div>
+            <div class="particle spark s4"></div>
+            <div class="particle mote m1"></div>
+            <div class="particle mote m2"></div>
         </div>
 
-        <!-- Emblem with epic aura -->
-        <div class="loading-logo-wrap">
-            <div class="loading-aura"></div>
-            <div class="loading-aura loading-aura-2"></div>
-            <div class="loading-rune-ring">
-                <svg viewBox="0 0 200 200">
-                    <circle class="rune-track" cx="100" cy="100" r="90" />
-                    <circle class="rune-arc" cx="100" cy="100" r="90" />
-                    <circle class="rune-arc rune-arc-2" cx="100" cy="100" r="82" />
-                </svg>
-            </div>
-            <!-- SVG Emblem: shield + sword + golden star + dragon curves -->
-            <svg class="loading-emblem" viewBox="0 0 200 220">
+        <!-- Magic summoning circle -->
+        <div class="magic-circle">
+            <!-- Aura glow layers -->
+            <div class="mc-aura"></div>
+            <div class="mc-aura mc-aura-2"></div>
+
+            <!-- Outer rune ring (Elder Futhark runes rotating CW) -->
+            <svg class="mc-ring mc-outer" viewBox="0 0 300 300">
                 <defs>
+                    <path id="runeOuter" d="M150,150 m-125,0 a125,125 0 1,1 250,0 a125,125 0 1,1 -250,0"/>
                     <linearGradient id="eg-gold" x1="0" y1="0" x2="1" y2="1">
                         <stop offset="0%" stop-color="#dbb668"/>
                         <stop offset="50%" stop-color="#c4953a"/>
@@ -67,39 +67,69 @@
                         <feGaussianBlur stdDeviation="2.5" result="b"/>
                         <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
                     </filter>
-                    <filter id="eg-glow-lg">
-                        <feGaussianBlur stdDeviation="5" result="b"/>
-                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                    </filter>
                 </defs>
+                <circle cx="150" cy="150" r="125" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="1"/>
+                <circle cx="150" cy="150" r="127" fill="none" stroke="rgba(196,149,58,0.04)" stroke-width="0.5" stroke-dasharray="4 8"/>
+                <text class="mc-rune-text" fill="rgba(196,149,58,0.5)">
+                    <textPath href="#runeOuter" startOffset="0%">&#5792; &#5794; &#5798; &#5800; &#5809; &#5810; &#5815; &#5817; &#5818; &#5822; &#5825; &#5827; &#5831; &#5832; &#5833; &#5834; &#5839; &#5842; &#5846; &#5848; &#5850; &#5852; &#5853; &#5855;</textPath>
+                </text>
+            </svg>
 
-                <!-- Dragon body curves (behind everything) -->
+            <!-- Mid energy ring (arcs rotating CCW) -->
+            <svg class="mc-ring mc-mid" viewBox="0 0 300 300">
+                <circle cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.05)" stroke-width="0.5"/>
+                <circle class="mc-energy-arc mc-arc-1" cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+                <circle class="mc-energy-arc mc-arc-2" cx="150" cy="150" r="96" fill="none" stroke="rgba(123,32,32,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+                <!-- Geometric marks at cardinal points -->
+                <g opacity="0.3" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1">
+                    <line x1="150" y1="44" x2="150" y2="54"/>
+                    <line x1="150" y1="246" x2="150" y2="256"/>
+                    <line x1="44" y1="150" x2="54" y2="150"/>
+                    <line x1="246" y1="150" x2="256" y2="150"/>
+                    <!-- Diagonal marks -->
+                    <line x1="78" y1="78" x2="85" y2="85" opacity="0.5"/>
+                    <line x1="222" y1="78" x2="215" y2="85" opacity="0.5"/>
+                    <line x1="78" y1="222" x2="85" y2="215" opacity="0.5"/>
+                    <line x1="222" y1="222" x2="215" y2="215" opacity="0.5"/>
+                </g>
+            </svg>
+
+            <!-- Inner text ring (VALDORIA rotating CW faster) -->
+            <svg class="mc-ring mc-inner" viewBox="0 0 300 300">
+                <defs>
+                    <path id="runeInner" d="M150,150 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0"/>
+                </defs>
+                <circle cx="150" cy="150" r="75" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="0.5"/>
+                <text class="mc-inner-text" fill="rgba(196,149,58,0.35)">
+                    <textPath href="#runeInner" startOffset="0%">&#9670; VALDORIA &#9670; LENDAS &#9670; VALDORIA &#9670; LENDAS </textPath>
+                </text>
+            </svg>
+
+            <!-- Magic pulse (periodic radial flash) -->
+            <div class="mc-pulse"></div>
+            <div class="mc-pulse mc-pulse-2"></div>
+
+            <!-- Central emblem (shield + sword + star) -->
+            <svg class="mc-emblem" viewBox="0 0 200 220">
+                <!-- Dragon body curves -->
                 <path class="emblem-dragon" d="M38,28 Q18,60 24,95 Q30,130 50,152 Q58,162 52,170" fill="none" stroke="rgba(176,152,108,0.25)" stroke-width="3" stroke-linecap="round"/>
                 <path class="emblem-dragon dragon-r" d="M162,28 Q182,60 176,95 Q170,130 150,152 Q142,162 148,170" fill="none" stroke="rgba(176,152,108,0.25)" stroke-width="3" stroke-linecap="round"/>
-                <!-- Dragon head hints (small pointed shapes) -->
                 <path class="emblem-dragon-head" d="M38,28 Q32,18 40,14 Q46,20 38,28" fill="rgba(176,152,108,0.18)" stroke="rgba(176,152,108,0.25)" stroke-width="1.5"/>
                 <path class="emblem-dragon-head dragon-head-r" d="M162,28 Q168,18 160,14 Q154,20 162,28" fill="rgba(176,152,108,0.18)" stroke="rgba(176,152,108,0.25)" stroke-width="1.5"/>
 
-                <!-- Sword (behind shield, diagonal bottom-left to top-right) -->
+                <!-- Sword -->
                 <g class="emblem-sword">
-                    <!-- Blade -->
                     <line x1="68" y1="198" x2="142" y2="22" stroke="url(#eg-steel)" stroke-width="7" stroke-linecap="round"/>
                     <line x1="68" y1="198" x2="142" y2="22" stroke="rgba(255,255,255,0.15)" stroke-width="3" stroke-linecap="round"/>
-                    <!-- Traveling gleam -->
                     <line class="sword-gleam" x1="68" y1="198" x2="142" y2="22" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                    <!-- Guard -->
                     <rect x="82" y="147" width="38" height="6" rx="3" fill="url(#eg-gold)" transform="rotate(-13.5, 101, 150)"/>
-                    <!-- Pommel -->
                     <circle cx="71" cy="195" r="6" fill="url(#eg-gold)" stroke="#9a7530" stroke-width="1"/>
-                    <!-- Tip sparkle -->
                     <circle class="sword-tip-sparkle" cx="142" cy="22" r="3" fill="white" opacity="0"/>
                 </g>
 
-                <!-- Shield body -->
+                <!-- Shield -->
                 <path class="emblem-shield-fill" d="M100,40 L150,62 L150,125 Q150,168 100,192 Q50,168 50,125 L50,62 Z" fill="url(#eg-shield)"/>
-                <!-- Shield border -->
                 <path class="emblem-shield-border" d="M100,40 L150,62 L150,125 Q150,168 100,192 Q50,168 50,125 L50,62 Z" fill="none" stroke="url(#eg-shield-border)" stroke-width="3.5"/>
-                <!-- Shield border rivets -->
                 <g class="emblem-rivets" opacity="0.5">
                     <circle cx="100" cy="42" r="2.5" fill="#a0a8b0"/>
                     <circle cx="148" cy="64" r="2.5" fill="#a0a8b0"/>
@@ -113,23 +143,18 @@
                     <circle cx="100" cy="189" r="2.5" fill="#a0a8b0"/>
                 </g>
 
-                <!-- Golden compass star emblem -->
+                <!-- Golden star -->
                 <g class="emblem-star" filter="url(#eg-glow)">
-                    <!-- Vertical arm -->
                     <polygon points="100,75 106,112 100,148 94,112" fill="url(#eg-gold)"/>
-                    <!-- Horizontal arm -->
                     <polygon points="68,115 96,108 132,115 104,122" fill="url(#eg-gold)"/>
-                    <!-- Ornate flourishes between arms -->
                     <path d="M100,82 Q118,96 118,115" fill="none" stroke="#dbb668" stroke-width="1.8" opacity="0.7"/>
                     <path d="M100,82 Q82,96 82,115" fill="none" stroke="#dbb668" stroke-width="1.8" opacity="0.7"/>
                     <path d="M100,143 Q118,132 118,115" fill="none" stroke="#dbb668" stroke-width="1.8" opacity="0.7"/>
                     <path d="M100,143 Q82,132 82,115" fill="none" stroke="#dbb668" stroke-width="1.8" opacity="0.7"/>
-                    <!-- Inner decorative curves -->
                     <path d="M95,90 Q88,100 92,108" fill="none" stroke="#dbb668" stroke-width="1.2" opacity="0.5"/>
                     <path d="M105,90 Q112,100 108,108" fill="none" stroke="#dbb668" stroke-width="1.2" opacity="0.5"/>
                     <path d="M95,138 Q88,128 92,120" fill="none" stroke="#dbb668" stroke-width="1.2" opacity="0.5"/>
                     <path d="M105,138 Q112,128 108,120" fill="none" stroke="#dbb668" stroke-width="1.2" opacity="0.5"/>
-                    <!-- Center boss -->
                     <circle cx="100" cy="115" r="8" fill="#c4953a" stroke="#dbb668" stroke-width="1.5"/>
                     <circle cx="100" cy="115" r="3.5" fill="#dbb668"/>
                 </g>
@@ -155,7 +180,6 @@
         <div class="loading-tip-area">
             <div id="loading-tip" class="loading-tip">Preparando sua aventura...</div>
         </div>
-
     </div>
 
     <!-- Main screen container (scrollable content only) -->
