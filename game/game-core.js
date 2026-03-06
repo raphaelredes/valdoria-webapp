@@ -14,13 +14,18 @@ const S = {
 };
 
 const DEBOUNCE_MS = 200;
-const RETRY_MAX = 3;
+const RETRY_MAX = 4;
 const RETRY_BASE_MS = 1000;
+const FETCH_TIMEOUT_MS = 12000; // 12s per fetch attempt (AbortController)
+const HEALTH_TIMEOUT_MS = 5000; // 5s for health check
+const LOADING_TIMEOUT_MS = 25000; // 25s max loading screen before auto-error
 const SCREEN_CACHE_KEY = 'valdoria_game_screen';
 const SCREEN_CACHE_TTL = 300000; // 5 minutes
 
+let _loadingTimeoutId = null;
+
 // ─── Initialization ───
-function init() {
+async function init() {
     const params = new URLSearchParams(window.location.search);
     S.token = params.get('token') || '';
     S.apiBase = (params.get('api') || '').replace(/\/$/, '');
@@ -55,6 +60,13 @@ function init() {
         }
     });
 
+    // Health check — verify API is reachable before loading game
+    const healthy = await checkHealth();
+    if (!healthy) {
+        showError('Servidor indisponível. Tente novamente em alguns segundos.');
+        return;
+    }
+
     // Check if returning from another WebApp (arena, explore, etc.)
     const isReturn = params.get('return') === 'game';
 
@@ -76,6 +88,34 @@ function init() {
     }
 }
 
+// ─── Health Check ───
+async function checkHealth() {
+    const url = `${S.apiBase}/api/game/health`;
+    try {
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
+        const resp = await fetch(url, {
+            method: 'GET',
+            headers: { 'ngrok-skip-browser-warning': '1' },
+            signal: controller.signal,
+        });
+        clearTimeout(tid);
+        if (!resp.ok) {
+            console.error('[GAME] Health check failed:', resp.status);
+            return false;
+        }
+        const data = await resp.json();
+        if (data.status === 'ok' && data.engine) {
+            return true;
+        }
+        console.warn('[GAME] Engine not ready:', data);
+        return false;
+    } catch (e) {
+        console.error('[GAME] Health check unreachable:', e.message);
+        return false;
+    }
+}
+
 // ─── API Methods ───
 async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
     const url = `${S.apiBase}${endpoint}`;
@@ -94,11 +134,17 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
 
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
+            // AbortController timeout — prevents infinite hang
+            const controller = new AbortController();
+            const tid = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
             const resp = await fetch(url, {
                 method: endpoint.includes('/image/') ? 'GET' : 'POST',
                 headers,
                 body: endpoint.includes('/image/') ? undefined : JSON.stringify({ user_id: S.uid, ...body }),
+                signal: controller.signal,
             });
+            clearTimeout(tid);
 
             if (resp.status === 429) {
                 // Rate limited — wait and retry
@@ -126,12 +172,24 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                 return null;
             }
         } catch (e) {
-            console.error('[GAME] fetch error:', e);
+            const isTimeout = e.name === 'AbortError';
+            console.error('[GAME] fetch error:', isTimeout ? 'timeout' : e);
             if (attempt === retries) {
-                showError('Sem conexão. Verifique sua internet.');
+                // Try to show cached screen instead of blank error
+                const cached = loadCachedScreen();
+                if (cached && !S.currentScreen) {
+                    renderScreen(cached);
+                    showToast('🔌 Reconectando...', 3000);
+                }
+                showError(isTimeout
+                    ? 'Servidor não respondeu a tempo. Tente novamente.'
+                    : 'Sem conexão. Verifique sua internet.');
                 return null;
             }
-            await sleep(RETRY_BASE_MS * (attempt + 1));
+            // Exponential backoff with jitter
+            const backoff = RETRY_BASE_MS * Math.pow(2, attempt);
+            const jitter = Math.random() * 500;
+            await sleep(backoff + jitter);
         }
     }
     return null;
@@ -188,7 +246,8 @@ async function doAction(callbackData) {
     if (data.error === 'no_response') return;
 
     // Handle transitions to specialized WebApps
-    if (data.transition) {
+    // Only auto-transition if there is NO text to display
+    if (data.transition && !data.text) {
         handleTransition(data.transition);
         return;
     }
@@ -205,6 +264,12 @@ async function doAction(callbackData) {
     // Render the new screen (only if there's content to render)
     if (data.text || data.buttons) {
         animateScreenTransition(() => renderScreen(data));
+
+        // If there's a transition AND we rendered a screen,
+        // it means the button is just there (like Mochila), so don't auto-redirect.
+        if (data.transition && data.text) {
+            console.log('[GAME] Screen has WebApp link:', data.transition.to);
+        }
     }
 }
 
@@ -219,24 +284,25 @@ async function doText(text) {
     }
 }
 
-// ─── Screen Cache (sessionStorage) ───
+// ─── Screen Cache (localStorage — survives WebView lifecycle) ───
 function cacheScreen(screen) {
     try {
         // Don't cache screens with active text input or timers — stale state on reload
         if (screen && (screen.waiting_for_text || screen.timer)) return;
-        sessionStorage.setItem(SCREEN_CACHE_KEY, JSON.stringify({
-            token: S.token, ts: Date.now(), screen,
+        localStorage.setItem(SCREEN_CACHE_KEY, JSON.stringify({
+            uid: S.uid, ts: Date.now(), screen,
         }));
     } catch (e) { /* quota exceeded — ignore */ }
 }
 
 function loadCachedScreen() {
     try {
-        const raw = sessionStorage.getItem(SCREEN_CACHE_KEY);
+        const raw = localStorage.getItem(SCREEN_CACHE_KEY);
         if (!raw) return null;
-        const { token, ts, screen } = JSON.parse(raw);
-        if (token !== S.token || Date.now() - ts > SCREEN_CACHE_TTL) {
-            sessionStorage.removeItem(SCREEN_CACHE_KEY);
+        const { uid, ts, screen } = JSON.parse(raw);
+        // Validate by user ID (not token — token changes each session)
+        if (uid !== S.uid || Date.now() - ts > SCREEN_CACHE_TTL) {
+            localStorage.removeItem(SCREEN_CACHE_KEY);
             return null;
         }
         return screen;

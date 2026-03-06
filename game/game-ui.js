@@ -26,6 +26,7 @@ function showLoading() {
     if (el) el.style.display = '';
     _startLoadingTips();
     _startLoadingProgress();
+    _startLoadingTimeout();
 }
 
 function hideLoading() {
@@ -34,6 +35,7 @@ function hideLoading() {
     const bar = document.getElementById('loading-progress');
     if (bar) bar.style.width = '100%';
     _stopLoadingProgress();
+    _stopLoadingTimeout();
 
     setTimeout(() => {
         if (el) {
@@ -88,6 +90,27 @@ function _stopLoadingTips() {
     if (_loadingTipTimer) {
         clearInterval(_loadingTipTimer);
         _loadingTipTimer = null;
+    }
+}
+
+// ─── Loading Timeout (prevents infinite loading screen) ───
+function _startLoadingTimeout() {
+    _stopLoadingTimeout();
+    if (typeof LOADING_TIMEOUT_MS === 'undefined') return;
+    _loadingTimeoutId = setTimeout(() => {
+        const el = document.getElementById('loading');
+        if (el && el.style.display !== 'none') {
+            console.error('[GAME] Loading timeout — server did not respond in time');
+            hideLoading();
+            showError('O servidor demorou demais para responder. Tente novamente.');
+        }
+    }, LOADING_TIMEOUT_MS);
+}
+
+function _stopLoadingTimeout() {
+    if (typeof _loadingTimeoutId !== 'undefined' && _loadingTimeoutId) {
+        clearTimeout(_loadingTimeoutId);
+        _loadingTimeoutId = null;
     }
 }
 
