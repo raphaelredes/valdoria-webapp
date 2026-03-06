@@ -48,7 +48,15 @@ function checkButtonOverflow() {
  *                           toast, alert, waiting_for_text, text_placeholder}
  */
 function renderScreen(screen) {
-    if (!screen) return;
+    if (!screen) { console.warn('[GAME] renderScreen() called with null/undefined screen'); return; }
+
+    console.log('[GAME] renderScreen() keys:', Object.keys(screen).join(','),
+        'text_len:', (screen.text || '').length,
+        'buttons:', (screen.buttons || []).length,
+        'footer:', screen.footer ? 'yes' : 'no',
+        'transition:', screen.transition ? 'yes' : 'no',
+        'dialogue:', screen.dialogue ? 'yes' : 'no',
+        'image:', screen.image_url ? 'yes' : 'no');
 
     S.currentScreen = screen;
     if (typeof cacheScreen === 'function') cacheScreen(screen);
@@ -313,37 +321,76 @@ function renderFooter(footer) {
     quickEl.innerHTML = '';
     navEl.innerHTML = '';
 
-    if (footer.quick && footer.quick.length) {
-        quickEl.style.display = '';
-        for (const btn of footer.quick) {
-            const el = document.createElement('button');
-            el.className = 'btn-action';
-            el.textContent = btn.text || '';
-            if (btn.cb) {
-                el.onclick = () => doAction(btn.cb);
-            } else if (btn.url) {
+    const setupButton = (btn, container) => {
+        const el = document.createElement('button');
+        el.className = 'btn-action';
+        el.textContent = btn.text || '';
+
+        if (btn.cb === 'main_menu') {
+            el.onclick = () => {
+                if (window.Telegram && Telegram.WebApp) {
+                    Telegram.WebApp.close();
+                }
+            };
+        } else if (btn.cb) {
+            el.onclick = () => doAction(btn.cb);
+        } else if (btn.url) {
+            // Plain URL → if it's a known WebApp target, open via transition (stays in overlay)
+            // Community links (t.me/*) and other external URLs open via openLink
+            const isWebAppUrl = btn.url && (
+                btn.url.includes('/inventory/') || btn.url.includes('/market/') ||
+                btn.url.includes('/levelup/') || btn.url.includes('/arena/') ||
+                btn.url.includes('/explore/') || btn.url.includes('/navigate/') ||
+                btn.url.includes('/dice/') || btn.url.includes('/workstation/') ||
+                btn.url.includes('/pix/')
+            );
+            if (isWebAppUrl) {
+                // Detect target and navigate inside the Telegram overlay
+                el.onclick = () => {
+                    if (typeof _detect_webapp_target_js === 'function') {
+                        const to = _detect_webapp_target_js(btn.url);
+                        handleTransition({ to, url: btn.url });
+                    } else {
+                        handleTransition({ to: 'unknown', url: btn.url });
+                    }
+                };
+            } else {
                 el.onclick = () => {
                     if (window.Telegram && Telegram.WebApp) Telegram.WebApp.openLink(btn.url);
                     else window.open(btn.url, '_blank');
                 };
             }
-            quickEl.appendChild(el);
+        } else if (btn.transition) {
+            // transition_data carries the full {to, url, text} — use it directly
+            const transData = btn.transition_data || null;
+            if (transData && transData.url) {
+                el.onclick = () => handleTransition(transData);
+            } else {
+                const target = typeof btn.transition === 'string' ? btn.transition : null;
+                if (target) {
+                    el.onclick = () => requestTransition(target);
+                } else {
+                    el.onclick = () => {
+                        const screen = S.currentScreen;
+                        if (screen && screen.transition) handleTransition(screen.transition);
+                    };
+                }
+            }
         }
+
+        container.appendChild(el);
+    };
+
+    if (footer.quick && footer.quick.length) {
+        quickEl.style.display = '';
+        for (const btn of footer.quick) setupButton(btn, quickEl);
     } else {
         quickEl.style.display = 'none';
     }
 
     if (footer.nav && footer.nav.length) {
         navEl.style.display = '';
-        for (const btn of footer.nav) {
-            const el = document.createElement('button');
-            el.className = 'btn-action';
-            el.textContent = btn.text || '';
-            if (btn.cb) {
-                el.onclick = () => doAction(btn.cb);
-            }
-            navEl.appendChild(el);
-        }
+        for (const btn of footer.nav) setupButton(btn, navEl);
     } else {
         navEl.style.display = 'none';
     }

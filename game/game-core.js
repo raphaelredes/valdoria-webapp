@@ -26,22 +26,32 @@ let _loadingTimeoutId = null;
 
 // ─── Initialization ───
 async function init() {
+    console.log('[GAME] init() started');
+    console.log('[GAME] URL:', window.location.href);
+
     const params = new URLSearchParams(window.location.search);
     S.token = params.get('token') || '';
     S.apiBase = (params.get('api') || '').replace(/\/$/, '');
     S.uid = parseInt(params.get('uid') || '0', 10);
     S.charId = params.get('char') || '';  // Character ID from menu (for char switch)
 
+    console.log('[GAME] Params: token=' + (S.token ? S.token.substring(0, 8) + '...' : 'MISSING') +
+        ' api=' + (S.apiBase || 'MISSING') +
+        ' uid=' + S.uid +
+        ' char=' + (S.charId || 'none'));
+
     // Immersive mode (collapsible bottom panel) — init before auth check
     if (typeof initImmersive === 'function') initImmersive();
 
     if (!S.token || !S.uid || !S.apiBase) {
+        console.error('[GAME] Missing required params - token:', !!S.token, 'uid:', S.uid, 'apiBase:', !!S.apiBase);
         showError('Parâmetros de sessão inválidos. Feche e toque em JOGAR novamente.');
         return;
     }
 
     // Telegram WebApp setup
     if (window.Telegram && Telegram.WebApp) {
+        console.log('[GAME] Telegram WebApp detected, version:', Telegram.WebApp.version || 'unknown');
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
         try { Telegram.WebApp.disableVerticalSwipes(); } catch (e) { /* older clients */ }
@@ -50,6 +60,8 @@ async function init() {
         Telegram.WebApp.BackButton.onClick(() => {
             doAction('action_universal_back');
         });
+    } else {
+        console.warn('[GAME] Telegram WebApp NOT detected - running outside Telegram?');
     }
 
     // Visibility change — refresh state when returning to app
@@ -61,7 +73,9 @@ async function init() {
     });
 
     // Health check — verify API is reachable before loading game
+    console.log('[GAME] Starting health check to:', S.apiBase + '/api/game/health');
     const healthy = await checkHealth();
+    console.log('[GAME] Health check result:', healthy);
     if (!healthy) {
         showError('Servidor indisponível. Tente novamente em alguns segundos.');
         return;
@@ -69,16 +83,20 @@ async function init() {
 
     // Check if returning from another WebApp (arena, explore, etc.)
     const isReturn = params.get('return') === 'game';
+    console.log('[GAME] Route: isReturn=' + isReturn + ' hasCharId=' + !!S.charId);
 
     if (isReturn) {
         // Returning from specialized WebApp — refresh state
+        console.log('[GAME] -> returnFromWebApp()');
         returnFromWebApp();
     } else if (S.charId) {
         // Opening from character selection — use /start to activate char
+        console.log('[GAME] -> startGame() with charId=' + S.charId);
         startGame();
     } else {
         // Try cached screen for instant render, then refresh from server
         const cached = loadCachedScreen();
+        console.log('[GAME] -> fetchState() cached=' + !!cached);
         if (cached) {
             renderScreen(cached);
             fetchState(true); // silent refresh in background
@@ -91,6 +109,7 @@ async function init() {
 // ─── Health Check ───
 async function checkHealth() {
     const url = `${S.apiBase}/api/game/health`;
+    console.log('[GAME] checkHealth() url:', url);
     try {
         const controller = new AbortController();
         const tid = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
@@ -100,18 +119,20 @@ async function checkHealth() {
             signal: controller.signal,
         });
         clearTimeout(tid);
+        console.log('[GAME] Health response status:', resp.status);
         if (!resp.ok) {
-            console.error('[GAME] Health check failed:', resp.status);
+            console.error('[GAME] Health check failed:', resp.status, resp.statusText);
             return false;
         }
         const data = await resp.json();
+        console.log('[GAME] Health data:', JSON.stringify(data));
         if (data.status === 'ok' && data.engine) {
             return true;
         }
         console.warn('[GAME] Engine not ready:', data);
         return false;
     } catch (e) {
-        console.error('[GAME] Health check unreachable:', e.message);
+        console.error('[GAME] Health check unreachable:', e.name, e.message);
         return false;
     }
 }
@@ -119,6 +140,7 @@ async function checkHealth() {
 // ─── API Methods ───
 async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
     const url = `${S.apiBase}${endpoint}`;
+    console.log('[GAME] apiCall:', endpoint, 'body:', JSON.stringify(body).substring(0, 200));
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${S.token}`,
@@ -134,6 +156,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
 
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
+            if (attempt > 0) console.log('[GAME] apiCall retry', attempt, '/', retries, 'for', endpoint);
             // AbortController timeout — prevents infinite hang
             const controller = new AbortController();
             const tid = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -146,24 +169,45 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             });
             clearTimeout(tid);
 
+            console.log('[GAME] apiCall response:', endpoint, 'status:', resp.status);
+
             if (resp.status === 429) {
+                console.warn('[GAME] Rate limited on', endpoint, '- waiting 2s');
                 // Rate limited — wait and retry
                 await sleep(2000);
                 continue;
             }
 
             if (resp.status === 401) {
+                console.error('[GAME] Session expired (401) for', endpoint);
                 showError('Sessão expirada. Feche e toque em JOGAR novamente.');
                 return null;
             }
 
-            const data = await resp.json();
+            let data;
+            try {
+                data = await resp.json();
+            } catch (jsonErr) {
+                console.error('[GAME] Failed to parse JSON response for', endpoint, ':', jsonErr);
+                const rawText = await resp.text().catch(() => '(could not read body)');
+                console.error('[GAME] Raw response body:', rawText.substring(0, 500));
+                if (attempt === retries) {
+                    showError('Resposta inválida do servidor.');
+                    return null;
+                }
+                continue;
+            }
 
             if (resp.ok) {
+                console.log('[GAME] apiCall OK:', endpoint,
+                    'keys:', Object.keys(data).join(','),
+                    'text_len:', (data.text || '').length,
+                    'buttons:', (data.buttons || []).length,
+                    'transition:', data.transition ? JSON.stringify(data.transition).substring(0, 80) : 'none');
                 return data;
             }
 
-            console.error('[GAME] API error:', resp.status, data);
+            console.error('[GAME] API error:', resp.status, JSON.stringify(data).substring(0, 300));
             if (attempt === retries) {
                 const msg = data && data.error === 'player_not_found'
                     ? 'Personagem não encontrado. Feche e selecione novamente.'
@@ -173,13 +217,13 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             }
         } catch (e) {
             const isTimeout = e.name === 'AbortError';
-            console.error('[GAME] fetch error:', isTimeout ? 'timeout' : e);
+            console.error('[GAME] fetch error on', endpoint, ':', isTimeout ? 'TIMEOUT after ' + FETCH_TIMEOUT_MS + 'ms' : e.name + ': ' + e.message);
             if (attempt === retries) {
                 // Try to show cached screen instead of blank error
                 const cached = loadCachedScreen();
                 if (cached && !S.currentScreen) {
                     renderScreen(cached);
-                    showToast('🔌 Reconectando...', 3000);
+                    showToast('Reconectando...', 3000);
                 }
                 showError(isTimeout
                     ? 'Servidor não respondeu a tempo. Tente novamente.'
@@ -189,6 +233,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             // Exponential backoff with jitter
             const backoff = RETRY_BASE_MS * Math.pow(2, attempt);
             const jitter = Math.random() * 500;
+            console.log('[GAME] Backoff:', Math.round(backoff + jitter) + 'ms before retry', (attempt + 1));
             await sleep(backoff + jitter);
         }
     }
@@ -196,22 +241,28 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
 }
 
 async function startGame() {
+    console.log('[GAME] startGame() called, charId:', S.charId || 'none');
     showLoading();
     const startBody = S.charId ? { char_id: S.charId } : {};
     const data = await apiCall('/api/game/start', startBody);
     hideLoading();
     if (data && !data.error) {
+        console.log('[GAME] startGame() success, rendering screen');
         renderScreen(data);
     } else if (data && data.error) {
+        console.error('[GAME] startGame() server error:', data.error);
         // apiCall already shows error for null; handle known server errors
         if (data.error === 'invalid_session') {
             showError('Sessão expirada. Feche e toque em JOGAR novamente.');
         }
         // Other errors already handled by apiCall
+    } else {
+        console.error('[GAME] startGame() returned null/empty data');
     }
 }
 
 async function fetchState(silent) {
+    console.log('[GAME] fetchState() silent:', silent);
     if (!silent) showLoading();
     const data = await apiCall('/api/game/state');
     if (!silent) hideLoading();
@@ -219,11 +270,16 @@ async function fetchState(silent) {
     if (data && !data.error) {
         // Check for transition (player is in combat/explore)
         if (data.transition) {
+            console.log('[GAME] fetchState() got transition:', JSON.stringify(data.transition).substring(0, 100));
             handleTransition(data.transition);
         } else {
+            console.log('[GAME] fetchState() rendering screen, text_len:', (data.text || '').length);
             renderScreen(data);
         }
+    } else if (data && data.error) {
+        console.error('[GAME] fetchState() server error:', data.error);
     } else if (!silent && !data) {
+        console.error('[GAME] fetchState() returned null - apiCall already showed error');
         // First time or server unreachable — apiCall already showed error
         // Nothing to do, error overlay has retry button
     }
@@ -322,5 +378,21 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// ─── Global Error Handlers ───
+window.addEventListener('error', (e) => {
+    console.error('[GAME] UNCAUGHT ERROR:', e.message, 'at', e.filename + ':' + e.lineno + ':' + e.colno, e.error);
+});
+window.addEventListener('unhandledrejection', (e) => {
+    console.error('[GAME] UNHANDLED PROMISE REJECTION:', e.reason);
+});
+
 // ─── Bootstrap ───
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('[GAME] DOMContentLoaded fired, starting init...');
+    init().catch(e => {
+        console.error('[GAME] init() CRASHED:', e);
+        if (typeof showError === 'function') {
+            showError('Erro ao iniciar o jogo: ' + e.message, e);
+        }
+    });
+});

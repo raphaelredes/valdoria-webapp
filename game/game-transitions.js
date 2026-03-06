@@ -10,7 +10,9 @@
  * @param {Object} transition - {to: string, url: string, text?: string}
  */
 function handleTransition(transition) {
-    if (!transition || !transition.url || S.transitioning) return;
+    if (!transition) { console.warn('[GAME] handleTransition() called with null transition'); return; }
+    if (!transition.url) { console.warn('[GAME] handleTransition() missing url:', JSON.stringify(transition)); return; }
+    if (S.transitioning) { console.warn('[GAME] handleTransition() blocked - already transitioning'); return; }
 
     S.transitioning = true;
     console.log('[GAME] Transition to:', transition.to, transition.url);
@@ -24,7 +26,7 @@ function handleTransition(transition) {
 
     // Redirect after brief animation
     setTimeout(() => {
-        window.location.href = transition.url;
+        window.location.replace(transition.url);
     }, 350);
 }
 
@@ -51,18 +53,22 @@ function buildReturnUrl() {
  * This triggers a state refresh to show the current game screen.
  */
 async function returnFromWebApp() {
+    console.log('[GAME] returnFromWebApp() called');
     showLoading();
     const data = await apiCall('/api/game/state');
     hideLoading();
 
     if (data && !data.error) {
-        if (data.transition) {
+        if (data.transition && !data.text) {
+            console.log('[GAME] returnFromWebApp() -> transition:', JSON.stringify(data.transition).substring(0, 100));
             // Still in a specialized state — redirect again
             handleTransition(data.transition);
         } else {
+            console.log('[GAME] returnFromWebApp() -> renderScreen, text_len:', (data.text || '').length);
             renderScreen(data);
         }
     } else {
+        console.error('[GAME] returnFromWebApp() failed, data:', data ? JSON.stringify(data).substring(0, 200) : 'null');
         showError('Não foi possível restaurar o jogo. Feche e toque em JOGAR novamente.');
     }
 }
