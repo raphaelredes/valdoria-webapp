@@ -2329,17 +2329,15 @@ function initBackButton() {
 }
 
 // ── Nav Bar Actions ──
-const _LOC_LABELS = {
-    city: '🏘️ Cidade',
+// Map the 'return' URL param to a contextual back label
+const _RETURN_LABELS = {
+    game: '🏘️ Cidade',
     explore: '🗺️ Mapa',
-    event: '🗺️ Mapa',
-    dungeon: '🏰 Masmorra',
-    combat: '⚔️ Combate',
+    arena: '⚔️ Combate',
 };
 
 function _initNavBar() {
-    const loc = D?.loc || 'city';
-    const label = _LOC_LABELS[loc] || _LOC_LABELS.city;
+    const label = _RETURN_LABELS[_returnTo] || _RETURN_LABELS.game;
     const backBtn = document.querySelector('#navBar .inv-nav-btn:first-child span');
     if (backBtn) backBtn.textContent = label;
 }
