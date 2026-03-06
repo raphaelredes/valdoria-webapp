@@ -215,9 +215,7 @@ function handleLocationTap(locId) {
         noteEl.style.color = '';
     }
 
-    // Close button (always last)
-    const closeBtn = createActionBtn('Fechar', 'info-btn-close', closeInfoPanel);
-    actionsEl.appendChild(closeBtn);
+    // Close: tap outside panel or use bottom bar / Telegram back button
 
     // Open panel
     panel.classList.add('open');

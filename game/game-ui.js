@@ -319,7 +319,7 @@ function showTimerOverlay(timer) {
     const circumference = 2 * Math.PI * 36; // r=36
 
     secondsEl.textContent = remaining;
-    labelEl.textContent = timer.type === 'reaction' ? 'Reação!' : 'Sua vez!';
+    labelEl.textContent = timer.type === 'reaction' ? 'Reação!' : 'Decidir!';
     arcEl.style.strokeDashoffset = '0';
     overlay.style.display = '';
     skipBtn.style.display = 'none';
