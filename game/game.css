@@ -532,9 +532,173 @@
     pointer-events: all;
 }
 
-/* ─── Screen fade transition ─── */
-.screen.fade-out { opacity: 0; transition: opacity 0.15s ease; }
-.screen.fade-in { opacity: 1; transition: opacity 0.2s ease; }
+/* ─── Screen Slide+Fade Transition ─── */
+.screen.fade-out {
+    opacity: 0;
+    transform: translateX(-12px);
+    transition: opacity 0.15s ease, transform 0.2s ease;
+}
+.screen.fade-in {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.2s ease, transform 0.25s ease;
+    animation: screenSlideIn 0.25s ease-out;
+}
+@keyframes screenSlideIn {
+    from { opacity: 0; transform: translateX(12px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* ─── Notification Badge Bounce ─── */
+@keyframes badgeBounce {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.25); }
+    60%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+.btn-action[data-badge]::after {
+    content: attr(data-badge);
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--v-crimson, #7b2020);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 0 4px;
+    animation: badgeBounce 0.5s ease;
+}
+.btn-action[data-badge] { position: relative; overflow: visible; }
+
+/* ─── Staggered Button Entrance ─── */
+@keyframes btnEntrance {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.btn-row {
+    animation: btnEntrance 0.25s ease-out both;
+}
+.btn-row:nth-child(1) { animation-delay: 0s; }
+.btn-row:nth-child(2) { animation-delay: 0.04s; }
+.btn-row:nth-child(3) { animation-delay: 0.08s; }
+.btn-row:nth-child(4) { animation-delay: 0.12s; }
+.btn-row:nth-child(5) { animation-delay: 0.16s; }
+.btn-row:nth-child(6) { animation-delay: 0.2s; }
+.btn-row:nth-child(n+7) { animation-delay: 0.24s; }
+
+/* ─── Hero Button Idle Gold Pulse ─── */
+@keyframes heroPulse {
+    0%, 100% { box-shadow: var(--v-shadow-gold); }
+    50%      { box-shadow: 0 0 18px rgba(196, 149, 58, 0.35), 0 0 6px rgba(196, 149, 58, 0.2); }
+}
+.btn-hero {
+    animation: heroPulse 3s ease-in-out infinite;
+}
+.btn-hero:active { animation: none; }
+
+/* ─── Content Block Staggered Entrance ─── */
+@keyframes blockFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.screen-content > * {
+    animation: blockFadeIn 0.3s ease-out both;
+}
+.screen-content > *:nth-child(1) { animation-delay: 0s; }
+.screen-content > *:nth-child(2) { animation-delay: 0.05s; }
+.screen-content > *:nth-child(3) { animation-delay: 0.1s; }
+.screen-content > *:nth-child(4) { animation-delay: 0.15s; }
+.screen-content > *:nth-child(5) { animation-delay: 0.2s; }
+.screen-content > *:nth-child(n+6) { animation-delay: 0.25s; }
+
+/* ─── Location Header Entrance ─── */
+@keyframes headerReveal {
+    0%   { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    60%  { opacity: 1; transform: translateY(1px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.v-location-header {
+    animation: headerReveal 0.4s ease-out;
+}
+.v-location-header h2 {
+    animation: headerReveal 0.5s ease-out 0.1s both;
+}
+
+/* ─── Ambient Particles (Canvas overlay) ─── */
+#ambient-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.7;
+}
+
+/* ─── Cross-WebApp Themed Transitions ─── */
+.transition-overlay.active.theme-leaves {
+    background: transparent;
+}
+.transition-overlay.active.theme-leaves::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, #1a2810 30%, #2a3a18 60%, #1a2810 100%);
+    animation: leavesWipe 0.5s ease-in-out forwards;
+}
+@keyframes leavesWipe {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+.transition-overlay.active.theme-portal {
+    background: transparent;
+}
+.transition-overlay.active.theme-portal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, #2a2420 0%, #1a1510 40%, #0a0805 100%);
+    animation: portalClose 0.5s ease-in-out forwards;
+}
+@keyframes portalClose {
+    from { clip-path: circle(100% at 50% 50%); }
+    to { clip-path: circle(0% at 50% 50%); }
+}
+
+.transition-overlay.active.theme-combat {
+    background: transparent;
+}
+.transition-overlay.active.theme-combat::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(123, 32, 32, 0.8);
+    animation: combatFlash 0.4s ease-out forwards;
+}
+@keyframes combatFlash {
+    0% { opacity: 0; }
+    30% { opacity: 1; }
+    100% { opacity: 1; background: var(--v-bg); }
+}
+
+.transition-overlay.active.theme-scroll {
+    background: transparent;
+}
+.transition-overlay.active.theme-scroll::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #3a3028 0%, #2a2420 100%);
+    animation: scrollRoll 0.5s ease-in-out forwards;
+}
+@keyframes scrollRoll {
+    from { clip-path: inset(0 0 100% 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
 
 /* ─── Text Input (bank amounts, chat, tickets) ─── */
 .text-input-wrap {
