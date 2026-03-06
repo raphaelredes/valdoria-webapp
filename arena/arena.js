@@ -26,6 +26,7 @@ let _audioCtx = null;           // Feature 8: Web Audio (lazy init)
 let _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
 let _currentPositions = null;   // Feature 9: combat positions
 let _cinematicInProgress = false; // Blocks re-render during action cinematic
+let _hitStreak = 0;               // P2-G: Combo streak counter
 
 // ─── TIMER / POLLING / HEARTBEAT STATE ───
 let _timerInterval = null;
@@ -380,7 +381,28 @@ const RES_ICON_MAP = {
 };
 
 // ─── MAIN RENDER ───
+let _lastRenderedPhase = null;
 function renderArena(s) {
+    const app = document.getElementById('app');
+
+    // P0-C: Phase transition fade (intro->init->active)
+    const newPh = s.ph || s.phase || 'intro';
+    if (_lastRenderedPhase && _lastRenderedPhase !== newPh && !_cinematicInProgress) {
+        app.classList.add('phase-fade-out');
+        setTimeout(() => {
+            app.classList.remove('phase-fade-out');
+            app.classList.add('phase-fade-in');
+            _lastRenderedPhase = newPh;
+            _renderArenaInner(s);
+            setTimeout(() => app.classList.remove('phase-fade-in'), 200);
+        }, 200);
+        return;
+    }
+    _lastRenderedPhase = newPh;
+    _renderArenaInner(s);
+}
+
+function _renderArenaInner(s) {
     const app = document.getElementById('app');
     // Clear previous biome classes before applying new one
     document.body.className = document.body.className.replace(/\bbiome-\S+/g, '').trim();
@@ -575,7 +597,9 @@ function startTimer(seconds) {
 
         if (_timerRemaining <= 5) {
             bar.classList.add('critical');
-            // Heartbeat: tick sound + haptic in last 5 seconds
+        }
+        // Heartbeat: tick sound + haptic in last 3 seconds (avoids auditory fatigue)
+        if (_timerRemaining <= 3 && _timerRemaining > 0) {
             sfxTimerTick();
             haptic('light');
         }
@@ -664,6 +688,29 @@ function startPolling() {
                         newTurn.t === 'e' ? `🎯 ${newTurn.n}${actionVerb}` : `🛡️ ${newTurn.n}`;
                     const bannerType = newTurn.t === 'p' ? 'player' : newTurn.t === 'e' ? 'enemy' : 'ally';
                     _showTurnBanner(bannerText, bannerType);
+                }
+
+                // P0-B: Cinematic enemy dice — animate enemy rolls before state update
+                const hasEnemyRoll = state.lr && state.lr.r && newTurn && newTurn.t !== 'p';
+                const rollSig = state.lr ? `${state.lr.r}-${state.lr.d}-${state.lr.miss||0}` : '';
+                if (hasEnemyRoll && rollSig !== _lastAnimatedRoll) {
+                    _cinematicInProgress = true;
+                    initDice(state.lr);
+                    if (!state.lr.miss && state.lr.d > 0) {
+                        setTimeout(() => _showDamageFloat(state.lr.d, state.lr.dt, '.entity.player'), 2000);
+                    }
+                    const enemyDelay = (state.lr.miss || state.lr.d <= 0) ? 1800 : 2800;
+                    setTimeout(() => {
+                        _cinematicInProgress = false;
+                        currentState = state;
+                        if (newPh === 'victory' || newPh === 'defeat' || newPh === 'ended') {
+                            renderResolution(state);
+                        } else {
+                            renderArena(state);
+                        }
+                    }, enemyDelay);
+                    _pollInterval = setTimeout(poll, _getPollInterval());
+                    return;
                 }
 
                 _showPollUpdateIndicator();
@@ -843,7 +890,8 @@ function renderPlayerCard(p, isCompact = false) {
     }
     const badgesHtml = badges.length > 0 ? `<div class="player-badge-row">${badges.join('')}</div>` : '';
 
-    return `<div class="entity player">
+    const concClass = p.conc ? ' concentrating' : '';
+    return `<div class="entity player${concClass}">
         <div class="entity-header">
             <span class="entity-icon">${p.ico || '👤'}</span>
             <span class="compact-name">${escHtml(p.n)}</span>
@@ -1159,7 +1207,7 @@ function bindActions(state) {
     });
 }
 
-// ─── LOADING INDICATOR ───
+// ─── LOADING INDICATOR (themed spinning die) ───
 function _showActionLoading(show) {
     let el = document.getElementById('actionLoading');
     if (show) {
@@ -1167,7 +1215,7 @@ function _showActionLoading(show) {
             el = document.createElement('div');
             el.id = 'actionLoading';
             el.className = 'action-loading';
-            el.innerHTML = '<div class="loading-spinner"></div><span>Enviando...</span>';
+            el.innerHTML = '<div class="loading-die">🎲</div><span>Resolvendo...</span>';
             const bar = document.querySelector('.action-bar');
             if (bar) bar.prepend(el);
         }
@@ -1286,6 +1334,23 @@ function _showTurnBanner(text, type) {
         el.classList.remove('visible');
         setTimeout(() => el.remove(), 400);
     }, 1000);
+}
+
+// ─── COMBO STREAK COUNTER (P2-G) ───
+function _showComboCounter(count) {
+    let el = document.getElementById('comboCounter');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'comboCounter';
+        el.className = 'combo-counter';
+        document.body.appendChild(el);
+    }
+    el.textContent = `x${count}`;
+    el.classList.remove('combo-pop');
+    void el.offsetWidth;
+    el.classList.add('combo-pop');
+    clearTimeout(el._hideTimer);
+    el._hideTimer = setTimeout(() => el.classList.remove('combo-pop'), 3000);
 }
 
 // ─── ANTICIPATION OVERLAY ───
@@ -1493,20 +1558,26 @@ function initDice(lr) {
     const formula = document.getElementById('diceFormula');
     if (!d1 || !r1) return;
 
-    // ── Phase 1: D20 Rolling (0→900ms) ──
+    // ── Phase 1: D20 Rolling (0→900ms) with easing deceleration ──
     d1.textContent = '🎲';
     d1.classList.add('shaking');
     r1.className = 'dice-result cycling';
     l1.textContent = 'rolando...';
     l1.className = 'dice-label rolling-label';
     haptic('light'); sfxDiceRoll(); // Feature 4+8
-    const d20Cycle = setInterval(() => {
+    let _d20CycleActive = true;
+    const _d20Ease = (step) => {
+        if (!_d20CycleActive) return;
         r1.textContent = Math.floor(Math.random() * 19) + 2;
-    }, 80);
+        // Decelerate: 60ms -> 80 -> 100 -> 130 -> 170 -> 220 -> 280ms
+        const nextDelay = Math.min(60 + step * step * 5, 300);
+        setTimeout(() => _d20Ease(step + 1), nextDelay);
+    };
+    _d20Ease(0);
 
     // ── Phase 2: D20 Reveal (at 900ms) ──
     setTimeout(() => {
-        clearInterval(d20Cycle);
+        _d20CycleActive = false;
         d1.classList.remove('shaking');
         r1.className = 'dice-result';
         r1.textContent = lr.r;
@@ -1527,6 +1598,7 @@ function initDice(lr) {
             }, 500);
             haptic('heavy'); hapticNotify('success'); sfxCrit(); // Feature 4+8
             showNarration(_pick(_NARR_CRIT), 'crit'); // Feature 7
+            _hitStreak++; if (_hitStreak >= 2) _showComboCounter(_hitStreak);
         } else if (lr.r === 1) {
             d1.textContent = '💀';
             r1.classList.add('miss');
@@ -1534,17 +1606,28 @@ function initDice(lr) {
             l1.className = 'dice-label miss';
             hapticNotify('error'); // Feature 4
             showNarration(_pick(_NARR_NAT1), 'nat1'); // Feature 7
+            _hitStreak = 0;
         } else if (lr.miss) {
             r1.classList.add('miss');
             l1.textContent = 'errou';
             l1.className = 'dice-label miss';
             haptic('light'); sfxMiss(); // Feature 4+8
             showNarration(_pick(_NARR_MISS), 'miss'); // Feature 7
+            // P1-F: Dodge flash on enemy when miss
+            const dodgeTarget = document.querySelector('.entity.enemy');
+            if (dodgeTarget) {
+                dodgeTarget.classList.add('dodge-flash');
+                setTimeout(() => dodgeTarget.classList.remove('dodge-flash'), 400);
+            }
+            _hitStreak = 0;
         } else {
             r1.classList.add('hit');
             l1.textContent = lr.t === 'skill' ? 'habilidade' : 'acerto';
             l1.className = 'dice-label hit';
             haptic('medium'); sfxHit(); // Feature 4+8
+            // P2-G: Increment hit streak on successful hit
+            _hitStreak++;
+            if (_hitStreak >= 2) _showComboCounter(_hitStreak);
         }
 
         // Formula: "25 vs CA 16"
@@ -1574,13 +1657,18 @@ function initDice(lr) {
         l2.textContent = 'rolando...';
         l2.className = 'dice-label rolling-label';
         const maxCycle = Math.max(lr.d, 6);
-        const dmgCycle = setInterval(() => {
+        let _dmgCycleActive = true;
+        const _dmgEase = (step) => {
+            if (!_dmgCycleActive) return;
             r2.textContent = Math.floor(Math.random() * maxCycle) + 1;
-        }, 80);
+            const nextDelay = Math.min(60 + step * step * 6, 280);
+            setTimeout(() => _dmgEase(step + 1), nextDelay);
+        };
+        _dmgEase(0);
 
         // ── Phase 5: Damage Reveal (700ms later) ──
         setTimeout(() => {
-            clearInterval(dmgCycle);
+            _dmgCycleActive = false;
             d2.classList.remove('shaking');
             d2.textContent = '⚔️';
             r2.textContent = lr.d;
@@ -1608,9 +1696,10 @@ function initDice(lr) {
                 // Feature 3: Particles on damage impact
                 spawnParticles(lr.crit, lr.dt || 'slashing');
 
-                // Feature 7: Kill narration
+                // Feature 7: Kill narration with enemy name
                 if (lr.kill) {
-                    showNarration(_pick(_NARR_KILL), 'crit');
+                    const killName = (currentState?.e && currentState.e[0]?.n) || 'O inimigo';
+                    showNarration(_pick(_NARR_KILL).replace('{name}', killName), 'crit');
                 }
             }, 120);
         }, 700);
@@ -1810,12 +1899,13 @@ const _NARR_MISS = [
     'A defesa do inimigo resiste.',
     'Sem efeito — o inimigo esquiva com destreza.',
 ];
+// P1-E: Kill narrations with enemy name template ({name} is replaced at call site)
 const _NARR_KILL = [
-    'O inimigo tomba derrotado!',
-    'Sem mais vida — o adversário cai.',
-    'O golpe final sela o combate.',
-    'Derrota inevitável — o inimigo sucumbe.',
-    'Vitória! O inimigo não se levanta mais.',
+    '{name} tomba derrotado!',
+    'Sem mais vida — {name} cai.',
+    'O golpe final abate {name}.',
+    'Derrota inevitável — {name} sucumbe.',
+    '{name} não se levanta mais.',
 ];
 
 function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
