@@ -52,6 +52,7 @@ async function initAsync() {
         S.token = params.get('token') || '';
         S.api = params.get('api') || '';
         S.uid = parseInt(params.get('uid') || '0');
+        S.returnTo = params.get('return') || 'game';
         const dataB64 = params.get('data') || '';
 
         if (!dataB64) {
@@ -370,7 +371,7 @@ async function _transitionToGame() {
     try {
         const r = await fetch(S.api + '/api/webapp/transition', {
             method: 'POST', headers: h,
-            body: JSON.stringify({ from: 'navigate', to: 'game', user_id: S.uid, payload: {} })
+            body: JSON.stringify({ from: 'navigate', to: (S.returnTo || 'game'), user_id: S.uid, payload: {} })
         });
         const d = await r.json();
         if (d.url) { window.location.replace(d.url); return; }

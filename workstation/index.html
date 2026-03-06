@@ -311,6 +311,14 @@
     <script>
         const tg = window.Telegram?.WebApp;
         const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
+
+        // Parse URL params for navigation
+        const _wsParams = new URLSearchParams(window.location.search);
+        const _wsApi = _wsParams.get('api') || '';
+        const _wsUid = _wsParams.get('uid') || '';
+        const _wsToken = _wsParams.get('token') || '';
+        const _wsReturn = _wsParams.get('return') || 'game';
+
         if (tg) {
             tg.ready();
             tg.expand();
@@ -318,10 +326,26 @@
             tg.setBackgroundColor(_vBg);
             if (tg.BackButton) {
                 tg.BackButton.show();
-                tg.BackButton.onClick(() => {
-                    try { tg.close(); } catch (e) { console.warn('[WORKSTATION] tg.close:', e); }
-                });
+                tg.BackButton.onClick(() => { _navigateBack(); });
             }
+        }
+
+        async function _navigateBack() {
+            if (_wsApi && _wsToken) {
+                const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _wsToken };
+                if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+                h['ngrok-skip-browser-warning'] = '1';
+                h['X-Idempotency-Key'] = crypto.randomUUID();
+                try {
+                    const r = await fetch(_wsApi + '/api/webapp/transition', {
+                        method: 'POST', headers: h,
+                        body: JSON.stringify({ from: 'workstation', to: _wsReturn, user_id: parseInt(_wsUid), payload: {} })
+                    });
+                    const d = await r.json();
+                    if (d.url) { window.location.replace(d.url); return; }
+                } catch (e) { console.error('[WORKSTATION] transition error:', e); }
+            }
+            try { if (tg) tg.close(); } catch (e) { console.warn('[WORKSTATION] tg.close:', e); }
         }
 
         let PAYLOAD = null;

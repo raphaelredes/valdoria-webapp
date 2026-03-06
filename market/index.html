@@ -784,9 +784,10 @@
                             if (tg.initData) h['X-Telegram-Init-Data'] = tg.initData;
                             h['X-Idempotency-Key'] = crypto.randomUUID();
 
+                            const returnTo = params.get('return') || 'game';
                             const r = await fetch(`${apiBase}/api/webapp/transition`, {
                                 method: 'POST', headers: h,
-                                body: JSON.stringify({ from: 'market', to: 'game', user_id: parseInt(uid), payload: {} })
+                                body: JSON.stringify({ from: 'market', to: returnTo, user_id: parseInt(uid), payload: {} })
                             });
                             const d = await r.json();
                             if (d.url) {

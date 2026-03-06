@@ -907,6 +907,22 @@
             try { tg?.HapticFeedback?.notificationOccurred(type); } catch (e) { console.warn('[LEVELUP] haptic:', e); }
         }
 
+        async function _levelupTransitionBack() {
+            const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+            if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+            h['ngrok-skip-browser-warning'] = '1';
+            h['X-Idempotency-Key'] = crypto.randomUUID();
+            try {
+                const r = await fetch(apiFallback + '/api/webapp/transition', {
+                    method: 'POST', headers: h,
+                    body: JSON.stringify({ from: 'levelup', to: returnTo, user_id: parseInt(userId), payload: {} })
+                });
+                const d = await r.json();
+                if (d.url) { window.location.replace(d.url); return; }
+            } catch (e) { console.error('[LEVELUP] transition error:', e); }
+            try { if (tg) tg.close(); } catch (e) { console.warn('[LEVELUP] tg.close:', e); }
+        }
+
         // ═══════════════════════════════════════════════
         // SCREEN MANAGEMENT
         // ═══════════════════════════════════════════════
@@ -1721,6 +1737,9 @@
                                 // Navigate to return URL if provided (webapp transition)
                                 if (data.return_url) {
                                     window.location.replace(data.return_url);
+                                } else if (returnTo && apiFallback && token) {
+                                    // Use transition API to return to origin webapp
+                                    _levelupTransitionBack();
                                 } else if (tg && tg.close) {
                                     tg.close();
                                 } else {
