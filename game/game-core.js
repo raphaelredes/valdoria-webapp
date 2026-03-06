@@ -44,6 +44,8 @@ async function init() {
 
     // Immersive mode (collapsible bottom panel) — init before auth check
     if (typeof initImmersive === 'function') initImmersive();
+    // Ambient particle system — init canvas
+    if (typeof initParticles === 'function') initParticles();
 
     if (!S.token || !S.uid || !S.apiBase) {
         console.error('[GAME] Missing required params - token:', !!S.token, 'uid:', S.uid, 'apiBase:', !!S.apiBase);

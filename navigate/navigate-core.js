@@ -273,6 +273,17 @@ function finishNavigation(type, target, flags) {
         btn.style.opacity = '0.5';
     });
 
+    // Play travel animation before sending API call
+    if (type === 'travel' && target && typeof animateTravel === 'function') {
+        closeInfoPanel();
+        animateTravel(S.currentLoc, target, () => _sendNavAction(type, target, flags));
+        return;
+    }
+    _sendNavAction(type, target, flags);
+}
+
+function _sendNavAction(type, target, flags) {
+
     const payload = {
         action: 'navigate_action',
         token: S.token,

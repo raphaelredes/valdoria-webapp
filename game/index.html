@@ -166,12 +166,15 @@
         </div>
     </div>
 
+    <!-- Ambient particles canvas -->
+    <canvas id="ambient-particles"></canvas>
+
     <!-- Transition animation overlay -->
     <div id="transition-overlay" class="transition-overlay" style="display:none"></div>
 
     <script>
         var v = Date.now();
-        var scripts = ['game-enhancer.js', 'game-core.js', 'game-renderer.js', 'game-dialogue.js', 'game-ui.js', 'game-transitions.js'];
+        var scripts = ['game-enhancer.js', 'game-particles.js', 'game-core.js', 'game-renderer.js', 'game-dialogue.js', 'game-ui.js', 'game-transitions.js'];
         scripts.forEach(function (s) {
             document.write('<script src="' + s + '?v=' + v + '"><\/script>');
         });

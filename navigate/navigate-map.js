@@ -562,7 +562,7 @@ function renderLocationNodes(group, fogState) {
     }
 }
 
-// -- Player marker --
+// -- Player marker (with breathing glow ring) --
 function renderPlayerMarker(svg) {
     const coords = LOCATION_COORDS[S.currentLoc];
     if (!coords) return;
@@ -570,14 +570,27 @@ function renderPlayerMarker(svg) {
     const { x, y } = hexToPixel(coords.col, coords.row);
     const marker = createSVG('g', { class: 'player-marker' });
 
-    // Outer glow ring (organic shape)
+    // Outer breathing glow ring
     const glow = createSVG('circle', {
         cx: x, cy: y, r: HEX_RADIUS + 7,
         fill: 'none',
         stroke: 'rgba(196, 149, 58, 0.25)',
         'stroke-width': 2.5,
+        class: 'player-glow-ring',
     });
     marker.appendChild(glow);
+
+    // Inner subtle ring
+    const innerGlow = createSVG('circle', {
+        cx: x, cy: y, r: HEX_RADIUS + 3,
+        fill: 'none',
+        stroke: 'rgba(196, 149, 58, 0.12)',
+        'stroke-width': 1,
+        class: 'player-glow-ring',
+    });
+    innerGlow.style.animationDelay = '-1.5s';
+    marker.appendChild(innerGlow);
+
     svg.appendChild(marker);
 }
 

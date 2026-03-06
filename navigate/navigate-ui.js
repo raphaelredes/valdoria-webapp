@@ -327,6 +327,109 @@ function highlightPath(fromId, toId) {
     }
 }
 
+// ── Travel animation (path drawing + marker movement) ──
+function animateTravel(fromId, toId, onComplete) {
+    const pathIds = bfsPath(fromId, toId);
+    if (!pathIds || pathIds.length < 2) { onComplete(); return; }
+
+    const svg = document.getElementById('map-svg');
+    const travelGroup = createSVG('g', { class: 'travel-anim-group' });
+    svg.appendChild(travelGroup);
+
+    // Build full path segments
+    const segments = [];
+    let totalLen = 0;
+    for (let i = 0; i < pathIds.length - 1; i++) {
+        const aC = LOCATION_COORDS[pathIds[i]];
+        const bC = LOCATION_COORDS[pathIds[i + 1]];
+        if (!aC || !bC) continue;
+        const aP = hexToPixel(aC.col, aC.row);
+        const bP = hexToPixel(bC.col, bC.row);
+        const seed = (aC.col * 31 + aC.row * 17 + bC.col * 13 + bC.row * 7);
+        const mx = (aP.x + bP.x) / 2;
+        const my = (aP.y + bP.y) / 2;
+        const dx = bP.x - aP.x, dy = bP.y - aP.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const perpX = -dy / len, perpY = dx / len;
+        const jitterAmt = (seededRandom(seed) - 0.5) * 8;
+        const midX = mx + perpX * jitterAmt, midY = my + perpY * jitterAmt;
+        segments.push({ ax: aP.x, ay: aP.y, mx: midX, my: midY, bx: bP.x, by: bP.y, len });
+        totalLen += len;
+    }
+
+    // Draw animated path (stroke-dashoffset reveal)
+    for (const seg of segments) {
+        const pathD = `M${seg.ax},${seg.ay} Q${seg.mx},${seg.my} ${seg.bx},${seg.by}`;
+        const p = createSVG('path', {
+            d: pathD,
+            class: 'travel-path-anim',
+            'stroke-dasharray': `${seg.len * 1.5}`,
+            'stroke-dashoffset': `${seg.len * 1.5}`,
+        });
+        p.style.animation = `travelPathDraw ${(seg.len / totalLen) * 1.5}s ease forwards`;
+        p.style.animationDelay = `${(segments.indexOf(seg) / segments.length) * 1.5}s`;
+        travelGroup.appendChild(p);
+    }
+
+    // Animate marker along path
+    const markerCoords = LOCATION_COORDS[fromId];
+    if (markerCoords) {
+        const startP = hexToPixel(markerCoords.col, markerCoords.row);
+        const marker = createSVG('circle', {
+            cx: startP.x, cy: startP.y, r: 5,
+            fill: '#c4953a', class: 'travel-marker',
+        });
+        travelGroup.appendChild(marker);
+
+        let elapsed = 0;
+        const duration = 2000; // 2s total
+        const startTime = performance.now();
+
+        function moveMarker(now) {
+            elapsed = now - startTime;
+            const t = Math.min(elapsed / duration, 1);
+            // Interpolate through segments
+            const targetLen = t * totalLen;
+            let accum = 0;
+            for (const seg of segments) {
+                if (accum + seg.len >= targetLen || seg === segments[segments.length - 1]) {
+                    const segT = Math.min((targetLen - accum) / seg.len, 1);
+                    // Quadratic bezier interpolation
+                    const u = 1 - segT;
+                    const px = u * u * seg.ax + 2 * u * segT * seg.mx + segT * segT * seg.bx;
+                    const py = u * u * seg.ay + 2 * u * segT * seg.my + segT * segT * seg.by;
+                    marker.setAttribute('cx', px);
+                    marker.setAttribute('cy', py);
+                    break;
+                }
+                accum += seg.len;
+            }
+            if (t < 1) {
+                requestAnimationFrame(moveMarker);
+            } else {
+                marker.classList.add('travel-marker-bounce');
+                // Fog reveal burst at destination
+                const destC = LOCATION_COORDS[toId];
+                if (destC) {
+                    const dp = hexToPixel(destC.col, destC.row);
+                    const burst = createSVG('circle', {
+                        cx: dp.x, cy: dp.y, r: 0,
+                        class: 'fog-reveal-burst',
+                    });
+                    travelGroup.appendChild(burst);
+                }
+                setTimeout(() => {
+                    travelGroup.remove();
+                    onComplete();
+                }, 800);
+            }
+        }
+        requestAnimationFrame(moveMarker);
+    } else {
+        setTimeout(() => { travelGroup.remove(); onComplete(); }, 1500);
+    }
+}
+
 // ── BFS path (returns array of location IDs) ──
 function bfsPath(fromId, toId) {
     if (fromId === toId) return [fromId];

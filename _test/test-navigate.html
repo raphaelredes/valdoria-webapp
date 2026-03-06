@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2a2420">
+    <title>TEST - Mapa do Mundo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cinzel+Decorative:wght@700&family=MedievalSharp&display=swap" rel="stylesheet">
+    <script>
+        // Stub Telegram WebApp so scripts don't error
+        window.Telegram = { WebApp: { ready(){}, expand(){}, disableVerticalSwipes(){}, BackButton: { show(){}, onClick(){} }, HapticFeedback: { impactOccurred(){} }, version: '7.0' } };
+    </script>
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+    </script>
+    <!-- Copy the navigate styles inline from navigate/index.html -->
+    <style>
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { overflow: hidden; display: flex; flex-direction: column; touch-action: none; font-family: 'MedievalSharp', 'Cinzel', serif; }
+        #loading { position: fixed; inset: 0; background: #2a2420; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; transition: opacity 0.5s ease; }
+        #loading.hidden { opacity: 0; pointer-events: none; }
+        .loading-compass { width: 48px; height: 48px; animation: compassSpin 2.5s linear infinite; }
+        @keyframes compassSpin { to { transform: rotate(360deg); } }
+        .loading-text { color: #8a7060; font-size: 12px; margin-top: 10px; }
+        #hud { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(42, 36, 32, 0.95); border-bottom: 1px solid rgba(112, 66, 20, 0.3); z-index: 50; font-size: 12px; color: #d4c8b0; }
+        .hud-name { font-weight: 700; color: #c4953a; font-family: 'Cinzel', serif; }
+        .hud-level { color: #8a7060; font-size: 11px; }
+        .hud-bar-group { display: flex; align-items: center; gap: 4px; flex: 1; max-width: 100px; }
+        .hud-bar-label { font-size: 9px; color: #8a7060; min-width: 16px; }
+        .hud-bar { flex: 1; height: 6px; background: #1a1512; border-radius: 3px; overflow: hidden; }
+        .hud-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
+        .hp-fill { background: linear-gradient(90deg, #7b2020, #a03030); width: 0%; }
+        .mp-fill { background: linear-gradient(90deg, #1a3a6a, #2a4a8a); width: 0%; }
+        #map-viewport { position: fixed; top: 36px; left: 0; right: 0; bottom: 52px; overflow: hidden; background: #2a2420; }
+        #map-wrapper { position: absolute; cursor: grab; }
+        #map-wrapper:active { cursor: grabbing; }
+        .loc-hex { cursor: pointer; transition: filter 0.2s; }
+        .loc-hex polygon { stroke-width: 2; }
+        .loc-hex.explored polygon { stroke: #c4953a; stroke-width: 2; }
+        .terrain-hex { pointer-events: none; }
+        @keyframes playerPulse { 0%, 100% { filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.35)); } 50% { filter: drop-shadow(0 0 16px rgba(196, 149, 58, 0.7)); } }
+        @keyframes playerBreath { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.4; } }
+        .player-marker { animation: playerPulse 2.5s ease-in-out infinite; }
+        .player-glow-ring { animation: playerBreath 3s ease-in-out infinite; }
+        @keyframes locFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+        @keyframes locShake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-2px); } 40% { transform: translateX(2px); } 60% { transform: translateX(-1px); } 80% { transform: translateX(1px); } }
+        .loc-hex.explored, .loc-hex.known_mapped { animation: locFloat 4s ease-in-out infinite; }
+        .loc-hex.explored:nth-child(odd) { animation-delay: -1s; }
+        .loc-hex.explored:nth-child(3n) { animation-delay: -2.5s; }
+        .loc-hex.explored:hover, .loc-hex.known_mapped:hover { filter: brightness(1.25) drop-shadow(0 0 6px rgba(196, 149, 58, 0.4)); animation: none; }
+        @keyframes travelPathDraw { to { stroke-dashoffset: 0; } }
+        @keyframes travelMarkerBounce { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 70% { transform: scale(0.9); } 100% { transform: scale(1); } }
+        .travel-path-anim { stroke: #c4953a; stroke-width: 3; stroke-linecap: round; fill: none; stroke-opacity: 0.8; }
+        .travel-marker { transition: transform 0.05s linear; }
+        .travel-marker-bounce { animation: travelMarkerBounce 0.3s ease; }
+        @keyframes fogRevealExpand { from { r: 0; opacity: 0.8; } to { r: 40; opacity: 0; } }
+        .fog-reveal-burst { animation: fogRevealExpand 0.8s ease-out forwards; fill: rgba(196, 149, 58, 0.3); pointer-events: none; }
+        @keyframes selectionPulse { 0%, 100% { stroke-opacity: 0.6; } 50% { stroke-opacity: 0.3; } }
+        .selection-ring { animation: selectionPulse 2s ease-in-out infinite; }
+        @keyframes pathDashFlow { to { stroke-dashoffset: -20; } }
+        .path-highlight { stroke-dasharray: 6 4; animation: pathDashFlow 1s linear infinite; }
+        #current-loc-badge { position: absolute; top: 8px; left: 12px; right: 12px; background: rgba(42, 36, 32, 0.92); border: 1px solid rgba(112, 66, 20, 0.3); border-radius: 4px; padding: 8px 12px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #d4c8b0; z-index: 40; pointer-events: none; font-family: 'Cinzel', serif; }
+        #current-loc-badge .badge-name { font-weight: 700; color: #c4953a; font-size: 13px; font-family: 'Cinzel Decorative', 'Cinzel', serif; }
+        #current-loc-badge .badge-icon { font-size: 18px; }
+        #current-loc-badge .badge-info { margin-left: auto; font-size: 11px; color: #8a7060; }
+        #legend { position: absolute; bottom: 8px; right: 8px; background: rgba(42, 36, 32, 0.88); border: 1px solid rgba(112, 66, 20, 0.25); border-radius: 3px; padding: 5px 10px; font-size: 10px; color: #8a7060; z-index: 40; display: flex; gap: 10px; font-family: 'MedievalSharp', serif; }
+        .legend-item { display: flex; align-items: center; gap: 3px; }
+        .legend-dot { width: 6px; height: 6px; border-radius: 1px; display: inline-block; }
+        .v-toast-error { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #7b2020; color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 13px; z-index: 300; }
+        .fog-cloud { animation: fogDrift 8s ease-in-out infinite alternate; }
+        @keyframes fogDrift { 0% { transform: translate(-5px, -2px); opacity: 0.05; } 50% { opacity: 0.11; } 100% { transform: translate(5px, 2px); opacity: 0.05; } }
+        .map-deco-text { font-family: 'MedievalSharp', serif; fill: #704214; fill-opacity: 0.12; text-anchor: middle; pointer-events: none; font-style: italic; }
+        .compass-rose { pointer-events: none; }
+        @keyframes compassSettle { 0% { transform: rotate(-8deg); } 15% { transform: rotate(5deg); } 30% { transform: rotate(-3deg); } 45% { transform: rotate(2deg); } 60% { transform: rotate(-1deg); } 75% { transform: rotate(0.5deg); } 100% { transform: rotate(0deg); } }
+        @keyframes compassTremble { 0%, 100% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } }
+        .compass-needle { animation: compassSettle 1.5s ease-out, compassTremble 4s ease-in-out 1.5s infinite; transform-origin: center; transform-box: fill-box; }
+        #bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; display: flex; gap: 8px; padding: 8px 12px; background: rgba(42, 36, 32, 0.95); border-top: 1px solid rgba(112, 66, 20, 0.3); z-index: 50; }
+        .bar-btn { flex: 1; padding: 10px; border: 1px solid rgba(112, 66, 20, 0.4); border-radius: 4px; background: rgba(60, 50, 40, 0.6); color: #d4c8b0; font-family: 'MedievalSharp', serif; font-size: 13px; cursor: pointer; text-align: center; }
+        .bar-btn-return { background: rgba(123, 32, 32, 0.5); border-color: rgba(123, 32, 32, 0.6); }
+        /* Info panel styles */
+        #info-panel { position: fixed; bottom: 52px; left: 0; right: 0; background: rgba(42, 36, 32, 0.96); border-top: 1px solid rgba(112, 66, 20, 0.4); border-radius: 12px 12px 0 0; padding: 12px 16px 16px; z-index: 60; transform: translateY(100%); transition: transform 0.3s ease; max-height: 60vh; overflow-y: auto; }
+        #info-panel.open { transform: translateY(0); }
+        .info-handle { width: 32px; height: 3px; background: rgba(112, 66, 20, 0.4); border-radius: 2px; margin: 0 auto 10px; }
+        .info-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .info-icon { font-size: 20px; }
+        .info-title { font-family: 'Cinzel', serif; font-weight: 700; color: #c4953a; font-size: 14px; }
+        .info-danger { margin-left: auto; font-size: 12px; }
+        .info-biome { font-size: 11px; color: #8a7060; margin-bottom: 8px; }
+        .info-desc { font-size: 12px; color: #d4c8b0; line-height: 1.4; margin-bottom: 8px; }
+        .info-tags { font-size: 11px; color: #8a7060; margin-bottom: 6px; }
+        .info-quests, .info-dungeons { font-size: 11px; color: #d4c8b0; margin-bottom: 4px; }
+        .info-note { font-size: 11px; color: #8a7060; font-style: italic; margin-bottom: 8px; }
+        .info-actions { display: flex; gap: 8px; }
+        .info-btn { flex: 1; padding: 10px; border: 1px solid rgba(112, 66, 20, 0.4); border-radius: 4px; background: rgba(60, 50, 40, 0.6); color: #d4c8b0; font-family: 'MedievalSharp', serif; font-size: 13px; cursor: pointer; text-align: center; }
+        .info-btn.primary { background: rgba(196, 149, 58, 0.2); border-color: rgba(196, 149, 58, 0.5); color: #c4953a; }
+        /* Test banner */
+        .test-banner { position: fixed; top: 36px; left: 0; right: 0; background: rgba(196, 149, 58, 0.15); color: #c4953a; font-size: 10px; text-align: center; padding: 2px 8px; z-index: 100; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="test-banner">TEST MODE - Mock Data</div>
+
+    <div id="loading">
+        <svg class="loading-compass" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="22" stroke="#704214" stroke-width="1.5" fill="none" opacity="0.4"/>
+            <path d="M24 4 L26 22 L24 24 L22 22 Z" fill="#c4953a"/>
+            <path d="M24 44 L22 26 L24 24 L26 26 Z" fill="#5a4020" opacity="0.6"/>
+            <circle cx="24" cy="24" r="2" fill="#c4953a"/>
+        </svg>
+        <div class="loading-text">Desenrolando o mapa...</div>
+    </div>
+
+    <div id="hud">
+        <span class="hud-name" id="hud-name">Heroi</span>
+        <span class="hud-level" id="hud-level">Nv.1</span>
+        <div class="hud-bar-group"><span class="hud-bar-label">HP</span><div class="hud-bar"><div class="hud-bar-fill hp-fill" id="hud-hp"></div></div></div>
+        <div class="hud-bar-group"><span class="hud-bar-label">MP</span><div class="hud-bar"><div class="hud-bar-fill mp-fill" id="hud-mp"></div></div></div>
+    </div>
+
+    <div id="map-viewport">
+        <div id="map-wrapper">
+            <svg id="map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div id="current-loc-badge">
+            <span class="badge-icon" id="badge-icon"></span>
+            <span class="badge-name" id="badge-name"></span>
+            <span class="badge-info" id="badge-info"></span>
+        </div>
+        <div id="legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#c4953a"></span> Atual</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#6a8a5a"></span> Explorado</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#5a5060"></span> Mapeado</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#3a3530"></span> Incognito</span>
+        </div>
+    </div>
+
+    <div id="info-panel">
+        <div class="info-handle"></div>
+        <div class="info-header">
+            <span class="info-icon" id="info-icon"></span>
+            <span class="info-title" id="info-title"></span>
+            <span class="info-danger" id="info-danger"></span>
+        </div>
+        <div class="info-biome" id="info-biome"></div>
+        <div class="info-desc" id="info-desc"></div>
+        <div class="info-tags" id="info-stats"></div>
+        <div class="info-quests" id="info-quests"></div>
+        <div class="info-dungeons" id="info-dungeons"></div>
+        <div class="info-note" id="info-note"></div>
+        <div class="info-actions" id="info-actions"></div>
+    </div>
+
+    <div id="bottom-bar">
+        <button type="button" class="bar-btn bar-btn-return" id="btn-return" onclick="handleReturn()">Retornar a Eldoria</button>
+        <button type="button" class="bar-btn" id="btn-close" onclick="handleClose()">Fechar Mapa</button>
+    </div>
+
+    <!-- Load the real map-layout.js first (static data) -->
+    <script>
+        var v = Date.now();
+        document.write('<script src="../navigate/map-layout.js?v=' + v + '"><\/script>');
+    </script>
+
+    <!-- Override initAsync BEFORE loading navigate-core.js -->
+    <script>
+        // We'll define our own initAsync that injects mock data
+        // The real navigate-core.js will call document.addEventListener('DOMContentLoaded', initAsync)
+        // but we override it after loading
+
+        // Prevent the real initAsync from running on DOMContentLoaded
+        var _originalAddEventListener = EventTarget.prototype.addEventListener;
+        var _blockedInits = [];
+        EventTarget.prototype.addEventListener = function(type, fn, opts) {
+            if (type === 'DOMContentLoaded' && typeof fn === 'function') {
+                _blockedInits.push(fn);
+                return; // block it
+            }
+            return _originalAddEventListener.call(this, type, fn, opts);
+        };
+    </script>
+
+    <!-- Load the real navigate scripts -->
+    <script>
+        var scripts = ['navigate-core.js', 'navigate-map.js', 'navigate-ui.js'];
+        scripts.forEach(function(s) { document.write('<script src="../navigate/' + s + '?v=' + v + '"><\/script>'); });
+    </script>
+
+    <!-- Inject test data and boot -->
+    <script>
+        // Restore original addEventListener
+        EventTarget.prototype.addEventListener = _originalAddEventListener;
+
+        // ═══════════════════════════════════════════════════
+        // TEST FIXTURE DATA — Rich map with multiple states
+        // ═══════════════════════════════════════════════════
+        const TEST_DATA = {
+            cl: 'city_gates',  // current location
+            c: {               // character data
+                nm: 'Tharivol Darkbane',
+                ci: '🧙',
+                lv: 7,
+                hp: 38,
+                mh: 52,
+                mp: 22,
+                mm: 30,
+            },
+            lo: {  // locations: id -> {n:name, b:biome, i:icon, d:danger, s:status, c:connections, ds:desc}
+                city_gates:          { n: 'Portoes de Eldoria',    b: 'plains',   i: '🏰', d: 0, s: 'explored',     ds: 'A grande capital do reino, protegida por muralhas ancestrais.' },
+                green_fields:        { n: 'Campos Verdejantes',    b: 'plains',   i: '🌾', d: 1, s: 'explored',     ds: 'Planices ferteis ao redor de Eldoria.' },
+                whispering_woods:    { n: 'Bosque Sussurrante',    b: 'forest',   i: '🌲', d: 3, s: 'explored',     ds: 'Arvores antigas que parecem murmurar segredos.' },
+                goblin_nest:         { n: 'Ninho dos Goblins',     b: 'forest',   i: '👺', d: 4, s: 'explored',     ds: 'Cavernas infestadas de goblins traicoeiros.' },
+                elven_ruins:         { n: 'Ruinas Elficas',        b: 'forest',   i: '🏛', d: 3, s: 'known_mapped', ds: 'Restos de uma civilizacao elfica esquecida.' },
+                frozen_waste:        { n: 'Ermo Congelado',        b: 'snow',     i: '❄️', d: 7, s: 'frontier',     ds: 'Terras geladas e desoladas ao norte.' },
+                stone_peaks:         { n: 'Picos de Pedra',        b: 'mountain', i: '⛰️', d: 5, s: 'known_mapped', ds: 'Montanhas escarpadas habitadas por trolls.' },
+                troll_cave:          { n: 'Caverna dos Trolls',    b: 'cave',     i: '🧌', d: 6, s: 'frontier',     ds: 'Profundezas onde criaturas colossais habitam.' },
+                korthag:             { n: 'Forte Korthag',         b: 'mountain', i: '🏔', d: 4, s: 'frontier',     ds: 'Forte dos anoes das montanhas.' },
+                orc_tribe:           { n: 'Tribo Orcish',          b: 'plains',   i: '🪓', d: 5, s: 'explored',     ds: 'Acampamento de orcs guerreiros.' },
+                underground_passage: { n: 'Passagem Subterranea',  b: 'cave',     i: '🕳️', d: 4, s: 'known_mapped', ds: 'Tuneis que conectam regioes distantes.' },
+                misty_marshes:       { n: 'Pantanos Brumosos',     b: 'swamp',    i: '🌫️', d: 4, s: 'explored',     ds: 'Terras alagadas cobertas por neblina eterna.' },
+                dragon_pass:         { n: 'Passo do Dragao',       b: 'mountain', i: '🐉', d: 8, s: 'frontier',     ds: 'Desfiladeiro guardado por uma lenda ancestral.' },
+                valkrest:            { n: 'Valkrest',              b: 'volcanic', i: '🔥', d: 6, s: 'frontier',     ds: 'Cidade forjada ao lado de vulcoes ativos.' },
+                bandit_fortress:     { n: 'Fortaleza dos Bandidos', b: 'plains',  i: '🏴', d: 5, s: 'known_mapped', ds: 'Ninho de ladroes e mercenarios.' },
+                ancient_cemetery:    { n: 'Cemiterio Antigo',      b: 'graveyard', i: '⚰️', d: 5, s: 'explored',    ds: 'Tumulos de herois e viloes esquecidos.' },
+                golden_sands:        { n: 'Areias Douradas',       b: 'desert',   i: '🏜️', d: 3, s: 'explored',    ds: 'Dunas infinitas sob sol escaldante.' },
+                deep_swamp:          { n: 'Pantano Profundo',      b: 'swamp',    i: '🐊', d: 6, s: 'frontier',    ds: 'Aguas turvas onde coisas se movem abaixo.' },
+                burning_crater:      { n: 'Cratera Ardente',       b: 'volcanic', i: '🌋', d: 9, s: 'frontier',    ds: 'Boca de um vulcao com lava borbulhante.' },
+            },
+            kl: [  // known locations
+                'city_gates', 'green_fields', 'whispering_woods', 'goblin_nest', 'elven_ruins',
+                'frozen_waste', 'stone_peaks', 'troll_cave', 'korthag', 'orc_tribe',
+                'underground_passage', 'misty_marshes', 'dragon_pass', 'valkrest',
+                'bandit_fortress', 'ancient_cemetery', 'golden_sands', 'deep_swamp', 'burning_crater',
+            ],
+            dl: [  // discovered (visited) locations
+                'city_gates', 'green_fields', 'whispering_woods', 'goblin_nest',
+                'orc_tribe', 'misty_marshes', 'ancient_cemetery', 'golden_sands',
+            ],
+            q: [  // quests
+                { id: 'q1', t: 'Pacificar os Goblins', loc: 'goblin_nest' },
+                { id: 'q2', t: 'Reliquia das Ruinas', loc: 'elven_ruins' },
+                { id: 'q3', t: 'Segredo do Pantano', loc: 'deep_swamp' },
+            ],
+            dd: {  // dungeons per location
+                goblin_nest: [{ n: 'Toca do Rei Goblin', done: false }],
+                ancient_cemetery: [{ n: 'Cripta dos Cavaleiros', done: true }, { n: 'Mausoleu Sombrio', done: false }],
+                underground_passage: [{ n: 'Minas Abandonadas', done: false }],
+            },
+            cc: true,   // can camp
+            hm: 1,      // has map (1 = regional)
+            mc: ['city_gates', 'green_fields', 'whispering_woods', 'goblin_nest', 'orc_tribe', 'misty_marshes', 'golden_sands', 'ancient_cemetery', 'elven_ruins', 'stone_peaks', 'underground_passage', 'bandit_fortress'],
+        };
+
+        // Boot with mock data
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inject data into global state S
+            S.currentLoc = TEST_DATA.cl;
+            S.locations = TEST_DATA.lo;
+            S.knownLocs = TEST_DATA.kl;
+            S.discoveredLocs = TEST_DATA.dl;
+            S.charData = TEST_DATA.c;
+            S.quests = TEST_DATA.q;
+            S.dungeons = TEST_DATA.dd;
+            S.canCamp = TEST_DATA.cc;
+            S.hasMap = TEST_DATA.hm;
+            S.mapCoverage = new Set(TEST_DATA.mc);
+            S.token = 'test-token';
+            S.api = '';  // No API — actions will show error toast (expected)
+            S.uid = 12345;
+
+            // Build connection graph
+            buildConnectionGraph();
+
+            // Update HUD
+            updateHUD();
+            updateLocationBadge();
+            updateBottomBar();
+
+            // Render the map
+            renderMap();
+
+            // Center on current location
+            centerOnLocation(S.currentLoc);
+
+            // Hide loading
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 800);
+
+            console.log('[TEST] Navigate loaded with', Object.keys(TEST_DATA.lo).length, 'locations,',
+                TEST_DATA.dl.length, 'discovered,', TEST_DATA.q.length, 'quests');
+        });
+
+        // Override navigation actions to prevent actual API calls
+        function handleReturn() { alert('TEST: handleReturn() - retornaria a Eldoria'); }
+        function handleClose() { alert('TEST: handleClose() - fecharia o mapa'); }
+    </script>
+</body>
+</html>

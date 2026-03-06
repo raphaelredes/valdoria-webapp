@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TEST - Game Hub</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <script>
+        window.Telegram = { WebApp: { ready(){}, expand(){}, disableVerticalSwipes(){}, BackButton: { show(){}, hide(){}, onClick(){} }, HapticFeedback: { impactOccurred(){} }, version: '7.0' } };
+    </script>
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../game/game.css?v=' + v + '">');
+    </script>
+    <style>
+        .test-banner { position: fixed; top: 0; left: 0; right: 0; background: rgba(196, 149, 58, 0.15); color: #c4953a; font-size: 10px; text-align: center; padding: 2px 8px; z-index: 1000; font-family: monospace; }
+        .test-controls { position: fixed; top: 16px; right: 8px; z-index: 1000; display: flex; flex-direction: column; gap: 4px; }
+        .test-btn { padding: 4px 8px; font-size: 9px; background: rgba(196, 149, 58, 0.2); border: 1px solid rgba(196, 149, 58, 0.3); border-radius: 3px; color: #c4953a; cursor: pointer; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="test-banner">TEST MODE - Game Hub</div>
+    <div class="test-controls">
+        <button class="test-btn" onclick="showScreen('city')">Cidade</button>
+        <button class="test-btn" onclick="showScreen('tavern')">Taverna</button>
+        <button class="test-btn" onclick="showScreen('temple')">Templo</button>
+        <button class="test-btn" onclick="showScreen('market')">Mercado</button>
+        <button class="test-btn" onclick="showScreen('arena')">Arena</button>
+        <button class="test-btn" onclick="showScreen('textInput')">Input</button>
+        <button class="test-btn" onclick="showScreen('dialogue')">Dialogo</button>
+        <button class="test-btn" onclick="testTransition('explore')">Trans: Explore</button>
+        <button class="test-btn" onclick="testTransition('arena')">Trans: Arena</button>
+        <button class="test-btn" onclick="testTransition('navigate')">Trans: Mapa</button>
+        <button class="test-btn" onclick="testTransition('dungeon')">Trans: Dungeon</button>
+    </div>
+
+    <!-- Loading overlay (from game/index.html) -->
+    <div id="loading" class="loading-overlay" style="display:none">
+        <div class="loading-particles">
+            <div class="particle ember p1"></div><div class="particle ember p2"></div>
+            <div class="particle ember p3"></div><div class="particle ember p4"></div>
+        </div>
+        <div class="magic-circle">
+            <div class="mc-aura"></div>
+            <div class="mc-pulse"></div>
+        </div>
+        <div class="loading-brand">
+            <div class="loading-title">LENDAS DE VALDORIA</div>
+        </div>
+        <div class="loading-progress-wrap">
+            <div class="loading-progress-track">
+                <div id="loading-progress" class="loading-progress-fill"></div>
+            </div>
+        </div>
+        <div class="loading-tip-area">
+            <div id="loading-tip" class="loading-tip">Preparando...</div>
+        </div>
+    </div>
+
+    <!-- Main screen container -->
+    <div id="screen" class="screen" style="display:">
+        <div id="banner" class="screen-banner" style="display:none">
+            <img id="banner-img" src="" alt="">
+        </div>
+        <div id="content" class="screen-content"></div>
+    </div>
+
+    <!-- Immersive mode toggle -->
+    <button id="immersive-toggle" class="immersive-toggle" style="display:none" aria-label="Recolher menu">&#9662;</button>
+
+    <!-- Fixed bottom panel -->
+    <div id="bottom-panel" class="bottom-panel" style="display:none">
+        <div id="buttons" class="screen-buttons"></div>
+        <div id="text-input-wrap" class="text-input-wrap" style="display:none">
+            <input id="text-input" type="text" class="text-input" placeholder="Digite aqui..." autocomplete="off">
+            <button id="text-send" class="text-send-btn">&#10148;</button>
+            <span id="text-input-max" class="text-input-max"></span>
+        </div>
+        <div id="footer-quick" class="footer-row footer-quick"></div>
+        <div id="footer-nav" class="footer-row footer-nav"></div>
+    </div>
+
+    <!-- Immersive restore pill -->
+    <button id="immersive-restore" class="immersive-restore" style="display:none">&#9652; Menu</button>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast" style="display:none"></div>
+
+    <!-- Timer overlay -->
+    <div id="timer-overlay" class="timer-overlay" style="display:none">
+        <div class="timer-ring">
+            <svg viewBox="0 0 80 80">
+                <circle class="timer-bg" cx="40" cy="40" r="36" />
+                <circle id="timer-arc" class="timer-arc" cx="40" cy="40" r="36" />
+            </svg>
+            <div id="timer-seconds" class="timer-seconds">30</div>
+        </div>
+        <div id="timer-label" class="timer-label">Sua vez!</div>
+        <button id="timer-skip" class="v-skip-btn" style="display:none">Pular</button>
+    </div>
+
+    <!-- Error overlay -->
+    <div id="error-overlay" class="error-overlay" style="display:none">
+        <div class="error-content">
+            <div class="error-icon">&#9888;&#65039;</div>
+            <div id="error-msg" class="error-msg"></div>
+            <button id="error-retry" class="btn-action">Tentar Novamente</button>
+        </div>
+    </div>
+
+    <!-- Ambient particles canvas -->
+    <canvas id="ambient-particles"></canvas>
+
+    <!-- Transition animation overlay -->
+    <div id="transition-overlay" class="transition-overlay" style="display:none"></div>
+
+    <!-- Block real DOMContentLoaded -->
+    <script>
+        var _originalAddEventListener = EventTarget.prototype.addEventListener;
+        EventTarget.prototype.addEventListener = function(type, fn, opts) {
+            if (type === 'DOMContentLoaded' && typeof fn === 'function') return;
+            return _originalAddEventListener.call(this, type, fn, opts);
+        };
+    </script>
+
+    <!-- Load real game scripts -->
+    <script>
+        var v = Date.now();
+        var scripts = ['game-enhancer.js', 'game-particles.js', 'game-core.js', 'game-renderer.js', 'game-dialogue.js', 'game-ui.js', 'game-transitions.js'];
+        scripts.forEach(function(s) { document.write('<script src="../game/' + s + '?v=' + v + '"><\/script>'); });
+    </script>
+
+    <!-- Test data and boot -->
+    <script>
+        EventTarget.prototype.addEventListener = _originalAddEventListener;
+
+        // ═══════════════════════════════════════════════════
+        // TEST SCREEN DATA — Mock screens for each location
+        // ═══════════════════════════════════════════════════
+
+        const TEST_SCREENS = {
+            city: {
+                text: '<b>Portoes de Eldoria</b>\n\n<i>O sol da manha banha as muralhas douradas da capital...</i>\n\n🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 HP 38/42\n🟦🟦🟦🟦🟦🟦🟦⬛⬛⬛ MP 22/30\n💰 1.250 GP\n\n━━━━━━━━━━━━━━━━━━\n',
+                buttons: [
+                    [{ text: '🏕️ PARTIR PARA AVENTURA', cb: 'action_depart' }],
+                    [{ text: '🏛️ Locais da Cidade', cb: 'action_city_locations' }, { text: '📜 Missoes (3)', cb: 'action_quests' }],
+                    [{ text: '🗺️ Mapa do Mundo', cb: 'action_map' }, { text: '⚔️ Arena PvP', cb: 'action_arena' }],
+                ],
+                footer: {
+                    quick: [
+                        { text: '🎒 Mochila', cb: 'action_inventory' },
+                        { text: '📋 Ficha', cb: 'action_status' },
+                        { text: '👥 Grupo', cb: 'action_party' },
+                    ],
+                    nav: [
+                        { text: '↩ Voltar', cb: 'action_universal_back' },
+                        { text: '❓', cb: 'action_help' },
+                        { text: '⚙️', cb: 'action_settings' },
+                        { text: '🏠 Menu', cb: 'main_menu' },
+                    ],
+                },
+            },
+            tavern: {
+                text: '<b>🍺 Taverna do Javali Dourado</b>\n\n<i>O calor da lareira e o som de canecas batendo criam uma atmosfera acolhedora.</i>\n\n🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 HP 38/42\n🟦🟦🟦🟦🟦🟦🟦⬛⬛⬛ MP 22/30\n\n━━━━━━━━━━━━━━━━━━\nO taverneiro Gundrik limpa um caneco com um pano sujo.\n"O que vai ser hoje, aventureiro?"\n',
+                buttons: [
+                    [{ text: '🛏️ Descansar (10 GP)', cb: 'action_rest' }, { text: '🍖 Comer (5 GP)', cb: 'action_eat' }],
+                    [{ text: '🗣️ Conversar com Gundrik', cb: 'action_talk_gundrik' }],
+                    [{ text: '📋 Quadro de Missoes', cb: 'action_quest_board' }, { text: '🎲 Mesa de Dados', cb: 'action_dice' }],
+                ],
+                footer: {
+                    quick: [
+                        { text: '🎒 Mochila', cb: 'action_inventory' },
+                        { text: '📋 Ficha', cb: 'action_status' },
+                        { text: '👥 Grupo', cb: 'action_party' },
+                    ],
+                    nav: [
+                        { text: '↩ Voltar', cb: 'action_universal_back' },
+                        { text: '❓', cb: 'action_help' },
+                        { text: '⚙️', cb: 'action_settings' },
+                        { text: '🏠 Menu', cb: 'main_menu' },
+                    ],
+                },
+            },
+            temple: {
+                text: '<b>⛪ Templo da Luz Eterna</b>\n\n<i>Raios de luz dourada filtram pelos vitrais, iluminando o altar sagrado.</i>\n\n🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 HP 38/42\n🟦🟦🟦🟦🟦🟦🟦⬛⬛⬛ MP 22/30\n\n━━━━━━━━━━━━━━━━━━\nA sacerdotisa Elyndra se aproxima serenamente.\n"Que a luz guie seus passos, aventureiro."\n',
+                buttons: [
+                    [{ text: '✨ Cura Divina (25 GP)', cb: 'action_heal' }, { text: '🙏 Orar', cb: 'action_pray' }],
+                    [{ text: '🗣️ Falar com Elyndra', cb: 'action_talk_elyndra' }],
+                    [{ text: '📜 Bencaos Disponiveis', cb: 'action_blessings' }],
+                ],
+                footer: {
+                    quick: [
+                        { text: '🎒 Mochila', cb: 'action_inventory' },
+                        { text: '📋 Ficha', cb: 'action_status' },
+                        { text: '👥 Grupo', cb: 'action_party' },
+                    ],
+                    nav: [
+                        { text: '↩ Voltar', cb: 'action_universal_back' },
+                        { text: '❓', cb: 'action_help' },
+                        { text: '⚙️', cb: 'action_settings' },
+                        { text: '🏠 Menu', cb: 'main_menu' },
+                    ],
+                },
+            },
+            market: {
+                text: '<b>🏪 Mercado Central</b>\n\n<i>Mercadores gritam ofertas enquanto carrocas passam pela via principal.</i>\n\n🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 HP 38/42\n💰 1.250 GP\n\n━━━━━━━━━━━━━━━━━━\n🛒 <b>Lojas Disponiveis:</b>\n⚔️ Ferreira Kaldra — Armas e Armaduras\n🧪 Alquimista Venn — Pocoes e Reagentes\n📜 Escriba Tomas — Pergaminhos\n',
+                buttons: [
+                    [{ text: '⚔️ Ferreira Kaldra', cb: 'action_shop_weapons' }, { text: '🧪 Alquimista Venn', cb: 'action_shop_potions' }],
+                    [{ text: '📜 Escriba Tomas', cb: 'action_shop_scrolls' }, { text: '💰 Vender Itens', cb: 'action_sell' }],
+                ],
+                footer: {
+                    quick: [
+                        { text: '🎒 Mochila', cb: 'action_inventory' },
+                        { text: '📋 Ficha', cb: 'action_status' },
+                        { text: '👥 Grupo', cb: 'action_party' },
+                    ],
+                    nav: [
+                        { text: '↩ Voltar', cb: 'action_universal_back' },
+                        { text: '❓', cb: 'action_help' },
+                        { text: '⚙️', cb: 'action_settings' },
+                        { text: '🏠 Menu', cb: 'main_menu' },
+                    ],
+                },
+            },
+            arena: {
+                text: '<b>⚔️ Arena de Combate</b>\n\n<i>O rugido da multidao ecoa pelas arquibancadas de pedra.</i>\n\n🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 HP 38/42\n🟦🟦🟦🟦🟦🟦🟦⬛⬛⬛ MP 22/30\n\n━━━━━━━━━━━━━━━━━━\n🏆 Ranking: #42\n⭐ Vitorias: 15 | Derrotas: 3\n',
+                buttons: [
+                    [{ text: '⚔️ DESAFIAR OPONENTE', cb: 'action_pvp_challenge' }],
+                    [{ text: '📊 Ranking', cb: 'action_pvp_ranking' }, { text: '📜 Regras', cb: 'action_pvp_rules' }],
+                ],
+                footer: {
+                    quick: [
+                        { text: '🎒 Mochila', cb: 'action_inventory' },
+                        { text: '📋 Ficha', cb: 'action_status' },
+                        { text: '👥 Grupo', cb: 'action_party' },
+                    ],
+                    nav: [
+                        { text: '↩ Voltar', cb: 'action_universal_back' },
+                        { text: '❓', cb: 'action_help' },
+                        { text: '⚙️', cb: 'action_settings' },
+                        { text: '🏠 Menu', cb: 'main_menu' },
+                    ],
+                },
+            },
+            textInput: {
+                text: '<b>🏦 Banco de Eldoria</b>\n\nSaldo atual: <b>1.250 GP</b>\n\nQuantas moedas deseja depositar?\n',
+                buttons: [],
+                waiting_for_text: true,
+                text_placeholder: 'Digite a quantia em GP...',
+                text_input_type: 'numeric',
+                text_max_value: 1250,
+                footer: {
+                    nav: [
+                        { text: '↩ Voltar', cb: 'action_universal_back' },
+                        { text: '🏠 Menu', cb: 'main_menu' },
+                    ],
+                },
+            },
+            dialogue: {
+                text: '<b>🍺 Taverna</b>',
+                dialogue: {
+                    speaker: 'Gundrik',
+                    mood: 'happy',
+                },
+                dialogue_text: 'Ah, aventureiro! Bom te ver de volta. Ouvi boatos estranhos vindo do pantano... criaturas que nao deveriam existir estao aparecendo. Tenha cuidado se for para la.',
+                buttons: [
+                    [{ text: '🗣️ Conte-me mais sobre as criaturas', cb: 'dialogue_creatures' }],
+                    [{ text: '🍺 Quero uma caneca de cerveja', cb: 'dialogue_drink' }],
+                    [{ text: '👋 Ate logo, Gundrik', cb: 'dialogue_bye' }],
+                ],
+                footer: {
+                    nav: [
+                        { text: '↩ Voltar', cb: 'action_universal_back' },
+                        { text: '🏠 Menu', cb: 'main_menu' },
+                    ],
+                },
+            },
+        };
+
+        // Initialize
+        S.token = 'test-token';
+        S.apiBase = '';
+        S.uid = 12345;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Init particles
+            if (typeof initParticles === 'function') initParticles();
+
+            // Show city screen by default
+            showScreen('city');
+
+            console.log('[TEST] Game Hub loaded with', Object.keys(TEST_SCREENS).length, 'test screens');
+        });
+
+        // Screen switching with slide animation
+        function showScreen(screenId) {
+            const screen = TEST_SCREENS[screenId];
+            if (!screen) return;
+            if (typeof animateScreenTransition === 'function') {
+                animateScreenTransition(() => renderScreen(screen));
+            } else {
+                renderScreen(screen);
+            }
+        }
+
+        // Transition test — show themed overlay then reset
+        function testTransition(target) {
+            const overlay = document.getElementById('transition-overlay');
+            const config = _TRANSITION_THEMES[target] || _TRANSITION_THEMES.default;
+
+            if (typeof stopParticles === 'function') stopParticles();
+
+            overlay.className = 'transition-overlay';
+            if (config.theme) overlay.classList.add(config.theme);
+            overlay.style.display = '';
+            requestAnimationFrame(() => overlay.classList.add('active'));
+
+            // Reset after animation completes
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    overlay.className = 'transition-overlay';
+                    if (typeof initParticles === 'function') initParticles();
+                    if (typeof updateParticleTheme === 'function' && S.currentScreen) {
+                        updateParticleTheme(S.currentScreen.text || '');
+                    }
+                }, 300);
+            }, config.duration + 200);
+        }
+
+        // Override doAction to log instead of making API calls
+        doAction = function(cb) {
+            console.log('[TEST] doAction:', cb);
+            if (cb === 'main_menu') {
+                alert('TEST: main_menu - fecharia o WebApp');
+                return;
+            }
+            // Show a toast with the callback
+            if (typeof showToast === 'function') {
+                showToast('Acao: ' + cb, 2000);
+            }
+        };
+
+        // Override doText
+        doText = function(text) {
+            console.log('[TEST] doText:', text);
+            if (typeof showToast === 'function') {
+                showToast('Texto enviado: ' + text, 2000);
+            }
+            // Switch to city screen after text input
+            setTimeout(() => showScreen('city'), 500);
+        };
+    </script>
+</body>
+</html>

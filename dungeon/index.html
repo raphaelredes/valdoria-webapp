@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1520">
+    <title>Masmorra - Lendas de Valdoria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=MedievalSharp&display=swap"
+        rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+    </script>
+    <style>
+        /* --- SCROLLBAR HIDING --- */
+        * { scrollbar-width: none; -ms-overflow-style: none; box-sizing: border-box; margin: 0; padding: 0; }
+        *::-webkit-scrollbar { display: none; }
+
+        body {
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            touch-action: none;
+            font-family: 'MedievalSharp', 'Cinzel', serif;
+            background: #1a1520;
+        }
+
+        /* ═══ LOADING ═══ */
+        #loading {
+            position: fixed; inset: 0;
+            background: #1a1520;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 200;
+            transition: opacity 0.6s ease;
+        }
+        #loading.hidden { opacity: 0; pointer-events: none; }
+        .loading-text { color: #8a6a3a; font-size: 14px; font-family: 'Cinzel', serif; letter-spacing: 1px; }
+        .loading-torch {
+            width: 40px; height: 60px; position: relative; margin-bottom: 16px;
+        }
+        .torch-flame {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 16px; height: 24px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            background: radial-gradient(ellipse, #f0c040 0%, #e08020 50%, #c04020 100%);
+            animation: flameFlicker 0.4s ease-in-out infinite alternate;
+            box-shadow: 0 0 12px rgba(240,192,64,0.6), 0 0 24px rgba(224,128,32,0.3);
+        }
+        .torch-handle {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 6px; height: 28px; background: #5a4030; border-radius: 2px;
+        }
+        @keyframes flameFlicker {
+            0% { transform: translateX(-50%) scaleY(1) scaleX(1); }
+            50% { transform: translateX(-48%) scaleY(1.08) scaleX(0.95); }
+            100% { transform: translateX(-52%) scaleY(0.95) scaleX(1.05); }
+        }
+
+        /* ═══ DUNGEON HUD ═══ */
+        #dungeon-hud {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 12px;
+            background: linear-gradient(180deg, #251a2a 0%, #1a1520 100%);
+            border-bottom: 1px solid rgba(112, 66, 20, 0.3);
+            z-index: 50; flex-shrink: 0;
+        }
+        .hud-dungeon-name {
+            font-size: 14px; font-weight: 700; color: #c4953a;
+            font-family: 'Cinzel', serif;
+            flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .hud-floor { font-size: 12px; color: #8a7060; font-family: 'Cinzel', serif; }
+
+        /* ═══ MAP AREA ═══ */
+        #dungeon-map {
+            flex: 1; overflow-y: auto; overflow-x: hidden;
+            position: relative;
+            background:
+                radial-gradient(ellipse at 50% 30%, rgba(40, 30, 50, 0.5), transparent 70%),
+                linear-gradient(180deg, #1a1520 0%, #15101a 100%);
+        }
+        /* Stone texture vignette */
+        #dungeon-map::after {
+            content: ''; position: absolute; inset: 0;
+            box-shadow: inset 0 0 60px 20px rgba(0, 0, 0, 0.6);
+            pointer-events: none; z-index: 5;
+        }
+
+        /* ═══ SVG NODE MAP ═══ */
+        #map-svg { display: block; width: 100%; }
+
+        /* Node styles */
+        .node-group { cursor: pointer; transition: filter 0.2s ease; }
+        .node-group:active { filter: brightness(1.2); }
+
+        .node-bg {
+            transition: fill 0.3s ease, stroke 0.3s ease;
+        }
+
+        /* Node states */
+        .node-visited .node-bg { fill: #2a2030; stroke: #4a3a50; }
+        .node-visited .node-icon { opacity: 0.5; }
+        .node-visited .node-check { display: block; }
+
+        .node-current .node-bg { fill: #3a2820; stroke: #c4953a; stroke-width: 2.5; }
+        @keyframes nodeCurrentPulse {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.3)); }
+            50% { filter: drop-shadow(0 0 14px rgba(196, 149, 58, 0.6)); }
+        }
+        .node-current { animation: nodeCurrentPulse 2s ease-in-out infinite; }
+
+        .node-available .node-bg { fill: #25202a; stroke: #6a5a70; }
+        @keyframes nodeShimmer {
+            0%, 100% { stroke-opacity: 0.5; }
+            50% { stroke-opacity: 1; }
+        }
+        .node-available .node-bg { animation: nodeShimmer 3s ease-in-out infinite; }
+
+        .node-locked .node-bg { fill: #1a1520; stroke: #2a2030; }
+        .node-locked .node-icon { opacity: 0.2; }
+
+        /* Path styles */
+        .path-line { stroke: #3a3040; stroke-width: 2; fill: none; stroke-linecap: round; }
+        .path-visited { stroke: #5a4a60; stroke-dasharray: none; }
+        .path-available { stroke: #6a5a70; stroke-dasharray: 6 4; }
+        @keyframes pathGlow {
+            0%, 100% { stroke-opacity: 0.4; }
+            50% { stroke-opacity: 0.8; }
+        }
+        .path-available { animation: pathGlow 2s ease-in-out infinite; }
+        .path-locked { stroke: #2a2030; stroke-dasharray: 4 8; stroke-opacity: 0.3; }
+
+        /* Node icon */
+        .node-icon {
+            font-size: 18px; text-anchor: middle; dominant-baseline: central;
+            pointer-events: none;
+        }
+        .node-check { display: none; fill: #6a8a5a; font-size: 10px; text-anchor: middle; }
+        .node-label {
+            fill: #8a7060; font-size: 9px; text-anchor: middle;
+            pointer-events: none; font-family: 'Cinzel', serif;
+        }
+
+        /* ═══ EVENT OVERLAY ═══ */
+        #event-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            -webkit-backdrop-filter: blur(3px);
+            backdrop-filter: blur(3px);
+        }
+        #event-overlay.open { display: flex; }
+
+        .event-card {
+            max-width: 360px; width: calc(100% - 32px);
+            background: linear-gradient(180deg, #2a2030 0%, #1a1520 100%);
+            border: 1px solid rgba(112, 66, 20, 0.3);
+            border-radius: 8px; padding: 20px;
+            animation: eventAppear 0.35s ease-out;
+        }
+        @keyframes eventAppear {
+            from { opacity: 0; transform: translateY(16px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .event-icon { font-size: 36px; text-align: center; margin-bottom: 12px; }
+        .event-title {
+            font-size: 16px; font-weight: 700; color: #c4953a;
+            text-align: center; margin-bottom: 8px; font-family: 'Cinzel', serif;
+        }
+        .event-desc {
+            font-size: 13px; color: #d4c8b0; line-height: 1.5;
+            text-align: center; margin-bottom: 16px;
+        }
+        .event-actions { display: flex; flex-direction: column; gap: 8px; }
+        .event-btn {
+            width: 100%; padding: 12px; border: 1px solid rgba(112, 66, 20, 0.3);
+            border-radius: 4px; background: rgba(112, 66, 20, 0.15);
+            color: #d4c8b0; font-size: 14px; font-family: 'Cinzel', serif;
+            cursor: pointer; transition: opacity 0.15s, transform 0.15s;
+        }
+        .event-btn:active { opacity: 0.8; transform: scale(0.98); }
+        .event-btn-primary {
+            background: linear-gradient(135deg, #704214 0%, #5a3210 100%);
+            border-color: #8a5a2a; color: #fff;
+        }
+
+        /* ═══ BOSS REVEAL ═══ */
+        #boss-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0); z-index: 150;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        #boss-overlay.open { display: flex; }
+        @keyframes bossOverlayDarken {
+            to { background: rgba(0, 0, 0, 0.75); }
+        }
+        @keyframes bossIconReveal {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes bossNameGlow {
+            from { opacity: 0; text-shadow: 0 0 0px transparent; }
+            to { opacity: 1; text-shadow: 0 0 20px rgba(196, 149, 58, 0.5); }
+        }
+        @keyframes bossSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .boss-icon {
+            font-size: 64px; opacity: 0;
+            animation: bossIconReveal 0.6s ease 0.5s forwards;
+        }
+        .boss-name {
+            font-size: 22px; font-weight: 700; color: #c4953a;
+            font-family: 'Cinzel', serif; margin-top: 16px;
+            opacity: 0; animation: bossNameGlow 0.4s ease 0.8s forwards;
+        }
+        .boss-subtitle {
+            font-size: 13px; color: #8a7060; margin-top: 6px;
+            opacity: 0; animation: bossSlideUp 0.3s ease 1s forwards;
+        }
+        .boss-btn {
+            margin-top: 24px; padding: 14px 32px;
+            background: linear-gradient(135deg, #7b2020 0%, #5a1010 100%);
+            border: 1px solid #a04040; border-radius: 4px;
+            color: #fff; font-size: 15px; font-weight: 700;
+            font-family: 'Cinzel', serif; cursor: pointer;
+            opacity: 0; animation: bossSlideUp 0.3s ease 1.2s forwards;
+        }
+        .boss-btn:active { transform: scale(0.97); }
+
+        /* ═══ DUNGEON PARTICLES (Canvas) ═══ */
+        #dungeon-particles {
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 1;
+            opacity: 0.6;
+        }
+
+        /* ═══ BOTTOM BAR ═══ */
+        #bottom-bar {
+            display: flex; gap: 8px; padding: 8px 12px;
+            background: linear-gradient(0deg, #1a1520, #251a2a);
+            border-top: 1px solid rgba(112, 66, 20, 0.2);
+            z-index: 50; flex-shrink: 0;
+        }
+        .bar-btn {
+            flex: 1; padding: 10px 4px;
+            border: 1px solid rgba(112, 66, 20, 0.25); border-radius: 4px;
+            background: rgba(112, 66, 20, 0.08);
+            color: #d4c8b0; font-size: 12px; font-weight: 600;
+            text-align: center; cursor: pointer; font-family: 'Cinzel', serif;
+        }
+        .bar-btn:active { opacity: 0.7; }
+        .bar-btn-retreat { border-color: rgba(123, 32, 32, 0.3); color: #cc8888; }
+
+        /* ═══ ERROR TOAST ═══ */
+        .v-toast-error {
+            position: fixed; bottom: 80px; left: 50%;
+            transform: translateX(-50%);
+            background: #7b2020; color: #fff;
+            padding: 8px 16px; border-radius: 4px;
+            font-size: 13px; z-index: 300;
+            animation: fadeInUp 0.3s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate(-50%, 10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading">
+        <div class="loading-torch">
+            <div class="torch-flame"></div>
+            <div class="torch-handle"></div>
+        </div>
+        <div class="loading-text">Entrando na masmorra...</div>
+    </div>
+
+    <div id="dungeon-hud">
+        <span class="hud-dungeon-name" id="hud-name">Masmorra</span>
+        <span class="hud-floor" id="hud-floor">Andar 1</span>
+    </div>
+
+    <div id="dungeon-map">
+        <svg id="map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <canvas id="dungeon-particles"></canvas>
+
+    <div id="event-overlay">
+        <div class="event-card">
+            <div class="event-icon" id="event-icon"></div>
+            <div class="event-title" id="event-title"></div>
+            <div class="event-desc" id="event-desc"></div>
+            <div class="event-actions" id="event-actions"></div>
+        </div>
+    </div>
+
+    <div id="boss-overlay">
+        <div class="boss-icon" id="boss-icon"></div>
+        <div class="boss-name" id="boss-name"></div>
+        <div class="boss-subtitle" id="boss-subtitle"></div>
+        <button class="boss-btn" id="boss-btn">Enfrentar</button>
+    </div>
+
+    <div id="bottom-bar">
+        <button class="bar-btn" id="btn-inventory">Mochila</button>
+        <button class="bar-btn bar-btn-retreat" id="btn-retreat">Recuar</button>
+    </div>
+
+    <script>
+        var v = Date.now();
+        var scripts = ['dungeon-core.js', 'dungeon-map.js', 'dungeon-ui.js'];
+        scripts.forEach(function (s) { document.write('<script src="' + s + '?v=' + v + '"><\/script>'); });
+    </script>
+</body>
+
+</html>

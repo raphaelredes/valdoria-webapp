@@ -9,6 +9,15 @@
  * Redirects to the target WebApp URL.
  * @param {Object} transition - {to: string, url: string, text?: string}
  */
+// Themed transition map: target webapp -> CSS theme class + duration
+const _TRANSITION_THEMES = {
+    explore:  { theme: 'theme-leaves', duration: 500 },
+    arena:    { theme: 'theme-combat', duration: 400 },
+    navigate: { theme: 'theme-scroll', duration: 500 },
+    dungeon:  { theme: 'theme-portal', duration: 500 },
+    default:  { theme: '', duration: 350 },
+};
+
 function handleTransition(transition) {
     if (!transition) { console.warn('[GAME] handleTransition() called with null transition'); return; }
     if (!transition.url) { console.warn('[GAME] handleTransition() missing url:', JSON.stringify(transition)); return; }
@@ -17,17 +26,25 @@ function handleTransition(transition) {
     S.transitioning = true;
     console.log('[GAME] Transition to:', transition.to, transition.url);
 
-    // Show transition overlay
+    // Stop ambient particles during transition
+    if (typeof stopParticles === 'function') stopParticles();
+
+    // Get themed transition
+    const transConfig = _TRANSITION_THEMES[transition.to] || _TRANSITION_THEMES.default;
+
+    // Show transition overlay with theme
     const overlay = document.getElementById('transition-overlay');
     if (overlay) {
+        overlay.className = 'transition-overlay';
+        if (transConfig.theme) overlay.classList.add(transConfig.theme);
         overlay.style.display = '';
         requestAnimationFrame(() => overlay.classList.add('active'));
     }
 
-    // Redirect after brief animation
+    // Redirect after themed animation
     setTimeout(() => {
         window.location.replace(transition.url);
-    }, 350);
+    }, transConfig.duration);
 }
 
 /**

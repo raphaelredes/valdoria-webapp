@@ -60,6 +60,8 @@ function renderScreen(screen) {
 
     S.currentScreen = screen;
     if (typeof cacheScreen === 'function') cacheScreen(screen);
+    // Update ambient particles based on screen content
+    if (typeof updateParticleTheme === 'function') updateParticleTheme(screen.text || '');
 
     const screenEl = document.getElementById('screen');
     const loadingEl = document.getElementById('loading');

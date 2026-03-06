@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Valdoria WebApp Test Hub</title>
+    <link rel="stylesheet" href="../valdoria-design.css">
+    <style>
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; padding: 24px; }
+        h1 { font-family: var(--v-font-display); color: var(--v-gold); font-size: 1.3rem; margin-bottom: 8px; }
+        p { color: var(--v-text-dim); font-size: 0.85rem; text-align: center; margin-bottom: 16px; }
+        .test-link { display: block; width: 100%; max-width: 340px; padding: 14px 20px; border-radius: 8px; background: var(--v-surface); border: 1px solid var(--v-border); color: var(--v-text); text-decoration: none; font-size: 0.95rem; text-align: center; transition: border-color 0.2s, background 0.2s; }
+        .test-link:hover { border-color: var(--v-gold); background: rgba(196, 149, 58, 0.08); }
+        .test-link small { display: block; color: var(--v-text-dim); font-size: 0.75rem; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Valdoria Test Hub</h1>
+    <p>Paginas de teste com dados mockados para verificar animacoes e layout de cada WebApp.</p>
+
+    <a class="test-link" href="test-navigate.html">
+        Mapa do Mundo (Navigate)
+        <small>Player marker, fog-of-war, travel animation, location nodes</small>
+    </a>
+
+    <a class="test-link" href="test-dungeon.html">
+        Masmorra (Dungeon)
+        <small>Node map SVG, path animations, boss reveal, ambient particles</small>
+    </a>
+
+    <a class="test-link" href="test-game.html">
+        Game Hub (Cidade)
+        <small>Screen transitions, ambient particles, cross-webapp overlays, dialogue</small>
+    </a>
+</body>
+</html>

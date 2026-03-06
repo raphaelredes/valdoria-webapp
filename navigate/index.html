@@ -475,20 +475,101 @@
             pointer-events: none;
         }
 
+        /* ═══ PLAYER MARKER — Breathing glow ═══ */
         @keyframes playerPulse {
-
-            0%,
-            100% {
-                filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.35));
-            }
-
-            50% {
-                filter: drop-shadow(0 0 16px rgba(196, 149, 58, 0.7));
-            }
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.35)); }
+            50% { filter: drop-shadow(0 0 16px rgba(196, 149, 58, 0.7)); }
+        }
+        @keyframes playerBreath {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.4; }
         }
 
         .player-marker {
             animation: playerPulse 2.5s ease-in-out infinite;
+        }
+        .player-glow-ring {
+            animation: playerBreath 3s ease-in-out infinite;
+        }
+
+        /* ═══ LOCATION NODES — Float, hover, shake ═══ */
+        @keyframes locFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+        }
+        @keyframes locShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-2px); }
+            40% { transform: translateX(2px); }
+            60% { transform: translateX(-1px); }
+            80% { transform: translateX(1px); }
+        }
+
+        .loc-hex.explored, .loc-hex.known_mapped {
+            animation: locFloat 4s ease-in-out infinite;
+        }
+        .loc-hex.explored:nth-child(odd) { animation-delay: -1s; }
+        .loc-hex.explored:nth-child(3n) { animation-delay: -2.5s; }
+
+        .loc-hex.explored:hover, .loc-hex.known_mapped:hover {
+            filter: brightness(1.25) drop-shadow(0 0 6px rgba(196, 149, 58, 0.4));
+            animation: none;
+        }
+        .loc-hex.frontier:active, .loc-hex.known_unmapped:not([style*="cursor"]):active {
+            animation: locShake 0.3s ease;
+        }
+
+        /* ═══ TRAVEL ANIMATION — Path drawing + marker ═══ */
+        @keyframes travelPathDraw {
+            to { stroke-dashoffset: 0; }
+        }
+        @keyframes travelMarkerBounce {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.25); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+        .travel-path-anim {
+            stroke: #c4953a;
+            stroke-width: 3;
+            stroke-linecap: round;
+            fill: none;
+            stroke-opacity: 0.8;
+        }
+        .travel-marker {
+            transition: transform 0.05s linear;
+        }
+        .travel-marker-bounce {
+            animation: travelMarkerBounce 0.3s ease;
+        }
+
+        /* ═══ FOG REVEAL — Expanding light ═══ */
+        @keyframes fogRevealExpand {
+            from { r: 0; opacity: 0.8; }
+            to { r: 40; opacity: 0; }
+        }
+        .fog-reveal-burst {
+            animation: fogRevealExpand 0.8s ease-out forwards;
+            fill: rgba(196, 149, 58, 0.3);
+            pointer-events: none;
+        }
+
+        /* ═══ SELECTION RING — Pulse ═══ */
+        @keyframes selectionPulse {
+            0%, 100% { stroke-opacity: 0.6; }
+            50% { stroke-opacity: 0.3; }
+        }
+        .selection-ring {
+            animation: selectionPulse 2s ease-in-out infinite;
+        }
+
+        /* ═══ PATH HIGHLIGHT — Animated dash ═══ */
+        @keyframes pathDashFlow {
+            to { stroke-dashoffset: -20; }
+        }
+        .path-highlight {
+            stroke-dasharray: 6 4;
+            animation: pathDashFlow 1s linear infinite;
         }
 
         /* ═══ CURRENT LOCATION BADGE ═══ */
@@ -624,13 +705,22 @@
             pointer-events: none;
         }
 
+        @keyframes compassSettle {
+            0% { transform: rotate(-8deg); }
+            15% { transform: rotate(5deg); }
+            30% { transform: rotate(-3deg); }
+            45% { transform: rotate(2deg); }
+            60% { transform: rotate(-1deg); }
+            75% { transform: rotate(0.5deg); }
+            100% { transform: rotate(0deg); }
+        }
         @keyframes compassTremble {
             0%, 100% { transform: rotate(-1deg); }
             50% { transform: rotate(1deg); }
         }
 
         .compass-needle {
-            animation: compassTremble 4s ease-in-out infinite;
+            animation: compassSettle 1.5s ease-out, compassTremble 4s ease-in-out 1.5s infinite;
             transform-origin: center;
             transform-box: fill-box;
         }
