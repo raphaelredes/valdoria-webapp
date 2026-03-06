@@ -259,8 +259,14 @@ async function startGame() {
     const data = await apiCall('/api/game/start', startBody);
     hideLoading();
     if (data && !data.error) {
-        console.log('[GAME] startGame() success, rendering screen');
-        renderScreen(data);
+        // Handle transition responses (prologue, level-up, explore, combat)
+        if (data.transition) {
+            console.log('[GAME] startGame() got transition:', JSON.stringify(data.transition).substring(0, 100));
+            handleTransition(data.transition);
+        } else {
+            console.log('[GAME] startGame() success, rendering screen');
+            renderScreen(data);
+        }
     } else if (data && data.error) {
         console.error('[GAME] startGame() server error:', data.error);
         // apiCall already shows error for null; handle known server errors
