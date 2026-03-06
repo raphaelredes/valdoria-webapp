@@ -863,6 +863,74 @@ body {
 .pos-badge.near  { border-color: rgba(229,57,53,0.4); color: #e08080; }
 .pos-badge.far   { border-color: rgba(176,184,192,0.3); color: var(--v-silver-dim, #8a9199); }
 
+/* ─── TURN ANNOUNCEMENT BANNER ─── */
+.turn-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 400;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.turn-banner.visible { opacity: 1; }
+.turn-banner-text {
+    font-size: 18px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 10px 28px;
+    border-radius: 8px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    animation: bannerPop 0.35s ease-out;
+}
+.turn-banner.player .turn-banner-text {
+    color: var(--v-gold-light);
+    background: rgba(43,40,48,0.92);
+    border: 1px solid rgba(196,149,58,0.5);
+    box-shadow: 0 0 30px rgba(196,149,58,0.2);
+}
+.turn-banner.enemy .turn-banner-text {
+    color: #e08080;
+    background: rgba(43,40,48,0.92);
+    border: 1px solid rgba(123,32,32,0.5);
+    box-shadow: 0 0 30px rgba(123,32,32,0.2);
+}
+.turn-banner.ally .turn-banner-text {
+    color: var(--v-silver);
+    background: rgba(43,40,48,0.92);
+    border: 1px solid rgba(176,184,192,0.4);
+    box-shadow: 0 0 20px rgba(176,184,192,0.15);
+}
+@keyframes bannerPop {
+    0% { transform: scale(0.7); opacity: 0; }
+    60% { transform: scale(1.06); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ─── FLOATING DAMAGE NUMBER ─── */
+.damage-float {
+    position: fixed;
+    font-size: 26px;
+    font-weight: 900;
+    font-family: var(--v-font-mono, monospace);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 12px currentColor;
+    pointer-events: none;
+    z-index: 500;
+    transform: translateX(-50%);
+    animation: damageFloat 1.2s ease-out forwards;
+}
+@keyframes damageFloat {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(0.5); }
+    20% { transform: translateX(-50%) translateY(-12px) scale(1.3); opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-60px) scale(0.7); opacity: 0; }
+}
+
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {

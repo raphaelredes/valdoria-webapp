@@ -25,6 +25,7 @@ let _prevPlayerHp = 0;          // Feature 2: detect player damage for shake
 let _audioCtx = null;           // Feature 8: Web Audio (lazy init)
 let _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
 let _currentPositions = null;   // Feature 9: combat positions
+let _cinematicInProgress = false; // Blocks re-render during action cinematic
 
 // ─── TIMER / POLLING / HEARTBEAT STATE ───
 let _timerInterval = null;
@@ -617,6 +618,24 @@ function startPolling() {
             const oldHp = hpHash(currentState);
 
             if (newPh !== oldPh || newRn !== oldRn || newTc !== oldTc || newHp !== oldHp) {
+                // Don't update during cinematic animation
+                if (_cinematicInProgress) {
+                    _pollInterval = setTimeout(poll, _getPollInterval());
+                    return;
+                }
+
+                // Detect turn change for announcement banner
+                const oldTurn = currentState?.to?.[0];
+                const newTurn = state.to?.[0];
+                const turnChanged = oldTurn && newTurn && (oldTurn.n !== newTurn.n || oldTurn.t !== newTurn.t);
+
+                if (turnChanged) {
+                    const bannerText = newTurn.t === 'p' ? '⚔️ Seu Turno!' :
+                        newTurn.t === 'e' ? `🎯 ${newTurn.n}` : `🛡️ ${newTurn.n}`;
+                    const bannerType = newTurn.t === 'p' ? 'player' : newTurn.t === 'e' ? 'enemy' : 'ally';
+                    _showTurnBanner(bannerText, bannerType);
+                }
+
                 _showPollUpdateIndicator();
                 currentState = state;
                 if (newPh === 'victory' || newPh === 'defeat' || newPh === 'ended') {
@@ -1131,7 +1150,7 @@ function _showActionLoading(show) {
 // ─── SEND ACTION ───
 let _actionSent = false;
 async function sendAction(actionData) {
-    if (_actionSent) return;
+    if (_actionSent || _cinematicInProgress) return;
     _actionSent = true;
     _lastAnimatedRoll = null; // Reset dedup — next render will animate dice
     _initDiceAnimated = false; // Reset initiative dice animation for new combat
@@ -1146,12 +1165,7 @@ async function sendAction(actionData) {
             _showActionLoading(false);
             _actionSent = false;
             if (!result) { showError('Sem resposta do servidor.'); return; }
-            if (result.phase === 'victory' || result.phase === 'defeat' || result.phase === 'ended') {
-                renderResolution(result);
-                return;
-            }
-            currentState = result;
-            renderArena(result);
+            _playCinematicResult(result, actionData.type);
         } catch (e) {
             _showActionLoading(false);
             _actionSent = false;
@@ -1172,6 +1186,74 @@ async function sendAction(actionData) {
         tg.sendData(JSON.stringify(payload));
         setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
     }
+}
+
+// ─── CINEMATIC ACTION RESULT ───
+// Delays state render so the player can watch dice animations unfold
+function _playCinematicResult(result, actionType) {
+    const isResolution = result.phase === 'victory' || result.phase === 'defeat' || result.phase === 'ended';
+    const hasRoll = result.lr && result.lr.r;
+    const isNonCombatAction = actionType === 'initiative' || actionType === 'proceed' || actionType === 'restore';
+    const oldPhase = currentState?.ph || currentState?.phase || '';
+
+    // No cinematic for: initiative actions, no dice roll, or not in active combat
+    if (!hasRoll || isNonCombatAction || oldPhase !== 'active') {
+        currentState = result;
+        if (isResolution) { renderResolution(result); }
+        else { renderArena(result); }
+        return;
+    }
+
+    _cinematicInProgress = true;
+
+    // Phase 1: Animate dice on CURRENT DOM (old state still visible)
+    initDice(result.lr);
+
+    // Phase 2: Show floating damage after dice reveal
+    if (!result.lr.miss && result.lr.d > 0) {
+        setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy'), 2000);
+    }
+
+    // Phase 3: After full animation, render new state with consequences
+    const delay = (result.lr.miss || result.lr.d <= 0) ? 1500 : 2500;
+    setTimeout(() => {
+        _cinematicInProgress = false;
+        currentState = result;
+        if (isResolution) { renderResolution(result); }
+        else { renderArena(result); }
+    }, delay);
+}
+
+// ─── TURN ANNOUNCEMENT BANNER ───
+function _showTurnBanner(text, type) {
+    document.querySelectorAll('.turn-banner').forEach(b => b.remove());
+    const el = document.createElement('div');
+    el.className = `turn-banner ${type || ''}`;
+    el.innerHTML = `<span class="turn-banner-text">${text}</span>`;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => el.classList.add('visible'));
+    });
+    setTimeout(() => {
+        el.classList.remove('visible');
+        setTimeout(() => el.remove(), 400);
+    }, 1000);
+}
+
+// ─── FLOATING DAMAGE NUMBER ───
+function _showDamageFloat(damage, damageType, targetSelector) {
+    const target = document.querySelector(targetSelector || '.entity.enemy');
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'damage-float';
+    el.textContent = `-${damage}`;
+    const colors = { fire: '#ff6020', cold: '#80c0ff', lightning: '#ffe040', necrotic: '#9040c0', radiant: '#ffe080', poison: '#60c040', acid: '#60d040' };
+    el.style.color = colors[damageType] || '#ff4444';
+    el.style.left = (rect.left + rect.width / 2) + 'px';
+    el.style.top = rect.top + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
 }
 
 // ─── SKILL PICKER ───
