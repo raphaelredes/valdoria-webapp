@@ -206,8 +206,11 @@ function showError(msg, err = null) {
         || msg.includes('indisponível') || msg.includes('não respondeu');
     if (isConnectionError && _errorRetryAttempt < _ERROR_RETRY_MAX) {
         _errorRetryAttempt++;
-        // Exponential backoff: 5s, 10s, 20s, 40s, 40s, 40s...
-        const delaySec = Math.min(_ERROR_RETRY_BASE * Math.pow(2, _errorRetryAttempt - 1), _ERROR_RETRY_CAP);
+        // Exponential backoff with jitter: ~5s, ~10s, ~20s, ~40s...
+        // Jitter prevents synchronized retries from multiple clients
+        const base = Math.min(_ERROR_RETRY_BASE * Math.pow(2, _errorRetryAttempt - 1), _ERROR_RETRY_CAP);
+        const jitter = Math.random() * 2 - 1; // -1 to +1 second
+        const delaySec = Math.max(2, Math.round(base + jitter));
         let countdown = delaySec;
         retryBtn.textContent = `Tentando novamente em ${countdown}s... (${_errorRetryAttempt}/${_ERROR_RETRY_MAX})`;
         _errorAutoRetryTimer = setInterval(() => {
@@ -225,31 +228,40 @@ function showError(msg, err = null) {
 }
 
 function _autoReconnect(overlay, msgEl, retryBtn) {
-    // All retries failed — inform user and auto-close WebApp
-    // sendData notifies the bot to refresh the Telegram message (like /start)
+    // All retries failed — notify backend via API to refresh Telegram message,
+    // then close the WebApp. sendData() only works with KeyboardButton Mini Apps,
+    // so we use a fetch() call to /api/game/reconnect instead.
     console.warn('[GAME] Auto-reconnect: all retries exhausted, closing WebApp');
     msgEl.textContent = 'Reconectando... O mini app sera fechado automaticamente.';
     retryBtn.style.display = 'none';
     const recoverBtn = document.getElementById('error-recover');
     if (recoverBtn) recoverBtn.style.display = 'none';
 
-    setTimeout(() => {
-        try {
-            if (window.Telegram?.WebApp?.sendData) {
-                Telegram.WebApp.sendData(JSON.stringify({ action: 'reconnect' }));
-                // sendData closes the WebApp automatically
-                return;
-            }
-        } catch (e) {
-            console.error('[GAME] sendData failed:', e);
-        }
-        // Fallback: just close
+    const closeApp = () => {
         if (window.Telegram?.WebApp?.close) {
             Telegram.WebApp.close();
         } else {
             window.close();
         }
-    }, 2000);
+    };
+
+    // Try to notify the backend to re-send character selection
+    if (S.apiBase && S.token) {
+        fetch(S.apiBase + '/api/game/reconnect', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': '1',
+            },
+            body: JSON.stringify({ token: S.token }),
+        })
+        .then(r => { console.log('[GAME] Reconnect API:', r.status); })
+        .catch(e => { console.warn('[GAME] Reconnect API failed:', e.message); })
+        .finally(() => { setTimeout(closeApp, 1500); });
+    } else {
+        // No API available — just close after delay
+        setTimeout(closeApp, 2000);
+    }
 }
 
 function hideError() {
