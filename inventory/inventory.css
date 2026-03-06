@@ -6,7 +6,7 @@
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { display: none; }
 
-body { padding-bottom: 80px; }
+body { padding-bottom: 110px; }
 
 /* ── Header ── */
 .header {
@@ -466,11 +466,38 @@ body { padding-bottom: 80px; }
 .select-item .si-name { font-size: 13px; color: var(--v-text-bright); font-weight: 600; }
 .select-item .si-desc { font-size: 11px; color: var(--v-text-dim); }
 
+/* ── Navigation Bar ── */
+.inv-nav-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    max-width: 430px; margin: 0 auto;
+    display: flex; gap: 0; z-index: 140;
+    background: var(--v-bg-raised);
+    border-top: 1px solid var(--v-border);
+    padding: 6px 8px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+}
+.inv-nav-btn {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+    background: none; border: none;
+    color: var(--v-text-dim); font-size: 11px;
+    font-family: var(--v-font); cursor: pointer;
+    padding: 6px 4px; border-radius: var(--v-radius-sm);
+    transition: color 0.2s, background 0.2s;
+    min-height: 44px; justify-content: center;
+}
+.inv-nav-btn:active {
+    background: rgba(196,149,58,0.12);
+    color: var(--v-gold);
+}
+.inv-nav-btn svg { opacity: 0.7; }
+.inv-nav-btn:active svg { opacity: 1; }
+
 /* ── Bottom Bar ── */
 .bottom-bar {
-    position: fixed; bottom: 0; left: 0; right: 0;
+    position: fixed; bottom: 50px; left: 0; right: 0;
     padding: 10px 16px; z-index: 150;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    padding-bottom: 6px;
     background: linear-gradient(transparent, var(--v-bg) 30%);
 }
 .bottom-bar .ops-count {
@@ -518,7 +545,7 @@ body { padding-bottom: 80px; }
 
 /* ── Selection Mode ── */
 .selection-bar {
-    position: fixed; bottom: 56px; left: 0; right: 0;
+    position: fixed; bottom: 106px; left: 0; right: 0;
     max-width: 430px; margin: 0 auto; z-index: 90;
     background: var(--v-card); border-top: 1px solid var(--v-border);
     display: flex; align-items: center; gap: 6px;
@@ -564,8 +591,8 @@ body { padding-bottom: 80px; }
     border-radius: var(--v-radius-pill); font-size: 13px;
     z-index: 300; animation: v-fadeSlideUp 0.25s ease;
     pointer-events: none; color: #fff;
-    /* Dynamic bottom: set via JS based on bottom bar height */
-    bottom: 90px;
+    /* Dynamic bottom: above bottom bar + nav bar */
+    bottom: 120px;
 }
 .toast-warn { background: var(--v-warning); }
 .toast-err { background: var(--v-danger); }

@@ -188,9 +188,11 @@ function init() {
             localAllyEq[a.id] = Object.assign({}, a.eq || {});
     }
 
-    // Dynamic body padding based on bottom bar height
+    // Dynamic body padding based on bottom bar + nav bar height
     const bar = document.getElementById('bottomBar');
-    document.body.style.paddingBottom = (bar ? bar.offsetHeight + 12 : 80) + 'px';
+    const nav = document.getElementById('navBar');
+    const navH = nav ? nav.offsetHeight : 50;
+    document.body.style.paddingBottom = ((bar ? bar.offsetHeight : 20) + navH + 12) + 'px';
 
     hideLoading();
     updateHeader();
@@ -2323,6 +2325,77 @@ function initBackButton() {
             }
         });
     }
+}
+
+// ── Nav Bar Actions ──
+function navBack() {
+    haptic('light');
+    _navigateBack();
+}
+
+function navCharSheet() {
+    haptic('light');
+    if (!_apiBase || !_apiToken) {
+        try { if (tg) tg.close(); } catch (e) { }
+        return;
+    }
+    // If pending ops, warn before leaving
+    if (pendingOps.length > 0) {
+        showConfirmModal();
+        return;
+    }
+    _transitionTo('game', { action: 'action_status' });
+}
+
+function navMenu() {
+    haptic('light');
+    if (pendingOps.length > 0) {
+        showConfirmModal();
+        return;
+    }
+    // Close webapp to return to Telegram chat (main menu)
+    try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] tg.close:', e); }
+}
+
+async function _transitionTo(target, payload = {}) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.querySelector('.loading-text').textContent = 'Navegando...';
+        overlay.classList.remove('hidden');
+    }
+    if (_apiBase) {
+        try {
+            const _th = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + _apiToken,
+            };
+            if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+            _th['ngrok-skip-browser-warning'] = '1';
+            _th['X-Idempotency-Key'] = crypto.randomUUID();
+            const resp = await fetch(_apiBase + '/api/webapp/transition', {
+                method: 'POST',
+                headers: _th,
+                body: JSON.stringify({
+                    from: 'inventory', to: target,
+                    user_id: parseInt(_apiUid),
+                    payload,
+                }),
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.url) {
+                    window.location.replace(data.url);
+                    return;
+                }
+            }
+            console.error('[INVENTORY] Nav transition failed');
+        } catch (e) {
+            console.error('[INVENTORY] Nav transition error:', e);
+        }
+    }
+    // Fallback: close
+    if (overlay) overlay.classList.add('hidden');
+    try { if (tg) tg.close(); } catch (e) { }
 }
 
 // ── Toast ──
