@@ -438,10 +438,23 @@ function triggerCombat(poi) {
     S.combatTrigger = combat;
     logMoveEvent([{ type: 'combat', enemy: combat.en || 'unknown' }]);
 
+    // Screen shake on map viewport for combat
+    const viewport = document.getElementById('map-viewport');
+    if (viewport) {
+        viewport.classList.add('screen-shake');
+        setTimeout(() => viewport.classList.remove('screen-shake'), 600);
+    }
+
+    // Double flash effect for combat
+    const flash = document.createElement('div');
+    flash.className = 'encounter-flash';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 700);
+
     const overlay = document.getElementById('combat-overlay');
     document.getElementById('combat-icon').textContent = combat.ei || '⚔️';
     document.getElementById('combat-enemy').textContent = combat.en || 'Inimigo';
-    document.getElementById('combat-text').textContent = 'Preparando combate...';
+    document.getElementById('combat-text').innerHTML = '<span style="color:#d44;font-weight:bold;">Iniciando Combate...</span>';
 
     overlay.classList.add('active');
     try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
@@ -527,7 +540,7 @@ async function transitionToArena() {
         if (resp.ok) {
             const data = await resp.json();
             if (data.url) {
-                window.location.href = data.url;
+                window.location.replace(data.url);
                 return;
             }
         }
@@ -568,7 +581,7 @@ async function transitionToInventory() {
         if (resp.ok) {
             const data = await resp.json();
             if (data.url) {
-                window.location.href = data.url;
+                window.location.replace(data.url);
                 return;
             }
         }
@@ -1518,8 +1531,8 @@ async function _transitionToGameFromExplore(payload) {
             })
         });
         const d = await r.json();
-        if (d.url) { window.location.href = d.url; return; }
-    } catch(e) { console.error('[EXPLORE] transition error:', e); }
+        if (d.url) { window.location.replace(d.url); return; }
+    } catch (e) { console.error('[EXPLORE] transition error:', e); }
     // Fallback: close WebApp and let user tap JOGAR from Telegram
     // (explore token is not valid for Game Hub sessions)
     if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.close(); }
@@ -1540,8 +1553,8 @@ async function _transitionToNavigateFromExplore(payload) {
             })
         });
         const d = await r.json();
-        if (d.url) { window.location.href = d.url; return; }
-    } catch(e) { console.error('[EXPLORE] navigate transition error:', e); }
+        if (d.url) { window.location.replace(d.url); return; }
+    } catch (e) { console.error('[EXPLORE] navigate transition error:', e); }
     // Fallback: close WebApp
     if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.close(); }
 }
@@ -1584,6 +1597,10 @@ async function initAsync() {
         tg.ready();
         tg.expand();
         try { tg.disableVerticalSwipes(); } catch (e) { console.warn('[EXPLORE] disableVerticalSwipes not supported'); }
+        if (tg.BackButton) {
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => { showExitRiskAssessment(); });
+        }
     }
 
     // Save state on close attempt
@@ -1593,8 +1610,51 @@ async function initAsync() {
     S.token = params.get('token') || '';
     S.apiBase = params.get('api') || '';
     S.uid = params.get('uid') || '';
-    const dataB64 = params.get('data') || '';
+    let dataB64 = params.get('data') || '';
     const isRestore = params.get('restore') === '1';
+
+    let dataObj = null;
+
+    // Fetch persistence state and payload from backend API if available
+    if (S.apiBase && S.uid && S.token) {
+        try {
+            const url = `${S.apiBase}/api/explore/state?user_id=${S.uid}`;
+            const _sh = { 'Authorization': `Bearer ${S.token}` };
+            if (window.Telegram?.WebApp?.initData) { _sh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+            _sh['ngrok-skip-browser-warning'] = '1';
+            const resp = await fetch(url, {
+                method: 'GET',
+                headers: _sh
+            });
+            if (resp.ok) {
+                const rData = await resp.json();
+
+                // Load map payload from API if not in URL
+                if (!dataB64 && rData && rData.payload) {
+                    dataB64 = rData.payload;
+                }
+
+                if (rData && rData.state) {
+                    // On restore (returning from combat/inventory), update token
+                    // and timestamp so restoreState() accepts the state
+                    if (isRestore) {
+                        rData.state.tk = S.token;
+                        rData.state.ts = Date.now();
+                        // Reset reward counters — already applied by transition API
+                        rData.state.xp = 0;
+                        rData.state.gp = 0;
+                        rData.state.hp = 0;
+                        rData.state.it = [];
+                        rData.state.iu = [];
+                        rData.state.ct = null;
+                    }
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(rData.state));
+                }
+            }
+        } catch (e) {
+            console.error('[EXPLORE] Could not fetch saved state/payload from API', e);
+        }
+    }
 
     if (!dataB64) {
         document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:20px">Dados do mapa não encontrados.<br>Volte ao bot e tente novamente.</div>';
@@ -1607,54 +1667,19 @@ async function initAsync() {
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
         const inflated = await zlibInflate(bytes);
-        const json = new TextDecoder().decode(inflated);
-        const data = JSON.parse(json);
-
-        // Fetch persistence state from backend API if available
-        if (S.apiBase && S.uid && S.token) {
-            try {
-                const url = `${S.apiBase}/api/explore/state?user_id=${S.uid}`;
-                const _sh = { 'Authorization': `Bearer ${S.token}` };
-                if (window.Telegram?.WebApp?.initData) { _sh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
-                _sh['ngrok-skip-browser-warning'] = '1';
-                const resp = await fetch(url, {
-                    method: 'GET',
-                    headers: _sh
-                });
-                if (resp.ok) {
-                    const rData = await resp.json();
-                    if (rData && rData.state) {
-                        // On restore (returning from combat/inventory), update token
-                        // and timestamp so restoreState() accepts the state
-                        if (isRestore) {
-                            rData.state.tk = S.token;
-                            rData.state.ts = Date.now();
-                            // Reset reward counters — already applied by transition API
-                            rData.state.xp = 0;
-                            rData.state.gp = 0;
-                            rData.state.hp = 0;
-                            rData.state.it = [];
-                            rData.state.iu = [];
-                            rData.state.ct = null;
-                        }
-                        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(rData.state));
-                    }
-                }
-            } catch (e) {
-                console.error('[EXPLORE] Could not fetch saved state from API', e);
-            }
-        }
+        const jsonStr = new TextDecoder().decode(inflated);
+        dataObj = JSON.parse(jsonStr);
 
         // Travel animation (only on fresh start, not restore)
-        const regionName = data.rn || '';
+        const regionName = dataObj.rn || '';
         if (!isRestore && regionName && typeof playTravelAnimation === 'function') {
             document.getElementById('loading').classList.add('hidden');
             await new Promise(resolve => {
-                playTravelAnimation(data.b || 'forest', regionName, resolve);
+                playTravelAnimation(dataObj.b || 'forest', regionName, resolve);
             });
         }
 
-        loadMapData(data);
+        loadMapData(dataObj);
 
         // Post-combat narrative when returning from arena
         if (isRestore) {

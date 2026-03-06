@@ -15,10 +15,10 @@ const MOOD_LABELS = {
     busy: 'Ocupado', neutral: ''
 };
 const MOOD_GRADIENTS = {
-    happy:   'radial-gradient(ellipse at 50% 0%, #3a3225 0%, var(--v-bg) 70%)',
-    angry:   'radial-gradient(ellipse at 50% 0%, #352028 0%, var(--v-bg) 70%)',
-    sad:     'radial-gradient(ellipse at 50% 0%, #2a2a30 0%, var(--v-bg) 70%)',
-    busy:    'radial-gradient(ellipse at 50% 0%, #302c30 0%, var(--v-bg) 70%)',
+    happy: 'radial-gradient(ellipse at 50% 0%, #3a3225 0%, var(--v-bg) 70%)',
+    angry: 'radial-gradient(ellipse at 50% 0%, #352028 0%, var(--v-bg) 70%)',
+    sad: 'radial-gradient(ellipse at 50% 0%, #2a2a30 0%, var(--v-bg) 70%)',
+    busy: 'radial-gradient(ellipse at 50% 0%, #302c30 0%, var(--v-bg) 70%)',
     neutral: 'radial-gradient(ellipse at 50% 0%, #352f38 0%, var(--v-bg) 70%)',
 };
 
@@ -90,8 +90,8 @@ function renderDialogue(screen) {
 
     contentEl.appendChild(card);
 
-    // Extract dialogue text (remove format_msg header)
-    const dialogueText = extractDialogueText(screen.text || '');
+    // Use clean dialogue text from backend when available, fallback to extraction
+    const dialogueText = screen.dialogue_text || extractDialogueText(screen.text || '');
 
     // Hide buttons initially
     if (buttonsEl) {
@@ -199,15 +199,27 @@ function extractDialogueText(rawText) {
     const lines = rawText.split('\n');
     let bodyStart = 0;
 
-    // Skip header lines: all-caps, divider chars, or empty
-    for (let i = 0; i < lines.length && i < 6; i++) {
-        const t = lines[i].trim();
-        if (!t || /^[═━⚜💎\u2550\u2501]+$/.test(t)) {
+    // Skip header lines: all-caps, divider chars, date strings, or empty
+    for (let i = 0; i < lines.length && i < 8; i++) {
+        let raw = lines[i].trim();
+        // Remove ZWSP commonly used in banner links
+        raw = raw.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+        // Strip HTML tags for condition checks
+        const t = raw.replace(/<[^>]+>/g, '').trim();
+
+        if (!t || /^[═━⚜💎\u2550\u2501\s\uFE0F]+$/.test(t)) {
             bodyStart = i + 1;
             continue;
         }
-        // All-caps header (NPC NAME)
-        const stripped = t.replace(/[\[\]\(\)⭐✨💀⚔️🛡️\s]/g, '');
+
+        // Date/Time line (e.g. 📅 12:29 | 28 de Seedsow, Ano 855 | ☁️ 23°C)
+        if (/\d{2}:\d{2}\s*\|/.test(t) || (t.includes('Ano ') && t.includes('|')) || /°C/.test(t)) {
+            bodyStart = i + 1;
+            continue;
+        }
+
+        // All-caps header (NPC NAME) — also strip ⚜️ which format_msg wraps around the title
+        const stripped = t.replace(/[\[\]\(\)⭐✨💀⚔️🛡️⚜\uFE0F\s]/g, '');
         if (stripped.length > 2 && stripped === stripped.toUpperCase() && !/[a-z]/.test(stripped)) {
             bodyStart = i + 1;
             continue;
@@ -215,7 +227,19 @@ function extractDialogueText(rawText) {
         break;
     }
 
-    return lines.slice(bodyStart).join('\n').trim();
+    let body = lines.slice(bodyStart);
+
+    // Strip trailing footer lines: dividers, invisible rulers (⠀), empty
+    while (body.length > 0) {
+        const last = body[body.length - 1].replace(/<[^>]+>/g, '').trim();
+        if (!last || /^[═━⚜💎\u2550\u2501\s\uFE0F\u2800]+$/.test(last)) {
+            body.pop();
+            continue;
+        }
+        break;
+    }
+
+    return body.join('\n').trim();
 }
 
 // ── Mood Ambient ─────────────────────────────────────────────

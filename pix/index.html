@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,11 +13,20 @@
     <link rel="manifest" href="../manifest.json">
     <title>PIX - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+    </script>
     <style>
         /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
-        * { scrollbar-width: none; -ms-overflow-style: none; }
-        *::-webkit-scrollbar { display: none; }
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        *::-webkit-scrollbar {
+            display: none;
+        }
 
         body {
             display: flex;
@@ -32,13 +42,17 @@
             background: linear-gradient(180deg, var(--v-bg-raised), transparent);
             position: relative;
         }
+
         .header::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 2px;
             background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
         }
+
         .header h1 {
             font-size: 16px;
             color: var(--v-gold);
@@ -46,6 +60,7 @@
             text-transform: uppercase;
             text-shadow: 0 0 15px rgba(196, 149, 58, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
         }
+
         .header .subtitle {
             font-size: 12px;
             color: var(--v-text-dim);
@@ -70,6 +85,7 @@
             padding: 16px;
             box-shadow: var(--v-shadow-glow);
         }
+
         #qr-container {
             width: 220px;
             height: 220px;
@@ -77,7 +93,9 @@
             align-items: center;
             justify-content: center;
         }
-        #qr-container img, #qr-container canvas {
+
+        #qr-container img,
+        #qr-container canvas {
             display: block !important;
             width: 220px !important;
             height: 220px !important;
@@ -100,19 +118,23 @@
             border-radius: 8px;
             padding: 12px;
         }
+
         .info-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 6px 0;
         }
-        .info-row + .info-row {
+
+        .info-row+.info-row {
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .info-label {
             font-size: 12px;
             color: var(--v-text-dim);
         }
+
         .info-value {
             font-size: 13px;
             color: var(--v-text);
@@ -120,7 +142,10 @@
         }
 
         /* Copy Section */
-        .copy-section { width: 100%; }
+        .copy-section {
+            width: 100%;
+        }
+
         .copy-label {
             font-size: 11px;
             color: var(--v-text-dim);
@@ -129,6 +154,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .code-box {
             width: 100%;
             background: var(--v-bg-raised);
@@ -158,20 +184,27 @@
             transition: all 0.2s;
             -webkit-tap-highlight-color: transparent;
         }
+
         .btn-copy {
             background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
             color: var(--v-bg);
         }
-        .btn-copy:active { transform: scale(0.97); }
+
+        .btn-copy:active {
+            transform: scale(0.97);
+        }
+
         .btn-copy.copied {
             background: linear-gradient(135deg, var(--v-success), #27ae60);
             color: #fff;
         }
+
         .btn-close {
             background: transparent;
             border: 1px solid var(--v-border-gold);
             color: var(--v-text-dim);
         }
+
         .btn-close:active {
             background: rgba(255, 255, 255, 0.05);
         }
@@ -193,6 +226,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>Pagamento PIX</h1>
@@ -205,133 +239,138 @@
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
-    (function() {
-        'use strict';
+        (function () {
+            'use strict';
 
-        const tg = window.Telegram && window.Telegram.WebApp;
-        const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
-        if (tg) {
-            tg.ready();
-            tg.expand();
-            tg.setHeaderColor(_vBg);
-            tg.setBackgroundColor(_vBg);
-        }
-
-        const params = new URLSearchParams(window.location.search);
-        const brcode = params.get('code');
-        const amount = params.get('amount') || '';
-        const txid = params.get('txid') || '';
-        const keyDisplay = params.get('key') || '';
-        const keyType = params.get('key_type') || '';
-
-        const content = document.getElementById('main-content');
-
-        if (!brcode) {
-            content.innerHTML = '<div class="error-msg">Nenhum codigo PIX recebido.<br>Volte e tente novamente.</div>' +
-                '<button class="btn btn-close" onclick="closePage()">Fechar</button>';
-            return;
-        }
-
-        let html = '';
-        html += '<div class="qr-wrapper"><div id="qr-container"></div></div>';
-        html += '<div class="scan-hint">Aponte a camera do app do banco para o QR acima</div>';
-        if (amount) {
-            html += '<div class="amount-display">' + escapeHtml(amount) + '</div>';
-        }
-        html += '<div class="info-card">';
-        if (keyType && keyDisplay) {
-            html += '<div class="info-row"><span class="info-label">Chave PIX (' +
-                escapeHtml(keyType) + ')</span><span class="info-value">' +
-                escapeHtml(keyDisplay) + '</span></div>';
-        }
-        if (txid) {
-            html += '<div class="info-row"><span class="info-label">Referencia</span>' +
-                '<span class="info-value">' + escapeHtml(txid) + '</span></div>';
-        }
-        html += '</div>';
-        html += '<div class="copy-section">' +
-            '<div class="copy-label">Codigo Pix Copia e Cola</div>' +
-            '<div class="code-box" id="code-text">' + escapeHtml(brcode) + '</div>' +
-            '</div>';
-        html += '<button class="btn btn-copy" id="btn-copy" onclick="copyCode()">Copiar Codigo PIX</button>';
-        html += '<button class="btn btn-close" onclick="closePage()">Fechar</button>';
-
-        content.innerHTML = html;
-
-        try {
-            var cs = getComputedStyle(document.documentElement);
-            var qrDark = cs.getPropertyValue('--v-bg').trim() || '#2b2830';
-            var qrLight = cs.getPropertyValue('--v-parchment').trim() || '#f5f0e0';
-            new QRCode(document.getElementById('qr-container'), {
-                text: brcode,
-                width: 220,
-                height: 220,
-                colorDark: qrDark,
-                colorLight: qrLight,
-                correctLevel: QRCode.CorrectLevel.M,
-            });
-        } catch (e) {
-            console.error('[PIX] Erro ao gerar QR Code', e);
-            document.getElementById('qr-container').innerHTML =
-                '<div style="color:var(--v-danger);font-size:12px;text-align:center;padding:20px;">' +
-                'Erro ao gerar QR Code.<br>Use o codigo abaixo.</div>';
-        }
-
-        window.copyCode = function() {
-            var btn = document.getElementById('btn-copy');
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(brcode).then(function() {
-                    showCopied(btn);
-                }).catch(function(err) {
-                    console.warn('[PIX] Clipboard API failed, using fallback', err);
-                    fallbackCopy(btn);
-                });
-            } else {
-                fallbackCopy(btn);
-            }
-        };
-
-        function fallbackCopy(btn) {
-            var textarea = document.createElement('textarea');
-            textarea.value = brcode;
-            textarea.style.position = 'fixed';
-            textarea.style.left = '-9999px';
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                showCopied(btn);
-            } catch (e) {
-                console.error('[PIX] Erro ao copiar', e);
-                btn.textContent = 'Erro ao copiar';
-            }
-            document.body.removeChild(textarea);
-        }
-
-        function showCopied(btn) {
-            btn.textContent = 'Copiado!';
-            btn.classList.add('copied');
-            setTimeout(function() {
-                btn.textContent = 'Copiar Codigo PIX';
-                btn.classList.remove('copied');
-            }, 2000);
-        }
-
-        window.closePage = function() {
+            const tg = window.Telegram && window.Telegram.WebApp;
+            const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
             if (tg) {
-                tg.close();
-            } else {
-                window.close();
+                tg.ready();
+                tg.expand();
+                tg.setHeaderColor(_vBg);
+                tg.setBackgroundColor(_vBg);
+                if (tg.BackButton) {
+                    tg.BackButton.show();
+                    tg.BackButton.onClick(() => { closePage(); });
+                }
             }
-        };
 
-        function escapeHtml(text) {
-            var div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-    })();
+            const params = new URLSearchParams(window.location.search);
+            const brcode = params.get('code');
+            const amount = params.get('amount') || '';
+            const txid = params.get('txid') || '';
+            const keyDisplay = params.get('key') || '';
+            const keyType = params.get('key_type') || '';
+
+            const content = document.getElementById('main-content');
+
+            if (!brcode) {
+                content.innerHTML = '<div class="error-msg">Nenhum codigo PIX recebido.<br>Volte e tente novamente.</div>' +
+                    '<button class="btn btn-close" onclick="closePage()">Fechar</button>';
+                return;
+            }
+
+            let html = '';
+            html += '<div class="qr-wrapper"><div id="qr-container"></div></div>';
+            html += '<div class="scan-hint">Aponte a camera do app do banco para o QR acima</div>';
+            if (amount) {
+                html += '<div class="amount-display">' + escapeHtml(amount) + '</div>';
+            }
+            html += '<div class="info-card">';
+            if (keyType && keyDisplay) {
+                html += '<div class="info-row"><span class="info-label">Chave PIX (' +
+                    escapeHtml(keyType) + ')</span><span class="info-value">' +
+                    escapeHtml(keyDisplay) + '</span></div>';
+            }
+            if (txid) {
+                html += '<div class="info-row"><span class="info-label">Referencia</span>' +
+                    '<span class="info-value">' + escapeHtml(txid) + '</span></div>';
+            }
+            html += '</div>';
+            html += '<div class="copy-section">' +
+                '<div class="copy-label">Codigo Pix Copia e Cola</div>' +
+                '<div class="code-box" id="code-text">' + escapeHtml(brcode) + '</div>' +
+                '</div>';
+            html += '<button class="btn btn-copy" id="btn-copy" onclick="copyCode()">Copiar Codigo PIX</button>';
+            html += '<button class="btn btn-close" onclick="closePage()">Fechar</button>';
+
+            content.innerHTML = html;
+
+            try {
+                var cs = getComputedStyle(document.documentElement);
+                var qrDark = cs.getPropertyValue('--v-bg').trim() || '#2b2830';
+                var qrLight = cs.getPropertyValue('--v-parchment').trim() || '#f5f0e0';
+                new QRCode(document.getElementById('qr-container'), {
+                    text: brcode,
+                    width: 220,
+                    height: 220,
+                    colorDark: qrDark,
+                    colorLight: qrLight,
+                    correctLevel: QRCode.CorrectLevel.M,
+                });
+            } catch (e) {
+                console.error('[PIX] Erro ao gerar QR Code', e);
+                document.getElementById('qr-container').innerHTML =
+                    '<div style="color:var(--v-danger);font-size:12px;text-align:center;padding:20px;">' +
+                    'Erro ao gerar QR Code.<br>Use o codigo abaixo.</div>';
+            }
+
+            window.copyCode = function () {
+                var btn = document.getElementById('btn-copy');
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(brcode).then(function () {
+                        showCopied(btn);
+                    }).catch(function (err) {
+                        console.warn('[PIX] Clipboard API failed, using fallback', err);
+                        fallbackCopy(btn);
+                    });
+                } else {
+                    fallbackCopy(btn);
+                }
+            };
+
+            function fallbackCopy(btn) {
+                var textarea = document.createElement('textarea');
+                textarea.value = brcode;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showCopied(btn);
+                } catch (e) {
+                    console.error('[PIX] Erro ao copiar', e);
+                    btn.textContent = 'Erro ao copiar';
+                }
+                document.body.removeChild(textarea);
+            }
+
+            function showCopied(btn) {
+                btn.textContent = 'Copiado!';
+                btn.classList.add('copied');
+                setTimeout(function () {
+                    btn.textContent = 'Copiar Codigo PIX';
+                    btn.classList.remove('copied');
+                }, 2000);
+            }
+
+            window.closePage = function () {
+                if (tg) {
+                    tg.close();
+                } else {
+                    window.close();
+                }
+            };
+
+            function escapeHtml(text) {
+                var div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        })();
     </script>
-    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(()=>{})}</script>
+    <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('../sw.js').catch(() => { }) }</script>
 </body>
+
 </html>

@@ -6,7 +6,15 @@
 // ═══════════════════════════════════════════════════════
 
 const tg = window.Telegram?.WebApp;
-if (tg) { tg.ready(); tg.expand(); }
+if (tg) {
+    tg.ready(); tg.expand();
+    if (tg.BackButton) {
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            try { tg.close(); } catch (e) { console.warn('[PROLOGUE] tg.close:', e); }
+        });
+    }
+}
 
 const params = new URLSearchParams(location.search);
 const TOKEN = params.get('token') || '';
@@ -21,7 +29,7 @@ let choices = {};       // Accumulated player choices
 let rerollsLeft = 5;
 
 function haptic(type) {
-    try { tg?.HapticFeedback?.impactOccurred?.(type || 'light'); } catch(_) {}
+    try { tg?.HapticFeedback?.impactOccurred?.(type || 'light'); } catch (_) { }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -407,7 +415,7 @@ async function doFight() {
 
         if (result.arena_url) {
             // Navigate to arena WebApp
-            window.location.href = result.arena_url;
+            window.location.replace(result.arena_url);
         } else {
             showError('Erro ao iniciar combate.');
         }
@@ -434,7 +442,7 @@ async function onEnterCity() {
 
         // Redirect to Game Hub (stays in WebApp)
         if (result && result.game_url) {
-            window.location.href = result.game_url;
+            window.location.replace(result.game_url);
         } else {
             // Fallback: close WebApp and let user tap JOGAR from Telegram
             // (prologue token is not valid for Game Hub sessions)

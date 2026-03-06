@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#2b2830">
     <title>Prologo - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="../valdoria-design.css?v=4">
-    <link rel="stylesheet" href="prologue.css?v=1">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="prologue.css?v=' + v + '">');
+    </script>
 </head>
+
 <body>
     <!-- Main viewport with horizontal slide transitions -->
     <div id="viewport">
@@ -59,6 +64,10 @@
         <button class="v-btn v-btn-secondary" style="margin-top:8px" onclick="tg.close()">Fechar</button>
     </div>
 
-    <script src="prologue.js?v=1"></script>
+    <script>
+        var v = Date.now();
+        document.write('<script src="prologue.js?v=' + v + '"><\/script>');
+    </script>
 </body>
+
 </html>

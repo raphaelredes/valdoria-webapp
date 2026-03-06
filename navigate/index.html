@@ -1,18 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#2b2830">
     <title>Mapa do Mundo - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+    </script>
     <style>
         /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
-        * { scrollbar-width: none; -ms-overflow-style: none; }
-        *::-webkit-scrollbar { display: none; }
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        *::-webkit-scrollbar {
+            display: none;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             overflow: hidden;
             display: flex;
@@ -22,27 +37,42 @@
 
         /* ═══ LOADING ═══ */
         #loading {
-            position: fixed; inset: 0;
+            position: fixed;
+            inset: 0;
             background: var(--v-bg, #2b2830);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             z-index: 200;
             transition: opacity 0.4s ease;
         }
-        #loading.hidden { opacity: 0; pointer-events: none; }
+
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         .loading-spinner {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(196,149,58,0.2);
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(196, 149, 58, 0.2);
             border-top-color: var(--v-gold, #c4953a);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
+
         .loading-text {
             margin-top: 12px;
             color: var(--v-gold, #c4953a);
             font-size: 13px;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* ═══ HUD (top bar) ═══ */
         #hud {
@@ -55,6 +85,7 @@
             z-index: 50;
             flex-shrink: 0;
         }
+
         .hud-name {
             font-size: 13px;
             font-weight: 700;
@@ -64,16 +95,19 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
         .hud-level {
             font-size: 11px;
             color: var(--v-text-dim, #8a8090);
             margin-right: auto;
         }
+
         .hud-bar-group {
             display: flex;
             align-items: center;
             gap: 4px;
         }
+
         .hud-bar {
             width: 50px;
             height: 7px;
@@ -82,13 +116,21 @@
             overflow: hidden;
             border: 1px solid #333;
         }
+
         .hud-bar-fill {
             height: 100%;
             border-radius: 4px;
             transition: width 0.4s ease;
         }
-        .hp-fill { background: linear-gradient(90deg, #7b2020, #a03030); }
-        .mp-fill { background: linear-gradient(90deg, #204080, #3060b0); }
+
+        .hp-fill {
+            background: linear-gradient(90deg, #7b2020, #a03030);
+        }
+
+        .mp-fill {
+            background: linear-gradient(90deg, #204080, #3060b0);
+        }
+
         .hud-bar-label {
             font-size: 10px;
             color: var(--v-text-dim, #8a8090);
@@ -102,11 +144,13 @@
             position: relative;
             background: #1e1b22;
         }
+
         #map-wrapper {
             position: absolute;
             transform-origin: 0 0;
             will-change: transform;
         }
+
         #map-svg {
             display: block;
         }
@@ -114,7 +158,9 @@
         /* ═══ LOCATION INFO PANEL ═══ */
         #info-panel {
             position: fixed;
-            bottom: 0; left: 0; right: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
             max-width: 430px;
             margin: 0 auto;
             background: linear-gradient(180deg, #3a343e 0%, #2b2830 100%);
@@ -127,42 +173,56 @@
             max-height: 55vh;
             overflow-y: auto;
         }
-        #info-panel.open { transform: translateY(0); }
+
+        #info-panel.open {
+            transform: translateY(0);
+        }
+
         .info-handle {
-            width: 36px; height: 4px;
-            background: rgba(196,149,58,0.3);
+            width: 36px;
+            height: 4px;
+            background: rgba(196, 149, 58, 0.3);
             border-radius: 2px;
             margin: 0 auto 10px;
         }
+
         .info-header {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 6px;
         }
-        .info-icon { font-size: 28px; line-height: 1; }
+
+        .info-icon {
+            font-size: 28px;
+            line-height: 1;
+        }
+
         .info-title {
             font-size: 17px;
             font-weight: 700;
             color: var(--v-gold, #c4953a);
             flex: 1;
         }
+
         .info-danger {
             font-size: 14px;
             padding: 3px 10px;
             border-radius: 10px;
-            background: rgba(60,40,40,0.6);
-            border: 1px solid rgba(123,32,32,0.4);
+            background: rgba(60, 40, 40, 0.6);
+            border: 1px solid rgba(123, 32, 32, 0.4);
             color: #e0a0a0;
             white-space: nowrap;
             letter-spacing: -1px;
             flex-shrink: 0;
         }
+
         .info-biome {
             font-size: 12px;
             color: var(--v-text-dim, #8a8090);
             margin-bottom: 6px;
         }
+
         .info-desc {
             font-size: 13px;
             color: var(--v-text, #e0d6c8);
@@ -171,38 +231,47 @@
             font-style: italic;
             opacity: 0.85;
         }
+
         .info-tags {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
             margin-bottom: 8px;
         }
+
         .info-tag {
             font-size: 11px;
             color: var(--v-text-dim, #8a8090);
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             padding: 3px 8px;
             border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
+
         .info-tag-warn {
             color: #cc9944;
-            background: rgba(180,130,40,0.1);
-            border-color: rgba(180,130,40,0.2);
+            background: rgba(180, 130, 40, 0.1);
+            border-color: rgba(180, 130, 40, 0.2);
         }
+
         .info-tag-danger {
             color: #cc6666;
-            background: rgba(160,50,50,0.1);
-            border-color: rgba(160,50,50,0.2);
+            background: rgba(160, 50, 50, 0.1);
+            border-color: rgba(160, 50, 50, 0.2);
         }
-        .info-quests, .info-dungeons {
+
+        .info-quests,
+        .info-dungeons {
             font-size: 12px;
             color: var(--v-text-dim, #8a8090);
             margin-bottom: 6px;
         }
-        .info-quests span, .info-dungeons span {
+
+        .info-quests span,
+        .info-dungeons span {
             color: var(--v-text, #e0d6c8);
         }
+
         .info-note {
             display: none;
             font-size: 12px;
@@ -211,12 +280,14 @@
             padding: 6px 0;
             font-style: italic;
         }
+
         .info-actions {
             display: flex;
             flex-direction: column;
             gap: 8px;
             margin-top: 10px;
         }
+
         .info-btn {
             width: 100%;
             padding: 12px 16px;
@@ -229,27 +300,36 @@
             text-align: center;
             transition: opacity 0.15s, transform 0.15s;
         }
+
         .info-btn-travel {
             background: linear-gradient(135deg, #c4953a, #a07828);
         }
+
         .info-btn-risky {
             background: linear-gradient(135deg, #8a5a1a, #6a3a0a);
             border: 1px solid #c4953a;
         }
+
         .info-btn-explore {
             background: linear-gradient(135deg, #2a7a2a, #1a5a1a);
         }
+
         .info-btn-camp {
             background: linear-gradient(135deg, #6a5a30, #4a3a20);
         }
+
         .info-btn-close {
-            background: rgba(255,255,255,0.07);
+            background: rgba(255, 255, 255, 0.07);
             color: var(--v-text-dim, #8a8090);
             font-weight: 500;
             font-size: 13px;
             padding: 10px 16px;
         }
-        .info-btn:active { opacity: 0.8; transform: scale(0.98); }
+
+        .info-btn:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
 
         /* ═══ BOTTOM BAR ═══ */
         #bottom-bar {
@@ -261,21 +341,26 @@
             z-index: 60;
             flex-shrink: 0;
         }
+
         .bar-btn {
             flex: 1;
             padding: 10px 4px;
             border: 1px solid var(--v-border, #3e3845);
             border-radius: 8px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             color: var(--v-text, #e0d6c8);
             font-size: 12px;
             font-weight: 600;
             text-align: center;
             cursor: pointer;
         }
-        .bar-btn:active { opacity: 0.7; }
+
+        .bar-btn:active {
+            opacity: 0.7;
+        }
+
         .bar-btn-return {
-            border-color: rgba(196,149,58,0.3);
+            border-color: rgba(196, 149, 58, 0.3);
             color: var(--v-gold, #c4953a);
         }
 
@@ -284,10 +369,22 @@
             cursor: pointer;
             transition: filter 0.2s ease;
         }
-        .loc-hex:hover { filter: brightness(1.15); }
-        .loc-hex.current { filter: drop-shadow(0 0 10px rgba(196,149,58,0.6)); }
-        .loc-hex.frontier { opacity: 0.4; }
-        .loc-hex.hidden { display: none; }
+
+        .loc-hex:hover {
+            filter: brightness(1.15);
+        }
+
+        .loc-hex.current {
+            filter: drop-shadow(0 0 10px rgba(196, 149, 58, 0.6));
+        }
+
+        .loc-hex.frontier {
+            opacity: 0.4;
+        }
+
+        .loc-hex.hidden {
+            display: none;
+        }
 
         .loc-label {
             font-size: 9.5px;
@@ -298,6 +395,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-weight: 500;
         }
+
         .loc-icon {
             font-size: 18px;
             text-anchor: middle;
@@ -311,6 +409,7 @@
             stroke-dasharray: 8 5;
             stroke-linecap: round;
         }
+
         .path-line.active {
             stroke: rgba(196, 149, 58, 0.45);
             stroke-width: 2;
@@ -321,9 +420,17 @@
         }
 
         @keyframes playerPulse {
-            0%, 100% { filter: drop-shadow(0 0 8px rgba(196,149,58,0.35)); }
-            50% { filter: drop-shadow(0 0 16px rgba(196,149,58,0.7)); }
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.35));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 16px rgba(196, 149, 58, 0.7));
+            }
         }
+
         .player-marker {
             animation: playerPulse 2.5s ease-in-out infinite;
         }
@@ -331,11 +438,13 @@
         /* ═══ CURRENT LOCATION BADGE ═══ */
         #current-loc-badge {
             position: absolute;
-            top: 8px; left: 12px; right: 12px;
+            top: 8px;
+            left: 12px;
+            right: 12px;
             background: rgba(43, 40, 48, 0.92);
             -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
-            border: 1px solid rgba(196,149,58,0.2);
+            border: 1px solid rgba(196, 149, 58, 0.2);
             border-radius: 10px;
             padding: 8px 12px;
             display: flex;
@@ -346,12 +455,17 @@
             z-index: 40;
             pointer-events: none;
         }
-        #current-loc-badge .badge-icon { font-size: 18px; }
+
+        #current-loc-badge .badge-icon {
+            font-size: 18px;
+        }
+
         #current-loc-badge .badge-name {
             font-weight: 600;
             color: var(--v-gold, #c4953a);
             font-size: 13px;
         }
+
         #current-loc-badge .badge-info {
             margin-left: auto;
             font-size: 11px;
@@ -361,7 +475,8 @@
         /* ═══ LEGEND ═══ */
         #legend {
             position: absolute;
-            bottom: 8px; right: 8px;
+            bottom: 8px;
+            right: 8px;
             background: rgba(43, 40, 48, 0.85);
             -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
@@ -379,7 +494,8 @@
         .v-toast-error {
             position: fixed;
             bottom: 80px;
-            left: 50%; transform: translateX(-50%);
+            left: 50%;
+            transform: translateX(-50%);
             background: #7b2020;
             color: #fff;
             padding: 8px 16px;
@@ -388,22 +504,42 @@
             z-index: 300;
             animation: fadeInUp 0.3s ease;
         }
+
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translate(-50%, 10px); }
-            to { opacity: 1; transform: translate(-50%, 0); }
+            from {
+                opacity: 0;
+                transform: translate(-50%, 10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
         }
 
         /* ═══ FOG PARTICLES ═══ */
         .fog-cloud {
             animation: fogDrift 8s ease-in-out infinite alternate;
         }
+
         @keyframes fogDrift {
-            0% { transform: translate(-5px, -2px); opacity: 0.05; }
-            50% { opacity: 0.11; }
-            100% { transform: translate(5px, 2px); opacity: 0.05; }
+            0% {
+                transform: translate(-5px, -2px);
+                opacity: 0.05;
+            }
+
+            50% {
+                opacity: 0.11;
+            }
+
+            100% {
+                transform: translate(5px, 2px);
+                opacity: 0.05;
+            }
         }
     </style>
 </head>
+
 <body>
     <!-- Loading Screen -->
     <div id="loading">
@@ -417,11 +553,15 @@
         <span class="hud-level" id="hud-level">Nv.1</span>
         <div class="hud-bar-group">
             <span class="hud-bar-label">HP</span>
-            <div class="hud-bar"><div class="hud-bar-fill hp-fill" id="hud-hp"></div></div>
+            <div class="hud-bar">
+                <div class="hud-bar-fill hp-fill" id="hud-hp"></div>
+            </div>
         </div>
         <div class="hud-bar-group">
             <span class="hud-bar-label">MP</span>
-            <div class="hud-bar"><div class="hud-bar-fill mp-fill" id="hud-mp"></div></div>
+            <div class="hud-bar">
+                <div class="hud-bar-fill mp-fill" id="hud-mp"></div>
+            </div>
         </div>
     </div>
 
@@ -470,9 +610,11 @@
         </button>
     </div>
 
-    <script src="map-layout.js"></script>
-    <script src="navigate-core.js"></script>
-    <script src="navigate-map.js"></script>
-    <script src="navigate-ui.js"></script>
+    <script>
+        var v = Date.now();
+        var scripts = ['map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-ui.js'];
+        scripts.forEach(function (s) { document.write('<script src="' + s + '?v=' + v + '"><\/script>'); });
+    </script>
 </body>
+
 </html>

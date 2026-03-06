@@ -8,23 +8,23 @@ const STORAGE_KEY = 'valdoria_navigate_state';
 
 // Global state
 let S = {
-                token: '',
-                api: '',
-                uid: 0,
-                currentLoc: 'city_gates',
-                knownLocs: [],
-                discoveredLocs: [],  // locations actually visited (for fog state)
-                locations: {},       // loc_id -> {n, b, i, d, s, c, ds}
-                charData: null,      // {nm, lv, hp, mh, mp, mm, ci}
-                quests: [],          // [{id, t, loc?}]
-                dungeons: {},        // loc_id -> [{n, done}]
-                canCamp: false,
-                hasMap: 0,           // 0=no map, 1=regional/fragment, 2=full map
-                mapCoverage: new Set(), // set of loc_ids with map coverage (for fog silhouette)
-                selectedLoc: null,   // currently tapped location ID
-                // Pan/zoom state
-                panX: 0, panY: 0,
-                zoom: 1.0,
+    token: '',
+    api: '',
+    uid: 0,
+    currentLoc: 'city_gates',
+    knownLocs: [],
+    discoveredLocs: [],  // locations actually visited (for fog state)
+    locations: {},       // loc_id -> {n, b, i, d, s, c, ds}
+    charData: null,      // {nm, lv, hp, mh, mp, mm, ci}
+    quests: [],          // [{id, t, loc?}]
+    dungeons: {},        // loc_id -> [{n, done}]
+    canCamp: false,
+    hasMap: 0,           // 0=no map, 1=regional/fragment, 2=full map
+    mapCoverage: new Set(), // set of loc_ids with map coverage (for fog silhouette)
+    selectedLoc: null,   // currently tapped location ID
+    // Pan/zoom state
+    panX: 0, panY: 0,
+    zoom: 1.0,
 };
 
 // Connection graph (built from location data)
@@ -35,74 +35,78 @@ let connectionGraph = {};  // loc_id -> [connected_loc_ids]
 // -----------------------------------------------------------
 
 async function initAsync() {
-                try {
-                                            tg = window.Telegram?.WebApp;
-                                            if (tg) {
-                                                                                        tg.ready();
-                                                                                        tg.expand();
-                                                                                        try { tg.disableVerticalSwipes(); } catch(e) { console.warn('[NAVIGATE] disableVerticalSwipes:', e); }
-                                            }
+    try {
+        tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            try { tg.disableVerticalSwipes(); } catch (e) { console.warn('[NAVIGATE] disableVerticalSwipes:', e); }
+            if (tg.BackButton) {
+                tg.BackButton.show();
+                tg.BackButton.onClick(() => { handleClose(); });
+            }
+        }
 
-                    // Parse URL params
-                    const params = new URLSearchParams(window.location.search);
-                                            S.token = params.get('token') || '';
-                                            S.api = params.get('api') || '';
-                                            S.uid = parseInt(params.get('uid') || '0');
-                                            const dataB64 = params.get('data') || '';
+        // Parse URL params
+        const params = new URLSearchParams(window.location.search);
+        S.token = params.get('token') || '';
+        S.api = params.get('api') || '';
+        S.uid = parseInt(params.get('uid') || '0');
+        const dataB64 = params.get('data') || '';
 
-                    if (!dataB64) {
-                                                        showError('Dados do mapa nao encontrados');
-                                                        return;
-                    }
+        if (!dataB64) {
+            showError('Dados do mapa nao encontrados');
+            return;
+        }
 
-                    // Decompress payload (zlib + base64)
-                    const data = await decompressPayload(dataB64);
-                                            if (!data) {
-                                                                                        showError('Falha ao carregar dados');
-                                                                                        return;
-                                            }
+        // Decompress payload (zlib + base64)
+        const data = await decompressPayload(dataB64);
+        if (!data) {
+            showError('Falha ao carregar dados');
+            return;
+        }
 
-                    // Load state
-                    S.currentLoc = data.cl || 'city_gates';
-                                            S.locations = data.lo || {};
-                                            S.knownLocs = data.kl || Object.keys(S.locations);
-                                            S.discoveredLocs = data.dl || [];
-                                            S.charData = data.c || {};
-                                            S.quests = data.q || [];
-                                            S.dungeons = data.dd || {};
-                                            S.canCamp = !!data.cc;
-                                            S.hasMap = data.hm || 0;
-                                            S.mapCoverage = new Set(data.mc || []);
+        // Load state
+        S.currentLoc = data.cl || 'city_gates';
+        S.locations = data.lo || {};
+        S.knownLocs = data.kl || Object.keys(S.locations);
+        S.discoveredLocs = data.dl || [];
+        S.charData = data.c || {};
+        S.quests = data.q || [];
+        S.dungeons = data.dd || {};
+        S.canCamp = !!data.cc;
+        S.hasMap = data.hm || 0;
+        S.mapCoverage = new Set(data.mc || []);
 
-                    // Build connection graph from location data
-                    buildConnectionGraph();
+        // Build connection graph from location data
+        buildConnectionGraph();
 
-                    // Restore viewport state if token matches
-                    restoreViewport();
+        // Restore viewport state if token matches
+        restoreViewport();
 
-                    // Update HUD
-                    updateHUD();
+        // Update HUD
+        updateHUD();
 
-                    // Update current location badge
-                    updateLocationBadge();
+        // Update current location badge
+        updateLocationBadge();
 
-                    // Update bottom bar
-                    updateBottomBar();
+        // Update bottom bar
+        updateBottomBar();
 
-                    // Render the map
-                    renderMap();
+        // Render the map
+        renderMap();
 
-                    // Center on current location
-                    centerOnLocation(S.currentLoc);
+        // Center on current location
+        centerOnLocation(S.currentLoc);
 
-                    // Hide loading screen
-                    setTimeout(() => {
-                                                        document.getElementById('loading').classList.add('hidden');
-                    }, 300);
+        // Hide loading screen
+        setTimeout(() => {
+            document.getElementById('loading').classList.add('hidden');
+        }, 300);
 
-                } catch(e) {
-                                            showError('Erro ao inicializar', e);
-                }
+    } catch (e) {
+        showError('Erro ao inicializar', e);
+    }
 }
 
 // -----------------------------------------------------------
@@ -110,48 +114,48 @@ async function initAsync() {
 // -----------------------------------------------------------
 
 async function decompressPayload(b64) {
-                try {
-                                            // URL-safe base64 -> standard
-                    const std = b64.replace(/-/g, '+').replace(/_/g, '/');
-                                            const binary = atob(std);
-                                            const bytes = new Uint8Array(binary.length);
-                                            for (let i = 0; i < binary.length; i++) {
-                                                                                        bytes[i] = binary.charCodeAt(i);
-                                            }
+    try {
+        // URL-safe base64 -> standard
+        const std = b64.replace(/-/g, '+').replace(/_/g, '/');
+        const binary = atob(std);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
 
-                    // 'deflate' mode handles zlib-wrapped data (header+payload+checksum) directly
-                    const inflated = await zlibInflate(bytes);
-                                            return JSON.parse(new TextDecoder().decode(inflated));
-                } catch(e) {
-                                            console.error('[NAVIGATE] Decompress failed:', e);
-                                            return null;
-                }
+        // 'deflate' mode handles zlib-wrapped data (header+payload+checksum) directly
+        const inflated = await zlibInflate(bytes);
+        return JSON.parse(new TextDecoder().decode(inflated));
+    } catch (e) {
+        console.error('[NAVIGATE] Decompress failed:', e);
+        return null;
+    }
 }
 
 async function zlibInflate(data) {
-                if (typeof DecompressionStream === 'undefined') {
-                                            throw new Error('DecompressionStream not supported');
-                }
-                // 'deflate' mode handles zlib-wrapped data (header+payload+checksum) directly
+    if (typeof DecompressionStream === 'undefined') {
+        throw new Error('DecompressionStream not supported');
+    }
+    // 'deflate' mode handles zlib-wrapped data (header+payload+checksum) directly
     const ds = new DecompressionStream('deflate');
-                const writer = ds.writable.getWriter();
-                writer.write(data);
-                writer.close();
-                const reader = ds.readable.getReader();
-                const chunks = [];
-                while (true) {
-                                            const { done, value } = await reader.read();
-                                            if (done) break;
-                                            chunks.push(value);
-                }
-                const totalLen = chunks.reduce((s, c) => s + c.length, 0);
-                const merged = new Uint8Array(totalLen);
-                let offset = 0;
-                for (const chunk of chunks) {
-                                            merged.set(chunk, offset);
-                                            offset += chunk.length;
-                }
-                return merged;
+    const writer = ds.writable.getWriter();
+    writer.write(data);
+    writer.close();
+    const reader = ds.readable.getReader();
+    const chunks = [];
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+    }
+    const totalLen = chunks.reduce((s, c) => s + c.length, 0);
+    const merged = new Uint8Array(totalLen);
+    let offset = 0;
+    for (const chunk of chunks) {
+        merged.set(chunk, offset);
+        offset += chunk.length;
+    }
+    return merged;
 }
 
 // -----------------------------------------------------------
@@ -159,30 +163,30 @@ async function zlibInflate(data) {
 // -----------------------------------------------------------
 
 function buildConnectionGraph() {
-                connectionGraph = {};
-                const knownSet = new Set(S.knownLocs);
+    connectionGraph = {};
+    const knownSet = new Set(S.knownLocs);
 
     // Initialize all known locations
     for (const locId of S.knownLocs) {
-                            connectionGraph[locId] = [];
+        connectionGraph[locId] = [];
     }
 
     // Build from static CONNECTION_EDGES (map-layout.js), filtered to known locations.
     for (const [aId, bId] of CONNECTION_EDGES) {
-                            if (knownSet.has(aId) && knownSet.has(bId)) {
-                                                                    if (connectionGraph[aId] && !connectionGraph[aId].includes(bId)) {
-                                                                                                                                connectionGraph[aId].push(bId);
-                                                                            }
-                                                                    if (connectionGraph[bId] && !connectionGraph[bId].includes(aId)) {
-                                                                                                                                connectionGraph[bId].push(aId);
-                                                                            }
-                            }
+        if (knownSet.has(aId) && knownSet.has(bId)) {
+            if (connectionGraph[aId] && !connectionGraph[aId].includes(bId)) {
+                connectionGraph[aId].push(bId);
+            }
+            if (connectionGraph[bId] && !connectionGraph[bId].includes(aId)) {
+                connectionGraph[bId].push(aId);
+            }
+        }
     }
 }
 
 function isConnected(fromId, toId) {
-                const conns = connectionGraph[fromId] || [];
-                return conns.includes(toId);
+    const conns = connectionGraph[fromId] || [];
+    return conns.includes(toId);
 }
 
 // -----------------------------------------------------------
@@ -190,26 +194,26 @@ function isConnected(fromId, toId) {
 // -----------------------------------------------------------
 
 function saveViewport() {
-                try {
-                                            sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-                                                                                        tk: S.token,
-                                                                                        px: S.panX, py: S.panY,
-                                                                                        zm: S.zoom,
-                                                                                        ts: Date.now(),
-                                            }));
-                } catch(e) { console.warn('[NAVIGATE] saveViewport:', e); }
+    try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+            tk: S.token,
+            px: S.panX, py: S.panY,
+            zm: S.zoom,
+            ts: Date.now(),
+        }));
+    } catch (e) { console.warn('[NAVIGATE] saveViewport:', e); }
 }
 
 function restoreViewport() {
-                try {
-                                            const raw = sessionStorage.getItem(STORAGE_KEY);
-                                            if (!raw) return;
-                                            const snap = JSON.parse(raw);
-                                            if (snap.tk !== S.token || Date.now() - snap.ts > 600000) return;
-                                            S.panX = snap.px || 0;
-                                            S.panY = snap.py || 0;
-                                            S.zoom = snap.zm || 1.0;
-                } catch(e) { console.warn('[NAVIGATE] restoreViewport:', e); }
+    try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const snap = JSON.parse(raw);
+        if (snap.tk !== S.token || Date.now() - snap.ts > 600000) return;
+        S.panX = snap.px || 0;
+        S.panY = snap.py || 0;
+        S.zoom = snap.zm || 1.0;
+    } catch (e) { console.warn('[NAVIGATE] restoreViewport:', e); }
 }
 
 // -----------------------------------------------------------
@@ -217,36 +221,36 @@ function restoreViewport() {
 // -----------------------------------------------------------
 
 function updateHUD() {
-                const c = S.charData;
-                if (!c) return;
+    const c = S.charData;
+    if (!c) return;
 
     document.getElementById('hud-name').textContent = `${c.ci || ''} ${c.nm || 'Heroi'}`;
-                document.getElementById('hud-level').textContent = `Nv.${c.lv || 1}`;
+    document.getElementById('hud-level').textContent = `Nv.${c.lv || 1}`;
 
     const hpPct = c.mh > 0 ? Math.min(100, (c.hp / c.mh) * 100) : 0;
-                document.getElementById('hud-hp').style.width = `${hpPct}%`;
+    document.getElementById('hud-hp').style.width = `${hpPct}%`;
 
     const mpPct = c.mm > 0 ? Math.min(100, (c.mp / c.mm) * 100) : 0;
-                document.getElementById('hud-mp').style.width = `${mpPct}%`;
+    document.getElementById('hud-mp').style.width = `${mpPct}%`;
 }
 
 function updateLocationBadge() {
-                const loc = S.locations[S.currentLoc];
-                if (!loc) return;
+    const loc = S.locations[S.currentLoc];
+    if (!loc) return;
 
     document.getElementById('badge-icon').textContent = loc.i || '';
-                document.getElementById('badge-name').textContent = loc.n || 'Desconhecido';
+    document.getElementById('badge-name').textContent = loc.n || 'Desconhecido';
 
     const known = S.knownLocs.length;
-                const total = Object.keys(LOCATION_COORDS).length;
-                document.getElementById('badge-info').textContent = `Mapa ${known}/${total}`;
+    const total = Object.keys(LOCATION_COORDS).length;
+    document.getElementById('badge-info').textContent = `Mapa ${known}/${total}`;
 }
 
 function updateBottomBar() {
-                const returnBtn = document.getElementById('btn-return');
-                // Hide return button if already at city gates
+    const returnBtn = document.getElementById('btn-return');
+    // Hide return button if already at city gates
     if (S.currentLoc === 'city_gates') {
-                            returnBtn.style.display = 'none';
+        returnBtn.style.display = 'none';
     }
 }
 
@@ -255,99 +259,99 @@ function updateBottomBar() {
 // -----------------------------------------------------------
 
 function finishNavigation(type, target, flags) {
-            console.log('[NAVIGATE][DEBUG] finishNavigation called:', { type, target, flags, _navSent, api: S.api, uid: S.uid });
+    console.log('[NAVIGATE][DEBUG] finishNavigation called:', { type, target, flags, _navSent, api: S.api, uid: S.uid });
 
     if (_navSent) {
-                    console.warn('[NAVIGATE][DEBUG] BLOCKED: double-fire');
-                    return;
+        console.warn('[NAVIGATE][DEBUG] BLOCKED: double-fire');
+        return;
     }
-            _navSent = true;
+    _navSent = true;
 
     // Disable all action buttons immediately
     document.querySelectorAll('.info-btn').forEach(btn => {
-                    btn.style.pointerEvents = 'none';
-                    btn.style.opacity = '0.5';
+        btn.style.pointerEvents = 'none';
+        btn.style.opacity = '0.5';
     });
 
     const payload = {
-                    action: 'navigate_action',
-                    token: S.token,
-                    uid: S.uid,
-                    type: type,
+        action: 'navigate_action',
+        token: S.token,
+        uid: S.uid,
+        type: type,
     };
-            if (target) payload.target = target;
-            // Map and visit flags for travel risk calculation
-            if (flags?.noMap || (type === 'travel' && S.hasMap === 0)) payload.noMap = true;
-            if (flags?.firstVisit) payload.firstVisit = true;
+    if (target) payload.target = target;
+    // Map and visit flags for travel risk calculation
+    if (flags?.noMap || (type === 'travel' && S.hasMap === 0)) payload.noMap = true;
+    if (flags?.firstVisit) payload.firstVisit = true;
 
-    try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e) {}
+    try { tg?.HapticFeedback?.impactOccurred('medium'); } catch (e) { }
 
     if (!S.api) {
-                    showError('Erro: API nao configurada. Feche e reabra o mapa.');
-                    console.error('[NAVIGATE] No api URL param - cannot send action. Redeploy needed.');
-                    setTimeout(() => { _navSent = false; }, 2000);
-                    // Re-enable buttons
-                document.querySelectorAll('.info-btn').forEach(btn => {
-                                    btn.style.pointerEvents = '';
-                                    btn.style.opacity = '';
-                });
-                    return;
+        showError('Erro: API nao configurada. Feche e reabra o mapa.');
+        console.error('[NAVIGATE] No api URL param - cannot send action. Redeploy needed.');
+        setTimeout(() => { _navSent = false; }, 2000);
+        // Re-enable buttons
+        document.querySelectorAll('.info-btn').forEach(btn => {
+            btn.style.pointerEvents = '';
+            btn.style.opacity = '';
+        });
+        return;
     }
 
     const apiUrl = `${S.api}/api/navigate/action`;
-            console.log('[NAVIGATE][DEBUG] fetch POST to', apiUrl, payload);
+    console.log('[NAVIGATE][DEBUG] fetch POST to', apiUrl, payload);
 
     // Show sending indicator
     const btn = document.getElementById('btn-travel') || document.querySelector('.info-btn.primary');
-            if (btn) btn.textContent = 'Enviando...';
+    if (btn) btn.textContent = 'Enviando...';
 
     const _nh = { 'Content-Type': 'application/json' };
     if (window.Telegram?.WebApp?.initData) { _nh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
     _nh['ngrok-skip-browser-warning'] = '1';
     fetch(apiUrl, {
-                    method: 'POST',
-                    headers: _nh,
-                    body: JSON.stringify(payload),
+        method: 'POST',
+        headers: _nh,
+        body: JSON.stringify(payload),
     })
-            .then(r => {
-                            console.log('[NAVIGATE][DEBUG] fetch status:', r.status);
-                            if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                            return r.json();
-            })
-            .then(d => {
-                console.log('[NAVIGATE][DEBUG] fetch ok:', d);
-                // Travel: backend returns explore URL -> redirect to explore
-                if (d.url && type === 'travel') {
-                    console.log('[NAVIGATE][DEBUG] travel -> explore:', d.url);
-                    window.location.href = d.url;
-                    return;
-                }
-                // Other actions (camp, return, explore): go to Game Hub
-                _transitionToGame();
-            })
-            .catch(e => {
-                            console.error('[NAVIGATE][DEBUG] fetch error:', e);
-                            showError('Erro ao viajar: ' + e.message + '. Tente novamente.');
-                            // Re-enable after error so user can retry
-                           _navSent = false;
-                            document.querySelectorAll('.info-btn').forEach(btn => {
-                                                btn.style.pointerEvents = '';
-                                                btn.style.opacity = '';
-                            });
-                            if (btn) btn.textContent = type === 'travel' ? 'Viajar' : type;
+        .then(r => {
+            console.log('[NAVIGATE][DEBUG] fetch status:', r.status);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
+        .then(d => {
+            console.log('[NAVIGATE][DEBUG] fetch ok:', d);
+            // Travel: backend returns explore URL -> redirect to explore
+            if (d.url && type === 'travel') {
+                console.log('[NAVIGATE][DEBUG] travel -> explore:', d.url);
+                window.location.replace(d.url);
+                return;
+            }
+            // Other actions (camp, return, explore): go to Game Hub
+            _transitionToGame();
+        })
+        .catch(e => {
+            console.error('[NAVIGATE][DEBUG] fetch error:', e);
+            showError('Erro ao viajar: ' + e.message + '. Tente novamente.');
+            // Re-enable after error so user can retry
+            _navSent = false;
+            document.querySelectorAll('.info-btn').forEach(btn => {
+                btn.style.pointerEvents = '';
+                btn.style.opacity = '';
             });
+            if (btn) btn.textContent = type === 'travel' ? 'Viajar' : type;
+        });
 }
 
 function handleReturn() {
-                finishNavigation('return');
+    finishNavigation('return');
 }
 
 function handleClose() {
-                _transitionToGame();
+    _transitionToGame();
 }
 
 async function _transitionToGame() {
-    if (!S.api || !S.token) { try { tg?.close(); } catch(e) {} return; }
+    if (!S.api || !S.token) { try { tg?.close(); } catch (e) { } return; }
     const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token };
     if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
     h['ngrok-skip-browser-warning'] = '1';
@@ -358,11 +362,11 @@ async function _transitionToGame() {
             body: JSON.stringify({ from: 'navigate', to: 'game', user_id: S.uid, payload: {} })
         });
         const d = await r.json();
-        if (d.url) { window.location.href = d.url; return; }
-    } catch(e) { console.error('[NAVIGATE] transition error:', e); }
+        if (d.url) { window.location.replace(d.url); return; }
+    } catch (e) { console.error('[NAVIGATE] transition error:', e); }
     // Fallback: redirect to game hub directly
     const base = window.location.href.replace(/\/navigate\/.*/, '');
-    window.location.href = `${base}/game/?token=${S.token}&api=${encodeURIComponent(S.api)}&uid=${S.uid}&return=game&v=1`;
+    window.location.replace(`${base}/game/?token=${S.token}&api=${encodeURIComponent(S.api)}&uid=${S.uid}&return=game&v=1`);
 }
 
 // -----------------------------------------------------------
@@ -370,12 +374,12 @@ async function _transitionToGame() {
 // -----------------------------------------------------------
 
 function showError(msg, err = null) {
-                console.error('[NAVIGATE]', msg, err || '');
-                const toast = document.createElement('div');
-                toast.className = 'v-toast-error';
-                toast.textContent = msg;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
+    console.error('[NAVIGATE]', msg, err || '');
+    const toast = document.createElement('div');
+    toast.className = 'v-toast-error';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
 
     // Hide loading on error
     document.getElementById('loading').classList.add('hidden');

@@ -1,155 +1,377 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#2b2830">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+    </script>
     <title>Wiki Dev — Lendas de Valdoria</title>
     <style>
         /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
-        * { scrollbar-width: none; -ms-overflow-style: none; }
-        *::-webkit-scrollbar { display: none; }
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
 
-        body { display:flex; flex-direction:column; }
+        *::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
 
         /* ─── Auth Gate ─── */
-        .gate { display:flex; flex-direction:column; align-items:center; justify-content:center;
-                min-height:80vh; text-align:center; padding:32px 24px; animation:v-fadeIn .5s ease; }
-        .gate-icon { font-size:64px; margin-bottom:16px; }
-        .gate-title { font-size:18px; color:var(--v-gold); font-weight:700; letter-spacing:1px; margin-bottom:8px; }
-        .gate-text  { font-size:13px; color:var(--v-text-dim); line-height:1.5; max-width:280px; }
+        .gate {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            text-align: center;
+            padding: 32px 24px;
+            animation: v-fadeIn .5s ease;
+        }
+
+        .gate-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .gate-title {
+            font-size: 18px;
+            color: var(--v-gold);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .gate-text {
+            font-size: 13px;
+            color: var(--v-text-dim);
+            line-height: 1.5;
+            max-width: 280px;
+        }
 
         /* ─── Header ─── */
-        .wiki-header { padding:20px 16px 12px; text-align:center;
-                       background:linear-gradient(180deg,#352f38 0%,var(--v-bg) 100%); position:relative; }
-        .wiki-header::before { content:''; position:absolute; top:0; left:0; right:0; height:2px;
-                               background:linear-gradient(90deg,transparent,var(--v-crimson),var(--v-gold),var(--v-crimson),transparent); }
-        .wiki-header h1 { font-size:18px; color:var(--v-gold); letter-spacing:3px; text-transform:uppercase;
-                          text-shadow:0 0 16px rgba(196,149,58,.4); font-weight:900; margin-bottom:4px; }
-        .wiki-header .sub { font-size:11px; color:var(--v-text-dim); letter-spacing:1px; }
+        .wiki-header {
+            padding: 20px 16px 12px;
+            text-align: center;
+            background: linear-gradient(180deg, #352f38 0%, var(--v-bg) 100%);
+            position: relative;
+        }
+
+        .wiki-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
+        }
+
+        .wiki-header h1 {
+            font-size: 18px;
+            color: var(--v-gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 16px rgba(196, 149, 58, .4);
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .wiki-header .sub {
+            font-size: 11px;
+            color: var(--v-text-dim);
+            letter-spacing: 1px;
+        }
 
         /* ─── Search ─── */
-        .search-wrap { padding:12px 16px 4px; }
-        .search-wrap input { width:100%; padding:10px 14px; background:var(--v-bg-card); border:1px solid var(--v-border);
-                             border-radius:var(--v-radius); color:var(--v-text); font-size:13px; outline:none; }
-        .search-wrap input:focus { border-color:var(--v-gold-dim); }
-        .search-wrap input::placeholder { color:var(--v-text-dim); }
+        .search-wrap {
+            padding: 12px 16px 4px;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--v-bg-card);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius);
+            color: var(--v-text);
+            font-size: 13px;
+            outline: none;
+        }
+
+        .search-wrap input:focus {
+            border-color: var(--v-gold-dim);
+        }
+
+        .search-wrap input::placeholder {
+            color: var(--v-text-dim);
+        }
 
         /* ─── Topic Grid ─── */
-        .topics { padding:8px 16px 24px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-        .topic-card { display:flex; flex-direction:column; align-items:center; text-align:center;
-                      padding:18px 10px 14px; background:linear-gradient(165deg,var(--v-bg-card) 0%,#282430 100%);
-                      border:1px solid var(--v-border); border-radius:var(--v-radius); cursor:pointer;
-                      transition:all .25s ease; box-shadow:0 2px 8px rgba(0,0,0,.3); }
-        .topic-card:active { transform:scale(.96); }
-        .topic-card:hover  { border-color:var(--v-gold-dim); box-shadow:0 0 12px rgba(196,149,58,.12); }
-        .topic-card.hidden { display:none; }
-        .tc-icon { font-size:28px; margin-bottom:6px; }
-        .tc-name { font-size:13px; font-weight:700; color:var(--v-text-bright); margin-bottom:3px; }
-        .tc-desc { font-size:10px; color:var(--v-text-dim); line-height:1.3; }
+        .topics {
+            padding: 8px 16px 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .topic-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 18px 10px 14px;
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius);
+            cursor: pointer;
+            transition: all .25s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+        }
+
+        .topic-card:active {
+            transform: scale(.96);
+        }
+
+        .topic-card:hover {
+            border-color: var(--v-gold-dim);
+            box-shadow: 0 0 12px rgba(196, 149, 58, .12);
+        }
+
+        .topic-card.hidden {
+            display: none;
+        }
+
+        .tc-icon {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .tc-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--v-text-bright);
+            margin-bottom: 3px;
+        }
+
+        .tc-desc {
+            font-size: 10px;
+            color: var(--v-text-dim);
+            line-height: 1.3;
+        }
 
         /* ─── Article View ─── */
-        .article { display:none; padding:16px; animation:v-fadeIn .35s ease; }
-        .article.active { display:block; }
-        .article h2 { font-size:16px; color:var(--v-gold); margin:20px 0 8px; border-bottom:1px solid var(--v-border); padding-bottom:4px; }
-        .article h2:first-child { margin-top:0; }
-        .article h3 { font-size:14px; color:var(--v-silver); margin:14px 0 6px; }
-        .article p  { font-size:13px; color:var(--v-text); line-height:1.6; margin:0 0 10px; }
-        .article ul { margin:0 0 10px 18px; padding:0; }
-        .article li { font-size:13px; color:var(--v-text); line-height:1.5; margin-bottom:4px; }
-        .article code { background:var(--v-bg-accent); color:var(--v-gold); padding:1px 5px; border-radius:3px; font-size:12px; }
-        .article pre { background:var(--v-bg-accent); border:1px solid var(--v-border); border-radius:var(--v-radius);
-                       padding:12px; overflow-x:auto; margin:0 0 12px; }
-        .article pre code { background:none; padding:0; color:var(--v-text); font-size:11px; line-height:1.5; }
-        .article table { width:100%; border-collapse:collapse; margin:0 0 12px; font-size:12px; }
-        .article th { background:var(--v-bg-accent); color:var(--v-gold); padding:6px 8px; text-align:left; border:1px solid var(--v-border); }
-        .article td { padding:6px 8px; border:1px solid var(--v-border); color:var(--v-text); }
-        .article .tag { display:inline-block; background:var(--v-bg-accent); color:var(--v-gold-dim); padding:2px 8px;
-                        border-radius:10px; font-size:10px; margin:0 4px 4px 0; }
+        .article {
+            display: none;
+            padding: 16px;
+            animation: v-fadeIn .35s ease;
+        }
+
+        .article.active {
+            display: block;
+        }
+
+        .article h2 {
+            font-size: 16px;
+            color: var(--v-gold);
+            margin: 20px 0 8px;
+            border-bottom: 1px solid var(--v-border);
+            padding-bottom: 4px;
+        }
+
+        .article h2:first-child {
+            margin-top: 0;
+        }
+
+        .article h3 {
+            font-size: 14px;
+            color: var(--v-silver);
+            margin: 14px 0 6px;
+        }
+
+        .article p {
+            font-size: 13px;
+            color: var(--v-text);
+            line-height: 1.6;
+            margin: 0 0 10px;
+        }
+
+        .article ul {
+            margin: 0 0 10px 18px;
+            padding: 0;
+        }
+
+        .article li {
+            font-size: 13px;
+            color: var(--v-text);
+            line-height: 1.5;
+            margin-bottom: 4px;
+        }
+
+        .article code {
+            background: var(--v-bg-accent);
+            color: var(--v-gold);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .article pre {
+            background: var(--v-bg-accent);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius);
+            padding: 12px;
+            overflow-x: auto;
+            margin: 0 0 12px;
+        }
+
+        .article pre code {
+            background: none;
+            padding: 0;
+            color: var(--v-text);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 0 12px;
+            font-size: 12px;
+        }
+
+        .article th {
+            background: var(--v-bg-accent);
+            color: var(--v-gold);
+            padding: 6px 8px;
+            text-align: left;
+            border: 1px solid var(--v-border);
+        }
+
+        .article td {
+            padding: 6px 8px;
+            border: 1px solid var(--v-border);
+            color: var(--v-text);
+        }
+
+        .article .tag {
+            display: inline-block;
+            background: var(--v-bg-accent);
+            color: var(--v-gold-dim);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin: 0 4px 4px 0;
+        }
 
         /* ─── Back Button ─── */
-        .back-bar { padding:12px 16px; }
-        .back-btn { width:100%; padding:11px; background:var(--v-bg-card); border:1px solid var(--v-border);
-                    border-radius:var(--v-radius); color:var(--v-text-bright); font-size:13px; font-weight:600;
-                    cursor:pointer; transition:all .2s; }
-        .back-btn:hover { border-color:var(--v-gold-dim); }
+        .back-bar {
+            padding: 12px 16px;
+        }
+
+        .back-btn {
+            width: 100%;
+            padding: 11px;
+            background: var(--v-bg-card);
+            border: 1px solid var(--v-border);
+            border-radius: var(--v-radius);
+            color: var(--v-text-bright);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .back-btn:hover {
+            border-color: var(--v-gold-dim);
+        }
     </style>
 </head>
+
 <body>
 
-<!-- Auth Gate (shown when not authorized) -->
-<div id="gate-blocked" class="gate" style="display:none">
-    <div class="gate-icon">🔒</div>
-    <div class="gate-title">Acesso Restrito</div>
-    <div class="gate-text">Esta wiki e exclusiva para desenvolvedores autorizados do projeto Lendas de Valdoria.</div>
-</div>
-<div id="gate-no-tg" class="gate" style="display:none">
-    <div class="gate-icon">📱</div>
-    <div class="gate-title">Acesse via Telegram</div>
-    <div class="gate-text">Abra esta pagina atraves do bot Lendas de Valdoria no Telegram para autenticar.</div>
-</div>
-
-<!-- Wiki Content (shown when authorized) -->
-<div id="wiki-app" style="display:none">
-    <!-- Main View -->
-    <div id="main-view">
-        <div class="wiki-header">
-            <h1>Wiki Dev</h1>
-            <div class="sub">Documentacao Tecnica Interna</div>
-        </div>
-        <div class="search-wrap">
-            <input type="text" id="search" placeholder="Buscar topico..." oninput="filterTopics(this.value)">
-        </div>
-        <div class="topics" id="topics-grid"></div>
-    </div>
-
-    <!-- Article View -->
-    <div id="article-view" style="display:none">
-        <div class="wiki-header">
-            <h1 id="article-title"></h1>
-        </div>
-        <div class="article active" id="article-body"></div>
-        <div class="back-bar">
-            <button class="back-btn" onclick="showMain()">&#8592; Voltar</button>
+    <!-- Auth Gate (shown when not authorized) -->
+    <div id="gate-blocked" class="gate" style="display:none">
+        <div class="gate-icon">🔒</div>
+        <div class="gate-title">Acesso Restrito</div>
+        <div class="gate-text">Esta wiki e exclusiva para desenvolvedores autorizados do projeto Lendas de Valdoria.
         </div>
     </div>
-</div>
+    <div id="gate-no-tg" class="gate" style="display:none">
+        <div class="gate-icon">📱</div>
+        <div class="gate-title">Acesse via Telegram</div>
+        <div class="gate-text">Abra esta pagina atraves do bot Lendas de Valdoria no Telegram para autenticar.</div>
+    </div>
 
-<script>
-/* ═══════════════════════════════════════════════════════════════════
-   AUTH — Telegram WebApp user verification
-   ═══════════════════════════════════════════════════════════════════ */
-const AUTHORIZED_IDS = [842486022];
+    <!-- Wiki Content (shown when authorized) -->
+    <div id="wiki-app" style="display:none">
+        <!-- Main View -->
+        <div id="main-view">
+            <div class="wiki-header">
+                <h1>Wiki Dev</h1>
+                <div class="sub">Documentacao Tecnica Interna</div>
+            </div>
+            <div class="search-wrap">
+                <input type="text" id="search" placeholder="Buscar topico..." oninput="filterTopics(this.value)">
+            </div>
+            <div class="topics" id="topics-grid"></div>
+        </div>
 
-const tg = window.Telegram?.WebApp;
-const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
+        <!-- Article View -->
+        <div id="article-view" style="display:none">
+            <div class="wiki-header">
+                <h1 id="article-title"></h1>
+            </div>
+            <div class="article active" id="article-body"></div>
+            <div class="back-bar">
+                <button class="back-btn" onclick="showMain()">&#8592; Voltar</button>
+            </div>
+        </div>
+    </div>
 
-function initAuth() {
-    if (!tg || !tg.initDataUnsafe?.user) {
-        document.getElementById('gate-no-tg').style.display = 'flex';
-        return false;
-    }
-    tg.ready(); tg.expand();
-    tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg);
-    const uid = tg.initDataUnsafe.user.id;
-    if (!AUTHORIZED_IDS.includes(uid)) {
-        document.getElementById('gate-blocked').style.display = 'flex';
-        return false;
-    }
-    document.getElementById('wiki-app').style.display = 'block';
-    return true;
-}
+    <script>
+        /* ═══════════════════════════════════════════════════════════════════
+           AUTH — Telegram WebApp user verification
+           ═══════════════════════════════════════════════════════════════════ */
+        const AUTHORIZED_IDS = [842486022];
 
-/* ═══════════════════════════════════════════════════════════════════
-   WIKI TOPICS — Technical documentation content
-   ═══════════════════════════════════════════════════════════════════ */
-const TOPICS = [
-{
-    id: 'arch', icon: '🏗️', name: 'Arquitetura Geral', desc: 'GSIA, modulos e fluxo de requests',
-    body: `<h2>Graph-Based Semantic Interaction Architecture (GSIA)</h2>
+        const tg = window.Telegram?.WebApp;
+        const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
+
+        function initAuth() {
+            if (!tg || !tg.initDataUnsafe?.user) {
+                document.getElementById('gate-no-tg').style.display = 'flex';
+                return false;
+            }
+            tg.ready(); tg.expand();
+            tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg);
+            const uid = tg.initDataUnsafe.user.id;
+            if (!AUTHORIZED_IDS.includes(uid)) {
+                document.getElementById('gate-blocked').style.display = 'flex';
+                return false;
+            }
+            document.getElementById('wiki-app').style.display = 'block';
+            return true;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           WIKI TOPICS — Technical documentation content
+           ═══════════════════════════════════════════════════════════════════ */
+        const TOPICS = [
+            {
+                id: 'arch', icon: '🏗️', name: 'Arquitetura Geral', desc: 'GSIA, modulos e fluxo de requests',
+                body: `<h2>Graph-Based Semantic Interaction Architecture (GSIA)</h2>
 <p>O jogo implementa uma arquitetura baseada em grafos para navegacao, dialogos e gerenciamento de estado.</p>
 <h3>Fluxo de Request</h3>
 <pre><code>Telegram → bot.py → GameEngine.process_callback()
@@ -167,10 +389,10 @@ const TOPICS = [
 <li><code>EventDispatcher</code> — pub/sub de eventos</li>
 <li><code>SessionManager</code> — sessoes por usuario</li>
 </ul>`
-},
-{
-    id: 'bot', icon: '🤖', name: 'Bot Transport', desc: 'Modulos bot_*.py e handlers',
-    body: `<h2>Camada de Transporte</h2>
+            },
+            {
+                id: 'bot', icon: '🤖', name: 'Bot Transport', desc: 'Modulos bot_*.py e handlers',
+                body: `<h2>Camada de Transporte</h2>
 <p>O bot e dividido em modulos especializados para manter cada arquivo abaixo de ~400 linhas:</p>
 <table><tr><th>Modulo</th><th>Responsabilidade</th></tr>
 <tr><td><code>bot_state.py</code></td><td>Globals compartilhados (engine, broker, timers)</td></tr>
@@ -183,10 +405,10 @@ const TOPICS = [
 <tr><td><code>bot_maintenance.py</code></td><td>Modo manutencao, UI, notificacoes</td></tr></table>
 <h3>Padrao de Import</h3>
 <p>Todos os modulos fazem <code>import src.bot_state as state</code> e acessam <code>state.engine</code>, <code>state.broker</code>. O <code>bot_state</code> so importa de <code>src/game/*</code>, evitando imports circulares.</p>`
-},
-{
-    id: 'db', icon: '🗄️', name: 'Banco de Dados', desc: 'Schema, storage per-character, SQLite/PG',
-    body: `<h2>Arquitetura de Dados</h2>
+            },
+            {
+                id: 'db', icon: '🗄️', name: 'Banco de Dados', desc: 'Schema, storage per-character, SQLite/PG',
+                body: `<h2>Arquitetura de Dados</h2>
 <h3>Tabelas Principais</h3>
 <table><tr><th>Tabela</th><th>Conteudo</th></tr>
 <tr><td><code>players</code></td><td>Metadados da conta: active_char_id, username</td></tr>
@@ -201,10 +423,10 @@ const TOPICS = [
 </ul>
 <h3>Persistencia por Personagem</h3>
 <p><code>save_player_state()</code> grava apenas UMA linha de personagem via <code>db.save_character()</code>. Nunca toca outros personagens. Soft delete via coluna <code>deleted_at</code>.</p>`
-},
-{
-    id: 'combat', icon: '⚔️', name: 'Motor de Combate', desc: 'CombatManager, Engine, Turn, Actions',
-    body: `<h2>Pipeline de Combate</h2>
+            },
+            {
+                id: 'combat', icon: '⚔️', name: 'Motor de Combate', desc: 'CombatManager, Engine, Turn, Actions',
+                body: `<h2>Pipeline de Combate</h2>
 <pre><code>CombatManager → CombatEngine → CombatTurn → CombatActions
   → CombatResultUI + CombatUI (renderizacao)</code></pre>
 <h3>Timers (IMUTAVEIS)</h3>
@@ -215,10 +437,10 @@ const TOPICS = [
 <h3>Recursos por Classe</h3>
 <p><span class="tag">Mana</span> <span class="tag">Ki</span> <span class="tag">Furia</span> <span class="tag">Inspiracao</span> <span class="tag">Pacto</span> <span class="tag">Vigor</span> <span class="tag">Energia</span></p>
 <p>Todos seguem a nomenclatura D&D 5e. Nunca inventar nomes alternativos.</p>`
-},
-{
-    id: 'broker', icon: '📨', name: 'MessageBroker', desc: 'Circuit breaker, rate limiter, handles',
-    body: `<h2>Entrega Centralizada de Mensagens</h2>
+            },
+            {
+                id: 'broker', icon: '📨', name: 'MessageBroker', desc: 'Circuit breaker, rate limiter, handles',
+                body: `<h2>Entrega Centralizada de Mensagens</h2>
 <p>Arquivo: <code>src/game/system/message_broker.py</code></p>
 <h3>Classificacao de Erros</h3>
 <table><tr><th>Tipo</th><th>Acao</th></tr>
@@ -233,10 +455,10 @@ const TOPICS = [
 <p><code>asyncio.Semaphore(25)</code> global + intervalo minimo de 0.35s por usuario.</p>
 <h3>MessageHandle</h3>
 <p>Rastreia estado da mensagem por usuario: <code>alive</code> | <code>gone</code> | <code>unknown</code>. Impede timers de editar mensagens deletadas.</p>`
-},
-{
-    id: 'nav', icon: '🧭', name: 'Navegacao & Telas', desc: 'Screen registry, nav manager, routing',
-    body: `<h2>Screen Registry</h2>
+            },
+            {
+                id: 'nav', icon: '🧭', name: 'Navegacao & Telas', desc: 'Screen registry, nav manager, routing',
+                body: `<h2>Screen Registry</h2>
 <p>Arquivo: <code>game/core/screen_registry.py</code></p>
 <p>Cada tela e registrada com ID hierarquico (<code>zone.screen.sub</code>), callback, parent_id, zone, tags e flag restorable.</p>
 <h3>Zones</h3>
@@ -247,10 +469,10 @@ const TOPICS = [
 <p>Estado em <code>player.metadata['nav_stack']</code> e <code>player.metadata['edge_weights']</code>.</p>
 <h3>Regra de Callback</h3>
 <p>NUNCA extrair IDs com <code>split("_")[N]</code>. Sempre usar <code>data.replace("prefix_", "", 1)</code> porque IDs contem underscores (ex: <code>npc_4889</code>).</p>`
-},
-{
-    id: 'persist', icon: '💾', name: 'Persistencia', desc: 'Salvar/carregar, multi-personagem, exclusão leve',
-    body: `<h2>PersistenceManager</h2>
+            },
+            {
+                id: 'persist', icon: '💾', name: 'Persistencia', desc: 'Salvar/carregar, multi-personagem, exclusão leve',
+                body: `<h2>PersistenceManager</h2>
 <p>Arquivo: <code>game/system/persistence.py</code></p>
 <h3>Storage por Personagem</h3>
 <ul>
@@ -264,10 +486,10 @@ const TOPICS = [
 <p><code>db.soft_delete_character()</code> seta <code>deleted_at</code>. <code>db.undelete_character()</code> limpa.</p>
 <h3>Backup</h3>
 <p><code>create_full_backup()</code> monta dados de todas as linhas de personagem + meta antes de criar backup JSON.</p>`
-},
-{
-    id: 'deploy', icon: '☁️', name: 'Deploy & Infra', desc: 'DEV/PROD local, Cloud Run, CI/CD',
-    body: `<h2>Ambientes Locais</h2>
+            },
+            {
+                id: 'deploy', icon: '☁️', name: 'Deploy & Infra', desc: 'DEV/PROD local, Cloud Run, CI/CD',
+                body: `<h2>Ambientes Locais</h2>
 <pre><code>environments/
 ├── dev/   (.env, data/, logs/, src/ → junction)
 └── prod/  (.env, data/, logs/, src/ → copia staged)</code></pre>
@@ -283,10 +505,10 @@ const TOPICS = [
 <p>DEVE sincronizar TODOS os arquivos de codigo. Hash SHA-256, verificacao pos-copia, limpeza de __pycache__.</p>
 <h3>Deploy Cloud</h3>
 <pre><code>gcloud run deploy lendas-bot --source . --region southamerica-east1</code></pre>`
-},
-{
-    id: 'tests', icon: '🧪', name: 'Testes', desc: 'Coverage, unit, preflight',
-    body: `<h2>Suite de Testes (3 niveis)</h2>
+            },
+            {
+                id: 'tests', icon: '🧪', name: 'Testes', desc: 'Coverage, unit, preflight',
+                body: `<h2>Suite de Testes (3 niveis)</h2>
 <p>Executar na ordem: Unit → Coverage → Preflight</p>
 <h3>1. Testes Unitarios</h3>
 <pre><code>scripts\\test_unit.bat
@@ -299,10 +521,10 @@ const TOPICS = [
 <h3>3. Preflight</h3>
 <pre><code>python -m src.scripts.preflight</code></pre>
 <p>9 checks CRITICAL + 16 WARNING + 14 INFO. Mesmo que roda no startup do bot. TODOS os findings devem ser corrigidos.</p>`
-},
-{
-    id: 'contrib', icon: '📝', name: 'Guia de Contribuicao', desc: 'Como adicionar telas, skills, itens',
-    body: `<h2>Adicionando uma Nova Tela</h2>
+            },
+            {
+                id: 'contrib', icon: '📝', name: 'Guia de Contribuicao', desc: 'Como adicionar telas, skills, itens',
+                body: `<h2>Adicionando uma Nova Tela</h2>
 <ol>
 <li>Registrar em <code>screen_data_*.py</code> com ID hierarquico, callback, parent_id, zone, tags</li>
 <li>Criar handler no arquivo de actions apropriado</li>
@@ -323,10 +545,10 @@ const TOPICS = [
 <li>Itens: DEVEM existir no ITEMS_DB</li>
 <li>Testes: rodar unit + coverage + preflight apos cada mudanca</li>
 </ul>`
-},
-{
-    id: 'npc-ai', icon: '🧠', name: 'Motor de Inteligência NPC', desc: 'Motor emocional, memória, LLM, rede social',
-    body: `<h2>Visao Geral</h2>
+            },
+            {
+                id: 'npc-ai', icon: '🧠', name: 'Motor de Inteligência NPC', desc: 'Motor emocional, memória, LLM, rede social',
+                body: `<h2>Visao Geral</h2>
 <p>O NPC Intelligence Engine eleva todos os NPCs do jogo com inteligencia adaptativa, inspirado em NVIDIA ACE, Inworld AI, Utility AI e GOAP. Composto por 8 componentes integrados.</p>
 
 <h2>Arquitetura — 8 Componentes</h2>
@@ -444,13 +666,13 @@ semantic_memory: Dict[str, Dict]             # npc_id → {relationship_summary,
 <tr><td>guild_npc_personality.py</td><td>system/guild/</td><td>Personalidade de Guilda</td></tr>
 <tr><td>guild_npc_combat_lines.py</td><td>system/guild/</td><td>Falas de Combate</td></tr>
 </table>`
-},
-{
-    id: 'explore-webapp',
-    icon: '🗺️',
-    name: 'Exploration WebApp',
-    desc: 'Mapa hexagonal interativo para exploração',
-    body: `<h2>Exploration WebApp</h2>
+            },
+            {
+                id: 'explore-webapp',
+                icon: '🗺️',
+                name: 'Exploration WebApp',
+                desc: 'Mapa hexagonal interativo para exploração',
+                body: `<h2>Exploration WebApp</h2>
 <p>Sistema de exploração visual via Telegram WebApp. O jogador navega um mapa hexagonal 11×13, interage com POIs (Points of Interest), realiza stat checks, e acumula recompensas — tudo com narração imersiva no estilo de Mestre de D&D.</p>
 
 <h3>Arquitetura</h3>
@@ -533,13 +755,13 @@ semantic_memory: Dict[str, Dict]             # npc_id → {relationship_summary,
 <tr><td>exploration_webapp_apply.py</td><td>exploration_webapp/</td><td>Processa sendData — aplica rewards</td></tr>
 <tr><td>explore/index.html</td><td>valdoria-webapp/</td><td>WebApp completo (1280 linhas)</td></tr>
 </table>`
-},
-{
-    id: 'game-hub',
-    icon: '🎮',
-    name: 'Game Hub WebApp',
-    desc: 'Renderizador universal — todo o jogo no WebApp',
-    body: `<h2>Game Hub WebApp</h2>
+            },
+            {
+                id: 'game-hub',
+                icon: '🎮',
+                name: 'Game Hub WebApp',
+                desc: 'Renderizador universal — todo o jogo no WebApp',
+                body: `<h2>Game Hub WebApp</h2>
 <p>WebApp universal que substitui os botoes inline do Telegram para TODA a experiencia de jogo. Apos selecionar/criar personagem no Telegram, o jogador clica "JOGAR" e todo o restante roda no WebApp — cidade, NPCs, quests, combate, inventario, mercado, level up, exploraçao.</p>
 
 <h3>Principio Chave</h3>
@@ -671,61 +893,62 @@ semantic_memory: Dict[str, Dict]             # npc_id → {relationship_summary,
 <tr><td>webapp_transition_game.py</td><td>game/</td><td>Handlers de transiçao game ↔ *</td></tr>
 <tr><td>webapp_transition_urls.py</td><td>game/</td><td>URL builders compartilhados</td></tr>
 </table>`
-}
-];
+            }
+        ];
 
-/* ═══════════════════════════════════════════════════════════════════
-   NAVIGATION — Render topics grid and article views
-   ═══════════════════════════════════════════════════════════════════ */
-const $grid = document.getElementById('topics-grid');
-const $mainView = document.getElementById('main-view');
-const $articleView = document.getElementById('article-view');
-const $articleTitle = document.getElementById('article-title');
-const $articleBody = document.getElementById('article-body');
+        /* ═══════════════════════════════════════════════════════════════════
+           NAVIGATION — Render topics grid and article views
+           ═══════════════════════════════════════════════════════════════════ */
+        const $grid = document.getElementById('topics-grid');
+        const $mainView = document.getElementById('main-view');
+        const $articleView = document.getElementById('article-view');
+        const $articleTitle = document.getElementById('article-title');
+        const $articleBody = document.getElementById('article-body');
 
-function renderGrid() {
-    $grid.innerHTML = TOPICS.map(t =>
-        `<div class="topic-card" data-id="${t.id}" data-search="${t.name.toLowerCase()} ${t.desc.toLowerCase()}" onclick="openTopic('${t.id}')">
+        function renderGrid() {
+            $grid.innerHTML = TOPICS.map(t =>
+                `<div class="topic-card" data-id="${t.id}" data-search="${t.name.toLowerCase()} ${t.desc.toLowerCase()}" onclick="openTopic('${t.id}')">
             <div class="tc-icon">${t.icon}</div>
             <div class="tc-name">${t.name}</div>
             <div class="tc-desc">${t.desc}</div>
         </div>`
-    ).join('');
-}
+            ).join('');
+        }
 
-function filterTopics(query) {
-    const q = query.toLowerCase().trim();
-    document.querySelectorAll('.topic-card').forEach(card => {
-        card.classList.toggle('hidden', q && !card.dataset.search.includes(q));
-    });
-}
+        function filterTopics(query) {
+            const q = query.toLowerCase().trim();
+            document.querySelectorAll('.topic-card').forEach(card => {
+                card.classList.toggle('hidden', q && !card.dataset.search.includes(q));
+            });
+        }
 
-function openTopic(id) {
-    const topic = TOPICS.find(t => t.id === id);
-    if (!topic) return;
-    $articleTitle.textContent = topic.icon + ' ' + topic.name;
-    $articleBody.innerHTML = topic.body;
-    $mainView.style.display = 'none';
-    $articleView.style.display = 'block';
-    window.scrollTo(0, 0);
-    if (tg) tg.BackButton.show();
-}
+        function openTopic(id) {
+            const topic = TOPICS.find(t => t.id === id);
+            if (!topic) return;
+            $articleTitle.textContent = topic.icon + ' ' + topic.name;
+            $articleBody.innerHTML = topic.body;
+            $mainView.style.display = 'none';
+            $articleView.style.display = 'block';
+            window.scrollTo(0, 0);
+            if (tg) tg.BackButton.show();
+        }
 
-function showMain() {
-    $articleView.style.display = 'none';
-    $mainView.style.display = 'block';
-    window.scrollTo(0, 0);
-    if (tg) tg.BackButton.hide();
-}
+        function showMain() {
+            $articleView.style.display = 'none';
+            $mainView.style.display = 'block';
+            window.scrollTo(0, 0);
+            if (tg) tg.BackButton.hide();
+        }
 
-// Telegram back button integration
-if (tg) tg.BackButton.onClick(() => {
-    if ($articleView.style.display !== 'none') showMain();
-});
+        // Telegram back button integration
+        if (tg) tg.BackButton.onClick(() => {
+            if ($articleView.style.display !== 'none') showMain();
+        });
 
-// ─── Init ───
-if (initAuth()) renderGrid();
-</script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(()=>{})}</script>
+        // ─── Init ───
+        if (initAuth()) renderGrid();
+    </script>
+    <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('../sw.js').catch(() => { }) }</script>
 </body>
+
 </html>

@@ -183,7 +183,7 @@ async function transitionFromArena(result) {
         if (resp.ok) {
             const data = await resp.json();
             if (data.url) {
-                window.location.href = data.url;
+                window.location.replace(data.url);
                 return;
             }
         }
@@ -219,7 +219,7 @@ async function transitionToLevelup() {
         if (resp.ok) {
             const data = await resp.json();
             if (data.url) {
-                window.location.href = data.url;
+                window.location.replace(data.url);
                 return;
             }
         }
@@ -253,7 +253,7 @@ async function transitionToInventoryFromArena() {
         if (resp.ok) {
             const data = await resp.json();
             if (data.url) {
-                window.location.href = data.url;
+                window.location.replace(data.url);
                 return;
             }
         }

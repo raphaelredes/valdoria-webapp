@@ -91,7 +91,7 @@ function saveState() {
             iu: S.inventoryUsed,
             ts: Date.now(),
         };
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
 
         // POST to backend API if enabled
         if (typeof S !== 'undefined' && S.apiBase && S.uid && S.token) {
@@ -114,12 +114,15 @@ function saveState() {
 
 function restoreState() {
     try {
-        const raw = sessionStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return false;
         const snap = JSON.parse(raw);
-        if (snap.tk !== S.token) return false;
+        if (snap.tk !== S.token) {
+            localStorage.removeItem(STORAGE_KEY);
+            return false;
+        }
         if (Date.now() - snap.ts > 600000) {
-            sessionStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(STORAGE_KEY);
             return false;
         }
         S.playerCol = snap.pc; S.playerRow = snap.pr;

@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#2b2830">
     <meta name="description" content="Lendas de Valdoria - RPG medieval de fantasia via Telegram, inspirado em D&D 5e">
     <meta property="og:title" content="Lendas de Valdoria">
-    <meta property="og:description" content="RPG medieval de fantasia via Telegram com dados 3D, criador de personagens e oficina de artesanato">
+    <meta property="og:description"
+        content="RPG medieval de fantasia via Telegram com dados 3D, criador de personagens e oficina de artesanato">
     <meta property="og:type" content="website">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="manifest" href="manifest.json">
     <title>Lendas de Valdoria</title>
-    <link rel="stylesheet" href="valdoria-design.css?v=4">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="valdoria-design.css?v=' + v + '">');
+    </script>
     <style>
         body {
             display: flex;
@@ -28,18 +33,23 @@
             background: linear-gradient(180deg, #352f38 0%, var(--v-bg) 100%);
             position: relative;
         }
+
         .hero::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 2px;
             background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
         }
+
         .hero-icon {
             font-size: 48px;
             margin-bottom: 8px;
             animation: v-fadeIn 0.6s ease;
         }
+
         .hero h1 {
             font-size: 22px;
             color: var(--v-gold);
@@ -49,6 +59,7 @@
             font-weight: 900;
             margin-bottom: 6px;
         }
+
         .hero-subtitle {
             font-size: 13px;
             color: var(--v-text-dim);
@@ -64,6 +75,7 @@
             margin: 16px auto 0;
             position: relative;
         }
+
         .hero-divider::after {
             content: '\u25C6';
             position: absolute;
@@ -82,6 +94,7 @@
             max-width: 380px;
             padding: 20px 16px;
         }
+
         .section-label {
             font-size: 11px;
             color: var(--v-text-dim);
@@ -90,6 +103,7 @@
             text-align: center;
             margin-bottom: 12px;
         }
+
         .apps-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -112,25 +126,32 @@
             position: relative;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
+
         .app-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 10%; right: 10%;
+            top: 0;
+            left: 10%;
+            right: 10%;
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(184, 196, 208, 0.12), transparent);
             border-radius: 1px;
         }
+
         .app-card:active {
             transform: scale(0.96);
         }
+
         .app-card:hover {
             border-color: var(--v-gold-dim);
             box-shadow: 0 0 15px rgba(196, 149, 58, 0.15), 0 4px 16px rgba(0, 0, 0, 0.4);
         }
+
         .app-icon {
             font-size: 36px;
             margin-bottom: 8px;
         }
+
         .app-name {
             font-size: 14px;
             font-weight: 700;
@@ -138,6 +159,7 @@
             margin-bottom: 4px;
             letter-spacing: 0.3px;
         }
+
         .app-desc {
             font-size: 11px;
             color: var(--v-text-dim);
@@ -145,12 +167,29 @@
         }
 
         /* Staggered fade-in for cards */
-        .app-card:nth-child(1) { animation: v-fadeIn 0.4s ease 0.1s both; }
-        .app-card:nth-child(2) { animation: v-fadeIn 0.4s ease 0.2s both; }
-        .app-card:nth-child(3) { animation: v-fadeIn 0.4s ease 0.3s both; }
-        .app-card:nth-child(4) { animation: v-fadeIn 0.4s ease 0.4s both; }
-        .app-card:nth-child(5) { animation: v-fadeIn 0.4s ease 0.5s both; }
-        .app-card:nth-child(6) { animation: v-fadeIn 0.4s ease 0.6s both; }
+        .app-card:nth-child(1) {
+            animation: v-fadeIn 0.4s ease 0.1s both;
+        }
+
+        .app-card:nth-child(2) {
+            animation: v-fadeIn 0.4s ease 0.2s both;
+        }
+
+        .app-card:nth-child(3) {
+            animation: v-fadeIn 0.4s ease 0.3s both;
+        }
+
+        .app-card:nth-child(4) {
+            animation: v-fadeIn 0.4s ease 0.4s both;
+        }
+
+        .app-card:nth-child(5) {
+            animation: v-fadeIn 0.4s ease 0.5s both;
+        }
+
+        .app-card:nth-child(6) {
+            animation: v-fadeIn 0.4s ease 0.6s both;
+        }
 
         /* ─── Footer ─── */
         .hub-footer {
@@ -159,6 +198,7 @@
             text-align: center;
             width: 100%;
         }
+
         .footer-divider {
             width: 40%;
             max-width: 120px;
@@ -166,15 +206,18 @@
             background: linear-gradient(90deg, transparent, var(--v-border), transparent);
             margin: 0 auto 12px;
         }
+
         .footer-text {
             font-size: 11px;
             color: var(--v-text-dim);
             letter-spacing: 0.5px;
         }
+
         .footer-text a {
             color: var(--v-gold-dim);
             text-decoration: none;
         }
+
         .footer-version {
             font-size: 10px;
             color: var(--v-border);
@@ -182,57 +225,59 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="hero">
-    <div class="hero-icon">🐉</div>
-    <h1>Lendas de Valdoria</h1>
-    <div class="hero-subtitle">RPG Medieval de Fantasia</div>
-    <div class="hero-divider"></div>
-</div>
-
-<div class="apps-section">
-    <div class="section-label">Mini Apps</div>
-    <div class="apps-grid">
-        <a href="dice/" class="app-card">
-            <div class="app-icon">🎲</div>
-            <div class="app-name">Mesa de Dados</div>
-            <div class="app-desc">Role dados 3D interativos</div>
-        </a>
-        <a href="character_creator/" class="app-card">
-            <div class="app-icon">⚔️</div>
-            <div class="app-name">Forjar Personagem</div>
-            <div class="app-desc">Crie seu heroi D&D 5e</div>
-        </a>
-        <a href="workstation/" class="app-card">
-            <div class="app-icon">🔨</div>
-            <div class="app-name">Oficina</div>
-            <div class="app-desc">Fabrique itens e equipamentos</div>
-        </a>
-        <a href="pix/" class="app-card">
-            <div class="app-icon">💰</div>
-            <div class="app-name">Pagamento PIX</div>
-            <div class="app-desc">QR Code para contribuicoes</div>
-        </a>
-        <a href="explore/" class="app-card">
-            <div class="app-icon">🗺️</div>
-            <div class="app-name">Explorar</div>
-            <div class="app-desc">Mapa hexagonal interativo</div>
-        </a>
-        <a href="wiki/" class="app-card">
-            <div class="app-icon">📖</div>
-            <div class="app-name">Wiki Dev</div>
-            <div class="app-desc">Documentacao tecnica interna</div>
-        </a>
+    <div class="hero">
+        <div class="hero-icon">🐉</div>
+        <h1>Lendas de Valdoria</h1>
+        <div class="hero-subtitle">RPG Medieval de Fantasia</div>
+        <div class="hero-divider"></div>
     </div>
-</div>
 
-<div class="hub-footer">
-    <div class="footer-divider"></div>
-    <div class="footer-text">Jogue via <a href="https://t.me/">Telegram Bot</a></div>
-    <div class="footer-version">v4.0</div>
-</div>
+    <div class="apps-section">
+        <div class="section-label">Mini Apps</div>
+        <div class="apps-grid">
+            <a href="dice/" class="app-card">
+                <div class="app-icon">🎲</div>
+                <div class="app-name">Mesa de Dados</div>
+                <div class="app-desc">Role dados 3D interativos</div>
+            </a>
+            <a href="character_creator/" class="app-card">
+                <div class="app-icon">⚔️</div>
+                <div class="app-name">Forjar Personagem</div>
+                <div class="app-desc">Crie seu heroi D&D 5e</div>
+            </a>
+            <a href="workstation/" class="app-card">
+                <div class="app-icon">🔨</div>
+                <div class="app-name">Oficina</div>
+                <div class="app-desc">Fabrique itens e equipamentos</div>
+            </a>
+            <a href="pix/" class="app-card">
+                <div class="app-icon">💰</div>
+                <div class="app-name">Pagamento PIX</div>
+                <div class="app-desc">QR Code para contribuicoes</div>
+            </a>
+            <a href="explore/" class="app-card">
+                <div class="app-icon">🗺️</div>
+                <div class="app-name">Explorar</div>
+                <div class="app-desc">Mapa hexagonal interativo</div>
+            </a>
+            <a href="wiki/" class="app-card">
+                <div class="app-icon">📖</div>
+                <div class="app-name">Wiki Dev</div>
+                <div class="app-desc">Documentacao tecnica interna</div>
+            </a>
+        </div>
+    </div>
 
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}</script>
+    <div class="hub-footer">
+        <div class="footer-divider"></div>
+        <div class="footer-text">Jogue via <a href="https://t.me/">Telegram Bot</a></div>
+        <div class="footer-version">v4.0</div>
+    </div>
+
+    <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(() => { }) }</script>
 </body>
+
 </html>

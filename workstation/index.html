@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,13 +13,25 @@
     <link rel="manifest" href="../manifest.json">
     <title>Oficina de Artesanato - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="../valdoria-design.css?v=4">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+    </script>
     <style>
         /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
-        * { scrollbar-width: none; -ms-overflow-style: none; }
-        *::-webkit-scrollbar { display: none; }
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
 
-        body { padding-bottom: 80px; }
+        *::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            padding-bottom: 80px;
+        }
+
         .header {
             background: linear-gradient(135deg, var(--v-bg-raised), var(--v-bg-accent));
             padding: 16px;
@@ -28,23 +41,29 @@
             top: 0;
             z-index: 100;
         }
+
         .header::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 2px;
             background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
         }
+
         .header h1 {
             font-size: 18px;
             color: var(--v-gold);
             margin-bottom: 4px;
             text-shadow: 0 0 15px rgba(196, 149, 58, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
         }
+
         .header .stats {
             font-size: 12px;
             color: var(--v-text-dim);
         }
+
         .tabs {
             display: flex;
             overflow-x: auto;
@@ -54,7 +73,11 @@
             border-bottom: 1px solid var(--v-border);
             -webkit-overflow-scrolling: touch;
         }
-        .tabs::-webkit-scrollbar { display: none; }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
         .tab {
             flex-shrink: 0;
             padding: 8px 14px;
@@ -67,12 +90,16 @@
             transition: all 0.2s;
             white-space: nowrap;
         }
+
         .tab.active {
             background: var(--v-gold-dim);
             color: #fff;
             border-color: var(--v-gold);
         }
-        .content { padding: 12px; }
+
+        .content {
+            padding: 12px;
+        }
 
         /* Recipe cards */
         .recipe-card {
@@ -84,32 +111,54 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .recipe-card:active { transform: scale(0.98); }
+
+        .recipe-card:active {
+            transform: scale(0.98);
+        }
+
         .recipe-card.selected {
             border-color: var(--v-gold);
             box-shadow: var(--v-shadow-gold);
         }
-        .recipe-card.craftable { border-left: 3px solid var(--v-success); }
-        .recipe-card.missing { border-left: 3px solid var(--v-danger); }
+
+        .recipe-card.craftable {
+            border-left: 3px solid var(--v-success);
+        }
+
+        .recipe-card.missing {
+            border-left: 3px solid var(--v-danger);
+        }
+
         .recipe-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 6px;
         }
+
         .recipe-name {
             font-size: 15px;
             font-weight: 600;
             color: var(--v-text);
         }
+
         .recipe-badge {
             font-size: 11px;
             padding: 2px 8px;
             border-radius: 12px;
             font-weight: 600;
         }
-        .badge-ready { background: var(--v-success); color: #fff; }
-        .badge-missing { background: var(--v-danger); color: #fff; }
+
+        .badge-ready {
+            background: var(--v-success);
+            color: #fff;
+        }
+
+        .badge-missing {
+            background: var(--v-danger);
+            color: #fff;
+        }
+
         .recipe-meta {
             font-size: 12px;
             color: var(--v-text-dim);
@@ -127,13 +176,18 @@
             margin-top: 12px;
             display: none;
         }
-        .detail-panel.visible { display: block; }
+
+        .detail-panel.visible {
+            display: block;
+        }
+
         .detail-title {
             font-size: 16px;
             font-weight: 700;
             color: var(--v-gold);
             margin-bottom: 10px;
         }
+
         .ingredient-row {
             display: flex;
             justify-content: space-between;
@@ -142,8 +196,16 @@
             border-bottom: 1px solid var(--v-border);
             font-size: 13px;
         }
-        .ingredient-row:last-child { border-bottom: none; }
-        .ing-status { font-size: 14px; margin-right: 6px; }
+
+        .ingredient-row:last-child {
+            border-bottom: none;
+        }
+
+        .ing-status {
+            font-size: 14px;
+            margin-right: 6px;
+        }
+
         .gold-row {
             display: flex;
             justify-content: space-between;
@@ -152,6 +214,7 @@
             font-weight: 600;
             color: var(--v-gold);
         }
+
         .output-row {
             padding: 10px 0;
             font-size: 14px;
@@ -169,6 +232,7 @@
             background: linear-gradient(transparent, var(--v-bg) 30%);
             z-index: 100;
         }
+
         .craft-btn {
             width: 100%;
             padding: 14px;
@@ -179,11 +243,16 @@
             cursor: pointer;
             transition: all 0.2s;
         }
+
         .craft-btn.enabled {
             background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
             color: var(--v-bg);
         }
-        .craft-btn.enabled:active { transform: scale(0.98); }
+
+        .craft-btn.enabled:active {
+            transform: scale(0.98);
+        }
+
         .craft-btn.disabled {
             background: var(--v-border);
             color: var(--v-text-dim);
@@ -201,6 +270,7 @@
             margin-bottom: 6px;
             font-size: 14px;
         }
+
         .material-qty {
             color: var(--v-gold);
             font-weight: 600;
@@ -212,14 +282,21 @@
             padding: 40px 20px;
             color: var(--v-text-dim);
         }
-        .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+        .empty-state .icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
 
         /* Rarity colors: use .v-rarity-* from valdoria-design.css */
 
         /* Animations */
-        .fade-in { animation: v-fadeIn 0.3s ease; }
+        .fade-in {
+            animation: v-fadeIn 0.3s ease;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>⚒️ OFICINA DE ARTESANATO</h1>
@@ -232,133 +309,139 @@
     </div>
 
     <script>
-    const tg = window.Telegram?.WebApp;
-    const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
-    if (tg) {
-        tg.ready();
-        tg.expand();
-        tg.setHeaderColor(_vBg);
-        tg.setBackgroundColor(_vBg);
-    }
-
-    let PAYLOAD = null;
-    let selectedRecipe = null;
-    let activeTab = null;
-
-    const RARITY_LABELS = {
-        common: 'Comum', uncommon: 'Incomum', rare: 'Raro',
-        very_rare: 'Muito Raro', legendary: 'Lendário',
-    };
-
-    // ── Parse URL params ──
-    function decodeBase64Utf8(b64) {
-        const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
-        const binary = atob(raw);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        return new TextDecoder().decode(bytes);
-    }
-
-    function init() {
-        const params = new URLSearchParams(window.location.search);
-        const dataB64 = params.get('data');
-
-        if (!dataB64) {
-            showError('Dados não encontrados.');
-            return;
+        const tg = window.Telegram?.WebApp;
+        const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            tg.setHeaderColor(_vBg);
+            tg.setBackgroundColor(_vBg);
+            if (tg.BackButton) {
+                tg.BackButton.show();
+                tg.BackButton.onClick(() => {
+                    try { tg.close(); } catch (e) { console.warn('[WORKSTATION] tg.close:', e); }
+                });
+            }
         }
 
-        try {
-            const json = decodeBase64Utf8(dataB64);
-            PAYLOAD = JSON.parse(json);
-        } catch (e) {
-            console.error('[WORKSTATION] Erro ao decodificar dados', e);
-            showError('Erro ao decodificar dados.');
-            return;
+        let PAYLOAD = null;
+        let selectedRecipe = null;
+        let activeTab = null;
+
+        const RARITY_LABELS = {
+            common: 'Comum', uncommon: 'Incomum', rare: 'Raro',
+            very_rare: 'Muito Raro', legendary: 'Lendário',
+        };
+
+        // ── Parse URL params ──
+        function decodeBase64Utf8(b64) {
+            const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
+            const binary = atob(raw);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return new TextDecoder().decode(bytes);
         }
 
-        updateHeader();
-        buildTabs();
-    }
+        function init() {
+            const params = new URLSearchParams(window.location.search);
+            const dataB64 = params.get('data');
 
-    function showError(msg) {
-        console.error('[WORKSTATION]', msg);
-        document.getElementById('mainContent').innerHTML =
-            `<div class="empty-state"><div class="icon">⚠️</div><p>${msg}</p></div>`;
-    }
+            if (!dataB64) {
+                showError('Dados não encontrados.');
+                return;
+            }
 
-    function updateHeader() {
-        const stats = document.getElementById('headerStats');
-        const matCount = Object.values(PAYLOAD.materials).reduce((a, b) => a + b, 0);
-        stats.textContent = `💰 ${PAYLOAD.gold} GP · 📦 ${matCount} materiais · Lv.${PAYLOAD.level}`;
-    }
+            try {
+                const json = decodeBase64Utf8(dataB64);
+                PAYLOAD = JSON.parse(json);
+            } catch (e) {
+                console.error('[WORKSTATION] Erro ao decodificar dados', e);
+                showError('Erro ao decodificar dados.');
+                return;
+            }
 
-    // ── Tabs ──
-    function buildTabs() {
-        const container = document.getElementById('tabsContainer');
-        container.innerHTML = '';
-        const toolKeys = Object.keys(PAYLOAD.tools);
-
-        toolKeys.forEach((tk, i) => {
-            const t = PAYLOAD.tools[tk];
-            const tab = document.createElement('div');
-            tab.className = 'tab' + (i === 0 ? ' active' : '');
-            tab.textContent = `${t.emoji} ${t.name}`;
-            tab.onclick = () => selectTab(tk, tab);
-            container.appendChild(tab);
-        });
-
-        const matTab = document.createElement('div');
-        matTab.className = 'tab';
-        matTab.textContent = '📦 Materiais';
-        matTab.onclick = () => selectTab('_materials', matTab);
-        container.appendChild(matTab);
-
-        if (toolKeys.length > 0) {
-            selectTab(toolKeys[0], container.children[0]);
-        } else {
-            selectTab('_materials', matTab);
-        }
-    }
-
-    function selectTab(key, tabEl) {
-        activeTab = key;
-        selectedRecipe = null;
-        updateCraftButton();
-
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        tabEl.classList.add('active');
-
-        if (key === '_materials') {
-            renderMaterials();
-        } else {
-            renderRecipes(key);
-        }
-    }
-
-    // ── Recipes ──
-    function renderRecipes(toolKey) {
-        const content = document.getElementById('mainContent');
-        const recipes = PAYLOAD.recipes.filter(r => r.tool === toolKey);
-
-        if (!recipes.length) {
-            content.innerHTML = '<div class="empty-state"><div class="icon">📜</div>' +
-                '<p>Nenhuma receita disponível para esta ferramenta no seu nível.</p></div>';
-            document.getElementById('craftBtnContainer').style.display = 'none';
-            return;
+            updateHeader();
+            buildTabs();
         }
 
-        document.getElementById('craftBtnContainer').style.display = 'block';
+        function showError(msg) {
+            console.error('[WORKSTATION]', msg);
+            document.getElementById('mainContent').innerHTML =
+                `<div class="empty-state"><div class="icon">⚠️</div><p>${msg}</p></div>`;
+        }
 
-        let html = '';
-        recipes.forEach(r => {
-            const ready = r.has_materials && r.can_afford;
-            const cls = ready ? 'craftable' : 'missing';
-            const badge = ready
-                ? '<span class="recipe-badge badge-ready">✅ Pronto</span>'
-                : '<span class="recipe-badge badge-missing">❌ Falta</span>';
+        function updateHeader() {
+            const stats = document.getElementById('headerStats');
+            const matCount = Object.values(PAYLOAD.materials).reduce((a, b) => a + b, 0);
+            stats.textContent = `💰 ${PAYLOAD.gold} GP · 📦 ${matCount} materiais · Lv.${PAYLOAD.level}`;
+        }
 
-            html += `
+        // ── Tabs ──
+        function buildTabs() {
+            const container = document.getElementById('tabsContainer');
+            container.innerHTML = '';
+            const toolKeys = Object.keys(PAYLOAD.tools);
+
+            toolKeys.forEach((tk, i) => {
+                const t = PAYLOAD.tools[tk];
+                const tab = document.createElement('div');
+                tab.className = 'tab' + (i === 0 ? ' active' : '');
+                tab.textContent = `${t.emoji} ${t.name}`;
+                tab.onclick = () => selectTab(tk, tab);
+                container.appendChild(tab);
+            });
+
+            const matTab = document.createElement('div');
+            matTab.className = 'tab';
+            matTab.textContent = '📦 Materiais';
+            matTab.onclick = () => selectTab('_materials', matTab);
+            container.appendChild(matTab);
+
+            if (toolKeys.length > 0) {
+                selectTab(toolKeys[0], container.children[0]);
+            } else {
+                selectTab('_materials', matTab);
+            }
+        }
+
+        function selectTab(key, tabEl) {
+            activeTab = key;
+            selectedRecipe = null;
+            updateCraftButton();
+
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tabEl.classList.add('active');
+
+            if (key === '_materials') {
+                renderMaterials();
+            } else {
+                renderRecipes(key);
+            }
+        }
+
+        // ── Recipes ──
+        function renderRecipes(toolKey) {
+            const content = document.getElementById('mainContent');
+            const recipes = PAYLOAD.recipes.filter(r => r.tool === toolKey);
+
+            if (!recipes.length) {
+                content.innerHTML = '<div class="empty-state"><div class="icon">📜</div>' +
+                    '<p>Nenhuma receita disponível para esta ferramenta no seu nível.</p></div>';
+                document.getElementById('craftBtnContainer').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('craftBtnContainer').style.display = 'block';
+
+            let html = '';
+            recipes.forEach(r => {
+                const ready = r.has_materials && r.can_afford;
+                const cls = ready ? 'craftable' : 'missing';
+                const badge = ready
+                    ? '<span class="recipe-badge badge-ready">✅ Pronto</span>'
+                    : '<span class="recipe-badge badge-missing">❌ Falta</span>';
+
+                html += `
             <div class="recipe-card ${cls} fade-in" data-id="${r.id}" onclick="selectRecipeCard('${r.id}')">
                 <div class="recipe-header">
                     <span class="recipe-name">${r.name}</span>
@@ -374,27 +457,27 @@
             <div class="detail-panel" id="detail-${r.id}">
                 ${buildDetailHTML(r)}
             </div>`;
-        });
+            });
 
-        content.innerHTML = html;
-    }
+            content.innerHTML = html;
+        }
 
-    function buildDetailHTML(recipe) {
-        let ingHTML = '';
-        recipe.ingredients.forEach(ing => {
-            const have = PAYLOAD.materials[ing.item] || 0;
-            const ok = have >= ing.qty;
-            const icon = ok ? '✅' : '❌';
-            ingHTML += `<div class="ingredient-row">
+        function buildDetailHTML(recipe) {
+            let ingHTML = '';
+            recipe.ingredients.forEach(ing => {
+                const have = PAYLOAD.materials[ing.item] || 0;
+                const ok = have >= ing.qty;
+                const icon = ok ? '✅' : '❌';
+                ingHTML += `<div class="ingredient-row">
                 <span><span class="ing-status">${icon}</span> ${ing.item}</span>
                 <span>${have}/${ing.qty}</span>
             </div>`;
-        });
+            });
 
-        const goldOk = PAYLOAD.gold >= recipe.cost_gp;
-        const goldIcon = goldOk ? '✅' : '❌';
+            const goldOk = PAYLOAD.gold >= recipe.cost_gp;
+            const goldIcon = goldOk ? '✅' : '❌';
 
-        return `
+            return `
             <div class="detail-title">📋 ${recipe.name}</div>
             <div style="font-size:13px;color:var(--v-text-dim);margin-bottom:8px;">
                 Resultado: <b>${recipe.output_qty}× ${recipe.output}</b>
@@ -408,133 +491,134 @@
                 <span>${recipe.cost_gp} GP (você: ${PAYLOAD.gold} GP)</span>
             </div>
         `;
-    }
-
-    function selectRecipeCard(recipeId) {
-        if (selectedRecipe === recipeId) {
-            selectedRecipe = null;
-        } else {
-            selectedRecipe = recipeId;
         }
 
-        document.querySelectorAll('.recipe-card').forEach(c => {
-            c.classList.toggle('selected', c.dataset.id === selectedRecipe);
-        });
-
-        document.querySelectorAll('.detail-panel').forEach(p => {
-            p.classList.toggle('visible', p.id === `detail-${selectedRecipe}`);
-        });
-
-        updateCraftButton();
-
-        if (selectedRecipe) {
-            const detail = document.getElementById(`detail-${selectedRecipe}`);
-            if (detail) {
-                setTimeout(() => detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+        function selectRecipeCard(recipeId) {
+            if (selectedRecipe === recipeId) {
+                selectedRecipe = null;
+            } else {
+                selectedRecipe = recipeId;
             }
-        }
-    }
 
-    function updateCraftButton() {
-        const btn = document.getElementById('craftBtn');
-        const container = document.getElementById('craftBtnContainer');
+            document.querySelectorAll('.recipe-card').forEach(c => {
+                c.classList.toggle('selected', c.dataset.id === selectedRecipe);
+            });
 
-        if (!selectedRecipe) {
-            btn.className = 'craft-btn disabled';
-            btn.disabled = true;
-            btn.textContent = '🔨 Selecione uma receita';
-            return;
-        }
+            document.querySelectorAll('.detail-panel').forEach(p => {
+                p.classList.toggle('visible', p.id === `detail-${selectedRecipe}`);
+            });
 
-        const recipe = PAYLOAD.recipes.find(r => r.id === selectedRecipe);
-        if (!recipe) return;
+            updateCraftButton();
 
-        const ready = recipe.has_materials && recipe.can_afford;
-        if (ready) {
-            btn.className = 'craft-btn enabled';
-            btn.disabled = false;
-            btn.textContent = `🔨 Fabricar ${recipe.name}`;
-            btn.onclick = () => executeCraft(recipe.id);
-        } else {
-            btn.className = 'craft-btn disabled';
-            btn.disabled = true;
-            const missing = recipe.missing.length > 0
-                ? `Falta: ${recipe.missing.join(', ')}`
-                : `Ouro insuficiente`;
-            btn.textContent = `❌ ${missing}`;
-        }
-    }
-
-    async function executeCraft(recipeId) {
-        const btn = document.getElementById('craftBtn');
-        btn.disabled = true;
-        btn.textContent = '⏳ Fabricando...';
-        btn.className = 'craft-btn disabled';
-
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('token') || '';
-        const _apiBase = params.get('api') || '';
-        const _apiUid = params.get('uid') || '';
-
-        const payload = { action: 'craft_complete', recipe_id: recipeId, token: token };
-
-        // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)
-        if (_apiBase && token && _apiUid) {
-            try {
-                const _ch = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
-                if (tg?.initData) _ch['X-Telegram-Init-Data'] = tg.initData;
-                _ch['X-Idempotency-Key'] = crypto.randomUUID();
-                const resp = await fetch(`${_apiBase}/api/craft/apply`, {
-                    method: 'POST', headers: _ch,
-                    body: JSON.stringify({ user_id: parseInt(_apiUid), token, recipe_id: recipeId })
-                });
-                if (resp.ok) {
-                    console.log('[WORKSTATION] Craft submitted via API');
-                    setTimeout(() => { try { tg?.close(); } catch(e) {} }, 300);
-                    return;
+            if (selectedRecipe) {
+                const detail = document.getElementById(`detail-${selectedRecipe}`);
+                if (detail) {
+                    setTimeout(() => detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
                 }
-                console.warn('[WORKSTATION] API returned', resp.status, '— falling back to sendData');
-            } catch (e) {
-                console.warn('[WORKSTATION] API fetch failed — falling back to sendData', e);
             }
         }
 
-        // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
-        if (tg) {
-            tg.sendData(JSON.stringify(payload));
-            setTimeout(() => { try { tg.close(); } catch(e) { console.warn('[WORKSTATION] tg.close:', e); } }, 300);
+        function updateCraftButton() {
+            const btn = document.getElementById('craftBtn');
+            const container = document.getElementById('craftBtnContainer');
+
+            if (!selectedRecipe) {
+                btn.className = 'craft-btn disabled';
+                btn.disabled = true;
+                btn.textContent = '🔨 Selecione uma receita';
+                return;
+            }
+
+            const recipe = PAYLOAD.recipes.find(r => r.id === selectedRecipe);
+            if (!recipe) return;
+
+            const ready = recipe.has_materials && recipe.can_afford;
+            if (ready) {
+                btn.className = 'craft-btn enabled';
+                btn.disabled = false;
+                btn.textContent = `🔨 Fabricar ${recipe.name}`;
+                btn.onclick = () => executeCraft(recipe.id);
+            } else {
+                btn.className = 'craft-btn disabled';
+                btn.disabled = true;
+                const missing = recipe.missing.length > 0
+                    ? `Falta: ${recipe.missing.join(', ')}`
+                    : `Ouro insuficiente`;
+                btn.textContent = `❌ ${missing}`;
+            }
         }
-    }
 
-    // ── Materials ──
-    function renderMaterials() {
-        const content = document.getElementById('mainContent');
-        document.getElementById('craftBtnContainer').style.display = 'none';
+        async function executeCraft(recipeId) {
+            const btn = document.getElementById('craftBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Fabricando...';
+            btn.className = 'craft-btn disabled';
 
-        const mats = PAYLOAD.materials;
-        const entries = Object.entries(mats).sort((a, b) => a[0].localeCompare(b[0]));
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token') || '';
+            const _apiBase = params.get('api') || '';
+            const _apiUid = params.get('uid') || '';
 
-        if (!entries.length) {
-            content.innerHTML = '<div class="empty-state"><div class="icon">📦</div>' +
-                '<p>Nenhum material no inventário.</p>' +
-                '<p style="font-size:12px;margin-top:8px;">Colete materiais na Oficina ou durante explorações.</p></div>';
-            return;
+            const payload = { action: 'craft_complete', recipe_id: recipeId, token: token };
+
+            // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)
+            if (_apiBase && token && _apiUid) {
+                try {
+                    const _ch = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+                    if (tg?.initData) _ch['X-Telegram-Init-Data'] = tg.initData;
+                    _ch['X-Idempotency-Key'] = crypto.randomUUID();
+                    const resp = await fetch(`${_apiBase}/api/craft/apply`, {
+                        method: 'POST', headers: _ch,
+                        body: JSON.stringify({ user_id: parseInt(_apiUid), token, recipe_id: recipeId })
+                    });
+                    if (resp.ok) {
+                        console.log('[WORKSTATION] Craft submitted via API');
+                        setTimeout(() => { try { tg?.close(); } catch (e) { } }, 300);
+                        return;
+                    }
+                    console.warn('[WORKSTATION] API returned', resp.status, '— falling back to sendData');
+                } catch (e) {
+                    console.warn('[WORKSTATION] API fetch failed — falling back to sendData', e);
+                }
+            }
+
+            // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
+            if (tg) {
+                tg.sendData(JSON.stringify(payload));
+                setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[WORKSTATION] tg.close:', e); } }, 300);
+            }
         }
 
-        let html = '';
-        entries.forEach(([name, qty]) => {
-            html += `<div class="material-row fade-in">
+        // ── Materials ──
+        function renderMaterials() {
+            const content = document.getElementById('mainContent');
+            document.getElementById('craftBtnContainer').style.display = 'none';
+
+            const mats = PAYLOAD.materials;
+            const entries = Object.entries(mats).sort((a, b) => a[0].localeCompare(b[0]));
+
+            if (!entries.length) {
+                content.innerHTML = '<div class="empty-state"><div class="icon">📦</div>' +
+                    '<p>Nenhum material no inventário.</p>' +
+                    '<p style="font-size:12px;margin-top:8px;">Colete materiais na Oficina ou durante explorações.</p></div>';
+                return;
+            }
+
+            let html = '';
+            entries.forEach(([name, qty]) => {
+                html += `<div class="material-row fade-in">
                 <span>${name}</span>
                 <span class="material-qty">×${qty}</span>
             </div>`;
-        });
+            });
 
-        content.innerHTML = html;
-    }
+            content.innerHTML = html;
+        }
 
-    // ── Boot ──
-    init();
+        // ── Boot ──
+        init();
     </script>
-    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(()=>{})}</script>
+    <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('../sw.js').catch(() => { }) }</script>
 </body>
+
 </html>

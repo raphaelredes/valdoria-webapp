@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>404 - Lendas de Valdoria</title>
     <meta name="theme-color" content="#2b2830">
     <link rel="icon" type="image/svg+xml" href="/valdoria-webapp/favicon.svg">
-    <link rel="stylesheet" href="/valdoria-webapp/valdoria-design.css?v=4">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="/valdoria-webapp/valdoria-design.css?v=' + v + '">');
+    </script>
     <style>
         body {
             display: flex;
@@ -17,11 +21,13 @@
             text-align: center;
             padding: 20px;
         }
+
         .lost-icon {
             font-size: 64px;
             margin-bottom: 16px;
             animation: v-fadeIn 0.5s ease;
         }
+
         .lost-title {
             font-size: 48px;
             font-weight: 900;
@@ -29,6 +35,7 @@
             text-shadow: 0 0 20px rgba(196, 149, 58, 0.4);
             margin-bottom: 8px;
         }
+
         .lost-subtitle {
             font-size: 16px;
             color: var(--v-text-dim);
@@ -36,6 +43,7 @@
             max-width: 280px;
             line-height: 1.5;
         }
+
         .home-btn {
             display: inline-flex;
             align-items: center;
@@ -52,13 +60,18 @@
             transition: transform 0.15s ease;
             box-shadow: 0 3px 12px rgba(196, 149, 58, 0.3);
         }
-        .home-btn:active { transform: scale(0.96); }
+
+        .home-btn:active {
+            transform: scale(0.96);
+        }
     </style>
 </head>
+
 <body>
     <div class="lost-icon">🗺️</div>
     <div class="lost-title">404</div>
     <div class="lost-subtitle">Aventureiro, parece que voce se perdeu nas terras de Valdoria...</div>
     <a href="/valdoria-webapp/" class="home-btn">🏰 Voltar ao Portal</a>
 </body>
+
 </html>
