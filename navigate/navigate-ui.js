@@ -287,31 +287,45 @@ function clearHighlight() {
     svg.querySelectorAll('.path-highlight').forEach(h => h.remove());
 }
 
-// ── Highlight BFS path between two locations ──
+// ── Highlight BFS path between two locations (curved, matching connection paths) ──
 function highlightPath(fromId, toId) {
-    const path = bfsPath(fromId, toId);
-    if (!path || path.length < 2) return;
+    const pathIds = bfsPath(fromId, toId);
+    if (!pathIds || pathIds.length < 2) return;
 
     const svg = document.getElementById('map-svg');
 
-    for (let i = 0; i < path.length - 1; i++) {
-        const aCoords = LOCATION_COORDS[path[i]];
-        const bCoords = LOCATION_COORDS[path[i + 1]];
+    for (let i = 0; i < pathIds.length - 1; i++) {
+        const aCoords = LOCATION_COORDS[pathIds[i]];
+        const bCoords = LOCATION_COORDS[pathIds[i + 1]];
         if (!aCoords || !bCoords) continue;
 
         const aPx = hexToPixel(aCoords.col, aCoords.row);
         const bPx = hexToPixel(bCoords.col, bCoords.row);
 
-        const line = createSVG('line', {
-            x1: aPx.x, y1: aPx.y,
-            x2: bPx.x, y2: bPx.y,
+        // Match the curved jitter from renderConnectionPaths
+        const seed = (aCoords.col * 31 + aCoords.row * 17 + bCoords.col * 13 + bCoords.row * 7);
+        const mx = (aPx.x + bPx.x) / 2;
+        const my = (aPx.y + bPx.y) / 2;
+        const dx = bPx.x - aPx.x;
+        const dy = bPx.y - aPx.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const perpX = -dy / len;
+        const perpY = dx / len;
+        const jitterAmt = (seededRandom(seed) - 0.5) * 8;
+        const midX = mx + perpX * jitterAmt;
+        const midY = my + perpY * jitterAmt;
+
+        const pathD = `M${aPx.x},${aPx.y} Q${midX},${midY} ${bPx.x},${bPx.y}`;
+        const highlight = createSVG('path', {
+            d: pathD,
+            fill: 'none',
             stroke: '#c4953a',
             'stroke-width': 3,
             'stroke-opacity': 0.5,
             'stroke-linecap': 'round',
             class: 'path-highlight',
         });
-        svg.appendChild(line);
+        svg.appendChild(highlight);
     }
 }
 
