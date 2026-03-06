@@ -321,6 +321,28 @@ function renderResolution(state) {
         ${rewardsBlock}
         ${buttonsHtml}
     </div>`;
+
+    // Sequential reveal: stagger each reward item appearance
+    const rewardEls = app.querySelectorAll('.res-reward');
+    const continueBtn = app.querySelector('.res-continue');
+    if (rewardEls.length > 0) {
+        rewardEls.forEach((el, i) => {
+            el.classList.add('reward-hidden');
+            setTimeout(() => {
+                el.classList.remove('reward-hidden');
+                el.classList.add('reward-reveal');
+                hapticSelect();
+            }, 400 + i * 500);
+        });
+        // Show continue button after all rewards revealed
+        if (continueBtn) {
+            continueBtn.classList.add('reward-hidden');
+            setTimeout(() => {
+                continueBtn.classList.remove('reward-hidden');
+                continueBtn.classList.add('reward-reveal');
+            }, 400 + rewardEls.length * 500 + 300);
+        }
+    }
 }
 
 // ─── CONSTANTS ───
@@ -553,6 +575,9 @@ function startTimer(seconds) {
 
         if (_timerRemaining <= 5) {
             bar.classList.add('critical');
+            // Heartbeat: tick sound + haptic in last 5 seconds
+            sfxTimerTick();
+            haptic('light');
         }
     }, 1000);
 }
@@ -630,8 +655,13 @@ function startPolling() {
                 const turnChanged = oldTurn && newTurn && (oldTurn.n !== newTurn.n || oldTurn.t !== newTurn.t);
 
                 if (turnChanged) {
+                    // Enemy banner shows action description from last roll
+                    let actionVerb = '';
+                    if (newTurn.t === 'e' && state.lr) {
+                        actionVerb = state.lr.t === 'skill' ? ' conjura!' : ' ataca!';
+                    }
                     const bannerText = newTurn.t === 'p' ? '⚔️ Seu Turno!' :
-                        newTurn.t === 'e' ? `🎯 ${newTurn.n}` : `🛡️ ${newTurn.n}`;
+                        newTurn.t === 'e' ? `🎯 ${newTurn.n}${actionVerb}` : `🛡️ ${newTurn.n}`;
                     const bannerType = newTurn.t === 'p' ? 'player' : newTurn.t === 'e' ? 'enemy' : 'ally';
                     _showTurnBanner(bannerText, bannerType);
                 }
@@ -1206,22 +1236,40 @@ function _playCinematicResult(result, actionType) {
 
     _cinematicInProgress = true;
 
-    // Phase 1: Animate dice on CURRENT DOM (old state still visible)
-    initDice(result.lr);
+    // Phase 0: Anticipation text (350ms) — "⚔️ Kalfin avança!"
+    const attackerName = currentState?.p?.n || 'Herói';
+    const anticipationText = result.lr.t === 'skill' ? `✨ ${attackerName} conjura!` : `⚔️ ${attackerName} avança!`;
+    _showAnticipation(anticipationText);
 
-    // Phase 2: Show floating damage after dice reveal
-    if (!result.lr.miss && result.lr.d > 0) {
-        setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy'), 2000);
-    }
-
-    // Phase 3: After full animation, render new state with consequences
-    const delay = (result.lr.miss || result.lr.d <= 0) ? 1500 : 2500;
+    // Phase 1: Animate dice on CURRENT DOM after anticipation (350ms delay)
     setTimeout(() => {
-        _cinematicInProgress = false;
-        currentState = result;
-        if (isResolution) { renderResolution(result); }
-        else { renderArena(result); }
-    }, delay);
+        initDice(result.lr);
+
+        // Phase 2: Show floating damage after dice reveal (+2000ms from dice start)
+        if (!result.lr.miss && result.lr.d > 0) {
+            setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy'), 2000);
+        }
+
+        // Phase 3: After full animation, check for kills then render new state
+        const baseDelay = (result.lr.miss || result.lr.d <= 0) ? 1500 : 2500;
+        const hasKill = result.lr.kill;
+        const totalDelay = hasKill ? baseDelay + 600 : baseDelay;
+
+        // Death animation: fade+shake on killed enemy before re-render
+        if (hasKill) {
+            setTimeout(() => {
+                const enemyCards = document.querySelectorAll('.entity.enemy');
+                enemyCards.forEach(card => card.classList.add('death-anim'));
+            }, baseDelay);
+        }
+
+        setTimeout(() => {
+            _cinematicInProgress = false;
+            currentState = result;
+            if (isResolution) { renderResolution(result); }
+            else { renderArena(result); }
+        }, totalDelay);
+    }, 350);
 }
 
 // ─── TURN ANNOUNCEMENT BANNER ───
@@ -1238,6 +1286,21 @@ function _showTurnBanner(text, type) {
         el.classList.remove('visible');
         setTimeout(() => el.remove(), 400);
     }, 1000);
+}
+
+// ─── ANTICIPATION OVERLAY ───
+function _showAnticipation(text) {
+    const el = document.createElement('div');
+    el.className = 'anticipation-overlay';
+    el.innerHTML = `<span class="anticipation-text">${text}</span>`;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => el.classList.add('visible'));
+    });
+    setTimeout(() => {
+        el.classList.remove('visible');
+        setTimeout(() => el.remove(), 200);
+    }, 350);
 }
 
 // ─── FLOATING DAMAGE NUMBER ───
@@ -1527,21 +1590,29 @@ function initDice(lr) {
             l2.textContent = lr.df || 'dano';
             l2.className = 'dice-label hit';
 
-            // Flash enemy card on damage
-            const enemies = document.querySelectorAll('.entity.enemy');
-            if (enemies.length > 0) {
-                enemies[0].classList.add('dmg-flash');
-                setTimeout(() => enemies[0].classList.remove('dmg-flash'), 400);
-            }
+            // ── HIT-STOP: Freeze frame 120ms at impact ──
+            const app = document.getElementById('app');
+            if (app) app.classList.add('hit-stop');
+            haptic('heavy'); // Feature 4: heavy impact
 
-            // Feature 3: Particles on damage impact
-            spawnParticles(lr.crit, lr.dt || 'slashing');
-            haptic('medium'); // Feature 4
+            setTimeout(() => {
+                if (app) app.classList.remove('hit-stop');
 
-            // Feature 7: Kill narration
-            if (lr.kill) {
-                showNarration(_pick(_NARR_KILL), 'crit');
-            }
+                // Flash enemy card on damage
+                const enemies = document.querySelectorAll('.entity.enemy');
+                if (enemies.length > 0) {
+                    enemies[0].classList.add('dmg-flash');
+                    setTimeout(() => enemies[0].classList.remove('dmg-flash'), 400);
+                }
+
+                // Feature 3: Particles on damage impact
+                spawnParticles(lr.crit, lr.dt || 'slashing');
+
+                // Feature 7: Kill narration
+                if (lr.kill) {
+                    showNarration(_pick(_NARR_KILL), 'crit');
+                }
+            }, 120);
         }, 700);
     }, 1200);
 }
@@ -1662,6 +1733,7 @@ function sfxHit() { _sfxTone(120, 0.25, 0.12, 'sawtooth'); }
 function sfxCrit() { _sfxTone(220, 0.4, 0.18, 'sawtooth'); setTimeout(() => _sfxTone(330, 0.3, 0.12, 'sine'), 80); }
 function sfxMiss() { _sfxTone(300, 0.2, 0.06, 'sine'); }
 function sfxPlayerHit() { _sfxTone(80, 0.3, 0.15, 'sawtooth'); }
+function sfxTimerTick() { _sfxTone(600, 0.08, 0.1, 'square'); }
 
 // ─── FEATURE 3: PARTICLE EFFECTS ───
 const _PARTICLE_COLORS = {
@@ -1798,11 +1870,12 @@ function _animateHpBars(state) {
     current.forEach((v, k) => _prevHpState.set(k, v));
 }
 
-// ─── FEATURE 2: PLAYER SHAKE ON DAMAGE ───
+// ─── FEATURE 2: PLAYER SHAKE ON DAMAGE + VIEWPORT FLASH + FLOAT ───
 function _checkPlayerDamage(state) {
     if (!state.p) return;
     const curHp = state.p.hp;
     if (_prevPlayerHp > 0 && curHp < _prevPlayerHp) {
+        const dmgTaken = _prevPlayerHp - curHp;
         const playerEl = document.querySelector('.entity.player');
         if (playerEl) {
             playerEl.classList.remove('dmg-shake');
@@ -1811,7 +1884,27 @@ function _checkPlayerDamage(state) {
             setTimeout(() => playerEl.classList.remove('dmg-shake'), 500);
             haptic('heavy');
             sfxPlayerHit();
+
+            // Floating damage on player
+            _showDamageFloat(dmgTaken, null, '.entity.player');
         }
+
+        // Viewport damage flash (red overlay)
+        _showViewportFlash();
     }
     _prevPlayerHp = curHp;
+}
+
+function _showViewportFlash() {
+    let flash = document.getElementById('viewportFlash');
+    if (!flash) {
+        flash = document.createElement('div');
+        flash.id = 'viewportFlash';
+        flash.className = 'viewport-flash';
+        document.body.appendChild(flash);
+    }
+    flash.classList.remove('active');
+    void flash.offsetWidth;
+    flash.classList.add('active');
+    setTimeout(() => flash.classList.remove('active'), 400);
 }

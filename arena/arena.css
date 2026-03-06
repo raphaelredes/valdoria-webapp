@@ -931,6 +931,93 @@ body {
     100% { transform: translateX(-50%) translateY(-60px) scale(0.7); opacity: 0; }
 }
 
+/* ─── HIT-STOP FREEZE FRAME ─── */
+#app.hit-stop {
+    animation: hitStopFreeze 120ms step-end;
+}
+@keyframes hitStopFreeze {
+    0%, 100% { filter: contrast(1.3) brightness(1.1); }
+}
+
+/* ─── VIEWPORT DAMAGE FLASH ─── */
+.viewport-flash {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at center, rgba(180,20,20,0.35) 0%, rgba(120,10,10,0.15) 60%, transparent 100%);
+    pointer-events: none;
+    z-index: 450;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+.viewport-flash.active {
+    opacity: 1;
+    animation: viewportFlashPulse 400ms ease-out;
+}
+@keyframes viewportFlashPulse {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* ─── ANTICIPATION OVERLAY ─── */
+.anticipation-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 410;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+.anticipation-overlay.visible { opacity: 1; }
+.anticipation-text {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 8px 24px;
+    border-radius: 6px;
+    color: var(--v-gold-light, #e8c95a);
+    background: rgba(43,40,48,0.9);
+    border: 1px solid rgba(196,149,58,0.4);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+    animation: anticipationSlide 0.3s ease-out;
+}
+@keyframes anticipationSlide {
+    0% { transform: translateX(-20px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+/* ─── DEATH ANIMATION ─── */
+.entity.enemy.death-anim {
+    animation: enemyDeath 600ms ease-out forwards;
+}
+@keyframes enemyDeath {
+    0% { opacity: 1; transform: translateX(0); }
+    10% { transform: translateX(-4px); }
+    20% { transform: translateX(4px); }
+    30% { transform: translateX(-3px); }
+    40% { transform: translateX(3px); }
+    50% { transform: translateX(-2px); opacity: 0.7; }
+    60% { transform: translateX(2px); }
+    100% { opacity: 0; transform: translateY(8px) scale(0.95); }
+}
+
+/* ─── SEQUENTIAL REWARDS REVEAL ─── */
+.reward-hidden {
+    opacity: 0;
+    transform: translateY(12px);
+}
+.reward-reveal {
+    animation: rewardPop 0.4s ease-out forwards;
+}
+@keyframes rewardPop {
+    0% { opacity: 0; transform: translateY(12px) scale(0.9); }
+    60% { transform: translateY(-2px) scale(1.03); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
