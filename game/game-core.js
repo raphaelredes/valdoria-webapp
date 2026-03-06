@@ -378,9 +378,53 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// ─── Server Log Relay ───
+// Intercepts console.log/warn/error and sends [GAME] entries to the server
+// so they appear in the GUI server window alongside backend logs.
+const _logQueue = [];
+let _logFlushTimer = null;
+const _LOG_FLUSH_INTERVAL = 2000; // Send batch every 2s
+const _LOG_MAX_QUEUE = 50;
+
+const _origLog = console.log.bind(console);
+const _origWarn = console.warn.bind(console);
+const _origError = console.error.bind(console);
+
+function _queueLog(level, args) {
+    const msg = Array.from(args).map(a =>
+        typeof a === 'object' ? JSON.stringify(a).substring(0, 200) : String(a)
+    ).join(' ');
+    // Only relay [GAME] tagged messages to avoid noise
+    if (!msg.includes('[GAME]')) return;
+    _logQueue.push({ level, msg: msg.substring(0, 500) });
+    if (_logQueue.length >= _LOG_MAX_QUEUE) _flushLogs();
+}
+
+console.log = function () { _origLog.apply(console, arguments); _queueLog('info', arguments); };
+console.warn = function () { _origWarn.apply(console, arguments); _queueLog('warn', arguments); };
+console.error = function () { _origError.apply(console, arguments); _queueLog('error', arguments); };
+
+function _flushLogs() {
+    if (!_logQueue.length || !S.apiBase) return;
+    const entries = _logQueue.splice(0, _LOG_MAX_QUEUE);
+    fetch(`${S.apiBase}/api/game/log`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': '1',
+        },
+        body: JSON.stringify({ entries }),
+    }).catch(() => { /* fire and forget */ });
+}
+
+// Start periodic flush
+_logFlushTimer = setInterval(_flushLogs, _LOG_FLUSH_INTERVAL);
+// Flush on page unload
+window.addEventListener('beforeunload', _flushLogs);
+
 // ─── Global Error Handlers ───
 window.addEventListener('error', (e) => {
-    console.error('[GAME] UNCAUGHT ERROR:', e.message, 'at', e.filename + ':' + e.lineno + ':' + e.colno, e.error);
+    console.error('[GAME] UNCAUGHT ERROR:', e.message, 'at', e.filename + ':' + e.lineno + ':' + e.colno);
 });
 window.addEventListener('unhandledrejection', (e) => {
     console.error('[GAME] UNHANDLED PROMISE REJECTION:', e.reason);
@@ -390,7 +434,7 @@ window.addEventListener('unhandledrejection', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('[GAME] DOMContentLoaded fired, starting init...');
     init().catch(e => {
-        console.error('[GAME] init() CRASHED:', e);
+        console.error('[GAME] init() CRASHED:', e.message);
         if (typeof showError === 'function') {
             showError('Erro ao iniciar o jogo: ' + e.message, e);
         }
