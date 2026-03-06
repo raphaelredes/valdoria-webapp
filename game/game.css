@@ -198,7 +198,7 @@
     min-height: 34px;
 }
 
-/* ─── Loading Overlay ─── */
+/* ─── Loading Overlay (Epic Medieval) ─── */
 .loading-overlay {
     position: fixed;
     inset: 0;
@@ -206,26 +206,279 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--v-bg);
+    background: radial-gradient(ellipse at 50% 40%, #352028 0%, #1a1520 50%, #0d0a10 100%);
     z-index: 1000;
+    overflow: hidden;
 }
 
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--v-border);
-    border-top-color: var(--v-gold);
+/* ── Floating Particles ── */
+.loading-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    background: var(--v-gold);
+    opacity: 0;
+    animation: particleFloat 6s ease-in-out infinite;
 }
 
-.loading-text {
-    margin-top: 14px;
+.p1 { left: 15%; bottom: -5%; animation-delay: 0s; animation-duration: 5s; }
+.p2 { left: 30%; bottom: -5%; animation-delay: 0.8s; animation-duration: 6.5s; }
+.p3 { left: 50%; bottom: -5%; animation-delay: 1.6s; animation-duration: 5.5s; }
+.p4 { left: 70%; bottom: -5%; animation-delay: 0.4s; animation-duration: 7s; }
+.p5 { left: 85%; bottom: -5%; animation-delay: 2s; animation-duration: 6s; }
+.p6 { left: 22%; bottom: -5%; animation-delay: 2.5s; animation-duration: 5.8s; }
+.p7 { left: 60%; bottom: -5%; animation-delay: 1.2s; animation-duration: 6.2s; }
+.p8 { left: 42%; bottom: -5%; animation-delay: 3s; animation-duration: 5.3s; }
+
+@keyframes particleFloat {
+    0%   { transform: translateY(0) scale(0); opacity: 0; }
+    10%  { opacity: 0.7; transform: translateY(-80px) scale(1); }
+    50%  { opacity: 0.4; }
+    100% { transform: translateY(-700px) scale(0); opacity: 0; }
+}
+
+/* ── Logo with Epic Aura ── */
+.loading-logo-wrap {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin-bottom: 20px;
+    animation: logoEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes logoEntrance {
+    0%   { opacity: 0; transform: scale(0.6) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.loading-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    object-fit: cover;
+    z-index: 3;
+    border: 2px solid rgba(196, 149, 58, 0.5);
+    box-shadow:
+        0 0 20px rgba(196, 149, 58, 0.3),
+        0 0 40px rgba(123, 32, 32, 0.2),
+        inset 0 0 20px rgba(0, 0, 0, 0.3);
+    animation: logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 20px rgba(196, 149, 58, 0.3),
+            0 0 40px rgba(123, 32, 32, 0.2),
+            inset 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        box-shadow:
+            0 0 30px rgba(196, 149, 58, 0.5),
+            0 0 60px rgba(123, 32, 32, 0.3),
+            0 0 80px rgba(196, 149, 58, 0.1),
+            inset 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Aura glow behind logo */
+.loading-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 140px;
+    height: 140px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196, 149, 58, 0.15) 0%, transparent 70%);
+    z-index: 1;
+    animation: auraPulse 3s ease-in-out infinite;
+}
+
+.loading-aura-2 {
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(123, 32, 32, 0.1) 0%, transparent 70%);
+    animation-delay: 1.5s;
+}
+
+@keyframes auraPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
+
+/* Rotating rune ring around logo */
+.loading-rune-ring {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    animation: v-fadeIn 0.8s ease 0.3s both;
+}
+
+.loading-rune-ring svg {
+    width: 100%;
+    height: 100%;
+}
+
+.rune-track {
+    fill: none;
+    stroke: rgba(196, 149, 58, 0.08);
+    stroke-width: 1;
+}
+
+.rune-arc {
+    fill: none;
+    stroke: var(--v-gold);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-dasharray: 40 520;
+    animation: runeOrbit 3s linear infinite;
+    filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.6));
+}
+
+.rune-arc-2 {
+    stroke: var(--v-crimson-light);
+    stroke-dasharray: 30 486;
+    animation-direction: reverse;
+    animation-duration: 4s;
+    filter: drop-shadow(0 0 4px rgba(123, 32, 32, 0.5));
+}
+
+@keyframes runeOrbit {
+    to { stroke-dashoffset: -565; }
+}
+
+/* ── Brand Section ── */
+.loading-brand {
+    text-align: center;
+    animation: v-fadeIn 0.7s ease 0.4s both;
+}
+
+.loading-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--v-gold);
+    letter-spacing: 6px;
+    text-shadow:
+        0 0 20px rgba(196, 149, 58, 0.4),
+        0 0 40px rgba(196, 149, 58, 0.2),
+        0 2px 4px rgba(0, 0, 0, 0.8);
+    animation: titleShimmer 3s ease-in-out infinite;
+}
+
+@keyframes titleShimmer {
+    0%, 100% { text-shadow: 0 0 20px rgba(196, 149, 58, 0.4), 0 0 40px rgba(196, 149, 58, 0.2), 0 2px 4px rgba(0, 0, 0, 0.8); }
+    50% { text-shadow: 0 0 30px rgba(196, 149, 58, 0.6), 0 0 60px rgba(196, 149, 58, 0.3), 0 2px 4px rgba(0, 0, 0, 0.8); }
+}
+
+.loading-divider {
+    width: 160px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--v-gold-dim), var(--v-gold), var(--v-gold-dim), transparent);
+    margin: 10px auto 0;
+    position: relative;
+    animation: v-fadeIn 0.5s ease 0.6s both;
+}
+
+.divider-rune {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+    color: var(--v-gold);
+    background: #1a1520;
+    padding: 0 12px;
+    animation: runePulse 2s ease-in-out infinite;
+}
+
+@keyframes runePulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* ── Progress Bar ── */
+.loading-progress-wrap {
+    margin: 22px 0 18px;
+    width: 200px;
+    animation: v-fadeIn 0.5s ease 0.7s both;
+}
+
+.loading-progress-track {
+    width: 100%;
+    height: 3px;
+    background: rgba(196, 149, 58, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.loading-progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--v-crimson), var(--v-gold), var(--v-gold-light));
+    box-shadow: 0 0 8px rgba(196, 149, 58, 0.5);
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.loading-progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--v-gold-light);
+    box-shadow: 0 0 10px var(--v-gold), 0 0 20px rgba(196, 149, 58, 0.4);
+}
+
+/* ── Tips Area ── */
+.loading-tip-area {
+    min-height: 20px;
+    animation: v-fadeIn 0.5s ease 0.8s both;
+}
+
+.loading-tip {
+    font-size: 12px;
     color: var(--v-text-dim);
-    font-size: 14px;
+    text-align: center;
+    max-width: 280px;
+    line-height: 1.4;
+    font-style: italic;
+    animation: tipFade 4s ease-in-out infinite;
+}
+
+@keyframes tipFade {
+    0%, 100% { opacity: 0.4; }
+    30%, 70% { opacity: 0.9; }
+}
+
+/* ── Footer ── */
+.loading-footer {
+    position: absolute;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    font-size: 10px;
+    color: rgba(196, 149, 58, 0.25);
+    letter-spacing: 1px;
+    animation: v-fadeIn 0.5s ease 1s both;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
 
 /* ─── Toast Notification ─── */
 .toast {

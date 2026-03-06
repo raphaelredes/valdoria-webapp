@@ -3,15 +3,92 @@
    Toast, loading, error, timer overlays, screen transitions.
    ═══════════════════════════════════════════════════════════════ */
 
-// ─── Loading ───
+// ─── Loading (with cycling tips) ───
+const _LOADING_TIPS = [
+    'Preparando sua aventura...',
+    '⚔️ Dica: Combine ataques com aliados para dano extra!',
+    '🛡️ Dica: Descansar na estalagem recupera todos os dados de vida.',
+    '🎲 Dica: Rolagens de ataque 20 são acertos críticos — dano dobrado!',
+    '💰 Dica: Venda itens que não usa no mercado da cidade.',
+    '📜 Dica: Converse com NPCs para descobrir quests escondidas.',
+    '🏰 Dica: A Guilda de Aventureiros oferece missões com boas recompensas.',
+    '🧪 Dica: Poções podem ser usadas durante o combate como ação bônus.',
+    '⭐ Dica: Suba de nível para desbloquear novas habilidades de classe.',
+    '🐉 Dica: Inimigos mais fortes concedem mais XP e ouro.',
+];
+let _loadingTipTimer = null;
+let _loadingTipIndex = 0;
+let _loadingProgressTimer = null;
+let _loadingProgress = 0;
+
 function showLoading() {
     const el = document.getElementById('loading');
     if (el) el.style.display = '';
+    _startLoadingTips();
+    _startLoadingProgress();
 }
 
 function hideLoading() {
     const el = document.getElementById('loading');
-    if (el) el.style.display = 'none';
+    // Fill progress to 100% before hiding
+    const bar = document.getElementById('loading-progress');
+    if (bar) bar.style.width = '100%';
+    _stopLoadingProgress();
+
+    setTimeout(() => {
+        if (el) {
+            el.style.opacity = '1';
+            el.style.transition = 'opacity 0.4s ease';
+            el.style.opacity = '0';
+            setTimeout(() => { el.style.display = 'none'; el.style.opacity = ''; el.style.transition = ''; }, 400);
+        }
+        _stopLoadingTips();
+    }, 200);
+}
+
+function _startLoadingProgress() {
+    _stopLoadingProgress();
+    _loadingProgress = 0;
+    const bar = document.getElementById('loading-progress');
+    if (bar) bar.style.width = '0%';
+    _loadingProgressTimer = setInterval(() => {
+        // Asymptotic progress — slows as it approaches 90%
+        const remaining = 90 - _loadingProgress;
+        _loadingProgress += remaining * 0.06;
+        if (bar) bar.style.width = _loadingProgress + '%';
+    }, 200);
+}
+
+function _stopLoadingProgress() {
+    if (_loadingProgressTimer) {
+        clearInterval(_loadingProgressTimer);
+        _loadingProgressTimer = null;
+    }
+}
+
+function _startLoadingTips() {
+    _stopLoadingTips();
+    _loadingTipIndex = 0;
+    const tipEl = document.getElementById('loading-tip');
+    if (tipEl) tipEl.textContent = _LOADING_TIPS[0];
+    _loadingTipTimer = setInterval(() => {
+        _loadingTipIndex = (_loadingTipIndex + 1) % _LOADING_TIPS.length;
+        const tipEl = document.getElementById('loading-tip');
+        if (tipEl) {
+            tipEl.style.opacity = '0';
+            setTimeout(() => {
+                tipEl.textContent = _LOADING_TIPS[_loadingTipIndex];
+                tipEl.style.opacity = '';
+            }, 300);
+        }
+    }, 3500);
+}
+
+function _stopLoadingTips() {
+    if (_loadingTipTimer) {
+        clearInterval(_loadingTipTimer);
+        _loadingTipTimer = null;
+    }
 }
 
 // ─── Toast Notification ───
@@ -35,6 +112,10 @@ function showToast(text, duration = 2000) {
 
 // ─── Error Overlay ───
 let _errorAutoRetryTimer = null;
+let _errorRetryAttempt = 0;
+const _ERROR_RETRY_BASE = 5;    // seconds
+const _ERROR_RETRY_CAP = 40;    // max seconds between retries
+const _ERROR_RETRY_MAX = 6;     // give up after this many auto-retries
 
 function showError(msg, err = null) {
     console.error('[GAME]', msg, err || '');
@@ -42,6 +123,7 @@ function showError(msg, err = null) {
     const overlay = document.getElementById('error-overlay');
     const msgEl = document.getElementById('error-msg');
     const retryBtn = document.getElementById('error-retry');
+    const recoverBtn = document.getElementById('error-recover');
 
     if (!overlay || !msgEl) return;
 
@@ -71,21 +153,39 @@ function showError(msg, err = null) {
         }
     };
 
-    retryBtn.onclick = doRetry;
+    retryBtn.onclick = () => {
+        _errorRetryAttempt = 0; // manual retry resets counter
+        doRetry();
+    };
 
-    // Auto-retry for connection errors after 5 seconds with countdown
+    // Recovery button triggers deep link back to bot to clear messages and restart session
+    if (recoverBtn) {
+        recoverBtn.onclick = () => {
+            const botUrl = window.Telegram?.WebApp?.initDataUnsafe?.chat?.username
+                ? `https://t.me/${window.Telegram.WebApp.initDataUnsafe.chat.username}?start=recovery`
+                : 'https://t.me/LendasDeValdoriaBOT?start=recovery';
+            window.Telegram?.WebApp?.openTelegramLink(botUrl);
+        };
+    }
+
+    // Auto-retry with exponential backoff for connection errors
     const isConnectionError = msg.includes('Sem conexão') || msg.includes('Erro no servidor');
-    if (isConnectionError) {
-        let countdown = 5;
-        retryBtn.textContent = `Tentando novamente em ${countdown}s...`;
+    if (isConnectionError && _errorRetryAttempt < _ERROR_RETRY_MAX) {
+        _errorRetryAttempt++;
+        // Exponential backoff: 5s, 10s, 20s, 40s, 40s, 40s...
+        const delaySec = Math.min(_ERROR_RETRY_BASE * Math.pow(2, _errorRetryAttempt - 1), _ERROR_RETRY_CAP);
+        let countdown = delaySec;
+        retryBtn.textContent = `Tentando novamente em ${countdown}s... (${_errorRetryAttempt}/${_ERROR_RETRY_MAX})`;
         _errorAutoRetryTimer = setInterval(() => {
             countdown--;
             if (countdown <= 0) {
                 doRetry();
             } else {
-                retryBtn.textContent = `Tentando novamente em ${countdown}s...`;
+                retryBtn.textContent = `Tentando novamente em ${countdown}s... (${_errorRetryAttempt}/${_ERROR_RETRY_MAX})`;
             }
         }, 1000);
+    } else if (isConnectionError) {
+        retryBtn.textContent = 'Tentar Novamente';
     }
 }
 

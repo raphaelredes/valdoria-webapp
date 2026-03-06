@@ -6,16 +6,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lendas de Valdoria</title>
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../valdoria-design.css?v=4">
-    <link rel="stylesheet" href="game.css?v=6">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="game.css?v=' + v + '">');
+    </script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
 <body>
     <!-- Loading overlay -->
     <div id="loading" class="loading-overlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Entrando em Valdoria...</div>
+        <!-- Floating particles -->
+        <div class="loading-particles">
+            <div class="particle p1"></div>
+            <div class="particle p2"></div>
+            <div class="particle p3"></div>
+            <div class="particle p4"></div>
+            <div class="particle p5"></div>
+            <div class="particle p6"></div>
+            <div class="particle p7"></div>
+            <div class="particle p8"></div>
+        </div>
+
+        <!-- Logo with epic aura -->
+        <div class="loading-logo-wrap">
+            <div class="loading-aura"></div>
+            <div class="loading-aura loading-aura-2"></div>
+            <div class="loading-rune-ring">
+                <svg viewBox="0 0 200 200">
+                    <circle class="rune-track" cx="100" cy="100" r="90" />
+                    <circle class="rune-arc" cx="100" cy="100" r="90" />
+                    <circle class="rune-arc rune-arc-2" cx="100" cy="100" r="82" />
+                </svg>
+            </div>
+            <img class="loading-logo" src="logo.jpg" alt="Lendas de Valdoria">
+        </div>
+
+        <!-- Title -->
+        <div class="loading-brand">
+            <div class="loading-title">LENDAS DE VALDORIA</div>
+            <div class="loading-divider">
+                <span class="divider-rune">&#9670;</span>
+            </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="loading-progress-wrap">
+            <div class="loading-progress-track">
+                <div id="loading-progress" class="loading-progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Tip -->
+        <div class="loading-tip-area">
+            <div id="loading-tip" class="loading-tip">Preparando sua aventura...</div>
+        </div>
+
+        <div class="loading-footer">v4.0 — D&amp;D 5e</div>
     </div>
 
     <!-- Main screen container (scrollable content only) -->
@@ -70,18 +118,22 @@
             <div class="error-icon">⚠️</div>
             <div id="error-msg" class="error-msg"></div>
             <button id="error-retry" class="btn-action">Tentar Novamente</button>
+            <button id="error-recover" class="btn-action btn-secondary"
+                style="margin-top: 10px; background: rgba(255, 60, 60, 0.2); border-color: rgba(255, 60, 60, 0.5);">🔌
+                Recuperar Conexão (Debug)</button>
         </div>
     </div>
 
     <!-- Transition animation overlay -->
     <div id="transition-overlay" class="transition-overlay" style="display:none"></div>
 
-    <script src="game-enhancer.js?v=3"></script>
-    <script src="game-core.js?v=4"></script>
-    <script src="game-renderer.js?v=6"></script>
-    <script src="game-dialogue.js?v=1"></script>
-    <script src="game-ui.js?v=6"></script>
-    <script src="game-transitions.js?v=3"></script>
+    <script>
+        var v = Date.now();
+        var scripts = ['game-enhancer.js', 'game-core.js', 'game-renderer.js', 'game-dialogue.js', 'game-ui.js', 'game-transitions.js'];
+        scripts.forEach(function (s) {
+            document.write('<script src="' + s + '?v=' + v + '"><\/script>');
+        });
+    </script>
 </body>
 
 </html>
