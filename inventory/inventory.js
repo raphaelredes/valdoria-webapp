@@ -200,6 +200,7 @@ function init() {
     renderTab();
     initSwipeToDismiss();
     initBackButton();
+    _initNavBar();
 }
 
 function hideLoading() {
@@ -2328,6 +2329,21 @@ function initBackButton() {
 }
 
 // ── Nav Bar Actions ──
+const _LOC_LABELS = {
+    city: '🏘️ Cidade',
+    explore: '🗺️ Mapa',
+    event: '🗺️ Mapa',
+    dungeon: '🏰 Masmorra',
+    combat: '⚔️ Combate',
+};
+
+function _initNavBar() {
+    const loc = D?.loc || 'city';
+    const label = _LOC_LABELS[loc] || _LOC_LABELS.city;
+    const backBtn = document.querySelector('#navBar .inv-nav-btn:first-child span');
+    if (backBtn) backBtn.textContent = label;
+}
+
 function navBack() {
     haptic('light');
     _navigateBack();
