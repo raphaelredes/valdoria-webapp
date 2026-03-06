@@ -29,7 +29,7 @@
             <div class="particle p8"></div>
         </div>
 
-        <!-- Logo with epic aura -->
+        <!-- Emblem with epic aura -->
         <div class="loading-logo-wrap">
             <div class="loading-aura"></div>
             <div class="loading-aura loading-aura-2"></div>
@@ -40,7 +40,100 @@
                     <circle class="rune-arc rune-arc-2" cx="100" cy="100" r="82" />
                 </svg>
             </div>
-            <img class="loading-logo" src="logo.jpg" alt="Lendas de Valdoria">
+            <!-- SVG Emblem: shield + sword + golden star + dragon curves -->
+            <svg class="loading-emblem" viewBox="0 0 200 220">
+                <defs>
+                    <linearGradient id="eg-gold" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#dbb668"/>
+                        <stop offset="50%" stop-color="#c4953a"/>
+                        <stop offset="100%" stop-color="#9a7530"/>
+                    </linearGradient>
+                    <linearGradient id="eg-steel" x1="0.3" y1="0" x2="0.7" y2="1">
+                        <stop offset="0%" stop-color="#e0e4e8"/>
+                        <stop offset="40%" stop-color="#b0b8c0"/>
+                        <stop offset="100%" stop-color="#707880"/>
+                    </linearGradient>
+                    <linearGradient id="eg-shield" x1="0.5" y1="0" x2="0.5" y2="1">
+                        <stop offset="0%" stop-color="#8b2525"/>
+                        <stop offset="60%" stop-color="#6a1a1a"/>
+                        <stop offset="100%" stop-color="#4a1212"/>
+                    </linearGradient>
+                    <linearGradient id="eg-shield-border" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#a0a8b0"/>
+                        <stop offset="50%" stop-color="#808890"/>
+                        <stop offset="100%" stop-color="#606870"/>
+                    </linearGradient>
+                    <filter id="eg-glow">
+                        <feGaussianBlur stdDeviation="2.5" result="b"/>
+                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="eg-glow-lg">
+                        <feGaussianBlur stdDeviation="5" result="b"/>
+                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                </defs>
+
+                <!-- Dragon body curves (behind everything) -->
+                <path class="emblem-dragon" d="M38,28 Q18,60 24,95 Q30,130 50,152 Q58,162 52,170" fill="none" stroke="rgba(176,152,108,0.25)" stroke-width="3" stroke-linecap="round"/>
+                <path class="emblem-dragon dragon-r" d="M162,28 Q182,60 176,95 Q170,130 150,152 Q142,162 148,170" fill="none" stroke="rgba(176,152,108,0.25)" stroke-width="3" stroke-linecap="round"/>
+                <!-- Dragon head hints (small pointed shapes) -->
+                <path class="emblem-dragon-head" d="M38,28 Q32,18 40,14 Q46,20 38,28" fill="rgba(176,152,108,0.18)" stroke="rgba(176,152,108,0.25)" stroke-width="1.5"/>
+                <path class="emblem-dragon-head dragon-head-r" d="M162,28 Q168,18 160,14 Q154,20 162,28" fill="rgba(176,152,108,0.18)" stroke="rgba(176,152,108,0.25)" stroke-width="1.5"/>
+
+                <!-- Sword (behind shield, diagonal bottom-left to top-right) -->
+                <g class="emblem-sword">
+                    <!-- Blade -->
+                    <line x1="68" y1="198" x2="142" y2="22" stroke="url(#eg-steel)" stroke-width="7" stroke-linecap="round"/>
+                    <line x1="68" y1="198" x2="142" y2="22" stroke="rgba(255,255,255,0.15)" stroke-width="3" stroke-linecap="round"/>
+                    <!-- Traveling gleam -->
+                    <line class="sword-gleam" x1="68" y1="198" x2="142" y2="22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Guard -->
+                    <rect x="82" y="147" width="38" height="6" rx="3" fill="url(#eg-gold)" transform="rotate(-13.5, 101, 150)"/>
+                    <!-- Pommel -->
+                    <circle cx="71" cy="195" r="6" fill="url(#eg-gold)" stroke="#9a7530" stroke-width="1"/>
+                    <!-- Tip sparkle -->
+                    <circle class="sword-tip-sparkle" cx="142" cy="22" r="3" fill="white" opacity="0"/>
+                </g>
+
+                <!-- Shield body -->
+                <path class="emblem-shield-fill" d="M100,40 L150,62 L150,125 Q150,168 100,192 Q50,168 50,125 L50,62 Z" fill="url(#eg-shield)"/>
+                <!-- Shield border -->
+                <path class="emblem-shield-border" d="M100,40 L150,62 L150,125 Q150,168 100,192 Q50,168 50,125 L50,62 Z" fill="none" stroke="url(#eg-shield-border)" stroke-width="3.5"/>
+                <!-- Shield border rivets -->
+                <g class="emblem-rivets" opacity="0.5">
+                    <circle cx="100" cy="42" r="2.5" fill="#a0a8b0"/>
+                    <circle cx="148" cy="64" r="2.5" fill="#a0a8b0"/>
+                    <circle cx="52" cy="64" r="2.5" fill="#a0a8b0"/>
+                    <circle cx="149" cy="95" r="2.5" fill="#a0a8b0"/>
+                    <circle cx="51" cy="95" r="2.5" fill="#a0a8b0"/>
+                    <circle cx="145" cy="126" r="2.5" fill="#a0a8b0"/>
+                    <circle cx="55" cy="126" r="2.5" fill="#a0a8b0"/>
+                    <circle cx="130" cy="155" r="2.5" fill="#a0a8b0"/>
+                    <circle cx="70" cy="155" r="2.5" fill="#a0a8b0"/>
+                    <circle cx="100" cy="189" r="2.5" fill="#a0a8b0"/>
+                </g>
+
+                <!-- Golden compass star emblem -->
+                <g class="emblem-star" filter="url(#eg-glow)">
+                    <!-- Vertical arm -->
+                    <polygon points="100,75 106,112 100,148 94,112" fill="url(#eg-gold)"/>
+                    <!-- Horizontal arm -->
+                    <polygon points="68,115 96,108 132,115 104,122" fill="url(#eg-gold)"/>
+                    <!-- Ornate flourishes between arms -->
+                    <path d="M100,82 Q118,96 118,115" fill="none" stroke="#dbb668" stroke-width="1.8" opacity="0.7"/>
+                    <path d="M100,82 Q82,96 82,115" fill="none" stroke="#dbb668" stroke-width="1.8" opacity="0.7"/>
+                    <path d="M100,143 Q118,132 118,115" fill="none" stroke="#dbb668" stroke-width="1.8" opacity="0.7"/>
+                    <path d="M100,143 Q82,132 82,115" fill="none" stroke="#dbb668" stroke-width="1.8" opacity="0.7"/>
+                    <!-- Inner decorative curves -->
+                    <path d="M95,90 Q88,100 92,108" fill="none" stroke="#dbb668" stroke-width="1.2" opacity="0.5"/>
+                    <path d="M105,90 Q112,100 108,108" fill="none" stroke="#dbb668" stroke-width="1.2" opacity="0.5"/>
+                    <path d="M95,138 Q88,128 92,120" fill="none" stroke="#dbb668" stroke-width="1.2" opacity="0.5"/>
+                    <path d="M105,138 Q112,128 108,120" fill="none" stroke="#dbb668" stroke-width="1.2" opacity="0.5"/>
+                    <!-- Center boss -->
+                    <circle cx="100" cy="115" r="8" fill="#c4953a" stroke="#dbb668" stroke-width="1.5"/>
+                    <circle cx="100" cy="115" r="3.5" fill="#dbb668"/>
+                </g>
+            </svg>
         </div>
 
         <!-- Title -->

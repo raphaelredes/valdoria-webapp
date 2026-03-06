@@ -244,52 +244,131 @@
     100% { transform: translateY(-700px) scale(0); opacity: 0; }
 }
 
-/* ── Logo with Epic Aura ── */
+/* ── Emblem with Epic Aura ── */
 .loading-logo-wrap {
     position: relative;
-    width: 160px;
-    height: 160px;
-    margin-bottom: 20px;
+    width: 180px;
+    height: 180px;
+    margin-bottom: 16px;
     animation: logoEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes logoEntrance {
-    0%   { opacity: 0; transform: scale(0.6) translateY(20px); }
+    0%   { opacity: 0; transform: scale(0.5) translateY(30px); }
     100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.loading-logo {
+/* SVG Emblem */
+.loading-emblem {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 120px;
-    height: 120px;
+    width: 130px;
+    height: 145px;
     transform: translate(-50%, -50%);
-    border-radius: 50%;
-    object-fit: cover;
     z-index: 3;
-    border: 2px solid rgba(196, 149, 58, 0.5);
-    box-shadow:
-        0 0 20px rgba(196, 149, 58, 0.3),
-        0 0 40px rgba(123, 32, 32, 0.2),
-        inset 0 0 20px rgba(0, 0, 0, 0.3);
-    animation: logoPulse 3s ease-in-out infinite;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
 }
 
-@keyframes logoPulse {
-    0%, 100% {
-        box-shadow:
-            0 0 20px rgba(196, 149, 58, 0.3),
-            0 0 40px rgba(123, 32, 32, 0.2),
-            inset 0 0 20px rgba(0, 0, 0, 0.3);
-    }
-    50% {
-        box-shadow:
-            0 0 30px rgba(196, 149, 58, 0.5),
-            0 0 60px rgba(123, 32, 32, 0.3),
-            0 0 80px rgba(196, 149, 58, 0.1),
-            inset 0 0 20px rgba(0, 0, 0, 0.3);
-    }
+/* Shield draw-in animation */
+.emblem-shield-border {
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+    animation: shieldDrawIn 1.8s ease forwards 0.2s;
+}
+
+@keyframes shieldDrawIn {
+    to { stroke-dashoffset: 0; }
+}
+
+.emblem-shield-fill {
+    opacity: 0;
+    animation: shieldFillIn 0.8s ease forwards 0.6s;
+}
+
+@keyframes shieldFillIn {
+    to { opacity: 1; }
+}
+
+/* Rivets fade in */
+.emblem-rivets {
+    opacity: 0;
+    animation: shieldFillIn 0.6s ease forwards 1s;
+}
+
+/* Golden star entrance + pulse */
+.emblem-star {
+    opacity: 0;
+    animation: starEntrance 0.8s ease forwards 0.8s, starPulse 3s ease-in-out infinite 1.6s;
+}
+
+@keyframes starEntrance {
+    0%   { opacity: 0; transform: scale(0.7); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes starPulse {
+    0%, 100% { filter: url(#eg-glow); }
+    50% { filter: url(#eg-glow-lg); }
+}
+
+/* Sword gleam traveling up the blade */
+.sword-gleam {
+    stroke-dasharray: 30 250;
+    stroke-dashoffset: 280;
+    opacity: 0;
+    animation: swordGleam 4s ease-in-out infinite 1.5s;
+}
+
+@keyframes swordGleam {
+    0%   { stroke-dashoffset: 280; opacity: 0; }
+    10%  { opacity: 0.8; }
+    50%  { stroke-dashoffset: -30; opacity: 0.8; }
+    60%  { opacity: 0; }
+    100% { opacity: 0; stroke-dashoffset: -30; }
+}
+
+/* Sword tip sparkle */
+.sword-tip-sparkle {
+    animation: tipSparkle 4s ease-in-out infinite 1.5s;
+}
+
+@keyframes tipSparkle {
+    0%, 45% { opacity: 0; r: 2; }
+    50% { opacity: 0.9; r: 5; }
+    60% { opacity: 0; r: 2; }
+    100% { opacity: 0; }
+}
+
+/* Sword entrance */
+.emblem-sword {
+    opacity: 0;
+    animation: shieldFillIn 0.6s ease forwards 0.4s;
+}
+
+/* Dragon curves draw-in */
+.emblem-dragon {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    animation: dragonDraw 2s ease forwards 0.5s;
+}
+
+.dragon-r {
+    animation-delay: 0.7s;
+}
+
+@keyframes dragonDraw {
+    to { stroke-dashoffset: 0; }
+}
+
+/* Dragon heads */
+.emblem-dragon-head {
+    opacity: 0;
+    animation: shieldFillIn 0.5s ease forwards 1.2s;
+}
+
+.dragon-head-r {
+    animation-delay: 1.4s;
 }
 
 /* Aura glow behind logo */
