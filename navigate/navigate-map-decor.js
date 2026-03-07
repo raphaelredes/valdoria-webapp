@@ -41,7 +41,7 @@ function renderOrnamentBorder(svg) {
         L${tcx - bw + 20},${m + bh} Q${tcx - bw + 10},${m + bh + 5} ${tcx - bw + 2},${m + bh} Z`;
     cartG.appendChild(_el('path', { d: banner, fill: OCEAN_BG, stroke: c, 'stroke-width': 1 }));
     const titleT = _el('text', { x: tcx, y: m + bh - 3, 'text-anchor': 'middle',
-        'font-size': '11px', 'font-family': "'Cinzel Decorative', serif", 'font-weight': '700', fill: INK }));
+        'font-size': '11px', 'font-family': "'Cinzel Decorative', serif", 'font-weight': '700', fill: INK });
     titleT.textContent = 'VALDORIA';
     cartG.appendChild(titleT);
     g.appendChild(cartG);

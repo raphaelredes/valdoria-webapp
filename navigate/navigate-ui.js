@@ -309,7 +309,7 @@ function highlightPath(fromId, toId) {
         const len = Math.sqrt(dx * dx + dy * dy);
         const perpX = -dy / len;
         const perpY = dx / len;
-        const jitterAmt = (seededRandom(seed) - 0.5) * 8;
+        const jitterAmt = (srand(seed) - 0.5) * 8;
         const midX = mx + perpX * jitterAmt;
         const midY = my + perpY * jitterAmt;
 
@@ -351,7 +351,7 @@ function animateTravel(fromId, toId, onComplete) {
         const dx = bP.x - aP.x, dy = bP.y - aP.y;
         const len = Math.sqrt(dx * dx + dy * dy);
         const perpX = -dy / len, perpY = dx / len;
-        const jitterAmt = (seededRandom(seed) - 0.5) * 8;
+        const jitterAmt = (srand(seed) - 0.5) * 8;
         const midX = mx + perpX * jitterAmt, midY = my + perpY * jitterAmt;
         segments.push({ ax: aP.x, ay: aP.y, mx: midX, my: midY, bx: bP.x, by: bP.y, len });
         totalLen += len;

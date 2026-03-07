@@ -150,10 +150,7 @@
             flex: 1;
             overflow: hidden;
             position: relative;
-            background:
-                radial-gradient(ellipse at 30% 20%, rgba(58, 48, 40, 0.6), transparent 60%),
-                radial-gradient(ellipse at 70% 80%, rgba(42, 36, 32, 0.6), transparent 60%),
-                linear-gradient(135deg, #2a2420 0%, #3a3028 40%, #2a2420 100%);
+            background: #4a3a2a;
         }
 
         /* Parchment vignette overlay */
@@ -426,11 +423,11 @@
         }
 
         .loc-node:hover {
-            filter: brightness(1.2);
+            opacity: 0.75;
         }
 
         .loc-node.current {
-            filter: drop-shadow(0 0 12px rgba(196, 149, 58, 0.6));
+            /* No glow — hand-drawn style uses double ink circle instead */
         }
 
         .loc-node.frontier {
@@ -461,33 +458,28 @@
 
         /* Ink road paths */
         .road-path {
-            stroke: #704214;
+            stroke: #8a6a3a;
             stroke-linecap: round;
         }
 
         .road-path.active {
-            stroke: #c4953a;
+            stroke: #a08050;
         }
 
         .terrain-illust {
             pointer-events: none;
         }
 
-        /* ═══ PLAYER MARKER — Breathing glow ═══ */
-        @keyframes playerPulse {
-            0%, 100% { filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.35)); }
-            50% { filter: drop-shadow(0 0 16px rgba(196, 149, 58, 0.7)); }
-        }
-        @keyframes playerBreath {
-            0%, 100% { opacity: 0.15; }
-            50% { opacity: 0.4; }
+        /* ═══ PLAYER MARKER — Gentle pennant sway ═══ */
+        @keyframes pennantSway {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(2deg); }
+            75% { transform: rotate(-2deg); }
         }
 
         .player-marker {
-            animation: playerPulse 2.5s ease-in-out infinite;
-        }
-        .player-glow-ring {
-            animation: playerBreath 3s ease-in-out infinite;
+            animation: pennantSway 3s ease-in-out infinite;
+            transform-origin: center bottom;
         }
 
         /* ═══ LOCATION NODES — Float, hover, shake ═══ */
@@ -510,7 +502,7 @@
         .loc-node.explored:nth-child(3n) { animation-delay: -2.5s; }
 
         .loc-node.explored:hover, .loc-node.known_mapped:hover {
-            filter: brightness(1.25) drop-shadow(0 0 6px rgba(196, 149, 58, 0.4));
+            opacity: 0.7;
             animation: none;
         }
         .loc-node.frontier:active, .loc-node.known_unmapped:not([style*="cursor"]):active {

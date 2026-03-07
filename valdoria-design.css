@@ -79,6 +79,7 @@
 
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+button, input, select, textarea { font-family: inherit; }
 
 /* ─── VIEWPORT LOCK — Telegram Mini App smartphone frame ─── */
 html {
