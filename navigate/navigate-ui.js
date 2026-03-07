@@ -251,7 +251,7 @@ function highlightSelected(locId) {
     clearHighlight();
 
     const svg = document.getElementById('map-svg');
-    const groups = svg.querySelectorAll('.loc-hex');
+    const groups = svg.querySelectorAll('.loc-node');
     for (const g of groups) {
         if (g.getAttribute('data-loc') === locId) {
             g.classList.add('selected');

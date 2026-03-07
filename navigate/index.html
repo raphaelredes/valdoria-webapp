@@ -419,25 +419,25 @@
             color: #c4953a;
         }
 
-        /* ═══ MAP ELEMENTS ═══ */
-        .loc-hex {
+        /* ═══ MAP ELEMENTS — Medieval Cartography ═══ */
+        .loc-node {
             cursor: pointer;
-            transition: filter 0.2s ease;
+            transition: filter 0.2s ease, opacity 0.2s ease;
         }
 
-        .loc-hex:hover {
-            filter: brightness(1.15);
+        .loc-node:hover {
+            filter: brightness(1.2);
         }
 
-        .loc-hex.current {
-            filter: drop-shadow(0 0 10px rgba(196, 149, 58, 0.6));
+        .loc-node.current {
+            filter: drop-shadow(0 0 12px rgba(196, 149, 58, 0.6));
         }
 
-        .loc-hex.frontier {
-            opacity: 0.4;
+        .loc-node.frontier {
+            opacity: 0.35;
         }
 
-        .loc-hex.hidden {
+        .loc-node.hidden {
             display: none;
         }
 
@@ -448,30 +448,28 @@
             text-anchor: middle;
             pointer-events: none;
             font-family: 'Cinzel', serif;
-            font-weight: 500;
+            font-weight: 600;
+            letter-spacing: 0.3px;
         }
 
         .loc-icon {
-            font-size: 18px;
+            font-size: 17px;
             text-anchor: middle;
             dominant-baseline: central;
             pointer-events: none;
         }
 
-        /* Sepia connection paths */
-        .path-line {
+        /* Ink road paths */
+        .road-path {
             stroke: #704214;
-            stroke-width: 1.5;
-            stroke-dasharray: 8 5;
             stroke-linecap: round;
         }
 
-        .path-line.active {
+        .road-path.active {
             stroke: #c4953a;
-            stroke-width: 2;
         }
 
-        .terrain-hex {
+        .terrain-illust {
             pointer-events: none;
         }
 
@@ -505,17 +503,17 @@
             80% { transform: translateX(1px); }
         }
 
-        .loc-hex.explored, .loc-hex.known_mapped {
+        .loc-node.explored, .loc-node.known_mapped {
             animation: locFloat 4s ease-in-out infinite;
         }
-        .loc-hex.explored:nth-child(odd) { animation-delay: -1s; }
-        .loc-hex.explored:nth-child(3n) { animation-delay: -2.5s; }
+        .loc-node.explored:nth-child(odd) { animation-delay: -1s; }
+        .loc-node.explored:nth-child(3n) { animation-delay: -2.5s; }
 
-        .loc-hex.explored:hover, .loc-hex.known_mapped:hover {
+        .loc-node.explored:hover, .loc-node.known_mapped:hover {
             filter: brightness(1.25) drop-shadow(0 0 6px rgba(196, 149, 58, 0.4));
             animation: none;
         }
-        .loc-hex.frontier:active, .loc-hex.known_unmapped:not([style*="cursor"]):active {
+        .loc-node.frontier:active, .loc-node.known_unmapped:not([style*="cursor"]):active {
             animation: locShake 0.3s ease;
         }
 
