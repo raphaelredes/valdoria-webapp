@@ -382,7 +382,9 @@ const _LOC_TRANSITIONS = {
     action_depart:   { icon: '🗺️', text: 'Partindo para aventura...' },
     trail_:          { icon: '🥾', text: 'Seguindo a trilha...' },
     explore_:        { icon: '🧭', text: 'Explorando o caminho...' },
-    // Return
+    // Return / Arrival
+    action_city_entry: { icon: '🏰', text: 'Avistando os portões de Eldoria...' },
+    action_enter_city: { icon: '🏰', text: 'Entrando em Eldoria...' },
     return_city:     { icon: '🏰', text: 'Retornando à cidade...' },
     action_return:   { icon: '🏰', text: 'Retornando à cidade...' },
     city_back:       { icon: '🏰', text: 'Voltando à praça central...' },

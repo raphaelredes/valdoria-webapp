@@ -28,7 +28,7 @@
 
     <!-- Loading Screen -->
     <div id="loading">
-        <div class="loading-icon">🗺️</div>
+        <div class="loading-icon"></div>
         <div class="loading-text">Gerando mapa...</div>
     </div>
 
@@ -36,17 +36,17 @@
     <div id="hud">
         <span class="hud-name" id="hud-name">Herói</span>
         <div class="hud-stat">
-            <span>❤️</span>
+            <span>HP</span>
             <div class="hp-bar">
                 <div class="hp-fill" id="hp-fill"></div>
             </div>
             <span id="hp-text">10/10</span>
         </div>
         <div class="hud-rewards">
-            <span class="reward-badge" id="badge-xp">✨ 0</span>
-            <span class="reward-badge" id="badge-gold">💰 0</span>
-            <span class="reward-badge atmosphere-badge" id="badge-time">☀️</span>
-            <span class="reward-badge atmosphere-badge" id="badge-weather">☀️</span>
+            <span class="reward-badge" id="badge-xp">XP 0</span>
+            <span class="reward-badge" id="badge-gold">GP 0</span>
+            <span class="reward-badge atmosphere-badge" id="badge-time"></span>
+            <span class="reward-badge atmosphere-badge" id="badge-weather"></span>
         </div>
     </div>
 
@@ -61,11 +61,11 @@
 
     <!-- Bottom Bar -->
     <div id="bottom-bar">
-        <button class="btn-return" id="btn-return" onclick="showExitRiskAssessment()">⬅️ Retornar</button>
+        <button class="btn-return" id="btn-return" onclick="showExitRiskAssessment()">Retornar</button>
         <button class="btn-inventory" id="btn-inventory" onclick="transitionToInventory()"
-            style="display:none">🎒</button>
+            style="display:none">Itens</button>
         <div class="bar-center">
-            <span class="step-counter" id="step-counter">⬡ 0</span>
+            <span class="step-counter" id="step-counter">0</span>
             <div class="danger-pips" id="danger-pips">
                 <span class="pip"></span>
                 <span class="pip"></span>
@@ -81,7 +81,7 @@
     <div class="dm-overlay" id="dm-overlay">
         <div class="dm-card">
             <div class="dm-header">
-                <span class="dm-icon" id="dm-icon">📜</span>
+                <span class="dm-icon" id="dm-icon"></span>
                 <div>
                     <div class="dm-title" id="dm-title">Evento</div>
                     <div class="dm-type-badge" id="dm-type">descoberta</div>
@@ -114,7 +114,7 @@
 
     <!-- Combat Warning Overlay -->
     <div class="combat-overlay" id="combat-overlay">
-        <div class="combat-icon" id="combat-icon">⚔️</div>
+        <div class="combat-icon" id="combat-icon"></div>
         <div class="combat-enemy" id="combat-enemy"></div>
         <div class="combat-text" id="combat-text"></div>
         <button class="v-skip-btn" id="combat-skip-btn">Entrar em Combate >></button>
@@ -122,7 +122,7 @@
 
     <!-- Portal Overlay (exit transition) -->
     <div class="portal-overlay" id="portal-overlay">
-        <div class="portal-icon">🚪</div>
+        <div class="portal-icon"></div>
         <div class="portal-title">EXPLORAÇÃO CONCLUÍDA</div>
         <div class="portal-summary" id="portal-summary"></div>
         <button class="v-skip-btn" id="portal-skip-btn">Continuar >></button>
