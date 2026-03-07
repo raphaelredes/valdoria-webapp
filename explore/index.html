@@ -228,6 +228,8 @@
 
     <script>
         var v = Date.now();
+        document.write('<script src="../shared/icon-registry.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/icon-renderer.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
             var scripts = ['explore-iso.js', 'explore-tiles.js', 'explore-fog.js', 'explore-travel.js', 'explore-movement.js', 'explore-renderer.js', 'explore-narrations.js', 'explore-core.js', 'explore-events.js', 'explore-particles.js'];
