@@ -22,7 +22,7 @@ const HEALTH_RETRIES = 3;       // retry health check up to 3 times
 const HEALTH_RETRY_MS = 2000;   // 2s between health retries
 const LOADING_TIMEOUT_MS = 25000; // 25s max loading screen before auto-error
 const SCREEN_CACHE_KEY = 'valdoria_game_screen';
-const SCREEN_CACHE_TTL = 300000; // 5 minutes
+const SCREEN_CACHE_TTL = 1800000; // 30 minutes
 
 let _loadingTimeoutId = null;
 
@@ -297,6 +297,12 @@ async function fetchState(silent) {
             console.log('[GAME] fetchState() got transition:', JSON.stringify(data.transition).substring(0, 100));
             handleTransition(data.transition);
         } else {
+            // Skip re-render if screen is identical to current (silent refresh optimization)
+            if (silent && S.currentScreen && data.text === S.currentScreen.text
+                && data.screen_id === S.currentScreen.screen_id) {
+                console.log('[GAME] fetchState() silent — screen unchanged, skip re-render');
+                return;
+            }
             console.log('[GAME] fetchState() rendering screen, text_len:', (data.text || '').length);
             renderScreen(data);
         }

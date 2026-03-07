@@ -29,6 +29,7 @@ let _cinematicInProgress = false; // Blocks re-render during action cinematic
 let _lastRenderedPhase = null;  // Phase transition tracking
 let _hitStreak = 0;               // P2-G: Combo streak counter
 let _initDice3d = null;           // THREE.js Dice3D instance for initiative screen
+let _dmgDice3d = null;            // THREE.js Dice3D instance for damage rolls
 
 // ─── TIMER / POLLING / HEARTBEAT STATE ───
 let _timerInterval = null;
@@ -409,6 +410,8 @@ function _renderArenaInner(s) {
     if (_initDice3d && (s.ph || s.phase || 'intro') !== 'intro') {
         _initDice3d.dispose(); _initDice3d = null;
     }
+    // Dispose damage 3D dice on re-render
+    if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
     const app = document.getElementById('app');
     // Clear previous biome classes before applying new one
     document.body.className = document.body.className.replace(/\bbiome-\S+/g, '').trim();
@@ -464,6 +467,8 @@ function _renderArenaInner(s) {
         </div>
         <div class="dice-formula" id="diceFormula" style="${diceDisplay}"></div>
         <div class="dice-narration" id="diceNarration" style="${diceDisplay}"></div>`;
+        // 3D damage dice overlay (appears during damage roll animation)
+        html += '<div class="dmg-dice3d-overlay" id="dmgDice3dOverlay" style="display:none"><div class="dmg-dice3d-particles" id="dmgDice3dParticles"></div><div class="dmg-dice3d-canvas" id="dmgDice3dCanvas"></div><div class="dmg-dice3d-label" id="dmgDice3dLabel"></div><button class="dmg-dice3d-skip" id="dmgDice3dSkip">Pular</button></div>';
     }
     if (s.feed && s.feed.length > 0) {
         const total = s.feed.length;
@@ -728,9 +733,10 @@ function startPolling() {
                     _cinematicInProgress = true;
                     initDice(state.lr);
                     if (!state.lr.miss && state.lr.d > 0) {
-                        setTimeout(() => _showDamageFloat(state.lr.d, state.lr.dt, '.entity.player'), 2000);
+                        setTimeout(() => _showDamageFloat(state.lr.d, state.lr.dt, '.entity.player'), 2700);
                     }
-                    const enemyDelay = (state.lr.miss || state.lr.d <= 0) ? 1800 : 2800;
+                    // 3D dice: 1200 + 1500 + 1200 + 200 = 4100ms for hits
+                    const enemyDelay = (state.lr.miss || state.lr.d <= 0) ? 1800 : 4100;
                     setTimeout(() => {
                         _cinematicInProgress = false;
                         currentState = state;
@@ -1348,13 +1354,14 @@ function _playCinematicResult(result, actionType) {
     setTimeout(() => {
         initDice(result.lr);
 
-        // Phase 2: Show floating damage after dice reveal (+2000ms from dice start)
+        // Phase 2: Show floating damage after 3D dice lands (+2700ms = 1200 delay + 1500 roll)
         if (!result.lr.miss && result.lr.d > 0) {
-            setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy'), 2000);
+            setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy'), 2700);
         }
 
         // Phase 3: After full animation, check for kills then render new state
-        const baseDelay = (result.lr.miss || result.lr.d <= 0) ? 1500 : 2500;
+        // Hit: 1200 (delay) + 1500 (3D roll) + 1200 (result hold) + 200 (buffer) = 4100ms
+        const baseDelay = (result.lr.miss || result.lr.d <= 0) ? 1500 : 4100;
         const hasKill = result.lr.kill;
         const totalDelay = hasKill ? baseDelay + 600 : baseDelay;
 
@@ -1705,62 +1712,158 @@ function initDice(lr) {
         return;
     }
 
-    // ── Phase 4: Damage Rolling (1200→1900ms) ──
+    // ── Phase 4: Damage Roll — 3D Dice (1200ms start) ──
+    const DMG_ROLL_MS = 1500; // 3D dice spin duration
+    const DMG_RESULT_HOLD = 1200; // Time to hold result visible for reading (after dice lands)
     setTimeout(() => {
         if (!d2 || !r2) return;
-        d2.textContent = '🎲';
-        d2.classList.add('shaking');
-        r2.className = 'dice-result cycling';
-        l2.textContent = 'rolando...';
-        l2.className = 'dice-label rolling-label';
-        const maxCycle = Math.max(lr.d, 6);
-        let _dmgCycleActive = true;
-        const _dmgEase = (step) => {
-            if (!_dmgCycleActive) return;
-            r2.textContent = Math.floor(Math.random() * maxCycle) + 1;
-            const nextDelay = Math.min(60 + step * step * 6, 280);
-            setTimeout(() => _dmgEase(step + 1), nextDelay);
-        };
-        _dmgEase(0);
 
-        // ── Phase 5: Damage Reveal (700ms later) ──
-        setTimeout(() => {
-            _dmgCycleActive = false;
-            d2.classList.remove('shaking');
-            d2.textContent = '⚔️';
-            r2.textContent = lr.d;
-            r2.className = 'dice-result hit';
-            d2.classList.add('slamming');
-            setTimeout(() => d2.classList.remove('slamming'), 300);
-            l2.textContent = lr.df || 'dano';
-            l2.className = 'dice-label hit';
+        // Parse die type from formula (e.g., "2d6+3" → "d6")
+        const dieType = _parseDieType(lr.df);
 
-            // ── HIT-STOP: Freeze frame 120ms at impact ──
-            const app = document.getElementById('app');
-            if (app) app.classList.add('hit-stop');
-            haptic('heavy'); // Feature 4: heavy impact
+        // Hide emoji damage box, show 3D overlay
+        const overlay = document.getElementById('dmgDice3dOverlay');
+        const canvas = document.getElementById('dmgDice3dCanvas');
+        const particles = document.getElementById('dmgDice3dParticles');
+        const label3d = document.getElementById('dmgDice3dLabel');
+        const skipBtn = document.getElementById('dmgDice3dSkip');
 
-            setTimeout(() => {
-                if (app) app.classList.remove('hit-stop');
+        d2.style.visibility = 'hidden';
+        r2.style.visibility = 'hidden';
+        l2.style.visibility = 'hidden';
 
-                // Flash enemy card on damage
-                const enemies = document.querySelectorAll('.entity.enemy');
-                if (enemies.length > 0) {
-                    enemies[0].classList.add('dmg-flash');
-                    setTimeout(() => enemies[0].classList.remove('dmg-flash'), 400);
-                }
+        if (overlay && canvas && typeof Dice3D !== 'undefined') {
+            // Dispose previous if any
+            if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
 
-                // Feature 3: Particles on damage impact
-                spawnParticles(lr.crit, lr.dt || 'slashing');
+            overlay.style.display = 'flex';
+            if (label3d) { label3d.textContent = lr.df || 'dano'; label3d.className = 'dmg-dice3d-label rolling'; }
+            if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
 
-                // Feature 7: Kill narration with enemy name
-                if (lr.kill) {
-                    const killName = (currentState?.e && currentState.e[0]?.n) || 'O inimigo';
-                    showNarration(_pick(_NARR_KILL).replace('{name}', killName), 'crit');
-                }
-            }, 120);
-        }, 700);
+            try {
+                _dmgDice3d = new Dice3D(canvas, {
+                    size: 140, dieType: dieType, duration: DMG_ROLL_MS,
+                    particlesContainer: particles
+                });
+
+                // Roll to a face value (clamped to die max)
+                const dieMax = { d4: 4, d6: 6, d8: 8, d10: 10, d12: 12, d20: 20 }[dieType] || 6;
+                const faceValue = Math.min(lr.d, dieMax) || (Math.floor(Math.random() * dieMax) + 1);
+
+                // Double-fire guard: both timer and skip call finish(), only first one executes
+                let _dmgDone = false;
+                const finishDmgOverlay = () => {
+                    if (_dmgDone) return;
+                    _dmgDone = true;
+                    if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+                    overlay.style.display = 'none';
+                    if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+                    _revealDamageResult(d2, r2, l2, lr);
+                };
+
+                _dmgDice3d.roll(faceValue, () => {
+                    // ── Phase 5: Dice landed — show result label for reading ──
+                    if (label3d) {
+                        label3d.textContent = `${lr.d} dano`;
+                        label3d.className = 'dmg-dice3d-label ' + (lr.crit ? 'crit' : 'hit');
+                    }
+
+                    // Show skip button after 500ms of result display
+                    setTimeout(() => {
+                        if (!_dmgDone && skipBtn) {
+                            skipBtn.classList.add('visible');
+                            skipBtn.onclick = finishDmgOverlay;
+                        }
+                    }, 500);
+
+                    // Auto-advance after DMG_RESULT_HOLD ms
+                    setTimeout(finishDmgOverlay, DMG_RESULT_HOLD);
+                });
+            } catch (e) {
+                console.warn('[COMBAT] Dice3D damage roll failed:', e);
+                overlay.style.display = 'none';
+                d2.style.visibility = '';
+                r2.style.visibility = '';
+                l2.style.visibility = '';
+                _fallbackDamageRoll(d2, r2, l2, lr);
+            }
+        } else {
+            // Fallback: no Dice3D — use emoji cycling
+            d2.style.visibility = '';
+            r2.style.visibility = '';
+            l2.style.visibility = '';
+            _fallbackDamageRoll(d2, r2, l2, lr);
+        }
     }, 1200);
+}
+
+// Parse die type from damage formula string (e.g., "2d6+3" → "d6", "1d8" → "d8")
+function _parseDieType(formula) {
+    if (!formula) return 'd6';
+    const m = formula.match(/d(\d+)/i);
+    if (!m) return 'd6';
+    const n = parseInt(m[1]);
+    const valid = [4, 6, 8, 10, 12, 20];
+    return valid.includes(n) ? `d${n}` : 'd6';
+}
+
+// Fallback damage roll animation (emoji cycling — original behavior)
+function _fallbackDamageRoll(d2, r2, l2, lr) {
+    d2.textContent = '🎲';
+    d2.classList.add('shaking');
+    r2.className = 'dice-result cycling';
+    l2.textContent = 'rolando...';
+    l2.className = 'dice-label rolling-label';
+    const maxCycle = Math.max(lr.d, 6);
+    let _dmgCycleActive = true;
+    const _dmgEase = (step) => {
+        if (!_dmgCycleActive) return;
+        r2.textContent = Math.floor(Math.random() * maxCycle) + 1;
+        const nextDelay = Math.min(60 + step * step * 6, 280);
+        setTimeout(() => _dmgEase(step + 1), nextDelay);
+    };
+    _dmgEase(0);
+    setTimeout(() => {
+        _dmgCycleActive = false;
+        _revealDamageResult(d2, r2, l2, lr);
+    }, 700);
+}
+
+// Reveal final damage result on emoji dice + trigger impact effects
+function _revealDamageResult(d2, r2, l2, lr) {
+    d2.classList.remove('shaking');
+    d2.textContent = '⚔️';
+    r2.textContent = lr.d;
+    r2.className = 'dice-result hit';
+    d2.classList.add('slamming');
+    setTimeout(() => d2.classList.remove('slamming'), 300);
+    l2.textContent = lr.df || 'dano';
+    l2.className = 'dice-label hit';
+
+    // ── HIT-STOP: Freeze frame 120ms at impact ──
+    const app = document.getElementById('app');
+    if (app) app.classList.add('hit-stop');
+    haptic('heavy');
+
+    setTimeout(() => {
+        if (app) app.classList.remove('hit-stop');
+
+        // Flash enemy card on damage
+        const enemies = document.querySelectorAll('.entity.enemy');
+        if (enemies.length > 0) {
+            enemies[0].classList.add('dmg-flash');
+            setTimeout(() => enemies[0].classList.remove('dmg-flash'), 400);
+        }
+
+        // Feature 3: Particles on damage impact
+        spawnParticles(lr.crit, lr.dt || 'slashing');
+
+        // Feature 7: Kill narration with enemy name
+        if (lr.kill) {
+            const killName = (currentState?.e && currentState.e[0]?.n) || 'O inimigo';
+            showNarration(_pick(_NARR_KILL).replace('{name}', killName), 'crit');
+        }
+    }, 120);
 }
 
 // Static dice display (for polling re-renders — no animation)

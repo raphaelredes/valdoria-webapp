@@ -22,7 +22,7 @@ const Dice3D = (() => {
     const V_GOLD_HEX = '#c4953a';
     const V_SUCCESS_HEX = '#4caf50';
     const V_DANGER_HEX = '#e74c3c';
-    const ROLL_MS = 2000;
+    const ROLL_MS_DEFAULT = 2000;
 
     function haptic(style) {
         try {
@@ -372,11 +372,12 @@ const Dice3D = (() => {
             this._container = container;
             this._size = opts.size || 200;
             this._dieType = opts.dieType || 'd20';
+            this._rollMs = opts.duration || ROLL_MS_DEFAULT;
             this._disposed = false;
             this._animFrame = null;
             this._rolling = false;
             this._rollStart = 0;
-            this._rollDuration = ROLL_MS;
+            this._rollDuration = this._rollMs;
             this._startEuler = { x: 0, y: 0, z: 0 };
             this._endEuler = { x: 0, y: 0, z: 0 };
             this._finalQuat = new THREE.Quaternion();
@@ -631,7 +632,7 @@ const Dice3D = (() => {
             var isCrit = resultValue === maxVal;
             var isFail = resultValue === minVal;
 
-            this._rollDuration = ROLL_MS;
+            this._rollDuration = this._rollMs;
             this._rollStart = performance.now();
             this._rolling = true;
 
