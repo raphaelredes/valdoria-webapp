@@ -8,7 +8,7 @@
     <title>Mapa do Mundo - Lendas de Valdoria</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cinzel+Decorative:wght@700&family=MedievalSharp&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cinzel+Decorative:wght@700&family=MedievalSharp&family=IM+Fell+English:ital@0;1&family=Pirata+One&family=Almendra:wght@400;700&family=Uncial+Antiqua&family=Metamorphous&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         var v = Date.now();
@@ -771,6 +771,102 @@
             transform-origin: center;
             transform-box: fill-box;
         }
+
+        /* ═══ FONT PICKER ═══ */
+        #font-picker-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 86px;
+            width: 32px;
+            height: 24px;
+            background: rgba(42, 36, 32, 0.88);
+            border: 1px solid rgba(112, 66, 20, 0.25);
+            border-radius: 3px;
+            color: #a08050;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Cinzel', serif;
+            cursor: pointer;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 1px 3px rgba(40, 30, 15, 0.3);
+            transition: opacity 0.15s;
+        }
+        #font-picker-btn:active { opacity: 0.7; }
+
+        #font-picker-dropdown {
+            display: none;
+            position: absolute;
+            bottom: 38px;
+            right: 86px;
+            width: 210px;
+            max-height: 320px;
+            overflow-y: auto;
+            background: rgba(42, 36, 32, 0.96);
+            border: 1px solid rgba(112, 66, 20, 0.4);
+            border-radius: 4px;
+            z-index: 45;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.4), inset 0 1px 4px rgba(40, 30, 15, 0.3);
+            padding: 4px 0;
+        }
+        #font-picker-dropdown.open { display: block; }
+
+        .font-option {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            color: #d4c8b0;
+            font-size: 14px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .font-option:active { background: rgba(112, 66, 20, 0.2); }
+        .font-option.selected {
+            color: #c4953a;
+            background: rgba(112, 66, 20, 0.12);
+        }
+        .font-picker-title {
+            padding: 6px 12px 4px;
+            font-size: 10px;
+            color: #8a7060;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Cinzel', serif;
+            border-bottom: 1px solid rgba(112, 66, 20, 0.15);
+            margin-bottom: 2px;
+        }
+
+        /* Font override — applied via JS on body[data-font] */
+        body[data-font] .loc-label,
+        body[data-font] .map-deco-text,
+        body[data-font] #map-svg text {
+            font-family: var(--user-font) !important;
+        }
+        body[data-font] .info-biome,
+        body[data-font] .info-desc,
+        body[data-font] .info-tag,
+        body[data-font] .info-quests,
+        body[data-font] .info-dungeons,
+        body[data-font] .info-note,
+        body[data-font] .info-title,
+        body[data-font] .info-btn,
+        body[data-font] .v-toast-error,
+        body[data-font] #legend,
+        body[data-font] #scale-container,
+        body[data-font] .bar-btn,
+        body[data-font] .hud-name,
+        body[data-font] .hud-level,
+        body[data-font] .hud-bar-label,
+        body[data-font] #current-loc-badge,
+        body[data-font] .badge-name,
+        body[data-font] .loading-text {
+            font-family: var(--user-font) !important;
+        }
     </style>
 </head>
 
@@ -833,6 +929,11 @@
             <span class="legend-item"><span class="legend-dot" style="background:#4a3a28;opacity:0.5"></span> Mapeado</span>
             <span class="legend-item"><span class="legend-dot" style="background:#3a2810;opacity:0.3"></span> Incognito</span>
         </div>
+        <!-- Font Picker -->
+        <button type="button" id="font-picker-btn" onclick="toggleFontPicker()" title="Fonte">Aa</button>
+        <div id="font-picker-dropdown">
+            <div class="font-picker-title">Escolher Fonte</div>
+        </div>
         <div id="scale-container">
             <span id="scale-level">Região</span>
             <div id="scale-bar-wrap">
@@ -877,6 +978,78 @@
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         var scripts = ['map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-map-terrain.js', 'navigate-map-decor.js', 'navigate-ui.js'];
         scripts.forEach(function (s) { document.write('<script src="' + s + '?v=' + v + '"><\/script>'); });
+    </script>
+    <script>
+        // ═══ FONT PICKER — Player font preference ═══
+        var FONT_OPTIONS = [
+            { id: 'medievalsharp', name: 'MedievalSharp', family: "'MedievalSharp', serif" },
+            { id: 'cinzel',        name: 'Cinzel',        family: "'Cinzel', serif" },
+            { id: 'imfell',        name: 'IM Fell English', family: "'IM Fell English', serif" },
+            { id: 'pirataone',     name: 'Pirata One',    family: "'Pirata One', cursive" },
+            { id: 'almendra',      name: 'Almendra',      family: "'Almendra', serif" },
+            { id: 'uncial',        name: 'Uncial Antiqua', family: "'Uncial Antiqua', cursive" },
+            { id: 'metamorphous',  name: 'Metamorphous',  family: "'Metamorphous', serif" },
+        ];
+        var _fpOpen = false;
+
+        function initFontPicker() {
+            var dd = document.getElementById('font-picker-dropdown');
+            var saved = localStorage.getItem('valdoria_font') || 'medievalsharp';
+            FONT_OPTIONS.forEach(function(f) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'font-option' + (f.id === saved ? ' selected' : '');
+                btn.style.fontFamily = f.family;
+                btn.textContent = f.name;
+                btn.dataset.fontId = f.id;
+                btn.onclick = function() { selectFont(f.id); };
+                dd.appendChild(btn);
+            });
+            applyFont(saved);
+        }
+
+        function toggleFontPicker() {
+            _fpOpen = !_fpOpen;
+            document.getElementById('font-picker-dropdown').classList.toggle('open', _fpOpen);
+        }
+
+        function selectFont(fontId) {
+            var opt = FONT_OPTIONS.find(function(f) { return f.id === fontId; });
+            if (!opt) return;
+            localStorage.setItem('valdoria_font', fontId);
+            applyFont(fontId);
+            // Update selected state
+            document.querySelectorAll('.font-option').forEach(function(btn) {
+                btn.classList.toggle('selected', btn.dataset.fontId === fontId);
+            });
+            _fpOpen = false;
+            document.getElementById('font-picker-dropdown').classList.remove('open');
+        }
+
+        function applyFont(fontId) {
+            var opt = FONT_OPTIONS.find(function(f) { return f.id === fontId; });
+            if (!opt) return;
+            // Set CSS variable for overrides + data attribute to activate selectors
+            document.body.style.setProperty('--user-font', opt.family);
+            document.body.dataset.font = fontId;
+            // Also set body font-family directly for non-overridden elements
+            document.body.style.fontFamily = opt.family;
+        }
+
+        // Close dropdown when tapping outside
+        document.addEventListener('click', function(e) {
+            if (_fpOpen && !e.target.closest('#font-picker-dropdown') && !e.target.closest('#font-picker-btn')) {
+                _fpOpen = false;
+                document.getElementById('font-picker-dropdown').classList.remove('open');
+            }
+        });
+
+        // Init on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFontPicker);
+        } else {
+            initFontPicker();
+        }
     </script>
 </body>
 
