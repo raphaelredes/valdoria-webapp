@@ -14,27 +14,73 @@ function srand(seed) {
 const INK = '#8a6a3a';        // Sepia ink (main strokes)
 const INK_DARK = '#3a2810';   // Dark brown ink (hatching, details)
 const INK_LIGHT = '#a08050';  // Light sepia (subtle marks)
-const PARCHMENT = '#5a4a38';  // Land parchment
-const OCEAN_BG = '#4a3a2a';   // Ocean (darker than land)
+const PARCHMENT = '#6a5a42';  // Land parchment (warmer, lighter base)
+const MAP_BG = '#2a2420';     // Dark background outside the map
 
-// Landmass outline (organic continent shape enclosing all locations)
+// Parchment paper outline (roughly rectangular with worn/torn edges)
 const LANDMASS_POINTS = (() => {
-    const pts = [
-        [240, 25], [310, 15], [380, 22],
-        [440, 45], [520, 70], [570, 110], [600, 160],
-        [620, 210], [635, 270], [640, 320], [630, 370],
-        [635, 410], [640, 460], [630, 510], [625, 560],
-        [610, 600], [580, 640], [540, 660],
-        [480, 670], [420, 680], [360, 675], [300, 670],
-        [240, 660], [190, 640],
-        [140, 610], [110, 560], [90, 510],
-        [80, 450], [75, 400], [70, 350], [75, 300],
-        [85, 250], [95, 200],
-        [110, 150], [130, 100], [160, 60], [200, 35],
-    ];
+    // Generate points along a rectangle with irregular wobble for worn paper effect
+    // Margin from SVG edge: ~18px (paper fills almost entire SVG)
+    const m = 18;
+    const w = 733, h = 720; // approximate SVG dimensions
+    const pts = [];
+    const N = 16; // points per edge (more = smoother but more irregular)
+
+    // Top edge (left to right) — some missing chunks
+    for (let i = 0; i <= N; i++) {
+        const t = i / N;
+        pts.push([m + t * (w - 2 * m), m]);
+    }
+    // Right edge (top to bottom)
+    for (let i = 1; i <= N; i++) {
+        const t = i / N;
+        pts.push([w - m, m + t * (h - 2 * m)]);
+    }
+    // Bottom edge (right to left)
+    for (let i = 1; i <= N; i++) {
+        const t = i / N;
+        pts.push([w - m - t * (w - 2 * m), h - m]);
+    }
+    // Left edge (bottom to top)
+    for (let i = 1; i < N; i++) {
+        const t = i / N;
+        pts.push([m, h - m - t * (h - 2 * m)]);
+    }
+
+    // Apply worn/torn wobble — larger on edges, with occasional deep tears
     return pts.map(([x, y], i) => {
-        const wx = (srand(i * 17 + 3) - 0.5) * 12;
-        const wy = (srand(i * 23 + 7) - 0.5) * 10;
+        const seed1 = srand(i * 17 + 3);
+        const seed2 = srand(i * 23 + 7);
+        const seed3 = srand(i * 31 + 11);
+        // Base wobble (small irregularity)
+        let wx = (seed1 - 0.5) * 8;
+        let wy = (seed2 - 0.5) * 8;
+        // Occasional deep tears/bites (10% of points)
+        if (seed3 > 0.88) {
+            // Deep inward bite (paper torn away)
+            const isHoriz = (y <= m + 5 || y >= h - m - 5);
+            if (isHoriz) wy += (seed1 > 0.5 ? 1 : -1) * (8 + seed2 * 12);
+            else wx += (seed2 > 0.5 ? 1 : -1) * (8 + seed1 * 12);
+        }
+        // Corners get extra wear (rounded/bitten off)
+        const nearCorner = (
+            (x < m + 40 && y < m + 40) ||
+            (x > w - m - 40 && y < m + 40) ||
+            (x < m + 40 && y > h - m - 40) ||
+            (x > w - m - 40 && y > h - m - 40)
+        );
+        if (nearCorner) {
+            // Push corner inward (worn away)
+            const cx = x < w / 2 ? m : w - m;
+            const cy = y < h / 2 ? m : h - m;
+            const dx = x - cx, dy = y - cy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 50) {
+                const pull = (1 - dist / 50) * (6 + seed3 * 10);
+                wx += (cx < w / 2 ? pull : -pull);
+                wy += (cy < h / 2 ? pull : -pull);
+            }
+        }
         return [x + wx, y + wy];
     });
 })();
@@ -157,9 +203,9 @@ function renderMap() {
     _buildAllDefs(defs);
     svg.appendChild(defs);
 
-    _renderOcean(svg);
+    _renderBackground(svg);
     _renderLandmass(svg);
-    _renderCoastline(svg);
+    _renderWornEdges(svg);
     _renderAgingEffects(svg);
     renderOrnamentBorder(svg);
     renderGroundCover(svg);
@@ -195,13 +241,7 @@ function _buildAllDefs(defs) {
     iw.appendChild(_el('feDisplacementMap', { in: 'SourceGraphic', in2: 'w', scale: '4', xChannelSelector: 'R', yChannelSelector: 'G' }));
     defs.appendChild(iw);
 
-    // Ocean wave pattern (hand-drawn parallel lines)
-    const wp = _el('pattern', { id: 'ocean-waves', width: '40', height: '14', patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(-3)' });
-    wp.appendChild(_el('path', { d: 'M0,7 Q10,3 20,7 Q30,11 40,7', fill: 'none', stroke: INK, 'stroke-width': '0.5', 'stroke-opacity': '0.12' }));
-    wp.appendChild(_el('path', { d: 'M0,12 Q10,8 20,12 Q30,16 40,12', fill: 'none', stroke: INK, 'stroke-width': '0.3', 'stroke-opacity': '0.07' }));
-    defs.appendChild(wp);
-
-    // Landmass clip path
+    // Landmass clip path (parchment shape)
     defs.appendChild(_el('clipPath', { id: 'land-clip' })).appendChild(_el('path', { d: _landmassPath() }));
 }
 
@@ -209,25 +249,9 @@ function _buildAllDefs(defs) {
 // OCEAN — Dark parchment with ink wave lines
 // ===============================================================
 
-function _renderOcean(svg) {
-    // Flat dark parchment base
-    svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: OCEAN_BG }));
-    // Wave pattern overlay
-    svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: 'url(#ocean-waves)' }));
-    // Scattered hand-drawn wave crests
-    const wG = _el('g', { 'pointer-events': 'none', opacity: '0.14' });
-    for (let i = 0; i < 25; i++) {
-        const wx = srand(i * 37 + 5) * SVG_W;
-        const wy = srand(i * 41 + 11) * SVG_H;
-        if (_pointInLandmass(wx, wy)) continue; // Only in ocean
-        const wl = 10 + srand(i * 53) * 15;
-        const wobble = (srand(i * 61) - 0.5) * 3;
-        wG.appendChild(_el('path', {
-            d: `M${wx},${wy} Q${wx + wl * 0.5},${wy - 2 + wobble} ${wx + wl},${wy}`,
-            fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-linecap': 'round',
-        }));
-    }
-    svg.appendChild(wG);
+function _renderBackground(svg) {
+    // Flat dark background outside the parchment
+    svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: MAP_BG }));
 }
 
 // ===============================================================
@@ -253,15 +277,24 @@ function _renderLandmass(svg) {
 }
 
 // ===============================================================
-// COASTLINE — Dense ink hatching (enhanced)
+// WORN PARCHMENT EDGES — Torn, burnt, aged paper border
 // ===============================================================
 
-function _renderCoastline(svg) {
+function _renderWornEdges(svg) {
     const path = _landmassPath();
-    const cG = _el('g', { class: 'coastline', 'pointer-events': 'none' });
-    // Main coastline ink stroke
-    cG.appendChild(_el('path', { d: path, fill: 'none', stroke: INK_DARK, 'stroke-width': 2.5, 'stroke-opacity': 0.65, filter: 'url(#ink-wobble)' }));
-    // Dense shore hatching (8 lines per segment, closer to coast)
+    const eG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
+
+    // Dark vignette shadow around parchment (depth under paper)
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#1a1410', 'stroke-width': 12, 'stroke-opacity': 0.3, filter: 'url(#fog-blur)' }));
+
+    // Burnt/stained edge (darker band along border)
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#3a2810', 'stroke-width': 6, 'stroke-opacity': 0.25 }));
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#4a3820', 'stroke-width': 3, 'stroke-opacity': 0.2 }));
+
+    // Main ink border (uneven, hand-drawn)
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: INK_DARK, 'stroke-width': 1.5, 'stroke-opacity': 0.6, filter: 'url(#ink-wobble)' }));
+
+    // Torn/frayed edge fragments (small marks along border)
     const p = LANDMASS_POINTS;
     for (let i = 0; i < p.length; i++) {
         const curr = p[i];
@@ -270,29 +303,63 @@ function _renderCoastline(svg) {
         const len = Math.sqrt(dx * dx + dy * dy);
         if (len < 1) continue;
         const nx = -dy / len, ny = dx / len;
-        // Primary hatching (close to coast, outward into ocean)
-        for (let j = 0; j < 8; j++) {
-            const t = 0.06 + j * 0.12;
+
+        // Ragged tear marks (outward from paper into dark bg)
+        for (let j = 0; j < 4; j++) {
+            const t = 0.1 + j * 0.22 + (srand(i * 67 + j) - 0.5) * 0.08;
             const hx = curr[0] + dx * t, hy = curr[1] + dy * t;
-            const hl = 4 + srand(i * 100 + j) * 8;
-            cG.appendChild(_el('line', {
-                x1: hx, y1: hy, x2: hx - nx * hl, y2: hy - ny * hl,
-                stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.25 + srand(i * 50 + j) * 0.12,
+            const tearLen = 2 + srand(i * 100 + j) * 5;
+            const tearAngle = (srand(i * 53 + j * 7) - 0.5) * 0.6;
+            const tnx = nx * Math.cos(tearAngle) - ny * Math.sin(tearAngle);
+            const tny = nx * Math.sin(tearAngle) + ny * Math.cos(tearAngle);
+            eG.appendChild(_el('line', {
+                x1: hx, y1: hy,
+                x2: hx - tnx * tearLen, y2: hy - tny * tearLen,
+                stroke: PARCHMENT, 'stroke-width': 0.5 + srand(i * 71 + j) * 0.8,
+                'stroke-opacity': 0.15 + srand(i * 83 + j) * 0.15,
+                'stroke-linecap': 'round',
             }));
         }
-        // Secondary hatching (further from coast, shorter/thinner)
-        for (let j = 0; j < 4; j++) {
-            const t = 0.1 + j * 0.22;
-            const hx = curr[0] + dx * t, hy = curr[1] + dy * t;
-            const hl = 7 + srand(i * 120 + j) * 10;
-            cG.appendChild(_el('line', {
-                x1: hx - nx * (hl + 3), y1: hy - ny * (hl + 3),
-                x2: hx - nx * (hl + 3 + 3 + srand(i * 130 + j) * 3), y2: hy - ny * (hl + 3 + 3 + srand(i * 130 + j) * 3),
-                stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.15 + srand(i * 60 + j) * 0.08,
+
+        // Small stain/burn dots along edge
+        if (srand(i * 91) > 0.5) {
+            const t = srand(i * 103) * 0.8 + 0.1;
+            const sx = curr[0] + dx * t - nx * 2;
+            const sy = curr[1] + dy * t - ny * 2;
+            eG.appendChild(_el('circle', {
+                cx: sx, cy: sy, r: 1 + srand(i * 107) * 2,
+                fill: '#2a1a08', 'fill-opacity': 0.08 + srand(i * 113) * 0.06,
             }));
         }
     }
-    svg.appendChild(cG);
+
+    // Small torn-away fragments (tiny parchment pieces outside the main shape)
+    for (let i = 0; i < 12; i++) {
+        const idx = Math.floor(srand(i * 137) * p.length);
+        const curr = p[idx];
+        const next = p[(idx + 1) % p.length];
+        const dx = next[0] - curr[0], dy = next[1] - curr[1];
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const nx = -dy / len, ny = dx / len;
+        const t = 0.3 + srand(i * 149) * 0.4;
+        const fx = curr[0] + dx * t - nx * (4 + srand(i * 151) * 6);
+        const fy = curr[1] + dy * t - ny * (4 + srand(i * 157) * 6);
+        const fr = 1 + srand(i * 163) * 2.5;
+        // Irregular fragment (tiny polygon)
+        const pts = [];
+        for (let k = 0; k < 5; k++) {
+            const a = (k / 5) * Math.PI * 2;
+            const rr = fr * (0.6 + srand(i * 100 + k * 31) * 0.8);
+            pts.push(`${fx + Math.cos(a) * rr},${fy + Math.sin(a) * rr}`);
+        }
+        eG.appendChild(_el('polygon', {
+            points: pts.join(' '),
+            fill: PARCHMENT, 'fill-opacity': 0.12 + srand(i * 167) * 0.1,
+            stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.15,
+        }));
+    }
+
+    svg.appendChild(eG);
 }
 
 // ===============================================================
@@ -330,23 +397,62 @@ function _renderAgingEffects(svg) {
 // PAN / ZOOM
 // ===============================================================
 
+// Discrete zoom levels: [full map, region, area, local]
+const ZOOM_LEVELS = [
+    { zoom: 0.85, label: 'Mapa',       turnsPerBar: 8 },
+    { zoom: 1.15, label: 'Região',     turnsPerBar: 4 },
+    { zoom: 1.6,  label: 'Área',       turnsPerBar: 2 },
+    { zoom: 2.2,  label: 'Local',      turnsPerBar: 1 },
+];
+let _zoomIdx = 1; // Default to "Região" level
+
+function _snapToZoomLevel(dir) {
+    _zoomIdx = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, _zoomIdx + dir));
+    S.zoom = ZOOM_LEVELS[_zoomIdx].zoom;
+    _updateScaleBar();
+}
+
+function _updateScaleBar() {
+    const bar = document.getElementById('scale-bar');
+    if (!bar) return;
+    const lvl = ZOOM_LEVELS[_zoomIdx];
+    const turnsLabel = document.getElementById('scale-turns');
+    const levelLabel = document.getElementById('scale-level');
+    if (turnsLabel) turnsLabel.textContent = `${lvl.turnsPerBar} turno${lvl.turnsPerBar > 1 ? 's' : ''}`;
+    if (levelLabel) levelLabel.textContent = lvl.label;
+    // Scale bar width represents a fixed map distance at current zoom
+    const barPx = 60; // fixed pixel width
+    bar.style.width = barPx + 'px';
+}
+
 function setupPanZoom() {
     const vp = document.getElementById('map-viewport');
     const wr = document.getElementById('map-wrapper');
-    let pan = false, moved = false, sx = 0, sy = 0, scx = 0, scy = 0, ipd = 0, iz = 1;
+    let pan = false, moved = false, sx = 0, sy = 0, scx = 0, scy = 0, ipd = 0, iIdx = 0;
     function apply() { wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`; saveViewport(); }
     function clamp() {
         const mw = SVG_W * S.zoom, mh = SVG_H * S.zoom, m = 50;
         S.panX = Math.max(-(mw - m), Math.min(m, S.panX));
         S.panY = Math.max(-(mh - m), Math.min(m, S.panY));
     }
+    // Find closest zoom level to current S.zoom (for session restore)
+    let bestDist = Infinity;
+    for (let i = 0; i < ZOOM_LEVELS.length; i++) {
+        const d = Math.abs(S.zoom - ZOOM_LEVELS[i].zoom);
+        if (d < bestDist) { bestDist = d; _zoomIdx = i; }
+    }
+    S.zoom = ZOOM_LEVELS[_zoomIdx].zoom;
+    _updateScaleBar();
+
     vp.addEventListener('pointerdown', e => { pan = true; moved = false; sx = e.clientX - S.panX; sy = e.clientY - S.panY; scx = e.clientX; scy = e.clientY; });
     vp.addEventListener('pointermove', e => { if (!pan) return; if (Math.abs(e.clientX - scx) > 5 || Math.abs(e.clientY - scy) > 5) moved = true; if (moved) { S.panX = e.clientX - sx; S.panY = e.clientY - sy; clamp(); apply(); } });
     vp.addEventListener('pointerup', () => { pan = false; });
     vp.addEventListener('pointercancel', () => { pan = false; });
-    vp.addEventListener('touchstart', e => { if (e.touches.length === 2) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); ipd = d; iz = S.zoom; } }, { passive: true });
-    vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); S.zoom = Math.max(0.5, Math.min(2.5, iz * (d / ipd))); clamp(); apply(); } }, { passive: true });
-    vp.addEventListener('wheel', e => { e.preventDefault(); S.zoom = Math.max(0.5, Math.min(2.5, S.zoom * (e.deltaY > 0 ? 0.9 : 1.1))); clamp(); apply(); }, { passive: false });
+    // Pinch zoom: snap to discrete levels
+    vp.addEventListener('touchstart', e => { if (e.touches.length === 2) { ipd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); iIdx = _zoomIdx; } }, { passive: true });
+    vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; if (ratio > 1.3 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1); ipd = d; clamp(); apply(); } else if (ratio < 0.7 && _zoomIdx > 0) { _snapToZoomLevel(-1); ipd = d; clamp(); apply(); } } }, { passive: true });
+    // Mouse wheel: snap to discrete levels
+    vp.addEventListener('wheel', e => { e.preventDefault(); _snapToZoomLevel(e.deltaY > 0 ? -1 : 1); clamp(); apply(); }, { passive: false });
     vp.addEventListener('click', e => { if (e.target === vp || e.target === wr || e.target.tagName === 'rect') closeInfoPanel(); });
     apply();
 }

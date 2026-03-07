@@ -3,50 +3,31 @@
 // Hand-drawn ink style — no fills, no glow, no drop shadows
 // ===============================================================
 
-// ── ORNATE BORDER (ink manuscript frame) ──
+// ── LABEL WRAPPING HELPER ──
+
+function _wrapLabel(name, maxChars) {
+    if (name.length <= maxChars) return [name];
+    // Try to split at space nearest to middle
+    const words = name.split(' ');
+    if (words.length === 1) return [name]; // single long word, show full
+    const lines = [];
+    let current = '';
+    for (const word of words) {
+        if (current && (current + ' ' + word).length > maxChars) {
+            lines.push(current);
+            current = word;
+        } else {
+            current = current ? current + ' ' + word : word;
+        }
+    }
+    if (current) lines.push(current);
+    return lines.length > 0 ? lines : [name];
+}
+
+// ── ORNATE BORDER (removed — parchment worn edges serve as border) ──
 
 function renderOrnamentBorder(svg) {
-    const m = 12, c = INK;
-    const g = _el('g', { class: 'border-ornament' });
-
-    // Triple-line frame
-    g.appendChild(_el('rect', { x: m, y: m, width: SVG_W - m * 2, height: SVG_H - m * 2,
-        fill: 'none', stroke: c, 'stroke-width': 2.5, 'stroke-opacity': 0.3 }));
-    g.appendChild(_el('rect', { x: m + 5, y: m + 5, width: SVG_W - m * 2 - 10, height: SVG_H - m * 2 - 10,
-        fill: 'none', stroke: c, 'stroke-width': 0.6, 'stroke-opacity': 0.2 }));
-    g.appendChild(_el('rect', { x: m + 8, y: m + 8, width: SVG_W - m * 2 - 16, height: SVG_H - m * 2 - 16,
-        fill: 'none', stroke: c, 'stroke-width': 0.3, 'stroke-dasharray': '2 3', 'stroke-opacity': 0.15 }));
-
-    // Corner flourishes (ink curls)
-    const corners = [[m, m, 1, 1], [SVG_W - m, m, -1, 1], [m, SVG_H - m, 1, -1], [SVG_W - m, SVG_H - m, -1, -1]];
-    for (const [cx, cy, dx, dy] of corners) {
-        const curl1 = `M${cx},${cy} C${cx + 30 * dx},${cy} ${cx + 35 * dx},${cy + 15 * dy} ${cx + 28 * dx},${cy + 22 * dy}
-            C${cx + 22 * dx},${cy + 28 * dy} ${cx + 12 * dx},${cy + 24 * dy} ${cx + 16 * dx},${cy + 18 * dy}`;
-        g.appendChild(_el('path', { d: curl1, fill: 'none', stroke: c, 'stroke-width': 1.2, 'stroke-opacity': 0.25 }));
-        const curl2 = `M${cx},${cy} C${cx},${cy + 30 * dy} ${cx + 15 * dx},${cy + 35 * dy} ${cx + 22 * dx},${cy + 28 * dy}
-            C${cx + 28 * dx},${cy + 22 * dy} ${cx + 24 * dx},${cy + 12 * dy} ${cx + 18 * dx},${cy + 16 * dy}`;
-        g.appendChild(_el('path', { d: curl2, fill: 'none', stroke: c, 'stroke-width': 1.2, 'stroke-opacity': 0.25 }));
-        // Small ink dot at corner (instead of diamond jewel)
-        g.appendChild(_el('circle', { cx: cx + 5 * dx, cy: cy + 5 * dy, r: 2,
-            fill: c, 'fill-opacity': 0.2, stroke: c, 'stroke-width': 0.4, 'stroke-opacity': 0.3 }));
-    }
-
-    // Title cartouche (scroll banner at top, stroke only)
-    const tcx = SVG_W / 2;
-    const cartG = _el('g', { opacity: '0.4' });
-    const bw = 110, bh = 18;
-    const banner = `M${tcx - bw},${m + 3} Q${tcx - bw + 8},${m - 6} ${tcx - bw + 18},${m + 3}
-        L${tcx + bw - 18},${m + 3} Q${tcx + bw - 8},${m - 6} ${tcx + bw},${m + 3}
-        L${tcx + bw - 2},${m + bh} Q${tcx + bw - 10},${m + bh + 5} ${tcx + bw - 20},${m + bh}
-        L${tcx - bw + 20},${m + bh} Q${tcx - bw + 10},${m + bh + 5} ${tcx - bw + 2},${m + bh} Z`;
-    cartG.appendChild(_el('path', { d: banner, fill: OCEAN_BG, stroke: c, 'stroke-width': 1 }));
-    const titleT = _el('text', { x: tcx, y: m + bh - 3, 'text-anchor': 'middle',
-        'font-size': '11px', 'font-family': "'Cinzel Decorative', serif", 'font-weight': '700', fill: INK });
-    titleT.textContent = 'VALDORIA';
-    cartG.appendChild(titleT);
-    g.appendChild(cartG);
-
-    svg.appendChild(g);
+    // No ornament border — the worn parchment edges define the map boundary
 }
 
 // ── CONNECTION ROADS (ink paths) ──
@@ -63,11 +44,11 @@ function renderRoads(group, fogState) {
         const anyExp = af === 'explored' || bf === 'explored';
         const isActive = (aId === S.currentLoc || bId === S.currentLoc) && bothExp;
 
-        let lOp = 0.06, lW = 0.8, dash = '2 4';
-        if (bothExp) { lOp = 0.3; lW = 1.5; dash = 'none'; }
-        else if (anyExp) { lOp = 0.15; lW = 1.0; dash = '5 4'; }
-        if (isActive) { lOp = 0.45; lW = 2.0; }
-        if (af === 'frontier' || bf === 'frontier') lOp = Math.min(lOp, 0.05);
+        let lOp = 0.08, lW = 1.0, dash = '2 4';
+        if (bothExp) { lOp = 0.45; lW = 2.0; dash = 'none'; }
+        else if (anyExp) { lOp = 0.25; lW = 1.4; dash = '5 4'; }
+        if (isActive) { lOp = 0.6; lW = 2.5; }
+        if (af === 'frontier' || bf === 'frontier') lOp = Math.min(lOp, 0.06);
 
         // Organic curve
         const seed = ac.col * 31 + ac.row * 17 + bc.col * 13 + bc.row * 7;
@@ -100,101 +81,199 @@ function renderRoads(group, fogState) {
 // ── LOCATION MARKERS (ink-drawn symbols) ──
 
 function _drawSettlementIcon(g, x, y, sz) {
-    // Small castle: 2 towers + center building
-    const bw = sz * 0.8, bh = sz * 0.6;
-    const tw = sz * 0.3, th = sz * 1.0;
-    // Left tower
+    // Detailed castle: 2 towers with crenellations + center keep + gate
+    const bw = sz * 0.9, bh = sz * 0.7;
+    const tw = sz * 0.35, th = sz * 1.2;
+    // Left tower body + roof
     g.appendChild(_el('rect', { x: x-bw-tw/2, y: y-th, width: tw, height: th,
-        fill: 'none', stroke: INK_DARK, 'stroke-width': 0.7 }));
-    g.appendChild(_el('path', { d: `M${x-bw-tw/2-1},${y-th} L${x-bw},${y-th-sz*0.35} L${x-bw+tw/2+1},${y-th}`,
-        fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6 }));
-    // Right tower
+        fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.8 }));
+    g.appendChild(_el('path', { d: `M${x-bw-tw/2-2},${y-th} L${x-bw},${y-th-sz*0.45} L${x-bw+tw/2+2},${y-th}`,
+        fill: INK_DARK, 'fill-opacity': 0.05, stroke: INK_DARK, 'stroke-width': 0.7 }));
+    // Left tower crenellations
+    for (let c = 0; c < 3; c++) {
+        const cx = x-bw-tw/2 + c * (tw/3);
+        g.appendChild(_el('rect', { x: cx, y: y-th-1.5, width: tw/4, height: 1.5,
+            fill: INK_DARK, 'fill-opacity': 0.3, stroke: 'none' }));
+    }
+    // Right tower body + roof
     g.appendChild(_el('rect', { x: x+bw-tw/2, y: y-th, width: tw, height: th,
-        fill: 'none', stroke: INK_DARK, 'stroke-width': 0.7 }));
-    g.appendChild(_el('path', { d: `M${x+bw-tw/2-1},${y-th} L${x+bw},${y-th-sz*0.35} L${x+bw+tw/2+1},${y-th}`,
-        fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6 }));
-    // Center building
-    g.appendChild(_el('rect', { x: x-bw*0.5, y: y-bh, width: bw, height: bh,
-        fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6 }));
-    // Center door
-    g.appendChild(_el('path', { d: `M${x-1.5},${y} L${x-1.5},${y-bh*0.4} Q${x},${y-bh*0.55} ${x+1.5},${y-bh*0.4} L${x+1.5},${y}`,
-        fill: 'none', stroke: INK_DARK, 'stroke-width': 0.4 }));
+        fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.8 }));
+    g.appendChild(_el('path', { d: `M${x+bw-tw/2-2},${y-th} L${x+bw},${y-th-sz*0.45} L${x+bw+tw/2+2},${y-th}`,
+        fill: INK_DARK, 'fill-opacity': 0.05, stroke: INK_DARK, 'stroke-width': 0.7 }));
+    // Right tower crenellations
+    for (let c = 0; c < 3; c++) {
+        const cx = x+bw-tw/2 + c * (tw/3);
+        g.appendChild(_el('rect', { x: cx, y: y-th-1.5, width: tw/4, height: 1.5,
+            fill: INK_DARK, 'fill-opacity': 0.3, stroke: 'none' }));
+    }
+    // Center keep (taller, with shadow)
+    g.appendChild(_el('rect', { x: x-bw*0.4, y: y-bh, width: bw*0.8, height: bh,
+        fill: INK_DARK, 'fill-opacity': 0.08, stroke: INK_DARK, 'stroke-width': 0.7 }));
+    // Wall between towers
+    g.appendChild(_el('line', { x1: x-bw+tw/2, y1: y-bh*0.6, x2: x+bw-tw/2, y2: y-bh*0.6,
+        stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.5 }));
+    // Gate arch (larger, filled dark)
+    g.appendChild(_el('path', { d: `M${x-2},${y} L${x-2},${y-bh*0.5} Q${x},${y-bh*0.7} ${x+2},${y-bh*0.5} L${x+2},${y}`,
+        fill: INK_DARK, 'fill-opacity': 0.2, stroke: INK_DARK, 'stroke-width': 0.5 }));
+    // Flag on center keep
+    g.appendChild(_el('line', { x1: x, y1: y-bh, x2: x, y2: y-bh-sz*0.4,
+        stroke: INK_DARK, 'stroke-width': 0.4 }));
+    g.appendChild(_el('path', { d: `M${x},${y-bh-sz*0.4} L${x+sz*0.3},${y-bh-sz*0.3} L${x},${y-bh-sz*0.2}`,
+        fill: INK_DARK, 'fill-opacity': 0.3, stroke: INK_DARK, 'stroke-width': 0.3 }));
 }
 
-function _drawBiomeIcon(g, x, y, biome, sz) {
+function _drawBiomeIcon(g, x, y, biome, sz, locName) {
+    // Check location name for special types (fort, ruins, passage, etc.)
+    const nm = (locName || '').toLowerCase();
+    const isFort = nm.includes('forte') || nm.includes('fortaleza') || nm.includes('bastião');
+    const isRuins = nm.includes('ruína') || nm.includes('ruinas') || nm.includes('antigo') || nm.includes('antiga');
+    const isPassage = nm.includes('passagem') || nm.includes('túnel') || nm.includes('portal');
+    const isTower = nm.includes('torre') || nm.includes('farol');
+    const isLake = nm.includes('lago') || nm.includes('oásis') || nm.includes('fonte');
+
+    if (isFort) {
+        // Fort/stronghold — watchtower with walls
+        g.appendChild(_el('rect', { x: x-sz*0.6, y: y-sz*0.3, width: sz*1.2, height: sz*0.5,
+            fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.8 }));
+        g.appendChild(_el('rect', { x: x-sz*0.25, y: y-sz*1.1, width: sz*0.5, height: sz*1.3,
+            fill: INK_DARK, 'fill-opacity': 0.08, stroke: INK_DARK, 'stroke-width': 0.8 }));
+        // Crenellations on tower
+        for (let c = 0; c < 3; c++) {
+            g.appendChild(_el('rect', { x: x-sz*0.25 + c * sz*0.18, y: y-sz*1.2, width: sz*0.12, height: sz*0.12,
+                fill: INK_DARK, 'fill-opacity': 0.3 }));
+        }
+        // Flag
+        g.appendChild(_el('line', { x1: x, y1: y-sz*1.1, x2: x, y2: y-sz*1.5,
+            stroke: INK_DARK, 'stroke-width': 0.4 }));
+        g.appendChild(_el('path', { d: `M${x},${y-sz*1.5} L${x+sz*0.35},${y-sz*1.4} L${x},${y-sz*1.3}`,
+            fill: INK_DARK, 'fill-opacity': 0.25, stroke: INK_DARK, 'stroke-width': 0.3 }));
+        return;
+    }
+    if (isRuins) {
+        // Ruins — broken columns/walls
+        g.appendChild(_el('line', { x1: x-sz*0.5, y1: y+2, x2: x-sz*0.5, y2: y-sz*0.8,
+            stroke: INK_DARK, 'stroke-width': 1.0 }));
+        g.appendChild(_el('line', { x1: x+sz*0.5, y1: y+2, x2: x+sz*0.5, y2: y-sz*0.5,
+            stroke: INK_DARK, 'stroke-width': 0.8 }));
+        // Broken arch between
+        g.appendChild(_el('path', { d: `M${x-sz*0.5},${y-sz*0.6} Q${x},${y-sz*1.2} ${x+sz*0.3},${y-sz*0.5}`,
+            fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-dasharray': '2 1.5' }));
+        // Rubble dots
+        for (let i = 0; i < 4; i++) {
+            g.appendChild(_el('circle', { cx: x + (srand(i*17)-0.5)*sz, cy: y+1+srand(i*23)*2,
+                r: 0.6, fill: INK_DARK, 'fill-opacity': 0.25 }));
+        }
+        return;
+    }
+    if (isPassage) {
+        // Underground passage — tunnel entrance
+        g.appendChild(_el('path', { d: `M${x-sz*0.7},${y+2} Q${x-sz*0.7},${y-sz*0.6} ${x},${y-sz*0.8} Q${x+sz*0.7},${y-sz*0.6} ${x+sz*0.7},${y+2}`,
+            fill: INK_DARK, 'fill-opacity': 0.15, stroke: INK_DARK, 'stroke-width': 0.9 }));
+        // Steps inside
+        for (let i = 0; i < 3; i++) {
+            const sy = y + 1 - i * 2;
+            const sw = sz * (0.5 - i * 0.1);
+            g.appendChild(_el('line', { x1: x-sw, y1: sy, x2: x+sw, y2: sy,
+                stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.3 }));
+        }
+        return;
+    }
+    if (isTower) {
+        // Watchtower — tall narrow structure
+        g.appendChild(_el('rect', { x: x-sz*0.2, y: y-sz*1.3, width: sz*0.4, height: sz*1.5,
+            fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.8 }));
+        g.appendChild(_el('path', { d: `M${x-sz*0.35},${y-sz*1.3} L${x},${y-sz*1.7} L${x+sz*0.35},${y-sz*1.3}`,
+            fill: INK_DARK, 'fill-opacity': 0.04, stroke: INK_DARK, 'stroke-width': 0.7 }));
+        return;
+    }
+
     switch (biome) {
         case 'forest':
-            // Larger tree
-            g.appendChild(_el('line', { x1: x, y1: y+2, x2: x, y2: y-sz*1.2,
-                stroke: INK_DARK, 'stroke-width': 0.8, 'stroke-linecap': 'round' }));
-            g.appendChild(_el('circle', { cx: x, cy: y-sz*1.5, r: sz*0.6,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.7 }));
-            break;
-        case 'mountain':
-            // Single prominent peak
-            g.appendChild(_el('line', { x1: x-sz, y1: y+3, x2: x, y2: y-sz*1.3,
-                stroke: INK_DARK, 'stroke-width': 1.0, 'stroke-linecap': 'round' }));
-            g.appendChild(_el('line', { x1: x, y1: y-sz*1.3, x2: x+sz, y2: y+3,
-                stroke: INK_DARK, 'stroke-width': 0.8, 'stroke-linecap': 'round' }));
-            for (let j = 0; j < 3; j++) {
-                const t = 0.25 + j * 0.2;
-                g.appendChild(_el('line', { x1: x-sz+sz*t, y1: y+3+(y-sz*1.3-y-3)*t, x2: x-sz+sz*t+1.5, y2: y+3+(y-sz*1.3-y-3)*t+2,
-                    stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.5 }));
+            // Tree cluster (3 overlapping trees)
+            for (let i = -1; i <= 1; i++) {
+                const tx = x + i * sz * 0.5, tsz = sz * (i === 0 ? 0.7 : 0.5);
+                g.appendChild(_el('line', { x1: tx, y1: y+2, x2: tx, y2: y-sz*0.8,
+                    stroke: INK_DARK, 'stroke-width': 0.7 }));
+                g.appendChild(_el('circle', { cx: tx, cy: y-sz*(i===0?1.2:1.0), r: tsz,
+                    fill: INK_DARK, 'fill-opacity': 0.1, stroke: INK_DARK, 'stroke-width': 0.7 }));
             }
             break;
+        case 'mountain':
+            // Twin peaks with shadow
+            g.appendChild(_el('polygon', { points: `${x-sz},${y+3} ${x-sz*0.2},${y-sz*1.3} ${x-sz*0.2},${y+3}`,
+                fill: INK_DARK, 'fill-opacity': 0.1 }));
+            g.appendChild(_el('line', { x1: x-sz, y1: y+3, x2: x-sz*0.2, y2: y-sz*1.3,
+                stroke: INK_DARK, 'stroke-width': 1.1 }));
+            g.appendChild(_el('line', { x1: x-sz*0.2, y1: y-sz*1.3, x2: x+sz, y2: y+3,
+                stroke: INK_DARK, 'stroke-width': 0.8 }));
+            g.appendChild(_el('line', { x1: x+sz*0.2, y1: y+1, x2: x+sz*0.6, y2: y-sz*0.7,
+                stroke: INK_DARK, 'stroke-width': 0.7 }));
+            g.appendChild(_el('line', { x1: x+sz*0.6, y1: y-sz*0.7, x2: x+sz, y2: y+1,
+                stroke: INK_DARK, 'stroke-width': 0.5 }));
+            break;
         case 'swamp':
-            // Wavy lines
+            // Reeds + water
             for (let i = 0; i < 3; i++) {
-                const wy = y - 3 + i * 3;
-                g.appendChild(_el('path', { d: `M${x-sz},${wy} Q${x},${wy-2} ${x+sz},${wy}`,
-                    fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-opacity': 0.6 }));
+                const wy = y - 2 + i * 2.5;
+                g.appendChild(_el('path', { d: `M${x-sz},${wy} Q${x},${wy-1.5} ${x+sz},${wy}`,
+                    fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6 }));
+            }
+            for (let i = -1; i <= 1; i += 2) {
+                g.appendChild(_el('line', { x1: x+i*sz*0.4, y1: y+2, x2: x+i*sz*0.4, y2: y-sz*0.8,
+                    stroke: INK_DARK, 'stroke-width': 0.5 }));
+                g.appendChild(_el('ellipse', { cx: x+i*sz*0.4, cy: y-sz, rx: 0.8, ry: 2,
+                    fill: INK_DARK, 'fill-opacity': 0.4 }));
             }
             break;
         case 'cave':
-            // Arch opening
-            g.appendChild(_el('path', { d: `M${x-sz*0.7},${y+3} Q${x-sz*0.7},${y-sz*0.8} ${x},${y-sz} Q${x+sz*0.7},${y-sz*0.8} ${x+sz*0.7},${y+3}`,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.8 }));
+            g.appendChild(_el('path', { d: `M${x-sz*0.8},${y+3} Q${x-sz*0.8},${y-sz*0.8} ${x},${y-sz} Q${x+sz*0.8},${y-sz*0.8} ${x+sz*0.8},${y+3}`,
+                fill: INK_DARK, 'fill-opacity': 0.15, stroke: INK_DARK, 'stroke-width': 0.9 }));
+            g.appendChild(_el('path', { d: `M${x-sz},${y-sz*0.5} Q${x},${y-sz*1.3} ${x+sz},${y-sz*0.5}`,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5 }));
             break;
         case 'desert':
-            // Small tent
-            g.appendChild(_el('path', { d: `M${x-sz},${y+2} L${x},${y-sz} L${x+sz},${y+2}`,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.7 }));
-            g.appendChild(_el('line', { x1: x, y1: y-sz, x2: x, y2: y-sz-3,
-                stroke: INK_DARK, 'stroke-width': 0.5 }));
-            break;
-        case 'graveyard':
-            // Cross
-            g.appendChild(_el('line', { x1: x, y1: y+3, x2: x, y2: y-sz*1.2,
-                stroke: INK_DARK, 'stroke-width': 1.0 }));
-            g.appendChild(_el('line', { x1: x-sz*0.5, y1: y-sz*0.5, x2: x+sz*0.5, y2: y-sz*0.5,
-                stroke: INK_DARK, 'stroke-width': 0.8 }));
-            break;
-        case 'volcanic':
-            // Smoking peak
-            g.appendChild(_el('line', { x1: x-sz*0.8, y1: y+3, x2: x-1, y2: y-sz,
-                stroke: INK_DARK, 'stroke-width': 0.8 }));
-            g.appendChild(_el('line', { x1: x+1, y1: y-sz, x2: x+sz*0.8, y2: y+3,
-                stroke: INK_DARK, 'stroke-width': 0.6 }));
-            g.appendChild(_el('path', { d: `M${x},${y-sz} Q${x+2},${y-sz-4} ${x-1},${y-sz-7}`,
-                fill: 'none', stroke: INK, 'stroke-width': 0.4, 'stroke-opacity': 0.4 }));
-            break;
-        case 'snow':
-            // Small peak with dots
-            g.appendChild(_el('line', { x1: x-sz*0.7, y1: y+2, x2: x, y2: y-sz,
-                stroke: INK_DARK, 'stroke-width': 0.8 }));
-            g.appendChild(_el('line', { x1: x, y1: y-sz, x2: x+sz*0.7, y2: y+2,
-                stroke: INK_DARK, 'stroke-width': 0.6 }));
+            // Dunes with oasis palm
+            g.appendChild(_el('path', { d: `M${x-sz*1.2},${y+2} Q${x-sz*0.3},${y-sz*0.5} ${x+sz*0.4},${y+2}`,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.8 }));
+            g.appendChild(_el('path', { d: `M${x-sz*0.3},${y+2} Q${x+sz*0.5},${y-sz*0.3} ${x+sz*1.2},${y+2}`,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6 }));
+            // Wind marks
             for (let i = 0; i < 3; i++) {
-                g.appendChild(_el('circle', { cx: x+(srand(x+i*3)-0.5)*sz, cy: y-sz+srand(x+i*3+1)*sz*0.3, r: 0.4,
-                    fill: INK_LIGHT, 'fill-opacity': 0.3 }));
+                const wx = x + (i-1)*sz*0.6, wy = y + 3 + i*0.5;
+                g.appendChild(_el('line', { x1: wx-2, y1: wy, x2: wx+3, y2: wy,
+                    stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.3 }));
             }
             break;
+        case 'graveyard':
+            g.appendChild(_el('path', { d: `M${x-sz*0.6},${y+3} Q${x},${y+1} ${x+sz*0.6},${y+3}`,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.4 }));
+            g.appendChild(_el('line', { x1: x, y1: y+2, x2: x, y2: y-sz*1.3,
+                stroke: INK_DARK, 'stroke-width': 1.2 }));
+            g.appendChild(_el('line', { x1: x-sz*0.5, y1: y-sz*0.6, x2: x+sz*0.5, y2: y-sz*0.6,
+                stroke: INK_DARK, 'stroke-width': 1.0 }));
+            break;
+        case 'volcanic':
+            g.appendChild(_el('polygon', { points: `${x-sz*0.9},${y+3} ${x-1.5},${y-sz} ${x+1.5},${y-sz} ${x+sz*0.9},${y+3}`,
+                fill: INK_DARK, 'fill-opacity': 0.08, stroke: INK_DARK, 'stroke-width': 0.9 }));
+            g.appendChild(_el('path', { d: `M${x-2},${y-sz} Q${x},${y-sz+2} ${x+2},${y-sz}`,
+                fill: INK_DARK, 'fill-opacity': 0.15, stroke: INK_DARK, 'stroke-width': 0.5 }));
+            g.appendChild(_el('path', { d: `M${x},${y-sz} Q${x+2},${y-sz-3} ${x-1},${y-sz-6}`,
+                fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.4 }));
+            break;
+        case 'snow':
+            g.appendChild(_el('polygon', { points: `${x-sz*0.8},${y+2} ${x},${y-sz} ${x+sz*0.8},${y+2}`,
+                fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.8 }));
+            g.appendChild(_el('path', { d: `M${x-sz*0.3},${y-sz*0.4} Q${x},${y-sz-1} ${x+sz*0.3},${y-sz*0.4}`,
+                fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.7, 'stroke-opacity': 0.5 }));
+            break;
         default:
-            // Plains: small house
+            // Plains: house with chimney
             g.appendChild(_el('rect', { x: x-sz*0.5, y: y-sz*0.4, width: sz, height: sz*0.6,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6 }));
+                fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.7 }));
             g.appendChild(_el('path', { d: `M${x-sz*0.6},${y-sz*0.4} L${x},${y-sz} L${x+sz*0.6},${y-sz*0.4}`,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6 }));
+                fill: INK_DARK, 'fill-opacity': 0.04, stroke: INK_DARK, 'stroke-width': 0.7 }));
+            g.appendChild(_el('line', { x1: x+sz*0.3, y1: y-sz*0.7, x2: x+sz*0.3, y2: y-sz*1.1,
+                stroke: INK_DARK, 'stroke-width': 0.4 }));
     }
 }
 
@@ -230,21 +309,21 @@ function renderLocationMarkers(group, fogState) {
                 stroke: INK, 'stroke-width': 0.6, 'stroke-opacity': 0.3, 'stroke-dasharray': '3 2' }));
             // Draw symbol
             if (isSett) _drawSettlementIcon(ng, x, y + 4, 7);
-            else _drawBiomeIcon(ng, x, y + 2, biome, 7);
+            else _drawBiomeIcon(ng, x, y + 2, biome, 7, name);
         } else if (isExp) {
             // Single ink circle
             ng.appendChild(_el('circle', { cx: x, cy: y, r: R - 2, fill: 'none',
                 stroke: INK_DARK, 'stroke-width': 0.8, 'stroke-opacity': 0.5 }));
             // Draw symbol
             if (isSett) _drawSettlementIcon(ng, x, y + 4, 6);
-            else _drawBiomeIcon(ng, x, y + 2, biome, 6);
+            else _drawBiomeIcon(ng, x, y + 2, biome, 6, name);
         } else if (fog === 'known_mapped') {
             // Dashed circle + faded symbol
             ng.setAttribute('opacity', '0.5');
             ng.appendChild(_el('circle', { cx: x, cy: y, r: R - 4, fill: 'none',
                 stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-dasharray': '3 3' }));
             if (isSett) _drawSettlementIcon(ng, x, y + 4, 5);
-            else _drawBiomeIcon(ng, x, y + 2, biome, 5);
+            else _drawBiomeIcon(ng, x, y + 2, biome, 5, name);
         } else if (fog === 'known_unmapped') {
             // Faded dot
             ng.setAttribute('opacity', '0.3');
@@ -255,24 +334,42 @@ function renderLocationMarkers(group, fogState) {
             ng.appendChild(_el('circle', { cx: x, cy: y, r: 2, fill: INK_DARK, 'fill-opacity': 0.2 }));
         }
 
-        // Label
+        // Label (multi-line for long names)
         if (isExp || isCurr) {
-            const short = name.length > 16 ? name.slice(0, 14) + '..' : name;
+            const lines = _wrapLabel(name, 14);
             const lbl = _el('text', { x: x, y: y + R + 13, class: 'loc-label' });
-            lbl.textContent = short;
+            if (lines.length === 1) {
+                lbl.textContent = lines[0];
+            } else {
+                for (let li = 0; li < lines.length; li++) {
+                    const ts = _el('tspan', { x: x, dy: li === 0 ? '0' : '10' });
+                    ts.textContent = lines[li];
+                    lbl.appendChild(ts);
+                }
+            }
             ng.appendChild(lbl);
             // Decorative underline flourish
-            const lw = short.length * 3.5;
-            ng.appendChild(_el('line', { x1: x - lw, y1: y + R + 16, x2: x + lw, y2: y + R + 16,
+            const lastLine = lines[lines.length - 1];
+            const lw = lastLine.length * 3.5;
+            const uy = y + R + 16 + (lines.length - 1) * 10;
+            ng.appendChild(_el('line', { x1: x - lw, y1: uy, x2: x + lw, y2: uy,
                 stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.2 }));
-            // Small serif ticks at ends
-            ng.appendChild(_el('line', { x1: x - lw, y1: y + R + 15, x2: x - lw, y2: y + R + 17,
+            ng.appendChild(_el('line', { x1: x - lw, y1: uy - 1, x2: x - lw, y2: uy + 1,
                 stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.15 }));
-            ng.appendChild(_el('line', { x1: x + lw, y1: y + R + 15, x2: x + lw, y2: y + R + 17,
+            ng.appendChild(_el('line', { x1: x + lw, y1: uy - 1, x2: x + lw, y2: uy + 1,
                 stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.15 }));
         } else if (fog === 'known_mapped') {
+            const lines = _wrapLabel(name, 14);
             const lbl = _el('text', { x: x, y: y + R + 11, class: 'loc-label', 'fill-opacity': 0.4 });
-            lbl.textContent = name.length > 16 ? name.slice(0, 14) + '..' : name;
+            if (lines.length === 1) {
+                lbl.textContent = lines[0];
+            } else {
+                for (let li = 0; li < lines.length; li++) {
+                    const ts = _el('tspan', { x: x, dy: li === 0 ? '0' : '10' });
+                    ts.textContent = lines[li];
+                    lbl.appendChild(ts);
+                }
+            }
             ng.appendChild(lbl);
         }
 
@@ -388,66 +485,115 @@ function _drawSeaSerpent(group, fogState) {
 // ── COMPASS ROSE (ink-drawn, no gradient fills) ──
 
 function renderCompassRose(svg) {
-    const cx = SVG_W - 55, cy = SVG_H - 55, r = 24;
-    const g = _el('g', { class: 'compass-rose', opacity: '0.45' });
+    const cx = SVG_W - 60, cy = SVG_H - 60, r = 30;
+    const g = _el('g', { class: 'compass-rose', opacity: '0.85' });
 
-    // Outer rings (thicker ink)
-    g.appendChild(_el('circle', { cx, cy, r: r + 6, fill: 'none', stroke: INK, 'stroke-width': 0.6 }));
-    g.appendChild(_el('circle', { cx, cy, r: r + 3, fill: 'none', stroke: INK, 'stroke-width': 1.4 }));
-    g.appendChild(_el('circle', { cx, cy, r: r, fill: 'none', stroke: INK, 'stroke-width': 0.5 }));
+    // Parchment background disc (opaque, so compass is readable over terrain)
+    g.appendChild(_el('circle', { cx, cy, r: r + 12,
+        fill: PARCHMENT, 'fill-opacity': 0.7, stroke: 'none' }));
 
-    // Tick marks (32 points)
+    // Ornate outer rings
+    g.appendChild(_el('circle', { cx, cy, r: r + 8, fill: 'none', stroke: INK_DARK, 'stroke-width': 1.8 }));
+    g.appendChild(_el('circle', { cx, cy, r: r + 5, fill: 'none', stroke: INK, 'stroke-width': 0.5 }));
+    g.appendChild(_el('circle', { cx, cy, r: r + 2, fill: 'none', stroke: INK_DARK, 'stroke-width': 1.2 }));
+    g.appendChild(_el('circle', { cx, cy, r: r - 1, fill: 'none', stroke: INK, 'stroke-width': 0.4, 'stroke-dasharray': '1.5 2' }));
+
+    // Decorative dots between rings (medieval detail)
+    for (let i = 0; i < 16; i++) {
+        const a = (i * 22.5) * Math.PI / 180;
+        const dr = r + 3.5;
+        if (i % 4 !== 0) { // skip cardinal positions
+            g.appendChild(_el('circle', {
+                cx: cx + Math.cos(a) * dr, cy: cy + Math.sin(a) * dr,
+                r: 0.7, fill: INK_DARK, 'fill-opacity': 0.5,
+            }));
+        }
+    }
+
+    // Tick marks (32 points on outer ring)
     for (let i = 0; i < 32; i++) {
         const a = (i * 11.25) * Math.PI / 180;
-        const inner = i % 8 === 0 ? r + 1 : i % 4 === 0 ? r + 2 : r + 2.5;
-        const outer = r + 5;
-        const sw = i % 8 === 0 ? 0.8 : 0.3;
+        const inner = i % 8 === 0 ? r + 2 : i % 4 === 0 ? r + 3 : r + 4;
+        const outer = r + 7.5;
+        const sw = i % 8 === 0 ? 1.2 : i % 4 === 0 ? 0.6 : 0.3;
         g.appendChild(_el('line', {
             x1: cx + Math.cos(a) * inner, y1: cy + Math.sin(a) * inner,
             x2: cx + Math.cos(a) * outer, y2: cy + Math.sin(a) * outer,
-            stroke: INK, 'stroke-width': sw,
+            stroke: INK_DARK, 'stroke-width': sw,
         }));
     }
 
-    // 8-point star needles (flat ink, no depth shading)
+    // 4 cardinal needles — bold medieval style
     const needle = _el('g', { class: 'compass-needle' });
     const cards = [
-        { a: -90, len: r, w: 6, col: INK, op: 0.8 },       // N
-        { a: 90, len: r * 0.8, w: 5, col: INK_DARK, op: 0.5 }, // S
-        { a: 0, len: r * 0.7, w: 4, col: INK, op: 0.4 },       // E
-        { a: 180, len: r * 0.7, w: 4, col: INK, op: 0.4 },      // W
+        { a: -90, len: r - 2, w: 5.5, dark: true },   // N (filled dark)
+        { a: 90,  len: r - 4, w: 4.5, dark: false },   // S
+        { a: 0,   len: r - 5, w: 4,   dark: false },   // E
+        { a: 180, len: r - 5, w: 4,   dark: false },   // W
     ];
     for (const c of cards) {
         const rad = c.a * Math.PI / 180;
         const tx = cx + Math.cos(rad) * c.len, ty = cy + Math.sin(rad) * c.len;
         const px1 = cx + Math.cos(rad + Math.PI / 2) * c.w, py1 = cy + Math.sin(rad + Math.PI / 2) * c.w;
         const px2 = cx + Math.cos(rad - Math.PI / 2) * c.w, py2 = cy + Math.sin(rad - Math.PI / 2) * c.w;
-        // Full needle (outline only for hand-drawn feel)
+        // Left half (shadow — filled)
         needle.appendChild(_el('polygon', {
-            points: `${tx},${ty} ${px1},${py1} ${px2},${py2}`,
-            fill: 'none', stroke: c.col, 'stroke-width': 0.6, opacity: c.op,
+            points: `${tx},${ty} ${px1},${py1} ${cx},${cy}`,
+            fill: INK_DARK, 'fill-opacity': c.dark ? 0.6 : 0.25,
+            stroke: INK_DARK, 'stroke-width': 0.8,
+        }));
+        // Right half (light)
+        needle.appendChild(_el('polygon', {
+            points: `${tx},${ty} ${cx},${cy} ${px2},${py2}`,
+            fill: c.dark ? INK : PARCHMENT,
+            'fill-opacity': c.dark ? 0.15 : 0.5,
+            stroke: INK_DARK, 'stroke-width': 0.6,
         }));
     }
-    // Intercardinals
+
+    // Intercardinal needles (thinner, elegant)
     for (const a of [-45, 45, 135, -135]) {
         const rad = a * Math.PI / 180;
-        const tx = cx + Math.cos(rad) * r * 0.5, ty = cy + Math.sin(rad) * r * 0.5;
+        const len = r * 0.55, w = 2.5;
+        const tx = cx + Math.cos(rad) * len, ty = cy + Math.sin(rad) * len;
+        const px1 = cx + Math.cos(rad + Math.PI / 2) * w, py1 = cy + Math.sin(rad + Math.PI / 2) * w;
+        const px2 = cx + Math.cos(rad - Math.PI / 2) * w, py2 = cy + Math.sin(rad - Math.PI / 2) * w;
         needle.appendChild(_el('polygon', {
-            points: `${tx},${ty} ${cx + Math.cos(rad + 0.4) * 3.5},${cy + Math.sin(rad + 0.4) * 3.5} ${cx + Math.cos(rad - 0.4) * 3.5},${cy + Math.sin(rad - 0.4) * 3.5}`,
-            fill: 'none', stroke: INK, 'stroke-width': 0.4, opacity: '0.3',
+            points: `${tx},${ty} ${px1},${py1} ${cx},${cy}`,
+            fill: INK_DARK, 'fill-opacity': 0.2, stroke: INK_DARK, 'stroke-width': 0.4,
+        }));
+        needle.appendChild(_el('polygon', {
+            points: `${tx},${ty} ${cx},${cy} ${px2},${py2}`,
+            fill: 'none', stroke: INK_DARK, 'stroke-width': 0.4,
         }));
     }
-    // Center (simple ink circle)
-    needle.appendChild(_el('circle', { cx, cy, r: 3, fill: 'none', stroke: INK, 'stroke-width': 1.0 }));
-    needle.appendChild(_el('circle', { cx, cy, r: 1, fill: INK_DARK }));
+
+    // Center ornament (medieval rosette)
+    needle.appendChild(_el('circle', { cx, cy, r: 5, fill: PARCHMENT, stroke: INK_DARK, 'stroke-width': 1.2 }));
+    needle.appendChild(_el('circle', { cx, cy, r: 2.5, fill: INK_DARK, 'fill-opacity': 0.3, stroke: INK_DARK, 'stroke-width': 0.6 }));
+    needle.appendChild(_el('circle', { cx, cy, r: 1, fill: INK_DARK, 'fill-opacity': 0.6 }));
     g.appendChild(needle);
 
-    // Labels
-    for (const l of [{ ch: 'N', dx: 0, dy: -r - 10 }, { ch: 'S', dx: 0, dy: r + 14 }, { ch: 'L', dx: r + 10, dy: 3 }, { ch: 'O', dx: -r - 10, dy: 3 }]) {
+    // Cardinal labels (larger, bolder, medieval font)
+    for (const l of [
+        { ch: 'N', dx: 0, dy: -r - 11, sz: '11px', w: '700' },
+        { ch: 'S', dx: 0, dy: r + 16,  sz: '9px',  w: '600' },
+        { ch: 'L', dx: r + 12, dy: 4,  sz: '9px',  w: '600' },
+        { ch: 'O', dx: -r - 12, dy: 4, sz: '9px',  w: '600' },
+    ]) {
         const t = _el('text', { x: cx + l.dx, y: cy + l.dy, 'text-anchor': 'middle',
-            'font-size': '8px', 'font-family': "'Cinzel', serif", 'font-weight': '700', fill: INK, 'fill-opacity': '0.6' });
+            'font-size': l.sz, 'font-family': "'Cinzel Decorative', 'Cinzel', serif",
+            'font-weight': l.w, fill: INK_DARK, 'fill-opacity': '0.8' });
         t.textContent = l.ch;
         g.appendChild(t);
     }
+
+    // Fleur-de-lis hint at North (small decorative mark)
+    const ny = cy - r - 5;
+    g.appendChild(_el('path', {
+        d: `M${cx},${ny} L${cx-2},${ny+3} L${cx},${ny+1.5} L${cx+2},${ny+3} Z`,
+        fill: INK_DARK, 'fill-opacity': 0.6, stroke: 'none',
+    }));
+
     svg.appendChild(g);
 }

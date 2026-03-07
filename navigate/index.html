@@ -150,7 +150,7 @@
             flex: 1;
             overflow: hidden;
             position: relative;
-            background: #4a3a2a;
+            background: #2a2420;
         }
 
         /* Parchment vignette overlay */
@@ -158,7 +158,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            box-shadow: inset 0 0 80px 30px rgba(10, 8, 5, 0.7);
+            box-shadow: inset 0 0 60px 20px rgba(20, 16, 10, 0.5);
             pointer-events: none;
             z-index: 30;
         }
@@ -631,6 +631,58 @@
             display: inline-block;
         }
 
+        /* ═══ SCALE BAR (turn-based distance) ═══ */
+        #scale-container {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(42, 36, 32, 0.88);
+            border: 1px solid rgba(112, 66, 20, 0.25);
+            border-radius: 3px;
+            padding: 4px 10px;
+            font-size: 10px;
+            color: #a08050;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'MedievalSharp', serif;
+            box-shadow: inset 0 1px 3px rgba(40, 30, 15, 0.3);
+        }
+        #scale-level {
+            font-size: 9px;
+            color: #8a7060;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        #scale-bar-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        #scale-bar {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #a08050, #8a6a3a);
+            border-radius: 1px;
+        }
+        #scale-ticks {
+            display: flex;
+            justify-content: space-between;
+            width: 60px;
+        }
+        #scale-ticks span {
+            width: 1px;
+            height: 4px;
+            background: #8a6a3a;
+            display: block;
+        }
+        #scale-turns {
+            font-size: 10px;
+            color: #c4953a;
+            font-weight: 700;
+        }
+
         /* ═══ ERROR TOAST ═══ */
         .v-toast-error {
             position: fixed;
@@ -771,6 +823,16 @@
             <span class="legend-item"><span class="legend-dot" style="background:#6a8a5a"></span> Explorado</span>
             <span class="legend-item"><span class="legend-dot" style="background:#5a5060"></span> Mapeado</span>
             <span class="legend-item"><span class="legend-dot" style="background:#3a3530"></span> Incognito</span>
+        </div>
+        <div id="scale-container">
+            <span id="scale-level">Região</span>
+            <div id="scale-bar-wrap">
+                <div id="scale-bar"></div>
+                <div id="scale-ticks">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+            <span id="scale-turns">4 turnos</span>
         </div>
     </div>
 
