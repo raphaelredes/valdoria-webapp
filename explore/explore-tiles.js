@@ -689,7 +689,7 @@ function drawExitDecoration(ctx, cx, cy, timestamp) {
     ctx.fill();
 }
 
-// POI marker (floating exclamation with bounce)
+// POI marker (floating exclamation with bounce + SVG icon support)
 function drawPOIMarker(ctx, cx, cy, icon, timestamp) {
     const t = (timestamp || 0) * 0.001;
     const bounce = Math.sin(t * 3) * 3;
@@ -707,7 +707,14 @@ function drawPOIMarker(ctx, cx, cy, icon, timestamp) {
     ctx.arc(cx, my, 5, 0, Math.PI * 2);
     ctx.fillStyle = '#c4953a';
     ctx.fill();
-    // Icon
+    // Try SVG icon from registry, fallback to '!'
+    if (typeof renderCanvasIcon === 'function' && icon) {
+        const img = (typeof getIconForCanvas === 'function') ? getIconForCanvas(icon) : null;
+        if (img && img.complete && img.naturalWidth > 0) {
+            ctx.drawImage(img, cx - 4, my - 4, 8, 8);
+            return;
+        }
+    }
     ctx.font = 'bold 8px system-ui';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
