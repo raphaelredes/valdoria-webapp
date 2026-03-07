@@ -426,6 +426,12 @@ function addRewardBadge(container, text, type) {
 function closeOutcome() {
     document.getElementById('outcome-overlay').classList.remove('active');
     if (checkDeath()) return;
+    // If returning to city, finish exploration after the encounter resolves
+    if (_returningToCity) {
+        _returningToCity = false;
+        finishExploration('exit');
+        return;
+    }
     if (checkLowHP()) { saveState(); return; }
     saveState();
 }
@@ -1100,12 +1106,12 @@ function showExitRiskAssessment() {
     // Build options
     optionsEl.innerHTML = '';
 
-    // Option 1: Return to city (always available)
+    // Option 1: Return to city (with encounter chance on the way back)
     addExitOption(optionsEl, '🏰', 'Retornar à Cidade',
         distance >= 0 ? `Jornada de ${distance} turnos, ${risk.chance}% risco` : 'Rota desconhecida',
         risk.color, () => {
             overlay.classList.remove('active');
-            finishExploration('exit');
+            attemptReturnToCity(risk.chance);
         });
 
     // Option 2: Use healing potion (if available and HP < 100%)
@@ -1445,6 +1451,24 @@ function showDeathOverlay() {
 
 // ═══════════════════════════════════════════════════════
 // FINISH
+// ═══════════════════════════════════════════════════════
+// RETURN JOURNEY — roll for encounter on the way back
+// ═══════════════════════════════════════════════════════
+let _returningToCity = false;
+
+function attemptReturnToCity(riskChance) {
+    const roll = Math.random() * 100;
+    if (roll < riskChance && S.randomEncounters.length > 0) {
+        // Encounter on the way back! Show it, then finish after resolution
+        _returningToCity = true;
+        const enc = S.randomEncounters.shift();
+        setTimeout(() => showRandomEncounter(enc), 300);
+    } else {
+        // Safe journey — finish exploration
+        finishExploration('exit');
+    }
+}
+
 // ═══════════════════════════════════════════════════════
 let _finishSent = false;
 
