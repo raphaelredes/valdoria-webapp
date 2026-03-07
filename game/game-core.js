@@ -262,7 +262,8 @@ async function startGame() {
     hideLoading();
     if (data && !data.error) {
         // Handle transition responses (prologue, level-up, explore, combat)
-        if (data.transition) {
+        // Only redirect if there's no screen text (pure transition signal).
+        if (data.transition && !data.text) {
             console.log('[GAME] startGame() got transition:', JSON.stringify(data.transition).substring(0, 100));
             handleTransition(data.transition);
         } else {
