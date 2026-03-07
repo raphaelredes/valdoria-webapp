@@ -89,6 +89,8 @@ function saveState() {
             sc: S._stepCount,
             inv: S.inventory,
             iu: S.inventoryUsed,
+            bd: S._bossDefeated || false,
+            cau: S._campAmbushUsed || false,
             ts: Date.now(),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
@@ -142,6 +144,8 @@ function restoreState() {
         S._stepCount = snap.sc || 0;
         S.inventory = snap.inv || [];
         S.inventoryUsed = snap.iu || [];
+        S._bossDefeated = snap.bd || false;
+        S._campAmbushUsed = snap.cau || false;
         return true;
     } catch (e) {
         console.error('[EXPLORE] restoreState:', e);
