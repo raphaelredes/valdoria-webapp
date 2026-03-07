@@ -547,17 +547,28 @@ function renderPlayerBanner(svg) {
         stroke: INK_DARK, 'stroke-width': 1.2, 'stroke-linecap': 'round',
     }));
 
-    // Square flag with wavy trailing edge (cloth waving effect)
-    const flagG = _el('g', { class: 'banner-flag' });
+    // Square flag with wavy trailing edge
+    const flagG = _el('g', {});
     const fw = 13, fh = 10;
-    flagG.appendChild(_el('path', {
+    const flagPath = _el('path', {
         d: `M${x},${topY}
             L${x + fw},${topY + 1}
             C${x + fw + 1},${topY + fh * 0.35} ${x + fw - 1},${topY + fh * 0.65} ${x + fw},${topY + fh}
             L${x},${topY + fh} Z`,
         fill: '#7b2020', 'fill-opacity': 0.85,
         stroke: INK_DARK, 'stroke-width': 0.6,
-    }));
+    });
+
+    // SVG animateTransform: rotate ±3deg around the pole attachment point
+    const anim = _el('animateTransform', {
+        attributeName: 'transform',
+        type: 'rotate',
+        values: `0 ${x} ${topY + fh / 2};3 ${x} ${topY + fh / 2};-2 ${x} ${topY + fh / 2};1 ${x} ${topY + fh / 2};0 ${x} ${topY + fh / 2}`,
+        dur: '2.5s',
+        repeatCount: 'indefinite',
+    });
+    flagPath.appendChild(anim);
+    flagG.appendChild(flagPath);
 
     mg.appendChild(flagG);
     svg.appendChild(mg);
