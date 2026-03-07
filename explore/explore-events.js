@@ -791,9 +791,9 @@ function showRandomEncounter(enc) {
 // ═══════════════════════════════════════════════════════
 function showDMIntro(text) {
     const overlay = document.getElementById('dm-overlay');
-    document.getElementById('dm-icon').textContent = '📜';
-    document.getElementById('dm-title').textContent = 'Mestre';
-    document.getElementById('dm-type').textContent = 'Narração';
+    // Hide the header (icon, title, badge) — DM intro is ambient narration, not an NPC
+    const header = overlay.querySelector('.dm-header');
+    if (header) header.style.display = 'none';
 
     const narrEl = document.getElementById('dm-narration');
     const choicesEl = document.getElementById('dm-choices');
@@ -803,7 +803,11 @@ function showDMIntro(text) {
         const btn = document.createElement('button');
         btn.className = 'dm-choice-btn';
         btn.innerHTML = '<span class="choice-icon">🗺️</span><span class="choice-label">Explorar</span>';
-        btn.addEventListener('click', () => overlay.classList.remove('active'));
+        btn.addEventListener('click', () => {
+            overlay.classList.remove('active');
+            // Restore header for next POI event usage
+            if (header) header.style.display = '';
+        });
         choicesEl.appendChild(btn);
     });
 

@@ -6,19 +6,19 @@
 
 // --- DM Intro (per biome, with '|' page breaks) ---
 const DM_INTROS = {
-    forest: "Você adentra a floresta.|Galhos estalam sob seus pés enquanto a luz do sol se filtra pelas copas das árvores antigas.",
-    plains: "Vastos campos se estendem diante de você.|O vento sopra livre, trazendo o cheiro de grama e sons distantes de criaturas selvagens.",
-    swamp: "O ar úmido e pesado envolve você.|Cada passo afunda na lama escura. Névoa espessa limita sua visão a poucos metros.",
-    cave: "A escuridão te engole por completo.|Apenas o eco dos seus passos e o pingar de água quebram o silêncio sepulcral.",
-    desert: "O sol castiga implacável.|Dunas douradas se estendem até o horizonte em todas as direções, sem fim à vista.",
-    mountain: "O vento gélido corta seu rosto.|Pedras soltas rangem sob seus pés no caminho íngreme rumo ao topo.",
-    snow: "Tudo é branco até onde a vista alcança.|O frio penetra até os ossos. Cada respiração forma uma nuvem de vapor.",
-    volcanic: "O calor é sufocante.|Rios de lava brilham ao longe. O chão treme sob seus pés a cada passo.",
-    graveyard: "Lápides cobertas de musgo emergem da névoa.|O silêncio é quebrado apenas por sussurros distantes e indecifráveis.",
+    forest: "Galhos estalam sob seus pés enquanto a luz do sol se filtra pelas copas das árvores antigas.",
+    plains: "O vento sopra livre, trazendo o cheiro de grama e sons distantes de criaturas selvagens.",
+    swamp: "O ar úmido envolve você. Cada passo afunda na lama escura enquanto a névoa limita sua visão.",
+    cave: "A escuridão te engole. Apenas o eco dos seus passos e o pingar de água quebram o silêncio.",
+    desert: "O sol castiga implacável. Dunas douradas se estendem até o horizonte, sem fim à vista.",
+    mountain: "O vento gélido corta seu rosto. Pedras soltas rangem sob seus pés no caminho íngreme.",
+    snow: "O frio penetra até os ossos. Tudo é branco até onde a vista alcança.",
+    volcanic: "O calor é sufocante. Rios de lava brilham ao longe e o chão treme a cada passo.",
+    graveyard: "Lápides cobertas de musgo emergem da névoa. Sussurros distantes e indecifráveis enchem o ar.",
 };
 const DM_DANGER_EXT = {
-    5: "|O perigo é palpável — cada sombra pode esconder uma ameaça mortal.",
-    3: "|Seu instinto diz para ficar alerta.",
+    5: " O perigo é palpável — cada sombra pode esconder uma ameaça mortal.",
+    3: " Seu instinto diz para ficar alerta.",
 };
 
 function getDMIntro(biome, dangerLevel) {
