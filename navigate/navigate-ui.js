@@ -299,21 +299,9 @@ function highlightPath(fromId, toId) {
 
         const aPx = hexToPixel(aCoords.col, aCoords.row);
         const bPx = hexToPixel(bCoords.col, bCoords.row);
-
-        // Match the curved jitter from renderConnectionPaths
         const seed = (aCoords.col * 31 + aCoords.row * 17 + bCoords.col * 13 + bCoords.row * 7);
-        const mx = (aPx.x + bPx.x) / 2;
-        const my = (aPx.y + bPx.y) / 2;
-        const dx = bPx.x - aPx.x;
-        const dy = bPx.y - aPx.y;
-        const len = Math.sqrt(dx * dx + dy * dy);
-        const perpX = -dy / len;
-        const perpY = dx / len;
-        const jitterAmt = (srand(seed) - 0.5) * 12;
-        const midX = mx + perpX * jitterAmt;
-        const midY = my + perpY * jitterAmt;
+        const pathD = _buildRoadPath(aPx, bPx, seed);
 
-        const pathD = `M${aPx.x},${aPx.y} Q${midX},${midY} ${bPx.x},${bPx.y}`;
         const highlight = createSVG('path', {
             d: pathD,
             fill: 'none',
@@ -346,20 +334,16 @@ function animateTravel(fromId, toId, onComplete) {
         const aP = hexToPixel(aC.col, aC.row);
         const bP = hexToPixel(bC.col, bC.row);
         const seed = (aC.col * 31 + aC.row * 17 + bC.col * 13 + bC.row * 7);
-        const mx = (aP.x + bP.x) / 2;
-        const my = (aP.y + bP.y) / 2;
         const dx = bP.x - aP.x, dy = bP.y - aP.y;
         const len = Math.sqrt(dx * dx + dy * dy);
-        const perpX = -dy / len, perpY = dx / len;
-        const jitterAmt = (srand(seed) - 0.5) * 12;
-        const midX = mx + perpX * jitterAmt, midY = my + perpY * jitterAmt;
-        segments.push({ ax: aP.x, ay: aP.y, mx: midX, my: midY, bx: bP.x, by: bP.y, len });
+        const pathD = _buildRoadPath(aP, bP, seed);
+        segments.push({ pathD, ax: aP.x, ay: aP.y, bx: bP.x, by: bP.y, len });
         totalLen += len;
     }
 
     // Draw animated path (stroke-dashoffset reveal)
     for (const seg of segments) {
-        const pathD = `M${seg.ax},${seg.ay} Q${seg.mx},${seg.my} ${seg.bx},${seg.by}`;
+        const pathD = seg.pathD;
         const p = createSVG('path', {
             d: pathD,
             class: 'travel-path-anim',

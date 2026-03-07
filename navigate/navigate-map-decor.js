@@ -26,6 +26,30 @@ function _wrapLabel(name, maxChars) {
 
 // ── CONNECTION ROADS (ink paths) ──
 
+function _buildRoadPath(aPx, bPx, seed) {
+    // Multi-segment organic path with 3 waypoints (not a straight line)
+    const dx = bPx.x - aPx.x, dy = bPx.y - aPx.y;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    const px = -dy / len, py = dx / len; // perpendicular
+
+    // 3 waypoints along the path at ~25%, 50%, 75%
+    const pts = [];
+    for (let i = 1; i <= 3; i++) {
+        const t = i / 4;
+        const bx = aPx.x + dx * t;
+        const by = aPx.y + dy * t;
+        // Perpendicular offset (organic wandering)
+        const off = (srand(seed + i * 37) - 0.5) * Math.min(len * 0.15, 18);
+        // Small tangent offset too (path doesn't follow straight line)
+        const tOff = (srand(seed + i * 53) - 0.5) * 4;
+        pts.push({ x: bx + px * off + (dx/len) * tOff, y: by + py * off + (dy/len) * tOff });
+    }
+
+    // Build cubic bezier through start → 3 waypoints → end
+    const p0 = aPx, p1 = pts[0], p2 = pts[1], p3 = pts[2], p4 = bPx;
+    return `M${p0.x},${p0.y} C${p1.x},${p1.y} ${p1.x},${p1.y} ${p2.x},${p2.y} S${p3.x},${p3.y} ${p4.x},${p4.y}`;
+}
+
 function renderRoads(group, fogState) {
     for (const [aId, bId] of CONNECTION_EDGES) {
         const af = fogState[aId], bf = fogState[bId];
@@ -39,20 +63,14 @@ function renderRoads(group, fogState) {
         const isActive = (aId === S.currentLoc || bId === S.currentLoc) && bothExp;
 
         let lOp = 0.08, lW = 1.0, dash = '2 4';
-        if (bothExp) { lOp = 0.45; lW = 2.0; dash = 'none'; }
-        else if (anyExp) { lOp = 0.25; lW = 1.4; dash = '5 4'; }
-        if (isActive) { lOp = 0.6; lW = 2.5; }
+        if (bothExp) { lOp = 0.45; lW = 1.8; dash = 'none'; }
+        else if (anyExp) { lOp = 0.25; lW = 1.3; dash = '5 4'; }
+        if (isActive) { lOp = 0.6; lW = 2.2; }
         if (af === 'frontier' || bf === 'frontier') lOp = Math.min(lOp, 0.06);
 
-        // Organic curve
+        // Organic multi-waypoint path
         const seed = ac.col * 31 + ac.row * 17 + bc.col * 13 + bc.row * 7;
-        const mx = (aPx.x + bPx.x) / 2, my = (aPx.y + bPx.y) / 2;
-        const dx = bPx.x - aPx.x, dy = bPx.y - aPx.y;
-        const len = Math.sqrt(dx * dx + dy * dy);
-        const px = -dy / len, py = dx / len;
-        const jit = (srand(seed) - 0.5) * 12;
-        const midX = mx + px * jit, midY = my + py * jit;
-        const pathD = `M${aPx.x},${aPx.y} Q${midX},${midY} ${bPx.x},${bPx.y}`;
+        const pathD = _buildRoadPath(aPx, bPx, seed);
 
         // Main road (single ink line)
         const road = _el('path', { d: pathD, fill: 'none', class: `road-path${isActive ? ' active' : ''}`,
@@ -60,10 +78,12 @@ function renderRoads(group, fogState) {
         if (dash !== 'none') road.setAttribute('stroke-dasharray', dash);
         group.appendChild(road);
 
-        // Distance badge (number only, no circle background)
+        // Distance badge at midpoint
         if (anyExp) {
             const dist = getConnectionDistance(aId, bId);
-            const txt = _el('text', { x: midX, y: midY + 3, 'text-anchor': 'middle',
+            const mx = (aPx.x + bPx.x) / 2 + (srand(seed+99)-0.5)*6;
+            const my = (aPx.y + bPx.y) / 2 + (srand(seed+100)-0.5)*4;
+            const txt = _el('text', { x: mx, y: my + 3, 'text-anchor': 'middle',
                 'font-size': '8px', 'font-weight': '700', 'font-family': "'Cinzel', serif",
                 fill: INK, 'fill-opacity': bothExp ? 0.4 : 0.25, 'pointer-events': 'none' });
             txt.textContent = dist;
@@ -220,10 +240,20 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
             }
             break;
         case 'cave':
-            g.appendChild(_el('path', { d: `M${x-sz*0.8},${y+3} Q${x-sz*0.8},${y-sz*0.8} ${x},${y-sz} Q${x+sz*0.8},${y-sz*0.8} ${x+sz*0.8},${y+3}`,
-                fill: INK_DARK, 'fill-opacity': 0.15, stroke: INK_DARK, 'stroke-width': 0.9 }));
-            g.appendChild(_el('path', { d: `M${x-sz},${y-sz*0.5} Q${x},${y-sz*1.3} ${x+sz},${y-sz*0.5}`,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5 }));
+            // Cave entrance with rocky surround and dark interior
+            // Rock formation above entrance
+            g.appendChild(_el('path', {
+                d: `M${x-sz*1.1},${y+3} L${x-sz*0.8},${y-sz*0.3} L${x-sz*0.4},${y-sz*0.9} L${x},${y-sz*1.2} L${x+sz*0.3},${y-sz*0.8} L${x+sz*0.7},${y-sz*0.2} L${x+sz*1.1},${y+3}`,
+                fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.7 }));
+            // Dark entrance arch
+            g.appendChild(_el('path', {
+                d: `M${x-sz*0.5},${y+3} Q${x-sz*0.5},${y-sz*0.3} ${x},${y-sz*0.5} Q${x+sz*0.5},${y-sz*0.3} ${x+sz*0.5},${y+3}`,
+                fill: INK_DARK, 'fill-opacity': 0.25, stroke: INK_DARK, 'stroke-width': 0.6 }));
+            // Stalactites
+            g.appendChild(_el('line', { x1: x-sz*0.2, y1: y-sz*0.3, x2: x-sz*0.2, y2: y-sz*0.05,
+                stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.5 }));
+            g.appendChild(_el('line', { x1: x+sz*0.15, y1: y-sz*0.35, x2: x+sz*0.15, y2: y-sz*0.1,
+                stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.5 }));
             break;
         case 'desert':
             // Dunes with oasis palm
@@ -385,21 +415,54 @@ function renderPlayerBanner(svg) {
     if (!coords) return;
     const { x, y } = hexToPixel(coords.col, coords.row);
     const mg = _el('g', { class: 'player-marker' });
-    // Pole
-    const poleTop = y - 28;
-    mg.appendChild(_el('line', { x1: x + 12, y1: y - 8, x2: x + 12, y2: poleTop,
-        stroke: INK_DARK, 'stroke-width': 1.2, 'stroke-linecap': 'round' }));
-    // Triangular pennant
+
+    // Medieval map pin — pointed drop shape with heraldic shield
+    const pinX = x, pinTip = y - 5; // tip of pin points to location
+    const pinTop = pinTip - 28;
+    const pinR = 10; // radius of the circular head
+
+    // Pin pole (tapered line from tip to circle)
     mg.appendChild(_el('path', {
-        d: `M${x+12},${poleTop} L${x+24},${poleTop+5} L${x+12},${poleTop+10}`,
-        fill: 'none', stroke: INK, 'stroke-width': 0.8,
+        d: `M${pinX - 2},${pinTip - pinR - 3} L${pinX},${pinTip} L${pinX + 2},${pinTip - pinR - 3}`,
+        fill: INK_DARK, 'fill-opacity': 0.35,
+        stroke: INK_DARK, 'stroke-width': 0.6,
     }));
-    // Small X mark on pennant
-    const cx = x + 17, cy = poleTop + 5;
-    mg.appendChild(_el('line', { x1: cx-2, y1: cy-2, x2: cx+2, y2: cy+2,
-        stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.6 }));
-    mg.appendChild(_el('line', { x1: cx+2, y1: cy-2, x2: cx-2, y2: cy+2,
-        stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.6 }));
+
+    // Circular head (opaque parchment fill so it's always visible)
+    mg.appendChild(_el('circle', {
+        cx: pinX, cy: pinTop + pinR, r: pinR,
+        fill: PARCHMENT, stroke: INK_DARK, 'stroke-width': 1.5,
+    }));
+
+    // Inner decorative ring
+    mg.appendChild(_el('circle', {
+        cx: pinX, cy: pinTop + pinR, r: pinR - 2.5,
+        fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.5,
+    }));
+
+    // Heraldic shield inside circle
+    const sy = pinTop + pinR - 4;
+    mg.appendChild(_el('path', {
+        d: `M${pinX - 5},${sy} L${pinX - 5},${sy + 5} Q${pinX},${sy + 9} ${pinX + 5},${sy + 5} L${pinX + 5},${sy} Z`,
+        fill: INK_DARK, 'fill-opacity': 0.2,
+        stroke: INK_DARK, 'stroke-width': 0.6,
+    }));
+    // Shield cross (heraldic division)
+    mg.appendChild(_el('line', { x1: pinX, y1: sy, x2: pinX, y2: sy + 8,
+        stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.4 }));
+    mg.appendChild(_el('line', { x1: pinX - 5, y1: sy + 3.5, x2: pinX + 5, y2: sy + 3.5,
+        stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.4 }));
+
+    // Small banner/pennant on top
+    const flagY = pinTop + 1;
+    mg.appendChild(_el('line', { x1: pinX, y1: pinTop + pinR - pinR, x2: pinX, y2: flagY - 6,
+        stroke: INK_DARK, 'stroke-width': 0.8, 'stroke-linecap': 'round' }));
+    mg.appendChild(_el('path', {
+        d: `M${pinX},${flagY - 6} L${pinX + 8},${flagY - 3} L${pinX},${flagY}`,
+        fill: INK_DARK, 'fill-opacity': 0.25,
+        stroke: INK_DARK, 'stroke-width': 0.5,
+    }));
+
     svg.appendChild(mg);
 }
 
@@ -478,13 +541,17 @@ function _drawSeaSerpent(group, fogState) {
 
 // ── COMPASS ROSE (ink-drawn, no gradient fills) ──
 
-function renderCompassRose(svg) {
-    const cx = SVG_W - 60, cy = SVG_H - 60, r = 30;
-    const g = _el('g', { class: 'compass-rose', opacity: '0.85' });
+function renderCompassRose() {
+    const compassSvg = document.getElementById('compass-svg');
+    if (!compassSvg) return;
+    compassSvg.innerHTML = '';
+    // Compass renders into its own fixed SVG (viewBox 0 0 90 90), centered at 45,45
+    const cx = 45, cy = 45, r = 30;
+    const g = _el('g', { class: 'compass-rose' });
 
-    // Parchment background disc (opaque, so compass is readable over terrain)
+    // Parchment background disc
     g.appendChild(_el('circle', { cx, cy, r: r + 12,
-        fill: PARCHMENT, 'fill-opacity': 0.7, stroke: 'none' }));
+        fill: PARCHMENT, stroke: 'none' }));
 
     // Ornate outer rings
     g.appendChild(_el('circle', { cx, cy, r: r + 8, fill: 'none', stroke: INK_DARK, 'stroke-width': 1.8 }));
@@ -492,11 +559,11 @@ function renderCompassRose(svg) {
     g.appendChild(_el('circle', { cx, cy, r: r + 2, fill: 'none', stroke: INK_DARK, 'stroke-width': 1.2 }));
     g.appendChild(_el('circle', { cx, cy, r: r - 1, fill: 'none', stroke: INK, 'stroke-width': 0.4, 'stroke-dasharray': '1.5 2' }));
 
-    // Decorative dots between rings (medieval detail)
+    // Decorative dots between rings
     for (let i = 0; i < 16; i++) {
         const a = (i * 22.5) * Math.PI / 180;
         const dr = r + 3.5;
-        if (i % 4 !== 0) { // skip cardinal positions
+        if (i % 4 !== 0) {
             g.appendChild(_el('circle', {
                 cx: cx + Math.cos(a) * dr, cy: cy + Math.sin(a) * dr,
                 r: 0.7, fill: INK_DARK, 'fill-opacity': 0.5,
@@ -504,7 +571,7 @@ function renderCompassRose(svg) {
         }
     }
 
-    // Tick marks (32 points on outer ring)
+    // Tick marks (32 points)
     for (let i = 0; i < 32; i++) {
         const a = (i * 11.25) * Math.PI / 180;
         const inner = i % 8 === 0 ? r + 2 : i % 4 === 0 ? r + 3 : r + 4;
@@ -517,26 +584,24 @@ function renderCompassRose(svg) {
         }));
     }
 
-    // 4 cardinal needles — bold medieval style
+    // 4 cardinal needles
     const needle = _el('g', { class: 'compass-needle' });
     const cards = [
-        { a: -90, len: r - 2, w: 5.5, dark: true },   // N (filled dark)
-        { a: 90,  len: r - 4, w: 4.5, dark: false },   // S
-        { a: 0,   len: r - 5, w: 4,   dark: false },   // E
-        { a: 180, len: r - 5, w: 4,   dark: false },   // W
+        { a: -90, len: r - 2, w: 5.5, dark: true },
+        { a: 90,  len: r - 4, w: 4.5, dark: false },
+        { a: 0,   len: r - 5, w: 4,   dark: false },
+        { a: 180, len: r - 5, w: 4,   dark: false },
     ];
     for (const c of cards) {
         const rad = c.a * Math.PI / 180;
         const tx = cx + Math.cos(rad) * c.len, ty = cy + Math.sin(rad) * c.len;
         const px1 = cx + Math.cos(rad + Math.PI / 2) * c.w, py1 = cy + Math.sin(rad + Math.PI / 2) * c.w;
         const px2 = cx + Math.cos(rad - Math.PI / 2) * c.w, py2 = cy + Math.sin(rad - Math.PI / 2) * c.w;
-        // Left half (shadow — filled)
         needle.appendChild(_el('polygon', {
             points: `${tx},${ty} ${px1},${py1} ${cx},${cy}`,
             fill: INK_DARK, 'fill-opacity': c.dark ? 0.6 : 0.25,
             stroke: INK_DARK, 'stroke-width': 0.8,
         }));
-        // Right half (light)
         needle.appendChild(_el('polygon', {
             points: `${tx},${ty} ${cx},${cy} ${px2},${py2}`,
             fill: c.dark ? INK : PARCHMENT,
@@ -545,7 +610,7 @@ function renderCompassRose(svg) {
         }));
     }
 
-    // Intercardinal needles (thinner, elegant)
+    // Intercardinal needles
     for (const a of [-45, 45, 135, -135]) {
         const rad = a * Math.PI / 180;
         const len = r * 0.55, w = 2.5;
@@ -562,13 +627,13 @@ function renderCompassRose(svg) {
         }));
     }
 
-    // Center ornament (medieval rosette)
+    // Center ornament
     needle.appendChild(_el('circle', { cx, cy, r: 5, fill: PARCHMENT, stroke: INK_DARK, 'stroke-width': 1.2 }));
     needle.appendChild(_el('circle', { cx, cy, r: 2.5, fill: INK_DARK, 'fill-opacity': 0.3, stroke: INK_DARK, 'stroke-width': 0.6 }));
     needle.appendChild(_el('circle', { cx, cy, r: 1, fill: INK_DARK, 'fill-opacity': 0.6 }));
     g.appendChild(needle);
 
-    // Cardinal labels (larger, bolder, medieval font)
+    // Cardinal labels
     for (const l of [
         { ch: 'N', dx: 0, dy: -r - 11, sz: '11px', w: '700' },
         { ch: 'S', dx: 0, dy: r + 16,  sz: '9px',  w: '600' },
@@ -582,12 +647,12 @@ function renderCompassRose(svg) {
         g.appendChild(t);
     }
 
-    // Fleur-de-lis hint at North (small decorative mark)
+    // Fleur-de-lis at North
     const ny = cy - r - 5;
     g.appendChild(_el('path', {
         d: `M${cx},${ny} L${cx-2},${ny+3} L${cx},${ny+1.5} L${cx+2},${ny+3} Z`,
         fill: INK_DARK, 'fill-opacity': 0.6, stroke: 'none',
     }));
 
-    svg.appendChild(g);
+    compassSvg.appendChild(g);
 }

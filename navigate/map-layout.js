@@ -192,10 +192,13 @@ const TERRAIN_HEXES = [
     // Plains region (west)
     [3, 10, 'plains'], [5, 10, 'plains'], [3, 11, 'plains'],
     [2, 10, 'plains'], [4, 11, 'plains'],
-    // Forest region (north)
+    // Forest region (north) — dense coverage
     [4, 4, 'forest'], [3, 5, 'forest'], [2, 6, 'forest'],
     [3, 6, 'forest'], [4, 7, 'forest'], [5, 6, 'forest'],
     [4, 3, 'forest'], [2, 4, 'forest'],
+    [3, 4, 'forest'], [5, 5, 'forest'], [2, 5, 'forest'],
+    [4, 6, 'forest'], [3, 8, 'forest'], [2, 7, 'forest'],
+    [5, 7, 'forest'], [1, 5, 'forest'], [1, 6, 'forest'],
     // Snow region (far north)
     [5, 1, 'snow'], [7, 1, 'snow'], [6, 2, 'snow'],
     [7, 2, 'snow'], [8, 2, 'snow'],

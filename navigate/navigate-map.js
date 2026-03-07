@@ -19,64 +19,50 @@ const MAP_BG = '#2a2420';     // Dark background outside the map
 
 // Parchment paper outline (roughly rectangular with worn/torn edges)
 const LANDMASS_POINTS = (() => {
-    // Generate points along a rectangle with irregular wobble for worn paper effect
-    // Margin from SVG edge: ~18px (paper fills almost entire SVG)
     const m = 18;
-    const w = 733, h = 720; // approximate SVG dimensions
+    const w = 733, h = 720;
     const pts = [];
-    const N = 16; // points per edge (more = smoother but more irregular)
+    const N = 28; // more points = more detailed irregular edge
 
-    // Top edge (left to right) — some missing chunks
-    for (let i = 0; i <= N; i++) {
-        const t = i / N;
-        pts.push([m + t * (w - 2 * m), m]);
-    }
-    // Right edge (top to bottom)
-    for (let i = 1; i <= N; i++) {
-        const t = i / N;
-        pts.push([w - m, m + t * (h - 2 * m)]);
-    }
-    // Bottom edge (right to left)
-    for (let i = 1; i <= N; i++) {
-        const t = i / N;
-        pts.push([w - m - t * (w - 2 * m), h - m]);
-    }
-    // Left edge (bottom to top)
-    for (let i = 1; i < N; i++) {
-        const t = i / N;
-        pts.push([m, h - m - t * (h - 2 * m)]);
-    }
+    // Generate base rectangle points
+    for (let i = 0; i <= N; i++) pts.push([m + (i / N) * (w - 2 * m), m]); // Top
+    for (let i = 1; i <= N; i++) pts.push([w - m, m + (i / N) * (h - 2 * m)]); // Right
+    for (let i = 1; i <= N; i++) pts.push([w - m - (i / N) * (w - 2 * m), h - m]); // Bottom
+    for (let i = 1; i < N; i++) pts.push([m, h - m - (i / N) * (h - 2 * m)]); // Left
 
-    // Apply worn/torn wobble — larger on edges, with occasional deep tears
     return pts.map(([x, y], i) => {
-        const seed1 = srand(i * 17 + 3);
-        const seed2 = srand(i * 23 + 7);
-        const seed3 = srand(i * 31 + 11);
-        // Base wobble (small irregularity)
-        let wx = (seed1 - 0.5) * 8;
-        let wy = (seed2 - 0.5) * 8;
-        // Occasional deep tears/bites (10% of points)
-        if (seed3 > 0.88) {
-            // Deep inward bite (paper torn away)
-            const isHoriz = (y <= m + 5 || y >= h - m - 5);
-            if (isHoriz) wy += (seed1 > 0.5 ? 1 : -1) * (8 + seed2 * 12);
-            else wx += (seed2 > 0.5 ? 1 : -1) * (8 + seed1 * 12);
+        const s1 = srand(i * 17 + 3), s2 = srand(i * 23 + 7), s3 = srand(i * 31 + 11);
+        const s4 = srand(i * 43 + 19), s5 = srand(i * 53 + 29);
+        const isTop = y <= m + 5, isBot = y >= h - m - 5;
+        const isLeft = x <= m + 5, isRight = x >= w - m - 5;
+        const isHoriz = isTop || isBot;
+
+        // Multi-frequency wobble (small + medium irregularity)
+        let wx = (s1 - 0.5) * 6 + (s4 - 0.5) * 4;
+        let wy = (s2 - 0.5) * 6 + (s5 - 0.5) * 4;
+
+        // Deep tears/bites — 18% of edge points (was 10%)
+        if (s3 > 0.82) {
+            const tearDepth = 10 + s2 * 18; // deeper tears (10-28px)
+            if (isHoriz) wy += (isTop ? 1 : -1) * tearDepth;
+            else wx += (isLeft ? 1 : -1) * tearDepth;
         }
-        // Corners get extra wear (rounded/bitten off)
-        const nearCorner = (
-            (x < m + 40 && y < m + 40) ||
-            (x > w - m - 40 && y < m + 40) ||
-            (x < m + 40 && y > h - m - 40) ||
-            (x > w - m - 40 && y > h - m - 40)
-        );
-        if (nearCorner) {
-            // Push corner inward (worn away)
-            const cx = x < w / 2 ? m : w - m;
-            const cy = y < h / 2 ? m : h - m;
+        // Medium notches — another 15% of points
+        else if (s3 > 0.67) {
+            const notch = 5 + s1 * 8;
+            if (isHoriz) wy += (isTop ? 1 : -1) * notch;
+            else wx += (isLeft ? 1 : -1) * notch;
+        }
+
+        // Corners: dramatic wear (large rounded bites)
+        const corners = [
+            [m, m], [w - m, m], [m, h - m], [w - m, h - m]
+        ];
+        for (const [cx, cy] of corners) {
             const dx = x - cx, dy = y - cy;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 50) {
-                const pull = (1 - dist / 50) * (6 + seed3 * 10);
+            if (dist < 70) {
+                const pull = (1 - dist / 70) * (10 + s3 * 18);
                 wx += (cx < w / 2 ? pull : -pull);
                 wy += (cy < h / 2 ? pull : -pull);
             }
@@ -220,7 +206,7 @@ function renderMap() {
     renderPlayerBanner(svg);
     renderFogWisps(svg, fogState);
     renderCartographyDecor(svg, fogState);
-    renderCompassRose(svg);
+    renderCompassRose();
     setupPanZoom();
 }
 
@@ -281,80 +267,146 @@ function _renderLandmass(svg) {
 function _renderWornEdges(svg) {
     const path = _landmassPath();
     const eG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
-
-    // Dark vignette shadow around parchment (depth under paper)
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#1a1410', 'stroke-width': 12, 'stroke-opacity': 0.3, filter: 'url(#fog-blur)' }));
-
-    // Burnt/stained edge (darker band along border)
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#3a2810', 'stroke-width': 6, 'stroke-opacity': 0.25 }));
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#4a3820', 'stroke-width': 3, 'stroke-opacity': 0.2 }));
-
-    // Main ink border (uneven, hand-drawn)
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: INK_DARK, 'stroke-width': 1.5, 'stroke-opacity': 0.6, filter: 'url(#ink-wobble)' }));
-
-    // Torn/frayed edge fragments (small marks along border)
     const p = LANDMASS_POINTS;
-    for (let i = 0; i < p.length; i++) {
-        const curr = p[i];
-        const next = p[(i + 1) % p.length];
-        const dx = next[0] - curr[0], dy = next[1] - curr[1];
-        const len = Math.sqrt(dx * dx + dy * dy);
-        if (len < 1) continue;
-        const nx = -dy / len, ny = dx / len;
 
-        // Ragged tear marks (outward from paper into dark bg)
-        for (let j = 0; j < 4; j++) {
-            const t = 0.1 + j * 0.22 + (srand(i * 67 + j) - 0.5) * 0.08;
-            const hx = curr[0] + dx * t, hy = curr[1] + dy * t;
-            const tearLen = 2 + srand(i * 100 + j) * 5;
-            const tearAngle = (srand(i * 53 + j * 7) - 0.5) * 0.6;
-            const tnx = nx * Math.cos(tearAngle) - ny * Math.sin(tearAngle);
-            const tny = nx * Math.sin(tearAngle) + ny * Math.cos(tearAngle);
+    // === Layer 1: Deep shadow under the paper (gives depth/elevation) ===
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#0a0806',
+        'stroke-width': 18, 'stroke-opacity': 0.25, filter: 'url(#fog-blur)' }));
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#1a1410',
+        'stroke-width': 10, 'stroke-opacity': 0.35, filter: 'url(#fog-blur)' }));
+
+    // === Layer 2: Burnt/darkened edge staining (multiple bands for depth) ===
+    // Wide darkened band (deep age stain)
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#2a1808',
+        'stroke-width': 14, 'stroke-opacity': 0.12 }));
+    // Medium stain band
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#3a2810',
+        'stroke-width': 8, 'stroke-opacity': 0.2 }));
+    // Narrow dark edge
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#4a3820',
+        'stroke-width': 4, 'stroke-opacity': 0.25 }));
+    // Inner edge darkening (visible on parchment side)
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#3a2810',
+        'stroke-width': 2, 'stroke-opacity': 0.15 }));
+
+    // === Layer 3: Main border line (irregular, hand-drawn feel) ===
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: INK_DARK,
+        'stroke-width': 1.8, 'stroke-opacity': 0.65, filter: 'url(#ink-wobble)' }));
+
+    // === Layer 4: Paper fiber wisps (fine lines radiating outward) ===
+    for (let i = 0; i < p.length; i++) {
+        const curr = p[i], next = p[(i + 1) % p.length];
+        const dx = next[0] - curr[0], dy = next[1] - curr[1];
+        const segLen = Math.sqrt(dx * dx + dy * dy);
+        if (segLen < 1) continue;
+        const nx = -dy / segLen, ny = dx / segLen; // outward normal
+
+        // Fine fiber threads (3-6 per segment, radiating outward)
+        const fiberCount = 3 + Math.floor(srand(i * 67) * 4);
+        for (let j = 0; j < fiberCount; j++) {
+            const t = 0.05 + j * (0.9 / fiberCount) + (srand(i * 67 + j * 3) - 0.5) * 0.06;
+            const bx = curr[0] + dx * t, by = curr[1] + dy * t;
+            const fLen = 2 + srand(i * 100 + j) * 7;
+            const fAngle = (srand(i * 53 + j * 7) - 0.5) * 0.8;
+            const fnx = nx * Math.cos(fAngle) - ny * Math.sin(fAngle);
+            const fny = nx * Math.sin(fAngle) + ny * Math.cos(fAngle);
+            // Fiber line (parchment colored, fading outward)
             eG.appendChild(_el('line', {
-                x1: hx, y1: hy,
-                x2: hx - tnx * tearLen, y2: hy - tny * tearLen,
-                stroke: PARCHMENT, 'stroke-width': 0.5 + srand(i * 71 + j) * 0.8,
-                'stroke-opacity': 0.15 + srand(i * 83 + j) * 0.15,
+                x1: bx, y1: by,
+                x2: bx - fnx * fLen, y2: by - fny * fLen,
+                stroke: PARCHMENT, 'stroke-width': 0.3 + srand(i * 71 + j) * 0.5,
+                'stroke-opacity': 0.12 + srand(i * 83 + j) * 0.18,
                 'stroke-linecap': 'round',
             }));
         }
 
-        // Small stain/burn dots along edge
-        if (srand(i * 91) > 0.5) {
+        // Thicker torn strands (1-2 per segment, longer)
+        if (srand(i * 41) > 0.55) {
+            const t = srand(i * 103) * 0.7 + 0.15;
+            const bx = curr[0] + dx * t, by = curr[1] + dy * t;
+            const sLen = 5 + srand(i * 107) * 10;
+            const sAngle = (srand(i * 109) - 0.5) * 0.5;
+            const snx = nx * Math.cos(sAngle) - ny * Math.sin(sAngle);
+            const sny = nx * Math.sin(sAngle) + ny * Math.cos(sAngle);
+            // Curving fiber strand
+            const mx = bx - snx * sLen * 0.5 + (srand(i * 111) - 0.5) * 4;
+            const my = by - sny * sLen * 0.5 + (srand(i * 113) - 0.5) * 4;
+            eG.appendChild(_el('path', {
+                d: `M${bx},${by} Q${mx},${my} ${bx - snx * sLen},${by - sny * sLen}`,
+                fill: 'none', stroke: PARCHMENT,
+                'stroke-width': 0.4 + srand(i * 117) * 0.4,
+                'stroke-opacity': 0.1 + srand(i * 119) * 0.12,
+                'stroke-linecap': 'round',
+            }));
+        }
+
+        // === Layer 5: Edge stain dots (foxing / burn spots) ===
+        if (srand(i * 91) > 0.35) {
             const t = srand(i * 103) * 0.8 + 0.1;
-            const sx = curr[0] + dx * t - nx * 2;
-            const sy = curr[1] + dy * t - ny * 2;
+            const sx = curr[0] + dx * t + nx * (srand(i * 121) - 0.5) * 4;
+            const sy = curr[1] + dy * t + ny * (srand(i * 123) - 0.5) * 4;
             eG.appendChild(_el('circle', {
-                cx: sx, cy: sy, r: 1 + srand(i * 107) * 2,
-                fill: '#2a1a08', 'fill-opacity': 0.08 + srand(i * 113) * 0.06,
+                cx: sx, cy: sy, r: 1.2 + srand(i * 107) * 2.5,
+                fill: '#2a1a08', 'fill-opacity': 0.06 + srand(i * 113) * 0.08,
+            }));
+        }
+        // Darker burn marks (less frequent, larger)
+        if (srand(i * 131) > 0.8) {
+            const t = srand(i * 133) * 0.6 + 0.2;
+            const bkx = curr[0] + dx * t + nx * 3;
+            const bky = curr[1] + dy * t + ny * 3;
+            eG.appendChild(_el('circle', {
+                cx: bkx, cy: bky, r: 2 + srand(i * 137) * 4,
+                fill: '#1a0e04', 'fill-opacity': 0.04 + srand(i * 139) * 0.05,
             }));
         }
     }
 
-    // Small torn-away fragments (tiny parchment pieces outside the main shape)
-    for (let i = 0; i < 12; i++) {
+    // === Layer 6: Torn-away fragments (loose paper pieces near the edge) ===
+    for (let i = 0; i < 20; i++) {
         const idx = Math.floor(srand(i * 137) * p.length);
-        const curr = p[idx];
-        const next = p[(idx + 1) % p.length];
+        const curr = p[idx], next = p[(idx + 1) % p.length];
         const dx = next[0] - curr[0], dy = next[1] - curr[1];
         const len = Math.sqrt(dx * dx + dy * dy) || 1;
         const nx = -dy / len, ny = dx / len;
-        const t = 0.3 + srand(i * 149) * 0.4;
-        const fx = curr[0] + dx * t - nx * (4 + srand(i * 151) * 6);
-        const fy = curr[1] + dy * t - ny * (4 + srand(i * 157) * 6);
-        const fr = 1 + srand(i * 163) * 2.5;
-        // Irregular fragment (tiny polygon)
-        const pts = [];
-        for (let k = 0; k < 5; k++) {
-            const a = (k / 5) * Math.PI * 2;
-            const rr = fr * (0.6 + srand(i * 100 + k * 31) * 0.8);
-            pts.push(`${fx + Math.cos(a) * rr},${fy + Math.sin(a) * rr}`);
+        const t = 0.2 + srand(i * 149) * 0.6;
+        const dist = 3 + srand(i * 151) * 8;
+        const fx = curr[0] + dx * t - nx * dist;
+        const fy = curr[1] + dy * t - ny * dist;
+        const fr = 1.5 + srand(i * 163) * 3;
+        // Irregular fragment shape (5-7 vertices)
+        const nVerts = 5 + Math.floor(srand(i * 165) * 3);
+        const fpts = [];
+        for (let k = 0; k < nVerts; k++) {
+            const a = (k / nVerts) * Math.PI * 2;
+            const rr = fr * (0.5 + srand(i * 100 + k * 31) * 1.0);
+            fpts.push(`${fx + Math.cos(a) * rr},${fy + Math.sin(a) * rr}`);
         }
         eG.appendChild(_el('polygon', {
-            points: pts.join(' '),
-            fill: PARCHMENT, 'fill-opacity': 0.12 + srand(i * 167) * 0.1,
-            stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.15,
+            points: fpts.join(' '),
+            fill: PARCHMENT, 'fill-opacity': 0.08 + srand(i * 167) * 0.12,
+            stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.12,
         }));
+    }
+
+    // === Layer 7: Corner wear detail (extra staining at worn corners) ===
+    const corners = [
+        [p[0][0], p[0][1]],                          // top-left area
+        [p[Math.floor(p.length * 0.25)][0], p[Math.floor(p.length * 0.25)][1]], // top-right
+        [p[Math.floor(p.length * 0.5)][0], p[Math.floor(p.length * 0.5)][1]],   // bottom-right
+        [p[Math.floor(p.length * 0.75)][0], p[Math.floor(p.length * 0.75)][1]], // bottom-left
+    ];
+    for (let ci = 0; ci < corners.length; ci++) {
+        const [cx, cy] = corners[ci];
+        // Cluster of stain dots around each corner
+        for (let j = 0; j < 8; j++) {
+            const sx = cx + (srand(ci * 200 + j * 7) - 0.5) * 25;
+            const sy = cy + (srand(ci * 200 + j * 7 + 3) - 0.5) * 25;
+            eG.appendChild(_el('circle', {
+                cx: sx, cy: sy, r: 0.8 + srand(ci * 200 + j * 7 + 5) * 2,
+                fill: '#2a1a08', 'fill-opacity': 0.04 + srand(ci * 200 + j * 7 + 6) * 0.05,
+            }));
+        }
     }
 
     svg.appendChild(eG);
@@ -429,9 +481,13 @@ function setupPanZoom() {
     let pan = false, moved = false, sx = 0, sy = 0, scx = 0, scy = 0, ipd = 0, iIdx = 0;
     function apply() { wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`; saveViewport(); }
     function clamp() {
-        const mw = SVG_W * S.zoom, mh = SVG_H * S.zoom, m = 50;
-        S.panX = Math.max(-(mw - m), Math.min(m, S.panX));
-        S.panY = Math.max(-(mh - m), Math.min(m, S.panY));
+        const vpW = vp.clientWidth, vpH = vp.clientHeight;
+        const mw = SVG_W * S.zoom, mh = SVG_H * S.zoom;
+        // Keep at least 40% of the smaller dimension visible at all times
+        const padX = Math.min(vpW, mw) * 0.4;
+        const padY = Math.min(vpH, mh) * 0.4;
+        S.panX = Math.max(padX - mw, Math.min(vpW - padX, S.panX));
+        S.panY = Math.max(padY - mh, Math.min(vpH - padY, S.panY));
     }
     // Find closest zoom level to current S.zoom (for session restore)
     let bestDist = Infinity;

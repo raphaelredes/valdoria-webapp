@@ -463,16 +463,14 @@
             pointer-events: none;
         }
 
-        /* ═══ PLAYER MARKER — Gentle pennant sway ═══ */
-        @keyframes pennantSway {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(2deg); }
-            75% { transform: rotate(-2deg); }
+        /* ═══ PLAYER MARKER — Vertical bobbing (pointing indicator) ═══ */
+        @keyframes pinBob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
         }
 
         .player-marker {
-            animation: pennantSway 3s ease-in-out infinite;
-            transform-origin: center bottom;
+            animation: pinBob 2s ease-in-out infinite;
         }
 
         /* ═══ LOCATION NODES — Float, hover, shake ═══ */
@@ -735,7 +733,21 @@
             font-style: italic;
         }
 
-        /* ═══ COMPASS ROSE ═══ */
+        /* ═══ COMPASS ROSE (fixed overlay) ═══ */
+        #compass-overlay {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            width: 80px;
+            height: 80px;
+            z-index: 15;
+            pointer-events: none;
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+        }
+        #compass-svg {
+            width: 100%;
+            height: 100%;
+        }
         .compass-rose {
             pointer-events: none;
         }
@@ -805,6 +817,10 @@
     <div id="map-viewport">
         <div id="map-wrapper">
             <svg id="map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <!-- Compass overlay (fixed above map, not affected by pan/zoom) -->
+        <div id="compass-overlay">
+            <svg id="compass-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"></svg>
         </div>
         <div id="current-loc-badge">
             <span class="badge-icon" id="badge-icon"></span>
