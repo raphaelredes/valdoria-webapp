@@ -382,6 +382,7 @@ const Dice3D = (() => {
             this._finalQuat = new THREE.Quaternion();
             this._rollCallback = null;
             this._showingResult = false;
+            this._resultTime = 0;
             this._idleTime = 0;
             this._dieMesh = null;
             this._particlesEl = opts.particlesContainer || null;
@@ -400,13 +401,14 @@ const Dice3D = (() => {
             container.appendChild(this._renderer.domElement);
 
             // Lighting — warm medieval
-            this._scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            this._ambient = new THREE.AmbientLight(0xffffff, 0.5);
+            this._scene.add(this._ambient);
 
-            var keyLight = new THREE.DirectionalLight(0xfff5e0, 1.2);
-            keyLight.position.set(3, 5, 5);
-            keyLight.castShadow = true;
-            keyLight.shadow.mapSize.set(512, 512);
-            this._scene.add(keyLight);
+            this._keyLight = new THREE.DirectionalLight(0xfff5e0, 1.2);
+            this._keyLight.position.set(3, 5, 5);
+            this._keyLight.castShadow = true;
+            this._keyLight.shadow.mapSize.set(512, 512);
+            this._scene.add(this._keyLight);
 
             var fillLight = new THREE.DirectionalLight(0xd4af37, 0.4);
             fillLight.position.set(-4, -1, 3);
@@ -415,6 +417,15 @@ const Dice3D = (() => {
             var rimLight = new THREE.DirectionalLight(0x8b6914, 0.3);
             rimLight.position.set(0, -4, -3);
             this._scene.add(rimLight);
+
+            // Orbiting point light (activated during roll)
+            this._orbitLight = new THREE.PointLight(0xd4af37, 0, 6);
+            this._scene.add(this._orbitLight);
+
+            // Result glow light (pulse after landing)
+            this._resultGlow = new THREE.PointLight(0xd4af37, 0, 5);
+            this._resultGlow.position.set(0, 0, 2);
+            this._scene.add(this._resultGlow);
 
             this._createMesh();
             this._animate = this._animate.bind(this);
@@ -439,12 +450,23 @@ const Dice3D = (() => {
             if (this._rolling) {
                 this._updateRoll(time);
             } else if (this._showingResult) {
-                // Hold still on result
+                // Breathing glow pulse on result
+                this._resultTime += 0.02;
+                var pulse = 0.3 + 0.2 * Math.sin(this._resultTime * 2.5);
+                this._resultGlow.intensity = pulse;
+                // Subtle scale breathing
+                if (this._dieMesh) {
+                    var s = 1.0 + 0.008 * Math.sin(this._resultTime * 2.0);
+                    this._dieMesh.scale.setScalar(s);
+                }
             } else if (this._dieMesh) {
                 // Gentle idle rotation
                 this._idleTime += 0.012;
                 this._dieMesh.rotation.y += 0.003;
                 this._dieMesh.rotation.x += 0.001;
+                // Idle: no extra lights
+                this._orbitLight.intensity = 0;
+                this._resultGlow.intensity = 0;
             }
 
             this._renderer.render(this._scene, this._camera);
@@ -462,11 +484,72 @@ const Dice3D = (() => {
             mesh.rotation.y = this._startEuler.y + (this._endEuler.y - this._startEuler.y) * eased;
             mesh.rotation.z = this._startEuler.z + (this._endEuler.z - this._startEuler.z) * eased;
 
+            // ─── ROLLING FX ───
+            var speed = 1 - eased; // 1 at start, 0 at end
+
+            // Orbiting golden light — circles the die, fades as spin slows
+            var orbitAngle = elapsed * 0.008;
+            this._orbitLight.position.set(
+                Math.cos(orbitAngle) * 2.5,
+                Math.sin(orbitAngle) * 2.5,
+                1.5
+            );
+            this._orbitLight.intensity = speed * 1.8;
+
+            // Scale pulse — die "breathes" fast while spinning, settles to normal
+            var scalePulse = 1.0 + speed * 0.04 * Math.sin(elapsed * 0.015);
+            mesh.scale.setScalar(scalePulse);
+
+            // Specular boost — shinier while spinning fast
+            if (mesh.material) {
+                mesh.material.shininess = 100 + speed * 150;
+            }
+
             if (elapsed >= this._rollDuration) {
-                // Snap to exact final quaternion
+                // ─── LANDING FX ───
                 mesh.quaternion.copy(this._finalQuat);
+                mesh.scale.setScalar(1.0);
+                if (mesh.material) mesh.material.shininess = 100;
+                this._orbitLight.intensity = 0;
+
+                // Flash — brief white light burst
+                this._keyLight.intensity = 3.0;
+                var self = this;
+                var flashI = 3.0;
+                var flashFade = setInterval(function () {
+                    flashI -= 0.15;
+                    if (flashI <= 1.2) {
+                        self._keyLight.intensity = 1.2;
+                        clearInterval(flashFade);
+                    } else {
+                        self._keyLight.intensity = flashI;
+                    }
+                }, 20);
+
+                // Scale punch — brief enlarge on impact
+                mesh.scale.setScalar(1.12);
+                setTimeout(function () {
+                    if (self._dieMesh) self._dieMesh.scale.setScalar(1.0);
+                }, 120);
+
+                // Screen shake on container
+                var el = self._container;
+                if (el) {
+                    el.style.transition = 'transform 0.06s ease-out';
+                    el.style.transform = 'translate(' + (Math.random() - 0.5) * 4 + 'px,' + (Math.random() - 0.5) * 4 + 'px)';
+                    setTimeout(function () {
+                        el.style.transform = 'translate(' + (Math.random() - 0.5) * 2 + 'px,' + (Math.random() - 0.5) * 2 + 'px)';
+                    }, 60);
+                    setTimeout(function () {
+                        el.style.transition = 'transform 0.1s ease-out';
+                        el.style.transform = '';
+                    }, 140);
+                }
+
                 this._rolling = false;
                 this._showingResult = true;
+                this._resultTime = 0;
+                this._resultGlow.intensity = 0.6;
                 if (this._rollCallback) this._rollCallback();
             }
         }
