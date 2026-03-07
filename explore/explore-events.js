@@ -390,6 +390,9 @@ function showStage2(poi, stage2) {
     document.getElementById('dm-title').textContent = stage2.tt || 'Continuação';
     document.getElementById('dm-type').textContent = 'mistério';
 
+    // Clear previous choices to prevent flash of stale content
+    document.getElementById('dm-choices').innerHTML = '';
+
     const narrEl = document.getElementById('dm-narration');
     narrEl.innerHTML = '';
     typewriter(narrEl, stage2.n || '', () => {
@@ -1792,19 +1795,16 @@ function _renderReturnHP(el) {
 
 function _renderReturnProgress(el, j) {
     const pct = Math.round(((j.currentStep - 1) / j.totalSteps) * 100);
-    // Dot-based progress
+    // Dot-based progress (no castle emoji — destination shown in header)
     let dots = '';
     for (let i = 1; i <= j.totalSteps; i++) {
         const cls = i < j.currentStep ? 'done' : i === j.currentStep ? 'current' : 'pending';
         dots += `<div class="return-progress-dot ${cls}"></div>`;
     }
-    // Add city dot at the end
-    dots += `<div class="return-progress-dot ${j.currentStep > j.totalSteps ? 'done' : 'pending'}" style="background:${j.currentStep > j.totalSteps ? 'var(--v-gold)' : 'rgba(196,149,58,0.3)'};border-color:rgba(196,149,58,0.5)">🏰</div>`;
     el.innerHTML =
         `<div class="return-progress-bar"><div class="return-progress-fill" style="width:${pct}%"></div></div>` +
         (j.totalSteps <= 8 ? `<div class="return-progress-steps">${dots}</div>` : '') +
-        `<div class="return-progress-label"><span>Etapa ${j.currentStep} de ${j.totalSteps}</span>` +
-        `<span>🏰 Eldoria</span></div>`;
+        `<div class="return-progress-label"><span>Etapa ${j.currentStep} de ${j.totalSteps}</span></div>`;
 }
 
 function _addReturnBtn(container, icon, title, desc, descColor, onClick) {
@@ -1862,11 +1862,11 @@ function showReturnJourneyStep() {
     actionsEl.innerHTML = '';
     _disposeReturnDice();
 
-    // Header
+    // Header — destination objective at top
     const remaining = j.totalSteps - j.currentStep;
-    titleEl.textContent = 'Jornada de Retorno';
+    titleEl.textContent = '🏰 Rumo a Eldoria';
     subtitleEl.textContent = remaining > 0
-        ? `${remaining + 1} etapa${remaining > 0 ? 's' : ''} até Eldoria`
+        ? `${remaining + 1} etapa${remaining > 0 ? 's' : ''} restante${remaining > 0 ? 's' : ''}`
         : 'Quase lá...';
     iconEl.textContent = hasEncounter ? '⚔️' : hasHazard ? hazard.icon : '🚶';
 
@@ -1886,17 +1886,19 @@ function showReturnJourneyStep() {
             setTimeout(() => showRandomEncounter(enc), 300);
         });
     } else if (hasHazard) {
-        // ─── HAZARD: skill check with 3D dice ───
+        // ─── HAZARD: multiple choices with different skill checks ───
         narrEl.innerHTML = `<div class="return-step-badge hazard">${hazard.icon} ${hazard.title}</div>` +
             `<div>${hazard.narr}</div>`;
-        const statName = STAT_NAMES[hazard.stat] || hazard.stat;
-        const mod = getAbilityMod(hazard.stat);
-        const proficient = S.charData && S.charData.sp && S.charData.sp.includes(hazard.stat);
-        const profMark = proficient ? ' ★' : '';
-        const chance = Math.max(5, Math.min(95, Math.round(((21 - hazard.dc + mod) / 20) * 100)));
-        _addReturnBtn(actionsEl, '🎲', `Teste de ${statName}${profMark}`,
-            `DC ${hazard.dc} | Mod ${mod >= 0 ? '+' : ''}${mod} | ${chance}% chance`, '#dca028',
-            () => _rollReturnHazard(hazard));
+        for (const choice of hazard.choices) {
+            const statName = STAT_NAMES[choice.k.s] || choice.k.s;
+            const mod = getAbilityMod(choice.k.s);
+            const proficient = S.charData && S.charData.sp && S.charData.sp.includes(choice.k.s);
+            const profMark = proficient ? ' ★' : '';
+            const chance = Math.max(5, Math.min(95, Math.round(((21 - choice.k.dc + mod) / 20) * 100)));
+            _addReturnBtn(actionsEl, choice.i, choice.t,
+                `${statName}${profMark} DC ${choice.k.dc} | ${mod >= 0 ? '+' : ''}${mod} | ${chance}%`, '#dca028',
+                () => _rollReturnHazard(hazard, choice));
+        }
     } else {
         // ─── SAFE: atmospheric narration ───
         narrEl.innerHTML = `<div class="return-step-badge safe">✓ Caminho seguro</div>` +
@@ -1908,21 +1910,23 @@ function showReturnJourneyStep() {
     try { if (tg) tg.HapticFeedback.impactOccurred(hasEncounter ? 'heavy' : hasHazard ? 'medium' : 'light'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 }
 
-function _rollReturnHazard(hazard) {
+function _rollReturnHazard(hazard, choice) {
     const actionsEl = document.getElementById('return-journey-actions');
     const diceEl = document.getElementById('return-journey-dice');
     const checkEl = document.getElementById('return-journey-check');
-    actionsEl.innerHTML = ''; // Remove the roll button
+    actionsEl.innerHTML = ''; // Remove choice buttons
 
-    const mod = getAbilityMod(hazard.stat);
-    const mode = getRollMode({ s: hazard.stat });
+    const stat = choice.k.s;
+    const dc = choice.k.dc;
+    const mod = getAbilityMod(stat);
+    const mode = getRollMode({ s: stat });
     const { roll, r1, r2 } = rollD20(mode);
     const total = roll + mod;
-    const success = total >= hazard.dc;
+    const success = total >= dc;
 
     // Record the check
     S.checksPerformed.push({
-        stat: hazard.stat, dc: hazard.dc, roll, mod, ok: success, mode, context: 'return',
+        stat, dc, roll, mod, ok: success, mode, context: 'return',
     });
 
     // 3D dice animation
@@ -1930,18 +1934,18 @@ function _rollReturnHazard(hazard) {
     if (dice) {
         diceEl.classList.add('active');
         dice.roll(roll, () => {
-            _resolveReturnHazard(hazard, roll, mod, total, success, r1, r2, mode);
+            _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2, mode);
         });
     } else {
         // Fallback without 3D
         checkEl.innerHTML = `<div style="font-size:48px;animation:diceRoll 0.7s ease">🎲</div>`;
         setTimeout(() => {
-            _resolveReturnHazard(hazard, roll, mod, total, success, r1, r2, mode);
+            _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2, mode);
         }, 800);
     }
 }
 
-function _resolveReturnHazard(hazard, roll, mod, total, success, r1, r2, mode) {
+function _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2, mode) {
     const overlay = document.getElementById('return-journey-overlay');
     const checkEl = document.getElementById('return-journey-check');
     const narrEl = document.getElementById('return-journey-narration');
@@ -1949,18 +1953,18 @@ function _resolveReturnHazard(hazard, roll, mod, total, success, r1, r2, mode) {
     const hpEl = document.getElementById('return-journey-hp');
 
     // Show formula
-    const statName = STAT_NAMES[hazard.stat] || hazard.stat;
-    const proficient = S.charData && S.charData.sp && S.charData.sp.includes(hazard.stat);
+    const statName = STAT_NAMES[choice.k.s] || choice.k.s;
+    const proficient = S.charData && S.charData.sp && S.charData.sp.includes(choice.k.s);
     const profMark = proficient ? '★' : '';
-    checkEl.innerHTML = buildFormula(roll, mod, statName, profMark, hazard.dc, total, r1, r2, mode) +
+    checkEl.innerHTML = buildFormula(roll, mod, statName, profMark, choice.k.dc, total, r1, r2, mode) +
         `<div style="margin-top:6px;font-size:15px;font-weight:700;color:${success ? '#4a8' : '#c44'}">${success ? '✅ Sucesso!' : '❌ Falha!'}</div>`;
 
     // Apply outcome
     if (success) {
         narrEl.innerHTML = `<div class="return-step-badge safe">✓ ${hazard.title} — Superado!</div>` +
-            `<div>${hazard.sNarr}</div>`;
+            `<div>${choice.sNarr}</div>`;
     } else {
-        const dmg = hazard.fDmg || 3;
+        const dmg = choice.fDmg || 3;
         S.hpChange -= dmg;
         if (S.charData) {
             const newHP = Math.max(0, S.charData.hp + S.hpChange);
@@ -1968,7 +1972,7 @@ function _resolveReturnHazard(hazard, roll, mod, total, success, r1, r2, mode) {
         }
         _renderReturnHP(hpEl);
         narrEl.innerHTML = `<div class="return-step-badge danger">✗ ${hazard.title} — Falha!</div>` +
-            `<div>${hazard.fNarr}</div>` +
+            `<div>${choice.fNarr}</div>` +
             `<div style="margin-top:6px;color:#c44;font-size:13px">💔 -${dmg} HP</div>`;
     }
 
@@ -2075,14 +2079,13 @@ function _showArrivalScreen() {
         'O cheiro de pão fresco e fumaça de lareiras atinge você antes mesmo de ver os muros. Eldoria, finalmente.',
     ];
 
-    narrEl.innerHTML = `<div class="return-step-badge arrival">🏰 Chegada a Eldoria</div>`;
-    typewriter(narrEl, '\n' + _pickFrom(arrivalTexts), () => {
-        _addReturnBtn(actionsEl, '🏰', 'Entrar na Cidade',
-            'Seus pés pisam solo seguro novamente', 'var(--v-gold, #c4953a)', () => {
-                _closeReturnJourney();
-                finishExploration('exit');
-            });
-    });
+    narrEl.innerHTML = `<div class="return-step-badge arrival">🏰 Chegada a Eldoria</div>` +
+        `<div>${_pickFrom(arrivalTexts)}</div>`;
+    _addReturnBtn(actionsEl, '🏰', 'Entrar na Cidade',
+        'Seus pés pisam solo seguro novamente', 'var(--v-gold, #c4953a)', () => {
+            _closeReturnJourney();
+            finishExploration('exit');
+        });
 
     overlay.classList.add('active');
     try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch (e) { /* ignore */ }

@@ -198,13 +198,22 @@
 
     <!-- Return Journey Overlay -->
     <div class="return-journey-overlay" id="return-journey-overlay">
-        <div class="dm-card">
+        <div class="dm-card return-journey-card">
             <div class="return-journey-header">
-                <span class="return-journey-icon">🚶</span>
-                <div class="return-journey-title">Jornada de Retorno</div>
+                <span class="return-journey-icon" id="return-journey-icon">🚶</span>
+                <div>
+                    <div class="return-journey-title" id="return-journey-title">Jornada de Retorno</div>
+                    <div class="return-journey-subtitle" id="return-journey-subtitle"></div>
+                </div>
             </div>
+            <div class="return-journey-hp" id="return-journey-hp"></div>
             <div class="return-journey-progress" id="return-journey-progress"></div>
             <div class="return-journey-narration" id="return-journey-narration"></div>
+            <div class="return-journey-dice" id="return-journey-dice">
+                <div class="dice3d-particles" id="return-dice-particles"></div>
+                <div class="dice3d-canvas" id="return-dice-canvas"></div>
+            </div>
+            <div class="return-journey-check" id="return-journey-check"></div>
             <div class="return-journey-actions" id="return-journey-actions"></div>
         </div>
     </div>
