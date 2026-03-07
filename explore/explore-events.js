@@ -57,6 +57,9 @@ function showPOI(poi) {
     document.getElementById('dm-title').textContent = poi.title || 'Evento';
     document.getElementById('dm-type').textContent = POI_TYPE_LABELS[poi.type] || poi.type;
 
+    // Clear previous choices to prevent flash of stale content
+    document.getElementById('dm-choices').innerHTML = '';
+
     // Typewriter narration
     const narrEl = document.getElementById('dm-narration');
     narrEl.innerHTML = '<span class="cursor"></span>';
@@ -1375,6 +1378,19 @@ function closeCampResult() {
         setTimeout(() => {
             triggerCombat({ combat: S.campAmbush });
         }, 1500);
+        return;
+    }
+
+    // If camping during return journey, resume the journey
+    if (_returningToCity && _returnJourney) {
+        setTimeout(() => {
+            document.getElementById('return-journey-overlay').classList.add('active');
+            _renderReturnHP(document.getElementById('return-journey-hp'));
+            const remaining = _returnJourney.totalSteps - _returnJourney.currentStep;
+            const actionsEl = document.getElementById('return-journey-actions');
+            const overlay = document.getElementById('return-journey-overlay');
+            _addReturnActions(actionsEl, overlay, remaining);
+        }, 400);
     }
 }
 
@@ -1565,33 +1581,249 @@ function showDeathOverlay() {
 // ═══════════════════════════════════════════════════════
 // FINISH
 // ═══════════════════════════════════════════════════════
-// RETURN JOURNEY — multi-step travel back to the city
+// RETURN JOURNEY — immersive multi-step travel to city
 // ═══════════════════════════════════════════════════════
 let _returningToCity = false;
-let _returnJourney = null; // { totalSteps, currentStep, riskChance }
+let _returnJourney = null;
+let _returnDice = null;
 
-const RETURN_TRAVEL_NARRATIONS = [
-    'Você segue pela estrada, atento a cada sombra entre as árvores.',
-    'O caminho se estreita. Sons distantes ecoam pela trilha.',
-    'Pegadas recentes no chão indicam que outros viajantes passaram por aqui.',
-    'O vento carrega um cheiro familiar — a cidade se aproxima.',
-    'Você avança com cautela, mão na arma, olhos na trilha.',
-    'Uma encruzilhada. Você escolhe o caminho mais seguro.',
-    'Ruínas antigas margeiam a estrada. Melhor não se demorar.',
-    'O terreno muda sob seus pés. A paisagem vai ficando mais familiar.',
-    'Você ouve o barulho distante de uma caravana. Sinal de civilização.',
-    'A vegetação diminui. Os muros da cidade começam a surgir no horizonte.',
-    'Um corvo observa sua passagem de cima de uma rocha.',
-    'O silêncio é perturbador. Você acelera o passo.',
-    'Marcas de garras em uma árvore. Algo esteve aqui recentemente.',
-    'Você cruza um riacho raso. A água fria revigora seus pés cansados.',
-    'O sol se move no céu enquanto você percorre a trilha batida.',
-];
+// Biome-specific travel narrations
+const RETURN_NARRATIONS = {
+    forest: [
+        'As copas das árvores se fecham sobre a trilha. Galhos estalam sob seus pés.',
+        'Um riacho serpenteia ao lado do caminho. O murmúrio da água acalma seus nervos.',
+        'Raízes expostas tornam o caminho traiçoeiro. Você avança com cautela.',
+        'A luz do sol mal penetra a copa densa. Sombras dançam entre os troncos.',
+        'Pegadas de cervos cruzam a trilha. A floresta tem seus próprios caminhos.',
+    ],
+    plains: [
+        'O vento varre os campos abertos, dobrando a grama alta em ondas douradas.',
+        'Uma estrada de terra batida se estende até o horizonte. O sol aquece suas costas.',
+        'Rebanhos selvagens pastam ao longe. A planície parece infinita.',
+        'Flores silvestres pontilham os campos. O aroma é doce e reconfortante.',
+        'Uma colina suave revela a estrada adiante. A cidade surge como um ponto distante.',
+    ],
+    cave: [
+        'O eco de seus passos é o único som nos túneis frios.',
+        'Estalactites gotejam lentamente. Você segue as marcações na parede.',
+        'A passagem se estreita e depois se abre novamente. O ar fica mais fresco.',
+        'Cristais incrustados na rocha refletem a luz da sua tocha.',
+        'Um corrente de ar indica a saída. Você acelera o passo.',
+    ],
+    swamp: [
+        'A lama suga seus pés a cada passo. O ar é pesado e úmido.',
+        'Brumas espessas cobrem o pântano. Você segue as estacas de marcação.',
+        'Sapos coaxam em coro ao redor. A trilha elevada é sua única rota segura.',
+        'Raízes de manguezais formam pontes naturais sobre a água escura.',
+        'Gases borbulham na superfície da lama. O cheiro é nauseante.',
+    ],
+    mountain: [
+        'O vento frio corta como lâmina nas passagens altas da montanha.',
+        'Pedras soltas rolam sob seus pés. Cada passo requer atenção.',
+        'A vista é deslumbrante, mas a trilha íngreme cobra seu preço.',
+        'Um desfiladeiro estreito obriga você a se encostar na parede de rocha.',
+        'Cabras montesas observam sua passagem de uma saliência acima.',
+    ],
+    desert: [
+        'O sol escaldante castiga a areia interminável. Miragens dançam no horizonte.',
+        'Dunas de areia mudam lentamente. Você mantém as estrelas como guia.',
+        'Um oásis seco é tudo o que resta de antiga fonte de água.',
+        'Lagartos escalam as rochas aquecidas pelo sol. O silêncio é ensurdecedor.',
+        'A areia fina se infiltra em cada fresta da sua armadura.',
+    ],
+    snow: [
+        'A neve range sob seus pés. O frio morde cada pedaço de pele exposta.',
+        'Uma trilha de pegadas antigas guia seu caminho entre os montes de neve.',
+        'Flocos de neve caem suavemente, cobrindo a paisagem em branco.',
+        'O vento uiva entre os pinheiros cobertos de gelo.',
+        'Cristais de gelo brilham como diamantes sob a fraca luz do sol.',
+    ],
+    _default: [
+        'A estrada se estende à sua frente. Cada passo aproxima você da segurança.',
+        'O terreno familiar traz um certo alívio. Você conhece estas terras.',
+        'Sons distantes ecoam pela trilha. Viajantes ou perigo? Impossível dizer.',
+        'Um marco de pedra indica a direção. A cidade não está longe.',
+        'O cansaço pesa, mas a promessa de descanso nos muros da cidade motiva seus passos.',
+    ],
+};
+
+// Travel hazards — each has multiple choices with different skill checks
+// choices[]: i=icon, t=title, k={s:stat, dc:DC}, sNarr/fNarr/fDmg per choice
+const RETURN_HAZARDS = {
+    forest: [
+        { icon: '🕸️', title: 'Teias Gigantes', narr: 'Teias enormes bloqueiam a trilha. Algo as teceu recentemente...', choices: [
+            { i: '🔥', t: 'Queimar as teias', k: { s: 'int', dc: 10 }, sNarr: 'Você improvisa uma tocha e queima as teias com precisão.', fNarr: 'O fogo se espalha! Você se queima tentando controlar as chamas.', fDmg: 3 },
+            { i: '🤸', t: 'Desviar por baixo', k: { s: 'dex', dc: 12 }, sNarr: 'Você se agacha e desliza sob as teias sem tocá-las.', fNarr: 'As teias grudam em você! Leva tempo e dor para se soltar.', fDmg: 4 },
+            { i: '💪', t: 'Forçar passagem', k: { s: 'str', dc: 13 }, sNarr: 'Com força bruta, você rasga as teias e abre caminho.', fNarr: 'As teias são mais resistentes do que parecem. Você se enrosca.', fDmg: 3 },
+        ]},
+        { icon: '🐻', title: 'Território de Urso', narr: 'Marcas de garras nos troncos. Você entrou em território de urso.', choices: [
+            { i: '🤫', t: 'Contornar em silêncio', k: { s: 'dex', dc: 12 }, sNarr: 'Seus passos silenciosos levam você por uma rota alternativa.', fNarr: 'Um galho estala sob seu pé! O urso percebe sua presença.', fDmg: 5 },
+            { i: '🧠', t: 'Ler os sinais da natureza', k: { s: 'wis', dc: 11 }, sNarr: 'Rastros frescos indicam que o urso se afastou. Caminho livre.', fNarr: 'Você interpreta os sinais errado e caminha direto para a toca.', fDmg: 5 },
+            { i: '🗣️', t: 'Fazer barulho para afastar', k: { s: 'cha', dc: 13 }, sNarr: 'Seus gritos intimidam o urso, que se afasta pesadamente.', fNarr: 'O urso não se intimida e avança! Você foge com arranhões.', fDmg: 6 },
+        ]},
+        { icon: '🌿', title: 'Raízes Traiçoeiras', narr: 'Raízes retorcidas cobrem o chão como serpentes vivas.', choices: [
+            { i: '👁️', t: 'Caminhar com cautela', k: { s: 'wis', dc: 10 }, sNarr: 'Olhos atentos guiam seus passos por entre as raízes.', fNarr: 'Você tropeça e cai pesadamente no chão.', fDmg: 2 },
+            { i: '🏃', t: 'Correr e saltar', k: { s: 'dex', dc: 12 }, sNarr: 'Com saltos ágeis, você atravessa o trecho perigoso.', fNarr: 'Seu pé engancha em uma raiz. A queda é dolorosa.', fDmg: 3 },
+        ]},
+    ],
+    plains: [
+        { icon: '🌪️', title: 'Ventania Repentina', narr: 'Nuvens escuras se formam. O vento se torna violento.', choices: [
+            { i: '🛡️', t: 'Resistir de pé', k: { s: 'str', dc: 11 }, sNarr: 'Você se firma e resiste à tempestade com determinação.', fNarr: 'O vento derruba você! Detritos cortam sua pele.', fDmg: 3 },
+            { i: '🕳️', t: 'Buscar abrigo', k: { s: 'wis', dc: 10 }, sNarr: 'Você identifica uma depressão no terreno e se protege.', fNarr: 'Não há abrigo. A ventania castiga sem piedade.', fDmg: 4 },
+        ]},
+        { icon: '🕳️', title: 'Buraco Oculto', narr: 'A grama alta esconde buracos cavados por animais.', choices: [
+            { i: '👁️', t: 'Observar o terreno', k: { s: 'wis', dc: 11 }, sNarr: 'Você nota as irregularidades e desvia a tempo.', fNarr: 'Seu pé afunda no buraco! Seu tornozelo gira.', fDmg: 4 },
+            { i: '🏃', t: 'Correr pelo campo', k: { s: 'dex', dc: 12 }, sNarr: 'Reflexos rápidos evitam os buracos escondidos.', fNarr: 'Velocidade não salva de um buraco que você não viu.', fDmg: 3 },
+        ]},
+    ],
+    cave: [
+        { icon: '🪨', title: 'Desmoronamento', narr: 'Pedras se soltam do teto. A passagem está instável!', choices: [
+            { i: '🏃', t: 'Correr para o outro lado', k: { s: 'dex', dc: 13 }, sNarr: 'Você dispara pela passagem antes que desabe.', fNarr: 'Pedras caem sobre você! Dor aguda percorre seu corpo.', fDmg: 6 },
+            { i: '🛡️', t: 'Proteger-se e esperar', k: { s: 'cn', dc: 11 }, sNarr: 'Você se protege até o desmoronamento parar.', fNarr: 'Uma pedra acerta seu ombro apesar da proteção.', fDmg: 4 },
+            { i: '🧠', t: 'Analisar a estrutura', k: { s: 'int', dc: 12 }, sNarr: 'Você identifica os pontos seguros e atravessa.', fNarr: 'Sua análise falha. O caminho que escolheu desaba.', fDmg: 5 },
+        ]},
+        { icon: '💨', title: 'Gás Venenoso', narr: 'Um cheiro pungente emana de uma fissura. Gás tóxico!', choices: [
+            { i: '💨', t: 'Prender a respiração', k: { s: 'cn', dc: 12 }, sNarr: 'Você passa pela zona contaminada sem respirar.', fNarr: 'O gás irrita seus pulmões. Você tosse violentamente.', fDmg: 4 },
+            { i: '🧠', t: 'Buscar corrente de ar', k: { s: 'int', dc: 11 }, sNarr: 'Você encontra uma passagem com ventilação natural.', fNarr: 'A corrente leva mais gás em sua direção.', fDmg: 3 },
+        ]},
+    ],
+    swamp: [
+        { icon: '🐊', title: 'Emboscada Rastejante', narr: 'A água escura se agita. Algo se move sob a superfície.', choices: [
+            { i: '👁️', t: 'Observar e contornar', k: { s: 'wis', dc: 12 }, sNarr: 'Você identifica o predador e desvia pelo caminho elevado.', fNarr: 'Mandíbulas emergem da água! Você escapa, mas não ileso.', fDmg: 5 },
+            { i: '🪵', t: 'Criar distração', k: { s: 'int', dc: 11 }, sNarr: 'Você joga um galho na água. A criatura persegue o ruído.', fNarr: 'A criatura não se engana. Ela avança em sua direção.', fDmg: 4 },
+            { i: '🏃', t: 'Atravessar correndo', k: { s: 'dex', dc: 13 }, sNarr: 'Seus pés rápidos cruzam antes que a criatura reaja.', fNarr: 'A lama atrasa você. A criatura alcança suas pernas.', fDmg: 6 },
+        ]},
+        { icon: '🌫️', title: 'Bruma Desorientante', narr: 'Uma névoa espessa desce. A trilha desaparece.', choices: [
+            { i: '🧭', t: 'Orientar-se pelas estrelas', k: { s: 'wis', dc: 11 }, sNarr: 'Seu senso de direção se mantém firme.', fNarr: 'Você se perde na bruma e vaga por horas, exausto.', fDmg: 3 },
+            { i: '👂', t: 'Seguir os sons da cidade', k: { s: 'wis', dc: 12 }, sNarr: 'Sons distantes de civilização guiam seus passos.', fNarr: 'Os sons enganam. Você anda em círculos.', fDmg: 3 },
+        ]},
+    ],
+    mountain: [
+        { icon: '🏔️', title: 'Passagem Estreita', narr: 'Uma beirada estreita sobre um precipício. Vertigem.', choices: [
+            { i: '🧗', t: 'Escalar devagar', k: { s: 'dex', dc: 13 }, sNarr: 'Passos calculados levam você pela passagem.', fNarr: 'Você escorrega e bate o corpo na rocha.', fDmg: 6 },
+            { i: '💪', t: 'Agarrar-se e avançar', k: { s: 'str', dc: 12 }, sNarr: 'Mãos firmes na rocha, você avança sem olhar para baixo.', fNarr: 'Suas mãos cedem. A queda é curta mas dolorosa.', fDmg: 5 },
+            { i: '🧠', t: 'Procurar rota alternativa', k: { s: 'int', dc: 11 }, sNarr: 'Você encontra um desvio mais seguro entre as rochas.', fNarr: 'O desvio leva a um beco sem saída. Tempo perdido.', fDmg: 2 },
+        ]},
+        { icon: '❄️', title: 'Gelo na Trilha', narr: 'Gelo cobre a trilha íngreme. Um passo em falso...', choices: [
+            { i: '🐾', t: 'Pisar com cuidado', k: { s: 'dex', dc: 12 }, sNarr: 'Você encontra apoio e cruza o gelo devagar.', fNarr: 'Seus pés perdem tração! Você desliza nas pedras.', fDmg: 4 },
+            { i: '🪓', t: 'Cavar apoios no gelo', k: { s: 'str', dc: 11 }, sNarr: 'Buracos no gelo servem como degraus improvisados.', fNarr: 'O gelo racha sob a força. Você perde o equilíbrio.', fDmg: 5 },
+        ]},
+    ],
+    desert: [
+        { icon: '🦂', title: 'Ninho de Escorpiões', narr: 'Escorpiões emergem da areia ao redor de seus pés!', choices: [
+            { i: '🏃', t: 'Saltar para fora', k: { s: 'dex', dc: 12 }, sNarr: 'Movimentos rápidos levam você para fora do ninho.', fNarr: 'Uma ferroada! O veneno arde com intensidade.', fDmg: 5 },
+            { i: '🧊', t: 'Ficar imóvel', k: { s: 'wis', dc: 11 }, sNarr: 'Parado como pedra, os escorpiões perdem interesse.', fNarr: 'Sua paciência falha. Um escorpião ataca.', fDmg: 4 },
+        ]},
+        { icon: '🌡️', title: 'Exaustão pelo Calor', narr: 'O calor é insuportável. Sua visão escurece.', choices: [
+            { i: '💪', t: 'Resistir e avançar', k: { s: 'cn', dc: 11 }, sNarr: 'Você controla a respiração e conserva energia.', fNarr: 'O calor vence. Você cambaleia e quase desmaia.', fDmg: 3 },
+            { i: '🧠', t: 'Improvisar proteção', k: { s: 'int', dc: 10 }, sNarr: 'Com pano úmido na cabeça, você resiste ao sol.', fNarr: 'Sem material adequado, o improviso falha.', fDmg: 4 },
+        ]},
+    ],
+    snow: [
+        { icon: '🌨️', title: 'Nevasca', narr: 'Uma nevasca furiosa reduz a visibilidade a zero.', choices: [
+            { i: '💪', t: 'Resistir ao frio', k: { s: 'cn', dc: 12 }, sNarr: 'Você se agasalha e persiste, resistindo ao frio.', fNarr: 'O frio penetra até os ossos. Movimentos lentos.', fDmg: 4 },
+            { i: '🕳️', t: 'Cavar abrigo na neve', k: { s: 'str', dc: 11 }, sNarr: 'Seu abrigo improvisado protege da nevasca.', fNarr: 'O abrigo desaba. Neve pesada cai sobre você.', fDmg: 5 },
+        ]},
+        { icon: '🧊', title: 'Lago Congelado', narr: 'O gelo estala sob seus pés. Pode ceder!', choices: [
+            { i: '🐾', t: 'Distribuir o peso', k: { s: 'dex', dc: 13 }, sNarr: 'Passos leves levam você ao outro lado.', fNarr: 'O gelo racha! Água gelada até a cintura.', fDmg: 6 },
+            { i: '🧠', t: 'Contornar pela margem', k: { s: 'wis', dc: 11 }, sNarr: 'Você encontra uma passagem segura pela borda.', fNarr: 'A margem também é frágil. Você afunda.', fDmg: 4 },
+        ]},
+    ],
+    _default: [
+        { icon: '🪤', title: 'Armadilha Abandonada', narr: 'Uma armadilha de caçadores entre as folhas secas.', choices: [
+            { i: '👁️', t: 'Examinar com cuidado', k: { s: 'wis', dc: 11 }, sNarr: 'Seus olhos treinados detectam o perigo.', fNarr: 'O mecanismo dispara! O ferro morde sua perna.', fDmg: 4 },
+            { i: '🏃', t: 'Pular por cima', k: { s: 'dex', dc: 12 }, sNarr: 'Um salto limpo leva você além da armadilha.', fNarr: 'Você aterra mal e ativa outra armadilha.', fDmg: 3 },
+        ]},
+        { icon: '🌑', title: 'Escuridão Repentina', narr: 'Nuvens cobrem a lua. Escuridão total.', choices: [
+            { i: '👂', t: 'Seguir pelos sons', k: { s: 'wis', dc: 10 }, sNarr: 'Seus sentidos compensam a falta de visão.', fNarr: 'Sons enganam. Você rola por uma encosta.', fDmg: 3 },
+            { i: '🔥', t: 'Improvisar luz', k: { s: 'int', dc: 11 }, sNarr: 'Uma tocha improvisada ilumina o caminho.', fNarr: 'Sem material. A escuridão prevalece.', fDmg: 2 },
+        ]},
+    ],
+};
+
+function _getReturnBiome() {
+    return (S.biome || 'forest').replace(/^dungeon_/, '');
+}
+
+function _pickFrom(pool) {
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function _getReturnNarration() {
+    const b = _getReturnBiome();
+    const pool = RETURN_NARRATIONS[b] || RETURN_NARRATIONS._default;
+    return _pickFrom(pool);
+}
+
+function _getReturnHazard() {
+    const b = _getReturnBiome();
+    const pool = RETURN_HAZARDS[b] || RETURN_HAZARDS._default;
+    return _pickFrom(pool);
+}
+
+// Dice instance for return journey checks
+function _getReturnDice() {
+    const canvas = document.getElementById('return-dice-canvas');
+    const particles = document.getElementById('return-dice-particles');
+    if (!canvas) return null;
+    if (_returnDice) { _returnDice.dispose(); _returnDice = null; }
+    try {
+        _returnDice = new Dice3D(canvas, { size: 160, particlesContainer: particles });
+    } catch (e) {
+        console.warn('[EXPLORE] Return dice init failed:', e);
+        return null;
+    }
+    return _returnDice;
+}
+
+function _disposeReturnDice() {
+    if (_returnDice) { _returnDice.dispose(); _returnDice = null; }
+}
+
+function _renderReturnHP(el) {
+    const hp = getCurrentHP();
+    const max = getMaxHP();
+    const pct = (hp / max) * 100;
+    const color = pct > 60 ? '#4a8' : pct > 25 ? '#dca028' : '#c44';
+    el.innerHTML = `<span>❤️</span>` +
+        `<div class="exit-hp-bar"><div class="exit-hp-fill" style="width:${Math.max(2, pct)}%;background:${color}"></div></div>` +
+        `<span>${hp}/${max}</span>`;
+}
+
+function _renderReturnProgress(el, j) {
+    const pct = Math.round(((j.currentStep - 1) / j.totalSteps) * 100);
+    // Dot-based progress
+    let dots = '';
+    for (let i = 1; i <= j.totalSteps; i++) {
+        const cls = i < j.currentStep ? 'done' : i === j.currentStep ? 'current' : 'pending';
+        dots += `<div class="return-progress-dot ${cls}"></div>`;
+    }
+    // Add city dot at the end
+    dots += `<div class="return-progress-dot ${j.currentStep > j.totalSteps ? 'done' : 'pending'}" style="background:${j.currentStep > j.totalSteps ? 'var(--v-gold)' : 'rgba(196,149,58,0.3)'};border-color:rgba(196,149,58,0.5)">🏰</div>`;
+    el.innerHTML =
+        `<div class="return-progress-bar"><div class="return-progress-fill" style="width:${pct}%"></div></div>` +
+        (j.totalSteps <= 8 ? `<div class="return-progress-steps">${dots}</div>` : '') +
+        `<div class="return-progress-label"><span>Etapa ${j.currentStep} de ${j.totalSteps}</span>` +
+        `<span>🏰 Eldoria</span></div>`;
+}
+
+function _addReturnBtn(container, icon, title, desc, descColor, onClick) {
+    const btn = document.createElement('button');
+    btn.className = 'exit-option-btn';
+    btn.innerHTML = `<span class="exit-option-icon">${icon}</span>` +
+        `<div class="exit-option-info"><div class="exit-option-title">${title}</div>` +
+        `<div class="exit-option-desc" style="color:${descColor}">${desc}</div></div>`;
+    btn.addEventListener('click', onClick);
+    container.appendChild(btn);
+}
 
 function attemptReturnToCity(riskChance) {
     const distance = bfsDistanceToExit(S.playerCol, S.playerRow);
     const steps = Math.max(1, distance);
-    _returnJourney = { totalSteps: steps, currentStep: 0, riskChance: riskChance };
+    _returnJourney = {
+        totalSteps: steps, currentStep: 0, riskChance: riskChance,
+        usedNarrations: new Set(), usedHazards: new Set(),
+    };
     _returningToCity = true;
     showReturnJourneyStep();
 }
@@ -1601,75 +1833,270 @@ function showReturnJourneyStep() {
     const j = _returnJourney;
     j.currentStep++;
 
-    // Arrived at the city
+    // Arrived at the city!
     if (j.currentStep > j.totalSteps) {
-        _closeReturnJourney();
-        finishExploration('exit');
+        _showArrivalScreen();
         return;
     }
 
-    // Roll for encounter this step
+    // Determine step type: encounter (from randomEncounters), hazard (skill check), or safe
     const roll = Math.random() * 100;
-    const hasEncounter = roll < j.riskChance && S.randomEncounters.length > 0;
+    const hasEncounter = roll < j.riskChance * 0.5 && S.randomEncounters.length > 0;
+    const hasHazard = !hasEncounter && roll < j.riskChance;
+    const hazard = hasHazard ? _getReturnHazard() : null;
 
     const overlay = document.getElementById('return-journey-overlay');
+    const hpEl = document.getElementById('return-journey-hp');
     const progressEl = document.getElementById('return-journey-progress');
     const narrEl = document.getElementById('return-journey-narration');
+    const diceEl = document.getElementById('return-journey-dice');
+    const checkEl = document.getElementById('return-journey-check');
     const actionsEl = document.getElementById('return-journey-actions');
+    const subtitleEl = document.getElementById('return-journey-subtitle');
+    const iconEl = document.getElementById('return-journey-icon');
+    const titleEl = document.getElementById('return-journey-title');
 
-    // Progress bar
-    const pct = Math.round((j.currentStep / j.totalSteps) * 100);
-    const remaining = j.totalSteps - j.currentStep;
-    progressEl.innerHTML =
-        `<div class="return-progress-bar"><div class="return-progress-fill" style="width:${pct}%"></div></div>` +
-        `<div class="return-progress-label"><span>Etapa ${j.currentStep}/${j.totalSteps}</span>` +
-        `<span>${remaining > 0 ? remaining + ' restante' + (remaining > 1 ? 's' : '') : 'Chegando...'}</span></div>`;
-
-    // Narration
-    if (hasEncounter) {
-        narrEl.innerHTML = `<div class="return-step-badge danger">⚔️ Perigo na estrada!</div>` +
-            `<div>Algo se move nas sombras... Você não está sozinho nesta trilha.</div>`;
-    } else {
-        const narr = RETURN_TRAVEL_NARRATIONS[Math.floor(Math.random() * RETURN_TRAVEL_NARRATIONS.length)];
-        narrEl.innerHTML = `<div class="return-step-badge safe">✓ Caminho seguro</div>` +
-            `<div>${narr}</div>`;
-    }
-
-    // Actions
+    // Reset state
+    diceEl.classList.remove('active');
+    checkEl.innerHTML = '';
     actionsEl.innerHTML = '';
+    _disposeReturnDice();
+
+    // Header
+    const remaining = j.totalSteps - j.currentStep;
+    titleEl.textContent = 'Jornada de Retorno';
+    subtitleEl.textContent = remaining > 0
+        ? `${remaining + 1} etapa${remaining > 0 ? 's' : ''} até Eldoria`
+        : 'Quase lá...';
+    iconEl.textContent = hasEncounter ? '⚔️' : hasHazard ? hazard.icon : '🚶';
+
+    // HP bar
+    _renderReturnHP(hpEl);
+
+    // Progress
+    _renderReturnProgress(progressEl, j);
+
     if (hasEncounter) {
-        const btn = document.createElement('button');
-        btn.className = 'exit-option-btn';
-        btn.innerHTML = `<span class="exit-option-icon">⚔️</span>` +
-            `<div class="exit-option-info"><div class="exit-option-title">Enfrentar</div>` +
-            `<div class="exit-option-desc" style="color:#c44">Resolver o encontro para continuar</div></div>`;
-        btn.addEventListener('click', () => {
+        // ─── ENCOUNTER: delegate to existing random encounter system ───
+        narrEl.innerHTML = `<div class="return-step-badge danger">⚔️ Encontro na estrada!</div>` +
+            `<div>Sombras se movem entre a vegetação. Algo se aproxima rapidamente...</div>`;
+        _addReturnBtn(actionsEl, '⚔️', 'Enfrentar', 'Resolver o encontro para continuar', '#c44', () => {
             overlay.classList.remove('active');
             const enc = S.randomEncounters.shift();
             setTimeout(() => showRandomEncounter(enc), 300);
         });
-        actionsEl.appendChild(btn);
+    } else if (hasHazard) {
+        // ─── HAZARD: skill check with 3D dice ───
+        narrEl.innerHTML = `<div class="return-step-badge hazard">${hazard.icon} ${hazard.title}</div>` +
+            `<div>${hazard.narr}</div>`;
+        const statName = STAT_NAMES[hazard.stat] || hazard.stat;
+        const mod = getAbilityMod(hazard.stat);
+        const proficient = S.charData && S.charData.sp && S.charData.sp.includes(hazard.stat);
+        const profMark = proficient ? ' ★' : '';
+        const chance = Math.max(5, Math.min(95, Math.round(((21 - hazard.dc + mod) / 20) * 100)));
+        _addReturnBtn(actionsEl, '🎲', `Teste de ${statName}${profMark}`,
+            `DC ${hazard.dc} | Mod ${mod >= 0 ? '+' : ''}${mod} | ${chance}% chance`, '#dca028',
+            () => _rollReturnHazard(hazard));
     } else {
-        const btn = document.createElement('button');
-        btn.className = 'exit-option-btn';
-        btn.innerHTML = `<span class="exit-option-icon">🚶</span>` +
-            `<div class="exit-option-info"><div class="exit-option-title">${remaining > 0 ? 'Continuar Viagem' : 'Chegar à Cidade'}</div>` +
-            `<div class="exit-option-desc" style="color:#4a8">${remaining > 0 ? remaining + ' etapa' + (remaining > 1 ? 's' : '') + ' restante' + (remaining > 1 ? 's' : '') : 'Os portões estão à frente!'}</div></div>`;
-        btn.addEventListener('click', () => {
-            showReturnJourneyStep();
-        });
-        actionsEl.appendChild(btn);
+        // ─── SAFE: atmospheric narration ───
+        narrEl.innerHTML = `<div class="return-step-badge safe">✓ Caminho seguro</div>` +
+            `<div>${_getReturnNarration()}</div>`;
+        _addReturnActions(actionsEl, overlay, remaining);
     }
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.impactOccurred(hasEncounter ? 'heavy' : 'light'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+    try { if (tg) tg.HapticFeedback.impactOccurred(hasEncounter ? 'heavy' : hasHazard ? 'medium' : 'light'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+}
+
+function _rollReturnHazard(hazard) {
+    const actionsEl = document.getElementById('return-journey-actions');
+    const diceEl = document.getElementById('return-journey-dice');
+    const checkEl = document.getElementById('return-journey-check');
+    actionsEl.innerHTML = ''; // Remove the roll button
+
+    const mod = getAbilityMod(hazard.stat);
+    const mode = getRollMode({ s: hazard.stat });
+    const { roll, r1, r2 } = rollD20(mode);
+    const total = roll + mod;
+    const success = total >= hazard.dc;
+
+    // Record the check
+    S.checksPerformed.push({
+        stat: hazard.stat, dc: hazard.dc, roll, mod, ok: success, mode, context: 'return',
+    });
+
+    // 3D dice animation
+    const dice = _getReturnDice();
+    if (dice) {
+        diceEl.classList.add('active');
+        dice.roll(roll, () => {
+            _resolveReturnHazard(hazard, roll, mod, total, success, r1, r2, mode);
+        });
+    } else {
+        // Fallback without 3D
+        checkEl.innerHTML = `<div style="font-size:48px;animation:diceRoll 0.7s ease">🎲</div>`;
+        setTimeout(() => {
+            _resolveReturnHazard(hazard, roll, mod, total, success, r1, r2, mode);
+        }, 800);
+    }
+}
+
+function _resolveReturnHazard(hazard, roll, mod, total, success, r1, r2, mode) {
+    const overlay = document.getElementById('return-journey-overlay');
+    const checkEl = document.getElementById('return-journey-check');
+    const narrEl = document.getElementById('return-journey-narration');
+    const actionsEl = document.getElementById('return-journey-actions');
+    const hpEl = document.getElementById('return-journey-hp');
+
+    // Show formula
+    const statName = STAT_NAMES[hazard.stat] || hazard.stat;
+    const proficient = S.charData && S.charData.sp && S.charData.sp.includes(hazard.stat);
+    const profMark = proficient ? '★' : '';
+    checkEl.innerHTML = buildFormula(roll, mod, statName, profMark, hazard.dc, total, r1, r2, mode) +
+        `<div style="margin-top:6px;font-size:15px;font-weight:700;color:${success ? '#4a8' : '#c44'}">${success ? '✅ Sucesso!' : '❌ Falha!'}</div>`;
+
+    // Apply outcome
+    if (success) {
+        narrEl.innerHTML = `<div class="return-step-badge safe">✓ ${hazard.title} — Superado!</div>` +
+            `<div>${hazard.sNarr}</div>`;
+    } else {
+        const dmg = hazard.fDmg || 3;
+        S.hpChange -= dmg;
+        if (S.charData) {
+            const newHP = Math.max(0, S.charData.hp + S.hpChange);
+            updateHP(newHP, S.charData.mh);
+        }
+        _renderReturnHP(hpEl);
+        narrEl.innerHTML = `<div class="return-step-badge danger">✗ ${hazard.title} — Falha!</div>` +
+            `<div>${hazard.fNarr}</div>` +
+            `<div style="margin-top:6px;color:#c44;font-size:13px">💔 -${dmg} HP</div>`;
+    }
+
+    try { if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error'); } catch (e) { /* ignore */ }
+
+    const remaining = _returnJourney ? _returnJourney.totalSteps - _returnJourney.currentStep : 0;
+
+    // Delay before showing action buttons (let the player read)
+    setTimeout(() => {
+        _disposeReturnDice();
+        document.getElementById('return-journey-dice').classList.remove('active');
+
+        // Check death
+        if (getCurrentHP() <= 0) {
+            actionsEl.innerHTML = '';
+            _addReturnBtn(actionsEl, '💀', 'Você sucumbiu...', 'Seus ferimentos foram fatais', '#c44', () => {
+                overlay.classList.remove('active');
+                _returnJourney = null;
+                _returningToCity = false;
+                showDeathSaves();
+            });
+            return;
+        }
+
+        _addReturnActions(actionsEl, overlay, remaining);
+    }, 1200);
+}
+
+function _addReturnActions(actionsEl, overlay, remaining) {
+    actionsEl.innerHTML = '';
+
+    // Continue journey
+    _addReturnBtn(actionsEl, '🚶',
+        remaining > 0 ? 'Continuar Viagem' : 'Chegar à Cidade',
+        remaining > 0 ? `${remaining} etapa${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}` : 'Os portões de Eldoria se erguem à frente!',
+        remaining > 0 ? '#8a7a68' : '#4a8',
+        () => showReturnJourneyStep()
+    );
+
+    // Camp option (needs food items per game rules)
+    const foodItems = getFoodItems();
+    if (foodItems.length > 0 && remaining > 0 && getHPPercent() < 100) {
+        const div = document.createElement('div');
+        div.className = 'return-camp-section';
+        actionsEl.appendChild(div);
+        _addReturnBtn(div, '🏕️', 'Montar Acampamento',
+            `Descanso Curto (1d8+CON) — ${foodItems.length} refeição disponível`,
+            '#4a8', () => {
+                overlay.classList.remove('active');
+                // Camp flows through existing camp system, then returns to journey
+                showCampOverlay();
+            });
+    }
+
+    // Healing potion (if available and HP < 100%)
+    const healItems = getHealingItems();
+    if (healItems.length > 0 && getHPPercent() < 100) {
+        const best = healItems[0];
+        _addReturnBtn(actionsEl, best.e || '🧪', `Usar ${best.n} (${best.q}x)`,
+            `Restaura ${best.h} HP`, '#4a8', () => {
+                const heal = useInventoryItem(best);
+                showTerrainToast(`${best.e || '🧪'} +${heal} HP`, 'ranger');
+                // Refresh HP display
+                _renderReturnHP(document.getElementById('return-journey-hp'));
+                // Rebuild actions
+                _addReturnActions(actionsEl, overlay, remaining);
+            });
+    }
+}
+
+function _showArrivalScreen() {
+    const overlay = document.getElementById('return-journey-overlay');
+    const hpEl = document.getElementById('return-journey-hp');
+    const progressEl = document.getElementById('return-journey-progress');
+    const narrEl = document.getElementById('return-journey-narration');
+    const diceEl = document.getElementById('return-journey-dice');
+    const checkEl = document.getElementById('return-journey-check');
+    const actionsEl = document.getElementById('return-journey-actions');
+    const subtitleEl = document.getElementById('return-journey-subtitle');
+    const iconEl = document.getElementById('return-journey-icon');
+    const titleEl = document.getElementById('return-journey-title');
+
+    diceEl.classList.remove('active');
+    checkEl.innerHTML = '';
+    actionsEl.innerHTML = '';
+    _disposeReturnDice();
+
+    iconEl.textContent = '🏰';
+    iconEl.style.animation = 'none'; // Stop bobbing
+    titleEl.textContent = 'Eldoria';
+    subtitleEl.textContent = 'Você chegou em segurança';
+
+    _renderReturnHP(hpEl);
+    // Full progress
+    const j = _returnJourney;
+    if (j) {
+        j.currentStep = j.totalSteps + 1;
+        _renderReturnProgress(progressEl, j);
+    }
+
+    const arrivalTexts = [
+        'Os portões se abrem diante de você. O som familiar da cidade traz alívio. Você sobreviveu à jornada.',
+        'As torres de vigia surgem entre as árvores. Os guardas acenam ao reconhecê-lo. Enfim, segurança.',
+        'O cheiro de pão fresco e fumaça de lareiras atinge você antes mesmo de ver os muros. Eldoria, finalmente.',
+    ];
+
+    narrEl.innerHTML = `<div class="return-step-badge arrival">🏰 Chegada a Eldoria</div>`;
+    typewriter(narrEl, '\n' + _pickFrom(arrivalTexts), () => {
+        _addReturnBtn(actionsEl, '🏰', 'Entrar na Cidade',
+            'Seus pés pisam solo seguro novamente', 'var(--v-gold, #c4953a)', () => {
+                _closeReturnJourney();
+                finishExploration('exit');
+            });
+    });
+
+    overlay.classList.add('active');
+    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch (e) { /* ignore */ }
 }
 
 function _closeReturnJourney() {
     const overlay = document.getElementById('return-journey-overlay');
     if (overlay) overlay.classList.remove('active');
+    _disposeReturnDice();
     _returnJourney = null;
     _returningToCity = false;
+    // Reset icon animation
+    const icon = document.getElementById('return-journey-icon');
+    if (icon) icon.style.animation = '';
 }
 
 // ═══════════════════════════════════════════════════════
