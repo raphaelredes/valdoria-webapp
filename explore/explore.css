@@ -591,7 +591,7 @@ body {
     transition: opacity 0.4s ease;
 }
 .portal-overlay.active { opacity: 1; pointer-events: all; }
-.portal-icon { font-size: 64px; animation: portalGlow 1.5s ease infinite; }
+.portal-icon { display: none; }
 .portal-title { font-size: 18px; font-weight: 700; color: #4ad680; letter-spacing: 1px; }
 .portal-summary { text-align: center; color: var(--v-text, #d4c8b0); font-size: 13px; line-height: 1.8; }
 .portal-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
@@ -671,7 +671,7 @@ body {
     transition: opacity 0.4s ease;
 }
 .death-overlay.active { opacity: 1; pointer-events: all; }
-.death-icon { font-size: 64px; animation: combatShake 0.5s ease; }
+.death-icon { display: none; }
 .death-title { font-size: 22px; font-weight: 900; color: #c44; letter-spacing: 2px; }
 .death-summary { text-align: center; color: var(--v-text, #d4c8b0); font-size: 13px; line-height: 1.8; }
 .death-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
@@ -766,7 +766,7 @@ body {
     gap: 16px;
 }
 #loading.hidden { display: none; }
-.loading-icon { font-size: 48px; animation: spin 2s linear infinite; }
+.loading-icon { display: none; }
 .loading-text { color: var(--v-text-dim, #8a8090); font-size: 14px; }
 
 /* ═══════════════════════════════════════════
@@ -814,7 +814,7 @@ body {
     gap: 10px;
     margin-bottom: 12px;
 }
-.exit-risk-icon { font-size: 28px; }
+.exit-risk-icon { display: none; }
 .exit-risk-title {
     font-size: 16px;
     font-weight: 700;
@@ -1170,9 +1170,7 @@ body {
     transform: translateY(0);
 }
 .camp-result-icon {
-    font-size: 48px;
-    text-align: center;
-    margin-bottom: 12px;
+    display: none;
 }
 .camp-result-text {
     font-size: 16px;
@@ -1221,7 +1219,7 @@ body {
     gap: 10px;
     margin-bottom: 8px;
 }
-.lowhp-icon { font-size: 28px; }
+.lowhp-icon { display: none; }
 .lowhp-title {
     font-size: 16px;
     font-weight: 700;
