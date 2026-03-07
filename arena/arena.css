@@ -1090,15 +1090,16 @@ body {
     100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ─── THEMED LOADING (spinning die) ─── */
-.loading-die {
-    font-size: 22px;
-    animation: dieSpin 1s linear infinite;
+/* ─── THEMED LOADING (3D dice idle spin) ─── */
+.loading-dice3d {
+    width: 40px;
+    height: 40px;
     margin-right: 8px;
+    flex-shrink: 0;
 }
-@keyframes dieSpin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.loading-dice3d canvas {
+    width: 40px !important;
+    height: 40px !important;
 }
 
 /* ─── PHASE TRANSITION FADE ─── */

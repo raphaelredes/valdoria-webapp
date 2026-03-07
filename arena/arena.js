@@ -521,7 +521,7 @@ function _renderArenaInner(s) {
         }
     } else {
         // Legacy intro or unknown phase
-        html += `<div class="action-bar"><div style="text-align:center;color:var(--v-text-dim);font-size:12px;padding:8px">🎲 Role iniciativa no Telegram</div></div>`;
+        html += `<div class="action-bar"><div style="text-align:center;color:var(--v-text-dim);font-size:12px;padding:8px">Definindo iniciativa</div></div>`;
     }
 
     // Fade transition on state change
@@ -1259,7 +1259,8 @@ function bindActions(state) {
     });
 }
 
-// ─── LOADING INDICATOR (themed spinning die) ───
+// ─── LOADING INDICATOR (3D dice idle spin) ───
+let _loadingDice3d = null;
 function _showActionLoading(show) {
     let el = document.getElementById('actionLoading');
     if (show) {
@@ -1267,12 +1268,20 @@ function _showActionLoading(show) {
             el = document.createElement('div');
             el.id = 'actionLoading';
             el.className = 'action-loading';
-            el.innerHTML = '<div class="loading-die">🎲</div><span>Resolvendo...</span>';
+            el.innerHTML = '<div class="loading-dice3d" id="loadingDice3dCanvas"></div><span>Resolvendo...</span>';
             const bar = document.querySelector('.action-bar');
             if (bar) bar.prepend(el);
         }
         el.style.display = 'flex';
+        // Create 3D dice idle animation
+        if (!_loadingDice3d) {
+            const canvas = document.getElementById('loadingDice3dCanvas');
+            if (canvas && typeof Dice3D !== 'undefined') {
+                _loadingDice3d = new Dice3D(canvas, { size: 40 });
+            }
+        }
     } else if (el) {
+        if (_loadingDice3d) { _loadingDice3d.dispose(); _loadingDice3d = null; }
         el.remove();
     }
 }
