@@ -318,13 +318,6 @@ body {
     border-color: var(--v-gold-dim, #9a7530);
     box-shadow: 0 0 10px rgba(196, 149, 58, 0.1);
 }
-/* SVG Icon System (.v-icon) */
-.v-icon { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; flex-shrink: 0; }
-.v-icon svg { width: 100%; height: 100%; }
-.dm-icon .v-icon { width: 28px; height: 28px; }
-.choice-icon .v-icon { width: 18px; height: 18px; }
-.combat-icon .v-icon { width: 64px; height: 64px; }
-.enc-icon .v-icon { width: 28px; height: 28px; }
 .choice-icon { font-size: 18px; flex-shrink: 0; }
 .choice-label { flex: 1; }
 .choice-check {

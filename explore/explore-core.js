@@ -384,14 +384,12 @@ function updateConditionHUD() {
         return;
     }
     bar.style.display = 'flex';
-    const icons = { poisoned: '\u2620\uFE0F', prone: '\u{1F9CA}', frightened: '\u{1F628}', exhaustion: '\u{1F629}' };
-    const labels = { poisoned: 'Envenenado', prone: 'Ca\u00EDdo', frightened: 'Amedrontado', exhaustion: 'Exaust\u00E3o' };
+    const icons = { poisoned: '☠️', prone: '🧊', frightened: '😨', exhaustion: '😩' };
+    const labels = { poisoned: 'Envenenado', prone: 'Caído', frightened: 'Amedrontado', exhaustion: 'Exaustão' };
     for (const c of S.conditions) {
         const tag = document.createElement('span');
         tag.className = 'condition-tag';
-        const iconEmoji = icons[c.type] || '\u26A0\uFE0F';
-        const iconHtml = renderChoiceIcon(iconEmoji);
-        tag.innerHTML = `${iconHtml} ${labels[c.type] || c.type} (${c.stepsLeft})`;
+        tag.textContent = `${icons[c.type] || '⚠️'} ${labels[c.type] || c.type} (${c.stepsLeft})`;
         bar.appendChild(tag);
     }
 }

@@ -55,7 +55,7 @@ function showPOI(poi) {
     // activateOverlay clears dm-choices + dm-narration before showing
     activateOverlay('dm-overlay');
 
-    renderIcon(document.getElementById('dm-icon'), poi.icon || '\u{1F4DC}', 28);
+    document.getElementById('dm-icon').textContent = poi.icon || '📜';
     document.getElementById('dm-title').textContent = poi.title || 'Evento';
     document.getElementById('dm-type').textContent = POI_TYPE_LABELS[poi.type] || poi.type;
 
@@ -157,7 +157,7 @@ function showChoices(poi) {
         const btn = document.createElement('button');
         btn.className = 'dm-choice-btn';
 
-        let html = `<span class="choice-icon">${renderChoiceIcon(ch.i || '\u27A1\uFE0F')}</span>`;
+        let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
         html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
 
         // Stat check display (D&D 5e skill with proficiency + adv/dis indicator)
@@ -386,7 +386,7 @@ function showStage2(poi, stage2) {
     activateOverlay('dm-overlay');
 
     const overlay = document.getElementById('dm-overlay');
-    renderIcon(document.getElementById('dm-icon'), '\u{1F52E}', 28);
+    document.getElementById('dm-icon').textContent = '🔮';
     document.getElementById('dm-title').textContent = stage2.tt || 'Continuação';
     document.getElementById('dm-type').textContent = 'mistério';
 
@@ -399,7 +399,7 @@ function showStage2(poi, stage2) {
         (stage2.ch || []).forEach((ch, idx) => {
             const btn = document.createElement('button');
             btn.className = 'dm-choice-btn';
-            let html = `<span class="choice-icon">${renderChoiceIcon(ch.i || '\u27A1\uFE0F')}</span>`;
+            let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
             html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
             if (ch.k) {
                 const statShort = STAT_SHORT[ch.k.s] || ch.k.s.toUpperCase();
@@ -534,7 +534,7 @@ function triggerCombat(poi) {
     setTimeout(() => flash.remove(), 700);
 
     const overlay = document.getElementById('combat-overlay');
-    renderIcon(document.getElementById('combat-icon'), combat.ei || '\u2694\uFE0F', 64);
+    document.getElementById('combat-icon').textContent = combat.ei || '⚔️';
     document.getElementById('combat-enemy').textContent = combat.en || 'Inimigo';
     document.getElementById('combat-text').innerHTML = '<span style="color:#d44;font-weight:bold;">Iniciando Combate...</span>';
 
@@ -802,7 +802,7 @@ function showRandomEncounter(enc) {
     try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
     const overlay = document.getElementById('encounter-overlay');
-    renderIcon(document.getElementById('enc-icon'), enc.icon || '\u26A0\uFE0F', 28);
+    document.getElementById('enc-icon').textContent = enc.icon || '⚠️';
     document.getElementById('enc-title').textContent = enc.title || 'Encontro!';
 
     const ENC_TYPE_LABELS = { amb: 'Emboscada', trp: 'Armadilha', hid: 'Descoberta', snd: 'Ameaça', wth: 'Clima' };
@@ -817,7 +817,7 @@ function showRandomEncounter(enc) {
             const btn = document.createElement('button');
             btn.className = 'dm-choice-btn';
 
-            let html = `<span class="choice-icon">${renderChoiceIcon(ch.i || '\u27A1\uFE0F')}</span>`;
+            let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
             html += `<span class="choice-label">${ch.t || ch.l || 'Agir'}</span>`;
 
             // cmb_direct choices (e.g., "Atacar") — no stat check, trigger combat
@@ -886,7 +886,7 @@ function showDMIntro(text) {
     typewriter(narrEl, text, () => {
         const btn = document.createElement('button');
         btn.className = 'dm-choice-btn';
-        btn.innerHTML = '<span class="choice-icon">' + renderChoiceIcon('\u{1F5FA}\uFE0F') + '</span><span class="choice-label">Explorar</span>';
+        btn.innerHTML = '<span class="choice-icon">🗺️</span><span class="choice-label">Explorar</span>';
         btn.addEventListener('click', () => {
             overlay.classList.remove('active');
             // Restore header for next POI event usage
@@ -1265,7 +1265,7 @@ function showExitRiskAssessment() {
 function addExitOption(container, icon, title, desc, color, onClick) {
     const btn = document.createElement('button');
     btn.className = 'exit-option-btn';
-    btn.innerHTML = `<span class="exit-option-icon">${renderChoiceIcon(icon)}</span>` +
+    btn.innerHTML = `<span class="exit-option-icon">${icon}</span>` +
         `<div class="exit-option-info">` +
         `<div class="exit-option-title">${title}</div>` +
         `<div class="exit-option-desc" style="color:${color}">${desc}</div>` +
@@ -1806,7 +1806,7 @@ function _renderReturnProgress(el, j) {
 function _addReturnBtn(container, icon, title, desc, descColor, onClick) {
     const btn = document.createElement('button');
     btn.className = 'exit-option-btn';
-    btn.innerHTML = `<span class="exit-option-icon">${renderChoiceIcon(icon)}</span>` +
+    btn.innerHTML = `<span class="exit-option-icon">${icon}</span>` +
         `<div class="exit-option-info"><div class="exit-option-title">${title}</div>` +
         `<div class="exit-option-desc" style="color:${descColor}">${desc}</div></div>`;
     btn.addEventListener('click', onClick);
@@ -1864,7 +1864,7 @@ function showReturnJourneyStep() {
     subtitleEl.textContent = remaining > 0
         ? `${remaining + 1} etapa${remaining > 0 ? 's' : ''} restante${remaining > 0 ? 's' : ''}`
         : 'Quase lá...';
-    renderIcon(iconEl, hasEncounter ? '\u2694\uFE0F' : hasHazard ? hazard.icon : '\u{1F6B6}', 28);
+    iconEl.textContent = hasEncounter ? '⚔️' : hasHazard ? hazard.icon : '🚶';
 
     // HP bar
     _renderReturnHP(hpEl);
@@ -1883,7 +1883,7 @@ function showReturnJourneyStep() {
         });
     } else if (hasHazard) {
         // ─── HAZARD: multiple choices with different skill checks ───
-        narrEl.innerHTML = `<div class="return-step-badge hazard">${renderChoiceIcon(hazard.icon)} ${hazard.title}</div>` +
+        narrEl.innerHTML = `<div class="return-step-badge hazard">${hazard.icon} ${hazard.title}</div>` +
             `<div>${hazard.narr}</div>`;
         for (const choice of hazard.choices) {
             const statName = STAT_NAMES[choice.k.s] || choice.k.s;
