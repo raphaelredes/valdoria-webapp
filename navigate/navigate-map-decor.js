@@ -547,27 +547,37 @@ function renderPlayerBanner(svg) {
         stroke: INK_DARK, 'stroke-width': 1.2, 'stroke-linecap': 'round',
     }));
 
-    // Square flag with wavy trailing edge
+    // Square flag with path morphing animation (cloth waving in wind)
     const flagG = _el('g', {});
     const fw = 13, fh = 10;
+    const t = topY; // shorthand
+
+    // 4 keyframe shapes: pole edge fixed, trailing edge morphs
+    // Shape 1: resting (slight curve right)
+    const d1 = `M${x},${t} L${x+fw},${t+1} C${x+fw+1},${t+fh*0.35} ${x+fw-1},${t+fh*0.65} ${x+fw},${t+fh} L${x},${t+fh} Z`;
+    // Shape 2: wind pushes trailing edge right + wave
+    const d2 = `M${x},${t} L${x+fw+3},${t+0} C${x+fw+4},${t+fh*0.3} ${x+fw+1},${t+fh*0.7} ${x+fw+2},${t+fh+1} L${x},${t+fh} Z`;
+    // Shape 3: wind eases, trailing edge curves back
+    const d3 = `M${x},${t} L${x+fw-1},${t+1} C${x+fw},${t+fh*0.4} ${x+fw-2},${t+fh*0.6} ${x+fw-1},${t+fh-1} L${x},${t+fh} Z`;
+    // Shape 4: slight push again
+    const d4 = `M${x},${t} L${x+fw+2},${t+1} C${x+fw+2},${t+fh*0.35} ${x+fw},${t+fh*0.65} ${x+fw+1},${t+fh} L${x},${t+fh} Z`;
+
     const flagPath = _el('path', {
-        d: `M${x},${topY}
-            L${x + fw},${topY + 1}
-            C${x + fw + 1},${topY + fh * 0.35} ${x + fw - 1},${topY + fh * 0.65} ${x + fw},${topY + fh}
-            L${x},${topY + fh} Z`,
+        d: d1,
         fill: '#7b2020', 'fill-opacity': 0.85,
         stroke: INK_DARK, 'stroke-width': 0.6,
     });
 
-    // SVG animateTransform: rotate ±3deg around the pole attachment point
-    const anim = _el('animateTransform', {
-        attributeName: 'transform',
-        type: 'rotate',
-        values: `0 ${x} ${topY + fh / 2};3 ${x} ${topY + fh / 2};-2 ${x} ${topY + fh / 2};1 ${x} ${topY + fh / 2};0 ${x} ${topY + fh / 2}`,
-        dur: '2.5s',
+    // Animate the 'd' attribute through keyframe shapes
+    const morphAnim = _el('animate', {
+        attributeName: 'd',
+        values: `${d1};${d2};${d1};${d3};${d4};${d1}`,
+        dur: '3s',
         repeatCount: 'indefinite',
+        calcMode: 'spline',
+        keySplines: '0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1',
     });
-    flagPath.appendChild(anim);
+    flagPath.appendChild(morphAnim);
     flagG.appendChild(flagPath);
 
     mg.appendChild(flagG);
