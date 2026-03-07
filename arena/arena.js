@@ -442,10 +442,11 @@ function _renderArenaInner(s) {
     // Battlefield — CENTER (arena where dice roll between combatants)
     html += '<div class="battlefield">';
     if (ph === 'intro') {
-        // Immersive initiative button centered in battlefield
+        // Immersive initiative button centered in battlefield with 3D dice
         html += '<div id="init-hero-area" class="init-hero-area">';
-        html += '<div class="init-hero-d20">🎲</div>';
-        html += '<button class="init-hero-btn" id="initHeroBtn" data-action="initiative">⚔️ ROLAR INICIATIVA</button>';
+        html += '<div class="init-dice-3d" id="initDice3d"><div class="dice-cube"><div class="dice-face dice-front">20</div><div class="dice-face dice-back">1</div><div class="dice-face dice-right">17</div><div class="dice-face dice-left">8</div><div class="dice-face dice-top">14</div><div class="dice-face dice-bottom">3</div></div></div>';
+        html += '<div class="init-hero-result" id="initHeroResult"></div>';
+        html += '<button class="init-hero-btn" id="initHeroBtn" data-action="initiative">ROLAR INICIATIVA</button>';
         html += '<div class="init-hero-subtitle">Toque para determinar a ordem de combate</div>';
         html += '</div>';
     } else {
@@ -957,14 +958,41 @@ function _animateInitiativeHero() {
     if (!area) return;
     const btn = document.getElementById('initHeroBtn');
     if (btn) btn.disabled = true;
+    try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium'); } catch(_) {}
 
-    // Phase 1: Button fades, d20 starts spinning
+    // Phase 1: Button + subtitle fade out, dice starts dramatic spin
     area.classList.add('rolling');
 
-    // Phase 2: After spin animation completes, send the initiative action
+    const cube = area.querySelector('.dice-cube');
+    const result = document.getElementById('initHeroResult');
+    const fakeRoll = Math.floor(Math.random() * 20) + 1;
+
+    // Phase 2: Number cycling on all faces during spin (800ms)
+    let cycleCount = 0;
+    const faces = cube ? cube.querySelectorAll('.dice-face') : [];
+    const cycleInterval = setInterval(() => {
+        faces.forEach(f => { f.textContent = Math.floor(Math.random() * 20) + 1; });
+        cycleCount++;
+    }, 70);
+
+    // Phase 3: After spin, slam result (1600ms)
+    setTimeout(() => {
+        clearInterval(cycleInterval);
+        if (cube) cube.parentElement.classList.add('dice-reveal');
+        faces.forEach(f => { f.textContent = fakeRoll; });
+        try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('heavy'); } catch(_) {}
+
+        // Show result number
+        if (result) {
+            result.textContent = fakeRoll;
+            result.className = 'init-hero-result visible' + (fakeRoll >= 18 ? ' crit' : fakeRoll <= 3 ? ' low' : '');
+        }
+    }, 1600);
+
+    // Phase 4: Send action after reveal pause (2400ms total)
     setTimeout(() => {
         sendAction({type: 'initiative'});
-    }, 1200);
+    }, 2400);
 }
 
 // ─── INITIATIVE DICE ANIMATION (uses shared DiceRoller component) ───
