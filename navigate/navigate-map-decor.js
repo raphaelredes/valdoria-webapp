@@ -529,7 +529,7 @@ function renderLocationMarkers(group, fogState) {
     }
 }
 
-// ── PLAYER MARKER (medieval banner on pole) ──
+// ── PLAYER MARKER (simple pennant on pole) ──
 
 function renderPlayerBanner(svg) {
     const coords = LOCATION_COORDS[S.currentLoc];
@@ -537,58 +537,23 @@ function renderPlayerBanner(svg) {
     const { x, y } = hexToPixel(coords.col, coords.row);
     const mg = _el('g', { class: 'player-marker' });
 
-    // Pole base point (where it touches the ground at the location)
-    const baseY = y - 2;
-    const poleH = 32;        // total pole height
+    const baseY = y - 3;
+    const poleH = 26;
     const topY = baseY - poleH;
 
-    // Ground shadow
-    mg.appendChild(_el('ellipse', {
-        cx: x + 1, cy: baseY + 1, rx: 3, ry: 1,
-        fill: '#000', 'fill-opacity': 0.12,
-    }));
-
-    // Pole (vertical line, gold-brown)
+    // Thin pole
     mg.appendChild(_el('line', {
         x1: x, y1: baseY, x2: x, y2: topY,
-        stroke: '#8a6a3a', 'stroke-width': 1.6, 'stroke-linecap': 'round',
+        stroke: INK_DARK, 'stroke-width': 1.2, 'stroke-linecap': 'round',
     }));
 
-    // Pole finial (small diamond/spearpoint at top)
-    mg.appendChild(_el('path', {
-        d: `M${x},${topY - 4} L${x + 2},${topY} L${x},${topY + 1} L${x - 2},${topY} Z`,
-        fill: '#c4953a', stroke: INK_DARK, 'stroke-width': 0.5,
-    }));
-
-    // Banner/pennant (burgundy with gold border, attached to pole)
-    // Wavy flag shape flowing to the right
-    const flagTop = topY + 2;
-    const flagBot = flagTop + 14;
-    const flagW = 16;
+    // Small triangular pennant (simple, solid color, no emblem)
     const flagG = _el('g', { class: 'banner-flag' });
-
-    // Flag body (wavy trailing edge via bezier)
     flagG.appendChild(_el('path', {
-        d: `M${x},${flagTop}
-            L${x + flagW},${flagTop + 1}
-            C${x + flagW - 2},${flagTop + 5} ${x + flagW + 1},${flagTop + 9} ${x + flagW - 1},${flagBot - 1}
-            L${x},${flagBot} Z`,
-        fill: '#7b2020', stroke: INK_DARK, 'stroke-width': 0.7,
+        d: `M${x},${topY} L${x + 12},${topY + 5} L${x},${topY + 10}`,
+        fill: '#7b2020', 'fill-opacity': 0.85,
+        stroke: INK_DARK, 'stroke-width': 0.6,
     }));
-
-    // Flag highlight stripe (diagonal gold band — heraldic)
-    flagG.appendChild(_el('path', {
-        d: `M${x + 2},${flagTop + 3} L${x + flagW - 3},${flagTop + 2}
-            L${x + flagW - 4},${flagTop + 5} L${x + 2},${flagTop + 6} Z`,
-        fill: '#c4953a', 'fill-opacity': 0.7, stroke: 'none',
-    }));
-
-    // Flag cross emblem (small gold cross in center)
-    const cx = x + 8, cy = flagTop + 9;
-    flagG.appendChild(_el('line', { x1: cx, y1: cy - 2.5, x2: cx, y2: cy + 2.5,
-        stroke: '#c4953a', 'stroke-width': 1, 'stroke-linecap': 'round' }));
-    flagG.appendChild(_el('line', { x1: cx - 2, y1: cy, x2: cx + 2, y2: cy,
-        stroke: '#c4953a', 'stroke-width': 1, 'stroke-linecap': 'round' }));
 
     mg.appendChild(flagG);
     svg.appendChild(mg);
