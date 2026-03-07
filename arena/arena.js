@@ -28,6 +28,7 @@ let _currentPositions = null;   // Feature 9: combat positions
 let _cinematicInProgress = false; // Blocks re-render during action cinematic
 let _lastRenderedPhase = null;  // Phase transition tracking
 let _hitStreak = 0;               // P2-G: Combo streak counter
+let _initDice3d = null;           // THREE.js Dice3D instance for initiative screen
 
 // ─── TIMER / POLLING / HEARTBEAT STATE ───
 let _timerInterval = null;
@@ -404,6 +405,10 @@ function renderArena(s) {
 }
 
 function _renderArenaInner(s) {
+    // Dispose 3D dice when leaving intro phase
+    if (_initDice3d && (s.ph || s.phase || 'intro') !== 'intro') {
+        _initDice3d.dispose(); _initDice3d = null;
+    }
     const app = document.getElementById('app');
     // Clear previous biome classes before applying new one
     document.body.className = document.body.className.replace(/\bbiome-\S+/g, '').trim();
@@ -442,9 +447,9 @@ function _renderArenaInner(s) {
     // Battlefield — CENTER (arena where dice roll between combatants)
     html += '<div class="battlefield">';
     if (ph === 'intro') {
-        // Immersive initiative button centered in battlefield with 3D dice
+        // Immersive initiative area with real 3D d20 (THREE.js Dice3D)
         html += '<div id="init-hero-area" class="init-hero-area">';
-        html += '<div class="init-dice-3d" id="initDice3d"><div class="dice-cube"><div class="dice-face dice-front">20</div><div class="dice-face dice-back">1</div><div class="dice-face dice-right">17</div><div class="dice-face dice-left">8</div><div class="dice-face dice-top">14</div><div class="dice-face dice-bottom">3</div></div></div>';
+        html += '<div class="init-dice3d-wrap" id="initDice3dWrap"><div class="init-dice3d-particles" id="initDice3dParticles"></div><div class="init-dice3d-canvas" id="initDice3dCanvas"></div></div>';
         html += '<div class="init-hero-result" id="initHeroResult"></div>';
         html += '<button class="init-hero-btn" id="initHeroBtn" data-action="initiative">ROLAR INICIATIVA</button>';
         html += '<div class="init-hero-subtitle">Toque para determinar a ordem de combate</div>';
@@ -531,12 +536,18 @@ function _renderArenaInner(s) {
     // Initiative dice animation (DiceRoller component)
     _triggerInitiativeDice(s);
 
-    // Immersive initiative button handler (intro phase)
+    // Immersive initiative: create 3D d20 + bind button (intro phase)
     const heroBtn = document.getElementById('initHeroBtn');
     if (heroBtn) {
-        heroBtn.addEventListener('click', () => {
-            _animateInitiativeHero();
-        });
+        // Init Dice3D (idle floating d20)
+        const d3dCanvas = document.getElementById('initDice3dCanvas');
+        const d3dPart = document.getElementById('initDice3dParticles');
+        if (d3dCanvas && typeof Dice3D !== 'undefined') {
+            if (_initDice3d) { _initDice3d.dispose(); _initDice3d = null; }
+            try { _initDice3d = new Dice3D(d3dCanvas, { size: 200, particlesContainer: d3dPart }); }
+            catch(e) { console.warn('[ARENA] Dice3D init failed:', e); }
+        }
+        heroBtn.addEventListener('click', () => { _animateInitiativeHero(); });
     }
 
     // Bind action button events
@@ -952,47 +963,28 @@ function renderTurnTimeline(to) {
     return html;
 }
 
-// ─── IMMERSIVE INITIATIVE HERO BUTTON ANIMATION ───
+// ─── IMMERSIVE INITIATIVE HERO BUTTON ANIMATION (uses Dice3D d20) ───
 function _animateInitiativeHero() {
     const area = document.getElementById('init-hero-area');
     if (!area) return;
     const btn = document.getElementById('initHeroBtn');
     if (btn) btn.disabled = true;
-    try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium'); } catch(_) {}
 
-    // Phase 1: Button + subtitle fade out, dice starts dramatic spin
+    // Phase 1: Button + subtitle fade out
     area.classList.add('rolling');
 
-    const cube = area.querySelector('.dice-cube');
-    const result = document.getElementById('initHeroResult');
     const fakeRoll = Math.floor(Math.random() * 20) + 1;
 
-    // Phase 2: Number cycling on all faces during spin (800ms)
-    let cycleCount = 0;
-    const faces = cube ? cube.querySelectorAll('.dice-face') : [];
-    const cycleInterval = setInterval(() => {
-        faces.forEach(f => { f.textContent = Math.floor(Math.random() * 20) + 1; });
-        cycleCount++;
-    }, 70);
-
-    // Phase 3: After spin, slam result (1600ms)
-    setTimeout(() => {
-        clearInterval(cycleInterval);
-        if (cube) cube.parentElement.classList.add('dice-reveal');
-        faces.forEach(f => { f.textContent = fakeRoll; });
-        try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('heavy'); } catch(_) {}
-
-        // Show result number
-        if (result) {
-            result.textContent = fakeRoll;
-            result.className = 'init-hero-result visible' + (fakeRoll >= 18 ? ' crit' : fakeRoll <= 3 ? ' low' : '');
-        }
-    }, 1600);
-
-    // Phase 4: Send action after reveal pause (2400ms total)
-    setTimeout(() => {
-        sendAction({type: 'initiative'});
-    }, 2400);
+    // Phase 2: Roll the real 3D d20
+    if (_initDice3d) {
+        const duration = _initDice3d.roll(fakeRoll, () => {
+            // Phase 3: Dice landed — send action after brief pause
+            setTimeout(() => { sendAction({type: 'initiative'}); }, 600);
+        });
+    } else {
+        // Fallback: no THREE.js — send immediately
+        setTimeout(() => { sendAction({type: 'initiative'}); }, 1200);
+    }
 }
 
 // ─── INITIATIVE DICE ANIMATION (uses shared DiceRoller component) ───

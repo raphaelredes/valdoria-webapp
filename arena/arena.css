@@ -542,69 +542,38 @@ body {
 
 
 /* ─── IMMERSIVE INITIATIVE HERO BUTTON ─── */
-/* ─── INITIATIVE HERO AREA (intro phase — 3D dice) ─── */
+/* ─── INITIATIVE HERO AREA (intro phase — THREE.js Dice3D) ─── */
 .init-hero-area {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    padding: 16px 0;
+    gap: 10px;
+    padding: 8px 0;
     width: 100%;
     min-height: 120px;
 }
 
-/* 3D Dice Cube */
-.init-dice-3d {
-    width: 80px; height: 80px;
-    perspective: 400px;
-    animation: initFloat 3s ease-in-out infinite;
-}
-.dice-cube {
-    width: 100%; height: 100%;
+/* THREE.js Dice3D canvas container */
+.init-dice3d-wrap {
     position: relative;
-    transform-style: preserve-3d;
-    transform: rotateX(-20deg) rotateY(25deg);
-    transition: transform 0.3s ease;
+    width: 200px; height: 200px;
 }
-.dice-face {
-    position: absolute;
-    width: 80px; height: 80px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 28px; font-weight: 900;
-    color: #e0c070;
-    background: linear-gradient(145deg, #3a3028, #2a2420);
-    border: 2px solid rgba(196,149,58,0.45);
-    border-radius: 10px;
-    backface-visibility: visible;
-    text-shadow: 0 2px 6px rgba(196,149,58,0.4);
+.init-dice3d-canvas {
+    width: 100%; height: 100%;
 }
-.dice-front  { transform: translateZ(40px); }
-.dice-back   { transform: rotateY(180deg) translateZ(40px); }
-.dice-right  { transform: rotateY(90deg) translateZ(40px); }
-.dice-left   { transform: rotateY(-90deg) translateZ(40px); }
-.dice-top    { transform: rotateX(90deg) translateZ(40px); }
-.dice-bottom { transform: rotateX(-90deg) translateZ(40px); }
+.init-dice3d-canvas canvas {
+    display: block;
+    width: 100% !important; height: 100% !important;
+}
+.init-dice3d-particles {
+    position: absolute; inset: 0;
+    pointer-events: none; overflow: visible;
+    z-index: 2;
+}
 
-/* Result number (appears after roll) */
-.init-hero-result {
-    font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 0; font-weight: 900;
-    color: var(--v-gold, #c4953a);
-    opacity: 0;
-    transition: all 0.4s ease;
-    text-shadow: 0 0 20px rgba(196,149,58,0.5);
-}
-.init-hero-result.visible {
-    font-size: 40px; opacity: 1;
-    animation: resultSlam 0.4s ease-out;
-}
-.init-hero-result.crit {
-    color: #ffd700;
-    text-shadow: 0 0 30px rgba(255,215,0,0.7), 0 0 60px rgba(255,215,0,0.3);
-}
-.init-hero-result.low { color: #c05050; }
+/* Result number (hidden, not used with Dice3D — it shows result on the die) */
+.init-hero-result { display: none; }
 
 /* Initiative button */
 .init-hero-btn {
@@ -633,7 +602,7 @@ body {
     font-style: italic; opacity: 0.8;
 }
 
-/* Rolling state: button fades, dice spins dramatically */
+/* Rolling state: button + subtitle fade out */
 .init-hero-area.rolling .init-hero-btn {
     opacity: 0; transform: scale(0.8);
     pointer-events: none;
@@ -641,43 +610,6 @@ body {
 }
 .init-hero-area.rolling .init-hero-subtitle {
     opacity: 0; transition: opacity 0.3s ease;
-}
-.init-hero-area.rolling .init-dice-3d {
-    animation: none;
-}
-.init-hero-area.rolling .dice-cube {
-    animation: diceRoll3d 1.6s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-}
-
-/* Reveal state: dice shrinks, result number shows */
-.dice-reveal .dice-cube {
-    animation: diceRevealShrink 0.5s ease-out forwards !important;
-}
-.dice-reveal {
-    filter: drop-shadow(0 0 25px rgba(196,149,58,0.6));
-}
-
-@keyframes initFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
-}
-@keyframes diceRoll3d {
-    0%   { transform: rotateX(-20deg) rotateY(25deg) scale(1); }
-    15%  { transform: rotateX(60deg) rotateY(-90deg) scale(1.15); }
-    30%  { transform: rotateX(180deg) rotateY(180deg) scale(1.2); }
-    50%  { transform: rotateX(300deg) rotateY(-270deg) scale(1.25); }
-    65%  { transform: rotateX(420deg) rotateY(360deg) scale(1.2); }
-    80%  { transform: rotateX(540deg) rotateY(-450deg) scale(1.1); }
-    100% { transform: rotateX(720deg) rotateY(540deg) scale(1); }
-}
-@keyframes diceRevealShrink {
-    0%   { transform: rotateX(720deg) rotateY(540deg) scale(1); opacity: 1; }
-    100% { transform: rotateX(720deg) rotateY(540deg) scale(0.5); opacity: 0; }
-}
-@keyframes resultSlam {
-    0%   { transform: scale(2); opacity: 0; }
-    60%  { transform: scale(0.9); }
-    100% { transform: scale(1); opacity: 1; }
 }
 
 /* ─── ACTION BAR (flex item at bottom, not fixed) ─── */
