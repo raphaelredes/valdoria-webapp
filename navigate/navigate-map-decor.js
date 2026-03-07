@@ -24,12 +24,6 @@ function _wrapLabel(name, maxChars) {
     return lines.length > 0 ? lines : [name];
 }
 
-// ── ORNATE BORDER (removed — parchment worn edges serve as border) ──
-
-function renderOrnamentBorder(svg) {
-    // No ornament border — the worn parchment edges define the map boundary
-}
-
 // ── CONNECTION ROADS (ink paths) ──
 
 function renderRoads(group, fogState) {

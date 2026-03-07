@@ -207,7 +207,6 @@ function renderMap() {
     _renderLandmass(svg);
     _renderWornEdges(svg);
     _renderAgingEffects(svg);
-    renderOrnamentBorder(svg);
     renderGroundCover(svg);
     _renderRivers(svg);
     renderTerrainRegions(svg, fogState);
@@ -246,11 +245,10 @@ function _buildAllDefs(defs) {
 }
 
 // ===============================================================
-// OCEAN — Dark parchment with ink wave lines
+// BACKGROUND — Flat dark fill outside the parchment paper
 // ===============================================================
 
 function _renderBackground(svg) {
-    // Flat dark background outside the parchment
     svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: MAP_BG }));
 }
 
