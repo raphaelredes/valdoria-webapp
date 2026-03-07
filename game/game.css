@@ -709,7 +709,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--v-bg, #2a2420);
+    background: radial-gradient(ellipse at 50% 40%, #302820 0%, #1a1510 50%, #0a0805 100%);
     animation: locFadeIn 0.35s ease-out;
 }
 @keyframes locFadeIn {
@@ -733,7 +733,18 @@
     font-size: 48px;
     animation: locIconPulse 1.5s ease-in-out infinite;
     z-index: 1;
-    filter: drop-shadow(0 0 12px rgba(196, 149, 58, 0.4));
+    filter: drop-shadow(0 0 16px rgba(196, 149, 58, 0.5)) drop-shadow(0 0 40px rgba(196, 149, 58, 0.15));
+}
+/* Gold ornamental divider below icon */
+.loc-transition-icon::after {
+    content: '◆';
+    display: block;
+    margin-top: 12px;
+    font-size: 8px;
+    color: var(--v-gold, #c4953a);
+    opacity: 0.5;
+    letter-spacing: 8px;
+    text-align: center;
 }
 @keyframes locIconPulse {
     0%, 100% { transform: scale(1); opacity: 0.85; }
@@ -742,8 +753,9 @@
 .loc-transition-text {
     margin-top: 16px;
     font-size: 15px;
-    color: var(--v-gold-light, #e8d5a3);
-    letter-spacing: 1px;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    color: var(--v-gold-light, #dbb668);
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     font-weight: 600;
     z-index: 1;
