@@ -280,7 +280,7 @@ function renderTextInput(screen) {
     // Max value label
     if (maxLabel) {
         if (isNumeric && maxVal != null) {
-            maxLabel.textContent = `Máx: ${maxVal.toLocaleString('pt-BR')} GP`;
+            maxLabel.textContent = `M\u00e1x: ${maxVal.toLocaleString('pt-BR')} GP`;
             maxLabel.style.display = '';
         } else {
             maxLabel.textContent = '';
@@ -317,8 +317,19 @@ function renderTextInput(screen) {
 
 /**
  * Render the footer rows (quick access + nav) inside #bottom-panel.
- * Nav row is collapsed by default — toggle button expands/collapses.
+ * Nav row collapsed/expanded state persists in localStorage.
+ * Toggle is handled entirely client-side (no server API call).
  */
+const _FOOTER_COLLAPSED_KEY = 'valdoria_footer_collapsed';
+
+function _isFooterCollapsed() {
+    try { return localStorage.getItem(_FOOTER_COLLAPSED_KEY) !== '0'; } catch (e) { return true; }
+}
+
+function _setFooterCollapsed(collapsed) {
+    try { localStorage.setItem(_FOOTER_COLLAPSED_KEY, collapsed ? '1' : '0'); } catch (e) { /* */ }
+}
+
 function renderFooter(footer) {
     const quickEl = document.getElementById('footer-quick');
     const navEl = document.getElementById('footer-nav');
@@ -336,6 +347,21 @@ function renderFooter(footer) {
                 if (window.Telegram && Telegram.WebApp) {
                     Telegram.WebApp.close();
                 }
+            };
+        } else if (btn.cb === 'action_toggle_footer') {
+            // Client-side toggle — no server call
+            el.className = 'btn-action footer-toggle-btn';
+            // Set initial text based on client-side collapsed state
+            el.textContent = collapsed ? '···' : '·';
+            el.setAttribute('aria-label', collapsed ? 'Expandir menu' : 'Recolher menu');
+            el.onclick = () => {
+                const expanded = navEl.style.display !== 'none';
+                navEl.style.display = expanded ? 'none' : '';
+                el.textContent = expanded ? '\u00B7\u00B7\u00B7' : '\u00B7';
+                el.setAttribute('aria-label', expanded ? 'Expandir menu' : 'Recolher menu');
+                _setFooterCollapsed(expanded);
+                if (typeof haptic === 'function') haptic('light');
+                updateBottomPadding();
             };
         } else if (btn.cb) {
             el.onclick = () => doAction(btn.cb);
@@ -382,32 +408,20 @@ function renderFooter(footer) {
         container.appendChild(el);
     };
 
+    // Restore collapsed state from localStorage
+    const collapsed = _isFooterCollapsed();
+
     // Quick row: toggle + quick buttons (always visible)
     if (footer.quick && footer.quick.length) {
         quickEl.style.display = '';
-        // Toggle button to expand/collapse nav row
-        if (footer.nav && footer.nav.length) {
-            const toggleBtn = document.createElement('button');
-            toggleBtn.className = 'btn-action footer-toggle-btn';
-            toggleBtn.textContent = '\u00B7\u00B7\u00B7';
-            toggleBtn.setAttribute('aria-label', 'Expandir menu');
-            toggleBtn.onclick = () => {
-                const expanded = navEl.style.display !== 'none';
-                navEl.style.display = expanded ? 'none' : '';
-                toggleBtn.textContent = expanded ? '\u00B7\u00B7\u00B7' : '\u00B7';
-                toggleBtn.setAttribute('aria-label', expanded ? 'Expandir menu' : 'Recolher menu');
-                updateBottomPadding();
-            };
-            quickEl.appendChild(toggleBtn);
-        }
         for (const btn of footer.quick) setupButton(btn, quickEl);
     } else {
         quickEl.style.display = 'none';
     }
 
-    // Nav row: hidden by default (collapsed)
+    // Nav row: show/hide based on persisted state
     if (footer.nav && footer.nav.length) {
-        navEl.style.display = 'none'; // collapsed by default
+        navEl.style.display = collapsed ? 'none' : '';
         for (const btn of footer.nav) setupButton(btn, navEl);
     } else {
         navEl.style.display = 'none';

@@ -312,6 +312,9 @@ async function fetchState(silent) {
 async function doAction(callbackData) {
     if (S.transitioning) return;
 
+    // Footer toggle is client-side only — never send to server
+    if (callbackData === 'action_toggle_footer') return;
+
     // Debounce
     const now = Date.now();
     if (now - S.lastActionTime < DEBOUNCE_MS) return;

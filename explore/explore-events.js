@@ -1,4 +1,34 @@
 // ═══════════════════════════════════════════════════════
+// 3D DICE MANAGER (shared Dice3D instance for check overlays)
+// ═══════════════════════════════════════════════════════
+
+let _dice3d = null;
+
+function getDice3D() {
+    const container = document.getElementById('dice3d-canvas');
+    const particles = document.getElementById('dice3d-particles');
+    if (!container) return null;
+    if (_dice3d) {
+        _dice3d.dispose();
+        _dice3d = null;
+    }
+    try {
+        _dice3d = new Dice3D(container, { size: 200, particlesContainer: particles });
+    } catch (e) {
+        console.warn('[EXPLORE] Dice3D init failed, fallback to emoji:', e);
+        return null;
+    }
+    return _dice3d;
+}
+
+function disposeDice3D() {
+    if (_dice3d) {
+        _dice3d.dispose();
+        _dice3d = null;
+    }
+}
+
+// ═══════════════════════════════════════════════════════
 // MOVEMENT LOG (internal — sent to backend)
 // ═══════════════════════════════════════════════════════
 function logMoveEvent(events) {
@@ -239,12 +269,8 @@ function performStatCheck(poi, choice) {
         stat: check.s, dc: dc, roll: roll, mod: mod, ok: success, mode: mode,
     });
 
-    // Haptic on dice roll
-    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
-
     // Show check overlay
     const overlay = document.getElementById('check-overlay');
-    const diceEl = document.getElementById('dice-display');
     const formulaEl = document.getElementById('check-formula');
     const resultEl = document.getElementById('check-result');
 
@@ -252,19 +278,97 @@ function performStatCheck(poi, choice) {
     const proficient = S.charData && S.charData.sp && S.charData.sp.includes(check.s);
     const profMark = proficient ? '★' : '';
 
-    // Dice animation
-    diceEl.innerHTML = r2 !== null ? buildDiceHTML(r1, r2, mode) : '🎲';
-    diceEl.style.animation = 'none';
-    void diceEl.offsetHeight;
-    diceEl.style.animation = 'diceRoll 0.7s ease';
+    formulaEl.innerHTML = '';
+    resultEl.textContent = '';
+    resultEl.className = 'check-result';
+    overlay.classList.add('active');
+
+    // 3D dice animation
+    const dice = getDice3D();
+    if (dice) {
+        // Show advantage/disadvantage label above the 3D dice
+        const wrapper = document.getElementById('dice3d-wrapper');
+        wrapper.classList.remove('has-mode-label');
+        let modeLabel = wrapper.querySelector('.roll-mode-label-3d');
+        if (modeLabel) modeLabel.remove();
+        if (r2 !== null) {
+            wrapper.classList.add('has-mode-label');
+            const cls = mode === 'advantage' ? 'adv' : 'dis';
+            const label = mode === 'advantage' ? 'VANTAGEM' : 'DESVANTAGEM';
+            modeLabel = document.createElement('div');
+            modeLabel.className = `roll-mode-label-3d ${cls}`;
+            modeLabel.textContent = label;
+            wrapper.insertBefore(modeLabel, wrapper.firstChild);
+        }
+
+        const animDur = dice.roll(roll, () => {
+            // Animation done — show formula and result
+            formulaEl.innerHTML = buildFormula(roll, mod, statName, profMark, dc, total, r1, r2, mode);
+
+            resultEl.textContent = success ? '✅ Sucesso!' : '❌ Falha!';
+            resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
+
+            try {
+                if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
+            } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+
+            _showCheckSkip(overlay, success, choice, poi);
+        });
+    } else {
+        // Fallback: emoji-based animation (no THREE.js)
+        _showCheckEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, profMark, dc, total, success, choice, poi);
+    }
+}
+
+// Skip/continue logic shared by both 3D and emoji paths
+function _showCheckSkip(overlay, success, choice, poi) {
+    let _checkDone = false;
+    const skipBtn = document.getElementById('check-skip-btn');
+
+    const finishCheck = () => {
+        if (_checkDone) return;
+        _checkDone = true;
+        if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+        disposeDice3D();
+        overlay.classList.remove('active');
+        const outcome = success ? (choice.o || {}) : (choice.f || choice.o || {});
+
+        if (!success && choice.cmb_on_fail && poi.combat) {
+            triggerCombat(poi);
+            return;
+        }
+        if (success && choice.s2) {
+            showStage2(poi, choice.s2);
+            return;
+        }
+        applyOutcome(poi, outcome, choice);
+    };
+
+    setTimeout(() => {
+        if (!_checkDone && skipBtn) {
+            skipBtn.classList.add('visible');
+            skipBtn.onclick = finishCheck;
+        }
+    }, 500);
+
+    setTimeout(finishCheck, 2500);
+}
+
+// Emoji fallback when THREE.js is unavailable
+function _showCheckEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, profMark, dc, total, success, choice, poi) {
+    const formulaEl = document.getElementById('check-formula');
+    const resultEl = document.getElementById('check-result');
+    const wrapper = document.getElementById('dice3d-wrapper');
+
+    // Show emoji in the wrapper
+    wrapper.innerHTML = `<div class="dice-display-fallback" style="font-size:64px;text-align:center;animation:diceRoll 0.7s ease">${r2 !== null ? buildDiceHTML(r1, r2, mode) : '🎲'}</div>`;
 
     formulaEl.innerHTML = buildFormula(roll, mod, statName, profMark, dc, total, r1, r2, mode);
 
-    overlay.classList.add('active');
-
     setTimeout(() => {
-        if (r2 === null) {
-            diceEl.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
+        const fb = wrapper.querySelector('.dice-display-fallback');
+        if (fb && r2 === null) {
+            fb.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
         }
         resultEl.textContent = success ? '✅ Sucesso!' : '❌ Falha!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
@@ -273,36 +377,7 @@ function performStatCheck(poi, choice) {
             if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
         } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
-        // Phase 2: Result reading time (2000ms with skip button)
-        let _checkDone = false;
-        const skipBtn = document.getElementById('check-skip-btn');
-
-        const finishCheck = () => {
-            if (_checkDone) return;
-            _checkDone = true;
-            if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
-            overlay.classList.remove('active');
-            const outcome = success ? (choice.o || {}) : (choice.f || choice.o || {});
-
-            if (!success && choice.cmb_on_fail && poi.combat) {
-                triggerCombat(poi);
-                return;
-            }
-            if (success && choice.s2) {
-                showStage2(poi, choice.s2);
-                return;
-            }
-            applyOutcome(poi, outcome, choice);
-        };
-
-        setTimeout(() => {
-            if (!_checkDone && skipBtn) {
-                skipBtn.classList.add('visible');
-                skipBtn.onclick = finishCheck;
-            }
-        }, 500);
-
-        setTimeout(finishCheck, 2000);
+        _showCheckSkip(overlay, success, choice, poi);
     }, 700);
 }
 
@@ -925,35 +1000,99 @@ function showHazardCheck(hazard) {
         stat: hazard.stat, dc: hazard.dc, roll: roll, mod: mod, ok: success, mode: mode,
     });
 
-    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
-
     const overlay = document.getElementById('check-overlay');
-    const diceEl = document.getElementById('dice-display');
     const formulaEl = document.getElementById('check-formula');
     const resultEl = document.getElementById('check-result');
 
     const statName = STAT_NAMES[hazard.stat] || hazard.stat;
 
-    // Dice animation (show hazard icon or dual dice for disadvantage)
-    if (r2 !== null) {
-        diceEl.innerHTML = buildDiceHTML(r1, r2, mode);
+    formulaEl.innerHTML = '';
+    resultEl.textContent = '';
+    resultEl.className = 'check-result';
+    overlay.classList.add('active');
+
+    // 3D dice animation
+    const dice = getDice3D();
+    if (dice) {
+        // Show advantage/disadvantage label
+        const wrapper = document.getElementById('dice3d-wrapper');
+        wrapper.classList.remove('has-mode-label');
+        let modeLabel = wrapper.querySelector('.roll-mode-label-3d');
+        if (modeLabel) modeLabel.remove();
+        if (r2 !== null) {
+            wrapper.classList.add('has-mode-label');
+            const cls = mode === 'advantage' ? 'adv' : 'dis';
+            const label = mode === 'advantage' ? 'VANTAGEM' : 'DESVANTAGEM';
+            modeLabel = document.createElement('div');
+            modeLabel.className = `roll-mode-label-3d ${cls}`;
+            modeLabel.textContent = label;
+            wrapper.insertBefore(modeLabel, wrapper.firstChild);
+        }
+
+        dice.roll(roll, () => {
+            const formulaStr = buildFormula(roll, mod, statName, '', hazard.dc, total, r1, r2, mode);
+            formulaEl.innerHTML =
+                `<span style="color:var(--v-gold);font-size:14px">${hazard.label}</span><br>` + formulaStr;
+
+            resultEl.textContent = success ? '✅ Resistiu!' : '❌ Falhou!';
+            resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
+
+            try {
+                if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
+            } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+
+            _showHazardSkip(overlay, success, hazard);
+        });
     } else {
-        diceEl.textContent = hazard.label.split(' ')[0];
+        _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, hazard, total, success);
     }
-    diceEl.style.animation = 'none';
-    void diceEl.offsetHeight;
-    diceEl.style.animation = 'diceRoll 0.7s ease';
+}
+
+function _showHazardSkip(overlay, success, hazard) {
+    let _hazDone = false;
+    const skipBtn = document.getElementById('check-skip-btn');
+
+    const finishHazard = () => {
+        if (_hazDone) return;
+        _hazDone = true;
+        if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+        disposeDice3D();
+        overlay.classList.remove('active');
+        if (!success) {
+            applyHazardEffect(hazard);
+            if (checkDeath()) return;
+            if (checkLowHP()) { saveState(); return; }
+            if (checkHazardCombat()) { saveState(); return; }
+        }
+        saveState();
+    };
+
+    setTimeout(() => {
+        if (!_hazDone && skipBtn) {
+            skipBtn.classList.add('visible');
+            skipBtn.onclick = finishHazard;
+        }
+    }, 500);
+
+    setTimeout(finishHazard, 2500);
+}
+
+function _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, hazard, total, success) {
+    const formulaEl = document.getElementById('check-formula');
+    const resultEl = document.getElementById('check-result');
+    const wrapper = document.getElementById('dice3d-wrapper');
+
+    const icon = r2 !== null ? buildDiceHTML(r1, r2, mode) : hazard.label.split(' ')[0];
+    wrapper.innerHTML = `<div class="dice-display-fallback" style="font-size:64px;text-align:center;animation:diceRoll 0.7s ease">${icon}</div>`;
 
     const formulaStr = buildFormula(roll, mod, statName, '', hazard.dc, total, r1, r2, mode);
     formulaEl.innerHTML =
         `<span style="color:var(--v-gold);font-size:14px">${hazard.label}</span><br>` + formulaStr;
 
-    resultEl.textContent = '';
-    overlay.classList.add('active');
-
     setTimeout(() => {
-        if (r2 === null) {
-            diceEl.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
+        const fb = wrapper.querySelector('.dice-display-fallback');
+        if (fb && r2 === null) {
+            fb.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
         }
         resultEl.textContent = success ? '✅ Resistiu!' : '❌ Falhou!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
@@ -962,32 +1101,7 @@ function showHazardCheck(hazard) {
             if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
         } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
-        // Phase 2: Result reading time (2000ms with skip button)
-        let _hazDone = false;
-        const skipBtn = document.getElementById('check-skip-btn');
-
-        const finishHazard = () => {
-            if (_hazDone) return;
-            _hazDone = true;
-            if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
-            overlay.classList.remove('active');
-            if (!success) {
-                applyHazardEffect(hazard);
-                if (checkDeath()) return;
-                if (checkLowHP()) { saveState(); return; }
-                if (checkHazardCombat()) { saveState(); return; }
-            }
-            saveState();
-        };
-
-        setTimeout(() => {
-            if (!_hazDone && skipBtn) {
-                skipBtn.classList.add('visible');
-                skipBtn.onclick = finishHazard;
-            }
-        }, 500);
-
-        setTimeout(finishHazard, 2000);
+        _showHazardSkip(overlay, success, hazard);
     }, 700);
 }
 
