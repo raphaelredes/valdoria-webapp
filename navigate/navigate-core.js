@@ -53,10 +53,16 @@ async function initAsync() {
         S.api = params.get('api') || '';
         S.uid = parseInt(params.get('uid') || '0');
         S.returnTo = params.get('return') || 'game';
-        const dataB64 = params.get('data') || '';
+        let dataB64 = params.get('data') || '';
+
+        // If URL data param is missing, fetch from API (robust fallback)
+        if (!dataB64 && S.api && S.token) {
+            console.log('[NAVIGATE] No URL data param, fetching from API...');
+            dataB64 = await fetchPayloadFromAPI();
+        }
 
         if (!dataB64) {
-            showError('Dados do mapa nao encontrados');
+            showError('Dados do mapa nao encontrados. Volte ao bot e tente novamente.');
             return;
         }
 
@@ -109,6 +115,43 @@ async function initAsync() {
         showError('Erro ao inicializar', e);
     }
 }
+
+// -----------------------------------------------------------
+// API-BASED PAYLOAD FETCH (robust fallback)
+// -----------------------------------------------------------
+
+async function fetchPayloadFromAPI(retries = 2) {
+    const url = S.api + '/api/navigate/state?token=' + encodeURIComponent(S.token) + '&uid=' + S.uid;
+    const headers = { 'ngrok-skip-browser-warning': '1' };
+    if (window.Telegram?.WebApp?.initData) {
+        headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    }
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            console.log('[NAVIGATE] API fetch attempt', attempt + 1);
+            const r = await fetchT(url, { method: 'GET', headers: headers });
+            if (!r.ok) {
+                console.warn('[NAVIGATE] API state returned', r.status);
+                if (attempt < retries) { await _sleep(800 * (attempt + 1)); continue; }
+                return '';
+            }
+            const d = await r.json();
+            if (d.data) {
+                console.log('[NAVIGATE] Got payload from API (' + d.data.length + ' chars)');
+                return d.data;
+            }
+            console.warn('[NAVIGATE] API returned ok but no data field');
+            return '';
+        } catch (e) {
+            console.error('[NAVIGATE] API fetch error:', e);
+            if (attempt < retries) { await _sleep(800 * (attempt + 1)); }
+        }
+    }
+    return '';
+}
+
+function _sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // -----------------------------------------------------------
 // PAYLOAD DECOMPRESSION

@@ -37,12 +37,13 @@
 
 /* ─── Content Area ─── */
 .screen-content {
-    font-size: 13px;
-    line-height: 1.45;
+    font-size: 14px;
+    line-height: 1.6;
     color: var(--v-text);
     margin-bottom: 8px;
     word-wrap: break-word;
     white-space: pre-line; /* \n from server HTML renders as line breaks */
+    --v-text-dim: #a09484; /* brighter dim for readability on dark bg */
 }
 
 .screen-content b, .screen-content strong {
@@ -944,7 +945,7 @@
 
 .v-bar-track {
     flex: 1;
-    height: 7px;
+    height: 8px;
     background: var(--v-bg);
     border-radius: 4px;
     overflow: hidden;
@@ -968,13 +969,14 @@
 .v-bar-fill.hd { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
 
 .v-bar-label {
-    font-size: 10px;
+    font-size: 11px;
     font-family: var(--v-font-mono);
-    color: var(--v-text-dim);
+    color: var(--v-text);
     min-width: 48px;
     text-align: right;
     flex-shrink: 0;
     white-space: nowrap;
+    opacity: 0.85;
 }
 
 .v-bar-extra {
@@ -995,11 +997,11 @@
     display: inline-flex;
     align-items: center;
     gap: 2px;
-    padding: 4px 8px;
+    padding: 5px 10px;
     background: var(--v-bg-raised);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm);
-    font-size: 12px;
+    font-size: 13px;
     font-family: var(--v-font-mono);
     color: var(--v-text);
     white-space: nowrap;
@@ -1017,11 +1019,11 @@
     display: inline-flex;
     align-items: center;
     gap: 3px;
-    padding: 4px 10px;
+    padding: 5px 12px;
     background: var(--v-bg-card);
     border: 1px solid var(--v-border-gold);
     border-radius: var(--v-radius-pill);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--v-gold-light);
     white-space: nowrap;
 }
@@ -1063,14 +1065,14 @@
 }
 
 .v-time-bar {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--v-text-dim);
     margin-bottom: 2px;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
 }
 .v-location-header h2 {
-    font-size: 14px;
-    color: var(--v-gold);
+    font-size: 15px;
+    color: var(--v-gold-light);
     font-weight: 700;
     letter-spacing: 2.5px;
     text-transform: uppercase;
@@ -1080,9 +1082,9 @@
 }
 /* Subtitle under header (e.g., difficulty + danger) */
 .v-location-subtitle {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--v-text-dim);
-    margin-top: 2px;
+    margin-top: 3px;
     letter-spacing: 0.5px;
 }
 
@@ -1153,13 +1155,13 @@
 
 /* ── Flavor Text ── */
 .v-flavor {
-    font-size: 12px;
+    font-size: 13px;
     font-style: italic;
     color: var(--v-text-dim);
-    padding: 4px 10px;
-    margin: 2px 0;
+    padding: 6px 12px;
+    margin: 4px 0;
     border-left: 2px solid var(--v-crimson, #7b2020);
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 /* ── Info Section (quests, map info, etc.) ── */
@@ -1192,10 +1194,10 @@
     border-bottom: 1px solid rgba(196,149,58,0.15);
 }
 .v-ally-row {
-    font-size: 12px;
+    font-size: 13px;
     padding: 3px 0;
     color: var(--v-text);
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 /* ── Notification Badge ── */
@@ -1212,10 +1214,10 @@
     color: var(--v-gold);
 }
 .v-notif-body {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--v-text-dim);
     margin-top: 4px;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 /* ── Social Pulse ── */
@@ -1236,8 +1238,8 @@
 /* ── Generic Text Section ── */
 .v-section {
     padding: 2px 0;
-    line-height: 1.4;
-    font-size: 13px;
+    line-height: 1.6;
+    font-size: 14px;
 }
 
 /* ── Spacer (replaces multiple blank lines) ── */
