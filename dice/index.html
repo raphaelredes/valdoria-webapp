@@ -605,10 +605,10 @@
         const V_GOLD_HEX = _cssVar('--v-gold') || '#c4953a';
         const V_SUCCESS_HEX = _cssVar('--v-success') || '#4caf50';
         const V_DANGER_HEX = _cssVar('--v-danger') || '#e74c3c';
-        const FACE_COLOR = 0x2a2a52;
+        const FACE_COLOR = 0x2e2218;
         const EDGE_COLOR = parseInt(V_GOLD_HEX.replace('#', ''), 16);
         const NUM_COLOR = V_GOLD_HEX;
-        const FACE_COLOR_HEX = '#2a2a52';
+        const FACE_COLOR_HEX = '#2e2218';
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         //  GEOMETRY BUILDERS PER DIE TYPE
@@ -648,7 +648,7 @@
             // Number — always centered at (0.5, 0.5) which maps to face centroid via UV
             const text = String(num);
             const fontSize = (text.length > 1 ? size * 0.32 : size * 0.42) * fontScale;
-            ctx.font = `bold ${fontSize}px "Segoe UI", Arial, sans-serif`;
+            ctx.font = `bold ${fontSize}px "Cinzel", Georgia, serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
@@ -843,11 +843,118 @@
         // ━━━━━━━━━━━━━━━━━━━━━━━━
 
         function buildD20() {
-            const geo = new THREE.IcosahedronGeometry(1.0);
+            const R = 1.0;
+            let geo = new THREE.IcosahedronGeometry(R, 0);
+            geo = geo.toNonIndexed();
+            const pos = geo.attributes.position;
+
+            // Vertex-color gradient: dark brown (bottom) -> gold (top)
+            const colorsArr = new Float32Array(pos.count * 3);
+            const cLow = new THREE.Color(0x2a1e10);
+            const cHigh = new THREE.Color(0xc4953a);
+            const cTmp = new THREE.Color();
+            for (let i = 0; i < pos.count; i++) {
+                const t = (pos.getY(i) / R + 1) / 2;
+                cTmp.copy(cLow).lerp(cHigh, t);
+                colorsArr[i * 3] = cTmp.r;
+                colorsArr[i * 3 + 1] = cTmp.g;
+                colorsArr[i * 3 + 2] = cTmp.b;
+            }
+            geo.setAttribute('color', new THREE.BufferAttribute(colorsArr, 3));
+
+            // Compute face normals and centers
+            const fNormals = [];
+            const fCenters = [];
+            for (let f = 0; f < 20; f++) {
+                const i = f * 3;
+                const a = new THREE.Vector3().fromBufferAttribute(pos, i);
+                const b = new THREE.Vector3().fromBufferAttribute(pos, i + 1);
+                const c = new THREE.Vector3().fromBufferAttribute(pos, i + 2);
+                const center = a.clone().add(b).add(c).divideScalar(3);
+                const normal = new THREE.Vector3()
+                    .crossVectors(b.clone().sub(a), c.clone().sub(a)).normalize();
+                if (normal.dot(center) < 0) normal.negate();
+                fCenters.push(center);
+                fNormals.push(normal);
+            }
+
+            const bodyMat = new THREE.MeshPhongMaterial({
+                vertexColors: true,
+                shininess: 100,
+                specular: new THREE.Color(0x554433),
+                flatShading: true,
+            });
+
+            const mesh = new THREE.Mesh(geo, bodyMat);
+
+            // Gold edge wireframe
+            const edgeGeo = new THREE.EdgesGeometry(
+                new THREE.IcosahedronGeometry(R * 1.003, 0)
+            );
+            mesh.add(new THREE.LineSegments(edgeGeo,
+                new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity: 0.5 })
+            ));
+
+            // Floating number labels on each face
+            for (let i = 0; i < 20; i++) {
+                const num = i + 1;
+                const s = 256;
+                const cv = document.createElement('canvas');
+                cv.width = s; cv.height = s;
+                const ctx = cv.getContext('2d');
+                ctx.clearRect(0, 0, s, s);
+
+                const fontSize = num >= 10 ? s * 0.42 : s * 0.52;
+                ctx.font = `bold ${fontSize}px "Cinzel", Georgia, serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+                ctx.lineWidth = 8;
+                ctx.lineJoin = 'round';
+                ctx.strokeText(String(num), s / 2, s / 2);
+
+                ctx.shadowColor = 'rgba(212,175,55,0.5)';
+                ctx.shadowBlur = s * 0.06;
+                ctx.fillStyle = '#fff8e0';
+                ctx.fillText(String(num), s / 2, s / 2);
+
+                if (num === 6 || num === 9) {
+                    const w = ctx.measureText(String(num)).width;
+                    ctx.fillRect(s / 2 - w / 2, s / 2 + fontSize * 0.38, w, fontSize * 0.06);
+                }
+
+                const tex = new THREE.CanvasTexture(cv);
+                const mat = new THREE.MeshBasicMaterial({
+                    map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide,
+                });
+
+                const plane = new THREE.Mesh(new THREE.PlaneGeometry(0.38, 0.38), mat);
+                const normal = fNormals[i];
+                const center = fCenters[i];
+
+                plane.position.copy(center.clone().add(normal.clone().multiplyScalar(0.008)));
+
+                const worldUp = new THREE.Vector3(0, 1, 0);
+                let faceUp = worldUp.clone().addScaledVector(normal, -worldUp.dot(normal));
+                if (faceUp.lengthSq() < 0.001) {
+                    const worldRight = new THREE.Vector3(1, 0, 0);
+                    faceUp = worldRight.clone().addScaledVector(normal, -worldRight.dot(normal));
+                }
+                faceUp.normalize();
+
+                const faceRight = new THREE.Vector3().crossVectors(faceUp, normal).normalize();
+                plane.rotation.setFromRotationMatrix(
+                    new THREE.Matrix4().makeBasis(faceRight, faceUp, normal)
+                );
+
+                mesh.add(plane);
+            }
+
             const numbers = [];
             for (let i = 1; i <= 20; i++) numbers.push(i);
-            const mesh = buildPolyhedron(geo, 20, 3, numbers, 'tri-auto');
-            mesh.userData.type = 'd20';
+            mesh.userData = { type: 'd20', numbers, normals: fNormals };
+            mesh.castShadow = true;
             return mesh;
         }
 
