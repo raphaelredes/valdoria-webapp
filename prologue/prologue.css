@@ -57,7 +57,7 @@
     background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.6;
     color: var(--v-text);
     margin-bottom: 12px;
@@ -156,7 +156,7 @@
     margin-bottom: 6px;
 }
 .lore-card-desc {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.5;
     color: var(--v-text-dim);
     font-style: italic;
@@ -181,7 +181,7 @@
 .sub-screen-body {
     flex: 1;
     overflow-y: auto;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.7;
     color: var(--v-text);
     padding-bottom: 16px;
@@ -365,7 +365,7 @@
     color: var(--v-gold);
 }
 .char-badge-details {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--v-text-dim);
 }
 
