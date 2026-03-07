@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2a2420">
+    <title>Teste de Dados 3D - Lendas de Valdoria</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=MedievalSharp&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        *::-webkit-scrollbar {
+            display: none;
+        }
+
+        :root {
+            --v-bg: #2a2420;
+            --v-bg-raised: #332a22;
+            --v-bg-card: #2e2520;
+            --v-border: #4a3828;
+            --v-text: #d4c8b0;
+            --v-text-dim: #8a7a68;
+            --v-gold: #c4953a;
+            --v-gold-light: #d4a84a;
+            --v-danger: #e74c3c;
+            --v-success: #4caf50;
+            --v-font: 'MedievalSharp', 'Cinzel', serif;
+            --v-font-display: 'Cinzel', serif;
+        }
+
+        body {
+            background: var(--v-bg);
+            color: var(--v-text);
+            font-family: var(--v-font);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: var(--v-font-display);
+            color: var(--v-gold);
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: var(--v-text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* ─── Dice type selector ─── */
+        .dice-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .dice-selector button {
+            font-family: var(--v-font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 8px 18px;
+            border: 2px solid var(--v-border);
+            border-radius: 8px;
+            background: var(--v-bg-card);
+            color: var(--v-text-dim);
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 56px;
+        }
+
+        .dice-selector button:hover {
+            border-color: var(--v-gold);
+            color: var(--v-text);
+            background: var(--v-bg-raised);
+        }
+
+        .dice-selector button.active {
+            border-color: var(--v-gold);
+            color: var(--v-gold);
+            background: rgba(196, 149, 58, 0.12);
+            box-shadow: 0 0 12px rgba(196, 149, 58, 0.2);
+        }
+
+        /* ─── Dice viewport ─── */
+        .dice-viewport {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            border: 2px solid var(--v-border);
+            border-radius: 16px;
+            background: radial-gradient(circle at 50% 40%, #3a3028, var(--v-bg));
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .dice-canvas-wrap {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dice-particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        /* ─── Result display ─── */
+        .result-display {
+            font-family: var(--v-font-display);
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--v-gold);
+            text-align: center;
+            min-height: 48px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        .result-display.crit {
+            color: var(--v-success);
+            text-shadow: 0 0 16px rgba(76, 175, 80, 0.5);
+        }
+
+        .result-display.fail {
+            color: var(--v-danger);
+            text-shadow: 0 0 16px rgba(231, 76, 60, 0.5);
+        }
+
+        .result-label {
+            font-size: 0.8rem;
+            color: var(--v-text-dim);
+            text-align: center;
+            margin-bottom: 16px;
+            min-height: 20px;
+        }
+
+        /* ─── Roll button ─── */
+        .roll-btn {
+            font-family: var(--v-font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 14px 48px;
+            border: 2px solid var(--v-gold);
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(196, 149, 58, 0.15), rgba(196, 149, 58, 0.05));
+            color: var(--v-gold);
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .roll-btn:hover {
+            background: linear-gradient(135deg, rgba(196, 149, 58, 0.25), rgba(196, 149, 58, 0.1));
+            box-shadow: 0 0 20px rgba(196, 149, 58, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .roll-btn:active {
+            transform: translateY(1px);
+        }
+
+        .roll-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ─── Modifier control ─── */
+        .modifier-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .modifier-row label {
+            font-size: 0.85rem;
+            color: var(--v-text-dim);
+        }
+
+        .modifier-row button {
+            font-family: var(--v-font-display);
+            font-size: 1rem;
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--v-border);
+            border-radius: 8px;
+            background: var(--v-bg-card);
+            color: var(--v-text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modifier-row button:hover {
+            border-color: var(--v-gold);
+            color: var(--v-gold);
+        }
+
+        .modifier-value {
+            font-family: var(--v-font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--v-gold-light);
+            min-width: 36px;
+            text-align: center;
+        }
+
+        /* ─── History log ─── */
+        .history-title {
+            font-family: var(--v-font-display);
+            font-size: 0.9rem;
+            color: var(--v-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 24px;
+            margin-bottom: 8px;
+        }
+
+        .history-log {
+            width: 100%;
+            max-width: 360px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .history-entry {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid var(--v-border);
+            font-size: 0.85rem;
+            animation: slideIn 0.25s ease;
+        }
+
+        .history-entry.crit {
+            border-left-color: var(--v-success);
+        }
+
+        .history-entry.fail {
+            border-left-color: var(--v-danger);
+        }
+
+        .history-die {
+            color: var(--v-text-dim);
+            min-width: 32px;
+        }
+
+        .history-result {
+            font-weight: 700;
+            color: var(--v-gold-light);
+            min-width: 28px;
+            text-align: right;
+        }
+
+        .history-entry.crit .history-result {
+            color: var(--v-success);
+        }
+
+        .history-entry.fail .history-result {
+            color: var(--v-danger);
+        }
+
+        .history-mod {
+            color: var(--v-text-dim);
+            font-size: 0.75rem;
+        }
+
+        .history-total {
+            font-weight: 700;
+            color: var(--v-text);
+            margin-left: auto;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─── Manual value control ─── */
+        .manual-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .manual-row label {
+            font-size: 0.8rem;
+            color: var(--v-text-dim);
+        }
+
+        .manual-row input {
+            font-family: var(--v-font-display);
+            font-size: 0.95rem;
+            width: 56px;
+            padding: 6px 8px;
+            border: 2px solid var(--v-border);
+            border-radius: 6px;
+            background: var(--v-bg-card);
+            color: var(--v-text);
+            text-align: center;
+        }
+
+        .manual-row input:focus {
+            outline: none;
+            border-color: var(--v-gold);
+        }
+
+        .manual-row .hint {
+            font-size: 0.7rem;
+            color: var(--v-text-dim);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Mesa de Dados 3D</h1>
+    <p class="subtitle">Teste interativo dos dados poliedrais</p>
+
+    <!-- Dice type selector -->
+    <div class="dice-selector" id="diceSelector">
+        <button data-die="d4" class="active">d4</button>
+        <button data-die="d6">d6</button>
+        <button data-die="d8">d8</button>
+        <button data-die="d10">d10</button>
+        <button data-die="d12">d12</button>
+        <button data-die="d20">d20</button>
+    </div>
+
+    <!-- 3D viewport -->
+    <div class="dice-viewport">
+        <div class="dice-canvas-wrap" id="canvasWrap"></div>
+        <div class="dice-particles" id="particles"></div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-display" id="resultDisplay">&mdash;</div>
+    <div class="result-label" id="resultLabel">Toque para rolar</div>
+
+    <!-- Manual value (optional) -->
+    <div class="manual-row">
+        <label>Valor fixo:</label>
+        <input type="number" id="manualValue" placeholder="auto" min="0" max="20">
+        <span class="hint">(vazio = aleatório)</span>
+    </div>
+
+    <!-- Modifier -->
+    <div class="modifier-row">
+        <label>Modificador:</label>
+        <button id="modMinus">&minus;</button>
+        <span class="modifier-value" id="modValue">+0</span>
+        <button id="modPlus">+</button>
+    </div>
+
+    <!-- Roll button -->
+    <button class="roll-btn" id="rollBtn">Rolar Dados</button>
+
+    <!-- History -->
+    <div class="history-title">Histórico</div>
+    <div class="history-log" id="historyLog"></div>
+
+    <script>
+        var v = Date.now();
+        document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
+    </script>
+    <script>
+        (function () {
+            'use strict';
+
+            // ─── State ───
+            let currentDie = 'd20';
+            let modifier = 0;
+            let dice3d = null;
+            let rolling = false;
+
+            // ─── Die ranges ───
+            const DIE_RANGE = {
+                d4: { min: 1, max: 4 },
+                d6: { min: 1, max: 6 },
+                d8: { min: 1, max: 8 },
+                d10: { min: 0, max: 9 },
+                d12: { min: 1, max: 12 },
+                d20: { min: 1, max: 20 }
+            };
+
+            // ─── DOM refs ───
+            const canvasWrap = document.getElementById('canvasWrap');
+            const particles = document.getElementById('particles');
+            const resultDisplay = document.getElementById('resultDisplay');
+            const resultLabel = document.getElementById('resultLabel');
+            const rollBtn = document.getElementById('rollBtn');
+            const modValue = document.getElementById('modValue');
+            const manualInput = document.getElementById('manualValue');
+            const historyLog = document.getElementById('historyLog');
+
+            // ─── Init Dice3D ───
+            function initDice(dieType) {
+                if (dice3d) {
+                    dice3d.dispose();
+                    dice3d = null;
+                }
+                currentDie = dieType;
+                dice3d = new Dice3D(canvasWrap, {
+                    size: 280,
+                    dieType: dieType,
+                    particlesContainer: particles
+                });
+
+                // Update manual input range
+                const range = DIE_RANGE[dieType];
+                manualInput.min = range.min;
+                manualInput.max = range.max;
+                manualInput.value = '';
+                manualInput.placeholder = 'auto';
+            }
+
+            // ─── Dice selector buttons ───
+            document.getElementById('diceSelector').addEventListener('click', function (e) {
+                const btn = e.target.closest('button');
+                if (!btn || rolling) return;
+
+                document.querySelectorAll('.dice-selector button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const dieType = btn.dataset.die;
+                initDice(dieType);
+
+                resultDisplay.textContent = '\u2014';
+                resultDisplay.className = 'result-display';
+                resultLabel.textContent = 'Toque para rolar';
+            });
+
+            // ─── Modifier controls ───
+            document.getElementById('modMinus').addEventListener('click', function () {
+                modifier = Math.max(-10, modifier - 1);
+                modValue.textContent = (modifier >= 0 ? '+' : '') + modifier;
+            });
+            document.getElementById('modPlus').addEventListener('click', function () {
+                modifier = Math.min(10, modifier + 1);
+                modValue.textContent = (modifier >= 0 ? '+' : '') + modifier;
+            });
+
+            // ─── Roll! ───
+            rollBtn.addEventListener('click', function () {
+                if (rolling || !dice3d) return;
+                rolling = true;
+                rollBtn.disabled = true;
+                resultDisplay.textContent = '...';
+                resultDisplay.className = 'result-display';
+                resultLabel.textContent = 'Rolando ' + currentDie + '...';
+
+                const range = DIE_RANGE[currentDie];
+                let result;
+
+                // Manual value override
+                const manual = parseInt(manualInput.value);
+                if (!isNaN(manual) && manual >= range.min && manual <= range.max) {
+                    result = manual;
+                } else {
+                    result = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+                }
+
+                const total = result + modifier;
+                const isCrit = result === range.max;
+                const isFail = result === range.min;
+
+                dice3d.roll(result, function () {
+                    // Show result after a brief pause
+                    setTimeout(function () {
+                        resultDisplay.textContent = total;
+                        if (isCrit) {
+                            resultDisplay.className = 'result-display crit';
+                            resultLabel.textContent = currentDie + ': ' + result +
+                                (modifier ? ' (' + (modifier > 0 ? '+' : '') + modifier + ')' : '') +
+                                ' \u2014 ACERTO CR\u00cdTICO!';
+                        } else if (isFail) {
+                            resultDisplay.className = 'result-display fail';
+                            resultLabel.textContent = currentDie + ': ' + result +
+                                (modifier ? ' (' + (modifier > 0 ? '+' : '') + modifier + ')' : '') +
+                                ' \u2014 FALHA CR\u00cdTICA!';
+                        } else {
+                            resultDisplay.className = 'result-display';
+                            resultLabel.textContent = currentDie + ': ' + result +
+                                (modifier ? ' (' + (modifier > 0 ? '+' : '') + modifier + ')' : '');
+                        }
+
+                        // Add to history
+                        addHistory(currentDie, result, modifier, total, isCrit, isFail);
+
+                        rolling = false;
+                        rollBtn.disabled = false;
+                    }, 400);
+                });
+            });
+
+            // ─── History ───
+            function addHistory(die, result, mod, total, isCrit, isFail) {
+                const entry = document.createElement('div');
+                entry.className = 'history-entry' + (isCrit ? ' crit' : '') + (isFail ? ' fail' : '');
+
+                var modStr = mod ? '<span class="history-mod">(' + (mod > 0 ? '+' : '') + mod + ')</span>' : '';
+                entry.innerHTML =
+                    '<span class="history-die">' + die + '</span>' +
+                    '<span class="history-result">' + result + '</span>' +
+                    modStr +
+                    '<span class="history-total">= ' + total + '</span>';
+
+                historyLog.insertBefore(entry, historyLog.firstChild);
+
+                // Keep max 20 entries
+                while (historyLog.children.length > 20) {
+                    historyLog.removeChild(historyLog.lastChild);
+                }
+            }
+
+            // ─── Start with d20 ───
+            initDice('d20');
+        })();
+    </script>
+</body>
+
+</html>
