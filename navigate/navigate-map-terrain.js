@@ -1,11 +1,10 @@
 // ===============================================================
-// NAVIGATE MAP — Terrain Rendering (Region-Based Architecture)
-// Style: WoW world map / Inkarnate — painted biome zones with
-// connected mountain ridgelines, merged forest canopy masses,
-// cross-hatching, full coverage with NO empty parchment space.
+// NAVIGATE MAP — Terrain Rendering (Hand-Drawn Medieval Style)
+// All terrain features are ink strokes on parchment — no fills,
+// no gradients, no blur. Pure 2D cartographic symbols.
 // ===============================================================
 
-// ── Utility: organic blob path ──
+// ── Utility: organic blob path (kept for region boundaries) ──
 function _organicBlob(cx, cy, rx, ry, seed, n = 8) {
     const pts = [];
     for (let i = 0; i < n; i++) {
@@ -23,16 +22,14 @@ function _organicBlob(cx, cy, rx, ry, seed, n = 8) {
     return d;
 }
 
-// ── Utility: smooth hull path around a set of points ──
+// ── Utility: smooth hull path ──
 function _hullPath(points, pad, seed) {
     if (points.length <= 1) {
         const p = points[0];
         return _organicBlob(p.x, p.y, pad, pad * 0.8, seed, 10);
     }
-    // Simple convex hull (gift wrapping) then smooth
     const pts = [...points].sort((a, b) => a.x - b.x || a.y - b.y);
     const hull = [];
-    // Lower hull
     for (const p of pts) {
         while (hull.length >= 2) {
             const a = hull[hull.length - 2], b = hull[hull.length - 1];
@@ -41,7 +38,6 @@ function _hullPath(points, pad, seed) {
         }
         hull.push(p);
     }
-    // Upper hull
     const lower = hull.length + 1;
     for (let i = pts.length - 2; i >= 0; i--) {
         const p = pts[i];
@@ -53,7 +49,6 @@ function _hullPath(points, pad, seed) {
         hull.push(p);
     }
     hull.pop();
-    // Expand hull outward by pad
     const cx = hull.reduce((s, p) => s + p.x, 0) / hull.length;
     const cy = hull.reduce((s, p) => s + p.y, 0) / hull.length;
     const expanded = hull.map((p, i) => {
@@ -62,7 +57,6 @@ function _hullPath(points, pad, seed) {
         const wobble = (srand(seed + i * 17) - 0.5) * pad * 0.4;
         return { x: p.x + (dx / len) * (pad + wobble), y: p.y + (dy / len) * (pad + wobble) };
     });
-    // Smooth bezier path
     let d = `M${expanded[0].x},${expanded[0].y}`;
     for (let i = 1; i <= expanded.length; i++) {
         const c = expanded[i % expanded.length], p = expanded[(i - 1) % expanded.length];
@@ -99,7 +93,7 @@ function _buildAutoFillHexes() {
     return extra;
 }
 
-// ── Region builder: group adjacent hexes by biome into clusters ──
+// ── Region builder ──
 function _buildBiomeRegions(allHexes) {
     const byKey = new Map();
     for (const [col, row, biome] of allHexes) {
@@ -114,7 +108,6 @@ function _buildBiomeRegions(allHexes) {
         const queue = [hex];
         while (queue.length) {
             const h = queue.shift();
-            // 6 hex neighbors (flat-top)
             const neighbors = [
                 [h.col - 1, h.row], [h.col + 1, h.row],
                 [h.col + (h.row % 2 ? 1 : -1), h.row - 1], [h.col, h.row - 1],
@@ -151,7 +144,7 @@ function _hexVisibility(col, row, knownSet, discoveredSet) {
     return op;
 }
 
-// ── Biome-aware ground cover texture ──
+// ── Ground cover (ink marks per biome) ──
 function renderGroundCover(svg) {
     const gG = _el('g', { class: 'ground-cover', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
     const biomeCache = new Map();
@@ -174,100 +167,95 @@ function renderGroundCover(svg) {
 function _groundCoverStrokes(x, y, biome, seed) {
     const els = [];
     if (biome === 'forest') {
-        for (let i = 0; i < 5; i++) {
+        // Tiny stipple dots (undergrowth)
+        for (let i = 0; i < 4; i++) {
             const bx = x + (srand(seed+i*7)-0.5)*HEX_W, by = y + (srand(seed+i*7+3)-0.5)*ROW_H;
-            els.push(_el('circle', { cx: bx, cy: by, r: 0.8+srand(seed+i*7+1)*0.7,
-                fill: '#1a3a10', 'fill-opacity': 0.15 }));
+            els.push(_el('circle', { cx: bx, cy: by, r: 0.5,
+                fill: INK_DARK, 'fill-opacity': 0.12 }));
         }
     } else if (biome === 'mountain' || biome === 'cave') {
-        for (let i = 0; i < 4; i++) {
+        // Small chevron marks ^
+        for (let i = 0; i < 3; i++) {
             const rx = x + (srand(seed+i*9)-0.5)*HEX_W, ry = y + (srand(seed+i*9+3)-0.5)*ROW_H;
-            els.push(_el('circle', { cx: rx, cy: ry, r: 0.4+srand(seed+i*9+1)*0.5,
-                fill: '#3a3830', 'fill-opacity': 0.18 }));
+            const sz = 2 + srand(seed+i*9+1) * 1.5;
+            els.push(_el('path', { d: `M${rx-sz},${ry+sz*0.5} L${rx},${ry-sz*0.5} L${rx+sz},${ry+sz*0.5}`,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.15 }));
         }
     } else if (biome === 'snow') {
-        for (let i = 0; i < 3; i++) {
-            const sx = x + (srand(seed+i*5)-0.5)*HEX_W, sy = y + (srand(seed+i*5+3)-0.5)*ROW_H;
-            els.push(_el('circle', { cx: sx, cy: sy, r: 0.5, fill: '#a0a098', 'fill-opacity': 0.12 }));
+        // Nearly empty — snow = blank parchment. Just 1-2 tiny dots
+        if (srand(seed) > 0.6) {
+            els.push(_el('circle', { cx: x + (srand(seed+1)-0.5)*HEX_W, cy: y + (srand(seed+2)-0.5)*ROW_H,
+                r: 0.4, fill: INK_LIGHT, 'fill-opacity': 0.08 }));
         }
     } else if (biome === 'desert') {
-        for (let i = 0; i < 4; i++) {
+        // Horizontal dash marks (wind)
+        for (let i = 0; i < 3; i++) {
             const dx = x + (srand(seed+i*6)-0.5)*HEX_W, dy = y + (srand(seed+i*6+3)-0.5)*ROW_H;
-            els.push(_el('circle', { cx: dx, cy: dy, r: 0.4, fill: '#8a7a48', 'fill-opacity': 0.12 }));
+            const wl = 4 + srand(seed+i*6+1) * 5;
+            els.push(_el('line', { x1: dx, y1: dy, x2: dx+wl, y2: dy - 0.3,
+                stroke: INK, 'stroke-width': 0.25, 'stroke-opacity': 0.12, 'stroke-dasharray': '2 2' }));
         }
     } else if (biome === 'swamp') {
+        // Wavy water lines
         if (srand(seed+500) > 0.35) {
             const wx = x + (srand(seed+501)-0.5)*20, wy = y + (srand(seed+502)-0.5)*12;
             els.push(_el('path', { d: `M${wx-6},${wy} Q${wx},${wy-2} ${wx+6},${wy}`,
-                fill: 'none', stroke: '#3a5a2a', 'stroke-width': 0.3, 'stroke-opacity': 0.12 }));
+                fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.12 }));
         }
     } else if (biome === 'volcanic') {
-        for (let i = 0; i < 3; i++) {
+        // Tiny dark dots (ash)
+        for (let i = 0; i < 2; i++) {
             const vx = x + (srand(seed+i*8)-0.5)*HEX_W, vy = y + (srand(seed+i*8+3)-0.5)*ROW_H;
-            els.push(_el('circle', { cx: vx, cy: vy, r: 0.4, fill: '#2a1a10', 'fill-opacity': 0.14 }));
+            els.push(_el('circle', { cx: vx, cy: vy, r: 0.4,
+                fill: INK_DARK, 'fill-opacity': 0.10 }));
         }
     } else {
-        // Plains grass
+        // Plains — grass blade strokes
         for (let i = 0; i < 3; i++) {
             const gx = x + (srand(seed+i*7)-0.5)*HEX_W, gy = y + (srand(seed+i*7+3)-0.5)*ROW_H;
             const a = (srand(seed+i*7+5)-0.5)*50*Math.PI/180, l = 3+srand(seed+i*7+1)*3;
             els.push(_el('line', { x1: gx, y1: gy, x2: gx+Math.sin(a)*l, y2: gy-Math.cos(a)*l,
-                stroke: '#5a6a3a', 'stroke-width': 0.3, 'stroke-opacity': 0.14, 'stroke-linecap': 'round' }));
+                stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.18, 'stroke-linecap': 'round' }));
         }
     }
     return els;
 }
 
 // ══════════════════════════════════════════════════════════
-// TERRAIN REGIONS — Strong painted biome zone fills
+// TERRAIN REGIONS — Ink boundary lines only (no colored fills)
 // ══════════════════════════════════════════════════════════
 
 function renderTerrainRegions(svg, fogState) {
     const knownSet = new Set(S.knownLocs);
     const discoveredSet = new Set(S.discoveredLocs || []);
     const regG = _el('g', { class: 'terrain-regions', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
-    const colors = {
-        plains: '#4a5a30', forest: '#1a3a12', snow: '#6a7078',
-        mountain: '#4a4448', desert: '#7a6a38', swamp: '#2a3a22',
-        cave: '#2a2a30', graveyard: '#3a2a28', volcanic: '#5a2a18',
-    };
     const allHexes = [...TERRAIN_HEXES, ..._buildAutoFillHexes()];
     const regions = _buildBiomeRegions(allHexes);
 
-    // Draw large painted blobs per region cluster
+    // Draw thin dashed ink boundary around each biome region
     for (const [biome, clusters] of Object.entries(regions)) {
+        if (biome === 'plains') continue; // Plains don't need boundaries
         for (const cluster of clusters) {
-            // Max visibility for any hex in cluster
+            if (cluster.length < 3) continue; // Skip tiny regions
             let vis = 0;
             for (const h of cluster) {
                 vis = Math.max(vis, _hexVisibility(h.col, h.row, knownSet, discoveredSet));
             }
             if (vis <= 0) continue;
-            // Paint a large blob covering the whole cluster
-            const hullD = _hullPath(cluster, 32 + srand(cluster[0].col * 100 + cluster[0].row) * 12, cluster[0].col * 77 + cluster[0].row * 33);
+            const hullD = _hullPath(cluster, 20 + srand(cluster[0].col * 100 + cluster[0].row) * 8, cluster[0].col * 77 + cluster[0].row * 33);
             regG.appendChild(_el('path', {
-                d: hullD, fill: colors[biome] || colors.plains,
-                'fill-opacity': vis * 0.55,
-                filter: 'url(#terrain-soft)',
+                d: hullD, fill: 'none',
+                stroke: INK_DARK, 'stroke-width': 0.4,
+                'stroke-opacity': vis * 0.12,
+                'stroke-dasharray': '4 6',
             }));
-            // Inner gradient for depth
-            if (cluster.length >= 3) {
-                const cx = cluster.reduce((s, h) => s + h.x, 0) / cluster.length;
-                const cy = cluster.reduce((s, h) => s + h.y, 0) / cluster.length;
-                regG.appendChild(_el('path', {
-                    d: _organicBlob(cx, cy, 25 + cluster.length * 6, 20 + cluster.length * 4, cluster[0].col * 43, 10),
-                    fill: colors[biome] || colors.plains,
-                    'fill-opacity': vis * 0.3,
-                    filter: 'url(#terrain-soft)',
-                }));
-            }
         }
     }
     svg.appendChild(regG);
 }
 
 // ══════════════════════════════════════════════════════════
-// TERRAIN DETAILS — Region-based connected features
+// TERRAIN DETAILS — Hand-drawn ink symbols per biome
 // ══════════════════════════════════════════════════════════
 
 function renderTerrainDetails(svg, fogState) {
@@ -277,12 +265,9 @@ function renderTerrainDetails(svg, fogState) {
     const allHexes = [...TERRAIN_HEXES, ..._buildAutoFillHexes()];
     const regions = _buildBiomeRegions(allHexes);
 
-    // Draw connected terrain per biome region
     for (const [biome, clusters] of Object.entries(regions)) {
         for (const cluster of clusters) {
-            // Sort by position for connected rendering
             cluster.sort((a, b) => a.row - b.row || a.col - b.col);
-            // Per-hex visibility weighted average
             let totalVis = 0;
             for (const h of cluster) {
                 h.vis = _hexVisibility(h.col, h.row, knownSet, discoveredSet);
@@ -292,15 +277,15 @@ function renderTerrainDetails(svg, fogState) {
             const avgVis = totalVis / cluster.length;
             const g = _el('g', { opacity: Math.min(1, avgVis * 1.1) });
 
-            if (biome === 'mountain') _drawConnectedMountains(g, cluster);
-            else if (biome === 'forest') _drawConnectedForest(g, cluster);
-            else if (biome === 'snow') _drawConnectedSnow(g, cluster);
-            else if (biome === 'swamp') _drawConnectedSwamp(g, cluster);
-            else if (biome === 'desert') _drawConnectedDesert(g, cluster);
-            else if (biome === 'volcanic') _drawConnectedVolcanic(g, cluster);
-            else if (biome === 'cave') _drawConnectedCave(g, cluster);
-            else if (biome === 'graveyard') _drawConnectedGraveyard(g, cluster);
-            else _drawConnectedGrassland(g, cluster);
+            if (biome === 'mountain') _drawMountains(g, cluster);
+            else if (biome === 'forest') _drawForest(g, cluster);
+            else if (biome === 'snow') _drawSnow(g, cluster);
+            else if (biome === 'swamp') _drawSwamp(g, cluster);
+            else if (biome === 'desert') _drawDesert(g, cluster);
+            else if (biome === 'volcanic') _drawVolcanic(g, cluster);
+            else if (biome === 'cave') _drawCave(g, cluster);
+            else if (biome === 'graveyard') _drawGraveyard(g, cluster);
+            else _drawGrassland(g, cluster);
 
             tG.appendChild(g);
         }
@@ -309,379 +294,350 @@ function renderTerrainDetails(svg, fogState) {
 }
 
 // ══════════════════════════════════════════════════════════
-// CONNECTED MOUNTAIN RANGE — Continuous ridgeline
+// MOUNTAINS — Triangular peaks with left-side hatching
 // ══════════════════════════════════════════════════════════
 
-function _drawConnectedMountains(g, cluster) {
-    // Draw peaks at each hex, but connect them with a ridgeline
+function _drawMountains(g, cluster) {
     const peaks = [];
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        const count = 3 + Math.floor(srand(seed) * 3);
+        const count = 2 + Math.floor(srand(seed) * 3);
         for (let i = 0; i < count; i++) {
             peaks.push({
-                x: h.x + (i - (count-1)/2) * 13 + (srand(seed+i*10)-0.5) * 6,
-                y: h.y + (srand(seed+i*10+5)-0.5) * 7,
-                h: 20 + srand(seed+i*10+1) * 26,
-                w: 10 + srand(seed+i*10+2) * 8,
+                x: h.x + (i - (count-1)/2) * 14 + (srand(seed+i*10)-0.5) * 6,
+                y: h.y + (srand(seed+i*10+5)-0.5) * 8,
+                h: 14 + srand(seed+i*10+1) * 18,
+                w: 8 + srand(seed+i*10+2) * 6,
                 seed: seed + i * 10,
             });
         }
     }
-    peaks.sort((a, b) => a.h - b.h);
+    peaks.sort((a, b) => a.y - b.y); // Back-to-front
 
-    // Base shadow under entire range
+    // Ridge line connecting adjacent peaks in same cluster
     if (cluster.length >= 2) {
-        g.appendChild(_el('path', {
-            d: _hullPath(cluster, 18, cluster[0].col * 999),
-            fill: '#2a2018', 'fill-opacity': 0.1, filter: 'url(#terrain-soft)',
-        }));
+        let ridgeD = '';
+        const sorted = [...cluster].sort((a, b) => a.col - b.col);
+        for (let i = 0; i < sorted.length; i++) {
+            const h = sorted[i];
+            if (i === 0) ridgeD = `M${h.x},${h.y - 8}`;
+            else {
+                const prev = sorted[i-1];
+                const mx = (prev.x + h.x) / 2 + (srand(h.col * 50 + h.row) - 0.5) * 10;
+                const my = Math.min(prev.y, h.y) - 12 + (srand(h.col * 51 + h.row) - 0.5) * 6;
+                ridgeD += ` Q${mx},${my} ${h.x},${h.y - 8}`;
+            }
+        }
+        g.appendChild(_el('path', { d: ridgeD, fill: 'none', stroke: INK_DARK,
+            'stroke-width': 0.4, 'stroke-opacity': 0.15, 'stroke-linecap': 'round' }));
     }
 
-    // Draw each peak
     for (const p of peaks) {
-        const by = p.y + 5, lx = p.x - p.w, rx = p.x + p.w, ty = p.y - p.h;
-        const jit = (srand(p.seed + 77) - 0.5) * 2.5;
+        const by = p.y + 4, ty = p.y - p.h;
+        const lx = p.x - p.w, rx = p.x + p.w;
+        const jit = (srand(p.seed + 77) - 0.5) * 2;
 
-        // Hump body
-        g.appendChild(_el('path', {
-            d: `M${lx},${by} Q${lx+p.w*0.12},${ty+p.h*0.2} ${p.x+jit},${ty} Q${rx-p.w*0.12},${ty+p.h*0.2} ${rx},${by} Z`,
-            fill: '#585248', stroke: '#2a2420', 'stroke-width': 0.8, 'stroke-linejoin': 'round',
-        }));
+        // Left slope
+        g.appendChild(_el('line', { x1: lx, y1: by, x2: p.x + jit, y2: ty,
+            stroke: INK_DARK, 'stroke-width': 0.9, 'stroke-linecap': 'round' }));
+        // Right slope (slightly thinner — light side)
+        g.appendChild(_el('line', { x1: p.x + jit, y1: ty, x2: rx, y2: by,
+            stroke: INK_DARK, 'stroke-width': 0.7, 'stroke-linecap': 'round' }));
 
-        // Left face hatching (10-14 lines)
-        const hatchCount = 10 + Math.floor(srand(p.seed + 50) * 5);
+        // Left-face hatching (4-5 diagonal lines)
+        const hatchCount = 4 + Math.floor(srand(p.seed + 50) * 2);
         for (let j = 0; j < hatchCount; j++) {
-            const t = 0.06 + j * (0.85 / hatchCount);
-            const hx = lx + (p.x - lx) * t * 0.6;
+            const t = 0.15 + j * (0.7 / hatchCount);
+            // Interpolate along left slope
+            const hx = lx + (p.x + jit - lx) * t;
             const hy = by + (ty - by) * t;
-            const hLen = p.h * 0.13 * (1 - t * 0.2);
-            g.appendChild(_el('line', { x1: hx, y1: hy, x2: hx + hLen * 0.3, y2: hy + hLen,
-                stroke: '#1a1810', 'stroke-width': 0.4, 'stroke-opacity': 0.6 * (1 - t * 0.2) }));
-        }
-
-        // Right face lighter hatching
-        for (let j = 0; j < 4; j++) {
-            const t = 0.15 + j * 0.18;
-            const hx = rx + (p.x - rx) * t * 0.45;
-            const hy = by + (ty - by) * t;
-            g.appendChild(_el('line', { x1: hx, y1: hy, x2: hx - 2, y2: hy + p.h * 0.06,
-                stroke: '#6a6058', 'stroke-width': 0.3, 'stroke-opacity': 0.3 }));
-        }
-
-        // Cross-hatching on left
-        for (let j = 0; j < 4; j++) {
-            const t = 0.2 + j * 0.14;
-            const hx = lx + (p.x - lx) * t * 0.5;
-            const hy = by + (ty - by) * t * 0.75;
-            g.appendChild(_el('line', { x1: hx, y1: hy, x2: hx + p.h * 0.06, y2: hy - p.h * 0.04,
-                stroke: '#1a1810', 'stroke-width': 0.25, 'stroke-opacity': 0.35 }));
-        }
-
-        // Snow cap
-        const cW = p.w * 0.5, cH = p.h * 0.22;
-        g.appendChild(_el('path', {
-            d: `M${p.x-cW+jit},${ty+cH} Q${p.x-cW*0.4+jit},${ty+cH*0.2} ${p.x+jit},${ty-1}
-                Q${p.x+cW*0.4+jit},${ty+cH*0.2} ${p.x+cW+jit},${ty+cH+1}
-                Q${p.x+cW*0.2+jit},${ty+cH*0.65} ${p.x+jit},${ty+cH*0.75}
-                Q${p.x-cW*0.2+jit},${ty+cH*0.65} ${p.x-cW+jit},${ty+cH}`,
-            fill: '#d8d0c0', stroke: '#a8a090', 'stroke-width': 0.3,
-        }));
-
-        // Ridge line
-        g.appendChild(_el('line', { x1: p.x+jit-p.w*0.3, y1: ty+p.h*0.15, x2: p.x+jit+p.w*0.1, y2: ty+1,
-            stroke: '#3a302a', 'stroke-width': 0.5, 'stroke-opacity': 0.4 }));
-    }
-
-    // Scree at base of each hex
-    for (const h of cluster) {
-        const seed = h.col * 100 + h.row;
-        for (let i = 0; i < 10; i++) {
-            const sx = h.x + (srand(seed+i*31)-0.5) * 30, sy = h.y + 5 + srand(seed+i*31+1) * 6;
-            g.appendChild(_el('circle', { cx: sx, cy: sy, r: 0.5+srand(seed+i*31+2)*0.6,
-                fill: '#4a4038', 'fill-opacity': 0.35 }));
+            const hLen = p.h * 0.12 * (1 - t * 0.3);
+            g.appendChild(_el('line', {
+                x1: hx, y1: hy,
+                x2: hx + hLen * 0.4, y2: hy + hLen,
+                stroke: INK_DARK, 'stroke-width': 0.35,
+                'stroke-opacity': 0.45 * (1 - t * 0.2),
+            }));
         }
     }
 }
 
 // ══════════════════════════════════════════════════════════
-// CONNECTED FOREST — Merged canopy masses
+// FOREST — Individual tree symbols (trunk + canopy outline)
 // ══════════════════════════════════════════════════════════
 
-function _drawConnectedForest(g, cluster) {
-    // Large unified shadow under entire forest
-    if (cluster.length >= 2) {
-        g.appendChild(_el('path', {
-            d: _hullPath(cluster, 22, cluster[0].col * 777),
-            fill: '#0a1a08', 'fill-opacity': 0.15, filter: 'url(#terrain-soft)',
-        }));
-    }
-
-    // Trunk layer (under canopy)
+function _drawForest(g, cluster) {
+    const trees = [];
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        for (let i = 0; i < 5; i++) {
-            const tx = h.x + (srand(seed+i*23)-0.5) * 28;
-            const ty = h.y + 6 + srand(seed+i*23+1) * 5;
-            g.appendChild(_el('line', { x1: tx, y1: ty, x2: tx + (srand(seed+i*23+2)-0.5)*2, y2: ty - 10,
-                stroke: '#3a2810', 'stroke-width': 0.8, 'stroke-linecap': 'round' }));
-        }
-    }
-
-    // Canopy blobs — draw per hex but with LARGE radius that overlaps adjacent hexes
-    const allBlobs = [];
-    for (const h of cluster) {
-        const seed = h.col * 100 + h.row;
-        const count = 8 + Math.floor(srand(seed) * 6);
+        const count = 5 + Math.floor(srand(seed) * 3);
         for (let i = 0; i < count; i++) {
-            allBlobs.push({
-                bx: h.x + (srand(seed+i*13)-0.5) * 38,  // Large spread — overlaps neighbors
-                by: h.y + (srand(seed+i*13+5)-0.5) * 22,
-                rw: 5 + srand(seed+i*13+1) * 8,
-                rh: 4 + srand(seed+i*13+2) * 6,
+            trees.push({
+                x: h.x + (srand(seed+i*13)-0.5) * 32,
+                y: h.y + (srand(seed+i*13+5)-0.5) * 20,
+                sz: 3 + srand(seed+i*13+1) * 3,
+                type: srand(seed+i*13+2) < 0.6 ? 'round' : 'conifer',
                 seed: seed + i * 13,
             });
         }
     }
-    allBlobs.sort((a, b) => a.by - b.by);
+    trees.sort((a, b) => a.y - b.y); // Back-to-front
 
-    // Also add "bridge" blobs between adjacent hexes to fill gaps
-    for (let i = 0; i < cluster.length; i++) {
-        for (let j = i + 1; j < cluster.length; j++) {
-            const a = cluster[i], b = cluster[j];
-            const dist = Math.hypot(a.x - b.x, a.y - b.y);
-            if (dist > HEX_W * 2) continue; // Only adjacent/near hexes
-            const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-            const bridgeSeed = a.col * 50 + b.col * 30 + a.row * 70;
-            for (let k = 0; k < 4; k++) {
-                allBlobs.push({
-                    bx: mx + (srand(bridgeSeed + k * 11) - 0.5) * 20,
-                    by: my + (srand(bridgeSeed + k * 11 + 3) - 0.5) * 14,
-                    rw: 5 + srand(bridgeSeed + k * 11 + 1) * 6,
-                    rh: 4 + srand(bridgeSeed + k * 11 + 2) * 5,
-                    seed: bridgeSeed + k * 11,
-                });
+    for (const t of trees) {
+        const trunkH = t.sz * 1.8;
+        // Trunk
+        g.appendChild(_el('line', {
+            x1: t.x, y1: t.y + 2,
+            x2: t.x + (srand(t.seed+99)-0.5)*0.8, y2: t.y + 2 - trunkH,
+            stroke: INK_DARK, 'stroke-width': 0.7, 'stroke-linecap': 'round',
+        }));
+
+        if (t.type === 'round') {
+            // Round canopy (stroke only — ink outline)
+            const cy = t.y + 2 - trunkH - t.sz * 0.4;
+            g.appendChild(_el('circle', {
+                cx: t.x, cy,
+                r: t.sz,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6,
+            }));
+            // Optional: tiny highlight arc
+            if (srand(t.seed + 200) > 0.5) {
+                const arcR = t.sz * 0.6;
+                g.appendChild(_el('path', {
+                    d: `M${t.x - arcR},${cy - arcR * 0.3} A${arcR},${arcR} 0 0 1 ${t.x + arcR * 0.3},${cy - arcR}`,
+                    fill: 'none', stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.3,
+                }));
             }
-        }
-    }
-    allBlobs.sort((a, b) => a.by - b.by);
-
-    // Draw all canopy blobs
-    for (const b of allBlobs) {
-        // Deep shadow
-        g.appendChild(_el('path', { d: _organicBlob(b.bx+0.5, b.by+b.rh*0.2, b.rw, b.rh*0.85, b.seed+99, 7),
-            fill: '#0a2808', 'fill-opacity': 0.5, stroke: '#061a04', 'stroke-width': 0.5 }));
-        // Main canopy
-        g.appendChild(_el('path', { d: _organicBlob(b.bx, b.by, b.rw, b.rh, b.seed+1, 8),
-            fill: '#1a4a12', 'fill-opacity': 0.9, stroke: '#0a2a08', 'stroke-width': 0.4 }));
-        // Highlight
-        g.appendChild(_el('ellipse', { cx: b.bx-b.rw*0.2, cy: b.by-b.rh*0.3,
-            rx: b.rw*0.35, ry: b.rh*0.25, fill: '#2a7a1a', 'fill-opacity': 0.2 }));
-    }
-
-    // Undergrowth at edges
-    for (const h of cluster) {
-        const seed = h.col * 100 + h.row;
-        for (let i = 0; i < 4; i++) {
-            const ux = h.x + (srand(seed+i*51)-0.5) * 30;
-            const uy = h.y + 9 + srand(seed+i*51+3) * 5;
-            g.appendChild(_el('path', { d: _organicBlob(ux, uy, 4, 2.5, seed+i*51+7, 5),
-                fill: '#1a3a10', 'fill-opacity': 0.35 }));
+        } else {
+            // Conifer — two angled lines forming a triangle
+            const topY = t.y + 2 - trunkH - t.sz * 1.2;
+            const baseW = t.sz * 0.9;
+            g.appendChild(_el('line', {
+                x1: t.x - baseW, y1: t.y + 2 - trunkH + 1,
+                x2: t.x, y2: topY,
+                stroke: INK_DARK, 'stroke-width': 0.5,
+            }));
+            g.appendChild(_el('line', {
+                x1: t.x, y1: topY,
+                x2: t.x + baseW, y2: t.y + 2 - trunkH + 1,
+                stroke: INK_DARK, 'stroke-width': 0.5,
+            }));
         }
     }
 }
 
 // ══════════════════════════════════════════════════════════
-// CONNECTED SNOW — Icy peaks with glacier bands
+// SNOW — Mountain peaks with stipple dots (snow)
 // ══════════════════════════════════════════════════════════
 
-function _drawConnectedSnow(g, cluster) {
-    // Snow drift base
-    if (cluster.length >= 2) {
-        g.appendChild(_el('path', {
-            d: _hullPath(cluster, 20, cluster[0].col * 555),
-            fill: '#b8b4ac', 'fill-opacity': 0.08, filter: 'url(#terrain-soft)',
-        }));
-    }
+function _drawSnow(g, cluster) {
+    // Draw peaks (same style as mountains but lighter)
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
         const count = 2 + Math.floor(srand(seed) * 2);
         for (let i = 0; i < count; i++) {
             const ox = (i-(count-1)/2)*16 + (srand(seed+i*11)-0.5)*6;
-            const ht = 22 + srand(seed+i*11+1)*16, w = 12 + srand(seed+i*11+2)*7;
-            const px = h.x+ox, py = h.y, ty = py - ht;
-            // Peak
-            g.appendChild(_el('path', { d: `M${px-w},${py+5} Q${px-w*0.12},${ty+ht*0.12} ${px},${ty} Q${px+w*0.12},${ty+ht*0.12} ${px+w},${py+5} Z`,
-                fill: '#8a8890', stroke: '#5a5860', 'stroke-width': 0.6 }));
-            // Left hatching
-            for (let j = 0; j < 8; j++) {
-                const t = 0.1+j*0.1;
-                g.appendChild(_el('line', { x1: px-w+w*t*0.5, y1: py+5+(ty-py-5)*t,
-                    x2: px-w+w*t*0.5+2.5, y2: py+5+(ty-py-5)*t+ht*0.08,
-                    stroke: '#4a4860', 'stroke-width': 0.35, 'stroke-opacity': 0.45 }));
+            const ht = 16 + srand(seed+i*11+1)*12;
+            const w = 9 + srand(seed+i*11+2)*5;
+            const px = h.x+ox, by = h.y+4, ty = h.y+4 - ht;
+            // Slopes
+            g.appendChild(_el('line', { x1: px-w, y1: by, x2: px, y2: ty,
+                stroke: INK_DARK, 'stroke-width': 0.8, 'stroke-linecap': 'round' }));
+            g.appendChild(_el('line', { x1: px, y1: ty, x2: px+w, y2: by,
+                stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-linecap': 'round' }));
+            // Hatching (left face, fewer)
+            for (let j = 0; j < 3; j++) {
+                const t = 0.2 + j * 0.25;
+                const hx = (px-w) + (px - (px-w)) * t;
+                const hy = by + (ty - by) * t;
+                g.appendChild(_el('line', { x1: hx, y1: hy, x2: hx+2, y2: hy + ht*0.08,
+                    stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.35 }));
             }
-            // Snow cap
-            g.appendChild(_el('path', { d: `M${px-w*0.65},${ty+ht*0.35} Q${px},${ty-2} ${px+w*0.65},${ty+ht*0.35}`,
-                fill: '#dcd8d0', stroke: '#b8b0a8', 'stroke-width': 0.35 }));
-            // Glacier lines
+            // Snow stipple on peak
             for (let j = 0; j < 4; j++) {
-                const ly = ty + ht*(0.12+j*0.07), lw = w*(0.45-j*0.08);
-                g.appendChild(_el('path', { d: `M${px-lw},${ly} Q${px},${ly-1.5} ${px+lw},${ly}`,
-                    fill: 'none', stroke: '#e8e4dc', 'stroke-width': 0.35, 'stroke-opacity': 0.45 }));
+                const sx = px + (srand(seed+i*20+j)-0.5)*w*0.8;
+                const sy = ty + srand(seed+i*20+j+10)*ht*0.25;
+                g.appendChild(_el('circle', { cx: sx, cy: sy, r: 0.5,
+                    fill: INK_LIGHT, 'fill-opacity': 0.25 }));
             }
         }
-        // Snow drifts
-        for (let i = 0; i < 3; i++) {
-            g.appendChild(_el('ellipse', { cx: h.x+(srand(seed+i*41)-0.5)*26, cy: h.y+6+srand(seed+i*41+1)*4,
-                rx: 5+srand(seed+i*41+2)*4, ry: 1.8, fill: '#c8c4bc', 'fill-opacity': 0.22 }));
+        // Snow drifts (horizontal ellipses, stroke only)
+        for (let i = 0; i < 2; i++) {
+            const dx = h.x + (srand(seed+i*41)-0.5)*22;
+            const dy = h.y + 6 + srand(seed+i*41+1)*3;
+            g.appendChild(_el('path', {
+                d: `M${dx-6},${dy} Q${dx},${dy-2} ${dx+6},${dy}`,
+                fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.4, 'stroke-opacity': 0.2,
+            }));
         }
     }
 }
 
-// ── Connected Swamp ──
-function _drawConnectedSwamp(g, cluster) {
-    // Water wash under region
-    if (cluster.length >= 2) {
-        g.appendChild(_el('path', { d: _hullPath(cluster, 18, cluster[0].col * 333),
-            fill: '#1a2a18', 'fill-opacity': 0.12, filter: 'url(#terrain-soft)' }));
-    }
+// ── Swamp — Wavy lines + reeds ──
+function _drawSwamp(g, cluster) {
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        g.appendChild(_el('path', { d: _organicBlob(h.x, h.y, 22, 14, seed+77, 9),
-            fill: '#1a2a18', 'fill-opacity': 0.4, stroke: '#2a3a1a', 'stroke-width': 0.5 }));
+        // Horizontal wavy water lines
         for (let i = 0; i < 6; i++) {
-            const wy = h.y-8+i*3.5, wj = (srand(seed+i*7)-0.5)*5;
-            g.appendChild(_el('path', { d: `M${h.x-16+wj},${wy} Q${h.x+wj},${wy-2} ${h.x+16+wj},${wy}`,
-                fill: 'none', stroke: '#3a5a2a', 'stroke-width': 0.5, 'stroke-opacity': 0.45 }));
+            const wy = h.y - 8 + i * 3.5;
+            const wj = (srand(seed+i*7)-0.5)*5;
+            g.appendChild(_el('path', {
+                d: `M${h.x-16+wj},${wy} Q${h.x+wj},${wy-2} ${h.x+16+wj},${wy}`,
+                fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.35,
+            }));
         }
+        // Reed/cattail stems
         for (let i = 0; i < 5; i++) {
-            const rx = h.x+(i<3?-12-i*4:8+(i-3)*5), ry = h.y-2+(srand(seed+i*7+20)-0.5)*7;
-            g.appendChild(_el('line', { x1: rx, y1: ry+6, x2: rx-0.5, y2: ry-12, stroke: '#4a6a2a', 'stroke-width': 0.7 }));
-            g.appendChild(_el('ellipse', { cx: rx-0.5, cy: ry-13, rx: 1.5, ry: 3, fill: '#5a4a20' }));
-        }
-        if (srand(seed+99) > 0.4) {
-            const dx = h.x+16, dy = h.y-5;
-            g.appendChild(_el('line', { x1: dx, y1: dy+7, x2: dx, y2: dy-10, stroke: '#3a3020', 'stroke-width': 1.2, 'stroke-linecap': 'round' }));
-            g.appendChild(_el('line', { x1: dx, y1: dy-6, x2: dx+6, y2: dy-10, stroke: '#3a3020', 'stroke-width': 0.6 }));
+            const rx = h.x + (i < 3 ? -12-i*4 : 8+(i-3)*5);
+            const ry = h.y - 2 + (srand(seed+i*7+20)-0.5)*7;
+            g.appendChild(_el('line', { x1: rx, y1: ry+6, x2: rx-0.5, y2: ry-10,
+                stroke: INK_DARK, 'stroke-width': 0.6 }));
+            // Cattail head (small oval)
+            g.appendChild(_el('ellipse', { cx: rx-0.5, cy: ry-11, rx: 1.2, ry: 2.5,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.4 }));
         }
     }
 }
 
-// ── Connected Desert ──
-function _drawConnectedDesert(g, cluster) {
+// ── Desert — Crescent dune marks + stipple ──
+function _drawDesert(g, cluster) {
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        for (let d = 0; d < 4; d++) {
-            const dy = -8+d*5, dOx = (srand(seed+d*17)-0.5)*10;
-            g.appendChild(_el('path', { d: `M${h.x-26+dOx},${h.y+dy+5} Q${h.x-8+dOx},${h.y+dy-8} ${h.x+2+dOx},${h.y+dy+3} Q${h.x+16+dOx},${h.y+dy-5} ${h.x+26+dOx},${h.y+dy+5}`,
-                fill: '#7a6a38', 'fill-opacity': 0.1+d*0.06, stroke: '#6a5a2a', 'stroke-width': 0.45 }));
+        // Crescent dune curves
+        for (let d = 0; d < 3; d++) {
+            const dy = -6 + d * 5, dOx = (srand(seed+d*17)-0.5)*8;
+            g.appendChild(_el('path', {
+                d: `M${h.x-18+dOx},${h.y+dy+3} Q${h.x+dOx},${h.y+dy-5} ${h.x+18+dOx},${h.y+dy+3}`,
+                fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.3,
+            }));
         }
-        for (let i = 0; i < 7; i++) {
-            const wy = h.y-4+i*3, wx = h.x-14+(srand(seed+i*9)-0.5)*8;
-            g.appendChild(_el('line', { x1: wx, y1: wy, x2: wx+12+srand(seed+i*9+1)*8, y2: wy-0.5,
-                stroke: '#9a8a4a', 'stroke-width': 0.35, 'stroke-dasharray': '2 3', 'stroke-opacity': 0.35 }));
-        }
-        for (let i = 0; i < 12; i++) {
-            g.appendChild(_el('circle', { cx: h.x+(srand(seed+i*5)-0.5)*32, cy: h.y+(srand(seed+i*5+3)-0.5)*16,
-                r: 0.45, fill: '#9a8a5a', 'fill-opacity': 0.3 }));
+        // Sand stipple dots
+        for (let i = 0; i < 10; i++) {
+            const sx = h.x + (srand(seed+i*5)-0.5)*30;
+            const sy = h.y + (srand(seed+i*5+3)-0.5)*16;
+            g.appendChild(_el('circle', { cx: sx, cy: sy, r: 0.4,
+                fill: INK, 'fill-opacity': 0.15 }));
         }
     }
 }
 
-// ── Connected Volcanic ──
-function _drawConnectedVolcanic(g, cluster) {
+// ── Volcanic — Mountain peak + crater + smoke wisps ──
+function _drawVolcanic(g, cluster) {
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
         const jx = (srand(seed)-0.5)*4;
-        g.appendChild(_el('path', { d: `M${h.x-20+jx},${h.y+8} Q${h.x-8+jx},${h.y-18} ${h.x+jx},${h.y-20} Q${h.x+8+jx},${h.y-18} ${h.x+20+jx},${h.y+8} Z`,
-            fill: '#3a2218', stroke: '#2a1a0a', 'stroke-width': 0.8 }));
-        for (let j = 0; j < 6; j++) { const t = 0.15+j*0.12;
-            g.appendChild(_el('line', { x1: h.x-20+jx+10*t, y1: h.y+8+(h.y-20-h.y-8)*t,
-                x2: h.x-20+jx+10*t+2, y2: h.y+8+(h.y-20-h.y-8)*t+4,
-                stroke: '#1a0a08', 'stroke-width': 0.3, 'stroke-opacity': 0.4 })); }
-        g.appendChild(_el('ellipse', { cx: h.x+jx, cy: h.y-19, rx: 7, ry: 3, fill: '#a04010', 'fill-opacity': 0.45 }));
-        g.appendChild(_el('ellipse', { cx: h.x+jx, cy: h.y-19, rx: 4, ry: 1.8, fill: '#c06020', 'fill-opacity': 0.35 }));
-        g.appendChild(_el('path', { d: `M${h.x+jx},${h.y-16} Q${h.x-3+jx},${h.y-6} ${h.x-8+jx},${h.y-1}`,
-            fill: 'none', stroke: '#a04010', 'stroke-width': 0.6, 'stroke-opacity': 0.5 }));
-        g.appendChild(_el('path', { d: `M${h.x+jx},${h.y-16} Q${h.x+4+jx},${h.y-4} ${h.x+7+jx},${h.y+2}`,
-            fill: 'none', stroke: '#903810', 'stroke-width': 0.5, 'stroke-opacity': 0.4 }));
+        const ht = 20 + srand(seed+1)*10, w = 14 + srand(seed+2)*6;
+        const px = h.x+jx, by = h.y+6, ty = by - ht;
+        // Slopes
+        g.appendChild(_el('line', { x1: px-w, y1: by, x2: px-2, y2: ty,
+            stroke: INK_DARK, 'stroke-width': 0.9, 'stroke-linecap': 'round' }));
+        g.appendChild(_el('line', { x1: px+2, y1: ty, x2: px+w, y2: by,
+            stroke: INK_DARK, 'stroke-width': 0.7, 'stroke-linecap': 'round' }));
+        // Crater opening (horizontal line at top)
+        g.appendChild(_el('line', { x1: px-3, y1: ty+1, x2: px+3, y2: ty+1,
+            stroke: INK_DARK, 'stroke-width': 0.8 }));
+        // Left hatching
+        for (let j = 0; j < 4; j++) {
+            const t = 0.2 + j * 0.18;
+            const hx = (px-w) + (px-2 - (px-w)) * t;
+            const hy = by + (ty - by) * t;
+            g.appendChild(_el('line', { x1: hx, y1: hy, x2: hx+2, y2: hy+ht*0.08,
+                stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.4 }));
+        }
+        // Smoke wisps (wavy lines rising from crater)
         for (let i = 0; i < 3; i++) {
-            const sx = h.x+jx+(srand(seed+i*3)-0.5)*6, sh = 7+i*6;
-            g.appendChild(_el('path', { d: `M${sx},${h.y-20} Q${sx+4+i*2},${h.y-20-sh} ${sx-3-i},${h.y-20-sh-5}`,
-                fill: 'none', stroke: '#5a4a38', 'stroke-width': 0.5+i*0.15, 'stroke-opacity': 0.18-i*0.03 }));
+            const sx = px + (srand(seed+i*3)-0.5)*4;
+            const sh = 8 + i * 5;
+            g.appendChild(_el('path', {
+                d: `M${sx},${ty} Q${sx+3+i*2},${ty-sh*0.5} ${sx-2-i},${ty-sh}`,
+                fill: 'none', stroke: INK, 'stroke-width': 0.4, 'stroke-opacity': 0.15 - i*0.03,
+            }));
         }
     }
 }
 
-// ── Connected Cave ──
-function _drawConnectedCave(g, cluster) {
+// ── Cave — Stipple clusters + arch entrance ──
+function _drawCave(g, cluster) {
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        for (let i = 0; i < 6; i++) {
-            const rx = h.x+(srand(seed+i*7)-0.5)*28, ry = h.y+(srand(seed+i*7+3)-0.5)*14;
-            const rw = 5+srand(seed+i*7+1)*6, rh = 3+srand(seed+i*7+2)*4;
-            g.appendChild(_el('path', { d: _organicBlob(rx, ry, rw, rh, seed+i*30, 6),
-                fill: '#3a3430', stroke: '#2a2420', 'stroke-width': 0.6 }));
-            g.appendChild(_el('line', { x1: rx-rw*0.3, y1: ry-rh*0.2, x2: rx+rw*0.4, y2: ry+rh*0.3,
-                stroke: '#1a1810', 'stroke-width': 0.35, 'stroke-opacity': 0.5 }));
+        // Rock stipple clusters
+        for (let i = 0; i < 8; i++) {
+            const rx = h.x + (srand(seed+i*7)-0.5)*28;
+            const ry = h.y + (srand(seed+i*7+3)-0.5)*14;
+            g.appendChild(_el('circle', { cx: rx, cy: ry,
+                r: 0.5 + srand(seed+i*7+1)*0.6,
+                fill: INK_DARK, 'fill-opacity': 0.25 }));
         }
+        // Cave entrance arch (stroke only)
         if (srand(seed+55) > 0.3) {
-            g.appendChild(_el('path', { d: `M${h.x-8},${h.y+7} Q${h.x-8},${h.y-5} ${h.x},${h.y-6} Q${h.x+8},${h.y-5} ${h.x+8},${h.y+7}`,
-                fill: '#1a1810', 'fill-opacity': 0.45, stroke: '#3a3028', 'stroke-width': 0.6 }));
+            g.appendChild(_el('path', {
+                d: `M${h.x-7},${h.y+6} Q${h.x-7},${h.y-5} ${h.x},${h.y-6} Q${h.x+7},${h.y-5} ${h.x+7},${h.y+6}`,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.7,
+            }));
+            // Dark interior stipple
+            for (let j = 0; j < 5; j++) {
+                const dx = h.x + (srand(seed+j*3+80)-0.5)*8;
+                const dy = h.y + (srand(seed+j*3+81)-0.5)*6;
+                g.appendChild(_el('circle', { cx: dx, cy: dy, r: 0.4,
+                    fill: INK_DARK, 'fill-opacity': 0.3 }));
+            }
         }
     }
 }
 
-// ── Connected Graveyard ──
-function _drawConnectedGraveyard(g, cluster) {
+// ── Graveyard — Tombstones + crosses (stroke only) ──
+function _drawGraveyard(g, cluster) {
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
         for (let i = 0; i < 5; i++) {
-            const tx = h.x+(srand(seed+i*9)-0.5)*28, ty = h.y+(srand(seed+i*9+3)-0.5)*12;
-            const th = 7+srand(seed+i*9+1)*5, tw = 3+srand(seed+i*9+2)*2.5;
+            const tx = h.x + (srand(seed+i*9)-0.5)*28;
+            const ty = h.y + (srand(seed+i*9+3)-0.5)*12;
+            const th = 7 + srand(seed+i*9+1)*5;
+            const tw = 3 + srand(seed+i*9+2)*2;
             const tilt = (srand(seed+i*9+5)-0.5)*10;
             if (i < 3) {
-                g.appendChild(_el('path', { d: `M${tx-tw},${ty+3} L${tx-tw},${ty-th+2} Q${tx},${ty-th-3} ${tx+tw},${ty-th+2} L${tx+tw},${ty+3} Z`,
-                    fill: '#4a4038', stroke: '#3a3028', 'stroke-width': 0.5,
-                    transform: `rotate(${tilt}, ${tx}, ${ty})` }));
+                // Tombstone (outline only)
+                g.appendChild(_el('path', {
+                    d: `M${tx-tw},${ty+3} L${tx-tw},${ty-th+2} Q${tx},${ty-th-3} ${tx+tw},${ty-th+2} L${tx+tw},${ty+3}`,
+                    fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6,
+                    transform: `rotate(${tilt}, ${tx}, ${ty})`,
+                }));
             } else {
-                g.appendChild(_el('line', { x1: tx, y1: ty+3, x2: tx, y2: ty-th-1, stroke: '#4a4038', 'stroke-width': 1.3,
+                // Cross
+                g.appendChild(_el('line', { x1: tx, y1: ty+3, x2: tx, y2: ty-th-1,
+                    stroke: INK_DARK, 'stroke-width': 1.0,
                     transform: `rotate(${tilt}, ${tx}, ${ty})` }));
-                g.appendChild(_el('line', { x1: tx-tw-1, y1: ty-th*0.55, x2: tx+tw+1, y2: ty-th*0.55, stroke: '#4a4038', 'stroke-width': 1.1,
+                g.appendChild(_el('line', { x1: tx-tw-1, y1: ty-th*0.55, x2: tx+tw+1, y2: ty-th*0.55,
+                    stroke: INK_DARK, 'stroke-width': 0.8,
                     transform: `rotate(${tilt}, ${tx}, ${ty})` }));
             }
         }
-        // Dead tree
-        g.appendChild(_el('line', { x1: h.x+12, y1: h.y+3, x2: h.x+12, y2: h.y-16, stroke: '#3a2820', 'stroke-width': 1.2, 'stroke-linecap': 'round' }));
-        g.appendChild(_el('line', { x1: h.x+12, y1: h.y-12, x2: h.x+19, y2: h.y-16, stroke: '#3a2820', 'stroke-width': 0.6 }));
-        g.appendChild(_el('line', { x1: h.x+12, y1: h.y-9, x2: h.x+6, y2: h.y-14, stroke: '#3a2820', 'stroke-width': 0.5 }));
-        // Mist
-        for (let i = 0; i < 2; i++) {
-            g.appendChild(_el('ellipse', { cx: h.x+(srand(seed+200+i)-0.5)*22, cy: h.y+5+srand(seed+201+i)*3,
-                rx: 8, ry: 2, fill: '#5a5a5a', 'fill-opacity': 0.06 }));
-        }
+        // Dead tree (simple 3 strokes)
+        g.appendChild(_el('line', { x1: h.x+12, y1: h.y+3, x2: h.x+12, y2: h.y-14,
+            stroke: INK_DARK, 'stroke-width': 0.9, 'stroke-linecap': 'round' }));
+        g.appendChild(_el('line', { x1: h.x+12, y1: h.y-11, x2: h.x+18, y2: h.y-15,
+            stroke: INK_DARK, 'stroke-width': 0.5 }));
+        g.appendChild(_el('line', { x1: h.x+12, y1: h.y-8, x2: h.x+7, y2: h.y-12,
+            stroke: INK_DARK, 'stroke-width': 0.4 }));
     }
 }
 
-// ── Connected Grassland ──
-function _drawConnectedGrassland(g, cluster) {
+// ── Grassland — Curved grass blades ──
+function _drawGrassland(g, cluster) {
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        for (let i = 0; i < 10; i++) {
-            const gx = h.x+(srand(seed+i*5)-0.5)*34, gy = h.y+(srand(seed+i*5+2)-0.5)*18;
-            for (let b = 0; b < 4; b++) {
-                const angle = -25+b*16+(srand(seed+i*5+b)-0.5)*12;
-                const bh = 5+srand(seed+i*5+b+10)*5;
-                const rad = angle*Math.PI/180;
-                g.appendChild(_el('path', { d: `M${gx},${gy} Q${gx+Math.sin(rad)*bh*0.5},${gy-bh*0.7} ${gx+Math.sin(rad)*bh},${gy-Math.cos(rad)*bh}`,
-                    fill: 'none', stroke: '#5a7a3a', 'stroke-width': 0.55, 'stroke-opacity': 0.45, 'stroke-linecap': 'round' }));
-            }
-        }
-        for (let i = 0; i < 4; i++) {
-            if (srand(seed+90+i) > 0.35) {
-                const fx = h.x+(srand(seed+70+i)-0.5)*26, fy = h.y+(srand(seed+71+i)-0.5)*14;
-                g.appendChild(_el('circle', { cx: fx, cy: fy, r: 1.2,
-                    fill: ['#8a6a8a','#8a8a5a','#aa7a5a','#7a8a6a','#aa8a6a'][i%5], 'fill-opacity': 0.35 }));
+        for (let i = 0; i < 8; i++) {
+            const gx = h.x + (srand(seed+i*5)-0.5)*32;
+            const gy = h.y + (srand(seed+i*5+2)-0.5)*16;
+            for (let b = 0; b < 3; b++) {
+                const angle = -20 + b * 18 + (srand(seed+i*5+b)-0.5)*12;
+                const bh = 4 + srand(seed+i*5+b+10)*4;
+                const rad = angle * Math.PI / 180;
+                g.appendChild(_el('path', {
+                    d: `M${gx},${gy} Q${gx+Math.sin(rad)*bh*0.5},${gy-bh*0.7} ${gx+Math.sin(rad)*bh},${gy-Math.cos(rad)*bh}`,
+                    fill: 'none', stroke: INK, 'stroke-width': 0.45,
+                    'stroke-opacity': 0.35, 'stroke-linecap': 'round',
+                }));
             }
         }
     }

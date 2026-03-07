@@ -1,6 +1,6 @@
 // ===============================================================
 // NAVIGATE MAP — Orchestrator, defs, ocean, landmass, pan/zoom
-// Medieval cartography: WoW + real portolan chart style
+// Hand-drawn medieval cartography: ink on dark parchment
 // ===============================================================
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -10,31 +10,28 @@ function srand(seed) {
     return x - Math.floor(x);
 }
 
+// Ink color constants (dark parchment palette)
+const INK = '#8a6a3a';        // Sepia ink (main strokes)
+const INK_DARK = '#3a2810';   // Dark brown ink (hatching, details)
+const INK_LIGHT = '#a08050';  // Light sepia (subtle marks)
+const PARCHMENT = '#5a4a38';  // Land parchment
+const OCEAN_BG = '#4a3a2a';   // Ocean (darker than land)
+
 // Landmass outline (organic continent shape enclosing all locations)
-// Defined as pixel coords, clockwise from north cape
 const LANDMASS_POINTS = (() => {
     const pts = [
-        // North cape (frozen waste)
         [240, 25], [310, 15], [380, 22],
-        // NE coast (mountain region)
         [440, 45], [520, 70], [570, 110], [600, 160],
-        // East coast
         [620, 210], [635, 270], [640, 320], [630, 370],
-        // SE coast (volcanic)
         [635, 410], [640, 460], [630, 510], [625, 560],
         [610, 600], [580, 640], [540, 660],
-        // South coast
         [480, 670], [420, 680], [360, 675], [300, 670],
         [240, 660], [190, 640],
-        // SW coast
         [140, 610], [110, 560], [90, 510],
-        // West coast
         [80, 450], [75, 400], [70, 350], [75, 300],
         [85, 250], [95, 200],
-        // NW coast (forest)
         [110, 150], [130, 100], [160, 60], [200, 35],
     ];
-    // Add organic wobble to each point
     return pts.map(([x, y], i) => {
         const wx = (srand(i * 17 + 3) - 0.5) * 12;
         const wy = (srand(i * 23 + 7) - 0.5) * 10;
@@ -49,7 +46,6 @@ function _landmassPath() {
         const prev = p[(i - 1 + p.length) % p.length];
         const curr = p[i];
         const next = p[(i + 1) % p.length];
-        // Smooth cubic bezier through points
         const cpx1 = prev[0] + (curr[0] - p[(i - 2 + p.length) % p.length][0]) * 0.2;
         const cpy1 = prev[1] + (curr[1] - p[(i - 2 + p.length) % p.length][1]) * 0.2;
         const cpx2 = curr[0] - (next[0] - prev[0]) * 0.2;
@@ -60,7 +56,6 @@ function _landmassPath() {
     return d;
 }
 
-// Point-in-polygon test (ray casting) for landmass shape
 function _pointInLandmass(px, py) {
     const pts = LANDMASS_POINTS;
     let inside = false;
@@ -72,11 +67,9 @@ function _pointInLandmass(px, py) {
     return inside;
 }
 
-// River paths (pixel coordinates, winding across the landmass)
+// River paths
 const RIVER_PATHS = [
-    // North River: snow region → forest → central plains
     { pts: [[300,55],[275,105],[245,165],[215,240],[225,300],[245,350],[265,385]], w: 1.8 },
-    // East River: mountains → swamp → south
     { pts: [[475,210],[468,270],[462,330],[468,385],[478,430],[488,465]], w: 1.4 },
 ];
 
@@ -84,17 +77,44 @@ function _renderRivers(svg) {
     const rG = _el('g', { class: 'rivers', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
     for (const river of RIVER_PATHS) {
         const p = river.pts;
+        // Build base path
         let d = `M${p[0][0]},${p[0][1]}`;
         for (let i = 1; i < p.length; i++) {
             const wobX = (srand(i * 37 + p[0][0]) - 0.5) * 8;
             const wobY = (srand(i * 41 + p[0][1]) - 0.5) * 6;
             d += ` Q${(p[i-1][0]+p[i][0])/2+wobX},${(p[i-1][1]+p[i][1])/2+wobY} ${p[i][0]},${p[i][1]}`;
         }
-        rG.appendChild(_el('path', { d, fill: 'none', stroke: '#2a4a5a',
-            'stroke-width': river.w, 'stroke-opacity': 0.3, 'stroke-linecap': 'round',
+        // Center line
+        rG.appendChild(_el('path', { d, fill: 'none', stroke: INK,
+            'stroke-width': river.w * 0.5, 'stroke-opacity': 0.4, 'stroke-linecap': 'round',
             filter: 'url(#ink-wobble)' }));
-        rG.appendChild(_el('path', { d, fill: 'none', stroke: '#4a7080',
-            'stroke-width': river.w * 0.35, 'stroke-opacity': 0.12, 'stroke-linecap': 'round' }));
+        // Two parallel side lines (medieval river convention)
+        for (const side of [-1, 1]) {
+            let dSide = '';
+            for (let i = 0; i < p.length; i++) {
+                const prev = i > 0 ? p[i-1] : p[0];
+                const curr = p[i];
+                const dx = i < p.length-1 ? p[i+1][0] - curr[0] : curr[0] - prev[0];
+                const dy = i < p.length-1 ? p[i+1][1] - curr[1] : curr[1] - prev[1];
+                const len = Math.sqrt(dx*dx + dy*dy) || 1;
+                const nx = -dy/len * side * 2.0;
+                const ny = dx/len * side * 2.0;
+                if (i === 0) dSide = `M${curr[0]+nx},${curr[1]+ny}`;
+                else {
+                    const wobX = (srand(i * 37 + p[0][0] + side*100) - 0.5) * 6;
+                    const wobY = (srand(i * 41 + p[0][1] + side*100) - 0.5) * 5;
+                    const mx = (prev[0]+curr[0])/2 + nx + wobX;
+                    const my = (prev[1]+curr[1])/2 + ny + wobY;
+                    dSide += ` Q${mx},${my} ${curr[0]+nx},${curr[1]+ny}`;
+                }
+            }
+            rG.appendChild(_el('path', { d: dSide, fill: 'none', stroke: INK,
+                'stroke-width': 0.35, 'stroke-opacity': 0.25, 'stroke-linecap': 'round' }));
+        }
+        // Source tick marks
+        const s0 = p[0];
+        rG.appendChild(_el('line', { x1: s0[0]-3, y1: s0[1], x2: s0[0]+3, y2: s0[1],
+            stroke: INK, 'stroke-width': 0.4, 'stroke-opacity': 0.3 }));
     }
     svg.appendChild(rG);
 }
@@ -137,97 +157,48 @@ function renderMap() {
     _buildAllDefs(defs);
     svg.appendChild(defs);
 
-    _renderOcean(svg);              // L0: Ocean water (fills ALL space)
-    _renderLandmass(svg);           // L1: Continental landmass
-    _renderCoastline(svg);          // L2: Ink coastline hatching
-    _renderAgingEffects(svg);       // L3: Foxing, creases, stains
-    renderOrnamentBorder(svg);      // L4: Manuscript border
-    renderGroundCover(svg);         // L5: Ground texture everywhere
-    _renderRivers(svg);             // L5.5: Rivers
-    renderTerrainRegions(svg, fogState);  // L6: Painted biome zones
-    renderTerrainDetails(svg, fogState);  // L7: Dense terrain illustrations
+    _renderOcean(svg);
+    _renderLandmass(svg);
+    _renderCoastline(svg);
+    _renderAgingEffects(svg);
+    renderOrnamentBorder(svg);
+    renderGroundCover(svg);
+    _renderRivers(svg);
+    renderTerrainRegions(svg, fogState);
+    renderTerrainDetails(svg, fogState);
     const roadG = _el('g', { class: 'roads-layer' });
     renderRoads(roadG, fogState);
-    svg.appendChild(roadG);         // L7: Roads
+    svg.appendChild(roadG);
     const locG = _el('g', { class: 'locations-layer' });
     renderLocationMarkers(locG, fogState);
-    svg.appendChild(locG);          // L8: Location markers
-    renderPlayerBanner(svg);        // L9: Player marker
-    renderFogWisps(svg, fogState);  // L10: Fog
-    renderCartographyDecor(svg, fogState); // L11: Decorations
-    renderCompassRose(svg);         // L12: Compass
+    svg.appendChild(locG);
+    renderPlayerBanner(svg);
+    renderFogWisps(svg, fogState);
+    renderCartographyDecor(svg, fogState);
+    renderCompassRose(svg);
     setupPanZoom();
 }
 
 // ===============================================================
-// SVG DEFS
+// SVG DEFS — Minimal set for hand-drawn ink style
 // ===============================================================
 
 function _buildAllDefs(defs) {
-    // Ocean gradient (dark teal-blue)
-    const og = _el('radialGradient', { id: 'ocean-grad', cx: '50%', cy: '50%', r: '60%' });
-    og.appendChild(_el('stop', { offset: '0%', 'stop-color': '#1a2a2a' }));
-    og.appendChild(_el('stop', { offset: '100%', 'stop-color': '#0e1a1a' }));
-    defs.appendChild(og);
-
-    // Land parchment gradient
-    const lg = _el('radialGradient', { id: 'land-grad', cx: '50%', cy: '45%', r: '65%' });
-    lg.appendChild(_el('stop', { offset: '0%', 'stop-color': '#4a4030' }));
-    lg.appendChild(_el('stop', { offset: '70%', 'stop-color': '#3e3428' }));
-    lg.appendChild(_el('stop', { offset: '100%', 'stop-color': '#342a20' }));
-    defs.appendChild(lg);
-
-    // Gold marker
-    const gm = _el('radialGradient', { id: 'gold-marker', cx: '35%', cy: '35%', r: '65%' });
-    gm.appendChild(_el('stop', { offset: '0%', 'stop-color': '#f0d070' }));
-    gm.appendChild(_el('stop', { offset: '100%', 'stop-color': '#8a6a2a' }));
-    defs.appendChild(gm);
-
-    // Current glow
-    const cg = _el('radialGradient', { id: 'current-glow', cx: '50%', cy: '50%', r: '50%' });
-    cg.appendChild(_el('stop', { offset: '0%', 'stop-color': 'rgba(196,149,58,0.6)' }));
-    cg.appendChild(_el('stop', { offset: '100%', 'stop-color': 'rgba(196,149,58,0)' }));
-    defs.appendChild(cg);
-
-    // Parchment grain
-    const pf = _el('filter', { id: 'parchment-grain', x: '0', y: '0', width: '100%', height: '100%' });
-    pf.appendChild(_el('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.8', numOctaves: '5', seed: '42', result: 'g' }));
-    pf.appendChild(_el('feColorMatrix', { in: 'g', type: 'saturate', values: '0', result: 'gg' }));
-    pf.appendChild(_el('feBlend', { in: 'SourceGraphic', in2: 'gg', mode: 'multiply' }));
-    defs.appendChild(pf);
-
-    // Ocean texture
-    const of2 = _el('filter', { id: 'ocean-tex', x: '0', y: '0', width: '100%', height: '100%' });
-    of2.appendChild(_el('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.5', numOctaves: '3', seed: '88', result: 'ot' }));
-    of2.appendChild(_el('feColorMatrix', { in: 'ot', type: 'saturate', values: '0', result: 'otg' }));
-    of2.appendChild(_el('feBlend', { in: 'SourceGraphic', in2: 'otg', mode: 'multiply' }));
-    defs.appendChild(of2);
-
-    // Fog blur
+    // Fog blur (functional — keep for fog of war)
     const fb = _el('filter', { id: 'fog-blur', x: '-50%', y: '-50%', width: '200%', height: '200%' });
     fb.appendChild(_el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '3' }));
     defs.appendChild(fb);
 
-    // Ink wobble
+    // Ink wobble — ESSENTIAL for hand-drawn effect (increased scale)
     const iw = _el('filter', { id: 'ink-wobble', x: '-5%', y: '-5%', width: '110%', height: '110%' });
     iw.appendChild(_el('feTurbulence', { type: 'turbulence', baseFrequency: '0.02', numOctaves: '2', seed: '5', result: 'w' }));
-    iw.appendChild(_el('feDisplacementMap', { in: 'SourceGraphic', in2: 'w', scale: '3', xChannelSelector: 'R', yChannelSelector: 'G' }));
+    iw.appendChild(_el('feDisplacementMap', { in: 'SourceGraphic', in2: 'w', scale: '4', xChannelSelector: 'R', yChannelSelector: 'G' }));
     defs.appendChild(iw);
 
-    // Marker shadow
-    const ms = _el('filter', { id: 'marker-shadow', x: '-20%', y: '-20%', width: '140%', height: '140%' });
-    ms.appendChild(_el('feDropShadow', { dx: '1', dy: '2', stdDeviation: '2', 'flood-color': '#1a1510', 'flood-opacity': '0.6' }));
-    defs.appendChild(ms);
-
-    // Terrain soft blur
-    const sg = _el('filter', { id: 'terrain-soft', x: '-15%', y: '-15%', width: '130%', height: '130%' });
-    sg.appendChild(_el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '10' }));
-    defs.appendChild(sg);
-
-    // Wave pattern for ocean
-    const wp = _el('pattern', { id: 'ocean-waves', width: '30', height: '12', patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(-5)' });
-    wp.appendChild(_el('path', { d: 'M0,6 Q7.5,2 15,6 Q22.5,10 30,6', fill: 'none', stroke: '#2a4040', 'stroke-width': '0.6', 'stroke-opacity': '0.35' }));
-    wp.appendChild(_el('path', { d: 'M0,10 Q7.5,6 15,10 Q22.5,14 30,10', fill: 'none', stroke: '#2a4040', 'stroke-width': '0.3', 'stroke-opacity': '0.2' }));
+    // Ocean wave pattern (hand-drawn parallel lines)
+    const wp = _el('pattern', { id: 'ocean-waves', width: '40', height: '14', patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(-3)' });
+    wp.appendChild(_el('path', { d: 'M0,7 Q10,3 20,7 Q30,11 40,7', fill: 'none', stroke: INK, 'stroke-width': '0.5', 'stroke-opacity': '0.12' }));
+    wp.appendChild(_el('path', { d: 'M0,12 Q10,8 20,12 Q30,16 40,12', fill: 'none', stroke: INK, 'stroke-width': '0.3', 'stroke-opacity': '0.07' }));
     defs.appendChild(wp);
 
     // Landmass clip path
@@ -235,62 +206,62 @@ function _buildAllDefs(defs) {
 }
 
 // ===============================================================
-// OCEAN (fills entire background with water)
+// OCEAN — Dark parchment with ink wave lines
 // ===============================================================
 
 function _renderOcean(svg) {
-    // Dark ocean base
-    svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: 'url(#ocean-grad)' }));
-    // Ocean noise texture
-    svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: '#1a2828', opacity: '0.12', filter: 'url(#ocean-tex)' }));
+    // Flat dark parchment base
+    svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: OCEAN_BG }));
     // Wave pattern overlay
     svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: 'url(#ocean-waves)' }));
-    // Scattered wave crests in open water
-    const wG = _el('g', { 'pointer-events': 'none', opacity: '0.15' });
-    for (let i = 0; i < 20; i++) {
+    // Scattered hand-drawn wave crests
+    const wG = _el('g', { 'pointer-events': 'none', opacity: '0.14' });
+    for (let i = 0; i < 25; i++) {
         const wx = srand(i * 37 + 5) * SVG_W;
         const wy = srand(i * 41 + 11) * SVG_H;
-        const wl = 8 + srand(i * 53) * 12;
+        if (_pointInLandmass(wx, wy)) continue; // Only in ocean
+        const wl = 10 + srand(i * 53) * 15;
+        const wobble = (srand(i * 61) - 0.5) * 3;
         wG.appendChild(_el('path', {
-            d: `M${wx},${wy} Q${wx + wl * 0.5},${wy - 2} ${wx + wl},${wy}`,
-            fill: 'none', stroke: '#4a6a6a', 'stroke-width': 0.5,
+            d: `M${wx},${wy} Q${wx + wl * 0.5},${wy - 2 + wobble} ${wx + wl},${wy}`,
+            fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-linecap': 'round',
         }));
     }
     svg.appendChild(wG);
 }
 
 // ===============================================================
-// LANDMASS (continental shape with parchment fill)
+// LANDMASS — Flat parchment, no gradient
 // ===============================================================
 
 function _renderLandmass(svg) {
     const path = _landmassPath();
-    // Land base color
-    svg.appendChild(_el('path', { d: path, fill: 'url(#land-grad)', stroke: 'none' }));
-    // Parchment grain on land
-    const grainG = _el('g', { 'clip-path': 'url(#land-clip)' });
-    grainG.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: '#3a3028', opacity: '0.15', filter: 'url(#parchment-grain)' }));
-    svg.appendChild(grainG);
-    // Inner land vignette (lighter center)
-    const lvig = _el('radialGradient', { id: '_lvig', cx: '45%', cy: '50%', r: '50%' });
-    lvig.appendChild(_el('stop', { offset: '0%', 'stop-color': 'rgba(74,64,48,0.15)' }));
-    lvig.appendChild(_el('stop', { offset: '100%', 'stop-color': 'rgba(0,0,0,0)' }));
-    svg.querySelector('defs').appendChild(lvig);
-    svg.appendChild(_el('path', { d: path, fill: 'url(#_lvig)', stroke: 'none' }));
+    // Flat parchment fill
+    svg.appendChild(_el('path', { d: path, fill: PARCHMENT, stroke: 'none' }));
+    // Subtle stipple dots for texture
+    const stG = _el('g', { 'clip-path': 'url(#land-clip)', 'pointer-events': 'none' });
+    for (let i = 0; i < 80; i++) {
+        const dx = srand(i * 73 + 11) * SVG_W;
+        const dy = srand(i * 79 + 17) * SVG_H;
+        if (!_pointInLandmass(dx, dy)) continue;
+        stG.appendChild(_el('circle', {
+            cx: dx, cy: dy, r: 0.6 + srand(i * 83) * 0.5,
+            fill: INK_DARK, 'fill-opacity': 0.04 + srand(i * 89) * 0.04,
+        }));
+    }
+    svg.appendChild(stG);
 }
 
 // ===============================================================
-// COASTLINE (ink hatching along landmass edge)
+// COASTLINE — Dense ink hatching (enhanced)
 // ===============================================================
 
 function _renderCoastline(svg) {
     const path = _landmassPath();
     const cG = _el('g', { class: 'coastline', 'pointer-events': 'none' });
-    // Main coastline ink
-    cG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#4a3420', 'stroke-width': 2.0, 'stroke-opacity': 0.5, filter: 'url(#ink-wobble)' }));
-    // Inner shadow line
-    cG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#3a2a18', 'stroke-width': 0.8, 'stroke-opacity': 0.25, 'stroke-dasharray': '4 3' }));
-    // Shore hatching (short perpendicular lines along coast — simplified)
+    // Main coastline ink stroke
+    cG.appendChild(_el('path', { d: path, fill: 'none', stroke: INK_DARK, 'stroke-width': 2.5, 'stroke-opacity': 0.65, filter: 'url(#ink-wobble)' }));
+    // Dense shore hatching (8 lines per segment, closer to coast)
     const p = LANDMASS_POINTS;
     for (let i = 0; i < p.length; i++) {
         const curr = p[i];
@@ -299,14 +270,25 @@ function _renderCoastline(svg) {
         const len = Math.sqrt(dx * dx + dy * dy);
         if (len < 1) continue;
         const nx = -dy / len, ny = dx / len;
-        // Dense shore hatching (5-6 lines per segment)
-        for (let j = 0; j < 5; j++) {
-            const t = 0.1 + j * 0.18;
+        // Primary hatching (close to coast, outward into ocean)
+        for (let j = 0; j < 8; j++) {
+            const t = 0.06 + j * 0.12;
             const hx = curr[0] + dx * t, hy = curr[1] + dy * t;
-            const hl = 3 + srand(i * 100 + j) * 7;
+            const hl = 4 + srand(i * 100 + j) * 8;
             cG.appendChild(_el('line', {
                 x1: hx, y1: hy, x2: hx - nx * hl, y2: hy - ny * hl,
-                stroke: '#4a3420', 'stroke-width': 0.35, 'stroke-opacity': 0.25 + srand(i * 50 + j) * 0.1,
+                stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.25 + srand(i * 50 + j) * 0.12,
+            }));
+        }
+        // Secondary hatching (further from coast, shorter/thinner)
+        for (let j = 0; j < 4; j++) {
+            const t = 0.1 + j * 0.22;
+            const hx = curr[0] + dx * t, hy = curr[1] + dy * t;
+            const hl = 7 + srand(i * 120 + j) * 10;
+            cG.appendChild(_el('line', {
+                x1: hx - nx * (hl + 3), y1: hy - ny * (hl + 3),
+                x2: hx - nx * (hl + 3 + 3 + srand(i * 130 + j) * 3), y2: hy - ny * (hl + 3 + 3 + srand(i * 130 + j) * 3),
+                stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.15 + srand(i * 60 + j) * 0.08,
             }));
         }
     }
@@ -314,17 +296,33 @@ function _renderCoastline(svg) {
 }
 
 // ===============================================================
-// AGING EFFECTS
+// AGING EFFECTS — Stipple clusters + crease lines
 // ===============================================================
 
 function _renderAgingEffects(svg) {
     const aG = _el('g', { class: 'aging', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
+    // Stipple clusters (foxing spots)
     const spots = [[80,60,15],[650,100,12],[200,650,18],[550,550,10],[400,200,8],[120,400,14],[600,350,11],[350,680,16],[500,80,9],[700,600,13]];
     for (const [x, y, r] of spots) {
-        aG.appendChild(_el('circle', { cx: x, cy: y, r, fill: '#5a4a30', 'fill-opacity': 0.04 + srand(x * 7 + y) * 0.04, filter: 'url(#terrain-soft)' }));
+        for (let j = 0; j < 12; j++) {
+            const sx = x + (srand(x * 7 + j * 13) - 0.5) * r * 2;
+            const sy = y + (srand(y * 11 + j * 17) - 0.5) * r * 2;
+            aG.appendChild(_el('circle', {
+                cx: sx, cy: sy, r: 0.4 + srand(x * 3 + j) * 0.5,
+                fill: INK_DARK, 'fill-opacity': 0.03 + srand(x * 5 + j * 7) * 0.03,
+            }));
+        }
     }
-    aG.appendChild(_el('line', { x1: 60, y1: SVG_H * 0.35, x2: SVG_W - 60, y2: SVG_H * 0.38, stroke: '#2a2018', 'stroke-width': 0.7, 'stroke-opacity': 0.07 }));
-    aG.appendChild(_el('line', { x1: SVG_W * 0.6, y1: 40, x2: SVG_W * 0.58, y2: SVG_H - 40, stroke: '#2a2018', 'stroke-width': 0.5, 'stroke-opacity': 0.05 }));
+    // Crease lines (more pronounced, more lines)
+    const creases = [
+        [60, SVG_H * 0.35, SVG_W - 60, SVG_H * 0.38, 0.7, 0.10],
+        [SVG_W * 0.6, 40, SVG_W * 0.58, SVG_H - 40, 0.5, 0.07],
+        [100, SVG_H * 0.65, SVG_W - 100, SVG_H * 0.62, 0.4, 0.06],
+        [SVG_W * 0.3, 60, SVG_W * 0.32, SVG_H - 60, 0.35, 0.05],
+    ];
+    for (const [x1, y1, x2, y2, sw, op] of creases) {
+        aG.appendChild(_el('line', { x1, y1, x2, y2, stroke: INK_DARK, 'stroke-width': sw, 'stroke-opacity': op }));
+    }
     svg.appendChild(aG);
 }
 
