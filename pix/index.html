@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#2b2830">
+    <meta name="theme-color" content="#2a2420">
     <meta name="description" content="Pagamento PIX - Lendas de Valdoria">
     <meta property="og:title" content="PIX - Lendas de Valdoria">
     <meta property="og:description" content="QR Code para contribuicoes via PIX">
@@ -243,7 +243,7 @@
             'use strict';
 
             const tg = window.Telegram && window.Telegram.WebApp;
-            const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
+            const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2a2420';
             if (tg) {
                 tg.ready();
                 tg.expand();
@@ -298,7 +298,7 @@
 
             try {
                 var cs = getComputedStyle(document.documentElement);
-                var qrDark = cs.getPropertyValue('--v-bg').trim() || '#2b2830';
+                var qrDark = cs.getPropertyValue('--v-bg').trim() || '#2a2420';
                 var qrLight = cs.getPropertyValue('--v-parchment').trim() || '#f5f0e0';
                 new QRCode(document.getElementById('qr-container'), {
                     text: brcode,

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#2b2830">
+    <meta name="theme-color" content="#2a2420">
     <meta name="description" content="Oficina de Artesanato - Lendas de Valdoria">
     <meta property="og:title" content="Oficina de Artesanato - Lendas de Valdoria">
     <meta property="og:description" content="Fabrique itens e equipamentos no RPG medieval">
@@ -308,9 +308,10 @@
         <button class="craft-btn disabled" id="craftBtn" disabled>🔨 Selecione uma receita</button>
     </div>
 
+    <script src="../shared/fetch-utils.js"></script>
     <script>
         const tg = window.Telegram?.WebApp;
-        const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
+        const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2a2420';
 
         // Parse URL params for navigation
         const _wsParams = new URLSearchParams(window.location.search);
@@ -337,7 +338,7 @@
                 h['ngrok-skip-browser-warning'] = '1';
                 h['X-Idempotency-Key'] = crypto.randomUUID();
                 try {
-                    const r = await fetch(_wsApi + '/api/webapp/transition', {
+                    const r = await fetchT(_wsApi + '/api/webapp/transition', {
                         method: 'POST', headers: h,
                         body: JSON.stringify({ from: 'workstation', to: _wsReturn, user_id: parseInt(_wsUid), payload: {} })
                     });

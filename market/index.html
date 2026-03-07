@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#2b2830">
+    <meta name="theme-color" content="#2a2420">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title>Mercado - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -189,7 +189,7 @@
         }
 
         .shop-card {
-            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
             padding: 10px;
@@ -379,7 +379,7 @@
 
         .sell-row.selected {
             border-color: var(--v-gold);
-            background: linear-gradient(165deg, #38333f 0%, #2d2932 100%);
+            background: linear-gradient(165deg, #382a20 0%, #2a2018 100%);
         }
 
         .sell-row.no-buy {
@@ -760,6 +760,7 @@
         <div class="modal" id="modalContent"></div>
     </div>
 
+    <script src="../shared/fetch-utils.js"></script>
     <script>
         /* ═══════════════════════════════════════════════════════════
            MARKET WEBAPP — Lendas de Valdoria
@@ -767,7 +768,7 @@
 
         const tg = window.Telegram?.WebApp;
         const _vBg = getComputedStyle(document.documentElement)
-            .getPropertyValue('--v-bg').trim() || '#2b2830';
+            .getPropertyValue('--v-bg').trim() || '#2a2420';
         if (tg) {
             tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg);
             if (tg.BackButton) {
@@ -785,7 +786,7 @@
                             h['X-Idempotency-Key'] = crypto.randomUUID();
 
                             const returnTo = params.get('return') || 'game';
-                            const r = await fetch(`${apiBase}/api/webapp/transition`, {
+                            const r = await fetchT(`${apiBase}/api/webapp/transition`, {
                                 method: 'POST', headers: h,
                                 body: JSON.stringify({ from: 'market', to: returnTo, user_id: parseInt(uid), payload: {} })
                             });
@@ -1410,7 +1411,7 @@
                     const _ch = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
                     if (tg?.initData) _ch['X-Telegram-Init-Data'] = tg.initData;
                     _ch['X-Idempotency-Key'] = crypto.randomUUID();
-                    const resp = await fetch(`${_apiBase}/api/market/apply`, {
+                    const resp = await fetchT(`${_apiBase}/api/market/apply`, {
                         method: 'POST', headers: _ch,
                         body: JSON.stringify({ user_id: parseInt(_apiUid), token, ops })
                     });

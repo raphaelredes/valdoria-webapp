@@ -4,12 +4,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#2b2830">
+    <meta name="theme-color" content="#2a2420">
     <title>Evolucao - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<script src="../shared/fetch-utils.js?v=' + v + '">\/script>');
         document.write('<script src="data.js?v=' + v + '"><\/script>');
     </script>
     <style>
@@ -376,7 +377,7 @@
 
         /* ─── Compact choice cards ─── */
         .choice-card {
-            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
             border: 1px solid var(--v-border);
             border-radius: 10px;
             padding: 10px 12px;
@@ -881,7 +882,7 @@
         // ═══════════════════════════════════════════════
         // INIT
         // ═══════════════════════════════════════════════
-        const _vBg = '#2b2830';
+        const _vBg = '#2a2420';
         const tg = window.Telegram?.WebApp;
         if (tg) {
             tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg);
@@ -913,7 +914,7 @@
             h['ngrok-skip-browser-warning'] = '1';
             h['X-Idempotency-Key'] = crypto.randomUUID();
             try {
-                const r = await fetch(apiFallback + '/api/webapp/transition', {
+                const r = await fetchT(apiFallback + '/api/webapp/transition', {
                     method: 'POST', headers: h,
                     body: JSON.stringify({ from: 'levelup', to: returnTo, user_id: parseInt(userId), payload: {} })
                 });
@@ -1727,7 +1728,7 @@
                     if (window.Telegram?.WebApp?.initData) { _lh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
                     _lh['ngrok-skip-browser-warning'] = '1';
                     _lh['X-Idempotency-Key'] = crypto.randomUUID();
-                    fetch(apiFallback + '/api/levelup/apply', {
+                    fetchT(apiFallback + '/api/levelup/apply', {
                         method: 'POST',
                         headers: _lh,
                         body: JSON.stringify(payload)

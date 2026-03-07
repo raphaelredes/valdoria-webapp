@@ -192,7 +192,7 @@ body {
     background: #1a1720;
     border-radius: 4px;
     overflow: hidden;
-    border: 1px solid #3a3540;
+    border: 1px solid #3a3028;
 }
 .bar-fill {
     height: 100%;
@@ -556,7 +556,7 @@ body {
     padding: 8px 6px;
     border-radius: var(--v-radius-sm);
     border: 1px solid var(--v-border);
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
     color: var(--v-text);
     font-size: 12px;
     font-weight: 600;

@@ -1,18 +1,21 @@
 /* ═══════════════════════════════════════════════════════════════
-   VALDORIA DESIGN SYSTEM v4.0
-   Design language for all Lendas de Valdoria webapps.
-   Derived from the project logo: bronze gold, burgundy, steel
-   on warm dark charcoal. Medieval fantasy aesthetic.
+   VALDORIA DESIGN SYSTEM v5.0
+   Medieval fantasy design language for all Lendas de Valdoria webapps.
+   Warm browns, parchment tones, leather textures, sepia borders.
+   Font: MedievalSharp + Cinzel serif stack.
    ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Google Fonts (Medieval serif stack) ─── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=MedievalSharp&display=swap');
 
 /* ─── COLOR TOKENS ─── */
 :root {
-    /* Backgrounds — warm dark charcoal (from logo background) */
-    --v-bg:            #2b2830;
-    --v-bg-raised:     #332f38;
+    /* Backgrounds — warm dark brown (medieval parchment-on-leather) */
+    --v-bg:            #2a2420;
+    --v-bg-raised:     #332a22;
     --v-bg-accent:     #4a2020;
-    --v-bg-card:       #302c35;
-    --v-bg-card-hover: #3a3540;
+    --v-bg-card:       #2e2520;
+    --v-bg-card-hover: #3a3028;
 
     /* Gold — primary brand (bronze/antique gold from shield ornaments) */
     --v-gold:          #c4953a;
@@ -30,9 +33,9 @@
     --v-silver-dim:    #707880;
 
     /* Text — warm parchment tones */
-    --v-text:          #e0d6c8;
-    --v-text-dim:      #9a918a;
-    --v-text-bright:   #f0ebe4;
+    --v-text:          #d4c8b0;
+    --v-text-dim:      #8a7a68;
+    --v-text-bright:   #e8dcc8;
 
     /* Semantic */
     --v-success:       #4caf50;
@@ -48,15 +51,16 @@
     --v-rarity-legendary: #ff9800;
 
     /* Structural */
-    --v-border:        #3e3845;
+    --v-border:        #4a3828;
     --v-border-gold:   rgba(196, 149, 58, 0.25);
     --v-radius:        10px;
     --v-radius-sm:     6px;
     --v-radius-lg:     14px;
     --v-radius-pill:   20px;
 
-    /* Typography */
-    --v-font:          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* Typography — medieval serif stack */
+    --v-font:          'MedievalSharp', 'Cinzel', serif;
+    --v-font-display:  'Cinzel', serif;
     --v-font-mono:     'Courier New', monospace;
 
     /* Shadows */
@@ -98,7 +102,7 @@ body {
     user-select: none;
     -webkit-user-select: none;
     /* Atmospheric radial gradient — depth */
-    background: radial-gradient(ellipse at 50% 0%, #352f38 0%, var(--v-bg) 70%);
+    background: radial-gradient(ellipse at 50% 0%, #3a3028 0%, var(--v-bg) 70%);
     background-attachment: fixed;
 }
 
@@ -163,7 +167,7 @@ body::after {
 
 /* ─── HEADER ─── */
 .v-header {
-    background: linear-gradient(180deg, #352f38 0%, #252228 100%);
+    background: linear-gradient(180deg, #3a3028 0%, #201a14 100%);
     padding: 16px 16px 12px;
     text-align: center;
     border-bottom: 1px solid var(--v-border-gold);
@@ -206,7 +210,7 @@ body::after {
     width: 28px;
     height: 4px;
     border-radius: 2px;
-    background: rgba(62, 56, 69, 0.8);
+    background: rgba(74, 56, 40, 0.8);
     transition: all 0.4s ease;
 }
 
@@ -229,7 +233,7 @@ body::after {
 
 /* ─── CARDS ─── */
 .v-card {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     padding: 12px;
@@ -262,7 +266,7 @@ body::after {
 
 .v-card.selected {
     border-color: var(--v-gold);
-    background: linear-gradient(165deg, #38333f 0%, #2d2932 100%);
+    background: linear-gradient(165deg, #382a20 0%, #2a2018 100%);
     box-shadow: 0 0 15px rgba(196, 149, 58, 0.2), 0 0 4px rgba(196, 149, 58, 0.15), inset 0 1px 0 rgba(196, 149, 58, 0.1);
 }
 
@@ -320,7 +324,7 @@ body::after {
 
 .v-btn-primary {
     background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
-    color: #2b2830;
+    color: #2a2420;
     padding: 12px 20px;
     border-radius: var(--v-radius);
     font-weight: 700;
@@ -367,7 +371,7 @@ body::after {
 }
 
 .v-toggle-item {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     padding: 10px 12px;
@@ -382,7 +386,7 @@ body::after {
 
 .v-toggle-item.selected {
     border-color: var(--v-gold);
-    background: linear-gradient(165deg, #38333f 0%, #2d2932 100%);
+    background: linear-gradient(165deg, #382a20 0%, #2a2018 100%);
     box-shadow: 0 0 10px rgba(196, 149, 58, 0.15);
 }
 
@@ -540,7 +544,7 @@ body::after {
 
 /* ─── SUMMARY SECTION ─── */
 .v-summary {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
     border: 1px solid var(--v-border-gold);
     border-radius: var(--v-radius);
     padding: 14px;
@@ -568,7 +572,7 @@ body::after {
 
 /* ─── STAT PREVIEW ─── */
 .v-stat-preview {
-    background: linear-gradient(165deg, var(--v-bg-raised) 0%, #252228 100%);
+    background: linear-gradient(165deg, var(--v-bg-raised) 0%, #201a14 100%);
     border: 1px solid var(--v-border-gold);
     border-radius: var(--v-radius);
     padding: 12px;
@@ -734,7 +738,7 @@ body::after {
 }
 
 .v-accordion-section {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     overflow: hidden;

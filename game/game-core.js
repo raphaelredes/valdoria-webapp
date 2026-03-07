@@ -316,14 +316,25 @@ async function doAction(callbackData) {
     // Haptic feedback
     haptic('light');
 
-    const data = await apiCall('/api/game/action', { cb: callbackData });
-    if (!data) return;
+    // Detect if this is a location change (show immersive travel screen)
+    const locCtx = (typeof _detectLocationTransition === 'function')
+        ? _detectLocationTransition(callbackData) : null;
+    if (locCtx) showLocationTransition(locCtx);
+    const t0 = Date.now();
 
-    if (data.error === 'no_response') return;
+    const data = await apiCall('/api/game/action', { cb: callbackData });
+    if (!data) { hideLocationTransition(); return; }
+
+    if (data.error === 'no_response') { hideLocationTransition(); return; }
 
     // Handle transitions to specialized WebApps
     // Only auto-transition if there is NO text to display
     if (data.transition && !data.text) {
+        // Wait remaining transition time before redirect
+        const elapsed = Date.now() - t0;
+        const remaining = locCtx ? Math.max(0, LOC_TRANSITION_MS - elapsed) : 0;
+        if (remaining > 0) await sleep(remaining);
+        hideLocationTransition();
         handleTransition(data.transition);
         return;
     }
@@ -339,6 +350,12 @@ async function doAction(callbackData) {
 
     // Render the new screen (only if there's content to render)
     if (data.text || data.buttons) {
+        // Wait remaining transition time before rendering
+        const elapsed = Date.now() - t0;
+        const remaining = locCtx ? Math.max(0, LOC_TRANSITION_MS - elapsed) : 0;
+        if (remaining > 0) await sleep(remaining);
+        hideLocationTransition();
+
         animateScreenTransition(() => renderScreen(data));
 
         // If there's a transition AND we rendered a screen,
@@ -346,6 +363,8 @@ async function doAction(callbackData) {
         if (data.transition && data.text) {
             console.log('[GAME] Screen has WebApp link:', data.transition.to);
         }
+    } else {
+        hideLocationTransition();
     }
 }
 

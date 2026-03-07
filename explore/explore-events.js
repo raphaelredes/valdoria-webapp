@@ -531,7 +531,7 @@ async function transitionToArena() {
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
-        const resp = await fetch(`${S.apiBase}/api/webapp/transition`, {
+        const resp = await fetchT(`${S.apiBase}/api/webapp/transition`, {
             method: 'POST',
             headers: _th,
             body: JSON.stringify(body)
@@ -572,7 +572,7 @@ async function transitionToInventory() {
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
-        const resp = await fetch(`${S.apiBase}/api/webapp/transition`, {
+        const resp = await fetchT(`${S.apiBase}/api/webapp/transition`, {
             method: 'POST',
             headers: _th,
             body: JSON.stringify(body)
@@ -1522,7 +1522,7 @@ async function _transitionToGameFromExplore(payload) {
     h['ngrok-skip-browser-warning'] = '1';
     h['X-Idempotency-Key'] = crypto.randomUUID();
     try {
-        const r = await fetch(S.apiBase + '/api/webapp/transition', {
+        const r = await fetchT(S.apiBase + '/api/webapp/transition', {
             method: 'POST', headers: h,
             body: JSON.stringify({
                 from: 'explore', to: 'game',
@@ -1544,7 +1544,7 @@ async function _transitionToNavigateFromExplore(payload) {
     h['ngrok-skip-browser-warning'] = '1';
     h['X-Idempotency-Key'] = crypto.randomUUID();
     try {
-        const r = await fetch(S.apiBase + '/api/webapp/transition', {
+        const r = await fetchT(S.apiBase + '/api/webapp/transition', {
             method: 'POST', headers: h,
             body: JSON.stringify({
                 from: 'explore', to: 'navigate',

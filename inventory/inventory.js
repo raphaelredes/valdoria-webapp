@@ -1894,7 +1894,7 @@ async function _performExit() {
             if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
             _th['ngrok-skip-browser-warning'] = '1';
             _th['X-Idempotency-Key'] = crypto.randomUUID();
-            const resp = await fetch(_apiBase + '/api/webapp/transition', {
+            const resp = await fetchT(_apiBase + '/api/webapp/transition', {
                 method: 'POST',
                 headers: _th,
                 body: JSON.stringify({
@@ -2386,7 +2386,7 @@ async function _transitionTo(target, payload = {}) {
             if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
             _th['ngrok-skip-browser-warning'] = '1';
             _th['X-Idempotency-Key'] = crypto.randomUUID();
-            const resp = await fetch(_apiBase + '/api/webapp/transition', {
+            const resp = await fetchT(_apiBase + '/api/webapp/transition', {
                 method: 'POST',
                 headers: _th,
                 body: JSON.stringify({

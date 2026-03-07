@@ -367,6 +367,69 @@ function hideTimerOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
+// ─── Location Transition Overlay (immersive 2s travel screen) ───
+const _LOC_TRANSITIONS = {
+    // City locations
+    city_tavern:     { icon: '🍺', text: 'Caminhando até a Taverna...' },
+    city_temple:     { icon: '⛪', text: 'Seguindo ao Templo...' },
+    city_market:     { icon: '🏪', text: 'Indo ao Mercado...' },
+    city_bank:       { icon: '🏦', text: 'Entrando no Banco...' },
+    city_guild:      { icon: '⚔️', text: 'Chegando na Guilda...' },
+    city_arena:      { icon: '🏟️', text: 'Entrando na Arena...' },
+    city_locations:  { icon: '🏰', text: 'Explorando a cidade...' },
+    // Travel / exploration
+    depart:          { icon: '🗺️', text: 'Partindo para aventura...' },
+    action_depart:   { icon: '🗺️', text: 'Partindo para aventura...' },
+    trail_:          { icon: '🥾', text: 'Seguindo a trilha...' },
+    explore_:        { icon: '🧭', text: 'Explorando o caminho...' },
+    // Return
+    return_city:     { icon: '🏰', text: 'Retornando à cidade...' },
+    action_return:   { icon: '🏰', text: 'Retornando à cidade...' },
+    city_back:       { icon: '🏰', text: 'Voltando à praça central...' },
+    // Combat end
+    combat_end:      { icon: '⚔️', text: 'Recolhendo espólios...' },
+    // Rest
+    rest:            { icon: '🏕️', text: 'Descansando...' },
+    long_rest:       { icon: '🛏️', text: 'Descansando na estalagem...' },
+};
+// Callbacks that should NOT trigger location transition (UI panels, not travel)
+const _NO_TRANSITION = /^(inv|char|status|help|settings|quest_view|action_universal_back|menu|equip|unequip|use_|sell_|buy_|deposit|withdraw|donate|skill_|feat_|spell_|npc_talk|dialogue|gossip|quest_accept|quest_deliver|shop_)/;
+
+const LOC_TRANSITION_MS = 2000;
+let _locTransitionActive = false;
+
+function _detectLocationTransition(cb) {
+    if (!cb || _NO_TRANSITION.test(cb)) return null;
+    // Exact match first
+    if (_LOC_TRANSITIONS[cb]) return _LOC_TRANSITIONS[cb];
+    // Prefix match
+    for (const [prefix, ctx] of Object.entries(_LOC_TRANSITIONS)) {
+        if (prefix.endsWith('_') && cb.startsWith(prefix)) return ctx;
+    }
+    return null;
+}
+
+function showLocationTransition(ctx) {
+    const el = document.getElementById('loc-transition');
+    if (!el) return;
+    _locTransitionActive = true;
+    el.classList.remove('hiding');
+    el.style.display = '';
+    const iconEl = document.getElementById('loc-icon');
+    const textEl = document.getElementById('loc-text');
+    if (iconEl) iconEl.textContent = ctx.icon || '🗺️';
+    if (textEl) textEl.textContent = ctx.text || 'Viajando...';
+    haptic('medium');
+}
+
+function hideLocationTransition() {
+    const el = document.getElementById('loc-transition');
+    if (!el || !_locTransitionActive) return;
+    _locTransitionActive = false;
+    el.classList.add('hiding');
+    setTimeout(() => { el.style.display = 'none'; el.classList.remove('hiding'); }, 400);
+}
+
 // ─── Immersive Mode (collapsible bottom panel) ───
 let _immersiveCollapsed = false;
 let _immersiveEligible = false;

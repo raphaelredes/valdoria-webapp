@@ -206,7 +206,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(ellipse at 50% 38%, #30202a 0%, #1a1520 45%, #0a0810 100%);
+    background: radial-gradient(ellipse at 50% 38%, #302018 0%, #1a1510 45%, #0a0805 100%);
     z-index: 1000;
     overflow: hidden;
 }
@@ -389,7 +389,7 @@
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     font-size: 8px; color: var(--v-gold);
-    background: #1a1520; padding: 0 12px;
+    background: #1a1510; padding: 0 12px;
     animation: runePulse 2s ease-in-out infinite;
 }
 @keyframes runePulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
@@ -700,6 +700,76 @@
     to { clip-path: inset(0 0 0 0); }
 }
 
+/* ─── Location Transition Overlay (immersive 2s travel) ─── */
+.loc-transition {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--v-bg, #2b2830);
+    animation: locFadeIn 0.35s ease-out;
+}
+@keyframes locFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.loc-transition.hiding {
+    animation: locFadeOut 0.4s ease-in forwards;
+}
+@keyframes locFadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+.loc-transition-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+}
+.loc-transition-icon {
+    font-size: 48px;
+    animation: locIconPulse 1.5s ease-in-out infinite;
+    z-index: 1;
+    filter: drop-shadow(0 0 12px rgba(196, 149, 58, 0.4));
+}
+@keyframes locIconPulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50%      { transform: scale(1.12); opacity: 1; }
+}
+.loc-transition-text {
+    margin-top: 16px;
+    font-size: 15px;
+    color: var(--v-gold-light, #e8d5a3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 600;
+    z-index: 1;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+}
+.loc-transition-dots {
+    margin-top: 20px;
+    display: flex;
+    gap: 6px;
+    z-index: 1;
+}
+.loc-transition-dots span {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--v-gold, #c4953a);
+    animation: locDotBlink 1.2s ease-in-out infinite;
+}
+.loc-transition-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loc-transition-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes locDotBlink {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50%      { opacity: 1; transform: scale(1.2); }
+}
+
 /* ─── Text Input (bank amounts, chat, tickets) ─── */
 .text-input-wrap {
     display: flex;
@@ -954,7 +1024,7 @@
 .v-char-name {
     font-size: 14px;
     font-weight: 600;
-    color: var(--v-text-bright, #f0e6d6);
+    color: var(--v-text-bright, #e8dcc8);
     line-height: 1.4;
 }
 .v-char-meta {
@@ -1277,7 +1347,7 @@
 
 /* ── Busy — minimal ── */
 .dlg-mood-busy {
-    border-left-color: var(--v-border, #3e3845);
+    border-left-color: var(--v-border, #4a3828);
 }
 .dlg-mood-busy .dlg-speaker { color: var(--v-text); }
 

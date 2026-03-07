@@ -18,10 +18,20 @@ const _TRANSITION_THEMES = {
     default:  { theme: '', duration: 350 },
 };
 
+// Cross-webapp location labels for immersive transition
+const _WEBAPP_LOC_LABELS = {
+    explore:  { icon: '🧭', text: 'Partindo para exploração...' },
+    arena:    { icon: '⚔️', text: 'Entrando em combate...' },
+    navigate: { icon: '🗺️', text: 'Abrindo o mapa...' },
+    dungeon:  { icon: '🏚️', text: 'Adentrando a masmorra...' },
+    inventory: { icon: '🎒', text: 'Abrindo a mochila...' },
+    market:   { icon: '🏪', text: 'Entrando no mercado...' },
+    levelup:  { icon: '⭐', text: 'Preparando evolução...' },
+};
+
 function handleTransition(transition) {
     if (!transition) { console.warn('[GAME] handleTransition() called with null transition'); return; }
-    if (!transition.url) { console.warn('[GAME] handleTransition() missing url:', JSON.stringify(transition)); return; }
-    if (S.transitioning) { console.warn('[GAME] handleTransition() blocked - already transitioning'); return; }
+    if (!transition.url) { console.warn('[GAME] handleTransition() missing url:', JSON.stringify(transition)); S.transitioning = false; return; }
 
     S.transitioning = true;
     console.log('[GAME] Transition to:', transition.to, transition.url);
@@ -29,10 +39,16 @@ function handleTransition(transition) {
     // Stop ambient particles during transition
     if (typeof stopParticles === 'function') stopParticles();
 
+    // Show immersive location transition for cross-webapp navigation
+    const locLabel = _WEBAPP_LOC_LABELS[transition.to];
+    if (locLabel && typeof showLocationTransition === 'function') {
+        showLocationTransition(locLabel);
+    }
+
     // Get themed transition
     const transConfig = _TRANSITION_THEMES[transition.to] || _TRANSITION_THEMES.default;
 
-    // Show transition overlay with theme
+    // Show transition overlay with theme (on top of loc-transition)
     const overlay = document.getElementById('transition-overlay');
     if (overlay) {
         overlay.className = 'transition-overlay';
@@ -41,10 +57,11 @@ function handleTransition(transition) {
         requestAnimationFrame(() => overlay.classList.add('active'));
     }
 
-    // Redirect after themed animation
+    // Redirect after immersive transition (min 2s for location feel)
+    const delay = locLabel ? Math.max(LOC_TRANSITION_MS, transConfig.duration) : transConfig.duration;
     setTimeout(() => {
         window.location.replace(transition.url);
-    }, transConfig.duration);
+    }, delay);
 }
 
 /**
@@ -110,9 +127,12 @@ async function requestTransition(toApp, payload = {}) {
     _headers['ngrok-skip-browser-warning'] = '1';
     _headers['X-Idempotency-Key'] = crypto.randomUUID();
     try {
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 15000);
         const resp = await fetch(url, {
             method: 'POST',
             headers: _headers,
+            signal: controller.signal,
             body: JSON.stringify({
                 from: 'game',
                 to: toApp,
@@ -120,24 +140,29 @@ async function requestTransition(toApp, payload = {}) {
                 payload,
             }),
         });
+        clearTimeout(tid);
 
-        const data = await resp.json();
+        let data;
+        try { data = await resp.json(); } catch (_) { data = {}; }
 
         if (data.url) {
             handleTransition({ to: toApp, url: data.url });
-        } else if (data.error) {
-            console.error('[GAME] Transition error:', data.error);
+        } else {
             S.transitioning = false;
-
-            if (data.fallback === 'close') {
-                showToast('Não disponível no momento', 2000);
+            if (data.error) {
+                console.error('[GAME] Transition error:', data.error);
+                if (data.fallback === 'close') {
+                    showToast('Não disponível no momento', 2000);
+                } else {
+                    showError('Transição falhou: ' + (data.error || 'erro desconhecido'));
+                }
             } else {
-                showError('Transição falhou: ' + (data.error || 'erro desconhecido'));
+                showError('Transição falhou: resposta inesperada do servidor.');
             }
         }
     } catch (e) {
         console.error('[GAME] Transition fetch error:', e);
         S.transitioning = false;
-        showError('Erro de conexão na transição.');
+        showError(e.name === 'AbortError' ? 'Timeout na transição. Tente novamente.' : 'Erro de conexão na transição.');
     }
 }

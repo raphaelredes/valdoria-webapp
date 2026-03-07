@@ -319,6 +319,7 @@
 
     <script>
         var v = Date.now();
+        document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         var scripts = ['dungeon-core.js', 'dungeon-map.js', 'dungeon-ui.js'];
         scripts.forEach(function (s) { document.write('<script src="' + s + '?v=' + v + '"><\/script>'); });
     </script>

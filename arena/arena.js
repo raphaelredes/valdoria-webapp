@@ -51,7 +51,7 @@ class CombatAPI {
         return h;
     }
     async getState() {
-        const r = await fetch(`${this.base}/api/combat/state`, {
+        const r = await fetchT(`${this.base}/api/combat/state`, {
             method: 'POST',
             headers: this._baseHeaders(),
             body: JSON.stringify({ user_id: this.userId }),
@@ -66,7 +66,7 @@ class CombatAPI {
     }
     async checkHealth() {
         try {
-            const r = await fetch(`${this.base}/api/combat/health`, { method: 'GET' });
+            const r = await fetchT(`${this.base}/api/combat/health`, { method: 'GET' });
             if (!r.ok) return { status: 'unreachable' };
             return r.json();
         } catch (e) {
@@ -76,7 +76,7 @@ class CombatAPI {
     async sendAction(data) {
         const h = this._baseHeaders();
         h['X-Idempotency-Key'] = crypto.randomUUID();
-        const r = await fetch(`${this.base}/api/combat/action`, {
+        const r = await fetchT(`${this.base}/api/combat/action`, {
             method: 'POST',
             headers: h,
             body: JSON.stringify({ user_id: this.userId, ...data }),
@@ -176,7 +176,7 @@ async function transitionFromArena(result) {
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
-        const resp = await fetch(`${apiBase}/api/webapp/transition`, {
+        const resp = await fetchT(`${apiBase}/api/webapp/transition`, {
             method: 'POST',
             headers: _th,
             body: JSON.stringify(body)
@@ -212,7 +212,7 @@ async function transitionToLevelup() {
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
-        const resp = await fetch(`${apiBase}/api/webapp/transition`, {
+        const resp = await fetchT(`${apiBase}/api/webapp/transition`, {
             method: 'POST',
             headers: _th,
             body: JSON.stringify(body)
@@ -246,7 +246,7 @@ async function transitionToInventoryFromArena() {
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     try {
-        const resp = await fetch(`${apiBase}/api/webapp/transition`, {
+        const resp = await fetchT(`${apiBase}/api/webapp/transition`, {
             method: 'POST',
             headers: _th,
             body: JSON.stringify(body)

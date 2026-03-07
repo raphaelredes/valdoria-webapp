@@ -320,7 +320,7 @@ function _sendNavAction(type, target, flags) {
     const _nh = { 'Content-Type': 'application/json' };
     if (window.Telegram?.WebApp?.initData) { _nh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
     _nh['ngrok-skip-browser-warning'] = '1';
-    fetch(apiUrl, {
+    fetchT(apiUrl, {
         method: 'POST',
         headers: _nh,
         body: JSON.stringify(payload),
@@ -369,7 +369,7 @@ async function _transitionToGame() {
     h['ngrok-skip-browser-warning'] = '1';
     h['X-Idempotency-Key'] = crypto.randomUUID();
     try {
-        const r = await fetch(S.api + '/api/webapp/transition', {
+        const r = await fetchT(S.api + '/api/webapp/transition', {
             method: 'POST', headers: h,
             body: JSON.stringify({ from: 'navigate', to: (S.returnTo || 'game'), user_id: S.uid, payload: {} })
         });

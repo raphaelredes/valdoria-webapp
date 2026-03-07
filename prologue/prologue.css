@@ -54,7 +54,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 12px;
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     font-size: 13px;
@@ -144,7 +144,7 @@
 /* ─── Lore info card ─── */
 .lore-card {
     padding: 12px;
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     margin-bottom: 12px;

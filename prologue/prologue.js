@@ -49,7 +49,7 @@ async function apiCall(endpoint, body = {}) {
     if (endpoint.includes('/reroll') || endpoint.includes('/fight') || endpoint.includes('/complete') || endpoint.includes('/distract')) {
         headers['X-Idempotency-Key'] = crypto.randomUUID();
     }
-    const resp = await fetch(`${API_BASE}${endpoint}`, {
+    const resp = await fetchT(`${API_BASE}${endpoint}`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ user_id: USER_ID, ...body }),

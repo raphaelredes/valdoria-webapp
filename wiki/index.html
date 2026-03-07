@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#2b2830">
+    <meta name="theme-color" content="#2a2420">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <script>
@@ -64,7 +64,7 @@
         .wiki-header {
             padding: 20px 16px 12px;
             text-align: center;
-            background: linear-gradient(180deg, #352f38 0%, var(--v-bg) 100%);
+            background: linear-gradient(180deg, #3a3028 0%, var(--v-bg) 100%);
             position: relative;
         }
 
@@ -132,7 +132,7 @@
             align-items: center;
             text-align: center;
             padding: 18px 10px 14px;
-            background: linear-gradient(165deg, var(--v-bg-card) 0%, #282430 100%);
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
             cursor: pointer;
@@ -347,7 +347,7 @@
         const AUTHORIZED_IDS = [842486022];
 
         const tg = window.Telegram?.WebApp;
-        const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2b2830';
+        const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2a2420';
 
         function initAuth() {
             if (!tg || !tg.initDataUnsafe?.user) {

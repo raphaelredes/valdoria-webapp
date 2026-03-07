@@ -20,8 +20,8 @@ body {
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    background: linear-gradient(180deg, #352f38 0%, var(--v-bg, #2b2830) 100%);
-    border-bottom: 1px solid var(--v-border, #3e3845);
+    background: linear-gradient(180deg, #3a3028 0%, var(--v-bg, #2a2420) 100%);
+    border-bottom: 1px solid var(--v-border, #4a3828);
     z-index: 50;
     flex-shrink: 0;
 }
@@ -100,8 +100,8 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 8px 12px;
-    background: linear-gradient(0deg, #352f38 0%, var(--v-bg, #2b2830) 100%);
-    border-top: 1px solid var(--v-border, #3e3845);
+    background: linear-gradient(0deg, #3a3028 0%, var(--v-bg, #2a2420) 100%);
+    border-top: 1px solid var(--v-border, #4a3828);
     z-index: 50;
     flex-shrink: 0;
 }
@@ -192,7 +192,7 @@ body {
 .dm-card {
     background:
         repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.015) 3px, rgba(0,0,0,0.015) 4px),
-        linear-gradient(165deg, #342e3a 0%, #282430 100%);
+        linear-gradient(165deg, #342818 0%, #241e18 100%);
     border: 1px solid rgba(196, 149, 58, 0.3);
     border-radius: 10px;
     padding: 20px;
@@ -298,7 +298,7 @@ body {
     gap: 10px;
     padding: 12px 16px;
     background: linear-gradient(165deg, #3a3440 0%, #302a36 100%);
-    border: 1px solid var(--v-border, #3e3845);
+    border: 1px solid var(--v-border, #4a3828);
     border-radius: 8px;
     color: var(--v-text-bright, #f0ebe4);
     font-size: 14px;
@@ -588,7 +588,7 @@ body {
     padding: 12px;
     min-height: 44px;
     background: rgba(255,255,255,0.05);
-    border: 1px solid var(--v-border, #3e3845);
+    border: 1px solid var(--v-border, #4a3828);
     color: var(--v-text-dim, #8a8090);
     border-radius: 8px;
     font-size: 14px;
@@ -714,7 +714,7 @@ body {
 #loading {
     position: fixed;
     inset: 0;
-    background: var(--v-bg, #2b2830);
+    background: var(--v-bg, #2a2420);
     z-index: 500;
     display: flex;
     flex-direction: column;

@@ -103,7 +103,7 @@ function saveState() {
                 _sh['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
             }
             _sh['ngrok-skip-browser-warning'] = '1';
-            fetch(`${S.apiBase}/api/explore/save?user_id=${S.uid}`, {
+            fetchT(`${S.apiBase}/api/explore/save?user_id=${S.uid}`, {
                 method: 'POST',
                 headers: _sh,
                 body: JSON.stringify(snap)
