@@ -39,13 +39,13 @@ const Dice3D = (() => {
         const ctx = c.getContext('2d');
         ctx.clearRect(0, 0, size, size);
 
-        const fontSize = num >= 10 ? size * 0.42 : size * 0.52;
+        const fontSize = num >= 10 ? size * 0.52 : size * 0.62;
         ctx.font = `bold ${fontSize}px "Cinzel", Georgia, serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
         ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-        ctx.lineWidth = 8;
+        ctx.lineWidth = 10;
         ctx.lineJoin = 'round';
         ctx.strokeText(String(num), size / 2, size / 2);
 
@@ -126,7 +126,7 @@ const Dice3D = (() => {
                 map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide,
             });
 
-            const plane = new THREE.Mesh(new THREE.PlaneGeometry(0.38, 0.38), mat);
+            const plane = new THREE.Mesh(new THREE.PlaneGeometry(0.48, 0.48), mat);
             const normal = fNormals[i];
             const center = fCenters[i];
 
