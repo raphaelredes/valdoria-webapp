@@ -26,6 +26,7 @@ let _audioCtx = null;           // Feature 8: Web Audio (lazy init)
 let _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
 let _currentPositions = null;   // Feature 9: combat positions
 let _cinematicInProgress = false; // Blocks re-render during action cinematic
+let _lastRenderedPhase = null;  // Phase transition tracking
 let _hitStreak = 0;               // P2-G: Combo streak counter
 
 // ─── TIMER / POLLING / HEARTBEAT STATE ───
@@ -101,6 +102,40 @@ function b64Decode(str) {
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return new TextDecoder().decode(bytes);
 }
+
+// ─── CONSTANTS ───
+const BIOME_NAMES = {
+    forest: 'Floresta', cave: 'Caverna', graveyard: 'Cemiterio', swamp: 'Pantano',
+    volcanic: 'Vulcanico', snow: 'Neve', desert: 'Deserto', mountain: 'Montanha',
+    plains: 'Planicie', dungeon: 'Masmorra', city: 'Cidade', ruins: 'Ruinas',
+};
+
+const STATUS_ICONS = {
+    poisoned: '🧪', blinded: '🌑', paralyzed: '⚡', prone: '🦶', restrained: '🕸️',
+    frightened: '😱', stunned: '💫', grappled: '👐', petrified: '🪨', exhausted: '😫',
+    marked: '🎯', blessed: '✨', hexed: '👁️', burning: '🔥', frozen: '❄️',
+    sleeping: '💤', charmed: '💖', deafened: '🔇', incapacitated: '🚫',
+    invisible: '👻', surprised: '❗', exposed: '🎯', inspired: '🎵',
+    concentrated: '🔮', raging: '💢', wild_shaped: '🐾',
+};
+
+const DMG_ICONS = {
+    slashing: '🗡️', piercing: '🏹', bludgeoning: '🔨', fire: '🔥', cold: '❄️',
+    lightning: '⚡', necrotic: '💀', radiant: '✨', psychic: '🧠', thunder: '💥',
+    poison: '🧪', acid: '🟢', force: '💠',
+};
+
+const ATK_TYPE_LABELS = { melee: 'Corpo a corpo', ranged: 'A distancia', magic: 'Magico' };
+
+const RES_CLASS_MAP = {
+    'Mana': 'mp', 'Ki': 'ki', 'Fúria': 'fury', 'Vigor': 'vigor',
+    'Inspiração': 'inspiration', 'Pacto': 'pact', 'Energia': 'energy',
+};
+
+const RES_ICON_MAP = {
+    'Mana': '💧', 'Ki': '⚡', 'Fúria': '💢', 'Vigor': '💪',
+    'Inspiração': '🎵', 'Pacto': '👁️', 'Energia': '⚡',
+};
 
 // ─── STARTUP ───
 if (isApiMode) {
@@ -346,42 +381,8 @@ function renderResolution(state) {
     }
 }
 
-// ─── CONSTANTS ───
-const BIOME_NAMES = {
-    forest: 'Floresta', cave: 'Caverna', graveyard: 'Cemiterio', swamp: 'Pantano',
-    volcanic: 'Vulcanico', snow: 'Neve', desert: 'Deserto', mountain: 'Montanha',
-    plains: 'Planicie', dungeon: 'Masmorra', city: 'Cidade', ruins: 'Ruinas',
-};
-
-const STATUS_ICONS = {
-    poisoned: '🧪', blinded: '🌑', paralyzed: '⚡', prone: '🦶', restrained: '🕸️',
-    frightened: '😱', stunned: '💫', grappled: '👐', petrified: '🪨', exhausted: '😫',
-    marked: '🎯', blessed: '✨', hexed: '👁️', burning: '🔥', frozen: '❄️',
-    sleeping: '💤', charmed: '💖', deafened: '🔇', incapacitated: '🚫',
-    invisible: '👻', surprised: '❗', exposed: '🎯', inspired: '🎵',
-    concentrated: '🔮', raging: '💢', wild_shaped: '🐾',
-};
-
-const DMG_ICONS = {
-    slashing: '🗡️', piercing: '🏹', bludgeoning: '🔨', fire: '🔥', cold: '❄️',
-    lightning: '⚡', necrotic: '💀', radiant: '✨', psychic: '🧠', thunder: '💥',
-    poison: '🧪', acid: '🟢', force: '💠',
-};
-
-const ATK_TYPE_LABELS = { melee: 'Corpo a corpo', ranged: 'A distancia', magic: 'Magico' };
-
-const RES_CLASS_MAP = {
-    'Mana': 'mp', 'Ki': 'ki', 'Fúria': 'fury', 'Vigor': 'vigor',
-    'Inspiração': 'inspiration', 'Pacto': 'pact', 'Energia': 'energy',
-};
-
-const RES_ICON_MAP = {
-    'Mana': '💧', 'Ki': '⚡', 'Fúria': '💢', 'Vigor': '💪',
-    'Inspiração': '🎵', 'Pacto': '👁️', 'Energia': '⚡',
-};
 
 // ─── MAIN RENDER ───
-let _lastRenderedPhase = null;
 function renderArena(s) {
     const app = document.getElementById('app');
 
@@ -440,14 +441,23 @@ function _renderArenaInner(s) {
 
     // Battlefield — CENTER (arena where dice roll between combatants)
     html += '<div class="battlefield">';
-    html += renderTurnTimeline(s.to);
-    const diceDisplay = (ph === 'init' || ph === 'intro') ? 'display:none;' : '';
-    html += `<div class="dice-row" style="${diceDisplay}">
-        <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>
-        <div class="dice-box-compact"><div class="dice-emoji" id="dice2">🎲</div><div><div class="dice-result" id="diceResult2"></div><div class="dice-label" id="diceLabel2">dano</div></div></div>
-    </div>
-    <div class="dice-formula" id="diceFormula" style="${diceDisplay}"></div>
-    <div class="dice-narration" id="diceNarration" style="${diceDisplay}"></div>`;
+    if (ph === 'intro') {
+        // Immersive initiative button centered in battlefield
+        html += '<div id="init-hero-area" class="init-hero-area">';
+        html += '<div class="init-hero-d20">🎲</div>';
+        html += '<button class="init-hero-btn" id="initHeroBtn" data-action="initiative">⚔️ ROLAR INICIATIVA</button>';
+        html += '<div class="init-hero-subtitle">Toque para determinar a ordem de combate</div>';
+        html += '</div>';
+    } else {
+        html += renderTurnTimeline(s.to);
+        const diceDisplay = ph === 'init' ? 'display:none;' : '';
+        html += `<div class="dice-row" style="${diceDisplay}">
+            <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>
+            <div class="dice-box-compact"><div class="dice-emoji" id="dice2">🎲</div><div><div class="dice-result" id="diceResult2"></div><div class="dice-label" id="diceLabel2">dano</div></div></div>
+        </div>
+        <div class="dice-formula" id="diceFormula" style="${diceDisplay}"></div>
+        <div class="dice-narration" id="diceNarration" style="${diceDisplay}"></div>`;
+    }
     if (s.feed && s.feed.length > 0) {
         const total = s.feed.length;
         const recentFeed = s.feed.slice(-3);
@@ -491,12 +501,10 @@ function _renderArenaInner(s) {
         html += renderTimerBar(s);
         html += renderActionBar(s.acts, s.e, s.p);
     } else if (ph === 'intro' && isApiMode) {
-        // API mode: interactive initiative button (with restore option if available)
-        html += `<div class="action-bar">`;
+        // Initiative button is in the battlefield center (immersive hero button)
         if (s.can_restore) {
-            html += `<button class="action-btn primary full-width" data-action="restore" style="font-size:14px;padding:12px">🔄 Restaurar Combate</button>`;
+            html += `<div class="action-bar"><button class="action-btn primary full-width" data-action="restore" style="font-size:14px;padding:12px">🔄 Restaurar Combate</button></div>`;
         }
-        html += `<button class="action-btn primary full-width" data-action="initiative" style="font-size:14px;padding:12px">⚔️ ROLAR INICIATIVA</button></div>`;
     } else if (ph === 'init') {
         // Initiative rolled — animated dice + proceed button
         html += '<div id="init-dice-area"></div>';
@@ -521,6 +529,14 @@ function _renderArenaInner(s) {
 
     // Initiative dice animation (DiceRoller component)
     _triggerInitiativeDice(s);
+
+    // Immersive initiative button handler (intro phase)
+    const heroBtn = document.getElementById('initHeroBtn');
+    if (heroBtn) {
+        heroBtn.addEventListener('click', () => {
+            _animateInitiativeHero();
+        });
+    }
 
     // Bind action button events
     bindActions(s);
@@ -933,6 +949,22 @@ function renderTurnTimeline(to) {
     });
     html += '</div>';
     return html;
+}
+
+// ─── IMMERSIVE INITIATIVE HERO BUTTON ANIMATION ───
+function _animateInitiativeHero() {
+    const area = document.getElementById('init-hero-area');
+    if (!area) return;
+    const btn = document.getElementById('initHeroBtn');
+    if (btn) btn.disabled = true;
+
+    // Phase 1: Button fades, d20 starts spinning
+    area.classList.add('rolling');
+
+    // Phase 2: After spin animation completes, send the initiative action
+    setTimeout(() => {
+        sendAction({type: 'initiative'});
+    }, 1200);
 }
 
 // ─── INITIATIVE DICE ANIMATION (uses shared DiceRoller component) ───
