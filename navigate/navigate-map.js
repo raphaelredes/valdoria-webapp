@@ -60,6 +60,45 @@ function _landmassPath() {
     return d;
 }
 
+// Point-in-polygon test (ray casting) for landmass shape
+function _pointInLandmass(px, py) {
+    const pts = LANDMASS_POINTS;
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+        const [xi, yi] = pts[i], [xj, yj] = pts[j];
+        if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi)
+            inside = !inside;
+    }
+    return inside;
+}
+
+// River paths (pixel coordinates, winding across the landmass)
+const RIVER_PATHS = [
+    // North River: snow region → forest → central plains
+    { pts: [[300,55],[275,105],[245,165],[215,240],[225,300],[245,350],[265,385]], w: 1.8 },
+    // East River: mountains → swamp → south
+    { pts: [[475,210],[468,270],[462,330],[468,385],[478,430],[488,465]], w: 1.4 },
+];
+
+function _renderRivers(svg) {
+    const rG = _el('g', { class: 'rivers', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
+    for (const river of RIVER_PATHS) {
+        const p = river.pts;
+        let d = `M${p[0][0]},${p[0][1]}`;
+        for (let i = 1; i < p.length; i++) {
+            const wobX = (srand(i * 37 + p[0][0]) - 0.5) * 8;
+            const wobY = (srand(i * 41 + p[0][1]) - 0.5) * 6;
+            d += ` Q${(p[i-1][0]+p[i][0])/2+wobX},${(p[i-1][1]+p[i][1])/2+wobY} ${p[i][0]},${p[i][1]}`;
+        }
+        rG.appendChild(_el('path', { d, fill: 'none', stroke: '#2a4a5a',
+            'stroke-width': river.w, 'stroke-opacity': 0.3, 'stroke-linecap': 'round',
+            filter: 'url(#ink-wobble)' }));
+        rG.appendChild(_el('path', { d, fill: 'none', stroke: '#4a7080',
+            'stroke-width': river.w * 0.35, 'stroke-opacity': 0.12, 'stroke-linecap': 'round' }));
+    }
+    svg.appendChild(rG);
+}
+
 function computeFogState() {
     const fog = {};
     const knownSet = new Set(S.knownLocs);
@@ -103,8 +142,10 @@ function renderMap() {
     _renderCoastline(svg);          // L2: Ink coastline hatching
     _renderAgingEffects(svg);       // L3: Foxing, creases, stains
     renderOrnamentBorder(svg);      // L4: Manuscript border
-    renderTerrainRegions(svg, fogState);  // L5: Painted biome zones
-    renderTerrainDetails(svg, fogState);  // L6: Dense terrain illustrations
+    renderGroundCover(svg);         // L5: Ground texture everywhere
+    _renderRivers(svg);             // L5.5: Rivers
+    renderTerrainRegions(svg, fogState);  // L6: Painted biome zones
+    renderTerrainDetails(svg, fogState);  // L7: Dense terrain illustrations
     const roadG = _el('g', { class: 'roads-layer' });
     renderRoads(roadG, fogState);
     svg.appendChild(roadG);         // L7: Roads
@@ -251,21 +292,21 @@ function _renderCoastline(svg) {
     cG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#3a2a18', 'stroke-width': 0.8, 'stroke-opacity': 0.25, 'stroke-dasharray': '4 3' }));
     // Shore hatching (short perpendicular lines along coast — simplified)
     const p = LANDMASS_POINTS;
-    for (let i = 0; i < p.length; i += 2) {
+    for (let i = 0; i < p.length; i++) {
         const curr = p[i];
         const next = p[(i + 1) % p.length];
         const dx = next[0] - curr[0], dy = next[1] - curr[1];
         const len = Math.sqrt(dx * dx + dy * dy);
         if (len < 1) continue;
-        const nx = -dy / len, ny = dx / len; // outward normal
-        const mx = (curr[0] + next[0]) / 2, my = (curr[1] + next[1]) / 2;
-        for (let j = 0; j < 3; j++) {
-            const t = 0.2 + j * 0.3;
+        const nx = -dy / len, ny = dx / len;
+        // Dense shore hatching (5-6 lines per segment)
+        for (let j = 0; j < 5; j++) {
+            const t = 0.1 + j * 0.18;
             const hx = curr[0] + dx * t, hy = curr[1] + dy * t;
-            const hl = 4 + srand(i * 100 + j) * 6;
+            const hl = 3 + srand(i * 100 + j) * 7;
             cG.appendChild(_el('line', {
                 x1: hx, y1: hy, x2: hx - nx * hl, y2: hy - ny * hl,
-                stroke: '#4a3420', 'stroke-width': 0.4, 'stroke-opacity': 0.3,
+                stroke: '#4a3420', 'stroke-width': 0.35, 'stroke-opacity': 0.25 + srand(i * 50 + j) * 0.1,
             }));
         }
     }
