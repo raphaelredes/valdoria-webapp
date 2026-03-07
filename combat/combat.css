@@ -641,6 +641,9 @@ body {
 .dmg-dice3d-canvas {
     width: 140px; height: 140px;
 }
+.dmg-dice3d-canvas.multi {
+    width: 180px; height: 140px;
+}
 .dmg-dice3d-canvas canvas {
     display: block;
     width: 100% !important; height: 100% !important;

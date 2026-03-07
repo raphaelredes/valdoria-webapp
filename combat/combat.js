@@ -1712,16 +1712,26 @@ function initDice(lr) {
         return;
     }
 
-    // ── Phase 4: Damage Roll — 3D Dice (1200ms start) ──
-    const DMG_ROLL_MS = 1500; // 3D dice spin duration
-    const DMG_RESULT_HOLD = 1200; // Time to hold result visible for reading (after dice lands)
+    // ── Phase 4: Damage Roll — 3D Multi-Dice with Fusion ──
+    const DMG_ROLL_MS = 1500;
+    const DMG_FUSION_HOLD = 400;   // Hold individual results before fusion
+    const DMG_RESULT_HOLD = 1200;  // Hold final result for reading
     setTimeout(() => {
         if (!d2 || !r2) return;
 
-        // Parse die type from formula (e.g., "2d6+3" → "d6")
-        const dieType = _parseDieType(lr.df);
+        const parsed = _parseDiceFormula(lr.df);
+        const dieType = parsed.type;
+        const dieCount = parsed.count;
 
-        // Hide emoji damage box, show 3D overlay
+        // Get individual die results from backend, or synthesize
+        let individualResults;
+        if (lr.dr && lr.dr.length >= dieCount) {
+            individualResults = lr.dr.slice(0, dieCount);
+        } else {
+            const diceOnly = Math.max(1, lr.d - parsed.modifier);
+            individualResults = _distributeTotal(diceOnly, dieCount, parsed.sides);
+        }
+
         const overlay = document.getElementById('dmgDice3dOverlay');
         const canvas = document.getElementById('dmgDice3dCanvas');
         const particles = document.getElementById('dmgDice3dParticles');
@@ -1733,62 +1743,98 @@ function initDice(lr) {
         l2.style.visibility = 'hidden';
 
         if (overlay && canvas && typeof Dice3D !== 'undefined') {
-            // Dispose previous if any
             if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+
+            // Wider canvas for multi-dice
+            if (dieCount >= 2) canvas.classList.add('multi');
+            else canvas.classList.remove('multi');
 
             overlay.style.display = 'flex';
             if (label3d) { label3d.textContent = lr.df || 'dano'; label3d.className = 'dmg-dice3d-label rolling'; }
             if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
 
+            let _dmgDone = false;
+            const finishDmgOverlay = () => {
+                if (_dmgDone) return;
+                _dmgDone = true;
+                if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+                overlay.style.display = 'none';
+                canvas.classList.remove('multi');
+                if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+                _revealDamageResult(d2, r2, l2, lr);
+            };
+
             try {
+                const canvasSize = dieCount >= 2 ? 180 : 140;
                 _dmgDice3d = new Dice3D(canvas, {
-                    size: 140, dieType: dieType, duration: DMG_ROLL_MS,
+                    size: canvasSize, dieType: dieType, duration: DMG_ROLL_MS,
                     particlesContainer: particles
                 });
 
-                // Roll to a face value (clamped to die max)
-                const dieMax = { d4: 4, d6: 6, d8: 8, d10: 10, d12: 12, d20: 20 }[dieType] || 6;
-                const faceValue = Math.min(lr.d, dieMax) || (Math.floor(Math.random() * dieMax) + 1);
+                if (dieCount >= 2) {
+                    // ── MULTI-DICE: roll N dice simultaneously ──
+                    const configs = individualResults.map(v => ({ value: v }));
 
-                // Double-fire guard: both timer and skip call finish(), only first one executes
-                let _dmgDone = false;
-                const finishDmgOverlay = () => {
-                    if (_dmgDone) return;
-                    _dmgDone = true;
-                    if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
-                    overlay.style.display = 'none';
-                    if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-                    _revealDamageResult(d2, r2, l2, lr);
-                };
-
-                _dmgDice3d.roll(faceValue, () => {
-                    // ── Phase 5: Dice landed — show result label for reading ──
-                    if (label3d) {
-                        label3d.textContent = `${lr.d} dano`;
-                        label3d.className = 'dmg-dice3d-label ' + (lr.crit ? 'crit' : 'hit');
-                    }
-
-                    // Show skip button after 500ms of result display
-                    setTimeout(() => {
-                        if (!_dmgDone && skipBtn) {
-                            skipBtn.classList.add('visible');
-                            skipBtn.onclick = finishDmgOverlay;
+                    _dmgDice3d.rollMultiple(configs, () => {
+                        // All dice landed — show individual results
+                        if (label3d) {
+                            const rollsText = individualResults.join(' + ');
+                            const modText = parsed.modifier ? ` + ${parsed.modifier}` : '';
+                            label3d.textContent = rollsText + modText;
+                            label3d.className = 'dmg-dice3d-label hit';
                         }
-                    }, 500);
 
-                    // Auto-advance after DMG_RESULT_HOLD ms
-                    setTimeout(finishDmgOverlay, DMG_RESULT_HOLD);
-                });
+                        // Hold individual results, then fusion
+                        setTimeout(() => {
+                            if (_dmgDone) return;
+                            if (label3d) { label3d.textContent = ''; label3d.className = 'dmg-dice3d-label rolling'; }
+
+                            _dmgDice3d.fusionTo(lr.d, () => {
+                                // Fusion complete — show total
+                                if (label3d) {
+                                    label3d.textContent = `${lr.d} dano`;
+                                    label3d.className = 'dmg-dice3d-label ' + (lr.crit ? 'crit' : 'hit');
+                                }
+
+                                setTimeout(() => {
+                                    if (!_dmgDone && skipBtn) {
+                                        skipBtn.classList.add('visible');
+                                        skipBtn.onclick = finishDmgOverlay;
+                                    }
+                                }, 500);
+                                setTimeout(finishDmgOverlay, DMG_RESULT_HOLD);
+                            });
+                        }, DMG_FUSION_HOLD);
+                    });
+                } else {
+                    // ── SINGLE DIE: original behavior ──
+                    const dieMax = { d4: 4, d6: 6, d8: 8, d10: 10, d12: 12, d20: 20 }[dieType] || 6;
+                    const faceValue = Math.min(lr.d, dieMax) || (Math.floor(Math.random() * dieMax) + 1);
+
+                    _dmgDice3d.roll(faceValue, () => {
+                        if (label3d) {
+                            label3d.textContent = `${lr.d} dano`;
+                            label3d.className = 'dmg-dice3d-label ' + (lr.crit ? 'crit' : 'hit');
+                        }
+                        setTimeout(() => {
+                            if (!_dmgDone && skipBtn) {
+                                skipBtn.classList.add('visible');
+                                skipBtn.onclick = finishDmgOverlay;
+                            }
+                        }, 500);
+                        setTimeout(finishDmgOverlay, DMG_RESULT_HOLD);
+                    });
+                }
             } catch (e) {
                 console.warn('[COMBAT] Dice3D damage roll failed:', e);
                 overlay.style.display = 'none';
+                canvas.classList.remove('multi');
                 d2.style.visibility = '';
                 r2.style.visibility = '';
                 l2.style.visibility = '';
                 _fallbackDamageRoll(d2, r2, l2, lr);
             }
         } else {
-            // Fallback: no Dice3D — use emoji cycling
             d2.style.visibility = '';
             r2.style.visibility = '';
             l2.style.visibility = '';
@@ -1797,14 +1843,43 @@ function initDice(lr) {
     }, 1200);
 }
 
-// Parse die type from damage formula string (e.g., "2d6+3" → "d6", "1d8" → "d8")
-function _parseDieType(formula) {
-    if (!formula) return 'd6';
-    const m = formula.match(/d(\d+)/i);
-    if (!m) return 'd6';
-    const n = parseInt(m[1]);
+// Parse dice formula into structured data
+// "2d6+3" → { count:2, type:'d6', sides:6, modifier:3 }
+// "1d8"   → { count:1, type:'d8', sides:8, modifier:0 }
+function _parseDiceFormula(formula) {
+    if (!formula) return { count: 1, type: 'd6', sides: 6, modifier: 0 };
+    const m = formula.match(/(\d*)d(\d+)/i);
+    if (!m) return { count: 1, type: 'd6', sides: 6, modifier: 0 };
+    const count = parseInt(m[1]) || 1;
+    const sides = parseInt(m[2]);
     const valid = [4, 6, 8, 10, 12, 20];
-    return valid.includes(n) ? `d${n}` : 'd6';
+    const type = valid.includes(sides) ? `d${sides}` : 'd6';
+    const actualSides = valid.includes(sides) ? sides : 6;
+    const rest = formula.slice(m.index + m[0].length);
+    const modMatch = rest.match(/([+-]\d+)/);
+    const modifier = modMatch ? parseInt(modMatch[1]) : 0;
+    return { count: Math.min(count, 5), type, sides: actualSides, modifier };
+}
+
+// Legacy compat wrapper
+function _parseDieType(formula) {
+    return _parseDiceFormula(formula).type;
+}
+
+// Distribute a total across N dice when backend doesn't send individual rolls
+function _distributeTotal(diceTotal, count, sides) {
+    const results = [];
+    let remaining = Math.max(count, Math.min(diceTotal, count * sides));
+    for (let i = 0; i < count - 1; i++) {
+        const minNeeded = count - i - 1;
+        const maxAllowed = remaining - minNeeded;
+        const value = Math.min(sides, Math.max(1,
+            Math.floor(Math.random() * Math.min(sides, maxAllowed)) + 1));
+        results.push(value);
+        remaining -= value;
+    }
+    results.push(Math.min(sides, Math.max(1, remaining)));
+    return results;
 }
 
 // Fallback damage roll animation (emoji cycling — original behavior)

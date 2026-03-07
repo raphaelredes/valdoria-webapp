@@ -390,6 +390,15 @@
     <!-- Roll button -->
     <button class="roll-btn" id="rollBtn">Rolar Dados</button>
 
+    <!-- Multi-dice controls -->
+    <div class="modifier-row" style="margin-top:12px;margin-bottom:8px">
+        <label>Qtd dados:</label>
+        <button id="diceCountMinus">&minus;</button>
+        <span class="modifier-value" id="diceCountValue">2</span>
+        <button id="diceCountPlus">+</button>
+    </div>
+    <button class="roll-btn" id="rollMultiBtn" style="font-size:0.9rem;padding:10px 32px">Rolar Multi + Fusão</button>
+
     <!-- History -->
     <div class="history-title">Histórico</div>
     <div class="history-log" id="historyLog"></div>
@@ -547,6 +556,68 @@
                     historyLog.removeChild(historyLog.lastChild);
                 }
             }
+
+            // ─── Multi-dice count controls ───
+            var diceCount = 2;
+            document.getElementById('diceCountMinus').addEventListener('click', function () {
+                diceCount = Math.max(2, diceCount - 1);
+                document.getElementById('diceCountValue').textContent = diceCount;
+            });
+            document.getElementById('diceCountPlus').addEventListener('click', function () {
+                diceCount = Math.min(5, diceCount + 1);
+                document.getElementById('diceCountValue').textContent = diceCount;
+            });
+
+            // ─── Multi-dice test (Nd* + fusion) ───
+            document.getElementById('rollMultiBtn').addEventListener('click', function () {
+                if (rolling) return;
+                rolling = true;
+                rollBtn.disabled = true;
+                document.getElementById('rollMultiBtn').disabled = true;
+                resultDisplay.textContent = '...';
+                resultDisplay.className = 'result-display';
+                resultLabel.textContent = 'Rolando ' + diceCount + currentDie + '...';
+
+                // Reinit with current die type
+                if (dice3d) { dice3d.dispose(); dice3d = null; }
+                dice3d = new Dice3D(canvasWrap, {
+                    size: 280,
+                    dieType: currentDie,
+                    particlesContainer: particles
+                });
+
+                var range = DIE_RANGE[currentDie];
+                var values = [];
+                var configs = [];
+                for (var i = 0; i < diceCount; i++) {
+                    var v = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+                    values.push(v);
+                    configs.push({ value: v });
+                }
+                var total = modifier;
+                for (var i = 0; i < values.length; i++) total += values[i];
+
+                dice3d.rollMultiple(configs, function () {
+                    resultDisplay.textContent = values.join(' + ');
+                    resultLabel.textContent = 'Valores individuais';
+
+                    setTimeout(function () {
+                        dice3d.fusionTo(total, function () {
+                            resultDisplay.textContent = total;
+                            resultDisplay.className = 'result-display crit';
+                            resultLabel.textContent = diceCount + currentDie +
+                                (modifier ? (modifier > 0 ? '+' : '') + modifier : '') +
+                                ' = ' + values.join('+') +
+                                (modifier ? (modifier > 0 ? '+' : '') + modifier : '') +
+                                ' = ' + total;
+                            addHistory(diceCount + currentDie, values.join('+'), modifier, total, false, false);
+                            rolling = false;
+                            rollBtn.disabled = false;
+                            document.getElementById('rollMultiBtn').disabled = false;
+                        });
+                    }, 600);
+                });
+            });
 
             // ─── Start with d20 ───
             initDice('d20');

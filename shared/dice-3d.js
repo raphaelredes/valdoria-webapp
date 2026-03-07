@@ -337,6 +337,39 @@ const Dice3D = (() => {
         return mesh;
     }
 
+    /**
+     * Build a special "result die" — a gold cube showing a custom total on all faces.
+     * Used after multi-dice fusion to display the sum (which may exceed die max).
+     */
+    function buildResultDie(total) {
+        var base = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+        var geo = base.toNonIndexed();
+        applyGradient(geo);
+        var mesh = new THREE.Mesh(geo, makeBodyMat());
+        addEdgeWire(mesh, base);
+        // Put the total number on all 6 faces
+        var pos = geo.attributes.position;
+        var centers = [], normals = [];
+        for (var f = 0; f < 6; f++) {
+            var bi = f * 6;
+            var center = new THREE.Vector3();
+            for (var v = 0; v < 6; v++) center.add(new THREE.Vector3().fromBufferAttribute(pos, bi + v));
+            center.divideScalar(6);
+            var a = new THREE.Vector3().fromBufferAttribute(pos, bi);
+            var b = new THREE.Vector3().fromBufferAttribute(pos, bi + 1);
+            var c = new THREE.Vector3().fromBufferAttribute(pos, bi + 2);
+            var n = new THREE.Vector3().crossVectors(b.clone().sub(a), c.clone().sub(a)).normalize();
+            if (n.dot(center) < 0) n.negate();
+            centers.push(center);
+            normals.push(n);
+        }
+        var nums = [total, total, total, total, total, total];
+        addLabels(mesh, nums, centers, normals, 0.92);
+        mesh.userData = { type: 'result', numbers: nums, normals: normals };
+        mesh.castShadow = true;
+        return mesh;
+    }
+
     var BUILDERS = { d4: buildD4, d6: buildD6, d8: buildD8, d10: buildD10, d12: buildD12, d20: buildD20 };
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -387,6 +420,20 @@ const Dice3D = (() => {
             this._idleTime = 0;
             this._dieMesh = null;
             this._particlesEl = opts.particlesContainer || null;
+
+            // Multi-dice state
+            this._multiMode = false;
+            this._multiMeshes = [];
+            this._multiStates = [];
+            this._multiLanded = 0;
+            this._multiCallback = null;
+
+            // Fusion state
+            this._fusionActive = false;
+            this._fusionStart = 0;
+            this._fusionDuration = 500;
+            this._fusionCallback = null;
+            this._fusionMesh = null;
 
             var W = this._size, H = this._size;
 
@@ -448,24 +495,34 @@ const Dice3D = (() => {
             if (this._disposed) return;
             this._animFrame = requestAnimationFrame(this._animate);
 
-            if (this._rolling) {
+            if (this._fusionActive) {
+                this._updateFusion(time);
+            } else if (this._multiMode && this._rolling) {
+                this._updateMultiRoll(time);
+            } else if (this._rolling) {
                 this._updateRoll(time);
             } else if (this._showingResult) {
-                // Breathing glow pulse on result
                 this._resultTime += 0.02;
                 var pulse = 0.3 + 0.2 * Math.sin(this._resultTime * 2.5);
                 this._resultGlow.intensity = pulse;
-                // Subtle scale breathing
-                if (this._dieMesh) {
+                var target = this._fusionMesh || this._dieMesh;
+                if (target) {
                     var s = 1.0 + 0.008 * Math.sin(this._resultTime * 2.0);
-                    this._dieMesh.scale.setScalar(s);
+                    target.scale.setScalar(s);
+                }
+                // Fusion die stays static — total is displayed on its face
+
+                // Multi-mode result: gentle breathing on all meshes
+                if (this._multiMode && this._multiMeshes.length > 0) {
+                    for (var i = 0; i < this._multiMeshes.length; i++) {
+                        var ms = 1.0 + 0.006 * Math.sin(this._resultTime * 2.0 + i * 0.5);
+                        this._multiMeshes[i].scale.setScalar(this._multiStates[i].baseScale * ms);
+                    }
                 }
             } else if (this._dieMesh) {
-                // Gentle idle rotation
                 this._idleTime += 0.012;
                 this._dieMesh.rotation.y += 0.003;
                 this._dieMesh.rotation.x += 0.001;
-                // Idle: no extra lights
                 this._orbitLight.intensity = 0;
                 this._resultGlow.intensity = 0;
             }
@@ -663,10 +720,291 @@ const Dice3D = (() => {
             return this._rollDuration;
         }
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  MULTI-DICE: rollMultiple + fusionTo
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        /**
+         * Roll multiple dice simultaneously in one scene.
+         * @param {Array<{value: number}>} configs - Per-die result values
+         * @param {function} onDone - Called when ALL dice have landed
+         * @returns {number} total duration in ms
+         */
+        rollMultiple(configs, onDone) {
+            if (!configs || configs.length <= 1) {
+                return this.roll(configs && configs[0] ? configs[0].value : 1, onDone);
+            }
+
+            var self = this;
+            var count = Math.min(configs.length, 5);
+            this._showingResult = false;
+            this._rolling = true;
+            this._multiMode = true;
+            this._multiLanded = 0;
+            this._multiCallback = onDone;
+            this._fusionActive = false;
+            this._fusionMesh = null;
+            haptic('medium');
+
+            // Remove single die mesh
+            if (this._dieMesh) { this._scene.remove(this._dieMesh); this._dieMesh = null; }
+            // Remove previous multi meshes
+            for (var k = 0; k < this._multiMeshes.length; k++) this._scene.remove(this._multiMeshes[k]);
+            this._multiMeshes = [];
+            this._multiStates = [];
+
+            // Adjust camera for multiple dice
+            this._camera.position.z = 4.5 + (count - 1) * 0.4;
+
+            // Scale factor per die
+            var baseScale = 1.0 / (1 + (count - 1) * 0.15);
+            // Horizontal spacing
+            var totalWidth = (count - 1) * 1.6;
+            var builder = BUILDERS[this._dieType] || BUILDERS.d20;
+            var staggerMs = 80;
+
+            for (var i = 0; i < count; i++) {
+                var mesh = builder();
+                var xPos = count === 1 ? 0 : -totalWidth / 2 + i * 1.6;
+                mesh.position.set(xPos, 0, 0);
+                mesh.scale.setScalar(baseScale);
+                this._scene.add(mesh);
+                this._multiMeshes.push(mesh);
+
+                // Compute target quaternion for this die's result
+                var val = configs[i].value;
+                var finalQuat = getTargetQuaternion(mesh, val);
+
+                // Random start + end euler per die
+                var startE = { x: mesh.rotation.x, y: mesh.rotation.y, z: mesh.rotation.z };
+                var targetE = new THREE.Euler().setFromQuaternion(finalQuat);
+                var spins = 3 + Math.floor(Math.random() * 3);
+                var dir = function () { return Math.random() > 0.5 ? 1 : -1; };
+                var endE = {
+                    x: targetE.x + Math.PI * 2 * spins * dir(),
+                    y: targetE.y + Math.PI * 2 * spins * dir(),
+                    z: targetE.z + Math.PI * 2 * spins * dir(),
+                };
+
+                this._multiStates.push({
+                    startEuler: startE,
+                    endEuler: endE,
+                    finalQuat: finalQuat,
+                    startTime: performance.now() + i * staggerMs,
+                    landed: false,
+                    baseScale: baseScale,
+                    originX: xPos,
+                    value: val,
+                });
+            }
+
+            this._rollStart = performance.now();
+            return this._rollMs + (count - 1) * staggerMs;
+        }
+
+        _updateMultiRoll(time) {
+            var allLanded = true;
+            var self = this;
+
+            for (var i = 0; i < this._multiMeshes.length; i++) {
+                var st = this._multiStates[i];
+                if (st.landed) continue;
+
+                var elapsed = time - st.startTime;
+                if (elapsed < 0) { allLanded = false; continue; } // not started yet (stagger)
+
+                var t = Math.min(elapsed / this._rollMs, 1);
+                var eased = 1 - Math.pow(1 - t, 4);
+                var mesh = this._multiMeshes[i];
+
+                mesh.rotation.x = st.startEuler.x + (st.endEuler.x - st.startEuler.x) * eased;
+                mesh.rotation.y = st.startEuler.y + (st.endEuler.y - st.startEuler.y) * eased;
+                mesh.rotation.z = st.startEuler.z + (st.endEuler.z - st.startEuler.z) * eased;
+
+                var speed = 1 - eased;
+                var scalePulse = st.baseScale * (1.0 + speed * 0.04 * Math.sin(elapsed * 0.015));
+                mesh.scale.setScalar(scalePulse);
+                if (mesh.material) mesh.material.shininess = 100 + speed * 150;
+
+                if (elapsed >= this._rollMs) {
+                    // This die landed
+                    mesh.quaternion.copy(st.finalQuat);
+                    mesh.scale.setScalar(st.baseScale * 1.1);
+                    if (mesh.material) mesh.material.shininess = 100;
+                    st.landed = true;
+                    self._multiLanded++;
+                    haptic('light');
+
+                    // Scale punch
+                    (function (m, bs) {
+                        setTimeout(function () { m.scale.setScalar(bs); }, 100);
+                    })(mesh, st.baseScale);
+                } else {
+                    allLanded = false;
+                }
+            }
+
+            // Shared orbiting light follows first die
+            if (this._multiMeshes.length > 0 && !this._multiStates[0].landed) {
+                var e0 = time - this._multiStates[0].startTime;
+                var sp0 = 1 - Math.min(e0 / this._rollMs, 1);
+                var angle = e0 * 0.008;
+                this._orbitLight.position.set(Math.cos(angle) * 2.5, Math.sin(angle) * 2.5, 1.5);
+                this._orbitLight.intensity = sp0 * 1.5;
+            } else {
+                this._orbitLight.intensity = 0;
+            }
+
+            if (allLanded && this._multiLanded >= this._multiMeshes.length) {
+                this._rolling = false;
+                this._showingResult = true;
+                this._resultTime = 0;
+
+                // Flash on all-landed
+                this._keyLight.intensity = 2.5;
+                var flashI = 2.5;
+                var flashFade = setInterval(function () {
+                    flashI -= 0.12;
+                    if (flashI <= 1.2) { self._keyLight.intensity = 1.2; clearInterval(flashFade); }
+                    else self._keyLight.intensity = flashI;
+                }, 20);
+
+                // Screen shake
+                var el = this._container;
+                if (el) {
+                    el.style.transition = 'transform 0.06s ease-out';
+                    el.style.transform = 'translate(' + (Math.random() - 0.5) * 3 + 'px,' + (Math.random() - 0.5) * 3 + 'px)';
+                    setTimeout(function () { el.style.transform = ''; el.style.transition = ''; }, 120);
+                }
+
+                this._spawnParticles(V_GOLD_HEX, 12);
+                this._resultGlow.intensity = 0.5;
+
+                if (this._multiCallback) this._multiCallback();
+            }
+        }
+
+        /**
+         * Merge all multi-dice into a single die with fusion effect.
+         * Call AFTER rollMultiple's onDone callback.
+         * @param {number} totalValue - The total to display on the fusion die
+         * @param {function} onDone - Called when fusion animation completes
+         */
+        fusionTo(totalValue, onDone) {
+            if (!this._multiMode || this._multiMeshes.length < 2) {
+                if (onDone) onDone();
+                return;
+            }
+            this._showingResult = false;
+            this._fusionActive = true;
+            this._fusionStart = performance.now();
+            this._fusionDuration = 500;
+            this._fusionCallback = onDone;
+            this._fusionTotal = totalValue;
+            this._resultGlow.intensity = 0;
+            haptic('medium');
+        }
+
+        _updateFusion(time) {
+            var elapsed = time - this._fusionStart;
+            var t = Math.min(elapsed / this._fusionDuration, 1);
+            // Ease-in-out cubic
+            var eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+            var self = this;
+
+            // Phase: converge all dice to center + shrink
+            for (var i = 0; i < this._multiMeshes.length; i++) {
+                var mesh = this._multiMeshes[i];
+                var st = this._multiStates[i];
+                var targetScale = st.baseScale * (1 - eased * 0.7); // shrink to 30%
+                mesh.scale.setScalar(targetScale);
+                mesh.position.x = st.originX * (1 - eased); // converge to center
+                // Spin faster during convergence
+                mesh.rotation.y += 0.02 * (1 + eased * 3);
+            }
+
+            // Orbiting light during fusion
+            var angle = elapsed * 0.015;
+            this._orbitLight.position.set(Math.cos(angle) * 1.5, Math.sin(angle) * 1.5, 1.5);
+            this._orbitLight.intensity = eased * 2.0;
+
+            if (elapsed >= this._fusionDuration) {
+                // Remove all multi meshes
+                for (var j = 0; j < this._multiMeshes.length; j++) {
+                    this._scene.remove(this._multiMeshes[j]);
+                }
+                this._multiMeshes = [];
+                this._multiStates = [];
+                this._multiMode = false;
+
+                // Create fusion result die showing total value
+                this._fusionMesh = buildResultDie(this._fusionTotal);
+                this._fusionMesh.position.set(0, 0, 0);
+                this._fusionMesh.scale.setScalar(0.01);
+                // Orient face toward camera, upright (no random twist)
+                var normals = this._fusionMesh.userData.normals;
+                var faceIdx = 0; // all faces show the same total, pick first Z-facing
+                for (var fi = 0; fi < normals.length; fi++) {
+                    if (normals[fi].z > normals[faceIdx].z) faceIdx = fi;
+                }
+                var alignQ = new THREE.Quaternion().setFromUnitVectors(
+                    normals[faceIdx].clone(), new THREE.Vector3(0, 0, 1)
+                );
+                this._fusionMesh.quaternion.copy(alignQ);
+                this._scene.add(this._fusionMesh);
+
+                // Reset camera
+                this._camera.position.z = 4.5;
+
+                // Flash burst
+                this._keyLight.intensity = 4.0;
+                var flashI = 4.0;
+                var flashFade = setInterval(function () {
+                    flashI -= 0.2;
+                    if (flashI <= 1.2) { self._keyLight.intensity = 1.2; clearInterval(flashFade); }
+                    else self._keyLight.intensity = flashI;
+                }, 20);
+
+                this._orbitLight.intensity = 0;
+                haptic('heavy');
+                this._spawnRing(V_GOLD_HEX);
+                this._spawnParticles(V_GOLD_HEX, 25);
+
+                // Scale punch: 0 → 1.2 → 1.0
+                var fm = this._fusionMesh;
+                fm.scale.setScalar(1.2);
+                setTimeout(function () {
+                    if (fm) fm.scale.setScalar(1.0);
+                }, 150);
+
+                // Screen shake
+                var el = this._container;
+                if (el) {
+                    el.style.transition = 'transform 0.06s ease-out';
+                    el.style.transform = 'translate(' + (Math.random() - 0.5) * 5 + 'px,' + (Math.random() - 0.5) * 5 + 'px)';
+                    setTimeout(function () {
+                        el.style.transform = 'translate(' + (Math.random() - 0.5) * 2 + 'px,' + (Math.random() - 0.5) * 2 + 'px)';
+                    }, 60);
+                    setTimeout(function () { el.style.transition = ''; el.style.transform = ''; }, 140);
+                }
+
+                this._fusionActive = false;
+                this._showingResult = true;
+                this._resultTime = 0;
+                this._resultGlow.intensity = 0.7;
+
+                if (this._fusionCallback) this._fusionCallback();
+            }
+        }
+
         dispose() {
             this._disposed = true;
             if (this._animFrame) cancelAnimationFrame(this._animFrame);
             if (this._dieMesh) this._scene.remove(this._dieMesh);
+            if (this._fusionMesh) this._scene.remove(this._fusionMesh);
+            for (var i = 0; i < this._multiMeshes.length; i++) this._scene.remove(this._multiMeshes[i]);
+            this._multiMeshes = [];
             this._renderer.dispose();
             if (this._renderer.domElement.parentNode) {
                 this._renderer.domElement.parentNode.removeChild(this._renderer.domElement);
