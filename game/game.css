@@ -709,7 +709,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--v-bg, #2b2830);
+    background: var(--v-bg, #2a2420);
     animation: locFadeIn 0.35s ease-out;
 }
 @keyframes locFadeIn {

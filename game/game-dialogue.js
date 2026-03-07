@@ -19,7 +19,7 @@ const MOOD_GRADIENTS = {
     angry: 'radial-gradient(ellipse at 50% 0%, #352028 0%, var(--v-bg) 70%)',
     sad: 'radial-gradient(ellipse at 50% 0%, #2a2a30 0%, var(--v-bg) 70%)',
     busy: 'radial-gradient(ellipse at 50% 0%, #302c30 0%, var(--v-bg) 70%)',
-    neutral: 'radial-gradient(ellipse at 50% 0%, #352f38 0%, var(--v-bg) 70%)',
+    neutral: 'radial-gradient(ellipse at 50% 0%, #3a3028 0%, var(--v-bg) 70%)',
 };
 
 // ── Typewriter State ─────────────────────────────────────────

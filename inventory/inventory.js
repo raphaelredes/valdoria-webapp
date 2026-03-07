@@ -4,7 +4,7 @@
 
 const tg = window.Telegram?.WebApp;
 const _vBg = getComputedStyle(document.documentElement)
-    .getPropertyValue('--v-bg').trim() || '#2b2830';
+    .getPropertyValue('--v-bg').trim() || '#2a2420';
 if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg); }
 
 // ── State ──

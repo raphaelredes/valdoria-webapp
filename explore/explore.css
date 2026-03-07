@@ -236,7 +236,7 @@ body {
 .dm-narration {
     font-style: italic;
     line-height: 1.6;
-    color: var(--v-text, #e0d6c8);
+    color: var(--v-text, #d4c8b0);
     margin-bottom: 16px;
     min-height: 40px;
     word-wrap: break-word;
@@ -300,7 +300,7 @@ body {
     background: linear-gradient(165deg, #3a3440 0%, #302a36 100%);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: 8px;
-    color: var(--v-text-bright, #f0ebe4);
+    color: var(--v-text-bright, #e8dcc8);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -358,7 +358,7 @@ body {
     font-size: 18px;
     color: var(--v-text-dim, #8a8090);
 }
-.check-formula b { color: var(--v-text-bright, #f0ebe4); }
+.check-formula b { color: var(--v-text-bright, #e8dcc8); }
 .check-result {
     font-size: 24px;
     font-weight: 900;
@@ -409,7 +409,7 @@ body {
 .dice-pair .die.kept {
     border-color: var(--v-gold, #c4953a);
     box-shadow: 0 0 12px rgba(196, 149, 58, 0.4);
-    color: var(--v-text-bright, #f0ebe4);
+    color: var(--v-text-bright, #e8dcc8);
 }
 .dice-pair .die.dropped {
     opacity: 0.35;
@@ -448,7 +448,7 @@ body {
 .outcome-text {
     font-style: italic;
     line-height: 1.6;
-    color: var(--v-text, #e0d6c8);
+    color: var(--v-text, #d4c8b0);
     margin-bottom: 16px;
     text-align: center;
     word-wrap: break-word;
@@ -511,7 +511,7 @@ body {
 .combat-icon { font-size: 64px; animation: combatShake 0.5s ease; }
 .combat-text {
     font-size: 18px;
-    color: #f0ebe4;
+    color: #e8dcc8;
     text-align: center;
     max-width: 280px;
 }
@@ -523,7 +523,7 @@ body {
 /* Skip button override for burgundy background */
 .combat-overlay .v-skip-btn {
     border-color: rgba(255, 255, 255, 0.3);
-    color: #f0ebe4;
+    color: #e8dcc8;
     background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
 }
 .combat-overlay .v-skip-btn:active {
@@ -550,7 +550,7 @@ body {
 .portal-overlay.active { opacity: 1; pointer-events: all; }
 .portal-icon { font-size: 64px; animation: portalGlow 1.5s ease infinite; }
 .portal-title { font-size: 18px; font-weight: 700; color: #4ad680; letter-spacing: 1px; }
-.portal-summary { text-align: center; color: var(--v-text, #e0d6c8); font-size: 13px; line-height: 1.8; }
+.portal-summary { text-align: center; color: var(--v-text, #d4c8b0); font-size: 13px; line-height: 1.8; }
 .portal-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
 /* Skip button override for dark green background */
 .portal-overlay .v-skip-btn {
@@ -630,11 +630,11 @@ body {
 .death-overlay.active { opacity: 1; pointer-events: all; }
 .death-icon { font-size: 64px; animation: combatShake 0.5s ease; }
 .death-title { font-size: 22px; font-weight: 900; color: #c44; letter-spacing: 2px; }
-.death-summary { text-align: center; color: var(--v-text, #e0d6c8); font-size: 13px; line-height: 1.8; }
+.death-summary { text-align: center; color: var(--v-text, #d4c8b0); font-size: 13px; line-height: 1.8; }
 .death-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
 .death-overlay .v-skip-btn {
     border-color: rgba(255, 255, 255, 0.3);
-    color: #f0ebe4;
+    color: #e8dcc8;
     background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
 }
 .death-overlay .v-skip-btn:active {

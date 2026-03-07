@@ -48,7 +48,7 @@
 .dr-name {
     flex: 1;
     font-size: 0.85rem;
-    color: #e0d6c8;
+    color: #d4c8b0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -73,7 +73,7 @@
     font-weight: 700;
     min-width: 28px;
     text-align: center;
-    color: #e0d6c8;
+    color: #d4c8b0;
     font-variant-numeric: tabular-nums;
 }
 
