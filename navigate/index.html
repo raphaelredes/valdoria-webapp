@@ -8,7 +8,7 @@
     <title>Mapa do Mundo - Lendas de Valdoria</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cinzel+Decorative:wght@700&family=MedievalSharp&family=IM+Fell+English:ital@0;1&family=Pirata+One&family=Almendra:wght@400;700&family=Uncial+Antiqua&family=Metamorphous&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cinzel+Decorative:wght@700&family=MedievalSharp&family=IM+Fell+English:ital@0;1&family=Pirata+One&family=Almendra:wght@400;700&family=Metamorphous&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         var v = Date.now();
@@ -983,19 +983,20 @@
     <script>
         // ═══ FONT PICKER — Player font preference ═══
         var FONT_OPTIONS = [
-            { id: 'medievalsharp', name: 'MedievalSharp', family: "'MedievalSharp', serif" },
-            { id: 'cinzel',        name: 'Cinzel',        family: "'Cinzel', serif" },
-            { id: 'imfell',        name: 'IM Fell English', family: "'IM Fell English', serif" },
-            { id: 'pirataone',     name: 'Pirata One',    family: "'Pirata One', cursive" },
-            { id: 'almendra',      name: 'Almendra',      family: "'Almendra', serif" },
-            { id: 'uncial',        name: 'Uncial Antiqua', family: "'Uncial Antiqua', cursive" },
-            { id: 'metamorphous',  name: 'Metamorphous',  family: "'Metamorphous', serif" },
+            { id: 'medievalsharp', name: 'MedievalSharp', family: "'MedievalSharp', serif", scale: 1.0 },
+            { id: 'cinzel',        name: 'Cinzel',        family: "'Cinzel', serif",        scale: 0.92 },
+            { id: 'imfell',        name: 'IM Fell English', family: "'IM Fell English', serif", scale: 1.0 },
+            { id: 'pirataone',     name: 'Pirata One',    family: "'Pirata One', cursive",  scale: 1.15 },
+            { id: 'almendra',      name: 'Almendra',      family: "'Almendra', serif",      scale: 1.05 },
+            { id: 'metamorphous',  name: 'Metamorphous',  family: "'Metamorphous', serif",  scale: 1.05 },
         ];
         var _fpOpen = false;
 
         function initFontPicker() {
             var dd = document.getElementById('font-picker-dropdown');
             var saved = localStorage.getItem('valdoria_font') || 'medievalsharp';
+            // Migrate removed fonts
+            if (saved === 'uncial') { saved = 'medievalsharp'; localStorage.setItem('valdoria_font', saved); }
             FONT_OPTIONS.forEach(function(f) {
                 var btn = document.createElement('button');
                 btn.type = 'button';
@@ -1035,6 +1036,13 @@
             document.body.dataset.font = fontId;
             // Also set body font-family directly for non-overridden elements
             document.body.style.fontFamily = opt.family;
+            // Scale SVG text for fonts that render smaller/larger
+            var s = opt.scale || 1;
+            document.querySelectorAll('#map-svg text, #compass-svg text').forEach(function(t) {
+                var base = parseFloat(t.getAttribute('data-base-size') || t.getAttribute('font-size') || '9.5');
+                if (!t.getAttribute('data-base-size')) t.setAttribute('data-base-size', base);
+                t.setAttribute('font-size', (base * s).toFixed(1) + 'px');
+            });
         }
 
         // Close dropdown when tapping outside
