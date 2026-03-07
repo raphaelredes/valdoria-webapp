@@ -511,68 +511,74 @@ const Dice3D = (() => {
             var mesh = this._dieMesh;
             if (!mesh) return;
             var ra = this._rollAnim;
-            var elapsedSec = elapsed / 1000;
+            var sec = elapsed / 1000;
 
-            var computeSpinQ = function (tSec) {
-                var sa = (ra.initialSpin / ra.spinDecay) * (1 - Math.exp(-ra.spinDecay * tSec));
-                var pq = new THREE.Quaternion().setFromEuler(new THREE.Euler(
-                    ra.spinDirX * ra.spinScaleX * sa,
-                    ra.spinDirY * ra.spinScaleY * sa * 1.1,
-                    ra.spinDirZ * ra.spinScaleZ * sa * 0.8
-                ));
-                var tsa = (ra.tumbleSpeed / ra.tumbleDecay) * (1 - Math.exp(-ra.tumbleDecay * tSec));
-                var pa = tSec * ra.precessionSpeed;
-                var cta = ra.tumbleAxis.clone().applyAxisAngle(ra.precessionAxis, pa);
-                var tq = new THREE.Quaternion().setFromAxisAngle(cta, tsa);
-                return pq.multiply(tq);
-            };
+            // Compute base spin quaternion (continuous, decaying)
+            var spinQ = ra.spinQ(sec);
 
-            if (elapsedSec < ra.tThrowEnd) {
-                var tl = elapsedSec;
-                mesh.position.set(
-                    clampPos(ra.vx0 * tl),
-                    Math.max(0, ra.v0_throw * tl - 0.5 * ra.G * tl * tl),
-                    clampPos(ra.vz0 * tl));
-                mesh.quaternion.copy(computeSpinQ(elapsedSec));
-            } else if (elapsedSec < ra.tB1End) {
-                var tl = elapsedSec - ra.tThrowEnd;
-                mesh.position.set(
-                    clampPos(ra.x_at_b1 + ra.vx1 * tl),
-                    Math.max(0, ra.v0_b1 * tl - 0.5 * ra.G * tl * tl),
-                    clampPos(ra.z_at_b1 + ra.vz1 * tl));
-                mesh.quaternion.copy(computeSpinQ(elapsedSec));
-                if (!ra.bounce1Haptic) { ra.bounce1Haptic = true; haptic('light'); }
-            } else if (elapsedSec < ra.tB2End) {
-                var tl = elapsedSec - ra.tB1End;
-                mesh.position.set(
-                    clampPos(ra.x_at_b2 + ra.vx2 * tl),
-                    Math.max(0, ra.v0_b2 * tl - 0.5 * ra.G * tl * tl),
-                    clampPos(ra.z_at_b2 + ra.vz2 * tl));
-                mesh.quaternion.copy(computeSpinQ(elapsedSec));
-                if (!ra.bounce2Haptic) { ra.bounce2Haptic = true; haptic('light'); }
+            // Determine current phase
+            var phase = -1;
+            for (var i = 0; i < ra.bounces.length; i++) {
+                if (sec < ra.bounces[i].tEnd) { phase = i; break; }
+            }
+            if (phase === -1) phase = ra.bounces.length; // settle
+
+            if (phase < ra.bounces.length) {
+                // ─── AIRBORNE PHASE (throw + bounces) ───
+                var b = ra.bounces[phase];
+                var tl = sec - b.tStart;
+
+                // Parabolic arc
+                var px = b.x0 + b.vx * tl;
+                var pz = b.z0 + b.vz * tl;
+                var py = Math.max(0, b.vy * tl - 0.5 * ra.G * tl * tl);
+                mesh.position.set(clampPos(px), py, clampPos(pz));
+
+                // Spin with cumulative bounce perturbation
+                mesh.quaternion.copy(spinQ.clone().multiply(b.rotQ));
+
+                // Haptic on first frame of each bounce
+                if (!b.hapticDone) { b.hapticDone = true; if (phase > 0) haptic('light'); }
             } else {
-                var tl = elapsedSec - ra.tB2End;
+                // ─── SETTLE PHASE ───
+                var tl = sec - ra.settleStart;
                 var p = Math.min(tl / ra.settleTime, 1);
-                var easeSlerpT = 1 - Math.pow(1 - Math.min(1, p * 1.5), 3);
-                var posEase = 1 - Math.pow(1 - p, 3);
-                var x = ra.x_at_settle * (1 - posEase);
-                var z = ra.z_at_settle * (1 - posEase);
-                var y = 0;
-                if (p < 0.4) y = 0.08 * Math.exp(-10 * p) * Math.abs(Math.sin(p * Math.PI * 4));
-                mesh.position.set(x, y, z);
 
-                var currentQ = ra.settleStartQ.clone().slerp(ra.targetQ, easeSlerpT);
-                if (p > 0.15 && p < 0.95) {
-                    var wt = p - 0.15;
-                    var env = Math.exp(-ra.wobbleDamp * wt);
+                // Position: slide to center with friction + micro-bounces
+                var posEase = 1 - Math.pow(1 - p, 2.5);
+                var sx = ra.settleX * (1 - posEase);
+                var sz = ra.settleZ * (1 - posEase);
+                // Damped micro-bounces (3-4 tiny hops)
+                var sy = 0;
+                if (p < 0.5) {
+                    var bp = p / 0.5;
+                    sy = 0.06 * (1 - bp) * Math.abs(Math.sin(bp * Math.PI * 4));
+                }
+                mesh.position.set(sx, sy, sz);
+
+                // Rotation: damped oscillation toward target (rocking)
+                // Base convergence with overshoot
+                var easeBase = 1 - Math.pow(1 - Math.min(1, p * 1.2), 3);
+                // Rocking: decaying sinusoidal overshoot
+                var rock = ra.rockAmp * Math.exp(-ra.rockDamp * p) *
+                    Math.sin(p * ra.rockFreq * Math.PI * 2);
+                var slerpT = Math.max(0, Math.min(1, easeBase + rock));
+
+                var currentQ = ra.settleStartQ.clone().slerp(ra.targetQ, slerpT);
+
+                // Extra wobble on perpendicular axes (die tips between faces)
+                if (p > 0.05 && p < 0.85) {
+                    var wp = p - 0.05;
+                    var env = Math.exp(-ra.wobbleDamp * wp);
                     currentQ.multiply(new THREE.Quaternion().setFromAxisAngle(
-                        ra.wobbleAxis1, ra.wobbleAmp * env * Math.sin(ra.wobbleFreq * wt * Math.PI * 2)));
+                        ra.wobbleAxis1, ra.wobbleAmp * env * Math.sin(ra.wobbleFreq * wp * Math.PI * 2)));
                     currentQ.multiply(new THREE.Quaternion().setFromAxisAngle(
-                        ra.wobbleAxis2, ra.wobbleAmp * 0.6 * env * Math.sin(ra.wobbleFreq * 1.3 * wt * Math.PI * 2 + 0.7)));
+                        ra.wobbleAxis2, ra.wobbleAmp * 0.5 * env * Math.sin(ra.wobbleFreq * 1.4 * wp * Math.PI * 2 + 0.8)));
                 }
                 mesh.quaternion.copy(currentQ);
             }
 
+            // Dynamic shadow
             this._ground.material.opacity = 0.35 - 0.25 * (Math.max(0, mesh.position.y) / 2.5);
 
             if (t >= 1) {
@@ -637,81 +643,165 @@ const Dice3D = (() => {
             var targetQ = getTargetQuaternion(this._dieMesh, resultValue);
             var dieType = this._dieType;
 
-            var G = 40;
-            var throwH = 2.2 + Math.random() * 0.6;
+            // ─── GRAVITY ───
+            var G = 38 + Math.random() * 8;
+
+            // ─── ENTRY DIRECTION (thrown from a random edge) ───
+            var throwSide = Math.random() > 0.5 ? 1 : -1;
+            var startX = throwSide * (1.2 + Math.random() * 0.8);
+            var startZ = (Math.random() - 0.5) * 1.2;
+
+            // ─── THROW ARC (varied height) ───
+            var throwH = 1.8 + Math.random() * 1.6;
             var v0_throw = Math.sqrt(2 * G * throwH);
-            var t_throw = 2 * v0_throw / G;
 
-            var e1 = 0.55 + Math.random() * 0.15;
-            var v0_b1 = e1 * v0_throw;
-            var t_b1 = 2 * v0_b1 / G;
+            // Horizontal velocity: biased toward center from start position
+            var vx0 = -startX * (1.8 + Math.random() * 1.5) + (Math.random() - 0.5) * 2.5;
+            var vz0 = -startZ * (1.0 + Math.random() * 1.0) + (Math.random() - 0.5) * 1.5;
 
-            var e2 = 0.50 + Math.random() * 0.15;
-            var v0_b2 = e2 * v0_b1;
-            var t_b2 = 2 * v0_b2 / G;
+            // ─── BOUNCE SEQUENCE (3-4 bounces with restitution + friction) ───
+            var numBounces = 3 + (Math.random() > 0.6 ? 1 : 0);
+            var restitution = [
+                0.50 + Math.random() * 0.18,
+                0.40 + Math.random() * 0.18,
+                0.30 + Math.random() * 0.15,
+                0.20 + Math.random() * 0.12,
+            ];
+            var hFric = 0.45 + Math.random() * 0.2;
 
-            var totalAirborne = t_throw + t_b1 + t_b2;
-            var settleTime = 0.42;
-            var duration = (totalAirborne + settleTime) * 1000;
-
-            var vx0 = (Math.random() - 0.5) * 6.0;
-            var vz0 = (Math.random() - 0.5) * 2.0;
-            var hFric = 0.5 + Math.random() * 0.2;
-            var x_at_b1 = clampPos(vx0 * t_throw);
-            var z_at_b1 = clampPos(vz0 * t_throw);
-            var vx1 = vx0 * hFric + (Math.random() - 0.5) * 0.5;
-            var vz1 = vz0 * hFric + (Math.random() - 0.5) * 0.3;
-            var x_at_b2 = clampPos(x_at_b1 + vx1 * t_b1);
-            var z_at_b2 = clampPos(z_at_b1 + vz1 * t_b1);
-            var vx2 = vx1 * hFric + (Math.random() - 0.5) * 0.3;
-            var vz2 = vz1 * hFric + (Math.random() - 0.5) * 0.2;
-            var x_at_settle = clampPos(x_at_b2 + vx2 * t_b2);
-            var z_at_settle = clampPos(z_at_b2 + vz2 * t_b2);
-
+            // ─── SPIN PARAMETERS (die-type scaled) ───
             var spinMult = { d4: 0.7, d6: 0.85, d8: 0.95, d10: 1.0, d12: 1.05, d20: 1.1 }[dieType] || 1.0;
-            var initialSpin = (10 + Math.random() * 4) * spinMult;
-            var spinDecay = 2.0 + Math.random() * 0.5;
-            var spinDirX = Math.random() > 0.5 ? 1 : -1;
-            var spinDirY = Math.random() > 0.5 ? 1 : -1;
-            var spinDirZ = Math.random() > 0.5 ? 1 : -1;
-            var spinScaleX = 0.8 + Math.random() * 0.4;
-            var spinScaleY = 0.8 + Math.random() * 0.4;
-            var spinScaleZ = 0.5 + Math.random() * 0.4;
+            var initialSpin = (10 + Math.random() * 6) * spinMult;
+            var spinDecay = 1.8 + Math.random() * 0.7;
+            var sdX = Math.random() > 0.5 ? 1 : -1;
+            var sdY = Math.random() > 0.5 ? 1 : -1;
+            var sdZ = Math.random() > 0.5 ? 1 : -1;
+            var ssX = 0.7 + Math.random() * 0.6;
+            var ssY = 0.7 + Math.random() * 0.6;
+            var ssZ = 0.4 + Math.random() * 0.5;
 
+            // Tumble (second rotation axis with precession)
             var tumbleAxis = new THREE.Vector3(
                 Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5
             ).normalize();
-            var tumbleSpeed = 3 + Math.random() * 4;
-            var tumbleDecay = 1.5 + Math.random() * 1.0;
-            var precessionSpeed = 1.5 + Math.random() * 2.0;
+            var tumbleSpeed = 3 + Math.random() * 5;
+            var tumbleDecay = 1.3 + Math.random() * 1.2;
+            var precessionSpeed = 1.5 + Math.random() * 2.5;
             var precessionAxis = new THREE.Vector3(0, 1, 0);
 
-            var wobbleAmp = 0.06 + Math.random() * 0.06;
-            var wobbleFreq = 14 + Math.random() * 6;
-            var wobbleDamp = 6 + Math.random() * 2;
+            // ─── SPIN FUNCTION (continuous, decaying) ───
+            var spinQ = function (tSec) {
+                var sa = (initialSpin / spinDecay) * (1 - Math.exp(-spinDecay * tSec));
+                var pq = new THREE.Quaternion().setFromEuler(new THREE.Euler(
+                    sdX * ssX * sa, sdY * ssY * sa * 1.1, sdZ * ssZ * sa * 0.8
+                ));
+                var tsa = (tumbleSpeed / tumbleDecay) * (1 - Math.exp(-tumbleDecay * tSec));
+                var pa = tSec * precessionSpeed;
+                var cta = tumbleAxis.clone().applyAxisAngle(precessionAxis, pa);
+                return pq.multiply(new THREE.Quaternion().setFromAxisAngle(cta, tsa));
+            };
 
+            // ─── BUILD BOUNCE TABLE ───
+            // Each bounce: {tStart, tEnd, x0, z0, vx, vz, vy, rotQ, hapticDone}
+            var bounces = [];
+            var tCursor = 0;
+            var cx = startX, cz = startZ;
+            var cvx = vx0, cvz = vz0;
+            var cvy = v0_throw;
+            var cumulRotQ = new THREE.Quaternion();
+
+            // Phase 0: initial throw
+            var t0 = 2 * cvy / G;
+            bounces.push({
+                tStart: 0, tEnd: t0,
+                x0: cx, z0: cz, vx: cvx, vz: cvz, vy: cvy,
+                rotQ: cumulRotQ.clone(),
+                hapticDone: false,
+            });
+            cx = cx + cvx * t0;
+            cz = cz + cvz * t0;
+            tCursor = t0;
+
+            // Subsequent bounces
+            for (var i = 0; i < numBounces; i++) {
+                // Impact: restitution + friction + random lateral kick
+                cvy = cvy * restitution[i];
+                cvx = cvx * hFric + (Math.random() - 0.5) * (1.5 - i * 0.3);
+                cvz = cvz * hFric + (Math.random() - 0.5) * (0.8 - i * 0.15);
+                // Skip if bounce too tiny
+                if (cvy < 0.3) break;
+
+                // Rotation perturbation on impact (key for realism!)
+                // Bigger perturbation for earlier bounces
+                var perturbAngle = (Math.random() - 0.5) * Math.PI * (0.7 - i * 0.15);
+                var perturbAxis = new THREE.Vector3(
+                    Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5
+                ).normalize();
+                var perturbQ = new THREE.Quaternion().setFromAxisAngle(perturbAxis, perturbAngle);
+                cumulRotQ = cumulRotQ.clone().multiply(perturbQ);
+
+                var tb = 2 * cvy / G;
+                bounces.push({
+                    tStart: tCursor, tEnd: tCursor + tb,
+                    x0: cx, z0: cz, vx: cvx, vz: cvz, vy: cvy,
+                    rotQ: cumulRotQ.clone(),
+                    hapticDone: false,
+                });
+                cx = cx + cvx * tb;
+                cz = cz + cvz * tb;
+                tCursor += tb;
+            }
+
+            var totalAirborne = tCursor;
+
+            // ─── SETTLE PARAMETERS ───
+            var settleTime = 0.55 + Math.random() * 0.2;
+            var duration = (totalAirborne + settleTime) * 1000;
+
+            // Settle start quaternion: spin at end of last airborne phase + bounce perturbation
+            var lastBounce = bounces[bounces.length - 1];
+            var settleStartQ = spinQ(totalAirborne).clone().multiply(lastBounce.rotQ);
+
+            // Rocking: damped oscillation (die tips between faces before settling)
+            var rockAmp = 0.10 + Math.random() * 0.08;
+            var rockFreq = 3 + Math.random() * 2;
+            var rockDamp = 4 + Math.random() * 3;
+
+            // Wobble on perpendicular axes
+            var wobbleAmp = 0.05 + Math.random() * 0.05;
+            var wobbleFreq = 12 + Math.random() * 8;
+            var wobbleDamp = 5 + Math.random() * 3;
+
+            // Crit/fail detection
             var maxVal = { d4: 4, d6: 6, d8: 8, d10: 9, d12: 12, d20: 20 }[dieType] || 20;
             var minVal = dieType === 'd10' ? 0 : 1;
             var isCrit = resultValue === maxVal;
             var isFail = resultValue === minVal;
 
             this._rollAnim = {
-                startTime: performance.now(), duration: duration, targetQ: targetQ, G: G,
-                v0_throw: v0_throw, v0_b1: v0_b1, v0_b2: v0_b2,
-                tThrowEnd: t_throw, tB1End: t_throw + t_b1, tB2End: totalAirborne, settleTime: settleTime,
-                vx0: vx0, vz0: vz0, vx1: vx1, vz1: vz1, vx2: vx2, vz2: vz2,
-                x_at_b1: x_at_b1, z_at_b1: z_at_b1, x_at_b2: x_at_b2, z_at_b2: z_at_b2,
-                x_at_settle: x_at_settle, z_at_settle: z_at_settle,
-                initialSpin: initialSpin, spinDecay: spinDecay,
-                spinDirX: spinDirX, spinDirY: spinDirY, spinDirZ: spinDirZ,
-                spinScaleX: spinScaleX, spinScaleY: spinScaleY, spinScaleZ: spinScaleZ,
-                tumbleAxis: tumbleAxis, tumbleSpeed: tumbleSpeed, tumbleDecay: tumbleDecay,
-                precessionSpeed: precessionSpeed, precessionAxis: precessionAxis,
-                wobbleAmp: wobbleAmp, wobbleFreq: wobbleFreq, wobbleDamp: wobbleDamp,
-                wobbleAxis1: new THREE.Vector3(1, 0, 0),
-                wobbleAxis2: new THREE.Vector3(0, 0, 1),
-                bounce1Haptic: false, bounce2Haptic: false,
-                settleStartQ: null,
+                startTime: performance.now(),
+                duration: duration,
+                targetQ: targetQ,
+                G: G,
+                bounces: bounces,
+                spinQ: spinQ,
+                settleStart: totalAirborne,
+                settleTime: settleTime,
+                settleX: cx,
+                settleZ: cz,
+                settleStartQ: settleStartQ,
+                rockAmp: rockAmp,
+                rockFreq: rockFreq,
+                rockDamp: rockDamp,
+                wobbleAmp: wobbleAmp,
+                wobbleFreq: wobbleFreq,
+                wobbleDamp: wobbleDamp,
+                wobbleAxis1: new THREE.Vector3(
+                    0.8 + Math.random() * 0.4, Math.random() * 0.3, Math.random() * 0.3
+                ).normalize(),
+                wobbleAxis2: new THREE.Vector3(
+                    Math.random() * 0.3, Math.random() * 0.3, 0.8 + Math.random() * 0.4
+                ).normalize(),
                 onDone: function () {
                     if (isCrit || isFail) {
                         haptic('heavy');
@@ -736,21 +826,6 @@ const Dice3D = (() => {
                     if (onDone) onDone();
                 },
             };
-
-            var ra = this._rollAnim;
-            var computeSettleQ = function (tSec) {
-                var sa = (ra.initialSpin / ra.spinDecay) * (1 - Math.exp(-ra.spinDecay * tSec));
-                var pq = new THREE.Quaternion().setFromEuler(new THREE.Euler(
-                    ra.spinDirX * ra.spinScaleX * sa,
-                    ra.spinDirY * ra.spinScaleY * sa * 1.1,
-                    ra.spinDirZ * ra.spinScaleZ * sa * 0.8
-                ));
-                var tsa = (ra.tumbleSpeed / ra.tumbleDecay) * (1 - Math.exp(-ra.tumbleDecay * tSec));
-                var pa = tSec * ra.precessionSpeed;
-                var cta = ra.tumbleAxis.clone().applyAxisAngle(ra.precessionAxis, pa);
-                return pq.multiply(new THREE.Quaternion().setFromAxisAngle(cta, tsa));
-            };
-            this._rollAnim.settleStartQ = computeSettleQ(totalAirborne);
 
             return duration;
         }
