@@ -470,9 +470,11 @@
         }
 
         @keyframes flagWave {
-            0%, 100% { transform: skewX(0deg); }
-            30% { transform: skewX(-3deg); }
-            70% { transform: skewX(2deg); }
+            0%   { transform: skewY(0deg) scaleX(1); }
+            20%  { transform: skewY(-2deg) scaleX(0.97); }
+            50%  { transform: skewY(1.5deg) scaleX(1.02); }
+            80%  { transform: skewY(-1deg) scaleX(0.98); }
+            100% { transform: skewY(0deg) scaleX(1); }
         }
 
         .player-marker {
@@ -480,7 +482,7 @@
         }
 
         .banner-flag {
-            animation: flagWave 2.5s ease-in-out infinite;
+            animation: flagWave 2s ease-in-out infinite;
             transform-origin: left center;
         }
 

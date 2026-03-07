@@ -483,17 +483,16 @@ function setupPanZoom() {
     function clamp() {
         const vpW = vp.clientWidth, vpH = vp.clientHeight;
         const mw = SVG_W * S.zoom, mh = SVG_H * S.zoom;
-        // Map edge cannot go more than 30px inside the viewport edge
-        const margin = 30;
-        // When map is larger than viewport: map can slide until only 30px margin remains
-        // When map is smaller than viewport: center it, don't allow sliding off
+        // Allow panning so the map edge reaches the viewport edge (pan=0)
+        // but not beyond (no empty space past the map border).
+        // On the other side, the far edge of the map aligns with far edge of viewport.
         if (mw > vpW) {
-            S.panX = Math.max(vpW - mw + margin, Math.min(-margin, S.panX));
+            S.panX = Math.max(vpW - mw, Math.min(0, S.panX));
         } else {
             S.panX = (vpW - mw) / 2; // center
         }
         if (mh > vpH) {
-            S.panY = Math.max(vpH - mh + margin, Math.min(-margin, S.panY));
+            S.panY = Math.max(vpH - mh, Math.min(0, S.panY));
         } else {
             S.panY = (vpH - mh) / 2; // center
         }

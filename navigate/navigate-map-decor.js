@@ -547,10 +547,14 @@ function renderPlayerBanner(svg) {
         stroke: INK_DARK, 'stroke-width': 1.2, 'stroke-linecap': 'round',
     }));
 
-    // Small triangular pennant (simple, solid color, no emblem)
+    // Square flag with wavy trailing edge (cloth waving effect)
     const flagG = _el('g', { class: 'banner-flag' });
+    const fw = 13, fh = 10;
     flagG.appendChild(_el('path', {
-        d: `M${x},${topY} L${x + 12},${topY + 5} L${x},${topY + 10}`,
+        d: `M${x},${topY}
+            L${x + fw},${topY + 1}
+            C${x + fw + 1},${topY + fh * 0.35} ${x + fw - 1},${topY + fh * 0.65} ${x + fw},${topY + fh}
+            L${x},${topY + fh} Z`,
         fill: '#7b2020', 'fill-opacity': 0.85,
         stroke: INK_DARK, 'stroke-width': 0.6,
     }));
