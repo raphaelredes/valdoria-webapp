@@ -50,6 +50,18 @@ function _buildRoadPath(aPx, bPx, seed) {
     return `M${p0.x},${p0.y} C${p1.x},${p1.y} ${p1.x},${p1.y} ${p2.x},${p2.y} S${p3.x},${p3.y} ${p4.x},${p4.y}`;
 }
 
+/** Point at t (0-1) along an SVG path */
+function _pointOnPath(pathD, t) {
+    const tmp = document.createElementNS(NS, 'path');
+    tmp.setAttribute('d', pathD);
+    const svg = document.getElementById('map-svg');
+    if (!svg) return { x: 0, y: 0 };
+    svg.appendChild(tmp);
+    const pt = tmp.getPointAtLength(tmp.getTotalLength() * t);
+    svg.removeChild(tmp);
+    return { x: pt.x, y: pt.y };
+}
+
 function renderRoads(group, fogState) {
     for (const [aId, bId] of CONNECTION_EDGES) {
         const af = fogState[aId], bf = fogState[bId];
@@ -78,14 +90,15 @@ function renderRoads(group, fogState) {
         if (dash !== 'none') road.setAttribute('stroke-dasharray', dash);
         group.appendChild(road);
 
-        // Distance badge at midpoint
+        // Distance badge on the curve midpoint
         if (anyExp) {
             const dist = getConnectionDistance(aId, bId);
-            const mx = (aPx.x + bPx.x) / 2 + (srand(seed+99)-0.5)*6;
-            const my = (aPx.y + bPx.y) / 2 + (srand(seed+100)-0.5)*4;
+            const mid = _pointOnPath(pathD, 0.5);
+            const mx = mid.x + (srand(seed+99)-0.5)*4;
+            const my = mid.y + (srand(seed+100)-0.5)*3;
             const txt = _el('text', { x: mx, y: my + 3, 'text-anchor': 'middle',
                 'font-size': '8px', 'font-weight': '700', 'font-family': "'Cinzel', serif",
-                fill: INK, 'fill-opacity': bothExp ? 0.4 : 0.25, 'pointer-events': 'none' });
+                fill: INK, 'fill-opacity': bothExp ? 0.45 : 0.25, 'pointer-events': 'none' });
             txt.textContent = dist;
             group.appendChild(txt);
         }
@@ -137,53 +150,44 @@ function _drawSettlementIcon(g, x, y, sz) {
 }
 
 function _drawBiomeIcon(g, x, y, biome, sz, locName) {
-    // Check location name for special types (fort, ruins, passage, etc.)
     const nm = (locName || '').toLowerCase();
-    const isFort = nm.includes('forte') || nm.includes('fortaleza') || nm.includes('bastião');
-    const isRuins = nm.includes('ruína') || nm.includes('ruinas') || nm.includes('antigo') || nm.includes('antiga');
-    const isPassage = nm.includes('passagem') || nm.includes('túnel') || nm.includes('portal');
-    const isTower = nm.includes('torre') || nm.includes('farol');
-    const isLake = nm.includes('lago') || nm.includes('oásis') || nm.includes('fonte');
 
-    if (isFort) {
-        // Fort/stronghold — watchtower with walls
+    // ── Name-based special icons (override biome) ──
+
+    // Fort/stronghold
+    if (nm.includes('forte') || nm.includes('fortaleza') || nm.includes('bastião')) {
         g.appendChild(_el('rect', { x: x-sz*0.6, y: y-sz*0.3, width: sz*1.2, height: sz*0.5,
             fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.8 }));
         g.appendChild(_el('rect', { x: x-sz*0.25, y: y-sz*1.1, width: sz*0.5, height: sz*1.3,
             fill: INK_DARK, 'fill-opacity': 0.08, stroke: INK_DARK, 'stroke-width': 0.8 }));
-        // Crenellations on tower
         for (let c = 0; c < 3; c++) {
             g.appendChild(_el('rect', { x: x-sz*0.25 + c * sz*0.18, y: y-sz*1.2, width: sz*0.12, height: sz*0.12,
                 fill: INK_DARK, 'fill-opacity': 0.3 }));
         }
-        // Flag
         g.appendChild(_el('line', { x1: x, y1: y-sz*1.1, x2: x, y2: y-sz*1.5,
             stroke: INK_DARK, 'stroke-width': 0.4 }));
         g.appendChild(_el('path', { d: `M${x},${y-sz*1.5} L${x+sz*0.35},${y-sz*1.4} L${x},${y-sz*1.3}`,
             fill: INK_DARK, 'fill-opacity': 0.25, stroke: INK_DARK, 'stroke-width': 0.3 }));
         return;
     }
-    if (isRuins) {
-        // Ruins — broken columns/walls
+    // Ruins — broken columns with arch
+    if (nm.includes('ruína') || nm.includes('ruinas') || nm.includes('ruínas')) {
         g.appendChild(_el('line', { x1: x-sz*0.5, y1: y+2, x2: x-sz*0.5, y2: y-sz*0.8,
             stroke: INK_DARK, 'stroke-width': 1.0 }));
         g.appendChild(_el('line', { x1: x+sz*0.5, y1: y+2, x2: x+sz*0.5, y2: y-sz*0.5,
             stroke: INK_DARK, 'stroke-width': 0.8 }));
-        // Broken arch between
         g.appendChild(_el('path', { d: `M${x-sz*0.5},${y-sz*0.6} Q${x},${y-sz*1.2} ${x+sz*0.3},${y-sz*0.5}`,
             fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-dasharray': '2 1.5' }));
-        // Rubble dots
         for (let i = 0; i < 4; i++) {
             g.appendChild(_el('circle', { cx: x + (srand(i*17)-0.5)*sz, cy: y+1+srand(i*23)*2,
                 r: 0.6, fill: INK_DARK, 'fill-opacity': 0.25 }));
         }
         return;
     }
-    if (isPassage) {
-        // Underground passage — tunnel entrance
+    // Underground passage — tunnel mouth with steps
+    if (nm.includes('passagem') || nm.includes('túnel') || nm.includes('portal')) {
         g.appendChild(_el('path', { d: `M${x-sz*0.7},${y+2} Q${x-sz*0.7},${y-sz*0.6} ${x},${y-sz*0.8} Q${x+sz*0.7},${y-sz*0.6} ${x+sz*0.7},${y+2}`,
             fill: INK_DARK, 'fill-opacity': 0.15, stroke: INK_DARK, 'stroke-width': 0.9 }));
-        // Steps inside
         for (let i = 0; i < 3; i++) {
             const sy = y + 1 - i * 2;
             const sw = sz * (0.5 - i * 0.1);
@@ -192,15 +196,128 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
         }
         return;
     }
-    if (isTower) {
-        // Watchtower — tall narrow structure
+    // Tower/lighthouse
+    if (nm.includes('torre') || nm.includes('farol')) {
         g.appendChild(_el('rect', { x: x-sz*0.2, y: y-sz*1.3, width: sz*0.4, height: sz*1.5,
             fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.8 }));
         g.appendChild(_el('path', { d: `M${x-sz*0.35},${y-sz*1.3} L${x},${y-sz*1.7} L${x+sz*0.35},${y-sz*1.3}`,
             fill: INK_DARK, 'fill-opacity': 0.04, stroke: INK_DARK, 'stroke-width': 0.7 }));
         return;
     }
+    // Camp/tribe — tent with campfire
+    if (nm.includes('acampamento') || nm.includes('tribo') || nm.includes('ninho')) {
+        // Tent (triangular A-frame)
+        g.appendChild(_el('path', {
+            d: `M${x-sz*0.7},${y+2} L${x},${y-sz*0.9} L${x+sz*0.7},${y+2}`,
+            fill: INK_DARK, 'fill-opacity': 0.08, stroke: INK_DARK, 'stroke-width': 0.8 }));
+        // Tent opening
+        g.appendChild(_el('path', {
+            d: `M${x-sz*0.2},${y+2} L${x},${y-sz*0.2} L${x+sz*0.2},${y+2}`,
+            fill: INK_DARK, 'fill-opacity': 0.15, stroke: INK_DARK, 'stroke-width': 0.4 }));
+        // Small campfire to the side
+        const fx = x + sz * 0.8, fy = y + 1;
+        g.appendChild(_el('path', {
+            d: `M${fx-1.5},${fy} Q${fx},${fy-3} ${fx+1.5},${fy}`,
+            fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.5 }));
+        // Smoke wisps
+        g.appendChild(_el('path', {
+            d: `M${fx},${fy-3} Q${fx+1},${fy-5} ${fx-0.5},${fy-6}`,
+            fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.3 }));
+        return;
+    }
+    // Mountain pass — gap between two peaks
+    if (nm.includes('passo') || nm.includes('desfiladeiro')) {
+        // Left peak
+        g.appendChild(_el('line', { x1: x-sz*1.2, y1: y+2, x2: x-sz*0.3, y2: y-sz*1.0,
+            stroke: INK_DARK, 'stroke-width': 0.9 }));
+        g.appendChild(_el('line', { x1: x-sz*0.3, y1: y-sz*1.0, x2: x-sz*0.1, y2: y-sz*0.2,
+            stroke: INK_DARK, 'stroke-width': 0.7 }));
+        // Right peak
+        g.appendChild(_el('line', { x1: x+sz*0.1, y1: y-sz*0.2, x2: x+sz*0.4, y2: y-sz*1.1,
+            stroke: INK_DARK, 'stroke-width': 0.9 }));
+        g.appendChild(_el('line', { x1: x+sz*0.4, y1: y-sz*1.1, x2: x+sz*1.2, y2: y+2,
+            stroke: INK_DARK, 'stroke-width': 0.7 }));
+        // Pass gap (valley between)
+        g.appendChild(_el('path', {
+            d: `M${x-sz*0.1},${y-sz*0.2} Q${x},${y} ${x+sz*0.1},${y-sz*0.2}`,
+            fill: 'none', stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.4 }));
+        // Path through pass (dashed)
+        g.appendChild(_el('line', { x1: x, y1: y+3, x2: x, y2: y-sz*0.1,
+            stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-dasharray': '1.5 1.5', 'stroke-opacity': 0.3 }));
+        return;
+    }
+    // Field/plains (non-settlement open terrain)
+    if (nm.includes('campo') || nm.includes('planície') || nm.includes('pradaria')) {
+        // Wheat/grass stalks (3 curved blades)
+        for (let i = -1; i <= 1; i++) {
+            const gx = x + i * sz * 0.5;
+            const gh = sz * 0.8 + Math.abs(i) * sz * 0.2;
+            const lean = i * 1.5;
+            g.appendChild(_el('path', {
+                d: `M${gx},${y+2} Q${gx+lean*0.3},${y-gh*0.5} ${gx+lean},${y-gh}`,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-linecap': 'round' }));
+            // Seed head (small oval at tip)
+            g.appendChild(_el('ellipse', { cx: gx+lean, cy: y-gh-1, rx: 0.8, ry: 1.8,
+                fill: INK_DARK, 'fill-opacity': 0.3, stroke: INK_DARK, 'stroke-width': 0.3 }));
+        }
+        // Ground line
+        g.appendChild(_el('path', {
+            d: `M${x-sz},${y+2} Q${x},${y+1} ${x+sz},${y+2}`,
+            fill: 'none', stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.3 }));
+        return;
+    }
+    // Crater/volcanic landmark
+    if (nm.includes('cratera') || nm.includes('vulcã')) {
+        // Wide crater rim
+        g.appendChild(_el('ellipse', { cx: x, cy: y-sz*0.2, rx: sz*0.8, ry: sz*0.4,
+            fill: INK_DARK, 'fill-opacity': 0.15, stroke: INK_DARK, 'stroke-width': 0.8 }));
+        // Inner darkness
+        g.appendChild(_el('ellipse', { cx: x, cy: y-sz*0.2, rx: sz*0.5, ry: sz*0.25,
+            fill: INK_DARK, 'fill-opacity': 0.25, stroke: 'none' }));
+        // Rising smoke/heat
+        for (let i = 0; i < 3; i++) {
+            const sx = x + (i-1)*sz*0.3;
+            g.appendChild(_el('path', {
+                d: `M${sx},${y-sz*0.5} Q${sx+(i-1)*1.5},${y-sz*1.0} ${sx-(i-1)*0.5},${y-sz*1.4}`,
+                fill: 'none', stroke: INK, 'stroke-width': 0.35, 'stroke-opacity': 0.3 }));
+        }
+        return;
+    }
+    // Frozen waste / icy terrain
+    if (nm.includes('congelado') || nm.includes('ermo') || nm.includes('gelo') || nm.includes('gelado')) {
+        // Icicle formation
+        for (let i = -1; i <= 1; i++) {
+            const ix = x + i * sz * 0.4;
+            const ih = sz * (0.8 + Math.abs(i) * 0.3);
+            g.appendChild(_el('polygon', {
+                points: `${ix-sz*0.15},${y+1} ${ix},${y-ih} ${ix+sz*0.15},${y+1}`,
+                fill: INK_LIGHT, 'fill-opacity': 0.08, stroke: INK_LIGHT, 'stroke-width': 0.5, 'stroke-opacity': 0.5 }));
+        }
+        // Frost crystal below
+        const fy = y + 3;
+        for (let a = 0; a < 3; a++) {
+            const angle = a * Math.PI / 3;
+            g.appendChild(_el('line', {
+                x1: x - Math.cos(angle)*sz*0.3, y1: fy - Math.sin(angle)*sz*0.3,
+                x2: x + Math.cos(angle)*sz*0.3, y2: fy + Math.sin(angle)*sz*0.3,
+                stroke: INK_LIGHT, 'stroke-width': 0.3, 'stroke-opacity': 0.3 }));
+        }
+        return;
+    }
+    // Cemetery/graveyard
+    if (nm.includes('cemitério') || nm.includes('catacumba') || nm.includes('necrópole')) {
+        // Ground mound
+        g.appendChild(_el('path', { d: `M${x-sz*0.6},${y+3} Q${x},${y+1} ${x+sz*0.6},${y+3}`,
+            fill: 'none', stroke: INK_DARK, 'stroke-width': 0.4 }));
+        // Cross
+        g.appendChild(_el('line', { x1: x, y1: y+2, x2: x, y2: y-sz*1.3,
+            stroke: INK_DARK, 'stroke-width': 1.2 }));
+        g.appendChild(_el('line', { x1: x-sz*0.5, y1: y-sz*0.6, x2: x+sz*0.5, y2: y-sz*0.6,
+            stroke: INK_DARK, 'stroke-width': 1.0 }));
+        return;
+    }
 
+    // ── Biome-based fallback icons ──
     switch (biome) {
         case 'forest':
             // Tree cluster (3 overlapping trees)
@@ -226,42 +343,43 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
                 stroke: INK_DARK, 'stroke-width': 0.5 }));
             break;
         case 'swamp':
-            // Reeds + water
+            // Water lines + cypress stumps
             for (let i = 0; i < 3; i++) {
                 const wy = y - 2 + i * 2.5;
                 g.appendChild(_el('path', { d: `M${x-sz},${wy} Q${x},${wy-1.5} ${x+sz},${wy}`,
-                    fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6 }));
+                    fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5 }));
             }
-            for (let i = -1; i <= 1; i += 2) {
-                g.appendChild(_el('line', { x1: x+i*sz*0.4, y1: y+2, x2: x+i*sz*0.4, y2: y-sz*0.8,
-                    stroke: INK_DARK, 'stroke-width': 0.5 }));
-                g.appendChild(_el('ellipse', { cx: x+i*sz*0.4, cy: y-sz, rx: 0.8, ry: 2,
-                    fill: INK_DARK, 'fill-opacity': 0.4 }));
-            }
+            // Cypress stump
+            g.appendChild(_el('path', {
+                d: `M${x-1},${y+2} L${x},${y-sz*0.6} L${x+1},${y+2}`,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6 }));
+            // Roots
+            g.appendChild(_el('path', {
+                d: `M${x},${y+1} Q${x-2.5},${y+2} ${x-3},${y+3}`,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35 }));
+            g.appendChild(_el('path', {
+                d: `M${x},${y+1} Q${x+2.5},${y+2} ${x+3},${y+3}`,
+                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35 }));
             break;
         case 'cave':
-            // Cave entrance with rocky surround and dark interior
-            // Rock formation above entrance
+            // Cave entrance with rocky surround
             g.appendChild(_el('path', {
                 d: `M${x-sz*1.1},${y+3} L${x-sz*0.8},${y-sz*0.3} L${x-sz*0.4},${y-sz*0.9} L${x},${y-sz*1.2} L${x+sz*0.3},${y-sz*0.8} L${x+sz*0.7},${y-sz*0.2} L${x+sz*1.1},${y+3}`,
                 fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.7 }));
-            // Dark entrance arch
             g.appendChild(_el('path', {
                 d: `M${x-sz*0.5},${y+3} Q${x-sz*0.5},${y-sz*0.3} ${x},${y-sz*0.5} Q${x+sz*0.5},${y-sz*0.3} ${x+sz*0.5},${y+3}`,
                 fill: INK_DARK, 'fill-opacity': 0.25, stroke: INK_DARK, 'stroke-width': 0.6 }));
-            // Stalactites
             g.appendChild(_el('line', { x1: x-sz*0.2, y1: y-sz*0.3, x2: x-sz*0.2, y2: y-sz*0.05,
                 stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.5 }));
             g.appendChild(_el('line', { x1: x+sz*0.15, y1: y-sz*0.35, x2: x+sz*0.15, y2: y-sz*0.1,
                 stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.5 }));
             break;
         case 'desert':
-            // Dunes with oasis palm
+            // Dunes with wind marks
             g.appendChild(_el('path', { d: `M${x-sz*1.2},${y+2} Q${x-sz*0.3},${y-sz*0.5} ${x+sz*0.4},${y+2}`,
                 fill: 'none', stroke: INK_DARK, 'stroke-width': 0.8 }));
             g.appendChild(_el('path', { d: `M${x-sz*0.3},${y+2} Q${x+sz*0.5},${y-sz*0.3} ${x+sz*1.2},${y+2}`,
                 fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6 }));
-            // Wind marks
             for (let i = 0; i < 3; i++) {
                 const wx = x + (i-1)*sz*0.6, wy = y + 3 + i*0.5;
                 g.appendChild(_el('line', { x1: wx-2, y1: wy, x2: wx+3, y2: wy,
@@ -277,6 +395,7 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
                 stroke: INK_DARK, 'stroke-width': 1.0 }));
             break;
         case 'volcanic':
+            // Volcano with smoke
             g.appendChild(_el('polygon', { points: `${x-sz*0.9},${y+3} ${x-1.5},${y-sz} ${x+1.5},${y-sz} ${x+sz*0.9},${y+3}`,
                 fill: INK_DARK, 'fill-opacity': 0.08, stroke: INK_DARK, 'stroke-width': 0.9 }));
             g.appendChild(_el('path', { d: `M${x-2},${y-sz} Q${x},${y-sz+2} ${x+2},${y-sz}`,
@@ -285,19 +404,21 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
                 fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.4 }));
             break;
         case 'snow':
-            g.appendChild(_el('polygon', { points: `${x-sz*0.8},${y+2} ${x},${y-sz} ${x+sz*0.8},${y+2}`,
-                fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.8 }));
-            g.appendChild(_el('path', { d: `M${x-sz*0.3},${y-sz*0.4} Q${x},${y-sz-1} ${x+sz*0.3},${y-sz*0.4}`,
-                fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.7, 'stroke-opacity': 0.5 }));
+            // Ice crystal formation
+            g.appendChild(_el('polygon', { points: `${x-sz*0.15},${y+1} ${x},${y-sz} ${x+sz*0.15},${y+1}`,
+                fill: INK_LIGHT, 'fill-opacity': 0.08, stroke: INK_LIGHT, 'stroke-width': 0.5 }));
+            g.appendChild(_el('polygon', { points: `${x-sz*0.5},${y+1} ${x-sz*0.3},${y-sz*0.6} ${x-sz*0.15},${y+1}`,
+                fill: INK_LIGHT, 'fill-opacity': 0.05, stroke: INK_LIGHT, 'stroke-width': 0.4 }));
+            g.appendChild(_el('polygon', { points: `${x+sz*0.15},${y+1} ${x+sz*0.35},${y-sz*0.5} ${x+sz*0.55},${y+1}`,
+                fill: INK_LIGHT, 'fill-opacity': 0.05, stroke: INK_LIGHT, 'stroke-width': 0.4 }));
             break;
         default:
-            // Plains: house with chimney
-            g.appendChild(_el('rect', { x: x-sz*0.5, y: y-sz*0.4, width: sz, height: sz*0.6,
-                fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.7 }));
-            g.appendChild(_el('path', { d: `M${x-sz*0.6},${y-sz*0.4} L${x},${y-sz} L${x+sz*0.6},${y-sz*0.4}`,
-                fill: INK_DARK, 'fill-opacity': 0.04, stroke: INK_DARK, 'stroke-width': 0.7 }));
-            g.appendChild(_el('line', { x1: x+sz*0.3, y1: y-sz*0.7, x2: x+sz*0.3, y2: y-sz*1.1,
-                stroke: INK_DARK, 'stroke-width': 0.4 }));
+            // Generic landmark: signpost
+            g.appendChild(_el('line', { x1: x, y1: y+3, x2: x, y2: y-sz*1.0,
+                stroke: INK_DARK, 'stroke-width': 0.8 }));
+            g.appendChild(_el('path', {
+                d: `M${x},${y-sz*0.7} L${x+sz*0.6},${y-sz*0.8} L${x+sz*0.6},${y-sz*0.5} L${x},${y-sz*0.4}`,
+                fill: INK_DARK, 'fill-opacity': 0.1, stroke: INK_DARK, 'stroke-width': 0.5 }));
     }
 }
 
@@ -408,7 +529,7 @@ function renderLocationMarkers(group, fogState) {
     }
 }
 
-// ── PLAYER BANNER (ink pennant) ──
+// ── PLAYER MARKER (medieval banner on pole) ──
 
 function renderPlayerBanner(svg) {
     const coords = LOCATION_COORDS[S.currentLoc];
@@ -416,53 +537,60 @@ function renderPlayerBanner(svg) {
     const { x, y } = hexToPixel(coords.col, coords.row);
     const mg = _el('g', { class: 'player-marker' });
 
-    // Medieval map pin — pointed drop shape with heraldic shield
-    const pinX = x, pinTip = y - 5; // tip of pin points to location
-    const pinTop = pinTip - 28;
-    const pinR = 10; // radius of the circular head
+    // Pole base point (where it touches the ground at the location)
+    const baseY = y - 2;
+    const poleH = 32;        // total pole height
+    const topY = baseY - poleH;
 
-    // Pin pole (tapered line from tip to circle)
+    // Ground shadow
+    mg.appendChild(_el('ellipse', {
+        cx: x + 1, cy: baseY + 1, rx: 3, ry: 1,
+        fill: '#000', 'fill-opacity': 0.12,
+    }));
+
+    // Pole (vertical line, gold-brown)
+    mg.appendChild(_el('line', {
+        x1: x, y1: baseY, x2: x, y2: topY,
+        stroke: '#8a6a3a', 'stroke-width': 1.6, 'stroke-linecap': 'round',
+    }));
+
+    // Pole finial (small diamond/spearpoint at top)
     mg.appendChild(_el('path', {
-        d: `M${pinX - 2},${pinTip - pinR - 3} L${pinX},${pinTip} L${pinX + 2},${pinTip - pinR - 3}`,
-        fill: INK_DARK, 'fill-opacity': 0.35,
-        stroke: INK_DARK, 'stroke-width': 0.6,
+        d: `M${x},${topY - 4} L${x + 2},${topY} L${x},${topY + 1} L${x - 2},${topY} Z`,
+        fill: '#c4953a', stroke: INK_DARK, 'stroke-width': 0.5,
     }));
 
-    // Circular head (opaque parchment fill so it's always visible)
-    mg.appendChild(_el('circle', {
-        cx: pinX, cy: pinTop + pinR, r: pinR,
-        fill: PARCHMENT, stroke: INK_DARK, 'stroke-width': 1.5,
+    // Banner/pennant (burgundy with gold border, attached to pole)
+    // Wavy flag shape flowing to the right
+    const flagTop = topY + 2;
+    const flagBot = flagTop + 14;
+    const flagW = 16;
+    const flagG = _el('g', { class: 'banner-flag' });
+
+    // Flag body (wavy trailing edge via bezier)
+    flagG.appendChild(_el('path', {
+        d: `M${x},${flagTop}
+            L${x + flagW},${flagTop + 1}
+            C${x + flagW - 2},${flagTop + 5} ${x + flagW + 1},${flagTop + 9} ${x + flagW - 1},${flagBot - 1}
+            L${x},${flagBot} Z`,
+        fill: '#7b2020', stroke: INK_DARK, 'stroke-width': 0.7,
     }));
 
-    // Inner decorative ring
-    mg.appendChild(_el('circle', {
-        cx: pinX, cy: pinTop + pinR, r: pinR - 2.5,
-        fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.5,
+    // Flag highlight stripe (diagonal gold band — heraldic)
+    flagG.appendChild(_el('path', {
+        d: `M${x + 2},${flagTop + 3} L${x + flagW - 3},${flagTop + 2}
+            L${x + flagW - 4},${flagTop + 5} L${x + 2},${flagTop + 6} Z`,
+        fill: '#c4953a', 'fill-opacity': 0.7, stroke: 'none',
     }));
 
-    // Heraldic shield inside circle
-    const sy = pinTop + pinR - 4;
-    mg.appendChild(_el('path', {
-        d: `M${pinX - 5},${sy} L${pinX - 5},${sy + 5} Q${pinX},${sy + 9} ${pinX + 5},${sy + 5} L${pinX + 5},${sy} Z`,
-        fill: INK_DARK, 'fill-opacity': 0.2,
-        stroke: INK_DARK, 'stroke-width': 0.6,
-    }));
-    // Shield cross (heraldic division)
-    mg.appendChild(_el('line', { x1: pinX, y1: sy, x2: pinX, y2: sy + 8,
-        stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.4 }));
-    mg.appendChild(_el('line', { x1: pinX - 5, y1: sy + 3.5, x2: pinX + 5, y2: sy + 3.5,
-        stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.4 }));
+    // Flag cross emblem (small gold cross in center)
+    const cx = x + 8, cy = flagTop + 9;
+    flagG.appendChild(_el('line', { x1: cx, y1: cy - 2.5, x2: cx, y2: cy + 2.5,
+        stroke: '#c4953a', 'stroke-width': 1, 'stroke-linecap': 'round' }));
+    flagG.appendChild(_el('line', { x1: cx - 2, y1: cy, x2: cx + 2, y2: cy,
+        stroke: '#c4953a', 'stroke-width': 1, 'stroke-linecap': 'round' }));
 
-    // Small banner/pennant on top
-    const flagY = pinTop + 1;
-    mg.appendChild(_el('line', { x1: pinX, y1: pinTop + pinR - pinR, x2: pinX, y2: flagY - 6,
-        stroke: INK_DARK, 'stroke-width': 0.8, 'stroke-linecap': 'round' }));
-    mg.appendChild(_el('path', {
-        d: `M${pinX},${flagY - 6} L${pinX + 8},${flagY - 3} L${pinX},${flagY}`,
-        fill: INK_DARK, 'fill-opacity': 0.25,
-        stroke: INK_DARK, 'stroke-width': 0.5,
-    }));
-
+    mg.appendChild(flagG);
     svg.appendChild(mg);
 }
 

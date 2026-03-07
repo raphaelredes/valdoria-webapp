@@ -483,11 +483,20 @@ function setupPanZoom() {
     function clamp() {
         const vpW = vp.clientWidth, vpH = vp.clientHeight;
         const mw = SVG_W * S.zoom, mh = SVG_H * S.zoom;
-        // Keep at least 40% of the smaller dimension visible at all times
-        const padX = Math.min(vpW, mw) * 0.4;
-        const padY = Math.min(vpH, mh) * 0.4;
-        S.panX = Math.max(padX - mw, Math.min(vpW - padX, S.panX));
-        S.panY = Math.max(padY - mh, Math.min(vpH - padY, S.panY));
+        // Map edge cannot go more than 30px inside the viewport edge
+        const margin = 30;
+        // When map is larger than viewport: map can slide until only 30px margin remains
+        // When map is smaller than viewport: center it, don't allow sliding off
+        if (mw > vpW) {
+            S.panX = Math.max(vpW - mw + margin, Math.min(-margin, S.panX));
+        } else {
+            S.panX = (vpW - mw) / 2; // center
+        }
+        if (mh > vpH) {
+            S.panY = Math.max(vpH - mh + margin, Math.min(-margin, S.panY));
+        } else {
+            S.panY = (vpH - mh) / 2; // center
+        }
     }
     // Find closest zoom level to current S.zoom (for session restore)
     let bestDist = Infinity;

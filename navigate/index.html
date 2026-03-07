@@ -254,19 +254,19 @@
         }
 
         .info-biome {
-            font-size: 12px;
+            font-size: 13px;
             color: #8a7060;
             margin-bottom: 6px;
             font-family: 'MedievalSharp', serif;
         }
 
         .info-desc {
-            font-size: 13px;
+            font-size: 14px;
             color: #d4c8b0;
-            line-height: 1.4;
+            line-height: 1.5;
             margin-bottom: 8px;
             font-style: italic;
-            opacity: 0.85;
+            opacity: 0.9;
             font-family: 'MedievalSharp', serif;
         }
 
@@ -278,7 +278,7 @@
         }
 
         .info-tag {
-            font-size: 11px;
+            font-size: 12px;
             color: #8a7060;
             background: rgba(112, 66, 20, 0.12);
             padding: 3px 8px;
@@ -301,7 +301,7 @@
 
         .info-quests,
         .info-dungeons {
-            font-size: 12px;
+            font-size: 13px;
             color: #8a7060;
             margin-bottom: 6px;
             font-family: 'MedievalSharp', serif;
@@ -314,7 +314,7 @@
 
         .info-note {
             display: none;
-            font-size: 12px;
+            font-size: 13px;
             color: #8a7060;
             text-align: center;
             padding: 6px 0;
@@ -463,14 +463,25 @@
             pointer-events: none;
         }
 
-        /* ═══ PLAYER MARKER — Vertical bobbing (pointing indicator) ═══ */
-        @keyframes pinBob {
+        /* ═══ PLAYER MARKER — Banner sway ═══ */
+        @keyframes bannerBob {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
+            50% { transform: translateY(-2px); }
+        }
+
+        @keyframes flagWave {
+            0%, 100% { transform: skewX(0deg); }
+            30% { transform: skewX(-3deg); }
+            70% { transform: skewX(2deg); }
         }
 
         .player-marker {
-            animation: pinBob 2s ease-in-out infinite;
+            animation: bannerBob 3s ease-in-out infinite;
+        }
+
+        .banner-flag {
+            animation: flagWave 2.5s ease-in-out infinite;
+            transform-origin: left center;
         }
 
         /* ═══ LOCATION NODES — Float, hover, shake ═══ */
@@ -595,7 +606,7 @@
         #legend {
             position: absolute;
             bottom: 8px;
-            right: 8px;
+            left: 8px;
             background: rgba(42, 36, 32, 0.88);
             border: 1px solid rgba(112, 66, 20, 0.25);
             border-radius: 3px;
@@ -625,7 +636,7 @@
         /* ═══ SCALE BAR (turn-based distance) ═══ */
         #scale-container {
             position: absolute;
-            bottom: 8px;
+            bottom: 34px;
             left: 8px;
             background: rgba(42, 36, 32, 0.88);
             border: 1px solid rgba(112, 66, 20, 0.25);
@@ -736,10 +747,10 @@
         /* ═══ COMPASS ROSE (fixed overlay) ═══ */
         #compass-overlay {
             position: absolute;
-            bottom: 12px;
-            right: 12px;
-            width: 80px;
-            height: 80px;
+            bottom: 36px;
+            right: 8px;
+            width: 70px;
+            height: 70px;
             z-index: 15;
             pointer-events: none;
             filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
