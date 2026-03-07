@@ -7,11 +7,34 @@
 
 const _COLOR_SQUARES = new Set(['🟩', '🟨', '🟧', '🟥', '🟦', '🟪']);
 
+// Biome detection from location header icons
+const _ICON_TO_BIOME = {
+    '🏔': 'mountain', '⛰': 'mountain',
+    '🌲': 'forest', '🌳': 'forest', '🍃': 'forest',
+    '🐍': 'swamp', '🌿': 'swamp',
+    '🌵': 'desert', '☀': 'desert',
+    '❄': 'snow', '🏔️': 'mountain',
+    '🌋': 'volcanic', '🔥': 'volcanic',
+    '🕳': 'cave', '⛏': 'cave',
+    '🏰': 'city', '🏘': 'city', '⛪': 'city',
+    '🌾': 'plains', '🏕': 'plains',
+    '🧭': 'exploration',
+};
+
+function _detectBiome(text) {
+    if (!text) return '';
+    for (const [icon, biome] of Object.entries(_ICON_TO_BIOME)) {
+        if (text.includes(icon)) return biome;
+    }
+    return '';
+}
+
 // ── Pattern detectors ───────────────────────────────────────────
 
 const _RE_HEADER_DIV   = /⚜️\s*[═]{4,}\s*⚜️/;
 const _RE_FOOTER_DIV   = /💎\s*[━]{4,}\s*💎/;
 const _RE_PLAIN_SEP    = /^[━]{6,}$/;
+const _RE_DOTTED_SEP   = /^[┄]{6,}$/;
 const _RE_BOLD_TITLE   = /^<b>.*<\/b>$/;
 const _RE_CHAR_LINE    = /^👤\s/;
 const _RE_CHAR_META    = /^(?:🏷️|💎)\s.*·/;
@@ -80,6 +103,12 @@ function _tokenize(lines) {
         // Plain separator (━━━━━━)
         if (_RE_PLAIN_SEP.test(t)) {
             blocks.push({ type: 'divider_sm' });
+            i++; continue;
+        }
+
+        // Dotted separator (┄┄┄┄┄┄)
+        if (_RE_DOTTED_SEP.test(t)) {
+            blocks.push({ type: 'divider_dot' });
             i++; continue;
         }
 
@@ -285,6 +314,9 @@ function _render(blocks) {
             case 'divider_sm':
                 out.push('<div class="v-divider v-divider-sm"></div>');
                 break;
+            case 'divider_dot':
+                out.push('<div class="v-divider v-divider-dot"></div>');
+                break;
             case 'spacer':
                 out.push('<div class="v-spacer"></div>');
                 break;
@@ -303,12 +335,24 @@ function _render(blocks) {
 // ── Block renderers ────────────────────────────────────────────
 
 function _renderHeader(b) {
-    let h = '<div class="v-location-header">';
+    const title = _esc(b.title || '');
+    const biome = _detectBiome(b.title || '');
+    const biomeAttr = biome ? ` data-biome="${biome}"` : '';
+
+    // Extract leading emoji icon from title
+    const iconMatch = title.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)/u);
+    const icon = iconMatch ? iconMatch[0] : '';
+    const titleText = icon ? title.slice(icon.length).replace(/^\s*[—\-:]\s*/, '').trim() : title;
+
+    let h = `<div class="v-location-header"${biomeAttr}>`;
     if (b.time) {
         h += `<div class="v-time-bar">${_esc(b.time)}</div>`;
     }
-    if (b.title) {
-        h += `<h2>${_esc(b.title)}</h2>`;
+    if (icon) {
+        h += `<span class="v-location-icon">${icon}</span>`;
+    }
+    if (titleText) {
+        h += `<h2>${titleText}</h2>`;
     }
     h += '</div>';
     return h;
