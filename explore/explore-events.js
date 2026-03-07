@@ -55,7 +55,7 @@ function showPOI(poi) {
     // activateOverlay clears dm-choices + dm-narration before showing
     activateOverlay('dm-overlay');
 
-    document.getElementById('dm-icon').textContent = poi.icon || '📜';
+    document.getElementById('dm-icon').textContent = '';
     document.getElementById('dm-title').textContent = poi.title || 'Evento';
     document.getElementById('dm-type').textContent = POI_TYPE_LABELS[poi.type] || poi.type;
 
@@ -157,7 +157,7 @@ function showChoices(poi) {
         const btn = document.createElement('button');
         btn.className = 'dm-choice-btn';
 
-        let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
+        let html = `<span class="choice-icon"></span>`;
         html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
 
         // Stat check display (D&D 5e skill with proficiency + adv/dis indicator)
@@ -217,7 +217,7 @@ function rollD20(mode) {
 
 // Build dice display HTML for the check overlay
 function buildDiceHTML(r1, r2, mode) {
-    if (!r2) return `<span class="dice-single">🎲</span>`;
+    if (!r2) return `<span class="dice-single">d20</span>`;
     const isAdv = mode === 'advantage';
     const kept = isAdv ? Math.max(r1, r2) : Math.min(r1, r2);
     const label = isAdv ? 'VANTAGEM' : 'DESVANTAGEM';
@@ -305,7 +305,7 @@ function performStatCheck(poi, choice) {
             // Animation done — show formula and result
             formulaEl.innerHTML = buildFormula(roll, mod, statName, profMark, dc, total, r1, r2, mode);
 
-            resultEl.textContent = success ? '✅ Sucesso!' : '❌ Falha!';
+            resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
             resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
             try {
@@ -361,16 +361,16 @@ function _showCheckEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, pro
     const wrapper = document.getElementById('dice3d-wrapper');
 
     // Show emoji in the wrapper
-    wrapper.innerHTML = `<div class="dice-display-fallback" style="font-size:64px;text-align:center;animation:diceRoll 0.7s ease">${r2 !== null ? buildDiceHTML(r1, r2, mode) : '🎲'}</div>`;
+    wrapper.innerHTML = `<div class="dice-display-fallback" style="font-size:64px;text-align:center;animation:diceRoll 0.7s ease">${r2 !== null ? buildDiceHTML(r1, r2, mode) : 'd20'}</div>`;
 
     formulaEl.innerHTML = buildFormula(roll, mod, statName, profMark, dc, total, r1, r2, mode);
 
     setTimeout(() => {
         const fb = wrapper.querySelector('.dice-display-fallback');
         if (fb && r2 === null) {
-            fb.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
+            fb.textContent = roll <= 1 ? 'Falha Critica' : roll >= 20 ? 'Critico!' : roll;
         }
-        resultEl.textContent = success ? '✅ Sucesso!' : '❌ Falha!';
+        resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
         try {
@@ -386,7 +386,7 @@ function showStage2(poi, stage2) {
     activateOverlay('dm-overlay');
 
     const overlay = document.getElementById('dm-overlay');
-    document.getElementById('dm-icon').textContent = '🔮';
+    document.getElementById('dm-icon').textContent = '';
     document.getElementById('dm-title').textContent = stage2.tt || 'Continuação';
     document.getElementById('dm-type').textContent = 'mistério';
 
@@ -399,7 +399,7 @@ function showStage2(poi, stage2) {
         (stage2.ch || []).forEach((ch, idx) => {
             const btn = document.createElement('button');
             btn.className = 'dm-choice-btn';
-            let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
+            let html = `<span class="choice-icon"></span>`;
             html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
             if (ch.k) {
                 const statShort = STAT_SHORT[ch.k.s] || ch.k.s.toUpperCase();
@@ -445,15 +445,15 @@ function applyOutcome(poi, outcome, choice) {
     // Apply and display rewards
     if (outcome.x) {
         S.xpEarned += outcome.x;
-        addRewardBadge(rewardsEl, `✨ +${outcome.x} XP`, 'xp');
+        addRewardBadge(rewardsEl, `+${outcome.x} XP`, 'xp');
     }
     if (outcome.g) {
         S.goldEarned += outcome.g;
-        addRewardBadge(rewardsEl, `💰 +${outcome.g} Ouro`, 'gold');
+        addRewardBadge(rewardsEl, `+${outcome.g} Ouro`, 'gold');
     }
     if (outcome.h && outcome.h > 0) {
         S.hpChange += outcome.h;
-        addRewardBadge(rewardsEl, `❤️ +${outcome.h} HP`, 'heal');
+        addRewardBadge(rewardsEl, `+${outcome.h} HP`, 'heal');
         if (S.charData) {
             const newHP = Math.min(S.charData.mh, (S.charData.hp + S.hpChange));
             updateHP(newHP, S.charData.mh);
@@ -461,7 +461,7 @@ function applyOutcome(poi, outcome, choice) {
     }
     if (outcome.d && outcome.d > 0) {
         S.hpChange -= outcome.d;
-        addRewardBadge(rewardsEl, `💔 -${outcome.d} HP`, 'damage');
+        addRewardBadge(rewardsEl, `-${outcome.d} HP`, 'damage');
         if (S.charData) {
             const newHP = Math.max(0, S.charData.hp + S.hpChange);
             updateHP(newHP, S.charData.mh);
@@ -469,7 +469,7 @@ function applyOutcome(poi, outcome, choice) {
     }
     if (outcome.i) {
         S.itemsFound.push(outcome.i);
-        addRewardBadge(rewardsEl, `🎒 ${outcome.i}`, 'item');
+        addRewardBadge(rewardsEl, outcome.i, 'item');
     }
 
     // Log the outcome event
@@ -534,7 +534,7 @@ function triggerCombat(poi) {
     setTimeout(() => flash.remove(), 700);
 
     const overlay = document.getElementById('combat-overlay');
-    document.getElementById('combat-icon').textContent = combat.ei || '⚔️';
+    document.getElementById('combat-icon').textContent = '';
     document.getElementById('combat-enemy').textContent = combat.en || 'Inimigo';
     document.getElementById('combat-text').innerHTML = '<span style="color:#d44;font-weight:bold;">Iniciando Combate...</span>';
 
@@ -577,7 +577,7 @@ function showPostCombatNarrative() {
         'Após a batalha, você examina os arredores com cautela.',
     ];
     const text = lines[Math.floor(Math.random() * lines.length)];
-    showTerrainToast(`⚔️ ${text}`, 'ranger');
+    showTerrainToast(text, 'ranger');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -627,10 +627,10 @@ async function transitionToArena() {
             }
         }
         console.error('[EXPLORE] Transition to arena failed, using fallback');
-        if (typeof showTerrainToast === 'function') showTerrainToast('⚠️ Erro na transição. Usando fallback...', 'damage');
+        if (typeof showTerrainToast === 'function') showTerrainToast('Erro na transição. Usando fallback...', 'damage');
     } catch (e) {
         console.error('[EXPLORE] Transition to arena error:', e);
-        if (typeof showTerrainToast === 'function') showTerrainToast('⚠️ Erro na transição. Usando fallback...', 'damage');
+        if (typeof showTerrainToast === 'function') showTerrainToast('Erro na transição. Usando fallback...', 'damage');
     }
 
     // Fallback: old sendData + close behavior
@@ -668,10 +668,10 @@ async function transitionToInventory() {
             }
         }
         console.error('[EXPLORE] Transition to inventory failed');
-        if (typeof showTerrainToast === 'function') showTerrainToast('⚠️ Erro ao abrir mochila. Tente novamente.', 'damage');
+        if (typeof showTerrainToast === 'function') showTerrainToast('Erro ao abrir mochila. Tente novamente.', 'damage');
     } catch (e) {
         console.error('[EXPLORE] Transition to inventory error:', e);
-        if (typeof showTerrainToast === 'function') showTerrainToast('⚠️ Erro ao abrir mochila. Tente novamente.', 'damage');
+        if (typeof showTerrainToast === 'function') showTerrainToast('Erro ao abrir mochila. Tente novamente.', 'damage');
     }
 }
 
@@ -698,7 +698,7 @@ function showBossEncounter() {
 
     overlay.innerHTML = `
         <div class="event-content" style="text-align:center">
-            <div style="font-size:40px;margin:12px 0">${boss.ei || '⚔️'}</div>
+            <div style="font-size:18px;margin:12px 0;color:#c4953a;font-weight:bold">GUARDIÃO</div>
             <div style="font-size:18px;font-weight:bold;color:#c4953a;margin-bottom:8px">${boss.en || 'Guardião'}</div>
             <div style="font-size:13px;color:#b0b8c0;margin-bottom:16px;line-height:1.4">${boss.n || 'Um guardião bloqueia a saída!'}</div>
             <div id="boss-choices" style="display:flex;flex-direction:column;gap:8px"></div>
@@ -708,7 +708,7 @@ function showBossEncounter() {
     // Fight (direct combat)
     const fightBtn = document.createElement('button');
     fightBtn.className = 'v-btn v-btn-primary';
-    fightBtn.innerHTML = '⚔️ Lutar';
+    fightBtn.innerHTML = 'Lutar';
     fightBtn.onclick = () => {
         overlay.classList.remove('active');
         triggerCombat({ combat: { en: boss.en, ei: boss.ei, b: boss.b || S.biome, d: boss.d || S.dangerLevel } });
@@ -719,20 +719,20 @@ function showBossEncounter() {
     // Stealth bypass (skill check)
     const stealthBtn = document.createElement('button');
     stealthBtn.className = 'v-btn';
-    stealthBtn.innerHTML = `🤫 Esgueirar <span style="font-size:11px;opacity:0.7">(${Math.round(stealthChance)}%)</span>`;
+    stealthBtn.innerHTML = `Esgueirar <span style="font-size:11px;opacity:0.7">(${Math.round(stealthChance)}%)</span>`;
     stealthBtn.onclick = () => {
         const roll = rollD20('normal');
         const total = roll + stealthMod;
         if (total >= stealthDC) {
             overlay.innerHTML = `<div class="event-content" style="text-align:center">
-                <div style="font-size:28px;margin:20px 0;color:#6a8">🤫 ${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
+                <div style="font-size:28px;margin:20px 0;color:#6a8">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
                 <div style="color:#6a8;font-size:16px">Você passa sem ser notado!</div></div>`;
             S._bossDefeated = true; saveState();
             S.xpEarned += 10;
             setTimeout(() => { overlay.classList.remove('active'); _showPortalSummary(); }, 2000);
         } else {
             overlay.innerHTML = `<div class="event-content" style="text-align:center">
-                <div style="font-size:28px;margin:20px 0;color:#a66">🤫 ${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
+                <div style="font-size:28px;margin:20px 0;color:#a66">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
                 <div style="color:#a66;font-size:16px">Detectado! O guardião ataca!</div></div>`;
             S._bossDefeated = true; saveState();
             setTimeout(() => {
@@ -747,7 +747,7 @@ function showBossEncounter() {
     const retreatBtn = document.createElement('button');
     retreatBtn.className = 'v-btn';
     retreatBtn.style.opacity = '0.7';
-    retreatBtn.innerHTML = '🏃 Recuar';
+    retreatBtn.innerHTML = 'Recuar';
     retreatBtn.onclick = () => { overlay.classList.remove('active'); };
     choicesDiv.appendChild(retreatBtn);
 
@@ -760,12 +760,12 @@ function _showPortalSummary() {
     const summary = document.getElementById('portal-summary');
 
     let html = '';
-    if (S.xpEarned > 0) html += `<div class="reward-line">✨ +${S.xpEarned} XP</div>`;
-    if (S.goldEarned > 0) html += `<div class="reward-line">💰 +${S.goldEarned} Ouro</div>`;
-    if (S.hpChange > 0) html += `<div class="reward-line">❤️ +${S.hpChange} HP</div>`;
-    else if (S.hpChange < 0) html += `<div class="reward-line">💔 ${S.hpChange} HP</div>`;
-    if (S.itemsFound.length > 0) html += `<div class="reward-line">🎒 ${S.itemsFound.length} itens</div>`;
-    html += `<div style="margin-top:8px;color:#8a8090">⬡ ${S.visited.size} turnos</div>`;
+    if (S.xpEarned > 0) html += `<div class="reward-line">+${S.xpEarned} XP</div>`;
+    if (S.goldEarned > 0) html += `<div class="reward-line">+${S.goldEarned} Ouro</div>`;
+    if (S.hpChange > 0) html += `<div class="reward-line">+${S.hpChange} HP</div>`;
+    else if (S.hpChange < 0) html += `<div class="reward-line">${S.hpChange} HP</div>`;
+    if (S.itemsFound.length > 0) html += `<div class="reward-line">${S.itemsFound.length} itens</div>`;
+    html += `<div style="margin-top:8px;color:#8a8090">${S.visited.size} turnos</div>`;
 
     summary.innerHTML = html;
     overlay.classList.add('active');
@@ -802,7 +802,7 @@ function showRandomEncounter(enc) {
     try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
     const overlay = document.getElementById('encounter-overlay');
-    document.getElementById('enc-icon').textContent = enc.icon || '⚠️';
+    document.getElementById('enc-icon').textContent = '';
     document.getElementById('enc-title').textContent = enc.title || 'Encontro!';
 
     const ENC_TYPE_LABELS = { amb: 'Emboscada', trp: 'Armadilha', hid: 'Descoberta', snd: 'Ameaça', wth: 'Clima' };
@@ -817,7 +817,7 @@ function showRandomEncounter(enc) {
             const btn = document.createElement('button');
             btn.className = 'dm-choice-btn';
 
-            let html = `<span class="choice-icon">${ch.i || '➡️'}</span>`;
+            let html = `<span class="choice-icon"></span>`;
             html += `<span class="choice-label">${ch.t || ch.l || 'Agir'}</span>`;
 
             // cmb_direct choices (e.g., "Atacar") — no stat check, trigger combat
@@ -886,7 +886,7 @@ function showDMIntro(text) {
     typewriter(narrEl, text, () => {
         const btn = document.createElement('button');
         btn.className = 'dm-choice-btn';
-        btn.innerHTML = '<span class="choice-icon">🗺️</span><span class="choice-label">Explorar</span>';
+        btn.innerHTML = '<span class="choice-icon"></span><span class="choice-label">Explorar</span>';
         btn.addEventListener('click', () => {
             overlay.classList.remove('active');
             // Restore header for next POI event usage
@@ -955,7 +955,7 @@ function checkHazard(col, row) {
         S._hazardsTriggered.add(key);
         return {
             type: 'lava', stat: 'cn', dc: 12,
-            label: '🔥 Calor Intenso',
+            label: 'Calor Intenso',
             desc: 'O calor abrasador da lava próxima queima sua pele.',
             failEffect: 'fire_damage',
         };
@@ -966,7 +966,7 @@ function checkHazard(col, row) {
         S._hazardsTriggered.add(key);
         return {
             type: 'swamp', stat: 'cn', dc: 10,
-            label: '☠️ Miasma Tóxico',
+            label: 'Miasma Tóxico',
             desc: 'Vapores tóxicos emanam do pântano.',
             failEffect: 'poisoned',
         };
@@ -977,7 +977,7 @@ function checkHazard(col, row) {
         S._hazardsTriggered.add(key);
         return {
             type: 'ice', stat: 'dx', dc: 11,
-            label: '🧊 Gelo Escorregadio',
+            label: 'Gelo Escorregadio',
             desc: 'O chão congelado ameaça fazê-lo escorregar.',
             failEffect: 'prone',
         };
@@ -1035,7 +1035,7 @@ function showHazardCheck(hazard) {
             formulaEl.innerHTML =
                 `<span style="color:var(--v-gold);font-size:14px">${hazard.label}</span><br>` + formulaStr;
 
-            resultEl.textContent = success ? '✅ Resistiu!' : '❌ Falhou!';
+            resultEl.textContent = success ? 'Resistiu!' : 'Falhou!';
             resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
             try {
@@ -1093,9 +1093,9 @@ function _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, ha
     setTimeout(() => {
         const fb = wrapper.querySelector('.dice-display-fallback');
         if (fb && r2 === null) {
-            fb.textContent = roll <= 1 ? '💀' : roll >= 20 ? '🌟' : '🎲';
+            fb.textContent = roll <= 1 ? 'Falha Critica' : roll >= 20 ? 'Critico!' : roll;
         }
-        resultEl.textContent = success ? '✅ Resistiu!' : '❌ Falhou!';
+        resultEl.textContent = success ? 'Resistiu!' : 'Falhou!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
         try {
@@ -1116,15 +1116,15 @@ function applyHazardEffect(hazard) {
             updateHP(newHP, S.charData.mh);
         }
         flashScreen('rgba(200,60,60,0.3)');
-        showTerrainToast(`💔 -${dmg} HP (fogo)`, 'damage');
+        showTerrainToast(`-${dmg} HP (fogo)`, 'damage');
     }
     if (hazard.failEffect === 'poisoned') {
         S.conditions.push({ type: 'poisoned', stepsLeft: 3 });
-        showTerrainToast('☠️ Envenenado! (3 turnos)', 'condition');
+        showTerrainToast('Envenenado! (3 turnos)', 'condition');
     }
     if (hazard.failEffect === 'prone') {
         S.conditions.push({ type: 'prone', stepsLeft: 1 });
-        showTerrainToast('🧊 Escorregou!', 'condition');
+        showTerrainToast('Escorregou!', 'condition');
     }
     updateConditionHUD();
     updateRewards();
@@ -1133,7 +1133,7 @@ function applyHazardEffect(hazard) {
     // 25% chance: hazard noise attracts nearby creatures
     if (Math.random() < 0.25 && S.encounters && S.encounters.length > 0) {
         const enc = S.encounters.pop();
-        const combat = enc.cb || { en: 'Criatura', ei: '⚔️', b: S.biome, d: S.dangerLevel };
+        const combat = enc.cb || { en: 'Criatura', ei: '', b: S.biome, d: S.dangerLevel };
         S._hazardCombatPending = { combat };
     }
 }
@@ -1143,7 +1143,7 @@ function checkHazardCombat() {
     if (!S._hazardCombatPending) return false;
     const data = S._hazardCombatPending;
     S._hazardCombatPending = null;
-    showTerrainToast('⚠️ O barulho atraiu criaturas!', 'danger');
+    showTerrainToast('O barulho atraiu criaturas!', 'danger');
     setTimeout(() => triggerCombat({ combat: data.combat }), 1500);
     return true;
 }
@@ -1205,7 +1205,7 @@ function showExitRiskAssessment() {
 
     // HP bar
     const hpColor = hpPct > 60 ? '#4a8' : hpPct > 25 ? '#dca028' : '#c44';
-    hpRow.innerHTML = `<span>❤️</span>` +
+    hpRow.innerHTML = `<span>HP</span>` +
         `<div class="exit-hp-bar"><div class="exit-hp-fill" style="width:${Math.max(2, hpPct)}%;background:${hpColor}"></div></div>` +
         `<span>${currentHP}/${maxHP}</span>`;
 
@@ -1213,16 +1213,16 @@ function showExitRiskAssessment() {
     const distText = distance >= 0 ? `${distance} turnos` : '???';
     const dangerLvl = S.dangerLevel || 1;
     const estEnc = distance > 0 ? Math.max(1, Math.round(distance * dangerLvl * 0.04)) : 0;
-    const encText = estEnc > 0 ? `<span>🎲 ~${estEnc} encontro${estEnc > 1 ? 's' : ''}</span>` : '';
-    infoRow.innerHTML = `<span>📏 ${distText} até a saída</span>` +
-        `<span style="color:${risk.color}">⚔️ Risco: ${risk.label} (${risk.chance}%)</span>` +
+    const encText = estEnc > 0 ? `<span>~${estEnc} encontro${estEnc > 1 ? 's' : ''}</span>` : '';
+    infoRow.innerHTML = `<span>${distText} até a saída</span>` +
+        `<span style="color:${risk.color}">Risco: ${risk.label} (${risk.chance}%)</span>` +
         encText;
 
     // Build options
     optionsEl.innerHTML = '';
 
     // Option 1: Return to city (with encounter chance on the way back)
-    addExitOption(optionsEl, '🏰', 'Retornar à Cidade',
+    addExitOption(optionsEl, '', 'Retornar à Cidade',
         distance >= 0 ? `Jornada de ${distance} turnos, ${risk.chance}% risco` : 'Rota desconhecida',
         risk.color, () => {
             overlay.classList.remove('active');
@@ -1233,10 +1233,10 @@ function showExitRiskAssessment() {
     const healItems = getHealingItems();
     if (healItems.length > 0 && hpPct < 100) {
         const best = healItems[0];
-        addExitOption(optionsEl, best.e || '🧪', `Usar ${best.n} (${best.q}x)`,
+        addExitOption(optionsEl, best.e || '', `Usar ${best.n} (${best.q}x)`,
             `Restaura ${best.h} HP`, '#4a8', () => {
                 const heal = useInventoryItem(best);
-                showTerrainToast(`${best.e || '🧪'} +${heal} HP`, 'ranger');
+                showTerrainToast(`${best.e || ''} +${heal} HP`, 'ranger');
                 // Refresh the overlay with new HP values
                 overlay.classList.remove('active');
                 setTimeout(() => showExitRiskAssessment(), 300);
@@ -1246,7 +1246,7 @@ function showExitRiskAssessment() {
     // Option 3: Camp (if has food items)
     const foodItems = getFoodItems();
     if (foodItems.length > 0) {
-        addExitOption(optionsEl, '🏕️', 'Montar Acampamento',
+        addExitOption(optionsEl, '', 'Montar Acampamento',
             'Descanso Curto: 1d8 + CON', '#4a8', () => {
                 overlay.classList.remove('active');
                 showCampOverlay();
@@ -1254,7 +1254,7 @@ function showExitRiskAssessment() {
     }
 
     // Option 4: Continue exploring (always)
-    addExitOption(optionsEl, '🗺️', 'Continuar Explorando',
+    addExitOption(optionsEl, '', 'Continuar Explorando',
         'Voltar ao mapa', '#8a8090', () => {
             overlay.classList.remove('active');
         });
@@ -1287,7 +1287,7 @@ function showCampOverlay() {
         const btn = document.createElement('button');
         btn.className = 'camp-food-btn';
         const healText = food.h && food.h !== '0' ? ` (+${food.h} HP)` : '';
-        btn.innerHTML = `<span style="font-size:20px">${food.e || '🍞'}</span>` +
+        btn.innerHTML = `<span style="font-size:14px;color:#c4953a;font-weight:bold">${food.n ? food.n[0] : '•'}</span>` +
             `<div style="flex:1"><div style="font-weight:600">${food.n} (${food.q}x)</div>` +
             `<div style="font-size:11px;color:#8a8090">Refeição${healText}</div></div>`;
         btn.addEventListener('click', () => {
@@ -1300,7 +1300,7 @@ function showCampOverlay() {
     // Option to rest without food
     const noFoodBtn = document.createElement('button');
     noFoodBtn.className = 'camp-food-btn';
-    noFoodBtn.innerHTML = `<span style="font-size:20px">💤</span>` +
+    noFoodBtn.innerHTML = `<span style="font-size:14px;color:#8a7a68;font-weight:bold">—</span>` +
         `<div style="flex:1"><div style="font-weight:600">Descansar sem comer</div>` +
         `<div style="font-size:11px;color:#8a8090">Apenas 1d8 + CON</div></div>`;
     noFoodBtn.addEventListener('click', () => {
@@ -1353,11 +1353,11 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName) {
     document.getElementById('camp-result-text').textContent = `+${total} HP Restaurados`;
 
     const sign = conMod >= 0 ? '+' : '';
-    let detail = `🎲 1d8 = ${roll} ${sign} ${conMod} (CON) = ${roll + conMod}`;
+    let detail = `1d8 = ${roll} ${sign} ${conMod} (CON) = ${roll + conMod}`;
     if (bonus > 0) {
-        detail += `\n🍽️ ${foodName}: +${bonus} HP`;
+        detail += `\n${foodName}: +${bonus} HP`;
     }
-    detail += `\n\n❤️ HP: ${getCurrentHP()}/${getMaxHP()}`;
+    detail += `\n\nHP: ${getCurrentHP()}/${getMaxHP()}`;
     document.getElementById('camp-result-detail').textContent = detail;
 
     overlay.classList.add('active');
@@ -1373,7 +1373,7 @@ function closeCampResult() {
     if (S.campAmbush && !S._campAmbushUsed) {
         S._campAmbushUsed = true;
         saveState();
-        showTerrainToast('⚠️ Algo ataca durante seu descanso!', 'danger');
+        showTerrainToast('Algo ataca durante seu descanso!', 'danger');
         setTimeout(() => {
             triggerCombat({ combat: S.campAmbush });
         }, 1500);
@@ -1417,7 +1417,7 @@ function showLowHPOverlay() {
     const risk = calculateExitRisk(distance);
 
     // HP bar (red tint)
-    hpRow.innerHTML = `<span>❤️</span>` +
+    hpRow.innerHTML = `<span>HP</span>` +
         `<div class="exit-hp-bar"><div class="exit-hp-fill" style="width:${Math.max(2, hpPct)}%;background:#c44"></div></div>` +
         `<span style="color:#c44">${currentHP}/${maxHP}</span>`;
 
@@ -1427,10 +1427,10 @@ function showLowHPOverlay() {
     // Option 1: Use healing potion (priority)
     const healItems = getHealingItems();
     for (const item of healItems.slice(0, 2)) {
-        addExitOption(optionsEl, item.e || '🧪', `Usar ${item.n} (${item.q}x)`,
+        addExitOption(optionsEl, item.e || '', `Usar ${item.n} (${item.q}x)`,
             `Restaura ${item.h} HP`, '#4a8', () => {
                 const heal = useInventoryItem(item);
-                showTerrainToast(`${item.e || '🧪'} +${heal} HP`, 'ranger');
+                showTerrainToast(`${item.e || ''} +${heal} HP`, 'ranger');
                 overlay.classList.remove('active');
                 // Allow alert to show again if still low after heal
                 S._lowHPAlertShown = false;
@@ -1439,14 +1439,14 @@ function showLowHPOverlay() {
 
     // Option 2: Return to city (multi-step journey)
     const distText = distance >= 0 ? `${distance} turnos` : '???';
-    addExitOption(optionsEl, '🏰', `Retornar (${distText})`,
+    addExitOption(optionsEl, '', `Retornar (${distText})`,
         `Risco: ${risk.label} (${risk.chance}%)`, risk.color, () => {
             overlay.classList.remove('active');
             attemptReturnToCity(risk.chance);
         });
 
     // Option 3: Continue exploring
-    addExitOption(optionsEl, '⚔️', 'Continuar Explorando',
+    addExitOption(optionsEl, '', 'Continuar Explorando',
         'Arriscar seguir adiante', '#8a8090', () => {
             overlay.classList.remove('active');
         });
@@ -1481,7 +1481,7 @@ function showDeathSaves() {
         const sMarks = '●'.repeat(successes) + '○'.repeat(3 - successes);
         const fMarks = '●'.repeat(failures) + '○'.repeat(3 - failures);
         let html = `<div style="text-align:center;margin-bottom:12px">
-            <div style="font-size:20px;margin-bottom:8px">💀 Salvaguardas contra Morte</div>
+            <div style="font-size:20px;margin-bottom:8px">Salvaguardas contra Morte</div>
             <div style="font-size:14px;color:#6a8">✓ ${sMarks}</div>
             <div style="font-size:14px;color:#a66">✗ ${fMarks}</div>
         </div>`;
@@ -1495,13 +1495,13 @@ function showDeathSaves() {
         if (isResult) {
             if (successes >= 3) {
                 html += `<div style="text-align:center;color:#6a8;font-size:16px;margin-top:12px">
-                    🛡️ Estabilizado! Você acorda com 1 HP.</div>`;
+                    Estabilizado! Você acorda com 1 HP.</div>`;
             } else if (failures >= 3) {
                 html += `<div style="text-align:center;color:#a66;font-size:16px;margin-top:12px">
-                    💀 Você sucumbe aos ferimentos...</div>`;
+                    Você sucumbe aos ferimentos...</div>`;
             } else if (roll === 20) {
                 html += `<div style="text-align:center;color:#ffd700;font-size:16px;margin-top:12px">
-                    ⭐ Crítico Natural! Você se levanta com 1 HP!</div>`;
+                    Crítico Natural! Você se levanta com 1 HP!</div>`;
             }
         }
         summary.innerHTML = html;
@@ -1561,9 +1561,9 @@ function showDeathOverlay() {
     const overlay = document.getElementById('death-overlay');
     const summary = document.getElementById('death-summary');
     let html = '';
-    if (S.xpEarned > 0) html += `<div class="reward-line">✨ +${S.xpEarned} XP</div>`;
-    if (S.goldEarned > 0) html += `<div class="reward-line">💰 +${S.goldEarned} Ouro</div>`;
-    html += `<div class="reward-line">💀 HP reduzido a 0</div>`;
+    if (S.xpEarned > 0) html += `<div class="reward-line">+${S.xpEarned} XP</div>`;
+    if (S.goldEarned > 0) html += `<div class="reward-line">+${S.goldEarned} Ouro</div>`;
+    html += `<div class="reward-line">HP reduzido a 0</div>`;
     summary.innerHTML = html;
     overlay.classList.add('active');
     let _deathDone = false;
@@ -1650,92 +1650,92 @@ const RETURN_NARRATIONS = {
 // choices[]: i=icon, t=title, k={s:stat, dc:DC}, sNarr/fNarr/fDmg per choice
 const RETURN_HAZARDS = {
     forest: [
-        { icon: '🕸️', title: 'Teias Gigantes', narr: 'Teias enormes bloqueiam a trilha entre os troncos, grossas como cordas e pegajosas ao toque. Casulos pendem dos galhos — o que as teceu é grande e ainda está por perto.', choices: [
-            { i: '🔥', t: 'Queimar as teias', k: { s: 'int', dc: 10 }, sNarr: 'Você improvisa uma tocha com galhos secos e queima as teias com precisão. As chamas consomem os fios sem se espalhar.', fNarr: 'O fogo se espalha descontrolado! Você recua, mas as chamas alcançam seu braço antes que consiga apagá-las.', fDmg: 3 },
-            { i: '🤸', t: 'Desviar por baixo', k: { s: 'dex', dc: 12 }, sNarr: 'Com movimentos calculados, você desliza sob as teias sem tocar em um único fio. Limpo e silencioso.', fNarr: 'As teias são mais baixas do que pareciam. Fios grudam em suas costas e puxam — quanto mais se debate, mais se enrosca.', fDmg: 4 },
-            { i: '💪', t: 'Forçar passagem', k: { s: 'str', dc: 13 }, sNarr: 'Com um grito de esforço, você rasga as teias como cortinas e abre caminho à força bruta.', fNarr: 'As teias são resistentes como aço! Seu braço fica preso e a vibração certamente alertou o que vive aqui.', fDmg: 3 },
+        { icon: '', title: 'Teias Gigantes', narr: 'Teias enormes bloqueiam a trilha entre os troncos, grossas como cordas e pegajosas ao toque. Casulos pendem dos galhos — o que as teceu é grande e ainda está por perto.', choices: [
+            { i: '', t: 'Queimar as teias', k: { s: 'int', dc: 10 }, sNarr: 'Você improvisa uma tocha com galhos secos e queima as teias com precisão. As chamas consomem os fios sem se espalhar.', fNarr: 'O fogo se espalha descontrolado! Você recua, mas as chamas alcançam seu braço antes que consiga apagá-las.', fDmg: 3 },
+            { i: '', t: 'Desviar por baixo', k: { s: 'dex', dc: 12 }, sNarr: 'Com movimentos calculados, você desliza sob as teias sem tocar em um único fio. Limpo e silencioso.', fNarr: 'As teias são mais baixas do que pareciam. Fios grudam em suas costas e puxam — quanto mais se debate, mais se enrosca.', fDmg: 4 },
+            { i: '', t: 'Forçar passagem', k: { s: 'str', dc: 13 }, sNarr: 'Com um grito de esforço, você rasga as teias como cortinas e abre caminho à força bruta.', fNarr: 'As teias são resistentes como aço! Seu braço fica preso e a vibração certamente alertou o que vive aqui.', fDmg: 3 },
         ]},
-        { icon: '🐻', title: 'Território de Urso', narr: 'Marcas de garras profundas nos troncos, casca arrancada, chão revolto. O ar carrega o cheiro forte e almiscarado do animal — ele esteve aqui há pouco tempo.', choices: [
-            { i: '🤫', t: 'Contornar em silêncio', k: { s: 'dex', dc: 12 }, sNarr: 'Controlando até a respiração, você traça uma rota alternativa. O urso nem percebe sua passagem.', fNarr: 'Um galho estala sob seu pé como um trovão no silêncio! O urso ergue a cabeça e avança com um urro.', fDmg: 5 },
-            { i: '🧠', t: 'Ler os sinais da natureza', k: { s: 'wis', dc: 11 }, sNarr: 'Rastros frescos apontam para o norte — o urso se afastou. Você cruza o território pela rota oposta.', fNarr: 'Você interpreta os sinais ao contrário. O caminho que parecia seguro leva direto à toca.', fDmg: 5 },
-            { i: '🗣️', t: 'Fazer barulho para afastar', k: { s: 'cha', dc: 13 }, sNarr: 'Batendo as mãos e gritando, você se faz parecer maior. O urso bufa e se retira pesadamente.', fNarr: 'O urso interpreta seus gritos como desafio! Ele avança e você foge com arranhões profundos.', fDmg: 6 },
+        { icon: '', title: 'Território de Urso', narr: 'Marcas de garras profundas nos troncos, casca arrancada, chão revolto. O ar carrega o cheiro forte e almiscarado do animal — ele esteve aqui há pouco tempo.', choices: [
+            { i: '', t: 'Contornar em silêncio', k: { s: 'dex', dc: 12 }, sNarr: 'Controlando até a respiração, você traça uma rota alternativa. O urso nem percebe sua passagem.', fNarr: 'Um galho estala sob seu pé como um trovão no silêncio! O urso ergue a cabeça e avança com um urro.', fDmg: 5 },
+            { i: '', t: 'Ler os sinais da natureza', k: { s: 'wis', dc: 11 }, sNarr: 'Rastros frescos apontam para o norte — o urso se afastou. Você cruza o território pela rota oposta.', fNarr: 'Você interpreta os sinais ao contrário. O caminho que parecia seguro leva direto à toca.', fDmg: 5 },
+            { i: '', t: 'Fazer barulho para afastar', k: { s: 'cha', dc: 13 }, sNarr: 'Batendo as mãos e gritando, você se faz parecer maior. O urso bufa e se retira pesadamente.', fNarr: 'O urso interpreta seus gritos como desafio! Ele avança e você foge com arranhões profundos.', fDmg: 6 },
         ]},
-        { icon: '🌿', title: 'Raízes Traiçoeiras', narr: 'O chão da floresta se transformou em um labirinto de raízes expostas, retorcidas e entrelaçadas como serpentes petrificadas. A trilha desapareceu sob esta teia vegetal.', choices: [
-            { i: '👁️', t: 'Caminhar com cautela', k: { s: 'wis', dc: 10 }, sNarr: 'Olhos atentos mapeiam cada passo. Você navega o trecho como quem lê um mapa no chão.', fNarr: 'Uma raiz que parecia firme cede! Você tropeça e cai pesadamente, batendo o joelho em uma rocha.', fDmg: 2 },
-            { i: '🏃', t: 'Correr e saltar', k: { s: 'dex', dc: 12 }, sNarr: 'Com saltos ágeis de raiz em raiz, você atravessa o trecho como um acrobata.', fNarr: 'Seu pé engancha em uma raiz oculta no meio do salto! A queda é dolorosa e seu tornozelo protesta.', fDmg: 3 },
+        { icon: '', title: 'Raízes Traiçoeiras', narr: 'O chão da floresta se transformou em um labirinto de raízes expostas, retorcidas e entrelaçadas como serpentes petrificadas. A trilha desapareceu sob esta teia vegetal.', choices: [
+            { i: '', t: 'Caminhar com cautela', k: { s: 'wis', dc: 10 }, sNarr: 'Olhos atentos mapeiam cada passo. Você navega o trecho como quem lê um mapa no chão.', fNarr: 'Uma raiz que parecia firme cede! Você tropeça e cai pesadamente, batendo o joelho em uma rocha.', fDmg: 2 },
+            { i: '', t: 'Correr e saltar', k: { s: 'dex', dc: 12 }, sNarr: 'Com saltos ágeis de raiz em raiz, você atravessa o trecho como um acrobata.', fNarr: 'Seu pé engancha em uma raiz oculta no meio do salto! A queda é dolorosa e seu tornozelo protesta.', fDmg: 3 },
         ]},
     ],
     plains: [
-        { icon: '🌪️', title: 'Ventania Repentina', narr: 'Nuvens negras surgem do nada sobre a planície. O vento se intensifica em segundos, arrancando grama e levantando poeira. Sem abrigo natural à vista, você precisa decidir rápido.', choices: [
-            { i: '🛡️', t: 'Resistir de pé', k: { s: 'str', dc: 11 }, sNarr: 'Fincando os pés no chão e curvando-se contra o vento, você resiste com determinação. Quando passa, ainda está de pé.', fNarr: 'Uma rajada mais forte derruba você de costas! Detritos arrastados pelo vento cortam sua pele exposta.', fDmg: 3 },
-            { i: '🕳️', t: 'Buscar abrigo', k: { s: 'wis', dc: 10 }, sNarr: 'Olhos treinados identificam uma depressão no terreno. Você se abriga ali até a tempestade passar.', fNarr: 'Não há abrigo nesta planície maldita. A ventania castiga sem piedade enquanto busca em vão por cobertura.', fDmg: 4 },
+        { icon: '', title: 'Ventania Repentina', narr: 'Nuvens negras surgem do nada sobre a planície. O vento se intensifica em segundos, arrancando grama e levantando poeira. Sem abrigo natural à vista, você precisa decidir rápido.', choices: [
+            { i: '', t: 'Resistir de pé', k: { s: 'str', dc: 11 }, sNarr: 'Fincando os pés no chão e curvando-se contra o vento, você resiste com determinação. Quando passa, ainda está de pé.', fNarr: 'Uma rajada mais forte derruba você de costas! Detritos arrastados pelo vento cortam sua pele exposta.', fDmg: 3 },
+            { i: '', t: 'Buscar abrigo', k: { s: 'wis', dc: 10 }, sNarr: 'Olhos treinados identificam uma depressão no terreno. Você se abriga ali até a tempestade passar.', fNarr: 'Não há abrigo nesta planície maldita. A ventania castiga sem piedade enquanto busca em vão por cobertura.', fDmg: 4 },
         ]},
-        { icon: '🕳️', title: 'Buraco Oculto', narr: 'A grama alta e densa esconde o terreno real. Tocas de animais e erosão criaram um campo minado de buracos invisíveis. Um passo errado pode custar um tornozelo.', choices: [
-            { i: '👁️', t: 'Observar o terreno', k: { s: 'wis', dc: 11 }, sNarr: 'Você nota as diferenças na grama que denunciam os buracos. Com passos cuidadosos, desvia de todos.', fNarr: 'Seu pé afunda até o joelho em um buraco invisível! Seu tornozelo gira com um estalo doloroso.', fDmg: 4 },
-            { i: '🏃', t: 'Correr pelo campo', k: { s: 'dex', dc: 12 }, sNarr: 'Reflexos afiados e passos leves levam você pelo campo. Quando um buraco aparece, seus pés já acharam outro apoio.', fNarr: 'Na velocidade, impossível ver os buracos. Um deles engole seu pé e o impulso faz o resto — queda brusca.', fDmg: 3 },
+        { icon: '', title: 'Buraco Oculto', narr: 'A grama alta e densa esconde o terreno real. Tocas de animais e erosão criaram um campo minado de buracos invisíveis. Um passo errado pode custar um tornozelo.', choices: [
+            { i: '', t: 'Observar o terreno', k: { s: 'wis', dc: 11 }, sNarr: 'Você nota as diferenças na grama que denunciam os buracos. Com passos cuidadosos, desvia de todos.', fNarr: 'Seu pé afunda até o joelho em um buraco invisível! Seu tornozelo gira com um estalo doloroso.', fDmg: 4 },
+            { i: '', t: 'Correr pelo campo', k: { s: 'dex', dc: 12 }, sNarr: 'Reflexos afiados e passos leves levam você pelo campo. Quando um buraco aparece, seus pés já acharam outro apoio.', fNarr: 'Na velocidade, impossível ver os buracos. Um deles engole seu pé e o impulso faz o resto — queda brusca.', fDmg: 3 },
         ]},
     ],
     cave: [
-        { icon: '🪨', title: 'Desmoronamento', narr: 'Um estrondo ecoa pelo túnel! Pedras se soltam do teto em cascata, rachaduras se espalham pelas paredes. Poeira enche o ar e a passagem começa a ceder.', choices: [
-            { i: '🏃', t: 'Correr para o outro lado', k: { s: 'dex', dc: 13 }, sNarr: 'Você dispara pela passagem em colapso! Pedras caem ao redor, mas seus pés são mais rápidos. Escapa por um fio.', fNarr: 'Pedras enormes caem sobre você antes que alcance o outro lado! Dor aguda percorre seu corpo sob os escombros.', fDmg: 6 },
-            { i: '🛡️', t: 'Proteger-se e esperar', k: { s: 'cn', dc: 11 }, sNarr: 'Você se encolhe sob uma saliência de rocha sólida. O desmoronamento passa e você emerge coberto de poeira mas intacto.', fNarr: 'A saliência não era tão sólida. Uma pedra acerta seu ombro com força apesar da proteção improvisada.', fDmg: 4 },
-            { i: '🧠', t: 'Analisar a estrutura', k: { s: 'int', dc: 12 }, sNarr: 'Em um relance, você identifica os pilares naturais e traça uma rota entre os pontos de sustentação. Sem um arranhão.', fNarr: 'Sua análise parecia correta, mas a rocha neste ponto era friável. O caminho que escolheu desaba sob seus pés.', fDmg: 5 },
+        { icon: '', title: 'Desmoronamento', narr: 'Um estrondo ecoa pelo túnel! Pedras se soltam do teto em cascata, rachaduras se espalham pelas paredes. Poeira enche o ar e a passagem começa a ceder.', choices: [
+            { i: '', t: 'Correr para o outro lado', k: { s: 'dex', dc: 13 }, sNarr: 'Você dispara pela passagem em colapso! Pedras caem ao redor, mas seus pés são mais rápidos. Escapa por um fio.', fNarr: 'Pedras enormes caem sobre você antes que alcance o outro lado! Dor aguda percorre seu corpo sob os escombros.', fDmg: 6 },
+            { i: '', t: 'Proteger-se e esperar', k: { s: 'cn', dc: 11 }, sNarr: 'Você se encolhe sob uma saliência de rocha sólida. O desmoronamento passa e você emerge coberto de poeira mas intacto.', fNarr: 'A saliência não era tão sólida. Uma pedra acerta seu ombro com força apesar da proteção improvisada.', fDmg: 4 },
+            { i: '', t: 'Analisar a estrutura', k: { s: 'int', dc: 12 }, sNarr: 'Em um relance, você identifica os pilares naturais e traça uma rota entre os pontos de sustentação. Sem um arranhão.', fNarr: 'Sua análise parecia correta, mas a rocha neste ponto era friável. O caminho que escolheu desaba sob seus pés.', fDmg: 5 },
         ]},
-        { icon: '💨', title: 'Gás Venenoso', narr: 'Um cheiro pungente e sulfuroso emana de uma fissura na rocha. O ar ganha uma tonalidade esverdeada e seus olhos ardem. Gás tóxico, espalhando-se pelo túnel.', choices: [
-            { i: '💨', t: 'Prender a respiração', k: { s: 'cn', dc: 12 }, sNarr: 'Você inspira fundo o último ar limpo e atravessa a zona contaminada em apneia. Seus pulmões ardem, mas resiste.', fNarr: 'O trecho é mais longo do que calculou! O gás irrita seus pulmões. Tosse violenta e náusea se seguem.', fDmg: 4 },
-            { i: '🧠', t: 'Buscar corrente de ar', k: { s: 'int', dc: 11 }, sNarr: 'Você localiza uma passagem lateral com ventilação natural. O ar limpo permite uma rota segura ao redor da nuvem.', fNarr: 'A corrente que você seguiu era a fonte do gás! O ar fica pior. Você recua tossindo e busca outro caminho.', fDmg: 3 },
+        { icon: '', title: 'Gás Venenoso', narr: 'Um cheiro pungente e sulfuroso emana de uma fissura na rocha. O ar ganha uma tonalidade esverdeada e seus olhos ardem. Gás tóxico, espalhando-se pelo túnel.', choices: [
+            { i: '', t: 'Prender a respiração', k: { s: 'cn', dc: 12 }, sNarr: 'Você inspira fundo o último ar limpo e atravessa a zona contaminada em apneia. Seus pulmões ardem, mas resiste.', fNarr: 'O trecho é mais longo do que calculou! O gás irrita seus pulmões. Tosse violenta e náusea se seguem.', fDmg: 4 },
+            { i: '', t: 'Buscar corrente de ar', k: { s: 'int', dc: 11 }, sNarr: 'Você localiza uma passagem lateral com ventilação natural. O ar limpo permite uma rota segura ao redor da nuvem.', fNarr: 'A corrente que você seguiu era a fonte do gás! O ar fica pior. Você recua tossindo e busca outro caminho.', fDmg: 3 },
         ]},
     ],
     swamp: [
-        { icon: '🐊', title: 'Emboscada Rastejante', narr: 'A água escura se agita em ondas suaves. Bolhas sobem à superfície, e por um instante você vê escamas brilhantes sob a lama. Algo grande se move abaixo.', choices: [
-            { i: '👁️', t: 'Observar e contornar', k: { s: 'wis', dc: 12 }, sNarr: 'Seus olhos identificam o formato do predador na água. Você traça uma rota elevada, longe de suas mandíbulas.', fNarr: 'O predador é mais rápido do que parecia! Mandíbulas emergem da água. Você escapa, mas garras rasgam sua perna.', fDmg: 5 },
-            { i: '🪵', t: 'Criar distração', k: { s: 'int', dc: 11 }, sNarr: 'Você arremessa um galho pesado na água a dez metros dali. A criatura persegue o ruído, abrindo passagem.', fNarr: 'A criatura não cai na armadilha — é mais esperta do que parece. Ignora o galho e avança em sua direção.', fDmg: 4 },
-            { i: '🏃', t: 'Atravessar correndo', k: { s: 'dex', dc: 13 }, sNarr: 'Seus pés encontram os pontos firmes na lama e você cruza antes que a criatura possa reagir. Velocidade pura.', fNarr: 'A lama suga seus pés no pior momento! A criatura ganha terreno e suas garras alcançam suas pernas.', fDmg: 6 },
+        { icon: '', title: 'Emboscada Rastejante', narr: 'A água escura se agita em ondas suaves. Bolhas sobem à superfície, e por um instante você vê escamas brilhantes sob a lama. Algo grande se move abaixo.', choices: [
+            { i: '', t: 'Observar e contornar', k: { s: 'wis', dc: 12 }, sNarr: 'Seus olhos identificam o formato do predador na água. Você traça uma rota elevada, longe de suas mandíbulas.', fNarr: 'O predador é mais rápido do que parecia! Mandíbulas emergem da água. Você escapa, mas garras rasgam sua perna.', fDmg: 5 },
+            { i: '', t: 'Criar distração', k: { s: 'int', dc: 11 }, sNarr: 'Você arremessa um galho pesado na água a dez metros dali. A criatura persegue o ruído, abrindo passagem.', fNarr: 'A criatura não cai na armadilha — é mais esperta do que parece. Ignora o galho e avança em sua direção.', fDmg: 4 },
+            { i: '', t: 'Atravessar correndo', k: { s: 'dex', dc: 13 }, sNarr: 'Seus pés encontram os pontos firmes na lama e você cruza antes que a criatura possa reagir. Velocidade pura.', fNarr: 'A lama suga seus pés no pior momento! A criatura ganha terreno e suas garras alcançam suas pernas.', fDmg: 6 },
         ]},
-        { icon: '🌫️', title: 'Bruma Desorientante', narr: 'Névoa espessa desce sobre o pântano como um manto vivo, engolindo toda visibilidade. A trilha desaparece, as estacas de marcação somem, e até o som parece abafado.', choices: [
-            { i: '🧭', t: 'Orientar-se pelas estrelas', k: { s: 'wis', dc: 11 }, sNarr: 'Olhando para cima, você encontra a Estrela do Norte. Seu senso de direção se mantém firme, e a névoa se dissipa.', fNarr: 'As nuvens cobrem tudo e a névoa engana seus sentidos. Você vaga por horas até achar a trilha, exausto.', fDmg: 3 },
-            { i: '👂', t: 'Seguir os sons da cidade', k: { s: 'wis', dc: 12 }, sNarr: 'Você fecha os olhos e aguça os ouvidos. Ali — um sino distante, um cão ladrando. Sons que guiam seus passos.', fNarr: 'O eco do pântano distorce tudo. Você segue miragens sonoras e anda em círculos até a exaustão.', fDmg: 3 },
+        { icon: '', title: 'Bruma Desorientante', narr: 'Névoa espessa desce sobre o pântano como um manto vivo, engolindo toda visibilidade. A trilha desaparece, as estacas de marcação somem, e até o som parece abafado.', choices: [
+            { i: '', t: 'Orientar-se pelas estrelas', k: { s: 'wis', dc: 11 }, sNarr: 'Olhando para cima, você encontra a Estrela do Norte. Seu senso de direção se mantém firme, e a névoa se dissipa.', fNarr: 'As nuvens cobrem tudo e a névoa engana seus sentidos. Você vaga por horas até achar a trilha, exausto.', fDmg: 3 },
+            { i: '', t: 'Seguir os sons da cidade', k: { s: 'wis', dc: 12 }, sNarr: 'Você fecha os olhos e aguça os ouvidos. Ali — um sino distante, um cão ladrando. Sons que guiam seus passos.', fNarr: 'O eco do pântano distorce tudo. Você segue miragens sonoras e anda em círculos até a exaustão.', fDmg: 3 },
         ]},
     ],
     mountain: [
-        { icon: '🏔️', title: 'Passagem Estreita', narr: 'A trilha se reduz a uma beirada de menos de um passo. De um lado, rocha vertical. Do outro, precipício que some nas nuvens. O vento empurra você para a borda.', choices: [
-            { i: '🧗', t: 'Escalar devagar', k: { s: 'dex', dc: 13 }, sNarr: 'Dedos e pés encontram apoio na rocha. Centímetro por centímetro, você cruza com precisão de escalador.', fNarr: 'Uma rajada de vento na hora errada! Você escorrega e bate o corpo contra a rocha áspera. O precipício quase vence.', fDmg: 6 },
-            { i: '💪', t: 'Agarrar-se e avançar', k: { s: 'str', dc: 12 }, sNarr: 'Mãos firmes como garras na rocha, você avança sem olhar para baixo. A força bruta vence a vertigem.', fNarr: 'Seus dedos cedem na rocha lisa! A queda é curta — uma saliência abaixo amortece — mas o impacto é brutal.', fDmg: 5 },
-            { i: '🧠', t: 'Procurar rota alternativa', k: { s: 'int', dc: 11 }, sNarr: 'Você estuda a formação rochosa e descobre um desvio mais largo. Mais longo, porém infinitamente mais seguro.', fNarr: 'O desvio leva a um beco sem saída — rocha intransponível. Você perde tempo e volta cansado para a passagem.', fDmg: 2 },
+        { icon: '', title: 'Passagem Estreita', narr: 'A trilha se reduz a uma beirada de menos de um passo. De um lado, rocha vertical. Do outro, precipício que some nas nuvens. O vento empurra você para a borda.', choices: [
+            { i: '', t: 'Escalar devagar', k: { s: 'dex', dc: 13 }, sNarr: 'Dedos e pés encontram apoio na rocha. Centímetro por centímetro, você cruza com precisão de escalador.', fNarr: 'Uma rajada de vento na hora errada! Você escorrega e bate o corpo contra a rocha áspera. O precipício quase vence.', fDmg: 6 },
+            { i: '', t: 'Agarrar-se e avançar', k: { s: 'str', dc: 12 }, sNarr: 'Mãos firmes como garras na rocha, você avança sem olhar para baixo. A força bruta vence a vertigem.', fNarr: 'Seus dedos cedem na rocha lisa! A queda é curta — uma saliência abaixo amortece — mas o impacto é brutal.', fDmg: 5 },
+            { i: '', t: 'Procurar rota alternativa', k: { s: 'int', dc: 11 }, sNarr: 'Você estuda a formação rochosa e descobre um desvio mais largo. Mais longo, porém infinitamente mais seguro.', fNarr: 'O desvio leva a um beco sem saída — rocha intransponível. Você perde tempo e volta cansado para a passagem.', fDmg: 2 },
         ]},
-        { icon: '❄️', title: 'Gelo na Trilha', narr: 'Gelo traiçoeiro cobre a trilha íngreme, transformando cada passo em uma aposta contra a gravidade. O vento gelado ameaça roubar seu equilíbrio.', choices: [
-            { i: '🐾', t: 'Pisar com cuidado', k: { s: 'dex', dc: 12 }, sNarr: 'Testando cada passo, você encontra as fissuras no gelo que oferecem tração. Lento, mas seguro.', fNarr: 'Seus pés perdem tração na parte mais íngreme! Você desliza descontrolado e bate nas pedras abaixo.', fDmg: 4 },
-            { i: '🪓', t: 'Cavar apoios no gelo', k: { s: 'str', dc: 11 }, sNarr: 'Com força e persistência, você escava degraus no gelo. Uma escada improvisada, mas funcional.', fNarr: 'O gelo racha em linha longa sob o impacto! A superfície cede e você desliza junto com os pedaços.', fDmg: 5 },
+        { icon: '', title: 'Gelo na Trilha', narr: 'Gelo traiçoeiro cobre a trilha íngreme, transformando cada passo em uma aposta contra a gravidade. O vento gelado ameaça roubar seu equilíbrio.', choices: [
+            { i: '', t: 'Pisar com cuidado', k: { s: 'dex', dc: 12 }, sNarr: 'Testando cada passo, você encontra as fissuras no gelo que oferecem tração. Lento, mas seguro.', fNarr: 'Seus pés perdem tração na parte mais íngreme! Você desliza descontrolado e bate nas pedras abaixo.', fDmg: 4 },
+            { i: '', t: 'Cavar apoios no gelo', k: { s: 'str', dc: 11 }, sNarr: 'Com força e persistência, você escava degraus no gelo. Uma escada improvisada, mas funcional.', fNarr: 'O gelo racha em linha longa sob o impacto! A superfície cede e você desliza junto com os pedaços.', fDmg: 5 },
         ]},
     ],
     desert: [
-        { icon: '🦂', title: 'Ninho de Escorpiões', narr: 'A areia ganha vida ao redor de seus pés! Dezenas de escorpiões emergem das tocas, pinças erguidas e ferrões curvados brilhando ao sol. Você está no centro do ninho.', choices: [
-            { i: '🏃', t: 'Saltar para fora', k: { s: 'dex', dc: 12 }, sNarr: 'Com movimentos explosivos, você salta por cima das criaturas e aterrissa em areia limpa.', fNarr: 'Um escorpião maior emerge onde você ia pousar! Uma ferroada no tornozelo — o veneno arde como fogo líquido.', fDmg: 5 },
-            { i: '🧊', t: 'Ficar imóvel', k: { s: 'wis', dc: 11 }, sNarr: 'Você congela como estátua. Sem movimento ou calor, os escorpiões perdem interesse e retornam às tocas.', fNarr: 'Um escorpião escalando sua perna é demais! O pânico toma conta e o ferrão encontra pele exposta.', fDmg: 4 },
+        { icon: '', title: 'Ninho de Escorpiões', narr: 'A areia ganha vida ao redor de seus pés! Dezenas de escorpiões emergem das tocas, pinças erguidas e ferrões curvados brilhando ao sol. Você está no centro do ninho.', choices: [
+            { i: '', t: 'Saltar para fora', k: { s: 'dex', dc: 12 }, sNarr: 'Com movimentos explosivos, você salta por cima das criaturas e aterrissa em areia limpa.', fNarr: 'Um escorpião maior emerge onde você ia pousar! Uma ferroada no tornozelo — o veneno arde como fogo líquido.', fDmg: 5 },
+            { i: '', t: 'Ficar imóvel', k: { s: 'wis', dc: 11 }, sNarr: 'Você congela como estátua. Sem movimento ou calor, os escorpiões perdem interesse e retornam às tocas.', fNarr: 'Um escorpião escalando sua perna é demais! O pânico toma conta e o ferrão encontra pele exposta.', fDmg: 4 },
         ]},
-        { icon: '🌡️', title: 'Exaustão pelo Calor', narr: 'O sol é implacável. O ar tremula sobre a areia escaldante, sua boca está seca como pergaminho e a visão escurece nas bordas. Cada passo fica mais pesado.', choices: [
-            { i: '💪', t: 'Resistir e avançar', k: { s: 'cn', dc: 11 }, sNarr: 'Você controla a respiração, modera o ritmo e conserva energia. Passo firme após passo firme, vence o trecho.', fNarr: 'O calor vence a vontade. Suas pernas cedem e você cambaleia — quase desmaia antes de encontrar sombra.', fDmg: 3 },
-            { i: '🧠', t: 'Improvisar proteção', k: { s: 'int', dc: 10 }, sNarr: 'Com pano úmido na cabeça e pausas nas raras sombras, você mantém a temperatura controlada.', fNarr: 'Sem material adequado e sem sombra, o improviso falha. O sol castiga sem misericórdia.', fDmg: 4 },
+        { icon: '', title: 'Exaustão pelo Calor', narr: 'O sol é implacável. O ar tremula sobre a areia escaldante, sua boca está seca como pergaminho e a visão escurece nas bordas. Cada passo fica mais pesado.', choices: [
+            { i: '', t: 'Resistir e avançar', k: { s: 'cn', dc: 11 }, sNarr: 'Você controla a respiração, modera o ritmo e conserva energia. Passo firme após passo firme, vence o trecho.', fNarr: 'O calor vence a vontade. Suas pernas cedem e você cambaleia — quase desmaia antes de encontrar sombra.', fDmg: 3 },
+            { i: '', t: 'Improvisar proteção', k: { s: 'int', dc: 10 }, sNarr: 'Com pano úmido na cabeça e pausas nas raras sombras, você mantém a temperatura controlada.', fNarr: 'Sem material adequado e sem sombra, o improviso falha. O sol castiga sem misericórdia.', fDmg: 4 },
         ]},
     ],
     snow: [
-        { icon: '🌨️', title: 'Nevasca', narr: 'O céu desaba em uma cortina branca furiosa. Flocos grossos chicoteiam seu rosto e o vento gela até os pensamentos. A visibilidade cai para dois metros — a trilha some.', choices: [
-            { i: '💪', t: 'Resistir ao frio', k: { s: 'cn', dc: 12 }, sNarr: 'Você se agasalha, cerra os dentes e avança contra a tempestade. Sua vontade é mais forte que o frio.', fNarr: 'O frio penetra até os ossos, ultrapassando toda proteção. Seus movimentos ficam lentos e entorpecidos.', fDmg: 4 },
-            { i: '🕳️', t: 'Cavar abrigo na neve', k: { s: 'str', dc: 11 }, sNarr: 'Você escava uma trincheira na neve compacta. Seu abrigo bloqueia o vento e conserva o calor. A nevasca passa.', fNarr: 'O abrigo desaba sob o peso da neve! Você fica soterrado por segundos aterrorizantes, gelado e machucado.', fDmg: 5 },
+        { icon: '', title: 'Nevasca', narr: 'O céu desaba em uma cortina branca furiosa. Flocos grossos chicoteiam seu rosto e o vento gela até os pensamentos. A visibilidade cai para dois metros — a trilha some.', choices: [
+            { i: '', t: 'Resistir ao frio', k: { s: 'cn', dc: 12 }, sNarr: 'Você se agasalha, cerra os dentes e avança contra a tempestade. Sua vontade é mais forte que o frio.', fNarr: 'O frio penetra até os ossos, ultrapassando toda proteção. Seus movimentos ficam lentos e entorpecidos.', fDmg: 4 },
+            { i: '', t: 'Cavar abrigo na neve', k: { s: 'str', dc: 11 }, sNarr: 'Você escava uma trincheira na neve compacta. Seu abrigo bloqueia o vento e conserva o calor. A nevasca passa.', fNarr: 'O abrigo desaba sob o peso da neve! Você fica soterrado por segundos aterrorizantes, gelado e machucado.', fDmg: 5 },
         ]},
-        { icon: '🧊', title: 'Lago Congelado', narr: 'A trilha cruza um lago congelado sem caminho ao redor. O gelo geme e rachaduras se espalham como veias sob a superfície. Água negra se move lá embaixo.', choices: [
-            { i: '🐾', t: 'Distribuir o peso', k: { s: 'dex', dc: 13 }, sNarr: 'De bruços, você distribui o peso e desliza sobre o gelo. Cada estalo faz seu coração parar, mas alcança o outro lado.', fNarr: 'O gelo racha sob você com um estampido! Água gelada invade até a cintura. O choque térmico é brutal.', fDmg: 6 },
-            { i: '🧠', t: 'Contornar pela margem', k: { s: 'wis', dc: 11 }, sNarr: 'Nas bordas, pedras se projetam sobre o lago. Pulando de rocha em rocha, cruza sem tocar o gelo.', fNarr: 'A margem é tão frágil quanto o centro. Uma placa de gelo costeiro cede e você afunda na água congelante.', fDmg: 4 },
+        { icon: '', title: 'Lago Congelado', narr: 'A trilha cruza um lago congelado sem caminho ao redor. O gelo geme e rachaduras se espalham como veias sob a superfície. Água negra se move lá embaixo.', choices: [
+            { i: '', t: 'Distribuir o peso', k: { s: 'dex', dc: 13 }, sNarr: 'De bruços, você distribui o peso e desliza sobre o gelo. Cada estalo faz seu coração parar, mas alcança o outro lado.', fNarr: 'O gelo racha sob você com um estampido! Água gelada invade até a cintura. O choque térmico é brutal.', fDmg: 6 },
+            { i: '', t: 'Contornar pela margem', k: { s: 'wis', dc: 11 }, sNarr: 'Nas bordas, pedras se projetam sobre o lago. Pulando de rocha em rocha, cruza sem tocar o gelo.', fNarr: 'A margem é tão frágil quanto o centro. Uma placa de gelo costeiro cede e você afunda na água congelante.', fDmg: 4 },
         ]},
     ],
     _default: [
-        { icon: '🪤', title: 'Armadilha Abandonada', narr: 'Folhas secas cobrem algo metálico na trilha. Um brilho de ferro entre o marrom — armadilha de caçadores, esquecida há meses. O mecanismo ainda parece funcional.', choices: [
-            { i: '👁️', t: 'Examinar com cuidado', k: { s: 'wis', dc: 11 }, sNarr: 'Olhos treinados identificam a placa de pressão e os fios. Você marca a armadilha e desvia com precisão.', fNarr: 'O mecanismo é mais sofisticado do que parecia! Ao pisar no que achava ser seguro, o ferro morde sua perna.', fDmg: 4 },
-            { i: '🏃', t: 'Pular por cima', k: { s: 'dex', dc: 12 }, sNarr: 'Um salto limpo e bem calculado leva você além da armadilha. Seus pés aterrissam em solo limpo e seguro.', fNarr: 'Você aterrissa mal e ativa uma segunda armadilha que não havia visto! Impacto duplo — queda e ferro.', fDmg: 3 },
+        { icon: '', title: 'Armadilha Abandonada', narr: 'Folhas secas cobrem algo metálico na trilha. Um brilho de ferro entre o marrom — armadilha de caçadores, esquecida há meses. O mecanismo ainda parece funcional.', choices: [
+            { i: '', t: 'Examinar com cuidado', k: { s: 'wis', dc: 11 }, sNarr: 'Olhos treinados identificam a placa de pressão e os fios. Você marca a armadilha e desvia com precisão.', fNarr: 'O mecanismo é mais sofisticado do que parecia! Ao pisar no que achava ser seguro, o ferro morde sua perna.', fDmg: 4 },
+            { i: '', t: 'Pular por cima', k: { s: 'dex', dc: 12 }, sNarr: 'Um salto limpo e bem calculado leva você além da armadilha. Seus pés aterrissam em solo limpo e seguro.', fNarr: 'Você aterrissa mal e ativa uma segunda armadilha que não havia visto! Impacto duplo — queda e ferro.', fDmg: 3 },
         ]},
-        { icon: '🌑', title: 'Escuridão Repentina', narr: 'Nuvens espessas cobrem a lua e as estrelas de uma vez. Escuridão total desce sobre a trilha — você não enxerga nem as próprias mãos. A trilha está ali, em algum lugar.', choices: [
-            { i: '👂', t: 'Seguir pelos sons', k: { s: 'wis', dc: 10 }, sNarr: 'Aguçando os ouvidos, você percebe o farfalhar de folhas, água corrente — um mapa sonoro que compensa a cegueira.', fNarr: 'Sons enganam no escuro. O que parecia trilha firme era encosta. Você rola antes de conseguir se agarrar.', fDmg: 3 },
-            { i: '🔥', t: 'Improvisar luz', k: { s: 'int', dc: 11 }, sNarr: 'Com galhos secos e engenho, uma tocha improvisada ilumina o caminho. A trilha reaparece, clara e segura.', fNarr: 'Sem material seco ou ignição, a escuridão prevalece. O terreno irregular cobra seu preço em tombos.', fDmg: 2 },
+        { icon: '', title: 'Escuridão Repentina', narr: 'Nuvens espessas cobrem a lua e as estrelas de uma vez. Escuridão total desce sobre a trilha — você não enxerga nem as próprias mãos. A trilha está ali, em algum lugar.', choices: [
+            { i: '', t: 'Seguir pelos sons', k: { s: 'wis', dc: 10 }, sNarr: 'Aguçando os ouvidos, você percebe o farfalhar de folhas, água corrente — um mapa sonoro que compensa a cegueira.', fNarr: 'Sons enganam no escuro. O que parecia trilha firme era encosta. Você rola antes de conseguir se agarrar.', fDmg: 3 },
+            { i: '', t: 'Improvisar luz', k: { s: 'int', dc: 11 }, sNarr: 'Com galhos secos e engenho, uma tocha improvisada ilumina o caminho. A trilha reaparece, clara e segura.', fNarr: 'Sem material seco ou ignição, a escuridão prevalece. O terreno irregular cobra seu preço em tombos.', fDmg: 2 },
         ]},
     ],
 };
@@ -1784,7 +1784,7 @@ function _renderReturnHP(el) {
     const max = getMaxHP();
     const pct = (hp / max) * 100;
     const color = pct > 60 ? '#4a8' : pct > 25 ? '#dca028' : '#c44';
-    el.innerHTML = `<span>❤️</span>` +
+    el.innerHTML = `<span>HP</span>` +
         `<div class="exit-hp-bar"><div class="exit-hp-fill" style="width:${Math.max(2, pct)}%;background:${color}"></div></div>` +
         `<span>${hp}/${max}</span>`;
 }
@@ -1860,11 +1860,11 @@ function showReturnJourneyStep() {
 
     // Header — destination objective at top
     const remaining = j.totalSteps - j.currentStep;
-    titleEl.textContent = '🏰 Rumo a Eldoria';
+    titleEl.textContent = 'Rumo a Eldoria';
     subtitleEl.textContent = remaining > 0
         ? `${remaining + 1} etapa${remaining > 0 ? 's' : ''} restante${remaining > 0 ? 's' : ''}`
         : 'Quase lá...';
-    iconEl.textContent = hasEncounter ? '⚔️' : hasHazard ? hazard.icon : '🚶';
+    iconEl.textContent = '';
 
     // HP bar
     _renderReturnHP(hpEl);
@@ -1874,16 +1874,16 @@ function showReturnJourneyStep() {
 
     if (hasEncounter) {
         // ─── ENCOUNTER: delegate to existing random encounter system ───
-        narrEl.innerHTML = `<div class="return-step-badge danger">⚔️ Encontro na estrada!</div>` +
+        narrEl.innerHTML = `<div class="return-step-badge danger">Encontro na estrada!</div>` +
             `<div>Sombras se movem entre a vegetação. Algo se aproxima rapidamente...</div>`;
-        _addReturnBtn(actionsEl, '⚔️', 'Enfrentar', 'Resolver o encontro para continuar', '#c44', () => {
+        _addReturnBtn(actionsEl, '', 'Enfrentar', 'Resolver o encontro para continuar', '#c44', () => {
             overlay.classList.remove('active');
             const enc = S.randomEncounters.shift();
             setTimeout(() => showRandomEncounter(enc), 300);
         });
     } else if (hasHazard) {
         // ─── HAZARD: multiple choices with different skill checks ───
-        narrEl.innerHTML = `<div class="return-step-badge hazard">${hazard.icon} ${hazard.title}</div>` +
+        narrEl.innerHTML = `<div class="return-step-badge hazard">${hazard.title}</div>` +
             `<div>${hazard.narr}</div>`;
         for (const choice of hazard.choices) {
             const statName = STAT_NAMES[choice.k.s] || choice.k.s;
@@ -1897,8 +1897,8 @@ function showReturnJourneyStep() {
         }
     } else {
         // ─── SAFE: atmospheric narration ───
-        const biomeLabels = { forest: '🌲 Floresta', plains: '🌾 Planície', cave: '🕳️ Caverna', swamp: '🌿 Pântano', mountain: '🏔️ Montanha', desert: '🏜️ Deserto', snow: '❄️ Neve' };
-        const biomeLabel = biomeLabels[_getReturnBiome()] || '🛤️ Estrada';
+        const biomeLabels = { forest: 'Floresta', plains: 'Planície', cave: 'Caverna', swamp: 'Pântano', mountain: 'Montanha', desert: 'Deserto', snow: 'Neve' };
+        const biomeLabel = biomeLabels[_getReturnBiome()] || 'Estrada';
         narrEl.innerHTML = `<div class="return-step-badge safe">✓ ${biomeLabel} — Caminho seguro</div>` +
             `<div>${_getReturnNarration()}</div>`;
         _addReturnActions(actionsEl, overlay, remaining);
@@ -1936,7 +1936,7 @@ function _rollReturnHazard(hazard, choice) {
         });
     } else {
         // Fallback without 3D
-        checkEl.innerHTML = `<div style="font-size:48px;animation:diceRoll 0.7s ease">🎲</div>`;
+        checkEl.innerHTML = `<div style="font-size:48px;animation:diceRoll 0.7s ease">d20</div>`;
         setTimeout(() => {
             _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2, mode);
         }, 800);
@@ -1955,11 +1955,11 @@ function _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2,
     const proficient = S.charData && S.charData.sp && S.charData.sp.includes(choice.k.s);
     const profMark = proficient ? '★' : '';
     checkEl.innerHTML = buildFormula(roll, mod, statName, profMark, choice.k.dc, total, r1, r2, mode) +
-        `<div style="margin-top:6px;font-size:15px;font-weight:700;color:${success ? '#4a8' : '#c44'}">${success ? '✅ Sucesso!' : '❌ Falha!'}</div>`;
+        `<div style="margin-top:6px;font-size:15px;font-weight:700;color:${success ? '#4a8' : '#c44'}">${success ? 'Sucesso!' : 'Falha!'}</div>`;
 
     // Apply outcome
     if (success) {
-        narrEl.innerHTML = `<div class="return-step-badge safe">✓ ${hazard.title} — Superado!</div>` +
+        narrEl.innerHTML = `<div class="return-step-badge safe">${hazard.title} — Superado!</div>` +
             `<div>${choice.sNarr}</div>`;
     } else {
         const dmg = choice.fDmg || 3;
@@ -1969,9 +1969,9 @@ function _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2,
             updateHP(newHP, S.charData.mh);
         }
         _renderReturnHP(hpEl);
-        narrEl.innerHTML = `<div class="return-step-badge danger">✗ ${hazard.title} — Falha!</div>` +
+        narrEl.innerHTML = `<div class="return-step-badge danger">${hazard.title} — Falha!</div>` +
             `<div>${choice.fNarr}</div>` +
-            `<div style="margin-top:6px;color:#c44;font-size:13px">💔 -${dmg} HP</div>`;
+            `<div style="margin-top:6px;color:#c44;font-size:13px">-${dmg} HP</div>`;
     }
 
     try { if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error'); } catch (e) { /* ignore */ }
@@ -1986,7 +1986,7 @@ function _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2,
         // Check death
         if (getCurrentHP() <= 0) {
             actionsEl.innerHTML = '';
-            _addReturnBtn(actionsEl, '💀', 'Você sucumbiu...', 'Seus ferimentos foram fatais', '#c44', () => {
+            _addReturnBtn(actionsEl, '', 'Você sucumbiu...', 'Seus ferimentos foram fatais', '#c44', () => {
                 overlay.classList.remove('active');
                 _returnJourney = null;
                 _returningToCity = false;
@@ -2003,7 +2003,7 @@ function _addReturnActions(actionsEl, overlay, remaining) {
     actionsEl.innerHTML = '';
 
     // Continue journey
-    _addReturnBtn(actionsEl, '🚶',
+    _addReturnBtn(actionsEl, '',
         remaining > 0 ? 'Continuar Viagem' : 'Chegar à Cidade',
         remaining > 0 ? `${remaining} etapa${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}` : 'Os portões de Eldoria se erguem à frente!',
         remaining > 0 ? '#8a7a68' : '#4a8',
@@ -2016,7 +2016,7 @@ function _addReturnActions(actionsEl, overlay, remaining) {
         const div = document.createElement('div');
         div.className = 'return-camp-section';
         actionsEl.appendChild(div);
-        _addReturnBtn(div, '🏕️', 'Montar Acampamento',
+        _addReturnBtn(div, '', 'Montar Acampamento',
             `Descanso Curto (1d8+CON) — ${foodItems.length} refeição disponível`,
             '#4a8', () => {
                 overlay.classList.remove('active');
@@ -2029,10 +2029,10 @@ function _addReturnActions(actionsEl, overlay, remaining) {
     const healItems = getHealingItems();
     if (healItems.length > 0 && getHPPercent() < 100) {
         const best = healItems[0];
-        _addReturnBtn(actionsEl, best.e || '🧪', `Usar ${best.n} (${best.q}x)`,
+        _addReturnBtn(actionsEl, '', `Usar ${best.n} (${best.q}x)`,
             `Restaura ${best.h} HP`, '#4a8', () => {
                 const heal = useInventoryItem(best);
-                showTerrainToast(`${best.e || '🧪'} +${heal} HP`, 'ranger');
+                showTerrainToast(`+${heal} HP`, 'ranger');
                 // Refresh HP display
                 _renderReturnHP(document.getElementById('return-journey-hp'));
                 // Rebuild actions
@@ -2058,7 +2058,7 @@ function _showArrivalScreen() {
     actionsEl.innerHTML = '';
     _disposeReturnDice();
 
-    iconEl.textContent = '🏰';
+    iconEl.textContent = '';
     iconEl.style.animation = 'none'; // Stop bobbing
     titleEl.textContent = 'Eldoria';
     subtitleEl.textContent = 'Você chegou em segurança';
@@ -2077,9 +2077,9 @@ function _showArrivalScreen() {
         'O cheiro de pão fresco e fumaça de lareiras atinge você antes mesmo de ver os muros. Eldoria, finalmente.',
     ];
 
-    narrEl.innerHTML = `<div class="return-step-badge arrival">🏰 Chegada a Eldoria</div>` +
+    narrEl.innerHTML = `<div class="return-step-badge arrival">Chegada a Eldoria</div>` +
         `<div>${_pickFrom(arrivalTexts)}</div>`;
-    _addReturnBtn(actionsEl, '🏰', 'Entrar na Cidade',
+    _addReturnBtn(actionsEl, '', 'Entrar na Cidade',
         'Seus pés pisam solo seguro novamente', 'var(--v-gold, #c4953a)', () => {
             _closeReturnJourney();
             finishExploration('exit');

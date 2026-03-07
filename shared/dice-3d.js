@@ -425,11 +425,15 @@ const Dice3D = (() => {
             this._dieMesh = null;
             this._particlesEl = opts.particlesContainer || null;
 
+            // Camera tracking state
+            this._camTarget = new THREE.Vector3(0, 0, 0);
+            this._camBasePos = new THREE.Vector3(0, 3.5, 6);
+
             var W = this._size, H = this._size;
 
             this._scene = new THREE.Scene();
             this._camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 100);
-            this._camera.position.set(0, 3.5, 6);
+            this._camera.position.copy(this._camBasePos);
             this._camera.lookAt(0, 0, 0);
 
             this._renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -493,13 +497,24 @@ const Dice3D = (() => {
             if (this._rollAnim) {
                 this._updateRoll(time);
             } else if (this._showingResult) {
-                // Hold still
+                // Hold still — smoothly return camera to center
+                this._camTarget.lerp(new THREE.Vector3(0, 0, 0), 0.08);
             } else if (this._dieMesh) {
                 this._idleTime += 0.012;
                 this._dieMesh.rotation.y = this._idleTime * 0.3;
                 this._dieMesh.rotation.x = Math.sin(this._idleTime * 0.5) * 0.12 - 0.2;
                 this._dieMesh.position.y = Math.sin(this._idleTime * 0.8) * 0.08;
+                this._camTarget.set(0, 0, 0);
             }
+
+            // Camera follows target smoothly
+            var camLookAt = this._camTarget;
+            this._camera.position.set(
+                this._camBasePos.x + camLookAt.x * 0.6,
+                this._camBasePos.y + camLookAt.y * 0.3,
+                this._camBasePos.z + camLookAt.z * 0.3
+            );
+            this._camera.lookAt(camLookAt.x, camLookAt.y, camLookAt.z);
 
             this._renderer.render(this._scene, this._camera);
         }
@@ -557,9 +572,7 @@ const Dice3D = (() => {
                 mesh.position.set(sx, sy, sz);
 
                 // Rotation: damped oscillation toward target (rocking)
-                // Base convergence with overshoot
                 var easeBase = 1 - Math.pow(1 - Math.min(1, p * 1.2), 3);
-                // Rocking: decaying sinusoidal overshoot
                 var rock = ra.rockAmp * Math.exp(-ra.rockDamp * p) *
                     Math.sin(p * ra.rockFreq * Math.PI * 2);
                 var slerpT = Math.max(0, Math.min(1, easeBase + rock));
@@ -577,6 +590,11 @@ const Dice3D = (() => {
                 }
                 mesh.quaternion.copy(currentQ);
             }
+
+            // ─── CAMERA FOLLOW ───
+            // Smooth lerp toward die position (heavier during airborne, lighter during settle)
+            var lerpRate = phase < ra.bounces.length ? 0.12 : 0.06;
+            this._camTarget.lerp(mesh.position, lerpRate);
 
             // Dynamic shadow
             this._ground.material.opacity = 0.35 - 0.25 * (Math.max(0, mesh.position.y) / 2.5);
@@ -638,71 +656,85 @@ const Dice3D = (() => {
             this._showingResult = false;
             this._rollAnim = null;
             this._createMesh();
+            this._camTarget.set(0, 0, 0);
             haptic('medium');
 
             var targetQ = getTargetQuaternion(this._dieMesh, resultValue);
             var dieType = this._dieType;
 
-            // ─── GRAVITY ───
-            var G = 38 + Math.random() * 8;
+            // ─── THROW STRENGTH (wide variation: gentle toss vs hard throw) ───
+            // throwForce 0.0-1.0: 0=gentle lob, 1=powerful throw
+            var throwForce = Math.random();
+            // Bias toward mid-range but allow extremes
+            throwForce = 0.5 + (throwForce - 0.5) * 1.4;
+            throwForce = Math.max(0.05, Math.min(1.0, throwForce));
 
-            // ─── ENTRY DIRECTION (thrown from a random edge) ───
-            var throwSide = Math.random() > 0.5 ? 1 : -1;
-            var startX = throwSide * (1.2 + Math.random() * 0.8);
-            var startZ = (Math.random() - 0.5) * 1.2;
+            // ─── GRAVITY (constant — real physics!) ───
+            var G = 9.81 * 4; // scaled for visual space
 
-            // ─── THROW ARC (varied height) ───
-            var throwH = 1.8 + Math.random() * 1.6;
+            // ─── ENTRY DIRECTION ───
+            var throwAngle = Math.random() * Math.PI * 2;
+            var entryDist = 0.8 + throwForce * 1.2;
+            var startX = Math.cos(throwAngle) * entryDist;
+            var startZ = Math.sin(throwAngle) * entryDist * 0.5;
+
+            // ─── THROW ARC — energy-based ───
+            // Gentle: low arc (0.8-1.2), strong: high arc (2.0-3.5)
+            var throwH = 0.8 + throwForce * 2.5 + Math.random() * 0.5;
             var v0_throw = Math.sqrt(2 * G * throwH);
 
-            // Horizontal velocity: biased toward center from start position
-            var vx0 = -startX * (1.8 + Math.random() * 1.5) + (Math.random() - 0.5) * 2.5;
-            var vz0 = -startZ * (1.0 + Math.random() * 1.0) + (Math.random() - 0.5) * 1.5;
+            // Horizontal: biased toward center, proportional to throw force
+            var hSpeed = (1.5 + throwForce * 3.0) * (0.7 + Math.random() * 0.6);
+            var aimAngle = Math.atan2(-startZ, -startX) + (Math.random() - 0.5) * 0.8;
+            var vx0 = Math.cos(aimAngle) * hSpeed;
+            var vz0 = Math.sin(aimAngle) * hSpeed * 0.6;
 
-            // ─── BOUNCE SEQUENCE (3-4 bounces with restitution + friction) ───
-            var numBounces = 3 + (Math.random() > 0.6 ? 1 : 0);
-            var restitution = [
-                0.50 + Math.random() * 0.18,
-                0.40 + Math.random() * 0.18,
-                0.30 + Math.random() * 0.15,
-                0.20 + Math.random() * 0.12,
-            ];
-            var hFric = 0.45 + Math.random() * 0.2;
+            // ─── BOUNCE SEQUENCE — energy conservation model ───
+            // Coefficient of restitution: how much energy preserved per bounce
+            // Real dice: ~0.3-0.5 on felt, 0.5-0.7 on hard surface
+            var cor = 0.38 + Math.random() * 0.22; // coefficient of restitution
+            var rollingFriction = 0.35 + Math.random() * 0.2;
+            var maxBounces = 5;
 
-            // ─── SPIN PARAMETERS (die-type scaled) ───
-            var spinMult = { d4: 0.7, d6: 0.85, d8: 0.95, d10: 1.0, d12: 1.05, d20: 1.1 }[dieType] || 1.0;
-            var initialSpin = (10 + Math.random() * 6) * spinMult;
-            var spinDecay = 1.8 + Math.random() * 0.7;
+            // ─── SPIN — velocity-coupled (faster throw = faster spin) ───
+            var mass = { d4: 0.6, d6: 0.8, d8: 0.7, d10: 0.75, d12: 0.9, d20: 1.0 }[dieType] || 1.0;
+            var inertia = mass * 0.6; // moment of inertia factor
+            // Spin speed proportional to throw energy, inversely proportional to inertia
+            var initialSpin = (6 + throwForce * 12) / inertia;
+            // Spin decays based on angular drag (air resistance + surface friction)
+            var spinDrag = 1.2 + throwForce * 0.8 + Math.random() * 0.5;
+
+            // Random spin axis components
             var sdX = Math.random() > 0.5 ? 1 : -1;
             var sdY = Math.random() > 0.5 ? 1 : -1;
             var sdZ = Math.random() > 0.5 ? 1 : -1;
-            var ssX = 0.7 + Math.random() * 0.6;
-            var ssY = 0.7 + Math.random() * 0.6;
-            var ssZ = 0.4 + Math.random() * 0.5;
+            var ssX = 0.6 + Math.random() * 0.8;
+            var ssY = 0.6 + Math.random() * 0.8;
+            var ssZ = 0.3 + Math.random() * 0.6;
 
-            // Tumble (second rotation axis with precession)
+            // Tumble axis with precession (gyroscopic effect)
             var tumbleAxis = new THREE.Vector3(
                 Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5
             ).normalize();
-            var tumbleSpeed = 3 + Math.random() * 5;
-            var tumbleDecay = 1.3 + Math.random() * 1.2;
-            var precessionSpeed = 1.5 + Math.random() * 2.5;
+            var tumbleSpeed = (2 + throwForce * 6) / inertia;
+            var tumbleDecay = 1.0 + throwForce * 1.2 + Math.random() * 0.8;
+            var precessionSpeed = 1.0 + Math.random() * 3.0;
             var precessionAxis = new THREE.Vector3(0, 1, 0);
 
-            // ─── SPIN FUNCTION (continuous, decaying) ───
+            // ─── SPIN FUNCTION — angular momentum with drag ───
             var spinQ = function (tSec) {
-                var sa = (initialSpin / spinDecay) * (1 - Math.exp(-spinDecay * tSec));
+                // Integrated angle = (w0/drag) * (1 - e^(-drag*t))
+                var sa = (initialSpin / spinDrag) * (1 - Math.exp(-spinDrag * tSec));
                 var pq = new THREE.Quaternion().setFromEuler(new THREE.Euler(
                     sdX * ssX * sa, sdY * ssY * sa * 1.1, sdZ * ssZ * sa * 0.8
                 ));
                 var tsa = (tumbleSpeed / tumbleDecay) * (1 - Math.exp(-tumbleDecay * tSec));
-                var pa = tSec * precessionSpeed;
+                var pa = tSec * precessionSpeed * Math.exp(-0.3 * tSec);
                 var cta = tumbleAxis.clone().applyAxisAngle(precessionAxis, pa);
                 return pq.multiply(new THREE.Quaternion().setFromAxisAngle(cta, tsa));
             };
 
-            // ─── BUILD BOUNCE TABLE ───
-            // Each bounce: {tStart, tEnd, x0, z0, vx, vz, vy, rotQ, hapticDone}
+            // ─── BUILD BOUNCE TABLE (energy-based timing) ───
             var bounces = [];
             var tCursor = 0;
             var cx = startX, cz = startZ;
@@ -722,18 +754,25 @@ const Dice3D = (() => {
             cz = cz + cvz * t0;
             tCursor = t0;
 
-            // Subsequent bounces
-            for (var i = 0; i < numBounces; i++) {
-                // Impact: restitution + friction + random lateral kick
-                cvy = cvy * restitution[i];
-                cvx = cvx * hFric + (Math.random() - 0.5) * (1.5 - i * 0.3);
-                cvz = cvz * hFric + (Math.random() - 0.5) * (0.8 - i * 0.15);
-                // Skip if bounce too tiny
-                if (cvy < 0.3) break;
+            // Subsequent bounces — energy-based
+            for (var i = 0; i < maxBounces; i++) {
+                // Impact: velocity * restitution (energy = 0.5*m*v^2, so v scales by cor)
+                cvy = cvy * cor;
+                // Rolling friction reduces horizontal speed
+                var speed = Math.sqrt(cvx * cvx + cvz * cvz);
+                if (speed > 0.01) {
+                    var newSpeed = speed * rollingFriction;
+                    cvx = cvx * (newSpeed / speed) + (Math.random() - 0.5) * (0.8 - i * 0.12);
+                    cvz = cvz * (newSpeed / speed) + (Math.random() - 0.5) * (0.5 - i * 0.08);
+                }
 
-                // Rotation perturbation on impact (key for realism!)
-                // Bigger perturbation for earlier bounces
-                var perturbAngle = (Math.random() - 0.5) * Math.PI * (0.7 - i * 0.15);
+                // Minimum bounce height: stop bouncing when too small
+                var bounceH = (cvy * cvy) / (2 * G);
+                if (bounceH < 0.01) break;
+
+                // Rotation perturbation on impact — angular impulse proportional to impact speed
+                var impactSpeed = cvy / v0_throw; // normalized 0-1
+                var perturbAngle = (Math.random() - 0.5) * Math.PI * impactSpeed * 1.2;
                 var perturbAxis = new THREE.Vector3(
                     Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5
                 ).normalize();
@@ -754,22 +793,22 @@ const Dice3D = (() => {
 
             var totalAirborne = tCursor;
 
-            // ─── SETTLE PARAMETERS ───
-            var settleTime = 0.55 + Math.random() * 0.2;
+            // ─── SETTLE — duration proportional to remaining energy ───
+            var remainingEnergy = cvy * cvy + cvx * cvx + cvz * cvz;
+            var settleTime = 0.35 + Math.min(0.4, remainingEnergy * 0.05) + Math.random() * 0.15;
             var duration = (totalAirborne + settleTime) * 1000;
 
-            // Settle start quaternion: spin at end of last airborne phase + bounce perturbation
             var lastBounce = bounces[bounces.length - 1];
             var settleStartQ = spinQ(totalAirborne).clone().multiply(lastBounce.rotQ);
 
-            // Rocking: damped oscillation (die tips between faces before settling)
-            var rockAmp = 0.10 + Math.random() * 0.08;
+            // Rocking amplitude proportional to remaining angular momentum
+            var angularRemaining = Math.exp(-spinDrag * totalAirborne);
+            var rockAmp = 0.06 + angularRemaining * 0.12 + Math.random() * 0.04;
             var rockFreq = 3 + Math.random() * 2;
             var rockDamp = 4 + Math.random() * 3;
 
-            // Wobble on perpendicular axes
-            var wobbleAmp = 0.05 + Math.random() * 0.05;
-            var wobbleFreq = 12 + Math.random() * 8;
+            var wobbleAmp = 0.03 + angularRemaining * 0.06;
+            var wobbleFreq = 10 + Math.random() * 10;
             var wobbleDamp = 5 + Math.random() * 3;
 
             // Crit/fail detection

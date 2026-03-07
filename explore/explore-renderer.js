@@ -410,9 +410,9 @@ function movePlayerCanvas(col, row) {
     // Terrain toast feedback
     if (difficult) {
         if (ranger) {
-            showTerrainToast('🏹 Terreno Natural', 'ranger');
+            showTerrainToast('Terreno Natural', 'ranger');
         } else {
-            showTerrainToast('🥾 Terreno Difícil', 'difficult');
+            showTerrainToast('Terreno Difícil', 'difficult');
         }
     }
 
@@ -477,7 +477,7 @@ function onMoveComplete(col, row) {
         return !IMPASSABLE.has(t);
     });
     if (!hasValidMove) {
-        showTerrainToast('🚫 Sem caminhos disponíveis!', 'damage');
+        showTerrainToast('Sem caminhos disponíveis!', 'damage');
     }
 
     // Flavor event (ambient mini-event between POIs)
@@ -519,16 +519,16 @@ function invalidateStatic() {
 // ATMOSPHERE — Day/Night Cycle + Weather Effects
 // ═══════════════════════════════════════════════════════
 const _DAY_PHASES = {
-    dawn:  { icon: '🌅', label: 'Amanhecer' },
-    day:   { icon: '☀️', label: 'Dia' },
-    dusk:  { icon: '🌅', label: 'Entardecer' },
-    night: { icon: '🌙', label: 'Noite' },
+    dawn:  { icon: '', label: 'Amanhecer' },
+    day:   { icon: '', label: 'Dia' },
+    dusk:  { icon: '', label: 'Entardecer' },
+    night: { icon: '', label: 'Noite' },
 };
 const _WEATHER_INFO = {
-    s: { icon: '☀️', label: 'Limpo' },
-    r: { icon: '🌧️', label: 'Chuva', css: 'weather-rain' },
-    f: { icon: '🌫️', label: 'Névoa', css: 'weather-fog' },
-    t: { icon: '⛈️', label: 'Tempestade', css: 'weather-storm' },
+    s: { icon: '', label: 'Limpo' },
+    r: { icon: '', label: 'Chuva', css: 'weather-rain' },
+    f: { icon: '', label: 'Névoa', css: 'weather-fog' },
+    t: { icon: '', label: 'Tempestade', css: 'weather-storm' },
 };
 
 function getCurrentHour() {

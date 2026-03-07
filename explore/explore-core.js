@@ -175,7 +175,7 @@ function loadMapData(data) {
     // Clone consumable inventory from payload
     S.inventory = (data.c && data.c.inv) ? JSON.parse(JSON.stringify(data.c.inv)) : [];
     S.randomEncounters = (data.re || []).map(re => ({
-        type: re.y, icon: re.ic || '⚠️', title: re.tt || 'Evento',
+        type: re.y, icon: re.ic || '', title: re.tt || 'Evento',
         // Narration: resolve from index (ni) via local pool, fallback to text (n)
         narration: (re.ni != null && typeof lookupEncNarr === 'function')
             ? (lookupEncNarr(re.y, S.biome, re.ni) || re.n || '')
@@ -272,7 +272,7 @@ function loadMapData(data) {
         const delay = S.dmIntro ? 2000 : 600;
         setTimeout(() => {
             if (typeof showTerrainToast === 'function') {
-                showTerrainToast(`👁️ Percepção Passiva (${S._passivePerception})`, 'ranger');
+                showTerrainToast(`Percepção Passiva (${S._passivePerception})`, 'ranger');
             }
         }, delay);
     }
@@ -284,7 +284,7 @@ function loadMapData(data) {
 function setupHUD() {
     const c = S.charData;
     if (!c) return;
-    document.getElementById('hud-name').textContent = (c.ci || '⚔️') + ' ' + (c.nm || 'Herói');
+    document.getElementById('hud-name').textContent = c.nm || 'Herói';
     updateHP(c.hp || 10, c.mh || 10);
     updateRewards();
 }
@@ -301,8 +301,8 @@ function updateHP(current, max) {
 function updateRewards() {
     const xpBadge = document.getElementById('badge-xp');
     const goldBadge = document.getElementById('badge-gold');
-    xpBadge.textContent = '✨ ' + S.xpEarned;
-    goldBadge.textContent = '💰 ' + S.goldEarned;
+    xpBadge.textContent = 'XP ' + S.xpEarned;
+    goldBadge.textContent = 'GP ' + S.goldEarned;
     // Spring bounce animation
     [xpBadge, goldBadge].forEach(b => {
         b.classList.remove('pop');
@@ -315,7 +315,7 @@ function updateRewards() {
 
 function updateStepCounter() {
     const el = document.getElementById('step-counter');
-    if (el) el.textContent = '⬡ ' + S.visited.size;
+    if (el) el.textContent = S.visited.size;
 }
 
 function initBottomBar() {
@@ -384,12 +384,11 @@ function updateConditionHUD() {
         return;
     }
     bar.style.display = 'flex';
-    const icons = { poisoned: '☠️', prone: '🧊', frightened: '😨', exhaustion: '😩' };
     const labels = { poisoned: 'Envenenado', prone: 'Caído', frightened: 'Amedrontado', exhaustion: 'Exaustão' };
     for (const c of S.conditions) {
         const tag = document.createElement('span');
         tag.className = 'condition-tag';
-        tag.textContent = `${icons[c.type] || '⚠️'} ${labels[c.type] || c.type} (${c.stepsLeft})`;
+        tag.textContent = `${labels[c.type] || c.type} (${c.stepsLeft})`;
         bar.appendChild(tag);
     }
 }
@@ -423,94 +422,94 @@ function updateLocationInfo() {
 // ═══════════════════════════════════════════════════════
 const FLAVOR_TEXTS = {
     forest: [
-        '🐦 Pássaros cantam nas copas distantes.',
-        '🍃 Uma brisa agita as folhas ao seu redor.',
-        '🌿 Raízes retorcidas formam padrões curiosos no chão.',
-        '🍄 Cogumelos brilhantes crescem na base de um tronco.',
-        '🦌 Algo se move entre as árvores — e desaparece.',
-        '🕸️ Uma teia de aranha reluz com gotas de orvalho.',
-        '🌲 O aroma de pinheiro e terra úmida envolve o ar.',
-        '🐿️ Um esquilo observa você de um galho alto.',
+        'Pássaros cantam nas copas distantes.',
+        'Uma brisa agita as folhas ao seu redor.',
+        'Raízes retorcidas formam padrões curiosos no chão.',
+        'Cogumelos brilhantes crescem na base de um tronco.',
+        'Algo se move entre as árvores — e desaparece.',
+        'Uma teia de aranha reluz com gotas de orvalho.',
+        'O aroma de pinheiro e terra úmida envolve o ar.',
+        'Um esquilo observa você de um galho alto.',
     ],
     plains: [
-        '🌾 O vento faz ondas suaves no capim alto.',
-        '🦅 Uma ave de rapina circula lentamente no céu.',
-        '🌻 Flores silvestres colorem o campo ao longe.',
-        '💨 Uma rajada de vento traz o cheiro de terra seca.',
-        '🦗 O canto dos grilos ecoa ritmicamente.',
-        '☁️ Nuvens projetam sombras que cruzam o campo.',
-        '🐾 Rastros de animais marcam o solo batido.',
-        '🌅 A luz dourada ilumina a paisagem aberta.',
+        'O vento faz ondas suaves no capim alto.',
+        'Uma ave de rapina circula lentamente no céu.',
+        'Flores silvestres colorem o campo ao longe.',
+        'Uma rajada de vento traz o cheiro de terra seca.',
+        'O canto dos grilos ecoa ritmicamente.',
+        'Nuvens projetam sombras que cruzam o campo.',
+        'Rastros de animais marcam o solo batido.',
+        'A luz dourada ilumina a paisagem aberta.',
     ],
     swamp: [
-        '🫧 Bolhas sobem lentamente da água turva.',
-        '🐸 Um coaxar grave ecoa entre os troncos retorcidos.',
-        '🦟 Nuvens de insetos pairam sobre a água parada.',
-        '💀 Um cheiro pútrido sobe da lama escura.',
-        '🌫️ Névoa densa se agarra ao solo encharcado.',
-        '🐊 Algo se move sob a superfície da água.',
-        '🪵 Troncos apodrecidos formam pontes naturais instáveis.',
-        '🕯️ Luzes pálidas piscam ao longe — fogos-fátuos.',
+        'Bolhas sobem lentamente da água turva.',
+        'Um coaxar grave ecoa entre os troncos retorcidos.',
+        'Nuvens de insetos pairam sobre a água parada.',
+        'Um cheiro pútrido sobe da lama escura.',
+        'Névoa densa se agarra ao solo encharcado.',
+        'Algo se move sob a superfície da água.',
+        'Troncos apodrecidos formam pontes naturais instáveis.',
+        'Luzes pálidas piscam ao longe — fogos-fátuos.',
     ],
     cave: [
-        '💧 Gotas de água ecoam nas paredes distantes.',
-        '🦇 Asas agitam-se na escuridão acima.',
-        '💎 Cristais refletem a luz fracamente nas paredes.',
-        '🕳️ Uma corrente de ar frio vem de um túnel lateral.',
-        '🪨 Estalagmites projetam sombras alongadas.',
-        '🕷️ Teias abandonadas pendem do teto rochoso.',
-        '🔊 Seus passos ecoam várias vezes antes de silenciar.',
-        '⛏️ Marcas de picareta antigas cobrem a parede.',
+        'Gotas de água ecoam nas paredes distantes.',
+        'Asas agitam-se na escuridão acima.',
+        'Cristais refletem a luz fracamente nas paredes.',
+        'Uma corrente de ar frio vem de um túnel lateral.',
+        'Estalagmites projetam sombras alongadas.',
+        'Teias abandonadas pendem do teto rochoso.',
+        'Seus passos ecoam várias vezes antes de silenciar.',
+        'Marcas de picareta antigas cobrem a parede.',
     ],
     desert: [
-        '🏜️ O calor distorce o horizonte em miragens.',
-        '🦂 Um escorpião desliza rapidamente entre as pedras.',
-        '💨 Uma rajada de areia agita-se em espiral.',
-        '☀️ O sol implacável castiga a areia sem fim.',
-        '🦎 Um lagarto observa imóvel sobre uma rocha quente.',
-        '🏺 Restos de cerâmica antiga emergem da areia.',
-        '🌵 Um cacto solitário projeta uma sombra minúscula.',
-        '💀 Ossos esbranquiçados pontilham a paisagem árida.',
+        'O calor distorce o horizonte em miragens.',
+        'Um escorpião desliza rapidamente entre as pedras.',
+        'Uma rajada de areia agita-se em espiral.',
+        'O sol implacável castiga a areia sem fim.',
+        'Um lagarto observa imóvel sobre uma rocha quente.',
+        'Restos de cerâmica antiga emergem da areia.',
+        'Um cacto solitário projeta uma sombra minúscula.',
+        'Ossos esbranquiçados pontilham a paisagem árida.',
     ],
     mountain: [
-        '🏔️ O vento uiva entre as rochas expostas.',
-        '🦅 Uma águia plana majestosamente nas correntes de ar.',
-        '⛰️ Pedras soltas rolam pelo declive abaixo.',
-        '❄️ A temperatura cai visivelmente a cada passo.',
-        '🐐 Uma cabra montanhesa observa de um penhasco.',
-        '🪨 Formações rochosas formam arcos naturais.',
-        '☁️ Nuvens baixas envolvem os picos ao redor.',
-        '💎 Veios minerais brilham na rocha cortada.',
+        'O vento uiva entre as rochas expostas.',
+        'Uma águia plana majestosamente nas correntes de ar.',
+        'Pedras soltas rolam pelo declive abaixo.',
+        'A temperatura cai visivelmente a cada passo.',
+        'Uma cabra montanhesa observa de um penhasco.',
+        'Formações rochosas formam arcos naturais.',
+        'Nuvens baixas envolvem os picos ao redor.',
+        'Veios minerais brilham na rocha cortada.',
     ],
     snow: [
-        '❄️ Flocos de neve dançam silenciosamente ao seu redor.',
-        '🐾 Pegadas no gelo se perdem na nevasca.',
-        '🌬️ O vento gélido corta como uma lâmina.',
-        '🏔️ Estalactites de gelo pendem das rochas acima.',
-        '🐺 Um uivo distante ecoa pelo ermo gelado.',
-        '❄️ O gelo sob seus pés range a cada passo.',
-        '🌀 Uma nevasca se forma no horizonte distante.',
-        '🦌 Rastros de um animal grande cruzam a neve fresca.',
+        'Flocos de neve dançam silenciosamente ao seu redor.',
+        'Pegadas no gelo se perdem na nevasca.',
+        'O vento gélido corta como uma lâmina.',
+        'Estalactites de gelo pendem das rochas acima.',
+        'Um uivo distante ecoa pelo ermo gelado.',
+        'O gelo sob seus pés range a cada passo.',
+        'Uma nevasca se forma no horizonte distante.',
+        'Rastros de um animal grande cruzam a neve fresca.',
     ],
     volcanic: [
-        '🔥 O ar quente tremula sobre fissuras incandescentes.',
-        '🌋 Um tremor sutil faz o chão vibrar.',
-        '💨 Jatos de vapor escapam de fendas na rocha.',
-        '🪨 Rocha derretida brilha em veios alaranjados.',
-        '☠️ O cheiro de enxofre arde nas narinas.',
-        '🔥 Cinzas flutuam no ar como neve negra.',
-        '🌡️ O calor intenso faz a pele arder.',
-        '💎 Obsidiana negra reluz entre as rochas vulcânicas.',
+        'O ar quente tremula sobre fissuras incandescentes.',
+        'Um tremor sutil faz o chão vibrar.',
+        'Jatos de vapor escapam de fendas na rocha.',
+        'Rocha derretida brilha em veios alaranjados.',
+        'O cheiro de enxofre arde nas narinas.',
+        'Cinzas flutuam no ar como neve negra.',
+        'O calor intenso faz a pele arder.',
+        'Obsidiana negra reluz entre as rochas vulcânicas.',
     ],
     graveyard: [
-        '🪦 Lápides tortas emergem da névoa rasteira.',
-        '🦉 Uma coruja pia sombriamente ao longe.',
-        '💀 O vento agita galhos secos como dedos esqueléticos.',
-        '🕯️ Uma vela bruxuleante arde sobre um túmulo antigo.',
-        '🌫️ Névoa fria se agarra às suas botas.',
-        '🦇 Morcegos irrompem de uma cripta entreaberta.',
-        '⚰️ Uma lápide rachada revela inscrições ilegíveis.',
-        '👻 Você sente um arrepio inexplicável na nuca.',
+        'Lápides tortas emergem da névoa rasteira.',
+        'Uma coruja pia sombriamente ao longe.',
+        'O vento agita galhos secos como dedos esqueléticos.',
+        'Uma vela bruxuleante arde sobre um túmulo antigo.',
+        'Névoa fria se agarra às suas botas.',
+        'Morcegos irrompem de uma cripta entreaberta.',
+        'Uma lápide rachada revela inscrições ilegíveis.',
+        'Você sente um arrepio inexplicável na nuca.',
     ],
 };
 

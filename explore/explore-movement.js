@@ -295,13 +295,7 @@ function drawPlayerToken(ctx, timestamp) {
     ctx.ellipse(px, py + 1, (baseW + 3) * glowPulse, (baseH + 2) * glowPulse, 0, 0, Math.PI * 2);
     ctx.stroke();
 
-    // ── Class icon above head ──
-    const icon = (S.charData && S.charData.ci) ? S.charData.ci : '⚔️';
-    const iconFloat = Math.sin(t * 2) * 2;
-    ctx.font = `${Math.round(14 * s)}px system-ui`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(icon, px, headY - 12 * s + iconFloat);
+    // ── Class icon above head (skipped — text-only mode) ──
 
     ctx.restore();
 }
