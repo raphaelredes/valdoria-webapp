@@ -445,6 +445,7 @@ function _renderArenaInner(s) {
     html += '</div>';
 
     // Battlefield — CENTER (arena where dice roll between combatants)
+    const isNarrative = s.vm === 'simple';
     html += '<div class="battlefield">';
     if (ph === 'intro') {
         // Immersive initiative area with real 3D d20 (THREE.js Dice3D)
@@ -456,7 +457,6 @@ function _renderArenaInner(s) {
         html += '</div>';
     } else {
         html += renderTurnTimeline(s.to);
-        const isNarrative = s.vm === 'simple';
         const diceDisplay = (ph === 'init' || isNarrative) ? 'display:none;' : '';
         html += `<div class="dice-row" style="${diceDisplay}">
             <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>

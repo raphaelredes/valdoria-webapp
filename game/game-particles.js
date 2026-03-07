@@ -15,9 +15,8 @@ const PARTICLE_THEMES = {
     taverna:  { color: [220, 140, 50], count: 12, speed: 0.5, size: [1.5, 3], drift: 0.1, glow: true },
     templo:   { color: [220, 200, 120], count: 8, speed: 0.2, size: [1, 2], drift: 0.2, glow: true },
     mercado:  { color: [196, 149, 58], count: 8, speed: 0.25, size: [1, 2], drift: 0.3, glow: false },
-    combat:   {
-    // backward compat alias
-    arena:    { color: [180, 60, 60], count: 10, speed: 0.6, size: [1, 2.5], drift: 0.05, glow: true },
+    combat:   { color: [180, 60, 60], count: 10, speed: 0.6, size: [1, 2.5], drift: 0.05, glow: true },
+    arena:    { color: [180, 60, 60], count: 10, speed: 0.6, size: [1, 2.5], drift: 0.05, glow: true },  // backward compat
     guilda:   { color: [160, 140, 100], count: 8, speed: 0.3, size: [1, 2], drift: 0.15, glow: false },
     banco:    { color: [196, 169, 88], count: 6, speed: 0.15, size: [1, 1.5], drift: 0.1, glow: true },
     floresta: { color: [80, 160, 80], count: 10, speed: 0.2, size: [1, 2], drift: 0.25, glow: false },
