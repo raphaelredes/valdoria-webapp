@@ -501,10 +501,9 @@ function addRewardBadge(container, text, type) {
 function closeOutcome() {
     document.getElementById('outcome-overlay').classList.remove('active');
     if (checkDeath()) return;
-    // If returning to city, finish exploration after the encounter resolves
-    if (_returningToCity) {
-        _returningToCity = false;
-        finishExploration('exit');
+    // If returning to city, continue the journey after resolving the encounter
+    if (_returningToCity && _returnJourney) {
+        setTimeout(() => showReturnJourneyStep(), 400);
         return;
     }
     if (checkLowHP()) { saveState(); return; }
@@ -1423,12 +1422,12 @@ function showLowHPOverlay() {
             });
     }
 
-    // Option 2: Return to city
+    // Option 2: Return to city (multi-step journey)
     const distText = distance >= 0 ? `${distance} turnos` : '???';
     addExitOption(optionsEl, '🏰', `Retornar (${distText})`,
         `Risco: ${risk.label} (${risk.chance}%)`, risk.color, () => {
             overlay.classList.remove('active');
-            finishExploration('exit');
+            attemptReturnToCity(risk.chance);
         });
 
     // Option 3: Continue exploring
@@ -1566,21 +1565,111 @@ function showDeathOverlay() {
 // ═══════════════════════════════════════════════════════
 // FINISH
 // ═══════════════════════════════════════════════════════
-// RETURN JOURNEY — roll for encounter on the way back
+// RETURN JOURNEY — multi-step travel back to the city
 // ═══════════════════════════════════════════════════════
 let _returningToCity = false;
+let _returnJourney = null; // { totalSteps, currentStep, riskChance }
+
+const RETURN_TRAVEL_NARRATIONS = [
+    'Você segue pela estrada, atento a cada sombra entre as árvores.',
+    'O caminho se estreita. Sons distantes ecoam pela trilha.',
+    'Pegadas recentes no chão indicam que outros viajantes passaram por aqui.',
+    'O vento carrega um cheiro familiar — a cidade se aproxima.',
+    'Você avança com cautela, mão na arma, olhos na trilha.',
+    'Uma encruzilhada. Você escolhe o caminho mais seguro.',
+    'Ruínas antigas margeiam a estrada. Melhor não se demorar.',
+    'O terreno muda sob seus pés. A paisagem vai ficando mais familiar.',
+    'Você ouve o barulho distante de uma caravana. Sinal de civilização.',
+    'A vegetação diminui. Os muros da cidade começam a surgir no horizonte.',
+    'Um corvo observa sua passagem de cima de uma rocha.',
+    'O silêncio é perturbador. Você acelera o passo.',
+    'Marcas de garras em uma árvore. Algo esteve aqui recentemente.',
+    'Você cruza um riacho raso. A água fria revigora seus pés cansados.',
+    'O sol se move no céu enquanto você percorre a trilha batida.',
+];
 
 function attemptReturnToCity(riskChance) {
-    const roll = Math.random() * 100;
-    if (roll < riskChance && S.randomEncounters.length > 0) {
-        // Encounter on the way back! Show it, then finish after resolution
-        _returningToCity = true;
-        const enc = S.randomEncounters.shift();
-        setTimeout(() => showRandomEncounter(enc), 300);
-    } else {
-        // Safe journey — finish exploration
+    const distance = bfsDistanceToExit(S.playerCol, S.playerRow);
+    const steps = Math.max(1, distance);
+    _returnJourney = { totalSteps: steps, currentStep: 0, riskChance: riskChance };
+    _returningToCity = true;
+    showReturnJourneyStep();
+}
+
+function showReturnJourneyStep() {
+    if (!_returnJourney) return;
+    const j = _returnJourney;
+    j.currentStep++;
+
+    // Arrived at the city
+    if (j.currentStep > j.totalSteps) {
+        _closeReturnJourney();
         finishExploration('exit');
+        return;
     }
+
+    // Roll for encounter this step
+    const roll = Math.random() * 100;
+    const hasEncounter = roll < j.riskChance && S.randomEncounters.length > 0;
+
+    const overlay = document.getElementById('return-journey-overlay');
+    const progressEl = document.getElementById('return-journey-progress');
+    const narrEl = document.getElementById('return-journey-narration');
+    const actionsEl = document.getElementById('return-journey-actions');
+
+    // Progress bar
+    const pct = Math.round((j.currentStep / j.totalSteps) * 100);
+    const remaining = j.totalSteps - j.currentStep;
+    progressEl.innerHTML =
+        `<div class="return-progress-bar"><div class="return-progress-fill" style="width:${pct}%"></div></div>` +
+        `<div class="return-progress-label"><span>Etapa ${j.currentStep}/${j.totalSteps}</span>` +
+        `<span>${remaining > 0 ? remaining + ' restante' + (remaining > 1 ? 's' : '') : 'Chegando...'}</span></div>`;
+
+    // Narration
+    if (hasEncounter) {
+        narrEl.innerHTML = `<div class="return-step-badge danger">⚔️ Perigo na estrada!</div>` +
+            `<div>Algo se move nas sombras... Você não está sozinho nesta trilha.</div>`;
+    } else {
+        const narr = RETURN_TRAVEL_NARRATIONS[Math.floor(Math.random() * RETURN_TRAVEL_NARRATIONS.length)];
+        narrEl.innerHTML = `<div class="return-step-badge safe">✓ Caminho seguro</div>` +
+            `<div>${narr}</div>`;
+    }
+
+    // Actions
+    actionsEl.innerHTML = '';
+    if (hasEncounter) {
+        const btn = document.createElement('button');
+        btn.className = 'exit-option-btn';
+        btn.innerHTML = `<span class="exit-option-icon">⚔️</span>` +
+            `<div class="exit-option-info"><div class="exit-option-title">Enfrentar</div>` +
+            `<div class="exit-option-desc" style="color:#c44">Resolver o encontro para continuar</div></div>`;
+        btn.addEventListener('click', () => {
+            overlay.classList.remove('active');
+            const enc = S.randomEncounters.shift();
+            setTimeout(() => showRandomEncounter(enc), 300);
+        });
+        actionsEl.appendChild(btn);
+    } else {
+        const btn = document.createElement('button');
+        btn.className = 'exit-option-btn';
+        btn.innerHTML = `<span class="exit-option-icon">🚶</span>` +
+            `<div class="exit-option-info"><div class="exit-option-title">${remaining > 0 ? 'Continuar Viagem' : 'Chegar à Cidade'}</div>` +
+            `<div class="exit-option-desc" style="color:#4a8">${remaining > 0 ? remaining + ' etapa' + (remaining > 1 ? 's' : '') + ' restante' + (remaining > 1 ? 's' : '') : 'Os portões estão à frente!'}</div></div>`;
+        btn.addEventListener('click', () => {
+            showReturnJourneyStep();
+        });
+        actionsEl.appendChild(btn);
+    }
+
+    overlay.classList.add('active');
+    try { if (tg) tg.HapticFeedback.impactOccurred(hasEncounter ? 'heavy' : 'light'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+}
+
+function _closeReturnJourney() {
+    const overlay = document.getElementById('return-journey-overlay');
+    if (overlay) overlay.classList.remove('active');
+    _returnJourney = null;
+    _returningToCity = false;
 }
 
 // ═══════════════════════════════════════════════════════

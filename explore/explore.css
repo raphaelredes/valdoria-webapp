@@ -883,6 +883,93 @@ body {
 .exit-option-desc { font-size: 12px; color: var(--v-text-dim, #8a8090); }
 
 /* ═══════════════════════════════════════════
+   RETURN JOURNEY OVERLAY
+   ═══════════════════════════════════════════ */
+.return-journey-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 360;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.return-journey-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+}
+.return-journey-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.return-journey-icon { font-size: 28px; }
+.return-journey-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--v-gold, #c4953a);
+}
+.return-journey-progress {
+    margin-bottom: 12px;
+}
+.return-progress-bar {
+    height: 10px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+.return-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--v-gold, #c4953a), #d4a84a);
+    border-radius: 5px;
+    transition: width 0.5s ease;
+}
+.return-progress-label {
+    font-size: 12px;
+    color: var(--v-text-dim, #8a8090);
+    display: flex;
+    justify-content: space-between;
+}
+.return-journey-narration {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--v-text, #d4c8b0);
+    margin-bottom: 14px;
+    min-height: 40px;
+}
+.return-journey-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.return-step-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+.return-step-badge.safe {
+    background: rgba(68,170,100,0.15);
+    color: #4a8;
+}
+.return-step-badge.danger {
+    background: rgba(204,68,68,0.15);
+    color: #c44;
+}
+
+/* ═══════════════════════════════════════════
    CAMP OVERLAY
    ═══════════════════════════════════════════ */
 .camp-overlay {
