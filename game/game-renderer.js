@@ -74,12 +74,14 @@ function renderScreen(screen) {
     // Reset scroll position to top
     screenEl.scrollTop = 0;
 
-    // Banner image
+    // Banner image (filter out placeholder text-banners)
     const bannerEl = document.getElementById('banner');
     const bannerImg = document.getElementById('banner-img');
-    if (screen.image_url) {
-        const imgUrl = screen.image_url.startsWith('/') ? S.apiBase + screen.image_url : screen.image_url;
-        bannerImg.src = imgUrl;
+    const imgUrl = screen.image_url || '';
+    const isRealImage = imgUrl && !imgUrl.includes('placehold.co');
+    if (isRealImage) {
+        const resolvedUrl = imgUrl.startsWith('/') ? S.apiBase + imgUrl : imgUrl;
+        bannerImg.src = resolvedUrl;
         bannerImg.onerror = () => { bannerEl.style.display = 'none'; };
         bannerEl.style.display = '';
     } else {
@@ -315,6 +317,7 @@ function renderTextInput(screen) {
 
 /**
  * Render the footer rows (quick access + nav) inside #bottom-panel.
+ * Nav row is collapsed by default — toggle button expands/collapses.
  */
 function renderFooter(footer) {
     const quickEl = document.getElementById('footer-quick');
@@ -337,8 +340,6 @@ function renderFooter(footer) {
         } else if (btn.cb) {
             el.onclick = () => doAction(btn.cb);
         } else if (btn.url) {
-            // Plain URL → if it's a known WebApp target, open via transition (stays in overlay)
-            // Community links (t.me/*) and other external URLs open via openLink
             const isWebAppUrl = btn.url && (
                 btn.url.includes('/inventory/') || btn.url.includes('/market/') ||
                 btn.url.includes('/levelup/') || btn.url.includes('/arena/') ||
@@ -347,7 +348,6 @@ function renderFooter(footer) {
                 btn.url.includes('/pix/')
             );
             if (isWebAppUrl) {
-                // Detect target and navigate inside the Telegram overlay
                 el.onclick = () => {
                     if (typeof _detect_webapp_target_js === 'function') {
                         const to = _detect_webapp_target_js(btn.url);
@@ -363,7 +363,6 @@ function renderFooter(footer) {
                 };
             }
         } else if (btn.transition) {
-            // transition_data carries the full {to, url, text} — use it directly
             const transData = btn.transition_data || null;
             if (transData && transData.url) {
                 el.onclick = () => handleTransition(transData);
@@ -383,15 +382,32 @@ function renderFooter(footer) {
         container.appendChild(el);
     };
 
+    // Quick row: toggle + quick buttons (always visible)
     if (footer.quick && footer.quick.length) {
         quickEl.style.display = '';
+        // Toggle button to expand/collapse nav row
+        if (footer.nav && footer.nav.length) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'btn-action footer-toggle-btn';
+            toggleBtn.textContent = '\u00B7\u00B7\u00B7';
+            toggleBtn.setAttribute('aria-label', 'Expandir menu');
+            toggleBtn.onclick = () => {
+                const expanded = navEl.style.display !== 'none';
+                navEl.style.display = expanded ? 'none' : '';
+                toggleBtn.textContent = expanded ? '\u00B7\u00B7\u00B7' : '\u00B7';
+                toggleBtn.setAttribute('aria-label', expanded ? 'Expandir menu' : 'Recolher menu');
+                updateBottomPadding();
+            };
+            quickEl.appendChild(toggleBtn);
+        }
         for (const btn of footer.quick) setupButton(btn, quickEl);
     } else {
         quickEl.style.display = 'none';
     }
 
+    // Nav row: hidden by default (collapsed)
     if (footer.nav && footer.nav.length) {
-        navEl.style.display = '';
+        navEl.style.display = 'none'; // collapsed by default
         for (const btn of footer.nav) setupButton(btn, navEl);
     } else {
         navEl.style.display = 'none';

@@ -198,6 +198,17 @@
     min-height: 34px;
 }
 
+/* Footer toggle button (expand/collapse nav row) */
+.footer-toggle-btn {
+    flex: 0 0 auto !important;
+    width: 38px;
+    min-height: 38px;
+    padding: 8px 4px !important;
+    font-size: 14px !important;
+    color: var(--v-text-dim) !important;
+    letter-spacing: 2px;
+}
+
 /* ─── Loading Overlay (Magic Summoning Circle) ─── */
 .loading-overlay {
     position: fixed;
@@ -1316,6 +1327,7 @@
 .screen-content .v-flavor,
 .screen-content .v-party-block,
 .screen-content .v-notification,
+.screen-content .v-bar-group,
 .screen-content .v-bar,
 .screen-content .v-stat-row,
 .screen-content .v-resource-row {
