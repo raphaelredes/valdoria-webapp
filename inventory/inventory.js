@@ -1850,7 +1850,7 @@ const _urlParams = new URLSearchParams(location.search);
 const _apiBase = _urlParams.get('api') || '';
 const _apiToken = _urlParams.get('token') || '';
 const _apiUid = _urlParams.get('uid') || '';
-const _returnTo = _urlParams.get('return') || '';  // 'game', 'explore', 'arena' or empty (close)
+const _returnTo = _urlParams.get('return') || '';  // 'game', 'explore', 'combat' or empty (close)
 const _combatMode = _urlParams.get('combat') === '1';
 
 async function _navigateBack() {
@@ -2333,7 +2333,8 @@ function initBackButton() {
 const _RETURN_LABELS = {
     game: '🏘️ Cidade',
     explore: '🗺️ Mapa',
-    arena: '⚔️ Combate',
+    combat: '⚔️ Combate',
+    arena: '⚔️ Combate',  // backward compat
 };
 
 function _initNavBar() {

@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    GAME HUB — Cross-WebApp Transitions
    Handles navigation between the Game Hub and specialized WebApps
-   (arena, explore, inventory, levelup, market, navigate).
+   (combat, explore, inventory, levelup, market, navigate).
    ═══════════════════════════════════════════════════════════════ */
 
 /**
@@ -12,7 +12,8 @@
 // Themed transition map: target webapp -> CSS theme class + duration
 const _TRANSITION_THEMES = {
     explore:  { theme: 'theme-leaves', duration: 500 },
-    arena:    { theme: 'theme-combat', duration: 400 },
+    combat:   { theme: 'theme-combat', duration: 400 },
+    arena:    { theme: 'theme-combat', duration: 400 },  // backward compat
     navigate: { theme: 'theme-scroll', duration: 500 },
     dungeon:  { theme: 'theme-portal', duration: 500 },
     default:  { theme: '', duration: 350 },
@@ -21,7 +22,8 @@ const _TRANSITION_THEMES = {
 // Cross-webapp location labels for immersive transition
 const _WEBAPP_LOC_LABELS = {
     explore:  { icon: '🧭', text: 'Partindo para exploração...' },
-    arena:    { icon: '⚔️', text: 'Entrando em combate...' },
+    combat:   { icon: '⚔️', text: 'Entrando em combate...' },
+    arena:    { icon: '⚔️', text: 'Entrando em combate...' },  // backward compat
     navigate: { icon: '🗺️', text: 'Abrindo o mapa...' },
     dungeon:  { icon: '🏚️', text: 'Adentrando a masmorra...' },
     inventory: { icon: '🎒', text: 'Abrindo a mochila...' },
@@ -109,7 +111,7 @@ async function returnFromWebApp() {
 
 /**
  * Request a transition to a specific WebApp via the transition API.
- * @param {string} toApp - Target app name (explore, arena, inventory, etc.)
+ * @param {string} toApp - Target app name (explore, combat, inventory, etc.)
  * @param {Object} payload - Optional payload for the transition
  */
 async function requestTransition(toApp, payload = {}) {

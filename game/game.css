@@ -1249,6 +1249,177 @@
 /* ── Hide spacers adjacent to bar groups (bars are already compact) ── */
 .v-bar-group + .v-spacer { height: 0; }
 
+/* ═══════════════════════════════════════════════════════════════
+   v3: ALLY CARDS — Party member display
+   ═══════════════════════════════════════════════════════════════ */
+
+.v-ally-card {
+    margin: 6px 0;
+    padding: 10px 12px;
+    background: var(--v-bg-card);
+    border-radius: var(--v-radius);
+    border-left: 3px solid var(--v-gold);
+    box-shadow: var(--v-shadow-sm);
+}
+
+.v-ally-card--dead {
+    border-left-color: #7b2020;
+    opacity: 0.7;
+}
+
+.v-ally-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--v-text-bright, #e8dcc8);
+    line-height: 1.3;
+}
+
+.v-ally-level {
+    font-size: 12px;
+    color: var(--v-text-dim);
+    margin-top: 1px;
+    margin-bottom: 4px;
+}
+
+.v-ally-card .v-bar-group {
+    margin-top: 4px;
+    padding: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   v3: SECTION HEADERS — Styled dividers for content sections
+   ═══════════════════════════════════════════════════════════════ */
+
+.v-section-hdr {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0 2px;
+    margin: 4px 0 2px;
+    border-bottom: 1px solid rgba(196, 149, 58, 0.2);
+}
+
+.v-section-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.v-section-label {
+    font-size: 11px;
+    color: var(--v-gold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+    font-family: var(--v-font-display);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   v3: ATTRIBUTE GRID — 2-column stat display
+   ═══════════════════════════════════════════════════════════════ */
+
+.v-attr-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0;
+    margin: 2px 0;
+}
+
+.v-attr-row {
+    display: flex;
+    gap: 4px;
+}
+
+.v-attr-cell {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: var(--v-bg-raised);
+    border-radius: var(--v-radius-sm);
+    border: 1px solid var(--v-border);
+    min-width: 0;
+}
+
+.v-attr-icon {
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.v-attr-label {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    font-family: var(--v-font-mono);
+    flex-shrink: 0;
+}
+
+.v-attr-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--v-text-bright, #e8dcc8);
+    font-family: var(--v-font-mono);
+    margin-left: auto;
+}
+
+.v-attr-mod {
+    font-size: 11px;
+    color: var(--v-gold);
+    font-family: var(--v-font-mono);
+    opacity: 0.8;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   v3: COMBAT BLOCK — Compact combat stat display
+   ═══════════════════════════════════════════════════════════════ */
+
+.v-combat-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0;
+    margin: 2px 0;
+}
+
+.v-combat-line {
+    padding: 3px 8px;
+    background: var(--v-bg-raised);
+    border-radius: var(--v-radius-sm);
+    border: 1px solid var(--v-border);
+}
+
+.v-combat-main {
+    font-size: 13px;
+    font-family: var(--v-font-mono);
+    color: var(--v-text);
+    line-height: 1.4;
+}
+
+.v-combat-detail {
+    font-size: 11px;
+    font-family: var(--v-font-mono);
+    color: var(--v-text-dim);
+    padding-left: 20px;
+    line-height: 1.3;
+    margin-top: 1px;
+}
+
+/* Hide spacers around v3 blocks for compact layout */
+.v-section-hdr + .v-spacer { height: 0; }
+.v-attr-grid + .v-spacer { height: 0; }
+.v-combat-block + .v-spacer { height: 0; }
+.v-ally-card + .v-spacer { height: 0; }
+.v-spacer + .v-section-hdr { margin-top: 0; }
+.v-spacer + .v-ally-card { margin-top: 0; }
+
+/* Ensure v3 blocks have normal white-space */
+.screen-content .v-ally-card,
+.screen-content .v-section-hdr,
+.screen-content .v-attr-grid,
+.screen-content .v-combat-block {
+    white-space: normal;
+}
+
 
 /* ═══════════════════════════════════════════════════════════════
    IMMERSIVE MODE — Collapsible Bottom Panel

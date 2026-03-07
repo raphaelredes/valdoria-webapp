@@ -182,7 +182,7 @@ function showCombatEnded() {
     if (isApiMode && originApp) {
         setTimeout(() => transitionFromArena('ended'), 1500);
     } else {
-        setTimeout(() => { try { if (tg) tg.close(); } catch (e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
+        setTimeout(() => { try { if (tg) tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 2000);
     }
 }
 
@@ -196,13 +196,13 @@ function closeCombat(result) {
     // sendData fallback (non-API mode)
     if (tg) {
         tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: result }));
-        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
+        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 300);
     }
 }
 
 async function transitionFromArena(result) {
     const body = {
-        from: 'arena', to: originApp,
+        from: 'combat', to: originApp,
         user_id: userId,
         payload: { result: result }
     };
@@ -225,20 +225,20 @@ async function transitionFromArena(result) {
                 return;
             }
         }
-        console.error('[ARENA] Transition back failed, closing');
+        console.error('[COMBAT] Transition back failed, closing');
     } catch (e) {
-        console.error('[ARENA] Transition error:', e);
+        console.error('[COMBAT] Transition error:', e);
     }
 
     // Fallback: close WebApp and let user tap JOGAR from Telegram
     // (combat token is not valid for Game Hub sessions)
     showError('Erro na transição. Fechando...');
-    setTimeout(() => { try { if (tg) tg.close(); } catch (e) { console.warn('[ARENA] tg.close() failed', e); } }, 2000);
+    setTimeout(() => { try { if (tg) tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 2000);
 }
 
 async function transitionToLevelup() {
     const body = {
-        from: 'arena', to: 'levelup',
+        from: 'combat', to: 'levelup',
         user_id: userId,
         payload: {}
     };
@@ -261,9 +261,9 @@ async function transitionToLevelup() {
                 return;
             }
         }
-        console.error('[ARENA] Transition to levelup failed');
+        console.error('[COMBAT] Transition to levelup failed');
     } catch (e) {
-        console.error('[ARENA] Transition to levelup error:', e);
+        console.error('[COMBAT] Transition to levelup error:', e);
     }
 
     // Fallback: continue normally (close or go back to explore)
@@ -272,7 +272,7 @@ async function transitionToLevelup() {
 
 async function transitionToInventoryFromArena() {
     const body = {
-        from: 'arena', to: 'inventory',
+        from: 'combat', to: 'inventory',
         user_id: userId,
         payload: {}
     };
@@ -295,9 +295,9 @@ async function transitionToInventoryFromArena() {
                 return;
             }
         }
-        console.error('[ARENA] Transition to inventory failed');
+        console.error('[COMBAT] Transition to inventory failed');
     } catch (e) {
-        console.error('[ARENA] Transition to inventory error:', e);
+        console.error('[COMBAT] Transition to inventory error:', e);
     }
 }
 
@@ -456,7 +456,8 @@ function _renderArenaInner(s) {
         html += '</div>';
     } else {
         html += renderTurnTimeline(s.to);
-        const diceDisplay = ph === 'init' ? 'display:none;' : '';
+        const isNarrative = s.vm === 'simple';
+        const diceDisplay = (ph === 'init' || isNarrative) ? 'display:none;' : '';
         html += `<div class="dice-row" style="${diceDisplay}">
             <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>
             <div class="dice-box-compact"><div class="dice-emoji" id="dice2">🎲</div><div><div class="dice-result" id="diceResult2"></div><div class="dice-label" id="diceLabel2">dano</div></div></div>
@@ -466,15 +467,17 @@ function _renderArenaInner(s) {
     }
     if (s.feed && s.feed.length > 0) {
         const total = s.feed.length;
-        const recentFeed = s.feed.slice(-3);
-        html += '<div class="combat-feed" id="combatFeed">';
-        if (total > 3) {
-            const older = s.feed.slice(0, -3);
+        const visibleCount = isNarrative ? 6 : 3;
+        const recentFeed = s.feed.slice(-visibleCount);
+        const narrativeCls = isNarrative ? ' combat-feed-narrative' : '';
+        html += `<div class="combat-feed${narrativeCls}" id="combatFeed">`;
+        if (total > visibleCount) {
+            const older = s.feed.slice(0, -visibleCount);
             older.forEach(f => { html += `<div class="feed-entry feed-hidden">${escHtml(f)}</div>`; });
         }
         recentFeed.forEach(f => { html += `<div class="feed-entry">${escHtml(f)}</div>`; });
-        if (total > 3) {
-            html += `<div class="feed-toggle" id="feedToggle">▲ Mostrar +${total - 3} anteriores</div>`;
+        if (total > visibleCount) {
+            html += `<div class="feed-toggle" id="feedToggle">▲ Mostrar +${total - visibleCount} anteriores</div>`;
         }
         html += '</div>';
     }
@@ -545,7 +548,7 @@ function _renderArenaInner(s) {
         if (d3dCanvas && typeof Dice3D !== 'undefined') {
             if (_initDice3d) { _initDice3d.dispose(); _initDice3d = null; }
             try { _initDice3d = new Dice3D(d3dCanvas, { size: 200, particlesContainer: d3dPart }); }
-            catch(e) { console.warn('[ARENA] Dice3D init failed:', e); }
+            catch(e) { console.warn('[COMBAT] Dice3D init failed:', e); }
         }
         heroBtn.addEventListener('click', () => { _animateInitiativeHero(); });
     }
@@ -756,7 +759,7 @@ function startPolling() {
                 return;
             }
             // Silently ignore other poll errors — don't spam user with toasts
-            console.warn('[ARENA] Poll error (silent)', e.message);
+            console.warn('[COMBAT] Poll error (silent)', e.message);
         }
         _pollInterval = setTimeout(poll, _getPollInterval());
     };
@@ -1299,7 +1302,7 @@ async function sendAction(actionData) {
         } catch (e) {
             _showActionLoading(false);
             _actionSent = false;
-            console.error('[ARENA] API sendAction error', e);
+            console.error('[COMBAT] API sendAction error', e);
             const msg = e.status === 401 ? 'Sessão expirada.'
                 : e.status === 429 ? 'Muitas ações. Aguarde um momento.'
                     : 'Erro de conexão. Tente novamente.';
@@ -1314,7 +1317,7 @@ async function sendAction(actionData) {
             ...actionData,
         };
         tg.sendData(JSON.stringify(payload));
-        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[ARENA] tg.close() failed', e); } }, 300);
+        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 300);
     }
 }
 
@@ -1595,6 +1598,8 @@ function showItemPicker(items, enemies, allies) {
 // ─── DICE ANIMATION — Cinematic multi-phase ───
 function initDice(lr) {
     if (!lr || !lr.r) return;
+    // Narrative mode: skip dice animation (dice area is hidden)
+    if (currentState && currentState.vm === 'simple') return;
 
     // Dedup — don't replay the same roll on polling re-renders
     const sig = `${lr.r}-${lr.d}-${lr.t}-${lr.crit || 0}-${lr.miss || 0}`;
@@ -1800,7 +1805,7 @@ function _showDiceStatic(lr) {
 // ─── UTILS ───
 // ─── ERROR DISPLAY ───
 function showError(msg, err = null) {
-    console.error('[ARENA]', msg, err || '');
+    console.error('[COMBAT]', msg, err || '');
     const app = document.getElementById('app');
     if (!app) return;
     const el = document.createElement('div');
@@ -1822,9 +1827,9 @@ function escHtml(str) {
 // ═══════════════════════════════════════════════════
 
 // ─── FEATURE 4: HAPTIC FEEDBACK ───
-function haptic(type) { try { tg?.HapticFeedback?.impactOccurred(type || 'light'); } catch (e) { console.warn('[ARENA] haptic:', e); } }
-function hapticNotify(type) { try { tg?.HapticFeedback?.notificationOccurred(type || 'success'); } catch (e) { console.warn('[ARENA] haptic:', e); } }
-function hapticSelect() { try { tg?.HapticFeedback?.selectionChanged(); } catch (e) { console.warn('[ARENA] haptic:', e); } }
+function haptic(type) { try { tg?.HapticFeedback?.impactOccurred(type || 'light'); } catch (e) { console.warn('[COMBAT] haptic:', e); } }
+function hapticNotify(type) { try { tg?.HapticFeedback?.notificationOccurred(type || 'success'); } catch (e) { console.warn('[COMBAT] haptic:', e); } }
+function hapticSelect() { try { tg?.HapticFeedback?.selectionChanged(); } catch (e) { console.warn('[COMBAT] haptic:', e); } }
 
 // ─── FEATURE 8: PROCEDURAL SFX (Web Audio API) ───
 function _ensureAudio() {
@@ -1832,7 +1837,7 @@ function _ensureAudio() {
     try {
         _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         return _audioCtx;
-    } catch (e) { console.warn('[ARENA] AudioContext unavailable', e); return null; }
+    } catch (e) { console.warn('[COMBAT] AudioContext unavailable', e); return null; }
 }
 
 function _sfxNoise(dur, vol) {
@@ -1850,7 +1855,7 @@ function _sfxNoise(dur, vol) {
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
         src.connect(gain); gain.connect(ctx.destination);
         src.start(); src.stop(ctx.currentTime + dur);
-    } catch (e) { console.warn('[ARENA] sfxNoise', e); }
+    } catch (e) { console.warn('[COMBAT] sfxNoise', e); }
 }
 
 function _sfxTone(freq, dur, vol, type) {
@@ -1866,7 +1871,7 @@ function _sfxTone(freq, dur, vol, type) {
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
         osc.connect(gain); gain.connect(ctx.destination);
         osc.start(); osc.stop(ctx.currentTime + dur);
-    } catch (e) { console.warn('[ARENA] sfxTone', e); }
+    } catch (e) { console.warn('[COMBAT] sfxTone', e); }
 }
 
 function sfxDiceRoll() { _sfxNoise(0.15, 0.08); }

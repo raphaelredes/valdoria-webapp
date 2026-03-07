@@ -391,11 +391,11 @@ function _drawMountains(g, cluster) {
             // ── ROUNDED/DOME mountain ──
             g.appendChild(_el('path', {
                 d: `M${lx},${by} Q${lx - p.w*0.05},${ty + p.h*0.12} ${peakX},${ty} Q${rx + p.w*0.05},${ty + p.h*0.12} ${rx},${by} Z`,
-                fill: PARCHMENT, stroke: 'none',
+                fill: INK_DARK, 'fill-opacity': 0.07,
             }));
             g.appendChild(_el('path', {
                 d: `M${lx},${by} Q${lx - p.w*0.05},${ty + p.h*0.12} ${peakX},${ty} L${peakX},${by} Z`,
-                fill: INK_DARK, 'fill-opacity': 0.08,
+                fill: INK_DARK, 'fill-opacity': 0.18,
             }));
             g.appendChild(_el('path', {
                 d: `M${lx},${by} Q${lx - p.w*0.05},${ty + p.h*0.12} ${peakX},${ty} Q${rx + p.w*0.05},${ty + p.h*0.12} ${rx},${by}`,
@@ -417,11 +417,11 @@ function _drawMountains(g, cluster) {
             const flatL = peakX - flatW, flatR = peakX + flatW;
             g.appendChild(_el('polygon', {
                 points: `${lx},${by} ${flatL},${ty} ${flatR},${ty} ${rx},${by}`,
-                fill: PARCHMENT, stroke: 'none',
+                fill: INK_DARK, 'fill-opacity': 0.07,
             }));
             g.appendChild(_el('polygon', {
                 points: `${lx},${by} ${flatL},${ty} ${peakX},${ty} ${peakX},${by}`,
-                fill: INK_DARK, 'fill-opacity': 0.09,
+                fill: INK_DARK, 'fill-opacity': 0.2,
             }));
             g.appendChild(_el('path', {
                 d: `M${lx},${by} L${flatL},${ty} L${flatR},${ty} L${rx},${by}`,
@@ -441,11 +441,11 @@ function _drawMountains(g, cluster) {
             // ── SHARP PEAK (classic triangular) ──
             g.appendChild(_el('polygon', {
                 points: `${lx},${by} ${peakX},${ty} ${rx},${by}`,
-                fill: PARCHMENT, stroke: 'none',
+                fill: INK_DARK, 'fill-opacity': 0.08,
             }));
             g.appendChild(_el('polygon', {
                 points: `${lx},${by} ${peakX},${ty} ${peakX},${by}`,
-                fill: INK_DARK, 'fill-opacity': 0.1,
+                fill: INK_DARK, 'fill-opacity': 0.22,
             }));
             g.appendChild(_el('line', { x1: lx, y1: by, x2: peakX, y2: ty,
                 stroke: INK_DARK, 'stroke-width': 0.65, 'stroke-linecap': 'round', 'stroke-opacity': 0.7 }));
@@ -496,21 +496,21 @@ function _drawForest(g, cluster) {
         if (t.type === 'round') {
             const cy = t.y + 2 - trunkH - t.sz * 0.2;
             const cx = t.x + trunkLean;
-            // Solid filled canopy (parchment base to occlude things behind)
+            // Solid filled canopy (base to occlude things behind + pencil shading)
             g.appendChild(_el('circle', {
                 cx, cy, r: t.sz + 0.5,
-                fill: PARCHMENT, stroke: 'none', // opaque base
+                fill: INK_DARK, 'fill-opacity': 0.12,
             }));
             // Dark fill for canopy body
             g.appendChild(_el('circle', {
                 cx, cy, r: t.sz,
-                fill: INK_DARK, 'fill-opacity': 0.1,
+                fill: INK_DARK, 'fill-opacity': 0.2,
                 stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.55,
             }));
             // Shadow crescent (right half darker)
             g.appendChild(_el('path', {
                 d: `M${cx + t.sz * 0.1},${cy - t.sz * 0.8} A${t.sz * 0.9},${t.sz * 0.9} 0 0 1 ${cx + t.sz * 0.1},${cy + t.sz * 0.8}`,
-                fill: INK_DARK, 'fill-opacity': 0.04, stroke: 'none',
+                fill: INK_DARK, 'fill-opacity': 0.08, stroke: 'none',
             }));
             // Leaf cluster bumps on outline
             const bumpCount = 4 + Math.floor(srand(t.seed + 140) * 3);
@@ -549,18 +549,18 @@ function _drawForest(g, cluster) {
                 // Opaque parchment base (occludes things behind)
                 g.appendChild(_el('polygon', {
                     points: `${topX},${tierTop} ${topX-tierW-1},${tierBot+1} ${topX+tierW+1},${tierBot+1}`,
-                    fill: PARCHMENT, stroke: 'none',
+                    fill: INK_DARK, 'fill-opacity': 0.05, stroke: 'none',
                 }));
                 // Dark filled tier
                 g.appendChild(_el('polygon', {
                     points: `${topX},${tierTop} ${topX-tierW},${tierBot} ${topX+tierW},${tierBot}`,
-                    fill: INK_DARK, 'fill-opacity': 0.08 + ti * 0.02,
+                    fill: INK_DARK, 'fill-opacity': 0.15 + ti * 0.03,
                     stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.5,
                 }));
                 // Shadow on left half
                 g.appendChild(_el('polygon', {
                     points: `${topX},${tierTop} ${topX-tierW},${tierBot} ${topX},${tierBot}`,
-                    fill: INK_DARK, 'fill-opacity': 0.03,
+                    fill: INK_DARK, 'fill-opacity': 0.08,
                 }));
             }
         }
@@ -612,7 +612,7 @@ function _drawSnow(g, cluster) {
             const midY = iy - ih * 0.4;
             g.appendChild(_el('polygon', {
                 points: `${bl},${iy} ${midL},${midY} ${tipX},${tipY} ${midR},${midY+1} ${br},${iy}`,
-                fill: INK_LIGHT, 'fill-opacity': 0.06,
+                fill: INK_LIGHT, 'fill-opacity': 0.14,
                 stroke: INK_LIGHT, 'stroke-width': 0.5, 'stroke-opacity': 0.35,
             }));
             // Inner facet line
@@ -682,7 +682,7 @@ function _drawSwamp(g, cluster) {
             // Organic blob outline for pool
             const poolPath = _organicBlob(px, py, prx, pry, seed+p*100, 7);
             g.appendChild(_el('path', { d: poolPath,
-                fill: INK_DARK, 'fill-opacity': 0.05,
+                fill: INK_DARK, 'fill-opacity': 0.12,
                 stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.25 }));
             // Water ripple lines inside pool
             for (let r = 0; r < 2; r++) {
@@ -708,7 +708,7 @@ function _drawSwamp(g, cluster) {
             const x2 = lx + Math.cos(endA)*lr, y2 = ly + Math.sin(endA)*lr;
             g.appendChild(_el('path', {
                 d: `M${lx},${ly} L${x1},${y1} A${lr},${lr} 0 1 1 ${x2},${y2} Z`,
-                fill: INK_DARK, 'fill-opacity': 0.06,
+                fill: INK_DARK, 'fill-opacity': 0.14,
                 stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.3,
             }));
             // Vein line on pad
@@ -833,7 +833,7 @@ function _drawVolcanic(g, cluster) {
         // Shadow fill
         g.appendChild(_el('polygon', {
             points: `${px-w},${by} ${px-2},${ty} ${px-2},${by}`,
-            fill: INK_DARK, 'fill-opacity': 0.06,
+            fill: INK_DARK, 'fill-opacity': 0.15,
         }));
         // Slopes
         g.appendChild(_el('line', { x1: px-w, y1: by, x2: px-2, y2: ty,
@@ -843,7 +843,7 @@ function _drawVolcanic(g, cluster) {
         // Crater opening (concave arc)
         g.appendChild(_el('path', {
             d: `M${px-4},${ty+1} Q${px},${ty+4} ${px+4},${ty+1}`,
-            fill: INK_DARK, 'fill-opacity': 0.1,
+            fill: INK_DARK, 'fill-opacity': 0.2,
             stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.6 }));
         // Dense left hatching
         for (let j = 0; j < 8; j++) {
@@ -888,12 +888,12 @@ function _drawCave(g, cluster) {
             const bsz = 3 + srand(seed+i*7+1)*4;
             const bPath = _organicBlob(bx, by, bsz, bsz * 0.7, seed+i*100, 6);
             g.appendChild(_el('path', { d: bPath,
-                fill: INK_DARK, 'fill-opacity': 0.05,
+                fill: INK_DARK, 'fill-opacity': 0.12,
                 stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.28 }));
             // Shadow crescent on one side
             g.appendChild(_el('path', {
                 d: `M${bx},${by-bsz*0.4} A${bsz*0.5},${bsz*0.5} 0 0 1 ${bx},${by+bsz*0.4}`,
-                fill: INK_DARK, 'fill-opacity': 0.06, stroke: 'none',
+                fill: INK_DARK, 'fill-opacity': 0.12, stroke: 'none',
             }));
         }
 
@@ -975,7 +975,7 @@ function _drawGraveyard(g, cluster) {
                 // Tombstone
                 g.appendChild(_el('path', {
                     d: `M${tx-tw},${ty+2} L${tx-tw},${ty-th+2} Q${tx},${ty-th-2} ${tx+tw},${ty-th+2} L${tx+tw},${ty+2} Z`,
-                    fill: INK_DARK, 'fill-opacity': 0.03,
+                    fill: INK_DARK, 'fill-opacity': 0.12,
                     stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.55,
                     transform: `rotate(${tilt}, ${tx}, ${ty})`,
                 }));

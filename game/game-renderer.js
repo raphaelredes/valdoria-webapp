@@ -345,7 +345,7 @@ function renderFooter(footer) {
         } else if (btn.url) {
             const isWebAppUrl = btn.url && (
                 btn.url.includes('/inventory/') || btn.url.includes('/market/') ||
-                btn.url.includes('/levelup/') || btn.url.includes('/arena/') ||
+                btn.url.includes('/levelup/') || btn.url.includes('/combat/') || btn.url.includes('/arena/') ||
                 btn.url.includes('/explore/') || btn.url.includes('/navigate/') ||
                 btn.url.includes('/dice/') || btn.url.includes('/workstation/') ||
                 btn.url.includes('/pix/')

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   GAME HUB — Content Enhancer v2
+   GAME HUB — Content Enhancer v3
    Two-pass block parser: tokenize lines → render semantic HTML.
    Transforms Telegram-style text into native WebApp components.
    Zero server changes — purely client-side post-processing.
@@ -48,6 +48,15 @@ const _RE_FLAVOR_WRAP  = /^<i>[^<]+<\/i>$/;
 const _RE_DEPARTURE    = /^📜\s*<i>/;
 const _RE_BAR_START    = /^(?:🎲\s?)?[🟩🟨🟧🟥🟦🟪⬛]/u;
 const _RE_SUBTITLE     = /^(?:\u{1F4CD}|\u{1F7E2}|\u{1F7E1}|\u{1F7E0}|\u{1F534}|\u26A0|\u{1F6A9})\uFE0F?\s/u;
+
+// v3: Section headers, attribute pairs, combat formulas, ally cards
+const _RE_SECTION_HDR  = /^(📊|⚔️|📖|🌟|⚠️|📜)\s+(ATRIBUTOS|COMBATE|FEITOS|HABILIDADES)/i;
+const _RE_ATTR_PAIR    = /^[💪⚡🧱🧠🦉🎭].*\([+-]\d+\).*\|.*\([+-]\d+\)/;
+const _RE_COMBAT_FORMULA = /^[🛡🎯💥📋].*└/;
+const _RE_COMBAT_STAT  = /^📋.*Prof/;
+const _RE_DEAD_ALLY    = /^💀\s/;
+const _RE_ALLY_IDENT   = /^(?:⚔️|🧙‍♂️|🗡️|⚕️|🛡️|🏹|🪓|🎻|🌿|🙏|🔮|👁️|👤)\s/;
+const _RE_ALLY_LEVEL   = /^Lvl\s+\d+\s+\S/;
 
 function _isSubtitleLine(line) {
     return _RE_SUBTITLE.test(line);
@@ -101,7 +110,6 @@ function _tokenize(lines) {
 
         // Footer divider (💎 ━━━ 💎)
         if (_RE_FOOTER_DIV.test(t)) {
-            // Don't render — content after it (resources) is handled separately
             i++; continue;
         }
 
@@ -114,6 +122,45 @@ function _tokenize(lines) {
         // Dotted separator (┄┄┄┄┄┄)
         if (_RE_DOTTED_SEP.test(t)) {
             blocks.push({ type: 'divider_dot' });
+            i++; continue;
+        }
+
+        // v3: Dead ally (💀 Name — Caído + Lvl line)
+        if (_RE_DEAD_ALLY.test(t)) {
+            const result = _consumeDeadAlly(lines, i);
+            blocks.push(result.block);
+            i = result.next; continue;
+        }
+
+        // v3: Ally identity + bars card (class icon + name, then Lvl, then bars)
+        if (_RE_ALLY_IDENT.test(t) && i + 1 < lines.length && _RE_ALLY_LEVEL.test(lines[i + 1].trim())) {
+            const result = _consumeAllyCard(lines, i);
+            blocks.push(result.block);
+            i = result.next; continue;
+        }
+
+        // v3: Section header (📊 ATRIBUTOS, ⚔️ COMBATE, 📖 FEITOS)
+        if (_RE_SECTION_HDR.test(t)) {
+            const titleClean = t.replace(/<\/?b>/g, '');
+            blocks.push({ type: 'section_hdr', text: titleClean });
+            i++; continue;
+        }
+
+        // v3: Attribute pair (💪 FOR: 8 (-1) | ⚡ DES: 14 (+2))
+        if (_RE_ATTR_PAIR.test(t)) {
+            blocks.push({ type: 'attr_pair', text: t });
+            i++; continue;
+        }
+
+        // v3: Combat formula (🛡️ DEF: 15  └ 10 + 2(DEX) + 0(Itens))
+        if (_RE_COMBAT_FORMULA.test(t)) {
+            blocks.push({ type: 'combat_formula', text: t });
+            i++; continue;
+        }
+
+        // v3: Combat stat without formula (📋 Prof.: +2)
+        if (_RE_COMBAT_STAT.test(t)) {
+            blocks.push({ type: 'combat_formula', text: t });
             i++; continue;
         }
 
@@ -176,7 +223,6 @@ function _tokenize(lines) {
 
         // Festival banner or any bold-only line (not consumed by header)
         if (_RE_BOLD_TITLE.test(t) && /⚜️/.test(t)) {
-            // Standalone ⚜️ title not inside header block — render as location title
             const titleText = t.replace(/<\/?b>/g, '');
             blocks.push({ type: 'location_title', text: titleText });
             i++; continue;
@@ -193,39 +239,32 @@ function _tokenize(lines) {
 // ── Header consumer ────────────────────────────────────────────
 
 function _consumeHeader(lines, startIdx, existingBlocks) {
-    // Pattern: [optional time line before] + ⚜️ ═══ ⚜️ + title + ⚜️ ═══ ⚜️ + [optional subtitle after]
     let i = startIdx;
     let timeLine = null;
 
-    // Check if previous block was a text line that looks like a time string
-    // (bold text with date/time info before the divider)
     if (existingBlocks.length > 0) {
         const prev = existingBlocks[existingBlocks.length - 1];
         if (prev.type === 'text' && /<b>.*<\/b>/.test(prev.text.trim()) && /\d/.test(prev.text)) {
             timeLine = prev.text.trim().replace(/<\/?b>/g, '');
-            existingBlocks.pop(); // consume the time line retroactively
+            existingBlocks.pop();
         }
     }
 
     i++; // skip first divider
 
-    // Look for title line(s) and second divider
     let titleLines = [];
     while (i < lines.length) {
         const t = lines[i].trim();
         if (_RE_HEADER_DIV.test(t)) {
-            i++; // skip second divider
+            i++;
             break;
         }
         if (t) titleLines.push(t);
         i++;
     }
 
-    // Extract title text (strip HTML tags)
     let title = titleLines.join(' ').replace(/<\/?b>/g, '').replace(/<\/?i>/g, '').trim();
 
-    // Check for subtitle line right after header (difficulty/danger info or location info)
-    // Matches: "🟢 Normal · ⚠️ Perigo ▪▪▪", "📍 Local Atual: ...", etc.
     let subtitle = null;
     if (i < lines.length) {
         const next = lines[i].trim();
@@ -244,17 +283,16 @@ function _consumeHeader(lines, startIdx, existingBlocks) {
 // ── Party consumer ─────────────────────────────────────────────
 
 function _consumeParty(lines, startIdx) {
-    let i = startIdx + 1; // skip the header line
+    let i = startIdx + 1;
     const allies = [];
 
     while (i < lines.length) {
         const t = lines[i].trim();
-        if (!t) { i++; break; } // blank line ends the party block
-        // Ally lines typically have : and ❤️
+        if (!t) { i++; break; }
         if (t.includes('❤️') || t.includes(':')) {
             allies.push(t);
         } else {
-            break; // non-ally line ends the block
+            break;
         }
         i++;
     }
@@ -274,13 +312,60 @@ function _consumeNotification(lines, startIdx) {
 
     while (i < lines.length) {
         const t = lines[i].trim();
-        if (!t) { i++; break; } // blank line ends notification
+        if (!t) { i++; break; }
         bodyLines.push(t);
         i++;
     }
 
     return {
         block: { type: 'notification', title: titleLine, body: bodyLines },
+        next: i
+    };
+}
+
+// ── v3: Ally card consumer (icon + name → Lvl line → bars) ────
+
+function _consumeAllyCard(lines, startIdx) {
+    const nameLine = lines[startIdx].trim();
+    const lvlLine = lines[startIdx + 1].trim();
+    let i = startIdx + 2;
+    const bars = [];
+
+    // Consume subsequent bar lines (HP, MP, XP)
+    while (i < lines.length) {
+        const t = lines[i].trim();
+        if (!t) { i++; continue; } // skip blank lines between bars
+        if (_RE_BAR_START.test(t)) {
+            const bar = _tryBar(t);
+            if (bar) { bars.push(bar); i++; continue; }
+        }
+        break; // non-bar, non-blank line ends the card
+    }
+
+    return {
+        block: { type: 'ally_card', name: nameLine, level: lvlLine, bars: bars },
+        next: i
+    };
+}
+
+// ── v3: Dead ally consumer (💀 Name — Caído + optional Lvl line) ──
+
+function _consumeDeadAlly(lines, startIdx) {
+    const deadLine = lines[startIdx].trim();
+    let i = startIdx + 1;
+    let lvlLine = '';
+
+    // Check if next line is a Lvl line
+    if (i < lines.length) {
+        const t = lines[i].trim();
+        if (_RE_ALLY_LEVEL.test(t)) {
+            lvlLine = t;
+            i++;
+        }
+    }
+
+    return {
+        block: { type: 'ally_dead', text: deadLine, level: lvlLine },
         next: i
     };
 }
@@ -304,6 +389,28 @@ function _render(blocks) {
                 i++;
             }
             out.push(`<div class="v-bar-group">${barHtml}</div>`);
+            continue;
+        }
+
+        // v3: Group consecutive attr_pair blocks into an attribute grid
+        if (b.type === 'attr_pair') {
+            let rows = '';
+            while (i < blocks.length && (blocks[i].type === 'attr_pair' || blocks[i].type === 'spacer')) {
+                if (blocks[i].type === 'attr_pair') rows += _renderAttrPair(blocks[i]);
+                i++;
+            }
+            out.push(`<div class="v-attr-grid">${rows}</div>`);
+            continue;
+        }
+
+        // v3: Group consecutive combat_formula blocks into a combat card
+        if (b.type === 'combat_formula') {
+            let formulas = '';
+            while (i < blocks.length && (blocks[i].type === 'combat_formula' || blocks[i].type === 'spacer')) {
+                if (blocks[i].type === 'combat_formula') formulas += _renderCombatLine(blocks[i]);
+                i++;
+            }
+            out.push(`<div class="v-combat-block">${formulas}</div>`);
             continue;
         }
 
@@ -345,8 +452,17 @@ function _render(blocks) {
             case 'spacer':
                 out.push('<div class="v-spacer"></div>');
                 break;
+            // v3: New block types
+            case 'section_hdr':
+                out.push(_renderSectionHeader(b));
+                break;
+            case 'ally_card':
+                out.push(_renderAllyCard(b));
+                break;
+            case 'ally_dead':
+                out.push(_renderAllyDead(b));
+                break;
             case 'text':
-                // Wrap non-empty text in section
                 if (b.text.trim()) {
                     out.push(`<div class="v-section">${b.text}</div>`);
                 }
@@ -365,7 +481,6 @@ function _renderHeader(b) {
     const biome = _detectBiome(b.title || '');
     const biomeAttr = biome ? ` data-biome="${biome}"` : '';
 
-    // Extract leading emoji icon from title
     const iconMatch = title.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)/u);
     const icon = iconMatch ? iconMatch[0] : '';
     const titleText = icon ? title.slice(icon.length).replace(/^\s*[—\-:]\s*/, '').trim() : title;
@@ -388,8 +503,6 @@ function _renderHeader(b) {
 }
 
 function _renderCharacter(b) {
-    // name line: "👤 <b>Wilzen</b> Lv.8 Bárbaro" → keep HTML for bold
-    // meta line: "🏷️ <i>Dwarf · Masculino</i>" → strip tags
     const metaClean = b.meta.replace(/<\/?[bi]>/g, '').replace(/^(?:🏷️|💎)\s*/, '');
     return (
         `<div class="v-char-card">`
@@ -419,7 +532,86 @@ function _renderNotification(b) {
     return h;
 }
 
-// ── Escape helper (strips only ⚜️ decorators, keeps safe chars) ──
+// ── v3: Section header renderer ────────────────────────────────
+
+function _renderSectionHeader(b) {
+    const text = b.text.replace(/<\/?b>/g, '');
+    // Extract leading emoji
+    const iconMatch = text.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s*/u);
+    const icon = iconMatch ? iconMatch[0].trim() : '';
+    const label = icon ? text.slice(iconMatch[0].length).trim() : text.trim();
+    return `<div class="v-section-hdr"><span class="v-section-icon">${icon}</span><span class="v-section-label">${label}</span></div>`;
+}
+
+// ── v3: Attribute pair renderer ────────────────────────────────
+
+function _renderAttrPair(b) {
+    const text = b.text.replace(/<\/?code>/g, '');
+    const parts = text.split('|').map(s => s.trim());
+    let h = '<div class="v-attr-row">';
+    for (const part of parts) {
+        // Extract: icon + LABEL: val (+mod)
+        const m = part.match(/^(.+?)\s*(\w+):\s*(\d+)\s*\(([+-]\d+)\)/);
+        if (m) {
+            const [, icon, label, val, mod] = m;
+            h += `<div class="v-attr-cell">`
+                + `<span class="v-attr-icon">${icon.trim()}</span>`
+                + `<span class="v-attr-label">${label}</span>`
+                + `<span class="v-attr-val">${val}</span>`
+                + `<span class="v-attr-mod">${mod}</span>`
+                + `</div>`;
+        } else {
+            h += `<div class="v-attr-cell"><span class="v-attr-label">${part}</span></div>`;
+        }
+    }
+    h += '</div>';
+    return h;
+}
+
+// ── v3: Combat formula renderer ────────────────────────────────
+
+function _renderCombatLine(b) {
+    const text = b.text.replace(/<\/?code>/g, '');
+    // Split on └ to get main stat and formula
+    const splitIdx = text.indexOf('└');
+    if (splitIdx >= 0) {
+        const main = text.slice(0, splitIdx).trim();
+        const formula = text.slice(splitIdx + 1).trim();
+        return `<div class="v-combat-line">`
+            + `<div class="v-combat-main">${main}</div>`
+            + `<div class="v-combat-detail">${formula}</div>`
+            + `</div>`;
+    }
+    // No formula breakdown (e.g., 📋 Prof.: +2)
+    return `<div class="v-combat-line"><div class="v-combat-main">${text}</div></div>`;
+}
+
+// ── v3: Ally card renderer ─────────────────────────────────────
+
+function _renderAllyCard(b) {
+    let h = '<div class="v-ally-card">';
+    h += `<div class="v-ally-name">${b.name}</div>`;
+    h += `<div class="v-ally-level">${b.level}</div>`;
+    if (b.bars.length) {
+        h += `<div class="v-bar-group">${b.bars.join('')}</div>`;
+    }
+    h += '</div>';
+    return h;
+}
+
+// ── v3: Dead ally renderer ─────────────────────────────────────
+
+function _renderAllyDead(b) {
+    let h = '<div class="v-ally-card v-ally-card--dead">';
+    h += `<div class="v-ally-name">${b.text}</div>`;
+    if (b.level) {
+        h += `<div class="v-ally-level">${b.level}</div>`;
+    }
+    h += '</div>';
+    return h;
+}
+
+// ── Escape helper ──────────────────────────────────────────────
 
 function _esc(text) {
     return text.replace(/⚜️\s*/g, '').trim();

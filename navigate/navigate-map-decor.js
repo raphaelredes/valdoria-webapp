@@ -114,9 +114,9 @@ function _drawSettlementIcon(g, x, y, sz) {
     const sw = 0.5, so = 0.55; // pencil-soft stroke
     // Left tower body + roof
     g.appendChild(_el('rect', { x: x-bw-tw/2, y: y-th, width: tw, height: th,
-        fill: INK_DARK, 'fill-opacity': 0.04, stroke: INK_DARK, 'stroke-width': sw, 'stroke-opacity': so }));
+        fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': sw, 'stroke-opacity': so }));
     g.appendChild(_el('path', { d: `M${x-bw-tw/2-2},${y-th} L${x-bw},${y-th-sz*0.45} L${x-bw+tw/2+2},${y-th}`,
-        fill: INK_DARK, 'fill-opacity': 0.03, stroke: INK_DARK, 'stroke-width': sw*0.9, 'stroke-opacity': so }));
+        fill: INK_DARK, 'fill-opacity': 0.10, stroke: INK_DARK, 'stroke-width': sw*0.9, 'stroke-opacity': so }));
     // Left tower crenellations
     for (let c = 0; c < 3; c++) {
         const cx = x-bw-tw/2 + c * (tw/3);
@@ -125,9 +125,9 @@ function _drawSettlementIcon(g, x, y, sz) {
     }
     // Right tower body + roof
     g.appendChild(_el('rect', { x: x+bw-tw/2, y: y-th, width: tw, height: th,
-        fill: INK_DARK, 'fill-opacity': 0.04, stroke: INK_DARK, 'stroke-width': sw, 'stroke-opacity': so }));
+        fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': sw, 'stroke-opacity': so }));
     g.appendChild(_el('path', { d: `M${x+bw-tw/2-2},${y-th} L${x+bw},${y-th-sz*0.45} L${x+bw+tw/2+2},${y-th}`,
-        fill: INK_DARK, 'fill-opacity': 0.03, stroke: INK_DARK, 'stroke-width': sw*0.9, 'stroke-opacity': so }));
+        fill: INK_DARK, 'fill-opacity': 0.10, stroke: INK_DARK, 'stroke-width': sw*0.9, 'stroke-opacity': so }));
     // Right tower crenellations
     for (let c = 0; c < 3; c++) {
         const cx = x+bw-tw/2 + c * (tw/3);
@@ -136,7 +136,7 @@ function _drawSettlementIcon(g, x, y, sz) {
     }
     // Center keep (taller, with shadow)
     g.appendChild(_el('rect', { x: x-bw*0.4, y: y-bh, width: bw*0.8, height: bh,
-        fill: INK_DARK, 'fill-opacity': 0.05, stroke: INK_DARK, 'stroke-width': sw*0.9, 'stroke-opacity': so }));
+        fill: INK_DARK, 'fill-opacity': 0.14, stroke: INK_DARK, 'stroke-width': sw*0.9, 'stroke-opacity': so }));
     // Wall between towers
     g.appendChild(_el('line', { x1: x-bw+tw/2, y1: y-bh*0.6, x2: x+bw-tw/2, y2: y-bh*0.6,
         stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.35 }));
@@ -159,9 +159,9 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
     // Fort/stronghold
     if (nm.includes('forte') || nm.includes('fortaleza') || nm.includes('bastião')) {
         g.appendChild(_el('rect', { x: x-sz*0.6, y: y-sz*0.3, width: sz*1.2, height: sz*0.5,
-            fill: INK_DARK, 'fill-opacity': 0.04, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
+            fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
         g.appendChild(_el('rect', { x: x-sz*0.25, y: y-sz*1.1, width: sz*0.5, height: sz*1.3,
-            fill: INK_DARK, 'fill-opacity': 0.05, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
+            fill: INK_DARK, 'fill-opacity': 0.14, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
         for (let c = 0; c < 3; c++) {
             g.appendChild(_el('rect', { x: x-sz*0.25 + c * sz*0.18, y: y-sz*1.2, width: sz*0.12, height: sz*0.12,
                 fill: INK_DARK, 'fill-opacity': 0.18 }));
@@ -189,7 +189,7 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
     // Underground passage — tunnel mouth with steps
     if (nm.includes('passagem') || nm.includes('túnel') || nm.includes('portal')) {
         g.appendChild(_el('path', { d: `M${x-sz*0.7},${y+2} Q${x-sz*0.7},${y-sz*0.6} ${x},${y-sz*0.8} Q${x+sz*0.7},${y-sz*0.6} ${x+sz*0.7},${y+2}`,
-            fill: INK_DARK, 'fill-opacity': 0.08, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
+            fill: INK_DARK, 'fill-opacity': 0.15, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
         for (let i = 0; i < 3; i++) {
             const sy = y + 1 - i * 2;
             const sw = sz * (0.5 - i * 0.1);
@@ -201,9 +201,9 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
     // Tower/lighthouse
     if (nm.includes('torre') || nm.includes('farol')) {
         g.appendChild(_el('rect', { x: x-sz*0.2, y: y-sz*1.3, width: sz*0.4, height: sz*1.5,
-            fill: INK_DARK, 'fill-opacity': 0.04, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
+            fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
         g.appendChild(_el('path', { d: `M${x-sz*0.35},${y-sz*1.3} L${x},${y-sz*1.7} L${x+sz*0.35},${y-sz*1.3}`,
-            fill: INK_DARK, 'fill-opacity': 0.03, stroke: INK_DARK, 'stroke-width': _sw*0.9, 'stroke-opacity': _so }));
+            fill: INK_DARK, 'fill-opacity': 0.10, stroke: INK_DARK, 'stroke-width': _sw*0.9, 'stroke-opacity': _so }));
         return;
     }
     // Camp/tribe — tent with campfire
@@ -211,11 +211,11 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
         // Tent (triangular A-frame)
         g.appendChild(_el('path', {
             d: `M${x-sz*0.7},${y+2} L${x},${y-sz*0.9} L${x+sz*0.7},${y+2}`,
-            fill: INK_DARK, 'fill-opacity': 0.05, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
+            fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
         // Tent opening
         g.appendChild(_el('path', {
             d: `M${x-sz*0.2},${y+2} L${x},${y-sz*0.2} L${x+sz*0.2},${y+2}`,
-            fill: INK_DARK, 'fill-opacity': 0.08, stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.4 }));
+            fill: INK_DARK, 'fill-opacity': 0.15, stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.4 }));
         // Small campfire to the side
         const fx = x + sz * 0.8, fy = y + 1;
         g.appendChild(_el('path', {
@@ -272,7 +272,7 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
     if (nm.includes('cratera') || nm.includes('vulcã')) {
         // Wide crater rim
         g.appendChild(_el('ellipse', { cx: x, cy: y-sz*0.2, rx: sz*0.8, ry: sz*0.4,
-            fill: INK_DARK, 'fill-opacity': 0.08, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
+            fill: INK_DARK, 'fill-opacity': 0.14, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
         // Inner darkness
         g.appendChild(_el('ellipse', { cx: x, cy: y-sz*0.2, rx: sz*0.5, ry: sz*0.25,
             fill: INK_DARK, 'fill-opacity': 0.15, stroke: 'none' }));
@@ -293,7 +293,7 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
             const ih = sz * (0.8 + Math.abs(i) * 0.3);
             g.appendChild(_el('polygon', {
                 points: `${ix-sz*0.15},${y+1} ${ix},${y-ih} ${ix+sz*0.15},${y+1}`,
-                fill: INK_LIGHT, 'fill-opacity': 0.08, stroke: INK_LIGHT, 'stroke-width': 0.5, 'stroke-opacity': 0.5 }));
+                fill: INK_LIGHT, 'fill-opacity': 0.15, stroke: INK_LIGHT, 'stroke-width': 0.5, 'stroke-opacity': 0.5 }));
         }
         // Frost crystal below
         const fy = y + 3;
@@ -328,13 +328,13 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
                 g.appendChild(_el('line', { x1: tx, y1: y+2, x2: tx, y2: y-sz*0.8,
                     stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': _so }));
                 g.appendChild(_el('circle', { cx: tx, cy: y-sz*(i===0?1.2:1.0), r: tsz,
-                    fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': _so }));
+                    fill: INK_DARK, 'fill-opacity': 0.14, stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': _so }));
             }
             break;
         case 'mountain':
             // Twin peaks with shadow
             g.appendChild(_el('polygon', { points: `${x-sz},${y+3} ${x-sz*0.2},${y-sz*1.3} ${x-sz*0.2},${y+3}`,
-                fill: INK_DARK, 'fill-opacity': 0.06 }));
+                fill: INK_DARK, 'fill-opacity': 0.14 }));
             g.appendChild(_el('line', { x1: x-sz, y1: y+3, x2: x-sz*0.2, y2: y-sz*1.3,
                 stroke: INK_DARK, 'stroke-width': 0.65, 'stroke-opacity': _so }));
             g.appendChild(_el('line', { x1: x-sz*0.2, y1: y-sz*1.3, x2: x+sz, y2: y+3,
@@ -367,7 +367,7 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
             // Cave entrance with rocky surround
             g.appendChild(_el('path', {
                 d: `M${x-sz*1.1},${y+3} L${x-sz*0.8},${y-sz*0.3} L${x-sz*0.4},${y-sz*0.9} L${x},${y-sz*1.2} L${x+sz*0.3},${y-sz*0.8} L${x+sz*0.7},${y-sz*0.2} L${x+sz*1.1},${y+3}`,
-                fill: INK_DARK, 'fill-opacity': 0.04, stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': _so }));
+                fill: INK_DARK, 'fill-opacity': 0.10, stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': _so }));
             g.appendChild(_el('path', {
                 d: `M${x-sz*0.5},${y+3} Q${x-sz*0.5},${y-sz*0.3} ${x},${y-sz*0.5} Q${x+sz*0.5},${y-sz*0.3} ${x+sz*0.5},${y+3}`,
                 fill: INK_DARK, 'fill-opacity': 0.15, stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': _so }));
@@ -399,20 +399,20 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
         case 'volcanic':
             // Volcano with smoke
             g.appendChild(_el('polygon', { points: `${x-sz*0.9},${y+3} ${x-1.5},${y-sz} ${x+1.5},${y-sz} ${x+sz*0.9},${y+3}`,
-                fill: INK_DARK, 'fill-opacity': 0.05, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
+                fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
             g.appendChild(_el('path', { d: `M${x-2},${y-sz} Q${x},${y-sz+2} ${x+2},${y-sz}`,
-                fill: INK_DARK, 'fill-opacity': 0.08, stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.45 }));
+                fill: INK_DARK, 'fill-opacity': 0.18, stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.45 }));
             g.appendChild(_el('path', { d: `M${x},${y-sz} Q${x+2},${y-sz-3} ${x-1},${y-sz-6}`,
                 fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.25 }));
             break;
         case 'snow':
             // Ice crystal formation
             g.appendChild(_el('polygon', { points: `${x-sz*0.15},${y+1} ${x},${y-sz} ${x+sz*0.15},${y+1}`,
-                fill: INK_LIGHT, 'fill-opacity': 0.05, stroke: INK_LIGHT, 'stroke-width': 0.3, 'stroke-opacity': 0.45 }));
+                fill: INK_LIGHT, 'fill-opacity': 0.12, stroke: INK_LIGHT, 'stroke-width': 0.3, 'stroke-opacity': 0.45 }));
             g.appendChild(_el('polygon', { points: `${x-sz*0.5},${y+1} ${x-sz*0.3},${y-sz*0.6} ${x-sz*0.15},${y+1}`,
-                fill: INK_LIGHT, 'fill-opacity': 0.03, stroke: INK_LIGHT, 'stroke-width': 0.25, 'stroke-opacity': 0.4 }));
+                fill: INK_LIGHT, 'fill-opacity': 0.08, stroke: INK_LIGHT, 'stroke-width': 0.25, 'stroke-opacity': 0.4 }));
             g.appendChild(_el('polygon', { points: `${x+sz*0.15},${y+1} ${x+sz*0.35},${y-sz*0.5} ${x+sz*0.55},${y+1}`,
-                fill: INK_LIGHT, 'fill-opacity': 0.03, stroke: INK_LIGHT, 'stroke-width': 0.25, 'stroke-opacity': 0.4 }));
+                fill: INK_LIGHT, 'fill-opacity': 0.08, stroke: INK_LIGHT, 'stroke-width': 0.25, 'stroke-opacity': 0.4 }));
             break;
         default:
             // Generic landmark: signpost
@@ -420,7 +420,7 @@ function _drawBiomeIcon(g, x, y, biome, sz, locName) {
                 stroke: INK_DARK, 'stroke-width': _sw, 'stroke-opacity': _so }));
             g.appendChild(_el('path', {
                 d: `M${x},${y-sz*0.7} L${x+sz*0.6},${y-sz*0.8} L${x+sz*0.6},${y-sz*0.5} L${x},${y-sz*0.4}`,
-                fill: INK_DARK, 'fill-opacity': 0.06, stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': _so }));
+                fill: INK_DARK, 'fill-opacity': 0.14, stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': _so }));
     }
 }
 

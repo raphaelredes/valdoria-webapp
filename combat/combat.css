@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   ARENA CSS - Lendas de Valdoria Combat WebApp
+   COMBAT CSS - Lendas de Valdoria Combat WebApp
    Separated from index.html for maintainability
    ═══════════════════════════════════════════════ */
 
@@ -484,6 +484,15 @@ body {
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
 }
+
+/* Narrative mode: feed is the primary combat display */
+.combat-feed-narrative { padding: 4px 8px; }
+.combat-feed-narrative .feed-entry {
+    font-size: 13px;
+    padding: 3px 0;
+    white-space: normal;
+}
+.combat-feed-narrative .feed-entry:last-child { font-size: 14px; }
 
 /* ─── TURN TIMER ─── */
 .turn-timer {

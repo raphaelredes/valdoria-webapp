@@ -567,7 +567,7 @@ function triggerCombat(poi) {
     setTimeout(finishCombat, 2000);
 }
 
-// Post-combat narrative (brief toast after returning from arena)
+// Post-combat narrative (brief toast after returning from combat)
 function showPostCombatNarrative() {
     const lines = [
         'A poeira assenta. Você respira fundo e segue adiante.',
@@ -591,7 +591,7 @@ async function transitionToArena() {
     const mapData = params.get('data') || '';
 
     const body = {
-        from: 'explore', to: 'arena',
+        from: 'explore', to: 'combat',
         user_id: parseInt(S.uid),
         payload: {
             results: {
@@ -626,10 +626,10 @@ async function transitionToArena() {
                 return;
             }
         }
-        console.error('[EXPLORE] Transition to arena failed, using fallback');
+        console.error('[EXPLORE] Transition to combat failed, using fallback');
         if (typeof showTerrainToast === 'function') showTerrainToast('Erro na transição. Usando fallback...', 'damage');
     } catch (e) {
-        console.error('[EXPLORE] Transition to arena error:', e);
+        console.error('[EXPLORE] Transition to combat error:', e);
         if (typeof showTerrainToast === 'function') showTerrainToast('Erro na transição. Usando fallback...', 'damage');
     }
 
@@ -2370,7 +2370,7 @@ async function initAsync() {
 
         loadMapData(dataObj);
 
-        // Post-combat narrative when returning from arena
+        // Post-combat narrative when returning from combat
         if (isRestore) {
             setTimeout(() => showPostCombatNarrative(), 600);
         }

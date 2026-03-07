@@ -413,9 +413,9 @@ async function doFight() {
             interaction_type: choices.interaction_type || 'gate',
         });
 
-        if (result.arena_url) {
+        if (result.combat_url || result.arena_url) {
             // Navigate to arena WebApp
-            window.location.replace(result.arena_url);
+            window.location.replace(result.combat_url || result.arena_url);
         } else {
             showError('Erro ao iniciar combate.');
         }

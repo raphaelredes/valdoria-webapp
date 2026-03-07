@@ -85,7 +85,7 @@ async function init() {
         return;
     }
 
-    // Check if returning from another WebApp (arena, explore, etc.)
+    // Check if returning from another WebApp (combat, explore, etc.)
     const isReturn = params.get('return') === 'game';
     console.log('[GAME] Route: isReturn=' + isReturn + ' hasCharId=' + !!S.charId);
 
