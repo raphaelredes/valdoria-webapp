@@ -350,7 +350,50 @@ body {
     opacity: 1;
     pointer-events: all;
 }
-.dice-display {
+/* 3D Dice wrapper (THREE.js canvas + particles) */
+.dice3d-wrapper {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.dice3d-wrapper.has-mode-label {
+    margin-top: 8px;
+}
+.dice3d-canvas {
+    width: 200px;
+    height: 200px;
+}
+.dice3d-canvas canvas {
+    display: block;
+}
+.dice3d-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+.roll-mode-label-3d {
+    position: absolute;
+    top: -4px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    z-index: 2;
+}
+.roll-mode-label-3d.adv { color: #4a8; }
+.roll-mode-label-3d.dis { color: #a44; }
+
+/* Legacy emoji dice fallback */
+.dice-display-fallback {
     font-size: 64px;
     animation: diceRoll 0.7s ease;
 }
