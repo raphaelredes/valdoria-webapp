@@ -891,8 +891,8 @@ body {
     z-index: 360;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: 16px;
+    justify-content: flex-start;
+    padding: 48px 16px 16px;
     background: rgba(0,0,0,0.7);
     opacity: 0;
     pointer-events: none;
@@ -1013,10 +1013,11 @@ body {
 }
 .return-journey-narration {
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.7;
     color: var(--v-text, #d4c8b0);
-    margin-bottom: 10px;
-    min-height: 36px;
+    margin-bottom: 12px;
+    min-height: 60px;
+    padding: 4px 0;
 }
 .return-journey-dice {
     display: none;

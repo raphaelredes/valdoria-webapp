@@ -1650,92 +1650,92 @@ const RETURN_NARRATIONS = {
 // choices[]: i=icon, t=title, k={s:stat, dc:DC}, sNarr/fNarr/fDmg per choice
 const RETURN_HAZARDS = {
     forest: [
-        { icon: '🕸️', title: 'Teias Gigantes', narr: 'Teias enormes bloqueiam a trilha. Algo as teceu recentemente...', choices: [
-            { i: '🔥', t: 'Queimar as teias', k: { s: 'int', dc: 10 }, sNarr: 'Você improvisa uma tocha e queima as teias com precisão.', fNarr: 'O fogo se espalha! Você se queima tentando controlar as chamas.', fDmg: 3 },
-            { i: '🤸', t: 'Desviar por baixo', k: { s: 'dex', dc: 12 }, sNarr: 'Você se agacha e desliza sob as teias sem tocá-las.', fNarr: 'As teias grudam em você! Leva tempo e dor para se soltar.', fDmg: 4 },
-            { i: '💪', t: 'Forçar passagem', k: { s: 'str', dc: 13 }, sNarr: 'Com força bruta, você rasga as teias e abre caminho.', fNarr: 'As teias são mais resistentes do que parecem. Você se enrosca.', fDmg: 3 },
+        { icon: '🕸️', title: 'Teias Gigantes', narr: 'Teias enormes bloqueiam a trilha entre os troncos, grossas como cordas e pegajosas ao toque. Casulos pendem dos galhos — o que as teceu é grande e ainda está por perto.', choices: [
+            { i: '🔥', t: 'Queimar as teias', k: { s: 'int', dc: 10 }, sNarr: 'Você improvisa uma tocha com galhos secos e queima as teias com precisão. As chamas consomem os fios sem se espalhar.', fNarr: 'O fogo se espalha descontrolado! Você recua, mas as chamas alcançam seu braço antes que consiga apagá-las.', fDmg: 3 },
+            { i: '🤸', t: 'Desviar por baixo', k: { s: 'dex', dc: 12 }, sNarr: 'Com movimentos calculados, você desliza sob as teias sem tocar em um único fio. Limpo e silencioso.', fNarr: 'As teias são mais baixas do que pareciam. Fios grudam em suas costas e puxam — quanto mais se debate, mais se enrosca.', fDmg: 4 },
+            { i: '💪', t: 'Forçar passagem', k: { s: 'str', dc: 13 }, sNarr: 'Com um grito de esforço, você rasga as teias como cortinas e abre caminho à força bruta.', fNarr: 'As teias são resistentes como aço! Seu braço fica preso e a vibração certamente alertou o que vive aqui.', fDmg: 3 },
         ]},
-        { icon: '🐻', title: 'Território de Urso', narr: 'Marcas de garras nos troncos. Você entrou em território de urso.', choices: [
-            { i: '🤫', t: 'Contornar em silêncio', k: { s: 'dex', dc: 12 }, sNarr: 'Seus passos silenciosos levam você por uma rota alternativa.', fNarr: 'Um galho estala sob seu pé! O urso percebe sua presença.', fDmg: 5 },
-            { i: '🧠', t: 'Ler os sinais da natureza', k: { s: 'wis', dc: 11 }, sNarr: 'Rastros frescos indicam que o urso se afastou. Caminho livre.', fNarr: 'Você interpreta os sinais errado e caminha direto para a toca.', fDmg: 5 },
-            { i: '🗣️', t: 'Fazer barulho para afastar', k: { s: 'cha', dc: 13 }, sNarr: 'Seus gritos intimidam o urso, que se afasta pesadamente.', fNarr: 'O urso não se intimida e avança! Você foge com arranhões.', fDmg: 6 },
+        { icon: '🐻', title: 'Território de Urso', narr: 'Marcas de garras profundas nos troncos, casca arrancada, chão revolto. O ar carrega o cheiro forte e almiscarado do animal — ele esteve aqui há pouco tempo.', choices: [
+            { i: '🤫', t: 'Contornar em silêncio', k: { s: 'dex', dc: 12 }, sNarr: 'Controlando até a respiração, você traça uma rota alternativa. O urso nem percebe sua passagem.', fNarr: 'Um galho estala sob seu pé como um trovão no silêncio! O urso ergue a cabeça e avança com um urro.', fDmg: 5 },
+            { i: '🧠', t: 'Ler os sinais da natureza', k: { s: 'wis', dc: 11 }, sNarr: 'Rastros frescos apontam para o norte — o urso se afastou. Você cruza o território pela rota oposta.', fNarr: 'Você interpreta os sinais ao contrário. O caminho que parecia seguro leva direto à toca.', fDmg: 5 },
+            { i: '🗣️', t: 'Fazer barulho para afastar', k: { s: 'cha', dc: 13 }, sNarr: 'Batendo as mãos e gritando, você se faz parecer maior. O urso bufa e se retira pesadamente.', fNarr: 'O urso interpreta seus gritos como desafio! Ele avança e você foge com arranhões profundos.', fDmg: 6 },
         ]},
-        { icon: '🌿', title: 'Raízes Traiçoeiras', narr: 'Raízes retorcidas cobrem o chão como serpentes vivas.', choices: [
-            { i: '👁️', t: 'Caminhar com cautela', k: { s: 'wis', dc: 10 }, sNarr: 'Olhos atentos guiam seus passos por entre as raízes.', fNarr: 'Você tropeça e cai pesadamente no chão.', fDmg: 2 },
-            { i: '🏃', t: 'Correr e saltar', k: { s: 'dex', dc: 12 }, sNarr: 'Com saltos ágeis, você atravessa o trecho perigoso.', fNarr: 'Seu pé engancha em uma raiz. A queda é dolorosa.', fDmg: 3 },
+        { icon: '🌿', title: 'Raízes Traiçoeiras', narr: 'O chão da floresta se transformou em um labirinto de raízes expostas, retorcidas e entrelaçadas como serpentes petrificadas. A trilha desapareceu sob esta teia vegetal.', choices: [
+            { i: '👁️', t: 'Caminhar com cautela', k: { s: 'wis', dc: 10 }, sNarr: 'Olhos atentos mapeiam cada passo. Você navega o trecho como quem lê um mapa no chão.', fNarr: 'Uma raiz que parecia firme cede! Você tropeça e cai pesadamente, batendo o joelho em uma rocha.', fDmg: 2 },
+            { i: '🏃', t: 'Correr e saltar', k: { s: 'dex', dc: 12 }, sNarr: 'Com saltos ágeis de raiz em raiz, você atravessa o trecho como um acrobata.', fNarr: 'Seu pé engancha em uma raiz oculta no meio do salto! A queda é dolorosa e seu tornozelo protesta.', fDmg: 3 },
         ]},
     ],
     plains: [
-        { icon: '🌪️', title: 'Ventania Repentina', narr: 'Nuvens escuras se formam. O vento se torna violento.', choices: [
-            { i: '🛡️', t: 'Resistir de pé', k: { s: 'str', dc: 11 }, sNarr: 'Você se firma e resiste à tempestade com determinação.', fNarr: 'O vento derruba você! Detritos cortam sua pele.', fDmg: 3 },
-            { i: '🕳️', t: 'Buscar abrigo', k: { s: 'wis', dc: 10 }, sNarr: 'Você identifica uma depressão no terreno e se protege.', fNarr: 'Não há abrigo. A ventania castiga sem piedade.', fDmg: 4 },
+        { icon: '🌪️', title: 'Ventania Repentina', narr: 'Nuvens negras surgem do nada sobre a planície. O vento se intensifica em segundos, arrancando grama e levantando poeira. Sem abrigo natural à vista, você precisa decidir rápido.', choices: [
+            { i: '🛡️', t: 'Resistir de pé', k: { s: 'str', dc: 11 }, sNarr: 'Fincando os pés no chão e curvando-se contra o vento, você resiste com determinação. Quando passa, ainda está de pé.', fNarr: 'Uma rajada mais forte derruba você de costas! Detritos arrastados pelo vento cortam sua pele exposta.', fDmg: 3 },
+            { i: '🕳️', t: 'Buscar abrigo', k: { s: 'wis', dc: 10 }, sNarr: 'Olhos treinados identificam uma depressão no terreno. Você se abriga ali até a tempestade passar.', fNarr: 'Não há abrigo nesta planície maldita. A ventania castiga sem piedade enquanto busca em vão por cobertura.', fDmg: 4 },
         ]},
-        { icon: '🕳️', title: 'Buraco Oculto', narr: 'A grama alta esconde buracos cavados por animais.', choices: [
-            { i: '👁️', t: 'Observar o terreno', k: { s: 'wis', dc: 11 }, sNarr: 'Você nota as irregularidades e desvia a tempo.', fNarr: 'Seu pé afunda no buraco! Seu tornozelo gira.', fDmg: 4 },
-            { i: '🏃', t: 'Correr pelo campo', k: { s: 'dex', dc: 12 }, sNarr: 'Reflexos rápidos evitam os buracos escondidos.', fNarr: 'Velocidade não salva de um buraco que você não viu.', fDmg: 3 },
+        { icon: '🕳️', title: 'Buraco Oculto', narr: 'A grama alta e densa esconde o terreno real. Tocas de animais e erosão criaram um campo minado de buracos invisíveis. Um passo errado pode custar um tornozelo.', choices: [
+            { i: '👁️', t: 'Observar o terreno', k: { s: 'wis', dc: 11 }, sNarr: 'Você nota as diferenças na grama que denunciam os buracos. Com passos cuidadosos, desvia de todos.', fNarr: 'Seu pé afunda até o joelho em um buraco invisível! Seu tornozelo gira com um estalo doloroso.', fDmg: 4 },
+            { i: '🏃', t: 'Correr pelo campo', k: { s: 'dex', dc: 12 }, sNarr: 'Reflexos afiados e passos leves levam você pelo campo. Quando um buraco aparece, seus pés já acharam outro apoio.', fNarr: 'Na velocidade, impossível ver os buracos. Um deles engole seu pé e o impulso faz o resto — queda brusca.', fDmg: 3 },
         ]},
     ],
     cave: [
-        { icon: '🪨', title: 'Desmoronamento', narr: 'Pedras se soltam do teto. A passagem está instável!', choices: [
-            { i: '🏃', t: 'Correr para o outro lado', k: { s: 'dex', dc: 13 }, sNarr: 'Você dispara pela passagem antes que desabe.', fNarr: 'Pedras caem sobre você! Dor aguda percorre seu corpo.', fDmg: 6 },
-            { i: '🛡️', t: 'Proteger-se e esperar', k: { s: 'cn', dc: 11 }, sNarr: 'Você se protege até o desmoronamento parar.', fNarr: 'Uma pedra acerta seu ombro apesar da proteção.', fDmg: 4 },
-            { i: '🧠', t: 'Analisar a estrutura', k: { s: 'int', dc: 12 }, sNarr: 'Você identifica os pontos seguros e atravessa.', fNarr: 'Sua análise falha. O caminho que escolheu desaba.', fDmg: 5 },
+        { icon: '🪨', title: 'Desmoronamento', narr: 'Um estrondo ecoa pelo túnel! Pedras se soltam do teto em cascata, rachaduras se espalham pelas paredes. Poeira enche o ar e a passagem começa a ceder.', choices: [
+            { i: '🏃', t: 'Correr para o outro lado', k: { s: 'dex', dc: 13 }, sNarr: 'Você dispara pela passagem em colapso! Pedras caem ao redor, mas seus pés são mais rápidos. Escapa por um fio.', fNarr: 'Pedras enormes caem sobre você antes que alcance o outro lado! Dor aguda percorre seu corpo sob os escombros.', fDmg: 6 },
+            { i: '🛡️', t: 'Proteger-se e esperar', k: { s: 'cn', dc: 11 }, sNarr: 'Você se encolhe sob uma saliência de rocha sólida. O desmoronamento passa e você emerge coberto de poeira mas intacto.', fNarr: 'A saliência não era tão sólida. Uma pedra acerta seu ombro com força apesar da proteção improvisada.', fDmg: 4 },
+            { i: '🧠', t: 'Analisar a estrutura', k: { s: 'int', dc: 12 }, sNarr: 'Em um relance, você identifica os pilares naturais e traça uma rota entre os pontos de sustentação. Sem um arranhão.', fNarr: 'Sua análise parecia correta, mas a rocha neste ponto era friável. O caminho que escolheu desaba sob seus pés.', fDmg: 5 },
         ]},
-        { icon: '💨', title: 'Gás Venenoso', narr: 'Um cheiro pungente emana de uma fissura. Gás tóxico!', choices: [
-            { i: '💨', t: 'Prender a respiração', k: { s: 'cn', dc: 12 }, sNarr: 'Você passa pela zona contaminada sem respirar.', fNarr: 'O gás irrita seus pulmões. Você tosse violentamente.', fDmg: 4 },
-            { i: '🧠', t: 'Buscar corrente de ar', k: { s: 'int', dc: 11 }, sNarr: 'Você encontra uma passagem com ventilação natural.', fNarr: 'A corrente leva mais gás em sua direção.', fDmg: 3 },
+        { icon: '💨', title: 'Gás Venenoso', narr: 'Um cheiro pungente e sulfuroso emana de uma fissura na rocha. O ar ganha uma tonalidade esverdeada e seus olhos ardem. Gás tóxico, espalhando-se pelo túnel.', choices: [
+            { i: '💨', t: 'Prender a respiração', k: { s: 'cn', dc: 12 }, sNarr: 'Você inspira fundo o último ar limpo e atravessa a zona contaminada em apneia. Seus pulmões ardem, mas resiste.', fNarr: 'O trecho é mais longo do que calculou! O gás irrita seus pulmões. Tosse violenta e náusea se seguem.', fDmg: 4 },
+            { i: '🧠', t: 'Buscar corrente de ar', k: { s: 'int', dc: 11 }, sNarr: 'Você localiza uma passagem lateral com ventilação natural. O ar limpo permite uma rota segura ao redor da nuvem.', fNarr: 'A corrente que você seguiu era a fonte do gás! O ar fica pior. Você recua tossindo e busca outro caminho.', fDmg: 3 },
         ]},
     ],
     swamp: [
-        { icon: '🐊', title: 'Emboscada Rastejante', narr: 'A água escura se agita. Algo se move sob a superfície.', choices: [
-            { i: '👁️', t: 'Observar e contornar', k: { s: 'wis', dc: 12 }, sNarr: 'Você identifica o predador e desvia pelo caminho elevado.', fNarr: 'Mandíbulas emergem da água! Você escapa, mas não ileso.', fDmg: 5 },
-            { i: '🪵', t: 'Criar distração', k: { s: 'int', dc: 11 }, sNarr: 'Você joga um galho na água. A criatura persegue o ruído.', fNarr: 'A criatura não se engana. Ela avança em sua direção.', fDmg: 4 },
-            { i: '🏃', t: 'Atravessar correndo', k: { s: 'dex', dc: 13 }, sNarr: 'Seus pés rápidos cruzam antes que a criatura reaja.', fNarr: 'A lama atrasa você. A criatura alcança suas pernas.', fDmg: 6 },
+        { icon: '🐊', title: 'Emboscada Rastejante', narr: 'A água escura se agita em ondas suaves. Bolhas sobem à superfície, e por um instante você vê escamas brilhantes sob a lama. Algo grande se move abaixo.', choices: [
+            { i: '👁️', t: 'Observar e contornar', k: { s: 'wis', dc: 12 }, sNarr: 'Seus olhos identificam o formato do predador na água. Você traça uma rota elevada, longe de suas mandíbulas.', fNarr: 'O predador é mais rápido do que parecia! Mandíbulas emergem da água. Você escapa, mas garras rasgam sua perna.', fDmg: 5 },
+            { i: '🪵', t: 'Criar distração', k: { s: 'int', dc: 11 }, sNarr: 'Você arremessa um galho pesado na água a dez metros dali. A criatura persegue o ruído, abrindo passagem.', fNarr: 'A criatura não cai na armadilha — é mais esperta do que parece. Ignora o galho e avança em sua direção.', fDmg: 4 },
+            { i: '🏃', t: 'Atravessar correndo', k: { s: 'dex', dc: 13 }, sNarr: 'Seus pés encontram os pontos firmes na lama e você cruza antes que a criatura possa reagir. Velocidade pura.', fNarr: 'A lama suga seus pés no pior momento! A criatura ganha terreno e suas garras alcançam suas pernas.', fDmg: 6 },
         ]},
-        { icon: '🌫️', title: 'Bruma Desorientante', narr: 'Uma névoa espessa desce. A trilha desaparece.', choices: [
-            { i: '🧭', t: 'Orientar-se pelas estrelas', k: { s: 'wis', dc: 11 }, sNarr: 'Seu senso de direção se mantém firme.', fNarr: 'Você se perde na bruma e vaga por horas, exausto.', fDmg: 3 },
-            { i: '👂', t: 'Seguir os sons da cidade', k: { s: 'wis', dc: 12 }, sNarr: 'Sons distantes de civilização guiam seus passos.', fNarr: 'Os sons enganam. Você anda em círculos.', fDmg: 3 },
+        { icon: '🌫️', title: 'Bruma Desorientante', narr: 'Névoa espessa desce sobre o pântano como um manto vivo, engolindo toda visibilidade. A trilha desaparece, as estacas de marcação somem, e até o som parece abafado.', choices: [
+            { i: '🧭', t: 'Orientar-se pelas estrelas', k: { s: 'wis', dc: 11 }, sNarr: 'Olhando para cima, você encontra a Estrela do Norte. Seu senso de direção se mantém firme, e a névoa se dissipa.', fNarr: 'As nuvens cobrem tudo e a névoa engana seus sentidos. Você vaga por horas até achar a trilha, exausto.', fDmg: 3 },
+            { i: '👂', t: 'Seguir os sons da cidade', k: { s: 'wis', dc: 12 }, sNarr: 'Você fecha os olhos e aguça os ouvidos. Ali — um sino distante, um cão ladrando. Sons que guiam seus passos.', fNarr: 'O eco do pântano distorce tudo. Você segue miragens sonoras e anda em círculos até a exaustão.', fDmg: 3 },
         ]},
     ],
     mountain: [
-        { icon: '🏔️', title: 'Passagem Estreita', narr: 'Uma beirada estreita sobre um precipício. Vertigem.', choices: [
-            { i: '🧗', t: 'Escalar devagar', k: { s: 'dex', dc: 13 }, sNarr: 'Passos calculados levam você pela passagem.', fNarr: 'Você escorrega e bate o corpo na rocha.', fDmg: 6 },
-            { i: '💪', t: 'Agarrar-se e avançar', k: { s: 'str', dc: 12 }, sNarr: 'Mãos firmes na rocha, você avança sem olhar para baixo.', fNarr: 'Suas mãos cedem. A queda é curta mas dolorosa.', fDmg: 5 },
-            { i: '🧠', t: 'Procurar rota alternativa', k: { s: 'int', dc: 11 }, sNarr: 'Você encontra um desvio mais seguro entre as rochas.', fNarr: 'O desvio leva a um beco sem saída. Tempo perdido.', fDmg: 2 },
+        { icon: '🏔️', title: 'Passagem Estreita', narr: 'A trilha se reduz a uma beirada de menos de um passo. De um lado, rocha vertical. Do outro, precipício que some nas nuvens. O vento empurra você para a borda.', choices: [
+            { i: '🧗', t: 'Escalar devagar', k: { s: 'dex', dc: 13 }, sNarr: 'Dedos e pés encontram apoio na rocha. Centímetro por centímetro, você cruza com precisão de escalador.', fNarr: 'Uma rajada de vento na hora errada! Você escorrega e bate o corpo contra a rocha áspera. O precipício quase vence.', fDmg: 6 },
+            { i: '💪', t: 'Agarrar-se e avançar', k: { s: 'str', dc: 12 }, sNarr: 'Mãos firmes como garras na rocha, você avança sem olhar para baixo. A força bruta vence a vertigem.', fNarr: 'Seus dedos cedem na rocha lisa! A queda é curta — uma saliência abaixo amortece — mas o impacto é brutal.', fDmg: 5 },
+            { i: '🧠', t: 'Procurar rota alternativa', k: { s: 'int', dc: 11 }, sNarr: 'Você estuda a formação rochosa e descobre um desvio mais largo. Mais longo, porém infinitamente mais seguro.', fNarr: 'O desvio leva a um beco sem saída — rocha intransponível. Você perde tempo e volta cansado para a passagem.', fDmg: 2 },
         ]},
-        { icon: '❄️', title: 'Gelo na Trilha', narr: 'Gelo cobre a trilha íngreme. Um passo em falso...', choices: [
-            { i: '🐾', t: 'Pisar com cuidado', k: { s: 'dex', dc: 12 }, sNarr: 'Você encontra apoio e cruza o gelo devagar.', fNarr: 'Seus pés perdem tração! Você desliza nas pedras.', fDmg: 4 },
-            { i: '🪓', t: 'Cavar apoios no gelo', k: { s: 'str', dc: 11 }, sNarr: 'Buracos no gelo servem como degraus improvisados.', fNarr: 'O gelo racha sob a força. Você perde o equilíbrio.', fDmg: 5 },
+        { icon: '❄️', title: 'Gelo na Trilha', narr: 'Gelo traiçoeiro cobre a trilha íngreme, transformando cada passo em uma aposta contra a gravidade. O vento gelado ameaça roubar seu equilíbrio.', choices: [
+            { i: '🐾', t: 'Pisar com cuidado', k: { s: 'dex', dc: 12 }, sNarr: 'Testando cada passo, você encontra as fissuras no gelo que oferecem tração. Lento, mas seguro.', fNarr: 'Seus pés perdem tração na parte mais íngreme! Você desliza descontrolado e bate nas pedras abaixo.', fDmg: 4 },
+            { i: '🪓', t: 'Cavar apoios no gelo', k: { s: 'str', dc: 11 }, sNarr: 'Com força e persistência, você escava degraus no gelo. Uma escada improvisada, mas funcional.', fNarr: 'O gelo racha em linha longa sob o impacto! A superfície cede e você desliza junto com os pedaços.', fDmg: 5 },
         ]},
     ],
     desert: [
-        { icon: '🦂', title: 'Ninho de Escorpiões', narr: 'Escorpiões emergem da areia ao redor de seus pés!', choices: [
-            { i: '🏃', t: 'Saltar para fora', k: { s: 'dex', dc: 12 }, sNarr: 'Movimentos rápidos levam você para fora do ninho.', fNarr: 'Uma ferroada! O veneno arde com intensidade.', fDmg: 5 },
-            { i: '🧊', t: 'Ficar imóvel', k: { s: 'wis', dc: 11 }, sNarr: 'Parado como pedra, os escorpiões perdem interesse.', fNarr: 'Sua paciência falha. Um escorpião ataca.', fDmg: 4 },
+        { icon: '🦂', title: 'Ninho de Escorpiões', narr: 'A areia ganha vida ao redor de seus pés! Dezenas de escorpiões emergem das tocas, pinças erguidas e ferrões curvados brilhando ao sol. Você está no centro do ninho.', choices: [
+            { i: '🏃', t: 'Saltar para fora', k: { s: 'dex', dc: 12 }, sNarr: 'Com movimentos explosivos, você salta por cima das criaturas e aterrissa em areia limpa.', fNarr: 'Um escorpião maior emerge onde você ia pousar! Uma ferroada no tornozelo — o veneno arde como fogo líquido.', fDmg: 5 },
+            { i: '🧊', t: 'Ficar imóvel', k: { s: 'wis', dc: 11 }, sNarr: 'Você congela como estátua. Sem movimento ou calor, os escorpiões perdem interesse e retornam às tocas.', fNarr: 'Um escorpião escalando sua perna é demais! O pânico toma conta e o ferrão encontra pele exposta.', fDmg: 4 },
         ]},
-        { icon: '🌡️', title: 'Exaustão pelo Calor', narr: 'O calor é insuportável. Sua visão escurece.', choices: [
-            { i: '💪', t: 'Resistir e avançar', k: { s: 'cn', dc: 11 }, sNarr: 'Você controla a respiração e conserva energia.', fNarr: 'O calor vence. Você cambaleia e quase desmaia.', fDmg: 3 },
-            { i: '🧠', t: 'Improvisar proteção', k: { s: 'int', dc: 10 }, sNarr: 'Com pano úmido na cabeça, você resiste ao sol.', fNarr: 'Sem material adequado, o improviso falha.', fDmg: 4 },
+        { icon: '🌡️', title: 'Exaustão pelo Calor', narr: 'O sol é implacável. O ar tremula sobre a areia escaldante, sua boca está seca como pergaminho e a visão escurece nas bordas. Cada passo fica mais pesado.', choices: [
+            { i: '💪', t: 'Resistir e avançar', k: { s: 'cn', dc: 11 }, sNarr: 'Você controla a respiração, modera o ritmo e conserva energia. Passo firme após passo firme, vence o trecho.', fNarr: 'O calor vence a vontade. Suas pernas cedem e você cambaleia — quase desmaia antes de encontrar sombra.', fDmg: 3 },
+            { i: '🧠', t: 'Improvisar proteção', k: { s: 'int', dc: 10 }, sNarr: 'Com pano úmido na cabeça e pausas nas raras sombras, você mantém a temperatura controlada.', fNarr: 'Sem material adequado e sem sombra, o improviso falha. O sol castiga sem misericórdia.', fDmg: 4 },
         ]},
     ],
     snow: [
-        { icon: '🌨️', title: 'Nevasca', narr: 'Uma nevasca furiosa reduz a visibilidade a zero.', choices: [
-            { i: '💪', t: 'Resistir ao frio', k: { s: 'cn', dc: 12 }, sNarr: 'Você se agasalha e persiste, resistindo ao frio.', fNarr: 'O frio penetra até os ossos. Movimentos lentos.', fDmg: 4 },
-            { i: '🕳️', t: 'Cavar abrigo na neve', k: { s: 'str', dc: 11 }, sNarr: 'Seu abrigo improvisado protege da nevasca.', fNarr: 'O abrigo desaba. Neve pesada cai sobre você.', fDmg: 5 },
+        { icon: '🌨️', title: 'Nevasca', narr: 'O céu desaba em uma cortina branca furiosa. Flocos grossos chicoteiam seu rosto e o vento gela até os pensamentos. A visibilidade cai para dois metros — a trilha some.', choices: [
+            { i: '💪', t: 'Resistir ao frio', k: { s: 'cn', dc: 12 }, sNarr: 'Você se agasalha, cerra os dentes e avança contra a tempestade. Sua vontade é mais forte que o frio.', fNarr: 'O frio penetra até os ossos, ultrapassando toda proteção. Seus movimentos ficam lentos e entorpecidos.', fDmg: 4 },
+            { i: '🕳️', t: 'Cavar abrigo na neve', k: { s: 'str', dc: 11 }, sNarr: 'Você escava uma trincheira na neve compacta. Seu abrigo bloqueia o vento e conserva o calor. A nevasca passa.', fNarr: 'O abrigo desaba sob o peso da neve! Você fica soterrado por segundos aterrorizantes, gelado e machucado.', fDmg: 5 },
         ]},
-        { icon: '🧊', title: 'Lago Congelado', narr: 'O gelo estala sob seus pés. Pode ceder!', choices: [
-            { i: '🐾', t: 'Distribuir o peso', k: { s: 'dex', dc: 13 }, sNarr: 'Passos leves levam você ao outro lado.', fNarr: 'O gelo racha! Água gelada até a cintura.', fDmg: 6 },
-            { i: '🧠', t: 'Contornar pela margem', k: { s: 'wis', dc: 11 }, sNarr: 'Você encontra uma passagem segura pela borda.', fNarr: 'A margem também é frágil. Você afunda.', fDmg: 4 },
+        { icon: '🧊', title: 'Lago Congelado', narr: 'A trilha cruza um lago congelado sem caminho ao redor. O gelo geme e rachaduras se espalham como veias sob a superfície. Água negra se move lá embaixo.', choices: [
+            { i: '🐾', t: 'Distribuir o peso', k: { s: 'dex', dc: 13 }, sNarr: 'De bruços, você distribui o peso e desliza sobre o gelo. Cada estalo faz seu coração parar, mas alcança o outro lado.', fNarr: 'O gelo racha sob você com um estampido! Água gelada invade até a cintura. O choque térmico é brutal.', fDmg: 6 },
+            { i: '🧠', t: 'Contornar pela margem', k: { s: 'wis', dc: 11 }, sNarr: 'Nas bordas, pedras se projetam sobre o lago. Pulando de rocha em rocha, cruza sem tocar o gelo.', fNarr: 'A margem é tão frágil quanto o centro. Uma placa de gelo costeiro cede e você afunda na água congelante.', fDmg: 4 },
         ]},
     ],
     _default: [
-        { icon: '🪤', title: 'Armadilha Abandonada', narr: 'Uma armadilha de caçadores entre as folhas secas.', choices: [
-            { i: '👁️', t: 'Examinar com cuidado', k: { s: 'wis', dc: 11 }, sNarr: 'Seus olhos treinados detectam o perigo.', fNarr: 'O mecanismo dispara! O ferro morde sua perna.', fDmg: 4 },
-            { i: '🏃', t: 'Pular por cima', k: { s: 'dex', dc: 12 }, sNarr: 'Um salto limpo leva você além da armadilha.', fNarr: 'Você aterra mal e ativa outra armadilha.', fDmg: 3 },
+        { icon: '🪤', title: 'Armadilha Abandonada', narr: 'Folhas secas cobrem algo metálico na trilha. Um brilho de ferro entre o marrom — armadilha de caçadores, esquecida há meses. O mecanismo ainda parece funcional.', choices: [
+            { i: '👁️', t: 'Examinar com cuidado', k: { s: 'wis', dc: 11 }, sNarr: 'Olhos treinados identificam a placa de pressão e os fios. Você marca a armadilha e desvia com precisão.', fNarr: 'O mecanismo é mais sofisticado do que parecia! Ao pisar no que achava ser seguro, o ferro morde sua perna.', fDmg: 4 },
+            { i: '🏃', t: 'Pular por cima', k: { s: 'dex', dc: 12 }, sNarr: 'Um salto limpo e bem calculado leva você além da armadilha. Seus pés aterrissam em solo limpo e seguro.', fNarr: 'Você aterrissa mal e ativa uma segunda armadilha que não havia visto! Impacto duplo — queda e ferro.', fDmg: 3 },
         ]},
-        { icon: '🌑', title: 'Escuridão Repentina', narr: 'Nuvens cobrem a lua. Escuridão total.', choices: [
-            { i: '👂', t: 'Seguir pelos sons', k: { s: 'wis', dc: 10 }, sNarr: 'Seus sentidos compensam a falta de visão.', fNarr: 'Sons enganam. Você rola por uma encosta.', fDmg: 3 },
-            { i: '🔥', t: 'Improvisar luz', k: { s: 'int', dc: 11 }, sNarr: 'Uma tocha improvisada ilumina o caminho.', fNarr: 'Sem material. A escuridão prevalece.', fDmg: 2 },
+        { icon: '🌑', title: 'Escuridão Repentina', narr: 'Nuvens espessas cobrem a lua e as estrelas de uma vez. Escuridão total desce sobre a trilha — você não enxerga nem as próprias mãos. A trilha está ali, em algum lugar.', choices: [
+            { i: '👂', t: 'Seguir pelos sons', k: { s: 'wis', dc: 10 }, sNarr: 'Aguçando os ouvidos, você percebe o farfalhar de folhas, água corrente — um mapa sonoro que compensa a cegueira.', fNarr: 'Sons enganam no escuro. O que parecia trilha firme era encosta. Você rola antes de conseguir se agarrar.', fDmg: 3 },
+            { i: '🔥', t: 'Improvisar luz', k: { s: 'int', dc: 11 }, sNarr: 'Com galhos secos e engenho, uma tocha improvisada ilumina o caminho. A trilha reaparece, clara e segura.', fNarr: 'Sem material seco ou ignição, a escuridão prevalece. O terreno irregular cobra seu preço em tombos.', fDmg: 2 },
         ]},
     ],
 };
