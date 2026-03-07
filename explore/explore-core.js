@@ -533,6 +533,36 @@ function checkFlavorEvent() {
 }
 
 // ═══════════════════════════════════════════════════════
+// OVERLAY SAFETY — clear dynamic children before activation
+// ═══════════════════════════════════════════════════════
+// Overlay→children mapping: which containers to clear before showing
+const _OVERLAY_CHILDREN = {
+    'dm-overlay':        ['dm-choices', 'dm-narration'],
+    'encounter-overlay': ['enc-choices', 'enc-narration'],
+    'exit-risk-overlay': ['exit-options', 'exit-hp-row', 'exit-info-row'],
+    'camp-overlay':      ['camp-food-list'],
+};
+
+/**
+ * Activate an overlay and automatically clear its dynamic children.
+ * Prevents stale content from the previous event flashing on screen.
+ * @param {string} overlayId - The overlay element ID
+ * @returns {HTMLElement} The overlay element (for further setup)
+ */
+function activateOverlay(overlayId) {
+    const children = _OVERLAY_CHILDREN[overlayId];
+    if (children) {
+        for (const childId of children) {
+            const el = document.getElementById(childId);
+            if (el) el.innerHTML = '';
+        }
+    }
+    const overlay = document.getElementById(overlayId);
+    overlay.classList.add('active');
+    return overlay;
+}
+
+// ═══════════════════════════════════════════════════════
 // HEX UTILITIES (shared with other modules)
 // ═══════════════════════════════════════════════════════
 function getNeighbors(col, row) {

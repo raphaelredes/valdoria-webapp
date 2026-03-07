@@ -52,13 +52,12 @@ function showPOI(poi) {
     const poiKey = `${poi.col},${poi.row}`;
     if (S.fogState[poiKey] !== 'hidden') flashHex(poi.col, poi.row);
 
-    const overlay = document.getElementById('dm-overlay');
+    // activateOverlay clears dm-choices + dm-narration before showing
+    activateOverlay('dm-overlay');
+
     document.getElementById('dm-icon').textContent = poi.icon || '📜';
     document.getElementById('dm-title').textContent = poi.title || 'Evento';
     document.getElementById('dm-type').textContent = POI_TYPE_LABELS[poi.type] || poi.type;
-
-    // Clear previous choices to prevent flash of stale content
-    document.getElementById('dm-choices').innerHTML = '';
 
     // Typewriter narration
     const narrEl = document.getElementById('dm-narration');
@@ -66,8 +65,6 @@ function showPOI(poi) {
     typewriter(narrEl, poi.narration || '', () => {
         showChoices(poi);
     });
-
-    overlay.classList.add('active');
 }
 
 // --- Paginated Typewriter ---
@@ -385,13 +382,13 @@ function _showCheckEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, pro
 }
 
 function showStage2(poi, stage2) {
+    // activateOverlay clears dm-choices + dm-narration before showing
+    activateOverlay('dm-overlay');
+
     const overlay = document.getElementById('dm-overlay');
     document.getElementById('dm-icon').textContent = '🔮';
     document.getElementById('dm-title').textContent = stage2.tt || 'Continuação';
     document.getElementById('dm-type').textContent = 'mistério';
-
-    // Clear previous choices to prevent flash of stale content
-    document.getElementById('dm-choices').innerHTML = '';
 
     const narrEl = document.getElementById('dm-narration');
     narrEl.innerHTML = '';
@@ -426,7 +423,6 @@ function showStage2(poi, stage2) {
             choicesEl.appendChild(btn);
         });
     });
-    overlay.classList.add('active');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -876,14 +872,16 @@ function showRandomEncounter(enc) {
 // DM INTRO
 // ═══════════════════════════════════════════════════════
 function showDMIntro(text) {
-    const overlay = document.getElementById('dm-overlay');
+    const overlay = document.getElementById('dm-overlay');  // kept for header hide
     // Hide the header (icon, title, badge) — DM intro is ambient narration, not an NPC
     const header = overlay.querySelector('.dm-header');
     if (header) header.style.display = 'none';
 
+    // activateOverlay clears dm-choices + dm-narration before showing
+    activateOverlay('dm-overlay');
+
     const narrEl = document.getElementById('dm-narration');
     const choicesEl = document.getElementById('dm-choices');
-    choicesEl.innerHTML = '';
 
     typewriter(narrEl, text, () => {
         const btn = document.createElement('button');
@@ -896,8 +894,6 @@ function showDMIntro(text) {
         });
         choicesEl.appendChild(btn);
     });
-
-    overlay.classList.add('active');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1593,60 +1589,60 @@ let _returnDice = null;
 // Biome-specific travel narrations
 const RETURN_NARRATIONS = {
     forest: [
-        'As copas das árvores se fecham sobre a trilha. Galhos estalam sob seus pés.',
-        'Um riacho serpenteia ao lado do caminho. O murmúrio da água acalma seus nervos.',
-        'Raízes expostas tornam o caminho traiçoeiro. Você avança com cautela.',
-        'A luz do sol mal penetra a copa densa. Sombras dançam entre os troncos.',
-        'Pegadas de cervos cruzam a trilha. A floresta tem seus próprios caminhos.',
+        'As copas das árvores se fecham sobre a trilha, criando um túnel verde onde a luz do sol mal penetra. Galhos estalam sob seus pés enquanto pássaros silenciam à sua passagem — a floresta observa quem ousa cruzá-la.',
+        'Um riacho serpenteia ao lado do caminho, seu murmúrio constante acalma seus nervos. Marcas de garras em uma árvore próxima lembram que você não está sozinho nesta floresta, mas por ora o caminho está livre.',
+        'Raízes retorcidas tornam cada passo uma negociação. A trilha foi feita por animais, não por homens — mas é o caminho mais curto de volta. Você se agacha sob um tronco caído e continua.',
+        'A luz dourada do entardecer penetra entre os galhos, pintando o chão da floresta com sombras alongadas. O aroma de musgo e terra úmida enche seus pulmões. Por um momento, a jornada quase parece pacífica.',
+        'Pegadas de cervos cruzam a trilha em várias direções. A floresta tem seus próprios caminhos e seus próprios viajantes. Ao longe, o canto de um pássaro desconhecido ecoa como um aviso — ou talvez uma despedida.',
     ],
     plains: [
-        'O vento varre os campos abertos, dobrando a grama alta em ondas douradas.',
-        'Uma estrada de terra batida se estende até o horizonte. O sol aquece suas costas.',
-        'Rebanhos selvagens pastam ao longe. A planície parece infinita.',
-        'Flores silvestres pontilham os campos. O aroma é doce e reconfortante.',
-        'Uma colina suave revela a estrada adiante. A cidade surge como um ponto distante.',
+        'O vento varre os campos abertos, dobrando a grama alta em ondas douradas que se estendem até o horizonte. Você caminha pela estrada de terra, sentindo o sol aquecer suas costas. A cidade é apenas um ponto distante, mas cresce a cada passo.',
+        'Rebanhos selvagens pastam ao longe, indiferentes à sua passagem. A planície parece infinita sob o céu vasto, e o silêncio só é quebrado pelo farfalhar da grama. Seus pés encontram ritmo na estrada batida por mil viajantes antes de você.',
+        'Flores silvestres pontilham os campos, pintando o verde com toques de roxo e amarelo. O aroma doce mistura-se com o cheiro de terra seca. Uma brisa gentil empurra você na direção certa — como se a própria planície quisesse levá-lo de volta.',
+        'Uma colina suave revela a vastidão da estrada à frente. Ao longe, fumaça de chaminés sobe preguiçosamente — sinal de civilização. O cansaço da jornada é real, mas seus pés encontram novo vigor com a promessa de um teto seguro.',
+        'Nuvens se acumulam no horizonte, projetando sombras enormes sobre os campos. O vento muda de direção, trazendo consigo o cheiro de chuva. Você aperta o passo — melhor chegar antes que a tempestade alcance a estrada.',
     ],
     cave: [
-        'O eco de seus passos é o único som nos túneis frios.',
-        'Estalactites gotejam lentamente. Você segue as marcações na parede.',
-        'A passagem se estreita e depois se abre novamente. O ar fica mais fresco.',
-        'Cristais incrustados na rocha refletem a luz da sua tocha.',
-        'Um corrente de ar indica a saída. Você acelera o passo.',
+        'O eco de seus passos é o único som nos túneis frios. Gotas de água caem do teto em intervalos regulares, como um relógio subterrâneo contando os minutos até a superfície. Suas mãos deslizam pela parede úmida, seguindo as marcações de giz.',
+        'Estalactites gotejam lentamente, criando poças cristalinas que refletem a luz bruxuleante da sua tocha. A passagem se estreita e depois se abre em uma câmara onde o ar é surpreendentemente fresco — um bom sinal de que a saída está próxima.',
+        'Cristais incrustados na rocha capturam a luz e a devolvem em faíscas multicoloridas. Por um instante, você para para apreciar a beleza oculta destas profundezas. Mas o caminho chama — e ficar parado demais nestas cavernas nunca é sábio.',
+        'Uma corrente de ar gelado atinge seu rosto, trazendo o cheiro inconfundível de vegetação. A superfície está perto. Você acelera o passo, ansioso para trocar a escuridão opressiva pela luz do dia e o ar livre.',
+        'Cogumelos luminescentes bordejam o caminho como lanternas fantasmagóricas. Seus tons azulados iluminam formações rochosas que parecem esculturas de algum artista subterrâneo. A natureza cria suas próprias maravilhas, mesmo nas profundezas.',
     ],
     swamp: [
-        'A lama suga seus pés a cada passo. O ar é pesado e úmido.',
-        'Brumas espessas cobrem o pântano. Você segue as estacas de marcação.',
-        'Sapos coaxam em coro ao redor. A trilha elevada é sua única rota segura.',
-        'Raízes de manguezais formam pontes naturais sobre a água escura.',
-        'Gases borbulham na superfície da lama. O cheiro é nauseante.',
+        'A lama suga seus pés a cada passo, relutante em liberá-lo. O ar pesado e úmido enche seus pulmões como um cobertor molhado. Insetos zumbem ao redor, mas você mantém o foco na trilha elevada — o único caminho seguro neste pântano traiçoeiro.',
+        'Brumas espessas cobrem a superfície da água estagnada. Você segue as estacas de marcação fincadas por viajantes anteriores, cada uma um testemunho de que outros cruzaram este pântano e sobreviveram. O silêncio é quebrado apenas pelo coaxar distante de sapos.',
+        'Raízes de manguezais formam pontes naturais sobre a água escura, seus galhos retorcidos como dedos de uma criatura adormecida. Você equilibra-se sobre elas com cuidado, observando bolhas subindo na lama abaixo — algo se move nas profundezas.',
+        'O pântano exala seus gases pútridos enquanto o sol se esforça para penetrar a névoa persistente. Tábuas de madeira apodrecida marcam uma passadeira improvisada. Cada passo é uma aposta, mas você conhece os sinais de madeira podre e avança com cautela.',
+        'Luzes fantasmagóricas dançam sobre a superfície da água — fogo-fátuo, dizem os viajantes. Belas, mas traiçoeiras. Você desvia o olhar e mantém os pés firmes na trilha. O pântano já engoliu muitos que se deixaram seduzir por suas luzes.',
     ],
     mountain: [
-        'O vento frio corta como lâmina nas passagens altas da montanha.',
-        'Pedras soltas rolam sob seus pés. Cada passo requer atenção.',
-        'A vista é deslumbrante, mas a trilha íngreme cobra seu preço.',
-        'Um desfiladeiro estreito obriga você a se encostar na parede de rocha.',
-        'Cabras montesas observam sua passagem de uma saliência acima.',
+        'O vento frio corta como lâmina nas passagens altas da montanha. Cada respiração é uma conquista nesta altitude, e seus músculos protestam na subida. Mas a vista panorâmica revela o vale distante onde Eldoria repousa — motivação suficiente para continuar.',
+        'Pedras soltas rolam sob seus pés, ecoando pelo desfiladeiro como tambores de guerra. A trilha serpenteia entre paredões de rocha escura, e você se mantém próximo à parede interna. Um olhar para o precipício confirma: não há margem para erro.',
+        'Cabras montesas observam sua passagem de uma saliência acima, suas silhuetas recortadas contra o céu cinzento. Elas conhecem estas montanhas melhor que qualquer mapa. Você segue o mesmo caminho que elas trilharam por gerações — o mais seguro.',
+        'Uma nascente brota da rocha, sua água gelada e cristalina. Você bebe e enche seu cantil, agradecendo por este pequeno presente da montanha. O frio nas mãos é um preço barato pelo revigor que a água traz aos seus membros cansados.',
+        'O caminho desce agora, e cada passo é um alívio depois da longa escalada. As árvores começam a reaparecer, primeiro arbustos raquíticos, depois pinheiros firmes. A montanha está ficando para trás, e com ela, os piores perigos da jornada.',
     ],
     desert: [
-        'O sol escaldante castiga a areia interminável. Miragens dançam no horizonte.',
-        'Dunas de areia mudam lentamente. Você mantém as estrelas como guia.',
-        'Um oásis seco é tudo o que resta de antiga fonte de água.',
-        'Lagartos escalam as rochas aquecidas pelo sol. O silêncio é ensurdecedor.',
-        'A areia fina se infiltra em cada fresta da sua armadura.',
+        'O sol escaldante castiga a areia interminável. Miragens dançam no horizonte, prometendo oásis que não existem. Você puxa o capuz sobre os olhos e segue as marcações de pedra empilhada — a única prova de que outros já cruzaram esta desolação antes.',
+        'Dunas imensas mudam lentamente sob o vento, redesenhando o deserto a cada hora. A areia fina se infiltra em cada fresta da armadura, irritando a pele. Você usa as estrelas e o sol como bússola, mantendo o rumo mesmo quando a trilha desaparece.',
+        'Um oásis seco é tudo que resta de uma antiga fonte — ossos brancos de animais ao redor contam a história. Mas adiante, rochas projetam uma sombra abençoada. Você descansa brevemente, recuperando forças antes de enfrentar o próximo trecho exposto.',
+        'Lagartos escalam as rochas aquecidas pelo sol, os únicos seres vivos visíveis nesta vastidão. O silêncio é ensurdecedor, quebrado apenas pelo sussurro da areia no vento. Seus passos deixam pegadas que serão apagadas em minutos — o deserto não guarda memórias.',
+        'O horizonte finalmente muda. Onde antes havia apenas areia, agora surgem os primeiros arbustos resistentes e, além deles, uma linha verde promissora. O deserto está cedendo terreno. Você sente a umidade no ar aumentar e respira fundo — o pior ficou para trás.',
     ],
     snow: [
-        'A neve range sob seus pés. O frio morde cada pedaço de pele exposta.',
-        'Uma trilha de pegadas antigas guia seu caminho entre os montes de neve.',
-        'Flocos de neve caem suavemente, cobrindo a paisagem em branco.',
-        'O vento uiva entre os pinheiros cobertos de gelo.',
-        'Cristais de gelo brilham como diamantes sob a fraca luz do sol.',
+        'A neve range sob seus pés com cada passo, um som ritmado que se tornou companhia constante. O frio morde cada pedaço de pele exposta, e sua respiração forma nuvens densas no ar gelado. Mas o caminho está firme — neve compactada por muitas passagens.',
+        'Uma trilha de pegadas antigas guia seu caminho entre os montes de neve. Alguém — ou algo — passou por aqui recentemente. Você segue os rastros com cautela, atento a qualquer sinal de perigo, mas agradecido por não ter que abrir caminho na neve virgem.',
+        'Pinheiros cobertos de gelo formam uma catedral branca ao redor da trilha. Flocos de neve caem suavemente, cobrindo a paisagem em um silêncio reverente. A beleza é hipnotizante, mas o frio é real — você mantém as mãos em movimento dentro das luvas.',
+        'O vento uiva entre os pinheiros, levantando redemoinhos de neve que reduzem a visibilidade. Você se abaixa e avança, usando as árvores como abrigo. Entre as rajadas, consegue vislumbrar a trilha descendo — sinal de que está deixando as alturas nevadas.',
+        'Cristais de gelo brilham como diamantes sob a fraca luz do sol que rompe as nuvens. A paisagem é de uma beleza cruel — esplêndida aos olhos, mortal para quem se perde. Você confere suas marcações e segue em frente, os olhos fixos no caminho.',
     ],
     _default: [
-        'A estrada se estende à sua frente. Cada passo aproxima você da segurança.',
-        'O terreno familiar traz um certo alívio. Você conhece estas terras.',
-        'Sons distantes ecoam pela trilha. Viajantes ou perigo? Impossível dizer.',
-        'Um marco de pedra indica a direção. A cidade não está longe.',
-        'O cansaço pesa, mas a promessa de descanso nos muros da cidade motiva seus passos.',
+        'A estrada se estende à sua frente, seus paralelepípedos gastos por mil viajantes. Cada passo aproxima você da segurança dos muros de Eldoria. O peso da exploração se faz sentir nos ombros, mas a determinação mantém seus pés firmes na trilha.',
+        'O terreno familiar traz um certo alívio — você reconhece uma árvore marcada, uma curva na estrada. Estas terras já não são desconhecidas. Sons de civilização começam a se misturar com os sons da natureza: um carro distante, vozes abafadas.',
+        'Sons distantes ecoam pela trilha. Viajantes ou perigo? Impossível dizer a esta distância. Você mantém a mão próxima à arma e os olhos atentos, mas não desacelera. Cada momento parado é um momento a mais em território hostil.',
+        'Um marco de pedra surge ao lado do caminho, gravado com a runa de Eldoria. A cidade não está longe — estas marcações são colocadas a cada meia légua dos portões. O alívio começa a se instalar, mas você sabe que os últimos passos são os mais traiçoeiros.',
+        'O cansaço pesa como chumbo em seus membros, mas no horizonte, as torres de vigia de Eldoria começam a se erguer contra o céu. A promessa de uma cama quente, comida e segurança motiva seus passos. Só mais um pouco — só mais um pouco.',
     ],
 };
 
@@ -1901,7 +1897,9 @@ function showReturnJourneyStep() {
         }
     } else {
         // ─── SAFE: atmospheric narration ───
-        narrEl.innerHTML = `<div class="return-step-badge safe">✓ Caminho seguro</div>` +
+        const biomeLabels = { forest: '🌲 Floresta', plains: '🌾 Planície', cave: '🕳️ Caverna', swamp: '🌿 Pântano', mountain: '🏔️ Montanha', desert: '🏜️ Deserto', snow: '❄️ Neve' };
+        const biomeLabel = biomeLabels[_getReturnBiome()] || '🛤️ Estrada';
+        narrEl.innerHTML = `<div class="return-step-badge safe">✓ ${biomeLabel} — Caminho seguro</div>` +
             `<div>${_getReturnNarration()}</div>`;
         _addReturnActions(actionsEl, overlay, remaining);
     }
