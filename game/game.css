@@ -11,7 +11,7 @@
 .screen {
     display: flex;
     flex-direction: column;
-    padding: 12px 14px;
+    padding: 10px 14px;
     padding-bottom: 120px; /* fallback — JS adjusts dynamically via updateBottomPadding() */
     min-height: 100%;
     overflow-y: auto;
@@ -37,10 +37,10 @@
 
 /* ─── Content Area ─── */
 .screen-content {
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 13px;
+    line-height: 1.45;
     color: var(--v-text);
-    margin-bottom: 14px;
+    margin-bottom: 8px;
     word-wrap: break-word;
     white-space: pre-line; /* \n from server HTML renders as line breaks */
 }
@@ -908,24 +908,32 @@
     border-style: none;
 }
 
+/* ─── Bar Group (consecutive bars wrapped together) ─── */
+.v-bar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 2px 0;
+}
+
 /* ─── Progress Bars (HP, MP, XP, HD) ─── */
 .v-bar {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 2px 0;
+    padding: 1px 0;
 }
 
 .v-bar-icon {
-    font-size: 13px;
-    width: 20px;
+    font-size: 12px;
+    width: 18px;
     text-align: center;
     flex-shrink: 0;
 }
 
 .v-bar-track {
     flex: 1;
-    height: 8px;
+    height: 7px;
     background: var(--v-bg);
     border-radius: 4px;
     overflow: hidden;
@@ -949,10 +957,10 @@
 .v-bar-fill.hd { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
 
 .v-bar-label {
-    font-size: 11px;
+    font-size: 10px;
     font-family: var(--v-font-mono);
     color: var(--v-text-dim);
-    min-width: 50px;
+    min-width: 48px;
     text-align: right;
     flex-shrink: 0;
     white-space: nowrap;
@@ -1014,8 +1022,8 @@
 /* ── Location Header ── */
 .v-location-header {
     text-align: center;
-    padding: 14px 16px 10px;
-    margin: -12px -14px 8px;
+    padding: 10px 16px 8px;
+    margin: -10px -14px 6px;
     background: linear-gradient(180deg, rgba(196,149,58,0.12) 0%, rgba(196,149,58,0.04) 60%, transparent 100%);
     border-bottom: 1px solid rgba(196,149,58,0.2);
     position: relative;
@@ -1037,33 +1045,33 @@
 /* Location icon (emoji before title) */
 .v-location-icon {
     display: block;
-    font-size: 28px;
-    margin-bottom: 4px;
+    font-size: 24px;
+    margin-bottom: 2px;
     filter: drop-shadow(0 0 8px rgba(196,149,58,0.3));
     line-height: 1;
 }
 
 .v-time-bar {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--v-text-dim);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     letter-spacing: 0.3px;
 }
 .v-location-header h2 {
-    font-size: 15px;
+    font-size: 14px;
     color: var(--v-gold);
     font-weight: 700;
     letter-spacing: 2.5px;
     text-transform: uppercase;
     text-shadow: 0 0 12px rgba(196,149,58,0.3);
     margin: 0;
-    line-height: 1.3;
+    line-height: 1.2;
 }
 /* Subtitle under header (e.g., difficulty + danger) */
 .v-location-subtitle {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--v-text-dim);
-    margin-top: 4px;
+    margin-top: 2px;
     letter-spacing: 0.5px;
 }
 
@@ -1134,13 +1142,25 @@
 
 /* ── Flavor Text ── */
 .v-flavor {
-    font-size: 13px;
+    font-size: 12px;
     font-style: italic;
     color: var(--v-text-dim);
-    padding: 6px 12px;
-    margin: 4px 0;
+    padding: 4px 10px;
+    margin: 2px 0;
     border-left: 2px solid var(--v-crimson, #7b2020);
-    line-height: 1.45;
+    line-height: 1.4;
+}
+
+/* ── Info Section (quests, map info, etc.) ── */
+.v-info-section {
+    padding: 4px 0;
+    margin: 0;
+}
+.v-info-section .v-section {
+    font-size: 13px;
+    line-height: 1.35;
+    margin: 0;
+    padding: 1px 0;
 }
 
 /* ── Party / Group Block ── */
@@ -1204,15 +1224,19 @@
 
 /* ── Generic Text Section ── */
 .v-section {
-    padding: 4px 0;
-    line-height: 1.5;
+    padding: 2px 0;
+    line-height: 1.4;
     font-size: 13px;
 }
 
 /* ── Spacer (replaces multiple blank lines) ── */
 .v-spacer {
-    height: 4px;
+    height: 3px;
 }
+
+/* ── Hide spacers adjacent to bar groups (bars are already compact) ── */
+.v-bar-group + .v-spacer { height: 0; }
+
 
 /* ═══════════════════════════════════════════════════════════════
    IMMERSIVE MODE — Collapsible Bottom Panel

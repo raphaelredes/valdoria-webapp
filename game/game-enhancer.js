@@ -47,6 +47,11 @@ const _RE_BANNER_LINK  = /^<a\s+href="[^"]*">\s*\u200b?\s*<\/a>$/;
 const _RE_FLAVOR_WRAP  = /^<i>[^<]+<\/i>$/;
 const _RE_DEPARTURE    = /^📜\s*<i>/;
 const _RE_BAR_START    = /^(?:🎲\s?)?[🟩🟨🟧🟥🟦🟪⬛]/u;
+const _RE_SUBTITLE     = /^(?:\u{1F4CD}|\u{1F7E2}|\u{1F7E1}|\u{1F7E0}|\u{1F534}|\u26A0|\u{1F6A9})\uFE0F?\s/u;
+
+function _isSubtitleLine(line) {
+    return _RE_SUBTITLE.test(line);
+}
 
 /**
  * Enhance server HTML with styled CSS components.
@@ -188,7 +193,7 @@ function _tokenize(lines) {
 // ── Header consumer ────────────────────────────────────────────
 
 function _consumeHeader(lines, startIdx, existingBlocks) {
-    // Pattern: [optional time line before] + ⚜️ ═══ ⚜️ + title + ⚜️ ═══ ⚜️
+    // Pattern: [optional time line before] + ⚜️ ═══ ⚜️ + title + ⚜️ ═══ ⚜️ + [optional subtitle after]
     let i = startIdx;
     let timeLine = null;
 
@@ -199,10 +204,6 @@ function _consumeHeader(lines, startIdx, existingBlocks) {
         if (prev.type === 'text' && /<b>.*<\/b>/.test(prev.text.trim()) && /\d/.test(prev.text)) {
             timeLine = prev.text.trim().replace(/<\/?b>/g, '');
             existingBlocks.pop(); // consume the time line retroactively
-        }
-        // Also remove spacer before time line
-        if (existingBlocks.length > 0 && existingBlocks[existingBlocks.length - 1].type === 'spacer') {
-            // Keep it, time + header look fine with spacing
         }
     }
 
@@ -223,8 +224,19 @@ function _consumeHeader(lines, startIdx, existingBlocks) {
     // Extract title text (strip HTML tags)
     let title = titleLines.join(' ').replace(/<\/?b>/g, '').replace(/<\/?i>/g, '').trim();
 
+    // Check for subtitle line right after header (difficulty/danger info or location info)
+    // Matches: "🟢 Normal · ⚠️ Perigo ▪▪▪", "📍 Local Atual: ...", etc.
+    let subtitle = null;
+    if (i < lines.length) {
+        const next = lines[i].trim();
+        if (next && _isSubtitleLine(next) && !_RE_HEADER_DIV.test(next) && !_RE_BAR_START.test(next)) {
+            subtitle = next;
+            i++;
+        }
+    }
+
     return {
-        block: { type: 'header', time: timeLine, title: title },
+        block: { type: 'header', time: timeLine, title: title, subtitle: subtitle },
         next: i
     };
 }
@@ -279,8 +291,22 @@ function _consumeNotification(lines, startIdx) {
 
 function _render(blocks) {
     const out = [];
+    let i = 0;
 
-    for (const b of blocks) {
+    while (i < blocks.length) {
+        const b = blocks[i];
+
+        // Group consecutive bar_html blocks into a single bar-group container
+        if (b.type === 'bar_html') {
+            let barHtml = '';
+            while (i < blocks.length && (blocks[i].type === 'bar_html' || blocks[i].type === 'spacer')) {
+                if (blocks[i].type === 'bar_html') barHtml += blocks[i].html;
+                i++;
+            }
+            out.push(`<div class="v-bar-group">${barHtml}</div>`);
+            continue;
+        }
+
         switch (b.type) {
             case 'header':
                 out.push(_renderHeader(b));
@@ -291,7 +317,6 @@ function _render(blocks) {
             case 'character':
                 out.push(_renderCharacter(b));
                 break;
-            case 'bar_html':
             case 'stats_html':
             case 'resources_html':
                 out.push(b.html);
@@ -327,6 +352,7 @@ function _render(blocks) {
                 }
                 break;
         }
+        i++;
     }
 
     return out.join('\n');
@@ -353,6 +379,9 @@ function _renderHeader(b) {
     }
     if (titleText) {
         h += `<h2>${titleText}</h2>`;
+    }
+    if (b.subtitle) {
+        h += `<div class="v-location-subtitle">${b.subtitle}</div>`;
     }
     h += '</div>';
     return h;
