@@ -289,7 +289,10 @@ async function fetchState(silent) {
 
     if (data && !data.error) {
         // Check for transition (player is in combat/explore)
-        if (data.transition) {
+        // Only auto-redirect if the response has ONLY a transition (no text/buttons).
+        // If text is present, the transition is just a WebApp button on a normal screen
+        // (e.g. Mochila on city hub) — render the screen, don't redirect.
+        if (data.transition && !data.text) {
             console.log('[GAME] fetchState() got transition:', JSON.stringify(data.transition).substring(0, 100));
             handleTransition(data.transition);
         } else {
