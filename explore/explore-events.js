@@ -1613,25 +1613,39 @@ async function initAsync() {
     let dataB64 = params.get('data') || '';
     const isRestore = params.get('restore') === '1';
 
+    console.log('[EXPLORE] Init params:', {
+        hasToken: !!S.token, hasApi: !!S.apiBase, hasUid: !!S.uid,
+        dataLen: dataB64.length, isRestore,
+        url: window.location.href.substring(0, 120) + '...'
+    });
+
     let dataObj = null;
 
     // Fetch persistence state and payload from backend API if available
     if (S.apiBase && S.uid && S.token) {
         try {
             const url = `${S.apiBase}/api/explore/state?user_id=${S.uid}`;
+            console.log('[EXPLORE] Fetching state from API:', url);
             const _sh = { 'Authorization': `Bearer ${S.token}` };
             if (window.Telegram?.WebApp?.initData) { _sh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
             _sh['ngrok-skip-browser-warning'] = '1';
-            const resp = await fetch(url, {
+            const resp = await fetchT(url, {
                 method: 'GET',
                 headers: _sh
             });
+            console.log('[EXPLORE] API response status:', resp.status);
             if (resp.ok) {
                 const rData = await resp.json();
+                console.log('[EXPLORE] API response:', {
+                    hasPayload: !!(rData && rData.payload),
+                    payloadLen: rData?.payload?.length || 0,
+                    hasState: !!(rData && rData.state),
+                });
 
                 // Load map payload from API if not in URL
                 if (!dataB64 && rData && rData.payload) {
                     dataB64 = rData.payload;
+                    console.log('[EXPLORE] Loaded payload from API fallback (' + dataB64.length + ' chars)');
                 }
 
                 if (rData && rData.state) {
@@ -1650,14 +1664,30 @@ async function initAsync() {
                     }
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(rData.state));
                 }
+            } else {
+                const errText = await resp.text().catch(() => '');
+                console.warn('[EXPLORE] API state returned error:', resp.status, errText);
             }
         } catch (e) {
             console.error('[EXPLORE] Could not fetch saved state/payload from API', e);
         }
+    } else {
+        console.warn('[EXPLORE] Skipping API fetch — missing params:', {
+            api: !!S.apiBase, uid: !!S.uid, token: !!S.token
+        });
     }
 
     if (!dataB64) {
-        document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:20px">Dados do mapa não encontrados.<br>Volte ao bot e tente novamente.</div>';
+        console.error('[EXPLORE] FATAL: No map data available. URL data param empty, API fallback failed.');
+        document.getElementById('loading').innerHTML = `
+            <div style="color:#a44;font-size:16px;text-align:center;padding:20px">
+                Dados do mapa não encontrados.<br>
+                Volte ao bot e tente novamente.
+                <br><br>
+                <button onclick="location.reload()" style="background:#4a3828;color:#d4c8b0;border:1px solid #6a4a2a;padding:10px 24px;border-radius:8px;font-family:var(--v-font);font-size:14px;cursor:pointer">
+                    Tentar novamente
+                </button>
+            </div>`;
         return;
     }
 
