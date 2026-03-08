@@ -573,7 +573,7 @@ function _renderArenaInner(s) {
     }
     if (s.feed && s.feed.length > 0) {
         const total = s.feed.length;
-        const visibleCount = isNarrative ? 6 : 2;
+        const visibleCount = isNarrative ? 6 : 3;
         const recentFeed = s.feed.slice(-visibleCount);
         const narrativeCls = isNarrative ? ' combat-feed-narrative' : '';
         html += `<div class="combat-feed${narrativeCls}" id="combatFeed">`;
@@ -1192,7 +1192,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
             <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
             <span class="compact-name">${escHtml(e.n)}</span>
             ${acBadge}
-            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
+            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct * 100}%"></div><span class="hp-mini-pct">${Math.round(pct * 100)}%</span></div>
             <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
             ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
             ${posBadge}
@@ -1254,9 +1254,12 @@ function renderTurnTimeline(to) {
     to.forEach((entry, i) => {
         const isFirst = i === 0;
         const tCls = entry.t === 'p' ? 't-player' : entry.t === 'a' ? 't-ally' : 't-enemy';
-        if (i > 0) html += '<div class="turn-arrow">▸</div>';
-        html += `<div class="turn-entry ${isFirst ? 'active' : ''} ${tCls}">
-            <span class="turn-val">${entry.v}</span>
+        const isDead = entry.hp !== undefined && entry.hp <= 0;
+        const deadCls = isDead ? ' dead' : '';
+        if (i > 0) html += '<div class="turn-arrow">·</div>';
+        const ico = entry.ico || (entry.t === 'p' ? '⚔️' : entry.t === 'a' ? '🛡️' : '👹');
+        html += `<div class="turn-entry ${isFirst ? 'active' : ''} ${tCls}${deadCls}">
+            <span class="turn-ico">${ico}</span>
             <span class="turn-name">${escHtml(entry.n)}</span>
         </div>`;
     });
@@ -2257,9 +2260,13 @@ function _initDiceDamageOnly(lr) {
         canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
         overlay.style.display = 'flex';
 
-        const infoText = lr.t === 'aoe' && lr.hits
-            ? (lr.sn || 'AOE') + ' — ' + lr.hits + ' alvos'
-            : (lr.sn || 'Acerto automatico!');
+        let infoText;
+        if (lr.t === 'aoe' && lr.hits) {
+            const killsText = lr.kills > 0 ? ` · ${lr.kills} abatido${lr.kills > 1 ? 's' : ''}` : '';
+            infoText = `${lr.sn || 'AOE'} — ${lr.hits} alvo${lr.hits > 1 ? 's' : ''}${killsText}`;
+        } else {
+            infoText = lr.sn || 'Acerto automático!';
+        }
         if (label3d) { label3d.textContent = infoText; label3d.className = 'dmg-dice3d-label rolling'; }
 
         // VFX: projectile for auto_hit/aoe spells
@@ -2977,14 +2984,15 @@ function _checkPlayerDamage(state) {
             haptic('heavy');
             sfxPlayerHit();
 
-            // Floating damage on player
-            _showDamageFloat(dmgTaken, null, '.entity.player');
+            // Floating damage on player (with correct damage type color)
+            _showDamageFloat(dmgTaken, _lastEnemyDmgType, '.entity.player');
         }
 
-        // VFX: impact on player + screen flash
+        // VFX: impact on player using tracked enemy damage type + screen flash
         if (window._combatVfx) {
-            window._combatVfx.impact(playerEl, 'slashing', {});
-            window._combatVfx.flash('rgba(255,60,30,0.3)', 400);
+            window._combatVfx.impact(playerEl, _lastEnemyDmgType || 'slashing', {});
+            const dtFlash = (typeof VFX_PROFILES !== 'undefined' && VFX_PROFILES[_lastEnemyDmgType]?.flashColor) || 'rgba(255,60,30,0.3)';
+            window._combatVfx.flash(dtFlash, 400);
         } else {
             _showViewportFlash();
         }
