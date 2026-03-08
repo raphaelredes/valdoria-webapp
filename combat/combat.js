@@ -2283,7 +2283,9 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
     };
 
     try {
-        const canvasSize = dieCount >= 5 ? 350 : dieCount >= 4 ? 320 : dieCount >= 3 ? 280 : dieCount >= 2 ? 220 : 140;
+        const canvasW = dieCount >= 5 ? 350 : dieCount >= 4 ? 320 : dieCount >= 3 ? 280 : dieCount >= 2 ? 220 : 140;
+        const canvasH = dieCount >= 5 ? 220 : dieCount >= 4 ? 210 : dieCount >= 3 ? 200 : dieCount >= 2 ? 180 : 140;
+        const canvasSize = Math.max(canvasW, canvasH);
         _dmgDice3d = new Dice3D(canvas, {
             size: canvasSize, dieType: dieType, duration: DMG_ROLL_MS,
             particlesContainer: particles
