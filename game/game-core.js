@@ -277,6 +277,17 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             if (resp.status === 401) {
                 _clog(`API ${endpoint} → 401 SESSION EXPIRED`);
                 console.error('[GAME] Session expired (401) for', endpoint);
+                // Auto-close and notify bot to show menu (user doesn't need to do anything)
+                try {
+                    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.sendData) {
+                        Telegram.WebApp.sendData(JSON.stringify({
+                            action: 'webapp_error_close',
+                            webapp: 'GAME',
+                            reason: 'session_expired',
+                        }));
+                        return null; // sendData auto-closes
+                    }
+                } catch (e) { console.warn('[GAME] sendData failed on 401:', e); }
                 showError('Sessão expirada. Feche e toque em JOGAR novamente.');
                 return null;
             }
@@ -443,7 +454,11 @@ async function doAction(callbackData) {
     const data = await apiCall('/api/game/action', { cb: callbackData });
     if (!data) { hideLocationTransition(); return; }
 
-    if (data.error === 'no_response') { hideLocationTransition(); return; }
+    if (data.error === 'no_response') {
+        hideLocationTransition();
+        if (typeof showToast === 'function') showToast('Ação não processada. Tente novamente.', 3000);
+        return;
+    }
 
     // Server says to close WebApp (e.g. main_menu action)
     // Server says to close WebApp (e.g. main_menu action) — already processed, just close
