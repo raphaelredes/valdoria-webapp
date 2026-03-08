@@ -17,7 +17,7 @@ const DEBOUNCE_MS = 200;
 const RETRY_MAX = 4;
 const RETRY_BASE_MS = 1000;
 const FETCH_TIMEOUT_MS = 12000; // 12s per fetch attempt (AbortController)
-const HEALTH_TIMEOUT_MS = 8000; // 8s for health check (ngrok can be slow)
+const HEALTH_TIMEOUT_MS = 8000; // 8s for health check
 const HEALTH_RETRIES = 3;       // retry health check up to 3 times
 const HEALTH_RETRY_MS = 1500;   // 1.5s between health retries
 const LOADING_TIMEOUT_MS = 25000; // 25s max loading screen before auto-error
@@ -198,7 +198,7 @@ async function checkHealth() {
             const t0 = Date.now();
             const resp = await fetch(url, {
                 method: 'GET',
-                headers: { 'ngrok-skip-browser-warning': '1' },
+                headers: {},
                 signal: controller.signal,
             });
             clearTimeout(tid);
@@ -243,7 +243,6 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
     if (window.Telegram?.WebApp?.initData) {
         headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
     }
-    headers['ngrok-skip-browser-warning'] = '1';
     // Idempotency key for mutating endpoints — generated ONCE, shared across retries
     if (endpoint.includes('/action') || endpoint.includes('/text') || endpoint.includes('/transition')) {
         headers['X-Idempotency-Key'] = crypto.randomUUID();
@@ -566,8 +565,7 @@ function _flushLogs() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': '1',
-        },
+},
         body: JSON.stringify({ entries }),
     }).catch(() => { /* fire and forget */ });
 }

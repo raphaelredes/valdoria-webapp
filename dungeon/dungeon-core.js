@@ -163,7 +163,6 @@ function sendAction(action, nodeId) {
 
     const h = { 'Content-Type': 'application/json' };
     if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
-    h['ngrok-skip-browser-warning'] = '1';
 
     fetchT(S.api + '/api/dungeon/action', {
         method: 'POST', headers: h,
@@ -201,7 +200,6 @@ function handleRetreat() {
 async function _transitionToGame() {
     const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token };
     if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
-    h['ngrok-skip-browser-warning'] = '1';
     h['X-Idempotency-Key'] = crypto.randomUUID();
     try {
         const r = await fetchT(S.api + '/api/webapp/transition', {

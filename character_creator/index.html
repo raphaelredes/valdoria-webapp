@@ -2397,7 +2397,7 @@
             // Fetch from API
             try {
                 const resp = await fetch(`${apiBase}/api/character/l1-skills?class=${sel.classKey}`, {
-                    headers: { 'ngrok-skip-browser-warning': '1' },
+                    headers: {},
                 });
                 if (!resp.ok) { finishClassScreen(); return; }
                 const data = await resp.json();
@@ -3065,7 +3065,6 @@
                         'Authorization': `Bearer ${token}`
                     };
                     if (window.Telegram?.WebApp?.initData) { _ch['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
-                    _ch['ngrok-skip-browser-warning'] = '1';
                     _ch['X-Idempotency-Key'] = crypto.randomUUID();
                     const resp = await fetch(`${apiBase}/api/character/apply`, {
                         method: 'POST',

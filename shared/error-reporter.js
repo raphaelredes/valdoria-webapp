@@ -465,8 +465,7 @@ var ValdoriaErrors = (function () {
         var rh = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + _cfg.token,
-            'ngrok-skip-browser-warning': '1',
-        };
+};
         if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
             rh['X-Telegram-Init-Data'] = window.Telegram.WebApp.initData;
         }
@@ -541,8 +540,7 @@ var ValdoriaErrors = (function () {
                 var fh = {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + _cfg.token,
-                    'ngrok-skip-browser-warning': '1',
-                };
+};
                 if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
                     fh['X-Telegram-Init-Data'] = window.Telegram.WebApp.initData;
                 }

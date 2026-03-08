@@ -131,6 +131,10 @@
             position: absolute;
             transform-origin: 0 0;
             will-change: transform;
+            transition: transform 0.25s ease;
+        }
+        #map-wrapper.panning {
+            transition: none;
         }
 
         #map-svg {
@@ -441,6 +445,11 @@
 
         .road-path.active {
             stroke: #a08050;
+            stroke-dasharray: 8 5;
+            animation: antMarch 0.8s linear infinite;
+        }
+        @keyframes antMarch {
+            to { stroke-dashoffset: -13; }
         }
 
         .terrain-illust {
@@ -765,6 +774,70 @@
             transform-box: fill-box;
         }
 
+        /* ═══ BIOME LEGEND (expanded) ═══ */
+        #legend-biomes {
+            display: none;
+            position: absolute;
+            bottom: 28px;
+            left: 8px;
+            background: rgba(42, 36, 32, 0.94);
+            border: 1px solid rgba(112, 66, 20, 0.25);
+            border-radius: 3px;
+            padding: 6px 10px;
+            font-size: 10px;
+            color: #8a7060;
+            z-index: 41;
+            font-family: 'MedievalSharp', serif;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+        }
+        #legend-biomes.open { display: flex; flex-wrap: wrap; gap: 4px 10px; max-width: 200px; }
+        .legend-toggle { cursor: pointer; }
+
+        /* ═══ OFF-SCREEN INDICATOR ═══ */
+        #offscreen-indicator {
+            position: absolute;
+            z-index: 35;
+            pointer-events: none;
+            display: none;
+            font-size: 14px;
+            color: #c4953a;
+            text-shadow: 0 0 4px rgba(0,0,0,0.8);
+            transition: left 0.3s ease, top 0.3s ease;
+        }
+        #offscreen-indicator .osi-arrow {
+            font-size: 18px;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+        }
+        #offscreen-indicator .osi-label {
+            font-size: 10px;
+            font-family: 'Cinzel', serif;
+            color: #c4953a;
+            opacity: 0.8;
+            white-space: nowrap;
+        }
+
+        /* ═══ HOVER TOOLTIP ═══ */
+        #map-tooltip {
+            position: absolute;
+            z-index: 45;
+            pointer-events: none;
+            display: none;
+            background: rgba(42, 36, 32, 0.94);
+            border: 1px solid rgba(112, 66, 20, 0.4);
+            border-radius: 3px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: #d4c8b0;
+            font-family: 'Cinzel', serif;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        #map-tooltip .tt-dist {
+            color: #8a7060;
+            font-size: 10px;
+            margin-left: 4px;
+        }
+
         /* ═══ FONT PICKER ═══ */
         #font-picker-btn {
             position: absolute;
@@ -982,17 +1055,21 @@
         <div id="compass-overlay">
             <svg id="compass-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"></svg>
         </div>
+        <div id="offscreen-indicator"><span class="osi-arrow"></span><br><span class="osi-label"></span></div>
+        <div id="map-tooltip"><span class="tt-name"></span><span class="tt-dist"></span></div>
         <div id="current-loc-badge">
             <span class="badge-icon" id="badge-icon"></span>
             <span class="badge-name" id="badge-name"></span>
             <span class="badge-info" id="badge-info"></span>
         </div>
-        <div id="legend">
+        <div id="legend" onclick="toggleLegendExpand()">
             <span class="legend-item"><span class="legend-dot" style="background:#8a6a3a"></span> Atual</span>
             <span class="legend-item"><span class="legend-dot" style="background:#5a4830"></span> Explorado</span>
             <span class="legend-item"><span class="legend-dot" style="background:#4a3a28;opacity:0.5"></span> Mapeado</span>
             <span class="legend-item"><span class="legend-dot" style="background:#3a2810;opacity:0.3"></span> Incognito</span>
+            <span class="legend-toggle" style="color:#8a7060;font-size:9px;cursor:pointer">▼</span>
         </div>
+        <div id="legend-biomes"></div>
         <!-- Font Picker -->
         <button type="button" id="font-picker-btn" onclick="toggleFontPicker()" title="Fonte">Aa</button>
         <div id="font-picker-dropdown">

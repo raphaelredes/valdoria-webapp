@@ -609,7 +609,6 @@ async function transitionToArena() {
     };
     const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${S.token}` };
     if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
-    _th['ngrok-skip-browser-warning'] = '1';
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     // Retry transition up to 2 times (tunnel might be reconnecting)
@@ -657,7 +656,6 @@ async function transitionToInventory() {
     };
     const _th = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${S.token}` };
     if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
-    _th['ngrok-skip-browser-warning'] = '1';
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -2287,7 +2285,6 @@ function finishExploration(reason) {
 async function _transitionToGameFromExplore(payload) {
     const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token };
     if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
-    h['ngrok-skip-browser-warning'] = '1';
     h['X-Idempotency-Key'] = crypto.randomUUID();
     for (let attempt = 0; attempt < 3; attempt++) {
         try {
@@ -2311,7 +2308,6 @@ async function _transitionToGameFromExplore(payload) {
 async function _transitionToNavigateFromExplore(payload) {
     const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token };
     if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
-    h['ngrok-skip-browser-warning'] = '1';
     h['X-Idempotency-Key'] = crypto.randomUUID();
     for (let attempt = 0; attempt < 3; attempt++) {
         try {
@@ -2377,7 +2373,7 @@ async function _exploreHealthCheck() {
             const tid = setTimeout(() => ac.abort(), _EXPLORE_HEALTH_TIMEOUT);
             const resp = await fetch(url, {
                 method: 'GET',
-                headers: { 'ngrok-skip-browser-warning': '1' },
+                headers: {},
                 signal: ac.signal,
             });
             clearTimeout(tid);
@@ -2470,7 +2466,6 @@ async function initAsync() {
             console.log('[EXPLORE] Fetching state from API:', url);
             const _sh = { 'Authorization': `Bearer ${S.token}` };
             if (window.Telegram?.WebApp?.initData) { _sh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
-            _sh['ngrok-skip-browser-warning'] = '1';
             const resp = await fetchT(url, {
                 method: 'GET',
                 headers: _sh

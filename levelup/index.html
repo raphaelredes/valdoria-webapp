@@ -914,7 +914,6 @@
         async function _levelupTransitionBack() {
             const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
             if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
-            h['ngrok-skip-browser-warning'] = '1';
             h['X-Idempotency-Key'] = crypto.randomUUID();
             try {
                 const r = await fetchT(apiFallback + '/api/webapp/transition', {
@@ -1744,7 +1743,6 @@
                         'Authorization': 'Bearer ' + token
                     };
                     if (window.Telegram?.WebApp?.initData) { _lh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
-                    _lh['ngrok-skip-browser-warning'] = '1';
                     _lh['X-Idempotency-Key'] = crypto.randomUUID();
                     fetchT(apiFallback + '/api/levelup/apply', {
                         method: 'POST',

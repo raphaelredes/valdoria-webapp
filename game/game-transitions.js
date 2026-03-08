@@ -126,7 +126,6 @@ async function requestTransition(toApp, payload = {}) {
     if (window.Telegram?.WebApp?.initData) {
         _headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
     }
-    _headers['ngrok-skip-browser-warning'] = '1';
     _headers['X-Idempotency-Key'] = crypto.randomUUID();
     try {
         const controller = new AbortController();
