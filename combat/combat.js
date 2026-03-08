@@ -663,6 +663,7 @@ function _renderArenaInner(s) {
     // Immersion features: HP bar animation + player shake detection
     _animateHpBars(s);
     _checkPlayerDamage(s);
+    _checkStatusChanges(s);
 
     // Auto-expand: ONLY the active-turn entity (never dead, never all enemies)
     // On player turn: enemies stay collapsed (tap to expand) — saves ~160px
@@ -1710,10 +1711,14 @@ function _showTurnBanner(text, type) {
     requestAnimationFrame(() => {
         requestAnimationFrame(() => el.classList.add('visible'));
     });
+    // Haptic on turn change — distinct per turn type
+    if (type === 'player') haptic('medium');
+    else if (type === 'enemy') haptic('light');
+    else if (type === 'ally') hapticSelect();
     setTimeout(() => {
         el.classList.remove('visible');
         setTimeout(() => el.remove(), 400);
-    }, 1000);
+    }, 1400);
 }
 
 // ─── COMBO STREAK COUNTER (P2-G) ───
@@ -2433,13 +2438,19 @@ function _initDiceEffect(lr) {
             overlay.style.display = 'none';
             canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
             if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-            // VFX: heal particles on player + narration + heal float + flash
+            // VFX: heal particles + narration OR buff particles + narration
             if (isHeal) {
                 const _pEl = document.querySelector('.entity.player');
                 if (window._combatVfx && _pEl) window._combatVfx.heal(_pEl);
                 showNarration(_pick(_NARR_HEAL), 'heal');
                 if (lr.d > 0) _showHealFloat(lr.d, '.entity.player');
                 _showHealFlash();
+            } else {
+                // Util / self-buff — golden buff VFX + narration
+                const _pEl = document.querySelector('.entity.player');
+                if (window._combatVfx && _pEl) window._combatVfx.buff(_pEl);
+                showNarration(_pick(_NARR_BUFF).replace('{name}', lr.sn || 'efeito'), '');
+                haptic('medium');
             }
         };
 
@@ -2761,6 +2772,13 @@ const _NARR_HEAL = [
     'Músculos se regeneram com calor reconfortante.',
     'O brilho da cura dissipa a exaustão.',
 ];
+const _NARR_BUFF = [
+    '{name} ativado — poder reforçado!',
+    'Uma aura dourada envolve o corpo — {name}!',
+    '{name} concedido — prepare-se para a batalha!',
+    'Energia mágica se concentra — {name}!',
+    'O poder de {name} flui pelas veias!',
+];
 // Enemy attack narrations (used during enemy turns)
 const _NARR_ENEMY_HIT = [
     'O golpe acerta em cheio!',
@@ -2898,6 +2916,37 @@ function _checkPlayerDamage(state) {
         _showHealFlash();
     }
     _prevPlayerHp = curHp;
+}
+
+// ─── STATUS CHANGE DETECTION — VFX on buff/debuff apply/remove ───
+function _checkStatusChanges(state) {
+    const vfx = window._combatVfx;
+    if (!vfx) return;
+    const entities = [];
+    if (state.p) entities.push({ key: 'player', se: state.p.se || [], sel: '.entity.player' });
+    (state.e || []).forEach((e, i) => entities.push({ key: `e${i}`, se: e.se || [], sel: `.entity.enemy[data-enemy-idx="${i}"]` }));
+    (state.a || []).forEach((a, i) => entities.push({ key: `a${i}`, se: a.se || [], sel: `.entity.ally:nth-child(${i + 2})` }));
+
+    for (const ent of entities) {
+        const prev = _prevStatusState.get(ent.key) || [];
+        const prevSet = new Set(prev);
+
+        // New statuses added
+        for (const s of ent.se) {
+            if (!prevSet.has(s)) {
+                const el = document.querySelector(ent.sel);
+                if (el) {
+                    if (STATUS_BUFFS.has(s)) {
+                        vfx.buff(el);
+                    } else {
+                        vfx.debuff(el);
+                    }
+                }
+                break; // One VFX per entity per tick to avoid spam
+            }
+        }
+        _prevStatusState.set(ent.key, [...ent.se]);
+    }
 }
 
 function _showViewportFlash() {
