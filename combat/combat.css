@@ -510,6 +510,52 @@ body {
     0% { background-color: rgba(229,57,53,0.5); box-shadow: 0 0 16px rgba(229,57,53,0.4); }
     100% { background-color: transparent; box-shadow: none; }
 }
+/* Damage-type colored flashes */
+.entity.dmg-flash-fire { animation: dmgFlashFire 0.4s ease-out; }
+@keyframes dmgFlashFire {
+    0% { background-color: rgba(255,96,32,0.5); box-shadow: 0 0 16px rgba(255,96,32,0.4); }
+    100% { background-color: transparent; box-shadow: none; }
+}
+.entity.dmg-flash-cold { animation: dmgFlashCold 0.4s ease-out; }
+@keyframes dmgFlashCold {
+    0% { background-color: rgba(80,160,255,0.45); box-shadow: 0 0 16px rgba(80,160,255,0.35); }
+    100% { background-color: transparent; box-shadow: none; }
+}
+.entity.dmg-flash-lightning { animation: dmgFlashLightning 0.4s ease-out; }
+@keyframes dmgFlashLightning {
+    0% { background-color: rgba(255,224,64,0.5); box-shadow: 0 0 20px rgba(255,224,64,0.5); }
+    100% { background-color: transparent; box-shadow: none; }
+}
+.entity.dmg-flash-necrotic { animation: dmgFlashNecrotic 0.4s ease-out; }
+@keyframes dmgFlashNecrotic {
+    0% { background-color: rgba(144,64,192,0.45); box-shadow: 0 0 16px rgba(144,64,192,0.35); }
+    100% { background-color: transparent; box-shadow: none; }
+}
+.entity.dmg-flash-radiant { animation: dmgFlashRadiant 0.4s ease-out; }
+@keyframes dmgFlashRadiant {
+    0% { background-color: rgba(255,224,128,0.5); box-shadow: 0 0 20px rgba(255,224,128,0.45); }
+    100% { background-color: transparent; box-shadow: none; }
+}
+.entity.dmg-flash-poison { animation: dmgFlashPoison 0.4s ease-out; }
+@keyframes dmgFlashPoison {
+    0% { background-color: rgba(96,192,64,0.45); box-shadow: 0 0 16px rgba(96,192,64,0.35); }
+    100% { background-color: transparent; box-shadow: none; }
+}
+.entity.dmg-flash-acid { animation: dmgFlashAcid 0.4s ease-out; }
+@keyframes dmgFlashAcid {
+    0% { background-color: rgba(96,208,64,0.5); box-shadow: 0 0 16px rgba(96,208,64,0.4); }
+    100% { background-color: transparent; box-shadow: none; }
+}
+.entity.dmg-flash-psychic { animation: dmgFlashPsychic 0.4s ease-out; }
+@keyframes dmgFlashPsychic {
+    0% { background-color: rgba(200,100,220,0.45); box-shadow: 0 0 16px rgba(200,100,220,0.35); }
+    100% { background-color: transparent; box-shadow: none; }
+}
+.entity.dmg-flash-thunder { animation: dmgFlashThunder 0.4s ease-out; }
+@keyframes dmgFlashThunder {
+    0% { background-color: rgba(100,140,220,0.5); box-shadow: 0 0 18px rgba(100,140,220,0.4); }
+    100% { background-color: transparent; box-shadow: none; }
+}
 .dice-row {
     display: flex;
     justify-content: center;
@@ -1008,12 +1054,16 @@ body {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.6);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
     z-index: 200;
     flex-direction: column;
     justify-content: flex-end;
+    opacity: 0;
+    transition: opacity 0.25s ease;
 }
-.skill-overlay.active, .target-overlay.active { display: flex; }
+.skill-overlay.active, .target-overlay.active { display: flex; opacity: 1; }
 .skill-panel, .target-panel {
     background: var(--v-bg);
     border-top: 1px solid var(--v-border-gold);
@@ -1021,6 +1071,12 @@ body {
     padding: 12px 16px max(12px, env(safe-area-inset-bottom)) 16px;
     max-height: 55vh;
     overflow-y: auto;
+    transform: translateY(100%);
+    animation: panelSlideUp 0.3s ease-out forwards;
+}
+@keyframes panelSlideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
 }
 .skill-panel-title {
     font-size: 14px;
@@ -1194,8 +1250,13 @@ body {
 
 /* ─── FADE TRANSITION ─── */
 #app { opacity: 1; }
-#app.fade-in { animation: fadeIn 0.2s ease-out; }
-@keyframes fadeIn { from { opacity: 0.4; } to { opacity: 1; } }
+#app.fade-in { animation: fadeIn 0.25s ease-out; }
+@keyframes fadeIn { from { opacity: 0.3; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+#app.phase-transition { animation: phaseSlide 0.3s ease-out; }
+@keyframes phaseSlide {
+    from { opacity: 0.2; transform: translateY(6px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 /* ─── RESOLUTION SCREEN ─── */
 .resolution-screen {
@@ -1332,13 +1393,19 @@ body {
     opacity: 0;
     transition: opacity 0.4s ease;
     letter-spacing: 0.3px;
-    padding: 0 10px;
+    padding: 4px 14px;
+    background: rgba(42,36,32,0.7);
+    border-radius: 8px;
+    border: 1px solid rgba(196,149,58,0.15);
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
 }
 .dice-narration.visible { opacity: 1; }
-.dice-narration.crit    { color: #ff9800; font-style: normal; font-weight: 600; }
-.dice-narration.nat1    { color: var(--v-danger, #e53935); }
-.dice-narration.heal    { color: #4a8; font-style: normal; font-weight: 600; }
-.dice-narration.miss    { color: var(--v-text-dim, #8a7a68); }
+.dice-narration.crit    { color: #ff9800; font-style: normal; font-weight: 600; border-color: rgba(255,152,0,0.3); text-shadow: 0 0 8px rgba(255,152,0,0.3); }
+.dice-narration.nat1    { color: var(--v-danger, #e53935); border-color: rgba(229,57,53,0.25); }
+.dice-narration.heal    { color: #4a8; font-style: normal; font-weight: 600; border-color: rgba(68,170,136,0.25); }
+.dice-narration.miss    { color: var(--v-text-dim, #8a7a68); border-color: rgba(74,56,40,0.2); }
 
 /* ─── FEATURE 9: POSITION BADGES ─── */
 .pos-badge {
@@ -1436,6 +1503,17 @@ body {
     font-size: 32px;
     color: #66bb6a !important;
     text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 16px rgba(102,187,106,0.6);
+}
+.damage-float.miss {
+    font-size: 22px;
+    color: var(--v-text-dim, #8a7a68) !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+    animation: damageFloatMiss 1s ease-out forwards;
+}
+@keyframes damageFloatMiss {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(0.6); }
+    20% { transform: translateX(-50%) translateY(-10px) scale(1.1); opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-50px) scale(0.7); opacity: 0; }
 }
 @keyframes damageFloat {
     0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(0.5); }
@@ -1565,17 +1643,18 @@ body {
     75% { content: '...'; }
 }
 
-/* ─── PHASE TRANSITION FADE ─── */
+/* ─── PHASE TRANSITION ─── */
 #app.phase-fade-out {
     opacity: 0;
-    transition: opacity 200ms ease-out;
+    transform: scale(0.97) translateY(-4px);
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
 }
 #app.phase-fade-in {
-    animation: phaseFadeIn 200ms ease-in;
+    animation: phaseFadeIn 300ms ease-out;
 }
 @keyframes phaseFadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% { opacity: 0; transform: scale(0.97) translateY(6px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* ─── DODGE FLASH (miss) ─── */

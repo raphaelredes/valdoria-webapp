@@ -960,6 +960,7 @@ function startPolling() {
                                 dodgeTarget.classList.add('dodge-flash');
                                 setTimeout(() => dodgeTarget.classList.remove('dodge-flash'), 400);
                             }
+                            _showMissFloat(_isAllyTurn ? '.entity.enemy' : '.entity.player');
                             if (window._combatVfx) {
                                 const fromEl = _isAllyTurn
                                     ? (document.querySelector('.entity.ally') || document.querySelector('.entity.player'))
@@ -1836,6 +1837,26 @@ function _showAnticipation(text) {
     }, 350);
 }
 
+// ─── DAMAGE-TYPE FLASH CLASS HELPER ───
+const _DMG_FLASH_TYPES = new Set(['fire','cold','lightning','necrotic','radiant','poison','acid','psychic','thunder']);
+function _dmgFlashClass(dt) {
+    return _DMG_FLASH_TYPES.has(dt) ? `dmg-flash-${dt}` : 'dmg-flash';
+}
+
+// ─── FLOATING MISS INDICATOR ───
+function _showMissFloat(targetSelector) {
+    const target = document.querySelector(targetSelector || '.entity.enemy');
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'damage-float miss';
+    el.textContent = 'Esquivou!';
+    el.style.left = (rect.left + rect.width / 2) + 'px';
+    el.style.top = rect.top + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+}
+
 // ─── FLOATING DAMAGE NUMBER ───
 function _showDamageFloat(damage, damageType, targetSelector, isCrit) {
     const target = document.querySelector(targetSelector || '.entity.enemy');
@@ -2170,6 +2191,7 @@ function _initDiceAttackOverlay(lr) {
                 if (isMiss) {
                     const dodgeTarget = document.querySelector('.entity.enemy');
                     if (dodgeTarget) { dodgeTarget.classList.add('dodge-flash'); setTimeout(() => dodgeTarget.classList.remove('dodge-flash'), 400); }
+                    _showMissFloat('.entity.enemy');
                     if (window._combatVfx) {
                         const _pEl = document.querySelector('.entity.player');
                         if (_pEl && dodgeTarget) window._combatVfx.miss(_pEl, dodgeTarget, lr.dt || 'slashing');
@@ -2386,8 +2408,9 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
         for (let i = 0; i < hitCount && i < enemies.length; i++) {
             const delay = isAoe ? i * 100 : 0;
             setTimeout(() => {
-                enemies[i].classList.add('dmg-flash');
-                setTimeout(() => enemies[i].classList.remove('dmg-flash'), 400);
+                const flashCls = _dmgFlashClass(lr.dt);
+                enemies[i].classList.add(flashCls);
+                setTimeout(() => enemies[i].classList.remove(flashCls), 400);
                 // Flash the HP bar red on damage
                 const hpBar = enemies[i].querySelector('.hp-mini');
                 if (hpBar) { hpBar.classList.add('dmg-taken'); setTimeout(() => hpBar.classList.remove('dmg-taken'), 500); }
@@ -3042,6 +3065,10 @@ function _checkPlayerDamage(state) {
             void playerEl.offsetWidth;
             playerEl.classList.add('dmg-shake');
             setTimeout(() => playerEl.classList.remove('dmg-shake'), 500);
+            // Damage-type colored flash on player
+            const pFlashCls = _dmgFlashClass(_lastEnemyDmgType);
+            playerEl.classList.add(pFlashCls);
+            setTimeout(() => playerEl.classList.remove(pFlashCls), 400);
             haptic('heavy');
             sfxPlayerHit();
 
