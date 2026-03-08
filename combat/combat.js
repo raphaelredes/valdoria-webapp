@@ -1574,6 +1574,10 @@ function _playCinematicResult(result, actionType) {
             setTimeout(() => {
                 const enemyCards = document.querySelectorAll('.entity.enemy');
                 enemyCards.forEach(card => card.classList.add('death-anim'));
+                // VFX: elemental dissolution on kill
+                if (window._combatVfx) {
+                    enemyCards.forEach(card => window._combatVfx.kill(card, result.lr.dt || 'slashing'));
+                }
             }, baseDelay);
         }
 
@@ -1903,6 +1907,11 @@ function _initDiceAttackOverlay(lr) {
                     showNarration(_pick(_NARR_MISS), 'miss');
                     const dodgeTarget = document.querySelector('.entity.enemy');
                     if (dodgeTarget) { dodgeTarget.classList.add('dodge-flash'); setTimeout(() => dodgeTarget.classList.remove('dodge-flash'), 400); }
+                    // VFX: projectile veers off on miss
+                    if (window._combatVfx) {
+                        const _pEl = document.querySelector('.entity.player');
+                        if (_pEl && dodgeTarget) window._combatVfx.miss(_pEl, dodgeTarget, lr.dt || 'slashing');
+                    }
                     _hitStreak = 0;
                 } else {
                     const total = lr.total || lr.r;
@@ -1912,6 +1921,13 @@ function _initDiceAttackOverlay(lr) {
                     haptic('medium'); sfxHit();
                     _hitStreak++; if (_hitStreak >= 2) _showComboCounter(_hitStreak);
                 }
+            }
+
+            // VFX: Launch projectile on hit (or crit) — flies during 800ms hold
+            if (!isMiss && lr.d > 0 && window._combatVfx) {
+                const _pEl = document.querySelector('.entity.player');
+                const _eEl = document.querySelector('.entity.enemy');
+                if (_pEl && _eEl) window._combatVfx.projectile(_pEl, _eEl, lr.dt || 'slashing', { crit: !!isCrit });
             }
 
             // Miss/no damage — hold result then close
@@ -1981,8 +1997,21 @@ function _initDiceSave(lr) {
                 }
             }
 
+            // VFX: projectile on save that deals damage (failed or partial)
+            if (!(lr.saved && !lr.half) && lr.d > 0 && window._combatVfx) {
+                const _pEl = document.querySelector('.entity.player');
+                const _eEl = document.querySelector('.entity.enemy');
+                if (_pEl && _eEl) window._combatVfx.projectile(_pEl, _eEl, lr.dt || 'fire', { crit: false });
+            }
+
             // Full resist, no damage — hold then close
             if (lr.saved && !lr.half) {
+                // VFX: miss effect on full resist
+                if (window._combatVfx) {
+                    const _pEl = document.querySelector('.entity.player');
+                    const _eEl = document.querySelector('.entity.enemy');
+                    if (_pEl && _eEl) window._combatVfx.miss(_pEl, _eEl, lr.dt || 'fire');
+                }
                 setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishAll; } }, 500);
                 setTimeout(finishAll, 1200);
                 return;
@@ -2023,6 +2052,13 @@ function _initDiceDamageOnly(lr) {
             ? (lr.sn || 'AOE') + ' — ' + lr.hits + ' alvos'
             : (lr.sn || 'Acerto automatico!');
         if (label3d) { label3d.textContent = infoText; label3d.className = 'dmg-dice3d-label rolling'; }
+
+        // VFX: projectile for auto_hit/aoe spells
+        if (window._combatVfx) {
+            const _pEl = document.querySelector('.entity.player');
+            const _eEl = document.querySelector('.entity.enemy');
+            if (_pEl && _eEl) window._combatVfx.projectile(_pEl, _eEl, lr.dt || 'force', { crit: false });
+        }
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         haptic('medium');
 
@@ -2081,7 +2117,12 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
         if (app) { app.classList.add('hit-stop'); setTimeout(() => app.classList.remove('hit-stop'), 120); }
         const enemies = document.querySelectorAll('.entity.enemy');
         if (enemies.length > 0) { enemies[0].classList.add('dmg-flash'); setTimeout(() => enemies[0].classList.remove('dmg-flash'), 400); }
-        spawnParticles(lr.crit, lr.dt || 'slashing');
+        // VFX impact replaces legacy particles
+        if (window._combatVfx && enemies.length > 0) {
+            window._combatVfx.impact(enemies[0], lr.dt || 'slashing', { crit: !!lr.crit });
+        } else {
+            spawnParticles(lr.crit, lr.dt || 'slashing');
+        }
         if (lr.kill) {
             const killName = (currentState?.e && currentState.e[0]?.n) || 'O inimigo';
             showNarration(_pick(_NARR_KILL).replace('{name}', killName), 'crit');
@@ -2236,6 +2277,12 @@ function _initDiceEffect(lr) {
             overlay.style.display = 'none';
             canvas.classList.remove('multi');
             if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+            // VFX: heal particles on player + narration
+            if (isHeal && window._combatVfx) {
+                const _pEl = document.querySelector('.entity.player');
+                if (_pEl) window._combatVfx.heal(_pEl);
+                showNarration(_pick(_NARR_HEAL), 'heal');
+            }
         };
 
         try {
@@ -2501,6 +2548,13 @@ const _NARR_MISS = [
     'Rápido demais — o golpe não conecta.',
     'A defesa do inimigo resiste.',
     'Sem efeito — o inimigo esquiva com destreza.',
+    'O golpe resvala na defesa sem causar dano.',
+    'Quase! Mas o inimigo recua a tempo.',
+    'A lâmina corta apenas o ar.',
+    'O escudo absorve o impacto por completo.',
+    'Reflexos ágeis salvam o oponente.',
+    'O ataque pega de raspão — sem dano real.',
+    'A distância era grande demais para conectar.',
 ];
 // P1-E: Kill narrations with enemy name template ({name} is replaced at call site)
 const _NARR_KILL = [
@@ -2509,6 +2563,24 @@ const _NARR_KILL = [
     'O golpe final abate {name}.',
     'Derrota inevitável — {name} sucumbe.',
     '{name} não se levanta mais.',
+    'O último suspiro de {name} ecoa no campo.',
+    '{name} desmorona sob o peso da derrota.',
+    'Vitória! {name} é eliminado.',
+    'Com um golpe decisivo, {name} é vencido.',
+    '{name} cai de joelhos e não se ergue mais.',
+    'O combate termina — {name} jaz imóvel.',
+    '{name} sucumbe ao golpe final sem resistência.',
+];
+// Heal narrations (shown when player or ally uses healing)
+const _NARR_HEAL = [
+    'Energia curativa flui e fecha ferimentos.',
+    'Luz restauradora envolve o corpo ferido.',
+    'As feridas se fecham com um brilho quente.',
+    'Vigor renovado percorre as veias.',
+    'A dor recua diante do poder restaurador.',
+    'Cura divina acalma corpo e espírito.',
+    'Músculos se regeneram com calor reconfortante.',
+    'O brilho da cura dissipa a exaustão.',
 ];
 
 function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -2582,8 +2654,13 @@ function _checkPlayerDamage(state) {
             _showDamageFloat(dmgTaken, null, '.entity.player');
         }
 
-        // Viewport damage flash (red overlay)
-        _showViewportFlash();
+        // VFX: impact on player + screen flash
+        if (window._combatVfx) {
+            window._combatVfx.impact(playerEl, 'slashing', {});
+            window._combatVfx.flash('rgba(255,60,30,0.3)', 400);
+        } else {
+            _showViewportFlash();
+        }
     }
     _prevPlayerHp = curHp;
 }

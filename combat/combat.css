@@ -1252,6 +1252,8 @@ body {
 .dice-narration.visible { opacity: 1; }
 .dice-narration.crit    { color: #ff9800; font-style: normal; font-weight: 600; }
 .dice-narration.nat1    { color: var(--v-danger, #e53935); }
+.dice-narration.heal    { color: #4a8; font-style: normal; font-weight: 600; }
+.dice-narration.miss    { color: var(--v-text-dim, #8a7a68); }
 
 /* ─── FEATURE 9: POSITION BADGES ─── */
 .pos-badge {
@@ -1802,4 +1804,14 @@ body {
 .conc-badge {
     color: #a78bfa;
     font-style: italic;
+}
+
+/* ─── VFX CANVAS OVERLAY ─── */
+#vfxCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 480;
 }

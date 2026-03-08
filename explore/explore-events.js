@@ -113,6 +113,7 @@ function _typewriterPage(el, pages, pageIdx, onDone) {
     const isLast = pageIdx >= pages.length - 1;
     const totalPages = pages.length;
     let i = 0;
+    let _done = false;
     el.innerHTML = '';
     const span = document.createElement('span');
     el.appendChild(span);
@@ -120,33 +121,55 @@ function _typewriterPage(el, pages, pageIdx, onDone) {
     cursor.className = 'cursor';
     el.appendChild(cursor);
 
+    // Tap-to-skip: tap narration area to complete text instantly
+    const skipTyping = () => {
+        if (_done) return;
+        _done = true;
+        clearInterval(iv);
+        span.textContent = text;
+        cursor.remove();
+        el.removeEventListener('click', skipTyping);
+        if (isLast) {
+            if (onDone) onDone();
+        } else {
+            _showPageContinue(el, pages, pageIdx, totalPages, onDone);
+        }
+    };
+    el.addEventListener('click', skipTyping);
+
     const iv = setInterval(() => {
         if (i >= text.length) {
+            if (_done) return;
+            _done = true;
             clearInterval(iv);
             cursor.remove();
+            el.removeEventListener('click', skipTyping);
             if (isLast) {
                 if (onDone) onDone();
             } else {
-                // Show page indicator + continue button
-                if (totalPages > 1) {
-                    const indicator = document.createElement('div');
-                    indicator.className = 'dm-page-indicator';
-                    indicator.textContent = `${pageIdx + 1} / ${totalPages}`;
-                    el.appendChild(indicator);
-                }
-                const contBtn = document.createElement('button');
-                contBtn.className = 'dm-continue-btn';
-                contBtn.innerHTML = '<span>Continuar…</span> <span style="font-size:16px">▸</span>';
-                contBtn.addEventListener('click', () => {
-                    _typewriterPage(el, pages, pageIdx + 1, onDone);
-                });
-                el.appendChild(contBtn);
+                _showPageContinue(el, pages, pageIdx, totalPages, onDone);
             }
             return;
         }
         span.textContent += text[i];
         i++;
     }, 20);
+}
+
+function _showPageContinue(el, pages, pageIdx, totalPages, onDone) {
+    if (totalPages > 1) {
+        const indicator = document.createElement('div');
+        indicator.className = 'dm-page-indicator';
+        indicator.textContent = `${pageIdx + 1} / ${totalPages}`;
+        el.appendChild(indicator);
+    }
+    const contBtn = document.createElement('button');
+    contBtn.className = 'dm-continue-btn';
+    contBtn.innerHTML = '<span>Continuar…</span> <span style="font-size:16px">▸</span>';
+    contBtn.addEventListener('click', () => {
+        _typewriterPage(el, pages, pageIdx + 1, onDone);
+    });
+    el.appendChild(contBtn);
 }
 
 function showChoices(poi) {

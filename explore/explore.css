@@ -270,6 +270,7 @@ body {
     letter-spacing: 1px;
 }
 .dm-narration {
+    font-size: 14px;
     font-style: italic;
     line-height: 1.6;
     color: var(--v-text, #d4c8b0);
@@ -291,6 +292,7 @@ body {
     justify-content: center;
     gap: 8px;
     padding: 10px 16px;
+    min-height: 44px;
     margin-top: 12px;
     background: linear-gradient(165deg, rgba(196,149,58,0.12) 0%, rgba(196,149,58,0.04) 100%);
     border: 1px solid rgba(196, 149, 58, 0.25);
@@ -525,11 +527,14 @@ body {
     pointer-events: all;
 }
 .outcome-text {
+    font-size: 14px;
     font-style: italic;
     line-height: 1.6;
     color: var(--v-text, #d4c8b0);
     margin-bottom: 16px;
     text-align: center;
+    max-width: 280px;
+    margin: 0 auto 16px;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }

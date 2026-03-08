@@ -481,11 +481,16 @@ function _showDiceAnimation(screen) {
     };
 
     const showResult = () => {
-        // Show formula: d20(roll) +mod = total vs DC dc
         const sign = dr.mod >= 0 ? '+' : '';
-        formulaEl.textContent = 'd20(' + dr.roll + ') ' + sign + dr.mod + ' = ' + dr.total + ' vs DC ' + dr.dc;
-
-        resultEl.textContent = dr.success ? 'Sucesso!' : 'Falha!';
+        if (dr.type === 'opposed') {
+            // Opposed roll: d20(roll) +mod = total vs Opponent: total
+            formulaEl.textContent = 'd20(' + dr.roll + ') ' + sign + dr.mod + ' = ' + dr.total + ' vs ' + (dr.opponent_name || 'Oponente') + ': ' + dr.opponent_total;
+            resultEl.textContent = dr.success ? 'Vitória!' : 'Derrota!';
+        } else {
+            // Skill check: d20(roll) +mod = total vs DC dc
+            formulaEl.textContent = 'd20(' + dr.roll + ') ' + sign + dr.mod + ' = ' + dr.total + ' vs DC ' + dr.dc;
+            resultEl.textContent = dr.success ? 'Sucesso!' : 'Falha!';
+        }
         resultEl.className = 'dice-result ' + (dr.success ? 'success' : 'failure');
 
         // Haptic feedback
