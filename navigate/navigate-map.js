@@ -203,6 +203,7 @@ function renderMap() {
     const locG = _el('g', { class: 'locations-layer' });
     renderLocationMarkers(locG, fogState);
     svg.appendChild(locG);
+    if (typeof renderDistanceRings === 'function') renderDistanceRings(svg);
     if (typeof renderBreadcrumbTrail === 'function') renderBreadcrumbTrail(svg);
     renderPlayerBanner(svg);
     renderFogWisps(svg, fogState);
@@ -471,6 +472,7 @@ function _snapToZoomLevel(dir, focalX, focalY) {
         S.panY = focalY - mapY * S.zoom;
     }
     _updateMinimap();
+    if (typeof window._zoomBtnUpdate === 'function') window._zoomBtnUpdate();
 }
 
 function _updateScaleBar() {
@@ -550,6 +552,24 @@ function setupPanZoom() {
     }, { passive: false });
     vp.addEventListener('click', e => { if (e.target === vp || e.target === wr || e.target.tagName === 'rect') closeInfoPanel(); });
     apply();
+
+    // --- Zoom +/- buttons ---
+    const btnIn = document.getElementById('btn-zoom-in');
+    const btnOut = document.getElementById('btn-zoom-out');
+    const btnRec = document.getElementById('btn-recenter');
+    function _updateZoomBtns() {
+        if (btnIn) btnIn.disabled = _zoomIdx >= ZOOM_LEVELS.length - 1;
+        if (btnOut) btnOut.disabled = _zoomIdx <= 0;
+    }
+    if (btnIn) btnIn.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(1); clamp(); apply(); _updateZoomBtns(); });
+    if (btnOut) btnOut.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(-1); clamp(); apply(); _updateZoomBtns(); });
+    if (btnRec) btnRec.addEventListener('click', e => { e.stopPropagation(); centerOnLocation(S.currentLoc); apply(); _updateMinimap(); });
+    _updateZoomBtns();
+    // Update buttons on any zoom change
+    const origSnap = _snapToZoomLevel;
+    // Patch snap to also update buttons
+    const _origSnapRef = window._snapToZoomLevel_ref;
+    window._zoomBtnUpdate = _updateZoomBtns;
 }
 
 function centerOnLocation(locId) {
@@ -687,6 +707,41 @@ function playArrivalAnimation() {
         wr.classList.remove('arrival-anim');
         wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
     }, { once: true });
+}
+
+// ===============================================================
+// DISTANCE RINGS — concentric turn-radius circles from current loc
+// ===============================================================
+
+function renderDistanceRings(svg) {
+    // Only show at zoom >= Região (index 1+)
+    if (_zoomIdx < 1) return;
+    const coords = LOCATION_COORDS[S.currentLoc];
+    if (!coords) return;
+    const { x: cx, y: cy } = hexToPixel(coords.col, coords.row);
+    const rG = _el('g', { class: 'distance-rings-layer', 'pointer-events': 'none' });
+    // Calculate radius per turn based on average hex spacing (~52px per turn)
+    const pxPerTurn = HEX_RADIUS * 2.0;
+    for (let t = 1; t <= 3; t++) {
+        const r = pxPerTurn * t;
+        const opac = 0.08 + (3 - t) * 0.03;
+        rG.appendChild(_el('circle', {
+            cx, cy, r,
+            class: 'distance-ring',
+            'stroke-opacity': opac,
+            'stroke-width': 0.6,
+            'stroke-dasharray': '4 3',
+        }));
+        // Label at top of ring
+        const lbl = _el('text', {
+            x: cx, y: cy - r - 3,
+            class: 'distance-ring-label',
+            'text-anchor': 'middle',
+        });
+        lbl.textContent = `${t} turno${t > 1 ? 's' : ''}`;
+        rG.appendChild(lbl);
+    }
+    svg.appendChild(rG);
 }
 
 function _el(tag, attrs) {

@@ -885,6 +885,207 @@
             pointer-events: none;
         }
 
+        /* ═══ ZOOM CONTROLS (right side, stacked) ═══ */
+        #zoom-controls {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 42;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            border: 1px solid rgba(112, 66, 20, 0.35);
+            background: rgba(42, 36, 32, 0.92);
+            color: #c4953a;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 1px 3px rgba(40, 30, 15, 0.3);
+            transition: opacity 0.15s;
+            font-family: 'Cinzel', serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .zoom-btn:active { opacity: 0.6; transform: scale(0.92); }
+        .zoom-btn:disabled { opacity: 0.3; pointer-events: none; }
+        .zoom-btn-recenter {
+            font-size: 14px;
+            color: #a08050;
+        }
+
+        /* ═══ DISTANCE RINGS ═══ */
+        .distance-ring {
+            fill: none;
+            stroke: #c4953a;
+            pointer-events: none;
+        }
+        .distance-ring-label {
+            font-size: 7px;
+            fill: #c4953a;
+            fill-opacity: 0.4;
+            font-family: 'Cinzel', serif;
+            pointer-events: none;
+        }
+
+        /* ═══ QUICK-LIST OVERLAY ═══ */
+        #quick-list {
+            display: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 55%;
+            background: rgba(42, 36, 32, 0.96);
+            border-top: 1px solid rgba(112, 66, 20, 0.4);
+            border-radius: 8px 8px 0 0;
+            z-index: 70;
+            overflow-y: auto;
+            padding: 0;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.5);
+            transition: transform 0.25s ease;
+        }
+        #quick-list.open { display: block; }
+        .ql-header {
+            position: sticky;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px 8px;
+            background: rgba(42, 36, 32, 0.98);
+            border-bottom: 1px solid rgba(112, 66, 20, 0.2);
+            z-index: 1;
+        }
+        .ql-title {
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            color: #c4953a;
+            font-weight: 700;
+        }
+        .ql-close {
+            background: none;
+            border: none;
+            color: #8a7060;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .ql-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(112, 66, 20, 0.1);
+            transition: background 0.1s;
+        }
+        .ql-item:active { background: rgba(112, 66, 20, 0.15); }
+        .ql-item-icon { font-size: 18px; flex-shrink: 0; }
+        .ql-item-name {
+            font-family: 'MedievalSharp', serif;
+            font-size: 14px;
+            color: #d4c8b0;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .ql-item-name.current { color: #c4953a; font-weight: 700; }
+        .ql-item-dist {
+            font-size: 11px;
+            color: #8a7060;
+            font-family: 'Cinzel', serif;
+            flex-shrink: 0;
+        }
+        .ql-item-badges {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .ql-badge {
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 2px;
+            background: rgba(112, 66, 20, 0.15);
+            color: #a08050;
+            font-family: 'Cinzel', serif;
+        }
+
+        /* ═══ LONG-PRESS PATH PREVIEW ═══ */
+        .path-preview {
+            stroke: #c4953a;
+            stroke-width: 2.5;
+            stroke-opacity: 0.35;
+            stroke-dasharray: 4 3;
+            fill: none;
+            pointer-events: none;
+        }
+
+        /* ═══ CYCLE ARROWS (info panel) ═══ */
+        .info-cycle {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+        .cycle-btn {
+            background: none;
+            border: none;
+            color: #8a7060;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: color 0.1s;
+            font-family: 'Cinzel', serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .cycle-btn:active { color: #c4953a; }
+        .cycle-btn:disabled { opacity: 0.2; pointer-events: none; }
+
+        /* ═══ GESTURE TUTORIAL OVERLAY ═══ */
+        #gesture-tutorial {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            background: rgba(10, 8, 6, 0.75);
+            pointer-events: auto;
+        }
+        #gesture-tutorial.visible { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+        .gt-hint {
+            text-align: center;
+            color: #d4c8b0;
+            font-family: 'MedievalSharp', serif;
+            font-size: 15px;
+            opacity: 0;
+            animation: gtFadeIn 0.5s ease forwards;
+        }
+        .gt-hint:nth-child(1) { animation-delay: 0.2s; }
+        .gt-hint:nth-child(2) { animation-delay: 0.7s; }
+        .gt-hint:nth-child(3) { animation-delay: 1.2s; }
+        .gt-icon { font-size: 28px; display: block; margin-bottom: 4px; }
+        .gt-text { color: #a09484; font-size: 12px; }
+        @keyframes gtFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #gesture-tutorial .gt-dismiss {
+            margin-top: 12px;
+            font-size: 11px;
+            color: #8a7060;
+            font-family: 'Cinzel', serif;
+            opacity: 0;
+            animation: gtFadeIn 0.5s ease 2s forwards;
+        }
+
         /* ═══ FONT PICKER ═══ */
         #font-picker-btn {
             position: absolute;
@@ -1103,6 +1304,12 @@
             <svg id="compass-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"></svg>
         </div>
         <div id="minimap"><svg id="minimap-svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+        <!-- Zoom controls -->
+        <div id="zoom-controls">
+            <button type="button" class="zoom-btn" id="btn-zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" class="zoom-btn zoom-btn-recenter" id="btn-recenter" aria-label="Recentrar">⊕</button>
+            <button type="button" class="zoom-btn" id="btn-zoom-out" aria-label="Zoom out">−</button>
+        </div>
         <div id="offscreen-indicator"><span class="osi-arrow"></span><br><span class="osi-label"></span></div>
         <div id="map-tooltip"><span class="tt-name"></span><span class="tt-dist"></span></div>
         <div id="current-loc-badge">
@@ -1142,6 +1349,10 @@
             <span class="info-icon" id="info-icon"></span>
             <span class="info-title" id="info-title"></span>
             <span class="info-danger" id="info-danger"></span>
+            <div class="info-cycle" id="info-cycle">
+                <button type="button" class="cycle-btn" id="cycle-prev" aria-label="Anterior">◂</button>
+                <button type="button" class="cycle-btn" id="cycle-next" aria-label="Próximo">▸</button>
+            </div>
             <button type="button" class="info-close" id="info-close" onclick="closeInfoPanel()" aria-label="Fechar">✕</button>
         </div>
         <div class="info-biome" id="info-biome"></div>
@@ -1153,10 +1364,30 @@
         <div class="info-actions" id="info-actions"></div>
     </div>
 
+    <!-- Quick-List Overlay -->
+    <div id="quick-list">
+        <div class="ql-header">
+            <span class="ql-title">📍 Locais Conhecidos</span>
+            <button type="button" class="ql-close" onclick="closeQuickList()">✕</button>
+        </div>
+        <div id="ql-items"></div>
+    </div>
+
+    <!-- Gesture Tutorial -->
+    <div id="gesture-tutorial">
+        <div class="gt-hint"><span class="gt-icon">👆</span>Tocar para info<br><span class="gt-text">Toque em um local para ver detalhes</span></div>
+        <div class="gt-hint"><span class="gt-icon">🤏</span>Pinçar para zoom<br><span class="gt-text">Use dois dedos para aproximar ou afastar</span></div>
+        <div class="gt-hint"><span class="gt-icon">☝️</span>Arrastar para mover<br><span class="gt-text">Deslize o dedo para navegar pelo mapa</span></div>
+        <div class="gt-dismiss">Toque em qualquer lugar para continuar</div>
+    </div>
+
     <!-- Bottom Bar -->
     <div id="bottom-bar">
         <button type="button" class="bar-btn bar-btn-return" id="btn-return" onclick="handleReturn()">
             Retornar a Eldoria
+        </button>
+        <button type="button" class="bar-btn" id="btn-locations" onclick="openQuickList()">
+            📍 Locais
         </button>
         <button type="button" class="bar-btn" id="btn-close" onclick="handleClose()">
             Fechar Mapa

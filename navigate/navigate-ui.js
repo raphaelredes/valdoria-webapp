@@ -19,6 +19,7 @@ function _haptic(type) {
 // ── Location tap handler ──
 function handleLocationTap(locId) {
     _haptic('tap');
+    closeQuickList();
 
     S.selectedLoc = locId;
     const locData = S.locations[locId];
@@ -256,6 +257,9 @@ function handleLocationTap(locId) {
     // Open panel
     panel.classList.add('open');
     _haptic('open');
+
+    // Update cycle buttons
+    _updateCycleButtons();
 
     // Smooth pan to selected location + highlight
     if (typeof panToLocationSmooth === 'function') panToLocationSmooth(locId);
@@ -632,10 +636,164 @@ function toggleLegendExpand() {
     }
 }
 
-// ── Init hover tooltip + off-screen indicator + swipe dismiss ──
+// ── Long-press path preview (500ms hold shows BFS path, release clears) ──
+function setupLongPress() {
+    const vp = document.getElementById('map-viewport');
+    if (!vp) return;
+    let _lpTimer = null, _lpLocId = null;
+    function _clearPreview() {
+        document.querySelectorAll('#map-svg .path-preview').forEach(p => p.remove());
+        _lpLocId = null;
+    }
+    vp.addEventListener('pointerdown', e => {
+        const loc = e.target.closest?.('.loc-node');
+        if (!loc) return;
+        const locId = loc.getAttribute('data-loc');
+        if (!locId || locId === S.currentLoc) return;
+        _lpTimer = setTimeout(() => {
+            _lpLocId = locId;
+            _showPathPreview(locId);
+            _haptic('tap');
+        }, 500);
+    });
+    vp.addEventListener('pointermove', () => { if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; } });
+    vp.addEventListener('pointerup', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearPreview(); });
+    vp.addEventListener('pointercancel', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearPreview(); });
+}
+
+function _showPathPreview(toId) {
+    const pathIds = bfsPath(S.currentLoc, toId);
+    if (!pathIds || pathIds.length < 2) return;
+    const svg = document.getElementById('map-svg');
+    for (let i = 0; i < pathIds.length - 1; i++) {
+        const aC = LOCATION_COORDS[pathIds[i]];
+        const bC = LOCATION_COORDS[pathIds[i + 1]];
+        if (!aC || !bC) continue;
+        const aP = hexToPixel(aC.col, aC.row);
+        const bP = hexToPixel(bC.col, bC.row);
+        const seed = (aC.col * 31 + aC.row * 17 + bC.col * 13 + bC.row * 7);
+        const pathD = _buildRoadPath(aP, bP, seed);
+        svg.appendChild(createSVG('path', { d: pathD, class: 'path-preview' }));
+    }
+}
+
+// ── Cycle adjacent locations (◂ ▸ arrows in info panel) ──
+function _setupCycleButtons() {
+    const prevBtn = document.getElementById('cycle-prev');
+    const nextBtn = document.getElementById('cycle-next');
+    if (!prevBtn || !nextBtn) return;
+    prevBtn.addEventListener('click', e => { e.stopPropagation(); _cycleLocation(-1); });
+    nextBtn.addEventListener('click', e => { e.stopPropagation(); _cycleLocation(1); });
+}
+
+// Build the cycleable list: neighbors of current player location (travel destinations)
+function _getCycleList() {
+    const neighbors = connectionGraph[S.currentLoc] || [];
+    const knownSet = new Set(S.knownLocs);
+    return neighbors.filter(id => knownSet.has(id));
+}
+
+function _cycleLocation(dir) {
+    const list = _getCycleList();
+    if (list.length === 0) return;
+    const curIdx = list.indexOf(S.selectedLoc);
+    let nextIdx;
+    if (curIdx === -1) {
+        nextIdx = dir > 0 ? 0 : list.length - 1;
+    } else {
+        nextIdx = (curIdx + dir + list.length) % list.length;
+    }
+    handleLocationTap(list[nextIdx]);
+    _haptic('tap');
+}
+
+function _updateCycleButtons() {
+    const prevBtn = document.getElementById('cycle-prev');
+    const nextBtn = document.getElementById('cycle-next');
+    if (!prevBtn || !nextBtn) return;
+    const list = _getCycleList();
+    const hasMultiple = list.length > 1;
+    prevBtn.disabled = !hasMultiple;
+    nextBtn.disabled = !hasMultiple;
+}
+
+// ── Quick-list of known locations ──
+function openQuickList() {
+    const ql = document.getElementById('quick-list');
+    const items = document.getElementById('ql-items');
+    if (!ql || !items) return;
+    items.innerHTML = '';
+    const discoveredSet = new Set(S.discoveredLocs || []);
+    // Build sorted list: current first, then by distance
+    const locs = S.knownLocs
+        .filter(id => LOCATION_COORDS[id])
+        .map(id => {
+            const ld = S.locations[id] || {};
+            const isExp = discoveredSet.has(id);
+            const isMapped = S.mapCoverage.has(id);
+            const dist = id === S.currentLoc ? -1 : weightedDistance(S.currentLoc, id, connectionGraph);
+            return { id, ld, isExp, isMapped, dist };
+        })
+        .sort((a, b) => {
+            if (a.id === S.currentLoc) return -1;
+            if (b.id === S.currentLoc) return 1;
+            return (a.dist < 0 ? 999 : a.dist) - (b.dist < 0 ? 999 : b.dist);
+        });
+
+    for (const loc of locs) {
+        const div = document.createElement('div');
+        div.className = 'ql-item';
+        const isCurr = loc.id === S.currentLoc;
+        const name = loc.isExp || loc.isMapped ? (loc.ld.n || loc.id) : '???';
+        const icon = loc.isExp || loc.isMapped ? (loc.ld.i || '📍') : '🌫️';
+
+        let badges = '';
+        if (isCurr) badges += '<span class="ql-badge">Aqui</span>';
+        const locQuests = (S.quests || []).filter(q => q.loc === loc.id);
+        if (locQuests.length > 0) badges += `<span class="ql-badge">📜${locQuests.length}</span>`;
+        const locDungeons = (S.dungeons || {})[loc.id] || [];
+        if (locDungeons.length > 0) badges += `<span class="ql-badge">🏰${locDungeons.length}</span>`;
+
+        div.innerHTML = `<span class="ql-item-icon">${icon}</span>` +
+            `<span class="ql-item-name${isCurr ? ' current' : ''}">${name}</span>` +
+            (badges ? `<span class="ql-item-badges">${badges}</span>` : '') +
+            (loc.dist > 0 ? `<span class="ql-item-dist">${loc.dist}🕐</span>` : '');
+        div.addEventListener('click', () => {
+            closeQuickList();
+            handleLocationTap(loc.id);
+        });
+        items.appendChild(div);
+    }
+    ql.classList.add('open');
+    closeInfoPanel();
+}
+
+function closeQuickList() {
+    const ql = document.getElementById('quick-list');
+    if (ql) ql.classList.remove('open');
+}
+
+// ── Gesture tutorial (first-visit only, auto-dismiss) ──
+function showGestureTutorial() {
+    if (localStorage.getItem('valdoria_nav_tutorial')) return;
+    const gt = document.getElementById('gesture-tutorial');
+    if (!gt) return;
+    gt.classList.add('visible');
+    // Auto-dismiss after 4s
+    const dismiss = () => {
+        gt.classList.remove('visible');
+        localStorage.setItem('valdoria_nav_tutorial', '1');
+    };
+    gt.addEventListener('click', dismiss, { once: true });
+    setTimeout(() => { if (gt.classList.contains('visible')) dismiss(); }, 4000);
+}
+
+// ── Init hover tooltip + off-screen indicator + swipe dismiss + new features ──
 function _initUIExtras() {
     setupHoverTooltip();
     setupSwipeDismiss();
+    setupLongPress();
+    _setupCycleButtons();
     const wr = document.getElementById('map-wrapper');
     if (wr) {
         const observer = new MutationObserver(_updateOffscreenIndicator);

@@ -121,6 +121,8 @@ async function initAsync() {
         setTimeout(() => {
             document.getElementById('loading').classList.add('hidden');
             if (typeof playArrivalAnimation === 'function') playArrivalAnimation();
+            // Show gesture tutorial after arrival animation
+            setTimeout(() => { if (typeof showGestureTutorial === 'function') showGestureTutorial(); }, 1500);
         }, 300);
 
     } catch (e) {
