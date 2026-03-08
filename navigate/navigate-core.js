@@ -4,6 +4,7 @@
 
 let tg = null;
 let _navSent = false;  // Double-fire guard (matches explore _finishSent pattern)
+let _navSentTimer = null;  // Auto-reset timer for _navSent (prevents stale lock)
 const STORAGE_KEY = 'valdoria_navigate_state';
 
 // Global state
@@ -117,6 +118,19 @@ async function initAsync() {
         // Init minimap
         if (typeof _initMinimap === 'function') _initMinimap();
 
+        // Reset stale _navSent on visibility change (e.g., user switches tabs and comes back)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && _navSent) {
+                console.log('[NAVIGATE] Resetting stale _navSent on visibility change');
+                _navSent = false;
+                clearTimeout(_navSentTimer);
+            }
+        });
+
+        // Auto-refresh map data when page becomes visible again (e.g., returning from explore)
+        document.addEventListener('visibilitychange', _onVisibilityRefresh);
+        window.addEventListener('pageshow', e => { if (e.persisted) _onVisibilityRefresh(); });
+
         // Hide loading screen, then play arrival animation
         setTimeout(() => {
             document.getElementById('loading').classList.add('hidden');
@@ -167,6 +181,46 @@ async function fetchPayloadFromAPI(retries = 2) {
 }
 
 function _sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// -----------------------------------------------------------
+// AUTO-REFRESH ON VISIBILITY CHANGE
+// -----------------------------------------------------------
+
+let _lastRefreshTs = Date.now();
+async function _onVisibilityRefresh() {
+    if (document.visibilityState !== 'visible') return;
+    // Only refresh if > 30s since last load (avoid rapid refires)
+    if (Date.now() - _lastRefreshTs < 30000) return;
+    _lastRefreshTs = Date.now();
+    console.log('[NAVIGATE] Refreshing map data on visibility change...');
+    try {
+        const dataB64 = await fetchPayloadFromAPI(1);
+        if (!dataB64) return;
+        const data = await decompressPayload(dataB64);
+        if (!data) return;
+        // Update state with fresh data
+        S.currentLoc = data.cl || S.currentLoc;
+        S.locations = data.lo || S.locations;
+        S.knownLocs = data.kl || Object.keys(S.locations);
+        S.discoveredLocs = data.dl || S.discoveredLocs;
+        S.charData = data.c || S.charData;
+        S.quests = data.q || S.quests;
+        S.dungeons = data.dd || S.dungeons;
+        S.canCamp = !!data.cc;
+        S.hasMap = data.hm || 0;
+        S.mapCoverage = new Set(data.mc || []);
+        // Rebuild and re-render
+        buildConnectionGraph();
+        updateHUD();
+        updateLocationBadge();
+        updateBottomBar();
+        renderMap();
+        if (typeof _initMinimap === 'function') _initMinimap();
+        console.log('[NAVIGATE] Map data refreshed successfully');
+    } catch (e) {
+        console.warn('[NAVIGATE] Auto-refresh failed:', e);
+    }
+}
 
 // -----------------------------------------------------------
 // PAYLOAD DECOMPRESSION
@@ -325,6 +379,15 @@ function finishNavigation(type, target, flags) {
         return;
     }
     _navSent = true;
+    // Auto-reset _navSent after 30s to prevent permanent lock after network timeouts
+    clearTimeout(_navSentTimer);
+    _navSentTimer = setTimeout(() => {
+        if (_navSent) {
+            console.warn('[NAVIGATE] Auto-resetting stale _navSent after 30s timeout');
+            _navSent = false;
+            _hideTravelOverlay();
+        }
+    }, 30000);
 
     // Disable all action buttons immediately
     document.querySelectorAll('.info-btn').forEach(btn => {
@@ -364,7 +427,8 @@ function _sendNavAction(type, target, flags) {
     if (!S.api) {
         showError('Erro: API nao configurada. Feche e reabra o mapa.');
         console.error('[NAVIGATE] No api URL param - cannot send action. Redeploy needed.');
-        setTimeout(() => { _navSent = false; }, 2000);
+        _navSent = false;
+        clearTimeout(_navSentTimer);
         // Re-enable buttons
         document.querySelectorAll('.info-btn').forEach(btn => {
             btn.style.pointerEvents = '';
@@ -376,9 +440,8 @@ function _sendNavAction(type, target, flags) {
     const apiUrl = `${S.api}/api/navigate/action`;
     console.log('[NAVIGATE][DEBUG] fetch POST to', apiUrl, payload);
 
-    // Show sending indicator
-    const btn = document.getElementById('btn-travel') || document.querySelector('.info-btn.primary');
-    if (btn) btn.textContent = 'Enviando...';
+    // Show full-screen travel loading overlay
+    _showTravelOverlay(type, target);
 
     const _nh = { 'Content-Type': 'application/json' };
     if (window.Telegram?.WebApp?.initData) { _nh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
@@ -408,12 +471,54 @@ function _sendNavAction(type, target, flags) {
             showError('Erro ao viajar: ' + e.message + '. Tente novamente.');
             // Re-enable after error so user can retry
             _navSent = false;
+            clearTimeout(_navSentTimer);
+            _hideTravelOverlay();
             document.querySelectorAll('.info-btn').forEach(btn => {
                 btn.style.pointerEvents = '';
                 btn.style.opacity = '';
             });
-            if (btn) btn.textContent = type === 'travel' ? 'Viajar' : type;
         });
+}
+
+// -----------------------------------------------------------
+// TRAVEL LOADING OVERLAY
+// -----------------------------------------------------------
+
+function _showTravelOverlay(type, target) {
+    let overlay = document.getElementById('travel-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'travel-overlay';
+        overlay.className = 'travel-overlay';
+        overlay.innerHTML = `
+            <div class="travel-overlay-content">
+                <div class="travel-overlay-compass">🧭</div>
+                <div class="travel-overlay-text">Preparando viagem...</div>
+                <div class="travel-overlay-dots"><span>.</span><span>.</span><span>.</span></div>
+            </div>`;
+        document.body.appendChild(overlay);
+    }
+    const textEl = overlay.querySelector('.travel-overlay-text');
+    if (type === 'travel' && target) {
+        const loc = S.locations[target];
+        textEl.textContent = `Viajando para ${loc?.n || 'destino'}...`;
+    } else if (type === 'return') {
+        textEl.textContent = 'Retornando...';
+    } else if (type === 'camp') {
+        textEl.textContent = 'Montando acampamento...';
+    } else if (type === 'explore') {
+        textEl.textContent = 'Explorando a região...';
+    } else {
+        textEl.textContent = 'Preparando...';
+    }
+    requestAnimationFrame(() => overlay.classList.add('visible'));
+}
+
+function _hideTravelOverlay() {
+    const overlay = document.getElementById('travel-overlay');
+    if (overlay) {
+        overlay.classList.remove('visible');
+    }
 }
 
 function handleReturn() {
