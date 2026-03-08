@@ -470,8 +470,8 @@ function _updateScaleBar() {
     const levelLabel = document.getElementById('scale-level');
     if (turnsLabel) turnsLabel.textContent = `${lvl.turnsPerBar} turno${lvl.turnsPerBar > 1 ? 's' : ''}`;
     if (levelLabel) levelLabel.textContent = lvl.label;
-    // Scale bar width represents a fixed map distance at current zoom
-    const barPx = 60; // fixed pixel width
+    // Scale bar width proportional to zoom (wider at higher zoom = more detail)
+    const barPx = Math.round(40 + (lvl.zoom - 0.85) * 25);
     bar.style.width = barPx + 'px';
 }
 
@@ -513,8 +513,14 @@ function setupPanZoom() {
     // Pinch zoom: snap to discrete levels
     vp.addEventListener('touchstart', e => { if (e.touches.length === 2) { ipd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); iIdx = _zoomIdx; } }, { passive: true });
     vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; if (ratio > 1.3 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1); ipd = d; clamp(); apply(); } else if (ratio < 0.7 && _zoomIdx > 0) { _snapToZoomLevel(-1); ipd = d; clamp(); apply(); } } }, { passive: true });
-    // Mouse wheel: snap to discrete levels
-    vp.addEventListener('wheel', e => { e.preventDefault(); _snapToZoomLevel(e.deltaY > 0 ? -1 : 1); clamp(); apply(); }, { passive: false });
+    // Mouse wheel: snap to discrete levels (debounced to prevent jitter)
+    let _wheelTimer = null;
+    vp.addEventListener('wheel', e => {
+        e.preventDefault();
+        if (_wheelTimer) return; // ignore rapid successive events
+        _snapToZoomLevel(e.deltaY > 0 ? -1 : 1); clamp(); apply();
+        _wheelTimer = setTimeout(() => { _wheelTimer = null; }, 200);
+    }, { passive: false });
     vp.addEventListener('click', e => { if (e.target === vp || e.target === wr || e.target.tagName === 'rect') closeInfoPanel(); });
     apply();
 }

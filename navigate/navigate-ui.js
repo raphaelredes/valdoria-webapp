@@ -122,8 +122,11 @@ function handleLocationTap(locId) {
     if (isExplored) {
         const locQuests = S.quests.filter(q => q.loc === locId);
         if (locQuests.length > 0) {
-            questsEl.innerHTML = '📜 <b>Missões:</b> ' +
-                locQuests.map(q => `<span>${q.t}</span>`).join(', ');
+            const shown = locQuests.slice(0, 3);
+            const extra = locQuests.length - shown.length;
+            let qHtml = '📜 <b>Missões:</b> ' + shown.map(q => `<span>${q.t}</span>`).join(', ');
+            if (extra > 0) qHtml += ` <span style="opacity:0.6">... +${extra} mais</span>`;
+            questsEl.innerHTML = qHtml;
             questsEl.style.display = '';
         } else {
             questsEl.style.display = 'none';
@@ -131,10 +134,13 @@ function handleLocationTap(locId) {
 
         const locDungeons = S.dungeons[locId] || [];
         if (locDungeons.length > 0) {
-            dungeonsEl.innerHTML = '🏰 <b>Masmorras:</b> ' +
-                locDungeons.map(d =>
-                    `<span>${d.done ? '✅' : '⭐'} ${d.n}</span>`
-                ).join(', ');
+            const shown = locDungeons.slice(0, 3);
+            const extra = locDungeons.length - shown.length;
+            let dHtml = '🏰 <b>Masmorras:</b> ' + shown.map(d =>
+                `<span>${d.done ? '✅' : '⭐'} ${d.n}</span>`
+            ).join(', ');
+            if (extra > 0) dHtml += ` <span style="opacity:0.6">... +${extra} mais</span>`;
+            dungeonsEl.innerHTML = dHtml;
             dungeonsEl.style.display = '';
         } else {
             dungeonsEl.style.display = 'none';
@@ -172,8 +178,13 @@ function handleLocationTap(locId) {
         const edgeDist = getConnectionDistance(S.currentLoc, locId);
 
         if (isExplored) {
-            // Explored + has map: safe direct travel
-            noteEl.innerHTML = `🕐 <b>${edgeDist} turno${edgeDist !== 1 ? 's' : ''}</b> de viagem`;
+            // Explored + has map: safe direct travel + encounter risk hint
+            const danger = locData.d || 0;
+            let riskHint = '';
+            if (danger >= 7) riskHint = ' · <span style="color:#8a2a2a">☠️ Perigo extremo</span>';
+            else if (danger >= 5) riskHint = ' · <span style="color:#8a4a3a">⚠️ Alta chance de encontros</span>';
+            else if (danger >= 3) riskHint = ' · <span style="color:#8a6a3a">⚠️ Encontros prováveis</span>';
+            noteEl.innerHTML = `🕐 <b>${edgeDist} turno${edgeDist !== 1 ? 's' : ''}</b> de viagem${riskHint}`;
             noteEl.style.display = 'block';
             noteEl.style.color = '';
             const travelBtn = createActionBtn(
@@ -427,21 +438,29 @@ function animateTravel(fromId, toId, onComplete) {
     }
 }
 
-// ── BFS path (returns array of location IDs) ──
+// ── BFS path (returns array of location IDs, cached) ──
+const _bfsCache = {};
 function bfsPath(fromId, toId) {
     if (fromId === toId) return [fromId];
+    const key = `${fromId}|${toId}`;
+    if (_bfsCache[key]) return _bfsCache[key];
     const visited = new Set([fromId]);
     const queue = [[fromId, [fromId]]];
     while (queue.length > 0) {
         const [current, path] = queue.shift();
         const neighbors = connectionGraph[current] || [];
         for (const nb of neighbors) {
-            if (nb === toId) return [...path, nb];
+            if (nb === toId) {
+                const result = [...path, nb];
+                _bfsCache[key] = result;
+                return result;
+            }
             if (!visited.has(nb)) {
                 visited.add(nb);
                 queue.push([nb, [...path, nb]]);
             }
         }
     }
+    _bfsCache[key] = null;
     return null;
 }

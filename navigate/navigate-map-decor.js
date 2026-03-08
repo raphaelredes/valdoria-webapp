@@ -514,16 +514,18 @@ function renderLocationMarkers(group, fogState) {
                 }
             }
             ng.appendChild(lbl);
-            // Decorative underline flourish
+            // Decorative underline flourish (gold for settlements)
             const lastLine = lines[lines.length - 1];
             const lw = lastLine.length * 3.5;
             const uy = y + R + 16 + (lines.length - 1) * 10;
+            const flourishColor = isSett ? '#c4953a' : INK;
+            const flourishOp = isSett ? 0.35 : 0.2;
             ng.appendChild(_el('line', { x1: x - lw, y1: uy, x2: x + lw, y2: uy,
-                stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.2 }));
+                stroke: flourishColor, 'stroke-width': isSett ? 0.5 : 0.3, 'stroke-opacity': flourishOp }));
             ng.appendChild(_el('line', { x1: x - lw, y1: uy - 1, x2: x - lw, y2: uy + 1,
-                stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.15 }));
+                stroke: flourishColor, 'stroke-width': 0.3, 'stroke-opacity': flourishOp * 0.7 }));
             ng.appendChild(_el('line', { x1: x + lw, y1: uy - 1, x2: x + lw, y2: uy + 1,
-                stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.15 }));
+                stroke: flourishColor, 'stroke-width': 0.3, 'stroke-opacity': flourishOp * 0.7 }));
         } else if (fog === 'known_mapped') {
             const lines = _wrapLabel(name, 14);
             const kmAttrs = { x: x, y: y + R + 11, class: 'loc-label', 'fill-opacity': 0.4 };
@@ -612,10 +614,8 @@ function renderLocationMarkers(group, fogState) {
             }
         }
 
-        // Click handler
-        if (isExp || fog === 'known_mapped') {
-            ng.addEventListener('click', e => { e.stopPropagation(); handleLocationTap(locId); });
-        } else if (fog === 'known_unmapped' && currentAdj.has(locId)) {
+        // Click handler — all known locations are tappable
+        if (isExp || fog === 'known_mapped' || fog === 'known_unmapped') {
             ng.style.cursor = 'pointer';
             ng.addEventListener('click', e => { e.stopPropagation(); handleLocationTap(locId); });
         }
@@ -732,8 +732,10 @@ function renderCartographyDecor(svg, fogState) {
 }
 
 function _drawSeaSerpent(group, fogState) {
-    const check = ['burning_crater', 'deep_swamp', 'valkrest'];
-    if (!check.every(id => fogState[id] === 'hidden' || fogState[id] === 'frontier')) return;
+    // Show serpent when SE corner is mostly unexplored (data-driven, not hardcoded IDs)
+    const seCorner = Object.entries(LOCATION_COORDS).filter(([, c]) => c.col >= 10 && c.row >= 10);
+    const seExplored = seCorner.filter(([id]) => fogState[id] === 'explored' || fogState[id] === 'known_mapped');
+    if (seCorner.length === 0 || seExplored.length / seCorner.length > 0.4) return;
     const sx = SVG_W - 90, sy = SVG_H - 100;
     const sg = _el('g', { opacity: '0.14' });
     sg.appendChild(_el('path', {
