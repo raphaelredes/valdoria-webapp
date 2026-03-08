@@ -446,7 +446,12 @@ async function doAction(callbackData) {
     if (data.error === 'no_response') { hideLocationTransition(); return; }
 
     // Server says to close WebApp (e.g. main_menu action)
-    if (data.close) { hideLocationTransition(); _closeGameHub(); return; }
+    // Server says to close WebApp (e.g. main_menu action) — already processed, just close
+    if (data.close) {
+        hideLocationTransition();
+        try { Telegram.WebApp.close(); } catch (e) { console.warn('[GAME] tg.close:', e); }
+        return;
+    }
 
     // Handle transitions to specialized WebApps
     // Only auto-transition if there is NO text to display

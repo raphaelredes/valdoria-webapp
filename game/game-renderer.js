@@ -239,16 +239,12 @@ function createButton(btn, forceHero = false) {
         return el;
     }
 
-    // Main menu button — close WebApp and return to Telegram
+    // Main menu button — notify server then close WebApp
     if (btn.cb === 'main_menu') {
         const el = document.createElement('button');
         el.className = 'btn-action';
         el.textContent = btn.text || '';
-        el.onclick = () => {
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.close();
-            }
-        };
+        el.onclick = () => _closeGameHub();
         return el;
     }
 
@@ -367,11 +363,7 @@ function renderFooter(footer) {
         el.textContent = btn.text || '';
 
         if (btn.cb === 'main_menu') {
-            el.onclick = () => {
-                if (window.Telegram && Telegram.WebApp) {
-                    Telegram.WebApp.close();
-                }
-            };
+            el.onclick = () => _closeGameHub();
         } else if (btn.cb) {
             el.onclick = () => doAction(btn.cb);
         } else if (btn.url) {
