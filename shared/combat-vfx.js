@@ -506,20 +506,20 @@ class CombatVFX {
         const prof = VFX_PROFILES[damageType] || VFX_PROFILES.slashing;
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
-        const count = 30;
+        const count = 40;
         for (let i = 0; i < count; i++) {
-            const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
-            const speed = 2 + Math.random() * 4;
+            const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+            const speed = 2.5 + Math.random() * 5;
             const shape = prof.impact.shapes[Math.floor(Math.random() * prof.impact.shapes.length)];
             const color = prof.colors[Math.floor(Math.random() * prof.colors.length)];
             this.particles.push({
-                x: cx + (Math.random() - 0.5) * rect.width * 0.6,
-                y: cy + (Math.random() - 0.5) * rect.height * 0.4,
+                x: cx + (Math.random() - 0.5) * rect.width * 0.8,
+                y: cy + (Math.random() - 0.5) * rect.height * 0.5,
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - 1.5,
+                vy: Math.sin(angle) * speed - 2,
                 gravity: -0.01, friction: 0.97,
-                size: 4 + Math.random() * 5,
-                life: 800 + Math.random() * 500,
+                size: 5 + Math.random() * 6,
+                life: 900 + Math.random() * 600,
                 born: performance.now(),
                 color, shape,
                 glow: true,
@@ -659,12 +659,12 @@ class CombatVFX {
                             ctx.save();
                             ctx.globalAlpha = 1 - _easeInQuad(t);
                             ctx.fillStyle = '#a0e0ff';
-                            const dist = t * 40 * e._scale;
+                            const dist = t * 55 * e._scale;
                             const px = ex + Math.cos(e._angle) * dist;
                             const py = ey + Math.sin(e._angle) * dist;
                             ctx.translate(px, py);
                             ctx.rotate(e._angle + t * 2);
-                            const sz = 6 * e._scale * (1 - t * 0.5);
+                            const sz = 9 * e._scale * (1 - t * 0.5);
                             ctx.beginPath();
                             ctx.moveTo(0, -sz);
                             ctx.lineTo(sz * 0.5, 0);
@@ -681,7 +681,7 @@ class CombatVFX {
             case 'electric_arcs':
                 for (let i = 0; i < 5; i++) {
                     const angle = (Math.PI * 2 * i) / 5 + (Math.random() - 0.5) * 0.5;
-                    const len = (30 + Math.random() * 20) * scale;
+                    const len = (40 + Math.random() * 30) * scale;
                     const segments = [];
                     const segCount = 5;
                     for (let s = 0; s <= segCount; s++) {
@@ -699,14 +699,14 @@ class CombatVFX {
                             ctx.globalCompositeOperation = 'lighter';
                             ctx.globalAlpha = (1 - t) * 0.8;
                             ctx.strokeStyle = '#ffe040';
-                            ctx.lineWidth = Math.max(1, 2 * (1 - t));
+                            ctx.lineWidth = Math.max(1.5, 3 * (1 - t));
                             ctx.beginPath();
                             ctx.moveTo(ex, ey);
                             e._segs.forEach(s => ctx.lineTo(ex + s.x, ey + s.y));
                             ctx.stroke();
                             // Bright core
                             ctx.strokeStyle = '#ffffff';
-                            ctx.lineWidth = Math.max(0.5, 1 * (1 - t));
+                            ctx.lineWidth = Math.max(1, 1.5 * (1 - t));
                             ctx.beginPath();
                             ctx.moveTo(ex, ey);
                             e._segs.forEach(s => ctx.lineTo(ex + s.x, ey + s.y));
@@ -724,15 +724,15 @@ class CombatVFX {
                         ctx.save();
                         ctx.globalAlpha = 0.5 * (1 - t);
                         ctx.strokeStyle = prof.colors[0];
-                        ctx.lineWidth = Math.max(1, 3 * (1 - t) * scale);
+                        ctx.lineWidth = Math.max(1.5, 4 * (1 - t) * scale);
                         ctx.beginPath();
-                        ctx.arc(ex, ey, (8 + t * 60) * scale, 0, Math.PI * 2);
+                        ctx.arc(ex, ey, (12 + t * 80) * scale, 0, Math.PI * 2);
                         ctx.stroke();
                         // Second ring
-                        ctx.globalAlpha = 0.3 * (1 - t);
-                        ctx.lineWidth = Math.max(1, 2 * (1 - t) * scale);
+                        ctx.globalAlpha = 0.35 * (1 - t);
+                        ctx.lineWidth = Math.max(1, 2.5 * (1 - t) * scale);
                         ctx.beginPath();
-                        ctx.arc(ex, ey, (4 + t * 40) * scale, 0, Math.PI * 2);
+                        ctx.arc(ex, ey, (6 + t * 55) * scale, 0, Math.PI * 2);
                         ctx.stroke();
                         ctx.restore();
                     },
@@ -751,7 +751,7 @@ class CombatVFX {
                             const it = t / 0.5;
                             ctx.globalAlpha = 0.4 * (1 - it);
                             ctx.fillStyle = prof.colors[0];
-                            const r = (40 - it * 35) * scale;
+                            const r = (55 - it * 48) * scale;
                             ctx.beginPath();
                             ctx.arc(ex, ey, r, 0, Math.PI * 2);
                             ctx.fill();
@@ -760,9 +760,9 @@ class CombatVFX {
                             const bt = (t - 0.5) / 0.5;
                             ctx.globalAlpha = 0.6 * (1 - bt);
                             ctx.strokeStyle = prof.colors[1] || prof.colors[0];
-                            ctx.lineWidth = Math.max(1, 3 * (1 - bt) * scale);
+                            ctx.lineWidth = Math.max(1.5, 4 * (1 - bt) * scale);
                             ctx.beginPath();
-                            ctx.arc(ex, ey, bt * 50 * scale, 0, Math.PI * 2);
+                            ctx.arc(ex, ey, bt * 70 * scale, 0, Math.PI * 2);
                             ctx.stroke();
                         }
                         ctx.restore();
@@ -777,8 +777,8 @@ class CombatVFX {
                     draw: (ctx, ex, ey, t) => {
                         ctx.save();
                         ctx.globalCompositeOperation = 'lighter';
-                        ctx.globalAlpha = 0.5 * (1 - _easeOutCubic(t));
-                        const r = (5 + t * 50) * scale;
+                        ctx.globalAlpha = 0.6 * (1 - _easeOutCubic(t));
+                        const r = (8 + t * 70) * scale;
                         const grad = ctx.createRadialGradient(ex, ey, 0, ex, ey, r);
                         grad.addColorStop(0, '#ffffff');
                         grad.addColorStop(0.4, '#ffe080');
