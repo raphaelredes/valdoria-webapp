@@ -62,17 +62,13 @@
         <p>Carregando prólogo...</p>
     </div>
 
-    <!-- Error overlay -->
-    <div class="error-overlay" id="errorOverlay" style="display:none">
-        <p class="error-msg" id="errorMsg"></p>
-        <button class="v-btn v-btn-secondary" onclick="location.reload()">Tentar Novamente</button>
-        <button class="v-btn v-btn-secondary" style="margin-top:8px" onclick="tg.close()">Fechar</button>
-    </div>
+    <!-- Error overlay injected by shared/error-reporter.js -->
 
     <script>
         var v = Date.now();
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="prologue.js?v=' + v + '"><\/script>');
     </script>
 </body>

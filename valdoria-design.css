@@ -819,6 +819,160 @@ body::after {
     padding-bottom: 0;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   ERROR REPORTER OVERLAY — Shared across all WebApps
+   Injected dynamically by shared/error-reporter.js
+   ═══════════════════════════════════════════════════════════════ */
+.v-err-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 40%, rgba(30,18,12,0.95) 0%, rgba(10,8,5,0.97) 100%);
+    z-index: 500;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+.v-err-content {
+    text-align: center;
+    padding: 28px 24px;
+    max-width: min(340px, 88vw);
+    background: linear-gradient(180deg, rgba(50,38,28,0.5) 0%, rgba(30,22,16,0.4) 100%);
+    border: 1px solid rgba(196,149,58,0.22);
+    border-radius: var(--v-radius-lg, 12px);
+    box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(196,149,58,0.08);
+    animation: v-errEntry 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes v-errEntry {
+    0% { opacity: 0; transform: scale(0.9) translateY(16px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.v-err-icon {
+    font-size: 44px;
+    margin-bottom: 14px;
+    animation: v-errPulse 3s ease-in-out infinite;
+}
+@keyframes v-errPulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(196,149,58,0.3)); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 16px rgba(196,149,58,0.7)); }
+}
+.v-err-msg {
+    color: var(--v-text, #d4c8b0);
+    font-size: 14px;
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+.v-err-hint {
+    color: var(--v-text-dim, #a09484);
+    font-size: 12px;
+    margin-bottom: 16px;
+    line-height: 1.4;
+    font-style: italic;
+}
+.v-err-hint:empty { display: none; }
+.v-err-content .v-err-btn {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    border: 1px solid rgba(196,149,58,0.3);
+    border-radius: var(--v-radius-md, 8px);
+    background: rgba(196,149,58,0.12);
+    color: var(--v-text, #d4c8b0);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 8px;
+    box-shadow: 0 0 8px rgba(196,149,58,0.1);
+    transition: background 0.15s;
+}
+.v-err-content .v-err-btn:active { background: rgba(196,149,58,0.25); }
+.v-err-content .v-err-btn:disabled { opacity: 0.5; cursor: default; }
+.v-err-content .v-err-btn-secondary {
+    background: rgba(196,149,58,0.06);
+    border-color: rgba(196,149,58,0.15);
+}
+/* Retry progress bar */
+.v-err-retry-wrap { position: relative; width: 100%; }
+.v-err-retry-progress {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--v-gold-dim, #8a6a2e), var(--v-gold, #c4953a));
+    border-radius: 0 0 var(--v-radius-md, 8px) var(--v-radius-md, 8px);
+    transition: width 1s linear;
+    box-shadow: 0 0 6px rgba(196,149,58,0.4);
+}
+/* Network badge */
+.v-err-network {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--v-radius-pill, 16px);
+    font-size: 11px;
+    margin-bottom: 10px;
+    animation: v-fadeIn 0.3s ease;
+}
+.v-err-network.online {
+    background: rgba(80,180,80,0.15);
+    color: #7cd47c;
+    border: 1px solid rgba(80,180,80,0.3);
+}
+.v-err-network.offline {
+    background: rgba(200,60,60,0.15);
+    color: #e07070;
+    border: 1px solid rgba(200,60,60,0.3);
+}
+/* Debug panel */
+.v-err-debug { margin-top: 14px; text-align: left; }
+.v-err-debug-toggle {
+    background: none; border: none;
+    color: var(--v-text-dim, #a09484);
+    font-size: 11px; cursor: pointer;
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    padding: 4px 0; opacity: 0.7;
+}
+.v-err-debug-toggle:hover { opacity: 1; }
+.v-err-debug-toggle:active { color: var(--v-gold, #c4953a); opacity: 1; }
+.v-err-log-wrap { position: relative; }
+.v-err-log-wrap::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 24px;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.5));
+    border-radius: 0 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px);
+    pointer-events: none;
+}
+.v-err-log {
+    margin-top: 6px;
+    max-height: 140px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(196,149,58,0.1);
+    border-radius: var(--v-radius-sm, 6px);
+    padding: 8px 10px;
+    font-family: monospace;
+    font-size: 10px;
+    line-height: 1.4;
+    color: var(--v-text-dim, #a09484);
+    white-space: pre-wrap;
+    word-break: break-all;
+    -webkit-user-select: text;
+    user-select: text;
+}
+.v-err-copy {
+    margin-top: 6px;
+    background: rgba(196,149,58,0.1);
+    border: 1px solid rgba(196,149,58,0.2);
+    border-radius: var(--v-radius-sm, 6px);
+    color: var(--v-text-dim, #a09484);
+    font-size: 11px;
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    padding: 5px 12px;
+    cursor: pointer;
+    width: 100%;
+}
+.v-err-copy:active { background: rgba(196,149,58,0.2); }
+
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {

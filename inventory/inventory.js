@@ -7,6 +7,9 @@ const _vBg = getComputedStyle(document.documentElement)
     .getPropertyValue('--v-bg').trim() || '#2a2420';
 if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg); }
 
+// ── Shared Error Reporter (lite tier — no API) ──
+if (window.ValdoriaErrors) { ValdoriaErrors.init({ appName: 'INVENTORY' }); }
+
 // ── State ──
 let D = null;           // Decoded payload
 let activeTab = 'items';

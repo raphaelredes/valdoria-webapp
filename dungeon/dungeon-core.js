@@ -50,6 +50,12 @@ async function initDungeon() {
         S.api = params.get('api') || '';
         S.uid = parseInt(params.get('uid') || '0');
         S.returnTo = params.get('return') || 'game';
+
+        // Init error reporter
+        if (window.ValdoriaErrors) {
+            ValdoriaErrors.init({ appName: 'DUNGEON', apiBase: S.api, token: S.token, uid: S.uid });
+        }
+
         const dataB64 = params.get('data') || '';
 
         if (!dataB64) {
@@ -208,16 +214,7 @@ async function _transitionToGame() {
     try { tg?.close(); } catch (e) { }
 }
 
-// ── Error handling ──
-function showError(msg, err = null) {
-    console.error('[DUNGEON]', msg, err || '');
-    const toast = document.createElement('div');
-    toast.className = 'v-toast-error';
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-    document.getElementById('loading').classList.add('hidden');
-}
+// showError provided by shared/error-reporter.js
 
 // ── Button handlers ──
 document.getElementById('btn-inventory')?.addEventListener('click', () => {

@@ -251,6 +251,7 @@
         var v = Date.now();
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
             var scripts = ['explore-iso.js', 'explore-tiles.js', 'explore-fog.js', 'explore-travel.js', 'explore-movement.js', 'explore-renderer.js', 'explore-narrations.js', 'explore-core.js', 'explore-events.js', 'explore-particles.js'];
         scripts.forEach(function (s) {
             document.write('<script src="' + s + '?v=' + v + '"><\/script>');

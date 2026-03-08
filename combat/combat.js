@@ -140,6 +140,16 @@ const RES_ICON_MAP = {
     'Inspiração': '🎵', 'Pacto': '👁️', 'Energia': '⚡',
 };
 
+// ─── Error Reporter Init ───
+if (window.ValdoriaErrors) {
+    ValdoriaErrors.init({
+        appName: 'COMBAT',
+        apiBase: apiBase,
+        token: token,
+        uid: userId,
+    });
+}
+
 // ─── STARTUP ───
 if (isApiMode) {
     loadCombatState();
@@ -2080,18 +2090,13 @@ function _showDiceStatic(lr) {
 
 // ─── UTILS ───
 // ─── ERROR DISPLAY ───
-function showError(msg, err = null) {
-    console.error('[COMBAT]', msg, err || '');
-    const app = document.getElementById('app');
-    if (!app) return;
-    const el = document.createElement('div');
-    el.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:#7b2020;color:#fff;padding:10px 20px;border-radius:8px;z-index:999;font-size:13px;text-align:center;max-width:90%;';
-    el.textContent = msg;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 3000);
+// showError provided by shared/error-reporter.js — keep combat-specific cleanup
+const _origShowError = window.showError;
+window.showError = function (msg, err) {
     _actionSent = false;
     document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('disabled'));
-}
+    if (_origShowError) _origShowError(msg, err);
+};
 
 function escHtml(str) {
     if (!str) return '';

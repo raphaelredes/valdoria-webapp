@@ -19,6 +19,7 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
     </script>
     <style>
         /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
@@ -332,6 +333,11 @@
                 tg.BackButton.show();
                 tg.BackButton.onClick(() => { _navigateBack(); });
             }
+        }
+
+        // ── Shared Error Reporter ──
+        if (window.ValdoriaErrors) {
+            ValdoriaErrors.init({ appName: 'WORKSTATION', apiBase: _wsApi, token: _wsToken, uid: _wsUid });
         }
 
         async function _navigateBack() {

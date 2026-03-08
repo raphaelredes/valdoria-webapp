@@ -180,35 +180,7 @@
         <button id="timer-skip" class="v-skip-btn" style="display:none">Pular ▸</button>
     </div>
 
-    <!-- Error overlay -->
-    <div id="error-overlay" class="error-overlay" style="display:none">
-        <div class="error-content">
-            <div class="error-icon">⚠️</div>
-            <div id="error-network-badge" class="error-network-badge" style="display:none"></div>
-            <div id="error-msg" class="error-msg"></div>
-            <div id="error-hint" class="error-hint"></div>
-            <div class="error-retry-wrap">
-                <button id="error-retry" class="btn-action">Tentar Novamente</button>
-                <div id="error-retry-progress" class="error-retry-progress" style="width:0"></div>
-            </div>
-            <button id="error-recover" class="btn-action btn-secondary"
-                style="margin-top: 10px;">🔙
-                Fechar e Voltar ao Chat</button>
-            <button id="error-report" class="btn-action btn-secondary"
-                style="margin-top: 8px;">📨
-                Reportar Problema</button>
-            <!-- Debug log panel -->
-            <div class="error-debug-panel">
-                <button id="error-debug-toggle" class="error-debug-toggle">📋 Ver detalhes técnicos ▸</button>
-                <div id="error-debug-wrap" style="display:none">
-                    <div class="error-debug-log-wrap">
-                        <div id="error-debug-log" class="error-debug-log"></div>
-                    </div>
-                    <button id="error-debug-copy" class="error-debug-copy">📋 Copiar log</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Error overlay injected dynamically by shared/error-reporter.js -->
 
     <!-- Ambient particles canvas -->
     <canvas id="ambient-particles"></canvas>
@@ -227,6 +199,7 @@
     <script>
         var v = Date.now();
         var scripts = ['game-enhancer.js', 'game-particles.js', 'game-core.js', 'game-renderer.js', 'game-dialogue.js', 'game-ui.js', 'game-transitions.js'];
+        document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
         scripts.forEach(function (s) {
             document.write('<script src="' + s + '?v=' + v + '"><\/script>');

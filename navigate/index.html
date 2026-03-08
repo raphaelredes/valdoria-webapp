@@ -219,69 +219,251 @@
         /* --- Walking traveler (center) --- */
         .load-traveler {
             position: absolute;
-            bottom: 16%;
+            bottom: 15%;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.7));
+            filter: drop-shadow(0 4px 14px rgba(0,0,0,0.7));
         }
 
-        /* === SPRITE SHEET WALK CYCLE — 8 frames, professional technique ===
-         * Single SVG contains 8 hand-drawn frames of a hooded medieval traveler.
-         * CSS steps(8) jumps through frames for crisp animation.
-         * Each frame = 80px wide, total strip = 640px.
-         * The div clips to show 1 frame at a time via overflow:hidden.
+        /* === SVG JOINT-BASED WALK (Andrew Hoyer technique) ===
+         * Single SVG with nested <g> groups at each joint pivot.
+         * CSS animations rotate each joint; child joints inherit parent rotation.
+         * transform-box: view-box ensures pixel-accurate pivots in SVG coords.
          *
-         * Walk cycle phases (standard 8-frame):
-         *   1: Contact (R leg forward, heel strike)
-         *   2: Recoil (weight absorb, lowest point)
-         *   3: Passing (legs together, L passes R)
-         *   4: High point (push off, highest point)
-         *   5: Contact (L leg forward, heel strike)
-         *   6: Recoil (mirror of 2)
-         *   7: Passing (mirror of 3)
-         *   8: High point (mirror of 4)
+         * Bone chain: hip > thigh > knee > shin > boot
+         *             shoulder > upper arm > elbow > forearm
+         *
+         * Walk cycle: 1.0s, 8-phase asymmetric (Contact→Down→Passing→High ×2)
+         * Physics: pendulum beziers for hips, spring for knees, overshoot for arms.
+         * Disney principles: overlapping action via staggered animation-delay.
+         * Cape: 3 nested segments with wave propagation (2.3s async period).
          */
         .walk-figure {
             position: relative;
-            width: 80px;
-            height: 130px;
-            overflow: hidden;
+            width: 120px;
+            height: 168px;
         }
 
-        .walk-strip {
-            display: flex;
-            width: 640px; /* 8 frames × 80px */
-            height: 130px;
-            animation: walkCycle 0.9s steps(8) infinite;
+        .walk-figure svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
         }
 
-        @keyframes walkCycle {
-            from { transform: translateX(0); }
-            to { transform: translateX(-640px); }
+        /* All animated SVG elements use viewBox as transform reference */
+        .walk-figure [class^="wk-"] {
+            transform-box: view-box;
         }
 
-        .walk-strip svg {
-            width: 80px;
-            height: 130px;
-            flex-shrink: 0;
+        /* --- Body bounce (vertical, synced with gait) --- */
+        .wk-bounce {
+            animation: wkBounce 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
+        }
+        @keyframes wkBounce {
+            0%, 100%  { transform: translateY(1.5px); }
+            15%       { transform: translateY(2.5px); }   /* lowest at down/recoil */
+            35%       { transform: translateY(-0.5px); }  /* rising at passing */
+            45%       { transform: translateY(-1px); }    /* highest at push-off */
+            50%       { transform: translateY(1.5px); }   /* contact again */
+            65%       { transform: translateY(2.5px); }   /* lowest */
+            85%       { transform: translateY(-0.5px); }  /* rising */
+            95%       { transform: translateY(-1px); }    /* highest */
         }
 
-        /* Cape flicker overlay — subtle shimmer on the cape across all frames */
-        .load-traveler::after {
-            content: '';
-            position: absolute;
-            top: 18%;
-            left: 10%;
-            width: 30%;
-            height: 40%;
-            background: linear-gradient(180deg, transparent 0%, rgba(196,149,58,0.03) 50%, transparent 100%);
-            animation: capeShimmer 3s ease-in-out infinite;
-            pointer-events: none;
+        /* --- Head bob (60% of body amplitude, vestibular compensation) --- */
+        .wk-head {
+            animation: wkHead 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
+            animation-delay: -0.02s;
         }
-        @keyframes capeShimmer {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
+        @keyframes wkHead {
+            0%, 100%  { transform: translateY(0.9px) rotate(0deg); }
+            15%       { transform: translateY(1.5px) rotate(0.5deg); }
+            35%       { transform: translateY(-0.3px) rotate(-0.3deg); }
+            45%       { transform: translateY(-0.6px) rotate(-0.5deg); }
+            50%       { transform: translateY(0.9px) rotate(0deg); }
+            65%       { transform: translateY(1.5px) rotate(0.5deg); }
+            85%       { transform: translateY(-0.3px) rotate(-0.3deg); }
+            95%       { transform: translateY(-0.6px) rotate(-0.5deg); }
+        }
+
+        /* --- Cape (3-segment wave propagation, async period) --- */
+        .wk-cape-1 {
+            transform-origin: 25px 24px;
+            animation: wkCape1 2.3s ease-in-out infinite;
+        }
+        .wk-cape-2 {
+            transform-origin: 20px 40px;
+            animation: wkCape2 2.3s ease-in-out infinite;
+            animation-delay: -0.02s;
+        }
+        .wk-cape-3 {
+            transform-origin: 17px 56px;
+            animation: wkCape3 2.3s ease-in-out infinite;
+            animation-delay: -0.04s;
+        }
+        @keyframes wkCape1 {
+            0%, 100% { transform: rotate(0deg); }
+            25%      { transform: rotate(2deg); }
+            50%      { transform: rotate(-1deg); }
+            75%      { transform: rotate(1.5deg); }
+        }
+        @keyframes wkCape2 {
+            0%, 100% { transform: rotate(0deg) skewY(0deg); }
+            20%      { transform: rotate(3deg) skewY(1deg); }
+            50%      { transform: rotate(-2deg) skewY(-0.5deg); }
+            80%      { transform: rotate(2deg) skewY(0.8deg); }
+        }
+        @keyframes wkCape3 {
+            0%, 100% { transform: rotate(0deg) skewY(0deg) scaleX(1); }
+            15%      { transform: rotate(5deg) skewY(2deg) scaleX(1.04); }
+            45%      { transform: rotate(-3deg) skewY(-1deg) scaleX(0.96); }
+            70%      { transform: rotate(4deg) skewY(1.5deg) scaleX(1.02); }
+        }
+
+        /* === RIGHT LEG (front, full opacity) === */
+        .wk-hip-r {
+            transform-origin: 34px 52px;
+            animation: wkHipR 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
+        }
+        @keyframes wkHipR {
+            0%, 100%  { transform: rotate(-25deg); }
+            15%       { transform: rotate(-12deg); }
+            35%       { transform: rotate(12deg); }
+            45%       { transform: rotate(22deg); }
+            50%       { transform: rotate(25deg); }
+            65%       { transform: rotate(12deg); }
+            85%       { transform: rotate(-12deg); }
+            95%       { transform: rotate(-22deg); }
+        }
+
+        .wk-knee-r {
+            transform-origin: 34px 72px;
+            animation: wkKneeR 1.0s cubic-bezier(0.23, 1.0, 0.32, 1.0) infinite;
+        }
+        @keyframes wkKneeR {
+            0%, 100%  { transform: rotate(12deg); }
+            15%       { transform: rotate(22deg); }
+            35%       { transform: rotate(3deg); }
+            45%       { transform: rotate(0deg); }
+            50%       { transform: rotate(5deg); }
+            65%       { transform: rotate(30deg); }
+            85%       { transform: rotate(40deg); }
+            95%       { transform: rotate(18deg); }
+        }
+
+        /* === LEFT LEG (back, dimmer) === */
+        .wk-hip-l {
+            transform-origin: 34px 52px;
+            animation: wkHipL 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
+            animation-delay: -0.01s;
+        }
+        @keyframes wkHipL {
+            0%, 100%  { transform: rotate(25deg); }
+            15%       { transform: rotate(12deg); }
+            35%       { transform: rotate(-12deg); }
+            45%       { transform: rotate(-22deg); }
+            50%       { transform: rotate(-25deg); }
+            65%       { transform: rotate(-12deg); }
+            85%       { transform: rotate(12deg); }
+            95%       { transform: rotate(22deg); }
+        }
+
+        .wk-knee-l {
+            transform-origin: 34px 72px;
+            animation: wkKneeL 1.0s cubic-bezier(0.23, 1.0, 0.32, 1.0) infinite;
+            animation-delay: -0.01s;
+        }
+        @keyframes wkKneeL {
+            0%, 100%  { transform: rotate(5deg); }
+            15%       { transform: rotate(30deg); }
+            35%       { transform: rotate(40deg); }
+            45%       { transform: rotate(18deg); }
+            50%       { transform: rotate(12deg); }
+            65%       { transform: rotate(22deg); }
+            85%       { transform: rotate(3deg); }
+            95%       { transform: rotate(0deg); }
+        }
+
+        /* === RIGHT ARM (front, swings OPPOSITE to right leg) === */
+        .wk-shoulder-r {
+            transform-origin: 37px 22px;
+            animation: wkShoulderR 1.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
+            animation-delay: -0.02s;
+        }
+        @keyframes wkShoulderR {
+            0%, 100%  { transform: rotate(18deg); }
+            15%       { transform: rotate(10deg); }
+            35%       { transform: rotate(-8deg); }
+            45%       { transform: rotate(-16deg); }
+            50%       { transform: rotate(-18deg); }
+            65%       { transform: rotate(-10deg); }
+            85%       { transform: rotate(8deg); }
+            95%       { transform: rotate(16deg); }
+        }
+
+        .wk-elbow-r {
+            transform-origin: 37px 36px;
+            animation: wkElbowR 1.0s cubic-bezier(0.23, 1.0, 0.32, 1.0) infinite;
+            animation-delay: -0.04s;
+        }
+        @keyframes wkElbowR {
+            0%, 100%  { transform: rotate(-10deg); }
+            25%       { transform: rotate(-30deg); }
+            50%       { transform: rotate(-8deg); }
+            75%       { transform: rotate(-30deg); }
+        }
+
+        /* === LEFT ARM (back, swings OPPOSITE to left leg) === */
+        .wk-shoulder-l {
+            transform-origin: 31px 22px;
+            animation: wkShoulderL 1.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
+            animation-delay: -0.015s;
+        }
+        @keyframes wkShoulderL {
+            0%, 100%  { transform: rotate(-18deg); }
+            15%       { transform: rotate(-10deg); }
+            35%       { transform: rotate(8deg); }
+            45%       { transform: rotate(16deg); }
+            50%       { transform: rotate(18deg); }
+            65%       { transform: rotate(10deg); }
+            85%       { transform: rotate(-8deg); }
+            95%       { transform: rotate(-16deg); }
+        }
+
+        .wk-elbow-l {
+            transform-origin: 31px 36px;
+            animation: wkElbowL 1.0s cubic-bezier(0.23, 1.0, 0.32, 1.0) infinite;
+            animation-delay: -0.035s;
+        }
+        @keyframes wkElbowL {
+            0%, 100%  { transform: rotate(-8deg); }
+            25%       { transform: rotate(-30deg); }
+            50%       { transform: rotate(-10deg); }
+            75%       { transform: rotate(-30deg); }
+        }
+
+        /* --- Staff sway (independent period, not synced to walk) --- */
+        .wk-staff {
+            transform-origin: 37px 36px;
+            animation: wkStaff 1.6s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
+        }
+        @keyframes wkStaff {
+            0%, 100%  { transform: rotate(6deg); }
+            25%       { transform: rotate(-4deg); }
+            50%       { transform: rotate(-6deg); }
+            75%       { transform: rotate(4deg); }
+        }
+
+        /* --- Lantern glow pulse (slow, independent) --- */
+        .wk-lantern {
+            animation: wkLantern 2.4s ease-in-out infinite;
+        }
+        @keyframes wkLantern {
+            0%, 100% { opacity: 0.08; }
+            30%      { opacity: 0.15; }
+            50%      { opacity: 0.2; }
+            70%      { opacity: 0.12; }
         }
 
         /* --- Foreground trees (silhouettes) --- */
@@ -1240,151 +1422,122 @@
             <!-- Dust particles -->
             <div class="load-dust" id="load-dust"></div>
 
-            <!-- Walking traveler — 8-frame SVG sprite sheet with steps() animation
+            <!-- Walking traveler — SVG skeletal animation (Andrew Hoyer technique)
+                 Single SVG with nested <g> bone groups. CSS rotates joints;
+                 children inherit parent rotation (forward kinematics).
                  Hooded medieval traveler, side profile facing right.
-                 Standard walk cycle: Contact→Recoil→Passing→HighPt (×2 for each leg)
                  Body: dark brown tunic (#221a12), cape (#2e2418), boots (#1a1410)
                  Details: belt buckle (#8a6a3a), eye glow (#c4953a), staff (#5a4428) -->
             <div class="load-traveler">
                 <div class="walk-figure">
-                    <div class="walk-strip">
-                        <!-- Frame 1: Right Contact — R heel strike, L toe push-off, body low -->
-                        <svg viewBox="0 0 80 130" fill="none">
-                            <path d="M25 24 Q20 28 16 46 Q13 60 18 74" fill="#2e2418" opacity="0.7"/>
-                            <rect x="23" y="32" width="7" height="12" rx="2" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.5"/>
-                            <path d="M31 60 L23 80 L25 98" stroke="#151010" stroke-width="4" stroke-linecap="round" fill="none"/>
-                            <path d="M25 97 L22 100 L27 101" fill="#151010"/>
-                            <path d="M30 28 L36 42 L38 50" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <path d="M27 22 Q25 24 25 32 L25 58 Q28 62 32 62 Q36 62 38 58 L38 32 Q38 24 36 22 Z" fill="#221a12"/>
-                            <rect x="24" y="50" width="15" height="2.5" rx="1" fill="#5a4428"/>
-                            <rect x="30" y="50" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
-                            <path d="M28 10 Q26 8 27 3 Q30 0 35 1 Q38 3 38 8 L38 22 Q36 24 32 24 Q28 24 28 22 Z" fill="#221a12"/>
-                            <circle cx="36.5" cy="12" r="1" fill="#c4953a" opacity="0.35"/>
-                            <path d="M35 60 L43 78 L41 94" stroke="#1a1410" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-                            <path d="M41 93 L39 96 L44 97" fill="#1a1410"/>
-                            <path d="M34 28 L28 42 L24 52" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <line x1="23" y1="48" x2="20" y2="96" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
-                        <!-- Frame 2: Right Recoil — weight absorb, body at lowest -->
-                        <svg viewBox="0 0 80 130" fill="none">
-                            <path d="M25 24 Q19 28 15 48 Q12 62 17 76" fill="#2e2418" opacity="0.7"/>
-                            <rect x="23" y="32" width="7" height="12" rx="2" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.5"/>
-                            <path d="M31 61 L25 80 L27 96" stroke="#151010" stroke-width="4" stroke-linecap="round" fill="none"/>
-                            <path d="M27 95 L24 98 L29 99" fill="#151010"/>
-                            <path d="M30 29 L35 40 L36 47" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <path d="M27 23 Q25 25 25 33 L25 59 Q28 63 32 63 Q36 63 38 59 L38 33 Q38 25 36 23 Z" fill="#221a12"/>
-                            <rect x="24" y="51" width="15" height="2.5" rx="1" fill="#5a4428"/>
-                            <rect x="30" y="51" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
-                            <path d="M28 11 Q26 9 27 4 Q30 1 35 2 Q38 4 38 9 L38 23 Q36 25 32 25 Q28 25 28 23 Z" fill="#221a12"/>
-                            <circle cx="36.5" cy="13" r="1" fill="#c4953a" opacity="0.35"/>
-                            <path d="M35 61 L40 78 L39 94" stroke="#1a1410" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-                            <path d="M39 93 L37 96 L42 97" fill="#1a1410"/>
-                            <path d="M34 29 L29 40 L26 50" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <line x1="25" y1="46" x2="22" y2="96" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
-                        <!-- Frame 3: Right Passing — L leg passes R, body rising -->
-                        <svg viewBox="0 0 80 130" fill="none">
-                            <path d="M25 24 Q20 26 17 44 Q14 58 18 72" fill="#2e2418" opacity="0.7"/>
-                            <rect x="23" y="32" width="7" height="12" rx="2" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.5"/>
-                            <path d="M32 60 L29 82 L30 96" stroke="#151010" stroke-width="4" stroke-linecap="round" fill="none"/>
-                            <path d="M30 95 L28 98 L33 99" fill="#151010"/>
-                            <path d="M30 28 L34 38 L34 44" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <path d="M27 22 Q25 24 25 32 L25 58 Q28 62 32 62 Q36 62 38 58 L38 32 Q38 24 36 22 Z" fill="#221a12"/>
-                            <rect x="24" y="50" width="15" height="2.5" rx="1" fill="#5a4428"/>
-                            <rect x="30" y="50" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
-                            <path d="M28 10 Q26 8 27 3 Q30 0 35 1 Q38 3 38 8 L38 22 Q36 24 32 24 Q28 24 28 22 Z" fill="#221a12"/>
-                            <circle cx="36.5" cy="12" r="1" fill="#c4953a" opacity="0.35"/>
-                            <path d="M34 60 L33 82 L34 96" stroke="#1a1410" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-                            <path d="M34 95 L32 98 L37 99" fill="#1a1410"/>
-                            <path d="M34 28 L30 38 L28 44" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <line x1="27" y1="40" x2="24" y2="96" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
-                        <!-- Frame 4: Right High Point — push off R, body highest -->
-                        <svg viewBox="0 0 80 130" fill="none">
-                            <path d="M25 23 Q21 26 18 42 Q15 56 19 68" fill="#2e2418" opacity="0.7"/>
-                            <rect x="23" y="31" width="7" height="12" rx="2" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.5"/>
-                            <path d="M33 59 L34 80 L33 96" stroke="#151010" stroke-width="4" stroke-linecap="round" fill="none"/>
-                            <path d="M33 95 L31 98 L36 99" fill="#151010"/>
-                            <path d="M30 27 L32 36 L31 42" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <path d="M27 21 Q25 23 25 31 L25 57 Q28 61 32 61 Q36 61 38 57 L38 31 Q38 23 36 21 Z" fill="#221a12"/>
-                            <rect x="24" y="49" width="15" height="2.5" rx="1" fill="#5a4428"/>
-                            <rect x="30" y="49" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
-                            <path d="M28 9 Q26 7 27 2 Q30 -1 35 0 Q38 2 38 7 L38 21 Q36 23 32 23 Q28 23 28 21 Z" fill="#221a12"/>
-                            <circle cx="36.5" cy="11" r="1" fill="#c4953a" opacity="0.35"/>
-                            <path d="M34 59 L28 78 L30 94" stroke="#1a1410" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-                            <path d="M30 93 L28 96 L33 97" fill="#1a1410"/>
-                            <path d="M34 27 L36 38 L38 48" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <line x1="37" y1="44" x2="34" y2="96" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
-                        <!-- Frame 5: Left Contact — L heel strike, R toe push-off -->
-                        <svg viewBox="0 0 80 130" fill="none">
-                            <path d="M25 24 Q20 28 16 46 Q13 60 18 74" fill="#2e2418" opacity="0.7"/>
-                            <rect x="23" y="32" width="7" height="12" rx="2" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.5"/>
-                            <path d="M35 60 L41 80 L39 96" stroke="#151010" stroke-width="4" stroke-linecap="round" fill="none"/>
-                            <path d="M39 95 L37 98 L42 99" fill="#151010"/>
-                            <path d="M34 28 L28 42 L24 52" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <path d="M27 22 Q25 24 25 32 L25 58 Q28 62 32 62 Q36 62 38 58 L38 32 Q38 24 36 22 Z" fill="#221a12"/>
-                            <rect x="24" y="50" width="15" height="2.5" rx="1" fill="#5a4428"/>
-                            <rect x="30" y="50" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
-                            <path d="M28 10 Q26 8 27 3 Q30 0 35 1 Q38 3 38 8 L38 22 Q36 24 32 24 Q28 24 28 22 Z" fill="#221a12"/>
-                            <circle cx="36.5" cy="12" r="1" fill="#c4953a" opacity="0.35"/>
-                            <path d="M31 60 L23 78 L25 94" stroke="#1a1410" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-                            <path d="M25 93 L23 96 L28 97" fill="#1a1410"/>
-                            <path d="M30 28 L36 42 L38 50" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <line x1="23" y1="48" x2="20" y2="96" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
-                        <!-- Frame 6: Left Recoil — weight absorb on L, body lowest -->
-                        <svg viewBox="0 0 80 130" fill="none">
-                            <path d="M25 24 Q19 28 15 48 Q12 62 17 76" fill="#2e2418" opacity="0.7"/>
-                            <rect x="23" y="32" width="7" height="12" rx="2" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.5"/>
-                            <path d="M35 61 L39 80 L38 96" stroke="#151010" stroke-width="4" stroke-linecap="round" fill="none"/>
-                            <path d="M38 95 L36 98 L41 99" fill="#151010"/>
-                            <path d="M34 29 L29 40 L26 50" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <path d="M27 23 Q25 25 25 33 L25 59 Q28 63 32 63 Q36 63 38 59 L38 33 Q38 25 36 23 Z" fill="#221a12"/>
-                            <rect x="24" y="51" width="15" height="2.5" rx="1" fill="#5a4428"/>
-                            <rect x="30" y="51" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
-                            <path d="M28 11 Q26 9 27 4 Q30 1 35 2 Q38 4 38 9 L38 23 Q36 25 32 25 Q28 25 28 23 Z" fill="#221a12"/>
-                            <circle cx="36.5" cy="13" r="1" fill="#c4953a" opacity="0.35"/>
-                            <path d="M31 61 L26 80 L28 94" stroke="#1a1410" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-                            <path d="M28 93 L26 96 L31 97" fill="#1a1410"/>
-                            <path d="M30 29 L35 40 L36 47" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <line x1="25" y1="46" x2="22" y2="96" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
-                        <!-- Frame 7: Left Passing — R leg passes L, body rising -->
-                        <svg viewBox="0 0 80 130" fill="none">
-                            <path d="M25 24 Q20 26 17 44 Q14 58 18 72" fill="#2e2418" opacity="0.7"/>
-                            <rect x="23" y="32" width="7" height="12" rx="2" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.5"/>
-                            <path d="M34 60 L33 82 L34 96" stroke="#151010" stroke-width="4" stroke-linecap="round" fill="none"/>
-                            <path d="M34 95 L32 98 L37 99" fill="#151010"/>
-                            <path d="M34 28 L30 38 L28 44" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <path d="M27 22 Q25 24 25 32 L25 58 Q28 62 32 62 Q36 62 38 58 L38 32 Q38 24 36 22 Z" fill="#221a12"/>
-                            <rect x="24" y="50" width="15" height="2.5" rx="1" fill="#5a4428"/>
-                            <rect x="30" y="50" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
-                            <path d="M28 10 Q26 8 27 3 Q30 0 35 1 Q38 3 38 8 L38 22 Q36 24 32 24 Q28 24 28 22 Z" fill="#221a12"/>
-                            <circle cx="36.5" cy="12" r="1" fill="#c4953a" opacity="0.35"/>
-                            <path d="M32 60 L29 82 L30 96" stroke="#1a1410" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-                            <path d="M30 95 L28 98 L33 99" fill="#1a1410"/>
-                            <path d="M30 28 L34 38 L34 44" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <line x1="27" y1="40" x2="24" y2="96" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
-                        <!-- Frame 8: Left High Point — push off L, body highest -->
-                        <svg viewBox="0 0 80 130" fill="none">
-                            <path d="M25 23 Q21 26 18 42 Q15 56 19 68" fill="#2e2418" opacity="0.7"/>
-                            <rect x="23" y="31" width="7" height="12" rx="2" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.5"/>
-                            <path d="M34 59 L28 78 L30 94" stroke="#151010" stroke-width="4" stroke-linecap="round" fill="none"/>
-                            <path d="M30 93 L28 96 L33 97" fill="#151010"/>
-                            <path d="M34 27 L36 38 L38 48" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <path d="M27 21 Q25 23 25 31 L25 57 Q28 61 32 61 Q36 61 38 57 L38 31 Q38 23 36 21 Z" fill="#221a12"/>
-                            <rect x="24" y="49" width="15" height="2.5" rx="1" fill="#5a4428"/>
-                            <rect x="30" y="49" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
-                            <path d="M28 9 Q26 7 27 2 Q30 -1 35 0 Q38 2 38 7 L38 21 Q36 23 32 23 Q28 23 28 21 Z" fill="#221a12"/>
-                            <circle cx="36.5" cy="11" r="1" fill="#c4953a" opacity="0.35"/>
-                            <path d="M33 59 L34 80 L33 96" stroke="#151010" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-                            <path d="M33 95 L31 98 L36 99" fill="#151010"/>
-                            <path d="M30 27 L32 36 L31 42" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                            <line x1="37" y1="44" x2="34" y2="96" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
-                    </div>
+                    <svg viewBox="0 0 80 130" fill="none">
+                        <g class="wk-bounce">
+                            <!-- === CAPE (3-segment filled shapes, behind everything) === -->
+                            <g class="wk-cape-1">
+                                <!-- Upper cape: attached at shoulder, flowing left -->
+                                <path d="M26 22 Q24 24 22 30 Q20 36 20 42 L24 42 Q24 36 25 30 Q26 26 27 24 Z" fill="#2e2418" opacity="0.65"/>
+                                <g class="wk-cape-2">
+                                    <!-- Mid cape: continues flowing down-left -->
+                                    <path d="M20 40 Q18 48 17 56 Q16 60 17 64 L21 62 Q20 56 20 50 Q21 44 22 42 Z" fill="#2e2418" opacity="0.55"/>
+                                    <g class="wk-cape-3">
+                                        <!-- Lower cape tail: maximum billow -->
+                                        <path d="M17 60 Q15 66 14 72 Q14 76 16 78 L20 76 Q19 72 19 68 Q19 64 20 62 Z" fill="#2e2418" opacity="0.45"/>
+                                    </g>
+                                </g>
+                            </g>
+
+                            <!-- === LEFT LEG (back, dimmer — rendered first = behind) === -->
+                            <g class="wk-hip-l" opacity="0.65">
+                                <!-- Left thigh: tapered from hip(34,52) to knee -->
+                                <path d="M32 52 L31 62 Q31 68 32 72 L35 72 Q35 68 35 62 L34 52 Z" fill="#1a1410"/>
+                                <g class="wk-knee-l">
+                                    <!-- Left shin: tapered from knee(34,72) to ankle -->
+                                    <path d="M32 72 L31 84 Q32 92 32 96 L35 96 Q35 92 35 84 L35 72 Z" fill="#1a1410"/>
+                                    <!-- Left boot -->
+                                    <path d="M31 95 L29 99 Q31 100 35 100 L36 97 Q35 95 33 95 Z" fill="#120e0e"/>
+                                </g>
+                            </g>
+
+                            <!-- === LEFT ARM (back, dimmer) === -->
+                            <g class="wk-shoulder-l" opacity="0.65">
+                                <!-- Left upper arm -->
+                                <path d="M30 24 L29 30 L30 36" stroke="#2a2018" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                                <g class="wk-elbow-l">
+                                    <!-- Left forearm -->
+                                    <path d="M30 36 L28 43 L26 49" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
+                                    <!-- Left hand (small circle) -->
+                                    <circle cx="26" cy="50" r="1.5" fill="#2a2018"/>
+                                </g>
+                            </g>
+
+                            <!-- === TORSO (static, inherits only bounce) === -->
+                            <g>
+                                <!-- Tunic body -->
+                                <path d="M27 22 Q25 24 25 32 L25 56 Q28 60 32 60 Q36 60 38 56 L38 32 Q38 24 36 22 Z" fill="#221a12"/>
+                                <!-- Tunic shadow (left side, depth) -->
+                                <path d="M25 28 L25 56 Q26 58 28 58 L28 28 Z" fill="#1a1410" opacity="0.15"/>
+                                <!-- Belt -->
+                                <rect x="24" y="50" width="15" height="2.5" rx="1" fill="#5a4428"/>
+                                <!-- Buckle -->
+                                <rect x="30" y="50" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
+                                <!-- Backpack (compact, rounded, flush against back) -->
+                                <path d="M23 30 Q22 30 22 32 L22 40 Q22 42 23 42 L26 42 Q27 42 27 40 L27 32 Q27 30 26 30 Z" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.3"/>
+                                <!-- Backpack top flap -->
+                                <path d="M22 32 Q24 30 27 32" stroke="#4a3828" stroke-width="0.4" fill="none"/>
+                                <!-- Backpack strap -->
+                                <path d="M25 30 L27 25" stroke="#4a3828" stroke-width="0.6" fill="none"/>
+                            </g>
+
+                            <!-- === RIGHT LEG (front, full opacity) === -->
+                            <g class="wk-hip-r">
+                                <!-- Right thigh: tapered from hip(34,52) to knee -->
+                                <path d="M32 52 L31 62 Q31 68 32 72 L35 72 Q35 68 36 62 L35 52 Z" fill="#151010"/>
+                                <g class="wk-knee-r">
+                                    <!-- Right shin: tapered from knee(34,72) to ankle -->
+                                    <path d="M32 72 L31 84 Q32 92 32 96 L35 96 Q35 92 36 84 L35 72 Z" fill="#151010"/>
+                                    <!-- Right boot -->
+                                    <path d="M31 95 L29 99 Q31 100 35 100 L36 97 Q35 95 33 95 Z" fill="#120e0e"/>
+                                </g>
+                            </g>
+
+                            <!-- === RIGHT ARM (front, full opacity) + staff === -->
+                            <g class="wk-shoulder-r">
+                                <!-- Right upper arm -->
+                                <path d="M37 24 L38 30 L37 36" stroke="#2a2018" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                                <g class="wk-elbow-r">
+                                    <!-- Right forearm -->
+                                    <path d="M37 36 L38 43 L39 49" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
+                                    <!-- Right hand -->
+                                    <circle cx="39" cy="50" r="1.5" fill="#2a2018"/>
+                                    <!-- Staff (held in right hand, sways independently) -->
+                                    <g class="wk-staff">
+                                        <line x1="39" y1="30" x2="36" y2="102" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
+                                        <!-- Staff top knob -->
+                                        <circle cx="39" cy="29" r="1.5" fill="#5a4428"/>
+                                        <!-- Lantern glow at staff top -->
+                                        <circle class="wk-lantern" cx="39" cy="28" r="3.5" fill="#c4953a" opacity="0.06"/>
+                                        <circle cx="39" cy="29" r="1" fill="#c4953a" opacity="0.25"/>
+                                    </g>
+                                </g>
+                            </g>
+
+                            <!-- === HEAD / HOOD (topmost layer) === -->
+                            <g class="wk-head">
+                                <!-- Hood shape (medieval pointed hood) -->
+                                <path d="M28 10 Q26 8 27 3 Q30 0 35 1 Q38 3 38 8 L38 22 Q36 24 32 24 Q28 24 28 22 Z" fill="#221a12"/>
+                                <!-- Hood fold detail -->
+                                <path d="M30 4 Q32 2 34 3" stroke="#2e2418" stroke-width="0.5" fill="none" opacity="0.4"/>
+                                <!-- Hood brim shadow -->
+                                <path d="M28 22 Q30 23 32 23 Q34 23 36 22" stroke="#1a1410" stroke-width="0.8" fill="none" opacity="0.4"/>
+                                <!-- Face shadow (under hood) -->
+                                <path d="M34 10 Q36 12 36 16 Q35 18 34 18 Q33 16 34 12 Z" fill="#1a1410" opacity="0.3"/>
+                                <!-- Eye glow (single, side profile) -->
+                                <circle cx="36" cy="13" r="1.2" fill="#c4953a" opacity="0.5"/>
+                                <!-- Subtle eye glow halo -->
+                                <circle cx="36" cy="13" r="4" fill="#c4953a" opacity="0.05"/>
+                            </g>
+                        </g>
+                    </svg>
                 </div>
             </div>
 
@@ -1504,6 +1657,7 @@
     <script>
         var v = Date.now();
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         var scripts = ['map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-map-terrain.js', 'navigate-map-decor.js', 'navigate-ui.js'];
         scripts.forEach(function (s) { document.write('<script src="' + s + '?v=' + v + '"><\/script>'); });
     </script>

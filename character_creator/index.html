@@ -19,6 +19,7 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="data.js?v=' + v + '"><\/script>');
         document.write('<script src="personality_data.js?v=' + v + '"><\/script>');
     </script>
@@ -1159,6 +1160,17 @@
             apiBase = params.get('api_base') || '';
             userId = params.get('user_id') || '';
             try { existingNames = JSON.parse(decodeBase64Utf8(params.get('names') || 'W10=')); } catch (e) { console.warn('[CHAR_CREATOR] Failed to decode existing names', e); existingNames = []; }
+
+            // ── Shared Error Reporter ──
+            if (window.ValdoriaErrors) {
+                ValdoriaErrors.init({
+                    appName: 'CHAR_CREATOR',
+                    apiBase: apiBase,
+                    token: token,
+                    uid: userId,
+                });
+            }
+
             buildProgressBar();
             buildDmBubbles();
             buildRaceGrid();

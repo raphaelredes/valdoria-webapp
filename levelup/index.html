@@ -14,6 +14,7 @@
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="data.js?v=' + v + '"><\/script>');
     </script>
     <style>
@@ -949,6 +950,12 @@
             apiFallback = params.get('api') || '';
             userId = params.get('uid') || '';
             returnTo = params.get('return') || '';
+
+            // ── Shared Error Reporter ──
+            if (window.ValdoriaErrors) {
+                ValdoriaErrors.init({ appName: 'LEVELUP', apiBase: apiFallback, token: token, uid: userId });
+            }
+
             try {
                 const raw = params.get('p') || '';
                 P = JSON.parse(decodeBase64Utf8(raw));

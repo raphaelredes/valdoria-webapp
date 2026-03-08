@@ -23,6 +23,16 @@ const USER_ID = parseInt(params.get('uid') || '0', 10);
 const MODE = params.get('mode') || 'full';
 const SHOW_PREFACE = params.get('preface') === '1';
 
+// ── Shared Error Reporter ──
+if (window.ValdoriaErrors) {
+    ValdoriaErrors.init({
+        appName: 'PROLOGUE',
+        apiBase: API_BASE,
+        token: TOKEN,
+        uid: USER_ID,
+    });
+}
+
 let DATA = null;       // Full prologue data from /api/prologue/init
 let screenIdx = 0;     // Current screen index in the track
 let choices = {};       // Accumulated player choices
@@ -62,15 +72,8 @@ async function apiCall(endpoint, body = {}) {
 }
 
 // ═══════════════════════════════════════════════════════
-// ERROR HANDLING
+// ERROR HANDLING — provided by shared/error-reporter.js
 // ═══════════════════════════════════════════════════════
-
-function showError(msg, err = null) {
-    console.error('[PROLOGUE]', msg, err || '');
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('errorMsg').textContent = msg;
-    document.getElementById('errorOverlay').style.display = 'flex';
-}
 
 // ═══════════════════════════════════════════════════════
 // SCREEN NAVIGATION

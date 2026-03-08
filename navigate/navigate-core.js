@@ -53,6 +53,12 @@ async function initAsync() {
         S.api = params.get('api') || '';
         S.uid = parseInt(params.get('uid') || '0');
         S.returnTo = params.get('return') || 'game';
+
+        // Init error reporter
+        if (window.ValdoriaErrors) {
+            ValdoriaErrors.init({ appName: 'NAVIGATE', apiBase: S.api, token: S.token, uid: S.uid });
+        }
+
         let dataB64 = params.get('data') || '';
 
         // If URL data param is missing, fetch from API (robust fallback)
@@ -428,17 +434,7 @@ async function _transitionToGame() {
 // ERROR HANDLING
 // -----------------------------------------------------------
 
-function showError(msg, err = null) {
-    console.error('[NAVIGATE]', msg, err || '');
-    const toast = document.createElement('div');
-    toast.className = 'v-toast-error';
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-
-    // Hide loading on error
-    document.getElementById('loading').classList.add('hidden');
-}
+// showError provided by shared/error-reporter.js
 
 // -----------------------------------------------------------
 // BOOT

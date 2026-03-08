@@ -2366,6 +2366,17 @@ async function initAsync() {
     S.token = params.get('token') || '';
     S.apiBase = params.get('api') || '';
     S.uid = params.get('uid') || '';
+
+    // ── Shared Error Reporter ──
+    if (window.ValdoriaErrors) {
+        ValdoriaErrors.init({
+            appName: 'EXPLORE',
+            apiBase: S.apiBase,
+            token: S.token,
+            uid: S.uid,
+        });
+    }
+
     let dataB64 = params.get('data') || '';
     const isRestore = params.get('restore') === '1';
 

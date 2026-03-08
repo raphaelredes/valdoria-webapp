@@ -26,105 +26,9 @@ const SCREEN_CACHE_TTL = 1800000; // 30 minutes
 
 let _loadingTimeoutId = null;
 
-// ─── Connection Debug Log (ring buffer for error diagnosis) ───
-const _connLog = [];
-const _CONN_LOG_MAX = 80;
-const _CONN_LOG_LS_KEY = 'valdoria_conn_log';
-let _clogFlushTimer = null;
-
+// ─── Connection logging alias (provided by shared/error-reporter.js) ───
 function _clog(msg) {
-    const ts = new Date().toISOString().substring(11, 23); // HH:MM:SS.mmm
-    const entry = `[${ts}] ${msg}`;
-    _connLog.push(entry);
-    if (_connLog.length > _CONN_LOG_MAX) _connLog.shift();
-    // Debounced persist to localStorage (avoids thrashing during rapid retries)
-    if (!_clogFlushTimer) {
-        _clogFlushTimer = setTimeout(() => {
-            _clogFlushTimer = null;
-            try { localStorage.setItem(_CONN_LOG_LS_KEY, JSON.stringify(_connLog)); } catch (e) { /* quota */ }
-        }, 500);
-    }
-}
-
-// Flush on page unload (ensure last entries are saved)
-window.addEventListener('beforeunload', () => {
-    try { localStorage.setItem(_CONN_LOG_LS_KEY, JSON.stringify(_connLog)); } catch (e) { /* */ }
-});
-
-// Restore logs from previous session
-try {
-    const prev = JSON.parse(localStorage.getItem(_CONN_LOG_LS_KEY) || '[]');
-    if (prev.length) {
-        _connLog.push('── previous session ──');
-        _connLog.push(...prev.slice(-20)); // keep last 20 from previous session
-        _connLog.push('── current session ──');
-    }
-} catch (e) { /* */ }
-
-/** Returns network connection info for debug */
-function _getNetworkInfo() {
-    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (!conn) return 'N/A';
-    const parts = [];
-    if (conn.effectiveType) parts.push(conn.effectiveType);
-    if (conn.downlink) parts.push(conn.downlink + 'Mbps');
-    if (conn.rtt) parts.push('rtt:' + conn.rtt + 'ms');
-    if (conn.saveData) parts.push('save-data');
-    return parts.join(' ') || 'N/A';
-}
-
-/** Returns device/platform info for error reports */
-function _getDeviceInfo() {
-    const tg = window.Telegram?.WebApp;
-    const parts = [];
-    if (tg?.platform) parts.push('platform:' + tg.platform);
-    parts.push(screen.width + 'x' + screen.height);
-    parts.push('vp:' + window.innerWidth + 'x' + window.innerHeight);
-    if (tg?.colorScheme) parts.push(tg.colorScheme);
-    return parts.join(' ') || 'N/A';
-}
-
-/** Classifies an error message into a category for admin reports */
-function _classifyError(msg) {
-    if (!msg) return 'unknown';
-    if (msg.includes('Sem conexão') || msg.includes('internet') || msg.includes('offline'))
-        return 'network';
-    if (msg.includes('não respondeu') || msg.includes('demorou') || msg.includes('timeout'))
-        return 'timeout';
-    if (msg.includes('expirada') || msg.includes('Sessão') || msg.includes('401'))
-        return 'session';
-    if (msg.includes('Personagem não encontrado') || msg.includes('player_not_found'))
-        return 'player';
-    if (msg.includes('indisponível') || msg.includes('500') || msg.includes('Erro no servidor'))
-        return 'server';
-    return 'unknown';
-}
-
-// Session start time (for duration tracking in error reports)
-const _sessionStartTime = Date.now();
-
-// JS error capture counter
-let _jsErrorCount = 0;
-
-/** Returns full connection debug log as copyable text */
-function getConnectionLog() {
-    const sessionSec = Math.round((Date.now() - _sessionStartTime) / 1000);
-    const sessionStr = sessionSec < 60 ? sessionSec + 's' : Math.floor(sessionSec / 60) + 'm' + (sessionSec % 60) + 's';
-    const header = [
-        '── Valdoria Connection Debug ──',
-        `Time: ${new Date().toISOString()}`,
-        `API: ${S.apiBase || '(not set)'}`,
-        `UID: ${S.uid || 0}`,
-        `Token: ${S.token ? S.token.substring(0, 8) + '...' : '(missing)'}`,
-        `Screen: ${S.currentScreen?.screen_id || '(none)'}`,
-        `Device: ${_getDeviceInfo()}`,
-        `UA: ${navigator.userAgent.substring(0, 80)}`,
-        `Online: ${navigator.onLine}  Network: ${_getNetworkInfo()}`,
-        `TG: ${window.Telegram?.WebApp?.version || 'N/A'}`,
-        `Session: ${sessionStr}  Retries: ${typeof _errorRetryAttempt !== 'undefined' ? _errorRetryAttempt : 0}  JS Errors: ${_jsErrorCount}`,
-        '─────────────────────────────',
-    ];
-    return header.concat(_connLog).join('\n');
+    if (window.ValdoriaErrors) ValdoriaErrors.log(msg);
 }
 
 // ─── Initialization ───
@@ -147,6 +51,25 @@ async function init() {
     if (typeof initImmersive === 'function') initImmersive();
     // Ambient particle system — init canvas
     if (typeof initParticles === 'function') initParticles();
+
+    // Initialize shared error reporter
+    if (window.ValdoriaErrors) {
+        ValdoriaErrors.init({
+            appName: 'GAME',
+            apiBase: S.apiBase,
+            token: S.token,
+            uid: S.uid,
+            getScreenId: () => S.currentScreen ? S.currentScreen.screen_id || '' : '',
+            onRetry: async () => {
+                showLoading(true);
+                _clog('RETRY health check...');
+                const ok = await checkHealth();
+                if (!ok) { _clog('RETRY health FAILED'); hideLoading(); showError('Servidor indisponível. Tente novamente em alguns segundos.'); return; }
+                _clog('RETRY health OK → loading state');
+                if (S.currentScreen) { fetchState(false); } else { startGame(); }
+            },
+        });
+    }
 
     if (!S.token || !S.uid || !S.apiBase) {
         console.error('[GAME] Missing required params - token:', !!S.token, 'uid:', S.uid, 'apiBase:', !!S.apiBase);
@@ -186,16 +109,15 @@ async function init() {
         _clog('NETWORK → ONLINE');
         console.log('[GAME] Network back online');
         // If error overlay is showing a connection error, auto-retry
-        const errOverlay = document.getElementById('error-overlay');
-        const errMsg = document.getElementById('error-msg');
+        const errOverlay = document.getElementById('v-err-overlay');
+        const errMsg = document.getElementById('v-err-msg');
         if (errOverlay && errOverlay.style.display !== 'none' && errMsg) {
             const msg = errMsg.textContent || '';
             if (msg.includes('Sem conexão') || msg.includes('indisponível')) {
                 _clog('NETWORK → auto-retry after coming online');
-                showToast('Conexão restaurada, reconectando...', 2000);
-                // Trigger retry after short delay (let network stabilize)
+                if (typeof showToast === 'function') showToast('Conexão restaurada, reconectando...', 2000);
                 setTimeout(() => {
-                    const retryBtn = document.getElementById('error-retry');
+                    const retryBtn = document.getElementById('v-err-retry');
                     if (retryBtn && retryBtn.onclick) retryBtn.onclick();
                 }, 1500);
             }
@@ -208,8 +130,6 @@ async function init() {
     const healthy = await checkHealth();
     _clog('INIT health result: ' + (healthy ? 'OK' : 'FAIL'));
     console.log('[GAME] Health check result:', healthy);
-    // Flush queued error reports from previous failed sessions
-    if (healthy && typeof _flushReportQueue === 'function') _flushReportQueue();
     if (!healthy) {
         showError('Servidor indisponível. Tente novamente em alguns segundos.');
         return;
@@ -625,112 +545,6 @@ function _flushLogs() {
 _logFlushTimer = setInterval(_flushLogs, _LOG_FLUSH_INTERVAL);
 // Flush on page unload
 window.addEventListener('beforeunload', _flushLogs);
-
-// ─── Player Error Reporting ───
-const _REPORT_QUEUE_KEY = 'valdoria_report_queue';
-
-async function reportError() {
-    const log = typeof getConnectionLog === 'function' ? getConnectionLog() : 'Log indisponível';
-    const screenId = S.currentScreen ? S.currentScreen.screen_id || '' : '';
-    // Capture the error message from the overlay
-    const errMsgEl = document.getElementById('error-msg');
-    const errorMsg = errMsgEl ? errMsgEl.textContent || '' : '';
-    const errorType = _classifyError(errorMsg);
-
-    const payload = {
-        user_id: S.uid,
-        log: log,
-        screen_id: screenId,
-        error_msg: errorMsg,
-        error_type: errorType,
-        device: _getDeviceInfo(),
-        retries: typeof _errorRetryAttempt !== 'undefined' ? _errorRetryAttempt : 0,
-    };
-
-    if (!S.apiBase || !navigator.onLine) {
-        // Offline: queue for later
-        _queueReport(payload);
-        return { ok: true, sent: false, queued: true };
-    }
-
-    try {
-        const resp = await fetch(S.apiBase + '/api/game/report-error', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + S.token,
-                'ngrok-skip-browser-warning': '1',
-            },
-            body: JSON.stringify(payload),
-        });
-        const data = await resp.json();
-        if (resp.status === 429 && data.retry_after) {
-            return { ok: false, error: 'cooldown', retry_after: data.retry_after };
-        }
-        // Also flush any queued reports
-        _flushReportQueue();
-        return data;
-    } catch (e) {
-        console.error('[GAME] reportError failed:', e.message);
-        // Queue on failure
-        _queueReport(payload);
-        return { ok: true, sent: false, queued: true };
-    }
-}
-
-function _queueReport(payload) {
-    try {
-        const queue = JSON.parse(localStorage.getItem(_REPORT_QUEUE_KEY) || '[]');
-        queue.push({ ...payload, queued_at: new Date().toISOString() });
-        // Max 5 queued reports
-        while (queue.length > 5) queue.shift();
-        localStorage.setItem(_REPORT_QUEUE_KEY, JSON.stringify(queue));
-    } catch (e) { /* quota */ }
-}
-
-function _flushReportQueue() {
-    try {
-        const queue = JSON.parse(localStorage.getItem(_REPORT_QUEUE_KEY) || '[]');
-        if (!queue.length || !S.apiBase) return;
-        localStorage.removeItem(_REPORT_QUEUE_KEY);
-        const now = Date.now();
-        const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h — discard stale reports
-        for (const payload of queue) {
-            // Skip reports older than 24h
-            if (payload.queued_at) {
-                const age = now - new Date(payload.queued_at).getTime();
-                if (age > MAX_AGE_MS) continue;
-            }
-            payload.was_queued = true; // flag for admin visibility
-            fetch(S.apiBase + '/api/game/report-error', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + S.token,
-                    'ngrok-skip-browser-warning': '1',
-                },
-                body: JSON.stringify(payload),
-            }).catch(() => { /* fire and forget */ });
-        }
-    } catch (e) { /* */ }
-}
-
-// Flush queued reports when coming online
-window.addEventListener('online', () => { setTimeout(_flushReportQueue, 3000); });
-
-// ─── Global Error Handlers ───
-window.addEventListener('error', (e) => {
-    _jsErrorCount++;
-    const loc = (e.filename || '').split('/').pop() + ':' + e.lineno;
-    _clog('JS ERROR: ' + e.message + ' @ ' + loc);
-    console.error('[GAME] UNCAUGHT ERROR:', e.message, 'at', e.filename + ':' + e.lineno + ':' + e.colno);
-});
-window.addEventListener('unhandledrejection', (e) => {
-    _jsErrorCount++;
-    const reason = e.reason ? (e.reason.message || String(e.reason)).substring(0, 100) : 'unknown';
-    _clog('PROMISE REJECT: ' + reason);
-    console.error('[GAME] UNHANDLED PROMISE REJECTION:', e.reason);
-});
 
 // ─── Bootstrap ───
 document.addEventListener('DOMContentLoaded', () => {
