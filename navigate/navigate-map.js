@@ -187,6 +187,61 @@ function computeFogState(forceRecompute) {
 // RENDER MAP
 // ===============================================================
 
+// Yield control to browser so CSS animations stay smooth
+function _yieldFrame() {
+    return new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+}
+
+// Async progressive render — used on initial load with loading screen
+async function renderMapAsync(onProgress) {
+    const svg = document.getElementById('map-svg');
+    svg.setAttribute('width', SVG_W);
+    svg.setAttribute('height', SVG_H);
+    svg.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
+    svg.innerHTML = '';
+    const fogState = computeFogState(true);
+
+    // Phase 1: Foundation (defs, background, landmass)
+    const defs = _el('defs');
+    _buildAllDefs(defs);
+    svg.appendChild(defs);
+    _renderBackground(svg);
+    _renderLandmass(svg);
+    if (onProgress) onProgress(20);
+    await _yieldFrame();
+
+    // Phase 2: Terrain base (edges, aging, ground, rivers, regions)
+    _renderWornEdges(svg);
+    _renderAgingEffects(svg);
+    renderGroundCover(svg);
+    _renderRivers(svg);
+    renderTerrainRegions(svg, fogState);
+    if (onProgress) onProgress(50);
+    await _yieldFrame();
+
+    // Phase 3: Details + roads + locations
+    renderTerrainDetails(svg, fogState);
+    const roadG = _el('g', { class: 'roads-layer' });
+    renderRoads(roadG, fogState);
+    svg.appendChild(roadG);
+    const locG = _el('g', { class: 'locations-layer' });
+    renderLocationMarkers(locG, fogState);
+    svg.appendChild(locG);
+    if (onProgress) onProgress(80);
+    await _yieldFrame();
+
+    // Phase 4: Polish (rings, fog, decor, compass, pan/zoom)
+    if (typeof renderDistanceRings === 'function') renderDistanceRings(svg);
+    if (typeof renderBreadcrumbTrail === 'function') renderBreadcrumbTrail(svg);
+    renderPlayerBanner(svg);
+    renderFogWisps(svg, fogState);
+    renderCartographyDecor(svg, fogState);
+    renderCompassRose();
+    setupPanZoom();
+    if (onProgress) onProgress(100);
+}
+
+// Synchronous render — used for re-renders (visibility refresh, no loading screen)
 function renderMap() {
     const svg = document.getElementById('map-svg');
     svg.setAttribute('width', SVG_W);

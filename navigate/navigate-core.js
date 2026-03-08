@@ -109,8 +109,14 @@ async function initAsync() {
         // Update bottom bar
         updateBottomBar();
 
-        // Render the map
-        renderMap();
+        // Progressive map render with real loading progress
+        const progressFill = document.querySelector('.loading-progress-fill');
+        const updateProgress = (pct) => {
+            if (progressFill) progressFill.style.width = pct + '%';
+        };
+        updateProgress(10); // payload decompressed, state loaded
+
+        await renderMapAsync(updateProgress);
 
         // Center on current location
         centerOnLocation(S.currentLoc);
@@ -131,13 +137,10 @@ async function initAsync() {
         document.addEventListener('visibilitychange', _onVisibilityRefresh);
         window.addEventListener('pageshow', e => { if (e.persisted) _onVisibilityRefresh(); });
 
-        // Hide loading screen, then play arrival animation
-        setTimeout(() => {
-            document.getElementById('loading').classList.add('hidden');
-            if (typeof playArrivalAnimation === 'function') playArrivalAnimation();
-            // Show gesture tutorial after arrival animation
-            setTimeout(() => { if (typeof showGestureTutorial === 'function') showGestureTutorial(); }, 1500);
-        }, 300);
+        // Hide loading screen now that map is fully rendered
+        document.getElementById('loading').classList.add('hidden');
+        if (typeof playArrivalAnimation === 'function') playArrivalAnimation();
+        setTimeout(() => { if (typeof showGestureTutorial === 'function') showGestureTutorial(); }, 1500);
 
     } catch (e) {
         document.getElementById('loading').classList.add('hidden');
