@@ -14,6 +14,7 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="explore.css?v=' + v + '">');
     </script>
 </head>
@@ -29,10 +30,72 @@
         <button class="v-skip-btn" id="travel-skip-btn">Pular >></button>
     </div>
 
-    <!-- Loading Screen -->
-    <div id="loading">
-        <div class="loading-icon"></div>
-        <div class="loading-text">Gerando mapa...</div>
+    <!-- Loading Screen (magic summoning circle) -->
+    <div id="loading" class="loading-overlay">
+        <div class="loading-particles">
+            <div class="particle ember p1"></div>
+            <div class="particle ember p2"></div>
+            <div class="particle ember p3"></div>
+            <div class="particle ember p4"></div>
+            <div class="particle ember p5"></div>
+            <div class="particle ember p6"></div>
+            <div class="particle spark s1"></div>
+            <div class="particle spark s2"></div>
+            <div class="particle spark s3"></div>
+            <div class="particle spark s4"></div>
+            <div class="particle mote m1"></div>
+            <div class="particle mote m2"></div>
+            <div class="particle flame fl1"></div>
+            <div class="particle flame fl2"></div>
+            <div class="particle flame fl3"></div>
+            <div class="particle frost fr1"></div>
+            <div class="particle frost fr2"></div>
+            <div class="particle frost fr3"></div>
+            <div class="particle lightning lt1"></div>
+            <div class="particle lightning lt2"></div>
+            <div class="particle arcane ar1"></div>
+            <div class="particle arcane ar2"></div>
+            <div class="particle arcane ar3"></div>
+        </div>
+        <div class="magic-circle">
+            <div class="mc-aura"></div>
+            <div class="mc-aura mc-aura-2"></div>
+            <svg class="mc-ring mc-outer" viewBox="0 0 300 300">
+                <defs><path id="runeOuter" d="M150,150 m-125,0 a125,125 0 1,1 250,0 a125,125 0 1,1 -250,0"/></defs>
+                <circle cx="150" cy="150" r="125" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="1"/>
+                <circle cx="150" cy="150" r="127" fill="none" stroke="rgba(196,149,58,0.04)" stroke-width="0.5" stroke-dasharray="4 8"/>
+                <text class="mc-rune-text" fill="rgba(196,149,58,0.5)">
+                    <textPath href="#runeOuter" startOffset="0%">&#5792; &#5794; &#5798; &#5800; &#5809; &#5810; &#5815; &#5817; &#5818; &#5822; &#5825; &#5827; &#5831; &#5832; &#5833; &#5834; &#5839; &#5842; &#5846; &#5848; &#5850; &#5852; &#5853; &#5855;</textPath>
+                </text>
+            </svg>
+            <svg class="mc-ring mc-mid" viewBox="0 0 300 300">
+                <circle cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.05)" stroke-width="0.5"/>
+                <circle class="mc-energy-arc mc-arc-1" cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+                <circle class="mc-energy-arc mc-arc-2" cx="150" cy="150" r="96" fill="none" stroke="rgba(123,32,32,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+                <g opacity="0.3" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1">
+                    <line x1="150" y1="44" x2="150" y2="54"/><line x1="150" y1="246" x2="150" y2="256"/>
+                    <line x1="44" y1="150" x2="54" y2="150"/><line x1="246" y1="150" x2="256" y2="150"/>
+                    <line x1="78" y1="78" x2="85" y2="85" opacity="0.5"/><line x1="222" y1="78" x2="215" y2="85" opacity="0.5"/>
+                    <line x1="78" y1="222" x2="85" y2="215" opacity="0.5"/><line x1="222" y1="222" x2="215" y2="215" opacity="0.5"/>
+                </g>
+            </svg>
+            <svg class="mc-ring mc-inner" viewBox="0 0 300 300">
+                <defs><path id="runeInner" d="M150,150 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0"/></defs>
+                <circle cx="150" cy="150" r="75" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="0.5"/>
+                <text class="mc-inner-text" fill="rgba(196,149,58,0.35)">
+                    <textPath href="#runeInner" startOffset="0%">&#9670; VALDORIA &#9670; LENDAS &#9670; VALDORIA &#9670; LENDAS </textPath>
+                </text>
+            </svg>
+            <div class="mc-pulse"></div>
+            <div class="mc-pulse mc-pulse-2"></div>
+        </div>
+        <div class="loading-brand">
+            <div class="loading-title">EXPLORAR</div>
+            <div class="loading-divider"><span class="divider-rune">&#9670;</span></div>
+        </div>
+        <div class="loading-tip-area">
+            <div id="loading-tip" class="loading-tip">Gerando mapa...</div>
+        </div>
     </div>
 
     <!-- HUD -->

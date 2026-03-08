@@ -13,6 +13,7 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
     </script>
     <style>
         /* --- SCROLLBAR HIDING (redundancy for valdoria-design.css) --- */
@@ -39,639 +40,10 @@
             font-family: 'MedievalSharp', 'Cinzel', serif;
         }
 
-        /* ═══ LOADING (walking traveler scene) ═══ */
-        #loading {
-            position: fixed;
-            inset: 0;
-            background: #2a2420;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-            transition: opacity 0.8s ease;
-            overflow: hidden;
-        }
+        /* ═══ LOADING (uses shared/loading.css) ═══ */
 
-        #loading.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* --- Parallax landscape scene --- */
-        .load-scene {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-        }
-
-        /* Sky gradient */
-        .load-sky {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg,
-                #1a1510 0%,
-                #2a2018 30%,
-                #3a2e1e 55%,
-                #4a3a22 75%,
-                #5a4428 100%
-            );
-        }
-
-        /* Stars */
-        .load-stars {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 45%;
-            opacity: 0.6;
-        }
-
-        .load-star {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: #d4c8b0;
-            border-radius: 50%;
-            animation: starTwinkle 3s ease-in-out infinite;
-        }
-
-        @keyframes starTwinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-
-        /* Moon */
-        .load-moon {
-            position: absolute;
-            top: 12%;
-            right: 18%;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 40% 40%, #e8dcc4 0%, #c4b896 60%, #a09070 100%);
-            box-shadow: 0 0 20px rgba(228, 220, 196, 0.15), 0 0 60px rgba(228, 220, 196, 0.06);
-            animation: moonGlow 4s ease-in-out infinite;
-        }
-
-        @keyframes moonGlow {
-            0%, 100% { box-shadow: 0 0 20px rgba(228,220,196,0.15), 0 0 60px rgba(228,220,196,0.06); }
-            50% { box-shadow: 0 0 28px rgba(228,220,196,0.22), 0 0 80px rgba(228,220,196,0.08); }
-        }
-
-        /* Far mountains (parallax layer 1) */
-        .load-mountains-far {
-            position: absolute;
-            bottom: 32%;
-            left: 0;
-            right: 0;
-            height: 25%;
-            animation: parallaxFar 12s linear infinite;
-        }
-
-        @keyframes parallaxFar {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        /* Near hills (parallax layer 2) */
-        .load-hills {
-            position: absolute;
-            bottom: 22%;
-            left: 0;
-            right: 0;
-            height: 18%;
-            animation: parallaxNear 8s linear infinite;
-        }
-
-        @keyframes parallaxNear {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        /* Ground plane */
-        .load-ground {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 28%;
-            background: linear-gradient(180deg, #3a2e1e 0%, #2e2418 40%, #241c12 100%);
-        }
-
-        /* Road/path on the ground — visible dirt road */
-        .load-road {
-            position: absolute;
-            top: 0;
-            left: 15%;
-            right: 15%;
-            height: 100%;
-            background: linear-gradient(90deg,
-                transparent 0%,
-                rgba(90, 68, 34, 0.25) 20%,
-                rgba(100, 78, 40, 0.35) 50%,
-                rgba(90, 68, 34, 0.25) 80%,
-                transparent 100%
-            );
-        }
-
-        /* Road edge lines */
-        .load-road::before,
-        .load-road::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 1px;
-            background: rgba(112, 66, 20, 0.15);
-        }
-
-        .load-road::before { left: 0; }
-        .load-road::after { right: 0; }
-
-        /* Dust particles */
-        .load-dust {
-            position: absolute;
-            bottom: 18%;
-            left: 0;
-            right: 0;
-            height: 12%;
-            overflow: hidden;
-        }
-
-        .dust-p {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: rgba(160, 140, 100, 0.25);
-            border-radius: 50%;
-            animation: dustFloat 6s linear infinite;
-        }
-
-        @keyframes dustFloat {
-            0% { transform: translate(0, 0) scale(1); opacity: 0; }
-            15% { opacity: 0.4; }
-            85% { opacity: 0.2; }
-            100% { transform: translate(-120px, -30px) scale(0.3); opacity: 0; }
-        }
-
-        /* --- Walking traveler (center) --- */
-        .load-traveler {
-            position: absolute;
-            bottom: 15%;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            filter: drop-shadow(0 4px 14px rgba(0,0,0,0.7));
-        }
-
-        /* === SVG JOINT-BASED WALK (Andrew Hoyer technique) ===
-         * Single SVG with nested <g> groups at each joint pivot.
-         * CSS animations rotate each joint; child joints inherit parent rotation.
-         * transform-box: view-box ensures pixel-accurate pivots in SVG coords.
-         *
-         * Bone chain: hip > thigh > knee > shin > boot
-         *             shoulder > upper arm > elbow > forearm
-         *
-         * Walk cycle: 1.0s, 8-phase asymmetric (Contact→Down→Passing→High ×2)
-         * Physics: pendulum beziers for hips, spring for knees, overshoot for arms.
-         * Disney principles: overlapping action via staggered animation-delay.
-         * Cape: 3 nested segments with wave propagation (2.3s async period).
-         */
-        .walk-figure {
-            position: relative;
-            width: 120px;
-            height: 168px;
-        }
-
-        .walk-figure svg {
-            width: 100%;
-            height: 100%;
-            overflow: visible;
-        }
-
-        /* All animated SVG elements use viewBox as transform reference */
-        .walk-figure [class^="wk-"] {
-            transform-box: view-box;
-        }
-
-        /* --- Body bounce (vertical + lateral weight shift + forward lean) --- */
-        .wk-bounce {
-            animation: wkBounce 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
-            transform-origin: 34px 52px;
-        }
-        @keyframes wkBounce {
-            0%, 100%  { transform: translateY(1.5px) translateX(0.4px) rotate(1.2deg); }
-            15%       { transform: translateY(2.5px) translateX(0.6px) rotate(1.2deg); }
-            35%       { transform: translateY(-0.5px) translateX(0px) rotate(1.2deg); }
-            45%       { transform: translateY(-1px) translateX(-0.2px) rotate(1.2deg); }
-            50%       { transform: translateY(1.5px) translateX(-0.4px) rotate(1.2deg); }
-            65%       { transform: translateY(2.5px) translateX(-0.6px) rotate(1.2deg); }
-            85%       { transform: translateY(-0.5px) translateX(0px) rotate(1.2deg); }
-            95%       { transform: translateY(-1px) translateX(0.2px) rotate(1.2deg); }
-        }
-
-        /* --- Head bob (60% of body amplitude, vestibular compensation) --- */
-        .wk-head {
-            animation: wkHead 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
-            animation-delay: -0.02s;
-        }
-        @keyframes wkHead {
-            0%, 100%  { transform: translateY(0.9px) rotate(0deg); }
-            15%       { transform: translateY(1.5px) rotate(0.5deg); }
-            35%       { transform: translateY(-0.3px) rotate(-0.3deg); }
-            45%       { transform: translateY(-0.6px) rotate(-0.5deg); }
-            50%       { transform: translateY(0.9px) rotate(0deg); }
-            65%       { transform: translateY(1.5px) rotate(0.5deg); }
-            85%       { transform: translateY(-0.3px) rotate(-0.3deg); }
-            95%       { transform: translateY(-0.6px) rotate(-0.5deg); }
-        }
-
-        /* --- Cape (3-segment wave propagation, async period) --- */
-        .wk-cape-1 {
-            transform-origin: 25px 24px;
-            animation: wkCape1 2.3s ease-in-out infinite;
-        }
-        .wk-cape-2 {
-            transform-origin: 20px 40px;
-            animation: wkCape2 2.3s ease-in-out infinite;
-            animation-delay: -0.02s;
-        }
-        .wk-cape-3 {
-            transform-origin: 17px 56px;
-            animation: wkCape3 2.3s ease-in-out infinite;
-            animation-delay: -0.04s;
-        }
-        @keyframes wkCape1 {
-            0%, 100% { transform: rotate(0deg); }
-            25%      { transform: rotate(2deg); }
-            50%      { transform: rotate(-1deg); }
-            75%      { transform: rotate(1.5deg); }
-        }
-        @keyframes wkCape2 {
-            0%, 100% { transform: rotate(0deg) skewY(0deg); }
-            20%      { transform: rotate(3deg) skewY(1deg); }
-            50%      { transform: rotate(-2deg) skewY(-0.5deg); }
-            80%      { transform: rotate(2deg) skewY(0.8deg); }
-        }
-        @keyframes wkCape3 {
-            0%, 100% { transform: rotate(0deg) skewY(0deg) scaleX(1); }
-            15%      { transform: rotate(5deg) skewY(2deg) scaleX(1.04); }
-            45%      { transform: rotate(-3deg) skewY(-1deg) scaleX(0.96); }
-            70%      { transform: rotate(4deg) skewY(1.5deg) scaleX(1.02); }
-        }
-
-        /* === RIGHT LEG (front, full opacity) === */
-        .wk-hip-r {
-            transform-origin: 34px 52px;
-            animation: wkHipR 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
-        }
-        @keyframes wkHipR {
-            0%, 100%  { transform: rotate(-25deg); }
-            15%       { transform: rotate(-12deg); }
-            35%       { transform: rotate(12deg); }
-            45%       { transform: rotate(22deg); }
-            50%       { transform: rotate(25deg); }
-            65%       { transform: rotate(12deg); }
-            85%       { transform: rotate(-12deg); }
-            95%       { transform: rotate(-22deg); }
-        }
-
-        .wk-knee-r {
-            transform-origin: 34px 72px;
-            animation: wkKneeR 1.0s cubic-bezier(0.23, 1.0, 0.32, 1.0) infinite;
-        }
-        @keyframes wkKneeR {
-            0%, 100%  { transform: rotate(12deg); }
-            15%       { transform: rotate(22deg); }
-            35%       { transform: rotate(3deg); }
-            45%       { transform: rotate(0deg); }
-            50%       { transform: rotate(5deg); }
-            65%       { transform: rotate(30deg); }
-            85%       { transform: rotate(40deg); }
-            95%       { transform: rotate(18deg); }
-        }
-
-        /* === LEFT LEG (back, dimmer) === */
-        .wk-hip-l {
-            transform-origin: 34px 52px;
-            animation: wkHipL 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
-            animation-delay: -0.01s;
-        }
-        @keyframes wkHipL {
-            0%, 100%  { transform: rotate(25deg); }
-            15%       { transform: rotate(12deg); }
-            35%       { transform: rotate(-12deg); }
-            45%       { transform: rotate(-22deg); }
-            50%       { transform: rotate(-25deg); }
-            65%       { transform: rotate(-12deg); }
-            85%       { transform: rotate(12deg); }
-            95%       { transform: rotate(22deg); }
-        }
-
-        .wk-knee-l {
-            transform-origin: 34px 72px;
-            animation: wkKneeL 1.0s cubic-bezier(0.23, 1.0, 0.32, 1.0) infinite;
-            animation-delay: -0.01s;
-        }
-        @keyframes wkKneeL {
-            0%, 100%  { transform: rotate(5deg); }
-            15%       { transform: rotate(30deg); }
-            35%       { transform: rotate(40deg); }
-            45%       { transform: rotate(18deg); }
-            50%       { transform: rotate(12deg); }
-            65%       { transform: rotate(22deg); }
-            85%       { transform: rotate(3deg); }
-            95%       { transform: rotate(0deg); }
-        }
-
-        /* === RIGHT ARM (front, swings OPPOSITE to right leg) === */
-        .wk-shoulder-r {
-            transform-origin: 37px 22px;
-            animation: wkShoulderR 1.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
-            animation-delay: -0.02s;
-        }
-        @keyframes wkShoulderR {
-            0%, 100%  { transform: rotate(18deg); }
-            15%       { transform: rotate(10deg); }
-            35%       { transform: rotate(-8deg); }
-            45%       { transform: rotate(-16deg); }
-            50%       { transform: rotate(-18deg); }
-            65%       { transform: rotate(-10deg); }
-            85%       { transform: rotate(8deg); }
-            95%       { transform: rotate(16deg); }
-        }
-
-        .wk-elbow-r {
-            transform-origin: 37px 36px;
-            animation: wkElbowR 1.0s cubic-bezier(0.23, 1.0, 0.32, 1.0) infinite;
-            animation-delay: -0.04s;
-        }
-        @keyframes wkElbowR {
-            0%, 100%  { transform: rotate(-10deg); }
-            25%       { transform: rotate(-30deg); }
-            50%       { transform: rotate(-8deg); }
-            75%       { transform: rotate(-30deg); }
-        }
-
-        /* === LEFT ARM (back, swings OPPOSITE to left leg) === */
-        .wk-shoulder-l {
-            transform-origin: 31px 22px;
-            animation: wkShoulderL 1.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
-            animation-delay: -0.015s;
-        }
-        @keyframes wkShoulderL {
-            0%, 100%  { transform: rotate(-18deg); }
-            15%       { transform: rotate(-10deg); }
-            35%       { transform: rotate(8deg); }
-            45%       { transform: rotate(16deg); }
-            50%       { transform: rotate(18deg); }
-            65%       { transform: rotate(10deg); }
-            85%       { transform: rotate(-8deg); }
-            95%       { transform: rotate(-16deg); }
-        }
-
-        .wk-elbow-l {
-            transform-origin: 31px 36px;
-            animation: wkElbowL 1.0s cubic-bezier(0.23, 1.0, 0.32, 1.0) infinite;
-            animation-delay: -0.035s;
-        }
-        @keyframes wkElbowL {
-            0%, 100%  { transform: rotate(-8deg); }
-            25%       { transform: rotate(-30deg); }
-            50%       { transform: rotate(-10deg); }
-            75%       { transform: rotate(-30deg); }
-        }
-
-
-
-        /* --- Eye glow pulse (very subtle ember flicker) --- */
-        .wk-eye {
-            animation: wkEye 3.2s ease-in-out infinite;
-        }
-        @keyframes wkEye {
-            0%, 100% { opacity: 0.12; }
-            30%      { opacity: 0.2; }
-            60%      { opacity: 0.1; }
-        }
-
-        /* --- Boot rotation (foot roll: heel→flat→toe) --- */
-        .wk-boot-r {
-            transform-origin: 33px 95px;
-            animation: wkBootR 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
-        }
-        @keyframes wkBootR {
-            0%, 100%  { transform: rotate(10deg); }   /* heel strike */
-            15%       { transform: rotate(4deg); }     /* weight absorb */
-            35%       { transform: rotate(0deg); }     /* flat */
-            45%       { transform: rotate(-15deg); }   /* toe push-off */
-            50%       { transform: rotate(0deg); }     /* swing neutral */
-            65%       { transform: rotate(0deg); }
-            85%       { transform: rotate(5deg); }     /* preparing contact */
-            95%       { transform: rotate(8deg); }
-        }
-        .wk-boot-l {
-            transform-origin: 33px 95px;
-            animation: wkBootL 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
-            animation-delay: -0.01s;
-        }
-        @keyframes wkBootL {
-            0%, 100%  { transform: rotate(0deg); }     /* swing neutral */
-            15%       { transform: rotate(0deg); }
-            35%       { transform: rotate(5deg); }     /* preparing */
-            45%       { transform: rotate(8deg); }
-            50%       { transform: rotate(10deg); }    /* heel strike */
-            65%       { transform: rotate(4deg); }     /* weight absorb */
-            85%       { transform: rotate(0deg); }     /* flat */
-            95%       { transform: rotate(-15deg); }   /* toe push-off */
-        }
-
-        /* --- Tunic hem sway (lower tunic edge moves with walk) --- */
-        .wk-hem {
-            transform-origin: 32px 56px;
-            animation: wkHem 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
-            animation-delay: -0.03s;
-        }
-        @keyframes wkHem {
-            0%, 100%  { transform: skewX(-2deg); }
-            25%       { transform: skewX(3deg); }
-            50%       { transform: skewX(2deg); }
-            75%       { transform: skewX(-3deg); }
-        }
-
-        /* --- Hood tip flap (secondary motion on hood peak) --- */
-        .wk-hood-tip {
-            transform-origin: 30px 4px;
-            animation: wkHoodTip 2.3s ease-in-out infinite;
-            animation-delay: -0.03s;
-        }
-        @keyframes wkHoodTip {
-            0%, 100% { transform: rotate(0deg); }
-            20%      { transform: rotate(3deg); }
-            50%      { transform: rotate(-2deg); }
-            80%      { transform: rotate(2deg); }
-        }
-
-        /* --- Ground shadow (static, anchors character to ground) --- */
-        .wk-ground-shadow {
-            /* No animation — stays fixed on the ground */
-        }
-
-        /* --- Breathing pulse (subtle torso expansion, independent of walk) --- */
-        .wk-breath {
-            transform-origin: 32px 40px;
-            animation: wkBreath 3.5s ease-in-out infinite;
-        }
-        @keyframes wkBreath {
-            0%, 100% { transform: scaleX(1) scaleY(1); }
-            40%      { transform: scaleX(1.012) scaleY(1.008); }
-            60%      { transform: scaleX(1.01) scaleY(1.006); }
-        }
-
-
-        /* --- Cape rim light (moonlight edge highlight) --- */
-        .wk-cape-rim {
-            animation: wkCapeRim 2.3s ease-in-out infinite;
-        }
-        @keyframes wkCapeRim {
-            0%, 100% { opacity: 0.12; }
-            25%      { opacity: 0.18; }
-            50%      { opacity: 0.08; }
-            75%      { opacity: 0.15; }
-        }
-
-        /* --- Dust kick particles (foot impact) --- */
-        .wk-dust {
-            animation: wkDust 1.0s ease-out infinite;
-        }
-        @keyframes wkDust {
-            0%        { opacity: 0; transform: translate(0, 0) scale(1); }
-            10%       { opacity: 0.3; }
-            15%       { opacity: 0.25; transform: translate(-3px, -2px) scale(0.8); }
-            30%       { opacity: 0.1; transform: translate(-6px, -5px) scale(0.4); }
-            40%, 100% { opacity: 0; transform: translate(-8px, -7px) scale(0.2); }
-        }
-        .wk-dust-2 {
-            animation: wkDust2 1.0s ease-out infinite;
-        }
-        @keyframes wkDust2 {
-            0%, 49%   { opacity: 0; transform: translate(0, 0) scale(1); }
-            55%       { opacity: 0; }
-            60%       { opacity: 0.3; }
-            65%       { opacity: 0.25; transform: translate(-3px, -2px) scale(0.8); }
-            80%       { opacity: 0.1; transform: translate(-6px, -5px) scale(0.4); }
-            90%, 100% { opacity: 0; transform: translate(-8px, -7px) scale(0.2); }
-        }
-
-        /* --- Foreground trees (silhouettes) --- */
-        .load-trees-fg {
-            position: absolute;
-            bottom: 22%;
-            left: 0;
-            right: 0;
-            height: 30%;
-            animation: parallaxTrees 6s linear infinite;
-            z-index: 5;
-        }
-
-        @keyframes parallaxTrees {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        /* --- Compass overlay (subtle, top area) --- */
-        .load-compass-overlay {
-            position: absolute;
-            top: 8%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0.12;
-            animation: compassFade 4s ease-in-out infinite;
-            z-index: 2;
-        }
-
-        @keyframes compassFade {
-            0%, 100% { opacity: 0.08; }
-            50% { opacity: 0.16; }
-        }
-
-        .load-compass-overlay svg {
-            width: 80px;
-            height: 80px;
-            animation: compassRotate 20s linear infinite;
-        }
-
-        @keyframes compassRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* --- Loading text (bottom) --- */
-        .load-text-area {
-            position: absolute;
-            bottom: 6%;
-            left: 0;
-            right: 0;
-            text-align: center;
-            z-index: 20;
-        }
-
-        .loading-text {
-            color: #c4953a;
-            font-size: 14px;
-            font-family: 'Cinzel', serif;
-            letter-spacing: 1.5px;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
-            animation: textPulse 2s ease-in-out infinite;
-        }
-
-        .loading-dots::after {
-            content: '';
-            animation: loadDots 1.5s steps(3, end) infinite;
-        }
-
-        @keyframes loadDots {
-            0% { content: ''; }
-            33% { content: '.'; }
-            66% { content: '..'; }
-            100% { content: '...'; }
-        }
-
-        @keyframes textPulse {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 1; }
-        }
-
-        /* --- Vignette overlay --- */
-        .load-vignette {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center, transparent 40%, rgba(20,16,10,0.6) 100%);
-            z-index: 15;
-            pointer-events: none;
-        }
-
-        /* --- Parchment border flourish --- */
-        .load-border {
-            position: absolute;
-            inset: 8px;
-            border: 1px solid rgba(196, 149, 58, 0.08);
-            border-radius: 2px;
-            z-index: 16;
-            pointer-events: none;
-        }
-
-        .load-border::before,
-        .load-border::after {
-            content: '✦';
-            position: absolute;
-            color: rgba(196, 149, 58, 0.12);
-            font-size: 10px;
-        }
-
-        .load-border::before { top: -1px; left: 50%; transform: translateX(-50%); }
-        .load-border::after { bottom: -1px; left: 50%; transform: translateX(-50%); }
+        /* Loading tip override for navigate context */
+        .loading-tip { font-family: 'Cinzel', serif; }
 
         /* ═══ HUD (top bar) ═══ */
         #hud {
@@ -1466,211 +838,92 @@
 </head>
 
 <body>
-    <!-- Loading Screen (walking traveler scene) -->
-    <div id="loading">
-        <div class="load-scene">
-            <!-- Sky -->
-            <div class="load-sky"></div>
-
-            <!-- Stars -->
-            <div class="load-stars" id="load-stars"></div>
-
-            <!-- Moon -->
-            <div class="load-moon"></div>
-
-            <!-- Far mountains (doubled for seamless loop) -->
-            <div class="load-mountains-far">
-                <svg width="200%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none">
-                    <polygon points="0,200 30,120 70,150 120,80 160,130 200,60 240,110 280,140 320,70 370,130 400,200" fill="#2e2418" opacity="0.7"/>
-                    <polygon points="400,200 430,120 470,150 520,80 560,130 600,60 640,110 680,140 720,70 770,130 800,200" fill="#2e2418" opacity="0.7"/>
-                    <polygon points="0,200 50,140 100,160 150,100 200,150 250,90 300,130 350,170 400,200" fill="#352a1c" opacity="0.5"/>
-                    <polygon points="400,200 450,140 500,160 550,100 600,150 650,90 700,130 750,170 800,200" fill="#352a1c" opacity="0.5"/>
-                </svg>
-            </div>
-
-            <!-- Near hills (doubled for seamless loop) -->
-            <div class="load-hills">
-                <svg width="200%" height="100%" viewBox="0 0 800 150" preserveAspectRatio="none">
-                    <polygon points="0,150 40,80 90,110 140,50 200,90 260,40 320,80 380,60 400,150" fill="#3a2e1e"/>
-                    <polygon points="400,150 440,80 490,110 540,50 600,90 660,40 720,80 780,60 800,150" fill="#3a2e1e"/>
-                </svg>
-            </div>
-
-            <!-- Ground -->
-            <div class="load-ground">
-                <div class="load-road"></div>
-            </div>
-
-            <!-- Foreground tree silhouettes (doubled for loop) -->
-            <div class="load-trees-fg">
-                <svg width="200%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none">
-                    <!-- Tree cluster 1 -->
-                    <polygon points="50,200 55,100 45,90 60,60 40,50 55,20 50,10 62,30 70,55 58,65 72,95 65,105 70,200" fill="#1a1510" opacity="0.6"/>
-                    <!-- Tree cluster 2 -->
-                    <polygon points="180,200 185,130 175,120 190,90 172,80 187,55 183,45 195,60 200,85 188,92 202,125 195,135 200,200" fill="#1a1510" opacity="0.4"/>
-                    <!-- Tree cluster 3 -->
-                    <polygon points="330,200 335,110 325,100 340,70 322,60 337,30 333,20 345,35 350,65 338,72 352,105 345,115 350,200" fill="#1a1510" opacity="0.5"/>
-                    <!-- Repeat for seamless loop -->
-                    <polygon points="450,200 455,100 445,90 460,60 440,50 455,20 450,10 462,30 470,55 458,65 472,95 465,105 470,200" fill="#1a1510" opacity="0.6"/>
-                    <polygon points="580,200 585,130 575,120 590,90 572,80 587,55 583,45 595,60 600,85 588,92 602,125 595,135 600,200" fill="#1a1510" opacity="0.4"/>
-                    <polygon points="730,200 735,110 725,100 740,70 722,60 737,30 733,20 745,35 750,65 738,72 752,105 745,115 750,200" fill="#1a1510" opacity="0.5"/>
-                </svg>
-            </div>
-
-            <!-- Dust particles -->
-            <div class="load-dust" id="load-dust"></div>
-
-            <!-- Walking traveler — SVG skeletal animation (Andrew Hoyer technique)
-                 Single SVG with nested <g> bone groups. CSS rotates joints;
-                 children inherit parent rotation (forward kinematics).
-                 Hooded medieval traveler, side profile facing right.
-                 Body: dark brown tunic (#221a12), cape (#2e2418), boots (#1a1410)
-                 Details: belt buckle (#8a6a3a), eye glow (#c4953a), staff (#5a4428) -->
-            <div class="load-traveler">
-                <div class="walk-figure">
-                    <svg viewBox="0 0 80 130" fill="none">
-                        <!-- === GROUND SHADOW (below bounce group, anchors to ground) === -->
-                        <ellipse class="wk-ground-shadow" cx="33" cy="104" rx="16" ry="3.5" fill="#0a0806" opacity="0.22"/>
-
-                        <g class="wk-bounce">
-                            <!-- === CAPE (3 segments, behind everything) === -->
-                            <g class="wk-cape-1">
-                                <path d="M25 24 Q22 27 20 34 Q18 42 18 48 L24 46 Q24 40 25 34 Q26 28 27 26 Z" fill="#2e2418" opacity="0.55"/>
-                                <g class="wk-cape-2">
-                                    <path d="M18 46 Q16 54 15 62 Q14 68 16 72 L22 70 Q20 64 20 56 Q20 50 22 46 Z" fill="#2e2418" opacity="0.45"/>
-                                    <g class="wk-cape-3">
-                                        <path d="M16 68 Q13 76 12 82 Q12 86 14 88 L20 86 Q18 82 18 76 Q18 72 20 70 Z" fill="#2e2418" opacity="0.35"/>
-                                    </g>
-                                </g>
-                            </g>
-
-                            <!-- === LEFT LEG (back, dimmer) === -->
-                            <g class="wk-hip-l" opacity="0.55">
-                                <!-- Left thigh: muscular curve (quad bulges front, hamstring rear) -->
-                                <path d="M30 52 Q28 56 28.5 62 Q29 67 30.5 72 L36 72 Q36 67 36.5 62 Q37.5 56 37 52 Z" fill="#1a1410"/>
-                                <g class="wk-knee-l">
-                                    <!-- Left shin: calf muscle bulges at back -->
-                                    <path d="M31 72 Q29.5 76 30 82 Q31 89 32 95 L35 95 Q35.5 89 35.5 82 Q35.5 76 35.5 72 Z" fill="#1a1410"/>
-                                    <g class="wk-boot-l">
-                                        <path d="M31 93 L28 98 Q30 100.5 34 100.5 L37 100 L37 96 Q35.5 93 33 93 Z" fill="#120e0e"/>
-                                        <path d="M28 98 Q32 101 37 100" stroke="#0a0806" stroke-width="0.4" fill="none"/>
-                                    </g>
-                                </g>
-                            </g>
-
-                            <!-- === LEFT ARM (back, dimmer) === -->
-                            <g class="wk-shoulder-l" opacity="0.5">
-                                <!-- Left upper arm: 4px wide -->
-                                <path d="M28 24 L26.5 30 Q26.5 33 27 36 L31 36 Q31 33 31 30 L30 24 Z" fill="#2a2018"/>
-                                <g class="wk-elbow-l">
-                                    <!-- Left forearm: 3.5px wide -->
-                                    <path d="M27.5 36 L26 43 Q25.5 46 26 48 L29.5 48 Q29.5 46 29.5 43 L31 36 Z" fill="#2a2018"/>
-                                    <!-- Hand: r=2 -->
-                                    <circle cx="27.5" cy="49.5" r="2" fill="#2a2018"/>
-                                </g>
-                            </g>
-
-                            <!-- === TORSO (broad shoulders, natural waist) === -->
-                            <g class="wk-breath">
-                                <!-- Tunic body: shoulders 18px (x=23-41), waist 13px (x=27-40) -->
-                                <path d="M25 23 Q23 25 22 30 Q23 38 25 46 Q28 52 33 52 Q38 52 40 46 Q42 38 42 30 Q41 25 39 23 Z" fill="#221a12"/>
-                                <!-- Shoulder cap (adds volume at shoulder line) -->
-                                <path d="M25 23 Q23 24 22 26 L23 30 Q24 26 26 24 Z" fill="#1a1410" opacity="0.1"/>
-                                <!-- Tunic shadow (left side depth) -->
-                                <path d="M23 28 L25 46 Q27 50 29 50 L27 28 Z" fill="#1a1410" opacity="0.1"/>
-                                <!-- Tunic hem sway -->
-                                <g class="wk-hem">
-                                    <path d="M25 46 Q29 56 33 56 Q37 56 40 46" fill="#221a12"/>
-                                    <path d="M27 48 Q30 54 33 54 Q36 54 38 48" fill="#1a1410" opacity="0.06"/>
-                                </g>
-                                <!-- Belt -->
-                                <rect x="25" y="44" width="14" height="2.5" rx="1" fill="#3a2e1e"/>
-                                <!-- Buckle -->
-                                <rect x="31" y="44" width="3" height="2.5" rx="0.5" fill="#4a3828"/>
-                                <!-- Backpack (flush against back) -->
-                                <path d="M21 30 Q20 30 20 32 L20 40 Q20 42 21 42 L24 42 Q25 42 25 40 L25 32 Q25 30 24 30 Z" fill="#2e2418" stroke="#3a2e1e" stroke-width="0.3"/>
-                                <!-- Backpack strap -->
-                                <path d="M23 30 L25 25 Q26 23 27 23" stroke="#2e2418" stroke-width="0.5" fill="none" opacity="0.3"/>
-                                <!-- Neck connection -->
-                                <path d="M30 19 Q32 18 34 19 L35 23 Q33 24 30 23 Z" fill="#221a12"/>
-                            </g>
-
-                            <!-- === RIGHT LEG (front, full opacity) === -->
-                            <g class="wk-hip-r">
-                                <!-- Right thigh: muscular curve (quad bulges front, tapers to knee) -->
-                                <path d="M30 52 Q28 56 28.5 62 Q29 67 30.5 72 L36 72 Q36 67 37 62 Q38 56 37 52 Z" fill="#151010"/>
-                                <g class="wk-knee-r">
-                                    <!-- Right shin: calf muscle bulges at back, tapers to ankle -->
-                                    <path d="M31 72 Q29.5 76 30 82 Q31 89 32 95 L35 95 Q35.5 89 35.5 82 Q35.5 76 35.5 72 Z" fill="#151010"/>
-                                    <g class="wk-boot-r">
-                                        <path d="M31 93 L28 98 Q30 100.5 34 100.5 L37 100 L37 96 Q35.5 93 33 93 Z" fill="#120e0e"/>
-                                        <path d="M28 98 Q32 101 37 100" stroke="#0a0806" stroke-width="0.4" fill="none"/>
-                                    </g>
-                                </g>
-                            </g>
-
-                            <!-- === RIGHT ARM (front, full opacity) === -->
-                            <g class="wk-shoulder-r">
-                                <!-- Right upper arm: 4px wide -->
-                                <path d="M37 24 L38 30 Q38 33 38 36 L41.5 36 Q41.5 33 41 30 L39.5 24 Z" fill="#2a2018"/>
-                                <g class="wk-elbow-r">
-                                    <!-- Right forearm: 3.5px wide -->
-                                    <path d="M38 36 L39 43 Q39 46 39 48 L42 48 Q42 46 41.5 43 L41.5 36 Z" fill="#2a2018"/>
-                                    <!-- Hand: r=2 -->
-                                    <circle cx="40" cy="49.5" r="2" fill="#2a2018"/>
-                                </g>
-                            </g>
-
-                            <!-- === HEAD / HOOD (topmost) === -->
-                            <g class="wk-head">
-                                <!-- Hood shape (proportional to wider body) -->
-                                <path d="M27 10 Q25.5 8 26 3 Q29 0 34 1 Q38 3 38.5 8 L38.5 20 Q37 22 32.5 22 Q28 22 27 20 Z" fill="#221a12"/>
-                                <!-- Hood tip flap -->
-                                <g class="wk-hood-tip">
-                                    <path d="M26 3 Q28.5 -1 31 0.5 Q29.5 2 27 5 Z" fill="#2e2418" opacity="0.4"/>
-                                </g>
-                                <!-- Hood fold -->
-                                <path d="M29 5 Q31.5 3 34 4" stroke="#2e2418" stroke-width="0.4" fill="none" opacity="0.3"/>
-                                <!-- Hood brim shadow -->
-                                <path d="M27 20 Q30 21 32.5 21 Q35 21 37.5 20" stroke="#1a1410" stroke-width="0.7" fill="none" opacity="0.3"/>
-                                <!-- Face shadow -->
-                                <path d="M34 10 Q36 12 36 16 Q35.5 17.5 34 17.5 Q33 15.5 34 12 Z" fill="#1a1410" opacity="0.25"/>
-                                <!-- Eye glow -->
-                                <circle class="wk-eye" cx="36" cy="13" r="0.7" fill="#c4953a" opacity="0.12"/>
-                            </g>
-                        </g>
-                    </svg>
-                </div>
-            </div>
-
-            <!-- Compass overlay (ghost, top) -->
-            <div class="load-compass-overlay">
-                <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="40" cy="40" r="36" stroke="#c4953a" stroke-width="1" fill="none"/>
-                    <circle cx="40" cy="40" r="28" stroke="#c4953a" stroke-width="0.5" fill="none" opacity="0.5"/>
-                    <path d="M40 6 L42 36 L40 40 L38 36 Z" fill="#c4953a"/>
-                    <path d="M40 74 L38 44 L40 40 L42 44 Z" fill="#704214" opacity="0.6"/>
-                    <path d="M74 40 L44 42 L40 40 L44 38 Z" fill="#8a6a3a" opacity="0.4"/>
-                    <path d="M6 40 L36 38 L40 40 L36 42 Z" fill="#8a6a3a" opacity="0.4"/>
-                    <circle cx="40" cy="40" r="2.5" fill="#c4953a"/>
-                    <!-- Cardinal labels -->
-                    <text x="40" y="5" text-anchor="middle" fill="#c4953a" font-size="5" font-family="Cinzel, serif" opacity="0.7">N</text>
-                    <text x="40" y="79" text-anchor="middle" fill="#c4953a" font-size="5" font-family="Cinzel, serif" opacity="0.5">S</text>
-                    <text x="78" y="42" text-anchor="end" fill="#c4953a" font-size="5" font-family="Cinzel, serif" opacity="0.5">L</text>
-                    <text x="3" y="42" text-anchor="start" fill="#c4953a" font-size="5" font-family="Cinzel, serif" opacity="0.5">O</text>
-                </svg>
-            </div>
-
-            <!-- Vignette -->
-            <div class="load-vignette"></div>
-
-            <!-- Parchment border -->
-            <div class="load-border"></div>
+    <!-- Loading Screen (magic summoning circle) -->
+    <div id="loading" class="loading-overlay">
+        <!-- Floating particles (embers + sparks + elemental) -->
+        <div class="loading-particles">
+            <div class="particle ember p1"></div>
+            <div class="particle ember p2"></div>
+            <div class="particle ember p3"></div>
+            <div class="particle ember p4"></div>
+            <div class="particle ember p5"></div>
+            <div class="particle ember p6"></div>
+            <div class="particle spark s1"></div>
+            <div class="particle spark s2"></div>
+            <div class="particle spark s3"></div>
+            <div class="particle spark s4"></div>
+            <div class="particle mote m1"></div>
+            <div class="particle mote m2"></div>
+            <div class="particle flame fl1"></div>
+            <div class="particle flame fl2"></div>
+            <div class="particle flame fl3"></div>
+            <div class="particle frost fr1"></div>
+            <div class="particle frost fr2"></div>
+            <div class="particle frost fr3"></div>
+            <div class="particle lightning lt1"></div>
+            <div class="particle lightning lt2"></div>
+            <div class="particle arcane ar1"></div>
+            <div class="particle arcane ar2"></div>
+            <div class="particle arcane ar3"></div>
         </div>
 
-        <!-- Text at bottom -->
-        <div class="load-text-area">
-            <div class="loading-text">Desenrolando o mapa<span class="loading-dots"></span></div>
+        <!-- Magic summoning circle -->
+        <div class="magic-circle">
+            <div class="mc-aura"></div>
+            <div class="mc-aura mc-aura-2"></div>
+
+            <svg class="mc-ring mc-outer" viewBox="0 0 300 300">
+                <defs>
+                    <path id="runeOuter" d="M150,150 m-125,0 a125,125 0 1,1 250,0 a125,125 0 1,1 -250,0"/>
+                </defs>
+                <circle cx="150" cy="150" r="125" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="1"/>
+                <circle cx="150" cy="150" r="127" fill="none" stroke="rgba(196,149,58,0.04)" stroke-width="0.5" stroke-dasharray="4 8"/>
+                <text class="mc-rune-text" fill="rgba(196,149,58,0.5)">
+                    <textPath href="#runeOuter" startOffset="0%">&#5792; &#5794; &#5798; &#5800; &#5809; &#5810; &#5815; &#5817; &#5818; &#5822; &#5825; &#5827; &#5831; &#5832; &#5833; &#5834; &#5839; &#5842; &#5846; &#5848; &#5850; &#5852; &#5853; &#5855;</textPath>
+                </text>
+            </svg>
+
+            <svg class="mc-ring mc-mid" viewBox="0 0 300 300">
+                <circle cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.05)" stroke-width="0.5"/>
+                <circle class="mc-energy-arc mc-arc-1" cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+                <circle class="mc-energy-arc mc-arc-2" cx="150" cy="150" r="96" fill="none" stroke="rgba(123,32,32,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+                <g opacity="0.3" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1">
+                    <line x1="150" y1="44" x2="150" y2="54"/>
+                    <line x1="150" y1="246" x2="150" y2="256"/>
+                    <line x1="44" y1="150" x2="54" y2="150"/>
+                    <line x1="246" y1="150" x2="256" y2="150"/>
+                    <line x1="78" y1="78" x2="85" y2="85" opacity="0.5"/>
+                    <line x1="222" y1="78" x2="215" y2="85" opacity="0.5"/>
+                    <line x1="78" y1="222" x2="85" y2="215" opacity="0.5"/>
+                    <line x1="222" y1="222" x2="215" y2="215" opacity="0.5"/>
+                </g>
+            </svg>
+
+            <svg class="mc-ring mc-inner" viewBox="0 0 300 300">
+                <defs>
+                    <path id="runeInner" d="M150,150 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0"/>
+                </defs>
+                <circle cx="150" cy="150" r="75" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="0.5"/>
+                <text class="mc-inner-text" fill="rgba(196,149,58,0.35)">
+                    <textPath href="#runeInner" startOffset="0%">&#9670; VALDORIA &#9670; LENDAS &#9670; VALDORIA &#9670; LENDAS </textPath>
+                </text>
+            </svg>
+
+            <div class="mc-pulse"></div>
+            <div class="mc-pulse mc-pulse-2"></div>
+        </div>
+
+        <!-- Title -->
+        <div class="loading-brand">
+            <div class="loading-title">MAPA DO MUNDO</div>
+            <div class="loading-divider">
+                <span class="divider-rune">&#9670;</span>
+            </div>
+        </div>
+
+        <!-- Tip -->
+        <div class="loading-tip-area">
+            <div id="loading-tip" class="loading-tip">Desenrolando o mapa...</div>
         </div>
     </div>
 
@@ -1842,33 +1095,6 @@
         } else {
             initFontPicker();
         }
-    </script>
-    <script>
-    // Generate stars and dust for loading scene
-    (function() {
-        const starsEl = document.getElementById('load-stars');
-        if (!starsEl) return;
-        for (let i = 0; i < 25; i++) {
-            const s = document.createElement('div');
-            s.className = 'load-star';
-            s.style.left = (Math.random() * 100) + '%';
-            s.style.top = (Math.random() * 100) + '%';
-            s.style.animationDelay = (Math.random() * 3) + 's';
-            s.style.width = s.style.height = (1 + Math.random() * 2) + 'px';
-            starsEl.appendChild(s);
-        }
-        const dustEl = document.getElementById('load-dust');
-        if (!dustEl) return;
-        for (let i = 0; i < 8; i++) {
-            const d = document.createElement('div');
-            d.className = 'dust-p';
-            d.style.left = (40 + Math.random() * 30) + '%';
-            d.style.bottom = (Math.random() * 60) + '%';
-            d.style.animationDelay = (Math.random() * 6) + 's';
-            d.style.animationDuration = (4 + Math.random() * 4) + 's';
-            dustEl.appendChild(d);
-        }
-    })();
     </script>
 </body>
 

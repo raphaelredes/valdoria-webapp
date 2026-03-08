@@ -752,22 +752,9 @@ body {
 #toast-layer { display: none; }
 
 /* ═══════════════════════════════════════════
-   LOADING
+   LOADING (shared/loading.css — z-index override)
    ═══════════════════════════════════════════ */
-#loading {
-    position: fixed;
-    inset: 0;
-    background: var(--v-bg, #2a2420);
-    z-index: 500;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-}
-#loading.hidden { display: none; }
-.loading-icon { display: none; }
-.loading-text { color: var(--v-text-dim, #8a8090); font-size: 14px; }
+#loading.loading-overlay { z-index: 500; }
 
 /* ═══════════════════════════════════════════
    TRAVEL ANIMATION
