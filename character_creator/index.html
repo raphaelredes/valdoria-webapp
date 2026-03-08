@@ -2396,9 +2396,12 @@
 
             // Fetch from API
             try {
+                const _ac1 = new AbortController();
+                const _tid1 = setTimeout(() => _ac1.abort(), 10000);
                 const resp = await fetch(`${apiBase}/api/character/l1-skills?class=${sel.classKey}`, {
-                    headers: {},
+                    headers: {}, signal: _ac1.signal,
                 });
+                clearTimeout(_tid1);
                 if (!resp.ok) { finishClassScreen(); return; }
                 const data = await resp.json();
                 _l1SkillsCache[sel.classKey] = data;
@@ -3066,11 +3069,15 @@
                     };
                     if (window.Telegram?.WebApp?.initData) { _ch['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
                     _ch['X-Idempotency-Key'] = crypto.randomUUID();
+                    const _ac2 = new AbortController();
+                    const _tid2 = setTimeout(() => _ac2.abort(), 15000);
                     const resp = await fetch(`${apiBase}/api/character/apply`, {
                         method: 'POST',
                         headers: _ch,
+                        signal: _ac2.signal,
                         body: JSON.stringify(payload)
                     });
+                    clearTimeout(_tid2);
                     if (resp.ok) {
                         const result = await resp.json().catch(() => ({}));
                         console.log('[CHAR_CREATOR] Character submitted via API');

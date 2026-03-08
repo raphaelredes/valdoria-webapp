@@ -127,28 +127,37 @@ async function requestTransition(toApp, payload = {}) {
         _headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
     }
     _headers['X-Idempotency-Key'] = crypto.randomUUID();
-    try {
-        const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 15000);
-        const resp = await fetch(url, {
-            method: 'POST',
-            headers: _headers,
-            signal: controller.signal,
-            body: JSON.stringify({
-                from: 'game',
-                to: toApp,
-                user_id: S.uid,
-                payload,
-            }),
-        });
-        clearTimeout(tid);
+    const MAX_RETRIES = 2;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const controller = new AbortController();
+            const tid = setTimeout(() => controller.abort(), 12000);
+            const resp = await fetch(url, {
+                method: 'POST',
+                headers: _headers,
+                signal: controller.signal,
+                body: JSON.stringify({
+                    from: 'game',
+                    to: toApp,
+                    user_id: S.uid,
+                    payload,
+                }),
+            });
+            clearTimeout(tid);
 
-        let data;
-        try { data = await resp.json(); } catch (_) { data = {}; }
+            // Retry on 5xx / 429
+            if ((resp.status >= 500 || resp.status === 429) && attempt < MAX_RETRIES) {
+                await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
+                continue;
+            }
 
-        if (data.url) {
-            handleTransition({ to: toApp, url: data.url });
-        } else {
+            let data;
+            try { data = await resp.json(); } catch (_) { data = {}; }
+
+            if (data.url) {
+                handleTransition({ to: toApp, url: data.url });
+                return;
+            }
             S.transitioning = false;
             if (data.error) {
                 console.error('[GAME] Transition error:', data.error);
@@ -160,10 +169,15 @@ async function requestTransition(toApp, payload = {}) {
             } else {
                 showError('Transição falhou: resposta inesperada do servidor.');
             }
+            return;
+        } catch (e) {
+            if (attempt < MAX_RETRIES) {
+                await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
+                continue;
+            }
+            console.error('[GAME] Transition fetch error:', e);
+            S.transitioning = false;
+            showError(e.name === 'AbortError' ? 'Timeout na transição. Tente novamente.' : 'Erro de conexão na transição.');
         }
-    } catch (e) {
-        console.error('[GAME] Transition fetch error:', e);
-        S.transitioning = false;
-        showError(e.name === 'AbortError' ? 'Timeout na transição. Tente novamente.' : 'Erro de conexão na transição.');
     }
 }

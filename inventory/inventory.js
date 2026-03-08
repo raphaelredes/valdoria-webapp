@@ -1951,11 +1951,15 @@ async function _sendViaAPI(overlay) {
         };
         if (window.Telegram?.WebApp?.initData) { _ah['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
         _ah['X-Idempotency-Key'] = crypto.randomUUID();
+        const ac = new AbortController();
+        const _tid = setTimeout(() => ac.abort(), 15000);
         const resp = await fetch(_apiBase + '/api/inventory/apply', {
             method: 'POST',
             headers: _ah,
+            signal: ac.signal,
             body: JSON.stringify({ user_id: _apiUid, ops: pendingOps }),
         });
+        clearTimeout(_tid);
         const result = await resp.json();
         if (resp.ok && result.ok) {
             pendingOps = [];
@@ -1974,7 +1978,8 @@ async function _sendViaAPI(overlay) {
     } catch (e) {
         console.error('[INVENTORY] fetch failed:', e);
         overlay.classList.add('hidden');
-        toast(`${vi('warn', 13)} Sem conexão. Tente novamente.`, 'err');
+        const msg = e.name === 'AbortError' ? 'Timeout. Tente novamente.' : 'Sem conexão. Tente novamente.';
+        toast(`${vi('warn', 13)} ${msg}`, 'err');
     }
 }
 

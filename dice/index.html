@@ -1561,9 +1561,11 @@
                 try {
                     const _ch = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GAME_TOKEN}` };
                     if (tg?.initData) _ch['X-Telegram-Init-Data'] = tg.initData;
+                    const _ac = new AbortController();
+                    const _tid = setTimeout(() => _ac.abort(), 15000);
                     const resp = await fetch(`${_apiBase}/api/dice/apply`, {
                         method: 'POST', headers: _ch,
-                        body: JSON.stringify({ user_id: parseInt(_apiUid), token: GAME_TOKEN, result: GAME_RESULT, formula: GAME_FORMULA, type: GAME_TYPE })
+                        signal: _ac.signal, body: JSON.stringify({ user_id: parseInt(_apiUid), token: GAME_TOKEN, result: GAME_RESULT, formula: GAME_FORMULA, type: GAME_TYPE })
                     });
                     if (resp.ok) {
                         console.log('[DICE] Roll confirmed via API');

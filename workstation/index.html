@@ -599,9 +599,11 @@
                     const _ch = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
                     if (tg?.initData) _ch['X-Telegram-Init-Data'] = tg.initData;
                     _ch['X-Idempotency-Key'] = crypto.randomUUID();
+                    const _ac = new AbortController();
+                    const _tid = setTimeout(() => _ac.abort(), 15000);
                     const resp = await fetch(`${_apiBase}/api/craft/apply`, {
                         method: 'POST', headers: _ch,
-                        body: JSON.stringify({ user_id: parseInt(_apiUid), token, recipe_id: recipeId })
+                        signal: _ac.signal, body: JSON.stringify({ user_id: parseInt(_apiUid), token, recipe_id: recipeId })
                     });
                     if (resp.ok) {
                         console.log('[WORKSTATION] Craft submitted via API');
