@@ -8,147 +8,147 @@
  * Zero external dependencies. Pure Canvas2D, RAF auto-managed.
  */
 
-/* ─── DAMAGE TYPE PROFILES ─── */
+/* ─── DAMAGE TYPE PROFILES (scaled for 390px smartphone) ─── */
 const VFX_PROFILES = {
     fire: {
         colors: ['#ff6020', '#ff9040', '#ffe060'],
-        trail: { count: 3, decay: 0.92, size: 6 },
-        head: { size: 14, glow: 18, shape: 'circle' },
-        impact: { count: 18, speed: 3.5, gravity: 0.04, life: 700, shapes: ['circle', 'circle', 'triangle'] },
+        trail: { count: 4, decay: 0.92, size: 8 },
+        head: { size: 20, glow: 26, shape: 'circle' },
+        impact: { count: 24, speed: 4, gravity: 0.04, life: 800, shapes: ['circle', 'circle', 'triangle'] },
         extra: 'flame_ring',
         path: 'arc',
         duration: 500,
-        flashColor: 'rgba(255,100,30,0.25)',
+        flashColor: 'rgba(255,100,30,0.38)',
     },
     cold: {
         colors: ['#80c0ff', '#a0e0ff', '#ffffff'],
-        trail: { count: 2, decay: 0.88, size: 4 },
-        head: { size: 10, glow: 14, shape: 'diamond' },
-        impact: { count: 16, speed: 3, gravity: 0.01, life: 800, shapes: ['diamond', 'diamond', 'circle'] },
+        trail: { count: 3, decay: 0.88, size: 6 },
+        head: { size: 15, glow: 20, shape: 'diamond' },
+        impact: { count: 20, speed: 3.5, gravity: 0.01, life: 900, shapes: ['diamond', 'diamond', 'circle'] },
         extra: 'ice_shatter',
         path: 'linear',
         duration: 450,
-        flashColor: 'rgba(128,200,255,0.2)',
+        flashColor: 'rgba(128,200,255,0.30)',
     },
     lightning: {
         colors: ['#ffe040', '#ffffff', '#ffe890'],
-        trail: { count: 1, decay: 0.95, size: 3 },
-        head: { size: 8, glow: 22, shape: 'circle' },
-        impact: { count: 14, speed: 5, gravity: 0, life: 500, shapes: ['line', 'line', 'circle'] },
+        trail: { count: 2, decay: 0.95, size: 4 },
+        head: { size: 12, glow: 30, shape: 'circle' },
+        impact: { count: 18, speed: 5.5, gravity: 0, life: 550, shapes: ['line', 'line', 'circle'] },
         extra: 'electric_arcs',
         path: 'jagged',
         duration: 300,
-        flashColor: 'rgba(255,230,80,0.3)',
+        flashColor: 'rgba(255,230,80,0.42)',
     },
     necrotic: {
         colors: ['#9040c0', '#604080', '#200840'],
-        trail: { count: 3, decay: 0.9, size: 5 },
-        head: { size: 12, glow: 16, shape: 'circle' },
-        impact: { count: 14, speed: 2, gravity: -0.02, life: 900, shapes: ['circle', 'circle'] },
+        trail: { count: 4, decay: 0.9, size: 7 },
+        head: { size: 18, glow: 22, shape: 'circle' },
+        impact: { count: 18, speed: 2.5, gravity: -0.02, life: 1000, shapes: ['circle', 'circle'] },
         extra: 'implosion',
         path: 'linear',
         duration: 550,
-        flashColor: 'rgba(140,60,200,0.2)',
+        flashColor: 'rgba(140,60,200,0.30)',
     },
     radiant: {
         colors: ['#ffe080', '#ffffff', '#ffcc40'],
-        trail: { count: 2, decay: 0.85, size: 5 },
-        head: { size: 12, glow: 24, shape: 'star' },
-        impact: { count: 20, speed: 4, gravity: -0.01, life: 700, shapes: ['star', 'circle', 'circle'] },
+        trail: { count: 3, decay: 0.85, size: 7 },
+        head: { size: 18, glow: 32, shape: 'star' },
+        impact: { count: 26, speed: 4.5, gravity: -0.01, life: 800, shapes: ['star', 'circle', 'circle'] },
         extra: 'light_burst',
         path: 'linear',
         duration: 400,
-        flashColor: 'rgba(255,220,100,0.25)',
+        flashColor: 'rgba(255,220,100,0.35)',
     },
     slashing: {
         colors: ['#c0c0c0', '#ffffff', '#e0d0b0'],
-        trail: { count: 1, decay: 0.9, size: 3 },
-        head: { size: 10, glow: 8, shape: 'line' },
-        impact: { count: 10, speed: 4, gravity: 0.06, life: 500, shapes: ['triangle', 'triangle', 'circle'] },
+        trail: { count: 2, decay: 0.9, size: 4 },
+        head: { size: 14, glow: 12, shape: 'line' },
+        impact: { count: 14, speed: 4.5, gravity: 0.06, life: 550, shapes: ['triangle', 'triangle', 'circle'] },
         extra: null,
         path: 'linear',
         duration: 350,
-        flashColor: 'rgba(200,200,200,0.15)',
+        flashColor: 'rgba(200,200,200,0.22)',
     },
     piercing: {
         colors: ['#c0c0c0', '#e0d0b0', '#ffffff'],
-        trail: { count: 1, decay: 0.93, size: 2 },
-        head: { size: 8, glow: 6, shape: 'triangle' },
-        impact: { count: 8, speed: 5, gravity: 0.08, life: 400, shapes: ['triangle', 'circle'] },
+        trail: { count: 1, decay: 0.93, size: 3 },
+        head: { size: 12, glow: 10, shape: 'triangle' },
+        impact: { count: 12, speed: 5.5, gravity: 0.08, life: 450, shapes: ['triangle', 'circle'] },
         extra: null,
         path: 'linear',
         duration: 300,
-        flashColor: 'rgba(200,200,200,0.12)',
+        flashColor: 'rgba(200,200,200,0.18)',
     },
     bludgeoning: {
         colors: ['#d0b888', '#ffffff', '#a09070'],
-        trail: { count: 1, decay: 0.88, size: 5 },
-        head: { size: 14, glow: 10, shape: 'circle' },
-        impact: { count: 12, speed: 3, gravity: 0.05, life: 600, shapes: ['circle', 'ring'] },
+        trail: { count: 2, decay: 0.88, size: 7 },
+        head: { size: 20, glow: 16, shape: 'circle' },
+        impact: { count: 16, speed: 3.5, gravity: 0.05, life: 700, shapes: ['circle', 'ring'] },
         extra: 'shockwave',
         path: 'linear',
         duration: 400,
-        flashColor: 'rgba(180,160,120,0.18)',
+        flashColor: 'rgba(180,160,120,0.26)',
     },
     poison: {
         colors: ['#60c040', '#80e040', '#40a020'],
-        trail: { count: 3, decay: 0.9, size: 5 },
-        head: { size: 12, glow: 12, shape: 'circle' },
-        impact: { count: 14, speed: 2, gravity: -0.02, life: 900, shapes: ['circle', 'circle'] },
+        trail: { count: 4, decay: 0.9, size: 7 },
+        head: { size: 16, glow: 16, shape: 'circle' },
+        impact: { count: 18, speed: 2.5, gravity: -0.02, life: 1000, shapes: ['circle', 'circle'] },
         extra: null,
         path: 'arc',
         duration: 550,
-        flashColor: 'rgba(80,200,60,0.2)',
+        flashColor: 'rgba(80,200,60,0.28)',
     },
     acid: {
         colors: ['#60d040', '#c0ff40', '#80e060'],
-        trail: { count: 2, decay: 0.88, size: 4 },
-        head: { size: 10, glow: 10, shape: 'circle' },
-        impact: { count: 12, speed: 3, gravity: 0.06, life: 700, shapes: ['circle', 'circle'] },
+        trail: { count: 3, decay: 0.88, size: 5 },
+        head: { size: 14, glow: 14, shape: 'circle' },
+        impact: { count: 16, speed: 3.5, gravity: 0.06, life: 800, shapes: ['circle', 'circle'] },
         extra: null,
         path: 'arc',
         duration: 480,
-        flashColor: 'rgba(100,210,60,0.18)',
+        flashColor: 'rgba(100,210,60,0.26)',
     },
     force: {
         colors: ['#60c0ff', '#a0e0ff', '#ffffff'],
-        trail: { count: 1, decay: 0.92, size: 4 },
-        head: { size: 10, glow: 18, shape: 'circle' },
-        impact: { count: 12, speed: 4, gravity: 0, life: 600, shapes: ['ring', 'circle'] },
+        trail: { count: 2, decay: 0.92, size: 5 },
+        head: { size: 14, glow: 24, shape: 'circle' },
+        impact: { count: 16, speed: 4.5, gravity: 0, life: 700, shapes: ['ring', 'circle'] },
         extra: 'shockwave',
         path: 'linear',
         duration: 350,
-        flashColor: 'rgba(80,190,255,0.2)',
+        flashColor: 'rgba(80,190,255,0.30)',
     },
     psychic: {
         colors: ['#e080ff', '#c060d0', '#8040a0'],
-        trail: { count: 2, decay: 0.85, size: 4 },
-        head: { size: 10, glow: 14, shape: 'circle' },
-        impact: { count: 10, speed: 2.5, gravity: -0.01, life: 800, shapes: ['ring', 'circle'] },
+        trail: { count: 3, decay: 0.85, size: 5 },
+        head: { size: 14, glow: 20, shape: 'circle' },
+        impact: { count: 14, speed: 3, gravity: -0.01, life: 900, shapes: ['ring', 'circle'] },
         extra: null,
         path: 'wave',
         duration: 500,
-        flashColor: 'rgba(220,120,255,0.2)',
+        flashColor: 'rgba(220,120,255,0.28)',
     },
     thunder: {
         colors: ['#a0a0e0', '#ffffff', '#8080c0'],
-        trail: { count: 1, decay: 0.9, size: 3 },
-        head: { size: 12, glow: 14, shape: 'ring' },
-        impact: { count: 14, speed: 4, gravity: 0, life: 600, shapes: ['ring', 'ring', 'circle'] },
+        trail: { count: 2, decay: 0.9, size: 4 },
+        head: { size: 16, glow: 20, shape: 'ring' },
+        impact: { count: 18, speed: 4.5, gravity: 0, life: 700, shapes: ['ring', 'ring', 'circle'] },
         extra: 'shockwave',
         path: 'linear',
         duration: 400,
-        flashColor: 'rgba(160,160,230,0.22)',
+        flashColor: 'rgba(160,160,230,0.32)',
     },
     magic: {
         colors: ['#c060ff', '#60c0ff', '#ffffff'],
-        trail: { count: 2, decay: 0.9, size: 4 },
-        head: { size: 10, glow: 16, shape: 'star' },
-        impact: { count: 14, speed: 3.5, gravity: 0, life: 650, shapes: ['star', 'circle'] },
+        trail: { count: 3, decay: 0.9, size: 5 },
+        head: { size: 14, glow: 22, shape: 'star' },
+        impact: { count: 18, speed: 4, gravity: 0, life: 750, shapes: ['star', 'circle'] },
         extra: null,
         path: 'linear',
         duration: 420,
-        flashColor: 'rgba(190,90,255,0.2)',
+        flashColor: 'rgba(190,90,255,0.28)',
     },
 };
 
@@ -535,17 +535,17 @@ class CombatVFX {
         if (!this.canvas) return;
         const pos = this._center(targetEl);
         const colors = ['#40e060', '#80ff80', '#ffe080', '#ffffff'];
-        const count = 16;
+        const count = 20;
         for (let i = 0; i < count; i++) {
             const color = colors[Math.floor(Math.random() * colors.length)];
             this.particles.push({
-                x: pos.x + (Math.random() - 0.5) * 40,
+                x: pos.x + (Math.random() - 0.5) * 50,
                 y: pos.y + Math.random() * 10,
-                vx: (Math.random() - 0.5) * 0.8,
-                vy: -1.5 - Math.random() * 2,
+                vx: (Math.random() - 0.5) * 1,
+                vy: -2 - Math.random() * 2.5,
                 gravity: -0.01, friction: 0.98,
-                size: 3 + Math.random() * 4,
-                life: 700 + Math.random() * 400,
+                size: 4 + Math.random() * 5,
+                life: 800 + Math.random() * 400,
                 born: performance.now(),
                 color, shape: Math.random() > 0.5 ? 'star' : 'circle',
                 glow: true,
@@ -560,8 +560,8 @@ class CombatVFX {
             draw: (ctx, x, y, t) => {
                 ctx.save();
                 ctx.globalCompositeOperation = 'lighter';
-                ctx.globalAlpha = 0.3 * (1 - t);
-                const r = 20 + t * 30;
+                ctx.globalAlpha = 0.4 * (1 - t);
+                const r = 28 + t * 40;
                 const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
                 grad.addColorStop(0, '#ffe080');
                 grad.addColorStop(1, 'rgba(255,224,128,0)');
@@ -599,13 +599,13 @@ class CombatVFX {
             const shape = prof.impact.shapes[Math.floor(Math.random() * prof.impact.shapes.length)];
             const color = prof.colors[Math.floor(Math.random() * prof.colors.length)];
             this.particles.push({
-                x: x + (Math.random() - 0.5) * 8,
-                y: y + (Math.random() - 0.5) * 8,
+                x: x + (Math.random() - 0.5) * 12,
+                y: y + (Math.random() - 0.5) * 12,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 gravity: prof.impact.gravity,
                 friction: 0.96,
-                size: (isCrit ? 5 : 3.5) + Math.random() * 3,
+                size: (isCrit ? 7 : 5) + Math.random() * 4,
                 life: prof.impact.life + Math.random() * 200,
                 born: performance.now(),
                 color, shape,
@@ -622,7 +622,7 @@ class CombatVFX {
     }
 
     _spawnExtra(x, y, type, prof, isCrit) {
-        const scale = isCrit ? 1.4 : 1;
+        const scale = isCrit ? 1.6 : 1.2;
         switch (type) {
             case 'flame_ring':
                 this.extras.push({
@@ -632,16 +632,16 @@ class CombatVFX {
                         ctx.globalCompositeOperation = 'lighter';
                         ctx.globalAlpha = 0.6 * (1 - t);
                         ctx.strokeStyle = prof.colors[0];
-                        ctx.lineWidth = Math.max(1, (4 - t * 3) * scale);
+                        ctx.lineWidth = Math.max(1.5, (5 - t * 4) * scale);
                         ctx.beginPath();
-                        ctx.arc(ex, ey, (10 + t * 50) * scale, 0, Math.PI * 2);
+                        ctx.arc(ex, ey, (14 + t * 70) * scale, 0, Math.PI * 2);
                         ctx.stroke();
                         // Inner ring
-                        ctx.globalAlpha = 0.3 * (1 - t);
+                        ctx.globalAlpha = 0.35 * (1 - t);
                         ctx.strokeStyle = prof.colors[1];
-                        ctx.lineWidth = Math.max(1, (2 - t * 2) * scale);
+                        ctx.lineWidth = Math.max(1, (3 - t * 2.5) * scale);
                         ctx.beginPath();
-                        ctx.arc(ex, ey, (5 + t * 30) * scale, 0, Math.PI * 2);
+                        ctx.arc(ex, ey, (8 + t * 45) * scale, 0, Math.PI * 2);
                         ctx.stroke();
                         ctx.restore();
                     },
