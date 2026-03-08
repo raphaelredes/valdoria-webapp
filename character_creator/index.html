@@ -1206,6 +1206,185 @@
         function mod(v) { return Math.floor((v - 10) / 2); }
         function toggleSection(el) { haptic(); el.closest('.detail-section').classList.toggle('collapsed'); }
 
+        // ═══════════════════════════════════════════════
+        // RANDOM CHARACTER
+        // ═══════════════════════════════════════════════
+        function randomizeCharacter() {
+            haptic();
+
+            // 1. Random race
+            const raceKeys = Object.keys(RACES);
+            const raceKey = pick(raceKeys);
+            const race = RACES[raceKey];
+            sel.race = raceKey;
+
+            // 2. Random subrace
+            sel.subrace = '';
+            sel.variantBonuses = [];
+            sel.variantSkill = '';
+            sel.variantFeat = '';
+            if (raceKey === 'Human') {
+                // 50% chance variant
+                if (Math.random() > 0.5) {
+                    sel.subrace = 'variant';
+                    const attrs = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
+                    const shuffled = attrs.sort(() => Math.random() - 0.5);
+                    sel.variantBonuses = [shuffled[0], shuffled[1]];
+                    const allSkills = Object.keys(SKILL_PT);
+                    sel.variantSkill = pick(allSkills);
+                    const featKeys = Object.keys(CREATION_FEATS);
+                    sel.variantFeat = pick(featKeys);
+                } else {
+                    sel.subrace = 'standard';
+                }
+            } else if (race.halfelf) {
+                // Half-Elf: pick 2 different non-charisma attributes
+                const attrs = ['strength','dexterity','constitution','intelligence','wisdom'];
+                const shuffled = attrs.sort(() => Math.random() - 0.5);
+                sel.subrace = shuffled[0] + '_' + shuffled[1];
+            } else if (race.subraces) {
+                const subKeys = Object.keys(race.subraces);
+                sel.subrace = pick(subKeys);
+            }
+
+            // 3. Random class
+            const classKeys = Object.keys(CLASSES);
+            const classKey = pick(classKeys);
+            const cls = CLASSES[classKey];
+            sel.classKey = classKey;
+
+            // 4. Random subclass (if L1 subclass required)
+            sel.subclass = '';
+            if (SUBCLASS_DATA[classKey]) {
+                const subKeys = Object.keys(SUBCLASS_DATA[classKey]);
+                sel.subclass = pick(subKeys);
+            }
+
+            // 5. Random fighting style (warrior only)
+            sel.fightingStyle = '';
+            if (classKey === 'class_warrior') {
+                const fsKeys = Object.keys(FIGHTING_STYLES);
+                sel.fightingStyle = pick(fsKeys);
+            }
+
+            // 6. Random equipment
+            sel.equipmentChoice = Math.random() > 0.5 ? 'A' : 'B';
+
+            // 7. Stats — use class recommended array
+            sel.statAssignment = {
+                strength: cls.stats[0], dexterity: cls.stats[1], constitution: cls.stats[2],
+                intelligence: cls.stats[3], wisdom: cls.stats[4], charisma: cls.stats[5]
+            };
+
+            // 8. Random background
+            const bgKeys = Object.keys(BACKGROUNDS);
+            sel.bg = pick(bgKeys);
+            const bg = BACKGROUNDS[sel.bg];
+
+            // 9. Random alignment
+            const alignKeys = Object.keys(ALIGNMENTS);
+            sel.alignment = pick(alignKeys);
+
+            // 10. Random skills (class skills not overlapping background)
+            sel.skillProfs = [];
+            const bgSkills = bg ? bg.skills : [];
+            const availableSkills = cls.skills.opts.filter(s => !bgSkills.includes(s));
+            const needed = Math.min(cls.skills.count, availableSkills.length);
+            const shuffledSkills = availableSkills.sort(() => Math.random() - 0.5);
+            sel.skillProfs = shuffledSkills.slice(0, needed);
+
+            // 11. Random tools (if needed)
+            sel.toolProfs = [];
+            let toolCount = 0;
+            if (cls.tools.some(t => t.startsWith('_choice'))) toolCount++;
+            if (bg && bg.toolChoice) toolCount += bg.toolChoice;
+            if (race.toolChoice) toolCount++;
+            if (toolCount > 0) {
+                const granted = [];
+                cls.tools.filter(t => !t.startsWith('_')).forEach(t => granted.push(t));
+                if (bg && bg.tools) bg.tools.filter(t => !t.startsWith('_')).forEach(t => granted.push(t));
+                if (raceKey === 'Gnome' && sel.subrace === 'rock') granted.push('tinker_tools');
+                const allTools = Object.keys(ARTISAN_TOOLS).filter(t => !granted.includes(t));
+                const shuffledTools = allTools.sort(() => Math.random() - 0.5);
+                sel.toolProfs = shuffledTools.slice(0, toolCount);
+            }
+
+            // 12. Random gender
+            sel.gender = pick(GENDERS).key;
+
+            // 13. Random name + surname
+            const pre = pick(NAMES_DATA.pre);
+            const useInfix = Math.random() > 0.5;
+            const inf = useInfix ? pick(NAMES_DATA.inf) : '';
+            const sufArr = (sel.gender === 'Female') ? NAMES_DATA.suf_f : NAMES_DATA.suf;
+            let name = pre + inf + pick(sufArr);
+            name = name.charAt(0).toUpperCase() + name.slice(1);
+            if (name.length > 15) name = name.slice(0, 15);
+            sel.name = name;
+
+            const pre2 = pick(NAMES_DATA.pre);
+            const title = pick(NAMES_DATA.titles);
+            let surname = pre2 + title.replace(/^(o |a |da |do )/, '');
+            if (surname.length > 15) surname = surname.slice(0, 15);
+            sel.surname = surname;
+
+            // Check duplicate name
+            const full = `${sel.name} ${sel.surname}`.trim().toLowerCase();
+            if (existingNames.includes(full)) {
+                sel.surname = pick(NAMES_DATA.pre) + pick(NAMES_DATA.suf);
+                if (sel.surname.length > 15) sel.surname = sel.surname.slice(0, 15);
+            }
+
+            // 14. Random languages (if race has +1 choice)
+            sel.languages = [];
+            const raceLangs = race.langs || [];
+            const needsLang = raceLangs.some(l => l.includes('à escolha'));
+            if (needsLang) {
+                const fixedLangs = raceLangs.filter(l => !l.includes('à escolha'));
+                const allLangs = [...LANGUAGES.standard, ...LANGUAGES.exotic];
+                const available = allLangs.filter(l => !fixedLangs.includes(l.key));
+                if (available.length > 0) sel.languages = [pick(available).key];
+            }
+
+            // 15. Random personality (optional — 50% chance)
+            sel.personalityTrait = '';
+            sel.ideal = '';
+            sel.bond = '';
+            sel.flaw = '';
+            if (Math.random() > 0.5 && window.PERSONALITY_DATA && PERSONALITY_DATA[sel.bg]) {
+                const pd = PERSONALITY_DATA[sel.bg];
+                if (pd.traits && pd.traits.length) sel.personalityTrait = pick(pd.traits);
+                if (pd.ideals && pd.ideals.length) sel.ideal = pick(pd.ideals);
+                if (pd.bonds && pd.bonds.length) sel.bond = pick(pd.bonds);
+                if (pd.flaws && pd.flaws.length) sel.flaw = pick(pd.flaws);
+            }
+
+            // 16. L1 skill — skip (optional, requires API fetch)
+            sel.selectedL1Skill = '';
+
+            // Mark as random for re-roll button
+            sel._wasRandom = true;
+
+            // Jump to summary
+            buildSummary();
+            closeAllSubScreens();
+            currentScreen = 8;
+            document.getElementById('screenTrack').style.transform = `translateX(${-100 * 8}vw)`;
+            SCREENS.forEach((s, i) => {
+                const dot = document.getElementById('pdot-' + i);
+                dot.className = 'v-progress-dot' + (i < 8 ? ' done' : i === 8 ? ' active' : '');
+            });
+            document.getElementById('progressLabel').textContent = `9/${SCREENS.length} - ${SCREEN_NAMES[8]}`;
+            document.getElementById(SCREENS[8]).scrollTop = 0;
+            if (tg) {
+                tg.MainButton.offClick(submitCharacter);
+                tg.MainButton.setText('⚔️ CONFIRMAR PERSONAGEM');
+                tg.MainButton.show();
+                tg.MainButton.onClick(submitCharacter);
+            }
+            updateBackButton();
+        }
+
         function buildDmBubbles() {
             for (let i = 0; i <= 8; i++) {
                 const el = document.getElementById('dm-' + i);
@@ -3035,6 +3214,14 @@
             equipBody += `<div class="detail-row"><b>Idiomas:</b> ${langList.join(', ')}</div>`;
             html += cSec('🎒', 'Equipamento & Proficiências', '', equipBody);
             html += `</div>`; // close #summarySections
+
+            // Re-roll button (only if character was randomly generated)
+            if (sel._wasRandom) {
+                html += `<div style="margin-top:12px;display:flex;gap:8px">`;
+                html += `<button type="button" class="v-btn v-btn-random" style="flex:1;margin-bottom:0" onclick="randomizeCharacter()">🎲 Sortear Outro</button>`;
+                html += `<button type="button" class="v-btn v-btn-secondary" style="flex:1" onclick="resetAndGoStart()">✏️ Criar Manual</button>`;
+                html += `</div>`;
+            }
 
             document.getElementById('summaryContent').innerHTML = html;
         }
