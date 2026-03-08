@@ -435,6 +435,9 @@ function renderLocationMarkers(group, fogState) {
         if (b === S.currentLoc) currentAdj.add(a);
     }
     const R = 18;
+    // Detect newly revealed locations for cascade animation
+    const prev = typeof _prevFogState !== 'undefined' ? _prevFogState : null;
+    let revealIdx = 0;
 
     for (const [locId, coords] of Object.entries(LOCATION_COORDS)) {
         const fog = fogState[locId];
@@ -447,7 +450,15 @@ function renderLocationMarkers(group, fogState) {
         const name = ld?.n || '';
         const isSett = ld?.s || false;
 
-        const ng = _el('g', { class: `loc-node ${fog}${isCurr ? ' current' : ''}`, 'data-loc': locId });
+        // Check if this location was just revealed (fog state upgraded)
+        const wasHidden = prev && (prev[locId] === 'hidden' || prev[locId] === 'frontier');
+        const isNewlyRevealed = wasHidden && fog !== 'hidden' && fog !== 'frontier';
+
+        const ng = _el('g', { class: `loc-node ${fog}${isCurr ? ' current' : ''}${isNewlyRevealed ? ' fog-reveal' : ''}`, 'data-loc': locId });
+        if (isNewlyRevealed) {
+            ng.style.animationDelay = `${revealIdx * 0.12}s`;
+            revealIdx++;
+        }
 
         // Invisible click target
         ng.appendChild(_el('circle', { cx: x, cy: y, r: R, fill: 'transparent', stroke: 'none' }));
