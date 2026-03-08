@@ -1382,6 +1382,11 @@ body {
     100% { opacity: 0; }
 }
 
+/* ─── HEAL VIEWPORT FLASH ─── */
+.viewport-flash.heal-flash {
+    background: radial-gradient(ellipse at center, rgba(40,180,60,0.35) 0%, rgba(20,120,30,0.15) 60%, transparent 100%);
+}
+
 /* ─── ANTICIPATION OVERLAY ─── */
 .anticipation-overlay {
     position: fixed;

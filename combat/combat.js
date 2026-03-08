@@ -849,13 +849,14 @@ function startPolling() {
                 const turnChanged = oldTurn && newTurn && (oldTurn.n !== newTurn.n || oldTurn.t !== newTurn.t);
 
                 if (turnChanged) {
-                    // Enemy banner shows action description from last roll
+                    // Enemy/ally banner shows action description from last roll
                     let actionVerb = '';
-                    if (newTurn.t === 'e' && state.lr) {
+                    if ((newTurn.t === 'e' || newTurn.t === 'a') && state.lr) {
                         actionVerb = state.lr.t === 'skill' ? ' conjura!' : ' ataca!';
                     }
                     const bannerText = newTurn.t === 'p' ? '⚔️ Seu Turno!' :
-                        newTurn.t === 'e' ? `🎯 ${newTurn.n}${actionVerb}` : `🛡️ ${newTurn.n}`;
+                        newTurn.t === 'e' ? `🎯 ${newTurn.n}${actionVerb}` :
+                        `🛡️ ${newTurn.n}${actionVerb}`;
                     const bannerType = newTurn.t === 'p' ? 'player' : newTurn.t === 'e' ? 'enemy' : 'ally';
                     _showTurnBanner(bannerText, bannerType);
                 }
@@ -2192,11 +2193,20 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
         const app = document.getElementById('app');
         if (app) { app.classList.add('hit-stop'); setTimeout(() => app.classList.remove('hit-stop'), 120); }
         const enemies = document.querySelectorAll('.entity.enemy');
-        if (enemies.length > 0) { enemies[0].classList.add('dmg-flash'); setTimeout(() => enemies[0].classList.remove('dmg-flash'), 400); }
-        // VFX impact replaces legacy particles
-        if (window._combatVfx && enemies.length > 0) {
-            window._combatVfx.impact(enemies[0], lr.dt || 'slashing', { crit: !!lr.crit });
-        } else {
+        const isAoe = lr.t === 'aoe';
+        const hitCount = isAoe ? Math.min(lr.hits || enemies.length, enemies.length) : 1;
+        // Apply dmg-flash + VFX impact to all hit targets (AOE) or first enemy (single)
+        for (let i = 0; i < hitCount && i < enemies.length; i++) {
+            const delay = isAoe ? i * 100 : 0;
+            setTimeout(() => {
+                enemies[i].classList.add('dmg-flash');
+                setTimeout(() => enemies[i].classList.remove('dmg-flash'), 400);
+                if (window._combatVfx) {
+                    window._combatVfx.impact(enemies[i], lr.dt || 'slashing', { crit: !!lr.crit });
+                }
+            }, delay);
+        }
+        if (!window._combatVfx) {
             spawnParticles(lr.crit, lr.dt || 'slashing');
         }
         if (lr.kill) {
