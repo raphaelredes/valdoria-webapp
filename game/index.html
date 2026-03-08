@@ -184,8 +184,12 @@
     <div id="error-overlay" class="error-overlay" style="display:none">
         <div class="error-content">
             <div class="error-icon">⚠️</div>
+            <div id="error-network-badge" class="error-network-badge" style="display:none"></div>
             <div id="error-msg" class="error-msg"></div>
-            <button id="error-retry" class="btn-action">Tentar Novamente</button>
+            <div class="error-retry-wrap">
+                <button id="error-retry" class="btn-action">Tentar Novamente</button>
+                <div id="error-retry-progress" class="error-retry-progress" style="width:0"></div>
+            </div>
             <button id="error-recover" class="btn-action btn-secondary"
                 style="margin-top: 10px;">🔙
                 Fechar e Voltar ao Chat</button>

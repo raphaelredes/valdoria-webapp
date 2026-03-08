@@ -39,7 +39,7 @@
             font-family: 'MedievalSharp', 'Cinzel', serif;
         }
 
-        /* ═══ LOADING (compass spinner) ═══ */
+        /* ═══ LOADING (walking traveler scene) ═══ */
         #loading {
             position: fixed;
             inset: 0;
@@ -49,7 +49,8 @@
             align-items: center;
             justify-content: center;
             z-index: 200;
-            transition: opacity 0.6s ease;
+            transition: opacity 0.8s ease;
+            overflow: hidden;
         }
 
         #loading.hidden {
@@ -57,27 +58,321 @@
             pointer-events: none;
         }
 
-        .loading-compass {
-            width: 48px;
-            height: 48px;
-            animation: compassSpin 2.5s ease-in-out infinite;
+        /* --- Parallax landscape scene --- */
+        .load-scene {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        /* Sky gradient */
+        .load-sky {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg,
+                #1a1510 0%,
+                #2a2018 30%,
+                #3a2e1e 55%,
+                #4a3a22 75%,
+                #5a4428 100%
+            );
+        }
+
+        /* Stars */
+        .load-stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 45%;
+            opacity: 0.6;
+        }
+
+        .load-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #d4c8b0;
+            border-radius: 50%;
+            animation: starTwinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Moon */
+        .load-moon {
+            position: absolute;
+            top: 12%;
+            right: 18%;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, #e8dcc4 0%, #c4b896 60%, #a09070 100%);
+            box-shadow: 0 0 20px rgba(228, 220, 196, 0.15), 0 0 60px rgba(228, 220, 196, 0.06);
+            animation: moonGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(228,220,196,0.15), 0 0 60px rgba(228,220,196,0.06); }
+            50% { box-shadow: 0 0 28px rgba(228,220,196,0.22), 0 0 80px rgba(228,220,196,0.08); }
+        }
+
+        /* Far mountains (parallax layer 1) */
+        .load-mountains-far {
+            position: absolute;
+            bottom: 32%;
+            left: 0;
+            right: 0;
+            height: 25%;
+            animation: parallaxFar 12s linear infinite;
+        }
+
+        @keyframes parallaxFar {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Near hills (parallax layer 2) */
+        .load-hills {
+            position: absolute;
+            bottom: 22%;
+            left: 0;
+            right: 0;
+            height: 18%;
+            animation: parallaxNear 8s linear infinite;
+        }
+
+        @keyframes parallaxNear {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Ground plane */
+        .load-ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 24%;
+            background: linear-gradient(180deg, #3a2e1e 0%, #2e2418 40%, #241c12 100%);
+        }
+
+        /* Road/path on the ground */
+        .load-road {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10%;
+            background: linear-gradient(180deg, transparent 0%, rgba(74, 56, 28, 0.4) 30%, rgba(90, 68, 34, 0.5) 100%);
+        }
+
+        /* Dust particles */
+        .load-dust {
+            position: absolute;
+            bottom: 18%;
+            left: 0;
+            right: 0;
+            height: 12%;
+            overflow: hidden;
+        }
+
+        .dust-p {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(160, 140, 100, 0.25);
+            border-radius: 50%;
+            animation: dustFloat 6s linear infinite;
+        }
+
+        @keyframes dustFloat {
+            0% { transform: translate(0, 0) scale(1); opacity: 0; }
+            15% { opacity: 0.4; }
+            85% { opacity: 0.2; }
+            100% { transform: translate(-120px, -30px) scale(0.3); opacity: 0; }
+        }
+
+        /* --- Walking traveler (center) --- */
+        .load-traveler {
+            position: absolute;
+            bottom: 19%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .load-traveler svg {
+            width: 56px;
+            height: 90px;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6));
+        }
+
+        /* Cape flutter */
+        .traveler-cape {
+            animation: capeFlutter 1.2s ease-in-out infinite;
+            transform-origin: top center;
+        }
+
+        @keyframes capeFlutter {
+            0%, 100% { transform: skewX(0deg) scaleX(1); }
+            30% { transform: skewX(-3deg) scaleX(1.05); }
+            70% { transform: skewX(2deg) scaleX(0.97); }
+        }
+
+        /* Walking bob — subtle shoulder sway, not float */
+        .load-traveler {
+            animation: walkBob 0.6s ease-in-out infinite;
+        }
+
+        @keyframes walkBob {
+            0%, 100% { transform: translateX(-50%) translateY(0) rotate(0.5deg); }
+            50% { transform: translateX(-50%) translateY(-1px) rotate(-0.5deg); }
+        }
+
+        /* Legs walking animation */
+        .traveler-leg-l {
+            animation: legSwingL 0.6s ease-in-out infinite;
+            transform-origin: top center;
+        }
+
+        .traveler-leg-r {
+            animation: legSwingR 0.6s ease-in-out infinite;
+            transform-origin: top center;
+        }
+
+        @keyframes legSwingL {
+            0%, 100% { transform: rotate(-12deg); }
+            50% { transform: rotate(12deg); }
+        }
+
+        @keyframes legSwingR {
+            0%, 100% { transform: rotate(12deg); }
+            50% { transform: rotate(-12deg); }
+        }
+
+        /* Staff sway */
+        .traveler-staff {
+            animation: staffSway 0.6s ease-in-out infinite;
+            transform-origin: bottom center;
+        }
+
+        @keyframes staffSway {
+            0%, 100% { transform: rotate(-4deg); }
+            50% { transform: rotate(4deg); }
+        }
+
+        /* --- Foreground trees (silhouettes) --- */
+        .load-trees-fg {
+            position: absolute;
+            bottom: 18%;
+            left: 0;
+            right: 0;
+            height: 30%;
+            animation: parallaxTrees 6s linear infinite;
+            z-index: 5;
+        }
+
+        @keyframes parallaxTrees {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* --- Compass overlay (subtle, top area) --- */
+        .load-compass-overlay {
+            position: absolute;
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.12;
+            animation: compassFade 4s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        @keyframes compassFade {
+            0%, 100% { opacity: 0.08; }
+            50% { opacity: 0.16; }
+        }
+
+        .load-compass-overlay svg {
+            width: 80px;
+            height: 80px;
+            animation: compassRotate 20s linear infinite;
+        }
+
+        @keyframes compassRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Loading text (bottom) --- */
+        .load-text-area {
+            position: absolute;
+            bottom: 6%;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 20;
         }
 
         .loading-text {
-            margin-top: 14px;
             color: #c4953a;
             font-size: 14px;
             font-family: 'Cinzel', serif;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+            animation: textPulse 2s ease-in-out infinite;
         }
 
-        @keyframes compassSpin {
-            0% { transform: rotate(-8deg); }
-            25% { transform: rotate(12deg); }
-            50% { transform: rotate(-5deg); }
-            75% { transform: rotate(8deg); }
-            100% { transform: rotate(-8deg); }
+        .loading-dots::after {
+            content: '';
+            animation: loadDots 1.5s steps(3, end) infinite;
         }
+
+        @keyframes loadDots {
+            0% { content: ''; }
+            33% { content: '.'; }
+            66% { content: '..'; }
+            100% { content: '...'; }
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* --- Vignette overlay --- */
+        .load-vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(20,16,10,0.6) 100%);
+            z-index: 15;
+            pointer-events: none;
+        }
+
+        /* --- Parchment border flourish --- */
+        .load-border {
+            position: absolute;
+            inset: 8px;
+            border: 1px solid rgba(196, 149, 58, 0.08);
+            border-radius: 2px;
+            z-index: 16;
+            pointer-events: none;
+        }
+
+        .load-border::before,
+        .load-border::after {
+            content: '✦';
+            position: absolute;
+            color: rgba(196, 149, 58, 0.12);
+            font-size: 10px;
+        }
+
+        .load-border::before { top: -1px; left: 50%; transform: translateX(-50%); }
+        .load-border::after { bottom: -1px; left: 50%; transform: translateX(-50%); }
 
         /* ═══ HUD (top bar) ═══ */
         #hud {
@@ -872,24 +1167,136 @@
 </head>
 
 <body>
-    <!-- Loading Screen (compass) -->
+    <!-- Loading Screen (walking traveler scene) -->
     <div id="loading">
-        <svg class="loading-compass" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Compass circle -->
-            <circle cx="24" cy="24" r="22" stroke="#704214" stroke-width="1.5" fill="none" opacity="0.4"/>
-            <circle cx="24" cy="24" r="18" stroke="#704214" stroke-width="0.5" fill="none" opacity="0.2"/>
-            <!-- North needle (gold) -->
-            <path d="M24 4 L26 22 L24 24 L22 22 Z" fill="#c4953a"/>
-            <!-- South needle (dark) -->
-            <path d="M24 44 L22 26 L24 24 L26 26 Z" fill="#5a4020" opacity="0.6"/>
-            <!-- East -->
-            <path d="M44 24 L26 26 L24 24 L26 22 Z" fill="#8a6a3a" opacity="0.4"/>
-            <!-- West -->
-            <path d="M4 24 L22 22 L24 24 L22 26 Z" fill="#8a6a3a" opacity="0.4"/>
-            <!-- Center dot -->
-            <circle cx="24" cy="24" r="2" fill="#c4953a"/>
-        </svg>
-        <div class="loading-text">Desenrolando o mapa...</div>
+        <div class="load-scene">
+            <!-- Sky -->
+            <div class="load-sky"></div>
+
+            <!-- Stars -->
+            <div class="load-stars" id="load-stars"></div>
+
+            <!-- Moon -->
+            <div class="load-moon"></div>
+
+            <!-- Far mountains (doubled for seamless loop) -->
+            <div class="load-mountains-far">
+                <svg width="200%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none">
+                    <polygon points="0,200 30,120 70,150 120,80 160,130 200,60 240,110 280,140 320,70 370,130 400,200" fill="#2e2418" opacity="0.7"/>
+                    <polygon points="400,200 430,120 470,150 520,80 560,130 600,60 640,110 680,140 720,70 770,130 800,200" fill="#2e2418" opacity="0.7"/>
+                    <polygon points="0,200 50,140 100,160 150,100 200,150 250,90 300,130 350,170 400,200" fill="#352a1c" opacity="0.5"/>
+                    <polygon points="400,200 450,140 500,160 550,100 600,150 650,90 700,130 750,170 800,200" fill="#352a1c" opacity="0.5"/>
+                </svg>
+            </div>
+
+            <!-- Near hills (doubled for seamless loop) -->
+            <div class="load-hills">
+                <svg width="200%" height="100%" viewBox="0 0 800 150" preserveAspectRatio="none">
+                    <polygon points="0,150 40,80 90,110 140,50 200,90 260,40 320,80 380,60 400,150" fill="#3a2e1e"/>
+                    <polygon points="400,150 440,80 490,110 540,50 600,90 660,40 720,80 780,60 800,150" fill="#3a2e1e"/>
+                </svg>
+            </div>
+
+            <!-- Ground -->
+            <div class="load-ground">
+                <div class="load-road"></div>
+            </div>
+
+            <!-- Foreground tree silhouettes (doubled for loop) -->
+            <div class="load-trees-fg">
+                <svg width="200%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none">
+                    <!-- Tree cluster 1 -->
+                    <polygon points="50,200 55,100 45,90 60,60 40,50 55,20 50,10 62,30 70,55 58,65 72,95 65,105 70,200" fill="#1a1510" opacity="0.6"/>
+                    <!-- Tree cluster 2 -->
+                    <polygon points="180,200 185,130 175,120 190,90 172,80 187,55 183,45 195,60 200,85 188,92 202,125 195,135 200,200" fill="#1a1510" opacity="0.4"/>
+                    <!-- Tree cluster 3 -->
+                    <polygon points="330,200 335,110 325,100 340,70 322,60 337,30 333,20 345,35 350,65 338,72 352,105 345,115 350,200" fill="#1a1510" opacity="0.5"/>
+                    <!-- Repeat for seamless loop -->
+                    <polygon points="450,200 455,100 445,90 460,60 440,50 455,20 450,10 462,30 470,55 458,65 472,95 465,105 470,200" fill="#1a1510" opacity="0.6"/>
+                    <polygon points="580,200 585,130 575,120 590,90 572,80 587,55 583,45 595,60 600,85 588,92 602,125 595,135 600,200" fill="#1a1510" opacity="0.4"/>
+                    <polygon points="730,200 735,110 725,100 740,70 722,60 737,30 733,20 745,35 750,65 738,72 752,105 745,115 750,200" fill="#1a1510" opacity="0.5"/>
+                </svg>
+            </div>
+
+            <!-- Dust particles -->
+            <div class="load-dust" id="load-dust"></div>
+
+            <!-- Walking traveler (dark silhouette with subtle details) -->
+            <div class="load-traveler">
+                <svg viewBox="0 0 44 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Walking staff (left hand, forward) -->
+                    <g class="traveler-staff">
+                        <line x1="11" y1="18" x2="7" y2="68" stroke="#6a5430" stroke-width="1.8" stroke-linecap="round"/>
+                        <line x1="7" y1="68" x2="5" y2="70" stroke="#5a4420" stroke-width="1.2" stroke-linecap="round"/>
+                    </g>
+                    <!-- Cape (flowing behind) -->
+                    <g class="traveler-cape">
+                        <path d="M18,20 Q14,34 15,50 L14,54 Q12,50 11,38 Q10,28 14,20 Z" fill="#3a2e1e" opacity="0.7"/>
+                        <path d="M26,20 Q30,32 32,46 L30,52 Q28,44 27,34 Q26,26 26,20 Z" fill="#2e2418" opacity="0.5"/>
+                    </g>
+                    <!-- Torso (dark cloak) -->
+                    <path d="M16,22 Q14,30 15,42 L17,46 L27,46 L29,42 Q30,30 28,22 Z" fill="#2e2418"/>
+                    <!-- Shoulder pauldrons (subtle) -->
+                    <ellipse cx="15" cy="23" rx="3" ry="1.5" fill="#3a2e1e"/>
+                    <ellipse cx="29" cy="23" rx="3" ry="1.5" fill="#3a2e1e"/>
+                    <!-- Hood -->
+                    <path d="M16,16 Q15,9 22,6 Q29,9 28,16 Q27,21 22,22 Q17,21 16,16Z" fill="#2e2418"/>
+                    <!-- Hood rim highlight -->
+                    <path d="M16.5,16 Q16,10 22,7.5 Q28,10 27.5,16" stroke="#4a3828" stroke-width="0.6" fill="none"/>
+                    <!-- Face shadow -->
+                    <ellipse cx="22" cy="15" rx="4" ry="4.5" fill="#1a1510"/>
+                    <!-- Eyes (faint amber glow) -->
+                    <circle cx="20.5" cy="14.5" r="0.5" fill="#c4953a" opacity="0.4"/>
+                    <circle cx="23.5" cy="14.5" r="0.5" fill="#c4953a" opacity="0.4"/>
+                    <!-- Belt -->
+                    <rect x="16" y="38" width="12" height="1.5" rx="0.5" fill="#4a3828" opacity="0.6"/>
+                    <rect x="21" y="37.5" width="2" height="2.5" rx="0.5" fill="#8a6a3a" opacity="0.4"/>
+                    <!-- Left leg -->
+                    <g class="traveler-leg-l">
+                        <path d="M18,46 L16,62 L13,63 L18,63 L20,46 Z" fill="#241c12"/>
+                    </g>
+                    <!-- Right leg -->
+                    <g class="traveler-leg-r">
+                        <path d="M24,46 L26,62 L29,63 L24,63 L22,46 Z" fill="#241c12"/>
+                    </g>
+                    <!-- Backpack (muted) -->
+                    <path d="M28,24 L31,26 L32,36 L30,38 L28,38 Z" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.4"/>
+                    <line x1="29" y1="28" x2="31" y2="28" stroke="#4a3828" stroke-width="0.3"/>
+                    <!-- Sword hilt at belt -->
+                    <line x1="14" y1="36" x2="13" y2="42" stroke="#8a6a3a" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+                    <line x1="12" y1="36" x2="15" y2="36" stroke="#c4953a" stroke-width="0.8" opacity="0.4"/>
+                </svg>
+            </div>
+
+            <!-- Compass overlay (ghost, top) -->
+            <div class="load-compass-overlay">
+                <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="40" cy="40" r="36" stroke="#c4953a" stroke-width="1" fill="none"/>
+                    <circle cx="40" cy="40" r="28" stroke="#c4953a" stroke-width="0.5" fill="none" opacity="0.5"/>
+                    <path d="M40 6 L42 36 L40 40 L38 36 Z" fill="#c4953a"/>
+                    <path d="M40 74 L38 44 L40 40 L42 44 Z" fill="#704214" opacity="0.6"/>
+                    <path d="M74 40 L44 42 L40 40 L44 38 Z" fill="#8a6a3a" opacity="0.4"/>
+                    <path d="M6 40 L36 38 L40 40 L36 42 Z" fill="#8a6a3a" opacity="0.4"/>
+                    <circle cx="40" cy="40" r="2.5" fill="#c4953a"/>
+                    <!-- Cardinal labels -->
+                    <text x="40" y="5" text-anchor="middle" fill="#c4953a" font-size="5" font-family="Cinzel, serif" opacity="0.7">N</text>
+                    <text x="40" y="79" text-anchor="middle" fill="#c4953a" font-size="5" font-family="Cinzel, serif" opacity="0.5">S</text>
+                    <text x="78" y="42" text-anchor="end" fill="#c4953a" font-size="5" font-family="Cinzel, serif" opacity="0.5">L</text>
+                    <text x="3" y="42" text-anchor="start" fill="#c4953a" font-size="5" font-family="Cinzel, serif" opacity="0.5">O</text>
+                </svg>
+            </div>
+
+            <!-- Vignette -->
+            <div class="load-vignette"></div>
+
+            <!-- Parchment border -->
+            <div class="load-border"></div>
+        </div>
+
+        <!-- Text at bottom -->
+        <div class="load-text-area">
+            <div class="loading-text">Desenrolando o mapa<span class="loading-dots"></span></div>
+        </div>
     </div>
 
     <!-- HUD -->
@@ -1059,6 +1466,33 @@
         } else {
             initFontPicker();
         }
+    </script>
+    <script>
+    // Generate stars and dust for loading scene
+    (function() {
+        const starsEl = document.getElementById('load-stars');
+        if (!starsEl) return;
+        for (let i = 0; i < 25; i++) {
+            const s = document.createElement('div');
+            s.className = 'load-star';
+            s.style.left = (Math.random() * 100) + '%';
+            s.style.top = (Math.random() * 100) + '%';
+            s.style.animationDelay = (Math.random() * 3) + 's';
+            s.style.width = s.style.height = (1 + Math.random() * 2) + 'px';
+            starsEl.appendChild(s);
+        }
+        const dustEl = document.getElementById('load-dust');
+        if (!dustEl) return;
+        for (let i = 0; i < 8; i++) {
+            const d = document.createElement('div');
+            d.className = 'dust-p';
+            d.style.left = (40 + Math.random() * 30) + '%';
+            d.style.bottom = (Math.random() * 60) + '%';
+            d.style.animationDelay = (Math.random() * 6) + 's';
+            d.style.animationDuration = (4 + Math.random() * 4) + 's';
+            dustEl.appendChild(d);
+        }
+    })();
     </script>
 </body>
 

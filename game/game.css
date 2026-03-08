@@ -512,6 +512,15 @@
 }
 @keyframes tipFade { 0%, 100% { opacity: 0.4; } 30%, 70% { opacity: 0.9; } }
 
+.loading-tip-slow {
+    color: var(--v-gold-dim) !important;
+    animation: tipSlowPulse 2s ease-in-out infinite !important;
+}
+@keyframes tipSlowPulse {
+    0%, 100% { opacity: 0.5; color: var(--v-text-dim); }
+    50% { opacity: 1; color: var(--v-gold); }
+}
+
 @keyframes spin { to { transform: rotate(360deg); } }
 
 
@@ -685,6 +694,42 @@
     width: 100%;
 }
 .error-debug-copy:active { background: rgba(196,149,58,0.2); }
+
+/* ── Error Retry Countdown Bar ── */
+.error-retry-wrap {
+    position: relative;
+    width: 100%;
+}
+.error-retry-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--v-gold-dim), var(--v-gold));
+    border-radius: 0 0 var(--v-radius-md, 8px) var(--v-radius-md, 8px);
+    transition: width 1s linear;
+    box-shadow: 0 0 6px rgba(196,149,58,0.4);
+}
+
+/* ── Network Status Badge ── */
+.error-network-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--v-radius-pill, 16px);
+    font-size: 11px;
+    margin-bottom: 10px;
+    animation: v-fadeIn 0.3s ease;
+}
+.error-network-badge.online {
+    background: rgba(80,180,80,0.15);
+    color: #7cd47c;
+    border: 1px solid rgba(80,180,80,0.3);
+}
+.error-network-badge.offline {
+    background: rgba(200,60,60,0.15);
+    color: #e07070;
+    border: 1px solid rgba(200,60,60,0.3);
+}
 
 /* ─── Transition Overlay ─── */
 .transition-overlay {

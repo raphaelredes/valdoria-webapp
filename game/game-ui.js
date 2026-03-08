@@ -21,12 +21,23 @@ let _loadingTipIndex = 0;
 let _loadingProgressTimer = null;
 let _loadingProgress = 0;
 
-function showLoading() {
+let _isRetryLoading = false;
+let _loadingSlowTimer = null;
+
+function showLoading(isRetry = false) {
     const el = document.getElementById('loading');
     if (el) el.style.display = '';
+    _isRetryLoading = isRetry;
     _startLoadingTips();
     _startLoadingProgress();
     _startLoadingTimeout();
+    _startSlowWarning();
+
+    // During retry, override the first tip
+    if (isRetry) {
+        const tipEl = document.getElementById('loading-tip');
+        if (tipEl) tipEl.textContent = '🔄 Reconectando ao servidor...';
+    }
 }
 
 function hideLoading() {
@@ -36,6 +47,8 @@ function hideLoading() {
     if (bar) bar.style.width = '100%';
     _stopLoadingProgress();
     _stopLoadingTimeout();
+    _stopSlowWarning();
+    _isRetryLoading = false;
 
     setTimeout(() => {
         if (el) {
@@ -114,6 +127,36 @@ function _stopLoadingTimeout() {
     }
 }
 
+// ─── Loading Slow Warning (visual cue after 10s) ───
+function _startSlowWarning() {
+    _stopSlowWarning();
+    _loadingSlowTimer = setTimeout(() => {
+        const el = document.getElementById('loading');
+        if (el && el.style.display !== 'none') {
+            const tipEl = document.getElementById('loading-tip');
+            if (tipEl) {
+                tipEl.style.opacity = '0';
+                setTimeout(() => {
+                    tipEl.textContent = _isRetryLoading
+                        ? '⏳ Servidor demorando para responder...'
+                        : '⏳ Carregamento demorando mais que o normal...';
+                    tipEl.style.opacity = '';
+                    tipEl.classList.add('loading-tip-slow');
+                }, 300);
+            }
+        }
+    }, 10000);
+}
+
+function _stopSlowWarning() {
+    if (_loadingSlowTimer) {
+        clearTimeout(_loadingSlowTimer);
+        _loadingSlowTimer = null;
+    }
+    const tipEl = document.getElementById('loading-tip');
+    if (tipEl) tipEl.classList.remove('loading-tip-slow');
+}
+
 // ─── Toast Notification ───
 let _toastTimeout = null;
 
@@ -153,6 +196,9 @@ function showError(msg, err = null) {
     msgEl.textContent = msg;
     overlay.style.display = '';
 
+    // Show network status badge
+    _updateNetworkBadge();
+
     // Populate debug log panel
     _populateDebugLog(err);
 
@@ -174,7 +220,7 @@ function showError(msg, err = null) {
         retryBtn.textContent = 'Tentar Novamente';
 
         // Show loading overlay during health check (prevents blank screen)
-        showLoading();
+        showLoading(true); // isRetry = true → shows "Reconectando..."
         if (typeof _clog === 'function') _clog('RETRY health check...');
 
         // Always re-check health before retrying — server may have restarted
@@ -197,6 +243,8 @@ function showError(msg, err = null) {
 
     retryBtn.onclick = () => {
         _errorRetryAttempt = 0; // manual retry resets counter
+        const pb = document.getElementById('error-retry-progress');
+        if (pb) { pb.style.transition = 'none'; pb.style.width = '0%'; }
         doRetry();
     };
 
@@ -225,9 +273,22 @@ function showError(msg, err = null) {
         const delaySec = Math.max(2, Math.round(base + jitter));
         let countdown = delaySec;
         retryBtn.textContent = `Tentando novamente em ${countdown}s... (${_errorRetryAttempt}/${_ERROR_RETRY_MAX})`;
+
+        // Animate progress bar under retry button
+        const progBar = document.getElementById('error-retry-progress');
+        if (progBar) {
+            progBar.style.transition = 'none';
+            progBar.style.width = '0%';
+            // Force reflow then animate
+            progBar.offsetHeight;
+            progBar.style.transition = `width ${delaySec}s linear`;
+            progBar.style.width = '100%';
+        }
+
         _errorAutoRetryTimer = setInterval(() => {
             countdown--;
             if (countdown <= 0) {
+                if (progBar) { progBar.style.transition = 'none'; progBar.style.width = '0%'; }
                 doRetry();
             } else {
                 retryBtn.textContent = `Tentando novamente em ${countdown}s... (${_errorRetryAttempt}/${_ERROR_RETRY_MAX})`;
@@ -279,6 +340,16 @@ function _autoReconnect(overlay, msgEl, retryBtn) {
 function hideError() {
     const el = document.getElementById('error-overlay');
     if (el) el.style.display = 'none';
+}
+
+// ─── Network Status Badge ───
+function _updateNetworkBadge() {
+    const badge = document.getElementById('error-network-badge');
+    if (!badge) return;
+    const online = navigator.onLine;
+    badge.style.display = '';
+    badge.className = 'error-network-badge ' + (online ? 'online' : 'offline');
+    badge.textContent = online ? '🟢 Conectado à internet' : '🔴 Sem conexão com a internet';
 }
 
 // ─── Debug Log Panel (inside error overlay) ───

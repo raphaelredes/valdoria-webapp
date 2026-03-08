@@ -28,13 +28,38 @@ let _loadingTimeoutId = null;
 
 // ─── Connection Debug Log (ring buffer for error diagnosis) ───
 const _connLog = [];
-const _CONN_LOG_MAX = 60;
+const _CONN_LOG_MAX = 80;
+const _CONN_LOG_LS_KEY = 'valdoria_conn_log';
 
 function _clog(msg) {
     const ts = new Date().toISOString().substring(11, 23); // HH:MM:SS.mmm
     const entry = `[${ts}] ${msg}`;
     _connLog.push(entry);
     if (_connLog.length > _CONN_LOG_MAX) _connLog.shift();
+    // Persist to localStorage for survival across page reloads
+    try { localStorage.setItem(_CONN_LOG_LS_KEY, JSON.stringify(_connLog)); } catch (e) { /* quota */ }
+}
+
+// Restore logs from previous session
+try {
+    const prev = JSON.parse(localStorage.getItem(_CONN_LOG_LS_KEY) || '[]');
+    if (prev.length) {
+        _connLog.push('── previous session ──');
+        _connLog.push(...prev.slice(-20)); // keep last 20 from previous session
+        _connLog.push('── current session ──');
+    }
+} catch (e) { /* */ }
+
+/** Returns network connection info for debug */
+function _getNetworkInfo() {
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!conn) return 'N/A';
+    const parts = [];
+    if (conn.effectiveType) parts.push(conn.effectiveType);
+    if (conn.downlink) parts.push(conn.downlink + 'Mbps');
+    if (conn.rtt) parts.push('rtt:' + conn.rtt + 'ms');
+    if (conn.saveData) parts.push('save-data');
+    return parts.join(' ') || 'N/A';
 }
 
 /** Returns full connection debug log as copyable text */
@@ -48,6 +73,7 @@ function getConnectionLog() {
         `Screen: ${S.currentScreen?.screen_id || '(none)'}`,
         `UA: ${navigator.userAgent.substring(0, 80)}`,
         `Online: ${navigator.onLine}`,
+        `Network: ${_getNetworkInfo()}`,
         `TG: ${window.Telegram?.WebApp?.version || 'N/A'}`,
         '─────────────────────────────',
     ];
@@ -101,6 +127,31 @@ async function init() {
         if (document.visibilityState === 'visible' && S.currentScreen) {
             // Soft refresh — don't show loading, just update if stale
             fetchState(true);
+        }
+    });
+
+    // Online/offline detection — auto-retry when network returns
+    window.addEventListener('offline', () => {
+        _clog('NETWORK → OFFLINE');
+        console.warn('[GAME] Network went offline');
+    });
+    window.addEventListener('online', () => {
+        _clog('NETWORK → ONLINE');
+        console.log('[GAME] Network back online');
+        // If error overlay is showing a connection error, auto-retry
+        const errOverlay = document.getElementById('error-overlay');
+        const errMsg = document.getElementById('error-msg');
+        if (errOverlay && errOverlay.style.display !== 'none' && errMsg) {
+            const msg = errMsg.textContent || '';
+            if (msg.includes('Sem conexão') || msg.includes('indisponível')) {
+                _clog('NETWORK → auto-retry after coming online');
+                showToast('Conexão restaurada, reconectando...', 2000);
+                // Trigger retry after short delay (let network stabilize)
+                setTimeout(() => {
+                    const retryBtn = document.getElementById('error-retry');
+                    if (retryBtn && retryBtn.onclick) retryBtn.onclick();
+                }, 1500);
+            }
         }
     });
 
@@ -185,6 +236,7 @@ async function checkHealth() {
             // continue to next retry
         }
     }
+    _clog(`HEALTH EXHAUSTED after ${HEALTH_RETRIES + 1} attempts`);
     console.error('[GAME] Health check failed after', HEALTH_RETRIES + 1, 'attempts');
     return false;
 }
@@ -209,7 +261,10 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
 
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-            if (attempt > 0) console.log('[GAME] apiCall retry', attempt, '/', retries, 'for', endpoint);
+            if (attempt > 0) {
+                _clog(`API ${endpoint} retry ${attempt}/${retries}`);
+                console.log('[GAME] apiCall retry', attempt, '/', retries, 'for', endpoint);
+            }
             // AbortController timeout — prevents infinite hang
             const controller = new AbortController();
             const tid = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -243,8 +298,10 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             try {
                 data = await resp.json();
             } catch (jsonErr) {
+                _clog(`API ${endpoint} → JSON PARSE ERROR: ${jsonErr.message}`);
                 console.error('[GAME] Failed to parse JSON response for', endpoint, ':', jsonErr);
                 const rawText = await resp.text().catch(() => '(could not read body)');
+                _clog(`API ${endpoint} → raw body: ${rawText.substring(0, 150)}`);
                 console.error('[GAME] Raw response body:', rawText.substring(0, 500));
                 if (attempt === retries) {
                     showError('Resposta inválida do servidor.');
