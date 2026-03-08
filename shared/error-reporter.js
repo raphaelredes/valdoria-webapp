@@ -235,16 +235,12 @@ var ValdoriaErrors = (function () {
             }
         }
 
-        // Close button (always shown)
+        // Close button (always shown) — sends data to bot so it can show the menu
         if (closeBtn) {
             closeBtn.style.display = '';
             closeBtn.onclick = function () {
                 if (_cfg.onClose) return _cfg.onClose();
-                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.close) {
-                    window.Telegram.WebApp.close();
-                } else {
-                    window.close();
-                }
+                _sendCloseAndReturn();
             };
         }
 
@@ -323,17 +319,13 @@ var ValdoriaErrors = (function () {
 
         var msgEl = document.getElementById('v-err-msg');
         var retryBtn = document.getElementById('v-err-retry');
-        if (msgEl) msgEl.textContent = 'Reconectando... O mini app será fechado automaticamente.';
+        if (msgEl) msgEl.textContent = 'Retornando ao menu...';
         if (retryBtn) retryBtn.style.display = 'none';
         var closeBtn = document.getElementById('v-err-close');
         if (closeBtn) closeBtn.style.display = 'none';
 
         setTimeout(function () {
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.close) {
-                window.Telegram.WebApp.close();
-            } else {
-                window.close();
-            }
+            _sendCloseAndReturn();
         }, 2500);
     }
 
@@ -567,6 +559,29 @@ var ValdoriaErrors = (function () {
         var reason = e.reason ? (e.reason.message || String(e.reason)).substring(0, 100) : 'unknown';
         _clog('PROMISE REJECT: ' + reason);
     });
+
+    // ─── Send Close & Return (notify bot to show menu) ───
+    function _sendCloseAndReturn() {
+        var tg = window.Telegram && window.Telegram.WebApp;
+        if (tg && tg.sendData) {
+            try {
+                tg.sendData(JSON.stringify({
+                    action: 'webapp_error_close',
+                    webapp: _cfg.appName,
+                }));
+                // sendData() automatically closes the WebApp
+                return;
+            } catch (e) {
+                _clog('sendData fallback to close: ' + e.message);
+            }
+        }
+        // Fallback: just close
+        if (tg && tg.close) {
+            tg.close();
+        } else {
+            window.close();
+        }
+    }
 
     // ─── Hide Error ───
     function hideError() {
