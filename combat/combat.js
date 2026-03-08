@@ -529,7 +529,7 @@ function _renderArenaInner(s) {
     }
     if (s.feed && s.feed.length > 0) {
         const total = s.feed.length;
-        const visibleCount = isNarrative ? 6 : 3;
+        const visibleCount = isNarrative ? 6 : 2;
         const recentFeed = s.feed.slice(-visibleCount);
         const narrativeCls = isNarrative ? ' combat-feed-narrative' : '';
         html += `<div class="combat-feed${narrativeCls}" id="combatFeed">`;
@@ -634,15 +634,12 @@ function _renderArenaInner(s) {
     _animateHpBars(s);
     _checkPlayerDamage(s);
 
-    // Auto-expand enemy cards:
-    // - When it's an enemy's turn: expand that specific enemy
-    // - When it's the player's turn: expand all enemies (target info)
+    // Auto-expand: ONLY the active-turn entity (never dead, never all enemies)
+    // On player turn: enemies stay collapsed (tap to expand) — saves ~160px
     if (activeTurn && ph !== 'init' && ph !== 'intro') {
-        if (activeTurn.t === 'p') {
-            document.querySelectorAll('.entity.enemy').forEach(el => el.classList.add('expanded'));
-        } else {
+        if (activeTurn.t !== 'p') {
             const activeEl = document.querySelector('.entity.active-turn');
-            if (activeEl) activeEl.classList.add('expanded');
+            if (activeEl && !activeEl.classList.contains('dead')) activeEl.classList.add('expanded');
         }
     }
 
