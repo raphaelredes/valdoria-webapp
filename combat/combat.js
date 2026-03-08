@@ -37,6 +37,7 @@ let _initAnimationInProgress = false; // Blocks poll re-render during initiative
 
 // ─── IMMERSION FEATURES STATE ───
 const _prevHpState = new Map(); // Feature 1: HP bar animation tracking
+const _prevStatusState = new Map(); // Status change detection for VFX
 let _prevPlayerHp = 0;          // Feature 2: detect player damage for shake
 let _audioCtx = null;           // Feature 8: Web Audio (lazy init)
 let _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
