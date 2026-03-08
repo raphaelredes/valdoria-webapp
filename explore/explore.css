@@ -135,7 +135,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
+    padding: 8px 12px max(8px, env(safe-area-inset-bottom)) 12px;
     background: linear-gradient(0deg, #3a3028 0%, var(--v-bg, #2a2420) 100%);
     border-top: 1px solid var(--v-border, #4a3828);
     z-index: 50;

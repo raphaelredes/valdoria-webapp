@@ -753,20 +753,28 @@ const Dice3D = (() => {
             this._multiMeshes = [];
             this._multiStates = [];
 
-            // Adjust camera for multiple dice
-            this._camera.position.z = 4.5 + (count - 1) * 0.4;
+            // Intelligent 2D dice distribution based on count
+            // Canvas aspect ratios: 2d=220×180, 3d=280×200, 4d=320×210, 5d=350×220
+            var layouts = {
+                2: [[-0.8, 0], [0.8, 0]],
+                3: [[-0.9, -0.45], [0.9, -0.45], [0, 0.6]],
+                4: [[-0.8, -0.55], [0.8, -0.55], [-0.8, 0.55], [0.8, 0.55]],
+                5: [[-1.0, -0.55], [0, -0.55], [1.0, -0.55], [-0.55, 0.55], [0.55, 0.55]],
+            };
+            var positions = layouts[count] || layouts[5];
+            // Camera pulls back more for larger layouts
+            this._camera.position.z = count <= 2 ? 4.5 : count === 3 ? 4.8 : count === 4 ? 5.0 : 5.4;
 
-            // Scale factor per die
-            var baseScale = 1.0 / (1 + (count - 1) * 0.15);
-            // Horizontal spacing
-            var totalWidth = (count - 1) * 1.6;
+            // Scale factor per die — slightly larger now that we use 2D space
+            var baseScale = count <= 2 ? 0.85 : count === 3 ? 0.78 : count === 4 ? 0.72 : 0.65;
             var builder = BUILDERS[this._dieType] || BUILDERS.d20;
             var staggerMs = 80;
 
             for (var i = 0; i < count; i++) {
                 var mesh = builder();
-                var xPos = count === 1 ? 0 : -totalWidth / 2 + i * 1.6;
-                mesh.position.set(xPos, 0, 0);
+                var pos = positions[i] || [0, 0];
+                var xPos = pos[0];
+                mesh.position.set(pos[0], pos[1], 0);
                 mesh.scale.setScalar(baseScale);
                 this._scene.add(mesh);
                 this._multiMeshes.push(mesh);
@@ -793,7 +801,8 @@ const Dice3D = (() => {
                     startTime: performance.now() + i * staggerMs,
                     landed: false,
                     baseScale: baseScale,
-                    originX: xPos,
+                    originX: pos[0],
+                    originY: pos[1],
                     value: val,
                 });
             }
@@ -920,6 +929,7 @@ const Dice3D = (() => {
                 var targetScale = st.baseScale * (1 - eased * 0.7); // shrink to 30%
                 mesh.scale.setScalar(targetScale);
                 mesh.position.x = st.originX * (1 - eased); // converge to center
+                mesh.position.y = (st.originY || 0) * (1 - eased);
                 // Spin faster during convergence
                 mesh.rotation.y += 0.02 * (1 + eased * 3);
             }

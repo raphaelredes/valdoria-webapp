@@ -158,9 +158,16 @@
         <div class="dice-overlay-content">
             <div class="dice-skill-label" id="dice-skill-label"></div>
             <div class="dice3d-canvas" id="dice3d-canvas"></div>
+            <!-- Single-line formula (skill checks) -->
             <div class="dice-formula" id="dice-formula"></div>
+            <!-- Two-line formula (opposed rolls) -->
+            <div id="dice-opposed-block" style="display:none">
+                <div class="dice-formula-player" id="dice-formula-player"></div>
+                <div class="dice-formula-vs">vs</div>
+                <div class="dice-formula-opponent" id="dice-formula-opponent"></div>
+            </div>
             <div class="dice-result" id="dice-result"></div>
-            <button class="v-skip-btn" id="dice-skip-btn" style="display:none">Continuar &raquo;</button>
+            <div class="dice-skip-pill" id="dice-skip-btn">Continuar</div>
         </div>
     </div>
 

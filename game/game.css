@@ -1955,56 +1955,118 @@
 
 /* ═══════════════════════════════════════════════════════════════
    Dice Roll Overlay (3D skill check animation)
+   Optimized for 390×844 smartphone viewport
    ═══════════════════════════════════════════════════════════════ */
 .dice-overlay {
     position: fixed;
     inset: 0;
     z-index: 50;
-    background: rgba(20, 16, 12, 0.92);
+    background: rgba(20, 16, 12, 0.94);
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: diceOverlayIn 0.3s ease;
 }
+.dice-overlay.entering { animation: diceOverlayIn 0.3s ease forwards; }
+.dice-overlay.exiting  { animation: diceOverlayOut 0.35s ease forwards; }
 @keyframes diceOverlayIn {
     from { opacity: 0; }
-    to { opacity: 1; }
+    to   { opacity: 1; }
+}
+@keyframes diceOverlayOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
 }
 .dice-overlay-content {
     text-align: center;
     width: 100%;
     max-width: 340px;
-    padding: 0 16px;
+    padding: 0 20px;
 }
 .dice-skill-label {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 15px;
+    font-size: 13px;
     color: var(--v-gold, #c4953a);
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
+    letter-spacing: 0.12em;
+    margin-bottom: 4px;
     text-transform: uppercase;
+    opacity: 0.85;
 }
 .dice-overlay .dice3d-canvas {
-    width: 200px;
-    height: 200px;
-    margin: 0 auto 12px;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 8px;
 }
+/* ── Formula: single line for checks, two-line for opposed ── */
 .dice-formula {
     font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: 16px;
+    font-size: 15px;
     color: var(--v-text, #d4c8b0);
-    margin-bottom: 6px;
-    min-height: 24px;
+    margin-bottom: 4px;
+    min-height: 20px;
+    line-height: 1.4;
 }
+/* Opposed roll: player line + opponent line */
+.dice-formula-player {
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 15px;
+    color: var(--v-text, #d4c8b0);
+    margin-bottom: 2px;
+}
+.dice-formula-opponent {
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 14px;
+    color: var(--v-text-dim, #a09484);
+    margin-bottom: 4px;
+}
+.dice-formula-vs {
+    font-size: 11px;
+    color: var(--v-text-dim, #a09484);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 2px 0;
+}
+/* ── Result with scale-in animation ── */
 .dice-result {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     min-height: 28px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    animation: diceResultIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
-.dice-result.success { color: #4ade80; }
-.dice-result.failure { color: #f87171; }
+@keyframes diceResultIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+}
+.dice-result.success {
+    color: #4ade80;
+    text-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
+}
+.dice-result.failure {
+    color: #f87171;
+    text-shadow: 0 0 12px rgba(248, 113, 113, 0.4);
+}
+/* ── Inline skip pill (replaces v-skip-btn for dice overlay) ── */
+.dice-skip-pill {
+    display: inline-block;
+    padding: 8px 28px;
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 13px;
+    color: var(--v-text-dim, #a09484);
+    background: rgba(196, 149, 58, 0.08);
+    border: 1px solid rgba(196, 149, 58, 0.2);
+    border-radius: 20px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    margin-top: 4px;
+}
+.dice-skip-pill.visible { opacity: 1; }
+.dice-skip-pill:active {
+    transform: scale(0.95);
+    background: rgba(196, 149, 58, 0.15);
+}
 
 
 /* ─── Ally Cards ─── */

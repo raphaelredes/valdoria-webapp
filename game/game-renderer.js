@@ -103,6 +103,9 @@ function renderScreen(screen) {
         contentEl.innerHTML = enhanceContent(screen.text || '');
     }
 
+    // Animate resource deltas (gold, XP changes between screens)
+    _animateResourceDeltas(contentEl);
+
     // Inject font picker on settings screen
     if (screen.screen_id === 'city.settings' && typeof injectFontPicker === 'function') {
         injectFontPicker(contentEl);

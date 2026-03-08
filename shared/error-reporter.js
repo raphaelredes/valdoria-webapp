@@ -153,7 +153,7 @@ var ValdoriaErrors = (function () {
     var _autoRetryTimer = null;
     var _RETRY_BASE = 3;
     var _RETRY_CAP = 40;
-    var _RETRY_MAX = 6;
+    var _RETRY_MAX = 10;
 
     function showError(msg, err) {
         console.error('[' + _cfg.appName + ']', msg, err || '');
