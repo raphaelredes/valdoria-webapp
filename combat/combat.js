@@ -881,32 +881,60 @@ function startPolling() {
                     initDice(_eLr);
 
                     if (_eLr.miss || _eLr.d <= 0) {
-                        // Enemy/ally missed — show dodge feedback on player
+                        // Miss — dodge feedback on the TARGET (enemy dodges ally, player dodges enemy)
                         setTimeout(() => {
-                            const playerEl = document.querySelector('.entity.player');
-                            if (playerEl) {
-                                playerEl.classList.remove('dodge-flash');
-                                void playerEl.offsetWidth;
-                                playerEl.classList.add('dodge-flash');
-                                setTimeout(() => playerEl.classList.remove('dodge-flash'), 400);
+                            const dodgeTarget = _isAllyTurn
+                                ? document.querySelector('.entity.enemy')
+                                : document.querySelector('.entity.player');
+                            if (dodgeTarget) {
+                                dodgeTarget.classList.remove('dodge-flash');
+                                void dodgeTarget.offsetWidth;
+                                dodgeTarget.classList.add('dodge-flash');
+                                setTimeout(() => dodgeTarget.classList.remove('dodge-flash'), 400);
                             }
-                            if (window._combatVfx && !_isAllyTurn) {
-                                const enemyEl = document.querySelector('.entity.enemy');
-                                if (enemyEl && playerEl) window._combatVfx.miss(enemyEl, playerEl, _eLr.dt || 'slashing');
+                            if (window._combatVfx) {
+                                const fromEl = _isAllyTurn
+                                    ? (document.querySelector('.entity.ally') || document.querySelector('.entity.player'))
+                                    : document.querySelector('.entity.enemy');
+                                if (fromEl && dodgeTarget) window._combatVfx.miss(fromEl, dodgeTarget, _eLr.dt || 'slashing');
                             }
-                            showNarration(_pick(_isAllyTurn ? _NARR_ALLY_ACTION : _NARR_ENEMY_MISS).replace('{name}', newTurn.n), 'miss');
+                            showNarration(_pick(_isAllyTurn ? _NARR_ALLY_MISS : _NARR_ENEMY_MISS).replace('{name}', newTurn.n), 'miss');
+                            if (_isAllyTurn) hapticBurst('miss');
                         }, 1800);
                     } else {
-                        // Enemy/ally hit — show damage float + narration
-                        setTimeout(() => _showDamageFloat(_eLr.d, _eLr.dt, '.entity.player', !!_eLr.crit), 2700);
+                        // Hit — damage float on the TARGET (enemy takes ally damage, player takes enemy damage)
+                        const dmgTarget = _isAllyTurn ? '.entity.enemy' : '.entity.player';
+                        setTimeout(() => _showDamageFloat(_eLr.d, _eLr.dt, dmgTarget, !!_eLr.crit), 2700);
+
+                        // VFX projectile for ally hits
+                        if (_isAllyTurn && window._combatVfx) {
+                            setTimeout(() => {
+                                const allyEl = document.querySelector('.entity.ally') || document.querySelector('.entity.player');
+                                const enemyEl = document.querySelector('.entity.enemy');
+                                if (allyEl && enemyEl) window._combatVfx.projectile(allyEl, enemyEl, _eLr.dt || 'slashing', { crit: !!_eLr.crit });
+                            }, 1600);
+                        }
+                        // VFX projectile for enemy hits
+                        if (!_isAllyTurn && window._combatVfx) {
+                            setTimeout(() => {
+                                const enemyEl = document.querySelector('.entity.enemy');
+                                const playerEl = document.querySelector('.entity.player');
+                                if (enemyEl && playerEl) window._combatVfx.projectile(enemyEl, playerEl, _eLr.dt || 'slashing', { crit: !!_eLr.crit });
+                            }, 1600);
+                        }
 
                         // Narration after dice settles
                         setTimeout(() => {
-                            if (_isAllyTurn) {
-                                showNarration(_pick(_NARR_ALLY_ACTION).replace('{name}', newTurn.n), 'heal');
+                            if (_isAllyTurn && _eLr.crit) {
+                                showNarration(_pick(_NARR_ALLY_CRIT).replace('{name}', newTurn.n), 'crit');
+                                const app = document.getElementById('app');
+                                if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                                hapticBurst('crit');
+                            } else if (_isAllyTurn) {
+                                showNarration(_pick(_NARR_ALLY_HIT).replace('{name}', newTurn.n), '');
+                                haptic('medium');
                             } else if (_eLr.crit) {
                                 showNarration(_pick(_NARR_ENEMY_CRIT), 'crit');
-                                // Screen shake on enemy crit
                                 const app = document.getElementById('app');
                                 if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
                                 haptic('heavy');
@@ -2741,6 +2769,27 @@ const _NARR_ALLY_ACTION = [
     '{name} não hesita e avança!',
     '{name} desfere seu golpe!',
     '{name} luta ao seu lado!',
+];
+const _NARR_ALLY_HIT = [
+    '{name} acerta o inimigo!',
+    '{name} conecta um belo golpe!',
+    'Excelente! {name} causa dano!',
+    '{name} encontra uma abertura!',
+    'O ataque de {name} é preciso!',
+];
+const _NARR_ALLY_CRIT = [
+    '{name} desfere um golpe devastador!',
+    'Golpe perfeito de {name}!',
+    '{name} acerta um ponto vital!',
+    'Incrível! {name} causa dano massivo!',
+    '{name} libera todo o seu poder!',
+];
+const _NARR_ALLY_MISS = [
+    '{name} erra o alvo!',
+    'O ataque de {name} passa de raspão.',
+    '{name} não consegue conectar.',
+    'O inimigo desvia do golpe de {name}.',
+    '{name} precisa de mais precisão.',
 ];
 
 function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
