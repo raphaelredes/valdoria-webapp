@@ -309,7 +309,9 @@ var ValdoriaErrors = (function () {
     }
 
     var _bgHealthTimer = null;
+    var _bgHealthCount = 0;
     var _BG_HEALTH_INTERVAL = 15000; // 15s background poll after exhaustion
+    var _BG_HEALTH_MAX_POLLS = 12;   // 12 * 15s = 3 min then give up (tunnel URL likely changed)
 
     function _autoReconnect() {
         _clog('AUTO-RECONNECT: all ' + _RETRY_MAX + ' retries exhausted');
@@ -346,8 +348,26 @@ var ValdoriaErrors = (function () {
 
     function _startBgHealth() {
         _stopBgHealth();
+        _bgHealthCount = 0;
         _bgHealthTimer = setInterval(function () {
             if (!_cfg.apiBase) return;
+            _bgHealthCount++;
+
+            // After 3 min of polling, the tunnel URL likely changed on restart.
+            // Close WebApp so user gets a fresh button with the new URL.
+            if (_bgHealthCount > _BG_HEALTH_MAX_POLLS) {
+                _clog('BG-HEALTH: gave up after ' + _bgHealthCount + ' polls, closing...');
+                _stopBgHealth();
+                var msgEl = document.getElementById('v-err-msg');
+                if (msgEl) msgEl.textContent = 'Retornando ao menu...';
+                setTimeout(function () { _sendCloseAndReturn(); }, 2000);
+                return;
+            }
+
+            var remaining = _BG_HEALTH_MAX_POLLS - _bgHealthCount;
+            var hintEl = document.getElementById('v-err-hint');
+            if (hintEl) hintEl.textContent = 'Verificando... (' + remaining + ' tentativas restantes)';
+
             var url = _cfg.apiBase + '/api/game/health';
             fetch(url, { method: 'GET' }).then(function (resp) {
                 if (!resp.ok) return;
@@ -629,6 +649,7 @@ var ValdoriaErrors = (function () {
         var el = document.getElementById('v-err-overlay');
         if (el) el.style.display = 'none';
         if (_autoRetryTimer) { clearInterval(_autoRetryTimer); _autoRetryTimer = null; }
+        _stopBgHealth();
     }
 
     // ─── Init ───

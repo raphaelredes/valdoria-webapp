@@ -164,7 +164,6 @@ body {
     opacity: 0.8;
 }
 .hp-mini {
-    position: relative;
     width: 44px;
     height: 12px;
     background: #3a2820;
@@ -178,19 +177,6 @@ body {
     height: 100%;
     border-radius: 3px;
     transition: width 0.5s ease;
-}
-.hp-mini-pct {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 8px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.85);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-    line-height: 1;
-    pointer-events: none;
 }
 .hp-mini-fill.hp-high { background: linear-gradient(90deg, #388e3c, #4caf50); }
 .hp-mini-fill.hp-mid { background: linear-gradient(90deg, #e65100, #f9a825); }
@@ -434,15 +420,13 @@ body {
 .turn-entry {
     flex: 0 0 auto;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    min-width: 40px;
+    justify-content: center;
+    min-width: 24px;
     padding: 2px 4px;
     border-radius: var(--v-radius-sm);
     background: var(--v-bg-card);
     border: 1px solid var(--v-border);
-    font-size: 10px;
-    line-height: 1.2;
     color: var(--v-text-dim);
 }
 .turn-entry.active {
@@ -457,25 +441,13 @@ body {
     50% { box-shadow: 0 0 14px rgba(196,149,58,0.4); }
 }
 .turn-val { font-size: 11px; font-weight: 700; color: var(--v-text-bright); display: block; }
-.turn-ico { font-size: 12px; line-height: 1; display: block; }
-.turn-name {
-    max-width: 52px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: block;
-    font-size: 10px;
-    line-height: 1.2;
-}
+.turn-ico { font-size: 14px; line-height: 1; }
 .turn-arrow { color: var(--v-text-dim); font-size: 9px; flex-shrink: 0; }
 
 /* Turn timeline colors */
 .turn-entry.t-player { border-color: var(--v-gold); }
-.turn-entry.t-player .turn-name { color: var(--v-gold); }
 .turn-entry.t-enemy { border-color: var(--v-crimson); }
-.turn-entry.t-enemy .turn-name { color: var(--v-crimson); }
 .turn-entry.t-ally { border-color: var(--v-silver); }
-.turn-entry.t-ally .turn-name { color: var(--v-silver); }
 
 /* Dice area — cinematic multi-phase animation */
 @keyframes dicePulse {
@@ -1856,10 +1828,6 @@ body {
 .turn-entry.dead {
     opacity: 0.35;
     filter: grayscale(0.5);
-}
-.turn-entry.dead .turn-name {
-    text-decoration: line-through;
-    text-decoration-color: rgba(196,149,58,0.3);
 }
 
 /* ─── ACTION BAR PRIMARY GRADIENT ─── */

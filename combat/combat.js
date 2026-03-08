@@ -1192,7 +1192,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
             <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
             <span class="compact-name">${escHtml(e.n)}</span>
             ${acBadge}
-            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct * 100}%"></div><span class="hp-mini-pct">${Math.round(pct * 100)}%</span></div>
+            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
             <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
             ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
             ${posBadge}
@@ -1260,7 +1260,6 @@ function renderTurnTimeline(to) {
         const ico = entry.ico || (entry.t === 'p' ? '⚔️' : entry.t === 'a' ? '🛡️' : '👹');
         html += `<div class="turn-entry ${isFirst ? 'active' : ''} ${tCls}${deadCls}">
             <span class="turn-ico">${ico}</span>
-            <span class="turn-name">${escHtml(entry.n)}</span>
         </div>`;
     });
     html += '</div>';

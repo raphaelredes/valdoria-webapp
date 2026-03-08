@@ -499,22 +499,29 @@ function _showDiceAnimation(screen) {
 
     const showResult = () => {
         const sign = dr.mod >= 0 ? '+' : '';
-        const isOpposed = dr.type === 'opposed';
 
-        if (isOpposed && opposedBlock) {
+        if (dr.type === 'opposed' && opposedBlock) {
             // Two-line layout for opposed rolls
             formulaEl.style.display = 'none';
             opposedBlock.style.display = '';
             playerEl.innerHTML = '\ud83c\udfb2 <b>' + dr.total + '</b> \u2039d20(' + dr.roll + ') ' + sign + dr.mod + '\u203a';
             opponentEl.innerHTML = '\ud83d\udc7a ' + (dr.opponent_name || 'Oponente') + ': <b>' + dr.opponent_total + '</b>';
             resultEl.textContent = dr.success ? 'Vit\u00f3ria!' : 'Derrota!';
+            resultEl.className = 'dice-result ' + (dr.success ? 'success' : 'failure');
+        } else if (dr.type === 'generic') {
+            // Generic roll (healing, hit dice) — no DC, no pass/fail
+            formulaEl.style.display = '';
+            var fStr = dr.formula || ('d20' + sign + dr.mod);
+            formulaEl.textContent = fStr + ' = ' + dr.total;
+            resultEl.textContent = '';
+            resultEl.className = 'dice-result success';
         } else {
-            // Single-line for skill checks
+            // Skill check: d20(roll) +mod = total vs DC dc
             formulaEl.style.display = '';
             formulaEl.textContent = 'd20(' + dr.roll + ') ' + sign + dr.mod + ' = ' + dr.total + ' vs DC ' + dr.dc;
             resultEl.textContent = dr.success ? 'Sucesso!' : 'Falha!';
+            resultEl.className = 'dice-result ' + (dr.success ? 'success' : 'failure');
         }
-        resultEl.className = 'dice-result ' + (dr.success ? 'success' : 'failure');
 
         // Haptic feedback
         try {
