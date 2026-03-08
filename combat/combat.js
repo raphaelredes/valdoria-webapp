@@ -18,6 +18,7 @@ const isApiMode = !!apiBase;
 let currentState = null;
 let _lastAnimatedRoll = null; // Dedup: prevents replaying same dice animation on re-render
 let _initDiceAnimated = false; // Dedup: prevents replaying initiative dice on poll re-render
+let _initAnimationInProgress = false; // Blocks poll re-render during initiative animation
 
 // ─── IMMERSION FEATURES STATE ───
 const _prevHpState = new Map(); // Feature 1: HP bar animation tracking
@@ -360,7 +361,7 @@ function renderResolution(state) {
         : '';
     const rewardsBlock = rewardsHtml
         ? `<div class="res-rewards">${rewardsHtml}</div>`
-        : '';
+        : (isVictory ? '<div class="res-rewards"><div class="res-reward"><span class="res-icon">\u2694\uFE0F</span><span>Combate encerrado</span></div></div>' : '');
 
     // Level-up transition button (when player leveled up with pending choices)
     const hasLevelUp = isVictory && state.leveled_up && isApiMode;
@@ -404,6 +405,13 @@ function renderResolution(state) {
                 continueBtn.classList.add('reward-reveal');
             }, 400 + rewardEls.length * 500 + 300);
         }
+    } else if (continueBtn) {
+        // No rewards — still animate the button entrance
+        continueBtn.classList.add('reward-hidden');
+        setTimeout(() => {
+            continueBtn.classList.remove('reward-hidden');
+            continueBtn.classList.add('reward-reveal');
+        }, 600);
     }
 }
 
@@ -717,9 +725,8 @@ async function _pollForTimerResult() {
                 if (newPh === 'victory' || newPh === 'defeat' || newPh === 'ended') {
                     renderResolution(state);
                 } else {
-                    renderArena(state);
+                    renderArena(state); // renderArena already calls startPolling
                 }
-                startPolling(); // Resume normal polling
                 return;
             }
         } catch (e) {
@@ -778,8 +785,8 @@ function startPolling() {
             const oldHp = hpHash(currentState);
 
             if (newPh !== oldPh || newRn !== oldRn || newTc !== oldTc || newHp !== oldHp) {
-                // Don't update during cinematic animation
-                if (_cinematicInProgress) {
+                // Don't update during cinematic or initiative animation
+                if (_cinematicInProgress || _initAnimationInProgress) {
                     _pollInterval = setTimeout(poll, _getPollInterval());
                     return;
                 }
@@ -826,6 +833,11 @@ function startPolling() {
                 }
 
                 _showPollUpdateIndicator();
+                // Reset init animation state on phase transition
+                if (oldPh === 'init' && newPh !== 'init') {
+                    _initDiceAnimated = false;
+                    _initAnimationInProgress = false;
+                }
                 currentState = state;
                 if (newPh === 'victory' || newPh === 'defeat' || newPh === 'ended') {
                     renderResolution(state);
@@ -1100,31 +1112,34 @@ function _triggerInitiativeDice(s) {
 
     // First render: animate!
     _initDiceAnimated = true;
+    _initAnimationInProgress = true;
     if (typeof DiceRoller !== 'undefined') {
         DiceRoller.rollSequence(items, {
             container: area,
             title: '\u{1F4DC} ORDEM DE COMBATE',
             onComplete: () => {
+                _initAnimationInProgress = false;
                 _appendSurpriseInfo(area, init);
                 _showProceedBar();
             },
         });
 
-        // Skip button
+        // Skip button — validates DOM is still intact before appending
         setTimeout(() => {
             const bar = document.getElementById('init-proceed-bar');
-            if (bar && bar.style.display === 'none') {
+            const currentArea = document.getElementById('init-dice-area');
+            if (bar && bar.style.display === 'none' && currentArea) {
                 const skipBtn = document.createElement('button');
                 skipBtn.className = 'v-skip-btn visible';
                 skipBtn.textContent = 'Pular \u{25B8}';
                 skipBtn.style.cssText = 'position:relative; z-index:10; margin:8px auto;display:block;padding:6px 16px;font-size:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#aaa;cursor:pointer; clear:both;';
                 skipBtn.onclick = () => {
-                    // Skip triggers immediate reveal via DiceRoller internals (safety net)
-                    _showInitiativeStatic(area, items, init);
+                    _initAnimationInProgress = false;
+                    _showInitiativeStatic(currentArea, items, init);
                     _showProceedBar();
                     skipBtn.remove();
                 };
-                area.appendChild(skipBtn);
+                currentArea.appendChild(skipBtn);
             }
         }, 800);
     } else {

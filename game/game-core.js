@@ -589,10 +589,32 @@ _logFlushTimer = setInterval(_flushLogs, _LOG_FLUSH_INTERVAL);
 window.addEventListener('beforeunload', _flushLogs);
 
 // ─── Player Error Reporting ───
+const _REPORT_QUEUE_KEY = 'valdoria_report_queue';
+
 async function reportError() {
-    if (\!S.apiBase) return { ok: false, error: 'no_api' };
     const log = typeof getConnectionLog === 'function' ? getConnectionLog() : 'Log indisponível';
     const screenId = S.currentScreen ? S.currentScreen.screen_id || '' : '';
+    // Capture the error message from the overlay
+    const errMsgEl = document.getElementById('error-msg');
+    const errorMsg = errMsgEl ? errMsgEl.textContent || '' : '';
+    const errorType = _classifyError(errorMsg);
+
+    const payload = {
+        user_id: S.uid,
+        log: log,
+        screen_id: screenId,
+        error_msg: errorMsg,
+        error_type: errorType,
+        device: _getDeviceInfo(),
+        retries: typeof _errorRetryAttempt !== 'undefined' ? _errorRetryAttempt : 0,
+    };
+
+    if (!S.apiBase || !navigator.onLine) {
+        // Offline: queue for later
+        _queueReport(payload);
+        return { ok: true, sent: false, queued: true };
+    }
+
     try {
         const resp = await fetch(S.apiBase + '/api/game/report-error', {
             method: 'POST',
@@ -601,22 +623,54 @@ async function reportError() {
                 'Authorization': 'Bearer ' + S.token,
                 'ngrok-skip-browser-warning': '1',
             },
-            body: JSON.stringify({
-                user_id: S.uid,
-                log: log,
-                screen_id: screenId,
-            }),
+            body: JSON.stringify(payload),
         });
         const data = await resp.json();
         if (resp.status === 429 && data.retry_after) {
             return { ok: false, error: 'cooldown', retry_after: data.retry_after };
         }
+        // Also flush any queued reports
+        _flushReportQueue();
         return data;
     } catch (e) {
         console.error('[GAME] reportError failed:', e.message);
-        return { ok: false, error: e.message };
+        // Queue on failure
+        _queueReport(payload);
+        return { ok: true, sent: false, queued: true };
     }
 }
+
+function _queueReport(payload) {
+    try {
+        const queue = JSON.parse(localStorage.getItem(_REPORT_QUEUE_KEY) || '[]');
+        queue.push({ ...payload, queued_at: new Date().toISOString() });
+        // Max 5 queued reports
+        while (queue.length > 5) queue.shift();
+        localStorage.setItem(_REPORT_QUEUE_KEY, JSON.stringify(queue));
+    } catch (e) { /* quota */ }
+}
+
+function _flushReportQueue() {
+    try {
+        const queue = JSON.parse(localStorage.getItem(_REPORT_QUEUE_KEY) || '[]');
+        if (!queue.length || !S.apiBase) return;
+        localStorage.removeItem(_REPORT_QUEUE_KEY);
+        for (const payload of queue) {
+            fetch(S.apiBase + '/api/game/report-error', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + S.token,
+                    'ngrok-skip-browser-warning': '1',
+                },
+                body: JSON.stringify(payload),
+            }).catch(() => { /* fire and forget */ });
+        }
+    } catch (e) { /* */ }
+}
+
+// Flush queued reports when coming online
+window.addEventListener('online', () => { setTimeout(_flushReportQueue, 3000); });
 
 // ─── Global Error Handlers ───
 window.addEventListener('error', (e) => {

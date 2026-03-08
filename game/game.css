@@ -613,9 +613,9 @@
 .error-content {
     text-align: center;
     padding: 28px 24px;
-    max-width: 320px;
+    max-width: min(340px, 88vw);
     background: linear-gradient(180deg, rgba(50,38,28,0.5) 0%, rgba(30,22,16,0.4) 100%);
-    border: 1px solid rgba(196,149,58,0.15);
+    border: 1px solid rgba(196,149,58,0.22);
     border-radius: var(--v-radius-lg, 12px);
     box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(196,149,58,0.08);
     animation: errorEntry 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -633,7 +633,7 @@
 }
 @keyframes errorIconPulse {
     0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(196,149,58,0.3)); }
-    50% { transform: scale(1.08); filter: drop-shadow(0 0 12px rgba(196,149,58,0.6)); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 16px rgba(196,149,58,0.7)); }
 }
 
 .error-msg {
@@ -695,6 +695,25 @@
 }
 .error-debug-copy:active { background: rgba(196,149,58,0.2); }
 
+.error-debug-log-wrap {
+    position: relative;
+}
+.error-debug-log-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.5));
+    border-radius: 0 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px);
+    pointer-events: none;
+}
+.error-debug-toggle:active {
+    color: var(--v-gold);
+    opacity: 1;
+}
+
 /* ── Error Retry Countdown Bar ── */
 .error-retry-wrap {
     position: relative;
@@ -704,7 +723,7 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    height: 3px;
+    height: 4px;
     background: linear-gradient(90deg, var(--v-gold-dim), var(--v-gold));
     border-radius: 0 0 var(--v-radius-md, 8px) var(--v-radius-md, 8px);
     transition: width 1s linear;

@@ -217,7 +217,9 @@ function showError(msg, err = null) {
     _updateNetworkBadge();
 
     // Populate debug log panel
-    _populateDebugLog(err);
+    const isConnErr = msg.includes('Sem conexão') || msg.includes('indisponível')
+        || msg.includes('não respondeu') || msg.includes('demorou');
+    _populateDebugLog(err, isConnErr);
 
     // Hide loading
     hideLoading();
@@ -280,22 +282,30 @@ function showError(msg, err = null) {
     // Report button: send debug log to admin Telegram chats
     const reportBtn = document.getElementById('error-report');
     if (reportBtn) {
+        reportBtn.disabled = false;
+        reportBtn.textContent = '📨 Reportar Problema';
         reportBtn.onclick = async () => {
             reportBtn.disabled = true;
             reportBtn.textContent = '⏳ Enviando...';
+            haptic('light');
             try {
                 const result = await reportError();
                 if (result.ok && result.sent) {
-                    reportBtn.textContent = '✅ Enviado\!';
-                    showToast('Problema reportado com sucesso\!', 3000);
+                    reportBtn.textContent = '✅ Enviado!';
+                    haptic('success');
+                    showToast('Problema reportado com sucesso!', 3000);
+                } else if (result.queued) {
+                    reportBtn.textContent = '📦 Salvo (enviará quando conectar)';
+                    showToast('Relatório salvo offline', 2500);
                 } else if (result.error === 'cooldown') {
-                    reportBtn.textContent = '⏳ Aguarde ' + (result.retry_after || 60) + 's';
+                    const secs = result.retry_after || 60;
+                    reportBtn.textContent = '⏳ Aguarde ' + secs + 's';
                     setTimeout(() => {
                         reportBtn.textContent = '📨 Reportar Problema';
                         reportBtn.disabled = false;
-                    }, (result.retry_after || 60) * 1000);
+                    }, secs * 1000);
                     return;
-                } else if (result.ok && \!result.sent) {
+                } else if (result.ok && !result.sent) {
                     reportBtn.textContent = '⚠️ Admins não configurados';
                 } else {
                     reportBtn.textContent = '❌ Falha ao enviar';
