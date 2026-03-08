@@ -543,8 +543,12 @@ function renderLocationMarkers(group, fogState) {
             ng.appendChild(lbl);
         }
 
+        // ── Sub-badges: quest markers + dungeon indicators ──
+        // Hidden at lowest zoom (0.85x) to reduce clutter on small screens
+        const showBadges = typeof _zoomIdx === 'undefined' || _zoomIdx >= 1;
+
         // ── Quest markers (mini scroll badge) ──
-        if (isExp) {
+        if (isExp && showBadges) {
             const locQuests = (S.quests || []).filter(q => q.loc === locId);
             if (locQuests.length > 0) {
                 const qx = x + R * 0.6, qy = y - R * 0.7;
@@ -583,7 +587,7 @@ function renderLocationMarkers(group, fogState) {
         }
 
         // ── Dungeon indicators (star=pending, check=done) ──
-        if (isExp) {
+        if (isExp && showBadges) {
             const locDungeons = (S.dungeons || {})[locId] || [];
             if (locDungeons.length > 0) {
                 const ddx = x + R * 0.65, ddy = y + R * 0.5;
@@ -621,6 +625,44 @@ function renderLocationMarkers(group, fogState) {
         }
         group.appendChild(ng);
     }
+}
+
+// ── BREADCRUMB TRAIL (dotted path through discovered locations) ──
+
+function renderBreadcrumbTrail(svg) {
+    const discovered = S.discoveredLocs || [];
+    if (discovered.length < 2) return;
+    const bG = _el('g', { class: 'breadcrumb-layer', 'pointer-events': 'none' });
+    // Connect consecutive discovered locations with subtle dotted trail
+    for (let i = 0; i < discovered.length - 1; i++) {
+        const aCoords = LOCATION_COORDS[discovered[i]];
+        const bCoords = LOCATION_COORDS[discovered[i + 1]];
+        if (!aCoords || !bCoords) continue;
+        const aP = hexToPixel(aCoords.col, aCoords.row);
+        const bP = hexToPixel(bCoords.col, bCoords.row);
+        const seed = (aCoords.col * 31 + aCoords.row * 17 + bCoords.col * 13 + bCoords.row * 7);
+        const pathD = _buildRoadPath(aP, bP, seed);
+        bG.appendChild(_el('path', {
+            d: pathD, class: 'breadcrumb-trail',
+            fill: 'none', stroke: '#c4953a',
+            'stroke-width': 1, 'stroke-opacity': 0.15,
+        }));
+    }
+    // Small footprint dots at each discovered location
+    for (const locId of discovered) {
+        const coords = LOCATION_COORDS[locId];
+        if (!coords) continue;
+        const { x, y } = hexToPixel(coords.col, coords.row);
+        bG.appendChild(_el('circle', {
+            cx: x + 3, cy: y + 8, r: 1.2,
+            fill: '#c4953a', 'fill-opacity': 0.12,
+        }));
+        bG.appendChild(_el('circle', {
+            cx: x - 2, cy: y + 10, r: 1,
+            fill: '#c4953a', 'fill-opacity': 0.1,
+        }));
+    }
+    svg.appendChild(bG);
 }
 
 // ── PLAYER MARKER (simple pennant on pole) ──

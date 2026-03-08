@@ -838,6 +838,53 @@
             margin-left: 4px;
         }
 
+        /* ═══ MINIMAP (compact, only at high zoom) ═══ */
+        #minimap {
+            position: absolute;
+            top: 44px;
+            right: 8px;
+            width: 55px;
+            height: 48px;
+            background: rgba(42, 36, 32, 0.92);
+            border: 1px solid rgba(112, 66, 20, 0.35);
+            border-radius: 3px;
+            z-index: 42;
+            overflow: hidden;
+            display: none;
+            cursor: pointer;
+            box-shadow: inset 0 1px 3px rgba(40, 30, 15, 0.3);
+            transition: opacity 0.5s ease;
+        }
+        #minimap.visible { display: block; }
+        #minimap.fading { opacity: 0.3; }
+        #minimap-svg { width: 100%; height: 100%; }
+        #minimap .mm-viewport {
+            fill: rgba(196, 149, 58, 0.2);
+            stroke: #c4953a;
+            stroke-width: 1.5;
+            stroke-opacity: 0.6;
+        }
+
+        /* ═══ SWIPE DISMISS — info panel ═══ */
+        #info-panel.dragging { transition: none; }
+
+        /* ═══ ARRIVAL ANIMATION ═══ */
+        @keyframes arrivalZoomOut {
+            from { transform: translate(var(--arr-tx), var(--arr-ty)) scale(var(--arr-zs)); }
+            to   { transform: translate(var(--arr-fx), var(--arr-fy)) scale(var(--arr-fz)); }
+        }
+        #map-wrapper.arrival-anim {
+            animation: arrivalZoomOut 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+            transition: none;
+        }
+
+        /* ═══ BREADCRUMB TRAIL ═══ */
+        .breadcrumb-trail {
+            stroke-dasharray: 3 4;
+            stroke-linecap: round;
+            pointer-events: none;
+        }
+
         /* ═══ FONT PICKER ═══ */
         #font-picker-btn {
             position: absolute;
@@ -1055,6 +1102,7 @@
         <div id="compass-overlay">
             <svg id="compass-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"></svg>
         </div>
+        <div id="minimap"><svg id="minimap-svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
         <div id="offscreen-indicator"><span class="osi-arrow"></span><br><span class="osi-label"></span></div>
         <div id="map-tooltip"><span class="tt-name"></span><span class="tt-dist"></span></div>
         <div id="current-loc-badge">

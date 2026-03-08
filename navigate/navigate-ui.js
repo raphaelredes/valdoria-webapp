@@ -2,9 +2,23 @@
 // NAVIGATE UI — Info panel, actions, interactions
 // ═══════════════════════════════════════════════════════
 
+// ── Haptic helper (differentiated by context) ──
+function _haptic(type) {
+    try {
+        if (!tg?.HapticFeedback) return;
+        if (type === 'tap') tg.HapticFeedback.impactOccurred('light');
+        else if (type === 'open') tg.HapticFeedback.impactOccurred('medium');
+        else if (type === 'travel') tg.HapticFeedback.impactOccurred('heavy');
+        else if (type === 'warn') tg.HapticFeedback.notificationOccurred('warning');
+        else if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
+        else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
+        else tg.HapticFeedback.impactOccurred('light');
+    } catch(e) { /* silent */ }
+}
+
 // ── Location tap handler ──
 function handleLocationTap(locId) {
-    try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e) { console.warn('[NAVIGATE] haptic:', e); }
+    _haptic('tap');
 
     S.selectedLoc = locId;
     const locData = S.locations[locId];
@@ -241,6 +255,7 @@ function handleLocationTap(locId) {
 
     // Open panel
     panel.classList.add('open');
+    _haptic('open');
 
     // Smooth pan to selected location + highlight
     if (typeof panToLocationSmooth === 'function') panToLocationSmooth(locId);
@@ -465,6 +480,57 @@ function bfsPath(fromId, toId) {
     return null;
 }
 
+// ── Swipe-to-dismiss info panel (drag down to close) ──
+function setupSwipeDismiss() {
+    const panel = document.getElementById('info-panel');
+    if (!panel) return;
+    let startY = 0, currentY = 0, dragging = false;
+    const threshold = 60; // px to trigger dismiss
+
+    panel.addEventListener('touchstart', e => {
+        // Only capture if touching the handle area (top 40px)
+        const rect = panel.getBoundingClientRect();
+        const touchY = e.touches[0].clientY - rect.top;
+        if (touchY > 50) return; // ignore touches below handle
+        startY = e.touches[0].clientY;
+        currentY = startY;
+        dragging = true;
+        panel.classList.add('dragging');
+    }, { passive: true });
+
+    panel.addEventListener('touchmove', e => {
+        if (!dragging) return;
+        currentY = e.touches[0].clientY;
+        const dy = currentY - startY;
+        if (dy > 0) {
+            // Only allow dragging downward
+            panel.style.transform = `translateY(${dy}px)`;
+        }
+    }, { passive: true });
+
+    panel.addEventListener('touchend', () => {
+        if (!dragging) return;
+        dragging = false;
+        panel.classList.remove('dragging');
+        const dy = currentY - startY;
+        if (dy > threshold) {
+            // Dismiss
+            panel.style.transform = '';
+            closeInfoPanel();
+            _haptic('tap');
+        } else {
+            // Snap back
+            panel.style.transform = '';
+        }
+    });
+
+    panel.addEventListener('touchcancel', () => {
+        dragging = false;
+        panel.classList.remove('dragging');
+        panel.style.transform = '';
+    });
+}
+
 // ── Hover tooltip (desktop only — shows name + distance without opening panel) ──
 function setupHoverTooltip() {
     const vp = document.getElementById('map-viewport');
@@ -566,23 +632,18 @@ function toggleLegendExpand() {
     }
 }
 
-// ── Init hover tooltip + off-screen indicator updates ──
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        setupHoverTooltip();
-        // Update off-screen indicator on pan/zoom
-        const vp = document.getElementById('map-viewport');
-        if (vp) {
-            const observer = new MutationObserver(_updateOffscreenIndicator);
-            const wr = document.getElementById('map-wrapper');
-            if (wr) observer.observe(wr, { attributes: true, attributeFilter: ['style'] });
-        }
-    });
-} else {
+// ── Init hover tooltip + off-screen indicator + swipe dismiss ──
+function _initUIExtras() {
     setupHoverTooltip();
+    setupSwipeDismiss();
     const wr = document.getElementById('map-wrapper');
     if (wr) {
         const observer = new MutationObserver(_updateOffscreenIndicator);
         observer.observe(wr, { attributes: true, attributeFilter: ['style'] });
     }
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initUIExtras);
+} else {
+    _initUIExtras();
 }

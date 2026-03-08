@@ -203,6 +203,7 @@ function renderMap() {
     const locG = _el('g', { class: 'locations-layer' });
     renderLocationMarkers(locG, fogState);
     svg.appendChild(locG);
+    if (typeof renderBreadcrumbTrail === 'function') renderBreadcrumbTrail(svg);
     renderPlayerBanner(svg);
     renderFogWisps(svg, fogState);
     renderCartographyDecor(svg, fogState);
@@ -456,10 +457,20 @@ const ZOOM_LEVELS = [
 ];
 let _zoomIdx = 1; // Default to "Região" level
 
-function _snapToZoomLevel(dir) {
+function _snapToZoomLevel(dir, focalX, focalY) {
+    const oldZoom = S.zoom;
     _zoomIdx = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, _zoomIdx + dir));
     S.zoom = ZOOM_LEVELS[_zoomIdx].zoom;
     _updateScaleBar();
+    // Focal-point zoom: keep the screen point (focalX, focalY) over the same map point
+    if (focalX !== undefined && focalY !== undefined) {
+        // Map point under focal: mapX = (focalX - panX) / oldZoom
+        const mapX = (focalX - S.panX) / oldZoom;
+        const mapY = (focalY - S.panY) / oldZoom;
+        S.panX = focalX - mapX * S.zoom;
+        S.panY = focalY - mapY * S.zoom;
+    }
+    _updateMinimap();
 }
 
 function _updateScaleBar() {
@@ -507,16 +518,18 @@ function setupPanZoom() {
     _updateScaleBar();
 
     vp.addEventListener('pointerdown', e => { pan = true; moved = false; wr.classList.add('panning'); sx = e.clientX - S.panX; sy = e.clientY - S.panY; scx = e.clientX; scy = e.clientY; });
-    vp.addEventListener('pointermove', e => { if (!pan) return; if (Math.abs(e.clientX - scx) > 5 || Math.abs(e.clientY - scy) > 5) moved = true; if (moved) { S.panX = e.clientX - sx; S.panY = e.clientY - sy; clamp(); apply(); } });
+    vp.addEventListener('pointermove', e => { if (!pan) return; if (Math.abs(e.clientX - scx) > 5 || Math.abs(e.clientY - scy) > 5) moved = true; if (moved) { S.panX = e.clientX - sx; S.panY = e.clientY - sy; clamp(); apply(); _updateMinimap(); } });
     vp.addEventListener('pointerup', () => { pan = false; wr.classList.remove('panning'); });
     vp.addEventListener('pointercancel', () => { pan = false; wr.classList.remove('panning'); });
-    // Double-tap to zoom in (single finger, < 300ms gap)
+    // Double-tap to zoom in (single finger, < 300ms gap) — centered on tap point
     let _lastTapTime = 0;
     vp.addEventListener('pointerup', e => {
         if (moved) return;
         const now = Date.now();
         if (now - _lastTapTime < 300 && _zoomIdx < ZOOM_LEVELS.length - 1) {
-            _snapToZoomLevel(1); clamp(); apply();
+            const vpR = vp.getBoundingClientRect();
+            _snapToZoomLevel(1, e.clientX - vpR.left, e.clientY - vpR.top);
+            clamp(); apply();
             _lastTapTime = 0;
         } else {
             _lastTapTime = now;
@@ -529,8 +542,10 @@ function setupPanZoom() {
     let _wheelTimer = null;
     vp.addEventListener('wheel', e => {
         e.preventDefault();
-        if (_wheelTimer) return; // ignore rapid successive events
-        _snapToZoomLevel(e.deltaY > 0 ? -1 : 1); clamp(); apply();
+        if (_wheelTimer) return;
+        const vpR = vp.getBoundingClientRect();
+        _snapToZoomLevel(e.deltaY > 0 ? -1 : 1, e.clientX - vpR.left, e.clientY - vpR.top);
+        clamp(); apply();
         _wheelTimer = setTimeout(() => { _wheelTimer = null; }, 200);
     }, { passive: false });
     vp.addEventListener('click', e => { if (e.target === vp || e.target === wr || e.target.tagName === 'rect') closeInfoPanel(); });
@@ -566,6 +581,112 @@ function panToLocationSmooth(locId) {
     // CSS transition handles the smooth animation
     wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
     saveViewport();
+}
+
+// ===============================================================
+// MINIMAP — Compact overview (visible at zoom >= Área)
+// ===============================================================
+
+let _mmFadeTimer = null;
+
+function _initMinimap() {
+    const mm = document.getElementById('minimap');
+    const svg = document.getElementById('minimap-svg');
+    if (!mm || !svg) return;
+    svg.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
+    // Draw landmass silhouette
+    svg.innerHTML = '';
+    svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: MAP_BG }));
+    svg.appendChild(_el('path', { d: _landmassPath(), fill: PARCHMENT, 'fill-opacity': 0.4, stroke: 'none' }));
+    // Location dots
+    const discoveredSet = new Set(S.discoveredLocs || []);
+    for (const [locId, coords] of Object.entries(LOCATION_COORDS)) {
+        if (!S.knownLocs.includes(locId)) continue;
+        const { x, y } = hexToPixel(coords.col, coords.row);
+        const isCurr = locId === S.currentLoc;
+        const isExp = discoveredSet.has(locId);
+        svg.appendChild(_el('circle', {
+            cx: x, cy: y, r: isCurr ? 8 : 4,
+            fill: isCurr ? '#c4953a' : isExp ? INK_LIGHT : INK_DARK,
+            'fill-opacity': isCurr ? 0.9 : isExp ? 0.5 : 0.25,
+        }));
+    }
+    // Viewport rectangle (updated dynamically)
+    svg.appendChild(_el('rect', { class: 'mm-viewport', x: 0, y: 0, width: 100, height: 100 }));
+    // Tap on minimap to recenter
+    mm.addEventListener('click', e => {
+        const r = svg.getBoundingClientRect();
+        const mx = (e.clientX - r.left) / r.width * SVG_W;
+        const my = (e.clientY - r.top) / r.height * SVG_H;
+        const vp = document.getElementById('map-viewport');
+        S.panX = (vp.clientWidth / 2) - mx * S.zoom;
+        S.panY = (vp.clientHeight / 2) - my * S.zoom;
+        const mw = SVG_W * S.zoom, mh = SVG_H * S.zoom;
+        if (mw > vp.clientWidth) S.panX = Math.max(vp.clientWidth - mw, Math.min(0, S.panX));
+        else S.panX = (vp.clientWidth - mw) / 2;
+        if (mh > vp.clientHeight) S.panY = Math.max(vp.clientHeight - mh, Math.min(0, S.panY));
+        else S.panY = (vp.clientHeight - mh) / 2;
+        document.getElementById('map-wrapper').style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
+        saveViewport();
+        _updateMinimap();
+    });
+    _updateMinimap();
+}
+
+function _updateMinimap() {
+    const mm = document.getElementById('minimap');
+    if (!mm) return;
+    // Only show at zoom >= Área (index 2+)
+    const show = _zoomIdx >= 2;
+    mm.classList.toggle('visible', show);
+    if (!show) return;
+    // Update viewport rect
+    const vp = document.getElementById('map-viewport');
+    const vpRect = mm.querySelector('.mm-viewport');
+    if (!vpRect || !vp) return;
+    const rx = -S.panX / S.zoom;
+    const ry = -S.panY / S.zoom;
+    const rw = vp.clientWidth / S.zoom;
+    const rh = vp.clientHeight / S.zoom;
+    vpRect.setAttribute('x', rx);
+    vpRect.setAttribute('y', ry);
+    vpRect.setAttribute('width', rw);
+    vpRect.setAttribute('height', rh);
+    // Auto-fade after 3s of no interaction
+    mm.classList.remove('fading');
+    clearTimeout(_mmFadeTimer);
+    _mmFadeTimer = setTimeout(() => { mm.classList.add('fading'); }, 3000);
+}
+
+// ===============================================================
+// ARRIVAL ANIMATION — Zoom-out reveal on first load
+// ===============================================================
+
+function playArrivalAnimation() {
+    const wr = document.getElementById('map-wrapper');
+    const vp = document.getElementById('map-viewport');
+    if (!wr || !vp) return;
+    // Start at highest zoom (Local), animate to current zoom
+    const startZoom = ZOOM_LEVELS[ZOOM_LEVELS.length - 1].zoom;
+    const endZoom = S.zoom;
+    const coords = LOCATION_COORDS[S.currentLoc];
+    if (!coords) return;
+    const { x, y } = hexToPixel(coords.col, coords.row);
+    // Calculate start pan (centered on current loc at startZoom)
+    const startPX = (vp.clientWidth / 2) - (x * startZoom);
+    const startPY = (vp.clientHeight / 2) - (y * startZoom);
+    // Set CSS variables for the keyframes
+    wr.style.setProperty('--arr-tx', startPX + 'px');
+    wr.style.setProperty('--arr-ty', startPY + 'px');
+    wr.style.setProperty('--arr-zs', startZoom);
+    wr.style.setProperty('--arr-fx', S.panX + 'px');
+    wr.style.setProperty('--arr-fy', S.panY + 'px');
+    wr.style.setProperty('--arr-fz', endZoom);
+    wr.classList.add('arrival-anim');
+    wr.addEventListener('animationend', () => {
+        wr.classList.remove('arrival-anim');
+        wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
+    }, { once: true });
 }
 
 function _el(tag, attrs) {

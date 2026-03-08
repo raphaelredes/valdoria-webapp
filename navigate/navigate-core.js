@@ -114,9 +114,13 @@ async function initAsync() {
         // Center on current location
         centerOnLocation(S.currentLoc);
 
-        // Hide loading screen
+        // Init minimap
+        if (typeof _initMinimap === 'function') _initMinimap();
+
+        // Hide loading screen, then play arrival animation
         setTimeout(() => {
             document.getElementById('loading').classList.add('hidden');
+            if (typeof playArrivalAnimation === 'function') playArrivalAnimation();
         }, 300);
 
     } catch (e) {
@@ -348,7 +352,12 @@ function _sendNavAction(type, target, flags) {
     if (flags?.noMap || (type === 'travel' && S.hasMap === 0)) payload.noMap = true;
     if (flags?.firstVisit) payload.firstVisit = true;
 
-    try { tg?.HapticFeedback?.impactOccurred('medium'); } catch (e) { }
+    // Differentiated haptic: warn for risky travel, heavy for safe travel, medium for other
+    if (typeof _haptic === 'function') {
+        if (flags?.noMap || flags?.firstVisit) _haptic('warn');
+        else if (type === 'travel') _haptic('travel');
+        else _haptic('open');
+    }
 
     if (!S.api) {
         showError('Erro: API nao configurada. Feche e reabra o mapa.');
