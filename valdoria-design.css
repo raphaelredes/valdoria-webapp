@@ -5,8 +5,7 @@
    Font: MedievalSharp + Cinzel serif stack.
    ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Google Fonts (Medieval serif stack) ─── */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=MedievalSharp&display=swap');
+/* ─── Fonts loaded locally via shared/fonts.css (no Google dependency) ─── */
 
 /* ─── COLOR TOKENS ─── */
 :root {

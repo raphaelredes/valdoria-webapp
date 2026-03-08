@@ -504,12 +504,12 @@ function _renderArenaInner(s) {
     } else {
         html += renderTurnTimeline(s.to);
         const diceDisplay = (ph === 'init' || isNarrative) ? 'display:none;' : '';
-        html += `<div class="dice-row" style="${diceDisplay}">
+        html += `<div class="dice-row" style="display:none;">
             <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>
             <div class="dice-box-compact"><div class="dice-emoji" id="dice2">🎲</div><div><div class="dice-result" id="diceResult2"></div><div class="dice-label" id="diceLabel2">dano</div></div></div>
         </div>
-        <div class="dice-formula" id="diceFormula" style="${diceDisplay}"></div>
-        <div class="dice-narration" id="diceNarration" style="${diceDisplay}"></div>`;
+        <div class="dice-formula" id="diceFormula" style="display:none;"></div>
+        <div class="dice-narration" id="diceNarration" style="display:none;"></div>`;
         // 3D damage dice overlay (appears during damage roll animation)
         html += '<div class="dmg-dice3d-overlay" id="dmgDice3dOverlay" style="display:none"><div class="dmg-dice3d-particles" id="dmgDice3dParticles"></div><div class="dmg-dice3d-canvas" id="dmgDice3dCanvas"></div><div class="dmg-dice3d-label" id="dmgDice3dLabel"></div><button class="dmg-dice3d-skip" id="dmgDice3dSkip">Pular</button></div>';
     }
@@ -1491,21 +1491,22 @@ function _playCinematicResult(result, actionType) {
     setTimeout(() => {
         initDice(result.lr);
 
-        // Phase 2: Show floating damage after 3D dice lands
+        // Phase 2: Show floating damage after 3D overlay completes
         const _rt = result.lr.t || 'attack';
         const _isDmgType = ['attack', 'skill', 'save', 'auto_hit', 'aoe', 'item_throw'].includes(_rt);
         if (_isDmgType && !result.lr.miss && result.lr.d > 0) {
-            const _floatDelay = ['auto_hit', 'aoe'].includes(_rt) ? 1800 : 2700;
+            // Overlay timing: d20(1200)+hold(800)+dmgRoll(1500)+fusion(400)+result(1200)
+            const _floatDelay = ['auto_hit', 'aoe'].includes(_rt) ? 2200 : 3800;
             setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy'), _floatDelay);
         }
 
-        // Phase 3: After full animation, check for kills then render new state
+        // Phase 3: After full overlay animation, check for kills then render new state
         let baseDelay;
-        if (_rt === 'death_save') baseDelay = 2800;
+        if (_rt === 'death_save') baseDelay = 3800;
         else if (_rt === 'heal' || _rt === 'util') baseDelay = 2800;
-        else if (_rt === 'auto_hit' || _rt === 'aoe') baseDelay = 3200;
-        else if (_rt === 'save') baseDelay = (result.lr.saved && !result.lr.half) ? 1800 : 4100;
-        else baseDelay = (result.lr.miss || result.lr.d <= 0) ? 1500 : 4100;
+        else if (_rt === 'auto_hit' || _rt === 'aoe') baseDelay = 3600;
+        else if (_rt === 'save') baseDelay = (result.lr.saved && !result.lr.half) ? 2600 : 5200;
+        else baseDelay = (result.lr.miss || result.lr.d <= 0) ? 2600 : 5200;
         const hasKill = result.lr.kill;
         const totalDelay = hasKill ? baseDelay + 600 : baseDelay;
 
@@ -1747,334 +1748,336 @@ function showItemPicker(items, enemies, allies) {
     };
 }
 
-// ─── DICE ANIMATION — Cinematic multi-phase ───
+// ═══════════════════════════════════════════════════
+// OVERLAY-ONLY DICE SYSTEM — All dice rolls use fullscreen 3D overlay
+// Replaces inline dice boxes (dice1/dice2) with immersive overlay
+// ═══════════════════════════════════════════════════
+
 function initDice(lr) {
     if (!lr) return;
     const rollType = lr.t || 'attack';
-    // Narrative mode: skip dice animation (dice area is hidden)
+    // Narrative mode: skip dice animation
     if (currentState && currentState.vm === 'simple') return;
 
     // Dedup — don't replay the same roll on polling re-renders
     const sig = `${rollType}-${lr.r||0}-${lr.d||0}-${lr.crit||0}-${lr.miss||0}-${lr.dc||0}`;
-    if (sig === _lastAnimatedRoll) {
-        if (rollType === 'attack' || rollType === 'skill' || rollType === 'item_throw') _showDiceStatic(lr);
-        return;
-    }
+    if (sig === _lastAnimatedRoll) return;
     _lastAnimatedRoll = sig;
 
-    // Dispatch to type-specific animation
+    // Dispatch to type-specific overlay animation
     if (rollType === 'save') { _initDiceSave(lr); return; }
     if (rollType === 'death_save') { _initDiceDeathSave(lr); return; }
     if (rollType === 'auto_hit' || rollType === 'aoe') { _initDiceDamageOnly(lr); return; }
     if (rollType === 'heal' || rollType === 'util') { _initDiceEffect(lr); return; }
 
-    // Default: attack/skill/item_throw — requires lr.r
+    // Default: attack/skill/item_throw — d20 + damage in overlay
     if (!lr.r) return;
+    _initDiceAttackOverlay(lr);
+}
 
-    const d1 = document.getElementById('dice1');
-    const d2 = document.getElementById('dice2');
-    const r1 = document.getElementById('diceResult1');
-    const l1 = document.getElementById('diceLabel1');
-    const r2 = document.getElementById('diceResult2');
-    const l2 = document.getElementById('diceLabel2');
-    const formula = document.getElementById('diceFormula');
-    if (!d1 || !r1) return;
-
-    // ── Phase 1: D20 Rolling (0→900ms) with easing deceleration ──
-    d1.textContent = '🎲';
-    d1.classList.add('shaking');
-    r1.className = 'dice-result cycling';
-    l1.textContent = 'rolando...';
-    l1.className = 'dice-label rolling-label';
-    haptic('light'); sfxDiceRoll(); // Feature 4+8
-    let _d20CycleActive = true;
-    const _d20Ease = (step) => {
-        if (!_d20CycleActive) return;
-        r1.textContent = Math.floor(Math.random() * 19) + 2;
-        // Decelerate: 60ms -> 80 -> 100 -> 130 -> 170 -> 220 -> 280ms
-        const nextDelay = Math.min(60 + step * step * 5, 300);
-        setTimeout(() => _d20Ease(step + 1), nextDelay);
-    };
-    _d20Ease(0);
-
-    // ── Phase 2: D20 Reveal (at 900ms) ──
-    setTimeout(() => {
-        _d20CycleActive = false;
-        d1.classList.remove('shaking');
-        r1.className = 'dice-result';
-        r1.textContent = lr.r;
-        d1.classList.add('slamming');
-        setTimeout(() => d1.classList.remove('slamming'), 300);
-
-        if (lr.crit || lr.r === 20) {
-            d1.textContent = '🌟';
-            r1.classList.add('crit');
-            l1.textContent = 'CRÍTICO!';
-            l1.className = 'dice-label crit';
-            d1.classList.add('crit-glow');
-            const app = document.getElementById('app');
-            if (app) app.classList.add('screen-shake');
-            setTimeout(() => {
-                if (app) app.classList.remove('screen-shake');
-                d1.classList.remove('crit-glow');
-            }, 500);
-            haptic('heavy'); hapticNotify('success'); sfxCrit(); // Feature 4+8
-            showNarration(_pick(_NARR_CRIT), 'crit'); // Feature 7
-            _hitStreak++; if (_hitStreak >= 2) _showComboCounter(_hitStreak);
-        } else if (lr.r === 1) {
-            d1.textContent = '💀';
-            r1.classList.add('miss');
-            l1.textContent = 'FALHA CRÍTICA!';
-            l1.className = 'dice-label miss';
-            hapticNotify('error'); // Feature 4
-            showNarration(_pick(_NARR_NAT1), 'nat1'); // Feature 7
-            _hitStreak = 0;
-        } else if (lr.miss) {
-            r1.classList.add('miss');
-            l1.textContent = 'errou';
-            l1.className = 'dice-label miss';
-            haptic('light'); sfxMiss(); // Feature 4+8
-            showNarration(_pick(_NARR_MISS), 'miss'); // Feature 7
-            // P1-F: Dodge flash on enemy when miss
-            const dodgeTarget = document.querySelector('.entity.enemy');
-            if (dodgeTarget) {
-                dodgeTarget.classList.add('dodge-flash');
-                setTimeout(() => dodgeTarget.classList.remove('dodge-flash'), 400);
-            }
-            _hitStreak = 0;
-        } else {
-            r1.classList.add('hit');
-            l1.textContent = lr.t === 'skill' ? 'habilidade' : 'acerto';
-            l1.className = 'dice-label hit';
-            haptic('medium'); sfxHit(); // Feature 4+8
-            // P2-G: Increment hit streak on successful hit
-            _hitStreak++;
-            if (_hitStreak >= 2) _showComboCounter(_hitStreak);
-        }
-
-        // Formula: "25 vs CA 16"
-        if (formula && lr.ac) {
-            const total = lr.total || lr.r;
-            formula.textContent = `${total} vs CA ${lr.ac}`;
-            formula.className = 'dice-formula visible ' + (lr.crit ? 'crit' : lr.miss ? 'miss' : 'hit');
-        }
-    }, 900);
-
-    // ── Phase 3: Miss/no-damage → shield on damage die ──
-    if (lr.miss || lr.d <= 0) {
-        setTimeout(() => {
-            if (d2) d2.textContent = '🛡️';
-            if (r2) { r2.textContent = '—'; r2.className = 'dice-result miss'; }
-            if (l2) { l2.textContent = 'bloqueado'; l2.className = 'dice-label miss'; }
-        }, 1100);
+// ─── ATTACK/SKILL/ITEM_THROW: Two-phase overlay (d20 → damage) ───
+function _initDiceAttackOverlay(lr) {
+    const overlay = document.getElementById('dmgDice3dOverlay');
+    const canvas = document.getElementById('dmgDice3dCanvas');
+    const particles = document.getElementById('dmgDice3dParticles');
+    const label3d = document.getElementById('dmgDice3dLabel');
+    const skipBtn = document.getElementById('dmgDice3dSkip');
+    if (!overlay || !canvas || typeof Dice3D === 'undefined') {
+        // Fallback: no 3D available
         return;
     }
 
-    // ── Phase 4: Damage Roll — 3D Multi-Dice with Fusion ──
-    const DMG_ROLL_MS = 1500;
-    const DMG_FUSION_HOLD = 400;   // Hold individual results before fusion
-    const DMG_RESULT_HOLD = 1200;  // Hold final result for reading
-    setTimeout(() => {
-        if (!d2 || !r2) return;
+    if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+    canvas.classList.remove('multi');
+    overlay.style.display = 'flex';
+    if (label3d) { label3d.textContent = 'd20'; label3d.className = 'dmg-dice3d-label rolling'; }
+    if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+    haptic('light'); sfxDiceRoll();
 
-        const parsed = _parseDiceFormula(lr.df);
-        const dieType = parsed.type;
-        const dieCount = parsed.count;
+    let _done = false;
+    const finishAll = () => {
+        if (_done) return;
+        _done = true;
+        if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+        overlay.style.display = 'none';
+        canvas.classList.remove('multi');
+        if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+    };
 
-        // Get individual die results from backend, or synthesize
-        let individualResults;
-        if (lr.dr && lr.dr.length >= dieCount) {
-            individualResults = lr.dr.slice(0, dieCount);
-        } else {
-            const diceOnly = Math.max(1, lr.d - parsed.modifier);
-            individualResults = _distributeTotal(diceOnly, dieCount, parsed.sides);
-        }
+    try {
+        // Phase 1: Roll 3D d20
+        _dmgDice3d = new Dice3D(canvas, { size: 200, dieType: 'd20', duration: 1200, particlesContainer: particles });
+        const faceValue = Math.min(lr.r, 20);
 
+        _dmgDice3d.roll(faceValue, () => {
+            if (_done) return;
+            // D20 landed — show result
+            const isCrit = lr.crit || lr.r === 20;
+            const isFail = lr.r === 1;
+            const isMiss = lr.miss || lr.d <= 0;
+
+            if (label3d) {
+                if (isCrit) {
+                    label3d.innerHTML = '<span style="font-size:1.3em">&#x1F31F;</span> CRITICO! <span style="font-size:0.7em">(' + lr.r + ' vs CA ' + lr.ac + ')</span>';
+                    label3d.className = 'dmg-dice3d-label crit';
+                    haptic('heavy'); hapticNotify('success'); sfxCrit();
+                    const app = document.getElementById('app');
+                    if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                    showNarration(_pick(_NARR_CRIT), 'crit');
+                    _hitStreak++; if (_hitStreak >= 2) _showComboCounter(_hitStreak);
+                } else if (isFail) {
+                    label3d.innerHTML = '<span style="font-size:1.3em">&#x1F480;</span> FALHA CRITICA!';
+                    label3d.className = 'dmg-dice3d-label miss';
+                    hapticNotify('error');
+                    showNarration(_pick(_NARR_NAT1), 'nat1');
+                    _hitStreak = 0;
+                } else if (isMiss) {
+                    const total = lr.total || lr.r;
+                    label3d.innerHTML = '&#x1F6E1;&#xFE0F; Errou! <span style="font-size:0.7em">(' + total + ' vs CA ' + lr.ac + ')</span>';
+                    label3d.className = 'dmg-dice3d-label miss';
+                    haptic('light'); sfxMiss();
+                    showNarration(_pick(_NARR_MISS), 'miss');
+                    const dodgeTarget = document.querySelector('.entity.enemy');
+                    if (dodgeTarget) { dodgeTarget.classList.add('dodge-flash'); setTimeout(() => dodgeTarget.classList.remove('dodge-flash'), 400); }
+                    _hitStreak = 0;
+                } else {
+                    const total = lr.total || lr.r;
+                    const hitLabel = lr.t === 'skill' ? 'Habilidade!' : 'Acertou!';
+                    label3d.innerHTML = '&#x2694;&#xFE0F; ' + hitLabel + ' <span style="font-size:0.7em">(' + total + ' vs CA ' + lr.ac + ')</span>';
+                    label3d.className = 'dmg-dice3d-label hit';
+                    haptic('medium'); sfxHit();
+                    _hitStreak++; if (_hitStreak >= 2) _showComboCounter(_hitStreak);
+                }
+            }
+
+            // Miss/no damage — hold result then close
+            if (isMiss || lr.d <= 0) {
+                setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishAll; } }, 500);
+                setTimeout(finishAll, 1200);
+                return;
+            }
+
+            // Phase 2: Damage dice (after 800ms hold on d20 result)
+            setTimeout(() => {
+                if (_done) return;
+                _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, finishAll, () => { _done = true; });
+            }, 800);
+        });
+    } catch (e) {
+        console.warn('[COMBAT] Attack overlay Dice3D failed:', e);
+        overlay.style.display = 'none';
+    }
+}
+
+// ─── SAVE SKILL DICE: d20 save in overlay + damage 3D ───
+function _initDiceSave(lr) {
+    const overlay = document.getElementById('dmgDice3dOverlay');
+    const canvas = document.getElementById('dmgDice3dCanvas');
+    const particles = document.getElementById('dmgDice3dParticles');
+    const label3d = document.getElementById('dmgDice3dLabel');
+    const skipBtn = document.getElementById('dmgDice3dSkip');
+    if (!overlay || !canvas || typeof Dice3D === 'undefined') return;
+
+    if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+    canvas.classList.remove('multi');
+    overlay.style.display = 'flex';
+    if (label3d) { label3d.textContent = 'Save vs CD ' + (lr.dc || '?'); label3d.className = 'dmg-dice3d-label rolling'; }
+    if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+    haptic('light'); sfxDiceRoll();
+
+    let _done = false;
+    const finishAll = () => {
+        if (_done) return;
+        _done = true;
+        if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+        overlay.style.display = 'none';
+        canvas.classList.remove('multi');
+        if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+    };
+
+    try {
+        _dmgDice3d = new Dice3D(canvas, { size: 200, dieType: 'd20', duration: 1200, particlesContainer: particles });
+        const faceValue = Math.min(lr.r, 20);
+
+        _dmgDice3d.roll(faceValue, () => {
+            if (_done) return;
+            if (label3d) {
+                if (lr.saved && !lr.half) {
+                    label3d.innerHTML = '&#x1F6E1;&#xFE0F; Resistiu! <span style="font-size:0.7em">(' + lr.r + ' vs CD ' + lr.dc + ')</span>';
+                    label3d.className = 'dmg-dice3d-label miss';
+                    haptic('light'); sfxMiss();
+                } else if (lr.saved && lr.half) {
+                    label3d.innerHTML = '&#x26A0;&#xFE0F; Parcial <span style="font-size:0.7em">(' + lr.r + ' vs CD ' + lr.dc + ')</span>';
+                    label3d.className = 'dmg-dice3d-label miss';
+                    haptic('medium');
+                } else {
+                    label3d.innerHTML = '&#x274C; Falhou! <span style="font-size:0.7em">(' + lr.r + ' vs CD ' + lr.dc + ')</span>';
+                    label3d.className = 'dmg-dice3d-label hit';
+                    haptic('medium'); sfxHit();
+                }
+            }
+
+            // Full resist, no damage — hold then close
+            if (lr.saved && !lr.half) {
+                setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishAll; } }, 500);
+                setTimeout(finishAll, 1200);
+                return;
+            }
+
+            // Has damage — show damage phase
+            if (lr.d > 0 && lr.df) {
+                setTimeout(() => {
+                    if (_done) return;
+                    _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, finishAll, () => { _done = true; });
+                }, 800);
+            } else {
+                setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishAll; } }, 500);
+                setTimeout(finishAll, 1200);
+            }
+        });
+    } catch (e) {
+        console.warn('[COMBAT] Save overlay Dice3D failed:', e);
+        overlay.style.display = 'none';
+    }
+}
+
+// ─── DAMAGE-ONLY DICE: auto_hit / aoe — skip d20, direct damage overlay ───
+function _initDiceDamageOnly(lr) {
+    if (lr.d > 0 && lr.df) {
         const overlay = document.getElementById('dmgDice3dOverlay');
         const canvas = document.getElementById('dmgDice3dCanvas');
         const particles = document.getElementById('dmgDice3dParticles');
         const label3d = document.getElementById('dmgDice3dLabel');
         const skipBtn = document.getElementById('dmgDice3dSkip');
+        if (!overlay || !canvas || typeof Dice3D === 'undefined') return;
 
-        d2.style.visibility = 'hidden';
-        r2.style.visibility = 'hidden';
-        l2.style.visibility = 'hidden';
+        if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+        canvas.classList.remove('multi');
+        overlay.style.display = 'flex';
 
-        if (overlay && canvas && typeof Dice3D !== 'undefined') {
-            if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+        const infoText = lr.t === 'aoe' && lr.hits
+            ? (lr.sn || 'AOE') + ' — ' + lr.hits + ' alvos'
+            : (lr.sn || 'Acerto automatico!');
+        if (label3d) { label3d.textContent = infoText; label3d.className = 'dmg-dice3d-label rolling'; }
+        if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+        haptic('medium');
 
-            // Wider canvas for multi-dice
-            if (dieCount >= 2) canvas.classList.add('multi');
-            else canvas.classList.remove('multi');
-
-            overlay.style.display = 'flex';
-            if (label3d) { label3d.textContent = lr.df || 'dano'; label3d.className = 'dmg-dice3d-label rolling'; }
+        let _done = false;
+        const finishAll = () => {
+            if (_done) return;
+            _done = true;
             if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+            overlay.style.display = 'none';
+            canvas.classList.remove('multi');
+            if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+        };
 
-            let _dmgDone = false;
-            const finishDmgOverlay = () => {
-                if (_dmgDone) return;
-                _dmgDone = true;
-                if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
-                overlay.style.display = 'none';
-                canvas.classList.remove('multi');
-                if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-                _revealDamageResult(d2, r2, l2, lr);
-            };
+        // Small delay then start damage dice
+        setTimeout(() => {
+            if (_done) return;
+            _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, finishAll, () => { _done = true; });
+        }, 300);
+    }
+}
 
-            try {
-                const canvasSize = dieCount >= 2 ? 180 : 140;
-                _dmgDice3d = new Dice3D(canvas, {
-                    size: canvasSize, dieType: dieType, duration: DMG_ROLL_MS,
-                    particlesContainer: particles
-                });
+// ─── SHARED: Damage dice phase (used by attack, save, auto_hit, aoe) ───
+function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, finishCallback, markDone) {
+    const DMG_ROLL_MS = 1500;
+    const DMG_FUSION_HOLD = 400;
+    const DMG_RESULT_HOLD = 1200;
 
-                if (dieCount >= 2) {
-                    // ── MULTI-DICE: roll N dice simultaneously ──
-                    const configs = individualResults.map(v => ({ value: v }));
+    if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
 
-                    _dmgDice3d.rollMultiple(configs, () => {
-                        // All dice landed — show individual results
+    const parsed = _parseDiceFormula(lr.df);
+    const dieType = parsed.type;
+    const dieCount = parsed.count;
+
+    let individualResults;
+    if (lr.dr && lr.dr.length >= dieCount) individualResults = lr.dr.slice(0, dieCount);
+    else individualResults = _distributeTotal(Math.max(1, lr.d - parsed.modifier), dieCount, parsed.sides);
+
+    if (dieCount >= 2) canvas.classList.add('multi');
+    else canvas.classList.remove('multi');
+
+    if (label3d) { label3d.textContent = lr.df || 'dano'; label3d.className = 'dmg-dice3d-label rolling'; }
+
+    let _phaseDone = false;
+    const finishPhase = () => {
+        if (_phaseDone) return;
+        _phaseDone = true;
+        markDone();
+        if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+        overlay.style.display = 'none';
+        canvas.classList.remove('multi');
+        if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+
+        // Impact effects
+        haptic('heavy');
+        const app = document.getElementById('app');
+        if (app) { app.classList.add('hit-stop'); setTimeout(() => app.classList.remove('hit-stop'), 120); }
+        const enemies = document.querySelectorAll('.entity.enemy');
+        if (enemies.length > 0) { enemies[0].classList.add('dmg-flash'); setTimeout(() => enemies[0].classList.remove('dmg-flash'), 400); }
+        spawnParticles(lr.crit, lr.dt || 'slashing');
+        if (lr.kill) {
+            const killName = (currentState?.e && currentState.e[0]?.n) || 'O inimigo';
+            showNarration(_pick(_NARR_KILL).replace('{name}', killName), 'crit');
+        }
+    };
+
+    try {
+        const canvasSize = dieCount >= 2 ? 180 : 140;
+        _dmgDice3d = new Dice3D(canvas, {
+            size: canvasSize, dieType: dieType, duration: DMG_ROLL_MS,
+            particlesContainer: particles
+        });
+
+        if (dieCount >= 2) {
+            const configs = individualResults.map(v => ({ value: v }));
+            _dmgDice3d.rollMultiple(configs, () => {
+                if (_phaseDone) return;
+                if (label3d) {
+                    const modText = parsed.modifier ? ` + ${parsed.modifier}` : '';
+                    label3d.textContent = individualResults.join(' + ') + modText;
+                    label3d.className = 'dmg-dice3d-label hit';
+                }
+                setTimeout(() => {
+                    if (_phaseDone) return;
+                    if (label3d) { label3d.textContent = ''; label3d.className = 'dmg-dice3d-label rolling'; }
+                    _dmgDice3d.fusionTo(lr.d, () => {
                         if (label3d) {
-                            const rollsText = individualResults.join(' + ');
-                            const modText = parsed.modifier ? ` + ${parsed.modifier}` : '';
-                            label3d.textContent = rollsText + modText;
-                            label3d.className = 'dmg-dice3d-label hit';
-                        }
-
-                        // Hold individual results, then fusion
-                        setTimeout(() => {
-                            if (_dmgDone) return;
-                            if (label3d) { label3d.textContent = ''; label3d.className = 'dmg-dice3d-label rolling'; }
-
-                            _dmgDice3d.fusionTo(lr.d, () => {
-                                // Fusion complete — show total
-                                if (label3d) {
-                                    label3d.textContent = `${lr.d} dano`;
-                                    label3d.className = 'dmg-dice3d-label ' + (lr.crit ? 'crit' : 'hit');
-                                }
-
-                                setTimeout(() => {
-                                    if (!_dmgDone && skipBtn) {
-                                        skipBtn.classList.add('visible');
-                                        skipBtn.onclick = finishDmgOverlay;
-                                    }
-                                }, 500);
-                                setTimeout(finishDmgOverlay, DMG_RESULT_HOLD);
-                            });
-                        }, DMG_FUSION_HOLD);
-                    });
-                } else {
-                    // ── SINGLE DIE: original behavior ──
-                    const dieMax = { d4: 4, d6: 6, d8: 8, d10: 10, d12: 12, d20: 20 }[dieType] || 6;
-                    const faceValue = Math.min(lr.d, dieMax) || (Math.floor(Math.random() * dieMax) + 1);
-
-                    _dmgDice3d.roll(faceValue, () => {
-                        if (label3d) {
-                            label3d.textContent = `${lr.d} dano`;
+                            label3d.textContent = lr.d + ' dano';
                             label3d.className = 'dmg-dice3d-label ' + (lr.crit ? 'crit' : 'hit');
                         }
-                        setTimeout(() => {
-                            if (!_dmgDone && skipBtn) {
-                                skipBtn.classList.add('visible');
-                                skipBtn.onclick = finishDmgOverlay;
-                            }
-                        }, 500);
-                        setTimeout(finishDmgOverlay, DMG_RESULT_HOLD);
+                        setTimeout(() => { if (!_phaseDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishPhase; } }, 500);
+                        setTimeout(finishPhase, DMG_RESULT_HOLD);
                     });
+                }, DMG_FUSION_HOLD);
+            });
+        } else {
+            const dieMax = { d4:4, d6:6, d8:8, d10:10, d12:12, d20:20 }[dieType] || 6;
+            const faceValue = Math.min(lr.d, dieMax) || (Math.floor(Math.random() * dieMax) + 1);
+            _dmgDice3d.roll(faceValue, () => {
+                if (label3d) {
+                    label3d.textContent = lr.d + ' dano';
+                    label3d.className = 'dmg-dice3d-label ' + (lr.crit ? 'crit' : 'hit');
                 }
-            } catch (e) {
-                console.warn('[COMBAT] Dice3D damage roll failed:', e);
-                overlay.style.display = 'none';
-                canvas.classList.remove('multi');
-                d2.style.visibility = '';
-                r2.style.visibility = '';
-                l2.style.visibility = '';
-                _fallbackDamageRoll(d2, r2, l2, lr);
-            }
-        } else {
-            d2.style.visibility = '';
-            r2.style.visibility = '';
-            l2.style.visibility = '';
-            _fallbackDamageRoll(d2, r2, l2, lr);
+                setTimeout(() => { if (!_phaseDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishPhase; } }, 500);
+                setTimeout(finishPhase, DMG_RESULT_HOLD);
+            });
         }
-    }, 1200);
-}
-
-// ─── SAVE SKILL DICE: d20 save in dice boxes + damage 3D overlay ───
-function _initDiceSave(lr) {
-    const d1 = document.getElementById('dice1');
-    const d2 = document.getElementById('dice2');
-    const r1 = document.getElementById('diceResult1');
-    const l1 = document.getElementById('diceLabel1');
-    const r2 = document.getElementById('diceResult2');
-    const l2 = document.getElementById('diceLabel2');
-    const formula = document.getElementById('diceFormula');
-    if (!d1 || !r1) return;
-
-    // Phase 1: Save d20 cycling (0→900ms)
-    d1.textContent = '🛡️';
-    d1.classList.add('shaking');
-    r1.className = 'dice-result cycling';
-    l1.textContent = 'save...';
-    l1.className = 'dice-label rolling-label';
-    haptic('light'); sfxDiceRoll();
-    let _saveCycle = true;
-    const _saveEase = (step) => {
-        if (!_saveCycle) return;
-        r1.textContent = Math.floor(Math.random() * 19) + 2;
-        setTimeout(() => _saveEase(step + 1), Math.min(60 + step * step * 5, 300));
-    };
-    _saveEase(0);
-
-    // Phase 2: Save reveal (900ms)
-    setTimeout(() => {
-        _saveCycle = false;
-        d1.classList.remove('shaking');
-        r1.textContent = lr.r;
-        r1.className = 'dice-result';
-        d1.classList.add('slamming');
-        setTimeout(() => d1.classList.remove('slamming'), 300);
-
-        if (lr.saved && !lr.half) {
-            r1.classList.add('miss');
-            l1.textContent = 'resistiu';
-            l1.className = 'dice-label miss';
-            haptic('light'); sfxMiss();
-        } else if (lr.saved && lr.half) {
-            r1.classList.add('miss');
-            l1.textContent = 'parcial';
-            l1.className = 'dice-label miss';
-            haptic('medium');
-        } else {
-            r1.classList.add('hit');
-            l1.textContent = 'falhou!';
-            l1.className = 'dice-label hit';
-            haptic('medium'); sfxHit();
-        }
-
-        if (formula) {
-            formula.textContent = `${lr.r} vs CD ${lr.dc}`;
-            formula.className = 'dice-formula visible ' + (lr.saved ? 'miss' : 'hit');
-        }
-    }, 900);
-
-    // Phase 3: Damage (if any) — reuse 3D overlay
-    if (lr.saved && !lr.half) {
-        // Full resist, no damage — show shield on d2
-        setTimeout(() => {
-            if (d2) d2.textContent = '🛡️';
-            if (r2) { r2.textContent = '—'; r2.className = 'dice-result miss'; }
-            if (l2) { l2.textContent = 'resistiu'; l2.className = 'dice-label miss'; }
-        }, 1100);
-        return;
-    }
-
-    // Has damage — show 3D dice overlay
-    if (lr.d > 0 && lr.df) {
-        _show3dDamageOverlay(lr, d2, r2, l2, 1200);
+    } catch (e) {
+        console.warn('[COMBAT] Damage phase Dice3D failed:', e);
+        overlay.style.display = 'none';
+        canvas.classList.remove('multi');
     }
 }
+
+// Static dice display (for polling re-renders — no animation, no-op in overlay mode)
+function _showDiceStatic(lr) {
+    // In overlay-only mode, static display is not needed
+    // The overlay auto-closes and the combat log shows results
+}
+
 
 // ─── DEATH SAVE DICE: Dramatic d20 in 3D overlay ───
 function _initDiceDeathSave(lr) {
@@ -2084,16 +2087,6 @@ function _initDiceDeathSave(lr) {
     const label3d = document.getElementById('dmgDice3dLabel');
     const skipBtn = document.getElementById('dmgDice3dSkip');
     if (!overlay || !canvas || typeof Dice3D === 'undefined') return;
-
-    // Hide dice boxes
-    const d1 = document.getElementById('dice1');
-    const d2 = document.getElementById('dice2');
-    if (d1) d1.style.visibility = 'hidden';
-    if (d2) d2.style.visibility = 'hidden';
-    ['diceResult1','diceLabel1','diceResult2','diceLabel2','diceFormula'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.visibility = 'hidden';
-    });
 
     if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
     canvas.classList.remove('multi');
@@ -2109,11 +2102,6 @@ function _initDiceDeathSave(lr) {
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         overlay.style.display = 'none';
         if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-        // Restore dice box visibility
-        [d1, d2].forEach(el => { if (el) el.style.visibility = ''; });
-        ['diceResult1','diceLabel1','diceResult2','diceLabel2','diceFormula'].forEach(id => {
-            const el = document.getElementById(id); if (el) el.style.visibility = '';
-        });
     };
 
     try {
@@ -2152,59 +2140,9 @@ function _initDiceDeathSave(lr) {
     }
 }
 
-// ─── DAMAGE-ONLY DICE: auto_hit / aoe — skip d20, go straight to 3D overlay ───
-function _initDiceDamageOnly(lr) {
-    const d1 = document.getElementById('dice1');
-    const d2 = document.getElementById('dice2');
-    const r1 = document.getElementById('diceResult1');
-    const l1 = document.getElementById('diceLabel1');
-    const r2 = document.getElementById('diceResult2');
-    const l2 = document.getElementById('diceLabel2');
-    const formula = document.getElementById('diceFormula');
-
-    // Show skill info in dice box 1 (brief)
-    if (d1) d1.textContent = lr.t === 'aoe' ? '🔥' : '✨';
-    if (r1) { r1.textContent = '✅'; r1.className = 'dice-result hit'; }
-    if (l1) { l1.textContent = lr.sn || 'auto'; l1.className = 'dice-label hit'; }
-    if (formula) {
-        if (lr.t === 'aoe' && lr.hits) {
-            formula.textContent = `${lr.hits} alvos atingidos`;
-        } else {
-            formula.textContent = 'Acerto automático!';
-        }
-        formula.className = 'dice-formula visible hit';
-    }
-
-    // Show 3D damage dice in overlay (300ms delay — no d20 phase)
-    if (lr.d > 0 && lr.df) {
-        _show3dDamageOverlay(lr, d2, r2, l2, 300);
-    } else if (d2) {
-        d2.textContent = '⚔️';
-        if (r2) { r2.textContent = lr.d || '0'; r2.className = 'dice-result hit'; }
-        if (l2) { l2.textContent = lr.df || 'dano'; l2.className = 'dice-label hit'; }
-    }
-}
-
 // ─── EFFECT DICE: heal / util — 3D overlay with themed label ───
 function _initDiceEffect(lr) {
-    const d1 = document.getElementById('dice1');
-    const d2 = document.getElementById('dice2');
-    const r1 = document.getElementById('diceResult1');
-    const l1 = document.getElementById('diceLabel1');
-    const r2 = document.getElementById('diceResult2');
-    const l2 = document.getElementById('diceLabel2');
-    const formula = document.getElementById('diceFormula');
-
     const isHeal = lr.t === 'heal';
-
-    // Show effect info in dice box 1
-    if (d1) d1.textContent = isHeal ? '❤️' : '✨';
-    if (r1) { r1.textContent = lr.d || '0'; r1.className = 'dice-result hit'; }
-    if (l1) { l1.textContent = lr.sn || (isHeal ? 'cura' : 'efeito'); l1.className = 'dice-label hit'; }
-    if (formula) {
-        formula.textContent = isHeal ? `+${lr.d} PV` : `${lr.d} (${lr.df || ''})`;
-        formula.className = 'dice-formula visible hit';
-    }
 
     if (lr.d > 0 && lr.df) {
         // Show 3D dice in overlay
@@ -2287,108 +2225,6 @@ function _initDiceEffect(lr) {
     }
 }
 
-// ─── SHARED: Show 3D damage overlay (used by save, auto_hit, aoe) ───
-function _show3dDamageOverlay(lr, d2, r2, l2, delayMs) {
-    const DMG_ROLL_MS = 1500;
-    const DMG_FUSION_HOLD = 400;
-    const DMG_RESULT_HOLD = 1200;
-    setTimeout(() => {
-        if (!d2 || !r2) return;
-
-        const parsed = _parseDiceFormula(lr.df);
-        const dieType = parsed.type;
-        const dieCount = parsed.count;
-
-        let individualResults;
-        if (lr.dr && lr.dr.length >= dieCount) individualResults = lr.dr.slice(0, dieCount);
-        else individualResults = _distributeTotal(Math.max(1, lr.d - parsed.modifier), dieCount, parsed.sides);
-
-        const overlay = document.getElementById('dmgDice3dOverlay');
-        const canvas = document.getElementById('dmgDice3dCanvas');
-        const particles = document.getElementById('dmgDice3dParticles');
-        const label3d = document.getElementById('dmgDice3dLabel');
-        const skipBtn = document.getElementById('dmgDice3dSkip');
-
-        d2.style.visibility = 'hidden';
-        r2.style.visibility = 'hidden';
-        if (l2) l2.style.visibility = 'hidden';
-
-        if (overlay && canvas && typeof Dice3D !== 'undefined') {
-            if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-            if (dieCount >= 2) canvas.classList.add('multi');
-            else canvas.classList.remove('multi');
-
-            overlay.style.display = 'flex';
-            if (label3d) { label3d.textContent = lr.df || 'dano'; label3d.className = 'dmg-dice3d-label rolling'; }
-            if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
-
-            let _dmgDone = false;
-            const finishOverlay = () => {
-                if (_dmgDone) return;
-                _dmgDone = true;
-                if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
-                overlay.style.display = 'none';
-                canvas.classList.remove('multi');
-                if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-                _revealDamageResult(d2, r2, l2, lr);
-            };
-
-            try {
-                const canvasSize = dieCount >= 2 ? 180 : 140;
-                _dmgDice3d = new Dice3D(canvas, {
-                    size: canvasSize, dieType: dieType, duration: DMG_ROLL_MS,
-                    particlesContainer: particles
-                });
-
-                if (dieCount >= 2) {
-                    const configs = individualResults.map(v => ({ value: v }));
-                    _dmgDice3d.rollMultiple(configs, () => {
-                        if (label3d) {
-                            const modText = parsed.modifier ? ` + ${parsed.modifier}` : '';
-                            label3d.textContent = individualResults.join(' + ') + modText;
-                            label3d.className = 'dmg-dice3d-label hit';
-                        }
-                        setTimeout(() => {
-                            if (_dmgDone) return;
-                            if (label3d) { label3d.textContent = ''; label3d.className = 'dmg-dice3d-label rolling'; }
-                            _dmgDice3d.fusionTo(lr.d, () => {
-                                if (label3d) {
-                                    label3d.textContent = `${lr.d} dano`;
-                                    label3d.className = 'dmg-dice3d-label ' + (lr.crit ? 'crit' : 'hit');
-                                }
-                                setTimeout(() => { if (!_dmgDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishOverlay; } }, 500);
-                                setTimeout(finishOverlay, DMG_RESULT_HOLD);
-                            });
-                        }, DMG_FUSION_HOLD);
-                    });
-                } else {
-                    const dieMax = { d4:4, d6:6, d8:8, d10:10, d12:12, d20:20 }[dieType] || 6;
-                    const faceValue = Math.min(lr.d, dieMax) || (Math.floor(Math.random() * dieMax) + 1);
-                    _dmgDice3d.roll(faceValue, () => {
-                        if (label3d) {
-                            label3d.textContent = `${lr.d} dano`;
-                            label3d.className = 'dmg-dice3d-label ' + (lr.crit ? 'crit' : 'hit');
-                        }
-                        setTimeout(() => { if (!_dmgDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishOverlay; } }, 500);
-                        setTimeout(finishOverlay, DMG_RESULT_HOLD);
-                    });
-                }
-            } catch (e) {
-                console.warn('[COMBAT] Dice3D damage overlay failed:', e);
-                overlay.style.display = 'none'; canvas.classList.remove('multi');
-                d2.style.visibility = ''; r2.style.visibility = '';
-                if (l2) l2.style.visibility = '';
-                _fallbackDamageRoll(d2, r2, l2, lr);
-            }
-        } else {
-            d2.style.visibility = ''; r2.style.visibility = '';
-            if (l2) l2.style.visibility = '';
-            _fallbackDamageRoll(d2, r2, l2, lr);
-        }
-    }, delayMs);
-}
-
-
 // Parse dice formula into structured data
 // "2d6+3" → { count:2, type:'d6', sides:6, modifier:3 }
 // "1d8"   → { count:1, type:'d8', sides:8, modifier:0 }
@@ -2426,104 +2262,6 @@ function _distributeTotal(diceTotal, count, sides) {
     }
     results.push(Math.min(sides, Math.max(1, remaining)));
     return results;
-}
-
-// Fallback damage roll animation (emoji cycling — original behavior)
-function _fallbackDamageRoll(d2, r2, l2, lr) {
-    d2.textContent = '🎲';
-    d2.classList.add('shaking');
-    r2.className = 'dice-result cycling';
-    l2.textContent = 'rolando...';
-    l2.className = 'dice-label rolling-label';
-    const maxCycle = Math.max(lr.d, 6);
-    let _dmgCycleActive = true;
-    const _dmgEase = (step) => {
-        if (!_dmgCycleActive) return;
-        r2.textContent = Math.floor(Math.random() * maxCycle) + 1;
-        const nextDelay = Math.min(60 + step * step * 6, 280);
-        setTimeout(() => _dmgEase(step + 1), nextDelay);
-    };
-    _dmgEase(0);
-    setTimeout(() => {
-        _dmgCycleActive = false;
-        _revealDamageResult(d2, r2, l2, lr);
-    }, 700);
-}
-
-// Reveal final damage result on emoji dice + trigger impact effects
-function _revealDamageResult(d2, r2, l2, lr) {
-    d2.classList.remove('shaking');
-    d2.textContent = '⚔️';
-    r2.textContent = lr.d;
-    r2.className = 'dice-result hit';
-    d2.classList.add('slamming');
-    setTimeout(() => d2.classList.remove('slamming'), 300);
-    l2.textContent = lr.df || 'dano';
-    l2.className = 'dice-label hit';
-
-    // ── HIT-STOP: Freeze frame 120ms at impact ──
-    const app = document.getElementById('app');
-    if (app) app.classList.add('hit-stop');
-    haptic('heavy');
-
-    setTimeout(() => {
-        if (app) app.classList.remove('hit-stop');
-
-        // Flash enemy card on damage
-        const enemies = document.querySelectorAll('.entity.enemy');
-        if (enemies.length > 0) {
-            enemies[0].classList.add('dmg-flash');
-            setTimeout(() => enemies[0].classList.remove('dmg-flash'), 400);
-        }
-
-        // Feature 3: Particles on damage impact
-        spawnParticles(lr.crit, lr.dt || 'slashing');
-
-        // Feature 7: Kill narration with enemy name
-        if (lr.kill) {
-            const killName = (currentState?.e && currentState.e[0]?.n) || 'O inimigo';
-            showNarration(_pick(_NARR_KILL).replace('{name}', killName), 'crit');
-        }
-    }, 120);
-}
-
-// Static dice display (for polling re-renders — no animation)
-function _showDiceStatic(lr) {
-    const d1 = document.getElementById('dice1');
-    const r1 = document.getElementById('diceResult1');
-    const l1 = document.getElementById('diceLabel1');
-    const d2 = document.getElementById('dice2');
-    const r2 = document.getElementById('diceResult2');
-    const l2 = document.getElementById('diceLabel2');
-    const formula = document.getElementById('diceFormula');
-    if (!d1 || !r1) return;
-
-    const isCrit = lr.crit || lr.r === 20;
-    const isFail = lr.r === 1;
-    const isMiss = lr.miss || lr.d <= 0;
-    const cls = isCrit ? 'crit' : isMiss ? 'miss' : 'hit';
-
-    d1.textContent = isCrit ? '🌟' : isFail ? '💀' : '🎲';
-    r1.textContent = lr.r;
-    r1.className = 'dice-result ' + cls;
-    l1.textContent = isCrit ? 'CRÍTICO!' : isFail ? 'FALHA CRÍTICA!' : isMiss ? 'errou' : (lr.t === 'skill' ? 'habilidade' : 'acerto');
-    l1.className = 'dice-label ' + cls;
-
-    if (lr.d > 0) {
-        if (d2) d2.textContent = '⚔️';
-        if (r2) { r2.textContent = lr.d; r2.className = 'dice-result hit'; }
-        if (l2) { l2.textContent = lr.df || 'dano'; l2.className = 'dice-label hit'; }
-    } else {
-        if (d2) d2.textContent = '🛡️';
-        if (r2) { r2.textContent = '—'; r2.className = 'dice-result miss'; }
-        if (l2) { l2.textContent = 'bloqueado'; l2.className = 'dice-label miss'; }
-    }
-
-    if (formula && lr.ac) {
-        const total = lr.total || lr.r;
-        formula.textContent = `${total} vs CA ${lr.ac}`;
-        formula.className = 'dice-formula visible ' + (isCrit ? 'crit' : isMiss ? 'miss' : 'hit');
-    }
 }
 
 // ─── UTILS ───
@@ -2621,11 +2359,9 @@ const _PARTICLE_COLORS = {
 function spawnParticles(isCrit, damageType) {
     const colors = _PARTICLE_COLORS[damageType] || _PARTICLE_COLORS['slashing'];
     const count = isCrit ? 12 : 7;
-    const anchor = document.getElementById('dice2');
-    if (!anchor) return;
-    const rect = anchor.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
+    // Use viewport center (overlay mode — no inline dice2)
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
 
     for (let i = 0; i < count; i++) {
         const p = document.createElement('div');
