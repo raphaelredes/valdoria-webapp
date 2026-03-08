@@ -612,26 +612,33 @@ async function transitionToArena() {
     _th['ngrok-skip-browser-warning'] = '1';
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
-    try {
-        const resp = await fetchT(`${S.apiBase}/api/webapp/transition`, {
-            method: 'POST',
-            headers: _th,
-            body: JSON.stringify(body)
-        });
-
-        if (resp.ok) {
-            const data = await resp.json();
-            if (data.url) {
-                window.location.replace(data.url);
-                return;
+    // Retry transition up to 2 times (tunnel might be reconnecting)
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            if (attempt > 0) {
+                console.log('[EXPLORE] Transition retry', attempt);
+                await new Promise(r => setTimeout(r, 2000));
             }
+            const resp = await fetchT(`${S.apiBase}/api/webapp/transition`, {
+                method: 'POST',
+                headers: _th,
+                body: JSON.stringify(body)
+            }, 10000);
+
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.url) {
+                    window.location.replace(data.url);
+                    return;
+                }
+            }
+            console.error('[EXPLORE] Transition to combat failed (attempt ' + attempt + ')');
+        } catch (e) {
+            console.error('[EXPLORE] Transition to combat error (attempt ' + attempt + '):', e);
         }
-        console.error('[EXPLORE] Transition to combat failed, using fallback');
-        if (typeof showTerrainToast === 'function') showTerrainToast('Erro na transição. Usando fallback...', 'damage');
-    } catch (e) {
-        console.error('[EXPLORE] Transition to combat error:', e);
-        if (typeof showTerrainToast === 'function') showTerrainToast('Erro na transição. Usando fallback...', 'damage');
     }
+
+    if (typeof showTerrainToast === 'function') showTerrainToast('Erro na transição. Usando fallback...', 'damage');
 
     // Fallback: old sendData + close behavior
     finishExploration('combat');
@@ -653,26 +660,31 @@ async function transitionToInventory() {
     _th['ngrok-skip-browser-warning'] = '1';
     _th['X-Idempotency-Key'] = crypto.randomUUID();
 
-    try {
-        const resp = await fetchT(`${S.apiBase}/api/webapp/transition`, {
-            method: 'POST',
-            headers: _th,
-            body: JSON.stringify(body)
-        });
-
-        if (resp.ok) {
-            const data = await resp.json();
-            if (data.url) {
-                window.location.replace(data.url);
-                return;
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            if (attempt > 0) {
+                console.log('[EXPLORE] Inventory transition retry', attempt);
+                await new Promise(r => setTimeout(r, 2000));
             }
+            const resp = await fetchT(`${S.apiBase}/api/webapp/transition`, {
+                method: 'POST',
+                headers: _th,
+                body: JSON.stringify(body)
+            }, 10000);
+
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.url) {
+                    window.location.replace(data.url);
+                    return;
+                }
+            }
+            console.error('[EXPLORE] Transition to inventory failed (attempt ' + attempt + ')');
+        } catch (e) {
+            console.error('[EXPLORE] Transition to inventory error (attempt ' + attempt + '):', e);
         }
-        console.error('[EXPLORE] Transition to inventory failed');
-        if (typeof showTerrainToast === 'function') showTerrainToast('Erro ao abrir mochila. Tente novamente.', 'damage');
-    } catch (e) {
-        console.error('[EXPLORE] Transition to inventory error:', e);
-        if (typeof showTerrainToast === 'function') showTerrainToast('Erro ao abrir mochila. Tente novamente.', 'damage');
     }
+    if (typeof showTerrainToast === 'function') showTerrainToast('Erro ao abrir mochila. Tente novamente.', 'damage');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2277,20 +2289,22 @@ async function _transitionToGameFromExplore(payload) {
     if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
     h['ngrok-skip-browser-warning'] = '1';
     h['X-Idempotency-Key'] = crypto.randomUUID();
-    try {
-        const r = await fetchT(S.apiBase + '/api/webapp/transition', {
-            method: 'POST', headers: h,
-            body: JSON.stringify({
-                from: 'explore', to: 'game',
-                user_id: parseInt(S.uid),
-                payload: { results: payload.results }
-            })
-        });
-        const d = await r.json();
-        if (d.url) { window.location.replace(d.url); return; }
-    } catch (e) { console.error('[EXPLORE] transition error:', e); }
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            if (attempt > 0) await new Promise(r => setTimeout(r, 2000));
+            const r = await fetchT(S.apiBase + '/api/webapp/transition', {
+                method: 'POST', headers: h,
+                body: JSON.stringify({
+                    from: 'explore', to: 'game',
+                    user_id: parseInt(S.uid),
+                    payload: { results: payload.results }
+                })
+            }, 10000);
+            const d = await r.json();
+            if (d.url) { window.location.replace(d.url); return; }
+        } catch (e) { console.error('[EXPLORE] transition error (attempt ' + attempt + '):', e); }
+    }
     // Fallback: close WebApp and let user tap JOGAR from Telegram
-    // (explore token is not valid for Game Hub sessions)
     if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.close(); }
 }
 
@@ -2299,18 +2313,21 @@ async function _transitionToNavigateFromExplore(payload) {
     if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
     h['ngrok-skip-browser-warning'] = '1';
     h['X-Idempotency-Key'] = crypto.randomUUID();
-    try {
-        const r = await fetchT(S.apiBase + '/api/webapp/transition', {
-            method: 'POST', headers: h,
-            body: JSON.stringify({
-                from: 'explore', to: 'navigate',
-                user_id: parseInt(S.uid),
-                payload: { results: payload.results }
-            })
-        });
-        const d = await r.json();
-        if (d.url) { window.location.replace(d.url); return; }
-    } catch (e) { console.error('[EXPLORE] navigate transition error:', e); }
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            if (attempt > 0) await new Promise(r => setTimeout(r, 2000));
+            const r = await fetchT(S.apiBase + '/api/webapp/transition', {
+                method: 'POST', headers: h,
+                body: JSON.stringify({
+                    from: 'explore', to: 'navigate',
+                    user_id: parseInt(S.uid),
+                    payload: { results: payload.results }
+                })
+            }, 10000);
+            const d = await r.json();
+            if (d.url) { window.location.replace(d.url); return; }
+        } catch (e) { console.error('[EXPLORE] navigate transition error (attempt ' + attempt + '):', e); }
+    }
     // Fallback: close WebApp
     if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.close(); }
 }
@@ -2345,6 +2362,36 @@ async function zlibInflate(data) {
 }
 
 // ═══════════════════════════════════════════════════════
+// HEALTH CHECK
+// ═══════════════════════════════════════════════════════
+const _EXPLORE_HEALTH_RETRIES = 3;
+const _EXPLORE_HEALTH_RETRY_MS = 1500;
+const _EXPLORE_HEALTH_TIMEOUT = 8000;
+
+async function _exploreHealthCheck() {
+    const url = `${S.apiBase}/api/game/health`;
+    for (let i = 0; i <= _EXPLORE_HEALTH_RETRIES; i++) {
+        if (i > 0) await new Promise(r => setTimeout(r, _EXPLORE_HEALTH_RETRY_MS));
+        try {
+            const ac = new AbortController();
+            const tid = setTimeout(() => ac.abort(), _EXPLORE_HEALTH_TIMEOUT);
+            const resp = await fetch(url, {
+                method: 'GET',
+                headers: { 'ngrok-skip-browser-warning': '1' },
+                signal: ac.signal,
+            });
+            clearTimeout(tid);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.status === 'ok' && data.engine) return true;
+            }
+        } catch (_e) { /* retry */ }
+    }
+    console.error('[EXPLORE] Health check failed after', _EXPLORE_HEALTH_RETRIES + 1, 'attempts');
+    return false;
+}
+
+// ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
 async function initAsync() {
@@ -2374,7 +2421,35 @@ async function initAsync() {
             apiBase: S.apiBase,
             token: S.token,
             uid: S.uid,
+            onRetry: async () => {
+                const ok = await _exploreHealthCheck();
+                if (!ok) { showError('Servidor indisponível. Tente novamente em alguns segundos.'); return; }
+                // Reload the page to re-init with fresh state
+                window.location.reload();
+            },
         });
+    }
+
+    // ── Health check before loading ──
+    if (S.apiBase) {
+        const healthy = await _exploreHealthCheck();
+        if (!healthy) {
+            // Try to show cached map while waiting for reconnect
+            if (restoreState()) {
+                try {
+                    const dataParam = params.get('data') || '';
+                    if (dataParam) {
+                        const bin = atob(dataParam.replace(/-/g, '+').replace(/_/g, '/'));
+                        const bytes = new Uint8Array(bin.length);
+                        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                        const inflated = await zlibInflate(bytes);
+                        loadMapData(JSON.parse(new TextDecoder().decode(inflated)));
+                    }
+                } catch (_e) { /* cached map render is best-effort */ }
+            }
+            showError('Servidor indisponível. Tente novamente em alguns segundos.');
+            return;
+        }
     }
 
     let dataB64 = params.get('data') || '';
