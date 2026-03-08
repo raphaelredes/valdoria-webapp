@@ -560,6 +560,13 @@ function _renderArenaInner(s) {
         html += '</div>';
     }
 
+    // Action Toast — shows last action result above buttons
+    if (s.feed && s.feed.length > 0 && ph === 'active') {
+        const lastFeed = s.feed[s.feed.length - 1];
+        const cls = _classifyFeed(lastFeed);
+        html += `<div class="action-toast ${cls}" id="actionToast">${escHtml(lastFeed)}</div>`;
+    }
+
     // Action Bar — phase-dependent (with D&D 5e sub-phase support)
     const subPh = s.sub_phase || '';
     const isUnconscious = s.unconscious || (s.p && s.p.hp <= 0);
@@ -1076,6 +1083,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
     const isDead = e.hp <= 0;
     const activeClass = isActiveTurn ? ' active-turn' : '';
     const deadClass = isDead ? ' dead' : '';
+    const hpStateClass = pct > 0.75 ? '' : pct > 0.50 ? ' hp-wounded' : pct > 0.25 ? ' hp-bloodied' : pct > 0 ? ' hp-critical' : '';
     const dataAttr = type === 'enemy' ? ` data-enemy-idx="${idx}"` : '';
 
     // Feature 9: Position badge
@@ -1093,7 +1101,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
     // Inline AC badge for enemies (visible in compact view)
     const acBadge = type === 'enemy' && e.ac ? `<span class="ac-badge">🛡${e.ac}</span>` : '';
 
-    return `<div class="entity ${type}${activeClass}${deadClass}"${dataAttr}>
+    return `<div class="entity ${type}${activeClass}${deadClass}${hpStateClass}"${dataAttr}>
         <div class="entity-header">
             <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
             <span class="compact-name">${escHtml(e.n)}</span>
@@ -1622,6 +1630,7 @@ function _playCinematicResult(result, actionType) {
             setTimeout(() => {
                 const enemyCards = document.querySelectorAll('.entity.enemy');
                 enemyCards.forEach(card => card.classList.add('death-anim'));
+                hapticBurst('kill');
                 // VFX: elemental dissolution on kill
                 if (window._combatVfx) {
                     enemyCards.forEach(card => window._combatVfx.kill(card, result.lr.dt || 'slashing'));
@@ -1965,7 +1974,7 @@ function _initDiceAttackOverlay(lr) {
                 if (isCrit) {
                     label3d.innerHTML = '<span style="font-size:1.3em">&#x1F31F;</span> CRITICO! <span style="font-size:0.7em">(' + lr.r + ' vs CA ' + lr.ac + ')</span>';
                     label3d.className = 'dmg-dice3d-label crit';
-                    haptic('heavy'); hapticNotify('success'); sfxCrit();
+                    hapticBurst('crit'); sfxCrit();
                     const app = document.getElementById('app');
                     if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
                     showNarration(_pick(_NARR_CRIT), 'crit');
@@ -1980,7 +1989,7 @@ function _initDiceAttackOverlay(lr) {
                     const total = lr.total || lr.r;
                     label3d.innerHTML = '&#x1F6E1;&#xFE0F; Errou! <span style="font-size:0.7em">(' + total + ' vs CA ' + lr.ac + ')</span>';
                     label3d.className = 'dmg-dice3d-label miss';
-                    haptic('light'); sfxMiss();
+                    hapticBurst('miss'); sfxMiss();
                     showNarration(_pick(_NARR_MISS), 'miss');
                     const dodgeTarget = document.querySelector('.entity.enemy');
                     if (dodgeTarget) { dodgeTarget.classList.add('dodge-flash'); setTimeout(() => dodgeTarget.classList.remove('dodge-flash'), 400); }
@@ -2062,7 +2071,7 @@ function _initDiceSave(lr) {
                 if (lr.saved && !lr.half) {
                     label3d.innerHTML = '&#x1F6E1;&#xFE0F; Resistiu! <span style="font-size:0.7em">(' + lr.r + ' vs CD ' + lr.dc + ')</span>';
                     label3d.className = 'dmg-dice3d-label miss';
-                    haptic('light'); sfxMiss();
+                    hapticBurst('miss'); sfxMiss();
                 } else if (lr.saved && lr.half) {
                     label3d.innerHTML = '&#x26A0;&#xFE0F; Parcial <span style="font-size:0.7em">(' + lr.r + ' vs CD ' + lr.dc + ')</span>';
                     label3d.className = 'dmg-dice3d-label miss';
@@ -2306,7 +2315,7 @@ function _initDiceDeathSave(lr) {
                 if (isCrit) {
                     label3d.textContent = '🌟 NAT 20! Acordou!';
                     label3d.className = 'dmg-dice3d-label crit';
-                    haptic('heavy'); hapticNotify('success'); sfxCrit();
+                    hapticBurst('crit'); sfxCrit();
                 } else if (isCritFail) {
                     label3d.textContent = '💀 NAT 1! Falha Dupla!';
                     label3d.className = 'dmg-dice3d-label miss';
@@ -2513,6 +2522,27 @@ function _classifyFeed(f) {
 function haptic(type) { try { tg?.HapticFeedback?.impactOccurred(type || 'light'); } catch (e) { console.warn('[COMBAT] haptic:', e); } }
 function hapticNotify(type) { try { tg?.HapticFeedback?.notificationOccurred(type || 'success'); } catch (e) { console.warn('[COMBAT] haptic:', e); } }
 function hapticSelect() { try { tg?.HapticFeedback?.selectionChanged(); } catch (e) { console.warn('[COMBAT] haptic:', e); } }
+function hapticBurst(pattern) {
+    // Distinct multi-pulse haptic patterns for dramatic moments
+    // pattern: 'crit' = 3x heavy, 'kill' = heavy+notify+heavy, 'miss' = 2x light
+    try {
+        const hf = tg?.HapticFeedback;
+        if (!hf) return;
+        if (pattern === 'crit') {
+            hf.impactOccurred('heavy');
+            setTimeout(() => hf.impactOccurred('heavy'), 100);
+            setTimeout(() => hf.impactOccurred('rigid'), 200);
+        } else if (pattern === 'kill') {
+            hf.impactOccurred('heavy');
+            setTimeout(() => hf.notificationOccurred('success'), 120);
+            setTimeout(() => hf.impactOccurred('heavy'), 280);
+            setTimeout(() => hf.impactOccurred('soft'), 400);
+        } else if (pattern === 'miss') {
+            hf.impactOccurred('light');
+            setTimeout(() => hf.impactOccurred('soft'), 80);
+        }
+    } catch (e) { console.warn('[COMBAT] hapticBurst:', e); }
+}
 
 // ─── FEATURE 8: PROCEDURAL SFX (Web Audio API) ───
 function _ensureAudio() {

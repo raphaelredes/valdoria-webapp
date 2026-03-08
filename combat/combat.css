@@ -176,8 +176,8 @@ body {
     opacity: 0.8;
 }
 .hp-mini {
-    width: 44px;
-    height: 7px;
+    width: 48px;
+    height: 10px;
     background: #1e1a16;
     border-radius: 3px;
     overflow: hidden;
@@ -256,7 +256,7 @@ body {
     border: 1px solid #3a3028;
 }
 .entity.player .bar-track {
-    height: 8px;
+    height: 12px;
 }
 .bar-fill {
     height: 100%;
@@ -485,15 +485,16 @@ body {
 }
 @keyframes screenShake {
     0%, 100% { transform: translateX(0); }
-    15% { transform: translateX(-4px); }
-    30% { transform: translateX(4px); }
-    45% { transform: translateX(-3px); }
-    60% { transform: translateX(2px); }
-    75% { transform: translateX(-1px); }
+    10% { transform: translateX(-8px) translateY(-2px); }
+    25% { transform: translateX(7px) translateY(1px); }
+    40% { transform: translateX(-5px) translateY(-1px); }
+    55% { transform: translateX(4px); }
+    70% { transform: translateX(-2px); }
+    85% { transform: translateX(1px); }
 }
 @keyframes dmgFlash {
-    0% { background-color: rgba(229,57,53,0.35); }
-    100% { background-color: transparent; }
+    0% { background-color: rgba(229,57,53,0.5); box-shadow: 0 0 16px rgba(229,57,53,0.4); }
+    100% { background-color: transparent; box-shadow: none; }
 }
 .dice-row {
     display: flex;
@@ -611,10 +612,37 @@ body {
 }
 .combat-feed-narrative .feed-entry:last-child { font-size: 14px; }
 
+/* ─── ACTION TOAST ─── */
+.action-toast {
+    padding: 5px 10px;
+    margin: 2px 10px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--v-text);
+    background: rgba(0,0,0,0.4);
+    border-radius: 6px;
+    border-left: 3px solid var(--v-border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: toastSlide 0.3s ease-out;
+    flex-shrink: 0;
+}
+.action-toast.feed-crit { border-left-color: #f5c842; color: #f5c842; }
+.action-toast.feed-miss { border-left-color: #6a6a6a; color: #8a8a8a; }
+.action-toast.feed-kill { border-left-color: #ff4444; color: #ff6666; }
+.action-toast.feed-heal { border-left-color: #44cc66; color: #66dd88; }
+.action-toast.feed-hit { border-left-color: #cc8844; }
+@keyframes toastSlide {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* ─── TURN TIMER ─── */
 .turn-timer {
     position: relative;
-    height: 18px;
+    height: 22px;
     background: rgba(0,0,0,0.35);
     border-radius: 4px;
     margin: 0 10px 4px;
@@ -660,9 +688,9 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 11px;
+    font-size: 13px;
     line-height: 1.2;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--v-text-bright);
     text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
@@ -1323,35 +1351,36 @@ body {
 /* ─── FLOATING DAMAGE NUMBER ─── */
 .damage-float {
     position: fixed;
-    font-size: 26px;
+    font-size: 32px;
     font-weight: 900;
     font-family: var(--v-font-mono, monospace);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 12px currentColor;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 16px currentColor;
     pointer-events: none;
     z-index: 500;
     transform: translateX(-50%);
-    animation: damageFloat 1.2s ease-out forwards;
+    animation: damageFloat 1.3s ease-out forwards;
 }
 .damage-float.crit {
-    font-size: 34px;
+    font-size: 42px;
     color: #ffa726 !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 20px rgba(255,167,38,0.6), 0 0 40px rgba(255,167,38,0.3);
-    animation: damageFloatCrit 1.4s ease-out forwards;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.95), 0 0 24px rgba(255,167,38,0.7), 0 0 48px rgba(255,167,38,0.35);
+    animation: damageFloatCrit 1.5s ease-out forwards;
 }
 .damage-float.heal {
+    font-size: 32px;
     color: #66bb6a !important;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 12px rgba(102,187,106,0.5);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 16px rgba(102,187,106,0.6);
 }
 @keyframes damageFloat {
     0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(0.5); }
-    20% { transform: translateX(-50%) translateY(-12px) scale(1.3); opacity: 1; }
-    100% { transform: translateX(-50%) translateY(-60px) scale(0.7); opacity: 0; }
+    20% { transform: translateX(-50%) translateY(-16px) scale(1.4); opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-75px) scale(0.8); opacity: 0; }
 }
 @keyframes damageFloatCrit {
     0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(0.4); }
-    15% { transform: translateX(-50%) translateY(-8px) scale(1.6); opacity: 1; }
-    30% { transform: translateX(-50%) translateY(-16px) scale(1.2); }
-    100% { transform: translateX(-50%) translateY(-70px) scale(0.8); opacity: 0; }
+    15% { transform: translateX(-50%) translateY(-10px) scale(1.8); opacity: 1; }
+    30% { transform: translateX(-50%) translateY(-20px) scale(1.3); }
+    100% { transform: translateX(-50%) translateY(-85px) scale(0.9); opacity: 0; }
 }
 
 /* ─── HIT-STOP FREEZE FRAME ─── */
@@ -1664,14 +1693,34 @@ body {
     box-shadow: 0 0 20px rgba(196,149,58,0.08);
 }
 
-/* ─── PLAYER LOW HP WARNING ─── */
+/* ─── HP STATE TINTS (player + enemy) ─── */
 .entity.player.hp-danger {
-    border-color: rgba(229,57,53,0.5);
-    animation: playerDangerPulse 2s ease-in-out infinite;
+    border-color: rgba(229,57,53,0.6);
+    animation: playerDangerPulse 1.5s ease-in-out infinite;
 }
 @keyframes playerDangerPulse {
-    0%, 100% { box-shadow: 0 0 6px rgba(229,57,53,0.1); border-color: rgba(229,57,53,0.4); }
-    50% { box-shadow: 0 0 14px rgba(229,57,53,0.3); border-color: rgba(229,57,53,0.7); }
+    0%, 100% { box-shadow: 0 0 8px rgba(229,57,53,0.15); border-color: rgba(229,57,53,0.5); }
+    50% { box-shadow: 0 0 18px rgba(229,57,53,0.4); border-color: rgba(229,57,53,0.8); }
+}
+.entity.hp-wounded {
+    border-color: rgba(230,81,0,0.4);
+    box-shadow: 0 0 6px rgba(230,81,0,0.1);
+}
+.entity.hp-bloodied {
+    border-color: rgba(229,57,53,0.5);
+    animation: bloodiedPulse 2s ease-in-out infinite;
+}
+@keyframes bloodiedPulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(229,57,53,0.1); }
+    50% { box-shadow: 0 0 12px rgba(229,57,53,0.25); }
+}
+.entity.hp-critical {
+    border-color: rgba(229,57,53,0.7);
+    animation: criticalPulse 1.2s ease-in-out infinite;
+}
+@keyframes criticalPulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(229,57,53,0.2); border-color: rgba(229,57,53,0.5); }
+    50% { box-shadow: 0 0 16px rgba(229,57,53,0.45); border-color: rgba(229,57,53,0.9); }
 }
 
 /* ─── SKILL CHANCE COLOR CODING ─── */
