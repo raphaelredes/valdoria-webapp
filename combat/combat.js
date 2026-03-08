@@ -865,12 +865,49 @@ function startPolling() {
                 const rollSig = state.lr ? `${state.lr.t||'a'}-${state.lr.r||0}-${state.lr.d||0}-${state.lr.miss||0}` : '';
                 if (hasEnemyRoll && rollSig !== _lastAnimatedRoll) {
                     _cinematicInProgress = true;
-                    initDice(state.lr);
-                    if (!state.lr.miss && state.lr.d > 0) {
-                        setTimeout(() => _showDamageFloat(state.lr.d, state.lr.dt, '.entity.player', !!state.lr.crit), 2700);
+                    const _eLr = state.lr;
+                    const _isAllyTurn = newTurn && newTurn.t === 'a';
+                    initDice(_eLr);
+
+                    if (_eLr.miss || _eLr.d <= 0) {
+                        // Enemy/ally missed — show dodge feedback on player
+                        setTimeout(() => {
+                            const playerEl = document.querySelector('.entity.player');
+                            if (playerEl) {
+                                playerEl.classList.remove('dodge-flash');
+                                void playerEl.offsetWidth;
+                                playerEl.classList.add('dodge-flash');
+                                setTimeout(() => playerEl.classList.remove('dodge-flash'), 400);
+                            }
+                            if (window._combatVfx && !_isAllyTurn) {
+                                const enemyEl = document.querySelector('.entity.enemy');
+                                if (enemyEl && playerEl) window._combatVfx.miss(enemyEl, playerEl, _eLr.dt || 'slashing');
+                            }
+                            showNarration(_pick(_isAllyTurn ? _NARR_ALLY_ACTION : _NARR_ENEMY_MISS).replace('{name}', newTurn.n), 'miss');
+                        }, 1800);
+                    } else {
+                        // Enemy/ally hit — show damage float + narration
+                        setTimeout(() => _showDamageFloat(_eLr.d, _eLr.dt, '.entity.player', !!_eLr.crit), 2700);
+
+                        // Narration after dice settles
+                        setTimeout(() => {
+                            if (_isAllyTurn) {
+                                showNarration(_pick(_NARR_ALLY_ACTION).replace('{name}', newTurn.n), 'heal');
+                            } else if (_eLr.crit) {
+                                showNarration(_pick(_NARR_ENEMY_CRIT), 'crit');
+                                // Screen shake on enemy crit
+                                const app = document.getElementById('app');
+                                if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                                haptic('heavy');
+                                hapticNotify('error');
+                            } else {
+                                showNarration(_pick(_NARR_ENEMY_HIT), '');
+                            }
+                        }, 2200);
                     }
+
                     // 3D dice: 1200 + 1500 + 1200 + 200 = 4100ms for hits
-                    const enemyDelay = (state.lr.miss || state.lr.d <= 0) ? 1800 : 4100;
+                    const enemyDelay = (_eLr.miss || _eLr.d <= 0) ? 2400 : 4100;
                     setTimeout(() => {
                         _cinematicInProgress = false;
                         currentState = state;
@@ -1556,7 +1593,17 @@ function _playCinematicResult(result, actionType) {
         if (_isDmgType && !result.lr.miss && result.lr.d > 0) {
             // Overlay timing: d20(1200)+hold(800)+dmgRoll(1500)+fusion(400)+result(1200)
             const _floatDelay = ['auto_hit', 'aoe'].includes(_rt) ? 2200 : 3800;
-            setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy', !!result.lr.crit), _floatDelay);
+            if (_rt === 'aoe') {
+                // AOE: stagger damage floats on each enemy target
+                const enemyCards = document.querySelectorAll('.entity.enemy');
+                const hitCount = Math.min(result.lr.hits || enemyCards.length, enemyCards.length);
+                for (let i = 0; i < hitCount; i++) {
+                    const selector = `.zone-enemies .entity.enemy:nth-child(${i + 1})`;
+                    setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, selector, !!result.lr.crit), _floatDelay + i * 200);
+                }
+            } else {
+                setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy', !!result.lr.crit), _floatDelay);
+            }
         }
 
         // Phase 3: After full overlay animation, check for kills then render new state
@@ -1567,7 +1614,7 @@ function _playCinematicResult(result, actionType) {
         else if (_rt === 'save') baseDelay = (result.lr.saved && !result.lr.half) ? 2600 : 5200;
         else baseDelay = (result.lr.miss || result.lr.d <= 0) ? 2600 : 5200;
         const hasKill = result.lr.kill;
-        const totalDelay = hasKill ? baseDelay + 600 : baseDelay;
+        const totalDelay = hasKill ? baseDelay + 1200 : baseDelay;
 
         // Death animation: fade+shake on killed enemy before re-render
         if (hasKill) {
@@ -1653,6 +1700,35 @@ function _showDamageFloat(damage, damageType, targetSelector, isCrit) {
     el.style.top = rect.top + 'px';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), isCrit ? 1500 : 1200);
+}
+
+// ─── FLOATING HEAL NUMBER ───
+function _showHealFloat(amount, targetSelector) {
+    const target = document.querySelector(targetSelector || '.entity.player');
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'damage-float heal';
+    el.textContent = `+${amount}`;
+    el.style.left = (rect.left + rect.width / 2) + 'px';
+    el.style.top = rect.top + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+}
+
+// ─── GREEN VIEWPORT FLASH (HEAL) ───
+function _showHealFlash() {
+    let flash = document.getElementById('healFlash');
+    if (!flash) {
+        flash = document.createElement('div');
+        flash.id = 'healFlash';
+        flash.className = 'viewport-flash heal-flash';
+        document.body.appendChild(flash);
+    }
+    flash.classList.remove('active');
+    void flash.offsetWidth;
+    flash.classList.add('active');
+    setTimeout(() => flash.classList.remove('active'), 400);
 }
 
 // ─── SKILL PICKER ───
@@ -2277,11 +2353,13 @@ function _initDiceEffect(lr) {
             overlay.style.display = 'none';
             canvas.classList.remove('multi');
             if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-            // VFX: heal particles on player + narration
-            if (isHeal && window._combatVfx) {
+            // VFX: heal particles on player + narration + heal float + flash
+            if (isHeal) {
                 const _pEl = document.querySelector('.entity.player');
-                if (_pEl) window._combatVfx.heal(_pEl);
+                if (window._combatVfx && _pEl) window._combatVfx.heal(_pEl);
                 showNarration(_pick(_NARR_HEAL), 'heal');
+                if (lr.d > 0) _showHealFloat(lr.d, '.entity.player');
+                _showHealFlash();
             }
         };
 
@@ -2582,6 +2660,35 @@ const _NARR_HEAL = [
     'Músculos se regeneram com calor reconfortante.',
     'O brilho da cura dissipa a exaustão.',
 ];
+// Enemy attack narrations (used during enemy turns)
+const _NARR_ENEMY_HIT = [
+    'O golpe acerta em cheio!',
+    'Sem tempo para reagir — o ataque conecta.',
+    'A defesa não foi suficiente.',
+    'Um impacto doloroso atravessa a guarda.',
+    'O inimigo encontra uma abertura!',
+];
+const _NARR_ENEMY_CRIT = [
+    'Golpe devastador do inimigo!',
+    'Um acerto brutal — impossível ignorar a dor!',
+    'Ataque certeiro atinge um ponto vital!',
+    'O inimigo desfere um golpe avassalador!',
+    'Sem defesa possível contra esse ataque!',
+];
+const _NARR_ENEMY_MISS = [
+    'Desvio no último instante!',
+    'A esquiva foi perfeita!',
+    'O ataque passa sem causar dano.',
+    'Reflexos rápidos evitam o golpe.',
+    'O inimigo erra por pouco!',
+];
+const _NARR_ALLY_ACTION = [
+    '{name} entra em ação!',
+    '{name} se posiciona e ataca!',
+    '{name} não hesita e avança!',
+    '{name} desfere seu golpe!',
+    '{name} luta ao seu lado!',
+];
 
 function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -2661,6 +2768,12 @@ function _checkPlayerDamage(state) {
         } else {
             _showViewportFlash();
         }
+    }
+    // Detect healing (HP increased)
+    if (_prevPlayerHp > 0 && curHp > _prevPlayerHp) {
+        const healAmt = curHp - _prevPlayerHp;
+        _showHealFloat(healAmt, '.entity.player');
+        _showHealFlash();
     }
     _prevPlayerHp = curHp;
 }
