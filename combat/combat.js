@@ -488,7 +488,7 @@ function _renderArenaInner(s) {
                 s.bio === 'city' ? 'Combate na Cidade' : 'Combate';
     html += `<div class="arena-header">
         <div class="arena-title">${biomeTitle}</div>
-        <div class="arena-subtitle">Rodada ${s.rn || 1} · ${biomeName} · ${weatherStr}</div>
+        <div class="arena-subtitle"><span class="round-badge">R${s.rn || 1}</span> ${biomeName} · ${weatherStr}</div>
     </div>`;
 
     // Enemy Zone — TOP (opponents on the far side of the arena)
@@ -1071,7 +1071,8 @@ function renderPlayerCard(p, isCompact = false) {
     const badgesHtml = badges.length > 0 ? `<div class="player-badge-row">${badges.join('')}</div>` : '';
 
     const concClass = p.conc ? ' concentrating' : '';
-    return `<div class="entity player${concClass}">
+    const dangerClass = hpPct <= 0.25 && hpPct > 0 ? ' hp-danger' : '';
+    return `<div class="entity player${concClass}${dangerClass}">
         <div class="entity-header">
             <span class="entity-icon">${p.ico || '👤'}</span>
             <span class="compact-name">${escHtml(p.n)}</span>
@@ -1246,20 +1247,23 @@ function renderActionBar(acts, enemies, player) {
     const fleeChance = acts.flee || 50;
     const hasSkills = acts.skills && acts.skills.length > 0;
     const itemCount = acts.items || 0;
+    const hitCh = hitChance >= 65 ? 'ch-high' : hitChance >= 40 ? 'ch-mid' : 'ch-low';
+    const fleeCh = fleeChance >= 65 ? 'ch-high' : fleeChance >= 40 ? 'ch-mid' : 'ch-low';
 
     let skillBtnText = '🧠 Habilidade';
     if (hasSkills && acts.skills.length === 1) {
         const sk = acts.skills[0];
-        skillBtnText = `🧠 ${sk.n} (${sk.ch}%)`;
+        const skCh = sk.ch >= 65 ? 'ch-high' : sk.ch >= 40 ? 'ch-mid' : 'ch-low';
+        skillBtnText = `🧠 ${sk.n} <span class="action-chance ${skCh}">${sk.ch}%</span>`;
     } else if (!hasSkills) {
         skillBtnText = `🚫 Sem ${player.res || 'Mana'}`;
     }
 
     return `<div class="action-bar"><div class="action-grid">
-        <button class="action-btn primary" data-action="attack">⚔️ Atacar <span class="action-chance">${hitChance}%</span></button>
+        <button class="action-btn primary" data-action="attack">⚔️ Atacar <span class="action-chance ${hitCh}">${hitChance}%</span></button>
         <button class="action-btn ${hasSkills ? '' : 'disabled'}" data-action="skill">${skillBtnText}</button>
         <button class="action-btn ${itemCount > 0 ? '' : 'disabled'}" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
-        <button class="action-btn danger" data-action="flee">🏃 Fugir <span class="action-chance">${fleeChance}%</span></button>
+        <button class="action-btn danger" data-action="flee">🏃 Fugir <span class="action-chance ${fleeCh}">${fleeChance}%</span></button>
         <button class="action-btn full-width" data-action="pass">⏭️ Passar Turno</button>
     </div></div>`;
 }
@@ -1685,8 +1689,9 @@ function showTargetPicker(enemies, actionType, skillId) {
                 if (sk) { chText = `${sk.ch}%`; dmgText = sk.eff || ''; }
             }
             if (chText) {
-                const good = parseInt(chText) >= 60;
-                previewHtml = `<div class="target-preview"><span class="${good ? 'prev-hit' : 'prev-miss'}">${chText} chance</span>${dmgText ? ` · ${escHtml(dmgText)}` : ''}</div>`;
+                const chVal = parseInt(chText);
+                const chCls = chVal >= 65 ? 'prev-hit' : chVal >= 40 ? 'prev-mid' : 'prev-miss';
+                previewHtml = `<div class="target-preview"><span class="${chCls}">${chText} chance</span>${dmgText ? ` · ${escHtml(dmgText)}` : ''}</div>`;
             }
         }
         const hpColor = pct > 50 ? '#4caf50' : pct > 25 ? '#ff9800' : '#e53935';
