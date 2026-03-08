@@ -151,7 +151,7 @@ var ValdoriaErrors = (function () {
 
     // ─── Show Error (full overlay) ───
     var _autoRetryTimer = null;
-    var _RETRY_BASE = 5;
+    var _RETRY_BASE = 3;
     var _RETRY_CAP = 40;
     var _RETRY_MAX = 6;
 

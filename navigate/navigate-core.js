@@ -68,6 +68,7 @@ async function initAsync() {
         }
 
         if (!dataB64) {
+            document.getElementById('loading').classList.add('hidden');
             showError('Dados do mapa nao encontrados. Volte ao bot e tente novamente.');
             return;
         }
@@ -75,6 +76,7 @@ async function initAsync() {
         // Decompress payload (zlib + base64)
         const data = await decompressPayload(dataB64);
         if (!data) {
+            document.getElementById('loading').classList.add('hidden');
             showError('Falha ao carregar dados');
             return;
         }
@@ -118,6 +120,7 @@ async function initAsync() {
         }, 300);
 
     } catch (e) {
+        document.getElementById('loading').classList.add('hidden');
         showError('Erro ao inicializar', e);
     }
 }

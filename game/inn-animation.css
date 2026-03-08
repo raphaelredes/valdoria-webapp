@@ -119,6 +119,26 @@
     white-space: nowrap;
 }
 
+/* Ally recovery section */
+.inn-allies-divider {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: 11px;
+    color: var(--v-gold-dim, #a08050);
+    letter-spacing: 2px;
+    text-align: center;
+    margin: 8px 0 4px;
+}
+.inn-ally-name {
+    font-size: 12px;
+    color: var(--v-text-dim, #8a7a68);
+    margin-top: 4px;
+    font-family: var(--v-font, 'MedievalSharp', serif);
+}
+.inn-bar-small {
+    font-size: 11px;
+    line-height: 1.5;
+}
+
 /* Skip button positioned at bottom */
 #inn-skip-btn {
     position: fixed;

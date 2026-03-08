@@ -195,13 +195,33 @@ function _recoveryHTML(data, pct) {
     const shownMp = Math.round(data.start_mp + (data.max_mp - data.start_mp) * pct);
     const hp = Math.min(shownHp, data.max_hp);
     const mp = Math.min(shownMp, data.max_mp);
+    const resEmoji = data.res_emoji || '💧';
 
     const hpBar = _makeBar(hp, data.max_hp, '🟥', '⬛', 5);
     const mpBar = _makeBar(mp, data.max_mp, '🟦', '⬛', 5);
     const spark = pct >= 1.0 ? ' ✨' : '';
 
-    return '<div class="inn-bar-line">' + hpBar + '  ❤️ ' + hp + '/' + data.max_hp + spark + '</div>' +
-           '<div class="inn-bar-line">' + mpBar + '  💧 ' + mp + '/' + data.max_mp + spark + '</div>';
+    let html = '<div class="inn-bar-line">' + hpBar + '  ❤️ ' + hp + '/' + data.max_hp + spark + '</div>' +
+               '<div class="inn-bar-line">' + mpBar + '  ' + resEmoji + ' ' + mp + '/' + data.max_mp + spark + '</div>';
+
+    // Ally recovery bars
+    if (data.allies && data.allies.length > 0) {
+        html += '<div class="inn-allies-divider">━ GRUPO ━</div>';
+        for (const a of data.allies) {
+            const aHp = Math.min(Math.round(a.start_hp + (a.final_hp - a.start_hp) * pct), a.max_hp);
+            const aMp = a.max_mp > 0 ? Math.min(Math.round(a.start_mp + (a.final_mp - a.start_mp) * pct), a.max_mp) : 0;
+            const aHpBar = _makeBar(aHp, a.max_hp, '🟥', '⬛', 4);
+            const aResEmoji = a.res_emoji || '💧';
+            html += '<div class="inn-ally-name">' + (a.icon || '👤') + ' ' + a.name + '</div>';
+            html += '<div class="inn-bar-line inn-bar-small">' + aHpBar + ' ❤️ ' + aHp + '/' + a.max_hp + spark + '</div>';
+            if (a.max_mp > 0) {
+                const aMpBar = _makeBar(aMp, a.max_mp, '🟦', '⬛', 4);
+                html += '<div class="inn-bar-line inn-bar-small">' + aMpBar + ' ' + aResEmoji + ' ' + aMp + '/' + a.max_mp + spark + '</div>';
+            }
+        }
+    }
+
+    return html;
 }
 
 // ─── Build Frame List ───
