@@ -410,7 +410,15 @@ function onGateChoice(key) {
     });
 }
 
+let _roadChoiceMade = false;
 async function onRoadChoice(key) {
+    // Prevent double-tap race condition (distract + fight firing simultaneously)
+    if (_roadChoiceMade) return;
+    _roadChoiceMade = true;
+
+    // Disable all road choice buttons immediately
+    document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
+
     choices.road_choice = key;
 
     if (key === 'fight') {

@@ -2102,6 +2102,9 @@ function _initDiceAttackOverlay(lr) {
     haptic('light'); sfxDiceRoll();
 
     let _done = false;
+    // Deferred VFX — queued during dice animation, played AFTER overlay closes
+    let _pendingVfx = null;
+
     const finishAll = () => {
         if (_done) return;
         _done = true;
@@ -2109,6 +2112,8 @@ function _initDiceAttackOverlay(lr) {
         overlay.style.display = 'none';
         canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
         if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+        // Play deferred VFX now that the overlay is gone
+        if (_pendingVfx) { setTimeout(_pendingVfx, 50); _pendingVfx = null; }
     };
 
     try {
@@ -2128,8 +2133,6 @@ function _initDiceAttackOverlay(lr) {
                     label3d.innerHTML = '<span style="font-size:1.3em">&#x1F31F;</span> CRITICO! <span style="font-size:0.7em">(' + lr.r + ' vs CA ' + lr.ac + ')</span>';
                     label3d.className = 'dmg-dice3d-label crit';
                     hapticBurst('crit'); sfxCrit();
-                    const app = document.getElementById('app');
-                    if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
                     showNarration(_pick(_NARR_CRIT), 'crit');
                     _hitStreak++; if (_hitStreak >= 2) _showComboCounter(_hitStreak);
                 } else if (isFail) {
@@ -2144,13 +2147,6 @@ function _initDiceAttackOverlay(lr) {
                     label3d.className = 'dmg-dice3d-label miss';
                     hapticBurst('miss'); sfxMiss();
                     showNarration(_pick(_NARR_MISS), 'miss');
-                    const dodgeTarget = document.querySelector('.entity.enemy');
-                    if (dodgeTarget) { dodgeTarget.classList.add('dodge-flash'); setTimeout(() => dodgeTarget.classList.remove('dodge-flash'), 400); }
-                    // VFX: projectile veers off on miss
-                    if (window._combatVfx) {
-                        const _pEl = document.querySelector('.entity.player');
-                        if (_pEl && dodgeTarget) window._combatVfx.miss(_pEl, dodgeTarget, lr.dt || 'slashing');
-                    }
                     _hitStreak = 0;
                 } else {
                     const total = lr.total || lr.r;
@@ -2162,12 +2158,25 @@ function _initDiceAttackOverlay(lr) {
                 }
             }
 
-            // VFX: Launch projectile on hit (or crit) — flies during 800ms hold
-            if (!isMiss && lr.d > 0 && window._combatVfx) {
-                const _pEl = document.querySelector('.entity.player');
-                const _eEl = document.querySelector('.entity.enemy');
-                if (_pEl && _eEl) window._combatVfx.projectile(_pEl, _eEl, lr.dt || 'slashing', { crit: !!isCrit });
-            }
+            // Queue VFX to play AFTER overlay closes (screen shake, projectiles, dodge flash)
+            _pendingVfx = () => {
+                if (isCrit) {
+                    const app = document.getElementById('app');
+                    if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                }
+                if (isMiss) {
+                    const dodgeTarget = document.querySelector('.entity.enemy');
+                    if (dodgeTarget) { dodgeTarget.classList.add('dodge-flash'); setTimeout(() => dodgeTarget.classList.remove('dodge-flash'), 400); }
+                    if (window._combatVfx) {
+                        const _pEl = document.querySelector('.entity.player');
+                        if (_pEl && dodgeTarget) window._combatVfx.miss(_pEl, dodgeTarget, lr.dt || 'slashing');
+                    }
+                } else if (lr.d > 0 && window._combatVfx) {
+                    const _pEl = document.querySelector('.entity.player');
+                    const _eEl = document.querySelector('.entity.enemy');
+                    if (_pEl && _eEl) window._combatVfx.projectile(_pEl, _eEl, lr.dt || 'slashing', { crit: !!isCrit });
+                }
+            };
 
             // Miss/no damage — hold result then close
             if (isMiss || lr.d <= 0) {
@@ -2205,6 +2214,8 @@ function _initDiceSave(lr) {
     haptic('light'); sfxDiceRoll();
 
     let _done = false;
+    let _pendingVfx = null;
+
     const finishAll = () => {
         if (_done) return;
         _done = true;
@@ -2212,6 +2223,7 @@ function _initDiceSave(lr) {
         overlay.style.display = 'none';
         canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
         if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+        if (_pendingVfx) { setTimeout(_pendingVfx, 50); _pendingVfx = null; }
     };
 
     try {
@@ -2236,21 +2248,23 @@ function _initDiceSave(lr) {
                 }
             }
 
-            // VFX: projectile on save that deals damage (failed or partial)
-            if (!(lr.saved && !lr.half) && lr.d > 0 && window._combatVfx) {
-                const _pEl = document.querySelector('.entity.player');
-                const _eEl = document.querySelector('.entity.enemy');
-                if (_pEl && _eEl) window._combatVfx.projectile(_pEl, _eEl, lr.dt || 'fire', { crit: false });
-            }
+            // Queue VFX to play AFTER overlay closes
+            _pendingVfx = () => {
+                if (lr.saved && !lr.half) {
+                    if (window._combatVfx) {
+                        const _pEl = document.querySelector('.entity.player');
+                        const _eEl = document.querySelector('.entity.enemy');
+                        if (_pEl && _eEl) window._combatVfx.miss(_pEl, _eEl, lr.dt || 'fire');
+                    }
+                } else if (lr.d > 0 && window._combatVfx) {
+                    const _pEl = document.querySelector('.entity.player');
+                    const _eEl = document.querySelector('.entity.enemy');
+                    if (_pEl && _eEl) window._combatVfx.projectile(_pEl, _eEl, lr.dt || 'fire', { crit: false });
+                }
+            };
 
             // Full resist, no damage — hold then close
             if (lr.saved && !lr.half) {
-                // VFX: miss effect on full resist
-                if (window._combatVfx) {
-                    const _pEl = document.querySelector('.entity.player');
-                    const _eEl = document.querySelector('.entity.enemy');
-                    if (_pEl && _eEl) window._combatVfx.miss(_pEl, _eEl, lr.dt || 'fire');
-                }
                 setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishAll; } }, 500);
                 setTimeout(finishAll, 1200);
                 return;
@@ -2295,13 +2309,6 @@ function _initDiceDamageOnly(lr) {
             infoText = lr.sn || 'Acerto automático!';
         }
         if (label3d) { label3d.textContent = infoText; label3d.className = 'dmg-dice3d-label rolling'; }
-
-        // VFX: projectile for auto_hit/aoe spells
-        if (window._combatVfx) {
-            const _pEl = document.querySelector('.entity.player');
-            const _eEl = document.querySelector('.entity.enemy');
-            if (_pEl && _eEl) window._combatVfx.projectile(_pEl, _eEl, lr.dt || 'force', { crit: false });
-        }
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         haptic('medium');
 
@@ -2313,6 +2320,14 @@ function _initDiceDamageOnly(lr) {
             overlay.style.display = 'none';
             canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
             if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+            // VFX: projectile for auto_hit/aoe — after overlay closes
+            if (window._combatVfx) {
+                setTimeout(() => {
+                    const _pEl = document.querySelector('.entity.player');
+                    const _eEl = document.querySelector('.entity.enemy');
+                    if (_pEl && _eEl) window._combatVfx.projectile(_pEl, _eEl, lr.dt || 'force', { crit: false });
+                }, 50);
+            }
         };
 
         // Small delay then start damage dice
@@ -2460,6 +2475,8 @@ function _initDiceDeathSave(lr) {
     overlay.classList.add('death-save-overlay');
 
     let _dsDone = false;
+    let _pendingDsVfx = null;
+
     const finishDs = () => {
         if (_dsDone) return;
         _dsDone = true;
@@ -2467,6 +2484,7 @@ function _initDiceDeathSave(lr) {
         overlay.style.display = 'none';
         overlay.classList.remove('death-save-overlay');
         if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+        if (_pendingDsVfx) { setTimeout(_pendingDsVfx, 50); _pendingDsVfx = null; }
     };
 
     try {
@@ -2481,20 +2499,10 @@ function _initDiceDeathSave(lr) {
                     label3d.textContent = '🌟 NAT 20! Acordou!';
                     label3d.className = 'dmg-dice3d-label crit';
                     hapticBurst('crit'); sfxCrit();
-                    if (window._combatVfx) {
-                        const pEl = document.querySelector('.entity.player');
-                        if (pEl) window._combatVfx.buff(pEl);
-                        window._combatVfx.flash('rgba(255,215,0,0.4)', 500);
-                    }
-                    const app = document.getElementById('app');
-                    if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
                 } else if (isCritFail) {
                     label3d.textContent = '💀 NAT 1! Falha Dupla!';
                     label3d.className = 'dmg-dice3d-label miss';
                     hapticNotify('error');
-                    if (window._combatVfx) window._combatVfx.flash('rgba(200,30,30,0.4)', 500);
-                    const app = document.getElementById('app');
-                    if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
                 } else if (isSuccess) {
                     label3d.textContent = `✅ ${lr.r} — Sucesso!`;
                     label3d.className = 'dmg-dice3d-label hit';
@@ -2503,8 +2511,25 @@ function _initDiceDeathSave(lr) {
                     label3d.textContent = `❌ ${lr.r} — Falha!`;
                     label3d.className = 'dmg-dice3d-label miss';
                     haptic('light');
-                    if (window._combatVfx) window._combatVfx.flash('rgba(200,30,30,0.25)', 350);
                 }
+                // Queue VFX to play AFTER overlay closes
+                _pendingDsVfx = () => {
+                    if (isCrit) {
+                        if (window._combatVfx) {
+                            const pEl = document.querySelector('.entity.player');
+                            if (pEl) window._combatVfx.buff(pEl);
+                            window._combatVfx.flash('rgba(255,215,0,0.4)', 500);
+                        }
+                        const app = document.getElementById('app');
+                        if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                    } else if (isCritFail) {
+                        if (window._combatVfx) window._combatVfx.flash('rgba(200,30,30,0.4)', 500);
+                        const app = document.getElementById('app');
+                        if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                    } else if (!isSuccess) {
+                        if (window._combatVfx) window._combatVfx.flash('rgba(200,30,30,0.25)', 350);
+                    }
+                };
             }
             setTimeout(() => { if (!_dsDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishDs; } }, 500);
             setTimeout(finishDs, 1800);
