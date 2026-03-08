@@ -517,6 +517,15 @@
             animation: pathDashFlow 1s linear infinite;
         }
 
+        /* ═══ FIRST-VISIT PULSE (known_mapped locations) ═══ */
+        @keyframes firstVisitPulse {
+            0%, 100% { stroke-opacity: 0.12; }
+            50% { stroke-opacity: 0.4; }
+        }
+        .first-visit-ring {
+            animation: firstVisitPulse 3s ease-in-out infinite;
+        }
+
         /* ═══ CURRENT LOCATION BADGE ═══ */
         #current-loc-badge {
             position: absolute;

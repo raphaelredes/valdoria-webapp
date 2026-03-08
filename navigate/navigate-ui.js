@@ -378,10 +378,10 @@ function animateTravel(fromId, toId, onComplete) {
             for (const seg of segments) {
                 if (accum + seg.len >= targetLen || seg === segments[segments.length - 1]) {
                     const segT = Math.min((targetLen - accum) / seg.len, 1);
-                    // Quadratic bezier interpolation
-                    const u = 1 - segT;
-                    const px = u * u * seg.ax + 2 * u * segT * seg.mx + segT * segT * seg.bx;
-                    const py = u * u * seg.ay + 2 * u * segT * seg.my + segT * segT * seg.by;
+                    // Interpolate along the actual SVG path curve
+                    const pt = _pointOnPath(seg.pathD, segT);
+                    const px = pt.x;
+                    const py = pt.y;
                     marker.setAttribute('cx', px);
                     marker.setAttribute('cy', py);
                     break;

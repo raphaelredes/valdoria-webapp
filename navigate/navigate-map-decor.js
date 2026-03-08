@@ -461,6 +461,13 @@ function renderLocationMarkers(group, fogState) {
             ng.setAttribute('opacity', '0.45');
             if (isSett) _drawSettlementIcon(ng, x, y + 4, 7);
             else _drawBiomeIcon(ng, x, y + 2, biome, 7, name);
+            // Pulsing golden ring — "discover me!"
+            ng.appendChild(_el('circle', {
+                cx: x, cy: y, r: R - 4,
+                fill: 'none', stroke: '#c4953a',
+                'stroke-width': 1.2, 'stroke-opacity': 0.35,
+                class: 'first-visit-ring',
+            }));
         } else if (fog === 'known_unmapped') {
             // Small ink mark
             ng.setAttribute('opacity', '0.3');
@@ -472,6 +479,18 @@ function renderLocationMarkers(group, fogState) {
             // Frontier — tiny dot
             ng.setAttribute('opacity', '0.2');
             ng.appendChild(_el('circle', { cx: x, cy: y, r: 1.5, fill: INK_DARK, 'fill-opacity': 0.2 }));
+        }
+
+        // ── Danger ring (subtle colored border based on danger level) ──
+        if ((isExp || fog === 'known_mapped') && ld?.d > 0) {
+            const dangerColor = getDangerColor(ld.d);
+            ng.appendChild(_el('circle', {
+                cx: x, cy: y, r: R - 2,
+                fill: 'none', stroke: dangerColor,
+                'stroke-width': 1.5,
+                'stroke-opacity': isExp ? 0.4 : 0.25,
+                'stroke-dasharray': isExp ? 'none' : '3 2',
+            }));
         }
 
         // Label (multi-line for long names)
@@ -511,6 +530,77 @@ function renderLocationMarkers(group, fogState) {
                 }
             }
             ng.appendChild(lbl);
+        }
+
+        // ── Quest markers (mini scroll badge) ──
+        if (isExp) {
+            const locQuests = (S.quests || []).filter(q => q.loc === locId);
+            if (locQuests.length > 0) {
+                const qx = x + R * 0.6, qy = y - R * 0.7;
+                // Mini scroll body
+                ng.appendChild(_el('rect', {
+                    x: qx - 5, y: qy - 4, width: 10, height: 8, rx: 1,
+                    fill: PARCHMENT, 'fill-opacity': 0.9,
+                    stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.6,
+                }));
+                // Scroll top roll
+                ng.appendChild(_el('ellipse', {
+                    cx: qx, cy: qy - 4, rx: 5.5, ry: 1.2,
+                    fill: PARCHMENT, stroke: INK_DARK,
+                    'stroke-width': 0.4, 'stroke-opacity': 0.5,
+                }));
+                if (locQuests.length > 1) {
+                    // Count number
+                    ng.appendChild(_el('text', {
+                        x: qx, y: qy + 2, 'text-anchor': 'middle',
+                        'font-size': '6px', 'font-weight': '700',
+                        'font-family': "'Cinzel', serif",
+                        fill: INK_DARK, 'fill-opacity': 0.7,
+                    })).textContent = locQuests.length;
+                } else {
+                    // Single quest: ink lines on scroll
+                    ng.appendChild(_el('line', {
+                        x1: qx - 3, y1: qy - 1, x2: qx + 3, y2: qy - 1,
+                        stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.4,
+                    }));
+                    ng.appendChild(_el('line', {
+                        x1: qx - 3, y1: qy + 1, x2: qx + 2, y2: qy + 1,
+                        stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.4,
+                    }));
+                }
+            }
+        }
+
+        // ── Dungeon indicators (star=pending, check=done) ──
+        if (isExp) {
+            const locDungeons = (S.dungeons || {})[locId] || [];
+            if (locDungeons.length > 0) {
+                const ddx = x + R * 0.65, ddy = y + R * 0.5;
+                const anyPending = locDungeons.some(d => !d.done);
+                if (anyPending) {
+                    // 5-point star (ink-drawn)
+                    const sr = 4, ir = 1.8;
+                    let starD = '';
+                    for (let si = 0; si < 5; si++) {
+                        const outerA = (si * 72 - 90) * Math.PI / 180;
+                        const innerA = ((si * 72 + 36) - 90) * Math.PI / 180;
+                        starD += `${si === 0 ? 'M' : 'L'}${ddx + Math.cos(outerA) * sr},${ddy + Math.sin(outerA) * sr}`;
+                        starD += `L${ddx + Math.cos(innerA) * ir},${ddy + Math.sin(innerA) * ir}`;
+                    }
+                    starD += 'Z';
+                    ng.appendChild(_el('path', {
+                        d: starD, fill: '#c4953a', 'fill-opacity': 0.6,
+                        stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.5,
+                    }));
+                } else {
+                    // Checkmark — all dungeons complete
+                    ng.appendChild(_el('path', {
+                        d: `M${ddx - 3},${ddy} L${ddx - 1},${ddy + 2.5} L${ddx + 3},${ddy - 2.5}`,
+                        fill: 'none', stroke: '#6a8a5a', 'stroke-width': 1.2,
+                        'stroke-opacity': 0.7, 'stroke-linecap': 'round',
+                    }));
+                }
+            }
         }
 
         // Click handler
