@@ -163,6 +163,19 @@
         </div>
     </div>
 
+    <!-- Inn sleep animation overlay -->
+    <div id="inn-overlay" class="inn-overlay" style="display:none">
+        <div class="inn-vignette"></div>
+        <div class="inn-frame" id="inn-frame">
+            <div class="inn-night-bar" id="inn-night-bar"></div>
+            <div class="inn-title" id="inn-title"></div>
+            <div class="inn-icons" id="inn-icons"></div>
+            <div class="inn-text" id="inn-text"></div>
+            <div class="inn-recovery" id="inn-recovery"></div>
+        </div>
+        <button class="v-skip-btn" id="inn-skip-btn" style="display:none">Acordar »</button>
+    </div>
+
     <!-- Toast notification -->
     <div id="toast" class="toast" style="display:none"></div>
 
@@ -197,7 +210,7 @@
 
     <script>
         var v = Date.now();
-        var scripts = ['game-enhancer.js', 'game-particles.js', 'game-core.js', 'game-renderer.js', 'game-dialogue.js', 'game-ui.js', 'game-transitions.js'];
+        var scripts = ['game-enhancer.js', 'game-particles.js', 'game-core.js', 'game-renderer.js', 'game-dialogue.js', 'game-ui.js', 'game-transitions.js', 'inn-animation.js'];
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
         scripts.forEach(function (s) {

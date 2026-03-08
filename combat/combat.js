@@ -6,7 +6,22 @@
 
 // ─── INIT ───
 const tg = window.Telegram?.WebApp;
-if (tg) { tg.ready(); tg.expand(); }
+if (tg) {
+    tg.ready(); tg.expand();
+    // BackButton — always available for closing the WebApp
+    if (tg.BackButton) {
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            // If no combat state loaded (server down / error screen), close immediately
+            if (!currentState) {
+                stopAllIntervals();
+                try { tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); }
+                return;
+            }
+            closeCombat('back');
+        });
+    }
+}
 
 const params = new URLSearchParams(window.location.search);
 const token = params.get('token') || '';
