@@ -114,13 +114,17 @@
     transform: translateY(0);
 }
 
-/* Night progress bar */
+/* Night progress bar — panel with subtle border */
 .inn-night-bar {
     font-size: 13px;
     letter-spacing: 1px;
     color: var(--v-text-dim, #8a7a68);
     margin-bottom: 20px;
     font-family: monospace;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 4px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(196, 149, 58, 0.1);
 }
 
 /* Frame title */
@@ -135,16 +139,26 @@
     margin-bottom: 16px;
 }
 
-/* Decorative icons */
+/* Decorative icons — with gold drop-shadow glow */
 .inn-icons {
     font-size: 28px;
     margin-bottom: 20px;
     line-height: 1.4;
     animation: innIconFloat 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(196, 149, 58, 0.4)) drop-shadow(0 0 30px rgba(196, 149, 58, 0.12));
 }
 @keyframes innIconFloat {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-4px); }
+}
+
+/* Ornamental divider */
+.inn-divider {
+    font-size: 12px;
+    color: var(--v-gold-dim, #a08050);
+    letter-spacing: 4px;
+    margin-bottom: 16px;
+    opacity: 0.6;
 }
 
 /* Narration text */
@@ -223,7 +237,7 @@
     background: linear-gradient(90deg, #203880 0%, #3050c0 100%);
 }
 .inn-bar-fill.full {
-    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.5), 0 0 4px rgba(255, 215, 0, 0.8);
 }
 .inn-bar-label {
     font-size: 12px;
@@ -238,9 +252,10 @@
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: 11px;
     color: var(--v-gold-dim, #a08050);
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     text-align: center;
     margin: 8px 0 4px;
+    opacity: 0.8;
 }
 .inn-ally-name {
     font-size: 12px;
@@ -256,10 +271,10 @@
     min-width: 60px;
 }
 
-/* Skip button positioned at bottom */
+/* Skip button positioned at bottom — aligned with design system */
 #inn-skip-btn {
     position: fixed;
-    bottom: 32px;
+    bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 9501;
@@ -268,4 +283,14 @@
 @keyframes innSkipFadeIn {
     from { opacity: 0; transform: translateX(-50%) translateY(8px); }
     to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+}
+
+/* ─── Title shimmer for final "full recovery" frame ─── */
+.inn-title.shimmer {
+    animation: innTitleShimmer 2s ease-in-out infinite;
+}
+@keyframes innTitleShimmer {
+    0%, 100% { text-shadow: 0 1px 8px rgba(196, 149, 58, 0.3); }
+    50%      { text-shadow: 0 1px 16px rgba(219, 182, 104, 0.6), 0 0 30px rgba(196, 149, 58, 0.2); }
 }

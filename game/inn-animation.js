@@ -217,13 +217,15 @@ function _createParticles(container, tier) {
     }
 }
 
-// ─── Smooth Recovery Bars (HTML/CSS) ───
-function _barHTML(emoji, current, max, type, isFull) {
+// ─── Smooth Recovery Bars (HTML/CSS with animated fill) ───
+// Bars are created with width:0, then animated to target via requestAnimationFrame
+function _barHTML(emoji, current, max, type, isFull, sizeClass) {
     const pct = max > 0 ? Math.round((current / max) * 100) : 0;
     const fullClass = isFull ? ' full' : '';
     const spark = isFull ? ' ✨' : '';
-    return '<div class="inn-bar-wrap">' +
-        '<div class="inn-bar-track"><div class="inn-bar-fill ' + type + fullClass + '" style="width:' + pct + '%"></div></div>' +
+    const wrapClass = sizeClass ? 'inn-bar-wrap ' + sizeClass : 'inn-bar-wrap';
+    return '<div class="' + wrapClass + '">' +
+        '<div class="inn-bar-track"><div class="inn-bar-fill ' + type + fullClass + '" data-target="' + pct + '" style="width:0%"></div></div>' +
         '<span class="inn-bar-label">' + emoji + ' ' + current + '/' + max + spark + '</span>' +
     '</div>';
 }
@@ -239,26 +241,30 @@ function _recoveryHTML(data, pct) {
 
     // Ally recovery bars
     if (data.allies && data.allies.length > 0) {
-        html += '<div class="inn-allies-divider">━ GRUPO ━</div>';
+        html += '<div class="inn-allies-divider">─ ◆ GRUPO ◆ ─</div>';
         for (const a of data.allies) {
             const aHp = Math.min(Math.round(a.start_hp + (a.final_hp - a.start_hp) * pct), a.max_hp);
             const aResEmoji = a.res_emoji || '💧';
             html += '<div class="inn-ally-name">' + (a.icon || '👤') + ' ' + a.name + '</div>';
-            html += '<div class="inn-bar-wrap small">' +
-                '<div class="inn-bar-track"><div class="inn-bar-fill hp' + (isFull ? ' full' : '') + '" style="width:' + (a.max_hp > 0 ? Math.round(aHp / a.max_hp * 100) : 0) + '%"></div></div>' +
-                '<span class="inn-bar-label">❤️ ' + aHp + '/' + a.max_hp + (isFull ? ' ✨' : '') + '</span>' +
-            '</div>';
+            html += _barHTML('❤️', aHp, a.max_hp, 'hp', isFull, 'small');
             if (a.max_mp > 0) {
                 const aMp = Math.min(Math.round(a.start_mp + (a.final_mp - a.start_mp) * pct), a.max_mp);
-                html += '<div class="inn-bar-wrap small">' +
-                    '<div class="inn-bar-track"><div class="inn-bar-fill mp' + (isFull ? ' full' : '') + '" style="width:' + Math.round(aMp / a.max_mp * 100) + '%"></div></div>' +
-                    '<span class="inn-bar-label">' + aResEmoji + ' ' + aMp + '/' + a.max_mp + (isFull ? ' ✨' : '') + '</span>' +
-                '</div>';
+                html += _barHTML(aResEmoji, aMp, a.max_mp, 'mp', isFull, 'small');
             }
         }
     }
 
     return html;
+}
+
+// Animate all bar fills after they've been inserted into the DOM
+function _animateBarFills(container) {
+    requestAnimationFrame(() => {
+        const fills = container.querySelectorAll('.inn-bar-fill[data-target]');
+        fills.forEach(el => {
+            el.style.width = el.dataset.target + '%';
+        });
+    });
 }
 
 // ─── Build Frame List ───
@@ -271,17 +277,36 @@ function _buildFrames(data) {
         lines: f.lines.map(l => l.replace('{name}', data.player_name || 'Aventureiro')),
     }));
 
-    // Insert dream frame before last (modest/wealthy)
-    if (data.dream && tier !== 'poor') {
+    // Insert dream frame (all tiers — poor gets a rougher dream)
+    if (data.dream) {
+        const dreamConfig = {
+            poor: {
+                title: 'SONHO AGITADO',
+                icons: '💭  · · ·  💭',
+                bg: 'radial-gradient(ellipse at 50% 40%, #1a100a 0%, #0a0805 100%)',
+                delay: 2000,
+                recovery: 0.8,
+            },
+            modest: {
+                title: 'MUNDO ONÍRICO',
+                icons: '💭  🔮  ✨',
+                bg: 'radial-gradient(ellipse at 50% 40%, #1a0a2e 0%, #0a0518 100%)',
+                delay: 2500,
+                recovery: 0.85,
+            },
+            wealthy: {
+                title: 'VISÃO ETÉREA',
+                icons: '🔮  💭  ⚜️',
+                bg: 'radial-gradient(ellipse at 50% 40%, #2a0a2e 0%, #150518 100%)',
+                delay: 2500,
+                recovery: 0.9,
+            },
+        };
+        const dc = dreamConfig[tier] || dreamConfig.modest;
         const dreamFrame = {
-            title: tier === 'wealthy' ? 'VISÃO ETÉREA' : 'MUNDO ONÍRICO',
-            icons: tier === 'wealthy' ? '🔮  💭  ⚜️' : '💭  🔮  ✨',
+            ...dc,
             lines: ['"' + data.dream + '"'],
-            bg: tier === 'wealthy'
-                ? 'radial-gradient(ellipse at 50% 40%, #2a0a2e 0%, #150518 100%)'
-                : 'radial-gradient(ellipse at 50% 40%, #1a0a2e 0%, #0a0518 100%)',
-            delay: 2500,
-            recovery: tier === 'wealthy' ? 0.9 : 0.85,
+            isDream: true,
         };
         frames.splice(frames.length - 1, 0, dreamFrame);
     }
@@ -346,9 +371,13 @@ function playInnAnimation(data, onDone) {
             overlay.style.display = 'none';
             overlay.classList.remove('hiding');
             frameEl.classList.remove('active');
+            titleEl.classList.remove('shimmer');
             // Clean up particles
             const particlesEl = overlay.querySelector('.inn-particles');
             if (particlesEl) particlesEl.innerHTML = '';
+            // Restore bottom panel
+            const panel = document.getElementById('bottom-panel');
+            if (panel) panel.style.display = '';
             onDone();
         }, 400);
     };
@@ -397,21 +426,28 @@ function playInnAnimation(data, onDone) {
             // Night progress bar
             nightBarEl.textContent = _nightBar(idx, totalFrames);
 
-            // Title
+            // Title + shimmer on final frame
             titleEl.textContent = frame.title;
+            if (frame.recovery >= 1.0) {
+                titleEl.classList.add('shimmer');
+            } else {
+                titleEl.classList.remove('shimmer');
+            }
 
-            // Icons
-            iconsEl.textContent = frame.icons;
+            // Ornamental divider + icons
+            iconsEl.innerHTML = frame.icons +
+                '<div class="inn-divider">─ ◆ ─</div>';
 
             // Narration text — lines appear staggered via CSS animation
             textEl.innerHTML = frame.lines.map(l =>
                 '<div class="inn-line">' + l + '</div>'
             ).join('');
 
-            // Recovery bars (smooth CSS fill via width transition)
+            // Recovery bars — set width:0 first, then animate after paint
             if (frame.recovery > 0) {
                 recoveryEl.innerHTML = _recoveryHTML(data, frame.recovery);
                 recoveryEl.style.display = '';
+                _animateBarFills(recoveryEl);
             } else {
                 recoveryEl.style.display = 'none';
             }
@@ -419,14 +455,19 @@ function playInnAnimation(data, onDone) {
             // Fade in frame
             frameEl.classList.add('active');
 
-            // Haptic on full recovery
-            if (frame.recovery >= 1.0) {
-                try {
-                    if (window.Telegram && Telegram.WebApp) {
-                        Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            // Granular haptic feedback
+            try {
+                if (window.Telegram && Telegram.WebApp) {
+                    const hf = Telegram.WebApp.HapticFeedback;
+                    if (frame.recovery >= 1.0) {
+                        hf.notificationOccurred('success');
+                    } else if (frame.isDream) {
+                        hf.impactOccurred('medium');
+                    } else if (idx > 0) {
+                        hf.impactOccurred('light');
                     }
-                } catch (e) { /* */ }
-            }
+                }
+            } catch (e) { /* */ }
 
             // Schedule next frame
             _frameTimer = setTimeout(() => showFrame(idx + 1), frame.delay);
