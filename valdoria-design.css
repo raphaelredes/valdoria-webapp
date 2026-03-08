@@ -72,6 +72,11 @@
     --v-transition:      0.2s ease;
     --v-transition-slow: 0.3s ease-out;
 
+    /* Spring / Bounce Easing — GPU-friendly micro-interactions */
+    --v-ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);   /* overshoot bounce (buttons, cards) */
+    --v-ease-snap:     cubic-bezier(0.16, 1, 0.3, 1);       /* fast snap, soft land (screen slides) */
+    --v-ease-dramatic: cubic-bezier(0.68, -0.55, 0.265, 1.55); /* dramatic enter/exit (rewards, loot) */
+
     /* Special surfaces */
     --v-parchment:     #f5f0e0;
 }
@@ -662,6 +667,66 @@ body::after {
 @keyframes v-fadeIn {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Button release bounce — triggered via JS on pointerup */
+@keyframes v-btnRelease {
+    0%   { transform: scale(0.95); }
+    40%  { transform: scale(1.04); }
+    70%  { transform: scale(0.99); }
+    100% { transform: scale(1); }
+}
+.v-btn-released {
+    animation: v-btnRelease 0.3s var(--v-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) forwards !important;
+}
+
+/* Floating reward popup — floats up and fades */
+@keyframes v-floatUp {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    70%  { opacity: 1; transform: translateY(-30px) scale(1.1); }
+    100% { opacity: 0; transform: translateY(-50px) scale(0.9); }
+}
+.v-float-popup {
+    position: absolute;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--v-gold-light);
+    text-shadow: 0 0 8px rgba(196, 149, 58, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5);
+    animation: v-floatUp 1.2s var(--v-ease-snap, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+    pointer-events: none;
+    z-index: 20;
+    white-space: nowrap;
+}
+
+/* Interactive pulse glow — subtle breathing for clickable elements */
+@keyframes v-subtlePulse {
+    0%, 100% { box-shadow: 0 0 0 rgba(196, 149, 58, 0); }
+    50%      { box-shadow: 0 0 8px rgba(196, 149, 58, 0.15); }
+}
+.v-interactive-pulse {
+    animation: v-subtlePulse 2.5s ease-in-out infinite;
+}
+
+/* Card flip — 3D reveal for loot/rewards */
+.v-card-flip {
+    perspective: 600px;
+}
+.v-card-flip-inner {
+    transition: transform 0.6s var(--v-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+    transform-style: preserve-3d;
+    position: relative;
+}
+.v-card-flip.revealed .v-card-flip-inner {
+    transform: rotateY(180deg);
+}
+.v-card-flip-front,
+.v-card-flip-back {
+    backface-visibility: hidden;
+}
+.v-card-flip-back {
+    transform: rotateY(180deg);
+    position: absolute;
+    inset: 0;
 }
 
 @keyframes v-fadeSlideUp {

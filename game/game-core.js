@@ -531,7 +531,9 @@ async function doAction(callbackData) {
         if (remaining > 0) await sleep(remaining);
         hideLocationTransition();
 
-        animateScreenTransition(() => renderScreen(data));
+        // Detect back navigation for directional slide
+        const isBack = /^(action_universal_back|city_back|back|voltar)/.test(callbackData);
+        animateScreenTransition(() => renderScreen(data), isBack ? 'back' : 'forward');
 
         // If there's a transition AND we rendered a screen,
         // it means the button is just there (like Mochila), so don't auto-redirect.

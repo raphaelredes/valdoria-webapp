@@ -182,13 +182,18 @@ function showToast(text, duration = 2000) {
 // showError(), hideError(), showToast() are injected by ValdoriaErrors.init()
 
 // ─── Screen Transition Animation ───
-function animateScreenTransition(renderFn) {
+// direction: 'forward' (slide right→left), 'back' (slide left→right)
+function animateScreenTransition(renderFn, direction) {
     const screenEl = document.getElementById('screen');
     const panelEl = document.getElementById('bottom-panel');
     if (!screenEl) { renderFn(); return; }
 
-    // Content fades out fully
-    screenEl.classList.add('fade-out');
+    const isBack = direction === 'back';
+    const outClass = isBack ? 'slide-back-out' : 'fade-out';
+    const inClass  = isBack ? 'slide-back-in'  : 'fade-in';
+
+    // Content fades/slides out
+    screenEl.classList.add(outClass);
     // Bottom panel dims subtly (stays present, acknowledges change)
     if (panelEl) {
         panelEl.style.opacity = '0.5';
@@ -197,16 +202,16 @@ function animateScreenTransition(renderFn) {
 
     setTimeout(() => {
         renderFn();
-        screenEl.classList.remove('fade-out');
-        screenEl.classList.add('fade-in');
+        screenEl.classList.remove(outClass);
+        screenEl.classList.add(inClass);
         if (panelEl) {
             panelEl.style.opacity = '1';
             panelEl.style.transition = 'opacity 0.15s ease';
         }
         setTimeout(() => {
-            screenEl.classList.remove('fade-in');
+            screenEl.classList.remove(inClass);
             if (panelEl) panelEl.style.transition = '';
-        }, 200);
+        }, 300);
     }, 150);
 }
 
@@ -499,6 +504,48 @@ function injectFontPicker(contentEl) {
 
     section.appendChild(grid);
     contentEl.appendChild(section);
+}
+
+// ─── Button Bounce-Back (pointerup spring animation) ───
+// Adds a satisfying elastic release to all game buttons.
+// CSS class .v-btn-released is defined in valdoria-design.css.
+document.addEventListener('pointerup', e => {
+    const btn = e.target.closest('.btn-action, .btn-hero, .v-btn-primary, .v-btn, .v-card');
+    if (!btn || btn.classList.contains('v-action-pending')) return;
+    btn.classList.remove('v-btn-released');
+    // Force reflow to restart animation if rapidly tapped
+    void btn.offsetWidth;
+    btn.classList.add('v-btn-released');
+    btn.addEventListener('animationend', () => btn.classList.remove('v-btn-released'), { once: true });
+});
+
+// ─── Floating Reward Popup ───
+// Shows a "+gold", "+XP", "+item" text that floats up and fades.
+function showFloatPopup(container, text, x, y, color) {
+    const el = document.createElement('div');
+    el.className = 'v-float-popup';
+    el.textContent = text;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    if (color) el.style.color = color;
+    (container || document.body).appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+}
+
+// ─── Animated Counter ───
+// Counts from `from` to `to` with ease-out deceleration.
+function animateCounter(el, from, to, duration) {
+    if (!el || from === to) { if (el) el.textContent = to; return; }
+    duration = duration || 600;
+    const start = performance.now();
+    const diff = to - from;
+    const step = (now) => {
+        const t = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
+        el.textContent = Math.round(from + diff * ease);
+        if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
 }
 
 // Font is applied on load by shared/font-apply.js (included in index.html)

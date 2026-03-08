@@ -301,6 +301,39 @@ body {
     0% { box-shadow: 0 0 10px rgba(76,175,80,0.8), inset 0 0 4px rgba(76,175,80,0.4); }
     100% { box-shadow: none; }
 }
+
+/* ─── HP Ghost Bar (shows damage "shadow" that drains slowly) ─── */
+.bar-ghost {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(200, 60, 60, 0.45);
+    border-radius: 4px;
+    transition: width 1.2s ease-in 0.3s;
+    pointer-events: none;
+}
+.hp-mini .bar-ghost {
+    border-radius: 3px;
+}
+
+/* ─── Heal Shine Sweep (GPU-composited via translateX) ─── */
+@keyframes barShineSweep {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(350%); }
+}
+.bar-fill.healing::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    animation: barShineSweep 0.6s ease-out forwards;
+    z-index: 1;
+    pointer-events: none;
+}
 .bar-fill.mp { background: linear-gradient(90deg, #1565c0, #42a5f5); }
 .bar-fill.ki { background: linear-gradient(90deg, #e65100, #ffa726); }
 .bar-fill.fury { background: linear-gradient(90deg, #bf360c, #ff5722); }
@@ -578,7 +611,60 @@ body {
 .dice-emoji.shaking { animation: diceShake 0.12s linear infinite !important; }
 .dice-emoji.slamming { animation: diceSlam 0.3s ease-out !important; }
 .dice-emoji.crit-glow { animation: critGlow 0.6s ease-out !important; }
+/* Shake variants — light (normal hit), heavy (crit) */
 #app.screen-shake { animation: screenShake 0.4s ease-out; }
+@keyframes shakeLight {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-3px); }
+    40% { transform: translateX(2px); }
+    60% { transform: translateX(-1px); }
+    80% { transform: translateX(1px); }
+}
+@keyframes shakeHeavy {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-6px, 2px); }
+    30% { transform: translate(5px, -3px); }
+    50% { transform: translate(-4px, 1px); }
+    70% { transform: translate(3px, -1px); }
+    90% { transform: translate(-1px, 0); }
+}
+#app.shake-light { animation: shakeLight 0.3s ease-out; }
+#app.shake-heavy { animation: shakeHeavy 0.45s ease-out; }
+
+/* ─── Impact Flash (radial burst at hit point) ─── */
+@keyframes impactFlash {
+    0%   { opacity: 0.8; transform: scale(0.3); }
+    100% { opacity: 0; transform: scale(2.5); }
+}
+.impact-flash {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+    animation: impactFlash 0.3s ease-out forwards;
+    pointer-events: none;
+    z-index: 5;
+}
+.impact-flash.crit {
+    width: 70px;
+    height: 70px;
+    background: radial-gradient(circle, rgba(255,200,60,0.9) 0%, rgba(255,120,20,0.3) 50%, transparent 70%);
+    animation-duration: 0.4s;
+}
+
+/* ─── Status Effect Pulse (buff = green, debuff = red) ─── */
+@keyframes debuffPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.3); text-shadow: 0 0 6px rgba(180, 40, 40, 0.6); }
+}
+@keyframes buffPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); text-shadow: 0 0 6px rgba(40, 180, 80, 0.5); }
+}
+.status-debuff { animation: debuffPulse 1.5s ease-in-out infinite; }
+.status-buff   { animation: buffPulse 2s ease-in-out infinite; }
+
 .entity.dmg-flash { animation: dmgFlash 0.4s ease-out; }
 .dice-result {
     font-size: 16px;

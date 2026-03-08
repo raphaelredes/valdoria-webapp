@@ -834,20 +834,32 @@
 }
 
 /* ─── Screen Slide+Fade Transition ─── */
+/* Default (forward) */
 .screen.fade-out {
     opacity: 0;
-    transform: translateX(-12px);
+    transform: translateX(-20px);
     transition: opacity 0.15s ease, transform 0.2s ease;
 }
 .screen.fade-in {
-    opacity: 1;
-    transform: translateX(0);
-    transition: opacity 0.2s ease, transform 0.25s ease;
-    animation: screenSlideIn 0.25s ease-out;
+    animation: slideFromRight 0.3s var(--v-ease-snap, cubic-bezier(0.16, 1, 0.3, 1));
 }
-@keyframes screenSlideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes slideFromRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Back direction (slide from left) */
+.screen.slide-back-out {
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.15s ease, transform 0.2s ease;
+}
+.screen.slide-back-in {
+    animation: slideFromLeft 0.3s var(--v-ease-snap, cubic-bezier(0.16, 1, 0.3, 1));
+}
+@keyframes slideFromLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to   { opacity: 1; transform: translateX(0); }
 }
 
 /* ─── Notification Badge Bounce ─── */
@@ -876,13 +888,14 @@
 }
 .btn-action[data-badge] { position: relative; overflow: visible; }
 
-/* ─── Staggered Button Entrance ─── */
+/* ─── Staggered Button Entrance (spring bounce) ─── */
 @keyframes btnEntrance {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    0%   { opacity: 0; transform: translateY(12px) scale(0.97); }
+    60%  { opacity: 1; transform: translateY(-2px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 .btn-row {
-    animation: btnEntrance 0.25s ease-out both;
+    animation: btnEntrance 0.3s var(--v-ease-snap, cubic-bezier(0.16, 1, 0.3, 1)) both;
 }
 .btn-row:nth-child(1) { animation-delay: 0s; }
 .btn-row:nth-child(2) { animation-delay: 0.04s; }
@@ -1083,6 +1096,36 @@
     50%      { opacity: 1; transform: scale(1.2); }
 }
 
+/* ─── Location Transition Floating Motes ─── */
+@keyframes locMoteDrift {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+    15%  { opacity: 0.6; }
+    85%  { opacity: 0.4; }
+    100% { opacity: 0; transform: translateY(-80px) scale(0.2); }
+}
+.loc-transition-motes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+.loc-transition-motes span {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--v-gold, #c4953a);
+    box-shadow: 0 0 6px rgba(196, 149, 58, 0.6);
+    animation: locMoteDrift 2.5s ease-in-out infinite;
+}
+.loc-transition-motes span:nth-child(1) { left: 15%; bottom: 30%; animation-delay: 0s; animation-duration: 2.2s; }
+.loc-transition-motes span:nth-child(2) { left: 35%; bottom: 20%; animation-delay: 0.3s; animation-duration: 2.8s; }
+.loc-transition-motes span:nth-child(3) { left: 55%; bottom: 35%; animation-delay: 0.6s; animation-duration: 2.4s; }
+.loc-transition-motes span:nth-child(4) { left: 75%; bottom: 25%; animation-delay: 0.9s; animation-duration: 2.6s; }
+.loc-transition-motes span:nth-child(5) { left: 45%; bottom: 40%; animation-delay: 1.2s; animation-duration: 3.0s; }
+.loc-transition-motes span:nth-child(6) { left: 25%; bottom: 15%; animation-delay: 0.4s; animation-duration: 2.3s; }
+
 /* ─── Text Input (bank amounts, chat, tickets) ─── */
 .text-input-wrap {
     display: flex;
@@ -1239,12 +1282,40 @@
     border-radius: 4px;
     overflow: hidden;
     border: 1px solid var(--v-border);
+    position: relative;
 }
 
 .v-bar-fill {
     height: 100%;
     border-radius: 3px;
     transition: width 0.4s ease;
+    position: relative;
+}
+
+/* Ghost bar for damage visualization in Game Hub */
+.v-bar-track .bar-ghost {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    background: rgba(200, 60, 60, 0.45);
+    border-radius: 3px;
+    transition: width 1.2s ease-in 0.3s;
+    pointer-events: none;
+}
+
+/* Shine sweep on heal in Game Hub */
+@keyframes hubShineSweep {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(350%); }
+}
+.v-bar-fill.healing::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 30%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: hubShineSweep 0.6s ease-out forwards;
+    pointer-events: none;
 }
 
 /* HP bar colors (health-based) */

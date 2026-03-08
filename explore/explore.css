@@ -85,11 +85,37 @@ body {
     border-radius: 4px;
     overflow: hidden;
     border: 1px solid #333;
+    position: relative;
 }
 .hp-fill {
     height: 100%;
     border-radius: 4px;
     transition: width 0.5s ease, background 0.4s ease;
+    position: relative;
+}
+/* Ghost bar for damage visualization */
+.hp-bar .bar-ghost {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    background: rgba(200, 60, 60, 0.45);
+    border-radius: 4px;
+    transition: width 1.2s ease-in 0.3s;
+    pointer-events: none;
+}
+/* Heal shine sweep */
+@keyframes exploreShineSweep {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(350%); }
+}
+.hp-fill.healing::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 30%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    animation: exploreShineSweep 0.6s ease-out forwards;
+    pointer-events: none;
 }
 .hp-fill.hp-high { background: linear-gradient(90deg, #2a7a2a, #3a9a3a); }
 .hp-fill.hp-mid  { background: linear-gradient(90deg, #8a6a1a, #aa8a2a); }
