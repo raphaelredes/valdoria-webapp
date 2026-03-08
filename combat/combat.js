@@ -1770,7 +1770,7 @@ function _showTurnBanner(text, type) {
     setTimeout(() => {
         el.classList.remove('visible');
         setTimeout(() => el.remove(), 400);
-    }, 1400);
+    }, 1800);
 }
 
 function _showRoundBanner(roundNum) {

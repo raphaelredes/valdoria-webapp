@@ -1640,7 +1640,7 @@
                 const tc = getToolChoiceCount();
                 if (sel.toolProfs.length !== tc) return `Selecione ${tc} ferramenta(s).`;
             }
-            if (currentScreen === 7) {
+            if (currentScreen === 7 || (currentScreen === 8 && sel._wasRandom)) {
                 if (!sel.gender) return 'Selecione um gênero.';
                 if (!sel.name || sel.name.length > 15) return 'Nome deve ter 1-15 caracteres.';
                 if (sel.surname.length > 15) return 'Sobrenome máximo 15 caracteres.';
@@ -3109,7 +3109,15 @@
 
             // --- Header (always visible) ---
             const alignText = sel.alignment && ALIGNMENTS[sel.alignment] ? ` | ${ALIGNMENTS[sel.alignment].icon} ${ALIGNMENTS[sel.alignment].abbr}` : '';
-            html += `<div class="sheet-header" style="padding:4px 0 8px"><div class="sheet-name" style="font-size:20px">${fullName}</div>`;
+            html += `<div class="sheet-header" style="padding:4px 0 8px">`;
+            if (sel._wasRandom) {
+                html += `<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-bottom:4px">`;
+                html += `<input class="v-input" id="summaryName" value="${sel.name}" maxlength="15" placeholder="Nome" style="flex:1;text-align:center;font-size:16px;padding:6px 8px">`;
+                html += `<input class="v-input" id="summarySurname" value="${sel.surname}" maxlength="15" placeholder="Sobrenome" style="flex:1;text-align:center;font-size:16px;padding:6px 8px">`;
+                html += `</div>`;
+            } else {
+                html += `<div class="sheet-name" style="font-size:20px">${fullName}</div>`;
+            }
             html += `<div class="sheet-subtitle">${race.icon} ${raceName} | ${cls.icon} ${cls.name} | 📖 ${bg.name}${alignText}</div>`;
             html += `<div class="sheet-subtitle">${g ? g.icon + ' ' + g.name : ''} | Nível 1 | 💰 +${bg.gold}g</div></div>`;
 
@@ -3256,6 +3264,14 @@
             }
 
             document.getElementById('summaryContent').innerHTML = html;
+
+            // Bind name editors for random characters
+            if (sel._wasRandom) {
+                const nameEl = document.getElementById('summaryName');
+                const surnameEl = document.getElementById('summarySurname');
+                if (nameEl) nameEl.addEventListener('input', e => { sel.name = e.target.value.trim(); });
+                if (surnameEl) surnameEl.addEventListener('input', e => { sel.surname = e.target.value.trim(); });
+            }
         }
 
         // ═══════════════════════════════════════════════

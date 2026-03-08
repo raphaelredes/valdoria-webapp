@@ -227,7 +227,7 @@ body {
 
 /* ─── PLAYER CARD (always shows bars) ─── */
 .player-bars {
-    padding: 1px 5px 2px;
+    padding: 2px 6px 3px;
 }
 .bar-row {
     display: flex;
@@ -245,7 +245,7 @@ body {
     border: 1px solid #3a3028;
 }
 .entity.player .bar-track {
-    height: 10px;
+    height: 12px;
 }
 .bar-fill {
     height: 100%;
@@ -282,10 +282,10 @@ body {
 .bar-fill.pact { background: linear-gradient(90deg, #4a148c, #7b1fa2); }
 .bar-fill.energy { background: linear-gradient(90deg, #827717, #cddc39); }
 .bar-val {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.3;
     color: var(--v-text-dim);
-    min-width: 32px;
+    min-width: 36px;
     text-align: right;
     white-space: nowrap;
 }
@@ -307,9 +307,9 @@ body {
     padding: 0;
 }
 .mini-badge {
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.3;
-    padding: 1px 4px;
+    padding: 2px 5px;
     border-radius: 10px;
     white-space: nowrap;
 }
@@ -331,8 +331,8 @@ body {
 .stats-row {
     display: flex;
     gap: 8px;
-    font-size: 11px;
-    line-height: 1.35;
+    font-size: 12px;
+    line-height: 1.4;
     color: var(--v-text-dim);
     flex-wrap: wrap;
     margin-top: 3px;
@@ -345,9 +345,9 @@ body {
     margin-top: 3px;
 }
 .status-pill {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.3;
-    padding: 2px 6px;
+    padding: 3px 7px;
     border-radius: 10px;
     background: rgba(123,32,32,0.3);
     color: #f0a0a0;
@@ -422,8 +422,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px;
-    padding: 2px 4px;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 3px 5px;
     border-radius: var(--v-radius-sm);
     background: var(--v-bg-card);
     border: 1px solid var(--v-border);
@@ -441,7 +442,7 @@ body {
     50% { box-shadow: 0 0 14px rgba(196,149,58,0.4); }
 }
 .turn-val { font-size: 11px; font-weight: 700; color: var(--v-text-bright); display: block; }
-.turn-ico { font-size: 14px; line-height: 1; }
+.turn-ico { font-size: 15px; line-height: 1; }
 .turn-arrow { color: var(--v-text-dim); font-size: 9px; flex-shrink: 0; }
 
 /* Turn timeline colors */
@@ -601,9 +602,9 @@ body {
 
 /* ─── ACTION TOAST (inside action-bar) ─── */
 .action-toast {
-    padding: 2px 8px;
-    margin: 0 0 2px;
-    font-size: 11px;
+    padding: 3px 8px;
+    margin: 0 0 3px;
+    font-size: 12px;
     font-weight: 600;
     text-align: center;
     color: var(--v-text-dim);
@@ -1274,16 +1275,16 @@ body {
 
 /* ─── FEATURE 7: DM NARRATION ─── */
 .dice-narration {
-    font-size: 12px;
+    font-size: 13px;
     font-style: italic;
     text-align: center;
-    color: var(--v-text-dim);
-    margin-top: 3px;
-    min-height: 14px;
+    color: var(--v-text);
+    margin-top: 4px;
+    min-height: 16px;
     opacity: 0;
     transition: opacity 0.4s ease;
     letter-spacing: 0.3px;
-    padding: 0 8px;
+    padding: 0 10px;
 }
 .dice-narration.visible { opacity: 1; }
 .dice-narration.crit    { color: #ff9800; font-style: normal; font-weight: 600; }
@@ -1447,10 +1448,10 @@ body {
 }
 .anticipation-overlay.visible { opacity: 1; }
 .anticipation-text {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     letter-spacing: 1.5px;
-    padding: 8px 24px;
+    padding: 10px 28px;
     border-radius: 6px;
     color: var(--v-gold-light, #e8c95a);
     background: rgba(42,36,32,0.9);
