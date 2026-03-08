@@ -172,6 +172,8 @@ async function init() {
     const healthy = await checkHealth();
     _clog('INIT health result: ' + (healthy ? 'OK' : 'FAIL'));
     console.log('[GAME] Health check result:', healthy);
+    // Flush any queued error reports from previous failed sessions
+    if (healthy && typeof _flushReportQueue === 'function') _flushReportQueue();
     if (!healthy) {
         showError('Servidor indisponível. Tente novamente em alguns segundos.');
         return;
@@ -674,9 +676,15 @@ window.addEventListener('online', () => { setTimeout(_flushReportQueue, 3000); }
 
 // ─── Global Error Handlers ───
 window.addEventListener('error', (e) => {
+    _jsErrorCount++;
+    const loc = (e.filename || '').split('/').pop() + ':' + e.lineno;
+    _clog('JS ERROR: ' + e.message + ' @ ' + loc);
     console.error('[GAME] UNCAUGHT ERROR:', e.message, 'at', e.filename + ':' + e.lineno + ':' + e.colno);
 });
 window.addEventListener('unhandledrejection', (e) => {
+    _jsErrorCount++;
+    const reason = e.reason ? (e.reason.message || String(e.reason)).substring(0, 100) : 'unknown';
+    _clog('PROMISE REJECT: ' + reason);
     console.error('[GAME] UNHANDLED PROMISE REJECTION:', e.reason);
 });
 
