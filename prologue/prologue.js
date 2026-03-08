@@ -171,7 +171,7 @@ function renderAftermath() {
     return `
         <div class="screen-title">Thorne, o Ferreiro</div>
         <div class="prologue-text">${text}</div>
-        <button class="hero-btn" onclick="haptic('heavy'); onEnterCity()">🏘️ Entrar em Eldoria</button>
+        <button class="hero-btn" onclick="haptic('heavy'); onAftermathDone()">🏰 Seguir para os Portões</button>
     `;
 }
 
@@ -342,7 +342,7 @@ function onPrefaceDone() {
 
 function onIntroDone() {
     closeLoreOverlay();
-    nextScreen(renderGate());
+    nextScreen(renderRoad());
 }
 
 async function doReroll() {
@@ -405,8 +405,8 @@ function onGateChoice(key) {
     }
 
     showGateResult(outcomeText, effectText, () => {
-        // Bridge text + road encounter
-        nextScreen(renderRoad());
+        // After gate: enter the city
+        onEnterCity();
     });
 }
 
@@ -446,10 +446,7 @@ async function doFight() {
         document.getElementById('loading').style.display = 'flex';
         document.querySelector('#loading p').textContent = 'Preparando combate...';
 
-        const result = await apiCall('/api/prologue/fight', {
-            gate_choice: choices.gate_choice || '',
-            interaction_type: choices.interaction_type || 'gate',
-        });
+        const result = await apiCall('/api/prologue/fight', {});
 
         if (result.combat_url || result.arena_url) {
             // Navigate to arena WebApp
@@ -460,6 +457,10 @@ async function doFight() {
     } catch (e) {
         showError('Erro ao iniciar combate.', e);
     }
+}
+
+function onAftermathDone() {
+    nextScreen(renderGate());
 }
 
 async function onEnterCity() {
