@@ -105,7 +105,18 @@ async function init() {
 
     // Visibility change — refresh state when returning to app
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && S.currentScreen) {
+        if (document.visibilityState !== 'visible') return;
+        // If error overlay is showing, trigger health check + retry
+        const errOverlay = document.getElementById('v-err-overlay');
+        if (errOverlay && errOverlay.style.display !== 'none') {
+            _clog('VISIBILITY → visible with error overlay, retrying...');
+            const retryBtn = document.getElementById('v-err-retry');
+            if (retryBtn && retryBtn.onclick) {
+                setTimeout(() => retryBtn.onclick(), 500);
+            }
+            return;
+        }
+        if (S.currentScreen) {
             // Soft refresh — don't show loading, just update if stale
             fetchState(true);
         }

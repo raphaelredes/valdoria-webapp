@@ -308,6 +308,9 @@ var ValdoriaErrors = (function () {
         }
     }
 
+    var _bgHealthTimer = null;
+    var _BG_HEALTH_INTERVAL = 15000; // 15s background poll after exhaustion
+
     function _autoReconnect() {
         _clog('AUTO-RECONNECT: all ' + _RETRY_MAX + ' retries exhausted');
         // Auto-send error report
@@ -319,14 +322,52 @@ var ValdoriaErrors = (function () {
 
         var msgEl = document.getElementById('v-err-msg');
         var retryBtn = document.getElementById('v-err-retry');
-        if (msgEl) msgEl.textContent = 'Retornando ao menu...';
-        if (retryBtn) retryBtn.style.display = 'none';
-        var closeBtn = document.getElementById('v-err-close');
-        if (closeBtn) closeBtn.style.display = 'none';
+        var hintEl = document.getElementById('v-err-hint');
+        if (msgEl) msgEl.textContent = 'Servidor indisponível. Aguardando retorno...';
+        if (hintEl) hintEl.textContent = 'Verificando automaticamente a cada 15 segundos.';
 
-        setTimeout(function () {
-            _sendCloseAndReturn();
-        }, 2500);
+        // Show manual reconnect button instead of auto-closing
+        if (retryBtn) {
+            retryBtn.style.display = '';
+            retryBtn.textContent = 'Reconectar';
+            retryBtn.disabled = false;
+            retryBtn.onclick = function () {
+                _retryAttempt = 0;
+                _stopBgHealth();
+                var pb = document.getElementById('v-err-retry-progress');
+                if (pb) { pb.style.transition = 'none'; pb.style.width = '0%'; }
+                _doRetry();
+            };
+        }
+
+        // Start background health poll — auto-recover when server returns
+        _startBgHealth();
+    }
+
+    function _startBgHealth() {
+        _stopBgHealth();
+        _bgHealthTimer = setInterval(function () {
+            if (!_cfg.apiBase) return;
+            var url = _cfg.apiBase + '/api/game/health';
+            fetch(url, { method: 'GET' }).then(function (resp) {
+                if (!resp.ok) return;
+                return resp.json();
+            }).then(function (data) {
+                if (data && data.status === 'ok' && data.engine) {
+                    _clog('BG-HEALTH: server restored!');
+                    _stopBgHealth();
+                    _retryAttempt = 0;
+                    var overlay = document.getElementById('v-err-overlay');
+                    if (overlay) overlay.style.display = 'none';
+                    if (_cfg.onRetry) { _cfg.onRetry(); }
+                    else { window.location.reload(); }
+                }
+            }).catch(function () { /* still down */ });
+        }, _BG_HEALTH_INTERVAL);
+    }
+
+    function _stopBgHealth() {
+        if (_bgHealthTimer) { clearInterval(_bgHealthTimer); _bgHealthTimer = null; }
     }
 
     // ─── Show Toast (non-fatal, lightweight) ───

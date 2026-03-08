@@ -1315,6 +1315,35 @@
     font-size: 13px;
     color: var(--v-gold-light);
     white-space: nowrap;
+    transition: transform 0.3s ease;
+    position: relative;
+}
+.v-resource-badge.resource-pop {
+    animation: resourcePop 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+@keyframes resourcePop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+/* Floating resource delta (+250 gold, -50 gold) */
+.resource-floater {
+    position: fixed;
+    font-family: var(--v-font);
+    font-size: 14px;
+    font-weight: 700;
+    pointer-events: none;
+    z-index: 200;
+    transform: translateX(-50%);
+    animation: resourceFloat 1.2s ease-out forwards;
+}
+.resource-floater.gain { color: var(--v-success, #4caf50); }
+.resource-floater.loss { color: var(--v-danger, #e74c3c); }
+@keyframes resourceFloat {
+    0%   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    70%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-40px); }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2090,6 +2119,14 @@
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm, 6px);
     min-height: 40px;
+    animation: cardSlideIn 0.35s ease-out both;
+}
+.ally-card:nth-child(2) { animation-delay: 0.06s; }
+.ally-card:nth-child(3) { animation-delay: 0.12s; }
+.ally-card:nth-child(4) { animation-delay: 0.18s; }
+@keyframes cardSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 .ally-card.ally-dead {
     opacity: 0.55;
@@ -2219,7 +2256,12 @@
     cursor: pointer;
     transition: all 0.15s;
     -webkit-tap-highlight-color: transparent;
+    animation: cardSlideIn 0.35s ease-out both;
 }
+.inn-select-card:nth-child(2) { animation-delay: 0.06s; }
+.inn-select-card:nth-child(3) { animation-delay: 0.12s; }
+.inn-select-card:nth-child(4) { animation-delay: 0.18s; }
+.inn-select-card:nth-child(5) { animation-delay: 0.24s; }
 .inn-select-card:active { transform: scale(0.97); }
 .inn-select-card.inn-selected {
     border-color: rgba(196, 149, 58, 0.4);

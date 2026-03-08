@@ -881,16 +881,26 @@ function startPolling() {
                 const turnChanged = oldTurn && newTurn && (oldTurn.n !== newTurn.n || oldTurn.t !== newTurn.t);
 
                 if (turnChanged) {
-                    // Enemy/ally banner shows action description from last roll
-                    let actionVerb = '';
+                    // Enemy/ally banner shows skill name from last roll
+                    let actionDesc = '';
                     if ((newTurn.t === 'e' || newTurn.t === 'a') && state.lr) {
-                        actionVerb = state.lr.t === 'skill' ? ' conjura!' : ' ataca!';
+                        const sn = state.lr.sn;
+                        if (sn) {
+                            actionDesc = ` usa ${sn}!`;
+                        } else {
+                            actionDesc = state.lr.t === 'skill' || state.lr.t === 'save' ? ' conjura!' : ' ataca!';
+                        }
                     }
                     const bannerText = newTurn.t === 'p' ? '⚔️ Seu Turno!' :
-                        newTurn.t === 'e' ? `🎯 ${newTurn.n}${actionVerb}` :
-                        `🛡️ ${newTurn.n}${actionVerb}`;
+                        newTurn.t === 'e' ? `🎯 ${newTurn.n}${actionDesc}` :
+                        `🛡️ ${newTurn.n}${actionDesc}`;
                     const bannerType = newTurn.t === 'p' ? 'player' : newTurn.t === 'e' ? 'enemy' : 'ally';
                     _showTurnBanner(bannerText, bannerType);
+                }
+
+                // Round transition announcement
+                if (newRn > oldRn && newRn > 1) {
+                    setTimeout(() => _showRoundBanner(newRn), turnChanged ? 1600 : 200);
                 }
 
                 // P0-B: Cinematic enemy dice — animate enemy rolls before state update
@@ -1638,7 +1648,16 @@ function _playCinematicResult(result, actionType) {
         'util': `✨ ${attackerName} prepara!`, 'item_throw': `🎯 ${attackerName} arremessa!`,
         'death_save': `💀 ${attackerName} luta pela vida...`,
     };
-    const anticipationText = _antTexts[result.lr.t] || `⚔️ ${attackerName} avança!`;
+    let anticipationText = _antTexts[result.lr.t] || `⚔️ ${attackerName} avança!`;
+    // Append skill/item name for clarity
+    const _sn = result.lr.sn;
+    if (_sn) {
+        const rt = result.lr.t;
+        if (rt === 'item_throw') anticipationText = `🎯 ${attackerName} arremessa ${_sn}!`;
+        else if (rt === 'heal') anticipationText = `✨ ${attackerName} usa ${_sn}!`;
+        else if (rt === 'util') anticipationText = `✨ ${attackerName} invoca ${_sn}!`;
+        else if (['skill', 'save', 'auto_hit', 'aoe'].includes(rt)) anticipationText = `✨ ${attackerName} lança ${_sn}!`;
+    }
     _showAnticipation(anticipationText);
 
     // Phase 1: Animate dice on CURRENT DOM after anticipation (350ms delay)
@@ -1715,6 +1734,20 @@ function _showTurnBanner(text, type) {
         el.classList.remove('visible');
         setTimeout(() => el.remove(), 400);
     }, 1400);
+}
+
+function _showRoundBanner(roundNum) {
+    document.querySelectorAll('.turn-banner').forEach(b => b.remove());
+    const el = document.createElement('div');
+    el.className = 'turn-banner round';
+    el.innerHTML = `<span class="turn-banner-text">── Rodada ${roundNum} ──</span>`;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => { requestAnimationFrame(() => el.classList.add('visible')); });
+    hapticSelect();
+    setTimeout(() => {
+        el.classList.remove('visible');
+        setTimeout(() => el.remove(), 400);
+    }, 1200);
 }
 
 // ─── COMBO STREAK COUNTER (P2-G) ───
@@ -2928,23 +2961,47 @@ function _checkStatusChanges(state) {
     for (const ent of entities) {
         const prev = _prevStatusState.get(ent.key) || [];
         const prevSet = new Set(prev);
+        const curSet = new Set(ent.se);
 
-        // New statuses added
+        // New statuses added — fire buff or debuff VFX
         for (const s of ent.se) {
             if (!prevSet.has(s)) {
                 const el = document.querySelector(ent.sel);
                 if (el) {
-                    if (STATUS_BUFFS.has(s)) {
-                        vfx.buff(el);
-                    } else {
-                        vfx.debuff(el);
-                    }
+                    if (STATUS_BUFFS.has(s)) vfx.buff(el);
+                    else vfx.debuff(el);
                 }
                 break; // One VFX per entity per tick to avoid spam
             }
         }
+
+        // Statuses removed — fire cleanse VFX for debuffs cleared from player/allies
+        if (ent.key === 'player' || ent.key.startsWith('a')) {
+            let cleansed = false;
+            for (const s of prev) {
+                if (!curSet.has(s) && !STATUS_BUFFS.has(s)) { cleansed = true; break; }
+            }
+            if (cleansed) {
+                const el = document.querySelector(ent.sel);
+                if (el) vfx.heal(el); // Green upward sparkles = cleanse
+            }
+        }
+
         _prevStatusState.set(ent.key, [...ent.se]);
     }
+
+    // Concentration break detection
+    const prevConc = _prevStatusState.get('_conc') || '';
+    const curConc = state.p?.conc || '';
+    if (prevConc && !curConc) {
+        // Concentration was broken!
+        const pEl = document.querySelector('.entity.player');
+        if (pEl) vfx.debuff(pEl);
+        vfx.flash('rgba(160,60,200,0.3)', 400);
+        showNarration('💔 Concentração quebrada!', 'miss');
+        haptic('heavy');
+    }
+    _prevStatusState.set('_conc', curConc);
 }
 
 function _showViewportFlash() {

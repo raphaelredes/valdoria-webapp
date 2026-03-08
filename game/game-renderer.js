@@ -450,6 +450,9 @@ function _showDiceAnimation(screen) {
     const overlay = document.getElementById('dice-overlay');
     const labelEl = document.getElementById('dice-skill-label');
     const formulaEl = document.getElementById('dice-formula');
+    const opposedBlock = document.getElementById('dice-opposed-block');
+    const playerEl = document.getElementById('dice-formula-player');
+    const opponentEl = document.getElementById('dice-formula-opponent');
     const resultEl = document.getElementById('dice-result');
     const skipBtn = document.getElementById('dice-skip-btn');
 
@@ -463,12 +466,16 @@ function _showDiceAnimation(screen) {
     const loadingEl = document.getElementById('loading');
     if (loadingEl) loadingEl.style.display = 'none';
 
-    // Setup overlay
+    // Reset overlay state
     labelEl.textContent = dr.skill + (dr.stat ? ' (' + dr.stat + ')' : '');
     formulaEl.textContent = '';
+    formulaEl.style.display = 'none';
+    if (opposedBlock) opposedBlock.style.display = 'none';
     resultEl.textContent = '';
     resultEl.className = 'dice-result';
-    skipBtn.style.display = 'none';
+    skipBtn.classList.remove('visible');
+    skipBtn.onclick = null;
+    overlay.className = 'dice-overlay entering';
     overlay.style.display = '';
 
     let _done = false;
@@ -476,21 +483,34 @@ function _showDiceAnimation(screen) {
     const finish = () => {
         if (_done) return;
         _done = true;
+        skipBtn.classList.remove('visible');
         skipBtn.onclick = null;
-        skipBtn.style.display = 'none';
-        overlay.style.display = 'none';
-        screen._diceShown = true;
-        renderScreen(screen);
+        // Fade-out animation
+        overlay.className = 'dice-overlay exiting';
+        const onEnd = () => {
+            overlay.removeEventListener('animationend', onEnd);
+            overlay.style.display = 'none';
+            overlay.className = 'dice-overlay';
+            screen._diceShown = true;
+            renderScreen(screen);
+        };
+        overlay.addEventListener('animationend', onEnd, { once: true });
     };
 
     const showResult = () => {
         const sign = dr.mod >= 0 ? '+' : '';
-        if (dr.type === 'opposed') {
-            // Opposed roll: d20(roll) +mod = total vs Opponent: total
-            formulaEl.textContent = 'd20(' + dr.roll + ') ' + sign + dr.mod + ' = ' + dr.total + ' vs ' + (dr.opponent_name || 'Oponente') + ': ' + dr.opponent_total;
-            resultEl.textContent = dr.success ? 'Vitória!' : 'Derrota!';
+        const isOpposed = dr.type === 'opposed';
+
+        if (isOpposed && opposedBlock) {
+            // Two-line layout for opposed rolls
+            formulaEl.style.display = 'none';
+            opposedBlock.style.display = '';
+            playerEl.innerHTML = '\ud83c\udfb2 <b>' + dr.total + '</b> \u2039d20(' + dr.roll + ') ' + sign + dr.mod + '\u203a';
+            opponentEl.innerHTML = '\ud83d\udc7a ' + (dr.opponent_name || 'Oponente') + ': <b>' + dr.opponent_total + '</b>';
+            resultEl.textContent = dr.success ? 'Vit\u00f3ria!' : 'Derrota!';
         } else {
-            // Skill check: d20(roll) +mod = total vs DC dc
+            // Single-line for skill checks
+            formulaEl.style.display = '';
             formulaEl.textContent = 'd20(' + dr.roll + ') ' + sign + dr.mod + ' = ' + dr.total + ' vs DC ' + dr.dc;
             resultEl.textContent = dr.success ? 'Sucesso!' : 'Falha!';
         }
@@ -503,10 +523,10 @@ function _showDiceAnimation(screen) {
             }
         } catch (e) { /* */ }
 
-        // Show skip after 500ms, auto-advance after 2500ms
+        // Show skip pill after 500ms, auto-advance after 2500ms
         setTimeout(() => {
             if (!_done) {
-                skipBtn.style.display = '';
+                skipBtn.classList.add('visible');
                 skipBtn.onclick = finish;
             }
         }, 500);
@@ -755,4 +775,56 @@ function renderMemberDetail(container, m) {
 
     wrap.innerHTML = bars + statsHtml;
     container.appendChild(wrap);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RESOURCE DELTA ANIMATIONS (floating +Gold, +XP badges)
+// ═══════════════════════════════════════════════════════════════
+
+var _prevResources = {};
+
+function _animateResourceDeltas(contentEl) {
+    var badges = contentEl.querySelectorAll('.v-resource-badge');
+    if (!badges.length) return;
+
+    var cur = {};
+    badges.forEach(function(b) {
+        var text = b.textContent.trim();
+        // Match patterns like "🪙 1250" or "✨ 450 XP" or "💎 3"
+        var m = text.match(/^(.+?)\s+([\d.,]+)/);
+        if (m) {
+            var key = m[1].trim();
+            var val = parseInt(m[2].replace(/[.,]/g, ''));
+            if (!isNaN(val)) cur[key] = { val: val, el: b };
+        }
+    });
+
+    // Compare with previous and animate deltas
+    for (var key in cur) {
+        if (_prevResources[key] !== undefined && cur[key].val !== _prevResources[key]) {
+            var delta = cur[key].val - _prevResources[key];
+            if (delta !== 0) {
+                _showResourceFloater(cur[key].el, delta, key);
+            }
+        }
+    }
+
+    // Cache current values
+    _prevResources = {};
+    for (var k in cur) { _prevResources[k] = cur[k].val; }
+}
+
+function _showResourceFloater(targetEl, delta, icon) {
+    var rect = targetEl.getBoundingClientRect();
+    var el = document.createElement('div');
+    el.className = 'resource-floater' + (delta > 0 ? ' gain' : ' loss');
+    el.textContent = (delta > 0 ? '+' : '') + delta;
+    el.style.left = (rect.left + rect.width / 2) + 'px';
+    el.style.top = rect.top + 'px';
+    document.body.appendChild(el);
+    // Pulse the badge itself
+    targetEl.classList.remove('resource-pop');
+    void targetEl.offsetWidth;
+    targetEl.classList.add('resource-pop');
+    setTimeout(function() { el.remove(); }, 1200);
 }
