@@ -206,9 +206,12 @@ var ValdoriaErrors = (function () {
             || msg.indexOf('não respondeu') >= 0 || msg.indexOf('demorou') >= 0;
         _populateDebugLog(err, isConnErr);
 
-        // Hide any loading overlay
-        var loadEl = document.getElementById('loading');
-        if (loadEl) loadEl.style.display = 'none';
+        // Hide any loading overlay (different IDs across WebApps)
+        var loadIds = ['loading', 'loadingOverlay'];
+        for (var li = 0; li < loadIds.length; li++) {
+            var loadEl = document.getElementById(loadIds[li]);
+            if (loadEl) { loadEl.style.display = 'none'; loadEl.classList.remove('active'); }
+        }
 
         // Clear previous auto-retry
         if (_autoRetryTimer) { clearInterval(_autoRetryTimer); _autoRetryTimer = null; }
@@ -459,13 +462,18 @@ var ValdoriaErrors = (function () {
             return Promise.resolve({ ok: true, sent: false, queued: true });
         }
 
+        var rh = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + _cfg.token,
+            'ngrok-skip-browser-warning': '1',
+        };
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+            rh['X-Telegram-Init-Data'] = window.Telegram.WebApp.initData;
+        }
+
         return fetch(_cfg.apiBase + '/api/game/report-error', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + _cfg.token,
-                'ngrok-skip-browser-warning': '1',
-            },
+            headers: rh,
             body: JSON.stringify(payload),
         }).then(function (resp) {
             return resp.json().then(function (data) {
@@ -530,13 +538,17 @@ var ValdoriaErrors = (function () {
                 var p = queue[i];
                 if (p.queued_at && (now - new Date(p.queued_at).getTime()) > MAX_AGE) continue;
                 p.was_queued = true;
+                var fh = {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + _cfg.token,
+                    'ngrok-skip-browser-warning': '1',
+                };
+                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+                    fh['X-Telegram-Init-Data'] = window.Telegram.WebApp.initData;
+                }
                 fetch(_cfg.apiBase + '/api/game/report-error', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + _cfg.token,
-                        'ngrok-skip-browser-warning': '1',
-                    },
+                    headers: fh,
                     body: JSON.stringify(p),
                 }).catch(function () { /* fire and forget */ });
             }

@@ -556,16 +556,6 @@
             95%       { transform: scaleX(0.88) scaleY(1.1); opacity: 0.18; }
         }
 
-        /* --- Lantern light cone (downward glow from staff) --- */
-        .wk-light-cone {
-            animation: wkLightCone 2.4s ease-in-out infinite;
-        }
-        @keyframes wkLightCone {
-            0%, 100% { opacity: 0.03; }
-            30%      { opacity: 0.06; }
-            50%      { opacity: 0.08; }
-            70%      { opacity: 0.04; }
-        }
 
         /* --- Dust kick particles (foot impact) --- */
         .wk-dust {
@@ -1657,7 +1647,6 @@
                                         <circle class="wk-lantern" cx="39" cy="26" r="3.5" fill="#c4953a" opacity="0.06"/>
                                         <circle cx="39" cy="27" r="1" fill="#c4953a" opacity="0.25"/>
                                         <!-- Light cone (downward triangular glow) -->
-                                        <path class="wk-light-cone" d="M37 30 L28 105 L48 105 Z" fill="#c4953a" opacity="0.03"/>
                                     </g>
                                 </g>
                             </g>

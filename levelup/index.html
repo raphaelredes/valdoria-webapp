@@ -1158,9 +1158,14 @@
 
         function showFatalError(msg, err = null) {
             console.error('[LEVELUP][FATAL]', msg, err || '');
-            const el = document.getElementById('fatalError');
-            document.getElementById('fatalMsg').textContent = msg;
-            el.classList.add('active');
+            // Use shared overlay if available, fallback to local
+            if (window.ValdoriaErrors) {
+                ValdoriaErrors.showError(msg, err);
+            } else {
+                const el = document.getElementById('fatalError');
+                document.getElementById('fatalMsg').textContent = msg;
+                el.classList.add('active');
+            }
         }
 
         function calcDmgRange(effect) {
