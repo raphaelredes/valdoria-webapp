@@ -727,6 +727,13 @@ body::after {
     background: linear-gradient(180deg, rgba(196,149,58,0.25), rgba(196,149,58,0.12));
 }
 
+/* ─── ACTION GUARD (anti-double-click visual feedback) ─── */
+.v-action-pending {
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.15s;
+}
+
 /* ─── ACCORDION (collapsible sections) ─── */
 /* Reusable pattern for grouped options that can be expanded/collapsed.
    Used in: character_creator (personality), levelup (future feat groups).

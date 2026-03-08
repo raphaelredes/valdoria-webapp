@@ -202,6 +202,8 @@ function showChoices(poi) {
 }
 
 function handleChoice(poi, choice, idx) {
+    // Guard: prevent double-processing the same POI choice
+    if (S.poisResolved.has(poi.id)) return;
     document.getElementById('dm-overlay').classList.remove('active');
     S.poisResolved.add(poi.id);
 

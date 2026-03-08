@@ -1942,8 +1942,11 @@ async function _performExit() {
 }
 
 let _sendRetries = 0;
+let _opsSending = false;
 function sendOps() {
     if (!pendingOps.length) return;
+    if (_opsSending) return;
+    _opsSending = true;
 
     closeModal();
     const overlay = document.getElementById('loadingOverlay');

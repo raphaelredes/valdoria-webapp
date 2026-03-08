@@ -11,6 +11,7 @@ const S = {
     currentScreen: null,
     transitioning: false,
     lastActionTime: 0,
+    screenVersion: 0,  // Server screen version for anti-double-action guard
 };
 
 const DEBOUNCE_MS = 200;
@@ -371,6 +372,7 @@ async function startGame() {
     const data = await apiCall('/api/game/start', startBody);
     hideLoading();
     if (data && !data.error) {
+        if (data.sv !== undefined) S.screenVersion = data.sv;
         // Handle transition responses (prologue, level-up, explore, combat)
         // Only redirect if there's no screen text (pure transition signal).
         if (data.transition && !data.text) {
@@ -399,6 +401,7 @@ async function fetchState(silent) {
     if (!silent) hideLoading();
 
     if (data && !data.error) {
+        if (data.sv !== undefined) S.screenVersion = data.sv;
         // Check for transition (player is in combat/explore)
         // Only auto-redirect if the response has ONLY a transition (no text/buttons).
         // If text is present, the transition is just a WebApp button on a normal screen
@@ -462,12 +465,22 @@ async function doAction(callbackData) {
     if (locCtx) showLocationTransition(locCtx);
     const t0 = Date.now();
 
-    const data = await apiCall('/api/game/action', { cb: callbackData });
+    const data = await apiCall('/api/game/action', { cb: callbackData, sv: S.screenVersion });
     if (!data) { hideLocationTransition(); return; }
+
+    // Store screen version from server response
+    if (data.sv !== undefined) S.screenVersion = data.sv;
 
     if (data.error === 'no_response') {
         hideLocationTransition();
         if (typeof showToast === 'function') showToast('Ação não processada. Tente novamente.', 3000);
+        return;
+    }
+
+    // Server rejected duplicate/stale action — silently ignore
+    if (data.error === 'action_rejected') {
+        hideLocationTransition();
+        console.log('[GAME] Action rejected by server:', data.reason);
         return;
     }
 

@@ -1712,7 +1712,10 @@
         // ═══════════════════════════════════════════════
         // SUBMIT
         // ═══════════════════════════════════════════════
+        let _submitted = false;
         function submit() {
+            if (_submitted) return;
+            _submitted = true;
             haptic('medium');
             const asiChoices = [];
             for (const [attr, count] of Object.entries(sel.asi)) {
