@@ -74,18 +74,15 @@ function renderLoop(timestamp) {
     const particlesActive = typeof updateParticles === 'function' ? updateParticles(dt) : false;
 
     const flashActive = _hexFlashes.length > 0;
-    const hasAnimations = movingActive || effectsActive || fogActive || particlesActive || flashActive;
+    const tapActive = _tapFeedbacks.length > 0;
+    const hasAnimations = movingActive || effectsActive || fogActive || particlesActive || flashActive || tapActive;
 
-    if (_needsRender || hasAnimations) {
-        renderFrame(timestamp);
-        _needsRender = false;
-    }
+    // Always render — pulsing highlights and visited trail need continuous animation
+    renderFrame(timestamp);
+    _needsRender = false;
 
-    if (hasAnimations) {
-        _rafId = requestAnimationFrame(renderLoop);
-    } else {
-        _rafId = null;
-    }
+    // Always keep loop running for pulsing adjacent highlights
+    _rafId = requestAnimationFrame(renderLoop);
 }
 
 function renderFrame(timestamp) {
@@ -103,8 +100,8 @@ function renderFrame(timestamp) {
     // Draw cached static layer
     _ctx.drawImage(_staticCanvas, 0, 0, _canvasLogicalW, _canvasLogicalH);
 
-    // 3. Adjacent hex highlights (dynamic — depends on player position)
-    drawAdjacentHighlights(_ctx);
+    // 3. Adjacent hex highlights (dynamic — depends on player position, pulsing)
+    drawAdjacentHighlights(_ctx, timestamp);
 
     // 4. Dynamic tile decorations (water waves, lava glow)
     drawAnimatedTiles(_ctx, timestamp);
@@ -115,13 +112,19 @@ function renderFrame(timestamp) {
     // 6. Exit portal glow
     drawExitPortalGlow(_ctx, timestamp);
 
+    // 6.5. Visited hex trail markers
+    drawVisitedTrail(_ctx, timestamp);
+
     // 7. Effects (dust, ripples)
     drawEffects(_ctx);
 
     // 7.5 POI discovery flash
     drawHexFlashes(_ctx, timestamp);
 
-    // 8. Player token
+    // 7.6 Tap feedback ripple
+    drawTapFeedback(_ctx, timestamp);
+
+    // 8. Player token (with direction indicator)
     drawPlayerToken(_ctx, timestamp);
 
     // 9. Ambient particles
@@ -131,6 +134,11 @@ function renderFrame(timestamp) {
 
     // 10. Fog of war (drawn last, on top of everything)
     drawFogOverlay(_ctx, _canvasLogicalW, _canvasLogicalH, S.fogState);
+
+    // 11. Smooth camera follow during movement
+    if (isMoving()) {
+        _smoothCameraFollow();
+    }
 }
 
 // Render all static tiles to the cache canvas
@@ -252,7 +260,9 @@ function drawAnimatedTiles(ctx, timestamp) {
 }
 
 // Draw highlight on valid adjacent hexes (gold=normal, amber=difficult, red=hazard)
-function drawAdjacentHighlights(ctx) {
+// Pulsing animation for better touch-target visibility
+function drawAdjacentHighlights(ctx, timestamp) {
+    const pulse = 0.5 + Math.sin((timestamp || 0) * 0.003) * 0.3; // 0.2-0.8 oscillation
     const neighbors = getNeighbors(S.playerCol, S.playerRow);
     for (const [c, r] of neighbors) {
         const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
@@ -287,15 +297,29 @@ function drawAdjacentHighlights(ctx) {
         for (let i = 1; i < topVerts.length; i++) ctx.lineTo(topVerts[i].x, topVerts[i].y);
         ctx.closePath();
 
+        // Inner glow fill (pulsing)
+        const fillAlpha = 0.1 + pulse * 0.12;
         const grad = ctx.createRadialGradient(center.x, center.y - h, 0, center.x, center.y - h, HEX_W * 0.5);
-        grad.addColorStop(0, `rgba(${glowR},${glowG},${glowB},0.18)`);
+        grad.addColorStop(0, `rgba(${glowR},${glowG},${glowB},${fillAlpha})`);
+        grad.addColorStop(0.7, `rgba(${glowR},${glowG},${glowB},${fillAlpha * 0.4})`);
         grad.addColorStop(1, `rgba(${glowR},${glowG},${glowB},0)`);
         ctx.fillStyle = grad;
         ctx.fill();
 
-        ctx.strokeStyle = `rgba(${glowR},${glowG},${glowB},0.35)`;
-        ctx.lineWidth = 1.2;
+        // Border glow (pulsing, thicker)
+        const borderAlpha = 0.25 + pulse * 0.25;
+        ctx.strokeStyle = `rgba(${glowR},${glowG},${glowB},${borderAlpha})`;
+        ctx.lineWidth = 1.5 + pulse * 0.5;
         ctx.stroke();
+
+        // Corner dots for touch-target clarity
+        const dotAlpha = 0.3 + pulse * 0.3;
+        ctx.fillStyle = `rgba(${glowR},${glowG},${glowB},${dotAlpha})`;
+        const topVert = topVerts[0]; // top vertex
+        ctx.beginPath();
+        ctx.arc(topVert.x, topVert.y, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.restore();
     }
 }
@@ -373,6 +397,9 @@ function handleCanvasClick(e) {
     if (!isAdjacent(S.playerCol, S.playerRow, hex.col, hex.row)) return;
     const tile = S.grid[hex.row] && S.grid[hex.row][hex.col] ? S.grid[hex.row][hex.col] : '.';
     if (IMPASSABLE.has(tile)) return;
+
+    // Visual tap feedback
+    spawnTapFeedback(hex.col, hex.row);
 
     // Trigger movement
     movePlayerCanvas(hex.col, hex.row);
@@ -507,6 +534,85 @@ function scrollCanvasToPlayer(smooth) {
         top: Math.max(0, targetY),
         behavior: smooth ? 'smooth' : 'instant',
     });
+}
+
+// Draw subtle markers on previously visited hexes (golden dot trail)
+function drawVisitedTrail(ctx, timestamp) {
+    if (!S.visited || S.visited.size === 0) return;
+    const pulse = 0.4 + Math.sin((timestamp || 0) * 0.002) * 0.15;
+
+    for (const key of S.visited) {
+        const [c, r] = key.split(',').map(Number);
+        // Skip current player hex and exit hex
+        if (c === S.playerCol && r === S.playerRow) continue;
+        if (S.fogState[key] !== 'visible') continue;
+
+        const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
+        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const center = hexToScreen(c, r);
+        const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+
+        // Small golden dot at hex center
+        ctx.fillStyle = `rgba(196,149,58,${pulse * 0.35})`;
+        ctx.beginPath();
+        ctx.arc(center.x, center.y - h, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+// Tap feedback effect — ripple on hex touch
+let _tapFeedbacks = [];
+function spawnTapFeedback(col, row) {
+    const center = hexToScreen(col, row);
+    const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+    _tapFeedbacks.push({
+        x: center.x,
+        y: center.y - h,
+        radius: 3,
+        maxRadius: HEX_W * 0.4,
+        alpha: 0.6,
+        start: performance.now(),
+    });
+}
+
+function drawTapFeedback(ctx, timestamp) {
+    for (let i = _tapFeedbacks.length - 1; i >= 0; i--) {
+        const f = _tapFeedbacks[i];
+        const elapsed = timestamp - f.start;
+        const duration = 400;
+        if (elapsed > duration) { _tapFeedbacks.splice(i, 1); continue; }
+        const t = elapsed / duration;
+        const radius = f.radius + (f.maxRadius - f.radius) * t;
+        const alpha = f.alpha * (1 - t);
+
+        ctx.strokeStyle = `rgba(196,149,58,${alpha.toFixed(2)})`;
+        ctx.lineWidth = 2 * (1 - t * 0.5);
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+}
+
+// Smooth camera follow during movement animation (lerp toward player)
+function _smoothCameraFollow() {
+    const viewport = document.getElementById('map-viewport');
+    if (!viewport) return;
+
+    const targetX = playerScreenX - viewport.clientWidth / 2;
+    const targetY = playerScreenY - viewport.clientHeight / 2;
+
+    const curX = viewport.scrollLeft;
+    const curY = viewport.scrollTop;
+
+    // Lerp factor — smooth tracking
+    const lerp = 0.12;
+    const newX = curX + (targetX - curX) * lerp;
+    const newY = curY + (targetY - curY) * lerp;
+
+    viewport.scrollLeft = Math.max(0, newX);
+    viewport.scrollTop = Math.max(0, newY);
 }
 
 // Mark static cache as dirty (forces redraw)

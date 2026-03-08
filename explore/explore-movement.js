@@ -19,6 +19,9 @@ let _moveToHex = { col: 0, row: 0 };
 let playerScreenX = 0;
 let playerScreenY = 0;
 
+// Player facing direction (angle in radians, 0=right, PI/2=down)
+let playerFacing = Math.PI / 2; // default: facing down
+
 // Effects
 let _dustParticles = [];
 let _ripples = [];
@@ -47,6 +50,11 @@ function startMovement(fromCol, fromRow, toCol, toRow) {
 
     playerScreenX = _moveFrom.x;
     playerScreenY = _moveFrom.y;
+
+    // Update facing direction based on movement vector
+    const dx = _moveTo.x - _moveFrom.x;
+    const dy = _moveTo.y - _moveFrom.y;
+    playerFacing = Math.atan2(dy, dx);
 
     // Spawn dust at departure
     spawnDust(_moveFrom.x, _moveFrom.y, _moveTo.x, _moveTo.y);
@@ -287,15 +295,36 @@ function drawPlayerToken(ctx, timestamp) {
     ctx.closePath();
     ctx.fill();
 
-    // ── Gold ring around base ──
-    const glowPulse = 1 + Math.sin(t * 3) * 0.15;
-    ctx.strokeStyle = `rgba(196,149,58,${(0.4 + Math.sin(t * 3) * 0.15).toFixed(2)})`;
-    ctx.lineWidth = 2 * s;
+    // ── Gold ring around base (pulsing) ──
+    const glowPulse = 1 + Math.sin(t * 3) * 0.12;
+    const ringAlpha = 0.45 + Math.sin(t * 3) * 0.15;
+    ctx.strokeStyle = `rgba(196,149,58,${ringAlpha.toFixed(2)})`;
+    ctx.lineWidth = 2.5 * s;
     ctx.beginPath();
     ctx.ellipse(px, py + 1, (baseW + 3) * glowPulse, (baseH + 2) * glowPulse, 0, 0, Math.PI * 2);
     ctx.stroke();
 
-    // ── Class icon above head (skipped — text-only mode) ──
+    // ── Direction indicator (subtle arrow on the ring) ──
+    const arrowDist = (baseW + 6) * s;
+    const arrowX = px + Math.cos(playerFacing) * arrowDist * 0.7;
+    const arrowY = py + 1 + Math.sin(playerFacing) * arrowDist * 0.4;
+    const arrowSize = 3 * s;
+    ctx.fillStyle = `rgba(196,149,58,${(ringAlpha * 0.8).toFixed(2)})`;
+    ctx.beginPath();
+    ctx.moveTo(
+        arrowX + Math.cos(playerFacing) * arrowSize,
+        arrowY + Math.sin(playerFacing) * arrowSize * 0.5
+    );
+    ctx.lineTo(
+        arrowX + Math.cos(playerFacing + 2.3) * arrowSize * 0.6,
+        arrowY + Math.sin(playerFacing + 2.3) * arrowSize * 0.3
+    );
+    ctx.lineTo(
+        arrowX + Math.cos(playerFacing - 2.3) * arrowSize * 0.6,
+        arrowY + Math.sin(playerFacing - 2.3) * arrowSize * 0.3
+    );
+    ctx.closePath();
+    ctx.fill();
 
     ctx.restore();
 }
