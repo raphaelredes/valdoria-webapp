@@ -382,10 +382,14 @@ function showError(msg, err = null) {
 }
 
 function _autoReconnect(overlay, msgEl, retryBtn) {
-    // All retries failed — notify backend via API to refresh Telegram message,
-    // then close the WebApp. sendData() only works with KeyboardButton Mini Apps,
-    // so we use a fetch() call to /api/game/reconnect instead.
+    // All retries failed — auto-report error to admins, then close WebApp
     if (typeof _clog === 'function') _clog(`AUTO-RECONNECT: all ${_ERROR_RETRY_MAX} retries exhausted, closing WebApp`);
+    // Auto-send error report so admins know about persistent failures
+    if (typeof reportError === 'function') {
+        reportError().catch(() => {});
+        const reportBtn = document.getElementById('error-report');
+        if (reportBtn) { reportBtn.textContent = '✅ Enviado automaticamente'; reportBtn.disabled = true; }
+    }
     console.warn('[GAME] Auto-reconnect: all retries exhausted, closing WebApp');
     msgEl.textContent = 'Reconectando... O mini app sera fechado automaticamente.';
     retryBtn.style.display = 'none';
@@ -452,7 +456,7 @@ function _updateNetworkBadge() {
 // ─── Debug Log Panel (inside error overlay) ───
 let _debugPanelReady = false;
 
-function _populateDebugLog(err) {
+function _populateDebugLog(err, isConnErr = false) {
     const logEl = document.getElementById('error-debug-log');
     const wrapEl = document.getElementById('error-debug-wrap');
     const toggleBtn = document.getElementById('error-debug-toggle');
@@ -465,9 +469,14 @@ function _populateDebugLog(err) {
         : 'Log indisponível' + (err ? '\n' + (err.stack || err.message || err) : '');
     logEl.textContent = logText;
 
-    // Reset panel state
-    wrapEl.style.display = 'none';
-    toggleBtn.textContent = '📋 Ver detalhes técnicos ▸';
+    // Auto-expand for connection errors (more useful debug info visible immediately)
+    if (isConnErr) {
+        wrapEl.style.display = '';
+        toggleBtn.textContent = '📋 Ocultar detalhes ▾';
+    } else {
+        wrapEl.style.display = 'none';
+        toggleBtn.textContent = '📋 Ver detalhes técnicos ▸';
+    }
 
     if (!_debugPanelReady) {
         _debugPanelReady = true;
