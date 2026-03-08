@@ -583,11 +583,12 @@ function _renderArenaInner(s) {
         html += '</div>';
     }
 
-    // Action Toast — shows last action result above buttons
+    // Build action toast HTML (will be placed inside action bar)
+    let _actionToastHtml = '';
     if (s.feed && s.feed.length > 0 && ph === 'active') {
         const lastFeed = s.feed[s.feed.length - 1];
         const cls = _classifyFeed(lastFeed);
-        html += `<div class="action-toast ${cls}" id="actionToast">${escHtml(lastFeed)}</div>`;
+        _actionToastHtml = `<div class="action-toast ${cls}" id="actionToast">${escHtml(lastFeed)}</div>`;
     }
 
     // Action Bar — phase-dependent (with D&D 5e sub-phase support)
@@ -600,13 +601,13 @@ function _renderArenaInner(s) {
         </div>`;
     } else if (ph === 'active' && subPh === 'bonus_action') {
         html += renderTimerBar(s);
-        html += renderBonusActionBar(s.acts, s.e, s.p);
+        html += renderBonusActionBar(s.acts, s.e, s.p, _actionToastHtml);
     } else if (ph === 'active' && subPh === 'reaction') {
         html += renderTimerBar(s);
-        html += renderReactionBar(s.acts, s.p);
+        html += renderReactionBar(s.acts, s.p, _actionToastHtml);
     } else if (ph === 'active') {
         html += renderTimerBar(s);
-        html += renderActionBar(s.acts, s.e, s.p);
+        html += renderActionBar(s.acts, s.e, s.p, _actionToastHtml);
     } else if (ph === 'intro' && isApiMode) {
         // Initiative button is in the battlefield center (immersive hero button)
         if (s.can_restore) {
@@ -1195,7 +1196,7 @@ function renderPlayerCard(p, isCompact = false) {
         <div class="entity-header">
             <span class="entity-icon">${p.ico || '👤'}</span>
             <span class="compact-name">${escHtml(p.n)}</span>
-            <span class="hp-text-compact" style="color:var(--v-gold-dim);font-size:10px">${escHtml(p.c)} Lv.${p.l}</span>
+            <span class="player-header-stats">🛡${p.ac} ⚔+${p.atk} 🗡${p.dmg}</span>
         </div>
         <div class="player-bars" style="${isCompact ? 'display:none;' : ''}">
             <div class="bar-row">
@@ -1207,11 +1208,6 @@ function renderPlayerCard(p, isCompact = false) {
                 <span class="bar-icon">${resIcon}</span>
                 <div class="bar-track"><div class="bar-fill ${resClass}" style="width:${mpPct * 100}%"></div></div>
                 <span class="bar-val">${p.mp}/${p.mmp}</span>
-            </div>
-            <div class="player-quick-stats">
-                <span class="stat-item">🛡️${p.ac}</span>
-                <span class="stat-item">⚔️+${p.atk}</span>
-                <span class="stat-item">🗡️${p.dmg}</span>
             </div>
             ${badgesHtml}
         </div>
@@ -1372,7 +1368,7 @@ function _showProceedBar() {
 }
 
 // ─── ACTION BAR ───
-function renderActionBar(acts, enemies, player) {
+function renderActionBar(acts, enemies, player, toastHtml) {
     if (!acts) return '';
     const hitChance = acts.hit || 50;
     const fleeChance = acts.flee || 50;
@@ -1390,7 +1386,7 @@ function renderActionBar(acts, enemies, player) {
         skillBtnText = `🚫 Sem ${player.res || 'Mana'}`;
     }
 
-    return `<div class="action-bar"><div class="action-grid action-grid-5">
+    return `<div class="action-bar">${toastHtml || ''}<div class="action-grid action-grid-5">
         <button class="action-btn primary" data-action="attack">⚔️ Atacar <span class="action-chance ${hitCh}">${hitChance}%</span></button>
         <button class="action-btn ${hasSkills ? '' : 'disabled'}" data-action="skill">${skillBtnText}</button>
         <button class="action-btn ${itemCount > 0 ? '' : 'disabled'}" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
@@ -1400,7 +1396,7 @@ function renderActionBar(acts, enemies, player) {
 }
 
 // ─── BONUS ACTION BAR (D&D 5e PHB p.189) ───
-function renderBonusActionBar(acts, enemies, player) {
+function renderBonusActionBar(acts, enemies, player, toastHtml) {
     if (!acts) return '';
     const hasSkills = acts.skills && acts.skills.length > 0;
     const resName = player.res || 'Mana';
@@ -1415,7 +1411,7 @@ function renderBonusActionBar(acts, enemies, player) {
         }
     }
 
-    return `<div class="action-bar"><div class="ba-header">
+    return `<div class="action-bar">${toastHtml || ''}<div class="ba-header">
         <div class="ba-label">⚡ AÇÃO BÔNUS</div>
         <div class="ba-hint">Use uma habilidade bônus ou pule.</div>
     </div><div class="action-grid">
@@ -1425,7 +1421,7 @@ function renderBonusActionBar(acts, enemies, player) {
 }
 
 // ─── REACTION BAR (D&D 5e PHB p.190) ───
-function renderReactionBar(acts, player) {
+function renderReactionBar(acts, player, toastHtml) {
     if (!acts) return '';
     const hasSkills = acts.skills && acts.skills.length > 0;
     const dmg = acts.damage_taken || 0;
@@ -1440,7 +1436,7 @@ function renderReactionBar(acts, player) {
         });
     }
 
-    return `<div class="action-bar"><div class="ba-header reaction-header">
+    return `<div class="action-bar">${toastHtml || ''}<div class="ba-header reaction-header">
         <div class="ba-label">⚡ REAÇÃO</div>
         <div class="ba-hint">Você recebeu ${dmg} de dano. Reagir?</div>
     </div><div class="action-grid">

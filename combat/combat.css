@@ -56,7 +56,7 @@ body {
 }
 /* Scrollable enemy zone when many enemies */
 .zone-enemies {
-    max-height: 160px;
+    max-height: 140px;
     overflow-y: auto;
 }
 .zone-label {
@@ -290,18 +290,15 @@ body {
     white-space: nowrap;
 }
 .player-quick-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    padding: 0;
-    font-size: 11px;
-    line-height: 1.3;
-    color: var(--v-text-dim);
+    display: none;
 }
-.player-quick-stats .stat-item {
+.player-header-stats {
     display: flex;
-    align-items: center;
-    gap: 2px;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--v-text-dim);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 .player-badge-row {
     display: flex;
@@ -394,9 +391,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: flex-end;
     overflow: hidden;
-    padding: 4px 6px;
+    padding: 2px 6px;
     gap: 2px;
     border-top: 1px solid rgba(196,149,58,0.15);
     border-bottom: 1px solid rgba(196,149,58,0.15);
@@ -595,10 +592,10 @@ body {
 .feed-expanded .feed-hidden { display: block; }
 .feed-toggle {
     text-align: center;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--v-gold-dim);
-    padding: 8px 0;
-    min-height: 28px;
+    padding: 3px 0;
+    min-height: 18px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
 }
@@ -612,22 +609,21 @@ body {
 }
 .combat-feed-narrative .feed-entry:last-child { font-size: 14px; }
 
-/* ─── ACTION TOAST ─── */
+/* ─── ACTION TOAST (inside action-bar) ─── */
 .action-toast {
-    padding: 5px 10px;
-    margin: 2px 10px 4px;
-    font-size: 12px;
+    padding: 3px 8px;
+    margin: 0 0 3px;
+    font-size: 11px;
     font-weight: 600;
     text-align: center;
-    color: var(--v-text);
-    background: rgba(0,0,0,0.4);
-    border-radius: 6px;
-    border-left: 3px solid var(--v-border);
+    color: var(--v-text-dim);
+    background: rgba(0,0,0,0.25);
+    border-radius: 4px;
+    border-left: 2px solid var(--v-border);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     animation: toastSlide 0.3s ease-out;
-    flex-shrink: 0;
 }
 .action-toast.feed-crit { border-left-color: #f5c842; color: #f5c842; }
 .action-toast.feed-miss { border-left-color: #6a6a6a; color: #8a8a8a; }
