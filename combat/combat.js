@@ -961,10 +961,14 @@ function renderEntity(e, type, idx, isActiveTurn) {
     const pct = e.mhp > 0 ? (e.hp / e.mhp) : 0;
     const hpClass = pct > 0.75 ? 'hp-high' : pct > 0.40 ? 'hp-mid' : 'hp-low';
 
-    // Compact status icons
+    // Compact status icons (show max 3, overflow as +N badge)
     let statusIcons = '';
     if (e.se && e.se.length > 0) {
-        statusIcons = e.se.map(s => STATUS_ICONS[s] || '').join('');
+        if (e.se.length > 3) {
+            statusIcons = e.se.slice(0, 3).map(s => STATUS_ICONS[s] || '').join('') + `<span class="status-overflow">+${e.se.length - 3}</span>`;
+        } else {
+            statusIcons = e.se.map(s => STATUS_ICONS[s] || '').join('');
+        }
     }
 
     // Build expanded details
