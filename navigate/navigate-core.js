@@ -312,6 +312,8 @@ function _invalidateMapCaches() {
     _cachedFogState = null;
     // Clear distance cache
     _cachedPxPerTurn = 0;
+    // Clear terrain caches (auto-fill hexes, biome regions)
+    if (typeof _invalidateTerrainCaches === 'function') _invalidateTerrainCaches();
 }
 
 function isConnected(fromId, toId) {

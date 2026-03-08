@@ -68,7 +68,31 @@ function _hullPath(points, pad, seed) {
 }
 
 // ── Auto-fill: ALL landmass hexes get a biome ──
+// Cache: these are called 3x and 2x respectively but produce identical results
+let _cachedAutoFillHexes = null;
+let _cachedAllHexes = null;
+let _cachedBiomeRegions = null;
+
+function _getAllHexes() {
+    if (_cachedAllHexes) return _cachedAllHexes;
+    _cachedAllHexes = [...TERRAIN_HEXES, ..._buildAutoFillHexes()];
+    return _cachedAllHexes;
+}
+
+function _getAllBiomeRegions() {
+    if (_cachedBiomeRegions) return _cachedBiomeRegions;
+    _cachedBiomeRegions = _buildBiomeRegions(_getAllHexes());
+    return _cachedBiomeRegions;
+}
+
+function _invalidateTerrainCaches() {
+    _cachedAutoFillHexes = null;
+    _cachedAllHexes = null;
+    _cachedBiomeRegions = null;
+}
+
 function _buildAutoFillHexes() {
+    if (_cachedAutoFillHexes) return _cachedAutoFillHexes;
     const seeds = [];
     for (const [col, row, biome] of TERRAIN_HEXES) seeds.push({ col, row, biome });
     for (const [locId, c] of Object.entries(LOCATION_COORDS))
@@ -90,6 +114,7 @@ function _buildAutoFillHexes() {
             extra.push([col, row, biome]);
         }
     }
+    _cachedAutoFillHexes = extra;
     return extra;
 }
 
@@ -148,7 +173,7 @@ function _hexVisibility(col, row, knownSet, discoveredSet) {
 function renderGroundCover(svg, insertBefore) {
     const gG = _el('g', { class: 'ground-cover', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
     const biomeCache = new Map();
-    const allHexes = [...TERRAIN_HEXES, ..._buildAutoFillHexes()];
+    const allHexes = _getAllHexes();
     for (const [c, r, b] of allHexes) biomeCache.set(`${c},${r}`, b);
 
     for (let row = 0; row <= GRID_ROWS + 1; row++) {
@@ -268,8 +293,7 @@ function renderTerrainRegions(svg, fogState) {
     const knownSet = new Set(S.knownLocs);
     const discoveredSet = new Set(S.discoveredLocs || []);
     const regG = _el('g', { class: 'terrain-regions', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
-    const allHexes = [...TERRAIN_HEXES, ..._buildAutoFillHexes()];
-    const regions = _buildBiomeRegions(allHexes);
+    const regions = _getAllBiomeRegions();
 
     for (const [biome, clusters] of Object.entries(regions)) {
         const fillInfo = BIOME_FILLS[biome];
@@ -314,8 +338,7 @@ function renderTerrainDetails(svg, fogState, insertBefore) {
     const knownSet = new Set(S.knownLocs);
     const discoveredSet = new Set(S.discoveredLocs || []);
     const tG = _el('g', { class: 'terrain-illust', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
-    const allHexes = [...TERRAIN_HEXES, ..._buildAutoFillHexes()];
-    const regions = _buildBiomeRegions(allHexes);
+    const regions = _getAllBiomeRegions();
 
     for (const [biome, clusters] of Object.entries(regions)) {
         for (const cluster of clusters) {

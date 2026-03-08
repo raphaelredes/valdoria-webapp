@@ -92,7 +92,21 @@ function _landmassPath() {
     return d;
 }
 
+// Grid-based cache for _pointInLandmass — avoids repeated ray-cast over 112 polygon vertices.
+// Grid cells are 10px wide; each cell is tested once and cached.
+const _landmassGrid = new Map();
+
 function _pointInLandmass(px, py) {
+    // Quantize to 10px grid for cache lookup
+    const key = (Math.floor(px / 10) << 16) | (Math.floor(py / 10) & 0xFFFF);
+    const cached = _landmassGrid.get(key);
+    if (cached !== undefined) return cached;
+    const result = _pointInLandmassRaw(px, py);
+    _landmassGrid.set(key, result);
+    return result;
+}
+
+function _pointInLandmassRaw(px, py) {
     const pts = LANDMASS_POINTS;
     let inside = false;
     for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
