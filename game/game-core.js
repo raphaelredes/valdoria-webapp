@@ -73,6 +73,39 @@ function _getNetworkInfo() {
     return parts.join(' ') || 'N/A';
 }
 
+/** Returns device/platform info for error reports */
+function _getDeviceInfo() {
+    const tg = window.Telegram?.WebApp;
+    const parts = [];
+    if (tg?.platform) parts.push('platform:' + tg.platform);
+    parts.push(screen.width + 'x' + screen.height);
+    parts.push('vp:' + window.innerWidth + 'x' + window.innerHeight);
+    if (tg?.colorScheme) parts.push(tg.colorScheme);
+    return parts.join(' ') || 'N/A';
+}
+
+/** Classifies an error message into a category for admin reports */
+function _classifyError(msg) {
+    if (!msg) return 'unknown';
+    if (msg.includes('Sem conexão') || msg.includes('internet') || msg.includes('offline'))
+        return 'network';
+    if (msg.includes('não respondeu') || msg.includes('demorou') || msg.includes('timeout'))
+        return 'timeout';
+    if (msg.includes('expirada') || msg.includes('Sessão') || msg.includes('401'))
+        return 'session';
+    if (msg.includes('Personagem não encontrado') || msg.includes('player_not_found'))
+        return 'player';
+    if (msg.includes('indisponível') || msg.includes('500') || msg.includes('Erro no servidor'))
+        return 'server';
+    return 'unknown';
+}
+
+// Session start time (for duration tracking in error reports)
+const _sessionStartTime = Date.now();
+
+// JS error capture counter
+let _jsErrorCount = 0;
+
 /** Returns full connection debug log as copyable text */
 function getConnectionLog() {
     const header = [
@@ -171,6 +204,8 @@ async function init() {
     console.log('[GAME] Starting health check to:', S.apiBase + '/api/game/health');
     const healthy = await checkHealth();
     _clog('INIT health result: ' + (healthy ? 'OK' : 'FAIL'));
+    // Flush queued error reports from previous failed sessions
+    if (healthy && typeof _flushReportQueue === 'function') _flushReportQueue();
     console.log('[GAME] Health check result:', healthy);
     // Flush any queued error reports from previous failed sessions
     if (healthy && typeof _flushReportQueue === 'function') _flushReportQueue();

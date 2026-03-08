@@ -213,6 +213,25 @@ function showError(msg, err = null) {
             iconEl.textContent = '⚠️';
     }
 
+    // Actionable hint text based on error type
+    const hintEl = document.getElementById('error-hint');
+    if (hintEl) {
+        if (msg.includes('Sem conexão') || msg.includes('internet'))
+            hintEl.textContent = 'Verifique se o Wi-Fi ou dados móveis estão ativos.';
+        else if (msg.includes('não respondeu') || msg.includes('demorou'))
+            hintEl.textContent = 'O servidor pode estar sobrecarregado. Tentaremos reconectar automaticamente.';
+        else if (msg.includes('indisponível'))
+            hintEl.textContent = 'O servidor está em manutenção ou reiniciando. Tente novamente em alguns instantes.';
+        else if (msg.includes('expirada') || msg.includes('Sessão'))
+            hintEl.textContent = 'Feche o mini app e toque em JOGAR para iniciar uma nova sessão.';
+        else if (msg.includes('Personagem não encontrado'))
+            hintEl.textContent = 'Feche o mini app e selecione um personagem novamente.';
+        else if (msg.includes('Resposta inválida'))
+            hintEl.textContent = 'Resposta inesperada do servidor. Toque em Reportar Problema para nos ajudar a corrigir.';
+        else
+            hintEl.textContent = '';
+    }
+
     // Show network status badge
     _updateNetworkBadge();
 

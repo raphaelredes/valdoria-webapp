@@ -219,257 +219,68 @@
         /* --- Walking traveler (center) --- */
         .load-traveler {
             position: absolute;
-            bottom: 14%;
+            bottom: 16%;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            filter: drop-shadow(0 3px 10px rgba(0,0,0,0.6));
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.7));
         }
 
-        /* === WALKING MAN — nested joint-based animation === */
+        /* === SVG WALKING TRAVELER — two-frame silhouette animation === */
         .walk-figure {
             position: relative;
-            width: 60px;
-            height: 110px;
-            animation: figBounce 1.2s ease-in-out infinite;
-            transform: rotate(3deg);
+            width: 100px;
+            height: 170px;
+            animation: figBounce 1.0s ease-in-out infinite;
         }
 
         @keyframes figBounce {
-            0%, 100% { transform: rotate(3deg) translate(1px, 0); }
-            25% { transform: rotate(3deg) translate(-1px, -3px); }
-            50% { transform: rotate(3deg) translate(1px, 0); }
-            75% { transform: rotate(3deg) translate(-1px, -3px); }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
         }
 
-        /* Head — angular hood shape, not round helmet */
-        .wm-head {
-            position: absolute;
-            width: 12px; height: 16px;
-            background: #221a12;
-            border-radius: 4px 6px 3px 3px;
-            top: 0; left: 19px;
-            clip-path: polygon(20% 0%, 80% 0%, 100% 40%, 95% 100%, 5% 100%, 0% 40%);
-        }
-        /* Hood peak */
-        .wm-head::before {
-            content: '';
-            position: absolute;
-            top: -5px; left: 2px;
-            width: 0; height: 0;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-bottom: 7px solid #221a12;
-        }
-        /* Eye glow */
-        .wm-head::after {
-            content: '';
-            position: absolute;
-            top: 8px; right: 1px;
-            width: 2px; height: 1.5px;
-            background: #c4953a;
-            border-radius: 50%;
-            opacity: 0.4;
+        .walk-figure svg {
+            width: 100%;
+            height: 100%;
         }
 
-        /* Torso — narrower, tapered like a tunic */
-        .wm-torso {
+        /* Two-frame walk cycle: alternate poses */
+        .walk-pose-a, .walk-pose-b {
             position: absolute;
-            width: 12px; height: 28px;
-            background: linear-gradient(180deg, #2a2018 0%, #221a12 100%);
-            border-radius: 3px 3px 1px 1px;
-            top: 14px; left: 19px;
-        }
-        /* Belt */
-        .wm-torso::after {
-            content: '';
-            position: absolute;
-            bottom: 8px; left: -1px;
-            width: 14px; height: 2px;
-            background: #5a4428;
-            border-radius: 1px;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
         }
 
-        /* Cape — larger, flowing behind like a real cloak */
-        .wm-cape {
-            position: absolute;
-            top: 8px; left: 6px;
-            width: 18px; height: 38px;
-            background: linear-gradient(180deg, #352a1e 0%, #2e2418 60%, #261e14 100%);
-            border-radius: 2px 0 8px 12px;
-            transform-origin: 100% 0;
-            animation: capeWave 2s ease-in-out infinite;
-            z-index: -1;
+        .walk-pose-a {
+            animation: poseA 1.0s ease-in-out infinite;
+        }
+        .walk-pose-b {
+            animation: poseB 1.0s ease-in-out infinite;
+        }
+
+        @keyframes poseA {
+            0%, 45% { opacity: 1; }
+            50%, 95% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes poseB {
+            0%, 45% { opacity: 0; }
+            50%, 95% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Cape flutter — separate SVG element animated */
+        .walk-cape {
+            animation: capeWave 2.5s ease-in-out infinite;
+            transform-origin: 28px 22px;
         }
 
         @keyframes capeWave {
-            0%, 100% { transform: skewX(0deg) scaleY(1); }
-            30% { transform: skewX(5deg) scaleY(1.04); }
-            70% { transform: skewX(-2deg) scaleY(0.97); }
+            0%, 100% { transform: skewY(0deg) scaleX(1); }
+            30% { transform: skewY(2deg) scaleX(1.05); }
+            70% { transform: skewY(-1deg) scaleX(0.97); }
         }
-
-        /* Backpack — smaller, less bulky */
-        .wm-pack {
-            position: absolute;
-            top: 16px; left: 10px;
-            width: 8px; height: 12px;
-            background: #3a2e1e;
-            border-radius: 2px;
-            border: 1px solid rgba(74, 56, 40, 0.4);
-            z-index: -1;
-        }
-
-        /* Staff — hidden */
-        .wm-staff { display: none; }
-
-        /* === LEGS (nested: thigh > shin > boot) === */
-        .wm-leg {
-            position: absolute;
-            top: 40px;
-        }
-
-        .wm-leg.left { left: 19px; }
-        .wm-leg.right { left: 25px; }
-
-        /* Thigh — thinner */
-        .wm-thigh {
-            width: 5px; height: 20px;
-            background: #1e1610;
-            border-radius: 2px;
-            transform-origin: 2px 2px;
-            position: relative;
-        }
-
-        .wm-leg.right .wm-thigh { animation: rThigh 1.2s ease-in-out infinite; }
-        .wm-leg.left .wm-thigh { animation: lThigh 1.2s ease-in-out infinite; }
-
-        @keyframes rThigh {
-            0%   { transform: rotate(-25deg); }
-            50%  { transform: rotate(18deg); }
-            100% { transform: rotate(-25deg); }
-        }
-
-        @keyframes lThigh {
-            0%   { transform: rotate(18deg); }
-            50%  { transform: rotate(-25deg); }
-            100% { transform: rotate(18deg); }
-        }
-
-        /* Shin — thinner */
-        .wm-shin {
-            width: 4px; height: 18px;
-            background: #181210;
-            border-radius: 2px;
-            position: absolute;
-            bottom: -16px; left: 0;
-            transform-origin: 2px 2px;
-        }
-
-        .wm-leg.right .wm-shin { animation: rShin 1.2s ease-in-out infinite; }
-        .wm-leg.left .wm-shin { animation: lShin 1.2s ease-in-out infinite; }
-
-        @keyframes rShin {
-            0%   { transform: rotate(18deg); }
-            25%  { transform: rotate(8deg); }
-            50%  { transform: rotate(8deg); }
-            75%  { transform: rotate(40deg); }
-            100% { transform: rotate(18deg); }
-        }
-
-        @keyframes lShin {
-            0%   { transform: rotate(8deg); }
-            25%  { transform: rotate(40deg); }
-            50%  { transform: rotate(18deg); }
-            75%  { transform: rotate(8deg); }
-            100% { transform: rotate(8deg); }
-        }
-
-        /* Boot — smaller */
-        .wm-boot {
-            width: 7px; height: 3px;
-            background: #181210;
-            border-radius: 1px 2px 1px 1px;
-            position: absolute;
-            bottom: -2px; left: -1px;
-            transform-origin: 1px 1px;
-        }
-
-        .wm-leg.right .wm-boot { animation: rBoot 1.2s ease-in-out infinite; }
-        .wm-leg.left .wm-boot { animation: lBoot 1.2s ease-in-out infinite; }
-
-        @keyframes rBoot {
-            0%   { transform: rotate(-5deg); }
-            25%  { transform: rotate(-7deg); }
-            50%  { transform: rotate(-14deg); }
-            75%  { transform: rotate(-8deg); }
-            100% { transform: rotate(-5deg); }
-        }
-
-        @keyframes lBoot {
-            0%   { transform: rotate(-14deg); }
-            25%  { transform: rotate(-8deg); }
-            50%  { transform: rotate(-5deg); }
-            75%  { transform: rotate(-7deg); }
-            100% { transform: rotate(-14deg); }
-        }
-
-        /* === ARMS (nested: bicep > forearm) === */
-        .wm-arm {
-            position: absolute;
-            top: 16px;
-        }
-
-        .wm-arm.left { left: 16px; z-index: -1; }
-        .wm-arm.right { left: 28px; }
-
-        .wm-bicep {
-            width: 4px; height: 14px;
-            background: #261e14;
-            border-radius: 2px;
-            transform-origin: 2px 2px;
-            position: relative;
-        }
-
-        .wm-arm.right .wm-bicep { animation: rBicep 1.2s ease-in-out infinite; }
-        .wm-arm.left .wm-bicep { animation: lBicep 1.2s ease-in-out infinite; }
-
-        @keyframes rBicep {
-            0%   { transform: rotate(16deg); }
-            50%  { transform: rotate(-12deg); }
-            100% { transform: rotate(16deg); }
-        }
-
-        @keyframes lBicep {
-            0%   { transform: rotate(-12deg); }
-            50%  { transform: rotate(16deg); }
-            100% { transform: rotate(-12deg); }
-        }
-
-        .wm-forearm {
-            width: 3px; height: 12px;
-            background: #201810;
-            border-radius: 2px;
-            position: absolute;
-            bottom: -10px; left: 0;
-            transform-origin: 1px 2px;
-        }
-
-        .wm-arm.right .wm-forearm { animation: rForearm 1.2s ease-in-out infinite; }
-        .wm-arm.left .wm-forearm { animation: lForearm 1.2s ease-in-out infinite; }
-
-        @keyframes rForearm {
-            0%   { transform: rotate(-8deg); }
-            50%  { transform: rotate(-30deg); }
-            100% { transform: rotate(-8deg); }
-        }
-
-        @keyframes lForearm {
-            0%   { transform: rotate(-30deg); }
-            50%  { transform: rotate(-8deg); }
-            100% { transform: rotate(-30deg); }
-        }
-
-        .wm-shadow { display: none; }
 
         /* --- Foreground trees (silhouettes) --- */
         .load-trees-fg {
@@ -1427,49 +1238,87 @@
             <!-- Dust particles -->
             <div class="load-dust" id="load-dust"></div>
 
-            <!-- Walking traveler — CSS joint-based skeleton (Andrew Hoyer technique) -->
+            <!-- Walking traveler — SVG silhouette with two-frame walk cycle -->
             <div class="load-traveler">
                 <div class="walk-figure">
-                    <!-- Cape (behind everything) -->
-                    <div class="wm-cape"></div>
-                    <!-- Backpack -->
-                    <div class="wm-pack"></div>
-                    <!-- Back arm (left) -->
-                    <div class="wm-arm left">
-                        <div class="wm-bicep">
-                            <div class="wm-forearm"></div>
-                        </div>
+                    <!-- Pose A: right leg forward, left arm forward -->
+                    <div class="walk-pose-a">
+                        <svg viewBox="0 0 70 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Cape (behind body) -->
+                            <path class="walk-cape" d="M22 22 Q18 24 14 42 Q11 56 16 70 Q18 62 20 50 Q22 38 24 28 Z" fill="#2e2418" opacity="0.8"/>
+                            <!-- Backpack (on back, overlapping torso) -->
+                            <rect x="20" y="28" width="8" height="14" rx="2" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.5"/>
+                            <line x1="22" y1="28" x2="24" y2="22" stroke="#4a3828" stroke-width="0.8"/>
+                            <line x1="26" y1="28" x2="28" y2="22" stroke="#4a3828" stroke-width="0.8"/>
+                            <!-- Back leg (left — behind, further back) -->
+                            <path d="M30 56 L24 76 L26 92 L29 93" stroke="#1a1410" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            <!-- Back arm (left — forward swing) -->
+                            <path d="M28 26 L34 38 L36 46" stroke="#2a2018" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            <!-- Body / Tunic -->
+                            <path d="M26 20 Q24 22 24 30 L24 54 Q26 58 30 58 Q34 58 36 54 L36 30 Q36 22 34 20 Z" fill="#221a12"/>
+                            <!-- Belt -->
+                            <rect x="23" y="46" width="14" height="2.5" rx="1" fill="#5a4428"/>
+                            <!-- Belt buckle -->
+                            <rect x="29" y="46" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
+                            <!-- Hood/Head -->
+                            <path d="M26 8 Q24 6 25 2 Q28 -1 33 0 Q36 2 36 6 L36 20 Q34 22 30 22 Q26 22 26 20 Z" fill="#221a12"/>
+                            <!-- Hood peak -->
+                            <path d="M28 2 Q30 -3 32 0" fill="#221a12" stroke="#221a12" stroke-width="1"/>
+                            <!-- Face shadow (side profile) -->
+                            <path d="M33 8 Q36 10 36 14 Q35 16 33 16 Q34 14 34 10 Z" fill="#1a1410" opacity="0.5"/>
+                            <!-- Eye glow -->
+                            <circle cx="34.5" cy="11" r="1" fill="#c4953a" opacity="0.35"/>
+                            <!-- Front leg (right — forward stride) -->
+                            <path d="M32 56 L40 74 L38 90 L35 92" stroke="#1a1410" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            <!-- Boot (front) -->
+                            <path d="M35 91 L33 93 L36 94 L38 92" fill="#1a1410"/>
+                            <!-- Boot (back) -->
+                            <path d="M29 92 L27 94 L30 95 L32 93" fill="#1a1410" opacity="0.7"/>
+                            <!-- Front arm (right — back swing, holding staff) -->
+                            <path d="M32 26 L26 40 L22 48" stroke="#2a2018" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            <!-- Walking staff -->
+                            <line x1="21" y1="44" x2="18" y2="90" stroke="#5a4428" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="18" cy="90" r="1.5" fill="#5a4428" opacity="0.4"/>
+                        </svg>
                     </div>
-                    <!-- Back leg (left) -->
-                    <div class="wm-leg left">
-                        <div class="wm-thigh">
-                            <div class="wm-shin">
-                                <div class="wm-boot"></div>
-                            </div>
-                        </div>
+                    <!-- Pose B: left leg forward, right arm forward (mirror stride) -->
+                    <div class="walk-pose-b">
+                        <svg viewBox="0 0 70 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Cape -->
+                            <path class="walk-cape" d="M22 22 Q16 26 12 44 Q10 58 15 72 Q17 62 19 50 Q22 36 24 28 Z" fill="#2e2418" opacity="0.8"/>
+                            <!-- Backpack -->
+                            <rect x="20" y="28" width="8" height="14" rx="2" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.5"/>
+                            <line x1="22" y1="28" x2="24" y2="22" stroke="#4a3828" stroke-width="0.8"/>
+                            <line x1="26" y1="28" x2="28" y2="22" stroke="#4a3828" stroke-width="0.8"/>
+                            <!-- Back leg (right — behind, further back) -->
+                            <path d="M32 56 L38 76 L36 92 L33 93" stroke="#1a1410" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            <!-- Back arm (right — forward swing, holding staff) -->
+                            <path d="M32 26 L38 38 L40 48" stroke="#2a2018" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            <!-- Staff (moves with front arm in this pose) -->
+                            <line x1="40" y1="44" x2="43" y2="90" stroke="#5a4428" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="43" cy="90" r="1.5" fill="#5a4428" opacity="0.4"/>
+                            <!-- Body / Tunic -->
+                            <path d="M26 20 Q24 22 24 30 L24 54 Q26 58 30 58 Q34 58 36 54 L36 30 Q36 22 34 20 Z" fill="#221a12"/>
+                            <!-- Belt -->
+                            <rect x="23" y="46" width="14" height="2.5" rx="1" fill="#5a4428"/>
+                            <rect x="29" y="46" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
+                            <!-- Hood/Head -->
+                            <path d="M26 8 Q24 6 25 2 Q28 -1 33 0 Q36 2 36 6 L36 20 Q34 22 30 22 Q26 22 26 20 Z" fill="#221a12"/>
+                            <path d="M28 2 Q30 -3 32 0" fill="#221a12" stroke="#221a12" stroke-width="1"/>
+                            <!-- Face shadow -->
+                            <path d="M33 8 Q36 10 36 14 Q35 16 33 16 Q34 14 34 10 Z" fill="#1a1410" opacity="0.5"/>
+                            <!-- Eye glow -->
+                            <circle cx="34.5" cy="11" r="1" fill="#c4953a" opacity="0.35"/>
+                            <!-- Front leg (left — forward stride) -->
+                            <path d="M30 56 L22 76 L24 90 L27 92" stroke="#1a1410" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            <!-- Boot (front) -->
+                            <path d="M27 91 L25 93 L28 94 L30 92" fill="#1a1410"/>
+                            <!-- Boot (back) -->
+                            <path d="M33 92 L31 94 L34 95 L36 93" fill="#1a1410" opacity="0.7"/>
+                            <!-- Front arm (left — back swing) -->
+                            <path d="M28 26 L22 38 L20 46" stroke="#2a2018" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
                     </div>
-                    <!-- Torso -->
-                    <div class="wm-torso"></div>
-                    <!-- Head -->
-                    <div class="wm-head"></div>
-                    <!-- Front leg (right) -->
-                    <div class="wm-leg right">
-                        <div class="wm-thigh">
-                            <div class="wm-shin">
-                                <div class="wm-boot"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Front arm (right) -->
-                    <div class="wm-arm right">
-                        <div class="wm-bicep">
-                            <div class="wm-forearm"></div>
-                        </div>
-                    </div>
-                    <!-- Staff -->
-                    <div class="wm-staff"></div>
-                    <!-- Ground shadow -->
-                    <div class="wm-shadow"></div>
                 </div>
             </div>
 
