@@ -226,60 +226,62 @@
             filter: drop-shadow(0 4px 12px rgba(0,0,0,0.7));
         }
 
-        /* === SVG WALKING TRAVELER — two-frame silhouette animation === */
+        /* === SPRITE SHEET WALK CYCLE — 8 frames, professional technique ===
+         * Single SVG contains 8 hand-drawn frames of a hooded medieval traveler.
+         * CSS steps(8) jumps through frames for crisp animation.
+         * Each frame = 80px wide, total strip = 640px.
+         * The div clips to show 1 frame at a time via overflow:hidden.
+         *
+         * Walk cycle phases (standard 8-frame):
+         *   1: Contact (R leg forward, heel strike)
+         *   2: Recoil (weight absorb, lowest point)
+         *   3: Passing (legs together, L passes R)
+         *   4: High point (push off, highest point)
+         *   5: Contact (L leg forward, heel strike)
+         *   6: Recoil (mirror of 2)
+         *   7: Passing (mirror of 3)
+         *   8: High point (mirror of 4)
+         */
         .walk-figure {
             position: relative;
-            width: 100px;
-            height: 170px;
-            animation: figBounce 1.0s ease-in-out infinite;
+            width: 80px;
+            height: 130px;
+            overflow: hidden;
         }
 
-        @keyframes figBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-2px); }
+        .walk-strip {
+            display: flex;
+            width: 640px; /* 8 frames × 80px */
+            height: 130px;
+            animation: walkCycle 0.9s steps(8) infinite;
         }
 
-        .walk-figure svg {
-            width: 100%;
-            height: 100%;
+        @keyframes walkCycle {
+            from { transform: translateX(0); }
+            to { transform: translateX(-640px); }
         }
 
-        /* Two-frame walk cycle: alternate poses */
-        .walk-pose-a, .walk-pose-b {
+        .walk-strip svg {
+            width: 80px;
+            height: 130px;
+            flex-shrink: 0;
+        }
+
+        /* Cape flicker overlay — subtle shimmer on the cape across all frames */
+        .load-traveler::after {
+            content: '';
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 18%;
+            left: 10%;
+            width: 30%;
+            height: 40%;
+            background: linear-gradient(180deg, transparent 0%, rgba(196,149,58,0.03) 50%, transparent 100%);
+            animation: capeShimmer 3s ease-in-out infinite;
+            pointer-events: none;
         }
-
-        .walk-pose-a {
-            animation: poseA 1.0s ease-in-out infinite;
-        }
-        .walk-pose-b {
-            animation: poseB 1.0s ease-in-out infinite;
-        }
-
-        @keyframes poseA {
-            0%, 45% { opacity: 1; }
-            50%, 95% { opacity: 0; }
-            100% { opacity: 1; }
-        }
-
-        @keyframes poseB {
-            0%, 45% { opacity: 0; }
-            50%, 95% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        /* Cape flutter — separate SVG element animated */
-        .walk-cape {
-            animation: capeWave 2.5s ease-in-out infinite;
-            transform-origin: 28px 22px;
-        }
-
-        @keyframes capeWave {
-            0%, 100% { transform: skewY(0deg) scaleX(1); }
-            30% { transform: skewY(2deg) scaleX(1.05); }
-            70% { transform: skewY(-1deg) scaleX(0.97); }
+        @keyframes capeShimmer {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
         }
 
         /* --- Foreground trees (silhouettes) --- */

@@ -108,6 +108,8 @@ let _jsErrorCount = 0;
 
 /** Returns full connection debug log as copyable text */
 function getConnectionLog() {
+    const sessionSec = Math.round((Date.now() - _sessionStartTime) / 1000);
+    const sessionStr = sessionSec < 60 ? sessionSec + 's' : Math.floor(sessionSec / 60) + 'm' + (sessionSec % 60) + 's';
     const header = [
         '── Valdoria Connection Debug ──',
         `Time: ${new Date().toISOString()}`,
@@ -115,10 +117,11 @@ function getConnectionLog() {
         `UID: ${S.uid || 0}`,
         `Token: ${S.token ? S.token.substring(0, 8) + '...' : '(missing)'}`,
         `Screen: ${S.currentScreen?.screen_id || '(none)'}`,
+        `Device: ${_getDeviceInfo()}`,
         `UA: ${navigator.userAgent.substring(0, 80)}`,
-        `Online: ${navigator.onLine}`,
-        `Network: ${_getNetworkInfo()}`,
+        `Online: ${navigator.onLine}  Network: ${_getNetworkInfo()}`,
         `TG: ${window.Telegram?.WebApp?.version || 'N/A'}`,
+        `Session: ${sessionStr}  Retries: ${typeof _errorRetryAttempt !== 'undefined' ? _errorRetryAttempt : 0}  JS Errors: ${_jsErrorCount}`,
         '─────────────────────────────',
     ];
     return header.concat(_connLog).join('\n');
@@ -204,10 +207,8 @@ async function init() {
     console.log('[GAME] Starting health check to:', S.apiBase + '/api/game/health');
     const healthy = await checkHealth();
     _clog('INIT health result: ' + (healthy ? 'OK' : 'FAIL'));
-    // Flush queued error reports from previous failed sessions
-    if (healthy && typeof _flushReportQueue === 'function') _flushReportQueue();
     console.log('[GAME] Health check result:', healthy);
-    // Flush any queued error reports from previous failed sessions
+    // Flush queued error reports from previous failed sessions
     if (healthy && typeof _flushReportQueue === 'function') _flushReportQueue();
     if (!healthy) {
         showError('Servidor indisponível. Tente novamente em alguns segundos.');
@@ -692,7 +693,15 @@ function _flushReportQueue() {
         const queue = JSON.parse(localStorage.getItem(_REPORT_QUEUE_KEY) || '[]');
         if (!queue.length || !S.apiBase) return;
         localStorage.removeItem(_REPORT_QUEUE_KEY);
+        const now = Date.now();
+        const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h — discard stale reports
         for (const payload of queue) {
+            // Skip reports older than 24h
+            if (payload.queued_at) {
+                const age = now - new Date(payload.queued_at).getTime();
+                if (age > MAX_AGE_MS) continue;
+            }
+            payload.was_queued = true; // flag for admin visibility
             fetch(S.apiBase + '/api/game/report-error', {
                 method: 'POST',
                 headers: {
