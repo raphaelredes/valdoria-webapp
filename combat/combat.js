@@ -136,6 +136,25 @@ const STATUS_ICONS = {
     concentrated: '🔮', raging: '💢', wild_shaped: '🐾',
 };
 
+// PT-BR translations for status effect keys from backend
+const STATUS_PT = {
+    poisoned: 'Envenenado', blinded: 'Cego', paralyzed: 'Paralisado', prone: 'Derrubado',
+    restrained: 'Preso', frightened: 'Amedrontado', stunned: 'Atordoado', grappled: 'Agarrado',
+    petrified: 'Petrificado', exhausted: 'Exausto', marked: 'Marcado', blessed: 'Abençoado',
+    hexed: 'Amaldiçoado', burning: 'Queimando', frozen: 'Congelado', sleeping: 'Dormindo',
+    charmed: 'Encantado', deafened: 'Surdo', incapacitated: 'Incapacitado',
+    invisible: 'Invisível', surprised: 'Surpreso', exposed: 'Exposto', inspired: 'Inspirado',
+    concentrated: 'Concentrado', raging: 'Furioso', wild_shaped: 'Forma Selvagem',
+    weakened: 'Enfraquecido', cursed: 'Amaldiçoado', corroded: 'Corroído',
+    mocked: 'Provocado', enraged: 'Enfurecido', regenerating: 'Regenerando',
+    slowed: 'Lento', pushed: 'Empurrado',
+};
+// Buff vs debuff classification (buffs get green styling, debuffs get red)
+const STATUS_BUFFS = new Set([
+    'blessed', 'inspired', 'invisible', 'raging', 'wild_shaped',
+    'concentrated', 'regenerating',
+]);
+
 const DMG_ICONS = {
     slashing: '🗡️', piercing: '🏹', bludgeoning: '🔨', fire: '🔥', cold: '❄️',
     lightning: '⚡', necrotic: '💀', radiant: '✨', psychic: '🧠', thunder: '💥',
@@ -1080,7 +1099,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
         }
 
         if (e.se && e.se.length > 0) {
-            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill">${STATUS_ICONS[s] || ''} ${s}</span>`).join('') + '</div>';
+            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff' : ''}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('') + '</div>';
         }
     } else {
         // Ally expanded — full status panel
@@ -1107,7 +1126,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
             detailsHtml += `<div class="stats-row"><span class="stat-item conc-badge">🔮 ${e.conc}</span></div>`;
         }
         if (e.se && e.se.length > 0) {
-            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill">${STATUS_ICONS[s] || ''} ${s}</span>`).join('') + '</div>';
+            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff' : ''}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('') + '</div>';
         }
     }
 
@@ -1158,7 +1177,7 @@ function renderPlayerCard(p, isCompact = false) {
     // Compact badges for status, cover, concentration
     const badges = [];
     if (p.se && p.se.length > 0) {
-        p.se.forEach(s => badges.push(`<span class="mini-badge status">${STATUS_ICONS[s] || ''} ${s}</span>`));
+        p.se.forEach(s => badges.push(`<span class="mini-badge status${STATUS_BUFFS.has(s) ? ' buff' : ''}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`));
     }
     if (p.cov) {
         badges.push(`<span class="mini-badge cover">${p.cov.ico} +${p.cov.ac} CA</span>`);
@@ -1785,7 +1804,7 @@ function showSkillPicker(skills, enemies, actionType) {
             sk.tp === 'auto' ? ' · <span class="sk-type">Auto</span>' :
                 sk.tp === 'heal' ? ' · <span class="sk-type">Cura</span>' : '';
         const tgtBadge = sk.tg === 'all' ? ' · <span class="sk-aoe">AOE</span>' :
-            sk.tg === 'self' ? ' · <span class="sk-aoe">Self</span>' : '';
+            sk.tg === 'self' ? ' · <span class="sk-aoe">Próprio</span>' : '';
         const effLine = sk.eff ? `<div class="skill-effect">${escHtml(sk.eff)}</div>` : '';
         const skCls = sk.tp === 'heal' ? 'sk-heal' : sk.tp === 'saving_throw' ? 'sk-save' : sk.tp === 'auto' ? 'sk-buff' : 'sk-damage';
         html += `<div class="skill-item ${skCls}" data-skill-id="${sk.id}" data-tg="${sk.tg || 'single'}">
