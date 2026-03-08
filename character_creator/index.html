@@ -1385,6 +1385,38 @@
             updateBackButton();
         }
 
+        function resetAndGoStart() {
+            haptic();
+            sel.race = null; sel.subrace = ''; sel.classKey = null; sel.subclass = '';
+            sel.fightingStyle = ''; sel.equipmentChoice = 'A'; sel.selectedL1Skill = '';
+            sel.bg = null; sel.personalityTrait = ''; sel.ideal = ''; sel.bond = ''; sel.flaw = '';
+            sel.alignment = ''; sel.skillProfs = []; sel.toolProfs = [];
+            sel.gender = null; sel.name = ''; sel.surname = '';
+            sel.languages = []; sel.statAssignment = {};
+            sel.variantBonuses = []; sel.variantSkill = ''; sel.variantFeat = '';
+            sel._wasRandom = false;
+            // Reset UI grids
+            buildRaceGrid();
+            buildClassGrid();
+            buildBgGrid();
+            buildAlignGrid();
+            buildGenderGrid();
+            document.getElementById('nameInput').value = '';
+            document.getElementById('surnameInput').value = '';
+            document.getElementById('nameLimit').textContent = '0/15';
+            document.getElementById('surnameLimit').textContent = '0/15';
+            // Go to screen 0
+            currentScreen = 0;
+            document.getElementById('screenTrack').style.transform = 'translateX(0)';
+            SCREENS.forEach((s, i) => {
+                const dot = document.getElementById('pdot-' + i);
+                dot.className = 'v-progress-dot' + (i === 0 ? ' active' : '');
+            });
+            document.getElementById('progressLabel').textContent = `1/${SCREENS.length} - ${SCREEN_NAMES[0]}`;
+            if (tg) { tg.MainButton.offClick(submitCharacter); tg.MainButton.hide(); }
+            updateBackButton();
+        }
+
         function buildDmBubbles() {
             for (let i = 0; i <= 8; i++) {
                 const el = document.getElementById('dm-' + i);
