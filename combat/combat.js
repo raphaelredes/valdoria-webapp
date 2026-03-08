@@ -508,8 +508,10 @@ function _renderArenaInner(s) {
     if (_initDice3d && (s.ph || s.phase || 'intro') !== 'intro') {
         _initDice3d.dispose(); _initDice3d = null;
     }
-    // Dispose damage 3D dice on re-render
+    // Dispose damage 3D dice on re-render and hide persistent overlay
     if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+    const existingOverlay = document.getElementById('dmgDice3dOverlay');
+    if (existingOverlay) existingOverlay.style.display = 'none';
     const app = document.getElementById('app');
     // Clear previous biome classes before applying new one
     document.body.className = document.body.className.replace(/\bbiome-\S+/g, '').trim();
@@ -568,8 +570,6 @@ function _renderArenaInner(s) {
         </div>
         <div class="dice-formula" id="diceFormula" style="display:none;"></div>
         <div class="dice-narration" id="diceNarration" style="display:none;"></div>`;
-        // 3D damage dice overlay (appears during damage roll animation)
-        html += '<div class="dmg-dice3d-overlay" id="dmgDice3dOverlay" style="display:none"><div class="dmg-dice3d-particles" id="dmgDice3dParticles"></div><div class="dmg-dice3d-canvas" id="dmgDice3dCanvas"></div><div class="dmg-dice3d-label" id="dmgDice3dLabel"></div><button class="dmg-dice3d-skip" id="dmgDice3dSkip">Pular</button></div>';
     }
     if (s.feed && s.feed.length > 0) {
         const total = s.feed.length;
@@ -659,6 +659,9 @@ function _renderArenaInner(s) {
     app.innerHTML = html;
     void app.offsetWidth; // force reflow
     app.classList.add('fade-in');
+
+    // Ensure full-screen 3D dice overlay exists (persistent, outside #app)
+    _ensureDiceOverlay();
 
     // Init dice animation (combat attack rolls)
     initDice(s.lr);
@@ -2043,6 +2046,20 @@ function showItemPicker(items, enemies, allies) {
 // Replaces inline dice boxes (dice1/dice2) with immersive overlay
 // ═══════════════════════════════════════════════════
 
+// Ensure the full-screen dice overlay exists as a persistent element outside #app
+function _ensureDiceOverlay() {
+    if (document.getElementById('dmgDice3dOverlay')) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'dmg-dice3d-overlay';
+    overlay.id = 'dmgDice3dOverlay';
+    overlay.style.display = 'none';
+    overlay.innerHTML = '<div class="dmg-dice3d-particles" id="dmgDice3dParticles"></div>'
+        + '<div class="dmg-dice3d-canvas" id="dmgDice3dCanvas"></div>'
+        + '<div class="dmg-dice3d-label" id="dmgDice3dLabel"></div>'
+        + '<button class="dmg-dice3d-skip" id="dmgDice3dSkip">Pular</button>';
+    document.body.appendChild(overlay);
+}
+
 function initDice(lr) {
     if (!lr) return;
     const rollType = lr.t || 'attack';
@@ -2095,8 +2112,8 @@ function _initDiceAttackOverlay(lr) {
     };
 
     try {
-        // Phase 1: Roll 3D d20
-        _dmgDice3d = new Dice3D(canvas, { size: 200, dieType: 'd20', duration: 1200, particlesContainer: particles });
+        // Phase 1: Roll 3D d20 (full-screen overlay)
+        _dmgDice3d = new Dice3D(canvas, { size: 220, dieType: 'd20', duration: 1200, particlesContainer: particles });
         const faceValue = Math.min(lr.r, 20);
 
         _dmgDice3d.roll(faceValue, () => {
@@ -2198,7 +2215,7 @@ function _initDiceSave(lr) {
     };
 
     try {
-        _dmgDice3d = new Dice3D(canvas, { size: 200, dieType: 'd20', duration: 1200, particlesContainer: particles });
+        _dmgDice3d = new Dice3D(canvas, { size: 220, dieType: 'd20', duration: 1200, particlesContainer: particles });
         const faceValue = Math.min(lr.r, 20);
 
         _dmgDice3d.roll(faceValue, () => {
@@ -2368,8 +2385,8 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
     };
 
     try {
-        const canvasW = dieCount >= 5 ? 350 : dieCount >= 4 ? 320 : dieCount >= 3 ? 280 : dieCount >= 2 ? 220 : 140;
-        const canvasH = dieCount >= 5 ? 220 : dieCount >= 4 ? 210 : dieCount >= 3 ? 200 : dieCount >= 2 ? 180 : 140;
+        const canvasW = dieCount >= 5 ? 370 : dieCount >= 4 ? 340 : dieCount >= 3 ? 300 : dieCount >= 2 ? 260 : 180;
+        const canvasH = dieCount >= 5 ? 240 : dieCount >= 4 ? 230 : dieCount >= 3 ? 220 : dieCount >= 2 ? 200 : 180;
         const canvasSize = Math.max(canvasW, canvasH);
         _dmgDice3d = new Dice3D(canvas, {
             size: canvasSize, dieType: dieType, duration: DMG_ROLL_MS,
@@ -2453,7 +2470,7 @@ function _initDiceDeathSave(lr) {
     };
 
     try {
-        _dmgDice3d = new Dice3D(canvas, { size: 200, dieType: 'd20', duration: 1800, particlesContainer: particles });
+        _dmgDice3d = new Dice3D(canvas, { size: 220, dieType: 'd20', duration: 1800, particlesContainer: particles });
         const faceValue = Math.min(lr.r, 20);
         _dmgDice3d.roll(faceValue, () => {
             if (label3d) {
@@ -2552,7 +2569,7 @@ function _initDiceEffect(lr) {
         };
 
         try {
-            const canvasSize = parsed.count >= 2 ? 180 : 140;
+            const canvasSize = parsed.count >= 2 ? 200 : 180;
             _dmgDice3d = new Dice3D(canvas, {
                 size: canvasSize, dieType: parsed.type, duration: 1500,
                 particlesContainer: particles

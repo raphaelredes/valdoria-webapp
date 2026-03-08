@@ -556,7 +556,7 @@
             margin-bottom: 4px;
         }
 
-        /* Character sheet summary — NO scroll on main screen */
+        /* Character sheet summary — scrollable content + sticky confirm button */
         #screen-summary {
             overflow-y: hidden !important;
         }
@@ -580,6 +580,14 @@
             min-height: 0;
             /* critical: allows flex child to shrink */
             overflow-y: auto;
+        }
+
+        /* Sticky footer for confirm button — always visible */
+        .summary-footer {
+            flex-shrink: 0;
+            padding: 10px 0 12px;
+            border-top: 1px solid var(--v-border);
+            background: var(--v-bg);
         }
 
         #summaryContent .section-body {
@@ -1135,7 +1143,7 @@
         // STATE
         // ═══════════════════════════════════════════════
         const SCREENS = ['screen-race', 'screen-class', 'screen-stats', 'screen-bg', 'screen-alignment', 'screen-skills', 'screen-tools', 'screen-identity', 'screen-summary'];
-        const SCREEN_NAMES = ['Raça', 'Classe', 'Atributos', 'Antecedente', 'Alinhamento', 'Perícias', 'Ferramentas', 'Identidade', 'Resumo'];
+        const SCREEN_NAMES = ['Raça', 'Classe', 'Atributos', 'Antecedente', 'Alinhamento', 'Perícias', 'Ferramentas', 'Identidade', 'Resumo Final'];
         let currentScreen = 0;
         let isTransitioning = false;
         let sel = { race: null, subrace: '', classKey: null, subclass: '', fightingStyle: '', equipmentChoice: 'A', selectedL1Skill: '', bg: null, personalityTrait: '', ideal: '', bond: '', flaw: '', alignment: '', skillProfs: [], toolProfs: [], gender: null, name: '', surname: '', languages: [], statAssignment: {} };
@@ -3082,9 +3090,10 @@
             const speed_m = (speed * 0.3).toFixed(1).replace('.0', '');
 
             // Helper: collapsible section wrapper
-            function cSec(icon, title, count, bodyHtml) {
+            function cSec(icon, title, count, bodyHtml, startExpanded = false) {
                 const c = count ? ` <span class="section-summary" style="color:var(--v-text-dim)">(${count})</span>` : '';
-                return `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">${icon} ${title}${c}<span class="toggle-arrow">▾</span></div><div class="section-body">${bodyHtml}</div></div>`;
+                const cls = startExpanded ? '' : 'collapsed';
+                return `<div class="detail-section ${cls}"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">${icon} ${title}${c}<span class="toggle-arrow">▾</span></div><div class="section-body">${bodyHtml}</div></div>`;
             }
 
             let html = '';
@@ -3130,7 +3139,7 @@
             hpBody += `<div class="detail-row"><b>HP:</b> ${stats.hp} <span style="color:var(--v-text-dim);font-size:10px">(${cls.hit_die} + mod CON)</span></div>`;
             hpBody += `<div class="detail-row"><b>🔮 ${cls.res}:</b> ${stats.mp} <span style="color:var(--v-text-dim);font-size:10px">${RES_DESC[cls.res] ? '— ' + RES_DESC[cls.res] : ''}</span></div>`;
             hpBody += `<div class="detail-row"><b>♻️</b> ${RECOVERY_PT[cls.rec]}</div>`;
-            html += cSec('❤️', 'Vida & Recurso', '', hpBody);
+            html += cSec('❤️', 'Vida & Recurso', '', hpBody, true);
 
             // --- 2. Saves (collapsible) ---
             let saveBody = '<div class="save-list">';
@@ -3245,8 +3254,8 @@
                 html += `</div>`;
             }
 
-            // Confirm button (inside WebApp, not Telegram MainButton)
-            html += `<button type="button" class="v-btn v-btn-primary btn-block" id="confirmBtn" onclick="submitCharacter()" style="margin-top:16px;font-size:16px;padding:14px 0;letter-spacing:1px">⚔️ CONFIRMAR PERSONAGEM</button>`;
+            // Confirm button in sticky footer (always visible at bottom)
+            html += `<div class="summary-footer"><button type="button" class="v-btn v-btn-primary btn-block" id="confirmBtn" onclick="submitCharacter()" style="margin:0;font-size:16px;padding:14px 0;letter-spacing:1px">⚔️ CONFIRMAR PERSONAGEM</button></div>`;
 
             document.getElementById('summaryContent').innerHTML = html;
 
@@ -3262,17 +3271,32 @@
         // ═══════════════════════════════════════════════
         // SUBMIT
         // ═══════════════════════════════════════════════
+        let _submitting = false;
         async function submitCharacter() {
+            if (_submitting) return; // Guard against double-click
             const err = validateCurrentScreen();
             if (err) { _showValidation(err); return; }
 
-            // Disable confirm button to prevent double-clicks
+            _submitting = true;
             const _confirmBtn = document.getElementById('confirmBtn');
             if (_confirmBtn) {
                 _confirmBtn.disabled = true;
                 _confirmBtn.textContent = '⏳ Criando personagem...';
                 _confirmBtn.style.opacity = '0.6';
+                _confirmBtn.style.pointerEvents = 'none';
             }
+
+            // Timeout: re-enable button if API hangs (20s)
+            const _submitTimeout = setTimeout(() => {
+                _submitting = false;
+                if (_confirmBtn) {
+                    _confirmBtn.disabled = false;
+                    _confirmBtn.textContent = '⚔️ CONFIRMAR PERSONAGEM';
+                    _confirmBtn.style.opacity = '';
+                    _confirmBtn.style.pointerEvents = '';
+                }
+                _showValidation('Tempo esgotado. Tente novamente.');
+            }, 20000);
 
             const bg = BACKGROUNDS[sel.bg];
             const bgSkills = bg ? bg.skills : [];
@@ -3326,6 +3350,7 @@
                     });
                     clearTimeout(_tid2);
                     if (resp.ok) {
+                        clearTimeout(_submitTimeout);
                         const result = await resp.json().catch(() => ({}));
                         console.log('[CHAR_CREATOR] Character submitted via API');
                         // Redirect to prologue WebApp if server provided URL
@@ -3346,6 +3371,7 @@
 
             // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
             try {
+                clearTimeout(_submitTimeout);
                 if (tg && tg.sendData) {
                     tg.sendData(JSON.stringify(payload));
                     setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[CHAR_CREATOR] tg.close:', e); } }, 300);
@@ -3354,13 +3380,15 @@
                     alert('Personagem criado! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
                 }
             } catch (e) {
+                clearTimeout(_submitTimeout);
+                _submitting = false;
                 if (window.ValdoriaErrors) ValdoriaErrors.showError('Erro ao enviar dados. Tente novamente.', e);
                 else _showValidation('Erro ao enviar dados. Tente novamente.');
-                // Re-enable confirm button on failure
                 if (_confirmBtn) {
                     _confirmBtn.disabled = false;
                     _confirmBtn.textContent = '⚔️ CONFIRMAR PERSONAGEM';
                     _confirmBtn.style.opacity = '';
+                    _confirmBtn.style.pointerEvents = '';
                 }
             }
         }
