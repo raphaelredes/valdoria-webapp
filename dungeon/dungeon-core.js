@@ -41,7 +41,7 @@ async function initDungeon() {
             try { tg.disableVerticalSwipes(); } catch (e) { }
             if (tg.BackButton) {
                 tg.BackButton.show();
-                tg.BackButton.onClick(() => handleRetreat());
+                tg.BackButton.onClick(() => { try { tg.close(); } catch (e) { console.warn('[DUNGEON] tg.close:', e); } });
             }
         }
 

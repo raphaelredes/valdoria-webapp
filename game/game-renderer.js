@@ -118,15 +118,9 @@ function renderScreen(screen) {
 
     if (hasFooter) {
         renderFooter(screen.footer);
-        if (window.Telegram && Telegram.WebApp) {
-            Telegram.WebApp.BackButton.show();
-        }
     } else {
         if (quickEl) quickEl.style.display = 'none';
         if (navEl) navEl.style.display = 'none';
-        if (window.Telegram && Telegram.WebApp) {
-            Telegram.WebApp.BackButton.hide();
-        }
     }
 
     // Show bottom panel if there's ANY bottom content

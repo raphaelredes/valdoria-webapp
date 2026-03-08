@@ -2355,7 +2355,7 @@ async function initAsync() {
         try { tg.disableVerticalSwipes(); } catch (e) { console.warn('[EXPLORE] disableVerticalSwipes not supported'); }
         if (tg.BackButton) {
             tg.BackButton.show();
-            tg.BackButton.onClick(() => { showExitRiskAssessment(); });
+            tg.BackButton.onClick(() => { try { tg.close(); } catch (e) { console.warn('[EXPLORE] tg.close:', e); } });
         }
     }
 

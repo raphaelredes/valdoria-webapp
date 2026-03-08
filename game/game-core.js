@@ -84,9 +84,10 @@ async function init() {
         Telegram.WebApp.expand();
         try { Telegram.WebApp.disableVerticalSwipes(); } catch (e) { /* older clients */ }
 
-        // Back button integration
+        // Back button closes the WebApp (in-game navigation uses the footer "Voltar" button)
+        Telegram.WebApp.BackButton.show();
         Telegram.WebApp.BackButton.onClick(() => {
-            doAction('action_universal_back');
+            try { Telegram.WebApp.close(); } catch (e) { console.warn('[GAME] tg.close:', e); }
         });
     } else {
         console.warn('[GAME] Telegram WebApp NOT detected - running outside Telegram?');
@@ -100,8 +101,10 @@ async function init() {
     window.addEventListener('popstate', (e) => {
         // Re-push so the trap stays active for subsequent presses
         history.pushState({ screen: 'game' }, '');
-        // Route through the same back action as Telegram's header button
-        doAction('action_universal_back');
+        // Close the WebApp (same as Telegram's header back button)
+        if (window.Telegram && Telegram.WebApp) {
+            try { Telegram.WebApp.close(); } catch (e2) { console.warn('[GAME] tg.close:', e2); }
+        }
     });
 
     // Visibility change — refresh state when returning to app

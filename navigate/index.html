@@ -1530,122 +1530,113 @@
                 <div class="walk-figure">
                     <svg viewBox="0 0 80 130" fill="none">
                         <!-- === GROUND SHADOW (below bounce group, anchors to ground) === -->
-                        <ellipse class="wk-ground-shadow" cx="33" cy="104" rx="14" ry="3" fill="#0a0806" opacity="0.25"/>
+                        <ellipse class="wk-ground-shadow" cx="33" cy="104" rx="16" ry="3.5" fill="#0a0806" opacity="0.22"/>
 
                         <g class="wk-bounce">
-                            <!-- === CAPE (3-segment filled shapes, behind everything) === -->
+                            <!-- === CAPE (3 segments, behind everything) === -->
                             <g class="wk-cape-1">
-                                <path d="M26 22 Q24 24 22 30 Q20 36 20 42 L24 42 Q24 36 25 30 Q26 26 27 24 Z" fill="#2e2418" opacity="0.65"/>
-                                <!-- Cape rim light (moonlight edge) -->
-                                <path class="wk-cape-rim" d="M26 22 Q24 24 22 30 Q20 36 20 42" stroke="#8a7a60" stroke-width="0.4" fill="none" opacity="0.12"/>
+                                <path d="M25 24 Q22 27 20 34 Q18 42 18 48 L24 46 Q24 40 25 34 Q26 28 27 26 Z" fill="#2e2418" opacity="0.55"/>
                                 <g class="wk-cape-2">
-                                    <path d="M20 40 Q18 48 17 56 Q16 60 17 64 L21 62 Q20 56 20 50 Q21 44 22 42 Z" fill="#2e2418" opacity="0.55"/>
-                                    <path class="wk-cape-rim" d="M20 40 Q18 48 17 56 Q16 60 17 64" stroke="#8a7a60" stroke-width="0.3" fill="none" opacity="0.1"/>
+                                    <path d="M18 46 Q16 54 15 62 Q14 68 16 72 L22 70 Q20 64 20 56 Q20 50 22 46 Z" fill="#2e2418" opacity="0.45"/>
                                     <g class="wk-cape-3">
-                                        <path d="M17 60 Q15 66 14 72 Q14 76 16 78 L20 76 Q19 72 19 68 Q19 64 20 62 Z" fill="#2e2418" opacity="0.45"/>
-                                        <path class="wk-cape-rim" d="M17 60 Q15 66 14 72 Q14 76 16 78" stroke="#8a7a60" stroke-width="0.3" fill="none" opacity="0.08"/>
+                                        <path d="M16 68 Q13 76 12 82 Q12 86 14 88 L20 86 Q18 82 18 76 Q18 72 20 70 Z" fill="#2e2418" opacity="0.35"/>
                                     </g>
                                 </g>
                             </g>
 
-                            <!-- === LEFT LEG (back, dimmer — rendered first = behind) === -->
-                            <g class="wk-hip-l" opacity="0.65">
-                                <path d="M32 52 L31 62 Q31 68 32 72 L35 72 Q35 68 35 62 L34 52 Z" fill="#1a1410"/>
+                            <!-- === LEFT LEG (back, dimmer) === -->
+                            <g class="wk-hip-l" opacity="0.55">
+                                <!-- Left thigh: muscular curve (quad bulges front, hamstring rear) -->
+                                <path d="M30 52 Q28 56 28.5 62 Q29 67 30.5 72 L36 72 Q36 67 36.5 62 Q37.5 56 37 52 Z" fill="#1a1410"/>
                                 <g class="wk-knee-l">
-                                    <path d="M32 72 L31 84 Q32 92 32 96 L35 96 Q35 92 35 84 L35 72 Z" fill="#1a1410"/>
-                                    <!-- Left boot with foot roll -->
+                                    <!-- Left shin: calf muscle bulges at back -->
+                                    <path d="M31 72 Q29.5 76 30 82 Q31 89 32 95 L35 95 Q35.5 89 35.5 82 Q35.5 76 35.5 72 Z" fill="#1a1410"/>
                                     <g class="wk-boot-l">
-                                        <path d="M31 94 L29 99 Q31 100 35 100 L36 97 Q35 94 33 94 Z" fill="#120e0e"/>
-                                        <!-- Boot sole detail -->
-                                        <path d="M29 99 Q32 100.5 35 100" stroke="#0a0806" stroke-width="0.4" fill="none"/>
+                                        <path d="M31 93 L28 98 Q30 100.5 34 100.5 L37 100 L37 96 Q35.5 93 33 93 Z" fill="#120e0e"/>
+                                        <path d="M28 98 Q32 101 37 100" stroke="#0a0806" stroke-width="0.4" fill="none"/>
                                     </g>
-                                    <!-- Dust kick (left foot, fires at 50% of cycle) -->
-                                    <circle class="wk-dust-2" cx="33" cy="99" r="1.5" fill="#8a7a60" opacity="0"/>
-                                    <circle class="wk-dust-2" cx="31" cy="98" r="1" fill="#8a7a60" opacity="0" style="animation-delay:-0.05s"/>
                                 </g>
                             </g>
 
-                            <!-- === LEFT ARM (back, dimmer — filled shapes) === -->
-                            <g class="wk-shoulder-l" opacity="0.6">
-                                <!-- Left upper arm (filled, tapered) -->
-                                <path d="M29 23 L28 29 Q28 33 29 36 L32 36 Q32 33 32 29 L31 23 Z" fill="#2a2018"/>
+                            <!-- === LEFT ARM (back, dimmer) === -->
+                            <g class="wk-shoulder-l" opacity="0.5">
+                                <!-- Left upper arm: 4px wide -->
+                                <path d="M28 24 L26.5 30 Q26.5 33 27 36 L31 36 Q31 33 31 30 L30 24 Z" fill="#2a2018"/>
                                 <g class="wk-elbow-l">
-                                    <!-- Left forearm (filled, tapered) -->
-                                    <path d="M29 36 L27 43 Q26 47 27 49 L30 49 Q30 47 30 43 L32 36 Z" fill="#2a2018"/>
-                                    <!-- Left hand -->
-                                    <circle cx="28" cy="50" r="1.8" fill="#3a2e1e"/>
+                                    <!-- Left forearm: 3.5px wide -->
+                                    <path d="M27.5 36 L26 43 Q25.5 46 26 48 L29.5 48 Q29.5 46 29.5 43 L31 36 Z" fill="#2a2018"/>
+                                    <!-- Hand: r=2 -->
+                                    <circle cx="27.5" cy="49.5" r="2" fill="#2a2018"/>
                                 </g>
                             </g>
 
-                            <!-- === TORSO (breathing pulse wraps all static parts) === -->
+                            <!-- === TORSO (broad shoulders, natural waist) === -->
                             <g class="wk-breath">
-                                <!-- Tunic body -->
-                                <path d="M27 22 Q25 24 25 32 L25 56 Q28 60 32 60 Q36 60 38 56 L38 32 Q38 24 36 22 Z" fill="#221a12"/>
-                                <!-- Tunic shadow (left side, depth) -->
-                                <path d="M25 28 L25 56 Q26 58 28 58 L28 28 Z" fill="#1a1410" opacity="0.15"/>
-                                <!-- Tunic hem sway (lower edge) -->
+                                <!-- Tunic body: shoulders 18px (x=23-41), waist 13px (x=27-40) -->
+                                <path d="M25 23 Q23 25 22 30 Q23 38 25 46 Q28 52 33 52 Q38 52 40 46 Q42 38 42 30 Q41 25 39 23 Z" fill="#221a12"/>
+                                <!-- Shoulder cap (adds volume at shoulder line) -->
+                                <path d="M25 23 Q23 24 22 26 L23 30 Q24 26 26 24 Z" fill="#1a1410" opacity="0.1"/>
+                                <!-- Tunic shadow (left side depth) -->
+                                <path d="M23 28 L25 46 Q27 50 29 50 L27 28 Z" fill="#1a1410" opacity="0.1"/>
+                                <!-- Tunic hem sway -->
                                 <g class="wk-hem">
-                                    <path d="M25 54 Q28 62 32 62 Q36 62 38 54" fill="#221a12"/>
-                                    <path d="M26 56 Q28 60 32 60 Q36 60 37 56" fill="#1a1410" opacity="0.1"/>
+                                    <path d="M25 46 Q29 56 33 56 Q37 56 40 46" fill="#221a12"/>
+                                    <path d="M27 48 Q30 54 33 54 Q36 54 38 48" fill="#1a1410" opacity="0.06"/>
                                 </g>
                                 <!-- Belt -->
-                                <rect x="24" y="50" width="15" height="2.5" rx="1" fill="#3a2e1e"/>
+                                <rect x="25" y="44" width="14" height="2.5" rx="1" fill="#3a2e1e"/>
                                 <!-- Buckle -->
-                                <rect x="30" y="50" width="3" height="2.5" rx="0.5" fill="#5a4428"/>
-                                <!-- Backpack (compact, flush against back) -->
-                                <path d="M23 30 Q22 30 22 32 L22 40 Q22 42 23 42 L26 42 Q27 42 27 40 L27 32 Q27 30 26 30 Z" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.3"/>
-                                <path d="M22 32 Q24 30 27 32" stroke="#4a3828" stroke-width="0.4" fill="none"/>
-                                <!-- Backpack strap (visible shoulder strap) -->
-                                <path d="M25 30 L27 25 Q28 23 29 22" stroke="#2e2418" stroke-width="0.6" fill="none" opacity="0.4"/>
-                                <path d="M25 30 L24 26 Q24 24 25 22" stroke="#2e2418" stroke-width="0.4" fill="none" opacity="0.3"/>
-                                <!-- Neck connection (fills gap between torso and head) -->
-                                <path d="M30 20 Q32 19 34 20 L34 24 Q32 25 30 24 Z" fill="#221a12"/>
+                                <rect x="31" y="44" width="3" height="2.5" rx="0.5" fill="#4a3828"/>
+                                <!-- Backpack (flush against back) -->
+                                <path d="M21 30 Q20 30 20 32 L20 40 Q20 42 21 42 L24 42 Q25 42 25 40 L25 32 Q25 30 24 30 Z" fill="#2e2418" stroke="#3a2e1e" stroke-width="0.3"/>
+                                <!-- Backpack strap -->
+                                <path d="M23 30 L25 25 Q26 23 27 23" stroke="#2e2418" stroke-width="0.5" fill="none" opacity="0.3"/>
+                                <!-- Neck connection -->
+                                <path d="M30 19 Q32 18 34 19 L35 23 Q33 24 30 23 Z" fill="#221a12"/>
                             </g>
 
                             <!-- === RIGHT LEG (front, full opacity) === -->
                             <g class="wk-hip-r">
-                                <path d="M32 52 L31 62 Q31 68 32 72 L35 72 Q35 68 36 62 L35 52 Z" fill="#151010"/>
+                                <!-- Right thigh: muscular curve (quad bulges front, tapers to knee) -->
+                                <path d="M30 52 Q28 56 28.5 62 Q29 67 30.5 72 L36 72 Q36 67 37 62 Q38 56 37 52 Z" fill="#151010"/>
                                 <g class="wk-knee-r">
-                                    <path d="M32 72 L31 84 Q32 92 32 96 L35 96 Q35 92 36 84 L35 72 Z" fill="#151010"/>
-                                    <!-- Right boot with foot roll -->
+                                    <!-- Right shin: calf muscle bulges at back, tapers to ankle -->
+                                    <path d="M31 72 Q29.5 76 30 82 Q31 89 32 95 L35 95 Q35.5 89 35.5 82 Q35.5 76 35.5 72 Z" fill="#151010"/>
                                     <g class="wk-boot-r">
-                                        <path d="M31 94 L29 99 Q31 100 35 100 L36 97 Q35 94 33 94 Z" fill="#120e0e"/>
-                                        <path d="M29 99 Q32 100.5 35 100" stroke="#0a0806" stroke-width="0.4" fill="none"/>
+                                        <path d="M31 93 L28 98 Q30 100.5 34 100.5 L37 100 L37 96 Q35.5 93 33 93 Z" fill="#120e0e"/>
+                                        <path d="M28 98 Q32 101 37 100" stroke="#0a0806" stroke-width="0.4" fill="none"/>
                                     </g>
-                                    <!-- Dust kick (right foot, fires at 0% of cycle) -->
-                                    <circle class="wk-dust" cx="33" cy="99" r="1.5" fill="#8a7a60" opacity="0"/>
-                                    <circle class="wk-dust" cx="31" cy="98" r="1" fill="#8a7a60" opacity="0" style="animation-delay:-0.05s"/>
                                 </g>
                             </g>
 
-                            <!-- === RIGHT ARM (front, full opacity — filled shapes) + staff === -->
+                            <!-- === RIGHT ARM (front, full opacity) === -->
                             <g class="wk-shoulder-r">
-                                <!-- Right upper arm (filled, tapered) -->
-                                <path d="M36 23 L37 29 Q37 33 37 36 L39 36 Q39 33 39 29 L38 23 Z" fill="#2a2018"/>
+                                <!-- Right upper arm: 4px wide -->
+                                <path d="M37 24 L38 30 Q38 33 38 36 L41.5 36 Q41.5 33 41 30 L39.5 24 Z" fill="#2a2018"/>
                                 <g class="wk-elbow-r">
-                                    <!-- Right forearm (filled, tapered) -->
-                                    <path d="M37 36 L38 43 Q38 47 38 49 L40 49 Q40 47 40 43 L39 36 Z" fill="#2a2018"/>
-                                    <!-- Right hand -->
-                                    <circle cx="39" cy="50" r="1.8" fill="#3a2e1e"/>
+                                    <!-- Right forearm: 3.5px wide -->
+                                    <path d="M38 36 L39 43 Q39 46 39 48 L42 48 Q42 46 41.5 43 L41.5 36 Z" fill="#2a2018"/>
+                                    <!-- Hand: r=2 -->
+                                    <circle cx="40" cy="49.5" r="2" fill="#2a2018"/>
                                 </g>
                             </g>
 
-                            <!-- === HEAD / HOOD (topmost layer) === -->
+                            <!-- === HEAD / HOOD (topmost) === -->
                             <g class="wk-head">
-                                <!-- Hood shape (medieval pointed hood) -->
-                                <path d="M28 10 Q26 8 27 3 Q30 0 35 1 Q38 3 38 8 L38 22 Q36 24 32 24 Q28 24 28 22 Z" fill="#221a12"/>
-                                <!-- Hood tip flap (secondary motion on peak) -->
+                                <!-- Hood shape (proportional to wider body) -->
+                                <path d="M27 10 Q25.5 8 26 3 Q29 0 34 1 Q38 3 38.5 8 L38.5 20 Q37 22 32.5 22 Q28 22 27 20 Z" fill="#221a12"/>
+                                <!-- Hood tip flap -->
                                 <g class="wk-hood-tip">
-                                    <path d="M27 3 Q29 -1 31 0 Q30 1 28 4 Z" fill="#2e2418" opacity="0.5"/>
+                                    <path d="M26 3 Q28.5 -1 31 0.5 Q29.5 2 27 5 Z" fill="#2e2418" opacity="0.4"/>
                                 </g>
-                                <!-- Hood fold detail -->
-                                <path d="M30 4 Q32 2 34 3" stroke="#2e2418" stroke-width="0.5" fill="none" opacity="0.4"/>
+                                <!-- Hood fold -->
+                                <path d="M29 5 Q31.5 3 34 4" stroke="#2e2418" stroke-width="0.4" fill="none" opacity="0.3"/>
                                 <!-- Hood brim shadow -->
-                                <path d="M28 22 Q30 23 32 23 Q34 23 36 22" stroke="#1a1410" stroke-width="0.8" fill="none" opacity="0.4"/>
-                                <!-- Face shadow (under hood) -->
-                                <path d="M34 10 Q36 12 36 16 Q35 18 34 18 Q33 16 34 12 Z" fill="#1a1410" opacity="0.3"/>
-                                <!-- Eye glow (tiny ember, very subtle) -->
-                                <circle class="wk-eye" cx="36" cy="13" r="0.8" fill="#c4953a" opacity="0.15"/>
+                                <path d="M27 20 Q30 21 32.5 21 Q35 21 37.5 20" stroke="#1a1410" stroke-width="0.7" fill="none" opacity="0.3"/>
+                                <!-- Face shadow -->
+                                <path d="M34 10 Q36 12 36 16 Q35.5 17.5 34 17.5 Q33 15.5 34 12 Z" fill="#1a1410" opacity="0.25"/>
+                                <!-- Eye glow -->
+                                <circle class="wk-eye" cx="36" cy="13" r="0.7" fill="#c4953a" opacity="0.12"/>
                             </g>
                         </g>
                     </svg>
