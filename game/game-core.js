@@ -92,6 +92,18 @@ async function init() {
         console.warn('[GAME] Telegram WebApp NOT detected - running outside Telegram?');
     }
 
+    // ─── Browser Back Button Trap ───
+    // Push a history entry so the phone's physical back button triggers popstate
+    // instead of navigating away from the WebApp entirely.
+    history.replaceState({ screen: 'init' }, '');
+    history.pushState({ screen: 'game' }, '');
+    window.addEventListener('popstate', (e) => {
+        // Re-push so the trap stays active for subsequent presses
+        history.pushState({ screen: 'game' }, '');
+        // Route through the same back action as Telegram's header button
+        doAction('action_universal_back');
+    });
+
     // Visibility change — refresh state when returning to app
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && S.currentScreen) {
