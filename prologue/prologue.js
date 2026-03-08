@@ -251,7 +251,23 @@ function showDiceRoll(result) {
                 'Você tenta assustar os lobos, mas o líder da matilha não se intimida. ' +
                 'Ele rosna e avança! Não há outra opção — é lutar ou morrer!'
             );
-            actions.innerHTML = `<button class="hero-btn" onclick="haptic('heavy'); onDistractFail()">⚔️ Lutar!</button>`;
+            // Auto-transition to combat after 2000ms (timed overlay rule)
+            // Skip button appears after 500ms (double-fire guard)
+            let _failDone = false;
+            const goFight = () => {
+                if (_failDone) return;
+                _failDone = true;
+                haptic('heavy');
+                onDistractFail();
+            };
+            actions.innerHTML = `<button class="v-skip-btn" id="distractFailSkip">⚔️ Lutar!</button>`;
+            setTimeout(() => {
+                if (!_failDone) {
+                    const skipBtn = document.getElementById('distractFailSkip');
+                    if (skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = goFight; }
+                }
+            }, 500);
+            setTimeout(goFight, 2500);
         }
 
         try { if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error'); } catch (e) {}
@@ -287,7 +303,22 @@ function _showDiceRollFallback(result) {
         } else {
             narrative.innerHTML = 'Você tenta assustar os lobos, mas o líder da matilha não se intimida. ' +
                 'Ele rosna e avança! Não há outra opção — é lutar ou morrer!';
-            actions.innerHTML = `<button class="hero-btn" onclick="haptic('heavy'); onDistractFail()">⚔️ Lutar!</button>`;
+            // Auto-transition to combat after 2500ms (timed overlay rule)
+            let _failDone = false;
+            const goFight = () => {
+                if (_failDone) return;
+                _failDone = true;
+                haptic('heavy');
+                onDistractFail();
+            };
+            actions.innerHTML = `<button class="v-skip-btn" id="distractFailSkipFb">⚔️ Lutar!</button>`;
+            setTimeout(() => {
+                if (!_failDone) {
+                    const skipBtn = document.getElementById('distractFailSkipFb');
+                    if (skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = goFight; }
+                }
+            }, 500);
+            setTimeout(goFight, 2500);
         }
     }, 1200);
 }
