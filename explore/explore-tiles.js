@@ -732,6 +732,189 @@ function drawPOIMarker(ctx, cx, cy, icon, timestamp) {
     ctx.fillText('!', cx, my);
 }
 
+// ═══════════════════════════════════════════
+// WIND-ANIMATED VEGETATION (dynamic pass)
+// ═══════════════════════════════════════════
+
+// Conifer helper with wind sway on tips (ref: navigate banner oscillation)
+function _drawConiferWind(ctx, tx, ty, scale, darkColor, lightColor, wind) {
+    const s = scale || 1;
+    const w = wind || 0;
+    // Trunk (stays fixed)
+    ctx.fillStyle = '#3a2a1a';
+    ctx.fillRect(tx - 1 * s, ty - 2 * s, 2 * s, 5 * s);
+    // Canopy — tip sways with wind via quadraticCurveTo
+    ctx.beginPath();
+    ctx.moveTo(tx + w * s, ty - 12 * s);
+    ctx.quadraticCurveTo(tx + w * 0.5 * s + 2.5 * s, ty - 6 * s, tx + 5 * s, ty - 1 * s);
+    ctx.lineTo(tx - 5 * s, ty - 1 * s);
+    ctx.quadraticCurveTo(tx + w * 0.5 * s - 2.5 * s, ty - 6 * s, tx + w * s, ty - 12 * s);
+    ctx.closePath();
+    ctx.fillStyle = darkColor || '#1a4a1a';
+    ctx.fill();
+    // Second layer
+    ctx.beginPath();
+    ctx.moveTo(tx + w * 0.8 * s, ty - 14 * s);
+    ctx.quadraticCurveTo(tx + w * 0.4 * s + 1.5 * s, ty - 10 * s, tx + 3.5 * s, ty - 7 * s);
+    ctx.lineTo(tx - 3.5 * s, ty - 7 * s);
+    ctx.quadraticCurveTo(tx + w * 0.4 * s - 1.5 * s, ty - 10 * s, tx + w * 0.8 * s, ty - 14 * s);
+    ctx.closePath();
+    ctx.fillStyle = lightColor || '#2a5a2a';
+    ctx.fill();
+}
+
+// Wind-animated tree decoration (4-phase oscillation like navigate banner)
+function drawTreeDecorationWind(ctx, cx, cy, biome, col, row, timestamp) {
+    const r1 = tileRand(col, row, 1);
+    const r2 = tileRand(col, row, 2);
+    const r3 = tileRand(col, row, 3);
+    const r4 = tileRand(col, row, 4);
+    const r5 = tileRand(col, row, 5);
+    const seed = col * 7 + row * 13;
+    const wind = Math.sin(timestamp * 0.0012 + seed) * 2;
+    const wind2 = Math.sin(timestamp * 0.0015 + seed * 1.3) * 1.5;
+
+    // Isometric shadow (static)
+    _drawDecorationShadow(ctx, cx, cy, 11, 4);
+
+    if (biome === 'swamp') {
+        const tx = cx + (r1 - 0.5) * 6;
+        const ty = cy + (r2 - 0.5) * 3;
+        ctx.fillStyle = '#1a3a16';
+        ctx.fillRect(tx - 1.5, ty - 6, 3, 10);
+        // Canopy sways
+        ctx.beginPath();
+        ctx.arc(tx + wind * 0.6, ty - 7, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#2a4a1a';
+        ctx.fill();
+        // Swaying vines with bezier curves
+        ctx.strokeStyle = '#1a3a16';
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(tx - 4, ty - 4);
+        ctx.quadraticCurveTo(tx - 4.5 + wind * 0.8, ty - 1, tx - 5 + wind, ty + 2);
+        ctx.moveTo(tx + 3, ty - 5);
+        ctx.quadraticCurveTo(tx + 3.5 + wind * 0.6, ty - 2, tx + 4 + wind * 0.8, ty + 1);
+        ctx.moveTo(tx - 1, ty - 2);
+        ctx.quadraticCurveTo(tx - 1.5 + wind * 0.4, ty + 0.5, tx - 2 + wind * 0.6, ty + 3);
+        ctx.stroke();
+        if (r3 > 0.3) {
+            const tx2 = cx + (r3 - 0.2) * 10;
+            const ty2 = cy + (r4 - 0.4) * 4;
+            ctx.fillStyle = '#1a3016';
+            ctx.fillRect(tx2 - 1, ty2 - 4, 2, 7);
+            ctx.beginPath();
+            ctx.arc(tx2 + wind2 * 0.4, ty2 - 5, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#1a3a16';
+            ctx.fill();
+        }
+        ctx.fillStyle = '#6a5a3a';
+        ctx.beginPath();
+        ctx.arc(cx + 6, cy + 3, 1.5, Math.PI, 0);
+        ctx.fill();
+        ctx.fillRect(cx + 5.5, cy + 3, 1, 2);
+
+    } else if (biome === 'plains') {
+        const trees = r5 > 0.4 ? 3 : 2;
+        const positions = [
+            [cx + (r1 - 0.5) * 6, cy + (r2 - 0.5) * 3, 1],
+            [cx + (r3 - 0.5) * 12, cy + (r4 - 0.3) * 5, 0.8],
+            [cx + (r5 - 0.6) * 10, cy + (r2 * 0.4) * 4, 0.65],
+        ];
+        for (let i = 0; i < trees; i++) {
+            const [tx, ty, s] = positions[i];
+            const w = wind * s;
+            ctx.fillStyle = '#4a3020';
+            ctx.fillRect(tx - 1.5 * s, ty - 3 * s, 3 * s, 7 * s);
+            // Canopy sways with wind
+            ctx.beginPath();
+            ctx.arc(tx + w * 0.5, ty - 6 * s, 6 * s, 0, Math.PI * 2);
+            ctx.fillStyle = i === 0 ? '#3a7a2a' : '#2a6a1a';
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.beginPath();
+            ctx.arc(tx + w * 0.5 - 1 * s, ty - 7 * s, 3 * s, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        if (r4 > 0.5) {
+            ctx.fillStyle = '#c87a30';
+            ctx.beginPath();
+            ctx.arc(cx - 7, cy + 2, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#d44a60';
+            ctx.beginPath();
+            ctx.arc(cx + 8, cy - 1, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+    } else {
+        // Default conifer with swaying tips (forest, mountain, graveyard)
+        const darkGreen = biome === 'graveyard' ? '#1a2a1a' : '#1a4a1a';
+        const lightGreen = biome === 'graveyard' ? '#0d200d' : '#0d3a0d';
+
+        const tx1 = cx + (r1 - 0.5) * 6;
+        const ty1 = cy + (r2 - 0.5) * 3;
+        _drawConiferWind(ctx, tx1, ty1, 1, darkGreen, darkGreen, wind);
+
+        const tx2 = cx + (r3 - 0.5) * 12;
+        const ty2 = cy + (r4 - 0.3) * 5;
+        _drawConiferWind(ctx, tx2, ty2, 0.7, lightGreen, lightGreen, wind2);
+
+        if (r5 > 0.4) {
+            const tx3 = cx + (r5 - 0.6) * 10;
+            const ty3 = cy + (r1 * 0.4 + 0.1) * 4;
+            _drawConiferWind(ctx, tx3, ty3, 0.55, darkGreen, lightGreen, wind * 0.7);
+        }
+
+        if (biome === 'forest') {
+            _drawBush(ctx, cx + 7, cy + 3, 2.5, '#1a3a10');
+            if (r4 > 0.5) _drawBush(ctx, cx - 6, cy + 2, 2, '#1a3a10');
+        }
+    }
+}
+
+// Wind-animated grass decoration
+function drawGrassDecorationWind(ctx, cx, cy, col, row, biome, timestamp) {
+    const seed = col * 7 + row * 13;
+    const wind = Math.sin(timestamp * 0.0015 + seed) * 1.5;
+    const wind2 = Math.sin(timestamp * 0.0018 + seed * 1.7) * 1;
+
+    const grassColor = biome === 'snow' ? '#8a9a8a' : biome === 'swamp' ? '#3a5a2a' : '#4a7a3a';
+    ctx.strokeStyle = grassColor;
+    ctx.lineWidth = 0.7;
+    // Grass tufts with swaying tips via quadraticCurveTo
+    for (let i = 0; i < 4; i++) {
+        const gx = cx + (tileRand(col, row, 90 + i) - 0.5) * 14;
+        const gy = cy + (tileRand(col, row, 93 + i) - 0.5) * 8;
+        const w = (i % 2 === 0) ? wind : wind2;
+        ctx.beginPath();
+        ctx.moveTo(gx, gy);
+        ctx.quadraticCurveTo(gx - 1 + w * 0.5, gy - 2, gx - 2 + w, gy - 4);
+        ctx.moveTo(gx, gy);
+        ctx.quadraticCurveTo(gx + 0.5 + w * 0.5, gy - 1.8, gx + 1 + w * 0.8, gy - 3.5);
+        ctx.moveTo(gx + 0.5, gy);
+        ctx.quadraticCurveTo(gx + 1.5 + w * 0.3, gy - 1.5, gx + 2.5 + w * 0.6, gy - 3);
+        ctx.stroke();
+    }
+    // Bushes (heavy, minimal sway)
+    if ((biome === 'forest' || biome === 'plains') && tileRand(col, row, 97) > 0.5) {
+        _drawBush(ctx, cx + (tileRand(col, row, 98) - 0.5) * 10, cy + 1, 2.5,
+            biome === 'forest' ? '#1a3a10' : '#3a6a20');
+    }
+    // Flowers in plains
+    if (biome === 'plains' && tileRand(col, row, 99) > 0.4) {
+        const colors = ['#d44a60', '#c87a30', '#8a5aaa', '#4a8ac0'];
+        for (let i = 0; i < 2; i++) {
+            ctx.fillStyle = colors[Math.floor(tileRand(col, row, 110 + i) * colors.length)];
+            const fx = cx + (tileRand(col, row, 112 + i) - 0.5) * 12;
+            const fy = cy + (tileRand(col, row, 114 + i) - 0.5) * 6;
+            ctx.beginPath();
+            ctx.arc(fx, fy, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
 // Dispatch decoration drawing based on tile char and biome
 function drawTileDecoration(ctx, cx, cy, tile, biome, col, row, timestamp) {
     switch (tile) {

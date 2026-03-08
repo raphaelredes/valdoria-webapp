@@ -50,6 +50,9 @@ function initRenderer() {
     // Fog init
     initFog(_canvas.width, _canvas.height);
 
+    // Minimap init
+    initMinimap();
+
     // Click handler on canvas
     _canvas.addEventListener('click', handleCanvasClick);
 
@@ -135,7 +138,10 @@ function renderFrame(timestamp) {
     // 10. Fog of war (drawn last, on top of everything)
     drawFogOverlay(_ctx, _canvasLogicalW, _canvasLogicalH, S.fogState);
 
-    // 11. Smooth camera follow during movement
+    // 11. Minimap (only redraws when dirty)
+    drawMinimap();
+
+    // 12. Smooth camera follow during movement
     if (isMoving()) {
         _smoothCameraFollow();
     }
@@ -211,7 +217,9 @@ function drawTile(ctx, col, row, biome, colors, timestamp) {
     ctx.fillRect(cx - HEX_W / 2, cy - heightPx - HEX_H / 2, HEX_W, HEX_H);
 
     // Static decorations (trees, rocks, etc. — not animated ones)
-    if (baseTile !== 'w' && baseTile !== 'W' && baseTile !== 'L') {
+    // Skip vegetation (T, g) in wind biomes — rendered dynamically with wind animation
+    const isWindVeg = WIND_BIOMES.has(biome) && (baseTile === 'T' || baseTile === 'g');
+    if (baseTile !== 'w' && baseTile !== 'W' && baseTile !== 'L' && !isWindVeg) {
         drawTileDecoration(ctx, cx, cy - heightPx, baseTile, biome, col, row, 0);
     }
 
@@ -234,17 +242,18 @@ function drawTile(ctx, col, row, biome, colors, timestamp) {
     ctx.stroke();
 }
 
-// Draw animated tile decorations (water, lava — skip static cache)
+// Draw animated tile decorations (water, lava, wind-animated vegetation)
 function drawAnimatedTiles(ctx, timestamp) {
     const biome = S.biome || 'forest';
+    const isWindy = WIND_BIOMES.has(biome);
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
             const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            const center = hexToScreen(col, row);
+
             if (baseTile === 'w' || baseTile === 'W' || baseTile === 'L') {
-                const center = hexToScreen(col, row);
                 const h = (TILE_HEIGHT[baseTile] || 0) * UNIT_PX;
-                // Clip to top face
                 const topVerts = hexTopVertices(center.x, center.y - h);
                 ctx.save();
                 ctx.beginPath();
@@ -253,6 +262,22 @@ function drawAnimatedTiles(ctx, timestamp) {
                 ctx.closePath();
                 ctx.clip();
                 drawTileDecoration(ctx, center.x, center.y - h, baseTile, biome, col, row, timestamp);
+                ctx.restore();
+            } else if (isWindy && (baseTile === 'T' || baseTile === 'g')) {
+                // Wind-animated vegetation (moved from static cache)
+                const hPx = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+                const topVerts = hexTopVertices(center.x, center.y - hPx);
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(topVerts[0].x, topVerts[0].y);
+                for (let i = 1; i < topVerts.length; i++) ctx.lineTo(topVerts[i].x, topVerts[i].y);
+                ctx.closePath();
+                ctx.clip();
+                if (baseTile === 'T') {
+                    drawTreeDecorationWind(ctx, center.x, center.y - hPx, biome, col, row, timestamp);
+                } else {
+                    drawGrassDecorationWind(ctx, center.x, center.y - hPx, col, row, biome, timestamp);
+                }
                 ctx.restore();
             }
         }
@@ -467,6 +492,7 @@ function onMoveComplete(col, row) {
     if (typeof updateLocationInfo === 'function') updateLocationInfo();
     tickConditions();
     updateAtmosphere();
+    updateMinimap();
     scrollCanvasToPlayer(true);
 
     // Environmental hazard check (priority over POI/exit)
@@ -613,6 +639,88 @@ function _smoothCameraFollow() {
 
     viewport.scrollLeft = Math.max(0, newX);
     viewport.scrollTop = Math.max(0, newY);
+}
+
+// ═══════════════════════════════════════════════════════
+// MINIMAP — small overview in top-right corner
+// ═══════════════════════════════════════════════════════
+let _minimapCanvas = null;
+let _minimapCtx = null;
+let _minimapDirty = true;
+
+function initMinimap() {
+    _minimapCanvas = document.getElementById('minimap');
+    if (!_minimapCanvas) return;
+    _minimapCtx = _minimapCanvas.getContext('2d');
+    _minimapDirty = true;
+}
+
+function updateMinimap() { _minimapDirty = true; }
+
+function drawMinimap() {
+    if (!_minimapCanvas || !_minimapCtx || !_minimapDirty) return;
+    _minimapDirty = false;
+
+    const w = _minimapCanvas.width;
+    const h = _minimapCanvas.height;
+    const ctx = _minimapCtx;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#1a1520';
+    ctx.fillRect(0, 0, w, h);
+
+    const cellW = w / COLS;
+    const cellH = h / ROWS;
+    const biome = S.biome || 'forest';
+    const colors = BIOME_COLORS[biome] || BIOME_COLORS.forest;
+
+    // Draw grid cells
+    for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+            const key = `${col},${row}`;
+            if (S.fogState[key] === 'hidden') continue;
+
+            const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+            const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            const color = colors[baseTile] || colors['.'] || '#3a3a3a';
+
+            if (S.fogState[key] === 'dim') ctx.globalAlpha = 0.4;
+            ctx.fillStyle = color;
+            ctx.fillRect(col * cellW, row * cellH, cellW + 0.5, cellH + 0.5);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // Exit marker (green)
+    if (S.fogState[`${S.exitCol},${S.exitRow}`] === 'visible') {
+        ctx.fillStyle = '#4ad680';
+        ctx.beginPath();
+        ctx.arc(S.exitCol * cellW + cellW / 2, S.exitRow * cellH + cellH / 2, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // POI markers (white)
+    for (const poi of S.pois) {
+        if (S.poisResolved.has(poi.id)) continue;
+        const key = `${poi.col},${poi.row}`;
+        if (S.fogState[key] !== 'visible') continue;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(poi.col * cellW + cellW / 2, poi.row * cellH + cellH / 2, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Player marker (gold with glow)
+    const px = S.playerCol * cellW + cellW / 2;
+    const py = S.playerRow * cellH + cellH / 2;
+    ctx.fillStyle = 'rgba(196,149,58,0.4)';
+    ctx.beginPath();
+    ctx.arc(px, py, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#c4953a';
+    ctx.beginPath();
+    ctx.arc(px, py, 3, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 // Mark static cache as dirty (forces redraw)
