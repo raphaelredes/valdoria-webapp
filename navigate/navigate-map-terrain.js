@@ -145,7 +145,7 @@ function _hexVisibility(col, row, knownSet, discoveredSet) {
 }
 
 // ── Ground cover (ink marks per biome) ──
-function renderGroundCover(svg) {
+function renderGroundCover(svg, insertBefore) {
     const gG = _el('g', { class: 'ground-cover', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
     const biomeCache = new Map();
     const allHexes = [...TERRAIN_HEXES, ..._buildAutoFillHexes()];
@@ -161,7 +161,8 @@ function renderGroundCover(svg) {
             for (const s of strokes) gG.appendChild(s);
         }
     }
-    svg.appendChild(gG);
+    if (insertBefore) svg.insertBefore(gG, insertBefore);
+    else svg.appendChild(gG);
 }
 
 function _groundCoverStrokes(x, y, biome, seed) {
@@ -309,7 +310,7 @@ function renderTerrainRegions(svg, fogState) {
 // TERRAIN DETAILS — Hand-drawn ink symbols per biome
 // ══════════════════════════════════════════════════════════
 
-function renderTerrainDetails(svg, fogState) {
+function renderTerrainDetails(svg, fogState, insertBefore) {
     const knownSet = new Set(S.knownLocs);
     const discoveredSet = new Set(S.discoveredLocs || []);
     const tG = _el('g', { class: 'terrain-illust', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
@@ -341,7 +342,8 @@ function renderTerrainDetails(svg, fogState) {
             tG.appendChild(g);
         }
     }
-    svg.appendChild(tG);
+    if (insertBefore) svg.insertBefore(tG, insertBefore);
+    else svg.appendChild(tG);
 }
 
 // ══════════════════════════════════════════════════════════

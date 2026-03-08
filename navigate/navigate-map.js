@@ -71,7 +71,10 @@ const LANDMASS_POINTS = (() => {
     });
 })();
 
+// Cache: landmass path string is deterministic and called 4+ times per render
+let _cachedLandmassPath = null;
 function _landmassPath() {
+    if (_cachedLandmassPath) return _cachedLandmassPath;
     const p = LANDMASS_POINTS;
     let d = `M${p[0][0]},${p[0][1]}`;
     for (let i = 1; i < p.length; i++) {
@@ -85,6 +88,7 @@ function _landmassPath() {
         d += ` C${cpx1},${cpy1} ${cpx2},${cpy2} ${curr[0]},${curr[1]}`;
     }
     d += ' Z';
+    _cachedLandmassPath = d;
     return d;
 }
 
@@ -210,27 +214,23 @@ async function renderMapAsync(onProgress) {
     svg.appendChild(defs);
     _renderBackground(svg);
     _renderLandmass(svg);
-    if (onProgress) onProgress(20);
+    if (onProgress) onProgress(25);
     await _yieldFrame();
 
-    // Phase 2: Functional map (terrain, rivers, roads, locations) — what the player needs
-    renderGroundCover(svg);
+    // Phase 2: Essential map (biome colors, rivers, roads, locations)
+    // This is what the player NEEDS to navigate — skip ground cover & terrain details
     _renderRivers(svg);
     renderTerrainRegions(svg, fogState);
-    if (onProgress) onProgress(45);
-    await _yieldFrame();
-
-    renderTerrainDetails(svg, fogState);
     const roadG = _el('g', { class: 'roads-layer' });
     renderRoads(roadG, fogState);
     svg.appendChild(roadG);
+    if (onProgress) onProgress(55);
+    await _yieldFrame();
+
+    // Phase 3: Location markers + interactive elements
     const locG = _el('g', { class: 'locations-layer' });
     renderLocationMarkers(locG, fogState);
     svg.appendChild(locG);
-    if (onProgress) onProgress(70);
-    await _yieldFrame();
-
-    // Phase 3: Interactive elements (rings, banner, fog, compass, pan/zoom)
     if (typeof renderDistanceRings === 'function') renderDistanceRings(svg);
     if (typeof renderBreadcrumbTrail === 'function') renderBreadcrumbTrail(svg);
     renderPlayerBanner(svg);
@@ -239,29 +239,41 @@ async function renderMapAsync(onProgress) {
     setupPanZoom();
     if (onProgress) onProgress(100);
 
-    // Phase 4 (deferred): Decorative layers rendered AFTER loading screen hides.
-    // These are the heaviest renders (~500+ SVG elements, SVG filter usage)
-    // but are purely cosmetic — the map is fully usable without them.
+    // Phase 4 (deferred): ALL decorative/texture layers rendered AFTER loading hides.
+    // Staggered across multiple frames to avoid a single heavy frame that causes jank.
+    // Total deferred: ~2200+ SVG elements (worn edges, aging, ground cover, terrain details, decor)
+    _deferDecorativeLayers(svg, fogState);
+}
+
+// Staggered deferred rendering — spreads heavy work across multiple frames
+function _deferDecorativeLayers(svg, fogState) {
+    // Frame 1: Worn edges + aging (insert behind terrain but above landmass)
     requestAnimationFrame(() => {
-        // Insert worn edges and aging BEHIND functional layers but ABOVE landmass.
-        // Find the ground-cover group or first terrain group to insert before it.
-        const groundCover = svg.querySelector('.ground-cover') || svg.querySelector('.terrain-regions');
-        if (groundCover) {
-            // Build in a fragment to avoid multiple reflows
-            const frag = document.createDocumentFragment();
-            const wornG = _el('g', { class: 'worn-edges-deferred' });
-            _renderWornEdgesInto(wornG);
-            frag.appendChild(wornG);
-            const agingG = _el('g', { class: 'aging-deferred' });
-            _renderAgingEffectsInto(agingG);
-            frag.appendChild(agingG);
-            svg.insertBefore(frag, groundCover);
-        } else {
-            _renderWornEdges(svg);
-            _renderAgingEffects(svg);
-        }
-        // Cartography decorations (corner flourishes) also deferred
-        renderCartographyDecor(svg, fogState);
+        const terrainRegions = svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer');
+        const frag = document.createDocumentFragment();
+        const wornG = _el('g', { class: 'worn-edges-deferred', 'pointer-events': 'none' });
+        _renderWornEdgesInto(wornG);
+        frag.appendChild(wornG);
+        const agingG = _el('g', { class: 'aging-deferred' });
+        _renderAgingEffectsInto(agingG);
+        frag.appendChild(agingG);
+        if (terrainRegions) svg.insertBefore(frag, terrainRegions);
+        else svg.appendChild(frag);
+
+        // Frame 2: Ground cover (subtle background texture, insert before terrain regions)
+        requestAnimationFrame(() => {
+            const insertBefore = svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer');
+            renderGroundCover(svg, insertBefore);
+
+            // Frame 3: Terrain details (trees, mountains — heaviest single layer)
+            requestAnimationFrame(() => {
+                renderTerrainDetails(svg, fogState, svg.querySelector('.roads-layer'));
+                // Frame 4: Cartography decorations (corner flourishes)
+                requestAnimationFrame(() => {
+                    renderCartographyDecor(svg, fogState);
+                });
+            });
+        });
     });
 }
 
