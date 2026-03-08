@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    INN SLEEP ANIMATION — Cinematic overlay styles
-   Medieval-themed fullscreen overlay with fade transitions
-   for the inn rest animation sequence.
+   Medieval-themed fullscreen overlay with fade transitions,
+   floating particles, and smooth recovery bar animations.
    ═══════════════════════════════════════════════════════════════ */
 
 /* No scrollbars (mandatory) */
@@ -19,6 +19,7 @@
     background: radial-gradient(ellipse at 50% 40%, #0a0a2e 0%, #050510 100%);
     transition: background 0.8s ease;
     animation: innFadeIn 0.5s ease-out;
+    overflow: hidden;
 }
 @keyframes innFadeIn {
     from { opacity: 0; }
@@ -38,9 +39,66 @@
     inset: 0;
     background: radial-gradient(ellipse at 50% 50%, transparent 25%, rgba(0,0,0,0.6) 100%);
     pointer-events: none;
+    z-index: 0;
 }
 
-/* Frame container — fades in/out */
+/* ─── Floating Particles (stars + embers) ─── */
+.inn-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+.inn-particle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+}
+/* Stars — small white/gold dots that twinkle */
+.inn-particle.star {
+    width: 2px;
+    height: 2px;
+    background: #dbb668;
+    box-shadow: 0 0 4px 1px rgba(219, 182, 104, 0.4);
+    animation: innStarTwinkle var(--dur, 3s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes innStarTwinkle {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    20%      { opacity: 0.8; transform: scale(1); }
+    50%      { opacity: 0.3; transform: scale(0.7); }
+    80%      { opacity: 0.9; transform: scale(1.1); }
+}
+/* Embers — warm orange dots that drift upward */
+.inn-particle.ember {
+    width: 3px;
+    height: 3px;
+    background: #c4953a;
+    box-shadow: 0 0 6px 2px rgba(196, 149, 58, 0.3);
+    animation: innEmberFloat var(--dur, 5s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes innEmberFloat {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+    20%  { opacity: 0.6; }
+    80%  { opacity: 0.3; }
+    100% { opacity: 0; transform: translateY(-120px) scale(0.2); }
+}
+/* Fireflies — larger soft glow for wealthy tier */
+.inn-particle.firefly {
+    width: 4px;
+    height: 4px;
+    background: #e8d48a;
+    box-shadow: 0 0 10px 3px rgba(232, 212, 138, 0.3);
+    animation: innFirefly var(--dur, 6s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes innFirefly {
+    0%, 100% { opacity: 0; transform: translate(0, 0); }
+    25%      { opacity: 0.5; transform: translate(10px, -15px); }
+    50%      { opacity: 0.7; transform: translate(-8px, -30px); }
+    75%      { opacity: 0.4; transform: translate(12px, -20px); }
+}
+
+/* ─── Frame container ─── */
 .inn-frame {
     position: relative;
     z-index: 1;
@@ -92,6 +150,7 @@
 /* Narration text */
 .inn-text {
     margin-bottom: 20px;
+    min-height: 72px;
 }
 .inn-line {
     font-family: var(--v-font, 'MedievalSharp', serif);
@@ -100,15 +159,33 @@
     color: var(--v-text, #d4c8b0);
     font-style: italic;
     margin-bottom: 4px;
+    opacity: 0;
+    transform: translateY(4px);
+    animation: innLineReveal 0.4s ease-out forwards;
+}
+/* Staggered line reveal */
+.inn-line:nth-child(1) { animation-delay: 0.1s; }
+.inn-line:nth-child(2) { animation-delay: 0.5s; }
+.inn-line:nth-child(3) { animation-delay: 0.9s; }
+.inn-line:nth-child(4) { animation-delay: 1.3s; }
+@keyframes innLineReveal {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Recovery bars */
+/* ─── Recovery bars (smooth fill) ─── */
 .inn-recovery {
     margin-top: 8px;
     padding: 10px 16px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(196, 149, 58, 0.15);
     border-radius: 8px;
+    opacity: 0;
+    animation: innRecoveryFadeIn 0.6s ease-out 0.3s forwards;
+}
+@keyframes innRecoveryFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 .inn-bar-line {
     font-size: 13px;
@@ -116,6 +193,43 @@
     color: var(--v-text, #d4c8b0);
     font-family: monospace;
     letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+/* Smooth bar container */
+.inn-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 3px 0;
+}
+.inn-bar-track {
+    flex: 1;
+    height: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.inn-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.8s ease-out;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+}
+.inn-bar-fill.hp {
+    background: linear-gradient(90deg, #8b2020 0%, #c43030 100%);
+}
+.inn-bar-fill.mp {
+    background: linear-gradient(90deg, #203880 0%, #3050c0 100%);
+}
+.inn-bar-fill.full {
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+.inn-bar-label {
+    font-size: 12px;
+    color: var(--v-text, #d4c8b0);
+    font-family: monospace;
+    min-width: 70px;
     white-space: nowrap;
 }
 
@@ -134,9 +248,12 @@
     margin-top: 4px;
     font-family: var(--v-font, 'MedievalSharp', serif);
 }
-.inn-bar-small {
+.inn-bar-wrap.small .inn-bar-track {
+    height: 7px;
+}
+.inn-bar-wrap.small .inn-bar-label {
     font-size: 11px;
-    line-height: 1.5;
+    min-width: 60px;
 }
 
 /* Skip button positioned at bottom */

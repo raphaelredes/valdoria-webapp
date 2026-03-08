@@ -1,15 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════
    INN SLEEP ANIMATION — Client-side cinematic rest sequence
    Renders multi-frame sleep animation with recovery bars,
-   dream sequences, and ally events. Triggered by inn_animation
-   data from the Game Hub API response.
+   dream sequences, ally events, floating particles, and
+   staggered text reveal. Triggered by inn_animation data
+   from the Game Hub API response.
    ═══════════════════════════════════════════════════════════════ */
 
 // ─── Frame Templates ───
-// Each tier has a sequence of frames with: title, icons, lines (narration),
-// bg (CSS background), delay (ms), recovery (0-1 for HP/MP interpolation).
-// {name} is replaced with player name, {dream} with dream text.
-
 const _INN_FRAMES = {
     poor: [
         {
@@ -86,7 +83,6 @@ const _INN_FRAMES = {
             delay: 2200,
             recovery: 0.7,
         },
-        // dream frame inserted dynamically
         {
             title: 'NOVO AMANHECER',
             icons: '🌅  🕊️  ☀️',
@@ -149,7 +145,6 @@ const _INN_FRAMES = {
             delay: 2500,
             recovery: 0.8,
         },
-        // dream frame inserted dynamically
         {
             title: 'AMANHECER DOURADO',
             icons: '☀️  🕊️  👑  🕊️  ☀️',
@@ -183,40 +178,82 @@ function _nightBar(phase, total) {
     return left + ' ' + bar + ' ' + right;
 }
 
-// ─── Recovery Bars ───
-function _makeBar(current, max, filledChar, emptyChar, width) {
-    const pct = max > 0 ? current / max : 0;
-    const filled = Math.round(pct * width);
-    return filledChar.repeat(filled) + emptyChar.repeat(width - filled);
+// ─── Floating Particles ───
+function _createParticles(container, tier) {
+    container.innerHTML = '';
+    // Stars: 12-18 depending on tier
+    const starCount = tier === 'wealthy' ? 18 : (tier === 'modest' ? 15 : 10);
+    for (let i = 0; i < starCount; i++) {
+        const p = document.createElement('div');
+        p.className = 'inn-particle star';
+        p.style.left = (Math.random() * 100) + '%';
+        p.style.top = (Math.random() * 70) + '%';
+        p.style.setProperty('--dur', (2 + Math.random() * 4) + 's');
+        p.style.setProperty('--delay', (Math.random() * 3) + 's');
+        container.appendChild(p);
+    }
+    // Embers: 4-8 warm drifting dots
+    const emberCount = tier === 'poor' ? 3 : (tier === 'wealthy' ? 8 : 5);
+    for (let i = 0; i < emberCount; i++) {
+        const p = document.createElement('div');
+        p.className = 'inn-particle ember';
+        p.style.left = (10 + Math.random() * 80) + '%';
+        p.style.bottom = (Math.random() * 30) + '%';
+        p.style.setProperty('--dur', (4 + Math.random() * 4) + 's');
+        p.style.setProperty('--delay', (Math.random() * 5) + 's');
+        container.appendChild(p);
+    }
+    // Fireflies: wealthy only
+    if (tier === 'wealthy') {
+        for (let i = 0; i < 5; i++) {
+            const p = document.createElement('div');
+            p.className = 'inn-particle firefly';
+            p.style.left = (15 + Math.random() * 70) + '%';
+            p.style.top = (20 + Math.random() * 50) + '%';
+            p.style.setProperty('--dur', (5 + Math.random() * 4) + 's');
+            p.style.setProperty('--delay', (Math.random() * 4) + 's');
+            container.appendChild(p);
+        }
+    }
+}
+
+// ─── Smooth Recovery Bars (HTML/CSS) ───
+function _barHTML(emoji, current, max, type, isFull) {
+    const pct = max > 0 ? Math.round((current / max) * 100) : 0;
+    const fullClass = isFull ? ' full' : '';
+    const spark = isFull ? ' ✨' : '';
+    return '<div class="inn-bar-wrap">' +
+        '<div class="inn-bar-track"><div class="inn-bar-fill ' + type + fullClass + '" style="width:' + pct + '%"></div></div>' +
+        '<span class="inn-bar-label">' + emoji + ' ' + current + '/' + max + spark + '</span>' +
+    '</div>';
 }
 
 function _recoveryHTML(data, pct) {
-    const shownHp = Math.round(data.start_hp + (data.max_hp - data.start_hp) * pct);
-    const shownMp = Math.round(data.start_mp + (data.max_mp - data.start_mp) * pct);
-    const hp = Math.min(shownHp, data.max_hp);
-    const mp = Math.min(shownMp, data.max_mp);
+    const hp = Math.min(Math.round(data.start_hp + (data.max_hp - data.start_hp) * pct), data.max_hp);
+    const mp = Math.min(Math.round(data.start_mp + (data.max_mp - data.start_mp) * pct), data.max_mp);
     const resEmoji = data.res_emoji || '💧';
+    const isFull = pct >= 1.0;
 
-    const hpBar = _makeBar(hp, data.max_hp, '🟥', '⬛', 5);
-    const mpBar = _makeBar(mp, data.max_mp, '🟦', '⬛', 5);
-    const spark = pct >= 1.0 ? ' ✨' : '';
-
-    let html = '<div class="inn-bar-line">' + hpBar + '  ❤️ ' + hp + '/' + data.max_hp + spark + '</div>' +
-               '<div class="inn-bar-line">' + mpBar + '  ' + resEmoji + ' ' + mp + '/' + data.max_mp + spark + '</div>';
+    let html = _barHTML('❤️', hp, data.max_hp, 'hp', isFull) +
+               _barHTML(resEmoji, mp, data.max_mp, 'mp', isFull);
 
     // Ally recovery bars
     if (data.allies && data.allies.length > 0) {
         html += '<div class="inn-allies-divider">━ GRUPO ━</div>';
         for (const a of data.allies) {
             const aHp = Math.min(Math.round(a.start_hp + (a.final_hp - a.start_hp) * pct), a.max_hp);
-            const aMp = a.max_mp > 0 ? Math.min(Math.round(a.start_mp + (a.final_mp - a.start_mp) * pct), a.max_mp) : 0;
-            const aHpBar = _makeBar(aHp, a.max_hp, '🟥', '⬛', 4);
             const aResEmoji = a.res_emoji || '💧';
             html += '<div class="inn-ally-name">' + (a.icon || '👤') + ' ' + a.name + '</div>';
-            html += '<div class="inn-bar-line inn-bar-small">' + aHpBar + ' ❤️ ' + aHp + '/' + a.max_hp + spark + '</div>';
+            html += '<div class="inn-bar-wrap small">' +
+                '<div class="inn-bar-track"><div class="inn-bar-fill hp' + (isFull ? ' full' : '') + '" style="width:' + (a.max_hp > 0 ? Math.round(aHp / a.max_hp * 100) : 0) + '%"></div></div>' +
+                '<span class="inn-bar-label">❤️ ' + aHp + '/' + a.max_hp + (isFull ? ' ✨' : '') + '</span>' +
+            '</div>';
             if (a.max_mp > 0) {
-                const aMpBar = _makeBar(aMp, a.max_mp, '🟦', '⬛', 4);
-                html += '<div class="inn-bar-line inn-bar-small">' + aMpBar + ' ' + aResEmoji + ' ' + aMp + '/' + a.max_mp + spark + '</div>';
+                const aMp = Math.min(Math.round(a.start_mp + (a.final_mp - a.start_mp) * pct), a.max_mp);
+                html += '<div class="inn-bar-wrap small">' +
+                    '<div class="inn-bar-track"><div class="inn-bar-fill mp' + (isFull ? ' full' : '') + '" style="width:' + Math.round(aMp / a.max_mp * 100) + '%"></div></div>' +
+                    '<span class="inn-bar-label">' + aResEmoji + ' ' + aMp + '/' + a.max_mp + (isFull ? ' ✨' : '') + '</span>' +
+                '</div>';
             }
         }
     }
@@ -229,13 +266,12 @@ function _buildFrames(data) {
     const tier = data.tier || 'modest';
     const templateFrames = _INN_FRAMES[tier] || _INN_FRAMES.modest;
 
-    // Deep copy frames and replace {name}
     const frames = templateFrames.map(f => ({
         ...f,
         lines: f.lines.map(l => l.replace('{name}', data.player_name || 'Aventureiro')),
     }));
 
-    // Insert dream frame before the last frame (for modest/wealthy)
+    // Insert dream frame before last (modest/wealthy)
     if (data.dream && tier !== 'poor') {
         const dreamFrame = {
             title: tier === 'wealthy' ? 'VISÃO ETÉREA' : 'MUNDO ONÍRICO',
@@ -250,7 +286,7 @@ function _buildFrames(data) {
         frames.splice(frames.length - 1, 0, dreamFrame);
     }
 
-    // Insert ally event frame before dream (or before last frame for poor)
+    // Insert ally event frame
     if (data.ally_event) {
         const ae = data.ally_event;
         const allyFrame = {
@@ -261,7 +297,6 @@ function _buildFrames(data) {
             delay: 2800,
             recovery: tier === 'poor' ? 0.8 : (frames.length > 4 ? 0.5 : 0.4),
         };
-        // Insert before the last 2 frames (dream + dawn) for modest/wealthy, or before last for poor
         const insertIdx = tier === 'poor' ? frames.length - 1 : frames.length - 2;
         frames.splice(insertIdx, 0, allyFrame);
     }
@@ -270,11 +305,6 @@ function _buildFrames(data) {
 }
 
 // ─── Main Animation Function ───
-/**
- * Play the inn sleep animation overlay.
- * @param {Object} data - Inn animation data from server (tier, player_name, dream, etc.)
- * @param {Function} onDone - Called when animation finishes (or is skipped)
- */
 function playInnAnimation(data, onDone) {
     const overlay = document.getElementById('inn-overlay');
     const frameEl = document.getElementById('inn-frame');
@@ -293,7 +323,6 @@ function playInnAnimation(data, onDone) {
 
     const frames = _buildFrames(data);
     const totalFrames = frames.length;
-    let currentFrame = 0;
     let _done = false;
     let _frameTimer = null;
 
@@ -317,11 +346,14 @@ function playInnAnimation(data, onDone) {
             overlay.style.display = 'none';
             overlay.classList.remove('hiding');
             frameEl.classList.remove('active');
+            // Clean up particles
+            const particlesEl = overlay.querySelector('.inn-particles');
+            if (particlesEl) particlesEl.innerHTML = '';
             onDone();
         }, 400);
     };
 
-    // Show skip button after 2s (total animation is 10-18s depending on tier)
+    // Show skip button after 2s
     setTimeout(() => {
         if (!_done) {
             skipBtn.style.display = '';
@@ -333,7 +365,16 @@ function playInnAnimation(data, onDone) {
     overlay.style.display = '';
     overlay.classList.remove('hiding');
 
-    // Hide bottom panel and other overlays
+    // Create particles container if needed
+    let particlesEl = overlay.querySelector('.inn-particles');
+    if (!particlesEl) {
+        particlesEl = document.createElement('div');
+        particlesEl.className = 'inn-particles';
+        overlay.insertBefore(particlesEl, overlay.firstChild);
+    }
+    _createParticles(particlesEl, data.tier || 'modest');
+
+    // Hide bottom panel
     const panelEl = document.getElementById('bottom-panel');
     if (panelEl) panelEl.style.display = 'none';
 
@@ -342,7 +383,6 @@ function playInnAnimation(data, onDone) {
             if (!_done) finish();
             return;
         }
-        currentFrame = idx;
         const frame = frames[idx];
 
         // Fade out current frame
@@ -351,7 +391,7 @@ function playInnAnimation(data, onDone) {
         setTimeout(() => {
             if (_done) return;
 
-            // Update background
+            // Update background (smooth CSS transition handles the blend)
             overlay.style.background = frame.bg;
 
             // Night progress bar
@@ -363,12 +403,12 @@ function playInnAnimation(data, onDone) {
             // Icons
             iconsEl.textContent = frame.icons;
 
-            // Narration text
+            // Narration text — lines appear staggered via CSS animation
             textEl.innerHTML = frame.lines.map(l =>
                 '<div class="inn-line">' + l + '</div>'
             ).join('');
 
-            // Recovery bars
+            // Recovery bars (smooth CSS fill via width transition)
             if (frame.recovery > 0) {
                 recoveryEl.innerHTML = _recoveryHTML(data, frame.recovery);
                 recoveryEl.style.display = '';
@@ -376,10 +416,10 @@ function playInnAnimation(data, onDone) {
                 recoveryEl.style.display = 'none';
             }
 
-            // Fade in
+            // Fade in frame
             frameEl.classList.add('active');
 
-            // Haptic on recovery frames
+            // Haptic on full recovery
             if (frame.recovery >= 1.0) {
                 try {
                     if (window.Telegram && Telegram.WebApp) {
@@ -390,7 +430,7 @@ function playInnAnimation(data, onDone) {
 
             // Schedule next frame
             _frameTimer = setTimeout(() => showFrame(idx + 1), frame.delay);
-        }, idx === 0 ? 50 : 500); // First frame appears quickly, rest have fade gap
+        }, idx === 0 ? 50 : 500);
     }
 
     // Start animation
