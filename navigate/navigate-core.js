@@ -295,6 +295,19 @@ function buildConnectionGraph() {
             }
         }
     }
+    // Invalidate caches that depend on the connection graph
+    _invalidateMapCaches();
+}
+
+function _invalidateMapCaches() {
+    // Clear BFS path cache
+    if (typeof _bfsCache !== 'undefined') {
+        for (const k in _bfsCache) delete _bfsCache[k];
+    }
+    // Clear fog state cache
+    _cachedFogState = null;
+    // Clear distance cache
+    _cachedPxPerTurn = 0;
 }
 
 function isConnected(fromId, toId) {

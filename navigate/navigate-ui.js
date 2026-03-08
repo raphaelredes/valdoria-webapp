@@ -232,7 +232,7 @@ function handleLocationTap(locId) {
             actionsEl.appendChild(travelBtn);
         }
     } else if (wDist > 0) {
-        // Show route hint via BFS path
+        // Show route hint via BFS path with total turn cost
         const routePath = bfsPath(S.currentLoc, locId);
         let routeHint = '';
         if (routePath && routePath.length > 2) {
@@ -243,15 +243,23 @@ function handleLocationTap(locId) {
             const viaStr = via.length <= 3
                 ? via.join(' → ')
                 : via.slice(0, 2).join(' → ') + ` → ... (${via.length} paradas)`;
-            routeHint = `\n🗺️ Rota: ${viaStr}`;
+            routeHint = `\n🗺️ Rota: ${viaStr} · <b>${wDist} turno${wDist !== 1 ? 's' : ''} total</b>`;
         }
         noteEl.innerHTML = `⛔ Não há caminho direto — <b>${wDist} turno${wDist !== 1 ? 's' : ''}</b> de distância${routeHint}`;
         noteEl.style.display = 'block';
         noteEl.style.color = '';
     } else {
-        noteEl.textContent = '⛔ Local inacessível';
+        // Fully inaccessible — explain why
+        const hasAnyConn = (connectionGraph[locId] || []).length > 0;
+        if (!hasAnyConn) {
+            noteEl.innerHTML = '⛔ <b>Local Isolado</b> — Nenhuma rota conhecida leva até aqui';
+        } else if (isKnownUnmapped) {
+            noteEl.innerHTML = '⛔ <b>Sem Rota</b> — Adquira um mapa para revelar caminhos ocultos';
+        } else {
+            noteEl.innerHTML = '⛔ <b>Inacessível</b> — Explore locais vizinhos para descobrir novas rotas';
+        }
         noteEl.style.display = 'block';
-        noteEl.style.color = '';
+        noteEl.style.color = '#8a4a3a';
     }
 
     // Open panel
@@ -787,17 +795,17 @@ function closeQuickList() {
 
 // ── Gesture tutorial (first-visit only, auto-dismiss) ──
 function showGestureTutorial() {
-    if (localStorage.getItem('valdoria_nav_tutorial')) return;
+    if (localStorage.getItem('valdoria_nav_tutorial_v2')) return;
     const gt = document.getElementById('gesture-tutorial');
     if (!gt) return;
     gt.classList.add('visible');
-    // Auto-dismiss after 4s
+    // Auto-dismiss after 6s (more hints to read now)
     const dismiss = () => {
         gt.classList.remove('visible');
-        localStorage.setItem('valdoria_nav_tutorial', '1');
+        localStorage.setItem('valdoria_nav_tutorial_v2', '1');
     };
     gt.addEventListener('click', dismiss, { once: true });
-    setTimeout(() => { if (gt.classList.contains('visible')) dismiss(); }, 4000);
+    setTimeout(() => { if (gt.classList.contains('visible')) dismiss(); }, 6000);
 }
 
 // ── Init hover tooltip + off-screen indicator + swipe dismiss + new features ──

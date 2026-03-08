@@ -151,7 +151,15 @@ function _renderRivers(svg) {
     svg.appendChild(rG);
 }
 
-function computeFogState() {
+// Fog state cache — invalidated by _invalidateMapCaches()
+let _cachedFogState = null;
+let _prevFogState = null; // Track previous state for reveal animations
+
+function computeFogState(forceRecompute) {
+    if (_cachedFogState && !forceRecompute) return _cachedFogState;
+    // Save previous state for cascade animation
+    if (_cachedFogState) _prevFogState = { ..._cachedFogState };
+
     const fog = {};
     const knownSet = new Set(S.knownLocs);
     const discoveredSet = new Set(S.discoveredLocs || []);
@@ -171,6 +179,7 @@ function computeFogState() {
             fog[locId] = neighbors.some(n => knownSet.has(n)) ? 'frontier' : 'hidden';
         }
     }
+    _cachedFogState = fog;
     return fog;
 }
 
@@ -499,22 +508,27 @@ function setupPanZoom() {
     const vp = document.getElementById('map-viewport');
     const wr = document.getElementById('map-wrapper');
     let pan = false, moved = false, sx = 0, sy = 0, scx = 0, scy = 0, ipd = 0, iIdx = 0;
+    // Velocity tracking for inertia
+    let _velX = 0, _velY = 0, _lastMoveT = 0, _lastMoveX = 0, _lastMoveY = 0;
+    // Minimap debounce
+    let _mmDebounce = null;
+    function _debouncedMinimap() {
+        if (_mmDebounce) return;
+        _mmDebounce = setTimeout(() => { _mmDebounce = null; _updateMinimap(); }, 80);
+    }
     function apply() { wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`; saveViewport(); }
     function clamp() {
         const vpW = vp.clientWidth, vpH = vp.clientHeight;
         const mw = SVG_W * S.zoom, mh = SVG_H * S.zoom;
-        // Allow panning so the map edge reaches the viewport edge (pan=0)
-        // but not beyond (no empty space past the map border).
-        // On the other side, the far edge of the map aligns with far edge of viewport.
         if (mw > vpW) {
             S.panX = Math.max(vpW - mw, Math.min(0, S.panX));
         } else {
-            S.panX = (vpW - mw) / 2; // center
+            S.panX = (vpW - mw) / 2;
         }
         if (mh > vpH) {
             S.panY = Math.max(vpH - mh, Math.min(0, S.panY));
         } else {
-            S.panY = (vpH - mh) / 2; // center
+            S.panY = (vpH - mh) / 2;
         }
     }
     // Find closest zoom level to current S.zoom (for session restore)
@@ -526,10 +540,50 @@ function setupPanZoom() {
     S.zoom = ZOOM_LEVELS[_zoomIdx].zoom;
     _updateScaleBar();
 
-    vp.addEventListener('pointerdown', e => { pan = true; moved = false; wr.classList.add('panning'); sx = e.clientX - S.panX; sy = e.clientY - S.panY; scx = e.clientX; scy = e.clientY; });
-    vp.addEventListener('pointermove', e => { if (!pan) return; if (Math.abs(e.clientX - scx) > 5 || Math.abs(e.clientY - scy) > 5) moved = true; if (moved) { S.panX = e.clientX - sx; S.panY = e.clientY - sy; clamp(); apply(); _updateMinimap(); } });
-    vp.addEventListener('pointerup', () => { pan = false; wr.classList.remove('panning'); });
-    vp.addEventListener('pointercancel', () => { pan = false; wr.classList.remove('panning'); });
+    vp.addEventListener('pointerdown', e => {
+        pan = true; moved = false;
+        wr.classList.add('panning');
+        wr.classList.remove('inertia');
+        sx = e.clientX - S.panX; sy = e.clientY - S.panY;
+        scx = e.clientX; scy = e.clientY;
+        _velX = 0; _velY = 0;
+        _lastMoveX = e.clientX; _lastMoveY = e.clientY; _lastMoveT = performance.now();
+    });
+    vp.addEventListener('pointermove', e => {
+        if (!pan) return;
+        if (Math.abs(e.clientX - scx) > 5 || Math.abs(e.clientY - scy) > 5) moved = true;
+        if (moved) {
+            const now = performance.now();
+            const dt = now - _lastMoveT;
+            if (dt > 0) {
+                // Exponential smoothing for velocity
+                const vx = (e.clientX - _lastMoveX) / dt * 16;
+                const vy = (e.clientY - _lastMoveY) / dt * 16;
+                _velX = _velX * 0.4 + vx * 0.6;
+                _velY = _velY * 0.4 + vy * 0.6;
+            }
+            _lastMoveX = e.clientX; _lastMoveY = e.clientY; _lastMoveT = now;
+            S.panX = e.clientX - sx; S.panY = e.clientY - sy;
+            clamp(); apply(); _debouncedMinimap();
+        }
+    });
+    vp.addEventListener('pointerup', () => {
+        if (!pan) return;
+        pan = false; wr.classList.remove('panning');
+        // Apply inertia if velocity is significant
+        const speed = Math.sqrt(_velX * _velX + _velY * _velY);
+        if (moved && speed > 1.5) {
+            const factor = Math.min(speed * 3, 120);
+            S.panX += _velX * factor / speed * 0.6;
+            S.panY += _velY * factor / speed * 0.6;
+            clamp();
+            wr.classList.add('inertia');
+            apply();
+            _debouncedMinimap();
+            setTimeout(() => wr.classList.remove('inertia'), 650);
+        }
+    });
+    vp.addEventListener('pointercancel', () => { pan = false; wr.classList.remove('panning'); wr.classList.remove('inertia'); });
     // Double-tap to zoom in (single finger, < 300ms gap) — centered on tap point
     let _lastTapTime = 0;
     vp.addEventListener('pointerup', e => {
