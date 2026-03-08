@@ -506,10 +506,22 @@ function setupPanZoom() {
     S.zoom = ZOOM_LEVELS[_zoomIdx].zoom;
     _updateScaleBar();
 
-    vp.addEventListener('pointerdown', e => { pan = true; moved = false; sx = e.clientX - S.panX; sy = e.clientY - S.panY; scx = e.clientX; scy = e.clientY; });
+    vp.addEventListener('pointerdown', e => { pan = true; moved = false; wr.classList.add('panning'); sx = e.clientX - S.panX; sy = e.clientY - S.panY; scx = e.clientX; scy = e.clientY; });
     vp.addEventListener('pointermove', e => { if (!pan) return; if (Math.abs(e.clientX - scx) > 5 || Math.abs(e.clientY - scy) > 5) moved = true; if (moved) { S.panX = e.clientX - sx; S.panY = e.clientY - sy; clamp(); apply(); } });
-    vp.addEventListener('pointerup', () => { pan = false; });
-    vp.addEventListener('pointercancel', () => { pan = false; });
+    vp.addEventListener('pointerup', () => { pan = false; wr.classList.remove('panning'); });
+    vp.addEventListener('pointercancel', () => { pan = false; wr.classList.remove('panning'); });
+    // Double-tap to zoom in (single finger, < 300ms gap)
+    let _lastTapTime = 0;
+    vp.addEventListener('pointerup', e => {
+        if (moved) return;
+        const now = Date.now();
+        if (now - _lastTapTime < 300 && _zoomIdx < ZOOM_LEVELS.length - 1) {
+            _snapToZoomLevel(1); clamp(); apply();
+            _lastTapTime = 0;
+        } else {
+            _lastTapTime = now;
+        }
+    });
     // Pinch zoom: snap to discrete levels
     vp.addEventListener('touchstart', e => { if (e.touches.length === 2) { ipd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); iIdx = _zoomIdx; } }, { passive: true });
     vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; if (ratio > 1.3 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1); ipd = d; clamp(); apply(); } else if (ratio < 0.7 && _zoomIdx > 0) { _snapToZoomLevel(-1); ipd = d; clamp(); apply(); } } }, { passive: true });
@@ -532,6 +544,27 @@ function centerOnLocation(locId) {
     S.panX = (vp.clientWidth / 2) - (x * S.zoom);
     S.panY = (vp.clientHeight / 2) - (y * S.zoom);
     document.getElementById('map-wrapper').style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
+    saveViewport();
+}
+
+/** Smooth pan so a location is visible (uses CSS transition) */
+function panToLocationSmooth(locId) {
+    const c = LOCATION_COORDS[locId]; if (!c) return;
+    const vp = document.getElementById('map-viewport');
+    const wr = document.getElementById('map-wrapper');
+    const { x, y } = hexToPixel(c.col, c.row);
+    // Target: location at upper third (leaving room for info panel at bottom)
+    const targetX = (vp.clientWidth / 2) - (x * S.zoom);
+    const targetY = (vp.clientHeight * 0.35) - (y * S.zoom);
+    S.panX = targetX; S.panY = targetY;
+    // Clamp
+    const mw = SVG_W * S.zoom, mh = SVG_H * S.zoom;
+    if (mw > vp.clientWidth) S.panX = Math.max(vp.clientWidth - mw, Math.min(0, S.panX));
+    else S.panX = (vp.clientWidth - mw) / 2;
+    if (mh > vp.clientHeight) S.panY = Math.max(vp.clientHeight - mh, Math.min(0, S.panY));
+    else S.panY = (vp.clientHeight - mh) / 2;
+    // CSS transition handles the smooth animation
+    wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
     saveViewport();
 }
 

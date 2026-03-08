@@ -239,13 +239,13 @@ function handleLocationTap(locId) {
         noteEl.style.color = '';
     }
 
-    // Close: tap outside panel or use bottom bar / Telegram back button
-
     // Open panel
     panel.classList.add('open');
 
-    // Highlight selected location on map
+    // Smooth pan to selected location + highlight
+    if (typeof panToLocationSmooth === 'function') panToLocationSmooth(locId);
     highlightSelected(locId);
+    _updateOffscreenIndicator();
 }
 
 // ── Create action button ──
@@ -463,4 +463,126 @@ function bfsPath(fromId, toId) {
     }
     _bfsCache[key] = null;
     return null;
+}
+
+// ── Hover tooltip (desktop only — shows name + distance without opening panel) ──
+function setupHoverTooltip() {
+    const vp = document.getElementById('map-viewport');
+    const tt = document.getElementById('map-tooltip');
+    if (!tt) return;
+    const ttName = tt.querySelector('.tt-name');
+    const ttDist = tt.querySelector('.tt-dist');
+
+    vp.addEventListener('pointermove', e => {
+        if (e.pointerType === 'touch') { tt.style.display = 'none'; return; }
+        const loc = e.target.closest?.('.loc-node');
+        if (!loc) { tt.style.display = 'none'; return; }
+        const locId = loc.getAttribute('data-loc');
+        const ld = S.locations[locId];
+        if (!ld?.n) { tt.style.display = 'none'; return; }
+        const fog = loc.classList.contains('known_unmapped') ? 'unmapped' : '';
+        ttName.textContent = fog === 'unmapped' ? '???' : ld.n;
+        const wDist = locId !== S.currentLoc ? weightedDistance(S.currentLoc, locId, connectionGraph) : -1;
+        ttDist.textContent = wDist > 0 ? `${wDist}🕐` : '';
+        tt.style.display = 'block';
+        // Position near cursor
+        const vpR = vp.getBoundingClientRect();
+        let tx = e.clientX - vpR.left + 12;
+        let ty = e.clientY - vpR.top - 28;
+        if (tx + 120 > vpR.width) tx = e.clientX - vpR.left - 120;
+        if (ty < 0) ty = e.clientY - vpR.top + 16;
+        tt.style.left = tx + 'px';
+        tt.style.top = ty + 'px';
+    });
+    vp.addEventListener('pointerleave', () => { tt.style.display = 'none'; });
+}
+
+// ── Off-screen indicator (arrow pointing to current location when off viewport) ──
+function _updateOffscreenIndicator() {
+    const osi = document.getElementById('offscreen-indicator');
+    if (!osi) return;
+    const vp = document.getElementById('map-viewport');
+    const coords = LOCATION_COORDS[S.currentLoc];
+    if (!coords) { osi.style.display = 'none'; return; }
+    const { x, y } = hexToPixel(coords.col, coords.row);
+    // Screen position of current loc
+    const sx = x * S.zoom + S.panX;
+    const sy = y * S.zoom + S.panY;
+    const vpW = vp.clientWidth, vpH = vp.clientHeight;
+    const margin = 40;
+    // Check if off-screen
+    if (sx >= -margin && sx <= vpW + margin && sy >= -margin && sy <= vpH + margin) {
+        osi.style.display = 'none';
+        return;
+    }
+    // Calculate position on viewport edge
+    const cx = vpW / 2, cy = vpH / 2;
+    const dx = sx - cx, dy = sy - cy;
+    const angle = Math.atan2(dy, dx);
+    const edgePad = 30;
+    let ex = cx + Math.cos(angle) * (vpW / 2 - edgePad);
+    let ey = cy + Math.sin(angle) * (vpH / 2 - edgePad);
+    ex = Math.max(edgePad, Math.min(vpW - edgePad, ex));
+    ey = Math.max(edgePad, Math.min(vpH - edgePad, ey));
+    // Arrow character based on angle
+    const deg = angle * 180 / Math.PI;
+    let arrow = '→';
+    if (deg > -22 && deg <= 22) arrow = '→';
+    else if (deg > 22 && deg <= 67) arrow = '↘';
+    else if (deg > 67 && deg <= 112) arrow = '↓';
+    else if (deg > 112 && deg <= 157) arrow = '↙';
+    else if (deg > 157 || deg <= -157) arrow = '←';
+    else if (deg > -157 && deg <= -112) arrow = '↖';
+    else if (deg > -112 && deg <= -67) arrow = '↑';
+    else arrow = '↗';
+    osi.querySelector('.osi-arrow').textContent = arrow;
+    osi.querySelector('.osi-label').textContent = S.locations[S.currentLoc]?.n || '';
+    osi.style.left = ex + 'px';
+    osi.style.top = ey + 'px';
+    osi.style.display = 'block';
+}
+
+// ── Biome legend toggle ──
+let _legendOpen = false;
+function toggleLegendExpand() {
+    _legendOpen = !_legendOpen;
+    const panel = document.getElementById('legend-biomes');
+    const toggle = document.querySelector('.legend-toggle');
+    if (!panel) return;
+    if (_legendOpen) {
+        // Populate biomes
+        panel.innerHTML = '';
+        for (const [biome, info] of Object.entries(BIOME_INFO)) {
+            const item = document.createElement('span');
+            item.className = 'legend-item';
+            item.innerHTML = `<span class="legend-dot" style="background:${info.hexFill}"></span> ${info.label}`;
+            panel.appendChild(item);
+        }
+        panel.classList.add('open');
+        if (toggle) toggle.textContent = '▲';
+    } else {
+        panel.classList.remove('open');
+        if (toggle) toggle.textContent = '▼';
+    }
+}
+
+// ── Init hover tooltip + off-screen indicator updates ──
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setupHoverTooltip();
+        // Update off-screen indicator on pan/zoom
+        const vp = document.getElementById('map-viewport');
+        if (vp) {
+            const observer = new MutationObserver(_updateOffscreenIndicator);
+            const wr = document.getElementById('map-wrapper');
+            if (wr) observer.observe(wr, { attributes: true, attributeFilter: ['style'] });
+        }
+    });
+} else {
+    setupHoverTooltip();
+    const wr = document.getElementById('map-wrapper');
+    if (wr) {
+        const observer = new MutationObserver(_updateOffscreenIndicator);
+        observer.observe(wr, { attributes: true, attributeFilter: ['style'] });
+    }
 }
