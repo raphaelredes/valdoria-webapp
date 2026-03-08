@@ -53,6 +53,9 @@ function initRenderer() {
     // Minimap init
     initMinimap();
 
+    // Terrain tooltip (long press)
+    initTerrainTooltip();
+
     // Click handler on canvas
     _canvas.addEventListener('click', handleCanvasClick);
 
@@ -75,6 +78,7 @@ function renderLoop(timestamp) {
     const effectsActive = updateEffects(dt);
     const fogActive = updateFogAnimations(dt);
     const particlesActive = typeof updateParticles === 'function' ? updateParticles(dt) : false;
+    const weatherActive = typeof updateWeatherParticles === 'function' ? updateWeatherParticles(dt) : false;
 
     const flashActive = _hexFlashes.length > 0;
     const tapActive = _tapFeedbacks.length > 0;
@@ -127,6 +131,9 @@ function renderFrame(timestamp) {
     // 7.6 Tap feedback ripple
     drawTapFeedback(_ctx, timestamp);
 
+    // 7.7 Player dynamic lighting (torch/ambient — drawn before fog so fog masks it)
+    drawPlayerLight(_ctx, timestamp);
+
     // 8. Player token (with direction indicator)
     drawPlayerToken(_ctx, timestamp);
 
@@ -135,8 +142,16 @@ function renderFrame(timestamp) {
         drawParticles(_ctx, timestamp);
     }
 
+    // 9.5 Weather particles (rain, storm)
+    if (typeof drawWeatherParticles === 'function') {
+        drawWeatherParticles(_ctx, timestamp);
+    }
+
     // 10. Fog of war (drawn last, on top of everything)
     drawFogOverlay(_ctx, _canvasLogicalW, _canvasLogicalH, S.fogState);
+
+    // 10.5 Fog reveal golden flash (on top of fog for dramatic effect)
+    drawFogRevealFlash(_ctx, timestamp);
 
     // 11. Minimap (only redraws when dirty)
     drawMinimap();
@@ -562,14 +577,13 @@ function scrollCanvasToPlayer(smooth) {
     });
 }
 
-// Draw subtle markers on previously visited hexes (golden dot trail)
+// Draw footprint trail on visited hexes
 function drawVisitedTrail(ctx, timestamp) {
     if (!S.visited || S.visited.size === 0) return;
     const pulse = 0.4 + Math.sin((timestamp || 0) * 0.002) * 0.15;
 
     for (const key of S.visited) {
         const [c, r] = key.split(',').map(Number);
-        // Skip current player hex and exit hex
         if (c === S.playerCol && r === S.playerRow) continue;
         if (S.fogState[key] !== 'visible') continue;
 
@@ -577,12 +591,26 @@ function drawVisitedTrail(ctx, timestamp) {
         const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
         const center = hexToScreen(c, r);
         const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+        const x = center.x;
+        const y = center.y - h;
 
-        // Small golden dot at hex center
-        ctx.fillStyle = `rgba(196,149,58,${pulse * 0.35})`;
+        // Seeded rotation so each hex has consistent footprint angle
+        const angle = (c * 7 + r * 13) % 6 * 0.5;
+        const alpha = pulse * 0.3;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.fillStyle = `rgba(196,149,58,${alpha})`;
+        // Left foot
         ctx.beginPath();
-        ctx.arc(center.x, center.y - h, 2.5, 0, Math.PI * 2);
+        ctx.ellipse(-1.8, -1.2, 1, 2, 0.15, 0, Math.PI * 2);
         ctx.fill();
+        // Right foot
+        ctx.beginPath();
+        ctx.ellipse(1.8, 1.2, 1, 2, -0.15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
     }
 }
 
@@ -639,6 +667,158 @@ function _smoothCameraFollow() {
 
     viewport.scrollLeft = Math.max(0, newX);
     viewport.scrollTop = Math.max(0, newY);
+}
+
+// ═══════════════════════════════════════════════════════
+// PLAYER DYNAMIC LIGHTING — torch glow based on day phase
+// ═══════════════════════════════════════════════════════
+function drawPlayerLight(ctx, timestamp) {
+    const phase = getDayPhase();
+    let radius, r, g, b, alpha;
+
+    switch (phase) {
+        case 'dawn':
+            radius = HEX_W * 2; r = 255; g = 180; b = 80; alpha = 0.07; break;
+        case 'day':
+            radius = HEX_W * 1.5; r = 255; g = 240; b = 200; alpha = 0.03; break;
+        case 'dusk':
+            radius = HEX_W * 2.2; r = 255; g = 140; b = 50; alpha = 0.1; break;
+        case 'night':
+            radius = HEX_W * 3; r = 255; g = 160; b = 60; alpha = 0.16; break;
+    }
+
+    // Torch flicker at night/dusk
+    if (phase === 'night' || phase === 'dusk') {
+        const flicker = Math.sin(timestamp * 0.005) * 0.025 + Math.sin(timestamp * 0.013) * 0.015;
+        alpha += flicker;
+        radius += Math.sin(timestamp * 0.007) * 4;
+    }
+
+    const grad = ctx.createRadialGradient(playerScreenX, playerScreenY, 0, playerScreenX, playerScreenY, radius);
+    grad.addColorStop(0, `rgba(${r},${g},${b},${alpha})`);
+    grad.addColorStop(0.4, `rgba(${r},${g},${b},${alpha * 0.5})`);
+    grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(playerScreenX, playerScreenY, radius, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// ═══════════════════════════════════════════════════════
+// FOG REVEAL FLASH — golden burst when new hexes are discovered
+// ═══════════════════════════════════════════════════════
+function drawFogRevealFlash(ctx, timestamp) {
+    if (!_fogReveals || _fogReveals.length === 0) return;
+
+    for (const rev of _fogReveals) {
+        const t = rev.progress;
+        if (t <= 0 || t >= 1) continue;
+
+        // Golden expanding burst
+        const radius = HEX_W * 0.8 * t;
+        const alpha = 0.35 * (1 - t);
+
+        const grad = ctx.createRadialGradient(rev.x, rev.y, 0, rev.x, rev.y, radius);
+        grad.addColorStop(0, `rgba(255,220,150,${alpha})`);
+        grad.addColorStop(0.5, `rgba(196,149,58,${alpha * 0.4})`);
+        grad.addColorStop(1, 'rgba(196,149,58,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(rev.x, rev.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Inner bright core
+        if (t < 0.3) {
+            const coreAlpha = 0.5 * (1 - t / 0.3);
+            ctx.fillStyle = `rgba(255,240,200,${coreAlpha})`;
+            ctx.beginPath();
+            ctx.arc(rev.x, rev.y, HEX_W * 0.15, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════
+// TERRAIN TOOLTIP — long press shows terrain info
+// ═══════════════════════════════════════════════════════
+const TERRAIN_NAMES = {
+    '.': 'Terreno Aberto', 'T': 'Floresta', 'g': 'Vegetação', 'w': 'Água Rasa',
+    'W': 'Água Profunda', 'r': 'Rochas', 'R': 'Ruínas', 'M': 'Montanha',
+    'p': 'Trilha', 'b': 'Ossadas', '#': 'Muro', 's': 'Areia',
+    'm': 'Lama', 'i': 'Gelo', 'v': 'Solo Vulcânico', 'L': 'Lava',
+};
+let _longPressTimer = null;
+let _longPressPos = null;
+
+function initTerrainTooltip() {
+    if (!_canvas) return;
+    _canvas.addEventListener('touchstart', _onTooltipTouchStart, { passive: true });
+    _canvas.addEventListener('touchend', _onTooltipTouchEnd);
+    _canvas.addEventListener('touchmove', _onTooltipTouchMove, { passive: true });
+}
+
+function _onTooltipTouchStart(e) {
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    _longPressPos = { x: touch.clientX, y: touch.clientY };
+    _longPressTimer = setTimeout(() => _showTerrainTooltip(touch), 500);
+}
+
+function _onTooltipTouchEnd() {
+    clearTimeout(_longPressTimer);
+    _longPressTimer = null;
+    _hideTerrainTooltip();
+}
+
+function _onTooltipTouchMove(e) {
+    if (!_longPressPos) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - _longPressPos.x;
+    const dy = touch.clientY - _longPressPos.y;
+    if (dx * dx + dy * dy > 100) { // moved > 10px
+        clearTimeout(_longPressTimer);
+        _longPressTimer = null;
+        _hideTerrainTooltip();
+    }
+}
+
+function _showTerrainTooltip(touch) {
+    const rect = _canvas.getBoundingClientRect();
+    const sx = touch.clientX - rect.left;
+    const sy = touch.clientY - rect.top;
+    const scaleX = _canvasLogicalW / rect.width;
+    const scaleY = _canvasLogicalH / rect.height;
+    const hex = screenToHex(sx * scaleX, sy * scaleY, S.grid, ROWS, COLS);
+    if (hex.col < 0 || hex.row < 0) return;
+
+    const key = `${hex.col},${hex.row}`;
+    if (S.fogState[key] === 'hidden') return;
+
+    const tile = S.grid[hex.row] && S.grid[hex.row][hex.col] ? S.grid[hex.row][hex.col] : '.';
+    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const name = TERRAIN_NAMES[baseTile] || 'Desconhecido';
+    const difficult = typeof isDifficultTerrain === 'function' && isDifficultTerrain(baseTile, S.biome);
+    const impass = IMPASSABLE.has(tile);
+
+    let label = name;
+    if (impass) label += ' · Intransitável';
+    else if (difficult) label += ' · Difícil';
+
+    const tooltip = document.getElementById('terrain-tooltip');
+    if (!tooltip) return;
+    tooltip.textContent = label;
+    tooltip.style.display = 'block';
+
+    // Position near touch, above finger
+    const viewport = document.getElementById('map-viewport');
+    const vpRect = viewport ? viewport.getBoundingClientRect() : rect;
+    tooltip.style.left = Math.min(touch.clientX - vpRect.left, vpRect.width - 120) + 'px';
+    tooltip.style.top = (touch.clientY - vpRect.top - 40) + 'px';
+}
+
+function _hideTerrainTooltip() {
+    const tooltip = document.getElementById('terrain-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -782,6 +962,11 @@ function updateAtmosphere() {
     if (wo) {
         wo.classList.remove('weather-rain', 'weather-fog', 'weather-storm');
         if (wInfo.css) wo.classList.add(wInfo.css);
+    }
+
+    // Initialize weather particles if available
+    if (typeof initWeatherParticles === 'function') {
+        initWeatherParticles(wCode);
     }
 
     // Mechanical effects: night → encounter chance + fog radius

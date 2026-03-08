@@ -100,6 +100,79 @@ function updateParticles(dt) {
     return true; // Always animate
 }
 
+// ═══════════════════════════════════════════════════════
+// WEATHER PARTICLES — Rain & Storm (canvas-based)
+// ═══════════════════════════════════════════════════════
+let _weatherParticles = [];
+let _currentWeather = 's';
+let _lightningAlpha = 0;
+
+function initWeatherParticles(weather) {
+    if (weather === _currentWeather && _weatherParticles.length > 0) return;
+    _currentWeather = weather;
+    _weatherParticles = [];
+    _lightningAlpha = 0;
+
+    if (weather === 'r') {
+        // Rain — moderate diagonal drops
+        for (let i = 0; i < 20; i++) _weatherParticles.push(_createRainDrop(false));
+    } else if (weather === 't') {
+        // Storm — heavy diagonal drops + lightning
+        for (let i = 0; i < 35; i++) _weatherParticles.push(_createRainDrop(true));
+    }
+}
+
+function _createRainDrop(storm) {
+    return {
+        x: Math.random() * (_canvasLogicalW + 40) - 20,
+        y: Math.random() * _canvasLogicalH - _canvasLogicalH,
+        speed: storm ? (350 + Math.random() * 250) : (250 + Math.random() * 150),
+        angle: storm ? (0.25 + Math.random() * 0.15) : (0.08 + Math.random() * 0.08),
+        length: storm ? (10 + Math.random() * 8) : (6 + Math.random() * 5),
+        alpha: storm ? (0.35 + Math.random() * 0.2) : (0.2 + Math.random() * 0.15),
+    };
+}
+
+function updateWeatherParticles(dt) {
+    if (_weatherParticles.length === 0) return false;
+    for (const p of _weatherParticles) {
+        p.y += p.speed * dt;
+        p.x += Math.sin(p.angle) * p.speed * dt;
+        if (p.y > _canvasLogicalH + 10) {
+            p.y = -p.length - Math.random() * 40;
+            p.x = Math.random() * (_canvasLogicalW + 40) - 20;
+        }
+    }
+    // Lightning flash (storm only)
+    if (_currentWeather === 't') {
+        _lightningAlpha *= 0.9; // decay
+        if (Math.random() < dt * 0.15) { // ~every 6-7 seconds
+            _lightningAlpha = 0.2 + Math.random() * 0.15;
+        }
+    }
+    return true;
+}
+
+function drawWeatherParticles(ctx, timestamp) {
+    if (_weatherParticles.length === 0) return;
+
+    // Rain streaks
+    for (const p of _weatherParticles) {
+        ctx.strokeStyle = `rgba(170,190,220,${p.alpha})`;
+        ctx.lineWidth = _currentWeather === 't' ? 1.3 : 0.9;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x + Math.sin(p.angle) * p.length, p.y + p.length);
+        ctx.stroke();
+    }
+
+    // Lightning flash overlay
+    if (_lightningAlpha > 0.01) {
+        ctx.fillStyle = `rgba(200,210,255,${_lightningAlpha})`;
+        ctx.fillRect(0, 0, _canvasLogicalW, _canvasLogicalH);
+    }
+}
+
 function drawParticles(ctx, timestamp) {
     if (!_particlesInited) return;
 

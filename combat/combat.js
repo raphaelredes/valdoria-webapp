@@ -472,7 +472,10 @@ function _renderArenaInner(s) {
     document.body.classList.add('biome-' + (s.bio || 'forest'));
 
     const biomeName = BIOME_NAMES[s.bio] || s.bio || 'Desconhecido';
-    const weatherStr = s.w ? `${s.w.ico} ${s.w.l}` : '☀️ Limpo';
+    const wLabel = s.w ? s.w.l : 'Limpo';
+    const wIco = s.w ? s.w.ico : '☀️';
+    const wCls = s.w ? _weatherClass(wLabel) : 'w-clear';
+    const weatherStr = `<span class="weather-badge ${wCls}">${wIco} ${wLabel}</span>`;
 
     const activeTurn = s.to && s.to[0] ? s.to[0] : null;
     _currentPositions = s.positions || null; // Feature 9
@@ -624,6 +627,8 @@ function _renderArenaInner(s) {
     // Bind expand/collapse on entity cards
     bindExpandCollapse();
     bindFeedToggle();
+    // Auto-scroll turn timeline to active entry
+    _scrollTimelineToActive();
 
     // Immersion features: HP bar animation + player shake detection
     _animateHpBars(s);
@@ -1129,6 +1134,18 @@ function renderTurnTimeline(to) {
     });
     html += '</div>';
     return html;
+}
+
+// ─── AUTO-SCROLL TIMELINE TO ACTIVE ENTRY ───
+function _scrollTimelineToActive() {
+    const timeline = document.querySelector('.turn-timeline');
+    const active = timeline && timeline.querySelector('.turn-entry.active');
+    if (active && timeline) {
+        const tl = timeline.getBoundingClientRect();
+        const ac = active.getBoundingClientRect();
+        const offset = ac.left - tl.left - (tl.width / 2) + (ac.width / 2);
+        timeline.scrollBy({ left: offset, behavior: 'smooth' });
+    }
 }
 
 // ─── IMMERSIVE INITIATIVE HERO BUTTON ANIMATION (uses Dice3D d20) ───
@@ -2323,6 +2340,18 @@ window.showError = function (msg, err) {
 function escHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Weather label → CSS class mapping
+function _weatherClass(label) {
+    if (!label) return 'w-clear';
+    const l = label.toLowerCase();
+    if (l.includes('chuva') || l.includes('garoa')) return 'w-rain';
+    if (l.includes('tempest') || l.includes('raio') || l.includes('trovão')) return 'w-storm';
+    if (l.includes('neve') || l.includes('gelo') || l.includes('granizo')) return 'w-snow';
+    if (l.includes('névoa') || l.includes('neblina') || l.includes('bruma') || l.includes('nevoeiro')) return 'w-fog';
+    if (l.includes('calor') || l.includes('seca') || l.includes('escaldante')) return 'w-hot';
+    return 'w-clear';
 }
 
 // Classify feed entry text for colored left-border accent
