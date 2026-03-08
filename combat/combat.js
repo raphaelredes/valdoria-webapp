@@ -691,6 +691,9 @@ function _renderArenaInner(s) {
     bindFeedToggle();
     // Auto-scroll turn timeline to active entry
     _scrollTimelineToActive();
+    // Auto-scroll combat feed to latest entry
+    const _feed = document.getElementById('combatFeed');
+    if (_feed) _feed.scrollTop = _feed.scrollHeight;
 
     // Immersion features: HP bar animation + player shake detection
     _animateHpBars(s);
@@ -2385,6 +2388,9 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
             setTimeout(() => {
                 enemies[i].classList.add('dmg-flash');
                 setTimeout(() => enemies[i].classList.remove('dmg-flash'), 400);
+                // Flash the HP bar red on damage
+                const hpBar = enemies[i].querySelector('.hp-mini');
+                if (hpBar) { hpBar.classList.add('dmg-taken'); setTimeout(() => hpBar.classList.remove('dmg-taken'), 500); }
                 if (window._combatVfx) {
                     window._combatVfx.impact(enemies[i], lr.dt || 'slashing', { crit: !!lr.crit });
                 }
@@ -2584,6 +2590,9 @@ function _initDiceEffect(lr) {
                 showNarration(_pick(_NARR_HEAL), 'heal');
                 if (lr.d > 0) _showHealFloat(lr.d, '.entity.player');
                 _showHealFlash();
+                // Glow the HP bar green on heal
+                const hpTrack = _pEl ? _pEl.querySelector('.bar-track') : null;
+                if (hpTrack) { hpTrack.classList.add('heal-glow'); setTimeout(() => hpTrack.classList.remove('heal-glow'), 600); }
             } else {
                 // Util / self-buff — golden buff VFX + narration
                 const _pEl = document.querySelector('.entity.player');

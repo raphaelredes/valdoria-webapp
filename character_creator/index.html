@@ -3363,6 +3363,22 @@
                         setTimeout(() => { try { tg?.close(); } catch (e) { } }, 300);
                         return;
                     }
+                    // Handle server-side validation errors (400 = creation failed)
+                    if (resp.status === 400) {
+                        clearTimeout(_submitTimeout);
+                        const errData = await resp.json().catch(() => ({}));
+                        const errMsg = errData.message || 'Erro na criação. Verifique os dados.';
+                        console.error('[CHAR_CREATOR] Creation failed:', errMsg);
+                        _submitting = false;
+                        if (_confirmBtn) {
+                            _confirmBtn.disabled = false;
+                            _confirmBtn.textContent = '⚔️ CONFIRMAR PERSONAGEM';
+                            _confirmBtn.style.opacity = '';
+                            _confirmBtn.style.pointerEvents = '';
+                        }
+                        _showValidation(errMsg);
+                        return;
+                    }
                     console.warn('[CHAR_CREATOR] API returned', resp.status, '— falling back to sendData');
                 } catch (e) {
                     console.warn('[CHAR_CREATOR] API fetch failed — falling back to sendData', e);
