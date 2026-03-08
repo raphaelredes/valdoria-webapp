@@ -308,28 +308,52 @@ function renderResolution(state) {
     const rawText = state.result_text || state.action_result_text || '';
     const app = document.getElementById('app');
 
-    // Parse reward lines from result text
-    const lines = rawText.split('\n').filter(l => l.trim());
+    // Build rewards from structured data (preferred) or parse from text (fallback)
     let rewardsHtml = '';
     let narrativeLines = [];
 
-    lines.forEach(line => {
-        const trimmed = line.trim();
-        // Detect reward patterns: XP, gold, item, level up
-        if (/\+\d+\s*(XP|xp|EXP)/i.test(trimmed)) {
-            const match = trimmed.match(/\+?(\d+)\s*(XP|xp|EXP)/i);
-            rewardsHtml += `<div class="res-reward"><span class="res-icon">⭐</span><span>${match[1]} XP</span></div>`;
-        } else if (/\d+\s*(GP|gp|gold|ouro)/i.test(trimmed)) {
-            const match = trimmed.match(/(\d+)\s*(GP|gp|gold|ouro)/i);
-            rewardsHtml += `<div class="res-reward"><span class="res-icon">🪙</span><span>${match[1]} GP</span></div>`;
-        } else if (/nível|level.*up|subiu/i.test(trimmed)) {
-            rewardsHtml += `<div class="res-reward res-levelup"><span class="res-icon">🎉</span><span>${escHtml(trimmed)}</span></div>`;
-        } else if (/ganhou|obteve|recebeu|encontrou|drop/i.test(trimmed)) {
-            rewardsHtml += `<div class="res-reward"><span class="res-icon">🎁</span><span>${escHtml(trimmed)}</span></div>`;
-        } else {
-            narrativeLines.push(trimmed);
+    const rewards = state.rewards;
+    if (rewards && isVictory) {
+        // Structured reward data from API
+        if (rewards.xp > 0) {
+            rewardsHtml += `<div class="res-reward"><span class="res-icon">⭐</span><span>+${rewards.xp} XP</span></div>`;
         }
-    });
+        if (rewards.gold > 0) {
+            rewardsHtml += `<div class="res-reward"><span class="res-icon">🪙</span><span>+${rewards.gold} GP</span></div>`;
+        }
+        if (rewards.loot) {
+            rewards.loot.split('\n').filter(l => l.trim()).forEach(item => {
+                rewardsHtml += `<div class="res-reward"><span class="res-icon">🎁</span><span>${escHtml(item.trim())}</span></div>`;
+            });
+        }
+    } else {
+        // Fallback: parse from raw text
+        const lines = rawText.split('\n').filter(l => l.trim());
+        lines.forEach(line => {
+            const trimmed = line.trim();
+            if (/\+\d+\s*(XP|xp|EXP)/i.test(trimmed)) {
+                const match = trimmed.match(/\+?(\d+)\s*(XP|xp|EXP)/i);
+                rewardsHtml += `<div class="res-reward"><span class="res-icon">⭐</span><span>${match[1]} XP</span></div>`;
+            } else if (/\d+\s*(GP|gp|gold|ouro)/i.test(trimmed)) {
+                const match = trimmed.match(/(\d+)\s*(GP|gp|gold|ouro)/i);
+                rewardsHtml += `<div class="res-reward"><span class="res-icon">🪙</span><span>${match[1]} GP</span></div>`;
+            } else if (/nível|level.*up|subiu/i.test(trimmed)) {
+                rewardsHtml += `<div class="res-reward res-levelup"><span class="res-icon">🎉</span><span>${escHtml(trimmed)}</span></div>`;
+            } else if (/ganhou|obteve|recebeu|encontrou|drop/i.test(trimmed)) {
+                rewardsHtml += `<div class="res-reward"><span class="res-icon">🎁</span><span>${escHtml(trimmed)}</span></div>`;
+            } else {
+                narrativeLines.push(trimmed);
+            }
+        });
+    }
+
+    // Extract narrative from raw text if not already parsed
+    if (!narrativeLines.length && rawText) {
+        rawText.split('\n').filter(l => l.trim()).forEach(line => {
+            const t = line.trim();
+            if (!/\+\d+\s*(XP|GP)/i.test(t)) narrativeLines.push(t);
+        });
+    }
 
     const narrativeHtml = narrativeLines.length > 0
         ? `<div class="res-narrative">${narrativeLines.map(l => escHtml(l)).join('<br>')}</div>`
@@ -505,7 +529,13 @@ function _renderArenaInner(s) {
 
     // Action Bar — phase-dependent (with D&D 5e sub-phase support)
     const subPh = s.sub_phase || '';
-    if (ph === 'active' && subPh === 'bonus_action') {
+    const isUnconscious = s.unconscious || (s.p && s.p.hp <= 0);
+    if (ph === 'active' && isUnconscious) {
+        // Spectator mode: player is unconscious, allies fight on
+        html += `<div class="action-bar spectator-bar">
+            <div class="spectator-msg">💀 <b>Inconsciente</b> — seus aliados continuam a luta</div>
+        </div>`;
+    } else if (ph === 'active' && subPh === 'bonus_action') {
         html += renderTimerBar(s);
         html += renderBonusActionBar(s.acts, s.e, s.p);
     } else if (ph === 'active' && subPh === 'reaction') {
@@ -624,6 +654,10 @@ function startTimer(seconds) {
             // Show toast feedback
             _showTimerExpiredToast();
             stopTimer();
+            // Trigger immediate poll to pick up server-side penalty turn result
+            if (isApiMode && api) {
+                setTimeout(() => { _pollForTimerResult(); }, 1500);
+            }
             return;
         }
 
@@ -658,10 +692,51 @@ function _showTimerExpiredToast() {
     setTimeout(() => { el.classList.remove('visible'); setTimeout(() => el.remove(), 300); }, 2500);
 }
 
+// Aggressive polling after timer expiry to pick up server penalty turn
+async function _pollForTimerResult() {
+    if (!isApiMode || !api) return;
+    const maxRetries = 5;
+    const interval = 2000; // 2s between retries
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const state = await api.getState();
+            if (!state || state.error) {
+                if (state && (state.error === 'no_combat' || state.phase === 'ended')) {
+                    showCombatEnded();
+                    return;
+                }
+                await new Promise(r => setTimeout(r, interval));
+                continue;
+            }
+            const newPh = state.ph || state.phase || '';
+            const newTc = state.tc || 0;
+            const oldTc = currentState ? (currentState.tc || 0) : 0;
+            // State changed (turn count advanced = penalty processed)
+            if (newTc !== oldTc || newPh === 'victory' || newPh === 'defeat') {
+                currentState = state;
+                if (newPh === 'victory' || newPh === 'defeat' || newPh === 'ended') {
+                    renderResolution(state);
+                } else {
+                    renderArena(state);
+                }
+                startPolling(); // Resume normal polling
+                return;
+            }
+        } catch (e) {
+            console.warn('[COMBAT] Timer poll retry', i, e.message);
+        }
+        await new Promise(r => setTimeout(r, interval));
+    }
+    // Fallback: resume normal polling after max retries
+    startPolling();
+}
+
 // ─── STATE POLLING (adaptive interval) ───
 function _getPollInterval() {
     // Faster polling when it's NOT the player's turn (waiting for server to advance)
     if (!currentState || !currentState.active_turn) return 5000;
+    // Unconscious: fast polling to see ally/enemy turns resolve
+    if (currentState.unconscious || (currentState.p && currentState.p.hp <= 0)) return 2000;
     return currentState.active_turn.type === 'player' ? 8000 : 2000;
 }
 

@@ -20,7 +20,7 @@
 <body>
     <!-- Loading overlay -->
     <div id="loading" class="loading-overlay">
-        <!-- Floating particles (embers + sparks) -->
+        <!-- Floating particles (embers + sparks + elemental) -->
         <div class="loading-particles">
             <div class="particle ember p1"></div>
             <div class="particle ember p2"></div>
@@ -34,6 +34,18 @@
             <div class="particle spark s4"></div>
             <div class="particle mote m1"></div>
             <div class="particle mote m2"></div>
+            <!-- Elemental particles -->
+            <div class="particle flame fl1"></div>
+            <div class="particle flame fl2"></div>
+            <div class="particle flame fl3"></div>
+            <div class="particle frost fr1"></div>
+            <div class="particle frost fr2"></div>
+            <div class="particle frost fr3"></div>
+            <div class="particle lightning lt1"></div>
+            <div class="particle lightning lt2"></div>
+            <div class="particle arcane ar1"></div>
+            <div class="particle arcane ar2"></div>
+            <div class="particle arcane ar3"></div>
         </div>
 
         <!-- Magic summoning circle -->
@@ -141,6 +153,17 @@
     <!-- Immersive mode: restore pill (when panel is collapsed) -->
     <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
 
+    <!-- Dice roll overlay (3D animation for skill checks) -->
+    <div id="dice-overlay" class="dice-overlay" style="display:none">
+        <div class="dice-overlay-content">
+            <div class="dice-skill-label" id="dice-skill-label"></div>
+            <div class="dice3d-canvas" id="dice3d-canvas"></div>
+            <div class="dice-formula" id="dice-formula"></div>
+            <div class="dice-result" id="dice-result"></div>
+            <button class="v-skip-btn" id="dice-skip-btn" style="display:none">Continuar &raquo;</button>
+        </div>
+    </div>
+
     <!-- Toast notification -->
     <div id="toast" class="toast" style="display:none"></div>
 
@@ -166,6 +189,14 @@
             <button id="error-recover" class="btn-action btn-secondary"
                 style="margin-top: 10px;">🔙
                 Fechar e Voltar ao Chat</button>
+            <!-- Debug log panel -->
+            <div class="error-debug-panel">
+                <button id="error-debug-toggle" class="error-debug-toggle">📋 Ver detalhes técnicos ▸</button>
+                <div id="error-debug-wrap" style="display:none">
+                    <div id="error-debug-log" class="error-debug-log"></div>
+                    <button id="error-debug-copy" class="error-debug-copy">📋 Copiar log</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -186,6 +217,7 @@
     <script>
         var v = Date.now();
         var scripts = ['game-enhancer.js', 'game-particles.js', 'game-core.js', 'game-renderer.js', 'game-dialogue.js', 'game-ui.js', 'game-transitions.js'];
+        document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
         scripts.forEach(function (s) {
             document.write('<script src="' + s + '?v=' + v + '"><\/script>');
         });

@@ -153,6 +153,9 @@ function showError(msg, err = null) {
     msgEl.textContent = msg;
     overlay.style.display = '';
 
+    // Populate debug log panel
+    _populateDebugLog(err);
+
     // Hide loading
     hideLoading();
 
@@ -170,13 +173,21 @@ function showError(msg, err = null) {
         overlay.style.display = 'none';
         retryBtn.textContent = 'Tentar Novamente';
 
+        // Show loading overlay during health check (prevents blank screen)
+        showLoading();
+        if (typeof _clog === 'function') _clog('RETRY health check...');
+
         // Always re-check health before retrying — server may have restarted
         const healthy = await checkHealth();
         if (!healthy) {
+            if (typeof _clog === 'function') _clog('RETRY health FAILED');
+            hideLoading();
             showError('Servidor indisponível. Tente novamente em alguns segundos.');
             return;
         }
+        if (typeof _clog === 'function') _clog('RETRY health OK → loading state');
 
+        // Loading will be hidden by startGame()/fetchState()
         if (S.currentScreen) {
             fetchState(false);
         } else {
@@ -206,6 +217,7 @@ function showError(msg, err = null) {
         || msg.includes('indisponível') || msg.includes('não respondeu');
     if (isConnectionError && _errorRetryAttempt < _ERROR_RETRY_MAX) {
         _errorRetryAttempt++;
+        if (typeof _clog === 'function') _clog(`AUTO-RETRY ${_errorRetryAttempt}/${_ERROR_RETRY_MAX}: ${msg}`);
         // Exponential backoff with jitter: ~5s, ~10s, ~20s, ~40s...
         // Jitter prevents synchronized retries from multiple clients
         const base = Math.min(_ERROR_RETRY_BASE * Math.pow(2, _errorRetryAttempt - 1), _ERROR_RETRY_CAP);
@@ -267,6 +279,69 @@ function _autoReconnect(overlay, msgEl, retryBtn) {
 function hideError() {
     const el = document.getElementById('error-overlay');
     if (el) el.style.display = 'none';
+}
+
+// ─── Debug Log Panel (inside error overlay) ───
+let _debugPanelReady = false;
+
+function _populateDebugLog(err) {
+    const logEl = document.getElementById('error-debug-log');
+    const wrapEl = document.getElementById('error-debug-wrap');
+    const toggleBtn = document.getElementById('error-debug-toggle');
+    const copyBtn = document.getElementById('error-debug-copy');
+    if (!logEl || !wrapEl || !toggleBtn) return;
+
+    // Build log text
+    const logText = typeof getConnectionLog === 'function'
+        ? getConnectionLog() + (err ? '\n\nERROR: ' + (err.stack || err.message || err) : '')
+        : 'Log indisponível' + (err ? '\n' + (err.stack || err.message || err) : '');
+    logEl.textContent = logText;
+
+    // Reset panel state
+    wrapEl.style.display = 'none';
+    toggleBtn.textContent = '📋 Ver detalhes técnicos ▸';
+
+    if (!_debugPanelReady) {
+        _debugPanelReady = true;
+        toggleBtn.onclick = () => {
+            const visible = wrapEl.style.display !== 'none';
+            wrapEl.style.display = visible ? 'none' : '';
+            toggleBtn.textContent = visible
+                ? '📋 Ver detalhes técnicos ▸'
+                : '📋 Ocultar detalhes ▾';
+        };
+        if (copyBtn) {
+            copyBtn.onclick = () => {
+                const text = logEl.textContent || '';
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        copyBtn.textContent = '✅ Copiado!';
+                        setTimeout(() => { copyBtn.textContent = '📋 Copiar log'; }, 2000);
+                    }).catch(() => _fallbackCopy(text, copyBtn));
+                } else {
+                    _fallbackCopy(text, copyBtn);
+                }
+            };
+        }
+    }
+}
+
+function _fallbackCopy(text, btn) {
+    // Fallback for environments without clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        btn.textContent = '✅ Copiado!';
+        setTimeout(() => { btn.textContent = '📋 Copiar log'; }, 2000);
+    } catch (e) {
+        btn.textContent = '❌ Falha ao copiar';
+        setTimeout(() => { btn.textContent = '📋 Copiar log'; }, 2000);
+    }
+    document.body.removeChild(ta);
 }
 
 // ─── Screen Transition Animation ───
@@ -501,6 +576,17 @@ function updateImmersiveEligibility(screen) {
     // Auto-expand if text input is active (need to see input field)
     if (screen && screen.waiting_for_text && _immersiveCollapsed && _immersiveEligible) {
         _immersiveCollapsed = false;
+    }
+
+    // Auto-collapse on text-heavy screens (narrative events, long descriptions)
+    // so the player can read the full story without the menu taking space
+    if (screen && _immersiveEligible && !_immersiveCollapsed && !screen.waiting_for_text) {
+        const textLen = (screen.text || '').length;
+        const isDialogue = !!screen.dialogue;
+        if (textLen > 280 || isDialogue) {
+            _immersiveCollapsed = true;
+            // Don't persist to localStorage — this is a per-screen auto-collapse
+        }
     }
 
     _applyImmersive();

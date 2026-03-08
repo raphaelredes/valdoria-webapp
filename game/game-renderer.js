@@ -50,6 +50,12 @@ function checkButtonOverflow() {
 function renderScreen(screen) {
     if (!screen) { console.warn('[GAME] renderScreen() called with null/undefined screen'); return; }
 
+    // If screen has a dice roll, show 3D animation first, then render content
+    if (screen.dice_roll && !screen._diceShown) {
+        _showDiceAnimation(screen);
+        return;
+    }
+
     console.log('[GAME] renderScreen() keys:', Object.keys(screen).join(','),
         'text_len:', (screen.text || '').length,
         'buttons:', (screen.buttons || []).length,
@@ -227,6 +233,13 @@ function createButton(btn, forceHero = false) {
         return el;
     }
 
+    // Skip toggle_footer — Game Hub uses its own immersive toggle
+    if (btn.cb === 'action_toggle_footer') {
+        const el = document.createElement('button');
+        el.style.display = 'none';
+        return el;
+    }
+
     // Regular callback button
     const el = document.createElement('button');
     const isHero = forceHero || HERO_KEYWORDS.some(k => (btn.text || '').toUpperCase().includes(k));
@@ -399,5 +412,99 @@ function renderFooter(footer) {
         for (const btn of footer.nav) setupButton(btn, navEl);
     } else {
         navEl.style.display = 'none';
+    }
+}
+
+// ─── Dice Roll 3D Animation ───
+let _diceInstance = null;
+
+function _getDice() {
+    if (_diceInstance) return _diceInstance;
+    const container = document.getElementById('dice3d-canvas');
+    if (!container || typeof DiceRoller3D === 'undefined') return null;
+    try {
+        _diceInstance = new DiceRoller3D(container);
+        return _diceInstance;
+    } catch (e) {
+        console.error('[GAME] Dice3D init error:', e);
+        return null;
+    }
+}
+
+function _showDiceAnimation(screen) {
+    const dr = screen.dice_roll;
+    const overlay = document.getElementById('dice-overlay');
+    const labelEl = document.getElementById('dice-skill-label');
+    const formulaEl = document.getElementById('dice-formula');
+    const resultEl = document.getElementById('dice-result');
+    const skipBtn = document.getElementById('dice-skip-btn');
+
+    if (!overlay) {
+        screen._diceShown = true;
+        renderScreen(screen);
+        return;
+    }
+
+    // Hide loading
+    const loadingEl = document.getElementById('loading');
+    if (loadingEl) loadingEl.style.display = 'none';
+
+    // Setup overlay
+    labelEl.textContent = dr.skill + (dr.stat ? ' (' + dr.stat + ')' : '');
+    formulaEl.textContent = '';
+    resultEl.textContent = '';
+    resultEl.className = 'dice-result';
+    skipBtn.style.display = 'none';
+    overlay.style.display = '';
+
+    let _done = false;
+
+    const finish = () => {
+        if (_done) return;
+        _done = true;
+        skipBtn.onclick = null;
+        skipBtn.style.display = 'none';
+        overlay.style.display = 'none';
+        screen._diceShown = true;
+        renderScreen(screen);
+    };
+
+    const showResult = () => {
+        // Show formula: d20(roll) +mod = total vs DC dc
+        const sign = dr.mod >= 0 ? '+' : '';
+        formulaEl.textContent = 'd20(' + dr.roll + ') ' + sign + dr.mod + ' = ' + dr.total + ' vs DC ' + dr.dc;
+
+        resultEl.textContent = dr.success ? 'Sucesso!' : 'Falha!';
+        resultEl.className = 'dice-result ' + (dr.success ? 'success' : 'failure');
+
+        // Haptic feedback
+        try {
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred(dr.success ? 'success' : 'error');
+            }
+        } catch (e) { /* */ }
+
+        // Show skip after 500ms, auto-advance after 2500ms
+        setTimeout(() => {
+            if (!_done) {
+                skipBtn.style.display = '';
+                skipBtn.onclick = finish;
+            }
+        }, 500);
+        setTimeout(finish, 2500);
+    };
+
+    // Try 3D dice
+    const dice = _getDice();
+    if (dice) {
+        try {
+            dice.roll(dr.roll, showResult);
+        } catch (e) {
+            console.error('[GAME] Dice3D roll error:', e);
+            showResult();
+        }
+    } else {
+        // Fallback: show result after brief delay
+        setTimeout(showResult, 800);
     }
 }

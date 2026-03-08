@@ -26,6 +26,34 @@ const SCREEN_CACHE_TTL = 1800000; // 30 minutes
 
 let _loadingTimeoutId = null;
 
+// ─── Connection Debug Log (ring buffer for error diagnosis) ───
+const _connLog = [];
+const _CONN_LOG_MAX = 60;
+
+function _clog(msg) {
+    const ts = new Date().toISOString().substring(11, 23); // HH:MM:SS.mmm
+    const entry = `[${ts}] ${msg}`;
+    _connLog.push(entry);
+    if (_connLog.length > _CONN_LOG_MAX) _connLog.shift();
+}
+
+/** Returns full connection debug log as copyable text */
+function getConnectionLog() {
+    const header = [
+        '── Valdoria Connection Debug ──',
+        `Time: ${new Date().toISOString()}`,
+        `API: ${S.apiBase || '(not set)'}`,
+        `UID: ${S.uid || 0}`,
+        `Token: ${S.token ? S.token.substring(0, 8) + '...' : '(missing)'}`,
+        `Screen: ${S.currentScreen?.screen_id || '(none)'}`,
+        `UA: ${navigator.userAgent.substring(0, 80)}`,
+        `Online: ${navigator.onLine}`,
+        `TG: ${window.Telegram?.WebApp?.version || 'N/A'}`,
+        '─────────────────────────────',
+    ];
+    return header.concat(_connLog).join('\n');
+}
+
 // ─── Initialization ───
 async function init() {
     console.log('[GAME] init() started');
@@ -77,8 +105,10 @@ async function init() {
     });
 
     // Health check — verify API is reachable before loading game
+    _clog('INIT health check → ' + S.apiBase + '/api/game/health');
     console.log('[GAME] Starting health check to:', S.apiBase + '/api/game/health');
     const healthy = await checkHealth();
+    _clog('INIT health result: ' + (healthy ? 'OK' : 'FAIL'));
     console.log('[GAME] Health check result:', healthy);
     if (!healthy) {
         showError('Servidor indisponível. Tente novamente em alguns segundos.');
@@ -119,30 +149,38 @@ async function checkHealth() {
             console.log('[GAME] Health retry', attempt, '/', HEALTH_RETRIES, '- waiting', HEALTH_RETRY_MS + 'ms');
             await sleep(HEALTH_RETRY_MS);
         }
+        _clog(`HEALTH attempt ${attempt}/${HEALTH_RETRIES}`);
         console.log('[GAME] checkHealth() attempt', attempt, 'url:', url);
         try {
             const controller = new AbortController();
             const tid = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
+            const t0 = Date.now();
             const resp = await fetch(url, {
                 method: 'GET',
                 headers: { 'ngrok-skip-browser-warning': '1' },
                 signal: controller.signal,
             });
             clearTimeout(tid);
+            const elapsed = Date.now() - t0;
+            _clog(`HEALTH response: ${resp.status} ${resp.statusText} (${elapsed}ms)`);
             console.log('[GAME] Health response status:', resp.status);
             if (!resp.ok) {
+                _clog(`HEALTH FAIL: HTTP ${resp.status} ${resp.statusText}`);
                 console.error('[GAME] Health check failed:', resp.status, resp.statusText);
                 continue; // retry
             }
             const data = await resp.json();
+            _clog(`HEALTH data: ${JSON.stringify(data)}`);
             console.log('[GAME] Health data:', JSON.stringify(data));
             if (data.status === 'ok' && data.engine) {
                 return true;
             }
             // Engine starting — worth retrying
+            _clog('HEALTH engine not ready: ' + JSON.stringify(data));
             console.warn('[GAME] Engine not ready:', data);
             continue;
         } catch (e) {
+            _clog(`HEALTH ERROR: ${e.name}: ${e.message}`);
             console.error('[GAME] Health check error:', e.name, e.message);
             // continue to next retry
         }
@@ -154,6 +192,7 @@ async function checkHealth() {
 // ─── API Methods ───
 async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
     const url = `${S.apiBase}${endpoint}`;
+    _clog(`API → ${endpoint}`);
     console.log('[GAME] apiCall:', endpoint, 'body:', JSON.stringify(body).substring(0, 200));
     const headers = {
         'Content-Type': 'application/json',
@@ -186,6 +225,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             console.log('[GAME] apiCall response:', endpoint, 'status:', resp.status);
 
             if (resp.status === 429) {
+                _clog(`API ${endpoint} → 429 RATE LIMITED`);
                 console.warn('[GAME] Rate limited on', endpoint, '- waiting 2s');
                 // Rate limited — wait and retry
                 await sleep(2000);
@@ -193,6 +233,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             }
 
             if (resp.status === 401) {
+                _clog(`API ${endpoint} → 401 SESSION EXPIRED`);
                 console.error('[GAME] Session expired (401) for', endpoint);
                 showError('Sessão expirada. Feche e toque em JOGAR novamente.');
                 return null;
@@ -213,6 +254,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             }
 
             if (resp.ok) {
+                _clog(`API ${endpoint} → OK`);
                 console.log('[GAME] apiCall OK:', endpoint,
                     'keys:', Object.keys(data).join(','),
                     'text_len:', (data.text || '').length,
@@ -221,6 +263,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                 return data;
             }
 
+            _clog(`API ${endpoint} → ERROR ${resp.status}: ${JSON.stringify(data).substring(0, 200)}`);
             console.error('[GAME] API error:', resp.status, JSON.stringify(data).substring(0, 300));
             if (attempt === retries) {
                 const msg = data && data.error === 'player_not_found'
@@ -231,6 +274,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             }
         } catch (e) {
             const isTimeout = e.name === 'AbortError';
+            _clog(`API ${endpoint} → ${isTimeout ? 'TIMEOUT ' + FETCH_TIMEOUT_MS + 'ms' : e.name + ': ' + e.message}`);
             console.error('[GAME] fetch error on', endpoint, ':', isTimeout ? 'TIMEOUT after ' + FETCH_TIMEOUT_MS + 'ms' : e.name + ': ' + e.message);
             if (attempt === retries) {
                 // Try to show cached screen instead of blank error
