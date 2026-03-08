@@ -71,7 +71,7 @@ function showPOI(poi) {
 // Splits text on '|' delimiter into pages. If no delimiter, auto-splits
 // long text at sentence boundaries to keep each page readable.
 // Shows a "Continuar..." button between pages, then calls onDone after the last.
-const _NARR_PAGE_MAX = 90; // Max chars per auto-page (fits dm-card on 390px)
+const _NARR_PAGE_MAX = 160; // Max chars per auto-page (fits dm-card on 390px)
 
 function _splitNarrationPages(text) {
     if (!text) return [''];
