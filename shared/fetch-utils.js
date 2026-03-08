@@ -12,10 +12,6 @@
 async function fetchT(url, opts = {}, timeoutMs = 15000) {
     const ac = new AbortController();
     const tid = setTimeout(() => ac.abort(), timeoutMs);
-    // Auto-inject ngrok header to skip free-tier interstitial page
-    if (url.includes('ngrok')) {
-        opts.headers = Object.assign({ 'ngrok-skip-browser-warning': '1' }, opts.headers || {});
-    }
     try {
         const r = await fetch(url, { ...opts, signal: ac.signal });
         clearTimeout(tid);
@@ -38,9 +34,9 @@ async function fetchJSON(url, opts = {}, timeoutMs = 15000) {
     const r = await fetchT(url, opts, timeoutMs);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const text = await r.text();
-    // Detect ngrok interstitial HTML page (free tier returns HTML instead of JSON)
-    if (text.trimStart().startsWith('<') || text.toLowerCase().includes('ngrok')) {
-        throw new Error('Resposta inesperada do servidor (HTML). Possível interstitial do ngrok.');
+    // Detect unexpected HTML responses (e.g., error pages, tunnel issues)
+    if (text.trimStart().startsWith('<')) {
+        throw new Error('Resposta inesperada do servidor (HTML ao invés de JSON).');
     }
     try { return JSON.parse(text); }
     catch (e) { throw new Error('Invalid JSON response'); }
