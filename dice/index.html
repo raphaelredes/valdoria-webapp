@@ -332,6 +332,9 @@
             margin-top: 4px;
             font-family: var(--v-font-mono);
             letter-spacing: 0.5px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
 
         .result-label {
@@ -1464,15 +1467,23 @@
                 spawnParticles(V_GOLD_HEX, 20);
             }
 
-            document.getElementById('resultTotal').textContent = total;
+            const totalEl = document.getElementById('resultTotal');
+            totalEl.textContent = total;
+            // Shrink total for large numbers
+            const totalLen = String(total).length;
+            totalEl.style.fontSize = totalLen >= 5 ? '24px' : totalLen >= 4 ? '30px' : '';
 
             const mod = MODE === 'game'
                 ? (GAME_FORMULA ? GAME_FORMULA.replace(/^\d*d\d+/, '') : '')
                 : (currentMod !== 0 ? (currentMod > 0 ? '+' + currentMod : '' + currentMod) : '');
             const rollStr = rawRolls.join(' + ');
-            document.getElementById('resultBreakdown').textContent =
-                rawRolls.length > 1 ? `[${rollStr}]${mod} = ${total}` :
+            const bdEl = document.getElementById('resultBreakdown');
+            const bdText = rawRolls.length > 1 ? `[${rollStr}]${mod} = ${total}` :
                     mod ? `${rawRolls[0]}${mod} = ${total}` : '';
+            bdEl.textContent = bdText;
+            // Shrink breakdown for long text
+            bdEl.style.fontSize = bdText.length > 50 ? '10px' : bdText.length > 35 ? '11px' : '';
+            bdEl.style.letterSpacing = bdText.length > 35 ? '0' : '';
 
             const lbl = document.getElementById('resultLabel');
             if (isCrit) { lbl.textContent = 'ACERTO CRITICO!'; lbl.className = 'result-label critical'; }

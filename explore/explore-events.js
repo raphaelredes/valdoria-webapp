@@ -1178,6 +1178,66 @@ function useInventoryItem(item) {
     return heal;
 }
 
+// Animated version: shows 3D dice roll, then calls onDone(heal)
+let _healDice = null;
+function useInventoryItemAnimated(item, onDone) {
+    if (!item || item.q <= 0) { if (onDone) onDone(0); return; }
+    // Parse formula to get die type
+    const formula = item.h || '0';
+    const match = formula.match(/^(\d+)d(\d+)([+-]\d+)?$/);
+    if (!match) {
+        // No dice formula — use sync version
+        const heal = useInventoryItem(item);
+        if (onDone) onDone(heal);
+        return;
+    }
+
+    const count = parseInt(match[1]);
+    const sides = parseInt(match[2]);
+    const dieType = 'd' + sides;
+
+    // Roll the dice first
+    const heal = useInventoryItem(item);
+    // Determine individual roll value (for single die)
+    const bonus = parseInt(match[3]) || 0;
+    const rollVal = Math.max(1, Math.min(sides, heal - bonus));
+
+    const overlay = document.getElementById('heal-dice-overlay');
+    const canvas = document.getElementById('heal-dice-canvas');
+    const label = document.getElementById('heal-dice-label');
+    const title = document.getElementById('heal-dice-title');
+
+    if (!overlay || !canvas || typeof Dice3D === 'undefined') {
+        if (onDone) onDone(heal);
+        return;
+    }
+
+    title.textContent = item.n || 'CURA';
+    label.textContent = '';
+    overlay.classList.add('active');
+
+    try {
+        if (_healDice) { _healDice.dispose(); _healDice = null; }
+        _healDice = new Dice3D(canvas, { size: 140, dieType: dieType, duration: 1000 });
+    } catch (e) {
+        console.warn('[EXPLORE] Heal Dice3D init failed:', e);
+        overlay.classList.remove('active');
+        if (onDone) onDone(heal);
+        return;
+    }
+
+    _healDice.roll(rollVal, function () {
+        label.textContent = `+${heal} HP`;
+        try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) {}
+
+        setTimeout(function () {
+            overlay.classList.remove('active');
+            if (_healDice) { _healDice.dispose(); _healDice = null; }
+            if (onDone) onDone(heal);
+        }, 1000);
+    });
+}
+
 // Get available healing items (potions + consumables with h > 0)
 function getHealingItems() {
     return S.inventory.filter(i => i.q > 0 && i.h && i.h !== '0');
@@ -1235,11 +1295,11 @@ function showExitRiskAssessment() {
         const best = healItems[0];
         addExitOption(optionsEl, best.e || '', `Usar ${best.n} (${best.q}x)`,
             `Restaura ${best.h} HP`, '#4a8', () => {
-                const heal = useInventoryItem(best);
-                showTerrainToast(`${best.e || ''} +${heal} HP`, 'ranger');
-                // Refresh the overlay with new HP values
                 overlay.classList.remove('active');
-                setTimeout(() => showExitRiskAssessment(), 300);
+                useInventoryItemAnimated(best, (heal) => {
+                    showTerrainToast(`${best.e || ''} +${heal} HP`, 'ranger');
+                    setTimeout(() => showExitRiskAssessment(), 300);
+                });
             });
     }
 
@@ -1345,7 +1405,45 @@ function doCampRest(food) {
     updateRewards();
     saveState();
 
-    showCampResultOverlay(hitDie, conMod, foodBonus, totalHeal, foodName);
+    // Show 3D d8 dice animation before result
+    _showCampDiceRoll(hitDie, conMod, foodBonus, totalHeal, foodName);
+}
+
+let _campDice = null;
+function _showCampDiceRoll(roll, conMod, bonus, total, foodName) {
+    const overlay = document.getElementById('camp-dice-overlay');
+    const canvas = document.getElementById('camp-dice-canvas');
+    const label = document.getElementById('camp-dice-label');
+
+    if (!overlay || !canvas) {
+        showCampResultOverlay(roll, conMod, bonus, total, foodName);
+        return;
+    }
+
+    label.textContent = '';
+    overlay.classList.add('active');
+
+    try {
+        if (_campDice) { _campDice.dispose(); _campDice = null; }
+        _campDice = new Dice3D(canvas, { size: 140, dieType: 'd8', duration: 1200 });
+    } catch (e) {
+        console.warn('[EXPLORE] Camp Dice3D init failed:', e);
+        overlay.classList.remove('active');
+        showCampResultOverlay(roll, conMod, bonus, total, foodName);
+        return;
+    }
+
+    _campDice.roll(roll, function () {
+        const sign = conMod >= 0 ? '+' : '';
+        label.textContent = `1d8 = ${roll} ${sign}${conMod} (CON)`;
+        try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) {}
+
+        setTimeout(function () {
+            overlay.classList.remove('active');
+            if (_campDice) { _campDice.dispose(); _campDice = null; }
+            showCampResultOverlay(roll, conMod, bonus, total, foodName);
+        }, 1200);
+    });
 }
 
 function showCampResultOverlay(roll, conMod, bonus, total, foodName) {
@@ -1429,11 +1527,11 @@ function showLowHPOverlay() {
     for (const item of healItems.slice(0, 2)) {
         addExitOption(optionsEl, item.e || '', `Usar ${item.n} (${item.q}x)`,
             `Restaura ${item.h} HP`, '#4a8', () => {
-                const heal = useInventoryItem(item);
-                showTerrainToast(`${item.e || ''} +${heal} HP`, 'ranger');
                 overlay.classList.remove('active');
-                // Allow alert to show again if still low after heal
-                S._lowHPAlertShown = false;
+                useInventoryItemAnimated(item, (heal) => {
+                    showTerrainToast(`${item.e || ''} +${heal} HP`, 'ranger');
+                    S._lowHPAlertShown = false;
+                });
             });
     }
 
@@ -2031,12 +2129,11 @@ function _addReturnActions(actionsEl, overlay, remaining) {
         const best = healItems[0];
         _addReturnBtn(actionsEl, '', `Usar ${best.n} (${best.q}x)`,
             `Restaura ${best.h} HP`, '#4a8', () => {
-                const heal = useInventoryItem(best);
-                showTerrainToast(`+${heal} HP`, 'ranger');
-                // Refresh HP display
-                _renderReturnHP(document.getElementById('return-journey-hp'));
-                // Rebuild actions
-                _addReturnActions(actionsEl, overlay, remaining);
+                useInventoryItemAnimated(best, (heal) => {
+                    showTerrainToast(`+${heal} HP`, 'ranger');
+                    _renderReturnHP(document.getElementById('return-journey-hp'));
+                    _addReturnActions(actionsEl, overlay, remaining);
+                });
             });
     }
 }

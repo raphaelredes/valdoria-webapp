@@ -218,6 +218,14 @@
     justify-content: center;
     margin-bottom: 16px;
 }
+.dice3d-canvas {
+    width: 160px;
+    height: 160px;
+}
+.dice3d-canvas canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
 .dice-d20 {
     width: 80px;
     height: 80px;

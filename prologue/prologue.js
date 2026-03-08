@@ -198,39 +198,39 @@ function closeLoreOverlay() {
 // DICE ANIMATION (distract skill check)
 // ═══════════════════════════════════════════════════════
 
+let _prologueDice = null;
+
 function showDiceRoll(result) {
     const overlay = document.getElementById('diceOverlay');
-    const d20 = document.getElementById('diceD20');
+    const canvas = document.getElementById('prologueDice3dCanvas');
     const breakdown = document.getElementById('diceBreakdown');
     const resultLabel = document.getElementById('diceResultLabel');
     const narrative = document.getElementById('diceNarrative');
     const actions = document.getElementById('diceActions');
 
-    // Start rolling animation
-    d20.className = 'dice-d20 rolling';
-    d20.textContent = '?';
     breakdown.textContent = '';
     resultLabel.textContent = '';
     narrative.textContent = '';
     actions.innerHTML = '';
     overlay.classList.add('active');
 
-    // Animate random numbers for 1 second
-    let rollInterval = setInterval(() => {
-        d20.textContent = Math.floor(Math.random() * 20) + 1;
-    }, 80);
+    // Initialize Dice3D for d20
+    try {
+        if (_prologueDice) { _prologueDice.dispose(); _prologueDice = null; }
+        _prologueDice = new Dice3D(canvas, { size: 160, dieType: 'd20', duration: 1200 });
+    } catch (e) {
+        console.warn('[PROLOGUE] Dice3D init failed, fallback:', e);
+        _showDiceRollFallback(result);
+        return;
+    }
 
-    setTimeout(() => {
-        clearInterval(rollInterval);
-        const natural = result.natural;
-        const mod = result.modifier;
-        const total = result.total;
-        const dc = result.dc;
-        const success = result.success;
+    const natural = result.natural;
+    const mod = result.modifier;
+    const total = result.total;
+    const dc = result.dc;
+    const success = result.success;
 
-        d20.textContent = natural;
-        d20.className = 'dice-d20 ' + (success ? 'success' : 'fail');
-
+    _prologueDice.roll(natural, function () {
         const modSign = mod >= 0 ? '+' : '';
         breakdown.textContent = `1d20 (${natural}) ${modSign}${mod} = ${total} vs DC ${dc}`;
         resultLabel.textContent = success ? 'SUCESSO!' : 'FALHA!';
@@ -249,6 +249,42 @@ function showDiceRoll(result) {
                 'Você tenta assustar os lobos, mas o líder da matilha não se intimida. ' +
                 'Ele rosna e avança! Não há outra opção — é lutar ou morrer!'
             );
+            actions.innerHTML = `<button class="hero-btn" onclick="haptic('heavy'); onDistractFail()">⚔️ Lutar!</button>`;
+        }
+
+        try { if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error'); } catch (e) {}
+    });
+}
+
+// Fallback if Dice3D/THREE.js fails to load
+function _showDiceRollFallback(result) {
+    const d20 = document.getElementById('diceD20');
+    d20.style.display = '';
+    d20.className = 'dice-d20 rolling';
+    d20.textContent = '?';
+    let rollInterval = setInterval(() => {
+        d20.textContent = Math.floor(Math.random() * 20) + 1;
+    }, 80);
+    setTimeout(() => {
+        clearInterval(rollInterval);
+        d20.textContent = result.natural;
+        d20.className = 'dice-d20 ' + (result.success ? 'success' : 'fail');
+        const modSign = result.modifier >= 0 ? '+' : '';
+        document.getElementById('diceBreakdown').textContent =
+            `1d20 (${result.natural}) ${modSign}${result.modifier} = ${result.total} vs DC ${result.dc}`;
+        document.getElementById('diceResultLabel').textContent = result.success ? 'SUCESSO!' : 'FALHA!';
+        document.getElementById('diceResultLabel').style.color = result.success ? 'var(--v-success)' : 'var(--v-danger)';
+        const narrative = document.getElementById('diceNarrative');
+        const actions = document.getElementById('diceActions');
+        if (result.success) {
+            narrative.innerHTML = 'Você pega uma tocha da carroça tombada e a balança na direção dos lobos, ' +
+                'gritando e batendo em um escudo improvisado. O fogo e o barulho os assustam — ' +
+                'os predadores recuam entre os arbustos, ganindo.<br><br>' +
+                '<span style="color:var(--v-success);font-weight:700">✨ +50 XP</span>';
+            actions.innerHTML = `<button class="hero-btn" onclick="haptic('medium'); onDistractSuccess()">🗣️ Falar com o ferreiro</button>`;
+        } else {
+            narrative.innerHTML = 'Você tenta assustar os lobos, mas o líder da matilha não se intimida. ' +
+                'Ele rosna e avança! Não há outra opção — é lutar ou morrer!';
             actions.innerHTML = `<button class="hero-btn" onclick="haptic('heavy'); onDistractFail()">⚔️ Lutar!</button>`;
         }
     }, 1200);
