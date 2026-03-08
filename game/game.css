@@ -846,8 +846,8 @@
     animation: screenSlideIn 0.25s ease-out;
 }
 @keyframes screenSlideIn {
-    from { opacity: 0; transform: translateX(12px); }
-    to { opacity: 1; transform: translateX(0); }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ─── Notification Badge Bounce ─── */

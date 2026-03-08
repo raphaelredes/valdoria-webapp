@@ -177,12 +177,13 @@ body {
 }
 .hp-mini {
     width: 48px;
-    height: 10px;
-    background: #1e1a16;
+    height: 12px;
+    background: #3a2820;
     border-radius: 3px;
     overflow: hidden;
     flex-shrink: 0;
-    border: 1px solid rgba(74,56,40,0.4);
+    border: 1px solid rgba(74,56,40,0.6);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
 }
 .hp-mini-fill {
     height: 100%;
@@ -358,9 +359,9 @@ body {
     margin-top: 3px;
 }
 .status-pill {
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.3;
-    padding: 1px 5px;
+    padding: 2px 6px;
     border-radius: 10px;
     background: rgba(123,32,32,0.3);
     color: var(--v-text);
@@ -787,7 +788,16 @@ body {
     width: 140px; height: 140px;
 }
 .dmg-dice3d-canvas.multi {
-    width: 180px; height: 140px;
+    width: 220px; height: 150px;
+}
+.dmg-dice3d-canvas.multi-3 {
+    width: 280px; height: 160px;
+}
+.dmg-dice3d-canvas.multi-4 {
+    width: 320px; height: 160px;
+}
+.dmg-dice3d-canvas.multi-5 {
+    width: 350px; height: 170px;
 }
 .dmg-dice3d-canvas canvas {
     display: block;
@@ -872,7 +882,8 @@ body {
     border-color: rgba(74,56,40,0.25);
 }
 .action-btn {
-    padding: 7px 5px;
+    padding: 10px 6px;
+    min-height: 44px;
     border-radius: var(--v-radius-sm);
     border: 1px solid var(--v-border);
     background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
@@ -891,6 +902,8 @@ body {
 .action-btn.full-width:not(.primary):not(.danger) { color: var(--v-text-dim); font-size: 12px; padding: 6px; }
 .action-btn .action-chance { font-size: 11px; line-height: 1.3; opacity: 0.7; }
 .action-btn.disabled { opacity: 0.4; pointer-events: none; }
+.action-btn.loading { opacity: 0.5; pointer-events: none; animation: btnShimmer 1.5s ease-in-out infinite; }
+@keyframes btnShimmer { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.7; } }
 
 /* ─── BONUS ACTION / REACTION HEADER ─── */
 .ba-header {

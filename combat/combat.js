@@ -327,6 +327,7 @@ async function transitionToInventoryFromArena() {
 function renderResolution(state) {
     stopAllIntervals();
     const isVictory = state.phase === 'victory';
+    const isFled = state.phase === 'fled';
     const rawText = state.result_text || state.action_result_text || '';
     const app = document.getElementById('app');
 
@@ -335,7 +336,7 @@ function renderResolution(state) {
     let narrativeLines = [];
 
     const rewards = state.rewards;
-    if (rewards && isVictory) {
+    if (rewards && isVictory && !isFled) {
         // Structured reward data from API
         if (rewards.xp > 0) {
             rewardsHtml += `<div class="res-reward"><span class="res-icon">⭐</span><span>+${rewards.xp} XP</span></div>`;
@@ -386,7 +387,9 @@ function renderResolution(state) {
             : (narrativeLines.length > 0 ? '' : '<div class="res-rewards"><div class="res-reward"><span class="res-icon">\u{1F4AB}</span><span>Você caiu em combate</span></div></div>'));
 
     // Level-up transition button (when player leveled up with pending choices)
-    const hasLevelUp = isVictory && state.leveled_up && isApiMode;
+    const hasLevelUp = isVictory && !isFled && state.leveled_up && isApiMode;
+    let btnLabel = isVictory ? '🏕️ Continuar Aventura' : '💫 Continuar';
+    if (isFled) btnLabel = '🏕️ Continuar Aventura';
     const buttonsHtml = hasLevelUp
         ? `<button class="action-btn primary res-continue res-levelup-btn" onclick="transitionToLevelup()">
                ⬆️ Distribuir Pontos!
@@ -395,12 +398,12 @@ function renderResolution(state) {
                🏕️ Pular
            </button>`
         : `<button class="action-btn primary res-continue" onclick="closeCombat('${state.phase}')">
-               ${isVictory ? '🏕️ Continuar Aventura' : '💫 Continuar'}
+               ${btnLabel}
            </button>`;
 
     app.innerHTML = `<div class="resolution-screen">
-        <div class="res-header ${isVictory ? 'victory' : 'defeat'}">
-            <div class="res-title">${isVictory ? '🏆 VITÓRIA!' : '💀 DERROTA'}</div>
+        <div class="res-header ${isFled ? 'victory' : (isVictory ? 'victory' : 'defeat')}">
+            <div class="res-title">${isFled ? '🏃 FUGA!' : (isVictory ? '🏆 VITÓRIA!' : '💀 DERROTA')}</div>
         </div>
         ${narrativeHtml}
         ${rewardsBlock}
@@ -1519,6 +1522,7 @@ function _showActionLoading(show) {
 let _actionSent = false;
 async function sendAction(actionData) {
     if (_actionSent || _cinematicInProgress) return;
+    haptic('medium');
     _actionSent = true;
     _lastAnimatedRoll = null; // Reset dedup — next render will animate dice
     _initDiceAnimated = false; // Reset initiative dice animation for new combat
@@ -1564,7 +1568,7 @@ async function sendAction(actionData) {
 // ─── CINEMATIC ACTION RESULT ───
 // Delays state render so the player can watch dice animations unfold
 function _playCinematicResult(result, actionType) {
-    const isResolution = result.phase === 'victory' || result.phase === 'defeat' || result.phase === 'ended';
+    const isResolution = result.phase === 'victory' || result.phase === 'defeat' || result.phase === 'ended' || result.phase === 'fled';
     const hasRoll = result.lr && (result.lr.r || result.lr.d || result.lr.t === 'death_save');
     const isNonCombatAction = actionType === 'initiative' || actionType === 'proceed' || actionType === 'restore';
     const oldPhase = currentState?.ph || currentState?.phase || '';
@@ -1770,6 +1774,7 @@ function showSkillPicker(skills, enemies, actionType) {
 
     panel.querySelectorAll('.skill-item').forEach(item => {
         item.addEventListener('click', () => {
+            haptic('light');
             const skillId = item.dataset.skillId;
             const tg = item.dataset.tg || 'single';
             overlay.classList.remove('active');
@@ -1830,6 +1835,7 @@ function showTargetPicker(enemies, actionType, skillId) {
 
     panel.querySelectorAll('.target-item').forEach(item => {
         item.addEventListener('click', () => {
+            haptic('medium');
             const target = parseInt(item.dataset.target);
             overlay.classList.remove('active');
             if (actionType === 'skill' || actionType === 'bonus_use') {
@@ -1942,7 +1948,7 @@ function _initDiceAttackOverlay(lr) {
     }
 
     if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-    canvas.classList.remove('multi');
+    canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
     overlay.style.display = 'flex';
     if (label3d) { label3d.textContent = 'd20'; label3d.className = 'dmg-dice3d-label rolling'; }
     if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
@@ -1954,7 +1960,7 @@ function _initDiceAttackOverlay(lr) {
         _done = true;
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         overlay.style.display = 'none';
-        canvas.classList.remove('multi');
+        canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
         if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
     };
 
@@ -2045,7 +2051,7 @@ function _initDiceSave(lr) {
     if (!overlay || !canvas || typeof Dice3D === 'undefined') return;
 
     if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-    canvas.classList.remove('multi');
+    canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
     overlay.style.display = 'flex';
     if (label3d) { label3d.textContent = 'Save vs CD ' + (lr.dc || '?'); label3d.className = 'dmg-dice3d-label rolling'; }
     if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
@@ -2057,7 +2063,7 @@ function _initDiceSave(lr) {
         _done = true;
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         overlay.style.display = 'none';
-        canvas.classList.remove('multi');
+        canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
         if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
     };
 
@@ -2131,7 +2137,7 @@ function _initDiceDamageOnly(lr) {
         if (!overlay || !canvas || typeof Dice3D === 'undefined') return;
 
         if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-        canvas.classList.remove('multi');
+        canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
         overlay.style.display = 'flex';
 
         const infoText = lr.t === 'aoe' && lr.hits
@@ -2154,7 +2160,7 @@ function _initDiceDamageOnly(lr) {
             _done = true;
             if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
             overlay.style.display = 'none';
-            canvas.classList.remove('multi');
+            canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
             if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
         };
 
@@ -2182,8 +2188,11 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
     if (lr.dr && lr.dr.length >= dieCount) individualResults = lr.dr.slice(0, dieCount);
     else individualResults = _distributeTotal(Math.max(1, lr.d - parsed.modifier), dieCount, parsed.sides);
 
-    if (dieCount >= 2) canvas.classList.add('multi');
-    else canvas.classList.remove('multi');
+    canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
+    if (dieCount >= 5) canvas.classList.add('multi', 'multi-5');
+    else if (dieCount >= 4) canvas.classList.add('multi', 'multi-4');
+    else if (dieCount >= 3) canvas.classList.add('multi', 'multi-3');
+    else if (dieCount >= 2) canvas.classList.add('multi');
 
     if (label3d) { label3d.textContent = lr.df || 'dano'; label3d.className = 'dmg-dice3d-label rolling'; }
 
@@ -2194,7 +2203,7 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
         markDone();
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         overlay.style.display = 'none';
-        canvas.classList.remove('multi');
+        canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
         if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
 
         // Impact effects
@@ -2225,7 +2234,7 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
     };
 
     try {
-        const canvasSize = dieCount >= 2 ? 180 : 140;
+        const canvasSize = dieCount >= 5 ? 350 : dieCount >= 4 ? 320 : dieCount >= 3 ? 280 : dieCount >= 2 ? 220 : 140;
         _dmgDice3d = new Dice3D(canvas, {
             size: canvasSize, dieType: dieType, duration: DMG_ROLL_MS,
             particlesContainer: particles
@@ -2268,7 +2277,7 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
     } catch (e) {
         console.warn('[COMBAT] Damage phase Dice3D failed:', e);
         overlay.style.display = 'none';
-        canvas.classList.remove('multi');
+        canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
     }
 }
 
@@ -2289,7 +2298,7 @@ function _initDiceDeathSave(lr) {
     if (!overlay || !canvas || typeof Dice3D === 'undefined') return;
 
     if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-    canvas.classList.remove('multi');
+    canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
     overlay.style.display = 'flex';
     if (label3d) { label3d.textContent = 'Teste contra a Morte'; label3d.className = 'dmg-dice3d-label rolling'; }
     if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
@@ -2356,8 +2365,12 @@ function _initDiceEffect(lr) {
         if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
 
         const parsed = _parseDiceFormula(lr.df);
-        if (parsed.count >= 2) canvas.classList.add('multi');
-        else canvas.classList.remove('multi');
+        canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
+        if (parsed.count >= 5) canvas.classList.add('multi', 'multi-5');
+        else if (parsed.count >= 4) canvas.classList.add('multi', 'multi-4');
+        else if (parsed.count >= 3) canvas.classList.add('multi', 'multi-3');
+        else if (parsed.count >= 2) canvas.classList.add('multi');
+        else canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
 
         overlay.style.display = 'flex';
         if (label3d) { label3d.textContent = lr.df || 'efeito'; label3d.className = 'dmg-dice3d-label rolling'; }
@@ -2370,7 +2383,7 @@ function _initDiceEffect(lr) {
             _efDone = true;
             if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
             overlay.style.display = 'none';
-            canvas.classList.remove('multi');
+            canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
             if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
             // VFX: heal particles on player + narration + heal float + flash
             if (isHeal) {
@@ -2428,7 +2441,7 @@ function _initDiceEffect(lr) {
             }
         } catch (e) {
             console.warn('[COMBAT] Effect Dice3D failed:', e);
-            overlay.style.display = 'none'; canvas.classList.remove('multi');
+            overlay.style.display = 'none'; canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
         }
     }
 }
