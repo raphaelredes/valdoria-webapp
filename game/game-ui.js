@@ -415,16 +415,8 @@ function updateImmersiveEligibility(screen) {
         _immersiveCollapsed = false;
     }
 
-    // Auto-collapse on text-heavy screens (narrative events, long descriptions)
-    // so the player can read the full story without the menu taking space
-    if (screen && _immersiveEligible && !_immersiveCollapsed && !screen.waiting_for_text) {
-        const textLen = (screen.text || '').length;
-        const isDialogue = !!screen.dialogue;
-        if (textLen > 280 || isDialogue) {
-            _immersiveCollapsed = true;
-            // Don't persist to localStorage — this is a per-screen auto-collapse
-        }
-    }
+    // Auto-collapse removed — default is always expanded for better discoverability.
+    // Players can manually collapse via the · toggle for immersion.
 
     _applyImmersive();
 }
