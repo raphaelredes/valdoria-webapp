@@ -2384,9 +2384,11 @@ function _initDiceDeathSave(lr) {
     if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
     canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
     overlay.style.display = 'flex';
-    if (label3d) { label3d.textContent = 'Teste contra a Morte'; label3d.className = 'dmg-dice3d-label rolling'; }
+    if (label3d) { label3d.textContent = '💀 Teste contra a Morte'; label3d.className = 'dmg-dice3d-label rolling death-save-roll'; }
     if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
     haptic('medium'); sfxDiceRoll();
+    // Add pulse vignette during roll
+    overlay.classList.add('death-save-overlay');
 
     let _dsDone = false;
     const finishDs = () => {
@@ -2394,6 +2396,7 @@ function _initDiceDeathSave(lr) {
         _dsDone = true;
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         overlay.style.display = 'none';
+        overlay.classList.remove('death-save-overlay');
         if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
     };
 
@@ -2409,10 +2412,20 @@ function _initDiceDeathSave(lr) {
                     label3d.textContent = '🌟 NAT 20! Acordou!';
                     label3d.className = 'dmg-dice3d-label crit';
                     hapticBurst('crit'); sfxCrit();
+                    if (window._combatVfx) {
+                        const pEl = document.querySelector('.entity.player');
+                        if (pEl) window._combatVfx.buff(pEl);
+                        window._combatVfx.flash('rgba(255,215,0,0.4)', 500);
+                    }
+                    const app = document.getElementById('app');
+                    if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
                 } else if (isCritFail) {
                     label3d.textContent = '💀 NAT 1! Falha Dupla!';
                     label3d.className = 'dmg-dice3d-label miss';
                     hapticNotify('error');
+                    if (window._combatVfx) window._combatVfx.flash('rgba(200,30,30,0.4)', 500);
+                    const app = document.getElementById('app');
+                    if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
                 } else if (isSuccess) {
                     label3d.textContent = `✅ ${lr.r} — Sucesso!`;
                     label3d.className = 'dmg-dice3d-label hit';
@@ -2421,6 +2434,7 @@ function _initDiceDeathSave(lr) {
                     label3d.textContent = `❌ ${lr.r} — Falha!`;
                     label3d.className = 'dmg-dice3d-label miss';
                     haptic('light');
+                    if (window._combatVfx) window._combatVfx.flash('rgba(200,30,30,0.25)', 350);
                 }
             }
             setTimeout(() => { if (!_dsDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishDs; } }, 500);
