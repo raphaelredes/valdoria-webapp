@@ -588,6 +588,36 @@ _logFlushTimer = setInterval(_flushLogs, _LOG_FLUSH_INTERVAL);
 // Flush on page unload
 window.addEventListener('beforeunload', _flushLogs);
 
+// ─── Player Error Reporting ───
+async function reportError() {
+    if (\!S.apiBase) return { ok: false, error: 'no_api' };
+    const log = typeof getConnectionLog === 'function' ? getConnectionLog() : 'Log indisponível';
+    const screenId = S.currentScreen ? S.currentScreen.screen_id || '' : '';
+    try {
+        const resp = await fetch(S.apiBase + '/api/game/report-error', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + S.token,
+                'ngrok-skip-browser-warning': '1',
+            },
+            body: JSON.stringify({
+                user_id: S.uid,
+                log: log,
+                screen_id: screenId,
+            }),
+        });
+        const data = await resp.json();
+        if (resp.status === 429 && data.retry_after) {
+            return { ok: false, error: 'cooldown', retry_after: data.retry_after };
+        }
+        return data;
+    } catch (e) {
+        console.error('[GAME] reportError failed:', e.message);
+        return { ok: false, error: e.message };
+    }
+}
+
 // ─── Global Error Handlers ───
 window.addEventListener('error', (e) => {
     console.error('[GAME] UNCAUGHT ERROR:', e.message, 'at', e.filename + ':' + e.lineno + ':' + e.colno);

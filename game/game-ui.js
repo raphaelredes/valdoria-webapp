@@ -277,6 +277,40 @@ function showError(msg, err = null) {
         };
     }
 
+    // Report button: send debug log to admin Telegram chats
+    const reportBtn = document.getElementById('error-report');
+    if (reportBtn) {
+        reportBtn.onclick = async () => {
+            reportBtn.disabled = true;
+            reportBtn.textContent = '⏳ Enviando...';
+            try {
+                const result = await reportError();
+                if (result.ok && result.sent) {
+                    reportBtn.textContent = '✅ Enviado\!';
+                    showToast('Problema reportado com sucesso\!', 3000);
+                } else if (result.error === 'cooldown') {
+                    reportBtn.textContent = '⏳ Aguarde ' + (result.retry_after || 60) + 's';
+                    setTimeout(() => {
+                        reportBtn.textContent = '📨 Reportar Problema';
+                        reportBtn.disabled = false;
+                    }, (result.retry_after || 60) * 1000);
+                    return;
+                } else if (result.ok && \!result.sent) {
+                    reportBtn.textContent = '⚠️ Admins não configurados';
+                } else {
+                    reportBtn.textContent = '❌ Falha ao enviar';
+                }
+            } catch (e) {
+                console.error('[GAME] Report error failed:', e);
+                reportBtn.textContent = '❌ Falha ao enviar';
+            }
+            setTimeout(() => {
+                reportBtn.textContent = '📨 Reportar Problema';
+                reportBtn.disabled = false;
+            }, 5000);
+        };
+    }
+
     // Auto-retry with exponential backoff for connection errors
     const isConnectionError = msg.includes('Sem conexão') || msg.includes('Erro no servidor')
         || msg.includes('indisponível') || msg.includes('não respondeu')
