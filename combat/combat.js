@@ -1052,10 +1052,14 @@ function renderEntity(e, type, idx, isActiveTurn) {
         }
     }
 
+    // Inline AC badge for enemies (visible in compact view)
+    const acBadge = type === 'enemy' && e.ac ? `<span class="ac-badge">🛡${e.ac}</span>` : '';
+
     return `<div class="entity ${type}${activeClass}${deadClass}"${dataAttr}>
         <div class="entity-header">
             <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
             <span class="compact-name">${escHtml(e.n)}</span>
+            ${acBadge}
             <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
             <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
             ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
@@ -1288,12 +1292,12 @@ function renderActionBar(acts, enemies, player) {
         skillBtnText = `🚫 Sem ${player.res || 'Mana'}`;
     }
 
-    return `<div class="action-bar"><div class="action-grid">
+    return `<div class="action-bar"><div class="action-grid action-grid-5">
         <button class="action-btn primary" data-action="attack">⚔️ Atacar <span class="action-chance ${hitCh}">${hitChance}%</span></button>
         <button class="action-btn ${hasSkills ? '' : 'disabled'}" data-action="skill">${skillBtnText}</button>
         <button class="action-btn ${itemCount > 0 ? '' : 'disabled'}" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
         <button class="action-btn danger" data-action="flee">🏃 Fugir <span class="action-chance ${fleeCh}">${fleeChance}%</span></button>
-        <button class="action-btn full-width" data-action="pass">⏭️ Passar Turno</button>
+        <button class="action-btn pass-btn" data-action="pass">⏭️ Pular</button>
     </div></div>`;
 }
 

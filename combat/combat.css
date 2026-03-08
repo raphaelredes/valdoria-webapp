@@ -167,8 +167,16 @@ body {
     text-overflow: ellipsis;
     min-width: 0;
 }
+/* Inline AC badge (visible in compact enemy header) */
+.ac-badge {
+    font-size: 9px;
+    color: var(--v-text-dim);
+    white-space: nowrap;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
 .hp-mini {
-    width: 48px;
+    width: 44px;
     height: 7px;
     background: #1e1a16;
     border-radius: 3px;
@@ -821,6 +829,18 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 3px;
+}
+/* 5-button layout: 2+2+1 → 2+2 with pass integrated */
+.action-grid-5 {
+    grid-template-columns: 1fr 1fr;
+}
+.action-grid-5 .pass-btn {
+    grid-column: 1 / -1;
+    padding: 4px;
+    font-size: 11px;
+    color: var(--v-text-dim);
+    background: transparent;
+    border-color: rgba(74,56,40,0.25);
 }
 .action-btn {
     padding: 7px 5px;
