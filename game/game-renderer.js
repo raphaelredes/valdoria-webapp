@@ -108,6 +108,26 @@ function renderScreen(screen) {
         injectFontPicker(contentEl);
     }
 
+    // Render structured ally cards (replaces plain text ally block)
+    if (screen.allies && screen.allies.length > 0) {
+        renderAllyCards(contentEl, screen.allies);
+    }
+
+    // Render inn member selection as visual toggle cards
+    if (screen.inn_select) {
+        renderInnSelect(contentEl, screen.inn_select);
+    }
+
+    // Render guild member detail as rich card
+    if (screen.member_detail) {
+        renderMemberDetail(contentEl, screen.member_detail);
+    }
+
+    // Show contextual notifications as toasts
+    if (screen.notifications && screen.notifications.length > 0) {
+        _showNotifications(screen.notifications);
+    }
+
     // Buttons (rendered into #buttons inside #bottom-panel)
     const buttonsEl = document.getElementById('buttons');
     buttonsEl.innerHTML = '';
@@ -506,4 +526,233 @@ function _showDiceAnimation(screen) {
         // Fallback: show result after brief delay
         setTimeout(showResult, 800);
     }
+}
+
+
+// ─── Ally Cards (rich party display) ───
+
+function renderAllyCards(container, allies) {
+    // Remove plain-text ally block (GRUPO section) if present
+    const textContent = container.innerHTML;
+    const grupoIdx = textContent.indexOf('━ GRUPO ━');
+    if (grupoIdx >= 0) {
+        container.innerHTML = textContent.replace(/━ GRUPO ━[\s\S]*$/, '');
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'ally-cards';
+
+    const header = document.createElement('div');
+    header.className = 'ally-header';
+    header.textContent = '━ GRUPO ━';
+    wrap.appendChild(header);
+
+    for (const a of allies) {
+        const card = document.createElement('div');
+        card.className = 'ally-card' + (a.dead ? ' ally-dead' : '');
+
+        // Left: icon
+        const ico = document.createElement('div');
+        ico.className = 'ally-ico';
+        ico.textContent = a.ico || '⚔️';
+        card.appendChild(ico);
+
+        // Center: info
+        const info = document.createElement('div');
+        info.className = 'ally-info';
+
+        // Name row: name + level + duration/level-up badges
+        const nameRow = document.createElement('div');
+        nameRow.className = 'ally-name-row';
+        const nameEl = document.createElement('span');
+        nameEl.className = 'ally-name';
+        nameEl.textContent = a.n;
+        nameRow.appendChild(nameEl);
+        if (a.l > 0) {
+            const lvl = document.createElement('span');
+            lvl.className = 'ally-lvl';
+            lvl.textContent = 'Lv' + a.l;
+            nameRow.appendChild(lvl);
+        }
+        if (a.type === 'merc' && a.dur > 0) {
+            const dur = document.createElement('span');
+            dur.className = 'ally-dur' + (a.dur <= 2 ? ' ally-dur-warn' : '');
+            dur.textContent = '📜' + a.dur;
+            nameRow.appendChild(dur);
+        }
+        if (a.lu && a.lu > 0) {
+            const luBadge = document.createElement('span');
+            luBadge.className = 'ally-lu';
+            luBadge.textContent = '⬆️';
+            nameRow.appendChild(luBadge);
+        }
+        info.appendChild(nameRow);
+
+        // HP bar
+        if (a.mhp > 0 && !a.dead) {
+            info.appendChild(_makeAllyBar(a.hp, a.mhp, 'hp'));
+        } else if (a.dead) {
+            const deadLabel = document.createElement('div');
+            deadLabel.className = 'ally-dead-label';
+            deadLabel.textContent = '💀 Caído';
+            info.appendChild(deadLabel);
+        }
+
+        // MP bar
+        if (a.mmp > 0 && !a.dead) {
+            info.appendChild(_makeAllyBar(a.mp, a.mmp, 'mp'));
+        }
+
+        // Adventurer description
+        if (a.type === 'adv' && a.desc) {
+            const descEl = document.createElement('div');
+            descEl.className = 'ally-desc';
+            descEl.textContent = '✨ ' + a.desc + (a.dur > 0 ? ' ⏳ ' + a.dur + ' combates' : '');
+            info.appendChild(descEl);
+        }
+
+        // Status effects
+        if (a.se && a.se.length > 0) {
+            const seRow = document.createElement('div');
+            seRow.className = 'ally-se';
+            seRow.textContent = a.se.join(' ');
+            info.appendChild(seRow);
+        }
+
+        card.appendChild(info);
+        wrap.appendChild(card);
+    }
+
+    container.appendChild(wrap);
+}
+
+function _makeAllyBar(current, max, type) {
+    const row = document.createElement('div');
+    row.className = 'ally-bar-row';
+
+    const track = document.createElement('div');
+    track.className = 'ally-bar-track';
+
+    const fill = document.createElement('div');
+    const pct = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0;
+    fill.className = 'ally-bar-fill ally-bar-' + type;
+    fill.style.width = pct + '%';
+    if (type === 'hp') {
+        if (pct <= 25) fill.classList.add('ally-bar-critical');
+        else if (pct <= 50) fill.classList.add('ally-bar-low');
+    }
+    track.appendChild(fill);
+    row.appendChild(track);
+
+    const label = document.createElement('span');
+    label.className = 'ally-bar-label';
+    label.textContent = current + '/' + max;
+    row.appendChild(label);
+
+    return row;
+}
+
+// ─── Contextual Notifications ───
+
+function _showNotifications(notifs) {
+    notifs.forEach((n, i) => {
+        setTimeout(() => {
+            if (typeof showToast === 'function') {
+                showToast(n.text, n.type === 'warn' ? 4000 : 3000);
+            }
+        }, i * 600);
+    });
+}
+
+
+// --- Inn Member Selection (visual toggle cards) ---
+
+function renderInnSelect(container, data) {
+    // Remove instruction text
+    var textContent = container.innerHTML;
+    var selectIdx = textContent.indexOf('Toque nos companheiros');
+    if (selectIdx >= 0) {
+        container.innerHTML = textContent.substring(0, selectIdx);
+    }
+
+    var wrap = document.createElement('div');
+    wrap.className = 'inn-select-cards';
+
+    for (var i = 0; i < data.allies.length; i++) {
+        var a = data.allies[i];
+        var card = document.createElement('div');
+        card.className = 'inn-select-card' + (a.sel ? ' inn-selected' : '') + (a.full ? ' inn-full' : '');
+
+        (function(cb) {
+            card.onclick = function() { if (cb) doAction(cb); };
+        })(a.cb);
+
+        var hpPct = a.mhp > 0 ? Math.round((a.hp / a.mhp) * 100) : 0;
+        var hpCls = hpPct > 75 ? 'ally-bar-hp' : hpPct > 40 ? 'ally-bar-hp ally-bar-low' : 'ally-bar-hp ally-bar-critical';
+
+        var barsHtml = '';
+        if (!a.full) {
+            barsHtml += '<div class="ally-bar-row"><div class="ally-bar-track"><div class="ally-bar-fill ' + hpCls + '" style="width:' + hpPct + '%"></div></div><span class="ally-bar-label">' + a.hp + '/' + a.mhp + '</span></div>';
+            if (a.mmp > 0) {
+                var mpPct = a.mmp > 0 ? Math.round((a.mp / a.mmp) * 100) : 0;
+                barsHtml += '<div class="ally-bar-row"><div class="ally-bar-track"><div class="ally-bar-fill ally-bar-mp" style="width:' + mpPct + '%"></div></div><span class="ally-bar-label">' + a.mp + '/' + a.mmp + '</span></div>';
+            }
+        }
+
+        var checkIcon = a.sel ? '✅' : '⬜';
+        var fullBadge = a.full ? ' <span class="inn-full-badge">✨ Completo</span>' : '';
+
+        card.innerHTML = '<div class="inn-select-check">' + checkIcon + '</div>'
+            + '<div class="inn-select-ico">' + a.ico + '</div>'
+            + '<div class="inn-select-info">'
+            + '<div class="inn-select-name">' + a.n + fullBadge + '</div>'
+            + barsHtml
+            + '</div>';
+
+        wrap.appendChild(card);
+    }
+
+    container.appendChild(wrap);
+}
+
+
+// --- Guild Member Detail (rich stat card) ---
+
+function renderMemberDetail(container, m) {
+    var wrap = document.createElement('div');
+    wrap.className = 'member-detail-card';
+
+    // HP bar
+    var hpPct = m.mhp > 0 ? Math.round((m.hp / m.mhp) * 100) : 0;
+    var hpCls = hpPct > 75 ? 'ally-bar-hp' : hpPct > 40 ? 'ally-bar-hp ally-bar-low' : 'ally-bar-hp ally-bar-critical';
+    var bars = '<div class="ally-bar-row"><span class="member-bar-icon">❤️</span><div class="ally-bar-track"><div class="ally-bar-fill ' + hpCls + '" style="width:' + hpPct + '%"></div></div><span class="ally-bar-label">' + m.hp + '/' + m.mhp + '</span></div>';
+
+    // MP bar
+    if (m.mmp > 0) {
+        var mpPct = m.mmp > 0 ? Math.round((m.mp / m.mmp) * 100) : 0;
+        bars += '<div class="ally-bar-row"><span class="member-bar-icon">' + (m.res || '💧') + '</span><div class="ally-bar-track"><div class="ally-bar-fill ally-bar-mp" style="width:' + mpPct + '%"></div></div><span class="ally-bar-label">' + m.mp + '/' + m.mmp + '</span></div>';
+    }
+
+    // XP bar
+    if (m.xpn > 0) {
+        var xpPct = m.xpn > 0 ? Math.round((m.xp / m.xpn) * 100) : 0;
+        bars += '<div class="ally-bar-row"><span class="member-bar-icon">✨</span><div class="ally-bar-track"><div class="ally-bar-fill ally-bar-xp" style="width:' + xpPct + '%"></div></div><span class="ally-bar-label">' + m.xp + '/' + m.xpn + '</span></div>';
+    }
+
+    // Stats grid
+    var stats = m.stats || {};
+    var statsNames = [['FOR', 'strength'], ['DES', 'dexterity'], ['CON', 'constitution'], ['INT', 'intelligence'], ['SAB', 'wisdom'], ['CAR', 'charisma']];
+    var statsHtml = '<div class="member-stats-grid">';
+    for (var i = 0; i < statsNames.length; i++) {
+        var label = statsNames[i][0];
+        var key = statsNames[i][1];
+        var val = stats[key] || 10;
+        var mod = Math.floor((val - 10) / 2);
+        var modStr = mod >= 0 ? '+' + mod : '' + mod;
+        statsHtml += '<div class="member-stat"><span class="member-stat-label">' + label + '</span><span class="member-stat-val">' + val + '</span><span class="member-stat-mod">(' + modStr + ')</span></div>';
+    }
+    statsHtml += '</div>';
+
+    wrap.innerHTML = bars + statsHtml;
+    container.appendChild(wrap);
 }

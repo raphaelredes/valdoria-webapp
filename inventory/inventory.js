@@ -687,14 +687,34 @@ function renderAlliesTab(c) {
     }
     let html = '';
     D.allies.forEach(a => {
-        html += `<div class="ally-card fade-in" onclick="openAllyEquip('${esc(a.id)}')">
+        const hpPct = a.mhp > 0 ? Math.round((a.hp / a.mhp) * 100) : 0;
+        const hpCls = hpPct > 75 ? 'bar-high' : hpPct > 40 ? 'bar-mid' : 'bar-low';
+        let mpBar = '';
+        if (a.mmp > 0) {
+            const mpPct = a.mmp > 0 ? Math.round((a.mp / a.mmp) * 100) : 0;
+            mpBar = `<div class="ally-bar-row">
+                <span class="ally-bar-label">${a.res || '💧'} ${a.mp}/${a.mmp}</span>
+                <div class="ally-bar-track"><div class="ally-bar-fill ally-bar-mp" style="width:${mpPct}%"></div></div>
+            </div>`;
+        }
+        const lvlBadge = a.l > 0 ? `<span class="ally-lvl-badge">Lv${a.l}</span>` : '';
+        const affBadge = a.aff > 0 ? `<span class="ally-aff-badge">❤️${a.aff}</span>` : '';
+        const deadClass = a.hp <= 0 ? ' ally-dead' : '';
+        html += `<div class="ally-card fade-in${deadClass}" onclick="openAllyEquip('${esc(a.id)}')">
                 <div class="ally-header">
-                    <span class="ally-name">${a.n}</span>
-                    <span class="ally-class">${a.c || 'Aliado'}</span>
-                </div>
-                <div class="ally-stats">
-                    <span class="ally-hp">${vi('heart', 12)} ${a.hp}/${a.mhp}</span>
+                    <span class="ally-ico">${a.ico || '⚔️'}</span>
+                    <div class="ally-name-col">
+                        <span class="ally-name">${a.n} ${lvlBadge}${affBadge}</span>
+                        <span class="ally-class">${a.c || 'Aliado'}</span>
+                    </div>
                     <span class="ally-ac">${vi('shield', 12)} ${a.ac}</span>
+                </div>
+                <div class="ally-bars">
+                    <div class="ally-bar-row">
+                        <span class="ally-bar-label">❤️ ${a.hp}/${a.mhp}</span>
+                        <div class="ally-bar-track"><div class="ally-bar-fill ${hpCls}" style="width:${hpPct}%"></div></div>
+                    </div>
+                    ${mpBar}
                 </div>
             </div>`;
     });

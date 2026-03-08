@@ -1005,13 +1005,28 @@ function renderEntity(e, type, idx, isActiveTurn) {
             detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill">${STATUS_ICONS[s] || ''} ${s}</span>`).join('') + '</div>';
         }
     } else {
-        // Ally expanded
+        // Ally expanded — full status panel
         detailsHtml += `<div class="bar-container">
             <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
             <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
         </div>`;
-        if (e.ac) {
-            detailsHtml += `<div class="stats-row"><span class="stat-item">🛡️ CA ${e.ac}</span></div>`;
+        if (e.mmp > 0) {
+            const mpPct = e.mmp > 0 ? (e.mp / e.mmp) : 0;
+            detailsHtml += `<div class="bar-container">
+                <div class="bar-label"><span>💧 MP</span><span>${e.mp}/${e.mmp}</span></div>
+                <div class="bar-track"><div class="bar-fill mp-bar" style="width:${mpPct * 100}%"></div></div>
+            </div>`;
+        }
+        const allyStats = [];
+        if (e.ac) allyStats.push(`🛡️ CA ${e.ac}`);
+        if (e.atk) allyStats.push(`⚔️ +${e.atk}`);
+        if (e.dmg) allyStats.push(`🗡️ ${e.dmg}`);
+        if (e.pot > 0) allyStats.push(`🧪 ${e.pot}`);
+        if (allyStats.length > 0) {
+            detailsHtml += '<div class="stats-row">' + allyStats.map(s => `<span class="stat-item">${s}</span>`).join('') + '</div>';
+        }
+        if (e.conc) {
+            detailsHtml += `<div class="stats-row"><span class="stat-item conc-badge">🔮 ${e.conc}</span></div>`;
         }
         if (e.se && e.se.length > 0) {
             detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill">${STATUS_ICONS[s] || ''} ${s}</span>`).join('') + '</div>';
