@@ -146,6 +146,12 @@ async function init() {
     _clog('INIT health result: ' + (healthy ? 'OK' : 'FAIL'));
     console.log('[GAME] Health check result:', healthy);
     if (!healthy) {
+        // Show cached screen behind error overlay so user sees familiar content
+        const staleScreen = loadCachedScreen();
+        if (staleScreen) {
+            renderScreen(staleScreen);
+            _clog('INIT showing cached screen behind error overlay');
+        }
         showError('Servidor indisponível. Tente novamente em alguns segundos.');
         return;
     }
