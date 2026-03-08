@@ -175,6 +175,45 @@ function renderStaticTiles(timestamp) {
             drawTile(_staticCtx, col, row, biome, colors, 0);
         }
     }
+
+    // Second pass: ambient occlusion (shadow on tiles next to taller neighbors)
+    for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+            _drawHeightShadow(_staticCtx, col, row);
+        }
+    }
+}
+
+// Ambient occlusion — darken tiles adjacent to taller neighbors
+function _drawHeightShadow(ctx, col, row) {
+    const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const height = TILE_HEIGHT[baseTile] || 1;
+
+    // Check neighbors for height difference
+    const neighbors = typeof getNeighbors === 'function' ? getNeighbors(col, row) : [];
+    let maxDiff = 0;
+    for (const [nc, nr] of neighbors) {
+        if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+        const nt = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
+        const nBase = nt.match(/[0-9@E]/) ? '.' : nt;
+        const nHeight = TILE_HEIGHT[nBase] || 1;
+        maxDiff = Math.max(maxDiff, nHeight - height);
+    }
+
+    if (maxDiff < 0.8) return; // Only shadow when significant height difference
+
+    const shadow = Math.min(0.12, maxDiff * 0.04);
+    const center = hexToScreen(col, row);
+    const heightPx = height * UNIT_PX;
+    const topVerts = hexTopVertices(center.x, center.y - heightPx);
+
+    ctx.beginPath();
+    ctx.moveTo(topVerts[0].x, topVerts[0].y);
+    for (let i = 1; i < topVerts.length; i++) ctx.lineTo(topVerts[i].x, topVerts[i].y);
+    ctx.closePath();
+    ctx.fillStyle = `rgba(0,0,0,${shadow})`;
+    ctx.fill();
 }
 
 // Draw a single tile: top face + side faces + static decorations

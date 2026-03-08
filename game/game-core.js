@@ -84,11 +84,9 @@ async function init() {
         Telegram.WebApp.expand();
         try { Telegram.WebApp.disableVerticalSwipes(); } catch (e) { /* older clients */ }
 
-        // Back button closes the WebApp (in-game navigation uses the footer "Voltar" button)
+        // Back button: notify server then close WebApp
         Telegram.WebApp.BackButton.show();
-        Telegram.WebApp.BackButton.onClick(() => {
-            try { Telegram.WebApp.close(); } catch (e) { console.warn('[GAME] tg.close:', e); }
-        });
+        Telegram.WebApp.BackButton.onClick(() => { _closeGameHub(); });
     } else {
         console.warn('[GAME] Telegram WebApp NOT detected - running outside Telegram?');
     }
@@ -102,9 +100,7 @@ async function init() {
         // Re-push so the trap stays active for subsequent presses
         history.pushState({ screen: 'game' }, '');
         // Close the WebApp (same as Telegram's header back button)
-        if (window.Telegram && Telegram.WebApp) {
-            try { Telegram.WebApp.close(); } catch (e2) { console.warn('[GAME] tg.close:', e2); }
-        }
+        if (window.Telegram && Telegram.WebApp) { _closeGameHub(); }
     });
 
     // Visibility change — refresh state when returning to app
@@ -407,6 +403,23 @@ async function fetchState(silent) {
     }
 }
 
+// ─── Close Game Hub ───
+// Notify server to update the underlying Telegram message, then close the WebApp.
+async function _closeGameHub() {
+    try {
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 2000);
+        await fetch(S.apiBase + '/api/game/close', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token },
+            body: JSON.stringify({ user_id: S.uid }),
+            signal: controller.signal,
+        }).catch(() => {});
+        clearTimeout(tid);
+    } catch (e) { /* never block close */ }
+    try { Telegram.WebApp.close(); } catch (e) { console.warn('[GAME] tg.close:', e); }
+}
+
 async function doAction(callbackData) {
     if (S.transitioning) return;
 
@@ -431,6 +444,9 @@ async function doAction(callbackData) {
     if (!data) { hideLocationTransition(); return; }
 
     if (data.error === 'no_response') { hideLocationTransition(); return; }
+
+    // Server says to close WebApp (e.g. main_menu action)
+    if (data.close) { hideLocationTransition(); _closeGameHub(); return; }
 
     // Handle transitions to specialized WebApps
     // Only auto-transition if there is NO text to display
@@ -573,7 +589,18 @@ function _flushLogs() {
 // Start periodic flush
 _logFlushTimer = setInterval(_flushLogs, _LOG_FLUSH_INTERVAL);
 // Flush on page unload
-window.addEventListener('beforeunload', _flushLogs);
+window.addEventListener('beforeunload', () => {
+    _flushLogs();
+    // Best-effort notify server that WebApp is closing
+    if (S.apiBase && S.token && S.uid) {
+        try {
+            navigator.sendBeacon(
+                S.apiBase + '/api/game/close',
+                JSON.stringify({ user_id: S.uid, token: S.token })
+            );
+        } catch (e) {}
+    }
+});
 
 // ─── Bootstrap ───
 document.addEventListener('DOMContentLoaded', () => {

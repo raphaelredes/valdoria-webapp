@@ -13,6 +13,25 @@ body {
 }
 
 /* ═══════════════════════════════════════════
+   TERRAIN TOOLTIP (long press)
+   ═══════════════════════════════════════════ */
+.terrain-tooltip {
+    display: none;
+    position: absolute;
+    z-index: 20;
+    background: rgba(42,36,32,0.92);
+    border: 1px solid rgba(196,149,58,0.5);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font: 12px var(--v-font, 'MedievalSharp', serif);
+    color: var(--v-text, #d4c8b0);
+    white-space: nowrap;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+/* ═══════════════════════════════════════════
    MINIMAP
    ═══════════════════════════════════════════ */
 #minimap {
