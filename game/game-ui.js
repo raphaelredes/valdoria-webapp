@@ -501,9 +501,4 @@ function injectFontPicker(contentEl) {
     contentEl.appendChild(section);
 }
 
-// Apply saved font on load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyGameFont);
-} else {
-    applyGameFont();
-}
+// Font is applied on load by shared/font-apply.js (included in index.html)
