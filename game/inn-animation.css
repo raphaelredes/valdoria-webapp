@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════════════════════
+   INN SLEEP ANIMATION — Cinematic overlay styles
+   Medieval-themed fullscreen overlay with fade transitions
+   for the inn rest animation sequence.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* No scrollbars (mandatory) */
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; }
+
+.inn-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 40%, #0a0a2e 0%, #050510 100%);
+    transition: background 0.8s ease;
+    animation: innFadeIn 0.5s ease-out;
+}
+@keyframes innFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.inn-overlay.hiding {
+    animation: innFadeOut 0.4s ease-in forwards;
+}
+@keyframes innFadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+/* Vignette effect */
+.inn-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, transparent 25%, rgba(0,0,0,0.6) 100%);
+    pointer-events: none;
+}
+
+/* Frame container — fades in/out */
+.inn-frame {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 320px;
+    padding: 0 24px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.inn-frame.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Night progress bar */
+.inn-night-bar {
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--v-text-dim, #8a7a68);
+    margin-bottom: 20px;
+    font-family: monospace;
+}
+
+/* Frame title */
+.inn-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--v-gold-light, #dbb668);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 8px rgba(196, 149, 58, 0.3);
+    margin-bottom: 16px;
+}
+
+/* Decorative icons */
+.inn-icons {
+    font-size: 28px;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    animation: innIconFloat 3s ease-in-out infinite;
+}
+@keyframes innIconFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+}
+
+/* Narration text */
+.inn-text {
+    margin-bottom: 20px;
+}
+.inn-line {
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--v-text, #d4c8b0);
+    font-style: italic;
+    margin-bottom: 4px;
+}
+
+/* Recovery bars */
+.inn-recovery {
+    margin-top: 8px;
+    padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(196, 149, 58, 0.15);
+    border-radius: 8px;
+}
+.inn-bar-line {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--v-text, #d4c8b0);
+    font-family: monospace;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Skip button positioned at bottom */
+#inn-skip-btn {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9501;
+    animation: innSkipFadeIn 0.3s ease-out;
+}
+@keyframes innSkipFadeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}

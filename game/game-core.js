@@ -448,6 +448,16 @@ async function doAction(callbackData) {
         showTimerOverlay(data.timer);
     }
 
+    // Inn sleep animation — play cinematic overlay before rendering result
+    if (data.inn_animation && typeof playInnAnimation === 'function') {
+        hideLocationTransition();
+        await new Promise(resolve => playInnAnimation(data.inn_animation, resolve));
+        if (data.text || data.buttons) {
+            renderScreen(data);
+        }
+        return;
+    }
+
     // Render the new screen (only if there's content to render)
     if (data.text || data.buttons) {
         // Wait remaining transition time before rendering
