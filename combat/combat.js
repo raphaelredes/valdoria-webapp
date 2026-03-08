@@ -699,8 +699,13 @@ function startTimer(seconds) {
         bar.style.width = pct + '%';
         text.textContent = Math.ceil(_timerRemaining) + 's';
 
+        // Multi-stage visual warnings
         if (_timerRemaining <= 5) {
+            bar.classList.remove('warning');
             bar.classList.add('critical');
+            text.classList.add('critical');
+        } else if (pct <= 40) {
+            bar.classList.add('warning');
         }
         // Heartbeat: tick sound + haptic in last 3 seconds (avoids auditory fatigue)
         if (_timerRemaining <= 3 && _timerRemaining > 0) {

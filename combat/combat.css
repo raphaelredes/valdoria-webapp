@@ -1303,6 +1303,136 @@ body {
     50% { box-shadow: 0 0 12px rgba(196,149,58,0.5), 0 0 24px rgba(196,149,58,0.25); }
 }
 
+/* ─── SPECTATOR BAR (Player Unconscious) ─── */
+.spectator-bar {
+    background: linear-gradient(180deg, rgba(123,32,32,0.12) 0%, rgba(42,36,32,0.95) 100%);
+    border-top: 2px solid rgba(123,32,32,0.4);
+}
+.spectator-msg {
+    text-align: center;
+    padding: 10px 8px;
+    color: #e08080;
+    font-size: 13px;
+    font-weight: 600;
+    animation: spectatePulse 2.5s ease-in-out infinite;
+}
+@keyframes spectatePulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* ─── OVERLAY ENTRY ANIMATIONS ─── */
+.skill-overlay.active,
+.target-overlay.active {
+    animation: overlayFadeIn 0.25s ease-out;
+}
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.skill-panel,
+.target-panel {
+    animation: panelSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes panelSlideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.skill-item:active,
+.target-item:active {
+    transform: scale(0.97);
+    transition: transform 80ms ease;
+}
+
+/* ─── ACTIVE TURN ENTITY ENHANCEMENT ─── */
+.entity.active-turn {
+    background: linear-gradient(165deg, rgba(196,149,58,0.06) 0%, var(--v-bg-card) 100%);
+}
+.entity.active-turn.enemy {
+    background: linear-gradient(165deg, rgba(229,57,53,0.06) 0%, var(--v-bg-card) 100%);
+}
+.entity.active-turn .compact-name {
+    color: var(--v-gold-light);
+}
+.entity.active-turn.enemy .compact-name {
+    color: #f0a0a0;
+}
+
+/* ─── TIMER MULTI-STAGE WARNINGS ─── */
+.timer-bar.warning {
+    background: linear-gradient(90deg, #e65100, #ffa726);
+}
+.timer-bar.critical {
+    height: 20px;
+}
+.timer-text.critical {
+    color: #e53935;
+    font-weight: 800;
+}
+
+/* ─── RESOLUTION SCREEN POLISH ─── */
+.res-header.victory {
+    animation: victoryGlow 2.5s ease-in-out infinite;
+}
+@keyframes victoryGlow {
+    0%, 100% { box-shadow: 0 0 12px rgba(196,149,58,0.1); }
+    50% { box-shadow: 0 0 24px rgba(196,149,58,0.3), 0 0 8px rgba(196,149,58,0.15) inset; }
+}
+.res-header.defeat {
+    animation: defeatPulse 3s ease-in-out infinite;
+}
+@keyframes defeatPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(123,32,32,0.1); }
+    50% { box-shadow: 0 0 20px rgba(123,32,32,0.25); }
+}
+.res-title {
+    text-shadow: 0 0 12px rgba(196,149,58,0.4);
+}
+.res-header.defeat .res-title {
+    text-shadow: 0 0 12px rgba(229,57,53,0.3);
+}
+.res-continue {
+    transition: all 0.2s ease;
+}
+.res-continue:active {
+    transform: scale(0.96);
+    border-color: rgba(196,149,58,0.6);
+    box-shadow: 0 0 12px rgba(196,149,58,0.2);
+}
+
+/* ─── BONUS/REACTION HEADER BACKGROUND ─── */
+.ba-header {
+    background: linear-gradient(135deg, rgba(196,149,58,0.06) 0%, transparent 100%);
+    border-radius: var(--v-radius-sm);
+}
+.ba-header.reaction-header {
+    background: linear-gradient(135deg, rgba(123,32,32,0.08) 0%, transparent 100%);
+}
+
+/* ─── DICE FORMULA ENTRY ANIMATION ─── */
+.dice-formula.visible {
+    animation: formulaReveal 0.3s ease-out;
+}
+@keyframes formulaReveal {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── ACTION BUTTON FOCUS ─── */
+.action-btn:focus-visible {
+    outline: 2px solid var(--v-gold);
+    outline-offset: 2px;
+}
+.action-btn.disabled {
+    cursor: not-allowed;
+}
+
+/* ─── INIT DICE WRAP GLOW ─── */
+.init-dice3d-wrap {
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(196,149,58,0.08);
+}
+
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
