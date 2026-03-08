@@ -209,8 +209,9 @@ async function _onVisibilityRefresh() {
         S.canCamp = !!data.cc;
         S.hasMap = data.hm || 0;
         S.mapCoverage = new Set(data.mc || []);
-        // Rebuild and re-render
+        // Rebuild and re-render (invalidate caches for fresh fog state)
         buildConnectionGraph();
+        _cachedFogState = null; // Force fog recompute to detect reveals
         updateHUD();
         updateLocationBadge();
         updateBottomBar();

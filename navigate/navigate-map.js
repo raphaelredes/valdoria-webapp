@@ -193,7 +193,7 @@ function renderMap() {
     svg.setAttribute('height', SVG_H);
     svg.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
     svg.innerHTML = '';
-    const fogState = computeFogState();
+    const fogState = computeFogState(true);
     const defs = _el('defs');
     _buildAllDefs(defs);
     svg.appendChild(defs);
