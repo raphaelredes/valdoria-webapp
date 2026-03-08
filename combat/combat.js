@@ -39,6 +39,7 @@ let _initAnimationInProgress = false; // Blocks poll re-render during initiative
 const _prevHpState = new Map(); // Feature 1: HP bar animation tracking
 const _prevStatusState = new Map(); // Status change detection for VFX
 let _prevPlayerHp = 0;          // Feature 2: detect player damage for shake
+let _lastEnemyDmgType = 'slashing'; // Track enemy damage type for VFX
 let _audioCtx = null;           // Feature 8: Web Audio (lazy init)
 let _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
 let _currentPositions = null;   // Feature 9: combat positions
@@ -457,6 +458,26 @@ function renderResolution(state) {
             continueBtn.classList.remove('reward-hidden');
             continueBtn.classList.add('reward-reveal');
         }, 600);
+    }
+
+    // VFX + SFX for resolution screens
+    if (window._combatVfx) {
+        const headerEl = app.querySelector('.res-header');
+        if (isVictory || isFled) {
+            // Victory: golden burst from header + triumphant flash
+            if (headerEl) {
+                window._combatVfx.buff(headerEl);
+                setTimeout(() => window._combatVfx.buff(headerEl), 400);
+            }
+            window._combatVfx.flash('rgba(255,215,0,0.25)', 600);
+            hapticBurst('crit');
+            sfxCrit(); // Triumphant chord
+        } else {
+            // Defeat: red vignette + somber flash
+            window._combatVfx.flash('rgba(120,20,20,0.35)', 800);
+            setTimeout(() => window._combatVfx.flash('rgba(80,10,10,0.2)', 600), 500);
+            haptic('heavy');
+        }
     }
 }
 
@@ -909,6 +930,8 @@ function startPolling() {
                 if (hasEnemyRoll && rollSig !== _lastAnimatedRoll) {
                     _cinematicInProgress = true;
                     const _eLr = state.lr;
+                    // Track enemy damage type for player damage VFX
+                    if (!_isAllyTurn && _eLr.dt) _lastEnemyDmgType = _eLr.dt;
                     const _isAllyTurn = newTurn && newTurn.t === 'a';
                     initDice(_eLr);
 
@@ -1694,6 +1717,7 @@ function _playCinematicResult(result, actionType) {
         const totalDelay = hasKill ? baseDelay + 1200 : baseDelay;
 
         // Death animation: fade+shake on killed enemy before re-render
+        const isBossKill = hasKill && currentState?.e?.some(e => e.leg && e.hp > 0);
         if (hasKill) {
             setTimeout(() => {
                 const enemyCards = document.querySelectorAll('.entity.enemy');
@@ -1702,6 +1726,17 @@ function _playCinematicResult(result, actionType) {
                 // VFX: elemental dissolution on kill
                 if (window._combatVfx) {
                     enemyCards.forEach(card => window._combatVfx.kill(card, result.lr.dt || 'slashing'));
+                    if (isBossKill) {
+                        // Boss kill — extra VFX burst + screen shake + flash
+                        window._combatVfx.flash('rgba(255,215,0,0.4)', 600);
+                        setTimeout(() => {
+                            enemyCards.forEach(card => window._combatVfx.kill(card, 'radiant'));
+                        }, 300);
+                    }
+                }
+                if (isBossKill) {
+                    const app = document.getElementById('app');
+                    if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 600); }
                 }
             }, baseDelay);
         }
