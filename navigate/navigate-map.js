@@ -481,11 +481,18 @@ function _updateScaleBar() {
     const lvl = ZOOM_LEVELS[_zoomIdx];
     const turnsLabel = document.getElementById('scale-turns');
     const levelLabel = document.getElementById('scale-level');
-    if (turnsLabel) turnsLabel.textContent = `${lvl.turnsPerBar} turno${lvl.turnsPerBar > 1 ? 's' : ''}`;
     if (levelLabel) levelLabel.textContent = lvl.label;
-    // Scale bar width proportional to zoom (wider at higher zoom = more detail)
-    const barPx = Math.round(40 + (lvl.zoom - 0.85) * 25);
-    bar.style.width = barPx + 'px';
+    // Fixed visual bar width (~60px), compute how many turns it represents
+    const BAR_PX = 60;
+    const ppt = _getAvgPxPerTurn();
+    const svgPx = BAR_PX / lvl.zoom; // bar width in SVG space
+    const turns = svgPx / ppt;        // how many turns the bar represents
+    // Round to nearest nice number
+    const niceT = turns < 0.8 ? '½' : turns < 1.5 ? '1' : turns < 2.5 ? '2' : turns < 4 ? '3' : turns < 6 ? '5' : Math.round(turns).toString();
+    if (turnsLabel) turnsLabel.textContent = `~${niceT} turno${niceT !== '1' && niceT !== '½' ? 's' : ''}`;
+    bar.style.width = BAR_PX + 'px';
+    const ticks = document.getElementById('scale-ticks');
+    if (ticks) ticks.style.width = BAR_PX + 'px';
 }
 
 function setupPanZoom() {
@@ -713,6 +720,24 @@ function playArrivalAnimation() {
 // DISTANCE RINGS — concentric turn-radius circles from current loc
 // ===============================================================
 
+// Compute average px/turn from actual connection data (cached)
+let _cachedPxPerTurn = 0;
+function _getAvgPxPerTurn() {
+    if (_cachedPxPerTurn > 0) return _cachedPxPerTurn;
+    let totalPxPerTurn = 0, count = 0;
+    for (const [aId, bId] of CONNECTION_EDGES) {
+        const ca = LOCATION_COORDS[aId], cb = LOCATION_COORDS[bId];
+        if (!ca || !cb) continue;
+        const pa = hexToPixel(ca.col, ca.row), pb = hexToPixel(cb.col, cb.row);
+        const pxDist = Math.sqrt((pa.x - pb.x) ** 2 + (pa.y - pb.y) ** 2);
+        const turns = getConnectionDistance(aId, bId);
+        totalPxPerTurn += pxDist / turns;
+        count++;
+    }
+    _cachedPxPerTurn = count > 0 ? totalPxPerTurn / count : HEX_RADIUS * 2;
+    return _cachedPxPerTurn;
+}
+
 function renderDistanceRings(svg) {
     // Only show at zoom >= Região (index 1+)
     if (_zoomIdx < 1) return;
@@ -720,8 +745,7 @@ function renderDistanceRings(svg) {
     if (!coords) return;
     const { x: cx, y: cy } = hexToPixel(coords.col, coords.row);
     const rG = _el('g', { class: 'distance-rings-layer', 'pointer-events': 'none' });
-    // Calculate radius per turn based on average hex spacing (~52px per turn)
-    const pxPerTurn = HEX_RADIUS * 2.0;
+    const pxPerTurn = _getAvgPxPerTurn();
     for (let t = 1; t <= 3; t++) {
         const r = pxPerTurn * t;
         const opac = 0.08 + (3 - t) * 0.03;
@@ -738,7 +762,7 @@ function renderDistanceRings(svg) {
             class: 'distance-ring-label',
             'text-anchor': 'middle',
         });
-        lbl.textContent = `${t} turno${t > 1 ? 's' : ''}`;
+        lbl.textContent = `~${t} turno${t > 1 ? 's' : ''}`;
         rG.appendChild(lbl);
     }
     svg.appendChild(rG);
