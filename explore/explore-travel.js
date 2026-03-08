@@ -509,40 +509,65 @@ function _drawGroundDetails(ctx, biome, w, h, groundY, elapsed) {
 function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const y = groundY;
     const bob = Math.sin(elapsed * 0.012) * 2.5;
-    const s = 1.8; // larger scale for more presence
+    const s = 1.8;
 
     ctx.save();
     ctx.translate(cx, y + bob);
 
-    // Ground shadow (larger, softer)
-    const shadowPulse = 0.3 + Math.sin(elapsed * 0.003) * 0.05;
-    ctx.fillStyle = `rgba(0,0,0,${shadowPulse})`;
+    // Walk cycle phase
+    const legSwing = Math.sin(elapsed * 0.01) * 5;
+    const armSwing = Math.sin(elapsed * 0.01) * 4;
+    // Wind factor for cape (ref: navigate banner 4-keyframe morph)
+    const wind1 = Math.sin(elapsed * 0.0012) * 2;   // slow sway
+    const wind2 = Math.sin(elapsed * 0.004) * 1.5;   // fast flutter
+    const windPhase = wind1 + wind2 * 0.5;
+
+    // ── Ground shadow ──
+    ctx.fillStyle = `rgba(0,0,0,${0.3 + Math.sin(elapsed * 0.003) * 0.05})`;
     ctx.beginPath();
     ctx.ellipse(0, 2, 16 * s, 5 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    const legSwing = Math.sin(elapsed * 0.01) * 5;
-    const armSwing = Math.sin(elapsed * 0.01) * 4;
-
-    // Cloak / cape flowing behind (drawn first, behind body)
-    ctx.fillStyle = '#3a2a30';
+    // ── Cast shadow behind figure (projected, not under) ──
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
     ctx.beginPath();
-    ctx.moveTo(-4 * s, -22 * s);
-    ctx.quadraticCurveTo(
-        (-8 + Math.sin(elapsed * 0.004) * 2) * s,
-        (-12 + legSwing * 0.3) * s,
-        (-6 + Math.sin(elapsed * 0.003) * 1.5) * s,
-        (-2 + Math.abs(legSwing) * 0.2) * s
-    );
-    ctx.lineTo(0, -6 * s);
-    ctx.lineTo(0, -20 * s);
+    ctx.moveTo(-3 * s, 0);
+    ctx.quadraticCurveTo((-12 + windPhase) * s, -10 * s, (-8 + windPhase) * s, -18 * s);
+    ctx.lineTo((-4 + windPhase * 0.5) * s, -18 * s);
+    ctx.quadraticCurveTo(-6 * s, -8 * s, -1 * s, 0);
     ctx.closePath();
     ctx.fill();
 
-    // Boots
-    ctx.fillStyle = '#2a2020';
+    // ── Cape flowing behind (banner-style wind animation) ──
+    // 4 control points animate like the navigate flag path morph
+    ctx.fillStyle = '#2a1e25';
+    ctx.beginPath();
+    ctx.moveTo(-3 * s, -24 * s);
+    ctx.bezierCurveTo(
+        (-7 + windPhase) * s, (-18 + wind2) * s,      // cp1 — upper billow
+        (-9 + wind1 * 1.5) * s, (-10 + wind2 * 0.5) * s,  // cp2 — mid wave
+        (-5 + windPhase * 0.8) * s, (-1 + Math.abs(legSwing) * 0.15) * s  // end — hem
+    );
+    ctx.lineTo(1 * s, -4 * s);
+    ctx.lineTo(0, -22 * s);
+    ctx.closePath();
+    ctx.fill();
+    // Cape edge highlight
+    ctx.strokeStyle = 'rgba(60,40,50,0.4)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(-3 * s, -24 * s);
+    ctx.bezierCurveTo(
+        (-7 + windPhase) * s, (-18 + wind2) * s,
+        (-9 + wind1 * 1.5) * s, (-10 + wind2 * 0.5) * s,
+        (-5 + windPhase * 0.8) * s, (-1 + Math.abs(legSwing) * 0.15) * s
+    );
+    ctx.stroke();
+
+    // ── Boots (dark) ──
     const bootL = legSwing * 0.5;
     const bootR = -legSwing * 0.5;
+    ctx.fillStyle = '#1a1418';
     ctx.beginPath();
     ctx.ellipse((-2 + bootL) * s, -1 * s, 3 * s, 1.8 * s, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -550,126 +575,98 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.ellipse((2 + bootR) * s, -1 * s, 3 * s, 1.8 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Legs (alternating walk frames — thicker, with knee bend)
-    ctx.fillStyle = '#3a3040';
-    // Left leg
+    // ── Legs (dark silhouette) ──
+    ctx.fillStyle = '#221a24';
     ctx.beginPath();
     ctx.moveTo(-3.5 * s, -2 * s);
-    ctx.lineTo((-3.5 + bootL * 0.3) * s, -7 * s);
     ctx.lineTo((-3 + bootL * 0.5) * s, -13 * s);
     ctx.lineTo((-0.5 + bootL * 0.5) * s, -13 * s);
-    ctx.lineTo((-1 + bootL * 0.3) * s, -7 * s);
     ctx.lineTo(-0.5 * s, -2 * s);
     ctx.fill();
-    // Right leg
     ctx.beginPath();
     ctx.moveTo(0.5 * s, -2 * s);
-    ctx.lineTo((1 + bootR * 0.3) * s, -7 * s);
     ctx.lineTo((0.5 + bootR * 0.5) * s, -13 * s);
     ctx.lineTo((3 + bootR * 0.5) * s, -13 * s);
-    ctx.lineTo((3.5 + bootR * 0.3) * s, -7 * s);
     ctx.lineTo(3.5 * s, -2 * s);
     ctx.fill();
 
-    // Belt
-    ctx.fillStyle = '#5a3a1a';
-    ctx.fillRect(-5 * s, -13.5 * s, 10 * s, 2 * s);
-    // Belt buckle
-    ctx.fillStyle = '#c4953a';
-    ctx.fillRect(-1 * s, -13.5 * s, 2 * s, 2 * s);
-
-    // Torso (layered — base + tunic)
-    ctx.fillStyle = '#4a3a50';
+    // ── Torso (dark robe) ──
+    ctx.fillStyle = '#2a2030';
     ctx.beginPath();
     ctx.moveTo(-5.5 * s, -13 * s);
-    ctx.lineTo(-6.5 * s, -25 * s);
-    ctx.lineTo(6.5 * s, -25 * s);
+    ctx.lineTo(-6 * s, -25 * s);
+    ctx.lineTo(6 * s, -25 * s);
     ctx.lineTo(5.5 * s, -13 * s);
     ctx.closePath();
     ctx.fill();
 
-    // Tunic center detail
-    ctx.fillStyle = '#554560';
+    // ── Shoulders (subtle, same dark tone) ──
+    ctx.fillStyle = '#2a2030';
     ctx.beginPath();
-    ctx.moveTo(-2 * s, -13 * s);
-    ctx.lineTo(-2.5 * s, -24 * s);
-    ctx.lineTo(2.5 * s, -24 * s);
-    ctx.lineTo(2 * s, -13 * s);
-    ctx.closePath();
+    ctx.ellipse(-6.5 * s, -24 * s, 3 * s, 2 * s, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(6.5 * s, -24 * s, 3 * s, 2 * s, 0.2, 0, Math.PI * 2);
     ctx.fill();
 
-    // Shoulders / pauldrons
-    ctx.fillStyle = '#3a3040';
-    ctx.beginPath();
-    ctx.ellipse(-7 * s, -24 * s, 3.5 * s, 2.5 * s, -0.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(7 * s, -24 * s, 3.5 * s, 2.5 * s, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Arms swinging (thicker)
-    ctx.strokeStyle = '#3a3040';
-    ctx.lineWidth = 3 * s;
+    // ── Arms (dark strokes) ──
+    ctx.strokeStyle = '#221a24';
+    ctx.lineWidth = 2.5 * s;
     ctx.lineCap = 'round';
-    // Left arm
     ctx.beginPath();
-    ctx.moveTo(-7 * s, -23 * s);
-    ctx.lineTo((-6 - armSwing) * s, -15 * s);
+    ctx.moveTo(-6.5 * s, -23 * s);
+    ctx.lineTo((-5.5 - armSwing) * s, -15 * s);
     ctx.stroke();
-    // Right arm (holding staff/weapon)
     ctx.beginPath();
-    ctx.moveTo(7 * s, -23 * s);
-    ctx.lineTo((6 + armSwing) * s, -15 * s);
+    ctx.moveTo(6.5 * s, -23 * s);
+    ctx.lineTo((5.5 + armSwing) * s, -15 * s);
     ctx.stroke();
 
-    // Walking staff (right hand)
-    ctx.strokeStyle = '#5a4a30';
-    ctx.lineWidth = 2 * s;
+    // ── Walking staff (right hand) ──
+    ctx.strokeStyle = '#3a2a1a';
+    ctx.lineWidth = 1.8 * s;
     ctx.beginPath();
-    ctx.moveTo((6 + armSwing) * s, -15 * s);
-    ctx.lineTo((7 + armSwing * 0.5) * s, 2 * s);
+    ctx.moveTo((5.5 + armSwing) * s, -15 * s);
+    ctx.lineTo((6.5 + armSwing * 0.4) * s, 2 * s);
     ctx.stroke();
-    // Staff tip glow
-    ctx.fillStyle = `rgba(196,149,58,${0.4 + Math.sin(elapsed * 0.005) * 0.2})`;
+    // Staff top gem glow
+    const gemGlow = 0.4 + Math.sin(elapsed * 0.005) * 0.2;
+    ctx.fillStyle = `rgba(196,149,58,${gemGlow})`;
     ctx.beginPath();
-    ctx.arc((6 + armSwing) * s, -15.5 * s, 2 * s, 0, Math.PI * 2);
+    ctx.arc((5.5 + armSwing) * s, -15.5 * s, 2 * s, 0, Math.PI * 2);
+    ctx.fill();
+    // Gem halo
+    ctx.fillStyle = `rgba(196,149,58,${gemGlow * 0.25})`;
+    ctx.beginPath();
+    ctx.arc((5.5 + armSwing) * s, -15.5 * s, 5 * s, 0, Math.PI * 2);
     ctx.fill();
 
-    // Neck
-    ctx.fillStyle = '#d4b896';
-    ctx.fillRect(-1.5 * s, -27 * s, 3 * s, 3 * s);
-
-    // Head
-    ctx.fillStyle = '#d4b896';
+    // ── Hood (covers head entirely — generic, no face visible) ──
+    ctx.fillStyle = '#221a25';
+    // Hood body — large rounded shape
     ctx.beginPath();
-    ctx.arc(0, -30 * s, 4.5 * s, 0, Math.PI * 2);
+    ctx.arc(0, -29 * s, 5.5 * s, 0, Math.PI * 2);
     ctx.fill();
-
-    // Hood (full coverage, medieval style)
-    ctx.fillStyle = '#3a2a30';
+    // Hood top point
     ctx.beginPath();
-    ctx.arc(0, -30.5 * s, 5.2 * s, Math.PI * 1.15, Math.PI * -0.15);
-    ctx.lineTo(4 * s, -26 * s);
-    ctx.lineTo(-4 * s, -26 * s);
+    ctx.moveTo(0, -35 * s);
+    ctx.lineTo(-2 * s, -30 * s);
+    ctx.lineTo(2 * s, -30 * s);
     ctx.closePath();
     ctx.fill();
-
-    // Hood pointed tip
+    // Hood brim shadow (darker bottom half — face in complete shadow)
+    ctx.fillStyle = '#18101a';
     ctx.beginPath();
-    ctx.moveTo(0, -35.5 * s);
-    ctx.lineTo(-1.5 * s, -31 * s);
-    ctx.lineTo(1.5 * s, -31 * s);
-    ctx.closePath();
+    ctx.arc(0, -28.5 * s, 4.5 * s, 0, Math.PI);
     ctx.fill();
 
-    // Eye glint (tiny)
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    // ── Gold aura pulse (mysterious glow) ──
+    const auraPulse = 0.2 + Math.sin(elapsed * 0.003) * 0.1;
+    ctx.strokeStyle = `rgba(196,149,58,${auraPulse})`;
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(-1.5 * s, -30.5 * s, 0.6 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(1.5 * s, -30.5 * s, 0.6 * s, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.ellipse(0, -15 * s, 12 * s, 22 * s, 0, 0, Math.PI * 2);
+    ctx.stroke();
 
     ctx.restore();
 }

@@ -532,9 +532,9 @@ function _renderArenaInner(s) {
         html += `<div class="combat-feed${narrativeCls}" id="combatFeed">`;
         if (total > visibleCount) {
             const older = s.feed.slice(0, -visibleCount);
-            older.forEach(f => { html += `<div class="feed-entry feed-hidden">${escHtml(f)}</div>`; });
+            older.forEach(f => { html += `<div class="feed-entry feed-hidden ${_classifyFeed(f)}">${escHtml(f)}</div>`; });
         }
-        recentFeed.forEach(f => { html += `<div class="feed-entry">${escHtml(f)}</div>`; });
+        recentFeed.forEach(f => { html += `<div class="feed-entry ${_classifyFeed(f)}">${escHtml(f)}</div>`; });
         if (total > visibleCount) {
             html += `<div class="feed-toggle" id="feedToggle">▲ Mostrar +${total - visibleCount} anteriores</div>`;
         }
@@ -865,7 +865,7 @@ function startPolling() {
                     _cinematicInProgress = true;
                     initDice(state.lr);
                     if (!state.lr.miss && state.lr.d > 0) {
-                        setTimeout(() => _showDamageFloat(state.lr.d, state.lr.dt, '.entity.player'), 2700);
+                        setTimeout(() => _showDamageFloat(state.lr.d, state.lr.dt, '.entity.player', !!state.lr.crit), 2700);
                     }
                     // 3D dice: 1200 + 1500 + 1200 + 200 = 4100ms for hits
                     const enemyDelay = (state.lr.miss || state.lr.d <= 0) ? 1800 : 4100;
@@ -1517,7 +1517,7 @@ function _playCinematicResult(result, actionType) {
         if (_isDmgType && !result.lr.miss && result.lr.d > 0) {
             // Overlay timing: d20(1200)+hold(800)+dmgRoll(1500)+fusion(400)+result(1200)
             const _floatDelay = ['auto_hit', 'aoe'].includes(_rt) ? 2200 : 3800;
-            setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy'), _floatDelay);
+            setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy', !!result.lr.crit), _floatDelay);
         }
 
         // Phase 3: After full overlay animation, check for kills then render new state
@@ -1597,19 +1597,19 @@ function _showAnticipation(text) {
 }
 
 // ─── FLOATING DAMAGE NUMBER ───
-function _showDamageFloat(damage, damageType, targetSelector) {
+function _showDamageFloat(damage, damageType, targetSelector, isCrit) {
     const target = document.querySelector(targetSelector || '.entity.enemy');
     if (!target) return;
     const rect = target.getBoundingClientRect();
     const el = document.createElement('div');
-    el.className = 'damage-float';
-    el.textContent = `-${damage}`;
+    el.className = 'damage-float' + (isCrit ? ' crit' : '');
+    el.textContent = isCrit ? `💥 -${damage}` : `-${damage}`;
     const colors = { fire: '#ff6020', cold: '#80c0ff', lightning: '#ffe040', necrotic: '#9040c0', radiant: '#ffe080', poison: '#60c040', acid: '#60d040' };
-    el.style.color = colors[damageType] || '#ff4444';
+    if (!isCrit) el.style.color = colors[damageType] || '#ff4444';
     el.style.left = (rect.left + rect.width / 2) + 'px';
     el.style.top = rect.top + 'px';
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1200);
+    setTimeout(() => el.remove(), isCrit ? 1500 : 1200);
 }
 
 // ─── SKILL PICKER ───
@@ -1626,7 +1626,8 @@ function showSkillPicker(skills, enemies, actionType) {
         const tgtBadge = sk.tg === 'all' ? ' · <span class="sk-aoe">AOE</span>' :
             sk.tg === 'self' ? ' · <span class="sk-aoe">Self</span>' : '';
         const effLine = sk.eff ? `<div class="skill-effect">${escHtml(sk.eff)}</div>` : '';
-        html += `<div class="skill-item" data-skill-id="${sk.id}" data-tg="${sk.tg || 'single'}">
+        const skCls = sk.tp === 'heal' ? 'sk-heal' : sk.tp === 'saving_throw' ? 'sk-save' : sk.tp === 'auto' ? 'sk-buff' : 'sk-damage';
+        html += `<div class="skill-item ${skCls}" data-skill-id="${sk.id}" data-tg="${sk.tg || 'single'}">
             <div>
                 <div class="skill-name">${escHtml(sk.n)}</div>
                 ${effLine}
@@ -1686,9 +1687,11 @@ function showTargetPicker(enemies, actionType, skillId) {
                 previewHtml = `<div class="target-preview"><span class="${good ? 'prev-hit' : 'prev-miss'}">${chText} chance</span>${dmgText ? ` · ${escHtml(dmgText)}` : ''}</div>`;
             }
         }
+        const hpColor = pct > 50 ? '#4caf50' : pct > 25 ? '#ff9800' : '#e53935';
         html += `<div class="target-item" data-target="${i}">
             <div><span>${e.ico || '👹'}</span> <b>${escHtml(e.n)}</b>${previewHtml}</div>
             <div class="skill-meta">${e.hp}/${e.mhp} HP (${pct}%)</div>
+            <div class="target-hp-bar"><div class="target-hp-fill" style="width:${pct}%;background:${hpColor}"></div></div>
         </div>`;
     });
     html += '<div class="skill-close" id="targetClose">Cancelar</div>';
@@ -1724,7 +1727,8 @@ function showItemPicker(items, enemies, allies) {
         const isThrown = !!it.tdmg;
         const effText = isThrown ? `${it.tdmg} ${it.ttype || ''}` : (it.heal ? `Cura ${it.heal}` : '');
         const typeBadge = isThrown ? '<span class="sk-aoe">Arremesso</span>' : '<span class="sk-type">Cura</span>';
-        html += `<div class="skill-item item-entry" data-item="${escHtml(it.n)}" data-thrown="${isThrown}">
+        const itemCls = isThrown ? 'item-thrown' : 'item-heal';
+        html += `<div class="skill-item item-entry ${itemCls}" data-item="${escHtml(it.n)}" data-thrown="${isThrown}">
             <div>
                 <div class="skill-name">${it.ico} ${escHtml(it.n)} <span class="action-chance">x${it.q}</span></div>
                 <div class="skill-meta">${effText} · ${typeBadge}</div>
@@ -2297,6 +2301,21 @@ window.showError = function (msg, err) {
 function escHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Classify feed entry text for colored left-border accent
+function _classifyFeed(f) {
+    if (!f) return '';
+    const t = f.toLowerCase();
+    if (t.includes('derrotou') || t.includes('abateu') || t.includes('caiu')) return 'feed-kill';
+    if (t.includes('crítico') || t.includes('crit')) return 'feed-crit';
+    if (t.includes('curou') || t.includes('cura') || t.includes('recuperou')) return 'feed-heal';
+    if (t.includes('errou') || t.includes('falhou') || t.includes('resistiu') || t.includes('miss')) return 'feed-miss';
+    if (t.includes('acertou') || t.includes('causou') || t.includes('dano')) return 'feed-hit';
+    if (t.includes('salvaguarda') || t.includes('teste de')) return 'feed-save';
+    if (t.includes('efeito') || t.includes('status') || t.includes('envenenad') || t.includes('atordoad') || t.includes('ceg')) return 'feed-status';
+    if (t.includes('usou') || t.includes('ativou') || t.includes('lançou')) return 'feed-self';
+    return '';
 }
 
 // ═══════════════════════════════════════════════════
