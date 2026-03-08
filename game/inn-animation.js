@@ -257,14 +257,23 @@ function _recoveryHTML(data, pct) {
     return html;
 }
 
-// Animate all bar fills after they've been inserted into the DOM
+// Animate bar fills with stagger (HP first, then MP 200ms later)
 function _animateBarFills(container) {
     requestAnimationFrame(() => {
         const fills = container.querySelectorAll('.inn-bar-fill[data-target]');
-        fills.forEach(el => {
-            el.style.width = el.dataset.target + '%';
+        fills.forEach((el, i) => {
+            setTimeout(() => {
+                el.style.width = el.dataset.target + '%';
+            }, i * 200);
         });
     });
+}
+
+// Force-restart a CSS animation on an element
+function _restartAnimation(el, animName) {
+    el.style.animation = 'none';
+    el.offsetHeight; // trigger reflow
+    el.style.animation = '';
 }
 
 // ─── Build Frame List ───
@@ -335,6 +344,7 @@ function playInnAnimation(data, onDone) {
     const frameEl = document.getElementById('inn-frame');
     const titleEl = document.getElementById('inn-title');
     const iconsEl = document.getElementById('inn-icons');
+    const dividerEl = document.getElementById('inn-divider');
     const textEl = document.getElementById('inn-text');
     const nightBarEl = document.getElementById('inn-night-bar');
     const recoveryEl = document.getElementById('inn-recovery');
@@ -434,19 +444,25 @@ function playInnAnimation(data, onDone) {
                 titleEl.classList.remove('shimmer');
             }
 
-            // Ornamental divider + icons
-            iconsEl.innerHTML = frame.icons +
-                '<div class="inn-divider">─ ◆ ─</div>';
+            // Icons (separate from divider now)
+            iconsEl.textContent = frame.icons;
 
-            // Narration text — lines appear staggered via CSS animation
+            // Divider — hidden during dream frames for cleaner look
+            if (dividerEl) {
+                dividerEl.style.display = frame.isDream ? 'none' : '';
+            }
+
+            // Narration text — dream lines get ethereal styling
+            const lineClass = frame.isDream ? 'inn-line dream' : 'inn-line';
             textEl.innerHTML = frame.lines.map(l =>
-                '<div class="inn-line">' + l + '</div>'
+                '<div class="' + lineClass + '">' + l + '</div>'
             ).join('');
 
             // Recovery bars — set width:0 first, then animate after paint
             if (frame.recovery > 0) {
                 recoveryEl.innerHTML = _recoveryHTML(data, frame.recovery);
                 recoveryEl.style.display = '';
+                _restartAnimation(recoveryEl, 'innRecoveryFadeIn');
                 _animateBarFills(recoveryEl);
             } else {
                 recoveryEl.style.display = 'none';

@@ -33,13 +33,18 @@
     to   { opacity: 0; }
 }
 
-/* Vignette effect */
+/* Vignette effect — subtle breathing pulse */
 .inn-vignette {
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse at 50% 50%, transparent 25%, rgba(0,0,0,0.6) 100%);
     pointer-events: none;
     z-index: 0;
+    animation: innVignetteBreathe 6s ease-in-out infinite;
+}
+@keyframes innVignetteBreathe {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.7; }
 }
 
 /* ─── Floating Particles (stars + embers) ─── */
@@ -142,7 +147,7 @@
 /* Decorative icons — with gold drop-shadow glow */
 .inn-icons {
     font-size: 28px;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
     line-height: 1.4;
     animation: innIconFloat 3s ease-in-out infinite;
     filter: drop-shadow(0 0 12px rgba(196, 149, 58, 0.4)) drop-shadow(0 0 30px rgba(196, 149, 58, 0.12));
@@ -176,6 +181,11 @@
     opacity: 0;
     transform: translateY(4px);
     animation: innLineReveal 0.4s ease-out forwards;
+}
+/* Dream lines — ethereal purple tint */
+.inn-line.dream {
+    color: #c8a8e0;
+    text-shadow: 0 0 12px rgba(160, 120, 200, 0.3);
 }
 /* Staggered line reveal */
 .inn-line:nth-child(1) { animation-delay: 0.1s; }
