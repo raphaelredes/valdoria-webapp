@@ -361,7 +361,8 @@ function renderResolution(state) {
         : '';
     const rewardsBlock = rewardsHtml
         ? `<div class="res-rewards">${rewardsHtml}</div>`
-        : (isVictory ? '<div class="res-rewards"><div class="res-reward"><span class="res-icon">\u2694\uFE0F</span><span>Combate encerrado</span></div></div>' : '');
+        : (isVictory ? '<div class="res-rewards"><div class="res-reward"><span class="res-icon">\u2694\uFE0F</span><span>Combate encerrado</span></div></div>'
+            : (narrativeLines.length > 0 ? '' : '<div class="res-rewards"><div class="res-reward"><span class="res-icon">\u{1F4AB}</span><span>Você caiu em combate</span></div></div>'));
 
     // Level-up transition button (when player leveled up with pending choices)
     const hasLevelUp = isVictory && state.leveled_up && isApiMode;
@@ -1403,7 +1404,12 @@ async function sendAction(actionData) {
                 : e.status === 429 ? 'Muitas ações. Aguarde um momento.'
                     : 'Erro de conexão. Tente novamente.';
             showError(msg);
-            startPolling();
+            // Don't poll immediately on rate-limit; wait 5s before resuming
+            if (e.status === 429) {
+                setTimeout(() => startPolling(), 5000);
+            } else if (e.status !== 401) {
+                startPolling();
+            }
         }
     } else {
         if (!tg) { console.log('No Telegram WebApp', actionData); _actionSent = false; return; }
@@ -1428,7 +1434,8 @@ function _playCinematicResult(result, actionType) {
     // No cinematic for: initiative actions, no dice roll, or not in active combat
     if (!hasRoll || isNonCombatAction || oldPhase !== 'active') {
         currentState = result;
-        if (isResolution) { renderResolution(result); }
+        if (result.phase === 'ended') { showCombatEnded(); }
+        else if (isResolution) { renderResolution(result); }
         else { renderArena(result); }
         return;
     }
@@ -1466,7 +1473,8 @@ function _playCinematicResult(result, actionType) {
         setTimeout(() => {
             _cinematicInProgress = false;
             currentState = result;
-            if (isResolution) { renderResolution(result); }
+            if (result.phase === 'ended') { showCombatEnded(); }
+            else if (isResolution) { renderResolution(result); }
             else { renderArena(result); }
         }, totalDelay);
     }, 350);
