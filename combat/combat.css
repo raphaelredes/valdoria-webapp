@@ -1598,6 +1598,18 @@ body {
     0%, 100% { opacity: 0.7; }
     50% { opacity: 1; }
 }
+.spectator-saves {
+    text-align: center;
+    font-size: 16px;
+    letter-spacing: 2px;
+    padding: 2px 0 4px;
+}
+.spectator-detail {
+    text-align: center;
+    font-size: 12px;
+    color: #a09484;
+    padding: 2px 0;
+}
 
 /* ─── OVERLAY ENTRY ANIMATIONS ─── */
 .skill-overlay.active,

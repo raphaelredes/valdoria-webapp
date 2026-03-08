@@ -1154,7 +1154,6 @@
         if (tg) {
             tg.ready();
             tg.expand();
-            tg.MainButton.hide();
             tg.setHeaderColor(_vBg);
             tg.setBackgroundColor(_vBg);
             document.documentElement.style.setProperty('--tg-viewport-height', tg.viewportHeight + 'px');
@@ -1376,12 +1375,6 @@
             });
             document.getElementById('progressLabel').textContent = `9/${SCREENS.length} - ${SCREEN_NAMES[8]}`;
             document.getElementById(SCREENS[8]).scrollTop = 0;
-            if (tg) {
-                tg.MainButton.offClick(submitCharacter);
-                tg.MainButton.setText('⚔️ CONFIRMAR PERSONAGEM');
-                tg.MainButton.show();
-                tg.MainButton.onClick(submitCharacter);
-            }
             updateBackButton();
         }
 
@@ -1413,7 +1406,6 @@
                 dot.className = 'v-progress-dot' + (i === 0 ? ' active' : '');
             });
             document.getElementById('progressLabel').textContent = `1/${SCREENS.length} - ${SCREEN_NAMES[0]}`;
-            if (tg) { tg.MainButton.offClick(submitCharacter); tg.MainButton.hide(); }
             updateBackButton();
         }
 
@@ -1519,16 +1511,6 @@
             });
             document.getElementById('progressLabel').textContent = `${idx + 1}/${SCREENS.length} - ${SCREEN_NAMES[idx]}`;
             document.getElementById(SCREENS[idx]).scrollTop = 0;
-            if (tg) {
-                tg.MainButton.offClick(submitCharacter);
-                if (idx === 8) {
-                    tg.MainButton.setText('⚔️ CONFIRMAR PERSONAGEM');
-                    tg.MainButton.show();
-                    tg.MainButton.onClick(submitCharacter);
-                } else {
-                    tg.MainButton.hide();
-                }
-            }
             updateBackButton();
             haptic();
         }
@@ -3263,6 +3245,9 @@
                 html += `</div>`;
             }
 
+            // Confirm button (inside WebApp, not Telegram MainButton)
+            html += `<button type="button" class="v-btn v-btn-primary btn-block" id="confirmBtn" onclick="submitCharacter()" style="margin-top:16px;font-size:16px;padding:14px 0;letter-spacing:1px">⚔️ CONFIRMAR PERSONAGEM</button>`;
+
             document.getElementById('summaryContent').innerHTML = html;
 
             // Bind name editors for random characters
@@ -3280,6 +3265,14 @@
         async function submitCharacter() {
             const err = validateCurrentScreen();
             if (err) { _showValidation(err); return; }
+
+            // Disable confirm button to prevent double-clicks
+            const _confirmBtn = document.getElementById('confirmBtn');
+            if (_confirmBtn) {
+                _confirmBtn.disabled = true;
+                _confirmBtn.textContent = '⏳ Criando personagem...';
+                _confirmBtn.style.opacity = '0.6';
+            }
 
             const bg = BACKGROUNDS[sel.bg];
             const bgSkills = bg ? bg.skills : [];
@@ -3363,6 +3356,12 @@
             } catch (e) {
                 if (window.ValdoriaErrors) ValdoriaErrors.showError('Erro ao enviar dados. Tente novamente.', e);
                 else _showValidation('Erro ao enviar dados. Tente novamente.');
+                // Re-enable confirm button on failure
+                if (_confirmBtn) {
+                    _confirmBtn.disabled = false;
+                    _confirmBtn.textContent = '⚔️ CONFIRMAR PERSONAGEM';
+                    _confirmBtn.style.opacity = '';
+                }
             }
         }
     </script>

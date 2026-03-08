@@ -617,8 +617,15 @@ function _renderArenaInner(s) {
     const isUnconscious = s.unconscious || (s.p && s.p.hp <= 0);
     if (ph === 'active' && isUnconscious) {
         // Spectator mode: player is unconscious, allies fight on
+        // D&D 5e PHB p.197: Death Saving Throws — show status + advance button
+        const ds = s.ds || { s: 0, f: 0 };
+        const dsMarks = '✅'.repeat(ds.s) + '⬜'.repeat(3 - ds.s) + '  ' + '❌'.repeat(ds.f) + '⬜'.repeat(3 - ds.f);
+        const stab = ds.stab ? '<div class="spectator-detail">🩹 Estabilizado — aguardando socorro</div>' : '';
         html += `<div class="action-bar spectator-bar">
-            <div class="spectator-msg">💀 <b>Inconsciente</b> — seus aliados continuam a luta</div>
+            <div class="spectator-msg">💀 <b>Inconsciente</b> — Teste contra a Morte</div>
+            <div class="spectator-saves">${dsMarks}</div>
+            ${stab}
+            <button class="action-btn primary full-width" data-action="continue_spectator" style="margin-top:6px">⏭️ Próximo Round</button>
         </div>`;
     } else if (ph === 'active' && subPh === 'bonus_action') {
         html += renderTimerBar(s);
@@ -1575,6 +1582,10 @@ function bindActions(state) {
             } else if (action === 'reaction_use') {
                 const skillId = btn.dataset.skillId;
                 sendAction({ type: 'reaction_use', skill_id: skillId });
+            }
+            // Spectator mode: player unconscious, advance round
+            else if (action === 'continue_spectator') {
+                sendAction({ type: 'continue_spectator' });
             }
         });
     });
