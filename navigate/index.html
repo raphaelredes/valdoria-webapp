@@ -217,6 +217,26 @@
             flex-shrink: 0;
         }
 
+        .info-close {
+            background: none;
+            border: 1px solid rgba(112, 66, 20, 0.3);
+            border-radius: 3px;
+            color: #a09484;
+            font-size: 14px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            padding: 0;
+            line-height: 1;
+        }
+        .info-close:active {
+            opacity: 0.6;
+        }
+
         .info-biome {
             font-size: 13px;
             color: #8a7060;
@@ -997,6 +1017,7 @@
             <span class="info-icon" id="info-icon"></span>
             <span class="info-title" id="info-title"></span>
             <span class="info-danger" id="info-danger"></span>
+            <button type="button" class="info-close" id="info-close" onclick="closeInfoPanel()" aria-label="Fechar">✕</button>
         </div>
         <div class="info-biome" id="info-biome"></div>
         <div class="info-desc" id="info-desc"></div>

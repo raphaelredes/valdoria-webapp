@@ -96,8 +96,9 @@ function renderRoads(group, fogState) {
             const mid = _pointOnPath(pathD, 0.5);
             const mx = mid.x + (srand(seed+99)-0.5)*4;
             const my = mid.y + (srand(seed+100)-0.5)*3;
+            const badgeSz = Math.max(6, Math.min(11, 8 / (S.zoom || 1)));
             const txt = _el('text', { x: mx, y: my + 3, 'text-anchor': 'middle',
-                'font-size': '8px', 'font-weight': '700', 'font-family': "'Cinzel', serif",
+                'font-size': badgeSz + 'px', 'font-weight': '700', 'font-family': "'Cinzel', serif",
                 fill: INK, 'fill-opacity': bothExp ? 0.45 : 0.25, 'pointer-events': 'none' });
             txt.textContent = dist;
             group.appendChild(txt);
@@ -453,8 +454,8 @@ function renderLocationMarkers(group, fogState) {
             if (isSett) _drawSettlementIcon(ng, x, y + 4, 9);
             else _drawBiomeIcon(ng, x, y + 2, biome, 9, name);
         } else if (isExp) {
-            // Silhouette icon — no circle
-            if (isSett) _drawSettlementIcon(ng, x, y + 4, 8);
+            // Silhouette icon — settlements slightly larger
+            if (isSett) _drawSettlementIcon(ng, x, y + 4, 9);
             else _drawBiomeIcon(ng, x, y + 2, biome, 8, name);
         } else if (fog === 'known_mapped') {
             // Faded silhouette
@@ -496,7 +497,13 @@ function renderLocationMarkers(group, fogState) {
         // Label (multi-line for long names)
         if (isExp || isCurr) {
             const lines = _wrapLabel(name, 14);
-            const lbl = _el('text', { x: x, y: y + R + 13, class: 'loc-label' });
+            const lblAttrs = { x: x, y: y + R + 13, class: 'loc-label' };
+            if (isSett) {
+                lblAttrs.fill = '#c4953a';
+                lblAttrs['font-size'] = '10.5px';
+                lblAttrs['font-weight'] = '700';
+            }
+            const lbl = _el('text', lblAttrs);
             if (lines.length === 1) {
                 lbl.textContent = lines[0];
             } else {
@@ -519,7 +526,9 @@ function renderLocationMarkers(group, fogState) {
                 stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.15 }));
         } else if (fog === 'known_mapped') {
             const lines = _wrapLabel(name, 14);
-            const lbl = _el('text', { x: x, y: y + R + 11, class: 'loc-label', 'fill-opacity': 0.4 });
+            const kmAttrs = { x: x, y: y + R + 11, class: 'loc-label', 'fill-opacity': 0.4 };
+            if (isSett) { kmAttrs.fill = '#c4953a'; kmAttrs['font-size'] = '10px'; }
+            const lbl = _el('text', kmAttrs);
             if (lines.length === 1) {
                 lbl.textContent = lines[0];
             } else {

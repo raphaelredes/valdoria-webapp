@@ -206,7 +206,20 @@ function handleLocationTap(locId) {
             actionsEl.appendChild(travelBtn);
         }
     } else if (wDist > 0) {
-        noteEl.textContent = `⛔ Não há caminho direto — ${wDist} turno${wDist !== 1 ? 's' : ''} de distância`;
+        // Show route hint via BFS path
+        const routePath = bfsPath(S.currentLoc, locId);
+        let routeHint = '';
+        if (routePath && routePath.length > 2) {
+            const via = routePath.slice(1, -1).map(id => {
+                const ld2 = S.locations[id];
+                return ld2?.n || id;
+            });
+            const viaStr = via.length <= 3
+                ? via.join(' → ')
+                : via.slice(0, 2).join(' → ') + ` → ... (${via.length} paradas)`;
+            routeHint = `\n🗺️ Rota: ${viaStr}`;
+        }
+        noteEl.innerHTML = `⛔ Não há caminho direto — <b>${wDist} turno${wDist !== 1 ? 's' : ''}</b> de distância${routeHint}`;
         noteEl.style.display = 'block';
         noteEl.style.color = '';
     } else {
