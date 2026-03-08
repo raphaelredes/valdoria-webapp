@@ -103,6 +103,11 @@ function renderScreen(screen) {
         contentEl.innerHTML = enhanceContent(screen.text || '');
     }
 
+    // Inject font picker on settings screen
+    if (screen.screen_id === 'city.settings' && typeof injectFontPicker === 'function') {
+        injectFontPicker(contentEl);
+    }
+
     // Buttons (rendered into #buttons inside #bottom-panel)
     const buttonsEl = document.getElementById('buttons');
     buttonsEl.innerHTML = '';

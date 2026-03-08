@@ -420,3 +420,90 @@ function updateImmersiveEligibility(screen) {
 
     _applyImmersive();
 }
+
+// ─── Font Picker (settings screen) ───
+const FONT_OPTIONS = [
+    { id: 'medievalsharp', name: 'MedievalSharp', family: "'MedievalSharp', serif" },
+    { id: 'cinzel',        name: 'Cinzel',        family: "'Cinzel', serif" },
+    { id: 'imfell',        name: 'IM Fell English', family: "'IM Fell English', serif" },
+    { id: 'pirataone',     name: 'Pirata One',    family: "'Pirata One', cursive" },
+    { id: 'almendra',      name: 'Almendra',      family: "'Almendra', serif" },
+    { id: 'metamorphous',  name: 'Metamorphous',  family: "'Metamorphous', serif" },
+];
+const FONT_KEY = 'valdoria_font';
+
+function getSelectedFont() {
+    try {
+        let id = localStorage.getItem(FONT_KEY) || 'medievalsharp';
+        if (id === 'uncial') { id = 'medievalsharp'; localStorage.setItem(FONT_KEY, id); }
+        return id;
+    } catch (e) { return 'medievalsharp'; }
+}
+
+function applyGameFont() {
+    const id = getSelectedFont();
+    const opt = FONT_OPTIONS.find(f => f.id === id);
+    if (!opt) return;
+    document.body.style.setProperty('--user-font', opt.family);
+    document.body.dataset.font = id;
+    document.body.style.fontFamily = opt.family;
+}
+
+function selectGameFont(fontId) {
+    const opt = FONT_OPTIONS.find(f => f.id === fontId);
+    if (!opt) return;
+    try { localStorage.setItem(FONT_KEY, fontId); } catch (e) { /* */ }
+    applyGameFont();
+    document.querySelectorAll('.font-pick-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.fontId === fontId);
+    });
+    haptic('light');
+}
+
+/**
+ * Inject font picker HTML into settings screen content.
+ * Called by renderScreen() when screen_id is 'city.settings'.
+ */
+function injectFontPicker(contentEl) {
+    const section = document.createElement('div');
+    section.className = 'font-picker-section';
+
+    const label = document.createElement('div');
+    label.className = 'font-picker-label';
+    label.textContent = '🔤 Fonte do Jogo';
+    section.appendChild(label);
+
+    const grid = document.createElement('div');
+    grid.className = 'font-picker-grid';
+
+    const currentId = getSelectedFont();
+    for (const f of FONT_OPTIONS) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'font-pick-btn' + (f.id === currentId ? ' active' : '');
+        btn.style.fontFamily = f.family;
+        btn.dataset.fontId = f.id;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = f.name;
+        btn.appendChild(nameSpan);
+
+        const check = document.createElement('span');
+        check.className = 'font-check';
+        check.textContent = '✓';
+        btn.appendChild(check);
+
+        btn.onclick = () => selectGameFont(f.id);
+        grid.appendChild(btn);
+    }
+
+    section.appendChild(grid);
+    contentEl.appendChild(section);
+}
+
+// Apply saved font on load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyGameFont);
+} else {
+    applyGameFont();
+}
