@@ -193,6 +193,9 @@ function _yieldFrame() {
 }
 
 // Async progressive render — used on initial load with loading screen
+// Strategy: render functional map first (landmass + terrain + roads + locations),
+// show to player, then add expensive decorative layers (worn edges, aging,
+// SVG filters) in the background after loading screen hides.
 async function renderMapAsync(onProgress) {
     const svg = document.getElementById('map-svg');
     svg.setAttribute('width', SVG_W);
@@ -201,7 +204,7 @@ async function renderMapAsync(onProgress) {
     svg.innerHTML = '';
     const fogState = computeFogState(true);
 
-    // Phase 1: Foundation (defs, background, landmass)
+    // Phase 1: Foundation (defs, background, landmass) — lightweight
     const defs = _el('defs');
     _buildAllDefs(defs);
     svg.appendChild(defs);
@@ -210,16 +213,13 @@ async function renderMapAsync(onProgress) {
     if (onProgress) onProgress(20);
     await _yieldFrame();
 
-    // Phase 2: Terrain base (edges, aging, ground, rivers, regions)
-    _renderWornEdges(svg);
-    _renderAgingEffects(svg);
+    // Phase 2: Functional map (terrain, rivers, roads, locations) — what the player needs
     renderGroundCover(svg);
     _renderRivers(svg);
     renderTerrainRegions(svg, fogState);
-    if (onProgress) onProgress(50);
+    if (onProgress) onProgress(45);
     await _yieldFrame();
 
-    // Phase 3: Details + roads + locations
     renderTerrainDetails(svg, fogState);
     const roadG = _el('g', { class: 'roads-layer' });
     renderRoads(roadG, fogState);
@@ -227,18 +227,42 @@ async function renderMapAsync(onProgress) {
     const locG = _el('g', { class: 'locations-layer' });
     renderLocationMarkers(locG, fogState);
     svg.appendChild(locG);
-    if (onProgress) onProgress(80);
+    if (onProgress) onProgress(70);
     await _yieldFrame();
 
-    // Phase 4: Polish (rings, fog, decor, compass, pan/zoom)
+    // Phase 3: Interactive elements (rings, banner, fog, compass, pan/zoom)
     if (typeof renderDistanceRings === 'function') renderDistanceRings(svg);
     if (typeof renderBreadcrumbTrail === 'function') renderBreadcrumbTrail(svg);
     renderPlayerBanner(svg);
     renderFogWisps(svg, fogState);
-    renderCartographyDecor(svg, fogState);
     renderCompassRose();
     setupPanZoom();
     if (onProgress) onProgress(100);
+
+    // Phase 4 (deferred): Decorative layers rendered AFTER loading screen hides.
+    // These are the heaviest renders (~500+ SVG elements, SVG filter usage)
+    // but are purely cosmetic — the map is fully usable without them.
+    requestAnimationFrame(() => {
+        // Insert worn edges and aging BEHIND functional layers but ABOVE landmass.
+        // Find the ground-cover group or first terrain group to insert before it.
+        const groundCover = svg.querySelector('.ground-cover') || svg.querySelector('.terrain-regions');
+        if (groundCover) {
+            // Build in a fragment to avoid multiple reflows
+            const frag = document.createDocumentFragment();
+            const wornG = _el('g', { class: 'worn-edges-deferred' });
+            _renderWornEdgesInto(wornG);
+            frag.appendChild(wornG);
+            const agingG = _el('g', { class: 'aging-deferred' });
+            _renderAgingEffectsInto(agingG);
+            frag.appendChild(agingG);
+            svg.insertBefore(frag, groundCover);
+        } else {
+            _renderWornEdges(svg);
+            _renderAgingEffects(svg);
+        }
+        // Cartography decorations (corner flourishes) also deferred
+        renderCartographyDecor(svg, fogState);
+    });
 }
 
 // Synchronous render — used for re-renders (visibility refresh, no loading screen)
@@ -330,9 +354,19 @@ function _renderLandmass(svg) {
 // WORN PARCHMENT EDGES — Torn, burnt, aged paper border
 // ===============================================================
 
+// Render worn edges into a target group (for deferred rendering)
+function _renderWornEdgesInto(targetG) {
+    _renderWornEdgesImpl(targetG);
+}
+
 function _renderWornEdges(svg) {
-    const path = _landmassPath();
     const eG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
+    _renderWornEdgesImpl(eG);
+    svg.appendChild(eG);
+}
+
+function _renderWornEdgesImpl(eG) {
+    const path = _landmassPath();
     const p = LANDMASS_POINTS;
 
     // === Layer 1: Deep shadow under the paper (gives depth/elevation) ===
@@ -475,15 +509,27 @@ function _renderWornEdges(svg) {
         }
     }
 
-    svg.appendChild(eG);
 }
 
 // ===============================================================
 // AGING EFFECTS — Stipple clusters + crease lines
 // ===============================================================
 
+// Render aging effects into a target group (for deferred rendering)
+function _renderAgingEffectsInto(targetG) {
+    targetG.setAttribute('class', 'aging');
+    targetG.setAttribute('pointer-events', 'none');
+    targetG.setAttribute('clip-path', 'url(#land-clip)');
+    _renderAgingEffectsImpl(targetG);
+}
+
 function _renderAgingEffects(svg) {
     const aG = _el('g', { class: 'aging', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
+    _renderAgingEffectsImpl(aG);
+    svg.appendChild(aG);
+}
+
+function _renderAgingEffectsImpl(aG) {
     // Stipple clusters (foxing spots)
     const spots = [[80,60,15],[650,100,12],[200,650,18],[550,550,10],[400,200,8],[120,400,14],[600,350,11],[350,680,16],[500,80,9],[700,600,13]];
     for (const [x, y, r] of spots) {
@@ -506,7 +552,6 @@ function _renderAgingEffects(svg) {
     for (const [x1, y1, x2, y2, sw, op] of creases) {
         aG.appendChild(_el('line', { x1, y1, x2, y2, stroke: INK_DARK, 'stroke-width': sw, 'stroke-opacity': op }));
     }
-    svg.appendChild(aG);
 }
 
 // ===============================================================
