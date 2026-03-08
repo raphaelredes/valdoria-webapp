@@ -90,16 +90,19 @@ function renderRoads(group, fogState) {
         if (dash !== 'none') road.setAttribute('stroke-dasharray', dash);
         group.appendChild(road);
 
-        // Distance badge on the curve midpoint
-        if (anyExp) {
+        // Distance badge on the curve midpoint (hidden at lowest zoom to reduce clutter)
+        if (anyExp && (typeof _zoomIdx === 'undefined' || _zoomIdx >= 1)) {
             const dist = getConnectionDistance(aId, bId);
             const mid = _pointOnPath(pathD, 0.5);
             const mx = mid.x + (srand(seed+99)-0.5)*4;
             const my = mid.y + (srand(seed+100)-0.5)*3;
-            const badgeSz = Math.max(6, Math.min(11, 8 / (S.zoom || 1)));
+            // Scale: bigger at higher zoom levels for readability
+            const zoomScale = typeof _zoomIdx !== 'undefined' ? [0, 7.5, 9, 11][_zoomIdx] || 8 : 8;
+            const badgeSz = zoomScale;
             const txt = _el('text', { x: mx, y: my + 3, 'text-anchor': 'middle',
                 'font-size': badgeSz + 'px', 'font-weight': '700', 'font-family': "'Cinzel', serif",
-                fill: INK, 'fill-opacity': bothExp ? 0.45 : 0.25, 'pointer-events': 'none' });
+                fill: INK, 'fill-opacity': bothExp ? 0.45 : 0.25, 'pointer-events': 'none',
+                class: 'road-distance-label' });
             txt.textContent = dist;
             group.appendChild(txt);
         }
@@ -450,6 +453,13 @@ function renderLocationMarkers(group, fogState) {
         ng.appendChild(_el('circle', { cx: x, cy: y, r: R, fill: 'transparent', stroke: 'none' }));
 
         if (isCurr) {
+            // Pulsing ring around current location (animated via CSS)
+            ng.appendChild(_el('circle', {
+                cx: x, cy: y, r: R + 4,
+                fill: 'none', stroke: '#c4953a',
+                'stroke-width': 1.5, 'stroke-opacity': 0.4,
+                class: 'current-pulse-ring',
+            }));
             // Silhouette icon (larger) — no circle
             if (isSett) _drawSettlementIcon(ng, x, y + 4, 9);
             else _drawBiomeIcon(ng, x, y + 2, biome, 9, name);

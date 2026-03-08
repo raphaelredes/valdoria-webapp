@@ -57,6 +57,16 @@ body {
     text-transform: uppercase;
     letter-spacing: 1.5px;
     padding: 4px 4px 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.zone-label::before,
+.zone-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,149,58,0.2), transparent);
 }
 
 /* ─── ENTITY (COMPACT + EXPANDABLE) ─── */
@@ -121,7 +131,22 @@ body {
     gap: 5px;
     padding: 4px 8px;
 }
-.entity-icon { font-size: 15px; flex-shrink: 0; line-height: 1; }
+.entity-icon {
+    font-size: 15px;
+    flex-shrink: 0;
+    line-height: 1;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(74,56,40,0.2);
+    border: 1px solid rgba(74,56,40,0.3);
+}
+.entity.enemy .entity-icon { background: rgba(123,32,32,0.12); border-color: rgba(123,32,32,0.25); }
+.entity.player .entity-icon { background: rgba(196,149,58,0.1); border-color: rgba(196,149,58,0.2); }
+.entity.ally .entity-icon { background: rgba(176,184,192,0.08); border-color: rgba(176,184,192,0.15); }
 .compact-name {
     flex: 1;
     font-size: 13px;
@@ -1496,6 +1521,71 @@ body {
 .init-dice3d-wrap {
     border-radius: 50%;
     box-shadow: 0 0 20px rgba(196,149,58,0.08);
+}
+
+/* ─── INIT BUTTON PULSE ─── */
+.init-hero-btn {
+    animation: initBtnPulse 2.5s ease-in-out infinite;
+}
+@keyframes initBtnPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(196,149,58,0.15), inset 0 1px 0 rgba(255,255,255,0.05); }
+    50% { box-shadow: 0 0 30px rgba(196,149,58,0.35), 0 0 60px rgba(196,149,58,0.12), inset 0 1px 0 rgba(255,255,255,0.08); }
+}
+
+/* ─── DEAD ENTITY TREATMENT ─── */
+.entity.dead {
+    opacity: 0.4;
+    filter: grayscale(0.6);
+    pointer-events: none;
+}
+.entity.dead .compact-name {
+    text-decoration: line-through;
+    text-decoration-color: rgba(196,149,58,0.3);
+}
+.entity.dead .hp-mini-fill {
+    background: rgba(100,80,60,0.3) !important;
+}
+
+/* ─── TURN TIMELINE DEAD ENTRY ─── */
+.turn-entry.dead {
+    opacity: 0.35;
+    filter: grayscale(0.5);
+}
+.turn-entry.dead .turn-name {
+    text-decoration: line-through;
+    text-decoration-color: rgba(196,149,58,0.3);
+}
+
+/* ─── ACTION BAR PRIMARY GRADIENT ─── */
+.action-btn.primary {
+    background: linear-gradient(165deg, rgba(196,149,58,0.12) 0%, var(--v-bg-card) 50%, rgba(196,149,58,0.06) 100%);
+}
+
+/* ─── RESOLUTION NARRATIVE STYLING ─── */
+.res-narrative {
+    font-style: italic;
+    position: relative;
+    padding: 0 12px;
+}
+.res-narrative::before {
+    content: '\201C';
+    position: absolute;
+    left: 0;
+    top: -4px;
+    font-size: 24px;
+    color: rgba(196,149,58,0.3);
+    font-style: normal;
+    line-height: 1;
+}
+
+/* ─── EXPANDED DETAILS SECTION DIVIDERS ─── */
+.entity-details .stats-row {
+    padding-top: 3px;
+    border-top: 1px solid rgba(74,56,40,0.15);
+}
+.entity-details .status-pills {
+    padding-top: 3px;
+    border-top: 1px solid rgba(74,56,40,0.15);
 }
 
 /* ─── REDUCED MOTION ─── */

@@ -686,11 +686,23 @@ function _setupCycleButtons() {
     nextBtn.addEventListener('click', e => { e.stopPropagation(); _cycleLocation(1); });
 }
 
-// Build the cycleable list: neighbors of current player location (travel destinations)
+// Build the cycleable list: ALL known locations sorted by distance (closest first)
 function _getCycleList() {
-    const neighbors = connectionGraph[S.currentLoc] || [];
     const knownSet = new Set(S.knownLocs);
-    return neighbors.filter(id => knownSet.has(id));
+    const locs = S.knownLocs.filter(id => id !== S.currentLoc && LOCATION_COORDS[id]);
+    // Sort by weighted distance (BFS hops), then alphabetically
+    locs.sort((a, b) => {
+        const da = weightedDistance(S.currentLoc, a, connectionGraph);
+        const db = weightedDistance(S.currentLoc, b, connectionGraph);
+        // Unreachable (-1) goes last
+        const sa = da < 0 ? 999 : da;
+        const sb = db < 0 ? 999 : db;
+        if (sa !== sb) return sa - sb;
+        const na = S.locations[a]?.n || '';
+        const nb = S.locations[b]?.n || '';
+        return na.localeCompare(nb);
+    });
+    return locs;
 }
 
 function _cycleLocation(dir) {

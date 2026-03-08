@@ -1018,7 +1018,9 @@ function renderEntity(e, type, idx, isActiveTurn) {
         }
     }
 
+    const isDead = e.hp <= 0;
     const activeClass = isActiveTurn ? ' active-turn' : '';
+    const deadClass = isDead ? ' dead' : '';
     const dataAttr = type === 'enemy' ? ` data-enemy-idx="${idx}"` : '';
 
     // Feature 9: Position badge
@@ -1033,7 +1035,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
         }
     }
 
-    return `<div class="entity ${type}${activeClass}"${dataAttr}>
+    return `<div class="entity ${type}${activeClass}${deadClass}"${dataAttr}>
         <div class="entity-header">
             <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
             <span class="compact-name">${escHtml(e.n)}</span>

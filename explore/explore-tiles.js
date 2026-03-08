@@ -62,11 +62,24 @@ function _drawBush(ctx, bx, by, size, color) {
     ctx.fill();
 }
 
+// Shadow projected under decorations (isometric light from top-left)
+function _drawDecorationShadow(ctx, cx, cy, w, h) {
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.beginPath();
+    ctx.ellipse(cx + 3, cy + 2, w, h, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// Biomes where wind animates vegetation (outdoor environments)
+const WIND_BIOMES = new Set(['forest', 'plains', 'swamp', 'mountain', 'graveyard']);
+
 // ═══════════════════════════════════════════
 // DECORATION DRAWING FUNCTIONS
 // ═══════════════════════════════════════════
 
 function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
+    // Isometric shadow under tree cluster
+    _drawDecorationShadow(ctx, cx, cy, 11, 4);
     const r1 = tileRand(col, row, 1);
     const r2 = tileRand(col, row, 2);
     const r3 = tileRand(col, row, 3);
@@ -235,6 +248,7 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
 }
 
 function drawMountainDecoration(ctx, cx, cy, col, row) {
+    _drawDecorationShadow(ctx, cx, cy, 13, 5);
     const r1 = tileRand(col, row, 10);
     const r2 = tileRand(col, row, 11);
     // Main peak
@@ -291,6 +305,7 @@ function drawMountainDecoration(ctx, cx, cy, col, row) {
 }
 
 function drawRockDecoration(ctx, cx, cy, col, row) {
+    _drawDecorationShadow(ctx, cx, cy, 8, 3);
     const r1 = tileRand(col, row, 20);
     // 2-3 angular rocks
     for (let i = 0; i < 2 + (r1 > 0.5 ? 1 : 0); i++) {
@@ -374,6 +389,7 @@ function drawLavaDecoration(ctx, cx, cy, timestamp) {
 }
 
 function drawRuinsDecoration(ctx, cx, cy, col, row) {
+    _drawDecorationShadow(ctx, cx, cy, 9, 3.5);
     const r1 = tileRand(col, row, 30);
     // Broken pillars
     for (let i = 0; i < 2; i++) {
@@ -401,6 +417,7 @@ function drawRuinsDecoration(ctx, cx, cy, col, row) {
 }
 
 function drawBonesDecoration(ctx, cx, cy, col, row, biome) {
+    _drawDecorationShadow(ctx, cx, cy, 7, 2.5);
     const color = biome === 'graveyard' ? '#9a8a7a' : '#c0b8a8';
     for (let i = 0; i < 2; i++) {
         const bx = cx + (tileRand(col, row, 40 + i) - 0.5) * 12;
