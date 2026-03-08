@@ -30,15 +30,26 @@ let _loadingTimeoutId = null;
 const _connLog = [];
 const _CONN_LOG_MAX = 80;
 const _CONN_LOG_LS_KEY = 'valdoria_conn_log';
+let _clogFlushTimer = null;
 
 function _clog(msg) {
     const ts = new Date().toISOString().substring(11, 23); // HH:MM:SS.mmm
     const entry = `[${ts}] ${msg}`;
     _connLog.push(entry);
     if (_connLog.length > _CONN_LOG_MAX) _connLog.shift();
-    // Persist to localStorage for survival across page reloads
-    try { localStorage.setItem(_CONN_LOG_LS_KEY, JSON.stringify(_connLog)); } catch (e) { /* quota */ }
+    // Debounced persist to localStorage (avoids thrashing during rapid retries)
+    if (!_clogFlushTimer) {
+        _clogFlushTimer = setTimeout(() => {
+            _clogFlushTimer = null;
+            try { localStorage.setItem(_CONN_LOG_LS_KEY, JSON.stringify(_connLog)); } catch (e) { /* quota */ }
+        }, 500);
+    }
 }
+
+// Flush on page unload (ensure last entries are saved)
+window.addEventListener('beforeunload', () => {
+    try { localStorage.setItem(_CONN_LOG_LS_KEY, JSON.stringify(_connLog)); } catch (e) { /* */ }
+});
 
 // Restore logs from previous session
 try {
@@ -268,6 +279,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             // AbortController timeout — prevents infinite hang
             const controller = new AbortController();
             const tid = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+            const t0 = Date.now();
 
             const resp = await fetch(url, {
                 method: endpoint.includes('/image/') ? 'GET' : 'POST',
@@ -276,8 +288,9 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                 signal: controller.signal,
             });
             clearTimeout(tid);
+            const elapsed = Date.now() - t0;
 
-            console.log('[GAME] apiCall response:', endpoint, 'status:', resp.status);
+            console.log('[GAME] apiCall response:', endpoint, 'status:', resp.status, `(${elapsed}ms)`);
 
             if (resp.status === 429) {
                 _clog(`API ${endpoint} → 429 RATE LIMITED`);
@@ -311,7 +324,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             }
 
             if (resp.ok) {
-                _clog(`API ${endpoint} → OK`);
+                _clog(`API ${endpoint} → OK (${elapsed}ms)`);
                 console.log('[GAME] apiCall OK:', endpoint,
                     'keys:', Object.keys(data).join(','),
                     'text_len:', (data.text || '').length,
@@ -320,7 +333,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                 return data;
             }
 
-            _clog(`API ${endpoint} → ERROR ${resp.status}: ${JSON.stringify(data).substring(0, 200)}`);
+            _clog(`API ${endpoint} → ERROR ${resp.status} (${elapsed}ms): ${JSON.stringify(data).substring(0, 200)}`);
             console.error('[GAME] API error:', resp.status, JSON.stringify(data).substring(0, 300));
             if (attempt === retries) {
                 const msg = data && data.error === 'player_not_found'

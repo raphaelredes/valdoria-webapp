@@ -28,15 +28,17 @@ function showLoading(isRetry = false) {
     const el = document.getElementById('loading');
     if (el) el.style.display = '';
     _isRetryLoading = isRetry;
-    _startLoadingTips();
     _startLoadingProgress();
     _startLoadingTimeout();
     _startSlowWarning();
 
-    // During retry, override the first tip
     if (isRetry) {
+        // During retry: show fixed "Reconectando..." — don't cycle tips
+        _stopLoadingTips();
         const tipEl = document.getElementById('loading-tip');
         if (tipEl) tipEl.textContent = '🔄 Reconectando ao servidor...';
+    } else {
+        _startLoadingTips();
     }
 }
 
@@ -196,6 +198,21 @@ function showError(msg, err = null) {
     msgEl.textContent = msg;
     overlay.style.display = '';
 
+    // Context-aware error icon
+    const iconEl = overlay.querySelector('.error-icon');
+    if (iconEl) {
+        if (msg.includes('Sem conexão') || msg.includes('internet'))
+            iconEl.textContent = '📡';
+        else if (msg.includes('não respondeu') || msg.includes('demorou'))
+            iconEl.textContent = '⏳';
+        else if (msg.includes('expirada') || msg.includes('Sessão'))
+            iconEl.textContent = '🔒';
+        else if (msg.includes('Personagem não encontrado'))
+            iconEl.textContent = '👤';
+        else
+            iconEl.textContent = '⚠️';
+    }
+
     // Show network status badge
     _updateNetworkBadge();
 
@@ -262,7 +279,8 @@ function showError(msg, err = null) {
 
     // Auto-retry with exponential backoff for connection errors
     const isConnectionError = msg.includes('Sem conexão') || msg.includes('Erro no servidor')
-        || msg.includes('indisponível') || msg.includes('não respondeu');
+        || msg.includes('indisponível') || msg.includes('não respondeu')
+        || msg.includes('demorou demais');
     if (isConnectionError && _errorRetryAttempt < _ERROR_RETRY_MAX) {
         _errorRetryAttempt++;
         if (typeof _clog === 'function') _clog(`AUTO-RETRY ${_errorRetryAttempt}/${_ERROR_RETRY_MAX}: ${msg}`);
@@ -304,6 +322,7 @@ function _autoReconnect(overlay, msgEl, retryBtn) {
     // All retries failed — notify backend via API to refresh Telegram message,
     // then close the WebApp. sendData() only works with KeyboardButton Mini Apps,
     // so we use a fetch() call to /api/game/reconnect instead.
+    if (typeof _clog === 'function') _clog(`AUTO-RECONNECT: all ${_ERROR_RETRY_MAX} retries exhausted, closing WebApp`);
     console.warn('[GAME] Auto-reconnect: all retries exhausted, closing WebApp');
     msgEl.textContent = 'Reconectando... O mini app sera fechado automaticamente.';
     retryBtn.style.display = 'none';
@@ -343,6 +362,8 @@ function hideError() {
 }
 
 // ─── Network Status Badge ───
+let _networkBadgeListening = false;
+
 function _updateNetworkBadge() {
     const badge = document.getElementById('error-network-badge');
     if (!badge) return;
@@ -350,6 +371,19 @@ function _updateNetworkBadge() {
     badge.style.display = '';
     badge.className = 'error-network-badge ' + (online ? 'online' : 'offline');
     badge.textContent = online ? '🟢 Conectado à internet' : '🔴 Sem conexão com a internet';
+
+    // Live updates while error overlay is open
+    if (!_networkBadgeListening) {
+        _networkBadgeListening = true;
+        const handler = () => {
+            const overlay = document.getElementById('error-overlay');
+            if (overlay && overlay.style.display !== 'none') {
+                _updateNetworkBadge();
+            }
+        };
+        window.addEventListener('online', handler);
+        window.addEventListener('offline', handler);
+    }
 }
 
 // ─── Debug Log Panel (inside error overlay) ───
