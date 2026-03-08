@@ -562,14 +562,11 @@ body {
 
 /* Combat feed */
 .combat-feed {
-    flex: 1;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    flex-shrink: 0;
 }
 .feed-entry {
     font-size: 11px;
