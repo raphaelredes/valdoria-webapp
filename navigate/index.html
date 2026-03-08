@@ -466,6 +466,130 @@
             70%      { opacity: 0.12; }
         }
 
+        /* --- Eye glow pulse (ember-like, living) --- */
+        .wk-eye {
+            animation: wkEye 3.2s ease-in-out infinite;
+        }
+        @keyframes wkEye {
+            0%, 100% { opacity: 0.4; r: 1.2; }
+            20%      { opacity: 0.7; r: 1.4; }
+            40%      { opacity: 0.35; r: 1.1; }
+            60%      { opacity: 0.65; r: 1.3; }
+            80%      { opacity: 0.45; r: 1.2; }
+        }
+        .wk-eye-halo {
+            animation: wkEyeHalo 3.2s ease-in-out infinite;
+        }
+        @keyframes wkEyeHalo {
+            0%, 100% { opacity: 0.04; r: 4; }
+            30%      { opacity: 0.1; r: 5; }
+            60%      { opacity: 0.03; r: 3.5; }
+        }
+
+        /* --- Boot rotation (foot roll: heel→flat→toe) --- */
+        .wk-boot-r {
+            transform-origin: 33px 95px;
+            animation: wkBootR 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
+        }
+        @keyframes wkBootR {
+            0%, 100%  { transform: rotate(10deg); }   /* heel strike */
+            15%       { transform: rotate(4deg); }     /* weight absorb */
+            35%       { transform: rotate(0deg); }     /* flat */
+            45%       { transform: rotate(-15deg); }   /* toe push-off */
+            50%       { transform: rotate(0deg); }     /* swing neutral */
+            65%       { transform: rotate(0deg); }
+            85%       { transform: rotate(5deg); }     /* preparing contact */
+            95%       { transform: rotate(8deg); }
+        }
+        .wk-boot-l {
+            transform-origin: 33px 95px;
+            animation: wkBootL 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
+            animation-delay: -0.01s;
+        }
+        @keyframes wkBootL {
+            0%, 100%  { transform: rotate(0deg); }     /* swing neutral */
+            15%       { transform: rotate(0deg); }
+            35%       { transform: rotate(5deg); }     /* preparing */
+            45%       { transform: rotate(8deg); }
+            50%       { transform: rotate(10deg); }    /* heel strike */
+            65%       { transform: rotate(4deg); }     /* weight absorb */
+            85%       { transform: rotate(0deg); }     /* flat */
+            95%       { transform: rotate(-15deg); }   /* toe push-off */
+        }
+
+        /* --- Tunic hem sway (lower tunic edge moves with walk) --- */
+        .wk-hem {
+            transform-origin: 32px 56px;
+            animation: wkHem 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
+            animation-delay: -0.03s;
+        }
+        @keyframes wkHem {
+            0%, 100%  { transform: skewX(-2deg); }
+            25%       { transform: skewX(3deg); }
+            50%       { transform: skewX(2deg); }
+            75%       { transform: skewX(-3deg); }
+        }
+
+        /* --- Hood tip flap (secondary motion on hood peak) --- */
+        .wk-hood-tip {
+            transform-origin: 30px 4px;
+            animation: wkHoodTip 2.3s ease-in-out infinite;
+            animation-delay: -0.03s;
+        }
+        @keyframes wkHoodTip {
+            0%, 100% { transform: rotate(0deg); }
+            20%      { transform: rotate(3deg); }
+            50%      { transform: rotate(-2deg); }
+            80%      { transform: rotate(2deg); }
+        }
+
+        /* --- Ground shadow (anchors character to ground) --- */
+        .wk-ground-shadow {
+            animation: wkShadow 1.0s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
+        }
+        @keyframes wkShadow {
+            0%, 100%  { transform: scaleX(1) scaleY(1); opacity: 0.25; }
+            15%       { transform: scaleX(1.08) scaleY(0.9); opacity: 0.3; }  /* body lowest, shadow wider */
+            45%       { transform: scaleX(0.88) scaleY(1.1); opacity: 0.18; } /* body highest, shadow narrow */
+            50%       { transform: scaleX(1) scaleY(1); opacity: 0.25; }
+            65%       { transform: scaleX(1.08) scaleY(0.9); opacity: 0.3; }
+            95%       { transform: scaleX(0.88) scaleY(1.1); opacity: 0.18; }
+        }
+
+        /* --- Lantern light cone (downward glow from staff) --- */
+        .wk-light-cone {
+            animation: wkLightCone 2.4s ease-in-out infinite;
+        }
+        @keyframes wkLightCone {
+            0%, 100% { opacity: 0.03; }
+            30%      { opacity: 0.06; }
+            50%      { opacity: 0.08; }
+            70%      { opacity: 0.04; }
+        }
+
+        /* --- Dust kick particles (foot impact) --- */
+        .wk-dust {
+            animation: wkDust 1.0s ease-out infinite;
+        }
+        @keyframes wkDust {
+            0%        { opacity: 0; transform: translate(0, 0) scale(1); }
+            10%       { opacity: 0.3; }
+            15%       { opacity: 0.25; transform: translate(-3px, -2px) scale(0.8); }
+            30%       { opacity: 0.1; transform: translate(-6px, -5px) scale(0.4); }
+            40%, 100% { opacity: 0; transform: translate(-8px, -7px) scale(0.2); }
+        }
+        .wk-dust-2 {
+            animation: wkDust2 1.0s ease-out infinite;
+        }
+        @keyframes wkDust2 {
+            0%, 49%   { opacity: 0; transform: translate(0, 0) scale(1); }
+            55%       { opacity: 0; }
+            60%       { opacity: 0.3; }
+            65%       { opacity: 0.25; transform: translate(-3px, -2px) scale(0.8); }
+            80%       { opacity: 0.1; transform: translate(-6px, -5px) scale(0.4); }
+            90%, 100% { opacity: 0; transform: translate(-8px, -7px) scale(0.2); }
+        }
+
         /* --- Foreground trees (silhouettes) --- */
         .load-trees-fg {
             position: absolute;
@@ -1431,16 +1555,16 @@
             <div class="load-traveler">
                 <div class="walk-figure">
                     <svg viewBox="0 0 80 130" fill="none">
+                        <!-- === GROUND SHADOW (below bounce group, anchors to ground) === -->
+                        <ellipse class="wk-ground-shadow" cx="33" cy="104" rx="14" ry="3" fill="#0a0806" opacity="0.25"/>
+
                         <g class="wk-bounce">
                             <!-- === CAPE (3-segment filled shapes, behind everything) === -->
                             <g class="wk-cape-1">
-                                <!-- Upper cape: attached at shoulder, flowing left -->
                                 <path d="M26 22 Q24 24 22 30 Q20 36 20 42 L24 42 Q24 36 25 30 Q26 26 27 24 Z" fill="#2e2418" opacity="0.65"/>
                                 <g class="wk-cape-2">
-                                    <!-- Mid cape: continues flowing down-left -->
                                     <path d="M20 40 Q18 48 17 56 Q16 60 17 64 L21 62 Q20 56 20 50 Q21 44 22 42 Z" fill="#2e2418" opacity="0.55"/>
                                     <g class="wk-cape-3">
-                                        <!-- Lower cape tail: maximum billow -->
                                         <path d="M17 60 Q15 66 14 72 Q14 76 16 78 L20 76 Q19 72 19 68 Q19 64 20 62 Z" fill="#2e2418" opacity="0.45"/>
                                     </g>
                                 </g>
@@ -1448,25 +1572,30 @@
 
                             <!-- === LEFT LEG (back, dimmer — rendered first = behind) === -->
                             <g class="wk-hip-l" opacity="0.65">
-                                <!-- Left thigh: tapered from hip(34,52) to knee -->
                                 <path d="M32 52 L31 62 Q31 68 32 72 L35 72 Q35 68 35 62 L34 52 Z" fill="#1a1410"/>
                                 <g class="wk-knee-l">
-                                    <!-- Left shin: tapered from knee(34,72) to ankle -->
                                     <path d="M32 72 L31 84 Q32 92 32 96 L35 96 Q35 92 35 84 L35 72 Z" fill="#1a1410"/>
-                                    <!-- Left boot -->
-                                    <path d="M31 95 L29 99 Q31 100 35 100 L36 97 Q35 95 33 95 Z" fill="#120e0e"/>
+                                    <!-- Left boot with foot roll -->
+                                    <g class="wk-boot-l">
+                                        <path d="M31 94 L29 99 Q31 100 35 100 L36 97 Q35 94 33 94 Z" fill="#120e0e"/>
+                                        <!-- Boot sole detail -->
+                                        <path d="M29 99 Q32 100.5 35 100" stroke="#0a0806" stroke-width="0.4" fill="none"/>
+                                    </g>
+                                    <!-- Dust kick (left foot, fires at 50% of cycle) -->
+                                    <circle class="wk-dust-2" cx="33" cy="99" r="1.5" fill="#8a7a60" opacity="0"/>
+                                    <circle class="wk-dust-2" cx="31" cy="98" r="1" fill="#8a7a60" opacity="0" style="animation-delay:-0.05s"/>
                                 </g>
                             </g>
 
-                            <!-- === LEFT ARM (back, dimmer) === -->
-                            <g class="wk-shoulder-l" opacity="0.65">
-                                <!-- Left upper arm -->
-                                <path d="M30 24 L29 30 L30 36" stroke="#2a2018" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                            <!-- === LEFT ARM (back, dimmer — filled shapes) === -->
+                            <g class="wk-shoulder-l" opacity="0.6">
+                                <!-- Left upper arm (filled, tapered) -->
+                                <path d="M29 23 L28 29 Q28 33 29 36 L32 36 Q32 33 32 29 L31 23 Z" fill="#2a2018"/>
                                 <g class="wk-elbow-l">
-                                    <!-- Left forearm -->
-                                    <path d="M30 36 L28 43 L26 49" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
-                                    <!-- Left hand (small circle) -->
-                                    <circle cx="26" cy="50" r="1.5" fill="#2a2018"/>
+                                    <!-- Left forearm (filled, tapered) -->
+                                    <path d="M29 36 L27 43 Q26 47 27 49 L30 49 Q30 47 30 43 L32 36 Z" fill="#2a2018"/>
+                                    <!-- Left hand -->
+                                    <circle cx="28" cy="50" r="1.8" fill="#3a2e1e"/>
                                 </g>
                             </g>
 
@@ -1476,47 +1605,59 @@
                                 <path d="M27 22 Q25 24 25 32 L25 56 Q28 60 32 60 Q36 60 38 56 L38 32 Q38 24 36 22 Z" fill="#221a12"/>
                                 <!-- Tunic shadow (left side, depth) -->
                                 <path d="M25 28 L25 56 Q26 58 28 58 L28 28 Z" fill="#1a1410" opacity="0.15"/>
+                                <!-- Tunic hem sway (lower edge) -->
+                                <g class="wk-hem">
+                                    <path d="M25 54 Q28 62 32 62 Q36 62 38 54" fill="#221a12"/>
+                                    <path d="M26 56 Q28 60 32 60 Q36 60 37 56" fill="#1a1410" opacity="0.1"/>
+                                </g>
                                 <!-- Belt -->
                                 <rect x="24" y="50" width="15" height="2.5" rx="1" fill="#5a4428"/>
                                 <!-- Buckle -->
                                 <rect x="30" y="50" width="3" height="2.5" rx="0.5" fill="#8a6a3a"/>
-                                <!-- Backpack (compact, rounded, flush against back) -->
+                                <!-- Backpack (compact, flush against back) -->
                                 <path d="M23 30 Q22 30 22 32 L22 40 Q22 42 23 42 L26 42 Q27 42 27 40 L27 32 Q27 30 26 30 Z" fill="#3a2e1e" stroke="#4a3828" stroke-width="0.3"/>
-                                <!-- Backpack top flap -->
                                 <path d="M22 32 Q24 30 27 32" stroke="#4a3828" stroke-width="0.4" fill="none"/>
-                                <!-- Backpack strap -->
                                 <path d="M25 30 L27 25" stroke="#4a3828" stroke-width="0.6" fill="none"/>
+                                <!-- Neck connection (fills gap between torso and head) -->
+                                <path d="M30 20 Q32 19 34 20 L34 24 Q32 25 30 24 Z" fill="#221a12"/>
                             </g>
 
                             <!-- === RIGHT LEG (front, full opacity) === -->
                             <g class="wk-hip-r">
-                                <!-- Right thigh: tapered from hip(34,52) to knee -->
                                 <path d="M32 52 L31 62 Q31 68 32 72 L35 72 Q35 68 36 62 L35 52 Z" fill="#151010"/>
                                 <g class="wk-knee-r">
-                                    <!-- Right shin: tapered from knee(34,72) to ankle -->
                                     <path d="M32 72 L31 84 Q32 92 32 96 L35 96 Q35 92 36 84 L35 72 Z" fill="#151010"/>
-                                    <!-- Right boot -->
-                                    <path d="M31 95 L29 99 Q31 100 35 100 L36 97 Q35 95 33 95 Z" fill="#120e0e"/>
+                                    <!-- Right boot with foot roll -->
+                                    <g class="wk-boot-r">
+                                        <path d="M31 94 L29 99 Q31 100 35 100 L36 97 Q35 94 33 94 Z" fill="#120e0e"/>
+                                        <path d="M29 99 Q32 100.5 35 100" stroke="#0a0806" stroke-width="0.4" fill="none"/>
+                                    </g>
+                                    <!-- Dust kick (right foot, fires at 0% of cycle) -->
+                                    <circle class="wk-dust" cx="33" cy="99" r="1.5" fill="#8a7a60" opacity="0"/>
+                                    <circle class="wk-dust" cx="31" cy="98" r="1" fill="#8a7a60" opacity="0" style="animation-delay:-0.05s"/>
                                 </g>
                             </g>
 
-                            <!-- === RIGHT ARM (front, full opacity) + staff === -->
+                            <!-- === RIGHT ARM (front, full opacity — filled shapes) + staff === -->
                             <g class="wk-shoulder-r">
-                                <!-- Right upper arm -->
-                                <path d="M37 24 L38 30 L37 36" stroke="#2a2018" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                                <!-- Right upper arm (filled, tapered) -->
+                                <path d="M36 23 L37 29 Q37 33 37 36 L39 36 Q39 33 39 29 L38 23 Z" fill="#2a2018"/>
                                 <g class="wk-elbow-r">
-                                    <!-- Right forearm -->
-                                    <path d="M37 36 L38 43 L39 49" stroke="#2a2018" stroke-width="3" stroke-linecap="round" fill="none"/>
+                                    <!-- Right forearm (filled, tapered) -->
+                                    <path d="M37 36 L38 43 Q38 47 38 49 L40 49 Q40 47 40 43 L39 36 Z" fill="#2a2018"/>
                                     <!-- Right hand -->
-                                    <circle cx="39" cy="50" r="1.5" fill="#2a2018"/>
+                                    <circle cx="39" cy="50" r="1.8" fill="#3a2e1e"/>
                                     <!-- Staff (held in right hand, sways independently) -->
                                     <g class="wk-staff">
-                                        <line x1="39" y1="30" x2="36" y2="102" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
+                                        <line x1="39" y1="28" x2="36" y2="104" stroke="#5a4428" stroke-width="1.8" stroke-linecap="round"/>
                                         <!-- Staff top knob -->
-                                        <circle cx="39" cy="29" r="1.5" fill="#5a4428"/>
-                                        <!-- Lantern glow at staff top -->
-                                        <circle class="wk-lantern" cx="39" cy="28" r="3.5" fill="#c4953a" opacity="0.06"/>
-                                        <circle cx="39" cy="29" r="1" fill="#c4953a" opacity="0.25"/>
+                                        <circle cx="39" cy="27" r="1.8" fill="#5a4428"/>
+                                        <circle cx="39" cy="27" r="1" fill="#6a5438"/>
+                                        <!-- Lantern glow -->
+                                        <circle class="wk-lantern" cx="39" cy="26" r="3.5" fill="#c4953a" opacity="0.06"/>
+                                        <circle cx="39" cy="27" r="1" fill="#c4953a" opacity="0.25"/>
+                                        <!-- Light cone (downward triangular glow) -->
+                                        <path class="wk-light-cone" d="M37 30 L28 105 L48 105 Z" fill="#c4953a" opacity="0.03"/>
                                     </g>
                                 </g>
                             </g>
@@ -1525,16 +1666,20 @@
                             <g class="wk-head">
                                 <!-- Hood shape (medieval pointed hood) -->
                                 <path d="M28 10 Q26 8 27 3 Q30 0 35 1 Q38 3 38 8 L38 22 Q36 24 32 24 Q28 24 28 22 Z" fill="#221a12"/>
+                                <!-- Hood tip flap (secondary motion on peak) -->
+                                <g class="wk-hood-tip">
+                                    <path d="M27 3 Q29 -1 31 0 Q30 1 28 4 Z" fill="#2e2418" opacity="0.5"/>
+                                </g>
                                 <!-- Hood fold detail -->
                                 <path d="M30 4 Q32 2 34 3" stroke="#2e2418" stroke-width="0.5" fill="none" opacity="0.4"/>
                                 <!-- Hood brim shadow -->
                                 <path d="M28 22 Q30 23 32 23 Q34 23 36 22" stroke="#1a1410" stroke-width="0.8" fill="none" opacity="0.4"/>
                                 <!-- Face shadow (under hood) -->
                                 <path d="M34 10 Q36 12 36 16 Q35 18 34 18 Q33 16 34 12 Z" fill="#1a1410" opacity="0.3"/>
-                                <!-- Eye glow (single, side profile) -->
-                                <circle cx="36" cy="13" r="1.2" fill="#c4953a" opacity="0.5"/>
-                                <!-- Subtle eye glow halo -->
-                                <circle cx="36" cy="13" r="4" fill="#c4953a" opacity="0.05"/>
+                                <!-- Eye glow (pulsing ember) -->
+                                <circle class="wk-eye" cx="36" cy="13" r="1.2" fill="#c4953a" opacity="0.4"/>
+                                <!-- Eye glow halo (pulsing) -->
+                                <circle class="wk-eye-halo" cx="36" cy="13" r="4" fill="#c4953a" opacity="0.04"/>
                             </g>
                         </g>
                     </svg>

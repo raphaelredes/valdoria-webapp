@@ -654,13 +654,17 @@ function renderTimerBar(s) {
     </div>`;
 }
 
+let _timerDeadline = 0; // Absolute timestamp (ms) when timer expires
+
 function startTimer(seconds) {
     stopTimer();
     _timerMax = seconds;
     _timerRemaining = seconds;
+    _timerDeadline = Date.now() + seconds * 1000;
 
     _timerInterval = setInterval(() => {
-        _timerRemaining -= 1;
+        // Use absolute deadline instead of decrement to survive tab switches
+        _timerRemaining = Math.max(0, (_timerDeadline - Date.now()) / 1000);
 
         const bar = document.getElementById('timerBar');
         const text = document.getElementById('timerText');
@@ -701,6 +705,25 @@ function stopTimer() {
         _timerInterval = null;
     }
 }
+
+// Resync timer display when player returns from another app/tab
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden || !_timerInterval || !_timerDeadline) return;
+    const remaining = Math.max(0, (_timerDeadline - Date.now()) / 1000);
+    _timerRemaining = remaining;
+    if (remaining <= 0) {
+        // Timer expired while tab was hidden — trigger expired flow
+        const bar = document.getElementById('timerBar');
+        const text = document.getElementById('timerText');
+        if (bar) { bar.style.width = '0%'; bar.classList.add('critical'); }
+        if (text) { text.textContent = '⏳ Turno perdido'; }
+        _showTimerExpiredToast();
+        stopTimer();
+        if (isApiMode && api) {
+            setTimeout(() => { _pollForTimerResult(); }, 500);
+        }
+    }
+});
 
 function _showTimerExpiredToast() {
     const el = document.createElement('div');
