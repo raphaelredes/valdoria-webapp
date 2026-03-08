@@ -575,6 +575,95 @@ class CombatVFX {
         this._ensureRunning();
     }
 
+    buff(targetEl) {
+        if (!this.canvas) return;
+        const pos = this._center(targetEl);
+        const colors = ['#ffd700', '#ffe680', '#ffffff', '#c4953a'];
+        // Upward golden sparkles — shield/blessing effect
+        for (let i = 0; i < 16; i++) {
+            const angle = (i / 16) * Math.PI * 2;
+            const dist = 20 + Math.random() * 20;
+            this.particles.push({
+                x: pos.x + Math.cos(angle) * dist,
+                y: pos.y + Math.sin(angle) * dist,
+                vx: Math.cos(angle) * 0.5,
+                vy: -1.5 - Math.random() * 2,
+                gravity: -0.02, friction: 0.97,
+                size: 3 + Math.random() * 4,
+                life: 700 + Math.random() * 400,
+                born: performance.now(),
+                color: colors[Math.floor(Math.random() * colors.length)],
+                shape: Math.random() > 0.4 ? 'star' : 'diamond',
+                glow: true,
+                angle: Math.random() * Math.PI * 2,
+                spin: (Math.random() - 0.5) * 0.04,
+            });
+        }
+        // Golden ring expanding outward
+        this.extras.push({
+            x: pos.x, y: pos.y,
+            start: performance.now(), duration: 500,
+            draw: (ctx, x, y, t) => {
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.globalAlpha = 0.5 * (1 - t);
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 2.5 * (1 - t);
+                ctx.beginPath();
+                ctx.arc(x, y, 10 + t * 50, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            },
+        });
+        this._ensureRunning();
+    }
+
+    debuff(targetEl) {
+        if (!this.canvas) return;
+        const pos = this._center(targetEl);
+        const colors = ['#9040c0', '#c060e0', '#ff4060', '#802060'];
+        // Inward-collapsing dark particles — curse/poison effect
+        for (let i = 0; i < 14; i++) {
+            const angle = (i / 14) * Math.PI * 2;
+            const dist = 40 + Math.random() * 15;
+            this.particles.push({
+                x: pos.x + Math.cos(angle) * dist,
+                y: pos.y + Math.sin(angle) * dist,
+                vx: -Math.cos(angle) * 1.5,
+                vy: -Math.sin(angle) * 1.5,
+                gravity: 0, friction: 0.95,
+                size: 3 + Math.random() * 3,
+                life: 600 + Math.random() * 300,
+                born: performance.now(),
+                color: colors[Math.floor(Math.random() * colors.length)],
+                shape: Math.random() > 0.5 ? 'triangle' : 'circle',
+                glow: true,
+                angle: Math.random() * Math.PI * 2,
+                spin: (Math.random() - 0.5) * 0.06,
+            });
+        }
+        // Dark implosion pulse
+        this.extras.push({
+            x: pos.x, y: pos.y,
+            start: performance.now(), duration: 400,
+            draw: (ctx, x, y, t) => {
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.globalAlpha = 0.35 * (1 - t);
+                const r = 40 * (1 - t) + 5;
+                const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+                grad.addColorStop(0, 'rgba(160,60,200,0.4)');
+                grad.addColorStop(1, 'rgba(160,60,200,0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            },
+        });
+        this._ensureRunning();
+    }
+
     flash(color, duration) {
         if (!this.canvas) return;
         duration = duration || 350;
