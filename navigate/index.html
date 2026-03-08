@@ -444,28 +444,7 @@
             75%       { transform: rotate(-30deg); }
         }
 
-        /* --- Staff sway (independent period, not synced to walk) --- */
-        .wk-staff {
-            transform-origin: 37px 36px;
-            animation: wkStaff 1.6s cubic-bezier(0.35, 0.0, 0.65, 1.0) infinite;
-        }
-        @keyframes wkStaff {
-            0%, 100%  { transform: rotate(6deg); }
-            25%       { transform: rotate(-4deg); }
-            50%       { transform: rotate(-6deg); }
-            75%       { transform: rotate(4deg); }
-        }
 
-        /* --- Lantern glow pulse (slow, independent) --- */
-        .wk-lantern {
-            animation: wkLantern 2.4s ease-in-out infinite;
-        }
-        @keyframes wkLantern {
-            0%, 100% { opacity: 0.03; }
-            30%      { opacity: 0.06; }
-            50%      { opacity: 0.08; }
-            70%      { opacity: 0.04; }
-        }
 
         /* --- Eye glow pulse (very subtle ember flicker) --- */
         .wk-eye {
@@ -550,16 +529,6 @@
             60%      { transform: scaleX(1.01) scaleY(1.006); }
         }
 
-        /* --- Lantern ground glow (soft radial circle on ground) --- */
-        .wk-ground-glow {
-            animation: wkGroundGlow 2.4s ease-in-out infinite;
-        }
-        @keyframes wkGroundGlow {
-            0%, 100% { opacity: 0.04; }
-            30%      { opacity: 0.07; }
-            50%      { opacity: 0.09; }
-            70%      { opacity: 0.05; }
-        }
 
         /* --- Cape rim light (moonlight edge highlight) --- */
         .wk-cape-rim {
@@ -1658,16 +1627,6 @@
                                     <path d="M37 36 L38 43 Q38 47 38 49 L40 49 Q40 47 40 43 L39 36 Z" fill="#2a2018"/>
                                     <!-- Right hand -->
                                     <circle cx="39" cy="50" r="1.8" fill="#3a2e1e"/>
-                                    <!-- Staff (held in right hand, sways independently) -->
-                                    <g class="wk-staff">
-                                        <!-- Staff shaft (tapered: thicker at grip, thinner at tip) -->
-                                        <path d="M38.5 28 L39.5 28 L36.8 104 L36.2 104 Z" fill="#3a2e1e"/>
-                                        <!-- Staff wood grain (subtle line) -->
-                                        <path d="M39 32 L37 90" stroke="#2e2418" stroke-width="0.3" fill="none" opacity="0.2"/>
-                                        <!-- Staff top knob -->
-                                        <circle cx="39" cy="27" r="2" fill="#3a2e1e"/>
-                                        <circle cx="39" cy="27" r="1" fill="#4a3828"/>
-                                    </g>
                                 </g>
                             </g>
 
