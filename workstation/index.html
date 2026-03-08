@@ -381,7 +381,7 @@
             const dataB64 = params.get('data');
 
             if (!dataB64) {
-                showError('Dados não encontrados.');
+                _showInitError('Dados não encontrados.');
                 return;
             }
 
@@ -390,7 +390,7 @@
                 PAYLOAD = JSON.parse(json);
             } catch (e) {
                 console.error('[WORKSTATION] Erro ao decodificar dados', e);
-                showError('Erro ao decodificar dados.');
+                _showInitError('Erro ao decodificar dados.');
                 return;
             }
 
@@ -398,7 +398,7 @@
             buildTabs();
         }
 
-        function showError(msg) {
+        function _showInitError(msg) {
             console.error('[WORKSTATION]', msg);
             document.getElementById('mainContent').innerHTML =
                 `<div class="empty-state"><div class="icon">⚠️</div><p>${msg}</p></div>`;

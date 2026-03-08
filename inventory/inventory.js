@@ -166,10 +166,10 @@ function decodeBase64Utf8(b64) {
 function init() {
     const params = new URLSearchParams(location.search);
     const b64 = params.get('data');
-    if (!b64) { hideLoading(); showError('Dados não encontrados.'); return; }
+    if (!b64) { hideLoading(); _showInitError('Dados não encontrados.'); return; }
     try {
         D = JSON.parse(decodeBase64Utf8(b64));
-    } catch (e) { console.error('[INVENTORY] Erro ao decodificar dados', e); hideLoading(); showError('Erro ao decodificar dados.'); return; }
+    } catch (e) { console.error('[INVENTORY] Erro ao decodificar dados', e); hideLoading(); _showInitError('Erro ao decodificar dados.'); return; }
 
     // Init local state from payload
     localEq = Object.assign({}, D.eq || {});
@@ -210,7 +210,7 @@ function hideLoading() {
     document.getElementById('loadingOverlay').classList.add('hidden');
 }
 
-function showError(msg) {
+function _showInitError(msg) {
     console.error('[INVENTORY]', msg);
     document.getElementById('mainContent').innerHTML =
         `<div class="empty-state"><div class="icon">${vi('warn', 32)}</div><p>${msg}</p></div>`;

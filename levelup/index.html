@@ -1045,7 +1045,7 @@
 
         function goNext() {
             const err = screens[cur].validate();
-            if (err) { showError(err); return; }
+            if (err) { _showValidation(err); return; }
             if (cur === screens.length - 1) {
                 submit();
             } else {
@@ -1147,13 +1147,17 @@
             return result;
         }
 
-        function showError(msg, err = null) {
-            console.error('[LEVELUP]', msg, err || '');
+        function _showValidation(msg) {
+            console.warn('[LEVELUP]', msg);
             hapticNotify('error');
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+            if (window.ValdoriaErrors) {
+                ValdoriaErrors.showToast(msg, 3000);
+            } else {
+                const t = document.getElementById('toast');
+                t.textContent = msg;
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3000);
+            }
         }
 
         function showFatalError(msg, err = null) {
@@ -1606,7 +1610,7 @@
                 sel.skills.splice(idx, 1);
             } else {
                 if (sel.skills.length >= needed) {
-                    showError(`Voce so pode escolher ${needed} habilidade(s)`);
+                    _showValidation(`Voce so pode escolher ${needed} habilidade(s)`);
                     return;
                 }
                 sel.skills.push(sid);
@@ -1765,13 +1769,13 @@
                                 document.getElementById('loadingOverlay').classList.remove('active');
                                 btn.disabled = false;
                                 btn.textContent = 'Confirmar';
-                                showError('Erro ao aplicar evolucao: ' + (data.error || 'Desconhecido'));
+                                showFatalError('Erro ao aplicar evolucao: ' + (data.error || 'Desconhecido'));
                             }
                         }).catch(e => {
                             document.getElementById('loadingOverlay').classList.remove('active');
                             btn.disabled = false;
                             btn.textContent = 'Confirmar';
-                            showError('Erro de conexao com servidor.', e);
+                            showFatalError('Erro de conexao com servidor.', e);
                         });
                 }
                 else if (tg && tg.sendData) {
@@ -1799,7 +1803,7 @@
             } catch (e) {
                 document.getElementById('loadingOverlay').classList.remove('active');
                 btn.disabled = false;
-                showError('Erro ao enviar dados. Tente novamente.', e);
+                showFatalError('Erro ao enviar dados. Tente novamente.', e);
             }
         }
     </script>
