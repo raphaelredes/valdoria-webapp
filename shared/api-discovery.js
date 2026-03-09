@@ -26,7 +26,7 @@ var ApiDiscovery = (function () {
     }
 
     async function _check() {
-        if (_checking || \!_apiBase) return;
+        if (_checking || !_apiBase) return;
         _checking = true;
         try {
             // 1. Try health — if OK, tunnel is alive
@@ -42,10 +42,10 @@ var ApiDiscovery = (function () {
                 cache: 'no-store',
                 signal: AbortSignal.timeout(4000),
             });
-            if (\!resp2.ok) { _checking = false; return; }
+            if (!resp2.ok) { _checking = false; return; }
             var data = await resp2.json();
             var newUrl = (data.url || '').replace(/\/$/, '');
-            if (newUrl && newUrl \!== _apiBase) {
+            if (newUrl && newUrl !== _apiBase) {
                 console.log('[ApiDiscovery] URL changed:', _apiBase, '->', newUrl);
                 _apiBase = newUrl;
                 if (_onUrlChange) _onUrlChange(newUrl);
