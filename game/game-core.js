@@ -238,7 +238,13 @@ async function checkHealth() {
         } catch (e) {
             _clog(`HEALTH ERROR: ${e.name}: ${e.message}`);
             console.error('[GAME] Health check error:', e.name, e.message);
-            // continue to next retry
+            // CORS block = dead tunnel (Cloudflare 530 without CORS headers)
+            // No point retrying the same dead URL — fail fast
+            if (e.name === 'TypeError') {
+                _clog('HEALTH: tunnel dead (CORS/network) — fast fail');
+                return false;
+            }
+            // Timeout or other error — worth retrying
         }
     }
     _clog(`HEALTH EXHAUSTED after ${HEALTH_RETRIES + 1} attempts`);
@@ -255,27 +261,29 @@ async function _waitForHealthy() {
     let ok = await checkHealth();
     if (ok) return true;
 
+    // If first check failed, poll for a bit (server might be restarting).
+    // But if it was a CORS/network error (dead tunnel), skip polling —
+    // we can't discover the new URL from the browser, only the bot can.
     _clog('INIT health failed — starting silent poll (player sees loading)');
     console.log('[GAME] Health failed, polling silently...');
 
     for (let i = 1; i <= HEALTH_POLL_MAX; i++) {
         await sleep(HEALTH_POLL_INTERVAL);
-
-        // Try the current apiBase
         ok = await checkHealth();
         if (ok) {
             _clog(`INIT health poll ${i} OK`);
-            console.log('[GAME] Health poll', i, 'succeeded');
             return true;
         }
-
         _clog(`INIT health poll ${i}/${HEALTH_POLL_MAX} failed`);
-        console.log('[GAME] Health poll', i, '/', HEALTH_POLL_MAX, 'failed');
     }
 
-    // All polls failed — last resort: sendData to close and get fresh menu
-    _clog('INIT health poll exhausted — sendData reconnect');
-    console.error('[GAME] Health poll exhausted after', HEALTH_POLL_MAX, 'attempts');
+    // All polls failed — sendData to close WebApp, bot sends fresh menu
+    // with the CURRENT tunnel URL. Player taps character → game loads.
+    return _sendDataReconnect();
+}
+
+function _sendDataReconnect() {
+    _clog('sendData reconnect — bot will send fresh menu');
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg && tg.sendData) {
         try {
@@ -390,8 +398,17 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             }
         } catch (e) {
             const isTimeout = e.name === 'AbortError';
+            const isCorsBlock = e.name === 'TypeError';
             _clog(`API ${endpoint} → ${isTimeout ? 'TIMEOUT ' + FETCH_TIMEOUT_MS + 'ms' : e.name + ': ' + e.message}`);
             console.error('[GAME] fetch error on', endpoint, ':', isTimeout ? 'TIMEOUT after ' + FETCH_TIMEOUT_MS + 'ms' : e.name + ': ' + e.message);
+
+            // CORS block = tunnel died mid-session → auto-reconnect
+            if (isCorsBlock) {
+                _clog('API: tunnel dead mid-session — sendData reconnect');
+                _sendDataReconnect();
+                return null;
+            }
+
             if (attempt === retries) {
                 // Try to show cached screen instead of blank error
                 const cached = loadCachedScreen();
