@@ -417,15 +417,16 @@ function _renderWornEdgesImpl(eG) {
     eG.appendChild(_el('path', { d: path, fill: 'none', stroke: INK_DARK,
         'stroke-width': 2.0, 'stroke-opacity': 0.65 }));
 
-    // === Layer 4: Paper fiber wisps (fine lines radiating outward) ===
+    // === Layer 4: Paper fiber wisps — batched into 3 opacity-bucket <path>s ===
+    const fiberBuckets = ['', '', '']; // low (0.12-0.17), mid (0.17-0.22), high (0.22-0.30)
+    let strandD = '';
     for (let i = 0; i < p.length; i++) {
         const curr = p[i], next = p[(i + 1) % p.length];
         const dx = next[0] - curr[0], dy = next[1] - curr[1];
         const segLen = Math.sqrt(dx * dx + dy * dy);
         if (segLen < 1) continue;
-        const nx = -dy / segLen, ny = dx / segLen; // outward normal
+        const nx = -dy / segLen, ny = dx / segLen;
 
-        // Fine fiber threads (3-6 per segment, radiating outward)
         const fiberCount = 3 + Math.floor(srand(i * 67) * 4);
         for (let j = 0; j < fiberCount; j++) {
             const t = 0.05 + j * (0.9 / fiberCount) + (srand(i * 67 + j * 3) - 0.5) * 0.06;
@@ -434,60 +435,65 @@ function _renderWornEdgesImpl(eG) {
             const fAngle = (srand(i * 53 + j * 7) - 0.5) * 0.8;
             const fnx = nx * Math.cos(fAngle) - ny * Math.sin(fAngle);
             const fny = nx * Math.sin(fAngle) + ny * Math.cos(fAngle);
-            // Fiber line (parchment colored, fading outward)
-            eG.appendChild(_el('line', {
-                x1: bx, y1: by,
-                x2: bx - fnx * fLen, y2: by - fny * fLen,
-                stroke: PARCHMENT, 'stroke-width': 0.3 + srand(i * 71 + j) * 0.5,
-                'stroke-opacity': 0.12 + srand(i * 83 + j) * 0.18,
-                'stroke-linecap': 'round',
-            }));
+            const op = 0.12 + srand(i * 83 + j) * 0.18;
+            const bucket = op < 0.17 ? 0 : op < 0.22 ? 1 : 2;
+            fiberBuckets[bucket] += `M${bx},${by}L${bx - fnx * fLen},${by - fny * fLen}`;
         }
 
-        // Thicker torn strands (1-2 per segment, longer)
-        if (srand(i * 41) > 0.55) {
+        // Torn strands (reduced frequency)
+        if (srand(i * 41) > 0.72) {
             const t = srand(i * 103) * 0.7 + 0.15;
             const bx = curr[0] + dx * t, by = curr[1] + dy * t;
             const sLen = 5 + srand(i * 107) * 10;
             const sAngle = (srand(i * 109) - 0.5) * 0.5;
             const snx = nx * Math.cos(sAngle) - ny * Math.sin(sAngle);
             const sny = nx * Math.sin(sAngle) + ny * Math.cos(sAngle);
-            // Curving fiber strand
             const mx = bx - snx * sLen * 0.5 + (srand(i * 111) - 0.5) * 4;
             const my = by - sny * sLen * 0.5 + (srand(i * 113) - 0.5) * 4;
-            eG.appendChild(_el('path', {
-                d: `M${bx},${by} Q${mx},${my} ${bx - snx * sLen},${by - sny * sLen}`,
-                fill: 'none', stroke: PARCHMENT,
-                'stroke-width': 0.4 + srand(i * 117) * 0.4,
-                'stroke-opacity': 0.1 + srand(i * 119) * 0.12,
-                'stroke-linecap': 'round',
-            }));
+            strandD += `M${bx},${by}Q${mx},${my} ${bx - snx * sLen},${by - sny * sLen}`;
         }
+    }
+    const fiberOps = [0.14, 0.19, 0.26];
+    for (let b = 0; b < 3; b++) {
+        if (fiberBuckets[b]) {
+            eG.appendChild(_el('path', { d: fiberBuckets[b], fill: 'none', stroke: PARCHMENT,
+                'stroke-width': 0.45, 'stroke-opacity': fiberOps[b], 'stroke-linecap': 'round' }));
+        }
+    }
+    if (strandD) {
+        eG.appendChild(_el('path', { d: strandD, fill: 'none', stroke: PARCHMENT,
+            'stroke-width': 0.55, 'stroke-opacity': 0.14, 'stroke-linecap': 'round' }));
+    }
 
-        // === Layer 5: Edge stain dots (foxing / burn spots) ===
+    // === Layer 5: Edge stain dots + burn marks — batched into <path>s ===
+    let foxingD = '', burnD = '';
+    for (let i = 0; i < p.length; i++) {
+        const curr = p[i], next = p[(i + 1) % p.length];
+        const dx = next[0] - curr[0], dy = next[1] - curr[1];
+        const segLen = Math.sqrt(dx * dx + dy * dy);
+        if (segLen < 1) continue;
+        const nx = -dy / segLen, ny = dx / segLen;
+
         if (srand(i * 91) > 0.35) {
             const t = srand(i * 103) * 0.8 + 0.1;
             const sx = curr[0] + dx * t + nx * (srand(i * 121) - 0.5) * 4;
             const sy = curr[1] + dy * t + ny * (srand(i * 123) - 0.5) * 4;
-            eG.appendChild(_el('circle', {
-                cx: sx, cy: sy, r: 1.2 + srand(i * 107) * 2.5,
-                fill: '#2a1a08', 'fill-opacity': 0.06 + srand(i * 113) * 0.08,
-            }));
+            const cr = 1.2 + srand(i * 107) * 2.5;
+            foxingD += `M${sx-cr},${sy}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
         }
-        // Darker burn marks (less frequent, larger)
         if (srand(i * 131) > 0.8) {
             const t = srand(i * 133) * 0.6 + 0.2;
             const bkx = curr[0] + dx * t + nx * 3;
             const bky = curr[1] + dy * t + ny * 3;
-            eG.appendChild(_el('circle', {
-                cx: bkx, cy: bky, r: 2 + srand(i * 137) * 4,
-                fill: '#1a0e04', 'fill-opacity': 0.04 + srand(i * 139) * 0.05,
-            }));
+            const cr = 2 + srand(i * 137) * 4;
+            burnD += `M${bkx-cr},${bky}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
         }
     }
+    if (foxingD) eG.appendChild(_el('path', { d: foxingD, fill: '#2a1a08', 'fill-opacity': 0.08, stroke: 'none' }));
+    if (burnD) eG.appendChild(_el('path', { d: burnD, fill: '#1a0e04', 'fill-opacity': 0.05, stroke: 'none' }));
 
-    // === Layer 6: Torn-away fragments (loose paper pieces near the edge) ===
-    for (let i = 0; i < 20; i++) {
+    // === Layer 6: Torn-away fragments (kept as polygons, reduced from 20 to 12) ===
+    for (let i = 0; i < 12; i++) {
         const idx = Math.floor(srand(i * 137) * p.length);
         const curr = p[idx], next = p[(idx + 1) % p.length];
         const dx = next[0] - curr[0], dy = next[1] - curr[1];
@@ -498,7 +504,6 @@ function _renderWornEdgesImpl(eG) {
         const fx = curr[0] + dx * t - nx * dist;
         const fy = curr[1] + dy * t - ny * dist;
         const fr = 1.5 + srand(i * 163) * 3;
-        // Irregular fragment shape (5-7 vertices)
         const nVerts = 5 + Math.floor(srand(i * 165) * 3);
         const fpts = [];
         for (let k = 0; k < nVerts; k++) {
@@ -513,25 +518,24 @@ function _renderWornEdgesImpl(eG) {
         }));
     }
 
-    // === Layer 7: Corner wear detail (extra staining at worn corners) ===
+    // === Layer 7: Corner wear — batched into single <path> ===
     const corners = [
-        [p[0][0], p[0][1]],                          // top-left area
-        [p[Math.floor(p.length * 0.25)][0], p[Math.floor(p.length * 0.25)][1]], // top-right
-        [p[Math.floor(p.length * 0.5)][0], p[Math.floor(p.length * 0.5)][1]],   // bottom-right
-        [p[Math.floor(p.length * 0.75)][0], p[Math.floor(p.length * 0.75)][1]], // bottom-left
+        [p[0][0], p[0][1]],
+        [p[Math.floor(p.length * 0.25)][0], p[Math.floor(p.length * 0.25)][1]],
+        [p[Math.floor(p.length * 0.5)][0], p[Math.floor(p.length * 0.5)][1]],
+        [p[Math.floor(p.length * 0.75)][0], p[Math.floor(p.length * 0.75)][1]],
     ];
+    let cornerD = '';
     for (let ci = 0; ci < corners.length; ci++) {
         const [cx, cy] = corners[ci];
-        // Cluster of stain dots around each corner
         for (let j = 0; j < 8; j++) {
             const sx = cx + (srand(ci * 200 + j * 7) - 0.5) * 25;
             const sy = cy + (srand(ci * 200 + j * 7 + 3) - 0.5) * 25;
-            eG.appendChild(_el('circle', {
-                cx: sx, cy: sy, r: 0.8 + srand(ci * 200 + j * 7 + 5) * 2,
-                fill: '#2a1a08', 'fill-opacity': 0.04 + srand(ci * 200 + j * 7 + 6) * 0.05,
-            }));
+            const cr = 0.8 + srand(ci * 200 + j * 7 + 5) * 2;
+            cornerD += `M${sx-cr},${sy}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
         }
     }
+    if (cornerD) eG.appendChild(_el('path', { d: cornerD, fill: '#2a1a08', 'fill-opacity': 0.05, stroke: 'none' }));
 
 }
 
