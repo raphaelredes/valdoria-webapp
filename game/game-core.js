@@ -148,54 +148,13 @@ async function init() {
         }
     });
 
-    // Health check — verify API is reachable before loading game
+    // Health check — verify API is reachable before loading game.
+    // If it fails, keep polling silently (player just sees loading screen).
     _clog('INIT health check → ' + S.apiBase + '/api/game/health');
     console.log('[GAME] Starting health check to:', S.apiBase + '/api/game/health');
-    const healthy = await checkHealth();
-    _clog('INIT health result: ' + (healthy ? 'OK' : 'FAIL'));
-    console.log('[GAME] Health check result:', healthy);
-    if (!healthy) {
-        // API from ?api= param is dead. Try same-origin as fallback —
-        // when served via aiohttp, the webapp origin IS the API server.
-        const originBase = window.location.origin.replace(/\/$/, '');
-        if (originBase && originBase !== S.apiBase) {
-            _clog('INIT trying same-origin fallback: ' + originBase);
-            S.apiBase = originBase;
-            // Update error reporter API base (init() has _initialized guard)
-            if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) {
-                ValdoriaErrors.updateApiBase(originBase);
-            }
-            const healthy2 = await checkHealth();
-            if (healthy2) {
-                _clog('INIT same-origin fallback succeeded!');
-                // Continue normal init below — don't return
-            } else {
-                // Both URLs dead — auto-reconnect via sendData
-                _clog('INIT both URLs dead — instant reconnect');
-                const tg = window.Telegram && window.Telegram.WebApp;
-                if (tg && tg.sendData) {
-                    try {
-                        tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'GAME' }));
-                        return;
-                    } catch (e) { _clog('sendData failed: ' + e.message); }
-                }
-                showError('Servidor indisponível. Tente novamente em alguns segundos.');
-                return;
-            }
-        } else {
-            // Same origin = same dead URL, instant reconnect
-            _clog('INIT health failed — instant reconnect');
-            const tg = window.Telegram && window.Telegram.WebApp;
-            if (tg && tg.sendData) {
-                try {
-                    tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'GAME' }));
-                    return;
-                } catch (e) { _clog('sendData failed: ' + e.message); }
-            }
-            showError('Servidor indisponível. Tente novamente em alguns segundos.');
-            return;
-        }
-    }
+    showLoading(); // Show loading screen immediately during health check
+    const healthy = await _waitForHealthy();
+    if (!healthy) return; // _waitForHealthy already handled error/sendData
 
     // Check if returning from another WebApp (combat, explore, etc.)
     const isReturn = params.get('return') === 'game';
@@ -284,6 +243,48 @@ async function checkHealth() {
     }
     _clog(`HEALTH EXHAUSTED after ${HEALTH_RETRIES + 1} attempts`);
     console.error('[GAME] Health check failed after', HEALTH_RETRIES + 1, 'attempts');
+    return false;
+}
+
+// ─── Health Poller (transparent retry — player sees loading, never error) ───
+const HEALTH_POLL_INTERVAL = 3000;   // 3s between polls
+const HEALTH_POLL_MAX = 20;          // Max 60s of polling before giving up
+
+async function _waitForHealthy() {
+    // First try: direct health check
+    let ok = await checkHealth();
+    if (ok) return true;
+
+    _clog('INIT health failed — starting silent poll (player sees loading)');
+    console.log('[GAME] Health failed, polling silently...');
+
+    for (let i = 1; i <= HEALTH_POLL_MAX; i++) {
+        await sleep(HEALTH_POLL_INTERVAL);
+
+        // Try the current apiBase
+        ok = await checkHealth();
+        if (ok) {
+            _clog(`INIT health poll ${i} OK`);
+            console.log('[GAME] Health poll', i, 'succeeded');
+            return true;
+        }
+
+        _clog(`INIT health poll ${i}/${HEALTH_POLL_MAX} failed`);
+        console.log('[GAME] Health poll', i, '/', HEALTH_POLL_MAX, 'failed');
+    }
+
+    // All polls failed — last resort: sendData to close and get fresh menu
+    _clog('INIT health poll exhausted — sendData reconnect');
+    console.error('[GAME] Health poll exhausted after', HEALTH_POLL_MAX, 'attempts');
+    const tg = window.Telegram && window.Telegram.WebApp;
+    if (tg && tg.sendData) {
+        try {
+            tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'GAME' }));
+            return false;
+        } catch (e) { _clog('sendData failed: ' + e.message); }
+    }
+    hideLoading();
+    showError('Servidor indisponível. Feche e tente novamente.');
     return false;
 }
 
