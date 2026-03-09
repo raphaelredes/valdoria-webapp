@@ -198,7 +198,7 @@ body {
 }
 .step-counter {
     font-size: 13px;
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
     font-weight: 600;
 }
 .danger-pips {
@@ -223,7 +223,7 @@ body {
 }
 .location-info {
     font-size: 12px;
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
     text-align: right;
 }
 
@@ -308,7 +308,7 @@ body {
 .dm-page-indicator {
     text-align: center;
     font-size: 11px;
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
     margin-top: 8px;
     letter-spacing: 2px;
 }
@@ -463,7 +463,7 @@ body {
 }
 .check-formula {
     font-size: 18px;
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
 }
 .check-formula b { color: var(--v-text-bright, #e8dcc8); }
 .check-result {
@@ -520,7 +520,7 @@ body {
 }
 .dice-pair .die.dropped {
     opacity: 0.35;
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
     text-decoration: line-through;
 }
 .choice-check.advantage {
@@ -691,7 +691,7 @@ body {
 .confirm-overlay.active { opacity: 1; pointer-events: all; }
 .confirm-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
 .confirm-title { font-size: 18px; font-weight: 700; color: var(--v-gold, #c4953a); text-align: center; margin-bottom: 8px; }
-.confirm-text { font-size: 13px; color: var(--v-text-dim, #8a8090); text-align: center; margin-bottom: 20px; }
+.confirm-text { font-size: 13px; color: var(--v-text-dim, #a09484); text-align: center; margin-bottom: 20px; }
 .confirm-buttons { display: flex; gap: 12px; }
 .btn-cancel {
     flex: 1;
@@ -699,7 +699,7 @@ body {
     min-height: 44px;
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--v-border, #4a3828);
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
@@ -901,7 +901,7 @@ body {
     gap: 12px;
     margin-bottom: 12px;
     font-size: 13px;
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
 }
 .exit-info-row span {
     display: flex;
@@ -934,7 +934,7 @@ body {
 .exit-option-icon { display: none; }
 .exit-option-info { flex: 1; }
 .exit-option-title { font-weight: 600; margin-bottom: 2px; }
-.exit-option-desc { font-size: 12px; color: var(--v-text-dim, #8a8090); }
+.exit-option-desc { font-size: 12px; color: var(--v-text-dim, #a09484); }
 
 /* ═══════════════════════════════════════════
    RETURN JOURNEY OVERLAY
@@ -1163,7 +1163,7 @@ body {
 }
 .camp-desc {
     font-size: 13px;
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
     margin: 8px 0 12px;
     line-height: 1.5;
 }
@@ -1196,7 +1196,7 @@ body {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px;
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
     font-size: 13px;
     cursor: pointer;
 }
@@ -1277,7 +1277,7 @@ body {
 }
 .camp-result-detail {
     font-size: 13px;
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
     text-align: center;
     margin-bottom: 16px;
     line-height: 1.5;
@@ -1333,7 +1333,7 @@ body {
 }
 .lowhp-desc {
     font-size: 13px;
-    color: var(--v-text-dim, #8a8090);
+    color: var(--v-text-dim, #a09484);
     margin-bottom: 12px;
 }
 .lowhp-options {

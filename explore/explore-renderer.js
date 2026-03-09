@@ -96,7 +96,7 @@ function renderFrame(timestamp) {
     _ctx.clearRect(0, 0, _canvasLogicalW, _canvasLogicalH);
 
     // 1. Background (matches #map-viewport CSS)
-    _ctx.fillStyle = '#1a1520';
+    _ctx.fillStyle = '#1e1a16';
     _ctx.fillRect(0, 0, _canvasLogicalW, _canvasLogicalH);
 
     // 2. Draw static tiles (cached unless dirty)
@@ -885,7 +885,7 @@ function drawMinimap() {
     const ctx = _minimapCtx;
 
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = '#1a1520';
+    ctx.fillStyle = '#1e1a16';
     ctx.fillRect(0, 0, w, h);
 
     const cellW = w / COLS;
