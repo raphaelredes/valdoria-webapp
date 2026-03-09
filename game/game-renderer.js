@@ -355,6 +355,7 @@ function renderTextInput(screen) {
 function renderFooter(footer) {
     const quickEl = document.getElementById('footer-quick');
     const navEl = document.getElementById('footer-nav');
+    if (!quickEl || !navEl) return;
 
     quickEl.innerHTML = '';
     navEl.innerHTML = '';
@@ -372,22 +373,11 @@ function renderFooter(footer) {
         } else if (btn.cb) {
             el.onclick = () => doAction(btn.cb);
         } else if (btn.url) {
-            const isWebAppUrl = btn.url && (
-                btn.url.includes('/inventory/') || btn.url.includes('/market/') ||
-                btn.url.includes('/levelup/') || btn.url.includes('/combat/') || btn.url.includes('/arena/') ||
-                btn.url.includes('/explore/') || btn.url.includes('/navigate/') ||
-                btn.url.includes('/dice/') || btn.url.includes('/workstation/') ||
-                btn.url.includes('/pix/')
-            );
-            if (isWebAppUrl) {
-                el.onclick = () => {
-                    if (typeof _detect_webapp_target_js === 'function') {
-                        const to = _detect_webapp_target_js(btn.url);
-                        handleTransition({ to, url: btn.url });
-                    } else {
-                        handleTransition({ to: 'unknown', url: btn.url });
-                    }
-                };
+            // Use unified WebApp detection (same as content buttons)
+            const target = typeof _detect_webapp_target_js === 'function'
+                ? _detect_webapp_target_js(btn.url) : 'unknown';
+            if (target !== 'unknown') {
+                el.onclick = () => handleTransition({ to: target, url: btn.url });
             } else {
                 el.onclick = () => {
                     if (window.Telegram && Telegram.WebApp) Telegram.WebApp.openLink(btn.url);
@@ -396,7 +386,7 @@ function renderFooter(footer) {
             }
         } else if (btn.transition) {
             const transData = btn.transition_data || null;
-            if (transData && transData.url) {
+            if (transData && typeof transData === 'object' && transData.url) {
                 el.onclick = () => handleTransition(transData);
             } else {
                 const target = typeof btn.transition === 'string' ? btn.transition : null;
@@ -409,6 +399,11 @@ function renderFooter(footer) {
                     };
                 }
             }
+        } else {
+            // No handler — mark as disabled
+            el.disabled = true;
+            el.style.opacity = '0.4';
+            console.warn('[GAME] Footer button has no handler:', btn.text);
         }
 
         container.appendChild(el);

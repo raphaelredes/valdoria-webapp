@@ -234,6 +234,12 @@
     overflow-y: auto;
 }
 
+/* Visual indicator when button area is scrollable */
+.bottom-panel .screen-buttons.has-overflow {
+    -webkit-mask-image: linear-gradient(to bottom, #000 85%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 85%, transparent 100%);
+}
+
 /* Text input inside bottom panel */
 .bottom-panel .text-input-wrap {
     margin-top: 2px;
