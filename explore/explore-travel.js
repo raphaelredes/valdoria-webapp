@@ -522,7 +522,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const torsoH   = 28 * s;   // shoulder to hip (tall rectangle)
     const torsoW   = 14 * s;   // torso width (side profile — narrow)
     const pelvisH  = 6 * s;    // pelvis block height
-    const pelvisW  = 16 * s;   // pelvis wider than torso
+    // pelvisW removed (simplified torso)
     const thighLen = 22 * s;   // hip to knee
     const shinLen  = 20 * s;   // knee to ankle
     const footW    = 14 * s;   // foot length
@@ -545,24 +545,21 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     // ── Torso lean (very slight forward tilt) ──
     const torsoLean = -0.03 + Math.sin(walkPhase * 2) * 0.012;
 
-    // ── Hip roll (pelvis rotates with stride) ──
-    const hipRoll = Math.sin(walkPhase) * 0.04;
-
     // ── Leg angles ──
     const rawNear = Math.sin(walkPhase);
     const rawFar  = Math.sin(walkPhase + Math.PI);
-    const hipSwing = 0.55; // wide stride like wireframe
+    const hipSwing = 0.38; // moderate stride — walking, not running
     const legAngleNear = rawNear * hipSwing;
     const legAngleFar  = rawFar  * hipSwing;
     // Knee bends on BACK leg (push-off phase: angle < 0)
     // NEGATIVE kneeBend = shin goes BACK+UP (human knee folds behind, lifting foot)
     // POSITIVE would make shin kick forward = alien/bird knee (WRONG!)
-    const kneeBendNear = rawNear < -0.1 ? -Math.pow(Math.abs(rawNear), 1.2) * 0.9 : 0;
-    const kneeBendFar  = rawFar  < -0.1 ? -Math.pow(Math.abs(rawFar),  1.2) * 0.9 : 0;
+    const kneeBendNear = rawNear < -0.1 ? -Math.pow(Math.abs(rawNear), 1.2) * 0.6 : 0;
+    const kneeBendFar  = rawFar  < -0.1 ? -Math.pow(Math.abs(rawFar),  1.2) * 0.6 : 0;
 
     // ── Arms counter-swing ──
-    const armSwingNear = Math.sin(walkPhase + Math.PI + 0.15) * 0.38;
-    const armSwingFar  = Math.sin(walkPhase + 0.15) * 0.38;
+    const armSwingNear = Math.sin(walkPhase + Math.PI + 0.15) * 0.28;
+    const armSwingFar  = Math.sin(walkPhase + 0.15) * 0.28;
 
     // ── Cape wind ──
     const wind = Math.sin(elapsed * 0.002) * 2 + Math.sin(elapsed * 0.005) * 1;
@@ -573,19 +570,15 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.save();
     ctx.translate(cx, groundY + bob);
 
-    // Colors — medieval adventurer, warm tones with enough contrast
-    const cSkin     = '#b08060';
-    const cTunic    = '#5a4030';   // main torso
-    const cTunicLt  = '#6a4a38';   // lighter torso (near side)
-    const cLegs     = '#3e2e20';   // leather pants (far)
-    const cLegsLt   = '#4a3628';   // leather pants (near)
+    // Colors — simple, generic silhouette with minimal detail
+    const cBody     = '#5a4535';   // torso/arms (near)
+    const cBodyDk   = '#4a3828';   // torso/arms (far)
+    const cLegs     = '#3e2e20';   // legs (far)
+    const cLegsLt   = '#4a3628';   // legs (near)
     const cBoot     = '#2a1e14';
     const cBootSole = '#1a1210';
-    const cCape     = '#4a2030';   // burgundy cape
-    const cCapeLt   = '#5a2a38';
-    const cBelt     = '#8a6a30';
-    const cHood     = '#4a3020';
-    const cHoodDk   = '#352418';
+    const cCape     = '#4a2030';
+    const cHood     = '#3e2e1e';
 
     // ── Ground shadow ──
     ctx.fillStyle = 'rgba(0,0,0,0.2)';
@@ -670,7 +663,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
         ctx.lineTo(handX, handY);
         ctx.stroke();
         // Hand
-        ctx.fillStyle = cSkin;
+        ctx.fillStyle = '#a07050';
         ctx.beginPath();
         ctx.arc(handX, handY, lw * 0.35, 0, Math.PI * 2);
         ctx.fill();
@@ -679,8 +672,9 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     }
 
     // ═══ DRAW ORDER (painter's: back → front) ═══
+    // Simplified generic silhouette — minimal detail
 
-    // 1. Cape (behind everything)
+    // 1. Cape (single shape behind everything)
     ctx.save();
     ctx.rotate(torsoLean);
     ctx.fillStyle = cCape;
@@ -688,193 +682,106 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.moveTo(-2 * s, shoulderY);
     ctx.bezierCurveTo(
         (-10 + wind * 0.4) * s, shoulderY + torsoH * 0.4,
-        (-14 + wind * 0.6) * s, hipY + 6 * s,
-        (-10 + wind * 0.5) * s, hipY + thighLen * 0.5
+        (-13 + wind * 0.5) * s, hipY + 5 * s,
+        (-9 + wind * 0.5) * s, hipY + thighLen * 0.45
     );
-    ctx.lineTo(-3 * s, hipY + thighLen * 0.35);
+    ctx.lineTo(-3 * s, hipY + thighLen * 0.3);
     ctx.lineTo(-2 * s, hipY);
-    ctx.closePath();
-    ctx.fill();
-    // Cape highlight
-    ctx.fillStyle = cCapeLt;
-    ctx.beginPath();
-    ctx.moveTo(-2 * s, shoulderY + 4 * s);
-    ctx.bezierCurveTo(
-        (-7 + wind * 0.3) * s, shoulderY + torsoH * 0.4,
-        (-10 + wind * 0.4) * s, hipY + 8 * s,
-        (-7 + wind * 0.3) * s, hipY + thighLen * 0.35
-    );
-    ctx.lineTo(-3 * s, hipY + 6 * s);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
 
-    // 2. Far leg (darker, behind body)
+    // 2. Far leg
     _leg(legAngleFar, kneeBendFar, cLegs, 5 * s);
 
     // 3. Far arm
     ctx.save();
     ctx.rotate(torsoLean);
-    _arm(1 * s, shoulderY + 3 * s, armSwingFar, cTunic, 3.5 * s);
+    _arm(1 * s, shoulderY + 3 * s, armSwingFar, cBodyDk, 3.5 * s);
     ctx.restore();
 
-    // 4. Torso block (narrow rectangle in side view)
+    // 4. Torso (simple rectangle)
     ctx.save();
     ctx.rotate(torsoLean);
     const tw = torsoW * 0.5;
-    // Main tunic
-    ctx.fillStyle = cTunicLt;
+    ctx.fillStyle = cBody;
     ctx.beginPath();
-    ctx.moveTo(-tw * 0.9, hipY);
-    ctx.lineTo(-tw * 0.8, hipY - torsoH * 0.5);
+    ctx.moveTo(-tw * 0.8, hipY);
     ctx.lineTo(-tw * 0.9, shoulderY);
     ctx.lineTo(tw, shoulderY);
-    ctx.lineTo(tw * 0.9, hipY - torsoH * 0.5);
     ctx.lineTo(tw * 0.8, hipY);
     ctx.closePath();
     ctx.fill();
-    // Pelvis block (slightly wider)
-    ctx.save();
-    ctx.rotate(hipRoll);
-    ctx.fillStyle = cTunic;
-    const pw = pelvisW * 0.5;
-    ctx.fillRect(-pw * 0.7, hipY - pelvisH, pelvisW * 0.7, pelvisH);
-    ctx.restore();
-    // Belt
-    ctx.fillStyle = cBelt;
-    const beltY = hipY - pelvisH + 1 * s;
-    ctx.fillRect(-tw * 0.9, beltY, torsoW * 0.9, 2.5 * s);
-    // Belt buckle
-    ctx.fillStyle = '#c4953a';
-    ctx.beginPath();
-    ctx.arc(tw * 0.5, beltY + 1.25 * s, 1.5 * s, 0, Math.PI * 2);
-    ctx.fill();
-    // Shoulder cap
-    ctx.fillStyle = cTunicLt;
-    ctx.beginPath();
-    ctx.ellipse(0, shoulderY, tw * 1.2, 3 * s, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Tunic hem
-    ctx.fillStyle = cTunic;
-    ctx.beginPath();
-    ctx.moveTo(-pw * 0.8, hipY);
-    ctx.quadraticCurveTo(0, hipY + 5 * s, pw * 0.8, hipY);
-    ctx.closePath();
-    ctx.fill();
+    // Belt (simple line)
+    ctx.fillStyle = '#7a5a28';
+    ctx.fillRect(-tw * 0.8, hipY - pelvisH, torsoW * 0.9, 2 * s);
     ctx.restore();
 
-    // 5. Near leg (brighter, in front)
+    // 5. Near leg
     _leg(legAngleNear, kneeBendNear, cLegsLt, 5.5 * s);
 
     // 6. Near arm + staff
     ctx.save();
     ctx.rotate(torsoLean);
-    const hand = _arm(-1 * s, shoulderY + 3 * s, armSwingNear, cTunicLt, 4 * s);
-    // Walking staff
+    const hand = _arm(-1 * s, shoulderY + 3 * s, armSwingNear, cBody, 4 * s);
+    // Simple walking staff
     const stX = hand.handX;
     const stY = hand.handY - 3 * s;
-    const stBotX = stX + 3 * s;
     const stBotY = 4 * s + bob;
     ctx.strokeStyle = '#6a4a20';
     ctx.lineWidth = 2.5 * s;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(stX, stY);
-    ctx.lineTo(stBotX, stBotY);
+    ctx.lineTo(stX + 3 * s, stBotY);
     ctx.stroke();
-    // Staff wraps
-    ctx.strokeStyle = '#8a6a30';
-    ctx.lineWidth = 0.8 * s;
-    const sdx = stBotX - stX, sdy = stBotY - stY;
-    for (let i = 0; i < 3; i++) {
-        const t = 0.1 + i * 0.1;
-        ctx.beginPath();
-        ctx.moveTo(stX + sdx * t - 1.5 * s, stY + sdy * t);
-        ctx.lineTo(stX + sdx * t + 1.5 * s, stY + sdy * t - s);
-        ctx.stroke();
-    }
-    // Staff knob + gem
-    ctx.fillStyle = '#6a4a20';
-    ctx.beginPath();
-    ctx.arc(stX, stY, 2.5 * s, 0, Math.PI * 2);
-    ctx.fill();
+    // Staff gem glow
     const glow = 0.5 + Math.sin(elapsed * 0.005) * 0.2;
     ctx.fillStyle = `rgba(196,149,58,${glow})`;
     ctx.beginPath();
-    ctx.arc(stX, stY, 1.8 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = `rgba(196,149,58,${glow * 0.12})`;
-    ctx.beginPath();
-    ctx.arc(stX, stY, 5 * s, 0, Math.PI * 2);
+    ctx.arc(stX, stY, 2 * s, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // 7. Head (hooded, profile facing right)
+    // 7. Head (simple hooded profile)
     ctx.save();
     ctx.rotate(torsoLean);
     ctx.translate(0, headBob);
     const hY = headY;
     const hw = headW * 0.5;
     const hh = headH * 0.5;
-    // Hood — large, blocky shape matching wireframe's prominent head block
-    // Back fill (larger, creates the hood volume)
+    // Hood — single solid shape
     ctx.fillStyle = cHood;
     ctx.beginPath();
-    ctx.moveTo(-hw * 1.1, hY + hh);             // lower back
-    ctx.lineTo(-hw * 1.3, hY - hh * 0.5);       // back side
-    ctx.quadraticCurveTo(-hw * 1.2, hY - hh * 1.3, 0, hY - hh * 1.4); // top back curve
-    ctx.quadraticCurveTo(hw * 0.8, hY - hh * 1.3, hw * 1.0, hY - hh * 0.8); // top front
-    ctx.lineTo(hw * 1.2, hY + hh * 0.3);        // front brow
-    ctx.lineTo(hw * 0.6, hY + hh);              // chin
-    ctx.closePath();
-    ctx.fill();
-    // Hood front panel (darker, creates depth)
-    ctx.fillStyle = cHoodDk;
-    ctx.beginPath();
-    ctx.moveTo(-hw * 0.8, hY + hh);
-    ctx.lineTo(-hw * 1.0, hY - hh * 0.3);
-    ctx.quadraticCurveTo(-hw * 0.9, hY - hh * 1.2, 0, hY - hh * 1.3);
-    ctx.quadraticCurveTo(hw * 0.6, hY - hh * 1.2, hw * 0.9, hY - hh * 0.7);
-    ctx.lineTo(hw * 1.1, hY + hh * 0.2);
+    ctx.moveTo(-hw * 1.0, hY + hh);
+    ctx.lineTo(-hw * 1.2, hY - hh * 0.4);
+    ctx.quadraticCurveTo(-hw * 1.1, hY - hh * 1.3, 0, hY - hh * 1.4);
+    ctx.quadraticCurveTo(hw * 0.8, hY - hh * 1.3, hw * 1.0, hY - hh * 0.7);
+    ctx.lineTo(hw * 1.2, hY + hh * 0.3);
     ctx.lineTo(hw * 0.5, hY + hh);
     ctx.closePath();
     ctx.fill();
-    // Face shadow (dark opening inside hood)
+    // Face shadow
     ctx.fillStyle = '#1a1210';
     ctx.beginPath();
-    ctx.moveTo(hw * 0.3, hY + hh * 0.7);
-    ctx.quadraticCurveTo(hw * 1.3, hY, hw * 1.1, hY - hh * 0.5);
-    ctx.quadraticCurveTo(hw * 0.7, hY - hh * 0.7, hw * 0.2, hY - hh * 0.1);
-    ctx.quadraticCurveTo(hw * 0.1, hY + hh * 0.4, hw * 0.3, hY + hh * 0.7);
+    ctx.moveTo(hw * 0.3, hY + hh * 0.6);
+    ctx.quadraticCurveTo(hw * 1.2, hY, hw * 1.0, hY - hh * 0.4);
+    ctx.quadraticCurveTo(hw * 0.6, hY - hh * 0.6, hw * 0.2, hY - hh * 0.1);
+    ctx.quadraticCurveTo(hw * 0.1, hY + hh * 0.3, hw * 0.3, hY + hh * 0.6);
     ctx.closePath();
     ctx.fill();
-    // Skin visible (profile — nose, chin)
-    ctx.fillStyle = cSkin;
-    ctx.beginPath();
-    ctx.arc(hw * 0.9, hY + hh * 0.1, 3 * s, -0.4, 1.0);
-    ctx.fill();
     // Eye glow
-    const eyeGlow = 0.4 + Math.sin(elapsed * 0.004) * 0.15;
+    const eyeGlow = 0.35 + Math.sin(elapsed * 0.004) * 0.15;
     ctx.fillStyle = `rgba(196,149,58,${eyeGlow})`;
     ctx.beginPath();
-    ctx.arc(hw * 0.9, hY - hh * 0.1, 1.5 * s, 0, Math.PI * 2);
+    ctx.arc(hw * 0.85, hY - hh * 0.05, 1.5 * s, 0, Math.PI * 2);
     ctx.fill();
-    // Hood edge highlight
-    ctx.strokeStyle = 'rgba(100,70,40,0.5)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(-hw * 1.1, hY + hh);
-    ctx.lineTo(-hw * 1.3, hY - hh * 0.5);
-    ctx.quadraticCurveTo(-hw * 1.2, hY - hh * 1.3, 0, hY - hh * 1.4);
-    ctx.quadraticCurveTo(hw * 0.8, hY - hh * 1.3, hw * 1.0, hY - hh * 0.8);
-    ctx.lineTo(hw * 1.2, hY + hh * 0.3);
-    ctx.stroke();
-    // Hood drape connecting to neck/shoulders
+    // Hood-to-neck drape
     ctx.fillStyle = cHood;
     ctx.beginPath();
-    ctx.moveTo(-hw * 1.1, hY + hh);
-    ctx.quadraticCurveTo(-hw * 0.5, hY + hh * 1.4, 0, shoulderY + neckH);
-    ctx.quadraticCurveTo(hw * 0.3, hY + hh * 1.4, hw * 0.6, hY + hh);
+    ctx.moveTo(-hw * 1.0, hY + hh);
+    ctx.quadraticCurveTo(-hw * 0.3, hY + hh * 1.3, 0, shoulderY + neckH);
+    ctx.quadraticCurveTo(hw * 0.2, hY + hh * 1.3, hw * 0.5, hY + hh);
     ctx.closePath();
     ctx.fill();
     ctx.restore(); // end head
