@@ -252,18 +252,41 @@ async function checkHealth() {
     return false;
 }
 
+// ─── API URL Discovery (auto-resolve stale tunnel URLs) ───
+const API_URL_DISCOVERY = '../api-url.json';
+
+async function _discoverApiUrl() {
+    // Fetch api-url.json from GitHub Pages (same origin, no CORS issues)
+    // Cache-bust to avoid stale CDN responses
+    try {
+        const resp = await fetch(API_URL_DISCOVERY + '?t=' + Date.now(), {
+            cache: 'no-store',
+            signal: AbortSignal.timeout(4000),
+        });
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        const url = (data.url || '').replace(/\/$/, '');
+        if (url && url !== S.apiBase) {
+            _clog('DISCOVERY: found new API URL: ' + url);
+            console.log('[GAME] Discovered new API URL:', url);
+            return url;
+        }
+    } catch (e) {
+        _clog('DISCOVERY failed: ' + (e.message || e));
+    }
+    return null;
+}
+
 // ─── Health Poller (transparent retry — player sees loading, never error) ───
 const HEALTH_POLL_INTERVAL = 2000;   // 2s between polls
-const HEALTH_POLL_MAX = 5;           // Max 10s of polling before sendData reconnect
+const HEALTH_POLL_MAX = 3;           // Max 6s of polling before discovery attempt
 
 async function _waitForHealthy() {
-    // First try: direct health check
+    // First try: direct health check with current ?api= URL
     let ok = await checkHealth();
     if (ok) return true;
 
-    // If first check failed, poll for a bit (server might be restarting).
-    // But if it was a CORS/network error (dead tunnel), skip polling —
-    // we can't discover the new URL from the browser, only the bot can.
+    // Poll for a bit (server might be restarting)
     _clog('INIT health failed — starting silent poll (player sees loading)');
     console.log('[GAME] Health failed, polling silently...');
 
@@ -277,8 +300,24 @@ async function _waitForHealthy() {
         _clog(`INIT health poll ${i}/${HEALTH_POLL_MAX} failed`);
     }
 
-    // All polls failed — sendData to close WebApp, bot sends fresh menu
-    // with the CURRENT tunnel URL. Player taps character → game loads.
+    // Polls failed — try discovering the new tunnel URL from api-url.json
+    _clog('Attempting API URL discovery...');
+    const newUrl = await _discoverApiUrl();
+    if (newUrl) {
+        S.apiBase = newUrl;
+        // Update error reporter API base
+        if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) {
+            ValdoriaErrors.updateApiBase(newUrl);
+        }
+        // Retry health with the discovered URL
+        ok = await checkHealth();
+        if (ok) {
+            _clog('DISCOVERY: health OK with new URL');
+            return true;
+        }
+    }
+
+    // All attempts failed — sendData to close WebApp, bot sends fresh menu
     return _sendDataReconnect();
 }
 
