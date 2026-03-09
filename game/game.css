@@ -470,14 +470,20 @@
 /* Shared ring styles */
 .mc-ring { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-/* Outer rune ring — CW slowly */
+/* ═══ IMMUTABLE — Ring Rotation Speeds ═══════════════════════
+   These durations are canonical and MUST NOT be changed.
+   Outer: 60s | Mid: 35s | Inner: 45s
+   Minimums enforced by shared/loading-guard.js at runtime.
+   Changing these values WILL trigger a console warning.
+   ════════════════════════════════════════════════════════════ */
+/* Outer rune ring — CW slowly — IMMUTABLE: 60s */
 .mc-outer {
     animation: spinCW 60s linear infinite;
     filter: drop-shadow(0 0 3px rgba(196,149,58,0.3));
 }
 .mc-rune-text { font-size: 13px; letter-spacing: 3px; font-family: serif; }
 
-/* Mid energy ring — CCW */
+/* Mid energy ring — CCW — IMMUTABLE: 35s */
 .mc-mid { animation: spinCCW 35s linear infinite; }
 
 .mc-energy-arc {
@@ -491,7 +497,7 @@
 
 @keyframes energyFlow { to { stroke-dashoffset: -640; } }
 
-/* Inner text ring — CW faster */
+/* Inner text ring — CW faster — IMMUTABLE: 45s */
 .mc-inner {
     animation: spinCW 45s linear infinite;
     filter: drop-shadow(0 0 2px rgba(196,149,58,0.2));

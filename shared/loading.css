@@ -203,14 +203,20 @@
 /* Shared ring styles */
 .mc-ring { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-/* Outer rune ring — CW slowly (speed driven by --ring-speed) */
+/* ═══ IMMUTABLE — Ring Rotation Speeds ═══════════════════════
+   These durations are canonical. CSS vars allow acceleration
+   (e.g., explore progress) but loading-guard.js enforces
+   minimum speeds: Outer ≥25s | Mid ≥15s | Inner ≥20s.
+   Default: Outer: 60s | Mid: 35s | Inner: 45s
+   ════════════════════════════════════════════════════════════ */
+/* Outer rune ring — CW slowly — DEFAULT: 60s, MIN: 25s */
 .mc-outer {
     animation: spinCW var(--ring-outer, 60s) linear infinite;
     filter: drop-shadow(0 0 3px rgba(196,149,58,0.3));
 }
 .mc-rune-text { font-size: 13px; letter-spacing: 3px; font-family: serif; }
 
-/* Mid energy ring — CCW (speed driven by --ring-speed) */
+/* Mid energy ring — CCW — DEFAULT: 35s, MIN: 15s */
 .mc-mid { animation: spinCCW var(--ring-mid, 35s) linear infinite; }
 
 .mc-energy-arc {
@@ -224,7 +230,7 @@
 
 @keyframes energyFlow { to { stroke-dashoffset: -640; } }
 
-/* Inner text ring — CW faster (speed driven by --ring-speed) */
+/* Inner text ring — CW faster — DEFAULT: 45s, MIN: 20s */
 .mc-inner {
     animation: spinCW var(--ring-inner, 45s) linear infinite;
     filter: drop-shadow(0 0 2px rgba(196,149,58,0.2));
