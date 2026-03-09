@@ -3,7 +3,7 @@
    Toast, loading, error, timer overlays, screen transitions.
    ═══════════════════════════════════════════════════════════════ */
 
-// ─── Loading (with cycling tips) ───
+// ─── Loading (with cycling tips, ring acceleration, gem phases, cinematic exit) ───
 const _LOADING_TIPS = [
     'Preparando sua aventura...',
     '⚔️ Dica: Combine ataques com aliados para dano extra!',
@@ -26,14 +26,26 @@ let _loadingSlowTimer = null;
 
 function showLoading(isRetry = false) {
     const el = document.getElementById('loading');
-    if (el) el.style.display = '';
+    if (el) {
+        el.style.display = '';
+        el.classList.remove('exit-cinematic', 'hidden');
+        el.style.opacity = '';
+        el.style.transition = '';
+        el.removeAttribute('data-phase');
+    }
+    // Reset ring speeds to canonical values
+    const circle = el ? el.querySelector('.magic-circle') : null;
+    if (circle) {
+        circle.style.removeProperty('--ring-outer');
+        circle.style.removeProperty('--ring-mid');
+        circle.style.removeProperty('--ring-inner');
+    }
     _isRetryLoading = isRetry;
     _startLoadingProgress();
     _startLoadingTimeout();
     _startSlowWarning();
 
     if (isRetry) {
-        // During retry: show fixed "Reconectando..." — don't cycle tips
         _stopLoadingTips();
         const tipEl = document.getElementById('loading-tip');
         if (tipEl) tipEl.textContent = '🔄 Reconectando ao servidor...';
@@ -44,23 +56,76 @@ function showLoading(isRetry = false) {
 
 function hideLoading() {
     const el = document.getElementById('loading');
-    // Fill progress to 100% before hiding
+    if (!el || el.style.display === 'none') return;
+
+    // Fill progress to 100%
     const bar = document.getElementById('loading-progress');
     if (bar) bar.style.width = '100%';
+    _loadingProgress = 100;
+    _updateLoadingPhase(100);
+
     _stopLoadingProgress();
     _stopLoadingTimeout();
     _stopSlowWarning();
     _isRetryLoading = false;
 
+    // Trigger completion pulse + haptic
+    _triggerCompletionPulse(el);
+
+    // Cinematic exit (0.9s coordinated animation)
     setTimeout(() => {
-        if (el) {
-            el.style.opacity = '1';
-            el.style.transition = 'opacity 0.4s ease';
-            el.style.opacity = '0';
-            setTimeout(() => { el.style.display = 'none'; el.style.opacity = ''; el.style.transition = ''; }, 400);
-        }
+        el.classList.add('exit-cinematic');
         _stopLoadingTips();
-    }, 200);
+        setTimeout(() => {
+            el.style.display = 'none';
+            el.classList.remove('exit-cinematic');
+            el.style.opacity = '';
+            el.style.transition = '';
+            // Reset ring speeds
+            const circle = el.querySelector('.magic-circle');
+            if (circle) {
+                circle.style.removeProperty('--ring-outer');
+                circle.style.removeProperty('--ring-mid');
+                circle.style.removeProperty('--ring-inner');
+            }
+            el.removeAttribute('data-phase');
+        }, 950);
+    }, 150);
+}
+
+// ── Ring acceleration: lerp speed based on progress ──
+// At 0%: canonical (60s/35s/45s). At 100%: 2.5x faster (24s/14s/18s).
+// Guard enforces min: outer≥25s, mid≥15s, inner≥20s
+function _updateRingSpeed(pct) {
+    const el = document.getElementById('loading');
+    const circle = el ? el.querySelector('.magic-circle') : null;
+    if (!circle) return;
+    const factor = 1 - (pct / 100) * 0.6; // 1.0 → 0.4 (gentler than explore's 0.25)
+    circle.style.setProperty('--ring-outer', (60 * factor) + 's');
+    circle.style.setProperty('--ring-mid', (35 * factor) + 's');
+    circle.style.setProperty('--ring-inner', (45 * factor) + 's');
+}
+
+// ── Gem phase: 0 (ruby) → 1 (amber at 50%) → 2 (bright gold at 90%) ──
+function _updateLoadingPhase(pct) {
+    const el = document.getElementById('loading');
+    if (!el) return;
+    if (pct >= 90) el.setAttribute('data-phase', '2');
+    else if (pct >= 50) el.setAttribute('data-phase', '1');
+    else el.removeAttribute('data-phase');
+    _updateRingSpeed(pct);
+}
+
+// ── Completion pulse at 100% + haptic ──
+function _triggerCompletionPulse(overlay) {
+    if (!overlay) return;
+    const waves = overlay.querySelectorAll('.mc-completion-wave');
+    waves.forEach(w => w.classList.add('active'));
+    try {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+        }
+    } catch (_) { /* older clients */ }
 }
 
 function _startLoadingProgress() {
@@ -69,10 +134,10 @@ function _startLoadingProgress() {
     const bar = document.getElementById('loading-progress');
     if (bar) bar.style.width = '0%';
     _loadingProgressTimer = setInterval(() => {
-        // Asymptotic progress — slows as it approaches 90%
         const remaining = 90 - _loadingProgress;
         _loadingProgress += remaining * 0.06;
         if (bar) bar.style.width = _loadingProgress + '%';
+        _updateLoadingPhase(_loadingProgress);
     }, 200);
 }
 
@@ -92,10 +157,13 @@ function _startLoadingTips() {
         _loadingTipIndex = (_loadingTipIndex + 1) % _LOADING_TIPS.length;
         const tipEl = document.getElementById('loading-tip');
         if (tipEl) {
-            tipEl.style.opacity = '0';
+            // Crossfade transition (matching explore loading)
+            tipEl.classList.add('tip-exit');
             setTimeout(() => {
                 tipEl.textContent = _LOADING_TIPS[_loadingTipIndex];
-                tipEl.style.opacity = '';
+                tipEl.classList.remove('tip-exit');
+                tipEl.classList.add('tip-enter');
+                setTimeout(() => tipEl.classList.remove('tip-enter'), 350);
             }, 300);
         }
     }, 3500);
@@ -107,6 +175,38 @@ function _stopLoadingTips() {
         _loadingTipTimer = null;
     }
 }
+
+// ── Gem tap burst interaction ──
+(function _initGemTap() {
+    function setup() {
+        const gemEl = document.getElementById('mc-gem');
+        if (!gemEl) return;
+        let cooldown = false;
+        gemEl.addEventListener('click', () => {
+            if (cooldown) return;
+            cooldown = true;
+            gemEl.classList.add('tapped');
+            const burst = document.createElement('div');
+            burst.className = 'mc-gem-burst';
+            gemEl.appendChild(burst);
+            try {
+                if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                    Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                }
+            } catch (_) { /* */ }
+            setTimeout(() => {
+                gemEl.classList.remove('tapped');
+                if (burst.parentNode) burst.parentNode.removeChild(burst);
+                cooldown = false;
+            }, 600);
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setup);
+    } else {
+        setup();
+    }
+})();
 
 // ─── Loading Timeout (prevents infinite loading screen) ───
 function _startLoadingTimeout() {
