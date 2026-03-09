@@ -63,6 +63,17 @@ async function apiCall(endpoint, body = {}) {
         headers,
         body: JSON.stringify({ user_id: USER_ID, ...body }),
     });
+    if (resp.status === 401 || resp.status === 403) {
+        console.error('[PROLOGUE] Auth error:', resp.status);
+        const tg = window.Telegram?.WebApp;
+        if (tg?.sendData) {
+            tg.sendData(JSON.stringify({
+                action: 'webapp_error_close', webapp: 'PROLOGUE',
+                reason: resp.status === 401 ? 'session_expired' : 'invalid_init_data',
+            }));
+        }
+        throw new Error('session_expired');
+    }
     if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
         throw new Error(errData.error || `HTTP ${resp.status}`);

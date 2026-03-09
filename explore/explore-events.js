@@ -2666,6 +2666,17 @@ async function initAsync() {
                 headers: _sh
             });
             console.log('[EXPLORE] API response status:', resp.status);
+            if (resp.status === 401 || resp.status === 403) {
+                console.error('[EXPLORE] Auth error on state fetch:', resp.status);
+                const tg = window.Telegram?.WebApp;
+                if (tg?.sendData) {
+                    tg.sendData(JSON.stringify({
+                        action: 'webapp_error_close', webapp: 'EXPLORE',
+                        reason: resp.status === 401 ? 'session_expired' : 'invalid_init_data',
+                    }));
+                    return; // sendData auto-closes
+                }
+            }
             if (resp.ok) {
                 const rData = await resp.json();
                 console.log('[EXPLORE] API response:', {
