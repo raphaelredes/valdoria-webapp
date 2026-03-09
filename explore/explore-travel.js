@@ -4,24 +4,24 @@
 
 // Per-biome visual config
 const TRAVEL_CONFIG = {
-    // rl=rimLight, lb=lightningBolts, fb=fogBands, sc=snowCaps, fl=fallingLeaves, cr=celestialReflection
-    forest:   { bg: ['#0d2e0d','#1a4a1a'], ground: '#2d3d1d', midColor: '#1a3a1a', farColor: '#0a2a0a', silhouette: 'conifers',   icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: true,  ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: true,  dm: true,  gv: true,  ds: false, sky2: ['#1a3a0a','#2a5a1a'], rl: true,  lb: false, fb: false, sc: false, fl: 'leaf',  cr: false },
-    plains:   { bg: ['#3a3a18','#5a5a28'], ground: '#5a4a30', midColor: '#4a4a20', farColor: '#3a3a15', silhouette: 'hills',      icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: false, ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: true,  dm: true,  gv: true,  ds: false, sky2: ['#4a3a10','#6a5a20'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false },
-    swamp:    { bg: ['#1a2a1a','#2a3a2a'], ground: '#3a3a2a', midColor: '#2a3a25', farColor: '#1a2a18', silhouette: 'deadTrees',  icon: '', horizonGlow: '100,140,80',  stars: true,  celestial: 'moon', cloud: 'fog',   sway: false, ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: true,  gr: false, dm: false, gv: false, ds: false, sky2: null,                  rl: true,  lb: false, fb: true,  sc: false, fl: 'dead',  cr: true  },
-    cave:     { bg: ['#0a0a14','#1a1a2a'], ground: '#1a1a2a', midColor: '#15152a', farColor: '#0a0a18', silhouette: 'rocks',      icon: '', horizonGlow: '100,100,160', stars: true,  celestial: null,   cloud: null,    sway: false, ff: false, lt: false, fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null,                  rl: false, lb: false, fb: true,  sc: false, fl: null,    cr: false },
-    desert:   { bg: ['#6a5a30','#8a7a4a'], ground: '#8a7a4a', midColor: '#7a6a3a', farColor: '#5a4a28', silhouette: 'dunes',      icon: '', horizonGlow: '220,180,80',  stars: false, celestial: 'sun',  cloud: null,    sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: false, wr: false, gr: false, dm: true,  gv: false, ds: true,  sky2: ['#7a5a20','#9a7a38'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false },
-    mountain: { bg: ['#3a3a4a','#5a5a6a'], ground: '#5a4a3a', midColor: '#4a4a5a', farColor: '#2a2a3a', silhouette: 'peaks',      icon: '', horizonGlow: '160,160,200', stars: true,  celestial: 'moon', cloud: 'thin',  sway: false, ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: ['#2a2a3a','#4a4a5a'], rl: true,  lb: false, fb: true,  sc: true,  fl: null,    cr: false },
-    snow:     { bg: ['#8a8a9a','#b0b8c0'], ground: '#c0c8d0', midColor: '#9a9aaa', farColor: '#7a7a8a', silhouette: 'peaks',      icon: '', horizonGlow: '140,180,220', stars: false, celestial: null,   cloud: 'heavy', sway: false, ff: false, lt: false, fa: null,   sh: false, au: true,  lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#7a7a8a','#9a9aaa'], rl: false, lb: false, fb: false, sc: true,  fl: null,    cr: false },
-    volcanic: { bg: ['#2a1a0a','#3a2a1a'], ground: '#3a2a1a', midColor: '#3a2010', farColor: '#1a0a00', silhouette: 'rocks',      icon: '', horizonGlow: '255,100,30',  stars: true,  celestial: 'moon', cloud: 'smoke', sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: true,  wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#3a1500','#4a2a0a'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false },
-    graveyard:{ bg: ['#1a1a20','#2a2a30'], ground: '#3a3a3a', midColor: '#252530', farColor: '#15151a', silhouette: 'tombstones', icon: '', horizonGlow: '120,120,160', stars: true,  celestial: 'moon', cloud: 'dark',  sway: false, ff: false, lt: true,  fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#10101a','#1a1a28'], rl: true,  lb: true,  fb: false, sc: false, fl: null,    cr: false },
+    // rn=rain, cs=cloudShadows, cn=constellations, tn=terrainNoise, cp=compass, ms=milestones
+    forest:   { bg: ['#0d2e0d','#1a4a1a'], ground: '#2d3d1d', midColor: '#1a3a1a', farColor: '#0a2a0a', silhouette: 'conifers',   icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: true,  ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: true,  dm: true,  gv: true,  ds: false, sky2: ['#1a3a0a','#2a5a1a'], rl: true,  lb: false, fb: false, sc: false, fl: 'leaf',  cr: false, rn: false, cs: true,  cn: false, tn: true,  cp: true,  ms: true  },
+    plains:   { bg: ['#3a3a18','#5a5a28'], ground: '#5a4a30', midColor: '#4a4a20', farColor: '#3a3a15', silhouette: 'hills',      icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: false, ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: true,  dm: true,  gv: true,  ds: false, sky2: ['#4a3a10','#6a5a20'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false, rn: false, cs: true,  cn: false, tn: false, cp: true,  ms: true  },
+    swamp:    { bg: ['#1a2a1a','#2a3a2a'], ground: '#3a3a2a', midColor: '#2a3a25', farColor: '#1a2a18', silhouette: 'deadTrees',  icon: '', horizonGlow: '100,140,80',  stars: true,  celestial: 'moon', cloud: 'fog',   sway: false, ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: true,  gr: false, dm: false, gv: false, ds: false, sky2: null,                  rl: true,  lb: false, fb: true,  sc: false, fl: 'dead',  cr: true,  rn: false, cs: false, cn: true,  tn: true,  cp: true,  ms: false },
+    cave:     { bg: ['#0a0a14','#1a1a2a'], ground: '#1a1a2a', midColor: '#15152a', farColor: '#0a0a18', silhouette: 'rocks',      icon: '', horizonGlow: '100,100,160', stars: true,  celestial: null,   cloud: null,    sway: false, ff: false, lt: false, fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null,                  rl: false, lb: false, fb: true,  sc: false, fl: null,    cr: false, rn: false, cs: false, cn: true,  tn: true,  cp: false, ms: false },
+    desert:   { bg: ['#6a5a30','#8a7a4a'], ground: '#8a7a4a', midColor: '#7a6a3a', farColor: '#5a4a28', silhouette: 'dunes',      icon: '', horizonGlow: '220,180,80',  stars: false, celestial: 'sun',  cloud: null,    sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: false, wr: false, gr: false, dm: true,  gv: false, ds: true,  sky2: ['#7a5a20','#9a7a38'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false, rn: false, cs: false, cn: false, tn: true,  cp: true,  ms: true  },
+    mountain: { bg: ['#3a3a4a','#5a5a6a'], ground: '#5a4a3a', midColor: '#4a4a5a', farColor: '#2a2a3a', silhouette: 'peaks',      icon: '', horizonGlow: '160,160,200', stars: true,  celestial: 'moon', cloud: 'thin',  sway: false, ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: ['#2a2a3a','#4a4a5a'], rl: true,  lb: false, fb: true,  sc: true,  fl: null,    cr: false, rn: true,  cs: false, cn: true,  tn: true,  cp: true,  ms: true  },
+    snow:     { bg: ['#8a8a9a','#b0b8c0'], ground: '#c0c8d0', midColor: '#9a9aaa', farColor: '#7a7a8a', silhouette: 'peaks',      icon: '', horizonGlow: '140,180,220', stars: false, celestial: null,   cloud: 'heavy', sway: false, ff: false, lt: false, fa: null,   sh: false, au: true,  lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#7a7a8a','#9a9aaa'], rl: false, lb: false, fb: false, sc: true,  fl: null,    cr: false, rn: false, cs: true,  cn: false, tn: false, cp: true,  ms: true  },
+    volcanic: { bg: ['#2a1a0a','#3a2a1a'], ground: '#3a2a1a', midColor: '#3a2010', farColor: '#1a0a00', silhouette: 'rocks',      icon: '', horizonGlow: '255,100,30',  stars: true,  celestial: 'moon', cloud: 'smoke', sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: true,  wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#3a1500','#4a2a0a'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false, rn: false, cs: false, cn: false, tn: true,  cp: true,  ms: false },
+    graveyard:{ bg: ['#1a1a20','#2a2a30'], ground: '#3a3a3a', midColor: '#252530', farColor: '#15151a', silhouette: 'tombstones', icon: '', horizonGlow: '120,120,160', stars: true,  celestial: 'moon', cloud: 'dark',  sway: false, ff: false, lt: true,  fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#10101a','#1a1a28'], rl: true,  lb: true,  fb: false, sc: false, fl: null,    cr: false, rn: true,  cs: false, cn: true,  tn: false, cp: true,  ms: false },
     // Dungeon variants — darker, more menacing
-    dungeon_cave:     { bg: ['#050510','#0a0a18'], ground: '#0f0f1a', midColor: '#0a0a15', farColor: '#050508', silhouette: 'rocks',      icon: '', horizonGlow: '80,80,140',   stars: true,  celestial: null,   cloud: null,    sway: false, ff: false, lt: false, fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null, rl: false, lb: false, fb: true,  sc: false, fl: null,   cr: false },
-    dungeon_graveyard:{ bg: ['#0a0a10','#15151a'], ground: '#1a1a20', midColor: '#101018', farColor: '#08080c', silhouette: 'tombstones', icon: '', horizonGlow: '100,80,140',  stars: true,  celestial: 'moon', cloud: 'dark',  sway: false, ff: false, lt: true,  fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: true,  fb: false, sc: false, fl: null,   cr: false },
-    dungeon_volcanic: { bg: ['#1a0a00','#2a1508'], ground: '#2a1a0a', midColor: '#200a00', farColor: '#100500', silhouette: 'rocks',      icon: '', horizonGlow: '255,60,0',    stars: true,  celestial: null,   cloud: 'smoke', sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: true,  wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: false, fb: false, sc: false, fl: null,   cr: false },
-    dungeon_forest:   { bg: ['#050a05','#0a150a'], ground: '#0a1a0a', midColor: '#081208', farColor: '#040a04', silhouette: 'conifers',   icon: '', horizonGlow: '60,100,60',   stars: true,  celestial: 'moon', cloud: 'fog',   sway: true,  ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: false, fb: true,  sc: false, fl: 'leaf', cr: false },
-    dungeon_swamp:    { bg: ['#0a100a','#151a15'], ground: '#1a1a15', midColor: '#121812', farColor: '#080a08', silhouette: 'deadTrees',  icon: '', horizonGlow: '80,100,60',   stars: true,  celestial: null,   cloud: 'fog',   sway: false, ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: true,  gr: false, dm: false, gv: false, ds: false, sky2: null, rl: false, lb: false, fb: true,  sc: false, fl: 'dead', cr: false },
-    dungeon_mountain: { bg: ['#1a1a20','#2a2a35'], ground: '#2a2020', midColor: '#202030', farColor: '#151520', silhouette: 'peaks',      icon: '', horizonGlow: '120,100,160', stars: true,  celestial: 'moon', cloud: 'thin',  sway: false, ff: false, lt: false, fa: null,   sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null, rl: true,  lb: false, fb: true,  sc: true,  fl: null,   cr: false },
-    dungeon_snow:     { bg: ['#4a4a55','#6a6a75'], ground: '#5a5a65', midColor: '#555560', farColor: '#404048', silhouette: 'peaks',      icon: '', horizonGlow: '140,150,180', stars: true,  celestial: null,   cloud: 'heavy', sway: false, ff: false, lt: false, fa: null,   sh: false, au: true,  lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: false, lb: false, fb: false, sc: true,  fl: null,   cr: false },
+    dungeon_cave:     { bg: ['#050510','#0a0a18'], ground: '#0f0f1a', midColor: '#0a0a15', farColor: '#050508', silhouette: 'rocks',      icon: '', horizonGlow: '80,80,140',   stars: true,  celestial: null,   cloud: null,    sway: false, ff: false, lt: false, fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null, rl: false, lb: false, fb: true,  sc: false, fl: null,   cr: false, rn: false, cs: false, cn: true,  tn: true,  cp: false, ms: false },
+    dungeon_graveyard:{ bg: ['#0a0a10','#15151a'], ground: '#1a1a20', midColor: '#101018', farColor: '#08080c', silhouette: 'tombstones', icon: '', horizonGlow: '100,80,140',  stars: true,  celestial: 'moon', cloud: 'dark',  sway: false, ff: false, lt: true,  fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: true,  fb: false, sc: false, fl: null,   cr: false, rn: true,  cs: false, cn: true,  tn: false, cp: false, ms: false },
+    dungeon_volcanic: { bg: ['#1a0a00','#2a1508'], ground: '#2a1a0a', midColor: '#200a00', farColor: '#100500', silhouette: 'rocks',      icon: '', horizonGlow: '255,60,0',    stars: true,  celestial: null,   cloud: 'smoke', sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: true,  wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: false, fb: false, sc: false, fl: null,   cr: false, rn: false, cs: false, cn: false, tn: true,  cp: false, ms: false },
+    dungeon_forest:   { bg: ['#050a05','#0a150a'], ground: '#0a1a0a', midColor: '#081208', farColor: '#040a04', silhouette: 'conifers',   icon: '', horizonGlow: '60,100,60',   stars: true,  celestial: 'moon', cloud: 'fog',   sway: true,  ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: false, fb: true,  sc: false, fl: 'leaf', cr: false, rn: false, cs: false, cn: false, tn: true,  cp: false, ms: false },
+    dungeon_swamp:    { bg: ['#0a100a','#151a15'], ground: '#1a1a15', midColor: '#121812', farColor: '#080a08', silhouette: 'deadTrees',  icon: '', horizonGlow: '80,100,60',   stars: true,  celestial: null,   cloud: 'fog',   sway: false, ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: true,  gr: false, dm: false, gv: false, ds: false, sky2: null, rl: false, lb: false, fb: true,  sc: false, fl: 'dead', cr: false, rn: false, cs: false, cn: true,  tn: true,  cp: false, ms: false },
+    dungeon_mountain: { bg: ['#1a1a20','#2a2a35'], ground: '#2a2020', midColor: '#202030', farColor: '#151520', silhouette: 'peaks',      icon: '', horizonGlow: '120,100,160', stars: true,  celestial: 'moon', cloud: 'thin',  sway: false, ff: false, lt: false, fa: null,   sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null, rl: true,  lb: false, fb: true,  sc: true,  fl: null,   cr: false, rn: true,  cs: false, cn: true,  tn: true,  cp: false, ms: false },
+    dungeon_snow:     { bg: ['#4a4a55','#6a6a75'], ground: '#5a5a65', midColor: '#555560', farColor: '#404048', silhouette: 'peaks',      icon: '', horizonGlow: '140,150,180', stars: true,  celestial: null,   cloud: 'heavy', sway: false, ff: false, lt: false, fa: null,   sh: false, au: true,  lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: false, lb: false, fb: false, sc: true,  fl: null,   cr: false, rn: false, cs: true,  cn: false, tn: false, cp: false, ms: false },
 };
 
 // Particle configs per biome
@@ -121,6 +121,15 @@ function playTravelAnimation(biome, regionName, onComplete) {
     // Generate fog bands (mist strips between terrain layers)
     const fogBands = cfg.fb ? _generateFogBands(w, h) : [];
 
+    // Generate rain drops
+    const rainDrops = cfg.rn ? _generateRain(w, h) : [];
+
+    // Generate constellations (connect nearby stars)
+    const constellations = (cfg.cn && stars.length > 0) ? _generateConstellations(stars) : [];
+
+    // Generate road milestones
+    const milestones = cfg.ms ? _generateMilestones(w, h) : [];
+
     overlay.classList.add('active');
 
     let _done = false;
@@ -190,6 +199,10 @@ function playTravelAnimation(biome, regionName, onComplete) {
         // Stars (twinkling, drawn before terrain so they peek through gaps)
         if (stars.length > 0) {
             _drawStars(ctx, stars, elapsed);
+            // Constellations (faint lines between nearby stars)
+            if (constellations.length > 0) {
+                _drawConstellations(ctx, constellations, stars, elapsed);
+            }
             _drawShootingStars(ctx, shootingStars, elapsed);
         }
 
@@ -206,6 +219,11 @@ function playTravelAnimation(biome, regionName, onComplete) {
         // Clouds (slow parallax in the sky)
         if (clouds.length > 0) {
             _drawClouds(ctx, clouds, w, elapsed);
+        }
+
+        // Cloud shadows on ground (dark patches that sweep across terrain)
+        if (cfg.cs && clouds.length > 0) {
+            _drawCloudShadows(ctx, clouds, w, h, elapsed);
         }
 
         // Far terrain layer (very slow parallax — distant mountains/trees)
@@ -247,8 +265,18 @@ function playTravelAnimation(biome, regionName, onComplete) {
         ctx.fillStyle = cfg.ground;
         ctx.fillRect(0, groundY, w, h - groundY);
 
+        // Terrain noise texture (subtle stipple on ground for surface detail)
+        if (cfg.tn) {
+            _drawTerrainNoise(ctx, w, h, groundY, elapsed, cfg.ground);
+        }
+
         // Scrolling road/path
         _drawRoadPath(ctx, w, h, groundY, elapsed, biome);
+
+        // Road milestones (stone markers scrolling past)
+        if (milestones.length > 0) {
+            _drawMilestones(ctx, milestones, w, groundY, elapsed);
+        }
 
         // Ground line (horizon)
         ctx.strokeStyle = 'rgba(255,255,255,0.06)';
@@ -289,6 +317,11 @@ function playTravelAnimation(biome, regionName, onComplete) {
         // Particles with depth-based parallax
         _updateTravelParticles(ctx, particles, pcfg, w, h, elapsed);
 
+        // Rain (diagonal streaks with ground splashes)
+        if (rainDrops.length > 0) {
+            _drawRain(ctx, rainDrops, w, h, elapsed);
+        }
+
         // Dust motes / pollen (sunlit biomes — tiny floating specks catching light)
         if (dustMotes.length > 0) {
             _drawDustMotes(ctx, dustMotes, w, h, elapsed);
@@ -316,6 +349,11 @@ function playTravelAnimation(biome, regionName, onComplete) {
             if (cfg.lb) {
                 _drawLightningBolts(ctx, lightning, w, h, elapsed);
             }
+        }
+
+        // Compass rose (small, slowly rotating in corner)
+        if (cfg.cp) {
+            _drawCompassRose(ctx, w, h, elapsed, progress);
         }
 
         // Text (fade in first 400ms, slow vertical drift upward)

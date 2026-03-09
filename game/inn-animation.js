@@ -353,7 +353,12 @@ function playInnAnimation(data, onDone) {
         return;
     }
 
-    const frames = _buildFrames(data);
+    let frames = _buildFrames(data);
+    // Veteran skip: players who rested 15+ times see only last 3 frames
+    const restCount = data.rest_count || 0;
+    if (restCount > 15 && frames.length > 3) {
+        frames = frames.slice(-3);
+    }
     const totalFrames = frames.length;
     let _done = false;
     let _frameTimer = null;
