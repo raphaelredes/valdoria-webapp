@@ -330,10 +330,7 @@ function renderMap() {
 // ===============================================================
 
 function _buildAllDefs(defs) {
-    // Fog blur (functional — keep for fog of war)
-    const fb = _el('filter', { id: 'fog-blur', x: '-50%', y: '-50%', width: '200%', height: '200%' });
-    fb.appendChild(_el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '3' }));
-    defs.appendChild(fb);
+    // fog-blur filter removed — replaced by multi-stroke shadow (no GPU filter overhead)
 
     // Ink wobble removed — LANDMASS_POINTS already has built-in irregularity;
     // feTurbulence + feDisplacementMap was an expensive GPU filter with negligible
@@ -393,11 +390,15 @@ function _renderWornEdgesImpl(eG) {
     const path = _landmassPath();
     const p = LANDMASS_POINTS;
 
-    // === Layer 1: Deep shadow under the paper (gives depth/elevation) ===
+    // === Layer 1: Deep shadow under the paper (multi-stroke, no GPU filter) ===
     eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#0a0806',
-        'stroke-width': 18, 'stroke-opacity': 0.25, filter: 'url(#fog-blur)' }));
+        'stroke-width': 22, 'stroke-opacity': 0.10 }));
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#0a0806',
+        'stroke-width': 16, 'stroke-opacity': 0.18 }));
     eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#1a1410',
-        'stroke-width': 10, 'stroke-opacity': 0.35, filter: 'url(#fog-blur)' }));
+        'stroke-width': 12, 'stroke-opacity': 0.22 }));
+    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#1a1410',
+        'stroke-width': 8, 'stroke-opacity': 0.30 }));
 
     // === Layer 2: Burnt/darkened edge staining (multiple bands for depth) ===
     // Wide darkened band (deep age stain)
@@ -716,7 +717,7 @@ function setupPanZoom() {
             S.panX = e.clientX - sx; S.panY = e.clientY - sy;
             clamp(); apply(); _debouncedMinimap();
         }
-    });
+    }, { passive: true });
     vp.addEventListener('pointerup', () => {
         if (!pan) return;
         pan = false; wr.classList.remove('panning');

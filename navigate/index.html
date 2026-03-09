@@ -472,6 +472,15 @@
             pointer-events: none;
         }
 
+        /* ═══ IDLE BREATHING — Subtle vignette pulse when idle (GPU-composited) ═══ */
+        @keyframes vignetteBreathe {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+        body.map-idle #map-viewport::after {
+            animation: vignetteBreathe 6s ease-in-out infinite;
+        }
+
         /* ═══ IDLE PAUSE — Suspend ALL decorative animations after 10s inactivity ═══ */
         body.map-idle .first-visit-ring,
         body.map-idle .current-pulse-ring,
@@ -483,7 +492,11 @@
             animation-play-state: paused !important;
         }
 
-        /* ═══ LOCATION NODES — Hover + shake only (no infinite float) ═══ */
+        /* ═══ LOCATION NODES — Fade-in + hover + shake ═══ */
+        @keyframes locFadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
         @keyframes locShake {
             0%, 100% { transform: translateX(0); }
             20% { transform: translateX(-2px); }
@@ -491,9 +504,21 @@
             60% { transform: translateX(-1px); }
             80% { transform: translateX(1px); }
         }
+        .loc-node {
+            animation: locFadeIn 0.4s ease-out backwards;
+        }
+        .loc-node:nth-child(2) { animation-delay: 0.05s; }
+        .loc-node:nth-child(3) { animation-delay: 0.10s; }
+        .loc-node:nth-child(4) { animation-delay: 0.12s; }
+        .loc-node:nth-child(5) { animation-delay: 0.16s; }
+        .loc-node:nth-child(6) { animation-delay: 0.20s; }
+        .loc-node:nth-child(7) { animation-delay: 0.24s; }
+        .loc-node:nth-child(8) { animation-delay: 0.28s; }
+        .loc-node:nth-child(n+9) { animation-delay: 0.32s; }
 
         .loc-node.explored:hover, .loc-node.known_mapped:hover {
             opacity: 0.7;
+            filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.5));
         }
         .loc-node.frontier:active, .loc-node.known_unmapped:not([style*="cursor"]):active {
             animation: locShake 0.3s ease;
@@ -543,15 +568,20 @@
         }
         .selection-ring {
             animation: selectionRingGrowPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.4));
         }
 
         /* ═══ PATH HIGHLIGHT — Animated dash ═══ */
         @keyframes pathDashFlow {
             to { stroke-dashoffset: -20; }
         }
+        @keyframes pathBreathe {
+            0%, 100% { stroke-opacity: 0.5; }
+            50% { stroke-opacity: 0.85; }
+        }
         .path-highlight {
             stroke-dasharray: 6 4;
-            animation: pathDashFlow 1s linear infinite;
+            animation: pathDashFlow 1s linear infinite, pathBreathe 3s ease-in-out infinite;
         }
 
         /* ═══ FLAG WAVE — GPU-friendly CSS transform (replaces SMIL path morph) ═══ */

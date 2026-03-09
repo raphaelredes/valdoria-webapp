@@ -2,6 +2,19 @@
 // NAVIGATE UI — Info panel, actions, interactions
 // ═══════════════════════════════════════════════════════
 
+// ── Cached weighted distance — avoids repeated Dijkstra on same currentLoc ──
+let _distCache = {};
+let _distCacheLoc = null;
+function cachedDist(fromId, toId) {
+    if (fromId === toId) return 0;
+    if (_distCacheLoc !== fromId) { _distCache = {}; _distCacheLoc = fromId; }
+    const key = toId;
+    if (_distCache[key] !== undefined) return _distCache[key];
+    const d = weightedDistance(fromId, toId, connectionGraph);
+    _distCache[key] = d;
+    return d;
+}
+
 // ── Haptic helper (differentiated by context) ──
 function _haptic(type) {
     try {
@@ -103,7 +116,7 @@ function handleLocationTap(locId) {
 
     // Tags (weighted distance, connections, danger hint)
     const tagsEl = document.getElementById('info-stats');
-    const wDist = weightedDistance(S.currentLoc, locId, connectionGraph);
+    const wDist = cachedDist(S.currentLoc, locId);
     const connCount = (connectionGraph[locId] || []).length;
 
     let tagsHtml = '';
@@ -559,28 +572,32 @@ function setupHoverTooltip() {
     const ttName = tt.querySelector('.tt-name');
     const ttDist = tt.querySelector('.tt-dist');
 
+    let _ttRAF = 0;
     vp.addEventListener('pointermove', e => {
         if (e.pointerType === 'touch') { tt.style.display = 'none'; return; }
-        const loc = e.target.closest?.('.loc-node');
-        if (!loc) { tt.style.display = 'none'; return; }
-        const locId = loc.getAttribute('data-loc');
-        const ld = S.locations[locId];
-        if (!ld?.n) { tt.style.display = 'none'; return; }
-        const fog = loc.classList.contains('known_unmapped') ? 'unmapped' : '';
-        ttName.textContent = fog === 'unmapped' ? '???' : ld.n;
-        const wDist = locId !== S.currentLoc ? weightedDistance(S.currentLoc, locId, connectionGraph) : -1;
-        ttDist.textContent = wDist > 0 ? `${wDist}🕐` : '';
-        tt.style.display = 'block';
-        // Position near cursor (use actual tooltip width)
-        const vpR = vp.getBoundingClientRect();
-        const ttW = tt.offsetWidth || 120;
-        let tx = e.clientX - vpR.left + 12;
-        let ty = e.clientY - vpR.top - 28;
-        if (tx + ttW > vpR.width) tx = e.clientX - vpR.left - ttW;
-        if (ty < 0) ty = e.clientY - vpR.top + 16;
-        tt.style.left = tx + 'px';
-        tt.style.top = ty + 'px';
-    });
+        if (_ttRAF) return; // throttle: max 1 update per animation frame
+        _ttRAF = requestAnimationFrame(() => {
+            _ttRAF = 0;
+            const loc = e.target.closest?.('.loc-node');
+            if (!loc) { tt.style.display = 'none'; return; }
+            const locId = loc.getAttribute('data-loc');
+            const ld = S.locations[locId];
+            if (!ld?.n) { tt.style.display = 'none'; return; }
+            const fog = loc.classList.contains('known_unmapped') ? 'unmapped' : '';
+            ttName.textContent = fog === 'unmapped' ? '???' : ld.n;
+            const wDist = locId !== S.currentLoc ? cachedDist(S.currentLoc, locId) : -1;
+            ttDist.textContent = wDist > 0 ? `${wDist}🕐` : '';
+            tt.style.display = 'block';
+            const vpR = vp.getBoundingClientRect();
+            const ttW = tt.offsetWidth || 120;
+            let tx = e.clientX - vpR.left + 12;
+            let ty = e.clientY - vpR.top - 28;
+            if (tx + ttW > vpR.width) tx = e.clientX - vpR.left - ttW;
+            if (ty < 0) ty = e.clientY - vpR.top + 16;
+            tt.style.left = tx + 'px';
+            tt.style.top = ty + 'px';
+        });
+    }, { passive: true });
     vp.addEventListener('pointerleave', () => { tt.style.display = 'none'; });
 }
 
@@ -680,7 +697,7 @@ function setupLongPress() {
             const dx = e.clientX - _lpStartX, dy = e.clientY - _lpStartY;
             if (dx * dx + dy * dy > 400) { clearTimeout(_lpTimer); _lpTimer = null; }
         }
-    });
+    }, { passive: true });
     vp.addEventListener('pointerup', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearPreview(); });
     vp.addEventListener('pointercancel', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearPreview(); });
 }
@@ -715,8 +732,8 @@ function _getCycleList() {
     const locs = S.knownLocs.filter(id => id !== S.currentLoc && LOCATION_COORDS[id]);
     // Sort by weighted distance (BFS hops), then alphabetically
     locs.sort((a, b) => {
-        const da = weightedDistance(S.currentLoc, a, connectionGraph);
-        const db = weightedDistance(S.currentLoc, b, connectionGraph);
+        const da = cachedDist(S.currentLoc, a);
+        const db = cachedDist(S.currentLoc, b);
         // Unreachable (-1) goes last
         const sa = da < 0 ? 999 : da;
         const sb = db < 0 ? 999 : db;
@@ -766,7 +783,7 @@ function openQuickList() {
             const ld = S.locations[id] || {};
             const isExp = discoveredSet.has(id);
             const isMapped = S.mapCoverage.has(id);
-            const dist = id === S.currentLoc ? -1 : weightedDistance(S.currentLoc, id, connectionGraph);
+            const dist = id === S.currentLoc ? -1 : cachedDist(S.currentLoc, id);
             return { id, ld, isExp, isMapped, dist };
         })
         .sort((a, b) => {
