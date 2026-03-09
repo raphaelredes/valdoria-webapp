@@ -576,15 +576,15 @@ function _drawBoot(ctx, ax, ay, footH, s, angle, lifting) {
 
 function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const s = 2.0;
-    // Proportions from walking reference photos
-    const headR = 5 * s;
-    const neckH = 2 * s;
-    const torsoH = 22 * s;          // shorter torso (shirt in reference is compact)
-    const thighL = 22 * s;          // shorter thigh (shorts length)
-    const shinL = 26 * s;           // longer shin (calves longer than thighs in reference)
-    const footH = 3.5 * s;
-    const armLen = 18 * s;
-    const hipSpread = 2 * s;        // legs originate offset from center
+    // Proportions: wide torso (shirt is dominant), shorter legs
+    const headR = 4.5 * s;
+    const neckH = 1.5 * s;
+    const torsoH = 26 * s;          // shirt is the largest visual element
+    const thighL = 18 * s;          // shorter (shorts cover upper thigh)
+    const shinL = 22 * s;           // calves visible below shorts
+    const footH = 3 * s;
+    const armLen = 16 * s;
+    const hipSpread = 2.5 * s;      // legs originate offset from center
     const hipY = -(footH + shinL + thighL);
     const shY  = hipY - torsoH;
     const neckY = shY - neckH;
@@ -643,20 +643,20 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
 
     // === FAR ARM (from shoulder edge, not center) ===
     const armOriginY = shY + 3 * s;
-    const armOxFar = -3 * s;  // far shoulder offset
+    const armOxFar = -5 * s;  // far shoulder edge
     const afx = armOxFar + Math.sin(aF) * armLen;
     const afy = armOriginY + Math.cos(aF) * armLen;
     _taperedLimb(ctx, armOxFar, armOriginY, afx, afy, 3.2 * s * 0.5, 2 * s * 0.5, cFar, cFarHi);
     ctx.fillStyle = '#4a3828';
     ctx.beginPath(); ctx.arc(afx, afy, 1.5 * s, 0, Math.PI * 2); ctx.fill();
 
-    // === TORSO (shorter, wider — matches reference t-shirt) ===
+    // === TORSO (wide, dominant — like shirt in reference) ===
     const tGrad = ctx.createLinearGradient(0, shY, 0, shY + torsoH);
     tGrad.addColorStop(0, '#6b5645');
     tGrad.addColorStop(0.35, '#5a4535');
     tGrad.addColorStop(1, '#4a3525');
     ctx.fillStyle = tGrad;
-    const shW = 8 * s, botW = 7 * s;
+    const shW = 10 * s, botW = 8.5 * s;  // much wider — shirt dominates silhouette
     ctx.beginPath();
     ctx.moveTo(-shW, shY);
     ctx.lineTo(shW, shY);
@@ -691,7 +691,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     leg(lN, kN, cPants, cPantsHi, false);
 
     // === NEAR ARM + STAFF (from shoulder edge) ===
-    const armOxNear = 3 * s;  // near shoulder offset
+    const armOxNear = 5 * s;  // near shoulder edge
     const ahx = armOxNear + Math.sin(aN) * armLen;
     const ahy = armOriginY + Math.cos(aN) * armLen;
     _taperedLimb(ctx, armOxNear, armOriginY, ahx, ahy, 3.8 * s * 0.5, 2.3 * s * 0.5, cTunic, cTunicHi);
@@ -718,7 +718,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.beginPath(); ctx.arc(ahx, ahy, 1.8 * s, 0, Math.PI * 2); ctx.fill();
 
     // === NECK ===
-    _taperedLimb(ctx, 0, shY, 0, neckY, 3 * s * 0.5, 2.5 * s * 0.5, '#4a3828', '#5a4838');
+    _taperedLimb(ctx, 0, shY, 0, neckY, 3.5 * s * 0.5, 2.5 * s * 0.5, '#4a3828', '#5a4838');
 
     // === HEAD ===
     ctx.fillStyle = '#3e2e1e';
