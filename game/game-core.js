@@ -18,9 +18,9 @@ const DEBOUNCE_MS = 200;
 const RETRY_MAX = 4;
 const RETRY_BASE_MS = 1000;
 const FETCH_TIMEOUT_MS = 12000; // 12s per fetch attempt (AbortController)
-const HEALTH_TIMEOUT_MS = 5000; // 5s for health check (fast fail for auto-reconnect)
-const HEALTH_RETRIES = 2;       // retry health check up to 2 times (fast fail for auto-reconnect)
-const HEALTH_RETRY_MS = 1500;   // 1.5s between health retries
+const HEALTH_TIMEOUT_MS = 3000; // 3s timeout — fast fail for instant reconnect
+const HEALTH_RETRIES = 1;       // 1 retry only — fast fail for instant reconnect
+const HEALTH_RETRY_MS = 1000;   // 1s between retries
 const LOADING_TIMEOUT_MS = 25000; // 25s max loading screen before auto-error
 const SCREEN_CACHE_KEY = 'valdoria_game_screen';
 const SCREEN_CACHE_TTL = 1800000; // 30 minutes
@@ -154,35 +154,24 @@ async function init() {
     _clog('INIT health result: ' + (healthy ? 'OK' : 'FAIL'));
     console.log('[GAME] Health check result:', healthy);
     if (!healthy) {
-        // Server unreachable — auto-reconnect via sendData so the bot sends
-        // a fresh menu with the correct tunnel URL. The player never sees
-        // the full error overlay; just a brief "Reconectando..." message.
-        _clog('INIT health failed — triggering auto-reconnect');
+        // Server unreachable (dead tunnel URL). Instantly close and ask bot
+        // for a fresh menu with the correct URL. Player sees nothing.
+        _clog('INIT health failed — instant reconnect');
         const tg = window.Telegram && window.Telegram.WebApp;
         if (tg && tg.sendData) {
-            _clog('INIT sending webapp_reconnect via sendData');
-            showLoading(true);
-            const loadMsg = document.querySelector('.loading-text, #loadingText');
-            if (loadMsg) loadMsg.textContent = 'Reconectando ao servidor...';
-            setTimeout(() => {
-                try {
-                    tg.sendData(JSON.stringify({
-                        action: 'webapp_reconnect',
-                        webapp: 'GAME',
-                    }));
-                } catch (e) {
-                    _clog('INIT sendData failed: ' + e.message);
-                    showError('Servidor indisponível. Tente novamente em alguns segundos.');
-                }
-            }, 800);
-            return;
+            _clog('INIT sendData webapp_reconnect');
+            try {
+                tg.sendData(JSON.stringify({
+                    action: 'webapp_reconnect',
+                    webapp: 'GAME',
+                }));
+                // sendData closes WebApp immediately — player sees nothing
+                return;
+            } catch (e) {
+                _clog('INIT sendData failed: ' + e.message);
+            }
         }
-        // Fallback for non-Telegram: show error overlay as before
-        const staleScreen = loadCachedScreen();
-        if (staleScreen) {
-            renderScreen(staleScreen);
-            _clog('INIT showing cached screen behind error overlay');
-        }
+        // Fallback for non-Telegram (dev): show error overlay
         showError('Servidor indisponível. Tente novamente em alguns segundos.');
         return;
     }

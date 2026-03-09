@@ -360,20 +360,19 @@ var ValdoriaErrors = (function () {
             var hintEl = document.getElementById('v-err-hint');
             if (hintEl) hintEl.textContent = 'Abrindo menu do jogo automaticamente.';
 
-            // Short delay so user sees the message
-            setTimeout(function () {
-                try {
-                    tg.sendData(JSON.stringify({
-                        action: 'webapp_reconnect',
-                        webapp: _cfg.appName,
-                    }));
-                    // sendData closes the WebApp automatically
-                } catch (e) {
-                    _clog('AUTO-RECONNECT: sendData failed: ' + e.message);
-                    // Fall through to background health polling
-                    _startBgHealthFallback();
-                }
-            }, 1500);
+            // Instant sendData — closes WebApp immediately, bot sends fresh menu
+            try {
+                tg.sendData(JSON.stringify({
+                    action: 'webapp_reconnect',
+                    webapp: _cfg.appName,
+                }));
+                // sendData closes the WebApp automatically
+                return;
+            } catch (e) {
+                _clog('AUTO-RECONNECT: sendData failed: ' + e.message);
+                // Fall through to background health polling
+                _startBgHealthFallback();
+            }
             return;
         }
 
