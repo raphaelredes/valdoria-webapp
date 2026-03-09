@@ -247,8 +247,8 @@ async function checkHealth() {
 }
 
 // ─── Health Poller (transparent retry — player sees loading, never error) ───
-const HEALTH_POLL_INTERVAL = 3000;   // 3s between polls
-const HEALTH_POLL_MAX = 20;          // Max 60s of polling before giving up
+const HEALTH_POLL_INTERVAL = 2000;   // 2s between polls
+const HEALTH_POLL_MAX = 5;           // Max 10s of polling before sendData reconnect
 
 async function _waitForHealthy() {
     // First try: direct health check
