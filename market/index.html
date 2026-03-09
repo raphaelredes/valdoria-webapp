@@ -795,6 +795,10 @@
                                 method: 'POST', headers: h,
                                 body: JSON.stringify({ from: 'market', to: returnTo, user_id: parseInt(uid), payload: {} })
                             });
+                            if (r.status === 401 || r.status === 403) {
+                                console.error('[MARKET] Auth error on transition:', r.status);
+                                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'MARKET', reason: 'session_expired' })); return; }
+                            }
                             const d = await r.json();
                             if (d.url) {
                                 window.location.replace(d.url);
@@ -1426,6 +1430,13 @@
                         method: 'POST', headers: _ch,
                         body: JSON.stringify({ user_id: parseInt(_apiUid), token, ops })
                     });
+                    if (resp.status === 401 || resp.status === 403) {
+                        console.error('[MARKET] Auth error on apply:', resp.status);
+                        if (tg?.sendData) {
+                            tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'MARKET', reason: 'session_expired' }));
+                            return;
+                        }
+                    }
                     if (resp.ok) {
                         console.log('[MARKET] Transaction submitted via API');
                         setTimeout(() => { try { tg?.close(); } catch (e) { } }, 300);

@@ -1925,6 +1925,11 @@ async function _performExit() {
                     payload: {}
                 }),
             });
+            if (resp.status === 401 || resp.status === 403) {
+                console.error('[INVENTORY] Auth error on transition:', resp.status);
+                const tg = window.Telegram?.WebApp;
+                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' })); return; }
+            }
             if (resp.ok) {
                 const data = await resp.json();
                 if (data.url) {
@@ -1983,6 +1988,17 @@ async function _sendViaAPI(overlay) {
             body: JSON.stringify({ user_id: _apiUid, ops: pendingOps }),
         });
         clearTimeout(_tid);
+        if (resp.status === 401 || resp.status === 403) {
+            console.error('[INVENTORY] Auth error on apply:', resp.status);
+            overlay.classList.add('hidden');
+            const tg = window.Telegram?.WebApp;
+            if (tg?.sendData) {
+                tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' }));
+                return;
+            }
+            toast(`${vi('warn', 13)} Sessão expirada. Feche e reabra.`, 'err');
+            return;
+        }
         const result = await resp.json();
         if (resp.ok && result.ok) {
             pendingOps = [];
@@ -2424,6 +2440,11 @@ async function _transitionTo(target, payload = {}) {
                     payload,
                 }),
             });
+            if (resp.status === 401 || resp.status === 403) {
+                console.error('[INVENTORY] Auth error on transition:', resp.status);
+                const tg = window.Telegram?.WebApp;
+                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' })); return; }
+            }
             if (resp.ok) {
                 const data = await resp.json();
                 if (data.url) {

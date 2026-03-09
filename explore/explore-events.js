@@ -710,6 +710,15 @@ async function transitionToArena() {
                 body: JSON.stringify(body)
             }, 10000);
 
+            if (resp.status === 401 || resp.status === 403) {
+                console.error('[EXPLORE] Auth error on combat transition:', resp.status);
+                const tg = window.Telegram?.WebApp;
+                if (tg?.sendData) {
+                    tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'EXPLORE', reason: 'session_expired' }));
+                    return;
+                }
+                break; // stop retrying on auth error
+            }
             if (resp.ok) {
                 const data = await resp.json();
                 if (data.url) {
@@ -756,6 +765,15 @@ async function transitionToInventory() {
                 body: JSON.stringify(body)
             }, 10000);
 
+            if (resp.status === 401 || resp.status === 403) {
+                console.error('[EXPLORE] Auth error on inventory transition:', resp.status);
+                const tg = window.Telegram?.WebApp;
+                if (tg?.sendData) {
+                    tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'EXPLORE', reason: 'session_expired' }));
+                    return;
+                }
+                break;
+            }
             if (resp.ok) {
                 const data = await resp.json();
                 if (data.url) {
@@ -2486,6 +2504,14 @@ async function _transitionToGameFromExplore(payload) {
                     payload: { results: payload.results }
                 })
             }, 10000);
+            if (r.status === 401 || r.status === 403) {
+                console.error('[EXPLORE] Auth error on game transition:', r.status);
+                if (window.Telegram?.WebApp?.sendData) {
+                    Telegram.WebApp.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'EXPLORE', reason: 'session_expired' }));
+                    return;
+                }
+                break;
+            }
             const d = await r.json();
             if (d.url) { window.location.replace(d.url); return; }
         } catch (e) { console.error('[EXPLORE] transition error (attempt ' + attempt + '):', e); }
@@ -2509,6 +2535,14 @@ async function _transitionToNavigateFromExplore(payload) {
                     payload: { results: payload.results }
                 })
             }, 10000);
+            if (r.status === 401 || r.status === 403) {
+                console.error('[EXPLORE] Auth error on navigate transition:', r.status);
+                if (window.Telegram?.WebApp?.sendData) {
+                    Telegram.WebApp.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'EXPLORE', reason: 'session_expired' }));
+                    return;
+                }
+                break;
+            }
             const d = await r.json();
             if (d.url) { window.location.replace(d.url); return; }
         } catch (e) { console.error('[EXPLORE] navigate transition error (attempt ' + attempt + '):', e); }

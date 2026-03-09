@@ -82,6 +82,16 @@ function handleTransition(transition) {
     setTimeout(() => {
         window.location.replace(transition.url);
     }, delay);
+
+    // Safety net: reset transitioning flag after 10s in case redirect fails
+    setTimeout(() => {
+        if (S.transitioning) {
+            console.warn('[GAME] Transition safety timeout — resetting flag');
+            S.transitioning = false;
+            if (overlay) { overlay.style.display = 'none'; overlay.classList.remove('active'); }
+            if (typeof hideLocationTransition === 'function') hideLocationTransition();
+        }
+    }, delay + 10000);
 }
 
 /**
