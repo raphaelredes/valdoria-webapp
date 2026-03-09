@@ -105,7 +105,18 @@ const Dice3D = (() => {
             new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity: 0.5 })));
     }
 
+    function computeLabelUp(n) {
+        var worldUp = new THREE.Vector3(0, 1, 0);
+        var faceUp = worldUp.clone().addScaledVector(n, -worldUp.dot(n));
+        if (faceUp.lengthSq() < 0.001) {
+            faceUp = new THREE.Vector3(1, 0, 0).addScaledVector(n,
+                -new THREE.Vector3(1, 0, 0).dot(n));
+        }
+        return faceUp.normalize();
+    }
+
     function addLabels(mesh, numbers, centers, normals, labelSize) {
+        var labelUps = [];
         for (var i = 0; i < numbers.length; i++) {
             var tex = makeLabelTexture(numbers[i], 256);
             var mat = new THREE.MeshBasicMaterial({
@@ -115,18 +126,15 @@ const Dice3D = (() => {
             var n = normals[i];
             plane.position.copy(centers[i].clone().add(n.clone().multiplyScalar(0.01)));
 
-            var worldUp = new THREE.Vector3(0, 1, 0);
-            var faceUp = worldUp.clone().addScaledVector(n, -worldUp.dot(n));
-            if (faceUp.lengthSq() < 0.001) {
-                faceUp = new THREE.Vector3(1, 0, 0).addScaledVector(n,
-                    -new THREE.Vector3(1, 0, 0).dot(n));
-            }
-            faceUp.normalize();
+            var faceUp = computeLabelUp(n);
+            labelUps.push(faceUp.clone());
             var faceRight = new THREE.Vector3().crossVectors(faceUp, n).normalize();
             plane.rotation.setFromRotationMatrix(
                 new THREE.Matrix4().makeBasis(faceRight, faceUp, n));
             mesh.add(plane);
         }
+        // Store label up directions for upright orientation calculation
+        if (!mesh.userData.labelUps) mesh.userData.labelUps = labelUps;
     }
 
     function facesFromTris(geo, count) {
@@ -388,10 +396,27 @@ const Dice3D = (() => {
             normals[faceIdx].clone(),
             new THREE.Vector3(0, 0, 1)
         );
-        // Twist around Z — d6/result use 90° snaps to keep edges aligned
+
         var twistAngle;
         if (dieType === 'd6' || dieType === 'result') {
-            twistAngle = Math.floor(Math.random() * 4) * (Math.PI / 2);
+            // D6/result: pick the 90° snap that keeps the result face label upright
+            var screenUp = new THREE.Vector3(0, 1, 0);
+            var labelUps = mesh.userData.labelUps;
+            // Use the label up direction for the specific result face
+            var labelUp = labelUps ? labelUps[faceIdx].clone() : new THREE.Vector3(0, 1, 0);
+            var bestAngle = 0;
+            var bestDot = -2;
+            for (var ci = 0; ci < 4; ci++) {
+                var angle = ci * (Math.PI / 2);
+                var testQ = new THREE.Quaternion().setFromAxisAngle(
+                    new THREE.Vector3(0, 0, 1), angle
+                ).multiply(alignQ.clone());
+                // Transform label up through candidate rotation to screen space
+                var upDir = labelUp.clone().applyQuaternion(testQ);
+                var dot = upDir.dot(screenUp);
+                if (dot > bestDot) { bestDot = dot; bestAngle = angle; }
+            }
+            twistAngle = bestAngle;
         } else {
             twistAngle = Math.random() * Math.PI * 2;
         }

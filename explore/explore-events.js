@@ -794,7 +794,7 @@ function showBossEncounter() {
         <div class="event-content" style="text-align:center">
             <div style="font-size:18px;margin:12px 0;color:#c4953a;font-weight:bold">GUARDIÃO</div>
             <div style="font-size:18px;font-weight:bold;color:#c4953a;margin-bottom:8px">${boss.en || 'Guardião'}</div>
-            <div style="font-size:13px;color:#b0b8c0;margin-bottom:16px;line-height:1.4">${boss.n || 'Um guardião bloqueia a saída!'}</div>
+            <div style="font-size:13px;color:var(--v-text-dim, #a09484);margin-bottom:16px;line-height:1.4">${boss.n || 'Um guardião bloqueia a saída!'}</div>
             <div id="boss-choices" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>`;
 
@@ -815,24 +815,28 @@ function showBossEncounter() {
     stealthBtn.className = 'v-btn';
     stealthBtn.innerHTML = `Esgueirar <span style="font-size:11px;opacity:0.7">(${Math.round(stealthChance)}%)</span>`;
     stealthBtn.onclick = () => {
-        const roll = rollD20('normal');
+        const { roll } = rollD20('normal');
         const total = roll + stealthMod;
         if (total >= stealthDC) {
+            const successText = 'Você passa sem ser notado!';
             overlay.innerHTML = `<div class="event-content" style="text-align:center">
                 <div style="font-size:28px;margin:20px 0;color:#6a8">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
-                <div style="color:#6a8;font-size:16px">Você passa sem ser notado!</div></div>`;
+                <div style="color:#6a8;font-size:16px">${successText}</div></div>`;
             S._bossDefeated = true; saveState();
             S.xpEarned += 10;
-            setTimeout(() => { overlay.classList.remove('active'); _showPortalSummary(); }, 2000);
+            const delay = typeof calcReadTime === 'function' ? calcReadTime(successText, 'overlay') : 2000;
+            setTimeout(() => { overlay.classList.remove('active'); _showPortalSummary(); }, delay);
         } else {
+            const failText = 'Detectado! O guardião ataca!';
             overlay.innerHTML = `<div class="event-content" style="text-align:center">
                 <div style="font-size:28px;margin:20px 0;color:#a66">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
-                <div style="color:#a66;font-size:16px">Detectado! O guardião ataca!</div></div>`;
+                <div style="color:#a66;font-size:16px">${failText}</div></div>`;
             S._bossDefeated = true; saveState();
+            const delay = typeof calcReadTime === 'function' ? calcReadTime(failText, 'overlay') : 2000;
             setTimeout(() => {
                 overlay.classList.remove('active');
                 triggerCombat({ combat: { en: boss.en, ei: boss.ei, b: boss.b || S.biome, d: boss.d || S.dangerLevel } });
-            }, 2000);
+            }, delay);
         }
     };
     choicesDiv.appendChild(stealthBtn);
@@ -873,7 +877,9 @@ function _showPortalSummary() {
         finishExploration('finished');
     };
     setTimeout(() => { if (!_portalDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishPortal; } }, 500);
-    setTimeout(finishPortal, 2500);
+    const summaryText = summary.textContent || '';
+    const portalDelay = typeof calcReadTime === 'function' ? calcReadTime(summaryText, 'summary') : 2500;
+    setTimeout(finishPortal, portalDelay);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1834,6 +1840,20 @@ const RETURN_NARRATIONS = {
         'O vento uiva entre os pinheiros, levantando redemoinhos de neve que reduzem a visibilidade. Você se abaixa e avança, usando as árvores como abrigo. Entre as rajadas, consegue vislumbrar a trilha descendo — sinal de que está deixando as alturas nevadas.',
         'Cristais de gelo brilham como diamantes sob a fraca luz do sol que rompe as nuvens. A paisagem é de uma beleza cruel — esplêndida aos olhos, mortal para quem se perde. Você confere suas marcações e segue em frente, os olhos fixos no caminho.',
     ],
+    volcanic: [
+        'O chão estremece sob seus pés enquanto geysers de vapor irrompem das fendas. O ar é denso, carregado de enxofre e cinzas que irritam os olhos. Cada passo é uma negociação com a terra instável — mas a trilha de obsidiana oferece passagem segura.',
+        'Rios de lava serpenteiam ao longe, pintando o horizonte de laranja e vermelho. O calor é opressivo mesmo a esta distância. Você segue as pedras marcadas com runas de proteção, deixadas por desbravadores que mapearam esta rota vulcânica.',
+        'Cristais de enxofre brilham como joias tóxicas entre as rochas negras. A beleza mortal do vulcão é hipnotizante, mas o tremor constante sob seus pés é um lembrete implacável: esta terra está viva e não tolera intrusos demorados.',
+        'Cinzas vulcânicas cobrem o caminho como neve negra, abafando seus passos. No horizonte, a silhueta escura do vulcão se recorta contra um céu avermelhado. A cada metro que se afasta, o ar fica mais respirável e a temperatura cede.',
+        'Uma ponte natural de basalto cruza uma fissura fumegante. O calor que sobe queima o rosto, mas a rocha é sólida. Do outro lado, a vegetação começa a reaparecer — sinal de que está deixando o domínio do vulcão para trás.',
+    ],
+    graveyard: [
+        'Lápides tortas e cruzes apodrecidas pontilham o caminho como sentinelas silenciosas. A névoa se agarra ao chão, ocultando raízes e pedras soltas. Você caminha entre os mortos com respeito cauteloso — neste lugar, respeito pode salvar vidas.',
+        'Corvos observam sua passagem dos galhos secos de árvores mortas. Seus olhos negros e brilhantes seguem cada movimento. O silêncio é antinatural — nem insetos ousam cantar neste solo amaldiçoado. Apenas seus passos quebram a quietude.',
+        'A terra aqui tem uma qualidade estranha — macia demais, como se recusasse ser pisada. Mausoléus de pedra erguem-se entre a névoa, seus portões de ferro enferrujados rangendo com o vento. Algo sussurra, mas são apenas folhas secas. Provavelmente.',
+        'Uma trilha de pedras brancas — ossos, percebe com um calafrio — guia seu caminho entre túmulos antigos. As inscrições são ilegíveis, gastas pelo tempo. Mas as flores murchas recentes indicam que alguém ainda visita os mortos. Ou algo.',
+        'A névoa se abre por um instante, revelando os muros distantes de Eldoria além do cemitério. A promessa de civilização acelera seus passos. Atrás de você, jura ouvir um suspiro — mas quando olha, há apenas pedras e silêncio.',
+    ],
     _default: [
         'A estrada se estende à sua frente, seus paralelepípedos gastos por mil viajantes. Cada passo aproxima você da segurança dos muros de Eldoria. O peso da exploração se faz sentir nos ombros, mas a determinação mantém seus pés firmes na trilha.',
         'O terreno familiar traz um certo alívio — você reconhece uma árvore marcada, uma curva na estrada. Estas terras já não são desconhecidas. Sons de civilização começam a se misturar com os sons da natureza: um carro distante, vozes abafadas.',
@@ -1923,6 +1943,28 @@ const RETURN_HAZARDS = {
         { icon: '', title: 'Lago Congelado', narr: 'A trilha cruza um lago congelado sem caminho ao redor. O gelo geme e rachaduras se espalham como veias sob a superfície. Água negra se move lá embaixo.', choices: [
             { i: '', t: 'Distribuir o peso', k: { s: 'dex', dc: 13 }, sNarr: 'De bruços, você distribui o peso e desliza sobre o gelo. Cada estalo faz seu coração parar, mas alcança o outro lado.', fNarr: 'O gelo racha sob você com um estampido! Água gelada invade até a cintura. O choque térmico é brutal.', fDmg: 6 },
             { i: '', t: 'Contornar pela margem', k: { s: 'wis', dc: 11 }, sNarr: 'Nas bordas, pedras se projetam sobre o lago. Pulando de rocha em rocha, cruza sem tocar o gelo.', fNarr: 'A margem é tão frágil quanto o centro. Uma placa de gelo costeiro cede e você afunda na água congelante.', fDmg: 4 },
+        ]},
+    ],
+    volcanic: [
+        { icon: '', title: 'Fissura de Lava', narr: 'O chão racha diante de seus pés com um estampido! Uma fissura se abre revelando lava incandescente metros abaixo. O calor é insuportável e a rachadura está se alargando.', choices: [
+            { i: '', t: 'Saltar sobre a fissura', k: { s: 'dex', dc: 13 }, sNarr: 'Com um salto potente, você cruza a fissura antes que ela se alargue. Seus pés aterrissam firmes do outro lado.', fNarr: 'A fissura era mais larga do que parecia! Você quase não alcança a borda, raspando as pernas na rocha incandescente.', fDmg: 6 },
+            { i: '', t: 'Contornar pelas rochas', k: { s: 'wis', dc: 11 }, sNarr: 'Seus olhos identificam rochas estáveis que formam um desvio natural. O caminho é mais longo, mas seguro.', fNarr: 'As rochas que pareciam estáveis cedem sob o calor! Você pisa em falso e o vapor queima seu tornozelo.', fDmg: 4 },
+            { i: '', t: 'Resistir ao calor e cruzar', k: { s: 'cn', dc: 12 }, sNarr: 'Protegendo o rosto, você atravessa a zona de calor com determinação. Sua pele arde, mas você resiste.', fNarr: 'O calor é demais! Suas roupas fumegam e queimaduras marcam seus braços antes de conseguir se afastar.', fDmg: 5 },
+        ]},
+        { icon: '', title: 'Chuva de Cinzas', narr: 'O vulcão cospe uma coluna de fumaça negra e cinzas começam a cair como neve sombria. A visibilidade cai rapidamente e o ar se torna irrespirável. Pedras incandescentes ricocheteiam ao longe.', choices: [
+            { i: '', t: 'Cobrir-se e avançar', k: { s: 'cn', dc: 12 }, sNarr: 'Com pano sobre o rosto e passos firmes, você atravessa a cortina de cinzas. Seus pulmões ardem, mas resiste.', fNarr: 'As cinzas penetram toda proteção improvisada. Tosse violenta e olhos cegados pela fuligem. Tropeços se seguem.', fDmg: 4 },
+            { i: '', t: 'Buscar abrigo rochoso', k: { s: 'int', dc: 11 }, sNarr: 'Você identifica uma formação rochosa que protege do impacto direto. Abrigado, espera a pior fase passar.', fNarr: 'O abrigo que escolheu canaliza as cinzas como uma chaminé! O ar fica pior do que ao ar livre.', fDmg: 3 },
+        ]},
+    ],
+    graveyard: [
+        { icon: '', title: 'Mãos da Terra', narr: 'A terra macia do cemitério se agita ao redor de seus pés! Dedos esqueléticos irrompem do solo, agarrando seus tornozelos. Os mortos não descansam aqui — e não querem que você parta.', choices: [
+            { i: '', t: 'Libertar-se à força', k: { s: 'str', dc: 12 }, sNarr: 'Com um puxão violento, você arranca seus pés das garras mortas. Ossos se quebram e a terra se acalma.', fNarr: 'As mãos são mais fortes do que parecem! Unhas de osso rasgam sua pele antes que consiga se libertar.', fDmg: 5 },
+            { i: '', t: 'Invocar fé ou vontade', k: { s: 'cha', dc: 11 }, sNarr: 'Sua voz firme ecoa entre as lápides. As mãos recuam, como se reconhecessem uma autoridade que não podem desafiar.', fNarr: 'Sua voz falha — o medo é mais forte. As garras apertam enquanto você gagueja, e arranhões profundos marcam suas pernas.', fDmg: 4 },
+            { i: '', t: 'Desviar com agilidade', k: { s: 'dex', dc: 13 }, sNarr: 'Passos rápidos e leves sobre as sepulturas — você dança entre as mãos emergentes como um fantasma.', fNarr: 'Uma mão que você não viu agarra seu tornozelo no meio do passo. A queda é pesada sobre lápides afiadas.', fDmg: 5 },
+        ]},
+        { icon: '', title: 'Névoa dos Lamentos', narr: 'Uma névoa densa e gélida desce sobre o cemitério. Nela, vozes sussurram seu nome, chamando você para mais fundo entre os túmulos. A desorientação é quase instantânea.', choices: [
+            { i: '', t: 'Manter a mente firme', k: { s: 'wis', dc: 12 }, sNarr: 'Você fecha os olhos e recita marcações mentais do caminho. A névoa tenta confundir, mas seu senso de orientação prevalece.', fNarr: 'Os sussurros são hipnóticos. Quando percebe, está em um canto desconhecido do cemitério, gelado e exausto.', fDmg: 3 },
+            { i: '', t: 'Correr para fora da névoa', k: { s: 'cn', dc: 11 }, sNarr: 'Prendendo a respiração, você sprint através da névoa gélida. O frio morde, mas você emerge do outro lado.', fNarr: 'O frio sobrenatural drena suas forças. Seus joelhos cedem e você rasteja até sair da névoa, trêmulo e fraco.', fDmg: 4 },
         ]},
     ],
     _default: [
