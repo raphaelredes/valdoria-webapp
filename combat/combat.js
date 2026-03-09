@@ -246,13 +246,11 @@ async function loadCombatState() {
         console.error('[COMBAT]', 'Erro ao carregar', e);
         // Distinguish "server down" from "session invalid" via health check
         const health = await api.checkHealth();
-        // Detect tunnel URL change — reload with new URL
+        // Detect tunnel URL change — update in memory (reload would break initData)
         if (health.api && health.api !== api.base) {
-            console.warn('[COMBAT] Tunnel URL changed, reloading with new URL');
-            const params = new URLSearchParams(window.location.search);
-            params.set('api', health.api);
-            window.location.replace(window.location.pathname + '?' + params.toString());
-            return;
+            console.log('[COMBAT] Tunnel URL changed, updating apiBase in memory');
+            api.base = health.api;
+            if (window.ApiDiscovery) ApiDiscovery.updateBase(health.api);
         }
         if (health.status === 'unreachable') {
             document.getElementById('app').innerHTML = '<div class="no-data"><h2>Servidor Indisponível</h2><p>O servidor de combate não está respondendo. Tente novamente em alguns segundos.</p></div>';
@@ -1102,11 +1100,10 @@ function startPolling() {
                 try {
                     const health = await api.checkHealth();
                     if (health.api && health.api !== api.base) {
-                        console.warn('[COMBAT] Tunnel URL changed, reloading');
-                        const params = new URLSearchParams(window.location.search);
-                        params.set('api', health.api);
-                        window.location.replace(window.location.pathname + '?' + params.toString());
-                        return; // don't reschedule poll
+                        console.log('[COMBAT] Tunnel URL changed, updating apiBase in memory');
+                        api.base = health.api;
+                        if (window.ApiDiscovery) ApiDiscovery.updateBase(health.api);
+                        _pollFailures = 0; // reset — new URL may work
                     }
                     if (health.status === 'unreachable') {
                         showError('Servidor indisponível. Tente novamente.');

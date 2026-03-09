@@ -2605,11 +2605,9 @@ async function _exploreHealthCheck() {
                 if (data.status === 'ok' && data.engine) {
                     // Detect tunnel URL change — reload with new URL
                     if (data.api && S.apiBase && data.api !== S.apiBase) {
-                        console.warn('[EXPLORE] Tunnel URL changed, reloading');
-                        const params = new URLSearchParams(window.location.search);
-                        params.set('api', data.api);
-                        window.location.replace(window.location.pathname + '?' + params.toString());
-                        return false;
+                        console.log('[EXPLORE] Tunnel URL changed, updating apiBase in memory');
+                        S.apiBase = data.api;
+                        if (window.ApiDiscovery) ApiDiscovery.updateBase(data.api);
                     }
                     return true;
                 }

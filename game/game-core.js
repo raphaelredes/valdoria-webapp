@@ -233,11 +233,10 @@ async function checkHealth() {
                 // Detect tunnel URL change — server reports a different API base
                 if (data.api && S.apiBase && data.api !== S.apiBase) {
                     _clog(`HEALTH: tunnel URL changed! ${S.apiBase} -> ${data.api}`);
-                    console.warn('[GAME] Tunnel URL changed, reloading with new URL');
-                    const params = new URLSearchParams(window.location.search);
-                    params.set('api', data.api);
-                    window.location.replace(window.location.pathname + '?' + params.toString());
-                    return false; // will reload
+                    console.log('[GAME] Tunnel URL changed, updating apiBase in memory');
+                    S.apiBase = data.api;
+                    if (window.ApiDiscovery) ApiDiscovery.updateBase(data.api);
+                    if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) ValdoriaErrors.updateApiBase(data.api);
                 }
                 return true;
             }
