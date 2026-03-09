@@ -60,6 +60,11 @@ async function initAsync() {
             ValdoriaErrors.init({ appName: 'NAVIGATE', apiBase: S.api, token: S.token, uid: S.uid });
         }
 
+        // Periodic tunnel URL discovery
+        if (S.api && window.ApiDiscovery) {
+            ApiDiscovery.init(S.api, function(newUrl) { S.api = newUrl; });
+        }
+
         let dataB64 = params.get('data') || '';
 
         // If URL data param is missing, fetch from API (robust fallback)

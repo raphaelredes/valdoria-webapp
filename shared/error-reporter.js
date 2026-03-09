@@ -302,13 +302,13 @@ var ValdoriaErrors = (function () {
         var url = _cfg.apiBase + '/api/game/health';
         _clog('RETRY health check...');
         _checkHealthForUrlChange(url).then(function (changed) {
-            if (changed) return; // _reloadWithNewApi already called
+            if (changed) return; // _reloadWithNewApi already handled
             var overlay = document.getElementById('v-err-overlay');
             if (overlay) overlay.style.display = 'none';
             if (_cfg.onRetry) {
                 _cfg.onRetry();
             } else {
-                window.location.reload();
+                _sendCloseAndReturn();
             }
         });
     }
@@ -333,13 +333,15 @@ var ValdoriaErrors = (function () {
     var _BG_HEALTH_MAX_POLLS = 12;   // 12 * 15s = 3 min then give up (tunnel URL likely changed)
 
     function _reloadWithNewApi(newApi) {
-        // Replace the api= parameter in the current URL and reload
-        _clog('RELOAD with new API: ' + newApi);
-        var loc = window.location;
-        var params = new URLSearchParams(loc.search);
-        params.set('api', newApi);
-        var newUrl = loc.pathname + '?' + params.toString();
-        window.location.replace(newUrl);
+        // Update apiBase in memory — never reload (breaks Telegram initData HMAC)
+        _clog('API URL updated in memory: ' + _cfg.apiBase + ' -> ' + newApi);
+        _cfg.apiBase = newApi;
+        if (window.ApiDiscovery) ApiDiscovery.updateBase(newApi);
+        // Hide error overlay and retry with new URL
+        _retryAttempt = 0;
+        var overlay = document.getElementById('v-err-overlay');
+        if (overlay) overlay.style.display = 'none';
+        if (_cfg.onRetry) _cfg.onRetry();
     }
 
     function _autoReconnect() {
@@ -464,7 +466,7 @@ var ValdoriaErrors = (function () {
                     var overlay = document.getElementById('v-err-overlay');
                     if (overlay) overlay.style.display = 'none';
                     if (_cfg.onRetry) { _cfg.onRetry(); }
-                    else { window.location.reload(); }
+                    else { _sendCloseAndReturn(); }
                 }
             }).catch(function () { /* still down */ });
         }, _BG_HEALTH_INTERVAL);

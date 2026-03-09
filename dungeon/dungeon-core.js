@@ -56,6 +56,11 @@ async function initDungeon() {
             ValdoriaErrors.init({ appName: 'DUNGEON', apiBase: S.api, token: S.token, uid: S.uid });
         }
 
+        // Periodic tunnel URL discovery
+        if (S.api && window.ApiDiscovery) {
+            ApiDiscovery.init(S.api, function(newUrl) { S.api = newUrl; });
+        }
+
         const dataB64 = params.get('data') || '';
 
         if (!dataB64) {

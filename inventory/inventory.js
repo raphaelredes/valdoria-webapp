@@ -1870,10 +1870,15 @@ function formatOp(op) {
 
 // ── API communication (fetch mode) ──
 const _urlParams = new URLSearchParams(location.search);
-const _apiBase = _urlParams.get('api') || '';
+let _apiBase = _urlParams.get('api') || '';
 const _apiToken = _urlParams.get('token') || '';
 const _apiUid = _urlParams.get('uid') || '';
 const _returnTo = _urlParams.get('return') || '';  // 'game', 'explore', 'combat' or empty (close)
+
+// Periodic tunnel URL discovery
+if (_apiBase && window.ApiDiscovery) {
+    ApiDiscovery.init(_apiBase, function(newUrl) { _apiBase = newUrl; });
+}
 const _combatMode = _urlParams.get('combat') === '1';
 
 async function _navigateBack() {
