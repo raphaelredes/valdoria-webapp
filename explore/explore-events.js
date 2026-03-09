@@ -592,17 +592,76 @@ function triggerCombat(poi) {
     setTimeout(finishCombat, 2000);
 }
 
-// Post-combat narrative (brief toast after returning from combat)
-function showPostCombatNarrative() {
-    const lines = [
+// Post-combat narrative (brief toast after returning from combat, biome-aware)
+const POST_COMBAT_NARRATIONS = {
+    forest: [
+        'O silêncio retorna à floresta. Pássaros voltam a cantar.',
+        'Folhas caem sobre o campo de batalha como um véu fúnebre.',
+        'A mata aceita sua vitória em silêncio. Você segue adiante.',
+        'O aroma de musgo substitui o cheiro de batalha.',
+        'Galhos quebrados marcam o local do combate. Você segue em frente.',
+    ],
+    plains: [
+        'O vento varre o campo, levando consigo os ecos da luta.',
+        'A grama alta se endireita lentamente onde pisaram.',
+        'O horizonte permanece imutável — a planície já esqueceu.',
+        'Uma brisa fresca seca o suor da batalha no seu rosto.',
+    ],
+    swamp: [
+        'A lama engole os vestígios do combate lentamente.',
+        'O pântano retoma seu silêncio úmido e opressivo.',
+        'Bolhas sobem da água turva — o pântano digerindo os restos.',
+        'Sapos voltam a coaxar. O perigo passou, por enquanto.',
+    ],
+    cave: [
+        'O eco da batalha reverbera e se perde nos túneis escuros.',
+        'Sua tocha vacila, mas se firma. A caverna está segura.',
+        'Pingos de água retomam seu ritmo constante na escuridão.',
+        'O silêncio subterrâneo retorna, pesado como pedra.',
+    ],
+    desert: [
+        'A areia cobre rapidamente as marcas do combate.',
+        'O calor implacável do deserto não dá trégua após a luta.',
+        'Abutres circulam ao longe — atraídos pelo cheiro de batalha.',
+        'O vento sopra areia sobre os rastros. O deserto esquece rápido.',
+    ],
+    mountain: [
+        'O vento gélido seca o suor da batalha nos seus ossos.',
+        'Pedras soltas pelo combate rolam encosta abaixo.',
+        'A montanha é indiferente à sua vitória. Você segue escalando.',
+        'O eco do combate se perde entre os picos distantes.',
+    ],
+    snow: [
+        'Neve fresca começa a cobrir as marcas da luta.',
+        'O frio penetra os cortes — você precisa se mover.',
+        'Flocos de neve caem sobre o campo de batalha em silêncio.',
+        'O branco imaculado já oculta os vestígios do combate.',
+    ],
+    volcanic: [
+        'O calor sufocante retorna como se nada tivesse acontecido.',
+        'Cinzas vulcânicas pousam sobre os restos da batalha.',
+        'A terra treme brevemente — a montanha segue viva.',
+        'O cheiro de enxofre se mistura ao aço e sangue.',
+    ],
+    graveyard: [
+        'Os mortos voltam ao seu repouso inquieto. Por enquanto.',
+        'A névoa se fecha sobre o local da batalha como uma mortalha.',
+        'Sussurros se calam entre as lápides. O silêncio pesa.',
+        'Corvos retornam aos seus postos como sentinelas da morte.',
+    ],
+    _default: [
         'A poeira assenta. Você respira fundo e segue adiante.',
         'O silêncio retorna ao redor. Você recupera o fôlego.',
         'A ameaça foi neutralizada. A trilha está livre.',
         'Com a vitória, sua confiança cresce.',
         'Após a batalha, você examina os arredores com cautela.',
-    ];
+    ],
+};
+
+function showPostCombatNarrative() {
+    const lines = POST_COMBAT_NARRATIONS[S.biome] || POST_COMBAT_NARRATIONS._default;
     const text = lines[Math.floor(Math.random() * lines.length)];
-    showTerrainToast(text, 'ranger');
+    showTerrainToast(text, 'flavor');
 }
 
 // ═══════════════════════════════════════════════════════
