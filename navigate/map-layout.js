@@ -146,8 +146,12 @@ function weightedDistance(fromId, toId, connections) {
     queue.push([0, fromId]);
 
     while (queue.length > 0) {
-        queue.sort((a, b) => a[0] - b[0]);
-        const [d, current] = queue.shift();
+        // Linear scan for min — faster than sort() for small graphs (~18 nodes)
+        let minIdx = 0;
+        for (let i = 1; i < queue.length; i++) {
+            if (queue[i][0] < queue[minIdx][0]) minIdx = i;
+        }
+        const [d, current] = queue.splice(minIdx, 1)[0];
         if (current === toId) return d;
         if (visited.has(current)) continue;
         visited.add(current);

@@ -319,24 +319,21 @@ function highlightSelected(locId) {
     clearHighlight();
 
     const svg = document.getElementById('map-svg');
-    const groups = svg.querySelectorAll('.loc-node');
-    for (const g of groups) {
-        if (g.getAttribute('data-loc') === locId) {
-            g.classList.add('selected');
-            const coords = LOCATION_COORDS[locId];
-            if (coords) {
-                const { x, y } = hexToPixel(coords.col, coords.row);
-                const ring = createSVG('circle', {
-                    cx: x, cy: y,
-                    r: HEX_RADIUS + 5,
-                    fill: 'none',
-                    stroke: '#c4953a',
-                    'stroke-width': 2,
-                    'stroke-opacity': 0.6,
-                    class: 'selection-ring',
-                });
-                svg.appendChild(ring);
-            }
+    const node = svg.querySelector(`.loc-node[data-loc="${locId}"]`);
+    if (node) {
+        node.classList.add('selected');
+        const coords = LOCATION_COORDS[locId];
+        if (coords) {
+            const { x, y } = hexToPixel(coords.col, coords.row);
+            svg.appendChild(createSVG('circle', {
+                cx: x, cy: y,
+                r: HEX_RADIUS + 5,
+                fill: 'none',
+                stroke: '#c4953a',
+                'stroke-width': 2,
+                'stroke-opacity': 0.6,
+                class: 'selection-ring',
+            }));
         }
     }
 
@@ -359,6 +356,7 @@ function highlightPath(fromId, toId) {
     if (!pathIds || pathIds.length < 2) return;
 
     const svg = document.getElementById('map-svg');
+    const frag = document.createDocumentFragment();
 
     for (let i = 0; i < pathIds.length - 1; i++) {
         const aCoords = LOCATION_COORDS[pathIds[i]];
@@ -370,7 +368,7 @@ function highlightPath(fromId, toId) {
         const seed = (aCoords.col * 31 + aCoords.row * 17 + bCoords.col * 13 + bCoords.row * 7);
         const pathD = _buildRoadPath(aPx, bPx, seed);
 
-        const highlight = createSVG('path', {
+        frag.appendChild(createSVG('path', {
             d: pathD,
             fill: 'none',
             stroke: '#c4953a',
@@ -378,9 +376,9 @@ function highlightPath(fromId, toId) {
             'stroke-opacity': 0.5,
             'stroke-linecap': 'round',
             class: 'path-highlight',
-        });
-        svg.appendChild(highlight);
+        }));
     }
+    svg.appendChild(frag);
 }
 
 // ── Travel animation (path drawing + marker movement) ──
@@ -846,11 +844,7 @@ function _initUIExtras() {
     setupSwipeDismiss();
     setupLongPress();
     _setupCycleButtons();
-    const wr = document.getElementById('map-wrapper');
-    if (wr) {
-        const observer = new MutationObserver(_updateOffscreenIndicator);
-        observer.observe(wr, { attributes: true, attributeFilter: ['style'] });
-    }
+    // Off-screen indicator updated directly from apply() in navigate-map.js (no MutationObserver needed)
 }
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', _initUIExtras);

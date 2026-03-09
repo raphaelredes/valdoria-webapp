@@ -381,9 +381,29 @@
             border: 1px solid rgba(112, 66, 20, 0.2);
         }
 
+        .info-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .info-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(196, 149, 58, 0.3) 0%, transparent 70%);
+            border-radius: inherit;
+            opacity: 0;
+            pointer-events: none;
+        }
         .info-btn:active {
             opacity: 0.8;
             transform: scale(0.98);
+        }
+        .info-btn:active::after {
+            animation: btnRipple 0.4s ease-out;
+        }
+        @keyframes btnRipple {
+            from { opacity: 1; transform: scale(0.5); }
+            to { opacity: 0; transform: scale(1.5); }
         }
 
         /* ═══ BOTTOM BAR ═══ */
@@ -459,10 +479,15 @@
             stroke-linecap: round;
         }
 
+        @keyframes roadGlow {
+            0%, 100% { stroke-opacity: 0.7; }
+            50% { stroke-opacity: 1; }
+        }
         .road-path.active {
             stroke: #a08050;
             stroke-dasharray: 8 5;
-            animation: antMarch 0.8s linear infinite;
+            animation: antMarch 0.8s linear infinite, roadGlow 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 2px rgba(160, 128, 80, 0.3));
         }
         @keyframes antMarch {
             to { stroke-dashoffset: -13; }
@@ -759,9 +784,26 @@
             }
         }
 
-        /* ═══ FOG PARTICLES — Static (no infinite animation to save GPU) ═══ */
+        /* ═══ FOG PARTICLES — Subtle drift (GPU-composited transform only) ═══ */
+        @keyframes fogDrift1 {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(5px, -3px); }
+            66% { transform: translate(-3px, 4px); }
+        }
+        @keyframes fogDrift2 {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(-4px, 3px); }
+            66% { transform: translate(3px, -5px); }
+        }
         .fog-cloud {
-            /* Static fog — random positions set in JS provide visual variety */
+            animation: fogDrift1 12s ease-in-out infinite;
+        }
+        .fog-cloud:nth-child(even) {
+            animation-name: fogDrift2;
+            animation-duration: 15s;
+        }
+        body.map-idle .fog-cloud {
+            animation-play-state: paused !important;
         }
 
         /* ═══ DECORATIVE MAP TEXT ═══ */
@@ -811,6 +853,7 @@
             animation: compassSettle 1.5s ease-out, compassTremble 4s ease-in-out 1.5s infinite;
             transform-origin: center;
             transform-box: fill-box;
+            will-change: transform;
         }
 
         /* ═══ BIOME LEGEND (expanded) ═══ */
@@ -900,11 +943,15 @@
         #minimap.visible { display: block; }
         #minimap.fading { opacity: 0.3; }
         #minimap-svg { width: 100%; height: 100%; }
+        @keyframes mmGlow {
+            0%, 100% { stroke-opacity: 0.4; }
+            50% { stroke-opacity: 0.8; }
+        }
         #minimap .mm-viewport {
             fill: rgba(196, 149, 58, 0.2);
             stroke: #c4953a;
             stroke-width: 1.5;
-            stroke-opacity: 0.6;
+            animation: mmGlow 2.5s ease-in-out infinite;
         }
 
         /* ═══ SWIPE DISMISS — info panel ═══ */
@@ -1008,7 +1055,11 @@
             box-shadow: 0 -4px 16px rgba(0,0,0,0.5);
             transition: transform 0.25s ease;
         }
-        #quick-list.open { display: block; }
+        #quick-list.open { display: block; animation: qlSlideUp 0.25s ease-out; }
+        @keyframes qlSlideUp {
+            from { transform: translateY(40px); opacity: 0.5; }
+            to { transform: translateY(0); opacity: 1; }
+        }
         .ql-header {
             position: sticky;
             top: 0;
@@ -1041,9 +1092,13 @@
             padding: 10px 14px;
             cursor: pointer;
             border-bottom: 1px solid rgba(112, 66, 20, 0.1);
-            transition: background 0.1s;
+            border-left: 3px solid transparent;
+            transition: background 0.1s, border-color 0.2s;
         }
-        .ql-item:active { background: rgba(112, 66, 20, 0.15); }
+        .ql-item:active {
+            background: rgba(112, 66, 20, 0.15);
+            border-left-color: #c4953a;
+        }
         .ql-item-icon { font-size: 18px; flex-shrink: 0; }
         .ql-item-name {
             font-family: 'MedievalSharp', serif;

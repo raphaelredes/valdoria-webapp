@@ -667,7 +667,7 @@ function setupPanZoom() {
         if (_mmDebounce) return;
         _mmDebounce = setTimeout(() => { _mmDebounce = null; _updateMinimap(); }, 80);
     }
-    function apply() { wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`; saveViewport(); }
+    function apply() { wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`; saveViewport(); if (typeof _updateOffscreenIndicator === 'function') _updateOffscreenIndicator(); }
     function clamp() {
         const vpW = vp.clientWidth, vpH = vp.clientHeight;
         const mw = SVG_W * S.zoom, mh = SVG_H * S.zoom;
