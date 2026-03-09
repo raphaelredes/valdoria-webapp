@@ -1880,7 +1880,7 @@ async function _navigateBack() {
     // If loading overlay is active, force close to prevent getting trapped
     const overlay = document.getElementById('loadingOverlay');
     if (overlay && !overlay.classList.contains('hidden')) {
-        try { if (tg) tg.close(); } catch (e) { }
+        try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
         return;
     }
 
@@ -2380,7 +2380,7 @@ function navBack() {
 function navCharSheet() {
     haptic('light');
     if (!_apiBase || !_apiToken) {
-        try { if (tg) tg.close(); } catch (e) { }
+        try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
         return;
     }
     // If pending ops, warn before leaving
@@ -2438,7 +2438,7 @@ async function _transitionTo(target, payload = {}) {
     }
     // Fallback: close
     if (overlay) overlay.classList.add('hidden');
-    try { if (tg) tg.close(); } catch (e) { }
+    try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
 }
 
 // ── Toast ──

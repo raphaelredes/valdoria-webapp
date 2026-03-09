@@ -13,7 +13,7 @@ function _haptic(type) {
         else if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
         else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
         else tg.HapticFeedback.impactOccurred('light');
-    } catch(e) { /* silent */ }
+    } catch(e) { console.warn('[NAVIGATE] Haptic:', e); }
 }
 
 // ── Location tap handler ──
@@ -634,7 +634,7 @@ function toggleLegendExpand() {
     if (_legendOpen) {
         // Populate biomes
         panel.innerHTML = '';
-        for (const [biome, info] of Object.entries(BIOME_INFO)) {
+        for (const [, info] of Object.entries(BIOME_INFO)) {
             const item = document.createElement('span');
             item.className = 'legend-item';
             item.innerHTML = `<span class="legend-dot" style="background:${info.hexFill}"></span> ${info.label}`;
@@ -652,7 +652,7 @@ function toggleLegendExpand() {
 function setupLongPress() {
     const vp = document.getElementById('map-viewport');
     if (!vp) return;
-    let _lpTimer = null, _lpLocId = null;
+    let _lpTimer = null, _lpLocId = null; // eslint-disable-line no-unused-vars
     function _clearPreview() {
         document.querySelectorAll('#map-svg .path-preview').forEach(p => p.remove());
         _lpLocId = null;
@@ -700,7 +700,6 @@ function _setupCycleButtons() {
 
 // Build the cycleable list: ALL known locations sorted by distance (closest first)
 function _getCycleList() {
-    const knownSet = new Set(S.knownLocs);
     const locs = S.knownLocs.filter(id => id !== S.currentLoc && LOCATION_COORDS[id]);
     // Sort by weighted distance (BFS hops), then alphabetically
     locs.sort((a, b) => {

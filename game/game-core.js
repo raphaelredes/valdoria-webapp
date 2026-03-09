@@ -654,7 +654,7 @@ window.addEventListener('beforeunload', () => {
                 S.apiBase + '/api/game/close',
                 JSON.stringify({ user_id: S.uid, token: S.token })
             );
-        } catch (e) {}
+        } catch (e) { console.warn('[GAME] sendBeacon close:', e); }
     }
 });
 

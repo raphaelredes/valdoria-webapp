@@ -550,7 +550,7 @@ function handleClose() {
 }
 
 async function _transitionToGame() {
-    if (!S.api || !S.token) { try { tg?.close(); } catch (e) { } return; }
+    if (!S.api || !S.token) { try { tg?.close(); } catch (e) { console.warn('[NAVIGATE] Close:', e); } return; }
     const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token };
     if (window.Telegram?.WebApp?.initData) h['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
     h['X-Idempotency-Key'] = crypto.randomUUID();

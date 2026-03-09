@@ -278,6 +278,9 @@ function playTravelAnimation(biome, regionName, onComplete) {
             _drawMilestones(ctx, milestones, w, groundY, elapsed);
         }
 
+        // Traveler silhouette (walking figure on road)
+        _drawTraveler(ctx, w, h, groundY, elapsed, cfg.celestial || 'sun');
+
         // Ground line (horizon)
         ctx.strokeStyle = 'rgba(255,255,255,0.06)';
         ctx.lineWidth = 1;
@@ -373,14 +376,14 @@ function playTravelAnimation(biome, regionName, onComplete) {
         // Fade-in (first 400ms) — drawn OUTSIDE zoom so it covers full canvas
         if (progress < 0.115) {
             const fadeIn = 1 - (progress / 0.115);
-            ctx.fillStyle = `rgba(26,21,32,${fadeIn})`;
+            ctx.fillStyle = `rgba(42,36,32,${fadeIn})`;
             ctx.fillRect(0, 0, w, h);
         }
 
         // Fade out last 400ms
         if (progress > 0.88) {
             const fadeOut = (progress - 0.88) / 0.12;
-            ctx.fillStyle = `rgba(26,21,32,${fadeOut})`;
+            ctx.fillStyle = `rgba(42,36,32,${fadeOut})`;
             ctx.fillRect(0, 0, w, h);
         }
 
@@ -2158,6 +2161,134 @@ function _drawMilestones(ctx, stones, w, groundY, elapsed) {
         ctx.lineTo(x + s.width * 0.4, baseY);
         ctx.stroke();
     }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// TRAVELER SILHOUETTE
+// ═══════════════════════════════════════════
+
+function _drawTraveler(ctx, w, h, groundY, elapsed, celestialType) {
+    const cx = w * 0.42; // slightly left of center
+    const baseY = groundY + 5; // feet on road surface
+
+    // Walk cycle: 2 steps per second
+    const walkCycle = (elapsed * 0.002) % 1; // 0→1 per half-second
+    const stepPhase = Math.sin(walkCycle * Math.PI * 2);
+    const bob = Math.abs(stepPhase) * 2.2; // vertical bounce 0→2.2px
+
+    // Breathing / sway
+    const sway = Math.sin(elapsed * 0.0008) * 0.6;
+
+    ctx.save();
+    ctx.translate(cx + sway, baseY - bob);
+
+    // === SHADOW (cast from celestial) ===
+    const shadowDir = celestialType === 'sun' ? 1 : -1; // sun=right, moon=left
+    const shadowLen = celestialType === 'sun' ? 28 : 22;
+    const shadowAlpha = celestialType === 'sun' ? 0.15 : 0.08;
+
+    ctx.save();
+    ctx.transform(1, 0, shadowDir * 0.7, 0.15, 0, 0); // shear for long shadow
+    ctx.globalAlpha = shadowAlpha;
+    ctx.fillStyle = '#000';
+    // Shadow body (stretched version of silhouette)
+    ctx.beginPath();
+    ctx.ellipse(shadowDir * shadowLen * 0.3, 0, shadowLen, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Scale for the figure (~26px tall)
+    const sc = 1.0;
+
+    // Color: dark silhouette with slight biome tint
+    const bodyColor = 'rgba(15,12,10,0.85)';
+    const cloakColor = 'rgba(25,20,18,0.80)';
+    const highlightColor = celestialType === 'sun'
+        ? 'rgba(196,149,58,0.15)' : 'rgba(140,150,180,0.12)';
+
+    // === LEGS (animated walk cycle) ===
+    const legSwing = stepPhase * 5 * sc; // leg angle in px offset
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 2.2 * sc;
+    ctx.lineCap = 'round';
+
+    // Back leg
+    ctx.beginPath();
+    ctx.moveTo(-1 * sc, -6 * sc);
+    ctx.lineTo(-1 * sc - legSwing * 0.6, 0);
+    ctx.stroke();
+
+    // Front leg
+    ctx.beginPath();
+    ctx.moveTo(1 * sc, -6 * sc);
+    ctx.lineTo(1 * sc + legSwing * 0.6, 0);
+    ctx.stroke();
+
+    // === BODY (torso) ===
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.ellipse(0, -11 * sc, 3.5 * sc, 6 * sc, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // === CLOAK (flowing behind, animated) ===
+    const cloakWave = Math.sin(elapsed * 0.003) * 2 * sc;
+    ctx.fillStyle = cloakColor;
+    ctx.beginPath();
+    ctx.moveTo(-2 * sc, -16 * sc);
+    ctx.quadraticCurveTo(-5 * sc - cloakWave, -10 * sc, -4 * sc - cloakWave * 1.3, -4 * sc);
+    ctx.quadraticCurveTo(-3 * sc, -8 * sc, -2 * sc, -6 * sc);
+    ctx.closePath();
+    ctx.fill();
+
+    // === HEAD ===
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(0, -18 * sc, 2.8 * sc, 0, Math.PI * 2);
+    ctx.fill();
+
+    // === HOOD (pointed, medieval) ===
+    ctx.fillStyle = cloakColor;
+    ctx.beginPath();
+    ctx.moveTo(-3 * sc, -18 * sc);
+    ctx.quadraticCurveTo(-1 * sc, -24 * sc, 1 * sc, -20.5 * sc);
+    ctx.quadraticCurveTo(2 * sc, -17 * sc, 3 * sc, -16 * sc);
+    ctx.lineTo(-3 * sc, -16 * sc);
+    ctx.closePath();
+    ctx.fill();
+
+    // === STAFF (walking stick, slight tilt with walk) ===
+    const staffTilt = stepPhase * 2 * sc;
+    ctx.strokeStyle = 'rgba(60,45,30,0.8)';
+    ctx.lineWidth = 1.5 * sc;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(4 * sc + staffTilt, -20 * sc);
+    ctx.lineTo(6 * sc - staffTilt * 0.5, 1 * sc);
+    ctx.stroke();
+
+    // Staff top knob
+    ctx.fillStyle = 'rgba(80,65,45,0.7)';
+    ctx.beginPath();
+    ctx.arc(4 * sc + staffTilt, -20.5 * sc, 1.2 * sc, 0, Math.PI * 2);
+    ctx.fill();
+
+    // === RIM LIGHT (edge highlight from celestial) ===
+    const rimSide = celestialType === 'sun' ? 1 : -1;
+    ctx.strokeStyle = highlightColor;
+    ctx.lineWidth = 1 * sc;
+    ctx.beginPath();
+    ctx.moveTo(rimSide * 3 * sc, -16 * sc);
+    ctx.quadraticCurveTo(rimSide * 4 * sc, -11 * sc, rimSide * 3.5 * sc, -6 * sc);
+    ctx.stroke();
+
+    // === BACKPACK (small bump on back) ===
+    ctx.fillStyle = cloakColor;
+    ctx.beginPath();
+    ctx.ellipse(-3 * sc, -12 * sc, 2.5 * sc, 3 * sc, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+
     ctx.restore();
 }
 

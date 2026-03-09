@@ -3362,7 +3362,7 @@
                             return;
                         }
                         // No redirect — close the WebApp (legacy fallback)
-                        setTimeout(() => { try { tg?.close(); } catch (e) { } }, 300);
+                        setTimeout(() => { try { tg?.close(); } catch (e) { console.warn('[CHAR_CREATOR] close:', e); } }, 300);
                         return;
                     }
                     // Handle server-side validation errors (400 = creation failed)
