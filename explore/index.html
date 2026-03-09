@@ -92,8 +92,8 @@
             <!-- Completion waves -->
             <div class="mc-completion-wave"></div>
             <div class="mc-completion-wave wave-2"></div>
-            <!-- Central gem -->
-            <div class="mc-gem">
+            <!-- Central gem (tap for burst) -->
+            <div class="mc-gem" id="mc-gem">
                 <div class="mc-gem-core"></div>
                 <div class="mc-gem-flare"></div>
             </div>
@@ -160,10 +160,44 @@
             else overlay.removeAttribute('data-phase');
         }
 
-        // Completion pulse at 100%
+        // Completion pulse at 100% + haptic feedback
         function triggerCompletionPulse() {
             var waves = overlay ? overlay.querySelectorAll('.mc-completion-wave') : [];
             waves.forEach(function(w) { w.classList.add('active'); });
+            // Haptic feedback via Telegram WebApp API
+            try {
+                if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                    Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+                }
+            } catch(_) {}
+        }
+
+        // Gem tap burst interaction
+        var gemEl = document.getElementById('mc-gem');
+        if (gemEl) {
+            var _tapCooldown = false;
+            gemEl.addEventListener('click', function() {
+                if (_tapCooldown) return;
+                _tapCooldown = true;
+                // Flash the gem
+                gemEl.classList.add('tapped');
+                // Create burst element
+                var burst = document.createElement('div');
+                burst.className = 'mc-gem-burst';
+                gemEl.appendChild(burst);
+                // Haptic tap feedback
+                try {
+                    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                        Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                    }
+                } catch(_) {}
+                // Cleanup after animation
+                setTimeout(function() {
+                    gemEl.classList.remove('tapped');
+                    if (burst.parentNode) burst.parentNode.removeChild(burst);
+                    _tapCooldown = false;
+                }, 600);
+            });
         }
 
         // Rotate tips every 3.5s with crossfade
