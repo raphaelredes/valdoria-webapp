@@ -506,20 +506,162 @@ function _drawGroundDetails(ctx, biome, w, h, groundY, elapsed) {
 // WALKING FIGURE
 // ═══════════════════════════════════════════
 
+// Hood physics state (verlet cloth simulation)
+const _hood = { pts: null, prevAnchorX: 0, prevAnchorY: 0 };
+const HOOD_N = 10;
+const HOOD_SEG = 7;  // segment length in px
+
+function _updateHood(anchorX, anchorY, wind, bob) {
+    // Initialize chain on first call
+    if (!_hood.pts) {
+        _hood.pts = [];
+        for (let i = 0; i < HOOD_N; i++) {
+            const x = anchorX - i * HOOD_SEG * 0.8;
+            const y = anchorY + i * HOOD_SEG * 0.3;
+            _hood.pts.push({ x, y, ox: x, oy: y });
+        }
+        _hood.prevAnchorX = anchorX;
+        _hood.prevAnchorY = anchorY;
+    }
+
+    // Head movement delta → inertia on free points
+    const hdx = anchorX - _hood.prevAnchorX;
+    const hdy = anchorY - _hood.prevAnchorY;
+    _hood.prevAnchorX = anchorX;
+    _hood.prevAnchorY = anchorY;
+
+    // Pin anchor (back-top of head)
+    const p0 = _hood.pts[0];
+    p0.x = anchorX; p0.y = anchorY;
+    p0.ox = anchorX; p0.oy = anchorY;
+
+    // Verlet integration for free points
+    for (let i = 1; i < HOOD_N; i++) {
+        const pt = _hood.pts[i];
+        let vx = (pt.x - pt.ox) * 0.965; // damping
+        let vy = (pt.y - pt.oy) * 0.965;
+        pt.ox = pt.x;
+        pt.oy = pt.y;
+        // Gravity (pulls hood down)
+        vy += 0.12;
+        // Wind (same as cape/environment wind)
+        vx += wind * 0.025;
+        // Inertia from walking (opposite to head movement)
+        vx -= hdx * 0.4;
+        vy -= hdy * 0.15;
+        // Tiny turbulence for organic feel
+        vx += (Math.random() - 0.5) * 0.15;
+        pt.x += vx;
+        pt.y += vy;
+    }
+
+    // Distance constraints (Jakobsen method)
+    for (let iter = 0; iter < 6; iter++) {
+        for (let i = 0; i < HOOD_N - 1; i++) {
+            const a = _hood.pts[i], b = _hood.pts[i + 1];
+            const dx = b.x - a.x, dy = b.y - a.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+            const diff = (dist - HOOD_SEG) / dist;
+            if (i === 0) {
+                // Anchor is fixed — only move b
+                b.x -= dx * diff;
+                b.y -= dy * diff;
+            } else {
+                const h = diff * 0.5;
+                a.x += dx * h; a.y += dy * h;
+                b.x -= dx * h; b.y -= dy * h;
+            }
+        }
+    }
+
+    return _hood.pts;
+}
+
+function _drawHood(ctx, headCX, headCY, headR, pts, s) {
+    const cHood = '#4a2030';
+    const cHoodDark = '#3a1525';
+
+    // --- Static hood covering head (top + back arc) ---
+    ctx.fillStyle = cHood;
+    ctx.beginPath();
+    // Start at forehead
+    ctx.moveTo(headCX + headR * 0.5, headCY);
+    // Arc over the top of head
+    ctx.arc(headCX, headCY, headR + 2 * s, -0.3, -Math.PI + 0.1, true);
+    // Down to first chain point
+    ctx.lineTo(pts[0].x, pts[0].y);
+    // Back up to the ear area
+    ctx.lineTo(headCX - headR * 0.2, headCY + headR * 0.3);
+    ctx.closePath();
+    ctx.fill();
+
+    // --- Physics-driven hood tail (tapered shape along chain) ---
+    if (pts.length < 3) return;
+
+    // Outer edge (wider)
+    const outerPts = [];
+    for (let i = 0; i < pts.length; i++) {
+        const t = i / (pts.length - 1); // 0→1
+        const width = (1 - t * 0.7) * 5 * s; // tapers from 10px to 3px
+        // Perpendicular offset
+        const nx = (i < pts.length - 1) ? pts[i + 1].y - pts[i].y : pts[i].y - pts[i - 1].y;
+        const ny = (i < pts.length - 1) ? -(pts[i + 1].x - pts[i].x) : -(pts[i].x - pts[i - 1].x);
+        const len = Math.sqrt(nx * nx + ny * ny) || 1;
+        outerPts.push({ x: pts[i].x + (nx / len) * width, y: pts[i].y + (ny / len) * width });
+    }
+
+    // Inner edge (narrower)
+    const innerPts = [];
+    for (let i = 0; i < pts.length; i++) {
+        const t = i / (pts.length - 1);
+        const width = (1 - t * 0.7) * 2.5 * s; // narrower inner edge
+        const nx = (i < pts.length - 1) ? pts[i + 1].y - pts[i].y : pts[i].y - pts[i - 1].y;
+        const ny = (i < pts.length - 1) ? -(pts[i + 1].x - pts[i].x) : -(pts[i].x - pts[i - 1].x);
+        const len = Math.sqrt(nx * nx + ny * ny) || 1;
+        innerPts.push({ x: pts[i].x - (nx / len) * width, y: pts[i].y - (ny / len) * width });
+    }
+
+    // Draw tail as filled shape
+    ctx.fillStyle = cHood;
+    ctx.beginPath();
+    ctx.moveTo(outerPts[0].x, outerPts[0].y);
+    for (let i = 1; i < outerPts.length; i++) {
+        ctx.lineTo(outerPts[i].x, outerPts[i].y);
+    }
+    // Tip
+    ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+    // Inner edge (reverse)
+    for (let i = innerPts.length - 1; i >= 0; i--) {
+        ctx.lineTo(innerPts[i].x, innerPts[i].y);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // Darker inner stripe for depth
+    ctx.fillStyle = cHoodDark;
+    ctx.globalAlpha = 0.4;
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    for (let i = innerPts.length - 1; i >= 0; i--) ctx.lineTo(innerPts[i].x, innerPts[i].y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+}
+
 function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
-    // Minimal stick-figure walking silhouette
     const s = 2.0;
     const headR = 8 * s, torsoH = 30 * s, thighL = 22 * s, shinL = 20 * s;
     const footH = 4 * s, armLen = 20 * s;
     const hipY = -(footH + shinL + thighL);
-    const shY  = hipY - torsoH; // shoulder
-    const hdY  = shY - 3 * s - headR; // head center
+    const shY  = hipY - torsoH;
+    const hdY  = shY - 3 * s - headR;
 
     // Walk cycle
     const p = elapsed * 0.006;
     const bob = Math.sin(p * 2) * 1.0;
     const rN = Math.sin(p), rF = Math.sin(p + Math.PI);
-    const sw = 0.38; // stride
+    const sw = 0.38;
     const lN = rN * sw, lF = rF * sw;
     const kN = rN < -0.1 ? -Math.pow(Math.abs(rN), 1.2) * 0.6 : 0;
     const kF = rF < -0.1 ? -Math.pow(Math.abs(rF), 1.2) * 0.6 : 0;
@@ -529,7 +671,15 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.save();
     ctx.translate(cx, groundY + bob);
 
-    const cN = '#5a4535', cF = '#443525'; // near/far color
+    const cN = '#5a4535', cF = '#443525';
+
+    // Head Y (with micro-bob)
+    const hy = hdY + Math.sin(p * 2 - 0.3) * 0.5;
+
+    // Update hood physics (anchor at back-top of head)
+    const hoodAnchorX = -headR * 0.65;
+    const hoodAnchorY = hy - headR * 0.55;
+    const hoodPts = _updateHood(hoodAnchorX, hoodAnchorY, wind, bob);
 
     // Shadow
     ctx.fillStyle = 'rgba(0,0,0,0.15)';
@@ -537,7 +687,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.ellipse(0, 3, 16 * s, 3 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Leg: hip→knee→ankle + foot rect
+    // Leg helper
     function leg(a, kb, c, w) {
         const kx = Math.sin(a) * thighL, ky = hipY + Math.cos(a) * thighL;
         const sa = a + kb;
@@ -550,7 +700,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
             ctx.fillRect(-2 * s, 0, 9 * s, footH * 0.85); ctx.restore(); }
     }
 
-    // Cape (simple shape behind)
+    // Cape (behind everything)
     ctx.fillStyle = '#4a2030';
     ctx.beginPath();
     ctx.moveTo(-1 * s, shY);
@@ -558,6 +708,9 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.lineTo(-1 * s, hipY);
     ctx.closePath();
     ctx.fill();
+
+    // Hood tail (behind head, in front of cape)
+    _drawHood(ctx, 0, hy, headR, hoodPts, s);
 
     // Far leg
     leg(lF, kF, cF, 4.5 * s);
@@ -567,7 +720,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.beginPath(); ctx.moveTo(0, shY + 2 * s);
     ctx.lineTo(Math.sin(aF) * armLen, shY + 2 * s + Math.cos(aF) * armLen); ctx.stroke();
 
-    // Torso (filled rectangle)
+    // Torso
     const tw = 5 * s;
     ctx.fillStyle = cN;
     ctx.fillRect(-tw, shY, tw * 2, torsoH);
@@ -579,20 +732,38 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const ahx = Math.sin(aN) * armLen, ahy = shY + 2 * s + Math.cos(aN) * armLen;
     ctx.strokeStyle = cN; ctx.lineWidth = 3 * s; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(0, shY + 2 * s); ctx.lineTo(ahx, ahy); ctx.stroke();
-    // Staff
     ctx.strokeStyle = '#6a4a20'; ctx.lineWidth = 2 * s;
     ctx.beginPath(); ctx.moveTo(ahx, ahy - 2 * s); ctx.lineTo(ahx + 2 * s, 2 * s); ctx.stroke();
     const gl = 0.4 + Math.sin(elapsed * 0.005) * 0.2;
     ctx.fillStyle = `rgba(196,149,58,${gl})`;
     ctx.beginPath(); ctx.arc(ahx, ahy - 2 * s, 1.6 * s, 0, Math.PI * 2); ctx.fill();
 
-    // Head (circle + eye)
-    const hy = hdY + Math.sin(p * 2 - 0.3) * 0.5;
+    // Head
     ctx.fillStyle = '#3e2e1e';
     ctx.beginPath(); ctx.arc(0, hy, headR, 0, Math.PI * 2); ctx.fill();
-    // Eye
+
+    // Hood covering (on top of head — drawn AFTER head so it covers it)
+    const cHood = '#4a2030';
+    ctx.fillStyle = cHood;
+    ctx.beginPath();
+    ctx.moveTo(headR * 0.55, hy + headR * 0.15);
+    ctx.arc(0, hy, headR + 2 * s, -0.15, -Math.PI + 0.15, true);
+    ctx.lineTo(hoodPts[0].x, hoodPts[0].y);
+    ctx.lineTo(-headR * 0.15, hy + headR * 0.35);
+    ctx.closePath();
+    ctx.fill();
+
+    // Hood brim shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.arc(0, hy, headR + 2 * s, -0.15, -0.8, true);
+    ctx.arc(0, hy, headR - 1, -0.8, -0.15, false);
+    ctx.closePath();
+    ctx.fill();
+
+    // Eye (peeking from under hood)
     ctx.fillStyle = `rgba(196,149,58,${0.35 + Math.sin(elapsed * 0.004) * 0.15})`;
-    ctx.beginPath(); ctx.arc(headR * 0.45, hy - headR * 0.1, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(headR * 0.45, hy + headR * 0.05, 1.2 * s, 0, Math.PI * 2); ctx.fill();
 
     ctx.restore();
 }
