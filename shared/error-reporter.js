@@ -151,9 +151,9 @@ var ValdoriaErrors = (function () {
 
     // ─── Show Error (full overlay) ───
     var _autoRetryTimer = null;
-    var _RETRY_BASE = 3;
-    var _RETRY_CAP = 40;
-    var _RETRY_MAX = 10;
+    var _RETRY_BASE = 2;       // Faster retry cycle
+    var _RETRY_CAP = 8;        // Quick escalation to auto-reconnect
+    var _RETRY_MAX = 3;   // Fast fail: 3 retries then auto-reconnect via sendData
 
     function showError(msg, err) {
         console.error('[' + _cfg.appName + ']', msg, err || '');
