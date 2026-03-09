@@ -465,7 +465,9 @@ function renderLocationMarkers(group, fogState) {
         const wasHidden = prev && (prev[locId] === 'hidden' || prev[locId] === 'frontier');
         const isNewlyRevealed = wasHidden && fog !== 'hidden' && fog !== 'frontier';
 
-        const ng = _el('g', { class: `loc-node ${fog}${isCurr ? ' current' : ''}${isNewlyRevealed ? ' fog-reveal' : ''}`, 'data-loc': locId });
+        const attrs = { class: `loc-node ${fog}${isCurr ? ' current' : ''}${isNewlyRevealed ? ' fog-reveal' : ''}`, 'data-loc': locId };
+        if (isCurr) attrs['data-current'] = 'true';
+        const ng = _el('g', attrs);
         if (isNewlyRevealed) {
             ng.style.animationDelay = `${revealIdx * 0.12}s`;
             revealIdx++;
@@ -680,20 +682,17 @@ function renderBreadcrumbTrail(svg) {
             'stroke-width': 1, 'stroke-opacity': 0.15,
         }));
     }
-    // Small footprint dots at each discovered location
+    // Small footprint dots — batched into a single <path>
+    let dotsD = '';
     for (const locId of discovered) {
         const coords = LOCATION_COORDS[locId];
         if (!coords) continue;
         const { x, y } = hexToPixel(coords.col, coords.row);
-        bG.appendChild(_el('circle', {
-            cx: x + 3, cy: y + 8, r: 1.2,
-            fill: '#c4953a', 'fill-opacity': 0.12,
-        }));
-        bG.appendChild(_el('circle', {
-            cx: x - 2, cy: y + 10, r: 1,
-            fill: '#c4953a', 'fill-opacity': 0.1,
-        }));
+        const r1 = 1.2, r2 = 1;
+        dotsD += `M${x+3-r1},${y+8}a${r1},${r1} 0 1,0 ${r1*2},0a${r1},${r1} 0 1,0 ${-r1*2},0`;
+        dotsD += `M${x-2-r2},${y+10}a${r2},${r2} 0 1,0 ${r2*2},0a${r2},${r2} 0 1,0 ${-r2*2},0`;
     }
+    if (dotsD) bG.appendChild(_el('path', { d: dotsD, fill: '#c4953a', 'fill-opacity': 0.11, stroke: 'none' }));
     svg.appendChild(bG);
 }
 

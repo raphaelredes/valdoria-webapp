@@ -89,6 +89,7 @@ function _invalidateTerrainCaches() {
     _cachedAutoFillHexes = null;
     _cachedAllHexes = null;
     _cachedBiomeRegions = null;
+    _invalidateVisCache();
 }
 
 function _buildAutoFillHexes() {
@@ -154,8 +155,13 @@ function _buildBiomeRegions(allHexes) {
     return regions;
 }
 
-// ── Visibility helper ──
+// ── Visibility helper (cached per render cycle) ──
+let _visCache = null;
+function _invalidateVisCache() { _visCache = null; }
 function _hexVisibility(col, row, knownSet, discoveredSet) {
+    if (!_visCache) _visCache = {};
+    const key = col * 100 + row;
+    if (_visCache[key] !== undefined) return _visCache[key];
     let op = 0;
     for (const locId of knownSet) {
         const c = LOCATION_COORDS[locId]; if (!c) continue;
@@ -166,6 +172,7 @@ function _hexVisibility(col, row, knownSet, discoveredSet) {
                 op = Math.max(op, d <= 1 ? 1.0 : d <= 2 ? 0.8 : d <= 3 ? 0.55 : d <= 4 ? 0.3 : 0.15);
         }
     }
+    _visCache[key] = op;
     return op;
 }
 
@@ -375,34 +382,27 @@ function _drawMountains(g, cluster) {
     const peaks = [];
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        const count = 2 + Math.floor(srand(seed) * 2); // 2-3 peaks per hex (less dense)
+        const count = 2 + Math.floor(srand(seed) * 2);
         for (let i = 0; i < count; i++) {
             const isBig = i === Math.floor(count / 2);
             const sizeRoll = srand(seed + i * 10 + 99);
             let height, width;
-            if (isBig) {
-                height = 22 + srand(seed+i*10+1) * 12; // 22-34
-                width = 10 + srand(seed+i*10+2) * 5;   // 10-15
-            } else if (sizeRoll > 0.5) {
-                height = 14 + srand(seed+i*10+1) * 10;  // 14-24
-                width = 7 + srand(seed+i*10+2) * 4;
-            } else {
-                height = 8 + srand(seed+i*10+1) * 8;    // 8-16
-                width = 5 + srand(seed+i*10+2) * 3;
-            }
-            // Vary shape: 0=sharp, 1=rounded, 2=flat-top
+            if (isBig) { height = 22 + srand(seed+i*10+1) * 12; width = 10 + srand(seed+i*10+2) * 5; }
+            else if (sizeRoll > 0.5) { height = 14 + srand(seed+i*10+1) * 10; width = 7 + srand(seed+i*10+2) * 4; }
+            else { height = 8 + srand(seed+i*10+1) * 8; width = 5 + srand(seed+i*10+2) * 3; }
             const typeRand = srand(seed + i * 10 + 88);
-            const type = typeRand < 0.4 ? 0 : typeRand < 0.7 ? 1 : 2;
             peaks.push({
-                x: h.x + (i - (count-1)/2) * 18 + (srand(seed+i*10)-0.5) * 5, // wider spacing (18px)
+                x: h.x + (i - (count-1)/2) * 18 + (srand(seed+i*10)-0.5) * 5,
                 y: h.y + (srand(seed+i*10+5)-0.5) * 5,
-                h: height, w: width,
-                seed: seed + i * 10, type,
+                h: height, w: width, seed: seed + i * 10,
+                type: typeRand < 0.4 ? 0 : typeRand < 0.7 ? 1 : 2,
             });
         }
     }
-    // Sort back-to-front (farther peaks drawn first, closer peaks on top)
     peaks.sort((a, b) => (a.y - a.h * 0.5) - (b.y - b.h * 0.5));
+
+    // Batched paths by visual layer (reduces DOM elements ~4x)
+    let bodyD = '', shadowD = '', outlineD = '', detailD = '';
 
     for (const p of peaks) {
         const by = p.y + 4, ty = p.y + 4 - p.h;
@@ -411,82 +411,38 @@ function _drawMountains(g, cluster) {
         const peakX = p.x + jit;
 
         if (p.type === 1) {
-            // ── ROUNDED/DOME mountain ──
-            g.appendChild(_el('path', {
-                d: `M${lx},${by} Q${lx - p.w*0.05},${ty + p.h*0.12} ${peakX},${ty} Q${rx + p.w*0.05},${ty + p.h*0.12} ${rx},${by} Z`,
-                fill: INK_DARK, 'fill-opacity': 0.07,
-            }));
-            g.appendChild(_el('path', {
-                d: `M${lx},${by} Q${lx - p.w*0.05},${ty + p.h*0.12} ${peakX},${ty} L${peakX},${by} Z`,
-                fill: INK_DARK, 'fill-opacity': 0.18,
-            }));
-            g.appendChild(_el('path', {
-                d: `M${lx},${by} Q${lx - p.w*0.05},${ty + p.h*0.12} ${peakX},${ty} Q${rx + p.w*0.05},${ty + p.h*0.12} ${rx},${by}`,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-linecap': 'round', 'stroke-opacity': 0.65,
-            }));
-            // 2 contour lines on shadow side (optimized from 3)
+            bodyD += `M${lx},${by}Q${lx - p.w*0.05},${ty + p.h*0.12} ${peakX},${ty}Q${rx + p.w*0.05},${ty + p.h*0.12} ${rx},${by}Z`;
+            shadowD += `M${lx},${by}Q${lx - p.w*0.05},${ty + p.h*0.12} ${peakX},${ty}L${peakX},${by}Z`;
+            outlineD += `M${lx},${by}Q${lx - p.w*0.05},${ty + p.h*0.12} ${peakX},${ty}Q${rx + p.w*0.05},${ty + p.h*0.12} ${rx},${by}`;
             for (let j = 0; j < 2; j++) {
-                const t = 0.35 + j * 0.22;
-                const cy = ty + p.h * t;
-                const cw = p.w * t * 0.55;
-                g.appendChild(_el('path', {
-                    d: `M${peakX - cw},${cy} Q${peakX - cw*0.3},${cy - 0.8} ${peakX},${cy + 0.3}`,
-                    fill: 'none', stroke: INK_DARK, 'stroke-width': 0.18, 'stroke-opacity': 0.18 - j*0.04,
-                }));
+                const t = 0.35 + j * 0.22, cy = ty + p.h * t, cw = p.w * t * 0.55;
+                detailD += `M${peakX - cw},${cy}Q${peakX - cw*0.3},${cy - 0.8} ${peakX},${cy + 0.3}`;
             }
         } else if (p.type === 2) {
-            // ── FLAT-TOP/MESA mountain ──
             const flatW = p.w * (0.3 + srand(p.seed + 88) * 0.15);
             const flatL = peakX - flatW, flatR = peakX + flatW;
-            g.appendChild(_el('polygon', {
-                points: `${lx},${by} ${flatL},${ty} ${flatR},${ty} ${rx},${by}`,
-                fill: INK_DARK, 'fill-opacity': 0.07,
-            }));
-            g.appendChild(_el('polygon', {
-                points: `${lx},${by} ${flatL},${ty} ${peakX},${ty} ${peakX},${by}`,
-                fill: INK_DARK, 'fill-opacity': 0.2,
-            }));
-            g.appendChild(_el('path', {
-                d: `M${lx},${by} L${flatL},${ty} L${flatR},${ty} L${rx},${by}`,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.55, 'stroke-linecap': 'round', 'stroke-opacity': 0.65,
-            }));
-            // 2 strata lines (fewer = cleaner)
+            bodyD += `M${lx},${by}L${flatL},${ty}L${flatR},${ty}L${rx},${by}Z`;
+            shadowD += `M${lx},${by}L${flatL},${ty}L${peakX},${ty}L${peakX},${by}Z`;
+            outlineD += `M${lx},${by}L${flatL},${ty}L${flatR},${ty}L${rx},${by}`;
             for (let j = 0; j < 2; j++) {
-                const t = 0.3 + j * 0.25;
-                const sy = by + (ty - by) * t;
-                const slx = lx + (flatL - lx) * t;
-                g.appendChild(_el('line', {
-                    x1: slx + 1, y1: sy, x2: peakX - 1, y2: sy,
-                    stroke: INK_DARK, 'stroke-width': 0.18, 'stroke-opacity': 0.18,
-                }));
+                const t = 0.3 + j * 0.25, sy = by + (ty - by) * t, slx = lx + (flatL - lx) * t;
+                detailD += `M${slx + 1},${sy}L${peakX - 1},${sy}`;
             }
         } else {
-            // ── SHARP PEAK (classic triangular) ──
-            g.appendChild(_el('polygon', {
-                points: `${lx},${by} ${peakX},${ty} ${rx},${by}`,
-                fill: INK_DARK, 'fill-opacity': 0.08,
-            }));
-            g.appendChild(_el('polygon', {
-                points: `${lx},${by} ${peakX},${ty} ${peakX},${by}`,
-                fill: INK_DARK, 'fill-opacity': 0.22,
-            }));
-            g.appendChild(_el('line', { x1: lx, y1: by, x2: peakX, y2: ty,
-                stroke: INK_DARK, 'stroke-width': 0.65, 'stroke-linecap': 'round', 'stroke-opacity': 0.7 }));
-            g.appendChild(_el('line', { x1: peakX, y1: ty, x2: rx, y2: by,
-                stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-linecap': 'round', 'stroke-opacity': 0.6 }));
-            // 2 hatching lines (optimized from 3-4)
+            bodyD += `M${lx},${by}L${peakX},${ty}L${rx},${by}Z`;
+            shadowD += `M${lx},${by}L${peakX},${ty}L${peakX},${by}Z`;
+            outlineD += `M${lx},${by}L${peakX},${ty}M${peakX},${ty}L${rx},${by}`;
             for (let j = 0; j < 2; j++) {
-                const t = 0.25 + j * 0.3;
-                const hx = lx + (peakX - lx) * t;
-                const hy = by + (ty - by) * t;
-                const hLen = p.h * 0.09;
-                g.appendChild(_el('line', {
-                    x1: hx, y1: hy, x2: hx + hLen * 0.35, y2: hy + hLen,
-                    stroke: INK_DARK, 'stroke-width': 0.2, 'stroke-opacity': 0.22,
-                }));
+                const t = 0.25 + j * 0.3, hx = lx + (peakX - lx) * t, hy = by + (ty - by) * t, hLen = p.h * 0.09;
+                detailD += `M${hx},${hy}L${hx + hLen * 0.35},${hy + hLen}`;
             }
         }
     }
+    // Emit 4 compound paths instead of 5-7 per peak
+    if (bodyD) g.appendChild(_el('path', { d: bodyD, fill: INK_DARK, 'fill-opacity': 0.07, stroke: 'none' }));
+    if (shadowD) g.appendChild(_el('path', { d: shadowD, fill: INK_DARK, 'fill-opacity': 0.2, stroke: 'none' }));
+    if (outlineD) g.appendChild(_el('path', { d: outlineD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-linecap': 'round', 'stroke-opacity': 0.65 }));
+    if (detailD) g.appendChild(_el('path', { d: detailD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.2, 'stroke-opacity': 0.18 }));
 }
 
 // ══════════════════════════════════════════════════════════
@@ -497,19 +453,21 @@ function _drawForest(g, cluster) {
     const trees = [];
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        const count = 5 + Math.floor(srand(seed) * 4); // 5-8 trees per hex (optimized)
+        const count = 5 + Math.floor(srand(seed) * 4);
         for (let i = 0; i < count; i++) {
-            const szRoll = srand(seed+i*13+1);
             trees.push({
                 x: h.x + (srand(seed+i*13)-0.5) * 34,
                 y: h.y + (srand(seed+i*13+5)-0.5) * 22,
-                sz: 2.5 + szRoll * 4.5,
+                sz: 2.5 + srand(seed+i*13+1) * 4.5,
                 type: srand(seed+i*13+2) < 0.5 ? 'round' : 'conifer',
                 seed: seed + i * 13,
             });
         }
     }
     trees.sort((a, b) => a.y - b.y);
+
+    // Batched: canopy circles as arc sub-paths, trunks as line sub-paths, tiers as polygon sub-paths
+    let canopyD = '', trunkD = '', tierD = '';
 
     for (const t of trees) {
         const trunkH = t.sz * 1.8;
@@ -518,42 +476,28 @@ function _drawForest(g, cluster) {
         if (t.type === 'round') {
             const cy = t.y + 2 - trunkH - t.sz * 0.2;
             const cx = t.x + trunkLean;
-            // Canopy body (single circle with fill + stroke)
-            g.appendChild(_el('circle', {
-                cx, cy, r: t.sz,
-                fill: INK_DARK, 'fill-opacity': 0.22,
-                stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.55,
-            }));
-            // Trunk
-            g.appendChild(_el('line', {
-                x1: t.x, y1: t.y + 2,
-                x2: cx, y2: cy + t.sz * 0.7,
-                stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.6, 'stroke-linecap': 'round',
-            }));
+            const r = t.sz;
+            // Circle as arc sub-path
+            canopyD += `M${cx-r},${cy}a${r},${r} 0 1,0 ${r*2},0a${r},${r} 0 1,0 ${-r*2},0`;
+            // Trunk as line sub-path
+            trunkD += `M${t.x},${t.y + 2}L${cx},${cy + r * 0.7}`;
         } else {
-            // Conifer — filled triangular tiers (simplified)
             const topX = t.x + trunkLean;
             const topY = t.y + 2 - trunkH - t.sz * 1.2;
             const tiers = 2 + Math.floor(srand(t.seed + 160) * 2);
-            // Trunk first (behind tiers)
-            g.appendChild(_el('line', {
-                x1: topX, y1: topY + tiers * t.sz * 0.7 + 2,
-                x2: t.x, y2: t.y + 2,
-                stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.55,
-            }));
+            trunkD += `M${topX},${topY + tiers * t.sz * 0.7 + 2}L${t.x},${t.y + 2}`;
             for (let ti = 0; ti < tiers; ti++) {
                 const tierTop = topY + ti * t.sz * 0.5;
                 const tierBot = topY + (ti + 1) * t.sz * 0.7;
                 const tierW = t.sz * (0.35 + ti * 0.3);
-                // Dark filled tier with outline
-                g.appendChild(_el('polygon', {
-                    points: `${topX},${tierTop} ${topX-tierW},${tierBot} ${topX+tierW},${tierBot}`,
-                    fill: INK_DARK, 'fill-opacity': 0.17 + ti * 0.03,
-                    stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.5,
-                }));
+                tierD += `M${topX},${tierTop}L${topX-tierW},${tierBot}L${topX+tierW},${tierBot}Z`;
             }
         }
     }
+    // 3 compound paths instead of 2-4 per tree
+    if (canopyD) g.appendChild(_el('path', { d: canopyD, fill: INK_DARK, 'fill-opacity': 0.22, stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.55 }));
+    if (tierD) g.appendChild(_el('path', { d: tierD, fill: INK_DARK, 'fill-opacity': 0.19, stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.5 }));
+    if (trunkD) g.appendChild(_el('path', { d: trunkD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.6, 'stroke-linecap': 'round' }));
 }
 
 // ══════════════════════════════════════════════════════════

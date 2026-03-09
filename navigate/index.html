@@ -1161,6 +1161,66 @@
         .cycle-btn:active { color: #c4953a; }
         .cycle-btn:disabled { opacity: 0.2; pointer-events: none; }
 
+        /* ═══ CURRENT LOCATION PULSE — warm glow on player's loc-node ═══ */
+        @keyframes currentLocGlow {
+            0%, 100% { filter: drop-shadow(0 0 3px rgba(196, 149, 58, 0.2)); }
+            50% { filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.5)); }
+        }
+        .loc-node.explored[data-current="true"] {
+            animation: currentLocGlow 4s ease-in-out infinite;
+        }
+        body.map-idle .loc-node.explored[data-current="true"] {
+            animation-play-state: paused !important;
+        }
+
+        /* ═══ DECORATIVE TEXT — staggered fade-in ═══ */
+        @keyframes decoTextFade {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 0.15; transform: translateY(0); }
+        }
+        .map-deco-text {
+            animation: decoTextFade 1.2s ease-out backwards;
+        }
+        .map-deco-text:nth-child(2) { animation-delay: 0.3s; }
+        .map-deco-text:nth-child(3) { animation-delay: 0.6s; }
+        .map-deco-text:nth-child(4) { animation-delay: 0.9s; }
+        .map-deco-text:nth-child(5) { animation-delay: 1.1s; }
+        .map-deco-text:nth-child(n+6) { animation-delay: 1.3s; }
+
+        /* ═══ ZOOM BUTTON — enhanced press feedback ═══ */
+        .zoom-btn {
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .zoom-btn:active {
+            transform: scale(0.88);
+        }
+
+        /* ═══ HUD BAR — subtle shimmer on fill change ═══ */
+        .hud-bar-fill {
+            position: relative;
+        }
+        .hud-bar-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+            background-size: 200% 100%;
+            animation: none;
+        }
+        .hud-bar-fill.shimmer::after {
+            animation: barShimmer 0.8s ease-out;
+        }
+        @keyframes barShimmer {
+            from { background-position: -100% 0; }
+            to { background-position: 200% 0; }
+        }
+
+        /* ═══ BREADCRUMB TRAIL — fade-in ═══ */
+        .breadcrumb-layer {
+            animation: locFadeIn 0.8s ease-out backwards;
+            animation-delay: 0.5s;
+        }
+
         /* ═══ GESTURE TUTORIAL OVERLAY ═══ */
         #gesture-tutorial {
             display: none;

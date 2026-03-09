@@ -376,11 +376,16 @@ function updateHUD() {
     document.getElementById('hud-name').textContent = `${c.ci || ''} ${c.nm || 'Heroi'}`;
     document.getElementById('hud-level').textContent = `Nv.${c.lv || 1}`;
 
+    const hpEl = document.getElementById('hud-hp');
+    const mpEl = document.getElementById('hud-mp');
     const hpPct = c.mh > 0 ? Math.min(100, (c.hp / c.mh) * 100) : 0;
-    document.getElementById('hud-hp').style.width = `${hpPct}%`;
-
     const mpPct = c.mm > 0 ? Math.min(100, (c.mp / c.mm) * 100) : 0;
-    document.getElementById('hud-mp').style.width = `${mpPct}%`;
+    // Trigger shimmer if value changed
+    const oldHp = hpEl.style.width, oldMp = mpEl.style.width;
+    hpEl.style.width = `${hpPct}%`;
+    mpEl.style.width = `${mpPct}%`;
+    if (oldHp && oldHp !== `${hpPct}%`) { hpEl.classList.remove('shimmer'); void hpEl.offsetWidth; hpEl.classList.add('shimmer'); }
+    if (oldMp && oldMp !== `${mpPct}%`) { mpEl.classList.remove('shimmer'); void mpEl.offsetWidth; mpEl.classList.add('shimmer'); }
 }
 
 function updateLocationBadge() {
