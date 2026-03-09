@@ -6,6 +6,21 @@
    from the Game Hub API response.
    ═══════════════════════════════════════════════════════════════ */
 
+// ─── Reading Time Calculator ───
+function _calcInnDelay(lines, category) {
+    const text = (Array.isArray(lines) ? lines.join(' ') : lines || '');
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    const base = words * 0.35;
+    const ranges = {
+        narrative: { min: 3.5, max: 6.0 },
+        data:      { min: 4.0, max: 6.5 },
+        dream:     { min: 3.5, max: 5.0 },
+        result:    { min: 5.0, max: 7.0 },
+    };
+    const r = ranges[category] || ranges.narrative;
+    return Math.max(r.min, Math.min(r.max, base)) * 1000;
+}
+
 // ─── Frame Templates ───
 const _INN_FRAMES = {
     poor: [
@@ -18,7 +33,7 @@ const _INN_FRAMES = {
                 '{name} se deita entre os fardos...',
             ],
             bg: 'radial-gradient(ellipse at 50% 40%, #1a1a0a 0%, #0a0805 100%)',
-            delay: 2500,
+            category: 'narrative',
             recovery: 0,
         },
         {
@@ -30,7 +45,7 @@ const _INN_FRAMES = {
                 'O vento frio entra pelas frestas...',
             ],
             bg: 'radial-gradient(ellipse at 50% 40%, #0a0a08 0%, #050505 100%)',
-            delay: 2500,
+            category: 'data',
             recovery: 0.6,
         },
         {
@@ -42,7 +57,7 @@ const _INN_FRAMES = {
                 'pelo buraco na parede.',
             ],
             bg: 'radial-gradient(ellipse at 50% 40%, #2a1a0a 0%, #1a1008 100%)',
-            delay: 2000,
+            category: 'data',
             recovery: 1.0,
         },
     ],
@@ -56,20 +71,8 @@ const _INN_FRAMES = {
                 '{name} apaga a chama e fecha os olhos.',
             ],
             bg: 'radial-gradient(ellipse at 50% 40%, #0a0a2e 0%, #050510 100%)',
-            delay: 2200,
+            category: 'narrative',
             recovery: 0,
-        },
-        {
-            title: 'NOITE ESTRELADA',
-            icons: '✦ · ✧ · ★ · ✦ · ✧',
-            lines: [
-                'Pela janela, estrelas cintilam.',
-                'O silêncio é quebrado apenas pelo crepitar',
-                'distante da lareira no salão.',
-            ],
-            bg: 'radial-gradient(ellipse at 50% 40%, #080820 0%, #050515 100%)',
-            delay: 2200,
-            recovery: 0.3,
         },
         {
             title: 'SONO RESTAURADOR',
@@ -80,8 +83,8 @@ const _INN_FRAMES = {
                 'reparando músculos e restaurando vigor.',
             ],
             bg: 'radial-gradient(ellipse at 50% 40%, #080810 0%, #050508 100%)',
-            delay: 2200,
-            recovery: 0.7,
+            category: 'data',
+            recovery: 0.6,
         },
         {
             title: 'NOVO AMANHECER',
@@ -92,7 +95,7 @@ const _INN_FRAMES = {
                 '{name} está renovado.',
             ],
             bg: 'radial-gradient(ellipse at 50% 40%, #3a2a00 0%, #2a1a00 100%)',
-            delay: 2000,
+            category: 'data',
             recovery: 1.0,
         },
     ],
@@ -106,19 +109,7 @@ const _INN_FRAMES = {
                 'dissolvem a tensão de cada músculo.',
             ],
             bg: 'radial-gradient(ellipse at 50% 40%, #2a0a0a 0%, #1a0505 100%)',
-            delay: 2300,
-            recovery: 0,
-        },
-        {
-            title: 'LENÇÓIS DE SEDA',
-            icons: '👑  🛏️  🕯️',
-            lines: [
-                'A cama é uma nuvem de penas de ganso.',
-                'Seda cor de vinho acaricia sua pele.',
-                'O mundo lá fora deixa de existir.',
-            ],
-            bg: 'radial-gradient(ellipse at 50% 40%, #1a0a2a 0%, #0a0518 100%)',
-            delay: 2300,
+            category: 'narrative',
             recovery: 0,
         },
         {
@@ -130,7 +121,7 @@ const _INN_FRAMES = {
                 'Há algo mágico no ar esta noite.',
             ],
             bg: 'radial-gradient(ellipse at 50% 40%, #0a0a20 0%, #050510 100%)',
-            delay: 2300,
+            category: 'data',
             recovery: 0.3,
         },
         {
@@ -142,7 +133,7 @@ const _INN_FRAMES = {
                 'Corpo, mente e espírito em harmonia.',
             ],
             bg: 'radial-gradient(ellipse at 50% 40%, #080810 0%, #050508 100%)',
-            delay: 2500,
+            category: 'data',
             recovery: 0.8,
         },
         {
@@ -154,7 +145,7 @@ const _INN_FRAMES = {
                 'esperam sobre a mesa de carvalho.',
             ],
             bg: 'radial-gradient(ellipse at 50% 40%, #3a2800 0%, #2a1a00 100%)',
-            delay: 2000,
+            category: 'data',
             recovery: 1.0,
         },
     ],
@@ -231,8 +222,11 @@ function _barHTML(emoji, current, max, type, isFull, sizeClass) {
 }
 
 function _recoveryHTML(data, pct) {
-    const hp = Math.min(Math.round(data.start_hp + (data.max_hp - data.start_hp) * pct), data.max_hp);
-    const mp = Math.min(Math.round(data.start_mp + (data.max_mp - data.start_mp) * pct), data.max_mp);
+    // Use final_hp/final_mp for interpolation (poor tier: final < max)
+    const finalHp = data.final_hp !== undefined ? data.final_hp : data.max_hp;
+    const finalMp = data.final_mp !== undefined ? data.final_mp : data.max_mp;
+    const hp = Math.min(Math.round(data.start_hp + (finalHp - data.start_hp) * pct), data.max_hp);
+    const mp = Math.min(Math.round(data.start_mp + (finalMp - data.start_mp) * pct), data.max_mp);
     const resEmoji = data.res_emoji || '💧';
     const isFull = pct >= 1.0;
 
@@ -243,12 +237,14 @@ function _recoveryHTML(data, pct) {
     if (data.allies && data.allies.length > 0) {
         html += '<div class="inn-allies-divider">─ ◆ GRUPO ◆ ─</div>';
         for (const a of data.allies) {
-            const aHp = Math.min(Math.round(a.start_hp + (a.final_hp - a.start_hp) * pct), a.max_hp);
+            const aFinalHp = a.final_hp !== undefined ? a.final_hp : a.max_hp;
+            const aHp = Math.min(Math.round(a.start_hp + (aFinalHp - a.start_hp) * pct), a.max_hp);
             const aResEmoji = a.res_emoji || '💧';
             html += '<div class="inn-ally-name">' + (a.icon || '👤') + ' ' + a.name + '</div>';
             html += _barHTML('❤️', aHp, a.max_hp, 'hp', isFull, 'small');
             if (a.max_mp > 0) {
-                const aMp = Math.min(Math.round(a.start_mp + (a.final_mp - a.start_mp) * pct), a.max_mp);
+                const aFinalMp = a.final_mp !== undefined ? a.final_mp : a.max_mp;
+                const aMp = Math.min(Math.round(a.start_mp + (aFinalMp - a.start_mp) * pct), a.max_mp);
                 html += _barHTML(aResEmoji, aMp, a.max_mp, 'mp', isFull, 'small');
             }
         }
@@ -284,6 +280,7 @@ function _buildFrames(data) {
     const frames = templateFrames.map(f => ({
         ...f,
         lines: f.lines.map(l => l.replace('{name}', data.player_name || 'Aventureiro')),
+        delay: _calcInnDelay(f.lines, f.category),
     }));
 
     // Insert dream frame (all tiers — poor gets a rougher dream)
@@ -293,28 +290,27 @@ function _buildFrames(data) {
                 title: 'SONHO AGITADO',
                 icons: '💭  · · ·  💭',
                 bg: 'radial-gradient(ellipse at 50% 40%, #1a100a 0%, #0a0805 100%)',
-                delay: 2000,
                 recovery: 0.8,
             },
             modest: {
                 title: 'MUNDO ONÍRICO',
                 icons: '💭  🔮  ✨',
                 bg: 'radial-gradient(ellipse at 50% 40%, #1a0a2e 0%, #0a0518 100%)',
-                delay: 2500,
                 recovery: 0.85,
             },
             wealthy: {
                 title: 'VISÃO ETÉREA',
                 icons: '🔮  💭  ⚜️',
                 bg: 'radial-gradient(ellipse at 50% 40%, #2a0a2e 0%, #150518 100%)',
-                delay: 2500,
                 recovery: 0.9,
             },
         };
         const dc = dreamConfig[tier] || dreamConfig.modest;
+        const dreamLines = ['"' + data.dream + '"'];
         const dreamFrame = {
             ...dc,
-            lines: ['"' + data.dream + '"'],
+            lines: dreamLines,
+            delay: _calcInnDelay(dreamLines, 'dream'),
             isDream: true,
         };
         frames.splice(frames.length - 1, 0, dreamFrame);
@@ -323,12 +319,13 @@ function _buildFrames(data) {
     // Insert ally event frame
     if (data.ally_event) {
         const ae = data.ally_event;
+        const allyLines = [ae.text];
         const allyFrame = {
             title: ae.title,
             icons: ae.icon + '  🌙',
-            lines: [ae.text],
+            lines: allyLines,
             bg: 'radial-gradient(ellipse at 50% 40%, #0a0a15 0%, #050508 100%)',
-            delay: 2800,
+            delay: _calcInnDelay(allyLines, 'narrative'),
             recovery: tier === 'poor' ? 0.8 : (frames.length > 4 ? 0.5 : 0.4),
         };
         const insertIdx = tier === 'poor' ? frames.length - 1 : frames.length - 2;
@@ -392,13 +389,13 @@ function playInnAnimation(data, onDone) {
         }, 400);
     };
 
-    // Show skip button after 2s
+    // Show skip button after 2.5s
     setTimeout(() => {
         if (!_done) {
             skipBtn.style.display = '';
             skipBtn.onclick = finish;
         }
-    }, 2000);
+    }, 2500);
 
     // Show overlay
     overlay.style.display = '';
