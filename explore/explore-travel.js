@@ -1626,6 +1626,543 @@ function _drawVegetation(ctx, veg, w, groundY, elapsed) {
 
 
 // ═══════════════════════════════════════════
+// TERRAIN RIM LIGHT
+// ═══════════════════════════════════════════
+
+function _drawTerrainRimLight(ctx, features, w, h, yRatio, offset, silhouetteType, celestialType, intensity) {
+    const baseY = h * yRatio;
+    const isSun = celestialType === 'sun';
+    const rimColor = isSun ? '255,220,140' : '180,190,230';
+    const alpha = (isSun ? 0.15 : 0.08) * intensity;
+    ctx.save();
+    ctx.strokeStyle = `rgba(${rimColor},${alpha})`;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    for (const f of features) {
+        const x = ((f.x - offset) % (w * 2) + w * 2) % (w * 2) - w * 0.3;
+        const fh = f.height * h * 0.18;
+        const fw = f.width * 40;
+        if (silhouetteType === 'conifers') {
+            ctx.moveTo(x, baseY - fh);
+            ctx.lineTo(x + fw * 0.4, baseY - fh * 0.58);
+            ctx.lineTo(x + fw * 0.5, baseY);
+        } else if (silhouetteType === 'peaks') {
+            ctx.moveTo(x + fw * 0.1, baseY - fh);
+            ctx.lineTo(x + fw * 0.4, baseY - fh * 0.75);
+            ctx.lineTo(x + fw * 0.7, baseY);
+        } else if (silhouetteType === 'deadTrees') {
+            ctx.moveTo(x, baseY - fh);
+            ctx.lineTo(x + fw * 0.4, baseY - fh * 0.9);
+            ctx.lineTo(x + fw * 0.08, baseY - fh * 0.5);
+        } else {
+            ctx.moveTo(x - fw * 0.1, baseY - fh);
+            ctx.lineTo(x + fw * 0.5, baseY - fh * 0.35);
+            ctx.lineTo(x + fw * 0.6, baseY);
+        }
+    }
+    ctx.stroke();
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// LIGHTNING BOLTS
+// ═══════════════════════════════════════════
+
+function _drawLightningBolts(ctx, flashes, w, h, elapsed) {
+    for (const f of flashes) {
+        const t = elapsed - f.triggerTime;
+        if (t < 0 || t > f.duration * 0.6) continue;
+        let alpha;
+        if (t < 40) alpha = 0.7;
+        else if (t < 80) alpha = 0.15;
+        else if (t < 120) alpha = 0.5;
+        else alpha = 0.5 * Math.max(0, 1 - (t - 120) / 80);
+        if (alpha < 0.05) continue;
+        const seed = f.triggerTime;
+        const boltX = w * 0.3 + (seed % 100) / 100 * w * 0.4;
+        ctx.save();
+        ctx.strokeStyle = `rgba(200,200,255,${alpha})`;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = `rgba(150,150,255,${alpha * 0.8})`;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        let bx = boltX, by = 0;
+        ctx.moveTo(bx, by);
+        const segments = 8 + ((seed * 7) % 5);
+        const endY = h * 0.45 + (seed % 50);
+        const segH = endY / segments;
+        for (let i = 0; i < segments; i++) {
+            bx += ((seed * (i + 3) * 13) % 40) - 20;
+            by += segH;
+            ctx.lineTo(bx, by);
+            if (i === Math.floor(segments * 0.3) || i === Math.floor(segments * 0.6)) {
+                const branchDir = (i % 2 === 0) ? 1 : -1;
+                const branchLen = 20 + (seed % 30);
+                ctx.moveTo(bx, by);
+                ctx.lineTo(bx + branchLen * branchDir, by + branchLen * 0.6);
+                ctx.moveTo(bx, by);
+            }
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
+
+// ═══════════════════════════════════════════
+// FOG BANDS
+// ═══════════════════════════════════════════
+
+function _generateFogBands(w, _h) {
+    const bands = [];
+    for (let group = 0; group < 2; group++) {
+        const count = 2 + Math.floor(Math.random() * 2);
+        for (let i = 0; i < count; i++) {
+            bands.push({
+                group, x: Math.random() * w * 2 - w * 0.5,
+                yOffset: (Math.random() - 0.5) * 15,
+                width: 100 + Math.random() * 120, height: 4 + Math.random() * 6,
+                alpha: 0.04 + Math.random() * 0.04,
+                speed: 0.005 + Math.random() * 0.008,
+                phase: Math.random() * Math.PI * 2,
+            });
+        }
+    }
+    return bands;
+}
+
+function _drawFogBands(ctx, bands, w, h, elapsed, group) {
+    const baseY = group === 0 ? h * 0.47 : h * 0.62;
+    ctx.save();
+    for (const b of bands) {
+        if (b.group !== group) continue;
+        const drift = elapsed * b.speed;
+        const bx = ((b.x - drift) % (w + b.width * 2));
+        const drawX = bx < -b.width ? bx + w + b.width * 2 : bx;
+        const by = baseY + b.yOffset + Math.sin(elapsed * 0.001 + b.phase) * 4;
+        ctx.fillStyle = `rgba(180,190,170,${b.alpha})`;
+        ctx.beginPath();
+        ctx.ellipse(drawX, by, b.width * 0.5, b.height, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = `rgba(180,190,170,${b.alpha * 0.5})`;
+        ctx.beginPath();
+        ctx.ellipse(drawX + b.width * 0.2, by + 2, b.width * 0.3, b.height * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// SNOW CAPS
+// ═══════════════════════════════════════════
+
+function _drawSnowCaps(ctx, features, w, h, yRatio, offset, silhouetteType, intensity) {
+    if (silhouetteType !== 'peaks') return;
+    const baseY = h * yRatio;
+    ctx.save();
+    ctx.fillStyle = `rgba(230,235,245,${0.3 * intensity})`;
+    for (const f of features) {
+        const x = ((f.x - offset) % (w * 2) + w * 2) % (w * 2) - w * 0.3;
+        const fh = f.height * h * 0.18;
+        const fw = f.width * 40;
+        const capH = fh * 0.2;
+        ctx.beginPath();
+        ctx.moveTo(x + fw * 0.1, baseY - fh);
+        ctx.lineTo(x + fw * 0.1 - fw * 0.12, baseY - fh + capH);
+        ctx.lineTo(x + fw * 0.1 + fw * 0.15, baseY - fh + capH);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x + fw * 0.4, baseY - fh * 0.75);
+        ctx.lineTo(x + fw * 0.4 - fw * 0.08, baseY - fh * 0.75 + capH * 0.7);
+        ctx.lineTo(x + fw * 0.4 + fw * 0.1, baseY - fh * 0.75 + capH * 0.7);
+        ctx.closePath();
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// FALLING LEAVES
+// ═══════════════════════════════════════════
+
+function _generateFallingLeaves(w, _h, type) {
+    const leaves = [];
+    const count = type === 'dead' ? 6 : 8;
+    for (let i = 0; i < count; i++) {
+        leaves.push({
+            x: Math.random() * w, y: -10 - Math.random() * 200,
+            size: 2 + Math.random() * 2.5, rotation: Math.random() * Math.PI * 2,
+            rotSpeed: 2 + Math.random() * 3, fallSpeed: 15 + Math.random() * 20,
+            swayAmp: 20 + Math.random() * 30, swayFreq: 1 + Math.random() * 1.5,
+            phase: Math.random() * Math.PI * 2, type,
+            spawnTime: Math.random() * 2500,
+        });
+    }
+    return leaves;
+}
+
+function _drawFallingLeaves(ctx, leaves, w, h, elapsed) {
+    const groundY = h * 0.72;
+    for (const l of leaves) {
+        if (elapsed < l.spawnTime) continue;
+        const t = (elapsed - l.spawnTime) * 0.001;
+        l.y = -10 + t * l.fallSpeed;
+        l.x += Math.sin(t * l.swayFreq + l.phase) * l.swayAmp * 0.01;
+        l.rotation += l.rotSpeed * 0.016;
+        if (l.y > groundY + 10) {
+            l.y = -10; l.x = Math.random() * w; l.spawnTime = elapsed + Math.random() * 500;
+        }
+        if (l.y < -15) continue;
+        ctx.save();
+        ctx.translate(l.x, l.y);
+        ctx.rotate(l.rotation);
+        if (l.type === 'dead') {
+            ctx.fillStyle = `rgba(${120 + Math.floor(l.phase * 20)},${70 + Math.floor(l.phase * 10)},20,0.5)`;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, l.size, l.size * 0.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            ctx.fillStyle = `rgba(${60 + Math.floor(l.phase * 15)},${120 + Math.floor(l.phase * 10)},30,0.5)`;
+            ctx.beginPath();
+            ctx.moveTo(0, -l.size);
+            ctx.quadraticCurveTo(l.size * 0.8, -l.size * 0.2, 0, l.size);
+            ctx.quadraticCurveTo(-l.size * 0.8, -l.size * 0.2, 0, -l.size);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+}
+
+
+// ═══════════════════════════════════════════
+// CELESTIAL REFLECTION ON WATER
+// ═══════════════════════════════════════════
+
+function _drawCelestialReflection(ctx, w, groundY, elapsed, celestialType) {
+    const isSun = celestialType === 'sun';
+    const drift = elapsed * 0.003;
+    const srcX = w * 0.78 + drift;
+    const reflX = Math.min(w * 0.7, Math.max(w * 0.2, srcX - w * 0.1));
+    const reflY = groundY + 25;
+    const baseAlpha = isSun ? 0.12 : 0.06;
+    const pulse = 0.7 + 0.3 * Math.sin(elapsed * 0.003);
+    const alpha = baseAlpha * pulse;
+    const color = isSun ? '255,220,120' : '180,200,240';
+    ctx.save();
+    for (let i = 0; i < 3; i++) {
+        const rippleX = reflX + Math.sin(elapsed * 0.005 + i * 2) * 4;
+        const rippleAlpha = alpha * (1 - i * 0.25);
+        const grad = ctx.createRadialGradient(rippleX, reflY + i * 6, 0, rippleX, reflY + i * 6, (isSun ? 12 : 8) + i * 5);
+        grad.addColorStop(0, `rgba(${color},${rippleAlpha})`);
+        grad.addColorStop(0.6, `rgba(${color},${rippleAlpha * 0.3})`);
+        grad.addColorStop(1, `rgba(${color},0)`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.ellipse(rippleX, reflY + i * 6, (isSun ? 12 : 8) + i * 3, 7 - i, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.fillStyle = `rgba(${color},${alpha * 1.5})`;
+    ctx.beginPath();
+    ctx.ellipse(reflX, reflY, 3, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// RAIN
+// ═══════════════════════════════════════════
+
+function _generateRain(w, h) {
+    const drops = [];
+    for (let i = 0; i < 60; i++) {
+        drops.push({
+            x: Math.random() * w * 1.3 - w * 0.15,
+            y: Math.random() * h,
+            speed: 400 + Math.random() * 200,
+            length: 8 + Math.random() * 12,
+            alpha: 0.15 + Math.random() * 0.2,
+        });
+    }
+    return drops;
+}
+
+function _drawRain(ctx, drops, w, h, elapsed) {
+    const groundY = h * 0.72;
+    const dt = 0.016;
+    const windAngle = 0.15; // slight diagonal
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(180,190,210,0.25)';
+    ctx.lineWidth = 0.8;
+
+    for (const d of drops) {
+        d.y += d.speed * dt;
+        d.x -= d.speed * dt * windAngle;
+
+        if (d.y > groundY) {
+            // Splash at ground
+            const splashAlpha = 0.2;
+            ctx.fillStyle = `rgba(180,190,210,${splashAlpha})`;
+            ctx.beginPath();
+            ctx.ellipse(d.x, groundY + 1, 2, 0.8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Reset drop
+            d.y = -d.length - Math.random() * 40;
+            d.x = Math.random() * w * 1.3 - w * 0.15;
+        }
+
+        const endX = d.x + d.length * windAngle;
+        const endY = d.y + d.length;
+        ctx.globalAlpha = d.alpha;
+        ctx.beginPath();
+        ctx.moveTo(d.x, d.y);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// CLOUD SHADOWS
+// ═══════════════════════════════════════════
+
+function _drawCloudShadows(ctx, clouds, w, h, elapsed) {
+    const groundY = h * 0.72;
+    ctx.save();
+    for (const c of clouds) {
+        const speed = 0.008 * c.depth;
+        const cx = ((c.x - elapsed * speed) % (w + c.w * 2));
+        const drawX = cx < -c.w ? cx + w + c.w * 2 : cx;
+        // Shadow on the ground, offset down from the cloud
+        const shadowY = groundY + 5;
+        const shadowW = c.w * 0.6;
+        const shadowAlpha = 0.06 * c.depth;
+        ctx.fillStyle = `rgba(0,0,0,${shadowAlpha})`;
+        ctx.beginPath();
+        ctx.ellipse(drawX, shadowY, shadowW, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// CONSTELLATIONS
+// ═══════════════════════════════════════════
+
+function _generateConstellations(stars) {
+    const consts = [];
+    // Pick 2-3 groups of 3-5 nearby stars and connect them
+    const used = new Set();
+    const groupCount = 2 + Math.floor(Math.random() * 2);
+
+    for (let g = 0; g < groupCount; g++) {
+        // Find a seed star not yet used
+        let seed = -1;
+        for (let i = 0; i < stars.length; i++) {
+            if (!used.has(i) && stars[i].brightness > 0.5) { seed = i; break; }
+        }
+        if (seed === -1) break;
+
+        const group = [seed];
+        used.add(seed);
+
+        // Find 2-4 nearest neighbors
+        const neighbors = [];
+        for (let i = 0; i < stars.length; i++) {
+            if (used.has(i)) continue;
+            const dx = stars[i].x - stars[seed].x;
+            const dy = stars[i].y - stars[seed].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 120) neighbors.push({ idx: i, dist });
+        }
+        neighbors.sort((a, b) => a.dist - b.dist);
+
+        const take = Math.min(2 + Math.floor(Math.random() * 3), neighbors.length);
+        for (let i = 0; i < take; i++) {
+            group.push(neighbors[i].idx);
+            used.add(neighbors[i].idx);
+        }
+
+        if (group.length >= 3) {
+            // Create edges (connect sequentially + one wrap)
+            const edges = [];
+            for (let i = 0; i < group.length - 1; i++) {
+                edges.push([group[i], group[i + 1]]);
+            }
+            consts.push({ edges, phase: Math.random() * Math.PI * 2 });
+        }
+    }
+    return consts;
+}
+
+function _drawConstellations(ctx, consts, stars, elapsed) {
+    ctx.save();
+    for (const c of consts) {
+        const pulse = 0.3 + 0.2 * Math.sin(elapsed * 0.0008 + c.phase);
+        ctx.strokeStyle = `rgba(180,200,255,${pulse * 0.12})`;
+        ctx.lineWidth = 0.6;
+        for (const [a, b] of c.edges) {
+            ctx.beginPath();
+            ctx.moveTo(stars[a].x, stars[a].y);
+            ctx.lineTo(stars[b].x, stars[b].y);
+            ctx.stroke();
+        }
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// TERRAIN NOISE TEXTURE
+// ═══════════════════════════════════════════
+
+function _drawTerrainNoise(ctx, w, h, groundY, elapsed, groundColor) {
+    const scrollX = elapsed * 0.08;
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    // Stipple dots scattered on the ground to break up flat color
+    const r = parseInt(groundColor.slice(1, 3), 16);
+    const g = parseInt(groundColor.slice(3, 5), 16);
+    const b = parseInt(groundColor.slice(5, 7), 16);
+    const lighter = `rgb(${Math.min(255, r + 30)},${Math.min(255, g + 25)},${Math.min(255, b + 20)})`;
+    const darker = `rgb(${Math.max(0, r - 20)},${Math.max(0, g - 20)},${Math.max(0, b - 15)})`;
+
+    for (let i = 0; i < 40; i++) {
+        // Pseudo-random position from index (deterministic noise)
+        const px = ((i * 37 + 13 - scrollX * 0.3) % (w + 20)) - 10;
+        const py = groundY + 5 + ((i * 53) % 60) + ((i * 19) % 30);
+        const sz = 0.5 + ((i * 7) % 3) * 0.5;
+        ctx.fillStyle = (i % 3 === 0) ? lighter : darker;
+        ctx.beginPath();
+        ctx.arc(px, py, sz, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// COMPASS ROSE
+// ═══════════════════════════════════════════
+
+function _drawCompassRose(ctx, w, h, elapsed, progress) {
+    const cx = 36, cy = h - 170; // bottom-left, above progress bar
+    const r = 14;
+    const rot = elapsed * 0.0002 + progress * 0.3; // slow rotation
+
+    // Fade in with progress, subtle
+    const alpha = Math.min(0.35, progress * 0.8);
+    if (alpha < 0.05) return;
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(cx, cy);
+    ctx.rotate(rot);
+
+    // Outer ring
+    ctx.strokeStyle = 'rgba(196,149,58,0.4)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Cardinal points (N/S/E/W arrows)
+    const points = [
+        { angle: 0, len: r * 0.95, color: 'rgba(220,60,60,0.7)' },   // N (red)
+        { angle: Math.PI, len: r * 0.7, color: 'rgba(196,149,58,0.5)' }, // S
+        { angle: Math.PI / 2, len: r * 0.7, color: 'rgba(196,149,58,0.5)' }, // E
+        { angle: -Math.PI / 2, len: r * 0.7, color: 'rgba(196,149,58,0.5)' }, // W
+    ];
+
+    for (const p of points) {
+        const tipX = Math.sin(p.angle) * p.len;
+        const tipY = -Math.cos(p.angle) * p.len;
+        const baseL = 3;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.moveTo(tipX, tipY);
+        ctx.lineTo(Math.sin(p.angle + 0.4) * baseL, -Math.cos(p.angle + 0.4) * baseL);
+        ctx.lineTo(Math.sin(p.angle - 0.4) * baseL, -Math.cos(p.angle - 0.4) * baseL);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // Center dot
+    ctx.fillStyle = 'rgba(196,149,58,0.5)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // N label
+    ctx.rotate(-rot); // undo rotation so N stays upright
+    ctx.font = "bold 6px 'Cinzel', serif";
+    ctx.fillStyle = 'rgba(220,60,60,0.5)';
+    ctx.textAlign = 'center';
+    ctx.fillText('N', 0, -r - 4);
+
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// ROAD MILESTONES
+// ═══════════════════════════════════════════
+
+function _generateMilestones(w, _h) {
+    const stones = [];
+    for (let i = 0; i < 3; i++) {
+        stones.push({
+            x: w * 0.3 + i * w * 0.8 + Math.random() * w * 0.3,
+            height: 8 + Math.random() * 5,
+            width: 4 + Math.random() * 2,
+        });
+    }
+    return stones;
+}
+
+function _drawMilestones(ctx, stones, w, groundY, elapsed) {
+    const scrollX = elapsed * 0.08;
+    ctx.save();
+    for (const s of stones) {
+        const x = ((s.x - scrollX) % (w * 2.4 + 60)) - 30;
+        if (x < -20 || x > w + 20) continue;
+
+        const baseY = groundY + 6;
+        // Stone post (small trapezoid)
+        ctx.fillStyle = 'rgba(120,110,95,0.5)';
+        ctx.beginPath();
+        ctx.moveTo(x - s.width * 0.4, baseY);
+        ctx.lineTo(x - s.width * 0.3, baseY - s.height);
+        ctx.lineTo(x + s.width * 0.3, baseY - s.height);
+        ctx.lineTo(x + s.width * 0.4, baseY);
+        ctx.closePath();
+        ctx.fill();
+
+        // Rounded top
+        ctx.beginPath();
+        ctx.arc(x, baseY - s.height, s.width * 0.3, Math.PI, 0);
+        ctx.fill();
+
+        // Light edge (right side, from moonlight/sunlight)
+        ctx.strokeStyle = 'rgba(180,170,150,0.2)';
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        ctx.moveTo(x + s.width * 0.3, baseY - s.height);
+        ctx.lineTo(x + s.width * 0.4, baseY);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
 // UTILITIES
 // ═══════════════════════════════════════════
 
