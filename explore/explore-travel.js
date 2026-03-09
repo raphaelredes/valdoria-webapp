@@ -536,27 +536,27 @@ function _taperedLimb(ctx, x1, y1, x2, y2, w1, w2, baseColor, highlightColor) {
     ctx.fill();
 }
 
-// Helper: draw a shoe/boot shape
+// Helper: draw a low-profile shoe/sneaker
 function _drawBoot(ctx, ax, ay, footH, s, angle, lifting) {
     ctx.save();
     ctx.translate(ax, ay);
     if (lifting) ctx.rotate(angle);
-    const bw = 4.5 * s, bh = footH;
-    ctx.fillStyle = '#2a1e14';
+    const bw = 5 * s, bh = footH;
+    // Low flat sneaker shape
+    ctx.fillStyle = '#1e1610';
     ctx.beginPath();
-    ctx.moveTo(-1.5 * s, 0);
-    ctx.lineTo(-2 * s, bh * 0.4);
-    ctx.lineTo(-1.5 * s, bh);
-    ctx.lineTo(bw + 0.5 * s, bh);
-    ctx.quadraticCurveTo(bw + 2.5 * s, bh * 0.4, bw, 0);
+    ctx.moveTo(-1 * s, 0);                              // top back
+    ctx.lineTo(-1.2 * s, bh);                           // heel (flat, no bump)
+    ctx.lineTo(bw + 1 * s, bh);                         // sole front
+    ctx.quadraticCurveTo(bw + 2 * s, bh * 0.3, bw, 0); // rounded toe
     ctx.closePath();
     ctx.fill();
-    // Sole line
-    ctx.strokeStyle = '#1a1208';
-    ctx.lineWidth = 1;
+    // Sole
+    ctx.strokeStyle = '#0e0a06';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.moveTo(-1.5 * s, bh);
-    ctx.lineTo(bw + 0.5 * s, bh);
+    ctx.moveTo(-1.2 * s, bh);
+    ctx.lineTo(bw + 1 * s, bh);
     ctx.stroke();
     ctx.restore();
 }
@@ -566,16 +566,16 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     // --- Proportions matched to walking reference photo ---
     const headR = 5 * s;
     const neckH = 2 * s;
-    const torsoH = 26 * s;          // shirt hangs past waist
+    const torsoH = 24 * s;          // shirt ends at mid-hip
     const upperArmL = 10 * s;
     const foreArmL = 10 * s;
-    const thighL = 20 * s;          // shorts reach to just above knee
-    const shinL = 16 * s;           // calves shorter than thighs
-    const footH = 3 * s;
+    const thighL = 13 * s;          // shorts are short — end well above knee
+    const shinL = 22 * s;           // long calves, prominent like reference
+    const footH = 2.5 * s;          // low-profile sneakers
     const hipSpread = 2.5 * s;
-    const shoulderW = 9 * s;        // broad (shirt is dominant shape)
-    const waistW = 8.5 * s;         // loose, not cinched
-    const hemW = 9 * s;             // slight flare at hem
+    const shoulderW = 10 * s;       // broad (shirt is widest element)
+    const waistW = 9 * s;           // loose, not cinched
+    const hemW = 9.5 * s;           // slight flare at hem
 
     const hipY = -(footH + shinL + thighL);
     const shY = hipY - torsoH;
@@ -624,18 +624,18 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
         const sa = a + kb;
         const ankleX = kx + Math.sin(sa) * shinL;
         const ankleY = ky + Math.cos(sa) * shinL;
-        // Upper thigh (shorts — dark, thick like reference)
-        const tw1 = isFar ? 7 * s : 7.5 * s;
-        const tw2 = isFar ? 5.5 * s : 6 * s;
+        // Upper thigh (shorts — baggy, wider at top)
+        const tw1 = isFar ? 7.5 * s : 8 * s;
+        const tw2 = isFar ? 5 * s : 5.5 * s;
         _taperedLimb(ctx, hipOx, hipY, kx, ky, tw1 * 0.5, tw2 * 0.5, shortsC, shortsHi);
-        // Knee cap
+        // Knee area
         ctx.fillStyle = skinC;
         ctx.beginPath();
-        ctx.arc(kx, ky, tw2 * 0.38, 0, Math.PI * 2);
+        ctx.arc(kx, ky, tw2 * 0.35, 0, Math.PI * 2);
         ctx.fill();
-        // Calf (skin-tone — tapered like reference)
-        const csw1 = isFar ? 5 * s : 5.5 * s;
-        const csw2 = isFar ? 2.5 * s : 2.8 * s;
+        // Calf (skin-tone — long, lean, tapered like reference)
+        const csw1 = isFar ? 4.5 * s : 5 * s;
+        const csw2 = isFar ? 2.2 * s : 2.5 * s;
         _taperedLimb(ctx, kx, ky, ankleX, ankleY, csw1 * 0.5, csw2 * 0.5, skinC, skinHi);
         // Boot
         const lifting = a < 0;
