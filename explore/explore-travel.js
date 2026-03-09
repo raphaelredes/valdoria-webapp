@@ -586,7 +586,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const p = elapsed * 0.006;
     const bob = Math.sin(p * 2) * 1.0;
     const rN = Math.sin(p), rF = Math.sin(p + Math.PI);
-    const sw = 0.35;
+    const sw = 0.30;
     const lN = rN * sw, lF = rF * sw;
     const kN = rN < -0.1 ? -Math.pow(Math.abs(rN), 1.2) * 0.5 : 0;
     const kF = rF < -0.1 ? -Math.pow(Math.abs(rF), 1.2) * 0.5 : 0;
@@ -602,10 +602,10 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
 
     // Colors — medieval palette
     const cTunic = '#5a4535', cTunicHi = '#6b5645';
-    const cSkin = '#7a5e42', cSkinHi = '#8a6e52';
+    const cSkin = '#5e4a32', cSkinHi = '#665038';
     const cShorts = '#3a2a1e', cShortsHi = '#4a3a2e';
     const cFar = '#443525', cFarHi = '#554535';
-    const cSkinFar = '#604830', cSkinFarHi = '#705840';
+    const cSkinFar = '#4e3c24', cSkinFarHi = '#54422a';
     const cShortsFar = '#2e2018', cShortsFarHi = '#3e3028';
 
     const hy = hdY + Math.sin(p * 2 - 0.3) * 0.5;
@@ -633,9 +633,9 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
         ctx.beginPath();
         ctx.arc(kx, ky, tw2 * 0.38, 0, Math.PI * 2);
         ctx.fill();
-        // Calf (skin-tone — exposed like reference)
-        const csw1 = isFar ? 5.5 * s : 6 * s;
-        const csw2 = isFar ? 3 * s : 3.2 * s;
+        // Calf (skin-tone — tapered like reference)
+        const csw1 = isFar ? 5 * s : 5.5 * s;
+        const csw2 = isFar ? 2.5 * s : 2.8 * s;
         _taperedLimb(ctx, kx, ky, ankleX, ankleY, csw1 * 0.5, csw2 * 0.5, skinC, skinHi);
         // Boot
         const lifting = a < 0;
