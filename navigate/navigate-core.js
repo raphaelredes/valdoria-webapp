@@ -301,6 +301,7 @@ function buildConnectionGraph() {
     }
     // Invalidate caches that depend on the connection graph
     _invalidateMapCaches();
+    if (typeof invalidateBfsCache === 'function') invalidateBfsCache();
 }
 
 function _invalidateMapCaches() {

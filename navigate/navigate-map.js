@@ -748,9 +748,9 @@ function setupPanZoom() {
         if (btnIn) btnIn.disabled = _zoomIdx >= ZOOM_LEVELS.length - 1;
         if (btnOut) btnOut.disabled = _zoomIdx <= 0;
     }
-    if (btnIn) btnIn.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(1); clamp(); apply(); _updateZoomBtns(); });
-    if (btnOut) btnOut.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(-1); clamp(); apply(); _updateZoomBtns(); });
-    if (btnRec) btnRec.addEventListener('click', e => { e.stopPropagation(); centerOnLocation(S.currentLoc); apply(); _updateMinimap(); });
+    if (btnIn) btnIn.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); });
+    if (btnOut) btnOut.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(-1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); });
+    if (btnRec) btnRec.addEventListener('click', e => { e.stopPropagation(); centerOnLocation(S.currentLoc); apply(); _updateMinimap(); if (typeof _haptic === 'function') _haptic('tap'); });
     _updateZoomBtns();
     // Update buttons on any zoom change
     const origSnap = _snapToZoomLevel;

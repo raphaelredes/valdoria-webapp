@@ -467,6 +467,9 @@ function animateTravel(fromId, toId, onComplete) {
 
 // ── BFS path (returns array of location IDs, cached) ──
 const _bfsCache = {};
+function invalidateBfsCache() {
+    for (const k in _bfsCache) delete _bfsCache[k];
+}
 function bfsPath(fromId, toId) {
     if (fromId === toId) return [fromId];
     const key = `${fromId}|${toId}`;
@@ -623,6 +626,7 @@ function _updateOffscreenIndicator() {
 // ── Biome legend toggle ──
 let _legendOpen = false;
 function toggleLegendExpand() {
+    _haptic('tap');
     _legendOpen = !_legendOpen;
     const panel = document.getElementById('legend-biomes');
     const toggle = document.querySelector('.legend-toggle');

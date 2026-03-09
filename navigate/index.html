@@ -227,11 +227,11 @@
         .info-close {
             background: none;
             border: 1px solid rgba(112, 66, 20, 0.3);
-            border-radius: 3px;
+            border-radius: 4px;
             color: #a09484;
-            font-size: 14px;
-            width: 28px;
-            height: 28px;
+            font-size: 16px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -457,6 +457,17 @@
 
         .terrain-illust {
             pointer-events: none;
+        }
+
+        /* ═══ IDLE PAUSE — Suspend decorative animations after 30s inactivity ═══ */
+        body.map-idle .player-marker,
+        body.map-idle .loc-node.explored,
+        body.map-idle .loc-node.known_mapped,
+        body.map-idle .fog-cloud,
+        body.map-idle .first-visit-ring,
+        body.map-idle .current-pulse-ring,
+        body.map-idle .compass-needle {
+            animation-play-state: paused !important;
         }
 
         /* ═══ PLAYER MARKER — Banner sway ═══ */
@@ -918,9 +929,9 @@
             gap: 6px;
         }
         .zoom-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
             border: 1px solid rgba(112, 66, 20, 0.35);
             background: rgba(42, 36, 32, 0.92);
             color: #c4953a;
@@ -949,7 +960,7 @@
             pointer-events: none;
         }
         .distance-ring-label {
-            font-size: 7px;
+            font-size: 10px;
             fill: #c4953a;
             fill-opacity: 0.4;
             font-family: 'Cinzel', serif;
@@ -1061,9 +1072,9 @@
             background: none;
             border: none;
             color: #8a7060;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 10px 14px;
             transition: color 0.1s;
             font-family: 'Cinzel', serif;
             -webkit-tap-highlight-color: transparent;
@@ -1578,6 +1589,23 @@
         } else {
             initFontPicker();
         }
+
+        // ── Idle detection: pause decorative animations after 30s ──
+        (function() {
+            var _idleTimer = null;
+            var IDLE_MS = 30000;
+            function _resetIdle() {
+                document.body.classList.remove('map-idle');
+                clearTimeout(_idleTimer);
+                _idleTimer = setTimeout(function() {
+                    document.body.classList.add('map-idle');
+                }, IDLE_MS);
+            }
+            ['pointerdown', 'pointermove', 'wheel', 'keydown'].forEach(function(evt) {
+                document.addEventListener(evt, _resetIdle, { passive: true });
+            });
+            _resetIdle();
+        })();
     </script>
 </body>
 
