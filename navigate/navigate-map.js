@@ -612,6 +612,8 @@ function _snapToZoomLevel(dir, focalX, focalY) {
         S.panY = focalY - mapY * S.zoom;
     }
     _updateMinimap();
+    // Toggle zoom-out class for disabling animations on distant views
+    document.body.classList.toggle('zoom-out', _zoomIdx <= 1);
     if (typeof window._zoomBtnUpdate === 'function') window._zoomBtnUpdate();
 }
 
@@ -649,6 +651,7 @@ function setupPanZoom() {
         }
         S.zoom = ZOOM_LEVELS[_zoomIdx].zoom;
         _updateScaleBar();
+        document.body.classList.toggle('zoom-out', _zoomIdx <= 1);
         wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
         if (typeof window._zoomBtnUpdate === 'function') window._zoomBtnUpdate();
         return;

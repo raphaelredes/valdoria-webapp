@@ -472,16 +472,15 @@
             pointer-events: none;
         }
 
-        /* ═══ IDLE PAUSE — Suspend remaining decorative animations after 30s inactivity ═══ */
+        /* ═══ IDLE PAUSE — Suspend ALL decorative animations after 10s inactivity ═══ */
         body.map-idle .first-visit-ring,
         body.map-idle .current-pulse-ring,
-        body.map-idle .compass-needle {
+        body.map-idle .compass-needle,
+        body.map-idle .selection-ring,
+        body.map-idle .road-path.active,
+        body.map-idle .path-highlight,
+        body.map-idle .flag-cloth {
             animation-play-state: paused !important;
-        }
-
-        /* ═══ PLAYER MARKER — Static (flag animate handles motion) ═══ */
-        .player-marker {
-            /* No CSS animation — SVG SMIL <animate> on the flag is sufficient */
         }
 
         /* ═══ LOCATION NODES — Hover + shake only (no infinite float) ═══ */
@@ -555,6 +554,19 @@
             animation: pathDashFlow 1s linear infinite;
         }
 
+        /* ═══ FLAG WAVE — GPU-friendly CSS transform (replaces SMIL path morph) ═══ */
+        @keyframes flagWave {
+            0%, 100% { transform: skewX(0deg) scaleX(1); }
+            25% { transform: skewX(3deg) scaleX(1.03); }
+            50% { transform: skewX(-2deg) scaleX(0.97); }
+            75% { transform: skewX(2deg) scaleX(1.01); }
+        }
+        .flag-cloth {
+            animation: flagWave 3s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: left center;
+        }
+
         /* ═══ FIRST-VISIT PULSE (known_mapped locations) ═══ */
         @keyframes firstVisitPulse {
             0%, 100% { stroke-opacity: 0.12; }
@@ -562,6 +574,10 @@
         }
         .first-visit-ring {
             animation: firstVisitPulse 3s ease-in-out infinite;
+        }
+        /* Disable pulse on zoom-out — rings are too small to see */
+        body.zoom-out .first-visit-ring {
+            animation: none;
         }
 
         /* ═══ CURRENT LOCATION BADGE ═══ */
@@ -1568,10 +1584,10 @@
             initFontPicker();
         }
 
-        // ── Idle detection: pause decorative animations after 30s ──
+        // ── Idle detection: pause ALL decorative animations after 10s ──
         (function() {
             var _idleTimer = null;
-            var IDLE_MS = 30000;
+            var IDLE_MS = 10000;
             function _resetIdle() {
                 document.body.classList.remove('map-idle');
                 clearTimeout(_idleTimer);
