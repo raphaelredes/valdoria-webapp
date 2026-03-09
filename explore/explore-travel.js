@@ -563,19 +563,19 @@ function _drawBoot(ctx, ax, ay, footH, s, angle, lifting) {
 
 function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const s = 2.0;
-    // --- Human proportions (approx 7 heads tall) ---
-    const headR = 6 * s;
+    // --- Proportions matched to reference (loose tunic + shorts + calves) ---
+    const headR = 5.5 * s;
     const neckH = 2 * s;
-    const torsoH = 22 * s;
-    const upperArmL = 12 * s;
-    const foreArmL = 10 * s;
-    const thighL = 18 * s;
-    const shinL = 18 * s;
+    const torsoH = 28 * s;          // long tunic (shirt hangs past hips)
+    const upperArmL = 10 * s;       // short sleeve length
+    const foreArmL = 11 * s;
+    const thighL = 16 * s;          // shorter (partly hidden by tunic)
+    const shinL = 20 * s;           // longer calves (prominent like reference)
     const footH = 3.5 * s;
     const hipSpread = 3 * s;
-    const shoulderW = 8 * s;
-    const waistW = 6 * s;
-    const hipW = 7 * s;
+    const shoulderW = 9 * s;        // broad (shirt is dominant shape)
+    const waistW = 8 * s;           // loose, not cinched
+    const hemW = 9.5 * s;           // tunic flares slightly at hem
 
     const hipY = -(footH + shinL + thighL);
     const shY = hipY - torsoH;
@@ -584,181 +584,168 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
 
     // Walk cycle
     const p = elapsed * 0.006;
-    const bob = Math.sin(p * 2) * 1.2;
+    const bob = Math.sin(p * 2) * 1.0;
     const rN = Math.sin(p), rF = Math.sin(p + Math.PI);
     const sw = 0.35;
     const lN = rN * sw, lF = rF * sw;
     const kN = rN < -0.1 ? -Math.pow(Math.abs(rN), 1.2) * 0.5 : 0;
     const kF = rF < -0.1 ? -Math.pow(Math.abs(rF), 1.2) * 0.5 : 0;
-    const armSwing = 0.28;
+    const armSwing = 0.25;
     const aN = Math.sin(p + Math.PI) * armSwing, aF = Math.sin(p) * armSwing;
-    // Elbow bend: arm bends more when swinging back
-    const elbowN = Math.max(0, -aN) * 0.6 + 0.15;
-    const elbowF = Math.max(0, -aF) * 0.6 + 0.15;
-    const wind = Math.sin(elapsed * 0.002) * 2;
-    // Slight torso rotation/lean with walk
-    const torsoLean = Math.sin(p) * 0.015;
+    const elbowN = Math.max(0, -aN) * 0.5 + 0.2;
+    const elbowF = Math.max(0, -aF) * 0.5 + 0.2;
+    const torsoLean = Math.sin(p) * 0.012;
 
     ctx.save();
     ctx.translate(cx, groundY + bob);
-    ctx.rotate(-0.03 + torsoLean);
+    ctx.rotate(-0.04 + torsoLean);  // slight forward lean like reference
 
-    // Colors
+    // Colors — medieval palette
     const cTunic = '#5a4535', cTunicHi = '#6b5645';
     const cSkin = '#8a6e52', cSkinHi = '#9a7e62';
-    const cPants = '#3a2a1e', cPantsHi = '#4a3a2e';
+    const cShorts = '#3a2a1e', cShortsHi = '#4a3a2e';
     const cFar = '#443525', cFarHi = '#554535';
     const cSkinFar = '#6e5840', cSkinFarHi = '#7e6850';
-    const cPantsFar = '#2e2018', cPantsFarHi = '#3e3028';
+    const cShortsFar = '#2e2018', cShortsFarHi = '#3e3028';
 
     const hy = hdY + Math.sin(p * 2 - 0.3) * 0.5;
 
     // === SHADOW ===
     ctx.fillStyle = 'rgba(0,0,0,0.15)';
     ctx.beginPath();
-    ctx.ellipse(0, 3, 12 * s, 2 * s, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 3, 13 * s, 2 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // === LEG HELPER ===
-    function leg(a, kb, pantsC, pantsHi, isFar) {
+    // === LEG HELPER (shorts on upper thigh, skin-tone calves, boots) ===
+    function leg(a, kb, shortsC, shortsHi, skinC, skinHi, isFar) {
         const hipOx = isFar ? -hipSpread * 0.4 : hipSpread * 0.4;
         const kx = hipOx + Math.sin(a) * thighL;
         const ky = hipY + Math.cos(a) * thighL;
         const sa = a + kb;
         const ankleX = kx + Math.sin(sa) * shinL;
         const ankleY = ky + Math.cos(sa) * shinL;
-        // Thigh — proportional to narrower torso
-        const tw1 = isFar ? 6.5 * s : 7 * s;
-        const tw2 = isFar ? 5 * s : 5.5 * s;
-        _taperedLimb(ctx, hipOx, hipY, kx, ky, tw1 * 0.5, tw2 * 0.5, pantsC, pantsHi);
-        // Knee joint
-        ctx.fillStyle = pantsC;
+        // Upper thigh (shorts — dark, thick like reference)
+        const tw1 = isFar ? 7 * s : 7.5 * s;
+        const tw2 = isFar ? 5.5 * s : 6 * s;
+        _taperedLimb(ctx, hipOx, hipY, kx, ky, tw1 * 0.5, tw2 * 0.5, shortsC, shortsHi);
+        // Knee cap
+        ctx.fillStyle = skinC;
         ctx.beginPath();
-        ctx.arc(kx, ky, tw2 * 0.42, 0, Math.PI * 2);
+        ctx.arc(kx, ky, tw2 * 0.38, 0, Math.PI * 2);
         ctx.fill();
-        // Shin — tapers to ankle
-        const csw1 = isFar ? 5 * s : 5.5 * s;
-        const csw2 = isFar ? 3.2 * s : 3.5 * s;
-        _taperedLimb(ctx, kx, ky, ankleX, ankleY, csw1 * 0.5, csw2 * 0.5, pantsC, pantsHi);
+        // Calf (skin-tone — exposed like reference)
+        const csw1 = isFar ? 5.5 * s : 6 * s;
+        const csw2 = isFar ? 3 * s : 3.2 * s;
+        _taperedLimb(ctx, kx, ky, ankleX, ankleY, csw1 * 0.5, csw2 * 0.5, skinC, skinHi);
         // Boot
         const lifting = a < 0;
         _drawBoot(ctx, ankleX, ankleY, footH, s, lifting ? Math.abs(kb) * 0.4 : 0, lifting);
     }
 
     // === FAR LEG ===
-    leg(lF, kF, cPantsFar, cPantsFarHi, true);
+    leg(lF, kF, cShortsFar, cShortsFarHi, cSkinFar, cSkinFarHi, true);
 
-    // === FAR ARM (upper + forearm with elbow bend) ===
+    // === FAR ARM (short sleeve + exposed forearm) ===
     const armOriginY = shY + 3 * s;
-    const armOxFar = -shoulderW * 0.5;
-    // Upper arm (sleeve)
+    const armOxFar = -shoulderW * 0.45;
     const farElbowX = armOxFar + Math.sin(aF) * upperArmL;
     const farElbowY = armOriginY + Math.cos(aF) * upperArmL;
+    // Short sleeve (tunic color, wider = loose fabric)
     _taperedLimb(ctx, armOxFar, armOriginY, farElbowX, farElbowY,
-        4 * s * 0.5, 3 * s * 0.5, cFar, cFarHi);
-    // Forearm (skin, bends at elbow)
+        4.5 * s * 0.5, 3.2 * s * 0.5, cFar, cFarHi);
+    // Exposed forearm (skin)
     const farForeAngle = aF + elbowF;
     const farHandX = farElbowX + Math.sin(farForeAngle) * foreArmL;
     const farHandY = farElbowY + Math.cos(farForeAngle) * foreArmL;
     _taperedLimb(ctx, farElbowX, farElbowY, farHandX, farHandY,
-        3 * s * 0.5, 2.2 * s * 0.5, cSkinFar, cSkinFarHi);
-    // Elbow joint
-    ctx.fillStyle = cFar;
-    ctx.beginPath(); ctx.arc(farElbowX, farElbowY, 2.8 * s * 0.5, 0, Math.PI * 2); ctx.fill();
-    // Hand
+        3 * s * 0.5, 2 * s * 0.5, cSkinFar, cSkinFarHi);
     ctx.fillStyle = cSkinFar;
-    ctx.beginPath(); ctx.arc(farHandX, farHandY, 1.8 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(farHandX, farHandY, 1.6 * s, 0, Math.PI * 2); ctx.fill();
 
-    // === TORSO (organic shape with shoulders, waist, hips) ===
+    // === TORSO / TUNIC (dominant visual — loose shirt shape like reference) ===
     const tGrad = ctx.createLinearGradient(0, shY, 0, shY + torsoH);
     tGrad.addColorStop(0, '#6b5645');
-    tGrad.addColorStop(0.3, '#5a4535');
-    tGrad.addColorStop(0.7, '#5a4535');
+    tGrad.addColorStop(0.25, '#5a4535');
+    tGrad.addColorStop(0.8, '#5a4535');
     tGrad.addColorStop(1, '#4a3525');
     ctx.fillStyle = tGrad;
     ctx.beginPath();
-    // Right shoulder (rounded)
+    // Shoulder line (rounded)
     ctx.moveTo(-shoulderW, shY + 3 * s);
-    ctx.quadraticCurveTo(-shoulderW, shY, -shoulderW * 0.5, shY);
-    // Neckline
-    ctx.lineTo(shoulderW * 0.5, shY);
-    // Left shoulder (rounded)
+    ctx.quadraticCurveTo(-shoulderW, shY, -shoulderW * 0.4, shY);
+    ctx.lineTo(shoulderW * 0.4, shY);
     ctx.quadraticCurveTo(shoulderW, shY, shoulderW, shY + 3 * s);
-    // Right side: shoulder → waist → hip
+    // Side: shoulder → loose waist → flared hem (like a t-shirt)
     ctx.bezierCurveTo(
-        shoulderW * 0.95, shY + torsoH * 0.3,
-        waistW * 0.95, shY + torsoH * 0.45,
-        hipW, shY + torsoH
+        shoulderW * 0.98, shY + torsoH * 0.35,
+        waistW, shY + torsoH * 0.5,
+        hemW, shY + torsoH
     );
-    // Bottom
-    ctx.lineTo(-hipW, shY + torsoH);
-    // Left side: hip → waist → shoulder
+    // Hem bottom (slight curve for fabric drape)
+    ctx.quadraticCurveTo(0, shY + torsoH + 2 * s, -hemW, shY + torsoH);
+    // Left side: hem → waist → shoulder
     ctx.bezierCurveTo(
-        -waistW * 0.95, shY + torsoH * 0.45,
-        -shoulderW * 0.95, shY + torsoH * 0.3,
+        -waistW, shY + torsoH * 0.5,
+        -shoulderW * 0.98, shY + torsoH * 0.35,
         -shoulderW, shY + 3 * s
     );
     ctx.closePath();
     ctx.fill();
 
-    // Belt
-    const beltY = shY + torsoH * 0.7;
-    const beltHalfW = waistW + (hipW - waistW) * 0.6;
+    // Belt at waist level
+    const beltY = shY + torsoH * 0.6;
+    const beltHalfW = waistW * 0.95;
     ctx.strokeStyle = '#6a4a20';
-    ctx.lineWidth = 1.8 * s;
+    ctx.lineWidth = 2 * s;
     ctx.beginPath();
     ctx.moveTo(-beltHalfW, beltY);
     ctx.lineTo(beltHalfW, beltY);
     ctx.stroke();
-    // Buckle
     ctx.fillStyle = '#c4953a';
     ctx.beginPath(); ctx.arc(0, beltY, 1.5 * s, 0, Math.PI * 2); ctx.fill();
 
-    // Volume shading (left side darker)
-    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    // Volume shading (left side)
+    ctx.fillStyle = 'rgba(0,0,0,0.10)';
     ctx.beginPath();
     ctx.moveTo(-shoulderW, shY + 3 * s);
-    ctx.quadraticCurveTo(-shoulderW, shY, -shoulderW * 0.5, shY);
-    ctx.lineTo(-shoulderW * 0.1, shY);
-    ctx.lineTo(-hipW * 0.1, shY + torsoH);
-    ctx.lineTo(-hipW, shY + torsoH);
+    ctx.quadraticCurveTo(-shoulderW, shY, -shoulderW * 0.4, shY);
+    ctx.lineTo(-shoulderW * 0.05, shY);
+    ctx.lineTo(-hemW * 0.05, shY + torsoH);
+    ctx.quadraticCurveTo(-hemW * 0.3, shY + torsoH + 1, -hemW, shY + torsoH);
     ctx.bezierCurveTo(
-        -waistW * 0.95, shY + torsoH * 0.45,
-        -shoulderW * 0.95, shY + torsoH * 0.3,
+        -waistW, shY + torsoH * 0.5,
+        -shoulderW * 0.98, shY + torsoH * 0.35,
         -shoulderW, shY + 3 * s
     );
     ctx.closePath();
     ctx.fill();
 
     // Tunic hem line
-    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+    ctx.strokeStyle = 'rgba(0,0,0,0.12)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(-hipW, shY + torsoH);
-    ctx.lineTo(hipW, shY + torsoH);
+    ctx.moveTo(-hemW, shY + torsoH);
+    ctx.quadraticCurveTo(0, shY + torsoH + 2 * s, hemW, shY + torsoH);
     ctx.stroke();
 
     // === NEAR LEG ===
-    leg(lN, kN, cPants, cPantsHi, false);
+    leg(lN, kN, cShorts, cShortsHi, cSkin, cSkinHi, false);
 
-    // === NEAR ARM + STAFF (upper + forearm with elbow) ===
-    const armOxNear = shoulderW * 0.5;
-    // Upper arm (sleeve)
+    // === NEAR ARM + STAFF (short sleeve + skin forearm) ===
+    const armOxNear = shoulderW * 0.45;
     const nearElbowX = armOxNear + Math.sin(aN) * upperArmL;
     const nearElbowY = armOriginY + Math.cos(aN) * upperArmL;
+    // Short sleeve
     _taperedLimb(ctx, armOxNear, armOriginY, nearElbowX, nearElbowY,
-        4.5 * s * 0.5, 3.2 * s * 0.5, cTunic, cTunicHi);
-    // Forearm (skin)
+        5 * s * 0.5, 3.5 * s * 0.5, cTunic, cTunicHi);
+    // Exposed forearm
     const nearForeAngle = aN + elbowN;
     const nearHandX = nearElbowX + Math.sin(nearForeAngle) * foreArmL;
     const nearHandY = nearElbowY + Math.cos(nearForeAngle) * foreArmL;
     _taperedLimb(ctx, nearElbowX, nearElbowY, nearHandX, nearHandY,
-        3.2 * s * 0.5, 2.2 * s * 0.5, cSkin, cSkinHi);
-    // Elbow joint
-    ctx.fillStyle = cTunic;
-    ctx.beginPath(); ctx.arc(nearElbowX, nearElbowY, 3 * s * 0.5, 0, Math.PI * 2); ctx.fill();
+        3.5 * s * 0.5, 2.2 * s * 0.5, cSkin, cSkinHi);
 
-    // Staff (from hand to ground and above)
+    // Staff
     const staffTopX = nearHandX + 1 * s, staffTopY = nearHandY - 6 * s;
     const staffBotX = nearHandX + 2.5 * s, staffBotY = 4 * s;
     _taperedLimb(ctx, staffTopX, staffTopY, staffBotX, staffBotY,
@@ -775,54 +762,50 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.fillStyle = orbGrad;
     ctx.beginPath(); ctx.arc(staffTopX, staffTopY, 2.5 * s, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    // Near hand
+    // Hand
     ctx.fillStyle = cSkin;
     ctx.beginPath(); ctx.arc(nearHandX, nearHandY, 1.8 * s, 0, Math.PI * 2); ctx.fill();
 
     // === NECK ===
-    _taperedLimb(ctx, 0, shY, 0, neckY, 3.5 * s * 0.5, 3 * s * 0.5, cSkin, cSkinHi);
+    _taperedLimb(ctx, 0, shY, 0, neckY, 3 * s * 0.5, 2.5 * s * 0.5, cSkin, cSkinHi);
 
-    // === HEAD ===
-    // Base head shape (slightly oval, taller than wide)
+    // === HEAD (slightly oval) ===
     ctx.fillStyle = cSkin;
     ctx.save();
     ctx.translate(0, hy);
-    ctx.scale(0.92, 1.0);
+    ctx.scale(0.9, 1.0);
     ctx.beginPath(); ctx.arc(0, 0, headR, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
 
-    // === HOOD ===
-    const hoodR = headR + 2.5 * s;
+    // === HOOD (dark, tight-fitting) ===
+    const hoodR = headR + 2 * s;
     ctx.fillStyle = '#1a1614';
     ctx.beginPath();
-    // Hood wraps over top and sides, open at face
-    ctx.arc(0, hy - 1 * s, hoodR, -Math.PI * 0.15, -Math.PI + 0.15, true);
-    // Drape down below chin on back side
-    ctx.lineTo(-hoodR * 0.65, hy + headR * 0.6);
-    // Under chin
-    ctx.quadraticCurveTo(-hoodR * 0.2, hy + headR * 0.4, hoodR * 0.35, hy + headR * 0.3);
+    ctx.arc(0, hy - 1 * s, hoodR, -Math.PI * 0.12, -Math.PI + 0.12, true);
+    ctx.lineTo(-hoodR * 0.6, hy + headR * 0.5);
+    ctx.quadraticCurveTo(-hoodR * 0.15, hy + headR * 0.35, hoodR * 0.3, hy + headR * 0.25);
     ctx.closePath();
     ctx.fill();
 
-    // Hood edge highlight
-    ctx.strokeStyle = 'rgba(60,55,50,0.3)';
-    ctx.lineWidth = 1.5;
+    // Hood edge
+    ctx.strokeStyle = 'rgba(60,55,50,0.25)';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.arc(0, hy - 1 * s, hoodR, -Math.PI * 0.15, -Math.PI + 0.15, true);
+    ctx.arc(0, hy - 1 * s, hoodR, -Math.PI * 0.12, -Math.PI + 0.12, true);
     ctx.stroke();
 
-    // Face shadow under hood
-    const faceShadow = ctx.createRadialGradient(headR * 0.15, hy, headR * 0.1, headR * 0.15, hy, headR * 0.8);
-    faceShadow.addColorStop(0, 'rgba(10,5,2,0.55)');
+    // Face shadow
+    const faceShadow = ctx.createRadialGradient(headR * 0.15, hy, headR * 0.1, headR * 0.15, hy, headR * 0.75);
+    faceShadow.addColorStop(0, 'rgba(10,5,2,0.5)');
     faceShadow.addColorStop(1, 'rgba(10,5,2,0)');
     ctx.fillStyle = faceShadow;
     ctx.beginPath();
-    ctx.arc(headR * 0.1, hy, headR * 0.75, -0.3, 0.7);
-    ctx.arc(headR * 0.1, hy, headR * 0.15, 0.7, -0.3, true);
+    ctx.arc(headR * 0.1, hy, headR * 0.7, -0.3, 0.65);
+    ctx.arc(headR * 0.1, hy, headR * 0.12, 0.65, -0.3, true);
     ctx.closePath();
     ctx.fill();
 
-    // Eyes (glowing from shadow)
+    // Glowing eyes
     ctx.save();
     const eyeGlow = 0.4 + Math.sin(elapsed * 0.004) * 0.15;
     ctx.shadowColor = `rgba(196,149,58,${eyeGlow * 0.6})`;
