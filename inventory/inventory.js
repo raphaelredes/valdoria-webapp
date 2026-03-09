@@ -2455,7 +2455,13 @@ function toast(msg, type) {
     const barH = bar ? bar.offsetHeight : 80;
     el.style.bottom = (barH + 12) + 'px';
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), 2000);
+    // Calculate reading time from text content
+    var clean = (msg || '').replace(/<[^>]*>/g, '');
+    var cat = (type === 'err' || type === 'warn') ? 'toast-warn' : 'toast';
+    var dur = (typeof calcReadTime === 'function')
+        ? calcReadTime(clean, cat)
+        : Math.max(1500, Math.min(4000, clean.split(/\s+/).length * 250));
+    setTimeout(() => el.remove(), dur);
 }
 
 // ── Escape for onclick attributes & HTML context ──

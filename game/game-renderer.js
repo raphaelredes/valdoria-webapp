@@ -687,7 +687,9 @@ function _showNotifications(notifs) {
     notifs.forEach((n, i) => {
         setTimeout(() => {
             if (typeof showToast === 'function') {
-                showToast(n.text, n.type === 'warn' ? 4000 : 3000);
+                const cat = n.type === 'warn' ? 'toast-warn' : 'toast';
+                const dur = (typeof calcReadTime === 'function') ? calcReadTime(n.text, cat) : (n.type === 'warn' ? 4000 : 3000);
+                showToast(n.text, dur);
             }
         }, i * 600);
     });

@@ -320,7 +320,7 @@ function _showDiceRollFallback(result) {
             }, 500);
             setTimeout(goFight, 2500);
         }
-    }, 1200);
+    }, 2000);
 }
 
 // ═══════════════════════════════════════════════════════

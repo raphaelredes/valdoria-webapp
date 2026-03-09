@@ -162,11 +162,18 @@ function _stopSlowWarning() {
 // ─── Toast Notification ───
 let _toastTimeout = null;
 
-function showToast(text, duration = 2000) {
+function showToast(text, duration) {
     const el = document.getElementById('toast');
     if (!el) return;
 
     if (_toastTimeout) clearTimeout(_toastTimeout);
+
+    // Calculate reading time if no explicit duration provided
+    if (duration === undefined || duration === null) {
+        duration = (typeof calcReadTime === 'function')
+            ? calcReadTime(text, 'toast')
+            : Math.max(1500, Math.min(4000, (text || '').split(/\s+/).length * 250));
+    }
 
     el.textContent = text;
     el.classList.remove('hiding');

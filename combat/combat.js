@@ -838,10 +838,12 @@ document.addEventListener('visibilitychange', () => {
 function _showTimerExpiredToast() {
     const el = document.createElement('div');
     el.className = 'timer-toast';
-    el.textContent = '⏳ Tempo esgotado — turno perdido!';
+    const msg = '⏳ Tempo esgotado — turno perdido!';
+    el.textContent = msg;
     document.body.appendChild(el);
+    const dur = (typeof calcReadTime === 'function') ? calcReadTime(msg, 'toast-warn') : 3000;
     setTimeout(() => el.classList.add('visible'), 50);
-    setTimeout(() => { el.classList.remove('visible'); setTimeout(() => el.remove(), 300); }, 2500);
+    setTimeout(() => { el.classList.remove('visible'); setTimeout(() => el.remove(), 300); }, dur);
 }
 
 // Aggressive polling after timer expiry to pick up server penalty turn
@@ -2228,10 +2230,10 @@ function _initDiceAttackOverlay(lr) {
                 }
             };
 
-            // Miss/no damage — hold result then close
+            // Miss/no damage — hold result then close (min 2400ms for readability)
             if (isMiss || lr.d <= 0) {
                 setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishAll; } }, 500);
-                setTimeout(finishAll, 1200);
+                setTimeout(finishAll, 2400);
                 return;
             }
 

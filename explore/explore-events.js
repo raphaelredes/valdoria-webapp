@@ -153,7 +153,7 @@ function _typewriterPage(el, pages, pageIdx, onDone) {
         }
         span.textContent += text[i];
         i++;
-    }, 20);
+    }, 35);
 }
 
 function _showPageContinue(el, pages, pageIdx, totalPages, onDone) {

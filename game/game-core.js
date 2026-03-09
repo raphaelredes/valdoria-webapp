@@ -138,7 +138,7 @@ async function init() {
             const msg = errMsg.textContent || '';
             if (msg.includes('Sem conexão') || msg.includes('indisponível')) {
                 _clog('NETWORK → auto-retry after coming online');
-                if (typeof showToast === 'function') showToast('Conexão restaurada, reconectando...', 2000);
+                if (typeof showToast === 'function') showToast('Conexão restaurada, reconectando...');
                 setTimeout(() => {
                     const retryBtn = document.getElementById('v-err-retry');
                     if (retryBtn && retryBtn.onclick) retryBtn.onclick();
@@ -348,7 +348,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                 const cached = loadCachedScreen();
                 if (cached && !S.currentScreen) {
                     renderScreen(cached);
-                    showToast('Reconectando...', 3000);
+                    showToast('Reconectando...');
                 }
                 showError(isTimeout
                     ? 'Servidor não respondeu a tempo. Tente novamente.'
@@ -473,7 +473,7 @@ async function doAction(callbackData) {
 
     if (data.error === 'no_response') {
         hideLocationTransition();
-        if (typeof showToast === 'function') showToast('Ação não processada. Tente novamente.', 3000);
+        if (typeof showToast === 'function') showToast('Ação não processada. Tente novamente.');
         return;
     }
 
@@ -506,7 +506,10 @@ async function doAction(callbackData) {
 
     // Handle toasts/alerts
     if (data.toast) showToast(data.toast);
-    if (data.alert) showToast(data.alert, 3000);
+    if (data.alert) {
+        const alertDur = (typeof calcReadTime === 'function') ? calcReadTime(data.alert, 'toast-warn') : 3000;
+        showToast(data.alert, alertDur);
+    }
 
     // Handle timer
     if (data.timer) {

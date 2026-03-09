@@ -149,7 +149,7 @@ function typewriterDialogue(el, text, onDone) {
         }
         span.textContent += text[i];
         i++;
-    }, 20); // 50 chars/sec
+    }, 35); // ~29 chars/sec (Human Reading Time rule: 30-50ms/char)
 }
 
 function skipTypewriter() {

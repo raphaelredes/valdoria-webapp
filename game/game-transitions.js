@@ -180,7 +180,7 @@ async function requestTransition(toApp, payload = {}) {
             if (data.error) {
                 console.error('[GAME] Transition error:', data.error);
                 if (data.fallback === 'close') {
-                    showToast('Não disponível no momento', 2000);
+                    showToast('Não disponível no momento');
                 } else {
                     showError('Transição falhou: ' + (data.error || 'erro desconhecido'));
                 }
