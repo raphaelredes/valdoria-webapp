@@ -542,10 +542,12 @@ function _renderArenaInner(s) {
     if (_initDice3d && (s.ph || s.phase || 'intro') !== 'intro') {
         _initDice3d.dispose(); _initDice3d = null;
     }
-    // Dispose damage 3D dice on re-render and hide persistent overlay
-    if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
-    const existingOverlay = document.getElementById('dmgDice3dOverlay');
-    if (existingOverlay) existingOverlay.style.display = 'none';
+    // Dispose damage 3D dice on re-render — but NOT during active action/cinematic
+    if (!_cinematicInProgress && !_actionSent) {
+        if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
+        const existingOverlay = document.getElementById('dmgDice3dOverlay');
+        if (existingOverlay) existingOverlay.style.display = 'none';
+    }
     const app = document.getElementById('app');
     // Clear previous biome classes before applying new one
     document.body.className = document.body.className.replace(/\bbiome-\S+/g, '').trim();
@@ -943,7 +945,7 @@ function startPolling() {
 
             if (newPh !== oldPh || newRn !== oldRn || newTc !== oldTc || newHp !== oldHp) {
                 // Don't update during cinematic, initiative animation, or overlay open
-                if (_cinematicInProgress || _initAnimationInProgress || _overlayOpen) {
+                if (_cinematicInProgress || _initAnimationInProgress || _overlayOpen || _actionSent) {
                     _pollInterval = setTimeout(poll, _getPollInterval());
                     return;
                 }
