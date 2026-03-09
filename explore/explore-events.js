@@ -2453,11 +2453,11 @@ async function initAsync() {
 
     // ── Loading progress controller ──
     const _lc = window._loadingCtrl || { setProgress: () => {}, hideLoading: (cb) => { if (cb) cb(); }, hideQuick: () => {}, cleanup: () => {} };
-    _lc.setProgress(10); // Init started
+    _lc.setProgress(10, 'Iniciando...'); // Init started
 
     // ── Health check before loading ──
     if (S.apiBase) {
-        _lc.setProgress(15);
+        _lc.setProgress(15, 'Conectando...');
         const healthy = await _exploreHealthCheck();
         if (!healthy) {
             // Try to show cached map while waiting for reconnect
@@ -2490,7 +2490,7 @@ async function initAsync() {
     let dataObj = null;
 
     // Fetch persistence state and payload from backend API if available
-    _lc.setProgress(25);
+    _lc.setProgress(25, 'Buscando dados...');
     if (S.apiBase && S.uid && S.token) {
         try {
             const url = `${S.apiBase}/api/explore/state?user_id=${S.uid}`;
@@ -2545,7 +2545,7 @@ async function initAsync() {
         });
     }
 
-    _lc.setProgress(50);
+    _lc.setProgress(50, 'Dados recebidos');
 
     if (!dataB64) {
         _lc.cleanup();
@@ -2563,7 +2563,7 @@ async function initAsync() {
     }
 
     try {
-        _lc.setProgress(60);
+        _lc.setProgress(60, 'Descomprimindo...');
         const binary = atob(dataB64.replace(/-/g, '+').replace(/_/g, '/'));
         const bytes = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -2571,7 +2571,7 @@ async function initAsync() {
         const inflated = await zlibInflate(bytes);
         const jsonStr = new TextDecoder().decode(inflated);
         dataObj = JSON.parse(jsonStr);
-        _lc.setProgress(75);
+        _lc.setProgress(75, 'Gerando terreno...');
 
         // Travel animation (only on fresh start, not restore)
         const regionName = dataObj.rn || '';
@@ -2582,7 +2582,7 @@ async function initAsync() {
             });
         }
 
-        _lc.setProgress(90);
+        _lc.setProgress(90, 'Preparando mapa...');
         loadMapData(dataObj);
 
         // Post-combat narrative when returning from combat

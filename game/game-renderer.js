@@ -527,14 +527,18 @@ function _showDiceAnimation(screen) {
             }
         } catch (e) { /* */ }
 
-        // Show skip pill after 500ms, auto-advance after 2500ms
+        // Show skip pill after 500ms, auto-advance after calculated reading time
+        var resultText = (formulaEl ? formulaEl.textContent : '') + ' ' + (resultEl ? resultEl.textContent : '');
+        var readDur = (typeof calcReadTime === 'function')
+            ? calcReadTime(resultText, 'overlay')
+            : 2500;
         setTimeout(() => {
             if (!_done) {
                 skipBtn.classList.add('visible');
                 skipBtn.onclick = finish;
             }
         }, 500);
-        setTimeout(finish, 2500);
+        setTimeout(finish, readDur);
     };
 
     // Try 3D dice

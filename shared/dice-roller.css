@@ -48,7 +48,7 @@
 .dr-name {
     flex: 1;
     font-size: 0.85rem;
-    color: #d4c8b0;
+    color: var(--v-text, #d4c8b0);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -73,22 +73,22 @@
     font-weight: 700;
     min-width: 28px;
     text-align: center;
-    color: #d4c8b0;
+    color: var(--v-text, #d4c8b0);
     font-variant-numeric: tabular-nums;
 }
 
 .dr-dice-value.dr-cycling {
-    color: #888;
+    color: var(--v-text-dim, #8a7a68);
 }
 
-.dr-dice-value.dr-player-val { color: #c4953a; }
+.dr-dice-value.dr-player-val { color: var(--v-gold, #c4953a); }
 .dr-dice-value.dr-ally-val   { color: #b0b8c0; }
 .dr-dice-value.dr-enemy-val  { color: #c05050; }
 
 /* ─── Formula (optional, e.g. "d20+2") ─── */
 .dr-formula {
     font-size: 0.7rem;
-    color: #887;
+    color: var(--v-text-dim, #8a7a68);
     margin-left: 2px;
 }
 
@@ -128,7 +128,7 @@
 /* ─── Title ─── */
 .dr-title {
     font-size: 0.8rem;
-    color: #c4953a;
+    color: var(--v-gold, #c4953a);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 4px;

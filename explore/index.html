@@ -89,6 +89,9 @@
             </svg>
             <div class="mc-pulse"></div>
             <div class="mc-pulse mc-pulse-2"></div>
+            <!-- Completion waves -->
+            <div class="mc-completion-wave"></div>
+            <div class="mc-completion-wave wave-2"></div>
             <!-- Central gem -->
             <div class="mc-gem">
                 <div class="mc-gem-core"></div>
@@ -103,6 +106,7 @@
             <div class="loading-progress-track">
                 <div id="loading-progress" class="loading-progress-fill" style="width:0%"></div>
             </div>
+            <div id="loading-stage" class="loading-stage"></div>
         </div>
         <div class="loading-tip-area">
             <div id="loading-tip" class="loading-tip">Gerando mapa...</div>
@@ -132,10 +136,37 @@
         ];
         var tipEl = document.getElementById('loading-tip');
         var progressEl = document.getElementById('loading-progress');
+        var stageEl = document.getElementById('loading-stage');
+        var overlay = document.getElementById('loading');
+        var circle = overlay ? overlay.querySelector('.magic-circle') : null;
         var tipIndex = 0;
         var _tipInterval, _slowTimer, _verySlowTimer;
+        var _lastPct = 0;
 
-        // Rotate tips every 3s with crossfade
+        // Ring acceleration: lerp speed based on progress (100% = 4x faster)
+        function updateRingSpeed(pct) {
+            if (!circle) return;
+            var factor = 1 - (pct / 100) * 0.75; // 1.0 → 0.25
+            circle.style.setProperty('--ring-outer', (60 * factor) + 's');
+            circle.style.setProperty('--ring-mid', (35 * factor) + 's');
+            circle.style.setProperty('--ring-inner', (45 * factor) + 's');
+        }
+
+        // Gem phase: 0 (default ruby), 1 (amber at 50%), 2 (bright gold at 90%)
+        function updateGemPhase(pct) {
+            if (!overlay) return;
+            if (pct >= 90) overlay.setAttribute('data-phase', '2');
+            else if (pct >= 50) overlay.setAttribute('data-phase', '1');
+            else overlay.removeAttribute('data-phase');
+        }
+
+        // Completion pulse at 100%
+        function triggerCompletionPulse() {
+            var waves = overlay ? overlay.querySelectorAll('.mc-completion-wave') : [];
+            waves.forEach(function(w) { w.classList.add('active'); });
+        }
+
+        // Rotate tips every 3.5s with crossfade
         _tipInterval = setInterval(function() {
             tipIndex = (tipIndex + 1) % TIPS.length;
             tipEl.classList.add('tip-exit');
@@ -159,19 +190,32 @@
 
         // Expose for explore-events.js
         window._loadingCtrl = {
-            setProgress: function(pct) {
-                if (progressEl) progressEl.style.width = Math.min(100, pct) + '%';
+            setProgress: function(pct, stageName) {
+                pct = Math.min(100, pct);
+                if (progressEl) progressEl.style.width = pct + '%';
+                // Stage text
+                if (stageEl && stageName) stageEl.textContent = stageName;
+                // Ring acceleration
+                updateRingSpeed(pct);
+                // Gem color evolution
+                updateGemPhase(pct);
+                // Completion pulse
+                if (pct >= 100 && _lastPct < 100) triggerCompletionPulse();
+                _lastPct = pct;
             },
             /** Cinematic exit with flash + circle zoom + disperse */
             hideLoading: function(cb) {
                 clearInterval(_tipInterval);
                 clearTimeout(_slowTimer);
                 clearTimeout(_verySlowTimer);
-                var overlay = document.getElementById('loading');
                 if (!overlay || overlay.classList.contains('hidden')) { if (cb) cb(); return; }
-                // Set progress to 100%
+                // Set progress to 100% with final stage
                 if (progressEl) progressEl.style.width = '100%';
-                // Trigger cinematic exit
+                updateRingSpeed(100);
+                updateGemPhase(100);
+                if (stageEl) stageEl.textContent = 'Pronto!';
+                if (_lastPct < 100) triggerCompletionPulse();
+                // Trigger cinematic exit after pulse settles
                 setTimeout(function() {
                     overlay.classList.add('exit-cinematic');
                     overlay.addEventListener('animationend', function handler(e) {
@@ -180,21 +224,20 @@
                         overlay.classList.add('hidden');
                         if (cb) cb();
                     });
-                    // Safety fallback in case animationend doesn't fire
+                    // Safety fallback
                     setTimeout(function() {
                         if (!overlay.classList.contains('hidden')) {
                             overlay.classList.add('hidden');
                             if (cb) cb();
                         }
                     }, 1200);
-                }, 250);
+                }, 350);
             },
             /** Quick hide (no cinematic, for restores) */
             hideQuick: function() {
                 clearInterval(_tipInterval);
                 clearTimeout(_slowTimer);
                 clearTimeout(_verySlowTimer);
-                var overlay = document.getElementById('loading');
                 if (overlay) overlay.classList.add('hidden');
             },
             cleanup: function() {

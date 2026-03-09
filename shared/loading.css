@@ -203,15 +203,15 @@
 /* Shared ring styles */
 .mc-ring { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-/* Outer rune ring — CW slowly */
+/* Outer rune ring — CW slowly (speed driven by --ring-speed) */
 .mc-outer {
-    animation: spinCW 60s linear infinite;
+    animation: spinCW var(--ring-outer, 60s) linear infinite;
     filter: drop-shadow(0 0 3px rgba(196,149,58,0.3));
 }
 .mc-rune-text { font-size: 13px; letter-spacing: 3px; font-family: serif; }
 
-/* Mid energy ring — CCW */
-.mc-mid { animation: spinCCW 35s linear infinite; }
+/* Mid energy ring — CCW (speed driven by --ring-speed) */
+.mc-mid { animation: spinCCW var(--ring-mid, 35s) linear infinite; }
 
 .mc-energy-arc {
     stroke-dasharray: 50 590;
@@ -224,9 +224,9 @@
 
 @keyframes energyFlow { to { stroke-dashoffset: -640; } }
 
-/* Inner text ring — CW faster */
+/* Inner text ring — CW faster (speed driven by --ring-speed) */
 .mc-inner {
-    animation: spinCW 45s linear infinite;
+    animation: spinCW var(--ring-inner, 45s) linear infinite;
     filter: drop-shadow(0 0 2px rgba(196,149,58,0.2));
 }
 .mc-inner-text { font-size: 9.5px; letter-spacing: 5px; font-family: serif; }
@@ -301,6 +301,86 @@
 @keyframes gemFlare {
     0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
     50%      { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+}
+
+/* ── Gem color evolution (driven by --gem-phase: 0→1) ── */
+.mc-gem-core {
+    --gem-glow: rgba(196,149,58, calc(0.5 + var(--gem-phase, 0) * 0.5));
+    --gem-outer: rgba(196,149,58, calc(0.3 + var(--gem-phase, 0) * 0.4));
+}
+.loading-overlay[data-phase="1"] .mc-gem-core {
+    background: radial-gradient(circle at 35% 35%, #ffe090, #d4aa4a 40%, #c4953a 80%, #8a5020);
+    box-shadow:
+        0 0 18px rgba(212,170,74,0.9),
+        0 0 40px rgba(196,149,58,0.5),
+        inset 0 -3px 6px rgba(0,0,0,0.3),
+        inset 0 2px 4px rgba(255,230,160,0.5);
+}
+.loading-overlay[data-phase="2"] .mc-gem-core {
+    background: radial-gradient(circle at 35% 35%, #fff4d0, #ffe080 40%, #d4aa4a 80%, #c4953a);
+    box-shadow:
+        0 0 24px rgba(255,224,128,0.9),
+        0 0 50px rgba(212,170,74,0.6),
+        0 0 80px rgba(196,149,58,0.3),
+        inset 0 -3px 6px rgba(0,0,0,0.2),
+        inset 0 2px 4px rgba(255,240,180,0.6);
+}
+.loading-overlay[data-phase="2"] .mc-gem-flare {
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, rgba(255,224,128,0.3) 0%, rgba(196,149,58,0.1) 40%, transparent 70%);
+}
+
+/* ── Progress bar spark trail ── */
+.loading-progress-fill::before {
+    content: ''; position: absolute; right: 4px; top: 50%;
+    width: 3px; height: 3px; border-radius: 50%;
+    background: #ffe080;
+    box-shadow: 0 0 6px #ffe080, 0 0 12px rgba(196,149,58,0.6);
+    transform: translateY(-50%);
+    animation: sparkTrail 0.8s ease-in-out infinite;
+}
+@keyframes sparkTrail {
+    0%, 100% { opacity: 0.3; box-shadow: 0 0 4px #ffe080; }
+    50%      { opacity: 1; box-shadow: 0 0 8px #ffe080, 0 0 16px rgba(196,149,58,0.6), 0 0 24px rgba(196,149,58,0.3); }
+}
+
+/* ── Stage text (below progress bar) ── */
+.loading-stage {
+    font-size: 11px;
+    color: rgba(196,149,58,0.5);
+    text-align: center;
+    font-family: var(--v-font, 'MedievalSharp'), serif;
+    margin-top: 6px;
+    letter-spacing: 1px;
+    transition: opacity 0.3s ease;
+    min-height: 14px;
+}
+
+/* ── Completion pulse (100% reached) ── */
+.mc-completion-wave {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 20px; height: 20px;
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 50%;
+    border: 2px solid rgba(255,224,128,0.8);
+    box-shadow: 0 0 20px rgba(196,149,58,0.4), inset 0 0 10px rgba(255,224,128,0.2);
+    opacity: 0; pointer-events: none;
+}
+.mc-completion-wave.active {
+    animation: completionWave 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.mc-completion-wave.wave-2 {
+    border-color: rgba(196,149,58,0.5);
+    box-shadow: 0 0 15px rgba(196,149,58,0.3);
+}
+.mc-completion-wave.wave-2.active {
+    animation-delay: 0.15s;
+}
+@keyframes completionWave {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0.9; }
+    50%  { opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(14); opacity: 0; }
 }
 
 /* ── Brand Section ── */

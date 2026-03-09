@@ -546,7 +546,7 @@
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     font-size: 8px; color: var(--v-gold);
-    background: #1a1510; padding: 0 12px;
+    background: var(--v-bg, #2a2420); padding: 0 12px;
     animation: runePulse 2s ease-in-out infinite;
 }
 @keyframes runePulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
@@ -966,7 +966,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, transparent 0%, #1a2810 30%, #2a3a18 60%, #1a2810 100%);
+    background: linear-gradient(90deg, transparent 0%, #1e2a14 30%, #2a3818 60%, #1e2a14 100%);
     animation: leavesWipe 0.5s ease-in-out forwards;
 }
 @keyframes leavesWipe {

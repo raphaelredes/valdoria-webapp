@@ -85,7 +85,7 @@ body {
 /* Dead/unconscious entities */
 .entity.dead { opacity: 0.45; filter: grayscale(80%) brightness(0.85); }
 .entity.dead .hp-mini-fill,
-.entity.dead .bar-fill { background: #4a3828 !important; animation: none !important; }
+.entity.dead .bar-fill { background: var(--v-border, #4a3828) !important; animation: none !important; }
 .entity:not(.player):active {
     background: var(--v-bg-raised);
     transition: background 80ms ease;
@@ -179,7 +179,7 @@ body {
     position: relative;
     width: 50px;
     height: 14px;
-    background: #3a2820;
+    background: var(--v-bg-raised, #332a22);
     border-radius: 3px;
     overflow: hidden;
     flex-shrink: 0;
