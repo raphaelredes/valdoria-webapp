@@ -1675,10 +1675,22 @@ function _showActionLoading(show) {
 
 // ─── SEND ACTION ───
 let _actionSent = false;
+let _actionSentTimer = null;
 async function sendAction(actionData) {
     if (_actionSent || _cinematicInProgress) return;
     haptic('medium');
     _actionSent = true;
+    // Safety net: force-reset after 30s to prevent permanent action block
+    clearTimeout(_actionSentTimer);
+    _actionSentTimer = setTimeout(() => {
+        if (_actionSent) {
+            console.warn('[COMBAT] Action safety timeout — force reset');
+            _actionSent = false;
+            _showActionLoading(false);
+            document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('disabled'));
+            startPolling();
+        }
+    }, 30000);
     _lastAnimatedRoll = null; // Reset dedup — next render will animate dice
     _initDiceAnimated = false; // Reset initiative dice animation for new combat
     document.querySelectorAll('.action-btn').forEach(b => b.classList.add('disabled'));
@@ -1689,11 +1701,13 @@ async function sendAction(actionData) {
     if (isApiMode && api) {
         try {
             const result = await api.sendAction(actionData);
+            clearTimeout(_actionSentTimer);
             _showActionLoading(false);
             _actionSent = false;
             if (!result) { showError('Sem resposta do servidor.'); return; }
             _playCinematicResult(result, actionData.type);
         } catch (e) {
+            clearTimeout(_actionSentTimer);
             _showActionLoading(false);
             _actionSent = false;
             console.error('[COMBAT] API sendAction error', e);
@@ -1740,6 +1754,14 @@ function _playCinematicResult(result, actionType) {
     }
 
     _cinematicInProgress = true;
+    // Safety net: force-reset after 15s to prevent permanent UI freeze
+    setTimeout(() => {
+        if (_cinematicInProgress) {
+            console.warn('[COMBAT] Cinematic safety timeout — force reset');
+            _cinematicInProgress = false;
+            startPolling();
+        }
+    }, 15000);
 
     // Phase 0: Anticipation text (350ms) — "⚔️ Kalfin avança!"
     const attackerName = currentState?.p?.n || 'Herói';
