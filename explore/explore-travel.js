@@ -618,18 +618,19 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.ellipse(0, 3, 14 * s, 2.5 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // === LEG HELPER (thicker, with different pants color) ===
+    // === LEG HELPER ===
     function leg(a, kb, pantsC, pantsHi, isFar) {
         const kx = Math.sin(a) * thighL, ky = hipY + Math.cos(a) * thighL;
         const sa = a + kb;
         const ax = kx + Math.sin(sa) * shinL, ay = ky + Math.cos(sa) * shinL;
-        // Thicker thigh (like reference — substantial legs)
-        const tw1 = isFar ? 5.5 * s : 6 * s;
-        const tw2 = isFar ? 3.5 * s : 4 * s;
+        // Thigh — wide and consistent (like shorts in reference)
+        const tw1 = isFar ? 5.5 * s : 6.2 * s;
+        const tw2 = isFar ? 4.5 * s : 5 * s;
         _taperedLimb(ctx, 0, hipY, kx, ky, tw1 * 0.5, tw2 * 0.5, pantsC, pantsHi);
-        // Shin (calf muscle bulge → taper)
-        const sw1 = isFar ? 3.5 * s : 4 * s;
-        _taperedLimb(ctx, kx, ky, ax, ay, sw1 * 0.5, 2.2 * s * 0.5, pantsC, pantsHi);
+        // Shin/calf — thicker, doesn't thin out as much
+        const sw1 = isFar ? 4.2 * s : 4.8 * s;
+        const sw2 = isFar ? 2.8 * s : 3.2 * s;
+        _taperedLimb(ctx, kx, ky, ax, ay, sw1 * 0.5, sw2 * 0.5, pantsC, pantsHi);
         // Boot
         const lifting = a < 0;
         _drawBoot(ctx, ax, ay, footH, s, lifting ? Math.abs(kb) * 0.5 : 0, lifting);
@@ -638,41 +639,39 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     // === FAR LEG ===
     leg(lF, kF, cPantsFar, cPantsFarHi, true);
 
-    // === FAR ARM (thicker) ===
+    // === FAR ARM ===
     const armOriginY = shY + 4 * s;
     const afx = Math.sin(aF) * armLen, afy = armOriginY + Math.cos(aF) * armLen;
-    _taperedLimb(ctx, 0, armOriginY, afx, afy, 3 * s * 0.5, 2 * s * 0.5, cFar, cFarHi);
-    // Far hand
+    _taperedLimb(ctx, 0, armOriginY, afx, afy, 3.5 * s * 0.5, 2.2 * s * 0.5, cFar, cFarHi);
     ctx.fillStyle = '#4a3828';
     ctx.beginPath(); ctx.arc(afx, afy, 1.5 * s, 0, Math.PI * 2); ctx.fill();
 
-    // === TORSO (wider, shorter — like t-shirt in reference) ===
+    // === TORSO (rectangular, like a real shirt — minimal taper) ===
     const tGrad = ctx.createLinearGradient(0, shY, 0, shY + torsoH);
     tGrad.addColorStop(0, '#6b5645');
     tGrad.addColorStop(0.4, '#5a4535');
     tGrad.addColorStop(1, '#4a3525');
     ctx.fillStyle = tGrad;
-    const shW = 7 * s, waistW = 5.5 * s, hipW = 6 * s;
+    const shW = 7.5 * s, botW = 6.5 * s;
     ctx.beginPath();
     ctx.moveTo(-shW, shY);
     ctx.lineTo(shW, shY);
-    // Right side contour: shoulder → waist → hip
-    ctx.quadraticCurveTo(shW, shY + torsoH * 0.4, waistW, shY + torsoH * 0.5);
-    ctx.quadraticCurveTo(hipW, shY + torsoH * 0.8, hipW, shY + torsoH);
+    // Right side — very slight taper (almost straight like reference t-shirt)
+    ctx.quadraticCurveTo(shW * 0.95, shY + torsoH * 0.5, botW, shY + torsoH);
     // Bottom
-    ctx.lineTo(-hipW, shY + torsoH);
-    // Left side contour
-    ctx.quadraticCurveTo(-hipW, shY + torsoH * 0.8, -waistW, shY + torsoH * 0.5);
-    ctx.quadraticCurveTo(-shW, shY + torsoH * 0.4, -shW, shY);
+    ctx.lineTo(-botW, shY + torsoH);
+    // Left side
+    ctx.quadraticCurveTo(-shW * 0.95, shY + torsoH * 0.5, -shW, shY);
     ctx.closePath();
     ctx.fill();
-    // Belt
-    const beltY = shY + torsoH * 0.6;
+    // Belt line (shirt/pants division)
+    const beltY = shY + torsoH * 0.62;
     ctx.strokeStyle = '#6a4a20';
     ctx.lineWidth = 1.5 * s;
     ctx.beginPath();
-    ctx.moveTo(-waistW + 1, beltY);
-    ctx.lineTo(waistW - 1, beltY);
+    const beltW = botW + (shW - botW) * 0.38; // interpolate width at belt height
+    ctx.moveTo(-beltW + 1, beltY);
+    ctx.lineTo(beltW - 1, beltY);
     ctx.stroke();
     ctx.fillStyle = '#c4953a';
     ctx.beginPath(); ctx.arc(0, beltY, 1.2 * s, 0, Math.PI * 2); ctx.fill();
@@ -681,10 +680,9 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.beginPath();
     ctx.moveTo(-shW, shY);
     ctx.lineTo(-shW * 0.3, shY);
-    ctx.lineTo(-hipW * 0.3, shY + torsoH);
-    ctx.lineTo(-hipW, shY + torsoH);
-    ctx.quadraticCurveTo(-hipW, shY + torsoH * 0.8, -waistW, shY + torsoH * 0.5);
-    ctx.quadraticCurveTo(-shW, shY + torsoH * 0.4, -shW, shY);
+    ctx.lineTo(-botW * 0.3, shY + torsoH);
+    ctx.lineTo(-botW, shY + torsoH);
+    ctx.quadraticCurveTo(-shW * 0.95, shY + torsoH * 0.5, -shW, shY);
     ctx.closePath();
     ctx.fill();
 
@@ -693,7 +691,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
 
     // === NEAR ARM + STAFF ===
     const ahx = Math.sin(aN) * armLen, ahy = armOriginY + Math.cos(aN) * armLen;
-    _taperedLimb(ctx, 0, armOriginY, ahx, ahy, 3.5 * s * 0.5, 2.2 * s * 0.5, cTunic, cTunicHi);
+    _taperedLimb(ctx, 0, armOriginY, ahx, ahy, 4 * s * 0.5, 2.5 * s * 0.5, cTunic, cTunicHi);
 
     // Staff
     const staffTopX = ahx + 1 * s, staffTopY = ahy - 4 * s;
