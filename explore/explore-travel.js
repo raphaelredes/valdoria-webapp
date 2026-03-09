@@ -88,19 +88,6 @@ function playTravelAnimation(biome, regionName, onComplete) {
     const midFeatures = _generateFeatures(cfg.silhouette, w, 10);
     const nearFeatures = _generateFeatures(cfg.silhouette, w, 6);
 
-    // Generate footprint trail positions
-    const footprints = [];
-    for (let i = 0; i < 8; i++) {
-        footprints.push({
-            baseX: w * 0.5 - (i + 1) * 28 + (i % 2 === 0 ? 4 : -4),
-            y: 0, // set per frame
-            alpha: 0.5 - i * 0.06,
-            side: i % 2, // alternating left/right
-        });
-    }
-
-    // Player walk cycle state
-    let walkFrame = 0;
 
     overlay.classList.add('active');
 
@@ -180,15 +167,7 @@ function playTravelAnimation(biome, regionName, onComplete) {
         // Biome-specific ground details
         _drawGroundDetails(ctx, biome, w, h, groundY, elapsed);
 
-        // Footprint trail behind character
-        _drawFootprints(ctx, footprints, groundY, elapsed, biome);
-
-        // Torch/lantern glow around character
-        _drawCharacterGlow(ctx, w * 0.5, groundY, elapsed, biome);
-
-        // Walking player (center, larger)
-        walkFrame = Math.floor(elapsed / 200) % 4;
-        _drawWalkingFigure(ctx, w * 0.5, groundY, walkFrame, elapsed);
+        // (character, footprints and glow removed — scenery-only travel animation)
 
         // Particles
         _updateTravelParticles(ctx, particles, pcfg, w, h, elapsed);
