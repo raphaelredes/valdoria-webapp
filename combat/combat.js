@@ -2982,6 +2982,11 @@ const _NARR_ENEMY_HIT = [
     'A defesa não foi suficiente.',
     'Um impacto doloroso atravessa a guarda.',
     'O inimigo encontra uma abertura!',
+    'O ataque rompe a defesa com força bruta.',
+    'Um golpe certeiro atravessa a armadura.',
+    'Dor aguda — o ataque passou direto.',
+    'A criatura ataca com precisão mortal.',
+    'O impacto faz seus joelhos fraquejarem.',
 ];
 const _NARR_ENEMY_CRIT = [
     'Golpe devastador do inimigo!',
@@ -2989,6 +2994,11 @@ const _NARR_ENEMY_CRIT = [
     'Ataque certeiro atinge um ponto vital!',
     'O inimigo desfere um golpe avassalador!',
     'Sem defesa possível contra esse ataque!',
+    'O inimigo explora uma brecha fatal na guarda!',
+    'Um golpe que faria veteranos recuarem!',
+    'Ataque devastador — a dor é insuportável!',
+    'O inimigo concentra toda a fúria em um único golpe!',
+    'Um acerto brutal que ecoa pelo campo de batalha!',
 ];
 const _NARR_ENEMY_MISS = [
     'Desvio no último instante!',
@@ -2996,6 +3006,11 @@ const _NARR_ENEMY_MISS = [
     'O ataque passa sem causar dano.',
     'Reflexos rápidos evitam o golpe.',
     'O inimigo erra por pouco!',
+    'A lâmina corta o ar — nada mais.',
+    'Instinto puro salva você do golpe.',
+    'O ataque passa de raspão pela armadura.',
+    'Uma abertura — mas o inimigo não a encontra.',
+    'O golpe se perde no vazio.',
 ];
 const _NARR_ALLY_ACTION = [
     '{name} entra em ação!',
@@ -3003,6 +3018,11 @@ const _NARR_ALLY_ACTION = [
     '{name} não hesita e avança!',
     '{name} desfere seu golpe!',
     '{name} luta ao seu lado!',
+    '{name} ergue a arma e investe!',
+    '{name} se lança contra o inimigo!',
+    '{name} aproveita o momento e ataca!',
+    '{name} avança com determinação!',
+    '{name} cobre seu flanco e contra-ataca!',
 ];
 const _NARR_ALLY_HIT = [
     '{name} acerta o inimigo!',
@@ -3010,6 +3030,11 @@ const _NARR_ALLY_HIT = [
     'Excelente! {name} causa dano!',
     '{name} encontra uma abertura!',
     'O ataque de {name} é preciso!',
+    '{name} desfere um golpe certeiro!',
+    'Direto no alvo! {name} não falha!',
+    '{name} acerta a criatura com força!',
+    'Boa! O golpe de {name} conecta!',
+    '{name} atinge o ponto fraco do inimigo!',
 ];
 const _NARR_ALLY_CRIT = [
     '{name} desfere um golpe devastador!',
@@ -3017,6 +3042,11 @@ const _NARR_ALLY_CRIT = [
     '{name} acerta um ponto vital!',
     'Incrível! {name} causa dano massivo!',
     '{name} libera todo o seu poder!',
+    '{name} atinge com fúria incontrolável!',
+    'Magistral! {name} supera todas as expectativas!',
+    '{name} canaliza toda a força em um único golpe!',
+    'O ataque de {name} é absolutamente devastador!',
+    '{name} explora uma brecha com precisão mortal!',
 ];
 const _NARR_ALLY_MISS = [
     '{name} erra o alvo!',
@@ -3024,6 +3054,11 @@ const _NARR_ALLY_MISS = [
     '{name} não consegue conectar.',
     'O inimigo desvia do golpe de {name}.',
     '{name} precisa de mais precisão.',
+    'O golpe de {name} não encontra o alvo.',
+    '{name} ataca, mas o inimigo é ágil demais.',
+    'A lâmina de {name} corta apenas o ar.',
+    '{name} hesita — e perde a chance.',
+    'O inimigo antecipa o golpe de {name}.',
 ];
 
 function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }

@@ -261,16 +261,18 @@ function showDiceRoll(result) {
                 onDistractFail();
             };
             actions.innerHTML = `<button class="v-skip-btn" id="distractFailSkip">⚔️ Lutar!</button>`;
+            const failDelay = typeof calcReadTime === 'function'
+                ? calcReadTime(narrative.textContent, 'overlay') : 2500;
             setTimeout(() => {
                 if (!_failDone) {
                     const skipBtn = document.getElementById('distractFailSkip');
                     if (skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = goFight; }
                 }
             }, 500);
-            setTimeout(goFight, 2500);
+            setTimeout(goFight, failDelay);
         }
 
-        try { if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error'); } catch (e) {}
+        try { if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error'); } catch (e) { console.warn('[PROLOGUE] haptic:', e); }
     });
 }
 
@@ -312,13 +314,15 @@ function _showDiceRollFallback(result) {
                 onDistractFail();
             };
             actions.innerHTML = `<button class="v-skip-btn" id="distractFailSkipFb">⚔️ Lutar!</button>`;
+            const fbDelay = typeof calcReadTime === 'function'
+                ? calcReadTime(narrative.textContent, 'overlay') : 2500;
             setTimeout(() => {
                 if (!_failDone) {
                     const skipBtn = document.getElementById('distractFailSkipFb');
                     if (skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = goFight; }
                 }
             }, 500);
-            setTimeout(goFight, 2500);
+            setTimeout(goFight, fbDelay);
         }
     }, 2000);
 }
@@ -344,7 +348,10 @@ function showGateResult(outcomeText, effectText, callback) {
 
     overlay.classList.add('active');
 
-    // Timed transition: 2500ms + skip after 500ms (mandatory rule)
+    // Timed transition: calcReadTime + skip after 500ms (mandatory rule)
+    const fullText = (outcomeText || '') + ' ' + (effectText || '');
+    const delay = typeof calcReadTime === 'function'
+        ? calcReadTime(fullText, 'summary') : 2500;
     let _done = false;
     const finish = () => {
         if (_done) return;
@@ -360,7 +367,7 @@ function showGateResult(outcomeText, effectText, callback) {
             skipBtn.onclick = finish;
         }
     }, 500);
-    setTimeout(finish, 2500);
+    setTimeout(finish, delay);
 }
 
 // ═══════════════════════════════════════════════════════

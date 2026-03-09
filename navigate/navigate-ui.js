@@ -639,7 +639,7 @@ function toggleLegendExpand() {
     if (_legendOpen) {
         // Populate biomes
         panel.innerHTML = '';
-        for (const [, info] of Object.entries(BIOME_INFO)) {
+        for (const [, info] of Object.entries(BIOME_INFO).sort((a, b) => a[1].label.localeCompare(b[1].label))) {
             const item = document.createElement('span');
             item.className = 'legend-item';
             item.innerHTML = `<span class="legend-dot" style="background:${info.hexFill}"></span> ${info.label}`;

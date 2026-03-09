@@ -795,6 +795,7 @@ function panToLocationSmooth(locId) {
 // ===============================================================
 
 let _mmFadeTimer = null;
+let _mmClickBound = false;
 
 function _initMinimap() {
     const mm = document.getElementById('minimap');
@@ -820,7 +821,9 @@ function _initMinimap() {
     }
     // Viewport rectangle (updated dynamically)
     svg.appendChild(_el('rect', { class: 'mm-viewport', x: 0, y: 0, width: 100, height: 100 }));
-    // Tap on minimap to recenter
+    // Tap on minimap to recenter (bind only once)
+    if (_mmClickBound) { _updateMinimap(); return; }
+    _mmClickBound = true;
     mm.addEventListener('click', e => {
         const r = svg.getBoundingClientRect();
         const mx = (e.clientX - r.left) / r.width * SVG_W;

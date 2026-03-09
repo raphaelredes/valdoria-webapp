@@ -140,7 +140,7 @@ function playTravelAnimation(biome, regionName, onComplete) {
 
     let _done = false;
     const startTime = performance.now();
-    const DURATION = 3500;
+    const DURATION = 4500;
 
     const finish = () => {
         if (_done) return;
@@ -395,8 +395,9 @@ function playTravelAnimation(biome, regionName, onComplete) {
         const textDrift = progress * 18; // pixels upward over full duration
         _drawTravelText(ctx, regionName, cfg.icon, w, h, textAlpha, textDrift);
 
-        // Travel progress bar
-        _drawProgressBar(ctx, w, h, progress);
+        // Travel progress bar (eased: fills to 100% before fade-out starts)
+        const barProgress = Math.min(1, progress / 0.88);
+        _drawProgressBar(ctx, w, h, barProgress);
 
         // Cinematic vignette (darkened edges)
         _drawVignette(ctx, w, h);
@@ -404,16 +405,16 @@ function playTravelAnimation(biome, regionName, onComplete) {
         // Restore zoom transform
         ctx.restore();
 
-        // Fade-in (first 400ms) — drawn OUTSIDE zoom so it covers full canvas
-        if (progress < 0.115) {
-            const fadeIn = 1 - (progress / 0.115);
+        // Fade-in (first ~400ms) — drawn OUTSIDE zoom so it covers full canvas
+        if (progress < 0.09) {
+            const fadeIn = 1 - (progress / 0.09);
             ctx.fillStyle = `rgba(42,36,32,${fadeIn})`;
             ctx.fillRect(0, 0, w, h);
         }
 
-        // Fade out last 400ms
-        if (progress > 0.88) {
-            const fadeOut = (progress - 0.88) / 0.12;
+        // Fade out last ~500ms (starts at ~89% = 4000ms, ends at 4500ms)
+        if (progress > 0.89) {
+            const fadeOut = (progress - 0.89) / 0.11;
             ctx.fillStyle = `rgba(42,36,32,${fadeOut})`;
             ctx.fillRect(0, 0, w, h);
         }
@@ -2512,7 +2513,7 @@ function _generateWildlife(w, _h, type) {
     for (let i = 0; i < count; i++) {
         animals.push({
             type: type,
-            triggerTime: 600 + Math.random() * 2200, // when it starts crossing
+            triggerTime: 600 + Math.random() * 3000, // when it starts crossing
             startX: Math.random() > 0.5 ? -20 : w + 20, // from left or right
             speed: (type === 'lizard' ? 220 : type === 'spider' ? 120 : 180) + Math.random() * 80,
             yOffset: Math.random() * 16 - 8, // slight vertical variation on road

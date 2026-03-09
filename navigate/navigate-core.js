@@ -196,10 +196,13 @@ function _sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 // -----------------------------------------------------------
 
 let _lastRefreshTs = Date.now();
+let _refreshing = false;
 async function _onVisibilityRefresh() {
     if (document.visibilityState !== 'visible') return;
     // Only refresh if > 30s since last load (avoid rapid refires)
     if (Date.now() - _lastRefreshTs < 30000) return;
+    if (_refreshing) return;
+    _refreshing = true;
     _lastRefreshTs = Date.now();
     console.log('[NAVIGATE] Refreshing map data on visibility change...');
     try {
@@ -229,6 +232,8 @@ async function _onVisibilityRefresh() {
         console.log('[NAVIGATE] Map data refreshed successfully');
     } catch (e) {
         console.warn('[NAVIGATE] Auto-refresh failed:', e);
+    } finally {
+        _refreshing = false;
     }
 }
 
@@ -499,6 +504,7 @@ function _sendNavAction(type, target, flags) {
         })
         .catch(e => {
             console.error('[NAVIGATE][DEBUG] fetch error:', e);
+            if (typeof _haptic === 'function') _haptic('error');
             showError('Erro ao viajar: ' + e.message + '. Tente novamente.');
             // Re-enable after error so user can retry
             _navSent = false;

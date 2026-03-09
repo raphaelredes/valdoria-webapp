@@ -103,8 +103,8 @@ body {
     50% { box-shadow: 0 0 18px rgba(229,57,53,0.50), 0 0 4px rgba(229,57,53,0.15) inset; }
 }
 @keyframes turnGlowAlly {
-    0%, 100% { box-shadow: 0 0 8px rgba(176,184,192,0.12); }
-    50% { box-shadow: 0 0 14px rgba(176,184,192,0.40); }
+    0%, 100% { box-shadow: 0 0 8px rgba(196,149,58,0.12); }
+    50% { box-shadow: 0 0 14px rgba(196,149,58,0.40); }
 }
 .entity.active-turn {
     border-color: var(--v-gold);
@@ -157,7 +157,7 @@ body {
 }
 .entity.enemy .entity-icon { background: rgba(123,32,32,0.12); border-color: rgba(123,32,32,0.25); }
 .entity.player .entity-icon { background: rgba(196,149,58,0.1); border-color: rgba(196,149,58,0.2); }
-.entity.ally .entity-icon { background: rgba(176,184,192,0.08); border-color: rgba(176,184,192,0.15); }
+.entity.ally .entity-icon { background: rgba(196,149,58,0.08); border-color: rgba(196,149,58,0.15); }
 .compact-name {
     flex: 1;
     font-size: 13px;
