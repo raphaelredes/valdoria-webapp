@@ -39,7 +39,8 @@ async function init() {
 
     const params = new URLSearchParams(window.location.search);
     S.token = params.get('token') || '';
-    S.apiBase = (params.get('api') || '').replace(/\/$/, '');
+    // Use ?api= param if provided, otherwise use same-origin (webapp + API share the same server)
+    S.apiBase = (params.get('api') || window.location.origin || '').replace(/\/$/, '');
     S.uid = parseInt(params.get('uid') || '0', 10);
     S.charId = params.get('char') || '';  // Character ID from menu (for char switch)
 
@@ -74,7 +75,7 @@ async function init() {
 
     if (!S.token || !S.uid || !S.apiBase) {
         console.error('[GAME] Missing required params - token:', !!S.token, 'uid:', S.uid, 'apiBase:', !!S.apiBase);
-        showError('Parâmetros de sessão inválidos. Feche e toque em JOGAR novamente.');
+        showError('Parâmetros de sessão inválidos. Feche e selecione seu personagem novamente.');
         return;
     }
 
@@ -154,26 +155,46 @@ async function init() {
     _clog('INIT health result: ' + (healthy ? 'OK' : 'FAIL'));
     console.log('[GAME] Health check result:', healthy);
     if (!healthy) {
-        // Server unreachable (dead tunnel URL). Instantly close and ask bot
-        // for a fresh menu with the correct URL. Player sees nothing.
-        _clog('INIT health failed — instant reconnect');
-        const tg = window.Telegram && window.Telegram.WebApp;
-        if (tg && tg.sendData) {
-            _clog('INIT sendData webapp_reconnect');
-            try {
-                tg.sendData(JSON.stringify({
-                    action: 'webapp_reconnect',
-                    webapp: 'GAME',
-                }));
-                // sendData closes WebApp immediately — player sees nothing
-                return;
-            } catch (e) {
-                _clog('INIT sendData failed: ' + e.message);
+        // API from ?api= param is dead. Try same-origin as fallback —
+        // when served via aiohttp, the webapp origin IS the API server.
+        const originBase = window.location.origin.replace(/\/$/, '');
+        if (originBase && originBase !== S.apiBase) {
+            _clog('INIT trying same-origin fallback: ' + originBase);
+            S.apiBase = originBase;
+            // Update error reporter API base (init() has _initialized guard)
+            if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) {
+                ValdoriaErrors.updateApiBase(originBase);
             }
+            const healthy2 = await checkHealth();
+            if (healthy2) {
+                _clog('INIT same-origin fallback succeeded!');
+                // Continue normal init below — don't return
+            } else {
+                // Both URLs dead — auto-reconnect via sendData
+                _clog('INIT both URLs dead — instant reconnect');
+                const tg = window.Telegram && window.Telegram.WebApp;
+                if (tg && tg.sendData) {
+                    try {
+                        tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'GAME' }));
+                        return;
+                    } catch (e) { _clog('sendData failed: ' + e.message); }
+                }
+                showError('Servidor indisponível. Tente novamente em alguns segundos.');
+                return;
+            }
+        } else {
+            // Same origin = same dead URL, instant reconnect
+            _clog('INIT health failed — instant reconnect');
+            const tg = window.Telegram && window.Telegram.WebApp;
+            if (tg && tg.sendData) {
+                try {
+                    tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'GAME' }));
+                    return;
+                } catch (e) { _clog('sendData failed: ' + e.message); }
+            }
+            showError('Servidor indisponível. Tente novamente em alguns segundos.');
+            return;
         }
-        // Fallback for non-Telegram (dev): show error overlay
-        showError('Servidor indisponível. Tente novamente em alguns segundos.');
-        return;
     }
 
     // Check if returning from another WebApp (combat, explore, etc.)
@@ -321,7 +342,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                         return null; // sendData auto-closes
                     }
                 } catch (e) { console.warn('[GAME] sendData failed on 401:', e); }
-                showError('Sessão expirada. Feche e toque em JOGAR novamente.');
+                showError('Sessão expirada. Feche e selecione seu personagem novamente.');
                 return null;
             }
 
@@ -407,7 +428,7 @@ async function startGame() {
         console.error('[GAME] startGame() server error:', data.error);
         // apiCall already shows error for null; handle known server errors
         if (data.error === 'invalid_session') {
-            showError('Sessão expirada. Feche e toque em JOGAR novamente.');
+            showError('Sessão expirada. Feche e selecione seu personagem novamente.');
         }
         // Other errors already handled by apiCall
     } else {

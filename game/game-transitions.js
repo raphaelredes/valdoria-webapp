@@ -123,7 +123,7 @@ async function returnFromWebApp() {
         }
     } else {
         console.error('[GAME] returnFromWebApp() failed, data:', data ? JSON.stringify(data).substring(0, 200) : 'null');
-        showError('Não foi possível restaurar o jogo. Feche e toque em JOGAR novamente.');
+        showError('Não foi possível restaurar o jogo. Feche e selecione seu personagem novamente.');
     }
 }
 

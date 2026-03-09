@@ -189,7 +189,7 @@ var ValdoriaErrors = (function () {
             else if (msg.indexOf('indisponível') >= 0)
                 hintEl.textContent = 'O servidor está em manutenção ou reiniciando. Tente novamente em alguns instantes.';
             else if (msg.indexOf('expirada') >= 0 || msg.indexOf('Sessão') >= 0)
-                hintEl.textContent = 'Feche o mini app e toque em JOGAR para iniciar uma nova sessão.';
+                hintEl.textContent = 'Feche o mini app e selecione seu personagem novamente.';
             else if (msg.indexOf('Personagem não encontrado') >= 0)
                 hintEl.textContent = 'Feche o mini app e selecione um personagem novamente.';
             else if (msg.indexOf('Resposta inválida') >= 0)
@@ -778,8 +778,14 @@ var ValdoriaErrors = (function () {
     }
 
     // ─── Public API ───
+    function updateApiBase(newApi) {
+        _cfg.apiBase = (newApi || '').replace(/\/$/, '');
+        _clog('API_BASE updated to: ' + _cfg.apiBase);
+    }
+
     return {
         init: init,
+        updateApiBase: updateApiBase,
         showError: showError,
         showToast: showToast,
         hideError: hideError,
