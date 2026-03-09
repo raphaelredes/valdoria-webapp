@@ -507,193 +507,92 @@ function _drawGroundDetails(ctx, biome, w, h, groundY, elapsed) {
 // ═══════════════════════════════════════════
 
 function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
-    // Simplified side-view walking figure — clean silhouette
+    // Minimal stick-figure walking silhouette
     const s = 2.0;
-
-    // Proportions
-    const headR    = 8 * s;    // head radius
-    const neckH    = 3 * s;
-    const torsoH   = 30 * s;   // shoulder to hip
-    const torsoW   = 12 * s;   // body width (side profile)
-    const thighLen = 22 * s;
-    const shinLen  = 20 * s;
-    const footW    = 12 * s;
-    const footH    = 4 * s;
-    const armLen   = 22 * s;   // single-segment arm (simplified)
-
-    // Key Y positions (ground = 0, up = negative)
-    const hipY      = -(footH + shinLen + thighLen);
-    const shoulderY = hipY - torsoH;
-    const headY     = shoulderY - neckH - headR;
+    const headR = 8 * s, torsoH = 30 * s, thighL = 22 * s, shinL = 20 * s;
+    const footH = 4 * s, armLen = 20 * s;
+    const hipY = -(footH + shinL + thighL);
+    const shY  = hipY - torsoH; // shoulder
+    const hdY  = shY - 3 * s - headR; // head center
 
     // Walk cycle
-    const phase = elapsed * 0.006;
-    const bob = Math.sin(phase * 2) * 1.0;
-    const lean = -0.03 + Math.sin(phase * 2) * 0.01;
-
-    // Legs
-    const rawN = Math.sin(phase);
-    const rawF = Math.sin(phase + Math.PI);
-    const swing = 0.38;
-    const legN = rawN * swing;
-    const legF = rawF * swing;
-    const kneeN = rawN < -0.1 ? -Math.pow(Math.abs(rawN), 1.2) * 0.6 : 0;
-    const kneeF = rawF < -0.1 ? -Math.pow(Math.abs(rawF), 1.2) * 0.6 : 0;
-
-    // Arms (opposite to legs)
-    const armN = Math.sin(phase + Math.PI) * 0.25;
-    const armF = Math.sin(phase) * 0.25;
-
-    // Cape wind
+    const p = elapsed * 0.006;
+    const bob = Math.sin(p * 2) * 1.0;
+    const rN = Math.sin(p), rF = Math.sin(p + Math.PI);
+    const sw = 0.38; // stride
+    const lN = rN * sw, lF = rF * sw;
+    const kN = rN < -0.1 ? -Math.pow(Math.abs(rN), 1.2) * 0.6 : 0;
+    const kF = rF < -0.1 ? -Math.pow(Math.abs(rF), 1.2) * 0.6 : 0;
+    const aN = Math.sin(p + Math.PI) * 0.22, aF = Math.sin(p) * 0.22;
     const wind = Math.sin(elapsed * 0.002) * 2;
 
     ctx.save();
     ctx.translate(cx, groundY + bob);
 
-    // Colors
-    const cBody = '#5a4535';
-    const cFar  = '#4a3828';
-    const cLeg  = '#3e2e20';
-    const cLegN = '#4a3628';
-    const cBoot = '#2a1e14';
+    const cN = '#5a4535', cF = '#443525'; // near/far color
 
     // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
     ctx.beginPath();
-    ctx.ellipse(0, 3, 18 * s, 3 * s, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 3, 16 * s, 3 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // ── Leg helper ──
-    function leg(angle, kb, color, lw) {
-        const kx = Math.sin(angle) * thighLen;
-        const ky = hipY + Math.cos(angle) * thighLen;
-        const sa = angle + kb;
-        const ax = kx + Math.sin(sa) * shinLen;
-        const ay = ky + Math.cos(sa) * shinLen;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = lw;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(0, hipY);
-        ctx.lineTo(kx, ky);
-        ctx.lineTo(ax, ay);
-        ctx.stroke();
-        // Boot
-        ctx.fillStyle = cBoot;
-        if (angle > 0) {
-            ctx.fillRect(ax - 3 * s, ay, footW, footH);
-        } else {
-            ctx.save();
-            ctx.translate(ax, ay);
-            ctx.rotate(Math.abs(kb) * 0.5);
-            ctx.fillRect(-2 * s, 0, footW * 0.9, footH * 0.85);
-            ctx.restore();
-        }
+    // Leg: hip→knee→ankle + foot rect
+    function leg(a, kb, c, w) {
+        const kx = Math.sin(a) * thighL, ky = hipY + Math.cos(a) * thighL;
+        const sa = a + kb;
+        const ax = kx + Math.sin(sa) * shinL, ay = ky + Math.cos(sa) * shinL;
+        ctx.strokeStyle = c; ctx.lineWidth = w; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(0, hipY); ctx.lineTo(kx, ky); ctx.lineTo(ax, ay); ctx.stroke();
+        ctx.fillStyle = '#2a1e14';
+        if (a > 0) { ctx.fillRect(ax - 3 * s, ay, 10 * s, footH); }
+        else { ctx.save(); ctx.translate(ax, ay); ctx.rotate(Math.abs(kb) * 0.5);
+            ctx.fillRect(-2 * s, 0, 9 * s, footH * 0.85); ctx.restore(); }
     }
 
-    // ── Arm helper (single segment) ──
-    function arm(sy, swing, color, lw) {
-        const hx = Math.sin(swing) * armLen;
-        const hy = sy + Math.cos(swing) * armLen;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = lw;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(0, sy);
-        ctx.lineTo(hx, hy);
-        ctx.stroke();
-        return { hx, hy };
-    }
-
-    // ═══ DRAW ORDER ═══
-
-    // 1. Cape (simple triangle behind body)
-    ctx.save();
-    ctx.rotate(lean);
+    // Cape (simple shape behind)
     ctx.fillStyle = '#4a2030';
     ctx.beginPath();
-    ctx.moveTo(-2 * s, shoulderY);
-    ctx.quadraticCurveTo((-10 + wind) * s, hipY, (-7 + wind) * s, hipY + thighLen * 0.4);
-    ctx.lineTo(-2 * s, hipY);
+    ctx.moveTo(-1 * s, shY);
+    ctx.quadraticCurveTo((-8 + wind) * s, hipY, (-5 + wind) * s, hipY + thighL * 0.35);
+    ctx.lineTo(-1 * s, hipY);
     ctx.closePath();
     ctx.fill();
-    ctx.restore();
 
-    // 2. Far leg + far arm
-    leg(legF, kneeF, cLeg, 5 * s);
-    ctx.save();
-    ctx.rotate(lean);
-    arm(shoulderY + 2 * s, armF, cFar, 3 * s);
-    ctx.restore();
+    // Far leg
+    leg(lF, kF, cF, 4.5 * s);
 
-    // 3. Torso (simple trapezoid)
-    ctx.save();
-    ctx.rotate(lean);
-    const tw = torsoW * 0.5;
-    ctx.fillStyle = cBody;
-    ctx.beginPath();
-    ctx.moveTo(-tw * 0.7, hipY);
-    ctx.lineTo(-tw * 0.8, shoulderY);
-    ctx.lineTo(tw * 0.9, shoulderY);
-    ctx.lineTo(tw * 0.7, hipY);
-    ctx.closePath();
-    ctx.fill();
-    // Belt
-    ctx.fillStyle = '#7a5a28';
-    ctx.fillRect(-tw * 0.7, hipY - 2 * s, torsoW * 0.7, 2 * s);
-    ctx.restore();
+    // Far arm
+    ctx.strokeStyle = cF; ctx.lineWidth = 2.5 * s; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(0, shY + 2 * s);
+    ctx.lineTo(Math.sin(aF) * armLen, shY + 2 * s + Math.cos(aF) * armLen); ctx.stroke();
 
-    // 4. Near leg + near arm + staff
-    leg(legN, kneeN, cLegN, 5.5 * s);
-    ctx.save();
-    ctx.rotate(lean);
-    const h = arm(shoulderY + 2 * s, armN, cBody, 3.5 * s);
-    // Staff (simple line + dot)
-    ctx.strokeStyle = '#6a4a20';
-    ctx.lineWidth = 2.2 * s;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(h.hx, h.hy - 2 * s);
-    ctx.lineTo(h.hx + 2 * s, 3 * s);
-    ctx.stroke();
-    const gl = 0.45 + Math.sin(elapsed * 0.005) * 0.2;
+    // Torso (filled rectangle)
+    const tw = 5 * s;
+    ctx.fillStyle = cN;
+    ctx.fillRect(-tw, shY, tw * 2, torsoH);
+
+    // Near leg
+    leg(lN, kN, cN, 5 * s);
+
+    // Near arm + staff
+    const ahx = Math.sin(aN) * armLen, ahy = shY + 2 * s + Math.cos(aN) * armLen;
+    ctx.strokeStyle = cN; ctx.lineWidth = 3 * s; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(0, shY + 2 * s); ctx.lineTo(ahx, ahy); ctx.stroke();
+    // Staff
+    ctx.strokeStyle = '#6a4a20'; ctx.lineWidth = 2 * s;
+    ctx.beginPath(); ctx.moveTo(ahx, ahy - 2 * s); ctx.lineTo(ahx + 2 * s, 2 * s); ctx.stroke();
+    const gl = 0.4 + Math.sin(elapsed * 0.005) * 0.2;
     ctx.fillStyle = `rgba(196,149,58,${gl})`;
-    ctx.beginPath();
-    ctx.arc(h.hx, h.hy - 2 * s, 1.8 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    ctx.beginPath(); ctx.arc(ahx, ahy - 2 * s, 1.6 * s, 0, Math.PI * 2); ctx.fill();
 
-    // 5. Head (circle + hood shape)
-    ctx.save();
-    ctx.rotate(lean);
-    const hY = headY + Math.sin(phase * 2 - 0.3) * 0.6;
-    // Hood
+    // Head (circle + eye)
+    const hy = hdY + Math.sin(p * 2 - 0.3) * 0.5;
     ctx.fillStyle = '#3e2e1e';
-    ctx.beginPath();
-    ctx.arc(0, hY, headR * 1.1, 0, Math.PI * 2);
-    ctx.fill();
-    // Hood peak (slight point at back)
-    ctx.beginPath();
-    ctx.moveTo(-headR * 0.8, hY - headR * 0.5);
-    ctx.quadraticCurveTo(-headR * 1.4, hY - headR * 1.2, 0, hY - headR * 1.3);
-    ctx.quadraticCurveTo(headR * 0.5, hY - headR * 1.1, headR * 0.6, hY - headR * 0.5);
-    ctx.closePath();
-    ctx.fill();
-    // Face shadow (dark opening)
-    ctx.fillStyle = '#1a1210';
-    ctx.beginPath();
-    ctx.arc(headR * 0.4, hY, headR * 0.55, -0.5, 1.2);
-    ctx.closePath();
-    ctx.fill();
-    // Eye glow
+    ctx.beginPath(); ctx.arc(0, hy, headR, 0, Math.PI * 2); ctx.fill();
+    // Eye
     ctx.fillStyle = `rgba(196,149,58,${0.35 + Math.sin(elapsed * 0.004) * 0.15})`;
-    ctx.beginPath();
-    ctx.arc(headR * 0.7, hY - headR * 0.1, 1.3 * s, 0, Math.PI * 2);
-    ctx.fill();
-    // Neck connection
-    ctx.fillStyle = '#3e2e1e';
-    ctx.fillRect(-headR * 0.3, hY + headR * 0.7, headR * 0.6, neckH);
-    ctx.restore();
+    ctx.beginPath(); ctx.arc(headR * 0.45, hy - headR * 0.1, 1.2 * s, 0, Math.PI * 2); ctx.fill();
 
     ctx.restore();
 }
