@@ -901,6 +901,8 @@ function _getPollInterval() {
     return currentState.active_turn.type === 'player' ? 8000 : 2000;
 }
 
+let _pollFailures = 0;
+
 function startPolling() {
     stopPolling();
     if (!isApiMode || !api) return;
@@ -908,6 +910,7 @@ function startPolling() {
     const poll = async () => {
         try {
             const state = await api.getState();
+            _pollFailures = 0; // Reset on successful fetch
             if (!state || state.error) {
                 if (state && state.error === 'invalid_session') {
                     showError('Sessão expirada — feche e reabra o combate');
@@ -1082,8 +1085,28 @@ function startPolling() {
                 stopPolling();
                 return;
             }
-            // Silently ignore other poll errors — don't spam user with toasts
+            // Track consecutive failures — trigger health check after 3
             console.warn('[COMBAT] Poll error (silent)', e.message);
+            _pollFailures++;
+            if (_pollFailures >= 3) {
+                console.warn('[COMBAT] 3+ consecutive poll failures — checking health');
+                try {
+                    const health = await api.checkHealth();
+                    if (health.api && health.api !== api.base) {
+                        console.warn('[COMBAT] Tunnel URL changed, reloading');
+                        const params = new URLSearchParams(window.location.search);
+                        params.set('api', health.api);
+                        window.location.replace(window.location.pathname + '?' + params.toString());
+                        return; // don't reschedule poll
+                    }
+                    if (health.status === 'unreachable') {
+                        showError('Servidor indisponível. Tente novamente.');
+                    }
+                } catch (he) {
+                    console.warn('[COMBAT] Health check also failed', he.message);
+                }
+                _pollFailures = 0; // reset after health check attempt
+            }
         }
         _pollInterval = setTimeout(poll, _getPollInterval());
     };
@@ -1678,6 +1701,8 @@ async function sendAction(actionData) {
                 : e.status === 429 ? 'Muitas ações. Aguarde um momento.'
                     : 'Erro de conexão. Tente novamente.';
             showError(msg);
+            // Re-enable action buttons so player can retry
+            document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('disabled'));
             // Don't poll immediately on rate-limit; wait 5s before resuming
             if (e.status === 429) {
                 setTimeout(() => startPolling(), 5000);
