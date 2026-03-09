@@ -222,6 +222,15 @@ async function checkHealth() {
             _clog(`HEALTH data: ${JSON.stringify(data)}`);
             console.log('[GAME] Health data:', JSON.stringify(data));
             if (data.status === 'ok' && data.engine) {
+                // Detect tunnel URL change — server reports a different API base
+                if (data.api && S.apiBase && data.api !== S.apiBase) {
+                    _clog(`HEALTH: tunnel URL changed! ${S.apiBase} -> ${data.api}`);
+                    console.warn('[GAME] Tunnel URL changed, reloading with new URL');
+                    const params = new URLSearchParams(window.location.search);
+                    params.set('api', data.api);
+                    window.location.replace(window.location.pathname + '?' + params.toString());
+                    return false; // will reload
+                }
                 return true;
             }
             // Engine starting — worth retrying

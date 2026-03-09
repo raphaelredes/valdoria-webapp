@@ -296,22 +296,51 @@ var ValdoriaErrors = (function () {
 
     function _doRetry() {
         if (_autoRetryTimer) { clearInterval(_autoRetryTimer); _autoRetryTimer = null; }
-        var overlay = document.getElementById('v-err-overlay');
-        if (overlay) overlay.style.display = 'none';
         _clog('RETRY attempt...');
 
-        if (_cfg.onRetry) {
-            _cfg.onRetry();
-        } else {
-            // Default: reload the page
-            window.location.reload();
-        }
+        // Before retrying, check health to detect tunnel URL changes
+        var url = _cfg.apiBase + '/api/game/health';
+        _clog('RETRY health check...');
+        _checkHealthForUrlChange(url).then(function (changed) {
+            if (changed) return; // _reloadWithNewApi already called
+            var overlay = document.getElementById('v-err-overlay');
+            if (overlay) overlay.style.display = 'none';
+            if (_cfg.onRetry) {
+                _cfg.onRetry();
+            } else {
+                window.location.reload();
+            }
+        });
+    }
+
+    function _checkHealthForUrlChange(url) {
+        return fetch(url, { method: 'GET' }).then(function (resp) {
+            if (!resp.ok) return false;
+            return resp.json().then(function (data) {
+                if (data && data.api && _cfg.apiBase && data.api !== _cfg.apiBase) {
+                    _clog('RETRY: tunnel URL changed! ' + _cfg.apiBase + ' -> ' + data.api);
+                    _reloadWithNewApi(data.api);
+                    return true;
+                }
+                return false;
+            });
+        }).catch(function () { return false; });
     }
 
     var _bgHealthTimer = null;
     var _bgHealthCount = 0;
     var _BG_HEALTH_INTERVAL = 15000; // 15s background poll after exhaustion
     var _BG_HEALTH_MAX_POLLS = 12;   // 12 * 15s = 3 min then give up (tunnel URL likely changed)
+
+    function _reloadWithNewApi(newApi) {
+        // Replace the api= parameter in the current URL and reload
+        _clog('RELOAD with new API: ' + newApi);
+        var loc = window.location;
+        var params = new URLSearchParams(loc.search);
+        params.set('api', newApi);
+        var newUrl = loc.pathname + '?' + params.toString();
+        window.location.replace(newUrl);
+    }
 
     function _autoReconnect() {
         _clog('AUTO-RECONNECT: all ' + _RETRY_MAX + ' retries exhausted');
@@ -368,12 +397,37 @@ var ValdoriaErrors = (function () {
             var hintEl = document.getElementById('v-err-hint');
             if (hintEl) hintEl.textContent = 'Verificando... (' + remaining + ' tentativas restantes)';
 
+            // Try same-origin health first (works when webapp is served by aiohttp),
+            // then fall back to the original apiBase URL.
             var url = _cfg.apiBase + '/api/game/health';
+            var originUrl = window.location.origin + '/api/game/health';
+            if (originUrl !== url) {
+                // Try origin first — if tunnel changed, origin is dead too,
+                // but if served locally from aiohttp it will work
+                fetch(originUrl, { method: 'GET' }).then(function (r) {
+                    if (!r.ok) throw new Error('not ok');
+                    return r.json();
+                }).then(function (data) {
+                    if (data && data.api && data.api !== _cfg.apiBase) {
+                        _clog('BG-HEALTH: tunnel URL changed via origin! -> ' + data.api);
+                        _stopBgHealth();
+                        _reloadWithNewApi(data.api);
+                    }
+                }).catch(function () { /* origin also dead, normal path below */ });
+            }
             fetch(url, { method: 'GET' }).then(function (resp) {
                 if (!resp.ok) return;
                 return resp.json();
             }).then(function (data) {
                 if (data && data.status === 'ok' && data.engine) {
+                    // Detect tunnel URL change — if server reports a different API base,
+                    // reload the page with the new URL so all future requests go to the right place.
+                    if (data.api && _cfg.apiBase && data.api !== _cfg.apiBase) {
+                        _clog('BG-HEALTH: tunnel URL changed! ' + _cfg.apiBase + ' -> ' + data.api);
+                        _stopBgHealth();
+                        _reloadWithNewApi(data.api);
+                        return;
+                    }
                     _clog('BG-HEALTH: server restored!');
                     _stopBgHealth();
                     _retryAttempt = 0;
