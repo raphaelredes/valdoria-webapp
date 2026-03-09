@@ -49,6 +49,31 @@ let _hitStreak = 0;               // P2-G: Combo streak counter
 let _initDice3d = null;           // THREE.js Dice3D instance for initiative screen
 let _dmgDice3d = null;            // THREE.js Dice3D instance for damage rolls
 
+// ─── SHAKE HELPER — shake-light or shake-heavy on #app ───
+function _shakeApp(intensity) {
+    const app = document.getElementById('app');
+    if (!app) return;
+    const cls = intensity === 'heavy' ? 'shake-heavy' : 'shake-light';
+    const dur = intensity === 'heavy' ? 450 : 300;
+    app.classList.remove('shake-light', 'shake-heavy');
+    void app.offsetWidth;
+    app.classList.add(cls);
+    setTimeout(() => app.classList.remove(cls), dur);
+}
+
+// ─── IMPACT FLASH — radial flash at a target element's center ───
+function _showImpactFlash(targetEl, isCrit) {
+    if (!targetEl) return;
+    const rect = targetEl.getBoundingClientRect();
+    const flash = document.createElement('div');
+    flash.className = 'impact-flash' + (isCrit ? ' crit' : '');
+    flash.style.left = (rect.left + rect.width / 2 - (isCrit ? 35 : 25)) + 'px';
+    flash.style.top = (rect.top + rect.height / 2 - (isCrit ? 35 : 25)) + 'px';
+    flash.style.position = 'fixed';
+    document.body.appendChild(flash);
+    flash.addEventListener('animationend', () => flash.remove());
+}
+
 // ─── TIMER / POLLING / HEARTBEAT STATE ───
 let _timerInterval = null;
 let _timerRemaining = 0;
@@ -996,16 +1021,14 @@ function startPolling() {
                         setTimeout(() => {
                             if (_isAllyTurn && _eLr.crit) {
                                 showNarration(_pick(_NARR_ALLY_CRIT).replace('{name}', newTurn.n), 'crit');
-                                const app = document.getElementById('app');
-                                if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                                _shakeApp('heavy');
                                 hapticBurst('crit');
                             } else if (_isAllyTurn) {
                                 showNarration(_pick(_NARR_ALLY_HIT).replace('{name}', newTurn.n), '');
                                 haptic('medium');
                             } else if (_eLr.crit) {
                                 showNarration(_pick(_NARR_ENEMY_CRIT), 'crit');
-                                const app = document.getElementById('app');
-                                if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                                _shakeApp('heavy');
                                 haptic('heavy');
                                 hapticNotify('error');
                             } else {
@@ -1149,7 +1172,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
         }
 
         if (e.se && e.se.length > 0) {
-            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff' : ''}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('') + '</div>';
+            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('') + '</div>';
         }
     } else {
         // Ally expanded — full status panel
@@ -1176,7 +1199,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
             detailsHtml += `<div class="stats-row"><span class="stat-item conc-badge">🔮 ${e.conc}</span></div>`;
         }
         if (e.se && e.se.length > 0) {
-            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff' : ''}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('') + '</div>';
+            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('') + '</div>';
         }
     }
 
@@ -1227,7 +1250,7 @@ function renderPlayerCard(p, isCompact = false) {
     // Compact badges for status, cover, concentration
     const badges = [];
     if (p.se && p.se.length > 0) {
-        p.se.forEach(s => badges.push(`<span class="mini-badge status${STATUS_BUFFS.has(s) ? ' buff' : ''}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`));
+        p.se.forEach(s => badges.push(`<span class="mini-badge status${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`));
     }
     if (p.cov) {
         badges.push(`<span class="mini-badge cover">${p.cov.ico} +${p.cov.ac} CA</span>`);
@@ -1755,8 +1778,7 @@ function _playCinematicResult(result, actionType) {
                     }
                 }
                 if (isBossKill) {
-                    const app = document.getElementById('app');
-                    if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 600); }
+                    _shakeApp('heavy');
                 }
             }, baseDelay);
         }
@@ -2185,8 +2207,7 @@ function _initDiceAttackOverlay(lr) {
             // Queue VFX to play AFTER overlay closes (screen shake, projectiles, dodge flash)
             _pendingVfx = () => {
                 if (isCrit) {
-                    const app = document.getElementById('app');
-                    if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                    _shakeApp('heavy');
                 }
                 if (isMiss) {
                     const dodgeTarget = document.querySelector('.entity.enemy');
@@ -2549,12 +2570,10 @@ function _initDiceDeathSave(lr) {
                             if (pEl) window._combatVfx.buff(pEl);
                             window._combatVfx.flash('rgba(255,215,0,0.4)', 500);
                         }
-                        const app = document.getElementById('app');
-                        if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                        _shakeApp('heavy');
                     } else if (isCritFail) {
                         if (window._combatVfx) window._combatVfx.flash('rgba(200,30,30,0.4)', 500);
-                        const app = document.getElementById('app');
-                        if (app) { app.classList.add('screen-shake'); setTimeout(() => app.classList.remove('screen-shake'), 500); }
+                        _shakeApp('light');
                     } else if (!isSuccess) {
                         if (window._combatVfx) window._combatVfx.flash('rgba(200,30,30,0.25)', 350);
                     }
@@ -3040,6 +3059,34 @@ function _animateHpBars(state) {
         }
         if (!fillEl) return;
 
+        const isDamage = newPct < oldPct;
+        const isHeal = newPct > oldPct;
+
+        // Ghost bar: show old HP draining slowly on damage
+        if (isDamage) {
+            const track = fillEl.parentElement;
+            if (track) {
+                let ghost = track.querySelector('.bar-ghost');
+                if (!ghost) {
+                    ghost = document.createElement('div');
+                    ghost.className = 'bar-ghost';
+                    track.insertBefore(ghost, fillEl);
+                }
+                ghost.style.transition = 'none';
+                ghost.style.width = oldPct + '%';
+                requestAnimationFrame(() => {
+                    ghost.style.transition = 'width 1.2s ease-in 0.3s';
+                    ghost.style.width = newPct + '%';
+                });
+            }
+        }
+
+        // Heal shine sweep
+        if (isHeal) {
+            fillEl.classList.add('healing');
+            setTimeout(() => fillEl.classList.remove('healing'), 700);
+        }
+
         fillEl.style.transition = 'none';
         fillEl.style.width = oldPct + '%';
         requestAnimationFrame(() => {
@@ -3074,6 +3121,8 @@ function _checkPlayerDamage(state) {
 
             // Floating damage on player (with correct damage type color)
             _showDamageFloat(dmgTaken, _lastEnemyDmgType, '.entity.player');
+            // Impact flash at player position
+            _showImpactFlash(playerEl, false);
         }
 
         // VFX: impact on player using tracked enemy damage type + screen flash

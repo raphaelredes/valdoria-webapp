@@ -506,18 +506,7 @@ function injectFontPicker(contentEl) {
     contentEl.appendChild(section);
 }
 
-// ─── Button Bounce-Back (pointerup spring animation) ───
-// Adds a satisfying elastic release to all game buttons.
-// CSS class .v-btn-released is defined in valdoria-design.css.
-document.addEventListener('pointerup', e => {
-    const btn = e.target.closest('.btn-action, .btn-hero, .v-btn-primary, .v-btn');
-    if (!btn || btn.classList.contains('v-action-pending')) return;
-    btn.classList.remove('v-btn-released');
-    // Force reflow to restart animation if rapidly tapped
-    void btn.offsetWidth;
-    btn.classList.add('v-btn-released');
-    btn.addEventListener('animationend', () => btn.classList.remove('v-btn-released'), { once: true });
-});
+// ─── Button Bounce-Back — now in shared/bounce-back.js ───
 
 // ─── Floating Reward Popup ───
 // Shows a "+gold", "+XP", "+item" text that floats up and fades.

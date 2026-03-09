@@ -190,6 +190,8 @@ body {
     height: 100%;
     border-radius: 3px;
     transition: width 0.5s ease;
+    position: relative;
+    overflow: hidden;
 }
 .hp-mini-fill.hp-high { background: linear-gradient(90deg, #388e3c, #4caf50); }
 .hp-mini-fill.hp-mid { background: linear-gradient(90deg, #e65100, #f9a825); }
@@ -323,7 +325,8 @@ body {
     from { transform: translateX(-100%); }
     to   { transform: translateX(350%); }
 }
-.bar-fill.healing::before {
+.bar-fill.healing::before,
+.hp-mini-fill.healing::before {
     content: '';
     position: absolute;
     top: 0;

@@ -105,6 +105,8 @@ function renderScreen(screen) {
 
     // Animate resource deltas (gold, XP changes between screens)
     _animateResourceDeltas(contentEl);
+    // Animate HP/MP bar deltas (ghost bar on damage, shine on heal)
+    _animateBarDeltas(contentEl);
 
     // Inject font picker on settings screen
     if (screen.screen_id === 'city.settings' && typeof injectFontPicker === 'function') {
@@ -812,6 +814,20 @@ function _animateResourceDeltas(contentEl) {
             var delta = cur[key].val - _prevResources[key];
             if (delta !== 0) {
                 _showResourceFloater(cur[key].el, delta, key);
+                // Count-up animation: animate the number from old to new value
+                var badge = cur[key].el;
+                var m = badge.textContent.trim().match(/^(.+?)\s+([\d.,]+)(.*)/);
+                if (m && typeof animateCounter === 'function') {
+                    var prefix = m[1] + ' ';
+                    var suffix = m[3] || '';
+                    var numSpan = document.createElement('span');
+                    numSpan.textContent = _prevResources[key];
+                    badge.textContent = '';
+                    badge.appendChild(document.createTextNode(prefix));
+                    badge.appendChild(numSpan);
+                    badge.appendChild(document.createTextNode(suffix));
+                    animateCounter(numSpan, _prevResources[key], cur[key].val, 600);
+                }
             }
         }
     }
@@ -834,4 +850,44 @@ function _showResourceFloater(targetEl, delta, icon) {
     void targetEl.offsetWidth;
     targetEl.classList.add('resource-pop');
     setTimeout(function() { el.remove(); }, 1200);
+}
+
+// ─── HP/MP Bar Delta — Ghost bar on damage, shine on heal ───
+var _prevBarState = {};
+
+function _animateBarDeltas(contentEl) {
+    var bars = contentEl.querySelectorAll('.v-bar-fill');
+    bars.forEach(function(fill) {
+        var track = fill.parentElement;
+        if (!track) return;
+        // Extract current width percentage
+        var curPct = parseFloat(fill.style.width) || 0;
+        // Build a key from the bar type class
+        var typeClass = Array.from(fill.classList).find(function(c) { return c !== 'v-bar-fill'; }) || 'unknown';
+        var key = typeClass + '_' + Array.from(track.parentElement.children).indexOf(track.parentElement);
+
+        if (_prevBarState[key] !== undefined && _prevBarState[key] !== curPct) {
+            var oldPct = _prevBarState[key];
+            if (curPct < oldPct) {
+                // Damage: show ghost bar
+                var ghost = track.querySelector('.bar-ghost');
+                if (!ghost) {
+                    ghost = document.createElement('div');
+                    ghost.className = 'bar-ghost';
+                    track.insertBefore(ghost, fill);
+                }
+                ghost.style.transition = 'none';
+                ghost.style.width = oldPct + '%';
+                requestAnimationFrame(function() {
+                    ghost.style.transition = 'width 1.2s ease-in 0.3s';
+                    ghost.style.width = curPct + '%';
+                });
+            } else {
+                // Heal: shine sweep
+                fill.classList.add('healing');
+                setTimeout(function() { fill.classList.remove('healing'); }, 700);
+            }
+        }
+        _prevBarState[key] = curPct;
+    });
 }
