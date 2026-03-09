@@ -344,20 +344,51 @@ var ValdoriaErrors = (function () {
 
     function _autoReconnect() {
         _clog('AUTO-RECONNECT: all ' + _RETRY_MAX + ' retries exhausted');
-        // Auto-send error report
+
+        // Auto-send error report (best effort)
         if (_cfg.apiBase) {
             _reportError().catch(function () { /* */ });
-            var reportBtn = document.getElementById('v-err-report');
-            if (reportBtn) { reportBtn.textContent = '✅ Enviado automaticamente'; reportBtn.disabled = true; }
         }
 
+        // Try to auto-reconnect via sendData — bot will send a fresh menu
+        // with the correct tunnel URL. This closes the WebApp automatically.
+        var tg = window.Telegram && window.Telegram.WebApp;
+        if (tg && tg.sendData) {
+            _clog('AUTO-RECONNECT: sending webapp_reconnect via sendData');
+            var msgEl = document.getElementById('v-err-msg');
+            if (msgEl) msgEl.textContent = 'Reconectando ao servidor...';
+            var hintEl = document.getElementById('v-err-hint');
+            if (hintEl) hintEl.textContent = 'Abrindo menu do jogo automaticamente.';
+
+            // Short delay so user sees the message
+            setTimeout(function () {
+                try {
+                    tg.sendData(JSON.stringify({
+                        action: 'webapp_reconnect',
+                        webapp: _cfg.appName,
+                    }));
+                    // sendData closes the WebApp automatically
+                } catch (e) {
+                    _clog('AUTO-RECONNECT: sendData failed: ' + e.message);
+                    // Fall through to background health polling
+                    _startBgHealthFallback();
+                }
+            }, 1500);
+            return;
+        }
+
+        // Fallback for non-Telegram contexts (dev, etc): background health poll
+        _startBgHealthFallback();
+    }
+
+    function _startBgHealthFallback() {
         var msgEl = document.getElementById('v-err-msg');
         var retryBtn = document.getElementById('v-err-retry');
         var hintEl = document.getElementById('v-err-hint');
         if (msgEl) msgEl.textContent = 'Servidor indisponível. Aguardando retorno...';
         if (hintEl) hintEl.textContent = 'Verificando automaticamente a cada 15 segundos.';
 
-        // Show manual reconnect button instead of auto-closing
+        // Show manual reconnect button
         if (retryBtn) {
             retryBtn.style.display = '';
             retryBtn.textContent = 'Reconectar';
@@ -371,7 +402,7 @@ var ValdoriaErrors = (function () {
             };
         }
 
-        // Start background health poll — auto-recover when server returns
+        // Start background health poll
         _startBgHealth();
     }
 
