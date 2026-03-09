@@ -576,13 +576,20 @@ function _drawBoot(ctx, ax, ay, footH, s, angle, lifting) {
 
 function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const s = 2.0;
-    const headR = 8 * s, torsoH = 30 * s, thighL = 22 * s, shinL = 20 * s;
-    const footH = 4 * s, armLen = 20 * s;
+    // Realistic proportions (head ≈ 1/7 height)
+    const headR = 6 * s;            // smaller head
+    const neckH = 4 * s;            // visible neck
+    const torsoH = 34 * s;          // longer torso
+    const thighL = 24 * s;          // longer legs
+    const shinL = 22 * s;
+    const footH = 3.5 * s;
+    const armLen = 22 * s;          // longer arms (hands near mid-thigh)
     const hipY = -(footH + shinL + thighL);
     const shY  = hipY - torsoH;
-    const hdY  = shY - 3 * s - headR;
+    const neckY = shY - neckH;
+    const hdY  = neckY - headR;
 
-    // Walk cycle (UNTOUCHED)
+    // Walk cycle
     const p = elapsed * 0.006;
     const bob = Math.sin(p * 2) * 1.0;
     const rN = Math.sin(p), rF = Math.sin(p + Math.PI);
@@ -590,71 +597,52 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const lN = rN * sw, lF = rF * sw;
     const kN = rN < -0.1 ? -Math.pow(Math.abs(rN), 1.2) * 0.6 : 0;
     const kF = rF < -0.1 ? -Math.pow(Math.abs(rF), 1.2) * 0.6 : 0;
-    const aN = Math.sin(p + Math.PI) * 0.22, aF = Math.sin(p) * 0.22;
+    const aN = Math.sin(p + Math.PI) * 0.25, aF = Math.sin(p) * 0.25;
     const wind = Math.sin(elapsed * 0.002) * 2;
 
     ctx.save();
     ctx.translate(cx, groundY + bob);
 
-    // Colors
-    const cN = '#5a4535', cNhi = '#6b5645';  // near + highlight
-    const cF = '#443525', cFhi = '#554535';  // far + highlight
+    // Slight forward lean (natural walking posture)
+    ctx.rotate(-0.03);
 
-    // Head Y (with micro-bob)
+    // Colors
+    const cN = '#5a4535', cNhi = '#6b5645';
+    const cF = '#443525', cFhi = '#554535';
+
+    // Head Y (micro-bob)
     const hy = hdY + Math.sin(p * 2 - 0.3) * 0.5;
 
     // === SHADOW ===
-    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.fillStyle = 'rgba(0,0,0,0.13)';
     ctx.beginPath();
-    ctx.ellipse(0, 3, 16 * s, 3 * s, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 3, 14 * s, 2.5 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // === LEG HELPER (tapered limbs + shaped boots) ===
+    // === LEG HELPER ===
     function leg(a, kb, baseC, hiC, isFar) {
         const kx = Math.sin(a) * thighL, ky = hipY + Math.cos(a) * thighL;
         const sa = a + kb;
         const ax = kx + Math.sin(sa) * shinL, ay = ky + Math.cos(sa) * shinL;
-        // Thigh (wider at hip, narrower at knee)
-        const tw1 = isFar ? 4.5 * s : 5 * s;
-        const tw2 = isFar ? 3 * s : 3.5 * s;
+        const tw1 = isFar ? 4 * s : 4.5 * s;
+        const tw2 = isFar ? 2.8 * s : 3.2 * s;
         _taperedLimb(ctx, 0, hipY, kx, ky, tw1 * 0.5, tw2 * 0.5, baseC, hiC);
-        // Shin (wider at knee, narrower at ankle)
-        _taperedLimb(ctx, kx, ky, ax, ay, tw2 * 0.5, 2 * s * 0.5, baseC, hiC);
-        // Boot
+        _taperedLimb(ctx, kx, ky, ax, ay, tw2 * 0.5, 1.8 * s * 0.5, baseC, hiC);
         const lifting = a < 0;
         _drawBoot(ctx, ax, ay, footH, s, lifting ? Math.abs(kb) * 0.5 : 0, lifting);
     }
 
-    // === CAPE (multi-layer flowing cloak behind everything) ===
-    // Outer cloak layer
+    // === CAPE (subtle, close to body) ===
     ctx.fillStyle = '#4a2030';
+    ctx.globalAlpha = 0.7;
     ctx.beginPath();
-    ctx.moveTo(-2 * s, shY + 2 * s);  // upper back
-    ctx.bezierCurveTo(
-        (-10 + wind * 0.5) * s, shY + torsoH * 0.4,
-        (-12 + wind) * s, hipY + thighL * 0.2,
-        (-6 + wind) * s, hipY + thighL * 0.5
-    );
-    ctx.lineTo((-3 + wind * 0.3) * s, hipY + thighL * 0.55);
-    ctx.bezierCurveTo(
-        (-8 + wind * 0.3) * s, hipY,
-        -3 * s, shY + torsoH * 0.6,
-        -1 * s, shY + 4 * s
-    );
-    ctx.closePath();
-    ctx.fill();
-    // Inner lining (visible at edge)
-    ctx.fillStyle = '#5a2838';
-    ctx.globalAlpha = 0.5;
-    ctx.beginPath();
-    ctx.moveTo(-1 * s, shY + 6 * s);
-    ctx.bezierCurveTo(
-        -5 * s, hipY * 0.7,
-        (-7 + wind * 0.5) * s, hipY + thighL * 0.1,
-        (-4 + wind * 0.5) * s, hipY + thighL * 0.45
+    ctx.moveTo(-3 * s, shY + 4 * s);
+    ctx.quadraticCurveTo(
+        (-6 + wind * 0.4) * s, hipY + thighL * 0.15,
+        (-4 + wind * 0.3) * s, hipY + thighL * 0.4
     );
     ctx.lineTo(-2 * s, hipY + thighL * 0.3);
-    ctx.bezierCurveTo(-4 * s, hipY, -2 * s, shY + torsoH * 0.5, -1 * s, shY + 8 * s);
+    ctx.quadraticCurveTo(-3 * s, hipY, -2 * s, shY + 6 * s);
     ctx.closePath();
     ctx.fill();
     ctx.globalAlpha = 1.0;
@@ -662,66 +650,48 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     // === FAR LEG ===
     leg(lF, kF, cF, cFhi, true);
 
-    // === FAR ARM (tapered) ===
-    const afx = Math.sin(aF) * armLen, afy = shY + 2 * s + Math.cos(aF) * armLen;
-    _taperedLimb(ctx, 0, shY + 2 * s, afx, afy, 2.5 * s * 0.5, 1.8 * s * 0.5, cF, cFhi);
-    // Far hand
+    // === FAR ARM ===
+    const afx = Math.sin(aF) * armLen, afy = shY + 3 * s + Math.cos(aF) * armLen;
+    _taperedLimb(ctx, 0, shY + 3 * s, afx, afy, 2.2 * s * 0.5, 1.5 * s * 0.5, cF, cFhi);
     ctx.fillStyle = '#3e2e1e';
-    ctx.beginPath(); ctx.arc(afx, afy, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(afx, afy, 1.3 * s, 0, Math.PI * 2); ctx.fill();
 
-    // === TORSO (shaped tunic with gradient) ===
+    // === TORSO (natural shape with gradient) ===
     const tGrad = ctx.createLinearGradient(0, shY, 0, shY + torsoH);
-    tGrad.addColorStop(0, '#6b5645');    // lighter at shoulders
-    tGrad.addColorStop(0.5, '#5a4535');  // base mid
-    tGrad.addColorStop(1, '#4a3525');    // darker at waist
+    tGrad.addColorStop(0, '#6b5645');
+    tGrad.addColorStop(0.5, '#5a4535');
+    tGrad.addColorStop(1, '#4a3525');
     ctx.fillStyle = tGrad;
+    const shW = 5.5 * s, waistW = 4 * s, hipW = 4.5 * s;
     ctx.beginPath();
-    const shoulderW = 6 * s, waistW = 4.5 * s, hipW = 5.5 * s;
-    ctx.moveTo(-shoulderW, shY);                                    // left shoulder
-    ctx.lineTo(shoulderW, shY);                                     // right shoulder
-    ctx.bezierCurveTo(shoulderW, shY + torsoH * 0.3,               // taper to waist
-        waistW, shY + torsoH * 0.5,
-        waistW, shY + torsoH * 0.5);
-    ctx.bezierCurveTo(waistW, shY + torsoH * 0.7,                  // flare to hip
-        hipW, shY + torsoH * 0.9,
-        hipW, shY + torsoH);
-    ctx.lineTo(-hipW, shY + torsoH);                                // bottom left
-    ctx.bezierCurveTo(-hipW, shY + torsoH * 0.9,                   // flare
-        -waistW, shY + torsoH * 0.7,
-        -waistW, shY + torsoH * 0.5);
-    ctx.bezierCurveTo(-waistW, shY + torsoH * 0.5,                 // taper
-        -shoulderW, shY + torsoH * 0.3,
-        -shoulderW, shY);
+    ctx.moveTo(-shW, shY);
+    ctx.lineTo(shW, shY);
+    ctx.quadraticCurveTo(shW * 0.9, shY + torsoH * 0.5, waistW, shY + torsoH * 0.55);
+    ctx.quadraticCurveTo(hipW, shY + torsoH * 0.85, hipW, shY + torsoH);
+    ctx.lineTo(-hipW, shY + torsoH);
+    ctx.quadraticCurveTo(-hipW, shY + torsoH * 0.85, -waistW, shY + torsoH * 0.55);
+    ctx.quadraticCurveTo(-shW * 0.9, shY + torsoH * 0.5, -shW, shY);
     ctx.closePath();
     ctx.fill();
     // Belt
-    const beltY = shY + torsoH * 0.55;
+    const beltY = shY + torsoH * 0.52;
     ctx.strokeStyle = '#6a4a20';
-    ctx.lineWidth = 1.5 * s;
+    ctx.lineWidth = 1.3 * s;
     ctx.beginPath();
     ctx.moveTo(-waistW + 1, beltY);
     ctx.lineTo(waistW - 1, beltY);
     ctx.stroke();
-    // Belt buckle
     ctx.fillStyle = '#c4953a';
+    ctx.beginPath(); ctx.arc(0, beltY, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+    // Volume shading
+    ctx.fillStyle = 'rgba(0,0,0,0.1)';
     ctx.beginPath();
-    ctx.arc(0, beltY, 1.5 * s, 0, Math.PI * 2);
-    ctx.fill();
-    // Volume shading (darker on far side)
-    ctx.fillStyle = 'rgba(0,0,0,0.12)';
-    ctx.beginPath();
-    ctx.moveTo(-shoulderW, shY);
-    ctx.lineTo(-waistW * 0.3, shY);
-    ctx.bezierCurveTo(-waistW * 0.3, shY + torsoH * 0.5,
-        -hipW * 0.3, shY + torsoH * 0.9,
-        -hipW * 0.3, shY + torsoH);
+    ctx.moveTo(-shW, shY);
+    ctx.lineTo(-shW * 0.3, shY);
+    ctx.quadraticCurveTo(-waistW * 0.3, shY + torsoH * 0.5, -hipW * 0.3, shY + torsoH);
     ctx.lineTo(-hipW, shY + torsoH);
-    ctx.bezierCurveTo(-hipW, shY + torsoH * 0.9,
-        -waistW, shY + torsoH * 0.7,
-        -waistW, shY + torsoH * 0.5);
-    ctx.bezierCurveTo(-waistW, shY + torsoH * 0.5,
-        -shoulderW, shY + torsoH * 0.3,
-        -shoulderW, shY);
+    ctx.quadraticCurveTo(-hipW, shY + torsoH * 0.85, -waistW, shY + torsoH * 0.55);
+    ctx.quadraticCurveTo(-shW * 0.9, shY + torsoH * 0.5, -shW, shY);
     ctx.closePath();
     ctx.fill();
 
@@ -729,107 +699,74 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     leg(lN, kN, cN, cNhi, false);
 
     // === NEAR ARM + STAFF ===
-    const ahx = Math.sin(aN) * armLen, ahy = shY + 2 * s + Math.cos(aN) * armLen;
-    _taperedLimb(ctx, 0, shY + 2 * s, ahx, ahy, 3 * s * 0.5, 2 * s * 0.5, cN, cNhi);
+    const ahx = Math.sin(aN) * armLen, ahy = shY + 3 * s + Math.cos(aN) * armLen;
+    _taperedLimb(ctx, 0, shY + 3 * s, ahx, ahy, 2.8 * s * 0.5, 1.8 * s * 0.5, cN, cNhi);
 
-    // Staff (tapered with wood grain)
+    // Staff
     const staffTopX = ahx + 1 * s, staffTopY = ahy - 4 * s;
     const staffBotX = ahx + 3 * s, staffBotY = 4 * s;
-    const sGrad = ctx.createLinearGradient(staffTopX, staffTopY, staffBotX, staffBotY);
-    sGrad.addColorStop(0, '#8a6a30');
-    sGrad.addColorStop(0.3, '#6a4a20');
-    sGrad.addColorStop(0.7, '#5a3a18');
-    sGrad.addColorStop(1, '#7a5a28');
-    // Tapered staff body
     _taperedLimb(ctx, staffTopX, staffTopY, staffBotX, staffBotY,
-        1.2 * s * 0.5, 1.8 * s * 0.5, '#6a4a20', '#8a6a30');
-
-    // Staff orb (radial gradient + glow)
+        1 * s * 0.5, 1.5 * s * 0.5, '#6a4a20', '#8a6a30');
+    // Staff orb
     const gl = 0.4 + Math.sin(elapsed * 0.005) * 0.2;
     ctx.save();
     ctx.shadowColor = `rgba(196,149,58,${gl * 0.8})`;
-    ctx.shadowBlur = 6 * s;
-    const orbGrad = ctx.createRadialGradient(
-        staffTopX, staffTopY, 0,
-        staffTopX, staffTopY, 2.5 * s
-    );
+    ctx.shadowBlur = 5 * s;
+    const orbGrad = ctx.createRadialGradient(staffTopX, staffTopY, 0, staffTopX, staffTopY, 2 * s);
     orbGrad.addColorStop(0, `rgba(255,220,120,${gl + 0.2})`);
     orbGrad.addColorStop(0.5, `rgba(196,149,58,${gl})`);
     orbGrad.addColorStop(1, `rgba(196,149,58,0)`);
     ctx.fillStyle = orbGrad;
-    ctx.beginPath();
-    ctx.arc(staffTopX, staffTopY, 2.5 * s, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(staffTopX, staffTopY, 2 * s, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-
-    // Near hand (gripping staff)
+    // Near hand
     ctx.fillStyle = '#4a3828';
-    ctx.beginPath(); ctx.arc(ahx, ahy, 1.8 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ahx, ahy, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+
+    // === NECK ===
+    _taperedLimb(ctx, 0, shY, 0, neckY, 2.5 * s * 0.5, 2 * s * 0.5, '#4a3828', '#5a4838');
 
     // === HEAD ===
     ctx.fillStyle = '#3e2e1e';
     ctx.beginPath(); ctx.arc(0, hy, headR, 0, Math.PI * 2); ctx.fill();
 
-    // === HOOD COVERING (on top of head) ===
-    const cHood = '#4a2030';
-    ctx.fillStyle = cHood;
+    // === HOOD (tight-fitting, no tail) ===
+    ctx.fillStyle = '#4a2030';
     ctx.beginPath();
-    ctx.moveTo(headR * 0.55, hy + headR * 0.15);
-    ctx.arc(0, hy, headR + 2 * s, -0.15, -Math.PI + 0.15, true);
-    ctx.lineTo(-headR * 0.7, hy + headR * 0.1);
-    ctx.lineTo(-headR * 0.15, hy + headR * 0.35);
-    ctx.closePath();
-    ctx.fill();
-
-    // Hood depth shadow (dark interior)
-    const hoodShadow = ctx.createRadialGradient(
-        headR * 0.2, hy, headR * 0.2,
-        headR * 0.2, hy, headR * 0.9
-    );
-    hoodShadow.addColorStop(0, 'rgba(10,5,2,0.6)');
-    hoodShadow.addColorStop(1, 'rgba(10,5,2,0)');
-    ctx.fillStyle = hoodShadow;
-    ctx.beginPath();
-    ctx.arc(headR * 0.1, hy + headR * 0.05, headR * 0.8, -0.5, 0.8);
-    ctx.arc(headR * 0.1, hy + headR * 0.05, headR * 0.2, 0.8, -0.5, true);
+    ctx.moveTo(headR * 0.5, hy + headR * 0.2);
+    ctx.arc(0, hy, headR + 1.5 * s, -0.2, -Math.PI + 0.2, true);
+    ctx.lineTo(-headR * 0.5, hy + headR * 0.3);
     ctx.closePath();
     ctx.fill();
 
     // Hood brim shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
     ctx.beginPath();
-    ctx.arc(0, hy, headR + 2 * s, -0.15, -0.9, true);
-    ctx.arc(0, hy, headR, -0.9, -0.15, false);
+    ctx.arc(0, hy, headR + 1.5 * s, -0.2, -0.8, true);
+    ctx.arc(0, hy, headR, -0.8, -0.2, false);
     ctx.closePath();
     ctx.fill();
 
-    // Hood brim highlight (material thickness)
-    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
-    ctx.lineWidth = 1;
+    // Face shadow under hood
+    const faceShadow = ctx.createRadialGradient(headR * 0.2, hy, headR * 0.15, headR * 0.2, hy, headR * 0.75);
+    faceShadow.addColorStop(0, 'rgba(10,5,2,0.5)');
+    faceShadow.addColorStop(1, 'rgba(10,5,2,0)');
+    ctx.fillStyle = faceShadow;
     ctx.beginPath();
-    ctx.arc(0, hy, headR + 2.5 * s, -0.2, -Math.PI + 0.2, true);
-    ctx.stroke();
+    ctx.arc(headR * 0.1, hy, headR * 0.7, -0.4, 0.7);
+    ctx.arc(headR * 0.1, hy, headR * 0.15, 0.7, -0.4, true);
+    ctx.closePath();
+    ctx.fill();
 
-    // Eyes (two glowing dots under hood)
+    // Eyes (glowing under hood)
     ctx.save();
     const eyeGlow = 0.35 + Math.sin(elapsed * 0.004) * 0.15;
-    ctx.shadowColor = `rgba(196,149,58,${eyeGlow * 0.6})`;
-    ctx.shadowBlur = 3 * s;
+    ctx.shadowColor = `rgba(196,149,58,${eyeGlow * 0.5})`;
+    ctx.shadowBlur = 2.5 * s;
     ctx.fillStyle = `rgba(196,149,58,${eyeGlow})`;
-    ctx.beginPath();
-    ctx.arc(headR * 0.25, hy + headR * 0.0, 1.1 * s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(headR * 0.55, hy + headR * 0.05, 1.0 * s, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(headR * 0.2, hy - headR * 0.05, 0.9 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(headR * 0.5, hy, 0.8 * s, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-
-    // Chin/jaw hint (subtle)
-    ctx.strokeStyle = 'rgba(62,46,30,0.4)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(headR * 0.3, hy + headR * 0.5, headR * 0.45, 0.3, 1.8);
-    ctx.stroke();
 
     ctx.restore();
 }

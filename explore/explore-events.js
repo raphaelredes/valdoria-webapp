@@ -345,7 +345,7 @@ function performStatCheck(poi, choice) {
     }
 }
 
-// Skip/continue logic shared by both 3D and emoji paths
+// Continue logic shared by both 3D and emoji paths — requires tap to advance
 function _showCheckSkip(overlay, success, choice, poi) {
     let _checkDone = false;
     const skipBtn = document.getElementById('check-skip-btn');
@@ -369,14 +369,14 @@ function _showCheckSkip(overlay, success, choice, poi) {
         applyOutcome(poi, outcome, choice);
     };
 
+    // Show "Continuar" button after 800ms — NO auto-advance timer
+    // Player must tap to proceed, giving time to read the result
     setTimeout(() => {
         if (!_checkDone && skipBtn) {
             skipBtn.classList.add('visible');
             skipBtn.onclick = finishCheck;
         }
-    }, 500);
-
-    setTimeout(finishCheck, 2500);
+    }, 800);
 }
 
 // Emoji fallback when THREE.js is unavailable
