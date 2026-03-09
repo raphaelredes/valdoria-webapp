@@ -118,6 +118,12 @@ async function initAsync() {
 
         await renderMapAsync(updateProgress);
 
+        // Re-apply font scale to SVG text (initFontPicker runs before SVG exists)
+        if (typeof applyFont === 'function') {
+            const savedFont = localStorage.getItem('valdoria_font') || 'medievalsharp';
+            applyFont(savedFont);
+        }
+
         // Center on current location
         centerOnLocation(S.currentLoc);
 
@@ -406,6 +412,11 @@ function finishNavigation(type, target, flags) {
             console.warn('[NAVIGATE] Auto-resetting stale _navSent after 30s timeout');
             _navSent = false;
             _hideTravelOverlay();
+            // Re-enable action buttons so user can retry
+            document.querySelectorAll('.info-btn').forEach(btn => {
+                btn.style.pointerEvents = '';
+                btn.style.opacity = '';
+            });
         }
     }, 30000);
 

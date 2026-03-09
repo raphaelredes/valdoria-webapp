@@ -265,6 +265,10 @@ function handleLocationTap(locId) {
     // Open panel
     panel.classList.add('open');
     _haptic('open');
+    // Check if content overflows (show scroll hint)
+    requestAnimationFrame(() => {
+        panel.classList.toggle('scrollable', panel.scrollHeight > panel.clientHeight + 8);
+    });
 
     // Update cycle buttons
     _updateCycleButtons();
@@ -566,11 +570,12 @@ function setupHoverTooltip() {
         const wDist = locId !== S.currentLoc ? weightedDistance(S.currentLoc, locId, connectionGraph) : -1;
         ttDist.textContent = wDist > 0 ? `${wDist}🕐` : '';
         tt.style.display = 'block';
-        // Position near cursor
+        // Position near cursor (use actual tooltip width)
         const vpR = vp.getBoundingClientRect();
+        const ttW = tt.offsetWidth || 120;
         let tx = e.clientX - vpR.left + 12;
         let ty = e.clientY - vpR.top - 28;
-        if (tx + 120 > vpR.width) tx = e.clientX - vpR.left - 120;
+        if (tx + ttW > vpR.width) tx = e.clientX - vpR.left - ttW;
         if (ty < 0) ty = e.clientY - vpR.top + 16;
         tt.style.left = tx + 'px';
         tt.style.top = ty + 'px';
@@ -652,7 +657,7 @@ function toggleLegendExpand() {
 function setupLongPress() {
     const vp = document.getElementById('map-viewport');
     if (!vp) return;
-    let _lpTimer = null, _lpLocId = null; // eslint-disable-line no-unused-vars
+    let _lpTimer = null, _lpLocId = null, _lpStartX = 0, _lpStartY = 0; // eslint-disable-line no-unused-vars
     function _clearPreview() {
         document.querySelectorAll('#map-svg .path-preview').forEach(p => p.remove());
         _lpLocId = null;
@@ -662,13 +667,19 @@ function setupLongPress() {
         if (!loc) return;
         const locId = loc.getAttribute('data-loc');
         if (!locId || locId === S.currentLoc) return;
+        _lpStartX = e.clientX; _lpStartY = e.clientY;
         _lpTimer = setTimeout(() => {
             _lpLocId = locId;
             _showPathPreview(locId);
             _haptic('tap');
         }, 500);
     });
-    vp.addEventListener('pointermove', () => { if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; } });
+    vp.addEventListener('pointermove', e => {
+        if (_lpTimer) {
+            const dx = e.clientX - _lpStartX, dy = e.clientY - _lpStartY;
+            if (dx * dx + dy * dy > 400) { clearTimeout(_lpTimer); _lpTimer = null; }
+        }
+    });
     vp.addEventListener('pointerup', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearPreview(); });
     vp.addEventListener('pointercancel', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearPreview(); });
 }

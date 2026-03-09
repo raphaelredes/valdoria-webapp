@@ -699,7 +699,7 @@ function setupPanZoom() {
         // Apply inertia if velocity is significant
         const speed = Math.sqrt(_velX * _velX + _velY * _velY);
         if (moved && speed > 1.5) {
-            const factor = Math.min(speed * 3, 120);
+            const factor = Math.min(speed * 2, 80);
             S.panX += _velX * factor / speed * 0.6;
             S.panY += _velY * factor / speed * 0.6;
             clamp();
@@ -851,14 +851,14 @@ function _updateMinimap() {
     const vp = document.getElementById('map-viewport');
     const vpRect = mm.querySelector('.mm-viewport');
     if (!vpRect || !vp) return;
-    const rx = -S.panX / S.zoom;
-    const ry = -S.panY / S.zoom;
-    const rw = vp.clientWidth / S.zoom;
-    const rh = vp.clientHeight / S.zoom;
+    const rx = Math.max(0, -S.panX / S.zoom);
+    const ry = Math.max(0, -S.panY / S.zoom);
+    const rw = Math.min(vp.clientWidth / S.zoom, SVG_W - rx);
+    const rh = Math.min(vp.clientHeight / S.zoom, SVG_H - ry);
     vpRect.setAttribute('x', rx);
     vpRect.setAttribute('y', ry);
-    vpRect.setAttribute('width', rw);
-    vpRect.setAttribute('height', rh);
+    vpRect.setAttribute('width', Math.max(0, rw));
+    vpRect.setAttribute('height', Math.max(0, rh));
     // Auto-fade after 3s of no interaction
     mm.classList.remove('fading');
     clearTimeout(_mmFadeTimer);
