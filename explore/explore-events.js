@@ -393,7 +393,7 @@ function _showCheckEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, pro
     setTimeout(() => {
         const fb = wrapper.querySelector('.dice-display-fallback');
         if (fb && r2 === null) {
-            fb.textContent = roll <= 1 ? 'Falha Critica' : roll >= 20 ? 'Critico!' : roll;
+            fb.textContent = roll <= 1 ? 'Falha Crítica' : roll >= 20 ? 'Critico!' : roll;
         }
         resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
@@ -940,9 +940,13 @@ const TOAST_STYLES = {
     difficult: 'background:rgba(220,160,40,0.2);border:1px solid rgba(220,160,40,0.4);color:#dca028',
     ranger: 'background:rgba(68,170,100,0.2);border:1px solid rgba(68,170,100,0.4);color:#4aa664',
     damage: 'background:rgba(200,60,60,0.25);border:1px solid rgba(200,60,60,0.5);color:#c44',
+    danger: 'background:rgba(200,60,60,0.25);border:1px solid rgba(200,60,60,0.5);color:#c44',
     condition: 'background:rgba(170,68,68,0.2);border:1px solid rgba(170,68,68,0.4);color:#c88',
     flavor: 'background:rgba(50,44,58,0.95);border:1px solid rgba(196,149,58,0.4);color:#ddd4c6;font-style:italic;font-size:12px;letter-spacing:0.3px;box-shadow:0 2px 12px rgba(0,0,0,0.5)',
 };
+
+// Toast category mapping for calcReadTime
+const _TOAST_TIMING = { damage: 'toast-warn', danger: 'toast-warn', condition: 'toast-warn', flavor: 'toast' };
 
 // Compact toast notification for terrain effects
 function showTerrainToast(message, type) {
@@ -958,7 +962,8 @@ function showTerrainToast(message, type) {
         'pointer-events:none;z-index:99999;text-align:center;' + theme;
     document.body.appendChild(toast);
 
-    const duration = type === 'flavor' ? 2500 : 1500;
+    const category = _TOAST_TIMING[type] || 'toast';
+    const duration = typeof calcReadTime === 'function' ? calcReadTime(message, category) : 1500;
     setTimeout(() => toast.remove(), duration);
 }
 
@@ -1128,7 +1133,7 @@ function _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, ha
     setTimeout(() => {
         const fb = wrapper.querySelector('.dice-display-fallback');
         if (fb && r2 === null) {
-            fb.textContent = roll <= 1 ? 'Falha Critica' : roll >= 20 ? 'Critico!' : roll;
+            fb.textContent = roll <= 1 ? 'Falha Crítica' : roll >= 20 ? 'Critico!' : roll;
         }
         resultEl.textContent = success ? 'Resistiu!' : 'Falhou!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
