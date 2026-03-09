@@ -563,19 +563,19 @@ function _drawBoot(ctx, ax, ay, footH, s, angle, lifting) {
 
 function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const s = 2.0;
-    // --- Proportions matched to reference (loose tunic + shorts + calves) ---
-    const headR = 5.5 * s;
+    // --- Proportions matched to walking reference photo ---
+    const headR = 5 * s;
     const neckH = 2 * s;
-    const torsoH = 28 * s;          // long tunic (shirt hangs past hips)
-    const upperArmL = 10 * s;       // short sleeve length
-    const foreArmL = 11 * s;
-    const thighL = 16 * s;          // shorter (partly hidden by tunic)
-    const shinL = 20 * s;           // longer calves (prominent like reference)
-    const footH = 3.5 * s;
-    const hipSpread = 3 * s;
+    const torsoH = 26 * s;          // shirt hangs past waist
+    const upperArmL = 10 * s;
+    const foreArmL = 10 * s;
+    const thighL = 20 * s;          // shorts reach to just above knee
+    const shinL = 16 * s;           // calves shorter than thighs
+    const footH = 3 * s;
+    const hipSpread = 2.5 * s;
     const shoulderW = 9 * s;        // broad (shirt is dominant shape)
-    const waistW = 8 * s;           // loose, not cinched
-    const hemW = 9.5 * s;           // tunic flares slightly at hem
+    const waistW = 8.5 * s;         // loose, not cinched
+    const hemW = 9 * s;             // slight flare at hem
 
     const hipY = -(footH + shinL + thighL);
     const shY = hipY - torsoH;
@@ -602,10 +602,10 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
 
     // Colors — medieval palette
     const cTunic = '#5a4535', cTunicHi = '#6b5645';
-    const cSkin = '#8a6e52', cSkinHi = '#9a7e62';
+    const cSkin = '#7a5e42', cSkinHi = '#8a6e52';
     const cShorts = '#3a2a1e', cShortsHi = '#4a3a2e';
     const cFar = '#443525', cFarHi = '#554535';
-    const cSkinFar = '#6e5840', cSkinFarHi = '#7e6850';
+    const cSkinFar = '#604830', cSkinFarHi = '#705840';
     const cShortsFar = '#2e2018', cShortsFarHi = '#3e3028';
 
     const hy = hdY + Math.sin(p * 2 - 0.3) * 0.5;
