@@ -589,7 +589,9 @@ function triggerCombat(poi) {
         }
     }, 500);
 
-    setTimeout(finishCombat, 2000);
+    const combatText = (combat.en || 'Inimigo') + ' Iniciando Combate';
+    const combatDelay = typeof calcReadTime === 'function' ? calcReadTime(combatText, 'combat') : 2000;
+    setTimeout(finishCombat, combatDelay);
 }
 
 // Post-combat narrative (brief toast after returning from combat, biome-aware)
@@ -1180,7 +1182,9 @@ function _showHazardSkip(overlay, success, hazard) {
         }
     }, 500);
 
-    setTimeout(finishHazard, 2500);
+    const hazardText = (document.getElementById('check-formula').textContent || '') + ' ' + (document.getElementById('check-result').textContent || '');
+    const hazardDelay = typeof calcReadTime === 'function' ? calcReadTime(hazardText, 'overlay') : 2500;
+    setTimeout(finishHazard, hazardDelay);
 }
 
 function _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, hazard, total, success) {
@@ -1777,7 +1781,9 @@ function showDeathOverlay() {
         finishExploration('death');
     };
     setTimeout(() => { if (!_deathDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishDeath; } }, 500);
-    setTimeout(finishDeath, 2500);
+    const deathText = summary.textContent || '';
+    const deathDelay = typeof calcReadTime === 'function' ? calcReadTime(deathText, 'summary') : 2500;
+    setTimeout(finishDeath, deathDelay);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2309,11 +2315,59 @@ function _showArrivalScreen() {
         _renderReturnProgress(progressEl, j);
     }
 
-    const arrivalTexts = [
-        'Os portões se abrem diante de você. O som familiar da cidade traz alívio. Você sobreviveu à jornada.',
-        'As torres de vigia surgem entre as árvores. Os guardas acenam ao reconhecê-lo. Enfim, segurança.',
-        'O cheiro de pão fresco e fumaça de lareiras atinge você antes mesmo de ver os muros. Eldoria, finalmente.',
-    ];
+    const ARRIVAL_TEXTS = {
+        forest: [
+            'As árvores se abrem e os muros de Eldoria surgem banhados pela luz dourada. O aroma da floresta se mistura ao cheiro de fumaça das chaminés. Você sobreviveu.',
+            'Pássaros cantam uma despedida enquanto a trilha desemboca na estrada principal. Os portões de Eldoria se erguem à frente, acolhedores.',
+            'O verde da floresta cede lugar à pedra dos muros. Guardas acenam ao reconhecê-lo entre as árvores. Enfim, segurança.',
+        ],
+        plains: [
+            'A estrada de terra se alarga e os portões de Eldoria dominam o horizonte. O vento dos campos sopra uma última vez em suas costas.',
+            'Rebanhos pastam ao lado da estrada enquanto os muros da cidade crescem a cada passo. O cheiro de pão fresco chega com a brisa.',
+            'A planície infinita termina nos muros familiares. Seus pés encontram calçamento e o alívio se instala. Eldoria, finalmente.',
+        ],
+        cave: [
+            'A luz do dia cega por um instante ao emergir das profundezas. Os muros de Eldoria brilham à distância como uma promessa cumprida.',
+            'O ar livre enche seus pulmões após a escuridão opressiva. Os portões de Eldoria nunca pareceram tão acolhedores.',
+            'Seus olhos se adaptam à claridade enquanto a estrada serpenteia até os muros da cidade. O pior ficou nas profundezas.',
+        ],
+        swamp: [
+            'A lama cede lugar a chão firme e o ar úmido se dissipa. Os muros de Eldoria emergem da bruma como uma fortaleza de esperança.',
+            'Você limpa a lama das botas na estrada pavimentada. O pântano fica para trás e a civilização retorna com cada passo.',
+            'O cheiro pútrido é substituído por aromas de comida e lareiras. Eldoria acolhe quem sobrevive ao pântano.',
+        ],
+        mountain: [
+            'A descida termina em terras planas e os muros de Eldoria surgem no vale como um oásis de pedra. O frio da montanha fica para trás.',
+            'Seus joelhos agradecem o terreno plano após a longa descida. Os portões da cidade se abrem com um ranger familiar.',
+            'O vento gélido dos picos é substituído pela brisa amena do vale. Eldoria espera com tetos aquecidos e comida quente.',
+        ],
+        desert: [
+            'A areia cede lugar à vegetação e os muros de Eldoria surgem como uma miragem que finalmente é real. Água e sombra, enfim.',
+            'O calor diminui com a proximidade dos muros. Guardas oferecem água ao vê-lo emergir das areias. O deserto ficou para trás.',
+            'Seus lábios rachados esboçam um sorriso ao ver os portões. O deserto tentou, mas Eldoria venceu.',
+        ],
+        snow: [
+            'A neve diminui e os muros de Eldoria surgem entre os flocos. O calor das lareiras da cidade pode ser sentido mesmo daqui.',
+            'Seus membros entorpecidos pelo frio se aquecem com a visão dos portões. A neve não venceu desta vez.',
+            'Pegadas na neve levam até a estrada limpa. Guardas com tochas iluminam a entrada. Você sobreviveu ao inverno.',
+        ],
+        volcanic: [
+            'O ar limpo substitui o enxofre e os muros de Eldoria surgem além das cinzas. Suas queimaduras pulsam, mas você está vivo.',
+            'O tremor da terra cessa ao se afastar do vulcão. Eldoria aguarda, imune ao fogo das profundezas.',
+            'O calor infernal fica para trás. O cheiro de comida e a visão dos muros renovam suas forças.',
+        ],
+        graveyard: [
+            'A névoa do cemitério se dissipa como um sonho ruim. Os muros de Eldoria, sólidos e reais, apagam os sussurros dos mortos.',
+            'Corvos ficam para trás enquanto a estrada leva aos portões. A luz das tochas dos guardas afasta as sombras persistentes.',
+            'O silêncio dos mortos é substituído pelo burburinho dos vivos. Eldoria pulsa com vida — exatamente o que você precisava.',
+        ],
+        _default: [
+            'Os portões se abrem diante de você. O som familiar da cidade traz alívio. Você sobreviveu à jornada.',
+            'As torres de vigia surgem entre as árvores. Os guardas acenam ao reconhecê-lo. Enfim, segurança.',
+            'O cheiro de pão fresco e fumaça de lareiras atinge você antes mesmo de ver os muros. Eldoria, finalmente.',
+        ],
+    };
+    const arrivalTexts = ARRIVAL_TEXTS[_getReturnBiome()] || ARRIVAL_TEXTS._default;
 
     narrEl.innerHTML = `<div class="return-step-badge arrival">Chegada a Eldoria</div>` +
         `<div>${_pickFrom(arrivalTexts)}</div>`;

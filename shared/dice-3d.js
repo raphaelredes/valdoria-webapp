@@ -203,8 +203,8 @@ const Dice3D = (() => {
         addEdgeWire(mesh, base);
         var numbers = [1, 2, 3, 4];
         var faces = facesFromTris(geo, 4);
-        addLabels(mesh, numbers, faces.centers, faces.normals, 0.85);
         mesh.userData = { type: 'd4', numbers: numbers, normals: faces.normals };
+        addLabels(mesh, numbers, faces.centers, faces.normals, 0.85);
         mesh.castShadow = true;
         return mesh;
     }
@@ -231,8 +231,8 @@ const Dice3D = (() => {
             centers.push(center);
             normals.push(n);
         }
-        addLabels(mesh, D6_NUMS, centers, normals, 0.92);
         mesh.userData = { type: 'd6', numbers: D6_NUMS, normals: normals };
+        addLabels(mesh, D6_NUMS, centers, normals, 0.92);
         mesh.castShadow = true;
         return mesh;
     }
@@ -245,8 +245,8 @@ const Dice3D = (() => {
         addEdgeWire(mesh, base);
         var numbers = [1, 2, 3, 4, 5, 6, 7, 8];
         var faces = facesFromTris(geo, 8);
-        addLabels(mesh, numbers, faces.centers, faces.normals, 0.55);
         mesh.userData = { type: 'd8', numbers: numbers, normals: faces.normals };
+        addLabels(mesh, numbers, faces.centers, faces.normals, 0.55);
         mesh.castShadow = true;
         return mesh;
     }
@@ -306,8 +306,8 @@ const Dice3D = (() => {
         applyGradient(geo);
         var mesh = new THREE.Mesh(geo, makeBodyMat());
         addEdgeWire(mesh, geo, 20);
-        addLabels(mesh, faceNumbers, faceCenters, faceNormals, 0.52);
         mesh.userData = { type: 'd10', numbers: faceNumbers, normals: faceNormals };
+        addLabels(mesh, faceNumbers, faceCenters, faceNormals, 0.52);
         mesh.castShadow = true;
         return mesh;
     }
@@ -321,8 +321,8 @@ const Dice3D = (() => {
         var faces = facesFromClusters(geo);
         var numbers = [];
         for (var i = 1; i <= faces.centers.length; i++) numbers.push(i);
-        addLabels(mesh, numbers, faces.centers, faces.normals, 0.62);
         mesh.userData = { type: 'd12', numbers: numbers, normals: faces.normals };
+        addLabels(mesh, numbers, faces.centers, faces.normals, 0.62);
         mesh.castShadow = true;
         return mesh;
     }
@@ -339,8 +339,8 @@ const Dice3D = (() => {
             new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity: 0.5 })));
         var numbers = [];
         for (var i = 1; i <= 20; i++) numbers.push(i);
-        addLabels(mesh, numbers, faces.centers, faces.normals, 0.56);
         mesh.userData = { type: 'd20', numbers: numbers, normals: faces.normals };
+        addLabels(mesh, numbers, faces.centers, faces.normals, 0.56);
         mesh.castShadow = true;
         return mesh;
     }
@@ -372,8 +372,8 @@ const Dice3D = (() => {
             normals.push(n);
         }
         var nums = [total, total, total, total, total, total];
-        addLabels(mesh, nums, centers, normals, 0.92);
         mesh.userData = { type: 'result', numbers: nums, normals: normals };
+        addLabels(mesh, nums, centers, normals, 0.92);
         mesh.castShadow = true;
         return mesh;
     }
