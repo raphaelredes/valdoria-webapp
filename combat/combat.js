@@ -241,7 +241,7 @@ async function loadCombatState() {
         const health = await api.checkHealth();
         if (health.status === 'unreachable') {
             document.getElementById('app').innerHTML = '<div class="no-data"><h2>Servidor Indisponível</h2><p>O servidor de combate não está respondendo. Tente novamente em alguns segundos.</p></div>';
-        } else if (e.status === 401) {
+        } else if (e.status === 401 || e.status === 403) {
             document.getElementById('app').innerHTML = '<div class="no-data"><h2>Sessão Expirada</h2><p>Feche esta janela e reabra o combate no Telegram.</p></div>';
         } else {
             document.getElementById('app').innerHTML = '<div class="no-data"><h2>Erro de Conexão</h2><p>Não foi possível carregar o combate.</p></div>';
@@ -1069,7 +1069,7 @@ function startPolling() {
                 }
             }
         } catch (e) {
-            if (e.status === 401 || (e.message && e.message.includes('401'))) {
+            if (e.status === 401 || e.status === 403 || (e.message && e.message.includes('401'))) {
                 showError('Sessão expirada — feche e reabra o combate');
                 stopPolling();
                 return;

@@ -163,6 +163,22 @@ async function requestTransition(toApp, payload = {}) {
             });
             clearTimeout(tid);
 
+            // Auth errors — don't retry, close WebApp
+            if (resp.status === 401 || resp.status === 403) {
+                S.transitioning = false;
+                console.error('[GAME] Transition auth error:', resp.status);
+                try {
+                    if (window.Telegram?.WebApp?.sendData) {
+                        Telegram.WebApp.sendData(JSON.stringify({
+                            action: 'webapp_error_close', webapp: 'GAME',
+                            reason: resp.status === 401 ? 'session_expired' : 'invalid_init_data',
+                        }));
+                        return;
+                    }
+                } catch (_) {}
+                showToast('Sessão expirada. Feche e reabra.');
+                return;
+            }
             // Retry on 5xx / 429
             if ((resp.status >= 500 || resp.status === 429) && attempt < MAX_RETRIES) {
                 await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
