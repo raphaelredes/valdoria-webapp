@@ -507,168 +507,352 @@ function _drawGroundDetails(ctx, biome, w, h, groundY, elapsed) {
 // ═══════════════════════════════════════════
 
 function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
-    const y = groundY;
-    const bob = Math.sin(elapsed * 0.012) * 2.5;
-    const s = 1.8;
+    // ═══════════════════════════════════════════════════════════
+    // Biomechanical walk cycle — based on human gait research:
+    // - Triangle-wave vertical bob (contact→down→passing→up)
+    // - Hip roll at half stride frequency
+    // - Articulated legs: hip angle → knee bend → foot plant
+    // - Arms counter-swing opposite legs with phase delay
+    // - Torso forward lean with slight rotation
+    // Refs: andrew.wang-hoyer.com/experiments/walking,
+    //        littlepolygon.com/posts/loco1, slynyrd.com walk cycle
+    // ═══════════════════════════════════════════════════════════
+
+    const s = 1.6;
+
+    // ── Walk cycle timing ──
+    // Phase advances continuously; one full cycle = 2π = one complete stride
+    const walkPhase = elapsed * 0.008;
+
+    // ── Vertical bob (triangle wave, not sine) ──
+    // Humans are LOWEST at contact (heel strike) and HIGHEST at passing (mid-stance)
+    // Two bounces per stride (each foot strike). Triangle wave = sharper, more energetic.
+    const rawBob = Math.sin(walkPhase * 2);
+    // Sharpen to triangle-like: pow with sign preservation
+    const bob = -Math.sign(rawBob) * Math.pow(Math.abs(rawBob), 0.7) * 2.8;
+
+    // ── Hip roll (side-to-side weight shift at half frequency) ──
+    const hipRoll = Math.sin(walkPhase) * 0.04; // radians
+    const hipSway = Math.sin(walkPhase) * 1.5;  // pixels
+
+    // ── Leg angles (articulated: hip → knee) ──
+    // Left leg: raw sine, asymmetric (forward swing faster via power curve)
+    const rawLegL = Math.sin(walkPhase);
+    const hipAngleL = rawLegL * 0.45 + (rawLegL > 0 ? rawLegL * rawLegL * 0.15 : 0);
+    // Knee bends when leg is in swing phase (moving forward, off ground)
+    const kneeBendL = rawLegL > 0.1 ? Math.pow(rawLegL, 1.5) * 0.5 : 0;
+    // Right leg: π offset (opposite phase)
+    const rawLegR = Math.sin(walkPhase + Math.PI);
+    const hipAngleR = rawLegR * 0.45 + (rawLegR > 0 ? rawLegR * rawLegR * 0.15 : 0);
+    const kneeBendR = rawLegR > 0.1 ? Math.pow(rawLegR, 1.5) * 0.5 : 0;
+
+    // ── Foot lift (during swing phase, foot rises off ground) ──
+    const footLiftL = rawLegL > 0 ? Math.sin(rawLegL * Math.PI) * 4 : 0;
+    const footLiftR = rawLegR > 0 ? Math.sin(rawLegR * Math.PI) * 4 : 0;
+
+    // ── Arms counter-swing (opposite to legs, with phase delay) ──
+    const armSwingL = Math.sin(walkPhase + Math.PI + 0.3) * 0.4;
+    const armSwingR = Math.sin(walkPhase + 0.3) * 0.4;
+
+    // ── Torso (slight forward lean + rotation following hips) ──
+    const torsoLean = -0.04 + Math.sin(walkPhase * 2) * 0.015;
+    const shoulderTwist = Math.sin(walkPhase) * 0.03;
+
+    // ── Wind for cape ──
+    const wind1 = Math.sin(elapsed * 0.0015) * 3;
+    const wind2 = Math.sin(elapsed * 0.005) * 1.5;
+    const windPhase = wind1 + wind2 * 0.6;
+
+    // ── Head bob trails body (slight delay, smaller amplitude) ──
+    const headBob = Math.sin(walkPhase * 2 - 0.3) * 0.8;
+    const headTilt = Math.sin(walkPhase) * 0.02;
 
     ctx.save();
-    ctx.translate(cx, y + bob);
-
-    // Walk cycle phase
-    const legSwing = Math.sin(elapsed * 0.01) * 5;
-    const armSwing = Math.sin(elapsed * 0.01) * 4;
-    // Wind factor for cape (ref: navigate banner 4-keyframe morph)
-    const wind1 = Math.sin(elapsed * 0.0012) * 2;   // slow sway
-    const wind2 = Math.sin(elapsed * 0.004) * 1.5;   // fast flutter
-    const windPhase = wind1 + wind2 * 0.5;
+    ctx.translate(cx + hipSway, groundY + bob);
+    ctx.rotate(hipRoll);
 
     // ── Ground shadow ──
-    ctx.fillStyle = `rgba(0,0,0,${0.3 + Math.sin(elapsed * 0.003) * 0.05})`;
+    ctx.fillStyle = `rgba(0,0,0,${0.22 + Math.sin(elapsed * 0.003) * 0.03})`;
     ctx.beginPath();
-    ctx.ellipse(0, 2, 16 * s, 5 * s, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 2, 13 * s, 3.5 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // ── Cast shadow behind figure (projected, not under) ──
-    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    // ── Cape (two layers, wind-animated) ──
+    ctx.fillStyle = '#3a2228';
     ctx.beginPath();
-    ctx.moveTo(-3 * s, 0);
-    ctx.quadraticCurveTo((-12 + windPhase) * s, -10 * s, (-8 + windPhase) * s, -18 * s);
-    ctx.lineTo((-4 + windPhase * 0.5) * s, -18 * s);
-    ctx.quadraticCurveTo(-6 * s, -8 * s, -1 * s, 0);
+    ctx.moveTo(-1 * s, -26 * s);
+    ctx.bezierCurveTo(
+        (-8 + windPhase * 0.8) * s, (-20 + wind2) * s,
+        (-12 + wind1 * 1.2) * s, (-12 + wind2 * 0.8) * s,
+        (-8 + windPhase) * s, (-2 + Math.abs(hipAngleL) * 2) * s
+    );
+    ctx.lineTo((-3 + windPhase * 0.3) * s, -2 * s);
+    ctx.lineTo(-1 * s, -10 * s);
     ctx.closePath();
     ctx.fill();
-
-    // ── Cape flowing behind (banner-style wind animation) ──
-    // 4 control points animate like the navigate flag path morph
-    ctx.fillStyle = '#2a1e25';
+    // Inner cape layer
+    ctx.fillStyle = '#4a2a30';
     ctx.beginPath();
-    ctx.moveTo(-3 * s, -24 * s);
+    ctx.moveTo(-1 * s, -24 * s);
     ctx.bezierCurveTo(
-        (-7 + windPhase) * s, (-18 + wind2) * s,      // cp1 — upper billow
-        (-9 + wind1 * 1.5) * s, (-10 + wind2 * 0.5) * s,  // cp2 — mid wave
-        (-5 + windPhase * 0.8) * s, (-1 + Math.abs(legSwing) * 0.15) * s  // end — hem
+        (-6 + windPhase * 0.6) * s, (-18 + wind2 * 0.7) * s,
+        (-9 + wind1) * s, (-10 + wind2 * 0.4) * s,
+        (-6 + windPhase * 0.7) * s, (-4 + Math.abs(hipAngleL) * 1.5) * s
     );
-    ctx.lineTo(1 * s, -4 * s);
-    ctx.lineTo(0, -22 * s);
+    ctx.lineTo(-2 * s, -8 * s);
     ctx.closePath();
     ctx.fill();
     // Cape edge highlight
-    ctx.strokeStyle = 'rgba(60,40,50,0.4)';
-    ctx.lineWidth = 0.8;
+    ctx.strokeStyle = 'rgba(90,50,60,0.5)';
+    ctx.lineWidth = 0.7;
     ctx.beginPath();
-    ctx.moveTo(-3 * s, -24 * s);
+    ctx.moveTo(-1 * s, -26 * s);
     ctx.bezierCurveTo(
-        (-7 + windPhase) * s, (-18 + wind2) * s,
-        (-9 + wind1 * 1.5) * s, (-10 + wind2 * 0.5) * s,
-        (-5 + windPhase * 0.8) * s, (-1 + Math.abs(legSwing) * 0.15) * s
+        (-8 + windPhase * 0.8) * s, (-20 + wind2) * s,
+        (-12 + wind1 * 1.2) * s, (-12 + wind2 * 0.8) * s,
+        (-8 + windPhase) * s, (-2 + Math.abs(hipAngleL) * 2) * s
     );
     ctx.stroke();
 
-    // ── Boots (dark) ──
-    const bootL = legSwing * 0.5;
-    const bootR = -legSwing * 0.5;
-    ctx.fillStyle = '#1a1418';
-    ctx.beginPath();
-    ctx.ellipse((-2 + bootL) * s, -1 * s, 3 * s, 1.8 * s, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse((2 + bootR) * s, -1 * s, 3 * s, 1.8 * s, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // ═══ ARTICULATED LEGS ═══
+    // Each leg: hip joint → upper leg → knee joint → lower leg → foot
+    const thighLen = 10 * s;
+    const shinLen = 9 * s;
+    const hipY = -13 * s; // hip joint height
 
-    // ── Legs (dark silhouette) ──
-    ctx.fillStyle = '#221a24';
-    ctx.beginPath();
-    ctx.moveTo(-3.5 * s, -2 * s);
-    ctx.lineTo((-3 + bootL * 0.5) * s, -13 * s);
-    ctx.lineTo((-0.5 + bootL * 0.5) * s, -13 * s);
-    ctx.lineTo(-0.5 * s, -2 * s);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(0.5 * s, -2 * s);
-    ctx.lineTo((0.5 + bootR * 0.5) * s, -13 * s);
-    ctx.lineTo((3 + bootR * 0.5) * s, -13 * s);
-    ctx.lineTo(3.5 * s, -2 * s);
-    ctx.fill();
+    // -- Helper: draw one articulated leg --
+    function _drawLeg(hipX, hipAngle, kneeBend, footLift) {
+        // Upper leg (thigh): rotates from hip
+        const kneeX = hipX + Math.sin(hipAngle) * thighLen;
+        const kneeY = hipY + Math.cos(hipAngle) * thighLen;
+        // Lower leg (shin): hangs from knee with bend
+        const ankleAngle = hipAngle - kneeBend;
+        const ankleX = kneeX + Math.sin(ankleAngle) * shinLen;
+        const ankleY = kneeY + Math.cos(ankleAngle) * shinLen - footLift;
 
-    // ── Torso (dark robe) ──
-    ctx.fillStyle = '#2a2030';
+        // Thigh
+        ctx.strokeStyle = '#352820';
+        ctx.lineWidth = 3.5 * s;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(hipX, hipY);
+        ctx.lineTo(kneeX, kneeY);
+        ctx.stroke();
+        // Knee joint highlight
+        ctx.fillStyle = '#3a2e22';
+        ctx.beginPath();
+        ctx.arc(kneeX, kneeY, 1.8 * s, 0, Math.PI * 2);
+        ctx.fill();
+        // Shin
+        ctx.strokeStyle = '#302418';
+        ctx.lineWidth = 3 * s;
+        ctx.beginPath();
+        ctx.moveTo(kneeX, kneeY);
+        ctx.lineTo(ankleX, ankleY);
+        ctx.stroke();
+
+        // Boot
+        ctx.fillStyle = '#2a1e18';
+        ctx.beginPath();
+        ctx.moveTo(ankleX - 2.5 * s, ankleY);
+        ctx.lineTo(ankleX - 3 * s, ankleY + 2 * s);
+        ctx.lineTo(ankleX + 3.5 * s, ankleY + 2 * s);
+        ctx.lineTo(ankleX + 3 * s, ankleY);
+        ctx.closePath();
+        ctx.fill();
+        // Sole
+        ctx.fillStyle = '#1a1210';
+        ctx.fillRect(ankleX - 3 * s, ankleY + 1.5 * s, 6.5 * s, 1 * s);
+    }
+
+    // Draw back leg first, then front leg (depth ordering)
+    if (rawLegL < rawLegR) {
+        _drawLeg(-1.5 * s, hipAngleL, kneeBendL, footLiftL);
+        _drawLeg(1.5 * s, hipAngleR, kneeBendR, footLiftR);
+    } else {
+        _drawLeg(1.5 * s, hipAngleR, kneeBendR, footLiftR);
+        _drawLeg(-1.5 * s, hipAngleL, kneeBendL, footLiftL);
+    }
+
+    // ═══ TORSO (robe/tunic with forward lean) ═══
+    ctx.save();
+    ctx.rotate(torsoLean);
+
+    ctx.fillStyle = '#3a2a20';
     ctx.beginPath();
     ctx.moveTo(-5.5 * s, -13 * s);
-    ctx.lineTo(-6 * s, -25 * s);
-    ctx.lineTo(6 * s, -25 * s);
-    ctx.lineTo(5.5 * s, -13 * s);
+    ctx.quadraticCurveTo(-5 * s, -17 * s, -4.5 * s, -20 * s);
+    ctx.lineTo(-5 * s, -25 * s);
+    ctx.lineTo(5 * s, -25 * s);
+    ctx.lineTo(4.5 * s, -20 * s);
+    ctx.quadraticCurveTo(5 * s, -17 * s, 5.5 * s, -13 * s);
     ctx.closePath();
     ctx.fill();
-
-    // ── Shoulders (subtle, same dark tone) ──
-    ctx.fillStyle = '#2a2030';
+    // Robe hem flare (covers hip joints)
+    ctx.fillStyle = '#352418';
     ctx.beginPath();
-    ctx.ellipse(-6.5 * s, -24 * s, 3 * s, 2 * s, -0.2, 0, Math.PI * 2);
+    ctx.moveTo(-6 * s, -13 * s);
+    ctx.quadraticCurveTo(-5 * s, -11 * s, -3 * s, -10 * s);
+    ctx.lineTo(3 * s, -10 * s);
+    ctx.quadraticCurveTo(5 * s, -11 * s, 6 * s, -13 * s);
+    ctx.closePath();
+    ctx.fill();
+    // Belt/sash (gold accent)
+    ctx.fillStyle = 'rgba(160,120,50,0.6)';
+    ctx.fillRect(-4.5 * s, -17.5 * s, 9 * s, 1.5 * s);
+    // Belt buckle
+    ctx.fillStyle = 'rgba(196,149,58,0.7)';
+    ctx.beginPath();
+    ctx.arc(0, -16.8 * s, 1.2 * s, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ═══ SHOULDERS (with twist following walk) ═══
+    ctx.save();
+    ctx.rotate(shoulderTwist);
+
+    ctx.fillStyle = '#3a2a20';
+    ctx.beginPath();
+    ctx.ellipse(-5.5 * s, -24.5 * s, 2.8 * s, 2 * s, -0.15, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(6.5 * s, -24 * s, 3 * s, 2 * s, 0.2, 0, Math.PI * 2);
+    ctx.ellipse(5.5 * s, -24.5 * s, 2.8 * s, 2 * s, 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    // Shoulder pad highlights
+    ctx.fillStyle = 'rgba(70,50,35,0.5)';
+    ctx.beginPath();
+    ctx.ellipse(-5.5 * s, -25 * s, 2 * s, 1 * s, -0.15, Math.PI, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(5.5 * s, -25 * s, 2 * s, 1 * s, 0.15, Math.PI, Math.PI * 2);
     ctx.fill();
 
-    // ── Arms (dark strokes) ──
-    ctx.strokeStyle = '#221a24';
-    ctx.lineWidth = 2.5 * s;
+    // ═══ ARMS (articulated: shoulder → elbow → hand) ═══
     ctx.lineCap = 'round';
+
+    // Left arm — swings counter to left leg
+    const lArmElbowX = -5.5 * s + Math.sin(armSwingL) * 6 * s;
+    const lArmElbowY = -19 * s;
+    const lArmHandX = lArmElbowX + Math.sin(armSwingL * 0.7) * 4 * s;
+    const lArmHandY = -14.5 * s;
+    ctx.strokeStyle = '#3a2a20';
+    ctx.lineWidth = 2.8 * s;
     ctx.beginPath();
-    ctx.moveTo(-6.5 * s, -23 * s);
-    ctx.lineTo((-5.5 - armSwing) * s, -15 * s);
+    ctx.moveTo(-5.5 * s, -23.5 * s);
+    ctx.lineTo(lArmElbowX, lArmElbowY);
     ctx.stroke();
+    ctx.lineWidth = 2.5 * s;
     ctx.beginPath();
-    ctx.moveTo(6.5 * s, -23 * s);
-    ctx.lineTo((5.5 + armSwing) * s, -15 * s);
+    ctx.moveTo(lArmElbowX, lArmElbowY);
+    ctx.lineTo(lArmHandX, lArmHandY);
+    ctx.stroke();
+    // Left hand
+    ctx.fillStyle = '#8a6a4a';
+    ctx.beginPath();
+    ctx.arc(lArmHandX, lArmHandY, 1.5 * s, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Right arm — holds staff, swings counter to right leg
+    const rArmElbowX = 5.5 * s + Math.sin(armSwingR) * 5 * s;
+    const rArmElbowY = -19 * s;
+    const rArmHandX = rArmElbowX + Math.sin(armSwingR * 0.5) * 3 * s;
+    const rArmHandY = -15.5 * s;
+    ctx.strokeStyle = '#3a2a20';
+    ctx.lineWidth = 2.8 * s;
+    ctx.beginPath();
+    ctx.moveTo(5.5 * s, -23.5 * s);
+    ctx.lineTo(rArmElbowX, rArmElbowY);
+    ctx.stroke();
+    ctx.lineWidth = 2.5 * s;
+    ctx.beginPath();
+    ctx.moveTo(rArmElbowX, rArmElbowY);
+    ctx.lineTo(rArmHandX, rArmHandY);
     ctx.stroke();
 
-    // ── Walking staff (right hand) ──
-    ctx.strokeStyle = '#3a2a1a';
-    ctx.lineWidth = 1.8 * s;
+    // ═══ WALKING STAFF ═══
+    ctx.strokeStyle = '#5a3a1a';
+    ctx.lineWidth = 2 * s;
     ctx.beginPath();
-    ctx.moveTo((5.5 + armSwing) * s, -15 * s);
-    ctx.lineTo((6.5 + armSwing * 0.4) * s, 2 * s);
+    ctx.moveTo(rArmHandX, rArmHandY);
+    ctx.lineTo(rArmHandX + 1 * s, 2 * s + bob); // staff bottom follows ground
     ctx.stroke();
-    // Staff top gem glow
-    const gemGlow = 0.4 + Math.sin(elapsed * 0.005) * 0.2;
+    // Staff leather wrap
+    ctx.strokeStyle = '#7a5a30';
+    ctx.lineWidth = 0.8 * s;
+    for (let i = 0; i < 3; i++) {
+        const gy = rArmHandY + (i + 1) * 2.5 * s;
+        const gx = rArmHandX + (i + 1) * 0.2 * s;
+        ctx.beginPath();
+        ctx.moveTo(gx - 1.5 * s, gy);
+        ctx.lineTo(gx + 1.5 * s, gy - 0.5 * s);
+        ctx.stroke();
+    }
+    // Staff top ornament
+    ctx.fillStyle = '#5a3a1a';
+    ctx.beginPath();
+    ctx.arc(rArmHandX, rArmHandY - 1 * s, 2 * s, 0, Math.PI * 2);
+    ctx.fill();
+    // Gem glow
+    const gemGlow = 0.5 + Math.sin(elapsed * 0.005) * 0.2;
     ctx.fillStyle = `rgba(196,149,58,${gemGlow})`;
     ctx.beginPath();
-    ctx.arc((5.5 + armSwing) * s, -15.5 * s, 2 * s, 0, Math.PI * 2);
+    ctx.arc(rArmHandX, rArmHandY - 1 * s, 1.3 * s, 0, Math.PI * 2);
     ctx.fill();
     // Gem halo
-    ctx.fillStyle = `rgba(196,149,58,${gemGlow * 0.25})`;
+    ctx.fillStyle = `rgba(196,149,58,${gemGlow * 0.12})`;
     ctx.beginPath();
-    ctx.arc((5.5 + armSwing) * s, -15.5 * s, 5 * s, 0, Math.PI * 2);
+    ctx.arc(rArmHandX, rArmHandY - 1 * s, 4.5 * s, 0, Math.PI * 2);
     ctx.fill();
 
-    // ── Hood (covers head entirely — generic, no face visible) ──
-    ctx.fillStyle = '#221a25';
-    // Hood body — large rounded shape
+    ctx.restore(); // end shoulder twist
+
+    // ═══ HEAD (hooded, with trailing bob) ═══
+    ctx.save();
+    ctx.translate(0, headBob);
+    ctx.rotate(headTilt);
+
+    // Hood back
+    ctx.fillStyle = '#3a2a20';
     ctx.beginPath();
-    ctx.arc(0, -29 * s, 5.5 * s, 0, Math.PI * 2);
+    ctx.ellipse(0, -28 * s, 5 * s, 5.5 * s, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Hood top point
+    // Hood shape — smooth rounded dome
+    ctx.fillStyle = '#352418';
     ctx.beginPath();
-    ctx.moveTo(0, -35 * s);
-    ctx.lineTo(-2 * s, -30 * s);
-    ctx.lineTo(2 * s, -30 * s);
+    ctx.moveTo(-4.5 * s, -26 * s);
+    ctx.quadraticCurveTo(-5 * s, -31 * s, -2 * s, -33 * s);
+    ctx.quadraticCurveTo(0, -34 * s, 2 * s, -33 * s);
+    ctx.quadraticCurveTo(5 * s, -31 * s, 4.5 * s, -26 * s);
     ctx.closePath();
     ctx.fill();
-    // Hood brim shadow (darker bottom half — face in complete shadow)
-    ctx.fillStyle = '#18101a';
+    // Hood front opening — face in shadow
+    ctx.fillStyle = '#1a1210';
     ctx.beginPath();
-    ctx.arc(0, -28.5 * s, 4.5 * s, 0, Math.PI);
+    ctx.ellipse(1 * s, -28.5 * s, 3 * s, 3.5 * s, 0.1, 0, Math.PI * 2);
     ctx.fill();
-
-    // ── Gold aura pulse (mysterious glow) ──
-    const auraPulse = 0.2 + Math.sin(elapsed * 0.003) * 0.1;
-    ctx.strokeStyle = `rgba(196,149,58,${auraPulse})`;
-    ctx.lineWidth = 1.5;
+    // Subtle eye glow (alive, not alien)
+    const eyeGlow = 0.25 + Math.sin(elapsed * 0.004) * 0.1;
+    ctx.fillStyle = `rgba(196,149,58,${eyeGlow})`;
     ctx.beginPath();
-    ctx.ellipse(0, -15 * s, 12 * s, 22 * s, 0, 0, Math.PI * 2);
+    ctx.arc(-0.3 * s, -29 * s, 0.6 * s, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(2 * s, -29 * s, 0.6 * s, 0, Math.PI * 2);
+    ctx.fill();
+    // Hood brim edge
+    ctx.strokeStyle = 'rgba(80,55,35,0.6)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(-4.5 * s, -26 * s);
+    ctx.quadraticCurveTo(-5 * s, -31 * s, -2 * s, -33 * s);
+    ctx.quadraticCurveTo(0, -34 * s, 2 * s, -33 * s);
+    ctx.quadraticCurveTo(5 * s, -31 * s, 4.5 * s, -26 * s);
     ctx.stroke();
 
-    ctx.restore();
+    ctx.restore(); // end head
+
+    ctx.restore(); // end torso lean
+
+    ctx.restore(); // end figure translate
 }
 
 
