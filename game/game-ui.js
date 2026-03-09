@@ -510,7 +510,7 @@ function injectFontPicker(contentEl) {
 // Adds a satisfying elastic release to all game buttons.
 // CSS class .v-btn-released is defined in valdoria-design.css.
 document.addEventListener('pointerup', e => {
-    const btn = e.target.closest('.btn-action, .btn-hero, .v-btn-primary, .v-btn, .v-card');
+    const btn = e.target.closest('.btn-action, .btn-hero, .v-btn-primary, .v-btn');
     if (!btn || btn.classList.contains('v-action-pending')) return;
     btn.classList.remove('v-btn-released');
     // Force reflow to restart animation if rapidly tapped

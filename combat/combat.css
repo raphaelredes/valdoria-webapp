@@ -256,6 +256,7 @@ body {
     border-radius: 4px;
     overflow: hidden;
     border: 1px solid #3a3028;
+    position: relative;
 }
 .entity.player .bar-track {
     height: 12px;
