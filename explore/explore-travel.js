@@ -538,9 +538,9 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     // ── Walk cycle timing ──
     const walkPhase = elapsed * 0.006;
 
-    // ── Vertical bob (triangle wave — 2 bounces per stride) ──
+    // ── Vertical bob (very subtle — just enough to feel alive) ──
     const rawBob = Math.sin(walkPhase * 2);
-    const bob = -Math.sign(rawBob) * Math.pow(Math.abs(rawBob), 0.7) * 4 * s;
+    const bob = -Math.sign(rawBob) * Math.pow(Math.abs(rawBob), 0.7) * 1.2;
 
     // ── Torso lean (very slight forward tilt) ──
     const torsoLean = -0.03 + Math.sin(walkPhase * 2) * 0.012;
@@ -565,7 +565,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const wind = Math.sin(elapsed * 0.002) * 2 + Math.sin(elapsed * 0.005) * 1;
 
     // ── Head bob (trails body slightly) ──
-    const headBob = Math.sin(walkPhase * 2 - 0.3) * 1.5 * s;
+    const headBob = Math.sin(walkPhase * 2 - 0.3) * 0.8;
 
     ctx.save();
     ctx.translate(cx, groundY + bob);
