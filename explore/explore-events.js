@@ -865,7 +865,7 @@ function _showPortalSummary() {
     if (S.hpChange > 0) html += `<div class="reward-line">+${S.hpChange} HP</div>`;
     else if (S.hpChange < 0) html += `<div class="reward-line">${S.hpChange} HP</div>`;
     if (S.itemsFound.length > 0) html += `<div class="reward-line">${S.itemsFound.length} itens</div>`;
-    html += `<div style="margin-top:8px;color:#8a8090">${S.visited.size} turnos</div>`;
+    html += `<div style="margin-top:8px;color:#8a7a68">${S.visited.size} turnos</div>`;
 
     summary.innerHTML = html;
     overlay.classList.add('active');
@@ -1424,7 +1424,7 @@ function showExitRiskAssessment() {
 
     // Option 4: Continue exploring (always)
     addExitOption(optionsEl, '', 'Continuar Explorando',
-        'Voltar ao mapa', '#8a8090', () => {
+        'Voltar ao mapa', '#8a7a68', () => {
             overlay.classList.remove('active');
         });
 
@@ -1458,7 +1458,7 @@ function showCampOverlay() {
         const healText = food.h && food.h !== '0' ? ` (+${food.h} HP)` : '';
         btn.innerHTML = `<span style="font-size:14px;color:#c4953a;font-weight:bold">${food.n ? food.n[0] : '•'}</span>` +
             `<div style="flex:1"><div style="font-weight:600">${food.n} (${food.q}x)</div>` +
-            `<div style="font-size:11px;color:#8a8090">Refeição${healText}</div></div>`;
+            `<div style="font-size:11px;color:#8a7a68">Refeição${healText}</div></div>`;
         btn.addEventListener('click', () => {
             overlay.classList.remove('active');
             doCampRest(food);
@@ -1471,7 +1471,7 @@ function showCampOverlay() {
     noFoodBtn.className = 'camp-food-btn';
     noFoodBtn.innerHTML = `<span style="font-size:14px;color:#8a7a68;font-weight:bold">—</span>` +
         `<div style="flex:1"><div style="font-weight:600">Descansar sem comer</div>` +
-        `<div style="font-size:11px;color:#8a8090">Apenas 1d8 + CON</div></div>`;
+        `<div style="font-size:11px;color:#8a7a68">Apenas 1d8 + CON</div></div>`;
     noFoodBtn.addEventListener('click', () => {
         overlay.classList.remove('active');
         doCampRest(null);
@@ -1654,7 +1654,7 @@ function showLowHPOverlay() {
 
     // Option 3: Continue exploring
     addExitOption(optionsEl, '', 'Continuar Explorando',
-        'Arriscar seguir adiante', '#8a8090', () => {
+        'Arriscar seguir adiante', '#8a7a68', () => {
             overlay.classList.remove('active');
         });
 
@@ -1696,7 +1696,7 @@ function showDeathSaves() {
             const color = roll === 20 ? '#ffd700' : roll === 1 ? '#ff3333' : roll >= 10 ? '#6a8' : '#a66';
             html += `<div style="text-align:center;margin:12px 0">
                 <div class="dice-result" style="font-size:28px;color:${color}">${roll}</div>
-                <div style="font-size:12px;color:#8a8090;margin-top:4px">Rolagem ${rollNum}</div>
+                <div style="font-size:12px;color:#8a7a68;margin-top:4px">Rolagem ${rollNum}</div>
             </div>`;
         }
         if (isResult) {
