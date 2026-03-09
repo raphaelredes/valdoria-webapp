@@ -334,9 +334,23 @@ function updateRewards() {
     updateStepCounter();
 }
 
+const _STEP_MILESTONES = {
+    10: 'Seus passos ganham confiança nesta terra.',
+    25: 'A paisagem revela seus segredos a você.',
+    50: 'Poucos exploradores chegam tão longe.',
+};
+
 function updateStepCounter() {
     const el = document.getElementById('step-counter');
     if (el) el.textContent = S.visited.size;
+    const msg = _STEP_MILESTONES[S.visited.size];
+    if (msg && typeof showTerrainToast === 'function') {
+        S._milestonesHit = S._milestonesHit || {};
+        if (!S._milestonesHit[S.visited.size]) {
+            S._milestonesHit[S.visited.size] = true;
+            showTerrainToast(msg, 'flavor');
+        }
+    }
 }
 
 function initBottomBar() {
@@ -409,6 +423,7 @@ function updateConditionHUD() {
     for (const c of S.conditions) {
         const tag = document.createElement('span');
         tag.className = 'condition-tag';
+        if (c.stepsLeft <= 2) tag.classList.add('condition-fading');
         tag.textContent = `${labels[c.type] || c.type} (${c.stepsLeft})`;
         bar.appendChild(tag);
     }

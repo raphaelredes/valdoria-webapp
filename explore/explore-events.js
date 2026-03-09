@@ -1017,21 +1017,25 @@ const _TOAST_TIMING = { damage: 'toast-warn', danger: 'toast-warn', condition: '
 
 // Compact toast notification for terrain effects
 function showTerrainToast(message, type) {
-    const existing = document.getElementById('terrain-toast-el');
-    if (existing) existing.remove();
+    try {
+        const existing = document.getElementById('terrain-toast-el');
+        if (existing) existing.remove();
 
-    const theme = TOAST_STYLES[type] || TOAST_STYLES.difficult;
-    const toast = document.createElement('div');
-    toast.id = 'terrain-toast-el';
-    toast.textContent = message;
-    toast.style.cssText = 'position:fixed;top:50px;left:50px;right:50px;' +
-        'padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;' +
-        'pointer-events:none;z-index:99999;text-align:center;' + theme;
-    document.body.appendChild(toast);
+        const theme = TOAST_STYLES[type] || TOAST_STYLES.difficult;
+        const toast = document.createElement('div');
+        toast.id = 'terrain-toast-el';
+        toast.textContent = message;
+        toast.style.cssText = 'position:fixed;top:50px;left:50px;right:50px;' +
+            'padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;' +
+            'pointer-events:none;z-index:99999;text-align:center;' + theme;
+        document.body.appendChild(toast);
 
-    const category = _TOAST_TIMING[type] || 'toast';
-    const duration = typeof calcReadTime === 'function' ? calcReadTime(message, category) : 1500;
-    setTimeout(() => toast.remove(), duration);
+        const category = _TOAST_TIMING[type] || 'toast';
+        const duration = typeof calcReadTime === 'function' ? calcReadTime(message, category) : 1500;
+        setTimeout(() => toast.remove(), duration);
+    } catch (err) {
+        console.error('[EXPLORE] showTerrainToast:', err);
+    }
 }
 
 // Full-screen color flash for hazard damage

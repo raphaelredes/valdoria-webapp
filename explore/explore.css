@@ -42,7 +42,7 @@ body {
     height: 70px;
     border: 1px solid rgba(196,149,58,0.4);
     border-radius: 4px;
-    background: rgba(26,21,32,0.85);
+    background: rgba(42,36,32,0.85);
     z-index: 15;
     pointer-events: none;
     opacity: 0.75;
@@ -810,6 +810,13 @@ body {
     color: #c88;
     white-space: nowrap;
     animation: badgeBounce 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.condition-tag.condition-fading {
+    animation: conditionPulse 1.2s ease-in-out infinite;
+}
+@keyframes conditionPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
 }
 
 /* ═══════════════════════════════════════════
