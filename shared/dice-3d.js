@@ -878,9 +878,9 @@ const Dice3D = (() => {
                     haptic('light');
 
                     // Scale punch
-                    (function (m, bs) {
-                        setTimeout(function () { m.scale.setScalar(bs); }, 100);
-                    })(mesh, st.baseScale);
+                    (function (m, bs, inst) {
+                        inst._trackTimeout(function () { m.scale.setScalar(bs); }, 100);
+                    })(mesh, st.baseScale, self);
                 } else {
                     allLanded = false;
                 }
@@ -905,7 +905,7 @@ const Dice3D = (() => {
                 // Flash on all-landed
                 this._keyLight.intensity = 2.5;
                 var flashI = 2.5;
-                var flashFade = setInterval(function () {
+                var flashFade = self._trackInterval(function () {
                     flashI -= 0.12;
                     if (flashI <= 1.2) { self._keyLight.intensity = 1.2; clearInterval(flashFade); }
                     else self._keyLight.intensity = flashI;
@@ -916,7 +916,7 @@ const Dice3D = (() => {
                 if (el) {
                     el.style.transition = 'transform 0.06s ease-out';
                     el.style.transform = 'translate(' + (Math.random() - 0.5) * 3 + 'px,' + (Math.random() - 0.5) * 3 + 'px)';
-                    setTimeout(function () { el.style.transform = ''; el.style.transition = ''; }, 120);
+                    self._trackTimeout(function () { el.style.transform = ''; el.style.transition = ''; }, 120);
                 }
 
                 this._spawnParticles(V_GOLD_HEX, 12);
@@ -1003,7 +1003,7 @@ const Dice3D = (() => {
                 // Flash burst
                 this._keyLight.intensity = 4.0;
                 var flashI = 4.0;
-                var flashFade = setInterval(function () {
+                var flashFade = self._trackInterval(function () {
                     flashI -= 0.2;
                     if (flashI <= 1.2) { self._keyLight.intensity = 1.2; clearInterval(flashFade); }
                     else self._keyLight.intensity = flashI;
@@ -1017,7 +1017,7 @@ const Dice3D = (() => {
                 // Scale punch: 0 → 1.2 → 1.0
                 var fm = this._fusionMesh;
                 fm.scale.setScalar(1.2);
-                setTimeout(function () {
+                self._trackTimeout(function () {
                     if (fm) fm.scale.setScalar(1.0);
                 }, 150);
 
@@ -1026,10 +1026,10 @@ const Dice3D = (() => {
                 if (el) {
                     el.style.transition = 'transform 0.06s ease-out';
                     el.style.transform = 'translate(' + (Math.random() - 0.5) * 5 + 'px,' + (Math.random() - 0.5) * 5 + 'px)';
-                    setTimeout(function () {
+                    self._trackTimeout(function () {
                         el.style.transform = 'translate(' + (Math.random() - 0.5) * 2 + 'px,' + (Math.random() - 0.5) * 2 + 'px)';
                     }, 60);
-                    setTimeout(function () { el.style.transition = ''; el.style.transform = ''; }, 140);
+                    self._trackTimeout(function () { el.style.transition = ''; el.style.transform = ''; }, 140);
                 }
 
                 this._fusionActive = false;
