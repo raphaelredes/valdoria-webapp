@@ -239,6 +239,14 @@ async function loadCombatState() {
         console.error('[COMBAT]', 'Erro ao carregar', e);
         // Distinguish "server down" from "session invalid" via health check
         const health = await api.checkHealth();
+        // Detect tunnel URL change — reload with new URL
+        if (health.api && health.api !== api.base) {
+            console.warn('[COMBAT] Tunnel URL changed, reloading with new URL');
+            const params = new URLSearchParams(window.location.search);
+            params.set('api', health.api);
+            window.location.replace(window.location.pathname + '?' + params.toString());
+            return;
+        }
         if (health.status === 'unreachable') {
             document.getElementById('app').innerHTML = '<div class="no-data"><h2>Servidor Indisponível</h2><p>O servidor de combate não está respondendo. Tente novamente em alguns segundos.</p></div>';
         } else if (e.status === 401 || e.status === 403) {

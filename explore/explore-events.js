@@ -2568,7 +2568,17 @@ async function _exploreHealthCheck() {
             clearTimeout(tid);
             if (resp.ok) {
                 const data = await resp.json();
-                if (data.status === 'ok' && data.engine) return true;
+                if (data.status === 'ok' && data.engine) {
+                    // Detect tunnel URL change — reload with new URL
+                    if (data.api && S.apiBase && data.api !== S.apiBase) {
+                        console.warn('[EXPLORE] Tunnel URL changed, reloading');
+                        const params = new URLSearchParams(window.location.search);
+                        params.set('api', data.api);
+                        window.location.replace(window.location.pathname + '?' + params.toString());
+                        return false;
+                    }
+                    return true;
+                }
             }
         } catch (_e) { /* retry */ }
     }

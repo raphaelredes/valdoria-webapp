@@ -442,9 +442,17 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             _clog(`API ${endpoint} → ${isTimeout ? 'TIMEOUT ' + FETCH_TIMEOUT_MS + 'ms' : e.name + ': ' + e.message}`);
             console.error('[GAME] fetch error on', endpoint, ':', isTimeout ? 'TIMEOUT after ' + FETCH_TIMEOUT_MS + 'ms' : e.name + ': ' + e.message);
 
-            // CORS block = tunnel died mid-session → auto-reconnect
+            // CORS block = tunnel died mid-session → try discovery before giving up
             if (isCorsBlock) {
-                _clog('API: tunnel dead mid-session — sendData reconnect');
+                _clog('API: tunnel dead mid-session — trying discovery');
+                const newUrl = await _discoverApiUrl();
+                if (newUrl) {
+                    S.apiBase = newUrl;
+                    if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) ValdoriaErrors.updateApiBase(newUrl);
+                    _clog('API: recovered with new URL: ' + newUrl);
+                    continue; // retry the API call with new URL
+                }
+                _clog('API: discovery failed — sendData reconnect');
                 _sendDataReconnect();
                 return null;
             }
