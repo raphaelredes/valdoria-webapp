@@ -590,10 +590,10 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const lN = rN * sw, lF = rF * sw;
     const kN = rN < -0.1 ? -Math.pow(Math.abs(rN), 1.2) * 0.5 : 0;
     const kF = rF < -0.1 ? -Math.pow(Math.abs(rF), 1.2) * 0.5 : 0;
-    const armSwing = 0.25;
+    const armSwing = 0.16;  // subtle, close to body like reference
     const aN = Math.sin(p + Math.PI) * armSwing, aF = Math.sin(p) * armSwing;
-    const elbowN = Math.max(0, -aN) * 0.5 + 0.2;
-    const elbowF = Math.max(0, -aF) * 0.5 + 0.2;
+    const elbowN = Math.max(0, -aN) * 0.3 + 0.08;  // very slight bend
+    const elbowF = Math.max(0, -aF) * 0.3 + 0.08;
     const torsoLean = Math.sin(p) * 0.012;
 
     ctx.save();
@@ -647,7 +647,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
 
     // === FAR ARM (sleeve + exposed forearm) ===
     const armOriginY = shY + 2.5 * s;
-    const armOxFar = -shoulderW * 0.5;
+    const armOxFar = -shoulderW * 0.35;  // closer to body
     const farElbowX = armOxFar + Math.sin(aF) * upperArmL;
     const farElbowY = armOriginY + Math.cos(aF) * upperArmL;
     // Sleeve (fitted)
@@ -724,7 +724,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     leg(lN, kN, cPants, cPantsHi, false);
 
     // === NEAR ARM + STAFF (sleeve + skin forearm) ===
-    const armOxNear = shoulderW * 0.5;
+    const armOxNear = shoulderW * 0.35;  // closer to body
     const nearElbowX = armOxNear + Math.sin(aN) * upperArmL;
     const nearElbowY = armOriginY + Math.cos(aN) * upperArmL;
     // Sleeve (fitted)
