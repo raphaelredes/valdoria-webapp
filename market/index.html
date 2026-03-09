@@ -12,6 +12,7 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
     </script>
     <style>
@@ -1481,7 +1482,9 @@
             el.className = `toast toast-${type || 'ok'}`;
             el.textContent = msg;
             document.body.appendChild(el);
-            setTimeout(() => el.remove(), 2000);
+            var cat = (type === 'err' || type === 'warn') ? 'toast-warn' : 'toast';
+            var dur = (typeof calcReadTime === 'function') ? calcReadTime(msg, cat) : 2000;
+            setTimeout(() => el.remove(), dur);
         }
 
         function esc(s) {

@@ -632,8 +632,8 @@ body {
     70% { transform: translate(3px, -1px); }
     90% { transform: translate(-1px, 0); }
 }
-#app.shake-light { animation: shakeLight 0.3s ease-out; }
-#app.shake-heavy { animation: shakeHeavy 0.45s ease-out; }
+#app.shake-light { animation: shakeLight 0.3s ease-out; will-change: transform; }
+#app.shake-heavy { animation: shakeHeavy 0.45s ease-out; will-change: transform; }
 
 /* ─── Impact Flash (radial burst at hit point) ─── */
 @keyframes impactFlash {

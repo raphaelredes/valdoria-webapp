@@ -173,6 +173,11 @@ function playTravelAnimation(biome, regionName, onComplete) {
             _drawShootingStars(ctx, shootingStars, elapsed);
         }
 
+        // Aurora borealis (snow biomes — behind clouds)
+        if (cfg.au) {
+            _drawAurora(ctx, w, h, elapsed);
+        }
+
         // Clouds (slow parallax in the sky)
         if (clouds.length > 0) {
             _drawClouds(ctx, clouds, w, elapsed);
@@ -213,8 +218,33 @@ function playTravelAnimation(biome, regionName, onComplete) {
         // Biome-specific ground details
         _drawGroundDetails(ctx, biome, w, h, groundY, elapsed);
 
+        // Heat shimmer (desert/volcanic — wavy distortion above ground)
+        if (cfg.sh) {
+            _drawHeatShimmer(ctx, w, groundY, elapsed);
+        }
+
+        // Lava glow rising from ground (volcanic)
+        if (cfg.lv) {
+            _drawLavaGlow(ctx, w, groundY, elapsed);
+        }
+
         // Particles with depth-based parallax
         _updateTravelParticles(ctx, particles, pcfg, w, h, elapsed);
+
+        // Fireflies (floating glow dots near ground)
+        if (fireflies.length > 0) {
+            _drawFireflies(ctx, fireflies, elapsed);
+        }
+
+        // Fauna (birds/bats flying across sky)
+        if (fauna.length > 0) {
+            _drawFauna(ctx, fauna, w, elapsed);
+        }
+
+        // Lightning flash (graveyard — full-screen flash)
+        if (lightning.length > 0) {
+            _drawLightning(ctx, lightning, w, h, elapsed);
+        }
 
         // Text (fade in first 400ms, slow vertical drift upward)
         const textAlpha = Math.min(1, elapsed / 400);
@@ -933,6 +963,277 @@ function _drawVignette(ctx, w, h) {
     grad.addColorStop(1, 'rgba(0,0,0,0.35)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
+}
+
+
+// ═══════════════════════════════════════════
+// FIREFLIES
+// ═══════════════════════════════════════════
+
+function _generateFireflies(w, h) {
+    const flies = [];
+    const groundY = h * 0.72;
+    for (let i = 0; i < 12; i++) {
+        flies.push({
+            x: Math.random() * w,
+            y: groundY - 30 - Math.random() * 200, // float above ground
+            baseX: Math.random() * w,
+            baseY: groundY - 30 - Math.random() * 200,
+            phase: Math.random() * Math.PI * 2,
+            speed: 0.5 + Math.random() * 1.0,
+            size: 1.5 + Math.random() * 1.5,
+            glowPhase: Math.random() * Math.PI * 2,
+        });
+    }
+    return flies;
+}
+
+function _drawFireflies(ctx, flies, elapsed) {
+    for (const f of flies) {
+        // Wander around base position
+        f.x = f.baseX + Math.sin(elapsed * 0.0008 * f.speed + f.phase) * 40;
+        f.y = f.baseY + Math.cos(elapsed * 0.0006 * f.speed + f.phase * 1.5) * 25;
+
+        // Pulsing glow (on/off cycle)
+        const glow = Math.max(0, Math.sin(elapsed * 0.003 * f.speed + f.glowPhase));
+        if (glow < 0.15) continue;
+
+        const alpha = glow * 0.8;
+        // Outer glow
+        const grad = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.size * 6);
+        grad.addColorStop(0, `rgba(180,200,60,${alpha * 0.4})`);
+        grad.addColorStop(0.5, `rgba(150,180,40,${alpha * 0.15})`);
+        grad.addColorStop(1, 'rgba(150,180,40,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(f.x - f.size * 6, f.y - f.size * 6, f.size * 12, f.size * 12);
+        // Bright core
+        ctx.fillStyle = `rgba(220,240,100,${alpha})`;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+
+// ═══════════════════════════════════════════
+// LIGHTNING
+// ═══════════════════════════════════════════
+
+function _generateLightning() {
+    const flashes = [];
+    const count = 1 + Math.floor(Math.random() * 2); // 1-2 flashes
+    for (let i = 0; i < count; i++) {
+        flashes.push({
+            triggerTime: 1000 + Math.random() * 2000,
+            duration: 300,
+        });
+    }
+    return flashes;
+}
+
+function _drawLightning(ctx, flashes, w, h, elapsed) {
+    for (const f of flashes) {
+        const t = elapsed - f.triggerTime;
+        if (t < 0 || t > f.duration) continue;
+
+        // Sharp flash (bright at start, rapid decay)
+        let alpha;
+        if (t < 40) {
+            alpha = 0.25; // initial flash
+        } else if (t < 80) {
+            alpha = 0.08; // brief dim
+        } else if (t < 120) {
+            alpha = 0.18; // second flash (double-strike)
+        } else {
+            alpha = 0.18 * Math.max(0, 1 - (t - 120) / 180); // slow decay
+        }
+
+        ctx.fillStyle = `rgba(200,200,240,${alpha})`;
+        ctx.fillRect(0, 0, w, h);
+    }
+}
+
+
+// ═══════════════════════════════════════════
+// FAUNA (birds / bats)
+// ═══════════════════════════════════════════
+
+function _generateFauna(w, h, type) {
+    const group = [];
+    const count = type === 'bat' ? 4 + Math.floor(Math.random() * 3) : 3 + Math.floor(Math.random() * 3);
+    const baseX = -40 - Math.random() * 60; // start off-screen left
+    const baseY = h * 0.08 + Math.random() * h * 0.2;
+    const triggerTime = 500 + Math.random() * 2000;
+
+    for (let i = 0; i < count; i++) {
+        group.push({
+            offsetX: i * (12 + Math.random() * 8),
+            offsetY: (Math.random() - 0.5) * 20,
+            wingPhase: Math.random() * Math.PI * 2,
+            wingSpeed: type === 'bat' ? 12 + Math.random() * 4 : 5 + Math.random() * 2,
+            size: type === 'bat' ? 3 + Math.random() * 2 : 2.5 + Math.random() * 1.5,
+            type: type,
+        });
+    }
+    return [{ members: group, baseX, baseY, speed: type === 'bat' ? 80 : 50, triggerTime }];
+}
+
+function _drawFauna(ctx, faunaGroups, canvasW, elapsed) {
+    for (const g of faunaGroups) {
+        const t = elapsed - g.triggerTime;
+        if (t < 0) continue;
+
+        const groupX = g.baseX + t * g.speed * 0.001;
+        // Fade out when off-screen right
+        if (groupX > canvasW + 100) continue;
+
+        for (const m of g.members) {
+            const x = groupX + m.offsetX;
+            const y = g.baseY + m.offsetY + Math.sin(t * 0.002 + m.wingPhase) * 5;
+            const wingAngle = Math.sin(t * 0.001 * m.wingSpeed + m.wingPhase);
+            const s = m.size;
+
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = m.type === 'bat' ? 'rgba(20,15,25,0.7)' : 'rgba(40,35,30,0.6)';
+
+            if (m.type === 'bat') {
+                // Bat: pointed jagged wings
+                const wingSpan = s * 2.5;
+                const wingY = wingAngle * s * 0.8;
+                ctx.beginPath();
+                ctx.moveTo(0, 0); // body center
+                ctx.lineTo(-wingSpan, wingY);
+                ctx.lineTo(-wingSpan * 0.6, wingY * 0.3);
+                ctx.lineTo(-wingSpan * 0.3, wingY * 0.7);
+                ctx.lineTo(0, 0);
+                ctx.lineTo(wingSpan * 0.3, wingY * 0.7);
+                ctx.lineTo(wingSpan * 0.6, wingY * 0.3);
+                ctx.lineTo(wingSpan, wingY);
+                ctx.closePath();
+                ctx.fill();
+            } else {
+                // Bird: simple V-shape
+                const wingSpan = s * 2;
+                const wingY = wingAngle * s * 0.6;
+                ctx.beginPath();
+                ctx.moveTo(-wingSpan, wingY);
+                ctx.quadraticCurveTo(-wingSpan * 0.3, wingY * 0.2, 0, s * 0.3);
+                ctx.quadraticCurveTo(wingSpan * 0.3, wingY * 0.2, wingSpan, wingY);
+                ctx.lineWidth = 1.2;
+                ctx.strokeStyle = ctx.fillStyle;
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+    }
+}
+
+
+// ═══════════════════════════════════════════
+// HEAT SHIMMER
+// ═══════════════════════════════════════════
+
+function _drawHeatShimmer(ctx, w, groundY, elapsed) {
+    // Wavy transparent bands just above the ground
+    const bandH = 30;
+    const bandY = groundY - bandH;
+    ctx.save();
+    ctx.globalAlpha = 0.04;
+    for (let i = 0; i < 5; i++) {
+        const waveOffset = Math.sin(elapsed * 0.002 + i * 1.2) * 8;
+        const y = bandY + i * 6 + waveOffset;
+        ctx.fillStyle = 'rgba(255,255,255,1)';
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        // Wavy line across the screen
+        for (let x = 0; x <= w; x += 20) {
+            const wy = y + Math.sin(x * 0.03 + elapsed * 0.003 + i) * 3;
+            ctx.lineTo(x, wy);
+        }
+        ctx.lineTo(w, y + 4);
+        ctx.lineTo(0, y + 4);
+        ctx.closePath();
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// AURORA BOREALIS
+// ═══════════════════════════════════════════
+
+function _drawAurora(ctx, w, h, elapsed) {
+    ctx.save();
+    const skyH = h * 0.35;
+    // 3 flowing aurora bands with different colors
+    const bands = [
+        { color: [80, 200, 120], yBase: 0.12, amplitude: 15, freq: 0.008, speed: 0.0004, alpha: 0.06 },
+        { color: [100, 140, 220], yBase: 0.18, amplitude: 20, freq: 0.006, speed: 0.0005, alpha: 0.04 },
+        { color: [160, 80, 200], yBase: 0.08, amplitude: 12, freq: 0.01,  speed: 0.0003, alpha: 0.035 },
+    ];
+
+    for (const b of bands) {
+        const baseY = skyH * b.yBase;
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+
+        // Top edge (wavy)
+        for (let x = 0; x <= w; x += 5) {
+            const y = baseY + Math.sin(x * b.freq + elapsed * b.speed) * b.amplitude
+                            + Math.sin(x * b.freq * 2.3 + elapsed * b.speed * 1.5) * b.amplitude * 0.4;
+            ctx.lineTo(x, y);
+        }
+        // Bottom edge (slightly lower, wider)
+        for (let x = w; x >= 0; x -= 5) {
+            const y = baseY + 40 + Math.sin(x * b.freq * 0.8 + elapsed * b.speed * 0.7) * b.amplitude * 0.6;
+            ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+
+        // Vertical gradient (bright at top, fading down)
+        const grad = ctx.createLinearGradient(0, baseY, 0, baseY + 50);
+        grad.addColorStop(0, `rgba(${b.color.join(',')},${b.alpha})`);
+        grad.addColorStop(0.5, `rgba(${b.color.join(',')},${b.alpha * 0.5})`);
+        grad.addColorStop(1, `rgba(${b.color.join(',')},0)`);
+        ctx.fillStyle = grad;
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// LAVA GLOW
+// ═══════════════════════════════════════════
+
+function _drawLavaGlow(ctx, w, groundY, elapsed) {
+    // Pulsing red-orange glow rising from the ground
+    const pulse = 0.5 + 0.5 * Math.sin(elapsed * 0.002);
+    const alpha = 0.04 + pulse * 0.04;
+    const glowH = 60;
+
+    const grad = ctx.createLinearGradient(0, groundY + 10, 0, groundY - glowH);
+    grad.addColorStop(0, `rgba(255,60,0,${alpha})`);
+    grad.addColorStop(0.4, `rgba(255,40,0,${alpha * 0.5})`);
+    grad.addColorStop(1, 'rgba(255,40,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, groundY - glowH, w, glowH + 10);
+
+    // Bright spots where lava cracks are (sync with ground details scroll)
+    const scrollX = elapsed * 0.08;
+    ctx.save();
+    for (let i = 0; i < 4; i++) {
+        const lx = ((i * 110 - scrollX * 0.6) % (w + 100)) - 50;
+        const spotAlpha = 0.08 + pulse * 0.06;
+        const spot = ctx.createRadialGradient(lx + 15, groundY + 5, 0, lx + 15, groundY + 5, 25);
+        spot.addColorStop(0, `rgba(255,80,0,${spotAlpha})`);
+        spot.addColorStop(1, 'rgba(255,80,0,0)');
+        ctx.fillStyle = spot;
+        ctx.fillRect(lx - 10, groundY - 20, 50, 40);
+    }
+    ctx.restore();
 }
 
 

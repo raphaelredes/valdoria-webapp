@@ -262,22 +262,40 @@ function loadMapData(data) {
     // Scroll to player
     setTimeout(() => scrollCanvasToPlayer(), 100);
 
-    // Hide loading
-    document.getElementById('loading').classList.add('hidden');
-
-    // Show DM intro only on fresh start
-    if (S.dmIntro && !restored) {
-        setTimeout(() => showDMIntro(S.dmIntro), 400);
-    }
-
-    // Passive Perception notification (after DM intro dismisses)
-    if (S._hiddenDetected > 0 && !restored) {
-        const delay = S.dmIntro ? 2000 : 600;
-        setTimeout(() => {
-            if (typeof showTerrainToast === 'function') {
-                showTerrainToast(`Percepção Passiva (${S._passivePerception})`, 'ranger');
+    // Hide loading — cinematic exit for fresh starts, quick for restores
+    const _lc = window._loadingCtrl;
+    if (_lc && !restored) {
+        _lc.setProgress(100);
+        _lc.hideLoading(() => {
+            // Show DM intro after cinematic exit completes
+            if (S.dmIntro) showDMIntro(S.dmIntro);
+            // Passive Perception notification
+            if (S._hiddenDetected > 0) {
+                const delay = S.dmIntro ? 2000 : 600;
+                setTimeout(() => {
+                    if (typeof showTerrainToast === 'function') {
+                        showTerrainToast(`Percepção Passiva (${S._passivePerception})`, 'ranger');
+                    }
+                }, delay);
             }
-        }, delay);
+        });
+    } else {
+        // Quick hide for restores
+        if (_lc) _lc.hideQuick();
+        else document.getElementById('loading').classList.add('hidden');
+        // Show DM intro only on fresh start
+        if (S.dmIntro && !restored) {
+            setTimeout(() => showDMIntro(S.dmIntro), 400);
+        }
+        // Passive Perception notification
+        if (S._hiddenDetected > 0 && !restored) {
+            const delay = S.dmIntro ? 2000 : 600;
+            setTimeout(() => {
+                if (typeof showTerrainToast === 'function') {
+                    showTerrainToast(`Percepção Passiva (${S._passivePerception})`, 'ranger');
+                }
+            }, delay);
+        }
     }
 }
 

@@ -1045,6 +1045,28 @@ body::after {
 }
 .v-err-copy:active { background: rgba(196,149,58,0.2); }
 
+/* ─── FOCUS VISIBLE — Keyboard navigation indicator ─── */
+/* Only shows on keyboard focus (Tab), not on mouse/touch clicks */
+:focus-visible {
+    outline: 2px solid var(--v-gold, #c4953a);
+    outline-offset: 2px;
+}
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ─── GPU ACCELERATION — Animated elements ─── */
+/* Elements that use transform/opacity animations get GPU compositing */
+.v-skip-btn,
+.toast,
+.v-toast,
+[class*="shake-"],
+[class*="fade-"],
+.loc-transition,
+.dice-overlay {
+    will-change: transform, opacity;
+}
+
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {

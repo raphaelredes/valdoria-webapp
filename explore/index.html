@@ -32,6 +32,7 @@
 
     <!-- Loading Screen (magic summoning circle) -->
     <div id="loading" class="loading-overlay">
+        <div class="loading-flash"></div>
         <div class="loading-particles">
             <div class="particle ember p1"></div>
             <div class="particle ember p2"></div>
@@ -88,15 +89,122 @@
             </svg>
             <div class="mc-pulse"></div>
             <div class="mc-pulse mc-pulse-2"></div>
+            <!-- Central gem -->
+            <div class="mc-gem">
+                <div class="mc-gem-core"></div>
+                <div class="mc-gem-flare"></div>
+            </div>
         </div>
         <div class="loading-brand">
             <div class="loading-title">EXPLORAR</div>
             <div class="loading-divider"><span class="divider-rune">&#9670;</span></div>
         </div>
+        <div class="loading-progress-wrap">
+            <div class="loading-progress-track">
+                <div id="loading-progress" class="loading-progress-fill" style="width:0%"></div>
+            </div>
+        </div>
         <div class="loading-tip-area">
             <div id="loading-tip" class="loading-tip">Gerando mapa...</div>
         </div>
     </div>
+
+    <!-- Loading controller (runs before explore scripts) -->
+    <script>
+    (function() {
+        var TIPS = [
+            'Gerando mapa...',
+            'Terrenos elevados concedem vantagem em combate',
+            'Descansar na estalagem restaura HP e MP',
+            'Feitiços de área afetam todos inimigos adjacentes',
+            'Percepção Passiva revela armadilhas ocultas',
+            'Anões têm resistência a veneno',
+            'Elfos possuem visão no escuro',
+            'Curandeiros podem usar Descanso Curto entre combates',
+            'Inimigos mais fortes concedem mais XP',
+            'Equipamentos podem ter encaixes para runas',
+            'Ladinos causam dano extra com Ataque Furtivo',
+            'Bardos inspiram aliados com Inspiração Bárdica',
+            'A reputação com NPCs afeta preços nas lojas',
+            'Explore cada sala — tesouros escondidos aguardam',
+            'Magos podem preparar magias diferentes a cada descanso',
+            'Paladinos podem Impor as Mãos para curar aliados',
+        ];
+        var tipEl = document.getElementById('loading-tip');
+        var progressEl = document.getElementById('loading-progress');
+        var tipIndex = 0;
+        var _tipInterval, _slowTimer, _verySlowTimer;
+
+        // Rotate tips every 3s with crossfade
+        _tipInterval = setInterval(function() {
+            tipIndex = (tipIndex + 1) % TIPS.length;
+            tipEl.classList.add('tip-exit');
+            setTimeout(function() {
+                tipEl.textContent = TIPS[tipIndex];
+                tipEl.classList.remove('tip-exit');
+                tipEl.classList.add('tip-enter');
+                setTimeout(function() { tipEl.classList.remove('tip-enter'); }, 350);
+            }, 300);
+        }, 3500);
+
+        // Slow loading indicator after 5s
+        _slowTimer = setTimeout(function() {
+            tipEl.classList.add('loading-tip-slow');
+        }, 5000);
+
+        // Very slow — reassure after 10s
+        _verySlowTimer = setTimeout(function() {
+            tipEl.textContent = 'Quase lá...';
+        }, 10000);
+
+        // Expose for explore-events.js
+        window._loadingCtrl = {
+            setProgress: function(pct) {
+                if (progressEl) progressEl.style.width = Math.min(100, pct) + '%';
+            },
+            /** Cinematic exit with flash + circle zoom + disperse */
+            hideLoading: function(cb) {
+                clearInterval(_tipInterval);
+                clearTimeout(_slowTimer);
+                clearTimeout(_verySlowTimer);
+                var overlay = document.getElementById('loading');
+                if (!overlay || overlay.classList.contains('hidden')) { if (cb) cb(); return; }
+                // Set progress to 100%
+                if (progressEl) progressEl.style.width = '100%';
+                // Trigger cinematic exit
+                setTimeout(function() {
+                    overlay.classList.add('exit-cinematic');
+                    overlay.addEventListener('animationend', function handler(e) {
+                        if (e.target !== overlay) return;
+                        overlay.removeEventListener('animationend', handler);
+                        overlay.classList.add('hidden');
+                        if (cb) cb();
+                    });
+                    // Safety fallback in case animationend doesn't fire
+                    setTimeout(function() {
+                        if (!overlay.classList.contains('hidden')) {
+                            overlay.classList.add('hidden');
+                            if (cb) cb();
+                        }
+                    }, 1200);
+                }, 250);
+            },
+            /** Quick hide (no cinematic, for restores) */
+            hideQuick: function() {
+                clearInterval(_tipInterval);
+                clearTimeout(_slowTimer);
+                clearTimeout(_verySlowTimer);
+                var overlay = document.getElementById('loading');
+                if (overlay) overlay.classList.add('hidden');
+            },
+            cleanup: function() {
+                clearInterval(_tipInterval);
+                clearTimeout(_slowTimer);
+                clearTimeout(_verySlowTimer);
+            }
+        };
+    })();
+    </script>
 
     <!-- HUD -->
     <div id="hud">

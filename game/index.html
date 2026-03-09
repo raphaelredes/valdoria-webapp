@@ -128,7 +128,7 @@
     <div id="screen" class="screen" style="display:none">
         <!-- Banner image (optional) -->
         <div id="banner" class="screen-banner" style="display:none">
-            <img id="banner-img" src="" alt="">
+            <img id="banner-img" src="" alt="Ilustração da cena atual">
         </div>
 
         <!-- Screen text content -->
@@ -144,7 +144,7 @@
         <div id="buttons" class="screen-buttons"></div>
         <div id="text-input-wrap" class="text-input-wrap" style="display:none">
             <input id="text-input" type="text" class="text-input" placeholder="Digite aqui..." autocomplete="off">
-            <button id="text-send" class="text-send-btn">➤</button>
+            <button id="text-send" class="text-send-btn" aria-label="Enviar mensagem">➤</button>
             <span id="text-input-max" class="text-input-max"></span>
         </div>
         <div id="footer-quick" class="footer-row footer-quick"></div>
@@ -152,7 +152,8 @@
     </div>
 
     <!-- Immersive mode: restore pill (when panel is collapsed) -->
-    <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
+    <button id="immersive-restore" class="immersive-restore" style="display:none"
+        aria-label="Expandir menu">&middot; Menu</button>
 
     <!-- Dice roll overlay (3D animation for skill checks) -->
     <div id="dice-overlay" class="dice-overlay" style="display:none">
@@ -183,7 +184,7 @@
             <div class="inn-text" id="inn-text"></div>
             <div class="inn-recovery" id="inn-recovery"></div>
         </div>
-        <button class="v-skip-btn" id="inn-skip-btn" style="display:none">Acordar »</button>
+        <button class="v-skip-btn" id="inn-skip-btn" style="display:none" aria-label="Pular animação e acordar">Acordar »</button>
     </div>
 
     <!-- Toast notification -->
@@ -199,7 +200,7 @@
             <div id="timer-seconds" class="timer-seconds">30</div>
         </div>
         <div id="timer-label" class="timer-label">Sua vez!</div>
-        <button id="timer-skip" class="v-skip-btn" style="display:none">Pular ▸</button>
+        <button id="timer-skip" class="v-skip-btn" style="display:none" aria-label="Pular ação">Pular ▸</button>
     </div>
 
     <!-- Error overlay injected dynamically by shared/error-reporter.js -->

@@ -392,7 +392,11 @@ var ValdoriaErrors = (function () {
 
     // ─── Show Toast (non-fatal, lightweight) ───
     function showToast(text, duration) {
-        duration = duration || 2500;
+        if (!duration) {
+            duration = (typeof window.calcReadTime === 'function')
+                ? window.calcReadTime(text, 'toast-warn')
+                : 2500;
+        }
         var el = document.getElementById('v-err-toast');
         if (!el) {
             el = document.createElement('div');

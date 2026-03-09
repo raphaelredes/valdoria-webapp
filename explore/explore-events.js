@@ -2451,8 +2451,13 @@ async function initAsync() {
         });
     }
 
+    // ── Loading progress controller ──
+    const _lc = window._loadingCtrl || { setProgress: () => {}, hideLoading: (cb) => { if (cb) cb(); }, hideQuick: () => {}, cleanup: () => {} };
+    _lc.setProgress(10); // Init started
+
     // ── Health check before loading ──
     if (S.apiBase) {
+        _lc.setProgress(15);
         const healthy = await _exploreHealthCheck();
         if (!healthy) {
             // Try to show cached map while waiting for reconnect
@@ -2485,6 +2490,7 @@ async function initAsync() {
     let dataObj = null;
 
     // Fetch persistence state and payload from backend API if available
+    _lc.setProgress(25);
     if (S.apiBase && S.uid && S.token) {
         try {
             const url = `${S.apiBase}/api/explore/state?user_id=${S.uid}`;
@@ -2539,7 +2545,10 @@ async function initAsync() {
         });
     }
 
+    _lc.setProgress(50);
+
     if (!dataB64) {
+        _lc.cleanup();
         console.error('[EXPLORE] FATAL: No map data available. URL data param empty, API fallback failed.');
         document.getElementById('loading').innerHTML = `
             <div style="color:#a44;font-size:16px;text-align:center;padding:20px">
@@ -2554,6 +2563,7 @@ async function initAsync() {
     }
 
     try {
+        _lc.setProgress(60);
         const binary = atob(dataB64.replace(/-/g, '+').replace(/_/g, '/'));
         const bytes = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -2561,16 +2571,18 @@ async function initAsync() {
         const inflated = await zlibInflate(bytes);
         const jsonStr = new TextDecoder().decode(inflated);
         dataObj = JSON.parse(jsonStr);
+        _lc.setProgress(75);
 
         // Travel animation (only on fresh start, not restore)
         const regionName = dataObj.rn || '';
         if (!isRestore && regionName && typeof playTravelAnimation === 'function') {
-            document.getElementById('loading').classList.add('hidden');
+            _lc.hideQuick();
             await new Promise(resolve => {
                 playTravelAnimation(dataObj.b || 'forest', regionName, resolve);
             });
         }
 
+        _lc.setProgress(90);
         loadMapData(dataObj);
 
         // Post-combat narrative when returning from combat
@@ -2584,6 +2596,7 @@ async function initAsync() {
             if (invBtn) invBtn.style.display = '';
         }
     } catch (e) {
+        _lc.cleanup();
         console.error('Failed to parse map data:', e);
         document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:20px">Erro ao carregar mapa.<br>' + e.message + '</div>';
     }
