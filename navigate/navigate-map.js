@@ -136,8 +136,7 @@ function _renderRivers(svg) {
         }
         // Center line
         rG.appendChild(_el('path', { d, fill: 'none', stroke: INK,
-            'stroke-width': river.w * 0.5, 'stroke-opacity': 0.4, 'stroke-linecap': 'round',
-            filter: 'url(#ink-wobble)' }));
+            'stroke-width': river.w * 0.5, 'stroke-opacity': 0.4, 'stroke-linecap': 'round' }));
         // Two parallel side lines (medieval river convention)
         for (const side of [-1, 1]) {
             let dSide = '';
@@ -336,11 +335,9 @@ function _buildAllDefs(defs) {
     fb.appendChild(_el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '3' }));
     defs.appendChild(fb);
 
-    // Ink wobble — ESSENTIAL for hand-drawn effect (increased scale)
-    const iw = _el('filter', { id: 'ink-wobble', x: '-5%', y: '-5%', width: '110%', height: '110%' });
-    iw.appendChild(_el('feTurbulence', { type: 'turbulence', baseFrequency: '0.02', numOctaves: '2', seed: '5', result: 'w' }));
-    iw.appendChild(_el('feDisplacementMap', { in: 'SourceGraphic', in2: 'w', scale: '4', xChannelSelector: 'R', yChannelSelector: 'G' }));
-    defs.appendChild(iw);
+    // Ink wobble removed — LANDMASS_POINTS already has built-in irregularity;
+    // feTurbulence + feDisplacementMap was an expensive GPU filter with negligible
+    // visual difference on mobile. Stroke-width increased to 2.0 to compensate.
 
     // Landmass clip path (parchment shape)
     defs.appendChild(_el('clipPath', { id: 'land-clip' })).appendChild(_el('path', { d: _landmassPath() }));
@@ -362,18 +359,19 @@ function _renderLandmass(svg) {
     const path = _landmassPath();
     // Flat parchment fill
     svg.appendChild(_el('path', { d: path, fill: PARCHMENT, stroke: 'none' }));
-    // Subtle stipple dots for texture
-    const stG = _el('g', { 'clip-path': 'url(#land-clip)', 'pointer-events': 'none' });
-    for (let i = 0; i < 80; i++) {
+    // Subtle stipple dots for texture — batched into single <path>
+    let stipD = '';
+    for (let i = 0; i < 30; i++) {
         const dx = srand(i * 73 + 11) * SVG_W;
         const dy = srand(i * 79 + 17) * SVG_H;
         if (!_pointInLandmass(dx, dy)) continue;
-        stG.appendChild(_el('circle', {
-            cx: dx, cy: dy, r: 0.6 + srand(i * 83) * 0.5,
-            fill: INK_DARK, 'fill-opacity': 0.04 + srand(i * 89) * 0.04,
-        }));
+        const cr = 0.6 + srand(i * 83) * 0.5;
+        stipD += `M${dx-cr},${dy}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
     }
-    svg.appendChild(stG);
+    if (stipD) {
+        svg.appendChild(_el('path', { d: stipD, fill: INK_DARK, 'fill-opacity': 0.05,
+            'clip-path': 'url(#land-clip)', 'pointer-events': 'none' }));
+    }
 }
 
 // ===============================================================
@@ -417,7 +415,7 @@ function _renderWornEdgesImpl(eG) {
 
     // === Layer 3: Main border line (irregular, hand-drawn feel) ===
     eG.appendChild(_el('path', { d: path, fill: 'none', stroke: INK_DARK,
-        'stroke-width': 1.8, 'stroke-opacity': 0.65, filter: 'url(#ink-wobble)' }));
+        'stroke-width': 2.0, 'stroke-opacity': 0.65 }));
 
     // === Layer 4: Paper fiber wisps (fine lines radiating outward) ===
     for (let i = 0; i < p.length; i++) {
@@ -556,28 +554,31 @@ function _renderAgingEffects(svg) {
 }
 
 function _renderAgingEffectsImpl(aG) {
-    // Stipple clusters (foxing spots)
+    // Stipple clusters (foxing spots) — batched into a single <path>
     const spots = [[80,60,15],[650,100,12],[200,650,18],[550,550,10],[400,200,8],[120,400,14],[600,350,11],[350,680,16],[500,80,9],[700,600,13]];
+    let foxD = '';
     for (const [x, y, r] of spots) {
         for (let j = 0; j < 12; j++) {
             const sx = x + (srand(x * 7 + j * 13) - 0.5) * r * 2;
             const sy = y + (srand(y * 11 + j * 17) - 0.5) * r * 2;
-            aG.appendChild(_el('circle', {
-                cx: sx, cy: sy, r: 0.4 + srand(x * 3 + j) * 0.5,
-                fill: INK_DARK, 'fill-opacity': 0.03 + srand(x * 5 + j * 7) * 0.03,
-            }));
+            const cr = 0.4 + srand(x * 3 + j) * 0.5;
+            foxD += `M${sx-cr},${sy}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
         }
     }
-    // Crease lines (more pronounced, more lines)
+    if (foxD) aG.appendChild(_el('path', { d: foxD, fill: INK_DARK, 'fill-opacity': 0.04, stroke: 'none' }));
+
+    // Crease lines — batched into a single <path>
     const creases = [
-        [60, SVG_H * 0.35, SVG_W - 60, SVG_H * 0.38, 0.7, 0.10],
-        [SVG_W * 0.6, 40, SVG_W * 0.58, SVG_H - 40, 0.5, 0.07],
-        [100, SVG_H * 0.65, SVG_W - 100, SVG_H * 0.62, 0.4, 0.06],
-        [SVG_W * 0.3, 60, SVG_W * 0.32, SVG_H - 60, 0.35, 0.05],
+        [60, SVG_H * 0.35, SVG_W - 60, SVG_H * 0.38, 0.10],
+        [SVG_W * 0.6, 40, SVG_W * 0.58, SVG_H - 40, 0.07],
+        [100, SVG_H * 0.65, SVG_W - 100, SVG_H * 0.62, 0.06],
+        [SVG_W * 0.3, 60, SVG_W * 0.32, SVG_H - 60, 0.05],
     ];
-    for (const [x1, y1, x2, y2, sw, op] of creases) {
-        aG.appendChild(_el('line', { x1, y1, x2, y2, stroke: INK_DARK, 'stroke-width': sw, 'stroke-opacity': op }));
+    let creaseD = '';
+    for (const [x1, y1, x2, y2] of creases) {
+        creaseD += `M${x1},${y1}L${x2},${y2}`;
     }
+    if (creaseD) aG.appendChild(_el('path', { d: creaseD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.07 }));
 }
 
 // ===============================================================

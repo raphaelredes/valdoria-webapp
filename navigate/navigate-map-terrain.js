@@ -500,19 +500,19 @@ function _drawForest(g, cluster) {
     const trees = [];
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        const count = 7 + Math.floor(srand(seed) * 5); // 7-11 trees per hex (denser)
+        const count = 5 + Math.floor(srand(seed) * 4); // 5-8 trees per hex (optimized)
         for (let i = 0; i < count; i++) {
             const szRoll = srand(seed+i*13+1);
             trees.push({
                 x: h.x + (srand(seed+i*13)-0.5) * 34,
                 y: h.y + (srand(seed+i*13+5)-0.5) * 22,
-                sz: 2.5 + szRoll * 4.5, // 2.5-7 range for variety
+                sz: 2.5 + szRoll * 4.5,
                 type: srand(seed+i*13+2) < 0.5 ? 'round' : 'conifer',
                 seed: seed + i * 13,
             });
         }
     }
-    trees.sort((a, b) => a.y - b.y); // back-to-front
+    trees.sort((a, b) => a.y - b.y);
 
     for (const t of trees) {
         const trunkH = t.sz * 1.8;
@@ -521,43 +521,20 @@ function _drawForest(g, cluster) {
         if (t.type === 'round') {
             const cy = t.y + 2 - trunkH - t.sz * 0.2;
             const cx = t.x + trunkLean;
-            // Solid filled canopy (base to occlude things behind + pencil shading)
-            g.appendChild(_el('circle', {
-                cx, cy, r: t.sz + 0.5,
-                fill: INK_DARK, 'fill-opacity': 0.12,
-            }));
-            // Dark fill for canopy body
+            // Canopy body (single circle with fill + stroke)
             g.appendChild(_el('circle', {
                 cx, cy, r: t.sz,
-                fill: INK_DARK, 'fill-opacity': 0.2,
+                fill: INK_DARK, 'fill-opacity': 0.22,
                 stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.55,
             }));
-            // Shadow crescent (right half darker)
-            g.appendChild(_el('path', {
-                d: `M${cx + t.sz * 0.1},${cy - t.sz * 0.8} A${t.sz * 0.9},${t.sz * 0.9} 0 0 1 ${cx + t.sz * 0.1},${cy + t.sz * 0.8}`,
-                fill: INK_DARK, 'fill-opacity': 0.08, stroke: 'none',
-            }));
-            // Leaf cluster bumps on outline
-            const bumpCount = 4 + Math.floor(srand(t.seed + 140) * 3);
-            for (let b = 0; b < bumpCount; b++) {
-                const ba = (b / bumpCount) * Math.PI * 2 + srand(t.seed + b * 11) * 0.6;
-                const bx = cx + Math.cos(ba) * t.sz * 0.65;
-                const by2 = cy + Math.sin(ba) * t.sz * 0.65;
-                const bsz = t.sz * (0.3 + srand(t.seed + b * 11 + 2) * 0.2);
-                g.appendChild(_el('circle', {
-                    cx: bx, cy: by2, r: bsz,
-                    fill: INK_DARK, 'fill-opacity': 0.03,
-                    stroke: INK_DARK, 'stroke-width': 0.18, 'stroke-opacity': 0.2,
-                }));
-            }
-            // Trunk (drawn after canopy so it shows below)
+            // Trunk
             g.appendChild(_el('line', {
                 x1: t.x, y1: t.y + 2,
                 x2: cx, y2: cy + t.sz * 0.7,
                 stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.6, 'stroke-linecap': 'round',
             }));
         } else {
-            // Conifer — filled triangular tiers
+            // Conifer — filled triangular tiers (simplified)
             const topX = t.x + trunkLean;
             const topY = t.y + 2 - trunkH - t.sz * 1.2;
             const tiers = 2 + Math.floor(srand(t.seed + 160) * 2);
@@ -571,21 +548,11 @@ function _drawForest(g, cluster) {
                 const tierTop = topY + ti * t.sz * 0.5;
                 const tierBot = topY + (ti + 1) * t.sz * 0.7;
                 const tierW = t.sz * (0.35 + ti * 0.3);
-                // Opaque parchment base (occludes things behind)
-                g.appendChild(_el('polygon', {
-                    points: `${topX},${tierTop} ${topX-tierW-1},${tierBot+1} ${topX+tierW+1},${tierBot+1}`,
-                    fill: INK_DARK, 'fill-opacity': 0.05, stroke: 'none',
-                }));
-                // Dark filled tier
+                // Dark filled tier with outline
                 g.appendChild(_el('polygon', {
                     points: `${topX},${tierTop} ${topX-tierW},${tierBot} ${topX+tierW},${tierBot}`,
-                    fill: INK_DARK, 'fill-opacity': 0.15 + ti * 0.03,
+                    fill: INK_DARK, 'fill-opacity': 0.17 + ti * 0.03,
                     stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.5,
-                }));
-                // Shadow on left half
-                g.appendChild(_el('polygon', {
-                    points: `${topX},${tierTop} ${topX-tierW},${tierBot} ${topX},${tierBot}`,
-                    fill: INK_DARK, 'fill-opacity': 0.08,
                 }));
             }
         }

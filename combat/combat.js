@@ -1756,15 +1756,16 @@ function _playCinematicResult(result, actionType) {
     }
 
     _cinematicInProgress = true;
-    // Safety net: force-reset after 15s to prevent permanent UI freeze
-    setTimeout(() => {
+    // Safety net: force-reset after 20s to prevent permanent UI freeze (slow devices may need >15s)
+    const _cinematicSafetyTimer = setTimeout(() => {
         if (_cinematicInProgress) {
             console.warn('[COMBAT] Cinematic safety timeout — force reset');
             _cinematicInProgress = false;
             startPolling();
         }
-    }, 15000);
+    }, 20000);
 
+    try {
     // Phase 0: Anticipation text (350ms) — "⚔️ Kalfin avança!"
     const attackerName = currentState?.p?.n || 'Herói';
     const _antTexts = {
@@ -1844,6 +1845,7 @@ function _playCinematicResult(result, actionType) {
         }
 
         setTimeout(() => {
+            clearTimeout(_cinematicSafetyTimer);
             _cinematicInProgress = false;
             currentState = result;
             if (result.phase === 'ended') { showCombatEnded(); }
@@ -1851,6 +1853,14 @@ function _playCinematicResult(result, actionType) {
             else { renderArena(result); }
         }, totalDelay);
     }, 350);
+
+    } catch (e) {
+        console.error('[COMBAT] Cinematic exception — force reset', e);
+        clearTimeout(_cinematicSafetyTimer);
+        _cinematicInProgress = false;
+        currentState = result;
+        renderArena(result);
+    }
 }
 
 // ─── TURN ANNOUNCEMENT BANNER ───
@@ -2017,13 +2027,17 @@ function showSkillPicker(skills, enemies, actionType) {
             haptic('light');
             const skillId = item.dataset.skillId;
             const tg = item.dataset.tg || 'single';
-            _closeOverlay(overlay);
+            // Hide overlay visually but keep _overlayOpen=true to block polls during transition
+            overlay.classList.remove('active');
             // AOE/self skills skip target picker
             if (tg === 'all' || tg === 'self') {
+                _overlayOpen = false;
                 sendAction({ type: actionType, skill_id: skillId, target: 0 });
             } else if (enemies.length > 1) {
+                // _overlayOpen stays true — showTargetPicker will take over
                 showTargetPicker(enemies, actionType, skillId);
             } else {
+                _overlayOpen = false;
                 sendAction({ type: actionType, skill_id: skillId, target: 0 });
             }
         });
@@ -2081,7 +2095,9 @@ function showTargetPicker(enemies, actionType, skillId) {
         item.addEventListener('click', () => {
             haptic('medium');
             const target = parseInt(item.dataset.target);
-            _closeOverlay(overlay);
+            // Hide overlay visually; sendAction will set _actionSent which blocks polls
+            overlay.classList.remove('active');
+            _overlayOpen = false;
             if (actionType === 'skill' || actionType === 'bonus_use') {
                 sendAction({ type: actionType, skill_id: skillId, target: target });
             } else {
@@ -2126,7 +2142,9 @@ function showItemPicker(items, enemies, allies) {
         el.addEventListener('click', () => {
             const itemName = el.dataset.item;
             const isThrown = el.dataset.thrown === 'true';
-            _closeOverlay(overlay);
+            // Hide overlay visually; sendAction will set _actionSent which blocks polls
+            overlay.classList.remove('active');
+            _overlayOpen = false;
             if (isThrown) {
                 // Thrown items always target enemy — target -2 means first enemy
                 sendAction({ type: 'use_item', item_key: itemName, item_target: -2 });

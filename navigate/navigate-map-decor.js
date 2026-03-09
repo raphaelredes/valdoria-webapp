@@ -50,16 +50,27 @@ function _buildRoadPath(aPx, bPx, seed) {
     return `M${p0.x},${p0.y} C${p1.x},${p1.y} ${p1.x},${p1.y} ${p2.x},${p2.y} S${p3.x},${p3.y} ${p4.x},${p4.y}`;
 }
 
-/** Point at t (0-1) along an SVG path */
+/** Point at t (0-1) along an SVG path — cached to avoid DOM thrashing */
+let _cachedPathEl = null, _cachedPathD = null, _cachedPathLen = 0;
 function _pointOnPath(pathD, t) {
-    const tmp = document.createElementNS(NS, 'path');
-    tmp.setAttribute('d', pathD);
     const svg = document.getElementById('map-svg');
     if (!svg) return { x: 0, y: 0 };
-    svg.appendChild(tmp);
-    const pt = tmp.getPointAtLength(tmp.getTotalLength() * t);
-    svg.removeChild(tmp);
+    if (pathD !== _cachedPathD) {
+        if (_cachedPathEl && _cachedPathEl.parentNode) _cachedPathEl.parentNode.removeChild(_cachedPathEl);
+        _cachedPathEl = document.createElementNS(NS, 'path');
+        _cachedPathEl.setAttribute('d', pathD);
+        _cachedPathEl.setAttribute('fill', 'none');
+        _cachedPathEl.setAttribute('stroke', 'none');
+        svg.appendChild(_cachedPathEl);
+        _cachedPathD = pathD;
+        _cachedPathLen = _cachedPathEl.getTotalLength();
+    }
+    const pt = _cachedPathEl.getPointAtLength(_cachedPathLen * t);
     return { x: pt.x, y: pt.y };
+}
+function _clearPathCache() {
+    if (_cachedPathEl && _cachedPathEl.parentNode) _cachedPathEl.parentNode.removeChild(_cachedPathEl);
+    _cachedPathEl = null; _cachedPathD = null; _cachedPathLen = 0;
 }
 
 function renderRoads(group, fogState) {

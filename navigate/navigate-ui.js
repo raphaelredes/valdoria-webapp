@@ -459,13 +459,14 @@ function animateTravel(fromId, toId, onComplete) {
                 }
                 setTimeout(() => {
                     travelGroup.remove();
+                    _clearPathCache();
                     onComplete();
                 }, 800);
             }
         }
         requestAnimationFrame(moveMarker);
     } else {
-        setTimeout(() => { travelGroup.remove(); onComplete(); }, 1500);
+        setTimeout(() => { travelGroup.remove(); _clearPathCache(); onComplete(); }, 1500);
     }
 }
 

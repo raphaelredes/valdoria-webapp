@@ -83,7 +83,7 @@ body {
     to { opacity: 1; transform: translateX(0); }
 }
 /* Dead/unconscious entities */
-.entity.dead { opacity: 0.45; filter: grayscale(80%) brightness(0.85); }
+.entity.dead { opacity: 0.4; filter: grayscale(0.6); pointer-events: none; }
 .entity.dead .hp-mini-fill,
 .entity.dead .bar-fill { background: var(--v-border, #4a3828) !important; animation: none !important; }
 .entity:not(.player):active {
@@ -931,7 +931,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 250;
     background: radial-gradient(circle, rgba(42,36,32,0.97) 0%, rgba(42,36,32,0.93) 100%);
     animation: dmgDice3dFadeIn 0.3s ease-out;
 }
@@ -1079,7 +1079,7 @@ body {
 }
 .action-btn.danger { border-color: rgba(123,32,32,0.5); color: #e08080; }
 .action-btn.full-width { grid-column: 1 / -1; }
-.action-btn.full-width:not(.primary):not(.danger) { color: var(--v-text-dim); font-size: 11px; padding: 4px; min-height: 28px; }
+.action-btn.full-width:not(.primary):not(.danger) { color: var(--v-text-dim); font-size: 11px; padding: 4px; min-height: 40px; }
 .action-btn .action-chance { font-size: 11px; line-height: 1.3; opacity: 0.7; }
 .action-btn.disabled { opacity: 0.4; pointer-events: none; }
 .action-btn.loading { opacity: 0.5; pointer-events: none; animation: btnShimmer 1.5s ease-in-out infinite; }
@@ -2041,11 +2041,6 @@ body {
 }
 
 /* ─── DEAD ENTITY TREATMENT ─── */
-.entity.dead {
-    opacity: 0.4;
-    filter: grayscale(0.6);
-    pointer-events: none;
-}
 .entity.dead .compact-name {
     text-decoration: line-through;
     text-decoration-color: rgba(196,149,58,0.3);
