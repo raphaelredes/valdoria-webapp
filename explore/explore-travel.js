@@ -4,24 +4,24 @@
 
 // Per-biome visual config
 const TRAVEL_CONFIG = {
-    // rn=rain, cs=cloudShadows, cn=constellations, tn=terrainNoise, cp=compass, ms=milestones
-    forest:   { bg: ['#0d2e0d','#1a4a1a'], ground: '#2d3d1d', midColor: '#1a3a1a', farColor: '#0a2a0a', silhouette: 'conifers',   icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: true,  ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: true,  dm: true,  gv: true,  ds: false, sky2: ['#1a3a0a','#2a5a1a'], rl: true,  lb: false, fb: false, sc: false, fl: 'leaf',  cr: false, rn: false, cs: true,  cn: false, tn: true,  cp: true,  ms: true  },
-    plains:   { bg: ['#3a3a18','#5a5a28'], ground: '#5a4a30', midColor: '#4a4a20', farColor: '#3a3a15', silhouette: 'hills',      icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: false, ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: true,  dm: true,  gv: true,  ds: false, sky2: ['#4a3a10','#6a5a20'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false, rn: false, cs: true,  cn: false, tn: false, cp: true,  ms: true  },
-    swamp:    { bg: ['#1a2a1a','#2a3a2a'], ground: '#3a3a2a', midColor: '#2a3a25', farColor: '#1a2a18', silhouette: 'deadTrees',  icon: '', horizonGlow: '100,140,80',  stars: true,  celestial: 'moon', cloud: 'fog',   sway: false, ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: true,  gr: false, dm: false, gv: false, ds: false, sky2: null,                  rl: true,  lb: false, fb: true,  sc: false, fl: 'dead',  cr: true,  rn: false, cs: false, cn: true,  tn: true,  cp: true,  ms: false },
-    cave:     { bg: ['#0a0a14','#1a1a2a'], ground: '#1a1a2a', midColor: '#15152a', farColor: '#0a0a18', silhouette: 'rocks',      icon: '', horizonGlow: '100,100,160', stars: true,  celestial: null,   cloud: null,    sway: false, ff: false, lt: false, fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null,                  rl: false, lb: false, fb: true,  sc: false, fl: null,    cr: false, rn: false, cs: false, cn: true,  tn: true,  cp: false, ms: false },
-    desert:   { bg: ['#6a5a30','#8a7a4a'], ground: '#8a7a4a', midColor: '#7a6a3a', farColor: '#5a4a28', silhouette: 'dunes',      icon: '', horizonGlow: '220,180,80',  stars: false, celestial: 'sun',  cloud: null,    sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: false, wr: false, gr: false, dm: true,  gv: false, ds: true,  sky2: ['#7a5a20','#9a7a38'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false, rn: false, cs: false, cn: false, tn: true,  cp: true,  ms: true  },
-    mountain: { bg: ['#3a3a4a','#5a5a6a'], ground: '#5a4a3a', midColor: '#4a4a5a', farColor: '#2a2a3a', silhouette: 'peaks',      icon: '', horizonGlow: '160,160,200', stars: true,  celestial: 'moon', cloud: 'thin',  sway: false, ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: ['#2a2a3a','#4a4a5a'], rl: true,  lb: false, fb: true,  sc: true,  fl: null,    cr: false, rn: true,  cs: false, cn: true,  tn: true,  cp: true,  ms: true  },
-    snow:     { bg: ['#8a8a9a','#b0b8c0'], ground: '#c0c8d0', midColor: '#9a9aaa', farColor: '#7a7a8a', silhouette: 'peaks',      icon: '', horizonGlow: '140,180,220', stars: false, celestial: null,   cloud: 'heavy', sway: false, ff: false, lt: false, fa: null,   sh: false, au: true,  lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#7a7a8a','#9a9aaa'], rl: false, lb: false, fb: false, sc: true,  fl: null,    cr: false, rn: false, cs: true,  cn: false, tn: false, cp: true,  ms: true  },
-    volcanic: { bg: ['#2a1a0a','#3a2a1a'], ground: '#3a2a1a', midColor: '#3a2010', farColor: '#1a0a00', silhouette: 'rocks',      icon: '', horizonGlow: '255,100,30',  stars: true,  celestial: 'moon', cloud: 'smoke', sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: true,  wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#3a1500','#4a2a0a'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false, rn: false, cs: false, cn: false, tn: true,  cp: true,  ms: false },
-    graveyard:{ bg: ['#1a1a20','#2a2a30'], ground: '#3a3a3a', midColor: '#252530', farColor: '#15151a', silhouette: 'tombstones', icon: '', horizonGlow: '120,120,160', stars: true,  celestial: 'moon', cloud: 'dark',  sway: false, ff: false, lt: true,  fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#10101a','#1a1a28'], rl: true,  lb: true,  fb: false, sc: false, fl: null,    cr: false, rn: true,  cs: false, cn: true,  tn: false, cp: true,  ms: false },
+    // ws=windStreaks, tg=torchGlow, rt=roadTracks, ap=ambientPulse(color), wl=wildlife(type)
+    forest:   { bg: ['#0d2e0d','#1a4a1a'], ground: '#2d3d1d', midColor: '#1a3a1a', farColor: '#0a2a0a', silhouette: 'conifers',   icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: true,  ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: true,  dm: true,  gv: true,  ds: false, sky2: ['#1a3a0a','#2a5a1a'], rl: true,  lb: false, fb: false, sc: false, fl: 'leaf',  cr: false, rn: false, cs: true,  cn: false, tn: true,  cp: true,  ms: true,  ws: false, tg: false, rt: 'boot',   ap: null,              wl: 'rabbit' },
+    plains:   { bg: ['#3a3a18','#5a5a28'], ground: '#5a4a30', midColor: '#4a4a20', farColor: '#3a3a15', silhouette: 'hills',      icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: false, ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: true,  dm: true,  gv: true,  ds: false, sky2: ['#4a3a10','#6a5a20'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false, rn: false, cs: true,  cn: false, tn: false, cp: true,  ms: true,  ws: true,  tg: false, rt: 'cart',   ap: null,              wl: 'rabbit' },
+    swamp:    { bg: ['#1a2a1a','#2a3a2a'], ground: '#3a3a2a', midColor: '#2a3a25', farColor: '#1a2a18', silhouette: 'deadTrees',  icon: '', horizonGlow: '100,140,80',  stars: true,  celestial: 'moon', cloud: 'fog',   sway: false, ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: true,  gr: false, dm: false, gv: false, ds: false, sky2: null,                  rl: true,  lb: false, fb: true,  sc: false, fl: 'dead',  cr: true,  rn: false, cs: false, cn: true,  tn: true,  cp: true,  ms: false, ws: false, tg: true,  rt: null,     ap: '80,120,60',       wl: null     },
+    cave:     { bg: ['#0a0a14','#1a1a2a'], ground: '#1a1a2a', midColor: '#15152a', farColor: '#0a0a18', silhouette: 'rocks',      icon: '', horizonGlow: '100,100,160', stars: true,  celestial: null,   cloud: null,    sway: false, ff: false, lt: false, fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null,                  rl: false, lb: false, fb: true,  sc: false, fl: null,    cr: false, rn: false, cs: false, cn: true,  tn: true,  cp: false, ms: false, ws: false, tg: true,  rt: null,     ap: '100,100,180',     wl: 'rat'    },
+    desert:   { bg: ['#6a5a30','#8a7a4a'], ground: '#8a7a4a', midColor: '#7a6a3a', farColor: '#5a4a28', silhouette: 'dunes',      icon: '', horizonGlow: '220,180,80',  stars: false, celestial: 'sun',  cloud: null,    sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: false, wr: false, gr: false, dm: true,  gv: false, ds: true,  sky2: ['#7a5a20','#9a7a38'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false, rn: false, cs: false, cn: false, tn: true,  cp: true,  ms: true,  ws: true,  tg: false, rt: 'hoof',   ap: null,              wl: 'lizard' },
+    mountain: { bg: ['#3a3a4a','#5a5a6a'], ground: '#5a4a3a', midColor: '#4a4a5a', farColor: '#2a2a3a', silhouette: 'peaks',      icon: '', horizonGlow: '160,160,200', stars: true,  celestial: 'moon', cloud: 'thin',  sway: false, ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: ['#2a2a3a','#4a4a5a'], rl: true,  lb: false, fb: true,  sc: true,  fl: null,    cr: false, rn: true,  cs: false, cn: true,  tn: true,  cp: true,  ms: true,  ws: true,  tg: true,  rt: 'boot',   ap: null,              wl: null     },
+    snow:     { bg: ['#8a8a9a','#b0b8c0'], ground: '#c0c8d0', midColor: '#9a9aaa', farColor: '#7a7a8a', silhouette: 'peaks',      icon: '', horizonGlow: '140,180,220', stars: false, celestial: null,   cloud: 'heavy', sway: false, ff: false, lt: false, fa: null,   sh: false, au: true,  lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#7a7a8a','#9a9aaa'], rl: false, lb: false, fb: false, sc: true,  fl: null,    cr: false, rn: false, cs: true,  cn: false, tn: false, cp: true,  ms: true,  ws: true,  tg: false, rt: 'boot',   ap: null,              wl: null     },
+    volcanic: { bg: ['#2a1a0a','#3a2a1a'], ground: '#3a2a1a', midColor: '#3a2010', farColor: '#1a0a00', silhouette: 'rocks',      icon: '', horizonGlow: '255,100,30',  stars: true,  celestial: 'moon', cloud: 'smoke', sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: true,  wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#3a1500','#4a2a0a'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false, rn: false, cs: false, cn: false, tn: true,  cp: true,  ms: false, ws: false, tg: true,  rt: null,     ap: '255,80,20',       wl: null     },
+    graveyard:{ bg: ['#1a1a20','#2a2a30'], ground: '#3a3a3a', midColor: '#252530', farColor: '#15151a', silhouette: 'tombstones', icon: '', horizonGlow: '120,120,160', stars: true,  celestial: 'moon', cloud: 'dark',  sway: false, ff: false, lt: true,  fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: ['#10101a','#1a1a28'], rl: true,  lb: true,  fb: false, sc: false, fl: null,    cr: false, rn: true,  cs: false, cn: true,  tn: false, cp: true,  ms: false, ws: false, tg: true,  rt: null,     ap: '120,100,180',     wl: 'spider' },
     // Dungeon variants — darker, more menacing
-    dungeon_cave:     { bg: ['#050510','#0a0a18'], ground: '#0f0f1a', midColor: '#0a0a15', farColor: '#050508', silhouette: 'rocks',      icon: '', horizonGlow: '80,80,140',   stars: true,  celestial: null,   cloud: null,    sway: false, ff: false, lt: false, fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null, rl: false, lb: false, fb: true,  sc: false, fl: null,   cr: false, rn: false, cs: false, cn: true,  tn: true,  cp: false, ms: false },
-    dungeon_graveyard:{ bg: ['#0a0a10','#15151a'], ground: '#1a1a20', midColor: '#101018', farColor: '#08080c', silhouette: 'tombstones', icon: '', horizonGlow: '100,80,140',  stars: true,  celestial: 'moon', cloud: 'dark',  sway: false, ff: false, lt: true,  fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: true,  fb: false, sc: false, fl: null,   cr: false, rn: true,  cs: false, cn: true,  tn: false, cp: false, ms: false },
-    dungeon_volcanic: { bg: ['#1a0a00','#2a1508'], ground: '#2a1a0a', midColor: '#200a00', farColor: '#100500', silhouette: 'rocks',      icon: '', horizonGlow: '255,60,0',    stars: true,  celestial: null,   cloud: 'smoke', sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: true,  wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: false, fb: false, sc: false, fl: null,   cr: false, rn: false, cs: false, cn: false, tn: true,  cp: false, ms: false },
-    dungeon_forest:   { bg: ['#050a05','#0a150a'], ground: '#0a1a0a', midColor: '#081208', farColor: '#040a04', silhouette: 'conifers',   icon: '', horizonGlow: '60,100,60',   stars: true,  celestial: 'moon', cloud: 'fog',   sway: true,  ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: false, fb: true,  sc: false, fl: 'leaf', cr: false, rn: false, cs: false, cn: false, tn: true,  cp: false, ms: false },
-    dungeon_swamp:    { bg: ['#0a100a','#151a15'], ground: '#1a1a15', midColor: '#121812', farColor: '#080a08', silhouette: 'deadTrees',  icon: '', horizonGlow: '80,100,60',   stars: true,  celestial: null,   cloud: 'fog',   sway: false, ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: true,  gr: false, dm: false, gv: false, ds: false, sky2: null, rl: false, lb: false, fb: true,  sc: false, fl: 'dead', cr: false, rn: false, cs: false, cn: true,  tn: true,  cp: false, ms: false },
-    dungeon_mountain: { bg: ['#1a1a20','#2a2a35'], ground: '#2a2020', midColor: '#202030', farColor: '#151520', silhouette: 'peaks',      icon: '', horizonGlow: '120,100,160', stars: true,  celestial: 'moon', cloud: 'thin',  sway: false, ff: false, lt: false, fa: null,   sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null, rl: true,  lb: false, fb: true,  sc: true,  fl: null,   cr: false, rn: true,  cs: false, cn: true,  tn: true,  cp: false, ms: false },
-    dungeon_snow:     { bg: ['#4a4a55','#6a6a75'], ground: '#5a5a65', midColor: '#555560', farColor: '#404048', silhouette: 'peaks',      icon: '', horizonGlow: '140,150,180', stars: true,  celestial: null,   cloud: 'heavy', sway: false, ff: false, lt: false, fa: null,   sh: false, au: true,  lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: false, lb: false, fb: false, sc: true,  fl: null,   cr: false, rn: false, cs: true,  cn: false, tn: false, cp: false, ms: false },
+    dungeon_cave:     { bg: ['#050510','#0a0a18'], ground: '#0f0f1a', midColor: '#0a0a15', farColor: '#050508', silhouette: 'rocks',      icon: '', horizonGlow: '80,80,140',   stars: true,  celestial: null,   cloud: null,    sway: false, ff: false, lt: false, fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null, rl: false, lb: false, fb: true,  sc: false, fl: null,   cr: false, rn: false, cs: false, cn: true,  tn: true,  cp: false, ms: false, ws: false, tg: true,  rt: null,   ap: '80,80,160',     wl: 'rat'    },
+    dungeon_graveyard:{ bg: ['#0a0a10','#15151a'], ground: '#1a1a20', midColor: '#101018', farColor: '#08080c', silhouette: 'tombstones', icon: '', horizonGlow: '100,80,140',  stars: true,  celestial: 'moon', cloud: 'dark',  sway: false, ff: false, lt: true,  fa: 'bat',  sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: true,  fb: false, sc: false, fl: null,   cr: false, rn: true,  cs: false, cn: true,  tn: false, cp: false, ms: false, ws: false, tg: true,  rt: null,   ap: '100,70,160',    wl: 'spider' },
+    dungeon_volcanic: { bg: ['#1a0a00','#2a1508'], ground: '#2a1a0a', midColor: '#200a00', farColor: '#100500', silhouette: 'rocks',      icon: '', horizonGlow: '255,60,0',    stars: true,  celestial: null,   cloud: 'smoke', sway: false, ff: false, lt: false, fa: null,   sh: true,  au: false, lv: true,  wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: false, fb: false, sc: false, fl: null,   cr: false, rn: false, cs: false, cn: false, tn: true,  cp: false, ms: false, ws: false, tg: true,  rt: null,   ap: '255,60,0',      wl: null     },
+    dungeon_forest:   { bg: ['#050a05','#0a150a'], ground: '#0a1a0a', midColor: '#081208', farColor: '#040a04', silhouette: 'conifers',   icon: '', horizonGlow: '60,100,60',   stars: true,  celestial: 'moon', cloud: 'fog',   sway: true,  ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: true,  lb: false, fb: true,  sc: false, fl: 'leaf', cr: false, rn: false, cs: false, cn: false, tn: true,  cp: false, ms: false, ws: false, tg: true,  rt: null,   ap: '60,100,60',     wl: null     },
+    dungeon_swamp:    { bg: ['#0a100a','#151a15'], ground: '#1a1a15', midColor: '#121812', farColor: '#080a08', silhouette: 'deadTrees',  icon: '', horizonGlow: '80,100,60',   stars: true,  celestial: null,   cloud: 'fog',   sway: false, ff: true,  lt: false, fa: null,   sh: false, au: false, lv: false, wr: true,  gr: false, dm: false, gv: false, ds: false, sky2: null, rl: false, lb: false, fb: true,  sc: false, fl: 'dead', cr: false, rn: false, cs: false, cn: true,  tn: true,  cp: false, ms: false, ws: false, tg: true,  rt: null,   ap: '80,100,50',     wl: null     },
+    dungeon_mountain: { bg: ['#1a1a20','#2a2a35'], ground: '#2a2020', midColor: '#202030', farColor: '#151520', silhouette: 'peaks',      icon: '', horizonGlow: '120,100,160', stars: true,  celestial: 'moon', cloud: 'thin',  sway: false, ff: false, lt: false, fa: null,   sh: false, au: false, lv: false, wr: false, gr: false, dm: false, gv: false, ds: true,  sky2: null, rl: true,  lb: false, fb: true,  sc: true,  fl: null,   cr: false, rn: true,  cs: false, cn: true,  tn: true,  cp: false, ms: false, ws: true,  tg: true,  rt: null,   ap: null,            wl: null     },
+    dungeon_snow:     { bg: ['#4a4a55','#6a6a75'], ground: '#5a5a65', midColor: '#555560', farColor: '#404048', silhouette: 'peaks',      icon: '', horizonGlow: '140,150,180', stars: true,  celestial: null,   cloud: 'heavy', sway: false, ff: false, lt: false, fa: null,   sh: false, au: true,  lv: false, wr: false, gr: false, dm: false, gv: false, ds: false, sky2: null, rl: false, lb: false, fb: false, sc: true,  fl: null,   cr: false, rn: false, cs: true,  cn: false, tn: false, cp: false, ms: false, ws: true,  tg: false, rt: 'boot', ap: null,            wl: null     },
 };
 
 // Particle configs per biome
@@ -129,6 +129,12 @@ function playTravelAnimation(biome, regionName, onComplete) {
 
     // Generate road milestones
     const milestones = cfg.ms ? _generateMilestones(w, h) : [];
+
+    // Generate wind streaks (horizontal speed lines)
+    const windStreaks = cfg.ws ? _generateWindStreaks(w, h) : [];
+
+    // Generate ground wildlife (small animals darting across road)
+    const wildlife = cfg.wl ? _generateWildlife(w, h, cfg.wl) : [];
 
     overlay.classList.add('active');
 
@@ -273,9 +279,19 @@ function playTravelAnimation(biome, regionName, onComplete) {
         // Scrolling road/path
         _drawRoadPath(ctx, w, h, groundY, elapsed, biome);
 
+        // Road tracks (footprints, wheel ruts, hoofprints scrolling on road)
+        if (cfg.rt) {
+            _drawRoadTracks(ctx, w, groundY, elapsed, cfg.rt);
+        }
+
         // Road milestones (stone markers scrolling past)
         if (milestones.length > 0) {
             _drawMilestones(ctx, milestones, w, groundY, elapsed);
+        }
+
+        // Ground wildlife (small animals darting across road)
+        if (wildlife.length > 0) {
+            _drawWildlife(ctx, wildlife, w, groundY, elapsed);
         }
 
         // Traveler silhouette (walking figure on road)
@@ -354,9 +370,24 @@ function playTravelAnimation(biome, regionName, onComplete) {
             }
         }
 
+        // Wind streaks (horizontal speed lines — sense of travel speed)
+        if (windStreaks.length > 0) {
+            _drawWindStreaks(ctx, windStreaks, w, h, elapsed);
+        }
+
         // Compass rose (small, slowly rotating in corner)
         if (cfg.cp) {
             _drawCompassRose(ctx, w, h, elapsed, progress);
+        }
+
+        // Torch / lantern glow (warm light from traveler in dark biomes)
+        if (cfg.tg) {
+            _drawTorchGlow(ctx, w, groundY, elapsed);
+        }
+
+        // Ambient light pulse (biome-specific screen-wide brightness oscillation)
+        if (cfg.ap) {
+            _drawAmbientPulse(ctx, w, h, elapsed, cfg.ap);
         }
 
         // Text (fade in first 400ms, slow vertical drift upward)
@@ -2289,6 +2320,331 @@ function _drawTraveler(ctx, w, h, groundY, elapsed, celestialType) {
     ctx.ellipse(-3 * sc, -12 * sc, 2.5 * sc, 3 * sc, -0.2, 0, Math.PI * 2);
     ctx.fill();
 
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// WIND STREAKS
+// ═══════════════════════════════════════════
+
+function _generateWindStreaks(w, h) {
+    const streaks = [];
+    for (let i = 0; i < 12; i++) {
+        streaks.push({
+            x: Math.random() * w * 1.5,
+            y: h * 0.15 + Math.random() * h * 0.65, // sky to mid-ground
+            len: 30 + Math.random() * 60,
+            speed: 180 + Math.random() * 120,
+            alpha: 0.03 + Math.random() * 0.06,
+            thickness: 0.5 + Math.random() * 1,
+            phase: Math.random() * Math.PI * 2,
+        });
+    }
+    return streaks;
+}
+
+function _drawWindStreaks(ctx, streaks, w, h, elapsed) {
+    ctx.save();
+    ctx.lineCap = 'round';
+    for (const s of streaks) {
+        // Pulse visibility (wind gusts)
+        const gust = Math.sin(elapsed * 0.001 + s.phase) * 0.5 + 0.5;
+        if (gust < 0.3) continue; // invisible during lull
+
+        const x = ((s.x - elapsed * s.speed * 0.001) % (w + s.len * 2)) - s.len;
+        const alpha = s.alpha * gust;
+
+        ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+        ctx.lineWidth = s.thickness;
+        ctx.beginPath();
+        // Slight diagonal (wind isn't perfectly horizontal)
+        ctx.moveTo(x, s.y);
+        ctx.lineTo(x + s.len, s.y - 1.5);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// TORCH / LANTERN GLOW
+// ═══════════════════════════════════════════
+
+function _drawTorchGlow(ctx, w, groundY, elapsed) {
+    // Warm amber glow emanating from the traveler's position
+    const cx = w * 0.42; // matches traveler position
+    const cy = groundY - 8; // near traveler's hand/torch
+
+    // Flicker: randomized intensity
+    const flicker1 = Math.sin(elapsed * 0.007) * 0.15;
+    const flicker2 = Math.sin(elapsed * 0.013 + 1.7) * 0.08;
+    const flicker3 = Math.sin(elapsed * 0.023 + 3.1) * 0.05;
+    const intensity = 0.12 + flicker1 + flicker2 + flicker3;
+
+    // Inner warm glow (small, bright)
+    const innerGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 50);
+    innerGrad.addColorStop(0, `rgba(255,180,60,${intensity * 1.2})`);
+    innerGrad.addColorStop(0.4, `rgba(255,140,30,${intensity * 0.6})`);
+    innerGrad.addColorStop(1, 'rgba(255,100,10,0)');
+    ctx.fillStyle = innerGrad;
+    ctx.fillRect(cx - 50, cy - 50, 100, 100);
+
+    // Outer ambient glow (large, subtle)
+    const outerGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 140);
+    outerGrad.addColorStop(0, `rgba(255,160,40,${intensity * 0.3})`);
+    outerGrad.addColorStop(0.5, `rgba(200,120,20,${intensity * 0.1})`);
+    outerGrad.addColorStop(1, 'rgba(180,100,10,0)');
+    ctx.fillStyle = outerGrad;
+    ctx.fillRect(cx - 140, cy - 140, 280, 280);
+
+    // Ground light pool (warm patch on road under torch)
+    const poolGrad = ctx.createRadialGradient(cx, groundY + 6, 0, cx, groundY + 6, 60);
+    poolGrad.addColorStop(0, `rgba(255,170,50,${intensity * 0.15})`);
+    poolGrad.addColorStop(1, 'rgba(255,140,30,0)');
+    ctx.fillStyle = poolGrad;
+    ctx.fillRect(cx - 60, groundY - 10, 120, 40);
+}
+
+
+// ═══════════════════════════════════════════
+// ROAD TRACKS
+// ═══════════════════════════════════════════
+
+function _drawRoadTracks(ctx, w, groundY, elapsed, trackType) {
+    const scrollX = elapsed * 0.08;
+    const pathY = groundY + 8;
+
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+
+    if (trackType === 'boot') {
+        // Alternating boot prints (left/right offset)
+        ctx.fillStyle = 'rgba(60,50,35,1)';
+        for (let i = 0; i < 14; i++) {
+            const bx = ((i * 32 - scrollX) % (w + 50)) - 25;
+            const side = (i % 2 === 0) ? -3 : 3;
+            // Boot shape: rounded rectangle
+            ctx.beginPath();
+            ctx.ellipse(bx, pathY + side, 3.5, 2, (i % 2 === 0) ? -0.15 : 0.15, 0, Math.PI * 2);
+            ctx.fill();
+            // Heel
+            ctx.beginPath();
+            ctx.ellipse(bx + 4, pathY + side + 0.5, 2, 1.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    } else if (trackType === 'cart') {
+        // Two parallel wheel ruts
+        ctx.strokeStyle = 'rgba(80,65,40,1)';
+        ctx.lineWidth = 1.5;
+        for (let rut = -1; rut <= 1; rut += 2) {
+            ctx.beginPath();
+            for (let i = 0; i < w + 20; i += 4) {
+                const rx = i;
+                const ry = pathY + rut * 4 + Math.sin((rx + scrollX) * 0.08) * 0.5;
+                if (i === 0) ctx.moveTo(rx, ry);
+                else ctx.lineTo(rx, ry);
+            }
+            ctx.stroke();
+        }
+        // Occasional hoofprint between ruts (draft animal)
+        ctx.fillStyle = 'rgba(70,55,35,1)';
+        for (let i = 0; i < 6; i++) {
+            const hx = ((i * 70 + 15 - scrollX) % (w + 80)) - 40;
+            // Horseshoe shape (U)
+            ctx.beginPath();
+            ctx.arc(hx, pathY, 2.5, 0.3, Math.PI - 0.3);
+            ctx.stroke();
+        }
+    } else if (trackType === 'hoof') {
+        // Camel/horse hoofprints (pairs)
+        ctx.fillStyle = 'rgba(120,100,60,1)';
+        for (let i = 0; i < 10; i++) {
+            const hx = ((i * 40 - scrollX) % (w + 50)) - 25;
+            const side = (i % 2 === 0) ? -2 : 2;
+            // Rounded hoofprint
+            ctx.beginPath();
+            ctx.ellipse(hx, pathY + side, 2.5, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Frog indent
+            ctx.clearRect(hx - 0.5, pathY + side - 1.5, 1, 3);
+        }
+    }
+
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// AMBIENT LIGHT PULSE
+// ═══════════════════════════════════════════
+
+function _drawAmbientPulse(ctx, w, h, elapsed, colorRGB) {
+    // Subtle screen-wide brightness oscillation — biome-specific
+    // Slow primary + faster secondary for organic feel
+    const pulse1 = Math.sin(elapsed * 0.0012) * 0.5 + 0.5;
+    const pulse2 = Math.sin(elapsed * 0.0031 + 1.2) * 0.3 + 0.5;
+    const combined = pulse1 * 0.7 + pulse2 * 0.3;
+
+    // Very subtle overlay (max ~3% opacity)
+    const alpha = combined * 0.03;
+
+    ctx.save();
+    // Radial from center-bottom (simulates underground/ambient glow source)
+    const grad = ctx.createRadialGradient(w * 0.5, h * 0.75, 0, w * 0.5, h * 0.5, h * 0.7);
+    grad.addColorStop(0, `rgba(${colorRGB},${alpha * 1.5})`);
+    grad.addColorStop(0.6, `rgba(${colorRGB},${alpha * 0.5})`);
+    grad.addColorStop(1, `rgba(${colorRGB},0)`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// GROUND WILDLIFE
+// ═══════════════════════════════════════════
+
+function _generateWildlife(w, _h, type) {
+    // 2-3 animals that dart across at random times
+    const animals = [];
+    const count = 2 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < count; i++) {
+        animals.push({
+            type: type,
+            triggerTime: 600 + Math.random() * 2200, // when it starts crossing
+            startX: Math.random() > 0.5 ? -20 : w + 20, // from left or right
+            speed: (type === 'lizard' ? 220 : type === 'spider' ? 120 : 180) + Math.random() * 80,
+            yOffset: Math.random() * 16 - 8, // slight vertical variation on road
+            size: type === 'spider' ? 3 : type === 'lizard' ? 5 : 4,
+            active: false,
+            x: 0,
+        });
+    }
+    return animals;
+}
+
+function _drawWildlife(ctx, animals, w, groundY, elapsed) {
+    ctx.save();
+    for (const a of animals) {
+        if (elapsed < a.triggerTime) continue;
+
+        const timeSinceTrigger = elapsed - a.triggerTime;
+        const dir = a.startX < 0 ? 1 : -1;
+        a.x = a.startX + dir * a.speed * timeSinceTrigger * 0.001;
+
+        // Off-screen after crossing? Skip
+        if ((dir > 0 && a.x > w + 30) || (dir < 0 && a.x < -30)) continue;
+
+        const baseY = groundY + 8 + a.yOffset;
+        const sz = a.size;
+
+        ctx.fillStyle = 'rgba(30,25,20,0.6)';
+
+        if (a.type === 'rabbit') {
+            // Small hopping silhouette — body + ears + legs
+            const hopPhase = Math.sin(timeSinceTrigger * 0.015) * 3;
+            const hop = Math.abs(hopPhase);
+            const bx = a.x, by = baseY - hop;
+            // Body
+            ctx.beginPath();
+            ctx.ellipse(bx, by, sz * 1.2, sz * 0.7, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Head
+            ctx.beginPath();
+            ctx.arc(bx + dir * sz, by - sz * 0.3, sz * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+            // Ears
+            ctx.strokeStyle = 'rgba(30,25,20,0.6)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(bx + dir * sz * 0.8, by - sz * 0.7);
+            ctx.lineTo(bx + dir * sz * 0.5, by - sz * 1.6);
+            ctx.moveTo(bx + dir * sz * 1.2, by - sz * 0.7);
+            ctx.lineTo(bx + dir * sz * 1.4, by - sz * 1.5);
+            ctx.stroke();
+            // Back legs (thrust when hopping)
+            if (hop > 1.5) {
+                ctx.beginPath();
+                ctx.moveTo(bx - dir * sz * 0.8, by + sz * 0.4);
+                ctx.lineTo(bx - dir * sz * 1.5, by + sz * 0.8);
+                ctx.stroke();
+            }
+        } else if (a.type === 'lizard') {
+            // Low flat body + long tail
+            const scurry = Math.sin(timeSinceTrigger * 0.02) * 2;
+            const bx = a.x, by = baseY + scurry * 0.3;
+            // Body (flat ellipse)
+            ctx.beginPath();
+            ctx.ellipse(bx, by, sz * 1.3, sz * 0.35, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Head (triangle)
+            ctx.beginPath();
+            ctx.moveTo(bx + dir * sz * 1.3, by);
+            ctx.lineTo(bx + dir * sz * 2, by - sz * 0.2);
+            ctx.lineTo(bx + dir * sz * 2, by + sz * 0.2);
+            ctx.closePath();
+            ctx.fill();
+            // Tail (sinuous curve)
+            ctx.strokeStyle = 'rgba(30,25,20,0.5)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(bx - dir * sz * 1.3, by);
+            ctx.quadraticCurveTo(bx - dir * sz * 2.5, by + scurry, bx - dir * sz * 3.5, by + scurry * 0.5);
+            ctx.stroke();
+            // Legs (4 small lines)
+            ctx.beginPath();
+            ctx.moveTo(bx - sz * 0.5, by);
+            ctx.lineTo(bx - sz * 0.8, by + sz * 0.6);
+            ctx.moveTo(bx + sz * 0.5, by);
+            ctx.lineTo(bx + sz * 0.8, by + sz * 0.6);
+            ctx.stroke();
+        } else if (a.type === 'rat') {
+            // Small round body + thin tail
+            const scurry = Math.sin(timeSinceTrigger * 0.018) * 1.5;
+            const bx = a.x, by = baseY - Math.abs(scurry) * 0.5;
+            // Body
+            ctx.beginPath();
+            ctx.ellipse(bx, by, sz * 0.9, sz * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Head
+            ctx.beginPath();
+            ctx.arc(bx + dir * sz * 0.8, by - sz * 0.1, sz * 0.35, 0, Math.PI * 2);
+            ctx.fill();
+            // Tail (thin curved line)
+            ctx.strokeStyle = 'rgba(30,25,20,0.4)';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(bx - dir * sz * 0.9, by);
+            ctx.quadraticCurveTo(bx - dir * sz * 2, by - scurry, bx - dir * sz * 2.8, by + 1);
+            ctx.stroke();
+        } else if (a.type === 'spider') {
+            // Small body + 8 legs radiating out
+            const bx = a.x, by = baseY;
+            const legWiggle = Math.sin(timeSinceTrigger * 0.025) * 1.5;
+            // Body
+            ctx.beginPath();
+            ctx.arc(bx, by, sz * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+            // 8 legs (4 per side, alternating wiggle)
+            ctx.strokeStyle = 'rgba(30,25,20,0.5)';
+            ctx.lineWidth = 0.6;
+            for (let leg = 0; leg < 4; leg++) {
+                const angle = (leg * 0.4 + 0.3);
+                const wiggle = ((leg % 2 === 0) ? legWiggle : -legWiggle);
+                // Left leg
+                ctx.beginPath();
+                ctx.moveTo(bx, by);
+                ctx.lineTo(bx - Math.cos(angle) * sz * 1.8, by - Math.sin(angle) * sz * 1.2 + wiggle);
+                ctx.stroke();
+                // Right leg
+                ctx.beginPath();
+                ctx.moveTo(bx, by);
+                ctx.lineTo(bx + Math.cos(angle) * sz * 1.8, by - Math.sin(angle) * sz * 1.2 - wiggle);
+                ctx.stroke();
+            }
+        }
+    }
     ctx.restore();
 }
 
