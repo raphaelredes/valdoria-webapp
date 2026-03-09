@@ -195,7 +195,7 @@ const Dice3D = (() => {
         addEdgeWire(mesh, base);
         var numbers = [1, 2, 3, 4];
         var faces = facesFromTris(geo, 4);
-        addLabels(mesh, numbers, faces.centers, faces.normals, 0.72);
+        addLabels(mesh, numbers, faces.centers, faces.normals, 0.85);
         mesh.userData = { type: 'd4', numbers: numbers, normals: faces.normals };
         mesh.castShadow = true;
         return mesh;
@@ -379,6 +379,7 @@ const Dice3D = (() => {
     function getTargetQuaternion(mesh, resultValue) {
         var numbers = mesh.userData.numbers;
         var normals = mesh.userData.normals;
+        var dieType = mesh.userData.type;
         var faceIdx = numbers.indexOf(resultValue);
         if (faceIdx === -1) faceIdx = 0;
 
@@ -387,10 +388,16 @@ const Dice3D = (() => {
             normals[faceIdx].clone(),
             new THREE.Vector3(0, 0, 1)
         );
-        // Random twist around Z so it doesn't always look the same
+        // Twist around Z — d6/result use 90° snaps to keep edges aligned
+        var twistAngle;
+        if (dieType === 'd6' || dieType === 'result') {
+            twistAngle = Math.floor(Math.random() * 4) * (Math.PI / 2);
+        } else {
+            twistAngle = Math.random() * Math.PI * 2;
+        }
         var twistQ = new THREE.Quaternion().setFromAxisAngle(
             new THREE.Vector3(0, 0, 1),
-            Math.random() * Math.PI * 2
+            twistAngle
         );
         return twistQ.multiply(alignQ);
     }
@@ -420,6 +427,7 @@ const Dice3D = (() => {
             this._idleTime = 0;
             this._dieMesh = null;
             this._particlesEl = opts.particlesContainer || null;
+            this._timers = []; // track setInterval/setTimeout for cleanup
 
             // Multi-dice state
             this._multiMode = false;
