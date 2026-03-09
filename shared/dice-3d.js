@@ -488,6 +488,31 @@ const Dice3D = (() => {
             this._animate(performance.now());
         }
 
+        _trackTimeout(fn, ms) {
+            var self = this;
+            var id = setTimeout(function () {
+                self._timers = self._timers.filter(function (t) { return t.id !== id; });
+                if (!self._disposed) fn();
+            }, ms);
+            this._timers.push({ id: id, type: 'timeout' });
+            return id;
+        }
+
+        _trackInterval(fn, ms) {
+            var id = setInterval(fn, ms);
+            this._timers.push({ id: id, type: 'interval' });
+            return id;
+        }
+
+        _clearTimers() {
+            for (var i = 0; i < this._timers.length; i++) {
+                var t = this._timers[i];
+                if (t.type === 'interval') clearInterval(t.id);
+                else clearTimeout(t.id);
+            }
+            this._timers = [];
+        }
+
         _createMesh() {
             if (this._dieMesh) {
                 this._scene.remove(this._dieMesh);
@@ -582,7 +607,7 @@ const Dice3D = (() => {
                 this._keyLight.intensity = 3.0;
                 var self = this;
                 var flashI = 3.0;
-                var flashFade = setInterval(function () {
+                var flashFade = self._trackInterval(function () {
                     flashI -= 0.15;
                     if (flashI <= 1.2) {
                         self._keyLight.intensity = 1.2;
@@ -594,7 +619,7 @@ const Dice3D = (() => {
 
                 // Scale punch — brief enlarge on impact
                 mesh.scale.setScalar(1.12);
-                setTimeout(function () {
+                self._trackTimeout(function () {
                     if (self._dieMesh) self._dieMesh.scale.setScalar(1.0);
                 }, 120);
 
@@ -603,10 +628,10 @@ const Dice3D = (() => {
                 if (el) {
                     el.style.transition = 'transform 0.06s ease-out';
                     el.style.transform = 'translate(' + (Math.random() - 0.5) * 4 + 'px,' + (Math.random() - 0.5) * 4 + 'px)';
-                    setTimeout(function () {
+                    self._trackTimeout(function () {
                         el.style.transform = 'translate(' + (Math.random() - 0.5) * 2 + 'px,' + (Math.random() - 0.5) * 2 + 'px)';
                     }, 60);
-                    setTimeout(function () {
+                    self._trackTimeout(function () {
                         el.style.transition = 'transform 0.1s ease-out';
                         el.style.transform = '';
                     }, 140);
@@ -712,9 +737,9 @@ const Dice3D = (() => {
                         glow.position.set(0, 0.5, 1);
                         self._dieMesh.add(glow);
                         var intensity = 1.5;
-                        var fadeGlow = setInterval(function () {
+                        var fadeGlow = self._trackInterval(function () {
                             intensity -= 0.05;
-                            if (intensity <= 0) { self._dieMesh.remove(glow); clearInterval(fadeGlow); }
+                            if (intensity <= 0) { if (self._dieMesh) self._dieMesh.remove(glow); clearInterval(fadeGlow); }
                             else glow.intensity = intensity;
                         }, 50);
                     }
@@ -1018,11 +1043,29 @@ const Dice3D = (() => {
 
         dispose() {
             this._disposed = true;
+            this._clearTimers();
             if (this._animFrame) cancelAnimationFrame(this._animFrame);
-            if (this._dieMesh) this._scene.remove(this._dieMesh);
-            if (this._fusionMesh) this._scene.remove(this._fusionMesh);
-            for (var i = 0; i < this._multiMeshes.length; i++) this._scene.remove(this._multiMeshes[i]);
+
+            var self = this;
+            function disposeMesh(mesh) {
+                if (!mesh) return;
+                self._scene.remove(mesh);
+                mesh.traverse(function (child) {
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) {
+                        if (child.material.map) child.material.map.dispose();
+                        child.material.dispose();
+                    }
+                });
+            }
+
+            disposeMesh(this._dieMesh);
+            disposeMesh(this._fusionMesh);
+            for (var i = 0; i < this._multiMeshes.length; i++) disposeMesh(this._multiMeshes[i]);
             this._multiMeshes = [];
+            this._dieMesh = null;
+            this._fusionMesh = null;
+
             this._renderer.dispose();
             if (this._renderer.domElement.parentNode) {
                 this._renderer.domElement.parentNode.removeChild(this._renderer.domElement);
