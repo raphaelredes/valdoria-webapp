@@ -393,7 +393,7 @@ function _showCheckEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, pro
     setTimeout(() => {
         const fb = wrapper.querySelector('.dice-display-fallback');
         if (fb && r2 === null) {
-            fb.textContent = roll <= 1 ? 'Falha Crítica' : roll >= 20 ? 'Critico!' : roll;
+            fb.textContent = roll <= 1 ? 'Falha Crítica' : roll >= 20 ? 'Crítico!' : roll;
         }
         resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
@@ -1192,7 +1192,7 @@ function _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, ha
     setTimeout(() => {
         const fb = wrapper.querySelector('.dice-display-fallback');
         if (fb && r2 === null) {
-            fb.textContent = roll <= 1 ? 'Falha Crítica' : roll >= 20 ? 'Critico!' : roll;
+            fb.textContent = roll <= 1 ? 'Falha Crítica' : roll >= 20 ? 'Crítico!' : roll;
         }
         resultEl.textContent = success ? 'Resistiu!' : 'Falhou!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
