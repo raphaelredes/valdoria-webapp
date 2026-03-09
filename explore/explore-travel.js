@@ -586,7 +586,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const p = elapsed * 0.006;
     const bob = Math.sin(p * 2) * 1.0;
     const rN = Math.sin(p), rF = Math.sin(p + Math.PI);
-    const sw = 0.30;
+    const sw = 0.36;
     const lN = rN * sw, lF = rF * sw;
     const kN = rN < -0.1 ? -Math.pow(Math.abs(rN), 1.2) * 0.5 : 0;
     const kF = rF < -0.1 ? -Math.pow(Math.abs(rF), 1.2) * 0.5 : 0;
@@ -603,10 +603,10 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     // Colors — medieval palette
     const cTunic = '#5a4535', cTunicHi = '#6b5645';
     const cSkin = '#5e4a32', cSkinHi = '#665038';
-    const cPants = '#3a2a1e', cPantsHi = '#4a3a2e';
+    const cPants = '#4a3828', cPantsHi = '#5a4838';
     const cFar = '#443525', cFarHi = '#554535';
     const cSkinFar = '#4e3c24', cSkinFarHi = '#54422a';
-    const cPantsFar = '#2e2018', cPantsFarHi = '#3e3028';
+    const cPantsFar = '#3a2a1c', cPantsFarHi = '#4a3a2c';
 
     const hy = hdY + Math.sin(p * 2 - 0.3) * 0.5;
 
@@ -624,9 +624,9 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
         const sa = a + kb;
         const ankleX = kx + Math.sin(sa) * shinL;
         const ankleY = ky + Math.cos(sa) * shinL;
-        // Thigh
-        const tw1 = isFar ? 6 * s : 6.5 * s;
-        const tw2 = isFar ? 4.5 * s : 5 * s;
+        // Thigh (substantial)
+        const tw1 = isFar ? 6.5 * s : 7 * s;
+        const tw2 = isFar ? 5 * s : 5.5 * s;
         _taperedLimb(ctx, hipOx, hipY, kx, ky, tw1 * 0.5, tw2 * 0.5, pantsC, pantsHi);
         // Knee joint
         ctx.fillStyle = pantsC;
@@ -769,22 +769,16 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.beginPath(); ctx.arc(0, 0, headR, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
 
-    // === HOOD (dark, tight-fitting) ===
-    const hoodR = headR + 2 * s;
+    // === HAIR (tight to head, like a cap of dark hair) ===
+    const hairR = headR + 1 * s;
     ctx.fillStyle = '#1a1614';
     ctx.beginPath();
-    ctx.arc(0, hy - 1 * s, hoodR, -Math.PI * 0.12, -Math.PI + 0.12, true);
-    ctx.lineTo(-hoodR * 0.6, hy + headR * 0.5);
-    ctx.quadraticCurveTo(-hoodR * 0.15, hy + headR * 0.35, hoodR * 0.3, hy + headR * 0.25);
+    // Hair covers top and back of head, stops at ear level
+    ctx.arc(0, hy - 0.5 * s, hairR, -Math.PI * 0.05, -Math.PI + 0.25, true);
+    // Back of neck hairline
+    ctx.lineTo(-hairR * 0.5, hy + headR * 0.15);
     ctx.closePath();
     ctx.fill();
-
-    // Hood edge
-    ctx.strokeStyle = 'rgba(60,55,50,0.25)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.arc(0, hy - 1 * s, hoodR, -Math.PI * 0.12, -Math.PI + 0.12, true);
-    ctx.stroke();
 
     // Face shadow
     const faceShadow = ctx.createRadialGradient(headR * 0.15, hy, headR * 0.1, headR * 0.15, hy, headR * 0.75);
