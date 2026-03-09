@@ -91,6 +91,16 @@ function hideLoading() {
             el.removeAttribute('data-phase');
         }, 950);
     }, 150);
+
+    // Safety net: force-hide after 2s regardless of animation state
+    setTimeout(() => {
+        if (el.style.display !== 'none') {
+            console.warn('[GAME] Loading force-hidden after 2s safety net');
+            el.style.display = 'none';
+            el.classList.remove('exit-cinematic');
+            el.removeAttribute('data-phase');
+        }
+    }, 2000);
 }
 
 // ── Ring acceleration: lerp speed based on progress ──

@@ -15,13 +15,13 @@ const S = {
 };
 
 const DEBOUNCE_MS = 200;
-const RETRY_MAX = 4;
+const RETRY_MAX = 2;
 const RETRY_BASE_MS = 1000;
 const FETCH_TIMEOUT_MS = 12000; // 12s per fetch attempt (AbortController)
 const HEALTH_TIMEOUT_MS = 3000; // 3s timeout — fast fail for instant reconnect
 const HEALTH_RETRIES = 1;       // 1 retry only — fast fail for instant reconnect
 const HEALTH_RETRY_MS = 1000;   // 1s between retries
-const LOADING_TIMEOUT_MS = 25000; // 25s max loading screen before auto-error
+const LOADING_TIMEOUT_MS = 15000; // 15s max loading screen before auto-error
 const SCREEN_CACHE_KEY = 'valdoria_game_screen';
 const SCREEN_CACHE_TTL = 1800000; // 30 minutes
 
@@ -201,24 +201,30 @@ async function init() {
     const isReturn = params.get('return') === 'game';
     console.log('[GAME] Route: isReturn=' + isReturn + ' hasCharId=' + !!S.charId);
 
-    if (isReturn) {
-        // Returning from specialized WebApp — refresh state
-        console.log('[GAME] -> returnFromWebApp()');
-        returnFromWebApp();
-    } else if (S.charId) {
-        // Opening from character selection — use /start to activate char
-        console.log('[GAME] -> startGame() with charId=' + S.charId);
-        startGame();
-    } else {
-        // Try cached screen for instant render, then refresh from server
-        const cached = loadCachedScreen();
-        console.log('[GAME] -> fetchState() cached=' + !!cached);
-        if (cached) {
-            renderScreen(cached);
-            fetchState(true); // silent refresh in background
+    try {
+        if (isReturn) {
+            // Returning from specialized WebApp — refresh state
+            console.log('[GAME] -> returnFromWebApp()');
+            await returnFromWebApp();
+        } else if (S.charId) {
+            // Opening from character selection — use /start to activate char
+            console.log('[GAME] -> startGame() with charId=' + S.charId);
+            await startGame();
         } else {
-            fetchState(false);
+            // Try cached screen for instant render, then refresh from server
+            const cached = loadCachedScreen();
+            console.log('[GAME] -> fetchState() cached=' + !!cached);
+            if (cached) {
+                renderScreen(cached);
+                fetchState(true); // silent refresh in background
+            } else {
+                await fetchState(false);
+            }
         }
+    } catch (routeError) {
+        console.error('[GAME] Route error:', routeError);
+        hideLoading();
+        showError('Erro ao carregar o jogo. Feche e tente novamente.');
     }
 }
 
@@ -433,6 +439,8 @@ async function startGame() {
         // Other errors already handled by apiCall
     } else {
         console.error('[GAME] startGame() returned null/empty data');
+        // apiCall() already tried sendData for 401 — if we're still here, show error
+        showError('Não foi possível conectar ao servidor. Feche e tente novamente.');
     }
 }
 
