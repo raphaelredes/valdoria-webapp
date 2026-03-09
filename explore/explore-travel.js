@@ -4,23 +4,23 @@
 
 // Per-biome visual config
 const TRAVEL_CONFIG = {
-    forest:   { bg: ['#0d2e0d','#1a4a1a'], ground: '#2d3d1d', midColor: '#1a3a1a', farColor: '#0a2a0a', silhouette: 'conifers',   icon: '', horizonGlow: '196,149,58',  stars: false },
-    plains:   { bg: ['#3a3a18','#5a5a28'], ground: '#5a4a30', midColor: '#4a4a20', farColor: '#3a3a15', silhouette: 'hills',      icon: '', horizonGlow: '196,149,58',  stars: false },
-    swamp:    { bg: ['#1a2a1a','#2a3a2a'], ground: '#3a3a2a', midColor: '#2a3a25', farColor: '#1a2a18', silhouette: 'deadTrees',  icon: '', horizonGlow: '100,140,80',  stars: true },
-    cave:     { bg: ['#0a0a14','#1a1a2a'], ground: '#1a1a2a', midColor: '#15152a', farColor: '#0a0a18', silhouette: 'rocks',      icon: '', horizonGlow: '100,100,160', stars: true },
-    desert:   { bg: ['#6a5a30','#8a7a4a'], ground: '#8a7a4a', midColor: '#7a6a3a', farColor: '#5a4a28', silhouette: 'dunes',      icon: '', horizonGlow: '220,180,80',  stars: false },
-    mountain: { bg: ['#3a3a4a','#5a5a6a'], ground: '#5a4a3a', midColor: '#4a4a5a', farColor: '#2a2a3a', silhouette: 'peaks',      icon: '', horizonGlow: '160,160,200', stars: true },
-    snow:     { bg: ['#8a8a9a','#b0b8c0'], ground: '#c0c8d0', midColor: '#9a9aaa', farColor: '#7a7a8a', silhouette: 'peaks',      icon: '', horizonGlow: '140,180,220', stars: false },
-    volcanic: { bg: ['#2a1a0a','#3a2a1a'], ground: '#3a2a1a', midColor: '#3a2010', farColor: '#1a0a00', silhouette: 'rocks',      icon: '', horizonGlow: '255,100,30',  stars: true },
-    graveyard:{ bg: ['#1a1a20','#2a2a30'], ground: '#3a3a3a', midColor: '#252530', farColor: '#15151a', silhouette: 'tombstones', icon: '', horizonGlow: '120,120,160', stars: true },
+    forest:   { bg: ['#0d2e0d','#1a4a1a'], ground: '#2d3d1d', midColor: '#1a3a1a', farColor: '#0a2a0a', silhouette: 'conifers',   icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: true },
+    plains:   { bg: ['#3a3a18','#5a5a28'], ground: '#5a4a30', midColor: '#4a4a20', farColor: '#3a3a15', silhouette: 'hills',      icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: false },
+    swamp:    { bg: ['#1a2a1a','#2a3a2a'], ground: '#3a3a2a', midColor: '#2a3a25', farColor: '#1a2a18', silhouette: 'deadTrees',  icon: '', horizonGlow: '100,140,80',  stars: true,  celestial: 'moon', cloud: 'fog',   sway: false },
+    cave:     { bg: ['#0a0a14','#1a1a2a'], ground: '#1a1a2a', midColor: '#15152a', farColor: '#0a0a18', silhouette: 'rocks',      icon: '', horizonGlow: '100,100,160', stars: true,  celestial: null,   cloud: null,    sway: false },
+    desert:   { bg: ['#6a5a30','#8a7a4a'], ground: '#8a7a4a', midColor: '#7a6a3a', farColor: '#5a4a28', silhouette: 'dunes',      icon: '', horizonGlow: '220,180,80',  stars: false, celestial: 'sun',  cloud: null,    sway: false },
+    mountain: { bg: ['#3a3a4a','#5a5a6a'], ground: '#5a4a3a', midColor: '#4a4a5a', farColor: '#2a2a3a', silhouette: 'peaks',      icon: '', horizonGlow: '160,160,200', stars: true,  celestial: 'moon', cloud: 'thin',  sway: false },
+    snow:     { bg: ['#8a8a9a','#b0b8c0'], ground: '#c0c8d0', midColor: '#9a9aaa', farColor: '#7a7a8a', silhouette: 'peaks',      icon: '', horizonGlow: '140,180,220', stars: false, celestial: null,   cloud: 'heavy', sway: false },
+    volcanic: { bg: ['#2a1a0a','#3a2a1a'], ground: '#3a2a1a', midColor: '#3a2010', farColor: '#1a0a00', silhouette: 'rocks',      icon: '', horizonGlow: '255,100,30',  stars: true,  celestial: 'moon', cloud: 'smoke', sway: false },
+    graveyard:{ bg: ['#1a1a20','#2a2a30'], ground: '#3a3a3a', midColor: '#252530', farColor: '#15151a', silhouette: 'tombstones', icon: '', horizonGlow: '120,120,160', stars: true,  celestial: 'moon', cloud: 'dark',  sway: false },
     // Dungeon variants — darker, more menacing
-    dungeon_cave:     { bg: ['#050510','#0a0a18'], ground: '#0f0f1a', midColor: '#0a0a15', farColor: '#050508', silhouette: 'rocks',      icon: '', horizonGlow: '80,80,140',   stars: true },
-    dungeon_graveyard:{ bg: ['#0a0a10','#15151a'], ground: '#1a1a20', midColor: '#101018', farColor: '#08080c', silhouette: 'tombstones', icon: '', horizonGlow: '100,80,140',  stars: true },
-    dungeon_volcanic: { bg: ['#1a0a00','#2a1508'], ground: '#2a1a0a', midColor: '#200a00', farColor: '#100500', silhouette: 'rocks',      icon: '', horizonGlow: '255,60,0',    stars: true },
-    dungeon_forest:   { bg: ['#050a05','#0a150a'], ground: '#0a1a0a', midColor: '#081208', farColor: '#040a04', silhouette: 'conifers',   icon: '', horizonGlow: '60,100,60',   stars: true },
-    dungeon_swamp:    { bg: ['#0a100a','#151a15'], ground: '#1a1a15', midColor: '#121812', farColor: '#080a08', silhouette: 'deadTrees',  icon: '', horizonGlow: '80,100,60',   stars: true },
-    dungeon_mountain: { bg: ['#1a1a20','#2a2a35'], ground: '#2a2020', midColor: '#202030', farColor: '#151520', silhouette: 'peaks',      icon: '', horizonGlow: '120,100,160', stars: true },
-    dungeon_snow:     { bg: ['#4a4a55','#6a6a75'], ground: '#5a5a65', midColor: '#555560', farColor: '#404048', silhouette: 'peaks',      icon: '', horizonGlow: '140,150,180', stars: true },
+    dungeon_cave:     { bg: ['#050510','#0a0a18'], ground: '#0f0f1a', midColor: '#0a0a15', farColor: '#050508', silhouette: 'rocks',      icon: '', horizonGlow: '80,80,140',   stars: true,  celestial: null,   cloud: null,    sway: false },
+    dungeon_graveyard:{ bg: ['#0a0a10','#15151a'], ground: '#1a1a20', midColor: '#101018', farColor: '#08080c', silhouette: 'tombstones', icon: '', horizonGlow: '100,80,140',  stars: true,  celestial: 'moon', cloud: 'dark',  sway: false },
+    dungeon_volcanic: { bg: ['#1a0a00','#2a1508'], ground: '#2a1a0a', midColor: '#200a00', farColor: '#100500', silhouette: 'rocks',      icon: '', horizonGlow: '255,60,0',    stars: true,  celestial: null,   cloud: 'smoke', sway: false },
+    dungeon_forest:   { bg: ['#050a05','#0a150a'], ground: '#0a1a0a', midColor: '#081208', farColor: '#040a04', silhouette: 'conifers',   icon: '', horizonGlow: '60,100,60',   stars: true,  celestial: 'moon', cloud: 'fog',   sway: true },
+    dungeon_swamp:    { bg: ['#0a100a','#151a15'], ground: '#1a1a15', midColor: '#121812', farColor: '#080a08', silhouette: 'deadTrees',  icon: '', horizonGlow: '80,100,60',   stars: true,  celestial: null,   cloud: 'fog',   sway: false },
+    dungeon_mountain: { bg: ['#1a1a20','#2a2a35'], ground: '#2a2020', midColor: '#202030', farColor: '#151520', silhouette: 'peaks',      icon: '', horizonGlow: '120,100,160', stars: true,  celestial: 'moon', cloud: 'thin',  sway: false },
+    dungeon_snow:     { bg: ['#4a4a55','#6a6a75'], ground: '#5a5a65', midColor: '#555560', farColor: '#404048', silhouette: 'peaks',      icon: '', horizonGlow: '140,150,180', stars: true,  celestial: null,   cloud: 'heavy', sway: false },
 };
 
 // Particle configs per biome
@@ -93,6 +93,12 @@ function playTravelAnimation(biome, regionName, onComplete) {
     // Generate stars (static positions, reused every frame)
     const stars = cfg.stars ? _generateStars(w, h) : [];
 
+    // Generate shooting stars (1-2 during the trip, only on star biomes)
+    const shootingStars = cfg.stars ? _generateShootingStars(w, h) : [];
+
+    // Generate clouds
+    const clouds = cfg.cloud ? _generateClouds(w, h, cfg.cloud) : [];
+
     overlay.classList.add('active');
 
     let _done = false;
@@ -146,9 +152,20 @@ function playTravelAnimation(biome, regionName, onComplete) {
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
 
+        // Celestial body (moon/sun) — behind everything
+        if (cfg.celestial) {
+            _drawCelestial(ctx, w, h, elapsed, cfg.celestial);
+        }
+
         // Stars (twinkling, drawn before terrain so they peek through gaps)
         if (stars.length > 0) {
             _drawStars(ctx, stars, elapsed);
+            _drawShootingStars(ctx, shootingStars, elapsed);
+        }
+
+        // Clouds (slow parallax in the sky)
+        if (clouds.length > 0) {
+            _drawClouds(ctx, clouds, w, elapsed);
         }
 
         // Far terrain layer (very slow parallax — distant mountains/trees)
@@ -160,12 +177,12 @@ function playTravelAnimation(biome, regionName, onComplete) {
 
         // Mid terrain layer (medium parallax)
         const midOffset = elapsed * 0.035;
-        _drawTerrainLayer(ctx, midFeatures, w, h, 0.55, cfg.midColor, midOffset, cfg.silhouette);
+        _drawTerrainLayer(ctx, midFeatures, w, h, 0.55, cfg.midColor, midOffset, cfg.silhouette, cfg.sway ? elapsed : 0);
 
         // Near terrain layer (fast parallax — closest vegetation)
         const nearOffset = elapsed * 0.07;
         const nearColor = _blendColor(cfg.midColor, cfg.ground, 0.5);
-        _drawTerrainLayer(ctx, nearFeatures, w, h, 0.68, nearColor, nearOffset, cfg.silhouette);
+        _drawTerrainLayer(ctx, nearFeatures, w, h, 0.68, nearColor, nearOffset, cfg.silhouette, cfg.sway ? elapsed : 0);
 
         // Ground plane
         const groundY = h * 0.72;
@@ -189,12 +206,16 @@ function playTravelAnimation(biome, regionName, onComplete) {
         // Particles with depth-based parallax
         _updateTravelParticles(ctx, particles, pcfg, w, h, elapsed);
 
-        // Text (fade in first 400ms) — medieval fonts
+        // Text (fade in first 400ms, slow vertical drift upward)
         const textAlpha = Math.min(1, elapsed / 400);
-        _drawTravelText(ctx, regionName, cfg.icon, w, h, textAlpha);
+        const textDrift = progress * 18; // pixels upward over full duration
+        _drawTravelText(ctx, regionName, cfg.icon, w, h, textAlpha, textDrift);
 
         // Travel progress bar
         _drawProgressBar(ctx, w, h, progress);
+
+        // Cinematic vignette (darkened edges)
+        _drawVignette(ctx, w, h);
 
         // Restore zoom transform
         ctx.restore();
@@ -287,7 +308,7 @@ function _generateFeatures(type, canvasW, count) {
     return features;
 }
 
-function _drawTerrainLayer(ctx, features, w, h, yRatio, color, offset, silhouetteType) {
+function _drawTerrainLayer(ctx, features, w, h, yRatio, color, offset, silhouetteType, swayTime) {
     const baseY = h * yRatio;
     ctx.fillStyle = color;
 
@@ -298,7 +319,19 @@ function _drawTerrainLayer(ctx, features, w, h, yRatio, color, offset, silhouett
         const x = ((f.x - offset) % (w * 2) + w * 2) % (w * 2) - w * 0.3;
         const fh = f.height * h * 0.18;
         const fw = f.width * 40;
-        _drawSilhouette(ctx, silhouetteType, x, baseY, fh, fw, f.variant);
+        // Wind sway for conifers/deadTrees — gentle lean based on time
+        if (swayTime && (silhouetteType === 'conifers' || silhouetteType === 'deadTrees')) {
+            const lean = Math.sin(swayTime * 0.0015 + f.x * 0.01) * 3 * f.height;
+            ctx.save();
+            ctx.translate(x, baseY);
+            ctx.transform(1, 0, lean / (fh || 1), 1, 0, 0); // horizontal shear
+            _drawSilhouette(ctx, silhouetteType, 0, 0, fh, fw, f.variant);
+            ctx.restore();
+            // Reconnect path after restore — move to last tree base
+            ctx.moveTo(x + fw * 0.5, baseY);
+        } else {
+            _drawSilhouette(ctx, silhouetteType, x, baseY, fh, fw, f.variant);
+        }
     }
 
     ctx.lineTo(w + 10, baseY);
@@ -648,11 +681,13 @@ function _updateTravelParticles(ctx, particles, cfg, w, h, elapsed) {
 // TEXT OVERLAY
 // ═══════════════════════════════════════════
 
-function _drawTravelText(ctx, regionName, icon, w, h, alpha) {
+function _drawTravelText(ctx, regionName, icon, w, h, alpha, drift) {
     if (alpha <= 0) return;
 
     ctx.save();
     ctx.globalAlpha = alpha;
+    // Slow vertical drift upward (cinematic crawl)
+    ctx.translate(0, -drift);
 
     // Region name — medieval display font
     ctx.font = "700 22px 'Cinzel', 'MedievalSharp', serif";
@@ -694,6 +729,200 @@ function _drawTravelText(ctx, regionName, icon, w, h, alpha) {
     ctx.fillText('Viajando...', w / 2, h * 0.29);
 
     ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// CELESTIAL BODIES
+// ═══════════════════════════════════════════
+
+function _drawCelestial(ctx, w, h, elapsed, type) {
+    ctx.save();
+    // Slow drift rightward to simulate sky movement
+    const drift = elapsed * 0.003;
+
+    if (type === 'moon') {
+        const mx = w * 0.78 + drift, my = h * 0.1;
+        const r = 18;
+        // Moon glow
+        const glow = ctx.createRadialGradient(mx, my, r * 0.5, mx, my, r * 4);
+        glow.addColorStop(0, 'rgba(200,210,230,0.12)');
+        glow.addColorStop(0.5, 'rgba(180,190,210,0.04)');
+        glow.addColorStop(1, 'rgba(180,190,210,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(mx - r * 4, my - r * 4, r * 8, r * 8);
+        // Moon disc
+        ctx.fillStyle = 'rgba(220,225,240,0.9)';
+        ctx.beginPath();
+        ctx.arc(mx, my, r, 0, Math.PI * 2);
+        ctx.fill();
+        // Crescent shadow (overlapping darker circle)
+        ctx.fillStyle = 'rgba(15,15,25,0.92)';
+        ctx.beginPath();
+        ctx.arc(mx + r * 0.45, my - r * 0.15, r * 0.85, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (type === 'sun') {
+        const sx = w * 0.8 + drift, sy = h * 0.12;
+        const r = 16;
+        // Sun glow (warm, larger)
+        const glow = ctx.createRadialGradient(sx, sy, r * 0.3, sx, sy, r * 5);
+        glow.addColorStop(0, 'rgba(255,220,120,0.18)');
+        glow.addColorStop(0.3, 'rgba(255,200,80,0.08)');
+        glow.addColorStop(0.7, 'rgba(255,180,60,0.02)');
+        glow.addColorStop(1, 'rgba(255,180,60,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(sx - r * 5, sy - r * 5, r * 10, r * 10);
+        // Sun disc
+        ctx.fillStyle = 'rgba(255,230,150,0.85)';
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fill();
+        // Inner bright core
+        ctx.fillStyle = 'rgba(255,245,200,0.5)';
+        ctx.beginPath();
+        ctx.arc(sx, sy, r * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// SHOOTING STARS
+// ═══════════════════════════════════════════
+
+function _generateShootingStars(w, h) {
+    const count = 1 + Math.floor(Math.random() * 2); // 1-2
+    const stars = [];
+    for (let i = 0; i < count; i++) {
+        stars.push({
+            startX: w * 0.2 + Math.random() * w * 0.6,
+            startY: Math.random() * h * 0.25,
+            angle: 0.4 + Math.random() * 0.4, // 23-46 degrees downward
+            speed: 280 + Math.random() * 120,
+            length: 40 + Math.random() * 30,
+            triggerTime: 800 + Math.random() * 2200, // when it appears (ms)
+            duration: 350 + Math.random() * 200,
+        });
+    }
+    return stars;
+}
+
+function _drawShootingStars(ctx, shootingStars, elapsed) {
+    for (const s of shootingStars) {
+        const t = elapsed - s.triggerTime;
+        if (t < 0 || t > s.duration) continue;
+
+        const progress = t / s.duration;
+        const alpha = progress < 0.3 ? progress / 0.3 : 1 - ((progress - 0.3) / 0.7);
+        const dist = progress * s.speed;
+        const dx = Math.cos(s.angle) * dist;
+        const dy = Math.sin(s.angle) * dist;
+        const headX = s.startX + dx;
+        const headY = s.startY + dy;
+        const tailX = headX - Math.cos(s.angle) * s.length;
+        const tailY = headY - Math.sin(s.angle) * s.length;
+
+        const grad = ctx.createLinearGradient(tailX, tailY, headX, headY);
+        grad.addColorStop(0, `rgba(255,255,240,0)`);
+        grad.addColorStop(0.7, `rgba(255,255,240,${alpha * 0.4})`);
+        grad.addColorStop(1, `rgba(255,255,255,${alpha * 0.9})`);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(headX, headY);
+        ctx.stroke();
+
+        // Bright head dot
+        ctx.fillStyle = `rgba(255,255,255,${alpha * 0.8})`;
+        ctx.beginPath();
+        ctx.arc(headX, headY, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+
+// ═══════════════════════════════════════════
+// CLOUDS
+// ═══════════════════════════════════════════
+
+function _generateClouds(w, h, type) {
+    const clouds = [];
+    let count, yRange, alphaBase, sizeBase;
+
+    switch (type) {
+        case 'thin':    count = 3; yRange = [0.05, 0.2];  alphaBase = 0.06; sizeBase = 60;  break;
+        case 'heavy':   count = 5; yRange = [0.03, 0.25]; alphaBase = 0.12; sizeBase = 80;  break;
+        case 'dark':    count = 4; yRange = [0.05, 0.22]; alphaBase = 0.10; sizeBase = 70;  break;
+        case 'fog':     count = 5; yRange = [0.20, 0.45]; alphaBase = 0.07; sizeBase = 100; break;
+        case 'smoke':   count = 4; yRange = [0.10, 0.35]; alphaBase = 0.10; sizeBase = 70;  break;
+        default:        count = 3; yRange = [0.05, 0.2];  alphaBase = 0.06; sizeBase = 60;  break;
+    }
+
+    for (let i = 0; i < count; i++) {
+        const depth = 0.3 + Math.random() * 0.7; // parallax depth
+        clouds.push({
+            x: Math.random() * w * 1.5 - w * 0.25,
+            y: h * (yRange[0] + Math.random() * (yRange[1] - yRange[0])),
+            w: sizeBase + Math.random() * sizeBase * 0.8,
+            h: 8 + Math.random() * 12,
+            alpha: alphaBase + Math.random() * alphaBase * 0.5,
+            depth: depth,
+            type: type,
+        });
+    }
+    return clouds;
+}
+
+function _drawClouds(ctx, clouds, canvasW, elapsed) {
+    ctx.save();
+    for (const c of clouds) {
+        const speed = 0.008 * c.depth;
+        const cx = ((c.x - elapsed * speed) % (canvasW + c.w * 2)) ;
+        // Wrap around
+        const drawX = cx < -c.w ? cx + canvasW + c.w * 2 : cx;
+
+        let color;
+        if (c.type === 'smoke') {
+            color = `rgba(80,40,20,${c.alpha})`;
+        } else if (c.type === 'dark') {
+            color = `rgba(30,30,40,${c.alpha})`;
+        } else if (c.type === 'fog') {
+            color = `rgba(140,150,130,${c.alpha})`;
+        } else {
+            color = `rgba(200,200,210,${c.alpha})`;
+        }
+
+        ctx.fillStyle = color;
+        // Cloud shape: multiple overlapping ellipses
+        ctx.beginPath();
+        ctx.ellipse(drawX, c.y, c.w * 0.5, c.h, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(drawX - c.w * 0.2, c.y + c.h * 0.3, c.w * 0.35, c.h * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(drawX + c.w * 0.25, c.y - c.h * 0.2, c.w * 0.3, c.h * 0.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+
+// ═══════════════════════════════════════════
+// VIGNETTE
+// ═══════════════════════════════════════════
+
+function _drawVignette(ctx, w, h) {
+    const cx = w / 2, cy = h / 2;
+    const outerR = Math.sqrt(cx * cx + cy * cy);
+    const grad = ctx.createRadialGradient(cx, cy, outerR * 0.45, cx, cy, outerR);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.7, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.35)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
 }
 
 

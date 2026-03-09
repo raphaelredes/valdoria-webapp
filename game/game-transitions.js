@@ -31,6 +31,24 @@ const _WEBAPP_LOC_LABELS = {
     levelup:  { icon: '⭐', text: 'Preparando evolução...' },
 };
 
+// Detect WebApp target from URL (mirrors backend _detect_webapp_target)
+function _detect_webapp_target_js(url) {
+    const u = url.toLowerCase();
+    if (u.includes('/combat/') || u.includes('/arena/')) return 'combat';
+    if (u.includes('/explore/')) return 'explore';
+    if (u.includes('/inventory/')) return 'inventory';
+    if (u.includes('/levelup/')) return 'levelup';
+    if (u.includes('/market/')) return 'market';
+    if (u.includes('/navigate/')) return 'navigate';
+    if (u.includes('/character_creator/')) return 'character_creator';
+    if (u.includes('/dice/')) return 'dice';
+    if (u.includes('/workstation/') || u.includes('/crafting/')) return 'workstation';
+    if (u.includes('/pix/')) return 'pix';
+    if (u.includes('/prologue/')) return 'prologue';
+    if (u.includes('/game/')) return 'game';
+    return 'unknown';
+}
+
 function handleTransition(transition) {
     if (!transition) { console.warn('[GAME] handleTransition() called with null transition'); return; }
     if (!transition.url) { console.warn('[GAME] handleTransition() missing url:', JSON.stringify(transition)); S.transitioning = false; return; }
