@@ -1666,14 +1666,14 @@ async function sendAction(actionData) {
             _showActionLoading(false);
             _actionSent = false;
             console.error('[COMBAT] API sendAction error', e);
-            const msg = e.status === 401 ? 'Sessão expirada.'
+            const msg = (e.status === 401 || e.status === 403) ? 'Sessão expirada.'
                 : e.status === 429 ? 'Muitas ações. Aguarde um momento.'
                     : 'Erro de conexão. Tente novamente.';
             showError(msg);
             // Don't poll immediately on rate-limit; wait 5s before resuming
             if (e.status === 429) {
                 setTimeout(() => startPolling(), 5000);
-            } else if (e.status !== 401) {
+            } else if (e.status !== 401 && e.status !== 403) {
                 startPolling();
             }
         }

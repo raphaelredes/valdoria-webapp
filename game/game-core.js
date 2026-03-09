@@ -382,20 +382,21 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                 continue;
             }
 
-            if (resp.status === 401) {
-                _clog(`API ${endpoint} → 401 SESSION EXPIRED`);
-                console.error('[GAME] Session expired (401) for', endpoint);
+            if (resp.status === 401 || resp.status === 403) {
+                const reason = resp.status === 401 ? 'session_expired' : 'invalid_init_data';
+                _clog(`API ${endpoint} → ${resp.status} ${reason.toUpperCase()}`);
+                console.error('[GAME]', reason, `(${resp.status}) for`, endpoint);
                 // Auto-close and notify bot to show menu (user doesn't need to do anything)
                 try {
                     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.sendData) {
                         Telegram.WebApp.sendData(JSON.stringify({
                             action: 'webapp_error_close',
                             webapp: 'GAME',
-                            reason: 'session_expired',
+                            reason,
                         }));
                         return null; // sendData auto-closes
                     }
-                } catch (e) { console.warn('[GAME] sendData failed on 401:', e); }
+                } catch (e) { console.warn('[GAME] sendData failed on ' + resp.status + ':', e); }
                 showError('Sessão expirada. Feche e selecione seu personagem novamente.');
                 return null;
             }
