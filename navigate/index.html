@@ -472,32 +472,19 @@
             pointer-events: none;
         }
 
-        /* ═══ IDLE PAUSE — Suspend decorative animations after 30s inactivity ═══ */
-        body.map-idle .player-marker,
-        body.map-idle .loc-node.explored,
-        body.map-idle .loc-node.known_mapped,
-        body.map-idle .fog-cloud,
+        /* ═══ IDLE PAUSE — Suspend remaining decorative animations after 30s inactivity ═══ */
         body.map-idle .first-visit-ring,
         body.map-idle .current-pulse-ring,
         body.map-idle .compass-needle {
             animation-play-state: paused !important;
         }
 
-        /* ═══ PLAYER MARKER — Banner sway ═══ */
-        @keyframes bannerBob {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-2px); }
-        }
-
+        /* ═══ PLAYER MARKER — Static (flag animate handles motion) ═══ */
         .player-marker {
-            animation: bannerBob 3s ease-in-out infinite;
+            /* No CSS animation — SVG SMIL <animate> on the flag is sufficient */
         }
 
-        /* ═══ LOCATION NODES — Float, hover, shake ═══ */
-        @keyframes locFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-2px); }
-        }
+        /* ═══ LOCATION NODES — Hover + shake only (no infinite float) ═══ */
         @keyframes locShake {
             0%, 100% { transform: translateX(0); }
             20% { transform: translateX(-2px); }
@@ -506,15 +493,8 @@
             80% { transform: translateX(1px); }
         }
 
-        .loc-node.explored, .loc-node.known_mapped {
-            animation: locFloat 4s ease-in-out infinite;
-        }
-        .loc-node.explored:nth-child(odd) { animation-delay: -1s; }
-        .loc-node.explored:nth-child(3n) { animation-delay: -2.5s; }
-
         .loc-node.explored:hover, .loc-node.known_mapped:hover {
             opacity: 0.7;
-            animation: none;
         }
         .loc-node.frontier:active, .loc-node.known_unmapped:not([style*="cursor"]):active {
             animation: locShake 0.3s ease;
@@ -733,25 +713,9 @@
             }
         }
 
-        /* ═══ FOG PARTICLES ═══ */
+        /* ═══ FOG PARTICLES — Static (no infinite animation to save GPU) ═══ */
         .fog-cloud {
-            animation: fogDrift 8s ease-in-out infinite alternate;
-        }
-
-        @keyframes fogDrift {
-            0% {
-                transform: translate(-5px, -2px);
-                opacity: 0.05;
-            }
-
-            50% {
-                opacity: 0.11;
-            }
-
-            100% {
-                transform: translate(5px, 2px);
-                opacity: 0.05;
-            }
+            /* Static fog — random positions set in JS provide visual variety */
         }
 
         /* ═══ DECORATIVE MAP TEXT ═══ */

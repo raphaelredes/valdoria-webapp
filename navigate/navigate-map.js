@@ -630,9 +630,25 @@ function _updateScaleBar() {
     if (ticks) ticks.style.width = BAR_PX + 'px';
 }
 
+let _panZoomInitialized = false;
 function setupPanZoom() {
     const vp = document.getElementById('map-viewport');
     const wr = document.getElementById('map-wrapper');
+    // Guard: only bind listeners once (renderMap may be called multiple times via refresh)
+    if (_panZoomInitialized) {
+        // Just recalc zoom index and apply current transform
+        let bestDist = Infinity;
+        for (let i = 0; i < ZOOM_LEVELS.length; i++) {
+            const d = Math.abs(S.zoom - ZOOM_LEVELS[i].zoom);
+            if (d < bestDist) { bestDist = d; _zoomIdx = i; }
+        }
+        S.zoom = ZOOM_LEVELS[_zoomIdx].zoom;
+        _updateScaleBar();
+        wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
+        if (typeof window._zoomBtnUpdate === 'function') window._zoomBtnUpdate();
+        return;
+    }
+    _panZoomInitialized = true;
     let pan = false, moved = false, sx = 0, sy = 0, scx = 0, scy = 0, ipd = 0, iIdx = 0;
     // Velocity tracking for inertia
     let _velX = 0, _velY = 0, _lastMoveT = 0, _lastMoveX = 0, _lastMoveY = 0;
