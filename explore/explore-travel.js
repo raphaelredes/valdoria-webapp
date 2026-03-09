@@ -555,8 +555,10 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     const legAngleNear = rawNear * hipSwing;
     const legAngleFar  = rawFar  * hipSwing;
     // Knee bends on BACK leg (push-off phase: angle < 0)
-    const kneeBendNear = rawNear < -0.1 ? Math.pow(Math.abs(rawNear), 1.3) * 0.85 : 0;
-    const kneeBendFar  = rawFar  < -0.1 ? Math.pow(Math.abs(rawFar),  1.3) * 0.85 : 0;
+    // NEGATIVE kneeBend = shin goes BACK+UP (human knee folds behind, lifting foot)
+    // POSITIVE would make shin kick forward = alien/bird knee (WRONG!)
+    const kneeBendNear = rawNear < -0.1 ? -Math.pow(Math.abs(rawNear), 1.2) * 0.9 : 0;
+    const kneeBendFar  = rawFar  < -0.1 ? -Math.pow(Math.abs(rawFar),  1.2) * 0.9 : 0;
 
     // ── Arms counter-swing ──
     const armSwingNear = Math.sin(walkPhase + Math.PI + 0.15) * 0.38;
@@ -627,10 +629,12 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
             ctx.fillStyle = cBootSole;
             ctx.fillRect(ankleX - 4 * s, ankleY + footH - 1.5 * s, footW, 1.5 * s);
         } else {
-            // Lifted — angled slightly
+            // Lifted boot — toe points down, foot angled as leg lifts behind
             ctx.save();
             ctx.translate(ankleX, ankleY);
-            ctx.rotate(kneeBend * 0.4);
+            // kneeBend is negative for back leg, so abs gives positive rotation
+            // Toe drops and foot angles naturally as the leg swings back
+            ctx.rotate(Math.abs(kneeBend) * 0.6);
             ctx.fillRect(-3 * s, 0, footW * 0.9, footH * 0.85);
             ctx.fillStyle = cBootSole;
             ctx.fillRect(-3 * s, footH * 0.85 - 1.5 * s, footW * 0.9, 1.5 * s);
