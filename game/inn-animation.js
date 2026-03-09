@@ -172,7 +172,6 @@ function _nightBar(phase, total) {
 // ─── Floating Particles ───
 function _createParticles(container, tier) {
     container.innerHTML = '';
-    // Stars: 12-18 depending on tier
     const starCount = tier === 'wealthy' ? 18 : (tier === 'modest' ? 15 : 10);
     for (let i = 0; i < starCount; i++) {
         const p = document.createElement('div');
@@ -183,7 +182,6 @@ function _createParticles(container, tier) {
         p.style.setProperty('--delay', (Math.random() * 3) + 's');
         container.appendChild(p);
     }
-    // Embers: 4-8 warm drifting dots
     const emberCount = tier === 'poor' ? 3 : (tier === 'wealthy' ? 8 : 5);
     for (let i = 0; i < emberCount; i++) {
         const p = document.createElement('div');
@@ -194,7 +192,6 @@ function _createParticles(container, tier) {
         p.style.setProperty('--delay', (Math.random() * 5) + 's');
         container.appendChild(p);
     }
-    // Fireflies: wealthy only
     if (tier === 'wealthy') {
         for (let i = 0; i < 5; i++) {
             const p = document.createElement('div');
@@ -208,8 +205,7 @@ function _createParticles(container, tier) {
     }
 }
 
-// ─── Smooth Recovery Bars (HTML/CSS with animated fill) ───
-// Bars are created with width:0, then animated to target via requestAnimationFrame
+// ─── Smooth Recovery Bars ───
 function _barHTML(emoji, current, max, type, isFull, sizeClass) {
     const pct = max > 0 ? Math.round((current / max) * 100) : 0;
     const fullClass = isFull ? ' full' : '';
@@ -222,7 +218,6 @@ function _barHTML(emoji, current, max, type, isFull, sizeClass) {
 }
 
 function _recoveryHTML(data, pct) {
-    // Use final_hp/final_mp for interpolation (poor tier: final < max)
     const finalHp = data.final_hp !== undefined ? data.final_hp : data.max_hp;
     const finalMp = data.final_mp !== undefined ? data.final_mp : data.max_mp;
     const hp = Math.min(Math.round(data.start_hp + (finalHp - data.start_hp) * pct), data.max_hp);
@@ -233,7 +228,6 @@ function _recoveryHTML(data, pct) {
     let html = _barHTML('❤️', hp, data.max_hp, 'hp', isFull) +
                _barHTML(resEmoji, mp, data.max_mp, 'mp', isFull);
 
-    // Ally recovery bars
     if (data.allies && data.allies.length > 0) {
         html += '<div class="inn-allies-divider">─ ◆ GRUPO ◆ ─</div>';
         for (const a of data.allies) {
@@ -253,7 +247,6 @@ function _recoveryHTML(data, pct) {
     return html;
 }
 
-// Animate bar fills with stagger (HP first, then MP 200ms later)
 function _animateBarFills(container) {
     requestAnimationFrame(() => {
         const fills = container.querySelectorAll('.inn-bar-fill[data-target]');
@@ -265,10 +258,9 @@ function _animateBarFills(container) {
     });
 }
 
-// Force-restart a CSS animation on an element
 function _restartAnimation(el, animName) {
     el.style.animation = 'none';
-    el.offsetHeight; // trigger reflow
+    el.offsetHeight;
     el.style.animation = '';
 }
 
@@ -283,7 +275,6 @@ function _buildFrames(data) {
         delay: _calcInnDelay(f.lines, f.category),
     }));
 
-    // Insert dream frame (all tiers — poor gets a rougher dream)
     if (data.dream) {
         const dreamConfig = {
             poor: {
@@ -316,7 +307,6 @@ function _buildFrames(data) {
         frames.splice(frames.length - 1, 0, dreamFrame);
     }
 
-    // Insert ally event frame
     if (data.ally_event) {
         const ae = data.ally_event;
         const allyLines = [ae.text];
@@ -336,6 +326,7 @@ function _buildFrames(data) {
 }
 
 // ─── Main Animation Function ───
+// Resolves with { skipped: boolean } so caller can decide on dream insight
 function playInnAnimation(data, onDone) {
     const overlay = document.getElementById('inn-overlay');
     const frameEl = document.getElementById('inn-frame');
@@ -349,18 +340,15 @@ function playInnAnimation(data, onDone) {
 
     if (!overlay || !frameEl) {
         console.error('[INN] Overlay elements not found');
-        onDone();
+        onDone({ skipped: true });
         return;
     }
 
     let frames = _buildFrames(data);
-    // Veteran skip: players who rested 15+ times see only last 3 frames
     const restCount = data.rest_count || 0;
-    if (restCount > 15 && frames.length > 3) {
-        frames = frames.slice(-3);
-    }
     const totalFrames = frames.length;
     let _done = false;
+    let _skipped = false;
     let _frameTimer = null;
 
     // Haptic on start
@@ -370,43 +358,45 @@ function playInnAnimation(data, onDone) {
         }
     } catch (e) { /* */ }
 
-    const finish = () => {
+    const finish = (wasSkipped) => {
         if (_done) return;
         _done = true;
+        _skipped = wasSkipped;
         if (_frameTimer) clearTimeout(_frameTimer);
         skipBtn.onclick = null;
         skipBtn.style.display = 'none';
 
-        // Fade out overlay
         overlay.classList.add('hiding');
         setTimeout(() => {
             overlay.style.display = 'none';
             overlay.classList.remove('hiding');
             frameEl.classList.remove('active');
             titleEl.classList.remove('shimmer');
-            // Clean up particles
             const particlesEl = overlay.querySelector('.inn-particles');
             if (particlesEl) particlesEl.innerHTML = '';
-            // Restore bottom panel
             const panel = document.getElementById('bottom-panel');
             if (panel) panel.style.display = '';
-            onDone();
+            onDone({ skipped: _skipped });
         }, 400);
     };
 
-    // Show skip button after 2.5s
+    // Skip button: after 3+ rests show immediately, otherwise after 2.5s
+    const skipDelay = restCount >= 3 ? 300 : 2500;
+    // Show dream insight hint on skip button if available
+    const hasDreamInsight = data.dream_insight && data.dream;
+    const skipLabel = hasDreamInsight ? 'Pular (sem bônus do sonho)' : 'Acordar »';
     setTimeout(() => {
         if (!_done) {
+            skipBtn.textContent = skipLabel;
             skipBtn.style.display = '';
-            skipBtn.onclick = finish;
+            skipBtn.onclick = () => finish(true);
         }
-    }, 2500);
+    }, skipDelay);
 
     // Show overlay
     overlay.style.display = '';
     overlay.classList.remove('hiding');
 
-    // Create particles container if needed
     let particlesEl = overlay.querySelector('.inn-particles');
     if (!particlesEl) {
         particlesEl = document.createElement('div');
@@ -415,30 +405,24 @@ function playInnAnimation(data, onDone) {
     }
     _createParticles(particlesEl, data.tier || 'modest');
 
-    // Hide bottom panel
     const panelEl = document.getElementById('bottom-panel');
     if (panelEl) panelEl.style.display = 'none';
 
     function showFrame(idx) {
         if (_done || idx >= totalFrames) {
-            if (!_done) finish();
+            if (!_done) finish(false);
             return;
         }
         const frame = frames[idx];
 
-        // Fade out current frame
         frameEl.classList.remove('active');
 
         setTimeout(() => {
             if (_done) return;
 
-            // Update background (smooth CSS transition handles the blend)
             overlay.style.background = frame.bg;
-
-            // Night progress bar
             nightBarEl.textContent = _nightBar(idx, totalFrames);
 
-            // Title + shimmer on final frame
             titleEl.textContent = frame.title;
             if (frame.recovery >= 1.0) {
                 titleEl.classList.add('shimmer');
@@ -446,21 +430,17 @@ function playInnAnimation(data, onDone) {
                 titleEl.classList.remove('shimmer');
             }
 
-            // Icons (separate from divider now)
             iconsEl.textContent = frame.icons;
 
-            // Divider — hidden during dream frames for cleaner look
             if (dividerEl) {
                 dividerEl.style.display = frame.isDream ? 'none' : '';
             }
 
-            // Narration text — dream lines get ethereal styling
             const lineClass = frame.isDream ? 'inn-line dream' : 'inn-line';
             textEl.innerHTML = frame.lines.map(l =>
                 '<div class="' + lineClass + '">' + l + '</div>'
             ).join('');
 
-            // Recovery bars — set width:0 first, then animate after paint
             if (frame.recovery > 0) {
                 recoveryEl.innerHTML = _recoveryHTML(data, frame.recovery);
                 recoveryEl.style.display = '';
@@ -470,10 +450,8 @@ function playInnAnimation(data, onDone) {
                 recoveryEl.style.display = 'none';
             }
 
-            // Fade in frame
             frameEl.classList.add('active');
 
-            // Granular haptic feedback
             try {
                 if (window.Telegram && Telegram.WebApp) {
                     const hf = Telegram.WebApp.HapticFeedback;
@@ -487,11 +465,9 @@ function playInnAnimation(data, onDone) {
                 }
             } catch (e) { /* */ }
 
-            // Schedule next frame
             _frameTimer = setTimeout(() => showFrame(idx + 1), frame.delay);
         }, idx === 0 ? 50 : 500);
     }
 
-    // Start animation
     showFrame(0);
 }

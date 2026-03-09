@@ -519,7 +519,14 @@ async function doAction(callbackData) {
     // Inn sleep animation — play cinematic overlay before rendering result
     if (data.inn_animation && typeof playInnAnimation === 'function') {
         hideLocationTransition();
-        await new Promise(resolve => playInnAnimation(data.inn_animation, resolve));
+        const result = await new Promise(resolve => playInnAnimation(data.inn_animation, resolve));
+        // Apply dream insight buff if player watched full animation (didn't skip)
+        if (!result?.skipped && data.inn_animation.dream_insight) {
+            try {
+                const diRes = await apiCall('/api/game/action', { cb: 'inn_dream_insight' });
+                if (diRes?.toast) showToast(diRes.toast);
+            } catch(e) { console.warn('[GAME] dream insight action failed', e); }
+        }
         if (data.text || data.buttons) {
             renderScreen(data);
         }
