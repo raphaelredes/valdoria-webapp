@@ -2643,6 +2643,12 @@ async function initAsync() {
     S.apiBase = params.get('api') || '';
     S.uid = params.get('uid') || '';
 
+    if (S.apiBase && window.ApiDiscovery) {
+        ApiDiscovery.init(S.apiBase, function(newUrl) {
+            S.apiBase = newUrl;
+        });
+    }
+
     // ── Shared Error Reporter ──
     if (window.ValdoriaErrors) {
         ValdoriaErrors.init({

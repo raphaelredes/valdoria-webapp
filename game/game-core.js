@@ -44,6 +44,16 @@ async function init() {
     S.uid = parseInt(params.get('uid') || '0', 10);
     S.charId = params.get('char') || '';  // Character ID from menu (for char switch)
 
+    // Periodic auto-discovery: detect tunnel URL changes during session
+    if (S.apiBase && window.ApiDiscovery) {
+        ApiDiscovery.init(S.apiBase, function(newUrl) {
+            S.apiBase = newUrl;
+            if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) {
+                ValdoriaErrors.updateApiBase(newUrl);
+            }
+        });
+    }
+
     console.log('[GAME] Params: token=' + (S.token ? S.token.substring(0, 8) + '...' : 'MISSING') +
         ' api=' + (S.apiBase || 'MISSING') +
         ' uid=' + S.uid +

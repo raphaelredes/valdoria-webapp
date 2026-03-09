@@ -138,6 +138,13 @@ class CombatAPI {
 }
 const api = isApiMode ? new CombatAPI(apiBase, token, userId) : null;
 
+// Auto-discover new tunnel URL if current one dies
+if (apiBase && window.ApiDiscovery) {
+    ApiDiscovery.init(apiBase, function(newUrl) {
+        if (api) api.baseUrl = newUrl;
+    });
+}
+
 function b64Decode(str) {
     const std = str.replace(/-/g, '+').replace(/_/g, '/');
     const pad = std.length % 4;
