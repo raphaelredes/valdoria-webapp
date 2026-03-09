@@ -506,148 +506,6 @@ function _drawGroundDetails(ctx, biome, w, h, groundY, elapsed) {
 // WALKING FIGURE
 // ═══════════════════════════════════════════
 
-// Hood physics state (verlet cloth simulation)
-const _hood = { pts: null, prevAnchorX: 0, prevAnchorY: 0 };
-const HOOD_N = 10;
-const HOOD_SEG = 7;  // segment length in px
-
-function _updateHood(anchorX, anchorY, wind, bob) {
-    // Initialize chain on first call
-    if (!_hood.pts) {
-        _hood.pts = [];
-        for (let i = 0; i < HOOD_N; i++) {
-            const x = anchorX - i * HOOD_SEG * 0.8;
-            const y = anchorY + i * HOOD_SEG * 0.3;
-            _hood.pts.push({ x, y, ox: x, oy: y });
-        }
-        _hood.prevAnchorX = anchorX;
-        _hood.prevAnchorY = anchorY;
-    }
-
-    // Head movement delta → inertia on free points
-    const hdx = anchorX - _hood.prevAnchorX;
-    const hdy = anchorY - _hood.prevAnchorY;
-    _hood.prevAnchorX = anchorX;
-    _hood.prevAnchorY = anchorY;
-
-    // Pin anchor (back-top of head)
-    const p0 = _hood.pts[0];
-    p0.x = anchorX; p0.y = anchorY;
-    p0.ox = anchorX; p0.oy = anchorY;
-
-    // Verlet integration for free points
-    for (let i = 1; i < HOOD_N; i++) {
-        const pt = _hood.pts[i];
-        let vx = (pt.x - pt.ox) * 0.965; // damping
-        let vy = (pt.y - pt.oy) * 0.965;
-        pt.ox = pt.x;
-        pt.oy = pt.y;
-        // Gravity (pulls hood down)
-        vy += 0.12;
-        // Wind (same as cape/environment wind)
-        vx += wind * 0.025;
-        // Inertia from walking (opposite to head movement)
-        vx -= hdx * 0.4;
-        vy -= hdy * 0.15;
-        // Tiny turbulence for organic feel
-        vx += (Math.random() - 0.5) * 0.15;
-        pt.x += vx;
-        pt.y += vy;
-    }
-
-    // Distance constraints (Jakobsen method)
-    for (let iter = 0; iter < 6; iter++) {
-        for (let i = 0; i < HOOD_N - 1; i++) {
-            const a = _hood.pts[i], b = _hood.pts[i + 1];
-            const dx = b.x - a.x, dy = b.y - a.y;
-            const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
-            const diff = (dist - HOOD_SEG) / dist;
-            if (i === 0) {
-                // Anchor is fixed — only move b
-                b.x -= dx * diff;
-                b.y -= dy * diff;
-            } else {
-                const h = diff * 0.5;
-                a.x += dx * h; a.y += dy * h;
-                b.x -= dx * h; b.y -= dy * h;
-            }
-        }
-    }
-
-    return _hood.pts;
-}
-
-function _drawHood(ctx, headCX, headCY, headR, pts, s) {
-    const cHood = '#4a2030';
-    const cHoodDark = '#3a1525';
-
-    // --- Static hood covering head (top + back arc) ---
-    ctx.fillStyle = cHood;
-    ctx.beginPath();
-    // Start at forehead
-    ctx.moveTo(headCX + headR * 0.5, headCY);
-    // Arc over the top of head
-    ctx.arc(headCX, headCY, headR + 2 * s, -0.3, -Math.PI + 0.1, true);
-    // Down to first chain point
-    ctx.lineTo(pts[0].x, pts[0].y);
-    // Back up to the ear area
-    ctx.lineTo(headCX - headR * 0.2, headCY + headR * 0.3);
-    ctx.closePath();
-    ctx.fill();
-
-    // --- Physics-driven hood tail (tapered shape along chain) ---
-    if (pts.length < 3) return;
-
-    // Outer edge (wider)
-    const outerPts = [];
-    for (let i = 0; i < pts.length; i++) {
-        const t = i / (pts.length - 1); // 0→1
-        const width = (1 - t * 0.7) * 5 * s; // tapers from 10px to 3px
-        // Perpendicular offset
-        const nx = (i < pts.length - 1) ? pts[i + 1].y - pts[i].y : pts[i].y - pts[i - 1].y;
-        const ny = (i < pts.length - 1) ? -(pts[i + 1].x - pts[i].x) : -(pts[i].x - pts[i - 1].x);
-        const len = Math.sqrt(nx * nx + ny * ny) || 1;
-        outerPts.push({ x: pts[i].x + (nx / len) * width, y: pts[i].y + (ny / len) * width });
-    }
-
-    // Inner edge (narrower)
-    const innerPts = [];
-    for (let i = 0; i < pts.length; i++) {
-        const t = i / (pts.length - 1);
-        const width = (1 - t * 0.7) * 2.5 * s; // narrower inner edge
-        const nx = (i < pts.length - 1) ? pts[i + 1].y - pts[i].y : pts[i].y - pts[i - 1].y;
-        const ny = (i < pts.length - 1) ? -(pts[i + 1].x - pts[i].x) : -(pts[i].x - pts[i - 1].x);
-        const len = Math.sqrt(nx * nx + ny * ny) || 1;
-        innerPts.push({ x: pts[i].x - (nx / len) * width, y: pts[i].y - (ny / len) * width });
-    }
-
-    // Draw tail as filled shape
-    ctx.fillStyle = cHood;
-    ctx.beginPath();
-    ctx.moveTo(outerPts[0].x, outerPts[0].y);
-    for (let i = 1; i < outerPts.length; i++) {
-        ctx.lineTo(outerPts[i].x, outerPts[i].y);
-    }
-    // Tip
-    ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
-    // Inner edge (reverse)
-    for (let i = innerPts.length - 1; i >= 0; i--) {
-        ctx.lineTo(innerPts[i].x, innerPts[i].y);
-    }
-    ctx.closePath();
-    ctx.fill();
-
-    // Darker inner stripe for depth
-    ctx.fillStyle = cHoodDark;
-    ctx.globalAlpha = 0.4;
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-    for (let i = innerPts.length - 1; i >= 0; i--) ctx.lineTo(innerPts[i].x, innerPts[i].y);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalAlpha = 1.0;
-}
 
 // Helper: draw a tapered limb segment with bezier contour + gradient
 function _taperedLimb(ctx, x1, y1, x2, y2, w1, w2, baseColor, highlightColor) {
@@ -745,11 +603,6 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     // Head Y (with micro-bob)
     const hy = hdY + Math.sin(p * 2 - 0.3) * 0.5;
 
-    // Update hood physics
-    const hoodAnchorX = -headR * 0.65;
-    const hoodAnchorY = hy - headR * 0.55;
-    const hoodPts = _updateHood(hoodAnchorX, hoodAnchorY, wind, bob);
-
     // === SHADOW ===
     ctx.fillStyle = 'rgba(0,0,0,0.15)';
     ctx.beginPath();
@@ -805,9 +658,6 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.closePath();
     ctx.fill();
     ctx.globalAlpha = 1.0;
-
-    // === HOOD TAIL (behind head, in front of cape) ===
-    _drawHood(ctx, 0, hy, headR, hoodPts, s);
 
     // === FAR LEG ===
     leg(lF, kF, cF, cFhi, true);
@@ -926,7 +776,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.beginPath();
     ctx.moveTo(headR * 0.55, hy + headR * 0.15);
     ctx.arc(0, hy, headR + 2 * s, -0.15, -Math.PI + 0.15, true);
-    ctx.lineTo(hoodPts[0].x, hoodPts[0].y);
+    ctx.lineTo(-headR * 0.7, hy + headR * 0.1);
     ctx.lineTo(-headR * 0.15, hy + headR * 0.35);
     ctx.closePath();
     ctx.fill();

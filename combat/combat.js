@@ -44,6 +44,7 @@ let _audioCtx = null;           // Feature 8: Web Audio (lazy init)
 let _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
 let _currentPositions = null;   // Feature 9: combat positions
 let _cinematicInProgress = false; // Blocks re-render during action cinematic
+let _overlayOpen = false;          // Blocks poll re-render while target/skill overlay is open
 let _lastRenderedPhase = null;  // Phase transition tracking
 let _hitStreak = 0;               // P2-G: Combo streak counter
 let _initDice3d = null;           // THREE.js Dice3D instance for initiative screen
@@ -928,8 +929,8 @@ function startPolling() {
             const oldHp = hpHash(currentState);
 
             if (newPh !== oldPh || newRn !== oldRn || newTc !== oldTc || newHp !== oldHp) {
-                // Don't update during cinematic or initiative animation
-                if (_cinematicInProgress || _initAnimationInProgress) {
+                // Don't update during cinematic, initiative animation, or overlay open
+                if (_cinematicInProgress || _initAnimationInProgress || _overlayOpen) {
                     _pollInterval = setTimeout(poll, _getPollInterval());
                     return;
                 }
@@ -1929,6 +1930,7 @@ function showSkillPicker(skills, enemies, actionType) {
     actionType = actionType || 'skill';
     const panel = document.getElementById('skillPanel');
     const overlay = document.getElementById('skillOverlay');
+    _overlayOpen = true;
     const title = actionType === 'bonus_use' ? '⚡ Ação Bônus' : 'Habilidades';
     let html = `<div class="skill-panel-title">${title}</div>`;
     skills.forEach(sk => {
@@ -1956,7 +1958,7 @@ function showSkillPicker(skills, enemies, actionType) {
             haptic('light');
             const skillId = item.dataset.skillId;
             const tg = item.dataset.tg || 'single';
-            overlay.classList.remove('active');
+            _closeOverlay(overlay);
             // AOE/self skills skip target picker
             if (tg === 'all' || tg === 'self') {
                 sendAction({ type: actionType, skill_id: skillId, target: 0 });
@@ -1968,18 +1970,22 @@ function showSkillPicker(skills, enemies, actionType) {
         });
     });
     document.getElementById('skillClose').addEventListener('click', () => {
-        overlay.classList.remove('active');
+        _closeOverlay(overlay);
     });
-    // Use onclick to avoid accumulating duplicate listeners on persistent overlay
-    overlay.onclick = (e) => {
-        if (e.target === overlay) overlay.classList.remove('active');
-    };
+    // Backdrop tap: only dismiss via Cancel button — prevents accidental closes on mobile
+    overlay.onclick = null;
 }
 
 // ─── TARGET PICKER ───
+function _closeOverlay(overlay) {
+    overlay.classList.remove('active');
+    _overlayOpen = false;
+}
+
 function showTargetPicker(enemies, actionType, skillId) {
     const panel = document.getElementById('targetPanel');
     const overlay = document.getElementById('targetOverlay');
+    _overlayOpen = true;
     let html = '<div class="skill-panel-title">Escolher Alvo</div>';
     enemies.forEach((e, i) => {
         const pct = e.mhp > 0 ? Math.round((e.hp / e.mhp) * 100) : 0;
@@ -2016,7 +2022,7 @@ function showTargetPicker(enemies, actionType, skillId) {
         item.addEventListener('click', () => {
             haptic('medium');
             const target = parseInt(item.dataset.target);
-            overlay.classList.remove('active');
+            _closeOverlay(overlay);
             if (actionType === 'skill' || actionType === 'bonus_use') {
                 sendAction({ type: actionType, skill_id: skillId, target: target });
             } else {
@@ -2025,12 +2031,10 @@ function showTargetPicker(enemies, actionType, skillId) {
         });
     });
     document.getElementById('targetClose').addEventListener('click', () => {
-        overlay.classList.remove('active');
+        _closeOverlay(overlay);
     });
-    // Use onclick to avoid accumulating duplicate listeners on persistent overlay
-    overlay.onclick = (e) => {
-        if (e.target === overlay) overlay.classList.remove('active');
-    };
+    // Backdrop tap: only dismiss via Cancel button — prevents accidental closes on mobile
+    overlay.onclick = null;
 }
 
 // ─── ITEM PICKER ───
@@ -2056,13 +2060,14 @@ function showItemPicker(items, enemies, allies) {
     }
     html += '<div class="skill-close" id="itemClose">Cancelar</div>';
     panel.innerHTML = html;
+    _overlayOpen = true;
     overlay.classList.add('active');
 
     panel.querySelectorAll('.item-entry').forEach(el => {
         el.addEventListener('click', () => {
             const itemName = el.dataset.item;
             const isThrown = el.dataset.thrown === 'true';
-            overlay.classList.remove('active');
+            _closeOverlay(overlay);
             if (isThrown) {
                 // Thrown items always target enemy — target -2 means first enemy
                 sendAction({ type: 'use_item', item_key: itemName, item_target: -2 });
@@ -2075,16 +2080,15 @@ function showItemPicker(items, enemies, allies) {
     const fullInvBtn = document.getElementById('itemFullInventory');
     if (fullInvBtn) {
         fullInvBtn.addEventListener('click', () => {
-            overlay.classList.remove('active');
+            _closeOverlay(overlay);
             transitionToInventoryFromArena();
         });
     }
     document.getElementById('itemClose').addEventListener('click', () => {
-        overlay.classList.remove('active');
+        _closeOverlay(overlay);
     });
-    overlay.onclick = (e) => {
-        if (e.target === overlay) overlay.classList.remove('active');
-    };
+    // Backdrop tap: only dismiss via Cancel button — prevents accidental closes on mobile
+    overlay.onclick = null;
 }
 
 // ═══════════════════════════════════════════════════
