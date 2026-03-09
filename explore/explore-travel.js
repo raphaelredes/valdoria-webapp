@@ -793,7 +793,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
 
     // === HOOD ===
     const hoodR = headR + 2.5 * s;
-    ctx.fillStyle = '#4a2030';
+    ctx.fillStyle = '#1a1614';
     ctx.beginPath();
     // Hood wraps over top and sides, open at face
     ctx.arc(0, hy - 1 * s, hoodR, -Math.PI * 0.15, -Math.PI + 0.15, true);
@@ -805,7 +805,7 @@ function _drawWalkingFigure(ctx, cx, groundY, frame, elapsed) {
     ctx.fill();
 
     // Hood edge highlight
-    ctx.strokeStyle = 'rgba(120,60,60,0.3)';
+    ctx.strokeStyle = 'rgba(60,55,50,0.3)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(0, hy - 1 * s, hoodR, -Math.PI * 0.15, -Math.PI + 0.15, true);
