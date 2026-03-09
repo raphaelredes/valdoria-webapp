@@ -892,42 +892,64 @@ function drawMinimap() {
     const cellH = h / ROWS;
     const biome = S.biome || 'forest';
     const colors = BIOME_COLORS[biome] || BIOME_COLORS.forest;
+    const vis = S.visibility || 3;
 
-    // Draw grid cells
+    // Draw grid cells with distance-based fog
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             const key = `${col},${row}`;
-            if (S.fogState[key] === 'hidden') continue;
+            const fog = S.fogState[key];
+            if (!fog || fog === 'hidden') continue;
 
             const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
             const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
             const color = colors[baseTile] || colors['.'] || '#3a3a3a';
 
-            if (S.fogState[key] === 'dim') ctx.globalAlpha = 0.4;
+            const dist = hexDist(col, row, S.playerCol, S.playerRow);
+            let alpha;
+            if (fog === 'dim') {
+                alpha = 0.08;
+            } else if (dist <= 1) {
+                alpha = 1;
+            } else if (dist <= vis) {
+                alpha = 0.7 - (dist - 1) * 0.15;
+            } else {
+                alpha = 0.12;
+            }
+
+            ctx.globalAlpha = alpha;
             ctx.fillStyle = color;
             ctx.fillRect(col * cellW, row * cellH, cellW + 0.5, cellH + 0.5);
-            ctx.globalAlpha = 1;
         }
     }
+    ctx.globalAlpha = 1;
 
-    // Exit marker (green)
-    if (S.fogState[`${S.exitCol},${S.exitRow}`] === 'visible') {
+    // Exit marker (green) — only if within visible range
+    const exitKey = `${S.exitCol},${S.exitRow}`;
+    const exitDist = hexDist(S.exitCol, S.exitRow, S.playerCol, S.playerRow);
+    if (S.fogState[exitKey] === 'visible' && exitDist <= vis + 1) {
+        ctx.globalAlpha = exitDist <= vis ? 0.9 : 0.4;
         ctx.fillStyle = '#4ad680';
         ctx.beginPath();
         ctx.arc(S.exitCol * cellW + cellW / 2, S.exitRow * cellH + cellH / 2, 2.5, 0, Math.PI * 2);
         ctx.fill();
+        ctx.globalAlpha = 1;
     }
 
-    // POI markers (white)
+    // POI markers (white) — only if within visible range
     for (const poi of S.pois) {
         if (S.poisResolved.has(poi.id)) continue;
         const key = `${poi.col},${poi.row}`;
         if (S.fogState[key] !== 'visible') continue;
+        const poiDist = hexDist(poi.col, poi.row, S.playerCol, S.playerRow);
+        if (poiDist > vis + 1) continue;
+        ctx.globalAlpha = poiDist <= vis ? 0.9 : 0.4;
         ctx.fillStyle = '#fff';
         ctx.beginPath();
         ctx.arc(poi.col * cellW + cellW / 2, poi.row * cellH + cellH / 2, 1.5, 0, Math.PI * 2);
         ctx.fill();
     }
+    ctx.globalAlpha = 1;
 
     // Player marker (gold with glow)
     const px = S.playerCol * cellW + cellW / 2;
