@@ -1003,7 +1003,8 @@ function _showFeedbackOverlay(data) {
             if (typeof apiCall === 'function') {
                 apiCall('/api/game/action', {
                     cb: 'fb_survey_no',
-                    user_id: S.userId
+                    user_id: S.userId,
+                    rating: _fbSelectedRating
                 }).catch(function(e) {
                     console.error('[GAME] Feedback save error:', e);
                 });
