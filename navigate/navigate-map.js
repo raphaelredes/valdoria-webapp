@@ -158,54 +158,100 @@ function computeFogState(forceRecompute) {
 
 
 // ===============================================================
-// FOG OVERLAY — Semi-transparent hex polygons over unexplored areas
+// FOG OVERLAY — Smooth radial mask (organic edges, no hex artifacts)
+// Uses SVG <mask> with radial gradients for a cinematic reveal effect.
+// Each explored/known location creates a soft light circle in the mask;
+// the rest is covered by a dark overlay.
 // ===============================================================
 
 function _renderFogOverlay(svg, fogState) {
+    // Skip fog entirely if all locations are explored (no visual artifact)
+    const allExplored = Object.values(fogState).every(s => s === 'explored');
+    if (allExplored) return;
+
     const fG = _el('g', { class: 'fog-overlay', 'pointer-events': 'none' });
-    const knownSet = new Set(S.knownLocs);
-    const discoveredSet = new Set(S.discoveredLocs || []);
+    const defs = svg.querySelector('defs') || svg.appendChild(_el('defs'));
 
-    // Batch fog hexes by opacity bucket for fewer DOM nodes
-    const buckets = { dark: '', medium: '', light: '', frontier: '' };
+    // --- Build mask: white = show fog overlay, black = reveal map ---
+    // SVG mask: white pixels make the masked element visible (fog shows),
+    // black pixels make it invisible (map shows through).
+    const mask = _el('mask', { id: 'fog-mask', maskUnits: 'userSpaceOnUse',
+        x: 0, y: 0, width: SVG_W, height: SVG_H });
 
-    for (let row = 0; row <= GRID_ROWS + 1; row++) {
-        for (let col = 0; col <= GRID_COLS + 1; col++) {
-            const { x, y } = hexToPixel(col, row);
-            if (!_pointInLandmass(x, y)) continue;
+    // Start with full white (fog covers everything)
+    mask.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: '#fff' }));
 
-            const vis = _hexVisibility(col, row, knownSet, discoveredSet);
-            if (vis >= 0.8) continue; // Fully explored, no fog
+    // For each known location, paint a dark circle (punches through the fog)
+    let gradIdx = 0;
+    for (const [locId, state] of Object.entries(fogState)) {
+        if (state === 'hidden') continue;
+        const coords = LOCATION_COORDS[locId];
+        if (!coords) continue;
+        const { x, y } = hexToPixel(coords.col, coords.row);
 
-            // Compute fog opacity (inverted visibility)
-            let fogOp;
-            if (vis <= 0) fogOp = 0.92;      // Hidden: near-opaque
-            else if (vis <= 0.15) fogOp = 0.7; // Frontier
-            else if (vis <= 0.4) fogOp = 0.45; // Known unmapped
-            else fogOp = 0.25;                  // Partially visible
-
-            // Build flat-top hex polygon points
-            const pts = [];
-            for (let i = 0; i < 6; i++) {
-                const a = (Math.PI / 3) * i;
-                pts.push(`${x + HEX_RADIUS * Math.cos(a)},${y + HEX_RADIUS * Math.sin(a)}`);
-            }
-
-            // Bucket by opacity range
-            const bucket = fogOp >= 0.8 ? 'dark' : fogOp >= 0.6 ? 'medium' : fogOp >= 0.35 ? 'light' : 'frontier';
-            buckets[bucket] += `M${pts.join('L')}Z `;
+        // Reveal radius and center darkness depend on exploration state
+        // Large radii ensure adjacent explored locations overlap for seamless reveal
+        let radius, centerDark, midStop;
+        if (state === 'explored') {
+            radius = HEX_RADIUS * 9;   // very wide overlap for seamless reveal
+            centerDark = '#000';
+            midStop = '65%';
+        } else if (state === 'known_mapped') {
+            radius = HEX_RADIUS * 6;
+            centerDark = '#111';
+            midStop = '55%';
+        } else if (state === 'known_unmapped') {
+            radius = HEX_RADIUS * 4;
+            centerDark = '#333';
+            midStop = '45%';
+        } else { // frontier
+            radius = HEX_RADIUS * 2.5;
+            centerDark = '#666';
+            midStop = '30%';
         }
+
+        // Radial gradient: dark center (reveal) -> white edge (fog)
+        const gId = `fog-g${gradIdx++}`;
+        const grad = _el('radialGradient', {
+            id: gId, cx: x, cy: y, r: radius,
+            gradientUnits: 'userSpaceOnUse',
+        });
+        grad.appendChild(_el('stop', { offset: '0%', 'stop-color': centerDark }));
+        grad.appendChild(_el('stop', { offset: midStop, 'stop-color': centerDark }));
+        grad.appendChild(_el('stop', { offset: '100%', 'stop-color': '#fff' }));
+        defs.appendChild(grad);
+
+        // Paint the gradient circle onto the mask (dark = reveal)
+        mask.appendChild(_el('circle', {
+            cx: x, cy: y, r: radius,
+            fill: `url(#${gId})`,
+        }));
     }
 
-    // Render each bucket as a single compound path
-    const opMap = { dark: 0.92, medium: 0.7, light: 0.45, frontier: 0.25 };
-    for (const [bucket, d] of Object.entries(buckets)) {
-        if (!d) continue;
+    defs.appendChild(mask);
+
+    // --- Dark overlay with mask: visible where fog should be ---
+    fG.appendChild(_el('rect', {
+        x: 0, y: 0, width: SVG_W, height: SVG_H,
+        fill: MAP_BG, 'fill-opacity': '0.9',
+        mask: 'url(#fog-mask)',
+        'clip-path': 'url(#land-clip)',
+    }));
+
+    // Subtle noise dots on fogged areas (medieval texture)
+    let noiseD = '';
+    for (let i = 0; i < 60; i++) {
+        const nx = srand(i * 73 + 11) * SVG_W;
+        const ny = srand(i * 79 + 17) * SVG_H;
+        if (!_pointInLandmass(nx, ny)) continue;
+        const cr = 0.8 + srand(i * 83) * 1.2;
+        noiseD += `M${nx-cr},${ny}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
+    }
+    if (noiseD) {
         fG.appendChild(_el('path', {
-            d: d.trim(),
-            fill: MAP_BG,
-            'fill-opacity': opMap[bucket],
-            stroke: 'none',
+            d: noiseD, fill: INK_DARK, 'fill-opacity': '0.12',
+            mask: 'url(#fog-mask)',
+            'clip-path': 'url(#land-clip)',
         }));
     }
 
