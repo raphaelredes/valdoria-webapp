@@ -51,7 +51,9 @@ let S = {
     dmIntro: '',
     dangerLevel: 1,
     randomEncounters: [],
-    conditions: [],          // Active conditions: [{type, stepsLeft}]
+    conditions: [],          // Active conditions
+    exhaustion: 0,           // D&D 5e exhaustion level (0-6)
+    _stepsWithoutRest: 0,    // Steps since last rest (forced march tracking): [{type, stepsLeft}]
     _hazardsTriggered: new Set(),  // Hexes that already triggered hazards
     _watchUsed: false,             // Watch activity: first encounter advantage consumed
     _flavorSteps: 0,         // Steps since last flavor event
@@ -96,6 +98,8 @@ function saveState() {
             bd: S._bossDefeated || false,
             cau: S._campAmbushUsed || false,
             wu: S._watchUsed || false,
+            ex: S.exhaustion || 0,
+            swr: S._stepsWithoutRest || 0,
             tp: S.travelPace || 'normal',
             ta: S.travelActivity || null,
             ih: Array.from(S.interactedHexes || new Set()),
@@ -154,6 +158,8 @@ function restoreState() {
         S._bossDefeated = snap.bd || false;
         S._campAmbushUsed = snap.cau || false;
         S._watchUsed = snap.wu || false;
+        S.exhaustion = snap.ex || 0;
+        S._stepsWithoutRest = snap.swr || 0;
         return true;
     } catch (e) {
         console.error('[EXPLORE] restoreState:', e);
@@ -216,6 +222,8 @@ function loadMapData(data) {
     S._bossDefeated = false;
     S._campAmbushUsed = false;
     S._watchUsed = false;
+    S.exhaustion = 0;
+    S._stepsWithoutRest = 0;
 
     // Parse POIs (with Passive Perception filter for hidden POIs)
     const allPois = (data.p || []).map(p => ({
@@ -279,6 +287,8 @@ function loadMapData(data) {
     // Initialize bottom bar
     initBottomBar();
     if (typeof _updateActivityBadge === 'function') _updateActivityBadge();
+    if (typeof updateExhaustionHUD === 'function') updateExhaustionHUD();
+    if (typeof updateCompass === 'function') updateCompass();
 
     // Initialize atmosphere (day/night + weather)
     if (typeof updateAtmosphere === 'function') updateAtmosphere();
@@ -470,6 +480,21 @@ function tickConditions() {
     });
     updateConditionHUD();
 
+    // Forced march exhaustion (D&D PHB Ch.8: CON save DC 10+1 per extra step after 15)
+    S._stepsWithoutRest = (S._stepsWithoutRest || 0) + 1;
+    if (S._stepsWithoutRest > 15) {
+        const extraSteps = S._stepsWithoutRest - 15;
+        const dc = 10 + extraSteps;
+        const conMod = getAbilityMod('cn');
+        const { roll } = rollD20('normal');
+        if (roll + conMod < dc) {
+            addExhaustion(1, 'Marcha for\u00e7ada');
+        }
+    }
+
+    // Update compass
+    if (typeof updateCompass === 'function') updateCompass();
+
     // Check death after poison tick
     if (typeof checkDeath === 'function') checkDeath();
 }
@@ -494,6 +519,108 @@ function updateConditionHUD() {
         tag.textContent = `${labels[c.type] || c.type} (${c.stepsLeft})`;
         bar.appendChild(tag);
     }
+}
+
+// ═══════════════════════════════════════════════════════
+// EXHAUSTION SYSTEM (D&D 5e PHB — 6 levels)
+// ═══════════════════════════════════════════════════════
+const EXHAUSTION_EFFECTS = [
+    '',
+    'Desvantagem em testes de habilidade',
+    'Velocidade reduzida pela metade',
+    'Desvantagem em saves e ataques',
+    'HP m\u00e1ximo reduzido pela metade',
+    'Velocidade = 0',
+    'Morte',
+];
+
+function addExhaustion(levels, source) {
+    const prev = S.exhaustion || 0;
+    S.exhaustion = Math.min(6, prev + levels);
+    if (S.exhaustion > prev) {
+        updateExhaustionHUD();
+        const effect = EXHAUSTION_EFFECTS[S.exhaustion] || '';
+        showTerrainToast(`\u26a0\ufe0f Exaust\u00e3o ${S.exhaustion}: ${effect}`, 'condition');
+        if (source) showTerrainToast(`Causa: ${source}`, 'info');
+        // Level 5: can't move
+        if (S.exhaustion >= 5) {
+            showTerrainToast('Voc\u00ea n\u00e3o consegue mais andar! Descanse imediatamente.', 'damage');
+        }
+        // Level 6: death
+        if (S.exhaustion >= 6 && typeof checkDeath === 'function') {
+            S.hpChange = -(S.charData ? S.charData.mh : 999);
+            checkDeath();
+        }
+        saveState();
+    }
+}
+
+function removeExhaustion(levels) {
+    S.exhaustion = Math.max(0, (S.exhaustion || 0) - levels);
+    updateExhaustionHUD();
+    saveState();
+}
+
+function resetStepsWithoutRest() {
+    S._stepsWithoutRest = 0;
+    saveState();
+}
+
+function getExhaustionPenalty() {
+    const lvl = S.exhaustion || 0;
+    return {
+        abilityDisadvantage: lvl >= 1,  // Disadvantage on ability checks
+        halfSpeed: lvl >= 2,            // Speed halved
+        saveDisadvantage: lvl >= 3,     // Disadvantage on saves + attacks
+        halfMaxHP: lvl >= 4,            // Max HP halved
+        speedZero: lvl >= 5,            // Can't move
+        death: lvl >= 6,               // Death
+    };
+}
+
+function updateExhaustionHUD() {
+    const hud = document.getElementById('exhaustion-hud');
+    if (!hud) return;
+    const lvl = S.exhaustion || 0;
+    if (lvl === 0) {
+        hud.style.display = 'none';
+        return;
+    }
+    hud.style.display = 'flex';
+    document.getElementById('exh-label').textContent = `Exaust\u00e3o ${lvl}`;
+    const pips = hud.querySelectorAll('.exh-pip');
+    pips.forEach((pip, i) => {
+        pip.classList.remove('filled', 'critical');
+        if (i < lvl) {
+            pip.classList.add('filled');
+            if (i >= 3) pip.classList.add('critical'); // Level 4+ = critical
+        }
+    });
+}
+
+// ═══════════════════════════════════════════════════════
+// EXIT COMPASS
+// ═══════════════════════════════════════════════════════
+function updateCompass() {
+    const el = document.getElementById('exit-compass');
+    if (!el) return;
+    if (S.exitCol == null || S.exitRow == null) { el.style.display = 'none'; return; }
+
+    el.style.display = 'flex';
+    const dx = S.exitCol - S.playerCol;
+    const dy = S.exitRow - S.playerRow;
+    const dist = typeof hexDist === 'function'
+        ? hexDist(S.playerCol, S.playerRow, S.exitCol, S.exitRow)
+        : Math.round(Math.sqrt(dx*dx + dy*dy));
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI) - 90; // -90 because arrow points up
+
+    const arrow = document.getElementById('compass-arrow');
+    const distEl = document.getElementById('compass-dist');
+    arrow.style.transform = `rotate(${angle}deg)`;
+    arrow.style.setProperty('--compass-angle', angle + 'deg');
+    distEl.textContent = dist + 'h';
+
+    el.classList.toggle('nearby', dist <= 3);
 }
 
 // ═══════════════════════════════════════════════════════

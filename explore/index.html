@@ -325,7 +325,21 @@
     <div id="map-viewport">
         <canvas id="iso-map"></canvas>
         <div id="weather-overlay" class="weather-overlay"></div>
+        <div id="exit-compass" class="exit-compass" style="display:none">
+            <div class="compass-arrow" id="compass-arrow"></div>
+            <div class="compass-dist" id="compass-dist"></div>
+        </div>
         <div id="terrain-tooltip" class="terrain-tooltip"></div>
+    </div>
+
+    <!-- Exhaustion HUD (D&D 5e PHB) -->
+    <div id="exhaustion-hud" class="exhaustion-hud" style="display:none">
+        <span class="exh-icon">⚠️</span>
+        <span class="exh-label" id="exh-label">Exaustão 0</span>
+        <div class="exh-pips" id="exh-pips">
+            <span class="exh-pip"></span><span class="exh-pip"></span><span class="exh-pip"></span>
+            <span class="exh-pip"></span><span class="exh-pip"></span><span class="exh-pip"></span>
+        </div>
     </div>
 
     <!-- Bottom Bar -->

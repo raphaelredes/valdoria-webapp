@@ -156,6 +156,9 @@ function renderFrame(timestamp) {
     // 11. Minimap (only redraws when dirty)
     drawMinimap();
 
+    // 12.5 Movement cost preview for adjacent hexes
+    _drawMoveCostIndicators(timestamp);
+
     // 12. Smooth camera follow during movement
     if (isMoving()) {
         _smoothCameraFollow();
@@ -1091,4 +1094,71 @@ function updateAtmosphere() {
     S._nightEncounterBonus = phase === 'night' ? 0.10 : 0;
     S._weatherVisibilityMod = wCode === 'f' ? -1 : 0;
     S._weatherEncounterMod = wCode === 't' ? 0.05 : 0;
+}
+
+
+// ═══════════════════════════════════════════════════════
+// MOVEMENT COST PREVIEW (on adjacent hexes)
+// ═══════════════════════════════════════════════════════
+function _drawMoveCostIndicators(timestamp) {
+    if (!S.grid || !S.grid.length) return;
+    if (typeof isMoving === 'function' && isMoving()) return;
+
+    const neighbors = typeof getNeighbors === 'function' ? getNeighbors(S.playerCol, S.playerRow) : [];
+    const IMPASSABLE_SET = typeof IMPASSABLE !== 'undefined' ? IMPASSABLE : new Set(['#', 'W', 'L']);
+    const DIFFICULT_SET = typeof DIFFICULT !== 'undefined' ? DIFFICULT : new Set(['~', 'S', 'r', 'H']);
+
+    for (const [c, r] of neighbors) {
+        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
+        const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
+        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        if (IMPASSABLE_SET.has(baseTile)) continue;
+
+        const isDifficult = DIFFICULT_SET.has(baseTile);
+        const cost = isDifficult ? 2 : 1;
+        // Exhaustion level 2+ = always difficult terrain
+        const exhHalf = S.exhaustion >= 2;
+        const effectiveCost = exhHalf && !isDifficult ? 2 : cost;
+
+        const center = hexToScreen(c, r);
+        const height = (typeof TILE_HEIGHT !== 'undefined' ? TILE_HEIGHT[baseTile] : 1) || 1;
+        const heightPx = height * (typeof UNIT_PX !== 'undefined' ? UNIT_PX : 3);
+
+        // Draw cost badge on hex
+        const bx = center.x;
+        const by = center.y - heightPx - 6;
+
+        _ctx.save();
+        _ctx.globalAlpha = 0.7;
+        const label = effectiveCost > 1 ? (effectiveCost + '') : '';
+        if (label) {
+            // Difficult terrain indicator
+            _ctx.font = '9px MedievalSharp, serif';
+            const tw = _ctx.measureText(label).width;
+            _ctx.fillStyle = 'rgba(42,36,32,0.85)';
+            _ctx.beginPath();
+            _ctx.roundRect(bx - tw/2 - 4, by - 6, tw + 8, 13, 3);
+            _ctx.fill();
+            _ctx.strokeStyle = 'rgba(220,160,40,0.6)';
+            _ctx.lineWidth = 0.5;
+            _ctx.stroke();
+            _ctx.fillStyle = '#dca028';
+            _ctx.textAlign = 'center';
+            _ctx.textBaseline = 'middle';
+            _ctx.fillText(label, bx, by + 1);
+        }
+
+        // Hazard warning icon for known hazards
+        const hasHazard = S._hazardsTriggered && !S._hazardsTriggered.has(c + ',' + r) &&
+            typeof HAZARD_TILES !== 'undefined' && HAZARD_TILES && HAZARD_TILES[baseTile];
+        if (hasHazard) {
+            _ctx.font = '10px serif';
+            _ctx.fillStyle = '#c44';
+            _ctx.textAlign = 'center';
+            _ctx.textBaseline = 'middle';
+            _ctx.fillText('\u26a0', bx, by - (label ? 12 : 0));
+        }
+
+        _ctx.restore();
+    }
 }
