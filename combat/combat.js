@@ -104,6 +104,10 @@ class CombatAPI {
         });
         if (!r.ok) {
             const body = await r.json().catch(() => ({}));
+            if (body.status === 'displaced' && window.SessionHeartbeat) {
+                SessionHeartbeat.handleDisplaced(body.device || '');
+                throw new Error('displaced');
+            }
             const err = new Error(body.error || `API ${r.status}`);
             err.status = r.status;
             throw err;
@@ -129,6 +133,10 @@ class CombatAPI {
         });
         if (!r.ok) {
             const body = await r.json().catch(() => ({}));
+            if (body.status === 'displaced' && window.SessionHeartbeat) {
+                SessionHeartbeat.handleDisplaced(body.device || '');
+                throw new Error('displaced');
+            }
             const err = new Error(body.error || `API ${r.status}`);
             err.status = r.status;
             throw err;

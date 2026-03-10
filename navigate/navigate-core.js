@@ -65,6 +65,11 @@ async function initAsync() {
             ApiDiscovery.init(S.api, function(newUrl) { S.api = newUrl; });
         }
 
+        // Start heartbeat for device displacement detection
+        if (S.api && S.token && S.uid && window.SessionHeartbeat) {
+            SessionHeartbeat.init({ apiBase: S.api, token: S.token, uid: S.uid });
+        }
+
         let dataB64 = params.get('data') || '';
 
         // If URL data param is missing, fetch from API (robust fallback)
