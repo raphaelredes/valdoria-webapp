@@ -53,6 +53,7 @@ let S = {
     randomEncounters: [],
     conditions: [],          // Active conditions: [{type, stepsLeft}]
     _hazardsTriggered: new Set(),  // Hexes that already triggered hazards
+    _watchUsed: false,             // Watch activity: first encounter advantage consumed
     _flavorSteps: 0,         // Steps since last flavor event
     travelPace: 'normal',    // 'fast'|'normal'|'cautious' (D&D PHB Ch.8)
     travelActivity: null,    // 'watch'|'forage'|'navigate'|'stealth'
@@ -94,6 +95,7 @@ function saveState() {
             iu: S.inventoryUsed,
             bd: S._bossDefeated || false,
             cau: S._campAmbushUsed || false,
+            wu: S._watchUsed || false,
             tp: S.travelPace || 'normal',
             ta: S.travelActivity || null,
             ih: Array.from(S.interactedHexes || new Set()),
@@ -151,6 +153,7 @@ function restoreState() {
         S.inventoryUsed = snap.iu || [];
         S._bossDefeated = snap.bd || false;
         S._campAmbushUsed = snap.cau || false;
+        S._watchUsed = snap.wu || false;
         return true;
     } catch (e) {
         console.error('[EXPLORE] restoreState:', e);
@@ -212,6 +215,7 @@ function loadMapData(data) {
     S.startHour = data.hr || 8;
     S._bossDefeated = false;
     S._campAmbushUsed = false;
+    S._watchUsed = false;
 
     // Parse POIs (with Passive Perception filter for hidden POIs)
     const allPois = (data.p || []).map(p => ({
@@ -274,6 +278,7 @@ function loadMapData(data) {
 
     // Initialize bottom bar
     initBottomBar();
+    if (typeof _updateActivityBadge === 'function') _updateActivityBadge();
 
     // Initialize atmosphere (day/night + weather)
     if (typeof updateAtmosphere === 'function') updateAtmosphere();
@@ -294,6 +299,13 @@ function loadMapData(data) {
         _lc.hideLoading(() => {
             // Show DM intro after cinematic exit completes
             if (S.dmIntro) showDMIntro(S.dmIntro);
+            // Show activity selection after DM intro (fresh start only)
+            if (!S.travelActivity && typeof showActivitySelection === 'function') {
+                const actDelay = S.dmIntro ? 4000 : 800;
+                setTimeout(() => {
+                    if (!S.travelActivity) showActivitySelection();
+                }, actDelay);
+            }
             // Passive Perception notification
             if (S._hiddenDetected > 0) {
                 const delay = S.dmIntro ? 2000 : 600;
@@ -311,6 +323,13 @@ function loadMapData(data) {
         // Show DM intro only on fresh start
         if (S.dmIntro && !restored) {
             setTimeout(() => showDMIntro(S.dmIntro), 400);
+        }
+        // Show activity selection on fresh start
+        if (!restored && !S.travelActivity && typeof showActivitySelection === 'function') {
+            const actDelay = S.dmIntro ? 4000 : 800;
+            setTimeout(() => {
+                if (!S.travelActivity) showActivitySelection();
+            }, actDelay);
         }
         // Passive Perception notification
         if (S._hiddenDetected > 0 && !restored) {

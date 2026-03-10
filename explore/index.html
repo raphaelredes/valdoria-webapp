@@ -336,6 +336,7 @@
             style="display:none">Itens</button>
         <div class="bar-center">
             <button class="pace-toggle" id="pace-toggle" onclick="cycleTravelPace()" title="Ritmo de viagem">&#x1f6b6;</button>
+            <span class="activity-badge" id="activity-badge" onclick="showActivitySelection()" style="display:none" title="Atividade de viagem"></span>
             <span class="step-counter" id="step-counter">0</span>
             <div class="danger-pips" id="danger-pips">
                 <span class="pip"></span>
@@ -346,6 +347,21 @@
             </div>
         </div>
         <div class="location-info" id="location-info">Carregando...</div>
+    </div>
+
+    <!-- Activity Selection Overlay (D&D PHB Ch.8) -->
+    <div class="activity-overlay" id="activity-overlay">
+        <div class="dm-card">
+            <div class="activity-header">
+                <span class="activity-header-icon">⚔️</span>
+                <div>
+                    <div class="dm-title">Atividade de Viagem</div>
+                    <div class="dm-type-badge" style="background:rgba(196,149,58,0.2);color:#c4953a">PHB Cap.8</div>
+                </div>
+            </div>
+            <div class="activity-desc" id="activity-desc">Escolha uma atividade para realizar durante a exploração. A atividade afeta como você interage com o ambiente.</div>
+            <div class="activity-choices" id="activity-choices"></div>
+        </div>
     </div>
 
     <!-- DM Narration Overlay -->

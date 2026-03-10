@@ -1682,6 +1682,144 @@ function getPaceDCMod() {
 }
 
 // =========================================================
+// TRAVEL ACTIVITIES (D&D PHB Ch.8)
+// =========================================================
+const ACTIVITY_CONFIG = {
+    watch:   { icon: '\u{1F441}',  name: 'Vigiar',      stat: 'per', desc: 'Vantagem no primeiro encontro (n\u00e3o \u00e9 surpreendido)', effect: 'Percep\u00e7\u00e3o ativa durante viagem' },
+    forage:  { icon: '\u{1F33F}',  name: 'Forragear',   stat: 'sur', desc: 'Encontra ervas e materiais a cada 5 passos (Sobreviv\u00eancia)', effect: 'DC 10+perigo' },
+    navigate:{ icon: '\u{1F9ED}',  name: 'Navegar',     stat: 'sur', desc: 'Revela POIs ocultos em raio maior (Sobreviv\u00eancia DC 15)', effect: 'Amplia detec\u00e7\u00e3o' },
+    stealth: { icon: '\u{1F977}',  name: 'Furtividade', stat: 'ste', desc: 'Chance de evitar encontros aleat\u00f3rios (requer ritmo Cauteloso)', effect: 'Requer ritmo Cauteloso' },
+};
+
+function showActivitySelection() {
+    const overlay = document.getElementById('activity-overlay');
+    const choicesEl = document.getElementById('activity-choices');
+    if (!overlay || !choicesEl) return;
+    choicesEl.innerHTML = '';
+
+    for (const [key, cfg] of Object.entries(ACTIVITY_CONFIG)) {
+        const btn = document.createElement('button');
+        btn.className = 'activity-choice-btn';
+        const mod = getAbilityMod(cfg.stat);
+        const prof = S.charData && S.charData.sp && S.charData.sp.includes(cfg.stat) ? (S.charData.pb || 2) : 0;
+        const statShort = STAT_SHORT[cfg.stat] || cfg.stat.toUpperCase();
+        const profStar = prof > 0 ? '\u2605' : '';
+        const isStealthLocked = key === 'stealth' && S.travelPace !== 'cautious';
+        const selected = S.travelActivity === key;
+
+        btn.innerHTML = `<span class="act-name">${cfg.icon} ${cfg.name}${selected ? ' \u2714' : ''}</span>` +
+            `<span class="act-stat">${statShort}${profStar} ${mod >= 0 ? '+' : ''}${mod + prof}${isStealthLocked ? ' \u{1F512} Requer Cauteloso' : ''}</span>` +
+            `<span class="act-effect">${cfg.desc}</span>`;
+
+        if (isStealthLocked) {
+            btn.style.opacity = '0.45';
+            btn.onclick = () => showTerrainToast('Furtividade requer ritmo Cauteloso!', 'info');
+        } else {
+            btn.onclick = () => {
+                S.travelActivity = key;
+                _updateActivityBadge();
+                overlay.classList.remove('active');
+                saveState();
+                showTerrainToast(`${cfg.icon} ${cfg.name}: ${cfg.effect}`, 'info');
+                // Navigate activity: immediate POI reveal check
+                if (key === 'navigate') _tryNavigateReveal();
+            };
+        }
+        choicesEl.appendChild(btn);
+    }
+
+    // Cancel / no activity
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'activity-choice-btn';
+    cancelBtn.style.opacity = '0.6';
+    cancelBtn.innerHTML = '<span class="act-name">Nenhuma</span><span class="act-effect">Viaje sem atividade especial</span>';
+    cancelBtn.onclick = () => {
+        S.travelActivity = null;
+        _updateActivityBadge();
+        overlay.classList.remove('active');
+        saveState();
+    };
+    choicesEl.appendChild(cancelBtn);
+
+    overlay.classList.add('active');
+}
+
+function _updateActivityBadge() {
+    const badge = document.getElementById('activity-badge');
+    if (!badge) return;
+    if (S.travelActivity) {
+        const cfg = ACTIVITY_CONFIG[S.travelActivity];
+        badge.textContent = cfg ? cfg.icon : '';
+        badge.title = cfg ? `${cfg.name}: ${cfg.effect}` : '';
+        badge.style.display = '';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// Navigate activity: reveal hidden POIs in extended radius
+function _tryNavigateReveal() {
+    const mod = getAbilityMod('sur');
+    const prof = S.charData && S.charData.sp && S.charData.sp.includes('sur') ? (S.charData.pb || 2) : 0;
+    const { roll } = rollD20('normal');
+    const total = roll + mod + prof;
+    if (total >= 15) {
+        let revealed = 0;
+        for (const poi of S.pois) {
+            if (!S.poisResolved.has(poi.id) && poi.hidden) {
+                const dist = hexDist(poi.col, poi.row, S.playerCol, S.playerRow);
+                if (dist <= S.visibility + 3) { poi.hidden = false; poi.hid = 0; revealed++; }
+            }
+        }
+        if (revealed > 0) showTerrainToast(`\u{1F9ED} Navega\u00e7\u00e3o: revelou ${revealed} local${revealed > 1 ? 'is' : ''} oculto${revealed > 1 ? 's' : ''}!`, 'ranger');
+        else showTerrainToast('\u{1F9ED} Navega\u00e7\u00e3o: caminho est\u00e1 claro.', 'info');
+    } else {
+        showTerrainToast('\u{1F9ED} Navega\u00e7\u00e3o: n\u00e3o detectou nada incomum.', 'info');
+    }
+}
+
+// Forage activity: check every 5 steps
+function _checkForageActivity() {
+    if (S.travelActivity !== 'forage') return;
+    if (S._stepCount % 5 !== 0) return;
+    const mod = getAbilityMod('sur');
+    const prof = S.charData && S.charData.sp && S.charData.sp.includes('sur') ? (S.charData.pb || 2) : 0;
+    const { roll } = rollD20('normal');
+    const dc = 10 + S.dangerLevel;
+    const total = roll + mod + prof;
+    if (total >= dc) {
+        const gp = 3 + Math.floor(Math.random() * 10);
+        S.goldEarned += gp;
+        updateRewards();
+        showTerrainToast(`\u{1F33F} Forragear: encontrou materiais (+${gp} GP)`, 'ranger');
+    }
+}
+
+// Watch activity: advantage on first random encounter
+function _checkWatchAdvantage() {
+    if (S.travelActivity !== 'watch') return false;
+    if (S._watchUsed) return false;
+    S._watchUsed = true;
+    showTerrainToast('\u{1F441} Vigiando: voc\u00ea n\u00e3o \u00e9 surpreendido!', 'ranger');
+    return true; // Caller grants advantage
+}
+
+// Stealth activity: chance to avoid random encounter
+function _checkStealthAvoid() {
+    if (S.travelActivity !== 'stealth') return false;
+    if (S.travelPace !== 'cautious') return false;
+    const mod = getAbilityMod('ste');
+    const prof = S.charData && S.charData.sp && S.charData.sp.includes('ste') ? (S.charData.pb || 2) : 0;
+    const { roll } = rollD20('normal');
+    const total = roll + mod + prof;
+    if (total >= 13) {
+        showTerrainToast('\u{1F977} Furtividade: evitou o encontro!', 'ranger');
+        return true; // Skip the encounter
+    }
+    return false;
+}
+
+// =========================================================
 // EXPLORE AREA (Search, Forage, Observe, Rest)
 // =========================================================
 function showExploreArea() {

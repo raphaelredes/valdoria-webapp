@@ -545,6 +545,7 @@ function onMoveComplete(col, row) {
     updateStepCounter();
     if (typeof updateLocationInfo === 'function') updateLocationInfo();
     tickConditions();
+    if (typeof _checkForageActivity === 'function') _checkForageActivity();
     updateAtmosphere();
     updateMinimap();
     if (typeof _resetExploreButton === 'function') _resetExploreButton();
@@ -574,9 +575,16 @@ function onMoveComplete(col, row) {
     // Random encounter (night + storm increase chance)
     const encChance = 0.08 + (S.dangerLevel * 0.03) + (S._nightEncounterBonus || 0) + (S._weatherEncounterMod || 0);
     if (Math.random() < encChance && S.randomEncounters.length > 0) {
-        const enc = S.randomEncounters.shift();
-        setTimeout(() => showRandomEncounter(enc), 300);
-        return;
+        // Stealth activity: chance to avoid encounter entirely
+        if (typeof _checkStealthAvoid === 'function' && _checkStealthAvoid()) {
+            // Encounter avoided — continue moving
+        } else {
+            const enc = S.randomEncounters.shift();
+            // Watch activity: grants advantage on first encounter
+            if (typeof _checkWatchAdvantage === 'function') _checkWatchAdvantage();
+            setTimeout(() => showRandomEncounter(enc), 300);
+            return;
+        }
     }
 
     // Ambient event — atmospheric moment without choices (10% chance if available)

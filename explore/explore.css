@@ -1675,6 +1675,72 @@ body {
 }
 
 /* ═══════════════════════════════════════════
+   TRAVEL ACTIVITY (D&D PHB Ch.8)
+   ═══════════════════════════════════════════ */
+.activity-overlay {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.7);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.activity-overlay.active { opacity: 1; pointer-events: auto; }
+.activity-overlay .dm-card { max-width: 350px; width: 90%; }
+.activity-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+}
+.activity-header-icon { font-size: 24px; }
+.activity-desc {
+    color: var(--v-text-dim, #a09484);
+    font: 13px/1.5 var(--v-font, 'MedievalSharp', serif);
+    margin-bottom: 14px;
+}
+.activity-choices { display: flex; flex-direction: column; gap: 6px; }
+.activity-choice-btn {
+    background: rgba(42,36,32,0.8);
+    border: 1px solid rgba(196,149,58,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--v-text, #d4c8b0);
+    font: 13px/1.4 var(--v-font, 'MedievalSharp', serif);
+    cursor: pointer;
+    text-align: left;
+    display: flex; flex-direction: column; gap: 2px;
+    transition: border-color 0.2s, background 0.2s;
+}
+.activity-choice-btn:active {
+    background: rgba(196,149,58,0.15);
+    border-color: rgba(196,149,58,0.6);
+}
+.activity-choice-btn .act-name {
+    font-size: 14px; font-weight: bold;
+    color: #ddd4c6;
+}
+.activity-choice-btn .act-stat {
+    font-size: 11px;
+    color: #c4953a;
+}
+.activity-choice-btn .act-effect {
+    font-size: 12px;
+    color: var(--v-text-dim, #a09484);
+    font-style: italic;
+}
+.activity-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px;
+    background: rgba(196,149,58,0.15);
+    border: 1px solid rgba(196,149,58,0.3);
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0 4px;
+    color: #c4953a;
+    transition: background 0.2s;
+}
+.activity-badge:active { background: rgba(196,149,58,0.3); }
+
+/* ═══════════════════════════════════════════
    REDUCED MOTION
    ═══════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
