@@ -167,7 +167,7 @@ const api = isApiMode ? new CombatAPI(apiBase, token, userId) : null;
 // Auto-discover new tunnel URL if current one dies
 if (apiBase && window.ApiDiscovery) {
     ApiDiscovery.init(apiBase, function(newUrl) {
-        if (api) api.baseUrl = newUrl;
+        if (api) api.base = newUrl;
     });
 }
 
@@ -304,6 +304,7 @@ async function loadCombatState() {
 
 function showCombatEnded() {
     stopAllIntervals();
+    if (typeof _clearStatusTracking === 'function') _clearStatusTracking();
     document.getElementById('app').innerHTML = '<div class="no-data"><h2>Combate Encerrado</h2><p>Este combate já foi finalizado.</p></div>';
     if (isApiMode && originApp) {
         setTimeout(() => transitionFromArena('ended'), 1500);
@@ -1054,7 +1055,7 @@ function startPolling() {
 
                 // P0-B: Cinematic enemy dice — animate enemy rolls before state update
                 const hasEnemyRoll = state.lr && (state.lr.r || state.lr.d) && newTurn && newTurn.t !== 'p';
-                const rollSig = state.lr ? `${state.lr.t||'a'}-${state.lr.r||0}-${state.lr.d||0}-${state.lr.miss||0}` : '';
+                const rollSig = state.lr ? `${state.lr.t||'a'}-${state.lr.r||0}-${state.lr.d||0}-${state.lr.miss||0}-${state.lr.crit||0}-${state.lr.dc||0}` : '';
                 if (hasEnemyRoll && rollSig !== _lastAnimatedRoll) {
                     _cinematicInProgress = true;
     _cinematicWarnTimer = setTimeout(() => {
@@ -1261,8 +1262,9 @@ function renderTurnTimeline(to) {
         // Legendary actions: show star entries when boss has legendary_actions
         if (entry.t !== 'e' && i < to.length - 1) {
             const nextE = to[i + 1];
-            if (nextE && nextE.leg) {
-                for (let li = 0; li < nextE.leg; li++) {
+            const _legCount = nextE ? (parseInt(nextE.leg) || 0) : 0;
+            if (_legCount > 0) {
+                for (let li = 0; li < Math.min(_legCount, 5); li++) {
                     html += '<div class="turn-arrow">\u00b7</div>';
                     html += '<div class="turn-entry t-legendary"><span class="turn-ico">\u2B50</span></div>';
                 }

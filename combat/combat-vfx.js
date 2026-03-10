@@ -64,12 +64,12 @@ function _playCinematicResult(result, actionType) {
             // Overlay timing: d20(1200)+hold(800)+dmgRoll(1500)+fusion(400)+result(1200)
             const _floatDelay = ['auto_hit', 'aoe'].includes(_rt) ? 2200 : 3800;
             if (_rt === 'aoe') {
-                // AOE: stagger damage floats on each enemy target
+                // AOE: stagger damage floats on each enemy using cached elements
                 const enemyCards = document.querySelectorAll('.entity.enemy');
                 const hitCount = Math.min(result.lr.hits || enemyCards.length, enemyCards.length);
                 for (let i = 0; i < hitCount; i++) {
-                    const selector = `.zone-enemies .entity.enemy:nth-child(${i + 1})`;
-                    setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, selector, !!result.lr.crit), _floatDelay + i * 200);
+                    const cachedCard = enemyCards[i];
+                    setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, null, !!result.lr.crit, cachedCard), _floatDelay + i * 200);
                 }
             } else {
                 setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy', !!result.lr.crit), _floatDelay);
@@ -204,7 +204,7 @@ function _dmgFlashClass(dt) {
 // ─── FLOATING MISS INDICATOR ───
 function _showMissFloat(targetSelector, cachedEl) {
     const target = cachedEl || document.querySelector(targetSelector || '.entity.enemy');
-    if (!target) return;
+    if (!target || !document.body.contains(target)) return;
     const rect = target.getBoundingClientRect();
     const el = document.createElement('div');
     el.className = 'damage-float miss';
@@ -218,7 +218,7 @@ function _showMissFloat(targetSelector, cachedEl) {
 // ─── FLOATING DAMAGE NUMBER ───
 function _showDamageFloat(damage, damageType, targetSelector, isCrit, cachedEl) {
     const target = cachedEl || document.querySelector(targetSelector || '.entity.enemy');
-    if (!target) return;
+    if (!target || !document.body.contains(target)) return;
     const rect = target.getBoundingClientRect();
     const el = document.createElement('div');
     el.className = 'damage-float' + (isCrit ? ' crit' : '');
@@ -234,7 +234,7 @@ function _showDamageFloat(damage, damageType, targetSelector, isCrit, cachedEl) 
 // ─── FLOATING HEAL NUMBER ───
 function _showHealFloat(amount, targetSelector, cachedEl) {
     const target = cachedEl || document.querySelector(targetSelector || '.entity.player');
-    if (!target) return;
+    if (!target || !document.body.contains(target)) return;
     const rect = target.getBoundingClientRect();
     const el = document.createElement('div');
     el.className = 'damage-float heal';
@@ -306,7 +306,7 @@ function _animateHpBars(state) {
         // Ghost bar: show old HP draining slowly on damage
         if (isDamage) {
             const track = fillEl.parentElement;
-            if (track) {
+            if (track && document.body.contains(fillEl)) {
                 let ghost = track.querySelector('.bar-ghost');
                 if (!ghost) {
                     ghost = document.createElement('div');
@@ -385,6 +385,7 @@ function _checkPlayerDamage(state) {
 }
 
 // ─── STATUS CHANGE DETECTION — VFX on buff/debuff apply/remove ───
+function _clearStatusTracking() { _prevStatusState.clear(); }
 function _checkStatusChanges(state) {
     const vfx = window._combatVfx;
     if (!vfx) return;

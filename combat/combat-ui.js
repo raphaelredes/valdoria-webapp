@@ -68,7 +68,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
             detailsHtml += '<div class="stats-row">' + allyStats.map(s => `<span class="stat-item">${s}</span>`).join('') + '</div>';
         }
         if (e.conc) {
-            detailsHtml += `<div class="stats-row"><span class="stat-item conc-badge">🔮 ${e.conc}</span></div>`;
+            detailsHtml += `<div class="stats-row"><span class="stat-item conc-badge">🔮 Conc.: ${escHtml(e.conc)}</span></div>`;
         }
         if (e.se && e.se.length > 0) {
             detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('') + '</div>';

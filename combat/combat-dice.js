@@ -531,8 +531,8 @@ function _initDiceDeathSave(lr) {
                     }
                 };
             }
-            setTimeout(() => { if (!_dsDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishDs; } }, 500);
-            setTimeout(finishDs, 1800);
+            setTimeout(() => { if (!_dsDone && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finishDs; } }, 300);
+            setTimeout(finishDs, 2200);
         });
     } catch (e) {
         console.warn('[COMBAT] Death save Dice3D failed:', e);
