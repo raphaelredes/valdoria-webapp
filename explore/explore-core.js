@@ -421,11 +421,28 @@ function getPassivePerception() {
 
 // Tick conditions down after each step
 function tickConditions() {
+    // Poison DOT: 1d4 damage per step while poisoned (D&D 5e poison damage)
+    for (const c of S.conditions) {
+        if (c.type === 'poisoned' && c.stepsLeft > 0) {
+            const dot = Math.floor(Math.random() * 4) + 1; // 1d4
+            S.hpChange -= dot;
+            if (S.charData) {
+                const newHP = Math.max(0, S.charData.hp + S.hpChange);
+                updateHP(newHP, S.charData.mh);
+            }
+            flashScreen('rgba(60,180,60,0.2)');
+            showTerrainToast(`-${dot} HP (veneno)`, 'damage');
+        }
+    }
+
     S.conditions = S.conditions.filter(c => {
         c.stepsLeft--;
         return c.stepsLeft > 0;
     });
     updateConditionHUD();
+
+    // Check death after poison tick
+    if (typeof checkDeath === 'function') checkDeath();
 }
 
 // Update condition icons in HUD
@@ -438,10 +455,12 @@ function updateConditionHUD() {
         return;
     }
     bar.style.display = 'flex';
-    const labels = { poisoned: 'Envenenado', prone: 'Caído', frightened: 'Amedrontado', exhaustion: 'Exaustão' };
+    const labels = { poisoned: '☠ Envenenado', prone: '❄ Caído', frightened: '⚠ Amedrontado', exhaustion: '☠ Exaustão' };
     for (const c of S.conditions) {
         const tag = document.createElement('span');
         tag.className = 'condition-tag';
+        if (c.type === 'poisoned') tag.classList.add('condition-poisoned');
+        if (c.type === 'prone') tag.classList.add('condition-prone');
         if (c.stepsLeft <= 2) tag.classList.add('condition-fading');
         tag.textContent = `${labels[c.type] || c.type} (${c.stepsLeft})`;
         bar.appendChild(tag);

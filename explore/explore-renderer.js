@@ -552,7 +552,7 @@ function onMoveComplete(col, row) {
     // Environmental hazard check (priority over POI/exit)
     const hazard = checkHazard(col, row);
     if (hazard) {
-        setTimeout(() => showHazardCheck(hazard), 200);
+        setTimeout(() => showHazardNarration(hazard), 200);
         return;
     }
 
@@ -874,14 +874,54 @@ let _minimapCanvas = null;
 let _minimapCtx = null;
 let _minimapDirty = true;
 
+// Minimap states: 'compact' (default), 'expanded', 'hidden'
+let _minimapState = 'compact';
+
 function initMinimap() {
     _minimapCanvas = document.getElementById('minimap');
     if (!_minimapCanvas) return;
     _minimapCtx = _minimapCanvas.getContext('2d');
     _minimapDirty = true;
+
+    // Restore saved state
+    if (S.minimapState) _minimapState = S.minimapState;
+    _applyMinimapState();
+
+    // Click to cycle: compact → expanded → hidden → compact
+    _minimapCanvas.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (_minimapState === 'compact') _minimapState = 'expanded';
+        else if (_minimapState === 'expanded') _minimapState = 'hidden';
+        else _minimapState = 'compact';
+        S.minimapState = _minimapState;
+        _applyMinimapState();
+        _minimapDirty = true;
+    });
 }
 
-function updateMinimap() { _minimapDirty = true; }
+function _applyMinimapState() {
+    if (!_minimapCanvas) return;
+    _minimapCanvas.classList.remove('minimap-expanded', 'minimap-hidden');
+    if (_minimapState === 'expanded') _minimapCanvas.classList.add('minimap-expanded');
+    else if (_minimapState === 'hidden') _minimapCanvas.classList.add('minimap-hidden');
+}
+
+// Auto-reposition minimap when player is near top-right
+function _updateMinimapPosition() {
+    if (!_minimapCanvas || _minimapState === 'hidden') return;
+    const canvas = document.getElementById('game-canvas');
+    if (!canvas) return;
+    const cw = canvas.clientWidth;
+    // Player screen position relative to viewport
+    const nearTopRight = playerScreenX > cw - 100 && playerScreenY < 120;
+    if (nearTopRight) {
+        _minimapCanvas.classList.add('minimap-bottom');
+    } else {
+        _minimapCanvas.classList.remove('minimap-bottom');
+    }
+}
+
+function updateMinimap() { _minimapDirty = true; _updateMinimapPosition(); }
 
 function drawMinimap() {
     if (!_minimapCanvas || !_minimapCtx || !_minimapDirty) return;

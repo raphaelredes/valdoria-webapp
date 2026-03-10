@@ -1,4 +1,26 @@
 // ═══════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+// HAZARD NARRATIONS — rich context before and after dice rolls
+// ═══════════════════════════════════════════════════════
+const HAZARD_NARRATIONS = {
+    lava: {
+        pre: "O chão racha e uma onda de calor sufocante emerge. Lava borbulha nas fendas próximas, espirrando gotas incandescentes que chiavam ao tocar a rocha.|Você precisa resistir ao calor — uma falha pode deixar marcas dolorosas.",
+        ok: "Com esforço, você supera a onda de calor. Sua pele arde, mas nenhuma queimadura real. A lava recua para suas fendas enquanto você se afasta.",
+        fail: "As chamas alcançam você antes que possa reagir. O fogo morde sua pele, deixando marcas que ardem a cada passo. O cheiro de tecido chamuscado preenche o ar."
+    },
+    swamp: {
+        pre: "Bolhas emergem da lama escura ao seu redor, liberando vapores esverdeados de cheiro pútrido. O miasma tóxico do pântano envolve você como um véu invisível.|Se não resistir, o veneno entrará pela pele e pelas narinas — e ficará cada vez mais difícil seguir em frente.",
+        ok: "Você prende a respiração e cobre o rosto a tempo. Os vapores passam sem efeito — desta vez. Seus olhos ardem levemente, mas o pior foi evitado.",
+        fail: "Os vapores tóxicos entram pelas narinas antes que você perceba. Uma náusea pesada se instala no estômago. O veneno já corre nas veias — cada passo ficará mais difícil enquanto durar."
+    },
+    ice: {
+        pre: "O chão à frente brilha com uma camada fina de gelo transparente. Cristais de geada cintilam sob a luz fraca, belos e traiçoeiros.|Cada passo pode ser o último antes de escorregar. Seus reflexos serão testados — gelo não perdoa.",
+        ok: "Com cuidado calculado, você atravessa a superfície congelada. Seus pés encontram tração onde parecia impossível. Um suspiro de alívio escapa dos seus lábios.",
+        fail: "Seus pés deslizam sem aviso. O impacto contra o chão gelado é duro e brusco, arrancando o ar dos pulmões. Você se levanta com dificuldade, sentindo cada osso protestar."
+    }
+};
+
 // 3D DICE MANAGER (shared Dice3D instance for check overlays)
 // ═══════════════════════════════════════════════════════
 
@@ -1284,6 +1306,14 @@ function flashScreen(color) {
 // Check if current hex has an environmental hazard
 function checkHazard(col, row) {
     if (!S._hazardsTriggered) S._hazardsTriggered = new Set();
+
+    // Cooldown: skip hazards for 3 steps after triggering one
+    if (!S._hazardCooldown) S._hazardCooldown = 0;
+    if (S._hazardCooldown > 0) {
+        S._hazardCooldown--;
+        return null;
+    }
+
     const key = `${col},${row}`;
     if (S._hazardsTriggered.has(key)) return null;
 
@@ -1298,6 +1328,7 @@ function checkHazard(col, row) {
     });
     if (nearLava) {
         S._hazardsTriggered.add(key);
+        S._hazardCooldown = 3;
         return {
             type: 'lava', stat: 'cn', dc: 12,
             label: 'Calor Intenso',
@@ -1306,9 +1337,10 @@ function checkHazard(col, row) {
         };
     }
 
-    // Swamp mud — CON save DC 10, poisoned 3 steps
-    if (baseTile === 'm' && S.biome === 'swamp') {
+    // Swamp mud — CON save DC 10, poisoned 3 steps (skip if already poisoned)
+    if (baseTile === 'm' && S.biome === 'swamp' && !hasCondition('poisoned')) {
         S._hazardsTriggered.add(key);
+        S._hazardCooldown = 3;
         return {
             type: 'swamp', stat: 'cn', dc: 10,
             label: 'Miasma Tóxico',
@@ -1317,9 +1349,10 @@ function checkHazard(col, row) {
         };
     }
 
-    // Ice — DEX save DC 11, prone (next move slow)
-    if (baseTile === 'i') {
+    // Ice — DEX save DC 11, prone (next move slow — skip if already prone)
+    if (baseTile === 'i' && !hasCondition('prone')) {
         S._hazardsTriggered.add(key);
+        S._hazardCooldown = 3;
         return {
             type: 'ice', stat: 'dx', dc: 11,
             label: 'Gelo Escorregadio',
@@ -1329,6 +1362,68 @@ function checkHazard(col, row) {
     }
 
     return null;
+}
+
+// Pre-check narration for environmental hazards
+function showHazardNarration(hazard) {
+    const narr = HAZARD_NARRATIONS[hazard.type];
+    if (!narr || !narr.pre) {
+        // Fallback: skip narration, go straight to check
+        showHazardCheck(hazard);
+        return;
+    }
+
+    const overlay = document.getElementById('dm-overlay');
+    const header = document.getElementById('dm-header');
+    const body = document.getElementById('dm-body');
+    const choicesEl = document.getElementById('dm-choices');
+
+    if (!overlay || !body) { showHazardCheck(hazard); return; }
+
+    header.textContent = hazard.label;
+    body.innerHTML = '';
+    choicesEl.innerHTML = '';
+    overlay.classList.add('active');
+
+    // Split narration on | for multi-page
+    const pages = narr.pre.split('|').map(p => p.trim()).filter(Boolean);
+    let pageIdx = 0;
+
+    function showPage() {
+        body.innerHTML = '';
+        const p = document.createElement('p');
+        p.style.cssText = 'color:var(--v-text);font-size:15px;line-height:1.75;margin:0';
+        body.appendChild(p);
+
+        // Typewriter effect
+        const text = pages[pageIdx];
+        let charIdx = 0;
+        const typeInterval = setInterval(() => {
+            if (charIdx < text.length) {
+                p.textContent += text[charIdx];
+                charIdx++;
+            } else {
+                clearInterval(typeInterval);
+                // Show continue button
+                choicesEl.innerHTML = '';
+                const btn = document.createElement('button');
+                btn.className = 'dm-choice-btn';
+                btn.textContent = pageIdx < pages.length - 1 ? 'Continuar…' : 'Enfrentar o perigo…';
+                btn.onclick = () => {
+                    pageIdx++;
+                    if (pageIdx < pages.length) {
+                        showPage();
+                    } else {
+                        overlay.classList.remove('active');
+                        showHazardCheck(hazard);
+                    }
+                };
+                choicesEl.appendChild(btn);
+            }
+        }, 18);
+    }
+
+    showPage();
 }
 
 // Automatic saving throw for environmental hazards
@@ -1398,19 +1493,23 @@ function _showHazardSkip(overlay, success, hazard) {
     let _hazDone = false;
     const skipBtn = document.getElementById('check-skip-btn');
 
+    // After dice result is shown, display narrative result text
+    const narr = HAZARD_NARRATIONS[hazard.type];
+    const resultText = narr ? (success ? narr.ok : narr.fail) : '';
+
     const finishHazard = () => {
         if (_hazDone) return;
         _hazDone = true;
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         disposeDice3D();
         overlay.classList.remove('active');
-        if (!success) {
-            applyHazardEffect(hazard);
-            if (checkDeath()) return;
-            if (checkLowHP()) { saveState(); return; }
-            if (checkHazardCombat()) { saveState(); return; }
+
+        if (resultText) {
+            // Show narrative result in DM overlay
+            _showHazardResultNarration(resultText, success, hazard);
+        } else {
+            _applyHazardAndContinue(success, hazard);
         }
-        saveState();
     };
 
     setTimeout(() => {
@@ -1423,6 +1522,58 @@ function _showHazardSkip(overlay, success, hazard) {
     const hazardText = (document.getElementById('check-formula').textContent || '') + ' ' + (document.getElementById('check-result').textContent || '');
     const hazardDelay = typeof calcReadTime === 'function' ? calcReadTime(hazardText, 'overlay') : 2500;
     setTimeout(finishHazard, hazardDelay);
+}
+
+// Show narrative result after hazard dice roll
+function _showHazardResultNarration(text, success, hazard) {
+    const overlay = document.getElementById('dm-overlay');
+    const header = document.getElementById('dm-header');
+    const body = document.getElementById('dm-body');
+    const choicesEl = document.getElementById('dm-choices');
+
+    if (!overlay || !body) { _applyHazardAndContinue(success, hazard); return; }
+
+    header.textContent = success ? 'Resistiu!' : 'Falhou!';
+    header.style.color = success ? 'var(--v-gold)' : '#c44';
+    body.innerHTML = '';
+    choicesEl.innerHTML = '';
+    overlay.classList.add('active');
+
+    const p = document.createElement('p');
+    p.style.cssText = 'color:var(--v-text);font-size:15px;line-height:1.75;margin:0';
+    body.appendChild(p);
+
+    // Typewriter
+    let charIdx = 0;
+    const typeInterval = setInterval(() => {
+        if (charIdx < text.length) {
+            p.textContent += text[charIdx];
+            charIdx++;
+        } else {
+            clearInterval(typeInterval);
+            choicesEl.innerHTML = '';
+            const btn = document.createElement('button');
+            btn.className = 'dm-choice-btn';
+            btn.textContent = 'Continuar…';
+            btn.onclick = () => {
+                overlay.classList.remove('active');
+                header.style.color = ''; // reset
+                _applyHazardAndContinue(success, hazard);
+            };
+            choicesEl.appendChild(btn);
+        }
+    }, 18);
+}
+
+// Apply hazard effect and continue game flow
+function _applyHazardAndContinue(success, hazard) {
+    if (!success) {
+        applyHazardEffect(hazard);
+        if (checkDeath()) return;
+        if (checkLowHP()) { saveState(); return; }
+        if (checkHazardCombat()) { saveState(); return; }
+    }
+    saveState();
 }
 
 function _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, hazard, total, success) {

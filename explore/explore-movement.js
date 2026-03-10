@@ -186,10 +186,10 @@ function drawEffects(ctx) {
     }
 }
 
-// Draw player miniature — scaled proportional to hex size
+// Draw player miniature — hooded traveler silhouette (generic, class-agnostic)
 function drawPlayerToken(ctx, timestamp) {
     const t = (timestamp || 0) * 0.001;
-    const breathe = Math.sin(t * 2.5) * 2;
+    const breathe = Math.sin(t * 2.5) * 1.5;
     const px = playerScreenX;
     const py = playerScreenY + breathe;
     // Scale factor based on hex width (designed at HEX_W=55 baseline)
@@ -197,115 +197,115 @@ function drawPlayerToken(ctx, timestamp) {
 
     ctx.save();
 
-    // Ground shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    // ── Ground shadow ──
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ctx.beginPath();
-    ctx.ellipse(px, py + 3 * s, 14 * s, 7 * s, 0, 0, Math.PI * 2);
+    ctx.ellipse(px, py + 2 * s, 10 * s, 5 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // ── Cylindrical base (disc) ──
-    const baseW = 13 * s;
-    const baseH = 7 * s;
-    const baseDepth = 4 * s;
+    // Colors (dark silhouette like the travel animation)
+    const bodyColor = 'rgba(20,16,14,0.85)';
+    const cloakColor = 'rgba(30,24,20,0.80)';
 
-    // Base cylinder side
-    ctx.fillStyle = '#8a6d2a';
+    // Subtle sway
+    const sway = Math.sin(t * 0.8) * 0.4 * s;
+
+    ctx.save();
+    ctx.translate(px + sway, py);
+
+    // ── Legs (slight idle shift) ──
+    const legShift = Math.sin(t * 1.2) * 0.8 * s;
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 2.2 * s;
+    ctx.lineCap = 'round';
+    // Back leg
     ctx.beginPath();
-    ctx.ellipse(px, py + baseDepth, baseW, baseH, 0, 0, Math.PI);
-    ctx.lineTo(px - baseW, py);
-    ctx.ellipse(px, py, baseW, baseH, 0, Math.PI, 0, true);
+    ctx.moveTo(-1.2 * s, -6 * s);
+    ctx.lineTo(-1.2 * s - legShift * 0.4, 0);
+    ctx.stroke();
+    // Front leg
+    ctx.beginPath();
+    ctx.moveTo(1.2 * s, -6 * s);
+    ctx.lineTo(1.2 * s + legShift * 0.4, 0);
+    ctx.stroke();
+
+    // ── Body (torso ellipse) ──
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.ellipse(0, -12 * s, 3.8 * s, 6.5 * s, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ── Cloak (flowing behind, animated) ──
+    const cloakWave = Math.sin(t * 3) * 1.8 * s;
+    ctx.fillStyle = cloakColor;
+    ctx.beginPath();
+    ctx.moveTo(-2.5 * s, -17 * s);
+    ctx.quadraticCurveTo(-5.5 * s - cloakWave, -11 * s, -4.5 * s - cloakWave * 1.2, -4 * s);
+    ctx.quadraticCurveTo(-3.5 * s, -8 * s, -2.5 * s, -6 * s);
     ctx.closePath();
     ctx.fill();
 
-    // Base top face (gold)
-    ctx.fillStyle = '#c4953a';
+    // ── Backpack (small bump on back) ──
+    ctx.fillStyle = cloakColor;
     ctx.beginPath();
-    ctx.ellipse(px, py, baseW, baseH, 0, 0, Math.PI * 2);
+    ctx.ellipse(-3.2 * s, -13 * s, 2.8 * s, 3.2 * s, -0.2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#a07828';
+
+    // ── Head ──
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(0, -19 * s, 3 * s, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ── Hood (pointed, medieval) ──
+    ctx.fillStyle = cloakColor;
+    ctx.beginPath();
+    ctx.moveTo(-3.2 * s, -19 * s);
+    ctx.quadraticCurveTo(-1 * s, -26 * s, 1.2 * s, -21.5 * s);
+    ctx.quadraticCurveTo(2.2 * s, -18 * s, 3.2 * s, -17 * s);
+    ctx.lineTo(-3.2 * s, -17 * s);
+    ctx.closePath();
+    ctx.fill();
+
+    // ── Staff (walking stick, slight sway) ──
+    const staffTilt = Math.sin(t * 1.5) * 1 * s;
+    ctx.strokeStyle = 'rgba(60,45,30,0.8)';
+    ctx.lineWidth = 1.6 * s;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(4.5 * s + staffTilt, -21 * s);
+    ctx.lineTo(6.5 * s - staffTilt * 0.5, 1 * s);
+    ctx.stroke();
+
+    // Staff top knob
+    ctx.fillStyle = 'rgba(80,65,45,0.7)';
+    ctx.beginPath();
+    ctx.arc(4.5 * s + staffTilt, -21.5 * s, 1.3 * s, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ── Rim light (golden edge highlight) ──
+    ctx.strokeStyle = 'rgba(196,149,58,0.2)';
     ctx.lineWidth = 1 * s;
+    ctx.beginPath();
+    ctx.moveTo(3.2 * s, -17 * s);
+    ctx.quadraticCurveTo(4.2 * s, -12 * s, 3.8 * s, -6 * s);
     ctx.stroke();
 
-    // ── Character body ──
-    const bodyBase = py - 2 * s;
+    ctx.restore(); // undo translate
 
-    // Legs
-    ctx.fillStyle = '#3a3040';
-    ctx.beginPath();
-    ctx.moveTo(px - 4 * s, bodyBase);
-    ctx.lineTo(px - 5.5 * s, bodyBase - 9 * s);
-    ctx.lineTo(px - 2 * s, bodyBase - 9 * s);
-    ctx.lineTo(px - 1.5 * s, bodyBase);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(px + 1.5 * s, bodyBase);
-    ctx.lineTo(px + 2 * s, bodyBase - 9 * s);
-    ctx.lineTo(px + 5.5 * s, bodyBase - 9 * s);
-    ctx.lineTo(px + 4 * s, bodyBase);
-    ctx.fill();
-
-    // Torso
-    const torsoTop = bodyBase - 20 * s;
-    ctx.fillStyle = '#4a3a50';
-    ctx.beginPath();
-    ctx.moveTo(px - 6 * s, bodyBase - 9 * s);
-    ctx.lineTo(px - 7 * s, torsoTop + 3 * s);
-    ctx.lineTo(px + 7 * s, torsoTop + 3 * s);
-    ctx.lineTo(px + 6 * s, bodyBase - 9 * s);
-    ctx.closePath();
-    ctx.fill();
-
-    // Armor highlight
-    ctx.fillStyle = '#5a4a60';
-    ctx.beginPath();
-    ctx.moveTo(px - 4 * s, bodyBase - 9 * s);
-    ctx.lineTo(px - 5 * s, torsoTop + 5 * s);
-    ctx.lineTo(px + 5 * s, torsoTop + 5 * s);
-    ctx.lineTo(px + 4 * s, bodyBase - 9 * s);
-    ctx.closePath();
-    ctx.fill();
-
-    // Shoulders
-    ctx.fillStyle = '#4a3a50';
-    ctx.fillRect(px - 9 * s, torsoTop + 1 * s, 18 * s, 4 * s);
-
-    // Arms
-    ctx.strokeStyle = '#3a3040';
-    ctx.lineWidth = 3 * s;
-    ctx.beginPath();
-    ctx.moveTo(px - 8.5 * s, torsoTop + 4 * s);
-    ctx.lineTo(px - 7.5 * s, bodyBase - 5 * s);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(px + 8.5 * s, torsoTop + 4 * s);
-    ctx.lineTo(px + 7.5 * s, bodyBase - 5 * s);
-    ctx.stroke();
-
-    // Head
-    const headY = torsoTop - 2 * s;
-    ctx.fillStyle = '#d4b896';
-    ctx.beginPath();
-    ctx.arc(px, headY, 6 * s, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Hair/helmet
-    ctx.fillStyle = '#3a2a20';
-    ctx.beginPath();
-    ctx.arc(px, headY - 1 * s, 6.5 * s, Math.PI, 0);
-    ctx.closePath();
-    ctx.fill();
-
-    // ── Gold ring around base (pulsing) ──
+    // ── Gold ring around feet (pulsing) ──
+    const ringW = 12 * s;
+    const ringH = 6 * s;
     const glowPulse = 1 + Math.sin(t * 3) * 0.12;
     const ringAlpha = 0.45 + Math.sin(t * 3) * 0.15;
     ctx.strokeStyle = `rgba(196,149,58,${ringAlpha.toFixed(2)})`;
     ctx.lineWidth = 2.5 * s;
     ctx.beginPath();
-    ctx.ellipse(px, py + 1, (baseW + 3) * glowPulse, (baseH + 2) * glowPulse, 0, 0, Math.PI * 2);
+    ctx.ellipse(px, py + 1, (ringW + 2) * glowPulse, (ringH + 1) * glowPulse, 0, 0, Math.PI * 2);
     ctx.stroke();
 
     // ── Direction indicator (subtle arrow on the ring) ──
-    const arrowDist = (baseW + 6) * s;
+    const arrowDist = (ringW + 5) * s;
     const arrowX = px + Math.cos(playerFacing) * arrowDist * 0.7;
     const arrowY = py + 1 + Math.sin(playerFacing) * arrowDist * 0.4;
     const arrowSize = 3 * s;
