@@ -1032,13 +1032,25 @@ function _showFeedbackOverlay(data) {
         submitBtn.onclick = _onSurveySubmit;
     }
 
+    // Click outside card to dismiss
+    overlay.onclick = function(evt) {
+        if (evt.target === overlay) {
+            _haptic();
+            _hideFeedbackOverlay();
+            if (typeof doAction === 'function') doAction('fb_dismiss');
+        }
+    };
+
     // Show phase 1, hide others
     _showFeedbackPhase('rating');
     overlay.classList.remove('fb-hiding');
     overlay.style.display = 'flex';
 }
 
+var _fbStarLocked = false;
 function _onStarClick(e) {
+    if (_fbStarLocked) return;
+    _fbStarLocked = true;
     var rating = parseInt(e.currentTarget.dataset.rating) || 3;
     _fbSelectedRating = rating;
     _haptic();
@@ -1052,9 +1064,17 @@ function _onStarClick(e) {
             s.classList.remove('active');
         }
     });
-    // Brief delay then show survey offer (client-side, no server round-trip)
+    // Show selected rating in survey offer title
+    var offerTitle = document.querySelector('#fb-phase-survey-offer .feedback-title');
+    if (offerTitle) {
+        var filled = '★'.repeat(rating);
+        var empty = '☆'.repeat(5 - rating);
+        offerTitle.textContent = filled + empty + ' Obrigado!';
+    }
+    // Brief delay then show survey offer
     setTimeout(function() {
         _showFeedbackPhase('survey-offer');
+        _fbStarLocked = false;
     }, 500);
 }
 
@@ -1106,6 +1126,7 @@ function _renderFeedbackSurvey(questions) {
             var ta = document.createElement('textarea');
             ta.className = 'fb-textarea';
             ta.placeholder = 'Sugest\u00f5es, elogios, cr\u00edticas...';
+            ta.maxLength = 500;
             ta.dataset.questionId = q.id;
             qDiv.appendChild(ta);
         }
@@ -1119,17 +1140,23 @@ function _onSurveySubmit() {
     if (!form) return;
     _haptic();
     var answers = {};
+    var choiceCount = 0;
     form.querySelectorAll('.fb-question').forEach(function(qDiv) {
         var qId = qDiv.dataset.questionId;
         var selected = qDiv.querySelector('.fb-option.selected');
         if (selected) {
             answers[qId] = selected.dataset.value;
+            choiceCount++;
         }
         var ta = qDiv.querySelector('.fb-textarea');
         if (ta && ta.value.trim()) {
-            answers[qId] = ta.value.trim();
+            answers[qId] = ta.value.trim().substring(0, 500);
         }
     });
+    if (choiceCount === 0) {
+        if (typeof showToast === 'function') showToast('Responda pelo menos uma pergunta', 2000);
+        return;
+    }
     _hideFeedbackOverlay();
     // Send rating + survey via single API call (no renderScreen to avoid re-trigger)
     if (typeof apiCall === 'function') {
