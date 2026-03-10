@@ -505,6 +505,11 @@ function movePlayerCanvas(col, row) {
         showTerrainToast('Exaust\u00e3o extrema! Voc\u00ea n\u00e3o consegue se mover.', 'damage');
         return;
     }
+    // Conditions that prevent movement (Restrained, Stunned, Incapacitated)
+    if (typeof conditionPreventsMovement === 'function' && conditionPreventsMovement()) {
+        showTerrainToast('Voc\u00ea n\u00e3o consegue se mover!', 'condition');
+        return;
+    }
 
     // Exhaustion level 2: speed halved (all terrain = difficult)
     const exhHalf = S.exhaustion >= 2;

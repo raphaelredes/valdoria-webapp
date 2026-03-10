@@ -277,6 +277,8 @@ function bindActions(state) {
             }
             const action = btn.dataset.action;
             if (btn.classList.contains('disabled')) {
+                btn.classList.add('disabled-shake');
+                setTimeout(() => btn.classList.remove('disabled-shake'), 400);
                 if (action === 'skill') showCombatToast('Sem recurso suficiente para habilidades');
                 else if (action === 'items') showCombatToast('Nenhum item utilizável em combate');
                 return;
@@ -518,7 +520,7 @@ function showTargetPicker(enemies, actionType, skillId) {
                 previewHtml = `<div class="target-preview"><span class="${chCls}">${chLabel} \u00b7 ${chText}</span>${dmgText ? ` \u00b7 ${escHtml(dmgText)}` : ''}</div>`;
             }
         }
-        const hpColor = pct > 50 ? '#4caf50' : pct > 25 ? '#ff9800' : '#e53935';
+        const hpColor = pct > 50 ? 'var(--v-hp-high, #5a8a3c)' : pct > 25 ? 'var(--v-hp-mid, #b88a2a)' : 'var(--v-hp-low, #a63a2a)';
         html += `<div class="target-item" data-target="${i}">
             <div><span>${e.ico || '👹'}</span> <b>${escHtml(e.n)}</b>${previewHtml}</div>
             <div class="skill-meta">${e.hp}/${e.mhp} HP (${pct}%)</div>
@@ -536,7 +538,7 @@ function showTargetPicker(enemies, actionType, skillId) {
     panel.onclick = (e) => {
         const item = e.target.closest('.target-item');
         if (e.target.closest('#targetClose')) { _closeOverlay(overlay); return; }
-        if (!item) return;
+        if (!item || _actionSent) return;
         haptic('medium');
         const target = parseInt(item.dataset.target);
         overlay.classList.remove('active');

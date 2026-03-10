@@ -453,11 +453,13 @@ function handleChoice(poi, choice, idx) {
 // Determine roll mode: 'normal', 'advantage', or 'disadvantage'
 function getRollMode(check) {
     const hasAdv = !!(check && check.adv);
-    const hasDis = hasCondition('poisoned') || !!(check && check.dis);
-    // D&D 5e: advantage + disadvantage cancel out
-    if (hasAdv && hasDis) return 'normal';
+    const stat = check ? check.s : null;
+    const condDis = stat && typeof conditionGivesDisadvantage === 'function' && conditionGivesDisadvantage(stat);
+    const hasDis = condDis || !!(check && check.dis);
+    const exhDis = S.exhaustion >= 3;
+    if (hasAdv && (hasDis || exhDis)) return 'normal';
     if (hasAdv) return 'advantage';
-    if (hasDis) return 'disadvantage';
+    if (hasDis || exhDis) return 'disadvantage';
     return 'normal';
 }
 
@@ -2584,6 +2586,19 @@ function showCampOverlay() {
     });
     foodList.appendChild(noFoodBtn);
 
+    // Long Rest (D&D 5e PHB)
+    const longRestBtn = document.createElement('button');
+    longRestBtn.className = 'camp-food-btn';
+    longRestBtn.style.borderColor = 'rgba(68,170,100,0.4)';
+    longRestBtn.innerHTML = `<span style="font-size:14px;color:#4a8;font-weight:bold">🌙</span>` +
+        `<div style="flex:1"><div style="font-weight:600;color:#6c8">Descanso Longo</div>` +
+        `<div style="font-size:11px;color:#8a7a68">Recupera todo HP, limpa condi\u00e7\u00f5es, -1 exaust\u00e3o</div></div>`;
+    longRestBtn.addEventListener('click', () => {
+        overlay.classList.remove('active');
+        doLongRest();
+    });
+    foodList.appendChild(longRestBtn);
+
     overlay.classList.add('active');
 }
 
@@ -2622,6 +2637,36 @@ function doCampRest(food) {
 
     // Show 3D d8 dice animation before result
     _showCampDiceRoll(hitDie, conMod, foodBonus, totalHeal, foodName);
+}
+
+function doLongRest() {
+    if (S.charData) {
+        const maxHP = S.charData.mh || 10;
+        const currentHP = S.charData.hp + S.hpChange;
+        const healed = maxHP - currentHP;
+        if (healed > 0) S.hpChange += healed;
+        updateHP(maxHP, maxHP);
+    }
+    S.conditions = [];
+    updateConditionHUD();
+    if (typeof removeExhaustion === 'function' && S.exhaustion > 0) removeExhaustion(1);
+    if (typeof resetStepsWithoutRest === 'function') resetStepsWithoutRest();
+    logMoveEvent([{ type: 'long_rest' }]);
+    saveState();
+    const overlay = document.getElementById('camp-result-overlay');
+    const resultEl = document.getElementById('camp-result-text');
+    if (overlay && resultEl) {
+        let t = '🌙 <b>Descanso Longo</b><br><br>';
+        t += '\u2764\ufe0f HP totalmente recuperado<br>';
+        t += '\u2728 Condi\u00e7\u00f5es removidas<br>';
+        if (S.exhaustion > 0) t += `\u26a0\ufe0f Exaust\u00e3o: ${S.exhaustion + 1} \u2192 ${S.exhaustion}<br>`;
+        else t += '\u2705 Sem exaust\u00e3o<br>';
+        t += '<br><i>Voc\u00ea se sente revigorado.</i>';
+        resultEl.innerHTML = t;
+        overlay.classList.add('active');
+    } else {
+        showTerrainToast('🌙 Descanso Longo: HP recuperado', 'ranger');
+    }
 }
 
 let _campDice = null;

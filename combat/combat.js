@@ -1012,6 +1012,10 @@ function startPolling() {
             const newHp = hpHash(state);
             const oldHp = hpHash(currentState);
 
+            // Detect server-side timer expiry (timer ran out before client noticed)
+            if (state.timer_expired && !currentState?.timer_expired) {
+                _showTimerExpiredToast();
+            }
             if (newPh !== oldPh || newRn !== oldRn || newTc !== oldTc || newHp !== oldHp) {
                 // Don't update during cinematic, initiative animation, or overlay open
                 if (_cinematicInProgress || _initAnimationInProgress || _overlayOpen || _actionSent) {

@@ -442,6 +442,42 @@ function isRanger() {
     return S.charData && S.charData.ci === '🏹';
 }
 
+function getClassAbility() {
+    if (!S.charData || !S.charData.ci) return null;
+    const ci = S.charData.ci;
+    const abilities = {
+        '🏹': { name: 'Explorador Natural', trapBonus: 0, perBonus: 0, stealthBonus: 0 },
+        '🗡': { name: 'Per\u00edcia com Armadilhas', trapBonus: 2, perBonus: 0, stealthBonus: 0 },
+        '🛡': { name: 'Sentido Marcial', trapBonus: 0, perBonus: 2, stealthBonus: 0 },
+        '✨': { name: 'Sentidos Arcanos', trapBonus: 0, perBonus: 0, stealthBonus: 0, arcane: true },
+        '⚔️': { name: 'Sens. ao Perigo', trapBonus: 0, perBonus: 1, stealthBonus: 0 },
+        '🎵': { name: 'Passos Leves', trapBonus: 0, perBonus: 0, stealthBonus: 2 },
+        '🌙': { name: 'Vis\u00e3o na Escurid\u00e3o', trapBonus: 0, perBonus: 0, stealthBonus: 0, darkvision: true },
+        '✡️': { name: 'Sentir Mortos-vivos', trapBonus: 0, perBonus: 0, stealthBonus: 0, detectUndead: true },
+    };
+    return abilities[ci] || null;
+}
+
+function getClassTrapBonus() {
+    const a = getClassAbility();
+    return a ? a.trapBonus : 0;
+}
+
+function getClassPerceptionBonus() {
+    const a = getClassAbility();
+    return a ? a.perBonus : 0;
+}
+
+function getClassStealthBonus() {
+    const a = getClassAbility();
+    return a ? a.stealthBonus : 0;
+}
+
+function hasClassDarkvision() {
+    const a = getClassAbility();
+    return a && a.darkvision;
+}
+
 // D&D ability modifier from compact stat key
 function getAbilityMod(statKey) {
     const val = (S.charData && S.charData[statKey]) || 10;
@@ -460,6 +496,8 @@ function getPassivePerception() {
     const profInPerception = S.charData.sp && S.charData.sp.includes('per');
     const profBonus = profInPerception ? (S.charData.pb || 2) : 0;
     let base = 10 + wisMod + profBonus;
+    if (typeof conditionPPMod === 'function') base += conditionPPMod();
+    if (typeof getClassPerceptionBonus === 'function') base += getClassPerceptionBonus();
     // D&D PHB: Fast pace = -5 passive perception, Cautious = +5
     if (S.travelPace === 'fast') base -= 5;
     if (S.travelPace === 'cautious') base += 5;
@@ -508,6 +546,45 @@ function tickConditions() {
 }
 
 // Update condition icons in HUD
+// D&D 5e Condition effects lookup
+const CONDITION_EFFECTS = {
+    poisoned:    { icon: '\u2620', label: 'Envenenado',  css: 'condition-poisoned',    dis: ['str','dx','cn','int','ws','cha','per','ste','sur','inv','atl','acr'], dot: true },
+    prone:       { icon: '🧎', label: 'Ca\u00eddo',       css: 'condition-prone',       dis: ['atl','acr'], extraMove: true },
+    frightened:  { icon: '😨', label: 'Amedrontado', css: 'condition-frightened',   dis: ['str','dx','atl','acr','ste'] },
+    blinded:     { icon: '👁', label: 'Cego',        css: 'condition-blinded',     dis: ['per','inv'], ppMod: -5 },
+    restrained:  { icon: '\u26d3',    label: 'Contido',     css: 'condition-restrained',  dis: ['dx','ste','acr'], speedZero: true },
+    deafened:    { icon: '👂', label: 'Surdo',       css: 'condition-deafened',    dis: ['per'] },
+    charmed:     { icon: '💜', label: 'Encantado',   css: 'condition-charmed',     dis: [] },
+    stunned:     { icon: '💫', label: 'Atordoado',   css: 'condition-stunned',     dis: ['str','dx','cn','int','ws','cha'], speedZero: true },
+    incapacitated:{ icon: '\u274c', label: 'Incapacitado', css: 'condition-incapacitated', dis: [], speedZero: true },
+};
+
+function conditionGivesDisadvantage(stat) {
+    for (const c of S.conditions) {
+        const fx = CONDITION_EFFECTS[c.type];
+        if (fx && fx.dis && fx.dis.includes(stat)) return true;
+    }
+    if (S.exhaustion >= 1) return true;
+    return false;
+}
+
+function conditionPreventsMovement() {
+    for (const c of S.conditions) {
+        const fx = CONDITION_EFFECTS[c.type];
+        if (fx && fx.speedZero) return true;
+    }
+    return false;
+}
+
+function conditionPPMod() {
+    let mod = 0;
+    for (const c of S.conditions) {
+        const fx = CONDITION_EFFECTS[c.type];
+        if (fx && fx.ppMod) mod += fx.ppMod;
+    }
+    return mod;
+}
+
 function updateConditionHUD() {
     const bar = document.getElementById('condition-bar');
     if (!bar) return;
@@ -517,14 +594,13 @@ function updateConditionHUD() {
         return;
     }
     bar.style.display = 'flex';
-    const labels = { poisoned: '☠ Envenenado', prone: '❄ Caído', frightened: '⚠ Amedrontado', exhaustion: '☠ Exaustão' };
     for (const c of S.conditions) {
+        const fx = CONDITION_EFFECTS[c.type] || { icon: '\u2753', label: c.type, css: '' };
         const tag = document.createElement('span');
         tag.className = 'condition-tag';
-        if (c.type === 'poisoned') tag.classList.add('condition-poisoned');
-        if (c.type === 'prone') tag.classList.add('condition-prone');
+        if (fx.css) tag.classList.add(fx.css);
         if (c.stepsLeft <= 2) tag.classList.add('condition-fading');
-        tag.textContent = `${labels[c.type] || c.type} (${c.stepsLeft})`;
+        tag.textContent = `${fx.icon} ${fx.label} (${c.stepsLeft})`;
         bar.appendChild(tag);
     }
 }

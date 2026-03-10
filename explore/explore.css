@@ -1781,6 +1781,17 @@ body {
 }
 
 /* ═══════════════════════════════════════════
+   D&D 5e CONDITIONS (expanded)
+   ============================================= */
+.condition-frightened { background: rgba(200,180,40,0.2); border-color: rgba(200,180,40,0.4); color: #cc8; }
+.condition-blinded { background: rgba(80,80,120,0.2); border-color: rgba(80,80,120,0.4); color: #99a; }
+.condition-restrained { background: rgba(120,80,40,0.2); border-color: rgba(120,80,40,0.4); color: #a86; }
+.condition-deafened { background: rgba(100,100,100,0.2); border-color: rgba(100,100,100,0.4); color: #999; }
+.condition-charmed { background: rgba(180,80,180,0.2); border-color: rgba(180,80,180,0.4); color: #c8c; }
+.condition-stunned { background: rgba(200,200,40,0.2); border-color: rgba(200,200,40,0.4); color: #cc8; }
+.condition-incapacitated { background: rgba(200,40,40,0.2); border-color: rgba(200,40,40,0.4); color: #c66; }
+
+/* =============================================
    TRAVEL ACTIVITY (D&D PHB Ch.8)
    ═══════════════════════════════════════════ */
 .activity-overlay {

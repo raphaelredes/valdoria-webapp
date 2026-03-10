@@ -24,7 +24,7 @@ function initDice(lr) {
     if (currentState && currentState.vm === 'simple') return;
 
     // Dedup — don't replay the same roll on polling re-renders
-    const sig = `${rollType}-${lr.r||0}-${lr.d||0}-${lr.crit||0}-${lr.miss||0}-${lr.dc||0}`;
+    const sig = `${rollType}-${lr.r||0}-${lr.d||0}-${lr.crit||0}-${lr.miss||0}-${lr.dc||0}-${(lr.dr||[]).join(',')}`;
     if (sig === _lastAnimatedRoll) return;
     _lastAnimatedRoll = sig;
 
