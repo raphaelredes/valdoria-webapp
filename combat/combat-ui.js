@@ -1,0 +1,626 @@
+/* ═══════════════════════════════════════════════
+   COMBAT-UI — Entity Rendering, Pickers, Action Bars
+   Lendas de Valdoria Combat WebApp
+   ═══════════════════════════════════════════════ */
+
+// ─── ENTITY CARD (COMPACT + EXPANDABLE) ───
+function renderEntity(e, type, idx, isActiveTurn) {
+    const pct = e.mhp > 0 ? (e.hp / e.mhp) : 0;
+    const hpClass = pct > 0.75 ? 'hp-high' : pct > 0.40 ? 'hp-mid' : 'hp-low';
+
+    // Compact status icons (show max 3, overflow as +N badge)
+    let statusIcons = '';
+    if (e.se && e.se.length > 0) {
+        if (e.se.length > 3) {
+            statusIcons = e.se.slice(0, 3).map(s => STATUS_ICONS[s] || '').join('') + `<span class="status-overflow">+${e.se.length - 3}</span>`;
+        } else {
+            statusIcons = e.se.map(s => STATUS_ICONS[s] || '').join('');
+        }
+    }
+
+    // Build expanded details
+    let detailsHtml = '';
+    if (type === 'enemy') {
+        const atkLabel = ATK_TYPE_LABELS[e.at] || e.at || '';
+        const dmgIcon = DMG_ICONS[e.dt] || '';
+
+        detailsHtml += `<div class="bar-container">
+            <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
+            <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
+        </div>`;
+        detailsHtml += `<div class="stats-row">
+            <span class="stat-item">🛡️ CA ${e.ac}</span>
+            <span class="stat-item">⚔️ +${e.atk}</span>
+            <span class="stat-item">${dmgIcon} ${e.dmg}</span>
+            <span class="entity-badge-sm">${atkLabel}</span>
+        </div>`;
+
+        if (e.leg) {
+            detailsHtml += '<div class="legendary-row">';
+            detailsHtml += '<span>👑 Boss</span>';
+            if (e.leg.lrm > 0) detailsHtml += `<span>🛡️ Resist. ${e.leg.lr}/${e.leg.lrm}</span>`;
+            if (e.leg.lam > 0) detailsHtml += `<span>⚡ Ações ${e.leg.la}/${e.leg.lam}</span>`;
+            detailsHtml += '</div>';
+        }
+
+        if (e.se && e.se.length > 0) {
+            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('') + '</div>';
+        }
+    } else {
+        // Ally expanded — full status panel
+        detailsHtml += `<div class="bar-container">
+            <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
+            <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
+        </div>`;
+        if (e.mmp > 0) {
+            const mpPct = e.mmp > 0 ? (e.mp / e.mmp) : 0;
+            detailsHtml += `<div class="bar-container">
+                <div class="bar-label"><span>💧 MP</span><span>${e.mp}/${e.mmp}</span></div>
+                <div class="bar-track"><div class="bar-fill mp-bar" style="width:${mpPct * 100}%"></div></div>
+            </div>`;
+        }
+        const allyStats = [];
+        if (e.ac) allyStats.push(`🛡️ CA ${e.ac}`);
+        if (e.atk) allyStats.push(`⚔️ +${e.atk}`);
+        if (e.dmg) allyStats.push(`🗡️ ${e.dmg}`);
+        if (e.pot > 0) allyStats.push(`🧪 ${e.pot}`);
+        if (allyStats.length > 0) {
+            detailsHtml += '<div class="stats-row">' + allyStats.map(s => `<span class="stat-item">${s}</span>`).join('') + '</div>';
+        }
+        if (e.conc) {
+            detailsHtml += `<div class="stats-row"><span class="stat-item conc-badge">🔮 ${e.conc}</span></div>`;
+        }
+        if (e.se && e.se.length > 0) {
+            detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('') + '</div>';
+        }
+    }
+
+    const isDead = e.hp <= 0;
+    const activeClass = isActiveTurn ? ' active-turn' : '';
+    const deadClass = isDead ? ' dead' : '';
+    const hpStateClass = pct > 0.75 ? '' : pct > 0.50 ? ' hp-wounded' : pct > 0.25 ? ' hp-bloodied' : pct > 0 ? ' hp-critical' : '';
+    const dataAttr = type === 'enemy' ? ` data-enemy-idx="${idx}"` : '';
+
+    // Feature 9: Position badge
+    let posBadge = '';
+    if (type === 'enemy' && _currentPositions) {
+        const pPos = _currentPositions['player'];
+        const ePos = _currentPositions[`enemy_${idx}`];
+        if (pPos && ePos) {
+            const dx = (pPos.x || 0) - (ePos.x || 0), dy = (pPos.y || 0) - (ePos.y || 0);
+            const near = Math.sqrt(dx * dx + dy * dy) <= 1.5;
+            posBadge = `<span class="pos-badge ${near ? 'near' : 'far'}">${near ? '⚔ Perto' : '🏹 Longe'}</span>`;
+        }
+    }
+
+    // Inline AC badge for enemies (visible in compact view)
+    const acBadge = type === 'enemy' && e.ac ? `<span class="ac-badge">🛡${e.ac}</span>` : '';
+
+    return `<div class="entity ${type}${activeClass}${deadClass}${hpStateClass}"${dataAttr}>
+        <div class="entity-header">
+            <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
+            <span class="compact-name">${escHtml(e.n)}</span>
+            ${acBadge}
+            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
+            <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
+            ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
+            ${posBadge}
+            <span class="expand-arrow">▸</span>
+        </div>
+        <div class="entity-details">${detailsHtml}</div>
+    </div>`;
+}
+
+// ─── PLAYER CARD (always shows HP + resource bars unless compact) ───
+function renderPlayerCard(p, isCompact = false) {
+    const hpPct = p.mhp > 0 ? (p.hp / p.mhp) : 0;
+    const hpClass = hpPct > 0.75 ? 'hp-high' : hpPct > 0.40 ? 'hp-mid' : 'hp-low';
+    const mpPct = p.mmp > 0 ? (p.mp / p.mmp) : 0;
+    const resClass = RES_CLASS_MAP[p.res] || 'mp';
+    const resIcon = RES_ICON_MAP[p.res] || '💧';
+
+    // Compact badges for status, cover, concentration
+    const badges = [];
+    if (p.se && p.se.length > 0) {
+        p.se.forEach(s => badges.push(`<span class="mini-badge status${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`));
+    }
+    if (p.cov) {
+        badges.push(`<span class="mini-badge cover">${p.cov.ico} +${p.cov.ac} CA</span>`);
+    }
+    if (p.conc) {
+        badges.push(`<span class="mini-badge conc">🔮 ${escHtml(p.conc)}</span>`);
+    }
+    const badgesHtml = badges.length > 0 ? `<div class="player-badge-row">${badges.join('')}</div>` : '';
+
+    const concClass = p.conc ? ' concentrating' : '';
+    const dangerClass = hpPct <= 0.25 && hpPct > 0 ? ' hp-danger' : '';
+    return `<div class="entity player${concClass}${dangerClass}">
+        <div class="entity-header">
+            <span class="entity-icon">${p.ico || '👤'}</span>
+            <span class="compact-name">${escHtml(p.n)}</span>
+            <span class="player-header-stats">🛡${p.ac} ⚔+${p.atk} 🗡${p.dmg}</span>
+        </div>
+        <div class="player-bars" style="${isCompact ? 'display:none;' : ''}">
+            <div class="bar-row">
+                <span class="bar-icon">❤️</span>
+                <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${hpPct * 100}%"></div></div>
+                <span class="bar-val">${p.hp}/${p.mhp}</span>
+            </div>
+            <div class="bar-row">
+                <span class="bar-icon">${resIcon}</span>
+                <div class="bar-track"><div class="bar-fill ${resClass}" style="width:${mpPct * 100}%"></div></div>
+                <span class="bar-val">${p.mp}/${p.mmp}</span>
+            </div>
+            ${badgesHtml}
+        </div>
+    </div>`;
+}
+
+
+// ─── ACTION BAR ───
+function renderActionBar(acts, enemies, player, toastHtml) {
+    if (!acts) return '';
+    const hitChance = acts.hit || 50;
+    const fleeChance = acts.flee || 50;
+    const hasSkills = acts.skills && acts.skills.length > 0;
+    const itemCount = acts.items || 0;
+    const hitCh = hitChance >= 65 ? 'ch-high' : hitChance >= 40 ? 'ch-mid' : 'ch-low';
+    const fleeCh = fleeChance >= 65 ? 'ch-high' : fleeChance >= 40 ? 'ch-mid' : 'ch-low';
+
+    let skillBtnText = '🧠 Habilidade';
+    if (hasSkills && acts.skills.length === 1) {
+        const sk = acts.skills[0];
+        const skCh = sk.ch >= 65 ? 'ch-high' : sk.ch >= 40 ? 'ch-mid' : 'ch-low';
+        skillBtnText = `🧠 ${sk.n} <span class="action-chance ${skCh}">${sk.ch}%</span>`;
+    } else if (!hasSkills) {
+        skillBtnText = `🚫 Sem ${player.res || 'Mana'}`;
+    }
+
+    return `<div class="action-bar">${toastHtml || ''}<div class="action-grid action-grid-5">
+        <button class="action-btn primary" data-action="attack">⚔️ Atacar <span class="action-chance ${hitCh}">${hitChance}%</span></button>
+        <button class="action-btn ${hasSkills ? '' : 'disabled'}" data-action="skill">${skillBtnText}</button>
+        <button class="action-btn ${itemCount > 0 ? '' : 'disabled'}" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
+        <button class="action-btn danger" data-action="flee">🏃 Fugir <span class="action-chance ${fleeCh}">${fleeChance}%</span></button>
+        <button class="action-btn pass-btn" data-action="pass">⏭️ Pular</button>
+    </div></div>`;
+}
+
+// ─── BONUS ACTION BAR (D&D 5e PHB p.189) ───
+function renderBonusActionBar(acts, enemies, player, toastHtml) {
+    if (!acts) return '';
+    const hasSkills = acts.skills && acts.skills.length > 0;
+    const resName = player.res || 'Mana';
+
+    let skillsHtml = '';
+    if (hasSkills) {
+        if (acts.skills.length === 1) {
+            const sk = acts.skills[0];
+            skillsHtml = `<button class="action-btn ba-btn" data-action="bonus_use_single" data-skill-id="${sk.id}" data-tg="${sk.tg || 'single'}">⚡ ${escHtml(sk.n)} <span class="action-chance">${sk.c} ${resName} · ${sk.ch}%</span></button>`;
+        } else {
+            skillsHtml = `<button class="action-btn ba-btn" data-action="bonus_skill_pick">⚡ Habilidade Bonus <span class="action-chance">(${acts.skills.length})</span></button>`;
+        }
+    }
+
+    return `<div class="action-bar">${toastHtml || ''}<div class="ba-header">
+        <div class="ba-label">⚡ AÇÃO BÔNUS</div>
+        <div class="ba-hint">Use uma habilidade bônus ou pule.</div>
+    </div><div class="action-grid">
+        ${skillsHtml}
+        <button class="action-btn" data-action="bonus_skip">⏭️ Pular</button>
+    </div></div>`;
+}
+
+// ─── REACTION BAR (D&D 5e PHB p.190) ───
+function renderReactionBar(acts, player, toastHtml) {
+    if (!acts) return '';
+    const hasSkills = acts.skills && acts.skills.length > 0;
+    const dmg = acts.damage_taken || 0;
+    const resName = player.res || 'Mana';
+
+    let skillsHtml = '';
+    if (hasSkills) {
+        acts.skills.forEach(sk => {
+            const ico = sk.ico || '⚡';
+            const effText = sk.eff ? ` · ${escHtml(sk.eff)}` : '';
+            skillsHtml += `<button class="action-btn reaction-btn" data-action="reaction_use" data-skill-id="${sk.id}">${ico} ${escHtml(sk.n)} <span class="action-chance">${sk.c} ${resName}${effText}</span></button>`;
+        });
+    }
+
+    return `<div class="action-bar">${toastHtml || ''}<div class="ba-header reaction-header">
+        <div class="ba-label">⚡ REAÇÃO</div>
+        <div class="ba-hint">Você recebeu ${dmg} de dano. Reagir?</div>
+    </div><div class="action-grid">
+        ${skillsHtml}
+        <button class="action-btn" data-action="reaction_skip">⏭️ Não reagir</button>
+    </div></div>`;
+}
+
+
+// ─── EXPAND / COLLAPSE (accordion) — event delegation to avoid listener leaks ───
+let _expandDelegated = false;
+function bindExpandCollapse() {
+    if (_expandDelegated) return;
+    _expandDelegated = true;
+    const arena = document.getElementById('arena');
+    if (!arena) return;
+    arena.addEventListener('click', (ev) => {
+        const entity = ev.target.closest('.entity:not(.player)');
+        if (!entity || ev.target.closest('.action-btn')) return;
+        const wasExpanded = entity.classList.contains('expanded');
+        document.querySelectorAll('.entity.expanded').forEach(e => e.classList.remove('expanded'));
+        if (!wasExpanded) entity.classList.add('expanded');
+    });
+}
+
+// ─── FEED TOGGLE ───
+function bindFeedToggle() {
+    const toggle = document.getElementById('feedToggle');
+    if (!toggle) return;
+    toggle.addEventListener('click', () => {
+        const feed = document.getElementById('combatFeed');
+        if (!feed) return;
+        const expanded = feed.classList.toggle('feed-expanded');
+        toggle.textContent = expanded ? '▼ Recolher' : toggle.dataset.label || '▲ Mostrar mais';
+    });
+    toggle.dataset.label = toggle.textContent;
+}
+
+// ─── BIND ACTIONS ───
+function bindActions(state) {
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Feature 4+8: Haptic + audio unlock on user gesture
+            hapticSelect();
+            if (!_audioUnlocked) {
+                _audioUnlocked = true;
+                if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume().catch(() => { });
+            }
+            const action = btn.dataset.action;
+            if (btn.classList.contains('disabled')) {
+                if (action === 'skill') showCombatToast('Sem recurso suficiente para habilidades');
+                else if (action === 'items') showCombatToast('Nenhum item utilizável em combate');
+                return;
+            }
+
+            const enemies = state.e || [];
+            const skills = state.acts?.skills || [];
+
+            if (action === 'attack') {
+                if (enemies.length > 1) {
+                    showTargetPicker(enemies, 'attack');
+                } else {
+                    sendAction({ type: 'attack', target: 0 });
+                }
+            } else if (action === 'skill') {
+                if (skills.length === 1) {
+                    if (enemies.length > 1) {
+                        showTargetPicker(enemies, 'skill', skills[0].id);
+                    } else {
+                        sendAction({ type: 'skill', skill_id: skills[0].id, target: 0 });
+                    }
+                } else if (skills.length > 1) {
+                    showSkillPicker(skills, enemies, 'skill');
+                }
+            } else if (action === 'flee') {
+                sendAction({ type: 'flee' });
+            } else if (action === 'pass') {
+                sendAction({ type: 'pass' });
+            } else if (action === 'items') {
+                const items = state.acts?.item_list || [];
+                if (items.length > 0) {
+                    showItemPicker(items, enemies, state.a || []);
+                }
+            } else if (action === 'initiative') {
+                sendAction({ type: 'initiative' });
+            } else if (action === 'proceed') {
+                sendAction({ type: 'proceed' });
+            } else if (action === 'restore') {
+                sendAction({ type: 'restore' });
+            }
+            // D&D 5e: Bonus Action actions
+            else if (action === 'bonus_skip') {
+                sendAction({ type: 'bonus_skip' });
+            } else if (action === 'bonus_use_single') {
+                const skillId = btn.dataset.skillId;
+                const tg = btn.dataset.tg || 'single';
+                if (tg === 'all' || tg === 'self') {
+                    sendAction({ type: 'bonus_use', skill_id: skillId, target: 0 });
+                } else if (enemies.length > 1) {
+                    showTargetPicker(enemies, 'bonus_use', skillId);
+                } else {
+                    sendAction({ type: 'bonus_use', skill_id: skillId, target: 0 });
+                }
+            } else if (action === 'bonus_skill_pick') {
+                showSkillPicker(skills, enemies, 'bonus_use');
+            }
+            // D&D 5e: Reaction actions
+            else if (action === 'reaction_skip') {
+                sendAction({ type: 'reaction_skip' });
+            } else if (action === 'reaction_use') {
+                const skillId = btn.dataset.skillId;
+                sendAction({ type: 'reaction_use', skill_id: skillId });
+            }
+            // Spectator mode: player unconscious, advance round
+            else if (action === 'continue_spectator') {
+                sendAction({ type: 'continue_spectator' });
+            }
+        });
+    });
+}
+
+// ─── LOADING INDICATOR (CSS d20 spin — lightweight, no WebGL) ───
+function _showActionLoading(show) {
+    let el = document.getElementById('actionLoading');
+    if (show) {
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'actionLoading';
+            el.className = 'action-loading';
+            el.innerHTML = '<div class="loading-d20-icon"></div><span>Resolvendo<span class="loading-dots"></span></span>';
+            const bar = document.querySelector('.action-bar');
+            if (bar) bar.prepend(el);
+        }
+        el.style.display = 'flex';
+    } else if (el) {
+        el.remove();
+    }
+}
+
+// ─── SEND ACTION ───
+let _actionSent = false;
+let _actionSentTimer = null;
+async function sendAction(actionData) {
+    if (_actionSent || _cinematicInProgress) return;
+    haptic('medium');
+    _actionSent = true;
+    // Safety net: force-reset after 30s to prevent permanent action block
+    clearTimeout(_actionSentTimer);
+    _actionSentTimer = setTimeout(() => {
+        if (_actionSent) {
+            console.warn('[COMBAT] Action safety timeout — force reset');
+            _actionSent = false;
+            _showActionLoading(false);
+            document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('disabled'));
+            startPolling();
+        }
+    }, 30000);
+    _lastAnimatedRoll = null; // Reset dedup — next render will animate dice
+    _initDiceAnimated = false; // Reset initiative dice animation for new combat
+    document.querySelectorAll('.action-btn').forEach(b => b.classList.add('disabled'));
+    _showActionLoading(true);
+    stopTimer();
+    stopPolling();
+
+    if (isApiMode && api) {
+        try {
+            const result = await api.sendAction(actionData);
+            clearTimeout(_actionSentTimer);
+            _showActionLoading(false);
+            _actionSent = false;
+            if (!result) { showError('Sem resposta do servidor.'); return; }
+            _playCinematicResult(result, actionData.type);
+        } catch (e) {
+            clearTimeout(_actionSentTimer);
+            _showActionLoading(false);
+            _actionSent = false;
+            console.error('[COMBAT] API sendAction error', e);
+            const msg = (e.status === 401 || e.status === 403) ? 'Sessão expirada.'
+                : e.status === 429 ? 'Muitas ações. Aguarde um momento.'
+                    : 'Erro de conexão. Tente novamente.';
+            showError(msg);
+            // Re-enable action buttons so player can retry
+            document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('disabled'));
+            // Don't poll immediately on rate-limit; wait 5s before resuming
+            if (e.status === 429) {
+                setTimeout(() => startPolling(), 5000);
+            } else if (e.status !== 401 && e.status !== 403) {
+                startPolling();
+            }
+        }
+    } else {
+        if (!tg) { console.log('No Telegram WebApp', actionData); _actionSent = false; return; }
+        const payload = {
+            action: 'combat_action',
+            token: token,
+            ...actionData,
+        };
+        tg.sendData(JSON.stringify(payload));
+        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 300);
+    }
+}
+
+
+
+// ─── SKILL PICKER ───
+function showSkillPicker(skills, enemies, actionType) {
+    if (!skills || skills.length === 0) return;
+    actionType = actionType || 'skill';
+    const panel = document.getElementById('skillPanel');
+    const overlay = document.getElementById('skillOverlay');
+    _overlayOpen = true;
+    const title = actionType === 'bonus_use' ? '⚡ Ação Bônus' : 'Habilidades';
+    let html = `<div class="skill-panel-title">${title}</div>`;
+    skills.forEach(sk => {
+        const typeBadge = sk.tp === 'saving_throw' ? ' · <span class="sk-type">ST</span>' :
+            sk.tp === 'auto' ? ' · <span class="sk-type">Auto</span>' :
+                sk.tp === 'heal' ? ' · <span class="sk-type">Cura</span>' : '';
+        const tgtBadge = sk.tg === 'all' ? ' · <span class="sk-aoe">AOE</span>' :
+            sk.tg === 'self' ? ' · <span class="sk-aoe">Próprio</span>' : '';
+        const effLine = sk.eff ? `<div class="skill-effect">${escHtml(sk.eff)}</div>` : '';
+        const skCls = sk.tp === 'heal' ? 'sk-heal' : sk.tp === 'saving_throw' ? 'sk-save' : sk.tp === 'auto' ? 'sk-buff' : 'sk-damage';
+        html += `<div class="skill-item ${skCls}" data-skill-id="${sk.id}" data-tg="${sk.tg || 'single'}">
+            <div>
+                <div class="skill-name">${escHtml(sk.n)}</div>
+                ${effLine}
+                <div class="skill-meta">Custo: ${sk.c} · Chance: ${sk.ch}%${typeBadge}${tgtBadge}</div>
+            </div>
+        </div>`;
+    });
+    html += '<div class="skill-close" id="skillClose">Cancelar</div>';
+    panel.innerHTML = html;
+    // Force animation re-trigger (Telegram WebView doesn't re-trigger on display change)
+    panel.style.animation = 'none';
+    panel.offsetHeight;
+    panel.style.animation = '';
+    overlay.classList.add('active');
+
+    panel.querySelectorAll('.skill-item').forEach(item => {
+        item.addEventListener('click', () => {
+            haptic('light');
+            const skillId = item.dataset.skillId;
+            const tg = item.dataset.tg || 'single';
+            // Hide overlay visually but keep _overlayOpen=true to block polls during transition
+            overlay.classList.remove('active');
+            // AOE/self skills skip target picker
+            if (tg === 'all' || tg === 'self') {
+                _overlayOpen = false;
+                sendAction({ type: actionType, skill_id: skillId, target: 0 });
+            } else if (enemies.length > 1) {
+                // _overlayOpen stays true — showTargetPicker will take over
+                showTargetPicker(enemies, actionType, skillId);
+            } else {
+                _overlayOpen = false;
+                sendAction({ type: actionType, skill_id: skillId, target: 0 });
+            }
+        });
+    });
+    document.getElementById('skillClose').addEventListener('click', () => {
+        _closeOverlay(overlay);
+    });
+    // Backdrop tap to close (standard mobile UX)
+    overlay.onclick = (e) => { if (e.target === overlay) _closeOverlay(overlay); };
+}
+
+// ─── TARGET PICKER ───
+function _closeOverlay(overlay) {
+    overlay.classList.remove('active');
+    _overlayOpen = false;
+}
+
+function showTargetPicker(enemies, actionType, skillId) {
+    const panel = document.getElementById('targetPanel');
+    const overlay = document.getElementById('targetOverlay');
+    _overlayOpen = true;
+    let html = '<div class="skill-panel-title">Escolher Alvo</div>';
+    enemies.forEach((e, i) => {
+        const pct = e.mhp > 0 ? Math.round((e.hp / e.mhp) * 100) : 0;
+        // Feature 6: Damage preview
+        let previewHtml = '';
+        const acts = currentState && currentState.acts;
+        if (acts) {
+            let chText = '', dmgText = '';
+            if (actionType === 'attack') {
+                chText = `${acts.hit || '?'}%`;
+                dmgText = currentState.p ? currentState.p.dmg : '';
+            } else if ((actionType === 'skill' || actionType === 'bonus_use') && skillId && acts.skills) {
+                const sk = acts.skills.find(s => s.id === skillId);
+                if (sk) { chText = `${sk.ch}%`; dmgText = sk.eff || ''; }
+            }
+            if (chText) {
+                const chVal = parseInt(chText);
+                const chCls = chVal >= 65 ? 'prev-hit' : chVal >= 40 ? 'prev-mid' : 'prev-miss';
+                const chLabel = chVal >= 65 ? '\u{1F3AF} Prov\u00e1vel' : chVal >= 40 ? '\u26A0\uFE0F Arriscado' : '\u274C Dif\u00edcil';
+                previewHtml = `<div class="target-preview"><span class="${chCls}">${chLabel} \u00b7 ${chText}</span>${dmgText ? ` \u00b7 ${escHtml(dmgText)}` : ''}</div>`;
+            }
+        }
+        const hpColor = pct > 50 ? '#4caf50' : pct > 25 ? '#ff9800' : '#e53935';
+        html += `<div class="target-item" data-target="${i}">
+            <div><span>${e.ico || '👹'}</span> <b>${escHtml(e.n)}</b>${previewHtml}</div>
+            <div class="skill-meta">${e.hp}/${e.mhp} HP (${pct}%)</div>
+            <div class="target-hp-bar"><div class="target-hp-fill" style="width:${pct}%;background:${hpColor}"></div></div>
+        </div>`;
+    });
+    html += '<div class="skill-close" id="targetClose">Cancelar</div>';
+    panel.innerHTML = html;
+    panel.style.animation = 'none';
+    panel.offsetHeight;
+    panel.style.animation = '';
+    overlay.classList.add('active');
+
+    panel.querySelectorAll('.target-item').forEach(item => {
+        item.addEventListener('click', () => {
+            haptic('medium');
+            const target = parseInt(item.dataset.target);
+            // Hide overlay visually; sendAction will set _actionSent which blocks polls
+            overlay.classList.remove('active');
+            _overlayOpen = false;
+            if (actionType === 'skill' || actionType === 'bonus_use') {
+                sendAction({ type: actionType, skill_id: skillId, target: target });
+            } else {
+                sendAction({ type: 'attack', target: target });
+            }
+        });
+    });
+    document.getElementById('targetClose').addEventListener('click', () => {
+        _closeOverlay(overlay);
+    });
+    // Backdrop tap to close (standard mobile UX)
+    overlay.onclick = (e) => { if (e.target === overlay) _closeOverlay(overlay); };
+}
+
+// ─── ITEM PICKER ───
+function showItemPicker(items, enemies, allies) {
+    const panel = document.getElementById('itemPanel');
+    const overlay = document.getElementById('itemOverlay');
+    let html = '<div class="skill-panel-title">🎒 Itens de Combate</div>';
+    items.forEach(it => {
+        const isThrown = !!it.tdmg;
+        const effText = isThrown ? `${it.tdmg} ${it.ttype || ''}` : (it.heal ? `Cura ${it.heal}` : '');
+        const typeBadge = isThrown ? '<span class="sk-aoe">Arremesso</span>' : '<span class="sk-type">Cura</span>';
+        const itemCls = isThrown ? 'item-thrown' : 'item-heal';
+        html += `<div class="skill-item item-entry ${itemCls}" data-item="${escHtml(it.n)}" data-thrown="${isThrown}">
+            <div>
+                <div class="skill-name">${it.ico} ${escHtml(it.n)} <span class="action-chance">x${it.q}</span></div>
+                <div class="skill-meta">${effText} · ${typeBadge}</div>
+            </div>
+        </div>`;
+    });
+    // Full inventory access via transition (API mode only)
+    if (isApiMode) {
+        html += '<div class="skill-item" id="itemFullInventory" style="text-align:center;color:var(--v-gold);font-size:12px;padding:10px;cursor:pointer;opacity:0.8">📦 Ver Mochila Completa</div>';
+    }
+    html += '<div class="skill-close" id="itemClose">Cancelar</div>';
+    panel.innerHTML = html;
+    _overlayOpen = true;
+    panel.style.animation = 'none';
+    panel.offsetHeight;
+    panel.style.animation = '';
+    overlay.classList.add('active');
+
+    panel.querySelectorAll('.item-entry').forEach(el => {
+        el.addEventListener('click', () => {
+            const itemName = el.dataset.item;
+            const isThrown = el.dataset.thrown === 'true';
+            // Hide overlay visually; sendAction will set _actionSent which blocks polls
+            overlay.classList.remove('active');
+            _overlayOpen = false;
+            if (isThrown) {
+                // Thrown items always target enemy — target -2 means first enemy
+                sendAction({ type: 'use_item', item_key: itemName, item_target: -2 });
+            } else {
+                // Healing items: target self (-1) directly
+                sendAction({ type: 'use_item', item_key: itemName, item_target: -1 });
+            }
+        });
+    });
+    const fullInvBtn = document.getElementById('itemFullInventory');
+    if (fullInvBtn) {
+        fullInvBtn.addEventListener('click', () => {
+            _closeOverlay(overlay);
+            transitionToInventoryFromArena();
+        });
+    }
+    document.getElementById('itemClose').addEventListener('click', () => {
+        _closeOverlay(overlay);
+    });
+    // Backdrop tap to close (standard mobile UX)
+    overlay.onclick = (e) => { if (e.target === overlay) _closeOverlay(overlay); };
+}
+
+// ═══════════════════════════════════════════════════
+// OVERLAY-ONLY DICE SYSTEM — All dice rolls use fullscreen 3D overlay
+// Replaces inline dice boxes (dice1/dice2) with immersive overlay
+// ═══════════════════════════════════════════════════
+
+// Ensure the full-screen dice overlay exists as a persistent element outside #app
+
