@@ -464,30 +464,25 @@ function showSkillPicker(skills, enemies, actionType) {
     panel.style.animation = '';
     overlay.classList.add('active');
 
-    panel.querySelectorAll('.skill-item').forEach(item => {
-        item.addEventListener('click', () => {
-            haptic('light');
-            const skillId = item.dataset.skillId;
-            const tg = item.dataset.tg || 'single';
-            // Hide overlay visually but keep _overlayOpen=true to block polls during transition
-            overlay.classList.remove('active');
-            // AOE/self skills skip target picker
-            if (tg === 'all' || tg === 'self') {
-                _overlayOpen = false;
-                sendAction({ type: actionType, skill_id: skillId, target: 0 });
-            } else if (enemies.length > 1) {
-                // _overlayOpen stays true — showTargetPicker will take over
-                showTargetPicker(enemies, actionType, skillId);
-            } else {
-                _overlayOpen = false;
-                sendAction({ type: actionType, skill_id: skillId, target: 0 });
-            }
-        });
-    });
-    document.getElementById('skillClose').addEventListener('click', () => {
-        _closeOverlay(overlay);
-    });
-    // Backdrop tap to close (standard mobile UX)
+    // Event delegation (prevents listener leaks on re-open)
+    panel.onclick = (e) => {
+        const item = e.target.closest('.skill-item');
+        if (e.target.closest('#skillClose')) { _closeOverlay(overlay); return; }
+        if (!item) return;
+        haptic('light');
+        const skillId = item.dataset.skillId;
+        const tg = item.dataset.tg || 'single';
+        overlay.classList.remove('active');
+        if (tg === 'all' || tg === 'self') {
+            _overlayOpen = false;
+            sendAction({ type: actionType, skill_id: skillId, target: 0 });
+        } else if (enemies.length > 1) {
+            showTargetPicker(enemies, actionType, skillId);
+        } else {
+            _overlayOpen = false;
+            sendAction({ type: actionType, skill_id: skillId, target: 0 });
+        }
+    };
     overlay.onclick = (e) => { if (e.target === overlay) _closeOverlay(overlay); };
 }
 
@@ -537,24 +532,21 @@ function showTargetPicker(enemies, actionType, skillId) {
     panel.style.animation = '';
     overlay.classList.add('active');
 
-    panel.querySelectorAll('.target-item').forEach(item => {
-        item.addEventListener('click', () => {
-            haptic('medium');
-            const target = parseInt(item.dataset.target);
-            // Hide overlay visually; sendAction will set _actionSent which blocks polls
-            overlay.classList.remove('active');
-            _overlayOpen = false;
-            if (actionType === 'skill' || actionType === 'bonus_use') {
-                sendAction({ type: actionType, skill_id: skillId, target: target });
-            } else {
-                sendAction({ type: 'attack', target: target });
-            }
-        });
-    });
-    document.getElementById('targetClose').addEventListener('click', () => {
-        _closeOverlay(overlay);
-    });
-    // Backdrop tap to close (standard mobile UX)
+    // Event delegation (prevents listener leaks on re-open)
+    panel.onclick = (e) => {
+        const item = e.target.closest('.target-item');
+        if (e.target.closest('#targetClose')) { _closeOverlay(overlay); return; }
+        if (!item) return;
+        haptic('medium');
+        const target = parseInt(item.dataset.target);
+        overlay.classList.remove('active');
+        _overlayOpen = false;
+        if (actionType === 'skill' || actionType === 'bonus_use') {
+            sendAction({ type: actionType, skill_id: skillId, target: target });
+        } else {
+            sendAction({ type: 'attack', target: target });
+        }
+    };
     overlay.onclick = (e) => { if (e.target === overlay) _closeOverlay(overlay); };
 }
 

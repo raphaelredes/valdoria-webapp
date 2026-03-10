@@ -45,6 +45,9 @@ let _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
 let _currentPositions = null;   // Feature 9: combat positions
 let _cinematicInProgress = false; // Blocks re-render during action cinematic
 let _overlayOpen = false;          // Blocks poll re-render while target/skill overlay is open
+let _bonusHapticFired = false;     // Haptic fired for bonus_action sub-phase
+let _reactionHapticFired = false;  // Haptic fired for reaction sub-phase
+let _reactionAutoTimer = null;     // 10s auto-skip timer for reactions
 let _lastRenderedPhase = null;  // Phase transition tracking
 let _hitStreak = 0;               // P2-G: Combo streak counter
 let _initDice3d = null;           // THREE.js Dice3D instance for initiative screen
@@ -607,8 +610,9 @@ function _renderArenaInner(s) {
 
     let html = '';
 
-    // Header (dynamic title based on biome)
-    const biomeTitle = s.bio === 'arena' ? 'Arena de Combate' :
+    // Header (dynamic title based on biome — show "Iniciativa" during init/intro phases)
+    const biomeTitle = (ph === 'init' || ph === 'intro') ? 'Iniciativa' :
+        s.bio === 'arena' ? 'Arena de Combate' :
         s.bio === 'dungeon' ? 'Combate na Masmorra' :
             s.bio === 'cave' ? 'Combate na Caverna' :
                 s.bio === 'city' ? 'Combate na Cidade' : 'Combate';
@@ -695,23 +699,40 @@ function _renderArenaInner(s) {
 
     // Action Bar — phase-dependent (with D&D 5e sub-phase support)
     const subPh = s.sub_phase || '';
+    // Reset sub-phase haptic flags when phase/sub-phase changes
+    if (subPh !== 'bonus_action') _bonusHapticFired = false;
+    if (subPh !== 'reaction') { _reactionHapticFired = false; if (_reactionAutoTimer) { clearTimeout(_reactionAutoTimer); _reactionAutoTimer = null; } }
     const isUnconscious = s.unconscious || (s.p && s.p.hp <= 0);
     if (ph === 'active' && isUnconscious) {
         // Spectator mode: player is unconscious, allies fight on
         // D&D 5e PHB p.197: Death Saving Throws — show status + advance button
         const ds = s.ds || { s: 0, f: 0 };
         const dsMarks = '✅'.repeat(ds.s) + '⬜'.repeat(3 - ds.s) + '  ' + '❌'.repeat(ds.f) + '⬜'.repeat(3 - ds.f);
+        const dsLegend = '<div class="spectator-legend">3 \u2705 = Estabilizado \u00b7 3 \u274c = Morte</div>';
         const stab = ds.stab ? '<div class="spectator-detail">🩹 Estabilizado — aguardando socorro</div>' : '';
         html += `<div class="action-bar spectator-bar">
             <div class="spectator-msg">💀 <b>Inconsciente</b> — Teste contra a Morte</div>
             <div class="spectator-saves">${dsMarks}</div>
             ${stab}
+            ${dsLegend}
             <button class="action-btn primary full-width" data-action="continue_spectator" style="margin-top:6px">⏭️ Próximo Round</button>
         </div>`;
     } else if (ph === 'active' && subPh === 'bonus_action') {
+        if (!_bonusHapticFired) { _bonusHapticFired = true; haptic('medium'); }
         html += renderTimerBar(s);
         html += renderBonusActionBar(s.acts, s.e, s.p, _actionToastHtml);
     } else if (ph === 'active' && subPh === 'reaction') {
+        if (!_reactionHapticFired) {
+            _reactionHapticFired = true;
+            hapticNotify('warning');
+            // D&D 5e: Reactions are quick decisions - auto-skip after 10s
+            if (_reactionAutoTimer) clearTimeout(_reactionAutoTimer);
+            _reactionAutoTimer = setTimeout(() => {
+                if (currentState && (currentState.sub_phase || '') === 'reaction') {
+                    sendAction({ type: 'reaction_skip' });
+                }
+            }, 10000);
+        }
         html += renderTimerBar(s);
         html += renderReactionBar(s.acts, s.p, _actionToastHtml);
     } else if (ph === 'active') {
@@ -1215,6 +1236,7 @@ function stopAllIntervals() {
     stopTimer();
     stopPolling();
     stopHeartbeat();
+    if (_reactionAutoTimer) { clearTimeout(_reactionAutoTimer); _reactionAutoTimer = null; }
     // Cleanup global listeners to prevent memory leaks
     document.removeEventListener('visibilitychange', _onVisibilityChange);
 }
@@ -1230,6 +1252,16 @@ function renderTurnTimeline(to) {
         const deadCls = isDead ? ' dead' : '';
         if (i > 0) html += '<div class="turn-arrow">·</div>';
         const ico = entry.ico || (entry.t === 'p' ? '⚔️' : entry.t === 'a' ? '🛡️' : '👹');
+        // Legendary actions: show star entries when boss has legendary_actions
+        if (entry.t !== 'e' && i < to.length - 1) {
+            const nextE = to[i + 1];
+            if (nextE && nextE.leg) {
+                for (let li = 0; li < nextE.leg; li++) {
+                    html += '<div class="turn-arrow">\u00b7</div>';
+                    html += '<div class="turn-entry t-legendary"><span class="turn-ico">\u2B50</span></div>';
+                }
+            }
+        }
         html += `<div class="turn-entry ${isFirst ? 'active' : ''} ${tCls}${deadCls}">
             <span class="turn-ico">${ico}</span>
         </div>`;

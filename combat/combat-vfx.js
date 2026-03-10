@@ -433,7 +433,8 @@ function _checkStatusChanges(state) {
         const pEl = document.querySelector('.entity.player');
         if (pEl) vfx.debuff(pEl);
         vfx.flash('rgba(160,60,200,0.3)', 400);
-        showNarration('💔 Concentração quebrada!', 'miss');
+        const spellName = prevConc.replace(/_/g, ' ');
+        showNarration('💔 Concentração quebrada: ' + spellName + '!', 'miss');
         haptic('heavy');
     }
     _prevStatusState.set('_conc', curConc);
