@@ -187,6 +187,18 @@ function loadMapData(data) {
         combat: re.cb || null,
     }));
 
+    // Ambient events — atmospheric moments (resolved from frontend pool)
+    S.ambientEvents = (data.ae || []).map(ae => ({
+        title: ae.tt || '',
+        narration: (ae.ni != null && typeof lookupAmbientNarr === 'function')
+            ? (lookupAmbientNarr(S.biome, ae.ni) || ae.n || '')
+            : (ae.n || ''),
+        xp: ae.x || 0,
+    }));
+
+    // Chain event clues found during this exploration
+    S.chainClues = new Set(data.cc || []);
+
     // Boss guardian at exit, camp ambush, weather, day cycle
     S.bossData = data.bo || null;
     S.campAmbush = data.ca || null;
@@ -206,6 +218,13 @@ function loadMapData(data) {
         choices: p.ch || [],
         combat: p.cb || null,
         hidden: !!p.h, hiddenDC: p.hd || 0,
+        // NPC dialogue lines (multi-turn)
+        dialogue: (p.dlg || []).map(d => ({ speaker: d.s || 'npc', text: d.t || '' })),
+        npcName: p.nn || null,
+        npcTitle: p.nt || null,
+        // Chain event metadata
+        chainId: p.ci || null,
+        chainStage: p.cs || 0,
     }));
 
     const pp = getPassivePerception();

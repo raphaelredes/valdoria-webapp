@@ -577,6 +577,13 @@ function onMoveComplete(col, row) {
         return;
     }
 
+    // Ambient event — atmospheric moment without choices (10% chance if available)
+    if (S.ambientEvents && S.ambientEvents.length > 0 && Math.random() < 0.10) {
+        const ambient = S.ambientEvents.shift();
+        setTimeout(() => showAmbientEvent(ambient), 200);
+        return;
+    }
+
     // Check if player is surrounded (no valid moves)
     const neighbors = getNeighbors(col, row);
     const hasValidMove = neighbors.some(([c, r]) => {

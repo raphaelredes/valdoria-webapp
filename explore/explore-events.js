@@ -55,16 +55,104 @@ function showPOI(poi) {
     // activateOverlay clears dm-choices + dm-narration before showing
     activateOverlay('dm-overlay');
 
+    // Apply biome visual theme
+    const overlay = document.getElementById('dm-overlay');
+    overlay.setAttribute('data-biome', S.biome || 'forest');
+    overlay.classList.remove('ambient-event');
+    _spawnBiomeParticles(overlay);
+
     document.getElementById('dm-icon').textContent = '';
     document.getElementById('dm-title').textContent = poi.title || 'Evento';
     document.getElementById('dm-type').textContent = POI_TYPE_LABELS[poi.type] || poi.type;
 
-    // Typewriter narration
+    // Route NPC dialogue POIs to the multi-turn dialogue system
+    if (poi.dialogue && poi.dialogue.length > 0) {
+        document.getElementById('dm-overlay').classList.remove('active');
+        showNPCDialogue(poi);
+        return;
+    }
+
+    // Typewriter narration — after text finishes, show "Continuar" button before choices
     const narrEl = document.getElementById('dm-narration');
     narrEl.innerHTML = '<span class="cursor"></span>';
     typewriter(narrEl, poi.narration || '', () => {
-        showChoices(poi);
+        // Show continue button to let player absorb the narration
+        const contBtn = document.createElement('button');
+        contBtn.className = 'dm-continue-btn';
+        contBtn.innerHTML = '<span>Continuar…</span> <span style="font-size:16px">▸</span>';
+        contBtn.addEventListener('click', () => {
+            contBtn.remove();
+            showChoices(poi);
+        });
+        narrEl.appendChild(contBtn);
     });
+}
+
+// Ambient event — narrative-only, no choices, just atmosphere
+function showAmbientEvent(poi) {
+    activateOverlay('dm-overlay');
+    const overlay = document.getElementById('dm-overlay');
+    overlay.setAttribute('data-biome', S.biome || 'forest');
+    overlay.classList.add('ambient-event');
+    _spawnBiomeParticles(overlay);
+
+    // Hide header for ambient events — pure atmosphere
+    const header = overlay.querySelector('.dm-header');
+    if (header) header.style.display = 'none';
+
+    const narrEl = document.getElementById('dm-narration');
+    narrEl.innerHTML = '<span class="cursor"></span>';
+    typewriter(narrEl, poi.narration || '', () => {
+        const contBtn = document.createElement('button');
+        contBtn.className = 'ambient-continue-btn';
+        contBtn.textContent = 'Prosseguir…';
+        contBtn.addEventListener('click', () => {
+            overlay.classList.remove('active', 'ambient-event');
+            if (header) header.style.display = '';
+            // Small XP reward for experiencing the world
+            if (poi.xp) {
+                S.xpEarned += poi.xp;
+                updateRewards();
+            }
+            logMoveEvent([{ type: 'ambient', title: poi.title || '' }]);
+            saveState();
+        });
+        narrEl.appendChild(contBtn);
+    });
+}
+
+// Biome-themed floating particles
+function _spawnBiomeParticles(overlay) {
+    let container = overlay.querySelector('.biome-particles');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'biome-particles';
+        overlay.insertBefore(container, overlay.firstChild);
+    }
+    container.innerHTML = '';
+    const BIOME_PARTICLES = {
+        forest: ['🍃', '🌿', '✨'],
+        plains: ['🌾', '🦋', '🌸'],
+        swamp: ['💧', '🪲', '🌫️'],
+        cave: ['💎', '✨', '🕯️'],
+        desert: ['🏜️', '✨', '💨'],
+        mountain: ['🪨', '❄️', '🦅'],
+        snow: ['❄️', '🌨️', '✨'],
+        volcanic: ['🔥', '💥', '🌋'],
+        graveyard: ['💀', '🕯️', '🌫️'],
+    };
+    const emojis = BIOME_PARTICLES[S.biome] || BIOME_PARTICLES.forest;
+    for (let i = 0; i < 5; i++) {
+        const p = document.createElement('span');
+        p.className = 'biome-particle';
+        p.textContent = emojis[i % emojis.length];
+        p.style.left = (10 + Math.random() * 80) + '%';
+        p.style.top = (20 + Math.random() * 60) + '%';
+        p.style.fontSize = (12 + Math.random() * 8) + 'px';
+        p.style.animationDelay = (Math.random() * 4) + 's';
+        p.style.animationDuration = (5 + Math.random() * 3) + 's';
+        container.appendChild(p);
+    }
 }
 
 // --- Paginated Typewriter ---
@@ -153,7 +241,7 @@ function _typewriterPage(el, pages, pageIdx, onDone) {
         }
         span.textContent += text[i];
         i++;
-    }, 35);
+    }, 18);
 }
 
 function _showPageContinue(el, pages, pageIdx, totalPages, onDone) {
@@ -170,6 +258,126 @@ function _showPageContinue(el, pages, pageIdx, totalPages, onDone) {
         _typewriterPage(el, pages, pageIdx + 1, onDone);
     });
     el.appendChild(contBtn);
+}
+
+
+// NPC Multi-Turn Dialogue — richer NPC encounters with personality
+function showNPCDialogue(poi) {
+    activateOverlay('dm-overlay');
+    const overlay = document.getElementById('dm-overlay');
+    overlay.setAttribute('data-biome', S.biome || 'forest');
+    overlay.classList.remove('ambient-event');
+    _spawnBiomeParticles(overlay);
+
+    // Show NPC name and title
+    document.getElementById('dm-icon').textContent = '';
+    document.getElementById('dm-title').textContent = poi.npcName || poi.title || 'Viajante';
+    document.getElementById('dm-type').textContent = poi.npcTitle || 'Encontro';
+
+    const narrEl = document.getElementById('dm-narration');
+    narrEl.innerHTML = '';
+
+    // Show intro narration first
+    typewriter(narrEl, poi.narration || '', () => {
+        // Then show dialogue lines one at a time
+        const dialogueLines = poi.dialogue || [];
+        if (dialogueLines.length > 0) {
+            _showDialogueLine(narrEl, dialogueLines, 0, poi);
+        } else {
+            // No dialogue, go straight to choices
+            _showNPCChoicesWithContinue(narrEl, poi);
+        }
+    });
+}
+
+function _showDialogueLine(narrEl, lines, idx, poi) {
+    if (idx >= lines.length) {
+        _showNPCChoicesWithContinue(narrEl, poi);
+        return;
+    }
+    const line = lines[idx];
+    const lineEl = document.createElement('div');
+    lineEl.className = 'npc-dialogue-line';
+
+    if (line.speaker === 'npc' && poi.npcName) {
+        const nameTag = document.createElement('div');
+        nameTag.className = 'npc-name-tag';
+        nameTag.textContent = poi.npcName;
+        lineEl.appendChild(nameTag);
+    }
+
+    const textSpan = document.createElement('span');
+    lineEl.appendChild(textSpan);
+    narrEl.appendChild(lineEl);
+
+    // Typewriter effect for the dialogue line
+    let i = 0;
+    let _done = false;
+    const text = line.text || line.t || '';
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    lineEl.appendChild(cursor);
+
+    const skipTyping = () => {
+        if (_done) return;
+        _done = true;
+        clearInterval(iv);
+        textSpan.textContent = text;
+        cursor.remove();
+        lineEl.removeEventListener('click', skipTyping);
+        // Show continue button for next line
+        const isLast = idx >= lines.length - 1;
+        if (isLast) {
+            _showNPCChoicesWithContinue(narrEl, poi);
+        } else {
+            const contBtn = document.createElement('button');
+            contBtn.className = 'dm-continue-btn';
+            contBtn.innerHTML = '<span>Continuar…</span> <span style="font-size:16px">▸</span>';
+            contBtn.addEventListener('click', () => {
+                contBtn.remove();
+                _showDialogueLine(narrEl, lines, idx + 1, poi);
+            });
+            narrEl.appendChild(contBtn);
+        }
+    };
+    lineEl.addEventListener('click', skipTyping);
+
+    const iv = setInterval(() => {
+        if (i >= text.length) {
+            if (_done) return;
+            _done = true;
+            clearInterval(iv);
+            cursor.remove();
+            lineEl.removeEventListener('click', skipTyping);
+            const isLast = idx >= lines.length - 1;
+            if (isLast) {
+                _showNPCChoicesWithContinue(narrEl, poi);
+            } else {
+                const contBtn = document.createElement('button');
+                contBtn.className = 'dm-continue-btn';
+                contBtn.innerHTML = '<span>Continuar…</span> <span style="font-size:16px">▸</span>';
+                contBtn.addEventListener('click', () => {
+                    contBtn.remove();
+                    _showDialogueLine(narrEl, lines, idx + 1, poi);
+                });
+                narrEl.appendChild(contBtn);
+            }
+            return;
+        }
+        textSpan.textContent += text[i];
+        i++;
+    }, 18);
+}
+
+function _showNPCChoicesWithContinue(narrEl, poi) {
+    const contBtn = document.createElement('button');
+    contBtn.className = 'dm-continue-btn';
+    contBtn.innerHTML = '<span>Responder…</span> <span style="font-size:16px">▸</span>';
+    contBtn.addEventListener('click', () => {
+        contBtn.remove();
+        showChoices(poi);
+    });
+    narrEl.appendChild(contBtn);
 }
 
 function showChoices(poi) {
@@ -411,6 +619,7 @@ function showStage2(poi, stage2) {
     activateOverlay('dm-overlay');
 
     const overlay = document.getElementById('dm-overlay');
+    overlay.setAttribute('data-biome', S.biome || 'forest');
     document.getElementById('dm-icon').textContent = '';
     document.getElementById('dm-title').textContent = stage2.tt || 'Continuação';
     document.getElementById('dm-type').textContent = 'mistério';
@@ -495,6 +704,12 @@ function applyOutcome(poi, outcome, choice) {
     if (outcome.i) {
         S.itemsFound.push(outcome.i);
         addRewardBadge(rewardsEl, outcome.i, 'item');
+    }
+    // Chain event clue — store for later POIs in the same map
+    if (outcome.cc) {
+        if (!S.chainClues) S.chainClues = new Set();
+        S.chainClues.add(outcome.cc);
+        addRewardBadge(rewardsEl, '🔗 Pista encontrada', 'item');
     }
 
     // Log the outcome event
@@ -922,6 +1137,7 @@ function showRandomEncounter(enc) {
     try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
     const overlay = document.getElementById('encounter-overlay');
+    overlay.setAttribute('data-biome', S.biome || 'forest');
     document.getElementById('enc-icon').textContent = '';
     document.getElementById('enc-title').textContent = enc.title || 'Encontro!';
 
