@@ -54,6 +54,9 @@ let S = {
     conditions: [],          // Active conditions: [{type, stepsLeft}]
     _hazardsTriggered: new Set(),  // Hexes that already triggered hazards
     _flavorSteps: 0,         // Steps since last flavor event
+    travelPace: 'normal',    // 'fast'|'normal'|'cautious' (D&D PHB Ch.8)
+    travelActivity: null,    // 'watch'|'forage'|'navigate'|'stealth'
+    interactedHexes: new Set(), // Hexes where player used "Explore Area"
 
     // Movement log (internal, sent to backend)
     moveLog: [],             // Array of log entries per step
@@ -91,6 +94,9 @@ function saveState() {
             iu: S.inventoryUsed,
             bd: S._bossDefeated || false,
             cau: S._campAmbushUsed || false,
+            tp: S.travelPace || 'normal',
+            ta: S.travelActivity || null,
+            ih: Array.from(S.interactedHexes || new Set()),
             ts: Date.now(),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
@@ -416,7 +422,11 @@ function getPassivePerception() {
     const wisMod = getAbilityMod('ws');
     const profInPerception = S.charData.sp && S.charData.sp.includes('per');
     const profBonus = profInPerception ? (S.charData.pb || 2) : 0;
-    return 10 + wisMod + profBonus;
+    let base = 10 + wisMod + profBonus;
+    // D&D PHB: Fast pace = -5 passive perception, Cautious = +5
+    if (S.travelPace === 'fast') base -= 5;
+    if (S.travelPace === 'cautious') base += 5;
+    return base;
 }
 
 // Tick conditions down after each step

@@ -50,6 +50,20 @@ let _hitStreak = 0;               // P2-G: Combo streak counter
 let _initDice3d = null;           // THREE.js Dice3D instance for initiative screen
 let _dmgDice3d = null;            // THREE.js Dice3D instance for damage rolls
 
+
+// ─── ANIMATION TIMING CONSTANTS ───
+const TIMING = {
+    D20_ROLL: 1200,           // Duration of d20 3D roll animation (ms)
+    D20_HOLD: 800,            // Hold time after d20 lands before damage phase (ms)
+    MISS_HOLD: 2400,          // Hold time on miss result before closing overlay (ms)
+    SKIP_DELAY: 500,          // Delay before skip button appears (ms)
+    CINEMATIC_WARN: 5000,     // Show "processing" toast after this delay (ms)
+    CINEMATIC_MAX: 20000,     // Force-reset cinematic after this timeout (ms)
+    POLL_ACTIVE: 2000,        // Poll interval during active combat (ms)
+    POLL_ENEMY: 3000,         // Poll interval during enemy turn (ms)
+    POLL_IDLE: 8000,          // Poll interval during idle phases (ms)
+};
+
 // ─── SHAKE HELPER — shake-light or shake-heavy on #app ───
 function _shakeApp(intensity) {
     const app = document.getElementById('app');
@@ -873,6 +887,8 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function _showTimerExpiredToast() {
+    hapticNotify('error');
+    _shakeApp('light');
     const el = document.createElement('div');
     el.className = 'timer-toast';
     const msg = '⏳ Tempo esgotado — turno perdido!';
@@ -1010,6 +1026,9 @@ function startPolling() {
                 const rollSig = state.lr ? `${state.lr.t||'a'}-${state.lr.r||0}-${state.lr.d||0}-${state.lr.miss||0}` : '';
                 if (hasEnemyRoll && rollSig !== _lastAnimatedRoll) {
                     _cinematicInProgress = true;
+    const _cinematicWarnTimer = setTimeout(() => {
+        if (_cinematicInProgress) showCombatToast('Processando...');
+    }, TIMING.CINEMATIC_WARN);
                     const _eLr = state.lr;
                     // Track enemy damage type for player damage VFX
                     if (!_isAllyTurn && _eLr.dt) _lastEnemyDmgType = _eLr.dt;
@@ -1615,7 +1634,11 @@ function bindActions(state) {
                 if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume().catch(() => { });
             }
             const action = btn.dataset.action;
-            if (btn.classList.contains('disabled')) return;
+            if (btn.classList.contains('disabled')) {
+                if (action === 'skill') showCombatToast('Sem recurso suficiente para habilidades');
+                else if (action === 'items') showCombatToast('Nenhum item utilizável em combate');
+                return;
+            }
 
             const enemies = state.e || [];
             const skills = state.acts?.skills || [];
@@ -1786,6 +1809,7 @@ function _playCinematicResult(result, actionType) {
     const _cinematicSafetyTimer = setTimeout(() => {
         if (_cinematicInProgress) {
             console.warn('[COMBAT] Cinematic safety timeout — force reset');
+            clearTimeout(_cinematicWarnTimer);
             _cinematicInProgress = false;
             startPolling();
         }
@@ -1872,6 +1896,7 @@ function _playCinematicResult(result, actionType) {
 
         setTimeout(() => {
             clearTimeout(_cinematicSafetyTimer);
+            clearTimeout(_cinematicWarnTimer);
             _cinematicInProgress = false;
             currentState = result;
             if (result.phase === 'ended') { showCombatEnded(); }
@@ -1883,6 +1908,7 @@ function _playCinematicResult(result, actionType) {
     } catch (e) {
         console.error('[COMBAT] Cinematic exception — force reset', e);
         clearTimeout(_cinematicSafetyTimer);
+        clearTimeout(_cinematicWarnTimer);
         _cinematicInProgress = false;
         currentState = result;
         renderArena(result);
@@ -2020,6 +2046,18 @@ function _showHealFlash() {
     setTimeout(() => flash.classList.remove('active'), 400);
 }
 
+
+// ─── COMBAT TOAST (lightweight feedback) ───
+function showCombatToast(msg, duration) {
+    const d = duration || 2500;
+    const el = document.createElement('div');
+    el.className = 'combat-toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.classList.add('visible'), 30);
+    setTimeout(() => { el.classList.remove('visible'); setTimeout(() => el.remove(), 300); }, d);
+}
+
 // ─── SKILL PICKER ───
 function showSkillPicker(skills, enemies, actionType) {
     if (!skills || skills.length === 0) return;
@@ -2108,7 +2146,8 @@ function showTargetPicker(enemies, actionType, skillId) {
             if (chText) {
                 const chVal = parseInt(chText);
                 const chCls = chVal >= 65 ? 'prev-hit' : chVal >= 40 ? 'prev-mid' : 'prev-miss';
-                previewHtml = `<div class="target-preview"><span class="${chCls}">${chText} chance</span>${dmgText ? ` · ${escHtml(dmgText)}` : ''}</div>`;
+                const chLabel = chVal >= 65 ? '\u{1F3AF} Prov\u00e1vel' : chVal >= 40 ? '\u26A0\uFE0F Arriscado' : '\u274C Dif\u00edcil';
+                previewHtml = `<div class="target-preview"><span class="${chCls}">${chLabel} \u00b7 ${chText}</span>${dmgText ? ` \u00b7 ${escHtml(dmgText)}` : ''}</div>`;
             }
         }
         const hpColor = pct > 50 ? '#4caf50' : pct > 25 ? '#ff9800' : '#e53935';
@@ -2617,11 +2656,7 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
     }
 }
 
-// Static dice display (for polling re-renders — no animation, no-op in overlay mode)
-function _showDiceStatic(lr) {
-    // In overlay-only mode, static display is not needed
-    // The overlay auto-closes and the combat log shows results
-}
+// (dead code _showDiceStatic removed)
 
 
 // ─── DEATH SAVE DICE: Dramatic d20 in 3D overlay ───

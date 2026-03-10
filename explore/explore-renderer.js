@@ -547,6 +547,8 @@ function onMoveComplete(col, row) {
     tickConditions();
     updateAtmosphere();
     updateMinimap();
+    if (typeof _resetExploreButton === 'function') _resetExploreButton();
+    if (typeof updatePaceUI === 'function') updatePaceUI();
     scrollCanvasToPlayer(true);
 
     // Environmental hazard check (priority over POI/exit)

@@ -7,6 +7,21 @@ let _moveStart = 0;
 let _moveDuration = 280;
 const MOVE_DURATION_NORMAL = 280;
 const MOVE_DURATION_DIFFICULT = 500;
+const MOVE_DURATION_FAST = 160;
+const MOVE_DURATION_CAUTIOUS = 450;
+
+// Get movement duration based on travel pace + terrain
+function getMoveDuration(isDifficult) {
+    if (isDifficult) {
+        // Difficult terrain: pace affects less (always slow-ish)
+        if (S.travelPace === 'fast') return 380;
+        if (S.travelPace === 'cautious') return 600;
+        return MOVE_DURATION_DIFFICULT;
+    }
+    if (S.travelPace === 'fast') return MOVE_DURATION_FAST;
+    if (S.travelPace === 'cautious') return MOVE_DURATION_CAUTIOUS;
+    return MOVE_DURATION_NORMAL;
+}
 
 function setMoveDuration(ms) { _moveDuration = ms; }
 

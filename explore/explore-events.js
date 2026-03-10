@@ -1434,8 +1434,10 @@ function showHazardCheck(hazard) {
     const mode = hasCondition('poisoned') ? 'disadvantage' : 'normal';
     const { roll, r1, r2 } = rollD20(mode);
 
+    const paceMod = typeof getPaceDCMod === 'function' ? getPaceDCMod() : 0;
+    const effectiveDC = Math.max(1, hazard.dc + paceMod);
     const total = roll + mod;
-    const success = total >= hazard.dc;
+    const success = total >= effectiveDC;
 
     S.checksPerformed.push({
         stat: hazard.stat, dc: hazard.dc, roll: roll, mod: mod, ok: success, mode: mode,
@@ -1471,7 +1473,7 @@ function showHazardCheck(hazard) {
         }
 
         dice.roll(roll, () => {
-            const formulaStr = buildFormula(roll, mod, statName, '', hazard.dc, total, r1, r2, mode);
+            const formulaStr = buildFormula(roll, mod, statName, '', effectiveDC, total, r1, r2, mode);
             formulaEl.innerHTML =
                 `<span style="color:var(--v-gold);font-size:14px">${hazard.label}</span><br>` + formulaStr;
 
@@ -1647,6 +1649,202 @@ function checkHazardCombat() {
 }
 
 // ═══════════════════════════════════════════════════════
+// =========================================================
+// TRAVEL PACE (D&D PHB Ch.8)
+// =========================================================
+const PACE_CONFIG = {
+    fast:     { icon: '\u{1F3C3}', label: 'R\u00e1pido',   color: 'pace-fast',     pp: -5, dcMod: 0,  desc: '-5 Percep\u00e7\u00e3o Passiva' },
+    normal:   { icon: '\u{1F6B6}', label: 'Normal',    color: '',              pp: 0,  dcMod: 0,  desc: 'Ritmo padr\u00e3o' },
+    cautious: { icon: '\u{1F43E}', label: 'Cauteloso', color: 'pace-cautious', pp: +5, dcMod: -2, desc: '+5 Percep\u00e7\u00e3o, -2 DC hazards' },
+};
+
+function cycleTravelPace() {
+    const order = ['fast', 'normal', 'cautious'];
+    const idx = order.indexOf(S.travelPace || 'normal');
+    S.travelPace = order[(idx + 1) % 3];
+    updatePaceUI();
+    saveState();
+    const cfg = PACE_CONFIG[S.travelPace];
+    showTerrainToast(`${cfg.icon} ${cfg.label}: ${cfg.desc}`, 'info');
+}
+
+function updatePaceUI() {
+    const btn = document.getElementById('pace-toggle');
+    if (!btn) return;
+    const cfg = PACE_CONFIG[S.travelPace || 'normal'];
+    btn.textContent = cfg.icon;
+    btn.className = 'pace-toggle ' + cfg.color;
+    btn.title = `${cfg.label}: ${cfg.desc}`;
+}
+
+function getPaceDCMod() {
+    return (PACE_CONFIG[S.travelPace] || {}).dcMod || 0;
+}
+
+// =========================================================
+// EXPLORE AREA (Search, Forage, Observe, Rest)
+// =========================================================
+function showExploreArea() {
+    const key = `${S.playerCol},${S.playerRow}`;
+    if (!S.interactedHexes) S.interactedHexes = new Set();
+    if (S.interactedHexes.has(key)) {
+        showTerrainToast('Voc\u00ea j\u00e1 explorou esta \u00e1rea.', 'info');
+        return;
+    }
+
+    const overlay = document.getElementById('dm-overlay');
+    const header = document.getElementById('dm-header');
+    const body = document.getElementById('dm-body');
+    const choicesEl = document.getElementById('dm-choices');
+    if (!overlay || !body) return;
+
+    header.textContent = '\u{1F50D} Explorar \u00c1rea';
+    body.innerHTML = '<p style="color:var(--v-text);font-size:14px;line-height:1.6;margin:0">Voc\u00ea para por um momento e observa os arredores. O que deseja fazer?</p>';
+    choicesEl.innerHTML = '';
+    overlay.classList.add('active');
+
+    const options = [
+        { label: '\u{1F50E} Procurar', stat: 'inv', dc: 12, onOk: _exploreSearchSuccess, onFail: _exploreSearchFail },
+        { label: '\u{1F33F} Forragear', stat: 'sur', dc: 10 + S.dangerLevel, onOk: _exploreForageSuccess, onFail: _exploreForageFail },
+        { label: '\u{1F441} Observar',  stat: 'per', dc: 13, onOk: _exploreObserveSuccess, onFail: _exploreObserveFail },
+    ];
+
+    for (const opt of options) {
+        const btn = document.createElement('button');
+        btn.className = 'dm-choice-btn';
+        const mod = getAbilityMod(opt.stat);
+        const prof = S.charData && S.charData.sp && S.charData.sp.includes(opt.stat) ? (S.charData.pb || 2) : 0;
+        const total = mod + prof;
+        const chance = Math.min(95, Math.max(5, (21 - opt.dc + total) * 5));
+        const statShort = STAT_SHORT[opt.stat] || opt.stat.toUpperCase();
+        const profStar = prof > 0 ? '\u2605' : '';
+        btn.innerHTML = `${opt.label} <span class="choice-stat-badge">${statShort}${profStar} ${chance}%</span>`;
+        btn.onclick = () => {
+            overlay.classList.remove('active');
+            S.interactedHexes.add(key);
+            _markExploreUsed();
+            _doExploreCheck(opt);
+        };
+        choicesEl.appendChild(btn);
+    }
+
+    const restBtn = document.createElement('button');
+    restBtn.className = 'dm-choice-btn';
+    restBtn.innerHTML = '\u26fa Descansar';
+    restBtn.onclick = () => {
+        overlay.classList.remove('active');
+        S.interactedHexes.add(key);
+        _markExploreUsed();
+        if (typeof showCampingOverlay === 'function') showCampingOverlay();
+    };
+    choicesEl.appendChild(restBtn);
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'dm-choice-btn';
+    cancelBtn.style.opacity = '0.6';
+    cancelBtn.textContent = 'Cancelar';
+    cancelBtn.onclick = () => overlay.classList.remove('active');
+    choicesEl.appendChild(cancelBtn);
+}
+
+function _markExploreUsed() {
+    const btn = document.getElementById('btn-explore');
+    if (btn) btn.classList.add('on-cooldown');
+    saveState();
+}
+
+function _resetExploreButton() {
+    const btn = document.getElementById('btn-explore');
+    if (!btn) return;
+    if (!S.interactedHexes) S.interactedHexes = new Set();
+    const key = `${S.playerCol},${S.playerRow}`;
+    btn.classList.toggle('on-cooldown', S.interactedHexes.has(key));
+}
+
+function _doExploreCheck(opt) {
+    const mod = getAbilityMod(opt.stat);
+    const prof = S.charData && S.charData.sp && S.charData.sp.includes(opt.stat) ? (S.charData.pb || 2) : 0;
+    const mode = hasCondition('poisoned') ? 'disadvantage' : 'normal';
+    const { roll, r1, r2 } = rollD20(mode);
+    const total = roll + mod + prof;
+    const success = total >= opt.dc;
+
+    S.checksPerformed.push({ stat: opt.stat, dc: opt.dc, roll, mod: mod + prof, ok: success, mode });
+
+    const overlay = document.getElementById('check-overlay');
+    const formulaEl = document.getElementById('check-formula');
+    const resultEl = document.getElementById('check-result');
+    formulaEl.innerHTML = '';
+    resultEl.textContent = '';
+    resultEl.className = 'check-result';
+    overlay.classList.add('active');
+
+    const statName = STAT_NAMES[opt.stat] || opt.stat;
+    const dice = getDice3D();
+    const finishCheck = () => {
+        resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
+        resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
+        const formulaStr = buildFormula(roll, mod + prof, statName, '', opt.dc, total, r1, r2, mode);
+        formulaEl.innerHTML = formulaStr;
+        try { if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error'); } catch(e) {}
+
+        let _done = false;
+        const finish = () => {
+            if (_done) return;
+            _done = true;
+            disposeDice3D();
+            overlay.classList.remove('active');
+            if (success) opt.onOk();
+            else opt.onFail();
+            saveState();
+        };
+        const skipBtn = document.getElementById('check-skip-btn');
+        setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finish; } }, 500);
+        setTimeout(finish, 2500);
+    };
+
+    if (dice) { dice.roll(roll, finishCheck); }
+    else { setTimeout(finishCheck, 700); }
+}
+
+function _exploreSearchSuccess() {
+    const xp = 15 + Math.floor(Math.random() * 20);
+    S.xpEarned += xp;
+    updateRewards();
+    showTerrainToast('\u{1F50E} Encontrou algo! +' + xp + ' XP', 'info');
+    const hiddenPoi = S.pois.find(p => !S.poisResolved.has(p.id) && p.hid);
+    if (hiddenPoi) {
+        hiddenPoi.hid = 0;
+        showTerrainToast('\u2728 Descobriu algo oculto nas proximidades!', 'info');
+    }
+}
+function _exploreSearchFail() { showTerrainToast('\u{1F50E} N\u00e3o encontrou nada de especial.', 'info'); }
+function _exploreForageSuccess() {
+    const gp = 5 + Math.floor(Math.random() * 15);
+    S.goldEarned += gp;
+    updateRewards();
+    showTerrainToast('\u{1F33F} Forragear: encontrou ervas e materiais (+' + gp + ' GP)', 'info');
+}
+function _exploreForageFail() { showTerrainToast('\u{1F33F} N\u00e3o encontrou nada \u00fatil.', 'info'); }
+function _exploreObserveSuccess() {
+    let revealed = 0;
+    for (const poi of S.pois) {
+        if (!S.poisResolved.has(poi.id) && poi.hid) {
+            const dist = hexDist(poi.col, poi.row, S.playerCol, S.playerRow);
+            if (dist <= S.visibility + 2) { poi.hid = 0; revealed++; }
+        }
+    }
+    if (revealed > 0) {
+        showTerrainToast('\u{1F441} Percep\u00e7\u00e3o agu\u00e7ada! ' + revealed + ' local(is) revelado(s)!', 'info');
+    } else {
+        S.xpEarned += 10;
+        updateRewards();
+        showTerrainToast('\u{1F441} Observou bem os arredores. +10 XP', 'info');
+    }
+}
+function _exploreObserveFail() { showTerrainToast('\u{1F441} Seus sentidos n\u00e3o captam nada al\u00e9m do \u00f3bvio.', 'info'); }
+
+
 // INVENTORY USAGE (potions, consumables, food)
 // ═══════════════════════════════════════════════════════
 function useInventoryItem(item) {
