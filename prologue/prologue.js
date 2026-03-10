@@ -564,6 +564,10 @@ async function boot() {
     try {
         DATA = await apiCall('/api/prologue/init');
 
+        // Hide initial magic circle loading with narrative delay
+        if (window._prologueInitLoading) {
+            window._prologueInitLoading.hide();
+        }
         document.getElementById('loading').style.display = 'none';
 
         if (DATA.mode === 'aftermath') {

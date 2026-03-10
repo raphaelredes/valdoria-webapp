@@ -124,7 +124,7 @@ async function initAsync() {
         const stageEl = document.getElementById('loading-stage');
         const tipEl = document.getElementById('loading-tip');
         const loadStart = Date.now();
-        const MIN_LOAD_MS = 2500; // Minimum loading time for animation to play
+        const MIN_LOAD_MS = 3500; // Minimum loading time for narrative immersion
 
         const updateProgress = (pct) => {
             if (progressFill) progressFill.style.width = pct + '%';
@@ -135,12 +135,15 @@ async function initAsync() {
 
         // Rotating map-themed tips
         const MAP_TIPS = [
-            'Desenrolando o pergaminho...',
-            'Traçando rotas conhecidas...',
-            'Gravando runas no pergaminho...',
-            'Cartografando os biomas...',
-            'Marcando territórios inexplorados...',
-            'Consultando bússola arcana...',
+            // Narrativas imersivas — mapa do mundo
+            'Você desenrola o pergaminho e estuda as rotas traçadas a carvão...',
+            'A bússola arcana gira lentamente, apontando para o norte verdadeiro...',
+            'Montanhas, florestas e rios se revelam no mapa desgastado pelo tempo...',
+            'Seus dedos percorrem as trilhas marcadas, calculando a distância...',
+            'Marcas de tinta vermelha indicam territórios perigosos e inexplorados...',
+            'O pergaminho cheira a tinta de carvalho e segredos antigos...',
+            'Runas cartográficas brilham levemente ao toque de seus dedos...',
+            'Cada dobra do mapa revela caminhos que poucos ousaram trilhar...',
         ];
         let _tipIdx = 0;
         const _tipTimer = setInterval(() => {
@@ -154,7 +157,7 @@ async function initAsync() {
                     setTimeout(() => tipEl.classList.remove('tip-enter'), 400);
                 }, 300);
             }
-        }, 2800);
+        }, 6000);
 
         updateProgress(5);
         await renderMapAsync(updateProgress, updateStage);

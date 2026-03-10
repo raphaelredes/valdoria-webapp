@@ -12,6 +12,7 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="inventory.css?v=' + v + '">');
     </script>
     <script src="../shared/font-apply.js"></script>
@@ -20,17 +21,131 @@
 </head>
 
 <body>
-    <!-- Loading -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"><svg class="vi" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="19" x2="19" y2="5" />
-                <line x1="14" y1="5" x2="19" y2="10" />
-                <line x1="5" y1="15" x2="9" y2="19" />
-                <circle cx="7" cy="17" r="1" />
-            </svg></div>
-        <div class="loading-text">Carregando mochila...</div>
+    <!-- Loading overlay (magic circle) -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-particles">
+            <div class="particle ember p1"></div>
+            <div class="particle ember p2"></div>
+            <div class="particle ember p3"></div>
+            <div class="particle ember p4"></div>
+            <div class="particle spark s1"></div>
+            <div class="particle spark s2"></div>
+            <div class="particle mote m1"></div>
+            <div class="particle mote m2"></div>
+            <div class="particle flame fl1"></div>
+            <div class="particle flame fl2"></div>
+            <div class="particle arcane ar1"></div>
+            <div class="particle arcane ar2"></div>
+        </div>
+        <div class="magic-circle">
+            <div class="mc-aura"></div>
+            <div class="mc-aura mc-aura-2"></div>
+            <svg class="mc-ring mc-outer" viewBox="0 0 300 300">
+                <defs><path id="runeOuter" d="M150,150 m-125,0 a125,125 0 1,1 250,0 a125,125 0 1,1 -250,0"/></defs>
+                <circle cx="150" cy="150" r="125" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="1"/>
+                <text class="mc-rune-text" fill="rgba(196,149,58,0.5)">
+                    <textPath href="#runeOuter" startOffset="0%">&#5792; &#5794; &#5798; &#5800; &#5809; &#5810; &#5815; &#5817; &#5818; &#5822; &#5825; &#5827;</textPath>
+                </text>
+            </svg>
+            <svg class="mc-ring mc-mid" viewBox="0 0 300 300">
+                <circle class="mc-energy-arc mc-arc-1" cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+                <circle class="mc-energy-arc mc-arc-2" cx="150" cy="150" r="96" fill="none" stroke="rgba(123,32,32,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <svg class="mc-ring mc-inner" viewBox="0 0 300 300">
+                <defs><path id="runeInner" d="M150,150 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0"/></defs>
+                <text class="mc-inner-text" fill="rgba(196,149,58,0.35)">
+                    <textPath href="#runeInner" startOffset="0%">&#9670; MOCHILA &#9670; ITENS &#9670; MOCHILA &#9670; ITENS </textPath>
+                </text>
+            </svg>
+            <div class="mc-pulse"></div>
+            <div class="mc-pulse mc-pulse-2"></div>
+            <div id="mc-gem" class="mc-gem">
+                <div class="mc-gem-core"></div>
+                <div class="mc-gem-flare"></div>
+            </div>
+            <div class="mc-completion-wave"></div>
+            <div class="mc-completion-wave wave-2"></div>
+        </div>
+        <div class="loading-flash"></div>
+        <div class="loading-brand">
+            <div class="loading-title">MOCHILA</div>
+            <div class="loading-divider"><span class="divider-rune">&#9670;</span></div>
+        </div>
+        <div class="loading-progress-wrap">
+            <div class="loading-progress-track">
+                <div id="loading-progress" class="loading-progress-fill"></div>
+            </div>
+        </div>
+        <div class="loading-tip-area">
+            <div id="loading-tip" class="loading-tip">Abrindo a mochila...</div>
+        </div>
     </div>
+
+    <!-- Loading controller (narrative tips + min load) -->
+    <script>
+    (function() {
+        var TIPS = [
+            'Você desamarra as fivelas da mochila de couro surrado...',
+            'O cheiro de ervas secas e metal se mistura ao abrir o alforje...',
+            'Seus dedos percorrem os compartimentos, catalogando seus pertences...',
+            'Frascos tilintam contra lâminas enquanto você organiza seus itens...',
+            'A luz da tocha revela o brilho de uma gema esquecida no fundo...',
+            'Cordas, tochas e rações — tudo que um aventureiro precisa...',
+            'Cada item carrega uma história das aventuras que você viveu...',
+            'O couro da mochila range enquanto você vasculha seus pertences...',
+        ];
+        var tipEl = document.getElementById('loading-tip');
+        var progressEl = document.getElementById('loading-progress');
+        var overlay = document.getElementById('loadingOverlay');
+        var tipIndex = 0;
+        var _tipInterval;
+        var _loadStart = Date.now();
+        var MIN_LOAD_MS = 2500;
+        var _progress = 0;
+
+        // Simulated progress
+        var _progressTimer = setInterval(function() {
+            _progress += (90 - _progress) * 0.08;
+            if (progressEl) progressEl.style.width = _progress + '%';
+        }, 200);
+
+        // Rotate tips every 5s with crossfade
+        _tipInterval = setInterval(function() {
+            tipIndex = (tipIndex + 1) % TIPS.length;
+            if (tipEl) {
+                tipEl.classList.add('tip-exit');
+                setTimeout(function() {
+                    tipEl.textContent = TIPS[tipIndex];
+                    tipEl.classList.remove('tip-exit');
+                    tipEl.classList.add('tip-enter');
+                    setTimeout(function() { tipEl.classList.remove('tip-enter'); }, 350);
+                }, 300);
+            }
+        }, 5000);
+
+        window._invLoadingCtrl = {
+            hide: function() {
+                clearInterval(_tipInterval);
+                clearInterval(_progressTimer);
+                if (!overlay || overlay.classList.contains('hidden')) return;
+                var elapsed = Date.now() - _loadStart;
+                var remaining = MIN_LOAD_MS - elapsed;
+                if (remaining > 0) {
+                    setTimeout(function() { window._invLoadingCtrl.hide(); }, remaining);
+                    return;
+                }
+                // Fill to 100% + cinematic exit
+                if (progressEl) progressEl.style.width = '100%';
+                setTimeout(function() {
+                    overlay.classList.add('exit-cinematic');
+                    setTimeout(function() {
+                        overlay.classList.add('hidden');
+                    }, 950);
+                }, 150);
+            }
+        };
+    })();
+    </script>
 
     <div class="header">
         <h1><svg class="vi" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"

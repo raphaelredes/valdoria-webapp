@@ -118,22 +118,24 @@
     <script>
     (function() {
         var TIPS = [
-            'Gerando mapa...',
-            'Terrenos elevados concedem vantagem em combate',
-            'Descansar na estalagem restaura HP e MP',
-            'Feitiços de área afetam todos inimigos adjacentes',
-            'Percepção Passiva revela armadilhas ocultas',
-            'Anões têm resistência a veneno',
-            'Elfos possuem visão no escuro',
-            'Curandeiros podem usar Descanso Curto entre combates',
-            'Inimigos mais fortes concedem mais XP',
-            'Equipamentos podem ter encaixes para runas',
-            'Ladinos causam dano extra com Ataque Furtivo',
-            'Bardos inspiram aliados com Inspiração Bárdica',
-            'A reputação com NPCs afeta preços nas lojas',
-            'Explore cada sala — tesouros escondidos aguardam',
-            'Magos podem preparar magias diferentes a cada descanso',
-            'Paladinos podem Impor as Mãos para curar aliados',
+            // Narrativas imersivas — exploração
+            'Você ajusta a mochila e dá os primeiros passos pela trilha...',
+            'O vento traz o cheiro de terra molhada e folhas secas...',
+            'O horizonte se abre diante de você, cheio de promessas e perigos...',
+            'Galhos estalando no escuro... sentidos aguçados, mão na arma...',
+            'A trilha se estreita entre rochas cobertas de musgo...',
+            'Pegadas na lama indicam que você não é o primeiro a passar por aqui...',
+            'O canto distante de um pássaro quebra o silêncio da floresta...',
+            'Nuvens escuras se acumulam no horizonte — melhor se apressar...',
+            // Dicas D&D intercaladas
+            '⚔️ Dica: Terrenos elevados concedem vantagem em combate',
+            '🛡️ Dica: Percepção Passiva revela armadilhas ocultas',
+            '🏹 Dica: Anões têm resistência a veneno',
+            '👁️ Dica: Elfos possuem visão no escuro',
+            '🗡️ Dica: Ladinos causam dano extra com Ataque Furtivo',
+            '🎵 Dica: Bardos inspiram aliados com Inspiração Bárdica',
+            '📜 Dica: Explore cada sala — tesouros escondidos aguardam',
+            '🧙 Dica: Magos podem preparar magias diferentes a cada descanso',
         ];
         var tipEl = document.getElementById('loading-tip');
         var progressEl = document.getElementById('loading-progress');
@@ -143,6 +145,8 @@
         var tipIndex = 0;
         var _tipInterval, _slowTimer, _verySlowTimer;
         var _lastPct = 0;
+        var _loadStart = Date.now();
+        var MIN_LOAD_MS = 3500;
 
         // Ring acceleration: lerp speed based on progress (100% = 4x faster)
         function updateRingSpeed(pct) {
@@ -201,7 +205,7 @@
             });
         }
 
-        // Rotate tips every 3.5s with crossfade
+        // Rotate tips every 6s with crossfade (narrative immersion)
         _tipInterval = setInterval(function() {
             tipIndex = (tipIndex + 1) % TIPS.length;
             tipEl.classList.add('tip-exit');
@@ -211,7 +215,7 @@
                 tipEl.classList.add('tip-enter');
                 setTimeout(function() { tipEl.classList.remove('tip-enter'); }, 350);
             }, 300);
-        }, 3500);
+        }, 6000);
 
         // Slow loading indicator after 5s
         _slowTimer = setTimeout(function() {
@@ -244,6 +248,14 @@
                 clearTimeout(_slowTimer);
                 clearTimeout(_verySlowTimer);
                 if (!overlay || overlay.classList.contains('hidden')) { if (cb) cb(); return; }
+                // Enforce minimum loading time for narrative immersion
+                var elapsed = Date.now() - _loadStart;
+                var remaining = MIN_LOAD_MS - elapsed;
+                if (remaining > 0) {
+                    var self = this;
+                    setTimeout(function() { self.hideLoading(cb); }, remaining);
+                    return;
+                }
                 // Set progress to 100% with final stage
                 if (progressEl) progressEl.style.width = '100%';
                 updateRingSpeed(100);

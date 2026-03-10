@@ -22,10 +22,19 @@ const HEALTH_TIMEOUT_MS = 3000; // 3s timeout — fast fail for instant reconnec
 const HEALTH_RETRIES = 1;       // 1 retry only — fast fail for instant reconnect
 const HEALTH_RETRY_MS = 1000;   // 1s between retries
 const LOADING_TIMEOUT_MS = 15000; // 15s max loading screen before auto-error
+const MIN_LOADING_MS = 3500; // 3.5s minimum loading for narrative immersion
 const SCREEN_CACHE_KEY = 'valdoria_game_screen';
 const SCREEN_CACHE_TTL = 1800000; // 30 minutes
 
 let _loadingTimeoutId = null;
+
+// ─── Minimum loading delay (narrative immersion) ───
+async function hideLoadingWithDelay() {
+    const elapsed = Date.now() - (_loadingStartTime || 0);
+    const remaining = MIN_LOADING_MS - elapsed;
+    if (remaining > 0) await sleep(remaining);
+    hideLoading();
+}
 
 // ─── Connection logging alias (provided by shared/error-reporter.js) ───
 function _clog(msg) {
@@ -501,7 +510,7 @@ async function startGame() {
     const tgPlatform = (window.Telegram && Telegram.WebApp && Telegram.WebApp.platform) || '';
     if (tgPlatform) startBody.platform = tgPlatform;
     const data = await apiCall('/api/game/start', startBody);
-    hideLoading();
+    await hideLoadingWithDelay();
     if (data && !data.error) {
         if (data.sv !== undefined) S.screenVersion = data.sv;
         // Handle transition responses (prologue, level-up, explore, combat)
@@ -531,7 +540,7 @@ async function fetchState(silent) {
     console.log('[GAME] fetchState() silent:', silent);
     if (!silent) showLoading();
     const data = await apiCall('/api/game/state');
-    if (!silent) hideLoading();
+    if (!silent) await hideLoadingWithDelay();
 
     if (data && !data.error) {
         if (data.sv !== undefined) S.screenVersion = data.sv;

@@ -158,6 +158,20 @@ function renderScreen(screen) {
         _showNotifications(screen.notifications);
     }
 
+    // Feedback popup (rare ~4% on city screens)
+    if (screen.feedback_popup) {
+        setTimeout(() => _showFeedbackOverlay(screen.feedback_popup), 800);
+    }
+    // Survey offer response (after rating)
+    if (screen.feedback_survey_offer) {
+        _showFeedbackPhase('survey-offer');
+    }
+    // Survey questions (after accepting)
+    if (screen.feedback_survey) {
+        _renderFeedbackSurvey(screen.feedback_survey);
+        _showFeedbackPhase('survey');
+    }
+
     // Buttons (rendered into #buttons inside #bottom-panel)
     const buttonsEl = document.getElementById('buttons');
     buttonsEl.innerHTML = '';
@@ -916,4 +930,197 @@ function _animateBarDeltas(contentEl) {
         }
         _prevBarState[key] = curPct;
     });
+}
+
+/* ═══════════════════════════════════════════════════════
+   FEEDBACK & DONATION OVERLAY
+   ═══════════════════════════════════════════════════════ */
+
+var _fbData = null;
+var _fbSelectedRating = 0;
+
+function _showFeedbackOverlay(data) {
+    _fbData = data;
+    _fbSelectedRating = 0;
+    var overlay = document.getElementById('feedback-overlay');
+    if (!overlay) return;
+
+    // Populate phase 1 (rating)
+    var titleEl = document.getElementById('fb-title');
+    var msgEl = document.getElementById('fb-message');
+    var starsEl = document.getElementById('fb-stars');
+    var pixBtn = document.getElementById('fb-pix-btn');
+
+    if (titleEl) titleEl.textContent = data.title || '';
+    if (msgEl) msgEl.textContent = data.message || '';
+
+    // Build star buttons
+    if (starsEl) {
+        starsEl.innerHTML = '';
+        for (var i = 1; i <= 5; i++) {
+            var star = document.createElement('button');
+            star.className = 'feedback-star';
+            star.textContent = '⭐';
+            star.dataset.rating = i;
+            star.setAttribute('aria-label', i + ' estrela' + (i > 1 ? 's' : ''));
+            star.addEventListener('click', _onStarClick);
+            starsEl.appendChild(star);
+        }
+    }
+
+    // PIX button
+    if (pixBtn) {
+        pixBtn.style.display = data.show_pix ? '' : 'none';
+        pixBtn.onclick = function() {
+            _hideFeedbackOverlay();
+            if (typeof doAction === 'function') doAction('fb_pix');
+        };
+    }
+
+    // Dismiss button
+    var dismissBtn = document.getElementById('fb-dismiss-btn');
+    if (dismissBtn) {
+        dismissBtn.onclick = function() {
+            _hideFeedbackOverlay();
+            if (typeof doAction === 'function') doAction('fb_dismiss');
+        };
+    }
+
+    // Survey offer buttons
+    var surveyYes = document.getElementById('fb-survey-yes');
+    if (surveyYes) {
+        surveyYes.onclick = function() {
+            if (typeof doAction === 'function') doAction('fb_survey_yes');
+        };
+    }
+    var surveyNo = document.getElementById('fb-survey-no');
+    if (surveyNo) {
+        surveyNo.onclick = function() {
+            _hideFeedbackOverlay();
+            if (typeof doAction === 'function') doAction('fb_survey_no');
+        };
+    }
+
+    // Submit survey button
+    var submitBtn = document.getElementById('fb-survey-submit');
+    if (submitBtn) {
+        submitBtn.onclick = _onSurveySubmit;
+    }
+
+    // Show phase 1, hide others
+    _showFeedbackPhase('rating');
+    overlay.style.display = 'flex';
+}
+
+function _onStarClick(e) {
+    var rating = parseInt(e.currentTarget.dataset.rating) || 3;
+    _fbSelectedRating = rating;
+    // Highlight stars up to selected
+    var stars = document.querySelectorAll('.feedback-star');
+    stars.forEach(function(s) {
+        var r = parseInt(s.dataset.rating) || 0;
+        if (r <= rating) {
+            s.classList.add('active');
+        } else {
+            s.classList.remove('active');
+        }
+    });
+    // Brief delay then send rating + show survey offer
+    setTimeout(function() {
+        if (typeof doAction === 'function') doAction('fb_rate_' + rating);
+    }, 400);
+}
+
+function _showFeedbackPhase(phase) {
+    var phases = ['rating', 'survey-offer', 'survey'];
+    phases.forEach(function(p) {
+        var el = document.getElementById('fb-phase-' + p);
+        if (el) el.style.display = (p === phase) ? '' : 'none';
+    });
+    // Ensure overlay is visible
+    var overlay = document.getElementById('feedback-overlay');
+    if (overlay) overlay.style.display = 'flex';
+}
+
+function _renderFeedbackSurvey(questions) {
+    var form = document.getElementById('fb-survey-form');
+    if (!form) return;
+    form.innerHTML = '';
+
+    questions.forEach(function(q) {
+        var qDiv = document.createElement('div');
+        qDiv.className = 'fb-question';
+        qDiv.dataset.questionId = q.id;
+
+        var label = document.createElement('div');
+        label.className = 'fb-question-text';
+        label.textContent = q.text;
+        qDiv.appendChild(label);
+
+        if (q.type === 'choice' && q.options) {
+            var opts = document.createElement('div');
+            opts.className = 'fb-options';
+            q.options.forEach(function(opt) {
+                var btn = document.createElement('button');
+                btn.className = 'fb-option';
+                btn.textContent = opt;
+                btn.dataset.questionId = q.id;
+                btn.dataset.value = opt;
+                btn.onclick = function() {
+                    // Deselect siblings
+                    opts.querySelectorAll('.fb-option').forEach(function(b) {
+                        b.classList.remove('selected');
+                    });
+                    btn.classList.add('selected');
+                };
+                opts.appendChild(btn);
+            });
+            qDiv.appendChild(opts);
+        } else if (q.type === 'text') {
+            var ta = document.createElement('textarea');
+            ta.className = 'fb-textarea';
+            ta.placeholder = 'Sugestões, elogios, críticas...';
+            ta.dataset.questionId = q.id;
+            qDiv.appendChild(ta);
+        }
+
+        form.appendChild(qDiv);
+    });
+}
+
+function _onSurveySubmit() {
+    var form = document.getElementById('fb-survey-form');
+    if (!form) return;
+    var answers = {};
+    form.querySelectorAll('.fb-question').forEach(function(qDiv) {
+        var qId = qDiv.dataset.questionId;
+        var selected = qDiv.querySelector('.fb-option.selected');
+        if (selected) {
+            answers[qId] = selected.dataset.value;
+        }
+        var ta = qDiv.querySelector('.fb-textarea');
+        if (ta && ta.value.trim()) {
+            answers[qId] = ta.value.trim();
+        }
+    });
+    _hideFeedbackOverlay();
+    // Send survey via API with extra body data
+    if (typeof apiCall === 'function') {
+        apiCall('/api/game/action', {
+            cb: 'fb_survey_submit',
+            user_id: S.userId,
+            survey: answers
+        }).then(function(data) {
+            if (data && typeof renderScreen === 'function') {
+                renderScreen(data);
+            }
+        }).catch(function(e) {
+            console.error('[GAME] Survey submit error:', e);
+        });
+    }
+}
+
+function _hideFeedbackOverlay() {
+    var overlay = document.getElementById('feedback-overlay');
+    if (overlay) overlay.style.display = 'none';
 }

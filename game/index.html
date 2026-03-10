@@ -230,6 +230,41 @@
         <div class="loc-transition-dots"><span>.</span><span>.</span><span>.</span></div>
     </div>
 
+    <!-- Feedback & donation overlay -->
+    <div id="feedback-overlay" class="feedback-overlay" style="display:none">
+        <div class="feedback-card">
+            <!-- Phase 1: Thank you + Rating -->
+            <div id="fb-phase-rating">
+                <div class="feedback-title" id="fb-title"></div>
+                <div class="feedback-message" id="fb-message"></div>
+                <div class="feedback-stars" id="fb-stars"></div>
+                <div class="feedback-actions">
+                    <button class="feedback-pix-btn" id="fb-pix-btn" style="display:none">
+                        💎 Apoiar via PIX
+                    </button>
+                    <button class="feedback-dismiss-btn" id="fb-dismiss-btn">Fechar</button>
+                </div>
+            </div>
+            <!-- Phase 2: Survey offer -->
+            <div id="fb-phase-survey-offer" style="display:none">
+                <div class="feedback-title">✨ Obrigado!</div>
+                <div class="feedback-message">Quer responder mais 4 perguntas rápidas? Leva menos de 1 minuto.</div>
+                <div class="feedback-actions">
+                    <button class="feedback-btn-primary" id="fb-survey-yes">Sim, claro!</button>
+                    <button class="feedback-dismiss-btn" id="fb-survey-no">Não, obrigado</button>
+                </div>
+            </div>
+            <!-- Phase 3: Survey -->
+            <div id="fb-phase-survey" style="display:none">
+                <div class="feedback-title">📋 Pesquisa Rápida</div>
+                <div class="feedback-survey-form" id="fb-survey-form"></div>
+                <div class="feedback-actions">
+                    <button class="feedback-btn-primary" id="fb-survey-submit">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Transition animation overlay -->
     <div id="transition-overlay" class="transition-overlay" style="display:none"></div>
 

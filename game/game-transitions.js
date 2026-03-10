@@ -120,7 +120,7 @@ async function returnFromWebApp() {
     console.log('[GAME] returnFromWebApp() called');
     showLoading();
     const data = await apiCall('/api/game/state');
-    hideLoading();
+    await hideLoadingWithDelay();
 
     if (data && !data.error) {
         if (data.transition && !data.text) {

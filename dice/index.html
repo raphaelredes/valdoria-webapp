@@ -1655,10 +1655,18 @@
             animate(performance.now());
         }
 
+        var _diceLoadStart = Date.now();
         init();
-        // Dismiss loading overlay once 3D scene is ready
+        // Dismiss loading overlay with minimum display time
         var lo = document.getElementById('loadingOverlay');
-        if (lo) { lo.classList.add('v-hidden'); setTimeout(function () { lo.remove(); }, 500); }
+        if (lo) {
+            var elapsed = Date.now() - _diceLoadStart;
+            var remaining = Math.max(0, 2000 - elapsed);
+            setTimeout(function() {
+                lo.classList.add('v-hidden');
+                setTimeout(function () { lo.remove(); }, 500);
+            }, remaining);
+        }
     </script>
     <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('../sw.js').catch(() => { }) }</script>
 </body>

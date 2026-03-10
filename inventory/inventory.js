@@ -207,7 +207,11 @@ function init() {
 }
 
 function hideLoading() {
-    document.getElementById('loadingOverlay').classList.add('hidden');
+    if (window._invLoadingCtrl) {
+        window._invLoadingCtrl.hide();
+    } else {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+    }
 }
 
 function _showInitError(msg) {

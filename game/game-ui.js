@@ -5,10 +5,18 @@
 
 // ─── Loading (with cycling tips, ring acceleration, gem phases, cinematic exit) ───
 const _LOADING_TIPS = [
-    'Preparando sua aventura...',
-    '⚔️ Dica: Combine ataques com aliados para dano extra!',
+    // Narrativas imersivas — cidade
+    'As muralhas de pedra se erguem enquanto os portões rangem ao abrir...',
+    'O som de bigornas e o aroma de pão fresco preenchem as ruas empedradas...',
+    'Guardas patrulham as ameias enquanto comerciantes montam suas barracas...',
+    'O vento traz murmúrios da taverna e risos de crianças brincando na praça...',
+    'Tochas acesas iluminam os brasões entalhados nos portais da cidade...',
+    'O sino do templo ecoa pela manhã, despertando a cidade de seu sono...',
+    'Mercadores ajustam suas bancas, exibindo relíquias de terras distantes...',
+    'O cheiro de cerveja e carne assada escapa pelas portas da estalagem...',
+    // Dicas D&D intercaladas
+    '⚔️ Dica: Rolagens de ataque 20 são acertos críticos — dano dobrado!',
     '🛡️ Dica: Descansar na estalagem recupera todos os dados de vida.',
-    '🎲 Dica: Rolagens de ataque 20 são acertos críticos — dano dobrado!',
     '💰 Dica: Venda itens que não usa no mercado da cidade.',
     '📜 Dica: Converse com NPCs para descobrir quests escondidas.',
     '🏰 Dica: A Guilda de Aventureiros oferece missões com boas recompensas.',
@@ -20,6 +28,7 @@ let _loadingTipTimer = null;
 let _loadingTipIndex = 0;
 let _loadingProgressTimer = null;
 let _loadingProgress = 0;
+let _loadingStartTime = 0;
 
 let _isRetryLoading = false;
 let _loadingSlowTimer = null;
@@ -41,6 +50,7 @@ function showLoading(isRetry = false) {
         circle.style.removeProperty('--ring-inner');
     }
     _isRetryLoading = isRetry;
+    _loadingStartTime = Date.now();
     _startLoadingProgress();
     _startLoadingTimeout();
     _startSlowWarning();
@@ -176,7 +186,7 @@ function _startLoadingTips() {
                 setTimeout(() => tipEl.classList.remove('tip-enter'), 350);
             }, 300);
         }
-    }, 3500);
+    }, 6000);
 }
 
 function _stopLoadingTips() {
