@@ -16,12 +16,153 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/dice-roller.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="combat.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
     </script>
     <script src="../shared/font-apply.js"></script>
     <script src="../shared/bounce-back.js"></script>
+    <script src="../shared/loading-guard.js"></script>
 </head>
 
 <body>
+    <!-- Loading overlay (magic circle) -->
+    <div id="combatLoading" class="loading-overlay">
+        <div class="loading-particles">
+            <div class="particle ember p1"></div>
+            <div class="particle ember p2"></div>
+            <div class="particle ember p3"></div>
+            <div class="particle ember p4"></div>
+            <div class="particle spark s1"></div>
+            <div class="particle spark s2"></div>
+            <div class="particle mote m1"></div>
+            <div class="particle mote m2"></div>
+            <div class="particle flame fl1"></div>
+            <div class="particle flame fl2"></div>
+            <div class="particle arcane ar1"></div>
+            <div class="particle arcane ar2"></div>
+        </div>
+        <div class="magic-circle">
+            <div class="mc-aura"></div>
+            <div class="mc-aura mc-aura-2"></div>
+            <svg class="mc-ring mc-outer" viewBox="0 0 300 300">
+                <defs><path id="runeOuter" d="M150,150 m-125,0 a125,125 0 1,1 250,0 a125,125 0 1,1 -250,0"/></defs>
+                <circle cx="150" cy="150" r="125" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="1"/>
+                <text class="mc-rune-text" fill="rgba(196,149,58,0.5)">
+                    <textPath href="#runeOuter" startOffset="0%">&#5792; &#5794; &#5798; &#5800; &#5809; &#5810; &#5815; &#5817; &#5818; &#5822; &#5825; &#5827;</textPath>
+                </text>
+            </svg>
+            <svg class="mc-ring mc-mid" viewBox="0 0 300 300">
+                <circle class="mc-energy-arc mc-arc-1" cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+                <circle class="mc-energy-arc mc-arc-2" cx="150" cy="150" r="96" fill="none" stroke="rgba(123,32,32,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <svg class="mc-ring mc-inner" viewBox="0 0 300 300">
+                <defs><path id="runeInner" d="M150,150 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0"/></defs>
+                <text class="mc-inner-text" fill="rgba(196,149,58,0.35)">
+                    <textPath href="#runeInner" startOffset="0%">&#9670; COMBATE &#9670; ARENA &#9670; COMBATE &#9670; ARENA </textPath>
+                </text>
+            </svg>
+            <div class="mc-pulse"></div>
+            <div class="mc-pulse mc-pulse-2"></div>
+            <div id="mc-gem" class="mc-gem">
+                <div class="mc-gem-core"></div>
+                <div class="mc-gem-flare"></div>
+            </div>
+            <div class="mc-completion-wave"></div>
+            <div class="mc-completion-wave wave-2"></div>
+        </div>
+        <div class="loading-flash"></div>
+        <div class="loading-brand">
+            <div class="loading-title">COMBATE</div>
+            <div class="loading-divider"><span class="divider-rune">&#9670;</span></div>
+        </div>
+        <div class="loading-progress-wrap">
+            <div class="loading-progress-track">
+                <div id="loading-progress" class="loading-progress-fill"></div>
+            </div>
+        </div>
+        <div class="loading-tip-area">
+            <div id="loading-tip" class="loading-tip">Preparando para o combate...</div>
+        </div>
+    </div>
+
+    <!-- Loading controller (narrative tips + min load) -->
+    <script>
+    (function() {
+        var TIPS = [
+            'Sua mão encontra o cabo da arma enquanto você se posiciona para o combate...',
+            'O chão treme sob seus pés — o inimigo se aproxima...',
+            'Você respira fundo e foca a mente. Cada segundo conta numa batalha.',
+            'O brilho de aço reflete nos olhos do adversário à sua frente...',
+            'Adrenalina percorre suas veias enquanto o confronto se aproxima...',
+            'Você analisa o terreno, buscando vantagem tática...',
+            'O som de armaduras tilintando ecoa enquanto ambos os lados se preparam...',
+            'Uma brisa fria corta o ar tenso entre você e seu oponente...',
+            '⚔️ Dica: Rolagens de ataque 20 são acertos críticos — dano dobrado!',
+            '🛡️ Dica: Cobertura parcial concede +2 na CA contra ataques à distância.',
+            '⚔️ Dica: Ações bônus como Investida Imprudente podem virar o jogo.',
+            '🛡️ Dica: Efeitos de status como Amedrontado impõem desvantagem nos ataques.',
+            '⚔️ Dica: Posicionamento tático pode garantir ataques de oportunidade.',
+            '🛡️ Dica: Curar-se no momento certo pode ser melhor que atacar.',
+            '⚔️ Dica: Habilidades de classe têm usos limitados — use com sabedoria.',
+            '🛡️ Dica: Resistência a dano reduz o dano recebido pela metade.',
+        ];
+        var tipEl = document.getElementById('loading-tip');
+        var progressEl = document.getElementById('loading-progress');
+        var overlay = document.getElementById('combatLoading');
+        var tipIndex = Math.floor(Math.random() * TIPS.length);
+        if (tipEl) tipEl.textContent = TIPS[tipIndex];
+        var _tipInterval;
+        var _loadStart = Date.now();
+        var MIN_LOAD_MS = 3000;
+        var _progress = 0;
+
+        var _progressTimer = setInterval(function() {
+            _progress += (90 - _progress) * 0.08;
+            if (progressEl) progressEl.style.width = _progress + '%';
+        }, 200);
+
+        _tipInterval = setInterval(function() {
+            tipIndex = (tipIndex + 1) % TIPS.length;
+            if (tipEl) {
+                tipEl.classList.add('tip-exit');
+                setTimeout(function() {
+                    tipEl.textContent = TIPS[tipIndex];
+                    tipEl.classList.remove('tip-exit');
+                    tipEl.classList.add('tip-enter');
+                    setTimeout(function() { tipEl.classList.remove('tip-enter'); }, 350);
+                }, 300);
+            }
+        }, 5000);
+
+        window._combatLoadingCtrl = {
+            hide: function() {
+                clearInterval(_tipInterval);
+                clearInterval(_progressTimer);
+                if (!overlay || overlay.classList.contains('hidden')) return;
+                var elapsed = Date.now() - _loadStart;
+                var remaining = MIN_LOAD_MS - elapsed;
+                if (remaining > 0) {
+                    setTimeout(function() { window._combatLoadingCtrl.hide(); }, remaining);
+                    return;
+                }
+                if (progressEl) progressEl.style.width = '100%';
+                var waves = overlay.querySelectorAll('.mc-completion-wave');
+                waves.forEach(function(w) { w.classList.add('active'); });
+                try {
+                    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                        Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+                    }
+                } catch(_) {}
+                setTimeout(function() {
+                    overlay.classList.add('exit-cinematic');
+                    setTimeout(function() {
+                        overlay.classList.add('hidden');
+                    }, 950);
+                }, 150);
+            }
+        };
+    })();
+    </script>
+
     <canvas id="vfxCanvas"></canvas>
     <div id="app"></div>
     <div class="skill-overlay" id="skillOverlay">

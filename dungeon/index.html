@@ -11,6 +11,7 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
     </script>
     <style>
         /* --- SCROLLBAR HIDING --- */
@@ -26,36 +27,7 @@
             background: #1a1520;
         }
 
-        /* ═══ LOADING ═══ */
-        #loading {
-            position: fixed; inset: 0;
-            background: #1a1520;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            z-index: 200;
-            transition: opacity 0.6s ease;
-        }
-        #loading.hidden { opacity: 0; pointer-events: none; }
-        .loading-text { color: #8a6a3a; font-size: 14px; font-family: 'Cinzel', serif; letter-spacing: 1px; }
-        .loading-torch {
-            width: 40px; height: 60px; position: relative; margin-bottom: 16px;
-        }
-        .torch-flame {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 16px; height: 24px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            background: radial-gradient(ellipse, #f0c040 0%, #e08020 50%, #c04020 100%);
-            animation: flameFlicker 0.4s ease-in-out infinite alternate;
-            box-shadow: 0 0 12px rgba(240,192,64,0.6), 0 0 24px rgba(224,128,32,0.3);
-        }
-        .torch-handle {
-            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 6px; height: 28px; background: #5a4030; border-radius: 2px;
-        }
-        @keyframes flameFlicker {
-            0% { transform: translateX(-50%) scaleY(1) scaleX(1); }
-            50% { transform: translateX(-48%) scaleY(1.08) scaleX(0.95); }
-            100% { transform: translateX(-52%) scaleY(0.95) scaleX(1.05); }
-        }
+
 
         /* ═══ DUNGEON HUD ═══ */
         #dungeon-hud {
@@ -273,16 +245,148 @@
     </style>
     <script src="../shared/font-apply.js"></script>
     <script src="../shared/bounce-back.js"></script>
+    <script src="../shared/loading-guard.js"></script>
 </head>
 
 <body>
-    <div id="loading">
-        <div class="loading-torch">
-            <div class="torch-flame"></div>
-            <div class="torch-handle"></div>
+    <!-- Loading overlay (magic circle) -->
+    <div id="loading" class="loading-overlay">
+        <div class="loading-particles">
+            <div class="particle ember p1"></div>
+            <div class="particle ember p2"></div>
+            <div class="particle ember p3"></div>
+            <div class="particle ember p4"></div>
+            <div class="particle spark s1"></div>
+            <div class="particle spark s2"></div>
+            <div class="particle mote m1"></div>
+            <div class="particle mote m2"></div>
+            <div class="particle flame fl1"></div>
+            <div class="particle flame fl2"></div>
+            <div class="particle arcane ar1"></div>
+            <div class="particle arcane ar2"></div>
         </div>
-        <div class="loading-text">Entrando na masmorra...</div>
+        <div class="magic-circle">
+            <div class="mc-aura"></div>
+            <div class="mc-aura mc-aura-2"></div>
+            <svg class="mc-ring mc-outer" viewBox="0 0 300 300">
+                <defs><path id="runeOuter" d="M150,150 m-125,0 a125,125 0 1,1 250,0 a125,125 0 1,1 -250,0"/></defs>
+                <circle cx="150" cy="150" r="125" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="1"/>
+                <text class="mc-rune-text" fill="rgba(196,149,58,0.5)">
+                    <textPath href="#runeOuter" startOffset="0%">&#5792; &#5794; &#5798; &#5800; &#5809; &#5810; &#5815; &#5817; &#5818; &#5822; &#5825; &#5827;</textPath>
+                </text>
+            </svg>
+            <svg class="mc-ring mc-mid" viewBox="0 0 300 300">
+                <circle class="mc-energy-arc mc-arc-1" cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+                <circle class="mc-energy-arc mc-arc-2" cx="150" cy="150" r="96" fill="none" stroke="rgba(123,32,32,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <svg class="mc-ring mc-inner" viewBox="0 0 300 300">
+                <defs><path id="runeInner" d="M150,150 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0"/></defs>
+                <text class="mc-inner-text" fill="rgba(196,149,58,0.35)">
+                    <textPath href="#runeInner" startOffset="0%">&#9670; MASMORRA &#9670; DUNGEON &#9670; MASMORRA &#9670; DUNGEON </textPath>
+                </text>
+            </svg>
+            <div class="mc-pulse"></div>
+            <div class="mc-pulse mc-pulse-2"></div>
+            <div id="mc-gem" class="mc-gem">
+                <div class="mc-gem-core"></div>
+                <div class="mc-gem-flare"></div>
+            </div>
+            <div class="mc-completion-wave"></div>
+            <div class="mc-completion-wave wave-2"></div>
+        </div>
+        <div class="loading-flash"></div>
+        <div class="loading-brand">
+            <div class="loading-title">MASMORRA</div>
+            <div class="loading-divider"><span class="divider-rune">&#9670;</span></div>
+        </div>
+        <div class="loading-progress-wrap">
+            <div class="loading-progress-track">
+                <div id="loading-progress" class="loading-progress-fill"></div>
+            </div>
+        </div>
+        <div class="loading-tip-area">
+            <div id="loading-tip" class="loading-tip">Entrando na masmorra...</div>
+        </div>
     </div>
+
+    <!-- Loading controller (narrative tips + min load) -->
+    <script>
+    (function() {
+        var TIPS = [
+            'A escuridão engole a luz da sua tocha poucos metros à frente...',
+            'Goteiras ecoam nas paredes de pedra úmida enquanto você desce...',
+            'O ar fica mais pesado a cada andar — algo antigo habita estas profundezas...',
+            'Runas desgastadas nas paredes sussurram avisos esquecidos...',
+            'O cheiro de mofo e ferro enferrujado invade suas narinas...',
+            'Correntes rangem em algum lugar além da curva do corredor...',
+            'Seus passos ecoam no silêncio opressor da masmorra...',
+            'Teias de aranha cobrem as tochas apagadas nas paredes...',
+            '⚔️ Dica: Masmorras ficam mais perigosas a cada andar — esteja preparado.',
+            '🛡️ Dica: Armadilhas podem ser detectadas com Percepção Passiva alta.',
+            '⚔️ Dica: Guarde seus recursos para o chefe da masmorra.',
+            '🛡️ Dica: Salas de descanso permitem recuperar dados de vida.',
+            '⚔️ Dica: Inimigos de masmorra podem ter resistências incomuns.',
+            '🛡️ Dica: Baús podem conter equipamentos raros — ou armadilhas.',
+            '⚔️ Dica: O chefe da masmorra tem habilidades lendárias únicas.',
+            '🛡️ Dica: Fugir da masmorra preserva metade do ouro coletado.',
+        ];
+        var tipEl = document.getElementById('loading-tip');
+        var progressEl = document.getElementById('loading-progress');
+        var overlay = document.getElementById('loading');
+        var tipIndex = Math.floor(Math.random() * TIPS.length);
+        if (tipEl) tipEl.textContent = TIPS[tipIndex];
+        var _tipInterval;
+        var _loadStart = Date.now();
+        var MIN_LOAD_MS = 3000;
+        var _progress = 0;
+
+        var _progressTimer = setInterval(function() {
+            _progress += (90 - _progress) * 0.08;
+            if (progressEl) progressEl.style.width = _progress + '%';
+        }, 200);
+
+        _tipInterval = setInterval(function() {
+            tipIndex = (tipIndex + 1) % TIPS.length;
+            if (tipEl) {
+                tipEl.classList.add('tip-exit');
+                setTimeout(function() {
+                    tipEl.textContent = TIPS[tipIndex];
+                    tipEl.classList.remove('tip-exit');
+                    tipEl.classList.add('tip-enter');
+                    setTimeout(function() { tipEl.classList.remove('tip-enter'); }, 350);
+                }, 300);
+            }
+        }, 5000);
+
+        window._dungeonLoadingCtrl = {
+            hide: function() {
+                clearInterval(_tipInterval);
+                clearInterval(_progressTimer);
+                if (!overlay || overlay.classList.contains('hidden')) return;
+                var elapsed = Date.now() - _loadStart;
+                var remaining = MIN_LOAD_MS - elapsed;
+                if (remaining > 0) {
+                    setTimeout(function() { window._dungeonLoadingCtrl.hide(); }, remaining);
+                    return;
+                }
+                if (progressEl) progressEl.style.width = '100%';
+                var waves = overlay.querySelectorAll('.mc-completion-wave');
+                waves.forEach(function(w) { w.classList.add('active'); });
+                try {
+                    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                        Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+                    }
+                } catch(_) {}
+                setTimeout(function() {
+                    overlay.classList.add('exit-cinematic');
+                    setTimeout(function() {
+                        overlay.classList.add('hidden');
+                    }, 950);
+                }, 150);
+            }
+        };
+    })();
+    </script>
 
     <div id="dungeon-hud">
         <span class="hud-dungeon-name" id="hud-name">Masmorra</span>

@@ -12,9 +12,11 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
     </script>
+    <script src="../shared/loading-guard.js"></script>
     <style>
         /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
         * {

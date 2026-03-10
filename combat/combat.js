@@ -239,12 +239,17 @@ if (isApiMode) {
         const state = JSON.parse(b64Decode(rawData));
         currentState = state;
         renderArena(state);
+        if (window._combatLoadingCtrl) window._combatLoadingCtrl.hide();
     } catch (e) {
         console.error('[COMBAT]', 'Dados corrompidos', e);
         document.getElementById('app').innerHTML = '<div class="no-data"><h2>Erro</h2><p>Dados de combate corrompidos.</p></div>';
+        var lo = document.getElementById('combatLoading');
+        if (lo) { lo.classList.add('exit-cinematic'); setTimeout(function() { lo.classList.add('hidden'); }, 950); }
     }
 } else {
     document.getElementById('app').innerHTML = '<div class="no-data"><h2>Combate</h2><p>Nenhum dado recebido.</p></div>';
+    var lo = document.getElementById('combatLoading');
+    if (lo) { lo.classList.add('exit-cinematic'); setTimeout(function() { lo.classList.add('hidden'); }, 950); }
 }
 
 async function loadCombatState() {
@@ -255,6 +260,7 @@ async function loadCombatState() {
         if (state.phase && !state.ph) state.ph = state.phase;
         renderArena(state);
         startHeartbeat();
+        if (window._combatLoadingCtrl) window._combatLoadingCtrl.hide();
     } catch (e) {
         console.error('[COMBAT]', 'Erro ao carregar', e);
         // Distinguish "server down" from "session invalid" via health check
@@ -272,6 +278,9 @@ async function loadCombatState() {
         } else {
             document.getElementById('app').innerHTML = '<div class="no-data"><h2>Erro de Conexão</h2><p>Não foi possível carregar o combate.</p></div>';
         }
+        // Hide loading immediately on error
+        var lo = document.getElementById('combatLoading');
+        if (lo) { lo.classList.add('exit-cinematic'); setTimeout(function() { lo.classList.add('hidden'); }, 950); }
     }
 }
 

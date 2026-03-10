@@ -93,10 +93,12 @@ async function initDungeon() {
         // Start ambient particles
         initDungeonParticles();
 
-        // Hide loading
-        setTimeout(() => {
+        // Hide loading with narrative delay
+        if (window._dungeonLoadingCtrl) {
+            window._dungeonLoadingCtrl.hide();
+        } else {
             document.getElementById('loading').classList.add('hidden');
-        }, 300);
+        }
 
     } catch (e) {
         showError('Erro ao inicializar masmorra', e);
