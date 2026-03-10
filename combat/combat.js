@@ -2022,6 +2022,7 @@ function _showHealFlash() {
 
 // ─── SKILL PICKER ───
 function showSkillPicker(skills, enemies, actionType) {
+    if (!skills || skills.length === 0) return;
     actionType = actionType || 'skill';
     const panel = document.getElementById('skillPanel');
     const overlay = document.getElementById('skillOverlay');
@@ -2046,6 +2047,10 @@ function showSkillPicker(skills, enemies, actionType) {
     });
     html += '<div class="skill-close" id="skillClose">Cancelar</div>';
     panel.innerHTML = html;
+    // Force animation re-trigger (Telegram WebView doesn't re-trigger on display change)
+    panel.style.animation = 'none';
+    panel.offsetHeight;
+    panel.style.animation = '';
     overlay.classList.add('active');
 
     panel.querySelectorAll('.skill-item').forEach(item => {
@@ -2071,8 +2076,8 @@ function showSkillPicker(skills, enemies, actionType) {
     document.getElementById('skillClose').addEventListener('click', () => {
         _closeOverlay(overlay);
     });
-    // Backdrop tap: only dismiss via Cancel button — prevents accidental closes on mobile
-    overlay.onclick = null;
+    // Backdrop tap to close (standard mobile UX)
+    overlay.onclick = (e) => { if (e.target === overlay) _closeOverlay(overlay); };
 }
 
 // ─── TARGET PICKER ───
@@ -2115,6 +2120,9 @@ function showTargetPicker(enemies, actionType, skillId) {
     });
     html += '<div class="skill-close" id="targetClose">Cancelar</div>';
     panel.innerHTML = html;
+    panel.style.animation = 'none';
+    panel.offsetHeight;
+    panel.style.animation = '';
     overlay.classList.add('active');
 
     panel.querySelectorAll('.target-item').forEach(item => {
@@ -2134,8 +2142,8 @@ function showTargetPicker(enemies, actionType, skillId) {
     document.getElementById('targetClose').addEventListener('click', () => {
         _closeOverlay(overlay);
     });
-    // Backdrop tap: only dismiss via Cancel button — prevents accidental closes on mobile
-    overlay.onclick = null;
+    // Backdrop tap to close (standard mobile UX)
+    overlay.onclick = (e) => { if (e.target === overlay) _closeOverlay(overlay); };
 }
 
 // ─── ITEM PICKER ───
@@ -2162,6 +2170,9 @@ function showItemPicker(items, enemies, allies) {
     html += '<div class="skill-close" id="itemClose">Cancelar</div>';
     panel.innerHTML = html;
     _overlayOpen = true;
+    panel.style.animation = 'none';
+    panel.offsetHeight;
+    panel.style.animation = '';
     overlay.classList.add('active');
 
     panel.querySelectorAll('.item-entry').forEach(el => {
@@ -2190,8 +2201,8 @@ function showItemPicker(items, enemies, allies) {
     document.getElementById('itemClose').addEventListener('click', () => {
         _closeOverlay(overlay);
     });
-    // Backdrop tap: only dismiss via Cancel button — prevents accidental closes on mobile
-    overlay.onclick = null;
+    // Backdrop tap to close (standard mobile UX)
+    overlay.onclick = (e) => { if (e.target === overlay) _closeOverlay(overlay); };
 }
 
 // ═══════════════════════════════════════════════════

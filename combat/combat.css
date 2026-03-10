@@ -1162,11 +1162,15 @@ body {
     max-height: 55vh;
     overflow-y: auto;
     transform: translateY(100%);
-    animation: panelSlideUp 0.3s ease-out forwards;
+    opacity: 0;
+}
+.skill-overlay.active .skill-panel,
+.target-overlay.active .target-panel {
+    animation: panelSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 @keyframes panelSlideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 .skill-panel-title {
     font-size: 14px;
@@ -1837,14 +1841,7 @@ body {
     from { opacity: 0; }
     to { opacity: 1; }
 }
-.skill-panel,
-.target-panel {
-    animation: panelSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes panelSlideUp {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
+/* duplicate animation removed — now gated by .active on parent overlay */
 .skill-item:active,
 .target-item:active {
     transform: scale(0.97);
