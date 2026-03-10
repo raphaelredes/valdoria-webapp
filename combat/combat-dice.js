@@ -211,7 +211,7 @@ function _initDiceSave(lr) {
     if (_dmgDice3d) { _dmgDice3d.dispose(); _dmgDice3d = null; }
     canvas.classList.remove('multi', 'multi-3', 'multi-4', 'multi-5');
     overlay.style.display = 'flex';
-    if (label3d) { label3d.textContent = 'Save vs CD ' + (lr.dc || '?'); label3d.className = 'dmg-dice3d-label rolling'; }
+    if (label3d) { const _dc = (lr.dc && lr.dc > 0) ? lr.dc : 12; label3d.textContent = 'Save vs CD ' + _dc; label3d.className = 'dmg-dice3d-label rolling'; }
     if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
     haptic('light'); sfxDiceRoll();
 

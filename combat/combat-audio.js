@@ -16,15 +16,15 @@ function hapticBurst(pattern) {
         if (pattern === 'crit') {
             hf.impactOccurred('heavy');
             setTimeout(() => hf.impactOccurred('heavy'), 100);
-            setTimeout(() => hf.impactOccurred('rigid'), 200);
+            setTimeout(() => hf.impactOccurred('heavy'), 200);
         } else if (pattern === 'kill') {
             hf.impactOccurred('heavy');
             setTimeout(() => hf.notificationOccurred('success'), 120);
             setTimeout(() => hf.impactOccurred('heavy'), 280);
-            setTimeout(() => hf.impactOccurred('soft'), 400);
+            setTimeout(() => hf.impactOccurred('medium'), 400);
         } else if (pattern === 'miss') {
             hf.impactOccurred('light');
-            setTimeout(() => hf.impactOccurred('soft'), 80);
+            setTimeout(() => hf.impactOccurred('light'), 80);
         }
     } catch (e) { console.warn('[COMBAT] hapticBurst:', e); }
 }

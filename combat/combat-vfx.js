@@ -202,8 +202,8 @@ function _dmgFlashClass(dt) {
 }
 
 // ─── FLOATING MISS INDICATOR ───
-function _showMissFloat(targetSelector) {
-    const target = document.querySelector(targetSelector || '.entity.enemy');
+function _showMissFloat(targetSelector, cachedEl) {
+    const target = cachedEl || document.querySelector(targetSelector || '.entity.enemy');
     if (!target) return;
     const rect = target.getBoundingClientRect();
     const el = document.createElement('div');
@@ -216,8 +216,8 @@ function _showMissFloat(targetSelector) {
 }
 
 // ─── FLOATING DAMAGE NUMBER ───
-function _showDamageFloat(damage, damageType, targetSelector, isCrit) {
-    const target = document.querySelector(targetSelector || '.entity.enemy');
+function _showDamageFloat(damage, damageType, targetSelector, isCrit, cachedEl) {
+    const target = cachedEl || document.querySelector(targetSelector || '.entity.enemy');
     if (!target) return;
     const rect = target.getBoundingClientRect();
     const el = document.createElement('div');
@@ -232,8 +232,8 @@ function _showDamageFloat(damage, damageType, targetSelector, isCrit) {
 }
 
 // ─── FLOATING HEAL NUMBER ───
-function _showHealFloat(amount, targetSelector) {
-    const target = document.querySelector(targetSelector || '.entity.player');
+function _showHealFloat(amount, targetSelector, cachedEl) {
+    const target = cachedEl || document.querySelector(targetSelector || '.entity.player');
     if (!target) return;
     const rect = target.getBoundingClientRect();
     const el = document.createElement('div');

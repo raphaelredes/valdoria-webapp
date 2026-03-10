@@ -44,6 +44,7 @@ let _audioCtx = null;           // Feature 8: Web Audio (lazy init)
 let _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
 let _currentPositions = null;   // Feature 9: combat positions
 let _cinematicInProgress = false; // Blocks re-render during action cinematic
+let _cinematicWarnTimer = null;     // Warn toast timer during cinematic
 let _overlayOpen = false;          // Blocks poll re-render while target/skill overlay is open
 let _bonusHapticFired = false;     // Haptic fired for bonus_action sub-phase
 let _reactionHapticFired = false;  // Haptic fired for reaction sub-phase
@@ -221,7 +222,7 @@ const DMG_ICONS = {
     poison: '🧪', acid: '🟢', force: '💠',
 };
 
-const ATK_TYPE_LABELS = { melee: 'Corpo a corpo', ranged: 'A distancia', magic: 'Magico' };
+const ATK_TYPE_LABELS = { melee: 'Corpo a corpo', ranged: 'À distância', magic: 'Mágico' };
 
 const RES_CLASS_MAP = {
     'Mana': 'mp', 'Ki': 'ki', 'Fúria': 'fury', 'Vigor': 'vigor',
@@ -349,14 +350,19 @@ async function transitionFromArena(result) {
                 return;
             }
         }
-        console.error('[COMBAT] Transition back failed, closing');
+        const errMsg = resp.status === 401 ? 'Sessão expirada — reabra o jogo'
+            : resp.status >= 500 ? 'Servidor indisponível — tente novamente'
+            : 'Erro ao sair do combate';
+        console.error('[COMBAT] Transition failed:', resp.status, errMsg);
+        showError(errMsg + '. Fechando...');
+        return;
     } catch (e) {
         console.error('[COMBAT] Transition error:', e);
     }
 
     // Fallback: close WebApp and let user tap JOGAR from Telegram
     // (combat token is not valid for Game Hub sessions)
-    showError('Erro na transição. Fechando...');
+    showError('Erro de conexão. Fechando...');
     setTimeout(() => { try { if (tg) tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 2000);
 }
 
@@ -644,13 +650,7 @@ function _renderArenaInner(s) {
         html += '</div>';
     } else {
         html += renderTurnTimeline(s.to);
-        const diceDisplay = (ph === 'init' || isNarrative) ? 'display:none;' : '';
-        html += `<div class="dice-row" style="display:none;">
-            <div class="dice-box-compact"><div class="dice-emoji" id="dice1">🎲</div><div><div class="dice-result" id="diceResult1"></div><div class="dice-label" id="diceLabel1">d20</div></div></div>
-            <div class="dice-box-compact"><div class="dice-emoji" id="dice2">🎲</div><div><div class="dice-result" id="diceResult2"></div><div class="dice-label" id="diceLabel2">dano</div></div></div>
-        </div>
-        <div class="dice-formula" id="diceFormula" style="display:none;"></div>
-        <div class="dice-narration" id="diceNarration" style="display:none;"></div>`;
+        // (Dead inline dice HTML removed — using 3D overlay dice system)
     }
     if (s.feed && s.feed.length > 0) {
         const total = s.feed.length;
@@ -996,6 +996,7 @@ function startPolling() {
             }
 
             // Compare: re-render only if state actually changed
+            if (!state) { _pollInterval = setTimeout(poll, 8000); return; }
             const newPh = state.ph || state.phase || '';
             const oldPh = currentState ? (currentState.ph || currentState.phase || '') : '';
             const newRn = state.rn || 0;
@@ -1056,13 +1057,13 @@ function startPolling() {
                 const rollSig = state.lr ? `${state.lr.t||'a'}-${state.lr.r||0}-${state.lr.d||0}-${state.lr.miss||0}` : '';
                 if (hasEnemyRoll && rollSig !== _lastAnimatedRoll) {
                     _cinematicInProgress = true;
-    const _cinematicWarnTimer = setTimeout(() => {
+    _cinematicWarnTimer = setTimeout(() => {
         if (_cinematicInProgress) showCombatToast('Processando...');
     }, TIMING.CINEMATIC_WARN);
                     const _eLr = state.lr;
+                    const _isAllyTurn = newTurn && newTurn.t === 'a';
                     // Track enemy damage type for player damage VFX
                     if (!_isAllyTurn && _eLr.dt) _lastEnemyDmgType = _eLr.dt;
-                    const _isAllyTurn = newTurn && newTurn.t === 'a';
                     initDice(_eLr);
 
                     if (_eLr.miss || _eLr.d <= 0) {
@@ -1241,6 +1242,7 @@ function stopAllIntervals() {
     stopPolling();
     stopHeartbeat();
     if (_reactionAutoTimer) { clearTimeout(_reactionAutoTimer); _reactionAutoTimer = null; }
+    if (_cinematicWarnTimer) { clearTimeout(_cinematicWarnTimer); _cinematicWarnTimer = null; }
     // Cleanup global listeners to prevent memory leaks
     document.removeEventListener('visibilitychange', _onVisibilityChange);
 }

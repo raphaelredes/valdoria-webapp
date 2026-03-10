@@ -38,7 +38,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
         if (e.leg) {
             detailsHtml += '<div class="legendary-row">';
             detailsHtml += '<span>👑 Boss</span>';
-            if (e.leg.lrm > 0) detailsHtml += `<span>🛡️ Resist. ${e.leg.lr}/${e.leg.lrm}</span>`;
+            if (e.leg.lrm > 0) detailsHtml += `<span title="Anula falha em salvaguarda">⭐ Resist. Lend. ${e.leg.lr}/${e.leg.lrm}</span>`;
             if (e.leg.lam > 0) detailsHtml += `<span>⚡ Ações ${e.leg.la}/${e.leg.lam}</span>`;
             detailsHtml += '</div>';
         }
@@ -96,7 +96,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
     // Inline AC badge for enemies (visible in compact view)
     const acBadge = type === 'enemy' && e.ac ? `<span class="ac-badge">🛡${e.ac}</span>` : '';
 
-    return `<div class="entity ${type}${activeClass}${deadClass}${hpStateClass}"${dataAttr}>
+    return `<div class="entity ${type}${activeClass}${deadClass}${hpStateClass}" role="group" aria-label="${escHtml(e.n)}"${dataAttr}>
         <div class="entity-header">
             <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
             <span class="compact-name">${escHtml(e.n)}</span>
@@ -465,6 +465,10 @@ function showSkillPicker(skills, enemies, actionType) {
     panel.offsetHeight;
     panel.style.animation = '';
     overlay.classList.add('active');
+    // Focus first item + Escape to close
+    const _firstItem = panel.querySelector('.skill-item');
+    if (_firstItem) _firstItem.focus();
+    overlay.onkeydown = (e) => { if (e.key === 'Escape') _closeOverlay(overlay); };
 
     // Event delegation (prevents listener leaks on re-open)
     panel.onclick = (e) => {
@@ -533,6 +537,10 @@ function showTargetPicker(enemies, actionType, skillId) {
     panel.offsetHeight;
     panel.style.animation = '';
     overlay.classList.add('active');
+    // Focus first item + Escape to close
+    const _firstTarget = panel.querySelector('.target-item');
+    if (_firstTarget) _firstTarget.focus();
+    overlay.onkeydown = (e) => { if (e.key === 'Escape') _closeOverlay(overlay); };
 
     // Event delegation (prevents listener leaks on re-open)
     panel.onclick = (e) => {
@@ -580,33 +588,28 @@ function showItemPicker(items, enemies, allies) {
     panel.offsetHeight;
     panel.style.animation = '';
     overlay.classList.add('active');
+    // Focus first item + Escape to close
+    const _firstEntry = panel.querySelector('.item-entry');
+    if (_firstEntry) _firstEntry.focus();
+    overlay.onkeydown = (e) => { if (e.key === 'Escape') _closeOverlay(overlay); };
 
-    panel.querySelectorAll('.item-entry').forEach(el => {
-        el.addEventListener('click', () => {
-            const itemName = el.dataset.item;
-            const isThrown = el.dataset.thrown === 'true';
-            // Hide overlay visually; sendAction will set _actionSent which blocks polls
-            overlay.classList.remove('active');
-            _overlayOpen = false;
-            if (isThrown) {
-                // Thrown items always target enemy — target -2 means first enemy
-                sendAction({ type: 'use_item', item_key: itemName, item_target: -2 });
-            } else {
-                // Healing items: target self (-1) directly
-                sendAction({ type: 'use_item', item_key: itemName, item_target: -1 });
-            }
-        });
-    });
-    const fullInvBtn = document.getElementById('itemFullInventory');
-    if (fullInvBtn) {
-        fullInvBtn.addEventListener('click', () => {
-            _closeOverlay(overlay);
-            transitionToInventoryFromArena();
-        });
-    }
-    document.getElementById('itemClose').addEventListener('click', () => {
-        _closeOverlay(overlay);
-    });
+    // Event delegation (prevents listener leaks on re-open)
+    panel.onclick = (e) => {
+        const item = e.target.closest('.item-entry');
+        if (e.target.closest('#itemClose')) { _closeOverlay(overlay); return; }
+        if (e.target.closest('#itemFullInventory')) { _closeOverlay(overlay); transitionToInventoryFromArena(); return; }
+        if (!item || _actionSent) return;
+        haptic('medium');
+        const itemName = item.dataset.item;
+        const isThrown = item.dataset.thrown === 'true';
+        overlay.classList.remove('active');
+        _overlayOpen = false;
+        if (isThrown) {
+            sendAction({ type: 'use_item', item_key: itemName, item_target: -2 });
+        } else {
+            sendAction({ type: 'use_item', item_key: itemName, item_target: -1 });
+        }
+    };
     // Backdrop tap to close (standard mobile UX)
     overlay.onclick = (e) => { if (e.target === overlay) _closeOverlay(overlay); };
 }
