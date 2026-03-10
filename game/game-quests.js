@@ -21,12 +21,18 @@ function renderQuestDiary(container, data) {
     // Filter tabs
     var filters = [
         { id: 'all', icon: '\ud83d\udccb', label: 'Todas' },
-        { id: 'story', icon: '\u2694\ufe0f', label: 'Story' },
+        { id: 'story', icon: '\u2694\ufe0f', label: 'Hist\u00f3ria' },
         { id: 'daily', icon: '\ud83d\udd04', label: 'Di\u00e1rias' },
         { id: 'done', icon: '\u2705', label: 'Feitas' },
     ];
     var totalQ = (data.story || []).length + (data.daily || []).length
         + (data.done || []).length + (data.failed || []).length;
+
+    // Apply client-side filter
+    var activeFilter = data.filter || 'all';
+    var showStory = activeFilter === 'all' || activeFilter === 'story';
+    var showDaily = activeFilter === 'all' || activeFilter === 'daily';
+    var showDone = activeFilter === 'all' || activeFilter === 'done';
 
     if (totalQ >= 3) {
         var tabRow = document.createElement('div');
@@ -34,7 +40,7 @@ function renderQuestDiary(container, data) {
         for (var i = 0; i < filters.length; i++) {
             var f = filters[i];
             var tab = document.createElement('button');
-            tab.className = 'quest-filter-tab' + (data.filter === f.id ? ' active' : '');
+            tab.className = 'quest-filter-tab' + (activeFilter === f.id ? ' active' : '');
             tab.textContent = f.icon + ' ' + f.label;
             (function(fid) { tab.onclick = function() { doAction('quest_filter_' + fid); }; })(f.id);
             tabRow.appendChild(tab);
@@ -59,7 +65,7 @@ function renderQuestDiary(container, data) {
     }
 
     // Active Story Quests
-    if (data.story && data.story.length > 0) {
+    if (data.story && data.story.length > 0 && showStory) {
         wrap.appendChild(_questSectionHdr('\u2694\ufe0f', 'Jornadas em Andamento'));
         for (var si = 0; si < data.story.length; si++) {
             wrap.appendChild(_renderQCard(data.story[si]));
@@ -67,7 +73,7 @@ function renderQuestDiary(container, data) {
     }
 
     // Active Daily Quests
-    if (data.daily && data.daily.length > 0) {
+    if (data.daily && data.daily.length > 0 && showDaily) {
         wrap.appendChild(_questSectionHdr('\ud83d\udd04', 'Tarefas do Dia'));
         for (var di = 0; di < data.daily.length; di++) {
             wrap.appendChild(_renderQCard(data.daily[di], true));
@@ -75,7 +81,7 @@ function renderQuestDiary(container, data) {
     }
 
     // Completed Quests
-    if (data.done && data.done.length > 0) {
+    if (data.done && data.done.length > 0 && showDone) {
         wrap.appendChild(_questSectionHdr('\u2705', 'Feitos Realizados'));
         for (var ci = 0; ci < data.done.length; ci++) {
             var d = data.done[ci];
@@ -89,7 +95,7 @@ function renderQuestDiary(container, data) {
     }
 
     // Failed Quests
-    if (data.failed && data.failed.length > 0) {
+    if (data.failed && data.failed.length > 0 && showDone) {
         wrap.appendChild(_questSectionHdr('\u274c', 'Miss\u00f5es Perdidas'));
         for (var fi = 0; fi < data.failed.length; fi++) {
             var fq = data.failed[fi];
@@ -108,6 +114,19 @@ function renderQuestDiary(container, data) {
             }
             wrap.appendChild(failCard);
         }
+    }
+
+    // Empty state for active filter (no results in this category)
+    var visibleQ = 0;
+    if (showStory && data.story) visibleQ += data.story.length;
+    if (showDaily && data.daily) visibleQ += data.daily.length;
+    if (showDone && data.done) visibleQ += data.done.length;
+    if (showDone && data.failed) visibleQ += data.failed.length;
+    if (totalQ > 0 && visibleQ === 0) {
+        var emptyFilter = document.createElement('div');
+        emptyFilter.className = 'quest-empty';
+        emptyFilter.innerHTML = '<div class="quest-empty-text">Nenhuma missão nesta categoria.</div>';
+        wrap.appendChild(emptyFilter);
     }
 
     // Empty state — immersive medieval themed
@@ -157,9 +176,9 @@ function _renderQCard(q, isDaily) {
     if (q.cat === 'daily') {
         catBadge = '<span class="quest-cat-badge quest-cat--daily">DI\u00c1RIA</span>';
     } else if (q.cat === 'story') {
-        catBadge = '<span class="quest-cat-badge quest-cat--story">STORY</span>';
+        catBadge = '<span class="quest-cat-badge quest-cat--story">HIST\u00d3RIA</span>';
     } else if (q.cat === 'side') {
-        catBadge = '<span class="quest-cat-badge quest-cat--side">SIDE</span>';
+        catBadge = '<span class="quest-cat-badge quest-cat--side">SECUND\u00c1RIA</span>';
     }
     hdr.innerHTML = '<span class="quest-npc-icon">' + npcIcon + '</span>'
         + '<span class="quest-title">' + _escQ(q.title) + '</span>'
