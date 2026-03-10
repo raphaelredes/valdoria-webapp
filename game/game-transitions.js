@@ -60,8 +60,12 @@ function handleTransition(transition) {
     if (typeof stopParticles === 'function') stopParticles();
 
     // Skip location transition for WebApps that have their own loading screen
-    // (navigate, combat, explore, dungeon all show a magic circle on open)
-    const _HAS_OWN_LOADING = { navigate: 1, combat: 1, arena: 1, explore: 1, dungeon: 1 };
+    // (ALL cross-webapp targets show a magic circle loading on open)
+    const _HAS_OWN_LOADING = {
+        navigate: 1, combat: 1, arena: 1, explore: 1, dungeon: 1,
+        inventory: 1, market: 1, levelup: 1, workstation: 1,
+        prologue: 1, character_creator: 1,
+    };
     const locLabel = _HAS_OWN_LOADING[transition.to] ? null : _WEBAPP_LOC_LABELS[transition.to];
     if (locLabel && typeof showLocationTransition === 'function') {
         showLocationTransition(locLabel);

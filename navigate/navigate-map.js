@@ -165,97 +165,101 @@ function computeFogState(forceRecompute) {
 // ===============================================================
 
 function _renderFogOverlay(svg, fogState) {
-    // Skip fog entirely if all locations are explored (no visual artifact)
+    const canvas = document.getElementById('fog-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // Skip fog entirely if all locations are explored
     const allExplored = Object.values(fogState).every(s => s === 'explored');
-    if (allExplored) return;
+    if (allExplored) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'none';
+        return;
+    }
+    canvas.style.display = 'block';
 
-    const fG = _el('g', { class: 'fog-overlay', 'pointer-events': 'none' });
-    const defs = svg.querySelector('defs') || svg.appendChild(_el('defs'));
+    // ── Step 1: Fill entire canvas with fog color ──
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = MAP_BG;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // --- Build mask: white = show fog overlay, black = reveal map ---
-    // SVG mask: white pixels make the masked element visible (fog shows),
-    // black pixels make it invisible (map shows through).
-    const mask = _el('mask', { id: 'fog-mask', maskUnits: 'userSpaceOnUse',
-        x: 0, y: 0, width: SVG_W, height: SVG_H });
+    // ── Step 2: Apply landmass clip (only fog over the parchment) ──
+    // Build landmass shape as a clip region — fog outside parchment is cleared
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.beginPath();
+    const pts = LANDMASS_POINTS;
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+    ctx.fill();
 
-    // Start with full white (fog covers everything)
-    mask.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: '#fff' }));
+    // ── Step 3: Punch holes with destination-out + radial gradients ──
+    ctx.globalCompositeOperation = 'destination-out';
 
-    // For each known location, paint a dark circle (punches through the fog)
-    let gradIdx = 0;
     for (const [locId, state] of Object.entries(fogState)) {
         if (state === 'hidden') continue;
         const coords = LOCATION_COORDS[locId];
         if (!coords) continue;
         const { x, y } = hexToPixel(coords.col, coords.row);
 
-        // Reveal radius and center darkness depend on exploration state
-        // Large radii ensure adjacent explored locations overlap for seamless reveal
-        let radius, centerDark, midStop;
+        let radius, strength, midStop;
         if (state === 'explored') {
-            radius = HEX_RADIUS * 9;   // very wide overlap for seamless reveal
-            centerDark = '#000';
-            midStop = '65%';
+            radius = HEX_RADIUS * 7;
+            strength = 1.0;    // fully clear
+            midStop = 0.55;
         } else if (state === 'known_mapped') {
-            radius = HEX_RADIUS * 6;
-            centerDark = '#111';
-            midStop = '55%';
+            radius = HEX_RADIUS * 5;
+            strength = 0.85;
+            midStop = 0.45;
         } else if (state === 'known_unmapped') {
-            radius = HEX_RADIUS * 4;
-            centerDark = '#333';
-            midStop = '45%';
+            radius = HEX_RADIUS * 3.5;
+            strength = 0.55;
+            midStop = 0.35;
         } else { // frontier
-            radius = HEX_RADIUS * 2.5;
-            centerDark = '#666';
-            midStop = '30%';
+            radius = HEX_RADIUS * 2;
+            strength = 0.25;
+            midStop = 0.2;
         }
 
-        // Radial gradient: dark center (reveal) -> white edge (fog)
-        const gId = `fog-g${gradIdx++}`;
-        const grad = _el('radialGradient', {
-            id: gId, cx: x, cy: y, r: radius,
-            gradientUnits: 'userSpaceOnUse',
-        });
-        grad.appendChild(_el('stop', { offset: '0%', 'stop-color': centerDark }));
-        grad.appendChild(_el('stop', { offset: midStop, 'stop-color': centerDark }));
-        grad.appendChild(_el('stop', { offset: '100%', 'stop-color': '#fff' }));
-        defs.appendChild(grad);
-
-        // Paint the gradient circle onto the mask (dark = reveal)
-        mask.appendChild(_el('circle', {
-            cx: x, cy: y, r: radius,
-            fill: `url(#${gId})`,
-        }));
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        grad.addColorStop(0, `rgba(0,0,0,${strength})`);
+        grad.addColorStop(midStop, `rgba(0,0,0,${strength * 0.8})`);
+        grad.addColorStop(0.85, `rgba(0,0,0,${strength * 0.15})`);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
     }
 
-    defs.appendChild(mask);
+    // ── Step 4: Add parchment texture to fog surface ──
+    ctx.globalCompositeOperation = 'source-atop';
 
-    // --- Dark overlay with mask: visible where fog should be ---
-    fG.appendChild(_el('rect', {
-        x: 0, y: 0, width: SVG_W, height: SVG_H,
-        fill: MAP_BG, 'fill-opacity': '0.9',
-        mask: 'url(#fog-mask)',
-        'clip-path': 'url(#land-clip)',
-    }));
-
-    // Subtle noise dots on fogged areas (medieval texture)
-    let noiseD = '';
-    for (let i = 0; i < 60; i++) {
-        const nx = srand(i * 73 + 11) * SVG_W;
-        const ny = srand(i * 79 + 17) * SVG_H;
-        if (!_pointInLandmass(nx, ny)) continue;
-        const cr = 0.8 + srand(i * 83) * 1.2;
-        noiseD += `M${nx-cr},${ny}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
-    }
-    if (noiseD) {
-        fG.appendChild(_el('path', {
-            d: noiseD, fill: INK_DARK, 'fill-opacity': '0.12',
-            mask: 'url(#fog-mask)',
-            'clip-path': 'url(#land-clip)',
-        }));
+    // Stipple dots (medieval parchment feel)
+    for (let i = 0; i < 200; i++) {
+        const nx = srand(i * 73 + 11) * canvas.width;
+        const ny = srand(i * 79 + 17) * canvas.height;
+        const cr = 0.6 + srand(i * 83) * 1.0;
+        const alpha = 0.04 + srand(i * 91) * 0.08;
+        ctx.globalCompositeOperation = 'source-atop';
+        ctx.fillStyle = `rgba(58, 40, 16, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(nx, ny, cr, 0, Math.PI * 2);
+        ctx.fill();
     }
 
-    svg.appendChild(fG);
+    // Subtle crosshatch lines (map cartography style)
+    ctx.globalCompositeOperation = 'source-atop';
+    ctx.strokeStyle = 'rgba(58, 40, 16, 0.06)';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < 40; i++) {
+        const sx = srand(i * 113 + 7) * canvas.width;
+        const sy = srand(i * 127 + 13) * canvas.height;
+        const angle = srand(i * 137 + 19) * Math.PI;
+        const len = 8 + srand(i * 149) * 15;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len);
+        ctx.stroke();
+    }
 }
 
 // ===============================================================

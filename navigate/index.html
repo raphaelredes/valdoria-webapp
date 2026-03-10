@@ -153,6 +153,12 @@
             height: 720px;
         }
 
+        #fog-canvas {
+            display: block;
+            width: 733px;
+            height: 720px;
+        }
+
 
         /* ═══ LOCATION INFO PANEL (parchment scroll) ═══ */
         #info-panel {
@@ -1566,6 +1572,8 @@
             <img id="map-bg" src="map-static-2x.png" draggable="false"
                  style="position:absolute;top:0;left:0;pointer-events:none;image-rendering:auto"
                  alt="">
+            <canvas id="fog-canvas" width="733" height="720"
+                    style="position:absolute;top:0;left:0;pointer-events:none"></canvas>
             <svg id="map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
         </div>
         <!-- Compass overlay (fixed above map, not affected by pan/zoom) -->
