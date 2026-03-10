@@ -113,6 +113,14 @@ function hideLoading() {
     }, 2000);
 }
 
+// ── Minimum loading delay (narrative immersion) ──
+async function hideLoadingWithDelay() {
+    const elapsed = Date.now() - _loadingStartTime;
+    const remaining = MIN_LOADING_MS - elapsed;
+    if (remaining > 0) await sleep(remaining);
+    hideLoading();
+}
+
 // ── Ring acceleration: lerp speed based on progress ──
 // At 0%: canonical (60s/35s/45s). At 100%: 2.5x faster (24s/14s/18s).
 // Guard enforces min: outer≥25s, mid≥15s, inner≥20s
@@ -170,7 +178,8 @@ function _stopLoadingProgress() {
 
 function _startLoadingTips() {
     _stopLoadingTips();
-    _loadingTipIndex = 0;
+    // Start at random index so tip varies each load
+    _loadingTipIndex = Math.floor(Math.random() * _LOADING_TIPS.length);
     const tipEl = document.getElementById('loading-tip');
     if (tipEl) tipEl.textContent = _LOADING_TIPS[0];
     _loadingTipTimer = setInterval(() => {

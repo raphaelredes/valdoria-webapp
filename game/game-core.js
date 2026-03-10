@@ -28,14 +28,6 @@ const SCREEN_CACHE_TTL = 1800000; // 30 minutes
 
 let _loadingTimeoutId = null;
 
-// ─── Minimum loading delay (narrative immersion) ───
-async function hideLoadingWithDelay() {
-    const elapsed = Date.now() - (_loadingStartTime || 0);
-    const remaining = MIN_LOADING_MS - elapsed;
-    if (remaining > 0) await sleep(remaining);
-    hideLoading();
-}
-
 // ─── Connection logging alias (provided by shared/error-reporter.js) ───
 function _clog(msg) {
     if (window.ValdoriaErrors) ValdoriaErrors.log(msg);

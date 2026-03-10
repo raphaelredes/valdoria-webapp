@@ -145,7 +145,8 @@ async function initAsync() {
             'Runas cartográficas brilham levemente ao toque de seus dedos...',
             'Cada dobra do mapa revela caminhos que poucos ousaram trilhar...',
         ];
-        let _tipIdx = 0;
+        let _tipIdx = Math.floor(Math.random() * MAP_TIPS.length);
+        if (tipEl) tipEl.textContent = MAP_TIPS[_tipIdx];
         const _tipTimer = setInterval(() => {
             _tipIdx = (_tipIdx + 1) % MAP_TIPS.length;
             if (tipEl) {

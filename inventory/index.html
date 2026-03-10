@@ -97,7 +97,8 @@
         var tipEl = document.getElementById('loading-tip');
         var progressEl = document.getElementById('loading-progress');
         var overlay = document.getElementById('loadingOverlay');
-        var tipIndex = 0;
+        var tipIndex = Math.floor(Math.random() * TIPS.length);
+        if (tipEl) tipEl.textContent = TIPS[tipIndex];
         var _tipInterval;
         var _loadStart = Date.now();
         var MIN_LOAD_MS = 2500;
@@ -134,8 +135,16 @@
                     setTimeout(function() { window._invLoadingCtrl.hide(); }, remaining);
                     return;
                 }
-                // Fill to 100% + cinematic exit
+                // Fill to 100% + completion pulse + cinematic exit
                 if (progressEl) progressEl.style.width = '100%';
+                // Trigger completion pulse waves
+                var waves = overlay.querySelectorAll('.mc-completion-wave');
+                waves.forEach(function(w) { w.classList.add('active'); });
+                try {
+                    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                        Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+                    }
+                } catch(_) {}
                 setTimeout(function() {
                     overlay.classList.add('exit-cinematic');
                     setTimeout(function() {
