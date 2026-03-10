@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    SESSION HEARTBEAT — Device displacement detection
    Polls /api/game/heartbeat to detect when another device takes
-   over the session. Shows a displacement overlay and closes.
+   over the session. Shows a displacement overlay with options to reopen here or close.
    Usage: SessionHeartbeat.init({ apiBase, token, uid })
    ═══════════════════════════════════════════════════════════════ */
 
@@ -85,8 +85,10 @@ var SessionHeartbeat = (function () {
                 '<div class="displaced-title">Sessão transferida</div>' +
                 '<div class="displaced-text">O jogo foi aberto em outro dispositivo:</div>' +
                 '<div class="displaced-device-badge">' + _escHtml(deviceLabel) + '</div>' +
-                '<div class="displaced-text displaced-sub">Esta janela será fechada.</div>' +
-                '<button class="displaced-close-btn" id="displaced-close">Fechar</button>' +
+                '<div class="displaced-actions">' +
+                    '<button class="displaced-reopen-btn" id="displaced-reopen">Reabrir aqui</button>' +
+                    '<button class="displaced-close-btn" id="displaced-close">Fechar</button>' +
+                '</div>' +
             '</div>';
 
         document.body.appendChild(overlay);
@@ -95,14 +97,89 @@ var SessionHeartbeat = (function () {
         overlay.offsetHeight; // eslint-disable-line no-unused-expressions
         overlay.classList.add('displaced-visible');
 
-        // Close button
-        var btn = document.getElementById('displaced-close');
-        if (btn) {
-            btn.addEventListener('click', function () { _close(); });
+        // Reopen button — re-registers this device as active
+        var reopenBtn = document.getElementById('displaced-reopen');
+        if (reopenBtn) {
+            reopenBtn.addEventListener('click', function () { _reopen(overlay); });
         }
 
-        // Auto-close after 8 seconds
-        setTimeout(function () { _close(); }, 8000);
+        // Close button
+        var closeBtn = document.getElementById('displaced-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () { _close(); });
+        }
+
+        // No auto-close — let the user choose
+    }
+
+    async function _reopen(overlay) {
+        var reopenBtn = document.getElementById('displaced-reopen');
+        if (reopenBtn) {
+            reopenBtn.disabled = true;
+            reopenBtn.textContent = 'Reconectando...';
+        }
+
+        try {
+            // Call /start to re-register this device (clears displacement)
+            var platform = '';
+            try {
+                var tg = window.Telegram && Telegram.WebApp;
+                if (tg) platform = tg.platform || '';
+            } catch (e) { /* ignore */ }
+
+            var resp = await fetch(_cfg.apiBase + '/api/game/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + _cfg.token,
+                },
+                body: JSON.stringify({
+                    user_id: _cfg.uid,
+                    platform: platform,
+                }),
+                signal: AbortSignal.timeout(8000),
+            });
+
+            if (!resp.ok) {
+                console.error('[HEARTBEAT] Reopen failed, status:', resp.status);
+                _showReopenError(overlay);
+                return;
+            }
+
+            var data = await resp.json();
+            console.info('[HEARTBEAT] Session reopened successfully');
+
+            // Remove overlay
+            if (overlay && overlay.parentNode) overlay.remove();
+
+            // Reset displaced flag and restart heartbeat
+            _displaced = false;
+            _timer = setInterval(_poll, _cfg.interval);
+
+            // Dispatch event so the WebApp can reload the screen
+            window.dispatchEvent(new CustomEvent('session-reopened', { detail: data }));
+
+        } catch (e) {
+            console.error('[HEARTBEAT] Reopen error:', e);
+            _showReopenError(overlay);
+        }
+    }
+
+    function _showReopenError(overlay) {
+        var reopenBtn = document.getElementById('displaced-reopen');
+        if (reopenBtn) {
+            reopenBtn.textContent = 'Reabrir aqui';
+            reopenBtn.disabled = false;
+        }
+        // Show error hint
+        var existing = overlay.querySelector('.displaced-error');
+        if (!existing) {
+            var errEl = document.createElement('div');
+            errEl.className = 'displaced-text displaced-error';
+            errEl.textContent = 'Falha ao reconectar. Tente novamente.';
+            var actions = overlay.querySelector('.displaced-actions');
+            if (actions) actions.parentNode.insertBefore(errEl, actions);
+        }
     }
 
     function _close() {

@@ -172,6 +172,21 @@ async function init() {
         SessionHeartbeat.init({ apiBase: S.apiBase, token: S.token, uid: S.uid });
     }
 
+    // Listen for session-reopened event (user clicked "Reabrir aqui" on displacement overlay)
+    window.addEventListener('session-reopened', function (e) {
+        console.log('[GAME] Session reopened, reloading screen');
+        var data = e.detail;
+        if (data && data.text) {
+            if (data.sv !== undefined) S.screenVersion = data.sv;
+            renderScreen(data);
+        } else if (data && data.transition) {
+            handleTransition(data.transition);
+        } else {
+            // Fallback: call startGame to get fresh state
+            startGame();
+        }
+    });
+
     // Check if returning from another WebApp (combat, explore, etc.)
     const isReturn = params.get('return') === 'game';
     console.log('[GAME] Route: isReturn=' + isReturn + ' hasCharId=' + !!S.charId);
