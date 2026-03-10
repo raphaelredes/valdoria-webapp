@@ -194,10 +194,13 @@ function renderGroundCover(svg, insertBefore) {
         grassLines: '',     // plains grass (INK stroke, 0.22 op)
     };
 
+    const knownSet = new Set(S.knownLocs);
+    const discoveredSet = new Set(S.discoveredLocs || []);
     for (let row = 0; row <= GRID_ROWS + 1; row++) {
         for (let col = 0; col <= GRID_COLS + 1; col++) {
             const { x, y } = hexToPixel(col, row);
             if (!_pointInLandmass(x, y)) continue;
+            if (_hexVisibility(col, row, knownSet, discoveredSet) <= 0) continue;
             const seed = col * 97 + row * 53;
             const biome = biomeCache.get(`${col},${row}`) || 'plains';
             _groundCoverBatch(x, y, biome, seed, batches);
@@ -219,18 +222,18 @@ function renderGroundCover(svg, insertBefore) {
 
 function _groundCoverBatch(x, y, biome, seed, b) {
     if (biome === 'forest') {
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 5; i++) {
             const bx = x + (srand(seed+i*7)-0.5)*HEX_W, by = y + (srand(seed+i*7+3)-0.5)*ROW_H;
             const cr = 0.4 + srand(seed+i*7+1)*0.4;
             b.darkCircles += `M${bx-cr},${by}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
         }
     } else if (biome === 'mountain' || biome === 'cave') {
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 3; i++) {
             const rx = x + (srand(seed+i*9)-0.5)*HEX_W, ry = y + (srand(seed+i*9+3)-0.5)*ROW_H;
             const sz = 2 + srand(seed+i*9+1) * 2;
             b.darkChevrons += `M${rx-sz},${ry+sz*0.5}L${rx},${ry-sz*0.5}L${rx+sz},${ry+sz*0.5}`;
         }
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 2; i++) {
             const dx = x + (srand(seed+i*11+50)-0.5)*HEX_W, dy = y + (srand(seed+i*11+53)-0.5)*ROW_H;
             b.darkCircles += `M${dx-0.5},${dy}a0.5,0.5 0 1,0 1,0a0.5,0.5 0 1,0 -1,0`;
         }
@@ -240,7 +243,7 @@ function _groundCoverBatch(x, y, biome, seed, b) {
             b.lightLines += `M${wx-3},${wy}L${wx+3},${wy-0.3}`;
         }
     } else if (biome === 'desert') {
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 3; i++) {
             const dx = x + (srand(seed+i*6)-0.5)*HEX_W, dy = y + (srand(seed+i*6+3)-0.5)*ROW_H;
             const wl = 4 + srand(seed+i*6+1) * 6;
             b.inkDashes += `M${dx},${dy}L${dx+wl},${dy-0.3}`;
@@ -251,7 +254,7 @@ function _groundCoverBatch(x, y, biome, seed, b) {
             b.inkWaves += `M${wx-5},${wy}Q${wx},${wy-1.5} ${wx+5},${wy}`;
         }
     } else if (biome === 'volcanic') {
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 3; i++) {
             const vx = x + (srand(seed+i*8)-0.5)*HEX_W, vy = y + (srand(seed+i*8+3)-0.5)*ROW_H;
             b.darkCircles += `M${vx-0.4},${vy}a0.4,0.4 0 1,0 0.8,0a0.4,0.4 0 1,0 -0.8,0`;
         }
@@ -266,7 +269,7 @@ function _groundCoverBatch(x, y, biome, seed, b) {
         }
     } else {
         // Plains
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 3; i++) {
             const gx = x + (srand(seed+i*7)-0.5)*HEX_W, gy = y + (srand(seed+i*7+3)-0.5)*ROW_H;
             for (let bl = 0; bl < 2; bl++) {
                 const a = (srand(seed+i*7+bl*3+5)-0.5)*60*Math.PI/180;
@@ -453,7 +456,7 @@ function _drawForest(g, cluster) {
     const trees = [];
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        const count = 5 + Math.floor(srand(seed) * 4);
+        const count = 3 + Math.floor(srand(seed) * 3);
         for (let i = 0; i < count; i++) {
             trees.push({
                 x: h.x + (srand(seed+i*13)-0.5) * 34,
@@ -506,454 +509,328 @@ function _drawForest(g, cluster) {
 // ══════════════════════════════════════════════════════════
 
 function _drawSnow(g, cluster) {
+    let crackD = '', crystalFillD = '', crystalFacetD = '', driftD = '', frostD = '', windD = '', stippleD = '';
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-
-        // Frozen ground — cracked ice pattern (irregular polygon cracks)
-        for (let i = 0; i < 4; i++) {
+        // Frozen ground — cracked ice (3 groups per hex)
+        for (let i = 0; i < 3; i++) {
             const cx = h.x + (srand(seed+i*31)-0.5)*28;
             const cy = h.y + (srand(seed+i*31+1)-0.5)*16;
-            // Radial crack lines from center point
             const cracks = 3 + Math.floor(srand(seed+i*31+2)*3);
             for (let c = 0; c < cracks; c++) {
                 const angle = (c / cracks) * Math.PI * 2 + (srand(seed+i*31+c*5)-0.5)*0.8;
                 const len = 5 + srand(seed+i*31+c*5+1)*8;
                 const midA = angle + (srand(seed+i*31+c*5+2)-0.5)*0.4;
-                const mx = cx + Math.cos(midA) * len * 0.5;
-                const my = cy + Math.sin(midA) * len * 0.5;
-                const ex = cx + Math.cos(angle) * len;
-                const ey = cy + Math.sin(angle) * len;
-                g.appendChild(_el('path', {
-                    d: `M${cx},${cy} Q${mx},${my} ${ex},${ey}`,
-                    fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.4, 'stroke-opacity': 0.3,
-                }));
+                const mx = cx + Math.cos(midA) * len * 0.5, my = cy + Math.sin(midA) * len * 0.5;
+                const ex = cx + Math.cos(angle) * len, ey = cy + Math.sin(angle) * len;
+                crackD += `M${cx},${cy}Q${mx},${my} ${ex},${ey}`;
             }
         }
-
-        // Ice formations — small jagged crystals (not tall mountains)
+        // Ice crystals
         const crystalCount = 1 + Math.floor(srand(seed+50)*2);
         for (let i = 0; i < crystalCount; i++) {
-            const ix = h.x + (srand(seed+i*17+60)-0.5)*20;
-            const iy = h.y + (srand(seed+i*17+61)-0.5)*10;
-            const ih = 6 + srand(seed+i*17+62)*6; // short! 6-12px
-            const iw = 3 + srand(seed+i*17+63)*3;
-            // Crystal body (irregular polygon — not a perfect triangle)
-            const tipX = ix + (srand(seed+i*17+64)-0.5)*2;
-            const tipY = iy - ih;
+            const ix = h.x + (srand(seed+i*17+60)-0.5)*20, iy = h.y + (srand(seed+i*17+61)-0.5)*10;
+            const ih = 6 + srand(seed+i*17+62)*6, iw = 3 + srand(seed+i*17+63)*3;
+            const tipX = ix + (srand(seed+i*17+64)-0.5)*2, tipY = iy - ih;
             const bl = ix - iw, br = ix + iw * 0.8;
-            const midL = ix - iw * 0.6, midR = ix + iw * 0.4;
-            const midY = iy - ih * 0.4;
-            g.appendChild(_el('polygon', {
-                points: `${bl},${iy} ${midL},${midY} ${tipX},${tipY} ${midR},${midY+1} ${br},${iy}`,
-                fill: INK_LIGHT, 'fill-opacity': 0.14,
-                stroke: INK_LIGHT, 'stroke-width': 0.5, 'stroke-opacity': 0.35,
-            }));
-            // Inner facet line
-            g.appendChild(_el('line', { x1: tipX, y1: tipY, x2: ix, y2: iy,
-                stroke: INK_LIGHT, 'stroke-width': 0.25, 'stroke-opacity': 0.2 }));
+            const midL = ix - iw * 0.6, midR = ix + iw * 0.4, midY = iy - ih * 0.4;
+            crystalFillD += `M${bl},${iy}L${midL},${midY}L${tipX},${tipY}L${midR},${midY+1}L${br},${iy}Z`;
+            crystalFacetD += `M${tipX},${tipY}L${ix},${iy}`;
         }
-
-        // Snow drifts — gentle rolling curves (wind-shaped)
-        for (let i = 0; i < 4; i++) {
-            const dx = h.x + (srand(seed+i*41)-0.5)*26;
-            const dy = h.y + (srand(seed+i*41+1)-0.5)*14 + 2;
+        // Snow drifts (3 per hex)
+        for (let i = 0; i < 3; i++) {
+            const dx = h.x + (srand(seed+i*41)-0.5)*26, dy = h.y + (srand(seed+i*41+1)-0.5)*14 + 2;
             const dw = 8 + srand(seed+i*41+2)*8;
-            g.appendChild(_el('path', {
-                d: `M${dx-dw},${dy} Q${dx-dw*0.3},${dy-2.5} ${dx},${dy-1} Q${dx+dw*0.4},${dy-3} ${dx+dw},${dy}`,
-                fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.5, 'stroke-opacity': 0.25,
-            }));
+            driftD += `M${dx-dw},${dy}Q${dx-dw*0.3},${dy-2.5} ${dx},${dy-1}Q${dx+dw*0.4},${dy-3} ${dx+dw},${dy}`;
         }
-
-        // Frost crystals — small 6-pointed star marks (snowflake hint)
-        for (let i = 0; i < 5; i++) {
-            const fx = h.x + (srand(seed+i*23+100)-0.5)*30;
-            const fy = h.y + (srand(seed+i*23+101)-0.5)*18;
+        // Frost crystals (3 per hex)
+        for (let i = 0; i < 3; i++) {
+            const fx = h.x + (srand(seed+i*23+100)-0.5)*30, fy = h.y + (srand(seed+i*23+101)-0.5)*18;
             const fr = 1.5 + srand(seed+i*23+102)*1.5;
-            // 3 crossing lines = 6-pointed star
             for (let a = 0; a < 3; a++) {
                 const angle = a * Math.PI / 3 + (srand(seed+i*23+a+103)-0.5)*0.2;
-                g.appendChild(_el('line', {
-                    x1: fx - Math.cos(angle)*fr, y1: fy - Math.sin(angle)*fr,
-                    x2: fx + Math.cos(angle)*fr, y2: fy + Math.sin(angle)*fr,
-                    stroke: INK_LIGHT, 'stroke-width': 0.3, 'stroke-opacity': 0.25,
-                }));
+                frostD += `M${fx-Math.cos(angle)*fr},${fy-Math.sin(angle)*fr}L${fx+Math.cos(angle)*fr},${fy+Math.sin(angle)*fr}`;
             }
         }
-
-        // Wind streaks (horizontal, suggesting blizzard)
+        // Wind streaks
         for (let i = 0; i < 3; i++) {
-            const wx = h.x + (srand(seed+i*37+150)-0.5)*28;
-            const wy = h.y + (srand(seed+i*37+151)-0.5)*16;
+            const wx = h.x + (srand(seed+i*37+150)-0.5)*28, wy = h.y + (srand(seed+i*37+151)-0.5)*16;
             const wl = 10 + srand(seed+i*37+152)*12;
-            g.appendChild(_el('line', { x1: wx, y1: wy, x2: wx+wl, y2: wy-0.5,
-                stroke: INK_LIGHT, 'stroke-width': 0.25, 'stroke-opacity': 0.18,
-                'stroke-dasharray': '4 3' }));
+            windD += `M${wx},${wy}L${wx+wl},${wy-0.5}`;
         }
-
-        // Sparse stipple (fallen snow particles)
-        for (let i = 0; i < 8; i++) {
-            const sx = h.x + (srand(seed+i*13+200)-0.5)*32;
-            const sy = h.y + (srand(seed+i*13+201)-0.5)*18;
-            g.appendChild(_el('circle', { cx: sx, cy: sy,
-                r: 0.3 + srand(seed+i*13+202)*0.3,
-                fill: INK_LIGHT, 'fill-opacity': 0.15 }));
+        // Stipple (5 per hex)
+        for (let i = 0; i < 5; i++) {
+            const sx = h.x + (srand(seed+i*13+200)-0.5)*32, sy = h.y + (srand(seed+i*13+201)-0.5)*18;
+            const r = 0.3 + srand(seed+i*13+202)*0.3;
+            stippleD += `M${sx-r},${sy}a${r},${r} 0 1,0 ${r*2},0a${r},${r} 0 1,0 ${-r*2},0`;
         }
     }
+    if (crackD) g.appendChild(_el('path', { d: crackD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.4, 'stroke-opacity': 0.3 }));
+    if (crystalFillD) g.appendChild(_el('path', { d: crystalFillD, fill: INK_LIGHT, 'fill-opacity': 0.14, stroke: INK_LIGHT, 'stroke-width': 0.5, 'stroke-opacity': 0.35 }));
+    if (crystalFacetD) g.appendChild(_el('path', { d: crystalFacetD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.25, 'stroke-opacity': 0.2 }));
+    if (driftD) g.appendChild(_el('path', { d: driftD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.5, 'stroke-opacity': 0.25 }));
+    if (frostD) g.appendChild(_el('path', { d: frostD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.3, 'stroke-opacity': 0.25 }));
+    if (windD) g.appendChild(_el('path', { d: windD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.25, 'stroke-opacity': 0.18, 'stroke-dasharray': '4 3' }));
+    if (stippleD) g.appendChild(_el('path', { d: stippleD, fill: INK_LIGHT, 'fill-opacity': 0.15, stroke: 'none' }));
 }
 
 // ── Swamp — Standing water pools, lily pads, cypress knees, hanging moss ──
 function _drawSwamp(g, cluster) {
+    let poolFillD = '', rippleD = '', padFillD = '', padVeinD = '';
+    let trunkThickD = '', trunkThinD = '', rootD = '', mossD = '', grassD = '', fogD = '';
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-
-        // Standing water pools (organic irregular shapes with dark fill)
+        // Standing water pools (3 per hex)
         for (let p = 0; p < 3; p++) {
-            const px = h.x + (srand(seed+p*31)-0.5)*22;
-            const py = h.y + (srand(seed+p*31+1)-0.5)*12;
-            const prx = 6 + srand(seed+p*31+2)*8;
-            const pry = 3 + srand(seed+p*31+3)*4;
-            // Organic blob outline for pool
-            const poolPath = _organicBlob(px, py, prx, pry, seed+p*100, 7);
-            g.appendChild(_el('path', { d: poolPath,
-                fill: INK_DARK, 'fill-opacity': 0.12,
-                stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.25 }));
-            // Water ripple lines inside pool
+            const px = h.x + (srand(seed+p*31)-0.5)*22, py = h.y + (srand(seed+p*31+1)-0.5)*12;
+            const prx = 6 + srand(seed+p*31+2)*8, pry = 3 + srand(seed+p*31+3)*4;
+            poolFillD += _organicBlob(px, py, prx, pry, seed+p*100, 7);
             for (let r = 0; r < 2; r++) {
-                const ry2 = py - 1 + r * 2.5;
-                const rw = prx * (0.5 + srand(seed+p*31+r*7)*0.3);
-                g.appendChild(_el('path', {
-                    d: `M${px-rw},${ry2} Q${px},${ry2-1} ${px+rw},${ry2}`,
-                    fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.2,
-                }));
+                const ry2 = py - 1 + r * 2.5, rw = prx * (0.5 + srand(seed+p*31+r*7)*0.3);
+                rippleD += `M${px-rw},${ry2}Q${px},${ry2-1} ${px+rw},${ry2}`;
             }
         }
-
-        // Lily pads (small circles with a notch, floating on water)
-        for (let i = 0; i < 5; i++) {
-            const lx = h.x + (srand(seed+i*17+50)-0.5)*28;
-            const ly = h.y + (srand(seed+i*17+51)-0.5)*14;
+        // Lily pads (3 per hex)
+        for (let i = 0; i < 3; i++) {
+            const lx = h.x + (srand(seed+i*17+50)-0.5)*28, ly = h.y + (srand(seed+i*17+51)-0.5)*14;
             const lr = 1.5 + srand(seed+i*17+52)*1.5;
             const notchAngle = srand(seed+i*17+53) * Math.PI * 2;
-            // Pad circle with notch cut
-            const startA = notchAngle + 0.3;
-            const endA = notchAngle + Math.PI * 2 - 0.3;
+            const startA = notchAngle + 0.3, endA = notchAngle + Math.PI * 2 - 0.3;
             const x1 = lx + Math.cos(startA)*lr, y1 = ly + Math.sin(startA)*lr;
             const x2 = lx + Math.cos(endA)*lr, y2 = ly + Math.sin(endA)*lr;
-            g.appendChild(_el('path', {
-                d: `M${lx},${ly} L${x1},${y1} A${lr},${lr} 0 1 1 ${x2},${y2} Z`,
-                fill: INK_DARK, 'fill-opacity': 0.14,
-                stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.3,
-            }));
-            // Vein line on pad
+            padFillD += `M${lx},${ly}L${x1},${y1}A${lr},${lr} 0 1 1 ${x2},${y2}Z`;
             const vx = lx + Math.cos(notchAngle + Math.PI)*lr*0.7;
             const vy = ly + Math.sin(notchAngle + Math.PI)*lr*0.7;
-            g.appendChild(_el('line', { x1: lx, y1: ly, x2: vx, y2: vy,
-                stroke: INK_DARK, 'stroke-width': 0.15, 'stroke-opacity': 0.2 }));
+            padVeinD += `M${lx},${ly}L${vx},${vy}`;
         }
-
-        // Cypress/mangrove stumps (gnarled root bases rising from water)
+        // Cypress stumps (3 per hex)
         for (let i = 0; i < 3; i++) {
-            const cx = h.x + (srand(seed+i*23+70)-0.5)*30;
-            const cy = h.y + (srand(seed+i*23+71)-0.5)*12;
-            const th = 6 + srand(seed+i*23+72)*5;
-            // Trunk (tapered, slightly curved)
-            const lean = (srand(seed+i*23+73)-0.5)*2;
-            g.appendChild(_el('path', {
-                d: `M${cx-1.5},${cy+3} Q${cx-1+lean*0.3},${cy-th*0.3} ${cx+lean},${cy-th}`,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-opacity': 0.6, 'stroke-linecap': 'round',
-            }));
-            g.appendChild(_el('path', {
-                d: `M${cx+1.5},${cy+3} Q${cx+1+lean*0.3},${cy-th*0.3} ${cx+lean},${cy-th}`,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.5, 'stroke-linecap': 'round',
-            }));
-            // Buttress roots (2-3 flared lines spreading from base)
+            const cx = h.x + (srand(seed+i*23+70)-0.5)*30, cy = h.y + (srand(seed+i*23+71)-0.5)*12;
+            const th = 6 + srand(seed+i*23+72)*5, lean = (srand(seed+i*23+73)-0.5)*2;
+            trunkThickD += `M${cx-1.5},${cy+3}Q${cx-1+lean*0.3},${cy-th*0.3} ${cx+lean},${cy-th}`;
+            trunkThinD += `M${cx+1.5},${cy+3}Q${cx+1+lean*0.3},${cy-th*0.3} ${cx+lean},${cy-th}`;
             for (let r = 0; r < 3; r++) {
                 const rDir = (r - 1) * 3.5 + (srand(seed+i*23+r*5+80)-0.5)*2;
-                g.appendChild(_el('path', {
-                    d: `M${cx},${cy+2} Q${cx+rDir*0.5},${cy+3} ${cx+rDir},${cy+4}`,
-                    fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.5,
-                }));
+                rootD += `M${cx},${cy+2}Q${cx+rDir*0.5},${cy+3} ${cx+rDir},${cy+4}`;
             }
-            // Hanging moss wisps (thin drooping curves from top)
             if (srand(seed+i*23+76) > 0.3) {
                 for (let m = 0; m < 2; m++) {
-                    const mx = cx + lean + (srand(seed+i*23+m*5+85)-0.5)*3;
-                    const my = cy - th + 1;
-                    const mLen = 3 + srand(seed+i*23+m*5+86)*3;
-                    const mSway = (srand(seed+i*23+m*5+87)-0.5)*2;
-                    g.appendChild(_el('path', {
-                        d: `M${mx},${my} Q${mx+mSway},${my+mLen*0.6} ${mx+mSway*0.5},${my+mLen}`,
-                        fill: 'none', stroke: INK, 'stroke-width': 0.25, 'stroke-opacity': 0.3,
-                    }));
+                    const mx = cx + lean + (srand(seed+i*23+m*5+85)-0.5)*3, my = cy - th + 1;
+                    const mLen = 3 + srand(seed+i*23+m*5+86)*3, mSway = (srand(seed+i*23+m*5+87)-0.5)*2;
+                    mossD += `M${mx},${my}Q${mx+mSway},${my+mLen*0.6} ${mx+mSway*0.5},${my+mLen}`;
                 }
             }
         }
-
-        // Short marsh grass tufts (low, spreading — NOT tall reeds)
-        for (let i = 0; i < 6; i++) {
-            const gx = h.x + (srand(seed+i*13+100)-0.5)*30;
-            const gy = h.y + (srand(seed+i*13+101)-0.5)*14;
+        // Marsh grass (4 tufts per hex)
+        for (let i = 0; i < 4; i++) {
+            const gx = h.x + (srand(seed+i*13+100)-0.5)*30, gy = h.y + (srand(seed+i*13+101)-0.5)*14;
             for (let b = 0; b < 4; b++) {
                 const angle = -30 + b * 20 + (srand(seed+i*13+b+102)-0.5)*15;
-                const bh = 2 + srand(seed+i*13+b+110)*2.5; // short!
+                const bh = 2 + srand(seed+i*13+b+110)*2.5;
                 const rad = angle * Math.PI / 180;
-                g.appendChild(_el('path', {
-                    d: `M${gx},${gy} Q${gx+Math.sin(rad)*bh*0.5},${gy-bh*0.7} ${gx+Math.sin(rad)*bh},${gy-Math.cos(rad)*bh}`,
-                    fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35,
-                    'stroke-opacity': 0.35, 'stroke-linecap': 'round',
-                }));
+                grassD += `M${gx},${gy}Q${gx+Math.sin(rad)*bh*0.5},${gy-bh*0.7} ${gx+Math.sin(rad)*bh},${gy-Math.cos(rad)*bh}`;
             }
         }
-
-        // Subtle fog/mist stipple (atmosphere)
-        for (let i = 0; i < 10; i++) {
-            const fx = h.x + (srand(seed+i*19+200)-0.5)*32;
-            const fy = h.y + (srand(seed+i*19+201)-0.5)*18;
-            g.appendChild(_el('circle', { cx: fx, cy: fy,
-                r: 0.3 + srand(seed+i*19+202)*0.4,
-                fill: INK, 'fill-opacity': 0.08 + srand(seed+i*19+203)*0.06 }));
+        // Fog stipple (6 per hex)
+        for (let i = 0; i < 6; i++) {
+            const fx = h.x + (srand(seed+i*19+200)-0.5)*32, fy = h.y + (srand(seed+i*19+201)-0.5)*18;
+            const r = 0.3 + srand(seed+i*19+202)*0.4;
+            fogD += `M${fx-r},${fy}a${r},${r} 0 1,0 ${r*2},0a${r},${r} 0 1,0 ${-r*2},0`;
         }
     }
+    if (poolFillD) g.appendChild(_el('path', { d: poolFillD, fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.25 }));
+    if (rippleD) g.appendChild(_el('path', { d: rippleD, fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.2 }));
+    if (padFillD) g.appendChild(_el('path', { d: padFillD, fill: INK_DARK, 'fill-opacity': 0.14, stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.3 }));
+    if (padVeinD) g.appendChild(_el('path', { d: padVeinD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.15, 'stroke-opacity': 0.2 }));
+    if (trunkThickD) g.appendChild(_el('path', { d: trunkThickD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-opacity': 0.6, 'stroke-linecap': 'round' }));
+    if (trunkThinD) g.appendChild(_el('path', { d: trunkThinD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.5, 'stroke-linecap': 'round' }));
+    if (rootD) g.appendChild(_el('path', { d: rootD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.5 }));
+    if (mossD) g.appendChild(_el('path', { d: mossD, fill: 'none', stroke: INK, 'stroke-width': 0.25, 'stroke-opacity': 0.3 }));
+    if (grassD) g.appendChild(_el('path', { d: grassD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.35, 'stroke-linecap': 'round' }));
+    if (fogD) g.appendChild(_el('path', { d: fogD, fill: INK, 'fill-opacity': 0.1, stroke: 'none' }));
 }
 
 // ── Desert — Crescent dunes with shading + stipple + wind marks ──
 function _drawDesert(g, cluster) {
+    let duneD = '', shadowD = '', stippleD = '', windD = '';
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        // Crescent dune curves (bolder, with shadow side)
-        for (let d = 0; d < 4; d++) {
-            const dy = -8 + d * 5, dOx = (srand(seed+d*17)-0.5)*10;
+        // Dunes (3 per hex)
+        for (let d = 0; d < 3; d++) {
+            const dy = -8 + d * 6, dOx = (srand(seed+d*17)-0.5)*10;
             const duneW = 16 + srand(seed+d*17+1)*8;
-            // Main dune curve
-            g.appendChild(_el('path', {
-                d: `M${h.x-duneW+dOx},${h.y+dy+3} Q${h.x+dOx},${h.y+dy-5} ${h.x+duneW+dOx},${h.y+dy+3}`,
-                fill: 'none', stroke: INK, 'stroke-width': 0.7, 'stroke-opacity': 0.4,
-            }));
-            // Shadow hatching under dune (3-4 parallel arcs)
-            for (let s = 0; s < 3; s++) {
-                const sOff = 1.5 + s * 1.2;
-                g.appendChild(_el('path', {
-                    d: `M${h.x-duneW*0.7+dOx},${h.y+dy+3+sOff} Q${h.x+dOx},${h.y+dy-2+sOff} ${h.x+duneW*0.7+dOx},${h.y+dy+3+sOff}`,
-                    fill: 'none', stroke: INK, 'stroke-width': 0.25, 'stroke-opacity': 0.2 - s*0.04,
-                }));
+            duneD += `M${h.x-duneW+dOx},${h.y+dy+3}Q${h.x+dOx},${h.y+dy-5} ${h.x+duneW+dOx},${h.y+dy+3}`;
+            for (let s = 0; s < 2; s++) {
+                const sOff = 1.5 + s * 1.5;
+                shadowD += `M${h.x-duneW*0.7+dOx},${h.y+dy+3+sOff}Q${h.x+dOx},${h.y+dy-2+sOff} ${h.x+duneW*0.7+dOx},${h.y+dy+3+sOff}`;
             }
         }
-        // Sand stipple dots (denser)
-        for (let i = 0; i < 18; i++) {
-            const sx = h.x + (srand(seed+i*5)-0.5)*32;
-            const sy = h.y + (srand(seed+i*5+3)-0.5)*18;
-            g.appendChild(_el('circle', { cx: sx, cy: sy, r: 0.35 + srand(seed+i*5+4)*0.3,
-                fill: INK, 'fill-opacity': 0.12 + srand(seed+i*5+5)*0.1 }));
+        // Sand stipple (10 per hex)
+        for (let i = 0; i < 10; i++) {
+            const sx = h.x + (srand(seed+i*5)-0.5)*32, sy = h.y + (srand(seed+i*5+3)-0.5)*18;
+            const r = 0.35 + srand(seed+i*5+4)*0.3;
+            stippleD += `M${sx-r},${sy}a${r},${r} 0 1,0 ${r*2},0a${r},${r} 0 1,0 ${-r*2},0`;
         }
         // Wind streaks
         for (let i = 0; i < 3; i++) {
-            const wx = h.x + (srand(seed+i*19)-0.5)*28;
-            const wy = h.y + (srand(seed+i*19+1)-0.5)*14;
+            const wx = h.x + (srand(seed+i*19)-0.5)*28, wy = h.y + (srand(seed+i*19+1)-0.5)*14;
             const wl = 8 + srand(seed+i*19+2)*10;
-            g.appendChild(_el('line', { x1: wx, y1: wy, x2: wx+wl, y2: wy-0.5,
-                stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.15, 'stroke-dasharray': '3 2' }));
+            windD += `M${wx},${wy}L${wx+wl},${wy-0.5}`;
         }
     }
+    if (duneD) g.appendChild(_el('path', { d: duneD, fill: 'none', stroke: INK, 'stroke-width': 0.7, 'stroke-opacity': 0.4 }));
+    if (shadowD) g.appendChild(_el('path', { d: shadowD, fill: 'none', stroke: INK, 'stroke-width': 0.25, 'stroke-opacity': 0.18 }));
+    if (stippleD) g.appendChild(_el('path', { d: stippleD, fill: INK, 'fill-opacity': 0.14, stroke: 'none' }));
+    if (windD) g.appendChild(_el('path', { d: windD, fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.15, 'stroke-dasharray': '3 2' }));
 }
 
 // ── Volcanic — Mountain peak + crater + lava flows + smoke ──
 function _drawVolcanic(g, cluster) {
+    let shadowFillD = '', slopeThickD = '', slopeThinD = '', craterD = '', hatchD = '', lavaD = '', smokeD = '';
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
         const jx = (srand(seed)-0.5)*4;
         const ht = 22 + srand(seed+1)*12, w = 14 + srand(seed+2)*6;
         const px = h.x+jx, by = h.y+6, ty = by - ht;
-        // Shadow fill
-        g.appendChild(_el('polygon', {
-            points: `${px-w},${by} ${px-2},${ty} ${px-2},${by}`,
-            fill: INK_DARK, 'fill-opacity': 0.15,
-        }));
-        // Slopes
-        g.appendChild(_el('line', { x1: px-w, y1: by, x2: px-2, y2: ty,
-            stroke: INK_DARK, 'stroke-width': 0.7, 'stroke-opacity': 0.65, 'stroke-linecap': 'round' }));
-        g.appendChild(_el('line', { x1: px+2, y1: ty, x2: px+w, y2: by,
-            stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.55, 'stroke-linecap': 'round' }));
-        // Crater opening (concave arc)
-        g.appendChild(_el('path', {
-            d: `M${px-4},${ty+1} Q${px},${ty+4} ${px+4},${ty+1}`,
-            fill: INK_DARK, 'fill-opacity': 0.2,
-            stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.6 }));
-        // Dense left hatching
-        for (let j = 0; j < 8; j++) {
-            const t = 0.1 + j * 0.1;
-            const hx = (px-w) + (px-2 - (px-w)) * t;
-            const hy = by + (ty - by) * t;
+        shadowFillD += `M${px-w},${by}L${px-2},${ty}L${px-2},${by}Z`;
+        slopeThickD += `M${px-w},${by}L${px-2},${ty}`;
+        slopeThinD += `M${px+2},${ty}L${px+w},${by}`;
+        craterD += `M${px-4},${ty+1}Q${px},${ty+4} ${px+4},${ty+1}`;
+        for (let j = 0; j < 6; j++) {
+            const t = 0.1 + j * 0.13;
+            const hx = (px-w) + (px-2 - (px-w)) * t, hy = by + (ty - by) * t;
             const hLen = ht * 0.12;
-            g.appendChild(_el('line', { x1: hx, y1: hy, x2: hx+hLen*0.4, y2: hy+hLen,
-                stroke: INK_DARK, 'stroke-width': 0.2, 'stroke-opacity': 0.28 }));
+            hatchD += `M${hx},${hy}L${hx+hLen*0.4},${hy+hLen}`;
         }
-        // Lava flow lines (wavy descending from crater)
         for (let i = 0; i < 2; i++) {
-            const side = i === 0 ? -1 : 1;
-            const lx = px + side * 2;
-            g.appendChild(_el('path', {
-                d: `M${lx},${ty+3} Q${lx+side*5},${ty+ht*0.3} ${lx+side*3},${ty+ht*0.5} Q${lx+side*7},${ty+ht*0.7} ${lx+side*4},${by-2}`,
-                fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.3,
-            }));
+            const side = i === 0 ? -1 : 1, lx = px + side * 2;
+            lavaD += `M${lx},${ty+3}Q${lx+side*5},${ty+ht*0.3} ${lx+side*3},${ty+ht*0.5}Q${lx+side*7},${ty+ht*0.7} ${lx+side*4},${by-2}`;
         }
-        // Smoke wisps (bolder, more dramatic)
-        for (let i = 0; i < 4; i++) {
-            const sx = px + (srand(seed+i*3)-0.5)*5;
-            const sh = 10 + i * 6;
-            const wobble = 3 + i * 2;
-            g.appendChild(_el('path', {
-                d: `M${sx},${ty} Q${sx+wobble},${ty-sh*0.3} ${sx-wobble*0.5},${ty-sh*0.6} Q${sx+wobble*0.8},${ty-sh*0.8} ${sx-wobble*0.3},${ty-sh}`,
-                fill: 'none', stroke: INK, 'stroke-width': 0.5 - i*0.08, 'stroke-opacity': 0.25 - i*0.04,
-            }));
+        for (let i = 0; i < 3; i++) {
+            const sx = px + (srand(seed+i*3)-0.5)*5, sh = 10 + i * 6, wobble = 3 + i * 2;
+            smokeD += `M${sx},${ty}Q${sx+wobble},${ty-sh*0.3} ${sx-wobble*0.5},${ty-sh*0.6}Q${sx+wobble*0.8},${ty-sh*0.8} ${sx-wobble*0.3},${ty-sh}`;
         }
     }
+    if (shadowFillD) g.appendChild(_el('path', { d: shadowFillD, fill: INK_DARK, 'fill-opacity': 0.15, stroke: 'none' }));
+    if (slopeThickD) g.appendChild(_el('path', { d: slopeThickD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.7, 'stroke-opacity': 0.65, 'stroke-linecap': 'round' }));
+    if (slopeThinD) g.appendChild(_el('path', { d: slopeThinD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.55, 'stroke-linecap': 'round' }));
+    if (craterD) g.appendChild(_el('path', { d: craterD, fill: INK_DARK, 'fill-opacity': 0.2, stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.6 }));
+    if (hatchD) g.appendChild(_el('path', { d: hatchD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.2, 'stroke-opacity': 0.28 }));
+    if (lavaD) g.appendChild(_el('path', { d: lavaD, fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.3 }));
+    if (smokeD) g.appendChild(_el('path', { d: smokeD, fill: 'none', stroke: INK, 'stroke-width': 0.4, 'stroke-opacity': 0.2 }));
 }
 
 // ── Cave — Rocky ground with scattered boulders, dark crevices, sparse entrance ──
 function _drawCave(g, cluster) {
+    let boulderFillD = '', boulderShadowD = '', creviceD = '', stippleD = '', entranceFillD = '', stalactiteD = '';
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-
-        // Scattered boulders (irregular rounded shapes, not arches)
-        for (let i = 0; i < 4; i++) {
-            const bx = h.x + (srand(seed+i*7)-0.5)*28;
-            const by = h.y + (srand(seed+i*7+3)-0.5)*14;
-            const bsz = 3 + srand(seed+i*7+1)*4;
-            const bPath = _organicBlob(bx, by, bsz, bsz * 0.7, seed+i*100, 6);
-            g.appendChild(_el('path', { d: bPath,
-                fill: INK_DARK, 'fill-opacity': 0.12,
-                stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.28 }));
-            // Shadow crescent on one side
-            g.appendChild(_el('path', {
-                d: `M${bx},${by-bsz*0.4} A${bsz*0.5},${bsz*0.5} 0 0 1 ${bx},${by+bsz*0.4}`,
-                fill: INK_DARK, 'fill-opacity': 0.12, stroke: 'none',
-            }));
-        }
-
-        // Ground crevice lines (dark cracks in rock)
+        // Boulders (3 per hex)
         for (let i = 0; i < 3; i++) {
-            const cx = h.x + (srand(seed+i*19+40)-0.5)*26;
-            const cy = h.y + (srand(seed+i*19+41)-0.5)*12;
-            const cLen = 6 + srand(seed+i*19+42)*8;
-            const cAngle = (srand(seed+i*19+43)-0.5)*1.2;
-            const ex = cx + Math.cos(cAngle)*cLen;
-            const ey = cy + Math.sin(cAngle)*cLen;
-            const mx = (cx+ex)/2 + (srand(seed+i*19+44)-0.5)*3;
-            const my = (cy+ey)/2 + (srand(seed+i*19+45)-0.5)*2;
-            g.appendChild(_el('path', {
-                d: `M${cx},${cy} Q${mx},${my} ${ex},${ey}`,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.35,
-            }));
+            const bx = h.x + (srand(seed+i*7)-0.5)*28, by = h.y + (srand(seed+i*7+3)-0.5)*14;
+            const bsz = 3 + srand(seed+i*7+1)*4;
+            boulderFillD += _organicBlob(bx, by, bsz, bsz * 0.7, seed+i*100, 6);
+            boulderShadowD += `M${bx},${by-bsz*0.4}A${bsz*0.5},${bsz*0.5} 0 0 1 ${bx},${by+bsz*0.4}`;
         }
-
-        // Dense stipple (rocky ground texture)
-        for (let i = 0; i < 16; i++) {
-            const sx = h.x + (srand(seed+i*11)-0.5)*30;
-            const sy = h.y + (srand(seed+i*11+3)-0.5)*16;
-            g.appendChild(_el('circle', { cx: sx, cy: sy,
-                r: 0.35 + srand(seed+i*11+1)*0.4,
-                fill: INK_DARK, 'fill-opacity': 0.15 + srand(seed+i*11+2)*0.1 }));
+        // Crevices
+        for (let i = 0; i < 3; i++) {
+            const cx = h.x + (srand(seed+i*19+40)-0.5)*26, cy = h.y + (srand(seed+i*19+41)-0.5)*12;
+            const cLen = 6 + srand(seed+i*19+42)*8, cAngle = (srand(seed+i*19+43)-0.5)*1.2;
+            const ex = cx + Math.cos(cAngle)*cLen, ey = cy + Math.sin(cAngle)*cLen;
+            const mx = (cx+ex)/2 + (srand(seed+i*19+44)-0.5)*3, my = (cy+ey)/2 + (srand(seed+i*19+45)-0.5)*2;
+            creviceD += `M${cx},${cy}Q${mx},${my} ${ex},${ey}`;
         }
-
-        // One cave entrance per hex (not every hex — only 60%)
+        // Stipple (8 per hex)
+        for (let i = 0; i < 8; i++) {
+            const sx = h.x + (srand(seed+i*11)-0.5)*30, sy = h.y + (srand(seed+i*11+3)-0.5)*16;
+            const r = 0.35 + srand(seed+i*11+1)*0.4;
+            stippleD += `M${sx-r},${sy}a${r},${r} 0 1,0 ${r*2},0a${r},${r} 0 1,0 ${-r*2},0`;
+        }
+        // Cave entrance (60% chance)
         if (srand(seed+55) > 0.4) {
-            const eW = 7 + srand(seed+56)*3;
-            const eH = 5 + srand(seed+57)*3;
-            const ex = h.x + (srand(seed+58)-0.5)*8;
-            const ey = h.y + (srand(seed+59)-0.5)*4;
-            // Dark filled entrance
-            g.appendChild(_el('path', {
-                d: `M${ex-eW},${ey+3} Q${ex-eW},${ey-eH} ${ex},${ey-eH-2} Q${ex+eW},${ey-eH} ${ex+eW},${ey+3}`,
-                fill: INK_DARK, 'fill-opacity': 0.12,
-                stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.55,
-            }));
-            // Stalactites (3 thin lines hanging down)
+            const eW = 7 + srand(seed+56)*3, eH = 5 + srand(seed+57)*3;
+            const ex = h.x + (srand(seed+58)-0.5)*8, ey = h.y + (srand(seed+59)-0.5)*4;
+            entranceFillD += `M${ex-eW},${ey+3}Q${ex-eW},${ey-eH} ${ex},${ey-eH-2}Q${ex+eW},${ey-eH} ${ex+eW},${ey+3}`;
             for (let j = 0; j < 3; j++) {
                 const sx = ex + (j-1)*3 + (srand(seed+j*5+90)-0.5)*1.5;
-                const sTop = ey - eH + Math.abs(j-1)*1.5;
-                const sLen = 1.5 + srand(seed+j*5+91)*2;
-                g.appendChild(_el('line', { x1: sx, y1: sTop, x2: sx, y2: sTop+sLen,
-                    stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.4 }));
+                const sTop = ey - eH + Math.abs(j-1)*1.5, sLen = 1.5 + srand(seed+j*5+91)*2;
+                stalactiteD += `M${sx},${sTop}L${sx},${sTop+sLen}`;
             }
         }
     }
+    if (boulderFillD) g.appendChild(_el('path', { d: boulderFillD, fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.28 }));
+    if (boulderShadowD) g.appendChild(_el('path', { d: boulderShadowD, fill: INK_DARK, 'fill-opacity': 0.12, stroke: 'none' }));
+    if (creviceD) g.appendChild(_el('path', { d: creviceD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.35 }));
+    if (stippleD) g.appendChild(_el('path', { d: stippleD, fill: INK_DARK, 'fill-opacity': 0.18, stroke: 'none' }));
+    if (entranceFillD) g.appendChild(_el('path', { d: entranceFillD, fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.55 }));
+    if (stalactiteD) g.appendChild(_el('path', { d: stalactiteD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.4 }));
 }
 
 // ── Graveyard — Tombstones + crosses + dead trees + fog ──
 function _drawGraveyard(g, cluster) {
+    let moundD = '', tombD = '', crossD = '', treeD = '';
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        // Ground mounds (low bumps — spaced out)
+        // Ground mounds
         for (let i = 0; i < 2; i++) {
             const mx = h.x + (i === 0 ? -12 : 10) + (srand(seed+i*13)-0.5)*6;
             const my = h.y + 6 + srand(seed+i*13+1)*3;
-            g.appendChild(_el('path', {
-                d: `M${mx-5},${my} Q${mx},${my-2.5} ${mx+5},${my}`,
-                fill: 'none', stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.25,
-            }));
+            moundD += `M${mx-5},${my}Q${mx},${my-2.5} ${mx+5},${my}`;
         }
-        // Graves — fewer, well-spaced using grid positions
-        const graves = [
-            [-14, -6], [0, -8], [14, -4],  // top row
-            [-10, 4], [8, 6],               // bottom row
-        ];
+        // Graves (tombstones + crosses) — use transform via individual elements for rotation
+        const graves = [[-14, -6], [0, -8], [14, -4], [-10, 4], [8, 6]];
         for (let i = 0; i < graves.length; i++) {
             const [gox, goy] = graves[i];
             const tx = h.x + gox + (srand(seed+i*9)-0.5)*4;
             const ty = h.y + goy + (srand(seed+i*9+3)-0.5)*3;
-            const th = 7 + srand(seed+i*9+1)*4;
-            const tw = 2.5 + srand(seed+i*9+2)*1.5;
+            const th = 7 + srand(seed+i*9+1)*4, tw = 2.5 + srand(seed+i*9+2)*1.5;
             const tilt = (srand(seed+i*9+5)-0.5)*8;
+            // Pre-compute rotated coords (avoid per-element transform attr)
+            const rad = tilt * Math.PI / 180;
+            const cos = Math.cos(rad), sin = Math.sin(rad);
+            const rot = (x, y) => { const dx = x-tx, dy = y-ty; return [tx+dx*cos-dy*sin, ty+dx*sin+dy*cos]; };
             if (i < 3) {
-                // Tombstone
-                g.appendChild(_el('path', {
-                    d: `M${tx-tw},${ty+2} L${tx-tw},${ty-th+2} Q${tx},${ty-th-2} ${tx+tw},${ty-th+2} L${tx+tw},${ty+2} Z`,
-                    fill: INK_DARK, 'fill-opacity': 0.12,
-                    stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.55,
-                    transform: `rotate(${tilt}, ${tx}, ${ty})`,
-                }));
+                const [ax,ay] = rot(tx-tw, ty+2), [bx,by] = rot(tx-tw, ty-th+2);
+                const [cx,cy] = rot(tx, ty-th-2), [dx,dy] = rot(tx+tw, ty-th+2), [ex,ey] = rot(tx+tw, ty+2);
+                tombD += `M${ax},${ay}L${bx},${by}Q${cx},${cy} ${dx},${dy}L${ex},${ey}Z`;
             } else {
-                // Cross
-                g.appendChild(_el('line', { x1: tx, y1: ty+2, x2: tx, y2: ty-th,
-                    stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-opacity': 0.6,
-                    transform: `rotate(${tilt}, ${tx}, ${ty})` }));
-                g.appendChild(_el('line', { x1: tx-tw-1, y1: ty-th*0.5, x2: tx+tw+1, y2: ty-th*0.5,
-                    stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.55,
-                    transform: `rotate(${tilt}, ${tx}, ${ty})` }));
+                const [x1,y1] = rot(tx, ty+2), [x2,y2] = rot(tx, ty-th);
+                crossD += `M${x1},${y1}L${x2},${y2}`;
+                const [x3,y3] = rot(tx-tw-1, ty-th*0.5), [x4,y4] = rot(tx+tw+1, ty-th*0.5);
+                crossD += `M${x3},${y3}L${x4},${y4}`;
             }
         }
-        // Dead tree (one per hex, offset to side)
+        // Dead tree
         if (srand(seed + 60) > 0.3) {
-            const dtx = h.x + 16 + (srand(seed+61)-0.5)*4;
-            const dty = h.y - 2;
-            g.appendChild(_el('line', { x1: dtx, y1: dty+3, x2: dtx-0.5, y2: dty-14,
-                stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-opacity': 0.55, 'stroke-linecap': 'round' }));
+            const dtx = h.x + 16 + (srand(seed+61)-0.5)*4, dty = h.y - 2;
+            treeD += `M${dtx},${dty+3}L${dtx-0.5},${dty-14}`;
             const branches = [[dty-11, 6, -3], [dty-8, -5, -4], [dty-5, 4, -2]];
             for (const [by, bx, bey] of branches) {
-                g.appendChild(_el('line', { x1: dtx, y1: by, x2: dtx+bx, y2: by+bey,
-                    stroke: INK_DARK, 'stroke-width': 0.45 + srand(seed+by)*0.25 }));
+                treeD += `M${dtx},${by}L${dtx+bx},${by+bey}`;
             }
         }
     }
+    if (moundD) g.appendChild(_el('path', { d: moundD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.25 }));
+    if (tombD) g.appendChild(_el('path', { d: tombD, fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.55 }));
+    if (crossD) g.appendChild(_el('path', { d: crossD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.55, 'stroke-opacity': 0.58 }));
+    if (treeD) g.appendChild(_el('path', { d: treeD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.55, 'stroke-opacity': 0.55, 'stroke-linecap': 'round' }));
 }
 
 // ── Grassland — Curved grass blades ──
 function _drawGrassland(g, cluster) {
+    let grassD = '';
     for (const h of cluster) {
         const seed = h.col * 100 + h.row;
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 5; i++) {
             const gx = h.x + (srand(seed+i*5)-0.5)*32;
             const gy = h.y + (srand(seed+i*5+2)-0.5)*16;
             for (let b = 0; b < 3; b++) {
                 const angle = -20 + b * 18 + (srand(seed+i*5+b)-0.5)*12;
                 const bh = 4 + srand(seed+i*5+b+10)*4;
                 const rad = angle * Math.PI / 180;
-                g.appendChild(_el('path', {
-                    d: `M${gx},${gy} Q${gx+Math.sin(rad)*bh*0.5},${gy-bh*0.7} ${gx+Math.sin(rad)*bh},${gy-Math.cos(rad)*bh}`,
-                    fill: 'none', stroke: INK, 'stroke-width': 0.3,
-                    'stroke-opacity': 0.22, 'stroke-linecap': 'round',
-                }));
+                grassD += `M${gx},${gy}Q${gx+Math.sin(rad)*bh*0.5},${gy-bh*0.7} ${gx+Math.sin(rad)*bh},${gy-Math.cos(rad)*bh}`;
             }
         }
     }
+    if (grassD) g.appendChild(_el('path', { d: grassD, fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.22, 'stroke-linecap': 'round' }));
 }

@@ -237,7 +237,7 @@ async function _onVisibilityRefresh() {
         updateHUD();
         updateLocationBadge();
         updateBottomBar();
-        renderMap();
+        await renderMapAsync();
         if (typeof _initMinimap === 'function') _initMinimap();
         console.log('[NAVIGATE] Map data refreshed successfully');
     } catch (e) {

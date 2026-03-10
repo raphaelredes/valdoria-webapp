@@ -263,15 +263,28 @@ function _deferDecorativeLayers(svg, fogState) {
     // Frame 1: Worn edges + aging (insert behind terrain but above landmass)
     requestAnimationFrame(() => {
         const terrainRegions = svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer');
-        const frag = document.createDocumentFragment();
-        const wornG = _el('g', { class: 'worn-edges-deferred', 'pointer-events': 'none' });
-        _renderWornEdgesInto(wornG);
-        frag.appendChild(wornG);
-        const agingG = _el('g', { class: 'aging-deferred' });
-        _renderAgingEffectsInto(agingG);
-        frag.appendChild(agingG);
-        if (terrainRegions) svg.insertBefore(frag, terrainRegions);
-        else svg.appendChild(frag);
+
+        // Use cached HTML if available (worn edges + aging are fully static)
+        if (_decorCache.wornHTML && _decorCache.agingHTML) {
+            const wrapper = _el('g');
+            wrapper.innerHTML = _decorCache.wornHTML + _decorCache.agingHTML;
+            while (wrapper.firstChild) {
+                if (terrainRegions) svg.insertBefore(wrapper.firstChild, terrainRegions);
+                else svg.appendChild(wrapper.firstChild);
+            }
+        } else {
+            const frag = document.createDocumentFragment();
+            const wornG = _el('g', { class: 'worn-edges-deferred', 'pointer-events': 'none' });
+            _renderWornEdgesInto(wornG);
+            frag.appendChild(wornG);
+            _decorCache.wornHTML = wornG.outerHTML;
+            const agingG = _el('g', { class: 'aging-deferred' });
+            _renderAgingEffectsInto(agingG);
+            frag.appendChild(agingG);
+            _decorCache.agingHTML = agingG.outerHTML;
+            if (terrainRegions) svg.insertBefore(frag, terrainRegions);
+            else svg.appendChild(frag);
+        }
 
         // Frame 2: Ground cover (subtle background texture, insert before terrain regions)
         requestAnimationFrame(() => {
@@ -290,6 +303,14 @@ function _deferDecorativeLayers(svg, fogState) {
     });
 }
 
+// ── Decorative layer cache — worn edges + aging are fully static ──
+let _decorCache = { wornHTML: null, agingHTML: null };
+
+function _invalidateDecorCache() {
+    _decorCache.wornHTML = null;
+    _decorCache.agingHTML = null;
+}
+
 // Synchronous render — used for re-renders (visibility refresh, no loading screen)
 function renderMap() {
     const svg = document.getElementById('map-svg');
@@ -304,8 +325,25 @@ function renderMap() {
 
     _renderBackground(svg);
     _renderLandmass(svg);
-    _renderWornEdges(svg);
-    _renderAgingEffects(svg);
+
+    // Worn edges + aging: use cached HTML if available (these are fully static)
+    if (_decorCache.wornHTML) {
+        svg.insertAdjacentHTML('beforeend', _decorCache.wornHTML);
+    } else {
+        const wG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
+        _renderWornEdgesImpl(wG);
+        svg.appendChild(wG);
+        _decorCache.wornHTML = wG.outerHTML;
+    }
+    if (_decorCache.agingHTML) {
+        svg.insertAdjacentHTML('beforeend', _decorCache.agingHTML);
+    } else {
+        const aG = _el('g', { class: 'aging', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
+        _renderAgingEffectsImpl(aG);
+        svg.appendChild(aG);
+        _decorCache.agingHTML = aG.outerHTML;
+    }
+
     renderGroundCover(svg);
     _renderRivers(svg);
     renderTerrainRegions(svg, fogState);

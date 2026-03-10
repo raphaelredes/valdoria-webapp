@@ -1662,12 +1662,21 @@
             { id: 'metamorphous',  name: 'Metamorphous',  family: "'Metamorphous', serif",  scale: 1.05 },
         ];
         var _fpOpen = false;
+        var _fpInitialized = false;
 
         function initFontPicker() {
-            var dd = document.getElementById('font-picker-dropdown');
             var saved = localStorage.getItem('valdoria_font') || 'medievalsharp';
             // Migrate removed fonts
             if (saved === 'uncial') { saved = 'medievalsharp'; localStorage.setItem('valdoria_font', saved); }
+            // Defer dropdown button creation until first open (avoids loading extra fonts)
+            applyFont(saved);
+        }
+
+        function _ensureFontPickerButtons() {
+            if (_fpInitialized) return;
+            _fpInitialized = true;
+            var dd = document.getElementById('font-picker-dropdown');
+            var saved = localStorage.getItem('valdoria_font') || 'medievalsharp';
             FONT_OPTIONS.forEach(function(f) {
                 var btn = document.createElement('button');
                 btn.type = 'button';
@@ -1678,10 +1687,10 @@
                 btn.onclick = function() { selectFont(f.id); };
                 dd.appendChild(btn);
             });
-            applyFont(saved);
         }
 
         function toggleFontPicker() {
+            _ensureFontPickerButtons();
             _fpOpen = !_fpOpen;
             document.getElementById('font-picker-dropdown').classList.toggle('open', _fpOpen);
         }
