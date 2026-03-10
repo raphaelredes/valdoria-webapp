@@ -22,7 +22,7 @@ const HEALTH_TIMEOUT_MS = 3000; // 3s timeout — fast fail for instant reconnec
 const HEALTH_RETRIES = 1;       // 1 retry only — fast fail for instant reconnect
 const HEALTH_RETRY_MS = 1000;   // 1s between retries
 const LOADING_TIMEOUT_MS = 15000; // 15s max loading screen before auto-error
-const MIN_LOADING_MS = 3500; // 3.5s minimum loading for narrative immersion
+const MIN_LOADING_MS = 4000; // 4s minimum loading for narrative immersion
 const SCREEN_CACHE_KEY = 'valdoria_game_screen';
 const SCREEN_CACHE_TTL = 1800000; // 30 minutes
 
