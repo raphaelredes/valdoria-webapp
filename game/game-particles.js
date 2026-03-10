@@ -8,6 +8,8 @@ let _particleCtx = null;
 let _particles = [];
 let _particleRafId = null;
 let _particleTheme = null;
+const _particleLite = (window._valdoriaMinLoadFactor || 1) < 1;
+let _particleFrameSkip = false;  // toggle for 30fps in lite mode
 
 // Particle themes per location keyword
 const PARTICLE_THEMES = {
@@ -62,7 +64,8 @@ function updateParticleTheme(screenText) {
     const w = _particleCanvas.width;
     const h = _particleCanvas.height;
 
-    for (let i = 0; i < theme.count; i++) {
+    const _count = _particleLite ? Math.ceil(theme.count / 2) : theme.count;
+    for (let i = 0; i < _count; i++) {
         _particles.push({
             x: Math.random() * w,
             y: Math.random() * h,
@@ -72,7 +75,7 @@ function updateParticleTheme(screenText) {
             alpha: 0.1 + Math.random() * 0.3,
             alphaDir: Math.random() > 0.5 ? 0.003 : -0.003,
             color: theme.color,
-            glow: theme.glow,
+            glow: _particleLite ? false : theme.glow,
         });
     }
 
@@ -88,9 +91,19 @@ function _particleLoop() {
         return;
     }
 
+    // Lite mode: skip alternate frames (30fps instead of 60fps)
+    if (_particleLite) {
+        _particleFrameSkip = !_particleFrameSkip;
+        if (_particleFrameSkip) {
+            _particleRafId = requestAnimationFrame(_particleLoop);
+            return;
+        }
+    }
+
     const w = _particleCanvas.width;
     const h = _particleCanvas.height;
-    _particleCtx.clearRect(0, 0, w, h);
+    const ctx = _particleCtx;
+    ctx.clearRect(0, 0, w, h);
 
     for (const p of _particles) {
         // Move
@@ -109,16 +122,16 @@ function _particleLoop() {
 
         // Draw
         const [r, g, b] = p.color;
-        _particleCtx.beginPath();
-        _particleCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        _particleCtx.fillStyle = `rgba(${r},${g},${b},${p.alpha.toFixed(2)})`;
-        _particleCtx.fill();
+        ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha.toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
 
         if (p.glow) {
-            _particleCtx.beginPath();
-            _particleCtx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
-            _particleCtx.fillStyle = `rgba(${r},${g},${b},${(p.alpha * 0.15).toFixed(3)})`;
-            _particleCtx.fill();
+            ctx.fillStyle = `rgba(${r},${g},${b},${(p.alpha * 0.15).toFixed(3)})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 

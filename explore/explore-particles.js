@@ -16,6 +16,7 @@ const BIOME_PARTICLE_CONFIGS = {
 
 let _particles = [];
 let _particlesInited = false;
+const _exploreLite = (window._valdoriaMinLoadFactor || 1) < 1;
 
 function initBiomeParticles(biome) {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -24,7 +25,8 @@ function initBiomeParticles(biome) {
 
     const configs = BIOME_PARTICLE_CONFIGS[biome] || [];
     for (const cfg of configs) {
-        for (let i = 0; i < cfg.n; i++) {
+        const n = _exploreLite ? Math.ceil(cfg.n / 2) : cfg.n;
+        for (let i = 0; i < n; i++) {
             _particles.push(createParticle(cfg));
         }
     }
@@ -115,10 +117,12 @@ function initWeatherParticles(weather) {
 
     if (weather === 'r') {
         // Rain — moderate diagonal drops
-        for (let i = 0; i < 20; i++) _weatherParticles.push(_createRainDrop(false));
+        const rainCount = _exploreLite ? 10 : 20;
+        for (let i = 0; i < rainCount; i++) _weatherParticles.push(_createRainDrop(false));
     } else if (weather === 't') {
         // Storm — heavy diagonal drops + lightning
-        for (let i = 0; i < 35; i++) _weatherParticles.push(_createRainDrop(true));
+        const stormCount = _exploreLite ? 15 : 35;
+        for (let i = 0; i < stormCount; i++) _weatherParticles.push(_createRainDrop(true));
     }
 }
 
@@ -207,31 +211,45 @@ function drawParticles(ctx, timestamp) {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size * fade, 0, Math.PI * 2);
                 ctx.fill();
-                // Tiny glow
-                ctx.fillStyle = 'rgba(255,200,50,0.15)';
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * 3 * fade, 0, Math.PI * 2);
-                ctx.fill();
+                if (!_exploreLite) {
+                    // Tiny glow (skipped in lite mode)
+                    ctx.fillStyle = 'rgba(255,200,50,0.15)';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * 3 * fade, 0, Math.PI * 2);
+                    ctx.fill();
+                }
                 break;
 
             case 'wisp':
-                const wGrad = ctx.createLinearGradient(p.x - p.size, p.y, p.x + p.size, p.y);
-                wGrad.addColorStop(0, 'rgba(0,0,0,0)');
-                wGrad.addColorStop(0.3, p.color);
-                wGrad.addColorStop(0.7, p.color);
-                wGrad.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = wGrad;
-                ctx.fillRect(p.x - p.size, p.y - 1, p.size * 2, 2);
+                if (_exploreLite) {
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x - p.size * 0.7, p.y - 1, p.size * 1.4, 2);
+                } else {
+                    const wGrad = ctx.createLinearGradient(p.x - p.size, p.y, p.x + p.size, p.y);
+                    wGrad.addColorStop(0, 'rgba(0,0,0,0)');
+                    wGrad.addColorStop(0.3, p.color);
+                    wGrad.addColorStop(0.7, p.color);
+                    wGrad.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = wGrad;
+                    ctx.fillRect(p.x - p.size, p.y - 1, p.size * 2, 2);
+                }
                 break;
 
             case 'mist':
-                const mGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
-                mGrad.addColorStop(0, p.color);
-                mGrad.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = mGrad;
-                ctx.beginPath();
-                ctx.ellipse(p.x, p.y, p.size, p.size * 0.4, 0, 0, Math.PI * 2);
-                ctx.fill();
+                if (_exploreLite) {
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.ellipse(p.x, p.y, p.size * 0.7, p.size * 0.3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    const mGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+                    mGrad.addColorStop(0, p.color);
+                    mGrad.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = mGrad;
+                    ctx.beginPath();
+                    ctx.ellipse(p.x, p.y, p.size, p.size * 0.4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
                 break;
         }
 

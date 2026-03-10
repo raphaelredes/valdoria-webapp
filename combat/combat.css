@@ -662,11 +662,11 @@ body {
 /* ─── Status Effect Pulse (buff = green, debuff = red) ─── */
 @keyframes debuffPulse {
     0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.3); text-shadow: 0 0 6px rgba(180, 40, 40, 0.6); }
+    50% { filter: brightness(1.3); }
 }
 @keyframes buffPulse {
     0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.2); text-shadow: 0 0 6px rgba(40, 180, 80, 0.5); }
+    50% { filter: brightness(1.2); }
 }
 .status-debuff { animation: debuffPulse 1.5s ease-in-out infinite; }
 .status-buff   { animation: buffPulse 2s ease-in-out infinite; }
@@ -1146,9 +1146,7 @@ body {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
-    -webkit-backdrop-filter: blur(4px);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.7);
     z-index: 200;
     flex-direction: column;
     justify-content: flex-end;

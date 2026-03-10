@@ -169,6 +169,7 @@ class CombatVFX {
         this.extras = [];
         this._raf = null;
         this._running = false;
+        this._lite = (window._valdoriaMinLoadFactor || 1) < 1;
         this._dpr = Math.min(window.devicePixelRatio || 1, 2);
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -236,8 +237,9 @@ class CombatVFX {
             }
             const pos = this._getProjectilePos(p, t);
             // Trail particles
-            if (p.prof.trail.count > 0 && Math.random() < 0.7) {
-                for (let j = 0; j < p.prof.trail.count; j++) {
+            const _trailCount = this._lite ? Math.ceil(p.prof.trail.count / 2) : p.prof.trail.count;
+            if (_trailCount > 0 && Math.random() < 0.7) {
+                for (let j = 0; j < _trailCount; j++) {
                     this._spawnTrailParticle(pos, p.prof);
                 }
             }
@@ -254,7 +256,7 @@ class CombatVFX {
         }
 
         // Particles
-        const MAX_PARTICLES = 200;
+        const MAX_PARTICLES = this._lite ? 80 : 200;
         if (this.particles.length > MAX_PARTICLES) {
             this.particles.splice(0, this.particles.length - MAX_PARTICLES);
         }
@@ -272,7 +274,7 @@ class CombatVFX {
             const size = p.size * (1 - t * 0.4);
             ctx.save();
             ctx.globalAlpha = alpha;
-            if (p.glow) {
+            if (p.glow && !this._lite) {
                 ctx.globalCompositeOperation = 'lighter';
             }
             ctx.fillStyle = p.color;
@@ -356,19 +358,28 @@ class CombatVFX {
 
     _drawHead(ctx, pos, prof, isCrit, t) {
         const size = isCrit ? prof.head.size * 1.4 : prof.head.size;
-        const glow = isCrit ? prof.head.glow * 1.5 : prof.head.glow;
         ctx.save();
-        // Glow
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = 0.5 * (1 - t * 0.3);
-        ctx.shadowColor = prof.colors[0];
-        ctx.shadowBlur = glow;
-        ctx.fillStyle = prof.colors[0];
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, size * 0.8, 0, Math.PI * 2);
-        ctx.fill();
+        if (this._lite) {
+            // Lite: no shadowBlur, just a filled circle + core
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.globalAlpha = 0.6 * (1 - t * 0.3);
+            ctx.fillStyle = prof.colors[0];
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, size * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            const glow = isCrit ? prof.head.glow * 1.5 : prof.head.glow;
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.globalAlpha = 0.5 * (1 - t * 0.3);
+            ctx.shadowColor = prof.colors[0];
+            ctx.shadowBlur = glow;
+            ctx.fillStyle = prof.colors[0];
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, size * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
         // Core
-        ctx.shadowBlur = 0;
         ctx.globalAlpha = 0.9;
         ctx.fillStyle = prof.colors[1] || prof.colors[0];
         this._drawShape(ctx, pos.x, pos.y, size * 0.5, prof.head.shape, t * 6);
@@ -506,7 +517,7 @@ class CombatVFX {
         const prof = VFX_PROFILES[damageType] || VFX_PROFILES.slashing;
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
-        const count = 40;
+        const count = this._lite ? 20 : 40;
         for (let i = 0; i < count; i++) {
             const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
             const speed = 2.5 + Math.random() * 5;
@@ -535,7 +546,7 @@ class CombatVFX {
         if (!this.canvas) return;
         const pos = this._center(targetEl);
         const colors = ['#40e060', '#80ff80', '#ffe080', '#ffffff'];
-        const count = 20;
+        const count = this._lite ? 10 : 20;
         for (let i = 0; i < count; i++) {
             const color = colors[Math.floor(Math.random() * colors.length)];
             this.particles.push({
@@ -679,7 +690,8 @@ class CombatVFX {
     /* ─── IMPACT GENERATOR ─── */
 
     _doImpact(x, y, prof, isCrit) {
-        const count = isCrit ? Math.floor(prof.impact.count * 1.5) : prof.impact.count;
+        let count = isCrit ? Math.floor(prof.impact.count * 1.5) : prof.impact.count;
+        if (this._lite) count = Math.ceil(count * 0.5);
         const speedMul = isCrit ? 1.3 : 1;
 
         for (let i = 0; i < count; i++) {
@@ -704,8 +716,8 @@ class CombatVFX {
             });
         }
 
-        // Extra effects
-        if (prof.extra) {
+        // Extra effects (disabled in lite mode — too many canvas draw calls)
+        if (prof.extra && !this._lite) {
             this._spawnExtra(x, y, prof.extra, prof, isCrit);
         }
     }

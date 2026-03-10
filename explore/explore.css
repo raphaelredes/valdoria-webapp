@@ -27,8 +27,6 @@ body {
     color: var(--v-text, #d4c8b0);
     white-space: nowrap;
     pointer-events: none;
-    -webkit-backdrop-filter: blur(4px);
-    backdrop-filter: blur(4px);
 }
 
 /* ═══════════════════════════════════════════
