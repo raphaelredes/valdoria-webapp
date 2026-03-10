@@ -124,7 +124,7 @@ async function initAsync() {
         const stageEl = document.getElementById('loading-stage');
         const tipEl = document.getElementById('loading-tip');
         const loadStart = Date.now();
-        const MIN_LOAD_MS = 3500; // Minimum loading time for narrative immersion
+        const MIN_LOAD_MS = 1500; // Reduced: static image loads instantly, minimal JS overhead
 
         const updateProgress = (pct) => {
             if (progressFill) progressFill.style.width = pct + '%';
@@ -285,7 +285,7 @@ async function _onVisibilityRefresh() {
         updateHUD();
         updateLocationBadge();
         updateBottomBar();
-        await renderMapAsync();
+        refreshDynamicLayers();
         if (typeof _initMinimap === 'function') _initMinimap();
         console.log('[NAVIGATE] Map data refreshed successfully');
     } catch (e) {
@@ -382,8 +382,9 @@ function _invalidateMapCaches() {
     _cachedFogState = null;
     // Clear distance cache
     _cachedPxPerTurn = 0;
-    // Clear terrain caches (auto-fill hexes, biome regions)
+    // Terrain caches no longer needed (pre-rendered static image)
     if (typeof _invalidateTerrainCaches === 'function') _invalidateTerrainCaches();
+    if (typeof _invalidateVisCache === 'function') _invalidateVisCache();
 }
 
 function isConnected(fromId, toId) {

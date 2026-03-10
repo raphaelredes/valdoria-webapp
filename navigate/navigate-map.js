@@ -123,50 +123,6 @@ const RIVER_PATHS = [
     { pts: [[475,210],[468,270],[462,330],[468,385],[478,430],[488,465]], w: 1.4 },
 ];
 
-function _renderRivers(svg) {
-    const rG = _el('g', { class: 'rivers', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
-    for (const river of RIVER_PATHS) {
-        const p = river.pts;
-        // Build base path
-        let d = `M${p[0][0]},${p[0][1]}`;
-        for (let i = 1; i < p.length; i++) {
-            const wobX = (srand(i * 37 + p[0][0]) - 0.5) * 8;
-            const wobY = (srand(i * 41 + p[0][1]) - 0.5) * 6;
-            d += ` Q${(p[i-1][0]+p[i][0])/2+wobX},${(p[i-1][1]+p[i][1])/2+wobY} ${p[i][0]},${p[i][1]}`;
-        }
-        // Center line
-        rG.appendChild(_el('path', { d, fill: 'none', stroke: INK,
-            'stroke-width': river.w * 0.5, 'stroke-opacity': 0.4, 'stroke-linecap': 'round' }));
-        // Two parallel side lines (medieval river convention)
-        for (const side of [-1, 1]) {
-            let dSide = '';
-            for (let i = 0; i < p.length; i++) {
-                const prev = i > 0 ? p[i-1] : p[0];
-                const curr = p[i];
-                const dx = i < p.length-1 ? p[i+1][0] - curr[0] : curr[0] - prev[0];
-                const dy = i < p.length-1 ? p[i+1][1] - curr[1] : curr[1] - prev[1];
-                const len = Math.sqrt(dx*dx + dy*dy) || 1;
-                const nx = -dy/len * side * 2.0;
-                const ny = dx/len * side * 2.0;
-                if (i === 0) dSide = `M${curr[0]+nx},${curr[1]+ny}`;
-                else {
-                    const wobX = (srand(i * 37 + p[0][0] + side*100) - 0.5) * 6;
-                    const wobY = (srand(i * 41 + p[0][1] + side*100) - 0.5) * 5;
-                    const mx = (prev[0]+curr[0])/2 + nx + wobX;
-                    const my = (prev[1]+curr[1])/2 + ny + wobY;
-                    dSide += ` Q${mx},${my} ${curr[0]+nx},${curr[1]+ny}`;
-                }
-            }
-            rG.appendChild(_el('path', { d: dSide, fill: 'none', stroke: INK,
-                'stroke-width': 0.35, 'stroke-opacity': 0.25, 'stroke-linecap': 'round' }));
-        }
-        // Source tick marks
-        const s0 = p[0];
-        rG.appendChild(_el('line', { x1: s0[0]-3, y1: s0[1], x2: s0[0]+3, y2: s0[1],
-            stroke: INK, 'stroke-width': 0.4, 'stroke-opacity': 0.3 }));
-    }
-    svg.appendChild(rG);
-}
 
 // Fog state cache — invalidated by _invalidateMapCaches()
 let _cachedFogState = null;
@@ -200,14 +156,65 @@ function computeFogState(forceRecompute) {
     return fog;
 }
 
+
+// ===============================================================
+// FOG OVERLAY — Semi-transparent hex polygons over unexplored areas
+// ===============================================================
+
+function _renderFogOverlay(svg, fogState) {
+    const fG = _el('g', { class: 'fog-overlay', 'pointer-events': 'none' });
+    const knownSet = new Set(S.knownLocs);
+    const discoveredSet = new Set(S.discoveredLocs || []);
+
+    // Batch fog hexes by opacity bucket for fewer DOM nodes
+    const buckets = { dark: '', medium: '', light: '', frontier: '' };
+
+    for (let row = 0; row <= GRID_ROWS + 1; row++) {
+        for (let col = 0; col <= GRID_COLS + 1; col++) {
+            const { x, y } = hexToPixel(col, row);
+            if (!_pointInLandmass(x, y)) continue;
+
+            const vis = _hexVisibility(col, row, knownSet, discoveredSet);
+            if (vis >= 0.8) continue; // Fully explored, no fog
+
+            // Compute fog opacity (inverted visibility)
+            let fogOp;
+            if (vis <= 0) fogOp = 0.92;      // Hidden: near-opaque
+            else if (vis <= 0.15) fogOp = 0.7; // Frontier
+            else if (vis <= 0.4) fogOp = 0.45; // Known unmapped
+            else fogOp = 0.25;                  // Partially visible
+
+            // Build flat-top hex polygon points
+            const pts = [];
+            for (let i = 0; i < 6; i++) {
+                const a = (Math.PI / 3) * i;
+                pts.push(`${x + HEX_RADIUS * Math.cos(a)},${y + HEX_RADIUS * Math.sin(a)}`);
+            }
+
+            // Bucket by opacity range
+            const bucket = fogOp >= 0.8 ? 'dark' : fogOp >= 0.6 ? 'medium' : fogOp >= 0.35 ? 'light' : 'frontier';
+            buckets[bucket] += `M${pts.join('L')}Z `;
+        }
+    }
+
+    // Render each bucket as a single compound path
+    const opMap = { dark: 0.92, medium: 0.7, light: 0.45, frontier: 0.25 };
+    for (const [bucket, d] of Object.entries(buckets)) {
+        if (!d) continue;
+        fG.appendChild(_el('path', {
+            d: d.trim(),
+            fill: MAP_BG,
+            'fill-opacity': opMap[bucket],
+            stroke: 'none',
+        }));
+    }
+
+    svg.appendChild(fG);
+}
+
 // ===============================================================
 // RENDER MAP
 // ===============================================================
-
-// Yield control to browser so CSS animations stay smooth
-function _yieldFrame() {
-    return new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
-}
 
 // Async progressive render — used on initial load with loading screen
 // Strategy: render functional map first (landmass + terrain + roads + locations),
@@ -221,58 +228,26 @@ async function renderMapAsync(onProgress, onStage) {
     svg.innerHTML = '';
     const fogState = computeFogState(true);
 
-    // Phase 1: Foundation (defs, background, landmass)
+    // Phase 1: Minimal defs (clip paths only)
     onStage?.('Preparando pergaminho...');
     const defs = _el('defs');
     _buildAllDefs(defs);
     svg.appendChild(defs);
-    _renderBackground(svg);
-    _renderLandmass(svg);
-    onProgress?.(15);
-    await _yieldFrame();
+    onProgress?.(20);
 
-    // Phase 2: Worn edges + aging (static, cached — insert behind terrain)
-    onStage?.('Envelhecendo o pergaminho...');
-    if (_decorCache.wornHTML && _decorCache.agingHTML) {
-        const wrapper = _el('g');
-        wrapper.innerHTML = _decorCache.wornHTML + _decorCache.agingHTML;
-        while (wrapper.firstChild) svg.appendChild(wrapper.firstChild);
-    } else {
-        const wornG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
-        _renderWornEdgesInto(wornG);
-        svg.appendChild(wornG);
-        _decorCache.wornHTML = wornG.outerHTML;
-        const agingG = _el('g', { class: 'aging' });
-        _renderAgingEffectsInto(agingG);
-        svg.appendChild(agingG);
-        _decorCache.agingHTML = agingG.outerHTML;
-    }
-    onProgress?.(25);
-    await _yieldFrame();
+    // Phase 2: Fog overlay (semi-transparent hexes over unexplored areas)
+    onStage?.('Revelando territórios...');
+    _renderFogOverlay(svg, fogState);
+    onProgress?.(40);
 
-    // Phase 3: Terrain regions + rivers + roads
-    onStage?.('Desenhando territórios...');
-    _renderRivers(svg);
-    renderTerrainRegions(svg, fogState);
+    // Phase 3: Roads
+    onStage?.('Traçando estradas...');
     const roadG = _el('g', { class: 'roads-layer' });
     renderRoads(roadG, fogState);
     svg.appendChild(roadG);
-    onProgress?.(40);
-    await _yieldFrame();
-
-    // Phase 4: Ground cover (subtle background texture)
-    onStage?.('Traçando vegetação...');
-    renderGroundCover(svg, svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer'));
     onProgress?.(55);
-    await _yieldFrame();
 
-    // Phase 5: Terrain details (trees, mountains — heaviest layer)
-    onStage?.('Detalhando relevos...');
-    renderTerrainDetails(svg, fogState, svg.querySelector('.roads-layer'));
-    onProgress?.(70);
-    await _yieldFrame();
-
-    // Phase 6: Location markers + interactive elements
+    // Phase 4: Location markers + interactive elements
     onStage?.('Posicionando marcadores...');
     const locG = _el('g', { class: 'locations-layer' });
     renderLocationMarkers(locG, fogState);
@@ -280,106 +255,46 @@ async function renderMapAsync(onProgress, onStage) {
     if (typeof renderDistanceRings === 'function') renderDistanceRings(svg);
     if (typeof renderBreadcrumbTrail === 'function') renderBreadcrumbTrail(svg);
     renderPlayerBanner(svg);
-    renderFogWisps(svg, fogState);
-    onProgress?.(85);
-    await _yieldFrame();
+    onProgress?.(80);
 
-    // Phase 7: Cartography decorations + interactivity
-    onStage?.('Finalizando cartografia...');
-    renderCartographyDecor(svg, fogState);
+    // Phase 5: Compass + interactivity
+    onStage?.('Finalizando...');
     renderCompassRose();
     setupPanZoom();
     onProgress?.(100);
 }
 
-// Staggered deferred rendering — only used for re-renders (visibility refresh)
-// Initial load now renders everything during the loading screen via renderMapAsync
-function _deferDecorativeLayers(svg, fogState) {
-    requestAnimationFrame(() => {
-        const ref = svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer');
-        if (_decorCache.wornHTML && _decorCache.agingHTML) {
-            const wrapper = _el('g');
-            wrapper.innerHTML = _decorCache.wornHTML + _decorCache.agingHTML;
-            while (wrapper.firstChild) {
-                if (ref) svg.insertBefore(wrapper.firstChild, ref);
-                else svg.appendChild(wrapper.firstChild);
-            }
-        } else {
-            const wornG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
-            _renderWornEdgesInto(wornG);
-            _decorCache.wornHTML = wornG.outerHTML;
-            const agingG = _el('g', { class: 'aging' });
-            _renderAgingEffectsInto(agingG);
-            _decorCache.agingHTML = agingG.outerHTML;
-            if (ref) { svg.insertBefore(agingG, ref); svg.insertBefore(wornG, agingG); }
-            else { svg.appendChild(wornG); svg.appendChild(agingG); }
-        }
-        requestAnimationFrame(() => {
-            renderGroundCover(svg, svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer'));
-            requestAnimationFrame(() => {
-                renderTerrainDetails(svg, fogState, svg.querySelector('.roads-layer'));
-                requestAnimationFrame(() => renderCartographyDecor(svg, fogState));
-            });
-        });
-    });
-}
-
-// ── Decorative layer cache — worn edges + aging are fully static ──
-let _decorCache = { wornHTML: null, agingHTML: null };
-
-function _invalidateDecorCache() {
-    _decorCache.wornHTML = null;
-    _decorCache.agingHTML = null;
-}
 
 // Synchronous render — used for re-renders (visibility refresh, no loading screen)
 function renderMap() {
+    refreshDynamicLayers();
+}
+
+// Lightweight re-render: only dynamic layers (fog, roads, markers, player)
+function refreshDynamicLayers() {
     const svg = document.getElementById('map-svg');
     svg.setAttribute('width', SVG_W);
     svg.setAttribute('height', SVG_H);
     svg.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
     svg.innerHTML = '';
     const fogState = computeFogState(true);
+
     const defs = _el('defs');
     _buildAllDefs(defs);
     svg.appendChild(defs);
 
-    _renderBackground(svg);
-    _renderLandmass(svg);
+    _renderFogOverlay(svg, fogState);
 
-    // Worn edges + aging: use cached HTML if available (these are fully static)
-    if (_decorCache.wornHTML) {
-        svg.insertAdjacentHTML('beforeend', _decorCache.wornHTML);
-    } else {
-        const wG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
-        _renderWornEdgesImpl(wG);
-        svg.appendChild(wG);
-        _decorCache.wornHTML = wG.outerHTML;
-    }
-    if (_decorCache.agingHTML) {
-        svg.insertAdjacentHTML('beforeend', _decorCache.agingHTML);
-    } else {
-        const aG = _el('g', { class: 'aging', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
-        _renderAgingEffectsImpl(aG);
-        svg.appendChild(aG);
-        _decorCache.agingHTML = aG.outerHTML;
-    }
-
-    renderGroundCover(svg);
-    _renderRivers(svg);
-    renderTerrainRegions(svg, fogState);
-    renderTerrainDetails(svg, fogState);
     const roadG = _el('g', { class: 'roads-layer' });
     renderRoads(roadG, fogState);
     svg.appendChild(roadG);
+
     const locG = _el('g', { class: 'locations-layer' });
     renderLocationMarkers(locG, fogState);
     svg.appendChild(locG);
     if (typeof renderDistanceRings === 'function') renderDistanceRings(svg);
     if (typeof renderBreadcrumbTrail === 'function') renderBreadcrumbTrail(svg);
     renderPlayerBanner(svg);
-    renderFogWisps(svg, fogState);
-    renderCartographyDecor(svg, fogState);
     renderCompassRose();
     setupPanZoom();
 }
@@ -399,251 +314,6 @@ function _buildAllDefs(defs) {
     defs.appendChild(_el('clipPath', { id: 'land-clip' })).appendChild(_el('path', { d: _landmassPath() }));
 }
 
-// ===============================================================
-// BACKGROUND — Flat dark fill outside the parchment paper
-// ===============================================================
-
-function _renderBackground(svg) {
-    svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: MAP_BG }));
-}
-
-// ===============================================================
-// LANDMASS — Flat parchment, no gradient
-// ===============================================================
-
-function _renderLandmass(svg) {
-    const path = _landmassPath();
-    // Flat parchment fill
-    svg.appendChild(_el('path', { d: path, fill: PARCHMENT, stroke: 'none' }));
-    // Subtle stipple dots for texture — batched into single <path>
-    let stipD = '';
-    for (let i = 0; i < 30; i++) {
-        const dx = srand(i * 73 + 11) * SVG_W;
-        const dy = srand(i * 79 + 17) * SVG_H;
-        if (!_pointInLandmass(dx, dy)) continue;
-        const cr = 0.6 + srand(i * 83) * 0.5;
-        stipD += `M${dx-cr},${dy}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
-    }
-    if (stipD) {
-        svg.appendChild(_el('path', { d: stipD, fill: INK_DARK, 'fill-opacity': 0.05,
-            'clip-path': 'url(#land-clip)', 'pointer-events': 'none' }));
-    }
-}
-
-// ===============================================================
-// WORN PARCHMENT EDGES — Torn, burnt, aged paper border
-// ===============================================================
-
-// Render worn edges into a target group (for deferred rendering)
-function _renderWornEdgesInto(targetG) {
-    _renderWornEdgesImpl(targetG);
-}
-
-function _renderWornEdges(svg) {
-    const eG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
-    _renderWornEdgesImpl(eG);
-    svg.appendChild(eG);
-}
-
-function _renderWornEdgesImpl(eG) {
-    const path = _landmassPath();
-    const p = LANDMASS_POINTS;
-
-    // === Layer 1: Deep shadow under the paper (multi-stroke, no GPU filter) ===
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#0a0806',
-        'stroke-width': 22, 'stroke-opacity': 0.10 }));
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#0a0806',
-        'stroke-width': 16, 'stroke-opacity': 0.18 }));
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#1a1410',
-        'stroke-width': 12, 'stroke-opacity': 0.22 }));
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#1a1410',
-        'stroke-width': 8, 'stroke-opacity': 0.30 }));
-
-    // === Layer 2: Burnt/darkened edge staining (multiple bands for depth) ===
-    // Wide darkened band (deep age stain)
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#2a1808',
-        'stroke-width': 14, 'stroke-opacity': 0.12 }));
-    // Medium stain band
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#3a2810',
-        'stroke-width': 8, 'stroke-opacity': 0.2 }));
-    // Narrow dark edge
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#4a3820',
-        'stroke-width': 4, 'stroke-opacity': 0.25 }));
-    // Inner edge darkening (visible on parchment side)
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: '#3a2810',
-        'stroke-width': 2, 'stroke-opacity': 0.15 }));
-
-    // === Layer 3: Main border line (irregular, hand-drawn feel) ===
-    eG.appendChild(_el('path', { d: path, fill: 'none', stroke: INK_DARK,
-        'stroke-width': 2.0, 'stroke-opacity': 0.65 }));
-
-    // === Layer 4: Paper fiber wisps — batched into 3 opacity-bucket <path>s ===
-    const fiberBuckets = ['', '', '']; // low (0.12-0.17), mid (0.17-0.22), high (0.22-0.30)
-    let strandD = '';
-    for (let i = 0; i < p.length; i++) {
-        const curr = p[i], next = p[(i + 1) % p.length];
-        const dx = next[0] - curr[0], dy = next[1] - curr[1];
-        const segLen = Math.sqrt(dx * dx + dy * dy);
-        if (segLen < 1) continue;
-        const nx = -dy / segLen, ny = dx / segLen;
-
-        const fiberCount = 3 + Math.floor(srand(i * 67) * 4);
-        for (let j = 0; j < fiberCount; j++) {
-            const t = 0.05 + j * (0.9 / fiberCount) + (srand(i * 67 + j * 3) - 0.5) * 0.06;
-            const bx = curr[0] + dx * t, by = curr[1] + dy * t;
-            const fLen = 2 + srand(i * 100 + j) * 7;
-            const fAngle = (srand(i * 53 + j * 7) - 0.5) * 0.8;
-            const fnx = nx * Math.cos(fAngle) - ny * Math.sin(fAngle);
-            const fny = nx * Math.sin(fAngle) + ny * Math.cos(fAngle);
-            const op = 0.12 + srand(i * 83 + j) * 0.18;
-            const bucket = op < 0.17 ? 0 : op < 0.22 ? 1 : 2;
-            fiberBuckets[bucket] += `M${bx},${by}L${bx - fnx * fLen},${by - fny * fLen}`;
-        }
-
-        // Torn strands (reduced frequency)
-        if (srand(i * 41) > 0.72) {
-            const t = srand(i * 103) * 0.7 + 0.15;
-            const bx = curr[0] + dx * t, by = curr[1] + dy * t;
-            const sLen = 5 + srand(i * 107) * 10;
-            const sAngle = (srand(i * 109) - 0.5) * 0.5;
-            const snx = nx * Math.cos(sAngle) - ny * Math.sin(sAngle);
-            const sny = nx * Math.sin(sAngle) + ny * Math.cos(sAngle);
-            const mx = bx - snx * sLen * 0.5 + (srand(i * 111) - 0.5) * 4;
-            const my = by - sny * sLen * 0.5 + (srand(i * 113) - 0.5) * 4;
-            strandD += `M${bx},${by}Q${mx},${my} ${bx - snx * sLen},${by - sny * sLen}`;
-        }
-    }
-    const fiberOps = [0.14, 0.19, 0.26];
-    for (let b = 0; b < 3; b++) {
-        if (fiberBuckets[b]) {
-            eG.appendChild(_el('path', { d: fiberBuckets[b], fill: 'none', stroke: PARCHMENT,
-                'stroke-width': 0.45, 'stroke-opacity': fiberOps[b], 'stroke-linecap': 'round' }));
-        }
-    }
-    if (strandD) {
-        eG.appendChild(_el('path', { d: strandD, fill: 'none', stroke: PARCHMENT,
-            'stroke-width': 0.55, 'stroke-opacity': 0.14, 'stroke-linecap': 'round' }));
-    }
-
-    // === Layer 5: Edge stain dots + burn marks — batched into <path>s ===
-    let foxingD = '', burnD = '';
-    for (let i = 0; i < p.length; i++) {
-        const curr = p[i], next = p[(i + 1) % p.length];
-        const dx = next[0] - curr[0], dy = next[1] - curr[1];
-        const segLen = Math.sqrt(dx * dx + dy * dy);
-        if (segLen < 1) continue;
-        const nx = -dy / segLen, ny = dx / segLen;
-
-        if (srand(i * 91) > 0.35) {
-            const t = srand(i * 103) * 0.8 + 0.1;
-            const sx = curr[0] + dx * t + nx * (srand(i * 121) - 0.5) * 4;
-            const sy = curr[1] + dy * t + ny * (srand(i * 123) - 0.5) * 4;
-            const cr = 1.2 + srand(i * 107) * 2.5;
-            foxingD += `M${sx-cr},${sy}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
-        }
-        if (srand(i * 131) > 0.8) {
-            const t = srand(i * 133) * 0.6 + 0.2;
-            const bkx = curr[0] + dx * t + nx * 3;
-            const bky = curr[1] + dy * t + ny * 3;
-            const cr = 2 + srand(i * 137) * 4;
-            burnD += `M${bkx-cr},${bky}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
-        }
-    }
-    if (foxingD) eG.appendChild(_el('path', { d: foxingD, fill: '#2a1a08', 'fill-opacity': 0.08, stroke: 'none' }));
-    if (burnD) eG.appendChild(_el('path', { d: burnD, fill: '#1a0e04', 'fill-opacity': 0.05, stroke: 'none' }));
-
-    // === Layer 6: Torn-away fragments (kept as polygons, reduced from 20 to 12) ===
-    for (let i = 0; i < 12; i++) {
-        const idx = Math.floor(srand(i * 137) * p.length);
-        const curr = p[idx], next = p[(idx + 1) % p.length];
-        const dx = next[0] - curr[0], dy = next[1] - curr[1];
-        const len = Math.sqrt(dx * dx + dy * dy) || 1;
-        const nx = -dy / len, ny = dx / len;
-        const t = 0.2 + srand(i * 149) * 0.6;
-        const dist = 3 + srand(i * 151) * 8;
-        const fx = curr[0] + dx * t - nx * dist;
-        const fy = curr[1] + dy * t - ny * dist;
-        const fr = 1.5 + srand(i * 163) * 3;
-        const nVerts = 5 + Math.floor(srand(i * 165) * 3);
-        const fpts = [];
-        for (let k = 0; k < nVerts; k++) {
-            const a = (k / nVerts) * Math.PI * 2;
-            const rr = fr * (0.5 + srand(i * 100 + k * 31) * 1.0);
-            fpts.push(`${fx + Math.cos(a) * rr},${fy + Math.sin(a) * rr}`);
-        }
-        eG.appendChild(_el('polygon', {
-            points: fpts.join(' '),
-            fill: PARCHMENT, 'fill-opacity': 0.08 + srand(i * 167) * 0.12,
-            stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.12,
-        }));
-    }
-
-    // === Layer 7: Corner wear — batched into single <path> ===
-    const corners = [
-        [p[0][0], p[0][1]],
-        [p[Math.floor(p.length * 0.25)][0], p[Math.floor(p.length * 0.25)][1]],
-        [p[Math.floor(p.length * 0.5)][0], p[Math.floor(p.length * 0.5)][1]],
-        [p[Math.floor(p.length * 0.75)][0], p[Math.floor(p.length * 0.75)][1]],
-    ];
-    let cornerD = '';
-    for (let ci = 0; ci < corners.length; ci++) {
-        const [cx, cy] = corners[ci];
-        for (let j = 0; j < 8; j++) {
-            const sx = cx + (srand(ci * 200 + j * 7) - 0.5) * 25;
-            const sy = cy + (srand(ci * 200 + j * 7 + 3) - 0.5) * 25;
-            const cr = 0.8 + srand(ci * 200 + j * 7 + 5) * 2;
-            cornerD += `M${sx-cr},${sy}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
-        }
-    }
-    if (cornerD) eG.appendChild(_el('path', { d: cornerD, fill: '#2a1a08', 'fill-opacity': 0.05, stroke: 'none' }));
-
-}
-
-// ===============================================================
-// AGING EFFECTS — Stipple clusters + crease lines
-// ===============================================================
-
-// Render aging effects into a target group (for deferred rendering)
-function _renderAgingEffectsInto(targetG) {
-    targetG.setAttribute('class', 'aging');
-    targetG.setAttribute('pointer-events', 'none');
-    targetG.setAttribute('clip-path', 'url(#land-clip)');
-    _renderAgingEffectsImpl(targetG);
-}
-
-function _renderAgingEffects(svg) {
-    const aG = _el('g', { class: 'aging', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
-    _renderAgingEffectsImpl(aG);
-    svg.appendChild(aG);
-}
-
-function _renderAgingEffectsImpl(aG) {
-    // Stipple clusters (foxing spots) — batched into a single <path>
-    const spots = [[80,60,15],[650,100,12],[200,650,18],[550,550,10],[400,200,8],[120,400,14],[600,350,11],[350,680,16],[500,80,9],[700,600,13]];
-    let foxD = '';
-    for (const [x, y, r] of spots) {
-        for (let j = 0; j < 12; j++) {
-            const sx = x + (srand(x * 7 + j * 13) - 0.5) * r * 2;
-            const sy = y + (srand(y * 11 + j * 17) - 0.5) * r * 2;
-            const cr = 0.4 + srand(x * 3 + j) * 0.5;
-            foxD += `M${sx-cr},${sy}a${cr},${cr} 0 1,0 ${cr*2},0a${cr},${cr} 0 1,0 ${-cr*2},0`;
-        }
-    }
-    if (foxD) aG.appendChild(_el('path', { d: foxD, fill: INK_DARK, 'fill-opacity': 0.04, stroke: 'none' }));
-
-    // Crease lines — batched into a single <path>
-    const creases = [
-        [60, SVG_H * 0.35, SVG_W - 60, SVG_H * 0.38, 0.10],
-        [SVG_W * 0.6, 40, SVG_W * 0.58, SVG_H - 40, 0.07],
-        [100, SVG_H * 0.65, SVG_W - 100, SVG_H * 0.62, 0.06],
-        [SVG_W * 0.3, 60, SVG_W * 0.32, SVG_H - 60, 0.05],
-    ];
-    let creaseD = '';
-    for (const [x1, y1, x2, y2] of creases) {
-        creaseD += `M${x1},${y1}L${x2},${y2}`;
-    }
-    if (creaseD) aG.appendChild(_el('path', { d: creaseD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.07 }));
-}
 
 // ===============================================================
 // PAN / ZOOM

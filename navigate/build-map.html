@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <title>Build Static Map - Lendas de Valdoria</title>
+    <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../shared/fonts/cinzel.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../shared/fonts.css">
+    <style>
+        body { margin: 0; background: #2a2420; display: flex; flex-direction: column; align-items: center; padding: 20px; color: #d4c8b0; font-family: 'MedievalSharp', serif; }
+        #status { margin: 20px 0; font-size: 16px; }
+        #map-svg { display: block; }
+        canvas { display: none; }
+    </style>
+</head>
+<body>
+    <div id="status">Carregando...</div>
+    <svg id="map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <canvas id="export-canvas"></canvas>
+
+    <script src="map-layout.js"></script>
+    <script src="navigate-map.js"></script>
+    <script src="navigate-map-terrain.js"></script>
+    <script src="navigate-map-decor.js"></script>
+    <script src="build-map-extras.js"></script>
+
+    <script>
+        // Override global state: all locations explored for full render
+        window.S = {
+            token: '', api: '', uid: 0,
+            currentLoc: 'city_gates',
+            knownLocs: Object.keys(LOCATION_COORDS),
+            discoveredLocs: Object.keys(LOCATION_COORDS),
+            locations: {},
+            charData: { nm: 'Build', lv: 1, hp: 50, mh: 50, mp: 20, mm: 20, ci: '' },
+            quests: [], dungeons: {}, canCamp: false, hasMap: 2,
+            mapCoverage: new Set(Object.keys(LOCATION_COORDS)),
+            selectedLoc: null, panX: 0, panY: 0, zoom: 1.0,
+        };
+
+        var BIOME_FOR_LOC = {
+            city_gates: 'plains', green_fields: 'plains', whispering_woods: 'forest',
+            misty_marshes: 'swamp', golden_sands: 'desert', underground_passage: 'cave',
+            orc_tribe: 'plains', goblin_nest: 'forest', elven_ruins: 'forest',
+            troll_cave: 'mountain', stone_peaks: 'mountain', korthag: 'mountain',
+            dragon_pass: 'mountain', bandit_fortress: 'plains', ancient_cemetery: 'graveyard',
+            deep_swamp: 'swamp', frozen_waste: 'snow', burning_crater: 'volcanic',
+            valkrest: 'volcanic',
+        };
+        for (var id of Object.keys(LOCATION_COORDS)) {
+            S.locations[id] = { n: id, b: BIOME_FOR_LOC[id] || 'plains', i: '', d: 0, s: 0 };
+        }
+
+        window.connectionGraph = {};
+        for (var id2 of Object.keys(LOCATION_COORDS)) connectionGraph[id2] = [];
+        for (var edge of CONNECTION_EDGES) {
+            if (connectionGraph[edge[0]]) connectionGraph[edge[0]].push(edge[1]);
+            if (connectionGraph[edge[1]]) connectionGraph[edge[1]].push(edge[0]);
+        }
+        window._zoomIdx = 1;
+
+        // All locations explored for the static image
+        window.computeFogState = function() {
+            var fog = {};
+            for (var locId of Object.keys(LOCATION_COORDS)) fog[locId] = 'explored';
+            return fog;
+        };
+
+        async function buildStaticMap() {
+            document.getElementById('status').textContent = 'Renderizando...';
+            var svg = document.getElementById('map-svg');
+            svg.setAttribute('width', SVG_W);
+            svg.setAttribute('height', SVG_H);
+            svg.setAttribute('viewBox', '0 0 ' + SVG_W + ' ' + SVG_H);
+            svg.innerHTML = '';
+
+            var fogState = computeFogState(true);
+            var defs = _el('defs');
+            _buildAllDefs(defs);
+            svg.appendChild(defs);
+            _renderBackground(svg);
+            _renderLandmass(svg);
+
+            var wornG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
+            _renderWornEdgesImpl(wornG);
+            svg.appendChild(wornG);
+            var agingG = _el('g', { class: 'aging', 'pointer-events': 'none', 'clip-path': 'url(#land-clip)' });
+            _renderAgingEffectsImpl(agingG);
+            svg.appendChild(agingG);
+
+            _renderRivers(svg);
+            renderTerrainRegions(svg, fogState);
+            renderGroundCover(svg, svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer'));
+            renderTerrainDetails(svg, fogState, svg.querySelector('.roads-layer'));
+
+            // Epic extras (build-only decorations)
+            renderEpicExtras(svg);
+
+            document.getElementById('status').textContent = 'Pronto! Use Playwright screenshot.';
+            // Signal to Playwright that render is complete
+            window.__MAP_READY__ = true;
+        }
+
+        window.addEventListener('load', function() { setTimeout(buildStaticMap, 300); });
+    </script>
+</body>
+</html>

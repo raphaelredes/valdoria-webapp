@@ -744,76 +744,9 @@ function renderPlayerBanner(svg) {
 
 // ── FOG WISPS ──
 
-function renderFogWisps(svg, fogState) {
-    const fG = _el('g', { class: 'fog-particles', 'pointer-events': 'none' });
-    for (const [locId, state] of Object.entries(fogState)) {
-        if (state !== 'known_mapped' && state !== 'known_unmapped' && state !== 'frontier') continue;
-        const coords = LOCATION_COORDS[locId];
-        if (!coords) continue;
-        const { x, y } = hexToPixel(coords.col, coords.row);
-        let cnt, bOp, fc;
-        // Reduced cloud counts (was 5/3/4), larger ellipses to compensate
-        if (state === 'known_unmapped') { cnt = 2; bOp = 0.14; fc = INK_DARK; }
-        else if (state === 'known_mapped') { cnt = 1; bOp = 0.08; fc = INK; }
-        else { cnt = 2; bOp = 0.10; fc = INK_DARK; }
+// renderFogWisps — REMOVED (replaced by _renderFogOverlay in navigate-map.js)
+// renderCartographyDecor — REMOVED (now in pre-rendered static image)
 
-        for (let i = 0; i < cnt; i++) {
-            const seed = coords.col * 1000 + coords.row * 100 + i;
-            fG.appendChild(_el('ellipse', {
-                cx: x + (srand(seed) - 0.5) * 35, cy: y + (srand(seed + 50) - 0.5) * 22,
-                rx: 18 + srand(seed + 100) * 14, ry: 9 + srand(seed + 150) * 8,
-                fill: fc, 'fill-opacity': bOp + srand(seed + 200) * 0.05, class: 'fog-cloud',
-            }));
-        }
-    }
-    svg.appendChild(fG);
-}
-
-// ── CARTOGRAPHIC DECORATIONS ──
-
-function renderCartographyDecor(svg, fogState) {
-    const dG = _el('g', { class: 'deco-texts' });
-    const texts = [
-        { text: 'Aqui Ha Dragoes', col: 12, row: 14, size: 14, rot: -8 },
-        { text: 'Terras Desconhecidas', col: 1, row: 2, size: 12, rot: 5 },
-        { text: 'Perigo', col: 13, row: 6, size: 11, rot: -12 },
-        { text: 'Confins do Mundo', col: 1, row: 14, size: 11, rot: 3 },
-        { text: '~ mare incognitum ~', col: 7, row: 15, size: 10, rot: -2 },
-        { text: 'Sombras Ancestrais', col: 8, row: 1, size: 11, rot: 6 },
-    ];
-    for (const t of texts) {
-        const { x, y } = hexToPixel(t.col, t.row);
-        const nearby = Object.entries(LOCATION_COORDS).filter(([, c]) => Math.abs(c.col - t.col) + Math.abs(c.row - t.row) <= 3);
-        if (nearby.length > 0 && !nearby.every(([id]) => fogState[id] === 'hidden' || fogState[id] === 'frontier' || !fogState[id])) continue;
-        const el = _el('text', { x, y, class: 'map-deco-text', 'font-size': t.size + 'px', transform: `rotate(${t.rot}, ${x}, ${y})` });
-        el.textContent = t.text;
-        dG.appendChild(el);
-    }
-    _drawSeaSerpent(dG, fogState);
-    svg.appendChild(dG);
-}
-
-function _drawSeaSerpent(group, fogState) {
-    // Show serpent when SE corner is mostly unexplored (data-driven, not hardcoded IDs)
-    const seCorner = Object.entries(LOCATION_COORDS).filter(([, c]) => c.col >= 10 && c.row >= 10);
-    const seExplored = seCorner.filter(([id]) => fogState[id] === 'explored' || fogState[id] === 'known_mapped');
-    if (seCorner.length === 0 || seExplored.length / seCorner.length > 0.4) return;
-    const sx = SVG_W - 90, sy = SVG_H - 100;
-    const sg = _el('g', { opacity: '0.14' });
-    sg.appendChild(_el('path', {
-        d: `M${sx},${sy} C${sx + 10},${sy - 12} ${sx + 20},${sy - 8} ${sx + 25},${sy - 2}
-            C${sx + 30},${sy + 5} ${sx + 38},${sy + 2} ${sx + 42},${sy - 6}
-            C${sx + 48},${sy - 16} ${sx + 55},${sy - 18} ${sx + 62},${sy - 12}`,
-        fill: 'none', stroke: INK, 'stroke-width': 3.5, 'stroke-linecap': 'round',
-    }));
-    sg.appendChild(_el('ellipse', { cx: sx + 63, cy: sy - 12, rx: 6, ry: 4, fill: INK, 'fill-opacity': 0.5 }));
-    sg.appendChild(_el('circle', { cx: sx + 64.5, cy: sy - 13, r: 1.3, fill: INK_LIGHT }));
-    sg.appendChild(_el('path', { d: `M${sx + 30},${sy - 6} L${sx + 28},${sy - 16} L${sx + 35},${sy - 8}`,
-        fill: 'none', stroke: INK, 'stroke-width': 0.8 }));
-    sg.appendChild(_el('path', { d: `M${sx},${sy} Q${sx - 5},${sy + 4} ${sx - 8},${sy - 2}`,
-        fill: 'none', stroke: INK, 'stroke-width': 2, 'stroke-linecap': 'round' }));
-    group.appendChild(sg);
-}
 
 // ── COMPASS ROSE (ink-drawn, no gradient fills) ──
 
