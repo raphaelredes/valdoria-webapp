@@ -3398,13 +3398,27 @@
     animation: feedbackFadeIn 0.4s ease;
 }
 .feedback-overlay[style*="flex"] { display: flex; }
+.feedback-overlay.fb-hiding {
+    animation: feedbackFadeOut 0.3s ease forwards;
+}
+.feedback-overlay.fb-hiding .feedback-card {
+    animation: feedbackScaleOut 0.3s ease forwards;
+}
 @keyframes feedbackFadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+@keyframes feedbackFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
 @keyframes feedbackScaleIn {
     from { transform: scale(0.92); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
+}
+@keyframes feedbackScaleOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.92); opacity: 0; }
 }
 .feedback-card {
     background: var(--v-bg-card, #2e2520);
@@ -3448,19 +3462,20 @@
 .feedback-star {
     width: 44px;
     height: 44px;
-    font-size: 28px;
+    font-size: 30px;
     background: none;
     border: none;
     cursor: pointer;
-    transition: transform 0.15s, filter 0.15s;
-    filter: grayscale(0.7) brightness(0.6);
+    transition: transform 0.15s, color 0.15s;
+    color: var(--v-border, #4a3828);
     padding: 0;
     line-height: 44px;
 }
 .feedback-star.active,
 .feedback-star:hover {
-    filter: none;
-    transform: scale(1.2);
+    color: var(--v-gold, #c4953a);
+    transform: scale(1.25);
+    text-shadow: 0 0 8px rgba(196, 149, 58, 0.5);
 }
 .feedback-star:active {
     transform: scale(0.95);

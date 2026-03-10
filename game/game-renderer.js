@@ -158,18 +158,9 @@ function renderScreen(screen) {
         _showNotifications(screen.notifications);
     }
 
-    // Feedback popup (rare ~4% on city screens)
-    if (screen.feedback_popup) {
+    // Feedback popup (rare ~4% on city screens) — all phases are client-side
+    if (screen.feedback_popup && !_fbActive) {
         setTimeout(() => _showFeedbackOverlay(screen.feedback_popup), 800);
-    }
-    // Survey offer response (after rating)
-    if (screen.feedback_survey_offer) {
-        _showFeedbackPhase('survey-offer');
-    }
-    // Survey questions (after accepting)
-    if (screen.feedback_survey) {
-        _renderFeedbackSurvey(screen.feedback_survey);
-        _showFeedbackPhase('survey');
     }
 
     // Buttons (rendered into #buttons inside #bottom-panel)
@@ -938,10 +929,12 @@ function _animateBarDeltas(contentEl) {
 
 var _fbData = null;
 var _fbSelectedRating = 0;
+var _fbActive = false; // Prevents re-trigger during same session
 
 function _showFeedbackOverlay(data) {
     _fbData = data;
     _fbSelectedRating = 0;
+    _fbActive = true;
     var overlay = document.getElementById('feedback-overlay');
     if (!overlay) return;
 
@@ -954,13 +947,13 @@ function _showFeedbackOverlay(data) {
     if (titleEl) titleEl.textContent = data.title || '';
     if (msgEl) msgEl.textContent = data.message || '';
 
-    // Build star buttons
+    // Build star buttons (Unicode ★ for consistent cross-platform rendering)
     if (starsEl) {
         starsEl.innerHTML = '';
         for (var i = 1; i <= 5; i++) {
             var star = document.createElement('button');
             star.className = 'feedback-star';
-            star.textContent = '⭐';
+            star.textContent = '\u2605'; // ★ filled star
             star.dataset.rating = i;
             star.setAttribute('aria-label', i + ' estrela' + (i > 1 ? 's' : ''));
             star.addEventListener('click', _onStarClick);
@@ -968,10 +961,16 @@ function _showFeedbackOverlay(data) {
         }
     }
 
+    // Pre-render survey form (questions come with the popup data)
+    if (data.survey_questions) {
+        _renderFeedbackSurvey(data.survey_questions);
+    }
+
     // PIX button
     if (pixBtn) {
         pixBtn.style.display = data.show_pix ? '' : 'none';
         pixBtn.onclick = function() {
+            _haptic();
             _hideFeedbackOverlay();
             if (typeof doAction === 'function') doAction('fb_pix');
         };
@@ -981,23 +980,37 @@ function _showFeedbackOverlay(data) {
     var dismissBtn = document.getElementById('fb-dismiss-btn');
     if (dismissBtn) {
         dismissBtn.onclick = function() {
+            _haptic();
             _hideFeedbackOverlay();
             if (typeof doAction === 'function') doAction('fb_dismiss');
         };
     }
 
-    // Survey offer buttons
+    // Survey offer buttons — purely client-side phase transition
     var surveyYes = document.getElementById('fb-survey-yes');
     if (surveyYes) {
         surveyYes.onclick = function() {
-            if (typeof doAction === 'function') doAction('fb_survey_yes');
+            _haptic();
+            _showFeedbackPhase('survey');
         };
     }
     var surveyNo = document.getElementById('fb-survey-no');
     if (surveyNo) {
         surveyNo.onclick = function() {
+            _haptic();
             _hideFeedbackOverlay();
-            if (typeof doAction === 'function') doAction('fb_survey_no');
+            // Save rating only (no survey)
+            if (typeof apiCall === 'function') {
+                apiCall('/api/game/action', {
+                    cb: 'fb_survey_no',
+                    user_id: S.userId
+                }).catch(function(e) {
+                    console.error('[GAME] Feedback save error:', e);
+                });
+            }
+            if (typeof showToast === 'function') {
+                showToast('\u2728 Obrigado pela avalia\u00e7\u00e3o!', 2500);
+            }
         };
     }
 
@@ -1009,12 +1022,14 @@ function _showFeedbackOverlay(data) {
 
     // Show phase 1, hide others
     _showFeedbackPhase('rating');
+    overlay.classList.remove('fb-hiding');
     overlay.style.display = 'flex';
 }
 
 function _onStarClick(e) {
     var rating = parseInt(e.currentTarget.dataset.rating) || 3;
     _fbSelectedRating = rating;
+    _haptic();
     // Highlight stars up to selected
     var stars = document.querySelectorAll('.feedback-star');
     stars.forEach(function(s) {
@@ -1025,10 +1040,10 @@ function _onStarClick(e) {
             s.classList.remove('active');
         }
     });
-    // Brief delay then send rating + show survey offer
+    // Brief delay then show survey offer (client-side, no server round-trip)
     setTimeout(function() {
-        if (typeof doAction === 'function') doAction('fb_rate_' + rating);
-    }, 400);
+        _showFeedbackPhase('survey-offer');
+    }, 500);
 }
 
 function _showFeedbackPhase(phase) {
@@ -1037,7 +1052,6 @@ function _showFeedbackPhase(phase) {
         var el = document.getElementById('fb-phase-' + p);
         if (el) el.style.display = (p === phase) ? '' : 'none';
     });
-    // Ensure overlay is visible
     var overlay = document.getElementById('feedback-overlay');
     if (overlay) overlay.style.display = 'flex';
 }
@@ -1067,7 +1081,7 @@ function _renderFeedbackSurvey(questions) {
                 btn.dataset.questionId = q.id;
                 btn.dataset.value = opt;
                 btn.onclick = function() {
-                    // Deselect siblings
+                    _haptic();
                     opts.querySelectorAll('.fb-option').forEach(function(b) {
                         b.classList.remove('selected');
                     });
@@ -1079,7 +1093,7 @@ function _renderFeedbackSurvey(questions) {
         } else if (q.type === 'text') {
             var ta = document.createElement('textarea');
             ta.className = 'fb-textarea';
-            ta.placeholder = 'Sugestões, elogios, críticas...';
+            ta.placeholder = 'Sugest\u00f5es, elogios, cr\u00edticas...';
             ta.dataset.questionId = q.id;
             qDiv.appendChild(ta);
         }
@@ -1091,6 +1105,7 @@ function _renderFeedbackSurvey(questions) {
 function _onSurveySubmit() {
     var form = document.getElementById('fb-survey-form');
     if (!form) return;
+    _haptic();
     var answers = {};
     form.querySelectorAll('.fb-question').forEach(function(qDiv) {
         var qId = qDiv.dataset.questionId;
@@ -1104,23 +1119,34 @@ function _onSurveySubmit() {
         }
     });
     _hideFeedbackOverlay();
-    // Send survey via API with extra body data
+    // Send rating + survey via single API call (no renderScreen to avoid re-trigger)
     if (typeof apiCall === 'function') {
         apiCall('/api/game/action', {
             cb: 'fb_survey_submit',
             user_id: S.userId,
-            survey: answers
-        }).then(function(data) {
-            if (data && typeof renderScreen === 'function') {
-                renderScreen(data);
-            }
+            survey: answers,
+            rating: _fbSelectedRating
         }).catch(function(e) {
             console.error('[GAME] Survey submit error:', e);
         });
+    }
+    if (typeof showToast === 'function') {
+        showToast('\u2728 Obrigado pelo feedback! Suas respostas ajudam muito.', 3500);
     }
 }
 
 function _hideFeedbackOverlay() {
     var overlay = document.getElementById('feedback-overlay');
-    if (overlay) overlay.style.display = 'none';
+    if (!overlay) return;
+    // Smooth fade-out animation
+    overlay.classList.add('fb-hiding');
+    setTimeout(function() {
+        overlay.style.display = 'none';
+        overlay.classList.remove('fb-hiding');
+    }, 300);
+}
+
+// Haptic feedback helper (vibration API)
+function _haptic() {
+    try { if (navigator.vibrate) navigator.vibrate(15); } catch(_) {}
 }

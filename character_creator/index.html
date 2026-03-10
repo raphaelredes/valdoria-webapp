@@ -17,11 +17,13 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="data.js?v=' + v + '"><\/script>');
         document.write('<script src="personality_data.js?v=' + v + '"><\/script>');
     </script>
+    <script src="../shared/loading-guard.js"></script>
     <style>
         /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
         * {
@@ -952,6 +954,145 @@
 
 <body>
 
+    <!-- Loading overlay (magic circle) -->
+    <div id="creatorLoading" class="loading-overlay">
+        <div class="loading-particles">
+            <div class="particle ember p1"></div>
+            <div class="particle ember p2"></div>
+            <div class="particle ember p3"></div>
+            <div class="particle ember p4"></div>
+            <div class="particle spark s1"></div>
+            <div class="particle spark s2"></div>
+            <div class="particle mote m1"></div>
+            <div class="particle mote m2"></div>
+            <div class="particle flame fl1"></div>
+            <div class="particle flame fl2"></div>
+            <div class="particle arcane ar1"></div>
+            <div class="particle arcane ar2"></div>
+        </div>
+        <div class="magic-circle">
+            <div class="mc-aura"></div>
+            <div class="mc-aura mc-aura-2"></div>
+            <svg class="mc-ring mc-outer" viewBox="0 0 300 300">
+                <defs><path id="runeOuter" d="M150,150 m-125,0 a125,125 0 1,1 250,0 a125,125 0 1,1 -250,0"/></defs>
+                <circle cx="150" cy="150" r="125" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="1"/>
+                <text class="mc-rune-text" fill="rgba(196,149,58,0.5)">
+                    <textPath href="#runeOuter" startOffset="0%">&#5792; &#5794; &#5798; &#5800; &#5809; &#5810; &#5815; &#5817; &#5818; &#5822; &#5825; &#5827;</textPath>
+                </text>
+            </svg>
+            <svg class="mc-ring mc-mid" viewBox="0 0 300 300">
+                <circle class="mc-energy-arc mc-arc-1" cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+                <circle class="mc-energy-arc mc-arc-2" cx="150" cy="150" r="96" fill="none" stroke="rgba(123,32,32,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <svg class="mc-ring mc-inner" viewBox="0 0 300 300">
+                <defs><path id="runeInner" d="M150,150 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0"/></defs>
+                <text class="mc-inner-text" fill="rgba(196,149,58,0.35)">
+                    <textPath href="#runeInner" startOffset="0%">&#9670; FORJAR &#9670; HERÓI &#9670; FORJAR &#9670; HERÓI </textPath>
+                </text>
+            </svg>
+            <div class="mc-pulse"></div>
+            <div class="mc-pulse mc-pulse-2"></div>
+            <div id="mc-gem" class="mc-gem">
+                <div class="mc-gem-core"></div>
+                <div class="mc-gem-flare"></div>
+            </div>
+            <div class="mc-completion-wave"></div>
+            <div class="mc-completion-wave wave-2"></div>
+        </div>
+        <div class="loading-flash"></div>
+        <div class="loading-brand">
+            <div class="loading-title">FORJAR HERÓI</div>
+            <div class="loading-divider"><span class="divider-rune">&#9670;</span></div>
+        </div>
+        <div class="loading-progress-wrap">
+            <div class="loading-progress-track">
+                <div id="loading-progress" class="loading-progress-fill"></div>
+            </div>
+        </div>
+        <div class="loading-tip-area">
+            <div id="loading-tip" class="loading-tip">Preparando a forja de heróis...</div>
+        </div>
+    </div>
+
+    <!-- Loading controller (narrative tips + min load) -->
+    <script>
+    (function() {
+        var TIPS = [
+            'Os deuses observam enquanto uma nova alma se prepara para nascer...',
+            'As estrelas se alinham, aguardando a escolha do destino do herói...',
+            'Pergaminhos antigos se desenrolam, revelando raças e linhagens...',
+            'O fogo da forja crepita, pronto para moldar um novo campeão...',
+            'Ecos de lendas passadas sussurram conselhos ao novo aventureiro...',
+            'Runas ancestrais brilham, canalizando o poder da criação...',
+            'O livro de classes se abre, revelando caminhos de poder...',
+            'Uma nova página na história de Valdoria está prestes a ser escrita...',
+            '⚔️ Dica: Cada raça oferece bônus únicos de atributo e habilidades.',
+            '🛡️ Dica: Escolha uma classe que combine com seu estilo de jogo.',
+            '⚔️ Dica: Atributos altos em Força ou Destreza melhoram seu ataque.',
+            '🛡️ Dica: Constituição alta significa mais pontos de vida.',
+            '⚔️ Dica: Magos usam Inteligência, Clérigos usam Sabedoria.',
+            '🛡️ Dica: Carisma é essencial para Bardos, Feiticeiros e Bruxos.',
+            '⚔️ Dica: A origem do personagem define suas perícias iniciais.',
+            '🛡️ Dica: Não existe escolha errada — cada combinação é viável!',
+        ];
+        var tipEl = document.getElementById('loading-tip');
+        var progressEl = document.getElementById('loading-progress');
+        var overlay = document.getElementById('creatorLoading');
+        var tipIndex = Math.floor(Math.random() * TIPS.length);
+        if (tipEl) tipEl.textContent = TIPS[tipIndex];
+        var _tipInterval;
+        var _loadStart = Date.now();
+        var MIN_LOAD_MS = 2500;
+        var _progress = 0;
+
+        var _progressTimer = setInterval(function() {
+            _progress += (90 - _progress) * 0.08;
+            if (progressEl) progressEl.style.width = _progress + '%';
+        }, 200);
+
+        _tipInterval = setInterval(function() {
+            tipIndex = (tipIndex + 1) % TIPS.length;
+            if (tipEl) {
+                tipEl.classList.add('tip-exit');
+                setTimeout(function() {
+                    tipEl.textContent = TIPS[tipIndex];
+                    tipEl.classList.remove('tip-exit');
+                    tipEl.classList.add('tip-enter');
+                    setTimeout(function() { tipEl.classList.remove('tip-enter'); }, 350);
+                }, 300);
+            }
+        }, 5000);
+
+        window._creatorLoadingCtrl = {
+            hide: function() {
+                clearInterval(_tipInterval);
+                clearInterval(_progressTimer);
+                if (!overlay || overlay.classList.contains('hidden')) return;
+                var elapsed = Date.now() - _loadStart;
+                var remaining = MIN_LOAD_MS - elapsed;
+                if (remaining > 0) {
+                    setTimeout(function() { window._creatorLoadingCtrl.hide(); }, remaining);
+                    return;
+                }
+                if (progressEl) progressEl.style.width = '100%';
+                var waves = overlay.querySelectorAll('.mc-completion-wave');
+                waves.forEach(function(w) { w.classList.add('active'); });
+                try {
+                    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                        Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+                    }
+                } catch(_) {}
+                setTimeout(function() {
+                    overlay.classList.add('exit-cinematic');
+                    setTimeout(function() {
+                        overlay.classList.add('hidden');
+                    }, 950);
+                }, 150);
+            }
+        };
+    })();
+    </script>
+
     <div class="v-header">
         <h1 id="headerTitle">FORJAR PERSONAGEM</h1>
         <div class="v-progress-bar" id="progressBar"></div>
@@ -1208,6 +1349,7 @@
             document.getElementById('nameInput').addEventListener('input', e => { sel.name = e.target.value.trim(); document.getElementById('nameLimit').textContent = `${sel.name.length}/15`; });
             document.getElementById('surnameInput').addEventListener('input', e => { sel.surname = e.target.value.trim(); document.getElementById('surnameLimit').textContent = `${sel.surname.length}/15`; });
             setupBackButton();
+            if (window._creatorLoadingCtrl) window._creatorLoadingCtrl.hide();
         })();
 
         function haptic() { try { tg?.HapticFeedback?.impactOccurred('light'); } catch (e) { console.warn('[CHAR_CREATOR] haptic:', e); } }
