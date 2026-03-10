@@ -1075,3 +1075,47 @@ body::after {
     }
     body::after { display: none; }
 }
+
+/* ─── DISPLACED OVERLAY (Device Lock) ─── */
+.displaced-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(20, 16, 12, 0.95);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.4s ease;
+    font-family: var(--v-font, 'MedievalSharp', 'Cinzel', serif);
+}
+.displaced-overlay.displaced-visible { opacity: 1; }
+.displaced-content {
+    text-align: center; padding: 32px 24px; max-width: 320px;
+}
+.displaced-icon {
+    font-size: 48px; margin-bottom: 16px;
+}
+.displaced-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: 20px; font-weight: 700;
+    color: var(--v-text, #d4c8b0); margin-bottom: 12px;
+}
+.displaced-text {
+    font-size: 14px; line-height: 1.6;
+    color: var(--v-text-dim, #a09484); margin-bottom: 8px;
+}
+.displaced-sub { margin-top: 16px; font-size: 13px; }
+.displaced-device-badge {
+    display: inline-block; padding: 8px 20px; margin: 8px 0;
+    border: 1px solid var(--v-gold, #c4953a); border-radius: 8px;
+    background: rgba(196, 149, 58, 0.1);
+    color: var(--v-gold, #c4953a); font-size: 15px; font-weight: 600;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+}
+.displaced-close-btn {
+    display: inline-block; margin-top: 20px; padding: 10px 32px;
+    background: var(--v-bg-raised, #332a22);
+    border: 1px solid var(--v-border, #4a3828); border-radius: 8px;
+    color: var(--v-text, #d4c8b0); font-size: 14px;
+    font-family: var(--v-font, 'MedievalSharp', 'Cinzel', serif);
+    cursor: pointer; transition: background 0.2s;
+}
+.displaced-close-btn:active {
+    background: var(--v-border, #4a3828);
+}

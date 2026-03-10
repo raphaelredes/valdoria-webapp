@@ -166,6 +166,11 @@ async function init() {
     const healthy = await _waitForHealthy();
     if (!healthy) return; // _waitForHealthy already handled error/sendData
 
+    // Start device displacement heartbeat
+    if (window.SessionHeartbeat) {
+        SessionHeartbeat.init({ apiBase: S.apiBase, token: S.token, uid: S.uid });
+    }
+
     // Check if returning from another WebApp (combat, explore, etc.)
     const isReturn = params.get('return') === 'game';
     console.log('[GAME] Route: isReturn=' + isReturn + ' hasCharId=' + !!S.charId);
@@ -492,6 +497,9 @@ async function startGame() {
     console.log('[GAME] startGame() called, charId:', S.charId || 'none');
     showLoading();
     const startBody = S.charId ? { char_id: S.charId } : {};
+    // Send device platform for displacement tracking
+    const tgPlatform = (window.Telegram && Telegram.WebApp && Telegram.WebApp.platform) || '';
+    if (tgPlatform) startBody.platform = tgPlatform;
     const data = await apiCall('/api/game/start', startBody);
     hideLoading();
     if (data && !data.error) {
@@ -556,6 +564,7 @@ async function fetchState(silent) {
 // ─── Close Game Hub ───
 // Notify server to update the underlying Telegram message, then close the WebApp.
 async function _closeGameHub() {
+    if (window.SessionHeartbeat) SessionHeartbeat.stop();
     try {
         const controller = new AbortController();
         const tid = setTimeout(() => controller.abort(), 2000);

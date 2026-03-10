@@ -218,6 +218,11 @@ if (window.ValdoriaErrors) {
     });
 }
 
+// ─── Device displacement heartbeat ───
+if (window.SessionHeartbeat && apiBase && token && userId) {
+    SessionHeartbeat.init({ apiBase: apiBase, token: token, uid: userId });
+}
+
 // ─── STARTUP ───
 if (isApiMode) {
     loadCombatState();

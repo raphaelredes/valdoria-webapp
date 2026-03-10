@@ -2663,6 +2663,11 @@ async function initAsync() {
         });
     }
 
+    // ── Device displacement heartbeat ──
+    if (window.SessionHeartbeat && S.apiBase && S.token && S.uid) {
+        SessionHeartbeat.init({ apiBase: S.apiBase, token: S.token, uid: parseInt(S.uid) || 0 });
+    }
+
     // ── Loading progress controller ──
     const _lc = window._loadingCtrl || { setProgress: () => {}, hideLoading: (cb) => { if (cb) cb(); }, hideQuick: () => {}, cleanup: () => {} };
     _lc.setProgress(10, 'Iniciando...'); // Init started
