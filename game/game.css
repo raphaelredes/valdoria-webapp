@@ -2780,8 +2780,8 @@
     gap: 6px;
     margin-bottom: 4px;
 }
-.quest-diff { font-size: 12px; flex-shrink: 0; }
-.quest-diff--lg { font-size: 16px; }
+.quest-npc-icon { font-size: 14px; flex-shrink: 0; }
+.quest-detail-icon { font-size: 24px; display: block; margin-bottom: 2px; }
 .quest-title {
     font-size: 14px;
     font-weight: 600;
@@ -3308,8 +3308,78 @@
     margin-right: 8px;
 }
 .quest-tracker-row--ready .quest-tracker-title { color: #81c784; }
-.quest-tracker-prog {
+.quest-tracker-prog,
+.quest-tracker-status {
     font-size: 11px;
     color: var(--v-text-dim);
     flex-shrink: 0;
+}
+
+/* Chain badge (card) */
+.quest-chain-badge {
+    font-size: 10px;
+    color: var(--v-gold);
+    opacity: 0.8;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+    font-family: var(--v-font-display);
+}
+
+/* Chain indicator (detail) */
+.quest-chain-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--v-text-dim);
+    margin-bottom: 10px;
+    padding: 4px 10px;
+    background: rgba(196, 149, 58, 0.06);
+    border-radius: var(--v-radius-sm, 6px);
+    border: 1px solid rgba(196, 149, 58, 0.12);
+}
+.quest-chain-next {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    opacity: 0.7;
+    margin-left: auto;
+}
+
+/* NPC name line (card) */
+.quest-card-npc {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    margin-top: 2px;
+    opacity: 0.8;
+}
+
+/* Action buttons (detail) */
+.quest-action-btn {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    margin-top: 8px;
+    border: none;
+    border-radius: var(--v-radius-sm, 6px);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--v-font);
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.quest-action-btn:active { transform: scale(0.97); }
+.quest-action-btn--turnin {
+    background: linear-gradient(135deg, rgba(46, 125, 50, 0.2), rgba(46, 125, 50, 0.12));
+    border: 1px solid rgba(46, 125, 50, 0.35);
+    color: #81c784;
+}
+.quest-action-btn--abandon {
+    background: rgba(123, 32, 32, 0.08);
+    border: 1px solid rgba(123, 32, 32, 0.2);
+    color: #e57373;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 6px 12px;
+    margin-top: 6px;
 }

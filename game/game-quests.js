@@ -1,5 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-   QUEST DIARY & DETAIL — Rich card rendering for quest screens
+   QUEST DIARY & DETAIL — Narrative RPG rendering (no progress bars)
+   Philosophy: Tabletop RPG immersion. No numeric counters, no bars.
+   Show only the next narrative beat, described as a DM would.
    ═══════════════════════════════════════════════════════════════ */
 
 function renderQuestDiary(container, data) {
@@ -58,7 +60,7 @@ function renderQuestDiary(container, data) {
 
     // Active Story Quests
     if (data.story && data.story.length > 0) {
-        wrap.appendChild(_questSectionHdr('\u2694\ufe0f', 'Miss\u00f5es Ativas'));
+        wrap.appendChild(_questSectionHdr('\u2694\ufe0f', 'Jornadas em Andamento'));
         for (var si = 0; si < data.story.length; si++) {
             wrap.appendChild(_renderQCard(data.story[si]));
         }
@@ -66,7 +68,7 @@ function renderQuestDiary(container, data) {
 
     // Active Daily Quests
     if (data.daily && data.daily.length > 0) {
-        wrap.appendChild(_questSectionHdr('\ud83d\udd04', 'Miss\u00f5es Di\u00e1rias'));
+        wrap.appendChild(_questSectionHdr('\ud83d\udd04', 'Tarefas do Dia'));
         for (var di = 0; di < data.daily.length; di++) {
             wrap.appendChild(_renderQCard(data.daily[di], true));
         }
@@ -74,7 +76,7 @@ function renderQuestDiary(container, data) {
 
     // Completed Quests
     if (data.done && data.done.length > 0) {
-        wrap.appendChild(_questSectionHdr('\u2705', 'Completadas'));
+        wrap.appendChild(_questSectionHdr('\u2705', 'Feitos Realizados'));
         for (var ci = 0; ci < data.done.length; ci++) {
             var d = data.done[ci];
             var doneCard = document.createElement('div');
@@ -88,7 +90,7 @@ function renderQuestDiary(container, data) {
 
     // Failed Quests
     if (data.failed && data.failed.length > 0) {
-        wrap.appendChild(_questSectionHdr('\u274c', 'Falhadas'));
+        wrap.appendChild(_questSectionHdr('\u274c', 'Miss\u00f5es Perdidas'));
         for (var fi = 0; fi < data.failed.length; fi++) {
             var fq = data.failed[fi];
             var failCard = document.createElement('div');
@@ -125,7 +127,7 @@ function renderQuestDiary(container, data) {
             + '</div>'
             + '<div class="quest-empty-text">O pergaminho est\u00e1 em branco...</div>'
             + '<div class="quest-empty-hint">Converse com os habitantes de Eldoria ou visite o <b>Quadro de Miss\u00f5es</b> na Guilda dos Aventureiros.</div>'
-            + '<div class="quest-empty-cta" onclick="doAction(\'action_city_locations\')">🏘\ufe0f Visitar Locais</div>';
+            + '<div class="quest-empty-cta" onclick="doAction(\'action_city_locations\')">\ud83c\udfe0 Visitar Locais</div>';
         wrap.appendChild(empty);
     }
 
@@ -145,9 +147,12 @@ function _renderQCard(q, isDaily) {
     card.className = 'quest-card' + (q.ready ? ' quest-card--ready' : '');
     card.onclick = function() { doAction(q.cb); };
 
-    // Header: difficulty + title + category badge + ready badge
+    // Header: NPC icon + title + category badge + ready badge
     var hdr = document.createElement('div');
     hdr.className = 'quest-card-header';
+
+    // NPC role icon (replaces difficulty dot)
+    var npcIcon = q.npc_icon || '\u2694\ufe0f';
     var catBadge = '';
     if (q.cat === 'daily') {
         catBadge = '<span class="quest-cat-badge quest-cat--daily">DI\u00c1RIA</span>';
@@ -156,49 +161,34 @@ function _renderQCard(q, isDaily) {
     } else if (q.cat === 'side') {
         catBadge = '<span class="quest-cat-badge quest-cat--side">SIDE</span>';
     }
-    hdr.innerHTML = '<span class="quest-diff">' + q.diff + '</span>'
+    hdr.innerHTML = '<span class="quest-npc-icon">' + npcIcon + '</span>'
         + '<span class="quest-title">' + _escQ(q.title) + '</span>'
         + catBadge
         + (q.ready ? '<span class="quest-ready-badge">\u2705</span>' : '');
     card.appendChild(hdr);
 
-    // Objective text
+    // Chain indicator (Part X of Y)
+    if (q.chain) {
+        var chainEl = document.createElement('div');
+        chainEl.className = 'quest-chain-badge';
+        chainEl.textContent = 'Cap\u00edtulo ' + q.chain.part + ' de ' + q.chain.total;
+        card.appendChild(chainEl);
+    }
+
+    // Narrative objective (immersive, no target icon)
     if (q.obj) {
         var objEl = document.createElement('div');
         objEl.className = 'quest-objective';
-        objEl.textContent = '\ud83c\udfaf ' + q.obj;
+        objEl.innerHTML = '<em>' + _escQ(q.obj) + '</em>';
         card.appendChild(objEl);
     }
 
-    // Progress bar
-    var progWrap = document.createElement('div');
-    progWrap.className = 'quest-progress';
-    var track = document.createElement('div');
-    track.className = 'quest-progress-track';
-    var fill = document.createElement('div');
-    fill.className = 'quest-progress-fill' + (q.ready ? ' quest-progress--ready' : '');
-    fill.style.width = q.pct + '%';
-    track.appendChild(fill);
-    progWrap.appendChild(track);
-
-    var progLabel = document.createElement('span');
-    progLabel.className = 'quest-progress-label';
-    progLabel.textContent = (isDaily && q.goal)
-        ? (q.cur + '/' + q.goal)
-        : (q.stage + '/' + q.total);
-    progWrap.appendChild(progLabel);
-    card.appendChild(progWrap);
-
-    // Rewards row
-    var rParts = [];
-    if (q.xp) rParts.push('\u2728 ' + q.xp);
-    if (q.gold) rParts.push('\ud83d\udcb0 ' + q.gold);
-    if (q.items && q.items.length > 0) rParts.push('\ud83c\udf81 ' + q.items.length);
-    if (rParts.length > 0) {
-        var rew = document.createElement('div');
-        rew.className = 'quest-rewards-mini';
-        rew.textContent = rParts.join(' \u00b7 ');
-        card.appendChild(rew);
+    // NPC giver name (subtle)
+    if (q.npc) {
+        var npcEl = document.createElement('div');
+        npcEl.className = 'quest-card-npc';
+        npcEl.textContent = q.npc;
+        card.appendChild(npcEl);
     }
 
     return card;
@@ -206,7 +196,7 @@ function _renderQCard(q, isDaily) {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   QUEST DETAIL — Rich card rendering for quest detail screen
+   QUEST DETAIL — Narrative RPG detail (no progress bars)
    ═══════════════════════════════════════════════════════════════ */
 
 function renderQuestDetail(container, q) {
@@ -215,15 +205,27 @@ function renderQuestDetail(container, q) {
     var wrap = document.createElement('div');
     wrap.className = 'quest-detail';
 
-    // Title + difficulty
+    // Title + NPC icon
     var titleBlock = document.createElement('div');
     titleBlock.className = 'quest-detail-title';
-    titleBlock.innerHTML = '<span class="quest-diff quest-diff--lg">' + q.diff + '</span>'
+    var npcIcon = q.npc_icon || '\u2694\ufe0f';
+    titleBlock.innerHTML = '<span class="quest-detail-icon">' + npcIcon + '</span>'
         + '<h2>' + _escQ(q.title) + '</h2>'
         + (q.ready ? '<div class="quest-ready-banner">\u2705 Pronta para entrega</div>' : '');
     wrap.appendChild(titleBlock);
 
-    // Description
+    // Chain indicator
+    if (q.chain) {
+        var chainEl = document.createElement('div');
+        chainEl.className = 'quest-chain-indicator';
+        chainEl.innerHTML = '\ud83d\udd17 <span>Cap\u00edtulo ' + q.chain.part + ' de ' + q.chain.total + '</span>';
+        if (q.chain.next_title) {
+            chainEl.innerHTML += '<span class="quest-chain-next">\u2192 Pr\u00f3ximo: ' + _escQ(q.chain.next_title) + '</span>';
+        }
+        wrap.appendChild(chainEl);
+    }
+
+    // Description (narrative)
     if (q.desc) {
         var descEl = document.createElement('div');
         descEl.className = 'quest-detail-desc';
@@ -231,58 +233,68 @@ function renderQuestDetail(container, q) {
         wrap.appendChild(descEl);
     }
 
-    // Current objective
+    // Current narrative beat (replaces "Objetivo Atual" with immersive framing)
     if (q.obj && q.status === 'active') {
         var objBlock = document.createElement('div');
         objBlock.className = 'quest-detail-objective';
-        objBlock.innerHTML = '<div class="quest-detail-obj-label">\ud83c\udfaf Objetivo Atual</div>'
-            + '<div class="quest-detail-obj-text">' + _escQ(q.obj) + '</div>';
+        if (q.ready) {
+            objBlock.innerHTML = '<div class="quest-detail-obj-label">\ud83d\udcdc O que voc\u00ea sabe</div>'
+                + '<div class="quest-detail-obj-text"><em>A miss\u00e3o est\u00e1 cumprida. Resta apenas reportar o feito.</em></div>';
+        } else {
+            objBlock.innerHTML = '<div class="quest-detail-obj-label">\ud83d\udcdc O que voc\u00ea sabe</div>'
+                + '<div class="quest-detail-obj-text"><em>' + _escQ(q.obj) + '</em></div>';
+        }
         wrap.appendChild(objBlock);
     }
 
-    // Progress bar (large)
-    var progBlock = document.createElement('div');
-    progBlock.className = 'quest-detail-progress';
-    var trk = document.createElement('div');
-    trk.className = 'quest-progress-track quest-progress-track--lg';
-    var fl = document.createElement('div');
-    fl.className = 'quest-progress-fill' + (q.ready ? ' quest-progress--ready' : '');
-    fl.style.width = q.pct + '%';
-    trk.appendChild(fl);
-    progBlock.appendChild(trk);
-    var plbl = document.createElement('div');
-    plbl.className = 'quest-detail-progress-label';
-    plbl.textContent = (q.cat === 'daily' && q.goal)
-        ? (q.cur + '/' + q.goal + ' (meta di\u00e1ria)')
-        : (q.stage + '/' + q.total + ' etapas');
-    progBlock.appendChild(plbl);
-    wrap.appendChild(progBlock);
-
-    // Objectives timeline
+    // Journey so far — narrative timeline (only completed + current, no future spoilers)
     if (q.objectives && q.objectives.length > 0) {
-        var timeline = document.createElement('div');
-        timeline.className = 'quest-timeline';
-        var tlHdr = document.createElement('div');
-        tlHdr.className = 'quest-timeline-header';
-        tlHdr.textContent = '\ud83d\udcdc Etapas';
-        timeline.appendChild(tlHdr);
-        for (var i = 0; i < q.objectives.length; i++) {
-            var o = q.objectives[i];
-            var step = document.createElement('div');
-            step.className = 'quest-step quest-step--' + o.state;
-            var marker = o.state === 'done' ? '\u2705'
-                : (o.state === 'current' ? '\u25b8' : '\u25cb');
-            step.innerHTML = '<span class="quest-step-marker">' + marker + '</span>'
-                + '<span class="quest-step-text">' + _escQ(o.text) + '</span>';
-            timeline.appendChild(step);
+        var hasCompleted = false;
+        for (var ci = 0; ci < q.objectives.length; ci++) {
+            if (q.objectives[ci].state === 'done') { hasCompleted = true; break; }
         }
-        wrap.appendChild(timeline);
+        if (hasCompleted) {
+            var timeline = document.createElement('div');
+            timeline.className = 'quest-timeline';
+            var tlHdr = document.createElement('div');
+            tlHdr.className = 'quest-timeline-header';
+            tlHdr.textContent = '\ud83d\udcd6 Sua Jornada At\u00e9 Aqui';
+            timeline.appendChild(tlHdr);
+            for (var i = 0; i < q.objectives.length; i++) {
+                var o = q.objectives[i];
+                if (o.state === 'future') continue; // Don't reveal future steps
+                var step = document.createElement('div');
+                step.className = 'quest-step quest-step--' + o.state;
+                var marker = o.state === 'done' ? '\u2705' : '\u25b8';
+                step.innerHTML = '<span class="quest-step-marker">' + marker + '</span>'
+                    + '<span class="quest-step-text"><em>' + _escQ(o.text) + '</em></span>';
+                timeline.appendChild(step);
+            }
+            wrap.appendChild(timeline);
+        }
     }
 
-    // Rewards
+    // Hint (atmospheric, more prominent)
+    if (q.hint) {
+        var hintEl = document.createElement('div');
+        hintEl.className = 'quest-detail-hint';
+        hintEl.innerHTML = '\ud83d\udcd6 <em>' + _escQ(q.hint) + '</em>';
+        wrap.appendChild(hintEl);
+    }
+
+    // NPC info with role icon
+    if (q.npc) {
+        var npcBlock = document.createElement('div');
+        npcBlock.className = 'quest-detail-npc';
+        var npcIc = q.npc_icon || '\ud83d\udc64';
+        npcBlock.innerHTML = npcIc + ' ' + _escQ(q.npc);
+        wrap.appendChild(npcBlock);
+    }
+
+    // Rewards (kept — these are promised, not progress)
     var rewBlock = document.createElement('div');
     rewBlock.className = 'quest-detail-rewards';
-    rewBlock.innerHTML = '<div class="quest-detail-rewards-label">\ud83d\udc8e Recompensas</div>';
+    rewBlock.innerHTML = '<div class="quest-detail-rewards-label">\ud83d\udc8e Recompensas Prometidas</div>';
     var rewList = document.createElement('div');
     rewList.className = 'quest-detail-rewards-list';
     if (q.xp) rewList.innerHTML += '<span class="quest-reward-item">\u2728 ' + q.xp + ' XP</span>';
@@ -295,20 +307,20 @@ function renderQuestDetail(container, q) {
     rewBlock.appendChild(rewList);
     wrap.appendChild(rewBlock);
 
-    // NPC info
-    if (q.npc) {
-        var npcBlock = document.createElement('div');
-        npcBlock.className = 'quest-detail-npc';
-        npcBlock.textContent = '\ud83d\udc64 Dado por: ' + q.npc;
-        wrap.appendChild(npcBlock);
+    // Action buttons (styled, inside the card)
+    if (q.can_turnin && q.turnin_cb) {
+        var turninBtn = document.createElement('button');
+        turninBtn.className = 'quest-action-btn quest-action-btn--turnin';
+        turninBtn.innerHTML = '\ud83d\udcdc Entregar Miss\u00e3o';
+        turninBtn.onclick = function() { doAction(q.turnin_cb); };
+        wrap.appendChild(turninBtn);
     }
-
-    // Hint
-    if (q.hint) {
-        var hintEl = document.createElement('div');
-        hintEl.className = 'quest-detail-hint';
-        hintEl.innerHTML = '\ud83d\udcd6 <em>' + _escQ(q.hint) + '</em>';
-        wrap.appendChild(hintEl);
+    if (q.can_abandon) {
+        var abandonBtn = document.createElement('button');
+        abandonBtn.className = 'quest-action-btn quest-action-btn--abandon';
+        abandonBtn.innerHTML = '\u274c Abandonar';
+        abandonBtn.onclick = function() { doAction(q.abandon_cb); };
+        wrap.appendChild(abandonBtn);
     }
 
     container.appendChild(wrap);
@@ -359,7 +371,7 @@ function renderQuestTurnin(container, data) {
     // Rewards section with staggered reveal
     var rewBlock = document.createElement('div');
     rewBlock.className = 'quest-turnin-rewards';
-    rewBlock.innerHTML = '<div class="quest-turnin-rewards-label">\ud83d\udc8e Recompensas Totais</div>';
+    rewBlock.innerHTML = '<div class="quest-turnin-rewards-label">\ud83d\udc8e Recompensas</div>';
 
     var rewItems = document.createElement('div');
     rewItems.className = 'quest-turnin-rewards-grid';
@@ -446,29 +458,19 @@ function renderQuestAbandon(container, data) {
     nameEl.innerHTML = '\ud83d\udcdc ' + _escQ(data.title);
     wrap.appendChild(nameEl);
 
-    // Warning text
+    // Warning text (narrative, no mention of "progress")
     var warnEl = document.createElement('div');
     warnEl.className = 'quest-abandon-warn';
     warnEl.textContent = data.is_daily
-        ? 'Voc\u00ea perder\u00e1 todo o progresso. Miss\u00f5es di\u00e1rias abandonadas contam para o limite do dia.'
-        : 'Voc\u00ea perder\u00e1 todo o progresso nesta miss\u00e3o. Poder\u00e1 aceitar novamente mais tarde.';
+        ? 'Ao desistir, tudo que foi feito se perder\u00e1. Tarefas di\u00e1rias abandonadas contam para o limite do dia.'
+        : 'Ao desistir, voc\u00ea perder\u00e1 tudo que conquistou nesta jornada. Poder\u00e1 retom\u00e1-la mais tarde.';
     wrap.appendChild(warnEl);
-
-    // Progress that will be lost
-    if (data.pct > 0) {
-        var lostEl = document.createElement('div');
-        lostEl.className = 'quest-abandon-lost';
-        lostEl.innerHTML = '<span class="quest-abandon-lost-label">Progresso a perder:</span>'
-            + '<div class="quest-progress-track"><div class="quest-progress-fill" style="width:' + data.pct + '%"></div></div>'
-            + '<span class="quest-abandon-lost-val">' + data.stage + '/' + data.total + '</span>';
-        wrap.appendChild(lostEl);
-    }
 
     container.appendChild(wrap);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   QUEST TRACKER — Compact mini-widget for City Hub
+   QUEST TRACKER — Narrative mini-widget for City Hub
    ═══════════════════════════════════════════════════════════════ */
 
 function renderQuestTracker(container, data) {
@@ -476,20 +478,21 @@ function renderQuestTracker(container, data) {
 
     var wrap = document.createElement('div');
     wrap.className = 'quest-tracker';
-    wrap.innerHTML = '<div class="quest-tracker-hdr">\ud83d\udcdc Miss\u00f5es Ativas</div>';
+    wrap.innerHTML = '<div class="quest-tracker-hdr">\ud83d\udcdc Jornadas</div>';
 
     for (var i = 0; i < data.quests.length; i++) {
         var q = data.quests[i];
         var row = document.createElement('div');
         row.className = 'quest-tracker-row' + (q.ready ? ' quest-tracker-row--ready' : '');
         row.onclick = (function(cb) { return function() { doAction(cb); }; })(q.cb);
+        // Narrative status instead of X/Y counter
+        var statusText = q.ready ? 'Conclu\u00edda' : (q.obj || '...');
         row.innerHTML = '<span class="quest-tracker-title">' + _escQ(q.title) + '</span>'
-            + '<span class="quest-tracker-prog">' + q.stage + '/' + q.total
-            + (q.ready ? ' \u2705' : '') + '</span>';
+            + '<span class="quest-tracker-status">' + (q.ready ? '\u2705' : '\u25b8') + '</span>';
         wrap.appendChild(row);
     }
 
-    // Insert before the first text block (after HUD bars)
+    // Insert after content starts
     var firstBlock = container.querySelector('.text-block, .v-bar-row');
     if (firstBlock && firstBlock.nextSibling) {
         container.insertBefore(wrap, firstBlock.nextSibling.nextSibling || null);
