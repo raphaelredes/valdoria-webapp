@@ -3033,3 +3033,283 @@
     border-left: 2px solid rgba(196, 149, 58, 0.15);
     line-height: 1.5;
 }
+
+/* Category badges */
+.quest-cat-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    line-height: 1.4;
+    text-transform: uppercase;
+    font-family: var(--v-font-display);
+}
+.quest-cat--story {
+    background: rgba(196, 149, 58, 0.15);
+    color: var(--v-gold);
+    border: 1px solid rgba(196, 149, 58, 0.3);
+}
+.quest-cat--daily {
+    background: rgba(33, 150, 243, 0.12);
+    color: #64b5f6;
+    border: 1px solid rgba(33, 150, 243, 0.25);
+}
+.quest-cat--side {
+    background: rgba(156, 39, 176, 0.12);
+    color: #ce93d8;
+    border: 1px solid rgba(156, 39, 176, 0.25);
+}
+
+/* Improved empty state */
+.quest-empty-scroll {
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: questEmptyFade 1s ease-out 0.2s forwards;
+}
+@keyframes questEmptyFade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.quest-empty-svg { display: block; margin: 0 auto; }
+.quest-empty-cta {
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: rgba(196, 149, 58, 0.1);
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: var(--v-radius-sm, 6px);
+    color: var(--v-gold);
+    font-size: 13px;
+    font-family: var(--v-font);
+    cursor: pointer;
+    display: inline-block;
+    transition: all 0.2s;
+}
+.quest-empty-cta:active { transform: scale(0.95); }
+
+/* ═══════════════════════════════════════════════════════════════
+   QUEST TURN-IN — Reward reveal screen
+   ═══════════════════════════════════════════════════════════════ */
+
+.quest-turnin { padding: 0 2px; }
+
+.quest-turnin-npc {
+    text-align: center;
+    font-size: 15px;
+    color: var(--v-text-bright, #e8dcc8);
+    margin-bottom: 8px;
+    font-family: var(--v-font-display);
+}
+.quest-turnin-dialogue {
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background: rgba(196, 149, 58, 0.06);
+    border-left: 3px solid var(--v-gold);
+    border-radius: var(--v-radius-sm, 6px);
+    font-size: 13px;
+    color: var(--v-text);
+    line-height: 1.5;
+}
+.quest-turnin-list { margin-bottom: 10px; }
+.quest-turnin-item {
+    padding: 6px 10px;
+    margin: 4px 0;
+    background: rgba(46, 125, 50, 0.08);
+    border-left: 3px solid #4caf50;
+    border-radius: var(--v-radius-sm, 6px);
+    font-size: 13px;
+    color: var(--v-text);
+    opacity: 0;
+    animation: questRevealSlide 0.4s ease-out forwards;
+}
+.quest-turnin-narrative {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    margin-top: 2px;
+    font-style: italic;
+}
+@keyframes questRevealSlide {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.quest-turnin-rewards {
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: rgba(196, 149, 58, 0.06);
+    border: 1px solid rgba(196, 149, 58, 0.15);
+    border-radius: var(--v-radius-sm, 6px);
+}
+.quest-turnin-rewards-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--v-gold);
+    margin-bottom: 8px;
+    font-family: var(--v-font-display);
+}
+.quest-turnin-rewards-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.quest-turnin-reward-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: rgba(42, 36, 32, 0.5);
+    border: 1px solid var(--v-border);
+    border-radius: 6px;
+    min-width: 80px;
+}
+.quest-turnin-reveal {
+    opacity: 0;
+    animation: questRewardPop 0.5s ease-out forwards;
+}
+@keyframes questRewardPop {
+    0% { opacity: 0; transform: scale(0.7); }
+    60% { transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.quest-turnin-reward-icon { font-size: 16px; }
+.quest-turnin-reward-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--v-text-bright, #e8dcc8);
+}
+.quest-turnin-reward-lbl {
+    font-size: 11px;
+    color: var(--v-text-dim);
+}
+.quest-turnin-levelup {
+    text-align: center;
+    padding: 10px;
+    margin: 8px 0;
+    background: linear-gradient(135deg, rgba(196, 149, 58, 0.12), rgba(255, 215, 0, 0.08));
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: var(--v-radius-sm, 6px);
+    font-size: 16px;
+    color: var(--v-gold);
+    font-family: var(--v-font-display);
+}
+.quest-turnin-gold {
+    text-align: center;
+    font-size: 12px;
+    color: var(--v-text-dim);
+    margin-top: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   QUEST ABANDON — Styled confirmation
+   ═══════════════════════════════════════════════════════════════ */
+
+.quest-abandon {
+    text-align: center;
+    padding: 8px 4px;
+}
+.quest-abandon-icon {
+    font-size: 36px;
+    margin-bottom: 6px;
+    animation: questAbandonPulse 1.5s ease-in-out infinite;
+}
+@keyframes questAbandonPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+.quest-abandon-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #e57373;
+    font-family: var(--v-font-display);
+    margin-bottom: 10px;
+}
+.quest-abandon-name {
+    font-size: 15px;
+    color: var(--v-text-bright, #e8dcc8);
+    margin-bottom: 10px;
+    padding: 6px 12px;
+    background: var(--v-bg-card);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm, 6px);
+    display: inline-block;
+}
+.quest-abandon-warn {
+    font-size: 13px;
+    color: var(--v-text-dim);
+    line-height: 1.5;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: rgba(123, 32, 32, 0.08);
+    border: 1px solid rgba(123, 32, 32, 0.2);
+    border-radius: var(--v-radius-sm, 6px);
+}
+.quest-abandon-lost {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(42, 36, 32, 0.4);
+    border-radius: var(--v-radius-sm, 6px);
+    margin-bottom: 6px;
+}
+.quest-abandon-lost-label {
+    font-size: 12px;
+    color: var(--v-text-dim);
+    white-space: nowrap;
+}
+.quest-abandon-lost .quest-progress-track { flex: 1; }
+.quest-abandon-lost-val {
+    font-size: 12px;
+    color: var(--v-text-dim);
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   QUEST TRACKER — Mini-widget for City Hub
+   ═══════════════════════════════════════════════════════════════ */
+
+.quest-tracker {
+    margin: 6px 0;
+    padding: 6px 10px;
+    background: rgba(42, 36, 32, 0.4);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm, 6px);
+}
+.quest-tracker-hdr {
+    font-size: 11px;
+    color: var(--v-gold);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    font-family: var(--v-font-display);
+}
+.quest-tracker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3px 0;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 3px;
+}
+.quest-tracker-row:active { background: rgba(196, 149, 58, 0.08); }
+.quest-tracker-row--ready {
+    color: #81c784;
+}
+.quest-tracker-title {
+    font-size: 12px;
+    color: var(--v-text);
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+}
+.quest-tracker-row--ready .quest-tracker-title { color: #81c784; }
+.quest-tracker-prog {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    flex-shrink: 0;
+}

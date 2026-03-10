@@ -138,6 +138,21 @@ function renderScreen(screen) {
         renderQuestDetail(contentEl, screen.quest_detail);
     }
 
+    // Render quest turn-in reward screen
+    if (screen.quest_turnin) {
+        renderQuestTurnin(contentEl, screen.quest_turnin);
+    }
+
+    // Render quest abandon confirmation
+    if (screen.quest_abandon) {
+        renderQuestAbandon(contentEl, screen.quest_abandon);
+    }
+
+    // Render quest mini-tracker on hub screens
+    if (screen.quest_tracker) {
+        renderQuestTracker(contentEl, screen.quest_tracker);
+    }
+
     // Show contextual notifications as toasts
     if (screen.notifications && screen.notifications.length > 0) {
         _showNotifications(screen.notifications);
