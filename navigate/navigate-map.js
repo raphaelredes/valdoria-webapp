@@ -168,23 +168,23 @@ function _renderFogOverlay(svg, fogState) {
     const canvas = document.getElementById('fog-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
 
     // Skip fog entirely if all locations are explored
     const allExplored = Object.values(fogState).every(s => s === 'explored');
     if (allExplored) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, W, H);
         canvas.style.display = 'none';
         return;
     }
     canvas.style.display = 'block';
 
-    // ── Step 1: Fill entire canvas with fog color ──
+    // ── Step 1: Fill canvas with dark fog ──
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = MAP_BG;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, W, H);
 
-    // ── Step 2: Apply landmass clip (only fog over the parchment) ──
-    // Build landmass shape as a clip region — fog outside parchment is cleared
+    // ── Step 2: Clip to landmass shape ──
     ctx.globalCompositeOperation = 'destination-in';
     ctx.beginPath();
     const pts = LANDMASS_POINTS;
@@ -193,68 +193,102 @@ function _renderFogOverlay(svg, fogState) {
     ctx.closePath();
     ctx.fill();
 
-    // ── Step 3: Punch holes with destination-out + radial gradients ──
-    ctx.globalCompositeOperation = 'destination-out';
-
+    // ── Step 3: Collect reveal points ──
+    const reveals = [];
     for (const [locId, state] of Object.entries(fogState)) {
         if (state === 'hidden') continue;
         const coords = LOCATION_COORDS[locId];
         if (!coords) continue;
         const { x, y } = hexToPixel(coords.col, coords.row);
 
-        let radius, strength, midStop;
+        let radius, strength, flatZone;
         if (state === 'explored') {
-            radius = HEX_RADIUS * 7;
-            strength = 1.0;    // fully clear
-            midStop = 0.55;
+            radius = HEX_RADIUS * 8;
+            strength = 1.0;
+            flatZone = 0.5;
         } else if (state === 'known_mapped') {
-            radius = HEX_RADIUS * 5;
-            strength = 0.85;
-            midStop = 0.45;
+            radius = HEX_RADIUS * 5.5;
+            strength = 0.88;
+            flatZone = 0.4;
         } else if (state === 'known_unmapped') {
-            radius = HEX_RADIUS * 3.5;
-            strength = 0.55;
-            midStop = 0.35;
+            radius = HEX_RADIUS * 4;
+            strength = 0.6;
+            flatZone = 0.3;
         } else { // frontier
-            radius = HEX_RADIUS * 2;
-            strength = 0.25;
-            midStop = 0.2;
+            radius = HEX_RADIUS * 2.5;
+            strength = 0.3;
+            flatZone = 0.15;
         }
+        reveals.push({ x, y, radius, strength, flatZone, state });
+    }
 
+    // ── Step 4: Punch reveal holes ──
+    ctx.globalCompositeOperation = 'destination-out';
+    for (const { x, y, radius, strength, flatZone } of reveals) {
         const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
         grad.addColorStop(0, `rgba(0,0,0,${strength})`);
-        grad.addColorStop(midStop, `rgba(0,0,0,${strength * 0.8})`);
-        grad.addColorStop(0.85, `rgba(0,0,0,${strength * 0.15})`);
+        grad.addColorStop(flatZone, `rgba(0,0,0,${strength})`);
+        grad.addColorStop(flatZone + 0.2, `rgba(0,0,0,${strength * 0.4})`);
+        grad.addColorStop(flatZone + 0.35, `rgba(0,0,0,${strength * 0.08})`);
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = grad;
         ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
     }
 
-    // ── Step 4: Add parchment texture to fog surface ──
+    // ── Step 5: Organic edge splotches around reveal boundaries ──
+    // Place small irregular blobs at the edge of each reveal circle
+    // (no getImageData needed — we know the boundary radius)
+    ctx.globalCompositeOperation = 'destination-out';
+    for (const { x, y, radius, strength, flatZone } of reveals) {
+        const edgeR = radius * (flatZone + 0.25); // outer boundary zone
+        const nBlobs = Math.floor(12 + strength * 8);
+        for (let j = 0; j < nBlobs; j++) {
+            const angle = srand(x * 100 + y * 200 + j * 37) * Math.PI * 2;
+            const dist = edgeR * (0.8 + srand(y * 300 + x * 400 + j * 53) * 0.5);
+            const bx = x + Math.cos(angle) * dist;
+            const by = y + Math.sin(angle) * dist;
+            const blobR = 2 + srand(x * 500 + j * 71) * 5;
+            const blobAlpha = strength * 0.15;
+
+            ctx.fillStyle = `rgba(0,0,0,${blobAlpha})`;
+            ctx.beginPath();
+            // Irregular blob shape
+            const nPts = 5 + Math.floor(srand(j * 97 + x) * 3);
+            for (let k = 0; k < nPts; k++) {
+                const a = (k / nPts) * Math.PI * 2;
+                const wobble = blobR * (0.4 + srand(j * 100 + k * 41 + x) * 0.8);
+                const px = bx + Math.cos(a) * wobble;
+                const py = by + Math.sin(a) * wobble;
+                if (k === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+
+    // ── Step 6: Parchment texture on fog ──
     ctx.globalCompositeOperation = 'source-atop';
 
-    // Stipple dots (medieval parchment feel)
-    for (let i = 0; i < 200; i++) {
-        const nx = srand(i * 73 + 11) * canvas.width;
-        const ny = srand(i * 79 + 17) * canvas.height;
-        const cr = 0.6 + srand(i * 83) * 1.0;
-        const alpha = 0.04 + srand(i * 91) * 0.08;
-        ctx.globalCompositeOperation = 'source-atop';
-        ctx.fillStyle = `rgba(58, 40, 16, ${alpha})`;
+    // Fine stipple dots (medieval parchment feel)
+    ctx.fillStyle = 'rgba(58, 40, 16, 0.04)';
+    for (let i = 0; i < 250; i++) {
+        const nx = srand(i * 73 + 11) * W;
+        const ny = srand(i * 79 + 17) * H;
+        const cr = 0.4 + srand(i * 83) * 0.7;
         ctx.beginPath();
         ctx.arc(nx, ny, cr, 0, Math.PI * 2);
         ctx.fill();
     }
 
-    // Subtle crosshatch lines (map cartography style)
-    ctx.globalCompositeOperation = 'source-atop';
-    ctx.strokeStyle = 'rgba(58, 40, 16, 0.06)';
+    // Crosshatch lines
+    ctx.strokeStyle = 'rgba(58, 40, 16, 0.03)';
     ctx.lineWidth = 0.5;
     for (let i = 0; i < 40; i++) {
-        const sx = srand(i * 113 + 7) * canvas.width;
-        const sy = srand(i * 127 + 13) * canvas.height;
+        const sx = srand(i * 113 + 7) * W;
+        const sy = srand(i * 127 + 13) * H;
         const angle = srand(i * 137 + 19) * Math.PI;
-        const len = 8 + srand(i * 149) * 15;
+        const len = 5 + srand(i * 149) * 10;
         ctx.beginPath();
         ctx.moveTo(sx, sy);
         ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len);

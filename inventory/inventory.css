@@ -131,13 +131,21 @@ body { padding-bottom: 110px; }
 .item-card.rarity-very_rare { border-left-color: var(--v-rarity-very-rare); }
 .item-card.rarity-legendary { border-left-color: var(--v-rarity-legendary); }
 
-/* Legendary glow pulse */
-.item-card.rarity-legendary {
-    animation: legendaryPulse 3s ease-in-out infinite;
+/* Legendary glow pulse — GPU-composited via ::after + opacity */
+.item-card.rarity-legendary { position: relative; }
+.item-card.rarity-legendary::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: 0 0 16px rgba(255,152,0,0.30);
+    opacity: 0;
+    animation: legendaryGlowFade 3s ease-in-out infinite;
+    pointer-events: none;
 }
-@keyframes legendaryPulse {
-    0%,100% { box-shadow: 0 0 8px rgba(255,152,0,0.15); }
-    50% { box-shadow: 0 0 16px rgba(255,152,0,0.30); }
+@keyframes legendaryGlowFade {
+    0%,100% { opacity: 0.4; }
+    50% { opacity: 1; }
 }
 
 /* Rarity icon backgrounds */
