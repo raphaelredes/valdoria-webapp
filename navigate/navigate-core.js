@@ -119,14 +119,46 @@ async function initAsync() {
         // Update bottom bar
         updateBottomBar();
 
-        // Progressive map render with real loading progress
-        const progressFill = document.querySelector('.loading-progress-fill');
+        // Progressive map render with loading progress + stage text
+        const progressFill = document.getElementById('loading-progress-fill');
+        const stageEl = document.getElementById('loading-stage');
+        const tipEl = document.getElementById('loading-tip');
+        const loadStart = Date.now();
+        const MIN_LOAD_MS = 2500; // Minimum loading time for animation to play
+
         const updateProgress = (pct) => {
             if (progressFill) progressFill.style.width = pct + '%';
         };
-        updateProgress(10); // payload decompressed, state loaded
+        const updateStage = (text) => {
+            if (stageEl) stageEl.textContent = text;
+        };
 
-        await renderMapAsync(updateProgress);
+        // Rotating map-themed tips
+        const MAP_TIPS = [
+            'Desenrolando o pergaminho...',
+            'Traçando rotas conhecidas...',
+            'Gravando runas no pergaminho...',
+            'Cartografando os biomas...',
+            'Marcando territórios inexplorados...',
+            'Consultando bússola arcana...',
+        ];
+        let _tipIdx = 0;
+        const _tipTimer = setInterval(() => {
+            _tipIdx = (_tipIdx + 1) % MAP_TIPS.length;
+            if (tipEl) {
+                tipEl.classList.add('tip-exit');
+                setTimeout(() => {
+                    tipEl.textContent = MAP_TIPS[_tipIdx];
+                    tipEl.classList.remove('tip-exit');
+                    tipEl.classList.add('tip-enter');
+                    setTimeout(() => tipEl.classList.remove('tip-enter'), 400);
+                }, 300);
+            }
+        }, 2800);
+
+        updateProgress(5);
+        await renderMapAsync(updateProgress, updateStage);
+        clearInterval(_tipTimer);
 
         // Re-apply font scale to SVG text (initFontPicker runs before SVG exists)
         if (typeof applyFont === 'function') {
@@ -153,8 +185,20 @@ async function initAsync() {
         document.addEventListener('visibilitychange', _onVisibilityRefresh);
         window.addEventListener('pageshow', e => { if (e.persisted) _onVisibilityRefresh(); });
 
-        // Hide loading screen now that map is fully rendered
-        document.getElementById('loading').classList.add('hidden');
+        // Wait for minimum loading time so animation plays nicely
+        const elapsed = Date.now() - loadStart;
+        if (elapsed < MIN_LOAD_MS) {
+            updateStage('Pronto!');
+            await _sleep(MIN_LOAD_MS - elapsed);
+        }
+
+        // Cinematic exit — flash + scale animation
+        const loadingEl = document.getElementById('loading');
+        loadingEl.classList.add('exit-cinematic');
+        await _sleep(900); // match exit animation duration
+        loadingEl.classList.add('hidden');
+        loadingEl.classList.remove('exit-cinematic');
+
         if (typeof playArrivalAnimation === 'function') playArrivalAnimation();
         setTimeout(() => { if (typeof showGestureTutorial === 'function') showGestureTutorial(); }, 1500);
 

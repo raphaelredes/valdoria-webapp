@@ -74,6 +74,16 @@ function _clearPathCache() {
 }
 
 function renderRoads(group, fogState) {
+    // Batch roads by visual style into compound paths (fewer DOM nodes)
+    // Buckets: [d string, width, opacity, dash, className]
+    const buckets = {
+        active:   { d: '', w: 2.2, op: 0.6,  dash: null, cls: 'road-path active' },
+        explored: { d: '', w: 1.8, op: 0.45, dash: null, cls: 'road-path' },
+        partial:  { d: '', w: 1.3, op: 0.25, dash: '5 4', cls: 'road-path' },
+        frontier: { d: '', w: 1.0, op: 0.06, dash: '2 4', cls: 'road-path' },
+        fog:      { d: '', w: 1.0, op: 0.08, dash: '2 4', cls: 'road-path' },
+    };
+
     for (const [aId, bId] of CONNECTION_EDGES) {
         const af = fogState[aId], bf = fogState[bId];
         if (af === 'hidden' && bf === 'hidden') continue;
@@ -85,38 +95,42 @@ function renderRoads(group, fogState) {
         const anyExp = af === 'explored' || bf === 'explored';
         const isActive = (aId === S.currentLoc || bId === S.currentLoc) && bothExp;
 
-        let lOp = 0.08, lW = 1.0, dash = '2 4';
-        if (bothExp) { lOp = 0.45; lW = 1.8; dash = 'none'; }
-        else if (anyExp) { lOp = 0.25; lW = 1.3; dash = '5 4'; }
-        if (isActive) { lOp = 0.6; lW = 2.2; }
-        if (af === 'frontier' || bf === 'frontier') lOp = Math.min(lOp, 0.06);
-
-        // Organic multi-waypoint path
         const seed = ac.col * 31 + ac.row * 17 + bc.col * 13 + bc.row * 7;
         const pathD = _buildRoadPath(aPx, bPx, seed);
 
-        // Main road (single ink line)
-        const road = _el('path', { d: pathD, fill: 'none', class: `road-path${isActive ? ' active' : ''}`,
-            'stroke-width': lW, 'stroke-opacity': lOp, 'stroke-linecap': 'round' });
-        if (dash !== 'none') road.setAttribute('stroke-dasharray', dash);
-        group.appendChild(road);
+        // Classify into style bucket
+        let bucket;
+        if (isActive) bucket = buckets.active;
+        else if (af === 'frontier' || bf === 'frontier') bucket = buckets.frontier;
+        else if (bothExp) bucket = buckets.explored;
+        else if (anyExp) bucket = buckets.partial;
+        else bucket = buckets.fog;
+        bucket.d += pathD;
 
-        // Distance badge on the curve midpoint (hidden at lowest zoom to reduce clutter)
+        // Distance badge on the curve midpoint
         if (anyExp && (typeof _zoomIdx === 'undefined' || _zoomIdx >= 1)) {
             const dist = getConnectionDistance(aId, bId);
             const mid = _pointOnPath(pathD, 0.5);
             const mx = mid.x + (srand(seed+99)-0.5)*4;
             const my = mid.y + (srand(seed+100)-0.5)*3;
-            // Scale: bigger at higher zoom levels for readability
             const zoomScale = typeof _zoomIdx !== 'undefined' ? [0, 7.5, 9, 11][_zoomIdx] || 8 : 8;
-            const badgeSz = zoomScale;
             const txt = _el('text', { x: mx, y: my + 3, 'text-anchor': 'middle',
-                'font-size': badgeSz + 'px', 'font-weight': '700', 'font-family': "'Cinzel', serif",
+                'font-size': zoomScale + 'px', 'font-weight': '700', 'font-family': "'Cinzel', serif",
                 fill: INK, 'fill-opacity': bothExp ? 0.45 : 0.25, 'pointer-events': 'none',
                 class: 'road-distance-label' });
             txt.textContent = dist;
             group.appendChild(txt);
         }
+    }
+
+    // Emit one compound <path> per bucket (5 paths max instead of N individual roads)
+    for (const key of ['fog', 'frontier', 'partial', 'explored', 'active']) {
+        const b = buckets[key];
+        if (!b.d) continue;
+        const attrs = { d: b.d, fill: 'none', class: b.cls,
+            'stroke-width': b.w, 'stroke-opacity': b.op, 'stroke-linecap': 'round' };
+        if (b.dash) attrs['stroke-dasharray'] = b.dash;
+        group.appendChild(_el('path', attrs));
     }
 }
 

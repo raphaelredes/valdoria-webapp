@@ -128,6 +128,16 @@ function renderScreen(screen) {
         renderMemberDetail(contentEl, screen.member_detail);
     }
 
+    // Render quest diary as rich cards (replaces plain text quest list)
+    if (screen.quest_diary) {
+        renderQuestDiary(contentEl, screen.quest_diary);
+    }
+
+    // Render quest detail as rich card (replaces plain text detail)
+    if (screen.quest_detail) {
+        renderQuestDetail(contentEl, screen.quest_detail);
+    }
+
     // Show contextual notifications as toasts
     if (screen.notifications && screen.notifications.length > 0) {
         _showNotifications(screen.notifications);

@@ -213,7 +213,7 @@ function _yieldFrame() {
 // Strategy: render functional map first (landmass + terrain + roads + locations),
 // show to player, then add expensive decorative layers (worn edges, aging,
 // SVG filters) in the background after loading screen hides.
-async function renderMapAsync(onProgress) {
+async function renderMapAsync(onProgress, onStage) {
     const svg = document.getElementById('map-svg');
     svg.setAttribute('width', SVG_W);
     svg.setAttribute('height', SVG_H);
@@ -221,26 +221,59 @@ async function renderMapAsync(onProgress) {
     svg.innerHTML = '';
     const fogState = computeFogState(true);
 
-    // Phase 1: Foundation (defs, background, landmass) — lightweight
+    // Phase 1: Foundation (defs, background, landmass)
+    onStage?.('Preparando pergaminho...');
     const defs = _el('defs');
     _buildAllDefs(defs);
     svg.appendChild(defs);
     _renderBackground(svg);
     _renderLandmass(svg);
-    if (onProgress) onProgress(25);
+    onProgress?.(15);
     await _yieldFrame();
 
-    // Phase 2: Essential map (biome colors, rivers, roads, locations)
-    // This is what the player NEEDS to navigate — skip ground cover & terrain details
+    // Phase 2: Worn edges + aging (static, cached — insert behind terrain)
+    onStage?.('Envelhecendo o pergaminho...');
+    if (_decorCache.wornHTML && _decorCache.agingHTML) {
+        const wrapper = _el('g');
+        wrapper.innerHTML = _decorCache.wornHTML + _decorCache.agingHTML;
+        while (wrapper.firstChild) svg.appendChild(wrapper.firstChild);
+    } else {
+        const wornG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
+        _renderWornEdgesInto(wornG);
+        svg.appendChild(wornG);
+        _decorCache.wornHTML = wornG.outerHTML;
+        const agingG = _el('g', { class: 'aging' });
+        _renderAgingEffectsInto(agingG);
+        svg.appendChild(agingG);
+        _decorCache.agingHTML = agingG.outerHTML;
+    }
+    onProgress?.(25);
+    await _yieldFrame();
+
+    // Phase 3: Terrain regions + rivers + roads
+    onStage?.('Desenhando territórios...');
     _renderRivers(svg);
     renderTerrainRegions(svg, fogState);
     const roadG = _el('g', { class: 'roads-layer' });
     renderRoads(roadG, fogState);
     svg.appendChild(roadG);
-    if (onProgress) onProgress(55);
+    onProgress?.(40);
     await _yieldFrame();
 
-    // Phase 3: Location markers + interactive elements
+    // Phase 4: Ground cover (subtle background texture)
+    onStage?.('Traçando vegetação...');
+    renderGroundCover(svg, svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer'));
+    onProgress?.(55);
+    await _yieldFrame();
+
+    // Phase 5: Terrain details (trees, mountains — heaviest layer)
+    onStage?.('Detalhando relevos...');
+    renderTerrainDetails(svg, fogState, svg.querySelector('.roads-layer'));
+    onProgress?.(70);
+    await _yieldFrame();
+
+    // Phase 6: Location markers + interactive elements
+    onStage?.('Posicionando marcadores...');
     const locG = _el('g', { class: 'locations-layer' });
     renderLocationMarkers(locG, fogState);
     svg.appendChild(locG);
@@ -248,56 +281,44 @@ async function renderMapAsync(onProgress) {
     if (typeof renderBreadcrumbTrail === 'function') renderBreadcrumbTrail(svg);
     renderPlayerBanner(svg);
     renderFogWisps(svg, fogState);
+    onProgress?.(85);
+    await _yieldFrame();
+
+    // Phase 7: Cartography decorations + interactivity
+    onStage?.('Finalizando cartografia...');
+    renderCartographyDecor(svg, fogState);
     renderCompassRose();
     setupPanZoom();
-    if (onProgress) onProgress(100);
-
-    // Phase 4 (deferred): ALL decorative/texture layers rendered AFTER loading hides.
-    // Staggered across multiple frames to avoid a single heavy frame that causes jank.
-    // Total deferred: ~2200+ SVG elements (worn edges, aging, ground cover, terrain details, decor)
-    _deferDecorativeLayers(svg, fogState);
+    onProgress?.(100);
 }
 
-// Staggered deferred rendering — spreads heavy work across multiple frames
+// Staggered deferred rendering — only used for re-renders (visibility refresh)
+// Initial load now renders everything during the loading screen via renderMapAsync
 function _deferDecorativeLayers(svg, fogState) {
-    // Frame 1: Worn edges + aging (insert behind terrain but above landmass)
     requestAnimationFrame(() => {
-        const terrainRegions = svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer');
-
-        // Use cached HTML if available (worn edges + aging are fully static)
+        const ref = svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer');
         if (_decorCache.wornHTML && _decorCache.agingHTML) {
             const wrapper = _el('g');
             wrapper.innerHTML = _decorCache.wornHTML + _decorCache.agingHTML;
             while (wrapper.firstChild) {
-                if (terrainRegions) svg.insertBefore(wrapper.firstChild, terrainRegions);
+                if (ref) svg.insertBefore(wrapper.firstChild, ref);
                 else svg.appendChild(wrapper.firstChild);
             }
         } else {
-            const frag = document.createDocumentFragment();
-            const wornG = _el('g', { class: 'worn-edges-deferred', 'pointer-events': 'none' });
+            const wornG = _el('g', { class: 'worn-edges', 'pointer-events': 'none' });
             _renderWornEdgesInto(wornG);
-            frag.appendChild(wornG);
             _decorCache.wornHTML = wornG.outerHTML;
-            const agingG = _el('g', { class: 'aging-deferred' });
+            const agingG = _el('g', { class: 'aging' });
             _renderAgingEffectsInto(agingG);
-            frag.appendChild(agingG);
             _decorCache.agingHTML = agingG.outerHTML;
-            if (terrainRegions) svg.insertBefore(frag, terrainRegions);
-            else svg.appendChild(frag);
+            if (ref) { svg.insertBefore(agingG, ref); svg.insertBefore(wornG, agingG); }
+            else { svg.appendChild(wornG); svg.appendChild(agingG); }
         }
-
-        // Frame 2: Ground cover (subtle background texture, insert before terrain regions)
         requestAnimationFrame(() => {
-            const insertBefore = svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer');
-            renderGroundCover(svg, insertBefore);
-
-            // Frame 3: Terrain details (trees, mountains — heaviest single layer)
+            renderGroundCover(svg, svg.querySelector('.terrain-regions') || svg.querySelector('.roads-layer'));
             requestAnimationFrame(() => {
                 renderTerrainDetails(svg, fogState, svg.querySelector('.roads-layer'));
-                // Frame 4: Cartography decorations (corner flourishes)
-                requestAnimationFrame(() => {
-                    renderCartographyDecor(svg, fogState);
-                });
+                requestAnimationFrame(() => renderCartographyDecor(svg, fogState));
             });
         });
     });
