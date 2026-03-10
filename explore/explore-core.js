@@ -102,6 +102,7 @@ function saveState() {
             swr: S._stepsWithoutRest || 0,
             tp: S.travelPace || 'normal',
             ta: S.travelActivity || null,
+            wt: S.weather || 's',
             ih: Array.from(S.interactedHexes || new Set()),
             ts: Date.now(),
         };
@@ -158,6 +159,7 @@ function restoreState() {
         S._bossDefeated = snap.bd || false;
         S._campAmbushUsed = snap.cau || false;
         S._watchUsed = snap.wu || false;
+        if (snap.wt) S.weather = snap.wt;
         S.exhaustion = snap.ex || 0;
         S._stepsWithoutRest = snap.swr || 0;
         return true;

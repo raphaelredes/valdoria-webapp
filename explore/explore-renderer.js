@@ -122,6 +122,9 @@ function renderFrame(timestamp) {
     // 6.5. Visited hex trail markers
     drawVisitedTrail(_ctx, timestamp);
 
+    // 6.6. Roaming danger markers (enemy patrols)
+    _drawDangerMarkers(_ctx, timestamp);
+
     // 7. Effects (dust, ripples)
     drawEffects(_ctx);
 
@@ -497,7 +500,15 @@ function movePlayerCanvas(col, row) {
     const ranger = isRanger();
     const isProne = hasCondition('prone');
 
-    if ((difficult && !ranger) || isProne) {
+    // Exhaustion level 5: speed = 0 (D&D 5e PHB)
+    if (S.exhaustion >= 5) {
+        showTerrainToast('Exaust\u00e3o extrema! Voc\u00ea n\u00e3o consegue se mover.', 'damage');
+        return;
+    }
+
+    // Exhaustion level 2: speed halved (all terrain = difficult)
+    const exhHalf = S.exhaustion >= 2;
+    if ((difficult && !ranger) || isProne || exhHalf) {
         setMoveDuration(MOVE_DURATION_DIFFICULT);
     } else {
         setMoveDuration(MOVE_DURATION_NORMAL);
@@ -517,9 +528,11 @@ function movePlayerCanvas(col, row) {
     }
 
     // Terrain toast feedback
-    if (difficult) {
-        if (ranger) {
+    if (difficult || S._weatherDifficultAll) {
+        if (ranger && difficult) {
             showTerrainToast('Terreno Natural', 'ranger');
+        } else if (S._weatherDifficultAll && !difficult) {
+            // Weather made it difficult
         } else {
             showTerrainToast('Terreno Difícil', 'difficult');
         }
@@ -549,11 +562,19 @@ function onMoveComplete(col, row) {
     if (typeof updateLocationInfo === 'function') updateLocationInfo();
     tickConditions();
     if (typeof _checkForageActivity === 'function') _checkForageActivity();
+
+    // Weather mechanical effects (DMG Ch.5)
+    if (typeof _checkWeatherEffects === 'function') _checkWeatherEffects();
     updateAtmosphere();
     updateMinimap();
     if (typeof _resetExploreButton === 'function') _resetExploreButton();
     if (typeof updatePaceUI === 'function') updatePaceUI();
     scrollCanvasToPlayer(true);
+
+    // Roaming danger marker collision (priority)
+    if (typeof _checkDangerMarkerCollision === 'function' && _checkDangerMarkerCollision()) return;
+    // Move danger markers after player moves
+    if (typeof _moveDangerMarkers === 'function') _moveDangerMarkers();
 
     // Environmental hazard check (priority over POI/exit)
     const hazard = checkHazard(col, row);
@@ -1090,10 +1111,86 @@ function updateAtmosphere() {
         initWeatherParticles(wCode);
     }
 
-    // Mechanical effects: night → encounter chance + fog radius
+    // Mechanical effects: night + weather
     S._nightEncounterBonus = phase === 'night' ? 0.10 : 0;
-    S._weatherVisibilityMod = wCode === 'f' ? -1 : 0;
-    S._weatherEncounterMod = wCode === 't' ? 0.05 : 0;
+
+    // Weather mechanical effects (DMG Ch.5)
+    S._weatherVisibilityMod = 0;
+    S._weatherEncounterMod = 0;
+    S._weatherDifficultAll = false;
+    S._weatherCONSaveDC = 0;
+    S._weatherLightningChance = 0;
+
+    if (wCode === 'f') {
+        S._weatherVisibilityMod = -1;  // Fog: -1 visibility
+    } else if (wCode === 'r') {
+        S._weatherVisibilityMod = -1;  // Heavy rain: -1 visibility
+        S._weatherDifficultAll = true;  // Mud = difficult terrain
+    } else if (wCode === 't') {
+        S._weatherVisibilityMod = -2;   // Storm: -2 visibility
+        S._weatherEncounterMod = 0.05;  // More encounters
+        S._weatherDifficultAll = true;   // Storm = difficult terrain
+        S._weatherLightningChance = 0.05; // 5% lightning per step in open terrain
+    }
+
+    // Extreme temperature (desert/volcanic biomes)
+    const extremeHeat = S.biome === 'desert' || S.biome === 'volcanic';
+    S._weatherCONSaveDC = extremeHeat ? 10 : (wCode === 't' ? 12 : 0);
+
+    // Weather transition: change weather every 15-20 steps
+    _checkWeatherTransition();
+}
+
+// Weather transition system (DMG Ch.5)
+let _weatherStepCounter = 0;
+let _weatherTransitionThreshold = 15 + Math.floor(Math.random() * 6); // 15-20
+
+function _checkWeatherTransition() {
+    _weatherStepCounter++;
+    if (_weatherStepCounter < _weatherTransitionThreshold) return;
+    _weatherStepCounter = 0;
+    _weatherTransitionThreshold = 15 + Math.floor(Math.random() * 6);
+
+    // Weather transition table (weighted by biome)
+    const transitions = {
+        s: ['s', 's', 'r', 'f'],       // Sunny: likely stays, can rain or fog
+        r: ['r', 's', 't', 'f'],       // Rain: can clear, worsen to storm, or fog
+        f: ['f', 's', 'r'],            // Fog: likely clears
+        t: ['t', 'r', 's'],            // Storm: can persist, weaken to rain, or clear
+    };
+    const current = S.weather || 's';
+    const options = transitions[current] || transitions.s;
+    const next = options[Math.floor(Math.random() * options.length)];
+
+    if (next !== current) {
+        S.weather = next;
+        const wInfo = _WEATHER_INFO[next] || _WEATHER_INFO.s;
+        const narrations = {
+            s: 'As nuvens se dissipam. O c\u00e9u clareia.',
+            r: 'Gotas come\u00e7am a cair. A chuva se intensifica.',
+            f: 'Uma n\u00e9voa densa come\u00e7a a se formar ao redor.',
+            t: 'Trov\u00f5es ecoam ao longe. Uma tempestade se aproxima!',
+        };
+        if (typeof showTerrainToast === 'function') {
+            showTerrainToast(`${wInfo.icon} ${narrations[next] || wInfo.label}`, 'flavor');
+        }
+        // Re-apply atmosphere visuals
+        const wCode = next;
+        const wo = document.getElementById('weather-overlay');
+        if (wo) {
+            wo.classList.remove('weather-rain', 'weather-fog', 'weather-storm');
+            if (wInfo.css) wo.classList.add(wInfo.css);
+        }
+        if (typeof initWeatherParticles === 'function') initWeatherParticles(wCode);
+
+        // Update mechanical effects
+        S._weatherVisibilityMod = wCode === 'f' ? -1 : (wCode === 'r' ? -1 : (wCode === 't' ? -2 : 0));
+        S._weatherDifficultAll = wCode === 'r' || wCode === 't';
+        S._weatherEncounterMod = wCode === 't' ? 0.05 : 0;
+        S._weatherLightningChance = wCode === 't' ? 0.05 : 0;
+
+        if (typeof saveState === 'function') saveState();
+    }
 }
 
 
@@ -1160,5 +1257,127 @@ function _drawMoveCostIndicators(timestamp) {
         }
 
         _ctx.restore();
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// ROAMING DANGER MARKERS (enemy patrols)
+// ═══════════════════════════════════════════════════════
+let _dangerMarkers = [];
+let _dangerMarkersInit = false;
+
+function _initDangerMarkers() {
+    if (_dangerMarkersInit) return;
+    _dangerMarkersInit = true;
+    const count = Math.min(3, Math.max(1, S.dangerLevel - 1)); // 0 at danger 1, 1-3 at higher
+    if (count <= 0) return;
+
+    _dangerMarkers = [];
+    for (let i = 0; i < count; i++) {
+        // Place marker at random walkable hex far from player
+        let col, row, attempts = 0;
+        do {
+            col = Math.floor(Math.random() * COLS);
+            row = Math.floor(Math.random() * ROWS);
+            attempts++;
+        } while (attempts < 50 && (
+            !S.grid[row] || !S.grid[row][col] ||
+            IMPASSABLE.has(S.grid[row][col]) ||
+            (typeof hexDist === 'function' && hexDist(col, row, S.playerCol, S.playerRow) < 4)
+        ));
+        if (attempts >= 50) continue;
+        _dangerMarkers.push({ col, row, icon: '\u2620', moveTimer: 0 });
+    }
+}
+
+function _moveDangerMarkers() {
+    for (const m of _dangerMarkers) {
+        m.moveTimer++;
+        if (m.moveTimer < 2) continue; // Move every 2 player steps
+        m.moveTimer = 0;
+
+        const neighbors = typeof getNeighbors === 'function' ? getNeighbors(m.col, m.row) : [];
+        const valid = neighbors.filter(([c, r]) => {
+            if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return false;
+            const t = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
+            return !IMPASSABLE.has(t);
+        });
+        if (valid.length === 0) continue;
+
+        // Bias toward player (50% chance to move closer)
+        if (Math.random() < 0.5 && typeof hexDist === 'function') {
+            valid.sort((a, b) =>
+                hexDist(a[0], a[1], S.playerCol, S.playerRow) -
+                hexDist(b[0], b[1], S.playerCol, S.playerRow)
+            );
+            m.col = valid[0][0];
+            m.row = valid[0][1];
+        } else {
+            const pick = valid[Math.floor(Math.random() * valid.length)];
+            m.col = pick[0];
+            m.row = pick[1];
+        }
+    }
+}
+
+function _checkDangerMarkerCollision() {
+    for (let i = _dangerMarkers.length - 1; i >= 0; i--) {
+        const m = _dangerMarkers[i];
+        if (m.col === S.playerCol && m.row === S.playerRow) {
+            // Player walked into danger marker = forced encounter
+            _dangerMarkers.splice(i, 1);
+            if (S.randomEncounters && S.randomEncounters.length > 0) {
+                const enc = S.randomEncounters.shift();
+                if (typeof showTerrainToast === 'function') {
+                    showTerrainToast('\u2620 Patrulha inimiga! Encontro inevit\u00e1vel!', 'danger');
+                }
+                setTimeout(() => {
+                    if (typeof showRandomEncounter === 'function') showRandomEncounter(enc);
+                }, 500);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function _drawDangerMarkers(ctx, timestamp) {
+    if (!_dangerMarkersInit) _initDangerMarkers();
+
+    const pulse = 0.6 + Math.sin((timestamp || 0) * 0.004) * 0.4;
+    for (const m of _dangerMarkers) {
+        const key = `${m.col},${m.row}`;
+        // Only draw if hex is visible (not in fog)
+        if (S.fogState[key] === 'hidden') continue;
+
+        const center = hexToScreen(m.col, m.row);
+        const baseTile = (S.grid[m.row] && S.grid[m.row][m.col]) || '.';
+        const height = (typeof TILE_HEIGHT !== 'undefined' ? TILE_HEIGHT[baseTile] : 1) || 1;
+        const heightPx = height * (typeof UNIT_PX !== 'undefined' ? UNIT_PX : 3);
+
+        ctx.save();
+        ctx.globalAlpha = pulse * 0.8;
+
+        // Red pulsing glow circle
+        const gx = center.x;
+        const gy = center.y - heightPx - 4;
+        const grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, 8);
+        grad.addColorStop(0, 'rgba(200,40,40,0.5)');
+        grad.addColorStop(1, 'rgba(200,40,40,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(gx, gy, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Skull icon
+        ctx.globalAlpha = 0.7 + pulse * 0.3;
+        ctx.font = '10px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#c44';
+        ctx.fillText('\u2620', gx, gy);
+
+        ctx.restore();
     }
 }

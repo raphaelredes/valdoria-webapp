@@ -1682,6 +1682,57 @@ function getPaceDCMod() {
 }
 
 // =========================================================
+// WEATHER MECHANICAL EFFECTS (DMG Ch.5)
+// =========================================================
+let _weatherEffectSteps = 0;
+
+function _checkWeatherEffects() {
+    _weatherEffectSteps++;
+
+    // CON save for extreme conditions every 8 steps
+    if (S._weatherCONSaveDC > 0 && _weatherEffectSteps % 8 === 0) {
+        const conMod = getAbilityMod('cn');
+        const prof = S.charData && S.charData.sp && S.charData.sp.includes('cn') ? (S.charData.pb || 2) : 0;
+        const { roll } = rollD20('normal');
+        const total = roll + conMod;
+        if (total < S._weatherCONSaveDC) {
+            if (typeof addExhaustion === 'function') {
+                const source = S.biome === 'desert' || S.biome === 'volcanic'
+                    ? 'Calor extremo' : 'Tempestade';
+                addExhaustion(1, source);
+            }
+        } else {
+            showTerrainToast('Resistiu ao clima! (CON ' + total + ' vs DC ' + S._weatherCONSaveDC + ')', 'ranger');
+        }
+    }
+
+    // Lightning strike in storms (open terrain: plains, desert, mountain)
+    if (S._weatherLightningChance > 0 && Math.random() < S._weatherLightningChance) {
+        const openBiomes = ['plains', 'desert', 'mountain'];
+        if (openBiomes.includes(S.biome)) {
+            // DEX save DC 13 or 2d6 lightning damage
+            const dexMod = getAbilityMod('dx');
+            const { roll } = rollD20('normal');
+            const total = roll + dexMod;
+            if (total < 13) {
+                const dmg = Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + 2; // 2d6
+                S.hpChange -= dmg;
+                if (S.charData) {
+                    const newHP = Math.max(0, S.charData.hp + S.hpChange);
+                    updateHP(newHP, S.charData.mh);
+                }
+                flashScreen('rgba(200,200,255,0.4)');
+                showTerrainToast('\u26a1 Raio! -' + dmg + ' HP (DEX ' + total + ' vs DC 13)', 'damage');
+            } else {
+                flashScreen('rgba(200,200,255,0.15)');
+                showTerrainToast('\u26a1 Um raio cai perto! Voc\u00ea desvia a tempo.', 'info');
+            }
+            if (typeof checkDeath === 'function') checkDeath();
+        }
+    }
+}
+
+// =========================================================
 // TRAVEL ACTIVITIES (D&D PHB Ch.8)
 // =========================================================
 const ACTIVITY_CONFIG = {

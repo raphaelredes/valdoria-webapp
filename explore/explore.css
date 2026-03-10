@@ -1766,6 +1766,21 @@ body {
 .move-preview .mp-hazard { color: #c44; }
 
 /* ═══════════════════════════════════════════
+   WEATHER EFFECTS (DMG Ch.5)
+   ═══════════════════════════════════════════ */
+.weather-overlay.weather-blizzard {
+    background: repeating-linear-gradient(
+        110deg, transparent, transparent 2px,
+        rgba(200,210,230,0.15) 2px, rgba(200,210,230,0.15) 4px
+    ),
+    radial-gradient(ellipse at center, rgba(200,210,230,0.08) 0%, transparent 60%);
+    animation: rain-fall 0.2s linear infinite;
+}
+.weather-overlay.weather-heat {
+    background: radial-gradient(ellipse at bottom, rgba(255,120,40,0.06) 0%, transparent 70%);
+}
+
+/* ═══════════════════════════════════════════
    TRAVEL ACTIVITY (D&D PHB Ch.8)
    ═══════════════════════════════════════════ */
 .activity-overlay {
