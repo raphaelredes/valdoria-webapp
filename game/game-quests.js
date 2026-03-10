@@ -64,12 +64,23 @@ function renderQuestDiary(container, data) {
         }
     }
 
-    // Active Story Quests
+    // Active Story Quests (filtered by category when specific filter active)
     if (data.story && data.story.length > 0 && showStory) {
-        wrap.appendChild(_questSectionHdr('\u2694\ufe0f', 'Jornadas em Andamento'));
-        for (var si = 0; si < data.story.length; si++) {
-            wrap.appendChild(_renderQCard(data.story[si]));
+        var filteredStory = data.story;
+        if (activeFilter === 'story') {
+            filteredStory = data.story.filter(function(q) { return q.cat === 'story'; });
         }
+        if (filteredStory.length > 0) {
+            wrap.appendChild(_questSectionHdr('\u2694\ufe0f', 'Jornadas em Andamento'));
+            for (var si = 0; si < filteredStory.length; si++) {
+                wrap.appendChild(_renderQCard(filteredStory[si]));
+            }
+        }
+    }
+
+    // Side quests section (only when 'all' filter — side quests are in data.story with cat='side')
+    if (activeFilter === 'all' && data.story && data.story.length > 0) {
+        // Already shown above in the mixed "Jornadas em Andamento" section
     }
 
     // Active Daily Quests
@@ -118,7 +129,13 @@ function renderQuestDiary(container, data) {
 
     // Empty state for active filter (no results in this category)
     var visibleQ = 0;
-    if (showStory && data.story) visibleQ += data.story.length;
+    if (showStory && data.story) {
+        if (activeFilter === 'story') {
+            visibleQ += data.story.filter(function(q) { return q.cat === 'story'; }).length;
+        } else {
+            visibleQ += data.story.length;
+        }
+    }
     if (showDaily && data.daily) visibleQ += data.daily.length;
     if (showDone && data.done) visibleQ += data.done.length;
     if (showDone && data.failed) visibleQ += data.failed.length;
