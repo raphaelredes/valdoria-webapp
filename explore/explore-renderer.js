@@ -583,6 +583,15 @@ function onMoveComplete(col, row) {
         return;
     }
 
+    // Trap check (chance-based, detected via PP)
+    if (typeof checkTrap === 'function') {
+        const trap = checkTrap(col, row);
+        if (trap) {
+            setTimeout(() => showTrapEvent(trap), 200);
+            return;
+        }
+    }
+
     // Check POI
     const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.has(p.id));
     if (poi) {
@@ -662,9 +671,13 @@ function drawVisitedTrail(ctx, timestamp) {
     if (!S.visited || S.visited.size === 0) return;
     const pulse = 0.4 + Math.sin((timestamp || 0) * 0.002) * 0.15;
 
-    for (const key of S.visited) {
+    // Build ordered path for breadcrumb line
+    const visitedArr = Array.from(S.visited);
+    const points = [];
+
+    for (let vi = 0; vi < visitedArr.length; vi++) {
+        const key = visitedArr[vi];
         const [c, r] = key.split(',').map(Number);
-        if (c === S.playerCol && r === S.playerRow) continue;
         if (S.fogState[key] !== 'visible') continue;
 
         const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
@@ -674,12 +687,38 @@ function drawVisitedTrail(ctx, timestamp) {
         const x = center.x;
         const y = center.y - h;
 
-        // Seeded rotation so each hex has consistent footprint angle
-        const angle = (c * 7 + r * 13) % 6 * 0.5;
-        const alpha = pulse * 0.3;
+        // Fade: older hexes are dimmer
+        const age = visitedArr.length - vi;
+        const fadeFactor = Math.max(0.15, 1.0 - age * 0.03);
+
+        points.push({ x, y, c, r, fadeFactor, age });
+    }
+
+    // Draw golden breadcrumb line connecting visited hexes in order
+    if (points.length >= 2) {
+        ctx.save();
+        ctx.strokeStyle = `rgba(196,149,58,${pulse * 0.25})`;
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+            ctx.lineTo(points[i].x, points[i].y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+    }
+
+    // Draw footprints on each visited hex
+    for (const p of points) {
+        if (p.c === S.playerCol && p.r === S.playerRow) continue;
+
+        const angle = (p.c * 7 + p.r * 13) % 6 * 0.5;
+        const alpha = pulse * 0.3 * p.fadeFactor;
 
         ctx.save();
-        ctx.translate(x, y);
+        ctx.translate(p.x, p.y);
         ctx.rotate(angle);
         ctx.fillStyle = `rgba(196,149,58,${alpha})`;
         // Left foot
@@ -690,6 +729,33 @@ function drawVisitedTrail(ctx, timestamp) {
         ctx.beginPath();
         ctx.ellipse(1.8, 1.2, 1, 2, -0.15, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+    }
+
+    // Direction arrows on breadcrumb (every 4th segment)
+    if (points.length >= 3) {
+        ctx.save();
+        for (let i = 2; i < points.length; i += 4) {
+            const prev = points[i - 1];
+            const curr = points[i];
+            const dx = curr.x - prev.x;
+            const dy = curr.y - prev.y;
+            const angle = Math.atan2(dy, dx);
+            const mx = (prev.x + curr.x) / 2;
+            const my = (prev.y + curr.y) / 2;
+
+            ctx.save();
+            ctx.translate(mx, my);
+            ctx.rotate(angle);
+            ctx.fillStyle = `rgba(196,149,58,${pulse * 0.4})`;
+            ctx.beginPath();
+            ctx.moveTo(3, 0);
+            ctx.lineTo(-2, -2);
+            ctx.lineTo(-2, 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
         ctx.restore();
     }
 }

@@ -1639,6 +1639,222 @@ function applyHazardEffect(hazard) {
 }
 
 // Called after hazard overlay closes to trigger attracted combat
+// ═══════════════════════════════════════════════════════
+// TRAP SYSTEM (D&D 5e — Detection + Disarm)
+// ═══════════════════════════════════════════════════════
+const TRAP_TYPES = [
+    {
+        id: 'spike', label: 'Espinhos Ocultos', icon: '\u{1F5E1}',
+        detectDC: 13, disarmDC: 14, disarmStat: 'dx',
+        bruteDC: 16, bruteStat: 'st',
+        narr: 'Algo est\u00e1 errado com o ch\u00e3o \u00e0 frente. Pequenas fissuras revelan pontas met\u00e1licas escondidas.',
+        failDmg: '1d8', failText: 'Os espinhos perfuram seus p\u00e9s!',
+        okText: 'Voc\u00ea desativa a armadilha com cuidado.',
+        triggerText: 'Os espinhos disparam do ch\u00e3o!',
+    },
+    {
+        id: 'net', label: 'Rede de Ca\u00e7a', icon: '\u{1FA24}',
+        detectDC: 12, disarmDC: 12, disarmStat: 'dx',
+        bruteDC: 15, bruteStat: 'st',
+        narr: 'Fibras quase invis\u00edveis se estendem entre as \u00e1rvores. Uma armadilha de rede espera voc\u00ea.',
+        failDmg: '0', failText: 'A rede se fecha ao redor de voc\u00ea! Voc\u00ea fica preso por um momento.',
+        failCondition: 'prone',
+        okText: 'Voc\u00ea corta as cordas e a rede cai in\u00f3cua.',
+        triggerText: 'A rede dispara e voc\u00ea \u00e9 pego!',
+    },
+    {
+        id: 'poison_dart', label: 'Dardos Envenenados', icon: '\u{1F3AF}',
+        detectDC: 14, disarmDC: 15, disarmStat: 'dx',
+        bruteDC: 18, bruteStat: 'st',
+        narr: 'Pequenos buracos na parede emitem um brilho sinistro. Dardos envenenados aguardam o incauto.',
+        failDmg: '1d4', failText: 'Um dardo envenenado acerta voc\u00ea!',
+        failCondition: 'poisoned',
+        okText: 'Voc\u00ea bloqueia os disparadores com precis\u00e3o.',
+        triggerText: 'Dardos voam das paredes!',
+    },
+    {
+        id: 'pit', label: 'Fosso Camuflado', icon: '\u{1F573}',
+        detectDC: 15, disarmDC: 13, disarmStat: 'dx',
+        bruteDC: 14, bruteStat: 'st',
+        narr: 'O ch\u00e3o parece susp eitosamente nivelado. Uma armadilha de fosso pode estar escondida aqui.',
+        failDmg: '2d6', failText: 'Voc\u00ea cai no fosso!',
+        failCondition: 'prone',
+        okText: 'Voc\u00ea contorna o fosso com seguran\u00e7a.',
+        triggerText: 'O ch\u00e3o desaba sob seus p\u00e9s!',
+    },
+];
+
+// Check for trap on hex (chance based on danger level, detected via PP or Investigation)
+function checkTrap(col, row) {
+    if (!S._trapsTriggered) S._trapsTriggered = new Set();
+    const key = `${col},${row}`;
+    if (S._trapsTriggered.has(key)) return null;
+
+    // 8% base chance + 3% per danger level (max ~23%)
+    const chance = 0.08 + (S.dangerLevel || 1) * 0.03;
+    if (Math.random() > chance) return null;
+
+    S._trapsTriggered.add(key);
+    const trap = TRAP_TYPES[Math.floor(Math.random() * TRAP_TYPES.length)];
+
+    // Passive Perception detection
+    const pp = typeof getPassivePerception === 'function' ? getPassivePerception() : 10;
+    const detected = pp >= trap.detectDC;
+
+    return { ...trap, detected, col, row };
+}
+
+function showTrapEvent(trap) {
+    if (trap.detected) {
+        // Player detected the trap — show disarm options
+        _showTrapDetected(trap);
+    } else {
+        // Trap triggered! No chance to disarm
+        _triggerTrap(trap);
+    }
+}
+
+function _showTrapDetected(trap) {
+    activateOverlay('dm-overlay');
+    const overlay = document.getElementById('dm-overlay');
+    document.getElementById('dm-icon').textContent = trap.icon;
+    document.getElementById('dm-title').textContent = trap.label;
+    document.getElementById('dm-type').textContent = 'armadilha';
+
+    const narrEl = document.getElementById('dm-narration');
+    const choicesEl = document.getElementById('dm-choices');
+    choicesEl.innerHTML = '';
+
+    typewriter(narrEl, trap.narr, () => {
+        // Disarm option (DEX / Thieves' Tools)
+        const dexMod = getAbilityMod(trap.disarmStat);
+        const dexProf = S.charData && S.charData.sp && S.charData.sp.includes(trap.disarmStat) ? (S.charData.pb || 2) : 0;
+        const dexTotal = dexMod + dexProf;
+        const dexChance = Math.max(5, Math.min(95, (21 - trap.disarmDC + dexTotal) * 5));
+        const dexShort = STAT_SHORT[trap.disarmStat] || 'DES';
+
+        const disarmBtn = document.createElement('button');
+        disarmBtn.className = 'dm-choice-btn';
+        disarmBtn.innerHTML = `<span class="choice-icon">\u{1F527}</span>` +
+            `<span class="choice-label">Desarmar</span>` +
+            `<span class="choice-check">${dexShort}${dexProf ? '\u2605' : ''} ${dexChance}%</span>`;
+        disarmBtn.onclick = () => {
+            overlay.classList.remove('active');
+            _attemptDisarm(trap, trap.disarmStat, trap.disarmDC, dexMod + dexProf);
+        };
+        choicesEl.appendChild(disarmBtn);
+
+        // Brute force option (STR)
+        const strMod = getAbilityMod(trap.bruteStat);
+        const strProf = S.charData && S.charData.sp && S.charData.sp.includes(trap.bruteStat) ? (S.charData.pb || 2) : 0;
+        const strTotal = strMod + strProf;
+        const strChance = Math.max(5, Math.min(95, (21 - trap.bruteDC + strTotal) * 5));
+        const strShort = STAT_SHORT[trap.bruteStat] || 'FOR';
+
+        const bruteBtn = document.createElement('button');
+        bruteBtn.className = 'dm-choice-btn';
+        bruteBtn.innerHTML = `<span class="choice-icon">\u{1F4AA}</span>` +
+            `<span class="choice-label">For\u00e7a Bruta</span>` +
+            `<span class="choice-check">${strShort}${strProf ? '\u2605' : ''} ${strChance}%</span>`;
+        bruteBtn.onclick = () => {
+            overlay.classList.remove('active');
+            _attemptDisarm(trap, trap.bruteStat, trap.bruteDC, strMod + strProf);
+        };
+        choicesEl.appendChild(bruteBtn);
+
+        // Avoid (safe but no reward)
+        const avoidBtn = document.createElement('button');
+        avoidBtn.className = 'dm-choice-btn';
+        avoidBtn.style.opacity = '0.6';
+        avoidBtn.innerHTML = `<span class="choice-icon">\u{1F6B6}</span>` +
+            `<span class="choice-label">Contornar</span>`;
+        avoidBtn.onclick = () => {
+            overlay.classList.remove('active');
+            showTerrainToast('Voc\u00ea contorna a armadilha com cuidado.', 'info');
+        };
+        choicesEl.appendChild(avoidBtn);
+    });
+}
+
+function _attemptDisarm(trap, stat, dc, totalMod) {
+    const mode = hasCondition('poisoned') ? 'disadvantage' : 'normal';
+    const { roll, r1, r2 } = rollD20(mode);
+    const total = roll + totalMod;
+    const success = total >= dc;
+
+    S.checksPerformed.push({ stat, dc, roll, mod: totalMod, ok: success, mode });
+
+    const overlay = document.getElementById('check-overlay');
+    const formulaEl = document.getElementById('check-formula');
+    const resultEl = document.getElementById('check-result');
+    formulaEl.innerHTML = '';
+    resultEl.textContent = '';
+    resultEl.className = 'check-result';
+    overlay.classList.add('active');
+
+    const statName = STAT_NAMES[stat] || stat;
+    const dice = getDice3D();
+    const finish = () => {
+        formulaEl.innerHTML = buildFormula(roll, totalMod, statName, '', dc, total, r1, r2, mode);
+        resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
+        resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
+
+        let _done = false;
+        const done = () => {
+            if (_done) return;
+            _done = true;
+            disposeDice3D();
+            overlay.classList.remove('active');
+            if (success) {
+                // Disarm success — XP reward
+                const xp = 10 + dc * 2;
+                S.xpEarned += xp;
+                updateRewards();
+                showTerrainToast(`${trap.icon} ${trap.okText} (+${xp} XP)`, 'ranger');
+            } else {
+                // Disarm failed — trigger trap
+                _triggerTrap(trap);
+            }
+            saveState();
+        };
+        const skipBtn = document.getElementById('check-skip-btn');
+        setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = done; } }, 500);
+        setTimeout(done, 2500);
+    };
+    if (dice) dice.roll(roll, finish);
+    else setTimeout(finish, 700);
+}
+
+function _triggerTrap(trap) {
+    // Apply damage
+    let dmg = 0;
+    if (trap.failDmg && trap.failDmg !== '0') {
+        const match = trap.failDmg.match(/(\d+)d(\d+)/);
+        if (match) {
+            for (let i = 0; i < parseInt(match[1]); i++) {
+                dmg += Math.floor(Math.random() * parseInt(match[2])) + 1;
+            }
+        }
+    }
+    if (dmg > 0) {
+        S.hpChange -= dmg;
+        if (S.charData) {
+            const newHP = Math.max(0, S.charData.hp + S.hpChange);
+            updateHP(newHP, S.charData.mh);
+        }
+        flashScreen('rgba(200,40,40,0.3)');
+    }
+    // Apply condition
+    if (trap.failCondition) {
+        S.conditions.push({ type: trap.failCondition, stepsLeft: trap.failCondition === 'poisoned' ? 5 : 2 });
+        updateConditionHUD();
+    }
+    const dmgText = dmg > 0 ? ` -${dmg} HP` : '';
+    showTerrainToast(`${trap.icon} ${trap.triggerText}${dmgText}`, 'damage');
+    if (typeof checkDeath === 'function') checkDeath();
+    saveState();
+}
+
 function checkHazardCombat() {
     if (!S._hazardCombatPending) return false;
     const data = S._hazardCombatPending;
@@ -1928,6 +2144,22 @@ function showExploreArea() {
     };
     choicesEl.appendChild(restBtn);
 
+    // Secret passage check (Investigation DC 15)
+    const secretBtn = document.createElement('button');
+    secretBtn.className = 'dm-choice-btn';
+    const invMod2 = getAbilityMod('inv');
+    const invProf2 = S.charData && S.charData.sp && S.charData.sp.includes('inv') ? (S.charData.pb || 2) : 0;
+    const invChance2 = Math.max(5, Math.min(95, (21 - 15 + invMod2 + invProf2) * 5));
+    const invShort2 = STAT_SHORT['inv'] || 'INV';
+    secretBtn.innerHTML = `\u{1F6AA} Procurar Passagem <span class="choice-stat-badge">${invShort2}${invProf2 ? '\u2605' : ''} ${invChance2}%</span>`;
+    secretBtn.onclick = () => {
+        overlay.classList.remove('active');
+        S.interactedHexes.add(key);
+        _markExploreUsed();
+        _doSecretPassageCheck();
+    };
+    choicesEl.appendChild(secretBtn);
+
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'dm-choice-btn';
     cancelBtn.style.opacity = '0.6';
@@ -2062,6 +2294,104 @@ function useInventoryItem(item) {
     saveState();
     return heal;
 }
+
+// Secret passage check (Investigation DC 15)
+function _doSecretPassageCheck() {
+    const stat = 'inv';
+    const dc = 15;
+    const mod = getAbilityMod(stat);
+    const prof = S.charData && S.charData.sp && S.charData.sp.includes(stat) ? (S.charData.pb || 2) : 0;
+    const mode = hasCondition('poisoned') ? 'disadvantage' : 'normal';
+    const { roll, r1, r2 } = rollD20(mode);
+    const total = roll + mod + prof;
+    const success = total >= dc;
+
+    S.checksPerformed.push({ stat, dc, roll, mod: mod + prof, ok: success, mode });
+
+    const overlay = document.getElementById('check-overlay');
+    const formulaEl = document.getElementById('check-formula');
+    const resultEl = document.getElementById('check-result');
+    formulaEl.innerHTML = '';
+    resultEl.textContent = '';
+    resultEl.className = 'check-result';
+    overlay.classList.add('active');
+
+    const statName = STAT_NAMES[stat] || stat;
+    const dice = getDice3D();
+    const finishCheck = () => {
+        resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
+        resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
+        formulaEl.innerHTML = buildFormula(roll, mod + prof, statName, '', dc, total, r1, r2, mode);
+
+        let _done = false;
+        const finish = () => {
+            if (_done) return;
+            _done = true;
+            disposeDice3D();
+            overlay.classList.remove('active');
+            if (success) _secretPassageSuccess();
+            else _secretPassageFail();
+            saveState();
+        };
+        const skipBtn = document.getElementById('check-skip-btn');
+        setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finish; } }, 500);
+        setTimeout(finish, 2500);
+    };
+    if (dice) dice.roll(roll, finishCheck);
+    else setTimeout(finishCheck, 700);
+}
+
+function _secretPassageSuccess() {
+    // Reveal a shortcut: find nearest impassable hex and make it passable
+    const neighbors = typeof getNeighbors === 'function' ? getNeighbors(S.playerCol, S.playerRow) : [];
+    const IMPASSABLE_SET = typeof IMPASSABLE !== 'undefined' ? IMPASSABLE : new Set(['#', 'W', 'M', 'L']);
+    let found = false;
+    for (const [c, r] of neighbors) {
+        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
+        const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
+        if (IMPASSABLE_SET.has(tile) && tile !== 'L') { // Don't open lava
+            S.grid[r][c] = '.'; // Open passage
+            if (typeof flashHex === 'function') flashHex(c, r);
+            found = true;
+            // Grant XP
+            S.xpEarned += 25;
+            updateRewards();
+            showTerrainToast('\u{1F6AA} Passagem secreta revelada! +25 XP', 'ranger');
+            // Trigger static redraw
+            if (typeof scheduleRender === 'function') {
+                _staticDirty = true;
+                scheduleRender();
+            }
+            break;
+        }
+    }
+    if (!found) {
+        // No impassable neighbor — reveal a hidden POI instead
+        let revealed = 0;
+        for (const poi of S.pois) {
+            if (!S.poisResolved.has(poi.id) && poi.hidden) {
+                poi.hidden = false;
+                poi.hid = 0;
+                revealed++;
+                break;
+            }
+        }
+        if (revealed > 0) {
+            S.xpEarned += 15;
+            updateRewards();
+            showTerrainToast('\u{1F50D} Descobriu algo oculto! +15 XP', 'ranger');
+        } else {
+            S.xpEarned += 10;
+            updateRewards();
+            showTerrainToast('\u{1F50D} Nada oculto aqui, mas a busca valeu. +10 XP', 'info');
+        }
+    }
+}
+
+function _secretPassageFail() {
+    showTerrainToast('\u{1F6AA} N\u00e3o encontrou nenhuma passagem oculta.', 'info');
+}
+
 
 // Animated version: shows 3D dice roll, then calls onDone(heal)
 let _healDice = null;

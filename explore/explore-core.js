@@ -91,6 +91,7 @@ function saveState() {
             re: S.randomEncounters,
             cd: S.conditions,
             hz: Array.from(S._hazardsTriggered || new Set()),
+            tt: Array.from(S._trapsTriggered || new Set()),
             ml: S.moveLog,
             sc: S._stepCount,
             inv: S.inventory,
@@ -152,6 +153,7 @@ function restoreState() {
         S.randomEncounters = snap.re || [];
         S.conditions = snap.cd || [];
         S._hazardsTriggered = new Set(snap.hz || []);
+        S._trapsTriggered = new Set(snap.tt || []);
         S.moveLog = snap.ml || [];
         S._stepCount = snap.sc || 0;
         S.inventory = snap.inv || [];
@@ -428,6 +430,10 @@ function initBottomBar() {
 function isDifficultTerrain(tile, biome) {
     if (tile === 'm' || tile === 'i') return true;
     if (tile === 's' && biome === 'desert') return true;
+    // Weather: rain/storm makes all ground difficult (mud)
+    if (S._weatherDifficultAll && (tile === '.' || tile === 'g')) return true;
+    // Dynamic terrain: snow-covered hexes are difficult
+    if (S._snowCoveredHexes && S._snowCoveredHexes.has(tile)) return true;
     return false;
 }
 
