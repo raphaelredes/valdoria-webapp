@@ -176,3 +176,103 @@
     setTimeout(patchShowHide, 100);
     setTimeout(patchShowHide, 500);
 })();
+
+/* ═══════════════════════════════════════════════════════════════
+   LITE MODE AUTO-DETECTION
+   Detects low-end devices and applies .loading-lite to reduce
+   animation complexity. Criteria:
+     - hardwareConcurrency <= 4
+     - deviceMemory <= 4 GB
+     - User preference via localStorage
+   ═══════════════════════════════════════════════════════════════ */
+(function() {
+    'use strict';
+
+    var LITE_KEY = 'valdoria_loading_lite';
+
+    function isLowEndDevice() {
+        var cores = navigator.hardwareConcurrency || 8;
+        var mem = navigator.deviceMemory || 8; // default high if unavailable
+        // Low-end: 4 or fewer cores AND 4GB or less memory
+        if (cores <= 4 && mem <= 4) return true;
+        // Very low-end: either metric alone is very low
+        if (cores <= 2) return true;
+        if (mem <= 2) return true;
+        return false;
+    }
+
+    function applyLiteMode() {
+        var overlays = document.querySelectorAll('.loading-overlay');
+        for (var i = 0; i < overlays.length; i++) {
+            overlays[i].classList.add('loading-lite');
+        }
+        console.log('[LOADING] Lite mode active — reduced animations for performance');
+    }
+
+    function shouldUseLite() {
+        // Check user override first
+        try {
+            var pref = localStorage.getItem(LITE_KEY);
+            if (pref === '1') return true;
+            if (pref === '0') return false;
+        } catch (e) {}
+        // Auto-detect
+        return isLowEndDevice();
+    }
+
+    function initLite() {
+        if (shouldUseLite()) {
+            applyLiteMode();
+            // Also observe for dynamically created loading overlays
+            var observer = new MutationObserver(function(mutations) {
+                for (var i = 0; i < mutations.length; i++) {
+                    var nodes = mutations[i].addedNodes;
+                    for (var j = 0; j < nodes.length; j++) {
+                        var node = nodes[j];
+                        if (node.nodeType === 1 && node.classList && node.classList.contains('loading-overlay')) {
+                            node.classList.add('loading-lite');
+                        }
+                    }
+                }
+            });
+            observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLite);
+    } else {
+        initLite();
+    }
+
+    // Expose for settings screen
+    window.ValdoriaLoadingLite = {
+        isLowEnd: isLowEndDevice,
+        enable: function() { try { localStorage.setItem(LITE_KEY, '1'); } catch(e){} applyLiteMode(); },
+        disable: function() { try { localStorage.setItem(LITE_KEY, '0'); } catch(e){} },
+        auto: function() { try { localStorage.removeItem(LITE_KEY); } catch(e){} },
+    };
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   MIN LOAD TIME REDUCER
+   Reduces MIN_LOAD_MS across all WebApps for lite mode devices.
+   Each WebApp reads window._valdoriaMinLoadFactor to scale its
+   minimum loading time. Factor: 1.0 = full, 0.4 = fast.
+   ═══════════════════════════════════════════════════════════════ */
+(function() {
+    'use strict';
+    // Set global factor immediately (before DOMContentLoaded)
+    var isLite = false;
+    try {
+        var pref = localStorage.getItem('valdoria_loading_lite');
+        if (pref === '1') isLite = true;
+        else if (pref !== '0') {
+            var cores = navigator.hardwareConcurrency || 8;
+            var mem = navigator.deviceMemory || 8;
+            isLite = (cores <= 4 && mem <= 4) || cores <= 2 || mem <= 2;
+        }
+    } catch(e) {}
+    // Lite: show loading for 40% of normal time; normal: 100%
+    window._valdoriaMinLoadFactor = isLite ? 0.4 : 1.0;
+})();

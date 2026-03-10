@@ -59,8 +59,10 @@ function handleTransition(transition) {
     // Stop ambient particles during transition
     if (typeof stopParticles === 'function') stopParticles();
 
-    // Show immersive location transition for cross-webapp navigation
-    const locLabel = _WEBAPP_LOC_LABELS[transition.to];
+    // Skip location transition for WebApps that have their own loading screen
+    // (navigate, combat, explore, dungeon all show a magic circle on open)
+    const _HAS_OWN_LOADING = { navigate: 1, combat: 1, arena: 1, explore: 1, dungeon: 1 };
+    const locLabel = _HAS_OWN_LOADING[transition.to] ? null : _WEBAPP_LOC_LABELS[transition.to];
     if (locLabel && typeof showLocationTransition === 'function') {
         showLocationTransition(locLabel);
     }
@@ -77,7 +79,7 @@ function handleTransition(transition) {
         requestAnimationFrame(() => overlay.classList.add('active'));
     }
 
-    // Redirect after immersive transition (min 2s for location feel)
+    // Fast redirect for WebApps with own loading; full transition for others
     const delay = locLabel ? Math.max(LOC_TRANSITION_MS, transConfig.duration) : transConfig.duration;
     setTimeout(() => {
         window.location.replace(transition.url);

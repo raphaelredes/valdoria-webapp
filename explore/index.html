@@ -147,7 +147,7 @@
         var _tipInterval, _slowTimer, _verySlowTimer;
         var _lastPct = 0;
         var _loadStart = Date.now();
-        var MIN_LOAD_MS = 3500;
+        var MIN_LOAD_MS = Math.round(3500 * (window._valdoriaMinLoadFactor || 1));
 
         // Ring acceleration: lerp speed based on progress (100% = 4x faster)
         function updateRingSpeed(pct) {

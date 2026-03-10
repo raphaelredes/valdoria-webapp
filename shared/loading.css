@@ -579,3 +579,80 @@
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   PERFORMANCE LITE MODE
+   Reduces particle count and animation complexity for
+   low-end devices. Applied via .loading-lite class or
+   automatically via prefers-reduced-motion.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Reduced Motion (OS-level accessibility) ── */
+@media (prefers-reduced-motion: reduce) {
+    .loading-overlay * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    .loading-particles { display: none !important; }
+    .mc-aura, .mc-aura-2, .mc-pulse, .mc-pulse-2 { display: none !important; }
+    .mc-gem-flare { display: none !important; }
+    .loading-overlay.exit-cinematic { animation: none !important; opacity: 0; }
+}
+
+/* ── Lite Mode (.loading-lite) — fewer particles, simpler animations ── */
+
+/* Hide heavy particle types: flames, frost, lightning, arcane, motes */
+.loading-lite .particle.flame,
+.loading-lite .particle.frost,
+.loading-lite .particle.lightning,
+.loading-lite .particle.arcane,
+.loading-lite .particle.mote { display: none !important; }
+
+/* Keep only 3 embers (hide p4, p5, p6) and 2 sparks (hide s3, s4) */
+.loading-lite .p4,
+.loading-lite .p5,
+.loading-lite .p6,
+.loading-lite .s3,
+.loading-lite .s4 { display: none !important; }
+
+/* Disable aura pulse and magic pulses */
+.loading-lite .mc-aura,
+.loading-lite .mc-aura-2 { animation: none !important; opacity: 0.5; }
+.loading-lite .mc-pulse,
+.loading-lite .mc-pulse-2 { display: none !important; }
+
+/* Simplify gem — no flare, no pulse animation */
+.loading-lite .mc-gem-flare { display: none !important; }
+.loading-lite .mc-gem-core { animation: none !important; }
+
+/* Slower ring rotation to reduce GPU composite cost */
+.loading-lite .mc-outer { animation-duration: 90s !important; }
+.loading-lite .mc-mid   { animation-duration: 55s !important; }
+.loading-lite .mc-inner { animation-duration: 70s !important; }
+
+/* Disable energy arc stroke-dash animation */
+.loading-lite .mc-energy-arc { animation: none !important; }
+
+/* Simpler title — no shimmer */
+.loading-lite .loading-title { animation: none !important; }
+
+/* No phase-based particle intensity changes */
+.loading-lite .loading-particles { filter: none !important; }
+
+/* Simpler exit — fast fade instead of cinematic */
+.loading-lite.exit-cinematic {
+    animation: loadingExitLite 0.4s ease forwards !important;
+}
+.loading-lite.exit-cinematic .magic-circle,
+.loading-lite.exit-cinematic .loading-particles,
+.loading-lite.exit-cinematic .loading-brand,
+.loading-lite.exit-cinematic .loading-progress-wrap,
+.loading-lite.exit-cinematic .loading-tip-area,
+.loading-lite.exit-cinematic .loading-flash {
+    animation: none !important;
+}
+@keyframes loadingExitLite {
+    from { opacity: 1; }
+    to   { opacity: 0; pointer-events: none; }
+}

@@ -124,7 +124,7 @@ async function initAsync() {
         const stageEl = document.getElementById('loading-stage');
         const tipEl = document.getElementById('loading-tip');
         const loadStart = Date.now();
-        const MIN_LOAD_MS = 1500; // Reduced: static image loads instantly, minimal JS overhead
+        const MIN_LOAD_MS = 600; // Minimal: static image loads instantly
 
         const updateProgress = (pct) => {
             if (progressFill) progressFill.style.width = pct + '%';
@@ -196,10 +196,11 @@ async function initAsync() {
             await _sleep(MIN_LOAD_MS - elapsed);
         }
 
-        // Cinematic exit — flash + scale animation
+        // Exit animation — lite mode uses fast fade (400ms), full uses cinematic (900ms)
         const loadingEl = document.getElementById('loading');
+        const isLite = loadingEl.classList.contains('loading-lite');
         loadingEl.classList.add('exit-cinematic');
-        await _sleep(900); // match exit animation duration
+        await _sleep(isLite ? 400 : 900);
         loadingEl.classList.add('hidden');
         loadingEl.classList.remove('exit-cinematic');
 

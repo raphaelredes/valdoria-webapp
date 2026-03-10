@@ -82,7 +82,9 @@ function hideLoading() {
     // Trigger completion pulse + haptic
     _triggerCompletionPulse(el);
 
-    // Cinematic exit (0.9s coordinated animation)
+    // Exit animation: lite mode = fast fade (400ms), normal = cinematic (950ms)
+    const isLite = el.classList.contains('loading-lite');
+    const exitMs = isLite ? 400 : 950;
     setTimeout(() => {
         el.classList.add('exit-cinematic');
         _stopLoadingTips();
@@ -99,18 +101,18 @@ function hideLoading() {
                 circle.style.removeProperty('--ring-inner');
             }
             el.removeAttribute('data-phase');
-        }, 950);
-    }, 150);
+        }, exitMs);
+    }, isLite ? 50 : 150);
 
-    // Safety net: force-hide after 2s regardless of animation state
+    // Safety net: force-hide after exit + buffer
     setTimeout(() => {
         if (el.style.display !== 'none') {
-            console.warn('[GAME] Loading force-hidden after 2s safety net');
+            console.warn('[GAME] Loading force-hidden after safety net');
             el.style.display = 'none';
             el.classList.remove('exit-cinematic');
             el.removeAttribute('data-phase');
         }
-    }, 2000);
+    }, exitMs + 500);
 }
 
 // ── Minimum loading delay (narrative immersion) ──
