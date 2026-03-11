@@ -38,19 +38,21 @@ body {
     right: 8px;
     width: 50px;
     height: 50px;
-    border: 1px solid rgba(196,149,58,0.4);
-    border-radius: 4px;
-    background: rgba(42,36,32,0.85);
+    border: 1px solid rgba(196,149,58,0.5);
+    border-radius: 6px;
+    background: linear-gradient(135deg, rgba(42,36,32,0.92) 0%, rgba(30,26,22,0.95) 100%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(196,149,58,0.08);
     z-index: 15;
     pointer-events: auto;
     cursor: pointer;
-    opacity: 0.65;
+    opacity: 0.75;
     transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease, top 0.4s ease, bottom 0.4s ease;
 }
 #minimap.minimap-expanded {
-    width: 85px;
-    height: 85px;
-    opacity: 0.88;
+    width: 95px;
+    height: 95px;
+    opacity: 0.92;
+    border-color: rgba(196,149,58,0.6);
 }
 #minimap.minimap-hidden {
     width: 0;
@@ -74,6 +76,7 @@ body {
     padding: 8px 12px;
     background: linear-gradient(180deg, #3a3028 0%, var(--v-bg, #2a2420) 100%);
     border-bottom: 1px solid var(--v-border, #4a3828);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     z-index: 50;
     flex-shrink: 0;
 }
@@ -163,6 +166,7 @@ body {
     overflow: auto;
     position: relative;
     background: #1e1a16;
+    background-image: linear-gradient(180deg, rgba(30,26,22,0.4) 0%, transparent 6%, transparent 94%, rgba(30,26,22,0.4) 100%);
     -webkit-overflow-scrolling: touch;
     /* Scrollbars hidden globally via valdoria-design.css */
 }
@@ -180,6 +184,7 @@ body {
     padding: 8px 12px max(8px, env(safe-area-inset-bottom)) 12px;
     background: linear-gradient(0deg, #3a3028 0%, var(--v-bg, #2a2420) 100%);
     border-top: 1px solid var(--v-border, #4a3828);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
     z-index: 50;
     flex-shrink: 0;
 }

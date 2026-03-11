@@ -102,13 +102,13 @@ function drawFogOverlay(mainCtx, canvasW, canvasH, fogState) {
                 opacity = 0.3;
                 gradRadius = HEX_W * 0.45;
             } else if (state === 'visible') {
-                // Explored but far — barely visible silhouette
-                opacity = 0.12;
-                gradRadius = HEX_W * 0.35;
+                // Explored but far — faintly visible silhouette
+                opacity = 0.20;
+                gradRadius = HEX_W * 0.40;
             } else if (state === 'dim') {
                 // Edge of exploration — faint hint
-                opacity = 0.06;
-                gradRadius = HEX_W * 0.3;
+                opacity = 0.10;
+                gradRadius = HEX_W * 0.33;
             } else {
                 continue;
             }
@@ -130,6 +130,43 @@ function drawFogOverlay(mainCtx, canvasW, canvasH, fogState) {
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         _fogCtx.fillStyle = grad;
         _fogCtx.fillRect(rev.x - currentR, rev.y - currentR, currentR * 2, currentR * 2);
+    }
+
+    _fogCtx.globalCompositeOperation = 'source-over';
+
+    // Fog boundary glow — warm golden edge where explored meets darkness
+    const vis = S.visibility || 3;
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const key = `${c},${r}`;
+            const state = fogState[key];
+            if (!state || state === 'hidden') continue;
+            const dist = hexDist(c, r, playerC, playerR);
+            // Only glow at the edge of visibility (dist == vis or vis+1)
+            if (dist < vis - 1 || dist > vis + 1) continue;
+            // Check if any neighbor is still hidden/dim
+            const nbs = typeof getNeighbors === 'function' ? getNeighbors(c, r) : [];
+            let hasFogNeighbor = false;
+            for (const [nc, nr] of nbs) {
+                const nk = `${nc},${nr}`;
+                if (!fogState[nk] || fogState[nk] === 'hidden' || fogState[nk] === 'dim') {
+                    hasFogNeighbor = true; break;
+                }
+            }
+            if (!hasFogNeighbor) continue;
+            const center = hexToScreen(c, r);
+            const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
+            const h = (TILE_HEIGHT[tile] || 1) * UNIT_PX;
+            const vy = center.y - h * 0.3;
+            const glowR = HEX_W * 0.55;
+            const alpha = dist <= vis ? 0.08 : 0.04;
+            const grad = _fogCtx.createRadialGradient(center.x, vy, 0, center.x, vy, glowR);
+            grad.addColorStop(0, `rgba(196,149,58,${alpha})`);
+            grad.addColorStop(0.5, `rgba(196,149,58,${alpha * 0.4})`);
+            grad.addColorStop(1, 'rgba(196,149,58,0)');
+            _fogCtx.fillStyle = grad;
+            _fogCtx.fillRect(center.x - glowR, vy - glowR, glowR * 2, glowR * 2);
+        }
     }
 
     _fogCtx.globalCompositeOperation = 'source-over';

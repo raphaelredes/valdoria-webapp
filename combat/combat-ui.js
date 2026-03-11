@@ -241,11 +241,10 @@ let _expandDelegated = false;
 function bindExpandCollapse() {
     if (_expandDelegated) return;
     _expandDelegated = true;
-    const arena = document.getElementById('arena');
-    if (!arena) return;
-    arena.addEventListener('click', (ev) => {
+    // Delegate to document.body — survives innerHTML replacement of #arena
+    document.body.addEventListener('click', (ev) => {
         const entity = ev.target.closest('.entity:not(.player)');
-        if (!entity || ev.target.closest('.action-btn')) return;
+        if (!entity || ev.target.closest('.action-btn') || ev.target.closest('.skill-item') || ev.target.closest('.target-item') || ev.target.closest('.item-entry')) return;
         const wasExpanded = entity.classList.contains('expanded');
         document.querySelectorAll('.entity.expanded').forEach(e => e.classList.remove('expanded'));
         if (!wasExpanded) entity.classList.add('expanded');

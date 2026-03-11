@@ -206,10 +206,25 @@ function renderFrame(timestamp) {
     // 12.5 Movement cost preview for adjacent hexes
     _drawMoveCostIndicators(timestamp);
 
+    // 13. Atmospheric vignette (darkens edges for depth)
+    _drawVignette(_ctx, _canvasLogicalW, _canvasLogicalH);
+
     // 12. Smooth camera follow during movement
     if (isMoving()) {
         _smoothCameraFollow();
     }
+}
+
+// Atmospheric vignette — subtle darkening at canvas edges
+function _drawVignette(ctx, w, h) {
+    const cx = w / 2, cy = h / 2;
+    const outerR = Math.max(w, h) * 0.75;
+    const grad = ctx.createRadialGradient(cx, cy, outerR * 0.5, cx, cy, outerR);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.7, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.3)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
 }
 
 // Render all static tiles to the cache canvas
@@ -230,6 +245,46 @@ function renderStaticTiles(timestamp) {
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             _drawHeightShadow(_staticCtx, col, row);
+        }
+    }
+
+    // Third pass: subtle hex grid lines for structure
+    _staticCtx.strokeStyle = 'rgba(0,0,0,0.10)';
+    _staticCtx.lineWidth = 0.5;
+    for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+            const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+            const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            if (baseTile === 'W' || baseTile === 'w') continue; // Skip water
+            const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+            const center = hexToScreen(col, row);
+            const verts = hexTopVertices(center.x, center.y - h);
+            _staticCtx.beginPath();
+            _staticCtx.moveTo(verts[0].x, verts[0].y);
+            for (let i = 1; i < verts.length; i++) _staticCtx.lineTo(verts[i].x, verts[i].y);
+            _staticCtx.closePath();
+            _staticCtx.stroke();
+        }
+    }
+
+    // Fourth pass: subtle light edge on top-left of hex (isometric highlight)
+    _staticCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+    _staticCtx.lineWidth = 0.5;
+    for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+            const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+            const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            if (baseTile === 'W' || baseTile === 'w') continue;
+            const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+            const center = hexToScreen(col, row);
+            const verts = hexTopVertices(center.x, center.y - h);
+            // Only highlight top-left edges (verts 4→5→0→1 = top-left to top-right)
+            _staticCtx.beginPath();
+            _staticCtx.moveTo(verts[4].x, verts[4].y);
+            _staticCtx.lineTo(verts[5].x, verts[5].y);
+            _staticCtx.lineTo(verts[0].x, verts[0].y);
+            _staticCtx.lineTo(verts[1].x, verts[1].y);
+            _staticCtx.stroke();
         }
     }
 }

@@ -790,6 +790,11 @@ function _renderArenaInner(s) {
     bindActions(s);
 
     // Bind expand/collapse on entity cards
+    // Close any open overlay when state re-renders (prevents blocking)
+    if (_overlayOpen) {
+        document.querySelectorAll('.skill-overlay, .target-overlay, .item-overlay').forEach(o => o.classList.remove('active'));
+        _overlayOpen = false;
+    }
     bindExpandCollapse();
     bindFeedToggle();
     // Auto-scroll turn timeline to active entry
