@@ -558,10 +558,6 @@ function drawTile(ctx, col, row, biome, colors, timestamp) {
     const isWindVeg = WIND_BIOMES.has(biome) && (baseTile === 'T' || baseTile === 'g');
     if (baseTile !== 'w' && baseTile !== 'W' && baseTile !== 'L' && !isWindVeg) {
         drawTileDecoration(ctx, cx, cy - heightPx, baseTile, biome, col, row, 0);
-            // Enhanced wall decoration (cracks, moss)
-            if (baseTile === '#') {
-                drawWallEnhanced(_staticCtx, centerX, centerY - h, col, row, S.biome);
-            }
     }
 
     ctx.restore();
