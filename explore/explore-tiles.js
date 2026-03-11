@@ -706,30 +706,83 @@ function drawExitDecoration(ctx, cx, cy, timestamp) {
     ctx.fill();
 }
 
-// POI marker (floating exclamation with bounce)
-function drawPOIMarker(ctx, cx, cy, icon, timestamp) {
+// POI marker with contextual icon based on type
+function drawPOIMarker(ctx, cx, cy, icon, timestamp, poiType) {
     const t = (timestamp || 0) * 0.001;
-    const bounce = Math.sin(t * 3) * 3;
-    const my = cy - 18 + bounce;
-    // Gold glow
-    const grad = ctx.createRadialGradient(cx, my, 0, cx, my, 10);
-    grad.addColorStop(0, 'rgba(196,149,58,0.4)');
-    grad.addColorStop(1, 'rgba(196,149,58,0)');
+    const bounce = Math.sin(t * 3) * 2.5;
+    const my = cy - 16 + bounce;
+
+    // Type-specific colors and symbols
+    const typeConfig = {
+        dis: { color: '#c4953a', glow: 'rgba(196,149,58,', symbol: '*', r: 8 },
+        sea: { color: '#8a9a5a', glow: 'rgba(138,154,90,', symbol: '?', r: 7 },
+        dan: { color: '#c44a2a', glow: 'rgba(196,74,42,',  symbol: '!', r: 8 },
+        mys: { color: '#8a6aaa', glow: 'rgba(138,106,170,', symbol: '~', r: 9 },
+        npc: { color: '#5a9a6a', glow: 'rgba(90,154,106,', symbol: 'o', r: 8 },
+    };
+    const cfg = typeConfig[poiType] || typeConfig.dis;
+
+    // Outer glow (type-colored)
+    const pulse = Math.sin(t * 2) * 0.15 + 0.85;
+    const grad = ctx.createRadialGradient(cx, my, 0, cx, my, cfg.r + 4);
+    grad.addColorStop(0, cfg.glow + (0.35 * pulse) + ')');
+    grad.addColorStop(0.6, cfg.glow + (0.1 * pulse) + ')');
+    grad.addColorStop(1, cfg.glow + '0)');
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(cx, my, 10, 0, Math.PI * 2);
+    ctx.arc(cx, my, cfg.r + 4, 0, Math.PI * 2);
     ctx.fill();
-    // Marker circle
+
+    // Inner disc
     ctx.beginPath();
-    ctx.arc(cx, my, 5, 0, Math.PI * 2);
-    ctx.fillStyle = '#c4953a';
+    ctx.arc(cx, my, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = cfg.color;
     ctx.fill();
-    // Icon
-    ctx.font = 'bold 8px system-ui';
+
+    // Symbol (type-specific)
+    ctx.font = 'bold 7px MedievalSharp, serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#fff';
-    ctx.fillText('!', cx, my);
+
+    if (cfg.symbol === 'o') {
+        // NPC — draw tiny head silhouette instead of text
+        ctx.beginPath();
+        ctx.arc(cx, my - 1, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.fillRect(cx - 1.5, my + 0.5, 3, 2);
+    } else if (cfg.symbol === '~') {
+        // Mystery — draw swirl
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(cx, my, 2.5, 0, Math.PI * 1.5);
+        ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(cx + 2.2, my - 1, 0.6, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (cfg.symbol === '*') {
+        // Discovery — draw sparkle
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(cx, my - 3); ctx.lineTo(cx, my + 3);
+        ctx.moveTo(cx - 3, my); ctx.lineTo(cx + 3, my);
+        ctx.moveTo(cx - 2, my - 2); ctx.lineTo(cx + 2, my + 2);
+        ctx.moveTo(cx + 2, my - 2); ctx.lineTo(cx - 2, my + 2);
+        ctx.stroke();
+    } else {
+        // Default text symbol (! or ?)
+        ctx.fillText(cfg.symbol, cx, my);
+    }
+
+    // Ground shadow indicator
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 1, 4, 1.5, 0, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 // ═══════════════════════════════════════════

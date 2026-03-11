@@ -1,10 +1,19 @@
-// ═══════════════════════════════════════════════════════
-// FOG OF WAR — Solid black, proximity-based visibility
-// ═══════════════════════════════════════════════════════
+// =====================================================
+// FOG OF WAR -- Navigate-style warm brown fog with organic edges
+// Inspired by the world map (navigate) fog system
+// =====================================================
 
 let _fogCanvas = null;
 let _fogCtx = null;
 let _fogReveals = []; // Active reveal animations {cx, cy, progress, maxRadius}
+
+const FOG_COLOR = '#2a2420'; // Warm dark brown (matches medieval theme)
+
+// Deterministic pseudo-random (same seed = same result, no flicker)
+function _fogSrand(seed) {
+    let x = Math.sin(seed * 9301 + 49297) * 49297;
+    return x - Math.floor(x);
+}
 
 function initFog(width, height) {
     _fogCanvas = document.createElement('canvas');
@@ -20,7 +29,7 @@ function resizeFog(width, height) {
     }
 }
 
-// Mark hexes as explored in fogState (permanent — survives movement)
+// Mark hexes as explored in fogState (permanent)
 function revealFogAt(cx, cy, radius, fogState, grid, animate) {
     for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
@@ -56,24 +65,25 @@ function updateFogAnimations(dt) {
     return _fogReveals.length > 0;
 }
 
-// Draw fog overlay — solid black with proximity-based holes
+// =====================================================
+// MAIN FOG RENDER -- Navigate-style with organic edges
+// =====================================================
 function drawFogOverlay(mainCtx, canvasW, canvasH, fogState) {
     if (!_fogCtx) return;
 
-    // Scale fog canvas buffer properly
     _fogCtx.setTransform(1, 0, 0, 1, 0, 0);
     _fogCtx.clearRect(0, 0, _fogCanvas.width, _fogCanvas.height);
     _fogCtx.scale(_dpr, _dpr);
 
-    // Fill entirely with solid black
-    _fogCtx.fillStyle = '#000000';
+    // -- STEP 1: Fill with warm brown fog --
+    _fogCtx.globalCompositeOperation = 'source-over';
+    _fogCtx.fillStyle = FOG_COLOR;
     _fogCtx.fillRect(0, 0, canvasW, canvasH);
 
-    // Punch holes based on proximity to CURRENT player position + exploration state
-    _fogCtx.globalCompositeOperation = 'destination-out';
-
+    // -- STEP 2: Collect reveal points --
     const playerC = S.playerCol;
     const playerR = S.playerRow;
+    const reveals = [];
 
     for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
@@ -87,42 +97,51 @@ function drawFogOverlay(mainCtx, canvasW, canvasH, fogState) {
             const h = (TILE_HEIGHT[tile] || 1) * UNIT_PX;
             const vy = center.y - h * 0.3;
 
-            let opacity, gradRadius;
+            let radius, strength, flatZone;
 
             if (distToPlayer === 0) {
-                // Player's hex — fully clear
-                opacity = 1;
-                gradRadius = HEX_W * 0.7;
+                radius = HEX_W * 1.1;
+                strength = 1.0;
+                flatZone = 0.55;
             } else if (distToPlayer === 1) {
-                // Adjacent — clear
-                opacity = 0.95;
-                gradRadius = HEX_W * 0.6;
+                radius = HEX_W * 0.9;
+                strength = 0.97;
+                flatZone = 0.5;
             } else if (distToPlayer === 2 && state === 'visible') {
-                // 2 hexes away — dim if explored
-                opacity = 0.3;
-                gradRadius = HEX_W * 0.45;
+                radius = HEX_W * 0.7;
+                strength = 0.6;
+                flatZone = 0.35;
             } else if (state === 'visible') {
-                // Explored but far — faintly visible silhouette
-                opacity = 0.20;
-                gradRadius = HEX_W * 0.40;
+                radius = HEX_W * 0.55;
+                strength = 0.35;
+                flatZone = 0.25;
             } else if (state === 'dim') {
-                // Edge of exploration — faint hint
-                opacity = 0.10;
-                gradRadius = HEX_W * 0.33;
+                radius = HEX_W * 0.4;
+                strength = 0.15;
+                flatZone = 0.15;
             } else {
                 continue;
             }
 
-            const grad = _fogCtx.createRadialGradient(center.x, vy, 0, center.x, vy, gradRadius);
-            grad.addColorStop(0, `rgba(0,0,0,${opacity})`);
-            grad.addColorStop(0.6, `rgba(0,0,0,${opacity * 0.6})`);
-            grad.addColorStop(1, 'rgba(0,0,0,0)');
-            _fogCtx.fillStyle = grad;
-            _fogCtx.fillRect(center.x - gradRadius, vy - gradRadius, gradRadius * 2, gradRadius * 2);
+            reveals.push({ x: center.x, y: vy, radius, strength, flatZone });
         }
     }
 
-    // Animated reveals (expanding glow during movement)
+    // -- STEP 3: Punch reveal holes with radial gradients --
+    _fogCtx.globalCompositeOperation = 'destination-out';
+
+    for (const { x, y, radius, strength, flatZone } of reveals) {
+        const grad = _fogCtx.createRadialGradient(x, y, 0, x, y, radius);
+        grad.addColorStop(0, `rgba(0,0,0,${strength})`);
+        grad.addColorStop(flatZone, `rgba(0,0,0,${strength})`);
+        grad.addColorStop(flatZone + 0.2, `rgba(0,0,0,${strength * 0.4})`);
+        grad.addColorStop(flatZone + 0.35, `rgba(0,0,0,${strength * 0.08})`);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        _fogCtx.fillStyle = grad;
+        _fogCtx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+    }
+
+    // -- STEP 4: Animated reveals (expanding glow during movement) --
     for (const rev of _fogReveals) {
         const currentR = rev.maxRadius * rev.progress;
         const grad = _fogCtx.createRadialGradient(rev.x, rev.y, 0, rev.x, rev.y, currentR);
@@ -132,48 +151,71 @@ function drawFogOverlay(mainCtx, canvasW, canvasH, fogState) {
         _fogCtx.fillRect(rev.x - currentR, rev.y - currentR, currentR * 2, currentR * 2);
     }
 
-    _fogCtx.globalCompositeOperation = 'source-over';
+    // -- STEP 5: Organic edge splotches (prevent perfect circles) --
+    _fogCtx.globalCompositeOperation = 'destination-out';
+    for (let ri = 0; ri < reveals.length; ri++) {
+        const { x, y, radius, strength, flatZone } = reveals[ri];
+        if (strength < 0.3) continue; // Only strong reveals get organic edges
+        const edgeR = radius * (flatZone + 0.25);
+        const nBlobs = Math.floor(8 + strength * 6);
 
-    // Fog boundary glow — warm golden edge where explored meets darkness
-    const vis = S.visibility || 3;
-    for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-            const key = `${c},${r}`;
-            const state = fogState[key];
-            if (!state || state === 'hidden') continue;
-            const dist = hexDist(c, r, playerC, playerR);
-            // Only glow at the edge of visibility (dist == vis or vis+1)
-            if (dist < vis - 1 || dist > vis + 1) continue;
-            // Check if any neighbor is still hidden/dim
-            const nbs = typeof getNeighbors === 'function' ? getNeighbors(c, r) : [];
-            let hasFogNeighbor = false;
-            for (const [nc, nr] of nbs) {
-                const nk = `${nc},${nr}`;
-                if (!fogState[nk] || fogState[nk] === 'hidden' || fogState[nk] === 'dim') {
-                    hasFogNeighbor = true; break;
-                }
+        for (let j = 0; j < nBlobs; j++) {
+            const angle = _fogSrand(x * 100 + y * 200 + j * 37) * Math.PI * 2;
+            const dist = edgeR * (0.8 + _fogSrand(y * 300 + x * 400 + j * 53) * 0.5);
+            const bx = x + Math.cos(angle) * dist;
+            const by = y + Math.sin(angle) * dist;
+            const blobR = 1.5 + _fogSrand(x * 500 + j * 71) * 3;
+            const blobAlpha = strength * 0.12;
+
+            _fogCtx.fillStyle = `rgba(0,0,0,${blobAlpha})`;
+            _fogCtx.beginPath();
+            const nPts = 5 + Math.floor(_fogSrand(j * 97 + x) * 3);
+            for (let k = 0; k < nPts; k++) {
+                const a = (k / nPts) * Math.PI * 2;
+                const wobble = blobR * (0.4 + _fogSrand(j * 100 + k * 41 + x) * 0.8);
+                const px = bx + Math.cos(a) * wobble;
+                const py = by + Math.sin(a) * wobble;
+                if (k === 0) _fogCtx.moveTo(px, py);
+                else _fogCtx.lineTo(px, py);
             }
-            if (!hasFogNeighbor) continue;
-            const center = hexToScreen(c, r);
-            const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
-            const h = (TILE_HEIGHT[tile] || 1) * UNIT_PX;
-            const vy = center.y - h * 0.3;
-            const glowR = HEX_W * 0.55;
-            const alpha = dist <= vis ? 0.08 : 0.04;
-            const grad = _fogCtx.createRadialGradient(center.x, vy, 0, center.x, vy, glowR);
-            grad.addColorStop(0, `rgba(196,149,58,${alpha})`);
-            grad.addColorStop(0.5, `rgba(196,149,58,${alpha * 0.4})`);
-            grad.addColorStop(1, 'rgba(196,149,58,0)');
-            _fogCtx.fillStyle = grad;
-            _fogCtx.fillRect(center.x - glowR, vy - glowR, glowR * 2, glowR * 2);
+            _fogCtx.closePath();
+            _fogCtx.fill();
         }
+    }
+
+    // -- STEP 6: Parchment texture on fog (medieval feel) --
+    _fogCtx.globalCompositeOperation = 'source-atop';
+
+    // Fine stipple dots
+    _fogCtx.fillStyle = 'rgba(58, 40, 16, 0.04)';
+    for (let i = 0; i < 150; i++) {
+        const nx = _fogSrand(i * 73 + 11) * canvasW;
+        const ny = _fogSrand(i * 79 + 17) * canvasH;
+        const cr = 0.3 + _fogSrand(i * 83) * 0.5;
+        _fogCtx.beginPath();
+        _fogCtx.arc(nx, ny, cr, 0, Math.PI * 2);
+        _fogCtx.fill();
+    }
+
+    // Crosshatch lines
+    _fogCtx.strokeStyle = 'rgba(58, 40, 16, 0.03)';
+    _fogCtx.lineWidth = 0.5;
+    for (let i = 0; i < 25; i++) {
+        const sx = _fogSrand(i * 113 + 7) * canvasW;
+        const sy = _fogSrand(i * 127 + 13) * canvasH;
+        const angle = _fogSrand(i * 137 + 19) * Math.PI;
+        const len = 4 + _fogSrand(i * 149) * 8;
+        _fogCtx.beginPath();
+        _fogCtx.moveTo(sx, sy);
+        _fogCtx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len);
+        _fogCtx.stroke();
     }
 
     _fogCtx.globalCompositeOperation = 'source-over';
 
-    // Draw the fog mask onto the main canvas (at native resolution)
+    // -- Draw fog onto main canvas --
     mainCtx.save();
-    mainCtx.setTransform(1, 0, 0, 1, 0, 0); // Reset to pixel coords
+    mainCtx.setTransform(1, 0, 0, 1, 0, 0);
     mainCtx.drawImage(_fogCanvas, 0, 0);
     mainCtx.restore();
 }

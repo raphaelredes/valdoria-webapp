@@ -56,6 +56,58 @@ function revealEventSprite(col, row, type, icon) {
 function clearEventSprite(col, row) {
     _eventSprites = _eventSprites.filter(s => !(s.col === col && s.row === row));
     scheduleRender();
+}
+
+// Floating text system (onomatopeias, damage numbers, status)
+let _floatingTexts = [];
+
+function spawnFloatingText(col, row, text, color, type) {
+    const center = hexToScreen(col, row);
+    const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+    _floatingTexts.push({
+        x: center.x + (Math.random() - 0.5) * 10,
+        y: center.y - h - 8,
+        text: text,
+        color: color || '#d4c8b0',
+        type: type || 'flavor',
+        birth: performance.now(),
+        duration: 2200,
+        vy: -0.4, // float upward speed
+    });
+    scheduleRender();
+}
+
+function _drawFloatingTexts(ctx, timestamp) {
+    const now = performance.now();
+    _floatingTexts = _floatingTexts.filter(ft => (now - ft.birth) < ft.duration);
+    for (const ft of _floatingTexts) {
+        const age = now - ft.birth;
+        const t = age / ft.duration;
+        // Ease: fast rise then slow
+        const yOff = ft.vy * age * (1 - t * 0.5);
+        const alpha = t < 0.15 ? t / 0.15 : (1 - (t - 0.15) / 0.85);
+        const scale = 1 + t * 0.15;
+
+        ctx.save();
+        ctx.globalAlpha = alpha * 0.85;
+        ctx.translate(ft.x, ft.y + yOff);
+        ctx.scale(scale, scale);
+
+        // Text shadow
+        ctx.font = ft.type === 'damage' ? 'bold 11px MedievalSharp, serif'
+                 : ft.type === 'big' ? 'bold 12px MedievalSharp, serif'
+                 : '10px MedievalSharp, serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillText(ft.text, 0.5, 0.5);
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, 0, 0);
+
+        ctx.restore();
+    }
 }   // [{col, row, startTime}] — tapped hexes with fading outline
 
 function initRenderer() {
@@ -218,8 +270,7 @@ function renderFrame(timestamp) {
     // 7.65 Hex hover/tap outline reveal
     drawHexHoverEffect(_ctx, timestamp);
 
-    // 7.7 Player dynamic lighting (torch/ambient — drawn before fog so fog masks it)
-    drawPlayerLight(_ctx, timestamp);
+
 
     // 8. Player token (with direction indicator)
     drawPlayerToken(_ctx, timestamp);
@@ -233,6 +284,9 @@ function renderFrame(timestamp) {
     if (typeof drawWeatherParticles === 'function') {
         drawWeatherParticles(_ctx, timestamp);
     }
+
+    // 9.7. Floating text (onomatopeias, status)
+    _drawFloatingTexts(_ctx, timestamp);
 
     // 10. Fog of war (drawn last, on top of everything)
     drawFogOverlay(_ctx, _canvasLogicalW, _canvasLogicalH, S.fogState);
@@ -249,6 +303,9 @@ function renderFrame(timestamp) {
     // 13. Atmospheric vignette (darkens edges for depth)
     _drawVignette(_ctx, _canvasLogicalW, _canvasLogicalH);
 
+    // 13.5. Day/night tint overlay (time-of-day atmosphere)
+    _drawDayNightTint(_ctx, _canvasLogicalW, _canvasLogicalH, timestamp);
+
     // 12. Smooth camera follow during movement
     if (isMoving()) {
         _smoothCameraFollow();
@@ -264,6 +321,32 @@ function _drawVignette(ctx, w, h) {
     grad.addColorStop(0.7, 'rgba(0,0,0,0)');
     grad.addColorStop(1, 'rgba(0,0,0,0.3)');
     ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+}
+
+// Day/night tint — subtle color overlay based on time of day
+function _drawDayNightTint(ctx, w, h, timestamp) {
+    const phase = typeof getDayPhase === 'function' ? getDayPhase() : 'day';
+    if (phase === 'day') return; // No tint during daylight
+
+    let r, g, b, alpha;
+    switch (phase) {
+        case 'dawn':
+            r = 255; g = 180; b = 100; alpha = 0.06; break;
+        case 'dusk':
+            r = 180; g = 80; b = 40; alpha = 0.12; break;
+        case 'night':
+            r = 20; g = 30; b = 60; alpha = 0.22; break;
+        default: return;
+    }
+
+    // Slight flicker at night (torch influence)
+    if (phase === 'night') {
+        const flicker = Math.sin((timestamp || 0) * 0.003) * 0.02;
+        alpha += flicker;
+    }
+
+    ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
     ctx.fillRect(0, 0, w, h);
 }
 
@@ -288,7 +371,43 @@ function renderStaticTiles(timestamp) {
         }
     }
 
-    // (Hex borders removed — terrain blends seamlessly)
+    // Third pass: soft edge blending between different terrain types
+    for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+            const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+            const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            if (baseTile === 'W' || baseTile === 'L') continue;
+
+            const center = hexToScreen(col, row);
+            const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+            const cx = center.x;
+            const cy = center.y - h;
+
+            // Check neighbors for different terrain
+            const nbs = typeof getNeighbors === 'function' ? getNeighbors(col, row) : [];
+            let hasDiffNeighbor = false;
+            for (const [nc, nr] of nbs) {
+                if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+                const nTile = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
+                const nBase = nTile.match(/[0-9@E]/) ? '.' : nTile;
+                if (nBase !== baseTile && nBase !== 'W' && nBase !== 'L') {
+                    hasDiffNeighbor = true;
+                    break;
+                }
+            }
+            if (!hasDiffNeighbor) continue;
+
+            // Soft radial fade at edges (blend with neighbors)
+            const blendGrad = _staticCtx.createRadialGradient(cx, cy, HEX_W * 0.25, cx, cy, HEX_W * 0.5);
+            blendGrad.addColorStop(0, 'rgba(0,0,0,0)');
+            blendGrad.addColorStop(0.7, 'rgba(0,0,0,0)');
+            blendGrad.addColorStop(1, 'rgba(0,0,0,0.06)');
+            _staticCtx.fillStyle = blendGrad;
+            _staticCtx.beginPath();
+            _staticCtx.arc(cx, cy, HEX_W * 0.5, 0, Math.PI * 2);
+            _staticCtx.fill();
+        }
+    }
 }
 
 // Ambient occlusion — darken tiles adjacent to taller neighbors
@@ -501,7 +620,7 @@ function drawPOIMarkers(ctx, timestamp) {
         const tile = S.grid[poi.row] && S.grid[poi.row][poi.col] ? S.grid[poi.row][poi.col] : '.';
         const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
         const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
-        drawPOIMarker(ctx, center.x, center.y - h, poi.icon, timestamp);
+        drawPOIMarker(ctx, center.x, center.y - h, poi.icon, timestamp, poi.type);
     }
 }
 
@@ -666,6 +785,7 @@ function onMoveComplete(col, row) {
     const hazard = checkHazard(col, row);
     if (hazard) {
         revealEventSprite(col, row, 'hazard');
+        spawnFloatingText(col, row, 'crack!', '#c44a2a', 'big');
         setTimeout(() => showHazardNarration(hazard), 200);
         return;
     }
@@ -675,6 +795,7 @@ function onMoveComplete(col, row) {
         const trap = checkTrap(col, row);
         if (trap) {
             revealEventSprite(col, row, 'trap');
+            spawnFloatingText(col, row, 'clank!', '#8a4a2a', 'big');
             setTimeout(() => showTrapEvent(trap), 200);
             return;
         }
@@ -685,6 +806,9 @@ function onMoveComplete(col, row) {
     if (poi) {
         const spriteType = {dis:'discovery',sea:'search',dan:'danger',mys:'mystery',npc:'npc'}[poi.type] || 'discovery';
         revealEventSprite(col, row, spriteType, poi.icon);
+        const poiSounds = {dis:'*brilho*', sea:'hmm...', dan:'!!', mys:'ooo...', npc:'ola!'};
+        const poiColors = {dis:'#c4953a', sea:'#8a9a5a', dan:'#c44a2a', mys:'#8a6aaa', npc:'#5a9a6a'};
+        spawnFloatingText(col, row, poiSounds[poi.type] || '!', poiColors[poi.type] || '#c4953a', 'flavor');
         setTimeout(() => showPOI(poi), 100);
         return;
     }
@@ -706,6 +830,7 @@ function onMoveComplete(col, row) {
             // Watch activity: grants advantage on first encounter
             if (typeof _checkWatchAdvantage === 'function') _checkWatchAdvantage();
             revealEventSprite(col, row, 'encounter');
+            spawnFloatingText(col, row, 'shh...', '#aa3a2a', 'big');
             setTimeout(() => showRandomEncounter(enc), 300);
             return;
         }
@@ -715,6 +840,7 @@ function onMoveComplete(col, row) {
     if (S.ambientEvents && S.ambientEvents.length > 0 && Math.random() < 0.10) {
         const ambient = S.ambientEvents.shift();
         revealEventSprite(col, row, 'ambient');
+        spawnFloatingText(col, row, '...', '#8a9a6a', 'flavor');
         setTimeout(() => showAmbientEvent(ambient), 200);
         return;
     }
@@ -786,27 +912,59 @@ function drawVisitedTrail(ctx, timestamp) {
         points.push({ x, y, c, r, fadeFactor, age });
     }
 
-    // Subtle footprints only (no connecting line — immersive)
-    // Draw footprints on each visited hex
+    // Breadcrumb path line connecting visited hexes
+    if (points.length > 1) {
+        ctx.save();
+        ctx.lineWidth = 1.2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        for (let i = 1; i < points.length; i++) {
+            const prev = points[i - 1];
+            const curr = points[i];
+            const segAlpha = 0.08 * Math.min(prev.fadeFactor, curr.fadeFactor);
+            ctx.strokeStyle = `rgba(196,149,58,${segAlpha})`;
+            ctx.beginPath();
+            ctx.moveTo(prev.x, prev.y);
+            ctx.lineTo(curr.x, curr.y);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    // Footprints on each visited hex (boot-shaped)
     for (const p of points) {
         if (p.c === S.playerCol && p.r === S.playerRow) continue;
 
-        const angle = (p.c * 7 + p.r * 13) % 6 * 0.5;
-        const alpha = pulse * 0.12 * p.fadeFactor;
+        // Direction toward next hex (or random if no next)
+        const idx = points.indexOf(p);
+        const next = points[idx + 1];
+        const angle = next
+            ? Math.atan2(next.y - p.y, next.x - p.x) + Math.PI / 2
+            : (p.c * 7 + p.r * 13) % 6 * 0.5;
+
+        const alpha = Math.min(0.2, pulse * 0.18 * p.fadeFactor);
 
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(angle);
-        // Subtle earth-tone footprints (blend with terrain)
-        ctx.fillStyle = `rgba(60,40,20,${alpha})`;
-        // Left foot
+
+        // Boot-shaped footprints (darker, more visible)
+        ctx.fillStyle = `rgba(40,30,15,${alpha})`;
+        // Left boot
         ctx.beginPath();
-        ctx.ellipse(-1.5, -1.0, 0.8, 1.6, 0.15, 0, Math.PI * 2);
+        ctx.ellipse(-2, -0.5, 1, 2, 0.1, 0, Math.PI * 2);
         ctx.fill();
-        // Right foot
         ctx.beginPath();
-        ctx.ellipse(1.5, 1.0, 0.8, 1.6, -0.15, 0, Math.PI * 2);
+        ctx.ellipse(-2, -2.8, 0.7, 0.6, 0, 0, Math.PI * 2);
         ctx.fill();
+        // Right boot
+        ctx.beginPath();
+        ctx.ellipse(2, 0.5, 1, 2, -0.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(2, -1.8, 0.7, 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.restore();
     }
 
@@ -1424,7 +1582,23 @@ function drawMinimap() {
         ctx.globalAlpha = 1;
     }
 
-    // POI markers (white) — only if within visible range
+    // Visited trail on minimap (subtle golden dots)
+    if (S.visited) {
+        ctx.globalAlpha = 0.35;
+        ctx.fillStyle = '#c4953a';
+        const visitedArr = Array.from(S.visited);
+        for (let i = 0; i < visitedArr.length; i++) {
+            const [vc, vr] = visitedArr[i].split(',').map(Number);
+            if (vc === S.playerCol && vr === S.playerRow) continue;
+            const fade = Math.max(0.15, 1 - (visitedArr.length - i) * 0.04);
+            ctx.globalAlpha = 0.25 * fade;
+            ctx.fillRect(vc * cellW + 0.5, vr * cellH + 0.5, cellW - 1, cellH - 1);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // POI markers (type-colored) — only if within visible range
+    const poiTypeColors = {dis:'#c4953a', sea:'#8a9a5a', dan:'#c44a2a', mys:'#8a6aaa', npc:'#5a9a6a'};
     for (const poi of S.pois) {
         if (S.poisResolved.has(poi.id)) continue;
         const key = `${poi.col},${poi.row}`;
@@ -1432,9 +1606,9 @@ function drawMinimap() {
         const poiDist = hexDist(poi.col, poi.row, S.playerCol, S.playerRow);
         if (poiDist > vis + 1) continue;
         ctx.globalAlpha = poiDist <= vis ? 0.9 : 0.4;
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = poiTypeColors[poi.type] || '#fff';
         ctx.beginPath();
-        ctx.arc(poi.col * cellW + cellW / 2, poi.row * cellH + cellH / 2, 1.5, 0, Math.PI * 2);
+        ctx.arc(poi.col * cellW + cellW / 2, poi.row * cellH + cellH / 2, 2, 0, Math.PI * 2);
         ctx.fill();
     }
     ctx.globalAlpha = 1;
