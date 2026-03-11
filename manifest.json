@@ -1,18 +1,18 @@
 {
   "name": "Lendas de Valdoria",
   "short_name": "Valdoria",
-  "description": "RPG medieval de fantasia via Telegram — D&D 5e",
-  "start_url": "/valdoria-webapp/",
-  "scope": "/valdoria-webapp/",
+  "description": "RPG de mesa D&D 5e via Telegram",
+  "start_url": "/game/index.html",
   "display": "standalone",
-  "background_color": "#2b2830",
-  "theme_color": "#2b2830",
+  "orientation": "portrait",
+  "theme_color": "#2a2420",
+  "background_color": "#2a2420",
   "icons": [
     {
-      "src": "favicon.svg",
+      "src": "/favicon.svg",
       "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/svg+xml"
     }
-  ]
+  ],
+  "lang": "pt-BR"
 }

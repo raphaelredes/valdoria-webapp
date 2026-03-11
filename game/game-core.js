@@ -158,6 +158,10 @@ async function init() {
         }
     });
 
+    // Init connection dot + debug console
+    if (typeof _initConnectionDot === "function") _initConnectionDot();
+    if (typeof _initDebugConsole === "function") _initDebugConsole();
+
     // Health check — verify API is reachable before loading game.
     // If it fails, keep polling silently (player just sees loading screen).
     _clog('INIT health check → ' + S.apiBase + '/api/game/health');
@@ -400,7 +404,8 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             if (resp.status === 429) {
                 _clog(`API ${endpoint} → 429 RATE LIMITED`);
                 console.warn('[GAME] Rate limited on', endpoint, '- waiting 2s');
-                // Rate limited — wait and retry
+                if (typeof showToast === 'function') showToast('\u23F3 Calma, aventureiro(a)! Aguarde um momento...', 2000);
+                haptic('warning');
                 await sleep(2000);
                 continue;
             }
@@ -441,6 +446,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             }
 
             if (resp.ok) {
+                if (typeof _trackApiPerf === 'function') _trackApiPerf(endpoint, elapsed);
                 _clog(`API ${endpoint} → OK (${elapsed}ms)`);
                 console.log('[GAME] apiCall OK:', endpoint,
                     'keys:', Object.keys(data).join(','),
@@ -737,6 +743,7 @@ function loadCachedScreen() {
             localStorage.removeItem(SCREEN_CACHE_KEY);
             return null;
         }
+        if (typeof _trackCacheHit === 'function') _trackCacheHit();
         return screen;
     } catch (e) { return null; }
 }
@@ -745,9 +752,19 @@ function loadCachedScreen() {
 function haptic(style) {
     try {
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
-            Telegram.WebApp.HapticFeedback.impactOccurred(style);
+            if (style === 'warning') {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
+            } else if (style === 'success') {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            } else if (style === 'error') {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            } else {
+                Telegram.WebApp.HapticFeedback.impactOccurred(style || 'light');
+            }
+        } else if (navigator.vibrate) {
+            navigator.vibrate(style === 'heavy' ? 30 : 15);
         }
-    } catch (e) { console.warn('[GAME] haptic failed:', e); }
+    } catch (e) { /* haptic not available */ }
 }
 
 function sleep(ms) {
@@ -817,4 +834,138 @@ document.addEventListener('DOMContentLoaded', () => {
             showError('Erro ao iniciar o jogo: ' + e.message, e);
         }
     });
+});
+
+
+// ─── Preload Next Screen (prefetch /api/game/start for single-char accounts) ───
+var _prefetchedStart = null;
+function _prefetchStart(charId) {
+    if (!charId || !S.apiBase || !S.token) return;
+    var url = S.apiBase + '/api/game/start';
+    var body = JSON.stringify({ user_id: S.uid, char_id: charId });
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token },
+        body: body,
+        signal: AbortSignal.timeout(8000),
+    }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data && !data.error) { _prefetchedStart = { charId: charId, data: data, ts: Date.now() }; }
+    }).catch(function() { /* silent prefetch */ });
+}
+
+// ─── Connection Status Dot ───
+var _connectionDot = null;
+function _initConnectionDot() {
+    _connectionDot = document.createElement('div');
+    _connectionDot.className = 'connection-dot';
+    _connectionDot.title = 'Conectado';
+    document.body.appendChild(_connectionDot);
+    window.addEventListener('offline', function() {
+        if (_connectionDot) { _connectionDot.classList.add('offline'); _connectionDot.title = 'Sem conex\u00e3o'; }
+    });
+    window.addEventListener('online', function() {
+        if (_connectionDot) { _connectionDot.classList.remove('offline', 'slow'); _connectionDot.title = 'Conectado'; }
+    });
+}
+
+// ─── Focus Management (move focus to first action button after render) ───
+function _focusFirstAction() {
+    requestAnimationFrame(function() {
+        // Try content buttons first, then footer buttons
+        var btn = document.querySelector('#content .btn-hero, #content .btn-action, #bottom-panel .btn-action');
+        if (btn && typeof btn.focus === 'function') {
+            btn.focus({ preventScroll: true });
+        }
+    });
+}
+
+// ─── Debug Console (triple-tap on title) ───
+var _debugTapCount = 0;
+var _debugTapTimer = null;
+
+function _initDebugConsole() {
+    document.addEventListener('click', function(e) {
+        var target = e.target;
+        if (!target || !target.classList) return;
+        // Triple-tap on char-select-title or loading-title
+        if (target.classList.contains('char-select-title') || target.classList.contains('loading-title')) {
+            _debugTapCount++;
+            if (_debugTapTimer) clearTimeout(_debugTapTimer);
+            _debugTapTimer = setTimeout(function() { _debugTapCount = 0; }, 800);
+            if (_debugTapCount >= 3) {
+                _debugTapCount = 0;
+                _showDebugConsole();
+            }
+        }
+    });
+}
+
+function _showDebugConsole() {
+    var existing = document.getElementById('debug-console');
+    if (existing) { existing.style.display = existing.style.display === 'none' ? '' : 'none'; return; }
+
+    var div = document.createElement('div');
+    div.id = 'debug-console';
+    div.className = 'debug-console';
+    div.style.display = '';
+
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'debug-close';
+    closeBtn.textContent = '\u2715';
+    closeBtn.onclick = function() { div.style.display = 'none'; };
+    div.appendChild(closeBtn);
+
+    var info = [
+        ['Sess\u00e3o', 'Token: ' + (S.token ? S.token.substring(0, 12) + '...' : 'N/A')],
+        ['API Base', S.apiBase || 'N/A'],
+        ['User ID', S.uid || 'N/A'],
+        ['Char ID', S.charId || 'N/A'],
+        ['Screen ID', S.currentScreen ? (S.currentScreen.screen_id || 'N/A') : 'N/A'],
+        ['Screen Version', S.screenVersion || 0],
+        ['Cache', localStorage.getItem('valdoria_game_screen') ? 'Presente (' + Math.round(localStorage.getItem('valdoria_game_screen').length / 1024) + 'KB)' : 'Vazio'],
+        ['Font', (typeof getSelectedFont === 'function' ? getSelectedFont() : 'N/A')],
+        ['Immersive', _immersiveCollapsed ? 'Recolhido' : 'Expandido'],
+        ['Platform', (window.Telegram && Telegram.WebApp ? Telegram.WebApp.platform : 'browser') || 'unknown'],
+        ['TG Version', (window.Telegram && Telegram.WebApp ? Telegram.WebApp.version : 'N/A') || 'N/A'],
+        ['Viewport', window.innerWidth + 'x' + window.innerHeight],
+        ['Perf', _perfMetrics ? JSON.stringify(_perfMetrics) : 'N/A'],
+    ];
+
+    for (var i = 0; i < info.length; i++) {
+        var sec = document.createElement('div');
+        sec.className = 'debug-section';
+        sec.innerHTML = '<span class="debug-label">' + info[i][0] + ':</span> ' + info[i][1];
+        div.appendChild(sec);
+    }
+
+    document.body.appendChild(div);
+}
+
+// ─── Performance Metrics ───
+var _perfMetrics = { apiCalls: 0, totalMs: 0, avgMs: 0, cacheHits: 0, renders: 0 };
+
+function _trackApiPerf(endpoint, elapsedMs) {
+    _perfMetrics.apiCalls++;
+    _perfMetrics.totalMs += elapsedMs;
+    _perfMetrics.avgMs = Math.round(_perfMetrics.totalMs / _perfMetrics.apiCalls);
+}
+
+function _trackRender() {
+    _perfMetrics.renders++;
+}
+
+function _trackCacheHit() {
+    _perfMetrics.cacheHits++;
+}
+
+// Send perf beacon on page unload
+window.addEventListener('beforeunload', function() {
+    if (_perfMetrics.apiCalls > 0 && S.apiBase) {
+        try {
+            navigator.sendBeacon(
+                S.apiBase + '/api/game/log',
+                JSON.stringify({ entries: [{ level: 'info', msg: '[GAME] PERF: ' + JSON.stringify(_perfMetrics) }] })
+            );
+        } catch (e) { /* best effort */ }
+    }
 });

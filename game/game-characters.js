@@ -17,7 +17,7 @@ function _escChar(s) {
  */
 async function showCharacterSelect() {
     console.log('[GAME] showCharacterSelect()');
-    showLoading();
+    _showCharSelectSkeleton();
 
     try {
         const url = `${S.apiBase}/api/game/characters?user_id=${S.uid}`;
@@ -135,6 +135,7 @@ function renderCharacterSelect(data) {
             html += `<div class="char-card-hp"><div class="char-card-hp-fill" style="width:${hpPct}%;background:${hpColor}"></div></div>`;
             html += '</div>';
             html += '<div class="char-card-arrow">\u25B8</div>';
+            html += '<button class="char-card-delete" data-del-id="' + _escChar(c.char_id) + '" data-del-name="' + fullName + '" aria-label="Excluir personagem">\u2715</button>';
             html += '</button>';
         }
         html += '</div>';
@@ -156,7 +157,10 @@ function renderCharacterSelect(data) {
 
     html += '</div>';
 
+    // Pull-to-refresh indicator
+    html = '<div id="ptr-indicator" class="ptr-indicator"></div>' + html;
     contentEl.innerHTML = html;
+    _initPullToRefresh();
 
     // Bind events: character cards
     contentEl.querySelectorAll('.char-card').forEach(card => {
@@ -164,6 +168,17 @@ function renderCharacterSelect(data) {
             const charId = card.dataset.charId;
             if (!charId) return;
             _selectCharacter(charId);
+        });
+    });
+
+    // Bind events: delete buttons (stop propagation to prevent card click)
+    contentEl.querySelectorAll('.char-card-delete').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            var charId = btn.dataset.delId;
+            var charName = btn.dataset.delName;
+            if (charId && charName) _showDeleteConfirmation(charId, charName);
         });
     });
 
@@ -191,6 +206,11 @@ function renderCharacterSelect(data) {
         accountBtn.addEventListener('click', () => doAction('action_account'));
     }
 
+    // Prefetch: if only 1 character, preload the game start
+    if (chars.length === 1 && typeof _prefetchStart === 'function') {
+        _prefetchStart(chars[0].char_id);
+    }
+
     // Bind events: community button
     const communityBtn = document.getElementById('cs-community');
     if (communityBtn) {
@@ -213,6 +233,9 @@ async function _selectCharacter(charId) {
     _selectingChar = true;
     console.log('[GAME] _selectCharacter:', charId);
     S.charId = charId;
+    // Animate card press before loading
+    var pressedCard = document.querySelector('.char-card[data-char-id="' + charId + '"]');
+    if (pressedCard) { pressedCard.style.transform = 'scale(0.97)'; pressedCard.style.opacity = '0.7'; }
     showLoading();
 
     const startBody = { char_id: charId };
@@ -229,6 +252,10 @@ async function _selectCharacter(charId) {
             handleTransition(data.transition);
         } else {
             renderScreen(data);
+            // Welcome toast with character name
+            var charBtn = document.querySelector('.char-card[data-char-id="' + charId + '"]');
+            var cName = charBtn ? charBtn.querySelector('.char-card-name') : null;
+            _showWelcomeToast(cName ? cName.textContent.replace(/Ativo/g, '').trim() : '');
         }
     } else if (data && data.error) {
         showError('Erro ao selecionar personagem. Tente novamente.');
@@ -239,4 +266,129 @@ async function _selectCharacter(charId) {
         setTimeout(() => showCharacterSelect(), 2500);
     }
     _selectingChar = false;
+}
+
+
+// ─── Character Deletion Confirmation Modal ───
+function _showDeleteConfirmation(charId, charName) {
+    // Remove existing modal
+    var existing = document.getElementById('char-delete-modal');
+    if (existing) existing.remove();
+
+    var modal = document.createElement('div');
+    modal.id = 'char-delete-modal';
+    modal.className = 'char-delete-modal';
+    modal.innerHTML = '<div class="char-delete-card">' +
+        '<div class="char-delete-icon">\u26A0\uFE0F</div>' +
+        '<div class="char-delete-title">Excluir Personagem?</div>' +
+        '<div class="char-delete-name">' + _escChar(charName) + '</div>' +
+        '<div class="char-delete-warn">Esta a\u00E7\u00E3o \u00E9 irrevers\u00EDvel.<br>O personagem ser\u00E1 permanentemente removido.</div>' +
+        '<div class="char-delete-actions">' +
+        '<button class="char-delete-cancel" id="del-cancel">Cancelar</button>' +
+        '<button class="char-delete-confirm" id="del-confirm">Excluir</button>' +
+        '</div></div>';
+
+    document.body.appendChild(modal);
+    if (typeof haptic === 'function') haptic('warning');
+
+    // Close on backdrop click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) { modal.remove(); }
+    });
+
+    document.getElementById('del-cancel').addEventListener('click', function() {
+        modal.remove();
+    });
+
+    document.getElementById('del-confirm').addEventListener('click', function() {
+        modal.remove();
+        _deleteCharacter(charId, charName);
+    });
+}
+
+async function _deleteCharacter(charId, charName) {
+    if (typeof showToast === 'function') showToast('\uD83D\uDDD1\uFE0F Excluindo ' + _escChar(charName) + '...', 2000);
+    var data = await apiCall('/api/game/action', { cb: 'delete_char_' + charId });
+    if (data && !data.error) {
+        if (typeof showToast === 'function') showToast('\u2705 Personagem exclu\u00EDdo.', 2000);
+        setTimeout(function() { showCharacterSelect(); }, 500);
+    } else {
+        if (typeof showToast === 'function') showToast('\u26A0\uFE0F N\u00E3o foi poss\u00EDvel excluir. Tente novamente.', 3000);
+    }
+}
+
+
+// ─── Skeleton Loading for Character Cards ───
+function _showCharSelectSkeleton() {
+    var screenEl = document.getElementById('screen');
+    var contentEl = document.getElementById('content');
+    var panelEl = document.getElementById('bottom-panel');
+    var bannerEl = document.getElementById('banner');
+    if (bannerEl) bannerEl.style.display = 'none';
+    if (panelEl) panelEl.style.display = 'none';
+    if (screenEl) { screenEl.style.display = ''; screenEl.scrollTop = 0; }
+
+    var html = '<div class="char-select-header">';
+    html += '<div class="char-select-title">\u269C\uFE0F Sele\u00E7\u00E3o de Personagem</div>';
+    html += '</div>';
+    for (var i = 0; i < 3; i++) {
+        html += '<div class="char-card-skeleton">';
+        html += '<div class="skeleton-icon"></div>';
+        html += '<div class="skeleton-lines">';
+        html += '<div class="skeleton-line long"></div>';
+        html += '<div class="skeleton-line medium"></div>';
+        html += '<div class="skeleton-line short"></div>';
+        html += '</div></div>';
+    }
+    if (contentEl) contentEl.innerHTML = html;
+}
+
+// ─── Pull-to-Refresh ───
+var _ptrStartY = 0;
+var _ptrActive = false;
+var _ptrRefreshing = false;
+
+function _initPullToRefresh() {
+    var screenEl = document.getElementById('screen');
+    if (!screenEl) return;
+
+    screenEl.addEventListener('touchstart', function(e) {
+        if (_ptrRefreshing) return;
+        if (screenEl.scrollTop <= 0) {
+            _ptrStartY = e.touches[0].clientY;
+            _ptrActive = true;
+        }
+    }, { passive: true });
+
+    screenEl.addEventListener('touchmove', function(e) {
+        if (!_ptrActive || _ptrRefreshing) return;
+        var dy = e.touches[0].clientY - _ptrStartY;
+        var indicator = document.getElementById('ptr-indicator');
+        if (dy > 30 && indicator) {
+            indicator.classList.add('visible');
+            indicator.textContent = dy > 80 ? '\uD83D\uDD04 Solte para atualizar' : '\u2B07\uFE0F Puxe para atualizar';
+        }
+    }, { passive: true });
+
+    screenEl.addEventListener('touchend', function(e) {
+        if (!_ptrActive) return;
+        _ptrActive = false;
+        var indicator = document.getElementById('ptr-indicator');
+        if (indicator && indicator.classList.contains('visible')) {
+            indicator.innerHTML = '<span class="ptr-spinner">\u2B6F</span> Atualizando...';
+            _ptrRefreshing = true;
+            showCharacterSelect().then(function() {
+                _ptrRefreshing = false;
+                if (indicator) indicator.classList.remove('visible');
+            });
+        }
+    }, { passive: true });
+}
+
+// ─── Welcome Toast (after character select → game) ───
+function _showWelcomeToast(charName) {
+    if (!charName || typeof showToast !== 'function') return;
+    setTimeout(function() {
+        showToast('\u2728 Bem-vindo(a) de volta, ' + charName + '!', 2500);
+    }, 800);
 }
