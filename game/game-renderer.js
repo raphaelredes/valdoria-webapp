@@ -34,17 +34,6 @@ function updateBottomPadding() {
 }
 
 /**
- * Check if the button area overflows its max-height and toggle overflow class.
- */
-function checkButtonOverflow() {
-    const el = document.getElementById('buttons');
-    if (!el) return;
-    const overflows = el.scrollHeight > el.clientHeight;
-    el.classList.toggle('has-overflow', overflows);
-    if (overflows) el.scrollTop = 0;
-}
-
-/**
  * Render a screen JSON object from the server.
  * @param {Object} screen - {text, buttons, footer, image_url, timer, transition,
  *                           toast, alert, waiting_for_text, text_placeholder}

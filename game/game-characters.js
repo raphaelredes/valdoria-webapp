@@ -4,6 +4,13 @@
    Replaces the inline Telegram buttons for character management.
    ═══════════════════════════════════════════════════════════════ */
 
+/** Escape HTML entities to prevent XSS in user-controlled strings. */
+function _escChar(s) {
+    if (!s) return '';
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
 /**
  * Fetch character list from /api/game/characters and render selection screen.
  * Called when: init() has no char param, main_menu callback, or character switch.
@@ -96,15 +103,15 @@ function renderCharacterSelect(data) {
     } else {
         html += '<div class="char-select-list">';
         for (const c of chars) {
-            const fullName = `${c.name} ${c.surname || ''}`.trim();
+            const fullName = _escChar(`${c.name} ${c.surname || ''}`.trim());
             const activeClass = c.is_active ? ' char-card-active' : '';
             const activeBadge = c.is_active ? '<span class="char-card-badge">Ativo</span>' : '';
 
-            html += `<button class="char-card${activeClass}" data-char-id="${c.char_id}">`;
-            html += `<div class="char-card-icon">${c.race_icon}</div>`;
+            html += `<button class="char-card${activeClass}" data-char-id="${_escChar(c.char_id)}">`;
+            html += `<div class="char-card-icon">${_escChar(c.race_icon)}</div>`;
             html += '<div class="char-card-info">';
             html += `<div class="char-card-name">${fullName} ${activeBadge}</div>`;
-            html += `<div class="char-card-details">Nv.${c.level} \u00B7 ${c.race} ${c.hero_class}</div>`;
+            html += `<div class="char-card-details">Nv.${c.level} \u00B7 ${_escChar(c.race)} ${_escChar(c.hero_class)}</div>`;
             html += '</div>';
             html += '<div class="char-card-arrow">\u25B8</div>';
             html += '</button>';
@@ -200,5 +207,10 @@ async function _selectCharacter(charId) {
         }
     } else if (data && data.error) {
         showError('Erro ao selecionar personagem. Tente novamente.');
+        // Return to character selection after brief delay
+        setTimeout(() => showCharacterSelect(), 2500);
+    } else if (!data) {
+        showError('Sem resposta do servidor. Verifique sua conex\u00e3o.');
+        setTimeout(() => showCharacterSelect(), 2500);
     }
 }

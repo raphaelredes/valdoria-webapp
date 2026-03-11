@@ -237,18 +237,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     transition: transform 0.3s ease, opacity 0.25s ease;
 }
 
-/* Safety net: limit button area height for screens with many buttons */
-.bottom-panel .screen-buttons {
-    max-height: 280px;
-    overflow-y: auto;
-}
-
-/* Visual indicator when button area is scrollable */
-.bottom-panel .screen-buttons.has-overflow {
-    position: relative;
-    -webkit-mask-image: linear-gradient(to bottom, #000 90%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 90%, transparent 100%);
-}
 
 /* Text input inside bottom panel */
 .bottom-panel .text-input-wrap {
@@ -4033,4 +4021,5 @@ body[data-time="night"] .screen-content strong {
     display: flex;
     gap: 2px;
     justify-content: space-around;
+    overflow-x: hidden;
 }

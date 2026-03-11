@@ -92,12 +92,6 @@ function renderDialogue(screen) {
     // Use clean dialogue text from backend when available, fallback to extraction
     const dialogueText = screen.dialogue_text || extractDialogueText(screen.text || '');
 
-    // Hide buttons initially
-    if (buttonsEl) {
-        buttonsEl.style.opacity = '0';
-        buttonsEl.style.pointerEvents = 'none';
-    }
-
     // Apply mood ambient gradient
     applyMoodAmbient(mood);
 
