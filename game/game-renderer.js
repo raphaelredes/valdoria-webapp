@@ -473,9 +473,9 @@ let _diceInstance = null;
 function _getDice() {
     if (_diceInstance) return _diceInstance;
     const container = document.getElementById('dice3d-canvas');
-    if (!container || typeof DiceRoller3D === 'undefined') return null;
+    if (!container || typeof Dice3D === 'undefined') return null;
     try {
-        _diceInstance = new DiceRoller3D(container);
+        _diceInstance = new Dice3D(container);
         return _diceInstance;
     } catch (e) {
         console.error('[GAME] Dice3D init error:', e);
