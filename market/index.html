@@ -1019,6 +1019,11 @@
         let sellCart = {};
 
         let localGold = 0;
+        // Cached URL params (parsed once)
+        const _urlParams = new URLSearchParams(location.search);
+        const _urlApi = _urlParams.get('api') || '';
+        const _urlToken = _urlParams.get('token') || '';
+        const _urlUid = _urlParams.get('uid') || '';
 
         // Tag display names
         const TAG_LABELS = {
@@ -1276,7 +1281,7 @@
 
             // Sell-all button (only for junk/bone/monster_part filter or all with sellable junk)
             const sellableItems = items.filter(inv => {
-                const itemTags = new Set(inv.t || []);
+                const itemTags = (inv.t || []);
                 return buyTags.has('all') || [...itemTags].some(t => buyTags.has(t));
             });
             if (sellableItems.length > 1) {
@@ -1292,8 +1297,7 @@
                 const qty = sellCart[inv.id]?.qty || 0;
 
                 // Check if NPC buys this item
-                const itemTags = new Set(inv.t || []);
-                const npcBuys = buyTags.has('all') || [...itemTags].some(t => buyTags.has(t));
+                const npcBuys = buyTags.has('all') || (inv.t || []).some(t => buyTags.has(t));
 
                 html += `<div class="sell-row ${selected ? 'selected' : ''} ${!npcBuys ? 'no-buy' : ''}">
                 <div class="sr-main" onclick="${npcBuys ? `toggleSell('${esc(inv.id)}','${esc(inv.n)}',${inv.q},${sellPrice})` : ''}">
@@ -1376,8 +1380,7 @@
             let added = 0;
             items.forEach(inv => {
                 if (sellCart[inv.id]) return; // already in cart
-                const itemTags = new Set(inv.t || []);
-                const npcBuys = buyTags.has('all') || [...itemTags].some(t => buyTags.has(t));
+                const npcBuys = buyTags.has('all') || (inv.t || []).some(t => buyTags.has(t));
                 if (!npcBuys) return;
                 const sellPrice = Math.floor(inv.v * mul);
                 sellCart[inv.id] = { npc: sellNpcKey, item: inv.n, qty: inv.q, maxQty: inv.q, unitPrice: sellPrice };
@@ -1607,12 +1610,11 @@
                 ops.push({ t: 'buy', npc: entry.npc, item: itemId, qty: entry.qty });
             }
 
-            if (!ops.length) return;
+            if (!ops.length) { _txSending = false; return; }
 
-            const params = new URLSearchParams(location.search);
-            const token = params.get('token') || '';
-            const _apiBase = params.get('api') || '';
-            const _apiUid = params.get('uid') || '';
+            const token = _urlToken;
+            const _apiBase = _urlApi;
+            const _apiUid = _urlUid;
 
             const data = {
                 action: 'market_transaction',
@@ -1632,6 +1634,7 @@
                     });
                     if (resp.status === 401 || resp.status === 403) {
                         console.error('[MARKET] Auth error on apply:', resp.status);
+                        _txSending = false;
                         if (tg?.sendData) {
                             tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'MARKET', reason: 'session_expired' }));
                             return;
@@ -1645,6 +1648,7 @@
                     console.warn('[MARKET] API returned', resp.status, '— falling back to sendData');
                 } catch (e) {
                     console.warn('[MARKET] API fetch failed — falling back to sendData', e);
+                    _txSending = false;
                 }
             }
 

@@ -612,9 +612,7 @@ body {
 .check-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(42, 36, 32, 0.94);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: rgba(42, 36, 32, 0.96);
     z-index: 300;
     display: flex;
     flex-direction: column;
@@ -830,9 +828,7 @@ body {
 .combat-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(123, 32, 32, 0.92);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(123, 32, 32, 0.95);
     z-index: 400;
     display: flex;
     flex-direction: column;
@@ -886,8 +882,7 @@ body {
     gap: 16px;
     opacity: 0;
     pointer-events: none;
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    background: rgba(42, 36, 32, 0.94);
     transition: opacity 0.4s ease;
 }
 .portal-overlay.active { opacity: 1; pointer-events: all; animation: portalBreathe 3s ease-in-out infinite; }
@@ -911,9 +906,7 @@ body {
 .confirm-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(42, 36, 32, 0.92);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(42, 36, 32, 0.95);
     z-index: 350;
     display: flex;
     flex-direction: column;
@@ -963,9 +956,7 @@ body {
 .death-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(80, 20, 20, 0.93);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(80, 20, 20, 0.96);
     z-index: 400;
     display: flex;
     flex-direction: column;

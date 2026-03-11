@@ -3,9 +3,17 @@
    Extends valdoria-design.css v4
    ═══════════════════════════════════════════════════════════════ */
 
-/* ─── No Scrollbars (redundancy per mandatory rule) ─── */
-* { scrollbar-width: none; -ms-overflow-style: none; }
-*::-webkit-scrollbar { display: none; }
+/* ─── No Scrollbars (targeted — avoids universal selector perf cost) ─── */
+html, body, .screen, .screen-content, .screen-buttons, .bottom-panel,
+.sub-screen, .sub-screen-body, .dlg-choices {
+    scrollbar-width: none; -ms-overflow-style: none;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
+.screen-content::-webkit-scrollbar, .screen-buttons::-webkit-scrollbar,
+.bottom-panel::-webkit-scrollbar, .sub-screen::-webkit-scrollbar,
+.sub-screen-body::-webkit-scrollbar, .dlg-choices::-webkit-scrollbar {
+    display: none;
+}
 
 /* ─── Font Picker (settings screen) ─── */
 .font-picker-section {
@@ -286,6 +294,12 @@
     background: radial-gradient(ellipse at 50% 38%, #302018 0%, #1a1510 45%, #0a0805 100%);
     z-index: 1000;
     overflow: hidden;
+}
+/* Pause ALL animations when loading overlay is hidden — saves GPU on 23+ infinite animations */
+.loading-overlay[style*="display: none"] *,
+.loading-overlay[style*="display:none"] *,
+.loading-overlay.hidden * {
+    animation-play-state: paused !important;
 }
 /* Vignette */
 .loading-overlay::before {
@@ -1140,6 +1154,7 @@
 }
 .btn-hero {
     animation: heroPulse 3s ease-in-out infinite;
+    will-change: box-shadow;
 }
 .btn-hero:active { animation: none; box-shadow: var(--v-shadow-gold); }
 
