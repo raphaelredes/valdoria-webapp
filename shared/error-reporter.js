@@ -23,7 +23,7 @@ var ValdoriaErrors = (function () {
 
     // ─── Connection Debug Log (ring buffer + localStorage) ───
     var _connLog = [];
-    var _CONN_LOG_MAX = 80;
+    var _CONN_LOG_MAX = 30;
     var _CONN_LOG_LS_KEY = 'valdoria_conn_log';
     var _clogFlushTimer = null;
     var _sessionStartTime = Date.now();
@@ -47,7 +47,7 @@ var ValdoriaErrors = (function () {
         var prev = JSON.parse(localStorage.getItem(_CONN_LOG_LS_KEY) || '[]');
         if (prev.length) {
             _connLog.push('── previous session ──');
-            for (var i = Math.max(0, prev.length - 20); i < prev.length; i++) _connLog.push(prev[i]);
+            for (var i = Math.max(0, prev.length - 8); i < prev.length; i++) _connLog.push(prev[i]);
             _connLog.push('── current session ──');
         }
     } catch (e) { /* */ }
@@ -128,39 +128,43 @@ var ValdoriaErrors = (function () {
             '</div>' +
         '</div>';
 
-    // ─── Haptic Helper ───
-    function _haptic(type) {
-        try {
-            var tg = window.Telegram && window.Telegram.WebApp;
-            if (tg && tg.HapticFeedback) {
-                if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
-                else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
-                else tg.HapticFeedback.impactOccurred('light');
-            }
-        } catch (e) { /* */ }
-    }
-
     // ─── Show Error (full overlay) ───
     var _autoRetryTimer = null;
     var _RETRY_BASE = 2;       // Faster retry cycle
     var _RETRY_CAP = 8;        // Quick escalation to auto-reconnect
     var _RETRY_MAX = 3;   // Fast fail: 3 retries then auto-reconnect via sendData
 
+    // ─── Cached DOM refs (populated once after init) ───
+    var _els = {};
+    function _cacheEls() {
+        if (_els.overlay) return;
+        _els.overlay = document.getElementById('v-err-overlay');
+        _els.msg = document.getElementById('v-err-msg');
+        _els.retry = document.getElementById('v-err-retry');
+        _els.close = document.getElementById('v-err-close');
+        _els.icon = document.getElementById('v-err-icon');
+        _els.hint = document.getElementById('v-err-hint');
+        _els.network = document.getElementById('v-err-network');
+        _els.progress = document.getElementById('v-err-retry-progress');
+        _els.autoReport = document.getElementById('v-err-auto-report');
+    }
+
+    var _lastReportedMsg = '';
+
     function showError(msg, err) {
         console.error('[' + _cfg.appName + ']', msg, err || '');
         _clog('ERROR: ' + msg);
 
-        var overlay = document.getElementById('v-err-overlay');
-        if (!overlay) return;
-        var msgEl = document.getElementById('v-err-msg');
-        var retryBtn = document.getElementById('v-err-retry');
-        var closeBtn = document.getElementById('v-err-close');
+        _cacheEls();
+        if (!_els.overlay) return;
+        var retryBtn = _els.retry;
+        var closeBtn = _els.close;
 
-        msgEl.textContent = msg;
-        overlay.style.display = '';
+        _els.msg.textContent = msg;
+        _els.overlay.style.display = '';
 
         // Context-aware icon
-        var iconEl = document.getElementById('v-err-icon');
+        var iconEl = _els.icon;
         if (iconEl) {
             if (msg.indexOf('Sem conexão') >= 0 || msg.indexOf('internet') >= 0) iconEl.textContent = '📡';
             else if (msg.indexOf('não respondeu') >= 0 || msg.indexOf('demorou') >= 0) iconEl.textContent = '⏳';
@@ -170,7 +174,7 @@ var ValdoriaErrors = (function () {
         }
 
         // Actionable hint
-        var hintEl = document.getElementById('v-err-hint');
+        var hintEl = _els.hint;
         if (hintEl) {
             if (msg.indexOf('Sem conexão') >= 0 || msg.indexOf('internet') >= 0)
                 hintEl.textContent = 'Verifique se o Wi-Fi ou dados móveis estão ativos.';
@@ -211,8 +215,7 @@ var ValdoriaErrors = (function () {
                 retryBtn.disabled = false;
                 retryBtn.onclick = function () {
                     _retryAttempt = 0;
-                    var pb = document.getElementById('v-err-retry-progress');
-                    if (pb) { pb.style.transition = 'none'; pb.style.width = '0%'; }
+                    if (_els.progress) { _els.progress.style.transition = 'none'; _els.progress.style.width = '0%'; }
                     _doRetry();
                 };
             } else {
@@ -229,12 +232,12 @@ var ValdoriaErrors = (function () {
             };
         }
 
-        // Auto-report: queue error report automatically (player doesn't need to do anything)
-        if (hasApi) {
+        // Auto-report: queue error report automatically (dedup: skip if same msg)
+        if (hasApi && msg !== _lastReportedMsg) {
+            _lastReportedMsg = msg;
             _reportError().catch(function () { /* queued offline */ });
-            var autoEl = document.getElementById('v-err-auto-report');
-            if (autoEl) autoEl.style.display = '';
         }
+        if (_els.autoReport) _els.autoReport.style.display = hasApi ? '' : 'none';
 
         // Auto-retry with exponential backoff (connection errors, API tier)
         var isConnectionError = msg.indexOf('Sem conexão') >= 0 || msg.indexOf('Erro no servidor') >= 0
@@ -250,7 +253,7 @@ var ValdoriaErrors = (function () {
             var countdown = delaySec;
             if (retryBtn) retryBtn.textContent = 'Tentando novamente em ' + countdown + 's... (' + _retryAttempt + '/' + _RETRY_MAX + ')';
 
-            var progBar = document.getElementById('v-err-retry-progress');
+            var progBar = _els.progress;
             if (progBar) {
                 progBar.style.transition = 'none';
                 progBar.style.width = '0%';
@@ -283,8 +286,7 @@ var ValdoriaErrors = (function () {
         _clog('RETRY health check...');
         _checkHealthForUrlChange(url).then(function (changed) {
             if (changed) return; // _reloadWithNewApi already handled
-            var overlay = document.getElementById('v-err-overlay');
-            if (overlay) overlay.style.display = 'none';
+            if (_els.overlay) _els.overlay.style.display = 'none';
             if (_cfg.onRetry) {
                 _cfg.onRetry();
             } else {
@@ -319,28 +321,20 @@ var ValdoriaErrors = (function () {
         if (window.ApiDiscovery) ApiDiscovery.updateBase(newApi);
         // Hide error overlay and retry with new URL
         _retryAttempt = 0;
-        var overlay = document.getElementById('v-err-overlay');
-        if (overlay) overlay.style.display = 'none';
+        if (_els.overlay) _els.overlay.style.display = 'none';
         if (_cfg.onRetry) _cfg.onRetry();
     }
 
     function _autoReconnect() {
         _clog('AUTO-RECONNECT: all ' + _RETRY_MAX + ' retries exhausted');
 
-        // Auto-send error report (best effort)
-        if (_cfg.apiBase) {
-            _reportError().catch(function () { /* */ });
-        }
-
         // Try to auto-reconnect via sendData — bot will send a fresh menu
         // with the correct tunnel URL. This closes the WebApp automatically.
         var tg = window.Telegram && window.Telegram.WebApp;
         if (tg && tg.sendData) {
             _clog('AUTO-RECONNECT: sending webapp_reconnect via sendData');
-            var msgEl = document.getElementById('v-err-msg');
-            if (msgEl) msgEl.textContent = 'Reconectando ao servidor...';
-            var hintEl = document.getElementById('v-err-hint');
-            if (hintEl) hintEl.textContent = 'Abrindo menu do jogo automaticamente.';
+            if (_els.msg) _els.msg.textContent = 'Reconectando ao servidor...';
+            if (_els.hint) _els.hint.textContent = 'Abrindo menu do jogo automaticamente.';
 
             // Instant sendData — closes WebApp immediately, bot sends fresh menu
             try {
@@ -363,13 +357,11 @@ var ValdoriaErrors = (function () {
     }
 
     function _startBgHealthFallback() {
-        var msgEl = document.getElementById('v-err-msg');
-        var retryBtn = document.getElementById('v-err-retry');
-        var hintEl = document.getElementById('v-err-hint');
-        if (msgEl) msgEl.textContent = 'Servidor indisponível. Aguardando retorno...';
-        if (hintEl) hintEl.textContent = 'Verificando automaticamente a cada 15 segundos.';
+        if (_els.msg) _els.msg.textContent = 'Servidor indisponível. Aguardando retorno...';
+        if (_els.hint) _els.hint.textContent = 'Verificando automaticamente a cada 15 segundos.';
 
         // Show manual reconnect button
+        var retryBtn = _els.retry;
         if (retryBtn) {
             retryBtn.style.display = '';
             retryBtn.textContent = 'Reconectar';
@@ -377,8 +369,7 @@ var ValdoriaErrors = (function () {
             retryBtn.onclick = function () {
                 _retryAttempt = 0;
                 _stopBgHealth();
-                var pb = document.getElementById('v-err-retry-progress');
-                if (pb) { pb.style.transition = 'none'; pb.style.width = '0%'; }
+                if (_els.progress) { _els.progress.style.transition = 'none'; _els.progress.style.width = '0%'; }
                 _doRetry();
             };
         }
@@ -399,34 +390,15 @@ var ValdoriaErrors = (function () {
             if (_bgHealthCount > _BG_HEALTH_MAX_POLLS) {
                 _clog('BG-HEALTH: gave up after ' + _bgHealthCount + ' polls, closing...');
                 _stopBgHealth();
-                var msgEl = document.getElementById('v-err-msg');
-                if (msgEl) msgEl.textContent = 'Retornando ao menu...';
+                if (_els.msg) _els.msg.textContent = 'Retornando ao menu...';
                 setTimeout(function () { _sendCloseAndReturn(); }, 2000);
                 return;
             }
 
             var remaining = _BG_HEALTH_MAX_POLLS - _bgHealthCount;
-            var hintEl = document.getElementById('v-err-hint');
-            if (hintEl) hintEl.textContent = 'Verificando... (' + remaining + ' tentativas restantes)';
+            if (_els.hint) _els.hint.textContent = 'Verificando... (' + remaining + ' tentativas restantes)';
 
-            // Try same-origin health first (works when webapp is served by aiohttp),
-            // then fall back to the original apiBase URL.
             var url = _cfg.apiBase + '/api/game/health';
-            var originUrl = window.location.origin + '/api/game/health';
-            if (originUrl !== url) {
-                // Try origin first — if tunnel changed, origin is dead too,
-                // but if served locally from aiohttp it will work
-                fetch(originUrl, { method: 'GET' }).then(function (r) {
-                    if (!r.ok) throw new Error('not ok');
-                    return r.json();
-                }).then(function (data) {
-                    if (data && data.api && data.api !== _cfg.apiBase) {
-                        _clog('BG-HEALTH: tunnel URL changed via origin! -> ' + data.api);
-                        _stopBgHealth();
-                        _reloadWithNewApi(data.api);
-                    }
-                }).catch(function () { /* origin also dead, normal path below */ });
-            }
             fetch(url, { method: 'GET' }).then(function (resp) {
                 if (!resp.ok) return;
                 return resp.json();
@@ -443,8 +415,7 @@ var ValdoriaErrors = (function () {
                     _clog('BG-HEALTH: server restored!');
                     _stopBgHealth();
                     _retryAttempt = 0;
-                    var overlay = document.getElementById('v-err-overlay');
-                    if (overlay) overlay.style.display = 'none';
+                    if (_els.overlay) _els.overlay.style.display = 'none';
                     if (_cfg.onRetry) { _cfg.onRetry(); }
                     else { _sendCloseAndReturn(); }
                 }
@@ -482,7 +453,8 @@ var ValdoriaErrors = (function () {
     var _networkListening = false;
 
     function _updateNetworkBadge() {
-        var badge = document.getElementById('v-err-network');
+        _cacheEls();
+        var badge = _els.network;
         if (!badge) return;
         var online = navigator.onLine;
         badge.style.display = '';
@@ -492,22 +464,19 @@ var ValdoriaErrors = (function () {
         if (!_networkListening) {
             _networkListening = true;
             var handler = function () {
-                var overlay = document.getElementById('v-err-overlay');
-                if (overlay && overlay.style.display !== 'none') _updateNetworkBadge();
+                if (_els.overlay && _els.overlay.style.display !== 'none') _updateNetworkBadge();
             };
             window.addEventListener('online', handler);
             window.addEventListener('offline', handler);
         }
     }
 
-
-
     // ─── Report Error to Admin ───
     var _REPORT_QUEUE_KEY = 'valdoria_report_queue';
 
     function _reportError() {
         var log = _getConnectionLog();
-        var errMsgEl = document.getElementById('v-err-msg');
+        var errMsgEl = _els.msg || document.getElementById('v-err-msg');
         var errorMsg = errMsgEl ? errMsgEl.textContent || '' : '';
         var errorType = _classifyError(errorMsg);
 
@@ -554,8 +523,6 @@ var ValdoriaErrors = (function () {
         });
     }
 
-
-
     function _queueReport(payload) {
         try {
             var queue = JSON.parse(localStorage.getItem(_REPORT_QUEUE_KEY) || '[]');
@@ -573,22 +540,29 @@ var ValdoriaErrors = (function () {
             localStorage.removeItem(_REPORT_QUEUE_KEY);
             var now = Date.now();
             var MAX_AGE = 24 * 60 * 60 * 1000;
+            var delay = 0;
             for (var i = 0; i < queue.length; i++) {
                 var p = queue[i];
                 if (p.queued_at && (now - new Date(p.queued_at).getTime()) > MAX_AGE) continue;
                 p.was_queued = true;
-                var fh = {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + _cfg.token,
-};
-                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
-                    fh['X-Telegram-Init-Data'] = window.Telegram.WebApp.initData;
-                }
-                fetch(_cfg.apiBase + '/api/game/report-error', {
-                    method: 'POST',
-                    headers: fh,
-                    body: JSON.stringify(p),
-                }).catch(function () { /* fire and forget */ });
+                // Stagger sends by 800ms to avoid burst on low-end phones
+                (function (payload, d) {
+                    setTimeout(function () {
+                        var fh = {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + _cfg.token,
+                        };
+                        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+                            fh['X-Telegram-Init-Data'] = window.Telegram.WebApp.initData;
+                        }
+                        fetch(_cfg.apiBase + '/api/game/report-error', {
+                            method: 'POST',
+                            headers: fh,
+                            body: JSON.stringify(payload),
+                        }).catch(function () { /* fire and forget */ });
+                    }, d);
+                })(p, delay);
+                delay += 800;
             }
         } catch (e) { /* */ }
     }
@@ -633,8 +607,7 @@ var ValdoriaErrors = (function () {
 
     // ─── Hide Error ───
     function hideError() {
-        var el = document.getElementById('v-err-overlay');
-        if (el) el.style.display = 'none';
+        if (_els.overlay) _els.overlay.style.display = 'none';
         if (_autoRetryTimer) { clearInterval(_autoRetryTimer); _autoRetryTimer = null; }
         _stopBgHealth();
     }
@@ -666,9 +639,8 @@ var ValdoriaErrors = (function () {
         window.showFatalError = showError; // alias for webapps that use showFatalError
         window.hideError = hideError;
 
-        // Expose log and report as globals for compatibility
+        // Expose log getter as global for compatibility
         window.getConnectionLog = _getConnectionLog;
-        window.reportError = _reportError;
 
         // Flush queued reports if API available
         if (_cfg.apiBase) {
@@ -690,6 +662,5 @@ var ValdoriaErrors = (function () {
         hideError: hideError,
         log: _clog,
         getConnectionLog: _getConnectionLog,
-
     };
 })();
