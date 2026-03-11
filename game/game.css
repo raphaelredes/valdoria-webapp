@@ -245,8 +245,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 
 /* Visual indicator when button area is scrollable */
 .bottom-panel .screen-buttons.has-overflow {
-    -webkit-mask-image: linear-gradient(to bottom, #000 85%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 85%, transparent 100%);
+    position: relative;
+    -webkit-mask-image: linear-gradient(to bottom, #000 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 90%, transparent 100%);
 }
 
 /* Text input inside bottom panel */
@@ -261,23 +262,23 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 
 .footer-row .btn-action {
     flex: 1;
-    padding: 6px 3px;
-    min-height: 34px;
+    padding: 8px 3px;
+    min-height: 40px;
     font-size: 12px;
 }
 
 .footer-nav .btn-action {
     font-size: 14px; /* icon buttons */
-    padding: 6px;
-    min-height: 34px;
+    padding: 8px;
+    min-height: 40px;
 }
 
 /* Footer toggle button (expand/collapse nav row) */
 .footer-toggle-btn {
     flex: 0 0 auto !important;
-    width: 32px;
-    min-height: 34px;
-    padding: 6px 3px !important;
+    width: 36px;
+    min-height: 40px;
+    padding: 8px 3px !important;
     font-size: 14px !important;
     color: var(--v-text-dim) !important;
     letter-spacing: 2px;

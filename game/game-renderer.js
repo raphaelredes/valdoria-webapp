@@ -39,7 +39,9 @@ function updateBottomPadding() {
 function checkButtonOverflow() {
     const el = document.getElementById('buttons');
     if (!el) return;
-    el.classList.toggle('has-overflow', el.scrollHeight > el.clientHeight);
+    const overflows = el.scrollHeight > el.clientHeight;
+    el.classList.toggle('has-overflow', overflows);
+    if (overflows) el.scrollTop = 0;
 }
 
 /**
