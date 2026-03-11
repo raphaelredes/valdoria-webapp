@@ -128,13 +128,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     font-size: 12px;
 }
 
-/* ─── Button Grid ─── */
-.screen-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
 .btn-row {
     display: grid;
     gap: 4px;

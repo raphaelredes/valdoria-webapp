@@ -87,7 +87,7 @@ function renderCharacterSelect(data) {
     if (census) {
         html += `<div class="char-select-census">\uD83C\uDF0D ${census.total} aventureiros em Valdoria`;
         if (census.max_level > 0) {
-            const names = (census.max_level_chars || []).join(', ');
+            const names = (census.max_level_chars || []).map(n => _escChar(n)).join(', ');
             html += ` \u00B7 \uD83C\uDFC6 Nv.${census.max_level}${names ? ' (' + names + ')' : ''}`;
         }
         html += '</div>';
