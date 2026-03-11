@@ -112,14 +112,14 @@ body {
     background-attachment: fixed;
 }
 
-/* Subtle vignette overlay for depth */
+/* Subtle vignette overlay for depth — z-index below modals/overlays */
 body::after {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 9999;
-    background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.3) 100%);
+    z-index: 1;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.25) 100%);
 }
 
 /* ─── TYPOGRAPHY ─── */

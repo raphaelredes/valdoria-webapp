@@ -87,7 +87,7 @@ function _drawFloatingTexts(ctx, timestamp) {
         const t = age / ft.duration;
         // Ease: fast rise then slow
         const yOff = ft.vy * age * (1 - t * 0.5);
-        const alpha = t < 0.12 ? t / 0.12 : t < 0.45 ? 1.0 : (1 - (t - 0.45) / 0.55);
+        const alpha = t < 0.15 ? t / 0.15 : t < 0.5 ? 1.0 : 1.0 - ((t - 0.5) / 0.5) * ((t - 0.5) / 0.5);
         const scale = 1 + t * 0.15;
 
         ctx.save();
@@ -214,12 +214,17 @@ function renderLoop(timestamp) {
     const tapActive = _tapFeedbacks.length > 0;
     const hasAnimations = movingActive || effectsActive || fogActive || particlesActive || flashActive || tapActive;
 
-    // Always render — pulsing highlights and visited trail need continuous animation
     renderFrame(timestamp);
     _needsRender = false;
 
-    // Always keep loop running for pulsing adjacent highlights
-    _rafId = requestAnimationFrame(renderLoop);
+    // Only keep loop running if there are active animations or pulsing highlights
+    // Adjacent highlight pulse needs continuous animation when player can move
+    const idleAnims = !S.inEvent && !S.lockMovement;
+    if (hasAnimations || weatherActive || idleAnims) {
+        _rafId = requestAnimationFrame(renderLoop);
+    } else {
+        _rafId = null; // Sleep until scheduleRender() wakes us
+    }
 }
 
 
@@ -1503,7 +1508,7 @@ function drawTapFeedback(ctx, timestamp) {
     for (let i = _tapFeedbacks.length - 1; i >= 0; i--) {
         const f = _tapFeedbacks[i];
         const elapsed = timestamp - f.start;
-        const duration = 400;
+        const duration = 600;
         if (elapsed > duration) { _tapFeedbacks.splice(i, 1); continue; }
         const t = elapsed / duration;
         const radius = f.radius + (f.maxRadius - f.radius) * t;
@@ -1529,7 +1534,7 @@ function _smoothCameraFollow() {
     const curY = viewport.scrollTop;
 
     // Lerp factor — smooth tracking
-    const lerp = 0.12;
+    const lerp = 0.16;
     const newX = curX + (targetX - curX) * lerp;
     const newY = curY + (targetY - curY) * lerp;
 

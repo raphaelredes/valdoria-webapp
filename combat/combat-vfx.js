@@ -263,7 +263,9 @@ function _showHealFlash() {
 
 // ─── COMBAT TOAST (lightweight feedback) ───
 function showCombatToast(msg, duration) {
-    const d = duration || 2500;
+    const d = duration || (typeof calcReadTime === 'function'
+        ? calcReadTime(msg, 'combat')
+        : Math.max(2000, Math.min(4000, (msg || '').split(/\s+/).length * 250)));
     const el = document.createElement('div');
     el.className = 'combat-toast';
     el.textContent = msg;
