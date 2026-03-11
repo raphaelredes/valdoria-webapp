@@ -841,7 +841,7 @@ function drawHexHoverEffect(ctx, timestamp) {
         const { x, y } = hexToScreen(_hoveredHex.col, _hoveredHex.row);
         const age = timestamp - (_hoveredHex.time || timestamp);
         const fadeIn = Math.min(1, age / 150); // 150ms fade in
-        const verts = getHexVertices(x, y - 2);
+        const verts = hexTopVertices(x, y - 2);
         ctx.beginPath();
         ctx.moveTo(verts[0].x, verts[0].y);
         for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
@@ -859,7 +859,7 @@ function drawHexHoverEffect(ctx, timestamp) {
         const { x, y } = hexToScreen(h.col, h.row);
         const age = now - h.startTime;
         const fadeOut = 1 - (age / TAP_DURATION);
-        const verts = getHexVertices(x, y - 2);
+        const verts = hexTopVertices(x, y - 2);
         ctx.beginPath();
         ctx.moveTo(verts[0].x, verts[0].y);
         for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
