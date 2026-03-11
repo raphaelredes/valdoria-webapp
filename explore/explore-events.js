@@ -4003,6 +4003,12 @@ function _interactDoor(col, row) {
     const key = `${col},${row}`;
     if (S._doorsOpened && S._doorsOpened.has(key)) return;
 
+    // Check if door is locked
+    const locked = S.lockedDoors ? S.lockedDoors.find(
+        d => d.col === col && d.row === row && !d.unlocked) : null;
+    if (locked) { _interactLockedDoor(col, row, locked); return; }
+
+
     // Show door overlay
     const overlay = document.getElementById('dm-overlay');
     const narr = document.getElementById('dm-narration');
@@ -4018,13 +4024,8 @@ function _interactDoor(col, row) {
     btnOpen.className = 'dm-choice-btn';
     btnOpen.innerHTML = '🚪 Abrir Porta';
     btnOpen.onclick = () => {
-        // Open the door — change grid tile
-        S.grid[row][col] = '.';
-        S._doorsOpened.add(key);
-        if (typeof _staticDirty !== 'undefined') _staticDirty = true;
         overlay.classList.remove('active');
-        showTerrainToast('Porta aberta!', 'flavor');
-        saveState();
+        _animateDoorOpen(col, row, key);
     };
     choices.appendChild(btnOpen);
 
@@ -4040,6 +4041,12 @@ function _interactDoor(col, row) {
 // ── Secret wall interaction ──────────────────────────────
 
 function _interactWall(col, row) {
+    // Check for wall inscriptions first
+    if (S.inscriptions) {
+        const ins = S.inscriptions.find(i => i.col === col && i.row === row && !i.read);
+        if (ins) { _showInscription(col, row, ins); return; }
+    }
+
     // Check if this wall is a secret passage
     if (!S.secretPassages) return;
     const sp = S.secretPassages.find(
@@ -4405,6 +4412,20 @@ function _applyTrapDamage(trap, success, roll) {
     if (success) {
         // D&D 5e: successful save = half damage (PHB)
         showTerrainToast('Esquivou parcialmente!', 'flavor');
+    } else if (trap.condition) {
+        // Apply D&D 5e condition on failure
+        const condNames = {psn: 'Envenenado', prn: 'Prone', rst: 'Impedido', alm: 'Alarme'};
+        if (trap.condition === 'alm') {
+            showTerrainToast('Um alarme dispara! Algo se aproxima...', 'damage');
+            S.checksPerformed.push({stat: trap.skill, dc: trap.dc, roll, mod: trap.mod || 0, ok: false, mode: 'normal'});
+            saveState();
+            return;
+        }
+        if (typeof addCondition === 'function') {
+            addCondition(trap.condition === 'psn' ? 'poisoned' : trap.condition === 'rst' ? 'restrained' : 'prone');
+        }
+        const cName = condNames[trap.condition] || '';
+        if (cName) showTerrainToast('Condicao: ' + cName + '!', 'condition');
     }
 
     // Roll trap damage
@@ -4435,3 +4456,429 @@ function _applyTrapDamage(trap, success, roll) {
     });
     saveState();
 }
+
+// =============================================
+// LOCKED DOOR INTERACTION
+// =============================================
+
+function _interactLockedDoor(col, row, locked) {
+    const overlay = document.getElementById('dm-overlay');
+    const narr = document.getElementById('dm-narration');
+    const choices = document.getElementById('dm-choices');
+    if (!overlay || !narr || !choices) return;
+    narr.innerHTML = '';
+    choices.innerHTML = '';
+    narr.innerHTML = '<p class="dm-text">A porta est\u00e1 trancada. Um mecanismo de ferro resiste \u00e0 abertura.</p>';
+
+    const btnPick = document.createElement('button');
+    btnPick.className = 'dm-choice-btn';
+    btnPick.textContent = 'Abrir Fechadura (Prestidigitacao DC ' + locked.pickDC + ')';
+    btnPick.onclick = () => { overlay.classList.remove('active'); _performLockedDoorCheck(col, row, locked, 'pick'); };
+    choices.appendChild(btnPick);
+
+    const btnForce = document.createElement('button');
+    btnForce.className = 'dm-choice-btn';
+    btnForce.textContent = 'Forcar (Atletismo DC ' + locked.forceDC + ')';
+    btnForce.onclick = () => { overlay.classList.remove('active'); _performLockedDoorCheck(col, row, locked, 'force'); };
+    choices.appendChild(btnForce);
+
+    const btnBack = document.createElement('button');
+    btnBack.className = 'dm-choice-btn dm-choice-secondary';
+    btnBack.textContent = 'Voltar';
+    btnBack.onclick = () => overlay.classList.remove('active');
+    choices.appendChild(btnBack);
+    overlay.classList.add('active');
+}
+
+function _performLockedDoorCheck(col, row, locked, method) {
+    const dc = method === 'pick' ? locked.pickDC : locked.forceDC;
+    const mod = method === 'pick' ? locked.modPick : locked.modForce;
+    const skillName = method === 'pick' ? 'Prestidigitacao' : 'Atletismo';
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const total = roll + mod;
+    const success = total >= dc;
+    const checkOverlay = document.getElementById('check-overlay');
+    if (!checkOverlay) return;
+    checkOverlay.classList.add('active');
+    const dice = typeof getDice3D === 'function' ? getDice3D() : null;
+    const showResult = () => {
+        const formulaEl = checkOverlay.querySelector('.check-formula') || document.getElementById('check-formula');
+        const resultEl = checkOverlay.querySelector('.check-result') || document.getElementById('check-result');
+        if (formulaEl) formulaEl.innerHTML = '<span class="check-roll">' + roll + '</span> + ' + mod + ' (' + skillName + ') = <b>' + total + '</b> vs DC ' + dc;
+        if (resultEl) {
+            resultEl.textContent = success ? 'Destrancada!' : 'Falhou!';
+            resultEl.className = 'check-result ' + (success ? 'check-success' : 'check-fail');
+        }
+        setTimeout(() => {
+            const skipArea = checkOverlay.querySelector('.check-skip') || document.getElementById('check-skip');
+            if (skipArea) {
+                skipArea.innerHTML = '';
+                const btn = document.createElement('button');
+                btn.className = 'v-skip-btn';
+                btn.textContent = 'Continuar';
+                btn.onclick = () => {
+                    checkOverlay.classList.remove('active');
+                    if (success) {
+                        locked.unlocked = true;
+                        S.grid[row][col] = '.';
+                        S._doorsOpened.add(col + ',' + row);
+                        if (typeof _staticDirty !== 'undefined') _staticDirty = true;
+                        showTerrainToast('Porta destrancada!', 'flavor');
+                    } else {
+                        if (method === 'force') {
+                            S.hpChange -= 2;
+                            showTerrainToast('Falha! -2 HP pelo impacto', 'damage');
+                            if (typeof updateHPHUD === 'function') updateHPHUD();
+                        } else {
+                            showTerrainToast('A fechadura resiste...', 'flavor');
+                        }
+                    }
+                    S.checksPerformed.push({stat: method === 'pick' ? 'slh' : 'atl', dc, roll, mod, ok: success, mode: 'normal'});
+                    saveState();
+                };
+                skipArea.appendChild(btn);
+            }
+        }, 800);
+    };
+    if (dice) dice.roll(roll, showResult);
+    else setTimeout(showResult, 500);
+}
+
+// =============================================
+// CHEST INTERACTION
+// =============================================
+
+function checkChestAtPosition(col, row) {
+    if (!S.chests) return null;
+    return S.chests.find(ch => ch.col === col && ch.row === row && !ch.opened);
+}
+
+function showChestEvent(chest) {
+    const overlay = document.getElementById('dm-overlay');
+    const narr = document.getElementById('dm-narration');
+    const choices = document.getElementById('dm-choices');
+    if (!overlay || !narr || !choices) return;
+    narr.innerHTML = '';
+    choices.innerHTML = '';
+    narr.innerHTML = '<p class="dm-text">Voce encontra um bau antigo parcialmente escondido. Gravuras gastas decoram a tampa.</p>';
+
+    if (chest.hasTrap && !chest.trapDetected) {
+        const btnExamine = document.createElement('button');
+        btnExamine.className = 'dm-choice-btn';
+        btnExamine.textContent = 'Examinar (Investigacao DC ' + chest.trapDC + ')';
+        btnExamine.onclick = () => {
+            const roll = Math.floor(Math.random() * 20) + 1;
+            const total = roll + (chest.modInv || 0);
+            if (total >= chest.trapDC) {
+                chest.trapDetected = true;
+                showTerrainToast('Armadilha detectada!', 'flavor');
+            } else {
+                showTerrainToast('Parece seguro...', 'flavor');
+            }
+        };
+        choices.appendChild(btnExamine);
+    }
+
+    const btnOpen = document.createElement('button');
+    btnOpen.className = 'dm-choice-btn';
+    btnOpen.textContent = 'Abrir Bau';
+    btnOpen.onclick = () => { overlay.classList.remove('active'); _openChest(chest, chest.col, chest.row, false); };
+    choices.appendChild(btnOpen);
+
+    const btnBack = document.createElement('button');
+    btnBack.className = 'dm-choice-btn dm-choice-secondary';
+    btnBack.textContent = 'Deixar';
+    btnBack.onclick = () => overlay.classList.remove('active');
+    choices.appendChild(btnBack);
+    overlay.classList.add('active');
+}
+
+function _openChest(chest, col, row, disarmed) {
+    chest.opened = true;
+    S._chestsOpened.add(col + ',' + row);
+    if (chest.hasTrap && !disarmed && !chest.trapDetected) {
+        const dmg = Math.floor(Math.random() * 6) + 1;
+        S.hpChange -= dmg;
+        showTerrainToast('Armadilha no bau! -' + dmg + ' HP', 'damage');
+        if (typeof updateHPHUD === 'function') updateHPHUD();
+    }
+    if (chest.gp > 0) { S.goldChange += chest.gp; showTerrainToast('+' + chest.gp + ' GP!', 'reward'); }
+    if (chest.xp > 0) { S.xpChange += chest.xp; showTerrainToast('+' + chest.xp + ' XP', 'reward'); }
+    saveState();
+}
+
+// =============================================
+// INSCRIPTION INTERACTION
+// =============================================
+
+const INSCRIPTION_TEXTS = {
+    cave: [
+        'Runas antigas marcam a pedra: "Os que buscam poder aqui encontrarao apenas escuridao."',
+        'Marcas de garras profundas riscam a parede. Algo grande passou por aqui.',
+        'Um simbolo circular gravado na rocha pulsa com uma luz fraca.',
+        'Palavras em uma lingua esquecida cobrem a parede.',
+        'Um mapa rudimentar esta riscado na pedra, mostrando tuneis que nao existem mais.',
+    ],
+    graveyard: [
+        'Uma inscricao funeraria: "Aqui jaz Valdrik, guardiao do portal."',
+        'Simbolos de protecao cobrem a parede. Alguem tentou selar algo aqui.',
+        'Nomes de aventureiros estao gravados na lapide.',
+        'Um aviso entalhado na pedra: "Nao perturbem os mortos."',
+        'Flores secas e moedas antigas ao pe de uma placa memorial.',
+    ],
+    mountain: [
+        'Runas anas marcam a rocha: "Mina de Thardurum - Era das Sombras."',
+        'Um mural desgastado mostra guerreiros lutando contra um dragao.',
+        'Marcas de picareta cobrem a parede. Veios de minerio esgotado.',
+        'Um simbolo de cla anao esculpido na pedra, quase apagado.',
+        'Instrucoes de mineracao em lingua antiga cobrem a superficie.',
+    ],
+    volcanic: [
+        'Glifos de fogo brilham fracamente na rocha vulcanica.',
+        'Uma profecia legivel entre as cinzas: "Quando a montanha despertar..."',
+        'Ossos fossilizados incrustados na parede de lava solidificada.',
+        'Cristais de obsidiana formam padroes que lembram constelacoes.',
+        'Marcas de rituais antigos circundam um altar de pedra vulcanica.',
+    ],
+};
+
+function _showInscription(col, row, ins) {
+    const overlay = document.getElementById('dm-overlay');
+    const narr = document.getElementById('dm-narration');
+    const choices = document.getElementById('dm-choices');
+    if (!overlay || !narr || !choices) return;
+    narr.innerHTML = '';
+    choices.innerHTML = '';
+    const pool = INSCRIPTION_TEXTS[S.biome] || INSCRIPTION_TEXTS['cave'];
+    const text = pool[ins.textIdx % pool.length];
+    narr.innerHTML = '<p class="dm-text">' + text + '</p>';
+    const btnOk = document.createElement('button');
+    btnOk.className = 'dm-choice-btn';
+    btnOk.textContent = 'Interessante (+5 XP)';
+    btnOk.onclick = () => {
+        ins.read = true;
+        S._inscriptionsRead.add(col + ',' + row);
+        S.xpChange += 5;
+        overlay.classList.remove('active');
+        showTerrainToast('+5 XP (Inscricao)', 'reward');
+        saveState();
+    };
+    choices.appendChild(btnOk);
+    overlay.classList.add('active');
+}
+
+// =============================================
+// SAFE ROOM DETECTION
+// =============================================
+
+function checkSafeRoom(col, row) {
+    if (!S.safeRooms) return;
+    const sr = S.safeRooms.find(s => s.col === col && s.row === row && !s.discovered);
+    if (!sr) return;
+    sr.discovered = true;
+    showTerrainToast('Area Segura - Descanso sem emboscada', 'flavor');
+    S._inSafeRoom = true;
+    saveState();
+}
+
+// =============================================
+// ENVIRONMENTAL HAZARDS
+// =============================================
+
+function checkEnvironmentalHazards(col, row) {
+    if (!S.grid) return;
+    const neighbors = typeof getNeighbors === 'function' ? getNeighbors(col, row) : [];
+    let nearLava = false;
+    for (const [nc, nr] of neighbors) {
+        if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+        const tile = S.grid[nr] && S.grid[nr][nc];
+        if (tile === 'L') { nearLava = true; break; }
+    }
+    if (nearLava) {
+        const roll = Math.floor(Math.random() * 20) + 1;
+        const conMod = S.playerData ? (S.playerData.con_mod || 0) : 0;
+        if (roll + conMod < 12) {
+            const dmg = Math.floor(Math.random() * 4) + 1;
+            S.hpChange -= dmg;
+            showTerrainToast('Calor extremo! -' + dmg + ' HP (fogo)', 'damage');
+            if (typeof updateHPHUD === 'function') updateHPHUD();
+        }
+    }
+}
+
+// ── Door Opening Animation ──────────────────────────────
+
+function _animateDoorOpen(col, row, key) {
+    const pos = typeof hexToScreen === 'function' ? hexToScreen(col, row) : null;
+    if (!pos) {
+        // Fallback: instant open
+        S.grid[row][col] = '.';
+        S._doorsOpened.add(key);
+        _staticDirty = true;
+        saveState();
+        return;
+    }
+
+    // Create door animation overlay on main canvas
+    const frames = 8;
+    let frame = 0;
+    const doorW = HEX_W * 0.4;
+    const doorH = HEX_H * 0.6;
+
+    function drawDoorFrame() {
+        // Draw on the animated (main) canvas context
+        const sx = (pos.x - _cameraOffsetX) * _zoomLevel;
+        const sy = (pos.y - _cameraOffsetY) * _zoomLevel;
+        const progress = frame / frames; // 0 to 1
+
+        _ctx.save();
+        _ctx.translate(sx, sy);
+        _ctx.scale(_zoomLevel, _zoomLevel);
+
+        // Erase the area
+        _ctx.clearRect(-doorW, -doorH / 2, doorW * 2, doorH);
+
+        // Draw door swinging open (perspective transform via scaleX)
+        const scaleX = 1.0 - progress * 0.85;
+        _ctx.save();
+        _ctx.translate(-doorW * 0.4, 0);
+        _ctx.scale(scaleX, 1);
+
+        // Door panel
+        _ctx.fillStyle = 'rgba(100,70,40,' + (0.9 - progress * 0.5) + ')';
+        _ctx.fillRect(-doorW / 2, -doorH / 2, doorW, doorH);
+        // Iron bands
+        _ctx.fillStyle = 'rgba(60,60,60,' + (0.7 - progress * 0.4) + ')';
+        _ctx.fillRect(-doorW / 2, -doorH / 3, doorW, 2);
+        _ctx.fillRect(-doorW / 2, doorH / 3, doorW, 2);
+        // Handle
+        _ctx.fillStyle = 'rgba(160,130,60,' + (0.8 - progress * 0.5) + ')';
+        _ctx.beginPath();
+        _ctx.arc(doorW / 3, 0, 1.5, 0, Math.PI * 2);
+        _ctx.fill();
+
+        _ctx.restore();
+
+        // Dust particles during opening
+        if (progress > 0.2 && progress < 0.8) {
+            const dustCount = 3;
+            for (let i = 0; i < dustCount; i++) {
+                const dx = (Math.random() - 0.5) * doorW * 2;
+                const dy = (Math.random() - 0.5) * doorH;
+                const alpha = 0.3 * (1 - progress);
+                _ctx.fillStyle = 'rgba(180,160,120,' + alpha + ')';
+                _ctx.beginPath();
+                _ctx.arc(dx, dy - doorH * 0.2, 1 + Math.random(), 0, Math.PI * 2);
+                _ctx.fill();
+            }
+        }
+
+        _ctx.restore();
+
+        frame++;
+        if (frame <= frames) {
+            requestAnimationFrame(drawDoorFrame);
+        } else {
+            // Animation done — update grid
+            S.grid[row][col] = '.';
+            S._doorsOpened.add(key);
+            _staticDirty = true;
+            scheduleRender();
+            showTerrainToast('A porta range ao abrir...', 'flavor');
+            saveState();
+        }
+    }
+
+    drawDoorFrame();
+}
+
+// ── Environmental Storytelling (Flavor Texts) ────────────
+
+const _BIOME_FLAVOR = {
+    cave: [
+        'Gotas d\'agua ecoam no escuro...',
+        'O ar e umido e frio. Musgo cobre as pedras.',
+        'Riscos antigos marcam a parede da caverna.',
+        'Um cheiro de terra molhada permeia o tunel.',
+        'Estalagmites brilham fracamente com minerais.',
+        'Ossos pequenos se espalham pelo chao rochoso.',
+        'O eco de seus passos viaja longe na escuridao.',
+        'Raizes grossas perfuram o teto da caverna.',
+    ],
+    graveyard: [
+        'Lapides desgastadas se inclinam no escuro.',
+        'Uma brisa gelada carrega sussurros indistintos.',
+        'Teias de aranha cobrem um velho candelabro.',
+        'O chao de pedra esta marcado por runas apagadas.',
+        'Um odor de mofo e incenso velho paira no ar.',
+        'Ossos antigos descansam em nichos na parede.',
+        'A escuridao aqui parece mais densa que o normal.',
+        'Velas derretidas formam estalactites de cera.',
+    ],
+    volcanic: [
+        'O calor e quase insuportavel nesta area.',
+        'Fissuras no chao emitem um brilho alaranjado.',
+        'O ar treme com ondas de calor intenso.',
+        'Cristais negros de obsidiana brilham fracamente.',
+        'Cinzas vulcanicas cobrem tudo como neve escura.',
+        'O chao vibra com um tremor distante.',
+    ],
+    mountain: [
+        'O vento uiva pelas fendas na rocha.',
+        'Neve antiga se acumula nos cantos sombrios.',
+        'Marcas de garras enormes riscam a pedra.',
+        'O ar rarefeito dificulta a respiracao.',
+        'Cristais de gelo decoram as paredes de granito.',
+        'Pedras soltas rangem sob seus pes.',
+    ],
+    swamp: [
+        'Bolhas sobem da lama escura com um plop.',
+        'Raizes retorcidas formam arcos naturais.',
+        'O ar e denso com o cheiro de decomposicao.',
+        'Insetos luminescentes piscam entre os juncos.',
+        'A lama suga seus passos com avidez.',
+        'Vapores esverdeados sobem do charco proximo.',
+    ],
+    forest: [
+        'Raios de luz filtram pela copa das arvores.',
+        'Cogumelos brilhantes crescem em um tronco caido.',
+        'Pegadas de animais marcam a trilha a frente.',
+        'Folhas secas estaliam sob seus passos.',
+        'Um riacho murmura suavemente ao longe.',
+        'O canto de passaros ecoa entre as arvores.',
+    ],
+    desert: [
+        'O sol escaldante reflete na areia clara.',
+        'Dunas de areia fina se movem com o vento.',
+        'Ossos branqueados pelo sol marcam uma antiga trilha.',
+        'O calor cria miragens tremeluzentes no horizonte.',
+    ],
+};
+
+// Flavor text cooldown and tracking
+let _flavorCooldown = 0;
+const _FLAVOR_CHANCE = 0.12; // 12% chance per step
+const _FLAVOR_COOLDOWN_STEPS = 6; // Min 6 steps between flavor texts
+
+function checkFlavorText(col, row) {
+    if (_flavorCooldown > 0) { _flavorCooldown--; return; }
+
+    // Only on passable terrain, not special tiles
+    const tile = S.grid[row] && S.grid[row][col];
+    if (!tile || tile === '#' || tile === 'D' || tile === '@' || tile === 'E') return;
+
+    // Roll for flavor text
+    if (Math.random() > _FLAVOR_CHANCE) return;
+
+    const biome = S.biome || 'cave';
+    const pool = _BIOME_FLAVOR[biome] || _BIOME_FLAVOR['cave'];
+    if (!pool || pool.length === 0) return;
+
+    // Pick a flavor text based on position (deterministic-ish but varied)
+    const idx = (col * 7 + row * 13 + (S._stepCount || 0)) % pool.length;
+    const text = pool[idx];
+
+    showTerrainToast(text, 'flavor');
+    _flavorCooldown = _FLAVOR_COOLDOWN_STEPS;
+}
+

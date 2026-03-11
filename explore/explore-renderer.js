@@ -222,6 +222,68 @@ function renderLoop(timestamp) {
     _rafId = requestAnimationFrame(renderLoop);
 }
 
+
+// Ambient tile lighting — drawn on static cache for zero per-frame cost
+function _drawAmbientLighting(ctx) {
+    if (!S.grid || !S.fogState) return;
+    const ROWS_L = S.grid.length;
+    const COLS_L = S.grid[0] ? S.grid[0].length : 0;
+
+    for (let r = 0; r < ROWS_L; r++) {
+        for (let c = 0; c < COLS_L; c++) {
+            const tile = S.grid[r][c];
+            if (tile === '#' || tile === 'D') continue; // Skip walls/doors
+
+            const fogKey = c + ',' + r;
+            if (S.fogState[fogKey] !== 'visible' && S.fogState[fogKey] !== 'dim') continue;
+
+            // Check adjacent tiles for glow sources
+            const nbrs = typeof getNeighbors === 'function' ? getNeighbors(c, r) : [];
+            let glowColor = null;
+            let glowAlpha = 0;
+
+            for (const [nc, nr] of nbrs) {
+                if (nr < 0 || nr >= ROWS_L || nc < 0 || nc >= COLS_L) continue;
+                const adjTile = S.grid[nr][nc];
+                if (adjTile === 'L') {
+                    glowColor = '200,50,0'; glowAlpha = Math.max(glowAlpha, 0.08);
+                } else if (adjTile === 'R') {
+                    if (!glowColor || glowAlpha < 0.06) {
+                        glowColor = '196,149,58'; glowAlpha = Math.max(glowAlpha, 0.06);
+                    }
+                } else if (adjTile === 'W' || adjTile === 'w') {
+                    if (!glowColor || glowAlpha < 0.04) {
+                        glowColor = '40,100,180'; glowAlpha = Math.max(glowAlpha, 0.04);
+                    }
+                }
+            }
+
+            // Torch proximity glow
+            if (S.torches) {
+                for (const torch of S.torches) {
+                    const dist = typeof hexDist === 'function' ? hexDist(c, r, torch.col, torch.row) : 99;
+                    if (dist <= (torch.radius || 2)) {
+                        glowColor = '220,160,50';
+                        glowAlpha = Math.max(glowAlpha, 0.07 * (1 - dist / 3));
+                    }
+                }
+            }
+
+            if (!glowColor || glowAlpha <= 0) continue;
+
+            const pos = typeof hexToScreen === 'function' ? hexToScreen(c, r) : null;
+            if (!pos) continue;
+            const grad = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, HEX_W * 0.8);
+            grad.addColorStop(0, 'rgba(' + glowColor + ',' + glowAlpha + ')');
+            grad.addColorStop(1, 'rgba(' + glowColor + ',0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, HEX_W * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
 function renderFrame(timestamp) {
     _ctx.clearRect(0, 0, _canvasLogicalW, _canvasLogicalH);
 
@@ -232,7 +294,11 @@ function renderFrame(timestamp) {
     // 2. Draw static tiles (cached unless dirty)
     if (_staticDirty) {
         renderStaticTiles(timestamp);
-        _staticDirty = false;
+        
+    // ── Ambient tile lighting (glow near lava, ruins, water) ──
+    _drawAmbientLighting(_staticCtx);
+
+_staticDirty = false;
     }
     // Draw cached static layer
     _ctx.drawImage(_staticCanvas, 0, 0, _canvasLogicalW, _canvasLogicalH);
@@ -342,6 +408,55 @@ function renderFrame(timestamp) {
                 _ctx.translate(sx, sy);
                 _ctx.scale(_zoomLevel, _zoomLevel);
                 drawSecretWallHint(_ctx, 0, 0);
+                _ctx.restore();
+            }
+        }
+
+    
+        // ── CHEST ICONS (visible, unopened) ──
+        if (S.chests && S.chests.length > 0) {
+            for (const chest of S.chests) {
+                if (chest.opened) continue;
+                const fogKey = chest.col + ',' + chest.row;
+                const fogSt = S.fogState[fogKey];
+                if (fogSt !== 'visible') continue;
+                const cPos = hexToScreen(chest.col, chest.row);
+                const sx = (cPos.x - _cameraOffsetX) * _zoomLevel;
+                const sy = (cPos.y - _cameraOffsetY) * _zoomLevel;
+                _ctx.save();
+                _ctx.translate(sx, sy);
+                _ctx.scale(_zoomLevel, _zoomLevel);
+                // Draw treasure chest icon
+                _ctx.fillStyle = 'rgba(160,120,50,0.9)';
+                _ctx.fillRect(-5, -3, 10, 6);
+                _ctx.fillStyle = 'rgba(196,149,58,0.9)';
+                _ctx.fillRect(-6, -4, 12, 2);
+                _ctx.fillStyle = 'rgba(120,80,30,0.8)';
+                _ctx.fillRect(-1, -1, 2, 2);
+                _ctx.restore();
+            }
+        }
+
+        // ── SAFE ROOM MARKER ──
+        if (S.safeRooms && S.safeRooms.length > 0) {
+            for (const sr of S.safeRooms) {
+                if (sr.discovered) continue;
+                const fogKey = sr.col + ',' + sr.row;
+                if (S.fogState[fogKey] !== 'visible') continue;
+                const sPos = hexToScreen(sr.col, sr.row);
+                const sx = (sPos.x - _cameraOffsetX) * _zoomLevel;
+                const sy = (sPos.y - _cameraOffsetY) * _zoomLevel;
+                _ctx.save();
+                _ctx.translate(sx, sy);
+                _ctx.scale(_zoomLevel, _zoomLevel);
+                // Subtle safe glow
+                const grad = _ctx.createRadialGradient(0, 0, 0, 0, 0, HEX_W * 0.5);
+                grad.addColorStop(0, 'rgba(100,180,100,0.12)');
+                grad.addColorStop(1, 'rgba(100,180,100,0)');
+                _ctx.fillStyle = grad;
+                _ctx.beginPath();
+                _ctx.arc(0, 0, HEX_W * 0.5, 0, Math.PI * 2);
+                _ctx.fill();
                 _ctx.restore();
             }
         }
@@ -874,6 +989,17 @@ function onMoveComplete(col, row) {
                 return;
             }
         }
+        // Check for chests
+        if (typeof checkChestAtPosition === 'function') {
+            const chest = checkChestAtPosition(col, row);
+            if (chest) showChestEvent(chest);
+        }
+        // Check for safe rooms
+        if (typeof checkSafeRoom === 'function') checkSafeRoom(col, row);
+        // Environmental hazards (lava proximity)
+        if (typeof checkEnvironmentalHazards === 'function') checkEnvironmentalHazards(col, row);
+        // Environmental storytelling flavor text (D&D exploration ambiance)
+        if (typeof checkFlavorText === 'function') checkFlavorText(col, row);
 
 const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.has(p.id));
     if (poi) {
