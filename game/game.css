@@ -2410,14 +2410,15 @@
 }
 .ally-card {
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 6px 8px;
-    margin-bottom: 4px;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    margin-bottom: 6px;
     background: var(--v-bg-card);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm, 6px);
-    min-height: 40px;
+    min-height: 48px;
+    overflow: hidden;
     animation: cardSlideIn 0.35s ease-out both;
 }
 .ally-card:nth-child(2) { animation-delay: 0.06s; }
@@ -2428,25 +2429,33 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 .ally-card.ally-dead {
-    opacity: 0.55;
+    opacity: 0.5;
+    filter: grayscale(0.3);
+}
+.ally-ico-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 1px solid var(--v-border);
 }
 .ally-ico {
-    font-size: 20px;
+    font-size: 22px;
     line-height: 1;
-    flex-shrink: 0;
-    width: 24px;
-    text-align: center;
-    padding-top: 2px;
 }
 .ally-info {
     flex: 1;
     min-width: 0;
+    padding: 6px 10px;
 }
 .ally-name-row {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 3px;
+    margin-bottom: 1px;
 }
 .ally-name {
     font-size: 13px;
@@ -2458,11 +2467,18 @@
 }
 .ally-lvl {
     font-size: 10px;
-    color: var(--v-gold-dim, #b8860b);
-    background: rgba(196, 149, 58, 0.1);
-    padding: 1px 4px;
+    color: var(--v-gold, #c4953a);
+    background: rgba(196, 149, 58, 0.12);
+    padding: 1px 5px;
     border-radius: 3px;
     flex-shrink: 0;
+    font-weight: 600;
+}
+.ally-sub {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    margin-bottom: 4px;
+    line-height: 1.2;
 }
 .ally-dur {
     font-size: 10px;
@@ -2486,6 +2502,11 @@
     font-size: 11px;
     color: var(--v-red, #e74c3c);
     font-style: italic;
+}
+.ally-aff {
+    font-size: 10px;
+    margin-top: 2px;
+    letter-spacing: -1px;
 }
 .ally-desc {
     font-size: 11px;
@@ -2516,7 +2537,7 @@
 .ally-bar-fill {
     height: 100%;
     border-radius: 3px;
-    transition: width 0.3s ease;
+    transition: width 0.5s ease;
 }
 .ally-bar-hp {
     background: linear-gradient(90deg, #22c55e, #4ade80);
@@ -2602,10 +2623,15 @@
 /* ─── Member Detail Card ─── */
 .member-detail-card {
     margin: 8px 0;
-    padding: 10px 12px;
+    padding: 0;
     background: var(--v-bg-card);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm, 6px);
+    overflow: hidden;
+}
+.member-bars {
+    padding: 10px 12px 6px;
+    border-bottom: 1px solid var(--v-border);
 }
 .member-bar-icon {
     font-size: 12px;
@@ -2617,33 +2643,124 @@
     background: linear-gradient(90deg, #a855f7, #c084fc);
 }
 
-/* Member stats grid */
+/* Member stats grid (compact 3x2) */
 .member-stats-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 12px;
-    margin-top: 8px;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px 0;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--v-border);
 }
 .member-stat {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     font-size: 12px;
+    padding: 3px 0;
+}
+.member-stat-ico {
+    font-size: 11px;
+    width: 14px;
+    text-align: center;
+    flex-shrink: 0;
 }
 .member-stat-label {
     color: var(--v-text-dim);
     font-weight: 600;
-    width: 28px;
+    font-size: 10px;
+    width: 24px;
 }
 .member-stat-val {
     color: var(--v-text);
-    font-weight: 600;
-    width: 18px;
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 14px;
     text-align: right;
 }
 .member-stat-mod {
-    color: var(--v-text-dim);
+    color: var(--v-gold, #c4953a);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Member spells */
+.member-spells {
+    padding: 6px 12px 8px;
+    border-bottom: 1px solid var(--v-border);
+}
+.member-spells-title {
     font-size: 11px;
+    color: var(--v-text-dim);
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+.member-spells-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.member-spell-tag {
+    font-size: 11px;
+    color: var(--v-text);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2px 7px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+/* Member affinity */
+.member-aff {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--v-border);
+}
+.member-aff-label {
+    font-size: 11px;
+    color: var(--v-text-dim);
+}
+.member-aff-dots {
+    display: flex;
+    gap: 3px;
+}
+.aff-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.aff-dot-filled {
+    background: #4ade80;
+    border-color: #22c55e;
+    box-shadow: 0 0 4px rgba(74, 222, 128, 0.3);
+}
+.member-aff-tier {
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* Member equipment summary */
+.member-equip {
+    padding: 5px 12px;
+    border-bottom: 1px solid var(--v-border);
+}
+.member-equip-label {
+    font-size: 11px;
+    color: var(--v-text-dim);
+}
+
+/* Member lore */
+.member-lore {
+    padding: 6px 12px 8px;
+    font-size: 12px;
+    color: var(--v-text-dim);
+    font-style: italic;
+    line-height: 1.4;
 }
 
 

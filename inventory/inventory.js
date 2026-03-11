@@ -79,6 +79,9 @@ const _IC = {
     food: '<circle cx="10" cy="10" r="5"/><path d="M14 14l6 6"/><line x1="14" y1="7" x2="17" y2="7"/>',
     stealth: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/><line x1="4" y1="20" x2="20" y2="4" stroke-width="2"/>',
     tent: '<path d="M3 20L12 4l9 16z"/><line x1="12" y1="4" x2="12" y2="20"/><path d="M8 20c0-2 2-4 4-4s4 2 4 4"/>',
+    // Body silhouette (gender-neutral) for equipment view
+    body_silhouette: '<path d="M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" fill="rgba(255,255,255,0.06)" stroke-width="0.8"/>' +
+        '<path d="M8 9h8c1 0 2 1 2.5 3l1 4h-3l-.5-3H16v9h-3v-5h-2v5H8v-9h0l-.5 3H4.5l1-4C6 10 7 9 8 9z" fill="rgba(255,255,255,0.06)" stroke-width="0.8"/>',
 };
 function vi(name, sz) {
     const p = _IC[name]; if (!p) return '';
@@ -532,82 +535,271 @@ function getFilteredItems() {
 // ══════════════════════════════════════════════════════════
 function renderEquipTab(c) {
     let html = '';
+    const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
 
-    // Stats summary
+    // Sub-navigation: show who's equipment we're viewing
+    if (D.allies && D.allies.length > 0) {
+        html += '<div class="ally-equip-nav">';
+        const playerActive = activeTarget === 'player' ? ' active' : '';
+        const pName = D.p?.n || 'Personagem';
+        html += `<button class="ally-equip-nav-btn${playerActive}" onclick="switchEquipTarget('player')">${pName}</button>`;
+        D.allies.forEach(a => {
+            const allyActive = activeTarget === a.id ? ' active' : '';
+            html += `<button class="ally-equip-nav-btn${allyActive}" onclick="switchEquipTarget('${esc(a.id)}')">${a.ico || '⚔️'} ${a.n}</button>`;
+        });
+        html += '</div>';
+    }
+
+    // Stats summary + sets + loadouts (player only)
     if (activeTarget === 'player') {
         html += buildStatsSummary();
         html += buildSetProgress();
         html += buildLoadoutBar();
+    } else {
+        // Show ally header with stats
+        const ally = D.allies.find(a => a.id === activeTarget);
+        if (ally) {
+            const hpPct = ally.mhp > 0 ? Math.round((ally.hp / ally.mhp) * 100) : 0;
+            html += `<div class="ally-equip-header">
+                <span>${ally.ico} <b>${ally.n}</b> · ${ally.c} Lv${ally.l}</span>
+                <span>❤️ ${ally.hp}/${ally.mhp} · ${vi('shield', 12)} CA ${ally.ac}</span>
+            </div>`;
+        }
     }
 
-    html += '<div class="equip-grid">';
-    const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+    // Auto-equip button (player only)
+    if (activeTarget === 'player') {
+        html += `<div class="auto-equip-row">
+            <button class="auto-equip-btn" onclick="doAutoEquip()">
+                ${vi('sparkle', 14)} Auto-Equipar
+            </button>
+        </div>`;
+    }
 
-    const SLOT_GROUPS = [
-        { label: `${vi('sword', 13)} Armas`, slots: ['main_hand', 'off_hand'] },
-        { label: `${vi('chest', 13)} Armadura`, slots: ['head', 'chest', 'shoulders', 'hands', 'legs', 'feet'] },
-        { label: `${vi('sparkle', 13)} Acessórios`, slots: ['necklace', 'ring_1', 'ring_2', 'belt', 'cloak', 'map'] },
+    // Body silhouette with slot positions
+    html += '<div class="body-equip">';
+    html += _buildBodySilhouette(eq);
+    html += '</div>';
+
+    c.innerHTML = html;
+}
+
+function _buildBodySilhouette(eq) {
+    // Layout: body SVG in center, slots arranged around it
+    // Left column: head, shoulders, chest, hands, legs, feet
+    // Right column: necklace, cloak, main_hand, off_hand, belt, rings
+    // The body silhouette is a CSS background, slots are positioned on a grid
+
+    const LEFT_SLOTS = [
+        { slot: 'head',      row: 1 },
+        { slot: 'shoulders', row: 2 },
+        { slot: 'chest',     row: 3 },
+        { slot: 'hands',     row: 4 },
+        { slot: 'legs',      row: 5 },
+        { slot: 'feet',      row: 6 },
     ];
+    const RIGHT_SLOTS = [
+        { slot: 'necklace',  row: 1 },
+        { slot: 'cloak',     row: 2 },
+        { slot: 'main_hand', row: 3 },
+        { slot: 'off_hand',  row: 4 },
+        { slot: 'belt',      row: 5 },
+        { slot: 'ring_1',    row: 6 },
+    ];
+    const BOTTOM_SLOTS = ['ring_2', 'map'];
 
-    SLOT_GROUPS.forEach(group => {
-        html += `<div class="equip-group-label">${group.label}</div>`;
-        group.slots.forEach(slot => {
-            renderEquipSlot(slot);
+    let html = '<div class="body-grid">';
+
+    // Left column
+    html += '<div class="body-col body-col-left">';
+    LEFT_SLOTS.forEach(s => { html += _buildBodySlot(s.slot, eq); });
+    html += '</div>';
+
+    // Center body silhouette
+    html += `<div class="body-center">
+        <svg class="body-svg" viewBox="0 0 80 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Head -->
+            <circle cx="40" cy="18" r="12" fill="rgba(255,255,255,0.04)" stroke="rgba(196,149,58,0.2)" stroke-width="1"/>
+            <!-- Neck -->
+            <line x1="40" y1="30" x2="40" y2="38" stroke="rgba(196,149,58,0.15)" stroke-width="1"/>
+            <!-- Torso -->
+            <path d="M24 38 H56 L58 90 H22 Z" fill="rgba(255,255,255,0.03)" stroke="rgba(196,149,58,0.2)" stroke-width="1" stroke-linejoin="round"/>
+            <!-- Belt area -->
+            <rect x="22" y="86" width="36" height="6" rx="1" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
+            <!-- Left Arm -->
+            <path d="M24 40 L12 58 L8 80" stroke="rgba(196,149,58,0.2)" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <!-- Right Arm -->
+            <path d="M56 40 L68 58 L72 80" stroke="rgba(196,149,58,0.2)" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <!-- Left Hand -->
+            <circle cx="8" cy="82" r="4" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
+            <!-- Right Hand -->
+            <circle cx="72" cy="82" r="4" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
+            <!-- Left Leg -->
+            <path d="M30 92 L28 130 L26 160" stroke="rgba(196,149,58,0.2)" stroke-width="1" fill="none"/>
+            <!-- Right Leg -->
+            <path d="M50 92 L52 130 L54 160" stroke="rgba(196,149,58,0.2)" stroke-width="1" fill="none"/>
+            <!-- Left Foot -->
+            <path d="M26 160 L20 168 L30 168 Z" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
+            <!-- Right Foot -->
+            <path d="M54 160 L50 168 L60 168 Z" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
+            <!-- Shoulder pads -->
+            <ellipse cx="22" cy="40" rx="6" ry="4" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
+            <ellipse cx="58" cy="40" rx="6" ry="4" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
+        </svg>
+    </div>`;
+
+    // Right column
+    html += '<div class="body-col body-col-right">';
+    RIGHT_SLOTS.forEach(s => { html += _buildBodySlot(s.slot, eq); });
+    html += '</div>';
+
+    html += '</div>'; // close body-grid
+
+    // Bottom row for remaining slots
+    html += '<div class="body-bottom-row">';
+    BOTTOM_SLOTS.forEach(s => { html += _buildBodySlot(s, eq); });
+    html += '</div>';
+
+    return html;
+}
+
+function _buildBodySlot(slot, eq) {
+    const item = eq[slot] || null;
+    const it = item ? getItemData(item) : null;
+    const filled = item ? 'filled' : '';
+    const icon = item ? (it?.e || '📦') : getSlotEmptyIcon(slot);
+    const label = SLOT_NAMES[slot] || slot;
+    const shortName = item ? (item.length > 14 ? item.slice(0, 12) + '…' : item) : '—';
+    const rarity = item ? (it?.r || 'common') : '';
+    const rarityBorder = rarity && item ? `border-color:${getRarityColor(rarity)};` : '';
+
+    // Upgrade indicator
+    let upgradeDot = '';
+    if (activeTarget === 'player' && !item) {
+        const compat = getCompatibleItems(slot);
+        if (compat.length > 0) upgradeDot = '<span class="bs-upgrade-dot"></span>';
+    } else if (activeTarget === 'player' && item) {
+        const compat = getCompatibleItems(slot);
+        const hasUpgrade = compat.some(ci => {
+            const cit = getItemData(ci.name);
+            if (ci.name === item) return false;
+            const { cls } = compareItemsDetailed(cit, it || { ac: 0, b: 0, hb: 0, mb: 0 }, slot);
+            return cls === 'better';
         });
+        if (hasUpgrade) upgradeDot = '<span class="bs-upgrade-dot"></span>';
+    }
+
+    // Gem/rune indicators
+    let gemDots = '';
+    if (activeTarget === 'player' && item) {
+        const sockets = it?.sk || 0;
+        const gems = localGems[slot] || [];
+        const rune = localRunes[slot];
+        if (sockets > 0 || rune) {
+            gemDots = '<div class="bs-gems">';
+            for (let i = 0; i < sockets; i++) {
+                gemDots += `<span class="bs-gem ${gems[i] ? 'bs-gem-filled' : ''}"></span>`;
+            }
+            if (rune) gemDots += `<span class="bs-rune">${vi('orb', 8)}</span>`;
+            gemDots += '</div>';
+        }
+    }
+
+    return `<div class="body-slot ${filled}" onclick="openSlotModal('${slot}')" style="${rarityBorder}">
+        ${upgradeDot}
+        <div class="bs-icon">${icon}</div>
+        <div class="bs-text">
+            <div class="bs-label">${label}</div>
+            <div class="bs-name">${shortName}</div>
+        </div>
+        ${gemDots}
+    </div>`;
+}
+
+// ─── Auto-Equip Logic ───
+function doAutoEquip() {
+    if (activeTarget !== 'player') return;
+    haptic('medium');
+
+    const SLOT_LIST = ['head', 'chest', 'shoulders', 'hands', 'legs', 'feet',
+                       'main_hand', 'off_hand', 'necklace', 'ring_1', 'ring_2',
+                       'belt', 'cloak', 'map'];
+    let equipped = 0;
+
+    SLOT_LIST.forEach(slot => {
+        const currentItem = localEq[slot] || null;
+        const currentData = currentItem ? getItemData(currentItem) : { ac: 0, b: 0, hb: 0, mb: 0 };
+        const compat = getCompatibleItems(slot);
+        if (!compat.length) return;
+
+        // Find best item for this slot
+        let bestName = currentItem;
+        let bestScore = _calcItemScore(currentData, slot);
+
+        compat.forEach(ci => {
+            if (ci.name === currentItem) return;
+            // Skip items already equipped in other slots
+            const alreadyEquipped = Object.entries(localEq).some(
+                ([s, n]) => s !== slot && n === ci.name
+            );
+            if (alreadyEquipped) return;
+
+            const cit = getItemData(ci.name);
+            const score = _calcItemScore(cit, slot);
+            if (score > bestScore) {
+                bestScore = score;
+                bestName = ci.name;
+            }
+        });
+
+        if (bestName && bestName !== currentItem) {
+            // Queue equip operation
+            if (currentItem) {
+                pendingOps.push({ t: 'unequip', slot, target: 'player' });
+                localEq[slot] = null;
+            }
+            pendingOps.push({ t: 'equip', item: bestName, slot, target: 'player' });
+            localEq[slot] = bestName;
+            // Remove from inventory
+            const invItem = localInv.find(i => i.n === bestName);
+            if (invItem && invItem.q > 0) invItem.q--;
+            equipped++;
+        }
     });
 
-    function renderEquipSlot(slot) {
-        const item = eq[slot] || null;
-        const it = item ? getItemData(item) : null;
-        const filled = item ? 'filled' : '';
-        const icon = item ? (it?.e || '📦') : getSlotEmptyIcon(slot);
-        const label = SLOT_NAMES[slot] || slot;
-        const nameDisplay = item ? item : '—';
-        const rarity = item ? (it?.r || 'common') : '';
-
-        // Gem/Rune badges for player slots
-        let badges = '';
-        if (activeTarget === 'player' && item) {
-            const sockets = it?.sk || 0;
-            const gems = localGems[slot] || [];
-            const rune = localRunes[slot];
-            if (sockets > 0) {
-                badges += '<div class="es-badges">';
-                for (let i = 0; i < sockets; i++) {
-                    const gFilled = gems[i] ? 'filled' : '';
-                    badges += `<div class="es-gem-dot ${gFilled}"></div>`;
-                }
-                if (rune) badges += `<span class="es-rune-dot">${vi('orb', 10)}</span>`;
-                badges += '</div>';
-            } else if (rune) {
-                badges += `<div class="es-badges"><span class="es-rune-dot">${vi('orb', 10)}</span></div>`;
-            }
-        }
-
-        // Upgrade available indicator
-        let upgradeBadge = '';
-        if (activeTarget === 'player') {
-            const compat = getCompatibleItems(slot);
-            const hasUpgrade = compat.some(ci => {
-                const cit = getItemData(ci.name);
-                if (ci.name === item) return false;
-                const { cls } = compareItemsDetailed(cit, it || { ac: 0, b: 0, hb: 0, mb: 0 }, slot);
-                return cls === 'better';
-            });
-            if (hasUpgrade) upgradeBadge = '<span style="position:absolute;top:4px;right:6px;font-size:10px;color:var(--v-success);font-weight:700;background:rgba(76,175,80,0.15);padding:1px 5px;border-radius:8px;">⬆</span>';
-        }
-
-        html += `<div class="equip-slot ${filled}" onclick="openSlotModal('${slot}')"
-                style="position:relative;${rarity && item ? `border-left:3px solid ${getRarityColor(rarity)}` : ''}">
-                ${upgradeBadge}
-                <div class="es-label">${label}</div>
-                <div class="es-icon">${icon}</div>
-                <div class="es-item">${nameDisplay}</div>
-                ${badges}
-            </div>`;
+    if (equipped > 0) {
+        localAC = calcLocalAC();
+        updateHeader();
+        renderTab();
+        toast(`⚔️ ${equipped} equipamento(s) otimizado(s)!`, 'ok');
+    } else {
+        toast('✅ Já está com os melhores equipamentos!', 'ok');
     }
-    html += '</div>';
-    c.innerHTML = html;
+}
+
+function _calcItemScore(it, slot) {
+    if (!it) return 0;
+    let score = 0;
+    // Weapon slots prioritize damage bonus
+    if (slot === 'main_hand' || slot === 'off_hand') {
+        score += (it.b || 0) * 10;
+        // Parse damage die (e.g., "1d8" = avg 4.5)
+        if (it.dd) {
+            const dm = it.dd.match(/(\d+)d(\d+)/);
+            if (dm) score += parseInt(dm[1]) * (parseInt(dm[2]) + 1) / 2;
+        }
+    }
+    // Armor slots prioritize AC
+    score += (it.ac || 0) * 8;
+    // HP/MP bonuses are always good
+    score += (it.hb || 0) * 3;
+    score += (it.mb || 0) * 3;
+    // General bonus
+    score += (it.b || 0) * 5;
+    // Rarity as tiebreaker
+    const rarityScores = { common: 0, uncommon: 1, rare: 2, very_rare: 3, legendary: 4 };
+    score += (rarityScores[it.r] || 0) * 0.5;
+    return score;
 }
 
 function buildStatsSummary() {
@@ -730,17 +922,14 @@ function openAllyEquip(npcId) {
     activeTab = 'equip';
     buildTabs();
     renderTab();
-    // Show back button to allies
-    const c = document.getElementById('mainContent');
-    const ally = D.allies.find(a => a.id === npcId);
-    const allyName = ally ? ally.n : npcId;
-    c.innerHTML = `<div style="margin-bottom:10px;">
-            <span style="font-size:13px;color:var(--v-text-dim);cursor:pointer;"
-                onclick="switchTab('allies')">← Aliados</span>
-            <span style="font-size:14px;color:var(--v-gold);margin-left:8px;font-weight:600;">
-                ${allyName}
-            </span>
-        </div>` + c.innerHTML;
+}
+
+function switchEquipTarget(target) {
+    haptic('light');
+    activeTarget = target;
+    activeTab = 'equip';
+    buildTabs();
+    renderTab();
 }
 
 // ── Loadouts ──
@@ -2392,9 +2581,14 @@ const _RETURN_LABELS = {
 };
 
 function _initNavBar() {
-    const label = _RETURN_LABELS[_returnTo] || _RETURN_LABELS.game;
-    const backBtn = document.querySelector('#navBar .inv-nav-btn:first-child span');
-    if (backBtn) backBtn.textContent = label;
+    // Nav bar removed — Telegram BackButton handles navigation
+    try {
+        if (tg && tg.BackButton) {
+            tg.BackButton.show();
+            tg.BackButton.offClick(navBack);
+            tg.BackButton.onClick(navBack);
+        }
+    } catch(e) { console.warn('[INVENTORY] BackButton setup:', e); }
 }
 
 function navBack() {

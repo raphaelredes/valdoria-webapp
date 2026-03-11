@@ -620,17 +620,20 @@ function renderAllyCards(container, allies) {
         const card = document.createElement('div');
         card.className = 'ally-card' + (a.dead ? ' ally-dead' : '');
 
-        // Left: icon
+        // Left: icon column
+        const icoCol = document.createElement('div');
+        icoCol.className = 'ally-ico-col';
         const ico = document.createElement('div');
         ico.className = 'ally-ico';
         ico.textContent = a.ico || '⚔️';
-        card.appendChild(ico);
+        icoCol.appendChild(ico);
+        card.appendChild(icoCol);
 
         // Center: info
         const info = document.createElement('div');
         info.className = 'ally-info';
 
-        // Name row: name + level + duration/level-up badges
+        // Name row: name + level + badges
         const nameRow = document.createElement('div');
         nameRow.className = 'ally-name-row';
         const nameEl = document.createElement('span');
@@ -646,7 +649,7 @@ function renderAllyCards(container, allies) {
         if (a.type === 'merc' && a.dur > 0) {
             const dur = document.createElement('span');
             dur.className = 'ally-dur' + (a.dur <= 2 ? ' ally-dur-warn' : '');
-            dur.textContent = '📜' + a.dur;
+            dur.textContent = '📜 ' + a.dur;
             nameRow.appendChild(dur);
         }
         if (a.lu && a.lu > 0) {
@@ -656,6 +659,16 @@ function renderAllyCards(container, allies) {
             nameRow.appendChild(luBadge);
         }
         info.appendChild(nameRow);
+
+        // Class + type subtitle
+        const subRow = document.createElement('div');
+        subRow.className = 'ally-sub';
+        let subText = a.c || '';
+        if (a.type === 'merc') subText += ' · Mercenário';
+        else if (a.type === 'adv') subText += ' · Explorador';
+        else if (a.type === 'familiar') subText = 'Familiar';
+        subRow.textContent = subText;
+        info.appendChild(subRow);
 
         // HP bar
         if (a.mhp > 0 && !a.dead) {
@@ -672,11 +685,20 @@ function renderAllyCards(container, allies) {
             info.appendChild(_makeAllyBar(a.mp, a.mmp, 'mp'));
         }
 
+        // Affinity indicator (party members only)
+        if (a.type === 'party' && a.aff > 0 && !a.dead) {
+            const affRow = document.createElement('div');
+            affRow.className = 'ally-aff';
+            const hearts = a.aff >= 5 ? '💚💚💚' : a.aff >= 3 ? '💚💚' : '💚';
+            affRow.textContent = hearts;
+            info.appendChild(affRow);
+        }
+
         // Adventurer description
         if (a.type === 'adv' && a.desc) {
             const descEl = document.createElement('div');
             descEl.className = 'ally-desc';
-            descEl.textContent = '✨ ' + a.desc + (a.dur > 0 ? ' ⏳ ' + a.dur + ' combates' : '');
+            descEl.textContent = '✨ ' + a.desc + (a.dur > 0 ? ' · ⏳ ' + a.dur : '');
             info.appendChild(descEl);
         }
 
@@ -793,25 +815,30 @@ function renderMemberDetail(container, m) {
     var wrap = document.createElement('div');
     wrap.className = 'member-detail-card';
 
+    // ── Bars section ──
+    var barsHtml = '<div class="member-bars">';
+
     // HP bar
     var hpPct = m.mhp > 0 ? Math.round((m.hp / m.mhp) * 100) : 0;
     var hpCls = hpPct > 75 ? 'ally-bar-hp' : hpPct > 40 ? 'ally-bar-hp ally-bar-low' : 'ally-bar-hp ally-bar-critical';
-    var bars = '<div class="ally-bar-row"><span class="member-bar-icon">❤️</span><div class="ally-bar-track"><div class="ally-bar-fill ' + hpCls + '" style="width:' + hpPct + '%"></div></div><span class="ally-bar-label">' + m.hp + '/' + m.mhp + '</span></div>';
+    barsHtml += '<div class="ally-bar-row"><span class="member-bar-icon">❤️</span><div class="ally-bar-track"><div class="ally-bar-fill ' + hpCls + '" style="width:' + hpPct + '%"></div></div><span class="ally-bar-label">' + m.hp + '/' + m.mhp + '</span></div>';
 
     // MP bar
     if (m.mmp > 0) {
         var mpPct = m.mmp > 0 ? Math.round((m.mp / m.mmp) * 100) : 0;
-        bars += '<div class="ally-bar-row"><span class="member-bar-icon">' + (m.res || '💧') + '</span><div class="ally-bar-track"><div class="ally-bar-fill ally-bar-mp" style="width:' + mpPct + '%"></div></div><span class="ally-bar-label">' + m.mp + '/' + m.mmp + '</span></div>';
+        barsHtml += '<div class="ally-bar-row"><span class="member-bar-icon">' + (m.res || '💧') + '</span><div class="ally-bar-track"><div class="ally-bar-fill ally-bar-mp" style="width:' + mpPct + '%"></div></div><span class="ally-bar-label">' + m.mp + '/' + m.mmp + '</span></div>';
     }
 
     // XP bar
     if (m.xpn > 0) {
         var xpPct = m.xpn > 0 ? Math.round((m.xp / m.xpn) * 100) : 0;
-        bars += '<div class="ally-bar-row"><span class="member-bar-icon">✨</span><div class="ally-bar-track"><div class="ally-bar-fill ally-bar-xp" style="width:' + xpPct + '%"></div></div><span class="ally-bar-label">' + m.xp + '/' + m.xpn + '</span></div>';
+        barsHtml += '<div class="ally-bar-row"><span class="member-bar-icon">✨</span><div class="ally-bar-track"><div class="ally-bar-fill ally-bar-xp" style="width:' + xpPct + '%"></div></div><span class="ally-bar-label">' + m.xp + '/' + m.xpn + '</span></div>';
     }
+    barsHtml += '</div>';
 
-    // Stats grid
+    // ── Stats grid (compact 3x2) ──
     var stats = m.stats || {};
+    var statsIcons = {strength:'💪', dexterity:'⚡', constitution:'🧱', intelligence:'🧠', wisdom:'🦉', charisma:'🎭'};
     var statsNames = [['FOR', 'strength'], ['DES', 'dexterity'], ['CON', 'constitution'], ['INT', 'intelligence'], ['SAB', 'wisdom'], ['CAR', 'charisma']];
     var statsHtml = '<div class="member-stats-grid">';
     for (var i = 0; i < statsNames.length; i++) {
@@ -820,11 +847,49 @@ function renderMemberDetail(container, m) {
         var val = stats[key] || 10;
         var mod = Math.floor((val - 10) / 2);
         var modStr = mod >= 0 ? '+' + mod : '' + mod;
-        statsHtml += '<div class="member-stat"><span class="member-stat-label">' + label + '</span><span class="member-stat-val">' + val + '</span><span class="member-stat-mod">(' + modStr + ')</span></div>';
+        var icon = statsIcons[key] || '';
+        statsHtml += '<div class="member-stat"><span class="member-stat-ico">' + icon + '</span><span class="member-stat-label">' + label + '</span><span class="member-stat-val">' + val + '</span><span class="member-stat-mod">' + modStr + '</span></div>';
     }
     statsHtml += '</div>';
 
-    wrap.innerHTML = bars + statsHtml;
+    // ── Spells/abilities section ──
+    var spellsHtml = '';
+    if (m.spells && m.spells.length > 0) {
+        var casterClasses = ['Mago', 'Clérigo', 'Druida', 'Feiticeiro', 'Bruxo', 'Bardo'];
+        var spellTitle = casterClasses.indexOf(m.c) >= 0 ? '📜 Magias' : '⚔️ Habilidades';
+        spellsHtml = '<div class="member-spells"><div class="member-spells-title">' + spellTitle + '</div>';
+        spellsHtml += '<div class="member-spells-list">';
+        for (var j = 0; j < m.spells.length; j++) {
+            spellsHtml += '<span class="member-spell-tag">' + m.spells[j] + '</span>';
+        }
+        spellsHtml += '</div></div>';
+    }
+
+    // ── Affinity section ──
+    var affHtml = '';
+    if (m.aff !== undefined) {
+        var affLevel = m.aff >= 5 ? 'Leal' : m.aff >= 3 ? 'Confiança' : m.aff >= 1 ? 'Conhecido' : 'Novo';
+        var affColor = m.aff >= 5 ? '#4ade80' : m.aff >= 3 ? '#60a5fa' : m.aff >= 1 ? '#fbbf24' : 'var(--v-text-dim)';
+        var dots = '';
+        for (var d = 0; d < 5; d++) {
+            dots += '<span class="aff-dot' + (d < m.aff ? ' aff-dot-filled' : '') + '"></span>';
+        }
+        affHtml = '<div class="member-aff"><span class="member-aff-label">💚 Afinidade</span><span class="member-aff-dots">' + dots + '</span><span class="member-aff-tier" style="color:' + affColor + '">' + affLevel + '</span></div>';
+    }
+
+    // ── Equipment summary ──
+    var equipHtml = '';
+    if (m.equip && m.equip.length > 0) {
+        equipHtml = '<div class="member-equip"><span class="member-equip-label">🛡️ ' + m.equip.length + ' equipado' + (m.equip.length > 1 ? 's' : '') + '</span></div>';
+    }
+
+    // ── Lore ──
+    var loreHtml = '';
+    if (m.lore) {
+        loreHtml = '<div class="member-lore">' + m.lore + '</div>';
+    }
+
+    wrap.innerHTML = barsHtml + statsHtml + spellsHtml + affHtml + equipHtml + loreHtml;
     container.appendChild(wrap);
 }
 

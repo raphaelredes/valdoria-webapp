@@ -371,14 +371,18 @@
         }
 
         .sell-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px;
             background: var(--v-bg-card);
             border-radius: var(--v-radius);
             border: 1px solid var(--v-border);
             transition: all 0.2s;
+            overflow: hidden;
+        }
+
+        .sell-row .sr-main {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
             cursor: pointer;
         }
 
@@ -430,42 +434,88 @@
             white-space: nowrap;
         }
 
+        .sr-qty-badge {
+            font-size: 11px;
+            color: var(--v-text-dim);
+            font-weight: 400;
+        }
+
         .sell-row .sr-price {
             font-size: 11px;
             color: var(--v-gold);
         }
 
-        .sell-row .sr-qty-controls {
+        .sr-total {
+            color: var(--v-gold);
+            font-weight: 600;
+        }
+
+        /* Quantity row (shown below item when selected + qty > 1) */
+        .sr-qty-row {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            padding: 6px 10px 8px;
+            border-top: 1px solid var(--v-border);
+            justify-content: center;
+        }
+
+        .sr-qty-label {
+            font-size: 12px;
+            color: var(--v-text-dim);
         }
 
         .qty-btn {
-            width: 26px;
-            height: 26px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             border: 1px solid var(--v-border);
             background: var(--v-bg-raised);
             color: var(--v-text);
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.15s;
             font-family: var(--v-font);
+            -webkit-tap-highlight-color: transparent;
         }
 
         .qty-btn:active {
             transform: scale(0.9);
+            background: var(--v-gold-dim);
+            color: #fff;
+        }
+
+        .qty-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .qty-btn-all {
+            padding: 6px 12px;
+            border-radius: var(--v-radius-pill);
+            border: 1px solid var(--v-gold-dim);
+            background: transparent;
+            color: var(--v-gold);
+            font-size: 12px;
+            cursor: pointer;
+            font-family: var(--v-font);
+            transition: all 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .qty-btn-all:active {
+            background: var(--v-gold-dim);
+            color: #fff;
         }
 
         .qty-val {
             font-size: 13px;
             color: var(--v-gold);
             font-weight: 600;
-            min-width: 20px;
+            min-width: 36px;
             text-align: center;
         }
 
@@ -1245,18 +1295,21 @@
                 const itemTags = new Set(inv.t || []);
                 const npcBuys = buyTags.has('all') || [...itemTags].some(t => buyTags.has(t));
 
-                html += `<div class="sell-row ${selected ? 'selected' : ''} ${!npcBuys ? 'no-buy' : ''}"
-                onclick="${npcBuys ? `toggleSell('${esc(inv.id)}','${esc(inv.n)}',${inv.q},${sellPrice})` : ''}">
-                <div class="sr-check">${selected ? '✓' : ''}</div>
-                <span class="sr-emoji">${inv.e || '📦'}</span>
-                <div class="sr-info">
-                    <div class="sr-name">${esc(inv.n)} ${inv.q > 1 ? `x${inv.q}` : ''}</div>
-                    <div class="sr-price">${npcBuys ? `${sellPrice} GP cada` + (selected ? ` (${sellPrice * qty} GP)` : '') : '❌ NPC não compra'}</div>
+                html += `<div class="sell-row ${selected ? 'selected' : ''} ${!npcBuys ? 'no-buy' : ''}">
+                <div class="sr-main" onclick="${npcBuys ? `toggleSell('${esc(inv.id)}','${esc(inv.n)}',${inv.q},${sellPrice})` : ''}">
+                    <div class="sr-check">${selected ? '✓' : ''}</div>
+                    <span class="sr-emoji">${inv.e || '📦'}</span>
+                    <div class="sr-info">
+                        <div class="sr-name">${esc(inv.n)} ${inv.q > 1 ? '<span class="sr-qty-badge">x' + inv.q + '</span>' : ''}</div>
+                        <div class="sr-price">${npcBuys ? sellPrice + ' GP' + (selected && qty > 0 ? ' · <span class="sr-total">' + (sellPrice * qty) + ' GP total</span>' : '') : '❌ NPC não compra'}</div>
+                    </div>
                 </div>
-                ${selected ? `<div class="sr-qty-controls" onclick="event.stopPropagation()">
-                    <button class="qty-btn" onclick="adjSellQty('${esc(inv.id)}',-1)">−</button>
-                    <span class="qty-val">${qty}</span>
-                    <button class="qty-btn" onclick="adjSellQty('${esc(inv.id)}',1)">+</button>
+                ${selected && inv.q > 1 ? `<div class="sr-qty-row" onclick="event.stopPropagation()">
+                    <span class="sr-qty-label">Qtd:</span>
+                    <button class="qty-btn" onclick="adjSellQty('${esc(inv.id)}',-1)" ${qty <= 1 ? 'disabled' : ''}>−</button>
+                    <span class="qty-val">${qty}/${inv.q}</span>
+                    <button class="qty-btn" onclick="adjSellQty('${esc(inv.id)}',1)" ${qty >= inv.q ? 'disabled' : ''}>+</button>
+                    <button class="qty-btn-all" onclick="adjSellQty('${esc(inv.id)}',${inv.q})">Todos</button>
                 </div>` : ''}
             </div>`;
             });
@@ -1304,7 +1357,13 @@
         function adjSellQty(invId, delta) {
             const entry = sellCart[invId];
             if (!entry) return;
-            entry.qty = Math.max(1, Math.min(entry.maxQty, entry.qty + delta));
+            // Large delta = "set to max" (Todos button)
+            if (delta >= entry.maxQty) {
+                entry.qty = entry.maxQty;
+            } else {
+                entry.qty = Math.max(1, Math.min(entry.maxQty, entry.qty + delta));
+            }
+            buildTabs();
             renderTab();
         }
 
