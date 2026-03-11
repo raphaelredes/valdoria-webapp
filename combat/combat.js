@@ -1055,7 +1055,7 @@ function startPolling() {
 
                 // P0-B: Cinematic enemy dice — animate enemy rolls before state update
                 const hasEnemyRoll = state.lr && (state.lr.r || state.lr.d) && newTurn && newTurn.t !== 'p';
-                const rollSig = state.lr ? `${state.lr.t||'a'}-${state.lr.r||0}-${state.lr.d||0}-${state.lr.miss||0}-${state.lr.crit||0}-${state.lr.dc||0}` : '';
+                const rollSig = state.lr ? `${state.lr.t||'a'}-${state.lr.r||0}-${state.lr.d||0}-${state.lr.miss||0}-${state.lr.crit||0}-${state.lr.dc||0}-${state.lr.adv||0}-${state.lr.ac||0}` : '';
                 if (hasEnemyRoll && rollSig !== _lastAnimatedRoll) {
                     _cinematicInProgress = true;
     _cinematicWarnTimer = setTimeout(() => {
@@ -1244,6 +1244,8 @@ function stopAllIntervals() {
     stopHeartbeat();
     if (_reactionAutoTimer) { clearTimeout(_reactionAutoTimer); _reactionAutoTimer = null; }
     if (_cinematicWarnTimer) { clearTimeout(_cinematicWarnTimer); _cinematicWarnTimer = null; }
+    _initAnimationInProgress = false;
+    _cinematicInProgress = false;
     // Cleanup global listeners to prevent memory leaks
     document.removeEventListener('visibilitychange', _onVisibilityChange);
 }

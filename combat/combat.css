@@ -76,6 +76,10 @@ body {
 .entity:nth-child(2) { animation-delay: 0.06s; }
 .entity:nth-child(3) { animation-delay: 0.12s; }
 .entity:nth-child(4) { animation-delay: 0.18s; }
+.entity:nth-child(5) { animation-delay: 0.24s; }
+.entity:nth-child(6) { animation-delay: 0.30s; }
+.entity:nth-child(7) { animation-delay: 0.36s; }
+.entity:nth-child(8) { animation-delay: 0.42s; }
 @keyframes entitySlideIn {
     from { opacity: 0; transform: translateX(-12px); }
     to { opacity: 1; transform: translateX(0); }

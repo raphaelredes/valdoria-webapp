@@ -208,6 +208,11 @@ function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function showNarration(text, cssClass) {
     const el = document.getElementById('diceNarration');
     if (!el) return;
+    // If narration already visible, delay to avoid overwrite
+    if (el.classList.contains('visible')) {
+        setTimeout(() => showNarration(text, cssClass), 1200);
+        return;
+    }
     el.textContent = text;
     el.className = 'dice-narration ' + (cssClass || '');
     void el.offsetWidth;
