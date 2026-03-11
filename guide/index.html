@@ -25,13 +25,13 @@
             overflow-x: hidden;
         }
 
-        /* ─── HEADER (sticky) ─── */
+        /* ─── HEADER (sticky — includes search + pills) ─── */
         .guide-header {
             position: sticky;
             top: 0;
             z-index: 10;
             background: var(--v-bg);
-            padding: 10px 16px 6px;
+            padding: 10px 16px 0;
             border-bottom: 1px solid var(--v-border);
         }
 
@@ -93,15 +93,13 @@
             font-size: 18px;
             cursor: pointer;
             padding: 4px 8px;
-            display: none;
             min-width: 44px;
             min-height: 44px;
-            display: flex;
             align-items: center;
             justify-content: center;
+            display: none;
         }
 
-        .search-clear { display: none; }
         .search-clear.visible { display: flex; }
 
         /* ─── RESULT COUNT ─── */
@@ -134,11 +132,11 @@
             margin-bottom: 8px;
         }
 
-        /* ─── CATEGORY PILLS ─── */
+        /* ─── CATEGORY PILLS (inside sticky header) ─── */
         .cat-filters {
             display: flex;
             gap: 6px;
-            padding: 6px 12px;
+            padding: 6px 0 8px;
             overflow-x: auto;
             flex-wrap: nowrap;
         }
@@ -311,9 +309,8 @@
             <button class="search-clear" id="searchClear">&times;</button>
         </div>
         <div class="result-count" id="resultCount"></div>
+        <div class="cat-filters" id="catFilters"></div>
     </div>
-
-    <div class="cat-filters" id="catFilters"></div>
 
     <div class="no-results" id="noResults">
         <span class="nr-icon">&#x1f4dc;</span>

@@ -1,12 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════
-   GUIDE APP v2 — Lightweight search + accordion navigation
-   Optimized: debounced search, pre-built index, zero forced reflows
+   GUIDE APP v3 — Lightweight search + accordion navigation
+   Optimized: debounced search, pre-built index, cached DOM refs
    ═══════════════════════════════════════════════════════════════ */
 (function() {
     'use strict';
 
     /* ─── PRE-BUILT SEARCH INDEX (computed once) ─── */
-    var _index = []; // [{id, plain, topic}]  plain = lowercase stripped text
+    var _index = []; // [{id, plain, topic}]
+    var _topicMap = {}; // id → topic (O(1) lookup)
     for (var k = 0; k < GUIDE_TOPICS.length; k++) {
         var t = GUIDE_TOPICS[k];
         _index.push({
@@ -14,13 +15,16 @@
             plain: (t.title + ' ' + t.body.replace(/<[^>]*>/g, '')).toLowerCase(),
             topic: t
         });
+        _topicMap[t.id] = t;
     }
 
     /* ─── STATE ─── */
     var activeCat = 'todos';
     var searchTerm = '';
+    var _searchWords = []; // split terms for multi-word AND search
     var _debounceTimer = null;
-    var _openCardId = null; // accordion: only one card open at a time
+    var _openCardId = null;
+    var _priorCat = null; // category before search override
 
     /* ─── DOM refs ─── */
     var searchInput = document.getElementById('searchInput');
@@ -30,6 +34,9 @@
     var noResults   = document.getElementById('noResults');
     var closeBtn    = document.getElementById('closeBtn');
     var resultCount = document.getElementById('resultCount');
+
+    /* ─── PER-CARD CACHED REFS (set during buildTopics) ─── */
+    var _cardRefs = []; // [{card, nameEl, contentEl}]
 
     /* ─── INIT ─── */
     function init() {
@@ -75,10 +82,7 @@
     }
 
     function findTopicForCtx(ctx) {
-        for (var i = 0; i < _index.length; i++) {
-            if (_index[i].id === ctx) return _index[i].topic;
-        }
-        // Prefix match
+        if (_topicMap[ctx]) return _topicMap[ctx];
         for (var j = 0; j < _index.length; j++) {
             if (ctx.indexOf(_index[j].id) === 0) return _index[j].topic;
         }
@@ -102,18 +106,21 @@
 
     function selectCategory(cat) {
         activeCat = cat;
+        _priorCat = null; // manual selection clears saved
+        _highlightPill(cat);
+        _openCardId = null;
+        filterTopics();
+        window.scrollTo(0, 0);
+    }
+
+    function _highlightPill(cat) {
         var pills = catFilters.querySelectorAll('.cat-pill');
         for (var i = 0; i < pills.length; i++) {
             pills[i].classList.toggle('active', pills[i].dataset.cat === cat);
         }
-        _openCardId = null; // collapse all on category switch
-        filterTopics();
-        // Scroll to top on category change
-        topicsEl.scrollTop = 0;
-        window.scrollTo(0, 0);
     }
 
-    /* ─── BUILD TOPIC CARDS ─── */
+    /* ─── BUILD TOPIC CARDS (cache DOM refs) ─── */
     function buildTopics() {
         var frag = document.createDocumentFragment();
         for (var i = 0; i < GUIDE_TOPICS.length; i++) {
@@ -140,13 +147,19 @@
 
             var content = document.createElement('div');
             content.className = 'topic-content';
-            // Body is rendered only when card opens (lazy)
 
             inner.appendChild(content);
             body.appendChild(inner);
             card.appendChild(header);
             card.appendChild(body);
             frag.appendChild(card);
+
+            // Cache refs — avoid querySelector per filter cycle
+            _cardRefs.push({
+                card: card,
+                nameEl: header.querySelector('.topic-name'),
+                contentEl: content
+            });
         }
         topicsEl.appendChild(frag);
     }
@@ -160,25 +173,25 @@
         var isOpen = card.classList.contains('open');
 
         if (isOpen) {
-            // Close this card
             card.classList.remove('open');
             _openCardId = null;
             return;
         }
 
-        // Close previously open card (accordion — only during non-search)
+        // Accordion: close previous (only when not searching)
         if (!searchTerm && _openCardId && _openCardId !== topicId) {
             var prev = topicsEl.querySelector('.topic-card.open');
             if (prev) prev.classList.remove('open');
         }
 
         // Lazy-render body content
-        var contentEl = card.querySelector('.topic-content');
-        if (!contentEl.innerHTML) {
-            var topic = findTopicById(topicId);
+        var idx = _getCardIndex(topicId);
+        var ref = idx >= 0 ? _cardRefs[idx] : null;
+        if (ref && !ref.contentEl.innerHTML) {
+            var topic = _topicMap[topicId];
             if (topic) {
-                contentEl.innerHTML = searchTerm
-                    ? highlightText(fmtBody(topic.body), searchTerm)
+                ref.contentEl.innerHTML = searchTerm
+                    ? highlightText(fmtBody(topic.body), _searchWords)
                     : fmtBody(topic.body);
             }
         }
@@ -186,54 +199,78 @@
         card.classList.add('open');
         _openCardId = topicId;
 
-        // Smooth scroll card header into view
         setTimeout(function() {
             card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 50);
     }
 
-    function findTopicById(id) {
-        for (var i = 0; i < GUIDE_TOPICS.length; i++) {
-            if (GUIDE_TOPICS[i].id === id) return GUIDE_TOPICS[i];
+    function _getCardIndex(topicId) {
+        for (var i = 0; i < _index.length; i++) {
+            if (_index[i].id === topicId) return i;
         }
-        return null;
+        return -1;
     }
 
     /* ─── SEARCH ─── */
     function onSearch() {
-        searchTerm = searchInput.value.trim().toLowerCase();
-        searchClear.classList.toggle('visible', searchTerm.length > 0);
-        filterTopics();
+        var raw = searchInput.value.trim().toLowerCase();
+        searchClear.classList.toggle('visible', raw.length > 0);
+
+        if (raw !== searchTerm) {
+            searchTerm = raw;
+            _searchWords = raw ? raw.split(/\s+/).filter(Boolean) : [];
+
+            // Auto-switch to "Todos" when searching, save prior category
+            if (searchTerm && activeCat !== 'todos') {
+                _priorCat = activeCat;
+                activeCat = 'todos';
+                _highlightPill('todos');
+            }
+
+            filterTopics();
+        }
     }
 
     function clearSearch() {
         searchInput.value = '';
         searchTerm = '';
+        _searchWords = [];
         searchClear.classList.remove('visible');
-        _openCardId = null; // collapse all when clearing
+        _openCardId = null;
+
+        // Restore prior category
+        if (_priorCat) {
+            activeCat = _priorCat;
+            _highlightPill(_priorCat);
+            _priorCat = null;
+        }
+
         filterTopics();
-        searchInput.blur(); // dismiss keyboard
+        searchInput.blur();
         window.scrollTo(0, 0);
     }
 
     function filterTopics() {
         var visibleCount = 0;
-        var cards = topicsEl.querySelectorAll('.topic-card');
         var firstMatch = null;
 
-        for (var i = 0; i < cards.length; i++) {
-            var card = cards[i];
-            var id = card.dataset.id;
-            var cat = card.dataset.cat;
-            var entry = _index[i]; // cards are built in same order as _index
+        for (var i = 0; i < _cardRefs.length; i++) {
+            var ref = _cardRefs[i];
+            var card = ref.card;
+            var entry = _index[i];
+            var cat = entry.topic.cat;
 
-            // Category filter
             var catMatch = activeCat === 'todos' || cat === activeCat;
 
-            // Search filter — uses pre-built plain text index
+            // Multi-word AND search
             var searchMatch = true;
-            if (searchTerm) {
-                searchMatch = entry.plain.indexOf(searchTerm) !== -1;
+            if (_searchWords.length) {
+                for (var w = 0; w < _searchWords.length; w++) {
+                    if (entry.plain.indexOf(_searchWords[w]) === -1) {
+                        searchMatch = false;
+                        break;
+                    }
+                }
             }
 
             var visible = catMatch && searchMatch;
@@ -241,33 +278,24 @@
 
             if (visible) {
                 visibleCount++;
-                var contentEl = card.querySelector('.topic-content');
-                var nameEl = card.querySelector('.topic-name');
                 var topic = entry.topic;
 
                 if (searchTerm) {
-                    // Highlight title
-                    nameEl.innerHTML = highlightText(topic.icon + ' ' + topic.title, searchTerm);
-                    // Render + highlight body content
-                    contentEl.innerHTML = highlightText(fmtBody(topic.body), searchTerm);
-                    // Auto-open matching cards during search
+                    ref.nameEl.innerHTML = highlightText(topic.icon + ' ' + topic.title, _searchWords);
+                    ref.contentEl.innerHTML = highlightText(fmtBody(topic.body), _searchWords);
                     card.classList.add('open');
-                    // Pulse — only on first render (avoid re-triggering)
                     if (!card.dataset.pulsed) {
                         card.classList.add('search-match');
                         card.dataset.pulsed = '1';
                     }
                     if (!firstMatch) firstMatch = card;
                 } else {
-                    // Restore title
-                    nameEl.innerHTML = topic.icon + ' ' + topic.title;
-                    // Close all cards and clear content (lazy re-render on open)
+                    ref.nameEl.innerHTML = topic.icon + ' ' + topic.title;
                     if (card.dataset.id !== _openCardId) {
                         card.classList.remove('open');
-                        contentEl.innerHTML = '';
+                        ref.contentEl.innerHTML = '';
                     } else {
-                        // Keep open card, but remove highlights
-                        contentEl.innerHTML = fmtBody(topic.body);
+                        ref.contentEl.innerHTML = fmtBody(topic.body);
                     }
                     card.classList.remove('search-match');
                     delete card.dataset.pulsed;
@@ -275,7 +303,6 @@
             }
         }
 
-        // Update result count
         if (resultCount) {
             if (searchTerm) {
                 resultCount.textContent = visibleCount + (visibleCount === 1 ? ' resultado' : ' resultados');
@@ -287,7 +314,6 @@
 
         noResults.classList.toggle('visible', visibleCount === 0);
 
-        // Scroll to first match
         if (firstMatch && searchTerm) {
             setTimeout(function() {
                 firstMatch.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -295,27 +321,30 @@
         }
     }
 
-    function highlightText(html, term) {
-        if (!term) return html;
-        var escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        var regex = new RegExp('(?![^<]*>)(' + escaped + ')', 'gi');
-        return html.replace(regex, '<mark class="search-hl">$1</mark>');
+    function highlightText(html, words) {
+        if (!words || !words.length) return html;
+        for (var i = 0; i < words.length; i++) {
+            var escaped = words[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            var regex = new RegExp('(?![^<]*>)(' + escaped + ')', 'gi');
+            html = html.replace(regex, '<mark class="search-hl">$1</mark>');
+        }
+        return html;
     }
 
     /* ─── SCROLL TO TOPIC (from URL ctx) ─── */
     function openAndScrollTo(topicId) {
-        var card = topicsEl.querySelector('[data-id="' + topicId + '"]');
-        if (!card) return;
+        var idx = _getCardIndex(topicId);
+        if (idx === -1) return;
+        var ref = _cardRefs[idx];
+        var card = ref.card;
 
-        var topic = findTopicById(topicId);
+        var topic = _topicMap[topicId];
         if (topic && activeCat !== 'todos' && topic.cat !== activeCat) {
             selectCategory('todos');
         }
 
-        // Lazy render
-        var contentEl = card.querySelector('.topic-content');
-        if (!contentEl.innerHTML) {
-            contentEl.innerHTML = fmtBody(topic.body);
+        if (!ref.contentEl.innerHTML) {
+            ref.contentEl.innerHTML = fmtBody(topic.body);
         }
 
         card.classList.add('open');
@@ -323,7 +352,6 @@
 
         card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Pulse
         setTimeout(function() {
             card.classList.add('search-match');
         }, 250);
