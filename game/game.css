@@ -3827,10 +3827,14 @@ body[data-time="night"] .screen-content strong {
 }
 
 /* ─── Bar Shine on Full HP/MP ─── */
-/* CSS-only: bars at 100% get a subtle animated gleam */
-.v-bar-fill[style*="width: 100%"],
-.v-bar-fill[style*="width:100%"] {
-    background-image: linear-gradient(
+/* CSS-only: bars at 100% get a subtle animated gleam via ::after overlay */
+.v-bar-fill[style*="width: 100%"]::after,
+.v-bar-fill[style*="width:100%"]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
         110deg,
         transparent 30%,
         rgba(255, 255, 255, 0.08) 45%,
@@ -3840,6 +3844,7 @@ body[data-time="night"] .screen-content strong {
     );
     background-size: 250% 100%;
     animation: barShine 4s ease-in-out infinite;
+    pointer-events: none;
 }
 @keyframes barShine {
     0%, 100% { background-position: 200% 0; }
