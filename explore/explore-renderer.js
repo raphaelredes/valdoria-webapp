@@ -19,7 +19,44 @@ let _staticDirty = true;
 
 // Hex hover/tap reveal effect
 let _hoveredHex = null;     // {col, row, time} — currently hovered hex
-let _tapRevealHexes = [];   // [{col, row, startTime}] — tapped hexes with fading outline
+let _tapRevealHexes = [];
+
+// Event sprites revealed on the map (NPCs, objects, dangers)
+let _eventSprites = [];
+const EVENT_SPRITE_TYPES = {
+    // NPC encounters
+    npc: { draw: '_drawNPCSprite', color: '#c4953a' },
+    npc_friendly: { draw: '_drawNPCSprite', color: '#5a9a5a' },
+    // Discoveries & searches
+    discovery: { draw: '_drawObjectSprite', color: '#c4953a' },
+    search: { draw: '_drawObjectSprite', color: '#8a7a5a' },
+    // Dangers & hazards
+    danger: { draw: '_drawDangerSprite', color: '#c44a2a' },
+    hazard: { draw: '_drawDangerSprite', color: '#c44a2a' },
+    trap: { draw: '_drawTrapSprite', color: '#8a4a2a' },
+    // Mystery & ambient
+    mystery: { draw: '_drawMysterySprite', color: '#6a5aaa' },
+    ambient: { draw: '_drawAmbientSprite', color: '#5a8a6a' },
+    // Combat encounter
+    encounter: { draw: '_drawEnemySprite', color: '#aa3a2a' },
+};
+
+function revealEventSprite(col, row, type, icon) {
+    // Prevent duplicate at same position
+    if (_eventSprites.find(s => s.col === col && s.row === row)) return;
+    _eventSprites.push({
+        col, row, type: type || 'discovery',
+        icon: icon || null,
+        revealTime: performance.now(),
+        alpha: 0 // fade in
+    });
+    scheduleRender();
+}
+
+function clearEventSprite(col, row) {
+    _eventSprites = _eventSprites.filter(s => !(s.col === col && s.row === row));
+    scheduleRender();
+}   // [{col, row, startTime}] — tapped hexes with fading outline
 
 function initRenderer() {
     _canvas = document.getElementById('iso-map');
@@ -160,6 +197,9 @@ function renderFrame(timestamp) {
     // 6. Exit portal glow
     drawExitPortalGlow(_ctx, timestamp);
 
+    // 6.3. Event sprites (NPCs, objects, dangers revealed on player step)
+    _drawEventSprites(_ctx, timestamp);
+
     // 6.5. Visited hex trail markers
     drawVisitedTrail(_ctx, timestamp);
 
@@ -248,45 +288,7 @@ function renderStaticTiles(timestamp) {
         }
     }
 
-    // Third pass: subtle hex grid lines for structure
-    _staticCtx.strokeStyle = 'rgba(0,0,0,0.10)';
-    _staticCtx.lineWidth = 0.5;
-    for (let row = 0; row < ROWS; row++) {
-        for (let col = 0; col < COLS; col++) {
-            const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
-            const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
-            if (baseTile === 'W' || baseTile === 'w') continue; // Skip water
-            const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
-            const center = hexToScreen(col, row);
-            const verts = hexTopVertices(center.x, center.y - h);
-            _staticCtx.beginPath();
-            _staticCtx.moveTo(verts[0].x, verts[0].y);
-            for (let i = 1; i < verts.length; i++) _staticCtx.lineTo(verts[i].x, verts[i].y);
-            _staticCtx.closePath();
-            _staticCtx.stroke();
-        }
-    }
-
-    // Fourth pass: subtle light edge on top-left of hex (isometric highlight)
-    _staticCtx.strokeStyle = 'rgba(255,255,255,0.04)';
-    _staticCtx.lineWidth = 0.5;
-    for (let row = 0; row < ROWS; row++) {
-        for (let col = 0; col < COLS; col++) {
-            const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
-            const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
-            if (baseTile === 'W' || baseTile === 'w') continue;
-            const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
-            const center = hexToScreen(col, row);
-            const verts = hexTopVertices(center.x, center.y - h);
-            // Only highlight top-left edges (verts 4→5→0→1 = top-left to top-right)
-            _staticCtx.beginPath();
-            _staticCtx.moveTo(verts[4].x, verts[4].y);
-            _staticCtx.lineTo(verts[5].x, verts[5].y);
-            _staticCtx.lineTo(verts[0].x, verts[0].y);
-            _staticCtx.lineTo(verts[1].x, verts[1].y);
-            _staticCtx.stroke();
-        }
-    }
+    // (Hex borders removed — terrain blends seamlessly)
 }
 
 // Ambient occlusion — darken tiles adjacent to taller neighbors
@@ -473,27 +475,15 @@ function drawAdjacentHighlights(ctx, timestamp) {
         for (let i = 1; i < topVerts.length; i++) ctx.lineTo(topVerts[i].x, topVerts[i].y);
         ctx.closePath();
 
-        // Inner glow fill (pulsing)
-        const fillAlpha = 0.1 + pulse * 0.12;
-        const grad = ctx.createRadialGradient(center.x, center.y - h, 0, center.x, center.y - h, HEX_W * 0.5);
+        // Soft radial glow (no hex border visible)
+        const fillAlpha = 0.12 + pulse * 0.14;
+        const glowRadius = HEX_W * 0.55;
+        const grad = ctx.createRadialGradient(center.x, center.y - h, 0, center.x, center.y - h, glowRadius);
         grad.addColorStop(0, `rgba(${glowR},${glowG},${glowB},${fillAlpha})`);
-        grad.addColorStop(0.7, `rgba(${glowR},${glowG},${glowB},${fillAlpha * 0.4})`);
+        grad.addColorStop(0.5, `rgba(${glowR},${glowG},${glowB},${fillAlpha * 0.5})`);
+        grad.addColorStop(0.8, `rgba(${glowR},${glowG},${glowB},${fillAlpha * 0.15})`);
         grad.addColorStop(1, `rgba(${glowR},${glowG},${glowB},0)`);
         ctx.fillStyle = grad;
-        ctx.fill();
-
-        // Border glow (pulsing, thicker)
-        const borderAlpha = 0.25 + pulse * 0.25;
-        ctx.strokeStyle = `rgba(${glowR},${glowG},${glowB},${borderAlpha})`;
-        ctx.lineWidth = 1.5 + pulse * 0.5;
-        ctx.stroke();
-
-        // Corner dots for touch-target clarity
-        const dotAlpha = 0.3 + pulse * 0.3;
-        ctx.fillStyle = `rgba(${glowR},${glowG},${glowB},${dotAlpha})`;
-        const topVert = topVerts[0]; // top vertex
-        ctx.beginPath();
-        ctx.arc(topVert.x, topVert.y, 1.5, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();
@@ -675,6 +665,7 @@ function onMoveComplete(col, row) {
     // Environmental hazard check (priority over POI/exit)
     const hazard = checkHazard(col, row);
     if (hazard) {
+        revealEventSprite(col, row, 'hazard');
         setTimeout(() => showHazardNarration(hazard), 200);
         return;
     }
@@ -683,6 +674,7 @@ function onMoveComplete(col, row) {
     if (typeof checkTrap === 'function') {
         const trap = checkTrap(col, row);
         if (trap) {
+            revealEventSprite(col, row, 'trap');
             setTimeout(() => showTrapEvent(trap), 200);
             return;
         }
@@ -691,6 +683,8 @@ function onMoveComplete(col, row) {
     // Check POI
     const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.has(p.id));
     if (poi) {
+        const spriteType = {dis:'discovery',sea:'search',dan:'danger',mys:'mystery',npc:'npc'}[poi.type] || 'discovery';
+        revealEventSprite(col, row, spriteType, poi.icon);
         setTimeout(() => showPOI(poi), 100);
         return;
     }
@@ -711,6 +705,7 @@ function onMoveComplete(col, row) {
             const enc = S.randomEncounters.shift();
             // Watch activity: grants advantage on first encounter
             if (typeof _checkWatchAdvantage === 'function') _checkWatchAdvantage();
+            revealEventSprite(col, row, 'encounter');
             setTimeout(() => showRandomEncounter(enc), 300);
             return;
         }
@@ -719,6 +714,7 @@ function onMoveComplete(col, row) {
     // Ambient event — atmospheric moment without choices (10% chance if available)
     if (S.ambientEvents && S.ambientEvents.length > 0 && Math.random() < 0.10) {
         const ambient = S.ambientEvents.shift();
+        revealEventSprite(col, row, 'ambient');
         setTimeout(() => showAmbientEvent(ambient), 200);
         return;
     }
@@ -834,40 +830,292 @@ function spawnTapFeedback(col, row) {
     });
 }
 
-// Draw hex outline on hover/tap (replaces permanent borders)
+// Draw soft glow on hover/tap (no hex outlines)
 function drawHexHoverEffect(ctx, timestamp) {
-    // Mouse hover — show single hex outline
+    // Mouse hover — soft radial glow
     if (_hoveredHex) {
         const { x, y } = hexToScreen(_hoveredHex.col, _hoveredHex.row);
+        const tile = S.grid[_hoveredHex.row] && S.grid[_hoveredHex.row][_hoveredHex.col] ? S.grid[_hoveredHex.row][_hoveredHex.col] : '.';
+        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         const age = timestamp - (_hoveredHex.time || timestamp);
-        const fadeIn = Math.min(1, age / 150); // 150ms fade in
-        const verts = hexTopVertices(x, y - 2);
+        const fadeIn = Math.min(1, age / 200);
+        const grad = ctx.createRadialGradient(x, y - h, 0, x, y - h, HEX_W * 0.45);
+        grad.addColorStop(0, `rgba(196,149,58,${0.18 * fadeIn})`);
+        grad.addColorStop(0.6, `rgba(196,149,58,${0.06 * fadeIn})`);
+        grad.addColorStop(1, 'rgba(196,149,58,0)');
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.moveTo(verts[0].x, verts[0].y);
-        for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
-        ctx.closePath();
-        ctx.strokeStyle = `rgba(196,149,58,${0.35 * fadeIn})`;
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
+        ctx.arc(x, y - h, HEX_W * 0.45, 0, Math.PI * 2);
+        ctx.fill();
     }
 
-    // Tap reveals — multiple hexes with fade out
-    const TAP_DURATION = 800; // ms
+    // Tap reveals — soft glow with fade out
+    const TAP_DURATION = 800;
     const now = timestamp;
     _tapRevealHexes = _tapRevealHexes.filter(h => (now - h.startTime) < TAP_DURATION);
     for (const h of _tapRevealHexes) {
         const { x, y } = hexToScreen(h.col, h.row);
+        const tile = S.grid[h.row] && S.grid[h.row][h.col] ? S.grid[h.row][h.col] : '.';
+        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const ht = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         const age = now - h.startTime;
         const fadeOut = 1 - (age / TAP_DURATION);
-        const verts = hexTopVertices(x, y - 2);
+        const alpha = 0.15 * fadeOut * fadeOut;
+        const grad = ctx.createRadialGradient(x, y - ht, 0, x, y - ht, HEX_W * 0.4);
+        grad.addColorStop(0, `rgba(196,149,58,${alpha})`);
+        grad.addColorStop(0.7, `rgba(196,149,58,${alpha * 0.3})`);
+        grad.addColorStop(1, 'rgba(196,149,58,0)');
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.moveTo(verts[0].x, verts[0].y);
-        for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
-        ctx.closePath();
-        ctx.strokeStyle = `rgba(196,149,58,${0.4 * fadeOut * fadeOut})`;
-        ctx.lineWidth = 0.6;
-        ctx.stroke();
+        ctx.arc(x, y - ht, HEX_W * 0.4, 0, Math.PI * 2);
+        ctx.fill();
     }
+}
+
+// ============================================
+// EVENT SPRITES — NPCs, objects, dangers on map
+// ============================================
+
+function _drawEventSprites(ctx, timestamp) {
+    for (const sprite of _eventSprites) {
+        const key = sprite.col + ',' + sprite.row;
+        if (S.fogState[key] !== 'visible') continue;
+
+        // Fade in
+        const age = timestamp - sprite.revealTime;
+        sprite.alpha = Math.min(1, age / 500);
+        if (sprite.alpha <= 0) continue;
+
+        const center = hexToScreen(sprite.col, sprite.row);
+        const tile = S.grid[sprite.row] && S.grid[sprite.row][sprite.col] ? S.grid[sprite.row][sprite.col] : '.';
+        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+        const cx = center.x;
+        const cy = center.y - h;
+
+        ctx.save();
+        ctx.globalAlpha = sprite.alpha;
+
+        const info = EVENT_SPRITE_TYPES[sprite.type] || EVENT_SPRITE_TYPES.discovery;
+        // Dispatch to drawing function
+        switch (info.draw) {
+            case '_drawNPCSprite':    _drawNPCSprite(ctx, cx, cy, info.color, timestamp, sprite); break;
+            case '_drawObjectSprite': _drawObjectSprite(ctx, cx, cy, info.color, timestamp, sprite); break;
+            case '_drawDangerSprite': _drawDangerSprite(ctx, cx, cy, info.color, timestamp, sprite); break;
+            case '_drawTrapSprite':   _drawTrapSprite(ctx, cx, cy, info.color, timestamp, sprite); break;
+            case '_drawMysterySprite':_drawMysterySprite(ctx, cx, cy, info.color, timestamp, sprite); break;
+            case '_drawAmbientSprite':_drawAmbientSprite(ctx, cx, cy, info.color, timestamp, sprite); break;
+            case '_drawEnemySprite':  _drawEnemySprite(ctx, cx, cy, info.color, timestamp, sprite); break;
+            default: _drawObjectSprite(ctx, cx, cy, info.color, timestamp, sprite); break;
+        }
+
+        ctx.restore();
+    }
+}
+
+// NPC silhouette — hooded figure
+function _drawNPCSprite(ctx, cx, cy, color, ts, sprite) {
+    const bob = Math.sin(ts * 0.002) * 1.5;
+    const y = cy - 6 + bob;
+    // Shadow on ground
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 2, 5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Body (cloak)
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(cx, y - 8);
+    ctx.quadraticCurveTo(cx + 5, y - 2, cx + 4, y + 4);
+    ctx.lineTo(cx - 4, y + 4);
+    ctx.quadraticCurveTo(cx - 5, y - 2, cx, y - 8);
+    ctx.closePath();
+    ctx.fill();
+    // Head
+    ctx.beginPath();
+    ctx.arc(cx, y - 9, 3, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    // Hood highlight
+    ctx.beginPath();
+    ctx.arc(cx, y - 9, 3, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    // Subtle glow at feet
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 8);
+    glow.addColorStop(0, color.replace(')', ',0.15)').replace('rgb', 'rgba'));
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// Object/discovery — small chest/artifact
+function _drawObjectSprite(ctx, cx, cy, color, ts, sprite) {
+    const pulse = Math.sin(ts * 0.003) * 0.5 + 0.5;
+    const y = cy - 2;
+    // Ground shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 1, 4, 1.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Small chest/crate
+    ctx.fillStyle = '#5a4a2a';
+    ctx.fillRect(cx - 4, y - 3, 8, 5);
+    // Lid
+    ctx.fillStyle = '#6a5a3a';
+    ctx.fillRect(cx - 4.5, y - 4, 9, 2);
+    // Metal band
+    ctx.fillStyle = color;
+    ctx.fillRect(cx - 0.5, y - 4, 1, 5);
+    // Sparkle
+    const sparkAlpha = 0.3 + pulse * 0.4;
+    ctx.fillStyle = 'rgba(255,235,180,' + sparkAlpha + ')';
+    ctx.beginPath();
+    ctx.arc(cx + 2, y - 5, 1, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// Danger — skull/warning
+function _drawDangerSprite(ctx, cx, cy, color, ts, sprite) {
+    const flash = Math.sin(ts * 0.004) * 0.3 + 0.7;
+    const y = cy - 4;
+    // Red glow
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 10);
+    glow.addColorStop(0, 'rgba(200,50,30,' + (0.12 * flash) + ')');
+    glow.addColorStop(1, 'rgba(200,50,30,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+    ctx.fill();
+    // Skull shape
+    ctx.fillStyle = '#d8d0c0';
+    ctx.beginPath();
+    ctx.arc(cx, y - 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+    // Jaw
+    ctx.fillRect(cx - 2.5, y + 1, 5, 2);
+    // Eye sockets
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(cx - 1.5, y - 2.5, 1, 0, Math.PI * 2);
+    ctx.arc(cx + 1.5, y - 2.5, 1, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// Trap — jaw trap on ground
+function _drawTrapSprite(ctx, cx, cy, color, ts, sprite) {
+    const y = cy - 1;
+    // Faint ground mark
+    ctx.strokeStyle = 'rgba(140,80,40,0.3)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.arc(cx, y, 4, 0, Math.PI * 2);
+    ctx.stroke();
+    // Trap jaws
+    ctx.strokeStyle = '#7a6a4a';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    // Left jaw
+    ctx.moveTo(cx - 4, y);
+    ctx.lineTo(cx - 2, y - 3);
+    ctx.lineTo(cx, y);
+    // Right jaw
+    ctx.moveTo(cx, y);
+    ctx.lineTo(cx + 2, y - 3);
+    ctx.lineTo(cx + 4, y);
+    ctx.stroke();
+    // Center pin
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(cx, y, 1, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// Mystery — glowing orb
+function _drawMysterySprite(ctx, cx, cy, color, ts, sprite) {
+    const pulse = Math.sin(ts * 0.002) * 0.4 + 0.6;
+    const y = cy - 6;
+    const bob = Math.sin(ts * 0.0015) * 2;
+    // Outer glow
+    const glow = ctx.createRadialGradient(cx, y + bob, 1, cx, y + bob, 9);
+    glow.addColorStop(0, 'rgba(120,100,200,' + (0.25 * pulse) + ')');
+    glow.addColorStop(0.5, 'rgba(120,100,200,' + (0.08 * pulse) + ')');
+    glow.addColorStop(1, 'rgba(120,100,200,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, y + bob, 9, 0, Math.PI * 2);
+    ctx.fill();
+    // Inner orb
+    const orbGrad = ctx.createRadialGradient(cx - 1, y + bob - 1, 0, cx, y + bob, 3.5);
+    orbGrad.addColorStop(0, 'rgba(200,190,255,' + (0.7 * pulse) + ')');
+    orbGrad.addColorStop(0.6, 'rgba(140,120,220,' + (0.5 * pulse) + ')');
+    orbGrad.addColorStop(1, 'rgba(100,80,180,' + (0.2 * pulse) + ')');
+    ctx.fillStyle = orbGrad;
+    ctx.beginPath();
+    ctx.arc(cx, y + bob, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// Ambient — small nature detail (butterfly, bird, mushroom)
+function _drawAmbientSprite(ctx, cx, cy, color, ts, sprite) {
+    const y = cy - 3;
+    const flutter = Math.sin(ts * 0.006) * 2;
+    // Small creature — bird on branch
+    ctx.fillStyle = color;
+    // Body
+    ctx.beginPath();
+    ctx.ellipse(cx + flutter * 0.3, y - 2, 2.5, 1.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Head
+    ctx.beginPath();
+    ctx.arc(cx + 2 + flutter * 0.3, y - 3, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+    // Wing
+    const wingSpread = Math.sin(ts * 0.008) * 0.5 + 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx + flutter * 0.3, y - 2.5);
+    ctx.quadraticCurveTo(cx - 2, y - 5 - wingSpread * 2, cx - 3, y - 2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+}
+
+// Enemy — dark menacing silhouette
+function _drawEnemySprite(ctx, cx, cy, color, ts, sprite) {
+    const sway = Math.sin(ts * 0.003) * 1;
+    const y = cy - 5;
+    // Dark aura
+    const aura = ctx.createRadialGradient(cx, cy - 2, 2, cx, cy - 2, 12);
+    aura.addColorStop(0, 'rgba(60,20,20,0.2)');
+    aura.addColorStop(1, 'rgba(60,20,20,0)');
+    ctx.fillStyle = aura;
+    ctx.beginPath();
+    ctx.arc(cx, cy - 2, 12, 0, Math.PI * 2);
+    ctx.fill();
+    // Shadow on ground
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 2, 5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Body — hunched figure
+    ctx.fillStyle = '#2a1a1a';
+    ctx.beginPath();
+    ctx.moveTo(cx + sway, y - 6);
+    ctx.quadraticCurveTo(cx + 6, y, cx + 5, y + 6);
+    ctx.lineTo(cx - 5, y + 6);
+    ctx.quadraticCurveTo(cx - 6, y, cx + sway, y - 6);
+    ctx.closePath();
+    ctx.fill();
+    // Eyes
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(cx - 1.5 + sway * 0.5, y - 4, 0.8, 0, Math.PI * 2);
+    ctx.arc(cx + 1.5 + sway * 0.5, y - 4, 0.8, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 function drawTapFeedback(ctx, timestamp) {

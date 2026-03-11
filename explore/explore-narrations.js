@@ -45,6 +45,10 @@ const POI_NARRATIONS = {
             "Frutas carmesim pendem de galhos baixos, seu aroma doce enchendo o ar.",
             "Um riacho serpenteia entre pedras cobertas de musgo fosforescente.",
             "Raízes entrelaçadas formam uma escada natural descendo para a escuridão.",
+            "Um silêncio antinatural toma conta da floresta. Até os insetos param.|Ao centro da clareira, uma árvore milenar carrega cicatrizes de raios que formam símbolos. Ao se aproximar, você sente o chão vibrar com uma frequência baixa, quase inaudível.|As marcas brilham por um instante quando você as toca. A árvore guarda memórias de uma era esquecida.",
+            "Teias de luz dourada conectam as copas das árvores mais antigas, invisíveis a olho nu até que o ângulo do sol as revela.|Você percebe que os fios não são de aranha — são de um material cristalino, fino como cabelo, resistente como aço.|Um druida antigo teceu esta rede séculos atrás. Ela ainda pulsa com magia residual.",
+            "Cogumelos gigantes formam um anfiteatro natural, seus chapéus largos o suficiente para servir de mesa.|Ao centro, uma pedra plana está coberta de marcas de faca e restos de cera de vela. Alguém usou este lugar recentemente para um ritual.|Você encontra uma bolsa de couro esquecida atrás de um dos cogumelos. Dentro, ervas secas e um mapa tosco rabiscado em pergaminho.",
+            "Uma clareira escondida abriga restos de um acampamento élfico: estacas de prata fincadas em círculo, cordas de seda entre elas, runas de proteção esculpidas em cada uma.|O acampamento foi abandonado às pressas. Equipamento valioso ficou para trás. O que assustou elfos o suficiente para fugirem sem seus pertences?",
         ],
         plains: [
             "O vento sopra forte e revela uma pedra semienterrada na grama. Inscrições cobrem sua superfície, desgastadas pelo tempo mas ainda legíveis.|Você se aproxima e traça os símbolos com os dedos. São marcas de uma civilização que habitou estas planícies séculos atrás.",
@@ -57,6 +61,9 @@ const POI_NARRATIONS = {
             "Um círculo de terra escura marca onde uma fogueira ardeu por séculos.",
             "Trilhas de animais convergem para um ponto — algo os atrai ali.",
             "Uma árvore solitária no meio do campo tem raízes expostas como tentáculos.",
+            "O vento muda de direção subitamente, e com ele vem um som — uma melodia que nenhum instrumento mortal produz.|Você segue o som até encontrar um monólito negro, liso como obsidiana, fincado na terra. A melodia vem de dentro da pedra.|Ao pousar a mão na superfície, imagens inundam sua mente: exércitos marchando, dragões no céu, uma cidade dourada consumida por chamas. Memórias de uma guerra que o mundo esqueceu.",
+            "Sulcos na terra formam um padrão geométrico que só é visível do alto de uma colina.|Alguém — ou algo — arou a terra em círculos concêntricos perfeitos, cada anel a exatos três metros do próximo.|No centro dos anéis, uma placa de metal enterrada mostra uma inscrição em uma língua desconhecida. Mas uma palavra se repete: 'Valdoria'.",
+            "Uma carroça tombada ao lado da trilha conta uma história silenciosa. As rodas foram arrancadas, a carga saqueada, mas um compartimento secreto sob o assento permanece intacto.|Dentro: cartas lacradas com selo real, endereçadas a um destinatário cujo nome foi riscado com tanta força que rasgou o pergaminho.",
         ],
         swamp: [
             "Uma poça brilha com um verde fosforescente intenso, seu reflexo dançando nas árvores ao redor. O cheiro é adocicado, quase hipnótico.|Bolhas sobem lentamente à superfície, cada uma carregando um brilho próprio. Este lugar tem algo de sobrenatural — belo e perigoso em partes iguais.",
@@ -69,6 +76,8 @@ const POI_NARRATIONS = {
             "Nenúfares gigantes flutuam como plataformas sobre a água turva.",
             "O ar fica denso e doce ao redor de flores carnívoras que se movem.",
             "Uma ponte de troncos caídos conecta ilhotas de terra seca no pântano.",
+            "A água do pântano borbulha e se abre, revelando os degraus de uma escadaria de pedra que desce para a escuridão submersa.|Os degraus são antigos mas perfeitos — nem musgo cresce neles. Uma magia de preservação os protege há séculos.|Você desce três degraus antes que a água se feche atrás de você. O ar aqui embaixo é seco e quente. Tochas se acendem sozinhas nas paredes.",
+            "Um sapo enorme, do tamanho de um cão, observa você de uma pedra com olhos que brilham com inteligência.|Ele coaxa uma vez e uma bolha dourada sobe da lama. Dentro da bolha, um objeto metálico gira lentamente.|Você nunca viu um sapo conjurar nada antes. Mas em Valdoria, os animais guardam segredos dos antigos.",
         ],
         cave: [
             "Cristais azulados crescem nas paredes como veias de luz na escuridão. Cada um pulsa com um ritmo próprio, quase como uma respiração.|Você estende a mão e toca um cristal. Ele vibra sob seus dedos e emite um som grave, como um sino distante. A caverna inteira parece responder.",
@@ -81,6 +90,8 @@ const POI_NARRATIONS = {
             "Um lago subterrâneo reflete o teto como um espelho perfeito e imóvel.",
             "Colunas naturais de estalagmites e estalactites formam um salão de pedra.",
             "Correntes de ar trazem cheiros de superfície — uma saída próxima talvez.",
+            "Uma câmara secreta se revela atrás de uma cortina de estalactites. Dentro, um esqueleto sentado em uma cadeira de pedra segura um livro aberto.|O livro está em branco — cada página imaculada. Mas quando você sopra a poeira da capa, letras douradas surgem brevemente: 'Diário do Último Guardião'.|O esqueleto ainda usa uma armadura completa. A espada ao seu lado não tem ferrugem. Este guardião morreu, mas seus pertences se recusam a perecer.",
+            "Veios de um metal desconhecido pulsam na rocha como veias de um ser vivo. O metal é quente ao toque e emite uma luminosidade azulada.|Você reconhece os símbolos gravados naturalmente no veio — são runas arcanas, formadas pela própria geologia. A montanha tem magia em seus ossos.",
         ],
         desert: [
             "Entre as dunas sem fim, uma mancha verde aparece como uma miragem — mas esta é real. Uma palmeira solitária se ergue sobre uma poça de água cristalina.|Você se ajoelha e bebe. A água é fresca e pura, impossível neste calor. A sombra da palmeira traz alívio imediato. Algo neste oásis parece protegido.",
@@ -93,6 +104,8 @@ const POI_NARRATIONS = {
             "Pegadas fossilizadas na rocha contam histórias de criaturas extintas.",
             "Uma formação rochosa cria sombra permanente — oásis de frescor no calor.",
             "Cristais de halita emergem do solo como dentes de um animal gigante.",
+            "O vento revela uma estrutura enterrada na areia — o topo de uma pirâmide invertida, sua ponta apontando para baixo, enterrada no deserto como uma adaga cravada na terra.|As pedras são de um material que você não reconhece: negro, liso, frio ao toque apesar do sol escaldante.|Uma porta selada na lateral mostra entalhes de uma civilização que adorava as estrelas.",
+            "Um oásis surge do nada entre as dunas, sua água cristalina refletindo um céu que não corresponde ao acima de você.|O reflexo mostra um céu noturno com constelações desconhecidas, mesmo ao meio-dia. A água é real — fresca, pura, revigorante. Mas o reflexo conta uma história diferente.|Você bebe e visões inundam sua mente: uma cidade submersa sob as areias, seus habitantes ainda andando por corredores eternos.",
         ],
         mountain: [
             "Água gelada jorra de uma fenda na rocha com força surpreendente. O riacho serpenteia brevemente antes de desaparecer sob uma camada de neve.|O gelo ao redor da nascente forma cristais de formas impossíveis. A temperatura aqui é mais baixa que nos arredores — algo antinatural.",
@@ -105,6 +118,8 @@ const POI_NARRATIONS = {
             "Um altiplano escondido entre picos oferece vista para vales infinitos.",
             "Liquens coloridos cobrem a rocha como uma tapeçaria natural viva.",
             "Cristais de ametista brotam de uma fenda na encosta íngreme.",
+            "No pico de um desfiladeiro, você encontra uma ponte de correntes suspensa sobre o abismo. No meio da ponte, um sino de bronze pende de um suporte enferrujado.|O vento faz o sino tocar sozinho — um som grave e melancólico que ecoa pelo vale inteiro.|Inscrições na base do sino dizem: 'Quando o sino parar de tocar, a montanha acordará'. O sino não para de tocar há séculos.",
+            "Uma cabana de pedra encravada na rocha parece crescer da própria montanha. A porta está aberta e lá dentro, um mapa detalhado de Valdoria está pregado na parede.|O mapa mostra locais que não existem em nenhuma cartografia conhecida — túneis, passagens secretas, câmaras subterrâneas.|Uma anotação no canto diz: 'Não confie no que vê na superfície. O verdadeiro Valdoria está embaixo'.",
         ],
         snow: [
             "Um lago congelado perfeitamente transparente se estende diante de você. Pedras coloridas no fundo criam um mosaico natural sob a camada de gelo.|Ao se aproximar da borda, o gelo range baixinho. Formas escuras se movem nas profundezas — peixes congelados no tempo, ou talvez algo mais.",
@@ -645,6 +660,11 @@ const AMBIENT_NARRATIONS = {
         "Um cervo majestoso surge entre as árvores, seus chifres decorados com musgo. Ele o observa por um instante — e desaparece.|Algo naquele olhar parecia inteligente demais para um animal comum.",
         "O vento traz o som distante de sinos — nenhuma aldeia está perto o suficiente para explicá-los.|As notas metálicas se misturam com o farfalhar das folhas, criando uma melodia que arrepia.",
         "Raízes expostas formam um padrão no chão que parece quase intencional — círculos dentro de círculos.|Talvez seja apenas a natureza seguindo suas próprias regras. Ou talvez não.",
+            "Uma teia gigante entre dois carvalhos captura a luz da manhã como um vitral vivo. A aranha não está à vista — mas sua obra é uma catedral.|Você percebe que a teia não é aleatória. Os fios formam constelações. Alguém — ou algo — está mapeando o céu noturno em seda.",
+            "O chão da floresta é coberto por uma camada de folhas que parecem se mover sozinhas, sussurrando histórias de outonos passados.|Você pisa com cuidado, como se andasse sobre memórias. Cada folha foi uma vez parte de uma árvore que viu séculos passarem.",
+            "Um tronco oco emite um zumbido grave e constante, como o ronronar de uma besta adormecida.|Ao espiar dentro, você vê centenas de pequenas luzes — vaga-lumes que escolheram este tronco como lar. Uma galáxia em miniatura.",
+            "A floresta se abre para uma clareira onde o tempo parece ter parado. A chuva cai em câmera lenta, as folhas flutuam em vez de cair.|Você estica a mão e sente as gotas tocarem sua pele como beijos gelados. Cada segundo aqui vale um minuto lá fora.",
+            "Um ribeiro serpenteia entre as raízes cantando uma canção que muda conforme as pedras no leito. É quase como se a água soubesse que alguém está ouvindo.",
     ],
     plains: [
         "O horizonte se estende até onde a vista alcança, um mar dourado de gramíneas dançando ao vento.|Por um instante, você se sente pequeno diante da vastidão. Mas também livre.",
@@ -652,6 +672,10 @@ const AMBIENT_NARRATIONS = {
         "O chão vibra sob seus pés — uma manada distânte galopando além do horizonte.|O trovão de cascos some tão rápido quanto surgiu, deixando apenas silêncio e poeira.",
         "Flores selvagens brotam em um círculo perfeito ao redor de uma pedra antiga.|O aroma é doce e incomum, como se as flores não pertençessem a esta estação.",
         "Uma torre de pedra em ruínas se ergue no horizonte, solitaria contra o céu vermelho do entardecer.|Quem a construiu? Para quê? As respostas se perderam com o tempo.",
+            "O céu se enche de nuvens que formam castelos efêmeros, torres e muralhas de vapor que o vento desfaz e reconstrói.|Você se pega assistindo ao espetáculo, esquecendo por um momento que está em território perigoso. A beleza é a melhor distração.",
+            "Um redemoinho de poeira dança no campo, girando e girando como um dervixe solitário.|Ele passa por você tão perto que você sente o vento nos cabelos. Por um instante, parece que o redemoinho desacelerou — como se quisesse olhá-lo nos olhos.",
+            "O campo inteiro se curva sob uma rajada de vento, cada haste de grama inclinando-se na mesma direção como fiéis em oração.|O som é um sussurro coletivo, milhões de vozes vegetais dizendo algo que você quase entende.",
+            "Ao longe, uma tempestade de raios ilumina o horizonte sem produzir trovão. Os relâmpagos duram segundos inteiros, congelando o céu em veias de prata.|O espetáculo é silencioso e surreal, como assistir ao fim do mundo atrás de um vidro.",
     ],
     swamp: [
         "Bolhas emergem da lama com estálidos úmidos, liberando um gás que brilha brevemente na escuridão.|O pântano tem sua própria linguagem. Esses sons são avisos — ou convites.",
@@ -659,6 +683,9 @@ const AMBIENT_NARRATIONS = {
         "Um tronco cai na água ao longe, quebrando o silêncio opressivo do pântano.|Nenúfares se agitam na onda resultante. Algo grande se move sob a superfície.",
         "O nevoeiro se adensa até que você mal vê três passos à frente.|Sons se distorcem na névoa — o que parece perto está longe, e o que parece longe pode estar ao seu lado.",
         "Uma orquídea rara floresce em um tronco apodrecido, sua beleza contrastando com a decadência ao redor.|A vida encontra um caminho, mesmo nos lugares mais esquecidos.",
+            "A superfície da água se ondula sem vento, sem causa visível. Círculos concêntricos surgem e somem como respirações de algo imenso submerso.|Você prende a respiração. Os círculos param. Quando você volta a respirar, eles recomeam. Coincidência?",
+            "Árvores mortas emergem da água negra como mãos ossudas implorando por resgate. Corvos pousam nelas em fileiras ordenadas, silenciosos.|Um deles vira a cabeça em sua direção com um movimento mecânico, preciso demais para um animal. Depois, todos viram ao mesmo tempo.",
+            "Uma luz esverdeada pulsa nas profundezas do pântano, rítmica como batimentos cardíacos. Não é fogo-fátuo — é mais profunda, mais constante.|Os animais do pântano se afastam da luz. Até os insetos evitam voar sobre aquele trecho de água.",
     ],
     cave: [
         "Uma gota d’água cai do teto e ecoa pela caverna como um sino de cristal.|O eco se multiplica nas paredes, criando uma sinfonia involuntária de uma única nota.",
@@ -666,6 +693,9 @@ const AMBIENT_NARRATIONS = {
         "O chão treme brevemente — um lembrete de que esta montanha está viva, de um jeito geológico e lento.|Poeira fina cai do teto. O tremor passa tão rápido quanto veio.",
         "Um morcego cruza seu caminho como um fantasma silencioso e desaparece na escuridão.|Você quase pode sentir o ar deslocado por suas asas contra seu rosto.",
         "Uma câmara se abre revelando estalactites gigantes, cada uma pingando água cristalina em uma poça perfeita.|O reflexo na água é tão nítido que parece um portal para outro mundo.",
+            "As paredes da caverna estão cobertas de musgos luminescentes que reagem ao som. Quando você fala, eles pulsam mais forte.|Você experimenta cantar uma nota. A caverna inteira se ilumina em ondas, como se a própria montanha respondesse à sua voz.",
+            "O silêncio aqui é tão absoluto que você ouve seu próprio sangue circulando. Cada batida do coração ecoa nas paredes como um tambor primordial.|É um som íntimo e assustador ao mesmo tempo. Você nunca esteve tão consciente de estar vivo.",
+            "Fósseis de criaturas marinhas decoram as paredes — conchas, tentáculos, mandíbulas de seres que nadaram aqui quando esta caverna era fundo do mar.|Milhões de anos comprimidos em pedra. Você caminha sobre o fundo de um oceano extinto.",
     ],
     desert: [
         "O sol se põe sobre as dunas, pintando o céu em tons de fogo e ouro.|Por um breve instante, o calor dá trégua e o deserto revela sua beleza austera.",
@@ -673,6 +703,9 @@ const AMBIENT_NARRATIONS = {
         "Um escorpião cruza a areia na sua frente, sua cauda erguida como um estandarte de aviso.|Ambos param. Ambos avaliam. O escorpião decide que você não vale o esforço.",
         "O vento esculpe a areia em ondas perfeitas, apagando seus rastros em minutos.|Nada permanece no deserto por muito tempo — nem pegadas, nem memórias.",
         "Estrelas começam a surgir antes mesmo do sol se pôr completamente, tão limpo é o céu.|A Via Láctea se desenha como um rio de luz sobre a imensidão árida.",
+            "A areia canta quando o vento a move — um som grave e harmônico que parece vir do fundo da terra.|Diz-se que a canção da areia conta a história dos reinos enterrados. Se você souber ouvir, ouvirá nomes de reis esquecidos.",
+            "Uma tempestade de areia se aproxima no horizonte como uma parede dourada. Ela é vasta, imponente, terrível.|Mas não chega até você. Ela para, como se hesitasse, e muda de direção. O deserto decidiu poupá-lo hoje.",
+            "Pegadas de um animal enorme cruzam as dunas em linha reta, cada marca do tamanho de um escudo.|As pegadas somem no meio da areia, como se a criatura tivesse sido erguida ao céu. Nenhum rastro de pouso.",
     ],
     mountain: [
         "O vento uiva entre os picos como um lobo ancestral, carregando cristais de gelo.|Aqui em cima, o mundo parece diferente — mais honesto, mais brutal, mais livre.",
@@ -680,6 +713,9 @@ const AMBIENT_NARRATIONS = {
         "Nuvens passam abaixo de você, criando a ilusão de que a montanha flutua.|Por um instante mágico, você está acima do mundo, acima das preocupações mortais.",
         "Uma águia pousa em uma rocha próxima, suas garras arranhando a pedra como aço.|Ela o observa com olhos dourados e antigos antes de abrir as asas e mergulhar no vale.",
         "A vista do pico revela vales, rios e florestas que se estendem até o infinito.|De aqui de cima, todas as distâncias parecem possíveis. Todos os caminhos, alcangáveis.",
+            "O eco de um grito distante reverbera entre os picos, multiplicando-se até parecer um coro de fantasmas.|Você não sabe se foi humano, animal ou apenas o vento brincando com a acústica da montanha. A incerteza é mais assustadora que a resposta.",
+            "Nuvens envolvem o pico como um manto, reduzindo o mundo ao espaço imediato ao seu redor. Você não vê chão, não vê céu — apenas branco.|Por um instante sublime, você existe sem referência, sem peso, sem direção. Como se a montanha o tivesse libertado da gravidade.",
+            "Cristais de gelo formam padrões nas rochas que lembram rostos — expressões congeladas em surpresa, dor, êxtase.|A montanha coleciona emoções de todos que a escalaram. Cada cristal é a memória de um momento vivido a esta altitude.",
     ],
     snow: [
         "Flocos de neve dançam ao redor como espíritos inquietos, cada um único e efêmero.|O mundo inteiro parece feito de silêncio e brancura — uma paz que beira o sobrenatural.",
@@ -687,6 +723,9 @@ const AMBIENT_NARRATIONS = {
         "Uma aurora boreal se forma no céu, cortinas de verde e roxo ondulando como tecido divino.|Você para, hipnotizado. Nenhuma magia mortal poderia criar algo tão vasto e belo.",
         "O gelo estala sob seus pés com sons que lembram ossos quebrando.|A superfície parece sólida, mas cada estalo é um lembrete de que nada aqui é permanente.",
         "Uma raposa polar cruza seu caminho, branca como a neve que a cerca. Seus olhos negros brilham.|Ela para, te observa, e então desaparece como se nunca tivesse existido.",
+            "O silêncio da neve é diferente de qualquer outro. Não é ausência de som — é presença de paz. Cada floco que cai adiciona uma camada a esse colchão de quietude.|Você se senta por um momento. O mundo pode esperar.",
+            "Uma aurora boreal inesperada tinge a neve de verde e violeta, transformando a paisagem em um sonho acordado.|As cores dançam sobre a superfície branca como espíritos brincalhões. Você estica a mão e quase pode tocá-las.",
+            "Pegadas na neve contam histórias: um coelho fugiu aqui, uma coruja pousou ali, algo grande e pesado arrastou-se atrás daquela colina.|Você lê a neve como um livro aberto. Cada capítulo dura apenas até a próxima nevasca.",
     ],
     volcanic: [
         "O chão pulsa com calor, como se a terra tivesse um coração batendo logo abaixo.|Vapor escapa por fendas na rocha, trazendo o cheiro acre de enxofre e minérios fundidos.",
@@ -694,6 +733,9 @@ const AMBIENT_NARRATIONS = {
         "Rios de lava fluem ao longe como veias de fogo na carne escura da montanha.|A luz alaranjada pinta tudo ao redor, transformando a paisagem em um quadro infernal.",
         "Cinzas vulcânicas flutuam no ar como neve negra, cobrindo tudo em uma camada fina.|O mundo aqui parece estar eternamente entre a criação e a destruição.",
         "Uma flor de fogo brota de uma fenda na rocha quente, suas pétalas vermelhas brilhando.|Vida encontra um caminho mesmo no coração do vulcão.",
+            "A terra geme sob seus pés — um som profundo e gutural que faz suas entranhas vibrarem.|O vulcão está digerindo algo lá embaixo. Rochas fundem, minerais cristalizam, e novos elementos nascem no calor impossível. Você está pisando em uma forja cósmica.",
+            "Uma fenda se abre na rocha revelando cristais de obsidiana perfeitos, cada faceta refletindo seu rosto distorcido em ângulos impossíveis.|Você se vê mais velho em um reflexo, mais jovem em outro. A obsidiana não reflete o presente — reflete possibilidades.",
+            "Cinzas vulcânicas caem como neve negra, cobrindo seus ombros e cabelo. O contraste entre o calor da terra e a delicadeza da cinza é poético.|Cada floco de cinza já foi parte de uma montanha. Cada montanha já foi parte de um oceano de magma.",
     ],
     graveyard: [
         "Um corvo pousa em uma lápide quebrada e o observa com olhos que parecem saber demais.|Ele grasna uma vez — um som que ecoa entre as tumbas como uma sentença.",
@@ -701,6 +743,9 @@ const AMBIENT_NARRATIONS = {
         "Uma vela acende sozinha dentro de uma cripta entreaberta, sua chama azulada tremulando.|Quem a acendeu? Não há sinais de presença viva nas redondezas.",
         "O chão frio emite um gemido quando você pisa — tubulações antigas sob as tumbas.|Ou talvez não sejam tubulações. Alguns sons não têm explicação confortável.",
         "Flores selvagens crescem em uma única tumba, a única com vegetação em todo o cemitério.|Alguém cuida desta. Ou algo cuida — as flores parecem frescas demais para este lugar.",
+            "Um livro aberto repousa sobre uma tumba como se alguém tivesse parado de ler há instantes. As páginas viram sozinhas ao vento.|Você lê algumas linhas — é um diário. A última entrada diz: 'Eles estão mais perto do que eu pensava. Se você está lendo isto, já é tarde demais'.",
+            "O sino da cripta central toca uma única vez, sem que ninguém o puxe. O som é grave, solene, final.|Os corvos levantam voo em bando. O silêncio que se segue é mais pesado que antes. Algo mudou no equilíbrio deste lugar.",
+            "Sombras se movem entre as lápides mesmo sem nuvens no céu. Elas parecem ter vida própria — esticando-se, encolhendo-se, tocando umas às outras.|Você percebe que sua própria sombra está imóvel enquanto as outras dançam. Ou talvez sua sombra tenha decidido ficar quieta para não chamar atenção.",
     ],
 };
 
