@@ -1559,8 +1559,10 @@ function drawMinimap() {
                 alpha = 1;
             } else if (dist <= vis) {
                 alpha = 0.7 - (dist - 1) * 0.15;
-            } else {
+            } else if (dist <= vis + 2) {
                 alpha = 0.12;
+            } else {
+                alpha = 0.05;
             }
 
             ctx.globalAlpha = alpha;

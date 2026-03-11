@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════
-const COLS = 11, ROWS = 13;
+let COLS = 11, ROWS = 13;
 const IMPASSABLE = new Set(['W', 'M', 'L', '#']);
 
 // Hex neighbors (odd-r offset)
@@ -106,6 +106,7 @@ function saveState() {
             wt: S.weather || 's',
             ih: Array.from(S.interactedHexes || new Set()),
             ccl: Array.from(S.chainClues || new Set()),
+            gc: COLS, gr: ROWS,
             ts: Date.now(),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
@@ -141,6 +142,8 @@ function restoreState() {
             localStorage.removeItem(STORAGE_KEY);
             return false;
         }
+        if (snap.gc) COLS = snap.gc;
+        if (snap.gr) ROWS = snap.gr;
         S.playerCol = snap.pc; S.playerRow = snap.pr;
         S.visited = new Set(snap.vis || []);
         S.fogState = snap.fog || {};
@@ -174,6 +177,10 @@ function restoreState() {
 }
 
 function loadMapData(data) {
+    // Dynamic grid size from payload (default 11×13)
+    COLS = data.gc || 11;
+    ROWS = data.gr || 13;
+
     // Parse grid
     const gridStr = data.g || '';
     S.grid = [];
@@ -191,7 +198,7 @@ function loadMapData(data) {
     S.playerRow = data.s ? data.s[1] : 12;
     S.exitCol = data.e ? data.e[0] : 5;
     S.exitRow = data.e ? data.e[1] : 0;
-    S.visibility = data.v || 3;
+    S.visibility = data.v || 1;
     // DM intro: generated client-side from biome + danger level (no longer in payload)
     S.dmIntro = data.i || (typeof getDMIntro === 'function' ? getDMIntro(S.biome, data.dl || 1) : '');
     S.charData = data.c || null;

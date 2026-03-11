@@ -105,20 +105,20 @@ function drawFogOverlay(mainCtx, canvasW, canvasH, fogState) {
                 flatZone = 0.55;
             } else if (distToPlayer === 1) {
                 radius = HEX_W * 0.9;
-                strength = 0.97;
+                strength = 0.95;
                 flatZone = 0.5;
             } else if (distToPlayer === 2 && state === 'visible') {
-                radius = HEX_W * 0.7;
-                strength = 0.6;
-                flatZone = 0.35;
-            } else if (state === 'visible') {
-                radius = HEX_W * 0.55;
-                strength = 0.35;
-                flatZone = 0.25;
-            } else if (state === 'dim') {
-                radius = HEX_W * 0.4;
+                radius = HEX_W * 0.45;
                 strength = 0.15;
-                flatZone = 0.15;
+                flatZone = 0.1;
+            } else if (state === 'visible') {
+                radius = HEX_W * 0.35;
+                strength = 0.07;
+                flatZone = 0.08;
+            } else if (state === 'dim') {
+                radius = HEX_W * 0.3;
+                strength = 0.04;
+                flatZone = 0.05;
             } else {
                 continue;
             }
@@ -155,7 +155,7 @@ function drawFogOverlay(mainCtx, canvasW, canvasH, fogState) {
     _fogCtx.globalCompositeOperation = 'destination-out';
     for (let ri = 0; ri < reveals.length; ri++) {
         const { x, y, radius, strength, flatZone } = reveals[ri];
-        if (strength < 0.3) continue; // Only strong reveals get organic edges
+        if (strength < 0.15) continue; // Only strong reveals get organic edges
         const edgeR = radius * (flatZone + 0.25);
         const nBlobs = Math.floor(8 + strength * 6);
 
