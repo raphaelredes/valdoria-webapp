@@ -73,7 +73,7 @@ function spawnFloatingText(col, row, text, color, type) {
         color: color || '#d4c8b0',
         type: type || 'flavor',
         birth: performance.now(),
-        duration: 2200,
+        duration: 3000,
         vy: -0.4, // float upward speed
     });
     scheduleRender();
@@ -87,7 +87,7 @@ function _drawFloatingTexts(ctx, timestamp) {
         const t = age / ft.duration;
         // Ease: fast rise then slow
         const yOff = ft.vy * age * (1 - t * 0.5);
-        const alpha = t < 0.15 ? t / 0.15 : (1 - (t - 0.15) / 0.85);
+        const alpha = t < 0.12 ? t / 0.12 : t < 0.45 ? 1.0 : (1 - (t - 0.45) / 0.55);
         const scale = 1 + t * 0.15;
 
         ctx.save();
@@ -96,9 +96,9 @@ function _drawFloatingTexts(ctx, timestamp) {
         ctx.scale(scale, scale);
 
         // Text shadow
-        ctx.font = ft.type === 'damage' ? 'bold 11px MedievalSharp, serif'
-                 : ft.type === 'big' ? 'bold 12px MedievalSharp, serif'
-                 : '10px MedievalSharp, serif';
+        ctx.font = ft.type === 'damage' ? 'bold 13px MedievalSharp, serif'
+                 : ft.type === 'big' ? 'bold 14px MedievalSharp, serif'
+                 : '13px MedievalSharp, serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -949,6 +949,8 @@ function onMoveComplete(col, row) {
     if (typeof _checkWeatherEffects === 'function') _checkWeatherEffects();
     updateAtmosphere();
     updateMinimap();
+    // Haptic feedback for each step
+    try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.selectionChanged(); } catch(e) {}
     if (typeof _resetExploreButton === 'function') _resetExploreButton();
     if (typeof updatePaceUI === 'function') updatePaceUI();
     scrollCanvasToPlayer(true);
@@ -1005,16 +1007,20 @@ const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.h
     if (poi) {
         const spriteType = {dis:'discovery',sea:'search',dan:'danger',mys:'mystery',npc:'npc'}[poi.type] || 'discovery';
         revealEventSprite(col, row, spriteType, poi.icon);
-        const poiSounds = {dis:'*brilho*', sea:'hmm...', dan:'!!', mys:'ooo...', npc:'ola!'};
+        const poiSounds = {dis:'*brilho*', sea:'intrigante...', dan:'PERIGO!', mys:'misterioso...', npc:'alguem!'};
         const poiColors = {dis:'#c4953a', sea:'#8a9a5a', dan:'#c44a2a', mys:'#8a6aaa', npc:'#5a9a6a'};
-        spawnFloatingText(col, row, poiSounds[poi.type] || '!', poiColors[poi.type] || '#c4953a', 'flavor');
+        spawnFloatingText(col, row, poiSounds[poi.type] || '!', poiColors[poi.type] || '#c4953a', 'big');
         setTimeout(() => showPOI(poi), 100);
         return;
     }
 
     // Check exit
     if (col === S.exitCol && row === S.exitRow) {
-        setTimeout(() => showPortalOverlay(), 200);
+        // Golden glow pulse to signal portal discovery
+        if (typeof flashScreen === 'function') flashScreen('rgba(196,149,58,0.2)');
+        spawnFloatingText(col, row, 'portal...', '#c4953a', 'big');
+        try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
+        setTimeout(() => showPortalOverlay(), 800);
         return;
     }
 

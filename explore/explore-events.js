@@ -263,16 +263,19 @@ function _typewriterPage(el, pages, pageIdx, onDone) {
             clearInterval(iv);
             cursor.remove();
             el.removeEventListener('click', skipTyping);
-            if (isLast) {
-                if (onDone) onDone();
-            } else {
-                _showPageContinue(el, pages, pageIdx, totalPages, onDone);
-            }
+            // Post-typing pause: let text settle before advancing
+            setTimeout(() => {
+                if (isLast) {
+                    if (onDone) onDone();
+                } else {
+                    _showPageContinue(el, pages, pageIdx, totalPages, onDone);
+                }
+            }, 1200);
             return;
         }
         span.textContent += text[i];
         i++;
-    }, 18);
+    }, 35);
 }
 
 function _showPageContinue(el, pages, pageIdx, totalPages, onDone) {
@@ -397,7 +400,7 @@ function _showDialogueLine(narrEl, lines, idx, poi) {
         }
         textSpan.textContent += text[i];
         i++;
-    }, 18);
+    }, 35);
 }
 
 function _showNPCChoicesWithContinue(narrEl, poi) {
@@ -1426,12 +1429,12 @@ function showHazardNarration(hazard) {
                         showPage();
                     } else {
                         overlay.classList.remove('active');
-                        showHazardCheck(hazard);
+                        setTimeout(() => showHazardCheck(hazard), 600);
                     }
                 };
                 choicesEl.appendChild(btn);
             }
-        }, 18);
+        }, 28);
     }
 
     showPage();
@@ -1486,7 +1489,7 @@ function showHazardCheck(hazard) {
         dice.roll(roll, () => {
             const formulaStr = buildFormula(roll, mod, statName, '', effectiveDC, total, r1, r2, mode);
             formulaEl.innerHTML =
-                `<span style="color:var(--v-gold);font-size:14px">${hazard.label}</span><br>` + formulaStr;
+                `<span style="color:var(--v-gold);font-size:16px;font-weight:700">${hazard.label}</span><br>` + formulaStr;
 
             resultEl.textContent = success ? 'Resistiu!' : 'Falhou!';
             resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
@@ -1495,7 +1498,15 @@ function showHazardCheck(hazard) {
                 if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
             } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
-            _showHazardSkip(overlay, success, hazard);
+            // Screen flash on fail (color by hazard type)
+            if (!success && typeof flashScreen === 'function') {
+                const _fc = {lava:'rgba(255,100,0,0.25)',fire:'rgba(255,100,0,0.25)',
+                    poison:'rgba(100,200,50,0.2)',gas:'rgba(100,200,50,0.2)',
+                    ice:'rgba(100,180,255,0.2)',cold:'rgba(100,180,255,0.2)'};
+                flashScreen(_fc[hazard.type] || 'rgba(200,70,40,0.25)');
+            }
+            // Delay before skip to let result sink in
+            setTimeout(() => _showHazardSkip(overlay, success, hazard), success ? 800 : 1800);
         });
     } else {
         _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, hazard, total, success);
@@ -1575,7 +1586,7 @@ function _showHazardResultNarration(text, success, hazard) {
             };
             choicesEl.appendChild(btn);
         }
-    }, 18);
+    }, 28);
 }
 
 // Apply hazard effect and continue game flow

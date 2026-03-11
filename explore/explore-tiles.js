@@ -332,7 +332,7 @@ function drawRockDecoration(ctx, cx, cy, col, row) {
 
 function drawWaterDecoration(ctx, cx, cy, timestamp, deep) {
     const t = (timestamp || 0) * 0.001;
-    const alpha = deep ? 0.12 : 0.18;
+    const alpha = deep ? 0.18 : 0.25;
     ctx.strokeStyle = `rgba(180,220,255,${alpha})`;
     ctx.lineWidth = 0.8;
     // 2-3 wave lines
@@ -340,7 +340,7 @@ function drawWaterDecoration(ctx, cx, cy, timestamp, deep) {
         const y = cy - 4 + i * 4;
         ctx.beginPath();
         for (let x = cx - 14; x <= cx + 14; x += 2) {
-            const wy = y + Math.sin((x + t * 40 + i * 30) * 0.15) * 2;
+            const wy = y + Math.sin((x + t * 40 + i * 30) * 0.15) * 3;
             if (x === cx - 14) ctx.moveTo(x, wy);
             else ctx.lineTo(x, wy);
         }
@@ -350,7 +350,7 @@ function drawWaterDecoration(ctx, cx, cy, timestamp, deep) {
     if (!deep) {
         const sparkleX = cx + Math.sin(t * 1.5) * 8;
         const sparkleY = cy + Math.cos(t * 2) * 4;
-        ctx.fillStyle = `rgba(255,255,255,${0.15 + Math.sin(t * 4) * 0.1})`;
+        ctx.fillStyle = `rgba(255,255,255,${0.25 + Math.sin(t * 4) * 0.15})`;
         ctx.beginPath();
         ctx.arc(sparkleX, sparkleY, 1, 0, Math.PI * 2);
         ctx.fill();
@@ -360,7 +360,7 @@ function drawWaterDecoration(ctx, cx, cy, timestamp, deep) {
 function drawLavaDecoration(ctx, cx, cy, timestamp) {
     const t = (timestamp || 0) * 0.001;
     // Glowing cracks
-    ctx.strokeStyle = `rgba(255,200,50,${0.4 + Math.sin(t * 2) * 0.2})`;
+    ctx.strokeStyle = `rgba(255,200,50,${0.5 + Math.sin(t * 2) * 0.25})`;
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(cx - 8, cy - 2);
@@ -376,13 +376,13 @@ function drawLavaDecoration(ctx, cx, cy, timestamp) {
     // Bubbles
     const bubbleX = cx + Math.sin(t * 1.3) * 5;
     const bubbleY = cy + Math.cos(t * 1.7) * 3;
-    ctx.fillStyle = `rgba(255,150,50,${0.3 + Math.sin(t * 5) * 0.15})`;
+    ctx.fillStyle = `rgba(255,150,50,${0.4 + Math.sin(t * 5) * 0.2})`;
     ctx.beginPath();
-    ctx.arc(bubbleX, bubbleY, 1.5 + Math.sin(t * 3) * 0.5, 0, Math.PI * 2);
+    ctx.arc(bubbleX, bubbleY, 2.0 + Math.sin(t * 3) * 0.7, 0, Math.PI * 2);
     ctx.fill();
     // Glow halo
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 18);
-    grad.addColorStop(0, `rgba(255,100,0,${0.08 + Math.sin(t * 3) * 0.04})`);
+    grad.addColorStop(0, `rgba(255,100,0,${0.12 + Math.sin(t * 3) * 0.06})`);
     grad.addColorStop(1, 'rgba(255,100,0,0)');
     ctx.fillStyle = grad;
     ctx.fillRect(cx - 18, cy - 18, 36, 36);

@@ -57,7 +57,7 @@ function revealFogAt(cx, cy, radius, fogState, grid, animate) {
 function updateFogAnimations(dt) {
     if (_fogReveals.length === 0) return false;
     for (let i = _fogReveals.length - 1; i >= 0; i--) {
-        _fogReveals[i].progress += dt * 2.5;
+        _fogReveals[i].progress += dt * 1.4;
         if (_fogReveals[i].progress >= 1) {
             _fogReveals.splice(i, 1);
         }
@@ -159,9 +159,10 @@ function drawFogOverlay(mainCtx, canvasW, canvasH, fogState) {
 
     // -- STEP 4: Animated reveals (expanding glow during movement) --
     for (const rev of _fogReveals) {
-        const currentR = rev.maxRadius * rev.progress;
+        const eased = 1 - Math.pow(1 - rev.progress, 2.5); // ease-out
+        const currentR = rev.maxRadius * eased;
         const grad = _fogCtx.createRadialGradient(rev.x, rev.y, 0, rev.x, rev.y, currentR);
-        grad.addColorStop(0, `rgba(0,0,0,${0.7 * rev.progress})`);
+        grad.addColorStop(0, `rgba(0,0,0,${0.85 * eased})`);
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         _fogCtx.fillStyle = grad;
         _fogCtx.fillRect(rev.x - currentR, rev.y - currentR, currentR * 2, currentR * 2);
