@@ -123,17 +123,8 @@ var ValdoriaErrors = (function () {
                 '</div>' +
                 '<button id="v-err-close" class="v-err-btn v-err-btn-secondary" style="display:none">' +
                     '🔙 Fechar e Voltar ao Chat</button>' +
-                '<button id="v-err-report" class="v-err-btn v-err-btn-secondary" style="display:none">' +
-                    '📨 Reportar Problema</button>' +
-                '<div class="v-err-debug">' +
-                    '<button id="v-err-debug-toggle" class="v-err-debug-toggle">📋 Ver detalhes técnicos ▸</button>' +
-                    '<div id="v-err-debug-wrap" style="display:none">' +
-                        '<div class="v-err-log-wrap">' +
-                            '<div id="v-err-log" class="v-err-log"></div>' +
-                        '</div>' +
-                        '<button id="v-err-copy" class="v-err-copy">📋 Copiar log</button>' +
-                    '</div>' +
-                '</div>' +
+                '<div id="v-err-auto-report" class="v-err-auto-report" style="display:none">' +
+                    '📡 Erro registrado — será enviado automaticamente</div>' +
             '</div>' +
         '</div>';
 
@@ -164,7 +155,6 @@ var ValdoriaErrors = (function () {
         var msgEl = document.getElementById('v-err-msg');
         var retryBtn = document.getElementById('v-err-retry');
         var closeBtn = document.getElementById('v-err-close');
-        var reportBtn = document.getElementById('v-err-report');
 
         msgEl.textContent = msg;
         overlay.style.display = '';
@@ -193,18 +183,13 @@ var ValdoriaErrors = (function () {
             else if (msg.indexOf('Personagem não encontrado') >= 0)
                 hintEl.textContent = 'Feche o mini app e selecione um personagem novamente.';
             else if (msg.indexOf('Resposta inválida') >= 0)
-                hintEl.textContent = 'Resposta inesperada do servidor. Toque em Reportar Problema para nos ajudar a corrigir.';
+                hintEl.textContent = 'Resposta inesperada do servidor. O erro foi registrado e será analisado.';
             else
                 hintEl.textContent = '';
         }
 
         // Network badge
         _updateNetworkBadge();
-
-        // Debug panel
-        var isConnErr = msg.indexOf('Sem conexão') >= 0 || msg.indexOf('indisponível') >= 0
-            || msg.indexOf('não respondeu') >= 0 || msg.indexOf('demorou') >= 0;
-        _populateDebugLog(err, isConnErr);
 
         // Hide any loading overlay (different IDs across WebApps)
         var loadIds = ['loading', 'loadingOverlay'];
@@ -244,16 +229,11 @@ var ValdoriaErrors = (function () {
             };
         }
 
-        // Report button (API tier only)
-        if (reportBtn) {
-            if (hasApi) {
-                reportBtn.style.display = '';
-                reportBtn.disabled = false;
-                reportBtn.textContent = '📨 Reportar Problema';
-                reportBtn.onclick = function () { _handleReport(reportBtn); };
-            } else {
-                reportBtn.style.display = 'none';
-            }
+        // Auto-report: queue error report automatically (player doesn't need to do anything)
+        if (hasApi) {
+            _reportError().catch(function () { /* queued offline */ });
+            var autoEl = document.getElementById('v-err-auto-report');
+            if (autoEl) autoEl.style.display = '';
         }
 
         // Auto-retry with exponential backoff (connection errors, API tier)
@@ -520,65 +500,7 @@ var ValdoriaErrors = (function () {
         }
     }
 
-    // ─── Debug Panel ───
-    var _debugReady = false;
 
-    function _populateDebugLog(err, isConnErr) {
-        var logEl = document.getElementById('v-err-log');
-        var wrapEl = document.getElementById('v-err-debug-wrap');
-        var toggleBtn = document.getElementById('v-err-debug-toggle');
-        var copyBtn = document.getElementById('v-err-copy');
-        if (!logEl || !wrapEl || !toggleBtn) return;
-
-        var logText = _getConnectionLog() + (err ? '\n\nERROR: ' + (err.stack || err.message || err) : '');
-        logEl.textContent = logText;
-
-        if (isConnErr) {
-            wrapEl.style.display = '';
-            toggleBtn.textContent = '📋 Ocultar detalhes ▾';
-        } else {
-            wrapEl.style.display = 'none';
-            toggleBtn.textContent = '📋 Ver detalhes técnicos ▸';
-        }
-
-        if (!_debugReady) {
-            _debugReady = true;
-            toggleBtn.onclick = function () {
-                var visible = wrapEl.style.display !== 'none';
-                wrapEl.style.display = visible ? 'none' : '';
-                toggleBtn.textContent = visible ? '📋 Ver detalhes técnicos ▸' : '📋 Ocultar detalhes ▾';
-            };
-            if (copyBtn) {
-                copyBtn.onclick = function () {
-                    var text = logEl.textContent || '';
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        navigator.clipboard.writeText(text).then(function () {
-                            copyBtn.textContent = '✅ Copiado!';
-                            setTimeout(function () { copyBtn.textContent = '📋 Copiar log'; }, 2000);
-                        }).catch(function () { _fallbackCopy(text, copyBtn); });
-                    } else {
-                        _fallbackCopy(text, copyBtn);
-                    }
-                };
-            }
-        }
-    }
-
-    function _fallbackCopy(text, btn) {
-        var ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
-        document.body.appendChild(ta);
-        ta.select();
-        try {
-            document.execCommand('copy');
-            btn.textContent = '✅ Copiado!';
-        } catch (e) {
-            btn.textContent = '❌ Falha ao copiar';
-        }
-        setTimeout(function () { btn.textContent = '📋 Copiar log'; }, 2000);
-        document.body.removeChild(ta);
-    }
 
     // ─── Report Error to Admin ───
     var _REPORT_QUEUE_KEY = 'valdoria_report_queue';
@@ -632,32 +554,7 @@ var ValdoriaErrors = (function () {
         });
     }
 
-    function _handleReport(btn) {
-        btn.disabled = true;
-        btn.textContent = '⏳ Enviando...';
-        _haptic('light');
-        _reportError().then(function (result) {
-            if (result.ok && result.sent) {
-                btn.textContent = '✅ Enviado!';
-                _haptic('success');
-            } else if (result.queued) {
-                btn.textContent = '📦 Salvo (enviará quando conectar)';
-            } else if (result.error === 'cooldown') {
-                var secs = result.retry_after || 60;
-                btn.textContent = '⏳ Aguarde ' + secs + 's';
-                setTimeout(function () { btn.textContent = '📨 Reportar Problema'; btn.disabled = false; }, secs * 1000);
-                return;
-            } else if (result.ok && !result.sent) {
-                btn.textContent = '⚠️ Admins não configurados';
-            } else {
-                btn.textContent = '❌ Falha ao enviar';
-            }
-            setTimeout(function () { btn.textContent = '📨 Reportar Problema'; btn.disabled = false; }, 5000);
-        }).catch(function () {
-            btn.textContent = '❌ Falha ao enviar';
-            setTimeout(function () { btn.textContent = '📨 Reportar Problema'; btn.disabled = false; }, 5000);
-        });
-    }
+
 
     function _queueReport(payload) {
         try {
@@ -793,6 +690,6 @@ var ValdoriaErrors = (function () {
         hideError: hideError,
         log: _clog,
         getConnectionLog: _getConnectionLog,
-        reportError: _reportError,
+
     };
 })();
