@@ -640,20 +640,26 @@ body { padding-bottom: 110px; }
 
 /* Navigation bar removed — uses Telegram back button instead */
 
-/* ── Bottom Bar ── */
-.bottom-bar {
+/* ── Bottom Panel (ops + nav footer) ── */
+.bottom-panel {
     position: fixed; bottom: 0; left: 0; right: 0;
-    padding: 10px 16px; z-index: 150;
-    padding-bottom: 6px;
-    background: linear-gradient(transparent, var(--v-bg) 30%);
+    max-width: 430px; margin: 0 auto; z-index: 150;
+    background: var(--v-bg);
+    border-top: 1px solid var(--v-border);
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
 }
-.bottom-bar .ops-count {
+.ops-section {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--v-border);
+}
+.ops-section.hidden { display: none; }
+.ops-section .ops-count {
     text-align: center; font-size: 13px;
     color: var(--v-text-dim); margin-bottom: 6px;
 }
 .confirm-btn {
-    width: 100%; padding: 14px; border: none;
-    border-radius: var(--v-radius); font-size: 15px;
+    width: 100%; padding: 12px; border: none;
+    border-radius: var(--v-radius); font-size: 14px;
     font-weight: 700; cursor: pointer; transition: all 0.2s;
     font-family: var(--v-font);
     background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
@@ -662,6 +668,25 @@ body { padding-bottom: 110px; }
 }
 .confirm-btn:active { transform: scale(0.98); }
 .confirm-btn.hidden { display: none; }
+/* ── Navigation Footer ── */
+.nav-footer {
+    display: flex; gap: 6px; padding: 8px 12px;
+}
+.nav-btn {
+    flex: 1; padding: 10px 6px;
+    border-radius: var(--v-radius);
+    border: 1px solid var(--v-border);
+    background: var(--v-bg-card);
+    color: var(--v-text);
+    font-size: 13px; font-family: var(--v-font);
+    cursor: pointer; transition: all 0.2s;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+}
+.nav-btn:active {
+    transform: scale(0.97);
+    background: var(--v-bg-raised);
+}
 
 /* ── Confirm Modal ── */
 .confirm-ops-list {
@@ -692,7 +717,7 @@ body { padding-bottom: 110px; }
 
 /* ── Selection Mode ── */
 .selection-bar {
-    position: fixed; bottom: 106px; left: 0; right: 0;
+    position: fixed; bottom: 96px; left: 0; right: 0;
     max-width: 430px; margin: 0 auto; z-index: 90;
     background: var(--v-card); border-top: 1px solid var(--v-border);
     display: flex; align-items: center; gap: 6px;
@@ -738,8 +763,8 @@ body { padding-bottom: 110px; }
     border-radius: var(--v-radius-pill); font-size: 13px;
     z-index: 300; animation: v-fadeSlideUp 0.25s ease;
     pointer-events: none; color: #fff;
-    /* Dynamic bottom: above bottom bar + nav bar */
-    bottom: 120px;
+    /* Dynamic bottom: above bottom panel */
+    bottom: 100px;
 }
 .toast-warn { background: var(--v-warning); }
 .toast-err { background: var(--v-danger); }

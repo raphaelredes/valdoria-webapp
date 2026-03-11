@@ -169,14 +169,19 @@
     <div class="tabs" id="tabsBar"></div>
     <div class="content" id="mainContent"></div>
     <div class="selection-bar hidden" id="selectionBar"></div>
-    <div class="bottom-bar" id="bottomBar">
-        <div class="ops-count" id="opsCount"></div>
-        <button class="confirm-btn hidden" id="confirmBtn" onclick="showConfirmModal()">
-            Confirmar Alterações
-        </button>
+    <div class="bottom-panel" id="bottomPanel">
+        <div class="ops-section hidden" id="opsSection">
+            <div class="ops-count" id="opsCount"></div>
+            <button class="confirm-btn hidden" id="confirmBtn" onclick="showConfirmModal()">
+                Confirmar Alterações
+            </button>
+        </div>
+        <div class="nav-footer">
+            <button class="nav-btn" onclick="navBack()">↩ Voltar</button>
+            <button class="nav-btn" onclick="navCharSheet()">📜 Ficha</button>
+            <button class="nav-btn" onclick="navMenu()">🏘️ Cidade</button>
+        </div>
     </div>
-
-    <!-- Nav bar removed — uses Telegram back button -->
 
     <!-- Modal Overlay -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">

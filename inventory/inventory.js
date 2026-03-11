@@ -194,11 +194,9 @@ function init() {
             localAllyEq[a.id] = Object.assign({}, a.eq || {});
     }
 
-    // Dynamic body padding based on bottom bar + nav bar height
-    const bar = document.getElementById('bottomBar');
-    const nav = document.getElementById('navBar');
-    const navH = nav ? nav.offsetHeight : 50;
-    document.body.style.paddingBottom = ((bar ? bar.offsetHeight : 20) + navH + 12) + 'px';
+    // Dynamic body padding based on bottom panel height
+    const panel = document.getElementById('bottomPanel');
+    document.body.style.paddingBottom = (panel ? panel.offsetHeight + 12 : 80) + 'px';
 
     hideLoading();
     updateHeader();
@@ -388,7 +386,7 @@ function renderItemsTab(c) {
     if (localPotions > 0 && (activeFilter === 'all' || activeFilter === 'use')
         && (!searchQuery || 'poção de cura'.includes(searchQuery))) {
         html += `<div style="margin-bottom:10px;"><div class="item-grid">
-                <div class="item-card rarity-common fade-in" onclick="doUsePotion()" style="grid-column: span 2;
+                <div class="item-card rarity-common fade-in" onclick="showPotionConfirm()" style="grid-column: span 2;
                     display:flex;align-items:center;gap:12px;padding:12px;">
                     <span style="font-size:28px;">${vi('flask', 28)}</span>
                     <div style="flex:1;">
@@ -1167,7 +1165,7 @@ function openItemDetail(name) {
     if (it.s && !isProtected(tags)) {
         const canEquip = checkProficiency(it, activeTarget, name);
         if (canEquip) {
-            html += `<button class="btn-equip" onclick="doEquip('${esc(name)}')">${vi('sword', 13)} Equipar</button>`;
+            html += `<button class="btn-equip" onclick="showEquipConfirm('${esc(name)}')">${vi('sword', 13)} Equipar</button>`;
         } else {
             html += `<button class="btn-disabled" disabled>${vi('lock', 13)} Sem proficiência</button>`;
         }
@@ -1182,15 +1180,15 @@ function openItemDetail(name) {
         } else if ((isFood || isPotion) && hasAllies) {
             html += `<button class="btn-use" onclick="showTargetPicker('${esc(name)}')">${vi('flask', 13)} Usar ▸</button>`;
         } else {
-            html += `<button class="btn-use" onclick="doUse('${esc(name)}')">${vi('flask', 13)} Usar</button>`;
+            html += `<button class="btn-use" onclick="showUseConfirm('${esc(name)}')">${vi('flask', 13)} Usar</button>`;
         }
     }
     if (canSell(it, tags) && qty > 0 && !isEquippedAnywhere(name)) {
         const sellPrice = Math.max(1, Math.floor((it.v || 1) * 0.5));
-        html += `<button class="btn-sell" onclick="doSell('${esc(name)}',${sellPrice})">${vi('coin', 13)} ${sellPrice}gp</button>`;
+        html += `<button class="btn-sell" onclick="showSellConfirm('${esc(name)}',${sellPrice})">${vi('coin', 13)} ${sellPrice}gp</button>`;
     }
     if (canDiscard(it, tags) && qty > 0 && !isEquippedAnywhere(name)) {
-        html += `<button class="btn-discard" onclick="doDiscard('${esc(name)}')" style="flex:0 0 44px;padding:10px;">${vi('trash', 14)}</button>`;
+        html += `<button class="btn-discard" onclick="showDiscardConfirm('${esc(name)}')" style="flex:0 0 44px;padding:10px;">${vi('trash', 14)}</button>`;
     }
     html += '</div>';
 
@@ -1500,6 +1498,122 @@ function _confirmRuneInscribe(slot, runeName) {
     haptic('heavy');
     toast(`${vi('orb', 13)} ${esc(runeName)} inscrita`, 'ok');
     openSlotModal(slot);
+}
+
+
+// ══════════════════════════════════════════════════════════
+//  CONFIRMATION MODALS (UX: always ask before acting)
+// ══════════════════════════════════════════════════════════
+function showPotionConfirm() {
+    if (localPotions <= 0) return;
+    const preview = Math.min(D.p.mhp, localHP + 7);
+    const gain = preview - localHP;
+    let html = '<div class="modal-handle"></div>';
+    html += `<div class="modal-title">${vi('flask', 16)} Poção de Cura</div>`;
+    html += `<div style="text-align:center;margin-bottom:12px;">`;
+    html += `<div style="font-size:28px;margin-bottom:6px;">${vi('flask', 28)}</div>`;
+    html += `<div style="font-size:12px;color:var(--v-text-dim);">Restante: x${localPotions}</div>`;
+    html += `<div style="font-size:13px;color:var(--v-success);margin-top:8px;">${vi('heart', 13)} Cura 2d4+2 HP (~+${gain > 0 ? gain : 7})</div>`;
+    html += `<div style="font-size:12px;color:var(--v-text-dim);margin-top:4px;">${vi('heart', 12)} ${localHP}/${D.p.mhp} → ~${preview}/${D.p.mhp}</div>`;
+    html += `</div>`;
+    html += `<div class="detail-actions">
+        <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+        <button class="btn-use" onclick="doUsePotion()">${vi('flask', 13)} Usar Poção</button>
+    </div>`;
+    showModal(html);
+}
+
+function showEquipConfirm(name) {
+    const it = getItemData(name);
+    if (!it || !it.s) return;
+    const slot = resolveSlot(it);
+    const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+    const currentItem = eq[slot];
+    const currentIt = currentItem ? getItemData(currentItem) : null;
+
+    let html = '<div class="modal-handle"></div>';
+    html += `<div class="modal-title">${vi('sword', 16)} Equipar?</div>`;
+    html += `<div style="text-align:center;margin-bottom:12px;">`;
+    html += `<div style="font-size:22px;margin-bottom:4px;">${it.e || '📦'}</div>`;
+    html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
+    html += `<div style="font-size:12px;color:var(--v-text-dim);">${SLOT_NAMES[slot] || slot}</div>`;
+    html += `</div>`;
+
+    if (currentItem) {
+        const delta = getStatDelta(it, currentIt || { ac:0, b:0, hb:0, mb:0 }, slot);
+        html += `<div style="padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;margin-bottom:12px;">`;
+        html += `<div style="color:var(--v-text-dim);margin-bottom:4px;">Substituindo: ${currentIt?.e || '📦'} ${currentItem}</div>`;
+        if (delta) html += `<div>${delta}</div>`;
+        else html += `<div style="color:var(--v-text-dim);">Sem diferença de stats</div>`;
+        html += `</div>`;
+    }
+
+    html += `<div class="detail-actions">
+        <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+        <button class="btn-equip" onclick="doEquip('${esc(name)}','${slot}')">${vi('sword', 13)} Equipar</button>
+    </div>`;
+    showModal(html);
+}
+
+function showUseConfirm(name) {
+    const it = getItemData(name);
+    const inv = localInv.find(i => i.n === name);
+    const qty = inv ? inv.q : 0;
+
+    let html = '<div class="modal-handle"></div>';
+    html += `<div class="modal-title">${vi('flask', 16)} Usar Item?</div>`;
+    html += `<div style="text-align:center;margin-bottom:12px;">`;
+    html += `<div style="font-size:22px;margin-bottom:4px;">${it.e || '📦'}</div>`;
+    html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
+    if (qty > 1) html += `<div style="font-size:12px;color:var(--v-text-dim);">Restante: x${qty}</div>`;
+    if (it.heal) {
+        const avg = avgDice(it.heal);
+        const preview = Math.min(D.p.mhp, localHP + avg) - localHP;
+        html += `<div style="font-size:13px;color:var(--v-success);margin-top:6px;">${vi('heart', 13)} Cura ~${preview > 0 ? preview : avg} HP</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="detail-actions">
+        <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+        <button class="btn-use" onclick="doUse('${esc(name)}')">${vi('flask', 13)} Usar</button>
+    </div>`;
+    showModal(html);
+}
+
+function showSellConfirm(name, price) {
+    const it = getItemData(name);
+
+    let html = '<div class="modal-handle"></div>';
+    html += `<div class="modal-title">${vi('coin', 16)} Vender Item?</div>`;
+    html += `<div style="text-align:center;margin-bottom:12px;">`;
+    html += `<div style="font-size:22px;margin-bottom:4px;">${it.e || '📦'}</div>`;
+    html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
+    html += `<div style="font-size:13px;color:var(--v-gold);margin-top:6px;">${vi('coin', 13)} +${price} GP (50% do valor)</div>`;
+    html += `</div>`;
+
+    html += `<div class="detail-actions">
+        <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+        <button class="btn-sell" onclick="doSell('${esc(name)}',${price})">${vi('coin', 13)} Vender</button>
+    </div>`;
+    showModal(html);
+}
+
+function showDiscardConfirm(name) {
+    const it = getItemData(name);
+
+    let html = '<div class="modal-handle"></div>';
+    html += `<div class="modal-title">${vi('trash', 16)} Descartar Item?</div>`;
+    html += `<div style="text-align:center;margin-bottom:12px;">`;
+    html += `<div style="font-size:22px;margin-bottom:4px;">${it.e || '📦'}</div>`;
+    html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
+    html += `<div style="font-size:12px;color:var(--v-danger);margin-top:6px;">${vi('warn', 12)} Este item será perdido.</div>`;
+    html += `</div>`;
+
+    html += `<div class="detail-actions">
+        <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
+        <button class="btn-discard" onclick="doDiscard('${esc(name)}')">${vi('trash', 13)} Descartar</button>
+    </div>`;
+    showModal(html);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2099,19 +2213,25 @@ async function _navigateBack() {
         return;
     }
 
-    // Step 1: If viewing ally equipment, go back to allies list
+    // If modal is open, close it first
+    if (_modalOpen) {
+        closeModal();
+        return;
+    }
+
+    // If viewing ally equipment, go back to allies list
     if (activeTarget !== 'player') {
         switchTab('allies');
         return;
     }
 
-    // Step 2: If there are pending ops, prompt confirmation before leaving
+    // Auto-save pending ops and exit (no confirmation dialog)
     if (pendingOps.length > 0) {
-        showConfirmModal();
+        sendOps();
         return;
     }
 
-    // Step 3: Perform the exit transition
+    // No pending ops — just exit
     await _performExit();
 }
 
@@ -2491,12 +2611,15 @@ function addOp(op) {
 function updateBottomBar() {
     const count = document.getElementById('opsCount');
     const btn = document.getElementById('confirmBtn');
+    const section = document.getElementById('opsSection');
     if (pendingOps.length > 0) {
         count.innerHTML = `${vi('quill', 13)} ${pendingOps.length} alteração(ões) · <span style="color:var(--v-text-dim);cursor:pointer;text-decoration:underline;" onclick="resetAllOps()">descartar</span>`;
         btn.classList.remove('hidden');
+        if (section) section.classList.remove('hidden');
     } else {
         count.textContent = '';
         btn.classList.add('hidden');
+        if (section) section.classList.add('hidden');
     }
 }
 
@@ -2600,12 +2723,7 @@ function initBackButton() {
         if (tg?.BackButton) {
             tg.BackButton.show();
             tg.BackButton.onClick(() => {
-                if (_modalOpen) {
-                    _modalOpen = false;
-                    document.getElementById('modalOverlay').classList.remove('visible');
-                } else {
-                    _navigateBack();
-                }
+                _navigateBack();
             });
         }
     } catch(e) { console.warn('[INVENTORY] BackButton setup:', e); }
@@ -2634,9 +2752,9 @@ function navCharSheet() {
         try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
         return;
     }
-    // If pending ops, warn before leaving
+    // Auto-save pending ops before navigating
     if (pendingOps.length > 0) {
-        showConfirmModal();
+        sendOps();
         return;
     }
     _transitionTo('game', { action: 'action_status' });
@@ -2644,8 +2762,9 @@ function navCharSheet() {
 
 function navMenu() {
     haptic('light');
+    // Auto-save pending ops before closing
     if (pendingOps.length > 0) {
-        showConfirmModal();
+        sendOps();
         return;
     }
     // Close webapp to return to Telegram chat (main menu)
@@ -2707,9 +2826,9 @@ function toast(msg, type) {
     el.className = `toast toast-${type || 'ok'}`;
     el.innerHTML = msg;
     // Dynamic position above bottom bar (Fix 12)
-    const bar = document.getElementById('bottomBar');
-    const barH = bar ? bar.offsetHeight : 80;
-    el.style.bottom = (barH + 12) + 'px';
+    const panel = document.getElementById('bottomPanel');
+    const panelH = panel ? panel.offsetHeight : 80;
+    el.style.bottom = (panelH + 12) + 'px';
     document.body.appendChild(el);
     // Calculate reading time from text content
     var clean = (msg || '').replace(/<[^>]*>/g, '');
