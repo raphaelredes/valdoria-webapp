@@ -863,7 +863,7 @@ function renderMemberDetail(container, m) {
         spellsHtml = '<div class="member-spells"><div class="member-spells-title">' + spellTitle + '</div>';
         spellsHtml += '<div class="member-spells-list">';
         for (var j = 0; j < m.spells.length; j++) {
-            spellsHtml += '<span class="member-spell-tag">' + m.spells[j] + '</span>';
+            spellsHtml += '<span class="member-spell-tag">' + _escHtml(m.spells[j]) + '</span>';
         }
         spellsHtml += '</div></div>';
     }
@@ -889,7 +889,7 @@ function renderMemberDetail(container, m) {
     // ── Lore ──
     var loreHtml = '';
     if (m.lore) {
-        loreHtml = '<div class="member-lore">' + m.lore + '</div>';
+        loreHtml = '<div class="member-lore">' + _escHtml(m.lore) + '</div>';
     }
 
     wrap.innerHTML = barsHtml + statsHtml + spellsHtml + affHtml + equipHtml + loreHtml;
