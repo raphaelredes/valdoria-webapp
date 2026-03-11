@@ -68,6 +68,10 @@ function renderScreen(screen) {
 
     S.currentScreen = screen;
     if (typeof cacheScreen === 'function') cacheScreen(screen);
+
+    // Apply day/night ambient tint based on server time
+    _applyTimeTint(screen);
+
     // Update ambient particles based on screen content
     if (typeof updateParticleTheme === 'function') updateParticleTheme(screen.text || '');
 
@@ -1255,4 +1259,24 @@ function _hideFeedbackOverlay() {
 // Haptic feedback helper (vibration API)
 function _haptic() {
     try { if (navigator.vibrate) navigator.vibrate(15); } catch(_) {}
+}
+
+
+// ─── Day/Night Ambient Tint ───
+// Sets body[data-time] attribute for CSS tint overlay.
+// Uses server is_night flag + client hour for dusk/dawn detection.
+function _applyTimeTint(screen) {
+    if (screen.is_night) {
+        document.body.setAttribute('data-time', 'night');
+    } else {
+        // Check for dusk/dawn based on local time (approximate)
+        const h = new Date().getHours();
+        if (h >= 5 && h < 7) {
+            document.body.setAttribute('data-time', 'dawn');
+        } else if (h >= 18 && h < 20) {
+            document.body.setAttribute('data-time', 'dusk');
+        } else {
+            document.body.removeAttribute('data-time');
+        }
+    }
 }

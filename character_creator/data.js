@@ -313,12 +313,12 @@ const NAMES_DATA = {
 const DM_NARRATION = {
     0: 'Muito bem, aventureiro! Antes de tudo, preciso saber sobre suas origens. De qual povo você descende? Cada raça possui dons únicos que moldarão seu destino.',
     1: 'Agora me conte: como você luta? Qual caminho de poder escolheu trilhar? Sua classe define suas habilidades em combate e exploração.',
-    2: 'Todo herói tem forças e fraquezas. Distribua seus atributos — coloque os valores mais altos no que importa para sua classe!',
-    3: 'Todo herói tem um passado. O que você fazia antes de se tornar aventureiro? Seu antecedente concede perícias e recursos do seu ofício anterior.',
-    4: 'Todo herói tem uma bússola moral. Seu alinhamento guia suas escolhas — mas não precisa ser rígido. Pode pular se preferir.',
+    2: 'Todo aventureiro tem forças e fraquezas. Distribua seus atributos — coloque os valores mais altos no que importa para sua classe!',
+    3: 'Todo aventureiro tem um passado. O que você fazia antes de se tornar aventureiro? Seu antecedente concede perícias e recursos do seu ofício anterior.',
+    4: 'Todo aventureiro tem uma bússola moral. Seu alinhamento guia suas escolhas — mas não precisa ser rígido. Pode pular se preferir.',
     5: 'Hora de refinar seus talentos. Escolha as perícias nas quais seu personagem se especializou durante seus anos de treinamento.',
     6: 'Um bom artesão sempre carrega suas ferramentas. Escolha as ferramentas com as quais você tem experiência prática.',
-    7: 'Quase lá! Agora dê vida ao seu personagem — escolha seu gênero e batize-o com um nome digno de um herói de Valdoria.',
+    7: 'Quase lá! Agora dê vida ao seu personagem — escolha seu gênero e batize-o com um nome digno de um aventureiro de Valdoria.',
     8: 'Excelente! Sua ficha está completa. Revise cada detalhe antes de partir em sua jornada pelas terras de Valdoria...'
 };
 
@@ -632,7 +632,7 @@ const HELP_TEXTS = {
     },
     alignment: {
         title: '⚖️ O que é Alinhamento?',
-        text: 'Alinhamento descreve a bússola moral do seu personagem em dois eixos:\n\nEixo da Ordem:\n• ⚖️ Leal — Segue regras, honra, tradição\n• ☯️ Neutro — Flexível, decide caso a caso\n• 🦅 Caótico — Liberdade acima de tudo\n\nEixo da Moral:\n• ✨ Bom — Ajuda os outros, faz sacrifícios\n• ☯️ Neutro — Equilíbrio, pragmatismo\n• 🖤 Mau — Egoísta, busca poder pessoal\n\n💡 Dica: A maioria dos heróis é Bom ou Neutro.'
+        text: 'Alinhamento descreve a bússola moral do seu personagem em dois eixos:\n\nEixo da Ordem:\n• ⚖️ Leal — Segue regras, honra, tradição\n• ☯️ Neutro — Flexível, decide caso a caso\n• 🦅 Caótico — Liberdade acima de tudo\n\nEixo da Moral:\n• ✨ Bom — Ajuda os outros, faz sacrifícios\n• ☯️ Neutro — Equilíbrio, pragmatismo\n• 🖤 Mau — Egoísta, busca poder pessoal\n\n💡 Dica: A maioria dos aventureiros é Bom ou Neutro.'
     },
     language: {
         title: '🗣️ O que são Idiomas?',

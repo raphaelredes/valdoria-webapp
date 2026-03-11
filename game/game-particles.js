@@ -13,16 +13,28 @@ let _particleFrameSkip = false;  // toggle for 30fps in lite mode
 
 // Particle themes per location keyword
 const PARTICLE_THEMES = {
-    cidade:   { color: [196, 149, 58], count: 10, speed: 0.3, size: [1, 2.5], drift: 0.15, glow: true },
-    taverna:  { color: [220, 140, 50], count: 12, speed: 0.5, size: [1.5, 3], drift: 0.1, glow: true },
-    templo:   { color: [220, 200, 120], count: 8, speed: 0.2, size: [1, 2], drift: 0.2, glow: true },
-    mercado:  { color: [196, 149, 58], count: 8, speed: 0.25, size: [1, 2], drift: 0.3, glow: false },
-    combat:   { color: [180, 60, 60], count: 10, speed: 0.6, size: [1, 2.5], drift: 0.05, glow: true },
-    arena:    { color: [180, 60, 60], count: 10, speed: 0.6, size: [1, 2.5], drift: 0.05, glow: true },  // backward compat
-    guilda:   { color: [160, 140, 100], count: 8, speed: 0.3, size: [1, 2], drift: 0.15, glow: false },
-    banco:    { color: [196, 169, 88], count: 6, speed: 0.15, size: [1, 1.5], drift: 0.1, glow: true },
-    floresta: { color: [80, 160, 80], count: 10, speed: 0.2, size: [1, 2], drift: 0.25, glow: false },
-    default:  { color: [196, 149, 58], count: 6, speed: 0.2, size: [1, 2], drift: 0.15, glow: false },
+    // City locations — each with distinct atmosphere
+    cidade:     { color: [196, 149, 58], count: 10, speed: 0.3,  size: [1, 2.5], drift: 0.15, glow: true },
+    taverna:    { color: [220, 140, 50], count: 12, speed: 0.5,  size: [1.5, 3], drift: 0.1,  glow: true },
+    estalagem:  { color: [210, 150, 70], count: 10, speed: 0.35, size: [1, 2.5], drift: 0.12, glow: true },
+    templo:     { color: [220, 200, 120],count: 8,  speed: 0.15, size: [1, 2],   drift: 0.25, glow: true },
+    mercado:    { color: [196, 149, 58], count: 8,  speed: 0.25, size: [1, 2],   drift: 0.3,  glow: false },
+    ferreiro:   { color: [255, 120, 40], count: 10, speed: 0.7,  size: [1, 2],   drift: 0.08, glow: true },
+    guilda:     { color: [160, 140, 100],count: 8,  speed: 0.3,  size: [1, 2],   drift: 0.15, glow: false },
+    banco:      { color: [196, 169, 88], count: 6,  speed: 0.15, size: [1, 1.5], drift: 0.1,  glow: true },
+    // Combat/arena — intense red embers
+    combat:     { color: [180, 60, 60],  count: 10, speed: 0.6,  size: [1, 2.5], drift: 0.05, glow: true },
+    arena:      { color: [180, 60, 60],  count: 10, speed: 0.6,  size: [1, 2.5], drift: 0.05, glow: true },
+    // Nature/exploration
+    floresta:   { color: [80, 160, 80],  count: 10, speed: 0.2,  size: [1, 2],   drift: 0.25, glow: false },
+    // Activities — calm, focused
+    ficha:      { color: [160, 140, 110],count: 4,  speed: 0.12, size: [1, 1.5], drift: 0.2,  glow: false },
+    inventário: { color: [170, 130, 80], count: 5,  speed: 0.15, size: [1, 1.5], drift: 0.15, glow: false },
+    mochila:    { color: [170, 130, 80], count: 5,  speed: 0.15, size: [1, 1.5], drift: 0.15, glow: false },
+    missão:     { color: [200, 170, 80], count: 7,  speed: 0.2,  size: [1, 2],   drift: 0.18, glow: true },
+    missões:    { color: [200, 170, 80], count: 7,  speed: 0.2,  size: [1, 2],   drift: 0.18, glow: true },
+    // Default fallback
+    default:    { color: [196, 149, 58], count: 6,  speed: 0.2,  size: [1, 2],   drift: 0.15, glow: false },
 };
 
 function initParticles() {
@@ -54,8 +66,16 @@ function updateParticleTheme(screenText) {
     }
     if (!theme) theme = PARTICLE_THEMES.default;
 
+    // Night mode: dim particles slightly (cooler, less vibrant)
+    if (document.body.getAttribute('data-time') === 'night') {
+        theme = Object.assign({}, theme, {
+            color: theme.color.map(c => Math.round(c * 0.7)),
+            glow: false,  // save GPU in night mode
+        });
+    }
+
     // Only restart if theme changed
-    const themeKey = JSON.stringify(theme.color) + theme.count;
+    const themeKey = JSON.stringify(theme.color) + theme.count + (document.body.getAttribute('data-time') || '');
     if (themeKey === _particleTheme) return;
     _particleTheme = themeKey;
 
