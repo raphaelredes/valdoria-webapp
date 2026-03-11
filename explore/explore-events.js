@@ -1399,8 +1399,8 @@ function showHazardNarration(hazard) {
     }
 
     const overlay = document.getElementById('dm-overlay');
-    const header = document.getElementById('dm-header');
-    const body = document.getElementById('dm-body');
+    const header = document.getElementById('dm-title');
+    const body = document.getElementById('dm-narration');
     const choicesEl = document.getElementById('dm-choices');
 
     if (!overlay || !body) { showHazardCheck(hazard); return; }
@@ -1562,8 +1562,8 @@ function _showHazardSkip(overlay, success, hazard) {
 // Show narrative result after hazard dice roll
 function _showHazardResultNarration(text, success, hazard) {
     const overlay = document.getElementById('dm-overlay');
-    const header = document.getElementById('dm-header');
-    const body = document.getElementById('dm-body');
+    const header = document.getElementById('dm-title');
+    const body = document.getElementById('dm-narration');
     const choicesEl = document.getElementById('dm-choices');
 
     if (!overlay || !body) { _applyHazardAndContinue(success, hazard); return; }
@@ -2134,8 +2134,8 @@ function showExploreArea() {
     }
 
     const overlay = document.getElementById('dm-overlay');
-    const header = document.getElementById('dm-header');
-    const body = document.getElementById('dm-body');
+    const header = document.getElementById('dm-title');
+    const body = document.getElementById('dm-narration');
     const choicesEl = document.getElementById('dm-choices');
     if (!overlay || !body) return;
 
