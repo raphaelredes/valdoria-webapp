@@ -17,6 +17,10 @@ let _staticCanvas = null;
 let _staticCtx = null;
 let _staticDirty = true;
 
+// Hex hover/tap reveal effect
+let _hoveredHex = null;     // {col, row, time} — currently hovered hex
+let _tapRevealHexes = [];   // [{col, row, startTime}] — tapped hexes with fading outline
+
 function initRenderer() {
     _canvas = document.getElementById('iso-map');
     if (!_canvas) return;
@@ -58,6 +62,43 @@ function initRenderer() {
 
     // Click handler on canvas
     _canvas.addEventListener('click', handleCanvasClick);
+
+    // Hex hover reveal (mouse)
+    _canvas.addEventListener('mousemove', (e) => {
+        const rect = _canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+        const scaleX = _canvasLogicalW / rect.width;
+        const scaleY = _canvasLogicalH / rect.height;
+        const hex = screenToHex(sx * scaleX, sy * scaleY, S.grid, ROWS, COLS);
+        if (hex.col >= 0 && hex.row >= 0) {
+            _hoveredHex = { col: hex.col, row: hex.row, time: performance.now() };
+        } else {
+            _hoveredHex = null;
+        }
+    });
+    _canvas.addEventListener('mouseleave', () => { _hoveredHex = null; });
+
+    // Hex tap reveal (touch — shows hex outline briefly on any touch)
+    _canvas.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        const rect = _canvas.getBoundingClientRect();
+        const sx = touch.clientX - rect.left;
+        const sy = touch.clientY - rect.top;
+        const scaleX = _canvasLogicalW / rect.width;
+        const scaleY = _canvasLogicalH / rect.height;
+        const hex = screenToHex(sx * scaleX, sy * scaleY, S.grid, ROWS, COLS);
+        if (hex.col >= 0 && hex.row >= 0) {
+            _tapRevealHexes.push({ col: hex.col, row: hex.row, startTime: performance.now() });
+            // Also reveal neighbors for context
+            const neighbors = getNeighbors(hex.col, hex.row);
+            for (const n of neighbors) {
+                if (n.col >= 0 && n.col < COLS && n.row >= 0 && n.row < ROWS) {
+                    _tapRevealHexes.push({ col: n.col, row: n.row, startTime: performance.now() });
+                }
+            }
+        }
+    }, { passive: true });
 
     // Start render loop
     scheduleRender();
@@ -133,6 +174,9 @@ function renderFrame(timestamp) {
 
     // 7.6 Tap feedback ripple
     drawTapFeedback(_ctx, timestamp);
+
+    // 7.65 Hex hover/tap outline reveal
+    drawHexHoverEffect(_ctx, timestamp);
 
     // 7.7 Player dynamic lighting (torch/ambient — drawn before fog so fog masks it)
     drawPlayerLight(_ctx, timestamp);
@@ -290,16 +334,8 @@ function drawTile(ctx, col, row, biome, colors, timestamp) {
         drawWallDecoration(ctx, cx, cy - heightPx, heightPx, col, row);
     }
 
-    // Tile edge outline (subtle)
-    ctx.beginPath();
-    ctx.moveTo(topVerts[0].x, topVerts[0].y);
-    for (let i = 1; i < topVerts.length; i++) {
-        ctx.lineTo(topVerts[i].x, topVerts[i].y);
-    }
-    ctx.closePath();
-    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-    ctx.lineWidth = 0.5;
-    ctx.stroke();
+    // No permanent tile borders — terrain blends seamlessly
+    // Hex outlines only appear on hover/tap (drawn in drawHexHoverEffect)
 }
 
 // Draw animated tile decorations (water, lava, wind-animated vegetation)
@@ -699,70 +735,31 @@ function drawVisitedTrail(ctx, timestamp) {
         points.push({ x, y, c, r, fadeFactor, age });
     }
 
-    // Draw golden breadcrumb line connecting visited hexes in order
-    if (points.length >= 2) {
-        ctx.save();
-        ctx.strokeStyle = `rgba(196,149,58,${pulse * 0.25})`;
-        ctx.lineWidth = 1.2;
-        ctx.setLineDash([3, 4]);
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
-            ctx.lineTo(points[i].x, points[i].y);
-        }
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.restore();
-    }
-
+    // Subtle footprints only (no connecting line — immersive)
     // Draw footprints on each visited hex
     for (const p of points) {
         if (p.c === S.playerCol && p.r === S.playerRow) continue;
 
         const angle = (p.c * 7 + p.r * 13) % 6 * 0.5;
-        const alpha = pulse * 0.3 * p.fadeFactor;
+        const alpha = pulse * 0.12 * p.fadeFactor;
 
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(angle);
-        ctx.fillStyle = `rgba(196,149,58,${alpha})`;
+        // Subtle earth-tone footprints (blend with terrain)
+        ctx.fillStyle = `rgba(60,40,20,${alpha})`;
         // Left foot
         ctx.beginPath();
-        ctx.ellipse(-1.8, -1.2, 1, 2, 0.15, 0, Math.PI * 2);
+        ctx.ellipse(-1.5, -1.0, 0.8, 1.6, 0.15, 0, Math.PI * 2);
         ctx.fill();
         // Right foot
         ctx.beginPath();
-        ctx.ellipse(1.8, 1.2, 1, 2, -0.15, 0, Math.PI * 2);
+        ctx.ellipse(1.5, 1.0, 0.8, 1.6, -0.15, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }
 
-    // Direction arrows on breadcrumb (every 4th segment)
-    if (points.length >= 3) {
-        ctx.save();
-        for (let i = 2; i < points.length; i += 4) {
-            const prev = points[i - 1];
-            const curr = points[i];
-            const dx = curr.x - prev.x;
-            const dy = curr.y - prev.y;
-            const angle = Math.atan2(dy, dx);
-            const mx = (prev.x + curr.x) / 2;
-            const my = (prev.y + curr.y) / 2;
-
-            ctx.save();
-            ctx.translate(mx, my);
-            ctx.rotate(angle);
-            ctx.fillStyle = `rgba(196,149,58,${pulse * 0.4})`;
-            ctx.beginPath();
-            ctx.moveTo(3, 0);
-            ctx.lineTo(-2, -2);
-            ctx.lineTo(-2, 2);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
-        }
-        ctx.restore();
-    }
+    // No direction arrows — footprints alone are sufficient
 }
 
 // Tap feedback effect — ripple on hex touch
@@ -780,6 +777,42 @@ function spawnTapFeedback(col, row) {
         alpha: 0.6,
         start: performance.now(),
     });
+}
+
+// Draw hex outline on hover/tap (replaces permanent borders)
+function drawHexHoverEffect(ctx, timestamp) {
+    // Mouse hover — show single hex outline
+    if (_hoveredHex) {
+        const { x, y } = hexToScreen(_hoveredHex.col, _hoveredHex.row);
+        const age = timestamp - (_hoveredHex.time || timestamp);
+        const fadeIn = Math.min(1, age / 150); // 150ms fade in
+        const verts = getHexVertices(x, y - 2);
+        ctx.beginPath();
+        ctx.moveTo(verts[0].x, verts[0].y);
+        for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
+        ctx.closePath();
+        ctx.strokeStyle = `rgba(196,149,58,${0.35 * fadeIn})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+    }
+
+    // Tap reveals — multiple hexes with fade out
+    const TAP_DURATION = 800; // ms
+    const now = timestamp;
+    _tapRevealHexes = _tapRevealHexes.filter(h => (now - h.startTime) < TAP_DURATION);
+    for (const h of _tapRevealHexes) {
+        const { x, y } = hexToScreen(h.col, h.row);
+        const age = now - h.startTime;
+        const fadeOut = 1 - (age / TAP_DURATION);
+        const verts = getHexVertices(x, y - 2);
+        ctx.beginPath();
+        ctx.moveTo(verts[0].x, verts[0].y);
+        for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
+        ctx.closePath();
+        ctx.strokeStyle = `rgba(196,149,58,${0.4 * fadeOut * fadeOut})`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+    }
 }
 
 function drawTapFeedback(ctx, timestamp) {

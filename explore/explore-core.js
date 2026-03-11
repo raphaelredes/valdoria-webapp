@@ -105,6 +105,7 @@ function saveState() {
             ta: S.travelActivity || null,
             wt: S.weather || 's',
             ih: Array.from(S.interactedHexes || new Set()),
+            ccl: Array.from(S.chainClues || new Set()),
             ts: Date.now(),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
@@ -154,6 +155,7 @@ function restoreState() {
         S.conditions = snap.cd || [];
         S._hazardsTriggered = new Set(snap.hz || []);
         S._trapsTriggered = new Set(snap.tt || []);
+        S.chainClues = new Set(snap.ccl || []);
         S.moveLog = snap.ml || [];
         S._stepCount = snap.sc || 0;
         S.inventory = snap.inv || [];
@@ -314,10 +316,11 @@ function loadMapData(data) {
             // Show DM intro after cinematic exit completes
             if (S.dmIntro) showDMIntro(S.dmIntro);
             // Show activity selection after DM intro (fresh start only)
+            // Blocked if tutorial is active — tutorial will trigger it on close
             if (!S.travelActivity && typeof showActivitySelection === 'function') {
                 const actDelay = S.dmIntro ? 4000 : 800;
                 setTimeout(() => {
-                    if (!S.travelActivity) showActivitySelection();
+                    if (!S.travelActivity && !_tutorialActive) showActivitySelection();
                 }, actDelay);
             }
             // Passive Perception notification
@@ -338,11 +341,11 @@ function loadMapData(data) {
         if (S.dmIntro && !restored) {
             setTimeout(() => showDMIntro(S.dmIntro), 400);
         }
-        // Show activity selection on fresh start
+        // Show activity selection on fresh start (blocked if tutorial active)
         if (!restored && !S.travelActivity && typeof showActivitySelection === 'function') {
             const actDelay = S.dmIntro ? 4000 : 800;
             setTimeout(() => {
-                if (!S.travelActivity) showActivitySelection();
+                if (!S.travelActivity && !_tutorialActive) showActivitySelection();
             }, actDelay);
         }
         // Passive Perception notification
@@ -355,6 +358,9 @@ function loadMapData(data) {
             }, delay);
         }
     }
+
+    // Auto-show tutorial on first visit (polls for loading to finish)
+    if (typeof autoShowTutorial === 'function') autoShowTutorial();
 }
 
 // ═══════════════════════════════════════════════════════

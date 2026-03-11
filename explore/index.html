@@ -346,6 +346,7 @@
     <div id="bottom-bar">
         <button class="btn-return" id="btn-return" onclick="showExitRiskAssessment()">Retornar</button>
         <button class="btn-explore" id="btn-explore" onclick="showExploreArea()">&#x1f50d;</button>
+        <button class="btn-help-tutorial" id="btn-help" onclick="showTutorialConfirm()" title="Tutorial">?</button>
         <button class="btn-inventory" id="btn-inventory" onclick="transitionToInventory()"
             style="display:none">Itens</button>
         <div class="bar-center">
@@ -553,7 +554,7 @@
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
-            var scripts = ['explore-iso.js', 'explore-tiles.js', 'explore-fog.js', 'explore-travel.js', 'explore-movement.js', 'explore-renderer.js', 'explore-narrations.js', 'explore-core.js', 'explore-events.js', 'explore-particles.js'];
+            var scripts = ['explore-iso.js', 'explore-tiles.js', 'explore-fog.js', 'explore-travel.js', 'explore-movement.js', 'explore-renderer.js', 'explore-narrations.js', 'explore-stories.js', 'explore-tutorial.js', 'explore-core.js', 'explore-events.js', 'explore-particles.js'];
         scripts.forEach(function (s) {
             document.write('<script src="' + s + '?v=' + v + '"><\/script>');
         });

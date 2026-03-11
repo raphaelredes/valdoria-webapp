@@ -1,0 +1,243 @@
+/* explore-tutorial.js — Tutorial de Exploração */
+
+const TUTORIAL_STEPS = [
+    { target: '#iso-map', title: 'Mapa de Exploração', text: 'Este é o mapa hexagonal. Toque nos hexágonos adjacentes ao seu personagem para se mover.', position: 'center', icon: '🗺️' },
+    { target: '#hud', title: 'Barra de Status', text: 'Aqui você vê o nome do personagem, vida (HP), XP e ouro acumulados, hora do dia e clima.', position: 'below', icon: '❤️' },
+    { target: '#minimap', title: 'Minimapa', text: 'O minimapa mostra uma visão geral da região. O ponto dourado é você, o verde é a saída.', position: 'below-left', icon: '🧭' },
+    { target: '.btn-return', title: 'Retornar à Cidade', text: 'Quando quiser encerrar a exploração, toque aqui para avaliar os riscos do retorno e voltar à cidade.', position: 'above', icon: '🏠' },
+    { target: '.btn-explore', title: 'Explorar Área', text: 'Toque aqui para investigar o hex atual — procurar itens, forragear ou observar os arredores.', position: 'above', icon: '🔍' },
+    { target: '.pace-toggle', title: 'Ritmo de Viagem', text: 'Alterne entre Rápido (2 hexes, -5 Percepção), Normal ou Cauteloso (+5 Percepção, -2 DC). Regra do PHB Cap.8.', position: 'above', icon: '🚶' },
+    { target: '.bar-center', title: 'Passos e Perigo', text: 'O número mostra hexes visitados. Os pontos vermelhos indicam o nível de perigo — quanto mais cheios, mais perigoso.', position: 'above', icon: '⚠️' },
+    { target: '#map-viewport', title: 'Névoa de Guerra', text: 'Áreas escuras ainda não foram exploradas. Conforme você se move, a névoa se dissipa revelando o terreno e pontos de interesse.', position: 'center', icon: '🌫️' },
+    { target: '#map-viewport', title: 'Eventos e Encontros', text: 'Ao explorar, você encontrará eventos narrativos, armadilhas, NPCs e combates. Testes de habilidade D&D 5e determinam o resultado — com dados 3D!', position: 'center', icon: '🎲' },
+    { target: '#map-viewport', title: 'Boa Exploração!', text: 'Descanse em acampamentos para recuperar vida, use itens do inventário e fique atento à exaustão. Que Valdoria revele seus segredos a você!', position: 'center', icon: '⚔️' }
+];
+
+const TUTORIAL_STORAGE_KEY = 'valdoria_explore_tutorial_seen';
+let _tutorialStep = 0;
+let _tutorialActive = false;
+let _tutorialOverlay = null;
+let _tutorialPendingActivity = false;
+
+function shouldShowTutorial() {
+    try { return !localStorage.getItem(TUTORIAL_STORAGE_KEY); }
+    catch(e) { return false; }
+}
+
+function markTutorialSeen() {
+    try { localStorage.setItem(TUTORIAL_STORAGE_KEY, '1'); }
+    catch(e) {}
+}
+
+function _buildTutorialDOM() {
+    if (_tutorialOverlay) return;
+    const ov = document.createElement('div');
+    ov.id = 'tutorial-overlay'; ov.className = 'tutorial-overlay';
+
+    const bd = document.createElement('div');
+    bd.className = 'tutorial-backdrop'; bd.id = 'tutorial-backdrop';
+    bd.addEventListener('click', function(e) { e.stopPropagation(); });
+    ov.appendChild(bd);
+
+    const sp = document.createElement('div');
+    sp.className = 'tutorial-spotlight'; sp.id = 'tutorial-spotlight';
+    ov.appendChild(sp);
+
+
+    const card = document.createElement('div');
+    card.className = 'tutorial-card'; card.id = 'tutorial-card';
+
+    // Header
+    const hdr = document.createElement('div'); hdr.className = 'tutorial-card-header';
+    const ic = document.createElement('span'); ic.className = 'tutorial-card-icon'; ic.id = 'tutorial-icon';
+    const ti = document.createElement('span'); ti.className = 'tutorial-card-title'; ti.id = 'tutorial-title';
+    const sn = document.createElement('span'); sn.className = 'tutorial-step-num'; sn.id = 'tutorial-step-num';
+    hdr.appendChild(ic); hdr.appendChild(ti); hdr.appendChild(sn);
+    card.appendChild(hdr);
+
+    // Text
+    const tx = document.createElement('div'); tx.className = 'tutorial-card-text'; tx.id = 'tutorial-text';
+    card.appendChild(tx);
+
+    // Dots
+    const dt = document.createElement('div'); dt.className = 'tutorial-dots'; dt.id = 'tutorial-dots';
+    card.appendChild(dt);
+
+    // Actions
+    const act = document.createElement('div'); act.className = 'tutorial-actions';
+    const skp = document.createElement('button'); skp.className = 'tutorial-btn-skip'; skp.id = 'tutorial-btn-skip';
+    skp.textContent = 'Pular'; skp.addEventListener('click', _tutorialClose);
+    const nxt = document.createElement('button'); nxt.className = 'tutorial-btn-next'; nxt.id = 'tutorial-btn-next';
+    nxt.textContent = 'Próximo'; nxt.addEventListener('click', _tutorialNext);
+    act.appendChild(skp); act.appendChild(nxt);
+    card.appendChild(act);
+
+    ov.appendChild(card);
+    document.body.appendChild(ov);
+    _tutorialOverlay = ov;
+}
+
+function _showTutorialStep(idx) {
+    if (idx < 0 || idx >= TUTORIAL_STEPS.length) { _tutorialClose(); return; }
+    _tutorialStep = idx;
+    const step = TUTORIAL_STEPS[idx];
+
+    document.getElementById('tutorial-icon').textContent = step.icon;
+    document.getElementById('tutorial-title').textContent = step.title;
+    document.getElementById('tutorial-text').textContent = step.text;
+    document.getElementById('tutorial-step-num').textContent = (idx + 1) + '/' + TUTORIAL_STEPS.length;
+
+    // Dots
+    const dotsEl = document.getElementById('tutorial-dots');
+    dotsEl.innerHTML = '';
+    for (let i = 0; i < TUTORIAL_STEPS.length; i++) {
+        const d = document.createElement('span');
+        d.className = 'tutorial-dot' + (i === idx ? ' active' : '') + (i < idx ? ' done' : '');
+        dotsEl.appendChild(d);
+    }
+
+    // Button text
+    const nxt = document.getElementById('tutorial-btn-next');
+    nxt.textContent = (idx === TUTORIAL_STEPS.length - 1) ? 'Começar!' : 'Próximo';
+
+    // Spotlight + card position
+    const spotlight = document.getElementById('tutorial-spotlight');
+    const card = document.getElementById('tutorial-card');
+    const target = document.querySelector(step.target);
+
+    if (target && step.position !== 'center') {
+        const r = target.getBoundingClientRect();
+        const p = 8;
+        spotlight.style.display = 'block';
+        spotlight.style.left = (r.left - p) + 'px';
+        spotlight.style.top = (r.top - p) + 'px';
+        spotlight.style.width = (r.width + p * 2) + 'px';
+        spotlight.style.height = (r.height + p * 2) + 'px';
+        spotlight.style.borderRadius = '12px';
+
+        // Arrow position: horizontal offset relative to card center, clamped within card
+        const targetCenterX = r.left + r.width / 2;
+        const cardCenterX = window.innerWidth / 2;
+        const cardHalfW = Math.min(170, (window.innerWidth - 40) / 2); // max-width 340px / 2
+        const rawOffset = targetCenterX - cardCenterX;
+        const arrowOffset = Math.max(-cardHalfW + 24, Math.min(cardHalfW - 24, rawOffset));
+        card.style.setProperty('--arrow-offset', arrowOffset + 'px');
+
+        card.style.left = '50%'; card.style.right = 'auto';
+        if (step.position === 'above') {
+            // Card ABOVE target — arrow points DOWN from card bottom
+            const cardBottom = window.innerHeight - r.top + 20;
+            card.style.top = 'auto';
+            card.style.bottom = cardBottom + 'px';
+            card.style.transform = 'translateX(-50%)';
+            card.setAttribute('data-arrow', 'down');
+        } else {
+            // Card BELOW target — arrow points UP from card top
+            card.style.top = (r.bottom + 20) + 'px';
+            card.style.bottom = 'auto';
+            card.style.transform = 'translateX(-50%)';
+            card.setAttribute('data-arrow', 'up');
+        }
+    } else {
+        spotlight.style.display = 'none';
+        card.removeAttribute('data-arrow');
+        card.style.top = '50%'; card.style.left = '50%';
+        card.style.bottom = 'auto'; card.style.right = 'auto';
+        card.style.transform = 'translate(-50%, -50%)';
+    }
+
+    card.classList.remove('tutorial-card-enter');
+    void card.offsetWidth;
+    card.classList.add('tutorial-card-enter');
+}
+
+function _tutorialNext() {
+    try {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback)
+            Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    } catch(_) {}
+    if (_tutorialStep >= TUTORIAL_STEPS.length - 1) _tutorialClose();
+    else _showTutorialStep(_tutorialStep + 1);
+}
+
+function _tutorialClose() {
+    _tutorialActive = false;
+    markTutorialSeen();
+    if (_tutorialOverlay) {
+        _tutorialOverlay.classList.add('tutorial-exit');
+        setTimeout(function() {
+            if (_tutorialOverlay) {
+                _tutorialOverlay.classList.remove('tutorial-exit');
+                _tutorialOverlay.style.display = 'none';
+            }
+            // After tutorial ends on first visit, trigger activity selection
+            if (typeof _tutorialPendingActivity === 'boolean' && _tutorialPendingActivity) {
+                _tutorialPendingActivity = false;
+                if (!S.travelActivity && typeof showActivitySelection === 'function') {
+                    setTimeout(showActivitySelection, 400);
+                }
+            }
+        }, 300);
+    }
+}
+
+function startTutorial() {
+    _buildTutorialDOM();
+    _tutorialActive = true;
+    _tutorialOverlay.style.display = '';
+    _tutorialOverlay.classList.remove('tutorial-exit');
+    _showTutorialStep(0);
+}
+
+function autoShowTutorial() {
+    if (!shouldShowTutorial()) return;
+    // Wait for loading overlay to be hidden before showing tutorial
+    function _tryShow() {
+        var overlay = document.getElementById('loading');
+        if (overlay && !overlay.classList.contains('hidden')) {
+            // Loading still visible — retry
+            setTimeout(_tryShow, 300);
+            return;
+        }
+        // Loading gone — show tutorial after a short pause
+        _tutorialPendingActivity = true;
+        setTimeout(startTutorial, 500);
+    }
+    // Start checking after a small initial delay
+    setTimeout(_tryShow, 400);
+}
+
+function showTutorialConfirm() {
+    let el = document.getElementById('tutorial-confirm');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'tutorial-confirm'; el.className = 'tutorial-confirm-overlay';
+
+        const card = document.createElement('div'); card.className = 'tutorial-confirm-card';
+
+        const ic = document.createElement('div'); ic.className = 'tutorial-confirm-icon';
+        ic.textContent = '❓'; card.appendChild(ic);
+
+        const ti = document.createElement('div'); ti.className = 'tutorial-confirm-title';
+        ti.textContent = 'Rever Tutorial?'; card.appendChild(ti);
+
+        const tx = document.createElement('div'); tx.className = 'tutorial-confirm-text';
+        tx.textContent = 'Deseja rever o guia passo a passo de como funciona a exploração?';
+        card.appendChild(tx);
+
+        const act = document.createElement('div'); act.className = 'tutorial-confirm-actions';
+
+        const no = document.createElement('button'); no.className = 'tutorial-confirm-no';
+        no.textContent = 'Não';
+        no.addEventListener('click', function() { el.classList.remove('active'); });
+        act.appendChild(no);
+
+        const yes = document.createElement('button'); yes.className = 'tutorial-confirm-yes';
+        yes.textContent = 'Sim, rever';
+        yes.addEventListener('click', function() { el.classList.remove('active'); startTutorial(); });
+        act.appendChild(yes);
+
+        card.appendChild(act); el.appendChild(card); document.body.appendChild(el);
+    }
+    el.classList.add('active');
+}

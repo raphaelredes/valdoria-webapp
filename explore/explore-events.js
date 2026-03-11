@@ -74,6 +74,15 @@ function showPOI(poi) {
     const poiKey = `${poi.col},${poi.row}`;
     if (S.fogState[poiKey] !== 'hidden') flashHex(poi.col, poi.row);
 
+    // Story event trigger — complex multi-stage narratives
+    if (typeof shouldTriggerStory === 'function' && typeof showStoryEvent === 'function') {
+        const story = shouldTriggerStory(poi);
+        if (story) {
+            showStoryEvent(story.id, 'intro');
+            return;
+        }
+    }
+
     // activateOverlay clears dm-choices + dm-narration before showing
     activateOverlay('dm-overlay');
 
