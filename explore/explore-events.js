@@ -1278,10 +1278,10 @@ function showDMIntro(text) {
 const TOAST_STYLES = {
     difficult: 'background:rgba(220,160,40,0.2);border:1px solid rgba(220,160,40,0.4);color:#dca028',
     ranger: 'background:rgba(68,170,100,0.2);border:1px solid rgba(68,170,100,0.4);color:#4aa664',
-    damage: 'background:rgba(200,60,60,0.25);border:1px solid rgba(200,60,60,0.5);color:#c44',
-    danger: 'background:rgba(200,60,60,0.25);border:1px solid rgba(200,60,60,0.5);color:#c44',
+    damage: 'background:rgba(180,60,60,0.18);border:1px solid rgba(180,60,60,0.35);color:#b55',
+    danger: 'background:rgba(180,60,60,0.18);border:1px solid rgba(180,60,60,0.35);color:#b55',
     condition: 'background:rgba(170,68,68,0.2);border:1px solid rgba(170,68,68,0.4);color:#c88',
-    flavor: 'background:rgba(50,44,58,0.95);border:1px solid rgba(196,149,58,0.4);color:#ddd4c6;font-style:italic;font-size:12px;letter-spacing:0.3px;box-shadow:0 2px 12px rgba(0,0,0,0.5)',
+    flavor: 'background:rgba(50,44,58,0.78);border:1px solid rgba(196,149,58,0.3);color:#d8d0c2;font-style:italic;font-size:12px;letter-spacing:0.3px;box-shadow:0 2px 8px rgba(0,0,0,0.4)',
 };
 
 // Toast category mapping for calcReadTime
@@ -1299,7 +1299,8 @@ function showTerrainToast(message, type) {
         toast.textContent = message;
         toast.style.cssText = 'position:fixed;top:50px;left:50px;right:50px;' +
             'padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;' +
-            'pointer-events:none;z-index:99999;text-align:center;' + theme;
+            'pointer-events:none;z-index:99999;text-align:center;' +
+            'animation:toastSlideIn 0.3s ease-out;' + theme;
         document.body.appendChild(toast);
 
         const category = _TOAST_TIMING[type] || 'toast';
