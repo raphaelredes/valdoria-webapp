@@ -212,6 +212,7 @@ function renderScreen(screen) {
     if (typeof updateImmersiveEligibility === 'function') {
         updateImmersiveEligibility(screen);
     }
+    if (typeof showImmersiveTooltip === 'function') showImmersiveTooltip();
 }
 
 /**

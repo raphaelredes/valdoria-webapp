@@ -30,7 +30,7 @@ async function showCharacterSelect() {
         if (!resp.ok) {
             console.error('[GAME] characters fetch failed:', resp.status);
             hideLoading();
-            showError('Erro ao carregar personagens. Tente novamente.');
+            showError('⚠️ Erro ao carregar personagens. Tente novamente.');
             return;
         }
 
@@ -47,7 +47,7 @@ async function showCharacterSelect() {
     } catch (e) {
         console.error('[GAME] showCharacterSelect error:', e);
         hideLoading();
-        showError('Sem conexão. Verifique sua internet.');
+        showError('🌐 Sem conexão. Verifique sua internet.');
     }
 }
 
@@ -107,11 +107,32 @@ function renderCharacterSelect(data) {
             const activeClass = c.is_active ? ' char-card-active' : '';
             const activeBadge = c.is_active ? '<span class="char-card-badge">Ativo</span>' : '';
 
+            // HP bar percentage
+            var hpPct = c.max_hp > 0 ? Math.round((c.hp / c.max_hp) * 100) : 100;
+            var hpColor = hpPct > 50 ? '#4ade80' : hpPct > 25 ? '#fbbf24' : '#ef4444';
+
+            // Last played relative time
+            var lastPlayed = '';
+            if (c.last_activity > 0) {
+                var ago = Math.floor((Date.now() / 1000) - c.last_activity);
+                if (ago < 3600) lastPlayed = Math.max(1, Math.floor(ago / 60)) + 'min';
+                else if (ago < 86400) lastPlayed = Math.floor(ago / 3600) + 'h';
+                else lastPlayed = Math.floor(ago / 86400) + 'd';
+            }
+
             html += `<button class="char-card${activeClass}" data-char-id="${_escChar(c.char_id)}">`;
             html += `<div class="char-card-icon">${_escChar(c.race_icon)}</div>`;
             html += '<div class="char-card-info">';
             html += `<div class="char-card-name">${fullName} ${activeBadge}</div>`;
             html += `<div class="char-card-details">Nv.${c.level} \u00B7 ${_escChar(c.race)} ${_escChar(c.hero_class)}</div>`;
+            // Meta line: location + quest + last played
+            html += '<div class="char-card-meta">';
+            if (c.location) html += `<span>${_escChar(c.location)}</span>`;
+            if (c.active_quests > 0) html += `<span>\uD83D\uDCDC ${c.active_quests}</span>`;
+            if (lastPlayed) html += `<span>\u23F0 ${lastPlayed}</span>`;
+            html += '</div>';
+            // HP bar
+            html += `<div class="char-card-hp"><div class="char-card-hp-fill" style="width:${hpPct}%;background:${hpColor}"></div></div>`;
             html += '</div>';
             html += '<div class="char-card-arrow">\u25B8</div>';
             html += '</button>';
@@ -203,6 +224,7 @@ async function _selectCharacter(charId) {
 
     if (data && !data.error) {
         if (data.sv !== undefined) S.screenVersion = data.sv;
+        if (data.session_ttl && typeof initSessionExpiry === 'function') initSessionExpiry(data.session_ttl);
         if (data.transition && !data.text) {
             handleTransition(data.transition);
         } else {

@@ -105,6 +105,10 @@ function _showTutorialStep(idx) {
     const card = document.getElementById('tutorial-card');
     const target = document.querySelector(step.target);
 
+    // Toggle backdrop: when spotlight is active, the spotlight's box-shadow provides
+    // the dark overlay. When centered (no spotlight), the backdrop provides it.
+    const backdrop = document.getElementById('tutorial-backdrop');
+
     if (target && step.position !== 'center') {
         const r = target.getBoundingClientRect();
         const p = 8;
@@ -114,6 +118,8 @@ function _showTutorialStep(idx) {
         spotlight.style.width = (r.width + p * 2) + 'px';
         spotlight.style.height = (r.height + p * 2) + 'px';
         spotlight.style.borderRadius = '12px';
+        // Hide backdrop so the spotlight cutout is visible (box-shadow on spotlight provides darkness)
+        if (backdrop) backdrop.style.background = 'transparent';
 
         // Arrow position: horizontal offset relative to card center, clamped within card
         const targetCenterX = r.left + r.width / 2;
@@ -140,6 +146,8 @@ function _showTutorialStep(idx) {
         }
     } else {
         spotlight.style.display = 'none';
+        // Restore backdrop for center position (no spotlight)
+        if (backdrop) backdrop.style.background = 'rgba(0,0,0,0.75)';
         card.removeAttribute('data-arrow');
         card.style.top = '50%'; card.style.left = '50%';
         card.style.bottom = 'auto'; card.style.right = 'auto';

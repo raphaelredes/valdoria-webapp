@@ -690,6 +690,21 @@ function showStoryEvent(storyId, stageId) {
                 _applyStoryOutcome(storyId, stage, story);
             } else if (stage.next) {
                 showStoryEvent(storyId, stage.next);
+            } else {
+                // Terminal stage — no choices, no outcome, no next
+                // Show a "Continuar" button to close the overlay and return to map
+                const choicesEl = document.getElementById('dm-choices');
+                choicesEl.innerHTML = '';
+                const btn = document.createElement('button');
+                btn.className = 'dm-continue-btn';
+                btn.textContent = 'Continuar...';
+                btn.addEventListener('click', () => {
+                    document.getElementById('dm-overlay').classList.remove('active');
+                    if (typeof checkDeath === 'function' && checkDeath()) return;
+                    if (typeof checkLowHP === 'function' && checkLowHP()) { saveState(); return; }
+                    saveState();
+                });
+                choicesEl.appendChild(btn);
             }
             return;
         }
@@ -725,7 +740,18 @@ function _showStoryChoices(storyId, stage, story) {
 
         let html = `<span class="choice-icon"></span>`;
         html += `<span class="choice-label">${ch.t}</span>`;
-        if (ch.desc) {
+        // Show D&D 5e success chance badge (same as regular events)
+        if (ch.k) {
+            const STAT_SHORT_LOCAL = typeof STAT_SHORT !== 'undefined' ? STAT_SHORT : {};
+            const statShort = STAT_SHORT_LOCAL[ch.k.s] || (ch.k.s || '').toUpperCase().slice(0,3);
+            const _proficient = typeof S !== 'undefined' && S.charData && S.charData.sp && S.charData.sp.includes(ch.k.s);
+            const _profMark = _proficient ? '\u2605' : '';
+            const _mode = (typeof getRollMode === 'function') ? getRollMode(ch.k) : 'normal';
+            const _modeMark = _mode === 'advantage' ? ' \u25B2' : _mode === 'disadvantage' ? ' \u25BC' : '';
+            const _mod = ch.k.m || 0;
+            const _chance = Math.max(5, Math.min(95, Math.round(((21 - (ch.k.dc || 10) + _mod) / 20) * 100)));
+            html += `<span class="choice-check${_mode !== 'normal' ? ' ' + _mode : ''}">${statShort}${_profMark}${_modeMark} ${_chance}%</span>`;
+        } else if (ch.desc) {
             html += `<span class="choice-dc" style="font-size:11px;color:#8a7a68;margin-left:auto">${ch.desc}</span>`;
         }
         btn.innerHTML = html;
@@ -848,35 +874,97 @@ function _performStoryCheck(storyId, stage, story, choice) {
     if (!S.checksPerformed) S.checksPerformed = [];
     S.checksPerformed.push({ s: stat, dc, r: chosen, t: total, ok: success });
 
-    // Show 3D dice if available
-    if (typeof dice !== 'undefined' && dice.roll) {
-        try {
-            document.getElementById('dice-overlay').classList.add('active');
-            dice.roll(chosen, () => {
-                setTimeout(() => {
-                    document.getElementById('dice-overlay').classList.remove('active');
-                }, 600);
-            });
-        } catch (e) { /* dice not available */ }
-    }
+    // Show 3D dice with full check overlay (same as regular events)
+    const diceInst = (typeof getDice3D === 'function') ? getDice3D() : null;
+    const checkOverlay = document.getElementById('check-overlay');
+    const formulaElCheck = document.getElementById('check-formula');
+    const resultElCheck = document.getElementById('check-result');
 
-    // After a delay, show continue button
-    setTimeout(() => {
-        const btn = document.createElement('button');
-        btn.className = 'dm-continue-btn';
-        btn.textContent = 'Continuar...';
-        btn.addEventListener('click', () => {
-            const nextStage = success ? origSuccess : (origFail || origNext);
-            if (nextStage) {
-                showStoryEvent(storyId, nextStage);
-            } else {
-                // Apply outcome directly
-                const outcome = success ? (choice.o || {}) : (choice.f || {});
-                _applyStoryOutcome(storyId, { outcome, effect: choice.effect }, story);
+    const _finishStoryCheck = () => {
+        if (typeof disposeDice3D === 'function') disposeDice3D();
+        if (checkOverlay) checkOverlay.classList.remove('active');
+        overlay.classList.remove('active');
+        const nextStage = success ? origSuccess : (origFail || origNext);
+        if (nextStage) {
+            showStoryEvent(storyId, nextStage);
+        } else {
+            const _outcome = success ? (choice.o || {}) : (choice.f || {});
+            _applyStoryOutcome(storyId, { outcome: _outcome, effect: choice.effect }, story);
+        }
+    };
+
+    if (diceInst && checkOverlay) {
+        // Use the full check overlay with 3D dice
+        formulaElCheck.innerHTML = '';
+        resultElCheck.textContent = '';
+        resultElCheck.className = 'check-result';
+        checkOverlay.classList.add('active');
+
+        // Advantage/disadvantage label
+        const wrapper3d = document.getElementById('dice3d-wrapper');
+        if (wrapper3d) {
+            wrapper3d.classList.remove('has-mode-label');
+            let mLabel = wrapper3d.querySelector('.roll-mode-label-3d');
+            if (mLabel) mLabel.remove();
+            if (roll2 !== null) {
+                wrapper3d.classList.add('has-mode-label');
+                const cls3d = rollMode === 'advantage' ? 'adv' : 'dis';
+                const lbl3d = rollMode === 'advantage' ? 'VANTAGEM' : 'DESVANTAGEM';
+                mLabel = document.createElement('div');
+                mLabel.className = 'roll-mode-label-3d ' + cls3d;
+                mLabel.textContent = lbl3d;
+                wrapper3d.insertBefore(mLabel, wrapper3d.firstChild);
             }
+        }
+
+        diceInst.roll(chosen, () => {
+            // Show formula in check overlay
+            const profMark = proficient ? '\u2605' : '';
+            const sName = statNames[stat] || stat;
+            const totalMod = mod + prof + bonus + classBonus;
+            const sign = totalMod >= 0 ? '+' : '';
+            let rollStr = '' + chosen;
+            if (roll2 !== null) {
+                const isAdv = rollMode === 'advantage';
+                const kept = isAdv ? Math.max(roll1, roll2) : Math.min(roll1, roll2);
+                const other = kept === roll1 ? roll2 : roll1;
+                const kColor = isAdv ? '#4a8' : '#a44';
+                rollStr = '<span style="color:' + kColor + '"><b>' + kept + '</b></span> / <span style="opacity:0.4">' + other + '</span>';
+            } else {
+                rollStr = '<b>' + chosen + '</b>';
+            }
+            const modeStr = roll2 !== null ? (rollMode === 'advantage'
+                ? ' <span style="color:#4a8;font-size:0.85em">Vant.</span>'
+                : ' <span style="color:#a44;font-size:0.85em">Desv.</span>') : '';
+            formulaElCheck.innerHTML = rollStr + ' ' + sign + ' ' + totalMod + ' (' + sName + profMark + ') = <b>' + total + '</b> vs DC <b>' + dc + '</b>' + modeStr;
+
+            resultElCheck.textContent = success ? 'Sucesso!' : 'Falha!';
+            resultElCheck.className = 'check-result ' + (success ? 'success' : 'failure');
+
+            try {
+                var _tg = window.Telegram && Telegram.WebApp;
+                if (_tg && _tg.HapticFeedback) _tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
+            } catch (e) { /* */ }
+
+            // Show skip button after delay
+            const skipBtn = document.getElementById('check-skip-btn');
+            setTimeout(() => {
+                if (skipBtn) {
+                    skipBtn.classList.add('visible');
+                    skipBtn.onclick = _finishStoryCheck;
+                }
+            }, 1500);
         });
-        choicesEl.appendChild(btn);
-    }, 1200);
+    } else {
+        // Fallback: show continue button in dm-overlay after delay
+        setTimeout(() => {
+            const btn = document.createElement('button');
+            btn.className = 'dm-continue-btn';
+            btn.textContent = 'Continuar...';
+            btn.addEventListener('click', _finishStoryCheck);
+            choicesEl.appendChild(btn);
+        }, 1200);
+    }
 }
 
 function _applyStoryOutcome(storyId, stage, story) {

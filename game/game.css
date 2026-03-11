@@ -3932,6 +3932,25 @@ body[data-time="night"] .screen-content strong {
     color: var(--v-text-dim, #a09484);
     flex-shrink: 0;
 }
+.char-card-meta {
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--v-text-dim);
+    margin-top: 2px;
+}
+.char-card-hp {
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+}
+.char-card-hp-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
 
 .char-select-empty {
     text-align: center;
@@ -4016,3 +4035,19 @@ body[data-time="night"] .screen-content strong {
     justify-content: space-around;
     overflow-x: hidden;
 }
+
+/* ─── Offline Badge ─── */
+.offline-badge {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    background: rgba(239, 68, 68, 0.9);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    z-index: 20;
+    font-family: var(--v-font);
+    animation: valdoriaFadeIn 0.3s ease;
+}
+@keyframes valdoriaFadeIn { from { opacity: 0; } to { opacity: 1; } }

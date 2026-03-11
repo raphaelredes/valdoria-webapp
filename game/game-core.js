@@ -60,8 +60,7 @@ async function init() {
         ' uid=' + S.uid +
         ' char=' + (S.charId || 'none'));
 
-    // Immersive mode (collapsible bottom panel) — init before auth check
-    if (typeof initImmersive === 'function') initImmersive();
+    // Immersive mode removed — bottom panel always visible
     // Ambient particle system — init canvas
     if (typeof initParticles === 'function') initParticles();
 
@@ -77,7 +76,7 @@ async function init() {
                 showLoading(true);
                 _clog('RETRY health check...');
                 const ok = await checkHealth();
-                if (!ok) { _clog('RETRY health FAILED'); hideLoading(); showError('Servidor indisponível. Tente novamente em alguns segundos.'); return; }
+                if (!ok) { _clog('RETRY health FAILED'); hideLoading(); showError('⚠️ Servidor indisponível. Tente novamente em alguns segundos.'); return; }
                 _clog('RETRY health OK → loading state');
                 if (S.currentScreen) { fetchState(false); } else { startGame(); }
             },
@@ -86,7 +85,7 @@ async function init() {
 
     if (!S.token || !S.uid || !S.apiBase) {
         console.error('[GAME] Missing required params - token:', !!S.token, 'uid:', S.uid, 'apiBase:', !!S.apiBase);
-        showError('Parâmetros de sessão inválidos. Feche e selecione seu personagem novamente.');
+        showError('🔐 Parâmetros de sessão inválidos. Feche e selecione seu personagem novamente.');
         return;
     }
 
@@ -208,7 +207,7 @@ async function init() {
     } catch (routeError) {
         console.error('[GAME] Route error:', routeError);
         hideLoading();
-        showError('Erro ao carregar o jogo. Feche e tente novamente.');
+        showError('⚠️ Erro ao carregar o jogo. Feche e tente novamente.');
     }
 }
 
@@ -355,7 +354,7 @@ function _sendDataReconnect() {
         } catch (e) { _clog('sendData failed: ' + e.message); }
     }
     hideLoading();
-    showError('Servidor indisponível. Feche e tente novamente.');
+    showError('⚠️ Servidor indisponível. Feche e tente novamente.');
     return false;
 }
 
@@ -421,7 +420,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                         return null; // sendData auto-closes
                     }
                 } catch (e) { console.warn('[GAME] sendData failed on ' + resp.status + ':', e); }
-                showError('Sessão expirada. Feche e selecione seu personagem novamente.');
+                showError('🔐 Sessão expirada. Feche e selecione seu personagem novamente.');
                 return null;
             }
 
@@ -435,7 +434,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                 _clog(`API ${endpoint} → raw body: ${rawText.substring(0, 150)}`);
                 console.error('[GAME] Raw response body:', rawText.substring(0, 500));
                 if (attempt === retries) {
-                    showError('Resposta inválida do servidor.');
+                    showError('⚠️ Resposta inesperada do servidor. Tente novamente.');
                     return null;
                 }
                 continue;
@@ -527,13 +526,13 @@ async function startGame() {
         console.error('[GAME] startGame() server error:', data.error);
         // apiCall already shows error for null; handle known server errors
         if (data.error === 'invalid_session') {
-            showError('Sessão expirada. Feche e selecione seu personagem novamente.');
+            showError('🔐 Sessão expirada. Feche e selecione seu personagem novamente.');
         }
         // Other errors already handled by apiCall
     } else {
         console.error('[GAME] startGame() returned null/empty data');
         // apiCall() already tried sendData for 401 — if we're still here, show error
-        showError('Não foi possível conectar ao servidor. Feche e tente novamente.');
+        showError('🌐 Não foi possível conectar. Verifique sua internet e tente novamente.');
     }
 }
 

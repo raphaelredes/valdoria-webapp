@@ -46,7 +46,7 @@ var SessionHeartbeat = (function () {
             if (data.status === 'displaced') {
                 _displaced = true;
                 stop();
-                _showDisplacedOverlay(data.device || 'Outro dispositivo');
+                _showDisplacedOverlay(data.device || 'Outro dispositivo', data.from_device || '');
             }
         } catch (e) {
             // Silent — heartbeat errors should not disrupt gameplay.
@@ -58,15 +58,15 @@ var SessionHeartbeat = (function () {
      * Also callable from apiCall() when a regular API response returns
      * {status: 'displaced'}. This avoids waiting for the next heartbeat.
      */
-    function handleDisplaced(deviceLabel) {
+    function handleDisplaced(deviceLabel, fromDevice) {
         if (_displaced) return;
         _displaced = true;
         stop();
-        _showDisplacedOverlay(deviceLabel || 'Outro dispositivo');
+        _showDisplacedOverlay(deviceLabel || 'Outro dispositivo', fromDevice || '');
     }
 
-    function _showDisplacedOverlay(deviceLabel) {
-        console.warn('[HEARTBEAT] Session displaced by:', deviceLabel);
+    function _showDisplacedOverlay(deviceLabel, fromDevice) {
+        console.warn('[HEARTBEAT] Session displaced by:', deviceLabel, 'from:', fromDevice);
 
         // Haptic feedback
         try {
@@ -77,14 +77,33 @@ var SessionHeartbeat = (function () {
         } catch (e) { /* ignore */ }
 
         // Create overlay
+        // Detect current device for context
+        var currentDevice = '';
+        try {
+            var _tg = window.Telegram && Telegram.WebApp;
+            if (_tg && _tg.platform) {
+                var _pLabels = {
+                    'android': 'Celular (Android)', 'ios': 'Celular (iOS)',
+                    'tdesktop': 'Computador (Windows/Linux)', 'macos': 'Computador (macOS)',
+                    'web': 'Navegador Web',
+                };
+                currentDevice = _pLabels[_tg.platform] || '';
+            }
+        } catch (e) { /* */ }
+
         var overlay = document.createElement('div');
         overlay.className = 'displaced-overlay';
+
+        // Show where the session moved TO (the displacing device)
+        var bodyText = 'Sua sessão foi transferida para:';
+        var badgeHtml = '<div class="displaced-device-badge">' + _escHtml(deviceLabel) + '</div>';
+
         overlay.innerHTML =
             '<div class="displaced-content">' +
                 '<div class="displaced-icon">📱</div>' +
                 '<div class="displaced-title">Sessão transferida</div>' +
-                '<div class="displaced-text">O jogo foi aberto em outro dispositivo:</div>' +
-                '<div class="displaced-device-badge">' + _escHtml(deviceLabel) + '</div>' +
+                '<div class="displaced-text">' + bodyText + '</div>' +
+                badgeHtml +
                 '<div class="displaced-actions">' +
                     '<button class="displaced-reopen-btn" id="displaced-reopen">Reabrir aqui</button>' +
                     '<button class="displaced-close-btn" id="displaced-close">Fechar</button>' +

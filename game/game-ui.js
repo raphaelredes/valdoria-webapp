@@ -676,3 +676,55 @@ function animateCounter(el, from, to, duration) {
 }
 
 // Font is applied on load by shared/font-apply.js (included in index.html)
+
+
+// ─── Session Expiry Warning ───
+let _sessionExpiryTimer = null;
+function initSessionExpiry(ttlSeconds) {
+    if (_sessionExpiryTimer) clearTimeout(_sessionExpiryTimer);
+    if (!ttlSeconds || ttlSeconds <= 0) return;
+    var warnAt = Math.max(0, (ttlSeconds - 900)) * 1000;
+    _sessionExpiryTimer = setTimeout(function() {
+        showToast('\u23F0 Sua sess\u00E3o expira em 15 minutos.', 5000);
+        _sessionExpiryTimer = setTimeout(function() {
+            showToast('\u26A0\uFE0F Sess\u00E3o expira em 5 minutos!', 5000);
+        }, 600000);
+    }, warnAt);
+}
+
+// ─── Offline Indicator ───
+function _showOfflineBadge() {
+    var badge = document.getElementById('offline-badge');
+    if (!badge) {
+        badge = document.createElement('div');
+        badge.id = 'offline-badge';
+        badge.className = 'offline-badge';
+        badge.textContent = '\uD83C\uDF10 Sem conex\u00E3o';
+        document.body.appendChild(badge);
+    }
+    badge.style.display = '';
+}
+function _hideOfflineBadge() {
+    var badge = document.getElementById('offline-badge');
+    if (badge) badge.style.display = 'none';
+}
+window.addEventListener('offline', function() { _showOfflineBadge(); });
+window.addEventListener('online', function() {
+    _hideOfflineBadge();
+    showToast('\u2705 Conex\u00E3o restaurada', 2500);
+});
+
+// ─── Immersive Toggle Tooltip (first visit) ───
+function showImmersiveTooltip() {
+    if (localStorage.getItem('valdoria_immersive_tip')) return;
+    var toggle = document.getElementById('immersive-toggle');
+    if (!toggle || toggle.style.display === 'none') return;
+    var tip = document.createElement('div');
+    tip.textContent = 'Toque para recolher o menu';
+    tip.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#d4c8b0;padding:6px 12px;border-radius:8px;font-size:12px;z-index:15;pointer-events:none;animation:valdoriaFadeIn 0.3s ease;';
+    document.body.appendChild(tip);
+    setTimeout(function() {
+        if (tip.parentElement) tip.parentElement.removeChild(tip);
+        localStorage.setItem('valdoria_immersive_tip', '1');
+    }, 4000);
+}
