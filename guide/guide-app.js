@@ -1,24 +1,38 @@
 /* ═══════════════════════════════════════════════════════════════
-   GUIDE APP — Search + browse help topics
+   GUIDE APP v2 — Lightweight search + accordion navigation
+   Optimized: debounced search, pre-built index, zero forced reflows
    ═══════════════════════════════════════════════════════════════ */
 (function() {
     'use strict';
 
+    /* ─── PRE-BUILT SEARCH INDEX (computed once) ─── */
+    var _index = []; // [{id, plain, topic}]  plain = lowercase stripped text
+    for (var k = 0; k < GUIDE_TOPICS.length; k++) {
+        var t = GUIDE_TOPICS[k];
+        _index.push({
+            id: t.id,
+            plain: (t.title + ' ' + t.body.replace(/<[^>]*>/g, '')).toLowerCase(),
+            topic: t
+        });
+    }
+
     /* ─── STATE ─── */
-    let activeCat = 'todos';
-    let searchTerm = '';
+    var activeCat = 'todos';
+    var searchTerm = '';
+    var _debounceTimer = null;
+    var _openCardId = null; // accordion: only one card open at a time
 
     /* ─── DOM refs ─── */
-    const searchInput = document.getElementById('searchInput');
-    const searchClear = document.getElementById('searchClear');
-    const catFilters  = document.getElementById('catFilters');
-    const topicsEl    = document.getElementById('topics');
-    const noResults   = document.getElementById('noResults');
-    const closeBtn    = document.getElementById('closeBtn');
+    var searchInput = document.getElementById('searchInput');
+    var searchClear = document.getElementById('searchClear');
+    var catFilters  = document.getElementById('catFilters');
+    var topicsEl    = document.getElementById('topics');
+    var noResults   = document.getElementById('noResults');
+    var closeBtn    = document.getElementById('closeBtn');
+    var resultCount = document.getElementById('resultCount');
 
     /* ─── INIT ─── */
     function init() {
-        // Telegram Mini App setup
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
@@ -29,23 +43,28 @@
         buildCategoryFilters();
         buildTopics();
 
-        // Auto-open context from URL param
+        // Context param — auto-open relevant card
         var params = new URLSearchParams(window.location.search);
         var ctx = params.get('ctx');
         if (ctx) {
-            var exact = GUIDE_TOPICS.find(function(t) { return t.id === ctx; });
-            var prefix = !exact ? GUIDE_TOPICS.find(function(t) {
-                return ctx.startsWith(t.id + '_') || ctx.startsWith(t.id);
-            }) : null;
-            var target = exact || prefix;
+            var target = findTopicForCtx(ctx);
             if (target) {
-                setTimeout(function() { openAndScrollTo(target.id); }, 250);
+                setTimeout(function() { openAndScrollTo(target.id); }, 200);
             }
         }
 
-        // Events
-        searchInput.addEventListener('input', onSearch);
+        // Search: debounced input
+        searchInput.addEventListener('input', function() {
+            clearTimeout(_debounceTimer);
+            _debounceTimer = setTimeout(onSearch, 180);
+        });
         searchClear.addEventListener('click', clearSearch);
+
+        // Dismiss keyboard on scroll (mobile UX)
+        topicsEl.addEventListener('touchmove', function() {
+            if (document.activeElement === searchInput) searchInput.blur();
+        }, { passive: true });
+
         closeBtn.addEventListener('click', function() {
             if (window.Telegram && Telegram.WebApp) {
                 Telegram.WebApp.close();
@@ -53,6 +72,17 @@
                 window.history.back();
             }
         });
+    }
+
+    function findTopicForCtx(ctx) {
+        for (var i = 0; i < _index.length; i++) {
+            if (_index[i].id === ctx) return _index[i].topic;
+        }
+        // Prefix match
+        for (var j = 0; j < _index.length; j++) {
+            if (ctx.indexOf(_index[j].id) === 0) return _index[j].topic;
+        }
+        return null;
     }
 
     /* ─── CATEGORY PILLS ─── */
@@ -76,11 +106,16 @@
         for (var i = 0; i < pills.length; i++) {
             pills[i].classList.toggle('active', pills[i].dataset.cat === cat);
         }
+        _openCardId = null; // collapse all on category switch
         filterTopics();
+        // Scroll to top on category change
+        topicsEl.scrollTop = 0;
+        window.scrollTo(0, 0);
     }
 
     /* ─── BUILD TOPIC CARDS ─── */
     function buildTopics() {
+        var frag = document.createDocumentFragment();
         for (var i = 0; i < GUIDE_TOPICS.length; i++) {
             var topic = GUIDE_TOPICS[i];
             var card = document.createElement('div');
@@ -93,30 +128,75 @@
             header.innerHTML =
                 '<span class="topic-name">' + topic.icon + ' ' + topic.title + '</span>' +
                 '<span class="topic-arrow">\u25b8</span>';
-            header.addEventListener('click', (function(c) {
-                return function() { toggleCard(c); };
-            })(card));
+            header.addEventListener('click', (function(c, tid) {
+                return function() { toggleCard(c, tid); };
+            })(card, topic.id));
 
             var body = document.createElement('div');
             body.className = 'topic-body';
 
+            var inner = document.createElement('div');
+            inner.className = 'topic-body-inner';
+
             var content = document.createElement('div');
             content.className = 'topic-content';
-            content.innerHTML = fmtBody(topic.body);
+            // Body is rendered only when card opens (lazy)
 
-            body.appendChild(content);
+            inner.appendChild(content);
+            body.appendChild(inner);
             card.appendChild(header);
             card.appendChild(body);
-            topicsEl.appendChild(card);
+            frag.appendChild(card);
         }
+        topicsEl.appendChild(frag);
     }
 
     function fmtBody(text) {
         return text.replace(/\n/g, '<br>');
     }
 
-    function toggleCard(card) {
-        card.classList.toggle('open');
+    /* ─── ACCORDION TOGGLE ─── */
+    function toggleCard(card, topicId) {
+        var isOpen = card.classList.contains('open');
+
+        if (isOpen) {
+            // Close this card
+            card.classList.remove('open');
+            _openCardId = null;
+            return;
+        }
+
+        // Close previously open card (accordion — only during non-search)
+        if (!searchTerm && _openCardId && _openCardId !== topicId) {
+            var prev = topicsEl.querySelector('.topic-card.open');
+            if (prev) prev.classList.remove('open');
+        }
+
+        // Lazy-render body content
+        var contentEl = card.querySelector('.topic-content');
+        if (!contentEl.innerHTML) {
+            var topic = findTopicById(topicId);
+            if (topic) {
+                contentEl.innerHTML = searchTerm
+                    ? highlightText(fmtBody(topic.body), searchTerm)
+                    : fmtBody(topic.body);
+            }
+        }
+
+        card.classList.add('open');
+        _openCardId = topicId;
+
+        // Smooth scroll card header into view
+        setTimeout(function() {
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 50);
+    }
+
+    function findTopicById(id) {
+        for (var i = 0; i < GUIDE_TOPICS.length; i++) {
+            if (GUIDE_TOPICS[i].id === id) return GUIDE_TOPICS[i];
+        }
+        return null;
     }
 
     /* ─── SEARCH ─── */
@@ -130,7 +210,10 @@
         searchInput.value = '';
         searchTerm = '';
         searchClear.classList.remove('visible');
+        _openCardId = null; // collapse all when clearing
         filterTopics();
+        searchInput.blur(); // dismiss keyboard
+        window.scrollTo(0, 0);
     }
 
     function filterTopics() {
@@ -142,20 +225,15 @@
             var card = cards[i];
             var id = card.dataset.id;
             var cat = card.dataset.cat;
-            var topic = null;
-            for (var j = 0; j < GUIDE_TOPICS.length; j++) {
-                if (GUIDE_TOPICS[j].id === id) { topic = GUIDE_TOPICS[j]; break; }
-            }
-            if (!topic) continue;
+            var entry = _index[i]; // cards are built in same order as _index
 
             // Category filter
             var catMatch = activeCat === 'todos' || cat === activeCat;
 
-            // Search filter
+            // Search filter — uses pre-built plain text index
             var searchMatch = true;
             if (searchTerm) {
-                var haystack = (topic.title + ' ' + stripHtml(topic.body)).toLowerCase();
-                searchMatch = haystack.indexOf(searchTerm) !== -1;
+                searchMatch = entry.plain.indexOf(searchTerm) !== -1;
             }
 
             var visible = catMatch && searchMatch;
@@ -164,30 +242,46 @@
             if (visible) {
                 visibleCount++;
                 var contentEl = card.querySelector('.topic-content');
+                var nameEl = card.querySelector('.topic-name');
+                var topic = entry.topic;
 
                 if (searchTerm) {
-                    contentEl.innerHTML = highlightText(fmtBody(topic.body), searchTerm);
-                    // Also highlight title
-                    var nameEl = card.querySelector('.topic-name');
+                    // Highlight title
                     nameEl.innerHTML = highlightText(topic.icon + ' ' + topic.title, searchTerm);
-
-                    // Auto-open matching cards
-                    if (!card.classList.contains('open')) {
-                        card.classList.add('open');
+                    // Render + highlight body content
+                    contentEl.innerHTML = highlightText(fmtBody(topic.body), searchTerm);
+                    // Auto-open matching cards during search
+                    card.classList.add('open');
+                    // Pulse — only on first render (avoid re-triggering)
+                    if (!card.dataset.pulsed) {
+                        card.classList.add('search-match');
+                        card.dataset.pulsed = '1';
                     }
-                    // Pulse animation
-                    card.classList.remove('search-match');
-                    void card.offsetWidth; // reflow
-                    card.classList.add('search-match');
-
                     if (!firstMatch) firstMatch = card;
                 } else {
-                    contentEl.innerHTML = fmtBody(topic.body);
                     // Restore title
-                    var nameEl2 = card.querySelector('.topic-name');
-                    nameEl2.innerHTML = topic.icon + ' ' + topic.title;
+                    nameEl.innerHTML = topic.icon + ' ' + topic.title;
+                    // Close all cards and clear content (lazy re-render on open)
+                    if (card.dataset.id !== _openCardId) {
+                        card.classList.remove('open');
+                        contentEl.innerHTML = '';
+                    } else {
+                        // Keep open card, but remove highlights
+                        contentEl.innerHTML = fmtBody(topic.body);
+                    }
                     card.classList.remove('search-match');
+                    delete card.dataset.pulsed;
                 }
+            }
+        }
+
+        // Update result count
+        if (resultCount) {
+            if (searchTerm) {
+                resultCount.textContent = visibleCount + (visibleCount === 1 ? ' resultado' : ' resultados');
+                resultCount.classList.add('visible');
+            } else {
+                resultCount.classList.remove('visible');
             }
         }
 
@@ -197,47 +291,42 @@
         if (firstMatch && searchTerm) {
             setTimeout(function() {
                 firstMatch.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 100);
+            }, 80);
         }
-    }
-
-    function stripHtml(html) {
-        return html.replace(/<[^>]*>/g, '');
     }
 
     function highlightText(html, term) {
         if (!term) return html;
-        // Escape regex special chars
         var escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Don't highlight inside HTML tags
         var regex = new RegExp('(?![^<]*>)(' + escaped + ')', 'gi');
         return html.replace(regex, '<mark class="search-hl">$1</mark>');
     }
 
-    /* ─── SCROLL TO TOPIC ─── */
+    /* ─── SCROLL TO TOPIC (from URL ctx) ─── */
     function openAndScrollTo(topicId) {
         var card = topicsEl.querySelector('[data-id="' + topicId + '"]');
         if (!card) return;
 
-        // Ensure category shows
-        var topic = null;
-        for (var i = 0; i < GUIDE_TOPICS.length; i++) {
-            if (GUIDE_TOPICS[i].id === topicId) { topic = GUIDE_TOPICS[i]; break; }
-        }
+        var topic = findTopicById(topicId);
         if (topic && activeCat !== 'todos' && topic.cat !== activeCat) {
             selectCategory('todos');
         }
 
-        // Open card
-        card.classList.add('open');
+        // Lazy render
+        var contentEl = card.querySelector('.topic-content');
+        if (!contentEl.innerHTML) {
+            contentEl.innerHTML = fmtBody(topic.body);
+        }
 
-        // Scroll into view
+        card.classList.add('open');
+        _openCardId = topicId;
+
         card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Pulse animation
+        // Pulse
         setTimeout(function() {
             card.classList.add('search-match');
-        }, 300);
+        }, 250);
     }
 
     /* ─── START ─── */
