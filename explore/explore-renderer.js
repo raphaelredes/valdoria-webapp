@@ -777,6 +777,15 @@ function drawAdjacentHighlights(ctx, timestamp) {
         ctx.fillStyle = grad;
         ctx.fill();
 
+        // Subtle hex outline stroke for touch target clarity
+        ctx.strokeStyle = `rgba(${glowR},${glowG},${glowB},${(fillAlpha * 0.5).toFixed(2)})`;
+        ctx.lineWidth = 1 + pulse * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(topVerts[0].x, topVerts[0].y);
+        for (let vi = 1; vi < topVerts.length; vi++) ctx.lineTo(topVerts[vi].x, topVerts[vi].y);
+        ctx.closePath();
+        ctx.stroke();
+
         ctx.restore();
     }
 }

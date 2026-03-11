@@ -88,7 +88,7 @@ function updateMovement(timestamp) {
     playerScreenY = _moveFrom.y + (_moveTo.y - _moveFrom.y) * ease;
 
     // Hop arc: parabolic rise at midpoint
-    playerScreenY -= Math.sin(t * Math.PI) * 8;
+    playerScreenY -= Math.sin(t * Math.PI) * 14;
 
     if (t >= 1) {
         _moving = false;
@@ -120,6 +120,18 @@ function spawnDust(fromX, fromY, toX, toY) {
     const ndx = dx / len;
     const ndy = dy / len;
 
+    // Biome-aware dust colors
+    const _dustColors = {
+        forest: ['rgba(100,90,70,','rgba(140,110,80,'],
+        plains: ['rgba(200,160,80,','rgba(220,180,100,'],
+        desert: ['rgba(210,170,80,','rgba(230,190,100,'],
+        cave: ['rgba(120,110,100,','rgba(150,140,120,'],
+        graveyard: ['rgba(100,95,90,','rgba(130,120,110,'],
+        volcanic: ['rgba(180,100,50,','rgba(200,120,60,'],
+        mountain: ['rgba(160,155,150,','rgba(180,175,165,'],
+        swamp: ['rgba(80,100,60,','rgba(110,120,80,'],
+    };
+    const _dCols = _dustColors[typeof S !== 'undefined' && S.biome ? S.biome : 'cave'] || _dustColors.cave;
     for (let i = 0; i < 6; i++) {
         const angle = Math.atan2(ndy, ndx) + (Math.random() - 0.5) * 1.5;
         const speed = 15 + Math.random() * 25;
@@ -127,11 +139,12 @@ function spawnDust(fromX, fromY, toX, toY) {
             x: fromX,
             y: fromY,
             vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
+            vy: Math.sin(angle) * speed - 3,
+            ay: 1.5,
             life: 1.0,
             decay: 1.8 + Math.random() * 0.8,
             size: 1.5 + Math.random() * 2.5,
-            color: Math.random() > 0.5 ? 'rgba(196,149,58,' : 'rgba(180,170,150,',
+            color: _dCols[i % _dCols.length],
         });
     }
 }
@@ -157,6 +170,7 @@ function updateEffects(dt) {
         p.x += p.vx * dt;
         p.y += p.vy * dt;
         p.vx *= 0.92;
+        if (p.ay) p.vy += p.ay * dt; // gravity settling
         p.vy *= 0.92;
         p.life -= p.decay * dt;
         if (p.life <= 0) {
@@ -308,12 +322,17 @@ function drawPlayerToken(ctx, timestamp) {
 
     ctx.restore(); // undo translate
 
-    // ── Gold ring around feet (pulsing) ──
+    // ── Gold ring around feet (pulsing, context-aware) ──
     const ringW = 12 * s;
     const ringH = 6 * s;
     const glowPulse = 1 + Math.sin(t * 3) * 0.12;
     const ringAlpha = 0.45 + Math.sin(t * 3) * 0.15;
-    ctx.strokeStyle = `rgba(196,149,58,${ringAlpha.toFixed(2)})`;
+    // Night: warm orange glow; Low HP: red warning
+    let _rR = 196, _rG = 149, _rB = 58;
+    if (typeof S !== 'undefined' && S.dayPhase === 'night') { _rR = 255; _rG = 190; _rB = 90; }
+    if (typeof S !== 'undefined' && S.dayPhase === 'dusk') { _rR = 220; _rG = 150; _rB = 70; }
+    if (typeof getHPPercent === 'function' && getHPPercent() <= 25) { _rR = 210; _rG = 70; _rB = 60; }
+    ctx.strokeStyle = `rgba(${_rR},${_rG},${_rB},${ringAlpha.toFixed(2)})`;
     ctx.lineWidth = 2.5 * s;
     ctx.beginPath();
     ctx.ellipse(px, py + 1, (ringW + 2) * glowPulse, (ringH + 1) * glowPulse, 0, 0, Math.PI * 2);
