@@ -38,7 +38,6 @@ let _twFullText = '';
  */
 function renderDialogue(screen) {
     const contentEl = document.getElementById('content');
-    const buttonsEl = document.getElementById('buttons');
     if (!contentEl) return;
 
     const d = screen.dialogue;
@@ -169,10 +168,10 @@ function skipTypewriter() {
 // ── Choice Reveal ────────────────────────────────────────────
 
 function revealChoices() {
-    const buttonsEl = document.getElementById('buttons');
-    if (!buttonsEl) return;
+    const contentEl = document.getElementById('content');
+    if (!contentEl) return;
 
-    const rows = buttonsEl.querySelectorAll('.btn-row');
+    const rows = contentEl.querySelectorAll('.btn-row');
     rows.forEach(function (row, i) {
         row.style.opacity = '0';
         row.style.transform = 'translateY(6px)';
@@ -183,9 +182,6 @@ function revealChoices() {
             row.style.transform = 'translateY(0)';
         }, 80 + i * 80);
     });
-
-    buttonsEl.style.opacity = '1';
-    buttonsEl.style.pointerEvents = '';
 }
 
 // ── Text Extraction ──────────────────────────────────────────

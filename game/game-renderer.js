@@ -180,10 +180,8 @@ function renderScreen(screen) {
         setTimeout(() => _showFeedbackOverlay(screen.feedback_popup), 800);
     }
 
-    // Buttons (rendered into #buttons inside #bottom-panel)
-    const buttonsEl = document.getElementById('buttons');
-    buttonsEl.innerHTML = '';
-    renderButtons(buttonsEl, screen.buttons || []);
+    // Buttons (rendered INTO #content, scrolling with text — not in fixed bottom panel)
+    renderButtons(contentEl, screen.buttons || []);
 
     // Text input field (bank amounts, NPC AI chat, tickets)
     renderTextInput(screen);
@@ -200,10 +198,9 @@ function renderScreen(screen) {
         if (navEl) navEl.style.display = 'none';
     }
 
-    // Show bottom panel if there's ANY bottom content
-    const hasButtons = (screen.buttons || []).length > 0;
+    // Show bottom panel only for text input or footer (buttons are now in content)
     const hasTextInput = !!screen.waiting_for_text;
-    if (hasButtons || hasTextInput || hasFooter) {
+    if (hasTextInput || hasFooter) {
         panelEl.style.display = '';
     } else {
         panelEl.style.display = 'none';
@@ -212,8 +209,7 @@ function renderScreen(screen) {
     // Hide error overlay if visible
     hideError();
 
-    // Dynamic padding + overflow check
-    checkButtonOverflow();
+    // Dynamic padding for footer
     updateBottomPadding();
 
     // Immersive mode eligibility
@@ -291,12 +287,14 @@ function createButton(btn, forceHero = false) {
         return el;
     }
 
-    // Main menu button — notify server then close WebApp
+    // Main menu button — show character selection screen
     if (btn.cb === 'main_menu') {
         const el = document.createElement('button');
         el.className = 'btn-action';
         el.textContent = btn.text || '';
-        el.onclick = () => _closeGameHub();
+        el.onclick = () => {
+            if (typeof showCharacterSelect === 'function') showCharacterSelect();
+        };
         return el;
     }
 
@@ -404,23 +402,43 @@ function renderFooter(footer) {
     const navEl = document.getElementById('footer-nav');
     if (!quickEl || !navEl) return;
 
+    // Merge all footer buttons into a single compact row
     quickEl.innerHTML = '';
-    navEl.innerHTML = '';
+    navEl.style.display = 'none';
 
-    const setupButton = (btn, container) => {
-        // Skip the toggle button — collapsing is handled by immersive mode
-        if (btn.cb === 'action_toggle_footer') return;
+    const allBtns = [];
+    // Quick row first (Mochila, Ficha, Grupo)
+    if (footer.quick && footer.quick.length) {
+        for (const btn of footer.quick) {
+            if (btn.cb === 'action_toggle_footer') continue;
+            allBtns.push(btn);
+        }
+    }
+    // Nav row second (help, settings, social — Voltar already extracted to content)
+    if (footer.nav && footer.nav.length) {
+        for (const btn of footer.nav) {
+            if (btn.cb === 'action_toggle_footer') continue;
+            allBtns.push(btn);
+        }
+    }
 
+    if (allBtns.length === 0) {
+        quickEl.style.display = 'none';
+        return;
+    }
+
+    quickEl.style.display = '';
+
+    for (const btn of allBtns) {
         const el = document.createElement('button');
-        el.className = 'btn-action';
+        el.className = 'btn-action footer-btn';
         el.textContent = btn.text || '';
 
         if (btn.cb === 'main_menu') {
-            el.onclick = () => _closeGameHub();
+            el.onclick = () => { if (typeof showCharacterSelect === 'function') showCharacterSelect(); };
         } else if (btn.cb) {
             el.onclick = () => doAction(btn.cb);
         } else if (btn.url) {
-            // Use unified WebApp detection (same as content buttons)
             const target = typeof _detect_webapp_target_js === 'function'
                 ? _detect_webapp_target_js(btn.url) : 'unknown';
             if (target !== 'unknown') {
@@ -447,29 +465,11 @@ function renderFooter(footer) {
                 }
             }
         } else {
-            // No handler — mark as disabled
             el.disabled = true;
             el.style.opacity = '0.4';
-            console.warn('[GAME] Footer button has no handler:', btn.text);
         }
 
-        container.appendChild(el);
-    };
-
-    // Quick row (always visible when panel is expanded — immersive handles collapse)
-    if (footer.quick && footer.quick.length) {
-        quickEl.style.display = '';
-        for (const btn of footer.quick) setupButton(btn, quickEl);
-    } else {
-        quickEl.style.display = 'none';
-    }
-
-    // Nav row (always visible when panel is expanded)
-    if (footer.nav && footer.nav.length) {
-        navEl.style.display = '';
-        for (const btn of footer.nav) setupButton(btn, navEl);
-    } else {
-        navEl.style.display = 'none';
+        quickEl.appendChild(el);
     }
 }
 

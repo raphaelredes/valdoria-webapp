@@ -197,19 +197,13 @@ async function init() {
             console.log('[GAME] -> returnFromWebApp()');
             await returnFromWebApp();
         } else if (S.charId) {
-            // Opening from character selection — use /start to activate char
+            // Opening with specific character — use /start to activate char
             console.log('[GAME] -> startGame() with charId=' + S.charId);
             await startGame();
         } else {
-            // Try cached screen for instant render, then refresh from server
-            const cached = loadCachedScreen();
-            console.log('[GAME] -> fetchState() cached=' + !!cached);
-            if (cached) {
-                renderScreen(cached);
-                fetchState(true); // silent refresh in background
-            } else {
-                await fetchState(false);
-            }
+            // No character specified — show character selection screen
+            console.log('[GAME] -> showCharacterSelect()');
+            await showCharacterSelect();
         }
     } catch (routeError) {
         console.error('[GAME] Route error:', routeError);
@@ -635,10 +629,17 @@ async function doAction(callbackData) {
     }
 
     // Server says to close WebApp (e.g. main_menu action)
-    // Server says to close WebApp (e.g. main_menu action) — already processed, just close
+    // Server says to close WebApp — close it
     if (data.close) {
         hideLocationTransition();
         try { Telegram.WebApp.close(); } catch (e) { console.warn('[GAME] tg.close:', e); }
+        return;
+    }
+
+    // Server says to show character selection (main_menu / char_selection)
+    if (data.char_select) {
+        hideLocationTransition();
+        if (typeof showCharacterSelect === 'function') showCharacterSelect();
         return;
     }
 
