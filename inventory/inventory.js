@@ -371,10 +371,11 @@ function renderItemsTab(c) {
     html += '</div>';
 
     // Quick action: Sell Junk
-    const junkCount = getJunkItems().reduce((sum, j) => sum + j.q, 0);
+    const _junkItems = getJunkItems();
+    const junkCount = _junkItems.reduce((sum, j) => sum + j.q, 0);
     if (junkCount > 0 && !searchQuery) {
         let junkGP = 0;
-        getJunkItems().forEach(inv => {
+        _junkItems.forEach(inv => {
             const jit = getItemData(inv.n);
             junkGP += Math.max(1, Math.floor((jit.v || 1) * 0.6)) * inv.q;
         });
@@ -673,16 +674,14 @@ function _buildBodySlot(slot, eq) {
     const rarity = item ? (it?.r || 'common') : '';
     const rarityBorder = rarity && item ? `border-color:${getRarityColor(rarity)};` : '';
 
-    // Upgrade indicator
+    // Upgrade indicator (uses cached compat list)
     let upgradeDot = '';
     if (activeTarget === 'player' && !item) {
-        const compat = getCompatibleItems(slot);
-        if (compat.length > 0) upgradeDot = '<span class="bs-upgrade-dot"></span>';
+        if (_getCompatCached(slot).length > 0) upgradeDot = '<span class="bs-upgrade-dot"></span>';
     } else if (activeTarget === 'player' && item) {
-        const compat = getCompatibleItems(slot);
-        const hasUpgrade = compat.some(ci => {
-            const cit = getItemData(ci.name);
+        const hasUpgrade = _getCompatCached(slot).some(ci => {
             if (ci.name === item) return false;
+            const cit = getItemData(ci.name);
             const { cls } = compareItemsDetailed(cit, it || { ac: 0, b: 0, hb: 0, mb: 0 }, slot);
             return cls === 'better';
         });
@@ -718,6 +717,7 @@ function _buildBodySlot(slot, eq) {
 
 // ─── Auto-Equip Logic ───
 function doAutoEquip() {
+    _invalidateEquipCache();
     if (activeTarget !== 'player') return;
     haptic('medium');
 
@@ -1506,6 +1506,7 @@ function _confirmRuneInscribe(slot, runeName) {
 //  ACTIONS: Equip / Unequip / Use
 // ══════════════════════════════════════════════════════════
 function doEquip(name, slot) {
+    _invalidateEquipCache();
     const it = getItemData(name);
     if (!it || !it.s) { console.warn('[INVENTORY] doEquip: invalid item or no slot', name); return; }
 
@@ -1567,6 +1568,7 @@ function returnLocalGems(slot) {
 }
 
 function doUnequip(slot) {
+    _invalidateEquipCache();
     const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
     const item = eq[slot];
     if (!item) { console.warn('[INVENTORY] doUnequip: slot empty', slot); return; }
@@ -1807,7 +1809,22 @@ function toggleSelectItem(name) {
     else selectedItems.add(name);
     haptic('light');
     updateSelectionBar();
-    renderTab();
+    // Targeted update: toggle checkbox without re-rendering entire tab
+    const cards = document.querySelectorAll('.item-card');
+    let found = false;
+    cards.forEach(card => {
+        const onclick = card.getAttribute('onclick') || '';
+        if (onclick.includes(name.replace(/'/g, "\\'"))) {
+            const chk = card.querySelector('.sel-check');
+            if (chk) {
+                const isNowSelected = selectedItems.has(name);
+                chk.className = 'sel-check' + (isNowSelected ? ' active' : '');
+                chk.innerHTML = isNowSelected ? vi_f('check', 12) : '';
+                found = true;
+            }
+        }
+    });
+    if (!found) renderTab(); // fallback
 }
 
 function updateSelectionBar() {
@@ -2188,6 +2205,7 @@ async function _sendViaAPI(overlay) {
         clearTimeout(_tid);
         if (resp.status === 401 || resp.status === 403) {
             console.error('[INVENTORY] Auth error on apply:', resp.status);
+            _opsSending = false;
             overlay.classList.add('hidden');
             const tg = window.Telegram?.WebApp;
             if (tg?.sendData) {
@@ -2209,11 +2227,13 @@ async function _sendViaAPI(overlay) {
             setTimeout(() => _performExit(), 500);
         } else {
             console.error('[INVENTORY] API error:', result.error || resp.status);
+            _opsSending = false;
             overlay.classList.add('hidden');
             toast(`${vi('warn', 13)} Erro: ${result.error || 'falha no servidor'}`, 'err');
         }
     } catch (e) {
         console.error('[INVENTORY] fetch failed:', e);
+        _opsSending = false;
         overlay.classList.add('hidden');
         const msg = e.name === 'AbortError' ? 'Timeout. Tente novamente.' : 'Sem conexão. Tente novamente.';
         toast(`${vi('warn', 13)} ${msg}`, 'err');
@@ -2282,19 +2302,37 @@ function getItemShortDesc(name, it) {
     return parts.join(' · ');
 }
 
-function isEquippedAnywhere(name) {
-    for (const v of Object.values(localEq)) { if (v === name) return true; }
+// Cached equipped set — rebuilt on demand
+let _equippedSet = null;
+function _rebuildEquippedSet() {
+    _equippedSet = new Set();
+    for (const v of Object.values(localEq)) { if (v) _equippedSet.add(v); }
     for (const aeq of Object.values(localAllyEq)) {
-        for (const v of Object.values(aeq)) { if (v === name) return true; }
+        for (const v of Object.values(aeq)) { if (v) _equippedSet.add(v); }
     }
-    return false;
+}
+function _invalidateEquipCache() { _equippedSet = null; _compatCache = null; }
+function isEquippedAnywhere(name) {
+    if (!_equippedSet) _rebuildEquippedSet();
+    return _equippedSet.has(name);
+}
+
+// Cached compatible items per slot — rebuilt on equip tab render
+let _compatCache = null;
+function _getCompatCached(slot) {
+    if (!_compatCache) {
+        _compatCache = {};
+        const ALL_SLOTS = ['head','shoulders','torso','hands','legs','feet',
+            'necklace','cloak','main_hand','off_hand','belt','ring_1','ring_2','map'];
+        ALL_SLOTS.forEach(s => { _compatCache[s] = getCompatibleItems(s); });
+    }
+    return _compatCache[slot] || [];
 }
 
 function isFav(name) { return localFavs.includes(name); }
 
 function isProtected(tags) {
-    const prot = ['quest', 'mission_item', 'key', 'map', 'map_fragment', 'no_sell', 'no_discard', 'story_item', 'unique'];
-    return tags.some(t => prot.includes(t));
+    return tags.some(t => SELL_PROTECTED.has(t));
 }
 
 function isConsumable(tags) {
@@ -2558,37 +2596,31 @@ function discardAndExit() {
 }
 
 function initBackButton() {
-    if (tg?.BackButton) {
-        tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-            if (_modalOpen) {
-                _modalOpen = false;
-                document.getElementById('modalOverlay').classList.remove('visible');
-            } else {
-                _navigateBack();
-            }
-        });
-    }
+    try {
+        if (tg?.BackButton) {
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => {
+                if (_modalOpen) {
+                    _modalOpen = false;
+                    document.getElementById('modalOverlay').classList.remove('visible');
+                } else {
+                    _navigateBack();
+                }
+            });
+        }
+    } catch(e) { console.warn('[INVENTORY] BackButton setup:', e); }
 }
 
 // ── Nav Bar Actions ──
-// Map the 'return' URL param to a contextual back label
 const _RETURN_LABELS = {
     game: '🏘️ Cidade',
     explore: '🗺️ Mapa',
     combat: '⚔️ Combate',
-    arena: '⚔️ Combate',  // backward compat
+    arena: '⚔️ Combate',
 };
 
 function _initNavBar() {
-    // Nav bar removed — Telegram BackButton handles navigation
-    try {
-        if (tg && tg.BackButton) {
-            tg.BackButton.show();
-            tg.BackButton.offClick(navBack);
-            tg.BackButton.onClick(navBack);
-        }
-    } catch(e) { console.warn('[INVENTORY] BackButton setup:', e); }
+    // Nav bar removed — BackButton handled by initBackButton()
 }
 
 function navBack() {

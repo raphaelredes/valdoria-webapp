@@ -100,10 +100,12 @@ body { padding-bottom: 110px; }
 .filters::-webkit-scrollbar { display: none; }
 .filter-btn {
     flex-shrink: 0; padding: 6px 12px;
+    min-height: 36px;
     border-radius: var(--v-radius-pill);
     font-size: 13px; border: 1px solid var(--v-border);
     background: var(--v-bg-card); color: var(--v-text-dim);
     cursor: pointer; transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
 .filter-btn.active {
     background: var(--v-gold-dim); color: #fff;
@@ -366,15 +368,7 @@ body { padding-bottom: 110px; }
     color: var(--v-text-dim);
 }
 
-/* ── Equipment grid kept for fallback ──
-.equip-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    max-width: 100%;
-    margin: 0 auto;
-}
-
+/* ── Equipment grid (legacy, replaced by body silhouette) ── */
 /* Equipment group labels */
 .equip-group-label {
     grid-column: span 2;
@@ -399,7 +393,7 @@ body { padding-bottom: 110px; }
 .equip-slot:not(.filled) {
     border-style: dashed;
     border-color: var(--v-border);
-    background: rgba(48,44,53,0.4);
+    background: rgba(42,36,32,0.4);
 }
 .equip-slot:not(.filled) .es-icon { opacity: 0.3; }
 .equip-slot .es-label {
