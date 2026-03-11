@@ -47,13 +47,15 @@ body {
     pointer-events: auto;
     cursor: pointer;
     opacity: 0.9;
-    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease, top 0.4s ease, bottom 0.4s ease;
+    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease, top 0.4s ease, bottom 0.4s ease, box-shadow 0.3s ease;
 }
 #minimap.minimap-expanded {
     width: 95px;
     height: 95px;
     opacity: 0.92;
     border-color: rgba(196,149,58,0.6);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(196,149,58,0.12),
+        0 0 16px rgba(196,149,58,0.2);
 }
 #minimap.minimap-hidden {
     width: 0;
@@ -77,7 +79,7 @@ body {
     padding: 8px 12px;
     background: linear-gradient(180deg, #3a3028 0%, var(--v-bg, #2a2420) 100%);
     border-bottom: 1px solid var(--v-border, #4a3828);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 -1px 0 rgba(0,0,0,0.2);
     z-index: 50;
     flex-shrink: 0;
 }
@@ -629,6 +631,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(196,149,58,0.12), inset 0 0 15px rgba(196,149,58,0.05);
 }
 .dice3d-wrapper.has-mode-label {
     margin-top: 8px;
@@ -866,9 +870,9 @@ body {
     pointer-events: none;
     transition: opacity 0.4s ease;
 }
-.portal-overlay.active { opacity: 1; pointer-events: all; }
+.portal-overlay.active { opacity: 1; pointer-events: all; animation: portalBreathe 3s ease-in-out infinite; }
 .portal-icon { display: none; }
-.portal-title { font-size: 18px; font-weight: 700; color: #4ad680; letter-spacing: 1px; }
+.portal-title { font-size: 18px; font-weight: 700; color: #4ad680; letter-spacing: 1px; text-shadow: 0 0 12px rgba(74,214,128,0.4), 0 2px 4px rgba(0,0,0,0.5); }
 .portal-summary { text-align: center; color: var(--v-text, #d4c8b0); font-size: 13px; line-height: 1.8; }
 .portal-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
 /* Skip button override for dark green background */
@@ -1019,6 +1023,8 @@ body {
     background: rgba(170, 68, 68, 0.2);
     color: #c88;
     white-space: nowrap;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 6px rgba(0,0,0,0.35);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
     animation: badgeBounce 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 .condition-tag.condition-poisoned {
@@ -1667,14 +1673,17 @@ body {
     animation: rain-fall 0.4s linear infinite;
 }
 .weather-fog {
-    background: radial-gradient(ellipse at center, rgba(180,180,200,0.12) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(180,180,200,0.15) 0%, transparent 70%);
+    backdrop-filter: blur(0.5px);
+    -webkit-backdrop-filter: blur(0.5px);
 }
 .weather-storm {
     background: repeating-linear-gradient(
         105deg, transparent, transparent 2px,
-        rgba(100,140,180,0.12) 2px, rgba(100,140,180,0.12) 3px
+        rgba(100,140,180,0.14) 2px, rgba(100,140,180,0.14) 3px
     );
     animation: rain-fall 0.25s linear infinite;
+    filter: saturate(1.15);
 }
 @keyframes rain-fall {
     from { background-position-y: 0; }
@@ -1682,6 +1691,7 @@ body {
 }
 
 /* Day/Night filters on map viewport canvas */
+#map-viewport canvas { transition: filter 1.5s ease; }
 #map-viewport.phase-dawn canvas { filter: brightness(0.92) sepia(0.08); }
 #map-viewport.phase-day canvas { filter: none; }
 #map-viewport.phase-dusk canvas { filter: brightness(0.82) sepia(0.15) hue-rotate(-8deg); }
@@ -1709,13 +1719,16 @@ body {
     bottom: 8px; left: 8px;
     z-index: 15;
     display: flex; flex-direction: column; align-items: center;
-    background: rgba(42,36,32,0.85);
+    background: rgba(42,36,32,0.82);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     border: 1px solid rgba(196,149,58,0.4);
     border-radius: 50%;
     width: 48px; height: 48px;
     justify-content: center;
     pointer-events: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(196,149,58,0.15);
+    transition: box-shadow 0.4s ease;
 }
 .compass-arrow {
     width: 0; height: 0;
@@ -1730,9 +1743,10 @@ body {
     color: var(--v-text-dim, #a09484);
     margin-top: 1px;
 }
+.exit-compass.nearby { box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 18px rgba(100,200,100,0.4); }
 .exit-compass.nearby .compass-arrow {
     border-bottom-color: #6c6;
-    filter: drop-shadow(0 0 6px rgba(100,200,100,0.8));
+    filter: drop-shadow(0 0 8px rgba(100,200,100,0.9));
     animation: compass-pulse 1s ease infinite;
 }
 @keyframes compass-pulse {
@@ -1754,6 +1768,8 @@ body {
     font: 12px/1 var(--v-font, 'MedievalSharp', serif);
     color: #c88;
     z-index: 5;
+    box-shadow: 0 0 10px rgba(180,60,60,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 .exh-icon { font-size: 14px; }
 .exh-label { color: #daa; font-size: 11px; }
@@ -1786,7 +1802,8 @@ body {
     white-space: nowrap;
     pointer-events: none;
     display: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 10px rgba(196,149,58,0.15);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 .move-preview .mp-cost { color: #c4953a; font-weight: bold; }
 .move-preview .mp-difficult { color: #dca028; }
@@ -1825,6 +1842,8 @@ body {
     position: fixed; inset: 0; z-index: 50;
     display: flex; align-items: center; justify-content: center;
     background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     opacity: 0; pointer-events: none;
     transition: opacity 0.4s ease;
 }
@@ -1851,9 +1870,10 @@ body {
     cursor: pointer;
     text-align: left;
     display: flex; flex-direction: column; gap: 2px;
-    transition: border-color 0.2s, background 0.2s;
+    transition: transform 0.12s ease, border-color 0.2s ease, background 0.2s ease;
 }
 .activity-choice-btn:active {
+    transform: scale(0.97);
     background: rgba(196,149,58,0.15);
     border-color: rgba(196,149,58,0.6);
 }
@@ -1883,6 +1903,11 @@ body {
     transition: background 0.2s;
 }
 .activity-badge:active { background: rgba(196,149,58,0.3); }
+
+@keyframes portalBreathe {
+    0%, 100% { background: rgba(20, 40, 30, 0.96); }
+    50% { background: rgba(30, 55, 42, 0.97); }
+}
 
 /* ═══════════════════════════════════════════
    REDUCED MOTION

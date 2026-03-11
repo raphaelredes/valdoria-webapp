@@ -1300,7 +1300,10 @@ function showTerrainToast(message, type) {
         toast.style.cssText = 'position:fixed;top:50px;left:50px;right:50px;' +
             'padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;' +
             'pointer-events:none;z-index:99999;text-align:center;' +
-            'animation:toastSlideIn 0.3s ease-out;' + theme;
+            'animation:toastSlideIn 0.3s ease-out;' +
+            'backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);' +
+            'box-shadow:0 4px 16px rgba(0,0,0,0.5),inset 0 1px 0 rgba(196,149,58,0.08);' +
+            'text-shadow:0 1px 3px rgba(0,0,0,0.7);' + theme;
         document.body.appendChild(toast);
 
         const category = _TOAST_TIMING[type] || 'toast';
