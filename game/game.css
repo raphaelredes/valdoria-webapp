@@ -226,6 +226,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    transition: transform 0.3s ease, opacity 0.25s ease;
 }
 
 /* Safety net: limit button area height for screens with many buttons */
@@ -1065,7 +1066,7 @@
 .screen.fade-out {
     opacity: 0;
     transform: translateX(-20px);
-    transition: opacity 0.15s ease, transform 0.2s ease;
+    transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .screen.fade-in {
     animation: slideFromRight 0.3s var(--v-ease-snap, cubic-bezier(0.16, 1, 0.3, 1));
@@ -1079,7 +1080,7 @@
 .screen.slide-back-out {
     opacity: 0;
     transform: translateX(20px);
-    transition: opacity 0.15s ease, transform 0.2s ease;
+    transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .screen.slide-back-in {
     animation: slideFromLeft 0.3s var(--v-ease-snap, cubic-bezier(0.16, 1, 0.3, 1));
@@ -1140,7 +1141,7 @@
 .btn-hero {
     animation: heroPulse 3s ease-in-out infinite;
 }
-.btn-hero:active { animation: none; }
+.btn-hero:active { animation: none; box-shadow: var(--v-shadow-gold); }
 
 /* ─── Content Block Staggered Entrance ─── */
 @keyframes blockFadeIn {

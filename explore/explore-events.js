@@ -263,14 +263,15 @@ function _typewriterPage(el, pages, pageIdx, onDone) {
             clearInterval(iv);
             cursor.remove();
             el.removeEventListener('click', skipTyping);
-            // Post-typing pause: let text settle before advancing
+            // Post-typing pause: calculated by text length for readable pacing
+            const _postMs = Math.max(1800, Math.min(3500, text.length * 12));
             setTimeout(() => {
                 if (isLast) {
                     if (onDone) onDone();
                 } else {
                     _showPageContinue(el, pages, pageIdx, totalPages, onDone);
                 }
-            }, 1200);
+            }, _postMs);
             return;
         }
         span.textContent += text[i];
@@ -613,14 +614,14 @@ function _showCheckSkip(overlay, success, choice, poi) {
         applyOutcome(poi, outcome, choice);
     };
 
-    // Show "Continuar" button after 800ms — NO auto-advance timer
+    // Show "Continuar" button after 1500ms — gives time to read the dice result
     // Player must tap to proceed, giving time to read the result
     setTimeout(() => {
         if (!_checkDone && skipBtn) {
             skipBtn.classList.add('visible');
             skipBtn.onclick = finishCheck;
         }
-    }, 800);
+    }, 1500);
 }
 
 // Emoji fallback when THREE.js is unavailable
@@ -647,7 +648,7 @@ function _showCheckEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, pro
         } catch (e) { console.warn('[EXPLORE] haptic:', e); }
 
         _showCheckSkip(overlay, success, choice, poi);
-    }, 700);
+    }, 1000);
 }
 
 function showStage2(poi, stage2) {
@@ -812,7 +813,8 @@ function triggerCombat(poi) {
     const overlay = document.getElementById('combat-overlay');
     document.getElementById('combat-icon').textContent = '';
     document.getElementById('combat-enemy').textContent = combat.en || 'Inimigo';
-    document.getElementById('combat-text').innerHTML = '<span style="color:#d44;font-weight:bold;">Iniciando Combate...</span>';
+    const _combatNarr = (combat.en || 'Inimigo') + ' se prepara para o combate!';
+    document.getElementById('combat-text').innerHTML = '<span style="color:#d44;font-weight:bold;">' + _combatNarr + '</span>';
 
     overlay.classList.add('active');
     try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
@@ -840,7 +842,7 @@ function triggerCombat(poi) {
         }
     }, 500);
 
-    const combatText = (combat.en || 'Inimigo') + ' Iniciando Combate';
+    const combatText = _combatNarr;
     const combatDelay = typeof calcReadTime === 'function' ? calcReadTime(combatText, 'combat') : 2000;
     setTimeout(finishCombat, combatDelay);
 }
@@ -1575,16 +1577,19 @@ function _showHazardResultNarration(text, success, hazard) {
             charIdx++;
         } else {
             clearInterval(typeInterval);
-            choicesEl.innerHTML = '';
-            const btn = document.createElement('button');
-            btn.className = 'dm-choice-btn';
-            btn.textContent = 'Continuar…';
-            btn.onclick = () => {
-                overlay.classList.remove('active');
-                header.style.color = ''; // reset
-                _applyHazardAndContinue(success, hazard);
-            };
-            choicesEl.appendChild(btn);
+            // Pause 1s after typing before showing continue
+            setTimeout(() => {
+                choicesEl.innerHTML = '';
+                const btn = document.createElement('button');
+                btn.className = 'dm-choice-btn';
+                btn.textContent = 'Continuar…';
+                btn.onclick = () => {
+                    overlay.classList.remove('active');
+                    header.style.color = '';
+                    _applyHazardAndContinue(success, hazard);
+                };
+                choicesEl.appendChild(btn);
+            }, 1000);
         }
     }, 28);
 }
@@ -2379,6 +2384,7 @@ function _secretPassageSuccess() {
             S.xpEarned += 25;
             updateRewards();
             showTerrainToast('\u{1F6AA} Passagem secreta revelada! +25 XP', 'ranger');
+            try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
             // Trigger static redraw
             if (typeof scheduleRender === 'function') {
                 _staticDirty = true;
@@ -2718,11 +2724,14 @@ function _showCampDiceRoll(roll, conMod, bonus, total, foodName) {
         label.textContent = `1d8 = ${roll} ${sign}${conMod} (CON)`;
         try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) {}
 
+        // Reading time for dice result formula
+        const _campResultText = `1d8 = ${roll} ${sign}${conMod} (CON) = ${roll + conMod}`;
+        const _campDelay = typeof calcReadTime === 'function' ? calcReadTime(_campResultText, 'result') : 3000;
         setTimeout(function () {
             overlay.classList.remove('active');
             if (_campDice) { _campDice.dispose(); _campDice = null; }
             showCampResultOverlay(roll, conMod, bonus, total, foodName);
-        }, 1200);
+        }, _campDelay);
     });
 }
 

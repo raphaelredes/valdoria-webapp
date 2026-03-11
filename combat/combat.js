@@ -526,7 +526,7 @@ function renderResolution(state) {
                 el.classList.remove('reward-hidden');
                 el.classList.add('reward-reveal');
                 hapticSelect();
-            }, 400 + i * 500);
+            }, 500 + i * 600);
         });
         // Show continue button after all rewards revealed
         if (continueBtn) {
@@ -534,7 +534,7 @@ function renderResolution(state) {
             setTimeout(() => {
                 continueBtn.classList.remove('reward-hidden');
                 continueBtn.classList.add('reward-reveal');
-            }, 400 + rewardEls.length * 500 + 300);
+            }, 500 + rewardEls.length * 600 + 400);
         }
     } else if (continueBtn) {
         // No rewards — still animate the button entrance
@@ -580,8 +580,8 @@ function renderArena(s) {
             app.classList.add('phase-fade-in');
             _lastRenderedPhase = newPh;
             _renderArenaInner(s);
-            setTimeout(() => app.classList.remove('phase-fade-in'), 200);
-        }, 200);
+            setTimeout(() => app.classList.remove('phase-fade-in'), 300);
+        }, 300);
         return;
     }
     _lastRenderedPhase = newPh;

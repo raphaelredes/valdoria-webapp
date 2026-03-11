@@ -731,7 +731,7 @@ function drawAnimatedTiles(ctx, timestamp) {
 // Draw highlight on valid adjacent hexes (gold=normal, amber=difficult, red=hazard)
 // Pulsing animation for better touch-target visibility
 function drawAdjacentHighlights(ctx, timestamp) {
-    const pulse = 0.5 + Math.sin((timestamp || 0) * 0.003) * 0.3; // 0.2-0.8 oscillation
+    const pulse = 0.5 + Math.sin((timestamp || 0) * 0.008) * 0.3; // 0.2-0.8, ~785ms period
     const neighbors = getNeighbors(S.playerCol, S.playerRow);
     for (const [c, r] of neighbors) {
         const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
@@ -858,6 +858,13 @@ function handleCanvasClick(e) {
             handleTileInteraction(hex.col, hex.row, tile);
         }
         return;
+    }
+
+    // Update player facing toward clicked hex
+    if (typeof playerFacing !== 'undefined') {
+        const _fc = hexToScreen(hex.col, hex.row);
+        const _fp = hexToScreen(S.playerCol, S.playerRow);
+        playerFacing = Math.atan2(_fc.y - _fp.y, _fc.x - _fp.x);
     }
 
     // Visual tap feedback
@@ -1245,9 +1252,11 @@ function _drawEventSprites(ctx, timestamp) {
         const key = sprite.col + ',' + sprite.row;
         if (S.fogState[key] !== 'visible') continue;
 
-        // Fade in
+        // Fade in (per-type: danger fast, NPC slow)
+        const _spriteFade = {danger:200,trap:250,encounter:300,enemy:250,hazard:200,
+            search:350,discovery:400,ambient:450,mystery:500,npc:600};
         const age = timestamp - sprite.revealTime;
-        sprite.alpha = Math.min(1, age / 500);
+        sprite.alpha = Math.min(1, age / (_spriteFade[sprite.type] || 500));
         if (sprite.alpha <= 0) continue;
 
         const center = hexToScreen(sprite.col, sprite.row);

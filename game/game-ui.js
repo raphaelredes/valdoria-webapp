@@ -197,7 +197,7 @@ function _startLoadingTips() {
                 setTimeout(() => tipEl.classList.remove('tip-enter'), 350);
             }, 300);
         }
-    }, 6000);
+    }, 4500);
 }
 
 function _stopLoadingTips() {
@@ -334,8 +334,8 @@ function animateScreenTransition(renderFn, direction) {
     screenEl.classList.add(outClass);
     // Bottom panel dims subtly (stays present, acknowledges change)
     if (panelEl) {
-        panelEl.style.opacity = '0.5';
-        panelEl.style.transition = 'opacity 0.1s ease';
+        panelEl.style.opacity = '0.7';
+        panelEl.style.transition = 'opacity 0.2s ease';
     }
 
     setTimeout(() => {
@@ -344,13 +344,13 @@ function animateScreenTransition(renderFn, direction) {
         screenEl.classList.add(inClass);
         if (panelEl) {
             panelEl.style.opacity = '1';
-            panelEl.style.transition = 'opacity 0.15s ease';
+            panelEl.style.transition = 'opacity 0.25s ease';
         }
         setTimeout(() => {
             screenEl.classList.remove(inClass);
             if (panelEl) panelEl.style.transition = '';
         }, 300);
-    }, 150);
+    }, 250);
 }
 
 // ─── Timer Overlay ───

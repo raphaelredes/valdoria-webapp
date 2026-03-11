@@ -306,7 +306,7 @@ body {
     padding: 20px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease;
 }
 .dm-overlay.active {
     opacity: 1;
@@ -604,7 +604,7 @@ body {
     gap: 20px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease;
 }
 .check-overlay.active {
     opacity: 1;
@@ -742,7 +742,7 @@ body {
     padding: 20px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease;
 }
 .outcome-overlay.active {
     opacity: 1;
@@ -808,7 +808,7 @@ body {
     gap: 16px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease;
 }
 .combat-overlay.active {
     opacity: 1;
@@ -882,7 +882,7 @@ body {
     padding: 20px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease;
 }
 .confirm-overlay.active { opacity: 1; pointer-events: all; }
 .confirm-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
@@ -1311,7 +1311,7 @@ body {
     font-size: 13px;
     min-height: 0;
     margin-bottom: 6px;
-    transition: opacity 0.3s;
+    transition: opacity 0.4s;
 }
 .return-journey-actions {
     display: flex;
@@ -1804,7 +1804,7 @@ body {
     display: flex; align-items: center; justify-content: center;
     background: rgba(0,0,0,0.7);
     opacity: 0; pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease;
 }
 .activity-overlay.active { opacity: 1; pointer-events: auto; }
 .activity-overlay .dm-card { max-width: 350px; width: 90%; }
