@@ -2448,6 +2448,17 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     opacity: 0.5;
     filter: grayscale(0.3);
 }
+.ally-card.ally-player {
+    border-color: rgba(196, 149, 58, 0.35);
+    background: linear-gradient(135deg, rgba(196, 149, 58, 0.08), var(--v-bg-card));
+}
+.ally-card.ally-player .ally-ico-col {
+    background: rgba(196, 149, 58, 0.08);
+    border-right-color: rgba(196, 149, 58, 0.2);
+}
+.ally-card.ally-player .ally-name {
+    color: var(--v-gold-light, #e8c874);
+}
 .ally-ico-col {
     display: flex;
     flex-direction: column;

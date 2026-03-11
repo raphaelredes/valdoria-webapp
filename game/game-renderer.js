@@ -624,7 +624,7 @@ function renderAllyCards(container, allies) {
 
     for (const a of allies) {
         const card = document.createElement('div');
-        card.className = 'ally-card' + (a.dead ? ' ally-dead' : '');
+        card.className = 'ally-card' + (a.dead ? ' ally-dead' : '') + (a.type === 'player' ? ' ally-player' : '');
 
         // Left: icon column
         const icoCol = document.createElement('div');
@@ -670,7 +670,8 @@ function renderAllyCards(container, allies) {
         const subRow = document.createElement('div');
         subRow.className = 'ally-sub';
         let subText = a.c || '';
-        if (a.type === 'merc') subText += ' · Mercenário';
+        if (a.type === 'player') {} // No subtitle suffix for player
+        else if (a.type === 'merc') subText += ' · Mercenário';
         else if (a.type === 'adv') subText += ' · Explorador';
         else if (a.type === 'familiar') subText = 'Familiar';
         subRow.textContent = subText;
