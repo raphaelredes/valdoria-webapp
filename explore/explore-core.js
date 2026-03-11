@@ -111,6 +111,9 @@ function saveState() {
             sr2: Array.from(S._secretsRevealed || new Set()),
             tp2: Array.from(S._terrainPassed || new Set()),
             trT: (S.traps || []).filter(t => t.triggered).map(t => `${t.col},${t.row}`),
+            ldU: Array.from(S._chestsOpened || new Set()),
+            isR: Array.from(S._inscriptionsRead || new Set()),
+            ldK: (S.lockedDoors || []).filter(d => d.unlocked).map(d => `${d.col},${d.row}`),
             ts: Date.now(),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
@@ -166,6 +169,20 @@ function restoreState() {
         S._doorsOpened = new Set(snap.do2 || []);
         S._secretsRevealed = new Set(snap.sr2 || []);
         S._terrainPassed = new Set(snap.tp2 || []);
+        S._chestsOpened = new Set(snap.ldU || []);
+        S._inscriptionsRead = new Set(snap.isR || []);
+        // Restore locked door unlock state
+        const ldkSet = new Set(snap.ldK || []);
+        if (S.lockedDoors) S.lockedDoors.forEach(d => {
+            if (ldkSet.has(`${d.col},${d.row}`)) d.unlocked = true;
+        });
+        // Restore chest open state
+        if (S.chests) S.chests.forEach(ch => {
+            if (S._chestsOpened.has(`${ch.col},${ch.row}`)) ch.opened = true;
+        });
+        if (S.inscriptions) S.inscriptions.forEach(ins => {
+            if (S._inscriptionsRead.has(`${ins.col},${ins.row}`)) ins.read = true;
+        });
         // Restore triggered traps
         const trT = new Set(snap.trT || []);
         if (S.traps) S.traps.forEach(t => {
@@ -239,10 +256,25 @@ function loadMapData(data) {
     S.traps = (data.tr || []).map(tr => ({
         col: tr.q, row: tr.r, name: tr.nm, skill: tr.sk, dc: tr.dc,
         dmg: tr.dm, mod: tr.m || 0, hidden: tr.h, hiddenDC: tr.hd || 0,
-        triggered: false,
+        condition: tr.cn || '', triggered: false,
     }));
     S.torches = (data.lt || []).map(lt => ({
         col: lt.q, row: lt.r, radius: lt.rd || 2,
+    }));
+    S.lockedDoors = (data.ld || []).map(ld => ({
+        col: ld.q, row: ld.r, pickDC: ld.pdc, forceDC: ld.fdc,
+        modPick: ld.mp || 0, modForce: ld.mf || 0, unlocked: false,
+    }));
+    S.chests = (data.ct || []).map(ct => ({
+        col: ct.q, row: ct.r, gp: ct.gp, xp: ct.xp,
+        hasTrap: ct.tp, trapDC: ct.td, modInv: ct.mi || 0,
+        opened: false, trapDetected: false,
+    }));
+    S.safeRooms = (data.sr || []).map(sr => ({
+        col: sr.q, row: sr.r, discovered: false,
+    }));
+    S.inscriptions = (data.is || []).map(ins => ({
+        col: ins.q, row: ins.r, textIdx: ins.ti, read: false,
     }));
     // Filter hidden traps by Passive Perception
     const pp2 = getPassivePerception();
@@ -253,6 +285,8 @@ function loadMapData(data) {
     S._doorsOpened = new Set();  // Track opened doors
     S._secretsRevealed = new Set();  // Track revealed secret passages
     S._terrainPassed = new Set();  // Track passed terrain challenges
+    S._chestsOpened = new Set();  // Track opened chests
+    S._inscriptionsRead = new Set();  // Track read inscriptions
 
     // Ambient events — atmospheric moments (resolved from frontend pool)
     S.ambientEvents = (data.ae || []).map(ae => ({

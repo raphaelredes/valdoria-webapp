@@ -1,13 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════
-   INN SLEEP ANIMATION — Cinematic overlay styles
-   Medieval-themed fullscreen overlay with fade transitions,
-   floating particles, and smooth recovery bar animations.
+   INN SLEEP ANIMATION — Cinematic overlay styles v2
+   Medieval-themed fullscreen overlay with cross-dissolve transitions,
+   tier-specific ambient effects, floating particles, smooth recovery
+   bars, and professional-grade animations matching loading screen.
    ═══════════════════════════════════════════════════════════════ */
 
-/* No scrollbars (mandatory) */
-* { scrollbar-width: none; -ms-overflow-style: none; }
-*::-webkit-scrollbar { display: none; }
+/* No scrollbars */
+.inn-overlay * { scrollbar-width: none; -ms-overflow-style: none; }
+.inn-overlay *::-webkit-scrollbar { display: none; }
 
+/* ─── Overlay ─── */
 .inn-overlay {
     position: fixed;
     inset: 0;
@@ -17,8 +19,8 @@
     align-items: center;
     justify-content: center;
     background: radial-gradient(ellipse at 50% 40%, #1a1510 0%, #0a0808 100%);
-    transition: background 0.8s ease;
-    animation: innFadeIn 0.5s ease-out;
+    transition: background 1.2s ease;
+    animation: innFadeIn 0.6s ease-out;
     overflow: hidden;
 }
 @keyframes innFadeIn {
@@ -26,14 +28,15 @@
     to   { opacity: 1; }
 }
 .inn-overlay.hiding {
-    animation: innFadeOut 0.4s ease-in forwards;
+    animation: innFadeOut 0.5s ease-in forwards;
 }
 @keyframes innFadeOut {
-    from { opacity: 1; }
-    to   { opacity: 0; }
+    0%   { opacity: 1; filter: blur(0); }
+    60%  { opacity: 0.3; filter: blur(2px); }
+    100% { opacity: 0; filter: blur(6px); }
 }
 
-/* Vignette effect — subtle breathing pulse */
+/* ─── Vignette — breathing pulse ─── */
 .inn-vignette {
     position: absolute;
     inset: 0;
@@ -47,20 +50,143 @@
     50%      { opacity: 0.7; }
 }
 
-/* ─── Floating Particles (stars + embers) ─── */
-.inn-particles {
+/* ═══════════════════════════════════════════════
+   TIER-SPECIFIC AMBIENT EFFECTS
+   ═══════════════════════════════════════════════ */
+
+.inn-ambient {
     position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 0;
     overflow: hidden;
 }
+
+/* ── Poor: Flickering candle glow ── */
+.inn-ambient-candle {
+    position: absolute;
+    bottom: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 180px;
+    background: radial-gradient(ellipse at 50% 90%, rgba(200,120,30,0.12) 0%, rgba(180,100,20,0.06) 40%, transparent 70%);
+    animation: innCandleFlicker 2.5s ease-in-out infinite;
+}
+.inn-ambient-candle::after {
+    content: '';
+    position: absolute;
+    bottom: 60%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 14px;
+    border-radius: 50% 50% 20% 20%;
+    background: radial-gradient(ellipse at 50% 80%, #ff9030 0%, #e07020 60%, transparent 100%);
+    box-shadow: 0 0 8px 4px rgba(255,144,48,0.3), 0 0 20px 8px rgba(255,100,30,0.15);
+    animation: innFlameWobble 1.8s ease-in-out infinite;
+}
+@keyframes innCandleFlicker {
+    0%, 100% { opacity: 0.8; }
+    25%      { opacity: 1; }
+    50%      { opacity: 0.6; }
+    75%      { opacity: 0.9; }
+}
+@keyframes innFlameWobble {
+    0%, 100% { transform: translateX(-50%) scaleX(1) scaleY(1); }
+    25%      { transform: translateX(-45%) scaleX(1.15) scaleY(0.9); }
+    50%      { transform: translateX(-55%) scaleX(0.9) scaleY(1.1); }
+    75%      { transform: translateX(-48%) scaleX(1.1) scaleY(0.95); }
+}
+
+/* ── Modest: Moon through window ── */
+.inn-ambient-moon {
+    position: absolute;
+    top: 6%;
+    right: 8%;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(210,220,240,0.18) 0%, rgba(180,190,220,0.06) 50%, transparent 70%);
+    box-shadow: 0 0 40px 20px rgba(180,190,220,0.06), 0 0 80px 40px rgba(160,170,200,0.03);
+    animation: innMoonGlow 5s ease-in-out infinite;
+}
+.inn-ambient-moonbeam {
+    position: absolute;
+    top: 6%;
+    right: 8%;
+    width: 80px;
+    height: 400px;
+    background: linear-gradient(180deg, rgba(200,210,230,0.04) 0%, transparent 100%);
+    transform: rotate(-12deg);
+    transform-origin: top right;
+    animation: innMoonbeamSway 8s ease-in-out infinite;
+}
+@keyframes innMoonGlow {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50%      { opacity: 1; transform: scale(1.08); }
+}
+@keyframes innMoonbeamSway {
+    0%, 100% { transform: rotate(-12deg); opacity: 0.6; }
+    50%      { transform: rotate(-8deg); opacity: 0.9; }
+}
+
+/* ── Wealthy: Arcane aura ring (like loading screen magic circle) ── */
+.inn-ambient-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    border: 1px solid rgba(196,149,58,0.08);
+    box-shadow: 0 0 40px 15px rgba(196,149,58,0.04), inset 0 0 30px 10px rgba(196,149,58,0.03);
+    animation: innAuraRotate 30s linear infinite, innAuraPulse 5s ease-in-out infinite;
+}
+.inn-ambient-aura::after {
+    content: '';
+    position: absolute;
+    inset: 15px;
+    border-radius: 50%;
+    border: 1px solid rgba(196,149,58,0.05);
+    animation: innAuraRotate 20s linear infinite reverse;
+}
+.inn-ambient-aura-inner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,149,58,0.06) 0%, transparent 60%);
+    animation: innAuraPulse 4s ease-in-out infinite 1s;
+}
+@keyframes innAuraRotate {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes innAuraPulse {
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1; }
+}
+
+/* ─── Floating Particles ─── */
+.inn-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    contain: layout style;
+}
 .inn-particle {
     position: absolute;
     border-radius: 50%;
     opacity: 0;
+    will-change: transform, opacity;
 }
-/* Stars — small white/gold dots that twinkle */
 .inn-particle.star {
     width: 2px;
     height: 2px;
@@ -74,7 +200,6 @@
     50%      { opacity: 0.3; transform: scale(0.7); }
     80%      { opacity: 0.9; transform: scale(1.1); }
 }
-/* Embers — warm orange dots that drift upward */
 .inn-particle.ember {
     width: 3px;
     height: 3px;
@@ -84,11 +209,11 @@
 }
 @keyframes innEmberFloat {
     0%   { opacity: 0; transform: translateY(0) scale(0.5); }
-    20%  { opacity: 0.6; }
-    80%  { opacity: 0.3; }
-    100% { opacity: 0; transform: translateY(-120px) scale(0.2); }
+    10%  { opacity: 0.7; transform: translateY(-20px) scale(1); }
+    40%  { opacity: 0.5; }
+    80%  { opacity: 0.2; }
+    100% { opacity: 0; transform: translateY(-150px) scale(0.2); }
 }
-/* Fireflies — larger soft glow for wealthy tier */
 .inn-particle.firefly {
     width: 4px;
     height: 4px;
@@ -102,8 +227,34 @@
     50%      { opacity: 0.7; transform: translate(-8px, -30px); }
     75%      { opacity: 0.4; transform: translate(12px, -20px); }
 }
+.inn-particle.spark {
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(255,255,255,0.8), 0 0 12px rgba(219,182,104,0.5);
+    animation: innSparkRise var(--dur, 3s) ease-out var(--delay, 0s) forwards;
+}
+@keyframes innSparkRise {
+    0%   { opacity: 0; transform: translateY(0) scale(0); }
+    5%   { opacity: 1; transform: translateY(0) scale(1.5); }
+    30%  { opacity: 0.7; }
+    100% { opacity: 0; transform: translateY(calc(-100px - var(--drift-y, 80px))) translateX(var(--drift-x, 0px)) scale(0); }
+}
+.inn-particle.arcane {
+    width: 3px;
+    height: 3px;
+    background: radial-gradient(circle, #d4a0ff 0%, #9955dd 60%, transparent 100%);
+    box-shadow: 0 0 8px rgba(180,120,255,0.5), 0 0 16px rgba(150,80,220,0.2);
+    animation: innArcaneDrift var(--dur, 8s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes innArcaneDrift {
+    0%, 100% { opacity: 0; transform: translate(0, 0) scale(0.5); }
+    20%      { opacity: 0.6; transform: translate(var(--dx, 15px), var(--dy, -20px)) scale(1); }
+    50%      { opacity: 0.4; transform: translate(calc(var(--dx, 15px) * -1), calc(var(--dy, -20px) * 1.5)) scale(0.8); }
+    80%      { opacity: 0.5; transform: translate(var(--dx, 15px), var(--dy, -20px)) scale(0.6); }
+}
 
-/* ─── Frame container ─── */
+/* ─── Frame container — cross-dissolve ─── */
 .inn-frame {
     position: relative;
     z-index: 1;
@@ -111,31 +262,40 @@
     max-width: 320px;
     padding: 0 24px;
     opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transform: translateY(8px) scale(0.98);
+    transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+    filter: blur(0);
 }
 .inn-frame.active {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+}
+.inn-frame.exiting {
+    opacity: 0;
+    transform: translateY(-4px) scale(1.01);
+    filter: blur(4px);
+    transition: opacity 0.45s ease-in, transform 0.45s ease-in, filter 0.45s ease-in;
 }
 
-/* Night progress bar — panel with subtle border */
+/* Night progress bar */
 .inn-night-bar {
     font-size: 13px;
     letter-spacing: 1px;
     color: var(--v-text-dim, #8a7a68);
     margin-bottom: 20px;
     font-family: monospace;
-    background: rgba(0, 0, 0, 0.25);
-    padding: 4px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px 14px;
     border-radius: 12px;
-    border: 1px solid rgba(196, 149, 58, 0.1);
+    border: 1px solid rgba(196, 149, 58, 0.12);
+    backdrop-filter: blur(4px);
 }
 
 /* Frame title */
 .inn-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     color: var(--v-gold-light, #dbb668);
     letter-spacing: 2.5px;
@@ -144,7 +304,7 @@
     margin-bottom: 16px;
 }
 
-/* Decorative icons — with gold drop-shadow glow */
+/* Decorative icons */
 .inn-icons {
     font-size: 28px;
     margin-bottom: 8px;
@@ -154,7 +314,7 @@
 }
 @keyframes innIconFloat {
     0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-4px); }
+    50%      { transform: translateY(-5px); }
 }
 
 /* Ornamental divider */
@@ -163,14 +323,12 @@
     color: var(--v-gold-dim, #a08050);
     letter-spacing: 4px;
     margin-bottom: 16px;
-    opacity: 0.6;
+    opacity: 0.5;
+    transition: opacity 0.4s ease;
 }
 
 /* Narration text */
-.inn-text {
-    margin-bottom: 20px;
-    min-height: 72px;
-}
+.inn-text { margin-bottom: 20px; min-height: 72px; }
 .inn-line {
     font-family: var(--v-font, 'MedievalSharp', serif);
     font-size: 14px;
@@ -179,31 +337,32 @@
     font-style: italic;
     margin-bottom: 4px;
     opacity: 0;
-    transform: translateY(4px);
-    animation: innLineReveal 0.4s ease-out forwards;
+    transform: translateY(5px);
+    animation: innLineReveal 0.5s ease-out forwards;
 }
-/* Dream lines — ethereal purple tint */
 .inn-line.dream {
     color: #c8a8e0;
-    text-shadow: 0 0 12px rgba(160, 120, 200, 0.3);
+    text-shadow: 0 0 14px rgba(160, 120, 200, 0.35);
+    font-size: 15px;
+    line-height: 1.8;
 }
-/* Staggered line reveal — tighter gaps so full text is readable sooner */
 .inn-line:nth-child(1) { animation-delay: 0.1s; }
 .inn-line:nth-child(2) { animation-delay: 0.35s; }
 .inn-line:nth-child(3) { animation-delay: 0.6s; }
 .inn-line:nth-child(4) { animation-delay: 0.85s; }
 @keyframes innLineReveal {
-    from { opacity: 0; transform: translateY(4px); }
+    from { opacity: 0; transform: translateY(5px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Recovery bars (smooth fill) ─── */
+/* ─── Recovery bars ─── */
 .inn-recovery {
     margin-top: 8px;
     padding: 10px 16px;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.35);
     border: 1px solid rgba(196, 149, 58, 0.15);
-    border-radius: 8px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
     opacity: 0;
     animation: innRecoveryFadeIn 0.6s ease-out 0.3s forwards;
 }
@@ -211,96 +370,95 @@
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-.inn-bar-line {
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--v-text, #d4c8b0);
-    font-family: monospace;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-}
-/* Smooth bar container */
-.inn-bar-wrap {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: 3px 0;
-}
+.inn-bar-wrap { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
 .inn-bar-track {
-    flex: 1;
-    height: 10px;
+    flex: 1; height: 10px;
     background: rgba(0, 0, 0, 0.4);
-    border-radius: 5px;
-    overflow: hidden;
+    border-radius: 5px; overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .inn-bar-fill {
-    height: 100%;
-    border-radius: 5px;
-    transition: width 1.2s ease-out;
+    height: 100%; border-radius: 5px;
+    transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
 }
-.inn-bar-fill.hp {
-    background: linear-gradient(90deg, #8b2020 0%, #c43030 100%);
-}
-.inn-bar-fill.mp {
-    background: linear-gradient(90deg, #203880 0%, #3050c0 100%);
-}
+.inn-bar-fill.hp { background: linear-gradient(90deg, #8b2020 0%, #c43030 100%); }
+.inn-bar-fill.mp { background: linear-gradient(90deg, #203880 0%, #3050c0 100%); }
 .inn-bar-fill.full {
     box-shadow: 0 0 16px rgba(255, 215, 0, 0.5), 0 0 4px rgba(255, 215, 0, 0.8);
+    animation: innBarFullPulse 1.5s ease-in-out infinite;
+}
+@keyframes innBarFullPulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(255,215,0,0.4), 0 0 4px rgba(255,215,0,0.6); }
+    50%      { box-shadow: 0 0 20px rgba(255,215,0,0.6), 0 0 8px rgba(255,215,0,1); }
 }
 .inn-bar-label {
-    font-size: 12px;
-    color: var(--v-text, #d4c8b0);
-    font-family: monospace;
-    min-width: 70px;
-    white-space: nowrap;
+    font-size: 12px; color: var(--v-text, #d4c8b0);
+    font-family: monospace; min-width: 70px; white-space: nowrap;
 }
-
-/* Ally recovery section */
 .inn-allies-divider {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 11px;
-    color: var(--v-gold-dim, #a08050);
-    letter-spacing: 3px;
-    text-align: center;
-    margin: 8px 0 4px;
-    opacity: 0.8;
+    font-size: 11px; color: var(--v-gold-dim, #a08050);
+    letter-spacing: 3px; text-align: center; margin: 8px 0 4px; opacity: 0.8;
 }
 .inn-ally-name {
-    font-size: 12px;
-    color: var(--v-text-dim, #8a7a68);
-    margin-top: 4px;
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 12px; color: var(--v-text-dim, #8a7a68);
+    margin-top: 4px; font-family: var(--v-font, 'MedievalSharp', serif);
 }
-.inn-bar-wrap.small .inn-bar-track {
-    height: 7px;
-}
-.inn-bar-wrap.small .inn-bar-label {
-    font-size: 11px;
-    min-width: 60px;
-}
+.inn-bar-wrap.small .inn-bar-track { height: 7px; }
+.inn-bar-wrap.small .inn-bar-label { font-size: 11px; min-width: 60px; }
 
-/* Skip button positioned at bottom — aligned with design system */
+/* ─── Skip button ─── */
 #inn-skip-btn {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9501;
+    position: fixed; bottom: 40px; left: 50%;
+    transform: translateX(-50%); z-index: 9501;
     animation: innSkipFadeIn 0.3s ease-out;
 }
 @keyframes innSkipFadeIn {
     from { opacity: 0; transform: translateX(-50%) translateY(8px); }
     to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-
 }
 
-/* ─── Title shimmer for final "full recovery" frame ─── */
-.inn-title.shimmer {
-    animation: innTitleShimmer 2s ease-in-out infinite;
-}
+/* ─── Title shimmer for final frame ─── */
+.inn-title.shimmer { animation: innTitleShimmer 2s ease-in-out infinite; }
 @keyframes innTitleShimmer {
     0%, 100% { text-shadow: 0 1px 8px rgba(196, 149, 58, 0.3); }
-    50%      { text-shadow: 0 1px 16px rgba(219, 182, 104, 0.6), 0 0 30px rgba(196, 149, 58, 0.2); }
+    50%      { text-shadow: 0 1px 20px rgba(219, 182, 104, 0.7), 0 0 40px rgba(196, 149, 58, 0.25); }
+}
+
+/* ─── Golden Burst — celebration on final frame ─── */
+.inn-burst {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0; height: 0; border-radius: 50%;
+    background: radial-gradient(circle, rgba(219,182,104,0.3) 0%, rgba(196,149,58,0.1) 40%, transparent 70%);
+    pointer-events: none; z-index: 0;
+    animation: innBurstExpand 1.2s ease-out forwards;
+}
+@keyframes innBurstExpand {
+    0%   { width: 0; height: 0; opacity: 0.8; }
+    50%  { width: 350px; height: 350px; opacity: 0.4; }
+    100% { width: 500px; height: 500px; opacity: 0; }
+}
+.inn-flash {
+    position: absolute; inset: 0;
+    background: rgba(219, 182, 104, 0.15);
+    pointer-events: none; z-index: 2;
+    animation: innFlash 0.6s ease-out forwards;
+}
+@keyframes innFlash {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+    .inn-overlay, .inn-frame, .inn-frame.exiting, .inn-frame.active { transition: none; animation: none; }
+    .inn-particle { animation: none !important; opacity: 0.4 !important; }
+    .inn-ambient-candle, .inn-ambient-moon, .inn-ambient-moonbeam,
+    .inn-ambient-aura, .inn-ambient-aura-inner { animation: none; }
+    .inn-vignette, .inn-icons { animation: none; }
+    .inn-line { animation: none; opacity: 1; transform: none; }
+    .inn-bar-fill { transition: none; }
+    .inn-title.shimmer { animation: none; }
 }
