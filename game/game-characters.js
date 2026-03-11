@@ -186,7 +186,10 @@ function renderCharacterSelect(data) {
 /**
  * Select a character and start the game.
  */
+let _selectingChar = false;
 async function _selectCharacter(charId) {
+    if (_selectingChar) return;
+    _selectingChar = true;
     console.log('[GAME] _selectCharacter:', charId);
     S.charId = charId;
     showLoading();
@@ -213,4 +216,5 @@ async function _selectCharacter(charId) {
         showError('Sem resposta do servidor. Verifique sua conex\u00e3o.');
         setTimeout(() => showCharacterSelect(), 2500);
     }
+    _selectingChar = false;
 }

@@ -183,7 +183,7 @@ function _startLoadingTips() {
     // Start at random index so tip varies each load
     _loadingTipIndex = Math.floor(Math.random() * _LOADING_TIPS.length);
     const tipEl = document.getElementById('loading-tip');
-    if (tipEl) tipEl.textContent = _LOADING_TIPS[0];
+    if (tipEl) tipEl.textContent = _LOADING_TIPS[_loadingTipIndex];
     _loadingTipTimer = setInterval(() => {
         _loadingTipIndex = (_loadingTipIndex + 1) % _LOADING_TIPS.length;
         const tipEl = document.getElementById('loading-tip');

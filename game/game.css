@@ -4,12 +4,12 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /* ─── No Scrollbars (targeted — avoids universal selector perf cost) ─── */
-html, body, .screen, .screen-content, .screen-buttons, .bottom-panel,
+html, body, .screen, .screen-content, .bottom-panel,
 .sub-screen, .sub-screen-body, .dlg-choices {
     scrollbar-width: none; -ms-overflow-style: none;
 }
 html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
-.screen-content::-webkit-scrollbar, .screen-buttons::-webkit-scrollbar,
+.screen-content::-webkit-scrollbar,
 .bottom-panel::-webkit-scrollbar, .sub-screen::-webkit-scrollbar,
 .sub-screen-body::-webkit-scrollbar, .dlg-choices::-webkit-scrollbar {
     display: none;

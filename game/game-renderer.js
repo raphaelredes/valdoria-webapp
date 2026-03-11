@@ -1,3 +1,10 @@
+/** Escape HTML entities to prevent XSS in user-controlled strings. */
+function _escHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
 /* ═══════════════════════════════════════════════════════════════
    GAME HUB — Universal Screen Renderer
    Converts server JSON screen data into DOM elements.
@@ -538,7 +545,7 @@ function _showDiceAnimation(screen) {
             formulaEl.style.display = 'none';
             opposedBlock.style.display = '';
             playerEl.innerHTML = '\ud83c\udfb2 <b>' + dr.total + '</b> \u2039d20(' + dr.roll + ') ' + sign + dr.mod + '\u203a';
-            opponentEl.innerHTML = '\ud83d\udc7a ' + (dr.opponent_name || 'Oponente') + ': <b>' + dr.opponent_total + '</b>';
+            opponentEl.innerHTML = '\ud83d\udc7a ' + _escHtml(dr.opponent_name || 'Oponente') + ': <b>' + dr.opponent_total + '</b>';
             resultEl.textContent = dr.success ? 'Vit\u00f3ria!' : 'Derrota!';
             resultEl.className = 'dice-result ' + (dr.success ? 'success' : 'failure');
         } else if (dr.type === 'generic') {
@@ -792,9 +799,9 @@ function renderInnSelect(container, data) {
         var fullBadge = a.full ? ' <span class="inn-full-badge">✨ Completo</span>' : '';
 
         card.innerHTML = '<div class="inn-select-check">' + checkIcon + '</div>'
-            + '<div class="inn-select-ico">' + a.ico + '</div>'
+            + '<div class="inn-select-ico">' + _escHtml(a.ico) + '</div>'
             + '<div class="inn-select-info">'
-            + '<div class="inn-select-name">' + a.n + fullBadge + '</div>'
+            + '<div class="inn-select-name">' + _escHtml(a.n) + fullBadge + '</div>'
             + barsHtml
             + '</div>';
 
