@@ -3970,3 +3970,468 @@ async function initAsync() {
 
 // Start
 document.addEventListener('DOMContentLoaded', () => initAsync());
+
+
+// ═══════════════════════════════════════════════════════════
+// TILE INTERACTION SYSTEM (D&D 5e)
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Handle interaction with an impassable tile the player clicked.
+ * Called from handleCanvasClick when tile is IMPASSABLE.
+ */
+function handleTileInteraction(col, row, tile) {
+    if (typeof isMoving === 'function' && isMoving()) return;
+
+    // Must be adjacent to player
+    if (!isAdjacent(S.playerCol, S.playerRow, col, row)) return;
+
+    if (tile === 'D') {
+        _interactDoor(col, row);
+    } else if (tile === '#') {
+        _interactWall(col, row);
+    } else if (tile === 'M') {
+        _interactMountain(col, row);
+    } else if (tile === 'W') {
+        _interactDeepWater(col, row);
+    }
+}
+
+// ── Door interaction ─────────────────────────────────────
+
+function _interactDoor(col, row) {
+    const key = `${col},${row}`;
+    if (S._doorsOpened && S._doorsOpened.has(key)) return;
+
+    // Show door overlay
+    const overlay = document.getElementById('dm-overlay');
+    const narr = document.getElementById('dm-narration');
+    const choices = document.getElementById('dm-choices');
+    if (!overlay || !narr || !choices) return;
+
+    narr.innerHTML = '';
+    choices.innerHTML = '';
+
+    narr.innerHTML = `<p class="dm-text">Uma porta de madeira reforçada bloqueia o caminho. Dobradiças de ferro enferrujado rangem ao toque.</p>`;
+
+    const btnOpen = document.createElement('button');
+    btnOpen.className = 'dm-choice-btn';
+    btnOpen.innerHTML = '🚪 Abrir Porta';
+    btnOpen.onclick = () => {
+        // Open the door — change grid tile
+        S.grid[row][col] = '.';
+        S._doorsOpened.add(key);
+        if (typeof _staticDirty !== 'undefined') _staticDirty = true;
+        overlay.classList.remove('active');
+        showTerrainToast('Porta aberta!', 'flavor');
+        saveState();
+    };
+    choices.appendChild(btnOpen);
+
+    const btnBack = document.createElement('button');
+    btnBack.className = 'dm-choice-btn dm-choice-secondary';
+    btnBack.innerHTML = '← Voltar';
+    btnBack.onclick = () => overlay.classList.remove('active');
+    choices.appendChild(btnBack);
+
+    overlay.classList.add('active');
+}
+
+// ── Secret wall interaction ──────────────────────────────
+
+function _interactWall(col, row) {
+    // Check if this wall is a secret passage
+    if (!S.secretPassages) return;
+    const sp = S.secretPassages.find(
+        s => s.col === col && s.row === row && !s.revealed
+    );
+    if (!sp) return; // Regular wall, no interaction
+
+    const key = `${col},${row}`;
+    const overlay = document.getElementById('dm-overlay');
+    const narr = document.getElementById('dm-narration');
+    const choices = document.getElementById('dm-choices');
+    if (!overlay || !narr || !choices) return;
+
+    narr.innerHTML = '';
+    choices.innerHTML = '';
+
+    const skillName = sp.skill === 'inv' ? 'Investigação' : 'Percepção';
+    narr.innerHTML = `<p class="dm-text">Há algo estranho nesta parede... rachaduras sutis formam um padrão incomum. Parece que pode haver algo por trás.</p>`;
+
+    const btnCheck = document.createElement('button');
+    btnCheck.className = 'dm-choice-btn';
+    const statShort = sp.skill === 'inv' ? 'INT' : 'SAB';
+    btnCheck.innerHTML = `🔍 Examinar (${skillName} DC ${sp.dc})`;
+    btnCheck.onclick = () => {
+        overlay.classList.remove('active');
+        // Perform D&D 5e skill check
+        _performSecretCheck(sp, col, row);
+    };
+    choices.appendChild(btnCheck);
+
+    const btnBack = document.createElement('button');
+    btnBack.className = 'dm-choice-btn dm-choice-secondary';
+    btnBack.innerHTML = '← Voltar';
+    btnBack.onclick = () => overlay.classList.remove('active');
+    choices.appendChild(btnBack);
+
+    overlay.classList.add('active');
+}
+
+function _performSecretCheck(sp, col, row) {
+    const mod = sp.mod || 0;
+    const dc = sp.dc;
+
+    // Roll d20
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const total = roll + mod;
+    const success = total >= dc;
+
+    // Show 3D dice
+    const checkOverlay = document.getElementById('check-overlay');
+    if (!checkOverlay) return;
+    checkOverlay.classList.add('active');
+
+    const dice = typeof getDice3D === 'function' ? getDice3D() : null;
+    const skillName = sp.skill === 'inv' ? 'Investigação' : 'Percepção';
+
+    const showResult = () => {
+        const formulaEl = checkOverlay.querySelector('.check-formula') ||
+            document.getElementById('check-formula');
+        const resultEl = checkOverlay.querySelector('.check-result') ||
+            document.getElementById('check-result');
+
+        if (formulaEl) {
+            formulaEl.innerHTML = `<span class="check-roll">${roll}</span> + ${mod} (${skillName}) = <b>${total}</b> vs DC ${dc}`;
+        }
+        if (resultEl) {
+            resultEl.textContent = success ? 'Passagem Descoberta!' : 'Nada encontrado...';
+            resultEl.className = 'check-result ' + (success ? 'check-success' : 'check-fail');
+        }
+
+        // Show continue button after delay
+        setTimeout(() => {
+            const skipArea = checkOverlay.querySelector('.check-skip') ||
+                document.getElementById('check-skip');
+            if (skipArea) {
+                skipArea.innerHTML = '';
+                const btn = document.createElement('button');
+                btn.className = 'v-skip-btn';
+                btn.textContent = 'Continuar';
+                btn.onclick = () => {
+                    checkOverlay.classList.remove('active');
+                    if (success) {
+                        // Reveal the secret passage!
+                        S.grid[row][col] = '.';
+                        sp.revealed = true;
+                        S._secretsRevealed.add(`${col},${row}`);
+                        if (typeof _staticDirty !== 'undefined') _staticDirty = true;
+                        showTerrainToast('Passagem secreta revelada!', 'flavor');
+                        // Reveal fog through the new opening
+                        revealFogAt(col, row, 1, S.fogState, S.grid, true);
+                    } else {
+                        showTerrainToast('A parede parece sólida...', 'flavor');
+                    }
+                    S.checksPerformed.push({
+                        stat: sp.skill, dc, roll, mod, ok: success, mode: 'normal'
+                    });
+                    saveState();
+                };
+                skipArea.appendChild(btn);
+            }
+        }, 800);
+    };
+
+    if (dice) {
+        dice.roll(roll, showResult);
+    } else {
+        setTimeout(showResult, 500);
+    }
+}
+
+// ── Mountain climbing ────────────────────────────────────
+
+function _interactMountain(col, row) {
+    if (!S.terrainChallenges) return;
+    const tc = S.terrainChallenges.find(
+        t => t.col === col && t.row === row && !t.used
+    );
+    if (!tc) return;
+
+    _showTerrainChallengeOverlay(tc, col, row, 'Escalar',
+        'Uma parede rochosa íngreme se ergue à sua frente. Escalar exigirá força e técnica.',
+        '⛰️');
+}
+
+// ── Deep water swimming ──────────────────────────────────
+
+function _interactDeepWater(col, row) {
+    if (!S.terrainChallenges) return;
+    const tc = S.terrainChallenges.find(
+        t => t.col === col && t.row === row && !t.used
+    );
+    if (!tc) return;
+
+    _showTerrainChallengeOverlay(tc, col, row, 'Nadar',
+        'Águas profundas e escuras bloqueiam o caminho. A correnteza parece forte.',
+        '🌊');
+}
+
+function _showTerrainChallengeOverlay(tc, col, row, actionLabel, desc, icon) {
+    const overlay = document.getElementById('dm-overlay');
+    const narr = document.getElementById('dm-narration');
+    const choices = document.getElementById('dm-choices');
+    if (!overlay || !narr || !choices) return;
+
+    narr.innerHTML = '';
+    choices.innerHTML = '';
+    narr.innerHTML = `<p class="dm-text">${desc}</p>`;
+
+    const btnAction = document.createElement('button');
+    btnAction.className = 'dm-choice-btn';
+    btnAction.innerHTML = `${icon} ${actionLabel} (Atletismo DC ${tc.dc})`;
+    btnAction.onclick = () => {
+        overlay.classList.remove('active');
+        _performTerrainCheck(tc, col, row);
+    };
+    choices.appendChild(btnAction);
+
+    const btnBack = document.createElement('button');
+    btnBack.className = 'dm-choice-btn dm-choice-secondary';
+    btnBack.innerHTML = '← Voltar';
+    btnBack.onclick = () => overlay.classList.remove('active');
+    choices.appendChild(btnBack);
+
+    overlay.classList.add('active');
+}
+
+function _performTerrainCheck(tc, col, row) {
+    const mod = tc.mod || 0;
+    const dc = tc.dc;
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const total = roll + mod;
+    const success = total >= dc;
+
+    const checkOverlay = document.getElementById('check-overlay');
+    if (!checkOverlay) return;
+    checkOverlay.classList.add('active');
+
+    const dice = typeof getDice3D === 'function' ? getDice3D() : null;
+
+    const showResult = () => {
+        const formulaEl = checkOverlay.querySelector('.check-formula') ||
+            document.getElementById('check-formula');
+        const resultEl = checkOverlay.querySelector('.check-result') ||
+            document.getElementById('check-result');
+
+        if (formulaEl) {
+            formulaEl.innerHTML = `<span class="check-roll">${roll}</span> + ${mod} (Atletismo) = <b>${total}</b> vs DC ${dc}`;
+        }
+        if (resultEl) {
+            resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
+            resultEl.className = 'check-result ' + (success ? 'check-success' : 'check-fail');
+        }
+
+        setTimeout(() => {
+            const skipArea = checkOverlay.querySelector('.check-skip') ||
+                document.getElementById('check-skip');
+            if (skipArea) {
+                skipArea.innerHTML = '';
+                const btn = document.createElement('button');
+                btn.className = 'v-skip-btn';
+                btn.textContent = 'Continuar';
+                btn.onclick = () => {
+                    checkOverlay.classList.remove('active');
+                    if (success) {
+                        // Terrain becomes passable temporarily
+                        tc.used = true;
+                        S._terrainPassed.add(`${col},${row}`);
+                        // Change tile to passable and move player there
+                        const origTile = S.grid[row][col];
+                        S.grid[row][col] = '.';
+                        if (typeof _staticDirty !== 'undefined') _staticDirty = true;
+                        showTerrainToast(`${tc.label} bem-sucedido!`, 'flavor');
+                        // Move player to the conquered tile
+                        if (typeof movePlayerCanvas === 'function') {
+                            movePlayerCanvas(col, row);
+                        }
+                    } else {
+                        // Failure: take damage
+                        const dmgDice = tc.dmg || '1d6';
+                        const dmgMatch = dmgDice.match(/(\d+)d(\d+)/);
+                        let dmg = 0;
+                        if (dmgMatch) {
+                            const count = parseInt(dmgMatch[1]);
+                            const sides = parseInt(dmgMatch[2]);
+                            for (let i = 0; i < count; i++) {
+                                dmg += Math.floor(Math.random() * sides) + 1;
+                            }
+                        }
+                        S.hpChange -= dmg;
+                        showTerrainToast(`Falha! -${dmg} HP`, 'damage');
+                        if (typeof updateHPHUD === 'function') updateHPHUD();
+                        if (typeof checkDeath === 'function') checkDeath();
+                    }
+                    S.checksPerformed.push({
+                        stat: tc.skill, dc, roll, mod, ok: success, mode: 'normal'
+                    });
+                    saveState();
+                };
+                skipArea.appendChild(btn);
+            }
+        }, 800);
+    };
+
+    if (dice) {
+        dice.roll(roll, showResult);
+    } else {
+        setTimeout(showResult, 500);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TRAP TRIGGER SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Check if player stepped on a trap. Called from onMoveComplete.
+ * Returns trap object if triggered, null otherwise.
+ */
+function checkTrapAtPosition(col, row) {
+    if (!S.traps) return null;
+    const trap = S.traps.find(
+        t => t.col === col && t.row === row && !t.triggered
+    );
+    if (!trap) return null;
+
+    trap.triggered = true;
+    return trap;
+}
+
+/**
+ * Show trap event with 10s reaction timer and DEX/CON/STR save.
+ */
+function showTrapEvent(trap) {
+    const overlay = document.getElementById('dm-overlay');
+    const narr = document.getElementById('dm-narration');
+    const choices = document.getElementById('dm-choices');
+    if (!overlay || !narr || !choices) return;
+
+    narr.innerHTML = '';
+    choices.innerHTML = '';
+
+    const statNames = {dex: 'Destreza', con: 'Constituição', str: 'Força'};
+    const statName = statNames[trap.skill] || 'Destreza';
+
+    narr.innerHTML = `<p class="dm-text">⚠️ <b>${trap.name}!</b></p><p class="dm-text">O chão cede sob seus pés! Você precisa reagir rapidamente!</p>`;
+
+    const btnReact = document.createElement('button');
+    btnReact.className = 'dm-choice-btn dm-choice-danger';
+    btnReact.innerHTML = `⚡ Reagir! (${statName} DC ${trap.dc})`;
+    btnReact.onclick = () => {
+        overlay.classList.remove('active');
+        _performTrapSave(trap);
+    };
+    choices.appendChild(btnReact);
+
+    overlay.classList.add('active');
+
+    // 10s reaction timer — auto-fail if player doesn't react
+    const timer = setTimeout(() => {
+        if (overlay.classList.contains('active')) {
+            overlay.classList.remove('active');
+            _applyTrapDamage(trap, false, 1); // Auto-fail with min roll
+        }
+    }, 10000);
+
+    // Clear timer if player reacts
+    btnReact.addEventListener('click', () => clearTimeout(timer), { once: true });
+}
+
+function _performTrapSave(trap) {
+    const mod = trap.mod || 0;
+    const dc = trap.dc;
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const total = roll + mod;
+    const success = total >= dc;
+
+    const checkOverlay = document.getElementById('check-overlay');
+    if (!checkOverlay) return;
+    checkOverlay.classList.add('active');
+
+    const dice = typeof getDice3D === 'function' ? getDice3D() : null;
+    const statNames = {dex: 'Destreza', con: 'Constituição', str: 'Força'};
+
+    const showResult = () => {
+        const formulaEl = checkOverlay.querySelector('.check-formula') ||
+            document.getElementById('check-formula');
+        const resultEl = checkOverlay.querySelector('.check-result') ||
+            document.getElementById('check-result');
+
+        if (formulaEl) {
+            formulaEl.innerHTML = `<span class="check-roll">${roll}</span> + ${mod} (${statNames[trap.skill] || 'DEX'}) = <b>${total}</b> vs DC ${dc}`;
+        }
+        if (resultEl) {
+            resultEl.textContent = success ? 'Esquivou!' : 'Atingido!';
+            resultEl.className = 'check-result ' + (success ? 'check-success' : 'check-fail');
+        }
+
+        setTimeout(() => {
+            const skipArea = checkOverlay.querySelector('.check-skip') ||
+                document.getElementById('check-skip');
+            if (skipArea) {
+                skipArea.innerHTML = '';
+                const btn = document.createElement('button');
+                btn.className = 'v-skip-btn';
+                btn.textContent = 'Continuar';
+                btn.onclick = () => {
+                    checkOverlay.classList.remove('active');
+                    _applyTrapDamage(trap, success, roll);
+                };
+                skipArea.appendChild(btn);
+            }
+        }, 800);
+    };
+
+    if (dice) {
+        dice.roll(roll, showResult);
+    } else {
+        setTimeout(showResult, 500);
+    }
+}
+
+function _applyTrapDamage(trap, success, roll) {
+    if (success) {
+        // D&D 5e: successful save = half damage (PHB)
+        showTerrainToast('Esquivou parcialmente!', 'flavor');
+    }
+
+    // Roll trap damage
+    const dmgDice = trap.dmg || '1d6';
+    const dmgMatch = dmgDice.match(/(\d+)d(\d+)/);
+    let fullDmg = 0;
+    if (dmgMatch) {
+        const count = parseInt(dmgMatch[1]);
+        const sides = parseInt(dmgMatch[2]);
+        for (let i = 0; i < count; i++) {
+            fullDmg += Math.floor(Math.random() * sides) + 1;
+        }
+    }
+
+    // Half damage on success (D&D 5e)
+    const dmg = success ? Math.floor(fullDmg / 2) : fullDmg;
+
+    if (dmg > 0) {
+        S.hpChange -= dmg;
+        showTerrainToast(`${trap.name}: -${dmg} HP${success ? ' (metade)' : ''}`, 'damage');
+        if (typeof updateHPHUD === 'function') updateHPHUD();
+        if (typeof checkDeath === 'function') checkDeath();
+    }
+
+    S.checksPerformed.push({
+        stat: trap.skill, dc: trap.dc, roll, mod: trap.mod || 0,
+        ok: success, mode: 'normal',
+    });
+    saveState();
+}

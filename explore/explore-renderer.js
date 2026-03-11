@@ -289,6 +289,63 @@ function renderFrame(timestamp) {
     _drawFloatingTexts(_ctx, timestamp);
 
     // 10. Fog of war (drawn last, on top of everything)
+
+        // ── TORCH FLAMES (animated) ──
+        if (S.torches && S.torches.length > 0) {
+            for (const torch of S.torches) {
+                const fogKey = `${torch.col},${torch.row}`;
+                const fogSt = S.fogState[fogKey];
+                if (fogSt !== 'visible' && fogSt !== 'dim') continue;
+                const tPos = hexToScreen(torch.col, torch.row);
+                const sx = (tPos.x - _cameraOffsetX) * _zoomLevel;
+                const sy = (tPos.y - _cameraOffsetY) * _zoomLevel;
+                _ctx.save();
+                _ctx.translate(sx, sy);
+                _ctx.scale(_zoomLevel, _zoomLevel);
+                drawTorchOnWall(_ctx, 0, 0, timestamp);
+                _ctx.restore();
+            }
+        }
+
+        // ── TRAP MARKS (visible traps only) ──
+        if (S.traps && S.traps.length > 0) {
+            for (const trap of S.traps) {
+                if (trap.triggered || trap.hidden) continue;
+                const fogKey = `${trap.col},${trap.row}`;
+                const fogSt = S.fogState[fogKey];
+                if (fogSt !== 'visible') continue;
+                const tPos = hexToScreen(trap.col, trap.row);
+                const sx = (tPos.x - _cameraOffsetX) * _zoomLevel;
+                const sy = (tPos.y - _cameraOffsetY) * _zoomLevel;
+                _ctx.save();
+                _ctx.translate(sx, sy);
+                _ctx.scale(_zoomLevel, _zoomLevel);
+                drawTrapMark(_ctx, 0, 0, trap.col, trap.row);
+                _ctx.restore();
+            }
+        }
+
+        // ── SECRET WALL HINTS ──
+        if (S.secretPassages && S.secretPassages.length > 0) {
+            for (const sp of S.secretPassages) {
+                if (sp.revealed) continue;
+                const fogKey = `${sp.col},${sp.row}`;
+                const fogSt = S.fogState[fogKey];
+                if (fogSt !== 'visible') continue;
+                // Only show hint if player is within 2 hexes
+                const dist = hexDist(sp.col, sp.row, S.playerCol, S.playerRow);
+                if (dist > 2) continue;
+                const sPos = hexToScreen(sp.col, sp.row);
+                const sx = (sPos.x - _cameraOffsetX) * _zoomLevel;
+                const sy = (sPos.y - _cameraOffsetY) * _zoomLevel;
+                _ctx.save();
+                _ctx.translate(sx, sy);
+                _ctx.scale(_zoomLevel, _zoomLevel);
+                drawSecretWallHint(_ctx, 0, 0);
+                _ctx.restore();
+            }
+        }
+
     drawFogOverlay(_ctx, _canvasLogicalW, _canvasLogicalH, S.fogState);
 
     // 10.5 Fog reveal golden flash (on top of fog for dramatic effect)
@@ -501,6 +558,10 @@ function drawTile(ctx, col, row, biome, colors, timestamp) {
     const isWindVeg = WIND_BIOMES.has(biome) && (baseTile === 'T' || baseTile === 'g');
     if (baseTile !== 'w' && baseTile !== 'W' && baseTile !== 'L' && !isWindVeg) {
         drawTileDecoration(ctx, cx, cy - heightPx, baseTile, biome, col, row, 0);
+            // Enhanced wall decoration (cracks, moss)
+            if (baseTile === '#') {
+                drawWallEnhanced(_staticCtx, centerX, centerY - h, col, row, S.biome);
+            }
     }
 
     ctx.restore();
@@ -681,7 +742,12 @@ function handleCanvasClick(e) {
     // Check adjacency and passability
     if (!isAdjacent(S.playerCol, S.playerRow, hex.col, hex.row)) return;
     const tile = S.grid[hex.row] && S.grid[hex.row][hex.col] ? S.grid[hex.row][hex.col] : '.';
-    if (IMPASSABLE.has(tile)) return;
+    if (IMPASSABLE.has(tile)) {
+        if (typeof handleTileInteraction === 'function') {
+            handleTileInteraction(hex.col, hex.row, tile);
+        }
+        return;
+    }
 
     // Visual tap feedback
     spawnTapFeedback(hex.col, hex.row);
@@ -802,7 +868,18 @@ function onMoveComplete(col, row) {
     }
 
     // Check POI
-    const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.has(p.id));
+    
+        // PRIORITY 2.5: Trap check (D&D 5e)
+        if (typeof checkTrapAtPosition === 'function') {
+            const trap = checkTrapAtPosition(col, row);
+            if (trap) {
+                showTrapEvent(trap);
+                saveState();
+                return;
+            }
+        }
+
+const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.has(p.id));
     if (poi) {
         const spriteType = {dis:'discovery',sea:'search',dan:'danger',mys:'mystery',npc:'npc'}[poi.type] || 'discovery';
         revealEventSprite(col, row, spriteType, poi.icon);

@@ -127,6 +127,22 @@ function drawFogOverlay(mainCtx, canvasW, canvasH, fogState) {
         }
     }
 
+    // -- STEP 2b: Torch light sources (expand fog around torches) --
+    if (typeof S !== 'undefined' && S.torches) {
+        for (const torch of S.torches) {
+            const fogKey = `${torch.col},${torch.row}`;
+            if (fogState[fogKey] === 'visible' || fogState[fogKey] === 'dim') {
+                const center = hexToScreen(torch.col, torch.row);
+                const tRadius = torch.radius || 2;
+                reveals.push({
+                    x: center.x, y: center.y + HEX_H * 0.15,
+                    radius: HEX_W * (tRadius * 0.7 + 0.3),
+                    strength: 0.85, flatZone: 0.3
+                });
+            }
+        }
+    }
+
     // -- STEP 3: Punch reveal holes with radial gradients --
     _fogCtx.globalCompositeOperation = 'destination-out';
 

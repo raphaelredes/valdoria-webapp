@@ -2,7 +2,7 @@
 // CONSTANTS
 // ═══════════════════════════════════════════════════════
 let COLS = 11, ROWS = 13;
-const IMPASSABLE = new Set(['W', 'M', 'L', '#']);
+const IMPASSABLE = new Set(['W', 'M', 'L', '#', 'D']);
 
 // Hex neighbors (odd-r offset)
 const EVEN_OFFSETS = [[-1, -1], [0, -1], [-1, 0], [1, 0], [-1, 1], [0, 1]];
@@ -107,6 +107,10 @@ function saveState() {
             ih: Array.from(S.interactedHexes || new Set()),
             ccl: Array.from(S.chainClues || new Set()),
             gc: COLS, gr: ROWS,
+            do2: Array.from(S._doorsOpened || new Set()),
+            sr2: Array.from(S._secretsRevealed || new Set()),
+            tp2: Array.from(S._terrainPassed || new Set()),
+            trT: (S.traps || []).filter(t => t.triggered).map(t => `${t.col},${t.row}`),
             ts: Date.now(),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
@@ -159,6 +163,14 @@ function restoreState() {
         S._hazardsTriggered = new Set(snap.hz || []);
         S._trapsTriggered = new Set(snap.tt || []);
         S.chainClues = new Set(snap.ccl || []);
+        S._doorsOpened = new Set(snap.do2 || []);
+        S._secretsRevealed = new Set(snap.sr2 || []);
+        S._terrainPassed = new Set(snap.tp2 || []);
+        // Restore triggered traps
+        const trT = new Set(snap.trT || []);
+        if (S.traps) S.traps.forEach(t => {
+            if (trT.has(`${t.col},${t.row}`)) t.triggered = true;
+        });
         S.moveLog = snap.ml || [];
         S._stepCount = snap.sc || 0;
         S.inventory = snap.inv || [];
@@ -214,6 +226,33 @@ function loadMapData(data) {
         choices: re.ch || [],
         combat: re.cb || null,
     }));
+
+    // ── Map features (secret passages, terrain challenges, traps, torches) ──
+    S.secretPassages = (data.sp || []).map(sp => ({
+        col: sp.q, row: sp.r, dc: sp.dc, skill: sp.sk, mod: sp.m || 0,
+        revealed: false,
+    }));
+    S.terrainChallenges = (data.tc || []).map(tc => ({
+        col: tc.q, row: tc.r, dc: tc.dc, skill: tc.sk, mod: tc.m || 0,
+        dmg: tc.dm, label: tc.lb, used: false,
+    }));
+    S.traps = (data.tr || []).map(tr => ({
+        col: tr.q, row: tr.r, name: tr.nm, skill: tr.sk, dc: tr.dc,
+        dmg: tr.dm, mod: tr.m || 0, hidden: tr.h, hiddenDC: tr.hd || 0,
+        triggered: false,
+    }));
+    S.torches = (data.lt || []).map(lt => ({
+        col: lt.q, row: lt.r, radius: lt.rd || 2,
+    }));
+    // Filter hidden traps by Passive Perception
+    const pp2 = getPassivePerception();
+    S.traps = S.traps.filter(t => {
+        if (!t.hidden) return true;
+        return pp2 >= t.hiddenDC;  // PP high enough to spot
+    });
+    S._doorsOpened = new Set();  // Track opened doors
+    S._secretsRevealed = new Set();  // Track revealed secret passages
+    S._terrainPassed = new Set();  // Track passed terrain challenges
 
     // Ambient events — atmospheric moments (resolved from frontend pool)
     S.ambientEvents = (data.ae || []).map(ae => ({
@@ -275,6 +314,15 @@ function loadMapData(data) {
     setupHUD();
 
     if (restored) {
+        // Re-apply opened doors and revealed secrets to grid
+        for (const key of (S._doorsOpened || [])) {
+            const [c, r] = key.split(',').map(Number);
+            if (S.grid[r] && S.grid[r][c] === 'D') S.grid[r][c] = '.';
+        }
+        for (const key of (S._secretsRevealed || [])) {
+            const [c, r] = key.split(',').map(Number);
+            if (S.grid[r] && S.grid[r][c] === '#') S.grid[r][c] = '.';
+        }
         // Re-apply fog for all visited positions
         for (const key of S.visited) {
             const [c, r] = key.split(',').map(Number);

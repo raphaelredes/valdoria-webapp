@@ -969,6 +969,206 @@ function drawGrassDecorationWind(ctx, cx, cy, col, row, biome, timestamp) {
 }
 
 // Dispatch decoration drawing based on tile char and biome
+
+// ── Door decoration ──────────────────────────────────────
+function drawDoorDecoration(ctx, cx, cy, col, row) {
+    const hw = HEX_W * 0.35;
+    const hh = HEX_H * 0.35;
+    // Wooden planks
+    ctx.fillStyle = '#5a3a1a';
+    ctx.fillRect(cx - hw, cy - hh, hw * 2, hh * 2);
+    // Planks lines
+    ctx.strokeStyle = '#3a2a0a';
+    ctx.lineWidth = 0.8;
+    for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cx - hw, cy + i * hh * 0.6);
+        ctx.lineTo(cx + hw, cy + i * hh * 0.6);
+        ctx.stroke();
+    }
+    // Vertical plank line
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - hh);
+    ctx.lineTo(cx, cy + hh);
+    ctx.stroke();
+    // Handle (small circle)
+    ctx.fillStyle = '#8a6a3a';
+    ctx.beginPath();
+    ctx.arc(cx + hw * 0.5, cy, HEX_W * 0.04, 0, Math.PI * 2);
+    ctx.fill();
+    // Iron bands
+    ctx.strokeStyle = '#4a4a4a';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(cx - hw, cy - hh * 0.8);
+    ctx.lineTo(cx + hw, cy - hh * 0.8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx - hw, cy + hh * 0.8);
+    ctx.lineTo(cx + hw, cy + hh * 0.8);
+    ctx.stroke();
+}
+
+// ── Enhanced wall decoration (cracks, moss, torch sconces) ──
+function drawWallEnhanced(ctx, cx, cy, col, row, biome) {
+    const seed = col * 7 + row * 13;
+    const hw = HEX_W * 0.38;
+    const hh = HEX_H * 0.38;
+
+    // Brick pattern (existing)
+    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < 3; i++) {
+        const y = cy - hh + (i + 1) * hh * 0.5;
+        const xOff = (i % 2 === 0) ? 0 : hw * 0.4;
+        ctx.beginPath();
+        ctx.moveTo(cx - hw + xOff, y);
+        ctx.lineTo(cx + hw - (hw * 0.4 - xOff), y);
+        ctx.stroke();
+    }
+
+    // Cracks (seeded, ~30% of walls)
+    if ((seed % 10) < 3) {
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+        ctx.lineWidth = 0.6;
+        const crackX = cx + ((seed % 5) - 2) * hw * 0.3;
+        const crackY = cy + ((seed % 7) - 3) * hh * 0.2;
+        ctx.beginPath();
+        ctx.moveTo(crackX, crackY - hh * 0.3);
+        ctx.lineTo(crackX + hw * 0.1, crackY);
+        ctx.lineTo(crackX - hw * 0.05, crackY + hh * 0.25);
+        ctx.stroke();
+    }
+
+    // Moss (green patches, ~20% of walls, cave/graveyard only)
+    if (biome === 'cave' || biome === 'graveyard') {
+        if ((seed % 10) >= 6 && (seed % 10) < 8) {
+            ctx.fillStyle = 'rgba(40,80,30,0.3)';
+            const mx = cx + ((seed % 3) - 1) * hw * 0.5;
+            const my = cy + hh * 0.3;
+            ctx.beginPath();
+            ctx.arc(mx, my, HEX_W * 0.06, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(mx + hw * 0.15, my - hh * 0.1, HEX_W * 0.04, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
+// ── Torch sconce on wall ──────────────────────────────────
+function drawTorchOnWall(ctx, cx, cy, timestamp) {
+    // Bracket
+    ctx.strokeStyle = '#5a4a3a';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - HEX_H * 0.15);
+    ctx.lineTo(cx, cy - HEX_H * 0.3);
+    ctx.stroke();
+
+    // Flame (animated)
+    const flicker = Math.sin(timestamp * 0.008 + cx * 0.5) * 0.15 + 0.85;
+    const flameH = HEX_H * 0.2 * flicker;
+    const grad = ctx.createRadialGradient(
+        cx, cy - HEX_H * 0.35, 0,
+        cx, cy - HEX_H * 0.35, HEX_W * 0.12
+    );
+    grad.addColorStop(0, `rgba(255,200,50,${0.9 * flicker})`);
+    grad.addColorStop(0.5, `rgba(255,120,20,${0.6 * flicker})`);
+    grad.addColorStop(1, 'rgba(255,60,10,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - HEX_H * 0.35, HEX_W * 0.08, flameH, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Light glow
+    const glowGrad = ctx.createRadialGradient(
+        cx, cy - HEX_H * 0.3, 0,
+        cx, cy - HEX_H * 0.3, HEX_W * 0.5
+    );
+    glowGrad.addColorStop(0, `rgba(255,180,50,${0.15 * flicker})`);
+    glowGrad.addColorStop(1, 'rgba(255,180,50,0)');
+    ctx.fillStyle = glowGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy - HEX_H * 0.3, HEX_W * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// ── Trap mark on floor ──────────────────────────────────
+function drawTrapMark(ctx, cx, cy, col, row) {
+    // Subtle pressure plate pattern
+    const s = HEX_W * 0.15;
+    ctx.strokeStyle = 'rgba(120,80,40,0.25)';
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([2, 2]);
+    ctx.strokeRect(cx - s, cy - s * 0.6, s * 2, s * 1.2);
+    ctx.setLineDash([]);
+    // Small dot in center
+    ctx.fillStyle = 'rgba(120,80,40,0.2)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, HEX_W * 0.03, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// ── Secret wall crack hint ──────────────────────────────
+function drawSecretWallHint(ctx, cx, cy) {
+    // Very subtle crack pattern suggesting a hidden passage
+    ctx.strokeStyle = 'rgba(60,40,20,0.3)';
+    ctx.lineWidth = 0.7;
+    ctx.setLineDash([1, 3]);
+    const hw = HEX_W * 0.2;
+    ctx.beginPath();
+    ctx.moveTo(cx - hw, cy - HEX_H * 0.1);
+    ctx.lineTo(cx, cy + HEX_H * 0.05);
+    ctx.lineTo(cx + hw * 0.5, cy - HEX_H * 0.15);
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+
+// Wall tile (#) decoration — cracks, moss, stone texture
+function drawWallTileDecoration(ctx, cx, cy, col, row, biome) {
+    const seed = (col * 7 + row * 13) % 100;
+    // Stone cracks
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+    ctx.lineWidth = 0.5;
+    if (seed % 3 === 0) {
+        ctx.beginPath();
+        ctx.moveTo(cx - 4, cy - 2);
+        ctx.lineTo(cx - 1, cy + 1);
+        ctx.lineTo(cx + 3, cy - 1);
+        ctx.stroke();
+    }
+    if (seed % 5 < 2) {
+        ctx.beginPath();
+        ctx.moveTo(cx + 2, cy + 3);
+        ctx.lineTo(cx + 5, cy + 1);
+        ctx.stroke();
+    }
+    // Moss patches (cave/graveyard only)
+    if (biome === 'cave' || biome === 'graveyard') {
+        if (seed % 4 === 0) {
+            ctx.fillStyle = 'rgba(40,80,30,0.15)';
+            ctx.beginPath();
+            ctx.arc(cx - 3, cy + 4, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        if (seed % 7 < 2) {
+            ctx.fillStyle = 'rgba(50,90,40,0.12)';
+            ctx.beginPath();
+            ctx.arc(cx + 4, cy - 2, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    // Stone texture dots
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    for (let i = 0; i < 3; i++) {
+        const dx = ((seed + i * 17) % 12) - 6;
+        const dy = ((seed + i * 23) % 10) - 5;
+        ctx.fillRect(cx + dx, cy + dy, 1, 1);
+    }
+}
+
 function drawTileDecoration(ctx, cx, cy, tile, biome, col, row, timestamp) {
     switch (tile) {
         case 'T': drawTreeDecoration(ctx, cx, cy, biome, col, row); break;
@@ -986,5 +1186,7 @@ function drawTileDecoration(ctx, cx, cy, tile, biome, col, row, timestamp) {
         case 'v': drawVolcanicDecoration(ctx, cx, cy, col, row); break;
         case 'g': drawGrassDecoration(ctx, cx, cy, col, row, biome); break;
         case '.': drawGroundTexture(ctx, cx, cy, col, row, biome); break;
+        case 'D': drawDoorDecoration(ctx, cx, cy, col, row); break;
+        case '#': drawWallTileDecoration(ctx, cx, cy, col, row, biome); break;
     }
 }
