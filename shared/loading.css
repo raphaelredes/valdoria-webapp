@@ -213,7 +213,6 @@
 /* Outer rune ring — CW slowly — DEFAULT: 60s, MIN: 25s */
 .mc-outer {
     animation: spinCW var(--ring-outer, 60s) linear infinite;
-    filter: drop-shadow(0 0 3px rgba(196,149,58,0.3));
 }
 .mc-rune-text { font-size: 13px; letter-spacing: 3px; font-family: serif; }
 
@@ -224,17 +223,15 @@
     stroke-dasharray: 50 590;
     stroke-linecap: round;
     animation: energyFlow 8s linear infinite;
-    filter: drop-shadow(0 0 4px rgba(196,149,58,0.5));
 }
 .mc-arc-1 { stroke-dasharray: 60 580; }
-.mc-arc-2 { stroke-dasharray: 40 563; animation-duration: 10s; animation-direction: reverse; filter: drop-shadow(0 0 4px rgba(123,32,32,0.4)); }
+.mc-arc-2 { stroke-dasharray: 40 563; animation-duration: 10s; animation-direction: reverse; }
 
 @keyframes energyFlow { to { stroke-dashoffset: -640; } }
 
 /* Inner text ring — CW faster — DEFAULT: 45s, MIN: 20s */
 .mc-inner {
     animation: spinCW var(--ring-inner, 45s) linear infinite;
-    filter: drop-shadow(0 0 2px rgba(196,149,58,0.2));
 }
 .mc-inner-text { font-size: 9.5px; letter-spacing: 5px; font-family: serif; }
 
@@ -296,14 +293,8 @@
     100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 @keyframes gemPulse {
-    0%, 100% {
-        box-shadow: 0 0 12px rgba(196,149,58,0.7), 0 0 30px rgba(196,149,58,0.3),
-                    inset 0 -3px 6px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,220,140,0.3);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(196,149,58,0.9), 0 0 50px rgba(196,149,58,0.4),
-                    inset 0 -3px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,220,140,0.5);
-    }
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+    50%      { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
 }
 @keyframes gemFlare {
     0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
@@ -323,18 +314,18 @@
 }
 
 /* ── Particle intensity scaling (driven by data-phase) ── */
-.loading-overlay[data-phase="1"] .loading-particles { opacity: 1.0; filter: brightness(1.2); }
-.loading-overlay[data-phase="2"] .loading-particles { opacity: 1.0; filter: brightness(1.5) saturate(1.3); }
+.loading-overlay[data-phase="1"] .loading-particles { opacity: 1.0; }
+.loading-overlay[data-phase="2"] .loading-particles { opacity: 1.0; }
 
 /* ── Rune text glow scaling (driven by data-phase) ── */
 .loading-overlay[data-phase="1"] .mc-rune-text { fill: rgba(196,149,58,0.65); }
 .loading-overlay[data-phase="1"] .mc-inner-text { fill: rgba(196,149,58,0.5); }
-.loading-overlay[data-phase="1"] .mc-outer { filter: drop-shadow(0 0 5px rgba(196,149,58,0.4)); }
-.loading-overlay[data-phase="1"] .mc-inner { filter: drop-shadow(0 0 4px rgba(196,149,58,0.3)); }
+.loading-overlay[data-phase="1"] .mc-outer { opacity: 0.9; }
+.loading-overlay[data-phase="1"] .mc-inner { opacity: 0.85; }
 .loading-overlay[data-phase="2"] .mc-rune-text { fill: rgba(196,149,58,0.85); }
 .loading-overlay[data-phase="2"] .mc-inner-text { fill: rgba(196,149,58,0.7); }
-.loading-overlay[data-phase="2"] .mc-outer { filter: drop-shadow(0 0 8px rgba(196,149,58,0.6)); }
-.loading-overlay[data-phase="2"] .mc-inner { filter: drop-shadow(0 0 6px rgba(196,149,58,0.5)); }
+.loading-overlay[data-phase="2"] .mc-outer { opacity: 1; }
+.loading-overlay[data-phase="2"] .mc-inner { opacity: 0.95; }
 
 /* ── Gem tap burst (touch interaction) ── */
 .mc-gem { cursor: pointer; -webkit-tap-highlight-color: transparent; }

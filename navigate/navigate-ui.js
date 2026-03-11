@@ -835,7 +835,7 @@ function showGestureTutorial() {
         localStorage.setItem('valdoria_nav_tutorial_v2', '1');
     };
     gt.addEventListener('click', dismiss, { once: true });
-    setTimeout(() => { if (gt.classList.contains('visible')) dismiss(); }, 6000);
+    setTimeout(() => { if (gt.classList.contains('visible')) dismiss(); }, 12000);
 }
 
 // ── Init hover tooltip + off-screen indicator + swipe dismiss + new features ──

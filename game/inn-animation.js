@@ -275,7 +275,7 @@ function _goldenBurst(overlay, particlesEl) {
     overlay.appendChild(burst);
     setTimeout(() => burst.remove(), 1300);
     // Spark shower
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 6; i++) {
         const p = document.createElement('div');
         p.className = 'inn-particle spark';
         p.style.left = (30 + Math.random() * 40) + '%';
