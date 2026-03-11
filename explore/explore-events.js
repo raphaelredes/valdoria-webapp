@@ -1304,7 +1304,11 @@ function showTerrainToast(message, type) {
 
         const category = _TOAST_TIMING[type] || 'toast';
         const duration = typeof calcReadTime === 'function' ? calcReadTime(message, category) : 1500;
-        setTimeout(() => toast.remove(), duration);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
     } catch (err) {
         console.error('[EXPLORE] showTerrainToast:', err);
     }

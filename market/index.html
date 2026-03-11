@@ -1636,7 +1636,12 @@
             document.body.appendChild(el);
             var cat = (type === 'err' || type === 'warn') ? 'toast-warn' : 'toast';
             var dur = (typeof calcReadTime === 'function') ? calcReadTime(msg, cat) : 2000;
-            setTimeout(() => el.remove(), dur);
+            // Fade-out before removal
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transition = 'opacity 0.25s ease';
+                setTimeout(() => el.remove(), 250);
+            }, dur);
         }
 
         function esc(s) {

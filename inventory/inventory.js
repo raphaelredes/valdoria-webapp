@@ -2491,7 +2491,12 @@ function toast(msg, type) {
     var dur = (typeof calcReadTime === 'function')
         ? calcReadTime(clean, cat)
         : Math.max(1500, Math.min(4000, clean.split(/\s+/).length * 250));
-    setTimeout(() => el.remove(), dur);
+    // Fade-out before removal
+    setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => el.remove(), 250);
+    }, dur);
 }
 
 // ── Escape for onclick attributes & HTML context ──

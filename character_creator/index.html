@@ -1799,7 +1799,11 @@
                 toast.className = 'v-toast v-toast-error';
                 toast.textContent = msg;
                 document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), dur);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.25s ease';
+                    setTimeout(() => toast.remove(), 250);
+                }, dur);
             }
             haptic();
         }
