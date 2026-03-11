@@ -65,12 +65,6 @@ function renderCharacterSelect(data) {
     if (bannerEl) bannerEl.style.display = 'none';
     if (panelEl) panelEl.style.display = 'none';
 
-    // Hide immersive toggle on char select
-    const immToggle = document.getElementById('immersive-toggle');
-    const immRestore = document.getElementById('immersive-restore');
-    if (immToggle) immToggle.style.display = 'none';
-    if (immRestore) immRestore.style.display = 'none';
-
     screenEl.style.display = '';
     screenEl.style.paddingBottom = '24px';
     screenEl.scrollTop = 0;
@@ -98,7 +92,7 @@ function renderCharacterSelect(data) {
     if (chars.length === 0) {
         html += '<div class="char-select-empty">';
         html += '<div class="char-select-empty-icon">\uD83D\uDCDC</div>';
-        html += '<div class="char-select-empty-text">Nenhum personagem encontrado.<br>Crie seu primeiro aventureiro!</div>';
+        html += '<div class="char-select-empty-text">Os pergaminhos est\u00E3o em branco...<br>Sua hist\u00F3ria em Vald\u00F3ria ainda n\u00E3o come\u00E7ou.</div>';
         html += '</div>';
     } else {
         html += '<div class="char-select-list">';
@@ -149,7 +143,6 @@ function renderCharacterSelect(data) {
     }
 
     html += '<div class="char-select-secondary">';
-    html += '<button class="btn-action char-select-manage" id="cs-manage">\uD83D\uDC65 Gerenciar</button>';
     html += '<button class="btn-action char-select-account" id="cs-account">\uD83D\uDD10 Conta</button>';
     html += '</div>';
 
@@ -192,12 +185,6 @@ function renderCharacterSelect(data) {
                 doAction('create_new_char');
             }
         });
-    }
-
-    // Bind events: manage button
-    const manageBtn = document.getElementById('cs-manage');
-    if (manageBtn) {
-        manageBtn.addEventListener('click', () => doAction('manage_chars'));
     }
 
     // Bind events: account button
