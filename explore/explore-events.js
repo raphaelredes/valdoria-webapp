@@ -1309,8 +1309,9 @@ function showTerrainToast(message, type) {
         const category = _TOAST_TIMING[type] || 'toast';
         const duration = typeof calcReadTime === 'function' ? calcReadTime(message, category) : 1500;
         setTimeout(() => {
+            toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
             toast.style.opacity = '0';
-            toast.style.transition = 'opacity 0.3s ease';
+            toast.style.transform = 'translateY(-10px)';
             setTimeout(() => toast.remove(), 300);
         }, duration);
     } catch (err) {

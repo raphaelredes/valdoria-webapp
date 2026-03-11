@@ -157,9 +157,10 @@ body {
     border-radius: 8px;
     background: rgba(196, 149, 58, 0.15);
     border: 1px solid rgba(196, 149, 58, 0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 .reward-badge.pop {
-    animation: badgeBounce 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+    animation: badgeBounce 0.4s cubic-bezier(0.34, 1.4, 0.64, 1), badgeGlow 0.6s ease-out;
 }
 
 /* ═══════════════════════════════════════════
@@ -334,6 +335,7 @@ body {
     padding: 20px;
     max-height: 88vh;
     overflow-y: auto;
+    transition: border-color 0.4s ease;
     box-shadow: 0 0 40px rgba(196, 149, 58, 0.15), 0 8px 32px rgba(0,0,0,0.6),
         inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -2px 4px rgba(0,0,0,0.25);
     position: relative;
@@ -553,6 +555,7 @@ body {
     line-height: 1.8;
     text-align: center;
     color: var(--v-text-bright, #e8dcc8);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
 }
 .ambient-continue-btn {
     display: flex;
@@ -570,11 +573,11 @@ body {
     font-weight: 600;
     font-style: italic;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.12s ease, border-color 0.2s ease, color 0.2s ease;
     animation: fadeInUp 0.5s ease;
 }
 .ambient-continue-btn:active {
-    transform: scale(0.97);
+    transform: scale(0.96);
     border-color: var(--v-gold, #c4953a);
     color: var(--v-gold, #c4953a);
 }
@@ -590,6 +593,8 @@ body {
     border-left: 2px solid rgba(196, 149, 58, 0.3);
     border-radius: 0 6px 6px 0;
     font-style: italic;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    box-shadow: -2px 0 8px rgba(196, 149, 58, 0.08);
 }
 .npc-name-tag {
     font-size: 12px;
@@ -598,6 +603,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 4px;
+    text-shadow: 0 0 8px rgba(196, 149, 58, 0.3), 0 1px 2px rgba(0,0,0,0.5);
 }
 
 /* ═══════════════════════════════════════════
@@ -868,12 +874,14 @@ body {
     gap: 16px;
     opacity: 0;
     pointer-events: none;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     transition: opacity 0.4s ease;
 }
 .portal-overlay.active { opacity: 1; pointer-events: all; animation: portalBreathe 3s ease-in-out infinite; }
 .portal-icon { display: none; }
 .portal-title { font-size: 18px; font-weight: 700; color: #4ad680; letter-spacing: 1px; text-shadow: 0 0 12px rgba(74,214,128,0.4), 0 2px 4px rgba(0,0,0,0.5); }
-.portal-summary { text-align: center; color: var(--v-text, #d4c8b0); font-size: 13px; line-height: 1.8; }
+.portal-summary { text-align: center; color: var(--v-text, #d4c8b0); font-size: 13px; line-height: 1.8; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 .portal-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
 /* Skip button override for dark green background */
 .portal-overlay .v-skip-btn {
@@ -999,7 +1007,7 @@ body {
     box-shadow: inset 0 0 80px rgba(180, 40, 40, 0.4);
 }
 .screen-shake {
-    animation: screenShake 0.4s ease-out;
+    animation: screenShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
 /* ═══════════════════════════════════════════
@@ -1248,6 +1256,7 @@ body {
     border-radius: 4px;
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    box-shadow: 0 0 6px rgba(196, 149, 58, 0.35);
 }
 .return-progress-fill::after {
     content: '';
@@ -1583,6 +1592,11 @@ body {
    ═══════════════════════════════════════════ */
 @keyframes badgeBounce {
     0% { transform: scale(1); }
+@keyframes badgeGlow {
+    0% { box-shadow: 0 0 12px rgba(196, 149, 58, 0.5); }
+    100% { box-shadow: 0 0 0 rgba(196, 149, 58, 0); }
+}
+
     40% { transform: scale(1.25); }
     70% { transform: scale(0.95); }
     100% { transform: scale(1); }
@@ -1638,15 +1652,15 @@ body {
     25% { transform: translateX(-5px); }
     75% { transform: translateX(5px); }
 }
-@keyframes screenShake {
-    0%, 100% { transform: translateX(0); }
 @keyframes lowHPPulse {
     0%, 100% { background-color: rgba(100,20,20,0); }
     50% { background-color: rgba(140,30,30,0.15); }
 }
-    15% { transform: translateX(-4px) translateY(1px); }
-    30% { transform: translateX(4px) translateY(-1px); }
-    45% { transform: translateX(-3px); }
+@keyframes screenShake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-6px) translateY(2px); }
+    30% { transform: translateX(5px) translateY(-2px); }
+    45% { transform: translateX(-4px) translateY(1px); }
     60% { transform: translateX(3px); }
     75% { transform: translateX(-1px); }
 }
