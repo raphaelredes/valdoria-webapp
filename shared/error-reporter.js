@@ -193,8 +193,15 @@ var ValdoriaErrors = (function () {
             }
             else if (msg.indexOf('não respondeu') >= 0 || msg.indexOf('demorou') >= 0)
                 hintEl.textContent = 'O servidor pode estar sobrecarregado. Tentaremos reconectar automaticamente.';
-            else if (msg.indexOf('indisponível') >= 0)
-                hintEl.textContent = 'Estamos reconectando automaticamente. Se persistir, feche este mini app e toque em "Retomar Jornada" novamente.';
+            else if (msg.indexOf('indisponível') >= 0) {
+                // Calculate total ETA for all remaining retries (exponential backoff)
+                var _etaTotal = 0;
+                for (var _r = _retryAttempt; _r < _RETRY_MAX; _r++) {
+                    _etaTotal += Math.min(_RETRY_BASE * Math.pow(2, _r), _RETRY_CAP);
+                }
+                var etaText = _etaTotal > 0 ? ' (estimativa: ~' + Math.round(_etaTotal) + 's)' : '';
+                hintEl.textContent = 'Estamos reconectando automaticamente' + etaText + '. Se persistir, feche este mini app e toque em "Retomar Jornada" novamente.';
+            }
             else if (msg.indexOf('expirada') >= 0 || msg.indexOf('Sessão') >= 0)
                 hintEl.textContent = 'Feche o mini app e selecione seu personagem novamente.';
             else if (msg.indexOf('Personagem não encontrado') >= 0)
