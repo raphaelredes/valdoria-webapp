@@ -321,10 +321,26 @@ async function _waitForHealthy() {
     let ok = await checkHealth();
     if (ok) return true;
 
-    // Poll for a bit (server might be restarting)
-    _clog('INIT health failed — starting silent poll (player sees loading)');
-    console.log('[GAME] Health failed, polling silently...');
+    // Discovery FIRST — tunnel URL likely changed (stale ?api= param)
+    _clog('INIT health failed — trying discovery before polling');
+    console.log('[GAME] Health failed, trying API URL discovery first...');
+    const newUrl = await _discoverApiUrl();
+    if (newUrl) {
+        S.apiBase = newUrl;
+        if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) ValdoriaErrors.updateApiBase(newUrl);
+        if (window.ApiDiscovery) ApiDiscovery.updateBase(newUrl);
+        ok = await checkHealth();
+        if (ok) {
+            _clog('DISCOVERY: health OK with new URL');
+            console.log('[GAME] Discovery succeeded, health OK with new URL:', newUrl);
+            return true;
+        }
+        _clog('DISCOVERY: new URL found but health still failing');
+    }
 
+    // Discovery didn't help — server may be restarting (same URL, temporarily down)
+    _clog('INIT polling (server may be restarting)...');
+    console.log('[GAME] Polling silently (server may be restarting)...');
     for (let i = 1; i <= HEALTH_POLL_MAX; i++) {
         await sleep(HEALTH_POLL_INTERVAL);
         ok = await checkHealth();
@@ -335,25 +351,12 @@ async function _waitForHealthy() {
         _clog(`INIT health poll ${i}/${HEALTH_POLL_MAX} failed`);
     }
 
-    // Polls failed — try discovering the new tunnel URL from api-url.json
-    _clog('Attempting API URL discovery...');
-    const newUrl = await _discoverApiUrl();
-    if (newUrl) {
-        S.apiBase = newUrl;
-        // Update error reporter API base
-        if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) {
-            ValdoriaErrors.updateApiBase(newUrl);
-        }
-        // Retry health with the discovered URL
-        ok = await checkHealth();
-        if (ok) {
-            _clog('DISCOVERY: health OK with new URL');
-            return true;
-        }
-    }
-
-    // All attempts failed — sendData to close WebApp, bot sends fresh menu
-    return _sendDataReconnect();
+    // All attempts failed — show error with retry button, NEVER auto-close from init
+    _clog('INIT all health attempts exhausted — showing error overlay');
+    console.error('[GAME] All health attempts failed — showing error overlay (not auto-closing)');
+    hideLoading();
+    showError('\u26a0\ufe0f Servidor indispon\u00edvel. Tente novamente em alguns segundos.');
+    return false;
 }
 
 function _sendDataReconnect() {
