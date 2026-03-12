@@ -96,9 +96,13 @@ async function init() {
         Telegram.WebApp.expand();
         try { Telegram.WebApp.disableVerticalSwipes(); } catch (e) { /* older clients */ }
 
-        // Back button: notify server then close WebApp
+        // Back button: navigate back in-game; close WebApp only from hub
         Telegram.WebApp.BackButton.show();
-        Telegram.WebApp.BackButton.onClick(() => { _closeGameHub(); });
+        Telegram.WebApp.BackButton.onClick(() => {
+            const sid = S.currentScreen ? S.currentScreen.screen_id || '' : '';
+            if (sid === 'city.hub' || !sid) { _closeGameHub(); }
+            else { doAction('action_universal_back'); }
+        });
     } else {
         console.warn('[GAME] Telegram WebApp NOT detected - running outside Telegram?');
     }
@@ -111,8 +115,12 @@ async function init() {
     window.addEventListener('popstate', (e) => {
         // Re-push so the trap stays active for subsequent presses
         history.pushState({ screen: 'game' }, '');
-        // Close the WebApp (same as Telegram's header back button)
-        if (window.Telegram && Telegram.WebApp) { _closeGameHub(); }
+        // Navigate back in-game; close WebApp only from hub
+        if (window.Telegram && Telegram.WebApp) {
+            const sid = S.currentScreen ? S.currentScreen.screen_id || '' : '';
+            if (sid === 'city.hub' || !sid) { _closeGameHub(); }
+            else { doAction('action_universal_back'); }
+        }
     });
 
     // Visibility change — refresh state when returning to app
