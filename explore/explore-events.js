@@ -90,7 +90,6 @@ function showPOI(poi) {
     const overlay = document.getElementById('dm-overlay');
     overlay.setAttribute('data-biome', S.biome || 'forest');
     overlay.classList.remove('ambient-event');
-    _spawnBiomeParticles(overlay);
 
     document.getElementById('dm-icon').textContent = '';
     document.getElementById('dm-title').textContent = poi.title || 'Evento';
@@ -106,7 +105,9 @@ function showPOI(poi) {
     // Typewriter narration — after text finishes, show "Continuar" button before choices
     const narrEl = document.getElementById('dm-narration');
     narrEl.innerHTML = '<span class="cursor"></span>';
-    typewriter(narrEl, poi.narration || '', () => {
+    const ambientText = poi.narration || 'O vento sussurra entre as sombras enquanto você avança com cautela...';
+    if (!poi.narration) console.warn('[EXPLORE] Ambient event with empty narration, using fallback');
+    typewriter(narrEl, ambientText, () => {
         // Show continue button to let player absorb the narration
         const contBtn = document.createElement('button');
         contBtn.className = 'dm-continue-btn';
@@ -125,7 +126,6 @@ function showAmbientEvent(poi) {
     const overlay = document.getElementById('dm-overlay');
     overlay.setAttribute('data-biome', S.biome || 'forest');
     overlay.classList.add('ambient-event');
-    _spawnBiomeParticles(overlay);
 
     // Hide header for ambient events — pure atmosphere
     const header = overlay.querySelector('.dm-header');
@@ -152,39 +152,7 @@ function showAmbientEvent(poi) {
     });
 }
 
-// Biome-themed floating particles
-function _spawnBiomeParticles(overlay) {
-    let container = overlay.querySelector('.biome-particles');
-    if (!container) {
-        container = document.createElement('div');
-        container.className = 'biome-particles';
-        overlay.insertBefore(container, overlay.firstChild);
-    }
-    container.innerHTML = '';
-    const BIOME_PARTICLES = {
-        forest: ['🍃', '🌿', '✨'],
-        plains: ['🌾', '🦋', '🌸'],
-        swamp: ['💧', '🪲', '🌫️'],
-        cave: ['💎', '✨', '🕯️'],
-        desert: ['🏜️', '✨', '💨'],
-        mountain: ['🪨', '❄️', '🦅'],
-        snow: ['❄️', '🌨️', '✨'],
-        volcanic: ['🔥', '💥', '🌋'],
-        graveyard: ['💀', '🕯️', '🌫️'],
-    };
-    const emojis = BIOME_PARTICLES[S.biome] || BIOME_PARTICLES.forest;
-    for (let i = 0; i < 5; i++) {
-        const p = document.createElement('span');
-        p.className = 'biome-particle';
-        p.textContent = emojis[i % emojis.length];
-        p.style.left = (10 + Math.random() * 80) + '%';
-        p.style.top = (20 + Math.random() * 60) + '%';
-        p.style.fontSize = (12 + Math.random() * 8) + 'px';
-        p.style.animationDelay = (Math.random() * 4) + 's';
-        p.style.animationDuration = (5 + Math.random() * 3) + 's';
-        container.appendChild(p);
-    }
-}
+
 
 // --- Paginated Typewriter ---
 // Splits text on '|' delimiter into pages. If no delimiter, auto-splits
@@ -239,7 +207,6 @@ function showNPCDialogue(poi) {
     const overlay = document.getElementById('dm-overlay');
     overlay.setAttribute('data-biome', S.biome || 'forest');
     overlay.classList.remove('ambient-event');
-    _spawnBiomeParticles(overlay);
 
     // Show NPC name and title
     document.getElementById('dm-icon').textContent = '';
@@ -557,6 +524,14 @@ function _showCheckSkip(overlay, success, choice, poi) {
             skipBtn.onclick = finishCheck;
         }
     }, 1500);
+
+    // Safety timeout: auto-advance after 15s to prevent stuck screen
+    setTimeout(() => {
+        if (!_checkDone) {
+            console.warn('[EXPLORE] Check skip auto-advance (15s safety timeout)');
+            finishCheck();
+        }
+    }, 15000);
 }
 
 // Emoji fallback when THREE.js is unavailable
@@ -4284,7 +4259,7 @@ function checkTrapAtPosition(col, row) {
 /**
  * Show trap event with 10s reaction timer and DEX/CON/STR save.
  */
-function showTrapEvent(trap) {
+function _showBackendTrapEvent(trap) {
     const overlay = document.getElementById('dm-overlay');
     const narr = document.getElementById('dm-narration');
     const choices = document.getElementById('dm-choices');

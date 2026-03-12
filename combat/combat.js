@@ -270,7 +270,7 @@ if (isApiMode) {
     if (lo) { lo.classList.add('exit-cinematic'); setTimeout(function() { lo.classList.add('hidden'); }, 950); }
 }
 
-async function loadCombatState() {
+async function loadCombatState(retryCount = 0) {
     try {
         const state = await api.getState();
         if (state.error === 'no_combat' || state.phase === 'ended') { showCombatEnded(); return; }
@@ -280,6 +280,12 @@ async function loadCombatState() {
         startHeartbeat();
         if (window._combatLoadingCtrl) window._combatLoadingCtrl.hide();
     } catch (e) {
+        // Retry once after 1.5s — session may not be ready yet
+        if (retryCount < 2) {
+            console.warn('[COMBAT] Load failed, retrying in 1.5s... (attempt ' + (retryCount + 1) + ')');
+            await new Promise(r => setTimeout(r, 1500));
+            return loadCombatState(retryCount + 1);
+        }
         console.error('[COMBAT]', 'Erro ao carregar', e);
         // Distinguish "server down" from "session invalid" via health check
         const health = await api.checkHealth();

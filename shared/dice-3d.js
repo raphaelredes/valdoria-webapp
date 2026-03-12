@@ -18,6 +18,12 @@
 const Dice3D = (() => {
     'use strict';
 
+    // Guard: THREE.js must be loaded before Dice3D can work
+    if (typeof THREE === 'undefined') {
+        console.warn('[DICE3D] THREE.js not loaded — Dice3D disabled (fallback to emoji)');
+        return null;
+    }
+
     const EDGE_COLOR = 0xc4953a;
     const V_GOLD_HEX = '#c4953a';
     const V_SUCCESS_HEX = '#4caf50';

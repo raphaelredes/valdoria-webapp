@@ -1007,7 +1007,7 @@ function onMoveComplete(col, row) {
         if (typeof checkTrapAtPosition === 'function') {
             const trap = checkTrapAtPosition(col, row);
             if (trap) {
-                showTrapEvent(trap);
+                _showBackendTrapEvent(trap);
                 saveState();
                 return;
             }
@@ -2038,7 +2038,7 @@ function _drawMoveCostIndicators(timestamp) {
 
         _ctx.save();
         _ctx.globalAlpha = 0.7;
-        const label = effectiveCost > 1 ? (effectiveCost + '') : '';
+        const label = effectiveCost > 1 ? ('×' + effectiveCost) : '';
         if (label) {
             // Difficult terrain indicator
             _ctx.font = '9px MedievalSharp, serif';

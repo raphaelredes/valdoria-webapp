@@ -617,33 +617,32 @@ function _buildBodySilhouette(eq) {
     // Center body silhouette
     html += `<div class="body-center">
         <svg class="body-svg" viewBox="0 0 80 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Head -->
-            <circle cx="40" cy="18" r="12" fill="rgba(255,255,255,0.04)" stroke="rgba(196,149,58,0.2)" stroke-width="1"/>
-            <!-- Neck -->
-            <line x1="40" y1="30" x2="40" y2="38" stroke="rgba(196,149,58,0.15)" stroke-width="1"/>
-            <!-- Torso -->
-            <path d="M24 38 H56 L58 90 H22 Z" fill="rgba(255,255,255,0.03)" stroke="rgba(196,149,58,0.2)" stroke-width="1" stroke-linejoin="round"/>
-            <!-- Belt area -->
-            <rect x="22" y="86" width="36" height="6" rx="1" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
-            <!-- Left Arm -->
-            <path d="M24 40 L12 58 L8 80" stroke="rgba(196,149,58,0.2)" stroke-width="1" fill="none" stroke-linecap="round"/>
-            <!-- Right Arm -->
-            <path d="M56 40 L68 58 L72 80" stroke="rgba(196,149,58,0.2)" stroke-width="1" fill="none" stroke-linecap="round"/>
-            <!-- Left Hand -->
-            <circle cx="8" cy="82" r="4" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
-            <!-- Right Hand -->
-            <circle cx="72" cy="82" r="4" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
-            <!-- Left Leg -->
-            <path d="M30 92 L28 130 L26 160" stroke="rgba(196,149,58,0.2)" stroke-width="1" fill="none"/>
-            <!-- Right Leg -->
-            <path d="M50 92 L52 130 L54 160" stroke="rgba(196,149,58,0.2)" stroke-width="1" fill="none"/>
-            <!-- Left Foot -->
-            <path d="M26 160 L20 168 L30 168 Z" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
-            <!-- Right Foot -->
-            <path d="M54 160 L50 168 L60 168 Z" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
-            <!-- Shoulder pads -->
-            <ellipse cx="22" cy="40" rx="6" ry="4" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
-            <ellipse cx="58" cy="40" rx="6" ry="4" fill="rgba(255,255,255,0.02)" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
+            <!-- Outer glow -->
+            <defs>
+                <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <g filter="url(#glow)" opacity="0.85">
+                <!-- Head -->
+                <circle cx="40" cy="16" r="10" stroke="rgba(196,149,58,0.35)" stroke-width="1.2" fill="rgba(196,149,58,0.04)"/>
+                <!-- Neck -->
+                <line x1="40" y1="26" x2="40" y2="34" stroke="rgba(196,149,58,0.25)" stroke-width="1"/>
+                <!-- Shoulders + Torso outline -->
+                <path d="M18 38 Q22 34 40 34 Q58 34 62 38 L60 56 L56 88 L50 92 L30 92 L24 88 L20 56 Z"
+                      stroke="rgba(196,149,58,0.3)" stroke-width="1.2" fill="rgba(196,149,58,0.03)" stroke-linejoin="round"/>
+                <!-- Belt -->
+                <line x1="26" y1="86" x2="54" y2="86" stroke="rgba(196,149,58,0.2)" stroke-width="1"/>
+                <!-- Left Arm -->
+                <path d="M20 40 Q14 55 10 72 Q8 78 12 82" stroke="rgba(196,149,58,0.25)" stroke-width="1" fill="none" stroke-linecap="round"/>
+                <!-- Right Arm -->
+                <path d="M60 40 Q66 55 70 72 Q72 78 68 82" stroke="rgba(196,149,58,0.25)" stroke-width="1" fill="none" stroke-linecap="round"/>
+                <!-- Left Leg -->
+                <path d="M32 92 Q30 120 28 148 Q27 156 24 164" stroke="rgba(196,149,58,0.25)" stroke-width="1" fill="none"/>
+                <!-- Right Leg -->
+                <path d="M48 92 Q50 120 52 148 Q53 156 56 164" stroke="rgba(196,149,58,0.25)" stroke-width="1" fill="none"/>
+                <!-- Feet -->
+                <path d="M24 164 Q20 168 18 168 L30 168" stroke="rgba(196,149,58,0.2)" stroke-width="0.8" fill="none"/>
+                <path d="M56 164 Q60 168 62 168 L50 168" stroke="rgba(196,149,58,0.2)" stroke-width="0.8" fill="none"/>
+            </g>
         </svg>
     </div>`;
 
@@ -2754,16 +2753,21 @@ function navBack() {
 
 function navCharSheet() {
     haptic('light');
-    if (!_apiBase || !_apiToken) {
-        try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
-        return;
-    }
     // Auto-save pending ops before navigating
     if (pendingOps.length > 0) {
         sendOps();
         return;
     }
-    _transitionTo('game', { action: 'action_status' });
+    if (_apiBase && _apiToken) {
+        _transitionTo('game', { action: 'action_status' });
+    } else {
+        // Fallback: send data to bot and close
+        const tg = window.Telegram?.WebApp;
+        if (tg?.sendData) {
+            try { tg.sendData(JSON.stringify({ action: 'action_status' })); } catch (e) { console.warn('[INVENTORY] sendData:', e); }
+        }
+        try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
+    }
 }
 
 function navMenu() {
