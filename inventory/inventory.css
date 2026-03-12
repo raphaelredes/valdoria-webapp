@@ -47,6 +47,8 @@ body { padding-bottom: 110px; }
     font-size: 13px; border: 1px solid var(--v-border);
     background: var(--v-bg-card); color: var(--v-text-dim);
     cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    min-height: 40px; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; text-overflow: ellipsis;
 }
 .tab.active {
     background: var(--v-gold-dim); color: #fff;
@@ -100,7 +102,7 @@ body { padding-bottom: 110px; }
 .filters::-webkit-scrollbar { display: none; }
 .filter-btn {
     flex-shrink: 0; padding: 6px 12px;
-    min-height: 36px;
+    min-height: 40px;
     border-radius: var(--v-radius-pill);
     font-size: 13px; border: 1px solid var(--v-border);
     background: var(--v-bg-card); color: var(--v-text-dim);
