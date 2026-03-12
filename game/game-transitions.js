@@ -183,15 +183,25 @@ async function requestTransition(toApp, payload = {}) {
             if (resp.status === 401 || resp.status === 403) {
                 S.transitioning = false;
                 console.error('[GAME] Transition auth error:', resp.status);
+                const tg = window.Telegram?.WebApp;
+                const doClose = () => { if (tg?.close) tg.close(); else window.close(); };
+                // Try API close first (reliable from any context)
+                if (S.apiBase && S.token && S.uid) {
+                    fetch(S.apiBase + '/api/game/close', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: S.token, user_id: S.uid }),
+                    }).then(() => doClose())
+                      .catch(() => {
+                        try { if (tg?.sendData) tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'GAME' })); } catch (_) {}
+                        setTimeout(doClose, 1000);
+                    });
+                    return;
+                }
                 try {
-                    const tg = window.Telegram?.WebApp;
                     if (tg?.sendData) {
-                        tg.sendData(JSON.stringify({
-                            action: 'webapp_error_close', webapp: 'GAME',
-                            reason: resp.status === 401 ? 'session_expired' : 'invalid_init_data',
-                        }));
-                        // Safety net: close after delay (sendData may not close from inline buttons)
-                        setTimeout(function () { if (tg.close) tg.close(); }, 1000);
+                        tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'GAME' }));
+                        setTimeout(doClose, 1000);
                         return;
                     }
                 } catch (_) {}

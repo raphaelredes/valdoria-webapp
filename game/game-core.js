@@ -351,17 +351,37 @@ async function _waitForHealthy() {
 function _sendDataReconnect() {
     _clog('sendData reconnect — bot will send fresh menu');
     const tg = window.Telegram && window.Telegram.WebApp;
+    const doClose = () => { if (tg && tg.close) tg.close(); else window.close(); };
+
+    // Try fetch /api/game/close first (reliable from any context)
+    if (S.apiBase && S.token && S.uid) {
+        fetch(S.apiBase + '/api/game/close', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: S.token, user_id: S.uid }),
+        }).then(() => { _clog('Close via API OK'); doClose(); })
+          .catch(() => {
+            _clog('Close via API failed, using sendData');
+            _sendDataFallback(tg, 'webapp_reconnect');
+            setTimeout(doClose, 1000);
+        });
+        return false;
+    }
     if (tg && tg.sendData) {
-        try {
-            tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'GAME' }));
-        } catch (e) { _clog('sendData failed: ' + e.message); }
-        // Safety net: close after delay (sendData may not close from inline buttons)
-        setTimeout(function () { if (tg.close) tg.close(); }, 1000);
+        _sendDataFallback(tg, 'webapp_reconnect');
+        setTimeout(doClose, 1000);
         return false;
     }
     hideLoading();
     showError('⚠️ Servidor indisponível. Feche e tente novamente.');
     return false;
+}
+
+function _sendDataFallback(tg, action) {
+    if (tg && tg.sendData) {
+        try { tg.sendData(JSON.stringify({ action, webapp: 'GAME' })); }
+        catch (e) { _clog('sendData failed: ' + e.message); }
+    }
 }
 
 // ─── API Methods ───
@@ -414,23 +434,26 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
 
             if (resp.status === 401 || resp.status === 403) {
                 const reason = resp.status === 401 ? 'session_expired' : 'invalid_init_data';
-                _clog(`API ${endpoint} → ${resp.status} ${reason.toUpperCase()}`);
+                _clog(`API ${endpoint} \u2192 ${resp.status} ${reason.toUpperCase()}`);
                 console.error('[GAME]', reason, `(${resp.status}) for`, endpoint);
-                // Auto-close and notify bot to show menu
+                // Close via API (reliable) then close WebApp
                 const tg = window.Telegram && Telegram.WebApp;
-                if (tg && tg.sendData) {
-                    try {
-                        tg.sendData(JSON.stringify({
-                            action: 'webapp_error_close',
-                            webapp: 'GAME',
-                            reason,
-                        }));
-                    } catch (e) { console.warn('[GAME] sendData failed on ' + resp.status + ':', e); }
-                    // Safety net: close after delay (sendData may not close from inline buttons)
-                    setTimeout(function () { if (tg.close) tg.close(); }, 1000);
+                const doClose = () => { if (tg && tg.close) tg.close(); else window.close(); };
+                if (S.apiBase && S.token && S.uid) {
+                    fetch(S.apiBase + '/api/game/close', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: S.token, user_id: S.uid }),
+                    }).then(() => doClose())
+                      .catch(() => { _sendDataFallback(tg, 'webapp_error_close'); setTimeout(doClose, 1000); });
                     return null;
                 }
-                showError('\ud83d\udd10 Sessão expirada. Feche e selecione seu personagem novamente.');
+                if (tg && tg.sendData) {
+                    _sendDataFallback(tg, 'webapp_error_close');
+                    setTimeout(doClose, 1000);
+                    return null;
+                }
+                showError('\ud83d\udd10 Sess\u00e3o expirada. Feche e selecione seu personagem novamente.');
                 return null;
             }
 
