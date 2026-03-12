@@ -176,8 +176,12 @@ var ValdoriaErrors = (function () {
         // Actionable hint
         var hintEl = _els.hint;
         if (hintEl) {
-            if (msg.indexOf('Sem conexão') >= 0 || msg.indexOf('internet') >= 0)
-                hintEl.textContent = 'Verifique se o Wi-Fi ou dados móveis estão ativos.';
+            if (msg.indexOf('Sem conexão') >= 0 || msg.indexOf('internet') >= 0) {
+                if (navigator.onLine)
+                    hintEl.textContent = 'Sua internet parece normal. O servidor pode estar temporariamente indisponível.';
+                else
+                    hintEl.textContent = 'Verifique se o Wi-Fi ou dados móveis estão ativos.';
+            }
             else if (msg.indexOf('não respondeu') >= 0 || msg.indexOf('demorou') >= 0)
                 hintEl.textContent = 'O servidor pode estar sobrecarregado. Tentaremos reconectar automaticamente.';
             else if (msg.indexOf('indisponível') >= 0)
@@ -329,20 +333,22 @@ var ValdoriaErrors = (function () {
         _clog('AUTO-RECONNECT: all ' + _RETRY_MAX + ' retries exhausted');
 
         // Try to auto-reconnect via sendData — bot will send a fresh menu
-        // with the correct tunnel URL. This closes the WebApp automatically.
+        // with the correct tunnel URL.
         var tg = window.Telegram && window.Telegram.WebApp;
         if (tg && tg.sendData) {
             _clog('AUTO-RECONNECT: sending webapp_reconnect via sendData');
             if (_els.msg) _els.msg.textContent = 'Reconectando ao servidor...';
             if (_els.hint) _els.hint.textContent = 'Abrindo menu do jogo automaticamente.';
 
-            // Instant sendData — closes WebApp immediately, bot sends fresh menu
             try {
                 tg.sendData(JSON.stringify({
                     action: 'webapp_reconnect',
                     webapp: _cfg.appName,
                 }));
-                // sendData closes the WebApp automatically
+                // sendData may not close from InlineKeyboardButton — close as safety net
+                setTimeout(function () {
+                    if (tg && tg.close) tg.close();
+                }, 300);
                 return;
             } catch (e) {
                 _clog('AUTO-RECONNECT: sendData failed: ' + e.message);
@@ -585,24 +591,27 @@ var ValdoriaErrors = (function () {
     // ─── Send Close & Return (notify bot to show menu) ───
     function _sendCloseAndReturn() {
         var tg = window.Telegram && window.Telegram.WebApp;
+        // Try sendData first (works from reply keyboard WebApps)
         if (tg && tg.sendData) {
             try {
                 tg.sendData(JSON.stringify({
                     action: 'webapp_error_close',
                     webapp: _cfg.appName,
                 }));
-                // sendData() automatically closes the WebApp
-                return;
+                // sendData may auto-close — but from InlineKeyboardButton it won't,
+                // so schedule tg.close() as safety net
             } catch (e) {
-                _clog('sendData fallback to close: ' + e.message);
+                _clog('sendData failed: ' + e.message);
             }
         }
-        // Fallback: just close
-        if (tg && tg.close) {
-            tg.close();
-        } else {
-            window.close();
-        }
+        // Always close the WebApp (sendData alone doesn't close from inline buttons)
+        setTimeout(function () {
+            if (tg && tg.close) {
+                tg.close();
+            } else {
+                window.close();
+            }
+        }, 300);
     }
 
     // ─── Hide Error ───
