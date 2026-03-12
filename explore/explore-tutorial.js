@@ -33,9 +33,30 @@ function shouldShowTutorial() {
     catch(e) { return false; }
 }
 
+/** Check server-side flag from payload data (called after map loads). */
+function checkServerTutorialFlag(playerData) {
+    if (playerData && playerData.ts) {
+        // Server says tutorial already seen — sync to localStorage
+        try { localStorage.setItem(TUTORIAL_STORAGE_KEY, '1'); } catch(e) {}
+    }
+}
+
 function markTutorialSeen() {
     try { localStorage.setItem(TUTORIAL_STORAGE_KEY, '1'); }
     catch(e) {}
+    // Notify server (fire-and-forget)
+    _notifyServerTutorialSeen();
+}
+
+function _notifyServerTutorialSeen() {
+    try {
+        if (typeof S === 'undefined' || !S.apiBase || !S.uid || !S.token) return;
+        fetch(S.apiBase + '/api/explore/tutorial-seen?user_id=' + S.uid, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
+            body: '{}'
+        }).catch(function() {});
+    } catch(e) {}
 }
 
 function _buildTutorialDOM() {

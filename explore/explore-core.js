@@ -448,6 +448,9 @@ function loadMapData(data) {
         }
     }
 
+    // Sync tutorial-seen flag from server (survives localStorage clear)
+    if (typeof checkServerTutorialFlag === 'function') checkServerTutorialFlag(S.charData);
+
     // Auto-show tutorial on first visit (polls for loading to finish)
     if (typeof autoShowTutorial === 'function') autoShowTutorial();
 }
