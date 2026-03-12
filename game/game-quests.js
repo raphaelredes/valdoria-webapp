@@ -397,7 +397,7 @@ function renderQuestTurnin(container, data) {
             qItem.style.animationDelay = (i * 0.15) + 's';
             qItem.innerHTML = '\u2705 <b>' + _escQ(data.quests[i].title) + '</b>';
             if (data.quests[i].narrative) {
-                qItem.innerHTML += '<div class="quest-turnin-narrative">' + _escQ(data.quests[i].narrative) + '</div>';
+                qItem.innerHTML += '<div class="quest-turnin-narrative">' + _safeQ(data.quests[i].narrative) + '</div>';
             }
             qList.appendChild(qItem);
         }
@@ -540,4 +540,13 @@ function renderQuestTracker(container, data) {
 function _escQ(text) {
     if (!text) return '';
     return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Escape HTML but allow <b>, </b>, <i>, </i> tags */
+function _safeQ(text) {
+    if (!text) return '';
+    var s = _escQ(text);
+    s = s.replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>');
+    s = s.replace(/&lt;i&gt;/g, '<i>').replace(/&lt;\/i&gt;/g, '</i>');
+    return s;
 }
