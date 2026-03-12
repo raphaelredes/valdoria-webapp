@@ -1025,6 +1025,11 @@
         const _urlToken = _urlParams.get('token') || '';
         const _urlUid = _urlParams.get('uid') || '';
 
+        // Update error reporter with API info (init was early, before URL params)
+        if (window.ValdoriaErrors && _urlApi && ValdoriaErrors.updateConfig) {
+            ValdoriaErrors.updateConfig({ apiBase: _urlApi, token: _urlToken, uid: _urlUid });
+        }
+
         // Tag display names
         const TAG_LABELS = {
             weapon: 'Armas', simple_weapon: 'Armas Simples', martial_weapon: 'Armas Marciais',

@@ -677,9 +677,17 @@ var ValdoriaErrors = (function () {
         _clog('API_BASE updated to: ' + _cfg.apiBase);
     }
 
+    // Update config after init (e.g., when URL params become available later)
+    function updateConfig(cfg) {
+        if (cfg.apiBase) _cfg.apiBase = (cfg.apiBase || '').replace(/\/$/, '');
+        if (cfg.token) _cfg.token = cfg.token;
+        if (cfg.uid) _cfg.uid = cfg.uid;
+    }
+
     return {
         init: init,
         updateApiBase: updateApiBase,
+        updateConfig: updateConfig,
         showError: showError,
         showToast: showToast,
         hideError: hideError,

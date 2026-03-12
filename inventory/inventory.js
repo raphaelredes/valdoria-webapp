@@ -2199,6 +2199,11 @@ const _apiToken = _urlParams.get('token') || '';
 const _apiUid = _urlParams.get('uid') || '';
 const _returnTo = _urlParams.get('return') || '';  // 'game', 'explore', 'combat' or empty (close)
 
+// Update error reporter with API info (init was early, before URL params)
+if (window.ValdoriaErrors && _apiBase && ValdoriaErrors.updateConfig) {
+    ValdoriaErrors.updateConfig({ apiBase: _apiBase, token: _apiToken, uid: _apiUid });
+}
+
 // Periodic tunnel URL discovery
 if (_apiBase && window.ApiDiscovery) {
     ApiDiscovery.init(_apiBase, function(newUrl) { _apiBase = newUrl; });
