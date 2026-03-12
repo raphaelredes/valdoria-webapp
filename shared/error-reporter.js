@@ -194,13 +194,25 @@ var ValdoriaErrors = (function () {
             else if (msg.indexOf('não respondeu') >= 0 || msg.indexOf('demorou') >= 0)
                 hintEl.textContent = 'O servidor pode estar sobrecarregado. Tentaremos reconectar automaticamente.';
             else if (msg.indexOf('indisponível') >= 0) {
-                // Calculate total ETA for all remaining retries (exponential backoff)
-                var _etaTotal = 0;
-                for (var _r = _retryAttempt; _r < _RETRY_MAX; _r++) {
-                    _etaTotal += Math.min(_RETRY_BASE * Math.pow(2, _r), _RETRY_CAP);
+                // Smart ETA based on error context + backend tunnel reconnection timings
+                // Backend: tunnel restart = 30-60s, rate-limited = 2-4min, server restart = 10-30s
+                // Frontend: 3 retries (2+4+8=14s), then auto-reconnect via sendData
+                var etaFriendly;
+                if (_retryAttempt === 0) {
+                    // First error — tunnel likely restarting (~30-60s)
+                    etaFriendly = 'menos de 1 minuto';
+                } else if (_retryAttempt < _RETRY_MAX) {
+                    // Mid-retry — tunnel still reconnecting, frontend will keep trying
+                    var secsLeft = 0;
+                    for (var _r = _retryAttempt; _r < _RETRY_MAX; _r++) {
+                        secsLeft += Math.min(_RETRY_BASE * Math.pow(2, _r), _RETRY_CAP);
+                    }
+                    etaFriendly = secsLeft > 10 ? 'menos de 1 minuto' : 'alguns segundos';
+                } else {
+                    // All retries exhausted — backend may be rate-limited
+                    etaFriendly = '1 a 2 minutos';
                 }
-                var etaText = _etaTotal > 0 ? ' (estimativa: ~' + Math.round(_etaTotal) + 's)' : '';
-                hintEl.textContent = 'Estamos reconectando automaticamente' + etaText + '. Se persistir, feche este mini app e toque em "Retomar Jornada" novamente.';
+                hintEl.textContent = 'O servidor est\u00e1 reconectando (estimativa: ' + etaFriendly + '). Se persistir, feche e toque em \u201cRetomar Jornada\u201d novamente.';
             }
             else if (msg.indexOf('expirada') >= 0 || msg.indexOf('Sessão') >= 0)
                 hintEl.textContent = 'Feche o mini app e selecione seu personagem novamente.';
