@@ -2243,7 +2243,7 @@ async function _performExit() {
     // Show loading overlay so user knows transition is happening
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) {
-        overlay.querySelector('.loading-text').textContent = 'Saindo...';
+        const _lt = overlay.querySelector('.loading-text'); if (_lt) _lt.textContent = 'Saindo...';
         overlay.classList.remove('hidden');
     }
 
@@ -2294,7 +2294,7 @@ function sendOps() {
 
     closeModal();
     const overlay = document.getElementById('loadingOverlay');
-    overlay.querySelector('.loading-text').textContent = 'Aplicando alterações...';
+    const _lt = overlay.querySelector('.loading-text'); if (_lt) _lt.textContent = 'Aplicando alterações...';
     overlay.classList.remove('hidden');
 
     if (_apiBase) {
@@ -2344,7 +2344,7 @@ async function _sendViaAPI(overlay) {
         if (resp.ok && result.ok) {
             pendingOps = [];
             // Keep overlay active for seamless transition
-            overlay.querySelector('.loading-text').textContent = 'Voltando...';
+            const _lt = overlay.querySelector('.loading-text'); if (_lt) _lt.textContent = 'Voltando...';
             if (result.summary) toast(result.summary, 'ok');
             else toast(`${vi('check', 13)} Alterações salvas!`, 'ok');
             updateBottomBar();
@@ -2784,7 +2784,7 @@ function navMenu() {
 async function _transitionTo(target, payload = {}) {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) {
-        overlay.querySelector('.loading-text').textContent = 'Navegando...';
+        const _lt = overlay.querySelector('.loading-text'); if (_lt) _lt.textContent = 'Navegando...';
         overlay.classList.remove('hidden');
     }
     if (_apiBase) {
