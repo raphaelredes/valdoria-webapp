@@ -1740,15 +1740,16 @@
                     closeSubScreen(openSub.id);
                     return;
                 }
-                if (currentScreen > 0) goScreen(currentScreen - 1);
+                if (currentScreen > 0) { goScreen(currentScreen - 1); return; }
+                // Screen 0 — close WebApp
+                try { tg.close(); } catch (e) { console.warn('[CREATOR] close failed:', e); }
             });
         }
 
         function updateBackButton() {
             if (!tg || !tg.BackButton) return;
             const hasOpenSub = document.querySelector('.sub-screen.active');
-            if (currentScreen > 0 || hasOpenSub) tg.BackButton.show();
-            else tg.BackButton.hide();
+            tg.BackButton.show(); // Always visible — closes WebApp from screen 0
         }
 
         // ═══════════════════════════════════════════════

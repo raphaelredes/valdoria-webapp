@@ -1191,7 +1191,9 @@
         }
 
         function goBack() {
-            if (cur > 0) goTo(cur - 1);
+            if (cur > 0) { goTo(cur - 1); return; }
+            // Screen 0 — close WebApp
+            try { tg.close(); } catch (e) { console.warn('[LEVELUP] close failed:', e); }
         }
 
         function updateNavBtn() {
@@ -1205,7 +1207,7 @@
             }
             if (tg && tg.BackButton) {
                 const hasOpenSub = document.querySelector('.sub-screen.active');
-                if (cur > 0 || hasOpenSub) { tg.BackButton.show(); } else { tg.BackButton.hide(); }
+                tg.BackButton.show(); // Always visible — closes WebApp from screen 0
             }
         }
 
