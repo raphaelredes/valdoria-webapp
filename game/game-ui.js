@@ -452,7 +452,7 @@ const _LOC_TRANSITIONS = {
 // Callbacks that should NOT trigger location transition (UI panels, not travel)
 const _NO_TRANSITION = /^(inv|char|status|help|settings|quest_view|action_universal_back|menu|equip|unequip|use_|sell_|buy_|deposit|withdraw|donate|skill_|feat_|spell_|npc_talk|dialogue|gossip|quest_accept|quest_deliver|shop_|inn_pay_)/;
 
-const LOC_TRANSITION_MS = 2000;
+const LOC_TRANSITION_MS = 1500;
 let _locTransitionActive = false;
 
 function _detectLocationTransition(cb) {

@@ -65,7 +65,7 @@ const TIMING = {
     CINEMATIC_MAX: 20000,     // Force-reset cinematic after this timeout (ms)
     POLL_ACTIVE: 2000,        // Poll interval during active combat (ms)
     POLL_ENEMY: 3000,         // Poll interval during enemy turn (ms)
-    POLL_IDLE: 8000,          // Poll interval during idle phases (ms)
+    POLL_IDLE: 5000,          // Poll interval during idle phases (ms)
 };
 
 // ─── SHAKE HELPER — shake-light or shake-heavy on #app ───
