@@ -265,6 +265,24 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     letter-spacing: 2px;
 }
 
+
+/* ─── Swipe-back edge hint (subtle left border glow on first visit) ─── */
+.swipe-edge-hint {
+    position: fixed;
+    left: 0;
+    top: 30%;
+    bottom: 30%;
+    width: 3px;
+    background: linear-gradient(to bottom, transparent, rgba(196,149,58,0.3), transparent);
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    animation: swipeHintPulse 2s ease-in-out 1s 2 both;
+}
+@keyframes swipeHintPulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
 /* ─── Loading Overlay (Magic Summoning Circle) ─── */
 .loading-overlay {
     position: fixed;

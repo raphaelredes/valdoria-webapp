@@ -213,6 +213,7 @@ function renderScreen(screen) {
         updateImmersiveEligibility(screen);
     }
     if (typeof showImmersiveTooltip === 'function') showImmersiveTooltip();
+    if (typeof showSwipeBackHint === 'function') showSwipeBackHint();
     if (typeof _focusFirstAction === 'function') _focusFirstAction();
     if (typeof _trackRender === 'function') _trackRender();
 }

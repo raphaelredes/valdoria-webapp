@@ -728,3 +728,48 @@ function showImmersiveTooltip() {
         localStorage.setItem('valdoria_immersive_tip', '1');
     }, 4000);
 }
+
+// ─── Swipe-Right to Go Back (mobile gesture) ───
+(function initSwipeBack() {
+    let _swStartX = 0, _swStartY = 0, _swActive = false;
+    const MIN_DX = 70;     // minimum horizontal distance (px)
+    const MAX_DY_RATIO = 0.5; // max vertical/horizontal ratio (prevents diagonal)
+    const EDGE_ZONE = 60;  // only trigger from left edge (px)
+
+    document.addEventListener('touchstart', function(e) {
+        if (S.transitioning) return;
+        const t = e.touches[0];
+        // Only start from left edge to avoid interfering with scrolling
+        if (t.clientX > EDGE_ZONE) return;
+        _swStartX = t.clientX;
+        _swStartY = t.clientY;
+        _swActive = true;
+    }, { passive: true });
+
+    document.addEventListener('touchend', function(e) {
+        if (!_swActive) return;
+        _swActive = false;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - _swStartX;
+        const dy = Math.abs(t.clientY - _swStartY);
+        // Must swipe right with enough distance and mostly horizontal
+        if (dx >= MIN_DX && dy / dx < MAX_DY_RATIO) {
+            // Find the back button in current screen
+            if (typeof doAction === 'function') {
+                haptic('light');
+                doAction('action_universal_back');
+            }
+        }
+    }, { passive: true });
+})();
+// ─── Swipe-back hint (show gold edge glow on first visit) ───
+function showSwipeBackHint() {
+    if (localStorage.getItem('valdoria_swipe_hint')) return;
+    var hint = document.createElement('div');
+    hint.className = 'swipe-edge-hint';
+    document.body.appendChild(hint);
+    setTimeout(function() {
+        if (hint.parentElement) hint.parentElement.removeChild(hint);
+        localStorage.setItem('valdoria_swipe_hint', '1');
+    }, 6000);
+}
