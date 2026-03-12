@@ -348,7 +348,7 @@ var ValdoriaErrors = (function () {
                 // sendData may not close from InlineKeyboardButton — close as safety net
                 setTimeout(function () {
                     if (tg && tg.close) tg.close();
-                }, 300);
+                }, 1000);
                 return;
             } catch (e) {
                 _clog('AUTO-RECONNECT: sendData failed: ' + e.message);
@@ -364,7 +364,7 @@ var ValdoriaErrors = (function () {
 
     function _startBgHealthFallback() {
         if (_els.msg) _els.msg.textContent = 'Servidor indisponível. Aguardando retorno...';
-        if (_els.hint) _els.hint.textContent = 'Verificando automaticamente a cada 15 segundos.';
+        if (_els.hint) _els.hint.textContent = 'Reconecte agora ou aguarde a tentativa autom\u00e1tica a cada 15 segundos.';
 
         // Show manual reconnect button
         var retryBtn = _els.retry;
@@ -402,7 +402,8 @@ var ValdoriaErrors = (function () {
             }
 
             var remaining = _BG_HEALTH_MAX_POLLS - _bgHealthCount;
-            if (_els.hint) _els.hint.textContent = 'Verificando... (' + remaining + ' tentativas restantes)';
+            var minutesLeft = Math.ceil((remaining * _BG_HEALTH_INTERVAL) / 60000);
+            if (_els.hint) _els.hint.textContent = 'Verificando automaticamente... (~' + minutesLeft + ' min restantes)';
 
             var url = _cfg.apiBase + '/api/game/health';
             fetch(url, { method: 'GET' }).then(function (resp) {
@@ -611,7 +612,7 @@ var ValdoriaErrors = (function () {
             } else {
                 window.close();
             }
-        }, 300);
+        }, 1000);
     }
 
     // ─── Hide Error ───

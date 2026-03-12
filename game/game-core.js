@@ -414,18 +414,21 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                 const reason = resp.status === 401 ? 'session_expired' : 'invalid_init_data';
                 _clog(`API ${endpoint} → ${resp.status} ${reason.toUpperCase()}`);
                 console.error('[GAME]', reason, `(${resp.status}) for`, endpoint);
-                // Auto-close and notify bot to show menu (user doesn't need to do anything)
-                try {
-                    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.sendData) {
-                        Telegram.WebApp.sendData(JSON.stringify({
+                // Auto-close and notify bot to show menu
+                const tg = window.Telegram && Telegram.WebApp;
+                if (tg && tg.sendData) {
+                    try {
+                        tg.sendData(JSON.stringify({
                             action: 'webapp_error_close',
                             webapp: 'GAME',
                             reason,
                         }));
-                        return null; // sendData auto-closes
-                    }
-                } catch (e) { console.warn('[GAME] sendData failed on ' + resp.status + ':', e); }
-                showError('🔐 Sessão expirada. Feche e selecione seu personagem novamente.');
+                    } catch (e) { console.warn('[GAME] sendData failed on ' + resp.status + ':', e); }
+                    // Safety net: close after delay (sendData may not close from inline buttons)
+                    setTimeout(function () { if (tg.close) tg.close(); }, 1000);
+                    return null;
+                }
+                showError('\ud83d\udd10 Sessão expirada. Feche e selecione seu personagem novamente.');
                 return null;
             }
 
@@ -494,8 +497,12 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                     showToast('Reconectando...');
                 }
                 showError(isTimeout
-                    ? 'Servidor não respondeu a tempo. Tente novamente.'
-                    : 'Sem conexão. Verifique sua internet.');
+                    ? (navigator.onLine
+                        ? 'O servidor demorou demais para responder. Pode estar sobrecarregado.'
+                        : 'Sem conexão com a internet. Verifique seu Wi-Fi ou dados móveis.')
+                    : (navigator.onLine
+                        ? 'Não foi possível conectar. Verifique sua internet e tente novamente.'
+                        : 'Sem conexão. Verifique sua internet.'));
                 return null;
             }
             // Exponential backoff with jitter
