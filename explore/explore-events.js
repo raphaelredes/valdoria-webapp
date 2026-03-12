@@ -1149,9 +1149,9 @@ function showRandomEncounter(enc) {
                 overlay.classList.remove('active');
                 logMoveEvent([{ type: 'encounter', enc_type: enc.type, choice: idx }]);
 
-                const encPoi = { id: -1, choices: [], combat: enc.combat || null, type: 'enc' };
+                const encPoi = { id: -1, choices: [], combat: enc.cb || null, type: 'enc' };
 
-                if (ch.cmb_direct && enc.combat) {
+                if (ch.cmb_direct && enc.cb) {
                     // Direct combat — skip stat check entirely
                     triggerCombat(encPoi);
                 } else if (ch.k) {
