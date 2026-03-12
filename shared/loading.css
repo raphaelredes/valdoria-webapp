@@ -173,7 +173,7 @@
     width: 260px;
     height: 260px;
     margin-bottom: 14px;
-    animation: circleEntrance 2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: circleEntrance 2s var(--v-ease-snap) both;
     contain: layout style;
 }
 @keyframes circleEntrance {
@@ -264,7 +264,7 @@
     transform: translate(-50%, -50%);
     width: 28px; height: 28px;
     z-index: 2;
-    animation: gemEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both;
+    animation: gemEntrance 1.2s var(--v-ease-snap) 0.8s both;
 }
 .mc-gem-core {
     position: absolute; inset: 0;
@@ -337,7 +337,7 @@
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255,224,128,0.6) 0%, rgba(196,149,58,0.3) 40%, transparent 70%);
     pointer-events: none;
-    animation: gemBurst 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: gemBurst 0.6s var(--v-ease-snap) forwards;
 }
 @keyframes gemBurst {
     0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
@@ -418,7 +418,7 @@
     opacity: 0; pointer-events: none;
 }
 .mc-completion-wave.active {
-    animation: completionWave 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: completionWave 0.8s var(--v-ease-snap) forwards;
 }
 .mc-completion-wave.wave-2 {
     border-color: rgba(196,149,58,0.5);

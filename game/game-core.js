@@ -782,21 +782,11 @@ function loadCachedScreen() {
 
 // ─── Helpers ───
 function haptic(style) {
-    try {
-        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
-            if (style === 'warning') {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
-            } else if (style === 'success') {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-            } else if (style === 'error') {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            } else {
-                Telegram.WebApp.HapticFeedback.impactOccurred(style || 'light');
-            }
-        } else if (navigator.vibrate) {
-            navigator.vibrate(style === 'heavy' ? 30 : 15);
-        }
-    } catch (e) { /* haptic not available */ }
+    if (\!window.vHaptic) return;
+    if (style === 'warning') vHaptic.warning();
+    else if (style === 'success') vHaptic.success();
+    else if (style === 'error') vHaptic.error();
+    else vHaptic.impact(style || 'light');
 }
 
 function sleep(ms) {

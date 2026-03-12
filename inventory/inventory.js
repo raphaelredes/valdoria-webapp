@@ -223,10 +223,10 @@ function _showInitError(msg) {
 
 // ── Haptic feedback ──
 function haptic(type) {
-    try { tg?.HapticFeedback?.impactOccurred?.(type || 'light'); } catch (e) { console.warn('[INVENTORY] haptic:', e); }
+    if (window.vHaptic) vHaptic.impact(type || 'light');
 }
 function hapticNotify(type) {
-    try { tg?.HapticFeedback?.notificationOccurred?.(type || 'error'); } catch (e) { console.warn('[INVENTORY] haptic:', e); }
+    if (window.vHaptic) vHaptic.notify(type || 'error');
 }
 
 // ── Header ──

@@ -139,7 +139,7 @@ function handleNodeTap(nodeId) {
     const node = S.nodes.find(n => n.id === nodeId);
     if (!node || !node.available) return;
 
-    try { tg?.HapticFeedback?.impactOccurred('light'); } catch (e) { }
+    if (window.vHaptic) vHaptic.tap();
 
     if (node.type === 'boss') {
         showBossReveal(node);
@@ -224,7 +224,7 @@ async function _transitionToGame() {
 // ── Button handlers ──
 document.getElementById('btn-inventory')?.addEventListener('click', () => {
     // Future: open inventory overlay
-    try { tg?.HapticFeedback?.impactOccurred('light'); } catch (e) { }
+    if (window.vHaptic) vHaptic.tap();
 });
 document.getElementById('btn-retreat')?.addEventListener('click', handleRetreat);
 

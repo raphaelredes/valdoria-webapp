@@ -437,7 +437,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     width: 260px;
     height: 260px;
     margin-bottom: 14px;
-    animation: circleEntrance 2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: circleEntrance 2s var(--v-ease-snap) both;
 }
 @keyframes circleEntrance {
     0%   { opacity: 0; transform: scale(0.3) rotate(-30deg); }
@@ -531,7 +531,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     width: 28px; height: 28px;
     z-index: 2;
     cursor: pointer; -webkit-tap-highlight-color: transparent;
-    animation: gemEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both;
+    animation: gemEntrance 1.2s var(--v-ease-snap) 0.8s both;
 }
 .mc-gem-core {
     position: absolute; inset: 0;
@@ -583,7 +583,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255,224,128,0.6) 0%, rgba(196,149,58,0.3) 40%, transparent 70%);
     pointer-events: none;
-    animation: gemBurst 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: gemBurst 0.6s var(--v-ease-snap) forwards;
 }
 @keyframes gemBurst {
     0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
@@ -652,7 +652,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     opacity: 0; pointer-events: none;
 }
 .mc-completion-wave.active {
-    animation: completionWave 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: completionWave 0.8s var(--v-ease-snap) forwards;
 }
 .mc-completion-wave.wave-2 {
     border-color: rgba(196,149,58,0.5);
@@ -808,8 +808,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     50% { opacity: 1; color: var(--v-gold); }
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
-
+/* spin → shared/animations.css */
 
 /* ─── Toast Notification ─── */
 .toast {
@@ -901,7 +900,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     border: 1px solid rgba(196,149,58,0.22);
     border-radius: var(--v-radius-lg, 12px);
     box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(196,149,58,0.08);
-    animation: errorEntry 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: errorEntry 0.4s var(--v-ease-snap) both;
 }
 
 @keyframes errorEntry {
@@ -1065,7 +1064,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .screen.fade-in {
-    animation: slideFromRight 0.3s var(--v-ease-snap, cubic-bezier(0.16, 1, 0.3, 1));
+    animation: slideFromRight 0.3s var(--v-ease-snap, var(--v-ease-snap));
 }
 @keyframes slideFromRight {
     from { opacity: 0; transform: translateX(20px); }
@@ -1079,7 +1078,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .screen.slide-back-in {
-    animation: slideFromLeft 0.3s var(--v-ease-snap, cubic-bezier(0.16, 1, 0.3, 1));
+    animation: slideFromLeft 0.3s var(--v-ease-snap, var(--v-ease-snap));
 }
 @keyframes slideFromLeft {
     from { opacity: 0; transform: translateX(-20px); }
@@ -1087,12 +1086,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 }
 
 /* ─── Notification Badge Bounce ─── */
-@keyframes badgeBounce {
-    0%   { transform: scale(1); }
-    30%  { transform: scale(1.25); }
-    60%  { transform: scale(0.9); }
-    100% { transform: scale(1); }
-}
+/* badgeBounce → shared/animations.css */
 .btn-action[data-badge]::after {
     content: attr(data-badge);
     position: absolute;
@@ -1119,7 +1113,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 .btn-row {
-    animation: btnEntrance 0.3s var(--v-ease-snap, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    animation: btnEntrance 0.3s var(--v-ease-snap, var(--v-ease-snap)) both;
 }
 .btn-row:nth-child(1) { animation-delay: 0s; }
 .btn-row:nth-child(2) { animation-delay: 0.04s; }
@@ -1615,7 +1609,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     position: relative;
 }
 .v-resource-badge.resource-pop {
-    animation: resourcePop 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+    animation: resourcePop 0.4s var(--v-ease-spring);
 }
 @keyframes resourcePop {
     0%   { transform: scale(1); }
@@ -2357,7 +2351,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     font-weight: 700;
     min-height: 28px;
     margin-bottom: 8px;
-    animation: diceResultIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: diceResultIn 0.35s var(--v-ease-spring) forwards;
 }
 @keyframes diceResultIn {
     from { opacity: 0; transform: scale(0.5); }
@@ -4105,7 +4099,7 @@ body[data-time="night"] .screen-content strong {
     display: inline-block;
     animation: spin 0.8s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+/* spin → shared/animations.css */
 
 /* ─── Connection Status Dot ─── */
 .connection-dot {

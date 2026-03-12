@@ -112,51 +112,17 @@ function renderDialogue(screen) {
 
 function typewriterDialogue(el, text, onDone) {
     // Clear any previous typewriter
-    if (_twInterval) {
-        clearInterval(_twInterval);
-        _twInterval = null;
+    if (window.vTypewriter) vTypewriter.skip();
+    if (window.vTypewriter) {
+        vTypewriter.write(el, text, { cursorClass: 'dlg-cursor', onDone: onDone });
+    } else {
+        el.textContent = text;
+        if (onDone) onDone();
     }
-
-    _twElement = el;
-    _twFullText = text;
-    _twCallback = onDone;
-
-    let i = 0;
-    el.innerHTML = '';
-    const span = document.createElement('span');
-    el.appendChild(span);
-    const cursor = document.createElement('span');
-    cursor.className = 'dlg-cursor';
-    el.appendChild(cursor);
-
-    _twInterval = setInterval(function () {
-        if (i >= text.length) {
-            clearInterval(_twInterval);
-            _twInterval = null;
-            cursor.remove();
-            if (_twCallback) {
-                _twCallback();
-                _twCallback = null;
-            }
-            return;
-        }
-        span.textContent += text[i];
-        i++;
-    }, 35); // ~29 chars/sec (Human Reading Time rule: 30-50ms/char)
 }
 
 function skipTypewriter() {
-    if (!_twInterval) return;
-    clearInterval(_twInterval);
-    _twInterval = null;
-    if (_twElement && _twFullText) {
-        // Preserve pre-line formatting
-        _twElement.textContent = _twFullText;
-    }
-    if (_twCallback) {
-        _twCallback();
-        _twCallback = null;
-    }
+    if (window.vTypewriter) vTypewriter.skip();
 }
 
 // ── Choice Reveal ────────────────────────────────────────────

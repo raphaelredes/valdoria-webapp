@@ -223,77 +223,14 @@ function _splitNarrationPages(text) {
 }
 
 function typewriter(el, text, onDone) {
-    const pages = _splitNarrationPages(text);
-    _typewriterPage(el, pages, 0, onDone);
+    if (window.vTypewriter) {
+        vTypewriter.write(el, text, { paginate: true, onDone: onDone });
+    } else if (onDone) { el.textContent = text; onDone(); }
 }
 
-function _typewriterPage(el, pages, pageIdx, onDone) {
-    const text = pages[pageIdx] || '';
-    const isLast = pageIdx >= pages.length - 1;
-    const totalPages = pages.length;
-    let i = 0;
-    let _done = false;
-    el.innerHTML = '';
-    const span = document.createElement('span');
-    el.appendChild(span);
-    const cursor = document.createElement('span');
-    cursor.className = 'cursor';
-    el.appendChild(cursor);
+/* _typewriterPage -> shared/typewriter.js */
 
-    // Tap-to-skip: tap narration area to complete text instantly
-    const skipTyping = () => {
-        if (_done) return;
-        _done = true;
-        clearInterval(iv);
-        span.textContent = text;
-        cursor.remove();
-        el.removeEventListener('click', skipTyping);
-        if (isLast) {
-            if (onDone) onDone();
-        } else {
-            _showPageContinue(el, pages, pageIdx, totalPages, onDone);
-        }
-    };
-    el.addEventListener('click', skipTyping);
-
-    const iv = setInterval(() => {
-        if (i >= text.length) {
-            if (_done) return;
-            _done = true;
-            clearInterval(iv);
-            cursor.remove();
-            el.removeEventListener('click', skipTyping);
-            // Post-typing pause: calculated by text length for readable pacing
-            const _postMs = Math.max(1800, Math.min(3500, text.length * 12));
-            setTimeout(() => {
-                if (isLast) {
-                    if (onDone) onDone();
-                } else {
-                    _showPageContinue(el, pages, pageIdx, totalPages, onDone);
-                }
-            }, _postMs);
-            return;
-        }
-        span.textContent += text[i];
-        i++;
-    }, 35);
-}
-
-function _showPageContinue(el, pages, pageIdx, totalPages, onDone) {
-    if (totalPages > 1) {
-        const indicator = document.createElement('div');
-        indicator.className = 'dm-page-indicator';
-        indicator.textContent = `${pageIdx + 1} / ${totalPages}`;
-        el.appendChild(indicator);
-    }
-    const contBtn = document.createElement('button');
-    contBtn.className = 'dm-continue-btn';
-    contBtn.innerHTML = '<span>Continuar…</span> <span style="font-size:16px">▸</span>';
-    contBtn.addEventListener('click', () => {
-        _typewriterPage(el, pages, pageIdx + 1, onDone);
-    });
-    el.appendChild(contBtn);
-}
+/* _showPageContinue -> shared/typewriter.js */
 
 
 // NPC Multi-Turn Dialogue — richer NPC encounters with personality
@@ -578,9 +515,7 @@ function performStatCheck(poi, choice) {
             resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
             resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
-            try {
-                if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
-            } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+            if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
 
             _showCheckSkip(overlay, success, choice, poi);
         });
@@ -643,9 +578,7 @@ function _showCheckEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, pro
         resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
-        try {
-            if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
-        } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+        if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
 
         _showCheckSkip(overlay, success, choice, poi);
     }, 1000);
@@ -761,7 +694,7 @@ function applyOutcome(poi, outcome, choice) {
     // Haptic feedback on positive rewards
     const hasReward = outcome.x || outcome.g || (outcome.h && outcome.h > 0) || outcome.i;
     if (hasReward) {
-        try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch (e) { /* ignore */ }
+        if (window.vHaptic) vHaptic.success();
     }
 
     updateRewards();
@@ -817,7 +750,7 @@ function triggerCombat(poi) {
     document.getElementById('combat-text').innerHTML = '<span style="color:#d44;font-weight:bold;">' + _combatNarr + '</span>';
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+    if (window.vHaptic) vHaptic.heavy();
 
     // Skip button + 2000ms auto-advance
     let _combatDone = false;
@@ -1124,7 +1057,7 @@ function showBossEncounter() {
     choicesDiv.appendChild(retreatBtn);
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.notificationOccurred('warning'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+    if (window.vHaptic) vHaptic.warning();
 }
 
 function _showPortalSummary() {
@@ -1141,7 +1074,7 @@ function _showPortalSummary() {
 
     summary.innerHTML = html;
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+    if (window.vHaptic) vHaptic.success();
 
     let _portalDone = false;
     const skipBtn = document.getElementById('portal-skip-btn');
@@ -1173,7 +1106,7 @@ function showRandomEncounter(enc) {
     document.body.appendChild(flash);
     setTimeout(() => flash.remove(), 700);
 
-    try { if (tg) tg.HapticFeedback.impactOccurred('heavy'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+    if (window.vHaptic) vHaptic.heavy();
 
     const overlay = document.getElementById('encounter-overlay');
     overlay.setAttribute('data-biome', S.biome || 'forest');
@@ -1506,9 +1439,7 @@ function showHazardCheck(hazard) {
             resultEl.textContent = success ? 'Resistiu!' : 'Falhou!';
             resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
-            try {
-                if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
-            } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+            if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
 
             // Screen flash on fail (color by hazard type)
             if (!success && typeof flashScreen === 'function') {
@@ -1635,9 +1566,7 @@ function _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, ha
         resultEl.textContent = success ? 'Resistiu!' : 'Falhou!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
-        try {
-            if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
-        } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+        if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
 
         _showHazardSkip(overlay, success, hazard);
     }, 700);
@@ -2244,7 +2173,7 @@ function _doExploreCheck(opt) {
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
         const formulaStr = buildFormula(roll, mod + prof, statName, '', opt.dc, total, r1, r2, mode);
         formulaEl.innerHTML = formulaStr;
-        try { if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error'); } catch(e) {}
+        if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
 
         let _done = false;
         const finish = () => {
@@ -2394,7 +2323,7 @@ function _secretPassageSuccess() {
             S.xpEarned += 25;
             updateRewards();
             showTerrainToast('\u{1F6AA} Passagem secreta revelada! +25 XP', 'ranger');
-            try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
+            if (window.vHaptic) vHaptic.success();
             // Trigger static redraw
             if (typeof scheduleRender === 'function') {
                 _staticDirty = true;
@@ -2481,7 +2410,7 @@ function useInventoryItemAnimated(item, onDone) {
 
     _healDice.roll(rollVal, function () {
         label.textContent = `+${heal} HP`;
-        try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) {}
+        if (window.vHaptic) vHaptic.medium();
 
         setTimeout(function () {
             overlay.classList.remove('active');
@@ -2732,7 +2661,7 @@ function _showCampDiceRoll(roll, conMod, bonus, total, foodName) {
     _campDice.roll(roll, function () {
         const sign = conMod >= 0 ? '+' : '';
         label.textContent = `1d8 = ${roll} ${sign}${conMod} (CON)`;
-        try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) {}
+        if (window.vHaptic) vHaptic.medium();
 
         // Reading time for dice result formula
         const _campResultText = `1d8 = ${roll} ${sign}${conMod} (CON) = ${roll + conMod}`;
@@ -2758,7 +2687,7 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName) {
     document.getElementById('camp-result-detail').textContent = detail;
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+    if (window.vHaptic) vHaptic.success();
 }
 
 function closeCampResult() {
@@ -2849,7 +2778,7 @@ function showLowHPOverlay() {
         });
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.notificationOccurred('warning'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+    if (window.vHaptic) vHaptic.warning();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2869,7 +2798,7 @@ function showDeathSaves() {
     const overlay = document.getElementById('death-overlay');
     const summary = document.getElementById('death-summary');
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.notificationOccurred('error'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+    if (window.vHaptic) vHaptic.error();
 
     let successes = 0, failures = 0, rollNum = 0;
     let _done = false;
@@ -3340,7 +3269,7 @@ function showReturnJourneyStep() {
     }
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.impactOccurred(hasEncounter ? 'heavy' : hasHazard ? 'medium' : 'light'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+    if (window.vHaptic) vHaptic.impact(hasEncounter ? 'heavy' : hasHazard ? 'medium' : 'light');
 }
 
 function _rollReturnHazard(hazard, choice) {
@@ -3409,7 +3338,7 @@ function _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2,
             `<div style="margin-top:6px;color:#c44;font-size:13px">-${dmg} HP</div>`;
     }
 
-    try { if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error'); } catch (e) { /* ignore */ }
+    if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
 
     const remaining = _returnJourney ? _returnJourney.totalSteps - _returnJourney.currentStep : 0;
 
@@ -3568,7 +3497,7 @@ function _showArrivalScreen() {
         });
 
     overlay.classList.add('active');
-    try { if (tg) tg.HapticFeedback.notificationOccurred('success'); } catch (e) { /* ignore */ }
+    if (window.vHaptic) vHaptic.success();
 }
 
 function _closeReturnJourney() {
@@ -3597,7 +3526,7 @@ function finishExploration(reason) {
     }
 
     // Haptic feedback
-    try { if (tg) tg.HapticFeedback.impactOccurred('medium'); } catch (e) { console.warn('[EXPLORE] haptic:', e); }
+    if (window.vHaptic) vHaptic.medium();
 
     // Clean up session storage
     try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) { console.warn('[EXPLORE] sessionStorage:', e); }

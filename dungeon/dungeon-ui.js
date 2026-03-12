@@ -106,7 +106,7 @@ function showBossReveal(node) {
     overlay.style.animation = 'bossOverlayDarken 0.5s ease forwards';
     overlay.classList.add('open');
 
-    try { tg?.HapticFeedback?.impactOccurred('heavy'); } catch (e) { }
+    if (window.vHaptic) vHaptic.heavy();
 
     btn.onclick = () => {
         btn.style.pointerEvents = 'none';

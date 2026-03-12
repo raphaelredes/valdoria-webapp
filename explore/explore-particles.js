@@ -19,7 +19,7 @@ let _particlesInited = false;
 const _exploreLite = (window._valdoriaMinLoadFactor || 1) < 1;
 
 function initBiomeParticles(biome) {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.vReducedMotion) return;
     _particles = [];
     _particlesInited = true;
 

@@ -169,7 +169,7 @@ class CombatVFX {
         this.extras = [];
         this._raf = null;
         this._running = false;
-        this._lite = (window._valdoriaMinLoadFactor || 1) < 1;
+        this._lite = (window._valdoriaMinLoadFactor || 1) < 1 || !!window.vReducedMotion;
         this._dpr = Math.min(window.devicePixelRatio || 1, 2);
         this.resize();
         window.addEventListener('resize', () => this.resize());

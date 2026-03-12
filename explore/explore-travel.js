@@ -55,7 +55,7 @@ let _travelRaf = 0;
  */
 function playTravelAnimation(biome, regionName, onComplete) {
     // Skip for reduced motion
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (window.vReducedMotion) {
         onComplete();
         return;
     }

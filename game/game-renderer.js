@@ -567,11 +567,7 @@ function _showDiceAnimation(screen) {
         }
 
         // Haptic feedback
-        try {
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.HapticFeedback.notificationOccurred(dr.success ? 'success' : 'error');
-            }
-        } catch (e) { /* */ }
+        if (window.vHaptic) vHaptic.notify(dr.success ? 'success' : 'error');
 
         // Show skip pill after 500ms, auto-advance after calculated reading time
         var resultText = (formulaEl ? formulaEl.textContent : '') + ' ' + (resultEl ? resultEl.textContent : '');
@@ -1256,9 +1252,9 @@ function _hideFeedbackOverlay() {
     }, 300);
 }
 
-// Haptic feedback helper (vibration API)
+// Haptic feedback helper
 function _haptic() {
-    try { if (navigator.vibrate) navigator.vibrate(15); } catch(_) {}
+    if (window.vHaptic) vHaptic.tap();
 }
 
 

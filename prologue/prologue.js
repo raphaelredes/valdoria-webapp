@@ -39,7 +39,7 @@ let choices = {};       // Accumulated player choices
 let rerollsLeft = 5;
 
 function haptic(type) {
-    try { tg?.HapticFeedback?.impactOccurred?.(type || 'light'); } catch (_) { }
+    if (window.vHaptic) vHaptic.impact(type || 'light');
 }
 
 // ═══════════════════════════════════════════════════════
