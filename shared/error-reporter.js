@@ -52,9 +52,18 @@ var ValdoriaErrors = (function () {
         }
     } catch (e) { /* */ }
 
-    // Flush on unload
+    // Flush on unload + send close beacon (universal safety net for all WebApps)
     window.addEventListener('beforeunload', function () {
         try { localStorage.setItem(_CONN_LOG_LS_KEY, JSON.stringify(_connLog)); } catch (e) { /* */ }
+        // Send close beacon so server can show the banner menu
+        if (_cfg.apiBase && _cfg.token && _cfg.uid && navigator.sendBeacon) {
+            try {
+                navigator.sendBeacon(
+                    _cfg.apiBase + '/api/game/close',
+                    JSON.stringify({ token: _cfg.token, user_id: _cfg.uid })
+                );
+            } catch (e) { /* best effort */ }
+        }
     });
 
     // ─── Device & Network Info ───
