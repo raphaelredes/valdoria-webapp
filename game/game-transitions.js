@@ -184,11 +184,14 @@ async function requestTransition(toApp, payload = {}) {
                 S.transitioning = false;
                 console.error('[GAME] Transition auth error:', resp.status);
                 try {
-                    if (window.Telegram?.WebApp?.sendData) {
-                        Telegram.WebApp.sendData(JSON.stringify({
+                    const tg = window.Telegram?.WebApp;
+                    if (tg?.sendData) {
+                        tg.sendData(JSON.stringify({
                             action: 'webapp_error_close', webapp: 'GAME',
                             reason: resp.status === 401 ? 'session_expired' : 'invalid_init_data',
                         }));
+                        // Safety net: close after delay (sendData may not close from inline buttons)
+                        setTimeout(function () { if (tg.close) tg.close(); }, 1000);
                         return;
                     }
                 } catch (_) {}

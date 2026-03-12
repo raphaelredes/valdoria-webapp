@@ -323,6 +323,7 @@ function closeCombat(result) {
     // sendData fallback (non-API mode)
     if (tg) {
         tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: result }));
+        setTimeout(function () { if (tg.close) tg.close(); }, 1000);
         setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 300);
     }
 }

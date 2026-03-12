@@ -354,8 +354,10 @@ function _sendDataReconnect() {
     if (tg && tg.sendData) {
         try {
             tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'GAME' }));
-            return false;
         } catch (e) { _clog('sendData failed: ' + e.message); }
+        // Safety net: close after delay (sendData may not close from inline buttons)
+        setTimeout(function () { if (tg.close) tg.close(); }, 1000);
+        return false;
     }
     hideLoading();
     showError('⚠️ Servidor indisponível. Feche e tente novamente.');

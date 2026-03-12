@@ -426,7 +426,7 @@ async function sendAction(actionData) {
             ...actionData,
         };
         tg.sendData(JSON.stringify(payload));
-        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 300);
+        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 1000);
     }
 }
 
