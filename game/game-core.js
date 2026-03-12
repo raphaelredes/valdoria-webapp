@@ -178,11 +178,6 @@ async function init() {
     const healthy = await _waitForHealthy();
     if (!healthy) return; // _waitForHealthy already handled error/sendData
 
-    // Start device displacement heartbeat
-    if (window.SessionHeartbeat) {
-        SessionHeartbeat.init({ apiBase: S.apiBase, token: S.token, uid: S.uid });
-    }
-
     // Listen for session-reopened event (user clicked "Reabrir aqui" on displacement overlay)
     window.addEventListener('session-reopened', function (e) {
         console.log('[GAME] Session reopened, reloading screen');
@@ -220,6 +215,13 @@ async function init() {
         console.error('[GAME] Route error:', routeError);
         hideLoading();
         showError('⚠️ Erro ao carregar o jogo. Feche e tente novamente.');
+    }
+
+    // Start device displacement heartbeat AFTER game routing completes.
+    // Must be after startGame/returnFromWebApp so the device is registered
+    // on the backend before heartbeat polling begins (prevents false displacement).
+    if (window.SessionHeartbeat) {
+        SessionHeartbeat.init({ apiBase: S.apiBase, token: S.token, uid: S.uid });
     }
 }
 
