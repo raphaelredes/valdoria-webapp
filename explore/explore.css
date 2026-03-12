@@ -2130,5 +2130,171 @@ body {
     50% { transform: translateX(-50%) translateY(-5px); }
 }
 
+
+/* ── Tutorial illustrations (mini-mockups inside cards) ── */
+.tutorial-card-illust {
+    margin: 0 0 12px; padding: 10px 12px;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(196,149,58,0.15);
+    border-radius: 8px;
+    display: flex; justify-content: center;
+}
+.tutorial-card-icon {
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif !important;
+}
+.tutorial-card-illust .ti-badge,
+.tutorial-card-illust .ti-pace,
+.tutorial-card-illust .ti-fog-hex,
+.tutorial-card-illust .ti-event-icon,
+.tutorial-card-illust .ti-btn-mock {
+    font-family: var(--v-font, serif), 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+}
+
+/* Hex grid */
+.ti-hex-grid { text-align: center; }
+.ti-hex-grid svg { display: block; margin: 0 auto; }
+
+/* HUD mockup */
+.ti-hud {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    font-size: 11px; color: var(--v-text-dim, #a09484);
+    font-family: var(--v-font, serif);
+    padding: 4px 8px;
+    background: linear-gradient(180deg, #3a3028, #2a2420);
+    border: 1px solid #4a3828; border-radius: 6px;
+    width: 100%;
+}
+.ti-hud-name { color: #c4953a; font-weight: 700; font-size: 12px; }
+.ti-hud-hp { display: flex; align-items: center; gap: 3px; }
+.ti-hp-label { color: #8a7a68; font-size: 10px; }
+.ti-hp-bar {
+    width: 40px; height: 6px; border-radius: 3px;
+    background: #1e1a16; overflow: hidden;
+}
+.ti-hp-fill {
+    display: block; height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, #4a8c3f, #6ab85a);
+}
+.ti-hp-val { font-size: 10px; color: #a09484; }
+.ti-badge {
+    font-size: 10px; padding: 1px 5px; border-radius: 4px;
+    background: rgba(196,149,58,0.12); color: #c4953a;
+}
+
+/* Minimap mockup */
+.ti-minimap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ti-minimap-box {
+    width: 52px; height: 52px; border-radius: 6px; position: relative;
+    border: 2px solid rgba(196,149,58,0.5);
+    background: linear-gradient(135deg, #3a3028, #2a2420);
+}
+.ti-mm-dot {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%;
+}
+.ti-mm-player { background: #c4953a; top: 60%; left: 40%; box-shadow: 0 0 4px rgba(196,149,58,0.6); }
+.ti-mm-exit { background: #4a8c3f; top: 20%; left: 70%; box-shadow: 0 0 4px rgba(74,140,63,0.6); }
+.ti-mm-explored { background: rgba(196,149,58,0.3); width: 4px; height: 4px; }
+.ti-minimap-label { font-size: 10px; color: #8a7a68; font-family: var(--v-font, serif); }
+
+/* Button mockups */
+.ti-btn-row { display: flex; justify-content: center; gap: 10px; }
+.ti-btn-mock {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 6px 14px; border-radius: 6px; font-size: 13px;
+    font-family: var(--v-font, serif); font-weight: 600;
+}
+.ti-btn-return {
+    background: linear-gradient(180deg, rgba(196,149,58,0.15), rgba(196,149,58,0.05));
+    border: 1px solid #9a7530; color: #c4953a;
+}
+.ti-btn-explore {
+    background: rgba(196,149,58,0.08);
+    border: 1px solid rgba(196,149,58,0.3); color: #c4953a;
+    font-size: 18px; padding: 4px 10px;
+}
+
+/* Pace toggle mockup */
+.ti-pace-row { display: flex; gap: 4px; justify-content: center; }
+.ti-pace {
+    padding: 4px 8px; border-radius: 4px; font-size: 11px;
+    font-family: var(--v-font, serif); white-space: nowrap;
+}
+.ti-pace-fast {
+    border: 1px solid rgba(200,120,40,0.4); color: #d89040;
+    background: rgba(200,120,40,0.08);
+}
+.ti-pace-normal {
+    border: 1px solid rgba(196,149,58,0.25); color: #a09484;
+    background: rgba(196,149,58,0.06);
+}
+.ti-pace-active {
+    border-color: rgba(196,149,58,0.5) !important;
+    color: #c4953a !important;
+    background: rgba(196,149,58,0.15) !important;
+    box-shadow: 0 0 6px rgba(196,149,58,0.2);
+}
+.ti-pace-cautious {
+    border: 1px solid rgba(80,160,120,0.4); color: #60b888;
+    background: rgba(80,160,120,0.08);
+}
+
+/* Steps & danger pips mockup */
+.ti-steps-row {
+    display: flex; align-items: center; gap: 8px; justify-content: center;
+    font-family: var(--v-font, serif);
+}
+.ti-step-count { font-size: 16px; font-weight: 700; color: #a09484; }
+.ti-step-label { font-size: 11px; color: #8a7a68; }
+.ti-danger-pips { display: flex; gap: 3px; align-items: center; }
+.ti-pip {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+}
+.ti-pip-filled {
+    background: #7b2020;
+    border-color: rgba(170,68,68,0.6);
+    box-shadow: 0 0 4px rgba(170,68,68,0.5);
+}
+
+/* Fog of war mockup */
+.ti-fog-row {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.ti-fog-hexes { display: flex; gap: 8px; justify-content: center; }
+.ti-fog-hex {
+    width: 44px; height: 44px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; border: 1px solid rgba(196,149,58,0.2);
+}
+.ti-fog-hidden {
+    background: rgba(0,0,0,0.6); color: #555;
+    font-family: var(--v-font, serif); font-size: 16px;
+}
+.ti-fog-partial {
+    background: rgba(0,0,0,0.3);
+    border-color: rgba(196,149,58,0.25);
+    opacity: 0.65;
+}
+.ti-fog-clear {
+    background: rgba(196,149,58,0.08);
+    border-color: rgba(196,149,58,0.4);
+}
+.ti-fog-labels {
+    display: flex; gap: 18px; font-size: 10px;
+    color: #8a7a68; font-family: var(--v-font, serif);
+}
+
+/* Events mockup */
+.ti-events-row {
+    display: flex; gap: 10px; justify-content: center;
+}
+.ti-event-icon {
+    font-size: 22px;
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    background: rgba(196,149,58,0.06); border-radius: 8px;
+    border: 1px solid rgba(196,149,58,0.15);
+}
+
 /* Toast slide-in animation */
 /* toastSlideIn -> shared/animations.css */

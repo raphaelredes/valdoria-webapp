@@ -1940,8 +1940,11 @@ function showActivitySelection() {
         const isStealthLocked = key === 'stealth' && S.travelPace !== 'cautious';
         const selected = S.travelActivity === key;
 
+        const total = mod + prof;
+        const statLine = total !== 0 ? `<span class="act-stat">${statShort}${profStar} ${total >= 0 ? '+' : ''}${total}${isStealthLocked ? ' \u{1F512} Requer Cauteloso' : ''}</span>` :
+            (isStealthLocked ? `<span class="act-stat">\u{1F512} Requer Cauteloso</span>` : '');
         btn.innerHTML = `<span class="act-name">${cfg.icon} ${cfg.name}${selected ? ' \u2714' : ''}</span>` +
-            `<span class="act-stat">${statShort}${profStar} ${mod >= 0 ? '+' : ''}${mod + prof}${isStealthLocked ? ' \u{1F512} Requer Cauteloso' : ''}</span>` +
+            statLine +
             `<span class="act-effect">${cfg.desc}</span>`;
 
         if (isStealthLocked) {

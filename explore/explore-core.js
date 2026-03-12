@@ -573,9 +573,18 @@ function hasClassDarkvision() {
     return a && a.darkvision;
 }
 
-// D&D ability modifier from compact stat key
+// D&D 5e skill → ability score mapping
+const SKILL_TO_ABILITY = {
+    atl: 'st', acr: 'dx', slh: 'dx', ste: 'dx', stl: 'dx',
+    arc: 'it', his: 'it', inv: 'it', nat: 'it', rel: 'it',
+    anh: 'ws', ins: 'ws', med: 'ws', per: 'ws', sur: 'ws',
+    dec: 'ch', itm: 'ch', prf: 'ch', prs: 'ch',
+};
+
+// D&D ability modifier from compact stat key or skill key
 function getAbilityMod(statKey) {
-    const val = (S.charData && S.charData[statKey]) || 10;
+    const abilityKey = SKILL_TO_ABILITY[statKey] || statKey;
+    const val = (S.charData && S.charData[abilityKey]) || 10;
     return Math.floor((val - 10) / 2);
 }
 
