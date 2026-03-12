@@ -50,6 +50,21 @@ jobs:
             echo "  OK"
           done
 
+      - name: Validate JavaScript syntax
+        run: |
+          echo "=== JavaScript Syntax Check (node --check) ==="
+          status=0
+          for f in $(find . -name "*.js" | grep -v node_modules | grep -v .git | grep -v '.min.js' | sort); do
+            if ! node --check "$f" 2>/dev/null; then
+              echo "  ERROR: Syntax error in $f"
+              node --check "$f" 2>&1 | head -5
+              status=1
+            else
+              echo "  OK: $f"
+            fi
+          done
+          exit $status
+
       - name: Validate CSS syntax
         run: |
           echo "=== CSS Syntax Check ==="
