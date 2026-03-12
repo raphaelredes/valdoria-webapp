@@ -425,7 +425,7 @@ async function sendAction(actionData) {
             token: token,
             ...actionData,
         };
-        tg.sendData(JSON.stringify(payload));
+        tg.sendData(JSON.stringify(payload)); // noqa: preflight -- sendData is correct fallback when isApiMode=false (no API URL)
         setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 1000);
     }
 }
