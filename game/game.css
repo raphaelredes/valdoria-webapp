@@ -4041,10 +4041,11 @@ body[data-time="night"] .screen-content strong {
     transform: none !important;
 }
 
-/* Voltar (back) button — slightly more prominent than other footer buttons */
-.footer-btn:first-child {
+/* Voltar (back) button — slightly more prominent in content area */
+.btn-back {
     color: var(--v-text, #d4c8b0) !important;
     font-weight: 600;
+    opacity: 0.85;
 }
 
 .footer-quick {

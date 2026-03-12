@@ -308,7 +308,8 @@ function createButton(btn, forceHero = false) {
     // Regular callback button
     const el = document.createElement('button');
     const isHero = forceHero || HERO_KEYWORDS.some(k => (btn.text || '').toUpperCase().includes(k));
-    el.className = isHero ? 'btn-hero' : 'btn-action';
+    const isBack = /^(action_universal_back|city_back)$/.test(btn.cb || '');
+    el.className = isHero ? 'btn-hero' : (isBack ? 'btn-action btn-back' : 'btn-action');
     el.textContent = btn.text || '';
     if (btn.cb) {
         el.onclick = () => doAction(btn.cb);
