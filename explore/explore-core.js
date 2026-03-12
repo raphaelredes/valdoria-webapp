@@ -733,6 +733,12 @@ function addExhaustion(levels, source) {
         const effect = EXHAUSTION_EFFECTS[S.exhaustion] || '';
         showTerrainToast(`\u26a0\ufe0f Exaust\u00e3o ${S.exhaustion}: ${effect}`, 'condition');
         if (source) showTerrainToast(`Causa: ${source}`, 'info');
+
+        // Level 3+: show modal overlay explaining the mechanical effects
+        if (S.exhaustion >= 3) {
+            _showExhaustionModal(S.exhaustion, effect, source);
+        }
+
         // Level 5: can't move
         if (S.exhaustion >= 5) {
             showTerrainToast('Voc\u00ea n\u00e3o consegue mais andar! Descanse imediatamente.', 'damage');
@@ -750,6 +756,32 @@ function removeExhaustion(levels) {
     S.exhaustion = Math.max(0, (S.exhaustion || 0) - levels);
     updateExhaustionHUD();
     saveState();
+}
+
+function _showExhaustionModal(level, effect, source) {
+    const existing = document.getElementById('exhaustion-modal');
+    if (existing) existing.remove();
+
+    const effects = [];
+    for (let i = 1; i <= level; i++) {
+        const e = EXHAUSTION_EFFECTS[i];
+        if (e) effects.push('<div class="exh-modal-effect ' + (i === level ? 'current' : '') + '">' + String.fromCharCode(8226) + ' N\u00edvel ' + i + ': ' + e + '</div>');
+    }
+
+    const modal = document.createElement('div');
+    modal.id = 'exhaustion-modal';
+    modal.className = 'exhaustion-modal';
+    modal.innerHTML = '<div class="exh-modal-card">' +
+        '<div class="exh-modal-icon">\u26a0\ufe0f</div>' +
+        '<div class="exh-modal-title">Exaust\u00e3o N\u00edvel ' + level + '</div>' +
+        (source ? '<div class="exh-modal-source">Causa: ' + source + '</div>' : '') +
+        '<div class="exh-modal-effects">' + effects.join('') + '</div>' +
+        '<div class="exh-modal-tip">\ud83d\udca1 Descanse em uma \u00e1rea segura ou acampe para reduzir a exaust\u00e3o.</div>' +
+        '<button class="exh-modal-btn" onclick="this.closest(\'.exhaustion-modal\').remove()">Entendido</button>' +
+        '</div>';
+    document.body.appendChild(modal);
+    // Auto-dismiss after 8s
+    setTimeout(function() { if (document.getElementById('exhaustion-modal')) modal.remove(); }, 8000);
 }
 
 function resetStepsWithoutRest() {
