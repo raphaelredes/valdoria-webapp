@@ -45,6 +45,12 @@
             Telegram.WebApp.expand();
             try { Telegram.WebApp.headerColor = '#2a2420'; } catch(e) {}
             try { Telegram.WebApp.backgroundColor = '#2a2420'; } catch(e) {}
+            if (Telegram.WebApp.BackButton) {
+                Telegram.WebApp.BackButton.show();
+                Telegram.WebApp.BackButton.onClick(function() {
+                    try { Telegram.WebApp.close(); } catch(e) { console.warn('[GUIDE] close failed:', e); }
+                });
+            }
         }
 
         buildCategoryFilters();

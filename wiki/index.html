@@ -941,13 +941,20 @@ semantic_memory: Dict[str, Dict]             # npc_id → {relationship_summary,
             $articleView.style.display = 'none';
             $mainView.style.display = 'block';
             window.scrollTo(0, 0);
-            if (tg) tg.BackButton.hide();
+            // BackButton stays visible — closes WebApp from main view
         }
 
         // Telegram back button integration
-        if (tg) tg.BackButton.onClick(() => {
-            if ($articleView.style.display !== 'none') showMain();
-        });
+        if (tg) {
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => {
+                if ($articleView.style.display !== 'none') {
+                    showMain();
+                } else {
+                    try { tg.close(); } catch(e) { console.warn('[WIKI] close failed:', e); }
+                }
+            });
+        }
 
         // ─── Init ───
         if (initAuth()) renderGrid();

@@ -4027,7 +4027,7 @@ body[data-time="night"] .screen-content strong {
     flex: 1;
     min-width: 0;
     padding: 8px 4px !important;
-    min-height: 38px !important;
+    min-height: 40px !important;
     font-size: 12px !important;
     border: none !important;
     background: transparent !important;
@@ -4039,6 +4039,12 @@ body[data-time="night"] .screen-content strong {
     color: var(--v-gold, #c4953a) !important;
     background: rgba(196, 149, 58, 0.08) !important;
     transform: none !important;
+}
+
+/* Voltar (back) button — slightly more prominent than other footer buttons */
+.footer-btn:first-child {
+    color: var(--v-text, #d4c8b0) !important;
+    font-weight: 600;
 }
 
 .footer-quick {
