@@ -782,7 +782,7 @@ function loadCachedScreen() {
 
 // ─── Helpers ───
 function haptic(style) {
-    if (\!window.vHaptic) return;
+    if (!window.vHaptic) return;
     if (style === 'warning') vHaptic.warning();
     else if (style === 'success') vHaptic.success();
     else if (style === 'error') vHaptic.error();
