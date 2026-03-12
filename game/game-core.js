@@ -76,7 +76,7 @@ async function init() {
                 showLoading(true);
                 _clog('RETRY health check...');
                 const ok = await checkHealth();
-                if (!ok) { _clog('RETRY health FAILED'); hideLoading(); showError('⚠️ Servidor indisponível. Tente novamente em alguns segundos.'); return; }
+                if (!ok) { _clog('RETRY health FAILED'); hideLoading(); showError('⚠️ Servidor indisponível no momento. Estamos tentando reconectar!'); return; }
                 _clog('RETRY health OK → loading state');
                 if (S.currentScreen) { fetchState(false); } else { startGame(); }
             },
@@ -355,7 +355,7 @@ async function _waitForHealthy() {
     _clog('INIT all health attempts exhausted — showing error overlay');
     console.error('[GAME] All health attempts failed — showing error overlay (not auto-closing)');
     hideLoading();
-    showError('\u26a0\ufe0f Servidor indispon\u00edvel. Tente novamente em alguns segundos.');
+    showError('\u26a0\ufe0f Servidor indispon\u00edvel no momento. Estamos tentando reconectar!');
     return false;
 }
 
@@ -384,7 +384,7 @@ function _sendDataReconnect() {
         return false;
     }
     hideLoading();
-    showError('⚠️ Servidor indisponível. Feche e tente novamente.');
+    showError('⚠️ Servidor indisponível. Feche este mini app e toque em "Retomar Jornada" novamente.');
     return false;
 }
 

@@ -194,7 +194,7 @@ var ValdoriaErrors = (function () {
             else if (msg.indexOf('não respondeu') >= 0 || msg.indexOf('demorou') >= 0)
                 hintEl.textContent = 'O servidor pode estar sobrecarregado. Tentaremos reconectar automaticamente.';
             else if (msg.indexOf('indisponível') >= 0)
-                hintEl.textContent = 'O servidor está em manutenção ou reiniciando. Tente novamente em alguns instantes.';
+                hintEl.textContent = 'Estamos reconectando automaticamente. Se persistir, feche este mini app e toque em "Retomar Jornada" novamente.';
             else if (msg.indexOf('expirada') >= 0 || msg.indexOf('Sessão') >= 0)
                 hintEl.textContent = 'Feche o mini app e selecione seu personagem novamente.';
             else if (msg.indexOf('Personagem não encontrado') >= 0)
@@ -264,7 +264,7 @@ var ValdoriaErrors = (function () {
             var jitter = Math.random() * 2 - 1;
             var delaySec = Math.max(2, Math.round(base + jitter));
             var countdown = delaySec;
-            if (retryBtn) retryBtn.textContent = 'Tentando novamente em ' + countdown + 's... (' + _retryAttempt + '/' + _RETRY_MAX + ')';
+            if (retryBtn) retryBtn.textContent = '\u23f3 Reconectando em ' + countdown + 's... (' + _retryAttempt + '/' + _RETRY_MAX + ')';
 
             var progBar = _els.progress;
             if (progBar) {
@@ -281,7 +281,7 @@ var ValdoriaErrors = (function () {
                     if (progBar) { progBar.style.transition = 'none'; progBar.style.width = '0%'; }
                     _doRetry();
                 } else if (retryBtn) {
-                    retryBtn.textContent = 'Tentando novamente em ' + countdown + 's... (' + _retryAttempt + '/' + _RETRY_MAX + ')';
+                    retryBtn.textContent = '\u23f3 Reconectando em ' + countdown + 's... (' + _retryAttempt + '/' + _RETRY_MAX + ')';
                 }
             }, 1000);
         } else if (isConnectionError && (hasApi || _cfg.onRetry)) {
@@ -347,7 +347,7 @@ var ValdoriaErrors = (function () {
         if (tg && tg.sendData) {
             _clog('AUTO-RECONNECT: sending webapp_reconnect via sendData');
             if (_els.msg) _els.msg.textContent = 'Reconectando ao servidor...';
-            if (_els.hint) _els.hint.textContent = 'Abrindo menu do jogo automaticamente.';
+            if (_els.hint) _els.hint.textContent = 'Voltando ao menu do jogo. Toque em "Retomar Jornada" para entrar novamente.';
 
             try {
                 tg.sendData(JSON.stringify({
