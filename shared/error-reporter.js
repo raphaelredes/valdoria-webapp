@@ -592,27 +592,40 @@ var ValdoriaErrors = (function () {
     // ─── Send Close & Return (notify bot to show menu) ───
     function _sendCloseAndReturn() {
         var tg = window.Telegram && window.Telegram.WebApp;
-        // Try sendData first (works from reply keyboard WebApps)
+        var closed = false;
+        function _doClose() {
+            if (closed) return;
+            closed = true;
+            if (tg && tg.close) { tg.close(); } else { window.close(); }
+        }
+
+        // 1. Try fetch to /api/game/close (triggers banner server-side, works from any context)
+        if (_cfg.apiBase && _cfg.token && _cfg.uid) {
+            fetch(_cfg.apiBase + '/api/game/close', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: _cfg.token, user_id: _cfg.uid }),
+            }).then(function () {
+                _clog('Close via API OK');
+                _doClose();
+            }).catch(function () {
+                _clog('Close via API failed, using sendData');
+                _sendDataClose(tg);
+                setTimeout(_doClose, 1000);
+            });
+        } else {
+            // No API info — use sendData directly
+            _sendDataClose(tg);
+            setTimeout(_doClose, 1000);
+        }
+    }
+
+    function _sendDataClose(tg) {
         if (tg && tg.sendData) {
             try {
-                tg.sendData(JSON.stringify({
-                    action: 'webapp_error_close',
-                    webapp: _cfg.appName,
-                }));
-                // sendData may auto-close — but from InlineKeyboardButton it won't,
-                // so schedule tg.close() as safety net
-            } catch (e) {
-                _clog('sendData failed: ' + e.message);
-            }
+                tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: _cfg.appName }));
+            } catch (e) { _clog('sendData failed: ' + e.message); }
         }
-        // Always close the WebApp (sendData alone doesn't close from inline buttons)
-        setTimeout(function () {
-            if (tg && tg.close) {
-                tg.close();
-            } else {
-                window.close();
-            }
-        }, 1000);
     }
 
     // ─── Hide Error ───
