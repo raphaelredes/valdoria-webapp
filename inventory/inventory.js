@@ -2263,7 +2263,7 @@ async function _performExit() {
             if (resp.status === 401 || resp.status === 403) {
                 console.error('[INVENTORY] Auth error on transition:', resp.status);
                 const tg = window.Telegram?.WebApp;
-                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' })); return; }
+                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' })); setTimeout(function () { if (tg.close) tg.close(); }, 1000); return; }
             }
             if (resp.ok) {
                 const data = await resp.json();
@@ -2330,6 +2330,7 @@ async function _sendViaAPI(overlay) {
             const tg = window.Telegram?.WebApp;
             if (tg?.sendData) {
                 tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' }));
+                setTimeout(function () { if (tg.close) tg.close(); }, 1000);
                 return;
             }
             toast(`${vi('warn', 13)} Sessão expirada. Feche e reabra.`, 'err');
@@ -2371,7 +2372,7 @@ function _sendViaSendData(overlay) {
         tg.sendData(JSON.stringify(data));
         _sendRetries = 0;
         // Safety: close webapp if sendData didn't auto-close
-        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[INVENTORY] tg.close:', e); } }, 300);
+        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[INVENTORY] tg.close:', e); } }, 1000);
         // Extra safety: if still open after 2s, hide overlay and inform user
         setTimeout(() => {
             if (document.visibilityState !== 'hidden') {
@@ -2797,7 +2798,7 @@ async function _transitionTo(target, payload = {}) {
             if (resp.status === 401 || resp.status === 403) {
                 console.error('[INVENTORY] Auth error on transition:', resp.status);
                 const tg = window.Telegram?.WebApp;
-                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' })); return; }
+                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' })); setTimeout(function () { if (tg.close) tg.close(); }, 1000); return; }
             }
             if (resp.ok) {
                 const data = await resp.json();

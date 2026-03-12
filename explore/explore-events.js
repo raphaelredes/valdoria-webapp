@@ -968,6 +968,7 @@ async function transitionToArena() {
                 const tg = window.Telegram?.WebApp;
                 if (tg?.sendData) {
                     tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'EXPLORE', reason: 'session_expired' }));
+                    setTimeout(function () { if (tg.close) tg.close(); }, 1000);
                     return;
                 }
                 break; // stop retrying on auth error
@@ -3653,7 +3654,7 @@ function finishExploration(reason) {
         try { if (tg) tg.close(); } catch (e) {
             console.warn('[EXPLORE] tg.close fallback failed:', e);
         }
-    }, 500);
+    }, 1000);
 }
 
 async function _transitionToGameFromExplore(payload) {
@@ -3675,6 +3676,7 @@ async function _transitionToGameFromExplore(payload) {
                 console.error('[EXPLORE] Auth error on game transition:', r.status);
                 if (window.Telegram?.WebApp?.sendData) {
                     Telegram.WebApp.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'EXPLORE', reason: 'session_expired' }));
+                    setTimeout(function () { if (Telegram.WebApp.close) Telegram.WebApp.close(); }, 1000);
                     return;
                 }
                 break;
@@ -3706,6 +3708,7 @@ async function _transitionToNavigateFromExplore(payload) {
                 console.error('[EXPLORE] Auth error on navigate transition:', r.status);
                 if (window.Telegram?.WebApp?.sendData) {
                     Telegram.WebApp.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'EXPLORE', reason: 'session_expired' }));
+                    setTimeout(function () { if (Telegram.WebApp.close) Telegram.WebApp.close(); }, 1000);
                     return;
                 }
                 break;
@@ -3894,7 +3897,8 @@ async function initAsync() {
                         action: 'webapp_error_close', webapp: 'EXPLORE',
                         reason: resp.status === 401 ? 'session_expired' : 'invalid_init_data',
                     }));
-                    return; // sendData auto-closes
+                    setTimeout(function () { if (tg.close) tg.close(); }, 1000);
+                    return;
                 }
             }
             if (resp.ok) {

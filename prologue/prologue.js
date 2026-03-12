@@ -71,6 +71,7 @@ async function apiCall(endpoint, body = {}) {
                 action: 'webapp_error_close', webapp: 'PROLOGUE',
                 reason: resp.status === 401 ? 'session_expired' : 'invalid_init_data',
             }));
+            setTimeout(function () { if (tg.close) tg.close(); }, 1000);
         }
         throw new Error('session_expired');
     }
