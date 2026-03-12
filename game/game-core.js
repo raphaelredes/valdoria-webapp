@@ -19,7 +19,7 @@ const RETRY_MAX = 2;
 const RETRY_BASE_MS = 1000;
 const FETCH_TIMEOUT_MS = 12000; // 12s per fetch attempt (AbortController)
 const HEALTH_TIMEOUT_MS = 3000; // 3s timeout — fast fail for instant reconnect
-const HEALTH_RETRIES = 1;       // 1 retry only — fast fail for instant reconnect
+const HEALTH_RETRIES = 2;       // 2 retries (3 attempts) — allows DNS propagation after discovery
 const HEALTH_RETRY_MS = 1000;   // 1s between retries
 const LOADING_TIMEOUT_MS = 15000; // 15s max loading screen before auto-error
 const MIN_LOADING_MS = Math.round(2500 * (window._valdoriaMinLoadFactor || 1)); // scaled for device performance
@@ -273,13 +273,8 @@ async function checkHealth() {
         } catch (e) {
             _clog(`HEALTH ERROR: ${e.name}: ${e.message}`);
             console.error('[GAME] Health check error:', e.name, e.message);
-            // CORS block = dead tunnel (Cloudflare 530 without CORS headers)
-            // No point retrying the same dead URL — fail fast
-            if (e.name === 'TypeError') {
-                _clog('HEALTH: tunnel dead (CORS/network) — fast fail');
-                return false;
-            }
-            // Timeout or other error — worth retrying
+            // TypeError = CORS/network (dead tunnel or DNS not propagated yet)
+            // AbortError = timeout — both worth retrying (DNS may need 1-2s)
         }
     }
     _clog(`HEALTH EXHAUSTED after ${HEALTH_RETRIES + 1} attempts`);
@@ -329,6 +324,8 @@ async function _waitForHealthy() {
         S.apiBase = newUrl;
         if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) ValdoriaErrors.updateApiBase(newUrl);
         if (window.ApiDiscovery) ApiDiscovery.updateBase(newUrl);
+        // Wait 2s for DNS propagation before checking new URL
+        await sleep(2000);
         ok = await checkHealth();
         if (ok) {
             _clog('DISCOVERY: health OK with new URL');
