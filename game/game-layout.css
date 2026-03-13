@@ -1,0 +1,269 @@
+/* game-layout.css — Layout, buttons, panels, font picker */
+
+/* ═══════════════════════════════════════════════════════════════
+   GAME HUB — Universal Screen Renderer Styles
+   Extends valdoria-design.css v4
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── No Scrollbars (targeted — avoids universal selector perf cost) ─── */
+html, body, .screen, .screen-content, .bottom-panel,
+.sub-screen, .sub-screen-body, .dlg-choices {
+    scrollbar-width: none; -ms-overflow-style: none;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
+.screen-content::-webkit-scrollbar,
+.bottom-panel::-webkit-scrollbar, .sub-screen::-webkit-scrollbar,
+.sub-screen-body::-webkit-scrollbar, .dlg-choices::-webkit-scrollbar {
+    display: none;
+}
+
+/* ─── Font Picker (settings screen) ─── */
+.font-picker-section {
+    margin: 12px 0 8px;
+    padding: 10px 12px;
+    background: var(--v-bg-raised);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+}
+
+.font-picker-label {
+    font-size: 13px;
+    color: var(--v-text-dim);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.font-picker-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.font-pick-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    background: var(--v-bg-card);
+    color: var(--v-text);
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.font-pick-btn:active {
+    transform: scale(0.97);
+}
+
+.font-pick-btn.active {
+    border-color: var(--v-gold-dim);
+    background: rgba(196, 149, 58, 0.08);
+    color: var(--v-gold);
+}
+
+.font-pick-btn .font-check {
+    font-size: 12px;
+    color: var(--v-gold);
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.font-pick-btn.active .font-check {
+    opacity: 1;
+}
+
+/* ─── Screen Layout (scrollable content only) ─── */
+.screen {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    padding-bottom: 120px; /* fallback — JS adjusts dynamically via updateBottomPadding() */
+    min-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ─── Banner Image ─── */
+.screen-banner {
+    width: 100%;
+    border-radius: var(--v-radius);
+    overflow: hidden;
+    margin-bottom: 6px;
+    box-shadow: var(--v-shadow-sm);
+}
+
+.screen-banner img {
+    width: 100%;
+    height: auto;
+    max-height: clamp(80px, 15vw, 120px);
+    object-fit: cover;
+    display: block;
+}
+
+/* ─── Content Area ─── */
+.screen-content {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--v-text);
+    margin-bottom: 4px;
+    word-wrap: break-word;
+    white-space: pre-line; /* \n from server HTML renders as line breaks */
+}
+
+.screen-content b, .screen-content strong {
+    color: var(--v-gold);
+}
+
+.screen-content i, .screen-content em {
+    color: var(--v-text-dim);
+}
+
+.screen-content code {
+    font-family: var(--v-font-mono);
+    background: var(--v-bg-raised);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.btn-row {
+    display: grid;
+    gap: 4px;
+}
+
+.btn-row.cols-1 { grid-template-columns: 1fr; }
+.btn-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.btn-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* ─── Action Button ─── */
+.btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 8px;
+    min-height: 44px;
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    background: linear-gradient(165deg, var(--v-bg-raised) 0%, var(--v-bg-card) 100%);
+    color: var(--v-text);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--v-transition);
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-action:active {
+    transform: scale(0.96);
+    background: var(--v-bg-card-hover);
+    border-color: var(--v-gold-dim);
+}
+
+/* ─── Hero Button (full-width CTA) ─── */
+.btn-hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 10px;
+    min-height: 44px;
+    border: 1px solid var(--v-gold-dim);
+    border-radius: var(--v-radius);
+    background: linear-gradient(165deg, var(--v-bg-accent) 0%, #3a1515 100%);
+    color: var(--v-gold-light);
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--v-transition);
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: var(--v-shadow-gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-hero:active {
+    transform: scale(0.97);
+    box-shadow: 0 0 24px rgba(196, 149, 58, 0.4);
+}
+
+/* ─── URL Link Button ─── */
+.btn-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 8px;
+    min-height: 44px;
+    border: 1px solid var(--v-info);
+    border-radius: var(--v-radius-sm);
+    background: transparent;
+    color: var(--v-info);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--v-transition);
+}
+
+/* ─── Fixed Bottom Panel (action buttons + text input + footer) ─── */
+.bottom-panel {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: var(--v-bg);
+    border-top: 1px solid var(--v-border);
+    padding: 6px 10px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    transition: transform 0.3s ease, opacity 0.25s ease;
+}
+
+
+/* Text input inside bottom panel */
+.bottom-panel .text-input-wrap {
+    margin-top: 2px;
+}
+
+.footer-row {
+    display: flex;
+    gap: 3px;
+}
+
+.footer-row .btn-action {
+    flex: 1;
+    padding: 8px 3px;
+    min-height: 40px;
+    font-size: 12px;
+}
+
+.footer-nav .btn-action {
+    font-size: 14px; /* icon buttons */
+    padding: 8px;
+    min-height: 40px;
+}
+
+/* Footer toggle button (expand/collapse nav row) */
+.footer-toggle-btn {
+    flex: 0 0 auto !important;
+    width: 36px;
+    min-height: 40px;
+    padding: 8px 3px !important;
+    font-size: 14px !important;
+    color: var(--v-text-dim) !important;
+    letter-spacing: 2px;
+}
+

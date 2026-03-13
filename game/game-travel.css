@@ -1,0 +1,254 @@
+/* game-travel.css — Cross-webapp transitions, location travel, input, skip */
+
+/* ─── Cross-WebApp Themed Transitions ─── */
+.transition-overlay.active.theme-leaves {
+    background: transparent;
+}
+.transition-overlay.active.theme-leaves::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, #1e2a14 30%, #2a3818 60%, #1e2a14 100%);
+    animation: leavesWipe 0.5s ease-in-out forwards;
+}
+@keyframes leavesWipe {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+.transition-overlay.active.theme-portal {
+    background: transparent;
+}
+.transition-overlay.active.theme-portal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, #2a2420 0%, #1a1510 40%, #0a0805 100%);
+    animation: portalClose 0.5s ease-in-out forwards;
+}
+@keyframes portalClose {
+    from { clip-path: circle(100% at 50% 50%); }
+    to { clip-path: circle(0% at 50% 50%); }
+}
+
+.transition-overlay.active.theme-combat {
+    background: transparent;
+}
+.transition-overlay.active.theme-combat::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(123, 32, 32, 0.8);
+    animation: combatFlash 0.4s ease-out forwards;
+}
+@keyframes combatFlash {
+    0% { opacity: 0; }
+    30% { opacity: 1; }
+    100% { opacity: 1; background: var(--v-bg); }
+}
+
+.transition-overlay.active.theme-scroll {
+    background: transparent;
+}
+.transition-overlay.active.theme-scroll::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #3a3028 0%, #2a2420 100%);
+    animation: scrollRoll 0.5s ease-in-out forwards;
+}
+@keyframes scrollRoll {
+    from { clip-path: inset(0 0 100% 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+/* ─── Location Transition Overlay (immersive 2s travel) ─── */
+.loc-transition {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 40%, #302820 0%, #1a1510 50%, #0a0805 100%);
+    animation: locFadeIn 0.35s ease-out;
+}
+@keyframes locFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.loc-transition.hiding {
+    animation: locFadeOut 0.4s ease-in forwards;
+}
+@keyframes locFadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+.loc-transition-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+}
+.loc-transition-icon {
+    font-size: clamp(36px, 12vw, 48px);
+    animation: locIconPulse 1.5s ease-in-out infinite;
+    z-index: 1;
+    filter: drop-shadow(0 0 16px rgba(196, 149, 58, 0.5)) drop-shadow(0 0 40px rgba(196, 149, 58, 0.15));
+}
+/* Gold ornamental divider below icon */
+.loc-transition-icon::after {
+    content: '◆';
+    display: block;
+    margin-top: 12px;
+    font-size: 8px;
+    color: var(--v-gold, #c4953a);
+    opacity: 0.5;
+    letter-spacing: 8px;
+    text-align: center;
+}
+@keyframes locIconPulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50%      { transform: scale(1.12); opacity: 1; }
+}
+.loc-transition-text {
+    margin-top: 16px;
+    font-size: 15px;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    color: var(--v-gold-light, #dbb668);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    z-index: 1;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+}
+.loc-transition-dots {
+    margin-top: 20px;
+    display: flex;
+    gap: 6px;
+    z-index: 1;
+}
+.loc-transition-dots span {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--v-gold, #c4953a);
+    animation: locDotBlink 1.2s ease-in-out infinite;
+}
+.loc-transition-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loc-transition-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes locDotBlink {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50%      { opacity: 1; transform: scale(1.2); }
+}
+
+/* ─── Location Transition Floating Motes ─── */
+@keyframes locMoteDrift {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+    15%  { opacity: 0.6; }
+    85%  { opacity: 0.4; }
+    100% { opacity: 0; transform: translateY(-80px) scale(0.2); }
+}
+.loc-transition-motes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+.loc-transition-motes span {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--v-gold, #c4953a);
+    box-shadow: 0 0 6px rgba(196, 149, 58, 0.6);
+    animation: locMoteDrift 2.5s ease-in-out infinite;
+}
+.loc-transition-motes span:nth-child(1) { left: 15%; bottom: 30%; animation-delay: 0s; animation-duration: 2.2s; }
+.loc-transition-motes span:nth-child(2) { left: 35%; bottom: 20%; animation-delay: 0.3s; animation-duration: 2.8s; }
+.loc-transition-motes span:nth-child(3) { left: 55%; bottom: 35%; animation-delay: 0.6s; animation-duration: 2.4s; }
+.loc-transition-motes span:nth-child(4) { left: 75%; bottom: 25%; animation-delay: 0.9s; animation-duration: 2.6s; }
+.loc-transition-motes span:nth-child(5) { left: 45%; bottom: 40%; animation-delay: 1.2s; animation-duration: 3.0s; }
+.loc-transition-motes span:nth-child(6) { left: 25%; bottom: 15%; animation-delay: 0.4s; animation-duration: 2.3s; }
+
+/* ─── Text Input (bank amounts, chat, tickets) ─── */
+.text-input-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.text-input-max {
+    width: 100%;
+    font-size: 11px;
+    color: var(--v-gold-dim);
+    text-align: right;
+    margin-top: -2px;
+}
+
+.text-input {
+    flex: 1;
+    padding: 11px 12px;
+    min-height: 44px;
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    background: var(--v-bg-raised);
+    color: var(--v-text);
+    font-size: 14px;
+    font-family: var(--v-font);
+    outline: none;
+    transition: border-color var(--v-transition);
+    -webkit-appearance: none;
+}
+
+.text-input:focus {
+    border-color: var(--v-gold-dim);
+}
+
+.text-input::placeholder {
+    color: var(--v-text-dim);
+}
+
+.text-send-btn {
+    width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--v-gold-dim);
+    border-radius: var(--v-radius-sm);
+    background: linear-gradient(165deg, var(--v-bg-accent) 0%, #3a1515 100%);
+    color: var(--v-gold-light);
+    font-size: 18px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all var(--v-transition);
+}
+
+.text-send-btn:active {
+    transform: scale(0.95);
+}
+
+/* ─── Skip Button (mandatory timed overlay rule) ─── */
+.v-skip-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 28px);
+    max-width: 400px;
+    padding: 12px;
+    background: var(--v-bg-raised);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius);
+    color: var(--v-text-dim);
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 350;
+}
+
+.v-skip-btn.visible { opacity: 1; }
+

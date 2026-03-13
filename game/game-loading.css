@@ -1,0 +1,564 @@
+/* game-loading.css — Loading overlay, magic circle, particles */
+
+/* ─── Swipe-back edge hint (subtle left border glow on first visit) ─── */
+.swipe-edge-hint {
+    position: fixed;
+    left: 0;
+    top: 30%;
+    bottom: 30%;
+    width: 3px;
+    background: linear-gradient(to bottom, transparent, rgba(196,149,58,0.3), transparent);
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    animation: swipeHintPulse 2s ease-in-out 1s 2 both;
+}
+@keyframes swipeHintPulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+/* ─── Loading Overlay (Magic Summoning Circle) ─── */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 38%, #302018 0%, #1a1510 45%, #0a0805 100%);
+    z-index: 1000;
+    overflow: hidden;
+}
+/* Pause ALL animations when loading overlay is hidden — saves GPU on 23+ infinite animations */
+.loading-overlay[style*="display: none"] *,
+.loading-overlay[style*="display:none"] *,
+.loading-overlay.hidden * {
+    animation-play-state: paused !important;
+}
+/* Vignette */
+.loading-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+}
+
+/* ── Particles (Embers + Sparks + Motes) ── */
+.loading-particles { position: absolute; inset: 0; pointer-events: none; }
+.particle { position: absolute; border-radius: 50%; opacity: 0; }
+
+.particle.ember {
+    width: 3px; height: 3px;
+    background: var(--v-gold);
+    box-shadow: 0 0 4px rgba(196,149,58,0.6);
+    animation: emberFloat 10s ease-in-out infinite;
+}
+.p1 { left: 12%; bottom: -3%; animation-delay: 0s; animation-duration: 9s; }
+.p2 { left: 28%; bottom: -3%; animation-delay: 1.5s; animation-duration: 11s; }
+.p3 { left: 48%; bottom: -3%; animation-delay: 3s; animation-duration: 8.5s; }
+.p4 { left: 65%; bottom: -3%; animation-delay: 0.8s; animation-duration: 12s; }
+.p5 { left: 82%; bottom: -3%; animation-delay: 4s; animation-duration: 10s; }
+.p6 { left: 38%; bottom: -3%; animation-delay: 5.5s; animation-duration: 9.5s; }
+
+@keyframes emberFloat {
+    0%   { transform: translateY(0) scale(0); opacity: 0; }
+    8%   { opacity: 0.8; transform: translateY(-60px) scale(1); }
+    40%  { opacity: 0.5; transform: translateY(-300px) scale(0.8); }
+    100% { transform: translateY(-750px) scale(0); opacity: 0; }
+}
+
+.particle.spark {
+    width: 2px; height: 2px;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(255,255,255,0.8), 0 0 12px rgba(196,149,58,0.5);
+    animation: sparkRise 5s ease-out infinite;
+}
+.s1 { left: 20%; bottom: 30%; animation-delay: 0.8s; }
+.s2 { left: 55%; bottom: 25%; animation-delay: 2.5s; animation-duration: 4.5s; }
+.s3 { left: 75%; bottom: 35%; animation-delay: 4s; animation-duration: 6s; }
+.s4 { left: 40%; bottom: 20%; animation-delay: 0s; animation-duration: 5s; }
+
+@keyframes sparkRise {
+    0%   { transform: translateY(0) scale(0); opacity: 0; }
+    5%   { opacity: 1; transform: translateY(0) scale(1.2); }
+    15%  { opacity: 0.8; }
+    100% { transform: translateY(-200px) translateX(20px) scale(0); opacity: 0; }
+}
+
+.particle.mote {
+    width: 2px; height: 2px;
+    background: var(--v-crimson-light);
+    box-shadow: 0 0 6px rgba(123,32,32,0.6);
+    animation: moteDrift 14s ease-in-out infinite;
+}
+.m1 { left: 10%; top: 40%; }
+.m2 { right: 10%; top: 55%; animation-delay: 6s; animation-duration: 16s; }
+
+@keyframes moteDrift {
+    0%   { transform: translate(0,0) scale(0); opacity: 0; }
+    10%  { opacity: 0.6; transform: translate(10px,-10px) scale(1); }
+    50%  { opacity: 0.3; transform: translate(60px,-30px) scale(0.8); }
+    100% { transform: translate(120px,-60px) scale(0); opacity: 0; }
+}
+
+/* ── Elemental Particles — Fire ── */
+.particle.flame {
+    width: 5px; height: 8px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: radial-gradient(ellipse at 50% 80%, #ff6a00 0%, #ff4500 40%, #c43a00 80%);
+    box-shadow: 0 0 8px rgba(255,106,0,0.7), 0 0 16px rgba(255,69,0,0.4);
+    animation: flameRise 7s ease-in-out infinite;
+}
+.fl1 { left: 18%; bottom: -5%; animation-delay: 0s; animation-duration: 6.5s; }
+.fl2 { left: 52%; bottom: -5%; animation-delay: 2.2s; animation-duration: 7.5s; }
+.fl3 { left: 78%; bottom: -5%; animation-delay: 4s; animation-duration: 8s; }
+
+@keyframes flameRise {
+    0%   { transform: translateY(0) scaleX(1) scaleY(0.5); opacity: 0; }
+    5%   { opacity: 0.9; transform: translateY(-30px) scaleX(1.2) scaleY(1); }
+    20%  { opacity: 0.7; transform: translateY(-120px) scaleX(0.8) scaleY(1.3); }
+    50%  { opacity: 0.4; transform: translateY(-350px) scaleX(0.5) scaleY(0.8); }
+    100% { transform: translateY(-700px) scaleX(0.2) scaleY(0.3); opacity: 0; }
+}
+
+/* ── Elemental Particles — Frost ── */
+.particle.frost {
+    width: 3px; height: 3px;
+    background: #aaddff;
+    box-shadow: 0 0 6px rgba(170,221,255,0.8), 0 0 14px rgba(100,180,255,0.4);
+    animation: frostFloat 12s ease-in-out infinite;
+}
+.fr1 { right: 15%; top: 15%; animation-delay: 0s; }
+.fr2 { left: 22%; top: 30%; animation-delay: 4s; animation-duration: 14s; }
+.fr3 { right: 30%; top: 60%; animation-delay: 7s; animation-duration: 10s; }
+
+@keyframes frostFloat {
+    0%   { transform: translate(0,0) scale(0) rotate(0deg); opacity: 0; }
+    8%   { opacity: 0.8; transform: translate(-5px,5px) scale(1.2) rotate(45deg); }
+    25%  { opacity: 0.6; transform: translate(-20px,15px) scale(1) rotate(120deg); box-shadow: 0 0 6px rgba(170,221,255,0.8), 0 0 20px rgba(100,180,255,0.5); }
+    50%  { opacity: 0.3; transform: translate(-40px,30px) scale(0.6) rotate(200deg); }
+    75%  { opacity: 0.15; transform: translate(-60px,20px) scale(0.3) rotate(300deg); }
+    100% { transform: translate(-80px,10px) scale(0) rotate(360deg); opacity: 0; }
+}
+
+/* ── Elemental Particles — Lightning ── */
+.particle.lightning {
+    width: 2px; height: 12px;
+    background: linear-gradient(to bottom, transparent, #fff 30%, #b0b0ff 60%, transparent);
+    box-shadow: 0 0 8px rgba(180,180,255,0.9), 0 0 20px rgba(130,130,255,0.5);
+    border-radius: 1px;
+    animation: lightningFlash 4s ease-out infinite;
+}
+.lt1 { left: 35%; top: 20%; animation-delay: 1s; transform: rotate(15deg); }
+.lt2 { right: 25%; top: 45%; animation-delay: 3s; animation-duration: 5s; transform: rotate(-20deg); }
+
+@keyframes lightningFlash {
+    0%   { opacity: 0; transform: scaleY(0.3) scaleX(1); }
+    2%   { opacity: 1; transform: scaleY(1.5) scaleX(2); box-shadow: 0 0 15px rgba(200,200,255,1), 0 0 30px rgba(150,150,255,0.7); }
+    5%   { opacity: 0; transform: scaleY(0.5) scaleX(0.5); }
+    7%   { opacity: 0.8; transform: scaleY(1.2) scaleX(1.5); box-shadow: 0 0 10px rgba(200,200,255,0.8); }
+    10%  { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* ── Elemental Particles — Arcane ── */
+.particle.arcane {
+    width: 4px; height: 4px;
+    background: radial-gradient(circle, #d4a0ff 0%, #9955dd 60%, transparent 100%);
+    box-shadow: 0 0 8px rgba(180,120,255,0.7), 0 0 16px rgba(150,80,220,0.3);
+    animation: arcaneOrbit 16s linear infinite;
+}
+.ar1 { left: 50%; top: 50%; animation-delay: 0s; --orbit-r: 100px; }
+.ar2 { left: 50%; top: 50%; animation-delay: 5.3s; animation-duration: 20s; --orbit-r: 80px; }
+.ar3 { left: 50%; top: 50%; animation-delay: 10.6s; animation-duration: 13s; --orbit-r: 120px; }
+
+@keyframes arcaneOrbit {
+    0%   { transform: translate(calc(var(--orbit-r) * 1), 0) scale(0); opacity: 0; }
+    5%   { opacity: 0.7; transform: translate(calc(var(--orbit-r) * 0.95), calc(var(--orbit-r) * -0.31)) scale(1); }
+    25%  { opacity: 0.5; transform: translate(0, calc(var(--orbit-r) * -1)) scale(0.8); }
+    50%  { opacity: 0.6; transform: translate(calc(var(--orbit-r) * -1), 0) scale(1.1); box-shadow: 0 0 12px rgba(180,120,255,0.9), 0 0 24px rgba(150,80,220,0.4); }
+    75%  { opacity: 0.4; transform: translate(0, calc(var(--orbit-r) * 1)) scale(0.7); }
+    95%  { opacity: 0.2; transform: translate(calc(var(--orbit-r) * 0.95), calc(var(--orbit-r) * 0.31)) scale(0.4); }
+    100% { transform: translate(calc(var(--orbit-r) * 1), 0) scale(0); opacity: 0; }
+}
+
+/* ── Magic Summoning Circle ── */
+.magic-circle {
+    position: relative;
+    width: clamp(180px, 60vw, 260px);
+    height: clamp(180px, 60vw, 260px);
+    margin-bottom: 10px;
+    animation: circleEntrance 2s var(--v-ease-snap) both;
+}
+@keyframes circleEntrance {
+    0%   { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+/* Aura layers */
+.mc-aura {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: clamp(160px, 62vw, 240px); height: clamp(160px, 62vw, 240px);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,149,58,0.12) 0%, rgba(196,149,58,0.04) 40%, transparent 70%);
+    animation: mcAuraPulse 5s ease-in-out infinite;
+}
+.mc-aura-2 {
+    width: clamp(190px, 72vw, 280px); height: clamp(190px, 72vw, 280px);
+    background: radial-gradient(circle, rgba(123,32,32,0.08) 0%, transparent 60%);
+    animation-delay: 1.5s;
+}
+@keyframes mcAuraPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
+}
+
+/* Shared ring styles */
+.mc-ring { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+/* ═══ IMMUTABLE — Ring Rotation Speeds ═══════════════════════
+   These durations are canonical and MUST NOT be changed.
+   Outer: 60s | Mid: 35s | Inner: 45s
+   Minimums enforced by shared/loading-guard.js at runtime.
+   Changing these values WILL trigger a console warning.
+   ════════════════════════════════════════════════════════════ */
+/* Outer rune ring — CW slowly — IMMUTABLE: 60s */
+.mc-outer {
+    animation: spinCW 60s linear infinite;
+    filter: drop-shadow(0 0 3px rgba(196,149,58,0.3));
+}
+.mc-rune-text { font-size: 13px; letter-spacing: 3px; font-family: serif; }
+
+/* Mid energy ring — CCW — IMMUTABLE: 35s */
+.mc-mid { animation: spinCCW 35s linear infinite; }
+
+.mc-energy-arc {
+    stroke-dasharray: 50 590;
+    stroke-linecap: round;
+    animation: energyFlow 8s linear infinite;
+    filter: drop-shadow(0 0 4px rgba(196,149,58,0.5));
+}
+.mc-arc-1 { stroke-dasharray: 60 580; }
+.mc-arc-2 { stroke-dasharray: 40 563; animation-duration: 10s; animation-direction: reverse; filter: drop-shadow(0 0 4px rgba(123,32,32,0.4)); }
+
+@keyframes energyFlow { to { stroke-dashoffset: -640; } }
+
+/* Inner text ring — CW faster — IMMUTABLE: 45s */
+.mc-inner {
+    animation: spinCW 45s linear infinite;
+    filter: drop-shadow(0 0 2px rgba(196,149,58,0.2));
+}
+.mc-inner-text { font-size: 9.5px; letter-spacing: 5px; font-family: serif; }
+
+@keyframes spinCW  { to { transform: rotate(360deg); } }
+@keyframes spinCCW { to { transform: rotate(-360deg); } }
+
+/* Magic pulse */
+.mc-pulse {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 20px; height: 20px;
+    transform: translate(-50%, -50%) scale(0.5);
+    border-radius: 50%;
+    border: 1px solid rgba(196,149,58,0.4);
+    box-shadow: 0 0 10px rgba(196,149,58,0.2);
+    opacity: 0;
+    animation: magicPulse 6s ease-out infinite 2s;
+}
+.mc-pulse-2 { animation-delay: 5s; border-color: rgba(123,32,32,0.3); box-shadow: 0 0 10px rgba(123,32,32,0.15); }
+
+@keyframes magicPulse {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(12); opacity: 0; }
+}
+
+/* ── Central Gem (interactive — tap for burst) ── */
+.mc-gem {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 28px; height: 28px;
+    z-index: 2;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    animation: gemEntrance 1.2s var(--v-ease-snap) 0.8s both;
+}
+.mc-gem-core {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #f0d080, #c4953a 40%, #7b2020 80%, #3a1510);
+    box-shadow:
+        0 0 12px rgba(196,149,58,0.7),
+        0 0 30px rgba(196,149,58,0.3),
+        inset 0 -3px 6px rgba(0,0,0,0.4),
+        inset 0 2px 4px rgba(255,220,140,0.3);
+    animation: gemPulse 3s ease-in-out infinite;
+}
+.mc-gem-flare {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 80px; height: 80px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,149,58,0.2) 0%, rgba(196,149,58,0.05) 40%, transparent 70%);
+    animation: gemFlare 4s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes gemEntrance {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+    60%  { transform: translate(-50%, -50%) scale(1.15); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes gemPulse {
+    0%, 100% {
+        box-shadow: 0 0 12px rgba(196,149,58,0.7), 0 0 30px rgba(196,149,58,0.3),
+                    inset 0 -3px 6px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,220,140,0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(196,149,58,0.9), 0 0 50px rgba(196,149,58,0.4),
+                    inset 0 -3px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,220,140,0.5);
+    }
+}
+@keyframes gemFlare {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50%      { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+}
+
+/* Gem tap burst */
+.mc-gem-burst {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 10px; height: 10px;
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,224,128,0.6) 0%, rgba(196,149,58,0.3) 40%, transparent 70%);
+    pointer-events: none;
+    animation: gemBurst 0.6s var(--v-ease-snap) forwards;
+}
+@keyframes gemBurst {
+    0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    40%  { opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(12); opacity: 0; }
+}
+.mc-gem.tapped .mc-gem-core {
+    animation: gemTapFlash 0.3s ease forwards;
+}
+@keyframes gemTapFlash {
+    0%   { filter: brightness(1); }
+    30%  { filter: brightness(2); }
+    100% { filter: brightness(1); }
+}
+
+/* ── Gem phase progression (data-phase on .loading-overlay) ── */
+.loading-overlay[data-phase="1"] .mc-gem-core {
+    background: radial-gradient(circle at 35% 35%, #ffe090, #d4aa4a 40%, #c4953a 80%, #8a5020);
+    box-shadow: 0 0 18px rgba(212,170,74,0.9), 0 0 40px rgba(196,149,58,0.5),
+                inset 0 -3px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,230,160,0.5);
+}
+.loading-overlay[data-phase="2"] .mc-gem-core {
+    background: radial-gradient(circle at 35% 35%, #fff4d0, #ffe080 40%, #d4aa4a 80%, #c4953a);
+    box-shadow: 0 0 24px rgba(255,224,128,0.9), 0 0 50px rgba(212,170,74,0.6),
+                0 0 80px rgba(196,149,58,0.3),
+                inset 0 -3px 6px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,240,180,0.6);
+}
+.loading-overlay[data-phase="2"] .mc-gem-flare {
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, rgba(255,224,128,0.3) 0%, rgba(196,149,58,0.1) 40%, transparent 70%);
+}
+
+/* ── Rune glow scaling by phase ── */
+.loading-overlay[data-phase="1"] .mc-rune-text { fill: rgba(196,149,58,0.65); }
+.loading-overlay[data-phase="1"] .mc-inner-text { fill: rgba(196,149,58,0.5); }
+.loading-overlay[data-phase="1"] .mc-outer { filter: drop-shadow(0 0 5px rgba(196,149,58,0.4)); }
+.loading-overlay[data-phase="1"] .mc-inner { filter: drop-shadow(0 0 4px rgba(196,149,58,0.3)); }
+.loading-overlay[data-phase="2"] .mc-rune-text { fill: rgba(196,149,58,0.85); }
+.loading-overlay[data-phase="2"] .mc-inner-text { fill: rgba(196,149,58,0.7); }
+.loading-overlay[data-phase="2"] .mc-outer { filter: drop-shadow(0 0 8px rgba(196,149,58,0.6)); }
+.loading-overlay[data-phase="2"] .mc-inner { filter: drop-shadow(0 0 6px rgba(196,149,58,0.5)); }
+
+/* ── Background warmth shift by phase ── */
+.loading-overlay[data-phase="1"] {
+    --lo-bg-center: #382818;
+    --lo-bg-mid: #201810;
+    --lo-bg-edge: #0c0906;
+}
+.loading-overlay[data-phase="2"] {
+    --lo-bg-center: #402a18;
+    --lo-bg-mid: #261c10;
+    --lo-bg-edge: #0e0a07;
+}
+.loading-overlay[data-phase="1"] .loading-particles { opacity: 1.0; filter: brightness(1.2); }
+.loading-overlay[data-phase="2"] .loading-particles { opacity: 1.0; filter: brightness(1.5) saturate(1.3); }
+
+/* ── Completion wave (100% reached) ── */
+.mc-completion-wave {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 20px; height: 20px;
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 50%;
+    border: 2px solid rgba(255,224,128,0.8);
+    box-shadow: 0 0 20px rgba(196,149,58,0.4), inset 0 0 10px rgba(255,224,128,0.2);
+    opacity: 0; pointer-events: none;
+}
+.mc-completion-wave.active {
+    animation: completionWave 0.8s var(--v-ease-snap) forwards;
+}
+.mc-completion-wave.wave-2 {
+    border-color: rgba(196,149,58,0.5);
+    box-shadow: 0 0 15px rgba(196,149,58,0.3);
+}
+.mc-completion-wave.wave-2.active { animation-delay: 0.15s; }
+@keyframes completionWave {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0.9; }
+    50%  { opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(14); opacity: 0; }
+}
+
+/* ── Cinematic exit ── */
+.loading-overlay.exit-cinematic {
+    animation: loadingExit 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.loading-overlay.exit-cinematic .magic-circle {
+    animation: circleExit 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.loading-overlay.exit-cinematic .loading-particles {
+    animation: particlesDisperse 0.6s ease-out forwards;
+}
+.loading-overlay.exit-cinematic .loading-brand,
+.loading-overlay.exit-cinematic .loading-progress-wrap,
+.loading-overlay.exit-cinematic .loading-tip-area {
+    animation: brandExit 0.4s ease forwards;
+}
+.loading-flash {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 45%, rgba(196,149,58,0.6), transparent 70%);
+    opacity: 0; pointer-events: none; z-index: 2;
+}
+.loading-overlay.exit-cinematic .loading-flash {
+    animation: flashBurst 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes loadingExit {
+    0%   { opacity: 1; }
+    60%  { opacity: 1; }
+    100% { opacity: 0; pointer-events: none; }
+}
+@keyframes circleExit {
+    0%   { transform: scale(1) rotate(0deg); opacity: 1; filter: brightness(1); }
+    30%  { transform: scale(1.15) rotate(8deg); opacity: 1; filter: brightness(1.8); }
+    100% { transform: scale(0.3) rotate(30deg); opacity: 0; filter: brightness(3); }
+}
+@keyframes particlesDisperse {
+    0%   { transform: scale(1); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
+@keyframes brandExit {
+    0%   { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(10px); }
+}
+@keyframes flashBurst {
+    0%   { opacity: 0; transform: scale(0.5); }
+    25%  { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2); }
+}
+
+/* ── Tip crossfade transition ── */
+.loading-tip.tip-exit {
+    animation: tipCrossfadeOut 0.3s ease forwards;
+}
+.loading-tip.tip-enter {
+    animation: tipCrossfadeIn 0.3s ease 0.3s both;
+}
+@keyframes tipCrossfadeOut {
+    from { opacity: 0.9; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes tipCrossfadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 0.9; transform: translateY(0); }
+}
+
+/* ── Progress bar spark trail ── */
+.loading-progress-fill::before {
+    content: ''; position: absolute; right: 4px; top: 50%;
+    width: 3px; height: 3px; border-radius: 50%;
+    background: #ffe080;
+    box-shadow: 0 0 6px #ffe080, 0 0 12px rgba(196,149,58,0.6);
+    transform: translateY(-50%);
+    animation: sparkTrail 0.8s ease-in-out infinite;
+}
+@keyframes sparkTrail {
+    0%, 100% { opacity: 0.3; box-shadow: 0 0 4px #ffe080; }
+    50%      { opacity: 1; box-shadow: 0 0 8px #ffe080, 0 0 16px rgba(196,149,58,0.6), 0 0 24px rgba(196,149,58,0.3); }
+}
+
+/* ── Brand Section ── */
+.loading-brand { text-align: center; animation: v-fadeIn 0.7s ease 0.6s both; }
+
+.loading-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--v-gold);
+    letter-spacing: 6px;
+    text-shadow: 0 0 20px rgba(196,149,58,0.4), 0 0 40px rgba(196,149,58,0.2), 0 2px 4px rgba(0,0,0,0.8);
+    animation: titleShimmer 5s ease-in-out infinite;
+}
+@keyframes titleShimmer {
+    0%, 100% { text-shadow: 0 0 20px rgba(196,149,58,0.4), 0 0 40px rgba(196,149,58,0.2), 0 2px 4px rgba(0,0,0,0.8); }
+    50% { text-shadow: 0 0 30px rgba(196,149,58,0.6), 0 0 60px rgba(196,149,58,0.3), 0 2px 4px rgba(0,0,0,0.8); }
+}
+
+.loading-divider {
+    width: 160px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--v-gold-dim), var(--v-gold), var(--v-gold-dim), transparent);
+    margin: 10px auto 0; position: relative;
+    animation: v-fadeIn 0.5s ease 0.8s both;
+}
+.divider-rune {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px; color: var(--v-gold);
+    background: var(--v-bg, #2a2420); padding: 0 12px;
+    animation: runePulse 2s ease-in-out infinite;
+}
+@keyframes runePulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+/* ── Progress Bar ── */
+.loading-progress-wrap { margin: 20px 0 16px; width: 200px; animation: v-fadeIn 0.5s ease 0.9s both; }
+.loading-progress-track { width: 100%; height: 3px; background: rgba(196,149,58,0.08); border-radius: 2px; overflow: hidden; position: relative; }
+.loading-progress-fill {
+    height: 100%; width: 0%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--v-crimson), var(--v-gold), var(--v-gold-light));
+    box-shadow: 0 0 8px rgba(196,149,58,0.5);
+    transition: width 0.3s ease; position: relative;
+}
+.loading-progress-fill::after {
+    content: ''; position: absolute; right: 0; top: -2px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--v-gold-light);
+    box-shadow: 0 0 10px var(--v-gold), 0 0 20px rgba(196,149,58,0.4);
+}
+
+/* ── Tips ── */
+.loading-tip-area { min-height: 20px; animation: v-fadeIn 0.5s ease 1s both; }
+.loading-tip {
+    font-size: 12px; color: var(--v-text-dim);
+    text-align: center; max-width: 280px;
+    line-height: 1.4; font-style: italic;
+    animation: tipFade 4s ease-in-out infinite;
+}
+@keyframes tipFade { 0%, 100% { opacity: 0.4; } 30%, 70% { opacity: 0.9; } }
+
+.loading-tip-slow {
+    color: var(--v-gold-dim) !important;
+    animation: tipSlowPulse 2s ease-in-out infinite !important;
+}
+@keyframes tipSlowPulse {
+    0%, 100% { opacity: 0.5; color: var(--v-text-dim); }
+    50% { opacity: 1; color: var(--v-gold); }
+}
+
+/* spin → shared/animations.css */
+

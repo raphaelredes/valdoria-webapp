@@ -1,0 +1,329 @@
+/* combat-polish.css — Overlay animations, active turn, timer warnings, resolution polish, accessibility */
+
+/* ─── OVERLAY ENTRY ANIMATIONS ─── */
+.skill-overlay.active,
+.target-overlay.active {
+    animation: overlayFadeIn 0.25s ease-out;
+}
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+/* duplicate animation removed — now gated by .active on parent overlay */
+.skill-item:active,
+.target-item:active {
+    transform: scale(0.97);
+    transition: transform 80ms ease;
+}
+
+/* ─── ACTIVE TURN ENTITY ENHANCEMENT ─── */
+.entity.active-turn {
+    background: linear-gradient(165deg, rgba(196,149,58,0.06) 0%, var(--v-bg-card) 100%);
+}
+.entity.active-turn.enemy {
+    background: linear-gradient(165deg, rgba(229,57,53,0.06) 0%, var(--v-bg-card) 100%);
+}
+.entity.active-turn .compact-name {
+    color: var(--v-gold-light);
+}
+.entity.active-turn.enemy .compact-name {
+    color: #f0a0a0;
+}
+.entity.active-turn.ally {
+    background: linear-gradient(165deg, rgba(180,190,210,0.08) 0%, var(--v-bg-card) 100%);
+}
+.entity.active-turn.ally .compact-name {
+    color: #c0d0e0;
+}
+
+/* ─── TIMER MULTI-STAGE WARNINGS ─── */
+.timer-bar.warning {
+    background: linear-gradient(90deg, #e65100, #ffa726);
+}
+.timer-bar.critical {
+    height: 20px;
+}
+.timer-text.critical {
+    color: #e53935;
+    font-weight: 800;
+}
+
+/* ─── RESOLUTION SCREEN POLISH ─── */
+.res-header.victory {
+    animation: victoryGlow 2.5s ease-in-out infinite;
+}
+@keyframes victoryGlow {
+    0%, 100% { box-shadow: 0 0 12px rgba(196,149,58,0.1); }
+    50% { box-shadow: 0 0 24px rgba(196,149,58,0.3), 0 0 8px rgba(196,149,58,0.15) inset; }
+}
+.res-header.defeat {
+    animation: defeatPulse 3s ease-in-out infinite;
+}
+@keyframes defeatPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(123,32,32,0.1); }
+    50% { box-shadow: 0 0 20px rgba(123,32,32,0.25); }
+}
+.res-title {
+    text-shadow: 0 0 12px rgba(196,149,58,0.4);
+}
+.res-header.defeat .res-title {
+    text-shadow: 0 0 12px rgba(229,57,53,0.3);
+}
+.res-continue {
+    transition: all 0.2s ease;
+}
+.res-continue:active {
+    transform: scale(0.96);
+    border-color: rgba(196,149,58,0.6);
+    box-shadow: 0 0 12px rgba(196,149,58,0.2);
+}
+
+/* ─── BONUS/REACTION HEADER BACKGROUND ─── */
+.ba-header {
+    background: linear-gradient(135deg, rgba(196,149,58,0.06) 0%, transparent 100%);
+    border-radius: var(--v-radius-sm);
+}
+.ba-header.reaction-header {
+    background: linear-gradient(135deg, rgba(123,32,32,0.15) 0%, transparent 100%);
+    border-bottom-color: rgba(229,57,53,0.25);
+    border-top-color: rgba(229,57,53,0.15);
+}
+
+/* ─── DICE FORMULA ENTRY ANIMATION ─── */
+.dice-formula.visible {
+    animation: formulaReveal 0.3s ease-out;
+}
+@keyframes formulaReveal {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── ACTION BUTTON FOCUS ─── */
+.action-btn:focus-visible {
+    outline: 2px solid var(--v-gold);
+    outline-offset: 2px;
+}
+.action-btn.disabled {
+    cursor: not-allowed;
+}
+
+/* ─── INIT DICE WRAP GLOW ─── */
+.init-dice3d-wrap {
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(196,149,58,0.08);
+}
+
+/* ─── HP STATE TINTS (player + enemy) ─── */
+.entity.player.hp-danger {
+    border-color: rgba(229,57,53,0.6);
+    animation: playerDangerPulse 1.5s ease-in-out infinite;
+}
+@keyframes playerDangerPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(229,57,53,0.15); border-color: rgba(229,57,53,0.5); }
+    50% { box-shadow: 0 0 18px rgba(229,57,53,0.4); border-color: rgba(229,57,53,0.8); }
+}
+.entity.hp-wounded {
+    border-color: rgba(230,81,0,0.4);
+    box-shadow: 0 0 6px rgba(230,81,0,0.1);
+}
+.entity.hp-bloodied {
+    border-color: rgba(229,57,53,0.5);
+    animation: bloodiedPulse 2s ease-in-out infinite;
+}
+@keyframes bloodiedPulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(229,57,53,0.1); }
+    50% { box-shadow: 0 0 12px rgba(229,57,53,0.25); }
+}
+.entity.hp-critical {
+    border-color: rgba(229,57,53,0.7);
+    animation: criticalPulse 1.2s ease-in-out infinite;
+}
+@keyframes criticalPulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(229,57,53,0.2); border-color: rgba(229,57,53,0.5); }
+    50% { box-shadow: 0 0 16px rgba(229,57,53,0.45); border-color: rgba(229,57,53,0.9); }
+}
+
+/* ─── SKILL CHANCE COLOR CODING ─── */
+.action-chance.ch-high { color: var(--v-success, #4caf50); opacity: 1; }
+.action-chance.ch-mid { color: #ffa726; opacity: 1; }
+.action-chance.ch-low { color: #e08080; opacity: 1; }
+
+/* ─── WAITING STATE (not your turn) ─── */
+.action-bar.waiting {
+    background: linear-gradient(180deg, rgba(42,36,32,0.6) 0%, var(--v-bg) 100%);
+}
+.waiting-msg {
+    text-align: center;
+    padding: 10px 8px;
+    color: var(--v-text-dim);
+    font-size: 12px;
+    font-style: italic;
+}
+.waiting-msg .waiting-icon {
+    display: inline-block;
+    animation: waitingSpin 2s linear infinite;
+    margin-right: 4px;
+}
+@keyframes waitingSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ─── ROUND COUNTER BADGE ─── */
+.round-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background: rgba(196,149,58,0.1);
+    border: 1px solid rgba(196,149,58,0.2);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--v-gold-dim);
+    letter-spacing: 0.5px;
+}
+
+/* ─── WEATHER BADGE ─── */
+.weather-badge {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.weather-badge.w-rain { background: rgba(30,100,180,0.12); border: 1px solid rgba(30,100,180,0.2); color: rgba(100,160,220,0.9); }
+.weather-badge.w-storm { background: rgba(200,180,40,0.1); border: 1px solid rgba(200,180,40,0.2); color: rgba(220,200,80,0.9); }
+.weather-badge.w-snow { background: rgba(200,220,240,0.1); border: 1px solid rgba(200,220,240,0.2); color: rgba(200,220,240,0.9); }
+.weather-badge.w-fog { background: rgba(160,160,160,0.1); border: 1px solid rgba(160,160,160,0.2); color: rgba(180,180,180,0.8); }
+.weather-badge.w-hot { background: rgba(230,120,30,0.1); border: 1px solid rgba(230,120,30,0.2); color: rgba(230,150,60,0.9); }
+.weather-badge.w-clear { background: rgba(196,149,58,0.08); border: 1px solid rgba(196,149,58,0.15); color: var(--v-gold-dim); }
+
+/* ─── INIT BUTTON PULSE ─── */
+.init-hero-btn {
+    animation: initBtnPulse 2.5s ease-in-out infinite;
+}
+@keyframes initBtnPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(196,149,58,0.15), inset 0 1px 0 rgba(255,255,255,0.05); }
+    50% { box-shadow: 0 0 30px rgba(196,149,58,0.35), 0 0 60px rgba(196,149,58,0.12), inset 0 1px 0 rgba(255,255,255,0.08); }
+}
+
+/* ─── DEAD ENTITY TREATMENT ─── */
+.entity.dead .compact-name {
+    text-decoration: line-through;
+    text-decoration-color: rgba(196,149,58,0.3);
+}
+.entity.dead .hp-mini-fill {
+    background: rgba(100,80,60,0.3) !important;
+}
+
+/* ─── TURN TIMELINE DEAD ENTRY ─── */
+.turn-entry.dead {
+    opacity: 0.35;
+    filter: grayscale(0.5);
+}
+
+/* ─── ACTION BAR PRIMARY GRADIENT ─── */
+.action-btn.primary {
+    background: linear-gradient(165deg, rgba(196,149,58,0.12) 0%, var(--v-bg-card) 50%, rgba(196,149,58,0.06) 100%);
+}
+
+/* ─── RESOLUTION NARRATIVE STYLING ─── */
+.res-narrative {
+    font-style: italic;
+    position: relative;
+    padding: 0 12px;
+}
+.res-narrative::before {
+    content: '\201C';
+    position: absolute;
+    left: 0;
+    top: -4px;
+    font-size: clamp(20px, 6vw, 24px);
+    color: rgba(196,149,58,0.3);
+    font-style: normal;
+    line-height: 1;
+}
+
+/* ─── EXPANDED DETAILS SECTION DIVIDERS ─── */
+.entity-details .stats-row {
+    padding-top: 3px;
+    border-top: 1px solid rgba(74,56,40,0.15);
+}
+.entity-details .status-pills {
+    padding-top: 3px;
+    border-top: 1px solid rgba(74,56,40,0.15);
+}
+
+/* ─── REDUCED MOTION ─── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ─── Ally MP bar + concentration badge ─── */
+.bar-fill.mp-bar {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+.conc-badge {
+    color: #a78bfa;
+    font-style: italic;
+}
+
+/* ─── VFX CANVAS OVERLAY ─── */
+#vfxCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 480;
+}
+
+/* ─── COMBAT TOAST (lightweight feedback) ─── */
+.combat-toast {
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(42,36,32,0.95);
+    color: var(--v-text);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: var(--v-font);
+    border: 1px solid var(--v-border-gold);
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    text-align: center;
+    max-width: 80%;
+}
+.combat-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.spectator-legend { font-size: 10px; color: var(--v-text-dim); margin-top: 2px; text-align: center; letter-spacing: 0.5px; }
+
+.turn-entry.t-legendary { background: rgba(196, 149, 58, 0.2); border-color: rgba(196, 149, 58, 0.5); opacity: 0.7; min-width: 22px; }
+.turn-entry.t-legendary .turn-ico { font-size: 9px; }
+
+/* ─── DISABLED BUTTON SHAKE ─── */
+@keyframes disabledShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+.action-btn.disabled-shake {
+    animation: disabledShake 0.3s ease-in-out;
+}
+
+/* ─── MEDIEVAL HP COLOR VARS ─── */
+:root {
+    --v-hp-high: #5a8a3c;
+    --v-hp-mid: #b88a2a;
+    --v-hp-low: #a63a2a;
+}

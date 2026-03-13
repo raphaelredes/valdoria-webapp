@@ -1,0 +1,449 @@
+/* game-utilities.css — Skeleton loading, debug console, char deletion, offline badge */
+
+/* ═══════════════════════════════════════════════════
+   Character Selection Screen
+   ═══════════════════════════════════════════════════ */
+
+.char-select-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 0 8px;
+}
+
+.char-select-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: 20px;
+    color: var(--v-gold, #c4953a);
+    margin-bottom: 6px;
+}
+
+.char-select-census {
+    font-size: 12px;
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.4;
+}
+
+.char-select-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.char-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 12px;
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: left;
+    width: 100%;
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    color: var(--v-text, #d4c8b0);
+}
+
+.char-card:active {
+    background: var(--v-bg-raised, #3a3028);
+    border-color: var(--v-gold, #c4953a);
+}
+
+.char-card-active {
+    border-color: rgba(196, 149, 58, 0.5);
+    background: rgba(196, 149, 58, 0.06);
+}
+
+.char-card-icon {
+    font-size: 28px;
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.char-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.char-card-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--v-text, #d4c8b0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.char-card-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(196, 149, 58, 0.2);
+    color: var(--v-gold, #c4953a);
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+.char-card-details {
+    font-size: 13px;
+    color: var(--v-text-dim, #a09484);
+    margin-top: 2px;
+}
+
+.char-card-arrow {
+    font-size: 16px;
+    color: var(--v-text-dim, #a09484);
+    flex-shrink: 0;
+}
+.char-card-meta {
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--v-text-dim);
+    margin-top: 2px;
+}
+.char-card-hp {
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+}
+.char-card-hp-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.char-select-empty {
+    text-align: center;
+    padding: 24px 14px;
+}
+
+.char-select-empty-icon {
+    font-size: clamp(36px, 12vw, 48px);
+    margin-bottom: 12px;
+}
+
+.char-select-empty-text {
+    font-size: 14px;
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.6;
+}
+
+.char-select-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.char-select-create {
+    width: 100%;
+}
+
+.char-select-secondary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.char-select-community {
+    width: 100%;
+    opacity: 0.7;
+    font-size: 13px;
+}
+
+
+/* ═══════════════════════════════════════════════════
+   In-Content Buttons (Phase 2: buttons scroll with text)
+   ═══════════════════════════════════════════════════ */
+
+/* Button rows rendered inside #content get top margin for spacing from text */
+.screen-content > .btn-row:first-of-type {
+    margin-top: 10px;
+}
+
+.screen-content > .btn-row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════
+   Compact Footer (Phase 3: universal pause menu)
+   Single row: Mochila | Ficha | Grupo | ⚙️ | ❓
+   ═══════════════════════════════════════════════════ */
+
+.footer-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 3px !important;
+    min-height: 34px !important;
+    font-size: 11px !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--v-text-dim, #a09484) !important;
+    transition: color 0.2s;
+}
+
+.footer-btn:active {
+    color: var(--v-gold, #c4953a) !important;
+    background: rgba(196, 149, 58, 0.08) !important;
+    transform: none !important;
+}
+
+/* Voltar (back) button — slightly more prominent in content area */
+.btn-back {
+    color: var(--v-text, #d4c8b0) !important;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+.footer-quick {
+    display: flex;
+    gap: 2px;
+    justify-content: space-around;
+    overflow-x: hidden;
+}
+
+/* Footer rendered at top of content (nav_position=top) */
+.footer-top-row {
+    display: flex;
+    gap: 1px;
+    justify-content: space-around;
+    overflow-x: hidden;
+    margin-bottom: 4px;
+    padding: 0 2px;
+}
+
+/* ─── Offline Badge ─── */
+.offline-badge {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    background: rgba(239, 68, 68, 0.9);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    z-index: 20;
+    font-family: var(--v-font);
+    animation: valdoriaFadeIn 0.3s ease;
+}
+@keyframes valdoriaFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ─── Skeleton Loading Cards ─── */
+.char-card-skeleton {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    flex-shrink: 0;
+}
+.skeleton-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.skeleton-line {
+    height: 12px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+}
+.skeleton-line.short { width: 60%; }
+.skeleton-line.medium { width: 80%; }
+.skeleton-line.long { width: 95%; }
+@keyframes skeletonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ─── Pull-to-Refresh ─── */
+.ptr-indicator {
+    text-align: center;
+    font-size: 12px;
+    color: var(--v-text-dim, #a09484);
+    padding: 8px 0 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-family: var(--v-font);
+}
+.ptr-indicator.visible { opacity: 1; }
+.ptr-indicator .ptr-spinner {
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+}
+/* spin → shared/animations.css */
+
+/* ─── Connection Status Dot ─── */
+.connection-dot {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    z-index: 18;
+    transition: background 0.3s ease;
+    box-shadow: 0 0 4px rgba(74,222,128,0.4);
+}
+.connection-dot.offline {
+    background: #ef4444;
+    box-shadow: 0 0 4px rgba(239,68,68,0.4);
+}
+.connection-dot.slow {
+    background: #fbbf24;
+    box-shadow: 0 0 4px rgba(251,191,36,0.4);
+}
+
+/* ─── Rate Limit Toast Style ─── */
+.toast.rate-limit {
+    background: rgba(251,191,36,0.9);
+    color: #1a1a1a;
+}
+
+/* ─── Debug Console ─── */
+.debug-console {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 9999;
+    padding: 16px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 11px;
+    color: #4ade80;
+    line-height: 1.5;
+    display: none;
+}
+.debug-console .debug-close {
+    position: fixed;
+    top: 8px;
+    right: 12px;
+    font-size: 20px;
+    color: #ef4444;
+    cursor: pointer;
+    z-index: 10000;
+    background: none;
+    border: none;
+}
+.debug-console .debug-section {
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(74,222,128,0.2);
+    padding-bottom: 8px;
+}
+.debug-console .debug-label {
+    color: #fbbf24;
+    font-weight: bold;
+}
+
+/* ─── Character Deletion Confirmation Modal ─── */
+.char-delete-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: valdoriaFadeIn 0.2s ease;
+}
+.char-delete-card {
+    background: var(--v-bg-raised, #332a22);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: 12px;
+    padding: 16px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    font-family: var(--v-font);
+}
+.char-delete-icon {
+    font-size: clamp(26px, 8vw, 32px);
+    margin-bottom: 8px;
+}
+.char-delete-title {
+    font-size: 16px;
+    color: var(--v-text, #d4c8b0);
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+.char-delete-name {
+    font-size: 14px;
+    color: #ef4444;
+    margin-bottom: 12px;
+}
+.char-delete-warn {
+    font-size: 12px;
+    color: var(--v-text-dim, #a09484);
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+.char-delete-actions {
+    display: flex;
+    gap: 8px;
+}
+.char-delete-actions button {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 8px;
+    border: 1px solid var(--v-border, #4a3828);
+    font-family: var(--v-font);
+    font-size: 13px;
+    cursor: pointer;
+}
+.char-delete-cancel {
+    background: var(--v-bg-card, #2e2520);
+    color: var(--v-text, #d4c8b0);
+}
+.char-delete-confirm {
+    background: rgba(239,68,68,0.2);
+    color: #ef4444;
+    border-color: rgba(239,68,68,0.4) !important;
+}
+/* Long press indicator on char cards */
+.char-card-delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(239,68,68,0.15);
+    color: #ef4444;
+    font-size: 12px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+}
+.char-card:hover .char-card-delete,
+.char-card.show-delete .char-card-delete {
+    display: flex;
+}
+.char-card {
+    position: relative;
+}

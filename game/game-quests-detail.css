@@ -1,0 +1,187 @@
+/* game-quests-detail.css — Quest detail view, abandon, chain, NPC */
+
+/* ═══════════════════════════════════════════════════════════════
+   QUEST ABANDON — Styled confirmation
+   ═══════════════════════════════════════════════════════════════ */
+
+.quest-abandon {
+    text-align: center;
+    padding: 8px 4px;
+}
+.quest-abandon-icon {
+    font-size: clamp(28px, 9vw, 36px);
+    margin-bottom: 6px;
+    animation: questAbandonPulse 1.5s ease-in-out infinite;
+}
+@keyframes questAbandonPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+.quest-abandon-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #e57373;
+    font-family: var(--v-font-display);
+    margin-bottom: 10px;
+}
+.quest-abandon-name {
+    font-size: 15px;
+    color: var(--v-text-bright, #e8dcc8);
+    margin-bottom: 10px;
+    padding: 6px 12px;
+    background: var(--v-bg-card);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm, 6px);
+    display: inline-block;
+}
+.quest-abandon-warn {
+    font-size: 13px;
+    color: var(--v-text-dim);
+    line-height: 1.5;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: rgba(123, 32, 32, 0.08);
+    border: 1px solid rgba(123, 32, 32, 0.2);
+    border-radius: var(--v-radius-sm, 6px);
+}
+.quest-abandon-lost {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(42, 36, 32, 0.4);
+    border-radius: var(--v-radius-sm, 6px);
+    margin-bottom: 6px;
+}
+.quest-abandon-lost-label {
+    font-size: 12px;
+    color: var(--v-text-dim);
+    white-space: nowrap;
+}
+.quest-abandon-lost .quest-progress-track { flex: 1; }
+.quest-abandon-lost-val {
+    font-size: 12px;
+    color: var(--v-text-dim);
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   QUEST TRACKER — Mini-widget for City Hub
+   ═══════════════════════════════════════════════════════════════ */
+
+.quest-tracker {
+    margin: 6px 0;
+    padding: 6px 10px;
+    background: rgba(42, 36, 32, 0.4);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm, 6px);
+}
+.quest-tracker-hdr {
+    font-size: 11px;
+    color: var(--v-gold);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    font-family: var(--v-font-display);
+}
+.quest-tracker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3px 0;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 3px;
+}
+.quest-tracker-row:active { background: rgba(196, 149, 58, 0.08); }
+.quest-tracker-row--ready {
+    color: #81c784;
+}
+.quest-tracker-title {
+    font-size: 12px;
+    color: var(--v-text);
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+}
+.quest-tracker-row--ready .quest-tracker-title { color: #81c784; }
+.quest-tracker-prog,
+.quest-tracker-status {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    flex-shrink: 0;
+}
+
+/* Chain badge (card) */
+.quest-chain-badge {
+    font-size: 10px;
+    color: var(--v-gold);
+    opacity: 0.8;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+    font-family: var(--v-font-display);
+}
+
+/* Chain indicator (detail) */
+.quest-chain-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--v-text-dim);
+    margin-bottom: 10px;
+    padding: 4px 10px;
+    background: rgba(196, 149, 58, 0.06);
+    border-radius: var(--v-radius-sm, 6px);
+    border: 1px solid rgba(196, 149, 58, 0.12);
+}
+.quest-chain-next {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    opacity: 0.7;
+    margin-left: auto;
+}
+
+/* NPC name line (card) */
+.quest-card-npc {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    margin-top: 2px;
+    opacity: 0.8;
+}
+
+/* Action buttons (detail) */
+.quest-action-btn {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    margin-top: 8px;
+    border: none;
+    border-radius: var(--v-radius-sm, 6px);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--v-font);
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.quest-action-btn:active { transform: scale(0.97); }
+.quest-action-btn--turnin {
+    background: linear-gradient(135deg, rgba(46, 125, 50, 0.2), rgba(46, 125, 50, 0.12));
+    border: 1px solid rgba(46, 125, 50, 0.35);
+    color: #81c784;
+}
+.quest-action-btn--abandon {
+    background: rgba(123, 32, 32, 0.08);
+    border: 1px solid rgba(123, 32, 32, 0.2);
+    color: #e57373;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 6px 12px;
+    margin-top: 6px;
+}
+

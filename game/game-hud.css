@@ -1,0 +1,215 @@
+/* game-hud.css — HUD bars (HP/MP/XP), stat badges, resource badges, dividers */
+
+/* ═══════════════════════════════════════════════════════════════
+   ENHANCED CONTENT COMPONENTS (game-enhancer.js)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Decorative Dividers ─── */
+.v-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+    margin: 2px 0;
+}
+
+.v-divider::before,
+.v-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--v-gold-dim), transparent);
+}
+
+.v-divider span {
+    font-size: 11px;
+    color: var(--v-gold-dim);
+    flex-shrink: 0;
+}
+
+.v-divider-sm {
+    padding: 4px 0;
+    margin: 4px 0;
+}
+
+.v-divider-sm::before,
+.v-divider-sm::after {
+    background: linear-gradient(90deg, transparent, var(--v-border), transparent);
+}
+
+.v-divider-dot {
+    padding: 2px 0;
+    margin: 2px 0;
+}
+.v-divider-dot::before,
+.v-divider-dot::after {
+    background: linear-gradient(90deg, transparent, rgba(196,149,58,0.12), transparent);
+    height: 1px;
+    border-style: none;
+}
+
+/* ─── Bar Group (consecutive bars wrapped together) ─── */
+.v-bar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 2px 0;
+}
+
+/* ─── Progress Bars (HP, MP, XP, HD) ─── */
+.v-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1px 0;
+}
+
+.v-bar-icon {
+    font-size: 12px;
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.v-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--v-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--v-border);
+    position: relative;
+}
+
+.v-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    position: relative;
+}
+
+/* Ghost bar for damage visualization in Game Hub */
+.v-bar-track .bar-ghost {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    background: rgba(200, 60, 60, 0.45);
+    border-radius: 3px;
+    transition: width 1.2s ease-in 0.3s;
+    pointer-events: none;
+}
+
+/* Shine sweep on heal in Game Hub */
+@keyframes hubShineSweep {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(350%); }
+}
+.v-bar-fill.healing::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 30%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: hubShineSweep 0.6s ease-out forwards;
+    pointer-events: none;
+}
+
+/* HP bar colors (health-based) */
+.v-bar-fill.hp      { background: linear-gradient(90deg, #2d8f2d, #4caf50); }
+.v-bar-fill.hp-warn  { background: linear-gradient(90deg, #d4a017, #f5c800); }
+.v-bar-fill.hp-crit  { background: linear-gradient(90deg, #c62828, #e74c3c); }
+
+/* Resource bar colors */
+.v-bar-fill.mp { background: linear-gradient(90deg, #1565c0, #42a5f5); }
+.v-bar-fill.xp { background: linear-gradient(90deg, #7b1fa2, #ab47bc); }
+.v-bar-fill.hd { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
+
+.v-bar-label {
+    font-size: 11px;
+    font-family: var(--v-font-mono);
+    color: var(--v-text);
+    min-width: 48px;
+    text-align: right;
+    flex-shrink: 0;
+    white-space: nowrap;
+    opacity: 0.85;
+}
+
+.v-bar-extra {
+    font-size: 11px;
+    color: var(--v-text-dim);
+    padding-left: 26px;
+}
+
+/* ─── Stat Badges (AC, ATK, DMG) ─── */
+.v-stat-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    padding: 3px 0;
+}
+
+.v-stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 5px 10px;
+    background: var(--v-bg-raised);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    font-size: 13px;
+    font-family: var(--v-font-mono);
+    color: var(--v-text);
+    white-space: nowrap;
+}
+
+/* ─── Resource Badges (Gold, Items) ─── */
+.v-resource-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 3px 0;
+}
+
+.v-resource-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 5px 12px;
+    background: var(--v-bg-card);
+    border: 1px solid var(--v-border-gold);
+    border-radius: var(--v-radius-pill);
+    font-size: 13px;
+    color: var(--v-gold-light);
+    white-space: nowrap;
+    transition: transform 0.3s ease;
+    position: relative;
+}
+.v-resource-badge.resource-pop {
+    animation: resourcePop 0.4s var(--v-ease-spring);
+}
+@keyframes resourcePop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+/* Floating resource delta (+250 gold, -50 gold) */
+.resource-floater {
+    position: fixed;
+    font-family: var(--v-font);
+    font-size: 14px;
+    font-weight: 700;
+    pointer-events: none;
+    z-index: 200;
+    transform: translateX(-50%);
+    animation: resourceFloat 1.2s ease-out forwards;
+}
+.resource-floater.gain { color: var(--v-success, #4caf50); }
+.resource-floater.loss { color: var(--v-danger, #e74c3c); }
+@keyframes resourceFloat {
+    0%   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    70%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-40px); }
+}
+

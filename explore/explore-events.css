@@ -1,0 +1,268 @@
+/* explore-events.css — Outcome, combat warning, portal, exit confirm, death, encounter */
+
+/* ═══════════════════════════════════════════
+   OUTCOME OVERLAY
+   ═══════════════════════════════════════════ */
+.outcome-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(42, 36, 32, 0.92);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 250;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+.outcome-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+.outcome-text {
+    font-size: 15px;
+    font-style: italic;
+    line-height: 1.75;
+    color: var(--v-text, #d4c8b0);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    margin-bottom: 16px;
+    text-align: center;
+    max-width: 340px;
+    margin: 0 auto 16px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+.outcome-rewards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.outcome-reward {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    animation: rewardPop 0.4s ease forwards;
+}
+.outcome-reward.xp { background: rgba(255, 215, 0, 0.15); color: var(--v-gold-light, #dbb668); text-shadow: 0 0 6px rgba(255,215,0,0.3); }
+.outcome-reward.gold { background: rgba(196, 149, 58, 0.15); color: var(--v-gold, #c4953a); text-shadow: 0 0 6px rgba(196,149,58,0.3); }
+.outcome-reward.heal { background: rgba(68, 170, 136, 0.15); color: #4a8; text-shadow: 0 0 6px rgba(68,170,136,0.3); }
+.outcome-reward.damage { background: rgba(170, 68, 68, 0.15); color: #a44; text-shadow: 0 0 6px rgba(170,68,68,0.3); }
+.outcome-reward.item { background: rgba(150, 100, 200, 0.15); color: #a8a; text-shadow: 0 0 6px rgba(150,100,200,0.3); }
+.btn-continue {
+    padding: 10px 20px;
+    background: linear-gradient(180deg, rgba(196,149,58,0.2), rgba(196,149,58,0.1));
+    border: 1px solid var(--v-gold-dim, #9a7530);
+    color: var(--v-gold, #c4953a);
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    align-self: center;
+}
+.btn-continue { transition: transform 0.12s ease, box-shadow 0.2s ease; }
+.btn-continue:active { transform: scale(0.95); box-shadow: 0 0 12px rgba(196,149,58,0.2); }
+
+/* ═══════════════════════════════════════════
+   COMBAT WARNING
+   ═══════════════════════════════════════════ */
+.combat-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(123, 32, 32, 0.95);
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+.combat-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+.combat-icon { display: none; }
+.combat-text {
+    font-size: 18px;
+    color: var(--v-text-bright, #e8dcc8);
+    text-align: center;
+    max-width: 280px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+.combat-enemy {
+    font-size: clamp(18px, 5.5vw, 22px);
+    font-weight: 900;
+    color: var(--v-gold, #c4953a);
+    text-shadow: 0 0 12px rgba(196,149,58,0.4), 0 2px 4px rgba(0,0,0,0.5);
+}
+/* Skip button override for burgundy background */
+.combat-overlay .v-skip-btn {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--v-text-bright, #e8dcc8);
+    background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+}
+.combat-overlay .v-skip-btn:active {
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08));
+}
+
+/* ═══════════════════════════════════════════
+   PORTAL OVERLAY (exit transition)
+   ═══════════════════════════════════════════ */
+.portal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 40, 30, 0.96);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    opacity: 0;
+    pointer-events: none;
+    background: rgba(42, 36, 32, 0.94);
+    transition: opacity 0.4s ease;
+}
+.portal-overlay.active { opacity: 1; pointer-events: all; animation: portalBreathe 3s ease-in-out infinite; }
+.portal-icon { display: none; }
+.portal-title { font-size: 18px; font-weight: 700; color: #4ad680; letter-spacing: 1px; text-shadow: 0 0 12px rgba(74,214,128,0.4), 0 2px 4px rgba(0,0,0,0.5); }
+.portal-summary { text-align: center; color: var(--v-text, #d4c8b0); font-size: 13px; line-height: 1.8; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+.portal-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
+/* Skip button override for dark green background */
+.portal-overlay .v-skip-btn {
+    border-color: rgba(74, 214, 128, 0.4);
+    color: #4ad680;
+    background: linear-gradient(180deg, rgba(74,214,128,0.12), rgba(74,214,128,0.04));
+}
+.portal-overlay .v-skip-btn:active {
+    background: linear-gradient(180deg, rgba(74,214,128,0.2), rgba(74,214,128,0.1));
+}
+
+/* ═══════════════════════════════════════════
+   EXIT CONFIRMATION OVERLAY
+   ═══════════════════════════════════════════ */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(42, 36, 32, 0.95);
+    z-index: 350;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+.confirm-overlay.active { opacity: 1; pointer-events: all; }
+.confirm-icon { font-size: clamp(32px, 10vw, 40px); text-align: center; margin-bottom: 12px; }
+.confirm-title { font-size: 18px; font-weight: 700; color: var(--v-gold, #c4953a); text-align: center; margin-bottom: 8px; text-shadow: 0 0 8px rgba(196,149,58,0.3), 0 1px 2px rgba(0,0,0,0.5); }
+.confirm-text { font-size: 13px; color: var(--v-text-dim, #a09484); text-align: center; margin-bottom: 20px; }
+.confirm-buttons { display: flex; gap: 12px; }
+.btn-cancel {
+    flex: 1;
+    padding: 12px;
+    min-height: 44px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--v-border, #4a3828);
+    color: var(--v-text-dim, #a09484);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-cancel { transition: transform 0.12s ease; }
+.btn-cancel:active { transform: scale(0.96); }
+.btn-confirm {
+    flex: 1;
+    padding: 12px;
+    min-height: 44px;
+    background: linear-gradient(180deg, rgba(123,32,32,0.3), rgba(123,32,32,0.15));
+    border: 1px solid rgba(170, 68, 68, 0.5);
+    color: #c88;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.btn-confirm { transition: transform 0.12s ease; }
+.btn-confirm:active { transform: scale(0.96); }
+
+/* ═══════════════════════════════════════════
+   DEATH OVERLAY
+   ═══════════════════════════════════════════ */
+.death-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(80, 20, 20, 0.96);
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+.death-overlay.active { opacity: 1; pointer-events: all; }
+.death-icon { display: none; }
+.death-title { font-size: clamp(18px, 5.5vw, 22px); font-weight: 900; color: #c44; letter-spacing: 2px; text-shadow: 0 0 16px rgba(204,68,68,0.5), 0 2px 4px rgba(0,0,0,0.6); }
+.death-summary { text-align: center; color: var(--v-text, #d4c8b0); font-size: 13px; line-height: 1.8; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+.death-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
+.death-overlay .v-skip-btn {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--v-text-bright, #e8dcc8);
+    background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+}
+.death-overlay .v-skip-btn:active {
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08));
+}
+
+/* ═══════════════════════════════════════════
+   RANDOM ENCOUNTER OVERLAY
+   ═══════════════════════════════════════════ */
+.encounter-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 250;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95) translateY(10px);
+    transition: opacity 0.25s ease, transform 0.4s var(--v-ease-spring);
+}
+.encounter-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: scale(1) translateY(0);
+}
+.encounter-overlay .dm-card {
+    border-color: rgba(180, 50, 50, 0.5);
+    box-shadow: 0 0 30px rgba(180, 50, 50, 0.15), 0 8px 32px rgba(0,0,0,0.5);
+}
+.encounter-flash {
+    position: fixed;
+    inset: 0;
+    background: rgba(200, 50, 50, 0.4);
+    z-index: 249;
+    animation: encounterFlash 0.8s ease-out forwards;
+    pointer-events: none;
+    box-shadow: inset 0 0 80px rgba(180, 40, 40, 0.4);
+}
+.screen-shake {
+    animation: screenShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+

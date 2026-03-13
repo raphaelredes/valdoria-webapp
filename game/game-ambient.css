@@ -1,0 +1,114 @@
+/* game-ambient.css — Night/day tint, button ripple, flavor atmosphere, bar shine */
+
+/* ═══════════════════════════════════════════════════════════════
+   IMMERSION ENHANCEMENTS — Night/Day Tint + Button Polish
+   Zero-weight CSS-only additions for ambient atmosphere.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Night/Day Ambient Tint Overlay ─── */
+/* Applied via body[data-time] attribute from server is_night flag.
+   Uses pseudo-element overlay — zero DOM weight, GPU-composited. */
+body[data-time="night"]::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+        ellipse at 50% 30%,
+        rgba(20, 30, 60, 0.06) 0%,
+        rgba(10, 15, 40, 0.12) 50%,
+        rgba(5, 8, 25, 0.18) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+}
+
+body[data-time="dusk"]::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+        ellipse at 50% 60%,
+        rgba(180, 100, 40, 0.04) 0%,
+        rgba(140, 60, 20, 0.08) 60%,
+        rgba(80, 30, 10, 0.12) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+}
+
+body[data-time="dawn"]::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+        ellipse at 50% 80%,
+        rgba(100, 130, 180, 0.04) 0%,
+        rgba(60, 80, 120, 0.07) 60%,
+        rgba(30, 40, 80, 0.10) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+}
+
+/* Night mode subtle adjustments — slightly cooler gold, dimmer text */
+body[data-time="night"] {
+    --v-gold-night: #b08530;
+}
+body[data-time="night"] .screen-content b,
+body[data-time="night"] .screen-content strong {
+    color: var(--v-gold-night);
+    text-shadow: 0 0 8px rgba(176, 133, 48, 0.15);
+}
+
+/* ─── Button Tap Ripple (lightweight) ─── */
+/* Adds a brief inner-glow on active state for tactile feel */
+.btn-action:active {
+    transform: scale(0.96);
+    background: var(--v-bg-card-hover);
+    border-color: var(--v-gold-dim);
+    box-shadow: inset 0 0 12px rgba(196, 149, 58, 0.15);
+    transition: all 0.08s ease;
+}
+
+/* ─── Footer Button Hover Glow (subtle) ─── */
+.footer-row .btn-action:active {
+    box-shadow: inset 0 0 8px rgba(196, 149, 58, 0.12);
+    border-color: var(--v-gold-dim);
+}
+
+/* ─── Content Flavor Text Atmosphere ─── */
+/* Italic (flavor) text gets a subtle dimmed glow for narrative feel */
+.screen-content i, .screen-content em {
+    color: var(--v-text-dim);
+    text-shadow: 0 0 20px rgba(138, 122, 104, 0.08);
+}
+
+/* ─── Bar Shine on Full HP/MP ─── */
+/* CSS-only: bars at 100% get a subtle animated gleam via ::after overlay */
+.v-bar-fill[style*="width: 100%"]::after,
+.v-bar-fill[style*="width:100%"]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        110deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.08) 45%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.08) 55%,
+        transparent 70%
+    );
+    background-size: 250% 100%;
+    animation: barShine 4s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes barShine {
+    0%, 100% { background-position: 200% 0; }
+    50%      { background-position: -100% 0; }
+}
+
+

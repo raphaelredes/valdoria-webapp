@@ -1,0 +1,117 @@
+/* game-transitions.css — Screen animations, badge bounce, button entrance */
+
+/* ─── Screen Slide+Fade Transition ─── */
+/* Default (forward) */
+.screen.fade-out {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.screen.fade-in {
+    animation: slideFromRight 0.3s var(--v-ease-snap, var(--v-ease-snap));
+}
+@keyframes slideFromRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Back direction (slide from left) */
+.screen.slide-back-out {
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.screen.slide-back-in {
+    animation: slideFromLeft 0.3s var(--v-ease-snap, var(--v-ease-snap));
+}
+@keyframes slideFromLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ─── Notification Badge Bounce ─── */
+/* badgeBounce → shared/animations.css */
+.btn-action[data-badge]::after {
+    content: attr(data-badge);
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--v-crimson, #7b2020);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 0 4px;
+    animation: badgeBounce 0.5s ease;
+}
+.btn-action[data-badge] { position: relative; overflow: visible; }
+
+/* ─── Staggered Button Entrance (spring bounce) ─── */
+@keyframes btnEntrance {
+    0%   { opacity: 0; transform: translateY(12px) scale(0.97); }
+    60%  { opacity: 1; transform: translateY(-2px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.btn-row {
+    animation: btnEntrance 0.3s var(--v-ease-snap, var(--v-ease-snap)) both;
+}
+.btn-row:nth-child(1) { animation-delay: 0s; }
+.btn-row:nth-child(2) { animation-delay: 0.04s; }
+.btn-row:nth-child(3) { animation-delay: 0.08s; }
+.btn-row:nth-child(4) { animation-delay: 0.12s; }
+.btn-row:nth-child(5) { animation-delay: 0.16s; }
+.btn-row:nth-child(6) { animation-delay: 0.2s; }
+.btn-row:nth-child(n+7) { animation-delay: 0.24s; }
+
+/* ─── Hero Button Idle Gold Pulse ─── */
+@keyframes heroPulse {
+    0%, 100% { box-shadow: var(--v-shadow-gold); }
+    50%      { box-shadow: 0 0 18px rgba(196, 149, 58, 0.35), 0 0 6px rgba(196, 149, 58, 0.2); }
+}
+.btn-hero {
+    animation: heroPulse 3s ease-in-out infinite;
+    will-change: box-shadow;
+}
+.btn-hero:active { animation: none; box-shadow: var(--v-shadow-gold); }
+
+/* ─── Content Block Staggered Entrance ─── */
+@keyframes blockFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.screen-content > * {
+    animation: blockFadeIn 0.3s ease-out both;
+}
+.screen-content > *:nth-child(1) { animation-delay: 0s; }
+.screen-content > *:nth-child(2) { animation-delay: 0.05s; }
+.screen-content > *:nth-child(3) { animation-delay: 0.1s; }
+.screen-content > *:nth-child(4) { animation-delay: 0.15s; }
+.screen-content > *:nth-child(5) { animation-delay: 0.2s; }
+.screen-content > *:nth-child(n+6) { animation-delay: 0.25s; }
+
+/* ─── Location Header Entrance ─── */
+@keyframes headerReveal {
+    0%   { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    60%  { opacity: 1; transform: translateY(1px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.v-location-header {
+    animation: headerReveal 0.4s ease-out;
+}
+.v-location-header h2 {
+    animation: headerReveal 0.5s ease-out 0.1s both;
+}
+
+/* ─── Ambient Particles (Canvas overlay) ─── */
+#ambient-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.7;
+}
+
