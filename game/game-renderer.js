@@ -184,33 +184,42 @@ function renderScreen(screen) {
         setTimeout(() => _showFeedbackOverlay(screen.feedback_popup), 800);
     }
 
-    // Buttons (rendered INTO #content, scrolling with text — not in fixed bottom panel)
-    renderButtons(contentEl, screen.buttons || []);
+    // Nav position setting
+    const navAtTop = screen.nav_position === 'top';
+
+    // Buttons — when navAtTop, render action buttons at the TOP of content (before text)
+    if (navAtTop) {
+        const firstChild = contentEl.firstChild;
+        const frag = document.createDocumentFragment();
+        renderButtons(frag, screen.buttons || []);
+        if (firstChild) {
+            contentEl.insertBefore(frag, firstChild);
+        } else {
+            contentEl.appendChild(frag);
+        }
+    } else {
+        // Default: action buttons after text content
+        renderButtons(contentEl, screen.buttons || []);
+    }
 
     // Text input field (bank amounts, NPC AI chat, tickets)
     renderTextInput(screen);
 
-    // Footer rows (quick + nav)
+    // Footer rows (quick + nav) — ALWAYS in fixed bottom panel
     const hasFooter = screen.footer && (screen.footer.quick || screen.footer.nav);
     const quickEl = document.getElementById('footer-quick');
     const navEl = document.getElementById('footer-nav');
-    const navAtTop = screen.nav_position === 'top';
 
-    if (hasFooter && !navAtTop) {
+    if (hasFooter) {
         renderFooter(screen.footer);
     } else {
         if (quickEl) quickEl.style.display = 'none';
         if (navEl) navEl.style.display = 'none';
     }
 
-    // Nav position: top — render footer buttons at the top of content area
-    if (hasFooter && navAtTop) {
-        renderFooterInContent(contentEl, screen.footer);
-    }
-
-    // Show bottom panel only for text input or footer (buttons are now in content)
+    // Show bottom panel for text input or footer
     const hasTextInput = !!screen.waiting_for_text;
-    if (hasTextInput || (hasFooter && !navAtTop)) {
+    if (hasTextInput || hasFooter) {
         panelEl.style.display = '';
     } else {
         panelEl.style.display = 'none';
