@@ -59,29 +59,28 @@ function handleLocationTap(locId) {
         document.getElementById('info-title').textContent = locData.n || 'Desconhecido';
     }
 
-    // Danger badge
+    // Danger badge — visual diamond pip meter
     const dangerEl = document.getElementById('info-danger');
     const danger = locData.d || 0;
-    if (isExplored) {
-        // Explored: show danger symbols
-        const dangerSymbols = getDangerLabel(danger);
-        if (dangerSymbols) {
-            dangerEl.textContent = dangerSymbols;
-            dangerEl.style.borderColor = getDangerColor(danger);
-            dangerEl.style.color = getDangerColor(danger);
-            dangerEl.style.display = '';
-        } else {
-            dangerEl.style.display = 'none';
+    if (isExplored && danger > 0) {
+        const pips = Math.min(5, Math.ceil(danger / 2));
+        let html = '<span class="danger-meter">';
+        for (let i = 0; i < 5; i++) {
+            const cls = i < pips ? 'danger-pip filled-' + (i + 1) : 'danger-pip empty';
+            html += '<span class="' + cls + '"></span>';
         }
+        html += '</span>';
+        dangerEl.innerHTML = html;
+        dangerEl.style.borderColor = 'transparent';
+        dangerEl.style.display = '';
     } else if (isKnownMapped) {
-        // Known with map: mysterious danger hint
         if (danger >= 5) {
-            dangerEl.textContent = '💀 ???';
+            dangerEl.innerHTML = '<span class="danger-meter"><span class="danger-pip filled-4"></span><span class="danger-pip filled-5"></span><span class="danger-pip empty"></span></span> ???';
             dangerEl.style.borderColor = '#8a4a3a';
             dangerEl.style.color = '#8a4a3a';
             dangerEl.style.display = '';
         } else if (danger >= 3) {
-            dangerEl.textContent = '⚠️ ???';
+            dangerEl.innerHTML = '<span class="danger-meter"><span class="danger-pip filled-2"></span><span class="danger-pip filled-3"></span><span class="danger-pip empty"></span></span> ???';
             dangerEl.style.borderColor = '#8a6a3a';
             dangerEl.style.color = '#8a6a3a';
             dangerEl.style.display = '';
@@ -89,7 +88,6 @@ function handleLocationTap(locId) {
             dangerEl.style.display = 'none';
         }
     } else {
-        // Unmapped: no danger info
         dangerEl.style.display = 'none';
     }
 
@@ -862,7 +860,11 @@ function openQuickList() {
     if (!ql || !items) return;
     items.innerHTML = '';
     const discoveredSet = new Set(S.discoveredLocs || []);
-    // Build sorted list: current first, then by distance
+
+    // Restore sort preference
+    let sortMode = localStorage.getItem('valdoria_ql_sort') || 'dist';
+
+    // Build location data
     const locs = S.knownLocs
         .filter(id => LOCATION_COORDS[id])
         .map(id => {
@@ -871,42 +873,106 @@ function openQuickList() {
             const isMapped = S.mapCoverage.has(id);
             const dist = id === S.currentLoc ? -1 : cachedDist(S.currentLoc, id);
             return { id, ld, isExp, isMapped, dist };
-        })
-        .sort((a, b) => {
-            if (a.id === S.currentLoc) return -1;
-            if (b.id === S.currentLoc) return 1;
-            return (a.dist < 0 ? 999 : a.dist) - (b.dist < 0 ? 999 : b.dist);
         });
 
-    for (const loc of locs) {
-        const div = document.createElement('div');
-        div.className = 'ql-item';
-        const isCurr = loc.id === S.currentLoc;
-        const name = loc.isExp || loc.isMapped ? (loc.ld.n || loc.id) : '???';
-        const icon = loc.isExp || loc.isMapped ? (loc.ld.i || '📍') : '🌫️';
-
-        let badges = '';
-        if (isCurr) badges += '<span class="ql-badge">Aqui</span>';
-        const locQuests = (S.quests || []).filter(q => q.loc === loc.id);
-        if (locQuests.length > 0) badges += `<span class="ql-badge">📜${locQuests.length}</span>`;
-        const locDungeons = (S.dungeons || {})[loc.id] || [];
-        if (locDungeons.length > 0) badges += `<span class="ql-badge">🏰${locDungeons.length}</span>`;
-
-        div.innerHTML = `<span class="ql-item-icon">${icon}</span>` +
-            `<span class="ql-item-name${isCurr ? ' current' : ''}">${name}</span>` +
-            (badges ? `<span class="ql-item-badges">${badges}</span>` : '') +
-            (loc.dist > 0 ? `<span class="ql-item-dist">${loc.dist}🕐</span>` : '');
-        div.addEventListener('click', () => {
-            closeQuickList();
-            // Flash route on map before opening panel
-            if (loc.id !== S.currentLoc) {
-                highlightPath(S.currentLoc, loc.id);
-                if (typeof panToLocationSmooth === 'function') panToLocationSmooth(loc.id);
-            }
-            setTimeout(() => handleLocationTap(loc.id), 350);
-        });
-        items.appendChild(div);
+    function sortLocs(mode) {
+        if (mode === 'name') {
+            locs.sort((a, b) => {
+                if (a.id === S.currentLoc) return -1;
+                if (b.id === S.currentLoc) return 1;
+                const na = (a.isExp || a.isMapped) ? (a.ld.n || '') : 'zzz';
+                const nb = (b.isExp || b.isMapped) ? (b.ld.n || '') : 'zzz';
+                return na.localeCompare(nb);
+            });
+        } else {
+            locs.sort((a, b) => {
+                if (a.id === S.currentLoc) return -1;
+                if (b.id === S.currentLoc) return 1;
+                return (a.dist < 0 ? 999 : a.dist) - (b.dist < 0 ? 999 : b.dist);
+            });
+        }
     }
+
+    // Sort bar
+    const sortBar = document.createElement('div');
+    sortBar.className = 'ql-sort-bar';
+    const btnDist = document.createElement('button');
+    btnDist.type = 'button';
+    btnDist.className = 'ql-sort-btn' + (sortMode === 'dist' ? ' active' : '');
+    btnDist.textContent = 'Por Dist\u00e2ncia';
+    const btnName = document.createElement('button');
+    btnName.type = 'button';
+    btnName.className = 'ql-sort-btn' + (sortMode === 'name' ? ' active' : '');
+    btnName.textContent = 'Por Nome';
+    btnDist.addEventListener('click', () => { sortMode = 'dist'; localStorage.setItem('valdoria_ql_sort', 'dist'); btnDist.classList.add('active'); btnName.classList.remove('active'); renderItems(); });
+    btnName.addEventListener('click', () => { sortMode = 'name'; localStorage.setItem('valdoria_ql_sort', 'name'); btnName.classList.add('active'); btnDist.classList.remove('active'); renderItems(); });
+    sortBar.appendChild(btnDist);
+    sortBar.appendChild(btnName);
+    items.appendChild(sortBar);
+
+    function renderItems() {
+        // Remove all items except sort bar
+        const existing = items.querySelectorAll('.ql-item');
+        existing.forEach(el => el.remove());
+
+        sortLocs(sortMode);
+
+        for (const loc of locs) {
+            const div = document.createElement('div');
+            div.className = 'ql-item';
+            const isCurr = loc.id === S.currentLoc;
+            if (isCurr) div.classList.add('ql-item-current');
+            const name = loc.isExp || loc.isMapped ? (loc.ld.n || loc.id) : '???';
+            const icon = loc.isExp || loc.isMapped ? (loc.ld.i || '\ud83d\udccd') : '\ud83c\udf2b\ufe0f';
+
+            // Biome dot
+            const biome = BIOME_INFO[loc.ld.b] || BIOME_INFO.plains;
+            const biomeDot = '<span class="ql-biome-dot" style="background:' + (biome.hexFill || '#6a8a5a') + '"></span>';
+
+            // Status icon
+            let statusIcon = '';
+            if (isCurr) statusIcon = '<span class="ql-status-icon">\ud83d\udccd</span>';
+            else if (loc.isExp) statusIcon = '<span class="ql-status-icon">\u2713</span>';
+            else if (loc.isMapped) statusIcon = '<span class="ql-status-icon">\ud83d\udc41</span>';
+            else statusIcon = '<span class="ql-status-icon">?</span>';
+
+            // Danger pips (mini)
+            let dangerHtml = '';
+            const danger = loc.ld.d || 0;
+            if (loc.isExp && danger > 0) {
+                const pips = Math.min(5, Math.ceil(danger / 2));
+                const colors = ['#5a8a3a', '#8a8a3a', '#aa6a2a', '#aa3a2a', '#6a1a1a'];
+                dangerHtml = '<span class="ql-danger-pips">';
+                for (let i = 0; i < pips; i++) {
+                    dangerHtml += '<span class="ql-danger-pip" style="background:' + colors[Math.min(i, colors.length - 1)] + '"></span>';
+                }
+                dangerHtml += '</span>';
+            }
+
+            let badges = '';
+            if (isCurr) badges += '<span class="ql-badge">Aqui</span>';
+            const locQuests = (S.quests || []).filter(q => q.loc === loc.id);
+            if (locQuests.length > 0) badges += '<span class="ql-badge">\ud83d\udcdc' + locQuests.length + '</span>';
+            const locDungeons = (S.dungeons || {})[loc.id] || [];
+            if (locDungeons.length > 0) badges += '<span class="ql-badge">\ud83c\udff0' + locDungeons.length + '</span>';
+
+            div.innerHTML = biomeDot + statusIcon +
+                '<span class="ql-item-name' + (isCurr ? ' current' : '') + '">' + name + '</span>' +
+                dangerHtml +
+                (badges ? '<span class="ql-item-badges">' + badges + '</span>' : '') +
+                (loc.dist > 0 ? '<span class="ql-item-dist">' + loc.dist + '\ud83d\udd50</span>' : '');
+            div.addEventListener('click', () => {
+                closeQuickList();
+                if (loc.id !== S.currentLoc) {
+                    highlightPath(S.currentLoc, loc.id);
+                    if (typeof panToLocationSmooth === 'function') panToLocationSmooth(loc.id);
+                }
+                setTimeout(() => handleLocationTap(loc.id), 350);
+            });
+            items.appendChild(div);
+        }
+    }
+    renderItems();
     ql.classList.add('open');
     closeInfoPanel();
 }
