@@ -659,13 +659,13 @@
    ═══════════════════════════════════════════ */
 .backpack-anim {
     position: relative;
-    width: 140px; height: 160px;
+    width: clamp(100px, 36vw, 140px); height: clamp(115px, 42vw, 160px);
     margin-bottom: 10px;
 }
 .bp-glow {
     position: absolute;
     top: 50%; left: 50%;
-    width: 120px; height: 120px;
+    width: clamp(85px, 30vw, 120px); height: clamp(85px, 30vw, 120px);
     transform: translate(-50%, -50%);
     background: radial-gradient(circle, rgba(196,149,58,0.15) 0%, transparent 70%);
     border-radius: 50%;
@@ -676,7 +676,7 @@
     50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
 }
 .bp-icon {
-    width: 140px; height: 160px;
+    width: clamp(100px, 36vw, 140px); height: clamp(115px, 42vw, 160px);
     filter: drop-shadow(0 0 8px rgba(196,149,58,0.3));
 }
 .bp-flap {
