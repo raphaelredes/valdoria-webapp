@@ -506,7 +506,7 @@ body::after {
 .v-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--v-gold-dim), transparent);
-    margin: 16px 0;
+    margin: clamp(8px, 2vw, 16px) 0;
     border: none;
     position: relative;
 }

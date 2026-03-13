@@ -97,7 +97,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 .screen-banner img {
     width: 100%;
     height: auto;
-    max-height: 120px;
+    max-height: clamp(80px, 15vw, 120px);
     object-fit: cover;
     display: block;
 }
@@ -452,9 +452,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 /* ── Magic Summoning Circle ── */
 .magic-circle {
     position: relative;
-    width: 260px;
-    height: 260px;
-    margin-bottom: 14px;
+    width: clamp(180px, 60vw, 260px);
+    height: clamp(180px, 60vw, 260px);
+    margin-bottom: 10px;
     animation: circleEntrance 2s var(--v-ease-snap) both;
 }
 @keyframes circleEntrance {

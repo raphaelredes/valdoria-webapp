@@ -627,8 +627,8 @@ body {
 /* 3D Dice wrapper (THREE.js canvas + particles) */
 .dice3d-wrapper {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: clamp(140px, 48vw, 200px);
+    height: clamp(140px, 48vw, 200px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -639,8 +639,8 @@ body {
     margin-top: 8px;
 }
 .dice3d-canvas {
-    width: 200px;
-    height: 200px;
+    width: clamp(140px, 48vw, 200px);
+    height: clamp(140px, 48vw, 200px);
 }
 .dice3d-canvas canvas {
     display: block;
