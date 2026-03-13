@@ -44,6 +44,8 @@ const _RE_PARTY_HDR    = /^━\s*<b>.*GRUPO.*<\/b>\s*━/i;
 const _RE_NOTIF        = /^📬/;
 const _RE_SOCIAL_PULSE = /^👥\s/;
 const _RE_BANNER_LINK  = /^<a\s+href="[^"]*">\s*\u200b?\s*<\/a>$/;
+// Date/weather line: emoji? HH:MM | DD de Month, Ano NNN | weather
+const _RE_DATE_LINE    = /^.{0,2}\s*\d{1,2}:\d{2}\s*\|.*Ano\s+\d/;
 const _RE_FLAVOR_WRAP  = /^<i>[^<]+<\/i>$/;
 const _RE_DEPARTURE    = /^📜\s*<i>/;
 const _RE_BAR_START    = /^(?:🎲\s?)?[🟩🟨🟧🟥🟦🟪⬛]/u;
@@ -101,6 +103,9 @@ function _tokenize(lines) {
 
         // Banner link (<a href="...">​</a>) — strip entirely
         if (_RE_BANNER_LINK.test(t)) { i++; continue; }
+
+        // Date/weather line — strip to save ~50px viewport per screen
+        if (_RE_DATE_LINE.test(t)) { i++; continue; }
 
         // Header block: [time] + divider + title + divider
         if (_RE_HEADER_DIV.test(t)) {
@@ -486,9 +491,7 @@ function _renderHeader(b) {
     const titleText = icon ? title.slice(icon.length).replace(/^\s*[—\-:]\s*/, '').trim() : title;
 
     let h = `<div class="v-location-header"${biomeAttr}>`;
-    if (b.time) {
-        h += `<div class="v-time-bar">${_esc(b.time)}</div>`;
-    }
+    // Date/time stripped from sub-screen headers — hub shows it separately
     if (icon) {
         h += `<span class="v-location-icon">${icon}</span>`;
     }

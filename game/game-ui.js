@@ -553,13 +553,12 @@ function _applyImmersive() {
 function updateImmersiveEligibility(screen) {
     _immersiveEligible = !!(screen && screen.immersive);
 
-    // Auto-expand if text input is active (need to see input field)
-    if (screen && screen.waiting_for_text && _immersiveCollapsed && _immersiveEligible) {
+    // Auto-expand on every screen navigation — buttons must always be visible.
+    // The user can manually collapse per-screen via the · toggle for immersion,
+    // but navigating to a new screen always restores the panel.
+    if (_immersiveCollapsed && _immersiveEligible) {
         _immersiveCollapsed = false;
     }
-
-    // Auto-collapse removed — default is always expanded for better discoverability.
-    // Players can manually collapse via the · toggle for immersion.
 
     _applyImmersive();
 }

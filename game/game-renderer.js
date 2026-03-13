@@ -98,6 +98,9 @@ function renderScreen(screen) {
     // Reset scroll position to top
     screenEl.scrollTop = 0;
 
+    // Clean up orphan resource floaters from previous screen
+    document.querySelectorAll('.resource-floater').forEach(function(el) { el.remove(); });
+
     // Banner image (filter out placeholder text-banners)
     const bannerEl = document.getElementById('banner');
     const bannerImg = document.getElementById('banner-img');
@@ -700,10 +703,14 @@ function renderAllyCards(container, allies) {
     const wrap = document.createElement('div');
     wrap.className = 'ally-cards';
 
-    const header = document.createElement('div');
-    header.className = 'ally-header';
-    header.textContent = '━ GRUPO ━';
-    wrap.appendChild(header);
+    // Solo player (only 1 entry of type 'player'): skip GRUPO header to save space
+    const isSolo = allies.length === 1 && allies[0].type === 'player';
+    if (!isSolo) {
+        const header = document.createElement('div');
+        header.className = 'ally-header';
+        header.textContent = '━ GRUPO ━';
+        wrap.appendChild(header);
+    }
 
     for (const a of allies) {
         const card = document.createElement('div');
@@ -1036,6 +1043,8 @@ function _animateResourceDeltas(contentEl) {
 
 function _showResourceFloater(targetEl, delta, icon) {
     var rect = targetEl.getBoundingClientRect();
+    // Skip floater if badge is not visible (collapsed panel, off-screen)
+    if (!rect.width || !rect.height || (rect.top === 0 && rect.left === 0)) return;
     var el = document.createElement('div');
     el.className = 'resource-floater' + (delta > 0 ? ' gain' : ' loss');
     el.textContent = (delta > 0 ? '+' : '') + delta;

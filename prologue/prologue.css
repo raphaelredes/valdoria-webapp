@@ -25,14 +25,14 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 16px;
+    padding: 12px;
     box-sizing: border-box;
     overflow-y: hidden;
 }
 
 /* ─── Screen header ─── */
 .screen-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--v-gold);
     text-align: center;
@@ -45,7 +45,7 @@
     font-size: 13px;
     color: var(--v-text-dim);
     text-align: center;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     font-style: italic;
 }
 
@@ -53,14 +53,14 @@
 .prologue-text {
     flex: 1;
     overflow-y: auto;
-    padding: 12px;
+    padding: 10px;
     background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     font-size: 14px;
     line-height: 1.6;
     color: var(--v-text);
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .prologue-text b { color: var(--v-gold); }
@@ -76,8 +76,8 @@
 
 .choice-btn {
     width: 100%;
-    min-height: 48px;
-    padding: 10px 16px;
+    min-height: 44px;
+    padding: 8px 14px;
     background: linear-gradient(135deg, rgba(196,149,58,0.15) 0%, rgba(196,149,58,0.05) 100%);
     border: 1px solid rgba(196,149,58,0.3);
     border-radius: var(--v-radius);
@@ -96,8 +96,8 @@
 /* Hero CTA (primary action) */
 .hero-btn {
     width: 100%;
-    min-height: 52px;
-    padding: 12px 16px;
+    min-height: 48px;
+    padding: 10px 14px;
     background: linear-gradient(135deg, var(--v-gold) 0%, #a87d2e 100%);
     border: none;
     border-radius: var(--v-radius);
@@ -143,11 +143,11 @@
 
 /* ─── Lore info card ─── */
 .lore-card {
-    padding: 12px;
+    padding: 10px;
     background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 .lore-card-title {
     font-size: 14px;
@@ -175,7 +175,7 @@
 }
 .sub-screen.active { display: flex; }
 .sub-screen-header {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     flex-shrink: 0;
 }
 .sub-screen-body {
@@ -202,7 +202,7 @@
 .dice-overlay.active { display: flex; }
 .dice-content {
     text-align: center;
-    padding: 24px;
+    padding: 16px;
     width: 90%;
     max-width: 360px;
 }
@@ -211,7 +211,7 @@
     font-weight: 700;
     color: var(--v-gold);
     letter-spacing: 1px;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 .dice-container {
     display: flex;
@@ -295,7 +295,7 @@
 .result-overlay.active { display: flex; }
 .result-content {
     text-align: center;
-    padding: 24px;
+    padding: 16px;
     width: 90%;
     max-width: 360px;
 }
@@ -344,7 +344,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 16px;
     text-align: center;
 }
 .error-msg {
@@ -359,11 +359,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 12px;
+    padding: 8px 10px;
     background: var(--v-bg-card);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 .char-badge-icon { font-size: 24px; }
 .char-badge-info { flex: 1; }

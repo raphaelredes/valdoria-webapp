@@ -1661,8 +1661,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 /* ── Location Header ── */
 .v-location-header {
     text-align: center;
-    padding: 6px 16px 4px;
-    margin: -10px -12px 4px;
+    padding: 4px 16px 3px;
+    margin: -10px -12px 2px;
     background: linear-gradient(180deg, rgba(196,149,58,0.12) 0%, rgba(196,149,58,0.04) 60%, transparent 100%);
     border-bottom: 1px solid rgba(196,149,58,0.2);
     position: relative;
@@ -1684,8 +1684,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 /* Location icon (emoji before title) */
 .v-location-icon {
     display: block;
-    font-size: 24px;
-    margin-bottom: 2px;
+    font-size: 20px;
+    margin-bottom: 1px;
     filter: drop-shadow(0 0 8px rgba(196,149,58,0.3));
     line-height: 1;
 }
@@ -1697,12 +1697,12 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     letter-spacing: 0.5px;
 }
 .v-location-header h2 {
-    font-size: 15px;
+    font-size: 16px;
     color: var(--v-gold-light);
     font-weight: 700;
     letter-spacing: 2.5px;
     text-transform: uppercase;
-    text-shadow: 0 0 12px rgba(196,149,58,0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6), 0 0 16px rgba(196,149,58,0.4);
     margin: 0;
     line-height: 1.2;
 }
@@ -1870,7 +1870,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 
 /* ── Spacer (replaces multiple blank lines) ── */
 .v-spacer {
-    height: 3px;
+    height: 2px;
 }
 
 /* ── Hide spacers adjacent to bar groups (bars are already compact) ── */
@@ -4026,9 +4026,9 @@ body[data-time="night"] .screen-content strong {
 .footer-btn {
     flex: 1;
     min-width: 0;
-    padding: 8px 4px !important;
-    min-height: 40px !important;
-    font-size: 12px !important;
+    padding: 5px 3px !important;
+    min-height: 34px !important;
+    font-size: 11px !important;
     border: none !important;
     background: transparent !important;
     color: var(--v-text-dim, #a09484) !important;
@@ -4058,10 +4058,10 @@ body[data-time="night"] .screen-content strong {
 /* Footer rendered at top of content (nav_position=top) */
 .footer-top-row {
     display: flex;
-    gap: 2px;
+    gap: 1px;
     justify-content: space-around;
     overflow-x: hidden;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     padding: 0 2px;
 }
 
