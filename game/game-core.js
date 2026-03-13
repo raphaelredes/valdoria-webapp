@@ -27,14 +27,14 @@ function _saveSession() {
 function _restoreSession() {
     try {
         var raw = localStorage.getItem(SESSION_KEY);
-        if (\!raw) return false;
+        if (!raw) return false;
         var d = JSON.parse(raw);
         // Expire after 4 hours (match server session TTL)
         if (Date.now() - d.ts > 4 * 60 * 60 * 1000) return false;
-        if (\!S.token && d.token) S.token = d.token;
-        if (\!S.apiBase && d.apiBase) S.apiBase = d.apiBase;
-        if (\!S.uid && d.uid) S.uid = d.uid;
-        if (\!S.charId && d.charId) S.charId = d.charId;
+        if (!S.token && d.token) S.token = d.token;
+        if (!S.apiBase && d.apiBase) S.apiBase = d.apiBase;
+        if (!S.uid && d.uid) S.uid = d.uid;
+        if (!S.charId && d.charId) S.charId = d.charId;
         return true;
     } catch (e) { return false; }
 }
@@ -81,7 +81,7 @@ async function init() {
     }
 
     // Restore missing params from localStorage (WebApp killed and reopened)
-    if (\!S.token || \!S.uid || \!S.apiBase) _restoreSession();
+    if (!S.token || !S.uid || !S.apiBase) _restoreSession();
     // Save current session for future recovery
     if (S.token && S.uid && S.apiBase) _saveSession();
 
