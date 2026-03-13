@@ -118,6 +118,8 @@ function renderPlayerCard(p, isCompact = false) {
     const mpPct = p.mmp > 0 ? (p.mp / p.mmp) : 0;
     const resClass = RES_CLASS_MAP[p.res] || 'mp';
     const resIcon = RES_ICON_MAP[p.res] || '💧';
+    // Low resource warning classes
+    const resLowCls = mpPct <= 0.10 && mpPct > 0 ? ' res-critical' : mpPct <= 0.25 && mpPct > 0 ? ' res-low' : '';
 
     // Compact badges for status, cover, concentration
     const badges = [];
@@ -148,7 +150,7 @@ function renderPlayerCard(p, isCompact = false) {
             </div>
             <div class="bar-row">
                 <span class="bar-icon">${resIcon}</span>
-                <div class="bar-track"><div class="bar-fill ${resClass}" style="width:${mpPct * 100}%"></div></div>
+                <div class="bar-track"><div class="bar-fill ${resClass}${resLowCls}" style="width:${mpPct * 100}%"></div></div>
                 <span class="bar-val">${p.mp}/${p.mmp}</span>
             </div>
             ${badgesHtml}

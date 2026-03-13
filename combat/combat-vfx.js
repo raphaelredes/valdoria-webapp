@@ -69,11 +69,30 @@ function _playCinematicResult(result, actionType) {
                 const hitCount = Math.min(result.lr.hits || enemyCards.length, enemyCards.length);
                 for (let i = 0; i < hitCount; i++) {
                     const cachedCard = enemyCards[i];
-                    setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, null, !!result.lr.crit, cachedCard), _floatDelay + i * 200);
+                    setTimeout(() => {
+                        _showDamageFloat(result.lr.d, result.lr.dt, null, !!result.lr.crit, cachedCard);
+                        _flashEnemyCard(cachedCard, result.lr.dt, !!result.lr.crit);
+                    }, _floatDelay + i * 200);
                 }
             } else {
-                setTimeout(() => _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy', !!result.lr.crit), _floatDelay);
+                setTimeout(() => {
+                    _showDamageFloat(result.lr.d, result.lr.dt, '.entity.enemy', !!result.lr.crit);
+                    const enemyCard = document.querySelector('.entity.enemy');
+                    if (enemyCard) _flashEnemyCard(enemyCard, result.lr.dt, !!result.lr.crit);
+                }, _floatDelay);
             }
+        }
+        // Miss: show miss float + shield block VFX on enemy
+        if (_isDmgType && result.lr.miss) {
+            const _missDelay = 2600;
+            setTimeout(() => {
+                _showMissFloat('.entity.enemy');
+                const enemyCard = document.querySelector('.entity.enemy');
+                if (enemyCard) {
+                    enemyCard.classList.add('miss-deflect');
+                    setTimeout(() => enemyCard.classList.remove('miss-deflect'), 400);
+                }
+            }, _missDelay);
         }
 
         // Phase 3: After full overlay animation, check for kills then render new state
@@ -199,6 +218,34 @@ function _showAnticipation(text) {
 
 function _dmgFlashClass(dt) {
     return _DMG_FLASH_TYPES.has(dt) ? `dmg-flash-${dt}` : 'dmg-flash';
+}
+
+// ─── ENEMY CARD FLASH + SHAKE ON PLAYER HIT ───
+function _flashEnemyCard(card, damageType, isCrit) {
+    if (!card || !document.body.contains(card)) return;
+    // Damage-type flash (reuse existing CSS classes)
+    const flashCls = _dmgFlashClass(damageType);
+    card.classList.remove(flashCls, 'dmg-shake');
+    void card.offsetWidth;
+    card.classList.add(flashCls);
+    setTimeout(() => card.classList.remove(flashCls), 400);
+    // Shake the card (heavier for crits)
+    const shakeCls = isCrit ? 'enemy-hit-heavy' : 'dmg-shake';
+    card.classList.add(shakeCls);
+    setTimeout(() => card.classList.remove(shakeCls), isCrit ? 600 : 500);
+    // Impact flash VFX at card center
+    _showImpactFlash(card, isCrit);
+    // Screen shake on crits
+    if (isCrit) {
+        _shakeApp('heavy');
+        typeof hapticBurst === 'function' && hapticBurst('crit');
+    } else {
+        _shakeApp('light');
+    }
+    // VFX particles if available
+    if (window._combatVfx) {
+        window._combatVfx.impact(card, damageType || 'slashing', {});
+    }
 }
 
 // ─── FLOATING MISS INDICATOR ───
