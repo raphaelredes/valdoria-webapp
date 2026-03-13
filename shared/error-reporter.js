@@ -678,6 +678,12 @@ var ValdoriaErrors = (function () {
 
         _clog('INIT ' + _cfg.appName + ' api=' + (_cfg.apiBase || 'none') + ' uid=' + _cfg.uid);
 
+        // Enable closing confirmation (Android back button / swipe-to-close)
+        var tg = window.Telegram && window.Telegram.WebApp;
+        if (tg && tg.enableClosingConfirmation) {
+            try { tg.enableClosingConfirmation(); } catch (e) { /* older clients */ }
+        }
+
         // Inject overlay HTML
         if (!document.getElementById('v-err-overlay')) {
             var wrapper = document.createElement('div');
