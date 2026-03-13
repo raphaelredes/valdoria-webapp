@@ -14,6 +14,31 @@ const S = {
     screenVersion: 0,  // Server screen version for anti-double-action guard
 };
 
+// ─── Session persistence (survives WebApp kill/reload) ───
+const SESSION_KEY = 'valdoria_session';
+function _saveSession() {
+    try {
+        localStorage.setItem(SESSION_KEY, JSON.stringify({
+            token: S.token, apiBase: S.apiBase, uid: S.uid, charId: S.charId,
+            ts: Date.now(),
+        }));
+    } catch (e) { /* quota exceeded or private mode */ }
+}
+function _restoreSession() {
+    try {
+        var raw = localStorage.getItem(SESSION_KEY);
+        if (\!raw) return false;
+        var d = JSON.parse(raw);
+        // Expire after 4 hours (match server session TTL)
+        if (Date.now() - d.ts > 4 * 60 * 60 * 1000) return false;
+        if (\!S.token && d.token) S.token = d.token;
+        if (\!S.apiBase && d.apiBase) S.apiBase = d.apiBase;
+        if (\!S.uid && d.uid) S.uid = d.uid;
+        if (\!S.charId && d.charId) S.charId = d.charId;
+        return true;
+    } catch (e) { return false; }
+}
+
 const DEBOUNCE_MS = 200;
 const RETRY_MAX = 2;
 const RETRY_BASE_MS = 1000;
@@ -54,6 +79,11 @@ async function init() {
             }
         });
     }
+
+    // Restore missing params from localStorage (WebApp killed and reopened)
+    if (\!S.token || \!S.uid || \!S.apiBase) _restoreSession();
+    // Save current session for future recovery
+    if (S.token && S.uid && S.apiBase) _saveSession();
 
     console.log('[GAME] Params: token=' + (S.token ? S.token.substring(0, 8) + '...' : 'MISSING') +
         ' api=' + (S.apiBase || 'MISSING') +
