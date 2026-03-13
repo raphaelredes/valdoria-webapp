@@ -390,7 +390,7 @@
     border-radius: 10px;
     background: rgba(123,32,32,0.3);
     color: #f0a0a0;
-    border: 1px solid rgba(123,32,32,0.5);
+    border: 1px dashed rgba(123,32,32,0.5);
     white-space: nowrap;
     animation: pillPop 0.3s ease-out;
 }
@@ -398,6 +398,7 @@
     background: rgba(40,100,40,0.35);
     color: #a0e0a0;
     border-color: rgba(60,140,60,0.5);
+    border-style: solid;
 }
 @keyframes pillPop {
     from { opacity: 0; transform: translateY(4px); }

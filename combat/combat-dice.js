@@ -17,6 +17,15 @@ function _ensureDiceOverlay() {
     document.body.appendChild(overlay);
 }
 
+
+// ─── BREAKDOWN DE MODIFICADORES ───
+function _formatBreakdown(lr) {
+    if (!lr.bk || !lr.bk.length) return '';
+    var parts = lr.bk.map(function(p) { return (p.v >= 0 ? '+' : '') + p.v + ' ' + p.l; }).join(' ');
+    var vs = lr.ac ? ' vs CA ' + lr.ac : '';
+    return 'd20(' + (lr.r || '?') + ') ' + parts + ' = ' + (lr.total || lr.r) + vs;
+}
+
 function initDice(lr) {
     if (!lr) return;
     const rollType = lr.t || 'attack';
@@ -140,9 +149,11 @@ function _processAttackResult(lr, label3d, overlay, canvas, particles, skipBtn, 
 
     if (label3d) {
         if (isCrit) {
-            label3d.innerHTML = '<span style="font-size:1.3em">&#x1F31F;</span> CRITICO! <span style="font-size:0.7em">(' + lr.r + ' vs CA ' + lr.ac + ')</span>';
+            var _bkLine = _formatBreakdown(lr);
+            label3d.innerHTML = '<span style="font-size:1.3em">&#x1F31F;</span> CRITICO!' + (_bkLine ? '<br><span class="breakdown-line">' + _bkLine + '</span>' : ' <span style="font-size:0.7em">(' + lr.r + ' vs CA ' + lr.ac + ')</span>');
             label3d.className = 'dmg-dice3d-label crit';
             hapticBurst('crit'); sfxCrit();
+            if (typeof announce === 'function') announce('Critico\! d20: ' + lr.r + ' vs CA ' + lr.ac);
             showNarration(_pick(_NARR_CRIT), 'crit');
             _hitStreak++; if (_hitStreak >= 2) _showComboCounter(_hitStreak);
         } else if (isFail) {
@@ -153,17 +164,21 @@ function _processAttackResult(lr, label3d, overlay, canvas, particles, skipBtn, 
             _hitStreak = 0;
         } else if (isMiss) {
             const total = lr.total || lr.r;
-            label3d.innerHTML = '&#x1F6E1;&#xFE0F; Errou! <span style="font-size:0.7em">(' + total + ' vs CA ' + lr.ac + ')</span>';
+            var _bkMiss = _formatBreakdown(lr);
+            label3d.innerHTML = '&#x1F6E1;&#xFE0F; Errou!' + (_bkMiss ? '<br><span class="breakdown-line">' + _bkMiss + '</span>' : ' <span style="font-size:0.7em">(' + total + ' vs CA ' + lr.ac + ')</span>');
             label3d.className = 'dmg-dice3d-label miss';
             hapticBurst('miss'); sfxMiss();
+            if (typeof announce === 'function') announce('Errou\! d20: ' + (lr.total || lr.r) + ' vs CA ' + lr.ac);
             showNarration(_pick(_NARR_MISS), 'miss');
             _hitStreak = 0;
         } else {
             const total = lr.total || lr.r;
             const hitLabel = lr.t === 'skill' ? 'Habilidade!' : 'Acertou!';
-            label3d.innerHTML = '&#x2694;&#xFE0F; ' + hitLabel + ' <span style="font-size:0.7em">(' + total + ' vs CA ' + lr.ac + ')</span>';
+            var _bkHit = _formatBreakdown(lr);
+            label3d.innerHTML = '&#x2694;&#xFE0F; ' + hitLabel + (_bkHit ? '<br><span class="breakdown-line">' + _bkHit + '</span>' : ' <span style="font-size:0.7em">(' + total + ' vs CA ' + lr.ac + ')</span>');
             label3d.className = 'dmg-dice3d-label hit';
             haptic('medium'); sfxHit();
+            if (typeof announce === 'function') announce(hitLabel + ' d20: ' + (lr.total || lr.r) + ' vs CA ' + lr.ac);
             _hitStreak++; if (_hitStreak >= 2) _showComboCounter(_hitStreak);
         }
     }
@@ -378,6 +393,7 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
         haptic('heavy');
         const app = document.getElementById('app');
         if (app) { app.classList.add('hit-stop'); setTimeout(() => app.classList.remove('hit-stop'), 120); }
+        if (typeof sfxDamageType === 'function') sfxDamageType(lr.dt || 'slashing');
         const enemies = document.querySelectorAll('.entity.enemy');
         const isAoe = lr.t === 'aoe';
         const hitCount = isAoe ? Math.min(lr.hits || enemies.length, enemies.length) : 1;
@@ -402,6 +418,7 @@ function _initDamagePhase(lr, overlay, canvas, particles, label3d, skipBtn, fini
         if (lr.kill) {
             const killName = (currentState?.e && currentState.e[0]?.n) || 'O inimigo';
             showNarration(_pick(_NARR_KILL).replace('{name}', killName), 'crit');
+            if (typeof announce === 'function') announce(killName + ' foi abatido\!');
         }
     };
 

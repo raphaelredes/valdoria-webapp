@@ -284,3 +284,13 @@
     opacity: 1;
 }
 
+
+/* ─── BREAKDOWN DE MODIFICADORES ─── */
+.breakdown-line {
+    font-size: 11px;
+    font-family: var(--v-font);
+    opacity: 0.8;
+    margin-top: 2px;
+    display: block;
+    letter-spacing: 0.3px;
+}

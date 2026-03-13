@@ -3,6 +3,12 @@
    Lendas de Valdoria Combat WebApp
    ═══════════════════════════════════════════════ */
 
+// ─── ARIA ANNOUNCER ───
+function announce(msg) {
+    var el = document.getElementById('combatAnnouncer');
+    if (el) { el.textContent = ''; setTimeout(function() { el.textContent = msg; }, 50); }
+}
+
 // ─── ENTITY CARD (COMPACT + EXPANDABLE) ───
 function renderEntity(e, type, idx, isActiveTurn) {
     const pct = e.mhp > 0 ? (e.hp / e.mhp) : 0;

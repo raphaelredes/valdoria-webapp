@@ -78,3 +78,35 @@ function sfxCrit() { _sfxTone(220, 0.4, 0.18, 'sawtooth'); setTimeout(() => _sfx
 function sfxMiss() { _sfxTone(300, 0.2, 0.06, 'sine'); }
 function sfxPlayerHit() { _sfxTone(80, 0.3, 0.15, 'sawtooth'); }
 function sfxTimerTick() { _sfxTone(600, 0.08, 0.1, 'square'); }
+
+
+// ─── SFX BY DAMAGE TYPE (Web Audio oscillator profiles) ───
+function sfxDamageType(dt) {
+    const ctx = _ensureAudio();
+    if (!ctx || !_audioUnlocked) return;
+    try {
+        const profiles = {
+            fire:      { type: 'sawtooth', f0: 180, f1: 80, dur: 0.35, vol: 0.12 },
+            cold:      { type: 'sine',     f0: 400, f1: 200, dur: 0.3, vol: 0.10 },
+            lightning: { type: 'square',   f0: 800, f1: 200, dur: 0.15, vol: 0.10 },
+            thunder:   { type: 'sawtooth', f0: 60,  f1: 30,  dur: 0.5, vol: 0.14 },
+            necrotic:  { type: 'triangle', f0: 60,  f1: 55,  dur: 0.5, vol: 0.10 },
+            radiant:   { type: 'sine',     f0: 600, f1: 900, dur: 0.4, vol: 0.09 },
+            poison:    { type: 'triangle', f0: 150, f1: 100, dur: 0.4, vol: 0.08 },
+            acid:      { type: 'sawtooth', f0: 250, f1: 120, dur: 0.35, vol: 0.10 },
+            psychic:   { type: 'sine',     f0: 500, f1: 700, dur: 0.35, vol: 0.08 },
+            force:     { type: 'square',   f0: 300, f1: 150, dur: 0.25, vol: 0.10 },
+        };
+        const p = profiles[dt];
+        if (!p) return; // slashing/piercing/bludgeoning use sfxHit()
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = p.type;
+        osc.frequency.setValueAtTime(p.f0, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(Math.max(p.f1, 20), ctx.currentTime + p.dur);
+        gain.gain.setValueAtTime(p.vol, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + p.dur);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + p.dur);
+    } catch (e) { console.warn('[COMBAT] sfxDamageType', e); }
+}
