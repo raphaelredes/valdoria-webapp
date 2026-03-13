@@ -205,6 +205,13 @@ async function initAsync() {
         loadingEl.classList.remove('exit-cinematic');
 
         if (typeof playArrivalAnimation === 'function') playArrivalAnimation();
+
+    // Start ambient music based on current location biome
+    if (typeof ValdoriaAudio !== 'undefined') {
+        const loc = S.locations[S.currentLoc];
+        if (loc && loc.b) ValdoriaAudio.playBiome(loc.b);
+        else ValdoriaAudio.play('city');
+    }
         setTimeout(() => { if (typeof showGestureTutorial === 'function') showGestureTutorial(); }, 1500);
 
     } catch (e) {

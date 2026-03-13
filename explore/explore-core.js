@@ -394,6 +394,11 @@ function loadMapData(data) {
     // Initialize ambient particles
     if (typeof initBiomeParticles === 'function') initBiomeParticles(S.biome);
 
+    // Start ambient music based on biome
+    if (typeof ValdoriaAudio !== 'undefined' && S.biome) {
+        ValdoriaAudio.playBiome(S.biome);
+    }
+
     // Scroll to player
     setTimeout(() => scrollCanvasToPlayer(), 100);
 

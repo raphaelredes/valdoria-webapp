@@ -218,6 +218,7 @@ async function init() {
         if (data && data.text) {
             if (data.sv !== undefined) S.screenVersion = data.sv;
             renderScreen(data);
+            _injectAudioButton();
         } else if (data && data.transition) {
             handleTransition(data.transition);
         } else {
@@ -667,6 +668,15 @@ async function _closeGameHub() {
         clearTimeout(tid);
     } catch (e) { /* never block close */ }
     try { Telegram.WebApp.close(); } catch (e) { console.warn('[GAME] tg.close:', e); }
+}
+
+// Inject audio mute button once
+let _audioButtonInjected = false;
+function _injectAudioButton() {
+    if (_audioButtonInjected || typeof ValdoriaAudio === 'undefined') return;
+    _audioButtonInjected = true;
+    const btn = ValdoriaAudio.createMuteButton();
+    document.body.appendChild(btn);
 }
 
 async function doAction(callbackData) {

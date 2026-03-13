@@ -1,0 +1,37 @@
+/* Valdoria Audio Manager - Mute Button Styles */
+
+.audio-mute-btn {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    z-index: 200;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(112, 66, 20, 0.4);
+    background: rgba(42, 36, 32, 0.85);
+    color: var(--v-text, #d4c8b0);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: opacity 0.2s, transform 0.15s;
+    padding: 0;
+    line-height: 1;
+}
+
+.audio-mute-btn:active {
+    transform: scale(0.9);
+    opacity: 0.8;
+}
+
+/* Hide mute button during loading or when overlays are active */
+.loading:not(.hidden) ~ .audio-mute-btn,
+.dm-overlay.active ~ .audio-mute-btn,
+.outcome-overlay.active ~ .audio-mute-btn {
+    opacity: 0;
+    pointer-events: none;
+}

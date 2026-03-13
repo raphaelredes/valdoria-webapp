@@ -62,6 +62,11 @@ function renderScreen(screen) {
         'dialogue:', screen.dialogue ? 'yes' : 'no',
         'image:', screen.image_url ? 'yes' : 'no');
 
+    // Ambient music: play track based on screen context
+    if (typeof ValdoriaAudio !== 'undefined') {
+        _updateAmbientMusic(screen.screen_id || '');
+    }
+
     S.currentScreen = screen;
     if (typeof cacheScreen === 'function') cacheScreen(screen);
 
@@ -1358,4 +1363,46 @@ function _applyTimeTint(screen) {
             document.body.removeAttribute('data-time');
         }
     }
+}
+
+
+// ===================================================================
+// AMBIENT MUSIC - Maps screen_id to audio track
+// ===================================================================
+function _updateAmbientMusic(screenId) {
+    if (!screenId || typeof ValdoriaAudio === 'undefined') return;
+
+    const SCREEN_MUSIC = {
+        // City screens -> city ambient
+        'city.hub':        'city',
+        'city.locations':  'city',
+        'city.guild':      'city',
+        'city.market':     'city',
+        'city.bank':       'city',
+        'city.temple':     'city',
+        'city.cartographer': 'city',
+        'city.arena':      'combat',
+        // Tavern -> tavern ambient
+        'city.tavern':     'tavern',
+        // Character screens -> city (background)
+        'char.status':     'city',
+        'char.inventory':  'city',
+        'char.skills':     'city',
+        // Exploration-related -> forest (generic)
+        'explore':         'forest',
+    };
+
+    // Match by prefix for sub-screens (e.g., city.guild.quests -> city)
+    let track = SCREEN_MUSIC[screenId];
+    if (!track) {
+        // Try prefix match
+        const prefix = screenId.split('.').slice(0, 2).join('.');
+        track = SCREEN_MUSIC[prefix];
+    }
+    if (!track) {
+        // Default: city ambient for all unmatched screens
+        track = 'city';
+    }
+
+    ValdoriaAudio.play(track);
 }
