@@ -33,7 +33,7 @@ function _playCinematicResult(result, actionType) {
 
     try {
     // Phase 0: Anticipation text (350ms) — "⚔️ Kalfin avança!"
-    const attackerName = currentState?.p?.n || 'Herói';
+    const attackerName = currentState?.p?.n || 'Aventureiro';
     const _antTexts = {
         'skill': `✨ ${attackerName} conjura!`, 'attack': `⚔️ ${attackerName} avança!`,
         'save': `✨ ${attackerName} conjura!`, 'auto_hit': `✨ ${attackerName} conjura!`,

@@ -466,7 +466,7 @@ function loadMapData(data) {
 function setupHUD() {
     const c = S.charData;
     if (!c) return;
-    document.getElementById('hud-name').textContent = c.nm || 'Herói';
+    document.getElementById('hud-name').textContent = c.nm || 'Aventureiro';
     updateHP(c.hp || 10, c.mh || 10);
     updateRewards();
 }
