@@ -770,6 +770,18 @@ body {
 .feed-self { border-left-color: rgba(220,160,80,0.5); }
 .feed-hidden { display: none; }
 .feed-expanded .feed-hidden { display: block; }
+.feed-round-badge {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--v-gold-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 1px 0;
+    border-bottom: 1px solid rgba(196,149,58,0.15);
+    margin-bottom: 2px;
+    opacity: 0.7;
+}
 .feed-toggle {
     text-align: center;
     font-size: 10px;
@@ -1117,6 +1129,14 @@ body {
     color: var(--v-gold-light);
     box-shadow: 0 0 10px rgba(196,149,58,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
     background: linear-gradient(165deg, rgba(196,149,58,0.08) 0%, #241e18 100%);
+}
+/* Player turn: primary attack button pulses to draw attention */
+.action-bar:not(.spectator-bar) .action-btn.primary[data-action="attack"] {
+    animation: attackBtnPulse 2.5s ease-in-out infinite;
+}
+@keyframes attackBtnPulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(196,149,58,0.15), inset 0 1px 0 rgba(255,255,255,0.06); }
+    50% { box-shadow: 0 0 18px rgba(196,149,58,0.35), 0 0 6px rgba(196,149,58,0.2), inset 0 1px 0 rgba(255,255,255,0.1); border-color: var(--v-gold); }
 }
 .action-btn.danger { border-color: rgba(123,32,32,0.5); color: #e08080; }
 .action-btn.full-width { grid-column: 1 / -1; }

@@ -671,11 +671,13 @@ function _renderArenaInner(s) {
         const total = s.feed.length;
         const visibleCount = isNarrative ? 6 : 3;
         const recentFeed = s.feed.slice(-visibleCount);
+        // Round header badge (shows current round at top of feed)
+        const roundBadge = s.rn && s.rn > 1 ? '<div class="feed-round-badge">Rodada ' + s.rn + '</div>' : '';
         const narrativeCls = isNarrative ? ' combat-feed-narrative' : '';
         // Auto-expand feed when latest entry is a crit or kill (epic moments)
         const lastFeedClass = _classifyFeed(s.feed[s.feed.length - 1]);
         const autoExpand = total > visibleCount && (lastFeedClass === 'feed-crit' || lastFeedClass === 'feed-kill');
-        html += `<div class="combat-feed${narrativeCls}${autoExpand ? ' feed-expanded' : ''}" id="combatFeed">`;
+        html += `<div class="combat-feed${narrativeCls}${autoExpand ? ' feed-expanded' : ''}" id="combatFeed">${roundBadge}`;
         if (total > visibleCount) {
             const older = s.feed.slice(0, -visibleCount);
             older.forEach(f => { html += `<div class="feed-entry feed-hidden ${_classifyFeed(f)}">${escHtml(f)}</div>`; });
