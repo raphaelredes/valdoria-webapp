@@ -63,6 +63,9 @@ async function init() {
     console.log('[GAME] init() started');
     console.log('[GAME] URL:', window.location.href);
 
+    // Initialize immersive mode (collapsible bottom panel)
+    if (typeof initImmersive === 'function') initImmersive();
+
     const params = new URLSearchParams(window.location.search);
     S.token = params.get('token') || '';
     // Use ?api= param if provided, otherwise use same-origin (webapp + API share the same server)

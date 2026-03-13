@@ -154,6 +154,10 @@
         <div id="content" class="screen-content" role="main"></div>
     </div>
 
+    <!-- Immersive mode toggle (collapse bottom panel) -->
+    <button id="immersive-toggle" class="immersive-toggle" style="display:none"
+        aria-label="Recolher menu">&middot;</button>
+
     <!-- Fixed bottom panel (action buttons + text input + footer) -->
     <div id="bottom-panel" class="bottom-panel" style="display:none">
         <div id="text-input-wrap" class="text-input-wrap" style="display:none">
@@ -164,6 +168,9 @@
         <div id="footer-quick" class="footer-row footer-quick" role="toolbar" aria-label="Ações Rápidas"></div>
         <div id="footer-nav" class="footer-row footer-nav" role="navigation" aria-label="Navegação"></div>
     </div>
+
+    <!-- Immersive mode restore pill (when panel collapsed) -->
+    <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
 
     <!-- Dice roll overlay (3D animation for skill checks) -->
     <div id="dice-overlay" class="dice-overlay" style="display:none">
