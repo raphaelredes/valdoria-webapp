@@ -131,7 +131,7 @@
     margin-bottom: 4px;
 }
 .quest-npc-icon { font-size: 14px; flex-shrink: 0; }
-.quest-detail-icon { font-size: 24px; display: block; margin-bottom: 2px; }
+.quest-detail-icon { font-size: clamp(20px, 5vw, 24px); display: block; margin-bottom: 2px; }
 .quest-title {
     font-size: 14px;
     font-weight: 600;

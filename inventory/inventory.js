@@ -388,7 +388,7 @@ function renderItemsTab(c) {
         html += `<div style="margin-bottom:10px;"><div class="item-grid">
                 <div class="item-card rarity-common fade-in" onclick="showPotionConfirm()" style="grid-column: span 2;
                     display:flex;align-items:center;gap:12px;padding:12px;">
-                    <span style="font-size:28px;">${vi('flask', 28)}</span>
+                    <span style="font-size:clamp(22px,6vw,28px);">${vi('flask', 28)}</span>
                     <div style="flex:1;">
                         <div class="ic-name" style="font-size:14px;">Poção de Cura</div>
                         <div class="ic-meta">Cura 2d4+2 HP</div>
@@ -1510,7 +1510,7 @@ function showPotionConfirm() {
     let html = '<div class="modal-handle"></div>';
     html += `<div class="modal-title">${vi('flask', 16)} Poção de Cura</div>`;
     html += `<div style="text-align:center;margin-bottom:12px;">`;
-    html += `<div style="font-size:28px;margin-bottom:6px;">${vi('flask', 28)}</div>`;
+    html += `<div style="font-size:clamp(22px,6vw,28px);margin-bottom:6px;">${vi('flask', 28)}</div>`;
     html += `<div style="font-size:12px;color:var(--v-text-dim);">Restante: x${localPotions}</div>`;
     html += `<div style="font-size:13px;color:var(--v-success);margin-top:8px;">${vi('heart', 13)} Cura 2d4+2 HP (~+${gain > 0 ? gain : 7})</div>`;
     html += `<div style="font-size:12px;color:var(--v-text-dim);margin-top:4px;">${vi('heart', 12)} ${localHP}/${D.p.mhp} → ~${preview}/${D.p.mhp}</div>`;
@@ -1533,7 +1533,7 @@ function showEquipConfirm(name) {
     let html = '<div class="modal-handle"></div>';
     html += `<div class="modal-title">${vi('sword', 16)} Equipar?</div>`;
     html += `<div style="text-align:center;margin-bottom:12px;">`;
-    html += `<div style="font-size:22px;margin-bottom:4px;">${it.e || '📦'}</div>`;
+    html += `<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;
     html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
     html += `<div style="font-size:12px;color:var(--v-text-dim);">${SLOT_NAMES[slot] || slot}</div>`;
     html += `</div>`;
@@ -1562,7 +1562,7 @@ function showUseConfirm(name) {
     let html = '<div class="modal-handle"></div>';
     html += `<div class="modal-title">${vi('flask', 16)} Usar Item?</div>`;
     html += `<div style="text-align:center;margin-bottom:12px;">`;
-    html += `<div style="font-size:22px;margin-bottom:4px;">${it.e || '📦'}</div>`;
+    html += `<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;
     html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
     if (qty > 1) html += `<div style="font-size:12px;color:var(--v-text-dim);">Restante: x${qty}</div>`;
     if (it.heal) {
@@ -1585,7 +1585,7 @@ function showSellConfirm(name, price) {
     let html = '<div class="modal-handle"></div>';
     html += `<div class="modal-title">${vi('coin', 16)} Vender Item?</div>`;
     html += `<div style="text-align:center;margin-bottom:12px;">`;
-    html += `<div style="font-size:22px;margin-bottom:4px;">${it.e || '📦'}</div>`;
+    html += `<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;
     html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
     html += `<div style="font-size:13px;color:var(--v-gold);margin-top:6px;">${vi('coin', 13)} +${price} GP (50% do valor)</div>`;
     html += `</div>`;
@@ -1603,7 +1603,7 @@ function showDiscardConfirm(name) {
     let html = '<div class="modal-handle"></div>';
     html += `<div class="modal-title">${vi('trash', 16)} Descartar Item?</div>`;
     html += `<div style="text-align:center;margin-bottom:12px;">`;
-    html += `<div style="font-size:22px;margin-bottom:4px;">${it.e || '📦'}</div>`;
+    html += `<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;
     html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
     html += `<div style="font-size:12px;color:var(--v-danger);margin-top:6px;">${vi('warn', 12)} Este item será perdido.</div>`;
     html += `</div>`;
@@ -1818,7 +1818,7 @@ function showCampConfirm(name) {
     const hdGain = Math.min(maxHD - curHD, Math.max(1, Math.floor((maxHD + 1) / 2)));
 
     let html = '<div style="text-align:center;padding:12px;">';
-    html += `<div style="font-size:20px;margin-bottom:8px;">${vi('tent', 18)} Descanso Longo</div>`;
+    html += `<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('tent', 18)} Descanso Longo</div>`;
     if (isTent && tentUses > 0) {
         const bars = Array.from({ length: 5 }, (_, i) =>
             `<span style="color:${i < tentUses ? 'var(--v-success)' : 'var(--v-text-dim)'}">${i < tentUses ? '■' : '□'}</span>`
@@ -1971,7 +1971,7 @@ function sellSelected() {
     });
     if (!sellable.length) { toast(`${vi('warn', 13)} Nenhum item vendível`, 'warn'); return; }
     let html = '<div style="text-align:center;padding:12px;">';
-    html += `<div style="font-size:20px;margin-bottom:8px;">${vi('coin', 18)} Vender Selecionados</div>`;
+    html += `<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('coin', 18)} Vender Selecionados</div>`;
     html += `<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
             Vender <b>${sellable.length}</b> item(ns) por <b>${totalGP} GP</b>? (50% do valor)</div>`;
     html += '<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';
@@ -2026,7 +2026,7 @@ function discardSelected() {
     });
     if (!discardable.length) { toast(`${vi('warn', 13)} Nenhum item descartável`, 'warn'); return; }
     let html = '<div style="text-align:center;padding:12px;">';
-    html += `<div style="font-size:20px;margin-bottom:8px;">${vi('trash', 18)} Descartar Selecionados</div>`;
+    html += `<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('trash', 18)} Descartar Selecionados</div>`;
     html += `<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
             Descartar <b>${discardable.length}</b> item(ns)? <b>Ação irreversível!</b></div>`;
     html += '<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';
@@ -2110,7 +2110,7 @@ function doSellJunk() {
     });
     // Confirm modal
     let html = '<div style="text-align:center;padding:12px;">';
-    html += `<div style="font-size:20px;margin-bottom:8px;">${vi('coin', 18)} Vender Lixo</div>`;
+    html += `<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('coin', 18)} Vender Lixo</div>`;
     html += `<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
             Vender <b>${totalItems}</b> itens de despojos por <b>${totalGP} GP</b>? (60% do valor)</div>`;
     html += '<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';

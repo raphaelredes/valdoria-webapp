@@ -549,7 +549,7 @@ function _showCheckEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, pro
     const wrapper = document.getElementById('dice3d-wrapper');
 
     // Show emoji in the wrapper
-    wrapper.innerHTML = `<div class="dice-display-fallback" style="font-size:64px;text-align:center;animation:diceRoll 0.7s ease">${r2 !== null ? buildDiceHTML(r1, r2, mode) : 'd20'}</div>`;
+    wrapper.innerHTML = `<div class="dice-display-fallback" style="font-size:clamp(48px,12vw,64px);text-align:center;animation:diceRoll 0.7s ease">${r2 !== null ? buildDiceHTML(r1, r2, mode) : 'd20'}</div>`;
 
     formulaEl.innerHTML = buildFormula(roll, mod, statName, profMark, dc, total, r1, r2, mode);
 
@@ -1019,7 +1019,7 @@ function showBossEncounter() {
         if (total >= stealthDC) {
             const successText = 'Você passa sem ser notado!';
             overlay.innerHTML = `<div class="event-content" style="text-align:center">
-                <div style="font-size:24px;margin:14px 0;color:#6a8">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
+                <div style="font-size:clamp(20px,5vw,24px);margin:10px 0;color:#6a8">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
                 <div style="color:#6a8;font-size:16px">${successText}</div></div>`;
             S._bossDefeated = true; saveState();
             S.xpEarned += 10;
@@ -1028,7 +1028,7 @@ function showBossEncounter() {
         } else {
             const failText = 'Detectado! O guardião ataca!';
             overlay.innerHTML = `<div class="event-content" style="text-align:center">
-                <div style="font-size:24px;margin:14px 0;color:#a66">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
+                <div style="font-size:clamp(20px,5vw,24px);margin:10px 0;color:#a66">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
                 <div style="color:#a66;font-size:16px">${failText}</div></div>`;
             S._bossDefeated = true; saveState();
             const delay = typeof calcReadTime === 'function' ? calcReadTime(failText, 'overlay') : 2000;
@@ -1546,7 +1546,7 @@ function _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, ha
     const wrapper = document.getElementById('dice3d-wrapper');
 
     const icon = r2 !== null ? buildDiceHTML(r1, r2, mode) : hazard.label.split(' ')[0];
-    wrapper.innerHTML = `<div class="dice-display-fallback" style="font-size:64px;text-align:center;animation:diceRoll 0.7s ease">${icon}</div>`;
+    wrapper.innerHTML = `<div class="dice-display-fallback" style="font-size:clamp(48px,12vw,64px);text-align:center;animation:diceRoll 0.7s ease">${icon}</div>`;
 
     const formulaStr = buildFormula(roll, mod, statName, '', hazard.dc, total, r1, r2, mode);
     formulaEl.innerHTML =
@@ -2830,7 +2830,7 @@ function showDeathSaves() {
         if (roll !== null) {
             const color = roll === 20 ? '#ffd700' : roll === 1 ? '#ff3333' : roll >= 10 ? '#6a8' : '#a66';
             html += `<div style="text-align:center;margin:12px 0">
-                <div class="dice-result" style="font-size:28px;color:${color}">${roll}</div>
+                <div class="dice-result" style="font-size:clamp(22px,6vw,28px);color:${color}">${roll}</div>
                 <div style="font-size:12px;color:#8a7a68;margin-top:4px">Rolagem ${rollNum}</div>
             </div>`;
         }
@@ -3316,7 +3316,7 @@ function _rollReturnHazard(hazard, choice) {
         });
     } else {
         // Fallback without 3D
-        checkEl.innerHTML = `<div style="font-size:48px;animation:diceRoll 0.7s ease">d20</div>`;
+        checkEl.innerHTML = `<div style="font-size:clamp(36px,10vw,48px);animation:diceRoll 0.7s ease">d20</div>`;
         setTimeout(() => {
             _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2, mode);
         }, 800);
