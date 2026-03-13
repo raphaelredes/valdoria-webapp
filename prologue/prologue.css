@@ -227,12 +227,12 @@
     height: 100% !important;
 }
 .dice-d20 {
-    width: 80px;
-    height: 80px;
+    width: min(80px, 20vw);
+    height: min(80px, 20vw);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: clamp(24px, 7vw, 32px);
     font-weight: 700;
     color: var(--v-gold);
     border: 3px solid var(--v-gold);
@@ -365,7 +365,7 @@
     border-radius: var(--v-radius);
     margin-bottom: 8px;
 }
-.char-badge-icon { font-size: 24px; }
+.char-badge-icon { font-size: clamp(20px, 5vw, 24px); }
 .char-badge-info { flex: 1; }
 .char-badge-name {
     font-size: 14px;

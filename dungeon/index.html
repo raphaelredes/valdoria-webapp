@@ -135,7 +135,7 @@
             from { opacity: 0; transform: translateY(16px) scale(0.96); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .event-icon { font-size: 36px; text-align: center; margin-bottom: 8px; }
+        .event-icon { font-size: clamp(28px, 8vw, 36px); text-align: center; margin-bottom: 8px; }
         .event-title {
             font-size: 16px; font-weight: 700; color: #c4953a;
             text-align: center; margin-bottom: 8px; font-family: 'Cinzel', serif;
@@ -182,7 +182,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .boss-icon {
-            font-size: 64px; opacity: 0;
+            font-size: clamp(40px, 12vw, 64px); opacity: 0;
             animation: bossIconReveal 0.6s ease 0.5s forwards;
         }
         .boss-name {
