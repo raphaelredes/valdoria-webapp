@@ -30,7 +30,7 @@
         }
 
         body {
-            padding-bottom: 100px;
+            padding-bottom: 80px;
         }
 
         /* ── Header ── */
@@ -620,7 +620,7 @@
             max-width: 480px;
             max-height: 85vh;
             overflow-y: auto;
-            padding: 16px 16px 24px;
+            padding: 16px 14px 20px;
             transform: translateY(100%);
             transition: transform 0.3s ease-out;
         }
@@ -757,12 +757,12 @@
         /* ── Empty State ── */
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
+            padding: 28px 16px;
             color: var(--v-text-dim);
         }
 
         .empty-state .icon {
-            font-size: 40px;
+            font-size: clamp(32px, 10vw, 40px);
             margin-bottom: 12px;
         }
 
