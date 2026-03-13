@@ -172,6 +172,21 @@
     margin-right: 0;
 }
 
+/* ─── Buttons at Top (nav_position=top) ─── */
+.buttons-top {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--v-border, #4a3828);
+}
+
+.buttons-top .btn-row:first-of-type {
+    margin-top: 0;
+}
+
+.buttons-top .btn-row + .btn-row {
+    margin-top: 4px;
+}
+
 
 /* ═══════════════════════════════════════════════════
    Compact Footer (Phase 3: universal pause menu)

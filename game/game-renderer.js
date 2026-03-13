@@ -189,13 +189,14 @@ function renderScreen(screen) {
 
     // Buttons — when navAtTop, render action buttons at the TOP of content (before text)
     if (navAtTop) {
+        const wrap = document.createElement('div');
+        wrap.className = 'buttons-top';
+        renderButtons(wrap, screen.buttons || []);
         const firstChild = contentEl.firstChild;
-        const frag = document.createDocumentFragment();
-        renderButtons(frag, screen.buttons || []);
         if (firstChild) {
-            contentEl.insertBefore(frag, firstChild);
+            contentEl.insertBefore(wrap, firstChild);
         } else {
-            contentEl.appendChild(frag);
+            contentEl.appendChild(wrap);
         }
     } else {
         // Default: action buttons after text content
