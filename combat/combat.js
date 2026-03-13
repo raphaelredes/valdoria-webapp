@@ -249,6 +249,13 @@ if (window.SessionHeartbeat && apiBase && token && userId) {
     SessionHeartbeat.init({ apiBase: apiBase, token: token, uid: userId });
 }
 
+// ─── Session reconnect (after displacement/expiry resolved) ───
+window.addEventListener('session-reopened', function (e) {
+    console.log('[COMBAT] Session reopened, reloading combat state');
+    currentState = null;
+    loadCombatState();
+});
+
 // ─── STARTUP ───
 if (isApiMode) {
     loadCombatState();

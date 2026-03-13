@@ -1,9 +1,11 @@
-/* ═══════════════════════════════════════════════════════════════
-   SESSION HEARTBEAT — Device displacement detection
-   Polls /api/game/heartbeat to detect when another device takes
-   over the session. Shows a displacement overlay with options to reopen here or close.
+/* ===================================================================
+   SESSION HEARTBEAT — Device displacement & session expiry detection
+   Polls /api/game/heartbeat to detect:
+   - 'displaced': another device took over the session
+   - 'expired': session expired due to inactivity (10 min)
+   Also tracks client-side inactivity (10 min without user interaction).
    Usage: SessionHeartbeat.init({ apiBase, token, uid })
-   ═══════════════════════════════════════════════════════════════ */
+   =================================================================== */
 
 /* global Telegram */
 // eslint-disable-next-line no-unused-vars
@@ -11,27 +13,53 @@ var SessionHeartbeat = (function () {
     'use strict';
 
     var _timer = null;
-    var _displaced = false;
+    var _inactivityTimer = null;
+    var _stopped = false;
     var _cfg = { apiBase: '', token: '', uid: 0, interval: 7000 };
+
+    // 10 minutes of no user interaction -> auto-expire client-side
+    var _INACTIVITY_MS = 10 * 60 * 1000;
 
     function init(cfg) {
         _cfg.apiBase = cfg.apiBase || '';
         _cfg.token = cfg.token || '';
         _cfg.uid = cfg.uid || 0;
         _cfg.interval = cfg.interval || 7000;
-        _displaced = false;
+        _stopped = false;
         if (_timer) clearInterval(_timer);
+        if (_inactivityTimer) clearTimeout(_inactivityTimer);
         if (!_cfg.apiBase || !_cfg.token || !_cfg.uid) return;
         _timer = setInterval(_poll, _cfg.interval);
+        _startInactivityTracker();
     }
 
     function stop() {
         if (_timer) { clearInterval(_timer); _timer = null; }
+        if (_inactivityTimer) { clearTimeout(_inactivityTimer); _inactivityTimer = null; }
     }
 
+    // --- Client-side inactivity detection ---
+    function _startInactivityTracker() {
+        _resetInactivityTimer();
+        ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (evt) {
+            document.addEventListener(evt, _resetInactivityTimer, { passive: true });
+        });
+    }
+
+    function _resetInactivityTimer() {
+        if (_stopped) return;
+        if (_inactivityTimer) clearTimeout(_inactivityTimer);
+        _inactivityTimer = setTimeout(function () {
+            if (_stopped) return;
+            _stopped = true;
+            stop();
+            _showExpiredOverlay();
+        }, _INACTIVITY_MS);
+    }
+
+    // --- Server heartbeat polling ---
     async function _poll() {
-        if (_displaced) return;
-        // Don't poll when tab is hidden (saves bandwidth)
+        if (_stopped) return;
         if (document.visibilityState === 'hidden') return;
         try {
             var resp = await fetch(
@@ -41,69 +69,69 @@ var SessionHeartbeat = (function () {
                     signal: AbortSignal.timeout(3000),
                 }
             );
-            if (!resp.ok) return; // 401 etc handled by main API layer
+            if (!resp.ok) return;
             var data = await resp.json();
             if (data.status === 'displaced') {
-                _displaced = true;
+                _stopped = true;
                 stop();
                 _showDisplacedOverlay(data.device || 'Outro dispositivo', data.from_device || '');
+            } else if (data.status === 'expired') {
+                _stopped = true;
+                stop();
+                _showExpiredOverlay();
             }
         } catch (e) {
-            // Silent — heartbeat errors should not disrupt gameplay.
-            // Connectivity issues are handled by the main API error reporter.
+            // Silent — connectivity issues handled by main API error reporter
         }
     }
 
-    /**
-     * Also callable from apiCall() when a regular API response returns
-     * {status: 'displaced'}. This avoids waiting for the next heartbeat.
-     */
     function handleDisplaced(deviceLabel, fromDevice) {
-        if (_displaced) return;
-        _displaced = true;
+        if (_stopped) return;
+        _stopped = true;
         stop();
         _showDisplacedOverlay(deviceLabel || 'Outro dispositivo', fromDevice || '');
     }
 
-    function _showDisplacedOverlay(deviceLabel, fromDevice) {
-        console.warn('[HEARTBEAT] Session displaced by:', deviceLabel, 'from:', fromDevice);
-
-        // Haptic feedback
-        try {
-            var tg = window.Telegram && Telegram.WebApp;
-            if (tg && tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('warning');
-            }
-        } catch (e) { /* ignore */ }
-
-        // Create overlay
-        // Detect current device for context
-        var currentDevice = '';
-        try {
-            var _tg = window.Telegram && Telegram.WebApp;
-            if (_tg && _tg.platform) {
-                var _pLabels = {
-                    'android': 'Celular (Android)', 'ios': 'Celular (iOS)',
-                    'tdesktop': 'Computador (Windows/Linux)', 'macos': 'Computador (macOS)',
-                    'web': 'Navegador Web',
-                };
-                currentDevice = _pLabels[_tg.platform] || '';
-            }
-        } catch (e) { /* */ }
+    // --- Expired overlay (session timed out) ---
+    function _showExpiredOverlay() {
+        console.warn('[HEARTBEAT] Session expired due to inactivity');
+        _removeExistingOverlay();
+        _haptic();
 
         var overlay = document.createElement('div');
         overlay.className = 'displaced-overlay';
-
-        // Show where the session moved TO (the displacing device)
-        var bodyText = 'Sua sessão foi transferida para:';
-        var badgeHtml = '<div class="displaced-device-badge">' + _escHtml(deviceLabel) + '</div>';
-
         overlay.innerHTML =
             '<div class="displaced-content">' +
-                '<div class="displaced-icon">📱</div>' +
-                '<div class="displaced-title">Sessão transferida</div>' +
-                '<div class="displaced-text">' + bodyText + '</div>' +
-                badgeHtml +
+                '<div class="displaced-icon">\u23F0</div>' +
+                '<div class="displaced-title">Sess\u00E3o expirada</div>' +
+                '<div class="displaced-text">Sua sess\u00E3o expirou por inatividade.</div>' +
+                '<div class="displaced-actions">' +
+                    '<button class="displaced-reopen-btn" id="displaced-reopen">Reconectar</button>' +
+                    '<button class="displaced-close-btn" id="displaced-close">Fechar</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        overlay.offsetHeight; // eslint-disable-line no-unused-expressions
+        overlay.classList.add('displaced-visible');
+        document.getElementById('displaced-reopen').addEventListener('click', function () { _reconnect(overlay); });
+        document.getElementById('displaced-close').addEventListener('click', function () { _close(); });
+    }
+
+    // --- Displaced overlay (another device took over) ---
+    function _showDisplacedOverlay(deviceLabel, fromDevice) {
+        console.warn('[HEARTBEAT] Session displaced by:', deviceLabel, 'from:', fromDevice);
+        _removeExistingOverlay();
+        _haptic();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'displaced-overlay';
+        overlay.innerHTML =
+            '<div class="displaced-content">' +
+                '<div class="displaced-icon">\uD83D\uDCF1</div>' +
+                '<div class="displaced-title">Sess\u00E3o transferida</div>' +
+                '<div class="displaced-text">Sua sess\u00E3o foi transferida para:</div>' +
+                '<div class="displaced-device-badge">' + _escHtml(deviceLabel) + '</div>' +
                 '<div class="displaced-actions">' +
                     '<button class="displaced-reopen-btn" id="displaced-reopen">Reabrir aqui</button>' +
                     '<button class="displaced-close-btn" id="displaced-close">Fechar</button>' +
@@ -111,35 +139,21 @@ var SessionHeartbeat = (function () {
             '</div>';
 
         document.body.appendChild(overlay);
-
-        // Force reflow then add visible class for animation
         overlay.offsetHeight; // eslint-disable-line no-unused-expressions
         overlay.classList.add('displaced-visible');
-
-        // Reopen button — re-registers this device as active
-        var reopenBtn = document.getElementById('displaced-reopen');
-        if (reopenBtn) {
-            reopenBtn.addEventListener('click', function () { _reopen(overlay); });
-        }
-
-        // Close button
-        var closeBtn = document.getElementById('displaced-close');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', function () { _close(); });
-        }
-
-        // No auto-close — let the user choose
+        document.getElementById('displaced-reopen').addEventListener('click', function () { _reconnect(overlay); });
+        document.getElementById('displaced-close').addEventListener('click', function () { _close(); });
     }
 
-    async function _reopen(overlay) {
-        var reopenBtn = document.getElementById('displaced-reopen');
-        if (reopenBtn) {
-            reopenBtn.disabled = true;
-            reopenBtn.textContent = 'Reconectando...';
+    // --- Reconnect: re-register device and handle transitions ---
+    async function _reconnect(overlay) {
+        var btn = document.getElementById('displaced-reopen');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Reconectando...';
         }
 
         try {
-            // Call /start to re-register this device (clears displacement)
             var platform = '';
             try {
                 var tg = window.Telegram && Telegram.WebApp;
@@ -160,45 +174,63 @@ var SessionHeartbeat = (function () {
             });
 
             if (!resp.ok) {
-                console.error('[HEARTBEAT] Reopen failed, status:', resp.status);
-                _showReopenError(overlay);
+                console.error('[HEARTBEAT] Reconnect failed, status:', resp.status);
+                _showReconnectError(overlay);
                 return;
             }
 
             var data = await resp.json();
-            console.info('[HEARTBEAT] Session reopened successfully');
+            console.info('[HEARTBEAT] Session reconnected successfully');
 
-            // Remove overlay
+            // If server returned a transition (e.g. active combat), navigate there
+            if (data.transition && data.transition.url) {
+                window.location.replace(data.transition.url);
+                return;
+            }
+
+            // Remove overlay and reset state
             if (overlay && overlay.parentNode) overlay.remove();
-
-            // Reset displaced flag and restart heartbeat
-            _displaced = false;
+            _stopped = false;
             _timer = setInterval(_poll, _cfg.interval);
+            _resetInactivityTimer();
 
-            // Dispatch event so the WebApp can reload the screen
+            // Dispatch event so the WebApp can reload its screen
             window.dispatchEvent(new CustomEvent('session-reopened', { detail: data }));
 
         } catch (e) {
-            console.error('[HEARTBEAT] Reopen error:', e);
-            _showReopenError(overlay);
+            console.error('[HEARTBEAT] Reconnect error:', e);
+            _showReconnectError(overlay);
         }
     }
 
-    function _showReopenError(overlay) {
-        var reopenBtn = document.getElementById('displaced-reopen');
-        if (reopenBtn) {
-            reopenBtn.textContent = 'Reabrir aqui';
-            reopenBtn.disabled = false;
+    function _showReconnectError(overlay) {
+        var btn = document.getElementById('displaced-reopen');
+        if (btn) {
+            btn.textContent = 'Tentar novamente';
+            btn.disabled = false;
         }
-        // Show error hint
         var existing = overlay.querySelector('.displaced-error');
         if (!existing) {
             var errEl = document.createElement('div');
             errEl.className = 'displaced-text displaced-error';
-            errEl.textContent = 'Falha ao reconectar. Tente novamente.';
+            errEl.textContent = 'Falha ao reconectar. Verifique sua conex\u00E3o.';
             var actions = overlay.querySelector('.displaced-actions');
             if (actions) actions.parentNode.insertBefore(errEl, actions);
         }
+    }
+
+    function _removeExistingOverlay() {
+        var existing = document.querySelector('.displaced-overlay');
+        if (existing) existing.remove();
+    }
+
+    function _haptic() {
+        try {
+            var tg = window.Telegram && Telegram.WebApp;
+            if (tg && tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('warning');
+            }
+        } catch (e) { /* ignore */ }
     }
 
     function _close() {
@@ -208,7 +240,6 @@ var SessionHeartbeat = (function () {
                 tg.close();
             }
         } catch (e) {
-            // Fallback: just hide overlay
             var el = document.querySelector('.displaced-overlay');
             if (el) el.remove();
         }
