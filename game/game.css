@@ -1784,8 +1784,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     font-size: 13px;
     font-style: italic;
     color: var(--v-text-dim);
-    padding: 6px 12px;
-    margin: 4px 0;
+    padding: 4px 10px;
+    margin: 2px 0;
     border-left: 2px solid var(--v-crimson, #7b2020);
     line-height: 1.5;
 }
