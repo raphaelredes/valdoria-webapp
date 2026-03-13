@@ -275,10 +275,11 @@ function handleLocationTap(locId) {
         noteEl.style.color = '#8a4a3a';
     }
 
-    // Open panel
-    panel.classList.add('open');
+    // Open panel in peek mode (compact), swipe up for full
+    panel.classList.remove('full');
+    panel.classList.add('open', 'peek');
     _haptic('open');
-    // Check if content overflows (show scroll hint)
+    // Check if content overflows in full mode
     requestAnimationFrame(() => {
         panel.classList.toggle('scrollable', panel.scrollHeight > panel.clientHeight + 8);
     });
@@ -309,7 +310,7 @@ function createActionBtn(text, className, onClick) {
 // ── Close info panel ──
 function closeInfoPanel() {
     const panel = document.getElementById('info-panel');
-    panel.classList.remove('open');
+    panel.classList.remove('open', 'peek', 'full');
     S.selectedLoc = null;
     clearHighlight();
 }
@@ -358,6 +359,7 @@ function highlightPath(fromId, toId) {
     const svg = document.getElementById('map-svg');
     const frag = document.createDocumentFragment();
 
+    let cumTurns = 0;
     for (let i = 0; i < pathIds.length - 1; i++) {
         const aCoords = LOCATION_COORDS[pathIds[i]];
         const bCoords = LOCATION_COORDS[pathIds[i + 1]];
@@ -368,15 +370,45 @@ function highlightPath(fromId, toId) {
         const seed = (aCoords.col * 31 + aCoords.row * 17 + bCoords.col * 13 + bCoords.row * 7);
         const pathD = _buildRoadPath(aPx, bPx, seed);
 
+        // Path line with animated dash
         frag.appendChild(createSVG('path', {
             d: pathD,
             fill: 'none',
             stroke: '#c4953a',
-            'stroke-width': 3,
+            'stroke-width': 4,
             'stroke-opacity': 0.5,
             'stroke-linecap': 'round',
+            'stroke-dasharray': '8 4',
             class: 'path-highlight',
         }));
+
+        // Direction arrow at midpoint
+        const midPt = _pointOnPath(pathD, 0.5);
+        const preP = _pointOnPath(pathD, 0.45);
+        const angle = Math.atan2(midPt.y - preP.y, midPt.x - preP.x) * 180 / Math.PI;
+        frag.appendChild(createSVG('polygon', {
+            points: '0,-4 8,0 0,4',
+            transform: `translate(${midPt.x},${midPt.y}) rotate(${angle})`,
+            class: 'path-arrow',
+        }));
+
+        // Turn cost label at waypoints (not first/last)
+        const edgeDist = getConnectionDistance(pathIds[i], pathIds[i + 1]);
+        cumTurns += edgeDist;
+        if (i < pathIds.length - 2) {
+            // Label at intermediate waypoint
+            const wp = bPx;
+            frag.appendChild(createSVG('rect', {
+                x: wp.x - 10, y: wp.y - 18, width: 20, height: 12, rx: 2,
+                class: 'path-turn-bg',
+            }));
+            const lbl = createSVG('text', {
+                x: wp.x, y: wp.y - 9,
+                class: 'path-turn-label',
+            });
+            lbl.textContent = cumTurns + 'T';
+            frag.appendChild(lbl);
+        }
     }
     svg.appendChild(frag);
 }
@@ -432,7 +464,7 @@ function animateTravel(fromId, toId, onComplete) {
         travelGroup.appendChild(marker);
 
         let elapsed = 0;
-        const duration = 2000; // 2s total
+        const duration = Math.max(1500, Math.min(4000, pathIds.length * 800)); // proportional to hops
         const startTime = performance.now();
 
         function moveMarker(now) {
@@ -450,6 +482,16 @@ function animateTravel(fromId, toId, onComplete) {
                     const py = pt.y;
                     marker.setAttribute('cx', px);
                     marker.setAttribute('cy', py);
+                    // Pulse waypoint marker when passing through
+                    if (segT > 0.95 && seg !== segments[segments.length - 1]) {
+                        const wpNode = document.querySelector('.loc-node[data-loc="' + pathIds[segments.indexOf(seg) + 1] + '"]');
+                        if (wpNode && !wpNode._pulsed) {
+                            wpNode._pulsed = true;
+                            wpNode.style.transition = 'transform 0.2s ease';
+                            wpNode.style.transform = 'scale(1.2)';
+                            setTimeout(() => { wpNode.style.transform = ''; }, 200);
+                        }
+                    }
                     break;
                 }
                 accum += seg.len;
@@ -516,13 +558,12 @@ function setupSwipeDismiss() {
     const panel = document.getElementById('info-panel');
     if (!panel) return;
     let startY = 0, currentY = 0, dragging = false;
-    const threshold = 60; // px to trigger dismiss
+    const threshold = 60;
 
     panel.addEventListener('touchstart', e => {
-        // Only capture if touching the handle area (top 40px)
         const rect = panel.getBoundingClientRect();
         const touchY = e.touches[0].clientY - rect.top;
-        if (touchY > 50) return; // ignore touches below handle
+        if (touchY > 50) return;
         startY = e.touches[0].clientY;
         currentY = startY;
         dragging = true;
@@ -534,8 +575,15 @@ function setupSwipeDismiss() {
         currentY = e.touches[0].clientY;
         const dy = currentY - startY;
         if (dy > 0) {
-            // Only allow dragging downward
             panel.style.transform = `translateY(${dy}px)`;
+        } else if (dy < -20 && panel.classList.contains('peek')) {
+            // Swipe up: expand from peek to full
+            panel.style.transform = '';
+            panel.classList.remove('peek');
+            panel.classList.add('full');
+            dragging = false;
+            panel.classList.remove('dragging');
+            _haptic('tap');
         }
     }, { passive: true });
 
@@ -545,12 +593,10 @@ function setupSwipeDismiss() {
         panel.classList.remove('dragging');
         const dy = currentY - startY;
         if (dy > threshold) {
-            // Dismiss
             panel.style.transform = '';
             closeInfoPanel();
             _haptic('tap');
         } else {
-            // Snap back
             panel.style.transform = '';
         }
     });
@@ -673,11 +719,12 @@ function toggleLegendExpand() {
 function setupLongPress() {
     const vp = document.getElementById('map-viewport');
     if (!vp) return;
-    let _lpTimer = null, _lpLocId = null, _lpStartX = 0, _lpStartY = 0; // eslint-disable-line no-unused-vars
-    function _clearPreview() {
-        document.querySelectorAll('#map-svg .path-preview').forEach(p => p.remove());
-        _lpLocId = null;
+    let _lpTimer = null, _lpStartX = 0, _lpStartY = 0;
+
+    function _clearTooltip() {
+        document.querySelectorAll('.lp-tooltip').forEach(t => t.remove());
     }
+
     vp.addEventListener('pointerdown', e => {
         const loc = e.target.closest?.('.loc-node');
         if (!loc) return;
@@ -685,8 +732,7 @@ function setupLongPress() {
         if (!locId || locId === S.currentLoc) return;
         _lpStartX = e.clientX; _lpStartY = e.clientY;
         _lpTimer = setTimeout(() => {
-            _lpLocId = locId;
-            _showPathPreview(locId);
+            _showQuickTooltip(locId, e.clientX, e.clientY);
             _haptic('tap');
         }, 500);
     });
@@ -696,8 +742,50 @@ function setupLongPress() {
             if (dx * dx + dy * dy > 400) { clearTimeout(_lpTimer); _lpTimer = null; }
         }
     }, { passive: true });
-    vp.addEventListener('pointerup', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearPreview(); });
-    vp.addEventListener('pointercancel', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearPreview(); });
+    vp.addEventListener('pointerup', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearTooltip(); });
+    vp.addEventListener('pointercancel', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearTooltip(); });
+}
+
+function _showQuickTooltip(locId, cx, cy) {
+    document.querySelectorAll('.lp-tooltip').forEach(t => t.remove());
+    const ld = S.locations[locId];
+    if (!ld) return;
+    const discoveredSet = new Set(S.discoveredLocs || []);
+    const isExp = discoveredSet.has(locId);
+    const name = isExp ? (ld.n || locId) : '???';
+    const biome = BIOME_INFO[ld.b] || BIOME_INFO.plains;
+    const wDist = cachedDist(S.currentLoc, locId);
+    const danger = ld.d || 0;
+
+    const tt = document.createElement('div');
+    tt.className = 'lp-tooltip';
+
+    let dangerHtml = '';
+    if (isExp && danger > 0) {
+        const pips = Math.min(5, Math.ceil(danger / 2));
+        const colors = ['#5a8a3a', '#8a8a3a', '#aa6a2a', '#aa3a2a', '#6a1a1a'];
+        dangerHtml = '<span class="lp-tooltip-danger">';
+        for (let i = 0; i < 5; i++) {
+            const bg = i < pips ? colors[Math.min(i, colors.length - 1)] : 'transparent';
+            const border = i < pips ? bg : 'rgba(112,66,20,0.3)';
+            dangerHtml += '<span class="lp-tooltip-pip" style="background:' + bg + ';border:1px solid ' + border + '"></span>';
+        }
+        dangerHtml += '</span>';
+    }
+
+    tt.innerHTML = '<div class="lp-tooltip-name">' + name + '</div>' +
+        '<div class="lp-tooltip-meta">' + biome.label +
+        (wDist > 0 ? ' \u00b7 ' + wDist + ' turno' + (wDist !== 1 ? 's' : '') : '') +
+        dangerHtml + '</div>';
+
+    const vpRect = document.getElementById('map-viewport').getBoundingClientRect();
+    let tx = cx - vpRect.left + 12;
+    let ty = cy - vpRect.top - 50;
+    if (tx + 180 > vpRect.width) tx = cx - vpRect.left - 180;
+    if (ty < 0) ty = cy - vpRect.top + 16;
+    tt.style.left = tx + 'px';
+    tt.style.top = ty + 'px';
+    document.getElementById('map-viewport').appendChild(tt);
 }
 
 function _showPathPreview(toId) {
@@ -810,7 +898,12 @@ function openQuickList() {
             (loc.dist > 0 ? `<span class="ql-item-dist">${loc.dist}🕐</span>` : '');
         div.addEventListener('click', () => {
             closeQuickList();
-            handleLocationTap(loc.id);
+            // Flash route on map before opening panel
+            if (loc.id !== S.currentLoc) {
+                highlightPath(S.currentLoc, loc.id);
+                if (typeof panToLocationSmooth === 'function') panToLocationSmooth(loc.id);
+            }
+            setTimeout(() => handleLocationTap(loc.id), 350);
         });
         items.appendChild(div);
     }

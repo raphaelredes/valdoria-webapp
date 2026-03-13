@@ -795,3 +795,44 @@ function _el(tag, attrs) {
     return el;
 }
 const createSVG = _el;
+
+
+// ── Fog boundary shimmer (SVG overlay at explored/unknown border) ──
+function _renderFogShimmer(svg, fogState) {
+    // Remove old shimmer
+    svg.querySelectorAll('.fog-shimmer-line').forEach(el => el.remove());
+    const frag = document.createDocumentFragment();
+    const explored = new Set(S.discoveredLocs || []);
+
+    for (const [locId, state] of Object.entries(fogState)) {
+        if (state !== 'explored' && state !== 'known_mapped') continue;
+        const coords = LOCATION_COORDS[locId];
+        if (!coords) continue;
+        const { x, y } = hexToPixel(coords.col, coords.row);
+
+        // Check if this location borders unexplored territory
+        const neighbors = (connectionGraph[locId] || []);
+        const hasFogBorder = neighbors.some(nId => {
+            const ns = fogState[nId];
+            return !ns || ns === 'hidden' || ns === 'frontier' || ns === 'known_unmapped';
+        });
+        if (!hasFogBorder) continue;
+
+        // Draw shimmer ring at fog boundary
+        const radius = HEX_RADIUS * (state === 'explored' ? 7 : 5);
+        const delay = ((coords.col * 3 + coords.row * 7) % 6).toFixed(1);
+        const shimmer = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        shimmer.setAttribute('cx', x);
+        shimmer.setAttribute('cy', y);
+        shimmer.setAttribute('r', radius);
+        shimmer.setAttribute('fill', 'none');
+        shimmer.setAttribute('stroke', '#c4953a');
+        shimmer.setAttribute('stroke-width', '1.5');
+        shimmer.setAttribute('stroke-opacity', '0.06');
+        shimmer.setAttribute('stroke-dasharray', '12 8');
+        shimmer.setAttribute('class', 'fog-shimmer-line');
+        shimmer.style.animationDelay = delay + 's';
+        frag.appendChild(shimmer);
+    }
+    svg.appendChild(frag);
+}

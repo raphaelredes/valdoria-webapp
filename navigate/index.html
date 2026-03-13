@@ -822,6 +822,369 @@
             animation-play-state: paused !important;
         }
 
+        /* === AMBIENT BIOME PARTICLES === */
+        .ambient-layer { opacity: 0.7; }
+        body.zoom-out .ambient-layer { opacity: 0.4; }
+
+        .amb-rise {
+            fill-opacity: 0;
+            animation: ambRise 5s ease-in-out infinite;
+            will-change: transform, opacity;
+        }
+        @keyframes ambRise {
+            0%   { fill-opacity: 0; transform: translateY(0) scale(0.8); }
+            20%  { fill-opacity: 0.6; }
+            80%  { fill-opacity: 0.3; transform: translateY(-18px) scale(0.5); }
+            100% { fill-opacity: 0; transform: translateY(-25px) scale(0.3); }
+        }
+
+        .amb-fall {
+            fill-opacity: 0;
+            animation: ambFall 6s ease-in-out infinite;
+            will-change: transform, opacity;
+        }
+        @keyframes ambFall {
+            0%   { fill-opacity: 0; transform: translateY(-8px) translateX(0); }
+            20%  { fill-opacity: 0.5; }
+            80%  { fill-opacity: 0.3; transform: translateY(15px) translateX(4px); }
+            100% { fill-opacity: 0; transform: translateY(20px) translateX(6px); }
+        }
+
+        .amb-pulse {
+            fill-opacity: 0;
+            animation: ambPulse 4s ease-in-out infinite;
+            will-change: opacity;
+        }
+        @keyframes ambPulse {
+            0%, 100% { fill-opacity: 0.05; }
+            40%      { fill-opacity: 0.55; }
+            60%      { fill-opacity: 0.45; }
+        }
+
+        .amb-breath {
+            fill-opacity: 0;
+            animation: ambBreath 7s ease-in-out infinite;
+            will-change: opacity, transform;
+        }
+        @keyframes ambBreath {
+            0%, 100% { fill-opacity: 0.05; transform: scale(0.8); }
+            50%      { fill-opacity: 0.25; transform: scale(1.2); }
+        }
+
+        .amb-drift {
+            fill-opacity: 0;
+            animation: ambDrift 5s ease-in-out infinite;
+            will-change: transform, opacity;
+        }
+        @keyframes ambDrift {
+            0%   { fill-opacity: 0; transform: translateX(-8px); }
+            30%  { fill-opacity: 0.4; }
+            70%  { fill-opacity: 0.2; transform: translateX(10px); }
+            100% { fill-opacity: 0; transform: translateX(15px); }
+        }
+
+        .amb-cloud {
+            fill-opacity: 0;
+            animation: ambCloudDrift 40s linear infinite;
+            will-change: transform, opacity;
+        }
+        @keyframes ambCloudDrift {
+            0%   { fill-opacity: 0; transform: translateX(-60px); }
+            10%  { fill-opacity: 0.06; }
+            50%  { fill-opacity: 0.08; }
+            90%  { fill-opacity: 0.04; }
+            100% { fill-opacity: 0; transform: translateX(60px); }
+        }
+
+        body.map-idle .amb-particle,
+        body.map-idle .amb-cloud {
+            animation-play-state: paused !important;
+        }
+
+        /* === ANIMATED MARKERS === */
+        .loc-breathing {
+            animation: locBreathe 4s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+        @keyframes locBreathe {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-2px); }
+        }
+        body.map-idle .loc-breathing { animation-play-state: paused !important; }
+
+        .quest-glow-ring {
+            animation: questGlow 2.5s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+        @keyframes questGlow {
+            0%, 100% { stroke-opacity: 0.15; }
+            50%      { stroke-opacity: 0.5; }
+        }
+        body.map-idle .quest-glow-ring { animation-play-state: paused !important; }
+
+        .loc-sparkle {
+            animation: locSparkle 3.5s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+        @keyframes locSparkle {
+            0%, 85%, 100% { fill-opacity: 0; transform: scale(0.5); }
+            90%           { fill-opacity: 0.7; transform: scale(1.3); }
+            95%           { fill-opacity: 0.3; transform: scale(0.9); }
+        }
+        body.map-idle .loc-sparkle { animation-play-state: paused !important; }
+
+        .danger-aura {
+            animation: dangerAura 3s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+        @keyframes dangerAura {
+            0%, 100% { stroke-opacity: 0.1; }
+            50%      { stroke-opacity: 0.3; }
+        }
+        body.map-idle .danger-aura { animation-play-state: paused !important; }
+
+        .novo-badge {
+            animation: novoBadgeFade 5s ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes novoBadgeFade {
+            0%   { fill-opacity: 1; transform: translateY(0); }
+            70%  { fill-opacity: 0.8; }
+            100% { fill-opacity: 0; transform: translateY(-6px); }
+        }
+
+        .fog-shimmer-line {
+            animation: fogShimmer 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes fogShimmer {
+            0%, 100% { stroke-opacity: 0.04; stroke-dashoffset: 0; }
+            50%      { stroke-opacity: 0.12; stroke-dashoffset: 20; }
+        }
+        body.map-idle .fog-shimmer-line { animation-play-state: paused !important; }
+
+        /* === PATH VISUALIZATION ENHANCED === */
+        .path-highlight {
+            stroke-dasharray: 8 4;
+        }
+        .path-arrow {
+            fill: #c4953a;
+            fill-opacity: 0.6;
+            pointer-events: none;
+        }
+        .path-turn-label {
+            font-size: 8px;
+            fill: #c4953a;
+            fill-opacity: 0.7;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+        .path-turn-bg {
+            fill: #2a2420;
+            fill-opacity: 0.8;
+            pointer-events: none;
+        }
+
+        /* === LONG-PRESS TOOLTIP === */
+        .lp-tooltip {
+            position: absolute;
+            z-index: 45;
+            background: rgba(42, 36, 32, 0.95);
+            border: 1px solid rgba(112, 66, 20, 0.5);
+            border-radius: 6px;
+            padding: 8px 12px;
+            pointer-events: none;
+            max-width: 180px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            animation: ttFadeIn 0.15s ease-out;
+        }
+        @keyframes ttFadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .lp-tooltip-name {
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            color: #c4953a;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .lp-tooltip-meta {
+            font-size: 11px;
+            color: #8a7060;
+            font-family: 'MedievalSharp', serif;
+        }
+        .lp-tooltip-danger {
+            display: inline-flex;
+            gap: 2px;
+            margin-left: 6px;
+        }
+        .lp-tooltip-pip {
+            width: 6px;
+            height: 6px;
+            border-radius: 1px;
+            display: inline-block;
+            transform: rotate(45deg);
+        }
+
+        /* === BOTTOM SHEET ENHANCEMENTS === */
+        #info-panel.peek {
+            max-height: 200px;
+            overflow: hidden;
+        }
+        #info-panel.peek .info-desc,
+        #info-panel.peek .info-quests,
+        #info-panel.peek .info-dungeons {
+            display: none;
+        }
+        #info-panel.peek .info-handle::after {
+            content: 'Deslize para cima para mais';
+            display: block;
+            text-align: center;
+            font-size: 10px;
+            color: #5a4a3a;
+            margin-top: 4px;
+            font-family: 'MedievalSharp', serif;
+        }
+        #info-panel.dragging {
+            transition: none !important;
+        }
+
+        .danger-meter {
+            display: inline-flex;
+            gap: 3px;
+            align-items: center;
+            margin-left: 6px;
+        }
+        .danger-pip {
+            width: 8px;
+            height: 8px;
+            border-radius: 1px;
+            transform: rotate(45deg);
+            border: 1px solid rgba(112, 66, 20, 0.3);
+        }
+        .danger-pip.filled-1 { background: #5a8a3a; border-color: #5a8a3a; }
+        .danger-pip.filled-2 { background: #8a8a3a; border-color: #8a8a3a; }
+        .danger-pip.filled-3 { background: #aa6a2a; border-color: #aa6a2a; }
+        .danger-pip.filled-4 { background: #aa3a2a; border-color: #aa3a2a; }
+        .danger-pip.filled-5 { background: #6a1a1a; border-color: #6a1a1a; }
+        .danger-pip.empty { background: transparent; }
+
+        .info-btn {
+            padding: 12px 14px !important;
+        }
+        .info-btn-risky {
+            animation: riskyPulse 2s ease-in-out infinite;
+        }
+        @keyframes riskyPulse {
+            0%, 100% { border-color: rgba(170, 58, 42, 0.3); }
+            50%      { border-color: rgba(170, 58, 42, 0.6); box-shadow: 0 0 8px rgba(170, 58, 42, 0.15); }
+        }
+
+        .zoom-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+        }
+
+        /* === TRAVEL OVERLAY ENHANCED === */
+        .travel-overlay-biome {
+            font-size: 12px;
+            color: #8a7060;
+            font-family: 'MedievalSharp', serif;
+            margin-bottom: 12px;
+        }
+        .travel-overlay-progress {
+            width: 120px;
+            height: 4px;
+            background: rgba(112, 66, 20, 0.2);
+            border-radius: 2px;
+            margin: 12px auto 0;
+            overflow: hidden;
+        }
+        .travel-overlay-progress-fill {
+            height: 100%;
+            background: #c4953a;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s linear;
+        }
+        .travel-overlay-danger {
+            font-size: 11px;
+            color: #aa5a3a;
+            margin-top: 6px;
+            font-family: 'MedievalSharp', serif;
+        }
+        .travel-overlay-compass-svg {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            display: block;
+            animation: compassSpin 2s linear infinite;
+        }
+
+        /* === QUICK-LIST ENHANCEMENTS === */
+        .ql-sort-bar {
+            display: flex;
+            gap: 0;
+            padding: 6px 14px 4px;
+            background: rgba(42, 36, 32, 0.98);
+            border-bottom: 1px solid rgba(112, 66, 20, 0.15);
+        }
+        .ql-sort-btn {
+            flex: 1;
+            background: none;
+            border: 1px solid rgba(112, 66, 20, 0.2);
+            color: #8a7060;
+            font-size: 11px;
+            padding: 5px 8px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .ql-sort-btn:first-child { border-radius: 3px 0 0 3px; }
+        .ql-sort-btn:last-child { border-radius: 0 3px 3px 0; }
+        .ql-sort-btn.active {
+            color: #c4953a;
+            border-color: rgba(196, 149, 58, 0.4);
+            background: rgba(196, 149, 58, 0.08);
+        }
+        .ql-item-current {
+            border-left-color: #c4953a !important;
+        }
+        .ql-biome-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .ql-status-icon {
+            font-size: 12px;
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+        .ql-danger-pips {
+            display: inline-flex;
+            gap: 1px;
+            margin-left: 4px;
+        }
+        .ql-danger-pip {
+            width: 4px;
+            height: 4px;
+            border-radius: 1px;
+            transform: rotate(45deg);
+        }
+
+
         /* ═══ DECORATIVE MAP TEXT ═══ */
         .map-deco-text {
             font-family: 'MedievalSharp', serif;
@@ -1552,7 +1915,7 @@
 
     <!-- HUD -->
     <div id="hud">
-        <span class="hud-name" id="hud-name">Heroi</span>
+        <span class="hud-name" id="hud-name">Aventureiro</span>
         <span class="hud-level" id="hud-level">Nv.1</span>
         <div class="hud-bar-group">
             <span class="hud-bar-label">HP</span>
@@ -1585,9 +1948,9 @@
         <div id="minimap"><svg id="minimap-svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
         <!-- Zoom controls -->
         <div id="zoom-controls">
-            <button type="button" class="zoom-btn" id="btn-zoom-in" aria-label="Zoom in">+</button>
-            <button type="button" class="zoom-btn zoom-btn-recenter" id="btn-recenter" aria-label="Recentrar">⊕</button>
-            <button type="button" class="zoom-btn" id="btn-zoom-out" aria-label="Zoom out">−</button>
+            <button type="button" class="zoom-btn" id="btn-zoom-in" aria-label="Aproximar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+            <button type="button" class="zoom-btn zoom-btn-recenter" id="btn-recenter" aria-label="Recentrar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></button>
+            <button type="button" class="zoom-btn" id="btn-zoom-out" aria-label="Afastar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
         </div>
         <div id="offscreen-indicator"><span class="osi-arrow"></span><br><span class="osi-label"></span></div>
         <div id="map-tooltip"><span class="tt-name"></span><span class="tt-dist"></span></div>
@@ -1681,7 +2044,7 @@
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
-        var scripts = ['map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-map-terrain.js', 'navigate-map-decor.js', 'navigate-ui.js'];
+        var scripts = ['map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-map-terrain.js', 'navigate-map-decor.js', 'navigate-ambient.js', 'navigate-ui.js'];
         scripts.forEach(function (s) { document.write('<script src="' + s + '?v=' + v + '"><\/script>'); });
     </script>
     <script>

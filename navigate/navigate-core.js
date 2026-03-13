@@ -592,28 +592,51 @@ function _showTravelOverlay(type, target) {
         overlay = document.createElement('div');
         overlay.id = 'travel-overlay';
         overlay.className = 'travel-overlay';
-        overlay.innerHTML = `
-            <div class="travel-overlay-content">
-                <div class="travel-overlay-compass">🧭</div>
-                <div class="travel-overlay-text">Preparando viagem...</div>
-                <div class="travel-overlay-dots"><span>.</span><span>.</span><span>.</span></div>
-            </div>`;
         document.body.appendChild(overlay);
     }
-    const textEl = overlay.querySelector('.travel-overlay-text');
-    if (type === 'travel' && target) {
-        const loc = S.locations[target];
-        textEl.textContent = `Viajando para ${loc?.n || 'destino'}...`;
+
+    const loc = target ? S.locations[target] : null;
+    const biome = loc ? (BIOME_INFO[loc.b] || BIOME_INFO.plains) : null;
+    const danger = loc?.d || 0;
+    const edgeDist = target ? getConnectionDistance(S.currentLoc, target) : 0;
+
+    // SVG compass icon
+    const compassSvg = '<svg class="travel-overlay-compass-svg" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="none" stroke="#c4953a" stroke-width="1.5" stroke-opacity="0.4"/><polygon points="24,6 27,22 24,20 21,22" fill="#c4953a" fill-opacity="0.8"/><polygon points="24,42 21,26 24,28 27,26" fill="#8a6a3a" fill-opacity="0.6"/><circle cx="24" cy="24" r="2" fill="#c4953a"/></svg>';
+
+    let text = 'Preparando...';
+    let biomeText = '';
+    let dangerText = '';
+
+    if (type === 'travel' && loc) {
+        text = 'Viajando para ' + (loc.n || 'destino') + '...';
+        if (biome) biomeText = biome.label + (edgeDist > 0 ? ' \u00b7 ' + edgeDist + ' turno' + (edgeDist !== 1 ? 's' : '') : '');
+        if (danger >= 7) dangerText = '\u2620\ufe0f Perigo extremo no caminho';
+        else if (danger >= 5) dangerText = '\u26a0\ufe0f Alta chance de encontros';
     } else if (type === 'return') {
-        textEl.textContent = 'Retornando...';
+        text = 'Retornando...';
     } else if (type === 'camp') {
-        textEl.textContent = 'Montando acampamento...';
+        text = 'Montando acampamento...';
     } else if (type === 'explore') {
-        textEl.textContent = 'Explorando a região...';
-    } else {
-        textEl.textContent = 'Preparando...';
+        text = 'Explorando a regi\u00e3o...';
     }
-    requestAnimationFrame(() => overlay.classList.add('visible'));
+
+    overlay.innerHTML =
+        '<div class="travel-overlay-content">' +
+            compassSvg +
+            '<div class="travel-overlay-text">' + text + '</div>' +
+            (biomeText ? '<div class="travel-overlay-biome">' + biomeText + '</div>' : '') +
+            (dangerText ? '<div class="travel-overlay-danger">' + dangerText + '</div>' : '') +
+            '<div class="travel-overlay-progress"><div class="travel-overlay-progress-fill" id="travel-progress-fill"></div></div>' +
+            '<div class="travel-overlay-dots"><span>.</span><span>.</span><span>.</span></div>' +
+        '</div>';
+
+    requestAnimationFrame(() => {
+        overlay.classList.add('visible');
+        const fill = document.getElementById('travel-progress-fill');
+        if (fill) {
+            requestAnimationFrame(() => { fill.style.width = '100%'; fill.style.transition = 'width 3s linear'; });
+        }
+    });
 }
 
 function _hideTravelOverlay() {

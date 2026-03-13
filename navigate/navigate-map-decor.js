@@ -498,6 +498,8 @@ function renderLocationMarkers(group, fogState) {
                 'stroke-width': 1.5, 'stroke-opacity': 0.4,
                 class: 'current-pulse-ring',
             }));
+            // Breathing animation wrapper for current location
+            ng.classList.add('loc-breathing');
             // Silhouette icon (larger) — no circle
             if (isSett) _drawSettlementIcon(ng, x, y + 4, 9);
             else _drawBiomeIcon(ng, x, y + 2, biome, 9, name);
@@ -540,6 +542,53 @@ function renderLocationMarkers(group, fogState) {
                 'stroke-opacity': isExp ? 0.4 : 0.25,
                 'stroke-dasharray': isExp ? 'none' : '3 2',
             }));
+        }
+
+        // Quest glow ring (animated golden ring on locations with active quests)
+        if (isExp && !isCurr) {
+            const locQuests = (S.quests || []).filter(q => q.loc === locId);
+            if (locQuests.length > 0) {
+                ng.appendChild(_el('circle', {
+                    cx: x, cy: y, r: R - 1,
+                    fill: 'none', stroke: '#c4953a',
+                    'stroke-width': 2, 'stroke-opacity': 0.3,
+                    class: 'quest-glow-ring',
+                }));
+            }
+        }
+
+        // Sparkle on known_mapped locations (twinkle effect)
+        if (fog === 'known_mapped') {
+            const sparkleDelay = ((coords.col * 7 + coords.row * 13) % 5).toFixed(1);
+            ng.appendChild(_el('circle', {
+                cx: x + 8, cy: y - 8, r: 2,
+                fill: '#c4953a', 'fill-opacity': 0,
+                class: 'loc-sparkle',
+                style: `animation-delay: ${sparkleDelay}s`,
+            }));
+        }
+
+        // Danger aura on high-danger explored locations
+        if (isExp && (ld?.d || 0) >= 5) {
+            ng.appendChild(_el('circle', {
+                cx: x, cy: y, r: R + 2,
+                fill: 'none', stroke: getDangerColor(ld.d),
+                'stroke-width': 3, 'stroke-opacity': 0.15,
+                class: 'danger-aura',
+            }));
+        }
+
+        // "NOVO" badge on freshly discovered locations
+        if (isNewlyRevealed) {
+            ng.appendChild(_el('text', {
+                x: x, y: y - R - 6,
+                'text-anchor': 'middle',
+                'font-size': '8px',
+                'font-family': "'Cinzel', serif",
+                'font-weight': '700',
+                fill: '#c4953a',
+                class: 'novo-badge',
+            })).textContent = 'NOVO';
         }
 
         // Label (multi-line for long names)
