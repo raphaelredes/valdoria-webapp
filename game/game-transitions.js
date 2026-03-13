@@ -129,6 +129,9 @@ async function returnFromWebApp() {
     await hideLoadingWithDelay();
 
     if (data && !data.error) {
+        // Sync screen version (anti-double-action guard)
+        if (data.sv !== undefined) S.screenVersion = data.sv;
+
         if (data.transition && !data.text) {
             console.log('[GAME] returnFromWebApp() -> transition:', JSON.stringify(data.transition).substring(0, 100));
             // Still in a specialized state — redirect again
