@@ -1281,7 +1281,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     pointer-events: none;
 }
 .loc-transition-icon {
-    font-size: 48px;
+    font-size: clamp(36px, 12vw, 48px);
     animation: locIconPulse 1.5s ease-in-out infinite;
     z-index: 1;
     filter: drop-shadow(0 0 16px rgba(196, 149, 58, 0.5)) drop-shadow(0 0 40px rgba(196, 149, 58, 0.15));
@@ -1828,8 +1828,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 
 /* ── Notification Badge ── */
 .v-notification {
-    padding: 8px 12px;
-    margin: 4px 0;
+    padding: 6px 10px;
+    margin: 3px 0;
     background: var(--v-bg-card);
     border-radius: var(--v-radius);
     border-left: 3px solid var(--v-gold);
@@ -1881,8 +1881,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
    ═══════════════════════════════════════════════════════════════ */
 
 .v-ally-card {
-    margin: 6px 0;
-    padding: 10px 12px;
+    margin: 4px 0;
+    padding: 8px 10px;
     background: var(--v-bg-card);
     border-radius: var(--v-radius);
     border-left: 3px solid var(--v-gold);
@@ -3342,7 +3342,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     padding: 8px 4px;
 }
 .quest-abandon-icon {
-    font-size: 36px;
+    font-size: clamp(28px, 9vw, 36px);
     margin-bottom: 6px;
     animation: questAbandonPulse 1.5s ease-in-out infinite;
 }
@@ -3596,7 +3596,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 .feedback-star {
     width: 44px;
     height: 44px;
-    font-size: 30px;
+    font-size: clamp(24px, 8vw, 30px);
     background: none;
     border: none;
     cursor: pointer;
@@ -4225,7 +4225,7 @@ body[data-time="night"] .screen-content strong {
     font-family: var(--v-font);
 }
 .char-delete-icon {
-    font-size: 32px;
+    font-size: clamp(26px, 8vw, 32px);
     margin-bottom: 8px;
 }
 .char-delete-title {
