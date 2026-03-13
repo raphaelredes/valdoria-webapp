@@ -4055,6 +4055,16 @@ body[data-time="night"] .screen-content strong {
     overflow-x: hidden;
 }
 
+/* Footer rendered at top of content (nav_position=top) */
+.footer-top-row {
+    display: flex;
+    gap: 2px;
+    justify-content: space-around;
+    overflow-x: hidden;
+    margin-bottom: 8px;
+    padding: 0 2px;
+}
+
 /* ─── Offline Badge ─── */
 .offline-badge {
     position: fixed;

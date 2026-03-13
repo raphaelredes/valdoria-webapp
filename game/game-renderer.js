@@ -186,21 +186,28 @@ function renderScreen(screen) {
     const hasFooter = screen.footer && (screen.footer.quick || screen.footer.nav);
     const quickEl = document.getElementById('footer-quick');
     const navEl = document.getElementById('footer-nav');
+    const navAtTop = screen.nav_position === 'top';
 
-    if (hasFooter) {
+    if (hasFooter && !navAtTop) {
         renderFooter(screen.footer);
     } else {
         if (quickEl) quickEl.style.display = 'none';
         if (navEl) navEl.style.display = 'none';
     }
 
+    // Nav position: top — render footer buttons at the top of content area
+    if (hasFooter && navAtTop) {
+        renderFooterInContent(contentEl, screen.footer);
+    }
+
     // Show bottom panel only for text input or footer (buttons are now in content)
     const hasTextInput = !!screen.waiting_for_text;
-    if (hasTextInput || hasFooter) {
+    if (hasTextInput || (hasFooter && !navAtTop)) {
         panelEl.style.display = '';
     } else {
         panelEl.style.display = 'none';
     }
+
 
     // Hide error overlay if visible
     hideError();
@@ -472,6 +479,80 @@ function renderFooter(footer) {
 
         quickEl.appendChild(el);
     }
+}
+
+/**
+ * Render footer buttons at the top of the content area (nav_position='top').
+ * Reuses the same button logic as renderFooter but places them as a row
+ * at the very beginning of the content element.
+ */
+function renderFooterInContent(contentEl, footer) {
+    // Remove previous top-nav if present
+    const prev = contentEl.querySelector('.footer-top-row');
+    if (prev) prev.remove();
+
+    const allBtns = [];
+    if (footer.quick && footer.quick.length) {
+        for (const btn of footer.quick) {
+            if (btn.cb === 'action_toggle_footer') continue;
+            allBtns.push(btn);
+        }
+    }
+    if (footer.nav && footer.nav.length) {
+        for (const btn of footer.nav) {
+            if (btn.cb === 'action_toggle_footer') continue;
+            allBtns.push(btn);
+        }
+    }
+    if (allBtns.length === 0) return;
+
+    const row = document.createElement('div');
+    row.className = 'footer-top-row';
+
+    for (const btn of allBtns) {
+        const el = document.createElement('button');
+        el.className = 'btn-action footer-btn';
+        el.textContent = btn.text || '';
+
+        if (btn.cb === 'main_menu') {
+            el.onclick = () => { if (typeof showCharacterSelect === 'function') showCharacterSelect(); };
+        } else if (btn.cb) {
+            el.onclick = () => doAction(btn.cb);
+        } else if (btn.url) {
+            const target = typeof _detect_webapp_target_js === 'function'
+                ? _detect_webapp_target_js(btn.url) : 'unknown';
+            if (target \!== 'unknown') {
+                el.onclick = () => handleTransition({ to: target, url: btn.url });
+            } else {
+                el.onclick = () => {
+                    if (window.Telegram && Telegram.WebApp) Telegram.WebApp.openLink(btn.url);
+                    else window.open(btn.url, '_blank');
+                };
+            }
+        } else if (btn.transition) {
+            const transData = btn.transition_data || null;
+            if (transData && typeof transData === 'object' && transData.url) {
+                el.onclick = () => handleTransition(transData);
+            } else {
+                const target = typeof btn.transition === 'string' ? btn.transition : null;
+                if (target) {
+                    el.onclick = () => requestTransition(target);
+                } else {
+                    el.onclick = () => {
+                        const screen = S.currentScreen;
+                        if (screen && screen.transition) handleTransition(screen.transition);
+                    };
+                }
+            }
+        } else {
+            el.disabled = true;
+            el.style.opacity = '0.4';
+        }
+
+        row.appendChild(el);
+    }
+
+    contentEl.insertBefore(row, contentEl.firstChild);
 }
 
 // ─── Dice Roll 3D Animation ───
