@@ -466,14 +466,14 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 .mc-aura {
     position: absolute;
     top: 50%; left: 50%;
-    width: 240px; height: 240px;
+    width: clamp(160px, 62vw, 240px); height: clamp(160px, 62vw, 240px);
     transform: translate(-50%, -50%);
     border-radius: 50%;
     background: radial-gradient(circle, rgba(196,149,58,0.12) 0%, rgba(196,149,58,0.04) 40%, transparent 70%);
     animation: mcAuraPulse 5s ease-in-out infinite;
 }
 .mc-aura-2 {
-    width: 280px; height: 280px;
+    width: clamp(190px, 72vw, 280px); height: clamp(190px, 72vw, 280px);
     background: radial-gradient(circle, rgba(123,32,32,0.08) 0%, transparent 60%);
     animation-delay: 1.5s;
 }

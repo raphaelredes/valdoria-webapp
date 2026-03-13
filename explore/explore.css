@@ -1333,15 +1333,15 @@ body {
     align-items: center;
     margin: 6px auto;
     position: relative;
-    width: 160px;
-    height: 160px;
+    width: clamp(110px, 42vw, 160px);
+    height: clamp(110px, 42vw, 160px);
 }
 .return-journey-dice.active {
     display: flex;
 }
 .return-journey-dice .dice3d-canvas {
-    width: 160px;
-    height: 160px;
+    width: clamp(110px, 42vw, 160px);
+    height: clamp(110px, 42vw, 160px);
 }
 .return-journey-dice .dice3d-particles {
     position: absolute;
