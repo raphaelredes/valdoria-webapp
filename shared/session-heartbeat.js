@@ -16,6 +16,7 @@ var SessionHeartbeat = (function () {
     var _inactivityTimer = null;
     var _stopped = false;
     var _cfg = { apiBase: '', token: '', uid: 0, interval: 7000 };
+    var _BACKGROUND_INTERVAL = 30000;
 
     // 10 minutes of no user interaction -> auto-expire client-side
     var _INACTIVITY_MS = 10 * 60 * 1000;
@@ -31,6 +32,7 @@ var SessionHeartbeat = (function () {
         if (!_cfg.apiBase || !_cfg.token || !_cfg.uid) return;
         _timer = setInterval(_poll, _cfg.interval);
         _startInactivityTracker();
+        document.addEventListener('visibilitychange', _onVisibilityChange);
     }
 
     function stop() {
@@ -57,10 +59,25 @@ var SessionHeartbeat = (function () {
         }, _INACTIVITY_MS);
     }
 
+    // --- Adaptive polling interval based on tab visibility ---
+    function _adjustInterval(ms) {
+        if (_timer) clearInterval(_timer);
+        _timer = setInterval(_poll, ms);
+    }
+
+    function _onVisibilityChange() {
+        if (_stopped) return;
+        if (document.visibilityState === 'hidden') {
+            _adjustInterval(_BACKGROUND_INTERVAL);
+        } else {
+            _poll();
+            _adjustInterval(_cfg.interval);
+        }
+    }
+
     // --- Server heartbeat polling ---
     async function _poll() {
         if (_stopped) return;
-        if (document.visibilityState === 'hidden') return;
         try {
             var resp = await fetch(
                 _cfg.apiBase + '/api/game/heartbeat?uid=' + _cfg.uid,
