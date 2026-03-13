@@ -990,8 +990,8 @@ function showBossEncounter() {
 
     overlay.innerHTML = `
         <div class="event-content" style="text-align:center">
-            <div style="font-size:18px;margin:12px 0;color:#c4953a;font-weight:bold">GUARDIÃO</div>
-            <div style="font-size:18px;font-weight:bold;color:#c4953a;margin-bottom:8px">${boss.en || 'Guardião'}</div>
+            <div style="font-size:16px;margin:10px 0;color:#c4953a;font-weight:bold">GUARDIÃO</div>
+            <div style="font-size:16px;font-weight:bold;color:#c4953a;margin-bottom:8px">${boss.en || 'Guardião'}</div>
             <div style="font-size:13px;color:var(--v-text-dim, #a09484);margin-bottom:16px;line-height:1.4">${boss.n || 'Um guardião bloqueia a saída!'}</div>
             <div id="boss-choices" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>`;
@@ -1019,7 +1019,7 @@ function showBossEncounter() {
         if (total >= stealthDC) {
             const successText = 'Você passa sem ser notado!';
             overlay.innerHTML = `<div class="event-content" style="text-align:center">
-                <div style="font-size:28px;margin:20px 0;color:#6a8">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
+                <div style="font-size:24px;margin:14px 0;color:#6a8">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
                 <div style="color:#6a8;font-size:16px">${successText}</div></div>`;
             S._bossDefeated = true; saveState();
             S.xpEarned += 10;
@@ -1028,7 +1028,7 @@ function showBossEncounter() {
         } else {
             const failText = 'Detectado! O guardião ataca!';
             overlay.innerHTML = `<div class="event-content" style="text-align:center">
-                <div style="font-size:28px;margin:20px 0;color:#a66">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
+                <div style="font-size:24px;margin:14px 0;color:#a66">${roll}+${stealthMod} = ${total} vs DC ${stealthDC}</div>
                 <div style="color:#a66;font-size:16px">${failText}</div></div>`;
             S._bossDefeated = true; saveState();
             const delay = typeof calcReadTime === 'function' ? calcReadTime(failText, 'overlay') : 2000;
@@ -2823,7 +2823,7 @@ function showDeathSaves() {
         const sMarks = '●'.repeat(successes) + '○'.repeat(3 - successes);
         const fMarks = '●'.repeat(failures) + '○'.repeat(3 - failures);
         let html = `<div style="text-align:center;margin-bottom:12px">
-            <div style="font-size:20px;margin-bottom:8px">Salvaguardas contra Morte</div>
+            <div style="font-size:18px;margin-bottom:8px">Salvaguardas contra Morte</div>
             <div style="font-size:14px;color:#6a8">✓ ${sMarks}</div>
             <div style="font-size:14px;color:#a66">✗ ${fMarks}</div>
         </div>`;
@@ -3895,11 +3895,11 @@ async function initAsync() {
         _lc.cleanup();
         console.error('[EXPLORE] FATAL: No map data available. URL data param empty, API fallback failed.');
         document.getElementById('loading').innerHTML = `
-            <div style="color:#a44;font-size:16px;text-align:center;padding:20px">
+            <div style="color:#a44;font-size:16px;text-align:center;padding:16px">
                 Dados do mapa não encontrados.<br>
                 Volte ao bot e tente novamente.
                 <br><br>
-                <button onclick="location.reload()" style="background:#4a3828;color:#d4c8b0;border:1px solid #6a4a2a;padding:10px 24px;border-radius:8px;font-family:var(--v-font);font-size:14px;cursor:pointer">
+                <button onclick="location.reload()" style="background:#4a3828;color:#d4c8b0;border:1px solid #6a4a2a;padding:10px 16px;border-radius:8px;font-family:var(--v-font);font-size:14px;cursor:pointer">
                     Tentar novamente
                 </button>
             </div>`;
@@ -3942,7 +3942,7 @@ async function initAsync() {
     } catch (e) {
         _lc.cleanup();
         console.error('Failed to parse map data:', e);
-        document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:20px">Erro ao carregar mapa.<br>' + e.message + '</div>';
+        document.getElementById('loading').innerHTML = '<div style="color:#a44;font-size:16px;text-align:center;padding:16px">Erro ao carregar mapa.<br>' + e.message + '</div>';
     }
 }
 
