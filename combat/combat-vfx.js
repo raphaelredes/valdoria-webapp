@@ -269,7 +269,9 @@ function _showDamageFloat(damage, damageType, targetSelector, isCrit, cachedEl) 
     const rect = target.getBoundingClientRect();
     const el = document.createElement('div');
     el.className = 'damage-float' + (isCrit ? ' crit' : '');
-    el.textContent = isCrit ? `💥 -${damage}` : `-${damage}`;
+    const _dIco = { fire: '🔥', cold: '❄️', lightning: '⚡', necrotic: '💀', radiant: '✨', poison: '🧪', acid: '🧪', psychic: '🔮', thunder: '💨', force: '💫', slashing: '⚔️', piercing: '🏹', bludgeoning: '🔨' };
+    const _ico = isCrit ? '💥' : (_dIco[damageType] || '⚔️');
+    el.textContent = `${_ico} -${damage}`;
     const colors = { fire: '#ff6020', cold: '#80c0ff', lightning: '#ffe040', necrotic: '#9040c0', radiant: '#ffe080', poison: '#60c040', acid: '#60d040', psychic: '#e080ff', thunder: '#a0c0ff', force: '#c0a0ff', slashing: '#ff4444', piercing: '#ff4444', bludgeoning: '#ff6644' };
     if (!isCrit) el.style.color = colors[damageType] || '#ff4444';
     el.style.left = (rect.left + rect.width / 2) + 'px';
@@ -285,7 +287,7 @@ function _showHealFloat(amount, targetSelector, cachedEl) {
     const rect = target.getBoundingClientRect();
     const el = document.createElement('div');
     el.className = 'damage-float heal';
-    el.textContent = `+${amount}`;
+    el.textContent = `💚 +${amount}`;
     el.style.left = (rect.left + rect.width / 2) + 'px';
     el.style.top = rect.top + 'px';
     document.body.appendChild(el);

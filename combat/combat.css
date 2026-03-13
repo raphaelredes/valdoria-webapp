@@ -248,7 +248,7 @@ body {
 .expand-arrow {
     font-size: 10px;
     color: var(--v-text-dim);
-    transition: transform 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     flex-shrink: 0;
 }
 .entity.expanded .expand-arrow { transform: rotate(90deg); }
@@ -257,7 +257,7 @@ body {
 .entity-details {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.25s ease;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
     padding: 0 8px;
 }
 .entity.expanded .entity-details {
@@ -856,7 +856,7 @@ body {
 }
 @keyframes timerPulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.55; }
+    50% { opacity: 0.7; }
 }
 .timer-toast {
     position: fixed;
@@ -903,7 +903,7 @@ body {
 }
 @keyframes timerTextPulse {
     0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.9; }
 }
 
 
@@ -953,19 +953,25 @@ body {
     padding: 14px 32px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
     text-shadow: 0 2px 8px rgba(196,149,58,0.3);
     box-shadow: 0 0 20px rgba(196,149,58,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
+    animation: initBtnPulse 2.5s ease-in-out infinite;
+}
+@keyframes initBtnPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(196,149,58,0.15), inset 0 1px 0 rgba(255,255,255,0.05); border-color: rgba(196,149,58,0.5); }
+    50% { box-shadow: 0 0 30px rgba(196,149,58,0.3), 0 0 8px rgba(196,149,58,0.15), inset 0 1px 0 rgba(255,255,255,0.08); border-color: rgba(196,149,58,0.7); }
 }
 .init-hero-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.96);
     border-color: var(--v-gold, #c4953a);
-    box-shadow: 0 0 30px rgba(196,149,58,0.3);
+    box-shadow: 0 0 35px rgba(196,149,58,0.4);
+    animation: none;
 }
 .init-hero-subtitle {
     font-size: 12px;
-    color: var(--v-text-dim, #8a7a68);
-    font-style: italic; opacity: 0.8;
+    color: var(--v-text, #d4c8b0);
+    font-style: italic; opacity: 0.6;
 }
 
 /* Rolling state: button + subtitle fade out */
@@ -1154,16 +1160,22 @@ body {
 /* ─── BONUS ACTION / REACTION HEADER ─── */
 .ba-header {
     text-align: center;
-    padding: 2px 0 3px;
-    margin-bottom: 1px;
-    border-bottom: 1px solid rgba(196,149,58,0.2);
+    padding: 4px 8px 5px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid rgba(196,149,58,0.25);
+    border-top: 1px solid rgba(196,149,58,0.15);
 }
 .ba-label {
     font-size: 13px;
     font-weight: 800;
     color: var(--v-gold-light);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    animation: baLabelGlow 2s ease-in-out infinite;
+}
+@keyframes baLabelGlow {
+    0%, 100% { text-shadow: 0 0 4px rgba(196,149,58,0.2); }
+    50% { text-shadow: 0 0 12px rgba(196,149,58,0.4); }
 }
 .ba-hint {
     font-size: 11px;
@@ -1178,11 +1190,15 @@ body {
     color: var(--v-gold-light);
     background: linear-gradient(165deg, #2e2520 0%, #3a3028 100%);
 }
-.reaction-header .ba-label { color: #e08080; }
+.reaction-header .ba-label { color: #f08080; animation-name: reactLabelGlow; }
+@keyframes reactLabelGlow {
+    0%, 100% { text-shadow: 0 0 4px rgba(229,57,53,0.2); }
+    50% { text-shadow: 0 0 14px rgba(229,57,53,0.5); }
+}
 .reaction-btn {
-    border-color: rgba(123,32,32,0.5);
+    border-color: rgba(180,50,50,0.5);
     color: #f0a0a0;
-    background: linear-gradient(165deg, #302018 0%, #3a2820 100%);
+    background: linear-gradient(165deg, rgba(123,32,32,0.12) 0%, #3a2820 100%);
 }
 
 /* ─── LOADING INDICATOR ─── */
@@ -2019,7 +2035,9 @@ body {
     border-radius: var(--v-radius-sm);
 }
 .ba-header.reaction-header {
-    background: linear-gradient(135deg, rgba(123,32,32,0.08) 0%, transparent 100%);
+    background: linear-gradient(135deg, rgba(123,32,32,0.15) 0%, transparent 100%);
+    border-bottom-color: rgba(229,57,53,0.25);
+    border-top-color: rgba(229,57,53,0.15);
 }
 
 /* ─── DICE FORMULA ENTRY ANIMATION ─── */
