@@ -521,7 +521,7 @@ function renderFooterInContent(contentEl, footer) {
         } else if (btn.url) {
             const target = typeof _detect_webapp_target_js === 'function'
                 ? _detect_webapp_target_js(btn.url) : 'unknown';
-            if (target \!== 'unknown') {
+            if (target !== 'unknown') {
                 el.onclick = () => handleTransition({ to: target, url: btn.url });
             } else {
                 el.onclick = () => {
