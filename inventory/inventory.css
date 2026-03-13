@@ -6,12 +6,12 @@
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { display: none; }
 
-body { padding-bottom: 110px; }
+body { padding-bottom: 92px; }
 
 /* ── Header ── */
 .header {
     background: linear-gradient(135deg, var(--v-bg-raised), var(--v-bg-accent));
-    padding: 14px 16px 10px;
+    padding: 10px 16px 8px;
     text-align: center;
     border-bottom: 2px solid var(--v-gold-dim);
     position: sticky; top: 0; z-index: 100;
@@ -37,7 +37,7 @@ body { padding-bottom: 110px; }
 
 /* ── Tabs ── */
 .tabs {
-    display: flex; gap: 4px; padding: 10px 12px;
+    display: flex; gap: 4px; padding: 8px 10px;
     background: var(--v-bg-raised);
     border-bottom: 1px solid var(--v-border);
 }
@@ -47,7 +47,7 @@ body { padding-bottom: 110px; }
     font-size: 13px; border: 1px solid var(--v-border);
     background: var(--v-bg-card); color: var(--v-text-dim);
     cursor: pointer; transition: all 0.2s; white-space: nowrap;
-    min-height: 40px; display: flex; align-items: center; justify-content: center;
+    min-height: 36px; display: flex; align-items: center; justify-content: center;
     overflow: hidden; text-overflow: ellipsis;
 }
 .tab.active {
@@ -57,11 +57,11 @@ body { padding-bottom: 110px; }
 }
 
 /* ── Content ── */
-.content { padding: 12px; }
+.content { padding: 10px; }
 
 /* ── Search Bar ── */
 .search-bar {
-    display: flex; gap: 6px; margin-bottom: 8px; align-items: center;
+    display: flex; gap: 6px; margin-bottom: 4px; align-items: center;
 }
 .search-wrap {
     flex: 1; position: relative;
@@ -94,7 +94,7 @@ body { padding-bottom: 110px; }
 
 /* ── Filters ── */
 .filters {
-    display: flex; gap: 6px; margin-bottom: 12px;
+    display: flex; gap: 6px; margin-bottom: 8px;
     overflow-x: auto; padding-bottom: 4px;
     -webkit-mask-image: linear-gradient(to right, #000 90%, transparent);
     mask-image: linear-gradient(to right, #000 90%, transparent);
@@ -102,7 +102,7 @@ body { padding-bottom: 110px; }
 .filters::-webkit-scrollbar { display: none; }
 .filter-btn {
     flex-shrink: 0; padding: 6px 12px;
-    min-height: 40px;
+    min-height: 34px;
     border-radius: var(--v-radius-pill);
     font-size: 13px; border: 1px solid var(--v-border);
     background: var(--v-bg-card); color: var(--v-text-dim);
@@ -121,12 +121,12 @@ body { padding-bottom: 110px; }
 /* ── Item Cards Grid ── */
 .item-grid {
     display: grid; grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 6px;
 }
 .item-card {
     background: linear-gradient(165deg, var(--v-bg-card) 0%, var(--v-bg-raised) 100%);
     border: 1px solid var(--v-border); border-radius: var(--v-radius);
-    padding: 10px; cursor: pointer; transition: all 0.2s;
+    padding: 8px; cursor: pointer; transition: all 0.2s;
     position: relative; overflow: hidden;
     border-left: 3px solid var(--v-border);
 }
@@ -156,7 +156,7 @@ body { padding-bottom: 110px; }
 /* Rarity icon backgrounds */
 .item-card .ic-emoji {
     font-size: 24px;
-    width: 40px; height: 40px; border-radius: 50%;
+    width: 34px; height: 34px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     background: rgba(158,158,158,0.08);
 }
@@ -254,7 +254,7 @@ body { padding-bottom: 110px; }
 }
 
 /* ── Body Silhouette Equipment Layout ── */
-.body-equip { margin-top: 6px; }
+.body-equip { margin-top: 2px; }
 .body-grid {
     display: grid;
     grid-template-columns: 1fr 60px 1fr;
@@ -384,9 +384,9 @@ body { padding-bottom: 110px; }
 
 .equip-slot {
     background: var(--v-bg-card); border: 1px solid var(--v-border);
-    border-radius: var(--v-radius); padding: 10px;
+    border-radius: var(--v-radius); padding: 8px;
     text-align: center; cursor: pointer; transition: all 0.2s;
-    min-height: 60px; display: flex; flex-direction: column;
+    min-height: 50px; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
 }
 .equip-slot:active { transform: scale(0.97); }
@@ -421,7 +421,7 @@ body { padding-bottom: 110px; }
 
 /* ── Stats Summary Bar ── */
 .stats-summary {
-    display: flex; gap: 6px; margin-bottom: 12px; padding: 10px;
+    display: flex; gap: 6px; margin-bottom: 8px; padding: 10px;
     background: var(--v-bg-card); border-radius: var(--v-radius);
     border: 1px solid var(--v-border); justify-content: center; flex-wrap: wrap;
 }
@@ -599,7 +599,7 @@ body { padding-bottom: 110px; }
 .gem-socket:active { transform: scale(0.9); }
 .rune-slot {
     background: var(--v-bg-card); border: 1px dashed var(--v-border);
-    border-radius: var(--v-radius); padding: 10px;
+    border-radius: var(--v-radius); padding: 8px;
     text-align: center; cursor: pointer; transition: all 0.2s;
     margin: 8px 0;
 }
@@ -718,7 +718,7 @@ body { padding-bottom: 110px; }
 /* ── Section Title ── */
 .section-title {
     font-size: 13px; font-weight: 600; color: var(--v-gold);
-    margin: 12px 0 8px; padding-bottom: 4px;
+    margin: 8px 0 6px; padding-bottom: 3px;
     border-bottom: 1px solid var(--v-border);
 }
 
@@ -782,7 +782,7 @@ body { padding-bottom: 110px; }
 
 /* ── Vault Header ── */
 .vault-header {
-    text-align: center; padding: 24px 16px;
+    text-align: center; padding: 16px 16px;
     background: linear-gradient(180deg, rgba(196,149,58,0.08), transparent);
     border-bottom: 1px solid var(--v-border);
     border-radius: var(--v-radius);
