@@ -30,7 +30,7 @@
         /* ─── Hero Header ─── */
         .hero {
             width: 100%;
-            padding: 32px 20px 24px;
+            padding: 24px 16px 20px;
             text-align: center;
             background: linear-gradient(180deg, #3a3028 0%, var(--v-bg) 100%);
             position: relative;
@@ -47,13 +47,13 @@
         }
 
         .hero-icon {
-            font-size: 48px;
+            font-size: clamp(36px, 12vw, 48px);
             margin-bottom: 8px;
             animation: v-fadeIn 0.6s ease;
         }
 
         .hero h1 {
-            font-size: 22px;
+            font-size: clamp(18px, 5.5vw, 22px);
             color: var(--v-gold);
             letter-spacing: 4px;
             text-transform: uppercase;
@@ -94,7 +94,7 @@
         .apps-section {
             width: 100%;
             max-width: 380px;
-            padding: 20px 16px;
+            padding: 16px 12px;
         }
 
         .section-label {
@@ -118,7 +118,7 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 20px 12px 16px;
+            padding: 16px 10px 14px;
             background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
@@ -150,7 +150,7 @@
         }
 
         .app-icon {
-            font-size: 36px;
+            font-size: clamp(28px, 9vw, 36px);
             margin-bottom: 8px;
         }
 
@@ -196,7 +196,7 @@
         /* ─── Footer ─── */
         .hub-footer {
             margin-top: auto;
-            padding: 20px 16px 24px;
+            padding: 16px 12px 20px;
             text-align: center;
             width: 100%;
         }

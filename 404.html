@@ -23,13 +23,13 @@
         }
 
         .lost-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
+            font-size: clamp(48px, 16vw, 64px);
+            margin-bottom: 12px;
             animation: v-fadeIn 0.5s ease;
         }
 
         .lost-title {
-            font-size: 48px;
+            font-size: clamp(36px, 12vw, 48px);
             font-weight: 900;
             color: var(--v-gold);
             text-shadow: 0 0 20px rgba(196, 149, 58, 0.4);
@@ -48,7 +48,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 14px 28px;
+            padding: 12px 24px;
             background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
             color: var(--v-bg);
             border: none;
