@@ -615,7 +615,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: 14px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
@@ -680,9 +680,9 @@ body {
 }
 .check-formula b { color: var(--v-text-bright, #e8dcc8); }
 .check-result {
-    font-size: 24px;
+    font-size: clamp(20px, 6vw, 24px);
     font-weight: 900;
-    padding: 8px 20px;
+    padding: 8px 16px;
     border-radius: 10px;
 }
 .check-result.success {
@@ -806,7 +806,7 @@ body {
 .outcome-reward.damage { background: rgba(170, 68, 68, 0.15); color: #a44; text-shadow: 0 0 6px rgba(170,68,68,0.3); }
 .outcome-reward.item { background: rgba(150, 100, 200, 0.15); color: #a8a; text-shadow: 0 0 6px rgba(150,100,200,0.3); }
 .btn-continue {
-    padding: 12px 24px;
+    padding: 10px 20px;
     background: linear-gradient(180deg, rgba(196,149,58,0.2), rgba(196,149,58,0.1));
     border: 1px solid var(--v-gold-dim, #9a7530);
     color: var(--v-gold, #c4953a);
@@ -849,7 +849,7 @@ body {
     text-shadow: 0 2px 6px rgba(0,0,0,0.6);
 }
 .combat-enemy {
-    font-size: 22px;
+    font-size: clamp(18px, 5.5vw, 22px);
     font-weight: 900;
     color: var(--v-gold, #c4953a);
     text-shadow: 0 0 12px rgba(196,149,58,0.4), 0 2px 4px rgba(0,0,0,0.5);
