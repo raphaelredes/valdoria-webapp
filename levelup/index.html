@@ -1502,8 +1502,8 @@
             <div class="asi-mod">(${fmtMod(val)})</div>
             <div class="asi-boost">${boost > 0 ? '+' + boost : ''}</div>
             <div class="asi-controls">
-                <button class="asi-btn minus" onclick="asiChange('${attr}',-1)" ${boost <= 0 ? 'disabled' : ''}>-</button>
-                <button class="asi-btn plus" onclick="asiChange('${attr}',1)" ${(remaining <= 0 || val >= 20) ? 'disabled' : ''}>+</button>
+                <button class="asi-btn minus" aria-label="Diminuir ${attr}" onclick="asiChange('${attr}',-1)" ${boost <= 0 ? 'disabled' : ''}>-</button>
+                <button class="asi-btn plus" aria-label="Aumentar ${attr}" onclick="asiChange('${attr}',1)" ${(remaining <= 0 || val >= 20) ? 'disabled' : ''}>+</button>
             </div>
         </div>`;
             }

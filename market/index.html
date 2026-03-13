@@ -1329,9 +1329,9 @@
                 </div>
                 ${selected && inv.q > 1 ? `<div class="sr-qty-row" onclick="event.stopPropagation()">
                     <span class="sr-qty-label">Qtd:</span>
-                    <button class="qty-btn" onclick="adjSellQty('${esc(inv.id)}',-1)" ${qty <= 1 ? 'disabled' : ''}>−</button>
+                    <button class="qty-btn" aria-label="Diminuir quantidade" onclick="adjSellQty('${esc(inv.id)}',-1)" ${qty <= 1 ? 'disabled' : ''}>−</button>
                     <span class="qty-val">${qty}/${inv.q}</span>
-                    <button class="qty-btn" onclick="adjSellQty('${esc(inv.id)}',1)" ${qty >= inv.q ? 'disabled' : ''}>+</button>
+                    <button class="qty-btn" aria-label="Aumentar quantidade" onclick="adjSellQty('${esc(inv.id)}',1)" ${qty >= inv.q ? 'disabled' : ''}>+</button>
                     <button class="qty-btn-all" onclick="adjSellQty('${esc(inv.id)}',${inv.q})">Todos</button>
                 </div>` : ''}
             </div>`;
@@ -1455,9 +1455,9 @@
             let modalQty = Math.max(1, Math.min(cartQty || 1, maxBuy));
 
             html += `<div class="qty-row">
-            <button class="qty-btn-lg" onclick="adjModalQty(-1)">−</button>
+            <button class="qty-btn-lg" aria-label="Diminuir quantidade" onclick="adjModalQty(-1)">−</button>
             <span class="qty-display" id="modalQty">${modalQty}</span>
-            <button class="qty-btn-lg" onclick="adjModalQty(1)">+</button>
+            <button class="qty-btn-lg" aria-label="Aumentar quantidade" onclick="adjModalQty(1)">+</button>
         </div>`;
             html += `<div style="text-align:center;font-size:13px;color:var(--v-gold);" id="modalTotal">
             Total: ${modalQty * item.p} GP
