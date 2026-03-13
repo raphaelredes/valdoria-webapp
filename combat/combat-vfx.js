@@ -256,7 +256,8 @@ function _showMissFloat(targetSelector, cachedEl) {
     const el = document.createElement('div');
     el.className = 'damage-float miss';
     el.textContent = 'Esquivou!';
-    el.style.left = (rect.left + rect.width / 2) + 'px';
+    const _mx = Math.max(30, Math.min(window.innerWidth - 30, rect.left + rect.width / 2));
+    el.style.left = _mx + 'px';
     el.style.top = rect.top + 'px';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1000);
@@ -274,7 +275,8 @@ function _showDamageFloat(damage, damageType, targetSelector, isCrit, cachedEl) 
     el.textContent = `${_ico} -${damage}`;
     const colors = { fire: '#ff6020', cold: '#80c0ff', lightning: '#ffe040', necrotic: '#9040c0', radiant: '#ffe080', poison: '#60c040', acid: '#60d040', psychic: '#e080ff', thunder: '#a0c0ff', force: '#c0a0ff', slashing: '#ff4444', piercing: '#ff4444', bludgeoning: '#ff6644' };
     if (!isCrit) el.style.color = colors[damageType] || '#ff4444';
-    el.style.left = (rect.left + rect.width / 2) + 'px';
+    const _fx = Math.max(30, Math.min(window.innerWidth - 30, rect.left + rect.width / 2));
+    el.style.left = _fx + 'px';
     el.style.top = rect.top + 'px';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), isCrit ? 1500 : 1200);
@@ -288,7 +290,8 @@ function _showHealFloat(amount, targetSelector, cachedEl) {
     const el = document.createElement('div');
     el.className = 'damage-float heal';
     el.textContent = `💚 +${amount}`;
-    el.style.left = (rect.left + rect.width / 2) + 'px';
+    const _hx = Math.max(30, Math.min(window.innerWidth - 30, rect.left + rect.width / 2));
+    el.style.left = _hx + 'px';
     el.style.top = rect.top + 'px';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1200);
