@@ -444,9 +444,9 @@ function showSkillPicker(skills, enemies, actionType) {
     const title = actionType === 'bonus_use' ? '⚡ Ação Bônus' : 'Habilidades';
     let html = `<div class="skill-panel-title">${title}</div>`;
     skills.forEach(sk => {
-        const typeBadge = sk.tp === 'saving_throw' ? ' · <span class="sk-type">ST</span>' :
-            sk.tp === 'auto' ? ' · <span class="sk-type">Auto</span>' :
-                sk.tp === 'heal' ? ' · <span class="sk-type">Cura</span>' : '';
+        const typeBadge = sk.tp === 'saving_throw' ? ' · <span class="sk-type sk-type-st">ST</span>' :
+            sk.tp === 'auto' ? ' · <span class="sk-type sk-type-auto">Auto</span>' :
+                sk.tp === 'heal' ? ' · <span class="sk-type sk-type-heal">Cura</span>' : '';
         const tgtBadge = sk.tg === 'all' ? ' · <span class="sk-aoe">AOE</span>' :
             sk.tg === 'self' ? ' · <span class="sk-aoe">Próprio</span>' : '';
         const effLine = sk.eff ? `<div class="skill-effect">${escHtml(sk.eff)}</div>` : '';
@@ -569,7 +569,7 @@ function showItemPicker(items, enemies, allies) {
     items.forEach(it => {
         const isThrown = !!it.tdmg;
         const effText = isThrown ? `${it.tdmg} ${it.ttype || ''}` : (it.heal ? `Cura ${it.heal}` : '');
-        const typeBadge = isThrown ? '<span class="sk-aoe">Arremesso</span>' : '<span class="sk-type">Cura</span>';
+        const typeBadge = isThrown ? '<span class="sk-aoe">Arremesso</span>' : '<span class="sk-type sk-type-heal">Cura</span>';
         const itemCls = isThrown ? 'item-thrown' : 'item-heal';
         html += `<div class="skill-item item-entry ${itemCls}" data-item="${escHtml(it.n)}" data-thrown="${isThrown}">
             <div>
