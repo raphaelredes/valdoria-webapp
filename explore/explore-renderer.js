@@ -981,6 +981,13 @@ function onMoveComplete(col, row) {
     // Move danger markers after player moves
     if (typeof _moveDangerMarkers === 'function') _moveDangerMarkers();
 
+    // Event mutex: skip event triggers if another event overlay is active
+    if (typeof isEventActive === 'function' && isEventActive()) {
+        logMoveEvent([{type:'move'}]);
+        saveState();
+        return;
+    }
+
     // Environmental hazard check (priority over POI/exit)
     const hazard = checkHazard(col, row);
     if (hazard) {

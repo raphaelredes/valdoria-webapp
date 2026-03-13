@@ -78,7 +78,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 .screen {
     display: flex;
     flex-direction: column;
-    padding: 10px 14px;
+    padding: 10px 12px;
     padding-bottom: 120px; /* fallback — JS adjusts dynamically via updateBottomPadding() */
     min-height: 100%;
     overflow-y: auto;
@@ -226,7 +226,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     z-index: 100;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
     transition: transform 0.3s ease, opacity 0.25s ease;
 }
 
@@ -238,7 +238,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 
 .footer-row {
     display: flex;
-    gap: 4px;
+    gap: 3px;
 }
 
 .footer-row .btn-action {
@@ -1661,8 +1661,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 /* ── Location Header ── */
 .v-location-header {
     text-align: center;
-    padding: 10px 16px 8px;
-    margin: -10px -14px 6px;
+    padding: 6px 16px 4px;
+    margin: -10px -12px 4px;
     background: linear-gradient(180deg, rgba(196,149,58,0.12) 0%, rgba(196,149,58,0.04) 60%, transparent 100%);
     border-bottom: 1px solid rgba(196,149,58,0.2);
     position: relative;
@@ -1710,7 +1710,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 .v-location-subtitle {
     font-size: 12px;
     color: var(--v-text-dim);
-    margin-top: 3px;
+    margin-top: 2px;
     letter-spacing: 0.5px;
 }
 
@@ -4009,7 +4009,7 @@ body[data-time="night"] .screen-content strong {
 
 /* Button rows rendered inside #content get top margin for spacing from text */
 .screen-content > .btn-row:first-of-type {
-    margin-top: 16px;
+    margin-top: 10px;
 }
 
 .screen-content > .btn-row {

@@ -428,7 +428,7 @@ function updateHUD() {
     const c = S.charData;
     if (!c) return;
 
-    document.getElementById('hud-name').textContent = `${c.ci || ''} ${c.nm || 'Heroi'}`;
+    document.getElementById('hud-name').textContent = `${c.ci || ''} ${c.nm || 'Aventureiro'}`;
     document.getElementById('hud-level').textContent = `Nv.${c.lv || 1}`;
 
     const hpEl = document.getElementById('hud-hp');

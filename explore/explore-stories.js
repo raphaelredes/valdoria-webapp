@@ -1000,7 +1000,13 @@ function _applyStoryOutcome(storyId, stage, story) {
     // Apply effects
     if (effect.condition) {
         const steps = effect.steps || 8;
-        S.conditions.push({ type: effect.condition, stepsLeft: steps });
+        // Prevent stacking: refresh duration if condition already active
+        const existStoryCond = S.conditions.find(c => c.type === effect.condition);
+        if (existStoryCond) {
+            existStoryCond.stepsLeft = Math.max(existStoryCond.stepsLeft, steps);
+        } else {
+            S.conditions.push({ type: effect.condition, stepsLeft: steps });
+        }
         updateConditionHUD();
     }
     if (effect.remove_condition) {

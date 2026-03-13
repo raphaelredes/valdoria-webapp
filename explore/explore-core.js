@@ -995,11 +995,19 @@ const _OVERLAY_CHILDREN = {
     'camp-overlay':      ['camp-food-list'],
 };
 
+// Event mutex: prevents multiple overlays from stacking simultaneously.
+// Set to true when an event overlay is active, cleared when dismissed.
+let _eventActive = false;
+
+function isEventActive() { return _eventActive; }
+function setEventActive(val) { _eventActive = !!val; }
+
 /**
  * Activate an overlay and automatically clear its dynamic children.
  * Prevents stale content from the previous event flashing on screen.
+ * Sets the event mutex to prevent concurrent overlay activation.
  * @param {string} overlayId - The overlay element ID
- * @returns {HTMLElement} The overlay element (for further setup)
+ * @returns {HTMLElement|null} The overlay element, or null if not found
  */
 function activateOverlay(overlayId) {
     const children = _OVERLAY_CHILDREN[overlayId];
@@ -1010,8 +1018,23 @@ function activateOverlay(overlayId) {
         }
     }
     const overlay = document.getElementById(overlayId);
+    if (!overlay) {
+        console.error('[EXPLORE] activateOverlay: element not found:', overlayId);
+        return null;
+    }
+    _eventActive = true;
     overlay.classList.add('active');
     return overlay;
+}
+
+/**
+ * Deactivate an overlay and release the event mutex.
+ * @param {string} overlayId - The overlay element ID
+ */
+function deactivateOverlay(overlayId) {
+    const overlay = document.getElementById(overlayId);
+    if (overlay) overlay.classList.remove('active');
+    _eventActive = false;
 }
 
 // ═══════════════════════════════════════════════════════

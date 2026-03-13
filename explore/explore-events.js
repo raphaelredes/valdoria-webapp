@@ -97,7 +97,8 @@ function showPOI(poi) {
 
     // Route NPC dialogue POIs to the multi-turn dialogue system
     if (poi.dialogue && poi.dialogue.length > 0) {
-        document.getElementById('dm-overlay').classList.remove('active');
+        if (typeof deactivateOverlay === 'function') deactivateOverlay('dm-overlay');
+        else document.getElementById('dm-overlay').classList.remove('active');
         showNPCDialogue(poi);
         return;
     }
@@ -139,6 +140,7 @@ function showAmbientEvent(poi) {
         contBtn.textContent = 'Prosseguir…';
         contBtn.addEventListener('click', () => {
             overlay.classList.remove('active', 'ambient-event');
+            if (typeof setEventActive === 'function') setEventActive(false);
             if (header) header.style.display = '';
             // Small XP reward for experiencing the world
             if (poi.xp) {
@@ -351,7 +353,12 @@ function showChoices(poi) {
 function handleChoice(poi, choice, idx) {
     // Guard: prevent double-processing the same POI choice
     if (S.poisResolved.has(poi.id)) return;
-    document.getElementById('dm-overlay').classList.remove('active');
+    // Release event mutex when closing overlay
+    if (typeof deactivateOverlay === 'function') {
+        deactivateOverlay('dm-overlay');
+    } else {
+        document.getElementById('dm-overlay').classList.remove('active');
+    }
     S.poisResolved.add(poi.id);
 
     if (choice.k) {
@@ -503,6 +510,7 @@ function _showCheckSkip(overlay, success, choice, poi) {
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
         disposeDice3D();
         overlay.classList.remove('active');
+        if (typeof setEventActive === 'function') setEventActive(false);
         const outcome = success ? (choice.o || {}) : (choice.f || choice.o || {});
 
         if (!success && choice.cmb_on_fail && poi.combat) {
@@ -593,6 +601,7 @@ function showStage2(poi, stage2) {
             btn.innerHTML = html;
             btn.addEventListener('click', () => {
                 overlay.classList.remove('active');
+                if (typeof setEventActive === 'function') setEventActive(false);
                 if (ch.k) {
                     performStatCheck(fakePoi, ch);
                 } else {
@@ -647,7 +656,10 @@ function applyOutcome(poi, outcome, choice) {
         }
     }
     if (outcome.i) {
-        S.itemsFound.push(outcome.i);
+        // Dedup: only add item if not already found in this exploration
+        if (!S.itemsFound.includes(outcome.i)) {
+            S.itemsFound.push(outcome.i);
+        }
         addRewardBadge(rewardsEl, outcome.i, 'item');
     }
     // Chain event clue — store for later POIs in the same map
@@ -686,7 +698,11 @@ function addRewardBadge(container, text, type) {
 }
 
 function closeOutcome() {
-    document.getElementById('outcome-overlay').classList.remove('active');
+    if (typeof deactivateOverlay === 'function') {
+        deactivateOverlay('outcome-overlay');
+    } else {
+        document.getElementById('outcome-overlay').classList.remove('active');
+    }
     if (checkDeath()) return;
     // If returning to city, continue the journey after resolving the encounter
     if (_returningToCity && _returnJourney) {
@@ -987,6 +1003,7 @@ function showBossEncounter() {
     fightBtn.innerHTML = 'Lutar';
     fightBtn.onclick = () => {
         overlay.classList.remove('active');
+        if (typeof setEventActive === 'function') setEventActive(false);
         triggerCombat({ combat: { en: boss.en, ei: boss.ei, b: boss.b || S.biome, d: boss.d || S.dangerLevel } });
         S._bossDefeated = true; saveState();
     };
@@ -1007,7 +1024,7 @@ function showBossEncounter() {
             S._bossDefeated = true; saveState();
             S.xpEarned += 10;
             const delay = typeof calcReadTime === 'function' ? calcReadTime(successText, 'overlay') : 2000;
-            setTimeout(() => { overlay.classList.remove('active'); _showPortalSummary(); }, delay);
+            setTimeout(() => { overlay.classList.remove('active'); if (typeof setEventActive === 'function') setEventActive(false); _showPortalSummary(); }, delay);
         } else {
             const failText = 'Detectado! O guardião ataca!';
             overlay.innerHTML = `<div class="event-content" style="text-align:center">
@@ -1017,6 +1034,7 @@ function showBossEncounter() {
             const delay = typeof calcReadTime === 'function' ? calcReadTime(failText, 'overlay') : 2000;
             setTimeout(() => {
                 overlay.classList.remove('active');
+                if (typeof setEventActive === 'function') setEventActive(false);
                 triggerCombat({ combat: { en: boss.en, ei: boss.ei, b: boss.b || S.biome, d: boss.d || S.dangerLevel } });
             }, delay);
         }
@@ -1028,7 +1046,7 @@ function showBossEncounter() {
     retreatBtn.className = 'v-btn';
     retreatBtn.style.opacity = '0.7';
     retreatBtn.innerHTML = 'Recuar';
-    retreatBtn.onclick = () => { overlay.classList.remove('active'); };
+    retreatBtn.onclick = () => { overlay.classList.remove('active'); if (typeof setEventActive === 'function') setEventActive(false); };
     choicesDiv.appendChild(retreatBtn);
 
     overlay.classList.add('active');
@@ -1122,6 +1140,7 @@ function showRandomEncounter(enc) {
             btn.innerHTML = html;
             btn.addEventListener('click', () => {
                 overlay.classList.remove('active');
+                if (typeof setEventActive === 'function') setEventActive(false);
                 logMoveEvent([{ type: 'encounter', enc_type: enc.type, choice: idx }]);
 
                 const encPoi = { id: -1, choices: [], combat: enc.cb || null, type: 'enc' };
@@ -1560,11 +1579,23 @@ function applyHazardEffect(hazard) {
         showTerrainToast(`-${dmg} HP (fogo)`, 'damage');
     }
     if (hazard.failEffect === 'poisoned') {
-        S.conditions.push({ type: 'poisoned', stepsLeft: 3 });
+        // Prevent stacking: refresh duration if already poisoned
+        const existPoison = S.conditions.find(c => c.type === 'poisoned');
+        if (existPoison) {
+            existPoison.stepsLeft = Math.max(existPoison.stepsLeft, 3);
+        } else {
+            S.conditions.push({ type: 'poisoned', stepsLeft: 3 });
+        }
         showTerrainToast('Envenenado! (3 turnos)', 'condition');
     }
     if (hazard.failEffect === 'prone') {
-        S.conditions.push({ type: 'prone', stepsLeft: 1 });
+        // Prevent stacking: refresh duration if already prone
+        const existProne = S.conditions.find(c => c.type === 'prone');
+        if (existProne) {
+            existProne.stepsLeft = Math.max(existProne.stepsLeft, 1);
+        } else {
+            S.conditions.push({ type: 'prone', stepsLeft: 1 });
+        }
         showTerrainToast('Escorregou!', 'condition');
     }
     updateConditionHUD();
@@ -1787,7 +1818,14 @@ function _triggerTrap(trap) {
     }
     // Apply condition
     if (trap.failCondition) {
-        S.conditions.push({ type: trap.failCondition, stepsLeft: trap.failCondition === 'poisoned' ? 5 : 2 });
+        // Prevent stacking: refresh duration if condition already active
+        const existTrapCond = S.conditions.find(c => c.type === trap.failCondition);
+        const trapCondSteps = trap.failCondition === 'poisoned' ? 5 : 2;
+        if (existTrapCond) {
+            existTrapCond.stepsLeft = Math.max(existTrapCond.stepsLeft, trapCondSteps);
+        } else {
+            S.conditions.push({ type: trap.failCondition, stepsLeft: trapCondSteps });
+        }
         updateConditionHUD();
     }
     const dmgText = dmg > 0 ? ` -${dmg} HP` : '';
