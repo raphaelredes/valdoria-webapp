@@ -588,9 +588,11 @@ async function startGame() {
     console.log('[GAME] startGame() called, charId:', S.charId || 'none');
     showLoading();
     const startBody = S.charId ? { char_id: S.charId } : {};
-    // Send device platform for displacement tracking
+    // Send device platform and device_id for displacement tracking
     const tgPlatform = (window.Telegram && Telegram.WebApp && Telegram.WebApp.platform) || '';
     if (tgPlatform) startBody.platform = tgPlatform;
+    const did = (window.DeviceId && DeviceId.get) ? DeviceId.get() : '';
+    if (did) startBody.device_id = did;
     const data = await apiCall('/api/game/start', startBody);
     await hideLoadingWithDelay();
     if (data && !data.error) {
@@ -917,7 +919,8 @@ var _prefetchedStart = null;
 function _prefetchStart(charId) {
     if (!charId || !S.apiBase || !S.token) return;
     var url = S.apiBase + '/api/game/start';
-    var body = JSON.stringify({ user_id: S.uid, char_id: charId });
+    var prefetchDid = (window.DeviceId && DeviceId.get) ? DeviceId.get() : '';
+    var body = JSON.stringify({ user_id: S.uid, char_id: charId, device_id: prefetchDid });
     fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token },

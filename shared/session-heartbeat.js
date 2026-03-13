@@ -79,8 +79,10 @@ var SessionHeartbeat = (function () {
     async function _poll() {
         if (_stopped) return;
         try {
+            var did = (window.DeviceId && DeviceId.get) ? DeviceId.get() : '';
+            var url = _cfg.apiBase + '/api/game/heartbeat?uid=' + _cfg.uid + (did ? '&did=' + encodeURIComponent(did) : '');
             var resp = await fetch(
-                _cfg.apiBase + '/api/game/heartbeat?uid=' + _cfg.uid,
+                url,
                 {
                     headers: { 'Authorization': 'Bearer ' + _cfg.token },
                     signal: AbortSignal.timeout(3000),
@@ -186,6 +188,7 @@ var SessionHeartbeat = (function () {
                 body: JSON.stringify({
                     user_id: _cfg.uid,
                     platform: platform,
+                    device_id: (window.DeviceId && DeviceId.get) ? DeviceId.get() : '',
                 }),
                 signal: AbortSignal.timeout(8000),
             });
