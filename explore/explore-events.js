@@ -1254,6 +1254,8 @@ function flashScreen(color) {
     flash.style.animation = 'encounterFlash 0.6s ease-out forwards';
     document.body.appendChild(flash);
     setTimeout(() => flash.remove(), 700);
+    // Camera shake on damage flash (M21)
+    if (typeof addShakeTrauma === 'function') addShakeTrauma(0.4);
 }
 
 // Check if current hex has an environmental hazard
@@ -1319,6 +1321,8 @@ function checkHazard(col, row) {
 
 // Pre-check narration for environmental hazards
 function showHazardNarration(hazard) {
+    // Camera shake on hazard reveal (M21)
+    if (typeof addShakeTrauma === 'function') addShakeTrauma(0.3);
     const narr = HAZARD_NARRATIONS[hazard.type];
     if (!narr || !narr.pre) {
         // Fallback: skip narration, go straight to check
@@ -1830,6 +1834,9 @@ function _triggerTrap(trap) {
     }
     const dmgText = dmg > 0 ? ` -${dmg} HP` : '';
     showTerrainToast(`${trap.icon} ${trap.triggerText}${dmgText}`, 'damage');
+    // Heavy shake for trap trigger (M21)
+    if (typeof addShakeTrauma === 'function') addShakeTrauma(0.6);
+    try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('error'); } catch(e) {}
     if (typeof checkDeath === 'function') checkDeath();
     saveState();
 }

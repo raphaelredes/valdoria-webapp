@@ -1933,7 +1933,7 @@
     </div>
 
     <!-- Map Viewport -->
-    <div id="map-viewport">
+    <div id="map-viewport" role="application" aria-label="Mapa mundo de Valdoria">
         <div id="map-wrapper">
             <img id="map-bg" src="map-static-2x.png" draggable="false"
                  style="position:absolute;top:0;left:0;pointer-events:none;image-rendering:auto"
@@ -1946,7 +1946,7 @@
         <div id="compass-overlay">
             <svg id="compass-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"></svg>
         </div>
-        <div id="minimap"><svg id="minimap-svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+        <div id="minimap" role="img" aria-label="Minimapa do mundo"><svg id="minimap-svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
         <!-- Zoom controls -->
         <div id="zoom-controls">
             <button type="button" class="zoom-btn" id="btn-zoom-in" aria-label="Aproximar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
@@ -1986,7 +1986,7 @@
     </div>
 
     <!-- Location Info Panel -->
-    <div id="info-panel">
+    <div id="info-panel" role="dialog" aria-label="Detalhes do local">
         <div class="info-handle"></div>
         <div class="info-header">
             <span class="info-icon" id="info-icon"></span>

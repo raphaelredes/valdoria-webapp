@@ -320,14 +320,14 @@
     </div>
 
     <!-- Minimap -->
-    <canvas id="minimap" width="80" height="80"></canvas>
+    <canvas id="minimap" width="80" height="80" role="img" aria-label="Minimapa"></canvas>
 
     <!-- Condition Bar (D&D 5e status effects) -->
-    <div id="condition-bar" class="condition-bar"></div>
+    <div id="condition-bar" class="condition-bar" role="status" aria-label="Condições ativas"></div>
 
     <!-- Map Viewport -->
-    <div id="map-viewport">
-        <canvas id="iso-map"></canvas>
+    <div id="map-viewport" role="application" aria-label="Mapa de exploração interativo">
+        <canvas id="iso-map" role="img" aria-label="Mapa hexagonal de exploração"></canvas>
         <div id="weather-overlay" class="weather-overlay"></div>
         <div id="exit-compass" class="exit-compass" style="display:none">
             <div class="compass-arrow" id="compass-arrow"></div>
@@ -337,7 +337,7 @@
     </div>
 
     <!-- Exhaustion HUD (D&D 5e PHB) -->
-    <div id="exhaustion-hud" class="exhaustion-hud" style="display:none">
+    <div id="exhaustion-hud" class="exhaustion-hud" role="status" aria-label="Nível de exaustão" style="display:none">
         <span class="exh-icon">⚠️</span>
         <span class="exh-label" id="exh-label">Exaustão 0</span>
         <div class="exh-pips" id="exh-pips">
@@ -386,7 +386,7 @@
     </div>
 
     <!-- DM Narration Overlay -->
-    <div class="dm-overlay" id="dm-overlay">
+    <div class="dm-overlay" id="dm-overlay" role="dialog" aria-label="Narração do Mestre">
         <div class="dm-card">
             <div class="dm-header">
                 <span class="dm-icon" id="dm-icon"></span>

@@ -564,7 +564,7 @@ function setupPanZoom() {
     });
     // Pinch zoom: snap to discrete levels
     vp.addEventListener('touchstart', e => { if (e.touches.length === 2) { ipd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); iIdx = _zoomIdx; } }, { passive: true });
-    vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; if (ratio > 1.3 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1); ipd = d; clamp(); apply(); } else if (ratio < 0.7 && _zoomIdx > 0) { _snapToZoomLevel(-1); ipd = d; clamp(); apply(); } } }, { passive: true });
+    vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; const vpR = vp.getBoundingClientRect(); const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - vpR.left; const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - vpR.top; if (ratio > 1.3 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1, midX, midY); ipd = d; clamp(); apply(); } else if (ratio < 0.7 && _zoomIdx > 0) { _snapToZoomLevel(-1, midX, midY); ipd = d; clamp(); apply(); } } }, { passive: true });
     // Mouse wheel: snap to discrete levels (debounced to prevent jitter)
     let _wheelTimer = null;
     vp.addEventListener('wheel', e => {

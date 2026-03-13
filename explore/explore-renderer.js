@@ -210,11 +210,13 @@ function renderLoop(timestamp) {
     const particlesActive = typeof updateParticles === 'function' ? updateParticles(dt) : false;
     const weatherActive = typeof updateWeatherParticles === 'function' ? updateWeatherParticles(dt) : false;
 
+    const shakeActive = _updateShake(dt);
     const flashActive = _hexFlashes.length > 0;
     const tapActive = _tapFeedbacks.length > 0;
-    const hasAnimations = movingActive || effectsActive || fogActive || particlesActive || flashActive || tapActive;
+    const hasAnimations = movingActive || effectsActive || fogActive || particlesActive || flashActive || tapActive || shakeActive;
 
     renderFrame(timestamp);
+    _applyShakeTransform();
     _needsRender = false;
 
     // Only keep loop running if there are active animations or pulsing highlights
@@ -310,6 +312,12 @@ _staticDirty = false;
 
     // 3. Adjacent hex highlights (dynamic — depends on player position, pulsing)
     drawAdjacentHighlights(_ctx, timestamp);
+
+    // 3.5. Danger signaling (red glow on hazardous hexes)
+    drawDangerSignaling(_ctx, timestamp);
+
+    // 3.7. Range highlighting (reachable hexes BFS overlay)
+    drawRangeHighlight(_ctx, timestamp);
 
     // 4. Dynamic tile decorations (water waves, lava glow)
     drawAnimatedTiles(_ctx, timestamp);
@@ -993,6 +1001,8 @@ function onMoveComplete(col, row) {
     if (hazard) {
         revealEventSprite(col, row, 'hazard');
         spawnFloatingText(col, row, 'crack!', '#c44a2a', 'big');
+        // Haptic: heavy impact for hazard (M4)
+        try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) {}
         setTimeout(() => showHazardNarration(hazard), 200);
         return;
     }
@@ -1003,6 +1013,8 @@ function onMoveComplete(col, row) {
         if (trap) {
             revealEventSprite(col, row, 'trap');
             spawnFloatingText(col, row, 'clank!', '#8a4a2a', 'big');
+            // Haptic: heavy impact for trap (M4)
+            try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) {}
             setTimeout(() => showTrapEvent(trap), 200);
             return;
         }
@@ -1038,6 +1050,13 @@ const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.h
         const poiSounds = {dis:'*brilho*', sea:'intrigante...', dan:'PERIGO!', mys:'misterioso...', npc:'alguem!'};
         const poiColors = {dis:'#c4953a', sea:'#8a9a5a', dan:'#c44a2a', mys:'#8a6aaa', npc:'#5a9a6a'};
         spawnFloatingText(col, row, poiSounds[poi.type] || '!', poiColors[poi.type] || '#c4953a', 'big');
+        // Haptic: medium for discovery, heavy for danger POI (M4)
+        try {
+            if (typeof tg !== 'undefined' && tg) {
+                if (poi.type === 'dan') tg.HapticFeedback.notificationOccurred('warning');
+                else tg.HapticFeedback.impactOccurred('medium');
+            }
+        } catch(e) {}
         setTimeout(() => showPOI(poi), 100);
         return;
     }
@@ -2198,4 +2217,251 @@ function _drawDangerMarkers(ctx, timestamp) {
 
         ctx.restore();
     }
+}
+
+// ═══════════════════════════════════════════════════════
+// CAMERA SHAKE — trauma-based shake on hazard/trap impacts (M21)
+// ═══════════════════════════════════════════════════════
+
+let _shakeTrauma = 0;       // 0-1 trauma level (decays over time)
+let _shakeOffsetX = 0;
+let _shakeOffsetY = 0;
+let _shakeRot = 0;
+const SHAKE_MAX_OFFSET = 6; // px
+const SHAKE_MAX_ROT = 1.5;  // degrees
+const SHAKE_DECAY = 2.5;    // trauma decay per second
+
+function addShakeTrauma(amount) {
+    _shakeTrauma = Math.min(1, _shakeTrauma + amount);
+    scheduleRender();
+    if (!_rafId) _rafId = requestAnimationFrame(renderLoop);
+}
+
+function _updateShake(dt) {
+    if (_shakeTrauma <= 0.001) {
+        _shakeTrauma = 0;
+        _shakeOffsetX = 0;
+        _shakeOffsetY = 0;
+        _shakeRot = 0;
+        return false;
+    }
+    _shakeTrauma = Math.max(0, _shakeTrauma - SHAKE_DECAY * dt);
+    var t2 = _shakeTrauma * _shakeTrauma;
+
+    var now = performance.now();
+    var rx = Math.sin(now * 0.037) * Math.cos(now * 0.059);
+    var ry = Math.cos(now * 0.041) * Math.sin(now * 0.071);
+
+    _shakeOffsetX = rx * t2 * SHAKE_MAX_OFFSET;
+    _shakeOffsetY = ry * t2 * SHAKE_MAX_OFFSET;
+    _shakeRot = Math.sin(now * 0.053) * t2 * SHAKE_MAX_ROT;
+    return true;
+}
+
+function _applyShakeTransform() {
+    if (!_canvas) return;
+    if (_shakeTrauma <= 0) {
+        if (_canvas.style.transform) _canvas.style.transform = '';
+        return;
+    }
+    _canvas.style.transform =
+        'translate(' + _shakeOffsetX.toFixed(1) + 'px, ' + _shakeOffsetY.toFixed(1) + 'px) ' +
+        'rotate(' + _shakeRot.toFixed(2) + 'deg)';
+}
+
+
+// ═══════════════════════════════════════════════════════
+// DANGER SIGNALING — red glow on hex borders for dangerous areas (M22)
+// ═══════════════════════════════════════════════════════
+
+function _getHexDangerLevel(col, row) {
+    var danger = 0;
+    if (S.hazardZones) {
+        for (var i = 0; i < S.hazardZones.length; i++) {
+            var hz = S.hazardZones[i];
+            if (hz.col === col && hz.row === row) { danger = Math.max(danger, 2); break; }
+        }
+    }
+    if (S.traps) {
+        for (var j = 0; j < S.traps.length; j++) {
+            var t = S.traps[j];
+            if (t.col === col && t.row === row && !t.triggered && !t.hidden) {
+                danger = Math.max(danger, 1);
+            }
+        }
+    }
+    if (S._dangerMarkers) {
+        for (var k = 0; k < S._dangerMarkers.length; k++) {
+            var m = S._dangerMarkers[k];
+            var dist = typeof hexDist === 'function' ? hexDist(col, row, m.col, m.row) : 99;
+            if (dist === 0) danger = Math.max(danger, 3);
+            else if (dist === 1) danger = Math.max(danger, 1);
+        }
+    }
+    if (S.grid && S.grid[row]) {
+        var tile = S.grid[row][col];
+        if (tile === 'L') danger = Math.max(danger, 2);
+        var nbrs = typeof getNeighbors === 'function' ? getNeighbors(col, row) : [];
+        for (var n = 0; n < nbrs.length; n++) {
+            var nc = nbrs[n][0], nr = nbrs[n][1];
+            var adjTile = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
+            if (adjTile === 'L') danger = Math.max(danger, 1);
+        }
+    }
+    return danger;
+}
+
+function drawDangerSignaling(ctx, timestamp) {
+    if (!S.grid || !S.fogState) return;
+    var pulse = 0.5 + Math.sin((timestamp || 0) * 0.004) * 0.3;
+    var ROWS_L = S.grid.length;
+    var COLS_L = S.grid[0] ? S.grid[0].length : 0;
+    var IMP = typeof IMPASSABLE !== 'undefined' ? IMPASSABLE : new Set(['#', 'W', 'M', 'L']);
+
+    for (var r = 0; r < ROWS_L; r++) {
+        for (var c = 0; c < COLS_L; c++) {
+            var key = c + ',' + r;
+            if (S.fogState[key] !== 'visible') continue;
+            if (c === S.playerCol && r === S.playerRow) continue;
+
+            var danger = _getHexDangerLevel(c, r);
+            if (danger <= 0) continue;
+
+            var tile = S.grid[r][c];
+            if (!tile || IMP.has(tile)) continue;
+
+            var center = hexToScreen(c, r);
+            var baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            var h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+            var topVerts = hexTopVertices(center.x, center.y - h);
+
+            var intensity = danger / 3;
+            var alpha = (0.06 + intensity * 0.12) * pulse;
+
+            ctx.save();
+            var grad = ctx.createRadialGradient(
+                center.x, center.y - h, 0,
+                center.x, center.y - h, HEX_W * 0.6
+            );
+            grad.addColorStop(0, 'rgba(200,40,40,' + (alpha * 1.5).toFixed(3) + ')');
+            grad.addColorStop(0.6, 'rgba(200,40,40,' + (alpha * 0.5).toFixed(3) + ')');
+            grad.addColorStop(1, 'rgba(200,40,40,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(topVerts[0].x, topVerts[0].y);
+            for (var vi = 1; vi < topVerts.length; vi++) ctx.lineTo(topVerts[vi].x, topVerts[vi].y);
+            ctx.closePath();
+            ctx.fill();
+
+            if (danger >= 2) {
+                ctx.strokeStyle = 'rgba(200,50,30,' + (alpha * 0.8).toFixed(3) + ')';
+                ctx.lineWidth = 1 + intensity * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(topVerts[0].x, topVerts[0].y);
+                for (var vi2 = 1; vi2 < topVerts.length; vi2++) ctx.lineTo(topVerts[vi2].x, topVerts[vi2].y);
+                ctx.closePath();
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// RANGE HIGHLIGHTING — BFS flood fill for reachable hexes (M24)
+// ═══════════════════════════════════════════════════════
+
+var _rangeHighlightHexes = null;
+var _rangeHighlightSteps = 0;
+
+function calcReachableHexes(startCol, startRow, maxSteps) {
+    var reachable = new Map();
+    var queue = [[startCol, startRow, maxSteps]];
+    reachable.set(startCol + ',' + startRow, maxSteps);
+    var IMP = typeof IMPASSABLE !== 'undefined' ? IMPASSABLE : new Set(['#', 'W', 'M', 'L']);
+
+    while (queue.length > 0) {
+        var item = queue.shift();
+        var col = item[0], row = item[1], remaining = item[2];
+        if (remaining <= 0) continue;
+
+        var neighbors = typeof getNeighbors === 'function' ? getNeighbors(col, row) : [];
+        for (var i = 0; i < neighbors.length; i++) {
+            var nc = neighbors[i][0], nr = neighbors[i][1];
+            if (nr < 0 || nr >= S.grid.length || nc < 0 || nc >= (S.grid[0] ? S.grid[0].length : 0)) continue;
+            var tile = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
+            if (IMP.has(tile)) continue;
+
+            var fogKey = nc + ',' + nr;
+            if (S.fogState[fogKey] === 'hidden') continue;
+
+            var baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            var difficult = isDifficultTerrain(baseTile, S.biome);
+            var ranger = typeof isRanger === 'function' && isRanger();
+            var cost = (difficult && !ranger) ? 2 : 1;
+
+            var newRemaining = remaining - cost;
+            if (newRemaining < 0) continue;
+
+            var key = nc + ',' + nr;
+            if (reachable.has(key) && reachable.get(key) >= newRemaining) continue;
+            reachable.set(key, newRemaining);
+            queue.push([nc, nr, newRemaining]);
+        }
+    }
+    return reachable;
+}
+
+function showRangeHighlight(steps) {
+    if (!steps || steps <= 0) {
+        _rangeHighlightHexes = null;
+        _rangeHighlightSteps = 0;
+        scheduleRender();
+        return;
+    }
+    _rangeHighlightSteps = steps;
+    _rangeHighlightHexes = calcReachableHexes(S.playerCol, S.playerRow, steps);
+    scheduleRender();
+}
+
+function drawRangeHighlight(ctx, timestamp) {
+    if (!_rangeHighlightHexes || _rangeHighlightHexes.size === 0) return;
+    var pulse = 0.5 + Math.sin((timestamp || 0) * 0.005) * 0.2;
+
+    _rangeHighlightHexes.forEach(function(remaining, key) {
+        var parts = key.split(',');
+        var c = parseInt(parts[0]), r = parseInt(parts[1]);
+        if (c === S.playerCol && r === S.playerRow) return;
+
+        var tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
+        var baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        var center = hexToScreen(c, r);
+        var h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+        var topVerts = hexTopVertices(center.x, center.y - h);
+
+        var intensity = remaining / _rangeHighlightSteps;
+        var alpha = (0.08 + intensity * 0.15) * pulse;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(topVerts[0].x, topVerts[0].y);
+        for (var i = 1; i < topVerts.length; i++) ctx.lineTo(topVerts[i].x, topVerts[i].y);
+        ctx.closePath();
+
+        var grad = ctx.createRadialGradient(
+            center.x, center.y - h, 0,
+            center.x, center.y - h, HEX_W * 0.5
+        );
+        grad.addColorStop(0, 'rgba(80,180,160,' + (alpha * 1.2).toFixed(3) + ')');
+        grad.addColorStop(0.7, 'rgba(60,140,130,' + (alpha * 0.4).toFixed(3) + ')');
+        grad.addColorStop(1, 'rgba(60,140,130,0)');
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(80,180,160,' + (alpha * 0.6).toFixed(3) + ')';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+        ctx.restore();
+    });
 }
