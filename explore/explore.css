@@ -1097,7 +1097,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     background: rgba(0,0,0,0.5);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
@@ -1196,7 +1196,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding: 48px 16px 16px;
+    padding: 40px 14px 14px;
     background: rgba(0,0,0,0.7);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
@@ -1407,7 +1407,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     background: rgba(0,0,0,0.5);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
@@ -1473,7 +1473,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     background: rgba(0,0,0,0.5);
     opacity: 0;
     pointer-events: none;
@@ -1515,7 +1515,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     background: rgba(0,0,0,0.5);
     opacity: 0;
     pointer-events: none;
@@ -1556,7 +1556,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     background: linear-gradient(135deg, rgba(120,25,25,0.45) 0%, rgba(80,15,15,0.35) 100%);
     animation: lowHPPulse 1.5s ease-in-out infinite;
     opacity: 0;
@@ -2061,11 +2061,11 @@ body {
     width: calc(100% - 48px); max-width: 300px;
     background: linear-gradient(135deg, #3a3028, #2a2420);
     border: 1px solid rgba(196,149,58,0.4);
-    border-radius: 14px; padding: 24px 20px 18px;
+    border-radius: 14px; padding: 20px 16px 14px;
     text-align: center;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
-.tutorial-confirm-icon { font-size: 32px; margin-bottom: 8px; }
+.tutorial-confirm-icon { font-size: clamp(26px, 8vw, 32px); margin-bottom: 8px; }
 .tutorial-confirm-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: 18px; font-weight: 700; color: #c4953a;
@@ -2310,11 +2310,11 @@ body {
     width: calc(100% - 48px); max-width: 300px;
     background: linear-gradient(135deg, #3a2820, #2a2018);
     border: 1px solid rgba(170,68,68,0.5);
-    border-radius: 14px; padding: 20px 18px;
+    border-radius: 14px; padding: 16px 14px;
     text-align: center;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(170,68,68,0.15);
 }
-.exh-modal-icon { font-size: 36px; margin-bottom: 6px; }
+.exh-modal-icon { font-size: clamp(28px, 9vw, 36px); margin-bottom: 6px; }
 .exh-modal-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: 18px; color: #cc6644; font-weight: 700;

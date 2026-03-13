@@ -323,7 +323,7 @@
 }
 
 /* Narration text */
-.inn-text { margin-bottom: 20px; min-height: 72px; }
+.inn-text { margin-bottom: 14px; min-height: 64px; }
 .inn-line {
     font-family: var(--v-font, 'MedievalSharp', serif);
     font-size: 14px;

@@ -3558,7 +3558,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     background: var(--v-bg-card, #2e2520);
     border: 2px solid var(--v-gold, #c4953a);
     border-radius: 14px;
-    padding: 22px 18px;
+    padding: 18px 14px;
     max-width: 340px;
     width: 90%;
     text-align: center;
@@ -3966,7 +3966,7 @@ body[data-time="night"] .screen-content strong {
 
 .char-select-empty {
     text-align: center;
-    padding: 28px 16px;
+    padding: 24px 14px;
 }
 
 .char-select-empty-icon {
