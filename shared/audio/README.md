@@ -160,3 +160,67 @@ combat   → combat_tense.mp3
 ```
 
 Telas do Game Hub mapeiam via `_updateAmbientMusic(screenId)` em `game-renderer.js`.
+
+
+---
+
+## SFX de Combate (Efeitos Sonoros)
+
+### Efeitos Procedurais (Web Audio API)
+
+O arquivo \ gera SFX procedurais via Web Audio API (osciladores).
+Estes funcionam sem arquivos MP3 — são criados em tempo real no navegador.
+
+| Função | Uso | Tipo |
+|--------|-----|------|
+| \ | Rolagem de dado | Ruído branco 150ms |
+| \ | Acerto normal | Sawtooth 120Hz, 250ms |
+| \ | Acerto crítico | Sawtooth 220Hz + Sine 330Hz |
+| \ | Erro | Sine 300Hz, 200ms |
+| \ | Jogador atingido | Sawtooth 80Hz, 300ms |
+| \ | Timer tick | Square 600Hz, 80ms |
+| \ | Dano por tipo | Perfil por tipo (ver abaixo) |
+
+### Perfis de sfxDamageType() por tipo de dano
+
+| Tipo | Oscilador | Frequência | Duração | Sensação |
+|------|-----------|------------|---------|----------|
+| \ | Sawtooth | 180→80Hz | 350ms | Rugido de chamas |
+| \ | Sine | 400→200Hz | 300ms | Vento gelado |
+| \ | Square | 800→200Hz | 150ms | Estalo elétrico |
+| \ | Sawtooth | 60→30Hz | 500ms | Trovão grave |
+| \ | Triangle | 60→55Hz | 500ms | Pulso sombrio |
+| \ | Sine | 600→900Hz | 400ms | Brilho ascendente |
+| \ | Triangle | 150→100Hz | 400ms | Borbulhar ácido |
+| \ | Sawtooth | 250→120Hz | 350ms | Corrosão |
+| \ | Sine | 500→700Hz | 350ms | Ressonância mental |
+| \ | Square | 300→150Hz | 250ms | Impacto mágico |
+| \ | — | — | — | Usa \ genérico |
+
+### Upgrade futuro: SFX com arquivos MP3
+
+Para substituir os SFX procedurais por áudios gravados/gerados:
+
+1. Crie MP3s curtos (100-500ms, mono, 64kbps) para cada tipo de dano
+2. Coloque em \ com nomes como \, 3. Modifique \ em \ para carregar o MP3 em vez de usar oscilador
+
+#### Prompts para Google MusicFX (SFX curtos)
+
+> **Nota**: MusicFX gera mínimo 10s. Recorte para 0.3-0.5s com Audacity.
+
+**sfx_fire.mp3**
+**sfx_cold.mp3**
+**sfx_lightning.mp3**
+**sfx_thunder.mp3**
+**sfx_necrotic.mp3**
+**sfx_radiant.mp3**
+**sfx_poison.mp3**
+**sfx_psychic.mp3**
+**sfx_force.mp3**
+#### Pós-geração de SFX
+
+1. Abra o arquivo no Audacity
+2. Recorte para o trecho mais impactante (~300-500ms)
+3. Aplique Fade In (50ms) e Fade Out (50ms) para evitar cliques
+4. Exporte como MP3 Mono, 64kbps
+5. Renomeie para o padrão 6. Coloque em 
