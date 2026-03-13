@@ -710,9 +710,9 @@ body { padding-bottom: 92px; }
 
 /* ── Empty State ── */
 .empty-state {
-    text-align: center; padding: 40px 20px; color: var(--v-text-dim);
+    text-align: center; padding: 28px 16px; color: var(--v-text-dim);
 }
-.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state .icon { font-size: clamp(32px, 10vw, 40px); margin-bottom: 12px; }
 .empty-state p { line-height: 1.5; }
 
 /* ── Section Title ── */

@@ -912,7 +912,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 
 .error-content {
     text-align: center;
-    padding: 28px 24px;
+    padding: 20px 18px;
     max-width: min(340px, 88vw);
     background: linear-gradient(180deg, rgba(50,38,28,0.5) 0%, rgba(30,22,16,0.4) 100%);
     border: 1px solid rgba(196,149,58,0.22);
@@ -927,7 +927,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 }
 
 .error-icon {
-    font-size: 44px;
+    font-size: clamp(36px, 10vw, 44px);
     margin-bottom: 14px;
     animation: errorIconPulse 3s ease-in-out infinite;
 }
@@ -3007,9 +3007,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 
 .quest-empty {
     text-align: center;
-    padding: 32px 16px;
+    padding: 24px 12px;
 }
-.quest-empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+.quest-empty-icon { font-size: clamp(32px, 10vw, 40px); margin-bottom: 12px; opacity: 0.5; }
 .quest-empty-text {
     font-size: 14px;
     color: var(--v-text);
@@ -3966,11 +3966,11 @@ body[data-time="night"] .screen-content strong {
 
 .char-select-empty {
     text-align: center;
-    padding: 40px 20px;
+    padding: 28px 16px;
 }
 
 .char-select-empty-icon {
-    font-size: 48px;
+    font-size: clamp(36px, 12vw, 48px);
     margin-bottom: 12px;
 }
 
@@ -4211,14 +4211,14 @@ body[data-time="night"] .screen-content strong {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 16px;
     animation: valdoriaFadeIn 0.2s ease;
 }
 .char-delete-card {
     background: var(--v-bg-raised, #332a22);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: 12px;
-    padding: 20px;
+    padding: 16px;
     max-width: 320px;
     width: 100%;
     text-align: center;

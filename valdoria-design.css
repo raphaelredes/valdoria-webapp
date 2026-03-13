@@ -1053,10 +1053,10 @@ body::after {
 }
 .displaced-overlay.displaced-visible { opacity: 1; }
 .displaced-content {
-    text-align: center; padding: 32px 24px; max-width: 320px;
+    text-align: center; padding: 24px 18px; max-width: 320px;
 }
 .displaced-icon {
-    font-size: 48px; margin-bottom: 16px;
+    font-size: clamp(36px, 12vw, 48px); margin-bottom: 16px;
 }
 .displaced-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
@@ -1069,7 +1069,7 @@ body::after {
 }
 .displaced-sub { margin-top: 16px; font-size: 13px; }
 .displaced-device-badge {
-    display: inline-block; padding: 8px 20px; margin: 8px 0;
+    display: inline-block; padding: 8px 16px; margin: 8px 0;
     border: 1px solid var(--v-gold, #c4953a); border-radius: 8px;
     background: rgba(196, 149, 58, 0.1);
     color: var(--v-gold, #c4953a); font-size: 15px; font-weight: 600;
@@ -1080,7 +1080,7 @@ body::after {
     gap: 10px; margin-top: 20px;
 }
 .displaced-reopen-btn {
-    display: inline-block; padding: 12px 36px;
+    display: inline-block; padding: 10px 28px;
     background: linear-gradient(135deg, rgba(196, 149, 58, 0.25), rgba(196, 149, 58, 0.1));
     border: 1px solid var(--v-gold, #c4953a); border-radius: 8px;
     color: var(--v-gold, #c4953a); font-size: 15px; font-weight: 600;
