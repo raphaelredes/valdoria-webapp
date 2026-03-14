@@ -475,7 +475,6 @@ function updateBottomBar() {
 // -----------------------------------------------------------
 
 function finishNavigation(type, target, flags) {
-    console.log('[NAVIGATE][DEBUG] finishNavigation called:', { type, target, flags, _navSent, api: S.api, uid: S.uid });
 
     if (_navSent) {
         console.warn('[NAVIGATE][DEBUG] BLOCKED: double-fire');
@@ -546,7 +545,6 @@ function _sendNavAction(type, target, flags) {
     }
 
     const apiUrl = `${S.api}/api/navigate/action`;
-    console.log('[NAVIGATE][DEBUG] fetch POST to', apiUrl, payload);
 
     // Show full-screen travel loading overlay
     _showTravelOverlay(type, target);
@@ -559,15 +557,12 @@ function _sendNavAction(type, target, flags) {
         body: JSON.stringify(payload),
     })
         .then(r => {
-            console.log('[NAVIGATE][DEBUG] fetch status:', r.status);
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.json();
         })
         .then(d => {
-            console.log('[NAVIGATE][DEBUG] fetch ok:', d);
             // Travel: backend returns explore URL -> redirect to explore
             if (d.url && type === 'travel') {
-                console.log('[NAVIGATE][DEBUG] travel -> explore:', d.url);
                 window.location.replace(d.url);
                 return;
             }

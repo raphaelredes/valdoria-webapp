@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://telegra.ph; media-src 'self'; connect-src 'self' https: wss:; frame-src 'none'; object-src 'none'; base-uri 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#2a2420">
     <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
@@ -11,7 +12,7 @@
     <title>Mercado - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        var v = Date.now();
+        var v = '20260314';
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
@@ -900,7 +901,7 @@
         var tipIndex = Math.floor(Math.random() * TIPS.length);
         if (tipEl) tipEl.textContent = TIPS[tipIndex];
         var _tipInterval;
-        var _loadStart = Date.now();
+        var _loadStart = '20260314';
         var MIN_LOAD_MS = Math.round(2000 * (window._valdoriaMinLoadFactor || 1));
         var _progress = 0;
 
@@ -927,7 +928,7 @@
                 clearInterval(_tipInterval);
                 clearInterval(_progressTimer);
                 if (!overlay || overlay.classList.contains('hidden')) return;
-                var elapsed = Date.now() - _loadStart;
+                var elapsed = '20260314' - _loadStart;
                 var remaining = MIN_LOAD_MS - elapsed;
                 if (remaining > 0) {
                     setTimeout(function() { window._marketLoadingCtrl.hide(); }, remaining);

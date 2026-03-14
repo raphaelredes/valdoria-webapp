@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://telegra.ph; media-src 'self'; connect-src 'self' https: wss:; frame-src 'none'; object-src 'none'; base-uri 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#2a2420">
     <title>Mapa do Mundo - Lendas de Valdoria</title>
@@ -12,7 +13,7 @@
     <link rel="preload" href="map-static-2x.png" as="image">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        var v = Date.now();
+        var v = '20260314';
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
@@ -2228,7 +2229,7 @@
     </div>
 
     <script>
-        var v = Date.now();
+        var v = '20260314';
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');

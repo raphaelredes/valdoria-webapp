@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://telegra.ph; media-src 'self'; connect-src 'self' https: wss:; frame-src 'none'; object-src 'none'; base-uri 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Lendas de Valdoria</title>
     <meta name="theme-color" content="#2a2420">
@@ -11,7 +12,7 @@
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../shared/fonts.css">
     <script>
-        var v = Date.now();
+        var v = '20260314';
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game.css?v=' + v + '">');
@@ -175,7 +176,7 @@
     </div>
 
     <!-- Immersive mode restore pill (when panel collapsed) -->
-    <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
+    <button id="immersive-restore" aria-label="Expandir menu" class="immersive-restore" style="display:none">&middot; Menu</button>
 
     <!-- Dice roll overlay (3D animation for skill checks) -->
     <div id="dice-overlay" class="dice-overlay" style="display:none">
@@ -278,7 +279,7 @@
     <div id="transition-overlay" class="transition-overlay" style="display:none"></div>
 
     <script>
-        var v = Date.now();
+        var v = '20260314';
         var scripts = ['game-enhancer.js', 'game-particles.js', 'game-core.js', 'game-renderer.js', 'game-quests.js', 'game-dialogue.js', 'game-characters.js', 'game-ui.js', 'game-transitions.js', 'inn-animation.js'];
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');

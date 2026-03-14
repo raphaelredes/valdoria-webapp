@@ -4108,7 +4108,6 @@ function finishExploration(reason) {
         if (tg && tg.sendData) {
             tg.sendData(JSON.stringify(payload));
         } else {
-            console.log('[EXPLORE] sendData payload:', JSON.stringify(payload, null, 2));
         }
     } catch (e) {
         console.error('[EXPLORE] sendData failed:', e);

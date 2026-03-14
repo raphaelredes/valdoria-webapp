@@ -427,7 +427,7 @@ async function sendAction(actionData) {
             }
         }
     } else {
-        if (!tg) { console.log('No Telegram WebApp', actionData); _actionSent = false; return; }
+        if (!tg) { console.warn('[COMBAT] No Telegram WebApp', actionData); _actionSent = false; return; }
         const payload = {
             action: 'combat_action',
             token: token,
