@@ -2613,15 +2613,17 @@ function showCampOverlay() {
         `<div style="font-size:11px;color:#8a7a68">${longDesc}</div></div>`;
     longRestBtn.addEventListener('click', () => {
         overlay.classList.remove('active');
-        doLongRest();
+        _startGuardWatch();
     });
     foodList.appendChild(longRestBtn);
 
     overlay.classList.add('active');
+    if (typeof setCampfireActive === 'function') setCampfireActive(true);
 }
 
 function closeCampOverlay() {
     document.getElementById('camp-overlay').classList.remove('active');
+    if (typeof setCampfireActive === 'function') setCampfireActive(false);
 }
 
 function doCampRest(food) {
@@ -2676,6 +2678,97 @@ function doCampRest(food) {
 
     // Show 3D dice animation (use correct die type for display)
     _showCampDiceRoll(hitDie, conMod, foodBonus, totalHeal, foodName, hdType, mpRecovered);
+}
+
+
+// ═══════════════════════════════════════════════════════
+// GUARD WATCH — D&D 5e watch before long rest (PHB Ch.8)
+// ═══════════════════════════════════════════════════════
+function _startGuardWatch() {
+    // D&D 5e: During a long rest, characters take turns keeping watch
+    // Perception (WIS) check to detect approaching threats
+    const wisMod = getAbilityMod('ws');
+    const profInPerception = S.charData && S.charData.sp && S.charData.sp.includes('per');
+    const profBonus = profInPerception ? (S.charData.pb || 2) : 0;
+    const totalMod = wisMod + profBonus;
+
+    // D&D 5e: Exhaustion level 1+ gives disadvantage on ability checks
+    const exhDis = (S.exhaustion || 0) >= 1;
+    const mode = exhDis ? 'disadvantage' : 'normal';
+    const { roll, r1, r2 } = rollD20(mode);
+    const total = roll + totalMod;
+
+    // DC based on danger level (higher danger = harder to detect)
+    const dangerDC = 10 + Math.floor((S.dangerLevel || 1) * 2);
+
+    // Store result for ambush phase
+    S._guardRoll = total;
+    S._guardDC = dangerDC;
+    S._guardSuccess = total >= dangerDC;
+
+    // Show guard overlay with dice animation
+    _showGuardOverlay(roll, r1, r2, mode, totalMod, profInPerception, dangerDC, total >= dangerDC);
+}
+
+function _showGuardOverlay(roll, r1, r2, mode, totalMod, proficient, dc, success) {
+    // Use the check overlay for the dice roll
+    const overlay = document.getElementById('check-overlay');
+    const formulaEl = document.getElementById('check-formula');
+    const resultEl = document.getElementById('check-result');
+    const diceContainer = document.getElementById('check-dice-container');
+    const diceCanvas = document.getElementById('check-dice-canvas');
+
+    if (!overlay) {
+        // Fallback: skip guard and go straight to long rest
+        doLongRest();
+        return;
+    }
+
+    // Build formula text
+    const sign = totalMod >= 0 ? '+' : '';
+    const profText = proficient ? ' (proficiente)' : '';
+    formulaEl.innerHTML = '<div style="font-size:13px;color:#c4953a;margin-bottom:4px">\u{1f6e1}\ufe0f Montando Guarda</div>' +
+        '<div style="font-size:11px;color:#8a7a68">Percep\u00e7\u00e3o (WIS)' + profText + '</div>' +
+        '<div style="font-size:11px;color:#8a7a68;margin-top:2px">DC ' + dc + '</div>';
+
+    // Dice HTML
+    const diceHTML = typeof buildDiceHTML === 'function' ? buildDiceHTML(r1, r2, mode) : '';
+    if (diceContainer) diceContainer.innerHTML = diceHTML;
+
+    // Show result
+    const total = roll + totalMod;
+    if (success) {
+        resultEl.innerHTML = '<div style="color:#6c8;font-size:16px;font-weight:700">\u2705 Vigil\u00e2ncia Alerta</div>' +
+            '<div style="font-size:12px;color:#8a7a68;margin-top:4px">' + roll + ' ' + sign + totalMod + ' = ' + total + ' \u2265 DC ' + dc + '</div>' +
+            '<div style="font-size:11px;color:#6c8;margin-top:6px">Voc\u00ea mant\u00e9m guarda atenta durante a noite.</div>';
+    } else {
+        resultEl.innerHTML = '<div style="color:#c44;font-size:16px;font-weight:700">\u274c Guarda Falha</div>' +
+            '<div style="font-size:12px;color:#8a7a68;margin-top:4px">' + roll + ' ' + sign + totalMod + ' = ' + total + ' < DC ' + dc + '</div>' +
+            '<div style="font-size:11px;color:#c44;margin-top:6px">O cansa\u00e7o vence e voc\u00ea cochila durante a guarda.</div>';
+    }
+
+    overlay.classList.add('active');
+
+    // 3D dice animation
+    if (diceCanvas && typeof Dice3D !== 'undefined') {
+        try {
+            if (window._checkDice) { window._checkDice.dispose(); window._checkDice = null; }
+            diceCanvas.style.display = 'block';
+            window._checkDice = new Dice3D(diceCanvas, { size: 120, dieType: 'd20', duration: 1200 });
+            window._checkDice.roll(roll, function() {
+                if (window.vHaptic) vHaptic.medium();
+            });
+        } catch(e) { console.warn('[EXPLORE] Guard dice error:', e); }
+    }
+
+    // After reading time, proceed to long rest
+    const readDelay = typeof calcReadTime === 'function' ? calcReadTime(success ? 'Vigil\u00e2ncia alerta durante a noite' : 'Cochilou durante a guarda', 'overlay') : 3500;
+    setTimeout(function() {
+        overlay.classList.remove('active');
+        if (diceCanvas) diceCanvas.style.display = 'none';
+        if (window._checkDice) { window._checkDice.dispose(); window._checkDice = null; }
+        doLongRest();
+    }, readDelay + 1500);
 }
 
 function doLongRest() {
@@ -2756,11 +2849,22 @@ function _checkLongRestAmbush() {
     const weatherBonus = S.weather === 't' ? 15 : S.weather === 'r' ? 5 : 0;
     const ambushChance = 20 + ((S._longRestCount - 1) * 15) + weatherBonus;
     const roll = Math.floor(Math.random() * 100) + 1;
+
     if (roll <= ambushChance && S.campAmbush && !S._campAmbushUsed) {
-        // Ambush will trigger when result overlay closes
-        // (handled by closeCampResult)
+        // Guard watch success reduces ambush severity
+        if (S._guardSuccess) {
+            // Successful watch: 50% chance to avoid ambush entirely
+            const avoidRoll = Math.floor(Math.random() * 100) + 1;
+            if (avoidRoll <= 50) {
+                S._longRestAmbushSafe = true;
+                showTerrainToast('\ud83d\udee1\ufe0f Sua vig\u00edlia afastou uma amea\u00e7a!', 'ranger');
+                return;
+            }
+            // Still ambushed but player is not surprised (no penalty)
+            showTerrainToast('\u26a0\ufe0f Voc\u00ea detectou a amea\u00e7a, prepare-se!', 'condition');
+        }
+        // Ambush triggers when result overlay closes (closeCampResult)
     } else {
-        // No ambush — clear the flag so closeCampResult skips it
         S._longRestAmbushSafe = true;
     }
 }
@@ -2829,6 +2933,7 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpR
 
 function closeCampResult() {
     document.getElementById('camp-result-overlay').classList.remove('active');
+    if (typeof setCampfireActive === 'function') setCampfireActive(false);
     // Reset low HP alert flag so it can trigger again after camp
     S._lowHPAlertShown = false;
 

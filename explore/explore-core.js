@@ -53,7 +53,8 @@ let S = {
     randomEncounters: [],
     conditions: [],          // Active conditions
     exhaustion: 0,           // D&D 5e exhaustion level (0-6)
-    _stepsWithoutRest: 0,    // Steps since last rest (forced march tracking): [{type, stepsLeft}]
+    _stepsWithoutRest: 0,    // Steps since last rest (forced march tracking)
+    _stepsForRation: 0,      // Steps since last ration consumed (D&D PHB: 1 ration/day)
     _longRestCount: 0,       // Long rests taken this exploration (consequences escalate)
     mpChange: 0,             // MP delta during exploration
     _hdUsed: 0,              // Hit Dice used during exploration (limits short rests)
@@ -105,6 +106,7 @@ function saveState() {
             wu: S._watchUsed || false,
             ex: S.exhaustion || 0,
             swr: S._stepsWithoutRest || 0,
+            sfr: S._stepsForRation || 0,
             lrc: S._longRestCount || 0,
             mpc: S.mpChange || 0,
             hdu: S._hdUsed || 0,
@@ -205,6 +207,7 @@ function restoreState() {
         if (snap.wt) S.weather = snap.wt;
         S.exhaustion = snap.ex || 0;
         S._stepsWithoutRest = snap.swr || 0;
+        S._stepsForRation = snap.sfr || 0;
         S._longRestCount = snap.lrc || 0;
         S.mpChange = snap.mpc || 0;
         S._hdUsed = snap.hdu || 0;
@@ -669,11 +672,47 @@ function tickConditions() {
         }
     }
 
+    // D&D 5e: Ration consumption (PHB Ch.8 — 1 ration per day of travel)
+    // Game scale: ~8 hexes = 1 travel period, consume 1 ration
+    S._stepsForRation = (S._stepsForRation || 0) + 1;
+    if (S._stepsForRation >= 8) {
+        S._stepsForRation = 0;
+        _consumeRation();
+    }
+
     // Update compass
     if (typeof updateCompass === 'function') updateCompass();
 
     // Check death after poison tick
     if (typeof checkDeath === 'function') checkDeath();
+}
+
+// D&D 5e: Auto-consume one ration from inventory
+function _consumeRation() {
+    if (!S.inventory) return;
+    // Find cheapest food item to consume automatically
+    const foods = S.inventory.filter(i => i.q > 0 && i.t === 'food');
+    if (foods.length === 0) {
+        // No food! Risk of exhaustion (D&D PHB: going without food)
+        // PHB: After 3+CON days without food, gain 1 exhaustion per day
+        // Simplified: immediate warning, exhaustion every 2 ration periods without food
+        S._noFoodPeriods = (S._noFoodPeriods || 0) + 1;
+        if (S._noFoodPeriods >= 2) {
+            S._noFoodPeriods = 0;
+            addExhaustion(1, 'Fome (sem ra\u00e7\u00f5es)');
+        } else {
+            showTerrainToast('\u26a0\ufe0f Sem ra\u00e7\u00f5es! Encontre comida ou acampe.', 'condition');
+        }
+        return;
+    }
+    // Reset no-food counter
+    S._noFoodPeriods = 0;
+    // Consume cheapest food first (preserve better food for camp rest)
+    foods.sort((a, b) => (a.v || 0) - (b.v || 0));
+    const ration = foods[0];
+    ration.q--;
+    showTerrainToast('\ud83c\udf56 Ra\u00e7\u00e3o consumida (' + ration.n + ')', 'info');
+    saveState();
 }
 
 // Update condition icons in HUD
@@ -758,10 +797,8 @@ function addExhaustion(levels, source) {
         showTerrainToast(`\u26a0\ufe0f Exaust\u00e3o ${S.exhaustion}: ${effect}`, 'condition');
         if (source) showTerrainToast(`Causa: ${source}`, 'info');
 
-        // Level 3+: show modal overlay explaining the mechanical effects
-        if (S.exhaustion >= 3) {
-            _showExhaustionModal(S.exhaustion, effect, source);
-        }
+        // Show modal overlay explaining mechanical effects at every level
+        _showExhaustionModal(S.exhaustion, effect, source);
 
         // Level 5: can't move
         if (S.exhaustion >= 5) {
@@ -794,6 +831,39 @@ function _showExhaustionModal(level, effect, source) {
         if (e) effects.push('<div class="exh-modal-effect ' + (i === level ? 'current' : '') + '">' + String.fromCharCode(8226) + ' N\u00edvel ' + i + ': ' + e + '</div>');
     }
 
+    // Concrete gameplay impact tips per level (D&D 5e PHB)
+    const impactTips = {
+        1: '\ud83c\udfaf Todos os testes de habilidade t\u00eam desvantagem.',
+        2: '\ud83d\udca8 Sua velocidade no mapa foi reduzida pela metade.',
+        3: '\u2694\ufe0f Ataques e salvaguardas tamb\u00e9m t\u00eam desvantagem.',
+        4: '\u2764\ufe0f Seu HP m\u00e1ximo foi cortado pela metade!',
+        5: '\ud83d\udeab Voc\u00ea n\u00e3o consegue se mover. Descanse!',
+        6: '\u2620\ufe0f Morte por exaust\u00e3o total.'
+    };
+    const impact = impactTips[level] || '';
+
+    // Recovery tip
+    let recovTip = '\ud83d\udd25 Toque no bot\u00e3o de fogueira para acampar.';
+    if (level >= 2) recovTip = '\ud83c\udf19 Fa\u00e7a um Descanso Longo para reduzir 1 n\u00edvel.';
+    if (level >= 4) recovTip = '\u26a0\ufe0f Urgente! Fa\u00e7a um Descanso Longo imediatamente.';
+
+    const modal = document.createElement('div');
+    modal.id = 'exhaustion-modal';
+    modal.className = 'exhaustion-modal';
+    modal.innerHTML = '<div class="exh-modal-card">' +
+        '<div class="exh-modal-icon">' + (level >= 4 ? '\u2620\ufe0f' : '\u26a0\ufe0f') + '</div>' +
+        '<div class="exh-modal-title">Exaust\u00e3o N\u00edvel ' + level + '</div>' +
+        (source ? '<div class="exh-modal-source">Causa: ' + source + '</div>' : '') +
+        '<div class="exh-modal-effects">' + effects.join('') + '</div>' +
+        (impact ? '<div class="exh-modal-impact">' + impact + '</div>' : '') +
+        '<div class="exh-modal-tip">' + recovTip + '</div>' +
+        '<button class="exh-modal-btn" onclick="this.closest(\'.exhaustion-modal\').remove()">Entendido</button>' +
+        '</div>';
+    document.body.appendChild(modal);
+    const dismissTime = level >= 4 ? 12000 : level >= 2 ? 10000 : 8000;
+    setTimeout(function() { if (document.getElementById('exhaustion-modal')) modal.remove(); }, dismissTime);
+}
+
     const modal = document.createElement('div');
     modal.id = 'exhaustion-modal';
     modal.className = 'exhaustion-modal';
@@ -812,6 +882,8 @@ function _showExhaustionModal(level, effect, source) {
 
 function resetStepsWithoutRest() {
     S._stepsWithoutRest = 0;
+    S._stepsForRation = 0;
+    S._noFoodPeriods = 0;
     saveState();
 }
 

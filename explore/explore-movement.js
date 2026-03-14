@@ -225,6 +225,105 @@ function drawEffects(ctx) {
 }
 
 // Draw player miniature — hooded traveler silhouette (generic, class-agnostic)
+
+// ═══════════════════════════════════════════════════════
+// CAMPFIRE VISUAL — animated fire near player during rest
+// ═══════════════════════════════════════════════════════
+let _campfireActive = false;
+let _campfireParticles = [];
+
+function setCampfireActive(active) {
+    _campfireActive = active;
+    if (!active) _campfireParticles = [];
+}
+
+function drawCampfire(ctx, timestamp) {
+    if (!_campfireActive) return;
+    const t = (timestamp || 0) * 0.001;
+    const s = HEX_W / 55;
+    // Position: offset from player (right side)
+    const fx = playerScreenX + 12 * s;
+    const fy = playerScreenY + 2 * s;
+
+    ctx.save();
+
+    // Warm glow (larger radius)
+    const glowR = (14 + Math.sin(t * 4) * 3) * s;
+    const glow = ctx.createRadialGradient(fx, fy - 4 * s, 0, fx, fy - 4 * s, glowR);
+    glow.addColorStop(0, 'rgba(255, 140, 40, 0.15)');
+    glow.addColorStop(0.6, 'rgba(255, 100, 20, 0.06)');
+    glow.addColorStop(1, 'rgba(255, 60, 10, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(fx, fy - 4 * s, glowR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wood logs (small X shape)
+    ctx.strokeStyle = 'rgba(60, 30, 10, 0.9)';
+    ctx.lineWidth = 1.5 * s;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(fx - 4 * s, fy + 1 * s);
+    ctx.lineTo(fx + 4 * s, fy - 1 * s);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(fx - 3.5 * s, fy - 1 * s);
+    ctx.lineTo(fx + 3.5 * s, fy + 1 * s);
+    ctx.stroke();
+
+    // Fire — flickering flame shapes
+    for (let i = 0; i < 3; i++) {
+        const phase = t * (5 + i) + i * 2.1;
+        const flicker = Math.sin(phase) * 1.5 * s;
+        const h = (6 + Math.sin(phase * 0.7) * 2) * s;
+        const ox = (i - 1) * 2.2 * s + flicker * 0.3;
+
+        // Outer flame (orange)
+        ctx.fillStyle = i === 1 ? 'rgba(255, 120, 20, 0.7)' : 'rgba(255, 80, 10, 0.5)';
+        ctx.beginPath();
+        ctx.moveTo(fx + ox - 1.8 * s, fy);
+        ctx.quadraticCurveTo(fx + ox - 0.5 * s + flicker, fy - h, fx + ox, fy - h - 1.5 * s);
+        ctx.quadraticCurveTo(fx + ox + 0.5 * s - flicker, fy - h, fx + ox + 1.8 * s, fy);
+        ctx.closePath();
+        ctx.fill();
+
+        // Inner flame (yellow-white core, only center)
+        if (i === 1) {
+            ctx.fillStyle = 'rgba(255, 220, 100, 0.6)';
+            ctx.beginPath();
+            ctx.moveTo(fx + ox - 0.8 * s, fy);
+            ctx.quadraticCurveTo(fx + ox + flicker * 0.5, fy - h * 0.7, fx + ox, fy - h * 0.6);
+            ctx.quadraticCurveTo(fx + ox - flicker * 0.5, fy - h * 0.7, fx + ox + 0.8 * s, fy);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+
+    // Sparks (small particles rising)
+    if (Math.random() < 0.3 && _campfireParticles.length < 6) {
+        _campfireParticles.push({
+            x: fx + (Math.random() - 0.5) * 4 * s,
+            y: fy - 2 * s,
+            vx: (Math.random() - 0.5) * 0.3 * s,
+            vy: -0.6 * s - Math.random() * 0.3 * s,
+            life: 1.0
+        });
+    }
+    for (let i = _campfireParticles.length - 1; i >= 0; i--) {
+        const p = _campfireParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.025;
+        if (p.life <= 0) { _campfireParticles.splice(i, 1); continue; }
+        ctx.fillStyle = `rgba(255, ${Math.floor(140 + p.life * 80)}, 40, ${p.life * 0.6})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 0.8 * s * p.life, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
 function drawPlayerToken(ctx, timestamp) {
     const t = (timestamp || 0) * 0.001;
     const breathe = Math.sin(t * 2.5) * 1.5;

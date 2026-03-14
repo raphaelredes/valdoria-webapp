@@ -351,6 +351,9 @@ _staticDirty = false;
 
 
 
+    // 7.8 Campfire visual during rest
+    if (typeof drawCampfire === 'function') drawCampfire(_ctx, timestamp);
+
     // 8. Player token (with direction indicator)
     drawPlayerToken(_ctx, timestamp);
 
