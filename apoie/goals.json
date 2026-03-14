@@ -2,7 +2,7 @@
     {
         "id": "server",
         "name": "Servidor Dedicado",
-        "desc": "Manter o bot online 24h sem interrupcoes",
+        "desc": "Manter o bot online 24h sem interrupções",
         "icon": "\ud83c\udff0",
         "target_brl": 50000,
         "current_brl": 0,
@@ -11,7 +11,7 @@
     {
         "id": "art",
         "name": "Arte de Personagens",
-        "desc": "Ilustracoes para as 12 classes jogaveis",
+        "desc": "Ilustrações para as 12 classes jogáveis",
         "icon": "\ud83c\udfa8",
         "target_brl": 100000,
         "current_brl": 0,
@@ -20,7 +20,7 @@
     {
         "id": "music",
         "name": "Trilha Sonora",
-        "desc": "Musica ambiente para taverna e exploracoes",
+        "desc": "Música ambiente para taverna e explorações",
         "icon": "\ud83c\udfb5",
         "target_brl": 30000,
         "current_brl": 0,
