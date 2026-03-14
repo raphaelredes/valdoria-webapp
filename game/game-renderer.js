@@ -129,8 +129,9 @@ function renderScreen(screen) {
     // Animate HP/MP bar deltas (ghost bar on damage, shine on heal)
     _animateBarDeltas(contentEl);
 
-    // Inject font picker and audio settings on settings screen
+    // Inject settings sections on settings screen
     if (screen.screen_id === 'city.settings') {
+        if (screen.settings_data && typeof injectGameSettings === 'function') injectGameSettings(contentEl, screen.settings_data);
         if (typeof injectFontPicker === 'function') injectFontPicker(contentEl);
         if (typeof injectAudioSettings === 'function') injectAudioSettings(contentEl);
     }

@@ -741,132 +741,80 @@ function _refreshAudioSettings(contentEl) {
     injectAudioSettings(contentEl);
 }
 
-// ─── Button Bounce-Back — now in shared/bounce-back.js ───
+// ─── Game Settings Injection (server-side toggles + extras) ───
 
-// ─── Floating Reward Popup ───
-// Shows a "+gold", "+XP", "+item" text that floats up and fades.
-function showFloatPopup(container, text, x, y, color) {
-    const el = document.createElement('div');
-    el.className = 'v-float-popup';
-    el.textContent = text;
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-    if (color) el.style.color = color;
-    (container || document.body).appendChild(el);
-    el.addEventListener('animationend', () => el.remove());
-}
+function injectGameSettings(contentEl, settingsData) {
+    if (!settingsData) return;
 
-// ─── Animated Counter ───
-// Counts from `from` to `to` with ease-out deceleration.
-function animateCounter(el, from, to, duration) {
-    if (!el || from === to) { if (el) el.textContent = to; return; }
-    duration = duration || 600;
-    const start = performance.now();
-    const diff = to - from;
-    const step = (now) => {
-        const t = Math.min((now - start) / duration, 1);
-        const ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
-        el.textContent = Math.round(from + diff * ease);
-        if (t < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-}
+    if (settingsData.toggles && settingsData.toggles.length > 0) {
+        var section = document.createElement("div");
+        section.className = "settings-section";
 
-// Font is applied on load by shared/font-apply.js (included in index.html)
+        var header = document.createElement("div");
+        header.className = "settings-section-header";
+        header.textContent = "⚔️ Jogo";
+        section.appendChild(header);
 
+        for (var i = 0; i < settingsData.toggles.length; i++) {
+            var t = settingsData.toggles[i];
+            var row = document.createElement("div");
+            row.className = "settings-toggle-row";
 
-// ─── Session Expiry Warning ───
-let _sessionExpiryTimer = null;
-function initSessionExpiry(ttlSeconds) {
-    if (_sessionExpiryTimer) clearTimeout(_sessionExpiryTimer);
-    if (!ttlSeconds || ttlSeconds <= 0) return;
-    var warnAt = Math.max(0, (ttlSeconds - 900)) * 1000;
-    _sessionExpiryTimer = setTimeout(function() {
-        showToast('\u23F0 Sua sess\u00E3o expira em 15 minutos.', 5000);
-        _sessionExpiryTimer = setTimeout(function() {
-            showToast('\u26A0\uFE0F Sess\u00E3o expira em 5 minutos!', 5000);
-        }, 600000);
-    }, warnAt);
-}
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "settings-toggle" + (t.enabled ? " on" : "");
 
-// ─── Offline Indicator ───
-function _showOfflineBadge() {
-    var badge = document.getElementById('offline-badge');
-    if (!badge) {
-        badge = document.createElement('div');
-        badge.id = 'offline-badge';
-        badge.className = 'offline-badge';
-        badge.textContent = '\uD83C\uDF10 Sem conex\u00E3o';
-        document.body.appendChild(badge);
-    }
-    badge.style.display = '';
-}
-function _hideOfflineBadge() {
-    var badge = document.getElementById('offline-badge');
-    if (badge) badge.style.display = 'none';
-}
-window.addEventListener('offline', function() { _showOfflineBadge(); });
-window.addEventListener('online', function() {
-    _hideOfflineBadge();
-    showToast('\u2705 Conex\u00E3o restaurada', 2500);
-});
+            var left = document.createElement("span");
+            left.className = "settings-toggle-left";
+            left.innerHTML = '<span class="settings-toggle-emoji">' + (t.emoji || '') + '</span>' +
+                             '<span class="settings-toggle-info">' +
+                             '<span class="settings-toggle-label">' + t.label + '</span>' +
+                             '<span class="settings-toggle-desc">' + (t.desc || '') + '</span>' +
+                             '</span>';
 
-// ─── Immersive Toggle Tooltip (first visit) ───
-function showImmersiveTooltip() {
-    if (localStorage.getItem('valdoria_immersive_tip')) return;
-    var toggle = document.getElementById('immersive-toggle');
-    if (!toggle || toggle.style.display === 'none') return;
-    var tip = document.createElement('div');
-    tip.textContent = 'Toque para recolher o menu';
-    tip.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#d4c8b0;padding:6px 12px;border-radius:8px;font-size:12px;z-index:15;pointer-events:none;animation:valdoriaFadeIn 0.3s ease;';
-    document.body.appendChild(tip);
-    setTimeout(function() {
-        if (tip.parentElement) tip.parentElement.removeChild(tip);
-        localStorage.setItem('valdoria_immersive_tip', '1');
-    }, 4000);
-}
+            var status = document.createElement("span");
+            status.className = "settings-toggle-status";
+            status.textContent = t.enabled ? "🟢" : "⚪";
 
-// ─── Swipe-Right to Go Back (mobile gesture) ───
-(function initSwipeBack() {
-    let _swStartX = 0, _swStartY = 0, _swActive = false;
-    const MIN_DX = 70;     // minimum horizontal distance (px)
-    const MAX_DY_RATIO = 0.5; // max vertical/horizontal ratio (prevents diagonal)
-    const EDGE_ZONE = 60;  // only trigger from left edge (px)
+            btn.appendChild(left);
+            btn.appendChild(status);
 
-    document.addEventListener('touchstart', function(e) {
-        if (S.transitioning) return;
-        const t = e.touches[0];
-        // Only start from left edge to avoid interfering with scrolling
-        if (t.clientX > EDGE_ZONE) return;
-        _swStartX = t.clientX;
-        _swStartY = t.clientY;
-        _swActive = true;
-    }, { passive: true });
+            btn.setAttribute("data-cb", t.cb);
+            btn.onclick = function() {
+                haptic("light");
+                if (typeof doAction === "function") doAction(this.getAttribute("data-cb"));
+            };
 
-    document.addEventListener('touchend', function(e) {
-        if (!_swActive) return;
-        _swActive = false;
-        const t = e.changedTouches[0];
-        const dx = t.clientX - _swStartX;
-        const dy = Math.abs(t.clientY - _swStartY);
-        // Must swipe right with enough distance and mostly horizontal
-        if (dx >= MIN_DX && dy / dx < MAX_DY_RATIO) {
-            // Find the back button in current screen
-            if (typeof doAction === 'function') {
-                haptic('light');
-                doAction('action_universal_back');
-            }
+            row.appendChild(btn);
+            section.appendChild(row);
         }
-    }, { passive: true });
-})();
-// ─── Swipe-back hint (show gold edge glow on first visit) ───
-function showSwipeBackHint() {
-    if (localStorage.getItem('valdoria_swipe_hint')) return;
-    var hint = document.createElement('div');
-    hint.className = 'swipe-edge-hint';
-    document.body.appendChild(hint);
-    setTimeout(function() {
-        if (hint.parentElement) hint.parentElement.removeChild(hint);
-        localStorage.setItem('valdoria_swipe_hint', '1');
-    }, 6000);
+
+        contentEl.appendChild(section);
+    }
+
+    if (settingsData.extras && settingsData.extras.length > 0) {
+        var section2 = document.createElement("div");
+        section2.className = "settings-section";
+
+        var header2 = document.createElement("div");
+        header2.className = "settings-section-header";
+        header2.textContent = "📩 Outros";
+        section2.appendChild(header2);
+
+        for (var j = 0; j < settingsData.extras.length; j++) {
+            var ex = settingsData.extras[j];
+            var btn2 = document.createElement("button");
+            btn2.type = "button";
+            btn2.className = "settings-extra-btn";
+            btn2.textContent = (ex.emoji ? ex.emoji + " " : "") + ex.label;
+            btn2.setAttribute("data-cb", ex.cb);
+            btn2.onclick = function() {
+                haptic("light");
+                if (typeof doAction === "function") doAction(this.getAttribute("data-cb"));
+            };
+            section2.appendChild(btn2);
+        }
+
+        contentEl.appendChild(section2);
+    }
 }

@@ -200,7 +200,7 @@ async function init() {
     });
 
     // Init connection dot + debug console
-    if (typeof _initConnectionDot === "function") _initConnectionDot();
+    if (typeof _initConnectionStatus === "function") _initConnectionStatus();
     if (typeof _initDebugConsole === "function") _initDebugConsole();
 
     // Health check — verify API is reachable before loading game.
@@ -291,6 +291,7 @@ async function checkHealth() {
             _clog(`HEALTH data: ${JSON.stringify(data)}`);
             console.log('[GAME] Health data:', JSON.stringify(data));
             if (data.status === 'ok' && data.engine) {
+                if (typeof _updateConnectionStatus === 'function') _updateConnectionStatus('connected');
                 // Detect tunnel URL change — server reports a different API base
                 if (data.api && S.apiBase && data.api !== S.apiBase) {
                     _clog(`HEALTH: tunnel URL changed! ${S.apiBase} -> ${data.api}`);
@@ -553,6 +554,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                     continue; // retry the API call with new URL
                 }
                 _clog('API: discovery failed — sendData reconnect');
+                if (typeof _trackApiLatency === 'function') _trackApiLatency(0, false);
                 _sendDataReconnect();
                 return null;
             }
@@ -564,6 +566,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
                     renderScreen(cached);
                     showToast('Reconectando...');
                 }
+                if (typeof _trackApiLatency === 'function') _trackApiLatency(0, false);
                 showError(isTimeout
                     ? (navigator.onLine
                         ? 'O servidor demorou demais para responder. Pode estar sobrecarregado.'
@@ -922,19 +925,73 @@ function _prefetchStart(charId) {
     }).catch(function() { /* silent prefetch */ });
 }
 
-// ─── Connection Status Dot ───
-var _connectionDot = null;
-function _initConnectionDot() {
-    _connectionDot = document.createElement('div');
-    _connectionDot.className = 'connection-dot';
-    _connectionDot.title = 'Conectado';
-    document.body.appendChild(_connectionDot);
-    window.addEventListener('offline', function() {
-        if (_connectionDot) { _connectionDot.classList.add('offline'); _connectionDot.title = 'Sem conex\u00e3o'; }
+// ─── Connection Status Pill ───
+var _connPill = null;
+var _connState = 'connected';
+var _connCollapseTimer = null;
+var _recentApiTimes = [];
+
+function _initConnectionStatus() {
+    _connPill = document.createElement('div');
+    _connPill.className = 'connection-status';
+    _connPill.id = 'connection-status';
+    _connPill.innerHTML = '<span class="conn-dot"></span><span class="conn-label">Conectado</span>';
+    document.body.appendChild(_connPill);
+
+    _connPill.addEventListener('click', function() {
+        if (_connState !== 'connected') return;
+        _connPill.classList.toggle('collapsed');
+        if (!_connPill.classList.contains('collapsed')) {
+            _scheduleCollapse(3000);
+        }
     });
-    window.addEventListener('online', function() {
-        if (_connectionDot) { _connectionDot.classList.remove('offline', 'slow'); _connectionDot.title = 'Conectado'; }
-    });
+
+    _scheduleCollapse(3000);
+
+    window.addEventListener('offline', function() { _updateConnectionStatus('offline'); });
+    window.addEventListener('online', function() { _updateConnectionStatus('connected'); });
+}
+
+function _updateConnectionStatus(state) {
+    if (!_connPill) return;
+    _connState = state;
+    _connPill.classList.remove('offline', 'slow', 'collapsed');
+    if (_connCollapseTimer) { clearTimeout(_connCollapseTimer); _connCollapseTimer = null; }
+
+    var label = _connPill.querySelector('.conn-label');
+    if (state === 'offline') {
+        _connPill.classList.add('offline');
+        if (label) label.textContent = 'Sem conexão';
+    } else if (state === 'slow') {
+        _connPill.classList.add('slow');
+        if (label) label.textContent = 'Conexão lenta';
+    } else {
+        if (label) label.textContent = 'Conectado';
+        _scheduleCollapse(3000);
+    }
+}
+
+function _scheduleCollapse(ms) {
+    if (_connCollapseTimer) clearTimeout(_connCollapseTimer);
+    _connCollapseTimer = setTimeout(function() {
+        if (_connPill && _connState === 'connected') {
+            _connPill.classList.add('collapsed');
+        }
+    }, ms);
+}
+
+function _trackApiLatency(elapsedMs, success) {
+    _recentApiTimes.push({ ms: elapsedMs, ok: success });
+    if (_recentApiTimes.length > 5) _recentApiTimes.shift();
+    if (!success) { _updateConnectionStatus('offline'); return; }
+    var recent = _recentApiTimes.filter(function(x) { return x.ok; });
+    if (recent.length >= 3) {
+        var avg = recent.reduce(function(s, x) { return s + x.ms; }, 0) / recent.length;
+        if (avg > 3000) { _updateConnectionStatus('slow'); }
+        else if (_connState !== 'connected') { _updateConnectionStatus('connected'); }
+    } else if (_connState === 'offline') {
+        _updateConnectionStatus('connected');
+    }
 }
 
 // ─── Focus Management (move focus to first action button after render) ───
@@ -1017,6 +1074,7 @@ function _trackApiPerf(endpoint, elapsedMs) {
     _perfMetrics.apiCalls++;
     _perfMetrics.totalMs += elapsedMs;
     _perfMetrics.avgMs = Math.round(_perfMetrics.totalMs / _perfMetrics.apiCalls);
+    if (typeof _trackApiLatency === 'function') _trackApiLatency(elapsedMs, true);
 }
 
 function _trackRender() {
