@@ -94,11 +94,20 @@ function handleLocationTap(locId) {
     // Biome
     const biomeInfo = BIOME_INFO[locData.b] || BIOME_INFO.plains;
     const biomeLabel = biomeInfo.label || locData.b;
+    const biomeEl = document.getElementById('info-biome');
     if (isKnownUnmapped) {
-        document.getElementById('info-biome').textContent = '🌫️ Região Desconhecida';
+        biomeEl.textContent = '🌫️ Região Desconhecida';
+        biomeEl.style.color = '';
     } else {
-        document.getElementById('info-biome').textContent =
+        biomeEl.textContent =
             `${locData.s ? '🏘️ Assentamento' : '🌍 Região'} — ${biomeLabel}`;
+        // Biome-specific color
+        const biomeColors = {
+            plains: '#8aaa5a', forest: '#5aaa4a', swamp: '#6a9a5a',
+            cave: '#7a7a9a', graveyard: '#8a6a6a', desert: '#caa85a',
+            mountain: '#8a8a9a', snow: '#9abacc', volcanic: '#cc6a3a'
+        };
+        biomeEl.style.color = biomeColors[locData.b] || '#a09484';
     }
 
     // Description
@@ -207,9 +216,9 @@ function handleLocationTap(locId) {
             // Explored + has map: safe direct travel + encounter risk hint
             const danger = locData.d || 0;
             let riskHint = '';
-            if (danger >= 7) riskHint = ' · <span style="color:#8a2a2a">☠️ Perigo extremo</span>';
-            else if (danger >= 5) riskHint = ' · <span style="color:#8a4a3a">⚠️ Alta chance de encontros</span>';
-            else if (danger >= 3) riskHint = ' · <span style="color:#8a6a3a">⚠️ Encontros prováveis</span>';
+            if (danger >= 7) riskHint = ' · <span style="color:#cc4040">☠️ Perigo extremo</span>';
+            else if (danger >= 5) riskHint = ' · <span style="color:#cc8844">⚠️ Alta chance de encontros</span>';
+            else if (danger >= 3) riskHint = ' · <span style="color:#aa9a5a">⚠️ Encontros prováveis</span>';
             noteEl.innerHTML = `🕐 <b>${edgeDist} turno${edgeDist !== 1 ? 's' : ''}</b> de viagem${riskHint}`;
             noteEl.style.display = 'block';
             noteEl.style.color = '';
@@ -706,7 +715,7 @@ function toggleLegendExpand() {
             item.innerHTML = `<span class="legend-dot" style="background:${info.hexFill}"></span> ${info.label}`;
             panel.appendChild(item);
         }
-        panel.classList.add('open');
+        panel.classList.remove('entering'); void panel.offsetWidth; panel.classList.add('open', 'entering');
         if (toggle) toggle.textContent = '▲';
     } else {
         panel.classList.remove('open');
@@ -762,7 +771,7 @@ function _showQuickTooltip(locId, cx, cy) {
     let dangerHtml = '';
     if (isExp && danger > 0) {
         const pips = Math.min(5, Math.ceil(danger / 2));
-        const colors = ['#5a8a3a', '#8a8a3a', '#aa6a2a', '#aa3a2a', '#6a1a1a'];
+        const colors = ['#6aaa3a', '#caaa3a', '#cc8a2a', '#cc4a2a', '#aa2a2a'];
         dangerHtml = '<span class="lp-tooltip-danger">';
         for (let i = 0; i < 5; i++) {
             const bg = i < pips ? colors[Math.min(i, colors.length - 1)] : 'transparent';
