@@ -214,6 +214,7 @@ var SessionHeartbeat = (function () {
 
             // If server returned a transition (e.g. active combat), navigate there
             if (data.transition && data.transition.url) {
+                window.__valdoria_transitioning = true;
                 window.location.replace(data.transition.url);
                 return;
             }

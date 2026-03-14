@@ -180,6 +180,7 @@ function sendAction(action, nodeId) {
     })
     .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
     .then(d => {
+        window.__valdoria_transitioning = true;
         if (d.url) { window.location.replace(d.url); return; }
         if (d.nodes) {
             S.nodes = d.nodes;
@@ -217,6 +218,7 @@ async function _transitionToGame() {
             body: JSON.stringify({ from: 'dungeon', to: (S.returnTo || 'game'), user_id: S.uid, payload: {} })
         });
         const d = await r.json();
+        window.__valdoria_transitioning = true;
         if (d.url) { window.location.replace(d.url); return; }
     } catch (e) { console.error('[DUNGEON] transition error:', e); }
     try { tg?.close(); } catch (e) { /* Telegram API optional */ }

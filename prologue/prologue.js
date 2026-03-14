@@ -508,6 +508,7 @@ async function doFight() {
 
         if (result.combat_url || result.arena_url) {
             // Navigate to arena WebApp
+            window.__valdoria_transitioning = true;
             window.location.replace(result.combat_url || result.arena_url);
         } else {
             showError('Erro ao iniciar combate.');
@@ -539,6 +540,7 @@ async function onEnterCity() {
 
         // Redirect to Game Hub (stays in WebApp)
         if (result && result.game_url) {
+            window.__valdoria_transitioning = true;
             window.location.replace(result.game_url);
         } else {
             // Fallback: close WebApp and let user tap JOGAR from Telegram

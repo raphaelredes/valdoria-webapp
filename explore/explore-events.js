@@ -912,6 +912,7 @@ async function transitionToArena() {
             if (resp.ok) {
                 const data = await resp.json();
                 if (data.url) {
+                    window.__valdoria_transitioning = true;
                     window.location.replace(data.url);
                     return;
                 }
@@ -967,6 +968,7 @@ async function transitionToInventory() {
             if (resp.ok) {
                 const data = await resp.json();
                 if (data.url) {
+                    window.__valdoria_transitioning = true;
                     window.location.replace(data.url);
                     return;
                 }
@@ -1465,6 +1467,7 @@ async function _transitionToGameFromExplore(payload) {
                 break;
             }
             const d = await r.json();
+            window.__valdoria_transitioning = true;
             if (d.url) { window.location.replace(d.url); return; }
         } catch (e) { console.error('[EXPLORE] transition error (attempt ' + attempt + '):', e); }
     }
@@ -1497,6 +1500,7 @@ async function _transitionToNavigateFromExplore(payload) {
                 break;
             }
             const d = await r.json();
+            window.__valdoria_transitioning = true;
             if (d.url) { window.location.replace(d.url); return; }
         } catch (e) { console.error('[EXPLORE] navigate transition error (attempt ' + attempt + '):', e); }
     }

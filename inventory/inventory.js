@@ -554,6 +554,7 @@ async function _transitionTo(target, payload = {}) {
             if (resp.ok) {
                 const data = await resp.json();
                 if (data.url) {
+                    window.__valdoria_transitioning = true;
                     window.location.replace(data.url);
                     return;
                 }

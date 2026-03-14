@@ -342,7 +342,7 @@
 /* ─── Connection Status Pill ─── */
 .connection-status {
     position: fixed;
-    top: 6px;
+    bottom: 52px;
     left: 8px;
     display: flex;
     align-items: center;

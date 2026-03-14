@@ -563,6 +563,7 @@ function _sendNavAction(type, target, flags) {
         .then(d => {
             // Travel: backend returns explore URL -> redirect to explore
             if (d.url && type === 'travel') {
+                window.__valdoria_transitioning = true;
                 window.location.replace(d.url);
                 return;
             }
@@ -667,10 +668,12 @@ async function _transitionToGame() {
             body: JSON.stringify({ from: 'navigate', to: (S.returnTo || 'game'), user_id: S.uid, payload: {} })
         });
         const d = await r.json();
+        window.__valdoria_transitioning = true;
         if (d.url) { window.location.replace(d.url); return; }
     } catch (e) { console.error('[NAVIGATE] transition error:', e); }
     // Fallback: redirect to game hub directly
     const base = window.location.href.replace(/\/navigate\/.*/, '');
+    window.__valdoria_transitioning = true;
     window.location.replace(`${base}/game/?token=${S.token}&api=${encodeURIComponent(S.api)}&uid=${S.uid}&return=game&v=1`);
 }
 

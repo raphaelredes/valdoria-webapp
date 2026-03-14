@@ -75,6 +75,7 @@ const ValdoriaAudio = (() => {
     let _unlocked = false;
     let _pendingTrack = '';
     let _looping = false;
+    let _fading = false;
     let _uiInjected = false;
 
     // -- Init --
@@ -143,8 +144,9 @@ const ValdoriaAudio = (() => {
         }
 
         // Sync with hardware volume buttons (best-effort, works on Android Chrome)
+        // Skip during crossfade (volume is ramping programmatically)
         audio.addEventListener('volumechange', () => {
-            if (audio !== _audio) return;
+            if (audio !== _audio || _fading) return;
             const newVol = audio.volume;
             if (Math.abs(newVol - _volume) > 0.01 && !_muted) {
                 _volume = Math.max(0, Math.min(1, newVol));
@@ -204,6 +206,7 @@ const ValdoriaAudio = (() => {
 
     function _crossfadeIn(audio) {
         if (!audio) return;
+        _fading = true;
         const target = _volume;
         const steps = 20;
         const stepMs = CROSSFADE_MS / steps;
@@ -214,6 +217,7 @@ const ValdoriaAudio = (() => {
             current += increment;
             if (current >= target || audio !== _audio) {
                 try { audio.volume = (audio === _audio) ? target : 0; } catch(e) { /* volume control */ }
+                _fading = false;
                 clearInterval(timer);
             } else {
                 try { audio.volume = current; } catch(e) { clearInterval(timer); }
@@ -299,23 +303,19 @@ const ValdoriaAudio = (() => {
         if (_audio && !_muted) {
             _smoothVol(_audio, _volume);
         }
-        // If volume > 0 and was muted, unmute
-        if (_volume > 0 && _muted) {
+        // If volume > 0 and was muted, unmute and resume playback
+        if (_volume > 0 && (_muted || _musicMuted)) {
             _muted = false;
             _musicMuted = false;
             localStorage.setItem(STORAGE_KEY, '0');
             localStorage.setItem(MUSIC_MUTED_KEY, '0');
             if (_audio && !_audio.paused) {
                 _audio.volume = _volume;
-            } else if (_pendingTrack) {
-                _playTrack(_pendingTrack);
+            } else if (_pendingTrack || _currentTrack) {
+                _playTrack(_pendingTrack || _currentTrack);
             }
         }
-        // If volume == 0, mute
-        if (_volume === 0 && !_muted) {
-            _muted = true;
-            localStorage.setItem(STORAGE_KEY, '1');
-        }
+        // Volume 0 is NOT the same as mute — don't auto-mute
         _syncUI();
     }
 

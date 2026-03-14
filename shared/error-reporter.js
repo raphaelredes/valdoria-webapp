@@ -56,7 +56,10 @@ var ValdoriaErrors = (function () {
     window.addEventListener('beforeunload', function () {
         try { localStorage.setItem(_CONN_LOG_LS_KEY, JSON.stringify(_connLog)); } catch (e) { /* */ }
         // Send close beacon so server can show the banner menu (dedup with game-core)
-        if (_cfg.apiBase && _cfg.token && _cfg.uid && navigator.sendBeacon && !window.__valdoria_close_sent) {
+        // SKIP during cross-WebApp transitions (window.location.replace to another Valdoria WebApp)
+        // — the player isn't leaving the game, just switching screens.
+        var isTransitioning = (window.S && window.S.transitioning) || window.__valdoria_transitioning;
+        if (_cfg.apiBase && _cfg.token && _cfg.uid && navigator.sendBeacon && !window.__valdoria_close_sent && !isTransitioning) {
             window.__valdoria_close_sent = true;
             try {
                 navigator.sendBeacon(
