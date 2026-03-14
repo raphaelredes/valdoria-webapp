@@ -351,7 +351,7 @@ body::after {
     margin-bottom: 16px;
     border-radius: 12px;
     filter: drop-shadow(0 8px 32px rgba(196, 149, 58, 0.3)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
-    animation: v-fadeIn 0.8s ease 0.2s both, ap-iconFloat 6s ease-in-out 1s infinite;
+    animation: v-fadeIn 0.8s ease 0.2s both;
 }
 
 .ap-hero-subtitle {
