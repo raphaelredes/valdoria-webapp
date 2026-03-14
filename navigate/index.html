@@ -150,6 +150,7 @@
         #map-svg {
             display: block;
             position: relative;
+            contain: layout style;
         }
 
         #map-bg {
@@ -182,6 +183,7 @@
             transition: transform 0.35s ease-out;
             max-height: calc(100vh - 130px);
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             /* Parchment inner shadow (aged scroll edges) */
             box-shadow:
                 inset 0 4px 16px rgba(40, 30, 15, 0.65),
@@ -635,7 +637,7 @@
             stroke: #a08050;
             stroke-dasharray: 8 5;
             animation: antMarch 0.8s linear infinite, roadGlow 3s ease-in-out infinite;
-            filter: drop-shadow(0 0 2px rgba(160, 128, 80, 0.3));
+            /* Removed drop-shadow for performance on low-end devices */
         }
         @keyframes antMarch {
             to { stroke-dashoffset: -13; }
@@ -652,6 +654,7 @@
         }
         body.map-idle #map-viewport::after {
             animation: vignetteBreathe 6s ease-in-out infinite;
+            animation-play-state: paused;
         }
 
         /* ═══ IDLE PAUSE — Suspend ALL decorative animations after 10s inactivity ═══ */
@@ -741,7 +744,7 @@
         }
         .selection-ring {
             animation: selectionRingGrowPulse 2s ease-in-out infinite;
-            filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.4));
+            /* Removed drop-shadow for low-end device performance */
         }
 
         /* ═══ PATH HIGHLIGHT — Animated dash ═══ */
@@ -961,12 +964,13 @@
 
         /* === AMBIENT BIOME PARTICLES === */
         .ambient-layer { opacity: 0.7; }
-        body.zoom-out .ambient-layer { opacity: 0.4; }
+        body.zoom-out .ambient-layer { opacity: 0.2; }
+        body.zoom-out .loc-label { opacity: 0; pointer-events: none; }
+        body.zoom-out .loc-node { transition: none; }
 
         .amb-rise {
             fill-opacity: 0;
             animation: ambRise 5s ease-in-out infinite;
-            will-change: transform, opacity;
         }
         @keyframes ambRise {
             0%   { fill-opacity: 0; transform: translateY(0) scale(0.8); }
@@ -978,7 +982,6 @@
         .amb-fall {
             fill-opacity: 0;
             animation: ambFall 6s ease-in-out infinite;
-            will-change: transform, opacity;
         }
         @keyframes ambFall {
             0%   { fill-opacity: 0; transform: translateY(-8px) translateX(0); }
@@ -990,7 +993,6 @@
         .amb-pulse {
             fill-opacity: 0;
             animation: ambPulse 4s ease-in-out infinite;
-            will-change: opacity;
         }
         @keyframes ambPulse {
             0%, 100% { fill-opacity: 0.05; }
@@ -1001,7 +1003,6 @@
         .amb-breath {
             fill-opacity: 0;
             animation: ambBreath 7s ease-in-out infinite;
-            will-change: opacity, transform;
         }
         @keyframes ambBreath {
             0%, 100% { fill-opacity: 0.05; transform: scale(0.8); }
@@ -1011,7 +1012,6 @@
         .amb-drift {
             fill-opacity: 0;
             animation: ambDrift 5s ease-in-out infinite;
-            will-change: transform, opacity;
         }
         @keyframes ambDrift {
             0%   { fill-opacity: 0; transform: translateX(-8px); }
@@ -1023,7 +1023,6 @@
         .amb-cloud {
             fill-opacity: 0;
             animation: ambCloudDrift 40s linear infinite;
-            will-change: transform, opacity;
         }
         @keyframes ambCloudDrift {
             0%   { fill-opacity: 0; transform: translateX(-60px); }
@@ -1087,7 +1086,8 @@
             0%, 100% { stroke-opacity: 0.1; }
             50%      { stroke-opacity: 0.3; }
         }
-        body.map-idle .danger-aura { animation-play-state: paused !important; }
+        body.map-idle .danger-aura,
+        body.map-idle .danger-aura-extreme { animation-play-state: paused !important; }
 
         .novo-badge {
             animation: novoBadgeFade 5s ease-out forwards;
@@ -1727,9 +1727,10 @@
         .cycle-btn:disabled { opacity: 0.2; pointer-events: none; }
 
         /* ═══ CURRENT LOCATION PULSE — warm glow on player's loc-node ═══ */
+        /* GPU-friendly: opacity instead of filter for low-end devices */
         @keyframes currentLocGlow {
-            0%, 100% { filter: drop-shadow(0 0 3px rgba(196, 149, 58, 0.2)); }
-            50% { filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.5)); }
+            0%, 100% { opacity: 0.85; }
+            50% { opacity: 1; }
         }
         .loc-node.explored[data-current="true"] {
             animation: currentLocGlow 4s ease-in-out infinite;

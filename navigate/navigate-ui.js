@@ -63,7 +63,8 @@ function handleLocationTap(locId) {
     const dangerEl = document.getElementById('info-danger');
     const danger = locData.d || 0;
     if (isExplored && danger > 0) {
-        const pips = Math.min(5, Math.ceil(danger / 2));
+        const DANGER_PIPS_MAX = 5;
+        const pips = Math.min(DANGER_PIPS_MAX, Math.ceil(danger / 2));
         let html = '<span class="danger-meter">';
         for (let i = 0; i < 5; i++) {
             const cls = i < pips ? 'danger-pip filled-' + (i + 1) : 'danger-pip empty';
@@ -995,7 +996,8 @@ function openQuickList() {
                     highlightPath(S.currentLoc, loc.id);
                     if (typeof panToLocationSmooth === 'function') panToLocationSmooth(loc.id);
                 }
-                setTimeout(() => handleLocationTap(loc.id), 350);
+                const CYCLE_TAP_DELAY = 350;
+            setTimeout(() => handleLocationTap(loc.id), CYCLE_TAP_DELAY);
             });
             items.appendChild(div);
         }
@@ -1022,7 +1024,8 @@ function showGestureTutorial() {
         localStorage.setItem('valdoria_nav_tutorial_v2', '1');
     };
     gt.addEventListener('click', dismiss, { once: true });
-    setTimeout(() => { if (gt.classList.contains('visible')) dismiss(); }, 12000);
+    const TUTORIAL_AUTO_DISMISS_MS = 12000;
+    setTimeout(() => { if (gt.classList.contains('visible')) dismiss(); }, TUTORIAL_AUTO_DISMISS_MS);
 }
 
 // ── Init hover tooltip + off-screen indicator + swipe dismiss + new features ──
