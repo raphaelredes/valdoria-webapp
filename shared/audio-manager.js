@@ -398,13 +398,13 @@ const ValdoriaAudio = (() => {
             }
             .va-slider::-webkit-slider-runnable-track {
                 height: 4px;
-                background: rgba(112, 66, 20, 0.4);
                 border-radius: 2px;
+                background: inherit;
             }
             .va-slider::-moz-range-track {
                 height: 4px;
-                background: rgba(112, 66, 20, 0.4);
                 border-radius: 2px;
+                background: rgba(112, 66, 20, 0.4);
             }
             /* Hide during loading/overlays */
             .loading:not(.hidden) ~ .va-ctrl,
@@ -469,6 +469,13 @@ const ValdoriaAudio = (() => {
         slider.max = '100';
         slider.value = String(Math.round(_muted ? 0 : _volume * 100));
         slider.setAttribute('aria-label', 'Volume');
+
+        // Set initial slider fill gradient
+        function _updateSliderFill() {
+            const pct = slider.value;
+            slider.style.background = 'linear-gradient(to right, rgba(196,149,58,0.6) 0%, rgba(196,149,58,0.6) ' + pct + '%, rgba(112,66,20,0.3) ' + pct + '%, rgba(112,66,20,0.3) 100%)';
+        }
+        _updateSliderFill();
 
         sliderWrap.appendChild(slider);
 
@@ -536,6 +543,7 @@ const ValdoriaAudio = (() => {
             e.stopPropagation();
             const val = parseInt(e.target.value, 10) / 100;
             setVolume(val);
+            _updateSliderFill();
             if (_closeTimer) clearTimeout(_closeTimer);
             _closeTimer = setTimeout(() => {
                 _sliderOpen = false;
@@ -570,7 +578,7 @@ const ValdoriaAudio = (() => {
 
         // Wait for loading to finish before showing hint
         const _tryShow = () => {
-            const loading = document.querySelector('.loading:not(.hidden), .loading-overlay:not(.hidden), #loading:not([style*="display: none"])');
+            const loading = document.querySelector('.loading:not(.hidden), .loading-overlay:not(.hidden), #loading:not([style*="display: none"]), #v-err-overlay:not([style*="display: none"])');
             if (loading) { setTimeout(_tryShow, 1000); return; }
 
             if (_hintDismissed) return;
@@ -619,6 +627,9 @@ const ValdoriaAudio = (() => {
         _updateBtnIcon(btn);
         if (slider) {
             slider.value = String(Math.round(_muted ? 0 : _volume * 100));
+            // Update fill gradient
+            const pct = slider.value;
+            slider.style.background = 'linear-gradient(to right, rgba(196,149,58,0.6) 0%, rgba(196,149,58,0.6) ' + pct + '%, rgba(112,66,20,0.3) ' + pct + '%, rgba(112,66,20,0.3) 100%)';
         }
     }
 

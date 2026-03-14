@@ -331,6 +331,10 @@
     background: #fbbf24;
     box-shadow: 0 0 4px rgba(251,191,36,0.4);
 }
+/* When bottom panel is collapsed, dot follows down */
+.bottom-panel.immersive-collapsed ~ .connection-dot {
+    bottom: 14px;
+}
 
 /* ─── Rate Limit Toast Style ─── */
 .toast.rate-limit {
