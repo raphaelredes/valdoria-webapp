@@ -56,7 +56,7 @@
     background: linear-gradient(135deg, rgba(46, 125, 50, 0.15), rgba(46, 125, 50, 0.08));
     border: 1px solid rgba(46, 125, 50, 0.3);
     border-radius: var(--v-radius-sm, 6px);
-    color: #81c784;
+    color: var(--v-success-light);
     font-family: var(--v-font);
     font-size: 13px;
     cursor: pointer;
@@ -121,7 +121,7 @@
 .quest-card:active { transform: scale(0.98); }
 
 .quest-card--ready {
-    border-left-color: #4caf50;
+    border-left-color: var(--v-success);
     background: linear-gradient(135deg, var(--v-bg-card), rgba(46, 125, 50, 0.05));
 }
 .quest-card--done {
@@ -130,7 +130,7 @@
     cursor: default;
 }
 .quest-card--failed {
-    border-left-color: #7b2020;
+    border-left-color: var(--v-crimson);
     opacity: 0.7;
 }
 
@@ -159,7 +159,7 @@
     font-weight: 400;
 }
 .quest-title--failed {
-    color: #e57373;
+    color: var(--v-danger-light);
     font-weight: 400;
 }
 .quest-ready-badge { font-size: 12px; flex-shrink: 0; }
@@ -272,7 +272,7 @@
     background: rgba(46, 125, 50, 0.15);
     border: 1px solid rgba(46, 125, 50, 0.3);
     border-radius: 12px;
-    color: #81c784;
+    color: var(--v-success-light);
     font-size: 12px;
     font-weight: 600;
 }
@@ -334,7 +334,7 @@
     border-left: 2px solid var(--v-border);
     margin-left: 8px;
 }
-.quest-step--done { border-left-color: #4caf50; }
+.quest-step--done { border-left-color: var(--v-success); }
 .quest-step--current {
     border-left-color: var(--v-gold);
     background: rgba(196, 149, 58, 0.05);
@@ -413,7 +413,7 @@
 }
 .quest-cat--daily {
     background: rgba(33, 150, 243, 0.12);
-    color: #64b5f6;
+    color: var(--v-info);
     border: 1px solid rgba(33, 150, 243, 0.25);
 }
 .quest-cat--side {

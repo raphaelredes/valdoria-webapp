@@ -896,16 +896,16 @@ _logFlushTimer = setInterval(_flushLogs, _LOG_FLUSH_INTERVAL);
 // Flush on page unload
 window.addEventListener('beforeunload', () => {
     _flushLogs();
-    // Best-effort notify server that WebApp is closing (dedup with error-reporter)
-    if (S.apiBase && S.token && S.uid && !window.__valdoria_close_sent) {
-        window.__valdoria_close_sent = true;
+    // Send perf beacon
+    if (_perfMetrics.apiCalls > 0 && S.apiBase) {
         try {
             navigator.sendBeacon(
-                S.apiBase + '/api/game/close',
-                JSON.stringify({ user_id: S.uid, token: S.token })
+                S.apiBase + '/api/game/log',
+                JSON.stringify({ entries: [{ level: 'info', msg: '[GAME] PERF: ' + JSON.stringify(_perfMetrics) }] })
             );
-        } catch (e) { console.warn('[GAME] sendBeacon close:', e); }
+        } catch (e) { /* best effort */ }
     }
+    // Close beacon handled by error-reporter.js (universal safety net)
 });
 
 // ─── Bootstrap ───
@@ -1097,14 +1097,4 @@ function _trackCacheHit() {
     _perfMetrics.cacheHits++;
 }
 
-// Send perf beacon on page unload
-window.addEventListener('beforeunload', function() {
-    if (_perfMetrics.apiCalls > 0 && S.apiBase) {
-        try {
-            navigator.sendBeacon(
-                S.apiBase + '/api/game/log',
-                JSON.stringify({ entries: [{ level: 'info', msg: '[GAME] PERF: ' + JSON.stringify(_perfMetrics) }] })
-            );
-        } catch (e) { /* best effort */ }
-    }
-});
+

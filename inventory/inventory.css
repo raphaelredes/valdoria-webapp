@@ -323,7 +323,7 @@ body { padding-bottom: 92px; }
 }
 .bs-gems { display: flex; gap: 2px; align-items: center; position: absolute; bottom: 2px; right: 4px; }
 .bs-gem { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); }
-.bs-gem-filled { background: #a855f7; border-color: #9333ea; box-shadow: 0 0 3px rgba(168, 85, 247, 0.4); }
+.bs-gem-filled { background: #a855f7; border-color: var(--v-rarity-very-rare); box-shadow: 0 0 3px rgba(168, 85, 247, 0.4); }
 .bs-rune { opacity: 0.7; }
 .body-bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; }
 
