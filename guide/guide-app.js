@@ -55,7 +55,10 @@
         // Detect return URL from Game Hub transition
         var params = new URLSearchParams(window.location.search);
         var ret = params.get('ret');
-        if (ret) _returnUrl = ret;
+        if (ret) {
+            _returnUrl = ret;
+            if (closeBtn) closeBtn.innerHTML = '🔙 Voltar';
+        }
 
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
