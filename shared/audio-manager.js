@@ -1,8 +1,8 @@
 // ===================================================================
-// VALDORIA AUDIO MANAGER v1.1
+// VALDORIA AUDIO MANAGER v1.2
 // Singleton for ambient music and sound effects across all WebApps.
-// Handles autoplay restrictions, seamless loop crossfade, mute toggle,
-// localStorage persistence, and random variant selection.
+// Handles autoplay restrictions, seamless loop crossfade, volume control,
+// localStorage persistence, random variant selection, and auto-injected UI.
 // ===================================================================
 
 const ValdoriaAudio = (() => {
@@ -11,15 +11,13 @@ const ValdoriaAudio = (() => {
     const STORAGE_KEY = 'valdoria_audio_muted';
     const VOLUME_KEY = 'valdoria_audio_volume';
     const CROSSFADE_MS = 1200;
-    const DEFAULT_VOLUME = 0.25;
+    const DEFAULT_VOLUME = 0.5;
     const NO_LOOP_TRACKS = ['victory', 'defeat'];
 
     // Base URL for audio files (relative to webapp root)
     const AUDIO_BASE = '../shared/audio/';
 
     // Track catalog: biome/context -> array of variant filenames
-    // Naming: base.mp3, base_2.mp3, base_3.mp3 (up to 3 variants)
-    // A random variant is picked each time a track starts or loops.
     const TRACKS = {
         tavern:   ['tavern_ambient.mp3', 'tavern_ambient_2.mp3', 'tavern_ambient_3.mp3', 'tavern_ambient_4.mp3'],
         city:     ['city_day.mp3', 'city_day_2.mp3', 'city_day_3.mp3', 'city_day_4.mp3'],
@@ -34,21 +32,21 @@ const ValdoriaAudio = (() => {
         defeat:   ['defeat_somber.mp3', 'defeat_somber_2.mp3', 'defeat_somber_3.mp3', 'defeat_somber_4.mp3'],
     };
 
-    // Pick a random file from a track's variant array
     function _pickVariant(trackKey) {
         const variants = TRACKS[trackKey];
         if (!variants || variants.length === 0) return null;
         return variants[Math.floor(Math.random() * variants.length)];
     }
 
-    let _audio = null;          // Current HTMLAudioElement
-    let _fadeAudio = null;      // Previous audio being faded out
-    let _currentTrack = '';     // Current track key
+    let _audio = null;
+    let _fadeAudio = null;
+    let _currentTrack = '';
     let _muted = false;
     let _volume = DEFAULT_VOLUME;
-    let _unlocked = false;      // Whether audio context has been unlocked by user gesture
-    let _pendingTrack = '';     // Track queued before unlock
-    let _looping = false;       // Whether loop crossfade is already in progress
+    let _unlocked = false;
+    let _pendingTrack = '';
+    let _looping = false;
+    let _uiInjected = false;
 
     // -- Init --
     function init() {
@@ -58,7 +56,6 @@ const ValdoriaAudio = (() => {
             _volume = savedVol;
         }
 
-        // Listen for first user gesture to unlock audio
         const unlockEvents = ['click', 'touchstart', 'keydown'];
         const unlockHandler = () => {
             _unlocked = true;
@@ -68,16 +65,18 @@ const ValdoriaAudio = (() => {
             }
         };
         unlockEvents.forEach(e => document.addEventListener(e, unlockHandler, { capture: true, once: false }));
+
+        _injectUI();
     }
 
-    // -- Play a track by key (e.g., 'tavern', 'forest') --
+    // -- Play a track by key --
     function play(trackKey) {
         if (!trackKey || !TRACKS[trackKey] || TRACKS[trackKey].length === 0) {
             console.warn('[AUDIO] Unknown track:', trackKey);
             return;
         }
         if (trackKey === _currentTrack && _audio && !_audio.paused) {
-            return; // Already playing this track
+            return;
         }
 
         _pendingTrack = trackKey;
@@ -91,7 +90,6 @@ const ValdoriaAudio = (() => {
         if (!file) return;
         const url = AUDIO_BASE + file;
 
-        // Crossfade out current track
         if (_audio && !_audio.paused) {
             _crossfadeOut(_audio);
         }
@@ -103,7 +101,6 @@ const ValdoriaAudio = (() => {
         _audio = audio;
         _currentTrack = trackKey;
 
-        // Seamless loop via crossfade (not audio.loop) to avoid MP3 gap
         if (!NO_LOOP_TRACKS.includes(trackKey)) {
             audio.addEventListener('timeupdate', _onTimeUpdate);
         }
@@ -117,7 +114,6 @@ const ValdoriaAudio = (() => {
         });
     }
 
-    // Seamless loop: when near end, crossfade to a new Audio instance
     function _onTimeUpdate() {
         const audio = _audio;
         if (!audio || _looping) return;
@@ -151,7 +147,6 @@ const ValdoriaAudio = (() => {
             _audio = newAudio;
             _looping = false;
         }).catch(() => {
-            // Fallback: restart old audio from beginning
             oldAudio.currentTime = 0;
             oldAudio.play().catch(() => {});
             _looping = false;
@@ -203,7 +198,6 @@ const ValdoriaAudio = (() => {
         }, stepMs);
     }
 
-    // -- Stop all audio --
     function stop() {
         if (_audio) {
             _crossfadeOut(_audio);
@@ -214,7 +208,6 @@ const ValdoriaAudio = (() => {
         _looping = false;
     }
 
-    // -- Play a one-shot sound effect (no loop) --
     function playSFX(trackKey) {
         if (_muted || !_unlocked) return;
         const file = _pickVariant(trackKey);
@@ -240,6 +233,7 @@ const ValdoriaAudio = (() => {
                 _playTrack(_pendingTrack);
             }
         }
+        _syncUI();
         return _muted;
     }
 
@@ -252,6 +246,22 @@ const ValdoriaAudio = (() => {
         if (_audio && !_muted) {
             _audio.volume = _volume;
         }
+        // If volume > 0 and was muted, unmute
+        if (_volume > 0 && _muted) {
+            _muted = false;
+            localStorage.setItem(STORAGE_KEY, '0');
+            if (_audio && !_audio.paused) {
+                _audio.volume = _volume;
+            } else if (_pendingTrack) {
+                _playTrack(_pendingTrack);
+            }
+        }
+        // If volume == 0, mute
+        if (_volume === 0 && !_muted) {
+            _muted = true;
+            localStorage.setItem(STORAGE_KEY, '1');
+        }
+        _syncUI();
     }
 
     function getVolume() { return _volume; }
@@ -273,23 +283,240 @@ const ValdoriaAudio = (() => {
         play(track);
     }
 
-    // -- Create mute button UI --
-    function createMuteButton() {
+    // =============================================
+    // AUTO-INJECTED VOLUME CONTROL UI
+    // =============================================
+
+    function _injectUI() {
+        if (_uiInjected) return;
+        _uiInjected = true;
+
+        // Inject CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            .va-ctrl {
+                position: fixed;
+                top: 8px;
+                right: 8px;
+                z-index: 200;
+                display: flex;
+                align-items: center;
+                gap: 0;
+            }
+            .va-btn {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                border: 1px solid rgba(112, 66, 20, 0.4);
+                background: rgba(42, 36, 32, 0.85);
+                color: var(--v-text, #d4c8b0);
+                font-size: 16px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                transition: opacity 0.2s, transform 0.15s;
+                padding: 0;
+                line-height: 1;
+                flex-shrink: 0;
+            }
+            .va-btn:active {
+                transform: scale(0.9);
+                opacity: 0.8;
+            }
+            .va-slider-wrap {
+                overflow: hidden;
+                max-width: 0;
+                opacity: 0;
+                transition: max-width 0.3s ease, opacity 0.25s ease;
+                display: flex;
+                align-items: center;
+            }
+            .va-slider-wrap.open {
+                max-width: 120px;
+                opacity: 1;
+            }
+            .va-slider {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 100px;
+                height: 28px;
+                background: rgba(42, 36, 32, 0.85);
+                border: 1px solid rgba(112, 66, 20, 0.4);
+                border-right: none;
+                border-radius: 14px 0 0 14px;
+                outline: none;
+                margin: 0;
+                padding: 0 8px;
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                cursor: pointer;
+            }
+            .va-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: var(--v-text, #d4c8b0);
+                border: 2px solid rgba(112, 66, 20, 0.6);
+                cursor: pointer;
+            }
+            .va-slider::-moz-range-thumb {
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: var(--v-text, #d4c8b0);
+                border: 2px solid rgba(112, 66, 20, 0.6);
+                cursor: pointer;
+            }
+            .va-slider::-webkit-slider-runnable-track {
+                height: 4px;
+                background: rgba(112, 66, 20, 0.4);
+                border-radius: 2px;
+            }
+            .va-slider::-moz-range-track {
+                height: 4px;
+                background: rgba(112, 66, 20, 0.4);
+                border-radius: 2px;
+            }
+            /* Hide during loading/overlays */
+            .loading:not(.hidden) ~ .va-ctrl,
+            .dm-overlay.active ~ .va-ctrl,
+            .outcome-overlay.active ~ .va-ctrl {
+                opacity: 0;
+                pointer-events: none;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Build UI
+        const wrap = document.createElement('div');
+        wrap.className = 'va-ctrl';
+        wrap.id = 'va-ctrl';
+
+        const sliderWrap = document.createElement('div');
+        sliderWrap.className = 'va-slider-wrap';
+        sliderWrap.id = 'va-slider-wrap';
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'va-slider';
+        slider.id = 'va-slider';
+        slider.min = '0';
+        slider.max = '100';
+        slider.value = String(Math.round(_muted ? 0 : _volume * 100));
+        slider.setAttribute('aria-label', 'Volume');
+
+        sliderWrap.appendChild(slider);
+
         const btn = document.createElement('button');
-        btn.className = 'audio-mute-btn';
-        btn.setAttribute('aria-label', 'Alternar som');
-        _updateMuteBtn(btn);
+        btn.className = 'va-btn';
+        btn.id = 'va-btn';
+        btn.setAttribute('aria-label', 'Ajustar volume');
+        _updateBtnIcon(btn);
+
+        wrap.appendChild(sliderWrap);
+        wrap.appendChild(btn);
+        document.body.appendChild(wrap);
+
+        // Remove old mute button if present
+        const oldBtn = document.querySelector('.audio-mute-btn');
+        if (oldBtn) oldBtn.remove();
+
+        // Events
+        let _sliderOpen = false;
+        let _closeTimer = null;
+
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            toggleMute();
-            _updateMuteBtn(btn);
+            _sliderOpen = !_sliderOpen;
+            sliderWrap.classList.toggle('open', _sliderOpen);
+            if (_closeTimer) clearTimeout(_closeTimer);
+            if (_sliderOpen) {
+                _closeTimer = setTimeout(() => {
+                    _sliderOpen = false;
+                    sliderWrap.classList.remove('open');
+                }, 4000);
+            }
         });
-        return btn;
+
+        // Long press to mute/unmute
+        let _longPress = null;
+        btn.addEventListener('pointerdown', () => {
+            _longPress = setTimeout(() => {
+                toggleMute();
+                slider.value = String(Math.round(_muted ? 0 : _volume * 100));
+                _longPress = null;
+            }, 500);
+        });
+        btn.addEventListener('pointerup', () => {
+            if (_longPress) clearTimeout(_longPress);
+            _longPress = null;
+        });
+        btn.addEventListener('pointerleave', () => {
+            if (_longPress) clearTimeout(_longPress);
+            _longPress = null;
+        });
+
+        slider.addEventListener('input', (e) => {
+            e.stopPropagation();
+            const val = parseInt(e.target.value, 10) / 100;
+            setVolume(val);
+            if (_closeTimer) clearTimeout(_closeTimer);
+            _closeTimer = setTimeout(() => {
+                _sliderOpen = false;
+                sliderWrap.classList.remove('open');
+            }, 4000);
+        });
+
+        // Prevent slider touches from propagating to game
+        slider.addEventListener('touchstart', (e) => e.stopPropagation());
+        slider.addEventListener('touchmove', (e) => e.stopPropagation());
+        slider.addEventListener('pointerdown', (e) => e.stopPropagation());
+
+        // Close slider on outside click
+        document.addEventListener('click', (e) => {
+            if (_sliderOpen && !wrap.contains(e.target)) {
+                _sliderOpen = false;
+                sliderWrap.classList.remove('open');
+                if (_closeTimer) clearTimeout(_closeTimer);
+            }
+        });
     }
 
-    function _updateMuteBtn(btn) {
-        btn.textContent = _muted ? '🔇' : '🔊';
-        btn.title = _muted ? 'Ativar som' : 'Desativar som';
+    function _updateBtnIcon(btn) {
+        if (!btn) return;
+        if (_muted || _volume === 0) {
+            btn.textContent = '🔇';
+            btn.title = 'Som desativado';
+        } else if (_volume < 0.5) {
+            btn.textContent = '🔉';
+            btn.title = 'Volume: ' + Math.round(_volume * 100) + '%';
+        } else {
+            btn.textContent = '🔊';
+            btn.title = 'Volume: ' + Math.round(_volume * 100) + '%';
+        }
+    }
+
+    function _syncUI() {
+        const btn = document.getElementById('va-btn');
+        const slider = document.getElementById('va-slider');
+        _updateBtnIcon(btn);
+        if (slider) {
+            slider.value = String(Math.round(_muted ? 0 : _volume * 100));
+        }
+    }
+
+    // Legacy compat — still exported but now auto-injected
+    function createMuteButton() {
+        // No-op: UI is auto-injected by init()
+        // Return empty element to avoid errors in callers
+        const span = document.createElement('span');
+        span.style.display = 'none';
+        return span;
     }
 
     // -- Public API --

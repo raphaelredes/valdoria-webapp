@@ -448,6 +448,15 @@ function renderResolution(state) {
     stopAllIntervals();
     const isVictory = state.phase === 'victory';
     const isFled = state.phase === 'fled';
+
+    // Play victory/defeat fanfare
+    if (typeof ValdoriaAudio !== 'undefined') {
+        if (isVictory && !isFled) {
+            ValdoriaAudio.play('victory');
+        } else if (!isVictory && !isFled) {
+            ValdoriaAudio.play('defeat');
+        }
+    }
     const rawText = state.result_text || state.action_result_text || '';
     const app = document.getElementById('app');
 
@@ -584,6 +593,12 @@ function renderResolution(state) {
 // ─── MAIN RENDER ───
 function renderArena(s) {
     const app = document.getElementById('app');
+
+    // Play combat music on first render
+    if (typeof ValdoriaAudio !== 'undefined' && !renderArena._musicStarted) {
+        renderArena._musicStarted = true;
+        ValdoriaAudio.play('combat');
+    }
 
     // P0-C: Phase transition fade (intro->init->active)
     const newPh = s.ph || s.phase || 'intro';
