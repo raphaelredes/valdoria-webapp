@@ -54,6 +54,8 @@ let S = {
     conditions: [],          // Active conditions
     exhaustion: 0,           // D&D 5e exhaustion level (0-6)
     _stepsWithoutRest: 0,    // Steps since last rest (forced march tracking): [{type, stepsLeft}]
+    _longRestCount: 0,       // Long rests taken this exploration (consequences escalate)
+    _longRestAmbushSafe: false, // Set true when long rest ambush check passed
     _hazardsTriggered: new Set(),  // Hexes that already triggered hazards
     _watchUsed: false,             // Watch activity: first encounter advantage consumed
     _flavorSteps: 0,         // Steps since last flavor event
@@ -101,6 +103,7 @@ function saveState() {
             wu: S._watchUsed || false,
             ex: S.exhaustion || 0,
             swr: S._stepsWithoutRest || 0,
+            lrc: S._longRestCount || 0,
             tp: S.travelPace || 'normal',
             ta: S.travelActivity || null,
             wt: S.weather || 's',
@@ -198,6 +201,7 @@ function restoreState() {
         if (snap.wt) S.weather = snap.wt;
         S.exhaustion = snap.ex || 0;
         S._stepsWithoutRest = snap.swr || 0;
+        S._longRestCount = snap.lrc || 0;
         return true;
     } catch (e) {
         console.error('[EXPLORE] restoreState:', e);
@@ -383,6 +387,7 @@ function loadMapData(data) {
     initBottomBar();
     if (typeof _updateActivityBadge === 'function') _updateActivityBadge();
     if (typeof updateExhaustionHUD === 'function') updateExhaustionHUD();
+    if (typeof updateCampButtonHint === 'function') updateCampButtonHint();
     if (typeof updateCompass === 'function') updateCompass();
 
     // Initialize atmosphere (day/night + weather)
@@ -753,6 +758,7 @@ function addExhaustion(levels, source) {
             S.hpChange = -(S.charData ? S.charData.mh : 999);
             checkDeath();
         }
+        if (typeof updateCampButtonHint === 'function') updateCampButtonHint();
         saveState();
     }
 }
@@ -760,6 +766,7 @@ function addExhaustion(levels, source) {
 function removeExhaustion(levels) {
     S.exhaustion = Math.max(0, (S.exhaustion || 0) - levels);
     updateExhaustionHUD();
+    if (typeof updateCampButtonHint === 'function') updateCampButtonHint();
     saveState();
 }
 
@@ -792,6 +799,14 @@ function _showExhaustionModal(level, effect, source) {
 function resetStepsWithoutRest() {
     S._stepsWithoutRest = 0;
     saveState();
+}
+
+// Update camp button visual hints based on exhaustion and HP
+function updateCampButtonHint() {
+    const btn = document.getElementById('btn-camp');
+    if (!btn) return;
+    btn.classList.toggle('has-exhaustion', S.exhaustion > 0);
+    btn.classList.toggle('low-hp', typeof getHPPercent === 'function' && getHPPercent() < 50);
 }
 
 function getExhaustionPenalty() {

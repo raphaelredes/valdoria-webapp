@@ -2508,17 +2508,7 @@ function showExitRiskAssessment() {
             });
     }
 
-    // Option 3: Camp (if has food items)
-    const foodItems = getFoodItems();
-    if (foodItems.length > 0) {
-        addExitOption(optionsEl, '', 'Montar Acampamento',
-            'Descanso Curto: 1d8 + CON', '#4a8', () => {
-                overlay.classList.remove('active');
-                showCampOverlay();
-            });
-    }
-
-    // Option 4: Continue exploring (always)
+    // Option 3: Continue exploring (always)
     addExitOption(optionsEl, '', 'Continuar Explorando',
         'Voltar ao mapa', '#8a7a68', () => {
             overlay.classList.remove('active');
@@ -2574,13 +2564,23 @@ function showCampOverlay() {
     });
     foodList.appendChild(noFoodBtn);
 
+    // Section divider
+    const divider = document.createElement('div');
+    divider.style.cssText = 'border-top:1px solid rgba(196,149,58,0.2);margin:8px 0;padding-top:4px;font-size:11px;color:#8a7a68;text-align:center';
+    divider.textContent = '\u2500\u2500 Descanso Longo (8 horas) \u2500\u2500';
+    foodList.appendChild(divider);
+
     // Long Rest (D&D 5e PHB)
+    const ambushChance = 20 + ((S._longRestCount || 0) * 15);
     const longRestBtn = document.createElement('button');
     longRestBtn.className = 'camp-food-btn';
     longRestBtn.style.borderColor = 'rgba(68,170,100,0.4)';
-    longRestBtn.innerHTML = `<span style="font-size:14px;color:#4a8;font-weight:bold">🌙</span>` +
+    let longDesc = 'Recupera todo HP, limpa condi\u00e7\u00f5es, -1 exaust\u00e3o';
+    longDesc += `<br>\u26a0\ufe0f Chance de emboscada: ${Math.min(ambushChance, 95)}%`;
+    if ((S._longRestCount || 0) >= 2) longDesc += '<br>\u26a0\ufe0f Perigo da regi\u00e3o j\u00e1 aumentou';
+    longRestBtn.innerHTML = `<span style="font-size:14px;color:#4a8;font-weight:bold">\ud83c\udf19</span>` +
         `<div style="flex:1"><div style="font-weight:600;color:#6c8">Descanso Longo</div>` +
-        `<div style="font-size:11px;color:#8a7a68">Recupera todo HP, limpa condi\u00e7\u00f5es, -1 exaust\u00e3o</div></div>`;
+        `<div style="font-size:11px;color:#8a7a68">${longDesc}</div></div>`;
     longRestBtn.addEventListener('click', () => {
         overlay.classList.remove('active');
         doLongRest();
@@ -2621,13 +2621,18 @@ function doCampRest(food) {
 
     logMoveEvent([{ type: 'camp', heal: totalHeal, food: foodName }]);
     updateRewards();
+    if (typeof resetStepsWithoutRest === 'function') resetStepsWithoutRest();
     saveState();
+    if (typeof updateCampButtonHint === 'function') updateCampButtonHint();
 
     // Show 3D d8 dice animation before result
     _showCampDiceRoll(hitDie, conMod, foodBonus, totalHeal, foodName);
 }
 
 function doLongRest() {
+    // Track long rest count for escalating consequences
+    S._longRestCount = (S._longRestCount || 0) + 1;
+
     if (S.charData) {
         const maxHP = S.charData.mh || 10;
         const currentHP = S.charData.hp + S.hpChange;
@@ -2637,23 +2642,50 @@ function doLongRest() {
     }
     S.conditions = [];
     updateConditionHUD();
+    const prevExhaustion = S.exhaustion;
     if (typeof removeExhaustion === 'function' && S.exhaustion > 0) removeExhaustion(1);
     if (typeof resetStepsWithoutRest === 'function') resetStepsWithoutRest();
-    logMoveEvent([{ type: 'long_rest' }]);
+
+    // Consequence: increase danger level (+0.5 per long rest)
+    S.dangerLevel = Math.min(5, (S.dangerLevel || 1) + 0.5);
+    if (typeof updateDangerPips === 'function') updateDangerPips();
+
+    logMoveEvent([{ type: 'long_rest', restCount: S._longRestCount }]);
     saveState();
+
+    // Update camp button hint
+    if (typeof updateCampButtonHint === 'function') updateCampButtonHint();
+
     const overlay = document.getElementById('camp-result-overlay');
     const resultEl = document.getElementById('camp-result-text');
     if (overlay && resultEl) {
-        let t = '🌙 <b>Descanso Longo</b><br><br>';
+        let t = '\ud83c\udf19 <b>Descanso Longo</b><br><br>';
         t += '\u2764\ufe0f HP totalmente recuperado<br>';
         t += '\u2728 Condi\u00e7\u00f5es removidas<br>';
-        if (S.exhaustion > 0) t += `\u26a0\ufe0f Exaust\u00e3o: ${S.exhaustion + 1} \u2192 ${S.exhaustion}<br>`;
+        if (prevExhaustion > 0) t += `\u26a0\ufe0f Exaust\u00e3o: ${prevExhaustion} \u2192 ${S.exhaustion}<br>`;
         else t += '\u2705 Sem exaust\u00e3o<br>';
+        if (S._longRestCount > 1) t += '<br>\u26a0\ufe0f <span style="color:#dca028">O perigo da regi\u00e3o aumentou.</span>';
         t += '<br><i>Voc\u00ea se sente revigorado.</i>';
         resultEl.innerHTML = t;
         overlay.classList.add('active');
     } else {
-        showTerrainToast('🌙 Descanso Longo: HP recuperado', 'ranger');
+        showTerrainToast('\ud83c\udf19 Descanso Longo: HP recuperado', 'ranger');
+    }
+
+    // Long rest ambush check — higher chance than short rest
+    _checkLongRestAmbush();
+}
+
+function _checkLongRestAmbush() {
+    // Ambush chance: 20% base + 15% per additional long rest
+    const ambushChance = 20 + ((S._longRestCount - 1) * 15);
+    const roll = Math.floor(Math.random() * 100) + 1;
+    if (roll <= ambushChance && S.campAmbush && !S._campAmbushUsed) {
+        // Ambush will trigger when result overlay closes
+        // (handled by closeCampResult)
+    } else {
+        // No ambush — clear the flag so closeCampResult skips it
+        S._longRestAmbushSafe = true;
     }
 }
 
@@ -2719,7 +2751,8 @@ function closeCampResult() {
     S._lowHPAlertShown = false;
 
     // Night ambush check — triggers after rest overlay closes
-    if (S.campAmbush && !S._campAmbushUsed) {
+    // Long rest uses _checkLongRestAmbush() which sets _longRestAmbushSafe if roll passed
+    if (S.campAmbush && !S._campAmbushUsed && !S._longRestAmbushSafe) {
         S._campAmbushUsed = true;
         saveState();
         showTerrainToast('Algo ataca durante seu descanso!', 'danger');
@@ -2728,6 +2761,8 @@ function closeCampResult() {
         }, 1500);
         return;
     }
+    // Reset the safe flag for next rest
+    S._longRestAmbushSafe = false;
 
     // If camping during return journey, resume the journey
     if (_returningToCity && _returnJourney) {

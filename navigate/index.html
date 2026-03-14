@@ -362,6 +362,9 @@
             text-align: center;
             transition: opacity 0.15s, transform 0.15s;
             font-family: 'Cinzel', serif;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            min-height: 44px;
         }
 
         /* Premium travel CTA button */
@@ -416,15 +419,36 @@
         }
 
         .info-btn-explore {
-            background: linear-gradient(135deg, #2a5a1a 0%, #1a4a10 50%, #2a5a1a 100%);
-            border: 1px solid #4a7a3a;
-            box-shadow: inset 0 1px 0 rgba(100, 200, 100, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            background: linear-gradient(180deg, #3a6a2a 0%, #2a5a1a 40%, #1a4a10 100%);
+            border: 1.5px solid #5a8a4a;
+            box-shadow: inset 0 1px 0 rgba(120, 200, 100, 0.15),
+                        inset 0 -2px 4px rgba(0, 0, 0, 0.25),
+                        0 0 8px rgba(90, 138, 74, 0.12),
+                        0 2px 6px rgba(0, 0, 0, 0.3);
+            padding: 13px 16px;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .info-btn-explore::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(120, 200, 100, 0.08), transparent);
+            animation: travelShine 4s ease-in-out infinite;
+            pointer-events: none;
         }
 
         .info-btn-camp {
-            background: linear-gradient(135deg, #5a4a20 0%, #4a3a18 50%, #5a4a20 100%);
-            border: 1px solid #7a6a3a;
-            box-shadow: inset 0 1px 0 rgba(200, 180, 100, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            background: linear-gradient(180deg, #6a5a28 0%, #5a4a20 40%, #4a3a18 100%);
+            border: 1.5px solid #8a7a4a;
+            box-shadow: inset 0 1px 0 rgba(200, 180, 100, 0.15),
+                        inset 0 -2px 4px rgba(0, 0, 0, 0.25),
+                        0 0 8px rgba(138, 122, 74, 0.1),
+                        0 2px 6px rgba(0, 0, 0, 0.3);
+            padding: 13px 16px;
+            font-size: 14px;
         }
 
         .info-btn-close {
@@ -464,35 +488,54 @@
         /* ═══ BOTTOM BAR ═══ */
         #bottom-bar {
             display: flex;
-            gap: 8px;
+            flex-wrap: wrap;
+            gap: 6px;
             padding: 8px 12px max(8px, env(safe-area-inset-bottom));
-            background: linear-gradient(0deg, #2a2420, #3a3028);
-            border-top: 1px solid rgba(112, 66, 20, 0.3);
+            background: linear-gradient(0deg, #2a2420 0%, #352c24 100%);
+            border-top: 2px solid #5a4020;
             z-index: 60;
             flex-shrink: 0;
         }
 
         .bar-btn {
             flex: 1;
-            padding: 10px 4px;
-            border: 1px solid rgba(112, 66, 20, 0.3);
-            border-radius: 4px;
-            background: rgba(112, 66, 20, 0.1);
+            padding: 11px 10px;
+            border: 1.5px solid #4a3828;
+            border-radius: 5px;
+            background: linear-gradient(180deg, #3e3228 0%, #332a22 100%);
             color: #d4c8b0;
             font-size: 12px;
             font-weight: 600;
             text-align: center;
             cursor: pointer;
             font-family: 'Cinzel', serif;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: inset 0 1px 0 rgba(255, 200, 100, 0.08),
+                        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+                        0 2px 4px rgba(0, 0, 0, 0.4);
+            transition: opacity 0.15s, transform 0.15s;
+            min-height: 44px;
         }
 
         .bar-btn:active {
-            opacity: 0.7;
+            opacity: 0.8;
+            transform: scale(0.97);
+            background: linear-gradient(180deg, #332a22 0%, #2e2520 100%);
         }
 
         .bar-btn-return {
-            border-color: rgba(196, 149, 58, 0.3);
+            flex-basis: 100%;
+            flex-grow: 0;
+            padding: 12px 16px;
+            border: 1.5px solid #6a4a1a;
+            background: linear-gradient(180deg, #4a3a1e 0%, #3a2e18 100%);
             color: #c4953a;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+            box-shadow: inset 0 1px 0 rgba(255, 200, 100, 0.12),
+                        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+                        0 0 10px rgba(196, 149, 58, 0.1),
+                        0 2px 5px rgba(0, 0, 0, 0.4);
         }
 
         /* ═══ MAP ELEMENTS — Medieval Cartography ═══ */
@@ -1504,33 +1547,42 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 12px;
+            padding: 10px 12px;
+            margin: 4px 8px;
             cursor: pointer;
-            border-bottom: 1px solid rgba(112, 66, 20, 0.1);
+            border: 1px solid rgba(112, 66, 20, 0.15);
             border-left: 3px solid transparent;
-            transition: background 0.1s, border-color 0.2s;
+            border-radius: 6px;
+            background: linear-gradient(135deg, rgba(112, 66, 20, 0.08) 0%, rgba(112, 66, 20, 0.03) 100%);
+            transition: background 0.15s, border-color 0.2s, transform 0.1s;
+            min-height: 44px;
         }
         .ql-item:active {
-            background: rgba(112, 66, 20, 0.15);
+            background: rgba(112, 66, 20, 0.2);
             border-left-color: #c4953a;
+            transform: scale(0.98);
         }
-        .ql-item-icon { font-size: 18px; flex-shrink: 0; }
+        .ql-item-current {
+            border-left-color: #c4953a !important;
+            background: linear-gradient(135deg, rgba(196, 149, 58, 0.1) 0%, rgba(112, 66, 20, 0.06) 100%);
+            box-shadow: 0 0 6px rgba(196, 149, 58, 0.08);
+        }
+        .ql-item-icon { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; }
         .ql-item-name {
             font-family: 'MedievalSharp', serif;
             font-size: 14px;
             color: #d4c8b0;
             flex: 1;
             min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            line-height: 1.3;
         }
         .ql-item-name.current { color: #c4953a; font-weight: 700; }
         .ql-item-dist {
             font-size: 11px;
-            color: #8a7060;
+            color: #a09484;
             font-family: 'Cinzel', serif;
             flex-shrink: 0;
+            white-space: nowrap;
         }
         .ql-item-badges {
             display: flex;
@@ -1539,9 +1591,10 @@
         }
         .ql-badge {
             font-size: 10px;
-            padding: 1px 4px;
-            border-radius: 2px;
-            background: rgba(112, 66, 20, 0.15);
+            padding: 2px 5px;
+            border-radius: 3px;
+            background: rgba(112, 66, 20, 0.18);
+            border: 1px solid rgba(112, 66, 20, 0.12);
             color: #a08050;
             font-family: 'Cinzel', serif;
         }

@@ -74,6 +74,31 @@
     pointer-events: none;
 }
 
+/* Camp/Rest button (circular like ?) */
+.btn-camp-rest {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(68, 170, 100, 0.12);
+    border: 1px solid rgba(68, 170, 100, 0.3);
+    color: #d4c8b0; font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; min-width: 34px;
+    transition: background 200ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+.btn-camp-rest:active { background: rgba(68, 170, 100, 0.25); transform: scale(0.94); }
+.btn-camp-rest.has-exhaustion {
+    border-color: rgba(200, 120, 40, 0.6);
+    box-shadow: 0 0 6px rgba(200, 120, 40, 0.3);
+    animation: campPulse 2s infinite;
+}
+.btn-camp-rest.low-hp {
+    border-color: rgba(200, 60, 60, 0.5);
+}
+@keyframes campPulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(200, 120, 40, 0.2); }
+    50% { box-shadow: 0 0 10px rgba(200, 120, 40, 0.5); }
+}
+
+
 /* Travel Pace toggle */
 .pace-toggle {
     padding: 4px 8px;
