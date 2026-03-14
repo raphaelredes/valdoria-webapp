@@ -65,7 +65,7 @@ function handleLocationTap(locId) {
     if (isExplored && danger > 0) {
         const DANGER_PIPS_MAX = 5;
         const pips = Math.min(DANGER_PIPS_MAX, Math.ceil(danger / 2));
-        let html = '<span class="danger-meter">';
+        let html = '<span class="danger-meter" role="img" aria-label="Perigo: ' + pips + ' de ' + DANGER_PIPS_MAX + '">';
         for (let i = 0; i < 5; i++) {
             const cls = i < pips ? 'danger-pip filled-' + (i + 1) : 'danger-pip empty';
             html += '<span class="' + cls + '"></span>';
@@ -76,12 +76,12 @@ function handleLocationTap(locId) {
         dangerEl.style.display = '';
     } else if (isKnownMapped) {
         if (danger >= 5) {
-            dangerEl.innerHTML = '<span class="danger-meter"><span class="danger-pip filled-4"></span><span class="danger-pip filled-5"></span><span class="danger-pip empty"></span></span> ???';
+            dangerEl.innerHTML = '<span class="danger-meter" role="img" aria-label="Perigo desconhecido: alto"><span class="danger-pip filled-4"></span><span class="danger-pip filled-5"></span><span class="danger-pip empty"></span></span> ???';
             dangerEl.style.borderColor = '#8a4a3a';
             dangerEl.style.color = '#8a4a3a';
             dangerEl.style.display = '';
         } else if (danger >= 3) {
-            dangerEl.innerHTML = '<span class="danger-meter"><span class="danger-pip filled-2"></span><span class="danger-pip filled-3"></span><span class="danger-pip empty"></span></span> ???';
+            dangerEl.innerHTML = '<span class="danger-meter" role="img" aria-label="Perigo desconhecido: moderado"><span class="danger-pip filled-2"></span><span class="danger-pip filled-3"></span><span class="danger-pip empty"></span></span> ???';
             dangerEl.style.borderColor = '#8a6a3a';
             dangerEl.style.color = '#8a6a3a';
             dangerEl.style.display = '';

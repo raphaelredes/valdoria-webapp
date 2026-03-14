@@ -508,7 +508,7 @@
         }
         .info-btn:active {
             opacity: 0.8;
-            transform: scale(0.98);
+            transform: scale(0.97);
         }
         .info-btn:active::after {
             animation: btnRipple 0.4s ease-out;
@@ -1118,9 +1118,9 @@
             pointer-events: none;
         }
         .path-turn-label {
-            font-size: 8px;
+            font-size: 9px;
             fill: #c4953a;
-            fill-opacity: 0.7;
+            fill-opacity: 0.8;
             font-family: 'Cinzel', serif;
             font-weight: 700;
             text-anchor: middle;
@@ -1229,6 +1229,10 @@
 
         .info-btn-risky {
             animation: riskyPulse 2s ease-in-out infinite;
+        }
+        .info-btn-travel,
+        .info-btn-risky {
+            line-height: 1.4;
         }
         @keyframes riskyPulse {
             0%, 100% { border-color: rgba(170, 58, 42, 0.3); }
@@ -1408,10 +1412,10 @@
             max-height: 0;
             overflow: hidden;
             opacity: 0;
-            transition: max-height 0.4s ease, padding 0.3s ease, opacity 0.3s ease;
+            transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.35s ease;
         }
         #legend-biomes.open { max-height: 200px; opacity: 1; padding: 6px 10px; }
-        .legend-toggle { cursor: pointer; transition: transform 0.3s ease; display: inline-block; }
+        .legend-toggle { cursor: pointer; transition: transform 0.35s ease; display: inline-block; }
         .legend-toggle.open { transform: rotate(180deg); }
 
         /* ═══ OFF-SCREEN INDICATOR ═══ */
@@ -1430,12 +1434,12 @@
             filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
         }
         #offscreen-indicator .osi-label {
-            font-size: 10px;
+            font-size: 11px;
             font-family: 'Cinzel', serif;
             color: #c4953a;
-            opacity: 0.8;
+            opacity: 0.85;
             white-space: nowrap;
-            max-width: 120px;
+            max-width: 150px;
             overflow: hidden;
             text-overflow: ellipsis;
         }
@@ -1480,7 +1484,7 @@
             transition: opacity 0.5s ease;
         }
         #minimap.visible { display: block; }
-        #minimap.fading { opacity: 0.3; }
+        #minimap.fading { opacity: 0.4; pointer-events: none; }
         #minimap-svg { width: 100%; height: 100%; }
         @keyframes mmGlow {
             0%, 100% { stroke-opacity: 0.4; }
@@ -1725,7 +1729,7 @@
             -webkit-tap-highlight-color: transparent;
         }
         .cycle-btn:active { color: #c4953a; background: rgba(196, 149, 58, 0.1); }
-        .cycle-btn:disabled { opacity: 0.2; pointer-events: none; }
+        .cycle-btn:disabled { opacity: 0.15; pointer-events: none; transition: opacity 0.2s ease; }
 
         /* ═══ CURRENT LOCATION PULSE — warm glow on player's loc-node ═══ */
         /* GPU-friendly: opacity instead of filter for low-end devices */
@@ -1758,9 +1762,7 @@
         .zoom-btn {
             transition: opacity 0.15s, transform 0.1s;
         }
-        .zoom-btn:active {
-            transform: scale(0.88);
-        }
+        /* active scale defined above at .zoom-btn:active { scale(0.92) } */
 
         /* ═══ HUD BAR — subtle shimmer on fill change ═══ */
         .hud-bar-fill {
