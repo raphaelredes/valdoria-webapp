@@ -52,10 +52,16 @@ const ValdoriaAudio = (() => {
         sfx_enemy_death:['sfx_enemy_death.wav', 'sfx_enemy_death_2.wav'],
     };
 
+    let _lastVariant = {};
     function _pickVariant(trackKey) {
         const variants = TRACKS[trackKey];
         if (!variants || variants.length === 0) return null;
-        return variants[Math.floor(Math.random() * variants.length)];
+        if (variants.length === 1) return variants[0];
+        let pick;
+        do { pick = variants[Math.floor(Math.random() * variants.length)]; }
+        while (pick === _lastVariant[trackKey]);
+        _lastVariant[trackKey] = pick;
+        return pick;
     }
 
     let _audio = null;
@@ -633,6 +639,7 @@ const ValdoriaAudio = (() => {
 
         // Re-inject after footer re-renders (screen changes)
         const mo = new MutationObserver(() => {
+            _closePopup();
             if (!document.getElementById('va-btn') && _isEmbedded) {
                 const el = document.getElementById('footer-quick');
                 if (el && el.children.length > 0) {
@@ -694,6 +701,26 @@ const ValdoriaAudio = (() => {
         if (slider) slider.style.setProperty('--fill', pct + '%');
     }
 
+    let _previewCtx = null;
+    let _previewTimer = null;
+    function _sfxPreviewTick() {
+        if (_sfxMuted || _previewTimer) return;
+        _previewTimer = setTimeout(function() { _previewTimer = null; }, 250);
+        try {
+            if (!_previewCtx) _previewCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var osc = _previewCtx.createOscillator();
+            var gain = _previewCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 440;
+            gain.gain.setValueAtTime(Math.min(0.15, _sfxVolume * 0.3), _previewCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, _previewCtx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(_previewCtx.destination);
+            osc.start();
+            osc.stop(_previewCtx.currentTime + 0.08);
+        } catch(e) {}
+    }
+
     function _createPopupRow(emoji, prefix, enabled, volume, onToggle, onVolume) {
         var row = document.createElement('div');
         row.className = 'va-popup-row';
@@ -719,9 +746,9 @@ const ValdoriaAudio = (() => {
             if (pctEl) pctEl.textContent = val + '%';
             onVolume(val);
         });
-        slider.addEventListener('touchstart', function(e) { e.stopPropagation(); });
+        slider.addEventListener('touchstart', function(e) { e.stopPropagation(); _resetCloseTimer(); });
         slider.addEventListener('touchmove', function(e) { e.stopPropagation(); });
-        slider.addEventListener('pointerdown', function(e) { e.stopPropagation(); });
+        slider.addEventListener('pointerdown', function(e) { e.stopPropagation(); _resetCloseTimer(); });
         _updateSliderFill(slider, enabled ? volume : 0);
 
         var pct = document.createElement('span');
@@ -766,7 +793,7 @@ const ValdoriaAudio = (() => {
         card.appendChild(_createPopupRow(
             '⚔', 'va-sfx', !_sfxMuted, sfxVol,
             () => { toggleSFX(); _updatePopupUI(); _resetCloseTimer(); },
-            (val) => { setSFXVolume(val / 100); _updatePopupUI(); _resetCloseTimer(); }
+            (val) => { setSFXVolume(val / 100); _sfxPreviewTick(); _updatePopupUI(); _resetCloseTimer(); }
         ));
 
         popup.appendChild(card);
@@ -955,6 +982,7 @@ const ValdoriaAudio = (() => {
         setSFXVolume,
         getSFXVolume,
         createMuteButton,
+        previewSFX: _sfxPreviewTick,
         TRACKS,
     };
 })();

@@ -681,7 +681,7 @@ function injectAudioSettings(contentEl) {
         !sfxMuted,
         sfxVol,
         (enabled) => { ValdoriaAudio.toggleSFX(); _refreshAudioSettings(contentEl); },
-        (val) => { ValdoriaAudio.setSFXVolume(val / 100); _refreshAudioSettings(contentEl); }
+        (val) => { ValdoriaAudio.setSFXVolume(val / 100); if (ValdoriaAudio.previewSFX) ValdoriaAudio.previewSFX(); _refreshAudioSettings(contentEl); }
     ));
 
     contentEl.appendChild(section);
