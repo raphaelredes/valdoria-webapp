@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#2a2420">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../shared/fonts.css">
@@ -104,7 +104,17 @@
             }
         }, 5000);
 
-        window._invLoadingCtrl = {
+        // Watchdog: force-hide loading after 8s to prevent stuck overlays
+    setTimeout(function() {
+        if (overlay && !overlay.classList.contains('hidden')) {
+            console.warn('[INVENTORY] Loading watchdog triggered after 8s');
+            clearInterval(_tipInterval);
+            clearInterval(_progressTimer);
+            overlay.classList.add('hidden');
+        }
+    }, 8000);
+
+    window._invLoadingCtrl = {
             hide: function() {
                 clearInterval(_tipInterval);
                 clearInterval(_progressTimer);
