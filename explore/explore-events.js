@@ -738,7 +738,12 @@ function triggerCombat(poi) {
     document.getElementById('combat-icon').textContent = '';
     document.getElementById('combat-enemy').textContent = combat.en || 'Inimigo';
     const _combatNarr = (combat.en || 'Inimigo') + ' se prepara para o combate!';
-    document.getElementById('combat-text').innerHTML = '<span style="color:#d44;font-weight:bold;">' + _combatNarr + '</span>';
+    const _combatSpan = document.createElement('span');
+    _combatSpan.style.cssText = 'color:#d44;font-weight:bold;';
+    _combatSpan.textContent = _combatNarr;
+    const _combatTextEl = document.getElementById('combat-text');
+    _combatTextEl.innerHTML = '';
+    _combatTextEl.appendChild(_combatSpan);
 
     overlay.classList.add('active');
     if (window.vHaptic) vHaptic.heavy();

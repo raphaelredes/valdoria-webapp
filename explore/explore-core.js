@@ -874,6 +874,9 @@ function removeExhaustion(levels) {
     saveState();
 }
 
+// HTML escape helper (defense-in-depth)
+function _esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
 function _showExhaustionModal(level, effect, source) {
     const existing = document.getElementById('exhaustion-modal');
     if (existing) existing.remove();
@@ -906,7 +909,7 @@ function _showExhaustionModal(level, effect, source) {
     modal.innerHTML = '<div class="exh-modal-card">' +
         '<div class="exh-modal-icon">' + (level >= 4 ? '\u2620\ufe0f' : '\u26a0\ufe0f') + '</div>' +
         '<div class="exh-modal-title">Exaust\u00e3o N\u00edvel ' + level + '</div>' +
-        (source ? '<div class="exh-modal-source">Causa: ' + source + '</div>' : '') +
+        (source ? '<div class="exh-modal-source">Causa: ' + _esc(source) + '</div>' : '') +
         '<div class="exh-modal-effects">' + effects.join('') + '</div>' +
         (impact ? '<div class="exh-modal-impact">' + impact + '</div>' : '') +
         '<div class="exh-modal-tip">' + recovTip + '</div>' +
