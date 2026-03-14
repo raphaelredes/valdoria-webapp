@@ -240,6 +240,8 @@ function startTutorial() {
 
 function autoShowTutorial() {
     if (!shouldShowTutorial()) return;
+    // Never show tutorial during return journey
+    if (typeof _returningToCity !== 'undefined' && _returningToCity) return;
     // Wait for loading overlay to be hidden before showing tutorial
     function _tryShow() {
         var overlay = document.getElementById('loading');
