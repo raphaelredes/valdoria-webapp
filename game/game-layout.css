@@ -159,13 +159,13 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 .audio-vol-slider::-webkit-slider-runnable-track {
     height: 4px;
     border-radius: 2px;
-    background: rgba(112, 66, 20, 0.3);
+    background: linear-gradient(to right, var(--v-gold, #c4953a) var(--fill, 0%), rgba(112, 66, 20, 0.3) var(--fill, 0%));
 }
 
 .audio-vol-slider::-moz-range-track {
     height: 4px;
     border-radius: 2px;
-    background: rgba(112, 66, 20, 0.3);
+    background: linear-gradient(to right, var(--v-gold, #c4953a) var(--fill, 0%), rgba(112, 66, 20, 0.3) var(--fill, 0%));
 }
 
 .audio-vol-slider::-webkit-slider-thumb {

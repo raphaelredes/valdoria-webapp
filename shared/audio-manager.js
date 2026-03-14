@@ -381,8 +381,8 @@ const ValdoriaAudio = (() => {
             }
             .va-popup-card {
                 display: flex;
-                align-items: center;
-                gap: 10px;
+                flex-direction: column;
+                gap: 6px;
                 background: var(--v-bg-raised, #332a22);
                 border: 1px solid var(--v-border, #4a3828);
                 border-radius: 12px;
@@ -391,9 +391,9 @@ const ValdoriaAudio = (() => {
                 max-width: 300px;
                 width: calc(100% - 32px);
             }
-            .va-popup-mute {
-                width: 36px;
-                height: 36px;
+            .va-popup-icon {
+                width: 30px;
+                height: 30px;
                 border-radius: 50%;
                 border: 1px solid var(--v-border, #4a3828);
                 background: transparent;
@@ -404,14 +404,23 @@ const ValdoriaAudio = (() => {
                 cursor: pointer;
                 flex-shrink: 0;
                 padding: 0;
+                font-size: 14px;
                 transition: color 0.2s, border-color 0.2s;
+                -webkit-tap-highlight-color: transparent;
             }
-            .va-popup-mute.unmuted {
+            .va-popup-icon.unmuted {
                 color: var(--v-gold, #c4953a);
                 border-color: rgba(196,149,58,0.4);
             }
-            .va-popup-mute:active {
+            .va-popup-icon:active {
                 transform: scale(0.9);
+            }
+            /* Popup row layout (music + sfx) */
+            .va-popup-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
             }
             .va-popup-slider {
                 -webkit-appearance: none;
@@ -428,12 +437,12 @@ const ValdoriaAudio = (() => {
             .va-popup-slider::-webkit-slider-runnable-track {
                 height: 6px;
                 border-radius: 3px;
-                background: rgba(112,66,20,0.3);
+                background: linear-gradient(to right, var(--v-gold, #c4953a) var(--fill, 0%), rgba(112,66,20,0.3) var(--fill, 0%));
             }
             .va-popup-slider::-moz-range-track {
                 height: 6px;
                 border-radius: 3px;
-                background: rgba(112,66,20,0.3);
+                background: linear-gradient(to right, var(--v-gold, #c4953a) var(--fill, 0%), rgba(112,66,20,0.3) var(--fill, 0%));
             }
             .va-popup-slider::-webkit-slider-thumb {
                 -webkit-appearance: none;
@@ -539,6 +548,15 @@ const ValdoriaAudio = (() => {
             @keyframes vaGlowPulse {
                 0%,100% { box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
                 50% { box-shadow: 0 0 0 6px rgba(196,149,58,0.25), 0 0 12px rgba(196,149,58,0.15); }
+            }
+            /* Breathing glow when music is playing */
+            @keyframes vaBreathing {
+                0%, 100% { filter: brightness(0.9); }
+                50% { filter: brightness(1.2); }
+            }
+            .va-footer-btn.va-playing,
+            .va-float-btn.va-playing {
+                animation: vaBreathing 3s ease-in-out infinite;
             }
         `;
         document.head.appendChild(style);
@@ -668,6 +686,55 @@ const ValdoriaAudio = (() => {
         _showFirstTimeHint(btn);
     }
 
+    function _haptic(type) {
+        try { var tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light'); } catch(e) {}
+    }
+
+    function _updateSliderFill(slider, pct) {
+        if (slider) slider.style.setProperty('--fill', pct + '%');
+    }
+
+    function _createPopupRow(emoji, prefix, enabled, volume, onToggle, onVolume) {
+        var row = document.createElement('div');
+        row.className = 'va-popup-row';
+
+        var icon = document.createElement('button');
+        icon.className = 'va-popup-icon' + (enabled ? ' unmuted' : '');
+        icon.id = prefix + '-icon';
+        icon.textContent = emoji;
+        icon.addEventListener('click', function(e) { e.stopPropagation(); _haptic('light'); onToggle(); });
+
+        var slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'va-popup-slider';
+        slider.id = prefix + '-slider';
+        slider.min = '0';
+        slider.max = '100';
+        slider.value = String(enabled ? volume : 0);
+        slider.addEventListener('input', function(e) {
+            e.stopPropagation();
+            var val = parseInt(e.target.value, 10);
+            _updateSliderFill(slider, val);
+            var pctEl = document.getElementById(prefix + '-pct');
+            if (pctEl) pctEl.textContent = val + '%';
+            onVolume(val);
+        });
+        slider.addEventListener('touchstart', function(e) { e.stopPropagation(); });
+        slider.addEventListener('touchmove', function(e) { e.stopPropagation(); });
+        slider.addEventListener('pointerdown', function(e) { e.stopPropagation(); });
+        _updateSliderFill(slider, enabled ? volume : 0);
+
+        var pct = document.createElement('span');
+        pct.className = 'va-popup-pct';
+        pct.id = prefix + '-pct';
+        pct.textContent = (enabled ? volume : 0) + '%';
+
+        row.appendChild(icon);
+        row.appendChild(slider);
+        row.appendChild(pct);
+        return row;
+    }
+
     function _createPopup() {
         if (document.getElementById('va-popup')) return;
 
@@ -686,54 +753,24 @@ const ValdoriaAudio = (() => {
         const card = document.createElement('div');
         card.className = 'va-popup-card';
 
-        // Mute button
-        const muteBtn = document.createElement('button');
-        muteBtn.className = 'va-popup-mute' + (_muted ? '' : ' unmuted');
-        muteBtn.id = 'va-popup-mute';
-        muteBtn.innerHTML = _muted ? _SVG_MUTED : (_volume < 0.5 ? _SVG_LOW : _SVG_HIGH);
-        muteBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleMute();
-            const sl = document.getElementById('va-popup-slider');
-            if (sl) sl.value = String(Math.round(_muted ? 0 : _volume * 100));
-            _updatePopupUI();
-            _resetCloseTimer();
-        });
+        // Music row
+        const musicVol = (_muted || _musicMuted) ? 0 : Math.round(_volume * 100);
+        card.appendChild(_createPopupRow(
+            '♫', 'va-music', !_musicMuted && !_muted, musicVol,
+            () => { toggleMusic(); _updatePopupUI(); _resetCloseTimer(); },
+            (val) => { setVolume(val / 100); _updatePopupUI(); _resetCloseTimer(); }
+        ));
 
-        // Slider
-        const slider = document.createElement('input');
-        slider.type = 'range';
-        slider.className = 'va-popup-slider';
-        slider.id = 'va-popup-slider';
-        slider.min = '0';
-        slider.max = '100';
-        slider.value = String(Math.round(_muted ? 0 : _volume * 100));
-        slider.setAttribute('aria-label', 'Volume');
+        // SFX row
+        const sfxVol = _sfxMuted ? 0 : Math.round(_sfxVolume * 100);
+        card.appendChild(_createPopupRow(
+            '⚔', 'va-sfx', !_sfxMuted, sfxVol,
+            () => { toggleSFX(); _updatePopupUI(); _resetCloseTimer(); },
+            (val) => { setSFXVolume(val / 100); _updatePopupUI(); _resetCloseTimer(); }
+        ));
 
-        slider.addEventListener('input', (e) => {
-            e.stopPropagation();
-            const val = parseInt(e.target.value, 10) / 100;
-            setVolume(val);
-            _updatePopupUI();
-            _resetCloseTimer();
-        });
-        slider.addEventListener('touchstart', (e) => e.stopPropagation());
-        slider.addEventListener('touchmove', (e) => e.stopPropagation());
-        slider.addEventListener('pointerdown', (e) => e.stopPropagation());
-
-        // Percentage label
-        const pct = document.createElement('span');
-        pct.className = 'va-popup-pct';
-        pct.id = 'va-popup-pct';
-        pct.textContent = Math.round(_muted ? 0 : _volume * 100) + '%';
-
-        card.appendChild(muteBtn);
-        card.appendChild(slider);
-        card.appendChild(pct);
         popup.appendChild(card);
         document.body.appendChild(popup);
-
-        // Position popup above the bottom panel
         _positionPopup();
     }
 
@@ -782,17 +819,22 @@ const ValdoriaAudio = (() => {
     }
 
     function _updatePopupUI() {
-        const muteBtn = document.getElementById('va-popup-mute');
-        const slider = document.getElementById('va-popup-slider');
-        const pctEl = document.getElementById('va-popup-pct');
-        const vol = _muted ? 0 : Math.round(_volume * 100);
-
-        if (muteBtn) {
-            muteBtn.classList.toggle('unmuted', !_muted);
-            muteBtn.innerHTML = _muted ? _SVG_MUTED : (_volume < 0.5 ? _SVG_LOW : _SVG_HIGH);
-        }
-        if (slider) slider.value = String(vol);
-        if (pctEl) pctEl.textContent = vol + '%';
+        // Music row
+        const mi = document.getElementById('va-music-icon');
+        const ms = document.getElementById('va-music-slider');
+        const mp = document.getElementById('va-music-pct');
+        const mv = (_muted || _musicMuted) ? 0 : Math.round(_volume * 100);
+        if (mi) mi.classList.toggle('unmuted', !_musicMuted && !_muted);
+        if (ms) { ms.value = String(mv); _updateSliderFill(ms, mv); }
+        if (mp) mp.textContent = mv + '%';
+        // SFX row
+        const si = document.getElementById('va-sfx-icon');
+        const ss = document.getElementById('va-sfx-slider');
+        const sp = document.getElementById('va-sfx-pct');
+        const sv = _sfxMuted ? 0 : Math.round(_sfxVolume * 100);
+        if (si) si.classList.toggle('unmuted', !_sfxMuted);
+        if (ss) { ss.value = String(sv); _updateSliderFill(ss, sv); }
+        if (sp) sp.textContent = sv + '%';
     }
 
     // -- First-time audio hint --
@@ -822,7 +864,7 @@ const ValdoriaAudio = (() => {
     // -- SVG icon update --
     function _updateBtnIcon(btn) {
         if (!btn) return;
-        if (_muted || _volume === 0) {
+        if (_muted || _musicMuted || _volume === 0) {
             btn.innerHTML = _SVG_MUTED;
             btn.title = 'Som desativado';
             btn.classList.remove('va-playing');

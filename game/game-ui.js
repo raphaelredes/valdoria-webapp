@@ -696,7 +696,7 @@ function _audioRow(label, enabled, volume, onToggle, onVolume) {
     toggle.className = 'audio-toggle' + (enabled ? ' on' : '');
     toggle.innerHTML = '<span class="audio-toggle-label">' + label + '</span>' +
                        '<span class="audio-toggle-status">' + (enabled ? '🟢' : '⚪') + '</span>';
-    toggle.onclick = () => onToggle(!enabled);
+    toggle.onclick = () => { try { var tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); } catch(e) {} onToggle(!enabled); };
     row.appendChild(toggle);
 
     // Volume slider (only if enabled)
@@ -711,6 +711,7 @@ function _audioRow(label, enabled, volume, onToggle, onVolume) {
         slider.max = '100';
         slider.value = String(volume);
         slider.setAttribute('aria-label', label + ' volume');
+        slider.style.setProperty('--fill', volume + '%');
 
         const pct = document.createElement('span');
         pct.className = 'audio-vol-pct';
@@ -720,6 +721,7 @@ function _audioRow(label, enabled, volume, onToggle, onVolume) {
             e.stopPropagation();
             const val = parseInt(e.target.value, 10);
             pct.textContent = val + '%';
+            slider.style.setProperty('--fill', val + '%');
             onVolume(val);
         });
         slider.addEventListener('touchstart', (e) => e.stopPropagation());
