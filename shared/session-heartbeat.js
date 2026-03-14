@@ -2,8 +2,8 @@
    SESSION HEARTBEAT — Device displacement & session expiry detection
    Polls /api/game/heartbeat to detect:
    - 'displaced': another device took over the session
-   - 'expired': session expired due to inactivity (10 min)
-   Also tracks client-side inactivity (10 min without user interaction).
+   - 'expired': session expired due to inactivity (30 min)
+   Also tracks client-side inactivity (30 min without user interaction).
    Usage: SessionHeartbeat.init({ apiBase, token, uid })
    =================================================================== */
 
@@ -19,7 +19,7 @@ var SessionHeartbeat = (function () {
     var _BACKGROUND_INTERVAL = 30000;
 
     // 10 minutes of no user interaction -> auto-expire client-side
-    var _INACTIVITY_MS = 10 * 60 * 1000;
+    var _INACTIVITY_MS = 30 * 60 * 1000;
 
     function init(cfg) {
         _cfg.apiBase = cfg.apiBase || '';
