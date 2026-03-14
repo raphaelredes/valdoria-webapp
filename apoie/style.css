@@ -583,10 +583,9 @@ body::after {
     transition: opacity 0.8s ease;
 }
 .ap-cinematic .ap-layer-sky { transition-delay: 0s; }
-.ap-cinematic .ap-layer-mountains { transition-delay: 0.15s; }
-.ap-cinematic .ap-layer-castle { transition-delay: 0.3s; }
-.ap-cinematic .ap-layer-forest { transition-delay: 0.45s; }
-.ap-cinematic .ap-layer-mist { transition-delay: 0.6s; }
+.ap-cinematic .ap-layer-castle { transition-delay: 0.15s; }
+.ap-cinematic .ap-layer-forest { transition-delay: 0.3s; }
+.ap-cinematic .ap-layer-mist { transition-delay: 0.45s; }
 
 .ap-cinematic.ap-scene-ready .ap-parallax-layer {
     opacity: 1;
@@ -2724,21 +2723,14 @@ body::after {
     z-index: 1;
 }
 
-.ap-layer-mountains {
-    background-image: url('layers/layer-mountains.jpg');
-    background-color: transparent;
-    z-index: 2;
-    mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 45%, transparent 65%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 45%, transparent 65%);
-}
+/* Mountains layer removed — castle is the main mid-layer */
 
 .ap-layer-castle {
     background-image: url('layers/layer-castle.jpg');
     background-color: transparent;
     z-index: 3;
-    opacity: 0.75;
-    mask-image: linear-gradient(to bottom, transparent 15%, black 35%, black 55%, transparent 75%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 15%, black 35%, black 55%, transparent 75%);
+    mask-image: linear-gradient(to bottom, transparent 5%, black 30%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 30%);
 }
 
 .ap-layer-forest {
@@ -3087,6 +3079,103 @@ body::after {
         opacity: 1 !important;
         transform: none !important;
         transition: none !important;
+    }
+}
+
+/* ─── Cookie Consent Banner ─── */
+
+.ap-cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: rgba(26, 22, 18, 0.97);
+    border-top: 1px solid rgba(196, 149, 58, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
+    animation: apCookieSlideUp 0.4s ease-out;
+}
+
+@keyframes apCookieSlideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.ap-cookie-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ap-cookie-text {
+    flex: 1;
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 13px;
+    color: var(--v-text, #d4c8b0);
+    line-height: 1.5;
+}
+
+.ap-cookie-icon {
+    margin-right: 6px;
+}
+
+.ap-cookie-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.ap-cookie-accept {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--v-gold, #c4953a), #d4a84a);
+    color: var(--v-bg, #2a2420);
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.15s, box-shadow 0.3s;
+    white-space: nowrap;
+}
+
+.ap-cookie-accept:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 16px rgba(196, 149, 58, 0.4);
+}
+
+.ap-cookie-reject {
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 12px;
+    padding: 8px 16px;
+    border: 1px solid rgba(196, 149, 58, 0.2);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--v-text-dim, #a09484);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.ap-cookie-reject:hover {
+    border-color: rgba(196, 149, 58, 0.4);
+    color: var(--v-text, #d4c8b0);
+}
+
+@media (max-width: 600px) {
+    .ap-cookie-inner {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+    .ap-cookie-text {
+        font-size: 12px;
     }
 }
 

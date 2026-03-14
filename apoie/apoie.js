@@ -415,7 +415,7 @@ function setupParallax() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (window.matchMedia('(max-width: 600px)').matches) return;
 
-    const speeds = [0.1, 0.2, 0.35, 0.5, 0.65]; // back to front
+    const speeds = [0.1, 0.3, 0.5, 0.65]; // sky, castle, forest, mist
     let ticking = false;
 
     window.addEventListener('scroll', () => {
@@ -476,7 +476,7 @@ function togglePlayer() {
         _apUpdateUI();
         return;
     }
-    if (_apAudio && _apAudio.paused && _apAudio.currentTime > 0) {
+    if (_apAudio && _apAudio.paused && _apAudio.src && _apAudio.currentTime > 0) {
         _apAudio.play().catch(function(){});
         _apPlaying = true;
         _apUpdateUI();
@@ -553,20 +553,43 @@ function _apPrevTrack() {
     }
 }
 
+function _apDestroyAudio() {
+    if (!_apAudio) return;
+    _apAudio.onended = null;
+    _apAudio.onerror = null;
+    _apAudio.pause();
+    try { _apAudio.src = ''; _apAudio.load(); } catch(e) {}
+    _apAudio = null;
+}
+
 function _apPlayTrack(track) {
-    if (_apAudio) { _apAudio.pause(); _apAudio.src = ''; }
+    _apDestroyAudio();
     _apCurrentTrack = track;
     _apLastFile = track.file;
-    _apAudio = new Audio(_AP_AUDIO_BASE + track.file);
-    _apAudio.volume = 0.15;
-    _apAudio.addEventListener('ended', function() {
+    var audio = new Audio(_AP_AUDIO_BASE + track.file);
+    audio.volume = 0.25;
+    _apAudio = audio;
+    var _errorCount = 0;
+    audio.onended = function() {
+        if (audio !== _apAudio) return;
         _apNextTrack();
-    });
-    _apAudio.addEventListener('error', function() {
-        console.warn('[APOIE] Audio error:', track.file);
-        setTimeout(function() { _apNextTrack(); }, 500);
-    });
-    _apAudio.play().then(function() {
+    };
+    audio.onerror = function() {
+        if (audio !== _apAudio) return;
+        _errorCount++;
+        console.warn('[APOIE] Audio error:', track.file, '(attempt ' + _errorCount + ')');
+        if (_errorCount < 3) {
+            setTimeout(function() {
+                if (audio === _apAudio) _apNextTrack();
+            }, 1000);
+        } else {
+            console.error('[APOIE] Too many audio errors, stopping player');
+            _apPlaying = false;
+            _apUpdateUI();
+        }
+    };
+    audio.play().then(function() {
+        if (audio !== _apAudio) return;
         _apPlaying = true;
         document.getElementById('ap-track-name').textContent = '\u266B ' + track.name;
         _apUpdateUI();
@@ -614,11 +637,46 @@ function setupTimelineAnimation() {
     }, { threshold: 0.2 });
     observer.observe(timeline);
 }
+// ── Cookie Consent ──
+function checkCookieConsent() {
+    var consent = localStorage.getItem('valdoria_cookies');
+    if (!consent) {
+        var banner = document.getElementById('cookie-banner');
+        if (banner) banner.style.display = 'block';
+        return false;
+    }
+    return consent === 'accepted';
+}
+
+function acceptCookies() {
+    localStorage.setItem('valdoria_cookies', 'accepted');
+    var banner = document.getElementById('cookie-banner');
+    if (banner) {
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateY(100%)';
+        banner.style.transition = 'opacity 0.3s, transform 0.3s';
+        setTimeout(function() { banner.style.display = 'none'; }, 300);
+    }
+    loadTelegramWidget();
+}
+
+function rejectCookies() {
+    localStorage.setItem('valdoria_cookies', 'rejected');
+    var banner = document.getElementById('cookie-banner');
+    if (banner) {
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateY(100%)';
+        banner.style.transition = 'opacity 0.3s, transform 0.3s';
+        setTimeout(function() { banner.style.display = 'none'; }, 300);
+    }
+}
+
 // ── Init ──
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
-    loadTelegramWidget();
+    var cookiesOk = checkCookieConsent();
+    if (cookiesOk) loadTelegramWidget();
     loadGoals();
     loadStats();
     setupNavbar();
