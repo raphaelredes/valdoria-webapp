@@ -651,6 +651,8 @@ function tickConditions() {
             }
             flashScreen('rgba(60,180,60,0.2)');
             showTerrainToast(`-${dot} HP (veneno)`, 'damage');
+            // Death check after each poison tick
+            if (typeof checkDeath === 'function') checkDeath();
         }
     }
 
@@ -662,6 +664,14 @@ function tickConditions() {
 
     // Forced march exhaustion (D&D PHB Ch.8: CON save DC 10+1 per extra step after 15)
     S._stepsWithoutRest = (S._stepsWithoutRest || 0) + 1;
+    // Warning at step thresholds before forced march
+    if (S._stepsWithoutRest === 10) {
+        showTerrainToast('\ud83d\udca8 Voc\u00ea j\u00e1 caminhou bastante. Considere descansar.', 'info');
+    } else if (S._stepsWithoutRest === 13) {
+        showTerrainToast('\u26a0\ufe0f Marcha for\u00e7ada se aproxima! Descanse em breve.', 'condition');
+    } else if (S._stepsWithoutRest === 15) {
+        showTerrainToast('\u26a0\ufe0f Marcha for\u00e7ada! Teste de CON a cada passo.', 'damage');
+    }
     if (S._stepsWithoutRest > 15) {
         const extraSteps = S._stepsWithoutRest - 15;
         const dc = 10 + extraSteps;
@@ -755,6 +765,47 @@ function conditionPPMod() {
     return mod;
 }
 
+
+// D&D 5e: Apply a condition to the player (poisoned, prone, restrained, etc.)
+function addCondition(type, duration) {
+    const fx = CONDITION_EFFECTS[type];
+    if (!fx) { console.warn('[EXPLORE] Unknown condition:', type); return; }
+    // Don't stack same condition — refresh duration instead
+    const existing = S.conditions.find(c => c.type === type);
+    if (existing) {
+        existing.stepsLeft = Math.max(existing.stepsLeft, duration || 5);
+        updateConditionHUD();
+        return;
+    }
+    // Default duration by condition type (D&D 5e approximate)
+    const defaultDurations = {
+        poisoned: 8,      // ~1 minute (8 steps)
+        prone: 1,         // Ends when you stand (1 step)
+        frightened: 5,    // Concentration-based
+        blinded: 5,
+        restrained: 3,    // Until escape (3 steps)
+        deafened: 5,
+        charmed: 8,
+        stunned: 2,       // Usually 1 round
+        incapacitated: 2,
+    };
+    const stepsLeft = duration || defaultDurations[type] || 5;
+    S.conditions.push({ type: type, stepsLeft: stepsLeft });
+    updateConditionHUD();
+    // Show toast with condition effect
+    showTerrainToast(fx.icon + ' ' + fx.label + '! (' + stepsLeft + ' passos)', 'condition');
+    // Haptic feedback
+    try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
+    saveState();
+}
+
+// Remove a specific condition
+function removeCondition(type) {
+    S.conditions = S.conditions.filter(c => c.type !== type);
+    updateConditionHUD();
+    saveState();
+}
+
 function updateConditionHUD() {
     const bar = document.getElementById('condition-bar');
     if (!bar) return;
@@ -810,6 +861,8 @@ function addExhaustion(levels, source) {
             checkDeath();
         }
         if (typeof updateCampButtonHint === 'function') updateCampButtonHint();
+        // D&D 5e: Enforce level 4 HP cap
+        if (typeof _enforceExhaustionHP === 'function') _enforceExhaustionHP();
         saveState();
     }
 }
@@ -914,6 +967,28 @@ function getExhaustionPenalty() {
         speedZero: lvl >= 5,            // Can't move
         death: lvl >= 6,               // Death
     };
+}
+
+// D&D 5e: Exhaustion level 4 halves max HP
+// Returns the effective max HP considering exhaustion
+function getEffectiveMaxHP() {
+    if (!S.charData) return 10;
+    const baseMax = S.charData.mh || 10;
+    if ((S.exhaustion || 0) >= 4) return Math.floor(baseMax / 2);
+    return baseMax;
+}
+
+// Enforce exhaustion level 4 HP cap after exhaustion changes
+function _enforceExhaustionHP() {
+    if (!S.charData) return;
+    const effMax = getEffectiveMaxHP();
+    const currentHP = S.charData.hp + (S.hpChange || 0);
+    if (currentHP > effMax) {
+        // Cap HP to effective max
+        S.hpChange = effMax - S.charData.hp;
+        updateHP(effMax, S.charData.mh);
+        showTerrainToast('\u26a0\ufe0f HP m\u00e1ximo reduzido pela exaust\u00e3o!', 'condition');
+    }
 }
 
 function updateExhaustionHUD() {

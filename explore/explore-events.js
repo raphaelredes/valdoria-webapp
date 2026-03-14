@@ -2719,56 +2719,98 @@ function _showGuardOverlay(roll, r1, r2, mode, totalMod, proficient, dc, success
     const diceCanvas = document.getElementById('check-dice-canvas');
 
     if (!overlay) {
-        // Fallback: skip guard and go straight to long rest
         doLongRest();
         return;
     }
 
-    // Build formula text
+    // Phase 1: Narration before dice roll
     const sign = totalMod >= 0 ? '+' : '';
     const profText = proficient ? ' (proficiente)' : '';
-    formulaEl.innerHTML = '<div style="font-size:13px;color:#c4953a;margin-bottom:4px">\u{1f6e1}\ufe0f Montando Guarda</div>' +
-        '<div style="font-size:11px;color:#8a7a68">Percep\u00e7\u00e3o (WIS)' + profText + '</div>' +
+    const disText = mode === 'disadvantage' ? ' <span style="color:#c44">(desvantagem)</span>' : '';
+
+    // Atmospheric pre-roll narration
+    const narrations = [
+        'A fogueira se reduz a brasas. O silêncio da noite se instala...',
+        'Sons distantes ecoam pela escuridão. Você aguça os sentidos...',
+        'As horas passam lentamente. Cada sombra parece se mover...',
+        'O vento sussurra entre as árvores. Algo se move na escuridão...',
+    ];
+    const narr = narrations[Math.floor(Math.random() * narrations.length)];
+
+    formulaEl.innerHTML = '<div style="font-size:13px;color:#c4953a;margin-bottom:6px">\u{1f6e1}\ufe0f Montando Guarda</div>' +
+        '<div style="font-size:12px;color:#a09484;font-style:italic;margin-bottom:8px;line-height:1.5">' + narr + '</div>' +
+        '<div style="font-size:11px;color:#8a7a68">Percep\u00e7\u00e3o (WIS)' + profText + disText + '</div>' +
         '<div style="font-size:11px;color:#8a7a68;margin-top:2px">DC ' + dc + '</div>';
+
+    // Clear result initially (will show after dice)
+    resultEl.innerHTML = '';
 
     // Dice HTML
     const diceHTML = typeof buildDiceHTML === 'function' ? buildDiceHTML(r1, r2, mode) : '';
     if (diceContainer) diceContainer.innerHTML = diceHTML;
 
-    // Show result
+    overlay.classList.add('active');
+
+    // Phase 2: Show dice after narration reading time
+    const narrDelay = typeof calcReadTime === 'function' ? calcReadTime(narr, 'narrative') : 2500;
+    setTimeout(function() {
+        // 3D dice animation
+        if (diceCanvas && typeof Dice3D !== 'undefined') {
+            try {
+                if (window._checkDice) { window._checkDice.dispose(); window._checkDice = null; }
+                diceCanvas.style.display = 'block';
+                window._checkDice = new Dice3D(diceCanvas, { size: 120, dieType: 'd20', duration: 1200 });
+                window._checkDice.roll(roll, function() {
+                    if (window.vHaptic) vHaptic.medium();
+                    _showGuardResult(overlay, resultEl, diceCanvas, roll, sign, totalMod, dc, success);
+                });
+            } catch(e) {
+                console.warn('[EXPLORE] Guard dice error:', e);
+                _showGuardResult(overlay, resultEl, diceCanvas, roll, sign, totalMod, dc, success);
+            }
+        } else {
+            _showGuardResult(overlay, resultEl, diceCanvas, roll, sign, totalMod, dc, success);
+        }
+    }, narrDelay);
+}
+
+function _showGuardResult(overlay, resultEl, diceCanvas, roll, sign, totalMod, dc, success) {
     const total = roll + totalMod;
+
+    // Post-roll narration based on result
+    const successNarrs = [
+        'Seus olhos penetram a escuridão. Nada escapa à sua vigília.',
+        'Um galho estala ao longe. Você identifica: apenas um animal. A noite está segura.',
+        'A aurora desponta. Sua guarda foi impecável.',
+    ];
+    const failNarrs = [
+        'O calor da fogueira e o cansaço vencem... seus olhos pesam...',
+        'Um som distante... ou foi imaginação? O sono chega antes da resposta.',
+        'As pálpebras cedem. Quando você acorda, horas se passaram.',
+    ];
+
+    const postNarr = success
+        ? successNarrs[Math.floor(Math.random() * successNarrs.length)]
+        : failNarrs[Math.floor(Math.random() * failNarrs.length)];
+
     if (success) {
-        resultEl.innerHTML = '<div style="color:#6c8;font-size:16px;font-weight:700">\u2705 Vigil\u00e2ncia Alerta</div>' +
+        resultEl.innerHTML = '<div style="color:#6c8;font-size:16px;font-weight:700">\u2705 Vigilância Alerta</div>' +
             '<div style="font-size:12px;color:#8a7a68;margin-top:4px">' + roll + ' ' + sign + totalMod + ' = ' + total + ' \u2265 DC ' + dc + '</div>' +
-            '<div style="font-size:11px;color:#6c8;margin-top:6px">Voc\u00ea mant\u00e9m guarda atenta durante a noite.</div>';
+            '<div style="font-size:12px;color:#a09484;font-style:italic;margin-top:8px;line-height:1.5">' + postNarr + '</div>';
     } else {
         resultEl.innerHTML = '<div style="color:#c44;font-size:16px;font-weight:700">\u274c Guarda Falha</div>' +
             '<div style="font-size:12px;color:#8a7a68;margin-top:4px">' + roll + ' ' + sign + totalMod + ' = ' + total + ' < DC ' + dc + '</div>' +
-            '<div style="font-size:11px;color:#c44;margin-top:6px">O cansa\u00e7o vence e voc\u00ea cochila durante a guarda.</div>';
+            '<div style="font-size:12px;color:#a09484;font-style:italic;margin-top:8px;line-height:1.5">' + postNarr + '</div>';
     }
 
-    overlay.classList.add('active');
-
-    // 3D dice animation
-    if (diceCanvas && typeof Dice3D !== 'undefined') {
-        try {
-            if (window._checkDice) { window._checkDice.dispose(); window._checkDice = null; }
-            diceCanvas.style.display = 'block';
-            window._checkDice = new Dice3D(diceCanvas, { size: 120, dieType: 'd20', duration: 1200 });
-            window._checkDice.roll(roll, function() {
-                if (window.vHaptic) vHaptic.medium();
-            });
-        } catch(e) { console.warn('[EXPLORE] Guard dice error:', e); }
-    }
-
-    // After reading time, proceed to long rest
-    const readDelay = typeof calcReadTime === 'function' ? calcReadTime(success ? 'Vigil\u00e2ncia alerta durante a noite' : 'Cochilou durante a guarda', 'overlay') : 3500;
+    // After reading result, proceed to long rest
+    const readDelay = typeof calcReadTime === 'function' ? calcReadTime(postNarr + ' Vigilância resultado', 'overlay') : 3500;
     setTimeout(function() {
         overlay.classList.remove('active');
         if (diceCanvas) diceCanvas.style.display = 'none';
         if (window._checkDice) { window._checkDice.dispose(); window._checkDice = null; }
         doLongRest();
-    }, readDelay + 1500);
+    }, readDelay + 1000);
 }
 
 function doLongRest() {
@@ -2828,7 +2870,7 @@ function doLongRest() {
         else t += '\u2705 Sem exaust\u00e3o<br>';
         if (S.charData && S.charData.mm > 0) t += '\u2728 MP totalmente recuperado<br>';
         const _hdNow = Math.max(0, maxHD - (S._hdUsed || 0));
-        t += `\ud83c\udfb2 Dados de Vida: ${_hdNow}/${maxHD}<br>`;
+        t += `\ud83c\udfb2 Dados de Vida: ${_hdNow}/${maxHD} (+${hdRecov} recuperados)<br>`;
         // Weather penalty on long rest
         if (S.weather === 't') t += '<br>\u26a1 <span style="color:#dca028">Tempestade: descanso dif\u00edcil, +1 exaust\u00e3o.</span>';
         else if (S.weather === 'r') t += '<br>\ud83c\udf27\ufe0f <span style="color:#8a7a68">Chuva: descanso desconfort\u00e1vel.</span>';

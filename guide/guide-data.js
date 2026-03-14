@@ -137,8 +137,8 @@ const GUIDE_TOPICS = [
         body: '<b>\u{1f691} AVENTUREIRA FERIDA</b>\n\n\u{1f9ea} <b>Dar Po\u00e7\u00e3o (-1 Po\u00e7\u00e3o)</b>\n\u2022 +50 XP (boa a\u00e7\u00e3o)\n\n\u{1fa79} <b>Prestar Socorros [WIS] DC 13</b>\n\u2022 Sucesso: +30 XP\n\n\u{1f441}\ufe0f <b>Analisar Sinceridade [WIS] DC 13</b>\n\u2022 Sucesso: Revela se \u00e9 emboscada\n\n<b>Op\u00e7\u00f5es de Classe:</b>\n\u2022 \u2728 Cl\u00e9rigo: Curar com Magia [WIS] DC 10\n\u2022 \u{1f33f} Druida: Herbalismo [WIS] DC 11\n\n<i>Dica: Nem toda v\u00edtima \u00e9 inocente... Use Intui\u00e7\u00e3o antes de ajudar!</i>'
     },
     {
-        id: 'classes', cat: 'personagem', icon: '⚔️', title: 'Classes',
-        body: '<b>⚔️ CLASSES JOGÁVEIS</b>\nEscolha sua especialização:\n\n<b>⚔️ Guerreiro</b> — Mestre em armas. Recurso: Vigor\n<b>⚔️ Bárbaro</b> — Fúria devastadora. Recurso: Fúria\n<b>⚔️ Paladino</b> — Guerreiro sagrado. Recurso: Mana\n<b>⚔️ Ranger</b> — Explorador hábil. Recurso: Mana\n<b>⚔️ Ladino</b> — Furtivo com Sneak Attack. Recurso: Energia\n<b>⚔️ Bardo</b> — Versátil com inspiração. Recurso: Inspiração\n<b>⚔️ Mago</b> — Poder arcano supremo. Recurso: Mana\n<b>⚔️ Feiticeiro</b> — Magia inata. Recurso: Mana\n<b>⚔️ Bruxo</b> — Pacto com entidade. Recurso: Pacto\n<b>⚔️ Druida</b> — Magia da natureza. Recurso: Mana\n<b>⚔️ Clérigo</b> — Curador divino. Recurso: Mana\n<b>⚔️ Monge</b> — Artes marciais. Recurso: Ki\n\n<i>Dica: A subclasse é escolhida no nível 3!</i>'
+        id: 'classes', cat: 'personagem', icon: '📜', title: 'Classes',
+        body: '<b>📜 CLASSES JOGÁVEIS</b>\nEscolha sua especialização:\n\n<b>⚔️ Guerreiro</b> — Mestre em armas e combate. Recurso: Vigor\n<b>🔥 Bárbaro</b> — Fúria devastadora e resistência. Recurso: Fúria\n<b>🛡️ Paladino</b> — Guerreiro sagrado com cura. Recurso: Mana\n<b>🎯 Ranger</b> — Explorador e caçador hábil. Recurso: Mana\n<b>🗡️ Ladino</b> — Furtivo com Sneak Attack. Recurso: Energia\n<b>🎶 Bardo</b> — Versátil com inspiração e magias. Recurso: Inspiração\n<b>📖 Mago</b> — Poder arcano supremo. Recurso: Mana\n<b>✨ Feiticeiro</b> — Magia inata com metamagia. Recurso: Mana\n<b>⭐ Bruxo</b> — Pacto com entidade. Recurso: Pacto\n<b>🌿 Druida</b> — Magia da natureza. Recurso: Mana\n<b>⛪ Clérigo</b> — Curador divino e suporte. Recurso: Mana\n<b>🥊 Monge</b> — Artes marciais e Ki. Recurso: Ki\n\n<i>Dica: A subclasse é escolhida no nível 3!</i>'
     },
     {
         id: 'races', cat: 'personagem', icon: '✨', title: 'Raças',
@@ -149,16 +149,16 @@ const GUIDE_TOPICS = [
         body: '<b>☠️ MORTE — O QUE ACONTECE?</b>\n\nQuando seu HP chega a 0:\n\n<b>❌ Derrota em Combate</b>\n• Perde <b>ouro da bolsa</b> (não do banco!)\n• Perde XP proporcional ao nível\n• Retorna à cidade automaticamente\n• Equipamentos NÃO são perdidos\n\n<b>Como Evitar</b>\n• Leve poções de cura (ação bônus em combate)\n• Fuja quando HP estiver baixo (teste de DEX)\n• Deposite ouro no Banco antes de explorar\n\n<i>Morrer não é o fim — mas dói no bolso!</i>'
     },
     {
-        id: 'allies', cat: 'personagem', icon: '⚔️', title: 'Companheiros',
-        body: '<b>⚔️ COMPANHEIROS DE AVENTURA</b>\n\nRecrute aliados para seu grupo (máx. 3):\n\n<b>Onde Recrutar</b>\n• <b>Guilda</b>: Aventureiros profissionais\n• <b>Taverna</b>: Mercenários por contrato\n• <b>Eventos</b>: NPCs resgatados podem se juntar\n\n<b>Afinidade</b>\n• Aliados têm nível de afinidade (0-5)\n• Afinidade alta = melhor desempenho\n\n<b>Em Combate</b>\n• Aliados agem automaticamente\n• Podem ser derrotados (voltam após descanso)\n\n<i>Um grupo equilibrado (tank + cura + dano) muda tudo!</i>'
+        id: 'allies', cat: 'personagem', icon: '👥', title: 'Companheiros',
+        body: '<b>👥 COMPANHEIROS DE AVENTURA</b>\n\nRecrute aliados para seu grupo (máx. 3):\n\n<b>Onde Recrutar</b>\n• <b>Guilda</b>: Aventureiros profissionais\n• <b>Taverna</b>: Mercenários por contrato\n• <b>Eventos</b>: NPCs resgatados podem se juntar\n\n<b>Afinidade</b>\n• Aliados têm nível de afinidade (0-5)\n• Afinidade alta = melhor desempenho\n\n<b>Em Combate</b>\n• Aliados agem automaticamente\n• Podem ser derrotados (voltam após descanso)\n\n<i>Um grupo equilibrado (tank + cura + dano) muda tudo!</i>'
     },
     {
-        id: 'world_map', cat: 'aventura', icon: '⚔️', title: 'Mapa do Mundo',
-        body: '<b>⚔️ MAPA DE VALDÓRIA</b>\n\nExplore o mundo pelo mapa interativo:\n\n<b>Como Acessar</b>\n• Compre um Mapa no Mercado ou Cartógrafo\n• Ou receba como recompensa de missão\n\n<b>Biomas</b>\n• <b>Floresta</b>: Lobos, bandidos, santuários\n• <b>Pântano</b>: Venenos, doenças, mortos-vivos\n• <b>Montanha</b>: Gelo, gigantes, minas\n• <b>Deserto</b>: Calor, escorpiões, ruínas\n• <b>Planície</b>: Eventos variados, viagem rápida\n\n<b>Névoa de Guerra</b>\n• Regiões não visitadas ficam cobertas\n• Explore para revelar o mapa\n\n<i>Cada bioma tem inimigos e eventos únicos!</i>'
+        id: 'world_map', cat: 'aventura', icon: '🗺️', title: 'Mapa do Mundo',
+        body: '<b>🗺️ MAPA DE VALDÓRIA</b>\n\nExplore o mundo pelo mapa interativo:\n\n<b>Como Acessar</b>\n• Compre um Mapa no Mercado ou Cartógrafo\n• Ou receba como recompensa de missão\n\n<b>Biomas</b>\n• <b>Floresta</b>: Lobos, bandidos, santuários\n• <b>Pântano</b>: Venenos, doenças, mortos-vivos\n• <b>Montanha</b>: Gelo, gigantes, minas\n• <b>Deserto</b>: Calor, escorpiões, ruínas\n• <b>Planície</b>: Eventos variados, viagem rápida\n\n<b>Névoa de Guerra</b>\n• Regiões não visitadas ficam cobertas\n• Explore para revelar o mapa\n\n<i>Cada bioma tem inimigos e eventos únicos!</i>'
     },
     {
-        id: 'advantage', cat: 'aventura', icon: '⚔️', title: 'Vantagem e Desvantagem',
-        body: '<b>⚔️ VANTAGEM E DESVANTAGEM (D&D 5e)</b>\n\n<b>✅ Vantagem</b>\n• Rola <b>2d20</b> e usa o <b>maior</b>\n• Quando: Ataque furtivo, bênção, terreno favorável\n\n<b>❌ Desvantagem</b>\n• Rola <b>2d20</b> e usa o <b>menor</b>\n• Quando: Envenenado, exausto, terreno difícil\n\n<b>Regras</b>\n• Vantagem + Desvantagem = rolagem normal\n• Múltiplas fontes não acumulam\n\n<i>Armadilhas com reação rápida (<3s) dão Vantagem!</i>'
+        id: 'advantage', cat: 'aventura', icon: '🎲', title: 'Vantagem e Desvantagem',
+        body: '<b>🎲 VANTAGEM E DESVANTAGEM (D&D 5e)</b>\n\n<b>✅ Vantagem</b>\n• Rola <b>2d20</b> e usa o <b>maior</b>\n• Quando: Ataque furtivo, bênção, terreno favorável\n\n<b>❌ Desvantagem</b>\n• Rola <b>2d20</b> e usa o <b>menor</b>\n• Quando: Envenenado, exausto, terreno difícil\n\n<b>Regras</b>\n• Vantagem + Desvantagem = rolagem normal\n• Múltiplas fontes não acumulam\n\n<i>Armadilhas com reação rápida (<3s) dão Vantagem!</i>'
     },
     {
         id: 'exhaustion', cat: 'aventura', icon: '⚠️', title: 'Exaustão',

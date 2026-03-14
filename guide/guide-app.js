@@ -18,6 +18,30 @@
         _topicMap[t.id] = t;
     }
 
+    /* --- CROSS-REFERENCES --- */
+    var _crossRefs = {
+        'combat': ['advantage', 'death', 'skills'],
+        'exploration': ['world_map', 'camp', 'advantage'],
+        'inn': ['exhaustion', 'camp'],
+        'death': ['combat', 'inn', 'bank'],
+        'classes': ['races', 'levelup', 'skills'],
+        'races': ['classes', 'levelup'],
+        'allies': ['guild', 'tavern', 'combat'],
+        'world_map': ['exploration', 'travel'],
+        'advantage': ['combat', 'event_trap'],
+        'exhaustion': ['inn', 'death'],
+        'levelup': ['classes', 'skills'],
+        'skills': ['combat', 'levelup'],
+        'inventory': ['market', 'workshop'],
+        'market': ['inventory', 'black_market']
+    };
+
+    // Global function for cross-ref links
+    window._openTopic = function(topicId) {
+        openAndScrollTo(topicId);
+    };
+
+
     /* ─── STATE ─── */
     var activeCat = 'todos';
     var searchTerm = '';
@@ -207,9 +231,22 @@
         if (ref && !ref.contentEl.innerHTML) {
             var topic = _topicMap[topicId];
             if (topic) {
-                ref.contentEl.innerHTML = searchTerm
+                var html = searchTerm
                     ? highlightText(fmtBody(topic.body), _searchWords)
                     : fmtBody(topic.body);
+                // Append cross-references
+                var refs = _crossRefs[topicId];
+                if (refs && refs.length && !searchTerm) {
+                    var links = [];
+                    for (var r = 0; r < refs.length; r++) {
+                        var rt = _topicMap[refs[r]];
+                        if (rt) links.push('<a onclick="_openTopic(\'' + refs[r] + '\')">' + rt.icon + ' ' + rt.title + '</a>');
+                    }
+                    if (links.length) {
+                        html += '<div class="topic-related">Veja tamb\u00e9m: ' + links.join(' \u00b7 ') + '</div>';
+                    }
+                }
+                ref.contentEl.innerHTML = html;
             }
         }
 

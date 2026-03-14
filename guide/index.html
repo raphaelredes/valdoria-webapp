@@ -275,6 +275,55 @@
             border-color: var(--v-gold-dim);
         }
 
+
+        /* ─── HEADER ORNAMENT ─── */
+        .guide-ornament {
+            text-align: center;
+            color: var(--v-gold-dim);
+            font-size: 11px;
+            letter-spacing: 6px;
+            margin: -2px 0 4px;
+            opacity: 0.6;
+        }
+
+        /* ─── TOPIC CARD HOVER GLOW ─── */
+        .topic-card:not(.hidden) {
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .topic-card.open {
+            border-color: var(--v-gold-dim);
+            box-shadow: 0 0 8px rgba(196, 149, 58, 0.1);
+        }
+
+        /* ─── SMOOTH SCROLL ─── */
+        html { scroll-behavior: smooth; }
+
+        /* ─── TOPIC CONTENT LISTS ─── */
+        .topic-content ul {
+            padding-left: 16px;
+            margin: 4px 0;
+        }
+
+        /* ─── RELATED TOPICS LINK ─── */
+        .topic-related {
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid var(--v-border);
+            font-size: 11px;
+            color: var(--v-text-dim);
+        }
+
+        .topic-related a {
+            color: var(--v-gold-dim);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .topic-related a:active {
+            color: var(--v-gold);
+        }
+
         /* ─── CLOSE BUTTON ─── */
         .guide-close {
             position: fixed;
@@ -306,6 +355,7 @@
 <body>
     <div class="guide-header">
         <h1 class="guide-title">GUIA DE VALDORIA</h1>
+        <div class="guide-ornament">⸱ ✦ ⸱</div>
         <div class="search-wrap">
             <span class="search-icon">&#x1f50d;</span>
             <input class="search-input" type="text" placeholder="Pesquisar no guia..." id="searchInput" autocomplete="off">
