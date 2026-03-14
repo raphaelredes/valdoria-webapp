@@ -39,7 +39,24 @@
     var _cardRefs = []; // [{card, nameEl, contentEl}]
 
     /* ─── INIT ─── */
+    var _returnUrl = null;
+
+    function _goBack() {
+        if (_returnUrl) {
+            window.location.replace(_returnUrl);
+        } else if (window.Telegram && Telegram.WebApp) {
+            try { Telegram.WebApp.close(); } catch(e) { console.warn('[GUIDE] close failed:', e); }
+        } else {
+            window.history.back();
+        }
+    }
+
     function init() {
+        // Detect return URL from Game Hub transition
+        var params = new URLSearchParams(window.location.search);
+        var ret = params.get('ret');
+        if (ret) _returnUrl = ret;
+
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
@@ -47,9 +64,7 @@
             try { Telegram.WebApp.backgroundColor = '#2a2420'; } catch(e) {}
             if (Telegram.WebApp.BackButton) {
                 Telegram.WebApp.BackButton.show();
-                Telegram.WebApp.BackButton.onClick(function() {
-                    try { Telegram.WebApp.close(); } catch(e) { console.warn('[GUIDE] close failed:', e); }
-                });
+                Telegram.WebApp.BackButton.onClick(_goBack);
             }
         }
 
@@ -57,7 +72,6 @@
         buildTopics();
 
         // Context param — auto-open relevant card
-        var params = new URLSearchParams(window.location.search);
         var ctx = params.get('ctx');
         if (ctx) {
             var target = findTopicForCtx(ctx);
@@ -78,13 +92,7 @@
             if (document.activeElement === searchInput) searchInput.blur();
         }, { passive: true });
 
-        closeBtn.addEventListener('click', function() {
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.close();
-            } else {
-                window.history.back();
-            }
-        });
+        closeBtn.addEventListener('click', _goBack);
     }
 
     function findTopicForCtx(ctx) {

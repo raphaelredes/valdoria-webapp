@@ -45,6 +45,7 @@ function _detect_webapp_target_js(url) {
     if (u.includes('/workstation/') || u.includes('/crafting/')) return 'workstation';
     if (u.includes('/pix/')) return 'pix';
     if (u.includes('/prologue/')) return 'prologue';
+    if (u.includes('/guide/')) return 'guide';
     if (u.includes('/game/')) return 'game';
     return 'unknown';
 }
@@ -64,7 +65,7 @@ function handleTransition(transition) {
     const _HAS_OWN_LOADING = {
         navigate: 1, combat: 1, arena: 1, explore: 1, dungeon: 1,
         inventory: 1, market: 1, levelup: 1, workstation: 1,
-        prologue: 1, character_creator: 1,
+        prologue: 1, character_creator: 1, guide: 1,
     };
     const locLabel = _HAS_OWN_LOADING[transition.to] ? null : _WEBAPP_LOC_LABELS[transition.to];
     if (locLabel && typeof showLocationTransition === 'function') {
@@ -86,7 +87,17 @@ function handleTransition(transition) {
     // Fast redirect for WebApps with own loading; full transition for others
     const delay = locLabel ? Math.max(LOC_TRANSITION_MS, transConfig.duration) : transConfig.duration;
     setTimeout(() => {
-        window.location.replace(transition.url);
+        let targetUrl = transition.url;
+        // Append Game Hub return params to guide URL so it can navigate back
+        if (transition.to === 'guide' && S.token && S.apiBase && S.uid) {
+            const sep = targetUrl.includes('?') ? '&' : '?';
+            const returnBase = window.location.origin + window.location.pathname;
+            const returnParams = new URLSearchParams({
+                token: S.token, api: S.apiBase, uid: S.uid.toString(), return: 'game', v: '1'
+            });
+            targetUrl += sep + 'ret=' + encodeURIComponent(returnBase + '?' + returnParams.toString());
+        }
+        window.location.replace(targetUrl);
     }, delay);
 
     // Safety net: reset transitioning flag after 10s in case redirect fails
