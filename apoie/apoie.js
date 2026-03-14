@@ -10,11 +10,11 @@ let telegramUser = null;
 
 // ── Tier Data (espelho de contribution_data.py) ──
 const TIERS = [
-    { id: 'supporter', name: 'Apoiador', icon: '\u{1F91D}', min: 100, max: 499, gold: 50, items: ['1x Pocao de Cura'], exclusive: null, title: null },
-    { id: 'copper', name: 'Patrono de Cobre', icon: '\u{1F7E4}', min: 500, max: 1499, gold: 200, items: ['2x Pocao de Cura'], exclusive: null, title: '\u{1F7E4} Patrono de Cobre' },
-    { id: 'silver', name: 'Patrono de Prata', icon: '\u26AA', min: 1500, max: 2999, gold: 750, items: ['3x Pocao de Cura'], exclusive: '\u{1F48D} Anel do Patrono', title: '\u26AA Patrono de Prata' },
-    { id: 'gold', name: 'Patrono de Ouro', icon: '\u{1F7E1}', min: 3000, max: 4999, gold: 2000, items: ['5x Pocao de Cura'], exclusive: '\u{1F458} Manto do Benfeitor', title: '\u{1F7E1} Patrono de Ouro' },
-    { id: 'platinum', name: 'Patrono de Platina', icon: '\u{1F48E}', min: 5000, max: 999999, gold: 5000, items: ['5x Pocao de Cura Superior'], exclusive: '\u{1F5E1}\uFE0F Lamina da Generosidade', title: '\u{1F48E} Patrono de Platina' },
+    { id: 'supporter', name: 'Apoiador', icon: '\u{1F91D}', min: 100, max: 499, gold: 50, items: ['1x Poção de Cura'], exclusive: null, title: null },
+    { id: 'copper', name: 'Patrono de Cobre', icon: '\u{1F7E4}', min: 500, max: 1499, gold: 200, items: ['2x Poção de Cura'], exclusive: null, title: '\u{1F7E4} Patrono de Cobre' },
+    { id: 'silver', name: 'Patrono de Prata', icon: '\u26AA', min: 1500, max: 2999, gold: 750, items: ['3x Poção de Cura'], exclusive: '\u{1F48D} Anel do Patrono', title: '\u26AA Patrono de Prata' },
+    { id: 'gold', name: 'Patrono de Ouro', icon: '\u{1F7E1}', min: 3000, max: 4999, gold: 2000, items: ['5x Poção de Cura'], exclusive: '\u{1F458} Manto do Benfeitor', title: '\u{1F7E1} Patrono de Ouro' },
+    { id: 'platinum', name: 'Patrono de Platina', icon: '\u{1F48E}', min: 5000, max: 999999, gold: 5000, items: ['5x Poção de Cura Superior'], exclusive: '\u{1F5E1}\uFE0F Lâmina da Generosidade', title: '\u{1F48E} Patrono de Platina' },
 ];
 
 function getTier(centavos) {
@@ -58,7 +58,7 @@ function updatePreview() {
 
     const tier = getTier(selectedAmount);
     if (!tier) {
-        preview.innerHTML = '<div style="font-size:13px;color:var(--v-text-dim)">Valor abaixo do minimo (R$ 1,00)</div>';
+        preview.innerHTML = '<div style="font-size:13px;color:var(--v-text-dim)">Valor abaixo do mínimo (R$ 1,00)</div>';
         btn.disabled = true;
         return;
     }
@@ -68,7 +68,7 @@ function updatePreview() {
     html += '\u{1F4B0} +' + tier.gold.toLocaleString() + ' GP<br>';
     tier.items.forEach(item => { html += '\u{1F392} ' + item + '<br>'; });
     if (tier.exclusive) html += '<strong>' + tier.exclusive + '</strong> (exclusivo)<br>';
-    if (tier.title) html += '\u{1F3C5} Titulo: ' + tier.title;
+    if (tier.title) html += '\u{1F3C5} Título: ' + tier.title;
     html += '</div>';
 
     preview.innerHTML = html;
@@ -100,7 +100,7 @@ function loadTelegramWidget() {
 
     const status = document.getElementById('tg-status');
     status.innerHTML = '<div class="ap-tg-badge ap-tg-badge-anon" style="margin-top:12px">' +
-        '\u{1F464} Sem login = doacao anonima. Para recompensas no jogo, entre com Telegram.</div>';
+        '\u{1F464} Sem login = doação anônima. Para recompensas no jogo, entre com Telegram.</div>';
 }
 
 // ── PIX Generation ──
@@ -136,7 +136,7 @@ async function generatePix() {
         resultDiv.style.display = 'block';
         resultDiv.innerHTML = '<div class="ap-qr-result" style="border-color:var(--v-danger)">' +
             '<div style="color:var(--v-danger);font-size:14px;margin-bottom:8px">\u274C ' + escapeHtml(e.message) + '</div>' +
-            '<div style="font-size:12px;color:var(--v-text-dim)">Verifique sua conexao e tente novamente.</div></div>';
+            '<div style="font-size:12px;color:var(--v-text-dim)">Verifique sua conexão e tente novamente.</div></div>';
     } finally {
         btn.disabled = false;
         btn.textContent = 'Gerar QR Code PIX';
@@ -149,7 +149,7 @@ function showQrResult(data) {
 
     let html = '<div class="ap-qr-result">';
     html += '<div class="ap-qr-wrapper"><div id="qr-container"></div></div>';
-    html += '<div style="font-size:12px;color:var(--v-text-dim);margin:8px 0">Aponte a camera do app do banco para o QR acima</div>';
+    html += '<div style="font-size:12px;color:var(--v-text-dim);margin:8px 0">Aponte a câmera do app do banco para o QR acima</div>';
     html += '<div class="ap-qr-amount">' + escapeHtml(data.amount_display) + '</div>';
     html += '<div class="ap-qr-info">';
     if (data.key_type && data.key_display) {
@@ -157,13 +157,13 @@ function showQrResult(data) {
     }
     html += 'Referencia: <strong>' + escapeHtml(data.txid) + '</strong>';
     if (!data.linked) {
-        html += '<br><em>Guarde este codigo para vincular ao bot</em>';
+        html += '<br><em>Guarde este código para vincular ao bot</em>';
     }
     html += '</div>';
     html += '<div class="ap-code-box" id="brcode-text">' + escapeHtml(data.brcode) + '</div>';
-    html += '<button class="ap-btn-copy" onclick="copyBrcode()">Copiar Codigo PIX</button>';
+    html += '<button class="ap-btn-copy" onclick="copyBrcode()">Copiar Código PIX</button>';
     if (data.linked) {
-        html += '<div class="ap-qr-note">\u2705 Vinculado a sua conta Telegram. Recompensas serao entregues automaticamente apos verificacao.</div>';
+        html += '<div class="ap-qr-note">\u2705 Vinculado a sua conta Telegram. Recompensas serao entregues automaticamente após verificação.</div>';
     } else {
         html += '<div class="ap-qr-note">\u{1F464} Doacao anonima. Para receber recompensas no jogo, use o comando <strong>/apoiar ' + escapeHtml(data.txid) + '</strong> no bot do Telegram.</div>';
     }
@@ -184,7 +184,7 @@ function showQrResult(data) {
     } catch (e) {
         console.error('[APOIE] Erro QR', e);
         document.getElementById('qr-container').innerHTML =
-            '<div style="color:var(--v-danger);font-size:12px;padding:20px">Erro ao gerar QR. Use o codigo abaixo.</div>';
+            '<div style="color:var(--v-danger);font-size:12px;padding:20px">Erro ao gerar QR. Use o código abaixo.</div>';
     }
 
     window._currentBrcode = data.brcode;
@@ -214,7 +214,7 @@ function fallbackCopy(btn) {
 function showCopied(btn) {
     btn.textContent = 'Copiado!';
     btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copiar Codigo PIX'; btn.classList.remove('copied'); }, 2000);
+    setTimeout(() => { btn.textContent = 'Copiar Código PIX'; btn.classList.remove('copied'); }, 2000);
 }
 
 // ── Goals ──
