@@ -126,7 +126,8 @@ function renderCharacterSelect(data) {
             if (lastPlayed) html += `<span>\u23F0 ${lastPlayed}</span>`;
             html += '</div>';
             // HP bar
-            html += `<div class="char-card-hp"><div class="char-card-hp-fill" style="width:${hpPct}%;background:${hpColor}"></div></div>`;
+            var hpCritCls = hpPct <= 25 ? " hp-critical" : "";
+            html += `<div class="char-card-hp"><div class="char-card-hp-fill${hpCritCls}" style="width:${hpPct}%;background:${hpColor}"></div></div>`;
             html += '</div>';
             html += '<div class="char-card-arrow">\u25B8</div>';
             html += '<button class="char-card-delete" data-del-id="' + _escChar(c.char_id) + '" data-del-name="' + fullName + '" aria-label="Excluir personagem">\u2715</button>';
@@ -164,14 +165,52 @@ function renderCharacterSelect(data) {
         });
     });
 
-    // Bind events: delete buttons (stop propagation to prevent card click)
+    // Bind events: delete buttons with long-press ring effect
     contentEl.querySelectorAll('.char-card-delete').forEach(function(btn) {
+        var pressTimer = null;
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
             e.preventDefault();
-            var charId = btn.dataset.delId;
-            var charName = btn.dataset.delName;
-            if (charId && charName) _showDeleteConfirmation(charId, charName);
+        });
+        btn.addEventListener('touchstart', function(e) {
+            e.stopPropagation();
+            btn.classList.add('pressing');
+            pressTimer = setTimeout(function() {
+                btn.classList.remove('pressing');
+                if (typeof haptic === 'function') haptic('heavy');
+                var charId = btn.dataset.delId;
+                var charName = btn.dataset.delName;
+                if (charId && charName) _showDeleteConfirmation(charId, charName);
+            }, 800);
+        }, { passive: true });
+        btn.addEventListener('touchend', function(e) {
+            e.stopPropagation();
+            btn.classList.remove('pressing');
+            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+        });
+        btn.addEventListener('touchcancel', function() {
+            btn.classList.remove('pressing');
+            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+        });
+        // Fallback: mouse click for desktop
+        btn.addEventListener('mousedown', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            btn.classList.add('pressing');
+            pressTimer = setTimeout(function() {
+                btn.classList.remove('pressing');
+                var charId = btn.dataset.delId;
+                var charName = btn.dataset.delName;
+                if (charId && charName) _showDeleteConfirmation(charId, charName);
+            }, 800);
+        });
+        btn.addEventListener('mouseup', function() {
+            btn.classList.remove('pressing');
+            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+        });
+        btn.addEventListener('mouseleave', function() {
+            btn.classList.remove('pressing');
+            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
         });
     });
 

@@ -76,6 +76,17 @@ function renderScreen(screen) {
     // Update ambient particles based on screen content
     if (typeof updateParticleTheme === 'function') updateParticleTheme(screen.text || '');
 
+    // Screen shake on impact events (defeat, critical damage)
+    if (typeof triggerScreenShake === 'function') {
+        var sid = (screen.screen_id || '').toLowerCase();
+        var txt = (screen.text || '').toLowerCase();
+        if (sid.includes('defeat') || sid.includes('death') || txt.includes('derrota') || txt.includes('foi derrotado')) {
+            triggerScreenShake('heavy');
+        } else if (screen.effects && screen.effects.includes && screen.effects.includes('shake')) {
+            triggerScreenShake('light');
+        }
+    }
+
     const screenEl = document.getElementById('screen');
     const loadingEl = document.getElementById('loading');
     const panelEl = document.getElementById('bottom-panel');
