@@ -215,7 +215,7 @@
             var pref = localStorage.getItem(LITE_KEY);
             if (pref === '1') return true;
             if (pref === '0') return false;
-        } catch (e) {}
+        } catch (e) { /* storage unavailable */ }
         // Auto-detect
         return isLowEndDevice();
     }
@@ -248,9 +248,9 @@
     // Expose for settings screen
     window.ValdoriaLoadingLite = {
         isLowEnd: isLowEndDevice,
-        enable: function() { try { localStorage.setItem(LITE_KEY, '1'); } catch(e){} applyLiteMode(); },
-        disable: function() { try { localStorage.setItem(LITE_KEY, '0'); } catch(e){} },
-        auto: function() { try { localStorage.removeItem(LITE_KEY); } catch(e){} },
+        enable: function() { try { localStorage.setItem(LITE_KEY, '1'); } catch(e) { /* storage unavailable */ } applyLiteMode(); },
+        disable: function() { try { localStorage.setItem(LITE_KEY, '0'); } catch(e) { /* storage unavailable */ } },
+        auto: function() { try { localStorage.removeItem(LITE_KEY); } catch(e) { /* storage unavailable */ } },
     };
 })();
 
@@ -272,7 +272,7 @@
             var mem = navigator.deviceMemory || 8;
             isLite = (cores <= 4 && mem <= 4) || cores <= 2 || mem <= 2;
         }
-    } catch(e) {}
+    } catch(e) { /* storage unavailable */ }
     // Lite: show loading for 40% of normal time; normal: 100%
     window._valdoriaMinLoadFactor = isLite ? 0.4 : 1.0;
 })();

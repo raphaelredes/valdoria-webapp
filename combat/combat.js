@@ -1439,8 +1439,10 @@ function _appendSurpriseInfo(area, init) {
     if (!init.player_surprised && !init.enemies_surprised) return;
     const div = document.createElement('div');
     div.style.cssText = 'padding:0 10px;font-size:11px';
-    if (init.player_surprised) div.innerHTML += '<div style="color:var(--v-crimson);margin-top:4px">\u2757 Você foi pego desprevenido!</div>';
-    if (init.enemies_surprised) div.innerHTML += '<div style="color:var(--v-gold);margin-top:4px">\u2728 Inimigos surpreendidos!</div>';
+    var _surpriseHtml = '';
+    if (init.player_surprised) _surpriseHtml += '<div style="color:var(--v-crimson);margin-top:4px">\u2757 Você foi pego desprevenido!</div>';
+    if (init.enemies_surprised) _surpriseHtml += '<div style="color:var(--v-gold);margin-top:4px">\u2728 Inimigos surpreendidos!</div>';
+    if (_surpriseHtml) div.innerHTML += _surpriseHtml;
     area.appendChild(div);
 }
 

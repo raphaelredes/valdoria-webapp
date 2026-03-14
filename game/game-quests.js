@@ -398,13 +398,15 @@ function renderQuestDetail(container, q) {
     rewBlock.innerHTML = '<div class="quest-detail-rewards-label">\ud83d\udc8e Recompensas Prometidas</div>';
     var rewList = document.createElement('div');
     rewList.className = 'quest-detail-rewards-list';
-    if (q.xp) rewList.innerHTML += '<span class="quest-reward-item">\u2728 ' + q.xp + ' XP</span>';
-    if (q.gold) rewList.innerHTML += '<span class="quest-reward-item">\ud83d\udcb0 ' + q.gold + ' GP</span>';
+    var _rewHtml = '';
+    if (q.xp) _rewHtml += '<span class="quest-reward-item">\u2728 ' + q.xp + ' XP</span>';
+    if (q.gold) _rewHtml += '<span class="quest-reward-item">\ud83d\udcb0 ' + q.gold + ' GP</span>';
     if (q.items && q.items.length > 0) {
         for (var ii = 0; ii < q.items.length; ii++) {
-            rewList.innerHTML += '<span class="quest-reward-item">\ud83c\udf81 ' + _escQ(q.items[ii]) + '</span>';
+            _rewHtml += '<span class="quest-reward-item">\ud83c\udf81 ' + _escQ(q.items[ii]) + '</span>';
         }
     }
+    rewList.innerHTML = _rewHtml;
     rewBlock.appendChild(rewList);
     wrap.appendChild(rewBlock);
 

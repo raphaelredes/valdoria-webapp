@@ -1,10 +1,10 @@
 // ═══════════════════════════════════════════════════════════
-//  LENDAS DE VALDORIA — Service Worker v3
+//  LENDAS DE VALDORIA — Service Worker v4
 //  Cache-first for static assets, Network-first for HTML
 //  Fonts + JS + CSS cached to bypass GitHub Pages 10min cache
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'valdoria-v3';
+const CACHE_NAME = 'valdoria-v4';
 
 const PRE_CACHE = [
     '/valdoria-webapp/valdoria-design.css',
@@ -22,6 +22,9 @@ const PRE_CACHE = [
     // Shared CSS
     '/valdoria-webapp/shared/loading.css',
     '/valdoria-webapp/shared/animations.css',
+    // Shared CSS — additional
+    '/valdoria-webapp/shared/audio-manager.css',
+    '/valdoria-webapp/shared/dice-roller.css',
     // Shared JS — critical utilities
     '/valdoria-webapp/shared/error-reporter.js',
     '/valdoria-webapp/shared/audio-manager.js',
