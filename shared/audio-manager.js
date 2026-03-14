@@ -14,7 +14,7 @@ const ValdoriaAudio = (() => {
     const SFX_MUTED_KEY = 'valdoria_audio_sfx_muted';
     const SFX_VOLUME_KEY = 'valdoria_audio_sfx_volume';
     const CROSSFADE_MS = 1200;
-    const DEFAULT_VOLUME = 0.3;
+    const DEFAULT_VOLUME = 0.15;
     const NO_LOOP_TRACKS = ['victory', 'defeat', 'levelup', 'sfx_hit', 'sfx_crit', 'sfx_miss', 'sfx_fire', 'sfx_cold', 'sfx_lightning', 'sfx_thunder', 'sfx_poison', 'sfx_radiant', 'sfx_necrotic', 'sfx_psychic', 'sfx_heal', 'sfx_enemy_death'];
 
     // Base URL for audio files (relative to webapp root)
