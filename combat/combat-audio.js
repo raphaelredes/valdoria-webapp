@@ -75,15 +75,30 @@ function _sfxTone(freq, dur, vol, type) {
 }
 
 function sfxDiceRoll() { _sfxNoise(0.15, 0.08); }
-function sfxHit() { _sfxTone(120, 0.25, 0.12, 'sawtooth'); }
-function sfxCrit() { _sfxTone(220, 0.4, 0.18, 'sawtooth'); setTimeout(() => _sfxTone(330, 0.3, 0.12, 'sine'), 80); }
-function sfxMiss() { _sfxTone(300, 0.2, 0.06, 'sine'); }
+function sfxHit() { if (typeof ValdoriaAudio !== 'undefined') { ValdoriaAudio.playSFX('sfx_hit'); } else { _sfxTone(120, 0.25, 0.12, 'sawtooth'); } }
+function sfxCrit() { if (typeof ValdoriaAudio !== 'undefined') { ValdoriaAudio.playSFX('sfx_crit'); } else { _sfxTone(220, 0.4, 0.18, 'sawtooth'); setTimeout(() => _sfxTone(330, 0.3, 0.12, 'sine'), 80); } }
+function sfxMiss() { if (typeof ValdoriaAudio !== 'undefined') { ValdoriaAudio.playSFX('sfx_miss'); } else { _sfxTone(300, 0.2, 0.06, 'sine'); } }
 function sfxPlayerHit() { _sfxTone(80, 0.3, 0.15, 'sawtooth'); }
 function sfxTimerTick() { _sfxTone(600, 0.08, 0.1, 'square'); }
 
 
 // ─── SFX BY DAMAGE TYPE (Web Audio oscillator profiles) ───
 function sfxDamageType(dt) {
+    // Try real MP3/WAV SFX first, fall back to oscillator
+    if (typeof ValdoriaAudio !== 'undefined') {
+        const sfxMap = {
+            fire: 'sfx_fire', cold: 'sfx_cold', lightning: 'sfx_lightning',
+            thunder: 'sfx_thunder', necrotic: 'sfx_necrotic', radiant: 'sfx_radiant',
+            poison: 'sfx_poison', acid: 'sfx_poison', psychic: 'sfx_psychic',
+            force: 'sfx_hit',
+        };
+        const key = sfxMap[dt];
+        if (key && ValdoriaAudio.TRACKS[key]) {
+            ValdoriaAudio.playSFX(key);
+            return;
+        }
+    }
+    // Fallback: oscillator
     const ctx = _ensureAudio();
     if (!ctx || !_audioUnlocked) return;
     try {
@@ -100,7 +115,7 @@ function sfxDamageType(dt) {
             force:     { type: 'square',   f0: 300, f1: 150, dur: 0.25, vol: 0.10 },
         };
         const p = profiles[dt];
-        if (!p) return; // slashing/piercing/bludgeoning use sfxHit()
+        if (!p) return;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = p.type;

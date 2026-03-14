@@ -15,7 +15,7 @@ const ValdoriaAudio = (() => {
     const SFX_VOLUME_KEY = 'valdoria_audio_sfx_volume';
     const CROSSFADE_MS = 1200;
     const DEFAULT_VOLUME = 0.3;
-    const NO_LOOP_TRACKS = ['victory', 'defeat', 'levelup'];
+    const NO_LOOP_TRACKS = ['victory', 'defeat', 'levelup', 'sfx_hit', 'sfx_crit', 'sfx_miss', 'sfx_fire', 'sfx_cold', 'sfx_lightning', 'sfx_thunder', 'sfx_poison', 'sfx_radiant', 'sfx_necrotic', 'sfx_psychic', 'sfx_heal', 'sfx_enemy_death'];
 
     // Base URL for audio files (relative to webapp root)
     const AUDIO_BASE = '../shared/audio/';
@@ -36,6 +36,20 @@ const ValdoriaAudio = (() => {
         levelup:  ['levelup_theme.mp3', 'levelup_theme_2.mp3', 'levelup_theme_3.mp3', 'levelup_theme_4.mp3'],
         prologue: ['prologue_theme.mp3', 'prologue_theme_2.mp3', 'prologue_theme_3.mp3', 'prologue_theme_4.mp3'],
         boss:     ['boss_battle.mp3', 'boss_battle_2.mp3', 'boss_battle_3.mp3', 'boss_battle_4.mp3'],
+        // SFX — Combat
+        sfx_hit:        ['sfx_hit.mp3', 'sfx_hit_02.mp3'],
+        sfx_crit:       ['sfx_crit.mp3', 'sfx_crit_2.mp3'],
+        sfx_miss:       ['sfx_miss.mp3', 'sfx_miss_2.mp3'],
+        sfx_fire:       ['sfx_fire.mp3', 'sfx_fire_2.mp3'],
+        sfx_cold:       ['sfx_cold.mp3', 'sfx_cold_2.mp3'],
+        sfx_lightning:  ['sfx_lightning.mp3', 'sfx_lightning_2.mp3'],
+        sfx_thunder:    ['sfx_thunder.wav', 'sfx_thunder_2.wav'],
+        sfx_poison:     ['sfx_poison.wav', 'sfx_poison_2.wav'],
+        sfx_radiant:    ['sfx_radiant.wav', 'sfx_radiant_2.wav'],
+        sfx_necrotic:   ['sfx_necrotic.wav', 'sfx_necrotic_2.wav'],
+        sfx_psychic:    ['sfx_psychic.wav', 'sfx_psychic_2.wav'],
+        sfx_heal:       ['sfx_heal.mp3', 'sfx_heal_2.mp3'],
+        sfx_enemy_death:['sfx_enemy_death.wav', 'sfx_enemy_death_2.wav'],
     };
 
     function _pickVariant(trackKey) {

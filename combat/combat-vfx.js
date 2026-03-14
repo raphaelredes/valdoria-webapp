@@ -112,6 +112,7 @@ function _playCinematicResult(result, actionType) {
                 const enemyCards = document.querySelectorAll('.entity.enemy');
                 enemyCards.forEach(card => card.classList.add('death-anim'));
                 hapticBurst('kill');
+                if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.playSFX('sfx_enemy_death');
                 // VFX: elemental dissolution on kill
                 if (window._combatVfx) {
                     enemyCards.forEach(card => window._combatVfx.kill(card, result.lr.dt || 'slashing'));
@@ -434,6 +435,7 @@ function _checkPlayerDamage(state) {
         const healAmt = curHp - _prevPlayerHp;
         _showHealFloat(healAmt, '.entity.player');
         _showHealFlash();
+        if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.playSFX('sfx_heal');
     }
     _prevPlayerHp = curHp;
 }
