@@ -87,15 +87,18 @@
     transition: width 0.4s ease;
     position: relative;
 }
+.v-bar-fill.hp, .v-bar-fill.hp-warn, .v-bar-fill.hp-crit { transition: width 0.35s ease-out; }
+.v-bar-fill.mp { transition: width 0.5s ease-in-out; }
+.v-bar-fill.xp { transition: width 0.6s ease; }
 
 /* Ghost bar for damage visualization in Game Hub */
 .v-bar-track .bar-ghost {
     position: absolute;
     top: 0; left: 0;
     height: 100%;
-    background: rgba(200, 60, 60, 0.45);
+    background: rgba(200, 60, 60, 0.6);
     border-radius: 3px;
-    transition: width 1.2s ease-in 0.3s;
+    transition: width 1.5s ease-in 0.5s, opacity 1.5s ease-in 0.5s;
     pointer-events: none;
 }
 
@@ -109,7 +112,7 @@
     position: absolute;
     top: 0; left: 0;
     width: 30%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
     animation: hubShineSweep 0.6s ease-out forwards;
     pointer-events: none;
 }
@@ -117,7 +120,7 @@
 /* HP bar colors (health-based) */
 .v-bar-fill.hp      { background: linear-gradient(90deg, #2d8f2d, #4caf50); }
 .v-bar-fill.hp-warn  { background: linear-gradient(90deg, #d4a017, #f5c800); }
-.v-bar-fill.hp-crit  { background: linear-gradient(90deg, #c62828, #e74c3c); }
+.v-bar-fill.hp-crit  { background: linear-gradient(90deg, #c62828, #e74c3c); animation: hpLowPulse 0.8s ease-in-out infinite; }
 
 /* Resource bar colors */
 .v-bar-fill.mp { background: linear-gradient(90deg, #1565c0, #42a5f5); }

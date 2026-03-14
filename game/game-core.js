@@ -680,9 +680,15 @@ async function doAction(callbackData) {
     // Footer toggle is client-side only — never send to server
     if (callbackData === 'action_toggle_footer') return;
 
+    // Action guard (prevents double-click during API requests)
+    if (window.actionGuard && !actionGuard.acquire()) return;
+
     // Debounce
     const now = Date.now();
-    if (now - S.lastActionTime < DEBOUNCE_MS) return;
+    if (now - S.lastActionTime < DEBOUNCE_MS) {
+        if (window.actionGuard) actionGuard.release();
+        return;
+    }
     S.lastActionTime = now;
 
     // Haptic feedback
@@ -695,13 +701,14 @@ async function doAction(callbackData) {
     const t0 = Date.now();
 
     const data = await apiCall('/api/game/action', { cb: callbackData, sv: S.screenVersion });
-    if (!data) { hideLocationTransition(); return; }
+    if (!data) { hideLocationTransition(); if (window.actionGuard) actionGuard.release(); return; }
 
     // Store screen version from server response
     if (data.sv !== undefined) S.screenVersion = data.sv;
 
     if (data.error === 'no_response') {
         hideLocationTransition();
+        if (window.actionGuard) actionGuard.release();
         if (typeof showToast === 'function') showToast('Ação não processada. Tente novamente.');
         return;
     }
@@ -709,6 +716,7 @@ async function doAction(callbackData) {
     // Server rejected duplicate/stale action — silently ignore
     if (data.error === 'action_rejected') {
         hideLocationTransition();
+        if (window.actionGuard) actionGuard.release();
         console.log('[GAME] Action rejected by server:', data.reason);
         return;
     }
@@ -717,6 +725,7 @@ async function doAction(callbackData) {
     // Server says to close WebApp — close it
     if (data.close) {
         hideLocationTransition();
+        if (window.actionGuard) actionGuard.release();
         try { Telegram.WebApp.close(); } catch (e) { console.warn('[GAME] tg.close:', e); }
         return;
     }
@@ -724,6 +733,7 @@ async function doAction(callbackData) {
     // Server says to show character selection (main_menu / char_selection)
     if (data.char_select) {
         hideLocationTransition();
+        if (window.actionGuard) actionGuard.release();
         if (typeof showCharacterSelect === 'function') showCharacterSelect();
         return;
     }
@@ -736,6 +746,7 @@ async function doAction(callbackData) {
         const remaining = locCtx ? Math.max(0, LOC_TRANSITION_MS - elapsed) : 0;
         if (remaining > 0) await sleep(remaining);
         hideLocationTransition();
+        if (window.actionGuard) actionGuard.release();
         handleTransition(data.transition);
         return;
     }
@@ -789,6 +800,7 @@ async function doAction(callbackData) {
     } else {
         hideLocationTransition();
     }
+    if (window.actionGuard) actionGuard.release();
 }
 
 async function doText(text) {

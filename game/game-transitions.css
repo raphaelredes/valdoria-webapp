@@ -60,20 +60,20 @@
     animation: btnEntrance 0.3s var(--v-ease-snap, var(--v-ease-snap)) both;
 }
 .btn-row:nth-child(1) { animation-delay: 0s; }
-.btn-row:nth-child(2) { animation-delay: 0.04s; }
-.btn-row:nth-child(3) { animation-delay: 0.08s; }
-.btn-row:nth-child(4) { animation-delay: 0.12s; }
-.btn-row:nth-child(5) { animation-delay: 0.16s; }
-.btn-row:nth-child(6) { animation-delay: 0.2s; }
-.btn-row:nth-child(n+7) { animation-delay: 0.24s; }
+.btn-row:nth-child(2) { animation-delay: 0.03s; }
+.btn-row:nth-child(3) { animation-delay: 0.06s; }
+.btn-row:nth-child(4) { animation-delay: 0.09s; }
+.btn-row:nth-child(5) { animation-delay: 0.12s; }
+.btn-row:nth-child(6) { animation-delay: 0.15s; }
+.btn-row:nth-child(n+7) { animation-delay: 0.18s; }
 
 /* ─── Hero Button Idle Gold Pulse ─── */
 @keyframes heroPulse {
     0%, 100% { box-shadow: var(--v-shadow-gold); }
-    50%      { box-shadow: 0 0 18px rgba(196, 149, 58, 0.35), 0 0 6px rgba(196, 149, 58, 0.2); }
+    50%      { box-shadow: 0 0 14px rgba(196, 149, 58, 0.2); }
 }
 .btn-hero {
-    animation: heroPulse 3s ease-in-out infinite;
+    animation: heroPulse 4s ease-in-out infinite;
     will-change: box-shadow;
 }
 .btn-hero:active { animation: none; box-shadow: var(--v-shadow-gold); }
@@ -84,7 +84,7 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 .screen-content > * {
-    animation: blockFadeIn 0.3s ease-out both;
+    animation: blockFadeIn 0.2s ease-out both;
 }
 .screen-content > *:nth-child(1) { animation-delay: 0s; }
 .screen-content > *:nth-child(2) { animation-delay: 0.05s; }
