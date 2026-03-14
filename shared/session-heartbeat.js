@@ -94,9 +94,19 @@ var SessionHeartbeat = (function () {
                 _stopped = true;
                 stop();
                 _showDisplacedOverlay(data.device || 'Outro dispositivo', data.from_device || '');
+            } else if (data.status === 'replaced') {
+                // Session replaced by WebApp transition — not a real expiry
+                _stopped = true;
+                stop();
+                console.info('[HEARTBEAT] Session replaced by transition — silent stop');
             } else if (data.status === 'expired') {
                 _stopped = true;
                 stop();
+                // If page is backgrounded (user transitioned to another WebApp), don't show overlay
+                if (document.visibilityState === 'hidden') {
+                    console.info('[HEARTBEAT] Session expired while backgrounded — silent stop');
+                    return;
+                }
                 _showExpiredOverlay();
             }
         } catch (e) {

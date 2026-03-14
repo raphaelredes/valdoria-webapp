@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#2a2420">
     <title>Mapa do Mundo - Lendas de Valdoria</title>
     <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
@@ -352,9 +352,9 @@
 
         .info-btn {
             width: 100%;
-            padding: 10px 14px;
+            padding: 12px 16px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -364,17 +364,55 @@
             font-family: 'Cinzel', serif;
         }
 
-        /* Leather-textured travel button */
+        /* Premium travel CTA button */
         .info-btn-travel {
-            background: linear-gradient(135deg, #704214 0%, #5a3210 50%, #6a3a12 100%);
-            border: 1px solid #8a5a2a;
-            box-shadow: inset 0 1px 0 rgba(255, 200, 100, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            background: linear-gradient(180deg, #8a5a2a 0%, #704214 40%, #5a3210 100%);
+            border: 1.5px solid #c4953a;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 200, 100, 0.3),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+                0 0 10px rgba(196, 149, 58, 0.2),
+                0 2px 8px rgba(0, 0, 0, 0.4);
+            padding: 14px 18px;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .info-btn-travel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 200, 100, 0.12), transparent);
+            animation: travelShine 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes travelShine {
+            0%, 100% { left: -100%; }
+            50% { left: 150%; }
+        }
+        .info-btn-travel:active {
+            background: linear-gradient(180deg, #704214 0%, #5a3210 40%, #4a2a0a 100%);
+            box-shadow:
+                inset 0 2px 4px rgba(0, 0, 0, 0.4),
+                0 0 6px rgba(196, 149, 58, 0.15);
+            transform: scale(0.97);
         }
 
         .info-btn-risky {
-            background: linear-gradient(135deg, #5a2a0a 0%, #4a1a00 50%, #5a2a0a 100%);
-            border: 1px solid #8a4a1a;
-            box-shadow: inset 0 1px 0 rgba(255, 150, 50, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+            background: linear-gradient(180deg, #6a2a0a 0%, #5a1a00 40%, #4a1500 100%);
+            border: 1.5px solid #aa4a1a;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 150, 50, 0.15),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+                0 0 10px rgba(170, 58, 42, 0.15),
+                0 2px 8px rgba(0, 0, 0, 0.4);
+            padding: 14px 18px;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
 
         .info-btn-explore {
@@ -1077,9 +1115,6 @@
         .danger-pip.filled-5 { background: #6a1a1a; border-color: #6a1a1a; }
         .danger-pip.empty { background: transparent; }
 
-        .info-btn {
-            padding: 12px 14px !important;
-        }
         .info-btn-risky {
             animation: riskyPulse 2s ease-in-out infinite;
         }

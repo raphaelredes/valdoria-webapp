@@ -1727,7 +1727,7 @@ let _minimapCanvas = null;
 let _minimapCtx = null;
 let _minimapDirty = true;
 
-// Minimap states: 'compact' (default), 'expanded', 'hidden'
+// Minimap states: 'compact' (default), 'expanded'
 let _minimapState = 'compact';
 
 function initMinimap() {
@@ -1736,16 +1736,15 @@ function initMinimap() {
     _minimapCtx = _minimapCanvas.getContext('2d');
     _minimapDirty = true;
 
-    // Restore saved state
-    if (S.minimapState) _minimapState = S.minimapState;
+    // Restore saved state (sanitize: 'hidden' no longer valid)
+    if (S.minimapState && S.minimapState !== 'hidden') _minimapState = S.minimapState;
+    else _minimapState = 'compact';
     _applyMinimapState();
 
-    // Click to cycle: compact → expanded → hidden → compact
+    // Click to toggle: compact ↔ expanded
     _minimapCanvas.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (_minimapState === 'compact') _minimapState = 'expanded';
-        else if (_minimapState === 'expanded') _minimapState = 'hidden';
-        else _minimapState = 'compact';
+        _minimapState = (_minimapState === 'compact') ? 'expanded' : 'compact';
         S.minimapState = _minimapState;
         _applyMinimapState();
         _minimapDirty = true;
@@ -1756,12 +1755,11 @@ function _applyMinimapState() {
     if (!_minimapCanvas) return;
     _minimapCanvas.classList.remove('minimap-expanded', 'minimap-hidden');
     if (_minimapState === 'expanded') _minimapCanvas.classList.add('minimap-expanded');
-    else if (_minimapState === 'hidden') _minimapCanvas.classList.add('minimap-hidden');
 }
 
 // Auto-reposition minimap when player is near top-right
 function _updateMinimapPosition() {
-    if (!_minimapCanvas || _minimapState === 'hidden') return;
+    if (!_minimapCanvas) return;
     const canvas = document.getElementById('game-canvas');
     if (!canvas) return;
     const cw = canvas.clientWidth;
