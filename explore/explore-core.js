@@ -917,21 +917,6 @@ function _showExhaustionModal(level, effect, source) {
     setTimeout(function() { if (document.getElementById('exhaustion-modal')) modal.remove(); }, dismissTime);
 }
 
-    const modal = document.createElement('div');
-    modal.id = 'exhaustion-modal';
-    modal.className = 'exhaustion-modal';
-    modal.innerHTML = '<div class="exh-modal-card">' +
-        '<div class="exh-modal-icon">\u26a0\ufe0f</div>' +
-        '<div class="exh-modal-title">Exaust\u00e3o N\u00edvel ' + level + '</div>' +
-        (source ? '<div class="exh-modal-source">Causa: ' + source + '</div>' : '') +
-        '<div class="exh-modal-effects">' + effects.join('') + '</div>' +
-        '<div class="exh-modal-tip">\ud83d\udca1 Descanse em uma \u00e1rea segura ou acampe para reduzir a exaust\u00e3o.</div>' +
-        '<button class="exh-modal-btn" onclick="this.closest(\'.exhaustion-modal\').remove()">Entendido</button>' +
-        '</div>';
-    document.body.appendChild(modal);
-    // Auto-dismiss after 8s
-    setTimeout(function() { if (document.getElementById('exhaustion-modal')) modal.remove(); }, 8000);
-}
 
 function resetStepsWithoutRest() {
     S._stepsWithoutRest = 0;
