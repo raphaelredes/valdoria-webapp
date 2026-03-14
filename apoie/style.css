@@ -1,4 +1,4 @@
-/* ─── Portal de Apoio — Lendas de Valdoria ─── */
+/* ─── Portal de Apoio — Lendas de Valdoria v1.3 ─── */
 /* Suplementa valdoria-design.css para pagina publica */
 
 /* Override viewport lock (pagina publica, nao Telegram Mini App) */
@@ -7,6 +7,7 @@ html {
     height: auto !important;
     overflow: auto !important;
     scroll-behavior: smooth;
+    scroll-padding-top: 72px;
 }
 
 body {
@@ -722,7 +723,8 @@ body::after {
 }
 
 .ap-amount-btn {
-    padding: 10px 4px;
+    padding: 12px 4px;
+    min-height: 44px;
     background: var(--v-bg-card, #2e2520);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: 8px;
@@ -732,6 +734,7 @@ body::after {
     cursor: pointer;
     transition: all 0.2s;
     font-family: var(--v-font, 'MedievalSharp', serif);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .ap-amount-btn:hover {
@@ -763,6 +766,7 @@ body::after {
 .ap-amount-custom input {
     flex: 1;
     padding: 10px 12px;
+    min-height: 44px;
     background: var(--v-bg-card, #2e2520);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: 8px;
@@ -807,6 +811,7 @@ body::after {
 .ap-generate-btn {
     width: 100%;
     padding: 14px;
+    min-height: 48px;
     background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530));
     color: var(--v-bg, #2a2420);
     font-family: var(--v-font-display, 'Cinzel', serif);
@@ -899,6 +904,7 @@ body::after {
 .ap-btn-copy {
     width: 100%;
     padding: 12px;
+    min-height: 44px;
     background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530));
     color: var(--v-bg, #2a2420);
     font-size: 14px;
@@ -925,6 +931,41 @@ body::after {
     font-style: italic;
     margin-top: 12px;
     line-height: 1.4;
+}
+
+/* Skeleton loading for QR */
+.ap-skeleton-result {
+    animation: none;
+}
+
+.ap-skeleton {
+    background: linear-gradient(90deg, var(--v-bg-raised, #332a22) 25%, rgba(196, 149, 58, 0.08) 50%, var(--v-bg-raised, #332a22) 75%);
+    background-size: 200% 100%;
+    animation: ap-skeletonShimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+.ap-skeleton-qr {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    border-radius: 12px;
+}
+
+.ap-skeleton-text {
+    height: 16px;
+    border-radius: 4px;
+}
+
+.ap-skeleton-btn {
+    height: 44px;
+    width: 100%;
+    border-radius: 8px;
+}
+
+@keyframes ap-skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 /* ─── Goals ─── */
@@ -1141,6 +1182,95 @@ body::after {
     color: var(--v-gold, #c4953a);
 }
 
+/* ─── FAQ Section ─── */
+
+.ap-faq-list {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ap-faq-item {
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: 10px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ap-faq-item.ap-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                border-color 0.3s ease, box-shadow 0.3s ease;
+    transition-delay: var(--ap-delay, 0s);
+}
+
+.ap-faq-item[open] {
+    border-color: var(--v-gold-dim, #9a7530);
+    box-shadow: 0 0 12px rgba(196, 149, 58, 0.08);
+}
+
+.ap-faq-question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--v-text, #d4c8b0);
+    font-weight: 600;
+    list-style: none;
+    transition: color 0.2s ease, background 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+}
+
+.ap-faq-question::-webkit-details-marker {
+    display: none;
+}
+
+.ap-faq-question::marker {
+    display: none;
+    content: '';
+}
+
+.ap-faq-question:hover {
+    color: var(--v-gold, #c4953a);
+    background: rgba(196, 149, 58, 0.05);
+}
+
+.ap-faq-chevron {
+    font-size: 12px;
+    color: var(--v-gold-dim, #9a7530);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.ap-faq-item[open] .ap-faq-chevron {
+    transform: rotate(180deg);
+}
+
+.ap-faq-answer {
+    padding: 0 16px 16px;
+    font-size: 13px;
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.6;
+    border-top: 1px solid rgba(74, 56, 40, 0.3);
+    padding-top: 12px;
+    animation: ap-faqReveal 0.3s ease both;
+}
+
+@keyframes ap-faqReveal {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ─── Transparency ─── */
 
 .ap-transparency-content {
@@ -1156,6 +1286,7 @@ body::after {
     border-bottom: 1px solid rgba(74, 56, 40, 0.3);
     border-radius: 6px;
     transition: background 0.2s ease;
+    min-height: 44px;
 }
 
 .ap-cost-item:last-child {
@@ -1196,6 +1327,69 @@ body::after {
     font-style: italic;
 }
 
+/* ─── Share Section ─── */
+
+.ap-share-section {
+    padding-top: 32px;
+    padding-bottom: 32px;
+}
+
+.ap-share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ap-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    min-height: 44px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: 1px solid;
+}
+
+.ap-share-whatsapp {
+    background: rgba(37, 211, 102, 0.1);
+    border-color: rgba(37, 211, 102, 0.3);
+    color: #25d366;
+}
+
+.ap-share-whatsapp:hover {
+    background: rgba(37, 211, 102, 0.2);
+    box-shadow: 0 0 12px rgba(37, 211, 102, 0.2);
+}
+
+.ap-share-twitter {
+    background: rgba(29, 161, 242, 0.1);
+    border-color: rgba(29, 161, 242, 0.3);
+    color: #1da1f2;
+}
+
+.ap-share-twitter:hover {
+    background: rgba(29, 161, 242, 0.2);
+    box-shadow: 0 0 12px rgba(29, 161, 242, 0.2);
+}
+
+.ap-share-copy {
+    background: rgba(196, 149, 58, 0.1);
+    border-color: rgba(196, 149, 58, 0.3);
+    color: var(--v-gold, #c4953a);
+}
+
+.ap-share-copy:hover {
+    background: rgba(196, 149, 58, 0.2);
+    box-shadow: 0 0 12px rgba(196, 149, 58, 0.2);
+}
+
 /* ─── Footer ─── */
 
 .ap-footer {
@@ -1205,6 +1399,21 @@ body::after {
     border-top: 1px solid rgba(74, 56, 40, 0.3);
     margin-top: auto;
     background: linear-gradient(180deg, transparent, rgba(196, 149, 58, 0.03));
+}
+
+.ap-footer-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.ap-footer-sep {
+    font-size: 6px;
+    color: var(--v-gold-dim, #9a7530);
+    opacity: 0.5;
 }
 
 .ap-footer-text {
@@ -1217,6 +1426,7 @@ body::after {
     color: var(--v-gold-dim, #9a7530);
     text-decoration: none;
     transition: color 0.2s ease, text-shadow 0.2s ease;
+    font-size: 13px;
 }
 
 .ap-footer a:hover {
@@ -1277,6 +1487,19 @@ body::after {
 @media (min-width: 768px) {
     .ap-section {
         padding: 64px 32px;
+    }
+}
+
+/* 3-column tier grid on desktop */
+@media (min-width: 960px) {
+    .ap-tiers-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .ap-tier-card[data-tier="gold"] {
+        grid-column: auto;
+    }
+    .ap-tier-card[data-tier="platinum"] {
+        grid-column: auto;
     }
 }
 
@@ -1373,7 +1596,11 @@ body::after {
 .ap-btn-copy:focus-visible,
 .ap-nav-link:focus-visible,
 .ap-nav-brand:focus-visible,
-.ap-back-top:focus-visible {
+.ap-back-top:focus-visible,
+.ap-share-btn:focus-visible,
+.ap-faq-question:focus-visible,
+.ap-audio-btn:focus-visible,
+.ap-audio-ctrl:focus-visible {
     outline: 2px solid var(--v-gold, #c4953a);
     outline-offset: 2px;
 }
@@ -1395,7 +1622,8 @@ body::after {
     }
     .ap-tier-card,
     .ap-goal-card,
-    .ap-timeline-step {
+    .ap-timeline-step,
+    .ap-faq-item {
         opacity: 1 !important;
         transform: none !important;
         transition: none !important;
@@ -1414,6 +1642,8 @@ body::after {
     .ap-nav { transition: none !important; }
     .ap-nav-links { animation: none !important; }
     .ap-back-top { transition: none !important; }
+    .ap-skeleton { animation: none !important; }
+    .ap-faq-answer { animation: none !important; }
 }
 
 /* Loading spinner */
