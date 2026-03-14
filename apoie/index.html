@@ -31,24 +31,27 @@
         <h1>Lendas de Valdoria</h1>
         <div class="ap-hero-subtitle">Apoie o desenvolvimento do RPG medieval de fantasia</div>
 
-        <!-- Soundtrack Player -->
+        <a href="#tiers" class="ap-hero-cta">Ver Recompensas &#x25BE;</a>
+
+        <!-- Soundtrack Player (prominent, below CTA) -->
         <div class="ap-player" id="ap-player">
-            <div class="ap-player-label">Trilha Sonora Original</div>
-            <div class="ap-player-controls">
-                <button class="ap-player-btn" id="ap-play-btn" aria-label="Tocar trilha sonora" onclick="togglePlayer()">
-                    <svg id="ap-icon-play" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21"/></svg>
-                    <svg id="ap-icon-pause" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+            <div class="ap-player-label">&#x266B; Trilha Sonora Original</div>
+            <div class="ap-player-controls" onclick="togglePlayer()">
+                <button class="ap-player-btn" id="ap-play-btn" aria-label="Tocar trilha sonora">
+                    <svg id="ap-icon-play" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21"/></svg>
+                    <svg id="ap-icon-pause" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
                 </button>
                 <div class="ap-player-meta">
-                    <div class="ap-player-track" id="ap-track-name">Clique para ouvir</div>
+                    <div class="ap-player-track" id="ap-track-name">Toque para ouvir</div>
                     <div class="ap-player-bar-wrap">
                         <div class="ap-player-bar" id="ap-progress-bar"></div>
                     </div>
                 </div>
+                <div class="ap-player-wave" id="ap-wave">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
             </div>
         </div>
-
-        <a href="#tiers" class="ap-hero-cta">Ver Recompensas &#x25BE;</a>
         <div class="ap-divider" style="margin-top:40px"></div>
     </section>
 
@@ -652,6 +655,11 @@
             document.getElementById('ap-icon-pause').style.display = _apPlaying ? 'block' : 'none';
             var btn = document.getElementById('ap-play-btn');
             if (btn) btn.classList.toggle('playing', _apPlaying);
+            var wave = document.getElementById('ap-wave');
+            if (wave) wave.classList.toggle('active', _apPlaying);
+            if (!_apPlaying) {
+                document.getElementById('ap-track-name').textContent = 'Toque para ouvir';
+            }
         }
 
         function _apAnimateBar() {

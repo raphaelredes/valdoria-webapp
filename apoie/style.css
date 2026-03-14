@@ -1958,66 +1958,71 @@ body::after {
 /* ─── Soundtrack Player ─── */
 
 .ap-player {
-    margin: 24px auto 20px;
-    max-width: 300px;
+    margin: 28px auto 20px;
+    max-width: 380px;
+    width: 90%;
     text-align: center;
 }
 
 .ap-player-label {
-    font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: 12px;
-    color: var(--v-text-dim, #8a7a68);
-    letter-spacing: 1.5px;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: 13px;
+    color: var(--v-gold, #c4953a);
+    letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 10px;
-    opacity: 0.8;
+    margin-bottom: 12px;
+    opacity: 0.9;
 }
 
 .ap-player-controls {
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: var(--v-bg-raised, #332a22);
-    border: 1px solid var(--v-border, #4a3828);
-    border-radius: 24px;
-    padding: 6px 16px 6px 6px;
+    gap: 14px;
+    background: linear-gradient(135deg, rgba(51, 42, 34, 0.95), rgba(42, 36, 32, 0.95));
+    border: 1px solid rgba(196, 149, 58, 0.35);
+    border-radius: 16px;
+    padding: 12px 18px 12px 12px;
+    cursor: pointer;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ap-player-controls:hover {
+    border-color: rgba(196, 149, 58, 0.5);
+    box-shadow: 0 0 16px rgba(196, 149, 58, 0.1);
 }
 
 .ap-player-btn {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
     border-radius: 50%;
-    border: 1px solid var(--v-border, #4a3828);
-    background: transparent;
+    border: 2px solid rgba(196, 149, 58, 0.4);
+    background: rgba(196, 149, 58, 0.08);
     color: var(--v-gold, #c4953a);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     padding: 0;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.3s, border-color 0.3s;
     -webkit-tap-highlight-color: transparent;
 }
 
-.ap-player-btn:hover {
-    background: rgba(196, 149, 58, 0.1);
-}
-
 .ap-player-btn:active {
-    transform: scale(0.9);
+    transform: scale(0.92);
 }
 
 .ap-player-btn.playing {
-    background: rgba(196, 149, 58, 0.15);
-    border-color: rgba(196, 149, 58, 0.4);
-    box-shadow: 0 0 8px rgba(196, 149, 58, 0.2);
+    background: rgba(196, 149, 58, 0.18);
+    border-color: rgba(196, 149, 58, 0.6);
+    box-shadow: 0 0 20px rgba(196, 149, 58, 0.25);
     animation: apBreathing 3s ease-in-out infinite;
 }
 
 @keyframes apBreathing {
-    0%, 100% { box-shadow: 0 0 4px rgba(196, 149, 58, 0.1); }
-    50% { box-shadow: 0 0 12px rgba(196, 149, 58, 0.3); }
+    0%, 100% { box-shadow: 0 0 8px rgba(196, 149, 58, 0.15); }
+    50% { box-shadow: 0 0 24px rgba(196, 149, 58, 0.35); }
 }
 
 .ap-player-meta {
@@ -2028,16 +2033,16 @@ body::after {
 
 .ap-player-track {
     font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: 13px;
+    font-size: 14px;
     color: var(--v-text, #d4c8b0);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .ap-player-bar-wrap {
-    height: 3px;
+    height: 4px;
     background: rgba(112, 66, 20, 0.3);
     border-radius: 2px;
     overflow: hidden;
@@ -2046,7 +2051,45 @@ body::after {
 .ap-player-bar {
     height: 100%;
     width: 0%;
-    background: var(--v-gold, #c4953a);
+    background: linear-gradient(90deg, var(--v-gold, #c4953a), #e0b04a);
     border-radius: 2px;
     transition: width 0.1s linear;
+}
+
+/* Waveform animation */
+.ap-player-wave {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 28px;
+    opacity: 0.3;
+    transition: opacity 0.3s;
+}
+
+.ap-player-wave.active {
+    opacity: 1;
+}
+
+.ap-player-wave span {
+    display: block;
+    width: 3px;
+    height: 6px;
+    background: var(--v-gold, #c4953a);
+    border-radius: 2px;
+    transition: height 0.15s ease;
+}
+
+.ap-player-wave.active span {
+    animation: apWave 1.2s ease-in-out infinite;
+}
+
+.ap-player-wave.active span:nth-child(1) { animation-delay: 0s; }
+.ap-player-wave.active span:nth-child(2) { animation-delay: 0.15s; }
+.ap-player-wave.active span:nth-child(3) { animation-delay: 0.3s; }
+.ap-player-wave.active span:nth-child(4) { animation-delay: 0.45s; }
+.ap-player-wave.active span:nth-child(5) { animation-delay: 0.6s; }
+
+@keyframes apWave {
+    0%, 100% { height: 6px; }
+    50% { height: 22px; }
 }
