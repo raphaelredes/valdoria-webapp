@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#2a2420">
+    <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
     <title>Explorar - Lendas de Valdoria</title>
     <link rel="stylesheet" href="../shared/fonts.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -22,6 +23,7 @@
     <script src="../shared/typewriter.js"></script>
     <script src="../shared/audio-manager.js"></script>
     <script src="../shared/loading-guard.js"></script>
+    <script src="../shared/motion.js"></script>
 </head>
 
 <body>
@@ -311,6 +313,12 @@
             </div>
             <span id="hp-text">10/10</span>
         </div>
+        <div class="hud-xp-row" id="xp-bar-row" style="display:none">
+            <div class="xp-bar">
+                <div class="xp-fill" id="xp-fill" style="width:0%"></div>
+            </div>
+            <span class="xp-label" id="xp-label">Nv 1</span>
+        </div>
         <div class="hud-rewards">
             <span class="reward-badge" id="badge-xp">XP 0</span>
             <span class="reward-badge" id="badge-gold">GP 0</span>
@@ -324,6 +332,7 @@
 
     <!-- Condition Bar (D&D 5e status effects) -->
     <div id="condition-bar" class="condition-bar" role="status" aria-label="Condições ativas"></div>
+    <span class="fatigue-badge" id="fatigue-badge" style="display:none"></span>
 
     <!-- Map Viewport -->
     <div id="map-viewport" role="application" aria-label="Mapa de exploração interativo">
@@ -567,6 +576,7 @@
             document.write('<script src="' + s + '?v=' + v + '"><\/script>');
         });
     </script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(()=>{})}</script>
 </body>
 
 </html>

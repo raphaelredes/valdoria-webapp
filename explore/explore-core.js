@@ -55,6 +55,10 @@ let S = {
     exhaustion: 0,           // D&D 5e exhaustion level (0-6)
     _stepsWithoutRest: 0,    // Steps since last rest (forced march tracking)
     _stepsForRation: 0,      // Steps since last ration consumed (D&D PHB: 1 ration/day)
+    _fatigue: 0,             // C1: Fatigue level (0-2): buffer before exhaustion
+    _fatiguePeriods: 0,      // C1: Periods of sustained fatigue without rest
+    _secondWindUsed: false,  // C4: Second Wind used this exploration (1x)
+    _healingSpringUsed: false, // C2: Healing spring used this exploration (1x)
     _longRestCount: 0,       // Long rests taken this exploration (consequences escalate)
     mpChange: 0,             // MP delta during exploration
     _hdUsed: 0,              // Hit Dice used during exploration (limits short rests)
@@ -107,6 +111,8 @@ function saveState() {
             ex: S.exhaustion || 0,
             swr: S._stepsWithoutRest || 0,
             sfr: S._stepsForRation || 0,
+            ftg: S._fatigue || 0,
+            ftp: S._fatiguePeriods || 0,
             lrc: S._longRestCount || 0,
             mpc: S.mpChange || 0,
             hdu: S._hdUsed || 0,
@@ -208,6 +214,8 @@ function restoreState() {
         S.exhaustion = snap.ex || 0;
         S._stepsWithoutRest = snap.swr || 0;
         S._stepsForRation = snap.sfr || 0;
+        S._fatigue = snap.ftg || 0;
+        S._fatiguePeriods = snap.ftp || 0;
         S._longRestCount = snap.lrc || 0;
         S.mpChange = snap.mpc || 0;
         S._hdUsed = snap.hdu || 0;
@@ -385,6 +393,7 @@ function loadMapData(data) {
     if (restored && S.conditions.length) {
         updateConditionHUD();
     }
+    updateXPBar();
 
     // Initialize canvas renderer
     initRenderer();
@@ -494,6 +503,24 @@ function updateHP(current, max) {
     document.getElementById('hp-text').textContent = current + '/' + max;
 }
 
+// A1: Update XP progress bar in HUD
+function updateXPBar() {
+    var row = document.getElementById('xp-bar-row');
+    var fill = document.getElementById('xp-fill');
+    var label = document.getElementById('xp-label');
+    if (!row || !fill || !label || !S.charData) return;
+
+    var xp = (S.charData.xp || 0) + (S.xpEarned || 0);
+    var nxp = S.charData.nxp || 300;
+    var prevXp = S.charData.pxp || 0;
+    var range = nxp - prevXp;
+    var progress = range > 0 ? Math.min(100, ((xp - prevXp) / range) * 100) : 0;
+
+    fill.style.width = progress + '%';
+    label.textContent = 'Nv ' + (S.charData.lv || 1);
+    row.style.display = 'flex';
+}
+
 function updateRewards() {
     const xpBadge = document.getElementById('badge-xp');
     const goldBadge = document.getElementById('badge-gold');
@@ -507,6 +534,7 @@ function updateRewards() {
     });
     setTimeout(() => { xpBadge.classList.remove('pop'); goldBadge.classList.remove('pop'); }, 800);
     updateStepCounter();
+    updateXPBar();
 }
 
 const _STEP_MILESTONES = {
@@ -662,23 +690,41 @@ function tickConditions() {
     });
     updateConditionHUD();
 
-    // Forced march exhaustion (D&D PHB Ch.8: CON save DC 10+1 per extra step after 15)
+    // A4+C1: Fatigue-first march system
     S._stepsWithoutRest = (S._stepsWithoutRest || 0) + 1;
-    // Warning at step thresholds before forced march
-    if (S._stepsWithoutRest === 10) {
-        showTerrainToast('\ud83d\udca8 Voc\u00ea j\u00e1 caminhou bastante. Considere descansar.', 'info');
-    } else if (S._stepsWithoutRest === 13) {
-        showTerrainToast('\u26a0\ufe0f Marcha for\u00e7ada se aproxima! Descanse em breve.', 'condition');
-    } else if (S._stepsWithoutRest === 15) {
-        showTerrainToast('\u26a0\ufe0f Marcha for\u00e7ada! Teste de CON a cada passo.', 'damage');
+    var steps = S._stepsWithoutRest;
+
+    // A4: Visual warning curve
+    if (steps === 8) {
+        showTerrainToast('Seus p\u00e9s come\u00e7am a pesar...', 'info');
+        _setFatigueVisual(1);
+    } else if (steps === 11) {
+        showTerrainToast('Voc\u00ea precisa descansar em breve.', 'condition');
+        _setFatigueVisual(2);
+    } else if (steps === 14) {
+        showTerrainToast('\u26a0\ufe0f Exaust\u00e3o se aproxima! Descanse agora!', 'damage');
+        _setFatigueVisual(3);
     }
-    if (S._stepsWithoutRest > 15) {
-        const extraSteps = S._stepsWithoutRest - 15;
-        const dc = 10 + extraSteps;
-        const conMod = getAbilityMod('cn');
-        const { roll } = rollD20('normal');
-        if (roll + conMod < dc) {
-            addExhaustion(1, 'Marcha for\u00e7ada');
+
+    // C1: Fatigue absorbs first exhaustion
+    if (steps === 12 && (S._fatigue || 0) < 1) {
+        S._fatigue = 1;
+        showTerrainToast('Fadiga: -1 em testes de habilidade', 'condition');
+        updateFatigueHUD();
+    }
+    if (steps > 15) {
+        var extraSteps = steps - 15;
+        var dc = 10 + extraSteps;
+        var conMod = getAbilityMod('cn');
+        var rollResult = rollD20('normal');
+        if (rollResult.roll + conMod < dc) {
+            if ((S._fatigue || 0) > 0 && (S._fatigue || 0) < 2) {
+                S._fatigue = 2;
+                showTerrainToast('Fadiga severa! Descanse ou ganhar\u00e1 exaust\u00e3o.', 'damage');
+                updateFatigueHUD();
+            } else {
+                addExhaustion(1, 'Marcha for\u00e7ada');
+            }
         }
     }
 
@@ -806,6 +852,31 @@ function removeCondition(type) {
     saveState();
 }
 
+
+// C1: Fatigue system functions
+function _setFatigueVisual(level) {
+    document.body.classList.remove('fatigue-1', 'fatigue-2', 'fatigue-3');
+    if (level > 0) document.body.classList.add('fatigue-' + level);
+}
+
+function updateFatigueHUD() {
+    var badge = document.getElementById('fatigue-badge');
+    if (!badge) return;
+    var f = S._fatigue || 0;
+    if (f <= 0) {
+        badge.style.display = 'none';
+        _setFatigueVisual(0);
+    } else {
+        badge.style.display = 'inline';
+        badge.textContent = f === 1 ? 'Fadiga' : 'Fadiga Severa';
+        badge.className = 'fatigue-badge fatigue-lv' + f;
+    }
+}
+
+function getFatigueMod() {
+    return -(S._fatigue || 0);
+}
+
 function updateConditionHUD() {
     const bar = document.getElementById('condition-bar');
     if (!bar) return;
@@ -925,6 +996,10 @@ function resetStepsWithoutRest() {
     S._stepsWithoutRest = 0;
     S._stepsForRation = 0;
     S._noFoodPeriods = 0;
+    S._fatigue = 0;
+    S._fatiguePeriods = 0;
+    _setFatigueVisual(0);
+    if (typeof updateFatigueHUD === 'function') updateFatigueHUD();
     saveState();
 }
 

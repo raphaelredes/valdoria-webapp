@@ -746,6 +746,26 @@ function drawAnimatedTiles(ctx, timestamp) {
 
 // Draw highlight on valid adjacent hexes (gold=normal, amber=difficult, red=hazard)
 // Pulsing animation for better touch-target visibility
+
+// C3: Get danger-based color for adjacent hex indicators
+function _getDangerColor(col, row) {
+    // Only show danger colors if passive perception >= 12
+    if (!S.passivePerception || S.passivePerception < 12) return null;
+    const dangerLevel = S.dangerLevel || 1;
+    // Check if hex has specific content that indicates danger
+    const tile = S.grid && S.grid[row] && S.grid[row][col];
+    if (!tile) return null;
+    // Dangerous tiles: enemies, traps, hazards
+    const hasDanger = tile === 'X' || tile === 'T' || tile === 'H' || tile === '!' || tile === 'D';
+    if (hasDanger) return { color: 'rgba(204, 68, 68, 0.35)', glow: 'rgba(204, 68, 68, 0.15)' };
+    // POI tiles
+    if (tile === '*' || tile === '?' || tile === 'N') return { color: 'rgba(106, 200, 106, 0.3)', glow: 'rgba(106, 200, 106, 0.1)' };
+    // Moderate danger based on region danger level
+    if (dangerLevel >= 5) return { color: 'rgba(204, 120, 68, 0.2)', glow: 'rgba(204, 120, 68, 0.08)' };
+    if (dangerLevel >= 3) return { color: 'rgba(196, 180, 100, 0.15)', glow: 'rgba(196, 180, 100, 0.06)' };
+    return null; // Safe — use default gold highlight
+}
+
 function drawAdjacentHighlights(ctx, timestamp) {
     const pulse = 0.5 + Math.sin((timestamp || 0) * 0.008) * 0.3; // 0.2-0.8, ~785ms period
     const neighbors = getNeighbors(S.playerCol, S.playerRow);

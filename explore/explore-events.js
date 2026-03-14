@@ -459,7 +459,14 @@ function performStatCheck(poi, choice) {
     const proficient = S.charData && S.charData.sp && S.charData.sp.includes(check.s);
     const profMark = proficient ? '★' : '';
 
-    formulaEl.innerHTML = '';
+    // A3: Show pre-roll breakdown so player knows their chances
+    const sign = mod >= 0 ? '+' : '';
+    const profLabel = proficient ? ' \u2605' : '';
+    const modeText = mode === 'advantage' ? ' <span style="color:#4a8;font-size:11px">(Vantagem)</span>'
+                   : mode === 'disadvantage' ? ' <span style="color:#a44;font-size:11px">(Desvantagem)</span>' : '';
+    formulaEl.innerHTML = '<div style="font-size:13px;color:#c4953a;margin-bottom:4px">\ud83c\udfaf ' + statName + '</div>' +
+        '<div style="font-size:12px;color:#a09484">d20 ' + sign + mod + ' (' + statName + profLabel + ')' + modeText + '</div>' +
+        '<div style="font-size:12px;color:#8a7a68;margin-top:2px">vs DC <b style="color:#e8dcc8">' + dc + '</b></div>';
     resultEl.textContent = '';
     resultEl.className = 'check-result';
     overlay.classList.add('active');
@@ -1221,8 +1228,32 @@ const TOAST_STYLES = {
 const _TOAST_TIMING = { damage: 'toast-warn', danger: 'toast-warn', condition: 'toast-warn', flavor: 'toast' };
 
 // Compact toast notification for terrain effects
+
+// A5: Detect reward patterns in toast messages and spawn floating text on map
+function _maybeSpawnRewardFloat(message) {
+    if (typeof spawnFloatingText !== 'function') return;
+    var clean = message.replace(/<[^>]*>/g, '');
+    var patterns = [
+        { rx: /\+(\d+)\s*XP/i, color: '#6c8', label: 'XP', sign: '+' },
+        { rx: /\+(\d+)\s*GP/i, color: '#c4953a', label: 'GP', sign: '+' },
+        { rx: /-(\d+)\s*HP/i, color: '#c44', label: 'HP', sign: '-' },
+        { rx: /\+(\d+)\s*HP/i, color: '#4a8', label: 'HP', sign: '+' },
+    ];
+    for (var i = 0; i < patterns.length; i++) {
+        var p = patterns[i];
+        var m = clean.match(p.rx);
+        if (m) {
+            spawnFloatingText(S.col, S.row, p.sign + m[1] + ' ' + p.label, p.color, 'damage');
+            return;
+        }
+    }
+}
+
 function showTerrainToast(message, type) {
     try {
+        // A5: Spawn floating text on map for rewards
+        _maybeSpawnRewardFloat(message);
+
         const existing = document.getElementById('terrain-toast-el');
         if (existing) existing.remove();
 
@@ -1411,7 +1442,14 @@ function showHazardCheck(hazard) {
 
     const statName = STAT_NAMES[hazard.stat] || hazard.stat;
 
-    formulaEl.innerHTML = '';
+    // A3: Show pre-roll breakdown so player knows their chances
+    const sign = mod >= 0 ? '+' : '';
+    const profLabel = proficient ? ' \u2605' : '';
+    const modeText = mode === 'advantage' ? ' <span style="color:#4a8;font-size:11px">(Vantagem)</span>'
+                   : mode === 'disadvantage' ? ' <span style="color:#a44;font-size:11px">(Desvantagem)</span>' : '';
+    formulaEl.innerHTML = '<div style="font-size:13px;color:#c4953a;margin-bottom:4px">\ud83c\udfaf ' + statName + '</div>' +
+        '<div style="font-size:12px;color:#a09484">d20 ' + sign + mod + ' (' + statName + profLabel + ')' + modeText + '</div>' +
+        '<div style="font-size:12px;color:#8a7a68;margin-top:2px">vs DC <b style="color:#e8dcc8">' + dc + '</b></div>';
     resultEl.textContent = '';
     resultEl.className = 'check-result';
     overlay.classList.add('active');
@@ -2689,6 +2727,66 @@ function doCampRest(food) {
 // ═══════════════════════════════════════════════════════
 // GUARD WATCH — D&D 5e watch before long rest (PHB Ch.8)
 // ═══════════════════════════════════════════════════════
+
+// B3: Campfire mini-stories — atmospheric narratives during long rest
+var CAMPFIRE_STORIES = {
+    forest: [
+        'O crepitar da fogueira mistura-se ao canto dos grilos. Entre as \u00e1rvores, vaga-lumes dan\u00e7am como estrelas ca\u00eddas.',
+        'O vento sussurra entre os galhos antigos. Voc\u00ea jura ouvir uma melodia distante, quase como uma can\u00e7\u00e3o de ninar.',
+        'Uma coruja pia ao longe. A floresta \u00e9 escura, mas a fogueira \u00e9 quente. Por ora, voc\u00ea est\u00e1 seguro.',
+        'As chamas projetam sombras dan\u00e7antes nos troncos. Uma delas parece ter forma humana por um instante.',
+    ],
+    plains: [
+        'O c\u00e9u noturno se abre vasto sobre a plan\u00edcie. Mais estrelas do que voc\u00ea jamais viu pontuam a escurid\u00e3o.',
+        'A brisa traz o cheiro de grama fresca. No horizonte, a lua cheia ilumina o caminho que voc\u00ea percorreu.',
+        'Os grilos cantam ao redor. A fogueira \u00e9 um ponto de luz solit\u00e1rio na vastid\u00e3o da plan\u00edcie.',
+    ],
+    desert: [
+        'O calor do deserto finalmente cede. A noite traz um frio cortante que faz a fogueira parecer um tesouro.',
+        'As dunas brilham prateadas sob a lua. O sil\u00eancio do deserto \u00e9 t\u00e3o profundo que voc\u00ea ouve seu pr\u00f3prio cora\u00e7\u00e3o.',
+        'Uma estrela cadente risca o c\u00e9u. Os viajantes do deserto dizem que \u00e9 um bom pres\u00e1gio.',
+    ],
+    snow: [
+        'A neve cai suavemente ao redor da fogueira, derretendo antes de tocar as chamas. Um manto branco cobre tudo.',
+        'O frio morde at\u00e9 os ossos, mas o calor da fogueira mant\u00e9m a escurid\u00e3o gelada \u00e0 dist\u00e2ncia.',
+        'Aurora boreal dan\u00e7a no c\u00e9u noturno. Cores que nenhum artista conseguiria reproduzir.',
+    ],
+    swamp: [
+        'O p\u00e2ntano borbulha na escurid\u00e3o. Luzes estranhas flutuam entre as \u00e1rvores mortas.',
+        'O ar \u00e9 pesado e \u00famido. Sapos coaxam um coro desafinado que, de alguma forma, \u00e9 reconfortante.',
+    ],
+    mountain: [
+        'Do alto, as luzes de aldeias distantes cintilam como velas. O vento uiva entre os picos rochosos.',
+        'A fogueira luta contra o vento da montanha. Cada rajada faz as chamas dan\u00e7arem furiosamente.',
+    ],
+    volcanic: [
+        'O ch\u00e3o \u00e9 quente mesmo longe das fissuras. A fogueira quase parece desnecess\u00e1ria neste calor infernal.',
+        'Um brilho alaranjado pulsa no horizonte. A terra vive e respira aqui, inquieta sob seus p\u00e9s.',
+    ],
+    cave: [
+        'Gotas de \u00e1gua ecoam na escurid\u00e3o da caverna. A fogueira projeta sombras imensas nas paredes de pedra.',
+        'Forma\u00e7\u00f5es de estalactites brilham \u00e0 luz do fogo, como j\u00f3ias incrustadas no teto.',
+    ],
+    graveyard: [
+        'O sil\u00eancio \u00e9 denso. Nem os mortos fazem barulho aqui \u2014 ou talvez fa\u00e7am, e voc\u00ea prefere n\u00e3o ouvir.',
+        'A n\u00e9voa se arrasta entre as l\u00e1pides. A fogueira \u00e9 sua \u00fanica companhia neste lugar esquecido.',
+    ],
+    _generic: [
+        'As chamas dan\u00e7am e crepitam. O calor \u00e9 reconfortante depois de um longo dia de viagem.',
+        'Voc\u00ea observa as brasas brilharem como pequenos s\u00f3is. Amanh\u00e3 ser\u00e1 um novo dia de aventura.',
+        'O cansa\u00e7o pesa sobre seus ombros, mas a fogueira aquece seu esp\u00edrito. Valdoria ainda guarda muitos segredos.',
+        'O sil\u00eancio da noite \u00e9 quebrado apenas pelo estalar da lenha. Momentos de paz s\u00e3o raros nesta terra.',
+        'Voc\u00ea pensa nos caminhos que ainda restam. Cada hex\u00e1gono pode esconder perigo ou tesouro \u2014 ou ambos.',
+    ]
+};
+
+function _getCampfireStory() {
+    var biome = S.currentBiome || '_generic';
+    var stories = CAMPFIRE_STORIES[biome] || CAMPFIRE_STORIES._generic;
+    var pool = stories.concat(CAMPFIRE_STORIES._generic);
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function _startGuardWatch() {
     // D&D 5e: During a long rest, characters take turns keeping watch
     // Perception (WIS) check to detect approaching threats
@@ -2710,6 +2808,9 @@ function _startGuardWatch() {
     S._guardRoll = total;
     S._guardDC = dangerDC;
     S._guardSuccess = total >= dangerDC;
+
+    // B3: Show campfire story before guard watch
+    S._campfireStory = _getCampfireStory();
 
     // Show guard overlay with dice animation
     _showGuardOverlay(roll, r1, r2, mode, totalMod, profInPerception, dangerDC, total >= dangerDC);
@@ -3076,14 +3177,155 @@ function showLowHPOverlay() {
 // ═══════════════════════════════════════════════════════
 // D&D 5e DEATH SAVING THROWS (PHB p.197)
 // ═══════════════════════════════════════════════════════
+
+// C2: Healing Springs — mercy POIs when player has low HP
+function _checkHealingSpring() {
+    if (!S.charData) return false;
+    if (S._healingSpringUsed) return false; // 1x per exploration
+
+    var currentHP = S.charData.hp + (S.hpChange || 0);
+    var maxHP = S.charData.mh || 10;
+    var hpPct = currentHP / maxHP;
+
+    // Chance scales with how low HP is
+    var chance = 0;
+    if (hpPct < 0.25) chance = 30;
+    else if (hpPct < 0.50) chance = 15;
+    else return false;
+
+    var roll = Math.floor(Math.random() * 100) + 1;
+    if (roll > chance) return false;
+
+    S._healingSpringUsed = true;
+    _showHealingSpring();
+    return true;
+}
+
+function _showHealingSpring() {
+    var overlay = document.getElementById('dm-overlay');
+    var textEl = document.getElementById('dm-text');
+    var choicesEl = document.getElementById('dm-choices');
+    if (!overlay || !textEl) return;
+
+    var biome = S.currentBiome || 'forest';
+    var springs = {
+        forest: { name: 'Fonte Silvestre', desc: 'Uma nascente cristalina brota entre as ra\u00edzes de um carvalho ancestral. A \u00e1gua brilha com um toque de magia.' },
+        plains: { name: 'Po\u00e7o do Peregrino', desc: 'Um po\u00e7o de pedra desgastado pelo tempo. A \u00e1gua fresca parece curar mais do que a sede.' },
+        desert: { name: 'O\u00e1sis Oculto', desc: 'Entre as dunas, uma po\u00e7a de \u00e1gua l\u00edmpida cercada por tamareiras. Uma miragem... que \u00e9 real.' },
+        snow: { name: 'Fonte Termal', desc: 'Vapor sobe de uma po\u00e7a quente na neve. A \u00e1gua mineral aquece e revigora.' },
+        swamp: { name: 'Claro do P\u00e2ntano', desc: 'Um c\u00edrculo de \u00e1gua estranhamente pura no meio do p\u00e2ntano. Flores azuis flutuam na superf\u00edcie.' },
+        mountain: { name: 'Cascata da Montanha', desc: 'Uma pequena cascata desce entre as rochas. A \u00e1gua gelada \u00e9 revigorante.' },
+        cave: { name: 'Lago Subterr\u00e2neo', desc: 'Um lago de \u00e1gua parada que brilha com luz pr\u00f3pria. Cogumelos luminescentes cercam suas margens.' },
+        volcanic: { name: 'Fonte Mineral', desc: 'A \u00e1gua borbulha quente da terra vulc\u00e2nica. Minerais dissolvidos d\u00e3o-lhe propriedades curativas.' },
+        graveyard: { name: 'Santu\u00e1rio Esquecido', desc: 'Uma est\u00e1tua coberta de musgo abriga uma fonte de \u00e1gua benta. A paz emana deste lugar.' },
+    };
+    var spring = springs[biome] || springs.forest;
+
+    // D&D 5e: 1d8 + WIS mod healing
+    var wisMod = typeof getAbilityMod === 'function' ? getAbilityMod('ws') : 0;
+    var healRoll = Math.floor(Math.random() * 8) + 1;
+    var totalHeal = Math.max(1, healRoll + wisMod);
+
+    textEl.innerHTML = '<div style="text-align:center">' +
+        '<div style="font-size:14px;color:#4a8;font-weight:700;margin-bottom:8px">\u26f2 ' + spring.name + '</div>' +
+        '<div style="font-size:13px;color:#d4c8b0;line-height:1.6;margin-bottom:10px">' + spring.desc + '</div>' +
+        '<div style="font-size:12px;color:#4a8;background:rgba(68,170,136,0.1);padding:6px 10px;border-radius:8px;border:1px solid rgba(68,170,136,0.2)">' +
+        '\ud83c\udfb2 1d8+' + wisMod + ' = <b>+' + totalHeal + ' HP</b> recuperados</div></div>';
+
+    // Apply healing
+    S.hpChange = (S.hpChange || 0) + totalHeal;
+    var newHP = Math.min(S.charData.mh, S.charData.hp + S.hpChange);
+    updateHP(newHP, S.charData.mh);
+    if (typeof spawnFloatingText === 'function') spawnFloatingText(S.col, S.row, '+' + totalHeal + ' HP', '#4a8', 'damage');
+
+    choicesEl.innerHTML = '';
+    overlay.classList.add('active');
+    if (typeof setEventActive === 'function') setEventActive(true);
+
+    var readDelay = typeof calcReadTime === 'function' ? calcReadTime(spring.desc, 'dm') : 3500;
+    setTimeout(function() {
+        overlay.classList.remove('active');
+        if (typeof setEventActive === 'function') setEventActive(false);
+        saveState();
+    }, readDelay);
+}
+
 function checkDeath() {
     if (!S.charData) return false;
     const currentHP = S.charData.hp + S.hpChange;
     if (currentHP <= 0) {
+        // C4: Second Wind — one free save per exploration
+        if (!S._secondWindUsed) {
+            S._secondWindUsed = true;
+            _showSecondWind();
+            return true;
+        }
         showDeathSaves();
         return true;
     }
     return false;
+}
+
+// C4: Second Wind overlay — dramatic d20 roll to survive at 1 HP
+function _showSecondWind() {
+    var overlay = document.getElementById('check-overlay');
+    var formulaEl = document.getElementById('check-formula');
+    var resultEl = document.getElementById('check-result');
+    if (!overlay) { showDeathSaves(); return; }
+
+    // Phase 1: Dramatic narration
+    formulaEl.innerHTML = '<div style="font-size:14px;color:#c44;margin-bottom:6px">\u2620\ufe0f Voc\u00ea cai...</div>' +
+        '<div style="font-size:12px;color:#a09484;line-height:1.5">Mas algo dentro de voc\u00ea se recusa a ceder.<br>' +
+        '<span style="color:#c4953a">F\u00f4lego (1x por explora\u00e7\u00e3o)</span></div>' +
+        '<div style="font-size:11px;color:#8a7a68;margin-top:6px">d20 \u2265 10 para sobreviver</div>';
+    resultEl.textContent = '';
+    resultEl.className = 'check-result';
+    overlay.classList.add('active');
+
+    var readDelay = typeof calcReadTime === 'function' ? calcReadTime('Voce cai mas algo dentro de voce se recusa a ceder', 'overlay') : 2500;
+    setTimeout(function() {
+        var result = rollD20('normal');
+        var roll = result.roll;
+        var success = roll >= 10;
+
+        var dice = getDice3D();
+        if (dice) {
+            dice.roll(roll, function() {
+                _resolveSecondWind(overlay, formulaEl, resultEl, roll, success);
+            });
+        } else {
+            _resolveSecondWind(overlay, formulaEl, resultEl, roll, success);
+        }
+    }, readDelay);
+}
+
+function _resolveSecondWind(overlay, formulaEl, resultEl, roll, success) {
+    if (success) {
+        S.hpChange = -(S.charData.hp - 1);
+        updateHP(1, S.charData.mh);
+        addExhaustion(2, 'F\u00f4lego');
+
+        resultEl.innerHTML = '<div style="color:#4a8;font-size:16px;font-weight:700">\u2705 F\u00f4lego!</div>' +
+            '<div style="font-size:12px;color:#a09484;margin-top:4px">\ud83c\udfb2 ' + roll + ' \u2265 10</div>' +
+            '<div style="font-size:11px;color:#c4953a;margin-top:6px">Voc\u00ea sobrevive com 1 HP + 2 n\u00edveis de exaust\u00e3o.</div>';
+        if (window.vHaptic) vHaptic.notify('success');
+    } else {
+        resultEl.innerHTML = '<div style="color:#c44;font-size:16px;font-weight:700">\u274c Escurid\u00e3o...</div>' +
+            '<div style="font-size:12px;color:#a09484;margin-top:4px">\ud83c\udfb2 ' + roll + ' < 10</div>' +
+            '<div style="font-size:11px;color:#c44;margin-top:6px">O f\u00f4lego n\u00e3o foi suficiente.</div>';
+        if (window.vHaptic) vHaptic.notify('error');
+    }
+
+    var readDelay = typeof calcReadTime === 'function' ? calcReadTime(success ? 'Folego sobrevive com 1 HP' : 'Escuridao o folego nao foi suficiente', 'result') : 4000;
+    setTimeout(function() {
+        overlay.classList.remove('active');
+        if (typeof disposeDice3D === 'function') disposeDice3D();
+        if (!success) {
+            showDeathSaves();
+        } else {
+            saveState();
+        }
+    }, readDelay);
 }
 
 function showDeathSaves() {
