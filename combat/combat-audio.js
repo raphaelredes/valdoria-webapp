@@ -41,6 +41,7 @@ function _ensureAudio() {
 function _sfxNoise(dur, vol) {
     const ctx = _ensureAudio();
     if (!ctx || !_audioUnlocked) return;
+    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.isSFXMuted()) return;
     try {
         const bufSize = ctx.sampleRate * dur;
         const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
@@ -59,6 +60,7 @@ function _sfxNoise(dur, vol) {
 function _sfxTone(freq, dur, vol, type) {
     const ctx = _ensureAudio();
     if (!ctx || !_audioUnlocked) return;
+    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.isSFXMuted()) return;
     try {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();

@@ -643,6 +643,102 @@ function injectFontPicker(contentEl) {
     contentEl.appendChild(section);
 }
 
+/**
+ * Inject audio settings (music + SFX toggles) into settings screen.
+ * Called by renderScreen() when screen_id is 'city.settings'.
+ * All state is client-side (localStorage) — no server round-trip needed.
+ */
+function injectAudioSettings(contentEl) {
+    if (typeof ValdoriaAudio === 'undefined') return;
+
+    const section = document.createElement('div');
+    section.className = 'audio-settings-section';
+    section.innerHTML = '';
+
+    const musicMuted = ValdoriaAudio.isMusicMuted();
+    const sfxMuted = ValdoriaAudio.isSFXMuted();
+    const musicVol = Math.round(ValdoriaAudio.getVolume() * 100);
+    const sfxVol = Math.round(ValdoriaAudio.getSFXVolume() * 100);
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'audio-settings-header';
+    header.textContent = '🔊 Som';
+    section.appendChild(header);
+
+    // Music row
+    section.appendChild(_audioRow(
+        '🎵 Música',
+        !musicMuted,
+        musicVol,
+        (enabled) => { ValdoriaAudio.toggleMusic(); _refreshAudioSettings(contentEl); },
+        (val) => { ValdoriaAudio.setVolume(val / 100); _refreshAudioSettings(contentEl); }
+    ));
+
+    // SFX row
+    section.appendChild(_audioRow(
+        '⚔️ Efeitos',
+        !sfxMuted,
+        sfxVol,
+        (enabled) => { ValdoriaAudio.toggleSFX(); _refreshAudioSettings(contentEl); },
+        (val) => { ValdoriaAudio.setSFXVolume(val / 100); _refreshAudioSettings(contentEl); }
+    ));
+
+    contentEl.appendChild(section);
+}
+
+function _audioRow(label, enabled, volume, onToggle, onVolume) {
+    const row = document.createElement('div');
+    row.className = 'audio-settings-row';
+
+    // Toggle button
+    const toggle = document.createElement('button');
+    toggle.className = 'audio-toggle' + (enabled ? ' on' : '');
+    toggle.innerHTML = '<span class="audio-toggle-label">' + label + '</span>' +
+                       '<span class="audio-toggle-status">' + (enabled ? '🟢' : '⚪') + '</span>';
+    toggle.onclick = () => onToggle(!enabled);
+    row.appendChild(toggle);
+
+    // Volume slider (only if enabled)
+    if (enabled) {
+        const sliderWrap = document.createElement('div');
+        sliderWrap.className = 'audio-vol-wrap';
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'audio-vol-slider';
+        slider.min = '0';
+        slider.max = '100';
+        slider.value = String(volume);
+        slider.setAttribute('aria-label', label + ' volume');
+
+        const pct = document.createElement('span');
+        pct.className = 'audio-vol-pct';
+        pct.textContent = volume + '%';
+
+        slider.addEventListener('input', (e) => {
+            e.stopPropagation();
+            const val = parseInt(e.target.value, 10);
+            pct.textContent = val + '%';
+            onVolume(val);
+        });
+        slider.addEventListener('touchstart', (e) => e.stopPropagation());
+        slider.addEventListener('touchmove', (e) => e.stopPropagation());
+
+        sliderWrap.appendChild(slider);
+        sliderWrap.appendChild(pct);
+        row.appendChild(sliderWrap);
+    }
+
+    return row;
+}
+
+function _refreshAudioSettings(contentEl) {
+    const old = contentEl.querySelector('.audio-settings-section');
+    if (old) old.remove();
+    injectAudioSettings(contentEl);
+}
+
 // ─── Button Bounce-Back — now in shared/bounce-back.js ───
 
 // ─── Floating Reward Popup ───

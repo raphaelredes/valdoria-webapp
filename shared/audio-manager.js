@@ -10,6 +10,9 @@ const ValdoriaAudio = (() => {
 
     const STORAGE_KEY = 'valdoria_audio_muted';
     const VOLUME_KEY = 'valdoria_audio_volume';
+    const MUSIC_MUTED_KEY = 'valdoria_audio_music_muted';
+    const SFX_MUTED_KEY = 'valdoria_audio_sfx_muted';
+    const SFX_VOLUME_KEY = 'valdoria_audio_sfx_volume';
     const CROSSFADE_MS = 1200;
     const DEFAULT_VOLUME = 0.3;
     const NO_LOOP_TRACKS = ['victory', 'defeat', 'levelup'];
@@ -46,6 +49,9 @@ const ValdoriaAudio = (() => {
     let _currentTrack = '';
     let _muted = false;
     let _volume = DEFAULT_VOLUME;
+    let _musicMuted = false;
+    let _sfxMuted = false;
+    let _sfxVolume = DEFAULT_VOLUME;
     let _unlocked = false;
     let _pendingTrack = '';
     let _looping = false;
@@ -58,6 +64,14 @@ const ValdoriaAudio = (() => {
         if (!isNaN(savedVol) && savedVol >= 0 && savedVol <= 1) {
             _volume = savedVol;
         }
+        _musicMuted = localStorage.getItem(MUSIC_MUTED_KEY) === '1';
+        _sfxMuted = localStorage.getItem(SFX_MUTED_KEY) === '1';
+        const savedSfxVol = parseFloat(localStorage.getItem(SFX_VOLUME_KEY));
+        if (!isNaN(savedSfxVol) && savedSfxVol >= 0 && savedSfxVol <= 1) {
+            _sfxVolume = savedSfxVol;
+        }
+        // Sync legacy mute with music mute
+        if (_muted) _musicMuted = true;
 
         const unlockEvents = ['click', 'touchstart', 'keydown'];
         const unlockHandler = () => {
@@ -83,7 +97,7 @@ const ValdoriaAudio = (() => {
         }
 
         _pendingTrack = trackKey;
-        if (!_unlocked || _muted) return;
+        if (!_unlocked || _muted || _musicMuted) return;
 
         _playTrack(trackKey);
     }
@@ -225,13 +239,13 @@ const ValdoriaAudio = (() => {
     }
 
     function playSFX(trackKey) {
-        if (_muted || !_unlocked) return;
+        if (_muted || _sfxMuted || !_unlocked) return;
         const file = _pickVariant(trackKey);
         if (!file) return;
         const url = AUDIO_BASE + file;
 
         const sfx = new Audio(url);
-        sfx.volume = Math.min(1, _volume * 1.5);
+        sfx.volume = Math.min(1, _sfxVolume * 1.5);
         sfx.play().catch(() => {});
     }
 
@@ -239,6 +253,9 @@ const ValdoriaAudio = (() => {
     function toggleMute() {
         _muted = !_muted;
         localStorage.setItem(STORAGE_KEY, _muted ? '1' : '0');
+        // Sync music mute with global mute
+        _musicMuted = _muted;
+        localStorage.setItem(MUSIC_MUTED_KEY, _musicMuted ? '1' : '0');
 
         if (_muted) {
             if (_audio) _audio.volume = 0;
@@ -265,7 +282,9 @@ const ValdoriaAudio = (() => {
         // If volume > 0 and was muted, unmute
         if (_volume > 0 && _muted) {
             _muted = false;
+            _musicMuted = false;
             localStorage.setItem(STORAGE_KEY, '0');
+            localStorage.setItem(MUSIC_MUTED_KEY, '0');
             if (_audio && !_audio.paused) {
                 _audio.volume = _volume;
             } else if (_pendingTrack) {
@@ -817,6 +836,51 @@ const ValdoriaAudio = (() => {
         return span;
     }
 
+    // -- Music/SFX separate controls --
+    function toggleMusic() {
+        _musicMuted = !_musicMuted;
+        localStorage.setItem(MUSIC_MUTED_KEY, _musicMuted ? '1' : '0');
+        if (_musicMuted) {
+            if (_audio) _audio.volume = 0;
+            // Also set global mute
+            _muted = true;
+            localStorage.setItem(STORAGE_KEY, '1');
+        } else {
+            _muted = false;
+            localStorage.setItem(STORAGE_KEY, '0');
+            if (_audio && !_audio.paused) {
+                _audio.volume = _volume;
+            } else if (_pendingTrack) {
+                _playTrack(_pendingTrack);
+            }
+        }
+        _syncUI();
+        return _musicMuted;
+    }
+
+    function toggleSFX() {
+        _sfxMuted = !_sfxMuted;
+        localStorage.setItem(SFX_MUTED_KEY, _sfxMuted ? '1' : '0');
+        return _sfxMuted;
+    }
+
+    function isMusicMuted() { return _musicMuted; }
+    function isSFXMuted() { return _sfxMuted; }
+
+    function setSFXVolume(val) {
+        _sfxVolume = Math.max(0, Math.min(1, val));
+        localStorage.setItem(SFX_VOLUME_KEY, _sfxVolume.toString());
+        if (_sfxVolume === 0 && !_sfxMuted) {
+            _sfxMuted = true;
+            localStorage.setItem(SFX_MUTED_KEY, '1');
+        }
+        if (_sfxVolume > 0 && _sfxMuted) {
+            _sfxMuted = false;
+            localStorage.setItem(SFX_MUTED_KEY, '0');
+        }
+    }
+    function getSFXVolume() { return _sfxVolume; }
+
     // -- Public API --
     return {
         init,
@@ -828,6 +892,12 @@ const ValdoriaAudio = (() => {
         isMuted,
         setVolume,
         getVolume,
+        toggleMusic,
+        toggleSFX,
+        isMusicMuted,
+        isSFXMuted,
+        setSFXVolume,
+        getSFXVolume,
         createMuteButton,
         TRACKS,
     };
