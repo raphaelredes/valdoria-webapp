@@ -881,8 +881,9 @@ _logFlushTimer = setInterval(_flushLogs, _LOG_FLUSH_INTERVAL);
 // Flush on page unload
 window.addEventListener('beforeunload', () => {
     _flushLogs();
-    // Best-effort notify server that WebApp is closing
-    if (S.apiBase && S.token && S.uid) {
+    // Best-effort notify server that WebApp is closing (dedup with error-reporter)
+    if (S.apiBase && S.token && S.uid && !window.__valdoria_close_sent) {
+        window.__valdoria_close_sent = true;
         try {
             navigator.sendBeacon(
                 S.apiBase + '/api/game/close',

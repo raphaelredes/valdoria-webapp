@@ -55,8 +55,9 @@ var ValdoriaErrors = (function () {
     // Flush on unload + send close beacon (universal safety net for all WebApps)
     window.addEventListener('beforeunload', function () {
         try { localStorage.setItem(_CONN_LOG_LS_KEY, JSON.stringify(_connLog)); } catch (e) { /* */ }
-        // Send close beacon so server can show the banner menu
-        if (_cfg.apiBase && _cfg.token && _cfg.uid && navigator.sendBeacon) {
+        // Send close beacon so server can show the banner menu (dedup with game-core)
+        if (_cfg.apiBase && _cfg.token && _cfg.uid && navigator.sendBeacon && !window.__valdoria_close_sent) {
+            window.__valdoria_close_sent = true;
             try {
                 navigator.sendBeacon(
                     _cfg.apiBase + '/api/game/close',
