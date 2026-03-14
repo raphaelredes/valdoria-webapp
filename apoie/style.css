@@ -2113,78 +2113,35 @@ body::after {
     will-change: transform;
 }
 
-/* Gradient placeholders (replaced by PNGs when available) */
+/* DALL-E 3 generated art layers */
 .ap-layer-sky {
-    background: linear-gradient(180deg,
-        #1a1520 0%,
-        #2a1e28 15%,
-        #3a2820 30%,
-        #5a3828 50%,
-        #8a5a30 70%,
-        #c47830 85%,
-        #d4944a 100%);
+    background-image: url('layers/layer-sky.jpg');
+    background-color: #1a1520;
     z-index: 1;
 }
 
 .ap-layer-mountains {
-    background: linear-gradient(180deg,
-        transparent 0%,
-        transparent 45%,
-        #2a2018 46%,
-        #342820 60%,
-        #3a2e22 100%);
+    background-image: url('layers/layer-mountains.jpg');
+    background-color: transparent;
     z-index: 2;
-    /* Simulated mountain silhouette with clip-path */
-    clip-path: polygon(
-        0% 100%, 0% 65%,
-        8% 52%, 15% 58%, 22% 45%, 30% 50%,
-        38% 38%, 42% 42%, 50% 32%, 55% 36%,
-        62% 40%, 68% 35%, 75% 48%, 82% 42%,
-        88% 50%, 95% 45%, 100% 55%, 100% 100%
-    );
+    mask-image: linear-gradient(to bottom, transparent 5%, black 35%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 35%);
 }
 
 .ap-layer-castle {
-    background: linear-gradient(180deg,
-        transparent 0%,
-        transparent 52%,
-        rgba(58, 44, 32, 0.9) 53%,
-        #3a2c20 100%);
+    background-image: url('layers/layer-castle.jpg');
+    background-color: transparent;
     z-index: 3;
-    /* Castle-like silhouette */
-    clip-path: polygon(
-        0% 100%, 0% 72%,
-        10% 72%, 12% 62%, 14% 62%, 14% 72%,
-        40% 72%, 42% 55%, 44% 55%, 44% 50%, 46% 50%,
-        47% 42%, 49% 42%, 50% 38%, 51% 42%, 53% 42%,
-        54% 50%, 56% 50%, 56% 55%, 58% 55%, 60% 72%,
-        86% 72%, 86% 62%, 88% 62%, 90% 72%,
-        100% 72%, 100% 100%
-    );
+    mask-image: linear-gradient(to bottom, transparent 10%, black 40%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 10%, black 40%);
 }
 
 .ap-layer-forest {
-    background: linear-gradient(180deg,
-        transparent 0%,
-        transparent 68%,
-        #241e18 69%,
-        #1e1812 100%);
+    background-image: url('layers/layer-forest.jpg');
+    background-color: transparent;
     z-index: 4;
-    /* Tree line silhouette */
-    clip-path: polygon(
-        0% 100%, 0% 78%,
-        3% 72%, 5% 78%, 8% 68%, 10% 75%,
-        13% 65%, 16% 73%, 18% 62%, 20% 70%,
-        23% 60%, 25% 68%, 28% 58%, 30% 72%,
-        33% 66%, 35% 74%, 38% 63%, 40% 71%,
-        43% 60%, 45% 69%, 48% 56%, 50% 66%,
-        53% 58%, 55% 67%, 58% 55%, 60% 65%,
-        63% 58%, 65% 68%, 68% 60%, 70% 72%,
-        73% 62%, 75% 70%, 78% 60%, 80% 68%,
-        83% 58%, 85% 66%, 88% 62%, 90% 72%,
-        93% 65%, 95% 74%, 98% 68%, 100% 78%,
-        100% 100%
-    );
+    mask-image: linear-gradient(to bottom, transparent 20%, black 55%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 20%, black 55%);
 }
 
 .ap-layer-mist {
@@ -2205,13 +2162,16 @@ body::after {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    padding: 40px 20px;
+    background: radial-gradient(ellipse at center, rgba(20, 16, 12, 0.65) 0%, rgba(20, 16, 12, 0.35) 50%, transparent 80%);
+    border-radius: 24px;
 }
 
 .ap-hero-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: clamp(28px, 7vw, 48px);
     color: var(--v-gold, #c4953a);
-    text-shadow: 0 0 30px rgba(196, 149, 58, 0.5), 0 2px 4px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 0 40px rgba(196, 149, 58, 0.6), 0 2px 8px rgba(0, 0, 0, 0.9), 0 0 80px rgba(0, 0, 0, 0.5);
     letter-spacing: 4px;
     text-transform: uppercase;
     margin: 0 0 12px;
