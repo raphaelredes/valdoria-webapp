@@ -11,7 +11,7 @@ const ValdoriaAudio = (() => {
     const STORAGE_KEY = 'valdoria_audio_muted';
     const VOLUME_KEY = 'valdoria_audio_volume';
     const CROSSFADE_MS = 1200;
-    const DEFAULT_VOLUME = 0.5;
+    const DEFAULT_VOLUME = 0.3;
     const NO_LOOP_TRACKS = ['victory', 'defeat', 'levelup'];
 
     // Base URL for audio files (relative to webapp root)
@@ -110,6 +110,7 @@ const ValdoriaAudio = (() => {
 
         audio.play().then(() => {
             _crossfadeIn(audio);
+            _syncUI();
         }).catch(e => {
             console.warn('[AUDIO] Play blocked:', e.message);
             _pendingTrack = trackKey;
@@ -209,6 +210,7 @@ const ValdoriaAudio = (() => {
         _currentTrack = '';
         _pendingTrack = '';
         _looping = false;
+        _syncUI();
     }
 
     function playSFX(trackKey) {
@@ -287,8 +289,24 @@ const ValdoriaAudio = (() => {
     }
 
     // =============================================
-    // AUTO-INJECTED VOLUME CONTROL UI
+    // AUTO-INJECTED VOLUME CONTROL UI v2.0
+    // Medieval theme, bottom-right position, SVG icons,
+    // first-time hint, auto-detect bottom bar offset
     // =============================================
+
+    const HINT_KEY = 'valdoria_audio_hint_seen';
+
+    // SVG speaker icons (inline, 18x18, parchment color via currentColor)
+    const _SVG_MUTED = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+    const _SVG_LOW = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+    const _SVG_HIGH = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+
+    function _updateBottomOffset() {
+        var bar = document.getElementById('bottom-panel') || document.getElementById('bottom-bar');
+        if (bar && bar.offsetHeight > 0) {
+            document.documentElement.style.setProperty('--va-bottom-offset', (bar.offsetHeight + 8) + 'px');
+        }
+    }
 
     function _injectUI() {
         if (_uiInjected) return;
@@ -299,28 +317,28 @@ const ValdoriaAudio = (() => {
         style.textContent = `
             .va-ctrl {
                 position: fixed;
-                top: 8px;
+                bottom: var(--va-bottom-offset, 8px);
                 right: 8px;
                 z-index: 200;
                 display: flex;
                 align-items: center;
                 gap: 0;
+                transition: bottom 0.3s ease;
             }
             .va-btn {
                 width: 36px;
                 height: 36px;
                 border-radius: 50%;
-                border: 1px solid rgba(112, 66, 20, 0.4);
-                background: rgba(42, 36, 32, 0.85);
-                color: var(--v-text, #d4c8b0);
-                font-size: 16px;
+                border: 1px solid var(--v-border, #4a3828);
+                background: var(--v-bg-raised, #332a22);
+                color: var(--v-text-dim, #8a7a68);
+                font-size: 15px;
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                backdrop-filter: blur(4px);
-                -webkit-backdrop-filter: blur(4px);
-                transition: opacity 0.2s, transform 0.15s;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                transition: opacity 0.2s, transform 0.15s, box-shadow 0.3s, color 0.3s;
                 padding: 0;
                 line-height: 1;
                 flex-shrink: 0;
@@ -328,6 +346,11 @@ const ValdoriaAudio = (() => {
             .va-btn:active {
                 transform: scale(0.9);
                 opacity: 0.8;
+            }
+            .va-btn.va-playing {
+                color: var(--v-gold, #c4953a);
+                border-color: rgba(196,149,58,0.4);
+                box-shadow: 0 0 8px rgba(196,149,58,0.2);
             }
             .va-slider-wrap {
                 overflow: hidden;
@@ -346,15 +369,13 @@ const ValdoriaAudio = (() => {
                 appearance: none;
                 width: 100px;
                 height: 28px;
-                background: rgba(42, 36, 32, 0.85);
-                border: 1px solid rgba(112, 66, 20, 0.4);
+                background: var(--v-bg-raised, #332a22);
+                border: 1px solid var(--v-border, #4a3828);
                 border-right: none;
                 border-radius: 14px 0 0 14px;
                 outline: none;
                 margin: 0;
                 padding: 0 8px;
-                backdrop-filter: blur(4px);
-                -webkit-backdrop-filter: blur(4px);
                 cursor: pointer;
             }
             .va-slider::-webkit-slider-thumb {
@@ -363,16 +384,16 @@ const ValdoriaAudio = (() => {
                 width: 18px;
                 height: 18px;
                 border-radius: 50%;
-                background: var(--v-text, #d4c8b0);
-                border: 2px solid rgba(112, 66, 20, 0.6);
+                background: var(--v-gold, #c4953a);
+                border: 2px solid var(--v-border, #4a3828);
                 cursor: pointer;
             }
             .va-slider::-moz-range-thumb {
                 width: 18px;
                 height: 18px;
                 border-radius: 50%;
-                background: var(--v-text, #d4c8b0);
-                border: 2px solid rgba(112, 66, 20, 0.6);
+                background: var(--v-gold, #c4953a);
+                border: 2px solid var(--v-border, #4a3828);
                 cursor: pointer;
             }
             .va-slider::-webkit-slider-runnable-track {
@@ -392,6 +413,42 @@ const ValdoriaAudio = (() => {
                 opacity: 0;
                 pointer-events: none;
             }
+            /* First-time hint */
+            .va-hint {
+                position: absolute;
+                bottom: 100%;
+                right: 0;
+                margin-bottom: 8px;
+                background: var(--v-bg-raised, #332a22);
+                border: 1px solid rgba(196,149,58,0.4);
+                border-radius: 8px;
+                padding: 6px 12px;
+                font-family: var(--v-font, 'MedievalSharp', 'Cinzel', serif);
+                font-size: 12px;
+                color: var(--v-gold, #c4953a);
+                white-space: nowrap;
+                pointer-events: none;
+                opacity: 0;
+                animation: vaHintIn 0.4s 0.8s ease forwards, vaHintOut 0.5s 5s ease forwards;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            }
+            .va-hint::after {
+                content: '';
+                position: absolute;
+                top: 100%;
+                right: 12px;
+                border: 5px solid transparent;
+                border-top-color: rgba(196,149,58,0.4);
+            }
+            .va-btn.va-hint-pulse {
+                animation: vaGlowPulse 1.5s ease infinite !important;
+            }
+            @keyframes vaGlowPulse {
+                0%,100% { box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+                50% { box-shadow: 0 0 0 6px rgba(196,149,58,0.25), 0 0 12px rgba(196,149,58,0.15); }
+            }
+            @keyframes vaHintIn { to { opacity: 1; } }
+            @keyframes vaHintOut { to { opacity: 0; visibility: hidden; } }
         `;
         document.head.appendChild(style);
 
@@ -429,12 +486,22 @@ const ValdoriaAudio = (() => {
         const oldBtn = document.querySelector('.audio-mute-btn');
         if (oldBtn) oldBtn.remove();
 
+        // Auto-detect bottom bar offset
+        setTimeout(_updateBottomOffset, 300);
+        setTimeout(_updateBottomOffset, 1000);
+        window.addEventListener('resize', _updateBottomOffset);
+        // Watch for panel changes (immersive toggle, footer render)
+        const _mo = new MutationObserver(() => { setTimeout(_updateBottomOffset, 50); });
+        const _bp = document.getElementById('bottom-panel') || document.getElementById('bottom-bar');
+        if (_bp) _mo.observe(_bp, { attributes: true, childList: true, attributeFilter: ['class', 'style'] });
+
         // Events
         let _sliderOpen = false;
         let _closeTimer = null;
 
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
+            _dismissHint(btn);
             _sliderOpen = !_sliderOpen;
             sliderWrap.classList.toggle('open', _sliderOpen);
             if (_closeTimer) clearTimeout(_closeTimer);
@@ -450,6 +517,7 @@ const ValdoriaAudio = (() => {
         let _longPress = null;
         btn.addEventListener('pointerdown', () => {
             _longPress = setTimeout(() => {
+                _dismissHint(btn);
                 toggleMute();
                 slider.value = String(Math.round(_muted ? 0 : _volume * 100));
                 _longPress = null;
@@ -488,19 +556,60 @@ const ValdoriaAudio = (() => {
                 if (_closeTimer) clearTimeout(_closeTimer);
             }
         });
+
+        // Show first-time hint after a short delay
+        _showFirstTimeHint(btn, wrap);
     }
 
+    // -- First-time audio hint --
+    let _hintDismissed = false;
+    function _showFirstTimeHint(btn, wrap) {
+        try {
+            if (localStorage.getItem(HINT_KEY)) return;
+        } catch(e) { return; }
+
+        // Wait for loading to finish before showing hint
+        const _tryShow = () => {
+            const loading = document.querySelector('.loading:not(.hidden), .loading-overlay:not(.hidden), #loading:not([style*="display: none"])');
+            if (loading) { setTimeout(_tryShow, 1000); return; }
+
+            if (_hintDismissed) return;
+            const hint = document.createElement('div');
+            hint.className = 'va-hint';
+            hint.textContent = '\u266B Toque para ajustar o som';
+            wrap.appendChild(hint);
+            btn.classList.add('va-hint-pulse');
+
+            // Auto-dismiss after 5.5s (matches animation)
+            setTimeout(() => { _dismissHint(btn); }, 5500);
+        };
+        setTimeout(_tryShow, 1500);
+    }
+
+    function _dismissHint(btn) {
+        if (_hintDismissed) return;
+        _hintDismissed = true;
+        try { localStorage.setItem(HINT_KEY, '1'); } catch(e) {}
+        if (btn) btn.classList.remove('va-hint-pulse');
+        const hint = document.querySelector('.va-hint');
+        if (hint) hint.remove();
+    }
+
+    // -- SVG icon update --
     function _updateBtnIcon(btn) {
         if (!btn) return;
         if (_muted || _volume === 0) {
-            btn.textContent = '🔇';
+            btn.innerHTML = _SVG_MUTED;
             btn.title = 'Som desativado';
+            btn.classList.remove('va-playing');
         } else if (_volume < 0.5) {
-            btn.textContent = '🔉';
+            btn.innerHTML = _SVG_LOW;
             btn.title = 'Volume: ' + Math.round(_volume * 100) + '%';
+            btn.classList.toggle('va-playing', !!(_audio && !_audio.paused));
         } else {
-            btn.textContent = '🔊';
+            btn.innerHTML = _SVG_HIGH;
             btn.title = 'Volume: ' + Math.round(_volume * 100) + '%';
+            btn.classList.toggle('va-playing', !!(_audio && !_audio.paused));
         }
     }
 

@@ -174,8 +174,8 @@
 
 /* ─── Buttons at Top (nav_position=top) ─── */
 .buttons-top {
-    margin-bottom: 10px;
-    padding-bottom: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
     border-bottom: 1px solid var(--v-border, #4a3828);
 }
 
@@ -184,7 +184,19 @@
 }
 
 .buttons-top .btn-row + .btn-row {
-    margin-top: 4px;
+    margin-top: 3px;
+}
+
+/* Reduce banner height when nav is at top (more space for buttons) */
+.nav-at-top .screen-banner img {
+    max-height: clamp(60px, 12vw, 90px);
+}
+
+/* Voltar button after content when nav at top — subtle separator */
+.nav-at-top .screen-content > .btn-row:last-child {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid var(--v-border, #4a3828);
 }
 
 
@@ -225,15 +237,7 @@
     overflow-x: hidden;
 }
 
-/* Footer rendered at top of content (nav_position=top) */
-.footer-top-row {
-    display: flex;
-    gap: 1px;
-    justify-content: space-around;
-    overflow-x: hidden;
-    margin-bottom: 4px;
-    padding: 0 2px;
-}
+
 
 /* ─── Offline Badge ─── */
 .offline-badge {
@@ -309,14 +313,14 @@
 /* ─── Connection Status Dot ─── */
 .connection-dot {
     position: fixed;
-    top: 10px;
+    bottom: calc(var(--bottom-panel-h, 120px) + 14px);
     left: 10px;
     width: 8px;
     height: 8px;
     border-radius: 50%;
     background: #4ade80;
     z-index: 18;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, bottom 0.3s ease;
     box-shadow: 0 0 4px rgba(74,222,128,0.4);
 }
 .connection-dot.offline {
