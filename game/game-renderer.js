@@ -204,16 +204,25 @@ function renderScreen(screen) {
                 actionRows.push(row);
             }
         }
-        // Render action buttons at TOP of content (before text)
+        // Render action buttons AFTER the header (title stays above buttons)
         if (actionRows.length > 0) {
             const wrap = document.createElement('div');
             wrap.className = 'buttons-top';
             renderButtons(wrap, actionRows);
-            const firstChild = contentEl.firstChild;
-            if (firstChild) {
-                contentEl.insertBefore(wrap, firstChild);
-            } else {
+            // Insert after the location header so title stays on top
+            const header = contentEl.querySelector('.v-location-header');
+            if (header && header.nextSibling) {
+                contentEl.insertBefore(wrap, header.nextSibling);
+            } else if (header) {
                 contentEl.appendChild(wrap);
+            } else {
+                // No header found — fallback to top
+                const firstChild = contentEl.firstChild;
+                if (firstChild) {
+                    contentEl.insertBefore(wrap, firstChild);
+                } else {
+                    contentEl.appendChild(wrap);
+                }
             }
         }
         // Render Voltar at the END of content (after text, allies, tracker)
