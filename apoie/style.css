@@ -2295,10 +2295,7 @@ body::after {
     outline-offset: 1px;
 }
 
-/* ─── Reduced Motion ─── */
-
-@media (prefers-reduced-motion: reduce) {
-    .ap-hero-particles { display: none !important; }
+/* Reduced motion rules consolidated at end of file */
     .ap-hero-icon,
     .ap-hero h1,
     .ap-hero-subtitle,
@@ -2563,6 +2560,45 @@ body::after {
 @keyframes apRingPulse {
     0%, 100% { opacity: 0.4; transform: scale(1); }
     50% { opacity: 0.8; transform: scale(1.08); }
+}
+
+/* ─── Player Navigation Buttons (Prev/Next) ─── */
+
+.ap-ctrl-prev, .ap-ctrl-next {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(196, 149, 58, 0.2);
+    background: rgba(196, 149, 58, 0.06);
+    color: var(--v-gold, #c4953a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s, opacity 0.3s;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0.7;
+}
+
+.ap-ctrl-prev:hover, .ap-ctrl-next:hover {
+    opacity: 1;
+    border-color: rgba(196, 149, 58, 0.5);
+    background: rgba(196, 149, 58, 0.12);
+    box-shadow: 0 0 10px rgba(196, 149, 58, 0.15);
+}
+
+.ap-ctrl-prev:active, .ap-ctrl-next:active {
+    transform: scale(0.88);
+}
+
+/* Ensure touch targets are 44px minimum */
+@media (pointer: coarse) {
+    .ap-ctrl-prev, .ap-ctrl-next {
+        min-width: 44px;
+        min-height: 44px;
+    }
 }
 
 .ap-player-meta {
@@ -2986,25 +3022,69 @@ body::after {
     text-shadow: 0 0 8px rgba(196, 149, 58, 0.3);
 }
 
-/* ─── Reduced Motion Overrides for New Elements ─── */
+/* ─── Mobile Performance Optimizations ─── */
+
+@media (max-width: 600px) {
+    /* Hide extra particles on mobile (keep only 6) */
+    .ap-e7, .ap-e8, .ap-e9, .ap-e10, .ap-e11, .ap-e12 {
+        display: none !important;
+    }
+
+    /* Reduce/remove backdrop-filter on mobile */
+    .ap-nav-scrolled {
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+
+    /* Simplify platinum tier on mobile (no conic-gradient) */
+    .ap-tier-card[data-tier="platinum"] {
+        border-image: none !important;
+        border: 1px solid rgba(180, 160, 220, 0.4) !important;
+    }
+
+    /* Reduce player button sizes slightly */
+    .ap-ctrl-prev, .ap-ctrl-next {
+        width: 32px;
+        height: 32px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+
+/* ─── Enhanced Reduced Motion (covers all animations) ─── */
 
 @media (prefers-reduced-motion: reduce) {
+    .ap-ember, .ap-qr-particle { display: none !important; }
+    .ap-hero-particles { display: none !important; }
+    .ap-story-icon { animation: none !important; }
+    .ap-tier-card[data-tier="platinum"] .ap-tier-icon { animation: none !important; }
+    .ap-tier-card[data-tier="silver"]::after { animation: none !important; }
+    .ap-player-controls::before { animation: none !important; }
+    .ap-player-btn.playing { animation: none !important; }
+    .ap-player-btn.playing::after { animation: none !important; }
+    .ap-player-wave.active span { animation: none !important; }
     .ap-parallax-layer { transform: none !important; }
     .ap-scroll-hint svg { animation: none !important; }
     .ap-ornament { animation: none !important; }
     .ap-reveal {
         opacity: 1 !important;
         transform: none !important;
-        transition: none !important;
+        transition-duration: 0.01ms !important;
     }
-    .ap-story-card,
-    .ap-impact-card {
+    .ap-story-card, .ap-impact-card {
         transform: none !important;
     }
-    .ap-impact-bar::after {
+    .ap-impact-bar::after { transition: none !important; }
+    .ap-hero-title { animation: none !important; }
+    .ap-cinematic .ap-hero-content,
+    .ap-cinematic .ap-hero-stats,
+    .ap-cinematic .ap-hero-cta,
+    .ap-cinematic .ap-hero-trust,
+    .ap-cinematic .ap-player {
+        opacity: 1 !important;
+        transform: none !important;
         transition: none !important;
     }
-    .ap-hero-title {
-        animation: none !important;
-    }
 }
+

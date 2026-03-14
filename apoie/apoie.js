@@ -411,8 +411,9 @@ function setupParallax() {
     const layers = document.querySelectorAll('.ap-parallax-layer');
     if (!layers.length) return;
 
-    // Check for reduced motion preference
+    // Skip parallax on reduced motion or mobile (performance)
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(max-width: 600px)').matches) return;
 
     const speeds = [0.1, 0.2, 0.35, 0.5, 0.65]; // back to front
     let ticking = false;
@@ -433,7 +434,7 @@ function setupParallax() {
 }
 
 // ── Soundtrack Player ──
-const _AP_AUDIO_BASE = '../shared/audio/';
+const _AP_AUDIO_BASE = 'https://raphaelredes.github.io/valdoria-webapp/shared/audio/';
 const _AP_TRACKS = {
     'Taverna':   ['tavern_ambient.mp3','tavern_ambient_2.mp3','tavern_ambient_3.mp3','tavern_ambient_4.mp3','tavern_ambient_5.mp3','tavern_ambient_6.mp3','tavern_ambient_7.mp3','tavern_ambient_8.mp3'],
     'Cidade':    ['city_day.mp3','city_day_2.mp3','city_day_3.mp3','city_day_4.mp3','city_day_5.mp3','city_day_6.mp3','city_day_7.mp3','city_day_8.mp3'],
@@ -448,16 +449,6 @@ const _AP_TRACKS = {
     'Boss':      ['boss_battle.mp3','boss_battle_2.mp3','boss_battle_3.mp3','boss_battle_4.mp3','boss_battle_5.mp3','boss_battle_6.mp3','boss_battle_7.mp3','boss_battle_8.mp3'],
 };
 
-// Section-specific track categories for contextual music
-const _AP_SECTION_TRACKS = {
-    'hero':    ['Prologo'],
-    'story':   ['Floresta', 'Montanha'],
-    'impact':  ['Cidade'],
-    'tiers':   ['Cidade', 'Taverna'],
-    'goals':   ['Floresta'],
-    'donate':  ['Taverna'],
-    'how':     ['Taverna'],
-};
 
 const _apAllTracks = [];
 for (const [name, files] of Object.entries(_AP_TRACKS)) {
@@ -468,14 +459,9 @@ let _apAudio = null;
 let _apPlaying = false;
 let _apLastFile = '';
 let _apRafId = null;
-let _apCurrentSection = 'hero';
 
-function _apPickRandom(categories) {
+function _apPickRandom() {
     let pool = _apAllTracks;
-    if (categories && categories.length) {
-        pool = _apAllTracks.filter(t => categories.includes(t.name));
-        if (!pool.length) pool = _apAllTracks;
-    }
     let pick;
     do { pick = pool[Math.floor(Math.random() * pool.length)]; }
     while (pick.file === _apLastFile && pool.length > 1);
@@ -500,28 +486,11 @@ function togglePlayer() {
     _apPlayRandom();
 }
 
-function _apPlayRandom(categories) {
-    if (_apAudio) { _apAudio.pause(); _apAudio.src = ''; }
-    var track = _apPickRandom(categories);
-    _apAudio = new Audio(_AP_AUDIO_BASE + track.file);
-    _apAudio.volume = 0.15;
-    _apAudio.addEventListener('ended', function() {
-        // Play next track from current section's categories
-        var cats = _AP_SECTION_TRACKS[_apCurrentSection] || null;
-        _apPlayRandom(cats);
-    });
-    _apAudio.addEventListener('error', function() {
-        console.warn('[APOIE] Audio error:', track.file);
-        setTimeout(function() { _apPlayRandom(); }, 500);
-    });
-    _apAudio.play().then(function() {
-        _apPlaying = true;
-        document.getElementById('ap-track-name').textContent = '\u266B ' + track.name;
-        _apUpdateUI();
-        _apAnimateBar();
-    }).catch(function(e) {
-        console.warn('[APOIE] Play blocked:', e.message);
-    });
+function _apPlayRandom() {
+    var track = _apPickRandom();
+    _apTrackHistory = [track];
+    _apHistoryIdx = 0;
+    _apPlayTrack(track);
 }
 
 function _apUpdateUI() {
@@ -548,38 +517,62 @@ function _apAnimateBar() {
     _apRafId = requestAnimationFrame(tick);
 }
 
-// ── Contextual Soundtrack (crossfade on section change) ──
-function setupSoundtrackContextual() {
-    const sectionIds = Object.keys(_AP_SECTION_TRACKS);
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && _apPlaying) {
-                const newSection = entry.target.id;
-                if (newSection !== _apCurrentSection && _AP_SECTION_TRACKS[newSection]) {
-                    _apCurrentSection = newSection;
-                    // Crossfade: fade out current, play new from section category
-                    if (_apAudio && _apPlaying) {
-                        const oldAudio = _apAudio;
-                        let vol = oldAudio.volume;
-                        const fadeOut = setInterval(() => {
-                            vol -= 0.02;
-                            if (vol <= 0) {
-                                clearInterval(fadeOut);
-                                oldAudio.pause();
-                                _apPlayRandom(_AP_SECTION_TRACKS[newSection]);
-                            } else {
-                                oldAudio.volume = vol;
-                            }
-                        }, 25);
-                    }
-                }
-            }
-        });
-    }, { threshold: 0.4 });
 
-    sectionIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) observer.observe(el);
+// ── Track Navigation (Next/Previous) ──
+let _apTrackHistory = [];
+let _apHistoryIdx = -1;
+let _apCurrentTrack = null;
+
+function _apNextTrack() {
+    if (!_apPlaying && !_apAudio) return;
+    // If we have forward history, use it
+    if (_apHistoryIdx < _apTrackHistory.length - 1) {
+        _apHistoryIdx++;
+        _apPlayTrack(_apTrackHistory[_apHistoryIdx]);
+    } else {
+        // Pick a new random track
+        var track = _apPickRandom();
+        _apTrackHistory.push(track);
+        _apHistoryIdx = _apTrackHistory.length - 1;
+        _apPlayTrack(track);
+    }
+}
+
+function _apPrevTrack() {
+    if (!_apPlaying && !_apAudio) return;
+    // If less than 3s played, go to previous track
+    if (_apAudio && _apAudio.currentTime > 3) {
+        _apAudio.currentTime = 0;
+        return;
+    }
+    if (_apHistoryIdx > 0) {
+        _apHistoryIdx--;
+        _apPlayTrack(_apTrackHistory[_apHistoryIdx]);
+    } else if (_apAudio) {
+        _apAudio.currentTime = 0;
+    }
+}
+
+function _apPlayTrack(track) {
+    if (_apAudio) { _apAudio.pause(); _apAudio.src = ''; }
+    _apCurrentTrack = track;
+    _apLastFile = track.file;
+    _apAudio = new Audio(_AP_AUDIO_BASE + track.file);
+    _apAudio.volume = 0.15;
+    _apAudio.addEventListener('ended', function() {
+        _apNextTrack();
+    });
+    _apAudio.addEventListener('error', function() {
+        console.warn('[APOIE] Audio error:', track.file);
+        setTimeout(function() { _apNextTrack(); }, 500);
+    });
+    _apAudio.play().then(function() {
+        _apPlaying = true;
+        document.getElementById('ap-track-name').textContent = '\u266B ' + track.name;
+        _apUpdateUI();
+        _apAnimateBar();
+    }).catch(function(e) {
+        console.warn('[APOIE] Play blocked:', e.message);
     });
 }
 
@@ -631,7 +624,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNavbar();
     setupParallax();
     observeReveals();
-    setupSoundtrackContextual();
     setupTimelineAnimation();
 
     // Cinematic hero entrance

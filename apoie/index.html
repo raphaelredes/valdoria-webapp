@@ -78,10 +78,16 @@
         </div>
         <div class="ap-player" id="ap-player">
             <div class="ap-player-label">&#x266B; Trilha Sonora Original</div>
-            <div class="ap-player-controls" onclick="togglePlayer()">
-                <button class="ap-player-btn" id="ap-play-btn" aria-label="Tocar trilha sonora">
+            <div class="ap-player-controls">
+                <button class="ap-ctrl-prev" onclick="event.stopPropagation(); _apPrevTrack()" aria-label="Faixa anterior">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="3" height="14"/><polygon points="21 5 10 12 21 19"/></svg>
+                </button>
+                <button class="ap-player-btn" id="ap-play-btn" onclick="togglePlayer()" aria-label="Tocar trilha sonora">
                     <svg id="ap-icon-play" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21"/></svg>
                     <svg id="ap-icon-pause" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+                </button>
+                <button class="ap-ctrl-next" onclick="event.stopPropagation(); _apNextTrack()" aria-label="Próxima faixa">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="3 5 14 12 3 19"/><rect x="18" y="5" width="3" height="14"/></svg>
                 </button>
                 <div class="ap-player-meta">
                     <div class="ap-player-track" id="ap-track-name">Toque para ouvir</div>
