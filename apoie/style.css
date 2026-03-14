@@ -748,7 +748,7 @@ body::after {
 .ap-tg-badge-anon {
     background: rgba(255, 193, 7, 0.1);
     border-color: rgba(255, 193, 7, 0.3);
-    color: #ffc107;
+    color: var(--v-warning);
     font-size: 12px;
 }
 
@@ -1858,7 +1858,7 @@ body::after {
 }
 
 .ap-qr-countdown.ap-countdown-warn {
-    color: #ff9800;
+    color: var(--v-rarity-legendary);
     font-weight: 600;
 }
 
@@ -2092,4 +2092,371 @@ body::after {
 @keyframes apWave {
     0%, 100% { height: 6px; }
     50% { height: 22px; }
+}
+
+
+/* ─── Parallax Hero Layers ─── */
+
+.ap-parallax-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.ap-parallax-layer {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    will-change: transform;
+}
+
+/* Gradient placeholders (replaced by PNGs when available) */
+.ap-layer-sky {
+    background: linear-gradient(180deg,
+        #1a1520 0%,
+        #2a1e28 15%,
+        #3a2820 30%,
+        #5a3828 50%,
+        #8a5a30 70%,
+        #c47830 85%,
+        #d4944a 100%);
+    z-index: 1;
+}
+
+.ap-layer-mountains {
+    background: linear-gradient(180deg,
+        transparent 0%,
+        transparent 45%,
+        #2a2018 46%,
+        #342820 60%,
+        #3a2e22 100%);
+    z-index: 2;
+    /* Simulated mountain silhouette with clip-path */
+    clip-path: polygon(
+        0% 100%, 0% 65%,
+        8% 52%, 15% 58%, 22% 45%, 30% 50%,
+        38% 38%, 42% 42%, 50% 32%, 55% 36%,
+        62% 40%, 68% 35%, 75% 48%, 82% 42%,
+        88% 50%, 95% 45%, 100% 55%, 100% 100%
+    );
+}
+
+.ap-layer-castle {
+    background: linear-gradient(180deg,
+        transparent 0%,
+        transparent 52%,
+        rgba(58, 44, 32, 0.9) 53%,
+        #3a2c20 100%);
+    z-index: 3;
+    /* Castle-like silhouette */
+    clip-path: polygon(
+        0% 100%, 0% 72%,
+        10% 72%, 12% 62%, 14% 62%, 14% 72%,
+        40% 72%, 42% 55%, 44% 55%, 44% 50%, 46% 50%,
+        47% 42%, 49% 42%, 50% 38%, 51% 42%, 53% 42%,
+        54% 50%, 56% 50%, 56% 55%, 58% 55%, 60% 72%,
+        86% 72%, 86% 62%, 88% 62%, 90% 72%,
+        100% 72%, 100% 100%
+    );
+}
+
+.ap-layer-forest {
+    background: linear-gradient(180deg,
+        transparent 0%,
+        transparent 68%,
+        #241e18 69%,
+        #1e1812 100%);
+    z-index: 4;
+    /* Tree line silhouette */
+    clip-path: polygon(
+        0% 100%, 0% 78%,
+        3% 72%, 5% 78%, 8% 68%, 10% 75%,
+        13% 65%, 16% 73%, 18% 62%, 20% 70%,
+        23% 60%, 25% 68%, 28% 58%, 30% 72%,
+        33% 66%, 35% 74%, 38% 63%, 40% 71%,
+        43% 60%, 45% 69%, 48% 56%, 50% 66%,
+        53% 58%, 55% 67%, 58% 55%, 60% 65%,
+        63% 58%, 65% 68%, 68% 60%, 70% 72%,
+        73% 62%, 75% 70%, 78% 60%, 80% 68%,
+        83% 58%, 85% 66%, 88% 62%, 90% 72%,
+        93% 65%, 95% 74%, 98% 68%, 100% 78%,
+        100% 100%
+    );
+}
+
+.ap-layer-mist {
+    background: linear-gradient(180deg,
+        transparent 0%,
+        transparent 75%,
+        rgba(42, 36, 32, 0.3) 85%,
+        rgba(42, 36, 32, 0.7) 95%,
+        #2a2420 100%);
+    z-index: 5;
+}
+
+/* Hero content above layers */
+.ap-hero-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.ap-hero-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: clamp(28px, 7vw, 48px);
+    color: var(--v-gold, #c4953a);
+    text-shadow: 0 0 30px rgba(196, 149, 58, 0.5), 0 2px 4px rgba(0, 0, 0, 0.6);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin: 0 0 12px;
+    animation: v-fadeIn 1s ease 0.3s both, ap-titleShimmer 6s ease-in-out 2s infinite;
+}
+
+.ap-hero-icon {
+    font-size: clamp(48px, 10vw, 72px);
+    animation: v-fadeIn 0.6s ease both, ap-iconFloat 4s ease-in-out 1s infinite;
+}
+
+/* ─── Scroll Hint ─── */
+
+.ap-scroll-hint {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--v-text-dim, #a09484);
+    font-size: 12px;
+    letter-spacing: 1px;
+    animation: v-fadeIn 1s ease 1.5s both;
+    transition: opacity 0.3s ease;
+}
+
+.ap-scroll-hint svg {
+    animation: ap-scrollBounce 2s ease-in-out infinite;
+}
+
+@keyframes ap-scrollBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+}
+
+/* ─── Ornament Dividers ─── */
+
+.ap-ornament {
+    text-align: center;
+    font-size: 14px;
+    color: var(--v-gold-dim, #9a7530);
+    letter-spacing: 12px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+    animation: ap-runePulse 4s ease-in-out infinite;
+}
+
+/* ─── Chapter Sections ─── */
+
+.ap-chapter {
+    position: relative;
+}
+
+/* ─── Story Grid ─── */
+
+.ap-story-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+@media (min-width: 600px) {
+    .ap-story-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.ap-story-card {
+    background: linear-gradient(165deg, var(--v-bg-card, #2e2520) 0%, #241e18 100%);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: 12px;
+    padding: 24px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.ap-story-card:hover {
+    border-color: var(--v-gold-dim, #9a7530);
+    box-shadow: 0 0 20px rgba(196, 149, 58, 0.12), 0 8px 24px rgba(0, 0, 0, 0.3);
+    transform: translateY(-4px);
+}
+
+.ap-story-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.ap-story-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: 15px;
+    color: var(--v-gold, #c4953a);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.ap-story-text {
+    font-size: 13px;
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.6;
+}
+
+/* ─── Impact Grid ─── */
+
+.ap-impact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+@media (max-width: 480px) {
+    .ap-impact-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ap-impact-card {
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.ap-impact-card:hover {
+    border-color: var(--v-gold-dim, #9a7530);
+    box-shadow: 0 0 12px rgba(196, 149, 58, 0.1);
+}
+
+.ap-impact-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.ap-impact-bar {
+    height: 6px;
+    background: var(--v-bg-raised, #332a22);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.ap-impact-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--v-gold-dim, #9a7530), var(--v-gold, #c4953a));
+    border-radius: 3px;
+    transition: width 1.5s ease-out 0.3s;
+}
+
+.ap-impact-bar.ap-bar-animated::after {
+    width: var(--bar-width, 0%);
+}
+
+.ap-impact-name {
+    font-size: 13px;
+    color: var(--v-text, #d4c8b0);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.ap-impact-pct {
+    font-size: 14px;
+    color: var(--v-gold, #c4953a);
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.ap-impact-desc {
+    font-size: 11px;
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.4;
+}
+
+.ap-impact-note {
+    max-width: 600px;
+    margin: 24px auto 0;
+    font-size: 13px;
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.6;
+    text-align: center;
+    font-style: italic;
+}
+
+/* ─── Reveal Animation ─── */
+
+.ap-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-delay: var(--ap-delay, 0s);
+}
+
+.ap-reveal.ap-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ─── Footer Links Row ─── */
+
+.ap-footer-links a {
+    color: var(--v-gold-dim, #9a7530);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s ease;
+}
+
+.ap-footer-links a:hover {
+    color: var(--v-gold, #c4953a);
+    text-shadow: 0 0 8px rgba(196, 149, 58, 0.3);
+}
+
+/* ─── Reduced Motion Overrides for New Elements ─── */
+
+@media (prefers-reduced-motion: reduce) {
+    .ap-parallax-layer { transform: none !important; }
+    .ap-scroll-hint svg { animation: none !important; }
+    .ap-ornament { animation: none !important; }
+    .ap-reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+    .ap-story-card,
+    .ap-impact-card {
+        transform: none !important;
+    }
+    .ap-impact-bar::after {
+        transition: none !important;
+    }
+    .ap-hero-title {
+        animation: none !important;
+    }
 }
