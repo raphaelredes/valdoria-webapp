@@ -459,6 +459,8 @@ let _apAudio = null;
 let _apPlaying = false;
 let _apLastFile = '';
 let _apRafId = null;
+let _apPreloadedTrack = null;
+let _apPreloadedAudio = null;
 
 function _apPickRandom() {
     let pool = _apAllTracks;
@@ -467,6 +469,20 @@ function _apPickRandom() {
     while (pick.file === _apLastFile && pool.length > 1);
     _apLastFile = pick.file;
     return pick;
+}
+
+function _apPreloadOne() {
+    if (_apPreloadedAudio) return;
+    var track = _apPickRandom();
+    _apPreloadedTrack = track;
+    var audio = new Audio(_AP_AUDIO_BASE + track.file);
+    audio.preload = 'auto';
+    audio.volume = 0.25;
+    _apPreloadedAudio = audio;
+    audio.addEventListener('error', function() {
+        _apPreloadedAudio = null;
+        _apPreloadedTrack = null;
+    });
 }
 
 function togglePlayer() {
@@ -483,7 +499,11 @@ function togglePlayer() {
         _apAnimateBar();
         return;
     }
-    _apPlayRandom();
+    if (_apPreloadedAudio && _apPreloadedTrack) {
+        _apUsePreloaded();
+    } else {
+        _apPlayRandom();
+    }
 }
 
 function _apPlayRandom() {
@@ -491,6 +511,48 @@ function _apPlayRandom() {
     _apTrackHistory = [track];
     _apHistoryIdx = 0;
     _apPlayTrack(track);
+}
+
+function _apUsePreloaded() {
+    var track = _apPreloadedTrack;
+    var audio = _apPreloadedAudio;
+    _apPreloadedTrack = null;
+    _apPreloadedAudio = null;
+    _apDestroyAudio();
+    _apCurrentTrack = track;
+    _apLastFile = track.file;
+    _apAudio = audio;
+    _apTrackHistory = [track];
+    _apHistoryIdx = 0;
+    var _errorCount = 0;
+    audio.onended = function() {
+        if (audio !== _apAudio) return;
+        _apNextTrack();
+    };
+    audio.onerror = function() {
+        if (audio !== _apAudio) return;
+        _errorCount++;
+        console.warn('[APOIE] Audio error:', track.file, '(attempt ' + _errorCount + ')');
+        if (_errorCount < 3) {
+            setTimeout(function() {
+                if (audio === _apAudio) _apNextTrack();
+            }, 1000);
+        } else {
+            console.error('[APOIE] Too many audio errors, stopping player');
+            _apPlaying = false;
+            _apUpdateUI();
+        }
+    };
+    audio.play().then(function() {
+        if (audio !== _apAudio) return;
+        _apPlaying = true;
+        document.getElementById('ap-track-name').textContent = '\u266B ' + track.name;
+        _apUpdateUI();
+        _apAnimateBar();
+    }).catch(function(e) {
+        console.warn('[APOIE] Preloaded play blocked, falling back:', e.message);
+        _apPlayRandom();
+    });
 }
 
 function _apUpdateUI() {
@@ -554,12 +616,18 @@ function _apPrevTrack() {
 }
 
 function _apDestroyAudio() {
-    if (!_apAudio) return;
-    _apAudio.onended = null;
-    _apAudio.onerror = null;
-    _apAudio.pause();
-    try { _apAudio.src = ''; _apAudio.load(); } catch(e) {}
-    _apAudio = null;
+    if (_apAudio) {
+        _apAudio.onended = null;
+        _apAudio.onerror = null;
+        _apAudio.pause();
+        try { _apAudio.src = ''; _apAudio.load(); } catch(e) {}
+        _apAudio = null;
+    }
+    if (_apPreloadedAudio) {
+        try { _apPreloadedAudio.src = ''; _apPreloadedAudio.load(); } catch(e) {}
+        _apPreloadedAudio = null;
+        _apPreloadedTrack = null;
+    }
 }
 
 function _apPlayTrack(track) {
@@ -683,6 +751,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupParallax();
     observeReveals();
     setupTimelineAnimation();
+
+    // Preload first audio track after critical content
+    setTimeout(_apPreloadOne, 3000);
 
     // Cinematic hero entrance
     requestAnimationFrame(() => {
