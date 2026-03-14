@@ -174,6 +174,58 @@
 }
 
 
+
+/* ─── Ally Grid (2-column layout for 3+ members) ─── */
+.ally-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+}
+.ally-card.ally-compact {
+    min-height: 40px;
+    margin-bottom: 0;
+}
+.ally-compact .ally-info {
+    padding: 4px 6px;
+}
+.ally-compact .ally-name-row {
+    margin-bottom: 0;
+}
+.ally-compact .ally-name {
+    font-size: 11px;
+    max-width: 80px;
+}
+.ally-compact .ally-lvl {
+    font-size: 9px;
+    padding: 0 3px;
+}
+.ally-ico-inline {
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-right: 2px;
+}
+.ally-compact .ally-bar-track {
+    height: 4px;
+}
+.ally-compact .ally-bar-label {
+    font-size: 9px;
+    min-width: 30px;
+}
+.ally-compact .ally-bar-row {
+    gap: 4px;
+    margin-bottom: 1px;
+}
+.ally-compact .ally-aff {
+    font-size: 8px;
+    margin-top: 1px;
+}
+.ally-compact .ally-se {
+    font-size: 9px;
+}
+.ally-compact .ally-dead-label {
+    font-size: 10px;
+}
+
 /* ─── Inn Member Selection Cards ─── */
 .inn-select-cards {
     margin: 8px 0;

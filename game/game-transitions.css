@@ -106,6 +106,15 @@
     animation: headerReveal 0.5s ease-out 0.1s both;
 }
 
+/* ─── Screen Shake (on impact events) ─── */
+.shake-light {
+    animation: screenShake 0.35s ease-out;
+}
+.shake-heavy {
+    animation: screenShake 0.5s ease-out;
+    --shake-scale: 1.3;
+}
+
 /* ─── Ambient Particles (Canvas overlay) ─── */
 #ambient-particles {
     position: fixed;

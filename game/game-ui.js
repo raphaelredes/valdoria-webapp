@@ -23,6 +23,15 @@ const _LOADING_TIPS = [
     '🧪 Dica: Poções podem ser usadas durante o combate como ação bônus.',
     '⭐ Dica: Suba de nível para desbloquear novas habilidades de classe.',
     '🐉 Dica: Inimigos mais fortes concedem mais XP e ouro.',
+    // Dicas táticas
+    '🎯 Dica: Advantage dobra suas chances — posicione-se bem!',
+    '🧪 Dica: Poções de cura restauram 2d4+2 pontos de vida.',
+    '🛡️ Dica: Classe de Armadura (CA) determina se ataques acertam você.',
+    '🔮 Dica: Magias de concentração se perdem ao receber dano.',
+    '🗺️ Dica: Explore cada localização — segredos estão por toda parte.',
+    '⚔️ Dica: Ataques de oportunidade atingem inimigos que fogem.',
+    '💠 Dica: Cada classe tem recursos únicos — conheça os seus!',
+    '🏰 Dica: O ferreiro pode forjar equipamentos poderosos.',
 ];
 let _loadingTipTimer = null;
 let _loadingTipIndex = 0;
@@ -817,4 +826,20 @@ function injectGameSettings(contentEl, settingsData) {
 
         contentEl.appendChild(section2);
     }
+}
+
+
+// ─── Screen Shake Effect ───
+function triggerScreenShake(intensity) {
+    var screen = document.getElementById('screen');
+    if (!screen) return;
+    var cls = intensity === 'heavy' ? 'shake-heavy' : 'shake-light';
+    screen.classList.remove('shake-light', 'shake-heavy');
+    void screen.offsetHeight; // reflow
+    screen.classList.add(cls);
+    screen.addEventListener('animationend', function onEnd() {
+        screen.classList.remove(cls);
+        screen.removeEventListener('animationend', onEnd);
+    });
+    if (typeof haptic === 'function') haptic(intensity === 'heavy' ? 'heavy' : 'medium');
 }

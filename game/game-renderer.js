@@ -662,124 +662,162 @@ function _showDiceAnimation(screen) {
 
 function renderAllyCards(container, allies) {
     // Remove plain-text ally block (GRUPO section) if present
-    const textContent = container.innerHTML;
-    const grupoIdx = textContent.indexOf('━ GRUPO ━');
+    var textContent = container.innerHTML;
+    var grupoIdx = textContent.indexOf('\u2501 GRUPO \u2501');
     if (grupoIdx >= 0) {
-        container.innerHTML = textContent.replace(/━ GRUPO ━[\s\S]*$/, '');
+        container.innerHTML = textContent.replace(/\u2501 GRUPO \u2501[\s\S]*$/, '');
     }
 
-    const wrap = document.createElement('div');
+    var wrap = document.createElement('div');
     wrap.className = 'ally-cards';
 
-    // Solo player (only 1 entry of type 'player'): skip GRUPO header to save space
-    const isSolo = allies.length === 1 && allies[0].type === 'player';
+    // Solo player (only 1 entry of type 'player'): skip GRUPO header
+    var isSolo = allies.length === 1 && allies[0].type === 'player';
+    var useGrid = allies.length >= 3; // 2+ allies = use grid for non-player cards
+
     if (!isSolo) {
-        const header = document.createElement('div');
+        var header = document.createElement('div');
         header.className = 'ally-header';
-        header.textContent = '━ GRUPO ━';
+        header.textContent = '\u2501 GRUPO \u2501';
         wrap.appendChild(header);
     }
 
-    for (const a of allies) {
-        const card = document.createElement('div');
-        card.className = 'ally-card' + (a.dead ? ' ally-dead' : '') + (a.type === 'player' ? ' ally-player' : '');
+    // Grid container for ally cards (non-player)
+    var gridWrap = useGrid ? document.createElement('div') : null;
+    if (gridWrap) gridWrap.className = 'ally-grid';
 
-        // Left: icon column
-        const icoCol = document.createElement('div');
+    for (var ai = 0; ai < allies.length; ai++) {
+        var a = allies[ai];
+        var isPlayer = a.type === 'player';
+
+        if (isPlayer || !useGrid) {
+            // Player card: full-width, standard layout
+            wrap.appendChild(_buildAllyCard(a, false));
+        } else {
+            // Ally card: compact layout for grid
+            gridWrap.appendChild(_buildAllyCard(a, true));
+        }
+    }
+
+    if (gridWrap) wrap.appendChild(gridWrap);
+    container.appendChild(wrap);
+}
+
+function _buildAllyCard(a, compact) {
+    var card = document.createElement('div');
+    card.className = 'ally-card'
+        + (a.dead ? ' ally-dead' : '')
+        + (a.type === 'player' ? ' ally-player' : '')
+        + (compact ? ' ally-compact' : '');
+
+    if (!compact) {
+        // Full layout: icon column + info
+        var icoCol = document.createElement('div');
         icoCol.className = 'ally-ico-col';
-        const ico = document.createElement('div');
+        var ico = document.createElement('div');
         ico.className = 'ally-ico';
-        ico.textContent = a.ico || '⚔️';
+        ico.textContent = a.ico || '\u2694\ufe0f';
         icoCol.appendChild(ico);
         card.appendChild(icoCol);
+    }
 
-        // Center: info
-        const info = document.createElement('div');
-        info.className = 'ally-info';
+    var info = document.createElement('div');
+    info.className = 'ally-info';
 
-        // Name row: name + level + badges
-        const nameRow = document.createElement('div');
-        nameRow.className = 'ally-name-row';
-        const nameEl = document.createElement('span');
-        nameEl.className = 'ally-name';
-        nameEl.textContent = a.n;
-        nameRow.appendChild(nameEl);
-        if (a.l > 0) {
-            const lvl = document.createElement('span');
-            lvl.className = 'ally-lvl';
-            lvl.textContent = 'Lv' + a.l;
-            nameRow.appendChild(lvl);
-        }
-        if (a.type === 'merc' && a.dur > 0) {
-            const dur = document.createElement('span');
-            dur.className = 'ally-dur' + (a.dur <= 2 ? ' ally-dur-warn' : '');
-            dur.textContent = '📜 ' + a.dur;
-            nameRow.appendChild(dur);
-        }
-        if (a.lu && a.lu > 0) {
-            const luBadge = document.createElement('span');
-            luBadge.className = 'ally-lu';
-            luBadge.textContent = '⬆️';
-            nameRow.appendChild(luBadge);
-        }
-        info.appendChild(nameRow);
+    // Name row
+    var nameRow = document.createElement('div');
+    nameRow.className = 'ally-name-row';
 
-        // Class + type subtitle
-        const subRow = document.createElement('div');
+    if (compact) {
+        // Compact: icon inline with name
+        var icoInline = document.createElement('span');
+        icoInline.className = 'ally-ico-inline';
+        icoInline.textContent = a.ico || '\u2694\ufe0f';
+        nameRow.appendChild(icoInline);
+    }
+
+    var nameEl = document.createElement('span');
+    nameEl.className = 'ally-name';
+    nameEl.textContent = a.n;
+    nameRow.appendChild(nameEl);
+
+    if (a.l > 0) {
+        var lvl = document.createElement('span');
+        lvl.className = 'ally-lvl';
+        lvl.textContent = 'Lv' + a.l;
+        nameRow.appendChild(lvl);
+    }
+
+    if (a.type === 'merc' && a.dur > 0) {
+        var dur = document.createElement('span');
+        dur.className = 'ally-dur' + (a.dur <= 2 ? ' ally-dur-warn' : '');
+        dur.textContent = '\ud83d\udcdc ' + a.dur;
+        nameRow.appendChild(dur);
+    }
+
+    if (a.lu && a.lu > 0) {
+        var luBadge = document.createElement('span');
+        luBadge.className = 'ally-lu';
+        luBadge.textContent = '\u2b06\ufe0f';
+        nameRow.appendChild(luBadge);
+    }
+    info.appendChild(nameRow);
+
+    // Subtitle (skip in compact mode to save space)
+    if (!compact) {
+        var subRow = document.createElement('div');
         subRow.className = 'ally-sub';
-        let subText = a.c || '';
-        if (a.type === 'player') {} // No subtitle suffix for player
-        else if (a.type === 'merc') subText += ' · Mercenário';
-        else if (a.type === 'adv') subText += ' · Explorador';
+        var subText = a.c || '';
+        if (a.type === 'player') {}
+        else if (a.type === 'merc') subText += ' \u00b7 Mercen\u00e1rio';
+        else if (a.type === 'adv') subText += ' \u00b7 Explorador';
         else if (a.type === 'familiar') subText = 'Familiar';
         subRow.textContent = subText;
         info.appendChild(subRow);
-
-        // HP bar
-        if (a.mhp > 0 && !a.dead) {
-            info.appendChild(_makeAllyBar(a.hp, a.mhp, 'hp'));
-        } else if (a.dead) {
-            const deadLabel = document.createElement('div');
-            deadLabel.className = 'ally-dead-label';
-            deadLabel.textContent = '💀 Caído';
-            info.appendChild(deadLabel);
-        }
-
-        // MP bar
-        if (a.mmp > 0 && !a.dead) {
-            info.appendChild(_makeAllyBar(a.mp, a.mmp, 'mp'));
-        }
-
-        // Affinity indicator (party members only)
-        if (a.type === 'party' && a.aff > 0 && !a.dead) {
-            const affRow = document.createElement('div');
-            affRow.className = 'ally-aff';
-            const hearts = a.aff >= 5 ? '💚💚💚' : a.aff >= 3 ? '💚💚' : '💚';
-            affRow.textContent = hearts;
-            info.appendChild(affRow);
-        }
-
-        // Adventurer description
-        if (a.type === 'adv' && a.desc) {
-            const descEl = document.createElement('div');
-            descEl.className = 'ally-desc';
-            descEl.textContent = '✨ ' + a.desc + (a.dur > 0 ? ' · ⏳ ' + a.dur : '');
-            info.appendChild(descEl);
-        }
-
-        // Status effects
-        if (a.se && a.se.length > 0) {
-            const seRow = document.createElement('div');
-            seRow.className = 'ally-se';
-            seRow.textContent = a.se.join(' ');
-            info.appendChild(seRow);
-        }
-
-        card.appendChild(info);
-        wrap.appendChild(card);
     }
 
-    container.appendChild(wrap);
+    // HP bar
+    if (a.mhp > 0 && !a.dead) {
+        info.appendChild(_makeAllyBar(a.hp, a.mhp, 'hp'));
+    } else if (a.dead) {
+        var deadLabel = document.createElement('div');
+        deadLabel.className = 'ally-dead-label';
+        deadLabel.textContent = '\ud83d\udc80 Ca\u00eddo';
+        info.appendChild(deadLabel);
+    }
+
+    // MP bar
+    if (a.mmp > 0 && !a.dead) {
+        info.appendChild(_makeAllyBar(a.mp, a.mmp, 'mp'));
+    }
+
+    // Affinity (compact: smaller dots)
+    if (a.type === 'party' && a.aff > 0 && !a.dead) {
+        var affRow = document.createElement('div');
+        affRow.className = 'ally-aff';
+        var hearts = a.aff >= 5 ? '\ud83d\udc9a\ud83d\udc9a\ud83d\udc9a' : a.aff >= 3 ? '\ud83d\udc9a\ud83d\udc9a' : '\ud83d\udc9a';
+        affRow.textContent = hearts;
+        info.appendChild(affRow);
+    }
+
+    // Adventurer description (only in full mode)
+    if (!compact && a.type === 'adv' && a.desc) {
+        var descEl = document.createElement('div');
+        descEl.className = 'ally-desc';
+        descEl.textContent = '\u2728 ' + a.desc + (a.dur > 0 ? ' \u00b7 \u23f3 ' + a.dur : '');
+        info.appendChild(descEl);
+    }
+
+    // Status effects
+    if (a.se && a.se.length > 0) {
+        var seRow = document.createElement('div');
+        seRow.className = 'ally-se';
+        seRow.textContent = a.se.join(' ');
+        info.appendChild(seRow);
+    }
+
+    card.appendChild(info);
+    return card;
 }
 
 function _makeAllyBar(current, max, type) {

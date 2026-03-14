@@ -96,13 +96,23 @@
 .quest-card {
     padding: 10px 12px;
     margin: 6px 0;
-    background: var(--v-bg-card);
+    background: linear-gradient(135deg, var(--v-bg-card) 0%, rgba(74, 56, 40, 0.15) 100%);
     border: 1px solid var(--v-border);
     border-left: 3px solid var(--v-gold-dim, #8a6914);
     border-radius: var(--v-radius-sm, 6px);
     cursor: pointer;
     transition: all 0.2s;
     animation: cardSlideIn 0.35s ease-out both;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+.quest-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--v-radius-sm, 6px);
+    background: radial-gradient(ellipse at 20% 50%, rgba(196, 149, 58, 0.04) 0%, transparent 60%);
+    pointer-events: none;
 }
 .quest-card:nth-child(2) { animation-delay: 0.05s; }
 .quest-card:nth-child(3) { animation-delay: 0.10s; }
@@ -549,3 +559,27 @@
     margin-top: 6px;
 }
 
+/* ─── Quest Search Bar ─── */
+.quest-search-wrap {
+    margin-bottom: 8px;
+}
+.quest-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(42, 36, 32, 0.6);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm, 6px);
+    color: var(--v-text);
+    font-family: var(--v-font);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+.quest-search-input::placeholder {
+    color: var(--v-text-dim);
+    opacity: 0.7;
+}
+.quest-search-input:focus {
+    border-color: var(--v-gold);
+}

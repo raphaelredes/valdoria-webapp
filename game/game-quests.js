@@ -18,42 +18,60 @@ function renderQuestDiary(container, data) {
         wrap.appendChild(flash);
     }
 
-    // Filter tabs
+    // --- Search bar (always visible) ---
+    var searchWrap = document.createElement('div');
+    searchWrap.className = 'quest-search-wrap';
+    var searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.className = 'quest-search-input';
+    searchInput.placeholder = '\ud83d\udd0d Pesquisar miss\u00f5es...';
+    searchWrap.appendChild(searchInput);
+    wrap.appendChild(searchWrap);
+
+    // --- Filter tabs (client-side only, no server roundtrip) ---
     var filters = [
         { id: 'all', icon: '\ud83d\udccb', label: 'Todas' },
         { id: 'story', icon: '\u2694\ufe0f', label: 'Hist\u00f3ria' },
         { id: 'daily', icon: '\ud83d\udd04', label: 'Di\u00e1rias' },
         { id: 'done', icon: '\u2705', label: 'Feitas' },
     ];
-    var totalQ = (data.story || []).length + (data.daily || []).length
-        + (data.done || []).length + (data.failed || []).length;
+    var activeFilter = 'all';
 
-    // Apply client-side filter
-    var activeFilter = data.filter || 'all';
-    var showStory = activeFilter === 'all' || activeFilter === 'story';
-    var showDaily = activeFilter === 'all' || activeFilter === 'daily';
-    var showDone = activeFilter === 'all' || activeFilter === 'done';
-
-    if (totalQ >= 3) {
-        var tabRow = document.createElement('div');
-        tabRow.className = 'quest-filter-tabs';
-        for (var i = 0; i < filters.length; i++) {
-            var f = filters[i];
-            var tab = document.createElement('button');
-            tab.className = 'quest-filter-tab' + (activeFilter === f.id ? ' active' : '');
-            tab.textContent = f.icon + ' ' + f.label;
-            (function(fid) { tab.onclick = function() { doAction('quest_filter_' + fid); }; })(f.id);
-            tabRow.appendChild(tab);
-        }
-        wrap.appendChild(tabRow);
+    var tabRow = document.createElement('div');
+    tabRow.className = 'quest-filter-tabs';
+    for (var i = 0; i < filters.length; i++) {
+        var f = filters[i];
+        var tab = document.createElement('button');
+        tab.className = 'quest-filter-tab' + (activeFilter === f.id ? ' active' : '');
+        tab.textContent = f.icon + ' ' + f.label;
+        tab.setAttribute('data-filter', f.id);
+        (function(fid, tabEl) {
+            tabEl.onclick = function() {
+                activeFilter = fid;
+                // Update active tab styling
+                var allTabs = tabRow.querySelectorAll('.quest-filter-tab');
+                for (var t = 0; t < allTabs.length; t++) {
+                    allTabs[t].classList.toggle('active', allTabs[t].getAttribute('data-filter') === fid);
+                }
+                _applyQuestFilter(wrap, fid, searchInput.value);
+            };
+        })(f.id, tab);
+        tabRow.appendChild(tab);
     }
+    wrap.appendChild(tabRow);
 
-    // Turn-in banner
+    // Search input handler — filters by title in real time
+    searchInput.oninput = function() {
+        _applyQuestFilter(wrap, activeFilter, searchInput.value);
+    };
+
+    // --- Turn-in banner ---
     if (data.turnin && data.turnin.length > 0) {
         for (var ti = 0; ti < data.turnin.length; ti++) {
             var t = data.turnin[ti];
             var banner = document.createElement('button');
             banner.className = 'quest-turnin-banner';
+            banner.setAttribute('data-qsection', 'turnin');
             var bannerText = t.count > 1
                 ? '\ud83d\udcdc Entregar ' + t.count + ' Miss\u00f5es'
                 : '\ud83d\udcdc Entregar: ' + _escQ(t.titles[0]);
@@ -64,40 +82,43 @@ function renderQuestDiary(container, data) {
         }
     }
 
-    // Active Story Quests (filtered by category when specific filter active)
-    if (data.story && data.story.length > 0 && showStory) {
-        var filteredStory = data.story;
-        if (activeFilter === 'story') {
-            filteredStory = data.story.filter(function(q) { return q.cat === 'story'; });
-        }
-        if (filteredStory.length > 0) {
-            wrap.appendChild(_questSectionHdr('\u2694\ufe0f', 'Jornadas em Andamento'));
-            for (var si = 0; si < filteredStory.length; si++) {
-                wrap.appendChild(_renderQCard(filteredStory[si]));
-            }
+    // --- Active Story Quests ---
+    if (data.story && data.story.length > 0) {
+        var storyHdr = _questSectionHdr('\u2694\ufe0f', 'Jornadas em Andamento');
+        storyHdr.setAttribute('data-qsection', 'story');
+        wrap.appendChild(storyHdr);
+        for (var si = 0; si < data.story.length; si++) {
+            var sCard = _renderQCard(data.story[si]);
+            sCard.setAttribute('data-qsection', 'story');
+            sCard.setAttribute('data-qtitle', (data.story[si].title || '').toLowerCase());
+            wrap.appendChild(sCard);
         }
     }
 
-    // Side quests section (only when 'all' filter — side quests are in data.story with cat='side')
-    if (activeFilter === 'all' && data.story && data.story.length > 0) {
-        // Already shown above in the mixed "Jornadas em Andamento" section
-    }
-
-    // Active Daily Quests
-    if (data.daily && data.daily.length > 0 && showDaily) {
-        wrap.appendChild(_questSectionHdr('\ud83d\udd04', 'Tarefas do Dia'));
+    // --- Active Daily Quests ---
+    if (data.daily && data.daily.length > 0) {
+        var dailyHdr = _questSectionHdr('\ud83d\udd04', 'Tarefas do Dia');
+        dailyHdr.setAttribute('data-qsection', 'daily');
+        wrap.appendChild(dailyHdr);
         for (var di = 0; di < data.daily.length; di++) {
-            wrap.appendChild(_renderQCard(data.daily[di], true));
+            var dCard = _renderQCard(data.daily[di], true);
+            dCard.setAttribute('data-qsection', 'daily');
+            dCard.setAttribute('data-qtitle', (data.daily[di].title || '').toLowerCase());
+            wrap.appendChild(dCard);
         }
     }
 
-    // Completed Quests
-    if (data.done && data.done.length > 0 && showDone) {
-        wrap.appendChild(_questSectionHdr('\u2705', 'Feitos Realizados'));
+    // --- Completed Quests ---
+    if (data.done && data.done.length > 0) {
+        var doneHdr = _questSectionHdr('\u2705', 'Feitos Realizados');
+        doneHdr.setAttribute('data-qsection', 'done');
+        wrap.appendChild(doneHdr);
         for (var ci = 0; ci < data.done.length; ci++) {
             var d = data.done[ci];
             var doneCard = document.createElement('div');
             doneCard.className = 'quest-card quest-card--done';
+            doneCard.setAttribute('data-qsection', 'done');
+            doneCard.setAttribute('data-qtitle', (d.title || '').toLowerCase());
             doneCard.innerHTML = '<div class="quest-card-header">'
                 + '<span class="quest-title quest-title--done">' + _escQ(d.title) + '</span></div>'
                 + '<div class="quest-rewards-mini">\u2728 ' + d.xp + ' XP \u00b7 \ud83d\udcb0 ' + d.gold + ' GP</div>';
@@ -105,13 +126,17 @@ function renderQuestDiary(container, data) {
         }
     }
 
-    // Failed Quests
-    if (data.failed && data.failed.length > 0 && showDone) {
-        wrap.appendChild(_questSectionHdr('\u274c', 'Miss\u00f5es Perdidas'));
+    // --- Failed Quests ---
+    if (data.failed && data.failed.length > 0) {
+        var failHdr = _questSectionHdr('\u274c', 'Miss\u00f5es Perdidas');
+        failHdr.setAttribute('data-qsection', 'done');
+        wrap.appendChild(failHdr);
         for (var fi = 0; fi < data.failed.length; fi++) {
             var fq = data.failed[fi];
             var failCard = document.createElement('div');
             failCard.className = 'quest-card quest-card--failed';
+            failCard.setAttribute('data-qsection', 'done');
+            failCard.setAttribute('data-qtitle', (fq.title || '').toLowerCase());
             failCard.innerHTML = '<div class="quest-card-header">'
                 + '<span class="quest-title quest-title--failed">\ud83d\udc80 ' + _escQ(fq.title) + '</span></div>';
             if (fq.cb_retry) {
@@ -127,26 +152,10 @@ function renderQuestDiary(container, data) {
         }
     }
 
-    // Empty state for active filter (no results in this category)
-    var visibleQ = 0;
-    if (showStory && data.story) {
-        if (activeFilter === 'story') {
-            visibleQ += data.story.filter(function(q) { return q.cat === 'story'; }).length;
-        } else {
-            visibleQ += data.story.length;
-        }
-    }
-    if (showDaily && data.daily) visibleQ += data.daily.length;
-    if (showDone && data.done) visibleQ += data.done.length;
-    if (showDone && data.failed) visibleQ += data.failed.length;
-    if (totalQ > 0 && visibleQ === 0) {
-        var emptyFilter = document.createElement('div');
-        emptyFilter.className = 'quest-empty';
-        emptyFilter.innerHTML = '<div class="quest-empty-text">Nenhuma missão nesta categoria.</div>';
-        wrap.appendChild(emptyFilter);
-    }
+    // --- Empty state (no quests at all) ---
+    var totalQ = (data.story || []).length + (data.daily || []).length
+        + (data.done || []).length + (data.failed || []).length;
 
-    // Empty state — immersive medieval themed
     if (totalQ === 0) {
         var empty = document.createElement('div');
         empty.className = 'quest-empty';
@@ -167,7 +176,63 @@ function renderQuestDiary(container, data) {
         wrap.appendChild(empty);
     }
 
+    // --- Empty filter state (shown when filter hides everything) ---
+    var emptyFilter = document.createElement('div');
+    emptyFilter.className = 'quest-empty quest-empty-filter';
+    emptyFilter.style.display = 'none';
+    emptyFilter.innerHTML = '<div class="quest-empty-text">Nenhuma miss\u00e3o nesta categoria.</div>';
+    wrap.appendChild(emptyFilter);
+
     container.appendChild(wrap);
+}
+
+/** Apply client-side filter + search to quest sections */
+function _applyQuestFilter(wrap, filter, searchText) {
+    var query = (searchText || '').toLowerCase().trim();
+    var sections = wrap.querySelectorAll('[data-qsection]');
+    var visibleCount = 0;
+
+    for (var i = 0; i < sections.length; i++) {
+        var el = sections[i];
+        var section = el.getAttribute('data-qsection');
+        var title = el.getAttribute('data-qtitle') || '';
+
+        // Filter by tab
+        var showByTab = (filter === 'all')
+            || (filter === 'story' && section === 'story')
+            || (filter === 'daily' && section === 'daily')
+            || (filter === 'done' && section === 'done')
+            || section === 'turnin';
+
+        // Filter by search (only cards with titles, not headers)
+        var showBySearch = !query || !title || title.indexOf(query) >= 0;
+
+        // Section headers: show if any card in that section is visible
+        var isHeader = el.classList.contains('quest-section-hdr');
+        if (isHeader) {
+            // Check if any sibling card in same section is visible
+            var hasVisible = false;
+            var next = el.nextElementSibling;
+            while (next && next.getAttribute('data-qsection') === section && !next.classList.contains('quest-section-hdr')) {
+                var nextTitle = next.getAttribute('data-qtitle') || '';
+                var nextSearch = !query || !nextTitle || nextTitle.indexOf(query) >= 0;
+                if (showByTab && nextSearch) { hasVisible = true; break; }
+                next = next.nextElementSibling;
+            }
+            el.style.display = hasVisible ? '' : 'none';
+        } else {
+            var show = showByTab && showBySearch;
+            el.style.display = show ? '' : 'none';
+            if (show && section !== 'turnin') visibleCount++;
+        }
+    }
+
+    // Show/hide empty filter message
+    var emptyEl = wrap.querySelector('.quest-empty-filter');
+    if (emptyEl) {
+        var totalQ = wrap.querySelectorAll('.quest-card').length;
+        emptyEl.style.display = (totalQ > 0 && visibleCount === 0) ? '' : 'none';
+    }
 }
 
 function _questSectionHdr(icon, label) {

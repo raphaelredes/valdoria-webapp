@@ -118,6 +118,35 @@
     border-radius: 2px;
     transition: width 0.3s ease;
 }
+.char-card-hp-fill.hp-critical {
+    animation: hpLowPulse 0.8s ease-in-out infinite;
+}
+
+/* ─── Long-press Delete Ring ─── */
+.char-card-delete {
+    position: relative;
+    overflow: visible;
+}
+.char-card-delete::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+    pointer-events: none;
+}
+.char-card-delete.pressing::before {
+    border-color: #ef4444;
+    animation: deleteRing 0.8s linear forwards;
+}
+@keyframes deleteRing {
+    0% { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 100% 0%, 100% 0%); border-color: #ef4444; }
+    25% { clip-path: polygon(50% 0%, 50% 50%, 100% 0%, 100% 100%, 100% 0%); }
+    50% { clip-path: polygon(50% 0%, 50% 50%, 100% 100%, 0% 100%, 100% 0%); }
+    75% { clip-path: polygon(50% 0%, 50% 50%, 0% 100%, 0% 0%, 100% 0%); }
+    100% { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%); border-color: #ff6b6b; }
+}
 
 .char-select-empty {
     text-align: center;
