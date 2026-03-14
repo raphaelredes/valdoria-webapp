@@ -1021,6 +1021,9 @@
         // ── Shared Error Reporter (lite tier — no API) ──
         if (window.ValdoriaErrors) { ValdoriaErrors.init({ appName: 'MARKET' }); }
 
+        // ── Ambient music ──
+        if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('tavern');
+
         // ── State ──
         let D = null;
         let activeTab = 'buy';

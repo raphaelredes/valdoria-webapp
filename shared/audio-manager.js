@@ -297,7 +297,7 @@ const ValdoriaAudio = (() => {
         _volume = Math.max(0, Math.min(1, val));
         localStorage.setItem(VOLUME_KEY, _volume.toString());
         if (_audio && !_muted) {
-            _audio.volume = _volume;
+            _smoothVol(_audio, _volume);
         }
         // If volume > 0 and was muted, unmute
         if (_volume > 0 && _muted) {
@@ -345,6 +345,15 @@ const ValdoriaAudio = (() => {
     // =============================================
 
     const HINT_KEY = 'valdoria_audio_hint_seen';
+
+    // Track key -> PT-BR display name
+    const _TRACK_NAMES = {
+        tavern: 'Taverna', city: 'Cidade', forest: 'Floresta',
+        combat: 'Combate', desert: 'Deserto', dungeon: 'Masmorra',
+        swamp: 'Pântano', mountain: 'Montanha', snow: 'Neve',
+        victory: 'Vitória', defeat: 'Derrota', levelup: 'Nível',
+        prologue: 'Prólogo', boss: 'Chefe',
+    };
 
     // SVG speaker icons (inline, 16x16, currentColor)
     const _SVG_MUTED = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
@@ -547,6 +556,28 @@ const ValdoriaAudio = (() => {
                 opacity: 0;
                 pointer-events: none;
             }
+            /* ── Row label ── */
+            .va-popup-label {
+                font-family: var(--v-font, 'MedievalSharp', serif);
+                font-size: 11px;
+                color: var(--v-text-dim, #8a7a68);
+                min-width: 44px;
+                text-align: center;
+                flex-shrink: 0;
+                line-height: 1;
+            }
+            /* ── Track indicator ── */
+            .va-popup-track {
+                font-family: var(--v-font, 'MedievalSharp', serif);
+                font-size: 11px;
+                color: var(--v-text-dim, #8a7a68);
+                text-align: center;
+                padding: 0 4px 2px;
+                opacity: 0.7;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
             /* ── First-time hint ── */
             .va-hint-pulse {
                 animation: vaGlowPulse 1.5s ease infinite !important;
@@ -697,6 +728,28 @@ const ValdoriaAudio = (() => {
         try { var tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light'); } catch(e) {}
     }
 
+    // Smooth volume ramp (avoids audible pops on slider drag)
+    let _volRafId = null;
+    function _smoothVol(audio, target) {
+        if (_volRafId) cancelAnimationFrame(_volRafId);
+        var current = audio.volume;
+        var diff = target - current;
+        if (Math.abs(diff) < 0.01) { try { audio.volume = target; } catch(e) {} return; }
+        var step = diff * 0.3;
+        function tick() {
+            current += step;
+            step *= 0.7;
+            if (Math.abs(target - current) < 0.005) {
+                try { audio.volume = target; } catch(e) {}
+                _volRafId = null;
+                return;
+            }
+            try { audio.volume = Math.max(0, Math.min(1, current)); } catch(e) { _volRafId = null; return; }
+            _volRafId = requestAnimationFrame(tick);
+        }
+        _volRafId = requestAnimationFrame(tick);
+    }
+
     function _updateSliderFill(slider, pct) {
         if (slider) slider.style.setProperty('--fill', pct + '%');
     }
@@ -721,7 +774,7 @@ const ValdoriaAudio = (() => {
         } catch(e) {}
     }
 
-    function _createPopupRow(emoji, prefix, enabled, volume, onToggle, onVolume) {
+    function _createPopupRow(emoji, label, prefix, enabled, volume, onToggle, onVolume) {
         var row = document.createElement('div');
         row.className = 'va-popup-row';
 
@@ -730,6 +783,10 @@ const ValdoriaAudio = (() => {
         icon.id = prefix + '-icon';
         icon.textContent = emoji;
         icon.addEventListener('click', function(e) { e.stopPropagation(); _haptic('light'); onToggle(); });
+
+        var lbl = document.createElement('span');
+        lbl.className = 'va-popup-label';
+        lbl.textContent = label;
 
         var slider = document.createElement('input');
         slider.type = 'range';
@@ -757,6 +814,7 @@ const ValdoriaAudio = (() => {
         pct.textContent = (enabled ? volume : 0) + '%';
 
         row.appendChild(icon);
+        row.appendChild(lbl);
         row.appendChild(slider);
         row.appendChild(pct);
         return row;
@@ -780,10 +838,17 @@ const ValdoriaAudio = (() => {
         const card = document.createElement('div');
         card.className = 'va-popup-card';
 
+        // Track indicator (current music name)
+        const trackEl = document.createElement('div');
+        trackEl.className = 'va-popup-track';
+        trackEl.id = 'va-track-name';
+        trackEl.textContent = _currentTrack ? ('♫ ' + (_TRACK_NAMES[_currentTrack] || _currentTrack)) : '';
+        card.appendChild(trackEl);
+
         // Music row
         const musicVol = (_muted || _musicMuted) ? 0 : Math.round(_volume * 100);
         card.appendChild(_createPopupRow(
-            '♫', 'va-music', !_musicMuted && !_muted, musicVol,
+            '♫', 'Música', 'va-music', !_musicMuted && !_muted, musicVol,
             () => { toggleMusic(); _updatePopupUI(); _resetCloseTimer(); },
             (val) => { setVolume(val / 100); _updatePopupUI(); _resetCloseTimer(); }
         ));
@@ -791,7 +856,7 @@ const ValdoriaAudio = (() => {
         // SFX row
         const sfxVol = _sfxMuted ? 0 : Math.round(_sfxVolume * 100);
         card.appendChild(_createPopupRow(
-            '⚔', 'va-sfx', !_sfxMuted, sfxVol,
+            '⚔', 'Efeitos', 'va-sfx', !_sfxMuted, sfxVol,
             () => { toggleSFX(); _updatePopupUI(); _resetCloseTimer(); },
             (val) => { setSFXVolume(val / 100); _sfxPreviewTick(); _updatePopupUI(); _resetCloseTimer(); }
         ));
@@ -846,6 +911,9 @@ const ValdoriaAudio = (() => {
     }
 
     function _updatePopupUI() {
+        // Track indicator
+        const tn = document.getElementById('va-track-name');
+        if (tn) tn.textContent = _currentTrack ? ('♫ ' + (_TRACK_NAMES[_currentTrack] || _currentTrack)) : '';
         // Music row
         const mi = document.getElementById('va-music-icon');
         const ms = document.getElementById('va-music-slider');
@@ -994,4 +1062,8 @@ if (typeof document !== 'undefined') {
     } else {
         ValdoriaAudio.init();
     }
+    // Fade-out on page unload (avoids abrupt audio cut)
+    window.addEventListener('pagehide', function() {
+        ValdoriaAudio.stop();
+    });
 }

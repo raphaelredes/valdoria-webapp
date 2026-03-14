@@ -167,6 +167,9 @@ function decodeBase64Utf8(b64) {
 
 // ── Init ──
 function init() {
+    // Ambient music
+    if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('city');
+
     const params = new URLSearchParams(location.search);
     const b64 = params.get('data');
     if (!b64) { hideLoading(); _showInitError('Dados não encontrados.'); return; }

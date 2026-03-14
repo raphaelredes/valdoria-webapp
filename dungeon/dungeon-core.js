@@ -56,6 +56,9 @@ async function initDungeon() {
             ValdoriaErrors.init({ appName: 'DUNGEON', apiBase: S.api, token: S.token, uid: S.uid });
         }
 
+        // Ambient music
+        if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('dungeon');
+
         // Periodic tunnel URL discovery
         if (S.api && window.ApiDiscovery) {
             ApiDiscovery.init(S.api, function(newUrl) { S.api = newUrl; });

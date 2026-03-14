@@ -23,6 +23,7 @@
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="data.js?v=' + v + '"><\/script>');
         document.write('<script src="personality_data.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
     </script>
     <script src="../shared/loading-guard.js"></script>
     <style>
@@ -1346,6 +1347,9 @@
                     uid: userId,
                 });
             }
+
+            // Ambient music
+            if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('prologue');
 
             buildProgressBar();
             buildDmBubbles();
