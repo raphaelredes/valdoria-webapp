@@ -1846,3 +1846,110 @@ body::after {
     margin-right: 8px;
     vertical-align: middle;
 }
+
+/* ─── QR Countdown & Status ─── */
+
+.ap-qr-countdown {
+    font-size: 13px;
+    color: var(--v-text-dim, #a09484);
+    margin: 10px 0 6px;
+    font-family: var(--v-font-mono, monospace);
+    letter-spacing: 1px;
+}
+
+.ap-qr-countdown.ap-countdown-warn {
+    color: #ff9800;
+    font-weight: 600;
+}
+
+.ap-qr-countdown.ap-countdown-expired {
+    color: var(--v-danger, #e74c3c);
+    font-weight: 700;
+}
+
+.ap-qr-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--v-text-dim, #a09484);
+    margin: 6px 0 10px;
+    padding: 8px 16px;
+    background: rgba(46, 37, 32, 0.6);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.ap-status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.ap-status-pending .ap-status-dot,
+.ap-status-dot.ap-status-pending {
+    background: #ff9800;
+    box-shadow: 0 0 6px rgba(255, 152, 0, 0.4);
+    animation: ap-statusPulse 1.5s ease-in-out infinite;
+}
+
+.ap-status-confirmed .ap-status-dot,
+.ap-status-dot.ap-status-confirmed {
+    background: var(--v-success, #4caf50);
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+.ap-status-confirmed {
+    border-color: rgba(76, 175, 80, 0.3);
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--v-success, #4caf50);
+}
+
+.ap-status-expired {
+    border-color: rgba(231, 76, 60, 0.3);
+    background: rgba(231, 76, 60, 0.1);
+    color: var(--v-danger, #e74c3c);
+}
+
+.ap-status-expired .ap-status-dot {
+    background: var(--v-danger, #e74c3c);
+    animation: none;
+}
+
+@keyframes ap-statusPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* ─── Live Stats Counter ─── */
+
+.ap-hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.ap-hero-stat {
+    text-align: center;
+}
+
+.ap-hero-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--v-gold, #c4953a);
+    font-family: var(--v-font-display, 'Cinzel', serif);
+}
+
+.ap-hero-stat-label {
+    font-size: 11px;
+    color: var(--v-text-dim, #a09484);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
