@@ -438,6 +438,9 @@ function _updateScaleBar() {
     const turnsLabel = document.getElementById('scale-turns');
     const levelLabel = document.getElementById('scale-level');
     if (levelLabel) levelLabel.textContent = lvl.label;
+    // Pulse scale bar on zoom change
+    var _sc = document.getElementById('scale-container');
+    if (_sc) { _sc.classList.add('pulse'); setTimeout(function() { _sc.classList.remove('pulse'); }, 400); }
     // Fixed visual bar width (~60px), compute how many turns it represents
     const BAR_PX = 60;
     const ppt = _getAvgPxPerTurn();
@@ -586,8 +589,8 @@ function setupPanZoom() {
         if (btnIn) btnIn.disabled = _zoomIdx >= ZOOM_LEVELS.length - 1;
         if (btnOut) btnOut.disabled = _zoomIdx <= 0;
     }
-    if (btnIn) btnIn.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); });
-    if (btnOut) btnOut.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(-1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); });
+    if (btnIn) btnIn.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); btnIn.classList.add('flash'); setTimeout(() => btnIn.classList.remove('flash'), 300); });
+    if (btnOut) btnOut.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(-1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); btnOut.classList.add('flash'); setTimeout(() => btnOut.classList.remove('flash'), 300); });
     if (btnRec) btnRec.addEventListener('click', e => { e.stopPropagation(); centerOnLocation(S.currentLoc); apply(); _updateMinimap(); if (typeof _haptic === 'function') _haptic('tap'); });
     _updateZoomBtns();
     // Update buttons on any zoom change

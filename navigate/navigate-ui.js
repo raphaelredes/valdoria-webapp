@@ -852,6 +852,24 @@ function _updateCycleButtons() {
     const hasMultiple = list.length > 1;
     prevBtn.disabled = !hasMultiple;
     nextBtn.disabled = !hasMultiple;
+    // Cycle counter
+    var counter = document.getElementById('cycle-counter');
+    if (!counter && hasMultiple) {
+        counter = document.createElement('span');
+        counter.id = 'cycle-counter';
+        counter.className = 'cycle-counter';
+        var row = prevBtn.parentElement;
+        if (row) row.insertBefore(counter, nextBtn);
+    }
+    if (counter) {
+        if (hasMultiple) {
+            var idx = list.indexOf(_selectedLoc);
+            counter.textContent = (idx + 1) + '/' + list.length;
+            counter.style.display = '';
+        } else {
+            counter.style.display = 'none';
+        }
+    }
 }
 
 // ── Quick-list of known locations ──

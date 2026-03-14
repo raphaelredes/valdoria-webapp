@@ -574,7 +574,7 @@ function renderLocationMarkers(group, fogState) {
                 cx: x, cy: y, r: R + 2,
                 fill: 'none', stroke: getDangerColor(ld.d),
                 'stroke-width': 3, 'stroke-opacity': 0.15,
-                class: 'danger-aura',
+                class: (ld.d || 0) >= 7 ? 'danger-aura danger-aura-extreme' : 'danger-aura',
             }));
         }
 
