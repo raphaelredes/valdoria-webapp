@@ -1506,11 +1506,7 @@ body::after {
     color: var(--v-text-dim, #a09484);
 }
 
-@media (min-width: 500px) {
-    .ap-recent-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
+
 
 /* ─── Share Section ─── */
 
@@ -1658,8 +1654,34 @@ body::after {
 .ap-toast-error   { border-color: var(--v-danger, #e74c3c); }
 .ap-toast-out     { animation: ap-toastOut 0.3s ease forwards; }
 
-/* ─── Responsive ─── */
+/* ======================================================= */
+/* --- RESPONSIVE - Mobile-First Breakpoints ------------- */
+/* ======================================================= */
 
+/* -- Small phones (<=380px) -- */
+@media (max-width: 380px) {
+    .ap-hero { padding: 60px 12px 30px; }
+    .ap-hero-content { padding: 24px 10px; }
+    .ap-hero-title { letter-spacing: 2px; }
+    .ap-hero-subtitle { font-size: 13px; margin-bottom: 20px; }
+    .ap-hero-cta { padding: 12px 24px; font-size: 13px; letter-spacing: 1px; }
+    .ap-hero-trust { font-size: 10px; gap: 6px; }
+    .ap-hero-stats { gap: 20px; }
+    .ap-hero-stat-value { font-size: 20px; }
+    .ap-section { padding: 32px 14px; }
+    .ap-section-title { letter-spacing: 1px; }
+    .ap-section-subtitle { font-size: 13px; margin-bottom: 24px; }
+    .ap-nav { padding: 10px 12px; }
+    .ap-nav-brand { font-size: 13px; letter-spacing: 1px; }
+    .ap-amount-grid { grid-template-columns: repeat(2, 1fr); }
+    .ap-tier-card { padding: 14px; }
+    .ap-tier-name { font-size: 14px; }
+    .ap-story-card { padding: 18px 14px; }
+    .ap-player { bottom: 8px; }
+    .ap-player-label { font-size: 10px; }
+}
+
+/* -- Tablets portrait (>=600px) -- */
 @media (min-width: 600px) {
     .ap-tiers-grid {
         grid-template-columns: 1fr 1fr;
@@ -1667,25 +1689,207 @@ body::after {
     .ap-tier-card[data-tier="platinum"] {
         grid-column: 1 / -1;
     }
-}
-
-@media (min-width: 768px) {
-    .ap-section {
-        padding: 64px 32px;
+    .ap-impact-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
     }
-}
-
-/* 3-column tier grid on desktop */
-@media (min-width: 960px) {
-    .ap-tiers-grid {
+    .ap-recent-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .ap-goals-list {
+        max-width: 700px;
+    }
+    .ap-donate-box {
+        max-width: 480px;
+    }
+    .ap-hero-stats { gap: 40px; }
+    .ap-hero-stat-value { font-size: 28px; }
+    .ap-story-grid {
         grid-template-columns: repeat(3, 1fr);
     }
-    .ap-tier-card[data-tier="gold"] {
-        grid-column: auto;
+}
+
+/* -- Tablets landscape / small desktops (>=768px) -- */
+@media (min-width: 768px) {
+    .ap-section {
+        padding: 72px 40px;
+        max-width: 1000px;
     }
+    .ap-hero {
+        min-height: 100vh;
+        padding: 100px 40px 60px;
+    }
+    .ap-hero-content {
+        padding: 48px 40px;
+        max-width: 700px;
+    }
+    .ap-hero-subtitle { font-size: 18px; }
+    .ap-hero-cta { padding: 16px 40px; font-size: 16px; }
+    .ap-hero-trust { font-size: 13px; gap: 16px; }
+    .ap-section-title { margin-bottom: 12px; }
+    .ap-section-subtitle { font-size: 15px; }
+    .ap-story-grid {
+        gap: 24px;
+        max-width: 900px;
+    }
+    .ap-story-card { padding: 28px 20px; }
+    .ap-story-icon { font-size: 42px; }
+    .ap-story-title { font-size: 16px; }
+    .ap-story-text { font-size: 14px; }
+    .ap-impact-grid {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 900px;
+    }
+    .ap-impact-card { padding: 20px; }
+    .ap-impact-icon { font-size: 32px; }
+    .ap-impact-name { font-size: 14px; }
+    .ap-impact-desc { font-size: 12px; }
+    .ap-impact-note { max-width: 700px; font-size: 14px; }
+    .ap-timeline { max-width: 600px; }
+    .ap-timeline-desc { font-size: 14px; }
+    .ap-faq-list { max-width: 700px; }
+    .ap-transparency-content { max-width: 600px; }
+    .ap-footer { padding: 40px 32px; }
+    .ap-footer-text { font-size: 14px; }
+    .ap-divider { max-width: 300px; }
+    .ap-player-label { font-size: 12px; }
+    .ap-player-track { font-size: 13px; }
+}
+
+/* -- Desktop (>=960px) -- */
+@media (min-width: 960px) {
+    .ap-section {
+        max-width: 1100px;
+        padding: 80px 48px;
+    }
+    .ap-tiers-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    .ap-tier-card[data-tier="gold"],
     .ap-tier-card[data-tier="platinum"] {
         grid-column: auto;
     }
+    .ap-hero-content {
+        max-width: 800px;
+        padding: 56px 48px;
+    }
+    .ap-hero-stats { gap: 60px; }
+    .ap-hero-stat-value { font-size: 32px; }
+    .ap-hero-stat-label { font-size: 14px; }
+    .ap-story-grid {
+        max-width: 1000px;
+        gap: 28px;
+    }
+    .ap-story-card { padding: 32px 24px; }
+    .ap-story-icon { font-size: 48px; }
+    .ap-story-title { font-size: 18px; }
+    .ap-story-text { font-size: 14px; }
+    .ap-goals-list {
+        max-width: 800px;
+    }
+    .ap-goal-card { padding: 20px 24px; }
+    .ap-goal-name { font-size: 16px; }
+    .ap-donate-box {
+        max-width: 520px;
+    }
+    .ap-donate-box .ap-amount-btn { padding: 14px 8px; font-size: 15px; }
+    .ap-generate-btn { font-size: 17px; padding: 16px; }
+    .ap-timeline {
+        max-width: 650px;
+        padding-left: 48px;
+    }
+    .ap-timeline-title { font-size: 16px; }
+    .ap-timeline-desc { font-size: 14px; }
+    .ap-nav-inner { max-width: 1100px; }
+    .ap-nav-link { font-size: 14px; padding: 8px 18px; }
+    .ap-nav-brand { font-size: 16px; }
+    .ap-footer-links { gap: 16px; }
+    .ap-footer a { font-size: 14px; }
+}
+
+/* -- Large desktop (>=1200px) -- */
+@media (min-width: 1200px) {
+    .ap-section {
+        max-width: 1200px;
+        padding: 96px 56px;
+    }
+    .ap-tiers-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+    }
+    .ap-tier-card { padding: 18px 16px; }
+    .ap-tier-name { font-size: 14px; }
+    .ap-tier-rewards li { font-size: 12px; }
+    .ap-hero-content {
+        max-width: 900px;
+        padding: 64px 56px;
+    }
+    .ap-hero-title { letter-spacing: 6px; }
+    .ap-hero-subtitle { font-size: 20px; letter-spacing: 2px; }
+    .ap-hero-cta { padding: 18px 48px; font-size: 17px; }
+    .ap-story-grid { max-width: 1100px; }
+    .ap-impact-grid { max-width: 1000px; }
+    .ap-impact-note { max-width: 800px; }
+    .ap-nav-inner { max-width: 1200px; }
+    .ap-nav-link { padding: 8px 22px; }
+    .ap-goals-list { max-width: 900px; }
+    .ap-donate-box { max-width: 560px; }
+    .ap-timeline { max-width: 700px; }
+    .ap-faq-list { max-width: 800px; }
+    .ap-transparency-content { max-width: 700px; }
+    .ap-recent-grid { max-width: 700px; grid-template-columns: repeat(3, 1fr); }
+}
+
+/* -- Ultra-wide (>=1440px) -- */
+@media (min-width: 1440px) {
+    .ap-section {
+        max-width: 1300px;
+    }
+    .ap-hero-content { max-width: 1000px; }
+    .ap-story-grid { max-width: 1200px; }
+    .ap-impact-grid { max-width: 1100px; }
+}
+
+/* -- Hover-capable devices (no touch) -- */
+@media (hover: hover) and (pointer: fine) {
+    .ap-story-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 0 24px rgba(196, 149, 58, 0.15), 0 12px 32px rgba(0, 0, 0, 0.3);
+    }
+    .ap-impact-card:hover {
+        transform: translateY(-3px);
+    }
+    .ap-tier-card:hover {
+        transform: translateY(-6px) scale(1.02);
+    }
+    .ap-goal-card:hover {
+        transform: translateY(-3px);
+    }
+}
+
+/* -- Touch devices: disable hover transforms -- */
+@media (hover: none) {
+    .ap-story-card:hover,
+    .ap-impact-card:hover,
+    .ap-tier-card:hover,
+    .ap-goal-card:hover {
+        transform: none;
+    }
+}
+
+/* -- Print -- */
+@media print {
+    .ap-nav, .ap-back-top, .ap-audio, .ap-player,
+    .ap-hero-particles, .ap-scroll-hint,
+    #ap-toast-container { display: none !important; }
+    .ap-hero { min-height: auto; padding: 40px 20px; }
+    .ap-reveal, .ap-tier-card, .ap-timeline-step,
+    .ap-goal-card, .ap-faq-item, .ap-recent-card {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    body { background: white; color: black; }
 }
 
 /* ─── Keyframes ─── */
@@ -2239,11 +2443,7 @@ body::after {
     margin: 0 auto;
 }
 
-@media (min-width: 600px) {
-    .ap-story-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
+
 
 .ap-story-card {
     background: linear-gradient(165deg, var(--v-bg-card, #2e2520) 0%, #241e18 100%);
