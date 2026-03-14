@@ -36,7 +36,7 @@ var DeviceId = (function () {
             return crypto.randomUUID();
         }
         // Fallback for older WebViews
-        return 'did_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        return 'did_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
     }
 
     return { get: get, reset: reset };
