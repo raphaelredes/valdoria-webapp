@@ -594,10 +594,12 @@ function renderResolution(state) {
 function renderArena(s) {
     const app = document.getElementById('app');
 
-    // Play combat music on first render
+    // Play combat/boss music on first render
     if (typeof ValdoriaAudio !== 'undefined' && !renderArena._musicStarted) {
         renderArena._musicStarted = true;
-        ValdoriaAudio.play('combat');
+        // Detect boss: enemies with legendary actions
+        const _hasBoss = s.turn_order && s.turn_order.some(e => e.t === 'e' && parseInt(e.leg) > 0);
+        ValdoriaAudio.play(_hasBoss ? 'boss' : 'combat');
     }
 
     // P0-C: Phase transition fade (intro->init->active)

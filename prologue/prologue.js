@@ -571,6 +571,9 @@ async function boot() {
         }
         document.getElementById('loading').style.display = 'none';
 
+        // Play prologue ambient music
+        if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('prologue');
+
         if (DATA.mode === 'aftermath') {
             // Post-combat: show aftermath directly
             addScreen(renderAftermath());

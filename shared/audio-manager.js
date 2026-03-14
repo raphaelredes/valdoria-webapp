@@ -12,7 +12,7 @@ const ValdoriaAudio = (() => {
     const VOLUME_KEY = 'valdoria_audio_volume';
     const CROSSFADE_MS = 1200;
     const DEFAULT_VOLUME = 0.5;
-    const NO_LOOP_TRACKS = ['victory', 'defeat'];
+    const NO_LOOP_TRACKS = ['victory', 'defeat', 'levelup'];
 
     // Base URL for audio files (relative to webapp root)
     const AUDIO_BASE = '../shared/audio/';
@@ -30,6 +30,9 @@ const ValdoriaAudio = (() => {
         snow:     ['snow_silence.mp3', 'snow_silence_2.mp3', 'snow_silence_3.mp3', 'snow_silence_4.mp3'],
         victory:  ['victory_fanfare.mp3', 'victory_fanfare_2.mp3', 'victory_fanfare_3.mp3', 'victory_fanfare_4.mp3'],
         defeat:   ['defeat_somber.mp3', 'defeat_somber_2.mp3', 'defeat_somber_3.mp3', 'defeat_somber_4.mp3'],
+        levelup:  ['levelup_theme.mp3', 'levelup_theme_2.mp3', 'levelup_theme_3.mp3', 'levelup_theme_4.mp3'],
+        prologue: ['prologue_theme.mp3', 'prologue_theme_2.mp3', 'prologue_theme_3.mp3', 'prologue_theme_4.mp3'],
+        boss:     ['boss_battle.mp3', 'boss_battle_2.mp3', 'boss_battle_3.mp3', 'boss_battle_4.mp3'],
     };
 
     function _pickVariant(trackKey) {
