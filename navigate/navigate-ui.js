@@ -696,6 +696,7 @@ function toggleLegendExpand() {
     const panel = document.getElementById('legend-biomes');
     const toggle = document.querySelector('.legend-toggle');
     if (!panel) return;
+    if (toggle) toggle.classList.toggle('open', _legendOpen);
     if (_legendOpen) {
         // Populate biomes
         panel.innerHTML = '';
@@ -941,7 +942,7 @@ function openQuickList() {
             const danger = loc.ld.d || 0;
             if (loc.isExp && danger > 0) {
                 const pips = Math.min(5, Math.ceil(danger / 2));
-                const colors = ['#5a8a3a', '#8a8a3a', '#aa6a2a', '#aa3a2a', '#6a1a1a'];
+                const colors = ['#5a9a3a', '#9a9a2a', '#cc7a2a', '#cc3a2a', '#8a1a1a'];
                 dangerHtml = '<span class="ql-danger-pips">';
                 for (let i = 0; i < pips; i++) {
                     dangerHtml += '<span class="ql-danger-pip" style="background:' + colors[Math.min(i, colors.length - 1)] + '"></span>';
