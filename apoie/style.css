@@ -2728,24 +2728,25 @@ body::after {
     background-image: url('layers/layer-mountains.jpg');
     background-color: transparent;
     z-index: 2;
-    mask-image: linear-gradient(to bottom, transparent 5%, black 35%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 35%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 45%, transparent 65%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 45%, transparent 65%);
 }
 
 .ap-layer-castle {
     background-image: url('layers/layer-castle.jpg');
     background-color: transparent;
     z-index: 3;
-    mask-image: linear-gradient(to bottom, transparent 10%, black 40%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 10%, black 40%);
+    opacity: 0.75;
+    mask-image: linear-gradient(to bottom, transparent 15%, black 35%, black 55%, transparent 75%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 15%, black 35%, black 55%, transparent 75%);
 }
 
 .ap-layer-forest {
     background-image: url('layers/layer-forest.jpg');
     background-color: transparent;
     z-index: 4;
-    mask-image: linear-gradient(to bottom, transparent 20%, black 55%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 20%, black 55%);
+    mask-image: linear-gradient(to bottom, transparent 40%, black 65%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 40%, black 65%);
 }
 
 .ap-layer-mist {
