@@ -1,6 +1,6 @@
 # Trilha Sonora + SFX — Lendas de Valdoria
 
-Audio completo do jogo: musica ambiente (14 tracks x 4 variantes) + SFX combate (13 efeitos x 2 variantes).
+Audio completo do jogo: musica ambiente (14 tracks x 8 variantes) + SFX combate (13 efeitos x 2 variantes).
 `audio-manager.js` v1.2 gerencia tudo — basta colocar os arquivos aqui.
 
 ## Formato obrigatorio
@@ -12,7 +12,7 @@ Audio completo do jogo: musica ambiente (14 tracks x 4 variantes) + SFX combate 
 - **Loop**: Crossfade automatico pelo audio-manager (1.2s)
 - **Vocals**: NENHUM — apenas instrumental
 - **Volume**: Normalizar para -14 LUFS
-- **Variantes**: 4 por track (ex: tavern_ambient.mp3, _2.mp3, _3.mp3, _4.mp3)
+- **Variantes**: 8 por track (ex: tavern_ambient.mp3, _2.mp3, ..., _8.mp3)
 
 ### SFX (Efeitos Sonoros)
 - **Codec**: MP3 (Suno) ou WAV (sintetizado)
@@ -23,24 +23,24 @@ Audio completo do jogo: musica ambiente (14 tracks x 4 variantes) + SFX combate 
 
 ## Catalogo Completo
 
-### Musica (56 MP3s)
+### Musica (112 MP3s — 14 tracks x 8 variantes)
 
-| Track | Arquivos | Bioma/Situacao | Loop |
-|-------|----------|----------------|------|
-| tavern | tavern_ambient[_2/_3/_4].mp3 | Taverna | Sim |
-| city | city_day[_2/_3/_4].mp3 | Cidade | Sim |
-| forest | forest_explore[_2/_3/_4].mp3 | Floresta | Sim |
-| combat | combat_tense[_2/_3/_4].mp3 | Combate normal | Sim |
-| desert | desert_wind[_2/_3/_4].mp3 | Deserto | Sim |
-| dungeon | dungeon_dark[_2/_3/_4].mp3 | Dungeon/Caverna | Sim |
-| swamp | swamp_mist[_2/_3/_4].mp3 | Pantano | Sim |
-| mountain | mountain_wind[_2/_3/_4].mp3 | Montanha | Sim |
-| snow | snow_silence[_2/_3/_4].mp3 | Neve/Tundra | Sim |
-| victory | victory_fanfare[_2/_3/_4].mp3 | Vitoria combate | Nao |
-| defeat | defeat_somber[_2/_3/_4].mp3 | Derrota combate | Nao |
-| levelup | levelup_theme[_2/_3/_4].mp3 | Level up | Nao |
-| prologue | prologue_theme[_2/_3/_4].mp3 | Prologo | Sim |
-| boss | boss_battle[_2/_3/_4].mp3 | Boss (legendary) | Sim |
+| Track | Arquivos | Sub-ambientes | Loop |
+|-------|----------|---------------|------|
+| tavern | tavern_ambient[_2..._8].mp3 | Animada, Calma, Bardo, Celebracao | Sim |
+| city | city_day[_2..._8].mp3 | Mercado, Ruas, Praca, Entardecer | Sim |
+| forest | forest_explore[_2..._8].mp3 | Densa, Clareira, Sombria, Rio | Sim |
+| combat | combat_tense[_2..._8].mp3 | Intenso, Escaramuca, Emboscada, Epico | Sim |
+| desert | desert_wind[_2..._8].mp3 | Dunas, Oasis, Tempestade, Ruinas | Sim |
+| dungeon | dungeon_dark[_2..._8].mp3 | Profunda, Arcana, Catacumbas, Tesouro | Sim |
+| swamp | swamp_mist[_2..._8].mp3 | Nebuloso, Mangue, Encantado, Ruinas | Sim |
+| mountain | mountain_wind[_2..._8].mp3 | Pico, Caverna, Trilha, Monasteiro | Sim |
+| snow | snow_silence[_2..._8].mp3 | Tundra, Nevasca, Floresta, Aurora | Sim |
+| victory | victory_fanfare[_2..._8].mp3 | Triunfo, Climax, Celebracao, Gloria | Nao |
+| defeat | defeat_somber[_2..._8].mp3 | Perda, Vazio, Lamento, Derrota | Nao |
+| levelup | levelup_theme[_2..._8].mp3 | Poder, Habilidade, Bencao, Evolucao | Nao |
+| prologue | prologue_theme[_2..._8].mp3 | Jornada, Mundo, Chamado, Misterio | Sim |
+| boss | boss_battle[_2..._8].mp3 | Chefe, Dragao, Lich, Demonio | Sim |
 
 ### SFX Combate (26 arquivos)
 
@@ -62,10 +62,10 @@ Audio completo do jogo: musica ambiente (14 tracks x 4 variantes) + SFX combate 
 
 ## Geracao de Audio
 
-### Musica — Suno Pro (recomendado)
+### Musica — Suno Pro
 1. Acesse https://suno.com no modo "Create Song"
 2. Use "Instrumental" (sem vocals), duracao ~45s
-3. Gere 4 variantes por prompt (variar seeds)
+3. Gere 2 variantes por prompt (2 prompts diferentes por track = 8 variantes)
 4. Baixe MP3, renomeie para o padrao acima
 
 ### SFX — Suno Sounds
@@ -120,4 +120,4 @@ git push origin main
 - sfx_discover, sfx_trap, sfx_campfire
 
 ### Musicas Extras
-- inn_rest, shop_browse, mystery_event, creation_theme, lore_reading (4 variantes cada)
+- inn_rest, shop_browse, mystery_event (8 variantes cada)

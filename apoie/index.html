@@ -30,6 +30,24 @@
         <div class="ap-hero-icon">&#x1F409;</div>
         <h1>Lendas de Valdoria</h1>
         <div class="ap-hero-subtitle">Apoie o desenvolvimento do RPG medieval de fantasia</div>
+
+        <!-- Soundtrack Player -->
+        <div class="ap-player" id="ap-player">
+            <div class="ap-player-label">Trilha Sonora Original</div>
+            <div class="ap-player-controls">
+                <button class="ap-player-btn" id="ap-play-btn" aria-label="Tocar trilha sonora" onclick="togglePlayer()">
+                    <svg id="ap-icon-play" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21"/></svg>
+                    <svg id="ap-icon-pause" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+                </button>
+                <div class="ap-player-meta">
+                    <div class="ap-player-track" id="ap-track-name">Clique para ouvir</div>
+                    <div class="ap-player-bar-wrap">
+                        <div class="ap-player-bar" id="ap-progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <a href="#tiers" class="ap-hero-cta">Ver Recompensas &#x25BE;</a>
         <div class="ap-divider" style="margin-top:40px"></div>
     </section>
@@ -556,6 +574,97 @@
             loadGoals();
             setupScrollAnimations();
         });
+
+        // ── Soundtrack Player ──
+        const _AP_AUDIO_BASE = '../shared/audio/';
+        const _AP_TRACKS = {
+            'Taverna':   ['tavern_ambient.mp3','tavern_ambient_2.mp3','tavern_ambient_3.mp3','tavern_ambient_4.mp3','tavern_ambient_5.mp3','tavern_ambient_6.mp3','tavern_ambient_7.mp3','tavern_ambient_8.mp3'],
+            'Cidade':    ['city_day.mp3','city_day_2.mp3','city_day_3.mp3','city_day_4.mp3','city_day_5.mp3','city_day_6.mp3','city_day_7.mp3','city_day_8.mp3'],
+            'Floresta':  ['forest_explore.mp3','forest_explore_2.mp3','forest_explore_3.mp3','forest_explore_4.mp3','forest_explore_5.mp3','forest_explore_6.mp3','forest_explore_7.mp3','forest_explore_8.mp3'],
+            'Combate':   ['combat_tense.mp3','combat_tense_2.mp3','combat_tense_3.mp3','combat_tense_4.mp3','combat_tense_5.mp3','combat_tense_6.mp3','combat_tense_7.mp3','combat_tense_8.mp3'],
+            'Deserto':   ['desert_wind.mp3','desert_wind_2.mp3','desert_wind_3.mp3','desert_wind_4.mp3','desert_wind_5.mp3','desert_wind_6.mp3','desert_wind_7.mp3','desert_wind_8.mp3'],
+            'Masmorra':  ['dungeon_dark.mp3','dungeon_dark_2.mp3','dungeon_dark_3.mp3','dungeon_dark_4.mp3','dungeon_dark_5.mp3','dungeon_dark_6.mp3','dungeon_dark_7.mp3','dungeon_dark_8.mp3'],
+            'Pantano':   ['swamp_mist.mp3','swamp_mist_2.mp3','swamp_mist_3.mp3','swamp_mist_4.mp3','swamp_mist_5.mp3','swamp_mist_6.mp3','swamp_mist_7.mp3','swamp_mist_8.mp3'],
+            'Montanha':  ['mountain_wind.mp3','mountain_wind_2.mp3','mountain_wind_3.mp3','mountain_wind_4.mp3','mountain_wind_5.mp3','mountain_wind_6.mp3','mountain_wind_7.mp3','mountain_wind_8.mp3'],
+            'Neve':      ['snow_silence.mp3','snow_silence_2.mp3','snow_silence_3.mp3','snow_silence_4.mp3','snow_silence_5.mp3','snow_silence_6.mp3','snow_silence_7.mp3','snow_silence_8.mp3'],
+            'Prologo':   ['prologue_theme.mp3','prologue_theme_2.mp3','prologue_theme_3.mp3','prologue_theme_4.mp3','prologue_theme_5.mp3','prologue_theme_6.mp3','prologue_theme_7.mp3','prologue_theme_8.mp3'],
+            'Boss':      ['boss_battle.mp3','boss_battle_2.mp3','boss_battle_3.mp3','boss_battle_4.mp3','boss_battle_5.mp3','boss_battle_6.mp3','boss_battle_7.mp3','boss_battle_8.mp3'],
+        };
+
+        // Flatten all tracks into a single pool
+        const _apAllTracks = [];
+        for (const [name, files] of Object.entries(_AP_TRACKS)) {
+            for (const f of files) _apAllTracks.push({ name: name, file: f });
+        }
+
+        let _apAudio = null;
+        let _apPlaying = false;
+        let _apLastFile = '';
+        let _apRafId = null;
+
+        function _apPickRandom() {
+            let pick;
+            do { pick = _apAllTracks[Math.floor(Math.random() * _apAllTracks.length)]; }
+            while (pick.file === _apLastFile && _apAllTracks.length > 1);
+            _apLastFile = pick.file;
+            return pick;
+        }
+
+        function togglePlayer() {
+            if (_apPlaying && _apAudio) {
+                _apAudio.pause();
+                _apPlaying = false;
+                _apUpdateUI();
+                return;
+            }
+            if (_apAudio && _apAudio.paused && _apAudio.currentTime > 0) {
+                _apAudio.play().catch(function(){});
+                _apPlaying = true;
+                _apUpdateUI();
+                _apAnimateBar();
+                return;
+            }
+            _apPlayRandom();
+        }
+
+        function _apPlayRandom() {
+            if (_apAudio) { _apAudio.pause(); _apAudio.src = ''; }
+            var track = _apPickRandom();
+            _apAudio = new Audio(_AP_AUDIO_BASE + track.file);
+            _apAudio.volume = 0.15;
+            _apAudio.addEventListener('ended', function() { _apPlayRandom(); });
+            _apAudio.addEventListener('error', function() {
+                console.warn('[APOIE] Audio error:', track.file);
+                setTimeout(_apPlayRandom, 500);
+            });
+            _apAudio.play().then(function() {
+                _apPlaying = true;
+                document.getElementById('ap-track-name').textContent = '♫ ' + track.name;
+                _apUpdateUI();
+                _apAnimateBar();
+            }).catch(function(e) {
+                console.warn('[APOIE] Play blocked:', e.message);
+            });
+        }
+
+        function _apUpdateUI() {
+            document.getElementById('ap-icon-play').style.display = _apPlaying ? 'none' : 'block';
+            document.getElementById('ap-icon-pause').style.display = _apPlaying ? 'block' : 'none';
+            var btn = document.getElementById('ap-play-btn');
+            if (btn) btn.classList.toggle('playing', _apPlaying);
+        }
+
+        function _apAnimateBar() {
+            if (_apRafId) cancelAnimationFrame(_apRafId);
+            function tick() {
+                if (!_apAudio || !_apPlaying) { _apRafId = null; return; }
+                var pct = _apAudio.duration ? (_apAudio.currentTime / _apAudio.duration * 100) : 0;
+                var bar = document.getElementById('ap-progress-bar');
+                if (bar) bar.style.width = pct + '%';
+                _apRafId = requestAnimationFrame(tick);
+            }
+            _apRafId = requestAnimationFrame(tick);
+        }
     </script>
 </body>
 
