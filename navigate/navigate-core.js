@@ -74,7 +74,7 @@ async function initAsync() {
 
         // If URL data param is missing, fetch from API (robust fallback)
         if (!dataB64 && S.api && S.token) {
-            console.log('[NAVIGATE] No URL data param, fetching from API...');
+            console.debug('[NAVIGATE] No URL data param, fetching from API...');
             dataB64 = await fetchPayloadFromAPI();
         }
 
@@ -179,7 +179,7 @@ async function initAsync() {
         // Reset stale _navSent on visibility change (e.g., user switches tabs and comes back)
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && _navSent) {
-                console.log('[NAVIGATE] Resetting stale _navSent on visibility change');
+                console.debug('[NAVIGATE] Resetting stale _navSent on visibility change');
                 _navSent = false;
                 clearTimeout(_navSentTimer);
             }
@@ -233,7 +233,7 @@ async function fetchPayloadFromAPI(retries = 2) {
 
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-            console.log('[NAVIGATE] API fetch attempt', attempt + 1);
+            console.debug('[NAVIGATE] API fetch attempt', attempt + 1);
             const r = await fetchT(url, { method: 'GET', headers: headers });
             if (!r.ok) {
                 console.warn('[NAVIGATE] API state returned', r.status);
@@ -242,7 +242,7 @@ async function fetchPayloadFromAPI(retries = 2) {
             }
             const d = await r.json();
             if (d.data) {
-                console.log('[NAVIGATE] Got payload from API (' + d.data.length + ' chars)');
+                console.debug('[NAVIGATE] Got payload from API (' + d.data.length + ' chars)');
                 return d.data;
             }
             console.warn('[NAVIGATE] API returned ok but no data field');
@@ -270,7 +270,7 @@ async function _onVisibilityRefresh() {
     if (_refreshing) return;
     _refreshing = true;
     _lastRefreshTs = Date.now();
-    console.log('[NAVIGATE] Refreshing map data on visibility change...');
+    console.debug('[NAVIGATE] Refreshing map data on visibility change...');
     try {
         const dataB64 = await fetchPayloadFromAPI(1);
         if (!dataB64) return;
@@ -295,7 +295,7 @@ async function _onVisibilityRefresh() {
         updateBottomBar();
         refreshDynamicLayers();
         if (typeof _initMinimap === 'function') _initMinimap();
-        console.log('[NAVIGATE] Map data refreshed successfully');
+        console.debug('[NAVIGATE] Map data refreshed successfully');
     } catch (e) {
         console.warn('[NAVIGATE] Auto-refresh failed:', e);
     } finally {

@@ -55,7 +55,7 @@ function handleTransition(transition) {
     if (!transition.url) { console.warn('[GAME] handleTransition() missing url:', JSON.stringify(transition)); S.transitioning = false; return; }
 
     S.transitioning = true;
-    console.log('[GAME] Transition to:', transition.to, transition.url);
+    console.debug('[GAME] Transition to:', transition.to, transition.url);
 
     // Stop ambient particles during transition
     if (typeof stopParticles === 'function') stopParticles();
@@ -134,7 +134,7 @@ function buildReturnUrl() {
  * This triggers a state refresh to show the current game screen.
  */
 async function returnFromWebApp() {
-    console.log('[GAME] returnFromWebApp() called');
+    console.debug('[GAME] returnFromWebApp() called');
     showLoading();
     const data = await apiCall('/api/game/state');
     await hideLoadingWithDelay();
@@ -144,11 +144,11 @@ async function returnFromWebApp() {
         if (data.sv !== undefined) S.screenVersion = data.sv;
 
         if (data.transition && !data.text) {
-            console.log('[GAME] returnFromWebApp() -> transition:', JSON.stringify(data.transition).substring(0, 100));
+            console.debug('[GAME] returnFromWebApp() -> transition:', JSON.stringify(data.transition).substring(0, 100));
             // Still in a specialized state — redirect again
             handleTransition(data.transition);
         } else {
-            console.log('[GAME] returnFromWebApp() -> renderScreen, text_len:', (data.text || '').length);
+            console.debug('[GAME] returnFromWebApp() -> renderScreen, text_len:', (data.text || '').length);
             renderScreen(data);
         }
     } else {
@@ -207,7 +207,7 @@ async function requestTransition(toApp, payload = {}) {
                         body: JSON.stringify({ token: S.token, user_id: S.uid }),
                     }).then(() => doClose())
                       .catch(() => {
-                        try { if (tg?.sendData) tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'GAME' })); } catch (_) {}
+                        try { if (tg?.sendData) tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'GAME' })); } catch (_) { /* Telegram API optional */ }
                         setTimeout(doClose, 1000);
                     });
                     return;
@@ -218,7 +218,7 @@ async function requestTransition(toApp, payload = {}) {
                         setTimeout(doClose, 1000);
                         return;
                     }
-                } catch (_) {}
+                } catch (_) { /* haptic optional */ }
                 showToast('Sessão expirada. Feche e reabra.');
                 return;
             }
@@ -229,7 +229,7 @@ async function requestTransition(toApp, payload = {}) {
             }
 
             let data;
-            try { data = await resp.json(); } catch (_) { data = {}; }
+            try { data = await resp.json(); } catch (_) { data = {}; /* parse fallback */ }
 
             if (data.url) {
                 handleTransition({ to: toApp, url: data.url });

@@ -197,7 +197,7 @@ const ValdoriaAudio = (() => {
             _looping = false;
         }).catch(() => {
             oldAudio.currentTime = 0;
-            oldAudio.play().catch(() => {});
+            oldAudio.play().catch(() => { /* autoplay blocked */ });
             _looping = false;
         });
     }
@@ -213,7 +213,7 @@ const ValdoriaAudio = (() => {
         const timer = setInterval(() => {
             current += increment;
             if (current >= target || audio !== _audio) {
-                try { audio.volume = (audio === _audio) ? target : 0; } catch(e) {}
+                try { audio.volume = (audio === _audio) ? target : 0; } catch(e) { /* volume control */ }
                 clearInterval(timer);
             } else {
                 try { audio.volume = current; } catch(e) { clearInterval(timer); }
@@ -266,7 +266,7 @@ const ValdoriaAudio = (() => {
 
         const sfx = new Audio(url);
         sfx.volume = Math.min(1, _sfxVolume * 1.5);
-        sfx.play().catch(() => {});
+        sfx.play().catch(() => { /* autoplay blocked */ });
     }
 
     // -- Mute toggle --
@@ -725,7 +725,7 @@ const ValdoriaAudio = (() => {
     }
 
     function _haptic(type) {
-        try { var tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light'); } catch(e) {}
+        try { var tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light'); } catch(e) { /* haptic optional */ }
     }
 
     // Smooth volume ramp (avoids audible pops on slider drag)
@@ -734,7 +734,7 @@ const ValdoriaAudio = (() => {
         if (_volRafId) cancelAnimationFrame(_volRafId);
         var current = audio.volume;
         var diff = target - current;
-        if (Math.abs(diff) < 0.01) { try { audio.volume = target; } catch(e) {} return; }
+        if (Math.abs(diff) < 0.01) { try { audio.volume = target; } catch(e) { /* volume control */ } return; }
         var step = diff * 0.3;
         function tick() {
             current += step;
@@ -952,7 +952,7 @@ const ValdoriaAudio = (() => {
     function _dismissHint(btn) {
         if (_hintDismissed) return;
         _hintDismissed = true;
-        try { localStorage.setItem(HINT_KEY, '1'); } catch(e) {}
+        try { localStorage.setItem(HINT_KEY, '1'); } catch(e) { /* storage unavailable */ }
         if (btn) btn.classList.remove('va-hint-pulse');
     }
 

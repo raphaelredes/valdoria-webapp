@@ -37,13 +37,13 @@ function shouldShowTutorial() {
 function checkServerTutorialFlag(playerData) {
     if (playerData && playerData.ts) {
         // Server says tutorial already seen — sync to localStorage
-        try { localStorage.setItem(TUTORIAL_STORAGE_KEY, '1'); } catch(e) {}
+        try { localStorage.setItem(TUTORIAL_STORAGE_KEY, '1'); } catch(e) { /* storage unavailable */ }
     }
 }
 
 function markTutorialSeen() {
     try { localStorage.setItem(TUTORIAL_STORAGE_KEY, '1'); }
-    catch(e) {}
+    catch(e) { /* localStorage unavailable */ }
     // Notify server (fire-and-forget)
     _notifyServerTutorialSeen();
 }
@@ -55,8 +55,8 @@ function _notifyServerTutorialSeen() {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
             body: '{}'
-        }).catch(function() {});
-    } catch(e) {}
+        }).catch(function() { /* font load optional */ });
+    } catch(e) { /* font preload optional */ }
 }
 
 function _buildTutorialDOM() {
@@ -204,7 +204,7 @@ function _tutorialNext() {
     try {
         if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback)
             Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    } catch(_) {}
+    } catch(_) { /* tutorial state optional */ }
     if (_tutorialStep >= TUTORIAL_STEPS.length - 1) _tutorialClose();
     else _showTutorialStep(_tutorialStep + 1);
 }

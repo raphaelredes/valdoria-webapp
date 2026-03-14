@@ -87,8 +87,8 @@
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
-            try { Telegram.WebApp.headerColor = '#2a2420'; } catch(e) {}
-            try { Telegram.WebApp.backgroundColor = '#2a2420'; } catch(e) {}
+            try { Telegram.WebApp.headerColor = '#2a2420'; } catch(e) { /* Telegram API optional */ }
+            try { Telegram.WebApp.backgroundColor = '#2a2420'; } catch(e) { /* Telegram API optional */ }
             if (Telegram.WebApp.BackButton) {
                 Telegram.WebApp.BackButton.show();
                 Telegram.WebApp.BackButton.onClick(_goBack);

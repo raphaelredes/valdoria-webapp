@@ -27,7 +27,7 @@
     color: var(--v-gold-light);
 }
 .entity.active-turn.enemy .compact-name {
-    color: #f0a0a0;
+    color: var(--v-danger-lighter);
 }
 .entity.active-turn.ally {
     background: linear-gradient(165deg, rgba(180,190,210,0.08) 0%, var(--v-bg-card) 100%);
@@ -145,8 +145,8 @@
 
 /* ─── SKILL CHANCE COLOR CODING ─── */
 .action-chance.ch-high { color: var(--v-success, #4caf50); opacity: 1; }
-.action-chance.ch-mid { color: #ffa726; opacity: 1; }
-.action-chance.ch-low { color: #e08080; opacity: 1; }
+.action-chance.ch-mid { color: var(--v-warning); opacity: 1; }
+.action-chance.ch-low { color: var(--v-danger-light); opacity: 1; }
 
 /* ─── WAITING STATE (not your turn) ─── */
 .action-bar.waiting {

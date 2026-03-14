@@ -60,8 +60,8 @@ function _clog(msg) {
 
 // ─── Initialization ───
 async function init() {
-    console.log('[GAME] init() started');
-    console.log('[GAME] URL:', window.location.href);
+    console.debug('[GAME] init() started');
+    console.debug('[GAME] URL:', window.location.href);
 
     // Initialize immersive mode (collapsible bottom panel)
     if (typeof initImmersive === 'function') initImmersive();
@@ -88,7 +88,7 @@ async function init() {
     // Save current session for future recovery
     if (S.token && S.uid && S.apiBase) _saveSession();
 
-    console.log('[GAME] Params: token=' + (S.token ? S.token.substring(0, 8) + '...' : 'MISSING') +
+    console.debug('[GAME] Params: token=' + (S.token ? S.token.substring(0, 8) + '...' : 'MISSING') +
         ' api=' + (S.apiBase || 'MISSING') +
         ' uid=' + S.uid +
         ' char=' + (S.charId || 'none'));
@@ -124,7 +124,7 @@ async function init() {
 
     // Telegram WebApp setup
     if (window.Telegram && Telegram.WebApp) {
-        console.log('[GAME] Telegram WebApp detected, version:', Telegram.WebApp.version || 'unknown');
+        console.debug('[GAME] Telegram WebApp detected, version:', Telegram.WebApp.version || 'unknown');
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
         try { Telegram.WebApp.disableVerticalSwipes(); } catch (e) { /* older clients */ }
@@ -182,7 +182,7 @@ async function init() {
     });
     window.addEventListener('online', () => {
         _clog('NETWORK → ONLINE');
-        console.log('[GAME] Network back online');
+        console.debug('[GAME] Network back online');
         // If error overlay is showing a connection error, auto-retry
         const errOverlay = document.getElementById('v-err-overlay');
         const errMsg = document.getElementById('v-err-msg');
@@ -206,14 +206,14 @@ async function init() {
     // Health check — verify API is reachable before loading game.
     // If it fails, keep polling silently (player just sees loading screen).
     _clog('INIT health check → ' + S.apiBase + '/api/game/health');
-    console.log('[GAME] Starting health check to:', S.apiBase + '/api/game/health');
+    console.debug('[GAME] Starting health check to:', S.apiBase + '/api/game/health');
     showLoading(); // Show loading screen immediately during health check
     const healthy = await _waitForHealthy();
     if (!healthy) return; // _waitForHealthy already handled error/sendData
 
     // Listen for session-reopened event (user clicked "Reabrir aqui" on displacement overlay)
     window.addEventListener('session-reopened', function (e) {
-        console.log('[GAME] Session reopened, reloading screen');
+        console.debug('[GAME] Session reopened, reloading screen');
         var data = e.detail;
         if (data && data.text) {
             if (data.sv !== undefined) S.screenVersion = data.sv;
@@ -228,20 +228,20 @@ async function init() {
 
     // Check if returning from another WebApp (combat, explore, etc.)
     const isReturn = params.get('return') === 'game';
-    console.log('[GAME] Route: isReturn=' + isReturn + ' hasCharId=' + !!S.charId);
+    console.debug('[GAME] Route: isReturn=' + isReturn + ' hasCharId=' + !!S.charId);
 
     try {
         if (isReturn) {
             // Returning from specialized WebApp — refresh state
-            console.log('[GAME] -> returnFromWebApp()');
+            console.debug('[GAME] -> returnFromWebApp()');
             await returnFromWebApp();
         } else if (S.charId) {
             // Opening with specific character — use /start to activate char
-            console.log('[GAME] -> startGame() with charId=' + S.charId);
+            console.debug('[GAME] -> startGame() with charId=' + S.charId);
             await startGame();
         } else {
             // No character specified — show character selection screen
-            console.log('[GAME] -> showCharacterSelect()');
+            console.debug('[GAME] -> showCharacterSelect()');
             await showCharacterSelect();
         }
     } catch (routeError) {
@@ -264,11 +264,11 @@ async function checkHealth() {
 
     for (let attempt = 0; attempt <= HEALTH_RETRIES; attempt++) {
         if (attempt > 0) {
-            console.log('[GAME] Health retry', attempt, '/', HEALTH_RETRIES, '- waiting', HEALTH_RETRY_MS + 'ms');
+            console.debug('[GAME] Health retry', attempt, '/', HEALTH_RETRIES, '- waiting', HEALTH_RETRY_MS + 'ms');
             await sleep(HEALTH_RETRY_MS);
         }
         _clog(`HEALTH attempt ${attempt}/${HEALTH_RETRIES}`);
-        console.log('[GAME] checkHealth() attempt', attempt, 'url:', url);
+        console.debug('[GAME] checkHealth() attempt', attempt, 'url:', url);
         try {
             const controller = new AbortController();
             const tid = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
@@ -281,7 +281,7 @@ async function checkHealth() {
             clearTimeout(tid);
             const elapsed = Date.now() - t0;
             _clog(`HEALTH response: ${resp.status} ${resp.statusText} (${elapsed}ms)`);
-            console.log('[GAME] Health response status:', resp.status);
+            console.debug('[GAME] Health response status:', resp.status);
             if (!resp.ok) {
                 _clog(`HEALTH FAIL: HTTP ${resp.status} ${resp.statusText}`);
                 console.error('[GAME] Health check failed:', resp.status, resp.statusText);
@@ -289,13 +289,13 @@ async function checkHealth() {
             }
             const data = await resp.json();
             _clog(`HEALTH data: ${JSON.stringify(data)}`);
-            console.log('[GAME] Health data:', JSON.stringify(data));
+            console.debug('[GAME] Health data:', JSON.stringify(data));
             if (data.status === 'ok' && data.engine) {
                 if (typeof _updateConnectionStatus === 'function') _updateConnectionStatus('connected');
                 // Detect tunnel URL change — server reports a different API base
                 if (data.api && S.apiBase && data.api !== S.apiBase) {
                     _clog(`HEALTH: tunnel URL changed! ${S.apiBase} -> ${data.api}`);
-                    console.log('[GAME] Tunnel URL changed, updating apiBase in memory');
+                    console.debug('[GAME] Tunnel URL changed, updating apiBase in memory');
                     S.apiBase = data.api;
                     if (window.ApiDiscovery) ApiDiscovery.updateBase(data.api);
                     if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) ValdoriaErrors.updateApiBase(data.api);
@@ -334,7 +334,7 @@ async function _discoverApiUrl() {
         const url = (data.url || '').replace(/\/$/, '');
         if (url && url !== S.apiBase) {
             _clog('DISCOVERY: found new API URL: ' + url);
-            console.log('[GAME] Discovered new API URL:', url);
+            console.debug('[GAME] Discovered new API URL:', url);
             return url;
         }
     } catch (e) {
@@ -354,7 +354,7 @@ async function _waitForHealthy() {
 
     // Discovery FIRST — tunnel URL likely changed (stale ?api= param)
     _clog('INIT health failed — trying discovery before polling');
-    console.log('[GAME] Health failed, trying API URL discovery first...');
+    console.debug('[GAME] Health failed, trying API URL discovery first...');
     const newUrl = await _discoverApiUrl();
     if (newUrl) {
         S.apiBase = newUrl;
@@ -365,7 +365,7 @@ async function _waitForHealthy() {
         ok = await checkHealth();
         if (ok) {
             _clog('DISCOVERY: health OK with new URL');
-            console.log('[GAME] Discovery succeeded, health OK with new URL:', newUrl);
+            console.debug('[GAME] Discovery succeeded, health OK with new URL:', newUrl);
             return true;
         }
         _clog('DISCOVERY: new URL found but health still failing');
@@ -373,7 +373,7 @@ async function _waitForHealthy() {
 
     // Discovery didn't help — server may be restarting (same URL, temporarily down)
     _clog('INIT polling (server may be restarting)...');
-    console.log('[GAME] Polling silently (server may be restarting)...');
+    console.debug('[GAME] Polling silently (server may be restarting)...');
     for (let i = 1; i <= HEALTH_POLL_MAX; i++) {
         await sleep(HEALTH_POLL_INTERVAL);
         ok = await checkHealth();
@@ -432,7 +432,7 @@ function _sendDataFallback(tg, action) {
 async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
     const url = `${S.apiBase}${endpoint}`;
     _clog(`API → ${endpoint}`);
-    console.log('[GAME] apiCall:', endpoint, 'body:', JSON.stringify(body).substring(0, 200));
+    console.debug('[GAME] apiCall:', endpoint, 'body:', JSON.stringify(body).substring(0, 200));
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${S.token}`,
@@ -449,7 +449,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
         try {
             if (attempt > 0) {
                 _clog(`API ${endpoint} retry ${attempt}/${retries}`);
-                console.log('[GAME] apiCall retry', attempt, '/', retries, 'for', endpoint);
+                console.debug('[GAME] apiCall retry', attempt, '/', retries, 'for', endpoint);
             }
             // AbortController timeout — prevents infinite hang
             const controller = new AbortController();
@@ -465,7 +465,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             clearTimeout(tid);
             const elapsed = Date.now() - t0;
 
-            console.log('[GAME] apiCall response:', endpoint, 'status:', resp.status, `(${elapsed}ms)`);
+            console.debug('[GAME] apiCall response:', endpoint, 'status:', resp.status, `(${elapsed}ms)`);
 
             if (resp.status === 429) {
                 _clog(`API ${endpoint} → 429 RATE LIMITED`);
@@ -520,7 +520,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             if (resp.ok) {
                 if (typeof _trackApiPerf === 'function') _trackApiPerf(endpoint, elapsed);
                 _clog(`API ${endpoint} → OK (${elapsed}ms)`);
-                console.log('[GAME] apiCall OK:', endpoint,
+                console.debug('[GAME] apiCall OK:', endpoint,
                     'keys:', Object.keys(data).join(','),
                     'text_len:', (data.text || '').length,
                     'buttons:', (data.buttons || []).length,
@@ -579,7 +579,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
             // Exponential backoff with jitter
             const backoff = RETRY_BASE_MS * Math.pow(2, attempt);
             const jitter = Math.random() * 500;
-            console.log('[GAME] Backoff:', Math.round(backoff + jitter) + 'ms before retry', (attempt + 1));
+            console.debug('[GAME] Backoff:', Math.round(backoff + jitter) + 'ms before retry', (attempt + 1));
             await sleep(backoff + jitter);
         }
     }
@@ -587,7 +587,7 @@ async function apiCall(endpoint, body = {}, retries = RETRY_MAX) {
 }
 
 async function startGame() {
-    console.log('[GAME] startGame() called, charId:', S.charId || 'none');
+    console.debug('[GAME] startGame() called, charId:', S.charId || 'none');
     showLoading();
     const startBody = S.charId ? { char_id: S.charId } : {};
     // Send device platform and device_id for displacement tracking
@@ -602,10 +602,10 @@ async function startGame() {
         // Handle transition responses (prologue, level-up, explore, combat)
         // Only redirect if there's no screen text (pure transition signal).
         if (data.transition && !data.text) {
-            console.log('[GAME] startGame() got transition:', JSON.stringify(data.transition).substring(0, 100));
+            console.debug('[GAME] startGame() got transition:', JSON.stringify(data.transition).substring(0, 100));
             handleTransition(data.transition);
         } else {
-            console.log('[GAME] startGame() success, rendering screen');
+            console.debug('[GAME] startGame() success, rendering screen');
             renderScreen(data);
         }
     } else if (data && data.error) {
@@ -623,7 +623,7 @@ async function startGame() {
 }
 
 async function fetchState(silent) {
-    console.log('[GAME] fetchState() silent:', silent);
+    console.debug('[GAME] fetchState() silent:', silent);
     if (!silent) showLoading();
     const data = await apiCall('/api/game/state');
     if (!silent) await hideLoadingWithDelay();
@@ -635,16 +635,16 @@ async function fetchState(silent) {
         // If text is present, the transition is just a WebApp button on a normal screen
         // (e.g. Mochila on city hub) — render the screen, don't redirect.
         if (data.transition && !data.text) {
-            console.log('[GAME] fetchState() got transition:', JSON.stringify(data.transition).substring(0, 100));
+            console.debug('[GAME] fetchState() got transition:', JSON.stringify(data.transition).substring(0, 100));
             handleTransition(data.transition);
         } else {
             // Skip re-render if screen is identical to current (silent refresh optimization)
             if (silent && S.currentScreen && data.text === S.currentScreen.text
                 && data.screen_id === S.currentScreen.screen_id) {
-                console.log('[GAME] fetchState() silent — screen unchanged, skip re-render');
+                console.debug('[GAME] fetchState() silent — screen unchanged, skip re-render');
                 return;
             }
-            console.log('[GAME] fetchState() rendering screen, text_len:', (data.text || '').length);
+            console.debug('[GAME] fetchState() rendering screen, text_len:', (data.text || '').length);
             renderScreen(data);
         }
     } else if (data && data.error) {
@@ -668,7 +668,7 @@ async function _closeGameHub() {
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token },
             body: JSON.stringify({ user_id: S.uid }),
             signal: controller.signal,
-        }).catch(() => {});
+        }).catch(e => console.warn('[GAME] cleanup:', e));
         clearTimeout(tid);
     } catch (e) { /* never block close */ }
     try { Telegram.WebApp.close(); } catch (e) { console.warn('[GAME] tg.close:', e); }
@@ -717,7 +717,7 @@ async function doAction(callbackData) {
     if (data.error === 'action_rejected') {
         hideLocationTransition();
         if (window.actionGuard) actionGuard.release();
-        console.log('[GAME] Action rejected by server:', data.reason);
+        console.debug('[GAME] Action rejected by server:', data.reason);
         return;
     }
 
@@ -795,7 +795,7 @@ async function doAction(callbackData) {
         // If there's a transition AND we rendered a screen,
         // it means the button is just there (like Mochila), so don't auto-redirect.
         if (data.transition && data.text) {
-            console.log('[GAME] Screen has WebApp link:', data.transition.to);
+            console.debug('[GAME] Screen has WebApp link:', data.transition.to);
         }
     } else {
         hideLocationTransition();
@@ -910,7 +910,7 @@ window.addEventListener('beforeunload', () => {
 
 // ─── Bootstrap ───
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('[GAME] DOMContentLoaded fired, starting init...');
+    console.debug('[GAME] DOMContentLoaded fired, starting init...');
     init().catch(e => {
         console.error('[GAME] init() CRASHED:', e.message);
         if (typeof showError === 'function') {

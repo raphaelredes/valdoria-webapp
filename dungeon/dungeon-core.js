@@ -38,7 +38,7 @@ async function initDungeon() {
         if (tg) {
             tg.ready();
             tg.expand();
-            try { tg.disableVerticalSwipes(); } catch (e) { }
+            try { tg.disableVerticalSwipes(); } catch (e) { /* Telegram API optional */ }
             if (tg.BackButton) {
                 tg.BackButton.show();
                 tg.BackButton.onClick(() => { try { tg.close(); } catch (e) { console.warn('[DUNGEON] tg.close:', e); } });
@@ -201,7 +201,7 @@ function sendAction(action, nodeId) {
 
 function handleRetreat() {
     if (!S.api || !S.token) {
-        try { tg?.close(); } catch (e) { }
+        try { tg?.close(); } catch (e) { /* Telegram API optional */ }
         return;
     }
     _transitionToGame();
@@ -219,7 +219,7 @@ async function _transitionToGame() {
         const d = await r.json();
         if (d.url) { window.location.replace(d.url); return; }
     } catch (e) { console.error('[DUNGEON] transition error:', e); }
-    try { tg?.close(); } catch (e) { }
+    try { tg?.close(); } catch (e) { /* Telegram API optional */ }
 }
 
 // showError provided by shared/error-reporter.js

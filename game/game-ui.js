@@ -705,7 +705,7 @@ function _audioRow(label, enabled, volume, onToggle, onVolume) {
     toggle.className = 'audio-toggle' + (enabled ? ' on' : '');
     toggle.innerHTML = '<span class="audio-toggle-label">' + label + '</span>' +
                        '<span class="audio-toggle-status">' + (enabled ? '🟢' : '⚪') + '</span>';
-    toggle.onclick = () => { try { var tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); } catch(e) {} onToggle(!enabled); };
+    toggle.onclick = () => { try { var tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); } catch(e) { /* haptic optional */ } onToggle(!enabled); };
     row.appendChild(toggle);
 
     // Volume slider (only if enabled)

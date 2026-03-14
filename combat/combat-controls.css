@@ -17,11 +17,11 @@
     text-overflow: ellipsis;
     animation: toastSlide 0.3s ease-out;
 }
-.action-toast.feed-crit { border-left-color: #f5c842; color: #f5c842; }
-.action-toast.feed-miss { border-left-color: #6a6a6a; color: #8a8a8a; }
-.action-toast.feed-kill { border-left-color: #ff4444; color: #ff6666; }
-.action-toast.feed-heal { border-left-color: #44cc66; color: #66dd88; }
-.action-toast.feed-hit { border-left-color: #cc8844; }
+.action-toast.feed-crit { border-left-color: var(--v-crit); color: var(--v-crit); }
+.action-toast.feed-miss { border-left-color: var(--v-miss); color: var(--v-miss); }
+.action-toast.feed-kill { border-left-color: var(--v-kill); color: var(--v-kill); }
+.action-toast.feed-heal { border-left-color: var(--v-heal); color: var(--v-success-light); }
+.action-toast.feed-hit { border-left-color: var(--v-gold-dim); }
 /* toastSlide → shared/animations.css */
 
 /* ─── TURN TIMER ─── */
@@ -91,7 +91,7 @@
 .timer-text.critical {
     font-size: 14px;
     font-weight: 900;
-    color: #ff4444;
+    color: var(--v-kill);
     animation: timerTextPulse 0.5s ease-in-out infinite;
     text-shadow: 0 0 12px rgba(229,57,53,0.7), 0 0 24px rgba(229,57,53,0.3);
 }
@@ -250,7 +250,7 @@
     text-shadow: 0 0 12px rgba(76,175,80,0.4);
 }
 .dmg-dice3d-label.crit {
-    color: #ff9800;
+    color: var(--v-warning);
     font-size: 18px;
     font-weight: 700;
     text-shadow: 0 0 14px rgba(255,152,0,0.5);

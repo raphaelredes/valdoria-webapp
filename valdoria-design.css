@@ -42,9 +42,18 @@
 
     /* Semantic */
     --v-success:       #4caf50;
+    --v-success-light: #66dd88;
     --v-danger:        #e74c3c;
+    --v-danger-light:  #e08080;
+    --v-danger-lighter:#f0a0a0;
     --v-info:          #5b9bd5;
     --v-warning:       #f39c12;
+
+    /* Combat feedback */
+    --v-crit:          #f5c842;
+    --v-heal:          #44cc66;
+    --v-miss:          #8a8a8a;
+    --v-kill:          #ff4444;
 
     /* Rarity (D&D item tiers) */
     --v-rarity-common:    #b0b0b0;
@@ -52,6 +61,14 @@
     --v-rarity-rare:      #2196f3;
     --v-rarity-very-rare: #9c27b0;
     --v-rarity-legendary: #ff9800;
+
+    /* Z-index stack (centralized) */
+    --v-z-base:        1;
+    --v-z-header:      100;
+    --v-z-overlay:     500;
+    --v-z-loading:     1000;
+    --v-z-modal:       5000;
+    --v-z-critical:    10000;
 
     /* Structural */
     --v-border:        #4a3828;

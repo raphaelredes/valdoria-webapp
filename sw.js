@@ -1,10 +1,10 @@
 // ═══════════════════════════════════════════════════════════
-//  LENDAS DE VALDORIA — Service Worker v2
+//  LENDAS DE VALDORIA — Service Worker v3
 //  Cache-first for static assets, Network-first for HTML
 //  Fonts + JS + CSS cached to bypass GitHub Pages 10min cache
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'valdoria-v2';
+const CACHE_NAME = 'valdoria-v3';
 
 const PRE_CACHE = [
     '/valdoria-webapp/valdoria-design.css',
@@ -14,9 +14,18 @@ const PRE_CACHE = [
     '/valdoria-webapp/shared/fonts.css',
     '/valdoria-webapp/shared/fonts/medievalsharp.woff2',
     '/valdoria-webapp/shared/fonts/cinzel.woff2',
+    '/valdoria-webapp/shared/fonts/pirataone.woff2',
+    '/valdoria-webapp/shared/fonts/almendra-regular.woff2',
+    '/valdoria-webapp/shared/fonts/almendra-bold.woff2',
+    '/valdoria-webapp/shared/fonts/imfell-regular.woff2',
+    '/valdoria-webapp/shared/fonts/metamorphous.woff2',
     // Shared CSS
     '/valdoria-webapp/shared/loading.css',
     '/valdoria-webapp/shared/animations.css',
+    // Shared JS — critical utilities
+    '/valdoria-webapp/shared/error-reporter.js',
+    '/valdoria-webapp/shared/audio-manager.js',
+    '/valdoria-webapp/shared/text-timing.js',
 ];
 
 // Install: pre-cache critical assets

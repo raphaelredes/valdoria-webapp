@@ -841,7 +841,7 @@ function addCondition(type, duration) {
     // Show toast with condition effect
     showTerrainToast(fx.icon + ' ' + fx.label + '! (' + stepsLeft + ' passos)', 'condition');
     // Haptic feedback
-    try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
+    try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('medium'); } catch(e) { /* haptic optional */ }
     saveState();
 }
 

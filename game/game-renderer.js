@@ -54,7 +54,7 @@ function renderScreen(screen) {
         return;
     }
 
-    console.log('[GAME] renderScreen() keys:', Object.keys(screen).join(','),
+    console.debug('[GAME] renderScreen() keys:', Object.keys(screen).join(','),
         'text_len:', (screen.text || '').length,
         'buttons:', (screen.buttons || []).length,
         'footer:', screen.footer ? 'yes' : 'no',

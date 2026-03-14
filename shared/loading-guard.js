@@ -206,7 +206,7 @@
         for (var i = 0; i < overlays.length; i++) {
             overlays[i].classList.add('loading-lite');
         }
-        console.log('[LOADING] Lite mode active — reduced animations for performance');
+        console.debug('[LOADING] Lite mode active — reduced animations for performance');
     }
 
     function shouldUseLite() {

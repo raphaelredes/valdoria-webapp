@@ -16,7 +16,7 @@ function _escChar(s) {
  * Called when: init() has no char param, main_menu callback, or character switch.
  */
 async function showCharacterSelect() {
-    console.log('[GAME] showCharacterSelect()');
+    console.debug('[GAME] showCharacterSelect()');
     _showCharSelectSkeleton();
 
     try {
@@ -257,7 +257,7 @@ let _selectingChar = false;
 async function _selectCharacter(charId) {
     if (_selectingChar) return;
     _selectingChar = true;
-    console.log('[GAME] _selectCharacter:', charId);
+    console.debug('[GAME] _selectCharacter:', charId);
     S.charId = charId;
     // Animate card press before loading
     var pressedCard = document.querySelector('.char-card[data-char-id="' + charId + '"]');

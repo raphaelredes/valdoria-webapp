@@ -16,7 +16,7 @@ const DiceRoller = (() => {
 
     // ─── Haptic helpers (Telegram WebApp) ───
     function haptic(style) {
-        try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.(style); } catch(_) {}
+        try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.(style); } catch(_) { /* haptic optional */ }
     }
 
     // ─── Build a single entry DOM node ───

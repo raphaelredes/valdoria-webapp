@@ -121,7 +121,7 @@ class CombatAPI {
             body: JSON.stringify({ user_id: this.userId }),
         });
         if (!r.ok) {
-            const body = await r.json().catch(() => ({}));
+            const body = await r.json().catch(() => ({}) /* parse fallback */);
             if (body.status === 'displaced' && window.SessionHeartbeat) {
                 SessionHeartbeat.handleDisplaced(body.device || '');
                 throw new Error('displaced');
@@ -150,7 +150,7 @@ class CombatAPI {
             body: JSON.stringify({ user_id: this.userId, ...data }),
         });
         if (!r.ok) {
-            const body = await r.json().catch(() => ({}));
+            const body = await r.json().catch(() => ({}) /* parse fallback */);
             if (body.status === 'displaced' && window.SessionHeartbeat) {
                 SessionHeartbeat.handleDisplaced(body.device || '');
                 throw new Error('displaced');
@@ -251,7 +251,7 @@ if (window.SessionHeartbeat && apiBase && token && userId) {
 
 // ─── Session reconnect (after displacement/expiry resolved) ───
 window.addEventListener('session-reopened', function (e) {
-    console.log('[COMBAT] Session reopened, reloading combat state');
+    console.debug('[COMBAT] Session reopened, reloading combat state');
     currentState = null;
     loadCombatState();
 });
@@ -298,7 +298,7 @@ async function loadCombatState(retryCount = 0) {
         const health = await api.checkHealth();
         // Detect tunnel URL change — update in memory (reload would break initData)
         if (health.api && health.api !== api.base) {
-            console.log('[COMBAT] Tunnel URL changed, updating apiBase in memory');
+            console.debug('[COMBAT] Tunnel URL changed, updating apiBase in memory');
             api.base = health.api;
             if (window.ApiDiscovery) ApiDiscovery.updateBase(health.api);
         }
@@ -1211,7 +1211,7 @@ function startPolling() {
                 try {
                     const health = await api.checkHealth();
                     if (health.api && health.api !== api.base) {
-                        console.log('[COMBAT] Tunnel URL changed, updating apiBase in memory');
+                        console.debug('[COMBAT] Tunnel URL changed, updating apiBase in memory');
                         api.base = health.api;
                         if (window.ApiDiscovery) ApiDiscovery.updateBase(health.api);
                         _pollFailures = 0; // reset — new URL may work

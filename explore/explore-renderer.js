@@ -1002,7 +1002,7 @@ function onMoveComplete(col, row) {
     updateAtmosphere();
     updateMinimap();
     // Haptic feedback for each step
-    try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.selectionChanged(); } catch(e) {}
+    try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.selectionChanged(); } catch(e) { /* haptic optional */ }
     if (typeof _resetExploreButton === 'function') _resetExploreButton();
     if (typeof updatePaceUI === 'function') updatePaceUI();
     scrollCanvasToPlayer(true);
@@ -1025,7 +1025,7 @@ function onMoveComplete(col, row) {
         revealEventSprite(col, row, 'hazard');
         spawnFloatingText(col, row, 'crack!', '#c44a2a', 'big');
         // Haptic: heavy impact for hazard (M4)
-        try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) {}
+        try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) { /* haptic optional */ }
         setTimeout(() => showHazardNarration(hazard), 200);
         return;
     }
@@ -1037,7 +1037,7 @@ function onMoveComplete(col, row) {
             revealEventSprite(col, row, 'trap');
             spawnFloatingText(col, row, 'clank!', '#8a4a2a', 'big');
             // Haptic: heavy impact for trap (M4)
-            try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) {}
+            try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) { /* haptic optional */ }
             setTimeout(() => showTrapEvent(trap), 200);
             return;
         }
@@ -1079,7 +1079,7 @@ const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.h
                 if (poi.type === 'dan') tg.HapticFeedback.notificationOccurred('warning');
                 else tg.HapticFeedback.impactOccurred('medium');
             }
-        } catch(e) {}
+        } catch(e) { /* canvas draw optional */ }
         setTimeout(() => showPOI(poi), 100);
         return;
     }
@@ -1089,7 +1089,7 @@ const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.h
         // Golden glow pulse to signal portal discovery
         if (typeof flashScreen === 'function') flashScreen('rgba(196,149,58,0.2)');
         spawnFloatingText(col, row, 'portal...', '#c4953a', 'big');
-        try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
+        try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) { /* haptic optional */ }
         setTimeout(() => showPortalOverlay(), 800);
         return;
     }

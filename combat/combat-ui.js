@@ -280,7 +280,7 @@ function bindActions(state) {
             hapticSelect();
             if (!_audioUnlocked) {
                 _audioUnlocked = true;
-                if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume().catch(() => { });
+                if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume().catch(() => { /* audio resume optional */ });
             }
             const action = btn.dataset.action;
             if (btn.classList.contains('disabled')) {

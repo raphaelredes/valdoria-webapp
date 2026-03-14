@@ -14,7 +14,7 @@
 }
 .damage-float.crit {
     font-size: clamp(32px, 10vw, 42px);
-    color: #ffa726 !important;
+    color: var(--v-warning) !important;
     text-shadow: 0 2px 8px rgba(0,0,0,0.95), 0 0 24px rgba(255,167,38,0.7), 0 0 48px rgba(255,167,38,0.35);
     animation: damageFloatCrit 1.5s ease-out forwards;
 }
@@ -222,7 +222,7 @@
 .spectator-msg {
     text-align: center;
     padding: 10px 8px;
-    color: #e08080;
+    color: var(--v-danger-light);
     font-size: 13px;
     font-weight: 600;
     animation: spectatePulse 2.5s ease-in-out infinite;

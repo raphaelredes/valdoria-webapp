@@ -46,7 +46,7 @@ var ApiDiscovery = (function () {
             var data = await resp2.json();
             var newUrl = (data.url || '').replace(/\/$/, '');
             if (newUrl && newUrl !== _apiBase) {
-                console.log('[ApiDiscovery] URL changed:', _apiBase, '->', newUrl);
+                console.debug('[ApiDiscovery] URL changed:', _apiBase, '->', newUrl);
                 _apiBase = newUrl;
                 if (_onUrlChange) _onUrlChange(newUrl);
             }
