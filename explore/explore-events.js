@@ -2537,6 +2537,25 @@ function showCampOverlay() {
     const foodList = document.getElementById('camp-food-list');
     foodList.innerHTML = '';
 
+    // D&D 5e: Check remaining Hit Dice
+    const maxHD = (S.charData && S.charData.mhd) || 1;
+    const hdRemaining = Math.max(0, maxHD - (S._hdUsed || 0));
+    const canShortRest = hdRemaining > 0;
+    const hdType = (S.charData && S.charData.hdt) || '1d8';
+
+    // Section header: Descanso Curto
+    const shortHeader = document.createElement('div');
+    shortHeader.style.cssText = 'font-size:11px;color:#8a7a68;text-align:center;margin-bottom:4px';
+    shortHeader.textContent = `\u2500\u2500 Descanso Curto (1 hora) \u2500\u2500 Dados de Vida: ${hdRemaining}/${maxHD}`;
+    foodList.appendChild(shortHeader);
+
+    if (!canShortRest) {
+        const noHD = document.createElement('div');
+        noHD.style.cssText = 'text-align:center;color:#c44;font-size:12px;padding:8px;font-style:italic';
+        noHD.textContent = 'Sem Dados de Vida restantes para descanso curto.';
+        foodList.appendChild(noHD);
+    }
+
     const foodItems = getFoodItems();
     for (const food of foodItems) {
         const btn = document.createElement('button');
@@ -2545,10 +2564,15 @@ function showCampOverlay() {
         btn.innerHTML = `<span style="font-size:14px;color:#c4953a;font-weight:bold">${food.n ? food.n[0] : '•'}</span>` +
             `<div style="flex:1"><div style="font-weight:600">${food.n} (${food.q}x)</div>` +
             `<div style="font-size:11px;color:#8a7a68">Refeição${healText}</div></div>`;
-        btn.addEventListener('click', () => {
-            overlay.classList.remove('active');
-            doCampRest(food);
-        });
+        if (canShortRest) {
+            btn.addEventListener('click', () => {
+                overlay.classList.remove('active');
+                doCampRest(food);
+            });
+        } else {
+            btn.style.opacity = '0.4';
+            btn.style.pointerEvents = 'none';
+        }
         foodList.appendChild(btn);
     }
 
@@ -2557,11 +2581,16 @@ function showCampOverlay() {
     noFoodBtn.className = 'camp-food-btn';
     noFoodBtn.innerHTML = `<span style="font-size:14px;color:#8a7a68;font-weight:bold">—</span>` +
         `<div style="flex:1"><div style="font-weight:600">Descansar sem comer</div>` +
-        `<div style="font-size:11px;color:#8a7a68">Apenas 1d8 + CON</div></div>`;
-    noFoodBtn.addEventListener('click', () => {
-        overlay.classList.remove('active');
-        doCampRest(null);
-    });
+        `<div style="font-size:11px;color:#8a7a68">Apenas ${hdType} + CON</div></div>`;
+    if (canShortRest) {
+        noFoodBtn.addEventListener('click', () => {
+            overlay.classList.remove('active');
+            doCampRest(null);
+        });
+    } else {
+        noFoodBtn.style.opacity = '0.4';
+        noFoodBtn.style.pointerEvents = 'none';
+    }
     foodList.appendChild(noFoodBtn);
 
     // Section divider
@@ -2571,7 +2600,8 @@ function showCampOverlay() {
     foodList.appendChild(divider);
 
     // Long Rest (D&D 5e PHB)
-    const ambushChance = 20 + ((S._longRestCount || 0) * 15);
+    const weatherBonus = S.weather === 't' ? 15 : S.weather === 'r' ? 5 : 0;
+    const ambushChance = 20 + ((S._longRestCount || 0) * 15) + weatherBonus;
     const longRestBtn = document.createElement('button');
     longRestBtn.className = 'camp-food-btn';
     longRestBtn.style.borderColor = 'rgba(68,170,100,0.4)';
@@ -2595,10 +2625,15 @@ function closeCampOverlay() {
 }
 
 function doCampRest(food) {
-    // D&D 5e Short Rest: 1d8 hit die + CON modifier
-    const hitDie = rollDiceFormula('1d8');
+    // D&D 5e Short Rest: hit die + CON modifier
+    // Use class hit die type from charData (d6, d8, d10, d12)
+    const hdType = (S.charData && S.charData.hdt) || '1d8';
+    const hitDie = rollDiceFormula(hdType);
     const conMod = getAbilityMod('cn');
     const baseHeal = Math.max(1, hitDie + conMod);
+
+    // Track HD usage
+    S._hdUsed = (S._hdUsed || 0) + 1;
 
     // Food bonus
     let foodBonus = 0;
@@ -2625,8 +2660,22 @@ function doCampRest(food) {
     saveState();
     if (typeof updateCampButtonHint === 'function') updateCampButtonHint();
 
-    // Show 3D d8 dice animation before result
-    _showCampDiceRoll(hitDie, conMod, foodBonus, totalHeal, foodName);
+    // D&D 5e: Short rest MP recovery (class-dependent)
+    let mpRecovered = 0;
+    if (S.charData && S.charData.mm > 0) {
+        const mpr = S.charData.mpr || 'none';
+        const maxMP = S.charData.mm;
+        if (mpr === 'full') mpRecovered = maxMP;
+        else if (mpr === 'half') mpRecovered = Math.ceil(maxMP / 2);
+        else if (mpr === 'third') mpRecovered = Math.ceil(maxMP / 3);
+        if (mpRecovered > 0) {
+            S.mpChange = (S.mpChange || 0) + mpRecovered;
+            saveState();
+        }
+    }
+
+    // Show 3D dice animation (use correct die type for display)
+    _showCampDiceRoll(hitDie, conMod, foodBonus, totalHeal, foodName, hdType, mpRecovered);
 }
 
 function doLongRest() {
@@ -2642,8 +2691,28 @@ function doLongRest() {
     }
     S.conditions = [];
     updateConditionHUD();
+
+    // D&D 5e: Long rest recovers ALL MP
+    if (S.charData && S.charData.mm > 0) {
+        const maxMP = S.charData.mm;
+        const currentMP = (S.charData.mp || 0) + (S.mpChange || 0);
+        const mpRecov = maxMP - currentMP;
+        if (mpRecov > 0) S.mpChange = (S.mpChange || 0) + mpRecov;
+    }
+
+    // D&D 5e: Long rest recovers half of max Hit Dice (rounded down, min 1)
+    const maxHD = (S.charData && S.charData.mhd) || 1;
+    const hdRecov = Math.max(1, Math.floor(maxHD / 2));
+    S._hdUsed = Math.max(0, (S._hdUsed || 0) - hdRecov);
+
     const prevExhaustion = S.exhaustion;
-    if (typeof removeExhaustion === 'function' && S.exhaustion > 0) removeExhaustion(1);
+    // D&D 5e: Storm weather makes rest difficult — no exhaustion reduction
+    if (S.weather === 't') {
+        // Storm: +1 exhaustion instead of recovery (DMG Ch.5: harsh weather)
+        if (typeof addExhaustion === 'function') addExhaustion(1, 'Tempestade durante descanso');
+    } else if (typeof removeExhaustion === 'function' && S.exhaustion > 0) {
+        removeExhaustion(1);
+    }
     if (typeof resetStepsWithoutRest === 'function') resetStepsWithoutRest();
 
     // Consequence: increase danger level (+0.5 per long rest)
@@ -2664,6 +2733,12 @@ function doLongRest() {
         t += '\u2728 Condi\u00e7\u00f5es removidas<br>';
         if (prevExhaustion > 0) t += `\u26a0\ufe0f Exaust\u00e3o: ${prevExhaustion} \u2192 ${S.exhaustion}<br>`;
         else t += '\u2705 Sem exaust\u00e3o<br>';
+        if (S.charData && S.charData.mm > 0) t += '\u2728 MP totalmente recuperado<br>';
+        const _hdNow = Math.max(0, maxHD - (S._hdUsed || 0));
+        t += `\ud83c\udfb2 Dados de Vida: ${_hdNow}/${maxHD}<br>`;
+        // Weather penalty on long rest
+        if (S.weather === 't') t += '<br>\u26a1 <span style="color:#dca028">Tempestade: descanso dif\u00edcil, +1 exaust\u00e3o.</span>';
+        else if (S.weather === 'r') t += '<br>\ud83c\udf27\ufe0f <span style="color:#8a7a68">Chuva: descanso desconfort\u00e1vel.</span>';
         if (S._longRestCount > 1) t += '<br>\u26a0\ufe0f <span style="color:#dca028">O perigo da regi\u00e3o aumentou.</span>';
         t += '<br><i>Voc\u00ea se sente revigorado.</i>';
         resultEl.innerHTML = t;
@@ -2677,8 +2752,9 @@ function doLongRest() {
 }
 
 function _checkLongRestAmbush() {
-    // Ambush chance: 20% base + 15% per additional long rest
-    const ambushChance = 20 + ((S._longRestCount - 1) * 15);
+    // Ambush chance: 20% base + 15% per additional long rest + weather bonus
+    const weatherBonus = S.weather === 't' ? 15 : S.weather === 'r' ? 5 : 0;
+    const ambushChance = 20 + ((S._longRestCount - 1) * 15) + weatherBonus;
     const roll = Math.floor(Math.random() * 100) + 1;
     if (roll <= ambushChance && S.campAmbush && !S._campAmbushUsed) {
         // Ambush will trigger when result overlay closes
@@ -2690,7 +2766,7 @@ function _checkLongRestAmbush() {
 }
 
 let _campDice = null;
-function _showCampDiceRoll(roll, conMod, bonus, total, foodName) {
+function _showCampDiceRoll(roll, conMod, bonus, total, foodName, hdType, mpRecovered) {
     const overlay = document.getElementById('camp-dice-overlay');
     const canvas = document.getElementById('camp-dice-canvas');
     const label = document.getElementById('camp-dice-label');
@@ -2705,7 +2781,8 @@ function _showCampDiceRoll(roll, conMod, bonus, total, foodName) {
 
     try {
         if (_campDice) { _campDice.dispose(); _campDice = null; }
-        _campDice = new Dice3D(canvas, { size: 140, dieType: 'd8', duration: 1200 });
+        const dieShape = (hdType || '1d8').replace(/^\d+/, '');
+        _campDice = new Dice3D(canvas, { size: 140, dieType: dieShape, duration: 1200 });
     } catch (e) {
         console.warn('[EXPLORE] Camp Dice3D init failed:', e);
         overlay.classList.remove('active');
@@ -2715,30 +2792,35 @@ function _showCampDiceRoll(roll, conMod, bonus, total, foodName) {
 
     _campDice.roll(roll, function () {
         const sign = conMod >= 0 ? '+' : '';
-        label.textContent = `1d8 = ${roll} ${sign}${conMod} (CON)`;
+        label.textContent = `${hdType || '1d8'} = ${roll} ${sign}${conMod} (CON)`;
         if (window.vHaptic) vHaptic.medium();
 
         // Reading time for dice result formula
-        const _campResultText = `1d8 = ${roll} ${sign}${conMod} (CON) = ${roll + conMod}`;
+        const _campResultText = `${hdType || '1d8'} = ${roll} ${sign}${conMod} (CON) = ${roll + conMod}`;
         const _campDelay = typeof calcReadTime === 'function' ? calcReadTime(_campResultText, 'result') : 3000;
         setTimeout(function () {
             overlay.classList.remove('active');
             if (_campDice) { _campDice.dispose(); _campDice = null; }
-            showCampResultOverlay(roll, conMod, bonus, total, foodName);
+            showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpRecovered);
         }, _campDelay);
     });
 }
 
-function showCampResultOverlay(roll, conMod, bonus, total, foodName) {
+function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpRecovered) {
     const overlay = document.getElementById('camp-result-overlay');
     document.getElementById('camp-result-text').textContent = `+${total} HP Restaurados`;
 
     const sign = conMod >= 0 ? '+' : '';
-    let detail = `1d8 = ${roll} ${sign} ${conMod} (CON) = ${roll + conMod}`;
+    let detail = `${hdType || '1d8'} = ${roll} ${sign} ${conMod} (CON) = ${roll + conMod}`;
     if (bonus > 0) {
         detail += `\n${foodName}: +${bonus} HP`;
     }
-    detail += `\n\nHP: ${getCurrentHP()}/${getMaxHP()}`;
+    if (mpRecovered > 0) {
+        detail += `\n\u2728 +${mpRecovered} MP recuperado`;
+    }
+    const maxHD = (S.charData && S.charData.mhd) || 1;
+    const hdRemaining = Math.max(0, maxHD - (S._hdUsed || 0));
+    detail += `\n\nHP: ${getCurrentHP()}/${getMaxHP()} \u2502 Dados de Vida: ${hdRemaining}/${maxHD}`;
     document.getElementById('camp-result-detail').textContent = detail;
 
     overlay.classList.add('active');

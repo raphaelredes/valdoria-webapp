@@ -10,17 +10,26 @@ const MOVE_DURATION_DIFFICULT = 500;
 const MOVE_DURATION_FAST = 160;
 const MOVE_DURATION_CAUTIOUS = 450;
 
-// Get movement duration based on travel pace + terrain
+// Get movement duration based on travel pace + terrain + exhaustion
 function getMoveDuration(isDifficult) {
+    // D&D 5e: Exhaustion level 2+ halves speed, level 5 = can't move
+    const exhMult = typeof getExhaustionSpeedMultiplier === 'function'
+        ? getExhaustionSpeedMultiplier() : 1.0;
+    if (exhMult === 0) return 99999; // Can't move at all (level 5)
+
     if (isDifficult) {
         // Difficult terrain: pace affects less (always slow-ish)
-        if (S.travelPace === 'fast') return 380;
-        if (S.travelPace === 'cautious') return 600;
-        return MOVE_DURATION_DIFFICULT;
+        let dBase;
+        if (S.travelPace === 'fast') dBase = 380;
+        else if (S.travelPace === 'cautious') dBase = 600;
+        else dBase = MOVE_DURATION_DIFFICULT;
+        return Math.round(dBase * exhMult);
     }
-    if (S.travelPace === 'fast') return MOVE_DURATION_FAST;
-    if (S.travelPace === 'cautious') return MOVE_DURATION_CAUTIOUS;
-    return MOVE_DURATION_NORMAL;
+    let base;
+    if (S.travelPace === 'fast') base = MOVE_DURATION_FAST;
+    else if (S.travelPace === 'cautious') base = MOVE_DURATION_CAUTIOUS;
+    else base = MOVE_DURATION_NORMAL;
+    return Math.round(base * exhMult);
 }
 
 function setMoveDuration(ms) { _moveDuration = ms; }

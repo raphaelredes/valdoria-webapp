@@ -55,6 +55,8 @@ let S = {
     exhaustion: 0,           // D&D 5e exhaustion level (0-6)
     _stepsWithoutRest: 0,    // Steps since last rest (forced march tracking): [{type, stepsLeft}]
     _longRestCount: 0,       // Long rests taken this exploration (consequences escalate)
+    mpChange: 0,             // MP delta during exploration
+    _hdUsed: 0,              // Hit Dice used during exploration (limits short rests)
     _longRestAmbushSafe: false, // Set true when long rest ambush check passed
     _hazardsTriggered: new Set(),  // Hexes that already triggered hazards
     _watchUsed: false,             // Watch activity: first encounter advantage consumed
@@ -104,6 +106,8 @@ function saveState() {
             ex: S.exhaustion || 0,
             swr: S._stepsWithoutRest || 0,
             lrc: S._longRestCount || 0,
+            mpc: S.mpChange || 0,
+            hdu: S._hdUsed || 0,
             tp: S.travelPace || 'normal',
             ta: S.travelActivity || null,
             wt: S.weather || 's',
@@ -202,6 +206,8 @@ function restoreState() {
         S.exhaustion = snap.ex || 0;
         S._stepsWithoutRest = snap.swr || 0;
         S._longRestCount = snap.lrc || 0;
+        S.mpChange = snap.mpc || 0;
+        S._hdUsed = snap.hdu || 0;
         return true;
     } catch (e) {
         console.error('[EXPLORE] restoreState:', e);
@@ -595,6 +601,14 @@ const SKILL_TO_ABILITY = {
 };
 
 // D&D ability modifier from compact stat key or skill key
+// D&D 5e exhaustion speed penalty (PHB p.291)
+function getExhaustionSpeedMultiplier() {
+    const lvl = S.exhaustion || 0;
+    if (lvl >= 5) return 0;    // Level 5: speed = 0 (can't move)
+    if (lvl >= 2) return 2.0;  // Level 2+: speed halved (double delay)
+    return 1.0;                // Level 0-1: normal speed
+}
+
 function getAbilityMod(statKey) {
     const abilityKey = SKILL_TO_ABILITY[statKey] || statKey;
     const val = (S.charData && S.charData[abilityKey]) || 10;
@@ -799,6 +813,15 @@ function _showExhaustionModal(level, effect, source) {
 function resetStepsWithoutRest() {
     S._stepsWithoutRest = 0;
     saveState();
+}
+
+// Update danger pips display when danger level changes
+function updateDangerPips() {
+    const pips = document.querySelectorAll('.danger-pips .pip');
+    const lvl = Math.floor(S.dangerLevel || 1);
+    pips.forEach((pip, i) => {
+        pip.classList.toggle('filled', i < lvl);
+    });
 }
 
 // Update camp button visual hints based on exhaustion and HP
