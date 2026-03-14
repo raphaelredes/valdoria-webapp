@@ -187,16 +187,37 @@ function renderScreen(screen) {
     // Nav position setting
     const navAtTop = screen.nav_position === 'top';
 
-    // Buttons — when navAtTop, render action buttons at the TOP of content (before text)
+    // Toggle CSS class on screen element for conditional styling
+    screenEl.classList.toggle('nav-at-top', navAtTop);
+
+    // Buttons — when navAtTop, separate Voltar from action buttons
     if (navAtTop) {
-        const wrap = document.createElement('div');
-        wrap.className = 'buttons-top';
-        renderButtons(wrap, screen.buttons || []);
-        const firstChild = contentEl.firstChild;
-        if (firstChild) {
-            contentEl.insertBefore(wrap, firstChild);
-        } else {
-            contentEl.appendChild(wrap);
+        const allRows = screen.buttons || [];
+        // Separate: action rows vs Voltar row (marked with is_back by serializer)
+        const actionRows = [];
+        let voltarRow = null;
+        for (const row of allRows) {
+            if (!voltarRow && row.length === 1 && row[0].is_back) {
+                voltarRow = row;
+            } else {
+                actionRows.push(row);
+            }
+        }
+        // Render action buttons at TOP of content (before text)
+        if (actionRows.length > 0) {
+            const wrap = document.createElement('div');
+            wrap.className = 'buttons-top';
+            renderButtons(wrap, actionRows);
+            const firstChild = contentEl.firstChild;
+            if (firstChild) {
+                contentEl.insertBefore(wrap, firstChild);
+            } else {
+                contentEl.appendChild(wrap);
+            }
+        }
+        // Render Voltar at the END of content (after text, allies, tracker)
+        if (voltarRow) {
+            renderButtons(contentEl, [voltarRow]);
         }
     } else {
         // Default: action buttons after text content
