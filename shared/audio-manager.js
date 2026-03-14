@@ -108,6 +108,17 @@ const ValdoriaAudio = (() => {
             audio.addEventListener('timeupdate', _onTimeUpdate);
         }
 
+        // Sync with hardware volume buttons (best-effort, works on Android Chrome)
+        audio.addEventListener('volumechange', () => {
+            if (audio !== _audio) return;
+            const newVol = audio.volume;
+            if (Math.abs(newVol - _volume) > 0.01 && !_muted) {
+                _volume = Math.max(0, Math.min(1, newVol));
+                localStorage.setItem(VOLUME_KEY, _volume.toString());
+                _syncUI();
+            }
+        });
+
         audio.play().then(() => {
             _crossfadeIn(audio);
             _syncUI();
@@ -289,307 +300,481 @@ const ValdoriaAudio = (() => {
     }
 
     // =============================================
-    // AUTO-INJECTED VOLUME CONTROL UI v2.0
-    // Medieval theme, bottom-right position, SVG icons,
-    // first-time hint, auto-detect bottom bar offset
+    // AUTO-INJECTED VOLUME CONTROL UI v3.0
+    // Embeds in footer menu (next to ⚙️) when available,
+    // falls back to floating button. Simple volume popup.
     // =============================================
 
     const HINT_KEY = 'valdoria_audio_hint_seen';
 
-    // SVG speaker icons (inline, 18x18, parchment color via currentColor)
-    const _SVG_MUTED = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
-    const _SVG_LOW = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
-    const _SVG_HIGH = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+    // SVG speaker icons (inline, 16x16, currentColor)
+    const _SVG_MUTED = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+    const _SVG_LOW = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+    const _SVG_HIGH = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
 
-    function _updateBottomOffset() {
-        var bar = document.getElementById('bottom-panel') || document.getElementById('bottom-bar');
-        if (bar && bar.offsetHeight > 0) {
-            document.documentElement.style.setProperty('--va-bottom-offset', (bar.offsetHeight + 8) + 'px');
-        }
-    }
+    let _popupOpen = false;
+    let _closeTimer = null;
 
     function _injectUI() {
         if (_uiInjected) return;
         _uiInjected = true;
 
-        // Inject CSS
+        _injectCSS();
+        _tryEmbedInFooter();
+    }
+
+    function _injectCSS() {
         const style = document.createElement('style');
         style.textContent = `
-            .va-ctrl {
+            /* ── Volume popup (appears above footer/button) ── */
+            .va-popup {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 300;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                pointer-events: none;
+                opacity: 0;
+                transform: translateY(8px);
+                transition: opacity 0.2s ease, transform 0.2s ease;
+            }
+            .va-popup.open {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+            .va-popup-card {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                background: var(--v-bg-raised, #332a22);
+                border: 1px solid var(--v-border, #4a3828);
+                border-radius: 12px;
+                padding: 10px 14px;
+                box-shadow: 0 -4px 16px rgba(0,0,0,0.5);
+                max-width: 300px;
+                width: calc(100% - 32px);
+            }
+            .va-popup-mute {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                border: 1px solid var(--v-border, #4a3828);
+                background: transparent;
+                color: var(--v-text-dim, #8a7a68);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                flex-shrink: 0;
+                padding: 0;
+                transition: color 0.2s, border-color 0.2s;
+            }
+            .va-popup-mute.unmuted {
+                color: var(--v-gold, #c4953a);
+                border-color: rgba(196,149,58,0.4);
+            }
+            .va-popup-mute:active {
+                transform: scale(0.9);
+            }
+            .va-popup-slider {
+                -webkit-appearance: none;
+                appearance: none;
+                flex: 1;
+                height: 36px;
+                background: transparent;
+                outline: none;
+                margin: 0;
+                padding: 0;
+                cursor: pointer;
+                border-radius: 4px;
+            }
+            .va-popup-slider::-webkit-slider-runnable-track {
+                height: 6px;
+                border-radius: 3px;
+                background: rgba(112,66,20,0.3);
+            }
+            .va-popup-slider::-moz-range-track {
+                height: 6px;
+                border-radius: 3px;
+                background: rgba(112,66,20,0.3);
+            }
+            .va-popup-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: var(--v-gold, #c4953a);
+                border: 2px solid var(--v-border, #4a3828);
+                cursor: pointer;
+                margin-top: -8px;
+            }
+            .va-popup-slider::-moz-range-thumb {
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: var(--v-gold, #c4953a);
+                border: 2px solid var(--v-border, #4a3828);
+                cursor: pointer;
+            }
+            .va-popup-pct {
+                font-family: var(--v-font, 'MedievalSharp', serif);
+                font-size: 13px;
+                color: var(--v-text-dim, #8a7a68);
+                min-width: 32px;
+                text-align: right;
+                flex-shrink: 0;
+            }
+            /* Backdrop to close popup on outside tap */
+            .va-backdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 299;
+                display: none;
+            }
+            .va-backdrop.open {
+                display: block;
+            }
+            /* ── Footer audio button (matches .btn-action) ── */
+            .va-footer-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: var(--v-bg-raised, #332a22);
+                border: 1px solid var(--v-border, #4a3828);
+                border-radius: 8px;
+                color: var(--v-text-dim, #8a7a68);
+                cursor: pointer;
+                padding: 8px 3px;
+                min-height: 40px;
+                font-size: 14px;
+                flex: 0 0 40px;
+                transition: color 0.2s, border-color 0.2s;
+            }
+            .va-footer-btn.va-playing {
+                color: var(--v-gold, #c4953a);
+                border-color: rgba(196,149,58,0.3);
+            }
+            .va-footer-btn:active {
+                transform: scale(0.95);
+            }
+            /* ── Floating fallback (non-footer webapps) ── */
+            .va-float {
                 position: fixed;
                 bottom: var(--va-bottom-offset, 8px);
                 right: 8px;
                 z-index: 200;
-                display: flex;
-                align-items: center;
-                gap: 0;
                 transition: bottom 0.3s ease;
             }
-            .va-btn {
+            .va-float-btn {
                 width: 36px;
                 height: 36px;
                 border-radius: 50%;
                 border: 1px solid var(--v-border, #4a3828);
                 background: var(--v-bg-raised, #332a22);
                 color: var(--v-text-dim, #8a7a68);
-                font-size: 15px;
-                cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                transition: opacity 0.2s, transform 0.15s, box-shadow 0.3s, color 0.3s;
+                cursor: pointer;
                 padding: 0;
-                line-height: 1;
-                flex-shrink: 0;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                transition: color 0.2s, border-color 0.2s, transform 0.15s;
             }
-            .va-btn:active {
-                transform: scale(0.9);
-                opacity: 0.8;
-            }
-            .va-btn.va-playing {
+            .va-float-btn.va-playing {
                 color: var(--v-gold, #c4953a);
-                border-color: rgba(196,149,58,0.4);
-                box-shadow: 0 0 8px rgba(196,149,58,0.2);
+                border-color: rgba(196,149,58,0.3);
             }
-            .va-slider-wrap {
-                overflow: hidden;
-                max-width: 0;
-                opacity: 0;
-                transition: max-width 0.3s ease, opacity 0.25s ease;
-                display: flex;
-                align-items: center;
-            }
-            .va-slider-wrap.open {
-                max-width: 120px;
-                opacity: 1;
-            }
-            .va-slider {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 100px;
-                height: 28px;
-                background: var(--v-bg-raised, #332a22);
-                border: 1px solid var(--v-border, #4a3828);
-                border-right: none;
-                border-radius: 14px 0 0 14px;
-                outline: none;
-                margin: 0;
-                padding: 0 8px;
-                cursor: pointer;
-            }
-            .va-slider::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 18px;
-                height: 18px;
-                border-radius: 50%;
-                background: var(--v-gold, #c4953a);
-                border: 2px solid var(--v-border, #4a3828);
-                cursor: pointer;
-            }
-            .va-slider::-moz-range-thumb {
-                width: 18px;
-                height: 18px;
-                border-radius: 50%;
-                background: var(--v-gold, #c4953a);
-                border: 2px solid var(--v-border, #4a3828);
-                cursor: pointer;
-            }
-            .va-slider::-webkit-slider-runnable-track {
-                height: 4px;
-                border-radius: 2px;
-                background: inherit;
-            }
-            .va-slider::-moz-range-track {
-                height: 4px;
-                border-radius: 2px;
-                background: rgba(112, 66, 20, 0.4);
+            .va-float-btn:active {
+                transform: scale(0.9);
             }
             /* Hide during loading/overlays */
-            .loading:not(.hidden) ~ .va-ctrl,
-            .dm-overlay.active ~ .va-ctrl,
-            .outcome-overlay.active ~ .va-ctrl {
+            .loading:not(.hidden) ~ .va-float,
+            .dm-overlay.active ~ .va-float,
+            .outcome-overlay.active ~ .va-float {
                 opacity: 0;
                 pointer-events: none;
             }
-            /* First-time hint */
-            .va-hint {
-                position: absolute;
-                bottom: 100%;
-                right: 0;
-                margin-bottom: 8px;
-                background: var(--v-bg-raised, #332a22);
-                border: 1px solid rgba(196,149,58,0.4);
-                border-radius: 8px;
-                padding: 6px 12px;
-                font-family: var(--v-font, 'MedievalSharp', 'Cinzel', serif);
-                font-size: 12px;
-                color: var(--v-gold, #c4953a);
-                white-space: nowrap;
-                pointer-events: none;
-                opacity: 0;
-                animation: vaHintIn 0.4s 0.8s ease forwards, vaHintOut 0.5s 5s ease forwards;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            }
-            .va-hint::after {
-                content: '';
-                position: absolute;
-                top: 100%;
-                right: 12px;
-                border: 5px solid transparent;
-                border-top-color: rgba(196,149,58,0.4);
-            }
-            .va-btn.va-hint-pulse {
+            /* ── First-time hint ── */
+            .va-hint-pulse {
                 animation: vaGlowPulse 1.5s ease infinite !important;
             }
             @keyframes vaGlowPulse {
                 0%,100% { box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
                 50% { box-shadow: 0 0 0 6px rgba(196,149,58,0.25), 0 0 12px rgba(196,149,58,0.15); }
             }
-            @keyframes vaHintIn { to { opacity: 1; } }
-            @keyframes vaHintOut { to { opacity: 0; visibility: hidden; } }
         `;
         document.head.appendChild(style);
+    }
 
-        // Build UI
-        const wrap = document.createElement('div');
-        wrap.className = 'va-ctrl';
-        wrap.id = 'va-ctrl';
+    // Try to embed the audio button in the footer row
+    let _isEmbedded = false;
 
-        const sliderWrap = document.createElement('div');
-        sliderWrap.className = 'va-slider-wrap';
-        sliderWrap.id = 'va-slider-wrap';
-
-        const slider = document.createElement('input');
-        slider.type = 'range';
-        slider.className = 'va-slider';
-        slider.id = 'va-slider';
-        slider.min = '0';
-        slider.max = '100';
-        slider.value = String(Math.round(_muted ? 0 : _volume * 100));
-        slider.setAttribute('aria-label', 'Volume');
-
-        // Set initial slider fill gradient
-        function _updateSliderFill() {
-            const pct = slider.value;
-            slider.style.background = 'linear-gradient(to right, rgba(196,149,58,0.6) 0%, rgba(196,149,58,0.6) ' + pct + '%, rgba(112,66,20,0.3) ' + pct + '%, rgba(112,66,20,0.3) 100%)';
+    function _tryEmbedInFooter() {
+        // Strategy: Watch for #footer-quick to have buttons and inject there
+        const footerEl = document.getElementById('footer-quick');
+        if (footerEl && footerEl.children.length > 0) {
+            _embedInFooter(footerEl);
+            return;
         }
-        _updateSliderFill();
 
-        sliderWrap.appendChild(slider);
+        // Watch for footer to appear/populate — even after floating fallback
+        const observer = new MutationObserver(() => {
+            const el = document.getElementById('footer-quick');
+            if (el && el.children.length > 0 && !_isEmbedded) {
+                // Remove floating button if it exists
+                const floatEl = document.getElementById('va-float');
+                if (floatEl) floatEl.remove();
+                const oldBtn = document.getElementById('va-btn');
+                if (oldBtn) oldBtn.remove();
+                _embedInFooter(el);
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
 
+        // Fallback: if no footer after 3s, use floating button (can be replaced later)
+        setTimeout(() => {
+            if (!document.getElementById('va-btn')) {
+                _createFloatingBtn();
+            }
+        }, 3000);
+    }
+
+    function _embedInFooter(footerEl) {
+        _isEmbedded = true;
+        // Find settings button (⚙️) and insert audio button after it
         const btn = document.createElement('button');
-        btn.className = 'va-btn';
+        btn.className = 'va-footer-btn';
         btn.id = 'va-btn';
         btn.setAttribute('aria-label', 'Ajustar volume');
         _updateBtnIcon(btn);
 
-        wrap.appendChild(sliderWrap);
+        // Find ⚙️ button to insert next to it
+        const buttons = footerEl.querySelectorAll('.btn-action');
+        let settingsBtn = null;
+        for (const b of buttons) {
+            if (b.textContent.includes('⚙') || b.textContent.includes('\u2699')) {
+                settingsBtn = b;
+                break;
+            }
+        }
+
+        if (settingsBtn && settingsBtn.nextSibling) {
+            footerEl.insertBefore(btn, settingsBtn.nextSibling);
+        } else if (settingsBtn) {
+            footerEl.appendChild(btn);
+        } else {
+            // No settings button found — append at end
+            footerEl.appendChild(btn);
+        }
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            _dismissHint(btn);
+            _togglePopup();
+        });
+
+        _createPopup();
+
+        // Re-inject after footer re-renders (screen changes)
+        const mo = new MutationObserver(() => {
+            if (!document.getElementById('va-btn') && _isEmbedded) {
+                const el = document.getElementById('footer-quick');
+                if (el && el.children.length > 0) {
+                    _isEmbedded = false; // allow re-embed
+                    _embedInFooter(el);
+                }
+            }
+        });
+        mo.observe(footerEl, { childList: true });
+
+        _showFirstTimeHint(btn);
+    }
+
+    function _createFloatingBtn() {
+        const wrap = document.createElement('div');
+        wrap.className = 'va-float';
+        wrap.id = 'va-float';
+
+        const btn = document.createElement('button');
+        btn.className = 'va-float-btn';
+        btn.id = 'va-btn';
+        btn.setAttribute('aria-label', 'Ajustar volume');
+        _updateBtnIcon(btn);
+
         wrap.appendChild(btn);
         document.body.appendChild(wrap);
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            _dismissHint(btn);
+            _togglePopup();
+        });
+
+        _createPopup();
+
+        // Auto-detect bottom bar offset for floating button
+        function _updateOffset() {
+            var bar = document.getElementById('bottom-panel') || document.getElementById('bottom-bar');
+            if (bar && bar.offsetHeight > 0) {
+                document.documentElement.style.setProperty('--va-bottom-offset', (bar.offsetHeight + 8) + 'px');
+            }
+        }
+        setTimeout(_updateOffset, 300);
+        setTimeout(_updateOffset, 1000);
+        window.addEventListener('resize', _updateOffset);
 
         // Remove old mute button if present
         const oldBtn = document.querySelector('.audio-mute-btn');
         if (oldBtn) oldBtn.remove();
 
-        // Auto-detect bottom bar offset
-        setTimeout(_updateBottomOffset, 300);
-        setTimeout(_updateBottomOffset, 1000);
-        window.addEventListener('resize', _updateBottomOffset);
-        // Watch for panel changes (immersive toggle, footer render)
-        const _mo = new MutationObserver(() => { setTimeout(_updateBottomOffset, 50); });
-        const _bp = document.getElementById('bottom-panel') || document.getElementById('bottom-bar');
-        if (_bp) _mo.observe(_bp, { attributes: true, childList: true, attributeFilter: ['class', 'style'] });
+        _showFirstTimeHint(btn);
+    }
 
-        // Events
-        let _sliderOpen = false;
-        let _closeTimer = null;
+    function _createPopup() {
+        if (document.getElementById('va-popup')) return;
 
-        btn.addEventListener('click', (e) => {
+        // Backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'va-backdrop';
+        backdrop.id = 'va-backdrop';
+        backdrop.addEventListener('click', () => _closePopup());
+        document.body.appendChild(backdrop);
+
+        // Popup
+        const popup = document.createElement('div');
+        popup.className = 'va-popup';
+        popup.id = 'va-popup';
+
+        const card = document.createElement('div');
+        card.className = 'va-popup-card';
+
+        // Mute button
+        const muteBtn = document.createElement('button');
+        muteBtn.className = 'va-popup-mute' + (_muted ? '' : ' unmuted');
+        muteBtn.id = 'va-popup-mute';
+        muteBtn.innerHTML = _muted ? _SVG_MUTED : (_volume < 0.5 ? _SVG_LOW : _SVG_HIGH);
+        muteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            _dismissHint(btn);
-            _sliderOpen = !_sliderOpen;
-            sliderWrap.classList.toggle('open', _sliderOpen);
-            if (_closeTimer) clearTimeout(_closeTimer);
-            if (_sliderOpen) {
-                _closeTimer = setTimeout(() => {
-                    _sliderOpen = false;
-                    sliderWrap.classList.remove('open');
-                }, 4000);
-            }
+            toggleMute();
+            const sl = document.getElementById('va-popup-slider');
+            if (sl) sl.value = String(Math.round(_muted ? 0 : _volume * 100));
+            _updatePopupUI();
+            _resetCloseTimer();
         });
 
-        // Long press to mute/unmute
-        let _longPress = null;
-        btn.addEventListener('pointerdown', () => {
-            _longPress = setTimeout(() => {
-                _dismissHint(btn);
-                toggleMute();
-                slider.value = String(Math.round(_muted ? 0 : _volume * 100));
-                _longPress = null;
-            }, 500);
-        });
-        btn.addEventListener('pointerup', () => {
-            if (_longPress) clearTimeout(_longPress);
-            _longPress = null;
-        });
-        btn.addEventListener('pointerleave', () => {
-            if (_longPress) clearTimeout(_longPress);
-            _longPress = null;
-        });
+        // Slider
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'va-popup-slider';
+        slider.id = 'va-popup-slider';
+        slider.min = '0';
+        slider.max = '100';
+        slider.value = String(Math.round(_muted ? 0 : _volume * 100));
+        slider.setAttribute('aria-label', 'Volume');
 
         slider.addEventListener('input', (e) => {
             e.stopPropagation();
             const val = parseInt(e.target.value, 10) / 100;
             setVolume(val);
-            _updateSliderFill();
-            if (_closeTimer) clearTimeout(_closeTimer);
-            _closeTimer = setTimeout(() => {
-                _sliderOpen = false;
-                sliderWrap.classList.remove('open');
-            }, 4000);
+            _updatePopupUI();
+            _resetCloseTimer();
         });
-
-        // Prevent slider touches from propagating to game
         slider.addEventListener('touchstart', (e) => e.stopPropagation());
         slider.addEventListener('touchmove', (e) => e.stopPropagation());
         slider.addEventListener('pointerdown', (e) => e.stopPropagation());
 
-        // Close slider on outside click
-        document.addEventListener('click', (e) => {
-            if (_sliderOpen && !wrap.contains(e.target)) {
-                _sliderOpen = false;
-                sliderWrap.classList.remove('open');
-                if (_closeTimer) clearTimeout(_closeTimer);
-            }
-        });
+        // Percentage label
+        const pct = document.createElement('span');
+        pct.className = 'va-popup-pct';
+        pct.id = 'va-popup-pct';
+        pct.textContent = Math.round(_muted ? 0 : _volume * 100) + '%';
 
-        // Show first-time hint after a short delay
-        _showFirstTimeHint(btn, wrap);
+        card.appendChild(muteBtn);
+        card.appendChild(slider);
+        card.appendChild(pct);
+        popup.appendChild(card);
+        document.body.appendChild(popup);
+
+        // Position popup above the bottom panel
+        _positionPopup();
+    }
+
+    function _positionPopup() {
+        const popup = document.getElementById('va-popup');
+        if (!popup) return;
+        const panel = document.getElementById('bottom-panel') || document.getElementById('bottom-bar');
+        if (panel) {
+            popup.style.bottom = panel.offsetHeight + 'px';
+        } else {
+            popup.style.bottom = '52px';
+        }
+    }
+
+    function _togglePopup() {
+        _popupOpen = !_popupOpen;
+        const popup = document.getElementById('va-popup');
+        const backdrop = document.getElementById('va-backdrop');
+        if (popup) {
+            popup.classList.toggle('open', _popupOpen);
+            _positionPopup();
+        }
+        if (backdrop) backdrop.classList.toggle('open', _popupOpen);
+
+        if (_popupOpen) {
+            _updatePopupUI();
+            _resetCloseTimer();
+        } else {
+            if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
+        }
+    }
+
+    function _closePopup() {
+        if (!_popupOpen) return;
+        _popupOpen = false;
+        const popup = document.getElementById('va-popup');
+        const backdrop = document.getElementById('va-backdrop');
+        if (popup) popup.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
+        if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
+    }
+
+    function _resetCloseTimer() {
+        if (_closeTimer) clearTimeout(_closeTimer);
+        _closeTimer = setTimeout(_closePopup, 5000);
+    }
+
+    function _updatePopupUI() {
+        const muteBtn = document.getElementById('va-popup-mute');
+        const slider = document.getElementById('va-popup-slider');
+        const pctEl = document.getElementById('va-popup-pct');
+        const vol = _muted ? 0 : Math.round(_volume * 100);
+
+        if (muteBtn) {
+            muteBtn.classList.toggle('unmuted', !_muted);
+            muteBtn.innerHTML = _muted ? _SVG_MUTED : (_volume < 0.5 ? _SVG_LOW : _SVG_HIGH);
+        }
+        if (slider) slider.value = String(vol);
+        if (pctEl) pctEl.textContent = vol + '%';
     }
 
     // -- First-time audio hint --
     let _hintDismissed = false;
-    function _showFirstTimeHint(btn, wrap) {
+    function _showFirstTimeHint(btn) {
         try {
             if (localStorage.getItem(HINT_KEY)) return;
         } catch(e) { return; }
 
-        // Wait for loading to finish before showing hint
         const _tryShow = () => {
             const loading = document.querySelector('.loading:not(.hidden), .loading-overlay:not(.hidden), #loading:not([style*="display: none"]), #v-err-overlay:not([style*="display: none"])');
             if (loading) { setTimeout(_tryShow, 1000); return; }
-
             if (_hintDismissed) return;
-            const hint = document.createElement('div');
-            hint.className = 'va-hint';
-            hint.textContent = '\u266B Toque para ajustar o som';
-            wrap.appendChild(hint);
-            btn.classList.add('va-hint-pulse');
-
-            // Auto-dismiss after 5.5s (matches animation)
-            setTimeout(() => { _dismissHint(btn); }, 5500);
+            if (btn) btn.classList.add('va-hint-pulse');
+            setTimeout(() => { _dismissHint(btn); }, 5000);
         };
         setTimeout(_tryShow, 1500);
     }
@@ -599,8 +784,6 @@ const ValdoriaAudio = (() => {
         _hintDismissed = true;
         try { localStorage.setItem(HINT_KEY, '1'); } catch(e) {}
         if (btn) btn.classList.remove('va-hint-pulse');
-        const hint = document.querySelector('.va-hint');
-        if (hint) hint.remove();
     }
 
     // -- SVG icon update --
@@ -623,20 +806,12 @@ const ValdoriaAudio = (() => {
 
     function _syncUI() {
         const btn = document.getElementById('va-btn');
-        const slider = document.getElementById('va-slider');
         _updateBtnIcon(btn);
-        if (slider) {
-            slider.value = String(Math.round(_muted ? 0 : _volume * 100));
-            // Update fill gradient
-            const pct = slider.value;
-            slider.style.background = 'linear-gradient(to right, rgba(196,149,58,0.6) 0%, rgba(196,149,58,0.6) ' + pct + '%, rgba(112,66,20,0.3) ' + pct + '%, rgba(112,66,20,0.3) 100%)';
-        }
+        if (_popupOpen) _updatePopupUI();
     }
 
     // Legacy compat — still exported but now auto-injected
     function createMuteButton() {
-        // No-op: UI is auto-injected by init()
-        // Return empty element to avoid errors in callers
         const span = document.createElement('span');
         span.style.display = 'none';
         return span;
