@@ -321,6 +321,22 @@ function observeReveals() {
                         impBar.classList.add('ap-bar-animated');
                     }
 
+                    // Animate impact percentage counters
+                    const impPct = entry.target.querySelector('.ap-impact-pct');
+                    if (impPct) {
+                        const text = impPct.textContent.trim();
+                        const match = text.match(/(\d+)/);
+                        if (match) {
+                            const target = parseInt(match[1]);
+                            const prefix = text.startsWith('~') ? '~' : '';
+                            const suffix = '%';
+                            animateCounter(impPct, target, 1500);
+                            impPct.dataset.count = target;
+                            impPct.dataset.prefix = prefix;
+                            impPct.textContent = prefix + '0' + suffix;
+                        }
+                    }
+
                     // Animate counters
                     const counter = entry.target.querySelector('[data-count]');
                     if (counter) {
@@ -589,6 +605,22 @@ function showToast(msg, type, duration) {
     }, duration);
 }
 
+
+
+// ── Timeline fill animation ──
+function setupTimelineAnimation() {
+    const timeline = document.querySelector('.ap-timeline');
+    if (!timeline) return;
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('ap-timeline-active');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.2 });
+    observer.observe(timeline);
+}
 // ── Init ──
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 document.addEventListener('DOMContentLoaded', () => {
@@ -600,4 +632,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupParallax();
     observeReveals();
     setupSoundtrackContextual();
+    setupTimelineAnimation();
+
+    // Cinematic hero entrance
+    requestAnimationFrame(() => {
+        const hero = document.querySelector('.ap-cinematic');
+        if (hero) {
+            setTimeout(() => hero.classList.add('ap-scene-ready'), 100);
+        }
+    });
 });
