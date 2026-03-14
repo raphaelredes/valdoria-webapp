@@ -1,7 +1,8 @@
 // ===================================================================
-// VALDORIA AUDIO MANAGER v1.0
+// VALDORIA AUDIO MANAGER v1.1
 // Singleton for ambient music and sound effects across all WebApps.
-// Handles autoplay restrictions, crossfade, mute toggle, localStorage persistence.
+// Handles autoplay restrictions, seamless loop crossfade, mute toggle,
+// localStorage persistence, and random variant selection.
 // ===================================================================
 
 const ValdoriaAudio = (() => {
@@ -11,24 +12,34 @@ const ValdoriaAudio = (() => {
     const VOLUME_KEY = 'valdoria_audio_volume';
     const CROSSFADE_MS = 1200;
     const DEFAULT_VOLUME = 0.25;
+    const NO_LOOP_TRACKS = ['victory', 'defeat'];
 
     // Base URL for audio files (relative to webapp root)
     const AUDIO_BASE = '../shared/audio/';
 
-    // Track catalog: biome/context -> filename
+    // Track catalog: biome/context -> array of variant filenames
+    // Naming: base.mp3, base_2.mp3, base_3.mp3 (up to 3 variants)
+    // A random variant is picked each time a track starts or loops.
     const TRACKS = {
-        tavern:   'tavern_ambient.mp3',
-        city:     'city_day.mp3',
-        forest:   'forest_explore.mp3',
-        combat:   'combat_tense.mp3',
-        desert:   'desert_wind.mp3',
-        dungeon:  'dungeon_dark.mp3',
-        swamp:    'swamp_mist.mp3',
-        mountain: 'mountain_wind.mp3',
-        snow:     'snow_silence.mp3',
-        victory:  'victory_fanfare.mp3',
-        defeat:   'defeat_somber.mp3',
+        tavern:   ['tavern_ambient.mp3', 'tavern_ambient_2.mp3', 'tavern_ambient_3.mp3', 'tavern_ambient_4.mp3'],
+        city:     ['city_day.mp3', 'city_day_2.mp3', 'city_day_3.mp3', 'city_day_4.mp3'],
+        forest:   ['forest_explore.mp3', 'forest_explore_2.mp3', 'forest_explore_3.mp3', 'forest_explore_4.mp3'],
+        combat:   ['combat_tense.mp3', 'combat_tense_2.mp3', 'combat_tense_3.mp3', 'combat_tense_4.mp3'],
+        desert:   ['desert_wind.mp3', 'desert_wind_2.mp3', 'desert_wind_3.mp3', 'desert_wind_4.mp3'],
+        dungeon:  ['dungeon_dark.mp3', 'dungeon_dark_2.mp3', 'dungeon_dark_3.mp3', 'dungeon_dark_4.mp3'],
+        swamp:    ['swamp_mist.mp3', 'swamp_mist_2.mp3', 'swamp_mist_3.mp3', 'swamp_mist_4.mp3'],
+        mountain: ['mountain_wind.mp3', 'mountain_wind_2.mp3', 'mountain_wind_3.mp3', 'mountain_wind_4.mp3'],
+        snow:     ['snow_silence.mp3', 'snow_silence_2.mp3', 'snow_silence_3.mp3', 'snow_silence_4.mp3'],
+        victory:  ['victory_fanfare.mp3', 'victory_fanfare_2.mp3', 'victory_fanfare_3.mp3', 'victory_fanfare_4.mp3'],
+        defeat:   ['defeat_somber.mp3', 'defeat_somber_2.mp3', 'defeat_somber_3.mp3', 'defeat_somber_4.mp3'],
     };
+
+    // Pick a random file from a track's variant array
+    function _pickVariant(trackKey) {
+        const variants = TRACKS[trackKey];
+        if (!variants || variants.length === 0) return null;
+        return variants[Math.floor(Math.random() * variants.length)];
+    }
 
     let _audio = null;          // Current HTMLAudioElement
     let _fadeAudio = null;      // Previous audio being faded out
@@ -37,7 +48,7 @@ const ValdoriaAudio = (() => {
     let _volume = DEFAULT_VOLUME;
     let _unlocked = false;      // Whether audio context has been unlocked by user gesture
     let _pendingTrack = '';     // Track queued before unlock
-    let _fadeTimer = null;
+    let _looping = false;       // Whether loop crossfade is already in progress
 
     // -- Init --
     function init() {
@@ -52,7 +63,6 @@ const ValdoriaAudio = (() => {
         const unlockHandler = () => {
             _unlocked = true;
             unlockEvents.forEach(e => document.removeEventListener(e, unlockHandler, { capture: true }));
-            // Play pending track if any
             if (_pendingTrack && !_muted) {
                 _playTrack(_pendingTrack);
             }
@@ -62,7 +72,7 @@ const ValdoriaAudio = (() => {
 
     // -- Play a track by key (e.g., 'tavern', 'forest') --
     function play(trackKey) {
-        if (!trackKey || !TRACKS[trackKey]) {
+        if (!trackKey || !TRACKS[trackKey] || TRACKS[trackKey].length === 0) {
             console.warn('[AUDIO] Unknown track:', trackKey);
             return;
         }
@@ -77,25 +87,74 @@ const ValdoriaAudio = (() => {
     }
 
     function _playTrack(trackKey) {
-        const url = AUDIO_BASE + TRACKS[trackKey];
+        const file = _pickVariant(trackKey);
+        if (!file) return;
+        const url = AUDIO_BASE + file;
 
-        // Crossfade: fade out current, fade in new
+        // Crossfade out current track
         if (_audio && !_audio.paused) {
             _crossfadeOut(_audio);
         }
+        _looping = false;
 
-        _audio = new Audio(url);
-        _audio.loop = true;
-        _audio.volume = 0;
+        const audio = new Audio(url);
+        audio.volume = 0;
+        audio.preload = 'auto';
+        _audio = audio;
         _currentTrack = trackKey;
 
-        _audio.play().then(() => {
-            _crossfadeIn(_audio);
+        // Seamless loop via crossfade (not audio.loop) to avoid MP3 gap
+        if (!NO_LOOP_TRACKS.includes(trackKey)) {
+            audio.addEventListener('timeupdate', _onTimeUpdate);
+        }
+
+        audio.play().then(() => {
+            _crossfadeIn(audio);
         }).catch(e => {
-            // Autoplay blocked - will retry on next user gesture
             console.warn('[AUDIO] Play blocked:', e.message);
             _pendingTrack = trackKey;
             _unlocked = false;
+        });
+    }
+
+    // Seamless loop: when near end, crossfade to a new Audio instance
+    function _onTimeUpdate() {
+        const audio = _audio;
+        if (!audio || _looping) return;
+        const remaining = audio.duration - audio.currentTime;
+        if (!isFinite(remaining)) return;
+
+        const fadeSeconds = CROSSFADE_MS / 1000;
+        if (remaining <= fadeSeconds + 0.1) {
+            _looping = true;
+            _loopCrossfade(audio);
+        }
+    }
+
+    function _loopCrossfade(oldAudio) {
+        const trackKey = _currentTrack;
+        const file = _pickVariant(trackKey);
+        if (!file) return;
+        const url = AUDIO_BASE + file;
+
+        const newAudio = new Audio(url);
+        newAudio.volume = 0;
+        newAudio.preload = 'auto';
+
+        if (!NO_LOOP_TRACKS.includes(trackKey)) {
+            newAudio.addEventListener('timeupdate', _onTimeUpdate);
+        }
+
+        newAudio.play().then(() => {
+            _crossfadeOut(oldAudio);
+            _crossfadeIn(newAudio);
+            _audio = newAudio;
+            _looping = false;
+        }).catch(() => {
+            // Fallback: restart old audio from beginning
+            oldAudio.currentTime = 0;
+            oldAudio.play().catch(() => {});
+            _looping = false;
         });
     }
 
@@ -109,11 +168,11 @@ const ValdoriaAudio = (() => {
 
         const timer = setInterval(() => {
             current += increment;
-            if (current >= target) {
-                audio.volume = target;
+            if (current >= target || audio !== _audio) {
+                try { audio.volume = (audio === _audio) ? target : 0; } catch(e) {}
                 clearInterval(timer);
             } else {
-                audio.volume = current;
+                try { audio.volume = current; } catch(e) { clearInterval(timer); }
             }
         }, stepMs);
     }
@@ -127,17 +186,19 @@ const ValdoriaAudio = (() => {
         const decrement = startVol / steps;
         let current = startVol;
 
-        clearTimeout(_fadeTimer);
         const timer = setInterval(() => {
             current -= decrement;
             if (current <= 0) {
-                audio.volume = 0;
-                audio.pause();
-                audio.src = '';
+                try {
+                    audio.volume = 0;
+                    audio.pause();
+                    audio.removeEventListener('timeupdate', _onTimeUpdate);
+                    audio.src = '';
+                } catch(e) {}
                 clearInterval(timer);
                 if (_fadeAudio === audio) _fadeAudio = null;
             } else {
-                audio.volume = current;
+                try { audio.volume = current; } catch(e) { clearInterval(timer); }
             }
         }, stepMs);
     }
@@ -150,16 +211,18 @@ const ValdoriaAudio = (() => {
         }
         _currentTrack = '';
         _pendingTrack = '';
+        _looping = false;
     }
 
     // -- Play a one-shot sound effect (no loop) --
     function playSFX(trackKey) {
         if (_muted || !_unlocked) return;
-        const url = AUDIO_BASE + TRACKS[trackKey];
-        if (!url) return;
+        const file = _pickVariant(trackKey);
+        if (!file) return;
+        const url = AUDIO_BASE + file;
 
         const sfx = new Audio(url);
-        sfx.volume = Math.min(1, _volume * 1.5); // SFX slightly louder
+        sfx.volume = Math.min(1, _volume * 1.5);
         sfx.play().catch(() => {});
     }
 
@@ -194,7 +257,6 @@ const ValdoriaAudio = (() => {
     function getVolume() { return _volume; }
 
     // -- Biome mapping helper --
-    // Maps game biome names to audio track keys
     function playBiome(biome) {
         const biomeMap = {
             'plains': 'city',
@@ -212,7 +274,6 @@ const ValdoriaAudio = (() => {
     }
 
     // -- Create mute button UI --
-    // Returns an HTML button element styled for Valdoria
     function createMuteButton() {
         const btn = document.createElement('button');
         btn.className = 'audio-mute-btn';
@@ -227,7 +288,7 @@ const ValdoriaAudio = (() => {
     }
 
     function _updateMuteBtn(btn) {
-        btn.textContent = _muted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
+        btn.textContent = _muted ? '🔇' : '🔊';
         btn.title = _muted ? 'Ativar som' : 'Desativar som';
     }
 
