@@ -79,3 +79,63 @@ jobs:
             fi
             echo "  OK (balanced braces: $opens)"
           done
+
+      - name: Check audio file sizes
+        run: |
+          echo "=== Audio File Size Check ==="
+          status=0
+          for f in $(find shared/audio -name "*.mp3" -o -name "*.wav" -o -name "*.ogg" 2>/dev/null | sort); do
+            size=$(wc -c < "$f")
+            size_mb=$((size / 1048576))
+            if [ "$size" -gt 5242880 ]; then
+              echo "WARNING: $f — ${size_mb}MB (>5MB)"
+              status=1
+            fi
+          done
+          if [ "$status" -eq 0 ]; then echo "All audio files OK (<5MB each)"; fi
+          exit $status
+
+      - name: Check Service Worker registration
+        run: |
+          echo "=== Service Worker Registration Check ==="
+          status=0
+          for d in game combat explore inventory navigate market prologue dungeon character_creator levelup; do
+            f="$d/index.html"
+            if [ -f "$f" ]; then
+              if grep -q 'serviceWorker' "$f"; then
+                echo "  OK: $f"
+              else
+                echo "  MISSING: $f — no SW registration"
+                status=1
+              fi
+            fi
+          done
+          exit $status
+
+      - name: Check error-reporter inclusion
+        run: |
+          echo "=== Error Reporter Check ==="
+          for d in game combat explore inventory navigate prologue dungeon; do
+            f="$d/index.html"
+            if [ -f "$f" ]; then
+              if grep -q 'error-reporter' "$f"; then
+                echo "  OK: $f"
+              else
+                echo "  WARNING: $f — no error-reporter.js"
+              fi
+            fi
+          done
+
+      - name: Check font preloading
+        run: |
+          echo "=== Font Preload Check ==="
+          for d in game combat explore inventory navigate market prologue dungeon character_creator levelup; do
+            f="$d/index.html"
+            if [ -f "$f" ]; then
+              if grep -q 'preload.*woff2' "$f"; then
+                echo "  OK: $f"
+              else
+                echo "  WARNING: $f — no font preload"
+              fi
+            fi
+          done

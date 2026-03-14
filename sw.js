@@ -1,14 +1,22 @@
 // ═══════════════════════════════════════════════════════════
-//  LENDAS DE VALDORIA — Service Worker v1
+//  LENDAS DE VALDORIA — Service Worker v2
 //  Cache-first for static assets, Network-first for HTML
+//  Fonts + JS + CSS cached to bypass GitHub Pages 10min cache
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'valdoria-v1';
+const CACHE_NAME = 'valdoria-v2';
 
 const PRE_CACHE = [
     '/valdoria-webapp/valdoria-design.css',
     '/valdoria-webapp/favicon.svg',
     '/valdoria-webapp/manifest.json',
+    // Fonts — critical path, avoid FOUT
+    '/valdoria-webapp/shared/fonts.css',
+    '/valdoria-webapp/shared/fonts/medievalsharp.woff2',
+    '/valdoria-webapp/shared/fonts/cinzel.woff2',
+    // Shared CSS
+    '/valdoria-webapp/shared/loading.css',
+    '/valdoria-webapp/shared/animations.css',
 ];
 
 // Install: pre-cache critical assets
@@ -45,8 +53,10 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // CSS, SVG, manifest — Cache-first
+    // CSS, JS, fonts, SVG, manifest — Cache-first (bypasses GitHub Pages 10min cache)
     if (url.pathname.endsWith('.css') ||
+        url.pathname.endsWith('.js') ||
+        url.pathname.endsWith('.woff2') ||
         url.pathname.endsWith('.svg') ||
         url.pathname.endsWith('.json') ||
         url.hostname.includes('cdn.jsdelivr.net')) {

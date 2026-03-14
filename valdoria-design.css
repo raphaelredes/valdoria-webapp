@@ -5,6 +5,10 @@
    Font: MedievalSharp + Cinzel serif stack.
    ═══════════════════════════════════════════════════════════════ */
 
+/* @layer: Webapp-local CSS (unlayered) automatically overrides design system rules.
+   This eliminates specificity wars between shared design system and local styles. */
+@layer valdoria {
+
 /* ─── Fonts loaded locally via shared/fonts.css (no Google dependency) ─── */
 
 /* ─── COLOR TOKENS ─── */
@@ -1107,3 +1111,5 @@ body::after {
 .displaced-error {
     color: var(--v-danger, #c44040); font-size: 13px; margin-top: 8px;
 }
+
+} /* end @layer valdoria */
