@@ -1783,11 +1783,11 @@ async function initAsync() {
                 }
 
                 if (rData && rData.state) {
-                    // On restore (returning from combat/inventory), update token
-                    // and timestamp so restoreState() accepts the state
+                    // Always update token and timestamp so restoreState() accepts
+                    // server state (handles page refresh, direct URL, and restore)
+                    rData.state.tk = S.token;
+                    rData.state.ts = Date.now();
                     if (isRestore) {
-                        rData.state.tk = S.token;
-                        rData.state.ts = Date.now();
                         // Reset reward counters — already applied by transition API
                         rData.state.xp = 0;
                         rData.state.gp = 0;
