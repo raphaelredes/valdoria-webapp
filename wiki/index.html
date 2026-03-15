@@ -10,7 +10,7 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../shared/fonts.css">
     <script>
-        var v = '20260314';
+        var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
     </script>
@@ -290,10 +290,10 @@
             border-color: var(--v-gold-dim);
         }
     </style>
-    <script src="../shared/font-apply.js?v=20260314"></script>
-    <script src="../shared/haptic.js?v=20260314"></script>
-    <script src="../shared/webapp-init.js?v=20260315"></script>
-    <script src="../shared/audio-manager.js?v=20260314"></script>
+    document.write('<script src="../shared/font-apply.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
 </head>
 
 <body>
@@ -953,7 +953,7 @@ semantic_memory: Dict[str, Dict]             # npc_id → {relationship_summary,
         if (initAuth()) renderGrid();
     </script>
     <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('../sw.js').catch(() => { }) }</script>
-<script src="../shared/error-reporter.js?v=20260314"></script>
+document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
 <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("WIKI")</script>
 </body>
 

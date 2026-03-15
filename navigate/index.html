@@ -13,14 +13,14 @@
     <link rel="preload" href="map-static-2x.png" as="image">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        var v = '20260315';
+        var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
     </script>
-    <script src="../shared/audio-manager.js?v=20260314"></script>
-    <script src="../shared/loading-guard.js?v=20260314"></script>
-    <script src="../shared/motion.js?v=20260314"></script>
+    document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/motion.js?v=' + v + '"><\/script>');
     <style>
         * {
             box-sizing: border-box;
@@ -2062,10 +2062,10 @@
             font-family: var(--user-font) !important;
         }
     </style>
-    <script src="../shared/font-apply.js?v=20260314"></script>
-    <script src="../shared/bounce-back.js?v=20260314"></script>
-    <script src="../shared/haptic.js?v=20260314"></script>
-    <script src="../shared/webapp-init.js?v=20260315"></script>
+    document.write('<script src="../shared/font-apply.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/bounce-back.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
 </head>
 
 <body>
@@ -2298,7 +2298,7 @@
     </div>
 
     <script>
-        var v = '20260315';
+        var v = Date.now();
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');

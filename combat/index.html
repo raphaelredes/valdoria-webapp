@@ -14,20 +14,20 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script>
-        var v = '20260314';
+        var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/dice-roller.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="combat.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
     </script>
-    <script src="../shared/font-apply.js?v=20260314"></script>
-    <script src="../shared/bounce-back.js?v=20260314"></script>
-    <script src="../shared/haptic.js?v=20260314"></script>
-    <script src="../shared/webapp-init.js?v=20260315"></script>
-    <script src="../shared/audio-manager.js?v=20260314"></script>
-    <script src="../shared/loading-guard.js?v=20260314"></script>
-    <script src="../shared/motion.js?v=20260314"></script>
+    document.write('<script src="../shared/font-apply.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/bounce-back.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/motion.js?v=' + v + '"><\/script>');
 </head>
 
 <body>
@@ -182,7 +182,7 @@
         <div class="skill-panel" id="itemPanel"></div>
     </div>
     <script>
-        var v = '20260314';
+        var v = Date.now();
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-roller.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
