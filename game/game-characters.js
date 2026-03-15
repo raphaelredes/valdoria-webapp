@@ -45,9 +45,10 @@ async function showCharacterSelect() {
 
         // Auto-select: if only 1 character, skip Hall and enter game directly
         var _chars = data.characters || [];
-        if (_chars.length === 1 && _chars[0].is_active) {
+        if (_chars.length === 1 && _chars[0].is_active && typeof showLoading === 'function') {
             renderCharacterSelect(data); // render briefly for visual continuity
-            _selectCharacter(_chars[0].char_id);
+            // Small delay ensures all UI functions are available
+            setTimeout(function() { _selectCharacter(_chars[0].char_id); }, 100);
             return;
         }
 
