@@ -955,7 +955,7 @@ semantic_memory: Dict[str, Dict]             # npc_id → {relationship_summary,
         if (initAuth()) renderGrid();
     </script>
     <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('../sw.js').catch(() => { }) }</script>
-document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
+<script>document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');</script>
 <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("WIKI")</script>
 </body>
 
