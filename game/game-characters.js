@@ -102,7 +102,7 @@ function renderCharacterSelect(data) {
         html += '<div class="hall-census-title" id="census-toggle">\ud83c\udff0 Estat\u00edsticas do Reino <span class="hall-census-toggle">\u25bc</span></div>';
         html += '<div class="hall-census-body">';
         html += '<div class="hall-census-grid">';
-        html += '<div class="hall-census-stat"><span class="hall-census-icon">\ud83d\udc65</span><span class="hall-census-val">' + census.total + '</span><span class="hall-census-label">Aventureiros</span></div>';
+        html += '<div class="hall-census-stat"><span class="hall-census-icon">\ud83d\udc65</span><span class="hall-census-val" data-count-to="' + census.total + '">0</span><span class="hall-census-label">Aventureiros</span></div>';
         // Top races
         if (census.top_races && census.top_races.length > 0) {
             var racesStr = census.top_races.map(function(r) { return _escChar(r.name) + ' (' + r.count + ')'; }).join(', ');
@@ -144,8 +144,9 @@ function renderCharacterSelect(data) {
     // ─── Character Cards ───
     if (chars.length === 0) {
         html += '<div class="char-select-empty">';
-        html += '<div class="char-select-empty-icon">\ud83d\udcdc</div>';
-        html += '<div class="char-select-empty-text">Os pergaminhos est\u00e3o em branco...<br>Sua hist\u00f3ria em Vald\u00f3ria ainda n\u00e3o come\u00e7ou.</div>';
+        html += '<div class="char-select-empty-icon">\u2694\ufe0f</div>';
+        html += '<div class="char-select-empty-title">Nenhum aventureiro encontrado</div>';
+        html += '<div class="char-select-empty-text">Os pergaminhos est\u00e3o em branco...<br>Crie seu primeiro personagem e comece<br>sua jornada em Vald\u00f3ria!</div>';
         html += '</div>';
     } else {
         html += '<div class="char-select-list">';
@@ -177,11 +178,12 @@ function renderCharacterSelect(data) {
             html += '<div class="char-card-avatar"><span class="char-card-icon">' + _escChar(c.race_icon) + '</span></div>';
             html += '<div class="char-card-info">';
             html += '<div class="char-card-name">' + fullName + ' ' + activeBadge + '</div>';
-            html += '<div class="char-card-details">Nv.' + c.level + ' \u00b7 ' + _escChar(c.race) + ' ' + _escChar(c.hero_class) + '</div>';
+            html += '<div class="char-card-details">Nv.' + c.level + ' \u00b7 ' + _escChar(c.race) + ' ' + _escChar(c.class_icon || '') + ' ' + _escChar(c.hero_class) + '</div>';
             // Meta line: location + quest + last played
             html += '<div class="char-card-meta">';
             if (c.location) html += '<span>' + _escChar(c.location) + '</span>';
             if (c.active_quests > 0) html += '<span>\ud83d\udcdc ' + c.active_quests + '</span>';
+            if (c.gold > 0) html += '<span>\ud83d\udcb0 ' + c.gold + '</span>';
             if (lastPlayed) html += '<span>\u23f0 ' + lastPlayed + '</span>';
             html += '</div>';
             // HP + MP bars
@@ -230,6 +232,20 @@ function renderCharacterSelect(data) {
         censusToggle.style.cursor = 'pointer';
         censusToggle.style.userSelect = 'none';
     }
+
+    // Count-up animation for census numbers
+    contentEl.querySelectorAll('[data-count-to]').forEach(function(el) {
+        var target = parseInt(el.dataset.countTo, 10);
+        if (isNaN(target) || target <= 0) { el.textContent = '0'; return; }
+        var duration = Math.min(800, target * 80);
+        var start = performance.now();
+        function _tick(now) {
+            var t = Math.min((now - start) / duration, 1);
+            el.textContent = Math.round(t * target);
+            if (t < 1) requestAnimationFrame(_tick);
+        }
+        requestAnimationFrame(_tick);
+    });
 
     _initPullToRefresh();
 
@@ -291,17 +307,35 @@ function renderCharacterSelect(data) {
         }
     });
 
-    // Bind events: create button
+    // Bind events: create button (inline + Telegram MainButton)
     var createBtn = document.getElementById('cs-create');
+    var _createAction = function() {
+        if (typeof requestTransition === 'function') {
+            requestTransition('character_creator');
+        } else {
+            doAction('create_new_char');
+        }
+    };
     if (createBtn) {
-        createBtn.addEventListener('click', function() {
-            if (typeof requestTransition === 'function') {
-                requestTransition('character_creator');
-            } else {
-                doAction('create_new_char');
-            }
-        });
+        createBtn.addEventListener('click', _createAction);
     }
+
+    // Telegram MainButton: native sticky CTA for "Iniciar Nova Jornada"
+    try {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.MainButton && canCreate && chars.length === 0) {
+            var mb = Telegram.WebApp.MainButton;
+            mb.setText('\u2795 Iniciar Nova Jornada');
+            mb.color = '#c4953a';
+            mb.textColor = '#1a1610';
+            mb.onClick(_createAction);
+            mb.show();
+            // Hide MainButton when leaving Hall
+            S._hallMainBtn = true;
+        } else if (window.Telegram && Telegram.WebApp && Telegram.WebApp.MainButton) {
+            Telegram.WebApp.MainButton.hide();
+            S._hallMainBtn = false;
+        }
+    } catch (e) { /* older clients */ }
 
     // Bind events: account button
     var accountBtn = document.getElementById('cs-account');
@@ -338,6 +372,8 @@ async function _selectCharacter(charId) {
     S.charId = charId;
     // Haptic feedback on card tap (Telegram WebApp API)
     if (typeof haptic === 'function') haptic('medium');
+    // Hide Telegram MainButton when leaving Hall
+    try { if (S._hallMainBtn && Telegram.WebApp.MainButton) Telegram.WebApp.MainButton.hide(); } catch(e) {}
     // Animate: selected card glows, others fade
     var listEl = document.querySelector('.char-select-list');
     var pressedCard = document.querySelector('.char-card[data-char-id="' + charId + '"]');
