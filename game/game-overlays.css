@@ -245,3 +245,11 @@
     opacity: 1;
     pointer-events: all;
 }
+
+/* ─── Performance tier overrides ─── */
+body.perf-lite .error-icon {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .error-icon { animation: none !important; }
+}

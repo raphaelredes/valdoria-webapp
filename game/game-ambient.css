@@ -111,4 +111,11 @@ body[data-time="night"] .screen-content strong {
     50%      { background-position: -100% 0; }
 }
 
-
+/* ─── Performance tier overrides ─── */
+body.perf-lite .hud-bar-glow,
+body.perf-medium .hud-bar-glow {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .hud-bar-glow { animation: none !important; }
+}

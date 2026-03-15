@@ -449,4 +449,10 @@
     line-height: 1.4;
 }
 
-
+/* ─── Performance tier overrides ─── */
+body.perf-lite [style*="ally-lu-pulse"] {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    [style*="ally-lu-pulse"] { animation: none !important; }
+}

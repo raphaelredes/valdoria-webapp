@@ -185,3 +185,10 @@
     margin-top: 6px;
 }
 
+/* ─── Performance tier overrides ─── */
+body.perf-lite .quest-abandon-icon {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .quest-abandon-icon { animation: none !important; }
+}

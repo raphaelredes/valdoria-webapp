@@ -2231,8 +2231,8 @@ body::after {
 }
 
 @keyframes ap-heroPulse {
-    0%, 100% { box-shadow: 0 4px 20px rgba(196,149,58,0.3); }
-    50%      { box-shadow: 0 4px 30px rgba(196,149,58,0.5), 0 0 6px rgba(196,149,58,0.2); }
+    0%, 100% { opacity: 0.85; }
+    50%      { opacity: 1; }
 }
 
 @keyframes ap-iconFloat {
@@ -2241,8 +2241,8 @@ body::after {
 }
 
 @keyframes ap-platinumGlow {
-    0%, 100% { box-shadow: 0 0 20px rgba(196,149,58,0.2); }
-    50%      { box-shadow: 0 0 30px rgba(196,149,58,0.35), 0 0 8px rgba(123,32,32,0.2); }
+    0%, 100% { opacity: 0.85; }
+    50%      { opacity: 1; }
 }
 
 @keyframes ap-amountBounce {
@@ -2262,8 +2262,8 @@ body::after {
 }
 
 @keyframes ap-sparkTrail {
-    0%, 100% { opacity: 0.3; box-shadow: 0 0 4px #ffe080; }
-    50%      { opacity: 1; box-shadow: 0 0 8px #ffe080, 0 0 16px rgba(196,149,58,0.6); }
+    0%, 100% { opacity: 0.3; }
+    50%      { opacity: 1; }
 }
 
 @keyframes ap-toastIn {

@@ -222,3 +222,10 @@
     100% { opacity: 0; transform: translateX(-50%) translateY(-45px); }
 }
 
+/* ─── Performance tier overrides ─── */
+body.perf-lite .v-bar-fill.hp-crit {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .v-bar-fill.hp-crit { animation: none !important; }
+}

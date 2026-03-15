@@ -285,4 +285,14 @@
     background: rgba(196, 149, 58, 0.15);
 }
 
-
+/* ─── Performance tier overrides ─── */
+body.perf-lite .dlg-cursor,
+body.perf-lite .dlg-mood-icon,
+body.perf-lite .dlg-typing .dlg-text::after {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .dlg-cursor, .dlg-mood-icon, .dlg-typing .dlg-text::after {
+        animation: none !important;
+    }
+}

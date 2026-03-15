@@ -379,3 +379,11 @@
     from { opacity: 1; transform: scale(1); }
     to   { opacity: 0; transform: scale(0.92) translateY(8px); }
 }
+
+/* ─── Performance tier overrides ─── */
+body.perf-lite .feedback-stars.rated .feedback-star.active {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .feedback-stars.rated .feedback-star.active { animation: none !important; }
+}
