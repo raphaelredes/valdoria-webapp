@@ -283,3 +283,26 @@ body.perf-medium .portal-overlay.active {
 @media (prefers-reduced-motion: reduce) {
     .portal-overlay.active { animation: none !important; }
 }
+
+/* Death saves narration text */
+.death-summary .death-narr {
+    font-size: 13px;
+    font-style: italic;
+    color: #a09484;
+    line-height: 1.5;
+    margin: 8px 12px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    animation: fadeInUp 0.4s ease;
+}
+/* Death save dice result pulse */
+.death-summary .dice-result {
+    animation: resultReveal 0.35s var(--v-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+}
+/* Death overlay pulsing border during saves */
+.death-overlay.active {
+    animation: deathPulse 2s ease-in-out infinite;
+}
+@keyframes deathPulse {
+    0%, 100% { background: rgba(80, 20, 20, 0.96); }
+    50% { background: rgba(90, 25, 25, 0.96); }
+}

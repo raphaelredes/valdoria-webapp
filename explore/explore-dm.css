@@ -286,6 +286,59 @@
     color: var(--v-gold, #c4953a);
 }
 
+/* ═══════════════════════════════════════════
+   EVENT TYPE VISUAL DISTINCTION
+   ═══════════════════════════════════════════ */
+
+/* Danger events (hazard combat, lightning, fire) */
+.dm-overlay[data-event="danger"] .dm-card {
+    border-color: rgba(200, 60, 60, 0.5);
+    box-shadow: 0 0 40px rgba(200, 60, 60, 0.2), 0 8px 32px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -2px 4px rgba(0,0,0,0.25);
+}
+.dm-overlay[data-event="danger"] .dm-card::before {
+    background: linear-gradient(90deg, transparent, #8a2020, #c44040, #8a2020, transparent);
+}
+.dm-overlay[data-event="danger"] .dm-type-badge {
+    background: rgba(200, 60, 60, 0.2);
+    color: #d88;
+}
+
+/* Discovery events (secret passage, search, forage) */
+.dm-overlay[data-event="discovery"] .dm-card {
+    border-color: rgba(196, 149, 58, 0.6);
+    box-shadow: 0 0 50px rgba(196, 149, 58, 0.25), 0 0 80px rgba(196, 149, 58, 0.1),
+        0 8px 32px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 4px rgba(0,0,0,0.25);
+}
+.dm-overlay[data-event="discovery"] .dm-card::before {
+    background: linear-gradient(90deg, transparent, #c4953a, #e8c060, #c4953a, transparent);
+    opacity: 0.8;
+}
+.dm-overlay[data-event="discovery"] .dm-type-badge {
+    background: rgba(196, 149, 58, 0.3);
+    color: var(--v-gold, #c4953a);
+    text-shadow: 0 0 6px rgba(196, 149, 58, 0.4);
+}
+.dm-overlay[data-event="discovery"] .dm-title {
+    text-shadow: 0 0 12px rgba(196, 149, 58, 0.5), 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Combat events (pre-combat encounter) */
+.dm-overlay[data-event="combat"] .dm-card {
+    border-color: rgba(180, 50, 50, 0.5);
+    box-shadow: 0 0 40px rgba(180, 50, 50, 0.2), 0 8px 32px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -2px 4px rgba(0,0,0,0.25);
+}
+.dm-overlay[data-event="combat"] .dm-card::before {
+    background: linear-gradient(90deg, transparent, #7b2020, #a03030, #7b2020, transparent);
+}
+.dm-overlay[data-event="combat"] .dm-type-badge {
+    background: rgba(200, 60, 60, 0.2);
+    color: #d88;
+}
+
+
 /* NPC dialogue styles */
 .npc-dialogue-line {
     font-size: 15px;

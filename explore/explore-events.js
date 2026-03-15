@@ -88,6 +88,12 @@ var DAMAGE_FLASH_COLORS = {
     poison: 'rgba(100,200,50,0.2)',
     bludgeoning: 'rgba(200,40,40,0.3)',
     slashing: 'rgba(200,40,40,0.3)',
+    cold: 'rgba(100,180,255,0.3)',
+    necrotic: 'rgba(120,60,160,0.3)',
+    radiant: 'rgba(255,220,100,0.3)',
+    psychic: 'rgba(180,100,220,0.3)',
+    acid: 'rgba(100,220,60,0.25)',
+    thunder: 'rgba(180,180,220,0.3)',
 };
 
 /**
@@ -117,7 +123,7 @@ function showDamageDice(formula, label, damageType, onDone) {
     if (!overlay || !formulaEl || !resultEl) { if (onDone) onDone(total); return; }
 
     // Setup overlay for damage display
-    formulaEl.innerHTML = '<span style="color:var(--v-gold);font-size:14px">' + formula + ' ' + label + '</span>';
+    formulaEl.innerHTML = '<span class="damage-formula">' + formula + '</span> <span class="damage-label">' + label + '</span>';
     resultEl.textContent = '';
     resultEl.className = 'check-result';
     if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
@@ -191,6 +197,7 @@ function showDamageDice(formula, label, damageType, onDone) {
 function showDamageEvent(icon, title, narration, formula, label, damageType, onDone) {
     activateOverlay('dm-overlay');
     var overlay = document.getElementById('dm-overlay');
+    if (overlay) overlay.setAttribute('data-event', 'danger');
     var dmIcon = document.getElementById('dm-icon');
     var dmTitle = document.getElementById('dm-title');
     var dmType = document.getElementById('dm-type');
@@ -998,6 +1005,7 @@ function triggerCombat(poi) {
 
     activateOverlay('dm-overlay');
     var dmOverlay = document.getElementById('dm-overlay');
+    if (dmOverlay) dmOverlay.setAttribute('data-event', 'combat');
     var dmIcon = document.getElementById('dm-icon');
     var dmTitle = document.getElementById('dm-title');
     var dmType = document.getElementById('dm-type');

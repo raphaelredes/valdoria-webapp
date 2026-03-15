@@ -652,6 +652,7 @@ function checkHazardCombat() {
         return true;
     }
 
+    if (overlay) overlay.setAttribute('data-event', 'danger');
     if (dmIcon) dmIcon.textContent = '\u{1F43E}';
     if (dmTitle) dmTitle.textContent = 'Barulho!';
     if (dmType) dmType.textContent = 'perigo';

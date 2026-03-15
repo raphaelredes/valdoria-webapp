@@ -1319,6 +1319,8 @@ function activateOverlay(overlayId) {
         }
     }
     const overlay = document.getElementById(overlayId);
+    // Clear event-type visual modifier from previous use
+    if (overlay) overlay.removeAttribute('data-event');
     if (!overlay) {
         console.error('[EXPLORE] activateOverlay: element not found:', overlayId);
         return null;

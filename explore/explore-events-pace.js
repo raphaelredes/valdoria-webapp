@@ -116,6 +116,7 @@ function _showLightningEvent() {
     var narrEl = document.getElementById('dm-narration');
     var choicesEl = document.getElementById('dm-choices');
 
+    if (overlay) overlay.setAttribute('data-event', 'danger');
     if (dmIcon) dmIcon.textContent = '\u26a1';
     if (dmTitle) dmTitle.textContent = 'Rel\u00e2mpago!';
     if (dmType) dmType.textContent = 'perigo';
@@ -334,6 +335,7 @@ function _checkStealthAvoid() {
 function _showDiscoveryOverlay(icon, title, narration, rewardText) {
     activateOverlay('dm-overlay');
     var overlay = document.getElementById('dm-overlay');
+    if (overlay) overlay.setAttribute('data-event', 'discovery');
     var dmIcon = document.getElementById('dm-icon');
     var dmTitle = document.getElementById('dm-title');
     var dmType = document.getElementById('dm-type');
