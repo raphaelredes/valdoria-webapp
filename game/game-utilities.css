@@ -1,27 +1,105 @@
 /* game-utilities.css — Skeleton loading, debug console, char deletion, offline badge */
 
 /* ═══════════════════════════════════════════════════
-   Character Selection Screen
+   Hall dos Personagens — Census Card
    ═══════════════════════════════════════════════════ */
 
-.char-select-header {
-    text-align: center;
-    margin-bottom: 20px;
-    padding: 0 8px;
+.hall-census {
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
 }
 
-.char-select-title {
+.hall-census-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: clamp(16px, 5vw, 20px);
+    font-size: 14px;
     color: var(--v-gold, #c4953a);
-    margin-bottom: 6px;
+    text-align: center;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
 }
 
-.char-select-census {
+.hall-census-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.hall-census-stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--v-text-dim, #a09484);
+}
+
+.hall-census-stat.wide {
+    width: 100%;
+}
+
+.hall-census-icon {
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.hall-census-val {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--v-text, #d4c8b0);
+    font-family: var(--v-font-display, 'Cinzel', serif);
+}
+
+.hall-census-label {
+    font-size: 11px;
+    color: var(--v-text-dim, #a09484);
+}
+
+.hall-census-detail {
     font-size: 12px;
     color: var(--v-text-dim, #a09484);
     line-height: 1.4;
 }
+
+.hall-census-highlights {
+    font-size: 11px;
+    color: var(--v-text-dim, #a09484);
+    text-align: center;
+    line-height: 1.5;
+    border-top: 1px solid rgba(74, 56, 40, 0.5);
+    padding-top: 8px;
+    margin-top: 4px;
+}
+
+.hall-hl-name {
+    color: var(--v-text, #d4c8b0);
+    font-weight: 500;
+}
+
+.hall-sep {
+    color: rgba(196, 149, 58, 0.4);
+    margin: 0 2px;
+}
+
+/* ═══════════════════════════════════════════════════
+   Hall dos Personagens — Section Title
+   ═══════════════════════════════════════════════════ */
+
+.hall-section-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: clamp(14px, 4vw, 16px);
+    color: var(--v-gold, #c4953a);
+    text-align: center;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════════════════════
+   Character Selection — Card List
+   ═══════════════════════════════════════════════════ */
 
 .char-select-list {
     display: flex;
@@ -33,22 +111,29 @@
 .char-card {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 14px 12px;
+    gap: 10px;
+    padding: 12px;
     background: var(--v-bg-card, #2e2520);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: 10px;
     cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
     text-align: left;
     width: 100%;
     font-family: var(--v-font, 'MedievalSharp', serif);
     color: var(--v-text, #d4c8b0);
+    animation: hallCardFadeIn 0.3s ease both;
+}
+
+@keyframes hallCardFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .char-card:active {
     background: var(--v-bg-raised, #3a3028);
     border-color: var(--v-gold, #c4953a);
+    transform: scale(0.98);
 }
 
 .char-card-active {
@@ -56,11 +141,21 @@
     background: rgba(196, 149, 58, 0.06);
 }
 
-.char-card-icon {
-    font-size: clamp(22px, 6vw, 28px);
-    width: 40px;
-    text-align: center;
+/* Avatar circle */
+.char-card-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(196, 149, 58, 0.1);
+    border: 1px solid rgba(196, 149, 58, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+}
+
+.char-card-icon {
+    font-size: clamp(20px, 5vw, 24px);
 }
 
 .char-card-info {
@@ -86,6 +181,7 @@
     color: var(--v-gold, #c4953a);
     vertical-align: middle;
     margin-left: 4px;
+    font-family: var(--v-font, 'MedievalSharp', serif);
 }
 
 .char-card-details {
@@ -95,10 +191,11 @@
 }
 
 .char-card-arrow {
-    font-size: 16px;
-    color: var(--v-text-dim, #a09484);
+    font-size: 14px;
+    color: rgba(196, 149, 58, 0.4);
     flex-shrink: 0;
 }
+
 .char-card-meta {
     display: flex;
     gap: 8px;
@@ -106,18 +203,21 @@
     color: var(--v-text-dim);
     margin-top: 2px;
 }
+
 .char-card-hp {
-    height: 3px;
-    background: rgba(255,255,255,0.08);
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 2px;
-    margin-top: 4px;
+    margin-top: 5px;
     overflow: hidden;
 }
+
 .char-card-hp-fill {
     height: 100%;
     border-radius: 2px;
-    transition: width 0.3s ease;
+    transition: width 0.4s ease;
 }
+
 .char-card-hp-fill.hp-critical {
     animation: hpLowPulse 0.8s ease-in-out infinite;
 }

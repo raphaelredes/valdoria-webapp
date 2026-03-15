@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
-   GAME HUB — Character Selection Screen
-   Renders the character list for in-WebApp character selection.
-   Replaces the inline Telegram buttons for character management.
+   GAME HUB — Character Selection Screen (Hall dos Personagens)
+   Professional medieval design with census stats and character cards.
    ═══════════════════════════════════════════════════════════════ */
 
 /** Escape HTML entities to prevent XSS in user-controlled strings. */
@@ -30,7 +29,7 @@ async function showCharacterSelect() {
         if (!resp.ok) {
             console.error('[GAME] characters fetch failed:', resp.status);
             hideLoading();
-            showError('⚠️ Erro ao carregar personagens. Tente novamente.');
+            showError('\u26a0\ufe0f Erro ao carregar personagens. Tente novamente.');
             return;
         }
 
@@ -38,7 +37,7 @@ async function showCharacterSelect() {
         if (data.error) {
             console.error('[GAME] characters error:', data.error);
             hideLoading();
-            showError('Sessão expirada. Feche e abra novamente.');
+            showError('Sess\u00e3o expirada. Feche e abra novamente.');
             return;
         }
 
@@ -47,12 +46,12 @@ async function showCharacterSelect() {
     } catch (e) {
         console.error('[GAME] showCharacterSelect error:', e);
         hideLoading();
-        showError('🌐 Sem conexão. Verifique sua internet.');
+        showError('\ud83c\udf10 Sem conex\u00e3o. Verifique sua internet.');
     }
 }
 
 /**
- * Render the character selection screen.
+ * Render the character selection screen with professional medieval design.
  * @param {Object} data - {characters, can_create, active_char_id, census}
  */
 function renderCharacterSelect(data) {
@@ -61,49 +60,83 @@ function renderCharacterSelect(data) {
     const panelEl = document.getElementById('bottom-panel');
     const bannerEl = document.getElementById('banner');
 
-    // Hide banner and bottom panel
+    // Hide banner, bottom panel, and immersive controls
     if (bannerEl) bannerEl.style.display = 'none';
     if (panelEl) panelEl.style.display = 'none';
+    var toggleEl = document.getElementById('immersive-toggle');
+    var restoreEl = document.getElementById('immersive-restore');
+    if (toggleEl) toggleEl.style.display = 'none';
+    if (restoreEl) restoreEl.style.display = 'none';
 
     screenEl.style.display = '';
     screenEl.style.paddingBottom = '24px';
+    screenEl.style.overflowY = 'auto';
     screenEl.scrollTop = 0;
 
     const chars = data.characters || [];
     const canCreate = data.can_create;
     const census = data.census;
 
-    let html = '';
+    let html = '<div id="ptr-indicator" class="ptr-indicator"></div>';
 
-    // Header
-    html += '<div class="char-select-header">';
-    html += '<div class="char-select-title">\u269C\uFE0F Sele\u00E7\u00E3o de Personagem</div>';
-    if (census) {
-        html += `<div class="char-select-census">\uD83C\uDF0D ${census.total} aventureiros em Valdoria`;
+    // ─── Census Card ───
+    if (census && census.total > 0) {
+        html += '<div class="hall-census">';
+        html += '<div class="hall-census-title">\ud83c\udff0 Estat\u00edsticas do Reino</div>';
+        html += '<div class="hall-census-grid">';
+        html += '<div class="hall-census-stat"><span class="hall-census-icon">\ud83d\udc65</span><span class="hall-census-val">' + census.total + '</span><span class="hall-census-label">Aventureiros</span></div>';
+        // Top races
+        if (census.top_races && census.top_races.length > 0) {
+            var racesStr = census.top_races.map(function(r) { return _escChar(r.name) + ' (' + r.count + ')'; }).join(', ');
+            html += '<div class="hall-census-stat wide"><span class="hall-census-icon">\ud83e\uddec</span><span class="hall-census-detail">' + racesStr + '</span></div>';
+        }
+        // Top classes
+        if (census.top_classes && census.top_classes.length > 0) {
+            var classesStr = census.top_classes.map(function(c) { return _escChar(c.name) + ' (' + c.count + ')'; }).join(', ');
+            html += '<div class="hall-census-stat wide"><span class="hall-census-icon">\u2694\ufe0f</span><span class="hall-census-detail">' + classesStr + '</span></div>';
+        }
+        html += '</div>';
+        // Highlights row
+        var highlights = [];
         if (census.max_level > 0) {
-            const names = (census.max_level_chars || []).map(n => _escChar(n)).join(', ');
-            html += ` \u00B7 \uD83C\uDFC6 Nv.${census.max_level}${names ? ' (' + names + ')' : ''}`;
+            var hlName = (census.max_level_chars || [])[0] || '';
+            highlights.push('\ud83c\udfc6 Nv.' + census.max_level + (hlName ? ' <span class="hall-hl-name">' + _escChar(hlName) + '</span>' : ''));
+        }
+        if (census.max_level_deathless > 0) {
+            var dlName = (census.max_level_deathless_chars || [])[0] || '';
+            highlights.push('\ud83d\udee1\ufe0f Inv\u00edcto Nv.' + census.max_level_deathless + (dlName ? ' <span class="hall-hl-name">' + _escChar(dlName) + '</span>' : ''));
+        }
+        if (census.max_daily_quests > 0) {
+            var mqName = (census.max_daily_quest_chars || [])[0] || '';
+            highlights.push('\ud83d\udcdc ' + census.max_daily_quests + ' miss\u00f5es' + (mqName ? ' <span class="hall-hl-name">' + _escChar(mqName) + '</span>' : ''));
+        }
+        if (highlights.length > 0) {
+            html += '<div class="hall-census-highlights">' + highlights.join(' <span class="hall-sep">\u00b7</span> ') + '</div>';
         }
         html += '</div>';
     }
-    html += '</div>';
 
-    // Character cards
+    // ─── Section Title ───
+    var countLabel = chars.length > 0 ? ' (' + chars.length + '/5)' : '';
+    html += '<div class="hall-section-title">\ud83d\udcdc Sele\u00e7\u00e3o de Personagem' + countLabel + '</div>';
+
+    // ─── Character Cards ───
     if (chars.length === 0) {
         html += '<div class="char-select-empty">';
-        html += '<div class="char-select-empty-icon">\uD83D\uDCDC</div>';
-        html += '<div class="char-select-empty-text">Os pergaminhos est\u00E3o em branco...<br>Sua hist\u00F3ria em Vald\u00F3ria ainda n\u00E3o come\u00E7ou.</div>';
+        html += '<div class="char-select-empty-icon">\ud83d\udcdc</div>';
+        html += '<div class="char-select-empty-text">Os pergaminhos est\u00e3o em branco...<br>Sua hist\u00f3ria em Vald\u00f3ria ainda n\u00e3o come\u00e7ou.</div>';
         html += '</div>';
     } else {
         html += '<div class="char-select-list">';
-        for (const c of chars) {
-            const fullName = _escChar(`${c.name} ${c.surname || ''}`.trim());
-            const activeClass = c.is_active ? ' char-card-active' : '';
-            const activeBadge = c.is_active ? '<span class="char-card-badge">Ativo</span>' : '';
+        for (var i = 0; i < chars.length; i++) {
+            var c = chars[i];
+            var fullName = _escChar((c.name + ' ' + (c.surname || '')).trim());
+            var activeClass = c.is_active ? ' char-card-active' : '';
+            var activeBadge = c.is_active ? '<span class="char-card-badge">\u2b50 Ativo</span>' : '';
 
             // HP bar percentage
             var hpPct = c.max_hp > 0 ? Math.round((c.hp / c.max_hp) * 100) : 100;
-            var hpColor = hpPct > 50 ? '#4ade80' : hpPct > 25 ? '#fbbf24' : '#ef4444';
+            var hpColor = hpPct > 50 ? 'var(--v-hp, #4ade80)' : hpPct > 25 ? '#fbbf24' : '#ef4444';
 
             // Last played relative time
             var lastPlayed = '';
@@ -114,52 +147,49 @@ function renderCharacterSelect(data) {
                 else lastPlayed = Math.floor(ago / 86400) + 'd';
             }
 
-            html += `<button class="char-card${activeClass}" data-char-id="${_escChar(c.char_id)}">`;
-            html += `<div class="char-card-icon">${_escChar(c.race_icon)}</div>`;
+            // Stagger animation delay
+            var animDelay = ' style="animation-delay:' + (i * 80) + 'ms"';
+
+            html += '<button class="char-card' + activeClass + '"' + animDelay + ' data-char-id="' + _escChar(c.char_id) + '">';
+            html += '<div class="char-card-avatar"><span class="char-card-icon">' + _escChar(c.race_icon) + '</span></div>';
             html += '<div class="char-card-info">';
-            html += `<div class="char-card-name">${fullName} ${activeBadge}</div>`;
-            html += `<div class="char-card-details">Nv.${c.level} \u00B7 ${_escChar(c.race)} ${_escChar(c.hero_class)}</div>`;
+            html += '<div class="char-card-name">' + fullName + ' ' + activeBadge + '</div>';
+            html += '<div class="char-card-details">Nv.' + c.level + ' \u00b7 ' + _escChar(c.race) + ' ' + _escChar(c.hero_class) + '</div>';
             // Meta line: location + quest + last played
             html += '<div class="char-card-meta">';
-            if (c.location) html += `<span>${_escChar(c.location)}</span>`;
-            if (c.active_quests > 0) html += `<span>\uD83D\uDCDC ${c.active_quests}</span>`;
-            if (lastPlayed) html += `<span>\u23F0 ${lastPlayed}</span>`;
+            if (c.location) html += '<span>' + _escChar(c.location) + '</span>';
+            if (c.active_quests > 0) html += '<span>\ud83d\udcdc ' + c.active_quests + '</span>';
+            if (lastPlayed) html += '<span>\u23f0 ' + lastPlayed + '</span>';
             html += '</div>';
             // HP bar
-            var hpCritCls = hpPct <= 25 ? " hp-critical" : "";
-            html += `<div class="char-card-hp"><div class="char-card-hp-fill${hpCritCls}" style="width:${hpPct}%;background:${hpColor}"></div></div>`;
+            var hpCritCls = hpPct <= 25 ? ' hp-critical' : '';
+            html += '<div class="char-card-hp"><div class="char-card-hp-fill' + hpCritCls + '" style="width:' + hpPct + '%;background:' + hpColor + '"></div></div>';
             html += '</div>';
-            html += '<div class="char-card-arrow">\u25B8</div>';
+            html += '<div class="char-card-arrow">\u25b8</div>';
             html += '<button class="char-card-delete" data-del-id="' + _escChar(c.char_id) + '" data-del-name="' + fullName + '" aria-label="Excluir personagem">\u2715</button>';
             html += '</button>';
         }
         html += '</div>';
     }
 
-    // Action buttons
+    // ─── Action Buttons ───
     html += '<div class="char-select-actions">';
-
     if (canCreate) {
         html += '<button class="btn-hero char-select-create" id="cs-create">\u2795 Iniciar Nova Jornada</button>';
     }
-
     html += '<div class="char-select-secondary">';
-    html += '<button class="btn-action char-select-account" id="cs-account">\uD83D\uDD10 Conta</button>';
+    html += '<button class="btn-action char-select-account" id="cs-account">\ud83d\udd10 Conta</button>';
+    html += '<button class="btn-action char-select-community" id="cs-community">\ud83d\udcac Comunidade</button>';
+    html += '</div>';
     html += '</div>';
 
-    html += '<button class="btn-action char-select-community" id="cs-community">\uD83D\uDCAC Comunidade</button>';
-
-    html += '</div>';
-
-    // Pull-to-refresh indicator
-    html = '<div id="ptr-indicator" class="ptr-indicator"></div>' + html;
     contentEl.innerHTML = html;
     _initPullToRefresh();
 
     // Bind events: character cards
-    contentEl.querySelectorAll('.char-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const charId = card.dataset.charId;
+    contentEl.querySelectorAll('.char-card').forEach(function(card) {
+        card.addEventListener('click', function() {
+            var charId = card.dataset.charId;
             if (!charId) return;
             _selectCharacter(charId);
         });
@@ -215,9 +245,9 @@ function renderCharacterSelect(data) {
     });
 
     // Bind events: create button
-    const createBtn = document.getElementById('cs-create');
+    var createBtn = document.getElementById('cs-create');
     if (createBtn) {
-        createBtn.addEventListener('click', () => {
+        createBtn.addEventListener('click', function() {
             if (typeof requestTransition === 'function') {
                 requestTransition('character_creator');
             } else {
@@ -227,9 +257,9 @@ function renderCharacterSelect(data) {
     }
 
     // Bind events: account button
-    const accountBtn = document.getElementById('cs-account');
+    var accountBtn = document.getElementById('cs-account');
     if (accountBtn) {
-        accountBtn.addEventListener('click', () => doAction('action_account'));
+        accountBtn.addEventListener('click', function() { doAction('action_account'); });
     }
 
     // Prefetch: if only 1 character, preload the game start
@@ -238,9 +268,9 @@ function renderCharacterSelect(data) {
     }
 
     // Bind events: community button
-    const communityBtn = document.getElementById('cs-community');
+    var communityBtn = document.getElementById('cs-community');
     if (communityBtn) {
-        communityBtn.addEventListener('click', () => {
+        communityBtn.addEventListener('click', function() {
             if (window.Telegram && Telegram.WebApp) {
                 Telegram.WebApp.openTelegramLink('https://t.me/lendasdevaldoria');
             } else {
@@ -285,11 +315,10 @@ async function _selectCharacter(charId) {
         }
     } else if (data && data.error) {
         showError('Erro ao selecionar personagem. Tente novamente.');
-        // Return to character selection after brief delay
-        setTimeout(() => showCharacterSelect(), 2500);
+        setTimeout(function() { showCharacterSelect(); }, 2500);
     } else if (!data) {
         showError('Sem resposta do servidor. Verifique sua conex\u00e3o.');
-        setTimeout(() => showCharacterSelect(), 2500);
+        setTimeout(function() { showCharacterSelect(); }, 2500);
     }
     _selectingChar = false;
 }
@@ -297,7 +326,6 @@ async function _selectCharacter(charId) {
 
 // ─── Character Deletion Confirmation Modal ───
 function _showDeleteConfirmation(charId, charName) {
-    // Remove existing modal
     var existing = document.getElementById('char-delete-modal');
     if (existing) existing.remove();
 
@@ -305,10 +333,10 @@ function _showDeleteConfirmation(charId, charName) {
     modal.id = 'char-delete-modal';
     modal.className = 'char-delete-modal';
     modal.innerHTML = '<div class="char-delete-card">' +
-        '<div class="char-delete-icon">\u26A0\uFE0F</div>' +
+        '<div class="char-delete-icon">\u26a0\ufe0f</div>' +
         '<div class="char-delete-title">Excluir Personagem?</div>' +
         '<div class="char-delete-name">' + _escChar(charName) + '</div>' +
-        '<div class="char-delete-warn">Esta a\u00E7\u00E3o \u00E9 irrevers\u00EDvel.<br>O personagem ser\u00E1 permanentemente removido.</div>' +
+        '<div class="char-delete-warn">Esta a\u00e7\u00e3o \u00e9 irrevers\u00edvel.<br>O personagem ser\u00e1 permanentemente removido.</div>' +
         '<div class="char-delete-actions">' +
         '<button class="char-delete-cancel" id="del-cancel">Cancelar</button>' +
         '<button class="char-delete-confirm" id="del-confirm">Excluir</button>' +
@@ -317,7 +345,6 @@ function _showDeleteConfirmation(charId, charName) {
     document.body.appendChild(modal);
     if (typeof haptic === 'function') haptic('warning');
 
-    // Close on backdrop click
     modal.addEventListener('click', function(e) {
         if (e.target === modal) { modal.remove(); }
     });
@@ -333,13 +360,13 @@ function _showDeleteConfirmation(charId, charName) {
 }
 
 async function _deleteCharacter(charId, charName) {
-    if (typeof showToast === 'function') showToast('\uD83D\uDDD1\uFE0F Excluindo ' + _escChar(charName) + '...', 2000);
+    if (typeof showToast === 'function') showToast('\ud83d\uddd1\ufe0f Excluindo ' + _escChar(charName) + '...', 2000);
     var data = await apiCall('/api/game/action', { cb: 'delete_char_' + charId });
     if (data && !data.error) {
-        if (typeof showToast === 'function') showToast('\u2705 Personagem exclu\u00EDdo.', 2000);
+        if (typeof showToast === 'function') showToast('\u2705 Personagem exclu\u00eddo.', 2000);
         setTimeout(function() { showCharacterSelect(); }, 500);
     } else {
-        if (typeof showToast === 'function') showToast('\u26A0\uFE0F N\u00E3o foi poss\u00EDvel excluir. Tente novamente.', 3000);
+        if (typeof showToast === 'function') showToast('\u26a0\ufe0f N\u00e3o foi poss\u00edvel excluir. Tente novamente.', 3000);
     }
 }
 
@@ -352,11 +379,14 @@ function _showCharSelectSkeleton() {
     var bannerEl = document.getElementById('banner');
     if (bannerEl) bannerEl.style.display = 'none';
     if (panelEl) panelEl.style.display = 'none';
+    // Hide immersive controls during loading
+    var toggleEl = document.getElementById('immersive-toggle');
+    var restoreEl = document.getElementById('immersive-restore');
+    if (toggleEl) toggleEl.style.display = 'none';
+    if (restoreEl) restoreEl.style.display = 'none';
     if (screenEl) { screenEl.style.display = ''; screenEl.scrollTop = 0; }
 
-    var html = '<div class="char-select-header">';
-    html += '<div class="char-select-title">\u269C\uFE0F Sele\u00E7\u00E3o de Personagem</div>';
-    html += '</div>';
+    var html = '<div class="hall-section-title">\ud83d\udcdc Sele\u00e7\u00e3o de Personagem</div>';
     for (var i = 0; i < 3; i++) {
         html += '<div class="char-card-skeleton">';
         html += '<div class="skeleton-icon"></div>';
@@ -392,7 +422,7 @@ function _initPullToRefresh() {
         var indicator = document.getElementById('ptr-indicator');
         if (dy > 30 && indicator) {
             indicator.classList.add('visible');
-            indicator.textContent = dy > 80 ? '\uD83D\uDD04 Solte para atualizar' : '\u2B07\uFE0F Puxe para atualizar';
+            indicator.textContent = dy > 80 ? '\ud83d\udd04 Solte para atualizar' : '\u2b07\ufe0f Puxe para atualizar';
         }
     }, { passive: true });
 
@@ -401,7 +431,7 @@ function _initPullToRefresh() {
         _ptrActive = false;
         var indicator = document.getElementById('ptr-indicator');
         if (indicator && indicator.classList.contains('visible')) {
-            indicator.innerHTML = '<span class="ptr-spinner">\u2B6F</span> Atualizando...';
+            indicator.innerHTML = '<span class="ptr-spinner">\u2b6f</span> Atualizando...';
             _ptrRefreshing = true;
             showCharacterSelect().then(function() {
                 _ptrRefreshing = false;
