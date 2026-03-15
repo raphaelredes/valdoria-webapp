@@ -198,6 +198,17 @@ async function init() {
             fetchState(true);
         }
     });
+    // bfcache restoration (iOS) — visibilitychange may not fire
+    window.addEventListener('pageshow', e => {
+        if (e.persisted && S.currentScreen) fetchState(true);
+    });
+    // Save session + screen cache when going to background (survives iOS WebApp kill)
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            _saveSession();
+            if (S.currentScreen) cacheScreen(S.currentScreen);
+        }
+    });
 
     // Online/offline detection — auto-retry when network returns
     window.addEventListener('offline', () => {

@@ -1669,6 +1669,7 @@ async function initAsync() {
 
     // Save state on close attempt (beforeunload) + visibility change (more reliable on iOS)
     window.addEventListener('beforeunload', () => { saveState(); });
+    window.addEventListener('pagehide', () => { saveState(); }); // bfcache-compatible unload signal
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') saveState();
     });
