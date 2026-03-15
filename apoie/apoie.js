@@ -10,11 +10,11 @@ let telegramUser = null;
 
 // ── Tier Data (espelho de contribution_data.py) ──
 const TIERS = [
-    { id: 'supporter', name: 'Apoiador', icon: '\u{1F91D}', min: 100, max: 499, gold: 50, items: ['1x Poção de Cura'], exclusive: null, title: null },
-    { id: 'copper', name: 'Patrono de Cobre', icon: '\u{1F7E4}', min: 500, max: 1499, gold: 200, items: ['2x Poção de Cura'], exclusive: null, title: '\u{1F7E4} Patrono de Cobre' },
-    { id: 'silver', name: 'Patrono de Prata', icon: '\u26AA', min: 1500, max: 2999, gold: 750, items: ['3x Poção de Cura'], exclusive: '\u{1F48D} Anel do Patrono', title: '\u26AA Patrono de Prata' },
-    { id: 'gold', name: 'Patrono de Ouro', icon: '\u{1F7E1}', min: 3000, max: 4999, gold: 2000, items: ['5x Poção de Cura'], exclusive: '\u{1F458} Manto do Benfeitor', title: '\u{1F7E1} Patrono de Ouro' },
-    { id: 'platinum', name: 'Patrono de Platina', icon: '\u{1F48E}', min: 5000, max: 999999, gold: 5000, items: ['5x Poção de Cura Superior'], exclusive: '\u{1F5E1}\uFE0F Lâmina da Generosidade', title: '\u{1F48E} Patrono de Platina' },
+    { id: 'supporter', name: 'Apoiador', icon: '\u{1F91D}', min: 100, max: 499, gold: 50, items: ['1x Poção de Cura'], exclusive: null, exclusiveImg: null, title: null },
+    { id: 'copper', name: 'Patrono de Cobre', icon: '\u{1F7E4}', min: 500, max: 1499, gold: 200, items: ['2x Poção de Cura'], exclusive: null, exclusiveImg: null, title: '\u{1F7E4} Patrono de Cobre' },
+    { id: 'silver', name: 'Patrono de Prata', icon: '\u26AA', min: 1500, max: 2999, gold: 750, items: ['3x Poção de Cura'], exclusive: '\u{1F48D} Anel do Patrono', exclusiveImg: 'img/items/anel_patrono.webp', title: '\u26AA Patrono de Prata' },
+    { id: 'gold', name: 'Patrono de Ouro', icon: '\u{1F7E1}', min: 3000, max: 4999, gold: 2000, items: ['5x Poção de Cura'], exclusive: '\u{1F458} Manto do Benfeitor', exclusiveImg: 'img/items/manto_benfeitor.webp', title: '\u{1F7E1} Patrono de Ouro' },
+    { id: 'platinum', name: 'Patrono de Platina', icon: '\u{1F48E}', min: 5000, max: 999999, gold: 5000, items: ['5x Poção de Cura Superior'], exclusive: '\u{1F5E1}\uFE0F Lâmina da Generosidade', exclusiveImg: 'img/items/lamina_generosidade.webp', title: '\u{1F48E} Patrono de Platina' },
 ];
 
 function getTier(centavos) {
@@ -67,7 +67,10 @@ function updatePreview() {
     html += '<div class="ap-tier-preview-list">';
     html += '\u{1F4B0} +' + tier.gold.toLocaleString() + ' GP<br>';
     tier.items.forEach(item => { html += '\u{1F392} ' + item + '<br>'; });
-    if (tier.exclusive) html += '<strong>' + tier.exclusive + '</strong> (exclusivo)<br>';
+    if (tier.exclusive) {
+        html += '<strong>' + tier.exclusive + '</strong> (exclusivo)<br>';
+        if (tier.exclusiveImg) html += '<img class="ap-item-thumb" src="' + tier.exclusiveImg + '" alt="' + tier.exclusive.replace(/<[^>]*>/g, '') + '" style="margin:6px auto;display:block">';
+    }
     if (tier.title) html += '\u{1F3C5} Título: ' + tier.title;
     html += '</div>';
 
