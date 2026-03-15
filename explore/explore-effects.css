@@ -348,3 +348,21 @@
     50% { background: rgba(30, 55, 42, 0.97); }
 }
 
+
+/* ═══════════════════════════════════════════
+   TRAVEL PACE VISUAL FEEDBACK
+   ═══════════════════════════════════════════ */
+body.pace-fast #map-viewport canvas {
+    filter: saturate(1.1) brightness(1.02);
+}
+body.pace-fast #bottom-bar .pace-toggle {
+    color: #ffa040;
+    text-shadow: 0 0 6px rgba(255,160,64,0.4);
+}
+body.pace-cautious #map-viewport canvas {
+    filter: saturate(0.92) brightness(0.97);
+}
+body.pace-cautious #bottom-bar .pace-toggle {
+    color: #60a0d0;
+    text-shadow: 0 0 6px rgba(96,160,208,0.4);
+}

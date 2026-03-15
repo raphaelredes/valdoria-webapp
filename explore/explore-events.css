@@ -48,8 +48,13 @@
     font-size: 14px;
     font-weight: 600;
     opacity: 0;
-    animation: rewardPop 0.4s ease forwards;
+    animation: rewardPop 0.5s ease forwards;
 }
+.outcome-reward:nth-child(1) { animation-delay: 0s; }
+.outcome-reward:nth-child(2) { animation-delay: 0.15s; }
+.outcome-reward:nth-child(3) { animation-delay: 0.3s; }
+.outcome-reward:nth-child(4) { animation-delay: 0.45s; }
+.outcome-reward:nth-child(5) { animation-delay: 0.6s; }
 .outcome-reward.xp { background: rgba(255, 215, 0, 0.15); color: var(--v-gold-light, #dbb668); text-shadow: 0 0 6px rgba(255,215,0,0.3); }
 .outcome-reward.gold { background: rgba(196, 149, 58, 0.15); color: var(--v-gold, #c4953a); text-shadow: 0 0 6px rgba(196,149,58,0.3); }
 .outcome-reward.heal { background: rgba(68, 170, 136, 0.15); color: #4a8; text-shadow: 0 0 6px rgba(68,170,136,0.3); }
@@ -102,7 +107,9 @@
     font-size: clamp(18px, 5.5vw, 22px);
     font-weight: 900;
     color: var(--v-gold, #c4953a);
-    text-shadow: 0 0 12px rgba(196,149,58,0.4), 0 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 0 0 20px rgba(196,60,60,0.35), 0 0 16px rgba(196,149,58,0.55), 0 2px 4px rgba(0,0,0,0.6);
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    letter-spacing: 1px;
 }
 /* Skip button override for burgundy background */
 .combat-overlay .v-skip-btn {
@@ -134,7 +141,7 @@
 }
 .portal-overlay.active { opacity: 1; pointer-events: all; animation: portalBreathe 3s ease-in-out infinite; }
 .portal-icon { display: none; }
-.portal-title { font-size: 18px; font-weight: 700; color: #4ad680; letter-spacing: 1px; text-shadow: 0 0 12px rgba(74,214,128,0.4), 0 2px 4px rgba(0,0,0,0.5); }
+.portal-title { font-size: 18px; font-weight: 700; color: #6acf80; letter-spacing: 1px; text-shadow: 0 0 16px rgba(100,200,120,0.4), 0 0 8px rgba(196,149,58,0.25), 0 2px 4px rgba(0,0,0,0.5); font-family: var(--v-font-display, 'Cinzel', serif); }
 .portal-summary { text-align: center; color: var(--v-text, #d4c8b0); font-size: 13px; line-height: 1.8; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 .portal-summary .reward-line { color: var(--v-gold, #c4953a); font-weight: 600; }
 /* Skip button override for dark green background */

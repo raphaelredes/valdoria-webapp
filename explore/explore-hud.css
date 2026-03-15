@@ -159,6 +159,10 @@
     font-size: 12px;
     color: var(--v-text-dim, #a09484);
     text-align: right;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* A1: XP Progress Bar */

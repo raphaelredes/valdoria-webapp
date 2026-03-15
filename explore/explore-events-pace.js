@@ -32,6 +32,10 @@ function updatePaceUI() {
     btn.textContent = cfg.icon;
     btn.className = 'pace-toggle ' + cfg.color;
     btn.title = `${cfg.label}: ${cfg.desc}`;
+    // Visual feedback: body class for canvas filter (fast=warm, cautious=cool)
+    document.body.classList.remove('pace-fast', 'pace-cautious');
+    if (cfg.color === 'pace-fast') document.body.classList.add('pace-fast');
+    else if (cfg.color === 'pace-cautious') document.body.classList.add('pace-cautious');
 }
 
 function getPaceDCMod() {

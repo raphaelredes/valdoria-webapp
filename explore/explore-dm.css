@@ -23,7 +23,7 @@
     pointer-events: all;
 }
 .dm-overlay.active .dm-card {
-    animation: cardUnscroll 0.35s var(--v-ease-spring);
+    animation: cardUnscroll 0.4s var(--v-ease-spring);
 }
 
 .dm-card {
@@ -52,6 +52,16 @@
     height: 2px;
     background: linear-gradient(90deg, transparent, var(--v-crimson, #7b2020), var(--v-gold, #c4953a), var(--v-crimson, #7b2020), transparent);
     border-radius: 1px;
+}
+.dm-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 15%;
+    right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--v-crimson, #7b2020), transparent);
+    opacity: 0.4;
 }
 .dm-header {
     display: flex;
@@ -175,7 +185,7 @@
     border-color: var(--v-gold-dim, #9a7530);
     box-shadow: 0 0 10px rgba(196, 149, 58, 0.1);
 }
-.choice-icon { display: none; }
+.choice-icon { display: inline-block; font-size: 13px; flex-shrink: 0; }
 .choice-label { flex: 1; }
 .choice-check {
     font-size: 11px;
@@ -191,47 +201,47 @@
    BIOME VISUAL THEMES (overlay backgrounds)
    ═══════════════════════════════════════════ */
 .dm-overlay[data-biome="forest"] { background: rgba(22, 38, 22, 0.96); }
-.dm-overlay[data-biome="forest"] .dm-card { border-color: rgba(68, 136, 68, 0.3); }
+.dm-overlay[data-biome="forest"] .dm-card { border-color: rgba(68, 136, 68, 0.45); }
 .dm-overlay[data-biome="forest"] .dm-card::before {
     background: linear-gradient(90deg, transparent, #2a6630, #4a8844, #2a6630, transparent);
 }
 .dm-overlay[data-biome="plains"] { background: rgba(38, 34, 22, 0.96); }
-.dm-overlay[data-biome="plains"] .dm-card { border-color: rgba(180, 150, 60, 0.3); }
+.dm-overlay[data-biome="plains"] .dm-card { border-color: rgba(180, 150, 60, 0.45); }
 .dm-overlay[data-biome="plains"] .dm-card::before {
     background: linear-gradient(90deg, transparent, #8a7530, #c4953a, #8a7530, transparent);
 }
 .dm-overlay[data-biome="swamp"] { background: rgba(22, 32, 28, 0.96); }
-.dm-overlay[data-biome="swamp"] .dm-card { border-color: rgba(80, 120, 80, 0.3); }
+.dm-overlay[data-biome="swamp"] .dm-card { border-color: rgba(80, 120, 80, 0.45); }
 .dm-overlay[data-biome="swamp"] .dm-card::before {
     background: linear-gradient(90deg, transparent, #3a6040, #5a8858, #3a6040, transparent);
 }
 .dm-overlay[data-biome="cave"] { background: rgba(20, 20, 28, 0.96); }
-.dm-overlay[data-biome="cave"] .dm-card { border-color: rgba(100, 120, 180, 0.3); }
+.dm-overlay[data-biome="cave"] .dm-card { border-color: rgba(100, 120, 180, 0.45); }
 .dm-overlay[data-biome="cave"] .dm-card::before {
     background: linear-gradient(90deg, transparent, #3a4a7a, #5a78b0, #3a4a7a, transparent);
 }
 .dm-overlay[data-biome="desert"] { background: rgba(42, 32, 20, 0.96); }
-.dm-overlay[data-biome="desert"] .dm-card { border-color: rgba(200, 160, 60, 0.3); }
+.dm-overlay[data-biome="desert"] .dm-card { border-color: rgba(200, 160, 60, 0.45); }
 .dm-overlay[data-biome="desert"] .dm-card::before {
     background: linear-gradient(90deg, transparent, #a08030, #c4a040, #a08030, transparent);
 }
 .dm-overlay[data-biome="mountain"] { background: rgba(28, 28, 32, 0.96); }
-.dm-overlay[data-biome="mountain"] .dm-card { border-color: rgba(140, 140, 160, 0.3); }
+.dm-overlay[data-biome="mountain"] .dm-card { border-color: rgba(140, 140, 160, 0.45); }
 .dm-overlay[data-biome="mountain"] .dm-card::before {
     background: linear-gradient(90deg, transparent, #6a6a80, #8a8aa0, #6a6a80, transparent);
 }
 .dm-overlay[data-biome="snow"] { background: rgba(24, 30, 36, 0.96); }
-.dm-overlay[data-biome="snow"] .dm-card { border-color: rgba(140, 180, 220, 0.3); }
+.dm-overlay[data-biome="snow"] .dm-card { border-color: rgba(140, 180, 220, 0.45); }
 .dm-overlay[data-biome="snow"] .dm-card::before {
     background: linear-gradient(90deg, transparent, #5a8ab0, #7ab0d0, #5a8ab0, transparent);
 }
 .dm-overlay[data-biome="volcanic"] { background: rgba(36, 20, 16, 0.96); }
-.dm-overlay[data-biome="volcanic"] .dm-card { border-color: rgba(200, 80, 40, 0.3); }
+.dm-overlay[data-biome="volcanic"] .dm-card { border-color: rgba(200, 80, 40, 0.45); }
 .dm-overlay[data-biome="volcanic"] .dm-card::before {
     background: linear-gradient(90deg, transparent, #a04020, #c86030, #a04020, transparent);
 }
 .dm-overlay[data-biome="graveyard"] { background: rgba(24, 22, 28, 0.96); }
-.dm-overlay[data-biome="graveyard"] .dm-card { border-color: rgba(120, 100, 140, 0.3); }
+.dm-overlay[data-biome="graveyard"] .dm-card { border-color: rgba(120, 100, 140, 0.45); }
 .dm-overlay[data-biome="graveyard"] .dm-card::before {
     background: linear-gradient(90deg, transparent, #5a4a6a, #7a6890, #5a4a6a, transparent);
 }
