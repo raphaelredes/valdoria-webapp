@@ -4,7 +4,7 @@
 //  Fonts + JS + CSS cached to bypass GitHub Pages 10min cache
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'valdoria-v4';
+const CACHE_NAME = 'valdoria-v5';
 
 const PRE_CACHE = [
     '/valdoria-webapp/valdoria-design.css',
