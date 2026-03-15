@@ -39,16 +39,7 @@ async function initDungeon() {
             tg.ready();
             tg.expand();
             try { tg.disableVerticalSwipes(); } catch (e) { /* Telegram API optional */ }
-            if (tg.BackButton) {
-                tg.BackButton.show();
-                tg.BackButton.onClick(() => {
-                    if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
-                    else { try { tg.close(); } catch (e) { console.warn('[DUNGEON] tg.close:', e); } }
-                });
-                window.__valdoriaExitAction = function() {
-                    try { tg.close(); } catch (e) { console.warn('[DUNGEON] tg.close:', e); }
-                };
-            }
+            // [EXIT-CONFIRM] BackButton handled by exit-confirm.js (shows popup, default tg.close)
         }
 
         const params = new URLSearchParams(window.location.search);

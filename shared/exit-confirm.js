@@ -1,18 +1,28 @@
 /* ========================================================
-   VALDORIA EXIT CONFIRM v1.0
+   VALDORIA EXIT CONFIRM v1.1
    Shared exit confirmation popup for ALL WebApps.
-   Shows a medieval-styled popup asking if the player wants
-   to leave the game when pressing Telegram BackButton or
-   Android physical back button.
+   Shows "Encerrar Aventura?" when pressing Telegram BackButton
+   or Android physical back button.
 
-   Usage: Include AFTER webapp-init.js in any WebApp HTML:
-     <script src="../shared/exit-confirm.js"></script>
+   AUTO-SETUP (no WebApp code needed):
+     - BackButton.show() + onClick() → shows popup
+     - Android back (popstate) → shows popup
+     - "Sair" → calls __valdoriaExitAction or tg.close()
+     - "Continuar Jogando" / backdrop click → dismisses popup
 
-   To customize the exit action (e.g., transition instead of close):
-     window.__valdoriaExitAction = function() { myCustomExit(); };
+   INTEGRATION PATTERNS:
+     1. DEFAULT — WebApp uses tg.close() on exit (most WebApps):
+        Nothing to do. exit-confirm.js handles everything.
 
-   To temporarily suppress the popup (e.g., during sub-screen nav):
-     window.__valdoriaExitBypass = true;
+     2. CUSTOM CLOSE — WebApp has cleanup/transition logic:
+        window.__valdoriaExitAction = function() { myCleanup(); };
+
+     3. COMPLEX NAV — WebApp has sub-screen back navigation:
+        Set window.__valdoriaPopstateTrap = true BEFORE this script loads.
+        Override BackButton.onClick with conditional logic.
+        Call ValdoriaExitConfirm.show() for the exit case.
+
+   TAG: All related code in WebApps is tagged [EXIT-CONFIRM].
    ======================================================== */
 (function () {
     "use strict";

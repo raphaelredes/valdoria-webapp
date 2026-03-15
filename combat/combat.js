@@ -8,21 +8,8 @@
 const tg = window.Telegram?.WebApp;
 if (tg) {
     tg.ready(); tg.expand();
-    // BackButton — always available for closing the WebApp
-    if (tg.BackButton) {
-        tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-            if (window.ValdoriaExitConfirm) { ValdoriaExitConfirm.show(); return; }
-            // If no combat state loaded (server down / error screen), close immediately
-            if (!currentState) {
-                stopAllIntervals();
-                try { tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); }
-                return;
-            }
-            closeCombat('back');
-        });
-    }
-    // Exit confirm: custom close action
+    // [EXIT-CONFIRM] BackButton handled by exit-confirm.js (shows popup)
+    // Custom exit: combat cleanup before close
     window.__valdoriaExitAction = function() {
         if (!currentState) { stopAllIntervals(); try { tg.close(); } catch(e){} return; }
         closeCombat('back');

@@ -42,14 +42,9 @@ async function initAsync() {
             tg.ready();
             tg.expand();
             try { tg.disableVerticalSwipes(); } catch (e) { console.warn('[NAVIGATE] disableVerticalSwipes:', e); }
-            if (tg.BackButton) {
-                tg.BackButton.show();
-                tg.BackButton.onClick(() => {
-                    if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
-                    else handleClose();
-                });
-                window.__valdoriaExitAction = function() { handleClose(); };
-            }
+            // [EXIT-CONFIRM] BackButton handled by exit-confirm.js (shows popup)
+            // Custom exit: transition back to game hub instead of raw close
+            window.__valdoriaExitAction = function() { handleClose(); };
         }
 
         // Parse URL params

@@ -90,14 +90,9 @@
             Telegram.WebApp.expand();
             try { Telegram.WebApp.headerColor = '#2a2420'; } catch(e) { /* Telegram API optional */ }
             try { Telegram.WebApp.backgroundColor = '#2a2420'; } catch(e) { /* Telegram API optional */ }
-            if (Telegram.WebApp.BackButton) {
-                Telegram.WebApp.BackButton.show();
-                Telegram.WebApp.BackButton.onClick(function() {
-                    if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
-                    else _goBack();
-                });
-                window.__valdoriaExitAction = function() { _goBack(); };
-            }
+            // [EXIT-CONFIRM] BackButton handled by exit-confirm.js (shows popup)
+            // Custom exit: guide may return to previous webapp
+            window.__valdoriaExitAction = function() { _goBack(); };
         }
 
         buildCategoryFilters();

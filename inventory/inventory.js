@@ -475,11 +475,12 @@ function initBackButton() {
     try {
         if (tg?.BackButton) {
             tg.BackButton.show();
-            tg.BackButton.onClick(() => {
-                if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
-                else _navigateBack();
-            });
+            // [EXIT-CONFIRM] Inventory overrides BackButton because _navigateBack()
+            // has conditional logic (close modals, save pending ops, then exit).
+            // exit-confirm.js popup is triggered via __valdoriaExitAction instead.
+            tg.BackButton.onClick(() => { _navigateBack(); });
         }
+        // [EXIT-CONFIRM] Custom exit: inventory cleanup + transition
         window.__valdoriaExitAction = function() { _navigateBack(); };
     } catch(e) { console.warn('[INVENTORY] BackButton setup:', e); }
 }

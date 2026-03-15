@@ -130,36 +130,38 @@ async function init() {
         try { Telegram.WebApp.disableVerticalSwipes(); } catch (e) { /* older clients */ }
         try { Telegram.WebApp.setHeaderColor('#2a2420'); Telegram.WebApp.setBackgroundColor('#2a2420'); } catch (e) { /* older clients */ }
 
-        // Back button: navigate back in-game; show exit popup from hub
+        // [EXIT-CONFIRM] Back button: sub-screens navigate back; root shows exit popup
         Telegram.WebApp.BackButton.show();
         Telegram.WebApp.BackButton.onClick(() => {
             const sid = S.currentScreen ? S.currentScreen.screen_id || '' : '';
-            if (sid === 'city.hub' || !sid) {
-                if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
-                else _closeGameHub();
+            if (sid && sid !== 'city.hub') {
+                doAction('action_universal_back');
+            } else if (window.ValdoriaExitConfirm) {
+                ValdoriaExitConfirm.show();
+            } else {
+                _closeGameHub();
             }
-            else { doAction('action_universal_back'); }
         });
-        // Set custom exit action for the shared exit-confirm module
+        // [EXIT-CONFIRM] Custom exit: close Game Hub (saves session + Telegram close)
         window.__valdoriaExitAction = function() { _closeGameHub(); };
     } else {
         console.warn('[GAME] Telegram WebApp NOT detected - running outside Telegram?');
     }
 
-    // ─── Browser Back Button Trap ───
-    // Game Hub manages its own popstate (exit-confirm.js popstate is disabled via __valdoriaPopstateTrap).
+    // ─── [EXIT-CONFIRM] Android Back Button ───
+    // Game Hub disables exit-confirm.js popstate via __valdoriaPopstateTrap (set in index.html)
+    // and manages its own: sub-screens navigate back, root shows exit popup.
     history.replaceState({ screen: 'init' }, '');
     history.pushState({ screen: 'game' }, '');
     window.addEventListener('popstate', (e) => {
         history.pushState({ screen: 'game' }, '');
         const sid = S.currentScreen ? S.currentScreen.screen_id || '' : '';
-        if (sid === 'city.hub' || !sid) {
-            // Root screen: show exit popup
-            if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
-            else _closeGameHub();
-        } else {
-            // Sub-screen: navigate back in-game
+        if (sid && sid !== 'city.hub') {
             doAction('action_universal_back');
+        } else if (window.ValdoriaExitConfirm) {
+            ValdoriaExitConfirm.show();
+        } else {
+            _closeGameHub();
         }
     });
 
