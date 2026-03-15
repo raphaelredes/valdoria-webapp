@@ -29,8 +29,8 @@ function _restoreSession() {
         var raw = localStorage.getItem(SESSION_KEY);
         if (!raw) return false;
         var d = JSON.parse(raw);
-        // Expire after 4 hours (match server session TTL)
-        if (Date.now() - d.ts > 4 * 60 * 60 * 1000) return false;
+        // Expire after 30 minutes (aligned with server _SESSION_TTL = 1800s)
+        if (Date.now() - d.ts > 30 * 60 * 1000) return false;
         if (!S.token && d.token) S.token = d.token;
         if (!S.apiBase && d.apiBase) S.apiBase = d.apiBase;
         if (!S.uid && d.uid) S.uid = d.uid;
@@ -668,6 +668,8 @@ async function fetchState(silent) {
 // ─── Close Game Hub ───
 // Notify server to update the underlying Telegram message, then close the WebApp.
 async function _closeGameHub() {
+    // Prevent beforeunload from also sending close beacon (dedup)
+    window.__valdoria_close_sent = true;
     if (window.SessionHeartbeat) SessionHeartbeat.stop();
     try {
         const controller = new AbortController();

@@ -1667,8 +1667,11 @@ async function initAsync() {
         // Default exit (tg.close) is sufficient — exploration state saved via beforeunload
     }
 
-    // Save state on close attempt
+    // Save state on close attempt (beforeunload) + visibility change (more reliable on iOS)
     window.addEventListener('beforeunload', () => { saveState(); });
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') saveState();
+    });
 
     const params = new URLSearchParams(window.location.search);
     S.token = params.get('token') || '';

@@ -55,7 +55,10 @@
             _hide();
         });
         document.getElementById('v-exit-leave').addEventListener('click', function () {
-            _hide();
+            // Don't call _hide() here — it would resume heartbeat just before exit.
+            // Just dismiss overlay and proceed with exit.
+            if (_overlay) _overlay.style.display = 'none';
+            _popupVisible = false;
             _doExit();
         });
         // Click on backdrop = stay
@@ -69,12 +72,18 @@
         _overlay.style.display = '';
         _popupVisible = true;
         if (window.vHaptic) vHaptic.medium();
+        // Pause heartbeat while popup is visible (no need to poll)
+        if (window.SessionHeartbeat) SessionHeartbeat.stop();
     }
 
     function _hide() {
         if (!_overlay) return;
         _overlay.style.display = 'none';
         _popupVisible = false;
+        // Resume heartbeat if player chose to stay
+        if (window.SessionHeartbeat && window.SessionHeartbeat.init && window.S) {
+            try { SessionHeartbeat.init({ apiBase: S.apiBase, token: S.token, uid: S.uid }); } catch(e) {}
+        }
     }
 
     function _doExit() {
