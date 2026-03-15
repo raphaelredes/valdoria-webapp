@@ -740,15 +740,9 @@
             animation: locShake 0.3s ease;
         }
 
-        /* ═══ TRAVEL ANIMATION — Path drawing + marker ═══ */
+        /* ═══ TRAVEL ANIMATION — Path drawing + hooded traveler ═══ */
         @keyframes travelPathDraw {
             to { stroke-dashoffset: 0; }
-        }
-        @keyframes travelMarkerBounce {
-            0% { transform: scale(1); }
-            40% { transform: scale(1.25); }
-            70% { transform: scale(0.9); }
-            100% { transform: scale(1); }
         }
         .travel-path-anim {
             stroke: #c4953a;
@@ -757,11 +751,50 @@
             fill: none;
             stroke-opacity: 0.8;
         }
-        .travel-marker {
-            transition: transform 0.05s linear;
+
+        /* Traveler silhouette — idle sway */
+        .travel-marker-group {
+            pointer-events: none;
         }
-        .travel-marker-bounce {
-            animation: travelMarkerBounce 0.3s ease;
+        .traveler-figure {
+            transform: scale(0.85);
+            transform-origin: 0 -10px;
+            animation: travelerSway 2.5s ease-in-out infinite;
+        }
+        @keyframes travelerSway {
+            0%, 100% { transform: scale(0.85) translateY(0) rotate(0deg); }
+            50% { transform: scale(0.85) translateY(-0.8px) rotate(0.6deg); }
+        }
+
+        /* Glow ring pulse at feet */
+        .traveler-glow-ring {
+            animation: travelerGlowPulse 2s ease-in-out infinite;
+        }
+        @keyframes travelerGlowPulse {
+            0%, 100% { stroke-opacity: 0.3; }
+            50% { stroke-opacity: 0.5; }
+        }
+
+        /* Arrival — gentle settle */
+        .travel-marker-arrive .traveler-figure {
+            animation: travelerArrive 0.5s ease forwards;
+        }
+        @keyframes travelerArrive {
+            0% { transform: scale(0.85); }
+            35% { transform: scale(0.95); }
+            65% { transform: scale(0.82); }
+            100% { transform: scale(0.85); }
+        }
+
+        /* Arrival gold glow burst */
+        .travel-arrive-glow {
+            fill: rgba(196, 149, 58, 0.3);
+            animation: arriveGlowPulse 0.6s ease-out forwards;
+        }
+        @keyframes arriveGlowPulse {
+            0% { r: 3; opacity: 0.4; }
+            50% { r: 12; opacity: 0.2; }
+            100% { r: 16; opacity: 0; }
         }
 
         /* ═══ FOG REVEAL — Expanding light ═══ */

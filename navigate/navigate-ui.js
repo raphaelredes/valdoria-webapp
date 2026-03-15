@@ -429,6 +429,77 @@ function highlightPath(fromId, toId) {
     svg.appendChild(frag);
 }
 
+// ── Travel marker — Hooded traveler silhouette (SVG) ──
+function _createTravelerMarker() {
+    var g = createSVG('g', { class: 'travel-marker-group' });
+    var fig = createSVG('g', { class: 'traveler-figure' });
+
+    // Ground shadow
+    fig.appendChild(createSVG('ellipse', {
+        cx: 0, cy: 2, rx: 8, ry: 3.5,
+        fill: 'rgba(0,0,0,0.3)'
+    }));
+    // Legs
+    fig.appendChild(createSVG('line', {
+        x1: -1.2, y1: -6, x2: -1.5, y2: 0,
+        stroke: 'rgba(20,16,14,0.85)', 'stroke-width': 2, 'stroke-linecap': 'round'
+    }));
+    fig.appendChild(createSVG('line', {
+        x1: 1.2, y1: -6, x2: 1.5, y2: 0,
+        stroke: 'rgba(20,16,14,0.85)', 'stroke-width': 2, 'stroke-linecap': 'round'
+    }));
+    // Body torso
+    fig.appendChild(createSVG('ellipse', {
+        cx: 0, cy: -12, rx: 3.8, ry: 6.5,
+        fill: 'rgba(20,16,14,0.85)'
+    }));
+    // Cloak
+    fig.appendChild(createSVG('path', {
+        d: 'M-2.5,-17 Q-5.5,-11 -4.5,-4 Q-3.5,-8 -2.5,-6 Z',
+        fill: 'rgba(30,24,20,0.80)', class: 'traveler-cloak'
+    }));
+    // Backpack
+    fig.appendChild(createSVG('ellipse', {
+        cx: -3.2, cy: -13, rx: 2.8, ry: 3.2,
+        fill: 'rgba(30,24,20,0.80)', transform: 'rotate(-11 -3.2 -13)'
+    }));
+    // Head
+    fig.appendChild(createSVG('circle', {
+        cx: 0, cy: -19, r: 3,
+        fill: 'rgba(20,16,14,0.85)'
+    }));
+    // Hood (pointed medieval)
+    fig.appendChild(createSVG('path', {
+        d: 'M-3.2,-19 Q-1,-26 1.2,-21.5 Q2.2,-18 3.2,-17 L-3.2,-17 Z',
+        fill: 'rgba(30,24,20,0.80)'
+    }));
+    // Staff
+    fig.appendChild(createSVG('line', {
+        x1: 4.5, y1: -21, x2: 6.5, y2: 1,
+        stroke: 'rgba(60,45,30,0.8)', 'stroke-width': 1.6, 'stroke-linecap': 'round'
+    }));
+    // Staff knob
+    fig.appendChild(createSVG('circle', {
+        cx: 4.5, cy: -21.5, r: 1.3,
+        fill: 'rgba(80,65,45,0.7)'
+    }));
+    // Rim light (gold edge)
+    fig.appendChild(createSVG('path', {
+        d: 'M3.2,-17 Q4.2,-12 3.8,-6',
+        stroke: 'rgba(196,149,58,0.45)', 'stroke-width': 1.4, fill: 'none',
+        'stroke-linecap': 'round'
+    }));
+    // Gold glow ring at feet
+    fig.appendChild(createSVG('ellipse', {
+        cx: 0, cy: 1, rx: 10, ry: 4.5,
+        fill: 'none', stroke: 'rgba(196,149,58,0.3)', 'stroke-width': 1.8,
+        class: 'traveler-glow-ring'
+    }));
+
+    g.appendChild(fig);
+    return g;
+}
+
 // ── Travel animation (path drawing + marker movement) ──
 function animateTravel(fromId, toId, onComplete) {
     const pathIds = bfsPath(fromId, toId);
@@ -473,11 +544,10 @@ function animateTravel(fromId, toId, onComplete) {
     const markerCoords = LOCATION_COORDS[fromId];
     if (markerCoords) {
         const startP = hexToPixel(markerCoords.col, markerCoords.row);
-        const marker = createSVG('circle', {
-            cx: startP.x, cy: startP.y, r: 5,
-            fill: '#c4953a', class: 'travel-marker',
-        });
+        const marker = _createTravelerMarker();
+        marker.setAttribute('transform', 'translate(' + startP.x + ',' + startP.y + ')');
         travelGroup.appendChild(marker);
+        var _prevTravelX = startP.x;
 
         let elapsed = 0;
         const duration = Math.max(1500, Math.min(4000, pathIds.length * 800)); // proportional to hops
@@ -496,8 +566,14 @@ function animateTravel(fromId, toId, onComplete) {
                     const pt = _pointOnPath(seg.pathD, segT);
                     const px = pt.x;
                     const py = pt.y;
-                    marker.setAttribute('cx', px);
-                    marker.setAttribute('cy', py);
+                    marker.setAttribute('transform', 'translate(' + px + ',' + py + ')');
+                    // Flip figure based on travel direction
+                    if (px < _prevTravelX - 0.5) {
+                        marker.querySelector('.traveler-figure').setAttribute('transform', 'scale(-0.85,0.85)');
+                    } else if (px > _prevTravelX + 0.5) {
+                        marker.querySelector('.traveler-figure').setAttribute('transform', 'scale(0.85,0.85)');
+                    }
+                    _prevTravelX = px;
                     // Pulse waypoint marker when passing through
                     if (segT > 0.95 && seg !== segments[segments.length - 1]) {
                         const wpNode = document.querySelector('.loc-node[data-loc="' + pathIds[segments.indexOf(seg) + 1] + '"]');
@@ -515,7 +591,10 @@ function animateTravel(fromId, toId, onComplete) {
             if (t < 1) {
                 requestAnimationFrame(moveMarker);
             } else {
-                marker.classList.add('travel-marker-bounce');
+                marker.classList.add('travel-marker-arrive');
+                // Gold arrival glow
+                var arrGlow = createSVG('circle', { cx: 0, cy: 0, r: 3, class: 'travel-arrive-glow' });
+                marker.appendChild(arrGlow);
                 // Fog reveal burst at destination
                 const destC = LOCATION_COORDS[toId];
                 if (destC) {
