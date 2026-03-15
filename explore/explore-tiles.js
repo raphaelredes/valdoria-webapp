@@ -749,24 +749,57 @@ function drawRuinsDecoration(ctx, cx, cy, col, row) {
 
 function drawBonesDecoration(ctx, cx, cy, col, row, biome) {
     _drawDecorationShadow(ctx, cx, cy, 7, 2.5);
-    const color = biome === 'graveyard' ? '#9a8a7a' : '#c0b8a8';
-    for (let i = 0; i < 2; i++) {
-        const bx = cx + (tileRand(col, row, 40 + i) - 0.5) * 12;
-        const by = cy + (tileRand(col, row, 42 + i) - 0.5) * 6;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.2;
-        // Cross shape
+    var color = biome === 'graveyard' ? '#9a8a7a' : '#c0b8a8';
+    var colorDim = biome === 'graveyard' ? '#7a6a5a' : '#a09888';
+    var r1 = tileRand(col, row, 40);
+    var r2 = tileRand(col, row, 41);
+
+    // Long bone (femur-like with bulges at ends)
+    var bx = cx + (r1 - 0.5) * 10;
+    var by = cy + (r2 - 0.5) * 4;
+    var bAngle = (r1 - 0.5) * 0.6;
+    ctx.save();
+    ctx.translate(bx, by);
+    ctx.rotate(bAngle);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(-4, 0);
+    ctx.lineTo(4, 0);
+    ctx.stroke();
+    // Knobby ends
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(-4, 0, 1.2, 0, Math.PI * 2);
+    ctx.arc(4, 0, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Rib fragment (curved short bone)
+    var rx = cx + (tileRand(col, row, 43) - 0.5) * 12;
+    var ry = cy + (tileRand(col, row, 44) - 0.5) * 5;
+    ctx.strokeStyle = colorDim;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.arc(rx, ry + 3, 4, -0.8, 0.8);
+    ctx.stroke();
+
+    // Small bone fragments (scattered)
+    ctx.strokeStyle = colorDim;
+    ctx.lineWidth = 0.6;
+    for (var fi = 0; fi < 2; fi++) {
+        var fx = cx + (tileRand(col, row, 46 + fi) - 0.5) * 14;
+        var fy = cy + (tileRand(col, row, 48 + fi) - 0.5) * 6;
         ctx.beginPath();
-        ctx.moveTo(bx - 3, by);
-        ctx.lineTo(bx + 3, by);
-        ctx.moveTo(bx, by - 3);
-        ctx.lineTo(bx, by + 3);
+        ctx.moveTo(fx - 1.5, fy - 0.5);
+        ctx.lineTo(fx + 1.5, fy + 0.5);
         ctx.stroke();
     }
+
     if (biome === 'graveyard') {
-        // Tombstone (3D-ish)
-        const gx = cx + (tileRand(col, row, 45) - 0.5) * 6;
-        const gy = cy + (tileRand(col, row, 46) - 0.5) * 4;
+        // Tombstone (3D-ish with moss)
+        var gx = cx + (tileRand(col, row, 45) - 0.5) * 6;
+        var gy = cy + (tileRand(col, row, 46) - 0.5) * 4;
         // Side (darker)
         ctx.fillStyle = '#4a4a4a';
         ctx.fillRect(gx - 3, gy - 5, 6, 8);
@@ -785,6 +818,32 @@ function drawBonesDecoration(ctx, cx, cy, col, row, biome) {
         ctx.moveTo(gx - 1.5, gy - 5.5);
         ctx.lineTo(gx + 1.5, gy - 5.5);
         ctx.stroke();
+        // Moss on tombstone base
+        ctx.fillStyle = 'rgba(60,90,40,0.2)';
+        ctx.beginPath();
+        ctx.ellipse(gx, gy + 2, 3.5, 1.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Cracks on stone
+        ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        ctx.moveTo(gx + 1, gy - 4);
+        ctx.lineTo(gx + 2, gy - 1);
+        ctx.stroke();
+    } else if (biome === 'cave') {
+        // Skull (small oval with eye sockets)
+        var sx = cx + (r2 - 0.3) * 8;
+        var sy = cy + (r1 - 0.4) * 4;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.ellipse(sx, sy, 2.5, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Eye sockets
+        ctx.fillStyle = 'rgba(30,25,20,0.5)';
+        ctx.beginPath();
+        ctx.arc(sx - 0.8, sy - 0.4, 0.6, 0, Math.PI * 2);
+        ctx.arc(sx + 0.8, sy - 0.4, 0.6, 0, Math.PI * 2);
+        ctx.fill();
     }
 }
 
@@ -813,24 +872,77 @@ function drawPathDecoration(ctx, cx, cy, col, row) {
 }
 
 function drawIceDecoration(ctx, cx, cy, col, row) {
-    // Shine lines
-    ctx.strokeStyle = 'rgba(220,240,255,0.3)';
-    ctx.lineWidth = 1;
-    const r1 = tileRand(col, row, 60);
+    var r1 = tileRand(col, row, 60);
+    var r2 = tileRand(col, row, 61);
+
+    // Frost surface sheen (subtle blue gradient)
+    ctx.fillStyle = 'rgba(180,210,240,0.04)';
     ctx.beginPath();
-    ctx.moveTo(cx - 10, cy - 2 + r1 * 3);
-    ctx.lineTo(cx + 8, cy - 2 + r1 * 3);
+    ctx.ellipse(cx, cy, 10, 5, r1 * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Crack network (branching lines)
+    ctx.strokeStyle = 'rgba(200,230,255,0.18)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - 8, cy - 1);
+    ctx.lineTo(cx - 2, cy + 1);
+    ctx.lineTo(cx + 5, cy - 2);
+    ctx.lineTo(cx + 9, cy + 1);
     ctx.stroke();
-    ctx.strokeStyle = 'rgba(220,240,255,0.15)';
+    // Branch off main crack
+    ctx.strokeStyle = 'rgba(200,230,255,0.12)';
+    ctx.lineWidth = 0.4;
+    ctx.beginPath();
+    ctx.moveTo(cx - 2, cy + 1);
+    ctx.lineTo(cx - 4, cy + 4);
+    ctx.moveTo(cx + 5, cy - 2);
+    ctx.lineTo(cx + 3, cy - 5);
+    ctx.stroke();
+
+    // Shine lines (reflective surface)
+    ctx.strokeStyle = 'rgba(220,240,255,0.25)';
+    ctx.lineWidth = 0.8;
+    var sy = cy - 2 + r1 * 3;
+    ctx.beginPath();
+    ctx.moveTo(cx - 10, sy);
+    ctx.lineTo(cx + 8, sy);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(220,240,255,0.12)';
+    ctx.lineWidth = 0.6;
     ctx.beginPath();
     ctx.moveTo(cx - 6, cy + 2 + r1 * 2);
     ctx.lineTo(cx + 10, cy + 2 + r1 * 2);
     ctx.stroke();
-    // Ice crystal sparkle
-    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+
+    // Frost crystal (6-pointed star shape)
+    var fx = cx + (r2 - 0.5) * 8;
+    var fy = cy + (r1 - 0.5) * 4;
+    ctx.strokeStyle = 'rgba(220,240,255,0.22)';
+    ctx.lineWidth = 0.5;
+    for (var ai = 0; ai < 3; ai++) {
+        var angle = ai * Math.PI / 3;
+        ctx.beginPath();
+        ctx.moveTo(fx + Math.cos(angle) * 3, fy + Math.sin(angle) * 3);
+        ctx.lineTo(fx - Math.cos(angle) * 3, fy - Math.sin(angle) * 3);
+        ctx.stroke();
+    }
+
+    // Ice sparkles (2-3 bright dots)
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
     ctx.beginPath();
     ctx.arc(cx + 3, cy - 1, 1, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = 'rgba(240,250,255,0.18)';
+    ctx.beginPath();
+    ctx.arc(cx - 5, cy + 2, 0.8, 0, Math.PI * 2);
+    ctx.fill();
+    if (r2 > 0.4) {
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath();
+        ctx.arc(cx + 7, cy + 1, 0.6, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
 function drawWallDecoration(ctx, cx, cy, heightPx, col, row) {
@@ -890,66 +1002,207 @@ function drawWallDecoration(ctx, cx, cy, heightPx, col, row) {
 }
 
 function drawSandDecoration(ctx, cx, cy, col, row) {
-    // Sand ripples (wind patterns)
-    ctx.strokeStyle = 'rgba(200,180,120,0.15)';
-    ctx.lineWidth = 0.6;
-    for (let i = 0; i < 3; i++) {
-        const y = cy - 3 + i * 4;
+    var r1 = tileRand(col, row, 70);
+    var r2 = tileRand(col, row, 71);
+
+    // Dune shadow (subtle gradient for depth — windward/leeward)
+    ctx.fillStyle = 'rgba(0,0,0,0.03)';
+    ctx.beginPath();
+    ctx.ellipse(cx + 3, cy + 1, 10, 4, 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    // Dune highlight (lighter crest)
+    ctx.fillStyle = 'rgba(255,240,200,0.05)';
+    ctx.beginPath();
+    ctx.ellipse(cx - 2, cy - 1, 8, 2.5, 0.15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wind ripple lines (4 curved, more natural)
+    for (var i = 0; i < 4; i++) {
+        var alpha = 0.14 - i * 0.02;
+        ctx.strokeStyle = 'rgba(200,180,120,' + alpha.toFixed(2) + ')';
+        ctx.lineWidth = 0.6;
+        var y = cy - 4 + i * 3.5;
         ctx.beginPath();
-        for (let x = cx - 10; x <= cx + 10; x += 3) {
-            const wy = y + Math.sin(x * 0.3 + i) * 1;
-            if (x === cx - 10) ctx.moveTo(x, wy);
+        for (var x = cx - 12; x <= cx + 12; x += 2) {
+            var wy = y + Math.sin(x * 0.25 + i * 0.8) * 1.2;
+            if (x === cx - 12) ctx.moveTo(x, wy);
             else ctx.lineTo(x, wy);
         }
         ctx.stroke();
     }
-    // Sand grain dots
-    ctx.fillStyle = 'rgba(200,180,120,0.15)';
-    for (let i = 0; i < 3; i++) {
-        const sx = cx + (tileRand(col, row, 70 + i) - 0.5) * 16;
-        const sy = cy + (tileRand(col, row, 75 + i) - 0.5) * 10;
+
+    // Sand drift accumulation (small crescent shapes)
+    ctx.fillStyle = 'rgba(210,190,130,0.08)';
+    ctx.beginPath();
+    ctx.arc(cx + 6, cy + 3, 3, 0.5, Math.PI - 0.5);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx - 7, cy - 2, 2.5, 0.3, Math.PI - 0.3);
+    ctx.fill();
+
+    // Partially buried object (stone or bone peeking out)
+    if (r1 > 0.5) {
+        var bx = cx + (r2 - 0.5) * 10;
+        var by = cy + (r1 - 0.5) * 4;
+        ctx.fillStyle = 'rgba(140,130,110,0.18)';
         ctx.beginPath();
-        ctx.arc(sx, sy, 0.8, 0, Math.PI * 2);
+        ctx.arc(bx, by, 1.8, Math.PI, 0); // half circle (buried bottom)
+        ctx.fill();
+        // Shadow under exposed part
+        ctx.fillStyle = 'rgba(0,0,0,0.06)';
+        ctx.beginPath();
+        ctx.ellipse(bx, by + 0.5, 2.2, 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Sand grain dots (scattered, 4 instead of 3)
+    ctx.fillStyle = 'rgba(200,180,120,0.12)';
+    for (var gi = 0; gi < 4; gi++) {
+        var sx = cx + (tileRand(col, row, 72 + gi) - 0.5) * 18;
+        var sy = cy + (tileRand(col, row, 76 + gi) - 0.5) * 10;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 0.6 + tileRand(col, row, 80 + gi) * 0.4, 0, Math.PI * 2);
         ctx.fill();
     }
 }
 
-function drawMudDecoration(ctx, cx, cy) {
-    // Wet reflection
-    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+function drawMudDecoration(ctx, cx, cy, col, row) {
+    var seed = (col || 0) * 7 + (row || 0) * 13;
+
+    // Muddy puddle pool (irregular dark ellipse)
+    ctx.fillStyle = 'rgba(60,50,30,0.18)';
     ctx.beginPath();
-    ctx.ellipse(cx - 2, cy - 1, 8, 3, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx - 1, cy, 9, 4, 0.2, 0, Math.PI * 2);
     ctx.fill();
-    // Bubbles
+
+    // Wet reflection sheen (lighter ellipse offset)
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.beginPath();
+    ctx.ellipse(cx - 2, cy - 1.5, 6, 2.5, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mud ripples (concentric arcs around puddle)
+    ctx.strokeStyle = 'rgba(80,70,45,0.12)';
+    ctx.lineWidth = 0.4;
+    ctx.beginPath();
+    ctx.arc(cx - 1, cy, 5, 0.3, 2.2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx - 1, cy, 7.5, 0.8, 1.8);
+    ctx.stroke();
+
+    // Footprint impressions (2 small oval pairs)
+    ctx.fillStyle = 'rgba(40,35,20,0.12)';
+    var fpX = cx + ((seed * 3) % 7) - 3;
+    var fpY = cy + ((seed * 5) % 5) - 2;
+    ctx.beginPath();
+    ctx.ellipse(fpX, fpY, 1.8, 1, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(fpX + 1.5, fpY - 2.2, 1.6, 0.9, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Bubbles (3 varied sizes)
     ctx.fillStyle = 'rgba(100,90,60,0.2)';
     ctx.beginPath();
     ctx.arc(cx + 3, cy + 1, 1.5, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = 'rgba(100,90,60,0.15)';
     ctx.beginPath();
     ctx.arc(cx - 4, cy - 2, 1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(110,100,70,0.12)';
+    ctx.beginPath();
+    ctx.arc(cx + 5, cy - 1, 0.7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Bubble highlight (tiny white dot on largest bubble)
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.beginPath();
+    ctx.arc(cx + 2.5, cy + 0.3, 0.5, 0, Math.PI * 2);
     ctx.fill();
 }
 
 function drawVolcanicDecoration(ctx, cx, cy, col, row) {
-    const r1 = tileRand(col, row, 80);
-    // Cracked surface pattern
-    ctx.strokeStyle = 'rgba(200,80,20,0.2)';
-    ctx.lineWidth = 0.6;
+    var r1 = tileRand(col, row, 80);
+    var r2 = tileRand(col, row, 81);
+
+    // Warm under-glow (radial gradient for subsurface heat)
+    var heatGrad = ctx.createRadialGradient(cx, cy, 1, cx, cy, 10);
+    heatGrad.addColorStop(0, 'rgba(255,100,20,0.07)');
+    heatGrad.addColorStop(0.6, 'rgba(255,60,10,0.03)');
+    heatGrad.addColorStop(1, 'rgba(255,40,0,0)');
+    ctx.fillStyle = heatGrad;
+    ctx.fillRect(cx - 10, cy - 8, 20, 16);
+
+    // Primary crack network (bright orange)
+    ctx.strokeStyle = 'rgba(220,90,20,0.22)';
+    ctx.lineWidth = 0.7;
     ctx.beginPath();
-    ctx.moveTo(cx - 6, cy - 3);
-    ctx.lineTo(cx + r1 * 4, cy + 1);
+    ctx.moveTo(cx - 8, cy - 3);
+    ctx.lineTo(cx - 2, cy + 1);
+    ctx.lineTo(cx + r1 * 4, cy - 1);
     ctx.lineTo(cx + 8, cy + 3);
     ctx.stroke();
-    // Smaller cracks
-    ctx.strokeStyle = 'rgba(200,80,20,0.12)';
+
+    // Secondary cracks (branching, dimmer)
+    ctx.strokeStyle = 'rgba(200,80,20,0.14)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - 2, cy + 1);
+    ctx.lineTo(cx - 5, cy + 4);
+    ctx.moveTo(cx + r1 * 4, cy - 1);
+    ctx.lineTo(cx + 3, cy - 4);
+    ctx.stroke();
+
+    // Tertiary hairline cracks
+    ctx.strokeStyle = 'rgba(180,70,20,0.08)';
+    ctx.lineWidth = 0.3;
     ctx.beginPath();
     ctx.moveTo(cx - 3, cy + 2);
     ctx.lineTo(cx + 4, cy - 1);
+    ctx.moveTo(cx + 5, cy + 2);
+    ctx.lineTo(cx + 2, cy + 5);
     ctx.stroke();
-    // Warm glow between cracks
-    ctx.fillStyle = 'rgba(255,100,20,0.04)';
+
+    // Obsidian shards (dark angular polygons with glassy highlight)
+    var sx = cx + (r2 - 0.5) * 10;
+    var sy = cy + (r1 - 0.5) * 5;
+    ctx.fillStyle = 'rgba(20,18,22,0.3)';
     ctx.beginPath();
-    ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+    ctx.moveTo(sx, sy - 2.5);
+    ctx.lineTo(sx + 2.5, sy + 1);
+    ctx.lineTo(sx - 1, sy + 2);
+    ctx.closePath();
+    ctx.fill();
+    // Glassy highlight edge
+    ctx.strokeStyle = 'rgba(180,170,200,0.15)';
+    ctx.lineWidth = 0.4;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy - 2.5);
+    ctx.lineTo(sx + 2.5, sy + 1);
+    ctx.stroke();
+
+    // Second smaller shard
+    if (r2 > 0.35) {
+        var sx2 = cx + (r1 - 0.3) * 8;
+        var sy2 = cy + (r2 - 0.4) * 6;
+        ctx.fillStyle = 'rgba(25,20,28,0.25)';
+        ctx.beginPath();
+        ctx.moveTo(sx2, sy2 - 1.5);
+        ctx.lineTo(sx2 + 1.8, sy2 + 0.5);
+        ctx.lineTo(sx2 - 0.5, sy2 + 1.2);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // Ash deposit patches (subtle gray smudges)
+    ctx.fillStyle = 'rgba(80,75,70,0.08)';
+    ctx.beginPath();
+    ctx.ellipse(cx - 5, cy + 2, 3, 1.5, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx + 6, cy - 1, 2.5, 1.2, -0.2, 0, Math.PI * 2);
     ctx.fill();
 }
 
@@ -2064,7 +2317,7 @@ function drawTileDecoration(ctx, cx, cy, tile, biome, col, row, timestamp) {
         case 'p': drawPathDecoration(ctx, cx, cy, col, row); break;
         case 'i': drawIceDecoration(ctx, cx, cy, col, row); break;
         case 's': drawSandDecoration(ctx, cx, cy, col, row); break;
-        case 'm': drawMudDecoration(ctx, cx, cy); break;
+        case 'm': drawMudDecoration(ctx, cx, cy, col, row); break;
         case 'v': drawVolcanicDecoration(ctx, cx, cy, col, row); break;
         case 'g': drawGrassDecoration(ctx, cx, cy, col, row, biome); break;
         case '.': drawGroundTexture(ctx, cx, cy, col, row, biome); break;
