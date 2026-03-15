@@ -1407,11 +1407,19 @@ function _rollReturnHazard(hazard, choice) {
             _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2, mode);
         });
     } else {
-        // Fallback without 3D
-        checkEl.innerHTML = `<div style="font-size:clamp(36px,10vw,48px);animation:diceRoll 0.7s ease">d20</div>`;
-        setTimeout(() => {
+        // Fallback without 3D: animated cycling numbers
+        checkEl.innerHTML = '';
+        var _rdie = document.createElement('div');
+        _rdie.className = 'die kept';
+        _rdie.style.cssText = 'width:56px;height:56px;font-size:28px;margin:0 auto;border-radius:10px';
+        _rdie.textContent = '\ud83c\udfb2';
+        checkEl.appendChild(_rdie);
+        var _rcyc = setInterval(function() { _rdie.textContent = Math.floor(Math.random() * 20) + 1; }, 50);
+        setTimeout(function() {
+            clearInterval(_rcyc);
+            _rdie.textContent = roll;
             _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2, mode);
-        }, 800);
+        }, 700);
     }
 }
 

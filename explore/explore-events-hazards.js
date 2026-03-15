@@ -302,18 +302,31 @@ function _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, ha
     const resultEl = document.getElementById('check-result');
     const wrapper = document.getElementById('dice3d-wrapper');
 
-    const icon = r2 !== null ? buildDiceHTML(r1, r2, mode) : hazard.label.split(' ')[0];
-    wrapper.innerHTML = `<div class="dice-display-fallback" style="font-size:clamp(48px,12vw,64px);text-align:center;animation:diceRoll 0.7s ease">${icon}</div>`;
+    if (r2 !== null) {
+        // Advantage/disadvantage: show two dice boxes
+        wrapper.innerHTML = '<div class="dice-display-fallback" style="font-size:clamp(48px,12vw,64px);text-align:center;animation:diceRoll 0.7s ease">' + buildDiceHTML(r1, r2, mode) + '</div>';
+    } else {
+        // Normal roll: animated cycling numbers
+        wrapper.innerHTML = '';
+        var die = document.createElement('div');
+        die.className = 'die kept';
+        die.style.cssText = 'width:64px;height:64px;font-size:32px;margin:0 auto;border-radius:10px';
+        die.textContent = '\ud83c\udfb2';
+        wrapper.appendChild(die);
+        var _cyc = setInterval(function() { die.textContent = Math.floor(Math.random() * 20) + 1; }, 50);
+        setTimeout(function() {
+            clearInterval(_cyc);
+            die.textContent = roll;
+            if (roll <= 1) { die.style.borderColor = '#a44'; die.style.boxShadow = '0 0 16px rgba(170,68,68,0.5)'; }
+            else if (roll >= 20) { die.style.borderColor = '#4a8'; die.style.boxShadow = '0 0 16px rgba(68,170,136,0.5)'; }
+        }, 500);
+    }
 
     const formulaStr = buildFormula(roll, mod, statName, '', hazard.dc, total, r1, r2, mode);
     formulaEl.innerHTML =
-        `<span style="color:var(--v-gold);font-size:14px">${hazard.label}</span><br>` + formulaStr;
+        '<span style="color:var(--v-gold);font-size:14px">' + hazard.label + '</span><br>' + formulaStr;
 
-    setTimeout(() => {
-        const fb = wrapper.querySelector('.dice-display-fallback');
-        if (fb && r2 === null) {
-            fb.textContent = roll <= 1 ? 'Falha Crítica' : roll >= 20 ? 'Crítico!' : roll;
-        }
+    setTimeout(function() {
         resultEl.textContent = success ? 'Resistiu!' : 'Falhou!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
