@@ -261,7 +261,7 @@ function renderEquipTab(c) {
             const hpPct = ally.mhp > 0 ? Math.round((ally.hp / ally.mhp) * 100) : 0;
             html += `<div class="ally-equip-header">
                 <span>${ally.ico} <b>${ally.n}</b> · ${ally.c} Lv${ally.l}</span>
-                <span>❤️ ${ally.hp}/${ally.mhp} · ${vi('shield', 12)} CA ${ally.ac}</span>
+                <span>❤️ ${ally.hp}/${ally.mhp}${ally.ac != null ? ' · ' + vi('shield', 12) + ' CA ' + ally.ac : ''}</span>
             </div>`;
         }
     }
@@ -600,7 +600,7 @@ function renderAlliesTab(c) {
                         <span class="ally-name">${a.n} ${lvlBadge}${affBadge}</span>
                         <span class="ally-class">${a.c || 'Aliado'}</span>
                     </div>
-                    <span class="ally-ac">${vi('shield', 12)} ${a.ac}</span>
+                    ${a.ac != null ? '<span class="ally-ac">' + vi('shield', 12) + ' ' + a.ac + '</span>' : ''}
                 </div>
                 <div class="ally-bars">
                     <div class="ally-bar-row">
