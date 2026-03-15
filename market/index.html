@@ -892,7 +892,7 @@
         if (tipEl) tipEl.textContent = TIPS[tipIndex];
         var _tipInterval;
         var _loadStart = '20260314';
-        var MIN_LOAD_MS = Math.round(2000 * (window._valdoriaMinLoadFactor || 1));
+        var MIN_LOAD_MS = window.VALDORIA_MIN_LOAD_MS || 5000;
         var _progress = 0;
 
         var _progressTimer = setInterval(function() {

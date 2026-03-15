@@ -94,7 +94,7 @@ function renderScreen(screen) {
     // Hide loading with narrative minimum delay, show screen
     if (loadingEl && loadingEl.style.display !== 'none') {
         const elapsed = Date.now() - (_loadingStartTime || 0);
-        const remaining = (typeof MIN_LOADING_MS !== 'undefined' ? MIN_LOADING_MS : 2500) - elapsed;
+        const remaining = (typeof MIN_LOADING_MS !== 'undefined' ? MIN_LOADING_MS : (window.VALDORIA_MIN_LOAD_MS || 5000)) - elapsed;
         if (remaining > 0) {
             // Delay hide — screen renders underneath (loading has z-index 1000)
             setTimeout(() => {

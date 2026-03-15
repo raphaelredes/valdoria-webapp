@@ -83,8 +83,8 @@
         var tipIndex = Math.floor(Math.random() * TIPS.length);
         if (tipEl) tipEl.textContent = TIPS[tipIndex];
         var _tipInterval;
-        var _loadStart = '20260314';
-        var MIN_LOAD_MS = Math.round(2500 * (window._valdoriaMinLoadFactor || 1));
+        var _loadStart = Date.now();
+        var MIN_LOAD_MS = window.VALDORIA_MIN_LOAD_MS || 5000;
         var _progress = 0;
 
         // Simulated progress
@@ -122,7 +122,7 @@
                 clearInterval(_tipInterval);
                 clearInterval(_progressTimer);
                 if (!overlay || overlay.classList.contains('hidden')) return;
-                var elapsed = '20260314' - _loadStart;
+                var elapsed = Date.now() - _loadStart;
                 var remaining = MIN_LOAD_MS - elapsed;
                 if (remaining > 0) {
                     setTimeout(function() { window._invLoadingCtrl.hide(); }, remaining);

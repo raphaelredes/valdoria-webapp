@@ -124,7 +124,7 @@ async function initAsync() {
         const stageEl = document.getElementById('loading-stage');
         const tipEl = document.getElementById('loading-tip');
         const loadStart = Date.now();
-        const MIN_LOAD_MS = 600; // Minimal: static image loads instantly
+        const MIN_LOAD_MS = window.VALDORIA_MIN_LOAD_MS || 5000; // immutable: tip readability rule
 
         const updateProgress = (pct) => {
             if (progressFill) progressFill.style.width = pct + '%';

@@ -255,14 +255,22 @@
 })();
 
 /* ═══════════════════════════════════════════════════════════════
-   MIN LOAD TIME REDUCER
-   Reduces MIN_LOAD_MS across all WebApps for lite mode devices.
-   Each WebApp reads window._valdoriaMinLoadFactor to scale its
-   minimum loading time. Factor: 1.0 = full, 0.4 = fast.
+   MIN LOAD TIME — IMMUTABLE
+   Absolute minimum loading screen duration (ms). Ensures loading
+   tips are always visible long enough to be read (at least 1 full
+   tip cycle). NOT affected by lite mode — 5 seconds is the floor.
+   ═══════════════════════════════════════════════════════════════ */
+window.VALDORIA_MIN_LOAD_MS = 5000;
+
+/* ═══════════════════════════════════════════════════════════════
+   LITE MODE FACTOR
+   Factor for animation complexity on low-end devices.
+   Used by particles, combat VFX, etc. Does NOT reduce loading
+   screen duration — only affects visual effects intensity.
+   Factor: 1.0 = full effects, 0.4 = reduced effects.
    ═══════════════════════════════════════════════════════════════ */
 (function() {
     'use strict';
-    // Set global factor immediately (before DOMContentLoaded)
     var isLite = false;
     try {
         var pref = localStorage.getItem('valdoria_loading_lite');
@@ -273,6 +281,6 @@
             isLite = (cores <= 4 && mem <= 4) || cores <= 2 || mem <= 2;
         }
     } catch(e) { /* storage unavailable */ }
-    // Lite: show loading for 40% of normal time; normal: 100%
+    // Lite factor: animation complexity only (NOT loading duration)
     window._valdoriaMinLoadFactor = isLite ? 0.4 : 1.0;
 })();

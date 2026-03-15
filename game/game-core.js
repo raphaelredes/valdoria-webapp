@@ -47,7 +47,7 @@ const HEALTH_TIMEOUT_MS = 3000; // 3s timeout — fast fail for instant reconnec
 const HEALTH_RETRIES = 2;       // 2 retries (3 attempts) — allows DNS propagation after discovery
 const HEALTH_RETRY_MS = 1000;   // 1s between retries
 const LOADING_TIMEOUT_MS = 15000; // 15s max loading screen before auto-error
-const MIN_LOADING_MS = Math.round(2500 * (window._valdoriaMinLoadFactor || 1)); // scaled for device performance
+const MIN_LOADING_MS = window.VALDORIA_MIN_LOAD_MS || 5000; // immutable: tip readability rule
 const SCREEN_CACHE_KEY = 'valdoria_game_screen';
 const SCREEN_CACHE_TTL = 1800000; // 30 minutes
 
