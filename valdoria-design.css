@@ -240,7 +240,7 @@ body::after {
     height: 4px;
     border-radius: 2px;
     background: rgba(74, 56, 40, 0.8);
-    transition: all 0.4s ease;
+    transition: opacity 0.4s ease, transform 0.4s ease, background 0.4s ease;
 }
 
 .v-progress-dot.active {
@@ -267,7 +267,7 @@ body::after {
     border-radius: var(--v-radius);
     padding: 12px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: opacity 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
     position: relative;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
@@ -343,7 +343,7 @@ body::after {
     cursor: pointer;
     font-family: var(--v-font);
     font-size: 13px;
-    transition: all var(--v-transition);
+    transition: opacity var(--v-transition), transform var(--v-transition), background var(--v-transition), border-color var(--v-transition);
     outline: none;
 }
 
@@ -408,7 +408,7 @@ body::after {
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    transition: all var(--v-transition);
+    transition: opacity var(--v-transition), background var(--v-transition);
     font-size: 13px;
     color: var(--v-text);
 }
@@ -433,7 +433,7 @@ body::after {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: all var(--v-transition);
+    transition: opacity var(--v-transition), transform var(--v-transition);
     font-size: 12px;
 }
 
@@ -468,7 +468,7 @@ body::after {
     font-size: 14px;
     font-family: var(--v-font);
     outline: none;
-    transition: all var(--v-transition);
+    transition: border-color var(--v-transition), box-shadow var(--v-transition);
 }
 
 .v-input:focus {
