@@ -37,25 +37,33 @@ var _tileDetail = (function() {
 // HELPER: draw a single small tree (reusable)
 // ═══════════════════════════════════════════
 function _drawConifer(ctx, tx, ty, scale, darkColor, lightColor) {
-    const s = scale || 1;
+    var s = scale || 1;
     // Trunk
     ctx.fillStyle = '#3a2a1a';
     ctx.fillRect(tx - 1 * s, ty - 2 * s, 2 * s, 5 * s);
-    // Canopy
+    // Canopy — right face (lighter)
     ctx.beginPath();
     ctx.moveTo(tx, ty - 12 * s);
     ctx.lineTo(tx + 5 * s, ty - 1 * s);
-    ctx.lineTo(tx - 5 * s, ty - 1 * s);
+    ctx.lineTo(tx, ty - 1 * s);
     ctx.closePath();
     ctx.fillStyle = darkColor || '#1a4a1a';
     ctx.fill();
-    // Second layer
+    // Canopy — left face (darker shadow)
+    ctx.beginPath();
+    ctx.moveTo(tx, ty - 12 * s);
+    ctx.lineTo(tx - 5 * s, ty - 1 * s);
+    ctx.lineTo(tx, ty - 1 * s);
+    ctx.closePath();
+    ctx.fillStyle = lightColor || '#0d3a0d';
+    ctx.fill();
+    // Upper canopy tier
     ctx.beginPath();
     ctx.moveTo(tx, ty - 14 * s);
     ctx.lineTo(tx + 3.5 * s, ty - 7 * s);
     ctx.lineTo(tx - 3.5 * s, ty - 7 * s);
     ctx.closePath();
-    ctx.fillStyle = lightColor || '#2a5a2a';
+    ctx.fillStyle = darkColor || '#1a4a1a';
     ctx.fill();
 }
 
@@ -178,31 +186,57 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
         ctx.fill();
 
     } else if (biome === 'swamp') {
-        // Droopy mangrove cluster
-        const tx = cx + (r1 - 0.5) * 6;
-        const ty = cy + (r2 - 0.5) * 3;
-        // Main tree
+        // Droopy mangrove cluster with exposed roots
+        var tx = cx + (r1 - 0.5) * 6;
+        var ty = cy + (r2 - 0.5) * 3;
+        // Exposed root system
+        ctx.strokeStyle = '#1a2a10';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(tx - 1, ty + 2);
+        ctx.quadraticCurveTo(tx - 5, ty + 1, tx - 7, ty + 4);
+        ctx.moveTo(tx + 1, ty + 2);
+        ctx.quadraticCurveTo(tx + 4, ty + 1, tx + 6, ty + 3);
+        ctx.stroke();
+        // Main trunk (thick, gnarled)
         ctx.fillStyle = '#1a3a16';
-        ctx.fillRect(tx - 1.5, ty - 6, 3, 10);
+        ctx.fillRect(tx - 2, ty - 6, 4, 10);
+        // Trunk shadow (left side)
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        ctx.fillRect(tx - 2, ty - 6, 1.5, 10);
+        // Canopy (irregular, droopy)
         ctx.beginPath();
         ctx.arc(tx, ty - 7, 6, 0, Math.PI * 2);
         ctx.fillStyle = '#2a4a1a';
         ctx.fill();
-        // Hanging vines
+        // Darker canopy underside
+        ctx.fillStyle = '#1a3010';
+        ctx.beginPath();
+        ctx.ellipse(tx, ty - 4, 5, 2, 0, 0, Math.PI);
+        ctx.fill();
+        // Hanging vines (curved, organic)
         ctx.strokeStyle = '#1a3a16';
         ctx.lineWidth = 0.7;
         ctx.beginPath();
         ctx.moveTo(tx - 4, ty - 4);
-        ctx.lineTo(tx - 5, ty + 2);
+        ctx.quadraticCurveTo(tx - 4.5, ty - 1, tx - 5, ty + 2);
         ctx.moveTo(tx + 3, ty - 5);
-        ctx.lineTo(tx + 4, ty + 1);
+        ctx.quadraticCurveTo(tx + 3.5, ty - 2, tx + 4, ty + 1);
         ctx.moveTo(tx - 1, ty - 2);
-        ctx.lineTo(tx - 2, ty + 3);
+        ctx.quadraticCurveTo(tx - 1.5, ty + 0.5, tx - 2, ty + 3);
         ctx.stroke();
+        // Spanish moss patches — medium+ only
+        if (_tileDetail >= 1) {
+            ctx.fillStyle = 'rgba(120,130,90,0.2)';
+            ctx.beginPath();
+            ctx.ellipse(tx - 4, ty - 1, 1.5, 2, 0.3, 0, Math.PI * 2);
+            ctx.ellipse(tx + 3, ty - 2, 1, 1.5, -0.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
         // Second smaller tree
         if (r3 > 0.3) {
-            const tx2 = cx + (r3 - 0.2) * 10;
-            const ty2 = cy + (r4 - 0.4) * 4;
+            var tx2 = cx + (r3 - 0.2) * 10;
+            var ty2 = cy + (r4 - 0.4) * 4;
             ctx.fillStyle = '#1a3016';
             ctx.fillRect(tx2 - 1, ty2 - 4, 2, 7);
             ctx.beginPath();
@@ -210,47 +244,88 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
             ctx.fillStyle = '#1a3a16';
             ctx.fill();
         }
-        // Mushrooms
-        ctx.fillStyle = '#6a5a3a';
-        ctx.beginPath();
-        ctx.arc(cx + 6, cy + 3, 1.5, Math.PI, 0);
-        ctx.fill();
+        // Toadstool mushroom (detailed cap)
+        ctx.fillStyle = '#6a4a2a';
         ctx.fillRect(cx + 5.5, cy + 3, 1, 2);
+        ctx.fillStyle = '#8a5a3a';
+        ctx.beginPath();
+        ctx.arc(cx + 6, cy + 3, 2, Math.PI, 0);
+        ctx.fill();
+        // Mushroom spots — full only
+        if (_tileDetail >= 2) {
+            ctx.fillStyle = 'rgba(255,255,200,0.2)';
+            ctx.beginPath();
+            ctx.arc(cx + 5.5, cy + 2.5, 0.4, 0, Math.PI * 2);
+            ctx.arc(cx + 6.5, cy + 2.2, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        // Lily pad on water — medium+ only
+        if (_tileDetail >= 1 && r5 > 0.5) {
+            ctx.fillStyle = '#2a5a20';
+            ctx.beginPath();
+            ctx.ellipse(cx - 5, cy + 4, 2.5, 1.5, 0, 0.3, Math.PI * 1.9);
+            ctx.fill();
+        }
 
     } else if (biome === 'snow') {
         // Snow-capped pine cluster (2-3 trees)
-        const trees = r5 > 0.5 ? 3 : 2;
-        const positions = [
+        var trees = r5 > 0.5 ? 3 : 2;
+        var positions = [
             [cx + (r1 - 0.5) * 6, cy + (r2 - 0.5) * 3, 1],
             [cx + (r3 - 0.5) * 12, cy + (r4 - 0.3) * 5, 0.75],
             [cx + (r5 - 0.5) * 10, cy + (r1 * 0.5 - 0.2) * 4, 0.6],
         ];
-        for (let i = 0; i < trees; i++) {
-            const [tx, ty, s] = positions[i];
+        for (var i = 0; i < trees; i++) {
+            var tx = positions[i][0], ty = positions[i][1], s = positions[i][2];
+            // Trunk
             ctx.fillStyle = '#3a2a1a';
             ctx.fillRect(tx - 1 * s, ty - 2 * s, 2 * s, 6 * s);
-            // Pine triangle
+            // Pine triangle (dark face left, light face right)
             ctx.beginPath();
             ctx.moveTo(tx, ty - 12 * s);
             ctx.lineTo(tx + 6 * s, ty - 1 * s);
-            ctx.lineTo(tx - 6 * s, ty - 1 * s);
+            ctx.lineTo(tx, ty - 1 * s);
             ctx.closePath();
             ctx.fillStyle = '#1a4a2a';
             ctx.fill();
-            // Snow cap
             ctx.beginPath();
             ctx.moveTo(tx, ty - 12 * s);
-            ctx.lineTo(tx + 3 * s, ty - 8 * s);
-            ctx.lineTo(tx - 3 * s, ty - 8 * s);
+            ctx.lineTo(tx - 6 * s, ty - 1 * s);
+            ctx.lineTo(tx, ty - 1 * s);
+            ctx.closePath();
+            ctx.fillStyle = '#14401e';
+            ctx.fill();
+            // Snow cap (wider, dripping edge)
+            ctx.beginPath();
+            ctx.moveTo(tx, ty - 12 * s);
+            ctx.lineTo(tx + 4 * s, ty - 7 * s);
+            ctx.lineTo(tx + 3 * s, ty - 7.5 * s);
+            ctx.lineTo(tx - 3 * s, ty - 7 * s);
+            ctx.lineTo(tx - 4 * s, ty - 7.5 * s);
             ctx.closePath();
             ctx.fillStyle = '#e0e8f0';
             ctx.fill();
+            // Snow ledge on branches — medium+ only
+            if (_tileDetail >= 1 && s >= 0.75) {
+                ctx.fillStyle = 'rgba(230,240,250,0.4)';
+                ctx.beginPath();
+                ctx.ellipse(tx + 3 * s, ty - 4 * s, 2.5 * s, 0.8 * s, 0.1, 0, Math.PI * 2);
+                ctx.ellipse(tx - 2 * s, ty - 5.5 * s, 2 * s, 0.6 * s, -0.1, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
-        // Snow mound — medium+ only
+        // Snow mound at base — medium+ only
         if (_tileDetail >= 1) {
             ctx.fillStyle = 'rgba(230,240,250,0.15)';
             ctx.beginPath();
             ctx.ellipse(cx + 3, cy + 3, 5, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        // Frost sparkle — full only
+        if (_tileDetail >= 2 && r3 > 0.5) {
+            ctx.fillStyle = 'rgba(200,220,255,0.3)';
+            ctx.beginPath();
+            ctx.arc(cx - 3, cy - 2, 0.7, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -531,18 +606,26 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
 
     } else if (biome === 'mountain') {
         // Mountain: alpine pines (shorter, wind-bent) + boulder clusters
-        const tx = cx + (r1 - 0.5) * 6;
-        const ty = cy + (r2 - 0.5) * 3;
+        var tx = cx + (r1 - 0.5) * 6;
+        var ty = cy + (r2 - 0.5) * 3;
         // Wind-bent alpine pine (main)
         ctx.fillStyle = '#3a2a18';
         ctx.fillRect(tx - 1, ty - 3, 2, 7);
-        // Asymmetric canopy (wind-bent right)
+        // Asymmetric canopy — wind-bent right (light face)
         ctx.beginPath();
         ctx.moveTo(tx - 1, ty - 10);
         ctx.lineTo(tx + 6, ty - 2);
-        ctx.lineTo(tx - 5, ty - 2);
+        ctx.lineTo(tx, ty - 2);
         ctx.closePath();
         ctx.fillStyle = '#1a4028';
+        ctx.fill();
+        // Dark face (left, shadow)
+        ctx.beginPath();
+        ctx.moveTo(tx - 1, ty - 10);
+        ctx.lineTo(tx - 5, ty - 2);
+        ctx.lineTo(tx, ty - 2);
+        ctx.closePath();
+        ctx.fillStyle = '#143020';
         ctx.fill();
         // Smaller pine
         if (r3 > 0.35) {
