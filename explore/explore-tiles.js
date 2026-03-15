@@ -721,30 +721,97 @@ function drawLavaDecoration(ctx, cx, cy, timestamp) {
 
 function drawRuinsDecoration(ctx, cx, cy, col, row) {
     _drawDecorationShadow(ctx, cx, cy, 9, 3.5);
-    const r1 = tileRand(col, row, 30);
-    // Broken pillars
-    for (let i = 0; i < 2; i++) {
-        const rx = cx + (tileRand(col, row, 31 + i) - 0.5) * 12;
-        const ry = cy + (tileRand(col, row, 33 + i) - 0.5) * 6;
-        const h = 4 + tileRand(col, row, 35 + i) * 5;
+    var r1 = tileRand(col, row, 30);
+    var r2 = tileRand(col, row, 31);
+
+    // Broken pillars (2, with depth shading)
+    for (var i = 0; i < 2; i++) {
+        var rx = cx + (tileRand(col, row, 31 + i) - 0.5) * 12;
+        var ry = cy + (tileRand(col, row, 33 + i) - 0.5) * 6;
+        var h = 5 + tileRand(col, row, 35 + i) * 6;
+
+        // Pillar body
         ctx.fillStyle = '#7a6a5a';
         ctx.fillRect(rx - 2, ry - h, 4, h);
-        // Broken top
+        // Shadow side (left face darker)
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(rx - 2, ry - h, 1.5, h);
+
+        // Broken jagged top
         ctx.fillStyle = '#8a7a6a';
         ctx.beginPath();
         ctx.moveTo(rx - 3, ry - h);
-        ctx.lineTo(rx + 1, ry - h - 2);
+        ctx.lineTo(rx - 1, ry - h - 3);
+        ctx.lineTo(rx + 1, ry - h - 1);
+        ctx.lineTo(rx + 3, ry - h - 2);
         ctx.lineTo(rx + 3, ry - h);
         ctx.closePath();
         ctx.fill();
+
+        // Cracks on pillar
+        ctx.strokeStyle = 'rgba(50,40,30,0.25)';
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        ctx.moveTo(rx - 0.5, ry - h * 0.7);
+        ctx.lineTo(rx + 1, ry - h * 0.4);
+        ctx.lineTo(rx - 0.5, ry - h * 0.2);
+        ctx.stroke();
+
+        // Vine growing on pillar (on first pillar only)
+        if (i === 0) {
+            ctx.strokeStyle = '#3a5a2a';
+            ctx.lineWidth = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(rx + 2, ry);
+            ctx.quadraticCurveTo(rx + 3, ry - h * 0.4, rx + 1.5, ry - h * 0.7);
+            ctx.stroke();
+            // Vine leaves
+            ctx.fillStyle = '#4a6a30';
+            ctx.beginPath();
+            ctx.arc(rx + 2.5, ry - h * 0.25, 1.2, 0, Math.PI * 2);
+            ctx.arc(rx + 2, ry - h * 0.5, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
-    // Rubble
+
+    // Moss patch at base
+    ctx.fillStyle = 'rgba(60,90,40,0.15)';
+    ctx.beginPath();
+    ctx.ellipse(cx - 1, cy + 2, 5, 2, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Rubble (more varied stones)
     ctx.fillStyle = '#6a5a4a';
     ctx.beginPath();
     ctx.arc(cx + 4, cy + 2, 1.5, 0, Math.PI * 2);
-    ctx.arc(cx - 3, cy + 3, 1, 0, Math.PI * 2);
+    ctx.arc(cx - 3, cy + 3, 1.2, 0, Math.PI * 2);
     ctx.arc(cx + 7, cy + 1, 0.8, 0, Math.PI * 2);
     ctx.fill();
+    // Lighter rubble pieces
+    ctx.fillStyle = '#7a6a58';
+    ctx.beginPath();
+    ctx.arc(cx - 6, cy + 1, 0.9, 0, Math.PI * 2);
+    ctx.arc(cx + 2, cy + 3.5, 0.7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Fallen stone block (rectangular rubble)
+    if (r2 > 0.4) {
+        var bx = cx + (r1 - 0.5) * 8;
+        var by = cy + (r2 - 0.3) * 3;
+        ctx.fillStyle = '#6a5a4a';
+        ctx.save();
+        ctx.translate(bx, by);
+        ctx.rotate((r1 - 0.5) * 0.4);
+        ctx.fillRect(-2.5, -1.5, 5, 3);
+        ctx.restore();
+        // Crack on block
+        ctx.strokeStyle = 'rgba(40,30,20,0.2)';
+        ctx.lineWidth = 0.3;
+        ctx.beginPath();
+        ctx.moveTo(bx - 1, by - 0.5);
+        ctx.lineTo(bx + 1, by + 0.5);
+        ctx.stroke();
+    }
 }
 
 function drawBonesDecoration(ctx, cx, cy, col, row, biome) {
@@ -848,25 +915,66 @@ function drawBonesDecoration(ctx, cx, cy, col, row, biome) {
 }
 
 function drawPathDecoration(ctx, cx, cy, col, row) {
-    const r1 = tileRand(col, row, 50);
-    ctx.strokeStyle = 'rgba(180,160,120,0.3)';
-    ctx.lineWidth = 2;
-    // Two parallel worn lines
+    var r1 = tileRand(col, row, 50);
+    var r2 = tileRand(col, row, 51);
+    var yOff = r1 * 2;
+
+    // Dirt patch base (slightly different color from surrounding)
+    ctx.fillStyle = 'rgba(140,120,80,0.06)';
     ctx.beginPath();
-    ctx.moveTo(cx - 12, cy - 1 + r1 * 2);
-    ctx.lineTo(cx + 12, cy - 1 + r1 * 2);
+    ctx.ellipse(cx, cy + 1 + yOff, 12, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cart wheel tracks (two parallel worn ruts)
+    ctx.strokeStyle = 'rgba(160,140,100,0.25)';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(cx - 12, cy - 1 + yOff);
+    ctx.lineTo(cx + 12, cy - 1 + yOff);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(cx - 12, cy + 3 + r1 * 2);
-    ctx.lineTo(cx + 12, cy + 3 + r1 * 2);
+    ctx.moveTo(cx - 12, cy + 3 + yOff);
+    ctx.lineTo(cx + 12, cy + 3 + yOff);
     ctx.stroke();
-    // Small pebbles along path
-    ctx.fillStyle = 'rgba(160,140,100,0.2)';
-    for (let i = 0; i < 3; i++) {
-        const px = cx + (tileRand(col, row, 52 + i) - 0.5) * 18;
-        const py = cy + r1 * 2 + 1;
+
+    // Inner track shadow (wheel depression)
+    ctx.strokeStyle = 'rgba(100,80,50,0.1)';
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(cx - 10, cy - 0.5 + yOff);
+    ctx.lineTo(cx + 10, cy - 0.5 + yOff);
+    ctx.moveTo(cx - 10, cy + 3.5 + yOff);
+    ctx.lineTo(cx + 10, cy + 3.5 + yOff);
+    ctx.stroke();
+
+    // Embedded cobblestones (flat oval shapes along path)
+    ctx.fillStyle = 'rgba(130,120,100,0.15)';
+    for (var ci = 0; ci < 3; ci++) {
+        var cx2 = cx + (tileRand(col, row, 55 + ci) - 0.5) * 16;
+        var cy2 = cy + yOff + (tileRand(col, row, 58 + ci) - 0.5) * 3;
+        var cSize = 1.2 + tileRand(col, row, 61 + ci) * 0.8;
         ctx.beginPath();
-        ctx.arc(px, py, 0.8, 0, Math.PI * 2);
+        ctx.ellipse(cx2, cy2, cSize, cSize * 0.6, tileRand(col, row, 64 + ci) * 1, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Pebbles scattered along edges
+    ctx.fillStyle = 'rgba(160,140,100,0.18)';
+    for (var pi = 0; pi < 4; pi++) {
+        var px = cx + (tileRand(col, row, 52 + pi) - 0.5) * 20;
+        var py = cy + yOff + (pi % 2 === 0 ? -2.5 : 4.5);
+        ctx.beginPath();
+        ctx.arc(px, py, 0.6 + tileRand(col, row, 67 + pi) * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Footprint impression (occasionally)
+    if (r2 > 0.55) {
+        var fpx = cx + (r2 - 0.5) * 8;
+        var fpy = cy + 1 + yOff;
+        ctx.fillStyle = 'rgba(100,85,55,0.08)';
+        ctx.beginPath();
+        ctx.ellipse(fpx, fpy, 1.5, 0.8, 0.2, 0, Math.PI * 2);
         ctx.fill();
     }
 }
@@ -1207,36 +1315,94 @@ function drawVolcanicDecoration(ctx, cx, cy, col, row) {
 }
 
 function drawGrassDecoration(ctx, cx, cy, col, row, biome) {
-    const grassColor = biome === 'snow' ? '#8a9a8a' : biome === 'swamp' ? '#3a5a2a' : '#4a7a3a';
-    ctx.strokeStyle = grassColor;
-    ctx.lineWidth = 0.7;
-    // Grass tufts (4-5)
-    for (let i = 0; i < 4; i++) {
-        const gx = cx + (tileRand(col, row, 90 + i) - 0.5) * 14;
-        const gy = cy + (tileRand(col, row, 93 + i) - 0.5) * 8;
+    var isDead = biome === 'graveyard' || biome === 'ruins';
+    var isSwamp = biome === 'swamp';
+    var grassColor = isDead ? '#6a5a3a' : isSwamp ? '#3a5a2a' : biome === 'snow' ? '#8a9a8a' : '#4a7a3a';
+    var grassTip = isDead ? '#5a4a28' : isSwamp ? '#2a4a1a' : biome === 'snow' ? '#7a8a7a' : '#5a8a4a';
+
+    // Grass tufts (5, with varied heights and slight curve)
+    var tufts = isDead ? 3 : 5;
+    for (var i = 0; i < tufts; i++) {
+        var gx = cx + (tileRand(col, row, 90 + i) - 0.5) * 14;
+        var gy = cy + (tileRand(col, row, 93 + i) - 0.5) * 8;
+        var h = isDead ? 2.5 + tileRand(col, row, 100 + i) * 1.5 : 3 + tileRand(col, row, 100 + i) * 2;
+        var lean = (tileRand(col, row, 105 + i) - 0.5) * 1.5;
+
+        ctx.strokeStyle = grassColor;
+        ctx.lineWidth = 0.7;
         ctx.beginPath();
         ctx.moveTo(gx, gy);
-        ctx.lineTo(gx - 2, gy - 4);
+        ctx.lineTo(gx - 2 + lean, gy - h);
+        ctx.stroke();
+        ctx.strokeStyle = grassTip;
+        ctx.beginPath();
         ctx.moveTo(gx, gy);
-        ctx.lineTo(gx + 1, gy - 3.5);
+        ctx.lineTo(gx + 1 + lean * 0.5, gy - h * 0.9);
         ctx.moveTo(gx + 0.5, gy);
-        ctx.lineTo(gx + 2.5, gy - 3);
+        ctx.lineTo(gx + 2.5 + lean * 0.3, gy - h * 0.75);
         ctx.stroke();
     }
+
+    // Dead grass: dry patches and fallen blades
+    if (isDead) {
+        ctx.fillStyle = 'rgba(90,70,40,0.08)';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 1, 5, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        return; // no flowers or bushes
+    }
+
+    // Swamp: slimy sheen on grass base
+    if (isSwamp) {
+        ctx.fillStyle = 'rgba(50,80,30,0.06)';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 1, 6, 2.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
     // Small bush in forest/plains
     if ((biome === 'forest' || biome === 'plains') && tileRand(col, row, 97) > 0.5) {
         _drawBush(ctx, cx + (tileRand(col, row, 98) - 0.5) * 10, cy + 1, 2.5,
             biome === 'forest' ? '#1a3a10' : '#3a6a20');
     }
-    // Flowers in plains
-    if (biome === 'plains' && tileRand(col, row, 99) > 0.4) {
-        const colors = ['#d44a60', '#c87a30', '#8a5aaa', '#4a8ac0'];
-        for (let i = 0; i < 2; i++) {
-            ctx.fillStyle = colors[Math.floor(tileRand(col, row, 110 + i) * colors.length)];
-            const fx = cx + (tileRand(col, row, 112 + i) - 0.5) * 12;
-            const fy = cy + (tileRand(col, row, 114 + i) - 0.5) * 6;
+
+    // Wildflowers in plains (3-4 with petals instead of just dots)
+    if (biome === 'plains' && tileRand(col, row, 99) > 0.35) {
+        var flowerColors = ['#d44a60', '#c87a30', '#8a5aaa', '#4a8ac0', '#daa520', '#e07080'];
+        var flowerCount = 2 + (tileRand(col, row, 116) > 0.5 ? 1 : 0);
+        for (var fi = 0; fi < flowerCount; fi++) {
+            var fc = flowerColors[Math.floor(tileRand(col, row, 110 + fi) * flowerColors.length)];
+            var fx = cx + (tileRand(col, row, 112 + fi) - 0.5) * 14;
+            var fy = cy + (tileRand(col, row, 114 + fi) - 0.5) * 6;
+            // Stem
+            ctx.strokeStyle = '#3a6a20';
+            ctx.lineWidth = 0.4;
             ctx.beginPath();
-            ctx.arc(fx, fy, 1.2, 0, Math.PI * 2);
+            ctx.moveTo(fx, fy + 2);
+            ctx.lineTo(fx, fy);
+            ctx.stroke();
+            // Petals (4-point star)
+            ctx.fillStyle = fc;
+            ctx.beginPath();
+            ctx.arc(fx, fy, 1.3, 0, Math.PI * 2);
+            ctx.fill();
+            // Center dot
+            ctx.fillStyle = '#daa520';
+            ctx.beginPath();
+            ctx.arc(fx, fy, 0.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Clover patches in forest (small 3-leaf shapes)
+    if (biome === 'forest' && tileRand(col, row, 118) > 0.6) {
+        var cx2 = cx + (tileRand(col, row, 119) - 0.5) * 10;
+        var cy2 = cy + (tileRand(col, row, 120) - 0.5) * 5;
+        ctx.fillStyle = '#2a5a18';
+        for (var ci = 0; ci < 3; ci++) {
+            var ca = ci * Math.PI * 2 / 3 - Math.PI / 2;
+            ctx.beginPath();
+            ctx.arc(cx2 + Math.cos(ca) * 1.2, cy2 + Math.sin(ca) * 1.2, 1, 0, Math.PI * 2);
             ctx.fill();
         }
     }
