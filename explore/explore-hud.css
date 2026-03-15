@@ -76,12 +76,12 @@
 
 /* Camp/Rest button (circular like ?) */
 .btn-camp-rest {
-    width: 34px; height: 34px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     background: rgba(68, 170, 100, 0.12);
     border: 1px solid rgba(68, 170, 100, 0.3);
     color: #d4c8b0; font-size: 16px;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; min-width: 34px;
+    flex-shrink: 0; min-width: 44px;
     transition: background 200ms ease, border-color 300ms ease, box-shadow 300ms ease;
 }
 .btn-camp-rest:active { background: rgba(68, 170, 100, 0.25); transform: scale(0.94); }
@@ -102,8 +102,8 @@
 /* Travel Pace toggle */
 .pace-toggle {
     padding: 4px 8px;
-    min-height: 40px;
-    min-width: 40px;
+    min-height: 44px;
+    min-width: 44px;
     border: 1px solid rgba(196,149,58,0.25);
     background: rgba(196,149,58,0.06);
     color: var(--v-text-dim, #a09484);
@@ -184,7 +184,7 @@
     box-shadow: 0 0 4px rgba(106, 90, 205, 0.4);
 }
 .xp-label {
-    font-size: 10px;
+    font-size: 12px;
     color: #9370db;
     font-weight: 600;
     white-space: nowrap;

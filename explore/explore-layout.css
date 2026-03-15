@@ -74,6 +74,10 @@ body {
 /* ═══════════════════════════════════════════
    HUD (top bar)
    ═══════════════════════════════════════════ */
+:root {
+    --va-bottom-offset: 112px;
+}
+
 #hud {
     display: flex;
     align-items: center;
@@ -152,6 +156,7 @@ body {
     margin-left: auto;
     display: flex;
     gap: 8px;
+    padding-right: 6px;
 }
 .reward-badge {
     font-size: 12px;

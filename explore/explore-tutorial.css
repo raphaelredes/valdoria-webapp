@@ -106,13 +106,13 @@
 
 /* ── Help button (?) in bottom bar ── */
 .btn-help-tutorial {
-    width: 34px; height: 34px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     background: rgba(196,149,58,0.12);
     border: 1px solid rgba(196,149,58,0.3);
     color: #c4953a; font-size: 16px; font-weight: 700;
     font-family: var(--v-font, serif);
     cursor: pointer; display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; min-width: 34px;
+    flex-shrink: 0; min-width: 44px;
     transition: background 200ms ease;
 }
 .btn-help-tutorial:active {
