@@ -22,7 +22,7 @@ function showExitRiskAssessment() {
     // HP bar
     const hpColor = hpPct > 60 ? '#4a8' : hpPct > 25 ? '#dca028' : '#c44';
     hpRow.innerHTML = `<span>HP</span>` +
-        `<div class="exit-hp-bar"><div class="exit-hp-fill" style="width:${Math.max(2, hpPct)}%;background:${hpColor}"></div></div>` +
+        `<div class="exit-hp-bar"><div class="exit-hp-fill" style="transform:scaleX(${Math.max(0.02, hpPct/100)});background:${hpColor}"></div></div>` +
         `<span>${currentHP}/${maxHP}</span>`;
 
     // Info: distance + risk + estimated encounters
@@ -694,7 +694,7 @@ function showLowHPOverlay() {
 
     // HP bar (red tint)
     hpRow.innerHTML = `<span>HP</span>` +
-        `<div class="exit-hp-bar"><div class="exit-hp-fill" style="width:${Math.max(2, hpPct)}%;background:#c44"></div></div>` +
+        `<div class="exit-hp-bar"><div class="exit-hp-fill" style="transform:scaleX(${Math.max(0.02, hpPct/100)});background:#c44"></div></div>` +
         `<span style="color:#c44">${currentHP}/${maxHP}</span>`;
 
     // Build options
@@ -1241,7 +1241,7 @@ function _renderReturnHP(el) {
     const pct = (hp / max) * 100;
     const color = pct > 60 ? '#4a8' : pct > 25 ? '#dca028' : '#c44';
     el.innerHTML = `<span>HP</span>` +
-        `<div class="exit-hp-bar"><div class="exit-hp-fill" style="width:${Math.max(2, pct)}%;background:${color}"></div></div>` +
+        `<div class="exit-hp-bar"><div class="exit-hp-fill" style="transform:scaleX(${Math.max(0.02, pct/100)});background:${color}"></div></div>` +
         `<span>${hp}/${max}</span>`;
 }
 

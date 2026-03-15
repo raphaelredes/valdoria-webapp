@@ -27,12 +27,17 @@ function renderItemsTab(c) {
 
     let html = '';
 
-    // Search bar + sort
+    // Search bar + view toggle + sort
+    const _viewIcon = viewMode === 'compact' ? vi('listView', 14) : vi('gridView', 14);
+    const _viewTitle = viewMode === 'compact' ? 'Modo detalhado' : 'Modo compacto';
     html += `<div class="search-bar">
             <div class="search-wrap">
                 <input type="text" placeholder="Buscar item..." value="${esc(searchQuery)}"
                     oninput="onSearch(this.value)" id="searchInput">
                 <button class="search-clear ${searchQuery ? 'visible' : ''}" onclick="clearSearch()" id="searchClear">&times;</button>
+            </div>
+            <div class="view-toggle-btn" onclick="toggleViewMode()" title="${_viewTitle}">
+                ${_viewIcon}
             </div>
             <div class="sort-btn ${selectionMode ? 'active' : ''}" onclick="toggleSelectionMode()" title="Modo seleção">
                 ${selectionMode ? vi_f('check', 14) : vi('check', 14)}
@@ -68,8 +73,8 @@ function renderItemsTab(c) {
     // Potion counter card (basic potions, separate from inventory)
     if (localPotions > 0 && (activeFilter === 'all' || activeFilter === 'use')
         && (!searchQuery || 'poção de cura'.includes(searchQuery))) {
-        html += `<div style="margin-bottom:10px;"><div class="item-grid">
-                <div class="item-card rarity-common fade-in" onclick="showPotionConfirm()" style="grid-column: span 2;
+        html += `<div style="margin-bottom:10px;"><div class="item-grid ${viewMode === 'compact' ? 'compact-grid' : ''}">
+                <div class="item-card rarity-common fade-in" onclick="showPotionConfirm()" style="grid-column: span ${viewMode === 'compact' ? 4 : 2};
                     display:flex;align-items:center;gap:12px;padding:12px;">
                     <span style="font-size:clamp(22px,6vw,28px);">${vi('flask', 28)}</span>
                     <div style="flex:1;">
@@ -93,7 +98,8 @@ function renderItemsTab(c) {
         const emptyMsg = searchQuery ? 'Nenhum item encontrado para a busca.' : 'Nenhum item encontrado.';
         html += `<div class="empty-state"><div class="icon">${vi('bag', 32)}</div><p>${emptyMsg}</p></div>`;
     } else if (items.length) {
-        html += '<div class="item-grid">';
+        const isCompact = viewMode === 'compact';
+        html += '<div class="item-grid' + (isCompact ? ' compact-grid' : '') + '">';
         items.forEach(inv => {
             const it = getItemData(inv.n);
             const rarity = it.r || 'common';
@@ -110,10 +116,11 @@ function renderItemsTab(c) {
                     ${selectionMode ? `<div class="sel-check ${isSelected ? 'active' : ''}">${isSelected ? vi_f('check', 12) : ''}</div>` : ''}
                     <div class="ic-badges">
                         ${inv.q > 1 ? `<span class="ic-qty">x${inv.q}</span>` : ''}
-                        ${equipped ? '<span class="ic-eq-badge">Equipado</span>' : ''}
+                        ${equipped ? (isCompact ? '<span class="ic-eq-badge">E</span>' : '<span class="ic-eq-badge">Equipado</span>') : ''}
                         ${setId ? `<span class="ic-set-badge">${getSetIcon(setId)}</span>` : ''}
                     </div>
                     ${!selectionMode && isFav(inv.n) ? `<span class="ic-fav">${vi_f('star', 14)}</span>` : ''}
+                    ${isNewItem(inv.n) ? '<span class="ic-new-dot"></span>' : ''}
                     <div class="ic-emoji">${it.e || '📦'}</div>
                     <div class="ic-name v-rarity-${rarity}">${inv.n}</div>
                     <div class="ic-meta">${getItemShortDesc(inv.n, it)}</div>
@@ -570,7 +577,7 @@ function renderAlliesTab(c) {
             const mpPct = a.mmp > 0 ? Math.round((a.mp / a.mmp) * 100) : 0;
             mpBar = `<div class="ally-bar-row">
                 <span class="ally-bar-label">${a.res || '💧'} ${a.mp}/${a.mmp}</span>
-                <div class="ally-bar-track"><div class="ally-bar-fill ally-bar-mp" style="width:${mpPct}%"></div></div>
+                <div class="ally-bar-track"><div class="ally-bar-fill ally-bar-mp" style="transform:scaleX(${mpPct/100})"></div></div>
             </div>`;
         }
         const lvlBadge = a.l > 0 ? `<span class="ally-lvl-badge">Lv${a.l}</span>` : '';
@@ -588,7 +595,7 @@ function renderAlliesTab(c) {
                 <div class="ally-bars">
                     <div class="ally-bar-row">
                         <span class="ally-bar-label">❤️ ${a.hp}/${a.mhp}</span>
-                        <div class="ally-bar-track"><div class="ally-bar-fill ${hpCls}" style="width:${hpPct}%"></div></div>
+                        <div class="ally-bar-track"><div class="ally-bar-fill ${hpCls}" style="transform:scaleX(${hpPct/100})"></div></div>
                     </div>
                     ${mpBar}
                 </div>

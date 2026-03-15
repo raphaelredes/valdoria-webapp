@@ -497,7 +497,7 @@ function setupHUD() {
 function updateHP(current, max) {
     const pct = Math.max(0, Math.min(100, (current / max) * 100));
     const fill = document.getElementById('hp-fill');
-    fill.style.width = pct + '%';
+    fill.style.transform = 'scaleX(' + (pct / 100) + ')';
     fill.classList.remove('hp-high', 'hp-mid', 'hp-low');
     fill.classList.add(pct > 60 ? 'hp-high' : pct > 25 ? 'hp-mid' : 'hp-low');
     document.getElementById('hp-text').textContent = current + '/' + max;
@@ -516,7 +516,7 @@ function updateXPBar() {
     var range = nxp - prevXp;
     var progress = range > 0 ? Math.min(100, ((xp - prevXp) / range) * 100) : 0;
 
-    fill.style.width = progress + '%';
+    fill.style.transform = 'scaleX(' + (progress / 100) + ')';
     label.textContent = 'Nv ' + (S.charData.lv || 1);
     row.style.display = 'flex';
 }

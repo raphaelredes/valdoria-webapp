@@ -32,7 +32,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
 
         detailsHtml += `<div class="bar-container">
             <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
-            <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
+            <div class="bar-track"><div class="bar-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
         </div>`;
         detailsHtml += `<div class="stats-row">
             <span class="stat-item">🛡️ CA ${e.ac}</span>
@@ -56,13 +56,13 @@ function renderEntity(e, type, idx, isActiveTurn) {
         // Ally expanded — full status panel
         detailsHtml += `<div class="bar-container">
             <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
-            <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
+            <div class="bar-track"><div class="bar-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
         </div>`;
         if (e.mmp > 0) {
             const mpPct = e.mmp > 0 ? (e.mp / e.mmp) : 0;
             detailsHtml += `<div class="bar-container">
                 <div class="bar-label"><span>💧 MP</span><span>${e.mp}/${e.mmp}</span></div>
-                <div class="bar-track"><div class="bar-fill mp-bar" style="width:${mpPct * 100}%"></div></div>
+                <div class="bar-track"><div class="bar-fill mp-bar" style="transform:scaleX(${mpPct})"></div></div>
             </div>`;
         }
         const allyStats = [];
@@ -107,7 +107,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
             <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
             <span class="compact-name">${escHtml(e.n)}</span>
             ${acBadge}
-            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="width:${pct * 100}%"></div></div>
+            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
             <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
             ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
             ${posBadge}
@@ -156,7 +156,7 @@ function renderPlayerCard(p, isCompact = false) {
             </div>
             <div class="bar-row">
                 <span class="bar-icon">${resIcon}</span>
-                <div class="bar-track"><div class="bar-fill ${resClass}${resLowCls}" style="width:${mpPct * 100}%"></div></div>
+                <div class="bar-track"><div class="bar-fill ${resClass}${resLowCls}" style="transform:scaleX(${mpPct})"></div></div>
                 <span class="bar-val">${p.mp}/${p.mmp}</span>
             </div>
             ${badgesHtml}
@@ -535,7 +535,7 @@ function showTargetPicker(enemies, actionType, skillId) {
         html += `<div class="target-item" data-target="${i}">
             <div><span>${e.ico || '👹'}</span> <b>${escHtml(e.n)}</b>${previewHtml}</div>
             <div class="skill-meta">${e.hp}/${e.mhp} HP (${pct}%)</div>
-            <div class="target-hp-bar"><div class="target-hp-fill" style="width:${pct}%;background:${hpColor}"></div></div>
+            <div class="target-hp-bar"><div class="target-hp-fill" style="transform:scaleX(${pct/100});background:${hpColor}"></div></div>
         </div>`;
     });
     html += '<div class="skill-close" id="targetClose">Cancelar</div>';

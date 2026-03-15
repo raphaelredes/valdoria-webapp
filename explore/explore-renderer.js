@@ -486,7 +486,13 @@ _staticDirty = false;
             }
         }
 
-    drawFogOverlay(_ctx, _canvasLogicalW, _canvasLogicalH, S.fogState);
+    // Fog drift — subtle sine-wave translation for living atmosphere
+    var _fogDriftX = Math.sin((timestamp || 0) * 0.0004) * 2.0;
+    var _fogDriftY = Math.cos((timestamp || 0) * 0.0003) * 1.5;
+    _ctx.save();
+    _ctx.translate(_fogDriftX, _fogDriftY);
+    drawFogOverlay(_ctx, _canvasLogicalW + 4, _canvasLogicalH + 4, S.fogState);
+    _ctx.restore();
 
     // 10.5 Fog reveal golden flash (on top of fog for dramatic effect)
     drawFogRevealFlash(_ctx, timestamp);
@@ -507,6 +513,58 @@ _staticDirty = false;
     if (isMoving()) {
         _smoothCameraFollow();
     }
+}
+
+// Edge-of-map biome haze — tinted gradient at canvas borders (Battle Brothers style)
+// Baked into static canvas: zero runtime cost
+function _drawEdgeHaze(ctx, w, h) {
+    var biome = S.biome || 'forest';
+    // Biome-tinted haze colors (warm, matching medieval palette)
+    var hazeColors = {
+        forest:    'rgba(30, 50, 25, ',   // deep green mist
+        desert:    'rgba(80, 65, 35, ',   // sandy haze
+        cave:      'rgba(15, 12, 20, ',   // dark purple-black
+        graveyard: 'rgba(25, 20, 30, ',   // ghostly violet-gray
+        snow:      'rgba(60, 65, 75, ',   // cold white-blue
+        swamp:     'rgba(30, 45, 25, ',   // murky green
+        mountain:  'rgba(40, 35, 45, ',   // stone gray
+        plains:    'rgba(45, 55, 30, ',   // warm green-gold
+        ruins:     'rgba(40, 30, 25, ',   // dusty brown
+    };
+    var base = hazeColors[biome] || hazeColors.forest;
+    var depth = Math.round(Math.min(w, h) * 0.12); // ~47px on 390px width
+
+    // Top edge
+    var gT = ctx.createLinearGradient(0, 0, 0, depth);
+    gT.addColorStop(0, base + '0.35)');
+    gT.addColorStop(0.5, base + '0.12)');
+    gT.addColorStop(1, base + '0)');
+    ctx.fillStyle = gT;
+    ctx.fillRect(0, 0, w, depth);
+
+    // Bottom edge
+    var gB = ctx.createLinearGradient(0, h, 0, h - depth);
+    gB.addColorStop(0, base + '0.35)');
+    gB.addColorStop(0.5, base + '0.12)');
+    gB.addColorStop(1, base + '0)');
+    ctx.fillStyle = gB;
+    ctx.fillRect(0, h - depth, w, depth);
+
+    // Left edge
+    var gL = ctx.createLinearGradient(0, 0, depth, 0);
+    gL.addColorStop(0, base + '0.25)');
+    gL.addColorStop(0.5, base + '0.08)');
+    gL.addColorStop(1, base + '0)');
+    ctx.fillStyle = gL;
+    ctx.fillRect(0, 0, depth, h);
+
+    // Right edge
+    var gR = ctx.createLinearGradient(w, 0, w - depth, 0);
+    gR.addColorStop(0, base + '0.25)');
+    gR.addColorStop(0.5, base + '0.08)');
+    gR.addColorStop(1, base + '0)');
+    ctx.fillStyle = gR;
+    ctx.fillRect(w - depth, 0, depth, h);
 }
 
 // Atmospheric vignette — subtle darkening at canvas edges
@@ -612,6 +670,9 @@ function renderStaticTiles(timestamp) {
             _staticCtx.fill();
         }
     }
+
+    // Fourth pass: edge-of-map biome haze (tinted gradient at borders)
+    _drawEdgeHaze(_staticCtx, _canvasLogicalW, _canvasLogicalH);
 }
 
 // Cast shadow — tall tiles project shadow onto SE neighbor (light from NW)

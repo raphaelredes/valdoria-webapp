@@ -51,7 +51,7 @@
     animation: hitStopFreeze 120ms step-end;
 }
 @keyframes hitStopFreeze {
-    0%, 100% { filter: contrast(1.3) brightness(1.1); }
+    0%, 100% { opacity: 0.85; }
 }
 
 /* ─── VIEWPORT DAMAGE FLASH ─── */

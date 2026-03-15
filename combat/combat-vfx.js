@@ -15,7 +15,14 @@ function _playCinematicResult(result, actionType) {
     if (!hasRoll || isNonCombatAction || oldPhase !== 'active') {
         currentState = result;
         if (result.phase === 'ended') { showCombatEnded(); }
-        else if (isResolution) { renderResolution(result); }
+        else if (isResolution) {
+            // Defeat with death save history: show cinematic replay before resolution
+            if (result.phase === 'defeat' && result.ds_history && result.ds_history.length > 0) {
+                renderDeathSaveReplay(result, function() { renderResolution(result); });
+            } else {
+                renderResolution(result);
+            }
+        }
         else { renderArena(result); }
         return;
     }
@@ -136,7 +143,13 @@ function _playCinematicResult(result, actionType) {
             _cinematicInProgress = false;
             currentState = result;
             if (result.phase === 'ended') { showCombatEnded(); }
-            else if (isResolution) { renderResolution(result); }
+            else if (isResolution) {
+                if (result.phase === 'defeat' && result.ds_history && result.ds_history.length > 0) {
+                    renderDeathSaveReplay(result, function() { renderResolution(result); });
+                } else {
+                    renderResolution(result);
+                }
+            }
             else { renderArena(result); }
         }, totalDelay);
     }, 350);
@@ -369,10 +382,10 @@ function _animateHpBars(state) {
                     track.insertBefore(ghost, fillEl);
                 }
                 ghost.style.transition = 'none';
-                ghost.style.width = oldPct + '%';
+                ghost.style.transform = 'scaleX(' + (oldPct / 100) + ')';
                 requestAnimationFrame(() => {
-                    ghost.style.transition = 'width 1.2s ease-in 0.3s';
-                    ghost.style.width = newPct + '%';
+                    ghost.style.transition = 'transform 1.2s ease-in 0.3s';
+                    ghost.style.transform = 'scaleX(' + (newPct / 100) + ')';
                 });
             }
         }
@@ -384,11 +397,11 @@ function _animateHpBars(state) {
         }
 
         fillEl.style.transition = 'none';
-        fillEl.style.width = oldPct + '%';
+        fillEl.style.transform = 'scaleX(' + (oldPct / 100) + ')';
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                fillEl.style.transition = 'width 0.65s ease-out';
-                fillEl.style.width = newPct + '%';
+                fillEl.style.transition = 'transform 0.65s ease-out';
+                fillEl.style.transform = 'scaleX(' + (newPct / 100) + ')';
             });
         });
     });

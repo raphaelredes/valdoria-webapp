@@ -129,13 +129,14 @@
     display: flex; flex-direction: column; align-items: center;
     background: radial-gradient(circle at center, rgba(50,42,35,0.92) 40%, rgba(42,36,32,0.88));
     /* backdrop-filter removed for mobile performance */
-    border: 2px solid rgba(196,149,58,0.45);
+    border: 2px solid rgba(196,149,58,0.55);
     border-radius: 50%;
     width: 56px; height: 56px;
     justify-content: center;
     pointer-events: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 14px rgba(196,149,58,0.18), inset 0 0 12px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 18px rgba(196,149,58,0.25), inset 0 0 12px rgba(0,0,0,0.3);
     transition: box-shadow 0.4s ease, border-color 0.4s ease;
+    animation: compass-idle-glow 4s ease-in-out infinite;
 }
 /* Compass rose notches (N/S/E/W) */
 .exit-compass::before {
@@ -159,9 +160,9 @@
     width: 0; height: 0;
     border-left: 7px solid transparent;
     border-right: 7px solid transparent;
-    border-bottom: 18px solid #c4953a;
+    border-bottom: 18px solid #d4a54a;
     transition: transform 0.3s ease;
-    /* drop-shadow removed for mobile performance */
+    filter: drop-shadow(0 0 3px rgba(212,165,74,0.5));
     z-index: 1;
 }
 .compass-dist {
@@ -182,6 +183,10 @@
     animation: compass-pulse 1s ease infinite;
 }
 .exit-compass.nearby::after { color: rgba(100,200,100,0.5); }
+@keyframes compass-idle-glow {
+    0%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 14px rgba(196,149,58,0.2), inset 0 0 12px rgba(0,0,0,0.3); }
+    50% { box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 22px rgba(196,149,58,0.35), inset 0 0 12px rgba(0,0,0,0.25); }
+}
 @keyframes compass-pulse {
     0%, 100% { transform: scale(1) rotate(var(--compass-angle)); }
     50% { transform: scale(1.2) rotate(var(--compass-angle)); }

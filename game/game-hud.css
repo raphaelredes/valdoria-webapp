@@ -84,12 +84,14 @@
 .v-bar-fill {
     height: 100%;
     border-radius: 3px;
-    transition: width 0.4s ease;
+    width: 100%;
+    transition: transform 0.4s ease;
+    transform-origin: left;
     position: relative;
 }
-.v-bar-fill.hp, .v-bar-fill.hp-warn, .v-bar-fill.hp-crit { transition: width 0.35s ease-out; }
-.v-bar-fill.mp { transition: width 0.5s ease-in-out; }
-.v-bar-fill.xp { transition: width 0.6s ease; }
+.v-bar-fill.hp, .v-bar-fill.hp-warn, .v-bar-fill.hp-crit { transition: transform 0.35s ease-out; }
+.v-bar-fill.mp { transition: transform 0.5s ease-in-out; }
+.v-bar-fill.xp { transition: transform 0.6s ease; }
 
 /* Ghost bar for damage visualization in Game Hub */
 .v-bar-track .bar-ghost {
@@ -98,7 +100,9 @@
     height: 100%;
     background: rgba(200, 60, 60, 0.6);
     border-radius: 3px;
-    transition: width 1.5s ease-in 0.5s, opacity 1.5s ease-in 0.5s;
+    width: 100%;
+    transition: transform 1.5s ease-in 0.5s, opacity 1.5s ease-in 0.5s;
+    transform-origin: left;
     pointer-events: none;
 }
 

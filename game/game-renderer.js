@@ -838,7 +838,7 @@ function _makeAllyBar(current, max, type) {
     const fill = document.createElement('div');
     const pct = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0;
     fill.className = 'ally-bar-fill ally-bar-' + type;
-    fill.style.width = pct + '%';
+    fill.style.transform = 'scaleX(' + (pct / 100) + ')';
     if (type === 'hp') {
         if (pct <= 25) fill.classList.add('ally-bar-critical');
         else if (pct <= 50) fill.classList.add('ally-bar-low');
@@ -1097,10 +1097,10 @@ function _animateBarDeltas(contentEl) {
                     track.insertBefore(ghost, fill);
                 }
                 ghost.style.transition = 'none';
-                ghost.style.width = oldPct + '%';
+                ghost.style.transform = 'scaleX(' + (oldPct / 100) + ')';
                 requestAnimationFrame(function() {
-                    ghost.style.transition = 'width 1.2s ease-in 0.3s';
-                    ghost.style.width = curPct + '%';
+                    ghost.style.transition = 'transform 1.2s ease-in 0.3s';
+                    ghost.style.transform = 'scaleX(' + (curPct / 100) + ')';
                 });
             } else {
                 // Heal: shine sweep

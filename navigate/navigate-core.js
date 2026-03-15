@@ -443,11 +443,13 @@ function updateHUD() {
     const hpPct = c.mh > 0 ? Math.min(100, (c.hp / c.mh) * 100) : 0;
     const mpPct = c.mm > 0 ? Math.min(100, (c.mp / c.mm) * 100) : 0;
     // Trigger shimmer if value changed
-    const oldHp = hpEl.style.width, oldMp = mpEl.style.width;
-    hpEl.style.width = `${hpPct}%`;
-    mpEl.style.width = `${mpPct}%`;
-    if (oldHp && oldHp !== `${hpPct}%`) { hpEl.classList.remove('shimmer'); void hpEl.offsetWidth; hpEl.classList.add('shimmer'); }
-    if (oldMp && oldMp !== `${mpPct}%`) { mpEl.classList.remove('shimmer'); void mpEl.offsetWidth; mpEl.classList.add('shimmer'); }
+    const oldHpV = hpEl.dataset.pct || '', oldMpV = mpEl.dataset.pct || '';
+    const newHpV = '' + Math.round(hpPct), newMpV = '' + Math.round(mpPct);
+    hpEl.dataset.pct = newHpV; mpEl.dataset.pct = newMpV;
+    hpEl.style.transform = `scaleX(${hpPct/100})`;
+    mpEl.style.transform = `scaleX(${mpPct/100})`;
+    if (oldHpV && oldHpV !== newHpV) { hpEl.classList.remove('shimmer'); void hpEl.offsetWidth; hpEl.classList.add('shimmer'); }
+    if (oldMpV && oldMpV !== newMpV) { mpEl.classList.remove('shimmer'); void mpEl.offsetWidth; mpEl.classList.add('shimmer'); }
 }
 
 function updateLocationBadge() {
@@ -637,7 +639,7 @@ function _showTravelOverlay(type, target) {
         overlay.classList.add('visible');
         const fill = document.getElementById('travel-progress-fill');
         if (fill) {
-            requestAnimationFrame(() => { fill.style.width = '100%'; fill.style.transition = 'width 3s linear'; });
+            requestAnimationFrame(() => { fill.style.transform = 'scaleX(1)'; fill.style.transition = 'transform 3s linear'; });
         }
     });
 }

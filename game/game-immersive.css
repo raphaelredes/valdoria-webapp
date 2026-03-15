@@ -23,7 +23,7 @@
     cursor: pointer;
     z-index: 101;
     -webkit-tap-highlight-color: transparent;
-    transition: bottom 0.3s ease, background var(--v-transition), color var(--v-transition);
+    transition: transform 0.3s ease, background var(--v-transition), color var(--v-transition);
 }
 
 .immersive-toggle:active {
