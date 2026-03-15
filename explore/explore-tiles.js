@@ -1796,26 +1796,31 @@ function drawExitDecoration(ctx, cx, cy, timestamp) {
     const pulse = 0.5 + Math.sin(t * 2) * 0.2;
     const pulse2 = 0.4 + Math.sin(t * 1.5 + 1) * 0.15;
 
-    // Outer glow ring (large, visible from distance)
-    const outerGrad = ctx.createRadialGradient(cx, cy - 2, 4, cx, cy - 2, 22);
-    outerGrad.addColorStop(0, 'rgba(74,214,128,' + (pulse * 0.6) + ')');
-    outerGrad.addColorStop(0.4, 'rgba(74,214,128,' + (pulse * 0.25) + ')');
-    outerGrad.addColorStop(0.7, 'rgba(74,214,128,' + (pulse * 0.08) + ')');
-    outerGrad.addColorStop(1, 'rgba(74,214,128,0)');
-    ctx.fillStyle = outerGrad;
-    ctx.beginPath();
-    ctx.arc(cx, cy - 2, 22, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Inner bright glow
-    const innerGrad = ctx.createRadialGradient(cx, cy - 2, 1, cx, cy - 2, 12);
-    innerGrad.addColorStop(0, 'rgba(120,255,160,' + (pulse * 0.7) + ')');
-    innerGrad.addColorStop(0.5, 'rgba(74,214,128,' + (pulse * 0.4) + ')');
-    innerGrad.addColorStop(1, 'rgba(74,214,128,0)');
-    ctx.fillStyle = innerGrad;
-    ctx.beginPath();
-    ctx.arc(cx, cy - 2, 12, 0, Math.PI * 2);
-    ctx.fill();
+    // Outer + inner glow — gradient on medium+, flat circle on lite
+    if (_tileDetail >= 1) {
+        var outerGrad = ctx.createRadialGradient(cx, cy - 2, 4, cx, cy - 2, 22);
+        outerGrad.addColorStop(0, 'rgba(74,214,128,' + (pulse * 0.6) + ')');
+        outerGrad.addColorStop(0.4, 'rgba(74,214,128,' + (pulse * 0.25) + ')');
+        outerGrad.addColorStop(0.7, 'rgba(74,214,128,' + (pulse * 0.08) + ')');
+        outerGrad.addColorStop(1, 'rgba(74,214,128,0)');
+        ctx.fillStyle = outerGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy - 2, 22, 0, Math.PI * 2);
+        ctx.fill();
+        var innerGrad = ctx.createRadialGradient(cx, cy - 2, 1, cx, cy - 2, 12);
+        innerGrad.addColorStop(0, 'rgba(120,255,160,' + (pulse * 0.7) + ')');
+        innerGrad.addColorStop(0.5, 'rgba(74,214,128,' + (pulse * 0.4) + ')');
+        innerGrad.addColorStop(1, 'rgba(74,214,128,0)');
+        ctx.fillStyle = innerGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy - 2, 12, 0, Math.PI * 2);
+        ctx.fill();
+    } else {
+        ctx.fillStyle = 'rgba(74,214,128,' + (pulse * 0.25) + ')';
+        ctx.beginPath();
+        ctx.arc(cx, cy - 2, 14, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
     // Portal archway frame (stone arch)
     ctx.fillStyle = 'rgba(80,60,40,' + (0.7 + pulse2 * 0.2) + ')';
@@ -1840,26 +1845,31 @@ function drawExitDecoration(ctx, cx, cy, timestamp) {
     ctx.quadraticCurveTo(cx, cy - 2 + Math.cos(t * 2.5) * 2, cx + 2, cy + 1 + Math.sin(t * 3.5) * 2);
     ctx.stroke();
 
-    // Light pillar effect (vertical beam above portal)
-    const beamGrad = ctx.createLinearGradient(cx, cy - 20, cx, cy - 8);
-    beamGrad.addColorStop(0, 'rgba(74,214,128,0)');
-    beamGrad.addColorStop(0.5, 'rgba(74,214,128,' + (pulse2 * 0.15) + ')');
-    beamGrad.addColorStop(1, 'rgba(120,255,160,' + (pulse2 * 0.25) + ')');
-    ctx.fillStyle = beamGrad;
-    ctx.fillRect(cx - 4, cy - 20, 8, 12);
+    // Light pillar effect — medium+ only (linear gradient)
+    if (_tileDetail >= 1) {
+        var beamGrad = ctx.createLinearGradient(cx, cy - 20, cx, cy - 8);
+        beamGrad.addColorStop(0, 'rgba(74,214,128,0)');
+        beamGrad.addColorStop(0.5, 'rgba(74,214,128,' + (pulse2 * 0.15) + ')');
+        beamGrad.addColorStop(1, 'rgba(120,255,160,' + (pulse2 * 0.25) + ')');
+        ctx.fillStyle = beamGrad;
+        ctx.fillRect(cx - 4, cy - 20, 8, 12);
+    }
 
-    // Floating sparkle particles
-    for (var sp = 0; sp < 4; sp++) {
-        var angle = t * (1.2 + sp * 0.3) + sp * 1.57;
-        var radius = 10 + Math.sin(t * 0.8 + sp) * 4;
-        var px = cx + Math.cos(angle) * radius;
-        var py = cy - 4 + Math.sin(angle) * radius * 0.5;
-        var sparkAlpha = 0.3 + Math.sin(t * 2 + sp * 2) * 0.25;
-        if (sparkAlpha > 0.1) {
-            ctx.fillStyle = 'rgba(180,255,200,' + sparkAlpha + ')';
-            ctx.beginPath();
-            ctx.arc(px, py, 1.2, 0, Math.PI * 2);
-            ctx.fill();
+    // Floating sparkle particles — medium+ only (4 animated per frame)
+    if (_tileDetail >= 1) {
+        var spCount = _tileDetail >= 2 ? 4 : 2;
+        for (var sp = 0; sp < spCount; sp++) {
+            var angle = t * (1.2 + sp * 0.3) + sp * 1.57;
+            var radius = 10 + Math.sin(t * 0.8 + sp) * 4;
+            var px = cx + Math.cos(angle) * radius;
+            var py = cy - 4 + Math.sin(angle) * radius * 0.5;
+            var sparkAlpha = 0.3 + Math.sin(t * 2 + sp * 2) * 0.25;
+            if (sparkAlpha > 0.1) {
+                ctx.fillStyle = 'rgba(180,255,200,' + sparkAlpha + ')';
+                ctx.beginPath();
+                ctx.arc(px, py, 1.2, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     }
 
@@ -1886,13 +1896,17 @@ function drawPOIMarker(ctx, cx, cy, icon, timestamp, poiType) {
     };
     const cfg = typeConfig[poiType] || typeConfig.dis;
 
-    // Outer glow (type-colored)
-    const pulse = Math.sin(t * 2) * 0.15 + 0.85;
-    const grad = ctx.createRadialGradient(cx, my, 0, cx, my, cfg.r + 4);
-    grad.addColorStop(0, cfg.glow + (0.35 * pulse) + ')');
-    grad.addColorStop(0.6, cfg.glow + (0.1 * pulse) + ')');
-    grad.addColorStop(1, cfg.glow + '0)');
-    ctx.fillStyle = grad;
+    // Outer glow — gradient on medium+, flat on lite
+    var pulse = Math.sin(t * 2) * 0.15 + 0.85;
+    if (_tileDetail >= 1) {
+        var grad = ctx.createRadialGradient(cx, my, 0, cx, my, cfg.r + 4);
+        grad.addColorStop(0, cfg.glow + (0.35 * pulse) + ')');
+        grad.addColorStop(0.6, cfg.glow + (0.1 * pulse) + ')');
+        grad.addColorStop(1, cfg.glow + '0)');
+        ctx.fillStyle = grad;
+    } else {
+        ctx.fillStyle = cfg.glow + (0.15 * pulse).toFixed(3) + ')';
+    }
     ctx.beginPath();
     ctx.arc(cx, my, cfg.r + 4, 0, Math.PI * 2);
     ctx.fill();
@@ -2048,10 +2062,13 @@ function drawTreeDecorationWind(ctx, cx, cy, biome, col, row, timestamp) {
             ctx.arc(tx + w * 0.5, ty - 6 * s, 6 * s, 0, Math.PI * 2);
             ctx.fillStyle = i === 0 ? '#3a7a2a' : '#2a6a1a';
             ctx.fill();
-            ctx.fillStyle = 'rgba(255,255,255,0.08)';
-            ctx.beginPath();
-            ctx.arc(tx + w * 0.5 - 1 * s, ty - 7 * s, 3 * s, 0, Math.PI * 2);
-            ctx.fill();
+            // Highlight — medium+ only
+            if (_tileDetail >= 1) {
+                ctx.fillStyle = 'rgba(255,255,255,0.08)';
+                ctx.beginPath();
+                ctx.arc(tx + w * 0.5 - 1 * s, ty - 7 * s, 3 * s, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
         if (r4 > 0.5) {
             ctx.fillStyle = '#c87a30';
@@ -2080,14 +2097,17 @@ function drawTreeDecorationWind(ctx, cx, cy, biome, col, row, timestamp) {
             ctx.lineTo(sx - 0.5, sy);
             ctx.closePath();
             ctx.fill();
-            ctx.fillStyle = 'rgba(100,100,140,0.3)';
-            ctx.beginPath();
-            ctx.moveTo(sx - 2, sy - sLen);
-            ctx.lineTo(sx - 0.5, sy - sLen);
-            ctx.lineTo(sx - 0.2, sy);
-            ctx.lineTo(sx - 0.5, sy);
-            ctx.closePath();
-            ctx.fill();
+            // Highlight — medium+ only
+            if (_tileDetail >= 1) {
+                ctx.fillStyle = 'rgba(100,100,140,0.3)';
+                ctx.beginPath();
+                ctx.moveTo(sx - 2, sy - sLen);
+                ctx.lineTo(sx - 0.5, sy - sLen);
+                ctx.lineTo(sx - 0.2, sy);
+                ctx.lineTo(sx - 0.5, sy);
+                ctx.closePath();
+                ctx.fill();
+            }
         }
         // Pulsing crystals
         const crystals = r5 > 0.4 ? 2 : 1;
@@ -2100,11 +2120,13 @@ function drawTreeDecorationWind(ctx, cx, cy, biome, col, row, timestamp) {
             const cH = 4 + tileRand(col, row, 76 + i) * 4;
             const alpha = 0.5 * pulse + 0.1;
             const gAlpha = 0.10 * pulse + 0.02;
-            // Glow (animated)
-            ctx.fillStyle = glowColors[cIdx].replace('GVAL', gAlpha.toFixed(2));
-            ctx.beginPath();
-            ctx.arc(cx2, cy2 - cH * 0.5, cH * 1.5 * (0.9 + pulse * 0.1), 0, Math.PI * 2);
-            ctx.fill();
+            // Glow (animated) — medium+ only
+            if (_tileDetail >= 1) {
+                ctx.fillStyle = glowColors[cIdx].replace('GVAL', gAlpha.toFixed(2));
+                ctx.beginPath();
+                ctx.arc(cx2, cy2 - cH * 0.5, cH * 1.5 * (0.9 + pulse * 0.1), 0, Math.PI * 2);
+                ctx.fill();
+            }
             // Crystal body
             ctx.fillStyle = crystalColors[cIdx].replace('VAL', alpha.toFixed(2));
             ctx.beginPath();
@@ -2132,10 +2154,12 @@ function drawTreeDecorationWind(ctx, cx, cy, biome, col, row, timestamp) {
             ctx.beginPath();
             ctx.ellipse(mx, my, mSize, mSize * 0.5, 0, Math.PI, 0);
             ctx.fill();
-            ctx.fillStyle = 'rgba(80,200,120,' + (0.06 * pulse + 0.02).toFixed(2) + ')';
-            ctx.beginPath();
-            ctx.arc(mx, my, mSize * 2.5, 0, Math.PI * 2);
-            ctx.fill();
+            if (_tileDetail >= 1) {
+                ctx.fillStyle = 'rgba(80,200,120,' + (0.06 * pulse + 0.02).toFixed(2) + ')';
+                ctx.beginPath();
+                ctx.arc(mx, my, mSize * 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
 
     } else if (biome === 'graveyard') {
@@ -2160,14 +2184,17 @@ function drawTreeDecorationWind(ctx, cx, cy, biome, col, row, timestamp) {
         ctx.moveTo(tx + 1, ty - 6);
         ctx.quadraticCurveTo(tx + 3 + sway * 0.8, ty - 8, tx + 6 + sway, ty - 7);
         ctx.stroke();
-        ctx.lineWidth = 0.6;
-        ctx.strokeStyle = '#3a2a2a';
-        ctx.beginPath();
-        ctx.moveTo(tx + 8 + sway * 1.5, ty - 12);
-        ctx.lineTo(tx + 10 + sway * 2, ty - 14);
-        ctx.moveTo(tx - 7 + sway, ty - 11);
-        ctx.lineTo(tx - 9 + sway * 1.5, ty - 13);
-        ctx.stroke();
+        // Twig tips — medium+ only
+        if (_tileDetail >= 1) {
+            ctx.lineWidth = 0.6;
+            ctx.strokeStyle = '#3a2a2a';
+            ctx.beginPath();
+            ctx.moveTo(tx + 8 + sway * 1.5, ty - 12);
+            ctx.lineTo(tx + 10 + sway * 2, ty - 14);
+            ctx.moveTo(tx - 7 + sway, ty - 11);
+            ctx.lineTo(tx - 9 + sway * 1.5, ty - 13);
+            ctx.stroke();
+        }
         // Second dead tree
         if (r3 > 0.3) {
             const tx2 = cx + (r3 - 0.2) * 12;
@@ -2356,8 +2383,9 @@ function drawGrassDecorationWind(ctx, cx, cy, col, row, biome, timestamp) {
     const grassColor = biome === 'snow' ? '#8a9a8a' : biome === 'swamp' ? '#3a5a2a' : '#4a7a3a';
     ctx.strokeStyle = grassColor;
     ctx.lineWidth = 0.7;
-    // Grass tufts with swaying tips via quadraticCurveTo
-    for (let i = 0; i < 4; i++) {
+    // Grass tufts — 4 on medium+, 2 on lite
+    var grassCount = _tileDetail >= 1 ? 4 : 2;
+    for (var i = 0; i < grassCount; i++) {
         const gx = cx + (tileRand(col, row, 90 + i) - 0.5) * 14;
         const gy = cy + (tileRand(col, row, 93 + i) - 0.5) * 8;
         const w = (i % 2 === 0) ? wind : wind2;
@@ -2370,13 +2398,13 @@ function drawGrassDecorationWind(ctx, cx, cy, col, row, biome, timestamp) {
         ctx.quadraticCurveTo(gx + 1.5 + w * 0.3, gy - 1.5, gx + 2.5 + w * 0.6, gy - 3);
         ctx.stroke();
     }
-    // Bushes (heavy, minimal sway)
-    if ((biome === 'forest' || biome === 'plains') && tileRand(col, row, 97) > 0.5) {
+    // Bushes — medium+ only (heavy)
+    if (_tileDetail >= 1 && (biome === 'forest' || biome === 'plains') && tileRand(col, row, 97) > 0.5) {
         _drawBush(ctx, cx + (tileRand(col, row, 98) - 0.5) * 10, cy + 1, 2.5,
             biome === 'forest' ? '#1a3a10' : '#3a6a20');
     }
-    // Flowers in plains
-    if (biome === 'plains' && tileRand(col, row, 99) > 0.4) {
+    // Flowers in plains — medium+ only
+    if (_tileDetail >= 1 && biome === 'plains' && tileRand(col, row, 99) > 0.4) {
         const colors = ['#d44a60', '#c87a30', '#8a5aaa', '#4a8ac0'];
         for (let i = 0; i < 2; i++) {
             ctx.fillStyle = colors[Math.floor(tileRand(col, row, 110 + i) * colors.length)];
@@ -2523,31 +2551,37 @@ function drawTorchOnWall(ctx, cx, cy, timestamp) {
     ctx.stroke();
 
     // Flame (animated)
-    const flicker = Math.sin(timestamp * 0.008 + cx * 0.5) * 0.15 + 0.85;
-    const flameH = HEX_H * 0.2 * flicker;
-    const grad = ctx.createRadialGradient(
-        cx, cy - HEX_H * 0.35, 0,
-        cx, cy - HEX_H * 0.35, HEX_W * 0.12
-    );
-    grad.addColorStop(0, `rgba(255,200,50,${0.9 * flicker})`);
-    grad.addColorStop(0.5, `rgba(255,120,20,${0.6 * flicker})`);
-    grad.addColorStop(1, 'rgba(255,60,10,0)');
-    ctx.fillStyle = grad;
+    var flicker = Math.sin(timestamp * 0.008 + cx * 0.5) * 0.15 + 0.85;
+    var flameH = HEX_H * 0.2 * flicker;
+    if (_tileDetail >= 1) {
+        var grad = ctx.createRadialGradient(
+            cx, cy - HEX_H * 0.35, 0,
+            cx, cy - HEX_H * 0.35, HEX_W * 0.12
+        );
+        grad.addColorStop(0, 'rgba(255,200,50,' + (0.9 * flicker) + ')');
+        grad.addColorStop(0.5, 'rgba(255,120,20,' + (0.6 * flicker) + ')');
+        grad.addColorStop(1, 'rgba(255,60,10,0)');
+        ctx.fillStyle = grad;
+    } else {
+        ctx.fillStyle = 'rgba(255,160,30,' + (0.7 * flicker).toFixed(3) + ')';
+    }
     ctx.beginPath();
     ctx.ellipse(cx, cy - HEX_H * 0.35, HEX_W * 0.08, flameH, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Light glow
-    const glowGrad = ctx.createRadialGradient(
-        cx, cy - HEX_H * 0.3, 0,
-        cx, cy - HEX_H * 0.3, HEX_W * 0.5
-    );
-    glowGrad.addColorStop(0, `rgba(255,180,50,${0.15 * flicker})`);
-    glowGrad.addColorStop(1, 'rgba(255,180,50,0)');
-    ctx.fillStyle = glowGrad;
-    ctx.beginPath();
-    ctx.arc(cx, cy - HEX_H * 0.3, HEX_W * 0.5, 0, Math.PI * 2);
-    ctx.fill();
+    // Light glow — medium+ only (radial gradient)
+    if (_tileDetail >= 1) {
+        var glowGrad = ctx.createRadialGradient(
+            cx, cy - HEX_H * 0.3, 0,
+            cx, cy - HEX_H * 0.3, HEX_W * 0.5
+        );
+        glowGrad.addColorStop(0, 'rgba(255,180,50,' + (0.15 * flicker) + ')');
+        glowGrad.addColorStop(1, 'rgba(255,180,50,0)');
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy - HEX_H * 0.3, HEX_W * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
 // ── Trap mark on floor ──────────────────────────────────
@@ -2660,32 +2694,43 @@ function drawChestDecoration(ctx, cx, cy, col, row, timestamp) {
     ctx.arc(cx, cy - 4, 1.5, 0, Math.PI * 2);
     ctx.fill();
 
-    // Subtle golden glow around chest
-    const grad = ctx.createRadialGradient(cx, cy - 3, 2, cx, cy - 3, 12);
-    grad.addColorStop(0, 'rgba(196,149,58,' + pulse + ')');
-    grad.addColorStop(0.5, 'rgba(196,149,58,' + (pulse * 0.2) + ')');
-    grad.addColorStop(1, 'rgba(196,149,58,0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(cx, cy - 3, 12, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Sparkle particles (2 random positions)
-    const r1 = tileRand(col, row, 7);
-    const r2 = tileRand(col, row, 8);
-    const sparkle = Math.sin(t * 3 + r1 * 6) * 0.5 + 0.5;
-    if (sparkle > 0.6) {
-        ctx.fillStyle = 'rgba(255,215,0,' + (sparkle * 0.6) + ')';
+    // Subtle golden glow — gradient on medium+, flat on lite
+    if (_tileDetail >= 1) {
+        var grad = ctx.createRadialGradient(cx, cy - 3, 2, cx, cy - 3, 12);
+        grad.addColorStop(0, 'rgba(196,149,58,' + pulse + ')');
+        grad.addColorStop(0.5, 'rgba(196,149,58,' + (pulse * 0.2) + ')');
+        grad.addColorStop(1, 'rgba(196,149,58,0)');
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(cx + (r1 - 0.5) * 14, cy - 8 + (r2 - 0.5) * 6, 1, 0, Math.PI * 2);
+        ctx.arc(cx, cy - 3, 12, 0, Math.PI * 2);
+        ctx.fill();
+    } else {
+        ctx.fillStyle = 'rgba(196,149,58,' + (pulse * 0.15) + ')';
+        ctx.beginPath();
+        ctx.arc(cx, cy - 3, 8, 0, Math.PI * 2);
         ctx.fill();
     }
-    const sparkle2 = Math.sin(t * 2.5 + r2 * 4) * 0.5 + 0.5;
-    if (sparkle2 > 0.65) {
-        ctx.fillStyle = 'rgba(255,215,0,' + (sparkle2 * 0.5) + ')';
-        ctx.beginPath();
-        ctx.arc(cx + (r2 - 0.5) * 12, cy - 6 + (r1 - 0.5) * 8, 0.8, 0, Math.PI * 2);
-        ctx.fill();
+
+    // Sparkle particles — medium+ only
+    if (_tileDetail >= 1) {
+        var r1 = tileRand(col, row, 7);
+        var r2 = tileRand(col, row, 8);
+        var sparkle = Math.sin(t * 3 + r1 * 6) * 0.5 + 0.5;
+        if (sparkle > 0.6) {
+            ctx.fillStyle = 'rgba(255,215,0,' + (sparkle * 0.6) + ')';
+            ctx.beginPath();
+            ctx.arc(cx + (r1 - 0.5) * 14, cy - 8 + (r2 - 0.5) * 6, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        if (_tileDetail >= 2) {
+            var sparkle2 = Math.sin(t * 2.5 + r2 * 4) * 0.5 + 0.5;
+            if (sparkle2 > 0.65) {
+                ctx.fillStyle = 'rgba(255,215,0,' + (sparkle2 * 0.5) + ')';
+                ctx.beginPath();
+                ctx.arc(cx + (r2 - 0.5) * 12, cy - 6 + (r1 - 0.5) * 8, 0.8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
     }
 }
 
