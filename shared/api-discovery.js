@@ -30,18 +30,24 @@ var ApiDiscovery = (function () {
         _checking = true;
         try {
             // 1. Try health — if OK, tunnel is alive
+            var _acH = new AbortController();
+            var _tidH = setTimeout(function() { _acH.abort(); }, 5000);
             var resp = await fetch(_apiBase + '/api/game/health', {
-                signal: AbortSignal.timeout(5000),
+                signal: _acH.signal,
             });
+            clearTimeout(_tidH);
             if (resp.ok) { _checking = false; return; }
         } catch (e) { /* health failed, try discovery */ }
 
         // 2. Fetch api-url.json from GitHub Pages
         try {
+            var _acD = new AbortController();
+            var _tidD = setTimeout(function() { _acD.abort(); }, 4000);
             var resp2 = await fetch('../api-url.json?t=' + Date.now(), {
                 cache: 'no-store',
-                signal: AbortSignal.timeout(4000),
+                signal: _acD.signal,
             });
+            clearTimeout(_tidD);
             if (!resp2.ok) { _checking = false; return; }
             var data = await resp2.json();
             var newUrl = (data.url || '').replace(/\/$/, '');

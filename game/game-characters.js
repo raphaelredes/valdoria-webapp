@@ -20,11 +20,14 @@ async function showCharacterSelect() {
 
     try {
         const url = `${S.apiBase}/api/game/characters?user_id=${S.uid}`;
+        var _ac = new AbortController();
+        var _tid = setTimeout(function() { _ac.abort(); }, 10000);
         const resp = await fetch(url, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${S.token}` },
-            signal: AbortSignal.timeout(10000),
+            signal: _ac.signal,
         });
+        clearTimeout(_tid);
 
         if (!resp.ok) {
             console.error('[GAME] characters fetch failed:', resp.status);

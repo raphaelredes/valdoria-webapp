@@ -86,13 +86,16 @@ var SessionHeartbeat = (function () {
         try {
             var did = (window.DeviceId && DeviceId.get) ? DeviceId.get() : '';
             var url = _cfg.apiBase + '/api/game/heartbeat?uid=' + _cfg.uid + (did ? '&did=' + encodeURIComponent(did) : '');
+            var _acHB = new AbortController();
+            var _tidHB = setTimeout(function() { _acHB.abort(); }, 3000);
             var resp = await fetch(
                 url,
                 {
                     headers: { 'Authorization': 'Bearer ' + _cfg.token },
-                    signal: AbortSignal.timeout(3000),
+                    signal: _acHB.signal,
                 }
             );
+            clearTimeout(_tidHB);
             if (!resp.ok) return;
             var data = await resp.json();
             if (data.status === 'displaced') {
@@ -194,6 +197,8 @@ var SessionHeartbeat = (function () {
                 if (tg) platform = tg.platform || '';
             } catch (e) { /* ignore */ }
 
+            var _acRC = new AbortController();
+            var _tidRC = setTimeout(function() { _acRC.abort(); }, 8000);
             var resp = await fetch(_cfg.apiBase + '/api/game/start', {
                 method: 'POST',
                 headers: {
@@ -205,8 +210,9 @@ var SessionHeartbeat = (function () {
                     platform: platform,
                     device_id: (window.DeviceId && DeviceId.get) ? DeviceId.get() : '',
                 }),
-                signal: AbortSignal.timeout(8000),
+                signal: _acRC.signal,
             });
+            clearTimeout(_tidRC);
 
             if (!resp.ok) {
                 console.error('[HEARTBEAT] Reconnect failed, status:', resp.status);

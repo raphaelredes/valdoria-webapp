@@ -360,10 +360,13 @@ async function _discoverApiUrl() {
     // Fetch api-url.json from GitHub Pages (same origin, no CORS issues)
     // Cache-bust to avoid stale CDN responses
     try {
+        var _acDisc = new AbortController();
+        var _tidDisc = setTimeout(function() { _acDisc.abort(); }, 4000);
         const resp = await fetch(API_URL_DISCOVERY + '?t=' + Date.now(), {
             cache: 'no-store',
-            signal: AbortSignal.timeout(4000),
+            signal: _acDisc.signal,
         });
+        clearTimeout(_tidDisc);
         if (!resp.ok) return null;
         const data = await resp.json();
         const url = (data.url || '').replace(/\/$/, '');
@@ -966,12 +969,14 @@ function _prefetchStart(charId) {
     var url = S.apiBase + '/api/game/start';
     var prefetchDid = (window.DeviceId && DeviceId.get) ? DeviceId.get() : '';
     var body = JSON.stringify({ user_id: S.uid, char_id: charId, device_id: prefetchDid });
+    var _acLog = new AbortController();
+    var _tidLog = setTimeout(function() { _acLog.abort(); }, 8000);
     fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token },
         body: body,
-        signal: AbortSignal.timeout(8000),
-    }).then(function(r) { return r.json(); }).then(function(data) {
+        signal: _acLog.signal,
+    }).then(function(r) { clearTimeout(_tidLog); return r.json(); }).then(function(data) {
         if (data && !data.error) { _prefetchedStart = { charId: charId, data: data, ts: Date.now() }; }
     }).catch(function() { /* silent prefetch */ });
 }
