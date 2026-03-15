@@ -516,10 +516,10 @@
 
 /* ── Cinematic exit ── */
 .loading-overlay.exit-cinematic {
-    animation: loadingExit 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: loadingExit 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 .loading-overlay.exit-cinematic .magic-circle {
-    animation: circleExit 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: circleExit 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 .loading-overlay.exit-cinematic .loading-particles {
     animation: particlesDisperse 0.6s ease-out forwards;
@@ -536,7 +536,7 @@
     opacity: 0; pointer-events: none; z-index: 2;
 }
 .loading-overlay.exit-cinematic .loading-flash {
-    animation: flashBurst 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: flashBurst 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes loadingExit {
@@ -640,7 +640,7 @@
 
 /* Simpler exit — fast fade instead of cinematic */
 .loading-lite.exit-cinematic {
-    animation: loadingExitLite 0.4s ease forwards !important;
+    animation: loadingExitLite 0.3s ease forwards !important;
 }
 .loading-lite.exit-cinematic .magic-circle,
 .loading-lite.exit-cinematic .loading-particles,
@@ -653,6 +653,71 @@
 @keyframes loadingExitLite {
     from { opacity: 1; }
     to   { opacity: 0; pointer-events: none; }
+}
+
+
+/* ═══════════════════════════════════════════
+   LOADING UX ENHANCEMENTS
+   Stage text, retry button, gem hint, tip transitions
+   ═══════════════════════════════════════════ */
+
+/* Stage text (below progress bar) */
+.loading-stage {
+    font-size: 11px;
+    color: var(--v-text-dim, #8a7a68);
+    text-align: center;
+    margin-top: 4px;
+    min-height: 16px;
+    font-style: italic;
+    transition: opacity 0.3s;
+}
+
+/* Retry button (shown after 10s slow warning) */
+.loading-retry {
+    display: none;
+    margin-top: 12px;
+    padding: 8px 24px;
+    background: rgba(196,149,58,0.15);
+    border: 1px solid rgba(196,149,58,0.4);
+    border-radius: 6px;
+    color: var(--v-text, #d4c8b0);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+.loading-retry:active {
+    background: rgba(196,149,58,0.3);
+    border-color: rgba(196,149,58,0.6);
+}
+
+/* Gem tap hint — subtle pulse to suggest interactivity */
+.mc-gem.gem-hint .mc-gem-core {
+    animation: gemHintPulse 0.75s ease-in-out 2;
+}
+@keyframes gemHintPulse {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.12); filter: brightness(1.3); }
+}
+
+/* Tip enter/exit transitions */
+.loading-tip-area .tip-exit {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+.loading-tip-area .tip-enter {
+    animation: tipEnter 0.35s ease-out;
+}
+@keyframes tipEnter {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Slow loading tip warning style */
+.loading-tip-slow {
+    color: var(--v-accent, #c4953a) !important;
+    font-style: normal !important;
 }
 
 

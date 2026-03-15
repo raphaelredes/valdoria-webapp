@@ -419,10 +419,10 @@
 
 /* ── Cinematic exit ── */
 .loading-overlay.exit-cinematic {
-    animation: loadingExit 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: loadingExit 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 .loading-overlay.exit-cinematic .magic-circle {
-    animation: circleExit 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: circleExit 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 .loading-overlay.exit-cinematic .loading-particles {
     animation: particlesDisperse 0.6s ease-out forwards;
@@ -438,7 +438,7 @@
     opacity: 0; pointer-events: none; z-index: 2;
 }
 .loading-overlay.exit-cinematic .loading-flash {
-    animation: flashBurst 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: flashBurst 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 @keyframes loadingExit {
     0%   { opacity: 1; }

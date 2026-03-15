@@ -4,8 +4,8 @@
    ═══════════════════════════════════════════════════════════════ */
 
 // ─── Loading (with cycling tips, ring acceleration, gem phases, cinematic exit) ───
-const _LOADING_TIPS = [
-    // Narrativas imersivas — cidade
+// Tips separated by phase: narrative first (0-5s), then mechanics (5s+)
+const _TIPS_NARRATIVE = [
     'As muralhas de pedra se erguem enquanto os portões rangem ao abrir...',
     'O som de bigornas e o aroma de pão fresco preenchem as ruas empedradas...',
     'Guardas patrulham as ameias enquanto comerciantes montam suas barracas...',
@@ -14,7 +14,8 @@ const _LOADING_TIPS = [
     'O sino do templo ecoa pela manhã, despertando a cidade de seu sono...',
     'Mercadores ajustam suas bancas, exibindo relíquias de terras distantes...',
     'O cheiro de cerveja e carne assada escapa pelas portas da estalagem...',
-    // Dicas D&D intercaladas
+];
+const _TIPS_MECHANICS = [
     '⚔️ Dica: Rolagens de ataque 20 são acertos críticos — dano dobrado!',
     '🛡️ Dica: Descansar na estalagem recupera todos os dados de vida.',
     '💰 Dica: Venda itens que não usa no mercado da cidade.',
@@ -23,7 +24,6 @@ const _LOADING_TIPS = [
     '🧪 Dica: Poções podem ser usadas durante o combate como ação bônus.',
     '⭐ Dica: Suba de nível para desbloquear novas habilidades de classe.',
     '🐉 Dica: Inimigos mais fortes concedem mais XP e ouro.',
-    // Dicas táticas
     '🎯 Dica: Advantage dobra suas chances — posicione-se bem!',
     '🧪 Dica: Poções de cura restauram 2d4+2 pontos de vida.',
     '🛡️ Dica: Classe de Armadura (CA) determina se ataques acertam você.',
@@ -33,6 +33,7 @@ const _LOADING_TIPS = [
     '💠 Dica: Cada classe tem recursos únicos — conheça os seus!',
     '🏰 Dica: O ferreiro pode forjar equipamentos poderosos.',
 ];
+const _LOADING_TIPS = _TIPS_NARRATIVE.concat(_TIPS_MECHANICS);
 let _loadingTipTimer = null;
 let _loadingTipIndex = 0;
 let _loadingProgressTimer = null;
@@ -71,29 +72,46 @@ function showLoading(isRetry = false) {
     } else {
         _startLoadingTips();
     }
+
+    // Gem tap hint — subtle pulse after 3s to suggest interactivity
+    setTimeout(() => {
+        const gemEl = document.getElementById('mc-gem');
+        if (gemEl && el && el.style.display !== 'none') {
+            gemEl.classList.add('gem-hint');
+            setTimeout(() => gemEl.classList.remove('gem-hint'), 1500);
+        }
+    }, 3000);
 }
 
 function hideLoading() {
     const el = document.getElementById('loading');
     if (!el || el.style.display === 'none') return;
 
-    // Fill progress to 100%
-    const bar = document.getElementById('loading-progress');
-    if (bar) bar.style.width = '100%';
-    _loadingProgress = 100;
-    _updateLoadingPhase(100);
-
     _stopLoadingProgress();
     _stopLoadingTimeout();
     _stopSlowWarning();
     _isRetryLoading = false;
 
+    // Hide retry button if visible
+    const retryBtn = document.getElementById('loading-retry');
+    if (retryBtn) retryBtn.style.display = 'none';
+
+    // Fill progress to 100% + show "Pronto!"
+    const bar = document.getElementById('loading-progress');
+    const stageEl = document.getElementById('loading-stage');
+    if (bar) bar.style.width = '100%';
+    _loadingProgress = 100;
+    _updateLoadingPhase(100);
+    if (stageEl) stageEl.textContent = 'Pronto!';
+
     // Trigger completion pulse + haptic
     _triggerCompletionPulse(el);
 
-    // Exit animation: lite mode = fast fade (400ms), normal = cinematic (950ms)
+    // Brief pause to show "Pronto!" (400ms), then exit
     const isLite = el.classList.contains('loading-lite');
-    const exitMs = isLite ? 400 : 950;
+    const exitMs = isLite ? 300 : 500;
+    const readyPause = 400;
+
     setTimeout(() => {
         el.classList.add('exit-cinematic');
         _stopLoadingTips();
@@ -102,7 +120,6 @@ function hideLoading() {
             el.classList.remove('exit-cinematic');
             el.style.opacity = '';
             el.style.transition = '';
-            // Reset ring speeds
             const circle = el.querySelector('.magic-circle');
             if (circle) {
                 circle.style.removeProperty('--ring-outer');
@@ -110,10 +127,11 @@ function hideLoading() {
                 circle.style.removeProperty('--ring-inner');
             }
             el.removeAttribute('data-phase');
+            if (stageEl) stageEl.textContent = '';
         }, exitMs);
-    }, isLite ? 50 : 150);
+    }, readyPause);
 
-    // Safety net: force-hide after exit + buffer
+    // Safety net
     setTimeout(() => {
         if (el.style.display !== 'none') {
             console.warn('[GAME] Loading force-hidden after safety net');
@@ -121,7 +139,7 @@ function hideLoading() {
             el.classList.remove('exit-cinematic');
             el.removeAttribute('data-phase');
         }
-    }, exitMs + 500);
+    }, readyPause + exitMs + 500);
 }
 
 // ── Minimum loading delay (narrative immersion) ──
@@ -171,10 +189,15 @@ function _startLoadingProgress() {
     _stopLoadingProgress();
     _loadingProgress = 0;
     const bar = document.getElementById('loading-progress');
+    const stageEl = document.getElementById('loading-stage');
     if (bar) bar.style.width = '0%';
+    if (stageEl) stageEl.textContent = '';
     _loadingProgressTimer = setInterval(() => {
-        const remaining = 90 - _loadingProgress;
-        _loadingProgress += remaining * 0.06;
+        const elapsed = Date.now() - _loadingStartTime;
+        const minLoad = (typeof MIN_LOADING_MS !== 'undefined') ? MIN_LOADING_MS : 5000;
+        // Map elapsed time to 0-95% (last 5% reserved for "Pronto!" completion)
+        const targetPct = Math.min(95, (elapsed / minLoad) * 95);
+        _loadingProgress += (targetPct - _loadingProgress) * 0.12;
         if (bar) bar.style.width = _loadingProgress + '%';
         _updateLoadingPhase(_loadingProgress);
     }, 200);
@@ -189,18 +212,21 @@ function _stopLoadingProgress() {
 
 function _startLoadingTips() {
     _stopLoadingTips();
-    // Start at random index so tip varies each load
-    _loadingTipIndex = Math.floor(Math.random() * _LOADING_TIPS.length);
+    // Phase 1 (0-5s): narrative only. Phase 2 (5s+): mechanics tips
+    const elapsed = Date.now() - _loadingStartTime;
+    const pool = elapsed < 5000 ? _TIPS_NARRATIVE : _TIPS_MECHANICS;
+    _loadingTipIndex = Math.floor(Math.random() * pool.length);
     const tipEl = document.getElementById('loading-tip');
-    if (tipEl) tipEl.textContent = _LOADING_TIPS[_loadingTipIndex];
+    if (tipEl) tipEl.textContent = pool[_loadingTipIndex];
     _loadingTipTimer = setInterval(() => {
-        _loadingTipIndex = (_loadingTipIndex + 1) % _LOADING_TIPS.length;
+        const now = Date.now() - _loadingStartTime;
+        const currentPool = now < 5000 ? _TIPS_NARRATIVE : _TIPS_MECHANICS;
+        _loadingTipIndex = (_loadingTipIndex + 1) % currentPool.length;
         const tipEl = document.getElementById('loading-tip');
         if (tipEl) {
-            // Crossfade transition (matching explore loading)
             tipEl.classList.add('tip-exit');
             setTimeout(() => {
-                tipEl.textContent = _LOADING_TIPS[_loadingTipIndex];
+                tipEl.textContent = currentPool[_loadingTipIndex];
                 tipEl.classList.remove('tip-exit');
                 tipEl.classList.add('tip-enter');
                 setTimeout(() => tipEl.classList.remove('tip-enter'), 350);
@@ -281,10 +307,24 @@ function _startSlowWarning() {
                 setTimeout(() => {
                     tipEl.textContent = _isRetryLoading
                         ? '⏳ Servidor demorando para responder...'
-                        : '⏳ Carregamento demorando mais que o normal...';
+                        : '⏳ Conexão lenta — verifique seu sinal ou tente novamente';
                     tipEl.style.opacity = '';
                     tipEl.classList.add('loading-tip-slow');
                 }, 300);
+            }
+            // Show retry button
+            const retryBtn = document.getElementById('loading-retry');
+            if (retryBtn) {
+                retryBtn.style.display = '';
+                retryBtn.onclick = () => {
+                    retryBtn.style.display = 'none';
+                    if (typeof init === 'function') {
+                        showLoading(true);
+                        init();
+                    } else {
+                        window.location.reload();
+                    }
+                };
             }
         }
     }, 10000);
