@@ -1677,6 +1677,8 @@ async function initAsync() {
     S.token = params.get('token') || '';
     S.apiBase = params.get('api') || '';
     S.uid = params.get('uid') || '';
+    // Set per-character localStorage key before any save/restore
+    if (typeof initCharKey === 'function') initCharKey();
 
     if (S.apiBase && window.ApiDiscovery) {
         ApiDiscovery.init(S.apiBase, function(newUrl) {

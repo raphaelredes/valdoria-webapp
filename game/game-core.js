@@ -31,6 +31,12 @@ function _restoreSession() {
         var d = JSON.parse(raw);
         // Expire after 30 minutes (aligned with server _SESSION_TTL = 1800s)
         if (Date.now() - d.ts > 30 * 60 * 1000) return false;
+        // Reject if stored charId doesn't match URL charId (cross-character guard)
+        if (S.charId && d.charId && S.charId !== d.charId) {
+            console.warn('[GAME] Stored session is for different character:', d.charId, 'vs', S.charId);
+            localStorage.removeItem(SESSION_KEY);
+            return false;
+        }
         if (!S.token && d.token) S.token = d.token;
         if (!S.apiBase && d.apiBase) S.apiBase = d.apiBase;
         if (!S.uid && d.uid) S.uid = d.uid;

@@ -79,7 +79,16 @@ let S = {
 };
 
 let tg = null;
-const STORAGE_KEY = 'valdoria_explore_state';
+// Per-character localStorage key (set in initCharKey from URL ?char= param)
+let STORAGE_KEY = 'valdoria_explore_state';
+
+function initCharKey() {
+    const charId = new URLSearchParams(window.location.search).get('char') || '';
+    if (charId) {
+        STORAGE_KEY = 'valdoria_explore_state_' + charId;
+        console.debug('[EXPLORE] Per-character storage key:', STORAGE_KEY);
+    }
+}
 
 // ═══════════════════════════════════════════════════════
 // SESSION PERSISTENCE
