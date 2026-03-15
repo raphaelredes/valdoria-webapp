@@ -3,15 +3,21 @@
 // ═══════════════════════════════════════════════════════
 
 const BIOME_PARTICLE_CONFIGS = {
-    forest:   [{ type: 'leaf', n: 4, color: 'rgba(80,140,40,0.5)', color2: 'rgba(140,100,30,0.4)' }],
+    forest:   [{ type: 'leaf', n: 4, color: 'rgba(80,140,40,0.5)', color2: 'rgba(140,100,30,0.4)' },
+               { type: 'mist', n: 1, color: 'rgba(60,120,40,0.08)' }],
     plains:   [{ type: 'leaf', n: 3, color: 'rgba(160,140,60,0.4)', color2: 'rgba(120,160,50,0.3)' }],
-    snow:     [{ type: 'snow', n: 6, color: 'rgba(220,230,255,0.6)' }],
+    snow:     [{ type: 'snow', n: 6, color: 'rgba(220,230,255,0.6)' },
+               { type: 'snow', n: 2, color: 'rgba(200,215,240,0.35)' }],
     desert:   [{ type: 'wisp', n: 3, color: 'rgba(180,160,100,0.25)' }],
-    volcanic: [{ type: 'ember', n: 5, color: 'rgba(255,100,0,0.7)', color2: 'rgba(255,200,50,0.5)' }],
-    swamp:    [{ type: 'mist', n: 3, color: 'rgba(150,170,140,0.08)' }],
-    graveyard:[{ type: 'mist', n: 3, color: 'rgba(140,140,160,0.06)' }],
-    cave:     [{ type: 'mist', n: 2, color: 'rgba(100,100,120,0.05)' }],
-    mountain: [{ type: 'mist', n: 2, color: 'rgba(180,180,200,0.06)' }, { type: 'leaf', n: 1, color: 'rgba(80,120,40,0.3)' }],
+    volcanic: [{ type: 'ember', n: 5, color: 'rgba(255,100,0,0.7)', color2: 'rgba(255,200,50,0.5)' },
+               { type: 'ember', n: 2, color: 'rgba(200,60,20,0.4)', color2: 'rgba(100,40,10,0.3)' }],
+    swamp:    [{ type: 'mist', n: 3, color: 'rgba(80,140,60,0.18)' },
+               { type: 'mist', n: 2, color: 'rgba(100,160,80,0.12)' }],
+    graveyard:[{ type: 'mist', n: 3, color: 'rgba(140,100,180,0.15)' },
+               { type: 'wisp', n: 2, color: 'rgba(160,120,200,0.10)' }],
+    cave:     [{ type: 'mist', n: 3, color: 'rgba(80,100,140,0.12)' }],
+    mountain: [{ type: 'mist', n: 2, color: 'rgba(180,190,210,0.12)' }, { type: 'leaf', n: 1, color: 'rgba(80,120,40,0.3)' },
+               { type: 'snow', n: 2, color: 'rgba(200,210,230,0.3)' }],
 };
 
 let _particles = [];
