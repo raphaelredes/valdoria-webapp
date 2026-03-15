@@ -803,6 +803,7 @@
     document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     </script>
 </head>
@@ -987,6 +988,10 @@
                     const apiBase = params.get('api');
                     const token = params.get('token');
                     const uid = params.get('uid');
+                    // [EXIT-CONFIRM] Heartbeat for displacement detection
+                    if (window.SessionHeartbeat && apiBase && token && uid) {
+                        SessionHeartbeat.init({ apiBase: apiBase, token: token, uid: parseInt(uid) || 0 });
+                    }
 
                     if (apiBase && token && uid && typeof crypto !== 'undefined') {
                         try {

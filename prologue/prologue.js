@@ -15,6 +15,10 @@ const params = new URLSearchParams(location.search);
 const TOKEN = params.get('token') || '';
 const API_BASE = (params.get('api') || '').replace(/\/$/, '');
 const USER_ID = parseInt(params.get('uid') || '0', 10);
+// [EXIT-CONFIRM] Heartbeat for displacement detection
+if (window.SessionHeartbeat && API_BASE && TOKEN && USER_ID) {
+    SessionHeartbeat.init({ apiBase: API_BASE, token: TOKEN, uid: USER_ID });
+}
 const MODE = params.get('mode') || 'full';
 const SHOW_PREFACE = params.get('preface') === '1';
 

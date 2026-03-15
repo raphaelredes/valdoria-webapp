@@ -865,6 +865,7 @@
     document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     </script>
 </head>
@@ -1083,6 +1084,10 @@
             token = params.get('token') || '';
             apiFallback = params.get('api') || '';
             userId = params.get('uid') || '';
+            // [EXIT-CONFIRM] Heartbeat for displacement detection
+            if (window.SessionHeartbeat && apiFallback && token && userId) {
+                SessionHeartbeat.init({ apiBase: apiFallback, token: token, uid: parseInt(userId) || 0 });
+            }
             returnTo = params.get('return') || '';
 
             // ── Shared Error Reporter ──

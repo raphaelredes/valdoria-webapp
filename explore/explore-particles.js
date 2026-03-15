@@ -18,6 +18,8 @@ const BIOME_PARTICLE_CONFIGS = {
     cave:     [{ type: 'mist', n: 3, color: 'rgba(80,100,140,0.12)' }],
     mountain: [{ type: 'mist', n: 2, color: 'rgba(180,190,210,0.12)' }, { type: 'leaf', n: 1, color: 'rgba(80,120,40,0.3)' },
                { type: 'snow', n: 2, color: 'rgba(200,210,230,0.3)' }],
+    ruins:    [{ type: 'wisp', n: 2, color: 'rgba(160,140,100,0.15)' },
+               { type: 'mist', n: 1, color: 'rgba(120,100,80,0.10)' }],
 };
 
 let _particles = [];

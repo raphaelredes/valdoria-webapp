@@ -712,6 +712,10 @@ if (window.ValdoriaErrors && _apiBase && ValdoriaErrors.updateConfig) {
 if (_apiBase && window.ApiDiscovery) {
     ApiDiscovery.init(_apiBase, function(newUrl) { _apiBase = newUrl; });
 }
+// [EXIT-CONFIRM] Heartbeat for displacement detection during inventory
+if (window.SessionHeartbeat && _apiBase && _apiToken && _apiUid) {
+    SessionHeartbeat.init({ apiBase: _apiBase, token: _apiToken, uid: parseInt(_apiUid) || 0 });
+}
 const _combatMode = _urlParams.get('combat') === '1';
 
 async function _navigateBack() {
@@ -734,9 +738,9 @@ async function _navigateBack() {
         return;
     }
 
-    // Auto-save pending ops and exit (no confirmation dialog)
+    // #4: Warn before exit if there are unsaved changes
     if (pendingOps.length > 0) {
-        sendOps();
+        _showPendingOpsExitConfirm();
         return;
     }
 
@@ -747,6 +751,20 @@ async function _navigateBack() {
     } else {
         await _performExit();
     }
+}
+
+function _showPendingOpsExitConfirm() {
+    hapticNotify('warning');
+    var html = '<div class="modal-handle"></div>';
+    html += '<div class="modal-title">' + vi('warn', 16) + ' Altera\u00e7\u00f5es Pendentes</div>';
+    html += '<div style="text-align:center;font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">';
+    html += 'Voc\u00ea tem <b style="color:var(--v-warning)">' + pendingOps.length + '</b> altera\u00e7\u00e3o(\u00f5es) n\u00e3o salvas.';
+    html += '</div>';
+    html += '<div class="detail-actions">';
+    html += '<button class="btn-discard" onclick="discardAndExit()">' + vi('trash', 13) + ' Descartar</button>';
+    html += '<button class="btn-equip" onclick="sendOps()">' + vi('save', 13) + ' Salvar e Sair</button>';
+    html += '</div>';
+    showModal(html);
 }
 
 async function _performExit() {

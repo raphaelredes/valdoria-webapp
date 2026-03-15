@@ -71,7 +71,7 @@ function _drawDecorationShadow(ctx, cx, cy, w, h) {
 }
 
 // Biomes where wind animates vegetation (outdoor environments)
-const WIND_BIOMES = new Set(['forest', 'plains', 'swamp', 'mountain', 'graveyard']);
+const WIND_BIOMES = new Set(['forest', 'plains', 'swamp', 'mountain', 'graveyard', 'ruins']);
 
 // ═══════════════════════════════════════════
 // DECORATION DRAWING FUNCTIONS
@@ -383,8 +383,117 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
             ctx.restore();
         }
 
+    } else if (biome === 'ruins') {
+        // Ruins: broken pillars with overgrown vines, crumbled stones
+        const px = cx + (r1 - 0.5) * 6;
+        const py = cy + (r2 - 0.5) * 3;
+        // Main broken pillar (tall, jagged top)
+        ctx.fillStyle = '#5a5040';
+        ctx.fillRect(px - 3, py - 10, 6, 13);
+        // Jagged broken top
+        ctx.fillStyle = '#6a5a48';
+        ctx.beginPath();
+        ctx.moveTo(px - 3, py - 10);
+        ctx.lineTo(px - 1, py - 13);
+        ctx.lineTo(px + 1, py - 11);
+        ctx.lineTo(px + 3, py - 14);
+        ctx.lineTo(px + 3, py - 10);
+        ctx.closePath();
+        ctx.fill();
+        // Pillar shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(px - 3, py - 10, 2, 13);
+        // Cracks
+        ctx.strokeStyle = '#3a3028';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(px - 1, py - 6);
+        ctx.lineTo(px + 1, py - 2);
+        ctx.moveTo(px + 2, py - 8);
+        ctx.lineTo(px, py - 5);
+        ctx.stroke();
+        // Vines growing up the pillar
+        ctx.strokeStyle = '#2a5a1a';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(px - 3, py);
+        ctx.quadraticCurveTo(px - 4, py - 5, px - 2, py - 9);
+        ctx.stroke();
+        // Vine leaves (small circles)
+        ctx.fillStyle = '#3a6a2a';
+        ctx.beginPath();
+        ctx.arc(px - 3.5, py - 3, 1.5, 0, Math.PI * 2);
+        ctx.arc(px - 3, py - 6, 1.2, 0, Math.PI * 2);
+        ctx.arc(px - 2.5, py - 8, 1, 0, Math.PI * 2);
+        ctx.fill();
+        // Second smaller broken pillar (70%)
+        if (r3 > 0.3) {
+            const px2 = cx + (r3 - 0.2) * 12;
+            const py2 = cy + (r4 - 0.4) * 4;
+            ctx.fillStyle = '#4a4538';
+            ctx.fillRect(px2 - 2, py2 - 5, 4, 7);
+            // Jagged top
+            ctx.beginPath();
+            ctx.moveTo(px2 - 2, py2 - 5);
+            ctx.lineTo(px2, py2 - 7);
+            ctx.lineTo(px2 + 2, py2 - 5);
+            ctx.closePath();
+            ctx.fill();
+        }
+        // Scattered rubble
+        ctx.fillStyle = '#5a5040';
+        ctx.beginPath();
+        ctx.arc(cx + 7, cy + 2, 1.5, 0, Math.PI * 2);
+        ctx.arc(cx + 5, cy + 3, 1, 0, Math.PI * 2);
+        ctx.arc(cx - 5, cy + 1, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+    } else if (biome === 'mountain') {
+        // Mountain: alpine pines (shorter, wind-bent) + boulder clusters
+        const tx = cx + (r1 - 0.5) * 6;
+        const ty = cy + (r2 - 0.5) * 3;
+        // Wind-bent alpine pine (main)
+        ctx.fillStyle = '#3a2a18';
+        ctx.fillRect(tx - 1, ty - 3, 2, 7);
+        // Asymmetric canopy (wind-bent right)
+        ctx.beginPath();
+        ctx.moveTo(tx - 1, ty - 10);
+        ctx.lineTo(tx + 6, ty - 2);
+        ctx.lineTo(tx - 5, ty - 2);
+        ctx.closePath();
+        ctx.fillStyle = '#1a4028';
+        ctx.fill();
+        // Smaller pine
+        if (r3 > 0.35) {
+            const tx2 = cx + (r3 - 0.3) * 10;
+            const ty2 = cy + (r4 - 0.4) * 4;
+            ctx.fillStyle = '#3a2a18';
+            ctx.fillRect(tx2 - 0.8, ty2 - 2, 1.6, 5);
+            ctx.beginPath();
+            ctx.moveTo(tx2, ty2 - 7);
+            ctx.lineTo(tx2 + 4, ty2 - 1);
+            ctx.lineTo(tx2 - 3.5, ty2 - 1);
+            ctx.closePath();
+            ctx.fillStyle = '#1a3a22';
+            ctx.fill();
+        }
+        // Boulder cluster
+        ctx.fillStyle = '#5a5a5a';
+        ctx.beginPath();
+        ctx.ellipse(cx + 6, cy + 2, 3, 2, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#4a4a4a';
+        ctx.beginPath();
+        ctx.ellipse(cx + 4, cy + 3, 2, 1.5, -0.1, 0, Math.PI * 2);
+        ctx.fill();
+        // Stone highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        ctx.beginPath();
+        ctx.ellipse(cx + 5, cy + 1.5, 2, 1, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+
     } else {
-        // Default conifer cluster (forest, mountain, volcanic)
+        // Default conifer cluster (forest, volcanic)
         const darkGreen = biome === 'volcanic' ? '#1a2a1a' : '#1a4a1a';
         const lightGreen = '#0d3a0d';
 
@@ -846,6 +955,106 @@ function drawGroundTexture(ctx, cx, cy, col, row, biome) {
             ctx.ellipse(cx + 3, cy + 1, 6, 2, 0.2, 0, Math.PI * 2);
             ctx.fill();
         }
+    } else if (biome === 'cave') {
+        // Small cave fungi clusters + tiny stones
+        if (tileRand(col, row, 120) > 0.6) {
+            var gx = cx + (tileRand(col, row, 121) - 0.5) * 10;
+            var gy = cy + (tileRand(col, row, 122) - 0.5) * 5;
+            ctx.fillStyle = 'rgba(60,160,100,0.15)';
+            ctx.beginPath();
+            ctx.arc(gx, gy, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(60,160,100,0.3)';
+            ctx.beginPath();
+            ctx.arc(gx, gy, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        // Tiny pebbles
+        if (tileRand(col, row, 125) > 0.5) {
+            ctx.fillStyle = 'rgba(60,60,70,0.3)';
+            ctx.beginPath();
+            ctx.arc(cx + 5, cy - 1, 0.8, 0, Math.PI * 2);
+            ctx.arc(cx - 4, cy + 2, 0.6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    } else if (biome === 'mountain') {
+        // Alpine rocks + sparse tiny flowers
+        if (tileRand(col, row, 120) > 0.5) {
+            ctx.fillStyle = '#5a5a60';
+            var rx = cx + (tileRand(col, row, 121) - 0.5) * 12;
+            var ry = cy + (tileRand(col, row, 122) - 0.5) * 5;
+            ctx.beginPath();
+            ctx.ellipse(rx, ry, 2, 1.2, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        // Tiny alpine flower (20%)
+        if (tileRand(col, row, 126) > 0.8) {
+            ctx.fillStyle = '#a0a0d0';
+            ctx.beginPath();
+            ctx.arc(cx + 6, cy - 1, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    } else if (biome === 'volcanic') {
+        // Scorched earth cracks + ash drifts
+        if (tileRand(col, row, 120) > 0.5) {
+            ctx.strokeStyle = 'rgba(100,40,10,0.2)';
+            ctx.lineWidth = 0.4;
+            var crx = cx + (tileRand(col, row, 121) - 0.5) * 12;
+            var cry = cy + (tileRand(col, row, 122) - 0.5) * 6;
+            ctx.beginPath();
+            ctx.moveTo(crx - 3, cry);
+            ctx.lineTo(crx + 3, cry + 1);
+            ctx.moveTo(crx, cry - 2);
+            ctx.lineTo(crx + 1, cry + 2);
+            ctx.stroke();
+        }
+        // Ash drift
+        if (tileRand(col, row, 127) > 0.7) {
+            ctx.fillStyle = 'rgba(50,40,30,0.12)';
+            ctx.beginPath();
+            ctx.ellipse(cx - 3, cy + 2, 4, 1.5, -0.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    } else if (biome === 'ruins') {
+        // Stone shards + moss patches
+        if (tileRand(col, row, 120) > 0.5) {
+            ctx.fillStyle = '#5a5040';
+            var sx = cx + (tileRand(col, row, 121) - 0.5) * 12;
+            var sy = cy + (tileRand(col, row, 122) - 0.5) * 6;
+            ctx.fillRect(sx - 1.5, sy - 0.5, 3, 1);
+            ctx.fillRect(sx + 3, sy + 1, 2, 0.8);
+        }
+        // Moss patch
+        if (tileRand(col, row, 126) > 0.6) {
+            ctx.fillStyle = 'rgba(60,100,40,0.12)';
+            ctx.beginPath();
+            ctx.ellipse(cx - 4, cy + 1, 3, 1.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    } else if (biome === 'graveyard') {
+        // Bone fragments + dead grass
+        if (tileRand(col, row, 120) > 0.7) {
+            ctx.fillStyle = '#7a7a6a';
+            var bx = cx + (tileRand(col, row, 121) - 0.5) * 10;
+            var by = cy + (tileRand(col, row, 122) - 0.5) * 5;
+            ctx.fillRect(bx - 2, by, 4, 0.6);
+            ctx.fillRect(bx + 1, by - 1, 0.6, 2.5);
+        }
+        // Dead grass tuft
+        if (tileRand(col, row, 128) > 0.6) {
+            ctx.strokeStyle = '#4a4a3a';
+            ctx.lineWidth = 0.5;
+            var gx2 = cx + (tileRand(col, row, 129) - 0.5) * 12;
+            var gy2 = cy + 2;
+            ctx.beginPath();
+            ctx.moveTo(gx2, gy2);
+            ctx.lineTo(gx2 - 1.5, gy2 - 3);
+            ctx.moveTo(gx2 + 1, gy2);
+            ctx.lineTo(gx2 + 2, gy2 - 2.5);
+            ctx.moveTo(gx2 - 0.5, gy2);
+            ctx.lineTo(gx2 - 2, gy2 - 2);
+            ctx.stroke();
+        }
     }
 }
 
@@ -1282,8 +1491,106 @@ function drawTreeDecorationWind(ctx, cx, cy, biome, col, row, timestamp) {
             ctx.restore();
         }
 
+    } else if (biome === 'mountain') {
+        // Mountain: wind-bent alpine pine with sway
+        const tx = cx + (r1 - 0.5) * 6;
+        const ty = cy + (r2 - 0.5) * 3;
+        ctx.fillStyle = '#3a2a18';
+        ctx.fillRect(tx - 1, ty - 3, 2, 7);
+        // Wind-bent canopy (sways more)
+        ctx.beginPath();
+        ctx.moveTo(tx - 1 + wind * 0.3, ty - 10);
+        ctx.lineTo(tx + 6 + wind * 0.8, ty - 2);
+        ctx.lineTo(tx - 5, ty - 2);
+        ctx.closePath();
+        ctx.fillStyle = '#1a4028';
+        ctx.fill();
+        // Smaller pine with wind
+        if (r3 > 0.35) {
+            const tx2 = cx + (r3 - 0.3) * 10;
+            const ty2 = cy + (r4 - 0.4) * 4;
+            ctx.fillStyle = '#3a2a18';
+            ctx.fillRect(tx2 - 0.8, ty2 - 2, 1.6, 5);
+            ctx.beginPath();
+            ctx.moveTo(tx2 + wind2 * 0.2, ty2 - 7);
+            ctx.lineTo(tx2 + 4 + wind2 * 0.6, ty2 - 1);
+            ctx.lineTo(tx2 - 3.5, ty2 - 1);
+            ctx.closePath();
+            ctx.fillStyle = '#1a3a22';
+            ctx.fill();
+        }
+        // Boulders (static)
+        ctx.fillStyle = '#5a5a5a';
+        ctx.beginPath();
+        ctx.ellipse(cx + 6, cy + 2, 3, 2, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#4a4a4a';
+        ctx.beginPath();
+        ctx.ellipse(cx + 4, cy + 3, 2, 1.5, -0.1, 0, Math.PI * 2);
+        ctx.fill();
+
+    } else if (biome === 'ruins') {
+        // Ruins: pillars (static) + vine sway in wind
+        const px = cx + (r1 - 0.5) * 6;
+        const py = cy + (r2 - 0.5) * 3;
+        // Pillar (static)
+        ctx.fillStyle = '#5a5040';
+        ctx.fillRect(px - 3, py - 10, 6, 13);
+        ctx.fillStyle = '#6a5a48';
+        ctx.beginPath();
+        ctx.moveTo(px - 3, py - 10);
+        ctx.lineTo(px - 1, py - 13);
+        ctx.lineTo(px + 1, py - 11);
+        ctx.lineTo(px + 3, py - 14);
+        ctx.lineTo(px + 3, py - 10);
+        ctx.closePath();
+        ctx.fill();
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(px - 3, py - 10, 2, 13);
+        // Cracks
+        ctx.strokeStyle = '#3a3028';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(px - 1, py - 6);
+        ctx.lineTo(px + 1, py - 2);
+        ctx.stroke();
+        // Vine with wind sway (living animation!)
+        ctx.strokeStyle = '#2a5a1a';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(px - 3, py);
+        ctx.quadraticCurveTo(px - 4 + wind * 0.3, py - 5, px - 2 + wind * 0.5, py - 9);
+        ctx.stroke();
+        // Vine leaves sway
+        ctx.fillStyle = '#3a6a2a';
+        ctx.beginPath();
+        ctx.arc(px - 3.5 + wind * 0.2, py - 3, 1.5, 0, Math.PI * 2);
+        ctx.arc(px - 3 + wind * 0.3, py - 6, 1.2, 0, Math.PI * 2);
+        ctx.arc(px - 2.5 + wind * 0.4, py - 8, 1, 0, Math.PI * 2);
+        ctx.fill();
+        // Second pillar
+        if (r3 > 0.3) {
+            const px2 = cx + (r3 - 0.2) * 12;
+            const py2 = cy + (r4 - 0.4) * 4;
+            ctx.fillStyle = '#4a4538';
+            ctx.fillRect(px2 - 2, py2 - 5, 4, 7);
+            ctx.beginPath();
+            ctx.moveTo(px2 - 2, py2 - 5);
+            ctx.lineTo(px2, py2 - 7);
+            ctx.lineTo(px2 + 2, py2 - 5);
+            ctx.closePath();
+            ctx.fill();
+        }
+        // Rubble (static)
+        ctx.fillStyle = '#5a5040';
+        ctx.beginPath();
+        ctx.arc(cx + 7, cy + 2, 1.5, 0, Math.PI * 2);
+        ctx.arc(cx - 5, cy + 1, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
     } else {
-        // Default conifer with swaying tips (forest, mountain)
+        // Default conifer with swaying tips (forest)
         const darkGreen = '#1a4a1a';
         const lightGreen = '#0d3a0d';
 

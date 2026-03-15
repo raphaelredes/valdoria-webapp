@@ -46,6 +46,10 @@ async function initDungeon() {
         S.token = params.get('token') || '';
         S.api = params.get('api') || '';
         S.uid = parseInt(params.get('uid') || '0');
+        // [EXIT-CONFIRM] Heartbeat for displacement detection
+        if (window.SessionHeartbeat && S.api && S.token && S.uid) {
+            SessionHeartbeat.init({ apiBase: S.api, token: S.token, uid: S.uid });
+        }
         S.returnTo = params.get('return') || 'game';
 
         // Init error reporter
