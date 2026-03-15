@@ -329,8 +329,8 @@ function _showGuardOverlay(roll, r1, r2, mode, totalMod, proficient, dc, success
     const overlay = document.getElementById('check-overlay');
     const formulaEl = document.getElementById('check-formula');
     const resultEl = document.getElementById('check-result');
-    const diceContainer = document.getElementById('check-dice-container');
-    const diceCanvas = document.getElementById('check-dice-canvas');
+    const diceContainer = document.getElementById('dice3d-wrapper');
+    const diceCanvas = document.getElementById('dice3d-canvas');
 
     if (!overlay) {
         doLongRest();
@@ -372,7 +372,10 @@ function _showGuardOverlay(roll, r1, r2, mode, totalMod, proficient, dc, success
         if (diceCanvas && typeof Dice3D !== 'undefined') {
             try {
                 if (window._checkDice) { window._checkDice.dispose(); window._checkDice = null; }
+                // Dispose shared skill check dice to release the container
+                if (typeof _dice3d !== 'undefined' && _dice3d) { _dice3d.dispose(); _dice3d = null; }
                 diceCanvas.style.display = 'block';
+                diceCanvas.innerHTML = ''; // Clear any leftover canvas elements
                 window._checkDice = new Dice3D(diceCanvas, { size: 120, dieType: 'd20', duration: 1200 });
                 window._checkDice.roll(roll, function() {
                     if (window.vHaptic) vHaptic.medium();
@@ -1240,6 +1243,22 @@ function showReturnJourneyStep() {
         _showArrivalScreen();
         return;
     }
+
+    // Play short travel animation between steps (silhouette walking)
+    if (typeof playTravelAnimation === 'function' && j.currentStep > 1) {
+        const biome = S.biome || 'forest';
+        const remaining = j.totalSteps - j.currentStep + 1;
+        playTravelAnimation(biome, '', function() {
+            _renderReturnStep();
+        }, { duration: 2000 });
+        return;
+    }
+    _renderReturnStep();
+}
+
+function _renderReturnStep() {
+    const j = _returnJourney;
+    if (!j) return;
 
     // Determine step type: encounter (from randomEncounters), hazard (skill check), or safe
     const roll = Math.random() * 100;

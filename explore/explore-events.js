@@ -325,6 +325,24 @@ function showChoices(poi) {
     const choicesEl = document.getElementById('dm-choices');
     choicesEl.innerHTML = '';
 
+    // Fallback for empty/missing choices — prevent stuck overlay
+    if (!poi.choices || poi.choices.length === 0) {
+        console.warn('[EXPLORE] POI has no choices, adding fallback button:', poi.id);
+        const btn = document.createElement('button');
+        btn.className = 'dm-choice-btn';
+        btn.innerHTML = '<span class="choice-label">Prosseguir…</span>';
+        btn.addEventListener('click', () => {
+            if (typeof deactivateOverlay === 'function') deactivateOverlay('dm-overlay');
+            else document.getElementById('dm-overlay').classList.remove('active');
+            S.poisResolved.add(poi.id);
+            if (poi.xp) { S.xpEarned += poi.xp; updateRewards(); }
+            logMoveEvent([{type: 'poi_empty', id: poi.id}]);
+            saveState();
+        });
+        choicesEl.appendChild(btn);
+        return;
+    }
+
     (poi.choices || []).forEach((ch, idx) => {
         const btn = document.createElement('button');
         btn.className = 'dm-choice-btn';
@@ -1263,12 +1281,13 @@ function showTerrainToast(message, type) {
         const toast = document.createElement('div');
         toast.id = 'terrain-toast-el';
         toast.textContent = message;
-        toast.style.cssText = 'position:fixed;top:50px;left:50px;right:50px;' +
-            'padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;' +
+        toast.style.cssText = 'position:fixed;top:50%;left:40px;right:40px;' +
+            'transform:translateY(-50%);' +
+            'padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;' +
             'pointer-events:none;z-index:99999;text-align:center;' +
-            'animation:toastSlideIn 0.3s ease-out;' +
-            'backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);' +
-            'box-shadow:0 4px 16px rgba(0,0,0,0.5),inset 0 1px 0 rgba(196,149,58,0.08);' +
+            'animation:toastFadeIn 0.3s ease-out;' +
+            'backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);' +
+            'box-shadow:0 4px 24px rgba(0,0,0,0.6),inset 0 1px 0 rgba(196,149,58,0.1);' +
             'text-shadow:0 1px 3px rgba(0,0,0,0.7);' + theme;
         document.body.appendChild(toast);
 
@@ -1277,7 +1296,7 @@ function showTerrainToast(message, type) {
         setTimeout(() => {
             toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
             toast.style.opacity = '0';
-            toast.style.transform = 'translateY(-10px)';
+            toast.style.transform = 'translateY(-50%) scale(0.95)';
             setTimeout(() => toast.remove(), 300);
         }, duration);
     } catch (err) {

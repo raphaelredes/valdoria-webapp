@@ -95,7 +95,7 @@
                 cursor.remove();
                 el.removeEventListener('click', skipTyping);
                 if (opts.paginate) {
-                    var postMs = Math.max(1800, Math.min(3500, text.length * 12));
+                    var postMs = Math.max(600, Math.min(1500, text.length * 8));
                     setTimeout(function() {
                         if (isLast) { if (onDone) onDone(); }
                         else { _showContinue(el, pages, pageIdx, total, onDone, opts); }

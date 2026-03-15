@@ -53,7 +53,8 @@ let _travelRaf = 0;
  * @param {string} regionName - Display name ("Pântano Nebuloso")
  * @param {Function} onComplete - Called when animation ends or is skipped
  */
-function playTravelAnimation(biome, regionName, onComplete) {
+function playTravelAnimation(biome, regionName, onComplete, opts) {
+    opts = opts || {};
     // Skip for reduced motion
     if (window.vReducedMotion) {
         onComplete();
@@ -140,7 +141,7 @@ function playTravelAnimation(biome, regionName, onComplete) {
 
     let _done = false;
     const startTime = performance.now();
-    const DURATION = 4500;
+    const DURATION = opts.duration || 4500;
 
     const finish = () => {
         if (_done) return;
