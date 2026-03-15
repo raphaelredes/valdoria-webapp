@@ -30,7 +30,7 @@ function updateBottomPadding() {
         // Skip if panel is collapsed (immersive mode handles padding)
         if (panelEl.classList.contains('immersive-collapsed')) return;
 
-        const h = panelEl.offsetHeight;
+        const h = Math.max(panelEl.offsetHeight, 100);
         screenEl.style.paddingBottom = (h + 8) + 'px';
         document.documentElement.style.setProperty('--bottom-panel-h', h + 'px');
 

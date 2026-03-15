@@ -488,21 +488,21 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
 .footer-row .btn-action {
     flex: 1;
     padding: 8px 3px;
-    min-height: 40px;
+    min-height: 44px;
     font-size: 12px;
 }
 
 .footer-nav .btn-action {
     font-size: 14px; /* icon buttons */
     padding: 8px;
-    min-height: 40px;
+    min-height: 44px;
 }
 
 /* Footer toggle button (expand/collapse nav row) */
 .footer-toggle-btn {
     flex: 0 0 auto !important;
     width: 36px;
-    min-height: 40px;
+    min-height: 44px;
     padding: 8px 3px !important;
     font-size: 14px !important;
     color: var(--v-text-dim) !important;
