@@ -153,8 +153,8 @@
     animation: initBtnPulse 2.5s ease-in-out infinite;
 }
 @keyframes initBtnPulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(196,149,58,0.15), inset 0 1px 0 rgba(255,255,255,0.05); border-color: rgba(196,149,58,0.5); }
-    50% { box-shadow: 0 0 30px rgba(196,149,58,0.3), 0 0 8px rgba(196,149,58,0.15), inset 0 1px 0 rgba(255,255,255,0.08); border-color: rgba(196,149,58,0.7); }
+    0%, 100% { opacity: 0.85; border-color: rgba(196,149,58,0.5); }
+    50% { opacity: 1; border-color: rgba(196,149,58,0.7); }
 }
 .init-hero-btn:active {
     transform: scale(0.96);
@@ -201,8 +201,8 @@
 }
 .death-save-roll { color: var(--v-danger-light) !important; }
 @keyframes deathSavePulse {
-    0%, 100% { box-shadow: inset 0 0 60px rgba(120,20,20,0.3); }
-    50% { box-shadow: inset 0 0 100px rgba(180,30,30,0.5); }
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
 }
 .dmg-dice3d-canvas {
     width: clamp(120px, 48vw, 180px); height: clamp(120px, 48vw, 180px);

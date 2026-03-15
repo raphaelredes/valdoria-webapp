@@ -31,7 +31,7 @@ function getDice3D() {
     const particles = document.getElementById('dice3d-particles');
     if (!container) { console.warn('[EXPLORE] dice3d-canvas not found'); return null; }
     if (typeof Dice3D === 'undefined') { console.warn('[EXPLORE] Dice3D class not defined, THREE:', typeof THREE); return null; }
-    console.log('[EXPLORE] getDice3D: container', container.offsetWidth + 'x' + container.offsetHeight, 'THREE:', typeof THREE);
+    // console.log removed for production
     if (_dice3d) {
         _dice3d.dispose();
         _dice3d = null;

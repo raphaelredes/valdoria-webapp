@@ -5,6 +5,10 @@
    recovery bar animations. Matches loading screen quality.
    ═══════════════════════════════════════════════════════════════ */
 
+// Set performance tier class on body for CSS particle reduction
+    var _perfTier = window._valdoriaPerformanceTier || 'full';
+    if (_perfTier !== 'full') document.body.classList.add('perf-' + _perfTier);
+
 // ─── Utility: pick random from array ───
 function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 

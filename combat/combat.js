@@ -1042,12 +1042,14 @@ function startTimer(seconds) {
     _timerRemaining = seconds;
     _timerDeadline = Date.now() + seconds * 1000;
 
+    const _timerBar = document.getElementById('timerBar');
+    const _timerText = document.getElementById('timerText');
     _timerInterval = setInterval(() => {
         // Use absolute deadline instead of decrement to survive tab switches
         _timerRemaining = Math.max(0, (_timerDeadline - Date.now()) / 1000);
 
-        const bar = document.getElementById('timerBar');
-        const text = document.getElementById('timerText');
+        const bar = _timerBar;
+        const text = _timerText;
         if (!bar || !text) { stopTimer(); return; }
 
         if (_timerRemaining <= 0) {

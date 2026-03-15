@@ -38,6 +38,11 @@ var SessionHeartbeat = (function () {
     function stop() {
         if (_timer) { clearInterval(_timer); _timer = null; }
         if (_inactivityTimer) { clearTimeout(_inactivityTimer); _inactivityTimer = null; }
+        // Remove all event listeners to prevent memory leaks
+        document.removeEventListener('visibilitychange', _onVisibilityChange);
+        ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (evt) {
+            document.removeEventListener(evt, _resetInactivityTimer);
+        });
     }
 
     // --- Client-side inactivity detection ---

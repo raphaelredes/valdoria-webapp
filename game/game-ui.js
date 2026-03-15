@@ -773,8 +773,8 @@ function _audioRow(label, enabled, volume, onToggle, onVolume) {
             slider.style.setProperty('--fill', val + '%');
             onVolume(val);
         });
-        slider.addEventListener('touchstart', (e) => e.stopPropagation());
-        slider.addEventListener('touchmove', (e) => e.stopPropagation());
+        slider.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+        slider.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
 
         sliderWrap.appendChild(slider);
         sliderWrap.appendChild(pct);

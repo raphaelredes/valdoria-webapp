@@ -142,11 +142,15 @@ function initDungeonParticles() {
     _dPartCanvas.width = Math.min(430, window.innerWidth);
     _dPartCanvas.height = window.innerHeight;
 
+    var _dungeonResizeDebounce;
     window.addEventListener('resize', () => {
-        if (_dPartCanvas) {
-            _dPartCanvas.width = Math.min(430, window.innerWidth);
-            _dPartCanvas.height = window.innerHeight;
-        }
+        clearTimeout(_dungeonResizeDebounce);
+        _dungeonResizeDebounce = setTimeout(() => {
+            if (_dPartCanvas) {
+                _dPartCanvas.width = Math.min(430, window.innerWidth);
+                _dPartCanvas.height = window.innerHeight;
+            }
+        }, 150);
     });
 
     const theme = BIOME_PARTICLES[S.biome] || BIOME_PARTICLES.cave;

@@ -456,3 +456,14 @@
     .inn-bar-fill { transition: none; }
     .inn-title.shimmer { animation: none; }
 }
+
+/* ─── PERFORMANCE: reduce particles on weak devices ─── */
+@media (prefers-reduced-motion: reduce) {
+    .inn-particle { display: none !important; }
+    .inn-vignette { animation: none !important; opacity: 0.5; }
+}
+/* Medium tier: reduce particle count */
+body.perf-medium .inn-particle.firefly,
+body.perf-medium .inn-particle:nth-child(n+5) { display: none !important; }
+body.perf-lite .inn-particle { display: none !important; }
+body.perf-lite .inn-vignette { animation: none !important; opacity: 0.5; }

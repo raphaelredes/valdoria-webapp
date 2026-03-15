@@ -732,7 +732,8 @@ const ValdoriaAudio = (() => {
         }
         setTimeout(_updateOffset, 300);
         setTimeout(_updateOffset, 1000);
-        window.addEventListener('resize', _updateOffset);
+        var _audioResizeDebounce;
+        window.addEventListener('resize', function() { clearTimeout(_audioResizeDebounce); _audioResizeDebounce = setTimeout(_updateOffset, 150); });
 
         // Remove old mute button if present
         const oldBtn = document.querySelector('.audio-mute-btn');

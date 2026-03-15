@@ -1205,7 +1205,7 @@ function onMoveComplete(col, row) {
 
     // ── PRIORITY 1: EXIT CHECK (highest priority — exploration ends here) ──
     if (col === S.exitCol && row === S.exitRow) {
-        console.log('[EXPLORE] Exit reached at', col, row);
+        // console.log removed for production
         if (typeof flashScreen === 'function') flashScreen('rgba(196,149,58,0.2)');
         spawnFloatingText(col, row, 'portal...', '#c4953a', 'big');
         try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) { /* haptic optional */ }

@@ -42,7 +42,11 @@ function initParticles() {
     if (!_particleCanvas) return;
     _particleCtx = _particleCanvas.getContext('2d');
     _resizeParticleCanvas();
-    window.addEventListener('resize', _resizeParticleCanvas);
+    var _resizeDebounce;
+    window.addEventListener('resize', function() {
+        clearTimeout(_resizeDebounce);
+        _resizeDebounce = setTimeout(_resizeParticleCanvas, 150);
+    });
 }
 
 function _resizeParticleCanvas() {
