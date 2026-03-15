@@ -132,6 +132,8 @@ function renderBankTab(c) {
 //  ITEM DETAIL MODAL
 // ══════════════════════════════════════════════════════════
 function openItemDetail(name) {
+    // Phase 3: Mark item as viewed (removes blue dot)
+    if (typeof markItemViewed === 'function') markItemViewed(name);
     const it = getItemData(name);
     const inv = localInv.find(i => i.n === name);
     const qty = inv ? inv.q : 0;
@@ -207,7 +209,7 @@ function openItemDetail(name) {
         html += '</div>';
     }
 
-    // Comparison with equipped (if equippable) — always show
+    // Comparison with equipped (if equippable) — Diablo IV style panel
     if (it.s) {
         const slot = resolveSlot(it);
         const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
@@ -217,17 +219,7 @@ function openItemDetail(name) {
                     <span style="color:var(--v-success);">${vi_f('check', 13)} Equipado neste slot</span>
                 </div>`;
         } else {
-            const currentIt = currentItem ? getItemData(currentItem) : { ac: 0, b: 0, hb: 0, mb: 0 };
-            const delta = getStatDelta(it, currentIt, slot);
-            if (currentItem) {
-                html += `<div style="margin-top:8px;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;">
-                        <span style="color:var(--v-text-dim);">vs ${currentItem}:</span> ${delta || '<span style="color:var(--v-text-dim);">sem diferença</span>'}
-                    </div>`;
-            } else if (delta) {
-                html += `<div style="margin-top:8px;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;">
-                        <span style="color:var(--v-success);">${vi('sword', 12)} Slot vazio — equipar dá:</span> ${delta}
-                    </div>`;
-            }
+            html += _buildComparisonPanel(it, currentItem, slot);
         }
     }
 
@@ -267,6 +259,76 @@ function openItemDetail(name) {
     html += '</div>';
 
     showModal(html);
+}
+
+// ── Diablo IV-style Comparison Panel ──
+function _buildComparisonPanel(newIt, currentItemName, slot) {
+    const curIt = currentItemName ? getItemData(currentItemName) : null;
+    const stats = [
+        { key: 'ac', label: 'CA', icon: 'shield' },
+        { key: 'b', label: 'ATK', icon: 'sword' },
+        { key: 'hb', label: 'HP', icon: 'heart' },
+        { key: 'mb', label: 'MP', icon: 'orb' },
+    ];
+
+    let newDmg = 0, curDmg = 0;
+    if (newIt.dd) { const m = newIt.dd.match(/(\d+)d(\d+)/); if (m) newDmg = parseInt(m[1]) * (parseInt(m[2]) + 1) / 2; }
+    if (curIt && curIt.dd) { const m = curIt.dd.match(/(\d+)d(\d+)/); if (m) curDmg = parseInt(m[1]) * (parseInt(m[2]) + 1) / 2; }
+    const showDmg = newDmg > 0 || curDmg > 0;
+
+    let totalDelta = 0;
+    let rows = '';
+
+    stats.forEach(s => {
+        const nv = newIt[s.key] || 0;
+        const cv = curIt ? (curIt[s.key] || 0) : 0;
+        const d = nv - cv;
+        if (nv === 0 && cv === 0) return;
+        totalDelta += d;
+        const cls = d > 0 ? 'cp-up' : d < 0 ? 'cp-down' : 'cp-same';
+        const sign = d > 0 ? '+' : '';
+        rows += `<div class="cp-row">
+            <span class="cp-label">${vi(s.icon, 12)} ${s.label}</span>
+            <span class="cp-cur">${cv}</span>
+            <span class="cp-arrow">→</span>
+            <span class="cp-new ${cls}">${nv}</span>
+            <span class="cp-delta ${cls}">${d !== 0 ? sign + d : '—'}</span>
+        </div>`;
+    });
+
+    if (showDmg) {
+        const d = Math.round((newDmg + (newIt.b || 0)) - (curDmg + (curIt ? curIt.b || 0 : 0)));
+        totalDelta += d;
+        const cls = d > 0 ? 'cp-up' : d < 0 ? 'cp-down' : 'cp-same';
+        const sign = d > 0 ? '+' : '';
+        const nvStr = newDmg > 0 ? newIt.dd + (newIt.b ? '+' + newIt.b : '') : '—';
+        const cvStr = curDmg > 0 ? curIt.dd + (curIt.b ? '+' + curIt.b : '') : '—';
+        rows += `<div class="cp-row">
+            <span class="cp-label">${vi('target', 12)} Dano</span>
+            <span class="cp-cur">${cvStr}</span>
+            <span class="cp-arrow">→</span>
+            <span class="cp-new ${cls}">${nvStr}</span>
+            <span class="cp-delta ${cls}">${d !== 0 ? sign + d : '—'}</span>
+        </div>`;
+    }
+
+    if (!rows) return '';
+
+    const summaryClass = totalDelta > 0 ? 'cp-up' : totalDelta < 0 ? 'cp-down' : 'cp-same';
+    const summarySign = totalDelta > 0 ? '+' : '';
+    const summaryText = totalDelta > 0 ? 'Melhoria' : totalDelta < 0 ? 'Perda' : 'Equivalente';
+    const vsLabel = currentItemName ? `vs ${currentItemName}` : 'Slot vazio';
+
+    return `<div class="comparison-panel">
+        <div class="cp-header">
+            <span class="cp-title">${vi('sword', 13)} Comparação</span>
+            <span class="cp-vs">${vsLabel}</span>
+        </div>
+        ${rows}
+        <div class="cp-summary ${summaryClass}">
+            ${summaryText}: <b>${summarySign}${totalDelta}</b>
+        </div>
+    </div>`;
 }
 
 function detailRow(label, val, cls) {
@@ -358,13 +420,12 @@ function openSlotModal(slot) {
         html += '<div style="text-align:center;color:var(--v-text-dim);padding:12px;">Slot vazio</div>';
     }
 
-    // Compatible items from inventory — sorted by stat delta (upgrades first)
+    // Compatible items — compact 4-col quick-preview grid
     html += `<div class="section-title">${vi('bag', 14)} Itens Compatíveis</div>`;
     const compatItems = getCompatibleItems(slot);
     if (compatItems.length === 0) {
         html += '<div style="font-size:12px;color:var(--v-text-dim);text-align:center;">Nenhum item compatível no inventário.</div>';
     } else {
-        // Pre-compute deltas for sorting
         const withDelta = compatItems.map(ci => {
             const cit = getItemData(ci.name);
             const { cls: compCls, delta, score } = compareItemsDetailed(cit, it, slot);
@@ -372,15 +433,16 @@ function openSlotModal(slot) {
         });
         withDelta.sort((a, b) => b.score - a.score);
 
-        html += '<div class="compat-list">';
-        withDelta.forEach(({ ci, cit, compCls, delta }) => {
-            html += `<div class="compat-item ${compCls}" onclick="doEquip('${esc(ci.name)}','${slot}')">
-                    <span class="compat-emoji">${cit?.e || '📦'}</span>
-                    <div class="compat-info">
-                        <div class="compat-name v-rarity-${cit?.r || 'common'}">${ci.name}</div>
-                        <div class="compat-stats">${getItemShortDesc(ci.name, cit)}</div>
-                    </div>
-                    ${delta}
+        html += '<div class="compat-quick-grid">';
+        withDelta.forEach(({ ci, cit, compCls, score }) => {
+            const arrow = compCls === 'better' ? '<span class="cq-badge cq-up">▲</span>'
+                        : compCls === 'worse' ? '<span class="cq-badge cq-down">▼</span>'
+                        : '';
+            const rarity = cit?.r || 'common';
+            html += `<div class="cq-item rarity-${rarity}" onclick="doEquip('${esc(ci.name)}','${slot}')">
+                    ${arrow}
+                    <div class="cq-emoji">${cit?.e || '📦'}</div>
+                    <div class="cq-name v-rarity-${rarity}">${ci.name}</div>
                 </div>`;
         });
         html += '</div>';

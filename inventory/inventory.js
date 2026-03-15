@@ -31,6 +31,8 @@ let localAC = 0;            // Dynamic AC (recalculated on equip/unequip)
 let activeTarget = 'player'; // 'player' or npc_id
 let selectionMode = false;
 let selectedItems = new Set(); // item names selected for batch ops
+let viewMode = localStorage.getItem('valdoria_inv_view') || 'compact'; // 'compact' or 'detailed'
+let viewedItems = null; // Set of item names the player has viewed (detail modal)
 
 // ── SVG Icon System (medieval line art) ──
 const _IC = {
@@ -79,6 +81,9 @@ const _IC = {
     food: '<circle cx="10" cy="10" r="5"/><path d="M14 14l6 6"/><line x1="14" y1="7" x2="17" y2="7"/>',
     stealth: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/><line x1="4" y1="20" x2="20" y2="4" stroke-width="2"/>',
     tent: '<path d="M3 20L12 4l9 16z"/><line x1="12" y1="4" x2="12" y2="20"/><path d="M8 20c0-2 2-4 4-4s4 2 4 4"/>',
+    // Body silhouette (gender-neutral) for equipment view
+    gridView: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+    listView: '<rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/>',
     // Body silhouette (gender-neutral) for equipment view
     body_silhouette: '<path d="M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" fill="rgba(255,255,255,0.06)" stroke-width="0.8"/>' +
         '<path d="M8 9h8c1 0 2 1 2.5 3l1 4h-3l-.5-3H16v9h-3v-5h-2v5H8v-9h0l-.5 3H4.5l1-4C6 10 7 9 8 9z" fill="rgba(255,255,255,0.06)" stroke-width="0.8"/>',
@@ -202,6 +207,7 @@ function init() {
     document.body.style.paddingBottom = (panel ? panel.offsetHeight + 12 : 80) + 'px';
 
     hideLoading();
+    _initViewedItems();
     updateHeader();
     buildTabs();
     renderTab();
@@ -601,6 +607,49 @@ function toast(msg, type) {
 function esc(s) {
     return (s || '').replace(/\\/g, '\\\\').replace(/&/g, '&amp;').replace(/</g, '&lt;')
         .replace(/>/g, '&gt;').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// ── New Item Tracking (blue dot) ──
+function _initViewedItems() {
+    try {
+        const stored = localStorage.getItem('valdoria_inv_viewed');
+        if (stored) {
+            viewedItems = new Set(JSON.parse(stored));
+        } else {
+            // First visit: mark all current items as viewed (avoid flood of dots)
+            viewedItems = new Set(localInv.map(i => i.n));
+            _saveViewedItems();
+        }
+    } catch(e) {
+        viewedItems = new Set(localInv.map(i => i.n));
+    }
+}
+
+function _saveViewedItems() {
+    try {
+        localStorage.setItem('valdoria_inv_viewed', JSON.stringify([...viewedItems]));
+    } catch(e) {}
+}
+
+function isNewItem(name) {
+    if (!viewedItems) return false;
+    return !viewedItems.has(name);
+}
+
+function markItemViewed(name) {
+    if (!viewedItems) return;
+    if (!viewedItems.has(name)) {
+        viewedItems.add(name);
+        _saveViewedItems();
+    }
+}
+
+// ── View Mode Toggle ──
+function toggleViewMode() {
+    viewMode = viewMode === 'compact' ? 'detailed' : 'compact';
+    try { localStorage.setItem('valdoria_inv_view', viewMode); } catch(e) {}
+    haptic('light');
+    renderTab();
 }
 
 // ── Start ──
