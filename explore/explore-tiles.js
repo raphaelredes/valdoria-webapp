@@ -607,35 +607,81 @@ function drawRockDecoration(ctx, cx, cy, col, row) {
 
 function drawWaterDecoration(ctx, cx, cy, timestamp, deep) {
     const t = (timestamp || 0) * 0.001;
-    const alpha = deep ? 0.18 : 0.25;
-    ctx.strokeStyle = `rgba(180,220,255,${alpha})`;
-    ctx.lineWidth = 0.8;
-    // 2-3 wave lines
-    for (let i = 0; i < (deep ? 3 : 3); i++) {
-        const y = cy - 4 + i * 4;
+
+    // Reflective sheen (gradient overlay — subtle surface reflection)
+    var reflAlpha = deep ? 0.06 : 0.1;
+    var reflGrad = ctx.createLinearGradient(cx - 10, cy - 6, cx + 10, cy + 4);
+    reflGrad.addColorStop(0, 'rgba(140,200,255,' + reflAlpha + ')');
+    reflGrad.addColorStop(0.5, 'rgba(200,240,255,' + (reflAlpha * 0.4) + ')');
+    reflGrad.addColorStop(1, 'rgba(100,180,240,' + (reflAlpha * 0.3) + ')');
+    ctx.fillStyle = reflGrad;
+    ctx.fillRect(cx - 14, cy - 8, 28, 16);
+
+    // Wave lines (3-4 for more coverage)
+    var waveCount = deep ? 4 : 3;
+    var alpha = deep ? 0.15 : 0.22;
+    for (var i = 0; i < waveCount; i++) {
+        ctx.strokeStyle = 'rgba(180,220,255,' + (alpha - i * 0.03) + ')';
+        ctx.lineWidth = deep ? 0.6 : 0.8;
+        var y = cy - 5 + i * 3.5;
         ctx.beginPath();
-        for (let x = cx - 14; x <= cx + 14; x += 2) {
-            const wy = y + Math.sin((x + t * 40 + i * 30) * 0.15) * 3;
+        for (var x = cx - 14; x <= cx + 14; x += 2) {
+            var wy = y + Math.sin((x + t * 40 + i * 30) * 0.15) * (deep ? 2 : 3);
             if (x === cx - 14) ctx.moveTo(x, wy);
             else ctx.lineTo(x, wy);
         }
         ctx.stroke();
     }
-    // Sparkle on shallow water
+
+    // Sparkles (2 on shallow, 1 on deep)
+    var sparkleCount = deep ? 1 : 2;
+    for (var si = 0; si < sparkleCount; si++) {
+        var sPhase = t * (1.5 + si * 0.7) + si * 2;
+        var sparkleX = cx + Math.sin(sPhase) * (6 + si * 3);
+        var sparkleY = cy + Math.cos(sPhase * 1.3) * 3;
+        var sAlpha = 0.2 + Math.sin(t * 4 + si) * 0.15;
+        if (sAlpha > 0.1) {
+            ctx.fillStyle = 'rgba(255,255,255,' + sAlpha.toFixed(2) + ')';
+            ctx.beginPath();
+            ctx.arc(sparkleX, sparkleY, deep ? 0.8 : 1.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Ripple ring (slow expanding circle on shallow water)
     if (!deep) {
-        const sparkleX = cx + Math.sin(t * 1.5) * 8;
-        const sparkleY = cy + Math.cos(t * 2) * 4;
-        ctx.fillStyle = `rgba(255,255,255,${0.25 + Math.sin(t * 4) * 0.15})`;
+        var ripplePhase = (t * 0.5) % 1;
+        var rippleR = 2 + ripplePhase * 8;
+        var rippleA = (1 - ripplePhase) * 0.12;
+        ctx.strokeStyle = 'rgba(200,230,255,' + rippleA.toFixed(2) + ')';
+        ctx.lineWidth = 0.4;
         ctx.beginPath();
-        ctx.arc(sparkleX, sparkleY, 1, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.arc(cx + 3, cy - 1, rippleR, 0, Math.PI * 2);
+        ctx.stroke();
     }
 }
 
 function drawLavaDecoration(ctx, cx, cy, timestamp) {
     const t = (timestamp || 0) * 0.001;
-    // Glowing cracks
-    ctx.strokeStyle = `rgba(255,200,50,${0.5 + Math.sin(t * 2) * 0.25})`;
+    var pulse = 0.5 + Math.sin(t * 2) * 0.25;
+
+    // Outer heat glow (larger, more dramatic)
+    var heatGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 22);
+    heatGrad.addColorStop(0, 'rgba(255,120,20,' + (0.15 + Math.sin(t * 2.5) * 0.08).toFixed(2) + ')');
+    heatGrad.addColorStop(0.5, 'rgba(255,80,0,' + (0.06 + Math.sin(t * 3) * 0.03).toFixed(2) + ')');
+    heatGrad.addColorStop(1, 'rgba(255,50,0,0)');
+    ctx.fillStyle = heatGrad;
+    ctx.fillRect(cx - 22, cy - 22, 44, 44);
+
+    // Crusted dark edges (cooled lava border)
+    ctx.strokeStyle = 'rgba(40,20,10,0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Glowing cracks (brighter, more complex pattern)
+    ctx.strokeStyle = 'rgba(255,200,50,' + pulse.toFixed(2) + ')';
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(cx - 8, cy - 2);
@@ -643,24 +689,34 @@ function drawLavaDecoration(ctx, cx, cy, timestamp) {
     ctx.lineTo(cx + 3, cy - 3);
     ctx.lineTo(cx + 9, cy + 2);
     ctx.stroke();
+    // Secondary cracks (dimmer)
+    ctx.strokeStyle = 'rgba(255,180,40,' + (pulse * 0.6).toFixed(2) + ')';
+    ctx.lineWidth = 0.8;
     ctx.beginPath();
     ctx.moveTo(cx - 4, cy + 4);
     ctx.lineTo(cx + 2, cy + 2);
     ctx.lineTo(cx + 7, cy + 5);
+    ctx.moveTo(cx - 6, cy - 4);
+    ctx.lineTo(cx - 1, cy - 5);
     ctx.stroke();
-    // Bubbles
-    const bubbleX = cx + Math.sin(t * 1.3) * 5;
-    const bubbleY = cy + Math.cos(t * 1.7) * 3;
-    ctx.fillStyle = `rgba(255,150,50,${0.4 + Math.sin(t * 5) * 0.2})`;
+
+    // Bright core glow (inner hot spot)
+    ctx.fillStyle = 'rgba(255,220,100,' + (0.2 + Math.sin(t * 4) * 0.1).toFixed(2) + ')';
     ctx.beginPath();
-    ctx.arc(bubbleX, bubbleY, 2.0 + Math.sin(t * 3) * 0.7, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 3, 0, Math.PI * 2);
     ctx.fill();
-    // Glow halo
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 18);
-    grad.addColorStop(0, `rgba(255,100,0,${0.12 + Math.sin(t * 3) * 0.06})`);
-    grad.addColorStop(1, 'rgba(255,100,0,0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(cx - 18, cy - 18, 36, 36);
+
+    // Bubbles (2 with different phases)
+    for (var bi = 0; bi < 2; bi++) {
+        var bPhase = t * (1.3 + bi * 0.5) + bi * 3;
+        var bubbleX = cx + Math.sin(bPhase) * (4 + bi * 2);
+        var bubbleY = cy + Math.cos(bPhase * 1.3) * (2 + bi);
+        var bSize = 1.5 + Math.sin(t * 3 + bi * 2) * 0.7;
+        ctx.fillStyle = 'rgba(255,150,50,' + (0.3 + Math.sin(t * 5 + bi) * 0.2).toFixed(2) + ')';
+        ctx.beginPath();
+        ctx.arc(bubbleX, bubbleY, bSize, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
 function drawRuinsDecoration(ctx, cx, cy, col, row) {
@@ -778,16 +834,58 @@ function drawIceDecoration(ctx, cx, cy, col, row) {
 }
 
 function drawWallDecoration(ctx, cx, cy, heightPx, col, row) {
-    // Brick lines on the right side face
+    const hh = HEX_H / 2;
+    const brickRows = Math.floor(heightPx / 4);
+    const seed = col * 7 + row * 13;
+
+    // Horizontal mortar lines (brick rows)
     ctx.strokeStyle = 'rgba(0,0,0,0.15)';
     ctx.lineWidth = 0.5;
-    const hh = HEX_H / 2;
-    for (let i = 1; i < Math.floor(heightPx / 4); i++) {
+    for (let i = 1; i < brickRows; i++) {
         const y = cy + hh + i * 4;
         ctx.beginPath();
         ctx.moveTo(cx - 2, y);
         ctx.lineTo(cx + HEX_W / 2 - 2, y - 2);
         ctx.stroke();
+    }
+
+    // Vertical mortar joints (staggered per row for realistic brick pattern)
+    ctx.strokeStyle = 'rgba(0,0,0,0.10)';
+    ctx.lineWidth = 0.4;
+    for (var vi = 0; vi < brickRows - 1; vi++) {
+        var vY = cy + hh + vi * 4;
+        // 2-3 vertical joints per row, offset alternating
+        var numJoints = 2 + ((seed + vi) % 2);
+        var jointOffset = (vi % 2) * 4; // Stagger
+        for (var vj = 0; vj < numJoints; vj++) {
+            var vX = cx + 2 + jointOffset + vj * 7;
+            if (vX > cx + HEX_W / 2 - 4) break;
+            ctx.beginPath();
+            ctx.moveTo(vX, vY);
+            ctx.lineTo(vX, vY + 4);
+            ctx.stroke();
+        }
+    }
+
+    // Random stone variation (lighter/darker blocks for depth)
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    for (var si = 0; si < Math.min(brickRows, 5); si++) {
+        var sIdx = (seed + si * 31) % 7;
+        if (sIdx < 3) {
+            var sY = cy + hh + si * 4 + 1;
+            var sX = cx + ((seed + si * 17) % 8);
+            ctx.fillRect(sX, sY, 5, 3);
+        }
+    }
+    // Darker blocks for shadow variation
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    for (var di = 1; di < Math.min(brickRows, 4); di++) {
+        var dIdx = (seed + di * 23) % 5;
+        if (dIdx < 2) {
+            var dY = cy + hh + di * 4 + 1;
+            var dX = cx + ((seed + di * 11 + 3) % 10);
+            ctx.fillRect(dX, dY, 4, 3);
+        }
     }
 }
 
@@ -1661,41 +1759,72 @@ function drawGrassDecorationWind(ctx, cx, cy, col, row, biome, timestamp) {
 
 // ── Door decoration ──────────────────────────────────────
 function drawDoorDecoration(ctx, cx, cy, col, row) {
-    const hw = HEX_W * 0.35;
-    const hh = HEX_H * 0.35;
-    // Wooden planks
+    var hw = HEX_W * 0.35;
+    var hh = HEX_H * 0.4;
+
+    // Door frame (stone archway)
+    ctx.fillStyle = '#4a4040';
+    ctx.fillRect(cx - hw - 2, cy - hh - 1, hw * 2 + 4, hh * 2 + 2);
+    // Arched top of frame
+    ctx.beginPath();
+    ctx.arc(cx, cy - hh - 1, hw + 2, Math.PI, 0);
+    ctx.fill();
+
+    // Wooden door body
     ctx.fillStyle = '#5a3a1a';
     ctx.fillRect(cx - hw, cy - hh, hw * 2, hh * 2);
-    // Planks lines
+    // Arched top of door
+    ctx.beginPath();
+    ctx.arc(cx, cy - hh, hw, Math.PI, 0);
+    ctx.fillStyle = '#5a3a1a';
+    ctx.fill();
+
+    // Wood grain (vertical plank lines)
     ctx.strokeStyle = '#3a2a0a';
-    ctx.lineWidth = 0.8;
-    for (let i = -1; i <= 1; i++) {
+    ctx.lineWidth = 0.6;
+    for (var pi = -1; pi <= 1; pi++) {
         ctx.beginPath();
-        ctx.moveTo(cx - hw, cy + i * hh * 0.6);
-        ctx.lineTo(cx + hw, cy + i * hh * 0.6);
+        ctx.moveTo(cx + pi * hw * 0.5, cy - hh);
+        ctx.lineTo(cx + pi * hw * 0.5, cy + hh);
         ctx.stroke();
     }
-    // Vertical plank line
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - hh);
-    ctx.lineTo(cx, cy + hh);
-    ctx.stroke();
-    // Handle (small circle)
-    ctx.fillStyle = '#8a6a3a';
-    ctx.beginPath();
-    ctx.arc(cx + hw * 0.5, cy, HEX_W * 0.04, 0, Math.PI * 2);
-    ctx.fill();
-    // Iron bands
+
+    // Iron bands (horizontal)
     ctx.strokeStyle = '#4a4a4a';
     ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.moveTo(cx - hw, cy - hh * 0.8);
-    ctx.lineTo(cx + hw, cy - hh * 0.8);
+    ctx.moveTo(cx - hw, cy - hh * 0.5);
+    ctx.lineTo(cx + hw, cy - hh * 0.5);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(cx - hw, cy + hh * 0.8);
-    ctx.lineTo(cx + hw, cy + hh * 0.8);
+    ctx.moveTo(cx - hw, cy + hh * 0.5);
+    ctx.lineTo(cx + hw, cy + hh * 0.5);
     ctx.stroke();
+
+    // Iron studs (4 rivets on bands)
+    ctx.fillStyle = '#5a5a5a';
+    for (var si = -1; si <= 1; si += 2) {
+        ctx.beginPath();
+        ctx.arc(cx + si * hw * 0.6, cy - hh * 0.5, 1, 0, Math.PI * 2);
+        ctx.arc(cx + si * hw * 0.6, cy + hh * 0.5, 1, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Handle (iron ring)
+    ctx.strokeStyle = '#6a5a3a';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx + hw * 0.4, cy + 1, 2, 0, Math.PI * 2);
+    ctx.stroke();
+    // Handle pin
+    ctx.fillStyle = '#5a5a5a';
+    ctx.beginPath();
+    ctx.arc(cx + hw * 0.4, cy - 1, 0.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Keyhole (tiny dark slit below handle)
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(cx + hw * 0.38, cy + 3, 1.5, 2);
 }
 
 // ── Enhanced wall decoration (cracks, moss, torch sconces) ──
