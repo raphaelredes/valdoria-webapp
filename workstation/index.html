@@ -21,7 +21,9 @@
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
     </script>
+    <script>
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    </script>
     <style>
         body {
             padding-bottom: 80px;
@@ -290,10 +292,12 @@
             animation: v-fadeIn 0.3s ease;
         }
     </style>
+    <script>
     document.write('<script src="../shared/font-apply.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/bounce-back.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
+    </script>
 </head>
 
 <body>
@@ -446,7 +450,9 @@
         <button class="craft-btn disabled" id="craftBtn" disabled>🔨 Selecione uma receita</button>
     </div>
 
+    <script>
     document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
+    </script>
     <script>
         const tg = window.Telegram?.WebApp;
         const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2a2420';

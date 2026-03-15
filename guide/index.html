@@ -349,9 +349,11 @@
             background: var(--v-bg-card-hover);
         }
     </style>
+    <script>
     document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
+    </script>
 </head>
 
 <body>
@@ -382,7 +384,9 @@
         document.write('<script src="guide-data.js?v=' + _v + '"><\/script>');
         document.write('<script src="guide-app.js?v=' + _v + '"><\/script>');
     </script>
+<script>
 document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
+</script>
 <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("GUIDE")</script>
 </body>
 
