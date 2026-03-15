@@ -459,7 +459,7 @@ function renderLocationMarkers(group, fogState) {
         if (a === S.currentLoc) currentAdj.add(b);
         if (b === S.currentLoc) currentAdj.add(a);
     }
-    const R = 18;
+    const R = 22;
     // Detect newly revealed locations for cascade animation
     const prev = typeof _prevFogState !== 'undefined' ? _prevFogState : null;
     let revealIdx = 0;
