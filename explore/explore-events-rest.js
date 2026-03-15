@@ -477,30 +477,22 @@ function doLongRest() {
     // Update camp button hint
     if (typeof updateCampButtonHint === 'function') updateCampButtonHint();
 
-    const overlay = document.getElementById('camp-result-overlay');
-    const resultEl = document.getElementById('camp-result-text');
-    if (overlay && resultEl) {
-        let t = '\ud83c\udf19 <b>Descanso Longo</b><br><br>';
-        t += '\u2764\ufe0f HP totalmente recuperado<br>';
-        t += '\u2728 Condi\u00e7\u00f5es removidas<br>';
-        if (prevExhaustion > 0) t += `\u26a0\ufe0f Exaust\u00e3o: ${prevExhaustion} \u2192 ${S.exhaustion}<br>`;
-        else t += '\u2705 Sem exaust\u00e3o<br>';
-        if (S.charData && S.charData.mm > 0) t += '\u2728 MP totalmente recuperado<br>';
-        const _hdNow = Math.max(0, maxHD - (S._hdUsed || 0));
-        t += `\ud83c\udfb2 Dados de Vida: ${_hdNow}/${maxHD} (+${hdRecov} recuperados)<br>`;
-        // Weather penalty on long rest
-        if (S.weather === 't') t += '<br>\u26a1 <span style="color:#dca028">Tempestade: descanso dif\u00edcil, +1 exaust\u00e3o.</span>';
-        else if (S.weather === 'r') t += '<br>\ud83c\udf27\ufe0f <span style="color:#8a7a68">Chuva: descanso desconfort\u00e1vel.</span>';
-        if (S._longRestCount > 1) t += '<br>\u26a0\ufe0f <span style="color:#dca028">O perigo da regi\u00e3o aumentou.</span>';
-        t += '<br><i>Voc\u00ea se sente revigorado.</i>';
-        resultEl.innerHTML = t;
-        overlay.classList.add('active');
-    } else {
-        showTerrainToast('\ud83c\udf19 Descanso Longo: HP recuperado', 'ranger');
-    }
+    // Build long rest summary text
+    const _hdNow = Math.max(0, maxHD - (S._hdUsed || 0));
+    let _lrText = '🌙 <b>Descanso Longo</b><br><br>';
+    _lrText += '❤️ HP totalmente recuperado<br>';
+    _lrText += '✨ Condi\u00e7\u00f5es removidas<br>';
+    if (prevExhaustion > 0) _lrText += `⚠️ Exaust\u00e3o: ${prevExhaustion} \u2192 ${S.exhaustion}<br>`;
+    else _lrText += '✅ Sem exaust\u00e3o<br>';
+    if (S.charData && S.charData.mm > 0) _lrText += '✨ MP totalmente recuperado<br>';
+    _lrText += `🎲 Dados de Vida: ${_hdNow}/${maxHD} (+${hdRecov} recuperados)<br>`;
+    if (S.weather === 't') _lrText += '<br>⚡ <span style="color:#dca028">Tempestade: descanso dif\u00edcil, +1 exaust\u00e3o.</span>';
+    else if (S.weather === 'r') _lrText += '<br>🌧️ <span style="color:#8a7a68">Chuva: descanso desconfort\u00e1vel.</span>';
+    if (S._longRestCount > 1) _lrText += '<br>⚠️ <span style="color:#dca028">O perigo da regi\u00e3o aumentou.</span>';
+    _lrText += '<br><i>Voc\u00ea se sente revigorado.</i>';
 
-    // Long rest ambush check — higher chance than short rest
-    _checkLongRestAmbush();
+    // Show 3D dice animation before the summary (cosmetic dice for visual flair)
+    _showLongRestDice(_lrText);
 }
 
 function _checkLongRestAmbush() {
@@ -526,6 +518,60 @@ function _checkLongRestAmbush() {
     } else {
         S._longRestAmbushSafe = true;
     }
+}
+
+let _lrDice = null;
+function _showLongRestDice(summaryHtml) {
+    const overlay = document.getElementById('camp-dice-overlay');
+    const canvas = document.getElementById('camp-dice-canvas');
+    const label = document.getElementById('camp-dice-label');
+
+    if (!overlay || !canvas || typeof Dice3D === 'undefined') {
+        _showLongRestSummary(summaryHtml);
+        return;
+    }
+
+    const hdType = (S.charData && S.charData.hdt) || '1d8';
+    const dieShape = hdType.replace(/^\d+/, '');
+    const sides = parseInt(dieShape.replace('d', '')) || 8;
+    const dieResult = sides;
+
+    label.textContent = '';
+    overlay.classList.add('active');
+
+    try {
+        if (_lrDice) { _lrDice.dispose(); _lrDice = null; }
+        _lrDice = new Dice3D(canvas, { size: 140, dieType: dieShape, duration: 1200 });
+    } catch (e) {
+        console.warn('[EXPLORE] Long Rest Dice3D init failed:', e);
+        overlay.classList.remove('active');
+        _showLongRestSummary(summaryHtml);
+        return;
+    }
+
+    _lrDice.roll(dieResult, function () {
+        label.textContent = hdType + ' = ' + dieResult + ' (Descanso Longo)';
+        if (window.vHaptic) vHaptic.medium();
+
+        var _lrDelay = typeof calcReadTime === 'function' ? calcReadTime('Descanso Longo resultado dado', 'result') : 3000;
+        setTimeout(function () {
+            overlay.classList.remove('active');
+            if (_lrDice) { _lrDice.dispose(); _lrDice = null; }
+            _showLongRestSummary(summaryHtml);
+        }, _lrDelay);
+    });
+}
+
+function _showLongRestSummary(summaryHtml) {
+    var overlay = document.getElementById('camp-result-overlay');
+    var resultEl = document.getElementById('camp-result-text');
+    if (overlay && resultEl) {
+        resultEl.innerHTML = summaryHtml;
+        overlay.classList.add('active');
+    } else {
+        showTerrainToast('Descanso Longo: HP recuperado', 'ranger');
+    }
+    _checkLongRestAmbush();
 }
 
 let _campDice = null;
