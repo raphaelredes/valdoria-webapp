@@ -75,8 +75,25 @@
 .btn-hero {
     animation: heroPulse 4s ease-in-out infinite;
     will-change: box-shadow;
+    position: relative;
+    overflow: hidden;
+}
+.btn-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(196,149,58,0.15), transparent);
+    animation: heroShimmer 5s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes heroShimmer {
+    0%, 80%  { left: -100%; }
+    100%     { left: 200%; }
 }
 .btn-hero:active { animation: none; box-shadow: var(--v-shadow-gold); }
+.btn-hero:active::before { animation: none; opacity: 0; }
 
 /* ─── Content Block Staggered Entrance ─── */
 @keyframes blockFadeIn {

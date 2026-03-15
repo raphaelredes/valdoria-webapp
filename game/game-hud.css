@@ -201,18 +201,20 @@
 .resource-floater {
     position: fixed;
     font-family: var(--v-font);
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     pointer-events: none;
     z-index: 200;
     transform: translateX(-50%);
-    animation: resourceFloat 1.2s ease-out forwards;
+    animation: resourceFloat 1.4s ease-out forwards;
+    text-shadow: 0 0 8px currentColor;
 }
 .resource-floater.gain { color: var(--v-success, #4caf50); }
 .resource-floater.loss { color: var(--v-danger, #e74c3c); }
 @keyframes resourceFloat {
-    0%   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    0%   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.1); }
+    15%  { opacity: 1; transform: translateX(-50%) translateY(-8px) scale(1); }
     70%  { opacity: 1; }
-    100% { opacity: 0; transform: translateX(-50%) translateY(-40px); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-45px); }
 }
 

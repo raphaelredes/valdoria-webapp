@@ -406,7 +406,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     transform: scale(0.96);
     background: var(--v-bg-card-hover);
     border-color: var(--v-gold-dim);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 0 8px rgba(196,149,58,0.15);
 }
 
 /* ─── Hero Button (full-width CTA) ─── */

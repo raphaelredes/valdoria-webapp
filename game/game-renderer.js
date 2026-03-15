@@ -378,7 +378,15 @@ function createButton(btn, forceHero = false) {
     const isHero = forceHero || HERO_KEYWORDS.some(k => (btn.text || '').toUpperCase().includes(k));
     const isBack = /^(action_universal_back|city_back)$/.test(btn.cb || '');
     el.className = isHero ? 'btn-hero' : (isBack ? 'btn-action btn-back' : 'btn-action');
-    el.textContent = btn.text || '';
+    // Extract badge from text: "Missões (3)" -> label="Missões", badge="3"
+    var rawText = btn.text || '';
+    var badgeMatch = rawText.match(/^(.+?)\s*\((\d+)\)\s*$/);
+    if (badgeMatch && !isHero) {
+        el.textContent = badgeMatch[1].trim();
+        el.setAttribute('data-badge', badgeMatch[2]);
+    } else {
+        el.textContent = rawText;
+    }
     if (btn.cb) {
         el.onclick = () => doAction(btn.cb);
     }
