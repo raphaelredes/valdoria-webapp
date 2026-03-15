@@ -53,6 +53,145 @@ function disposeDice3D() {
 }
 
 // ═══════════════════════════════════════════════════════
+// DAMAGE DICE — 3D animated damage rolls (reuses #check-overlay)
+// ═══════════════════════════════════════════════════════
+
+var DAMAGE_FLASH_COLORS = {
+    fire: 'rgba(255,100,0,0.25)',
+    lightning: 'rgba(200,200,255,0.4)',
+    piercing: 'rgba(200,40,40,0.3)',
+    poison: 'rgba(100,200,50,0.2)',
+    bludgeoning: 'rgba(200,40,40,0.3)',
+    slashing: 'rgba(200,40,40,0.3)',
+};
+
+/**
+ * Show 3D dice animation for damage rolls.
+ * @param {string} formula - Dice formula ("2d6", "1d4", "1d8")
+ * @param {string} label - Damage label ("dano de queda", "dano de fogo")
+ * @param {string} damageType - Flash color key ("fire","lightning","piercing","bludgeoning")
+ * @param {function} onDone - Callback(totalDamage) after animation
+ */
+function showDamageDice(formula, label, damageType, onDone) {
+    var match = formula.match(/(\d+)d(\d+)/);
+    if (!match) { if (onDone) onDone(0); return; }
+    var count = parseInt(match[1]);
+    var sides = parseInt(match[2]);
+
+    // Pre-calculate total
+    var total = 0;
+    for (var i = 0; i < count; i++) {
+        total += Math.floor(Math.random() * sides) + 1;
+    }
+    if (total < 1) total = 1;
+
+    var overlay = document.getElementById('check-overlay');
+    var formulaEl = document.getElementById('check-formula');
+    var resultEl = document.getElementById('check-result');
+    var skipBtn = document.getElementById('check-skip-btn');
+    if (!overlay || !formulaEl || !resultEl) { if (onDone) onDone(total); return; }
+
+    // Setup overlay for damage display
+    formulaEl.innerHTML = '<span style="color:var(--v-gold);font-size:14px">' + formula + ' ' + label + '</span>';
+    resultEl.textContent = '';
+    resultEl.className = 'check-result';
+    if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+    activateOverlay('check-overlay');
+
+    var dice = getDice3D();
+    var _done = false;
+    var canvas = document.getElementById('dice3d-canvas');
+
+    var finishDamage = function () {
+        if (_done) return;
+        _done = true;
+        // Show damage result
+        resultEl.textContent = '-' + total + ' HP';
+        resultEl.className = 'check-result failure';
+        flashScreen(DAMAGE_FLASH_COLORS[damageType] || 'rgba(200,40,40,0.3)');
+        if (window.vHaptic) vHaptic.notify('error');
+
+        // Auto-close after reading time
+        var closeDelay = typeof calcReadTime === 'function' ? calcReadTime('-' + total + ' HP ' + label, 'overlay') : 2000;
+        var _closed = false;
+        var closeDamage = function () {
+            if (_closed) return;
+            _closed = true;
+            disposeDice3D();
+            if (canvas) canvas.classList.remove('multi');
+            overlay.classList.remove('active');
+            if (onDone) onDone(total);
+        };
+        setTimeout(function () { if (!_closed && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = closeDamage; } }, 500);
+        setTimeout(closeDamage, closeDelay);
+    };
+
+    if (!dice) {
+        // Fallback: no 3D — show result directly after brief pause
+        setTimeout(finishDamage, 700);
+        return;
+    }
+
+    if (count >= 2) {
+        // Multi-dice: rollMultiple → fusionTo
+        var individualResults = _distributeHealTotal(total, count, sides);
+        var configs = individualResults.map(function (v) { return { value: v }; });
+        if (canvas) canvas.classList.add('multi');
+
+        dice.rollMultiple(configs, function () {
+            formulaEl.innerHTML = '<span style="color:var(--v-text-dim);font-size:13px">' +
+                individualResults.join(' + ') + '</span>';
+            setTimeout(function () {
+                formulaEl.innerHTML = '';
+                dice.fusionTo(total, finishDamage);
+            }, 800);
+        });
+    } else {
+        // Single die: roll directly
+        var rollVal = Math.max(1, Math.min(sides, total));
+        dice.roll(rollVal, finishDamage);
+    }
+}
+
+/**
+ * Show DM narration overlay then damage dice.
+ * @param {string} icon - Emoji icon for the event
+ * @param {string} title - Overlay title
+ * @param {string} narration - DM narration text
+ * @param {string} formula - Dice formula
+ * @param {string} label - Damage label
+ * @param {string} damageType - Flash color key
+ * @param {function} onDone - Callback(totalDamage) after everything
+ */
+function showDamageEvent(icon, title, narration, formula, label, damageType, onDone) {
+    activateOverlay('dm-overlay');
+    var overlay = document.getElementById('dm-overlay');
+    var dmIcon = document.getElementById('dm-icon');
+    var dmTitle = document.getElementById('dm-title');
+    var dmType = document.getElementById('dm-type');
+    var narrEl = document.getElementById('dm-narration');
+    var choicesEl = document.getElementById('dm-choices');
+
+    if (!overlay) { showDamageDice(formula, label, damageType, onDone); return; }
+
+    if (dmIcon) dmIcon.textContent = icon;
+    if (dmTitle) dmTitle.textContent = title;
+    if (dmType) dmType.textContent = 'perigo';
+    if (choicesEl) choicesEl.innerHTML = '';
+
+    typewriter(narrEl, narration, function () {
+        var btn = document.createElement('button');
+        btn.className = 'dm-choice-btn';
+        btn.textContent = 'Continuar...';
+        btn.onclick = function () {
+            overlay.classList.remove('active');
+            showDamageDice(formula, label, damageType, onDone);
+        };
+        if (choicesEl) choicesEl.appendChild(btn);
+    });
+}
+
+// ═══════════════════════════════════════════════════════
 // MOVEMENT LOG (internal — sent to backend)
 // ═══════════════════════════════════════════════════════
 function logMoveEvent(events) {

@@ -69,28 +69,106 @@ function _checkWeatherEffects() {
 
     // Lightning strike in storms (open terrain: plains, desert, mountain)
     if (S._weatherLightningChance > 0 && Math.random() < S._weatherLightningChance) {
-        const openBiomes = ['plains', 'desert', 'mountain'];
+        var openBiomes = ['plains', 'desert', 'mountain'];
         if (openBiomes.includes(S.biome)) {
-            // DEX save DC 13 or 2d6 lightning damage
-            const dexMod = getAbilityMod('dx');
-            const { roll } = rollD20('normal');
-            const total = roll + dexMod;
-            if (total < 13) {
-                const dmg = Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + 2; // 2d6
-                S.hpChange -= dmg;
-                if (S.charData) {
-                    const newHP = Math.max(0, S.charData.hp + S.hpChange);
-                    updateHP(newHP, S.charData.mh);
-                }
-                flashScreen('rgba(200,200,255,0.4)');
-                showTerrainToast('\u26a1 Raio! -' + dmg + ' HP (DEX ' + total + ' vs DC 13)', 'damage');
-            } else {
-                flashScreen('rgba(200,200,255,0.15)');
-                showTerrainToast('\u26a1 Um raio cai perto! Voc\u00ea desvia a tempo.', 'info');
-            }
-            if (typeof checkDeath === 'function') checkDeath();
+            _showLightningEvent();
         }
     }
+}
+
+// Full lightning event: narration → DEX save 3D → (if fail) 2d6 damage 3D
+function _showLightningEvent() {
+    var mode = hasCondition('prone') ? 'disadvantage' : 'normal';
+    var dexMod = getAbilityMod('dx');
+    var prof = S.charData && S.charData.sp && S.charData.sp.includes('dx') ? (S.charData.pb || 2) : 0;
+    var totalMod = dexMod + prof;
+    var rollResult = rollD20(mode);
+    var roll = rollResult.roll;
+    var r1 = rollResult.r1;
+    var r2 = rollResult.r2;
+    var total = roll + totalMod;
+    var success = total >= 13;
+
+    S.checksPerformed.push({ stat: 'dx', dc: 13, roll: roll, mod: totalMod, ok: success, mode: mode });
+
+    // Show narration first
+    activateOverlay('dm-overlay');
+    var overlay = document.getElementById('dm-overlay');
+    var dmIcon = document.getElementById('dm-icon');
+    var dmTitle = document.getElementById('dm-title');
+    var dmType = document.getElementById('dm-type');
+    var narrEl = document.getElementById('dm-narration');
+    var choicesEl = document.getElementById('dm-choices');
+
+    if (dmIcon) dmIcon.textContent = '\u26a1';
+    if (dmTitle) dmTitle.textContent = 'Rel\u00e2mpago!';
+    if (dmType) dmType.textContent = 'perigo';
+    if (choicesEl) choicesEl.innerHTML = '';
+
+    var narrText = 'O c\u00e9u escurece subitamente. Um rel\u00e2mpago corta as nuvens e uma descarga el\u00e9trica se dirige diretamente para voc\u00ea!|Seus reflexos ser\u00e3o testados.';
+    typewriter(narrEl, narrText, function () {
+        var btn = document.createElement('button');
+        btn.className = 'dm-choice-btn';
+        btn.innerHTML = '<span class="choice-icon">\u26a1</span>' +
+            '<span class="choice-label">Esquivar</span>' +
+            '<span class="choice-check">DES ' + (totalMod >= 0 ? '+' : '') + totalMod + '</span>';
+        btn.onclick = function () {
+            overlay.classList.remove('active');
+            _showLightningSave(roll, totalMod, total, success, r1, r2, mode);
+        };
+        if (choicesEl) choicesEl.appendChild(btn);
+    });
+}
+
+function _showLightningSave(roll, totalMod, total, success, r1, r2, mode) {
+    var checkOverlay = document.getElementById('check-overlay');
+    var formulaEl = document.getElementById('check-formula');
+    var resultEl = document.getElementById('check-result');
+    var skipBtn = document.getElementById('check-skip-btn');
+    if (!checkOverlay) return;
+
+    formulaEl.innerHTML = '';
+    resultEl.textContent = '';
+    resultEl.className = 'check-result';
+    if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
+    activateOverlay('check-overlay');
+
+    var dice = getDice3D();
+    var finish = function () {
+        formulaEl.innerHTML = buildFormula(roll, totalMod, 'Destreza', '', 13, total, r1, r2, mode);
+        resultEl.textContent = success ? 'Desviou!' : 'Atingido!';
+        resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
+        if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
+
+        var _done = false;
+        var done = function () {
+            if (_done) return;
+            _done = true;
+            disposeDice3D();
+            checkOverlay.classList.remove('active');
+
+            if (success) {
+                flashScreen('rgba(200,200,255,0.15)');
+                showTerrainToast('\u26a1 Um raio cai perto! Voc\u00ea desvia a tempo.', 'info');
+            } else {
+                // Failed save — show 2d6 damage dice
+                showDamageDice('2d6', 'dano de raio', 'lightning', function (dmg) {
+                    S.hpChange -= dmg;
+                    if (S.charData) {
+                        var newHP = Math.max(0, S.charData.hp + S.hpChange);
+                        updateHP(newHP, S.charData.mh);
+                    }
+                    if (typeof checkDeath === 'function') checkDeath();
+                    saveState();
+                });
+            }
+        };
+        setTimeout(function () { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = done; } }, 500);
+        setTimeout(done, 2500);
+    };
+
+    if (dice) dice.roll(roll, finish);
+    else setTimeout(finish, 700);
 }
 
 // =========================================================

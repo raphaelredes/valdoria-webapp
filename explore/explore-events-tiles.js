@@ -649,15 +649,30 @@ function showChestEvent(chest) {
 function _openChest(chest, col, row, disarmed) {
     chest.opened = true;
     S._chestsOpened.add(col + ',' + row);
+
+    var giveRewards = function () {
+        if (chest.gp > 0) { S.goldChange += chest.gp; showTerrainToast('+' + chest.gp + ' GP!', 'reward'); }
+        if (chest.xp > 0) { S.xpChange += chest.xp; showTerrainToast('+' + chest.xp + ' XP', 'reward'); }
+        if (typeof checkDeath === 'function') checkDeath();
+        saveState();
+    };
+
     if (chest.hasTrap && !disarmed && !chest.trapDetected) {
-        const dmg = Math.floor(Math.random() * 6) + 1;
-        S.hpChange -= dmg;
-        showTerrainToast('Armadilha no bau! -' + dmg + ' HP', 'damage');
-        if (typeof updateHPHUD === 'function') updateHPHUD();
+        // Show narration + 3D dice for chest trap
+        showDamageEvent('\u{1F4E6}', 'Armadilha no Ba\u00fa',
+            'Ao abrir o ba\u00fa, um mecanismo oculto dispara! Agulhas envenenadas e fragmentos de metal voam em sua dire\u00e7\u00e3o.',
+            '1d6', 'dano da armadilha', 'piercing', function (dmg) {
+                S.hpChange -= dmg;
+                if (S.charData) {
+                    var newHP = Math.max(0, S.charData.hp + S.hpChange);
+                    updateHP(newHP, S.charData.mh);
+                }
+                updateRewards();
+                giveRewards();
+            });
+    } else {
+        giveRewards();
     }
-    if (chest.gp > 0) { S.goldChange += chest.gp; showTerrainToast('+' + chest.gp + ' GP!', 'reward'); }
-    if (chest.xp > 0) { S.xpChange += chest.xp; showTerrainToast('+' + chest.xp + ' XP', 'reward'); }
-    saveState();
 }
 
 // =============================================

@@ -286,13 +286,16 @@ function _showHazardResultNarration(text, success, hazard) {
     }, 28);
 }
 
-// Apply hazard effect and continue game flow
+// Apply hazard effect and continue game flow (async for fire_damage)
 function _applyHazardAndContinue(success, hazard) {
     if (!success) {
-        applyHazardEffect(hazard);
-        if (checkDeath()) return;
-        if (checkLowHP()) { saveState(); return; }
-        if (checkHazardCombat()) { saveState(); return; }
+        applyHazardEffect(hazard, function () {
+            if (checkDeath()) return;
+            if (checkLowHP()) { saveState(); return; }
+            if (checkHazardCombat()) { saveState(); return; }
+            saveState();
+        });
+        return;
     }
     saveState();
 }
@@ -336,48 +339,55 @@ function _showHazardEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, ha
     }, 700);
 }
 
-// Apply hazard consequences on failed save
-function applyHazardEffect(hazard) {
-    if (hazard.failEffect === 'fire_damage') {
-        const dmg = Math.floor(Math.random() * 4) + 1; // 1d4
-        S.hpChange -= dmg;
-        if (S.charData) {
-            const newHP = Math.max(0, S.charData.hp + S.hpChange);
-            updateHP(newHP, S.charData.mh);
+// Apply hazard consequences on failed save (async for fire_damage dice)
+function applyHazardEffect(hazard, onDone) {
+    var afterEffect = function () {
+        if (hazard.failEffect === 'poisoned') {
+            var existPoison = S.conditions.find(function(c) { return c.type === 'poisoned'; });
+            if (existPoison) {
+                existPoison.stepsLeft = Math.max(existPoison.stepsLeft, 3);
+            } else {
+                S.conditions.push({ type: 'poisoned', stepsLeft: 3 });
+            }
+            showTerrainToast('Envenenado! (3 turnos)', 'condition');
         }
-        flashScreen('rgba(200,60,60,0.3)');
-        showTerrainToast(`-${dmg} HP (fogo)`, 'damage');
-    }
-    if (hazard.failEffect === 'poisoned') {
-        // Prevent stacking: refresh duration if already poisoned
-        const existPoison = S.conditions.find(c => c.type === 'poisoned');
-        if (existPoison) {
-            existPoison.stepsLeft = Math.max(existPoison.stepsLeft, 3);
-        } else {
-            S.conditions.push({ type: 'poisoned', stepsLeft: 3 });
+        if (hazard.failEffect === 'prone') {
+            var existProne = S.conditions.find(function(c) { return c.type === 'prone'; });
+            if (existProne) {
+                existProne.stepsLeft = Math.max(existProne.stepsLeft, 1);
+            } else {
+                S.conditions.push({ type: 'prone', stepsLeft: 1 });
+            }
+            showTerrainToast('Escorregou!', 'condition');
         }
-        showTerrainToast('Envenenado! (3 turnos)', 'condition');
-    }
-    if (hazard.failEffect === 'prone') {
-        // Prevent stacking: refresh duration if already prone
-        const existProne = S.conditions.find(c => c.type === 'prone');
-        if (existProne) {
-            existProne.stepsLeft = Math.max(existProne.stepsLeft, 1);
-        } else {
-            S.conditions.push({ type: 'prone', stepsLeft: 1 });
-        }
-        showTerrainToast('Escorregou!', 'condition');
-    }
-    updateConditionHUD();
-    updateRewards();
-    logMoveEvent([{ type: 'hazard', effect: hazard.failEffect, source: hazard.type }]);
+        updateConditionHUD();
+        updateRewards();
+        logMoveEvent([{ type: 'hazard', effect: hazard.failEffect, source: hazard.type }]);
 
-    // 25% chance: hazard noise attracts nearby creatures
-    if (Math.random() < 0.25 && S.encounters && S.encounters.length > 0) {
-        const enc = S.encounters.pop();
-        const combat = enc.cb || { en: 'Criatura', ei: '', b: S.biome, d: S.dangerLevel };
-        S._hazardCombatPending = { combat };
+        // 25% chance: hazard noise attracts nearby creatures
+        if (Math.random() < 0.25 && S.encounters && S.encounters.length > 0) {
+            var enc = S.encounters.pop();
+            var combat = enc.cb || { en: 'Criatura', ei: '', b: S.biome, d: S.dangerLevel };
+            S._hazardCombatPending = { combat };
+        }
+        if (onDone) onDone();
+    };
+
+    if (hazard.failEffect === 'fire_damage') {
+        // 3D dice for fire damage (1d4)
+        showDamageDice('1d4', 'dano de fogo', 'fire', function (dmg) {
+            S.hpChange -= dmg;
+            if (S.charData) {
+                var newHP = Math.max(0, S.charData.hp + S.hpChange);
+                updateHP(newHP, S.charData.mh);
+            }
+            afterEffect();
+        });
+        return;
     }
+
+    // Non-damage effects (poisoned, prone) — synchronous
+    afterEffect();
 }
 
 // Called after hazard overlay closes to trigger attracted combat
@@ -567,44 +577,54 @@ function _attemptDisarm(trap, stat, dc, totalMod) {
     else setTimeout(finish, 700);
 }
 
+var TRAP_DAMAGE_LABELS = {
+    spike: { label: 'dano de perfura\u00e7\u00e3o', type: 'piercing' },
+    pit: { label: 'dano de queda', type: 'bludgeoning' },
+    poison_dart: { label: 'dano de perfura\u00e7\u00e3o', type: 'piercing' },
+    net: { label: '', type: 'bludgeoning' },
+};
+
 function _triggerTrap(trap) {
-    // Apply damage
-    let dmg = 0;
-    if (trap.failDmg && trap.failDmg !== '0') {
-        const match = trap.failDmg.match(/(\d+)d(\d+)/);
-        if (match) {
-            for (let i = 0; i < parseInt(match[1]); i++) {
-                dmg += Math.floor(Math.random() * parseInt(match[2])) + 1;
+    var hasDmg = trap.failDmg && trap.failDmg !== '0';
+    var dmgInfo = TRAP_DAMAGE_LABELS[trap.id] || { label: 'dano', type: 'piercing' };
+
+    var applyConditionAndFinish = function () {
+        // Apply condition
+        if (trap.failCondition) {
+            var existTrapCond = S.conditions.find(function(c) { return c.type === trap.failCondition; });
+            var trapCondSteps = trap.failCondition === 'poisoned' ? 5 : 2;
+            if (existTrapCond) {
+                existTrapCond.stepsLeft = Math.max(existTrapCond.stepsLeft, trapCondSteps);
+            } else {
+                S.conditions.push({ type: trap.failCondition, stepsLeft: trapCondSteps });
             }
+            updateConditionHUD();
         }
+        // Heavy shake for trap trigger (M21)
+        if (typeof addShakeTrauma === 'function') addShakeTrauma(0.6);
+        if (typeof checkDeath === 'function') checkDeath();
+        saveState();
+    };
+
+    if (hasDmg) {
+        // Show narration + 3D dice for damage
+        showDamageEvent(trap.icon, trap.label, trap.triggerText, trap.failDmg,
+            dmgInfo.label, dmgInfo.type, function (dmg) {
+                S.hpChange -= dmg;
+                if (S.charData) {
+                    var newHP = Math.max(0, S.charData.hp + S.hpChange);
+                    updateHP(newHP, S.charData.mh);
+                }
+                updateRewards();
+                applyConditionAndFinish();
+            });
+    } else {
+        // No damage (e.g., net trap) — just show toast and apply condition
+        showTerrainToast(trap.icon + ' ' + trap.triggerText, 'damage');
+        if (typeof addShakeTrauma === 'function') addShakeTrauma(0.6);
+        try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('error'); } catch(e) { /* haptic optional */ }
+        applyConditionAndFinish();
     }
-    if (dmg > 0) {
-        S.hpChange -= dmg;
-        if (S.charData) {
-            const newHP = Math.max(0, S.charData.hp + S.hpChange);
-            updateHP(newHP, S.charData.mh);
-        }
-        flashScreen('rgba(200,40,40,0.3)');
-    }
-    // Apply condition
-    if (trap.failCondition) {
-        // Prevent stacking: refresh duration if condition already active
-        const existTrapCond = S.conditions.find(c => c.type === trap.failCondition);
-        const trapCondSteps = trap.failCondition === 'poisoned' ? 5 : 2;
-        if (existTrapCond) {
-            existTrapCond.stepsLeft = Math.max(existTrapCond.stepsLeft, trapCondSteps);
-        } else {
-            S.conditions.push({ type: trap.failCondition, stepsLeft: trapCondSteps });
-        }
-        updateConditionHUD();
-    }
-    const dmgText = dmg > 0 ? ` -${dmg} HP` : '';
-    showTerrainToast(`${trap.icon} ${trap.triggerText}${dmgText}`, 'damage');
-    // Heavy shake for trap trigger (M21)
-    if (typeof addShakeTrauma === 'function') addShakeTrauma(0.6);
-    try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('error'); } catch(e) { /* haptic optional */ }
-    if (typeof checkDeath === 'function') checkDeath();
-    saveState();
 }
 
 function checkHazardCombat() {
