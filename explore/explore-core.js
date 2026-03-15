@@ -160,7 +160,8 @@ function restoreState() {
             localStorage.removeItem(STORAGE_KEY);
             return false;
         }
-        if (Date.now() - snap.ts > 600000) {
+        // Aligned with server _SESSION_TTL (30min) + 5min grace
+        if (Date.now() - snap.ts > 35 * 60 * 1000) {
             localStorage.removeItem(STORAGE_KEY);
             return false;
         }

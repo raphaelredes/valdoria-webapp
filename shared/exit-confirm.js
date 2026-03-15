@@ -30,6 +30,7 @@
     var tg = window.Telegram && Telegram.WebApp;
     var _popupVisible = false;
     var _overlay = null;
+    var _savedHeartbeatCfg = null; // Saved config for heartbeat resume
 
     // --- Inject HTML ---
     function _ensureDOM() {
@@ -67,13 +68,33 @@
         });
     }
 
+    // Resolve heartbeat config from any WebApp state (Game Hub, Explore, Navigate, Combat)
+    function _resolveHeartbeatCfg() {
+        var api = '', tk = '', uid = 0;
+        if (window.S) {
+            api = S.apiBase || S.api || '';
+            tk = S.token || '';
+            uid = parseInt(S.uid) || 0;
+        }
+        // Combat uses global vars (apiBase, token, userId)
+        if (!api && typeof apiBase !== 'undefined') api = apiBase;
+        if (!tk && typeof token !== 'undefined') tk = token;
+        if (!uid && typeof userId !== 'undefined') uid = parseInt(userId) || 0;
+        if (api && tk && uid) return { apiBase: api, token: tk, uid: uid };
+        return null;
+    }
+
     function _show() {
         _ensureDOM();
         _overlay.style.display = '';
         _popupVisible = true;
         if (window.vHaptic) vHaptic.medium();
         // Pause heartbeat while popup is visible (no need to poll)
-        if (window.SessionHeartbeat) SessionHeartbeat.stop();
+        // Save current config so we can resume regardless of WebApp state vars
+        if (window.SessionHeartbeat) {
+            _savedHeartbeatCfg = _resolveHeartbeatCfg();
+            SessionHeartbeat.stop();
+        }
     }
 
     function _hide() {
@@ -81,8 +102,9 @@
         _overlay.style.display = 'none';
         _popupVisible = false;
         // Resume heartbeat if player chose to stay
-        if (window.SessionHeartbeat && window.SessionHeartbeat.init && window.S) {
-            try { SessionHeartbeat.init({ apiBase: S.apiBase, token: S.token, uid: S.uid }); } catch(e) {}
+        if (window.SessionHeartbeat && _savedHeartbeatCfg) {
+            try { SessionHeartbeat.init(_savedHeartbeatCfg); } catch(e) {}
+            _savedHeartbeatCfg = null;
         }
     }
 

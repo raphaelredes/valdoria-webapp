@@ -328,6 +328,7 @@ function closeCombat(result) {
     }
     // sendData fallback (non-API mode)
     if (tg) {
+        window.__valdoria_close_sent = true; // [EXIT-CONFIRM] Prevent beforeunload double beacon
         tg.sendData(JSON.stringify({ action: 'combat_close', token: token, result: result }));
         setTimeout(function () { if (tg.close) tg.close(); }, 1000);
         setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[COMBAT] tg.close() failed', e); } }, 300);
