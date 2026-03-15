@@ -92,7 +92,11 @@
             try { Telegram.WebApp.backgroundColor = '#2a2420'; } catch(e) { /* Telegram API optional */ }
             if (Telegram.WebApp.BackButton) {
                 Telegram.WebApp.BackButton.show();
-                Telegram.WebApp.BackButton.onClick(_goBack);
+                Telegram.WebApp.BackButton.onClick(function() {
+                    if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
+                    else _goBack();
+                });
+                window.__valdoriaExitAction = function() { _goBack(); };
             }
         }
 

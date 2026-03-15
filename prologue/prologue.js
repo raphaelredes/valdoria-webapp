@@ -11,9 +11,13 @@ if (tg) {
     if (tg.BackButton) {
         tg.BackButton.show();
         tg.BackButton.onClick(() => {
-            try { tg.close(); } catch (e) { console.warn('[PROLOGUE] tg.close:', e); }
+            if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
+            else { try { tg.close(); } catch (e) { console.warn('[PROLOGUE] tg.close:', e); } }
         });
     }
+    window.__valdoriaExitAction = function() {
+        try { tg.close(); } catch (e) { console.warn('[PROLOGUE] tg.close:', e); }
+    };
 }
 
 const params = new URLSearchParams(location.search);

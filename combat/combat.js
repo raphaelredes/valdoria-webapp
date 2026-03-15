@@ -12,6 +12,7 @@ if (tg) {
     if (tg.BackButton) {
         tg.BackButton.show();
         tg.BackButton.onClick(() => {
+            if (window.ValdoriaExitConfirm) { ValdoriaExitConfirm.show(); return; }
             // If no combat state loaded (server down / error screen), close immediately
             if (!currentState) {
                 stopAllIntervals();
@@ -21,6 +22,11 @@ if (tg) {
             closeCombat('back');
         });
     }
+    // Exit confirm: custom close action
+    window.__valdoriaExitAction = function() {
+        if (!currentState) { stopAllIntervals(); try { tg.close(); } catch(e){} return; }
+        closeCombat('back');
+    };
 }
 
 const params = new URLSearchParams(window.location.search);
@@ -447,6 +453,147 @@ async function transitionToInventoryFromArena() {
     }
 }
 
+
+// ─── DEATH SAVE CINEMATIC REPLAY ───
+// Shows dramatic replay of all death saves before the defeat resolution screen
+function renderDeathSaveReplay(state, onComplete) {
+    stopAllIntervals();
+    var app = document.getElementById('app');
+    var dsHist = state.ds_history || [];
+    var ds = state.ds || { s: 0, f: 0 };
+    var stabilized = ds.s >= 3;
+    var _replaySkipped = false;
+
+    // Build tracker HTML: 3 success slots + 3 failure slots
+    var trackerHtml = '<div class="ds-tracker">';
+    trackerHtml += '<div class="ds-row ds-row-success"><span class="ds-row-label">\u2714</span>';
+    for (var i = 0; i < 3; i++) trackerHtml += '<div class="ds-dot success-slot" data-idx="' + i + '"></div>';
+    trackerHtml += '</div>';
+    trackerHtml += '<div class="ds-row ds-row-failure"><span class="ds-row-label">\u2718</span>';
+    for (var i = 0; i < 3; i++) trackerHtml += '<div class="ds-dot failure-slot" data-idx="' + i + '"></div>';
+    trackerHtml += '</div></div>';
+
+    app.innerHTML = '<div class="death-save-replay">' +
+        '<div class="ds-header">\u2696\uFE0F Salvaguardas contra Morte</div>' +
+        trackerHtml +
+        '<div class="ds-roll-display" id="dsRollDisplay"></div>' +
+        '<div class="ds-roll-counter" id="dsRollCounter"></div>' +
+        '<div class="ds-outcome" id="dsOutcome"></div>' +
+        '<button class="v-skip-btn ds-skip" id="dsSkipBtn" style="display:none">Pular \u25B8</button>' +
+    '</div>';
+
+    // Play defeat audio
+    if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('defeat');
+
+    // Red vignette flash
+    if (window._combatVfx) window._combatVfx.flash('rgba(120,20,20,0.35)', 800);
+    haptic('heavy');
+
+    // Show skip button after 500ms
+    var skipBtn = document.getElementById('dsSkipBtn');
+    setTimeout(function() {
+        if (!_replaySkipped && skipBtn) skipBtn.style.display = '';
+    }, 500);
+    if (skipBtn) skipBtn.onclick = function() {
+        if (_replaySkipped) return;
+        _replaySkipped = true;
+        skipBtn.style.display = 'none';
+        // Fill all dots instantly
+        _fillAllDotsInstant(dsHist);
+        // Show outcome immediately
+        _showFinalOutcome();
+        setTimeout(onComplete, 1200);
+    };
+
+    function _fillAllDotsInstant(history) {
+        var si = 0, fi = 0;
+        for (var h = 0; h < history.length; h++) {
+            var roll = history[h];
+            if (roll.crit) { si++; }
+            else if (roll.crit_fail) { fi = Math.min(fi + 2, 3); }
+            else if (roll.success) { si++; }
+            else { fi++; }
+        }
+        var sDots = document.querySelectorAll('.ds-dot.success-slot');
+        var fDots = document.querySelectorAll('.ds-dot.failure-slot');
+        for (var s = 0; s < Math.min(si, 3); s++) { if (sDots[s]) sDots[s].classList.add('filled'); }
+        for (var f = 0; f < Math.min(fi, 3); f++) { if (fDots[f]) fDots[f].classList.add('filled'); }
+    }
+
+    function _showFinalOutcome() {
+        var outcomeEl = document.getElementById('dsOutcome');
+        if (!outcomeEl) return;
+        if (stabilized) {
+            outcomeEl.innerHTML = '<span class="ds-outcome-text ds-stabilized">\u2728 Estabilizado! Voc\u00EA acorda com 1 HP.</span>';
+            if (window._combatVfx) window._combatVfx.flash('rgba(68,170,136,0.3)', 500);
+        } else {
+            outcomeEl.innerHTML = '<span class="ds-outcome-text ds-death">\uD83D\uDC80 Sucumbiu aos ferimentos...</span>';
+            if (window._combatVfx) window._combatVfx.flash('rgba(200,30,30,0.4)', 600);
+        }
+        outcomeEl.classList.add('visible');
+    }
+
+    // Animate each roll sequentially
+    var successIdx = 0, failIdx = 0;
+    var rollIdx = 0;
+
+    function _animateNextRoll() {
+        if (_replaySkipped || rollIdx >= dsHist.length) {
+            if (!_replaySkipped) {
+                _showFinalOutcome();
+                setTimeout(function() { if (!_replaySkipped) onComplete(); }, 2000);
+            }
+            return;
+        }
+        var roll = dsHist[rollIdx];
+        var rollDisplay = document.getElementById('dsRollDisplay');
+        var rollCounter = document.getElementById('dsRollCounter');
+        if (rollCounter) rollCounter.textContent = 'Rolagem ' + (rollIdx + 1);
+
+        // Use 3D dice overlay for each roll
+        var lr = { t: 'death_save', r: roll.r, d: 0, crit: roll.crit, crit_fail: roll.crit_fail, success: roll.success };
+        _initDiceDeathSave(lr);
+
+        // After dice animation finishes (~2500ms), fill the dot
+        setTimeout(function() {
+            if (_replaySkipped) return;
+            var dotFilled = false;
+            if (roll.crit) {
+                var sDots = document.querySelectorAll('.ds-dot.success-slot');
+                if (sDots[successIdx]) { sDots[successIdx].classList.add('filled', 'pulse'); dotFilled = true; }
+                successIdx++;
+            } else if (roll.crit_fail) {
+                var fDots = document.querySelectorAll('.ds-dot.failure-slot');
+                for (var x = 0; x < 2 && failIdx < 3; x++) {
+                    if (fDots[failIdx]) { fDots[failIdx].classList.add('filled', 'pulse'); dotFilled = true; }
+                    failIdx++;
+                }
+            } else if (roll.success) {
+                var sDots2 = document.querySelectorAll('.ds-dot.success-slot');
+                if (sDots2[successIdx]) { sDots2[successIdx].classList.add('filled', 'pulse'); dotFilled = true; }
+                successIdx++;
+            } else {
+                var fDots2 = document.querySelectorAll('.ds-dot.failure-slot');
+                if (fDots2[failIdx]) { fDots2[failIdx].classList.add('filled', 'pulse'); dotFilled = true; }
+                failIdx++;
+            }
+            if (dotFilled) haptic('medium');
+
+            // Show roll value briefly
+            if (rollDisplay) {
+                rollDisplay.textContent = roll.r;
+                rollDisplay.className = 'ds-roll-display ' + (roll.crit ? 'crit' : roll.crit_fail ? 'crit-fail' : roll.success ? 'success' : 'failure');
+            }
+
+            rollIdx++;
+            setTimeout(_animateNextRoll, 800);
+        }, 2500);
+    }
+
+    // Start first roll after a brief pause
+    setTimeout(_animateNextRoll, 800);
+}
+
 function renderResolution(state) {
     stopAllIntervals();
     const isVictory = state.phase === 'victory';
@@ -513,6 +660,24 @@ function renderResolution(state) {
     const narrativeHtml = narrativeLines.length > 0
         ? `<div class="res-narrative">${narrativeLines.map(l => escHtml(l)).join('<br>')}</div>`
         : '';
+
+    // Build death save tracker for defeat resolution (static summary)
+    let dsTrackerHtml = '';
+    if (!isVictory && !isFled && state.ds) {
+        const _ds = state.ds;
+        const _stab = _ds.s >= 3;
+        let _tHtml = '<div class="ds-tracker ds-tracker-result">';
+        _tHtml += '<div class="ds-row ds-row-success"><span class="ds-row-label">\u2714</span>';
+        for (let _i = 0; _i < 3; _i++) _tHtml += '<div class="ds-dot success-slot' + (_i < _ds.s ? ' filled' : '') + '"></div>';
+        _tHtml += '</div><div class="ds-row ds-row-failure"><span class="ds-row-label">\u2718</span>';
+        for (let _i = 0; _i < 3; _i++) _tHtml += '<div class="ds-dot failure-slot' + (_i < _ds.f ? ' filled' : '') + '"></div>';
+        _tHtml += '</div></div>';
+        const _outcomeText = _stab
+            ? '<div class="ds-outcome-inline ds-stabilized">\u2728 Estabilizado! Voc\u00ea acorda com 1 HP.</div>'
+            : '<div class="ds-outcome-inline ds-death">\uD83D\uDC80 Sucumbiu aos ferimentos...</div>';
+        dsTrackerHtml = '<div class="ds-summary">' + _tHtml + _outcomeText + '</div>';
+    }
+
     const rewardsBlock = rewardsHtml
         ? `<div class="res-rewards">${rewardsHtml}</div>`
         : (isVictory ? '<div class="res-rewards"><div class="res-reward"><span class="res-icon">\u2694\uFE0F</span><span>Combate encerrado</span></div></div>'
@@ -537,6 +702,7 @@ function renderResolution(state) {
         <div class="res-header ${isFled ? 'victory' : (isVictory ? 'victory' : 'defeat')}">
             <div class="res-title">${isFled ? '🏃 FUGA!' : (isVictory ? '🏆 VITÓRIA!' : '💀 DERROTA')}</div>
         </div>
+        ${dsTrackerHtml}
         ${narrativeHtml}
         ${rewardsBlock}
         ${buttonsHtml}
@@ -744,14 +910,17 @@ function _renderArenaInner(s) {
         // Spectator mode: player is unconscious, allies fight on
         // D&D 5e PHB p.197: Death Saving Throws — show status + advance button
         const ds = s.ds || { s: 0, f: 0 };
-        const dsMarks = '✅'.repeat(ds.s) + '⬜'.repeat(3 - ds.s) + '  ' + '❌'.repeat(ds.f) + '⬜'.repeat(3 - ds.f);
-        const dsLegend = '<div class="spectator-legend">3 \u2705 = Estabilizado \u00b7 3 \u274c = Morte</div>';
+        let dsHtml = '<div class="ds-tracker ds-tracker-compact">';
+        dsHtml += '<div class="ds-row ds-row-success"><span class="ds-row-label">\u2714</span>';
+        for (let _si = 0; _si < 3; _si++) dsHtml += '<div class="ds-dot success-slot' + (_si < ds.s ? ' filled' : '') + '"></div>';
+        dsHtml += '</div><div class="ds-row ds-row-failure"><span class="ds-row-label">\u2718</span>';
+        for (let _fi = 0; _fi < 3; _fi++) dsHtml += '<div class="ds-dot failure-slot' + (_fi < ds.f ? ' filled' : '') + '"></div>';
+        dsHtml += '</div></div>';
         const stab = ds.stab ? '<div class="spectator-detail">🩹 Estabilizado — aguardando socorro</div>' : '';
         html += `<div class="action-bar spectator-bar">
             <div class="spectator-msg">💀 <b>Inconsciente</b> — Teste contra a Morte</div>
-            <div class="spectator-saves">${dsMarks}</div>
+            ${dsHtml}
             ${stab}
-            ${dsLegend}
             <button class="action-btn primary full-width" data-action="continue_spectator" style="margin-top:6px">⏭️ Próximo Round</button>
         </div>`;
     } else if (ph === 'active' && subPh === 'bonus_action') {

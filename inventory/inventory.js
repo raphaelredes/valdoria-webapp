@@ -476,9 +476,11 @@ function initBackButton() {
         if (tg?.BackButton) {
             tg.BackButton.show();
             tg.BackButton.onClick(() => {
-                _navigateBack();
+                if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
+                else _navigateBack();
             });
         }
+        window.__valdoriaExitAction = function() { _navigateBack(); };
     } catch(e) { console.warn('[INVENTORY] BackButton setup:', e); }
 }
 

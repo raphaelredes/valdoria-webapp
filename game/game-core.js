@@ -130,30 +130,36 @@ async function init() {
         try { Telegram.WebApp.disableVerticalSwipes(); } catch (e) { /* older clients */ }
         try { Telegram.WebApp.setHeaderColor('#2a2420'); Telegram.WebApp.setBackgroundColor('#2a2420'); } catch (e) { /* older clients */ }
 
-        // Back button: navigate back in-game; close WebApp only from hub
+        // Back button: navigate back in-game; show exit popup from hub
         Telegram.WebApp.BackButton.show();
         Telegram.WebApp.BackButton.onClick(() => {
             const sid = S.currentScreen ? S.currentScreen.screen_id || '' : '';
-            if (sid === 'city.hub' || !sid) { _closeGameHub(); }
+            if (sid === 'city.hub' || !sid) {
+                if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
+                else _closeGameHub();
+            }
             else { doAction('action_universal_back'); }
         });
+        // Set custom exit action for the shared exit-confirm module
+        window.__valdoriaExitAction = function() { _closeGameHub(); };
     } else {
         console.warn('[GAME] Telegram WebApp NOT detected - running outside Telegram?');
     }
 
     // ─── Browser Back Button Trap ───
-    // Push a history entry so the phone's physical back button triggers popstate
-    // instead of navigating away from the WebApp entirely.
+    // Game Hub manages its own popstate (exit-confirm.js popstate is disabled via __valdoriaPopstateTrap).
     history.replaceState({ screen: 'init' }, '');
     history.pushState({ screen: 'game' }, '');
     window.addEventListener('popstate', (e) => {
-        // Re-push so the trap stays active for subsequent presses
         history.pushState({ screen: 'game' }, '');
-        // Navigate back in-game; close WebApp only from hub
-        if (window.Telegram && Telegram.WebApp) {
-            const sid = S.currentScreen ? S.currentScreen.screen_id || '' : '';
-            if (sid === 'city.hub' || !sid) { _closeGameHub(); }
-            else { doAction('action_universal_back'); }
+        const sid = S.currentScreen ? S.currentScreen.screen_id || '' : '';
+        if (sid === 'city.hub' || !sid) {
+            // Root screen: show exit popup
+            if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
+            else _closeGameHub();
+        } else {
+            // Sub-screen: navigate back in-game
+            doAction('action_universal_back');
         }
     });
 

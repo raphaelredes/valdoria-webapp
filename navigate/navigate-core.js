@@ -44,7 +44,11 @@ async function initAsync() {
             try { tg.disableVerticalSwipes(); } catch (e) { console.warn('[NAVIGATE] disableVerticalSwipes:', e); }
             if (tg.BackButton) {
                 tg.BackButton.show();
-                tg.BackButton.onClick(() => { handleClose(); });
+                tg.BackButton.onClick(() => {
+                    if (window.ValdoriaExitConfirm) ValdoriaExitConfirm.show();
+                    else handleClose();
+                });
+                window.__valdoriaExitAction = function() { handleClose(); };
             }
         }
 

@@ -1,0 +1,135 @@
+/* ========================================================
+   VALDORIA EXIT CONFIRM v1.0
+   Shared exit confirmation popup for ALL WebApps.
+   Shows a medieval-styled popup asking if the player wants
+   to leave the game when pressing Telegram BackButton or
+   Android physical back button.
+
+   Usage: Include AFTER webapp-init.js in any WebApp HTML:
+     <script src="../shared/exit-confirm.js"></script>
+
+   To customize the exit action (e.g., transition instead of close):
+     window.__valdoriaExitAction = function() { myCustomExit(); };
+
+   To temporarily suppress the popup (e.g., during sub-screen nav):
+     window.__valdoriaExitBypass = true;
+   ======================================================== */
+(function () {
+    "use strict";
+
+    var tg = window.Telegram && Telegram.WebApp;
+    var _popupVisible = false;
+    var _overlay = null;
+
+    // --- Inject HTML ---
+    function _ensureDOM() {
+        if (_overlay) return;
+        var div = document.createElement('div');
+        div.innerHTML =
+            '<div id="v-exit-overlay" class="v-exit-overlay" style="display:none">' +
+                '<div class="v-exit-box">' +
+                    '<div class="v-exit-icon">\u2694\uFE0F</div>' +
+                    '<div class="v-exit-title">Encerrar Aventura?</div>' +
+                    '<div class="v-exit-msg">Deseja realmente sair do jogo?</div>' +
+                    '<div class="v-exit-buttons">' +
+                        '<button id="v-exit-stay" class="v-exit-btn v-exit-btn-stay">Continuar Jogando</button>' +
+                        '<button id="v-exit-leave" class="v-exit-btn v-exit-btn-leave">Sair</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(div.firstChild);
+        _overlay = document.getElementById('v-exit-overlay');
+
+        // Event listeners
+        document.getElementById('v-exit-stay').addEventListener('click', function () {
+            _hide();
+        });
+        document.getElementById('v-exit-leave').addEventListener('click', function () {
+            _hide();
+            _doExit();
+        });
+        // Click on backdrop = stay
+        _overlay.addEventListener('click', function (e) {
+            if (e.target === _overlay) _hide();
+        });
+    }
+
+    function _show() {
+        _ensureDOM();
+        _overlay.style.display = '';
+        _popupVisible = true;
+        if (window.vHaptic) vHaptic.medium();
+    }
+
+    function _hide() {
+        if (!_overlay) return;
+        _overlay.style.display = 'none';
+        _popupVisible = false;
+    }
+
+    function _doExit() {
+        if (window.__valdoriaExitAction) {
+            try { window.__valdoriaExitAction(); } catch (e) {
+                console.warn('[EXIT-CONFIRM] custom exit failed:', e);
+            }
+            return;
+        }
+        if (tg) {
+            try { tg.close(); } catch (e) { console.warn('[EXIT-CONFIRM] tg.close:', e); }
+        }
+    }
+
+    // --- Public API ---
+    function showExitConfirm() {
+        if (window.__valdoriaExitBypass) {
+            _doExit();
+            return;
+        }
+        if (_popupVisible) {
+            _hide();
+            return;
+        }
+        _show();
+    }
+
+    function isExitPopupVisible() {
+        return _popupVisible;
+    }
+
+    function hideExitConfirm() {
+        _hide();
+    }
+
+    window.ValdoriaExitConfirm = {
+        show: showExitConfirm,
+        hide: hideExitConfirm,
+        isVisible: isExitPopupVisible,
+    };
+
+    // --- Auto-setup Telegram BackButton ---
+    // Show BackButton and wire it to the exit popup as a fallback.
+    // WebApps that register their own BackButton.onClick will override this.
+    if (tg && tg.BackButton) {
+        try { tg.BackButton.show(); } catch(e) {}
+        try {
+            tg.BackButton.onClick(function() {
+                showExitConfirm();
+            });
+        } catch(e) {}
+    }
+
+    // --- Android back button trap ---
+    // Set up history trap for WebApps that don't have their own popstate handler.
+    // WebApps with custom navigation (Game Hub) override this with their own handler.
+    // Guard: only push if no WebApp has already set up its own trap.
+    if (!window.__valdoriaPopstateTrap) {
+        window.__valdoriaPopstateTrap = true;
+        history.replaceState({ screen: 'valdoria_init' }, '');
+        history.pushState({ screen: 'valdoria_app' }, '');
+        window.addEventListener('popstate', function () {
+            history.pushState({ screen: 'valdoria_app' }, '');
+            if (window.__valdoria_transitioning) return;
+            showExitConfirm();
+        });
+    }
+})();

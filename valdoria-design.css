@@ -1129,4 +1129,70 @@ body::after {
     color: var(--v-danger, #c44040); font-size: 13px; margin-top: 8px;
 }
 
+
+/* ─── EXIT CONFIRMATION POPUP ─── */
+.v-exit-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex; align-items: center; justify-content: center;
+    animation: v-exit-fadein 0.2s ease-out;
+}
+@keyframes v-exit-fadein {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.v-exit-box {
+    background: var(--v-bg-raised, #332a22);
+    border: 2px solid var(--v-gold-dim, #9a7530);
+    border-radius: 12px;
+    padding: 24px 20px 20px;
+    max-width: 300px; width: 85%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(196, 149, 58, 0.1);
+    animation: v-exit-scalein 0.2s ease-out;
+}
+@keyframes v-exit-scalein {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.v-exit-icon {
+    font-size: 36px; margin-bottom: 8px;
+}
+.v-exit-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: 18px; font-weight: 700;
+    color: var(--v-gold, #c4953a);
+    margin-bottom: 8px;
+}
+.v-exit-msg {
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 14px; line-height: 1.5;
+    color: var(--v-text, #d4c8b0);
+    margin-bottom: 20px;
+}
+.v-exit-buttons {
+    display: flex; flex-direction: column; gap: 10px;
+}
+.v-exit-btn {
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 15px; font-weight: 600;
+    border: none; border-radius: 8px;
+    padding: 12px 16px; cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    min-height: 44px;
+}
+.v-exit-btn:active {
+    transform: scale(0.97);
+}
+.v-exit-btn-stay {
+    background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530));
+    color: #1a1410;
+    box-shadow: 0 2px 8px rgba(196, 149, 58, 0.3);
+}
+.v-exit-btn-leave {
+    background: var(--v-bg-card, #2e2520);
+    color: var(--v-text-dim, #a09484);
+    border: 1px solid var(--v-border, #4a3828);
+}
+
 } /* end @layer valdoria */
