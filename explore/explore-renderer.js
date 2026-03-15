@@ -363,6 +363,9 @@ _staticDirty = false;
     // 8. Player token (with direction indicator)
     drawPlayerToken(_ctx, timestamp);
 
+    // 8.5. Occlusion fade — tall tiles above player become transparent (Diablo/BG3 technique)
+    _drawOcclusionFade(_ctx);
+
     // 9. Ambient particles
     if (typeof drawParticles === 'function') {
         drawParticles(_ctx, timestamp);
@@ -528,15 +531,15 @@ function _drawDayNightTint(ctx, w, h, timestamp) {
         case 'dawn':
             r = 255; g = 180; b = 100; alpha = 0.06; break;
         case 'dusk':
-            r = 180; g = 80; b = 40; alpha = 0.12; break;
+            r = 180; g = 80; b = 40; alpha = 0.16; break;
         case 'night':
-            r = 20; g = 30; b = 60; alpha = 0.22; break;
+            r = 20; g = 30; b = 60; alpha = 0.28; break;
         default: return;
     }
 
     // Slight flicker at night (torch influence)
     if (phase === 'night') {
-        const flicker = Math.sin((timestamp || 0) * 0.003) * 0.02;
+        const flicker = Math.sin((timestamp || 0) * 0.003) * 0.06;
         alpha += flicker;
     }
 
@@ -562,6 +565,13 @@ function renderStaticTiles(timestamp) {
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             _drawHeightShadow(_staticCtx, col, row);
+        }
+    }
+
+    // 2.5 pass: Cast shadows from tall obstacles (light from NW → shadow SE)
+    for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+            _drawCastShadow(_staticCtx, col, row);
         }
     }
 
@@ -600,6 +610,113 @@ function renderStaticTiles(timestamp) {
             _staticCtx.beginPath();
             _staticCtx.arc(cx, cy, HEX_W * 0.5, 0, Math.PI * 2);
             _staticCtx.fill();
+        }
+    }
+}
+
+// Cast shadow — tall tiles project shadow onto SE neighbor (light from NW)
+function _drawCastShadow(ctx, col, row) {
+    const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+    const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
+    const height = TILE_HEIGHT[baseTile] || 1;
+    if (height < 3) return; // Only tall tiles cast shadows
+
+    // Shadow projects to SE neighbors (light comes from NW)
+    const nbs = typeof getNeighbors === 'function' ? getNeighbors(col, row) : [];
+    for (const [nc, nr] of nbs) {
+        if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+        // Only shadow onto tiles that are BELOW this one (SE direction: row+1 or same row + col+1)
+        if (nr < row) continue; // Skip tiles above
+        const nTile = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
+        const nBase = nTile.match(/[0-9@EC]/) ? '.' : nTile;
+        const nHeight = TILE_HEIGHT[nBase] || 1;
+        if (nHeight >= height) continue; // Don't shadow equally tall tiles
+
+        const nCenter = hexToScreen(nc, nr);
+        const nHeightPx = nHeight * UNIT_PX;
+        const shadowAlpha = Math.min(0.15, (height - nHeight) * 0.025);
+
+        // Elliptical shadow on the neighbor's top face
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,' + shadowAlpha.toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.ellipse(nCenter.x, nCenter.y - nHeightPx, HEX_W * 0.35, HEX_H * 0.25, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+// Occlusion fade — tall tiles above player become semi-transparent
+// Technique from Diablo/BG3: walls fade to let player be visible "behind" them
+function _drawOcclusionFade(ctx) {
+    if (!S.grid || typeof playerGridCol === 'undefined') return;
+    const pRow = playerGridRow;
+    const pCol = playerGridCol;
+    const OCCLUDE_HEIGHT = 4; // Only fade tiles taller than this
+    const biome = S.biome || 'forest';
+    const colors = BIOME_COLORS[biome] || BIOME_COLORS.forest;
+
+    // Check rows above the player (lower row index = visually above in iso)
+    // In isometric top-down, rows with HIGHER index are visually "in front" (south)
+    // A wall in row pRow-1 could visually overlap the player in pRow
+    for (let dr = -2; dr <= 0; dr++) {
+        const checkRow = pRow + dr;
+        if (checkRow < 0 || checkRow >= ROWS) continue;
+        for (let col = 0; col < COLS; col++) {
+            // Only check tiles near the player column (±3)
+            if (Math.abs(col - pCol) > 3) continue;
+
+            const tile = S.grid[checkRow] && S.grid[checkRow][col] ? S.grid[checkRow][col] : '.';
+            const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
+            const height = TILE_HEIGHT[baseTile] || 1;
+
+            if (height < OCCLUDE_HEIGHT) continue;
+
+            // This tall tile is above or at the player row — fade it
+            const center = hexToScreen(col, checkRow);
+            const heightPx = height * UNIT_PX;
+            const cx = center.x;
+            const cy = center.y;
+
+            // Draw a semi-transparent dark overlay to "fade" the tile
+            // This effectively makes the cached static tile appear transparent
+            ctx.save();
+            ctx.globalAlpha = 0.55; // 55% dark overlay = tile appears at ~45% opacity
+            ctx.fillStyle = '#1e1a16'; // Match background color
+
+            // Cover the tile's top face
+            const topVerts = hexTopVertices(cx, cy - heightPx);
+            ctx.beginPath();
+            ctx.moveTo(topVerts[0].x, topVerts[0].y);
+            for (let i = 1; i < topVerts.length; i++) {
+                ctx.lineTo(topVerts[i].x, topVerts[i].y);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            // Cover the tile's side faces
+            const leftVerts = hexLeftSideVertices(cx, cy - heightPx, heightPx);
+            ctx.beginPath();
+            ctx.moveTo(leftVerts[0].x, leftVerts[0].y);
+            for (let i = 1; i < leftVerts.length; i++) ctx.lineTo(leftVerts[i].x, leftVerts[i].y);
+            ctx.closePath();
+            ctx.fill();
+
+            const rightVerts = hexRightSideVertices(cx, cy - heightPx, heightPx);
+            ctx.beginPath();
+            ctx.moveTo(rightVerts[0].x, rightVerts[0].y);
+            for (let i = 1; i < rightVerts.length; i++) ctx.lineTo(rightVerts[i].x, rightVerts[i].y);
+            ctx.closePath();
+            ctx.fill();
+
+            const frontVerts = hexFrontSideVertices(cx, cy - heightPx, heightPx);
+            ctx.beginPath();
+            ctx.moveTo(frontVerts[0].x, frontVerts[0].y);
+            for (let i = 1; i < frontVerts.length; i++) ctx.lineTo(frontVerts[i].x, frontVerts[i].y);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
         }
     }
 }

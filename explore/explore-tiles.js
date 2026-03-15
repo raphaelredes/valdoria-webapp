@@ -217,10 +217,176 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
             ctx.fill();
         }
 
+    } else if (biome === 'cave') {
+        // Cave: stalactites, glowing crystals, bioluminescent fungi
+        // Stalactites hanging from above (2-3)
+        for (let i = 0; i < 3; i++) {
+            const sx = cx + (tileRand(col, row, 60 + i) - 0.5) * 18;
+            const sy = cy + (tileRand(col, row, 63 + i) - 0.5) * 6;
+            const sLen = 5 + tileRand(col, row, 66 + i) * 7;
+            ctx.fillStyle = '#2a2a3a';
+            ctx.beginPath();
+            ctx.moveTo(sx - 2, sy - sLen);
+            ctx.lineTo(sx + 2, sy - sLen);
+            ctx.lineTo(sx + 0.5, sy);
+            ctx.lineTo(sx - 0.5, sy);
+            ctx.closePath();
+            ctx.fill();
+            // Highlight edge
+            ctx.fillStyle = 'rgba(100,100,140,0.3)';
+            ctx.beginPath();
+            ctx.moveTo(sx - 2, sy - sLen);
+            ctx.lineTo(sx - 0.5, sy - sLen);
+            ctx.lineTo(sx - 0.2, sy);
+            ctx.lineTo(sx - 0.5, sy);
+            ctx.closePath();
+            ctx.fill();
+        }
+        // Glowing crystal cluster (1-2)
+        const crystals = r5 > 0.4 ? 2 : 1;
+        const crystalColors = ['rgba(80,140,200,0.6)', 'rgba(120,60,180,0.5)', 'rgba(60,180,140,0.5)'];
+        const glowColors = ['rgba(80,140,200,0.12)', 'rgba(120,60,180,0.10)', 'rgba(60,180,140,0.10)'];
+        for (let i = 0; i < crystals; i++) {
+            const cx2 = cx + (tileRand(col, row, 70 + i) - 0.5) * 14;
+            const cy2 = cy + (tileRand(col, row, 72 + i) - 0.3) * 5;
+            const cIdx = Math.floor(tileRand(col, row, 74 + i) * 3);
+            const cH = 4 + tileRand(col, row, 76 + i) * 4;
+            // Glow
+            ctx.fillStyle = glowColors[cIdx];
+            ctx.beginPath();
+            ctx.arc(cx2, cy2 - cH * 0.5, cH * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            // Crystal body (angled triangle)
+            ctx.fillStyle = crystalColors[cIdx];
+            ctx.beginPath();
+            ctx.moveTo(cx2 - 1.5, cy2);
+            ctx.lineTo(cx2 + 0.5, cy2 - cH);
+            ctx.lineTo(cx2 + 2, cy2);
+            ctx.closePath();
+            ctx.fill();
+            // Highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.beginPath();
+            ctx.moveTo(cx2 - 0.5, cy2);
+            ctx.lineTo(cx2 + 0.5, cy2 - cH);
+            ctx.lineTo(cx2 + 0.8, cy2 - cH * 0.3);
+            ctx.closePath();
+            ctx.fill();
+        }
+        // Bioluminescent mushrooms (2-3 small)
+        for (let i = 0; i < 2 + (r3 > 0.5 ? 1 : 0); i++) {
+            const mx = cx + (tileRand(col, row, 80 + i) - 0.5) * 16;
+            const my = cy + (tileRand(col, row, 82 + i) * 0.4 + 0.1) * 6;
+            const mSize = 1.5 + tileRand(col, row, 84 + i) * 1.5;
+            // Stem
+            ctx.fillStyle = '#3a3a4a';
+            ctx.fillRect(mx - 0.4, my, 0.8, mSize * 1.5);
+            // Cap (glowing)
+            ctx.fillStyle = 'rgba(80,200,120,0.5)';
+            ctx.beginPath();
+            ctx.ellipse(mx, my, mSize, mSize * 0.5, 0, Math.PI, 0);
+            ctx.fill();
+            // Glow
+            ctx.fillStyle = 'rgba(80,200,120,0.08)';
+            ctx.beginPath();
+            ctx.arc(mx, my, mSize * 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+    } else if (biome === 'graveyard') {
+        // Graveyard: dead twisted trees, more tombstones, scattered skulls
+        // Dead tree (bare branches, no leaves)
+        const tx = cx + (r1 - 0.5) * 6;
+        const ty = cy + (r2 - 0.5) * 3;
+        // Trunk (gnarled)
+        ctx.strokeStyle = '#2a1a1a';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty + 3);
+        ctx.quadraticCurveTo(tx - 1, ty - 4, tx + 1, ty - 10);
+        ctx.stroke();
+        // Branches (bare, twisted)
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(tx + 1, ty - 8);
+        ctx.quadraticCurveTo(tx + 5, ty - 10, tx + 8, ty - 12);
+        ctx.moveTo(tx, ty - 9);
+        ctx.quadraticCurveTo(tx - 4, ty - 12, tx - 7, ty - 11);
+        ctx.moveTo(tx + 1, ty - 6);
+        ctx.quadraticCurveTo(tx + 3, ty - 8, tx + 6, ty - 7);
+        ctx.stroke();
+        // Thin twigs
+        ctx.lineWidth = 0.6;
+        ctx.strokeStyle = '#3a2a2a';
+        ctx.beginPath();
+        ctx.moveTo(tx + 8, ty - 12);
+        ctx.lineTo(tx + 10, ty - 14);
+        ctx.moveTo(tx - 7, ty - 11);
+        ctx.lineTo(tx - 9, ty - 13);
+        ctx.moveTo(tx + 6, ty - 7);
+        ctx.lineTo(tx + 7, ty - 9);
+        ctx.stroke();
+        // Second dead tree (smaller, 70% chance)
+        if (r3 > 0.3) {
+            const tx2 = cx + (r3 - 0.2) * 12;
+            const ty2 = cy + (r4 - 0.4) * 4;
+            ctx.strokeStyle = '#2a1a1a';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(tx2, ty2 + 2);
+            ctx.quadraticCurveTo(tx2 + 1, ty2 - 3, tx2 - 1, ty2 - 7);
+            ctx.stroke();
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(tx2 - 1, ty2 - 5);
+            ctx.lineTo(tx2 - 4, ty2 - 8);
+            ctx.moveTo(tx2 - 1, ty2 - 6);
+            ctx.lineTo(tx2 + 3, ty2 - 9);
+            ctx.stroke();
+        }
+        // Extra tombstones (varied shapes)
+        const tombX = cx + (r5 - 0.5) * 10;
+        const tombY = cy + (r4 * 0.3 + 0.2) * 5;
+        // Rounded tombstone
+        ctx.fillStyle = '#4a4a4a';
+        ctx.fillRect(tombX - 2.5, tombY - 4, 5, 6);
+        ctx.beginPath();
+        ctx.arc(tombX, tombY - 4, 2.5, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = '#5a5a5a';
+        ctx.fillRect(tombX - 2.5, tombY - 3.5, 5, 5);
+        ctx.beginPath();
+        ctx.arc(tombX, tombY - 3.5, 2.5, Math.PI, 0);
+        ctx.fill();
+        // RIP text (tiny line)
+        ctx.strokeStyle = '#6a6a6a';
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        ctx.moveTo(tombX - 1.5, tombY - 1.5);
+        ctx.lineTo(tombX + 1.5, tombY - 1.5);
+        ctx.stroke();
+        // Tilted cross (different spot)
+        if (r1 > 0.4) {
+            const crx = cx + (r2 - 0.6) * 14;
+            const cry = cy + (r5 * 0.3) * 4;
+            ctx.save();
+            ctx.translate(crx, cry);
+            ctx.rotate(-0.15);
+            ctx.strokeStyle = '#4a3a3a';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, -6);
+            ctx.lineTo(0, 2);
+            ctx.moveTo(-2.5, -4);
+            ctx.lineTo(2.5, -4);
+            ctx.stroke();
+            ctx.restore();
+        }
+
     } else {
-        // Default conifer cluster (forest, mountain, cave, graveyard, volcanic)
-        const darkGreen = biome === 'graveyard' ? '#1a2a1a' : biome === 'volcanic' ? '#1a2a1a' : '#1a4a1a';
-        const lightGreen = biome === 'graveyard' ? '#0d200d' : '#0d3a0d';
+        // Default conifer cluster (forest, mountain, volcanic)
+        const darkGreen = biome === 'volcanic' ? '#1a2a1a' : '#1a4a1a';
+        const lightGreen = '#0d3a0d';
 
         // Main tree (always)
         const tx1 = cx + (r1 - 0.5) * 6;
@@ -957,10 +1123,169 @@ function drawTreeDecorationWind(ctx, cx, cy, biome, col, row, timestamp) {
             ctx.fill();
         }
 
+    } else if (biome === 'cave') {
+        // Cave animated: crystals with subtle pulsing glow
+        const pulse = Math.sin(timestamp * 0.002) * 0.15 + 0.85;
+        // Stalactites (static)
+        for (let i = 0; i < 3; i++) {
+            const sx = cx + (tileRand(col, row, 60 + i) - 0.5) * 18;
+            const sy = cy + (tileRand(col, row, 63 + i) - 0.5) * 6;
+            const sLen = 5 + tileRand(col, row, 66 + i) * 7;
+            ctx.fillStyle = '#2a2a3a';
+            ctx.beginPath();
+            ctx.moveTo(sx - 2, sy - sLen);
+            ctx.lineTo(sx + 2, sy - sLen);
+            ctx.lineTo(sx + 0.5, sy);
+            ctx.lineTo(sx - 0.5, sy);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = 'rgba(100,100,140,0.3)';
+            ctx.beginPath();
+            ctx.moveTo(sx - 2, sy - sLen);
+            ctx.lineTo(sx - 0.5, sy - sLen);
+            ctx.lineTo(sx - 0.2, sy);
+            ctx.lineTo(sx - 0.5, sy);
+            ctx.closePath();
+            ctx.fill();
+        }
+        // Pulsing crystals
+        const crystals = r5 > 0.4 ? 2 : 1;
+        const crystalColors = ['rgba(80,140,200,VAL)', 'rgba(120,60,180,VAL)', 'rgba(60,180,140,VAL)'];
+        const glowColors = ['rgba(80,140,200,GVAL)', 'rgba(120,60,180,GVAL)', 'rgba(60,180,140,GVAL)'];
+        for (let i = 0; i < crystals; i++) {
+            const cx2 = cx + (tileRand(col, row, 70 + i) - 0.5) * 14;
+            const cy2 = cy + (tileRand(col, row, 72 + i) - 0.3) * 5;
+            const cIdx = Math.floor(tileRand(col, row, 74 + i) * 3);
+            const cH = 4 + tileRand(col, row, 76 + i) * 4;
+            const alpha = 0.5 * pulse + 0.1;
+            const gAlpha = 0.10 * pulse + 0.02;
+            // Glow (animated)
+            ctx.fillStyle = glowColors[cIdx].replace('GVAL', gAlpha.toFixed(2));
+            ctx.beginPath();
+            ctx.arc(cx2, cy2 - cH * 0.5, cH * 1.5 * (0.9 + pulse * 0.1), 0, Math.PI * 2);
+            ctx.fill();
+            // Crystal body
+            ctx.fillStyle = crystalColors[cIdx].replace('VAL', alpha.toFixed(2));
+            ctx.beginPath();
+            ctx.moveTo(cx2 - 1.5, cy2);
+            ctx.lineTo(cx2 + 0.5, cy2 - cH);
+            ctx.lineTo(cx2 + 2, cy2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.beginPath();
+            ctx.moveTo(cx2 - 0.5, cy2);
+            ctx.lineTo(cx2 + 0.5, cy2 - cH);
+            ctx.lineTo(cx2 + 0.8, cy2 - cH * 0.3);
+            ctx.closePath();
+            ctx.fill();
+        }
+        // Fungi (subtle glow pulse)
+        for (let i = 0; i < 2 + (r3 > 0.5 ? 1 : 0); i++) {
+            const mx = cx + (tileRand(col, row, 80 + i) - 0.5) * 16;
+            const my = cy + (tileRand(col, row, 82 + i) * 0.4 + 0.1) * 6;
+            const mSize = 1.5 + tileRand(col, row, 84 + i) * 1.5;
+            ctx.fillStyle = '#3a3a4a';
+            ctx.fillRect(mx - 0.4, my, 0.8, mSize * 1.5);
+            ctx.fillStyle = 'rgba(80,200,120,' + (0.4 * pulse + 0.1).toFixed(2) + ')';
+            ctx.beginPath();
+            ctx.ellipse(mx, my, mSize, mSize * 0.5, 0, Math.PI, 0);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(80,200,120,' + (0.06 * pulse + 0.02).toFixed(2) + ')';
+            ctx.beginPath();
+            ctx.arc(mx, my, mSize * 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+    } else if (biome === 'graveyard') {
+        // Graveyard animated: dead trees with gentle sway + tombstones
+        const tx = cx + (r1 - 0.5) * 6;
+        const ty = cy + (r2 - 0.5) * 3;
+        const sway = wind * 0.4; // Very subtle sway for dead branches
+        // Trunk
+        ctx.strokeStyle = '#2a1a1a';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty + 3);
+        ctx.quadraticCurveTo(tx - 1, ty - 4, tx + 1, ty - 10);
+        ctx.stroke();
+        // Branches with wind sway
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(tx + 1, ty - 8);
+        ctx.quadraticCurveTo(tx + 5 + sway, ty - 10, tx + 8 + sway * 1.5, ty - 12);
+        ctx.moveTo(tx, ty - 9);
+        ctx.quadraticCurveTo(tx - 4 + sway * 0.5, ty - 12, tx - 7 + sway, ty - 11);
+        ctx.moveTo(tx + 1, ty - 6);
+        ctx.quadraticCurveTo(tx + 3 + sway * 0.8, ty - 8, tx + 6 + sway, ty - 7);
+        ctx.stroke();
+        ctx.lineWidth = 0.6;
+        ctx.strokeStyle = '#3a2a2a';
+        ctx.beginPath();
+        ctx.moveTo(tx + 8 + sway * 1.5, ty - 12);
+        ctx.lineTo(tx + 10 + sway * 2, ty - 14);
+        ctx.moveTo(tx - 7 + sway, ty - 11);
+        ctx.lineTo(tx - 9 + sway * 1.5, ty - 13);
+        ctx.stroke();
+        // Second dead tree
+        if (r3 > 0.3) {
+            const tx2 = cx + (r3 - 0.2) * 12;
+            const ty2 = cy + (r4 - 0.4) * 4;
+            ctx.strokeStyle = '#2a1a1a';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(tx2, ty2 + 2);
+            ctx.quadraticCurveTo(tx2 + 1, ty2 - 3, tx2 - 1, ty2 - 7);
+            ctx.stroke();
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(tx2 - 1, ty2 - 5);
+            ctx.lineTo(tx2 - 4 + sway * 0.5, ty2 - 8);
+            ctx.moveTo(tx2 - 1, ty2 - 6);
+            ctx.lineTo(tx2 + 3 + sway * 0.5, ty2 - 9);
+            ctx.stroke();
+        }
+        // Tombstones (static)
+        const tombX = cx + (r5 - 0.5) * 10;
+        const tombY = cy + (r4 * 0.3 + 0.2) * 5;
+        ctx.fillStyle = '#4a4a4a';
+        ctx.fillRect(tombX - 2.5, tombY - 4, 5, 6);
+        ctx.beginPath();
+        ctx.arc(tombX, tombY - 4, 2.5, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = '#5a5a5a';
+        ctx.fillRect(tombX - 2.5, tombY - 3.5, 5, 5);
+        ctx.beginPath();
+        ctx.arc(tombX, tombY - 3.5, 2.5, Math.PI, 0);
+        ctx.fill();
+        ctx.strokeStyle = '#6a6a6a';
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        ctx.moveTo(tombX - 1.5, tombY - 1.5);
+        ctx.lineTo(tombX + 1.5, tombY - 1.5);
+        ctx.stroke();
+        // Tilted cross
+        if (r1 > 0.4) {
+            const crx = cx + (r2 - 0.6) * 14;
+            const cry = cy + (r5 * 0.3) * 4;
+            ctx.save();
+            ctx.translate(crx, cry);
+            ctx.rotate(-0.15);
+            ctx.strokeStyle = '#4a3a3a';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, -6);
+            ctx.lineTo(0, 2);
+            ctx.moveTo(-2.5, -4);
+            ctx.lineTo(2.5, -4);
+            ctx.stroke();
+            ctx.restore();
+        }
+
     } else {
-        // Default conifer with swaying tips (forest, mountain, graveyard)
-        const darkGreen = biome === 'graveyard' ? '#1a2a1a' : '#1a4a1a';
-        const lightGreen = biome === 'graveyard' ? '#0d200d' : '#0d3a0d';
+        // Default conifer with swaying tips (forest, mountain)
+        const darkGreen = '#1a4a1a';
+        const lightGreen = '#0d3a0d';
 
         const tx1 = cx + (r1 - 0.5) * 6;
         const ty1 = cy + (r2 - 0.5) * 3;
