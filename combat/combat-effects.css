@@ -168,9 +168,9 @@
     animation: dodgeStep 400ms ease-out;
 }
 @keyframes dodgeStep {
-    0% { transform: translateX(0); filter: brightness(1); }
-    30% { transform: translateX(6px); filter: brightness(1.4) hue-rotate(180deg); }
-    100% { transform: translateX(0); filter: brightness(1); }
+    0% { transform: translateX(0); opacity: 1; }
+    30% { transform: translateX(6px); opacity: 0.7; }
+    100% { transform: translateX(0); opacity: 1; }
 }
 
 /* ─── COMBO STREAK COUNTER ─── */

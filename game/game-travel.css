@@ -95,7 +95,7 @@
     font-size: clamp(36px, 12vw, 48px);
     animation: locIconPulse 1.5s ease-in-out infinite;
     z-index: 1;
-    filter: drop-shadow(0 0 16px rgba(196, 149, 58, 0.5)) drop-shadow(0 0 40px rgba(196, 149, 58, 0.15));
+    /* drop-shadow removed for mobile performance */
 }
 /* Gold ornamental divider below icon */
 .loc-transition-icon::after {

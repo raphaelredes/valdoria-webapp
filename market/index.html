@@ -530,8 +530,7 @@
             padding: 10px 16px;
             z-index: 150;
             background: linear-gradient(transparent, var(--v-bg) 30%);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            /* backdrop-filter removed for mobile performance */
         }
 
         .cart-summary {
@@ -591,8 +590,7 @@
             inset: 0;
             z-index: 200;
             background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            /* backdrop-filter removed for mobile performance */
             display: flex;
             align-items: flex-end;
             justify-content: center;

@@ -948,8 +948,8 @@ body::after {
     animation: v-errPulse 3s ease-in-out infinite;
 }
 @keyframes v-errPulse {
-    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(196,149,58,0.3)); }
-    50% { transform: scale(1.15); filter: drop-shadow(0 0 16px rgba(196,149,58,0.7)); }
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.15); opacity: 1; }
 }
 .v-err-msg {
     color: var(--v-text, #d4c8b0);

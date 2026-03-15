@@ -190,47 +190,58 @@
 
     var LITE_KEY = 'valdoria_loading_lite';
 
-    function isLowEndDevice() {
+    // Performance tier detection:
+    //   'lite'   — very low-end (cores ≤ 2 OR mem ≤ 2): minimal animations
+    //   'medium' — smartphones (cores ≤ 8 AND mem ≤ 8): no heavy filters, fewer particles
+    //   'full'   — desktops/high-end (cores > 8 OR mem > 8): all effects
+    function detectPerformanceTier() {
         var cores = navigator.hardwareConcurrency || 8;
-        var mem = navigator.deviceMemory || 8; // default high if unavailable
-        // Low-end: 4 or fewer cores AND 4GB or less memory
-        if (cores <= 4 && mem <= 4) return true;
-        // Very low-end: either metric alone is very low
-        if (cores <= 2) return true;
-        if (mem <= 2) return true;
-        return false;
+        var mem = navigator.deviceMemory || 8;
+        if (cores <= 2 || mem <= 2) return 'lite';
+        if (cores <= 4 && mem <= 4) return 'lite';
+        if (cores <= 8 && mem <= 8) return 'medium';
+        return 'full';
     }
 
-    function applyLiteMode() {
+    function isLowEndDevice() {
+        return detectPerformanceTier() === 'lite';
+    }
+
+    function applyPerformanceMode(tier) {
         var overlays = document.querySelectorAll('.loading-overlay');
         for (var i = 0; i < overlays.length; i++) {
-            overlays[i].classList.add('loading-lite');
+            if (tier === 'lite') {
+                overlays[i].classList.add('loading-lite');
+            } else if (tier === 'medium') {
+                overlays[i].classList.add('loading-medium');
+            }
         }
-        console.debug('[LOADING] Lite mode active — reduced animations for performance');
+        if (tier !== 'full') {
+            console.debug('[LOADING] ' + tier + ' mode active');
+        }
     }
 
-    function shouldUseLite() {
-        // Check user override first
+    function getEffectiveTier() {
         try {
             var pref = localStorage.getItem(LITE_KEY);
-            if (pref === '1') return true;
-            if (pref === '0') return false;
-        } catch (e) { /* storage unavailable */ }
-        // Auto-detect
-        return isLowEndDevice();
+            if (pref === '1') return 'lite';
+            if (pref === '0') return 'full';
+        } catch (e) {}
+        return detectPerformanceTier();
     }
 
-    function initLite() {
-        if (shouldUseLite()) {
-            applyLiteMode();
-            // Also observe for dynamically created loading overlays
+    function initPerformanceMode() {
+        var tier = getEffectiveTier();
+        if (tier !== 'full') {
+            applyPerformanceMode(tier);
             var observer = new MutationObserver(function(mutations) {
                 for (var i = 0; i < mutations.length; i++) {
                     var nodes = mutations[i].addedNodes;
                     for (var j = 0; j < nodes.length; j++) {
                         var node = nodes[j];
                         if (node.nodeType === 1 && node.classList && node.classList.contains('loading-overlay')) {
-                            node.classList.add('loading-lite');
+                            if (tier === 'lite') node.classList.add('loading-lite');
+                            else if (tier === 'medium') node.classList.add('loading-medium');
                         }
                     }
                 }
@@ -240,17 +251,19 @@
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initLite);
+        document.addEventListener('DOMContentLoaded', initPerformanceMode);
     } else {
-        initLite();
+        initPerformanceMode();
     }
 
     // Expose for settings screen
     window.ValdoriaLoadingLite = {
         isLowEnd: isLowEndDevice,
-        enable: function() { try { localStorage.setItem(LITE_KEY, '1'); } catch(e) { /* storage unavailable */ } applyLiteMode(); },
-        disable: function() { try { localStorage.setItem(LITE_KEY, '0'); } catch(e) { /* storage unavailable */ } },
-        auto: function() { try { localStorage.removeItem(LITE_KEY); } catch(e) { /* storage unavailable */ } },
+        isMedium: function() { return detectPerformanceTier() === 'medium'; },
+        getTier: getEffectiveTier,
+        enable: function() { try { localStorage.setItem(LITE_KEY, '1'); } catch(e) {} applyPerformanceMode('lite'); },
+        disable: function() { try { localStorage.setItem(LITE_KEY, '0'); } catch(e) {} },
+        auto: function() { try { localStorage.removeItem(LITE_KEY); } catch(e) {} },
     };
 })();
 
@@ -271,16 +284,19 @@ window.VALDORIA_MIN_LOAD_MS = 5000;
    ═══════════════════════════════════════════════════════════════ */
 (function() {
     'use strict';
-    var isLite = false;
+    var tier = 'full';
     try {
         var pref = localStorage.getItem('valdoria_loading_lite');
-        if (pref === '1') isLite = true;
+        if (pref === '1') tier = 'lite';
         else if (pref !== '0') {
             var cores = navigator.hardwareConcurrency || 8;
             var mem = navigator.deviceMemory || 8;
-            isLite = (cores <= 4 && mem <= 4) || cores <= 2 || mem <= 2;
+            if (cores <= 2 || mem <= 2 || (cores <= 4 && mem <= 4)) tier = 'lite';
+            else if (cores <= 8 && mem <= 8) tier = 'medium';
         }
-    } catch(e) { /* storage unavailable */ }
-    // Lite factor: animation complexity only (NOT loading duration)
-    window._valdoriaMinLoadFactor = isLite ? 0.4 : 1.0;
+    } catch(e) {}
+    // Factor: animation complexity only (NOT loading duration)
+    // lite=0.4, medium=0.7, full=1.0
+    window._valdoriaMinLoadFactor = tier === 'lite' ? 0.4 : tier === 'medium' ? 0.7 : 1.0;
+    window._valdoriaPerformanceTier = tier;
 })();

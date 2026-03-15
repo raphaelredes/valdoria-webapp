@@ -622,7 +622,6 @@
 
         .loc-node:hover {
             opacity: 0.85;
-            filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.35));
         }
 
         .loc-node.current {
@@ -736,7 +735,6 @@
 
         .loc-node.explored:hover, .loc-node.known_mapped:hover {
             opacity: 0.7;
-            filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.5));
         }
         .loc-node.frontier:active, .loc-node.known_unmapped:not([style*="cursor"]):active {
             animation: locShake 0.3s ease;
@@ -1042,6 +1040,24 @@
         body.zoom-out .ambient-layer { opacity: 0.2; }
         body.zoom-out .loc-label { opacity: 0; pointer-events: none; }
         body.zoom-out .loc-node { transition: none; }
+        /* ═══ PANNING PAUSE — Suspend decorative animations during map drag (GPU relief) ═══ */
+        #map-wrapper.panning .amb-rise,
+        #map-wrapper.panning .amb-fall,
+        #map-wrapper.panning .amb-pulse,
+        #map-wrapper.panning .amb-breath,
+        #map-wrapper.panning .amb-drift,
+        #map-wrapper.panning .amb-cloud,
+        #map-wrapper.panning .fog-cloud,
+        #map-wrapper.panning .flag-cloth,
+        #map-wrapper.panning .first-visit-ring,
+        #map-wrapper.panning .selection-ring,
+        #map-wrapper.panning .road-path.active,
+        #map-wrapper.panning .path-highlight,
+        #map-wrapper.panning .traveler-glow-ring,
+        #map-wrapper.panning .compass-needle {
+            animation-play-state: paused !important;
+        }
+
 
         .amb-rise {
             fill-opacity: 0;
@@ -1427,7 +1443,7 @@
             height: 70px;
             z-index: 15;
             pointer-events: none;
-            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+            /* drop-shadow removed for mobile performance */
         }
         #compass-svg {
             width: 100%;
@@ -1455,7 +1471,6 @@
             animation: compassSettle 1.5s ease-out, compassTremble 4s ease-in-out 1.5s infinite;
             transform-origin: center;
             transform-box: fill-box;
-            will-change: transform;
         }
 
         /* ═══ BIOME LEGEND (expanded) ═══ */
@@ -1498,7 +1513,7 @@
         }
         #offscreen-indicator .osi-arrow {
             font-size: 18px;
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
         }
         #offscreen-indicator .osi-label {
             font-size: 11px;
@@ -1628,7 +1643,7 @@
             -webkit-tap-highlight-color: transparent;
         }
         .zoom-btn:active { opacity: 0.6; transform: scale(0.92); }
-        .zoom-btn:disabled { opacity: 0.25; pointer-events: none; filter: grayscale(0.5); }
+        .zoom-btn:disabled { opacity: 0.25; pointer-events: none; }
         .zoom-btn.flash { box-shadow: inset 0 1px 3px rgba(40, 30, 15, 0.3), 0 0 8px rgba(196, 149, 58, 0.3); }
         .zoom-btn-recenter {
             font-size: 14px;

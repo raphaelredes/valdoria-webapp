@@ -83,8 +83,7 @@
     justify-content: center;
     padding: 16px;
     background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    /* backdrop-filter removed for mobile performance */
     opacity: 0;
     pointer-events: none;
     transform: translateY(20px);
@@ -182,8 +181,7 @@
     justify-content: flex-start;
     padding: clamp(20px, 8vw, 40px) 14px 14px;
     background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    /* backdrop-filter removed for mobile performance */
     opacity: 0;
     pointer-events: none;
     transform: translateY(20px);
@@ -393,8 +391,7 @@
     justify-content: center;
     padding: 16px;
     background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    /* backdrop-filter removed for mobile performance */
     opacity: 0;
     pointer-events: none;
     transform: translateY(20px);

@@ -40,8 +40,7 @@ body::after {
 
 .ap-nav-scrolled {
     background: rgba(36, 30, 24, 0.95);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    /* backdrop-filter removed for mobile performance */
     border-bottom: 1px solid rgba(196, 149, 58, 0.15);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     padding: 8px 20px;
@@ -171,8 +170,7 @@ body::after {
         left: 0;
         right: 0;
         background: rgba(36, 30, 24, 0.97);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        /* backdrop-filter removed for mobile performance */
         border-bottom: 1px solid rgba(196, 149, 58, 0.15);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         flex-direction: column;
@@ -222,8 +220,7 @@ body::after {
     transform: translateY(12px);
     transition: all 0.3s ease;
     z-index: 90;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    /* backdrop-filter removed for mobile performance */
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
@@ -266,8 +263,7 @@ body::after {
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    /* backdrop-filter removed for mobile performance */
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     z-index: 2;
 }
@@ -294,8 +290,7 @@ body::after {
     top: 48px;
     right: 0;
     min-width: 160px;
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    /* backdrop-filter removed for mobile performance */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     opacity: 0;
     visibility: hidden;
@@ -517,7 +512,7 @@ body::after {
     height: auto;
     margin-bottom: 16px;
     border-radius: 12px;
-    filter: drop-shadow(0 8px 32px rgba(196, 149, 58, 0.3)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+    /* heavy drop-shadow removed for mobile performance */
     animation: v-fadeIn 0.8s ease 0.2s both;
 }
 
@@ -853,7 +848,7 @@ body::after {
 }
 .ap-tier-card[data-tier="copper"] .ap-tier-icon {
     text-shadow: 0 0 12px rgba(139, 94, 60, 0.5);
-    filter: drop-shadow(0 0 6px rgba(139, 94, 60, 0.5));
+    /* drop-shadow removed for mobile performance */
 }
 .ap-tier-card[data-tier="copper"] .ap-tier-name {
     color: #c08050;
@@ -887,7 +882,7 @@ body::after {
 }
 .ap-tier-card[data-tier="silver"] .ap-tier-icon {
     text-shadow: 0 0 12px rgba(192, 192, 192, 0.5);
-    filter: drop-shadow(0 0 6px rgba(192, 192, 192, 0.5));
+    /* drop-shadow removed for mobile performance */
 }
 .ap-tier-card[data-tier="silver"] .ap-tier-name {
     color: #c0c0c0;
@@ -921,12 +916,12 @@ body::after {
 }
 .ap-tier-card[data-tier="gold"] .ap-tier-icon {
     text-shadow: 0 0 16px rgba(196, 149, 58, 0.6);
-    filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.6));
+    /* drop-shadow removed for mobile performance */
     animation: ap-goldIconPulse 3s ease-in-out infinite;
 }
 @keyframes ap-goldIconPulse {
-    0%, 100% { text-shadow: 0 0 12px rgba(196, 149, 58, 0.4); filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.4)); }
-    50% { text-shadow: 0 0 24px rgba(196, 149, 58, 0.7); filter: drop-shadow(0 0 12px rgba(196, 149, 58, 0.7)); }
+    0%, 100% { text-shadow: 0 0 12px rgba(196, 149, 58, 0.4); opacity: 0.85; }
+    50% { text-shadow: 0 0 24px rgba(196, 149, 58, 0.7); opacity: 1; }
 }
 .ap-tier-card[data-tier="gold"]:hover {
     box-shadow: 0 0 24px rgba(196, 149, 58, 0.3), inset 0 0 24px rgba(196, 149, 58, 0.08);
@@ -960,12 +955,12 @@ body::after {
 }
 .ap-tier-card[data-tier="platinum"] .ap-tier-icon {
     text-shadow: 0 0 20px rgba(224, 208, 160, 0.6);
-    filter: drop-shadow(0 0 10px rgba(224, 208, 160, 0.6));
+    /* drop-shadow removed for mobile performance */
     animation: ap-platinumIconGlow 3s ease-in-out infinite;
 }
 @keyframes ap-platinumIconGlow {
-    0%, 100% { text-shadow: 0 0 16px rgba(196, 149, 58, 0.5); filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.5)); transform: scale(1); }
-    50% { text-shadow: 0 0 28px rgba(224, 208, 160, 0.8); filter: drop-shadow(0 0 14px rgba(224, 208, 160, 0.8)); transform: scale(1.05); }
+    0%, 100% { text-shadow: 0 0 16px rgba(196, 149, 58, 0.5); opacity: 0.85; transform: scale(1); }
+    50% { text-shadow: 0 0 28px rgba(224, 208, 160, 0.8); opacity: 1; transform: scale(1.05); }
 }
 .ap-tier-card[data-tier="platinum"] .ap-tier-name {
     background: linear-gradient(90deg, #c4953a, #e0d0a0, #c4953a);
@@ -1181,8 +1176,7 @@ body::after {
     border: 1px solid var(--v-gold-dim, #9a7530);
     border-radius: 12px;
     margin-top: 16px;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    /* backdrop-filter removed for mobile performance */
     animation: ap-qrReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -1967,8 +1961,7 @@ body::after {
     background: rgba(46, 37, 32, 0.95);
     border: 1px solid var(--v-gold-dim, #9a7530);
     color: var(--v-text, #d4c8b0);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    /* backdrop-filter removed for mobile performance */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     animation: ap-toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
     pointer-events: auto;
@@ -3082,8 +3075,7 @@ body::after {
 
     /* Reduce/remove backdrop-filter on mobile */
     .ap-nav-scrolled {
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
+        /* backdrop-filter removed for mobile performance */
     }
 
     /* Simplify platinum tier on mobile (no conic-gradient) */
@@ -3148,8 +3140,7 @@ body::after {
     z-index: 200;
     background: rgba(26, 22, 18, 0.97);
     border-top: 1px solid rgba(196, 149, 58, 0.3);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    /* backdrop-filter removed for mobile performance */
     box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
     animation: apCookieSlideUp 0.4s ease-out;
 }

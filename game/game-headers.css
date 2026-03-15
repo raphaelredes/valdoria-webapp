@@ -32,7 +32,7 @@
     display: block;
     font-size: clamp(16px, 5vw, 20px);
     margin-bottom: 1px;
-    filter: drop-shadow(0 0 8px rgba(196,149,58,0.3));
+    /* drop-shadow removed for mobile performance */
     line-height: 1;
 }
 

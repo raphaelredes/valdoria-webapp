@@ -311,15 +311,15 @@
     animation: resLowPulse 1.8s ease-in-out infinite;
 }
 @keyframes resLowPulse {
-    0%, 100% { opacity: 1; filter: brightness(1); }
-    50% { opacity: 0.6; filter: brightness(1.5); }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
 }
 .bar-fill.res-critical {
     animation: resCritPulse 1.2s ease-in-out infinite;
 }
 @keyframes resCritPulse {
-    0%, 100% { opacity: 1; filter: brightness(1); }
-    50% { opacity: 0.45; filter: brightness(1.8); }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
 }
 .bar-val {
     font-size: 12px;

@@ -228,7 +228,6 @@
 /* Outer rune ring — CW slowly — IMMUTABLE: 60s */
 .mc-outer {
     animation: spinCW 60s linear infinite;
-    filter: drop-shadow(0 0 3px rgba(196,149,58,0.3));
 }
 .mc-rune-text { font-size: 13px; letter-spacing: 3px; font-family: serif; }
 
@@ -239,17 +238,15 @@
     stroke-dasharray: 50 590;
     stroke-linecap: round;
     animation: energyFlow 8s linear infinite;
-    filter: drop-shadow(0 0 4px rgba(196,149,58,0.5));
 }
 .mc-arc-1 { stroke-dasharray: 60 580; }
-.mc-arc-2 { stroke-dasharray: 40 563; animation-duration: 10s; animation-direction: reverse; filter: drop-shadow(0 0 4px rgba(123,32,32,0.4)); }
+.mc-arc-2 { stroke-dasharray: 40 563; animation-duration: 10s; animation-direction: reverse; }
 
 @keyframes energyFlow { to { stroke-dashoffset: -640; } }
 
 /* Inner text ring — CW faster — IMMUTABLE: 45s */
 .mc-inner {
     animation: spinCW 45s linear infinite;
-    filter: drop-shadow(0 0 2px rgba(196,149,58,0.2));
 }
 .mc-inner-text { font-size: 9.5px; letter-spacing: 5px; font-family: serif; }
 
@@ -312,14 +309,8 @@
     100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 @keyframes gemPulse {
-    0%, 100% {
-        box-shadow: 0 0 12px rgba(196,149,58,0.7), 0 0 30px rgba(196,149,58,0.3),
-                    inset 0 -3px 6px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,220,140,0.3);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(196,149,58,0.9), 0 0 50px rgba(196,149,58,0.4),
-                    inset 0 -3px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,220,140,0.5);
-    }
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+    50%      { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
 }
 @keyframes gemFlare {
     0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
@@ -346,9 +337,9 @@
     animation: gemTapFlash 0.3s ease forwards;
 }
 @keyframes gemTapFlash {
-    0%   { filter: brightness(1); }
-    30%  { filter: brightness(2); }
-    100% { filter: brightness(1); }
+    0%   { opacity: 1; }
+    30%  { opacity: 1; box-shadow: 0 0 30px rgba(255,224,128,0.9), 0 0 60px rgba(196,149,58,0.5); }
+    100% { opacity: 1; }
 }
 
 /* ── Gem phase progression (data-phase on .loading-overlay) ── */
@@ -371,12 +362,12 @@
 /* ── Rune glow scaling by phase ── */
 .loading-overlay[data-phase="1"] .mc-rune-text { fill: rgba(196,149,58,0.65); }
 .loading-overlay[data-phase="1"] .mc-inner-text { fill: rgba(196,149,58,0.5); }
-.loading-overlay[data-phase="1"] .mc-outer { filter: drop-shadow(0 0 5px rgba(196,149,58,0.4)); }
-.loading-overlay[data-phase="1"] .mc-inner { filter: drop-shadow(0 0 4px rgba(196,149,58,0.3)); }
+.loading-overlay[data-phase="1"] .mc-outer { opacity: 0.95; }
+.loading-overlay[data-phase="1"] .mc-inner { opacity: 0.9; }
 .loading-overlay[data-phase="2"] .mc-rune-text { fill: rgba(196,149,58,0.85); }
 .loading-overlay[data-phase="2"] .mc-inner-text { fill: rgba(196,149,58,0.7); }
-.loading-overlay[data-phase="2"] .mc-outer { filter: drop-shadow(0 0 8px rgba(196,149,58,0.6)); }
-.loading-overlay[data-phase="2"] .mc-inner { filter: drop-shadow(0 0 6px rgba(196,149,58,0.5)); }
+.loading-overlay[data-phase="2"] .mc-outer { opacity: 1; }
+.loading-overlay[data-phase="2"] .mc-inner { opacity: 0.98; }
 
 /* ── Background warmth shift by phase ── */
 .loading-overlay[data-phase="1"] {
@@ -389,8 +380,8 @@
     --lo-bg-mid: #261c10;
     --lo-bg-edge: #0e0a07;
 }
-.loading-overlay[data-phase="1"] .loading-particles { opacity: 1.0; filter: brightness(1.2); }
-.loading-overlay[data-phase="2"] .loading-particles { opacity: 1.0; filter: brightness(1.5) saturate(1.3); }
+.loading-overlay[data-phase="1"] .loading-particles { opacity: 1.0; }
+.loading-overlay[data-phase="2"] .loading-particles { opacity: 1.0; }
 
 /* ── Completion wave (100% reached) ── */
 .mc-completion-wave {
@@ -446,9 +437,9 @@
     100% { opacity: 0; pointer-events: none; }
 }
 @keyframes circleExit {
-    0%   { transform: scale(1) rotate(0deg); opacity: 1; filter: brightness(1); }
-    30%  { transform: scale(1.15) rotate(8deg); opacity: 1; filter: brightness(1.8); }
-    100% { transform: scale(0.3) rotate(30deg); opacity: 0; filter: brightness(3); }
+    0%   { transform: scale(1) rotate(0deg); opacity: 1; }
+    30%  { transform: scale(1.15) rotate(8deg); opacity: 1; }
+    100% { transform: scale(0.3) rotate(30deg); opacity: 0; }
 }
 @keyframes particlesDisperse {
     0%   { transform: scale(1); opacity: 1; }
@@ -490,8 +481,8 @@
     animation: sparkTrail 0.8s ease-in-out infinite;
 }
 @keyframes sparkTrail {
-    0%, 100% { opacity: 0.3; box-shadow: 0 0 4px #ffe080; }
-    50%      { opacity: 1; box-shadow: 0 0 8px #ffe080, 0 0 16px rgba(196,149,58,0.6), 0 0 24px rgba(196,149,58,0.3); }
+    0%, 100% { opacity: 0.3; }
+    50%      { opacity: 1; }
 }
 
 /* ── Brand Section ── */
@@ -506,8 +497,8 @@
     animation: titleShimmer 5s ease-in-out infinite;
 }
 @keyframes titleShimmer {
-    0%, 100% { text-shadow: 0 0 20px rgba(196,149,58,0.4), 0 0 40px rgba(196,149,58,0.2), 0 2px 4px rgba(0,0,0,0.8); }
-    50% { text-shadow: 0 0 30px rgba(196,149,58,0.6), 0 0 60px rgba(196,149,58,0.3), 0 2px 4px rgba(0,0,0,0.8); }
+    0%, 100% { opacity: 0.85; }
+    50%      { opacity: 1; }
 }
 
 .loading-divider {

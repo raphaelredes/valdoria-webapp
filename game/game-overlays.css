@@ -104,8 +104,8 @@
     animation: errorIconPulse 3s ease-in-out infinite;
 }
 @keyframes errorIconPulse {
-    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(196,149,58,0.3)); }
-    50% { transform: scale(1.15); filter: drop-shadow(0 0 16px rgba(196,149,58,0.7)); }
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.15); opacity: 1; }
 }
 
 .error-msg {

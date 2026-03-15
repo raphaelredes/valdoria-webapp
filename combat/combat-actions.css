@@ -137,8 +137,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    /* backdrop-filter removed for mobile performance */
     z-index: 200;
     flex-direction: column;
     justify-content: flex-end;

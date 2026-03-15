@@ -67,7 +67,7 @@
 
         /* Node styles */
         .node-group { cursor: pointer; transition: filter 0.2s ease; }
-        .node-group:active { filter: brightness(1.2); }
+        .node-group:active { opacity: 0.85; }
 
         .node-bg {
             transition: fill 0.3s ease, stroke 0.3s ease;
@@ -80,8 +80,8 @@
 
         .node-current .node-bg { fill: #3a2820; stroke: #c4953a; stroke-width: 2.5; }
         @keyframes nodeCurrentPulse {
-            0%, 100% { filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.3)); }
-            50% { filter: drop-shadow(0 0 14px rgba(196, 149, 58, 0.6)); }
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
         }
         .node-current { animation: nodeCurrentPulse 2s ease-in-out infinite; }
 
