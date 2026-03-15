@@ -107,6 +107,8 @@ body { padding-bottom: 92px; }
     overflow-x: auto; padding-bottom: 4px;
     -webkit-mask-image: linear-gradient(to right, #000 90%, transparent);
     mask-image: linear-gradient(to right, #000 90%, transparent);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
 }
 .filters::-webkit-scrollbar { display: none; }
 .filter-btn {
@@ -117,6 +119,7 @@ body { padding-bottom: 92px; }
     background: var(--v-bg-card); color: var(--v-text-dim);
     cursor: pointer; transition: all 0.2s;
     -webkit-tap-highlight-color: transparent;
+    scroll-snap-align: start;
 }
 .filter-btn.active {
     background: var(--v-gold-dim); color: #fff;
@@ -249,11 +252,6 @@ body { padding-bottom: 92px; }
     background: linear-gradient(165deg, var(--v-bg-card) 0%, rgba(196,149,58,0.10) 100%);
 }
 
-/* Equipped marker */
-.item-card.equipped-marker {
-    border-color: var(--v-gold-dim);
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, rgba(196,149,58,0.10) 100%);
-}
 .item-card .ic-name {
     font-size: 13px; font-weight: 600; color: var(--v-text-bright);
     text-shadow: 0 1px 3px rgba(0,0,0,0.4);
@@ -982,6 +980,69 @@ body { padding-bottom: 92px; }
 }
 .vault-sub {
     font-size: 12px; color: var(--v-text-dim); margin-top: 4px;
+}
+
+/* ── Long-press preview tooltip (#2) ── */
+.lp-tooltip {
+    position: fixed; z-index: 250;
+    background: var(--v-bg-raised);
+    border: 1px solid var(--v-gold-dim);
+    border-radius: var(--v-radius);
+    padding: 8px 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    pointer-events: none;
+    opacity: 0; transform: scale(0.9);
+    transition: opacity 0.15s, transform 0.15s;
+    max-width: 200px; font-size: 12px;
+}
+.lp-tooltip.visible { opacity: 1; transform: scale(1); }
+.lp-tooltip .lpt-name { font-size: 13px; font-weight: 700; color: var(--v-text-bright); margin-bottom: 3px; }
+.lp-tooltip .lpt-stat { color: var(--v-text-dim); line-height: 1.4; }
+.lp-tooltip .lpt-rarity { font-size: 11px; font-weight: 600; margin-top: 2px; }
+
+/* ── Rarity group separator (#6) ── */
+.rarity-separator {
+    grid-column: 1 / -1;
+    font-size: 11px; font-weight: 700;
+    color: var(--v-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 6px 2px 2px;
+    border-bottom: 1px solid var(--v-border);
+    display: flex; align-items: center; gap: 6px;
+}
+.rarity-separator .rs-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── Power Score badge (#3) ── */
+.hs-power {
+    color: var(--v-gold);
+    font-weight: 700;
+    font-size: 12px;
+}
+
+/* ── Item count badge (#9) ── */
+.hs-count {
+    color: var(--v-text-dim);
+    font-size: 12px;
+}
+
+/* ── Tab swipe transition (#1) ── */
+.content.swipe-left {
+    animation: swipeLeft 0.2s ease;
+}
+.content.swipe-right {
+    animation: swipeRight 0.2s ease;
+}
+@keyframes swipeLeft {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes swipeRight {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {

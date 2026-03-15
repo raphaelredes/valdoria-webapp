@@ -100,7 +100,17 @@ function renderItemsTab(c) {
     } else if (items.length) {
         const isCompact = viewMode === 'compact';
         html += '<div class="item-grid' + (isCompact ? ' compact-grid' : '') + '">';
+        let _lastRarGroup = null;
         items.forEach(inv => {
+            // #6: Rarity group separators
+            if (sortMode === 'rarity') {
+                const _rg = (getItemData(inv.n).r || 'common');
+                if (_rg !== _lastRarGroup) {
+                    _lastRarGroup = _rg;
+                    const _rc = getRarityColor(_rg);
+                    html += `<div class="rarity-separator"><span class="rs-dot" style="background:${_rc}"></span>${getRarityLabel(_rg)}</div>`;
+                }
+            }
             const it = getItemData(inv.n);
             const rarity = it.r || 'common';
             const equipped = isEquippedAnywhere(inv.n);

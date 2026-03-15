@@ -212,6 +212,8 @@ function init() {
     buildTabs();
     renderTab();
     initSwipeToDismiss();
+    _initTabSwipe();
+    _initLongPress();
     initBackButton();
     _initNavBar();
 }
@@ -283,6 +285,16 @@ function updateHeader() {
         ).join('');
     }
     const combatBadge = _combatMode ? '<span style="font-size:10px;color:#e44;font-weight:700">⚔️ COMBATE</span>' : '';
+    // #9: Item count badge
+    const _itemCount = localInv.reduce((s, i) => s + (i.q > 0 ? i.q : 0), 0) + localPotions;
+    // #3: Equipment Power Score
+    let _pwrScore = 0;
+    for (const [_ps, _pi] of Object.entries(localEq)) {
+        if (!_pi) continue;
+        const _pd = getItemData(_pi);
+        _pwrScore += (_pd.ac || 0) + (_pd.b || 0) + (_pd.hb || 0) + (_pd.mb || 0);
+    }
+    const pwrStr = _pwrScore > 0 ? `<span class="hs-power">${vi('sparkle', 12)} ${_pwrScore}</span>` : '';
     s.innerHTML = `
             <span>${D.p.n}</span>
             ${combatBadge}
@@ -290,7 +302,9 @@ function updateHeader() {
             <span class="hs-mp">${vi('orb', 12)} ${localMP}/${D.p.mmp}</span>
             <span class="hs-gold">${vi('coin', 12)} ${localGold}</span>
             <span class="hs-ac">${vi('shield', 12)} ${localAC}</span>
-            ${potStr}${buffsStr}
+            ${potStr}${pwrStr}
+            <span class="hs-count">${vi('backpack', 12)} ${_itemCount}</span>
+            ${buffsStr}
         `;
 }
 
@@ -654,6 +668,109 @@ function toggleViewMode() {
     try { localStorage.setItem('valdoria_inv_view', viewMode); } catch(e) {}
     haptic('light');
     renderTab();
+}
+
+// ── #1: Swipe between tabs ──
+function _initTabSwipe() {
+    const content = document.getElementById('mainContent');
+    let _sx = 0, _sy = 0, _swiping = false;
+    const TAB_LIST = function() {
+        const t = ['items', 'equip'];
+        if (D && D.allies && D.allies.length > 0) t.push('allies');
+        if (D && D.bank) t.push('bank');
+        return t;
+    };
+    content.addEventListener('touchstart', function(e) {
+        _sx = e.touches[0].clientX;
+        _sy = e.touches[0].clientY;
+        _swiping = true;
+    }, { passive: true });
+    content.addEventListener('touchend', function(e) {
+        if (!_swiping) return;
+        _swiping = false;
+        var dx = e.changedTouches[0].clientX - _sx;
+        var dy = e.changedTouches[0].clientY - _sy;
+        if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
+        var tabs = TAB_LIST();
+        var idx = tabs.indexOf(activeTab);
+        if (idx < 0) return;
+        if (dx < 0 && idx < tabs.length - 1) {
+            // Swipe left → next tab
+            content.classList.remove('swipe-left', 'swipe-right', 'tab-entering');
+            void content.offsetWidth;
+            content.classList.add('swipe-left');
+            switchTab(tabs[idx + 1]);
+        } else if (dx > 0 && idx > 0) {
+            // Swipe right → prev tab
+            content.classList.remove('swipe-left', 'swipe-right', 'tab-entering');
+            void content.offsetWidth;
+            content.classList.add('swipe-right');
+            switchTab(tabs[idx - 1]);
+        }
+    }, { passive: true });
+}
+
+// ── #2: Long-press preview tooltip ──
+var _lpTimer = null, _lpTooltip = null;
+function _initLongPress() {
+    _lpTooltip = document.createElement('div');
+    _lpTooltip.className = 'lp-tooltip';
+    document.body.appendChild(_lpTooltip);
+
+    document.addEventListener('touchstart', function(e) {
+        var card = e.target.closest('.item-card');
+        if (!card || selectionMode) return;
+        var name = _getCardName(card);
+        if (!name) return;
+        _lpTimer = setTimeout(function() {
+            _showTooltip(name, e.touches[0].clientX, e.touches[0].clientY);
+            haptic('medium');
+            // #5: Long-press favorite toggle in compact mode
+            if (viewMode === 'compact') {
+                doToggleFav(name);
+                renderTab();
+            }
+        }, 500);
+    }, { passive: true });
+    document.addEventListener('touchmove', function() { _cancelLongPress(); }, { passive: true });
+    document.addEventListener('touchend', function() { _cancelLongPress(); }, { passive: true });
+}
+
+function _getCardName(card) {
+    var nameEl = card.querySelector('.ic-name');
+    return nameEl ? nameEl.textContent.trim() : '';
+}
+
+function _showTooltip(name, x, y) {
+    var it = getItemData(name);
+    if (!it) { _cancelLongPress(); return; }
+    var rarity = it.r || 'common';
+    var rarColor = getRarityColor(rarity);
+    var stats = [];
+    if (it.s) stats.push(SLOT_NAMES[it.s] || it.s);
+    if (it.dd) stats.push('Dano: ' + it.dd + (it.b ? '+' + it.b : ''));
+    if (it.ac) stats.push('CA: +' + it.ac);
+    if (it.hb) stats.push('HP: +' + it.hb);
+    if (it.mb) stats.push('MP: +' + it.mb);
+    if (it.v) stats.push(it.v + ' GP');
+    _lpTooltip.innerHTML = '<div class="lpt-name">' + (it.e || '') + ' ' + name + '</div>'
+        + '<div class="lpt-rarity" style="color:' + rarColor + '">' + getRarityLabel(rarity) + '</div>'
+        + (stats.length ? '<div class="lpt-stat">' + stats.join(' \u00b7 ') + '</div>' : '');
+    // Position tooltip
+    var tw = 200, th = 80;
+    var tx = Math.min(x - tw / 2, window.innerWidth - tw - 8);
+    tx = Math.max(8, tx);
+    var ty = y - th - 16;
+    if (ty < 8) ty = y + 20;
+    _lpTooltip.style.left = tx + 'px';
+    _lpTooltip.style.top = ty + 'px';
+    _lpTooltip.classList.add('visible');
+}
+
+function _cancelLongPress() {
+    clearTimeout(_lpTimer);
+    _lpTimer = null;
+    if (_lpTooltip) _lpTooltip.classList.remove('visible');
 }
 
 // ── Start ──
