@@ -7,6 +7,17 @@ let _navSent = false;  // Double-fire guard (matches explore _finishSent pattern
 let _navSentTimer = null;  // Auto-reset timer for _navSent (prevents stale lock)
 const STORAGE_KEY = 'valdoria_navigate_state';
 
+// Cached helper: enable/disable all .info-btn in batch
+function _setInfoBtns(disabled) {
+    const btns = document.querySelectorAll('.info-btn');
+    if (disabled) {
+        btns.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.5'; });
+    } else {
+        btns.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
+    }
+}
+
+
 // Global state
 let S = {
     token: '',
@@ -490,18 +501,12 @@ function finishNavigation(type, target, flags) {
             _navSent = false;
             _hideTravelOverlay();
             // Re-enable action buttons so user can retry
-            document.querySelectorAll('.info-btn').forEach(btn => {
-                btn.style.pointerEvents = '';
-                btn.style.opacity = '';
-            });
+            _setInfoBtns(false);
         }
     }, 30000);
 
     // Disable all action buttons immediately
-    document.querySelectorAll('.info-btn').forEach(btn => {
-        btn.style.pointerEvents = 'none';
-        btn.style.opacity = '0.5';
-    });
+    _setInfoBtns(true);
 
     // Play travel animation before sending API call
     if (type === 'travel' && target && typeof animateTravel === 'function') {
@@ -538,10 +543,7 @@ function _sendNavAction(type, target, flags) {
         _navSent = false;
         clearTimeout(_navSentTimer);
         // Re-enable buttons
-        document.querySelectorAll('.info-btn').forEach(btn => {
-            btn.style.pointerEvents = '';
-            btn.style.opacity = '';
-        });
+        _setInfoBtns(false);
         return;
     }
 
@@ -579,10 +581,7 @@ function _sendNavAction(type, target, flags) {
             _navSent = false;
             clearTimeout(_navSentTimer);
             _hideTravelOverlay();
-            document.querySelectorAll('.info-btn').forEach(btn => {
-                btn.style.pointerEvents = '';
-                btn.style.opacity = '';
-            });
+            _setInfoBtns(false);
         });
 }
 

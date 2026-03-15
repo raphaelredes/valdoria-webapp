@@ -326,6 +326,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .screen::-webkit-scrollbar,
     min-height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    contain: layout style;
 }
 
 /* ─── Banner Image ─── */
