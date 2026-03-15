@@ -42,6 +42,15 @@ async function showCharacterSelect() {
         }
 
         await hideLoadingWithDelay();
+
+        // Auto-select: if only 1 character, skip Hall and enter game directly
+        var _chars = data.characters || [];
+        if (_chars.length === 1 && _chars[0].is_active) {
+            renderCharacterSelect(data); // render briefly for visual continuity
+            _selectCharacter(_chars[0].char_id);
+            return;
+        }
+
         renderCharacterSelect(data);
     } catch (e) {
         console.error('[GAME] showCharacterSelect error:', e);
@@ -69,9 +78,16 @@ function renderCharacterSelect(data) {
     if (restoreEl) restoreEl.style.display = 'none';
 
     screenEl.style.display = '';
-    screenEl.style.paddingBottom = '24px';
+    screenEl.style.paddingBottom = 'max(24px, env(safe-area-inset-bottom, 24px))';
     screenEl.style.overflowY = 'auto';
     screenEl.scrollTop = 0;
+
+    // Hide Telegram BackButton on Hall (root screen — no back target)
+    try {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.BackButton) {
+            Telegram.WebApp.BackButton.hide();
+        }
+    } catch (e) { /* older clients */ }
 
     const chars = data.characters || [];
     const canCreate = data.can_create;
@@ -196,6 +212,9 @@ function renderCharacterSelect(data) {
     html += '</div>';
 
     contentEl.innerHTML = html;
+    // Smooth entry animation
+    screenEl.classList.add('hall-enter');
+    requestAnimationFrame(function() { screenEl.classList.add('hall-enter-active'); });
 
     // Census collapsible toggle
     var censusToggle = document.getElementById('census-toggle');
@@ -223,53 +242,53 @@ function renderCharacterSelect(data) {
         });
     });
 
-    // Bind events: delete buttons with long-press ring effect
+    // Bind events: swipe-to-delete on character cards
+    contentEl.querySelectorAll('.char-card').forEach(function(card) {
+        var startX = 0, startY = 0, swiping = false;
+        card.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            swiping = false;
+        }, { passive: true });
+        card.addEventListener('touchmove', function(e) {
+            var dx = e.touches[0].clientX - startX;
+            var dy = Math.abs(e.touches[0].clientY - startY);
+            // Horizontal swipe detection (left swipe)
+            if (dx < -20 && dy < 30) {
+                swiping = true;
+                card.classList.add('swiped');
+            } else if (dx > 10 && card.classList.contains('swiped')) {
+                card.classList.remove('swiped');
+            }
+        }, { passive: true });
+        card.addEventListener('touchend', function() {
+            if (!swiping) return;
+            // If swiped far enough, show delete confirmation
+            if (card.classList.contains('swiped')) {
+                if (typeof haptic === 'function') haptic('light');
+            }
+        }, { passive: true });
+    });
+
+    // Bind events: delete button tap (revealed by swipe)
     contentEl.querySelectorAll('.char-card-delete').forEach(function(btn) {
-        var pressTimer = null;
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
             e.preventDefault();
+            if (typeof haptic === 'function') haptic('heavy');
+            var charId = btn.dataset.delId;
+            var charName = btn.dataset.delName;
+            if (charId && charName) _showDeleteConfirmation(charId, charName);
         });
-        btn.addEventListener('touchstart', function(e) {
-            e.stopPropagation();
-            btn.classList.add('pressing');
-            pressTimer = setTimeout(function() {
-                btn.classList.remove('pressing');
-                if (typeof haptic === 'function') haptic('heavy');
-                var charId = btn.dataset.delId;
-                var charName = btn.dataset.delName;
-                if (charId && charName) _showDeleteConfirmation(charId, charName);
-            }, 800);
-        }, { passive: true });
-        btn.addEventListener('touchend', function(e) {
-            e.stopPropagation();
-            btn.classList.remove('pressing');
-            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-        });
-        btn.addEventListener('touchcancel', function() {
-            btn.classList.remove('pressing');
-            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-        });
-        // Fallback: mouse click for desktop
-        btn.addEventListener('mousedown', function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            btn.classList.add('pressing');
-            pressTimer = setTimeout(function() {
-                btn.classList.remove('pressing');
-                var charId = btn.dataset.delId;
-                var charName = btn.dataset.delName;
-                if (charId && charName) _showDeleteConfirmation(charId, charName);
-            }, 800);
-        });
-        btn.addEventListener('mouseup', function() {
-            btn.classList.remove('pressing');
-            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-        });
-        btn.addEventListener('mouseleave', function() {
-            btn.classList.remove('pressing');
-            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-        });
+    });
+
+    // Tap anywhere on screen to un-swipe all cards
+    contentEl.addEventListener('click', function(e) {
+        if (!e.target.closest('.char-card-delete')) {
+            contentEl.querySelectorAll('.char-card.swiped').forEach(function(c) {
+                c.classList.remove('swiped');
+            });
+        }
     });
 
     // Bind events: create button
@@ -327,6 +346,12 @@ async function _selectCharacter(charId) {
     // Brief delay for visual feedback before loading overlay
     await new Promise(function(r) { setTimeout(r, 250); });
     showLoading();
+    // Restore Telegram BackButton when entering game
+    try {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.BackButton) {
+            Telegram.WebApp.BackButton.show();
+        }
+    } catch (e) { /* older clients */ }
 
     const startBody = { char_id: charId };
     const tgPlatform = (window.Telegram && Telegram.WebApp && Telegram.WebApp.platform) || '';

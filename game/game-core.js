@@ -128,6 +128,7 @@ async function init() {
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
         try { Telegram.WebApp.disableVerticalSwipes(); } catch (e) { /* older clients */ }
+        try { Telegram.WebApp.setHeaderColor('#2a2420'); Telegram.WebApp.setBackgroundColor('#2a2420'); } catch (e) { /* older clients */ }
 
         // Back button: navigate back in-game; close WebApp only from hub
         Telegram.WebApp.BackButton.show();

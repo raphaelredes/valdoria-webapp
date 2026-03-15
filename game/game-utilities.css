@@ -295,31 +295,7 @@
     animation: hpLowPulse 0.8s ease-in-out infinite;
 }
 
-/* ─── Long-press Delete Ring ─── */
-.char-card-delete {
-    position: relative;
-    overflow: visible;
-}
-.char-card-delete::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    transition: border-color 0.2s;
-    pointer-events: none;
-}
-.char-card-delete.pressing::before {
-    border-color: #ef4444;
-    animation: deleteRing 0.8s linear forwards;
-}
-@keyframes deleteRing {
-    0% { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 100% 0%, 100% 0%); border-color: #ef4444; }
-    25% { clip-path: polygon(50% 0%, 50% 50%, 100% 0%, 100% 100%, 100% 0%); }
-    50% { clip-path: polygon(50% 0%, 50% 50%, 100% 100%, 0% 100%, 100% 0%); }
-    75% { clip-path: polygon(50% 0%, 50% 50%, 0% 100%, 0% 0%, 100% 0%); }
-    100% { clip-path: polygon(50% 0%, 50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%); border-color: #ff6b6b; }
-}
+/* ─── Swipe-to-Delete ─── */
 
 .char-select-empty {
     text-align: center;
@@ -712,29 +688,45 @@
     color: #ef4444;
     border-color: rgba(239,68,68,0.4) !important;
 }
-/* Delete button on char cards — always visible on mobile */
+/* Swipe-to-delete: card slides to reveal delete button */
+.char-card {
+    overflow: hidden;
+    touch-action: pan-y;
+}
+.char-card-inner {
+    transition: transform 0.2s ease;
+}
+.char-card.swiped {
+    background: linear-gradient(90deg, transparent 70%, rgba(239,68,68,0.08) 100%);
+}
+.char-card.swiped .char-card-delete {
+    opacity: 1;
+    transform: scale(1);
+}
 .char-card-delete {
     position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 22px;
-    height: 22px;
+    top: 50%;
+    right: 8px;
+    transform: scale(0.5) translateY(-50%);
+    transform-origin: center;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    background: rgba(239,68,68,0.1);
-    color: rgba(239,68,68,0.4);
-    font-size: 10px;
+    background: rgba(239,68,68,0.15);
+    color: #ef4444;
+    font-size: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
     cursor: pointer;
     z-index: 2;
-    transition: color 0.2s, background 0.2s;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s;
     -webkit-tap-highlight-color: transparent;
 }
-.char-card-delete.pressing {
-    color: #ef4444;
-    background: rgba(239,68,68,0.25);
+.char-card-delete:active {
+    background: rgba(239,68,68,0.35);
 }
 
 /* Card selection animation */
@@ -748,4 +740,15 @@
     box-shadow: 0 0 16px rgba(196, 149, 58, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     transform: scale(1.01);
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* Hall entry animation */
+.hall-enter {
+    opacity: 0;
+    transform: translateY(6px);
+}
+.hall-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
