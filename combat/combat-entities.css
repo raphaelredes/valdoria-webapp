@@ -429,3 +429,21 @@
     white-space: nowrap;
 }
 
+/* ─── Performance tier overrides ─── */
+body.perf-lite .entity.active-turn::after {
+    animation: none !important;
+    opacity: 0.5;
+}
+body.perf-lite .hp-mini-fill.hp-low,
+body.perf-lite .bar-fill.hp-low,
+body.perf-lite .bar-fill.res-low,
+body.perf-lite .bar-fill.res-critical {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .entity.active-turn::after,
+    .hp-mini-fill.hp-low, .bar-fill.hp-low,
+    .bar-fill.res-low, .bar-fill.res-critical {
+        animation: none !important;
+    }
+}

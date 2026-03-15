@@ -324,3 +324,21 @@
 }
 .combat-feed-narrative .feed-entry:last-child { font-size: 14px; }
 
+/* ─── Performance tier overrides ─── */
+body.perf-lite .turn-entry.active,
+body.perf-lite .dice-emoji,
+body.perf-lite .dice-emoji.shaking,
+body.perf-lite .status-debuff,
+body.perf-lite .status-buff,
+body.perf-lite .dice-label.rolling-label {
+    animation: none !important;
+}
+body.perf-medium .dice-emoji.shaking {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .turn-entry.active, .dice-emoji, .dice-emoji.shaking,
+    .status-debuff, .status-buff, .dice-label.rolling-label {
+        animation: none !important;
+    }
+}

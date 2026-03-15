@@ -405,3 +405,15 @@
     right: 16px;
     z-index: 600;
 }
+
+/* ─── Performance tier overrides ─── */
+body.perf-lite .res-header.victory .res-title,
+body.perf-lite .res-levelup-btn {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .res-header.victory .res-title,
+    .res-levelup-btn {
+        animation: none !important;
+    }
+}

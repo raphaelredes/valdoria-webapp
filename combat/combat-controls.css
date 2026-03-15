@@ -294,3 +294,18 @@
     display: block;
     letter-spacing: 0.3px;
 }
+
+/* ─── Performance tier overrides ─── */
+body.perf-lite .timer-bar.critical,
+body.perf-lite .timer-text.critical,
+body.perf-lite .dmg-dice3d-overlay.death-save-overlay,
+body.perf-lite .dmg-dice3d-label.rolling {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .timer-bar.critical, .timer-text.critical,
+    .dmg-dice3d-overlay.death-save-overlay,
+    .dmg-dice3d-label.rolling {
+        animation: none !important;
+    }
+}

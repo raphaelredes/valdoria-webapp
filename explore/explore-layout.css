@@ -190,3 +190,10 @@ body {
     display: block;
 }
 
+/* ─── Performance tier overrides ─── */
+body.perf-lite .hp-fill.hp-low {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .hp-fill.hp-low { animation: none !important; }
+}

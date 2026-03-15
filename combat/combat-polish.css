@@ -330,3 +330,26 @@
 
 /* ─── SCREEN READER ONLY (ARIA) ─── */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+/* ─── Performance tier overrides ─── */
+body.perf-lite .res-header.victory,
+body.perf-lite .res-header.defeat,
+body.perf-lite .entity.player.hp-danger,
+body.perf-lite .entity.hp-bloodied,
+body.perf-lite .entity.hp-critical,
+body.perf-lite .waiting-msg .waiting-icon,
+body.perf-lite .init-hero-btn {
+    animation: none !important;
+}
+body.perf-medium .entity.hp-bloodied,
+body.perf-medium .entity.hp-critical {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .res-header.victory, .res-header.defeat,
+    .entity.player.hp-danger, .entity.hp-bloodied,
+    .entity.hp-critical, .waiting-msg .waiting-icon,
+    .init-hero-btn {
+        animation: none !important;
+    }
+}

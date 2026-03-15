@@ -594,3 +594,16 @@
     gap: 6px;
 }
 
+/* ─── Performance tier overrides ─── */
+body.perf-lite .condition-tag.condition-fading,
+body.perf-lite .return-progress-dot.current,
+body.perf-lite .hp-fill.hp-low {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .condition-tag.condition-fading,
+    .return-progress-dot.current,
+    .hp-fill.hp-low {
+        animation: none !important;
+    }
+}

@@ -272,3 +272,14 @@
     animation: screenShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
+/* ─── Performance tier overrides ─── */
+body.perf-lite .portal-overlay.active {
+    animation: none !important;
+}
+body.perf-medium .portal-overlay.active {
+    animation: none !important;
+    opacity: 0.7;
+}
+@media (prefers-reduced-motion: reduce) {
+    .portal-overlay.active { animation: none !important; }
+}

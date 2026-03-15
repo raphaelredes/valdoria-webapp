@@ -244,3 +244,19 @@
     padding: 2px 0;
 }
 
+/* ─── Performance tier overrides ─── */
+body.perf-lite .loading-d20-icon,
+body.perf-lite .loading-dots::after,
+body.perf-lite .entity.player.concentrating,
+body.perf-lite .spectator-msg {
+    animation: none !important;
+}
+body.perf-medium .spectator-msg {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .loading-d20-icon, .loading-dots::after,
+    .entity.player.concentrating, .spectator-msg {
+        animation: none !important;
+    }
+}

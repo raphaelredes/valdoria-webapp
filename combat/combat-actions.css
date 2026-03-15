@@ -229,3 +229,18 @@
     cursor: pointer;
 }
 
+/* ─── Performance tier overrides ─── */
+body.perf-lite .action-btn.primary[data-action="attack"],
+body.perf-lite .action-btn.loading,
+body.perf-lite .ba-label {
+    animation: none !important;
+}
+body.perf-medium .ba-label {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .action-btn.primary[data-action="attack"],
+    .action-btn.loading, .ba-label {
+        animation: none !important;
+    }
+}

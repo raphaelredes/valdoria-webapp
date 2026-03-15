@@ -125,3 +125,28 @@
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* ─── Performance tier overrides ─── */
+body.perf-lite .biome-snow .battlefield::after,
+body.perf-lite .biome-volcanic .battlefield::after,
+body.perf-lite .biome-swamp .battlefield::after,
+body.perf-lite .biome-graveyard .battlefield::after,
+body.perf-lite .biome-cave .battlefield::after,
+body.perf-lite .biome-dungeon .battlefield::after {
+    animation: none !important;
+    opacity: 0.3;
+}
+body.perf-medium .biome-snow .battlefield::after,
+body.perf-medium .biome-volcanic .battlefield::after,
+body.perf-medium .biome-swamp .battlefield::after,
+body.perf-medium .biome-graveyard .battlefield::after,
+body.perf-medium .biome-cave .battlefield::after,
+body.perf-medium .biome-dungeon .battlefield::after {
+    animation: none !important;
+    opacity: 0.25;
+}
+@media (prefers-reduced-motion: reduce) {
+    [class*="biome-"] .battlefield::after {
+        animation: none !important;
+        opacity: 0;
+    }
+}

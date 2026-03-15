@@ -299,4 +299,14 @@ window.VALDORIA_MIN_LOAD_MS = 5000;
     // lite=0.4, medium=0.7, full=1.0
     window._valdoriaMinLoadFactor = tier === 'lite' ? 0.4 : tier === 'medium' ? 0.7 : 1.0;
     window._valdoriaPerformanceTier = tier;
+    // Apply perf tier class to body for CSS animation overrides
+    if (tier !== 'full') {
+        var _applyPerfClass = function() {
+            if (document.body) document.body.classList.add('perf-' + tier);
+            else document.addEventListener('DOMContentLoaded', function() {
+                document.body.classList.add('perf-' + tier);
+            });
+        };
+        _applyPerfClass();
+    }
 })();

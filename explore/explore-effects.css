@@ -368,3 +368,29 @@ body.pace-cautious #bottom-bar .pace-toggle {
     color: #60a0d0;
     text-shadow: 0 0 6px rgba(96,160,208,0.4);
 }
+
+/* ─── Performance tier overrides ─── */
+body.perf-lite .weather-rain,
+body.perf-lite .weather-storm,
+body.perf-lite .weather-storm::after,
+body.perf-lite .weather-overlay.weather-blizzard,
+body.perf-lite .exit-compass,
+body.perf-lite .exit-compass.nearby .compass-arrow,
+body.perf-lite .exit-compass.nearby,
+body.perf-lite .exh-pip.filled.critical {
+    animation: none !important;
+}
+body.perf-medium .weather-storm::after {
+    animation: none !important;
+}
+body.perf-medium .weather-overlay.weather-blizzard {
+    animation-duration: 0.5s !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .weather-rain, .weather-storm, .weather-storm::after,
+    .weather-overlay.weather-blizzard,
+    .exit-compass, .exit-compass.nearby .compass-arrow,
+    .exit-compass.nearby, .exh-pip.filled.critical {
+        animation: none !important;
+    }
+}

@@ -252,3 +252,22 @@ body.fatigue-3::after {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
 }
+
+/* ─── Performance tier overrides ─── */
+body.perf-lite .btn-camp-rest.has-exhaustion,
+body.perf-lite .pip.filled.pulse,
+body.perf-lite .fatigue-badge.fatigue-lv2,
+body.perf-lite.fatigue-3::after {
+    animation: none !important;
+}
+body.perf-medium .fatigue-badge.fatigue-lv2 {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .btn-camp-rest.has-exhaustion,
+    .pip.filled.pulse,
+    .fatigue-badge.fatigue-lv2,
+    body.fatigue-3::after {
+        animation: none !important;
+    }
+}
