@@ -148,7 +148,7 @@ function renderCharacterSelect(data) {
             }
 
             // Stagger animation delay
-            var animDelay = ' style="animation-delay:' + (i * 80) + 'ms"';
+            var animDelay = ' style="animation-delay:' + (i * 60) + 'ms"';
 
             html += '<button class="char-card' + activeClass + '"' + animDelay + ' data-char-id="' + _escChar(c.char_id) + '">';
             html += '<div class="char-card-avatar"><span class="char-card-icon">' + _escChar(c.race_icon) + '</span></div>';
