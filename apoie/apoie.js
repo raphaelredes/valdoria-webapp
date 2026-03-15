@@ -8,6 +8,20 @@ const BOT_USERNAME = 'LendasDeValdoriaBOT';
 let selectedAmount = 0; // em centavos
 let telegramUser = null;
 
+
+
+// ── Amount Slider ──
+function onSliderInput(slider) {
+    var val = parseInt(slider.value);
+    selectedAmount = val;
+    document.getElementById('slider-display').textContent = formatBrl(val);
+    document.querySelectorAll('.ap-amount-btn').forEach(function(btn) {
+        btn.classList.toggle('active', parseInt(btn.dataset.amount) === val);
+    });
+    document.getElementById('custom-amount').value = '';
+    updatePreview();
+}
+
 // ── Tier Data (espelho de contribution_data.py) ──
 const TIERS = [
     { id: 'supporter', name: 'Apoiador', icon: '\u{1F91D}', min: 100, max: 499, gold: 50, items: ['1x Poção de Cura'], exclusive: null, exclusiveImg: null, title: null },
@@ -285,6 +299,46 @@ async function loadStats() {
         }
     } catch (e) {
         console.warn('[APOIE] Stats load failed', e);
+    }
+}
+
+
+
+// ── Recent Donors ──
+async function loadRecentDonors() {
+    var container = document.getElementById('donors-list');
+    if (!container) return;
+    try {
+        var resp = await fetch(WORKER_URL + '/api/recent').catch(function() { return null; });
+        if (!resp || !resp.ok) { container.innerHTML = ''; return; }
+        var donors = await resp.json();
+        if (!donors || !donors.length) {
+            container.innerHTML = '<div class="ap-donors-empty">Seja o primeiro aventureiro a apoiar Valdoria!</div>';
+            return;
+        }
+        var html = '';
+        donors.forEach(function(d) {
+            var name = d.name || 'An\u00f4nimo';
+            var tier = d.tier || 'supporter';
+            var tierIcon = { supporter: '\u{1F91D}', copper: '\u{1F7E4}', silver: '\u26AA', gold: '\u{1F7E1}', platinum: '\u{1F48E}' };
+            var tierName = { supporter: 'Apoiador', copper: 'Patrono de Cobre', silver: 'Patrono de Prata', gold: 'Patrono de Ouro', platinum: 'Patrono de Platina' };
+            var icon = tierIcon[tier] || '\u{1F91D}';
+            var label = tierName[tier] || 'Apoiador';
+            var timeAgo = d.time_ago || '';
+            html += '<div class="ap-donor-card ap-reveal" data-tier="' + tier + '">' +
+                '<span class="ap-donor-icon">' + icon + '</span>' +
+                '<div class="ap-donor-info">' +
+                '<span class="ap-donor-name">' + escapeHtml(name) + '</span>' +
+                '<span class="ap-donor-tier">' + label + '</span>' +
+                '</div>' +
+                (timeAgo ? '<span class="ap-donor-time">' + escapeHtml(timeAgo) + '</span>' : '') +
+                '</div>';
+        });
+        container.innerHTML = html;
+        observeReveals();
+    } catch (e) {
+        console.warn('[APOIE] Recent donors load failed', e);
+        container.innerHTML = '';
     }
 }
 
@@ -757,6 +811,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cookiesOk) loadTelegramWidget();
     loadGoals();
     loadStats();
+    loadRecentDonors();
     setupNavbar();
     setupParallax();
     observeReveals();
