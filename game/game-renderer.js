@@ -30,7 +30,7 @@ function updateBottomPadding() {
         // Skip if panel is collapsed (immersive mode handles padding)
         if (panelEl.classList.contains('immersive-collapsed')) return;
 
-        const h = Math.max(panelEl.offsetHeight, 100);
+        const h = Math.max(panelEl.offsetHeight, 48);
         screenEl.style.paddingBottom = (h + 8) + 'px';
         document.documentElement.style.setProperty('--bottom-panel-h', h + 'px');
 
@@ -756,10 +756,10 @@ function _buildAllyCard(a, compact) {
         nameRow.appendChild(lvl);
     }
 
-    if (a.type === 'merc' && a.dur > 0) {
+    if ((a.type === 'merc' || a.type === 'adv') && a.dur > 0) {
         var dur = document.createElement('span');
         dur.className = 'ally-dur' + (a.dur <= 2 ? ' ally-dur-warn' : '');
-        dur.textContent = '\ud83d\udcdc ' + a.dur;
+        dur.textContent = (a.type === 'adv' ? '⏳ ' : '📋 ') + a.dur;
         nameRow.appendChild(dur);
     }
 
@@ -809,10 +809,10 @@ function _buildAllyCard(a, compact) {
     }
 
     // Adventurer description (only in full mode)
-    if (!compact && a.type === 'adv' && a.desc) {
+    if (a.type === 'adv' && a.desc) {
         var descEl = document.createElement('div');
         descEl.className = 'ally-desc';
-        descEl.textContent = '\u2728 ' + a.desc + (a.dur > 0 ? ' \u00b7 \u23f3 ' + a.dur : '');
+        descEl.textContent = compact ? a.desc : ('\u2728 ' + a.desc + (a.dur > 0 ? ' \u00b7 \u23f3 ' + a.dur : ''));
         info.appendChild(descEl);
     }
 
