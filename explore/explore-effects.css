@@ -125,42 +125,72 @@
    ═══════════════════════════════════════════ */
 .exit-compass {
     position: absolute;
-    bottom: 8px; left: 8px;
+    bottom: 10px; left: 10px;
     z-index: 15;
     display: flex; flex-direction: column; align-items: center;
-    background: rgba(42,36,32,0.82);
+    background: radial-gradient(circle at center, rgba(50,42,35,0.92) 40%, rgba(42,36,32,0.88));
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
-    border: 1px solid rgba(196,149,58,0.4);
+    border: 2px solid rgba(196,149,58,0.45);
     border-radius: 50%;
-    width: 48px; height: 48px;
+    width: 56px; height: 56px;
     justify-content: center;
     pointer-events: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(196,149,58,0.15);
-    transition: box-shadow 0.4s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 14px rgba(196,149,58,0.18), inset 0 0 12px rgba(0,0,0,0.3);
+    transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+/* Compass rose notches (N/S/E/W) */
+.exit-compass::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    border: 1px solid rgba(196,149,58,0.15);
+    background: radial-gradient(circle, transparent 60%, rgba(196,149,58,0.06));
+}
+.exit-compass::after {
+    content: '\2726';
+    position: absolute;
+    top: 3px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 6px;
+    color: rgba(196,149,58,0.5);
+    line-height: 1;
 }
 .compass-arrow {
     width: 0; height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-bottom: 16px solid #c4953a;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 18px solid #c4953a;
     transition: transform 0.3s ease;
-    filter: drop-shadow(0 0 3px rgba(196,149,58,0.6));
+    filter: drop-shadow(0 0 4px rgba(196,149,58,0.7));
+    z-index: 1;
 }
 .compass-dist {
-    font: 10px/1 var(--v-font, 'MedievalSharp', serif);
+    font: 11px/1 var(--v-font, 'MedievalSharp', serif);
     color: var(--v-text-dim, #a09484);
-    margin-top: 1px;
+    margin-top: 2px;
+    z-index: 1;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
-.exit-compass.nearby { box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 18px rgba(100,200,100,0.4); }
+.exit-compass.nearby {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 22px rgba(100,200,100,0.45), inset 0 0 12px rgba(100,200,100,0.1);
+    border-color: rgba(100,200,100,0.5);
+    animation: compass-glow 2s ease infinite;
+}
 .exit-compass.nearby .compass-arrow {
     border-bottom-color: #6c6;
-    filter: drop-shadow(0 0 8px rgba(100,200,100,0.9));
+    filter: drop-shadow(0 0 10px rgba(100,200,100,0.9));
     animation: compass-pulse 1s ease infinite;
 }
+.exit-compass.nearby::after { color: rgba(100,200,100,0.5); }
 @keyframes compass-pulse {
     0%, 100% { transform: scale(1) rotate(var(--compass-angle)); }
     50% { transform: scale(1.2) rotate(var(--compass-angle)); }
+}
+@keyframes compass-glow {
+    0%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 22px rgba(100,200,100,0.35), inset 0 0 12px rgba(100,200,100,0.08); }
+    50% { box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 30px rgba(100,200,100,0.55), inset 0 0 16px rgba(100,200,100,0.15); }
 }
 
 /* ═══════════════════════════════════════════

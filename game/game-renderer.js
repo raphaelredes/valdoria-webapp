@@ -682,35 +682,24 @@ function renderAllyCards(container, allies) {
     var wrap = document.createElement('div');
     wrap.className = 'ally-cards';
 
-    // Solo player (only 1 entry of type 'player'): skip GRUPO header
     var isSolo = allies.length === 1 && allies[0].type === 'player';
-    var useGrid = allies.length >= 3; // 2+ allies = use grid for non-player cards
+    var useGrid = allies.length >= 2; // grid for 2+ members (all cards compact)
 
-    if (!isSolo) {
-        var header = document.createElement('div');
-        header.className = 'ally-header';
-        header.textContent = '\u2501 GRUPO \u2501';
-        wrap.appendChild(header);
-    }
-
-    // Grid container for ally cards (non-player)
-    var gridWrap = useGrid ? document.createElement('div') : null;
-    if (gridWrap) gridWrap.className = 'ally-grid';
-
-    for (var ai = 0; ai < allies.length; ai++) {
-        var a = allies[ai];
-        var isPlayer = a.type === 'player';
-
-        if (isPlayer || !useGrid) {
-            // Player card: full-width, standard layout
-            wrap.appendChild(_buildAllyCard(a, false));
-        } else {
-            // Ally card: compact layout for grid
-            gridWrap.appendChild(_buildAllyCard(a, true));
+    if (useGrid) {
+        // All cards in compact grid (including player)
+        var gridWrap = document.createElement('div');
+        gridWrap.className = 'ally-grid';
+        for (var ai = 0; ai < allies.length; ai++) {
+            gridWrap.appendChild(_buildAllyCard(allies[ai], true));
+        }
+        wrap.appendChild(gridWrap);
+    } else {
+        // Solo player: single compact card (no grid needed)
+        for (var ai = 0; ai < allies.length; ai++) {
+            wrap.appendChild(_buildAllyCard(allies[ai], false));
         }
     }
 
-    if (gridWrap) wrap.appendChild(gridWrap);
     container.appendChild(wrap);
 }
 

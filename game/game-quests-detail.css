@@ -70,26 +70,26 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .quest-tracker {
-    margin: 6px 0;
-    padding: 6px 10px;
+    margin: 4px 0;
+    padding: 4px 8px;
     background: rgba(42, 36, 32, 0.4);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm, 6px);
 }
 .quest-tracker-hdr {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--v-gold);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     font-family: var(--v-font-display);
 }
 .quest-tracker-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 3px 0;
+    padding: 2px 0;
     cursor: pointer;
     transition: background 0.15s;
     border-radius: 3px;

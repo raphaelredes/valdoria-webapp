@@ -331,6 +331,12 @@ _staticDirty = false;
     // 6.3. Event sprites (NPCs, objects, dangers revealed on player step)
     _drawEventSprites(_ctx, timestamp);
 
+    // 6.4. Tile interaction indicators (door keys, chest sparkles)
+    drawTileInteractionIndicators(_ctx, timestamp);
+
+    // 6.45. Exit waypoint arrow (when exit is off-screen)
+    drawExitWaypoint(_ctx, timestamp);
+
     // 6.5. Visited hex trail markers
     drawVisitedTrail(_ctx, timestamp);
 
@@ -1909,6 +1915,29 @@ function drawMinimap() {
     }
     ctx.globalAlpha = 1;
 
+    // Chest markers (golden yellow dots)
+    for (var row = 0; row < ROWS; row++) {
+        for (var col = 0; col < COLS; col++) {
+            var _mk = col + ',' + row;
+            if (S.fogState[_mk] !== 'visible') continue;
+            var _mt = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+            if (_mt === 'C') {
+                ctx.globalAlpha = 0.85;
+                ctx.fillStyle = '#dca028';
+                ctx.beginPath();
+                ctx.arc(col * cellW + cellW / 2, row * cellH + cellH / 2, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (_mt === 'D') {
+                ctx.globalAlpha = 0.7;
+                ctx.fillStyle = '#a09484';
+                ctx.beginPath();
+                ctx.arc(col * cellW + cellW / 2, row * cellH + cellH / 2, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    }
+    ctx.globalAlpha = 1;
+
     // Player marker (gold with glow)
     const px = S.playerCol * cellW + cellW / 2;
     const py = S.playerRow * cellH + cellH / 2;
@@ -2137,6 +2166,139 @@ function _drawMoveCostIndicators(timestamp) {
     }
 }
 
+
+
+
+// ═══════════════════════════════════════════════════════
+// TILE INTERACTION INDICATORS — small icons on interactive tiles
+// ═══════════════════════════════════════════════════════
+function drawTileInteractionIndicators(ctx, timestamp) {
+    if (!S.grid || !S.grid.length) return;
+    if (typeof isMoving === 'function' && isMoving()) return;
+    var pulse = 0.6 + Math.sin((timestamp || 0) * 0.004) * 0.25;
+
+    for (var row = 0; row < ROWS; row++) {
+        for (var col = 0; col < COLS; col++) {
+            var key = col + ',' + row;
+            if (S.fogState[key] !== 'visible') continue;
+            if (col === S.playerCol && row === S.playerRow) continue;
+
+            var tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+            var icon = null, iconColor = null, iconGlow = null;
+
+            if (tile === 'D') {
+                icon = '\u{1F511}'; // key emoji
+                iconColor = '#dca028';
+                iconGlow = 'rgba(220,160,40,';
+            } else if (tile === 'C') {
+                icon = '\u2728'; // sparkle
+                iconColor = '#c4953a';
+                iconGlow = 'rgba(196,149,58,';
+            }
+
+            if (!icon) continue;
+
+            var center = hexToScreen(col, row);
+            var baseTile = '.';
+            var h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
+            var x = center.x;
+            var y = center.y - h - HEX_H * 0.35; // Above the tile
+
+            // Pulsing glow circle behind icon
+            ctx.save();
+            ctx.globalAlpha = pulse * 0.4;
+            var grad = ctx.createRadialGradient(x, y, 0, x, y, 8);
+            grad.addColorStop(0, iconGlow + '0.5)');
+            grad.addColorStop(1, iconGlow + '0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(x, y, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Icon text
+            ctx.globalAlpha = 0.7 + pulse * 0.2;
+            ctx.font = '10px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = iconColor;
+            ctx.fillText(icon, x, y);
+            ctx.restore();
+        }
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// EXIT WAYPOINT — directional arrow at canvas edge when exit is off-screen
+// ═══════════════════════════════════════════════════════
+function drawExitWaypoint(ctx, timestamp) {
+    if (S.exitCol == null || S.exitRow == null) return;
+    var exitKey = S.exitCol + ',' + S.exitRow;
+    if (S.fogState[exitKey] !== 'visible') return;
+
+    // Check if exit is currently visible on screen
+    var viewport = document.getElementById('map-viewport');
+    if (!viewport) return;
+    var exitScreen = hexToScreen(S.exitCol, S.exitRow);
+    var vl = viewport.scrollLeft;
+    var vt = viewport.scrollTop;
+    var vw = viewport.clientWidth;
+    var vh = viewport.clientHeight;
+
+    // If exit is on screen, don't draw waypoint
+    if (exitScreen.x >= vl + 20 && exitScreen.x <= vl + vw - 20 &&
+        exitScreen.y >= vt + 20 && exitScreen.y <= vt + vh - 20) return;
+
+    // Calculate angle from viewport center to exit
+    var cx = vl + vw / 2;
+    var cy = vt + vh / 2;
+    var angle = Math.atan2(exitScreen.y - cy, exitScreen.x - cx);
+
+    // Place arrow at viewport edge, clamped with margin
+    var margin = 28;
+    var ax = cx + Math.cos(angle) * (vw / 2 - margin);
+    var ay = cy + Math.sin(angle) * (vh / 2 - margin);
+
+    // Clamp to viewport bounds
+    ax = Math.max(vl + margin, Math.min(vl + vw - margin, ax));
+    ay = Math.max(vt + margin, Math.min(vl + vh - margin, ay));
+
+    var pulse = 0.6 + Math.sin((timestamp || 0) * 0.003) * 0.3;
+
+    ctx.save();
+    ctx.globalAlpha = pulse * 0.8;
+
+    // Glow behind arrow
+    var grad = ctx.createRadialGradient(ax, ay, 0, ax, ay, 16);
+    grad.addColorStop(0, 'rgba(74,214,128,0.35)');
+    grad.addColorStop(1, 'rgba(74,214,128,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(ax, ay, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Arrow pointing toward exit
+    ctx.translate(ax, ay);
+    ctx.rotate(angle);
+    ctx.fillStyle = '#4ad680';
+    ctx.beginPath();
+    ctx.moveTo(10, 0);       // tip
+    ctx.lineTo(-4, -6);      // top
+    ctx.lineTo(-1, -2);
+    ctx.lineTo(-7, -2);
+    ctx.lineTo(-7, 2);
+    ctx.lineTo(-1, 2);
+    ctx.lineTo(-4, 6);       // bottom
+    ctx.closePath();
+    ctx.fill();
+
+    // Border
+    ctx.strokeStyle = 'rgba(74,214,128,0.5)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    ctx.restore();
+}
 
 // ═══════════════════════════════════════════════════════
 // ROAMING DANGER MARKERS (enemy patrols)

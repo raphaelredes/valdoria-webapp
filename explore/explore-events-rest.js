@@ -713,8 +713,10 @@ function _checkHealingSpring() {
 }
 
 function _showHealingSpring() {
+    // Use activateOverlay to properly clear stale content (dm-narration, dm-choices)
+    activateOverlay('dm-overlay');
     var overlay = document.getElementById('dm-overlay');
-    var textEl = document.getElementById('dm-text');
+    var textEl = document.getElementById('dm-narration');
     var choicesEl = document.getElementById('dm-choices');
     if (!overlay || !textEl) return;
 
@@ -750,8 +752,7 @@ function _showHealingSpring() {
     if (typeof spawnFloatingText === 'function') spawnFloatingText(S.col, S.row, '+' + totalHeal + ' HP', '#4a8', 'damage');
 
     choicesEl.innerHTML = '';
-    overlay.classList.add('active');
-    if (typeof setEventActive === 'function') setEventActive(true);
+    // activateOverlay already set 'active' class and _eventActive=true
 
     var readDelay = typeof calcReadTime === 'function' ? calcReadTime(spring.desc, 'dm') : 3500;
     setTimeout(function() {

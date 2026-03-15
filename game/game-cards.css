@@ -2,25 +2,25 @@
 
 /* ─── Ally Cards ─── */
 .ally-cards {
-    margin: 8px 0 4px;
+    margin: 4px 0 2px;
 }
 .ally-header {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--v-text-dim);
     text-align: center;
     letter-spacing: 2px;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
 }
 .ally-card {
     display: flex;
     align-items: stretch;
     gap: 0;
     padding: 0;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     background: var(--v-bg-card);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm, 6px);
-    min-height: 48px;
+    min-height: 42px;
     overflow: hidden;
     animation: cardSlideIn 0.35s ease-out both;
 }
