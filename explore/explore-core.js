@@ -1249,11 +1249,25 @@ const _OVERLAY_CHILDREN = {
 };
 
 // Event mutex: prevents multiple overlays from stacking simultaneously.
-// Set to true when an event overlay is active, cleared when dismissed.
-let _eventActive = false;
+// DOM-derived: checks if ANY overlay actually has the 'active' class.
+// This is immune to desync — overlays can be dismissed by any method
+// (deactivateOverlay, classList.remove, etc.) and the mutex auto-clears.
+const _EVENT_OVERLAY_IDS = [
+    'dm-overlay', 'check-overlay', 'outcome-overlay', 'combat-overlay',
+    'portal-overlay', 'encounter-overlay', 'exit-risk-overlay',
+    'death-overlay', 'camp-overlay', 'camp-result-overlay', 'lowhp-overlay',
+    'activity-overlay', 'heal-dice-overlay', 'camp-dice-overlay',
+    'return-journey-overlay',
+];
 
-function isEventActive() { return _eventActive; }
-function setEventActive(val) { _eventActive = !!val; }
+function isEventActive() {
+    for (let i = 0; i < _EVENT_OVERLAY_IDS.length; i++) {
+        const el = document.getElementById(_EVENT_OVERLAY_IDS[i]);
+        if (el && el.classList.contains('active')) return true;
+    }
+    return false;
+}
+function setEventActive(val) { /* no-op: DOM-derived, kept for compat */ }
 
 /**
  * Activate an overlay and automatically clear its dynamic children.
@@ -1275,7 +1289,7 @@ function activateOverlay(overlayId) {
         console.error('[EXPLORE] activateOverlay: element not found:', overlayId);
         return null;
     }
-    _eventActive = true;
+    // _eventActive is now DOM-derived; classList.add('active') is sufficient
     overlay.classList.add('active');
     return overlay;
 }
@@ -1287,7 +1301,7 @@ function activateOverlay(overlayId) {
 function deactivateOverlay(overlayId) {
     const overlay = document.getElementById(overlayId);
     if (overlay) overlay.classList.remove('active');
-    _eventActive = false;
+    // _eventActive is now DOM-derived; removing 'active' class is sufficient
 }
 
 // ═══════════════════════════════════════════════════════
