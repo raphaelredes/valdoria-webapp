@@ -193,7 +193,11 @@
 }
 .ally-compact .ally-name {
     font-size: 11px;
-    max-width: 80px;
+}
+.ally-compact .ally-sub {
+    font-size: 10px;
+    margin-bottom: 2px;
+    line-height: 1.1;
 }
 .ally-compact .ally-lvl {
     font-size: 9px;

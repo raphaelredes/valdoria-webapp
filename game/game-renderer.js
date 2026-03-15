@@ -774,15 +774,15 @@ function _buildAllyCard(a, compact) {
     }
     info.appendChild(nameRow);
 
-    // Subtitle (skip in compact mode to save space)
-    if (!compact) {
-        var subRow = document.createElement('div');
-        subRow.className = 'ally-sub';
-        var subText = a.c || '';
-        if (a.type === 'player') {}
-        else if (a.type === 'merc') subText += ' \u00b7 Mercen\u00e1rio';
-        else if (a.type === 'adv') subText += ' \u00b7 Explorador';
-        else if (a.type === 'familiar') subText = 'Familiar';
+    // Subtitle
+    var subRow = document.createElement('div');
+    subRow.className = 'ally-sub';
+    var subText = a.c || '';
+    if (a.type === 'player') {}
+    else if (a.type === 'merc') subText += compact ? '' : ' \u00b7 Mercen\u00e1rio';
+    else if (a.type === 'adv') subText += compact ? '' : ' \u00b7 Explorador';
+    else if (a.type === 'familiar') subText = 'Familiar';
+    if (subText) {
         subRow.textContent = subText;
         info.appendChild(subRow);
     }
