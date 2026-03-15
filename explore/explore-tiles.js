@@ -24,6 +24,15 @@ function tileRand(col, row, seed) {
     return (h & 0xffff) / 0x10000;
 }
 
+// Performance tier for tile detail level
+// 0 = lite (low-end: skip gradients, micro-details, extra elements)
+// 1 = medium (mid-range: skip only the most subtle details)
+// 2 = full (high-end: all details rendered)
+var _tileDetail = (function() {
+    var tier = window._valdoriaPerformanceTier || 'full';
+    return tier === 'lite' ? 0 : tier === 'medium' ? 1 : 2;
+})();
+
 // ═══════════════════════════════════════════
 // HELPER: draw a single small tree (reusable)
 // ═══════════════════════════════════════════
@@ -608,14 +617,16 @@ function drawRockDecoration(ctx, cx, cy, col, row) {
 function drawWaterDecoration(ctx, cx, cy, timestamp, deep) {
     const t = (timestamp || 0) * 0.001;
 
-    // Reflective sheen (gradient overlay — subtle surface reflection)
-    var reflAlpha = deep ? 0.06 : 0.1;
-    var reflGrad = ctx.createLinearGradient(cx - 10, cy - 6, cx + 10, cy + 4);
-    reflGrad.addColorStop(0, 'rgba(140,200,255,' + reflAlpha + ')');
-    reflGrad.addColorStop(0.5, 'rgba(200,240,255,' + (reflAlpha * 0.4) + ')');
-    reflGrad.addColorStop(1, 'rgba(100,180,240,' + (reflAlpha * 0.3) + ')');
-    ctx.fillStyle = reflGrad;
-    ctx.fillRect(cx - 14, cy - 8, 28, 16);
+    // Reflective sheen — gradient on medium+, flat on lite
+    if (_tileDetail >= 1) {
+        var reflAlpha = deep ? 0.06 : 0.1;
+        var reflGrad = ctx.createLinearGradient(cx - 10, cy - 6, cx + 10, cy + 4);
+        reflGrad.addColorStop(0, 'rgba(140,200,255,' + reflAlpha + ')');
+        reflGrad.addColorStop(0.5, 'rgba(200,240,255,' + (reflAlpha * 0.4) + ')');
+        reflGrad.addColorStop(1, 'rgba(100,180,240,' + (reflAlpha * 0.3) + ')');
+        ctx.fillStyle = reflGrad;
+        ctx.fillRect(cx - 14, cy - 8, 28, 16);
+    }
 
     // Wave lines (3-4 for more coverage)
     var waveCount = deep ? 4 : 3;
@@ -648,8 +659,8 @@ function drawWaterDecoration(ctx, cx, cy, timestamp, deep) {
         }
     }
 
-    // Ripple ring (slow expanding circle on shallow water)
-    if (!deep) {
+    // Ripple ring — medium+ only
+    if (_tileDetail >= 1 && !deep) {
         var ripplePhase = (t * 0.5) % 1;
         var rippleR = 2 + ripplePhase * 8;
         var rippleA = (1 - ripplePhase) * 0.12;
@@ -665,20 +676,29 @@ function drawLavaDecoration(ctx, cx, cy, timestamp) {
     const t = (timestamp || 0) * 0.001;
     var pulse = 0.5 + Math.sin(t * 2) * 0.25;
 
-    // Outer heat glow (larger, more dramatic)
-    var heatGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 22);
-    heatGrad.addColorStop(0, 'rgba(255,120,20,' + (0.15 + Math.sin(t * 2.5) * 0.08).toFixed(2) + ')');
-    heatGrad.addColorStop(0.5, 'rgba(255,80,0,' + (0.06 + Math.sin(t * 3) * 0.03).toFixed(2) + ')');
-    heatGrad.addColorStop(1, 'rgba(255,50,0,0)');
-    ctx.fillStyle = heatGrad;
-    ctx.fillRect(cx - 22, cy - 22, 44, 44);
+    // Outer heat glow — gradient on medium+, flat on lite
+    if (_tileDetail >= 1) {
+        var heatGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 22);
+        heatGrad.addColorStop(0, 'rgba(255,120,20,' + (0.15 + Math.sin(t * 2.5) * 0.08).toFixed(2) + ')');
+        heatGrad.addColorStop(0.5, 'rgba(255,80,0,' + (0.06 + Math.sin(t * 3) * 0.03).toFixed(2) + ')');
+        heatGrad.addColorStop(1, 'rgba(255,50,0,0)');
+        ctx.fillStyle = heatGrad;
+        ctx.fillRect(cx - 22, cy - 22, 44, 44);
+    } else {
+        ctx.fillStyle = 'rgba(255,100,15,0.08)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
-    // Crusted dark edges (cooled lava border)
-    ctx.strokeStyle = 'rgba(40,20,10,0.25)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 10, 0, Math.PI * 2);
-    ctx.stroke();
+    // Crusted dark edges — medium+ only
+    if (_tileDetail >= 1) {
+        ctx.strokeStyle = 'rgba(40,20,10,0.25)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+        ctx.stroke();
+    }
 
     // Glowing cracks (brighter, more complex pattern)
     ctx.strokeStyle = 'rgba(255,200,50,' + pulse.toFixed(2) + ')';
@@ -757,20 +777,22 @@ function drawRuinsDecoration(ctx, cx, cy, col, row) {
         ctx.lineTo(rx - 0.5, ry - h * 0.2);
         ctx.stroke();
 
-        // Vine growing on pillar (on first pillar only)
-        if (i === 0) {
+        // Vine growing on pillar — medium+ only
+        if (_tileDetail >= 1 && i === 0) {
             ctx.strokeStyle = '#3a5a2a';
             ctx.lineWidth = 0.6;
             ctx.beginPath();
             ctx.moveTo(rx + 2, ry);
             ctx.quadraticCurveTo(rx + 3, ry - h * 0.4, rx + 1.5, ry - h * 0.7);
             ctx.stroke();
-            // Vine leaves
-            ctx.fillStyle = '#4a6a30';
-            ctx.beginPath();
-            ctx.arc(rx + 2.5, ry - h * 0.25, 1.2, 0, Math.PI * 2);
-            ctx.arc(rx + 2, ry - h * 0.5, 1, 0, Math.PI * 2);
-            ctx.fill();
+            // Vine leaves — full only
+            if (_tileDetail >= 2) {
+                ctx.fillStyle = '#4a6a30';
+                ctx.beginPath();
+                ctx.arc(rx + 2.5, ry - h * 0.25, 1.2, 0, Math.PI * 2);
+                ctx.arc(rx + 2, ry - h * 0.5, 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     }
 
@@ -794,8 +816,8 @@ function drawRuinsDecoration(ctx, cx, cy, col, row) {
     ctx.arc(cx + 2, cy + 3.5, 0.7, 0, Math.PI * 2);
     ctx.fill();
 
-    // Fallen stone block (rectangular rubble)
-    if (r2 > 0.4) {
+    // Fallen stone block — medium+ only (uses save/restore + rotate)
+    if (_tileDetail >= 1 && r2 > 0.4) {
         var bx = cx + (r1 - 0.5) * 8;
         var by = cy + (r2 - 0.3) * 3;
         ctx.fillStyle = '#6a5a4a';
@@ -804,13 +826,14 @@ function drawRuinsDecoration(ctx, cx, cy, col, row) {
         ctx.rotate((r1 - 0.5) * 0.4);
         ctx.fillRect(-2.5, -1.5, 5, 3);
         ctx.restore();
-        // Crack on block
-        ctx.strokeStyle = 'rgba(40,30,20,0.2)';
-        ctx.lineWidth = 0.3;
-        ctx.beginPath();
-        ctx.moveTo(bx - 1, by - 0.5);
-        ctx.lineTo(bx + 1, by + 0.5);
-        ctx.stroke();
+        if (_tileDetail >= 2) {
+            ctx.strokeStyle = 'rgba(40,30,20,0.2)';
+            ctx.lineWidth = 0.3;
+            ctx.beginPath();
+            ctx.moveTo(bx - 1, by - 0.5);
+            ctx.lineTo(bx + 1, by + 0.5);
+            ctx.stroke();
+        }
     }
 }
 
@@ -842,25 +865,29 @@ function drawBonesDecoration(ctx, cx, cy, col, row, biome) {
     ctx.fill();
     ctx.restore();
 
-    // Rib fragment (curved short bone)
-    var rx = cx + (tileRand(col, row, 43) - 0.5) * 12;
-    var ry = cy + (tileRand(col, row, 44) - 0.5) * 5;
-    ctx.strokeStyle = colorDim;
-    ctx.lineWidth = 0.8;
-    ctx.beginPath();
-    ctx.arc(rx, ry + 3, 4, -0.8, 0.8);
-    ctx.stroke();
-
-    // Small bone fragments (scattered)
-    ctx.strokeStyle = colorDim;
-    ctx.lineWidth = 0.6;
-    for (var fi = 0; fi < 2; fi++) {
-        var fx = cx + (tileRand(col, row, 46 + fi) - 0.5) * 14;
-        var fy = cy + (tileRand(col, row, 48 + fi) - 0.5) * 6;
+    // Rib fragment — medium+ only
+    if (_tileDetail >= 1) {
+        var rx = cx + (tileRand(col, row, 43) - 0.5) * 12;
+        var ry = cy + (tileRand(col, row, 44) - 0.5) * 5;
+        ctx.strokeStyle = colorDim;
+        ctx.lineWidth = 0.8;
         ctx.beginPath();
-        ctx.moveTo(fx - 1.5, fy - 0.5);
-        ctx.lineTo(fx + 1.5, fy + 0.5);
+        ctx.arc(rx, ry + 3, 4, -0.8, 0.8);
         ctx.stroke();
+    }
+
+    // Small bone fragments — full only
+    if (_tileDetail >= 2) {
+        ctx.strokeStyle = colorDim;
+        ctx.lineWidth = 0.6;
+        for (var fi = 0; fi < 2; fi++) {
+            var fx = cx + (tileRand(col, row, 46 + fi) - 0.5) * 14;
+            var fy = cy + (tileRand(col, row, 48 + fi) - 0.5) * 6;
+            ctx.beginPath();
+            ctx.moveTo(fx - 1.5, fy - 0.5);
+            ctx.lineTo(fx + 1.5, fy + 0.5);
+            ctx.stroke();
+        }
     }
 
     if (biome === 'graveyard') {
@@ -947,15 +974,17 @@ function drawPathDecoration(ctx, cx, cy, col, row) {
     ctx.lineTo(cx + 10, cy + 3.5 + yOff);
     ctx.stroke();
 
-    // Embedded cobblestones (flat oval shapes along path)
-    ctx.fillStyle = 'rgba(130,120,100,0.15)';
-    for (var ci = 0; ci < 3; ci++) {
-        var cx2 = cx + (tileRand(col, row, 55 + ci) - 0.5) * 16;
-        var cy2 = cy + yOff + (tileRand(col, row, 58 + ci) - 0.5) * 3;
-        var cSize = 1.2 + tileRand(col, row, 61 + ci) * 0.8;
-        ctx.beginPath();
-        ctx.ellipse(cx2, cy2, cSize, cSize * 0.6, tileRand(col, row, 64 + ci) * 1, 0, Math.PI * 2);
-        ctx.fill();
+    // Embedded cobblestones — medium+ only
+    if (_tileDetail >= 1) {
+        ctx.fillStyle = 'rgba(130,120,100,0.15)';
+        for (var ci = 0; ci < (_tileDetail >= 2 ? 3 : 2); ci++) {
+            var cx2 = cx + (tileRand(col, row, 55 + ci) - 0.5) * 16;
+            var cy2 = cy + yOff + (tileRand(col, row, 58 + ci) - 0.5) * 3;
+            var cSize = 1.2 + tileRand(col, row, 61 + ci) * 0.8;
+            ctx.beginPath();
+            ctx.ellipse(cx2, cy2, cSize, cSize * 0.6, tileRand(col, row, 64 + ci) * 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 
     // Pebbles scattered along edges
@@ -968,8 +997,8 @@ function drawPathDecoration(ctx, cx, cy, col, row) {
         ctx.fill();
     }
 
-    // Footprint impression (occasionally)
-    if (r2 > 0.55) {
+    // Footprint impression — full detail only
+    if (_tileDetail >= 2 && r2 > 0.55) {
         var fpx = cx + (r2 - 0.5) * 8;
         var fpy = cy + 1 + yOff;
         ctx.fillStyle = 'rgba(100,85,55,0.08)';
@@ -998,15 +1027,17 @@ function drawIceDecoration(ctx, cx, cy, col, row) {
     ctx.lineTo(cx + 5, cy - 2);
     ctx.lineTo(cx + 9, cy + 1);
     ctx.stroke();
-    // Branch off main crack
-    ctx.strokeStyle = 'rgba(200,230,255,0.12)';
-    ctx.lineWidth = 0.4;
-    ctx.beginPath();
-    ctx.moveTo(cx - 2, cy + 1);
-    ctx.lineTo(cx - 4, cy + 4);
-    ctx.moveTo(cx + 5, cy - 2);
-    ctx.lineTo(cx + 3, cy - 5);
-    ctx.stroke();
+    // Branch off main crack — medium+ only
+    if (_tileDetail >= 1) {
+        ctx.strokeStyle = 'rgba(200,230,255,0.12)';
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        ctx.moveTo(cx - 2, cy + 1);
+        ctx.lineTo(cx - 4, cy + 4);
+        ctx.moveTo(cx + 5, cy - 2);
+        ctx.lineTo(cx + 3, cy - 5);
+        ctx.stroke();
+    }
 
     // Shine lines (reflective surface)
     ctx.strokeStyle = 'rgba(220,240,255,0.25)';
@@ -1023,17 +1054,19 @@ function drawIceDecoration(ctx, cx, cy, col, row) {
     ctx.lineTo(cx + 10, cy + 2 + r1 * 2);
     ctx.stroke();
 
-    // Frost crystal (6-pointed star shape)
-    var fx = cx + (r2 - 0.5) * 8;
-    var fy = cy + (r1 - 0.5) * 4;
-    ctx.strokeStyle = 'rgba(220,240,255,0.22)';
-    ctx.lineWidth = 0.5;
-    for (var ai = 0; ai < 3; ai++) {
-        var angle = ai * Math.PI / 3;
-        ctx.beginPath();
-        ctx.moveTo(fx + Math.cos(angle) * 3, fy + Math.sin(angle) * 3);
-        ctx.lineTo(fx - Math.cos(angle) * 3, fy - Math.sin(angle) * 3);
-        ctx.stroke();
+    // Frost crystal (6-pointed star shape) — medium+ only
+    if (_tileDetail >= 1) {
+        var fx = cx + (r2 - 0.5) * 8;
+        var fy = cy + (r1 - 0.5) * 4;
+        ctx.strokeStyle = 'rgba(220,240,255,0.22)';
+        ctx.lineWidth = 0.5;
+        for (var ai = 0; ai < 3; ai++) {
+            var angle = ai * Math.PI / 3;
+            ctx.beginPath();
+            ctx.moveTo(fx + Math.cos(angle) * 3, fy + Math.sin(angle) * 3);
+            ctx.lineTo(fx - Math.cos(angle) * 3, fy - Math.sin(angle) * 3);
+            ctx.stroke();
+        }
     }
 
     // Ice sparkles (2-3 bright dots)
@@ -1069,42 +1102,44 @@ function drawWallDecoration(ctx, cx, cy, heightPx, col, row) {
         ctx.stroke();
     }
 
-    // Vertical mortar joints (staggered per row for realistic brick pattern)
-    ctx.strokeStyle = 'rgba(0,0,0,0.10)';
-    ctx.lineWidth = 0.4;
-    for (var vi = 0; vi < brickRows - 1; vi++) {
-        var vY = cy + hh + vi * 4;
-        // 2-3 vertical joints per row, offset alternating
-        var numJoints = 2 + ((seed + vi) % 2);
-        var jointOffset = (vi % 2) * 4; // Stagger
-        for (var vj = 0; vj < numJoints; vj++) {
-            var vX = cx + 2 + jointOffset + vj * 7;
-            if (vX > cx + HEX_W / 2 - 4) break;
-            ctx.beginPath();
-            ctx.moveTo(vX, vY);
-            ctx.lineTo(vX, vY + 4);
-            ctx.stroke();
+    // Vertical mortar joints — medium+ only
+    if (_tileDetail >= 1) {
+        ctx.strokeStyle = 'rgba(0,0,0,0.10)';
+        ctx.lineWidth = 0.4;
+        for (var vi = 0; vi < brickRows - 1; vi++) {
+            var vY = cy + hh + vi * 4;
+            var numJoints = 2 + ((seed + vi) % 2);
+            var jointOffset = (vi % 2) * 4;
+            for (var vj = 0; vj < numJoints; vj++) {
+                var vX = cx + 2 + jointOffset + vj * 7;
+                if (vX > cx + HEX_W / 2 - 4) break;
+                ctx.beginPath();
+                ctx.moveTo(vX, vY);
+                ctx.lineTo(vX, vY + 4);
+                ctx.stroke();
+            }
         }
     }
 
-    // Random stone variation (lighter/darker blocks for depth)
-    ctx.fillStyle = 'rgba(255,255,255,0.04)';
-    for (var si = 0; si < Math.min(brickRows, 5); si++) {
-        var sIdx = (seed + si * 31) % 7;
-        if (sIdx < 3) {
-            var sY = cy + hh + si * 4 + 1;
-            var sX = cx + ((seed + si * 17) % 8);
-            ctx.fillRect(sX, sY, 5, 3);
+    // Random stone variation — full detail only
+    if (_tileDetail >= 2) {
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        for (var si = 0; si < Math.min(brickRows, 5); si++) {
+            var sIdx = (seed + si * 31) % 7;
+            if (sIdx < 3) {
+                var sY = cy + hh + si * 4 + 1;
+                var sX = cx + ((seed + si * 17) % 8);
+                ctx.fillRect(sX, sY, 5, 3);
+            }
         }
-    }
-    // Darker blocks for shadow variation
-    ctx.fillStyle = 'rgba(0,0,0,0.05)';
-    for (var di = 1; di < Math.min(brickRows, 4); di++) {
-        var dIdx = (seed + di * 23) % 5;
-        if (dIdx < 2) {
-            var dY = cy + hh + di * 4 + 1;
-            var dX = cx + ((seed + di * 11 + 3) % 10);
-            ctx.fillRect(dX, dY, 4, 3);
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        for (var di = 1; di < Math.min(brickRows, 4); di++) {
+            var dIdx = (seed + di * 23) % 5;
+            if (dIdx < 2) {
+                var dY = cy + hh + di * 4 + 1;
+                var dX = cx + ((seed + di * 11 + 3) % 10);
+                ctx.fillRect(dX, dY, 4, 3);
+            }
         }
     }
 }
@@ -1139,24 +1174,25 @@ function drawSandDecoration(ctx, cx, cy, col, row) {
         ctx.stroke();
     }
 
-    // Sand drift accumulation (small crescent shapes)
-    ctx.fillStyle = 'rgba(210,190,130,0.08)';
-    ctx.beginPath();
-    ctx.arc(cx + 6, cy + 3, 3, 0.5, Math.PI - 0.5);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(cx - 7, cy - 2, 2.5, 0.3, Math.PI - 0.3);
-    ctx.fill();
+    // Sand drift accumulation — medium+ only
+    if (_tileDetail >= 1) {
+        ctx.fillStyle = 'rgba(210,190,130,0.08)';
+        ctx.beginPath();
+        ctx.arc(cx + 6, cy + 3, 3, 0.5, Math.PI - 0.5);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx - 7, cy - 2, 2.5, 0.3, Math.PI - 0.3);
+        ctx.fill();
+    }
 
-    // Partially buried object (stone or bone peeking out)
-    if (r1 > 0.5) {
+    // Partially buried object — full detail only
+    if (_tileDetail >= 2 && r1 > 0.5) {
         var bx = cx + (r2 - 0.5) * 10;
         var by = cy + (r1 - 0.5) * 4;
         ctx.fillStyle = 'rgba(140,130,110,0.18)';
         ctx.beginPath();
-        ctx.arc(bx, by, 1.8, Math.PI, 0); // half circle (buried bottom)
+        ctx.arc(bx, by, 1.8, Math.PI, 0);
         ctx.fill();
-        // Shadow under exposed part
         ctx.fillStyle = 'rgba(0,0,0,0.06)';
         ctx.beginPath();
         ctx.ellipse(bx, by + 0.5, 2.2, 0.6, 0, 0, Math.PI * 2);
@@ -1189,26 +1225,32 @@ function drawMudDecoration(ctx, cx, cy, col, row) {
     ctx.ellipse(cx - 2, cy - 1.5, 6, 2.5, 0.1, 0, Math.PI * 2);
     ctx.fill();
 
-    // Mud ripples (concentric arcs around puddle)
-    ctx.strokeStyle = 'rgba(80,70,45,0.12)';
-    ctx.lineWidth = 0.4;
-    ctx.beginPath();
-    ctx.arc(cx - 1, cy, 5, 0.3, 2.2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(cx - 1, cy, 7.5, 0.8, 1.8);
-    ctx.stroke();
+    // Mud ripples (concentric arcs around puddle) — skip on lite
+    if (_tileDetail >= 1) {
+        ctx.strokeStyle = 'rgba(80,70,45,0.12)';
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        ctx.arc(cx - 1, cy, 5, 0.3, 2.2);
+        ctx.stroke();
+        if (_tileDetail >= 2) {
+            ctx.beginPath();
+            ctx.arc(cx - 1, cy, 7.5, 0.8, 1.8);
+            ctx.stroke();
+        }
+    }
 
-    // Footprint impressions (2 small oval pairs)
-    ctx.fillStyle = 'rgba(40,35,20,0.12)';
-    var fpX = cx + ((seed * 3) % 7) - 3;
-    var fpY = cy + ((seed * 5) % 5) - 2;
-    ctx.beginPath();
-    ctx.ellipse(fpX, fpY, 1.8, 1, 0.3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(fpX + 1.5, fpY - 2.2, 1.6, 0.9, 0.3, 0, Math.PI * 2);
-    ctx.fill();
+    // Footprint impressions — full detail only
+    if (_tileDetail >= 2) {
+        ctx.fillStyle = 'rgba(40,35,20,0.12)';
+        var fpX = cx + ((seed * 3) % 7) - 3;
+        var fpY = cy + ((seed * 5) % 5) - 2;
+        ctx.beginPath();
+        ctx.ellipse(fpX, fpY, 1.8, 1, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(fpX + 1.5, fpY - 2.2, 1.6, 0.9, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
     // Bubbles (3 varied sizes)
     ctx.fillStyle = 'rgba(100,90,60,0.2)';
@@ -1224,24 +1266,33 @@ function drawMudDecoration(ctx, cx, cy, col, row) {
     ctx.arc(cx + 5, cy - 1, 0.7, 0, Math.PI * 2);
     ctx.fill();
 
-    // Bubble highlight (tiny white dot on largest bubble)
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.beginPath();
-    ctx.arc(cx + 2.5, cy + 0.3, 0.5, 0, Math.PI * 2);
-    ctx.fill();
+    // Bubble highlight (tiny white dot on largest bubble) — full only
+    if (_tileDetail >= 2) {
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath();
+        ctx.arc(cx + 2.5, cy + 0.3, 0.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
 function drawVolcanicDecoration(ctx, cx, cy, col, row) {
     var r1 = tileRand(col, row, 80);
     var r2 = tileRand(col, row, 81);
 
-    // Warm under-glow (radial gradient for subsurface heat)
-    var heatGrad = ctx.createRadialGradient(cx, cy, 1, cx, cy, 10);
-    heatGrad.addColorStop(0, 'rgba(255,100,20,0.07)');
-    heatGrad.addColorStop(0.6, 'rgba(255,60,10,0.03)');
-    heatGrad.addColorStop(1, 'rgba(255,40,0,0)');
-    ctx.fillStyle = heatGrad;
-    ctx.fillRect(cx - 10, cy - 8, 20, 16);
+    // Warm under-glow — gradient on medium+, flat on lite
+    if (_tileDetail >= 1) {
+        var heatGrad = ctx.createRadialGradient(cx, cy, 1, cx, cy, 10);
+        heatGrad.addColorStop(0, 'rgba(255,100,20,0.07)');
+        heatGrad.addColorStop(0.6, 'rgba(255,60,10,0.03)');
+        heatGrad.addColorStop(1, 'rgba(255,40,0,0)');
+        ctx.fillStyle = heatGrad;
+        ctx.fillRect(cx - 10, cy - 8, 20, 16);
+    } else {
+        ctx.fillStyle = 'rgba(255,80,15,0.04)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
     // Primary crack network (bright orange)
     ctx.strokeStyle = 'rgba(220,90,20,0.22)';
@@ -1304,14 +1355,16 @@ function drawVolcanicDecoration(ctx, cx, cy, col, row) {
         ctx.fill();
     }
 
-    // Ash deposit patches (subtle gray smudges)
-    ctx.fillStyle = 'rgba(80,75,70,0.08)';
-    ctx.beginPath();
-    ctx.ellipse(cx - 5, cy + 2, 3, 1.5, 0.4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(cx + 6, cy - 1, 2.5, 1.2, -0.2, 0, Math.PI * 2);
-    ctx.fill();
+    // Ash deposit patches — full detail only
+    if (_tileDetail >= 2) {
+        ctx.fillStyle = 'rgba(80,75,70,0.08)';
+        ctx.beginPath();
+        ctx.ellipse(cx - 5, cy + 2, 3, 1.5, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(cx + 6, cy - 1, 2.5, 1.2, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
 function drawGrassDecoration(ctx, cx, cy, col, row, biome) {
@@ -1394,8 +1447,8 @@ function drawGrassDecoration(ctx, cx, cy, col, row, biome) {
         }
     }
 
-    // Clover patches in forest (small 3-leaf shapes)
-    if (biome === 'forest' && tileRand(col, row, 118) > 0.6) {
+    // Clover patches in forest — full detail only
+    if (_tileDetail >= 2 && biome === 'forest' && tileRand(col, row, 118) > 0.6) {
         var cx2 = cx + (tileRand(col, row, 119) - 0.5) * 10;
         var cy2 = cy + (tileRand(col, row, 120) - 0.5) * 5;
         ctx.fillStyle = '#2a5a18';
@@ -2220,13 +2273,15 @@ function drawDoorDecoration(ctx, cx, cy, col, row) {
     ctx.lineTo(cx + hw, cy + hh * 0.5);
     ctx.stroke();
 
-    // Iron studs (4 rivets on bands)
-    ctx.fillStyle = '#5a5a5a';
-    for (var si = -1; si <= 1; si += 2) {
-        ctx.beginPath();
-        ctx.arc(cx + si * hw * 0.6, cy - hh * 0.5, 1, 0, Math.PI * 2);
-        ctx.arc(cx + si * hw * 0.6, cy + hh * 0.5, 1, 0, Math.PI * 2);
-        ctx.fill();
+    // Iron studs — medium+ only
+    if (_tileDetail >= 1) {
+        ctx.fillStyle = '#5a5a5a';
+        for (var si = -1; si <= 1; si += 2) {
+            ctx.beginPath();
+            ctx.arc(cx + si * hw * 0.6, cy - hh * 0.5, 1, 0, Math.PI * 2);
+            ctx.arc(cx + si * hw * 0.6, cy + hh * 0.5, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 
     // Handle (iron ring)
@@ -2241,9 +2296,11 @@ function drawDoorDecoration(ctx, cx, cy, col, row) {
     ctx.arc(cx + hw * 0.4, cy - 1, 0.8, 0, Math.PI * 2);
     ctx.fill();
 
-    // Keyhole (tiny dark slit below handle)
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(cx + hw * 0.38, cy + 3, 1.5, 2);
+    // Keyhole — full detail only
+    if (_tileDetail >= 2) {
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(cx + hw * 0.38, cy + 3, 1.5, 2);
+    }
 }
 
 // ── Enhanced wall decoration (cracks, moss, torch sconces) ──

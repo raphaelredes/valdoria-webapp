@@ -486,13 +486,17 @@ _staticDirty = false;
             }
         }
 
-    // Fog drift — subtle sine-wave translation for living atmosphere
-    var _fogDriftX = Math.sin((timestamp || 0) * 0.0004) * 2.0;
-    var _fogDriftY = Math.cos((timestamp || 0) * 0.0003) * 1.5;
-    _ctx.save();
-    _ctx.translate(_fogDriftX, _fogDriftY);
-    drawFogOverlay(_ctx, _canvasLogicalW + 4, _canvasLogicalH + 4, S.fogState);
-    _ctx.restore();
+    // Fog drift — medium+ only (save/restore per frame)
+    if (_renderDetail >= 1) {
+        var _fogDriftX = Math.sin((timestamp || 0) * 0.0004) * 2.0;
+        var _fogDriftY = Math.cos((timestamp || 0) * 0.0003) * 1.5;
+        _ctx.save();
+        _ctx.translate(_fogDriftX, _fogDriftY);
+        drawFogOverlay(_ctx, _canvasLogicalW + 4, _canvasLogicalH + 4, S.fogState);
+        _ctx.restore();
+    } else {
+        drawFogOverlay(_ctx, _canvasLogicalW, _canvasLogicalH, S.fogState);
+    }
 
     // 10.5 Fog reveal golden flash (on top of fog for dramatic effect)
     drawFogRevealFlash(_ctx, timestamp);
@@ -626,15 +630,18 @@ function renderStaticTiles(timestamp) {
         }
     }
 
-    // 2.5 pass: Cast shadows from tall obstacles (light from NW → shadow SE)
-    for (let row = 0; row < ROWS; row++) {
-        for (let col = 0; col < COLS; col++) {
-            _drawCastShadow(_staticCtx, col, row);
+    // 2.5 pass: Cast shadows — medium+ only (many ellipse draws per tile)
+    if (_renderDetail >= 1) {
+        for (let row = 0; row < ROWS; row++) {
+            for (let col = 0; col < COLS; col++) {
+                _drawCastShadow(_staticCtx, col, row);
+            }
         }
     }
 
-    // Third pass: soft edge blending between different terrain types
-    for (let row = 0; row < ROWS; row++) {
+    // Third pass: soft edge blending — medium+ only (radial gradient per tile)
+    if (_renderDetail < 1) { /* skip edge blending on lite */ }
+    else for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
             const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
@@ -671,9 +678,17 @@ function renderStaticTiles(timestamp) {
         }
     }
 
-    // Fourth pass: edge-of-map biome haze (tinted gradient at borders)
-    _drawEdgeHaze(_staticCtx, _canvasLogicalW, _canvasLogicalH);
+    // Fourth pass: edge-of-map biome haze — medium+ only (4 gradients)
+    if (_renderDetail >= 1) {
+        _drawEdgeHaze(_staticCtx, _canvasLogicalW, _canvasLogicalH);
+    }
 }
+
+// Performance tier for render detail (mirrors explore-tiles.js)
+var _renderDetail = (function() {
+    var tier = window._valdoriaPerformanceTier || 'full';
+    return tier === 'lite' ? 0 : tier === 'medium' ? 1 : 2;
+})();
 
 // Cast shadow — tall tiles project shadow onto SE neighbor (light from NW)
 function _drawCastShadow(ctx, col, row) {
