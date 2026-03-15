@@ -15,7 +15,8 @@ const S = {
 };
 
 // ─── Session persistence (survives WebApp kill/reload) ───
-const SESSION_KEY = 'valdoria_session';
+// Key is suffixed with charId for per-character isolation (set in init())
+let SESSION_KEY = 'valdoria_session';
 function _saveSession() {
     try {
         localStorage.setItem(SESSION_KEY, JSON.stringify({
@@ -31,7 +32,7 @@ function _restoreSession() {
         var d = JSON.parse(raw);
         // Expire after 30 minutes (aligned with server _SESSION_TTL = 1800s)
         if (Date.now() - d.ts > 30 * 60 * 1000) return false;
-        // Reject if stored charId doesn't match URL charId (cross-character guard)
+        // Per-character keys already isolate data; extra guard for legacy unsuffixed entries
         if (S.charId && d.charId && S.charId !== d.charId) {
             console.warn('[GAME] Stored session is for different character:', d.charId, 'vs', S.charId);
             localStorage.removeItem(SESSION_KEY);
@@ -54,7 +55,7 @@ const HEALTH_RETRIES = 2;       // 2 retries (3 attempts) — allows DNS propaga
 const HEALTH_RETRY_MS = 1000;   // 1s between retries
 const LOADING_TIMEOUT_MS = 15000; // 15s max loading screen before auto-error
 const MIN_LOADING_MS = window.VALDORIA_MIN_LOAD_MS || 5000; // immutable: tip readability rule
-const SCREEN_CACHE_KEY = 'valdoria_game_screen';
+let SCREEN_CACHE_KEY = 'valdoria_game_screen';
 const SCREEN_CACHE_TTL = 1800000; // 30 minutes
 
 let _loadingTimeoutId = null;
@@ -78,6 +79,14 @@ async function init() {
     S.apiBase = (params.get('api') || window.location.origin || '').replace(/\/$/, '');
     S.uid = parseInt(params.get('uid') || '0', 10);
     S.charId = params.get('char') || '';  // Character ID from menu (for char switch)
+
+    // [EXIT-CONFIRM] Per-character localStorage keys (prevents cross-char data leaks)
+    if (S.charId) {
+        SESSION_KEY = 'valdoria_session_' + S.charId;
+        SCREEN_CACHE_KEY = 'valdoria_game_screen_' + S.charId;
+        // Clean up legacy unsuffixed keys (one-time migration)
+        try { localStorage.removeItem('valdoria_session'); localStorage.removeItem('valdoria_game_screen'); } catch(e) {}
+    }
 
     // Periodic auto-discovery: detect tunnel URL changes during session
     if (S.apiBase && window.ApiDiscovery) {
@@ -848,7 +857,7 @@ function loadCachedScreen() {
         if (!raw) return null;
         const parsed = JSON.parse(raw);
         const { uid, ts, screen } = parsed;
-        // Validate by user ID + charId (not token — token changes each session)
+        // Validate by user ID + TTL (per-character keys provide char isolation)
         var charId = parsed.charId || '';
         if (uid !== S.uid || (S.charId && charId && S.charId !== charId) || Date.now() - ts > SCREEN_CACHE_TTL) {
             localStorage.removeItem(SCREEN_CACHE_KEY);
