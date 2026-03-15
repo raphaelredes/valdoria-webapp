@@ -708,6 +708,20 @@ const INSCRIPTION_TEXTS = {
         'Cristais de obsidiana formam padroes que lembram constelacoes.',
         'Marcas de rituais antigos circundam um altar de pedra vulcanica.',
     ],
+    snow: [
+        'Runas congeladas brilham sob a camada de gelo milenar.',
+        'Uma mensagem gravada em osso: "O inverno eterno aguarda os imprudentes."',
+        'Pegadas gigantes fossilizadas no gelo contam historias de criaturas antigas.',
+        'Simbolos de protecao contra o frio esculpidos na pedra por maos desesperadas.',
+        'Um mapa de rotas comerciais antigas, preservado pelo gelo perpetuo.',
+    ],
+    graveyard: [
+        'Epitafios desgastados contam historias de aventureiros que nunca voltaram.',
+        'Simbolos necromantes riscados na pedra emanam uma aura fria.',
+        'Uma lista de nomes apagados pelo tempo. O ultimo ainda e legivel.',
+        'Inscricoes de protecao contra mortos-vivos cobrem o batente de um tumulo.',
+        'Versos funerarios em lingua antiga: "Que os mortos descansem em paz."',
+    ],
 };
 
 function _showInscription(col, row, ins) {

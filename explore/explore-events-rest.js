@@ -886,40 +886,48 @@ function _resolveSecondWind(overlay, formulaEl, resultEl, roll, success) {
     }, readDelay);
 }
 
+var DEATH_SAVE_NARRATIONS = [
+    'O mundo escurece nas bordas. Cada batida do coração parece mais fraca que a anterior...',
+    'Vozes sussurram ao longe. Serão os deuses decidindo seu destino?',
+    'Uma luz fraca brilha além da escuridão. Ainda não é hora de segui-la.',
+    'Memórias passam como sombras. Você se agarra ao fio de vida que resta.',
+    'O frio se instala. Seus dedos formigam. A luta entre vida e morte continua.',
+];
+
 function showDeathSaves() {
-    const overlay = document.getElementById('death-overlay');
-    const summary = document.getElementById('death-summary');
+    var overlay = document.getElementById('death-overlay');
+    var summary = document.getElementById('death-summary');
     overlay.classList.add('active');
     if (window.vHaptic) vHaptic.error();
 
-    let successes = 0, failures = 0, rollNum = 0;
-    let _done = false;
+    var successes = 0, failures = 0, rollNum = 0;
+    var _done = false;
 
-    function renderState(roll, isResult) {
-        const sMarks = '●'.repeat(successes) + '○'.repeat(3 - successes);
-        const fMarks = '●'.repeat(failures) + '○'.repeat(3 - failures);
-        let html = `<div style="text-align:center;margin-bottom:12px">
-            <div style="font-size:18px;margin-bottom:8px">Salvaguardas contra Morte</div>
-            <div style="font-size:14px;color:#6a8">✓ ${sMarks}</div>
-            <div style="font-size:14px;color:#a66">✗ ${fMarks}</div>
-        </div>`;
+    function renderState(roll, isResult, narrText) {
+        var sMarks = '●'.repeat(successes) + '○'.repeat(3 - successes);
+        var fMarks = '●'.repeat(failures) + '○'.repeat(3 - failures);
+        var html = '<div style="text-align:center;margin-bottom:12px">' +
+            '<div style="font-size:18px;margin-bottom:8px">Salvaguardas contra Morte</div>' +
+            '<div style="font-size:14px;color:#6a8">✓ ' + sMarks + '</div>' +
+            '<div style="font-size:14px;color:#a66">✗ ' + fMarks + '</div>' +
+            '</div>';
+        if (narrText) {
+            html += '<div style="text-align:center;font-size:12px;color:#a09484;line-height:1.5;margin:8px 12px;font-style:italic">' + narrText + '</div>';
+        }
         if (roll !== null) {
-            const color = roll === 20 ? '#ffd700' : roll === 1 ? '#ff3333' : roll >= 10 ? '#6a8' : '#a66';
-            html += `<div style="text-align:center;margin:12px 0">
-                <div class="dice-result" style="font-size:clamp(22px,6vw,28px);color:${color}">${roll}</div>
-                <div style="font-size:12px;color:#8a7a68;margin-top:4px">Rolagem ${rollNum}</div>
-            </div>`;
+            var color = roll === 20 ? '#ffd700' : roll === 1 ? '#ff3333' : roll >= 10 ? '#6a8' : '#a66';
+            html += '<div style="text-align:center;margin:12px 0">' +
+                '<div class="dice-result" style="font-size:clamp(22px,6vw,28px);color:' + color + '">' + roll + '</div>' +
+                '<div style="font-size:12px;color:#8a7a68;margin-top:4px">Rolagem ' + rollNum + '</div>' +
+                '</div>';
         }
         if (isResult) {
             if (successes >= 3) {
-                html += `<div style="text-align:center;color:#6a8;font-size:16px;margin-top:12px">
-                    Estabilizado! Você acorda com 1 HP.</div>`;
+                html += '<div style="text-align:center;color:#6a8;font-size:16px;margin-top:12px">Estabilizado! Você acorda com 1 HP.</div>';
             } else if (failures >= 3) {
-                html += `<div style="text-align:center;color:#a66;font-size:16px;margin-top:12px">
-                    Você sucumbe aos ferimentos...</div>`;
+                html += '<div style="text-align:center;color:#a66;font-size:16px;margin-top:12px">Você sucumbe aos ferimentos...</div>';
             } else if (roll === 20) {
-                html += `<div style="text-align:center;color:#ffd700;font-size:16px;margin-top:12px">
-                    Crítico Natural! Você se levanta com 1 HP!</div>`;
+                html += '<div style="text-align:center;color:#ffd700;font-size:16px;margin-top:12px">Crítico Natural! Você se levanta com 1 HP!</div>';
             }
         }
         summary.innerHTML = html;
@@ -928,49 +936,82 @@ function showDeathSaves() {
     function rollDeathSave() {
         if (_done) return;
         rollNum++;
-        const roll = Math.floor(Math.random() * 20) + 1;
 
-        if (roll === 20) {
-            // Nat 20: regain 1 HP, continue exploring
-            successes = 3;
-            renderState(roll, true);
-            setTimeout(() => {
-                if (_done) return; _done = true;
-                overlay.classList.remove('active');
-                S.hpChange = -(S.charData.hp - 1); // Set to exactly 1 HP
-                updateHP(1);
-                saveState();
-            }, 2500);
-            return;
-        }
-        if (roll === 1) { failures += 2; } // Nat 1 = 2 failures (PHB p.197)
-        else if (roll >= 10) { successes++; }
-        else { failures++; }
+        // Show narration between rolls
+        var narrIdx = (rollNum - 1) % DEATH_SAVE_NARRATIONS.length;
+        var narrText = DEATH_SAVE_NARRATIONS[narrIdx];
+        renderState(null, false, narrText);
 
-        renderState(roll, successes >= 3 || failures >= 3);
+        // Use rollD20 for proper die rolling
+        var result = typeof rollD20 === 'function' ? rollD20('normal') : { roll: Math.floor(Math.random() * 20) + 1 };
+        var roll = result.roll;
 
-        if (successes >= 3) {
-            // Stabilized: wake with 1 HP
-            setTimeout(() => {
-                if (_done) return; _done = true;
-                overlay.classList.remove('active');
-                S.hpChange = -(S.charData.hp - 1);
-                updateHP(1);
-                saveState();
-            }, 2500);
-        } else if (failures >= 3) {
-            // Dead: temple rescue
-            setTimeout(() => {
-                if (_done) return; _done = true;
-                finishExploration('death');
-            }, 2500);
-        } else {
-            // Continue rolling after delay
-            setTimeout(rollDeathSave, 1500);
-        }
+        // Delay before showing dice to let narration be read
+        var narrDelay = typeof calcReadTime === 'function' ? calcReadTime(narrText, 'combat') : 1500;
+        setTimeout(function () {
+            if (_done) return;
+
+            // 3D dice animation
+            var dice = typeof getDice3D === 'function' ? getDice3D() : null;
+            var afterDice = function () {
+                if (roll === 20) {
+                    successes = 3;
+                    renderState(roll, true, null);
+                    if (window.vHaptic) vHaptic.success();
+                    flashScreen('rgba(255,215,0,0.3)');
+                    setTimeout(function () {
+                        if (_done) return; _done = true;
+                        if (typeof disposeDice3D === 'function') disposeDice3D();
+                        overlay.classList.remove('active');
+                        S.hpChange = -(S.charData.hp - 1);
+                        updateHP(1);
+                        saveState();
+                    }, 2500);
+                    return;
+                }
+                if (roll === 1) { failures += 2; }
+                else if (roll >= 10) { successes++; }
+                else { failures++; }
+
+                var isFinal = successes >= 3 || failures >= 3;
+                renderState(roll, isFinal, null);
+
+                if (roll >= 10 && roll !== 20) {
+                    if (window.vHaptic) vHaptic.notify('success');
+                } else {
+                    if (window.vHaptic) vHaptic.notify('error');
+                }
+                if (roll === 1) flashScreen('rgba(200,0,0,0.3)');
+
+                if (typeof disposeDice3D === 'function') disposeDice3D();
+
+                if (successes >= 3) {
+                    setTimeout(function () {
+                        if (_done) return; _done = true;
+                        overlay.classList.remove('active');
+                        S.hpChange = -(S.charData.hp - 1);
+                        updateHP(1);
+                        saveState();
+                    }, 2500);
+                } else if (failures >= 3) {
+                    setTimeout(function () {
+                        if (_done) return; _done = true;
+                        finishExploration('death');
+                    }, 2500);
+                } else {
+                    setTimeout(rollDeathSave, 1200);
+                }
+            };
+
+            if (dice) {
+                dice.roll(roll, afterDice);
+            } else {
+                setTimeout(afterDice, 700);
+            }
+        }, narrDelay);
     }
 
-    renderState(null, false);
+    renderState(null, false, null);
     setTimeout(rollDeathSave, 1000);
 }
 
