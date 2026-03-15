@@ -573,9 +573,10 @@ function _drawEdgeHaze(ctx, w, h) {
 
 // Atmospheric vignette — subtle darkening at canvas edges
 function _drawVignette(ctx, w, h) {
-    const cx = w / 2, cy = h / 2;
-    const outerR = Math.max(w, h) * 0.75;
-    const grad = ctx.createRadialGradient(cx, cy, outerR * 0.5, cx, cy, outerR);
+    if (_renderDetail < 1) return; // Skip vignette on lite (radial gradient)
+    var cx = w / 2, cy = h / 2;
+    var outerR = Math.max(w, h) * 0.75;
+    var grad = ctx.createRadialGradient(cx, cy, outerR * 0.5, cx, cy, outerR);
     grad.addColorStop(0, 'rgba(0,0,0,0)');
     grad.addColorStop(0.7, 'rgba(0,0,0,0)');
     grad.addColorStop(1, 'rgba(0,0,0,0.3)');
@@ -799,6 +800,7 @@ function _drawOcclusionFade(ctx) {
 
 // Ambient occlusion — darken tiles adjacent to taller neighbors
 function _drawHeightShadow(ctx, col, row) {
+    if (_renderDetail < 1) return; // Skip ambient occlusion on lite
     const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
     const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
     const height = TILE_HEIGHT[baseTile] || 1;
@@ -1813,8 +1815,8 @@ function _smoothCameraFollow() {
 // PLAYER DYNAMIC LIGHTING — torch glow based on day phase
 // ═══════════════════════════════════════════════════════
 function drawPlayerLight(ctx, timestamp) {
-    const phase = getDayPhase();
-    let radius, r, g, b, alpha;
+    var phase = getDayPhase();
+    var radius, r, g, b, alpha;
 
     switch (phase) {
         case 'dawn':
@@ -1829,15 +1831,24 @@ function drawPlayerLight(ctx, timestamp) {
 
     // Torch flicker at night/dusk
     if (phase === 'night' || phase === 'dusk') {
-        const flicker = Math.sin(timestamp * 0.005) * 0.025 + Math.sin(timestamp * 0.013) * 0.015;
+        var flicker = Math.sin(timestamp * 0.005) * 0.025 + Math.sin(timestamp * 0.013) * 0.015;
         alpha += flicker;
         radius += Math.sin(timestamp * 0.007) * 4;
     }
 
-    const grad = ctx.createRadialGradient(playerScreenX, playerScreenY, 0, playerScreenX, playerScreenY, radius);
-    grad.addColorStop(0, `rgba(${r},${g},${b},${alpha})`);
-    grad.addColorStop(0.4, `rgba(${r},${g},${b},${alpha * 0.5})`);
-    grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+    // Lite: simple flat circle (no gradient)
+    if (_renderDetail < 1) {
+        ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.6).toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(playerScreenX, playerScreenY, radius * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+    }
+
+    var grad = ctx.createRadialGradient(playerScreenX, playerScreenY, 0, playerScreenX, playerScreenY, radius);
+    grad.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')');
+    grad.addColorStop(0.4, 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.5) + ')');
+    grad.addColorStop(1, 'rgba(' + r + ',' + g + ',' + b + ',0)');
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.arc(playerScreenX, playerScreenY, radius, 0, Math.PI * 2);
@@ -1849,6 +1860,7 @@ function drawPlayerLight(ctx, timestamp) {
 // ═══════════════════════════════════════════════════════
 function drawFogRevealFlash(ctx, timestamp) {
     if (!_fogReveals || _fogReveals.length === 0) return;
+    if (_renderDetail < 1) return; // Skip fog flash on lite (radial gradients)
 
     for (const rev of _fogReveals) {
         const t = rev.progress;

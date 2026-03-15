@@ -533,10 +533,11 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
 
 function drawMountainDecoration(ctx, cx, cy, col, row) {
     _drawDecorationShadow(ctx, cx, cy, 13, 5);
-    const r1 = tileRand(col, row, 10);
-    const r2 = tileRand(col, row, 11);
-    // Main peak
-    const peakH = 14 + r1 * 4;
+    var r1 = tileRand(col, row, 10);
+    var r2 = tileRand(col, row, 11);
+    var peakH = 14 + r1 * 4;
+
+    // Main peak (light face)
     ctx.beginPath();
     ctx.moveTo(cx, cy - peakH);
     ctx.lineTo(cx + 10, cy + 2);
@@ -544,7 +545,8 @@ function drawMountainDecoration(ctx, cx, cy, col, row) {
     ctx.closePath();
     ctx.fillStyle = '#5a5a6a';
     ctx.fill();
-    // Dark face (left side)
+
+    // Dark face (left side — shadow)
     ctx.beginPath();
     ctx.moveTo(cx, cy - peakH);
     ctx.lineTo(cx - 10, cy + 2);
@@ -552,18 +554,42 @@ function drawMountainDecoration(ctx, cx, cy, col, row) {
     ctx.closePath();
     ctx.fillStyle = '#4a4a5a';
     ctx.fill();
-    // Snow cap
+
+    // Ridge line (subtle edge between faces) — medium+
+    if (_tileDetail >= 1) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - peakH);
+        ctx.lineTo(cx, cy + 2);
+        ctx.stroke();
+    }
+
+    // Snow cap (larger, with drip edge)
     ctx.beginPath();
     ctx.moveTo(cx, cy - peakH);
-    ctx.lineTo(cx + 4, cy - peakH + 6);
-    ctx.lineTo(cx - 4, cy - peakH + 6);
+    ctx.lineTo(cx + 5, cy - peakH + 7);
+    ctx.lineTo(cx + 3, cy - peakH + 6);
+    ctx.lineTo(cx - 3, cy - peakH + 7);
+    ctx.lineTo(cx - 5, cy - peakH + 6);
     ctx.closePath();
     ctx.fillStyle = '#e8e8f0';
     ctx.fill();
+
+    // Crevasse (dark crack on light face) — medium+
+    if (_tileDetail >= 1) {
+        ctx.strokeStyle = 'rgba(30,30,40,0.15)';
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        ctx.moveTo(cx + 3, cy - peakH * 0.5);
+        ctx.lineTo(cx + 5, cy - peakH * 0.2);
+        ctx.stroke();
+    }
+
     // Secondary peak (70% chance)
     if (r2 > 0.3) {
-        const ox = (r2 - 0.5) * 12;
-        const h2 = peakH * 0.6;
+        var ox = (r2 - 0.5) * 12;
+        var h2 = peakH * 0.6;
         ctx.beginPath();
         ctx.moveTo(cx + ox, cy - h2);
         ctx.lineTo(cx + ox + 6, cy + 1);
@@ -580,37 +606,101 @@ function drawMountainDecoration(ctx, cx, cy, col, row) {
         ctx.fillStyle = '#dde0e8';
         ctx.fill();
     }
-    // Rocks at base
+
+    // Rocks at base (more varied)
     ctx.fillStyle = '#6a6a6a';
     ctx.beginPath();
     ctx.arc(cx - 7, cy + 1, 1.5, 0, Math.PI * 2);
     ctx.arc(cx + 8, cy, 1.2, 0, Math.PI * 2);
     ctx.fill();
+    if (_tileDetail >= 1) {
+        ctx.fillStyle = '#5a5a5a';
+        ctx.beginPath();
+        ctx.arc(cx - 4, cy + 2, 0.9, 0, Math.PI * 2);
+        ctx.arc(cx + 5, cy + 2, 0.7, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Wind streaks (snow blown off peak) — full detail only
+    if (_tileDetail >= 2) {
+        ctx.strokeStyle = 'rgba(230,230,240,0.08)';
+        ctx.lineWidth = 0.3;
+        ctx.beginPath();
+        ctx.moveTo(cx + 1, cy - peakH + 3);
+        ctx.lineTo(cx + 8, cy - peakH + 5);
+        ctx.moveTo(cx - 1, cy - peakH + 5);
+        ctx.lineTo(cx + 6, cy - peakH + 7);
+        ctx.stroke();
+    }
 }
 
 function drawRockDecoration(ctx, cx, cy, col, row) {
     _drawDecorationShadow(ctx, cx, cy, 8, 3);
-    const r1 = tileRand(col, row, 20);
-    // 2-3 angular rocks
-    for (let i = 0; i < 2 + (r1 > 0.5 ? 1 : 0); i++) {
-        const rx = cx + (tileRand(col, row, 22 + i) - 0.5) * 14;
-        const ry = cy + (tileRand(col, row, 25 + i) - 0.5) * 8;
-        const size = 3 + tileRand(col, row, 28 + i) * 3;
+    var r1 = tileRand(col, row, 20);
+    var rockCount = 2 + (r1 > 0.5 ? 1 : 0);
+
+    // 2-3 angular rocks with depth shading
+    for (var i = 0; i < rockCount; i++) {
+        var rx = cx + (tileRand(col, row, 22 + i) - 0.5) * 14;
+        var ry = cy + (tileRand(col, row, 25 + i) - 0.5) * 8;
+        var size = 3 + tileRand(col, row, 28 + i) * 3;
+        var gray = 80 + i * 15;
+
+        // Rock body
         ctx.beginPath();
         ctx.moveTo(rx, ry - size);
         ctx.lineTo(rx + size, ry);
         ctx.lineTo(rx + size * 0.3, ry + size * 0.5);
         ctx.lineTo(rx - size * 0.7, ry + size * 0.3);
         ctx.closePath();
-        ctx.fillStyle = `rgb(${80 + i * 15},${80 + i * 15},${80 + i * 15})`;
+        ctx.fillStyle = 'rgb(' + gray + ',' + gray + ',' + gray + ')';
         ctx.fill();
-        // Highlight edge
-        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+
+        // Shadow face (left side darker)
+        ctx.beginPath();
+        ctx.moveTo(rx, ry - size);
+        ctx.lineTo(rx - size * 0.7, ry + size * 0.3);
+        ctx.lineTo(rx + size * 0.3, ry + size * 0.5);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        ctx.fill();
+
+        // Highlight edge (top-right)
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
         ctx.lineWidth = 0.5;
         ctx.beginPath();
         ctx.moveTo(rx, ry - size);
         ctx.lineTo(rx + size, ry);
         ctx.stroke();
+
+        // Surface crack — medium+ only
+        if (_tileDetail >= 1 && i === 0) {
+            ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+            ctx.lineWidth = 0.4;
+            ctx.beginPath();
+            ctx.moveTo(rx - size * 0.2, ry - size * 0.3);
+            ctx.lineTo(rx + size * 0.3, ry + size * 0.1);
+            ctx.stroke();
+        }
+    }
+
+    // Lichen patch on largest rock — full detail only
+    if (_tileDetail >= 2 && r1 > 0.4) {
+        var lx = cx + (tileRand(col, row, 22) - 0.5) * 14;
+        var ly = cy + (tileRand(col, row, 25) - 0.5) * 8;
+        ctx.fillStyle = 'rgba(80,100,60,0.12)';
+        ctx.beginPath();
+        ctx.arc(lx + 1, ly - 1, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Small pebbles around rocks — medium+ only
+    if (_tileDetail >= 1) {
+        ctx.fillStyle = 'rgba(100,100,100,0.15)';
+        ctx.beginPath();
+        ctx.arc(cx + 5, cy + 3, 0.8, 0, Math.PI * 2);
+        ctx.arc(cx - 4, cy + 2, 0.6, 0, Math.PI * 2);
+        ctx.fill();
     }
 }
 
