@@ -773,5 +773,4 @@ function _cancelLongPress() {
     if (_lpTooltip) _lpTooltip.classList.remove('visible');
 }
 
-// ── Start ──
-init();
+// ── Start ── (called from index.html after all scripts load)
