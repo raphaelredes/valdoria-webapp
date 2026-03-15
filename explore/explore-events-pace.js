@@ -399,7 +399,8 @@ function showExploreArea() {
         const chance = Math.min(95, Math.max(5, (21 - opt.dc + total) * 5));
         const statShort = STAT_SHORT[opt.stat] || opt.stat.toUpperCase();
         const profStar = prof > 0 ? '\u2605' : '';
-        btn.innerHTML = `${opt.label} <span class="choice-stat-badge">${statShort}${profStar} ${chance}%</span>`;
+        var chanceClass = chance >= 70 ? ' high-chance' : chance <= 30 ? ' low-chance' : '';
+        btn.innerHTML = `${opt.label} <span class="choice-stat-badge${chanceClass}">${statShort}${profStar} ${chance}%</span>`;
         btn.onclick = () => {
             overlay.classList.remove('active');
             S.interactedHexes.add(key);
@@ -416,7 +417,7 @@ function showExploreArea() {
         overlay.classList.remove('active');
         S.interactedHexes.add(key);
         _markExploreUsed();
-        if (typeof showCampingOverlay === 'function') showCampingOverlay();
+        if (typeof showCampOverlay === 'function') showCampOverlay();
     };
     choicesEl.appendChild(restBtn);
 
@@ -427,7 +428,8 @@ function showExploreArea() {
     var invProf2 = S.charData && S.charData.sp && S.charData.sp.includes('inv') ? (S.charData.pb || 2) : 0;
     var invChance2 = Math.max(5, Math.min(95, (21 - 15 + invMod2 + invProf2) * 5));
     var invShort2 = STAT_SHORT['inv'] || 'INV';
-    secretBtn.innerHTML = '\u{1F6AA} Procurar Passagem <span class="choice-stat-badge">' + invShort2 + (invProf2 ? '\u2605' : '') + ' ' + invChance2 + '%</span>';
+    var secChanceClass = invChance2 >= 70 ? ' high-chance' : invChance2 <= 30 ? ' low-chance' : '';
+    secretBtn.innerHTML = '\u{1F6AA} Procurar Passagem <span class="choice-stat-badge' + secChanceClass + '">' + invShort2 + (invProf2 ? '\u2605' : '') + ' ' + invChance2 + '%</span>';
     secretBtn.onclick = function () {
         overlay.classList.remove('active');
         S.interactedHexes.add(key);
@@ -445,7 +447,8 @@ function showExploreArea() {
         var chaProf = S.charData && S.charData.sp && S.charData.sp.includes('prs') ? (S.charData.pb || 2) : 0;
         var chaChance = Math.max(5, Math.min(95, (21 - 14 + chaMod + chaProf) * 5));
         var chaShort = STAT_SHORT['prs'] || 'PRS';
-        socialBtn.innerHTML = '\u{1F5E3} Chamar por Ajuda <span class="choice-stat-badge">' + chaShort + (chaProf ? '\u2605' : '') + ' ' + chaChance + '%</span>';
+        var socChanceClass = chaChance >= 70 ? ' high-chance' : chaChance <= 30 ? ' low-chance' : '';
+        socialBtn.innerHTML = '\u{1F5E3} Chamar por Ajuda <span class="choice-stat-badge' + socChanceClass + '">' + chaShort + (chaProf ? '\u2605' : '') + ' ' + chaChance + '%</span>';
         socialBtn.onclick = function () {
             overlay.classList.remove('active');
             S.interactedHexes.add(key);
@@ -728,25 +731,78 @@ var SOCIAL_FAIL_NARRATIONS = [
 ];
 
 function _doSocialCheck() {
+    // Uses _doExploreCheck pattern (self-managed check overlay, not performStatCheck)
     var stat = 'prs';
     var dc = 14;
-    var onOk = function () {
-        var healAmount = Math.floor(Math.random() * 4) + 2;
-        S.hpChange += healAmount;
-        S.xpEarned += 10;
-        if (typeof updateHPHUD === 'function') updateHPHUD();
-        if (typeof updateRewards === 'function') updateRewards();
-        saveState();
-        var narr = SOCIAL_SUCCESS_NARRATIONS[Math.floor(Math.random() * SOCIAL_SUCCESS_NARRATIONS.length)];
-        if (typeof _showDiscoveryOverlay === 'function') {
-            _showDiscoveryOverlay('\u{1F5E3}', 'Ajuda Encontrada!', narr, '+' + healAmount + ' HP, +10 XP');
+    var mod = getAbilityMod(stat);
+    var prof = S.charData && S.charData.sp && S.charData.sp.includes(stat) ? (S.charData.pb || 2) : 0;
+    var mode = hasCondition('poisoned') ? 'disadvantage' : 'normal';
+    var result = rollD20(mode);
+    var roll = result.roll;
+    var r1 = result.r1;
+    var r2 = result.r2;
+    var total = roll + mod + prof;
+    var success = total >= dc;
+
+    S.checksPerformed.push({ stat: stat, dc: dc, roll: roll, mod: mod + prof, ok: success, mode: mode });
+
+    var overlay = document.getElementById('check-overlay');
+    var formulaEl = document.getElementById('check-formula');
+    var resultEl = document.getElementById('check-result');
+    formulaEl.innerHTML = '';
+    resultEl.textContent = '';
+    resultEl.className = 'check-result';
+    activateOverlay('check-overlay');
+
+    var statName = STAT_NAMES[stat] || 'Persuas\u00e3o';
+    var dice = typeof getDice3D === 'function' ? getDice3D() : null;
+    var finishCheck = function () {
+        resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
+        resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
+        var formulaStr = typeof buildFormula === 'function' ? buildFormula(roll, mod + prof, statName, '', dc, total, r1, r2, mode) : (roll + ' + ' + (mod + prof) + ' = ' + total + ' vs DC ' + dc);
+        formulaEl.innerHTML = formulaStr;
+        if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
+
+        var _done = false;
+        var finish = function () {
+            if (_done) return;
+            _done = true;
+            if (typeof disposeDice3D === 'function') disposeDice3D();
+            overlay.classList.remove('active');
+            if (success) {
+                // D&D 5e: reward uses 1d4+1 healing
+                var healRoll = typeof rollDiceFormula === 'function' ? rollDiceFormula('1d4') : (Math.floor(Math.random() * 4) + 1);
+                var healAmount = healRoll + 1; // 1d4+1 = 2-5 HP
+                S.hpChange += healAmount;
+                S.xpEarned += 10;
+                if (typeof updateHPHUD === 'function') updateHPHUD();
+                if (typeof updateRewards === 'function') updateRewards();
+                saveState();
+                var narr = SOCIAL_SUCCESS_NARRATIONS[Math.floor(Math.random() * SOCIAL_SUCCESS_NARRATIONS.length)];
+                if (typeof _showDiscoveryOverlay === 'function') {
+                    _showDiscoveryOverlay('\u{1F5E3}', 'Ajuda Encontrada!', narr, '+' + healAmount + ' HP, +10 XP');
+                } else {
+                    showTerrainToast('+' + healAmount + ' HP da ajuda recebida!', 'ranger');
+                }
+            } else {
+                var narr = SOCIAL_FAIL_NARRATIONS[Math.floor(Math.random() * SOCIAL_FAIL_NARRATIONS.length)];
+                showTerrainToast(narr, 'flavor');
+            }
+            saveState();
+        };
+        var skipBtn = document.getElementById('check-skip-btn');
+        setTimeout(function () { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finish; } }, 500);
+        var checkDelay = typeof calcReadTime === 'function' ? calcReadTime(formulaStr + ' ' + (success ? 'Sucesso' : 'Falha'), 'overlay') : 2500;
+        setTimeout(finish, checkDelay);
+    };
+
+    if (dice) {
+        dice.roll(roll, finishCheck);
+    } else {
+        if (typeof _emojiFallbackDie === 'function') {
+            _emojiFallbackDie(overlay, roll, finishCheck);
         } else {
-            showTerrainToast('+' + healAmount + ' HP da ajuda recebida!', 'ranger');
+            setTimeout(finishCheck, 700);
         }
-    };
-    var onFail = function () {
-        var narr = SOCIAL_FAIL_NARRATIONS[Math.floor(Math.random() * SOCIAL_FAIL_NARRATIONS.length)];
-        showTerrainToast(narr, 'flavor');
-    };
-    performStatCheck(stat, dc, onOk, onFail);
+    }
 }

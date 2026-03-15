@@ -126,7 +126,7 @@
 .portal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(20, 40, 30, 0.96);
+    /* background set below with animation */
     z-index: 300;
     display: flex;
     flex-direction: column;

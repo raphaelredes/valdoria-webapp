@@ -478,7 +478,7 @@ function _applyTrapDamage(trap, success, roll) {
             addCondition(trap.condition === 'psn' ? 'poisoned' : trap.condition === 'rst' ? 'restrained' : 'prone');
         }
         const cName = condNames[trap.condition] || '';
-        if (cName) showTerrainToast('Condicao: ' + cName + '!', 'condition');
+        if (cName) showTerrainToast('Condi\u00e7\u00e3o: ' + cName + '!', 'condition');
     }
 
     // 3D dice damage animation

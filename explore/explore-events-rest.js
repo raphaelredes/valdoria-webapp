@@ -665,6 +665,7 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpR
 
     // Animated HP bar below detail
     var barContainer = document.createElement('div');
+    barContainer.className = 'camp-hp-bar-container';
     barContainer.style.cssText = 'margin-top:8px;padding:0 12px';
     barContainer.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#8a7a68">' +
         '<span>HP</span>' +
@@ -690,7 +691,7 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpR
 function closeCampResult() {
     var campResultOverlay = document.getElementById('camp-result-overlay');
     // Remove dynamically added HP bar
-    var bars = campResultOverlay.querySelectorAll('div[style*="margin-top:8px"]');
+    var bars = campResultOverlay.querySelectorAll('.camp-hp-bar-container');
     bars.forEach(function (b) { b.remove(); });
     campResultOverlay.classList.remove('active');
     if (typeof setCampfireActive === 'function') setCampfireActive(false);

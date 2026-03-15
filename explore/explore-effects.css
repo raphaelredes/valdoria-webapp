@@ -5,14 +5,13 @@
    ═══════════════════════════════════════════ */
 @keyframes badgeBounce {
     0% { transform: scale(1); }
-@keyframes badgeGlow {
-    0% { box-shadow: 0 0 12px rgba(196, 149, 58, 0.5); }
-    100% { box-shadow: 0 0 0 rgba(196, 149, 58, 0); }
-}
-
     40% { transform: scale(1.25); }
     70% { transform: scale(0.95); }
     100% { transform: scale(1); }
+}
+@keyframes badgeGlow {
+    0% { box-shadow: 0 0 12px rgba(196, 149, 58, 0.5); }
+    100% { box-shadow: 0 0 0 rgba(196, 149, 58, 0); }
 }
 /* hpLowPulse -> shared/animations.css */
 @keyframes pipPulse {
