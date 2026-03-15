@@ -29,7 +29,9 @@ let _dice3d = null;
 function getDice3D() {
     const container = document.getElementById('dice3d-canvas');
     const particles = document.getElementById('dice3d-particles');
-    if (!container) return null;
+    if (!container) { console.warn('[EXPLORE] dice3d-canvas not found'); return null; }
+    if (typeof Dice3D === 'undefined') { console.warn('[EXPLORE] Dice3D class not defined, THREE:', typeof THREE); return null; }
+    console.log('[EXPLORE] getDice3D: container', container.offsetWidth + 'x' + container.offsetHeight, 'THREE:', typeof THREE);
     if (_dice3d) {
         _dice3d.dispose();
         _dice3d = null;
@@ -37,7 +39,7 @@ function getDice3D() {
     try {
         _dice3d = new Dice3D(container, { size: 200, particlesContainer: particles });
     } catch (e) {
-        console.warn('[EXPLORE] Dice3D init failed, fallback to emoji:', e);
+        console.error('[EXPLORE] Dice3D init failed:', e);
         return null;
     }
     return _dice3d;
@@ -573,16 +575,29 @@ function _showCheckEmojiFallback(overlay, roll, r1, r2, mode, mod, statName, pro
     const resultEl = document.getElementById('check-result');
     const wrapper = document.getElementById('dice3d-wrapper');
 
-    // Show emoji in the wrapper
-    wrapper.innerHTML = `<div class="dice-display-fallback" style="font-size:clamp(48px,12vw,64px);text-align:center;animation:diceRoll 0.7s ease">${r2 !== null ? buildDiceHTML(r1, r2, mode) : 'd20'}</div>`;
+    if (r2 !== null) {
+        // Advantage/disadvantage: show two dice boxes (existing logic)
+        wrapper.innerHTML = '<div class="dice-display-fallback" style="font-size:clamp(48px,12vw,64px);text-align:center;animation:diceRoll 0.7s ease">' + buildDiceHTML(r1, r2, mode) + '</div>';
+    } else {
+        // Normal roll: animated cycling numbers inside a styled die box
+        wrapper.innerHTML = '';
+        var die = document.createElement('div');
+        die.className = 'die kept';
+        die.style.cssText = 'width:64px;height:64px;font-size:32px;margin:0 auto;border-radius:10px';
+        die.textContent = '\ud83c\udfb2';
+        wrapper.appendChild(die);
+        var _cyc = setInterval(function() { die.textContent = Math.floor(Math.random() * 20) + 1; }, 50);
+        setTimeout(function() {
+            clearInterval(_cyc);
+            die.textContent = roll;
+            if (roll <= 1) { die.style.borderColor = '#a44'; die.style.boxShadow = '0 0 16px rgba(170,68,68,0.5)'; }
+            else if (roll >= 20) { die.style.borderColor = '#4a8'; die.style.boxShadow = '0 0 16px rgba(68,170,136,0.5)'; }
+        }, 700);
+    }
 
     formulaEl.innerHTML = buildFormula(roll, mod, statName, profMark, dc, total, r1, r2, mode);
 
-    setTimeout(() => {
-        const fb = wrapper.querySelector('.dice-display-fallback');
-        if (fb && r2 === null) {
-            fb.textContent = roll <= 1 ? 'Falha Crítica' : roll >= 20 ? 'Crítico!' : roll;
-        }
+    setTimeout(function() {
         resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
         resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
 
@@ -1222,7 +1237,8 @@ function showDMIntro(text) {
         btn.className = 'dm-choice-btn';
         btn.innerHTML = '<span class="choice-icon"></span><span class="choice-label">Explorar</span>';
         btn.addEventListener('click', () => {
-            overlay.classList.remove('active');
+            if (typeof deactivateOverlay === 'function') deactivateOverlay('dm-overlay');
+            else overlay.classList.remove('active');
             // Restore header for next POI event usage
             if (header) header.style.display = '';
         });
