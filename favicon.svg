@@ -1,25 +1,96 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
+    <!-- Gold gradient (diagonal) -->
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8c96e"/>
+      <stop offset="50%" stop-color="#c4953a"/>
+      <stop offset="100%" stop-color="#8a6520"/>
+    </linearGradient>
+    <!-- Gold gradient (vertical, for ring) -->
+    <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#dbb668"/>
+      <stop offset="50%" stop-color="#c4953a"/>
       <stop offset="100%" stop-color="#9a7530"/>
     </linearGradient>
+    <!-- Background -->
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#352f38"/>
-      <stop offset="100%" stop-color="#2b2830"/>
+      <stop offset="0%" stop-color="#3a3028"/>
+      <stop offset="100%" stop-color="#2a2420"/>
     </linearGradient>
+    <!-- Shield fill -->
+    <linearGradient id="sf" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#453828"/>
+      <stop offset="100%" stop-color="#2e2218"/>
+    </linearGradient>
+    <!-- Sword blade -->
+    <linearGradient id="blade" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#e8dcc8"/>
+      <stop offset="40%" stop-color="#d4c8b0"/>
+      <stop offset="100%" stop-color="#a09484"/>
+    </linearGradient>
+    <!-- Inner glow -->
+    <radialGradient id="glow" cx="0.5" cy="0.35" r="0.45">
+      <stop offset="0%" stop-color="#c4953a" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#c4953a" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Shield inner shadow -->
+    <filter id="sh" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <!-- Outer ring shadow -->
+    <filter id="rsh" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="0.5" stdDeviation="0.8" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
   </defs>
-  <!-- Background circle -->
-  <circle cx="32" cy="32" r="30" fill="url(#bg)" stroke="url(#g)" stroke-width="2"/>
-  <!-- Shield shape -->
-  <path d="M32 12 L48 20 L48 36 Q48 48 32 54 Q16 48 16 36 L16 20 Z"
-        fill="none" stroke="url(#g)" stroke-width="2.5" stroke-linejoin="round"/>
-  <!-- Sword -->
-  <line x1="32" y1="18" x2="32" y2="48" stroke="#b0b8c0" stroke-width="2" stroke-linecap="round"/>
-  <line x1="26" y1="30" x2="38" y2="30" stroke="#b0b8c0" stroke-width="2" stroke-linecap="round"/>
-  <!-- Sword pommel -->
-  <circle cx="32" cy="48" r="2" fill="#c4953a"/>
-  <!-- Dragon silhouette (simplified) -->
-  <path d="M24 22 Q28 18 32 22 Q36 18 40 22 L38 26 Q36 24 32 26 Q28 24 26 26 Z"
-        fill="#7b2020" opacity="0.8"/>
+
+  <!-- === Outer ring (double border) === -->
+  <circle cx="32" cy="32" r="31" fill="none" stroke="#1a1410" stroke-width="1"/>
+  <circle cx="32" cy="32" r="30" fill="url(#bg)" stroke="url(#g2)" stroke-width="2.5" filter="url(#rsh)"/>
+  <circle cx="32" cy="32" r="27.5" fill="none" stroke="#c4953a" stroke-width="0.4" opacity="0.35"/>
+
+  <!-- Inner glow -->
+  <circle cx="32" cy="28" r="22" fill="url(#glow)"/>
+
+  <!-- === Shield (filled with inner border) === -->
+  <path d="M32 11 L49 19.5 L49 36 Q49 49 32 55 Q15 49 15 36 L15 19.5 Z"
+        fill="url(#sf)" stroke="url(#g)" stroke-width="2" stroke-linejoin="round" filter="url(#sh)"/>
+  <!-- Shield inner trim -->
+  <path d="M32 15 L45 21.5 L45 35 Q45 45.5 32 51 Q19 45.5 19 35 L19 21.5 Z"
+        fill="none" stroke="#c4953a" stroke-width="0.6" stroke-linejoin="round" opacity="0.4"/>
+
+  <!-- === Sword (proper shape, not just a line) === -->
+  <!-- Blade -->
+  <path d="M31 16 L32 14 L33 16 L33 28 L31 28 Z" fill="url(#blade)" opacity="0.95"/>
+  <path d="M31 28 L31 46 L32 47.5 L33 46 L33 28 Z" fill="url(#blade)" opacity="0.85"/>
+  <!-- Blade center highlight -->
+  <line x1="32" y1="15" x2="32" y2="46" stroke="#f0e8d8" stroke-width="0.5" opacity="0.4"/>
+  <!-- Guard (crossguard with ends) -->
+  <path d="M23.5 29 Q24 28 25 28.5 L39 28.5 Q40 28 40.5 29 Q40 30 39 30.5 L25 30.5 Q24 30 23.5 29 Z"
+        fill="#c4953a" stroke="#9a7530" stroke-width="0.4"/>
+  <!-- Guard center gem -->
+  <circle cx="32" cy="29.5" r="1.8" fill="#8b2020" stroke="#c4953a" stroke-width="0.5"/>
+  <!-- Pommel -->
+  <circle cx="32" cy="48.5" r="2.5" fill="#c4953a" stroke="#9a7530" stroke-width="0.5"/>
+  <circle cx="32" cy="48.5" r="1" fill="#dbb668" opacity="0.6"/>
+
+  <!-- === Dragon wings (more detailed) === -->
+  <path d="M22 21 Q24 16 28 18 Q30 16 32 19 Q34 16 36 18 Q40 16 42 21
+           L40 24 Q38 22 36 23 Q34 21 32 23 Q30 21 28 23 Q26 22 24 24 Z"
+        fill="#8b2020" opacity="0.8"/>
+  <!-- Dragon wing highlight -->
+  <path d="M25 21 Q27 18 30 19 L28 22 Z" fill="#a83030" opacity="0.4"/>
+  <path d="M39 21 Q37 18 34 19 L36 22 Z" fill="#a83030" opacity="0.4"/>
+
+  <!-- === Shield ornaments === -->
+  <!-- Top ornament (small V chevron) -->
+  <path d="M30 33 L32 31 L34 33" fill="none" stroke="#c4953a" stroke-width="0.7" opacity="0.5" stroke-linecap="round"/>
+  <!-- Bottom diamond -->
+  <path d="M32 37 L34 39.5 L32 42 L30 39.5 Z" fill="#c4953a" opacity="0.45"/>
+  <path d="M32 38 L33 39.5 L32 41 L31 39.5 Z" fill="#dbb668" opacity="0.3"/>
+
+  <!-- === Corner ornaments on ring (4 small dots) === -->
+  <circle cx="32" cy="3.5" r="1" fill="#c4953a" opacity="0.5"/>
+  <circle cx="32" cy="60.5" r="1" fill="#c4953a" opacity="0.5"/>
+  <circle cx="3.5" cy="32" r="1" fill="#c4953a" opacity="0.5"/>
+  <circle cx="60.5" cy="32" r="1" fill="#c4953a" opacity="0.5"/>
 </svg>
