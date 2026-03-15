@@ -8,6 +8,12 @@
 //  TAB 1: ITEMS
 // ══════════════════════════════════════════════════════════
 function renderItemsTab(c) {
+    // Handle stripped items (payload too large)
+    if (D.items_stripped) {
+        c.innerHTML = '<div class="empty-state"><div class="icon">' + vi('warn', 32) + '</div>'
+            + '<p>Inventário muito grande para exibir aqui. Use o bot para gerenciar seus itens.</p></div>';
+        return;
+    }
     const counts = getFilterCounts();
     const filters = [
         { id: 'all', label: 'Todos', cnt: counts.all },
