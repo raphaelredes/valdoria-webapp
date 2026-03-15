@@ -173,9 +173,10 @@
             z-index: 100;
             transform: translateY(100%);
             transition: transform 0.35s ease-out;
-            max-height: calc(100vh - 130px);
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            max-height: calc(100vh - 100px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             /* Parchment inner shadow (aged scroll edges) */
             box-shadow:
                 inset 0 4px 16px rgba(40, 30, 15, 0.65),
@@ -194,14 +195,26 @@
             animation: panelEntrance 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
-        /* Bottom fade hint when content is scrollable */
-        #info-panel.scrollable::after {
+        /* Scrollable content area — everything except handle, header, and actions */
+        .info-content-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .info-content-scroll::-webkit-scrollbar { display: none; }
+
+        /* Bottom fade hint when content area is scrollable */
+        #info-panel.scrollable .info-content-scroll::after {
             content: '';
             position: sticky;
             bottom: 0;
             display: block;
-            height: 24px;
-            margin-top: -24px;
+            height: 20px;
+            margin-top: -20px;
             background: linear-gradient(transparent 0%, rgba(42, 36, 32, 0.8) 100%);
             pointer-events: none;
         }
@@ -223,14 +236,16 @@
             height: 3px;
             background: rgba(112, 66, 20, 0.4);
             border-radius: 1px;
-            margin: 0 auto 10px;
+            margin: 0 auto 8px;
+            flex-shrink: 0;
         }
 
         .info-header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 6px;
+            gap: 8px;
+            margin-bottom: 4px;
+            flex-shrink: 0;
         }
 
         .info-icon {
@@ -239,11 +254,14 @@
         }
 
         .info-title {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 700;
             color: #c4953a;
             flex: 1;
             font-family: 'Cinzel Decorative', 'Cinzel', serif;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .info-danger {
@@ -280,34 +298,38 @@
         }
 
         .info-biome {
-            font-size: 14px;
+            font-size: 12px;
             color: #a09484;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             font-family: 'MedievalSharp', serif;
         }
 
         .info-desc {
-            font-size: 14px;
+            font-size: 13px;
             color: #d4c8b0;
-            line-height: 1.5;
-            margin-bottom: 8px;
+            line-height: 1.4;
+            margin-bottom: 6px;
             font-style: italic;
             opacity: 0.9;
             font-family: 'MedievalSharp', serif;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .info-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: 4px;
+            margin-bottom: 6px;
         }
 
         .info-tag {
-            font-size: 12px;
+            font-size: 11px;
             color: #a09484;
             background: rgba(112, 66, 20, 0.18);
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 4px;
             border: 1px solid rgba(112, 66, 20, 0.25);
             font-family: 'MedievalSharp', serif;
@@ -328,9 +350,9 @@
 
         .info-quests,
         .info-dungeons {
-            font-size: 13px;
+            font-size: 12px;
             color: #8a7060;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             font-family: 'MedievalSharp', serif;
         }
 
@@ -341,10 +363,10 @@
 
         .info-note {
             display: none;
-            font-size: 13px;
+            font-size: 12px;
             color: #8a7060;
             text-align: center;
-            padding: 6px 0;
+            padding: 4px 0;
             font-style: italic;
             font-family: 'MedievalSharp', serif;
         }
@@ -352,8 +374,9 @@
         .info-actions {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-top: 10px;
+            gap: 6px;
+            margin-top: 8px;
+            flex-shrink: 0;
         }
 
         .info-btn {
@@ -387,8 +410,8 @@
                 inset 0 -2px 4px rgba(0, 0, 0, 0.3),
                 0 0 10px rgba(196, 149, 58, 0.2),
                 0 2px 8px rgba(0, 0, 0, 0.4);
-            padding: 14px 18px;
-            font-size: 15px;
+            padding: 12px 16px;
+            font-size: 14px;
             letter-spacing: 0.5px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
             position: relative;
@@ -423,8 +446,8 @@
                 inset 0 -2px 4px rgba(0, 0, 0, 0.3),
                 0 0 10px rgba(170, 58, 42, 0.15),
                 0 2px 8px rgba(0, 0, 0, 0.4);
-            padding: 14px 18px;
-            font-size: 15px;
+            padding: 12px 16px;
+            font-size: 14px;
             letter-spacing: 0.5px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
@@ -436,8 +459,8 @@
                         inset 0 -2px 4px rgba(0, 0, 0, 0.3),
                         0 0 10px rgba(90, 154, 74, 0.15),
                         0 2px 8px rgba(0, 0, 0, 0.4);
-            padding: 14px 18px;
-            font-size: 15px;
+            padding: 12px 16px;
+            font-size: 14px;
             letter-spacing: 0.5px;
             position: relative;
             overflow: hidden;
@@ -459,8 +482,8 @@
                         inset 0 -2px 4px rgba(0, 0, 0, 0.3),
                         0 0 10px rgba(154, 138, 80, 0.12),
                         0 2px 8px rgba(0, 0, 0, 0.4);
-            padding: 14px 18px;
-            font-size: 15px;
+            padding: 12px 16px;
+            font-size: 14px;
             letter-spacing: 0.5px;
             position: relative;
             overflow: hidden;
@@ -2178,12 +2201,14 @@
             </div>
             <button type="button" class="info-close" id="info-close" onclick="closeInfoPanel()" aria-label="Fechar">✕</button>
         </div>
-        <div class="info-biome" id="info-biome"></div>
-        <div class="info-desc" id="info-desc"></div>
-        <div class="info-tags" id="info-stats"></div>
-        <div class="info-quests" id="info-quests"></div>
-        <div class="info-dungeons" id="info-dungeons"></div>
-        <div class="info-note" id="info-note"></div>
+        <div class="info-content-scroll">
+            <div class="info-biome" id="info-biome"></div>
+            <div class="info-desc" id="info-desc"></div>
+            <div class="info-tags" id="info-stats"></div>
+            <div class="info-quests" id="info-quests"></div>
+            <div class="info-dungeons" id="info-dungeons"></div>
+            <div class="info-note" id="info-note"></div>
+        </div>
         <div class="info-actions" id="info-actions"></div>
     </div>
 
