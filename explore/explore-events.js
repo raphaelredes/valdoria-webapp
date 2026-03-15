@@ -1379,8 +1379,26 @@ function useInventoryItemAnimated(item, onDone) {
         _healDice = new Dice3D(canvas, { size: canvasSize, dieType: dieType, duration: 1000 });
     } catch (e) {
         console.warn('[EXPLORE] Heal Dice3D init failed:', e);
-        overlay.classList.remove('active');
-        if (onDone) onDone(heal);
+        // Emoji fallback: show cycling numbers then result
+        var die = document.createElement('div');
+        die.className = 'die kept';
+        die.style.cssText = 'width:64px;height:64px;font-size:32px;margin:0 auto;border-radius:10px';
+        die.textContent = '\ud83c\udfb2';
+        canvas.parentNode.insertBefore(die, canvas);
+        canvas.style.display = 'none';
+        var _cyc = setInterval(function() { die.textContent = Math.floor(Math.random() * sides) + 1; }, 50);
+        setTimeout(function() {
+            clearInterval(_cyc);
+            die.textContent = heal;
+            label.textContent = '+' + heal + ' HP';
+            if (window.vHaptic) vHaptic.medium();
+            setTimeout(function() {
+                overlay.classList.remove('active');
+                canvas.style.display = '';
+                die.remove();
+                if (onDone) onDone(heal);
+            }, 1000);
+        }, 700);
         return;
     }
 
@@ -1412,7 +1430,7 @@ function useInventoryItemAnimated(item, onDone) {
         _healDice.roll(rollVal, function () {
             label.textContent = '+' + heal + ' HP';
             if (window.vHaptic) vHaptic.medium();
-            setTimeout(function () {
+            setTimeout(function () { // noqa: preflight — single-die path, not fallback
                 overlay.classList.remove('active');
                 if (_healDice) { _healDice.dispose(); _healDice = null; }
                 if (onDone) onDone(heal);

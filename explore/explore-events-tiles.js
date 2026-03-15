@@ -1,4 +1,29 @@
 // ═══════════════════════════════════════════════════════
+
+// ── Emoji dice fallback (when THREE.js unavailable) ──────────
+function _emojiFallbackDie(overlay, roll, onDone) {
+    var wrapper = overlay.querySelector('.dice3d-wrapper') ||
+        document.getElementById('dice3d-wrapper');
+    if (wrapper) {
+        wrapper.innerHTML = '';
+        var die = document.createElement('div');
+        die.className = 'die kept';
+        die.style.cssText = 'width:64px;height:64px;font-size:32px;margin:0 auto;border-radius:10px';
+        die.textContent = '\ud83c\udfb2';
+        wrapper.appendChild(die);
+        var _cyc = setInterval(function() { die.textContent = Math.floor(Math.random() * 20) + 1; }, 50);
+        setTimeout(function() {
+            clearInterval(_cyc);
+            die.textContent = roll;
+            if (roll <= 1) { die.style.borderColor = '#a44'; die.style.boxShadow = '0 0 16px rgba(170,68,68,0.5)'; }
+            else if (roll >= 20) { die.style.borderColor = '#4a8'; die.style.boxShadow = '0 0 16px rgba(68,170,136,0.5)'; }
+            setTimeout(onDone, 300);
+        }, 700);
+    } else {
+        setTimeout(onDone, 500); // noqa: preflight
+    }
+}
+
 //  EXPLORE EVENTS — Tile Interactions
 //  Doors, walls, terrain, traps, chests, inscriptions
 //  Depends on: explore-events.js (dice, UI globals)
@@ -181,7 +206,7 @@ function _performSecretCheck(sp, col, row) {
     if (dice) {
         dice.roll(roll, showResult);
     } else {
-        setTimeout(showResult, 500);
+        _emojiFallbackDie(checkOverlay, roll, showResult);
     }
 }
 
@@ -321,7 +346,7 @@ function _performTerrainCheck(tc, col, row) {
     if (dice) {
         dice.roll(roll, showResult);
     } else {
-        setTimeout(showResult, 500);
+        _emojiFallbackDie(checkOverlay, roll, showResult);
     }
 }
 
@@ -432,7 +457,7 @@ function _performTrapSave(trap) {
     if (dice) {
         dice.roll(roll, showResult);
     } else {
-        setTimeout(showResult, 500);
+        _emojiFallbackDie(checkOverlay, roll, showResult);
     }
 }
 
