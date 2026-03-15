@@ -240,12 +240,20 @@
             flex-shrink: 0;
         }
 
-        .info-header {
+        .info-header-top {
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-bottom: 2px;
+            flex-shrink: 0;
+        }
+        .info-header-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 4px;
             flex-shrink: 0;
+            min-height: 32px;
         }
 
         .info-icon {
@@ -302,6 +310,10 @@
             color: #a09484;
             margin-bottom: 4px;
             font-family: 'MedievalSharp', serif;
+        }
+        .info-biome .meta-sep {
+            color: #5a4a38;
+            margin: 0 2px;
         }
 
         .info-desc {
@@ -1205,18 +1217,11 @@
         }
         #info-panel.peek .info-desc,
         #info-panel.peek .info-quests,
-        #info-panel.peek .info-dungeons {
+        #info-panel.peek .info-dungeons,
+        #info-panel.peek .info-tags {
             display: none;
         }
-        #info-panel.peek .info-handle::after {
-            content: '▲ Deslize para mais detalhes';
-            display: block;
-            text-align: center;
-            font-size: 11px;
-            color: #8a7060;
-            margin-top: 4px;
-            font-family: 'MedievalSharp', serif;
-        }
+
         #info-panel.dragging {
             transition: none !important;
         }
@@ -1730,9 +1735,9 @@
             border: 1px solid rgba(112, 66, 20, 0.2);
             border-radius: 4px;
             color: #a09484;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
-            padding: 10px 14px;
+            padding: 6px 10px;
             min-width: 44px;
             min-height: 44px;
             display: flex;
@@ -2191,15 +2196,17 @@
     <!-- Location Info Panel -->
     <div id="info-panel" role="dialog" aria-label="Detalhes do local">
         <div class="info-handle"></div>
-        <div class="info-header">
+        <div class="info-header-top">
             <span class="info-icon" id="info-icon"></span>
             <span class="info-title" id="info-title"></span>
+            <button type="button" class="info-close" id="info-close" onclick="closeInfoPanel()" aria-label="Fechar">✕</button>
+        </div>
+        <div class="info-header-meta" id="info-header-meta">
             <span class="info-danger" id="info-danger"></span>
             <div class="info-cycle" id="info-cycle">
                 <button type="button" class="cycle-btn" id="cycle-prev" aria-label="Anterior">◂</button>
                 <button type="button" class="cycle-btn" id="cycle-next" aria-label="Próximo">▸</button>
             </div>
-            <button type="button" class="info-close" id="info-close" onclick="closeInfoPanel()" aria-label="Fechar">✕</button>
         </div>
         <div class="info-content-scroll">
             <div class="info-biome" id="info-biome"></div>

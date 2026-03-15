@@ -92,22 +92,37 @@ function handleLocationTap(locId) {
         dangerEl.style.display = 'none';
     }
 
-    // Biome
+    // Toggle header-meta row visibility (danger + cycle)
+    const headerMeta = document.getElementById('info-header-meta');
+    const cycleList = _getCycleList();
+    const showMeta = (dangerEl.style.display !== 'none') || (cycleList.length > 1);
+    headerMeta.style.display = showMeta ? '' : 'none';
+
+    // Weighted distance and connections (used by biome inline + tags)
+    const wDist = cachedDist(S.currentLoc, locId);
+    const connCount = (connectionGraph[locId] || []).length;
+
+    // Biome + inline meta (distance, routes)
     const biomeInfo = BIOME_INFO[locData.b] || BIOME_INFO.plains;
     const biomeLabel = biomeInfo.label || locData.b;
     const biomeEl = document.getElementById('info-biome');
+    const biomeColors = {
+        plains: '#8aaa5a', forest: '#5aaa4a', swamp: '#6a9a5a',
+        cave: '#7a7a9a', graveyard: '#8a6a6a', desert: '#caa85a',
+        mountain: '#8a8a9a', snow: '#9abacc', volcanic: '#cc6a3a'
+    };
     if (isKnownUnmapped) {
-        biomeEl.textContent = '🌫️ Região Desconhecida';
+        biomeEl.innerHTML = '🌫️ Região Desconhecida';
         biomeEl.style.color = '';
     } else {
-        biomeEl.textContent =
-            `${locData.s ? '🏘️ Assentamento' : '🌍 Região'} — ${biomeLabel}`;
-        // Biome-specific color
-        const biomeColors = {
-            plains: '#8aaa5a', forest: '#5aaa4a', swamp: '#6a9a5a',
-            cave: '#7a7a9a', graveyard: '#8a6a6a', desert: '#caa85a',
-            mountain: '#8a8a9a', snow: '#9abacc', volcanic: '#cc6a3a'
-        };
+        let biomeHtml = `${locData.s ? '🏘️ Assentamento' : '🌍 Região'} — ${biomeLabel}`;
+        if (!isCurrent && wDist >= 0) {
+            biomeHtml += ` <span class="meta-sep">·</span> 🕐 ${wDist} turno${wDist !== 1 ? 's' : ''}`;
+        }
+        if (isExplored) {
+            biomeHtml += ` <span class="meta-sep">·</span> 🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}`;
+        }
+        biomeEl.innerHTML = biomeHtml;
         biomeEl.style.color = biomeColors[locData.b] || '#a09484';
     }
 
@@ -122,19 +137,10 @@ function handleLocationTap(locId) {
             'Névoa densa... Sem um mapa, é impossível distinguir o que há aqui.';
     }
 
-    // Tags (weighted distance, connections, danger hint)
+    // Tags (danger hints — distance/routes now inline with biome)
     const tagsEl = document.getElementById('info-stats');
-    const wDist = cachedDist(S.currentLoc, locId);
-    const connCount = (connectionGraph[locId] || []).length;
 
     let tagsHtml = '';
-    if (!isCurrent && wDist >= 0) {
-        tagsHtml += `<span class="info-tag">🕐 ${wDist} turno${wDist !== 1 ? 's' : ''}</span>`;
-    }
-    if (isExplored) {
-        tagsHtml += `<span class="info-tag">🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}</span>`;
-    }
-
     // Mysterious danger hints
     if (isExplored) {
         const playerLv = S.charData?.lv || 1;
