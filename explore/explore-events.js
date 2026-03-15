@@ -1334,12 +1334,10 @@ function useInventoryItemAnimated(item, onDone) {
     const count = parseInt(match[1]);
     const sides = parseInt(match[2]);
     const dieType = 'd' + sides;
-
-    // Roll the dice first
-    const heal = useInventoryItem(item);
-    // Determine individual roll value (for single die)
     const bonus = parseInt(match[3]) || 0;
-    const rollVal = Math.max(1, Math.min(sides, heal - bonus));
+
+    // Roll the dice first (applies healing)
+    const heal = useInventoryItem(item);
 
     const overlay = document.getElementById('heal-dice-overlay');
     const canvas = document.getElementById('heal-dice-canvas');
@@ -1355,9 +1353,14 @@ function useInventoryItemAnimated(item, onDone) {
     label.textContent = '';
     overlay.classList.add('active');
 
+    // Add multi class for wider canvas when 2+ dice
+    canvas.classList.remove('multi');
+    if (count >= 2) canvas.classList.add('multi');
+
     try {
         if (_healDice) { _healDice.dispose(); _healDice = null; }
-        _healDice = new Dice3D(canvas, { size: 140, dieType: dieType, duration: 1000 });
+        const canvasSize = count >= 2 ? 200 : 140;
+        _healDice = new Dice3D(canvas, { size: canvasSize, dieType: dieType, duration: 1000 });
     } catch (e) {
         console.warn('[EXPLORE] Heal Dice3D init failed:', e);
         overlay.classList.remove('active');
@@ -1365,16 +1368,57 @@ function useInventoryItemAnimated(item, onDone) {
         return;
     }
 
-    _healDice.roll(rollVal, function () {
-        label.textContent = `+${heal} HP`;
-        if (window.vHaptic) vHaptic.medium();
+    if (count >= 2) {
+        // Multi-dice: rollMultiple -> fusionTo (same pattern as combat-dice.js)
+        const diceTotal = Math.max(count, heal - bonus);
+        const individualResults = _distributeHealTotal(diceTotal, count, sides);
+        const configs = individualResults.map(function (v) { return { value: v }; });
 
-        setTimeout(function () {
-            overlay.classList.remove('active');
-            if (_healDice) { _healDice.dispose(); _healDice = null; }
-            if (onDone) onDone(heal);
-        }, 1000);
-    });
+        _healDice.rollMultiple(configs, function () {
+            label.textContent = individualResults.join(' + ') + (bonus ? ' + ' + bonus : '');
+            setTimeout(function () {
+                label.textContent = '';
+                _healDice.fusionTo(heal, function () {
+                    label.textContent = '+' + heal + ' HP';
+                    if (window.vHaptic) vHaptic.medium();
+                    setTimeout(function () {
+                        overlay.classList.remove('active');
+                        canvas.classList.remove('multi');
+                        if (_healDice) { _healDice.dispose(); _healDice = null; }
+                        if (onDone) onDone(heal);
+                    }, 1000);
+                });
+            }, 800);
+        });
+    } else {
+        // Single die: roll directly
+        const rollVal = Math.max(1, Math.min(sides, heal - bonus));
+        _healDice.roll(rollVal, function () {
+            label.textContent = '+' + heal + ' HP';
+            if (window.vHaptic) vHaptic.medium();
+            setTimeout(function () {
+                overlay.classList.remove('active');
+                if (_healDice) { _healDice.dispose(); _healDice = null; }
+                if (onDone) onDone(heal);
+            }, 1000);
+        });
+    }
+}
+
+// Distribute a heal total across N dice (same algorithm as combat-dice.js)
+function _distributeHealTotal(diceTotal, count, sides) {
+    var results = [];
+    var remaining = Math.max(count, Math.min(diceTotal, count * sides));
+    for (var i = 0; i < count - 1; i++) {
+        var minNeeded = count - i - 1;
+        var maxAllowed = remaining - minNeeded;
+        var value = Math.min(sides, Math.max(1,
+            Math.floor(Math.random() * Math.min(sides, maxAllowed)) + 1));
+        results.push(value);
+        remaining -= value;
+    }
+    results.push(Math.min(sides, Math.max(1, remaining)));
+    return results;
 }
 
 // Get available healing items (potions + consumables with h > 0)
