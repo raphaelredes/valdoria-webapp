@@ -561,13 +561,13 @@ function _sendNavAction(type, target, flags) {
             return r.json();
         })
         .then(d => {
-            // Travel: backend returns explore URL -> redirect to explore
-            if (d.url && type === 'travel') {
+            // Travel/Return: backend returns URL -> redirect
+            if (d.url && (type === 'travel' || type === 'return')) {
                 window.__valdoria_transitioning = true;
                 window.location.replace(d.url);
                 return;
             }
-            // Other actions (camp, return, explore): go to Game Hub
+            // Other actions (camp, explore): go to Game Hub
             _transitionToGame();
         })
         .catch(e => {
