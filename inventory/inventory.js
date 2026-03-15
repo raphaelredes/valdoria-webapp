@@ -171,6 +171,47 @@ function decodeBase64Utf8(b64) {
 }
 
 // ── Init ──
+// ── Immersive Mode (shared pattern — localStorage 'valdoria_immersive') ──
+function initImmersive() {
+    const toggle = document.getElementById('immersive-toggle');
+    const restore = document.getElementById('immersive-restore');
+    const panel = document.getElementById('bottomPanel');
+    if (!toggle || !restore || !panel) return;
+
+    function applyState(collapsed) {
+        if (collapsed) {
+            panel.classList.add('immersive-collapsed');
+            toggle.style.display = 'none';
+            restore.style.display = '';
+        } else {
+            panel.classList.remove('immersive-collapsed');
+            toggle.style.display = '';
+            restore.style.display = 'none';
+            // Position toggle above panel
+            requestAnimationFrame(() => {
+                toggle.style.bottom = panel.offsetHeight + 'px';
+            });
+        }
+        // Update body padding
+        requestAnimationFrame(() => {
+            const h = collapsed ? 48 : (panel.offsetHeight + 12);
+            document.body.style.paddingBottom = h + 'px';
+        });
+    }
+
+    const saved = localStorage.getItem('valdoria_immersive') === 'true';
+    applyState(saved);
+
+    toggle.addEventListener('click', () => {
+        localStorage.setItem('valdoria_immersive', 'true');
+        applyState(true);
+    });
+    restore.addEventListener('click', () => {
+        localStorage.setItem('valdoria_immersive', 'false');
+        applyState(false);
+    });
+}
+
 function init() {
     // Ambient music
     if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('city');
@@ -216,6 +257,7 @@ function init() {
     _initLongPress();
     initBackButton();
     _initNavBar();
+    initImmersive();
 }
 
 function hideLoading() {

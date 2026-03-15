@@ -167,6 +167,10 @@
     <div class="tabs" id="tabsBar"></div>
     <div class="content" id="mainContent"></div>
     <div class="selection-bar hidden" id="selectionBar"></div>
+    <!-- Immersive mode toggle (above bottom panel) -->
+    <button id="immersive-toggle" class="immersive-toggle" style="display:none"
+        aria-label="Recolher menu">&middot;</button>
+
     <div class="bottom-panel" id="bottomPanel">
         <div class="ops-section hidden" id="opsSection">
             <div class="ops-count" id="opsCount"></div>
@@ -180,6 +184,9 @@
             <button class="nav-btn" onclick="navMenu()">🏘️ Cidade</button>
         </div>
     </div>
+
+    <!-- Immersive mode restore pill -->
+    <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
 
     <!-- Modal Overlay -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
