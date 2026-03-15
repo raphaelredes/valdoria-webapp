@@ -16,6 +16,7 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="game-feedback.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="inn-animation.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/audio-manager.css?v=' + v + '">');
     </script>
@@ -243,11 +244,15 @@
     <!-- Feedback & donation overlay -->
     <div id="feedback-overlay" class="feedback-overlay" style="display:none">
         <div class="feedback-card">
-            <!-- Phase 1: Thank you + Rating -->
-            <div id="fb-phase-rating">
+            <div class="fb-ornament-top"></div>
+
+            <!-- Phase 1: Rating -->
+            <div id="fb-phase-rating" class="fb-phase">
                 <div class="feedback-title" id="fb-title"></div>
+                <div class="fb-divider"></div>
                 <div class="feedback-message" id="fb-message"></div>
                 <div class="feedback-stars" id="fb-stars"></div>
+                <div class="fb-star-label" id="fb-star-label"></div>
                 <div class="feedback-actions">
                     <button class="feedback-pix-btn" id="fb-pix-btn" style="display:none">
                         💎 Apoiar via PIX
@@ -255,23 +260,32 @@
                     <button class="feedback-dismiss-btn" id="fb-dismiss-btn">Fechar</button>
                 </div>
             </div>
+
             <!-- Phase 2: Survey offer -->
-            <div id="fb-phase-survey-offer" style="display:none">
-                <div class="feedback-title">✨ Obrigado!</div>
-                <div class="feedback-message">Quer responder mais 4 perguntas rápidas? Leva menos de 1 minuto.</div>
+            <div id="fb-phase-survey-offer" class="fb-phase" style="display:none">
+                <div class="feedback-title" id="fb-offer-title">✨ Obrigado!</div>
+                <div class="fb-divider"></div>
+                <div class="feedback-message">Mais 4 perguntas rápidas?</div>
                 <div class="feedback-actions">
                     <button class="feedback-btn-primary" id="fb-survey-yes">Sim, claro!</button>
                     <button class="feedback-dismiss-btn" id="fb-survey-no">Não, obrigado</button>
                 </div>
             </div>
-            <!-- Phase 3: Survey -->
-            <div id="fb-phase-survey" style="display:none">
-                <div class="feedback-title">📋 Pesquisa Rápida</div>
-                <div class="feedback-survey-form" id="fb-survey-form"></div>
+
+            <!-- Phase 3: Survey (one question at a time) -->
+            <div id="fb-phase-survey" class="fb-phase" style="display:none">
+                <div class="fb-survey-header">
+                    <div class="feedback-title">📋 Pesquisa Rápida</div>
+                    <div class="fb-progress" id="fb-progress"></div>
+                </div>
+                <div class="fb-survey-viewport" id="fb-survey-viewport"></div>
                 <div class="feedback-actions">
-                    <button class="feedback-btn-primary" id="fb-survey-submit">Enviar</button>
+                    <button class="feedback-btn-primary" id="fb-survey-next" disabled>Próximo</button>
+                    <button class="feedback-dismiss-btn fb-survey-skip" id="fb-survey-skip" style="display:none">Pular</button>
                 </div>
             </div>
+
+            <div class="fb-ornament-bottom"></div>
         </div>
     </div>
 

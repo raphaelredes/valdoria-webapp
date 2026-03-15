@@ -1121,41 +1121,58 @@ function _animateBarDeltas(contentEl) {
 
 var _fbData = null;
 var _fbSelectedRating = 0;
-var _fbActive = false; // Prevents re-trigger during same session
+var _fbActive = false;
+var _fbData = null;
+var _fbSelectedRating = 0;
+var _fbStarLocked = false;
+var _fbCurrentPhase = 'rating';
+var _fbStarLabels = ['', 'Terr\u00edvel', 'Fraco', 'Bom', '\u00d3timo', 'Incr\u00edvel!'];
+var _fbSurveyQuestions = [];
+var _fbSurveyIndex = 0;
+var _fbSurveyAnswers = {};
 
 function _showFeedbackOverlay(data) {
     _fbData = data;
     _fbSelectedRating = 0;
+    _fbStarLocked = false;
+    _fbCurrentPhase = 'rating';
     _fbActive = true;
     var overlay = document.getElementById('feedback-overlay');
     if (!overlay) return;
 
-    // Populate phase 1 (rating)
+    // Phase 1
     var titleEl = document.getElementById('fb-title');
     var msgEl = document.getElementById('fb-message');
     var starsEl = document.getElementById('fb-stars');
     var pixBtn = document.getElementById('fb-pix-btn');
+    var starLabel = document.getElementById('fb-star-label');
 
     if (titleEl) titleEl.textContent = data.title || '';
     if (msgEl) msgEl.textContent = data.message || '';
+    if (starLabel) { starLabel.textContent = ''; starLabel.classList.remove('visible'); }
 
-    // Build star buttons (Unicode ★ for consistent cross-platform rendering)
+    // Build stars
     if (starsEl) {
         starsEl.innerHTML = '';
+        starsEl.classList.remove('rated');
         for (var i = 1; i <= 5; i++) {
             var star = document.createElement('button');
             star.className = 'feedback-star';
-            star.textContent = '\u2605'; // ★ filled star
+            star.textContent = '\u2605';
             star.dataset.rating = i;
             star.setAttribute('aria-label', i + ' estrela' + (i > 1 ? 's' : ''));
+            star.addEventListener('pointerenter', _onStarHover);
+            star.addEventListener('pointerleave', _onStarLeave);
             star.addEventListener('click', _onStarClick);
             starsEl.appendChild(star);
         }
     }
 
-    // Pre-render survey form (questions come with the popup data)
+    // Pre-render survey
     if (data.survey_questions) {
-        _renderFeedbackSurvey(data.survey_questions);
+        _fbSurveyQuestions = data.survey_questions;
+        _fbSurveyIndex = 0;
+        _fbSurveyAnswers = {};
     }
 
     // PIX button
@@ -1178,12 +1195,13 @@ function _showFeedbackOverlay(data) {
         };
     }
 
-    // Survey offer buttons — purely client-side phase transition
+    // Survey offer buttons
     var surveyYes = document.getElementById('fb-survey-yes');
     if (surveyYes) {
         surveyYes.onclick = function() {
             _haptic();
-            _showFeedbackPhase('survey');
+            _initSurveyPhase();
+            _transitionPhase('survey');
         };
     }
     var surveyNo = document.getElementById('fb-survey-no');
@@ -1191,7 +1209,6 @@ function _showFeedbackOverlay(data) {
         surveyNo.onclick = function() {
             _haptic();
             _hideFeedbackOverlay();
-            // Save rating only (no survey)
             if (typeof apiCall === 'function') {
                 apiCall('/api/game/action', {
                     cb: 'fb_survey_no',
@@ -1207,13 +1224,29 @@ function _showFeedbackOverlay(data) {
         };
     }
 
-    // Submit survey button
-    var submitBtn = document.getElementById('fb-survey-submit');
-    if (submitBtn) {
-        submitBtn.onclick = _onSurveySubmit;
+    // Survey next/skip buttons
+    var nextBtn = document.getElementById('fb-survey-next');
+    if (nextBtn) {
+        nextBtn.onclick = function() {
+            _haptic();
+            var isLast = _fbSurveyIndex >= _fbSurveyQuestions.length - 1;
+            if (isLast) {
+                _onSurveySubmit();
+            } else {
+                _fbSurveyIndex++;
+                _renderSurveyQuestion(_fbSurveyIndex, true);
+            }
+        };
+    }
+    var skipBtn = document.getElementById('fb-survey-skip');
+    if (skipBtn) {
+        skipBtn.onclick = function() {
+            _haptic();
+            _onSurveySubmit();
+        };
     }
 
-    // Click outside card to dismiss
+    // Click outside to dismiss
     overlay.onclick = function(evt) {
         if (evt.target === overlay) {
             _haptic();
@@ -1222,129 +1255,232 @@ function _showFeedbackOverlay(data) {
         }
     };
 
-    // Show phase 1, hide others
-    _showFeedbackPhase('rating');
+    // Show phase 1
+    ['rating', 'survey-offer', 'survey'].forEach(function(p) {
+        var el = document.getElementById('fb-phase-' + p);
+        if (el) {
+            el.style.display = (p === 'rating') ? '' : 'none';
+            el.classList.remove('phase-exit', 'phase-enter');
+        }
+    });
     overlay.classList.remove('fb-hiding');
     overlay.style.display = 'flex';
 }
 
-var _fbStarLocked = false;
+/* ─── Star hover trail ─── */
+function _onStarHover(e) {
+    if (_fbStarLocked || _fbSelectedRating > 0) return;
+    var r = parseInt(e.currentTarget.dataset.rating) || 0;
+    document.querySelectorAll('.feedback-star').forEach(function(s) {
+        var sr = parseInt(s.dataset.rating) || 0;
+        s.classList.toggle('trail', sr <= r);
+    });
+    _showStarLabel(r);
+}
+
+function _onStarLeave() {
+    if (_fbStarLocked || _fbSelectedRating > 0) return;
+    document.querySelectorAll('.feedback-star').forEach(function(s) {
+        s.classList.remove('trail');
+    });
+    _hideStarLabel();
+}
+
+function _showStarLabel(rating) {
+    var el = document.getElementById('fb-star-label');
+    if (el) {
+        el.textContent = _fbStarLabels[rating] || '';
+        el.classList.add('visible');
+    }
+}
+function _hideStarLabel() {
+    var el = document.getElementById('fb-star-label');
+    if (el) el.classList.remove('visible');
+}
+
+/* ─── Star click ─── */
 function _onStarClick(e) {
     if (_fbStarLocked) return;
     _fbStarLocked = true;
     var rating = parseInt(e.currentTarget.dataset.rating) || 3;
     _fbSelectedRating = rating;
     _haptic();
-    // Highlight stars up to selected
+
     var stars = document.querySelectorAll('.feedback-star');
     stars.forEach(function(s) {
         var r = parseInt(s.dataset.rating) || 0;
-        if (r <= rating) {
-            s.classList.add('active');
-        } else {
-            s.classList.remove('active');
-        }
+        s.classList.remove('trail', 'just-selected');
+        s.classList.toggle('active', r <= rating);
     });
-    // Show selected rating in survey offer title
-    var offerTitle = document.querySelector('#fb-phase-survey-offer .feedback-title');
+
+    // Pop on clicked star
+    e.currentTarget.classList.add('just-selected');
+
+    // Enable shimmer
+    var starsContainer = document.getElementById('fb-stars');
+    if (starsContainer) starsContainer.classList.add('rated');
+
+    // Show label
+    _showStarLabel(rating);
+
+    // Update offer title with visual stars
+    var offerTitle = document.getElementById('fb-offer-title');
     if (offerTitle) {
-        var filled = '★'.repeat(rating);
-        var empty = '☆'.repeat(5 - rating);
-        offerTitle.textContent = filled + empty + ' Obrigado!';
+        offerTitle.textContent = '\u2605'.repeat(rating) + '\u2606'.repeat(5 - rating) + ' Obrigado!';
     }
-    // Brief delay then show survey offer
+
+    // Transition to survey offer
     setTimeout(function() {
-        _showFeedbackPhase('survey-offer');
+        _transitionPhase('survey-offer');
         _fbStarLocked = false;
-    }, 500);
+    }, 600);
 }
 
-function _showFeedbackPhase(phase) {
-    var phases = ['rating', 'survey-offer', 'survey'];
-    phases.forEach(function(p) {
-        var el = document.getElementById('fb-phase-' + p);
-        if (el) el.style.display = (p === phase) ? '' : 'none';
-    });
-    var overlay = document.getElementById('feedback-overlay');
-    if (overlay) overlay.style.display = 'flex';
+/* ─── Phase crossfade ─── */
+function _transitionPhase(nextPhase) {
+    if (_fbCurrentPhase === nextPhase) return;
+
+    var currentEl = document.getElementById('fb-phase-' + _fbCurrentPhase);
+    var nextEl = document.getElementById('fb-phase-' + nextPhase);
+    if (!nextEl) return;
+
+    if (currentEl) {
+        currentEl.classList.add('phase-exit');
+        var ce = currentEl;
+        setTimeout(function() {
+            ce.style.display = 'none';
+            ce.classList.remove('phase-exit');
+        }, 250);
+    }
+
+    setTimeout(function() {
+        nextEl.style.display = '';
+        nextEl.classList.add('phase-enter');
+        setTimeout(function() {
+            nextEl.classList.remove('phase-enter');
+        }, 300);
+    }, 150);
+
+    _fbCurrentPhase = nextPhase;
 }
 
-function _renderFeedbackSurvey(questions) {
-    var form = document.getElementById('fb-survey-form');
-    if (!form) return;
-    form.innerHTML = '';
+/* ─── Survey stepper ─── */
+function _initSurveyPhase() {
+    _fbSurveyIndex = 0;
+    _renderProgressDots(_fbSurveyQuestions.length);
+    _renderSurveyQuestion(0, false);
+}
 
-    questions.forEach(function(q) {
-        var qDiv = document.createElement('div');
-        qDiv.className = 'fb-question';
-        qDiv.dataset.questionId = q.id;
+function _renderProgressDots(count) {
+    var container = document.getElementById('fb-progress');
+    if (!container) return;
+    container.innerHTML = '';
+    for (var i = 0; i < count; i++) {
+        var dot = document.createElement('div');
+        dot.className = 'fb-progress-dot' + (i === 0 ? ' active' : '');
+        container.appendChild(dot);
+    }
+}
 
-        var label = document.createElement('div');
-        label.className = 'fb-question-text';
-        label.textContent = q.text;
-        qDiv.appendChild(label);
-
-        if (q.type === 'choice' && q.options) {
-            var opts = document.createElement('div');
-            opts.className = 'fb-options';
-            q.options.forEach(function(opt) {
-                var btn = document.createElement('button');
-                btn.className = 'fb-option';
-                btn.textContent = opt;
-                btn.dataset.questionId = q.id;
-                btn.dataset.value = opt;
-                btn.onclick = function() {
-                    _haptic();
-                    opts.querySelectorAll('.fb-option').forEach(function(b) {
-                        b.classList.remove('selected');
-                    });
-                    btn.classList.add('selected');
-                };
-                opts.appendChild(btn);
-            });
-            qDiv.appendChild(opts);
-        } else if (q.type === 'text') {
-            var ta = document.createElement('textarea');
-            ta.className = 'fb-textarea';
-            ta.placeholder = 'Sugest\u00f5es, elogios, cr\u00edticas...';
-            ta.maxLength = 500;
-            ta.dataset.questionId = q.id;
-            qDiv.appendChild(ta);
-        }
-
-        form.appendChild(qDiv);
+function _updateProgressDots(index) {
+    var dots = document.querySelectorAll('.fb-progress-dot');
+    dots.forEach(function(dot, i) {
+        dot.classList.toggle('active', i === index);
+        dot.classList.toggle('done', i < index);
     });
+}
+
+function _renderSurveyQuestion(index, animate) {
+    var viewport = document.getElementById('fb-survey-viewport');
+    if (!viewport) return;
+    var q = _fbSurveyQuestions[index];
+    if (!q) return;
+
+    var oldCard = viewport.querySelector('.fb-question-card');
+
+    var card = document.createElement('div');
+    card.className = 'fb-question-card' + (animate ? ' q-enter' : '');
+
+    var label = document.createElement('div');
+    label.className = 'fb-question-text';
+    label.textContent = q.text;
+    card.appendChild(label);
+
+    if (q.type === 'choice' && q.options) {
+        var opts = document.createElement('div');
+        opts.className = 'fb-options';
+        q.options.forEach(function(opt) {
+            var btn = document.createElement('button');
+            btn.className = 'fb-option';
+            if (_fbSurveyAnswers[q.id] === opt) btn.classList.add('selected');
+            btn.textContent = opt;
+            btn.onclick = function() {
+                _haptic();
+                opts.querySelectorAll('.fb-option').forEach(function(b) {
+                    b.classList.remove('selected');
+                });
+                btn.classList.add('selected');
+                _fbSurveyAnswers[q.id] = opt;
+                _updateNextBtn();
+            };
+            opts.appendChild(btn);
+        });
+        card.appendChild(opts);
+    } else if (q.type === 'text') {
+        var ta = document.createElement('textarea');
+        ta.className = 'fb-textarea';
+        ta.placeholder = 'Sugest\u00f5es, elogios, cr\u00edticas...';
+        ta.maxLength = 500;
+        ta.value = _fbSurveyAnswers[q.id] || '';
+        ta.oninput = function() {
+            _fbSurveyAnswers[q.id] = ta.value.trim().substring(0, 500);
+            _updateNextBtn();
+        };
+        card.appendChild(ta);
+    }
+
+    if (oldCard && animate) {
+        oldCard.classList.add('q-exit');
+        setTimeout(function() { oldCard.remove(); }, 200);
+    } else if (oldCard) {
+        oldCard.remove();
+    }
+
+    viewport.appendChild(card);
+    _updateProgressDots(index);
+    _updateNextBtn();
+}
+
+function _updateNextBtn() {
+    var nextBtn = document.getElementById('fb-survey-next');
+    var skipBtn = document.getElementById('fb-survey-skip');
+    if (!nextBtn) return;
+
+    var q = _fbSurveyQuestions[_fbSurveyIndex];
+    var hasAnswer = q && _fbSurveyAnswers[q.id];
+    var isLast = _fbSurveyIndex >= _fbSurveyQuestions.length - 1;
+    var isOptional = q && q.optional;
+
+    nextBtn.disabled = !hasAnswer && !isOptional;
+    nextBtn.textContent = isLast ? 'Enviar' : 'Pr\u00f3ximo';
+    if (skipBtn) skipBtn.style.display = (isOptional && !hasAnswer) ? '' : 'none';
 }
 
 function _onSurveySubmit() {
-    var form = document.getElementById('fb-survey-form');
-    if (!form) return;
-    _haptic();
-    var answers = {};
     var choiceCount = 0;
-    form.querySelectorAll('.fb-question').forEach(function(qDiv) {
-        var qId = qDiv.dataset.questionId;
-        var selected = qDiv.querySelector('.fb-option.selected');
-        if (selected) {
-            answers[qId] = selected.dataset.value;
-            choiceCount++;
-        }
-        var ta = qDiv.querySelector('.fb-textarea');
-        if (ta && ta.value.trim()) {
-            answers[qId] = ta.value.trim().substring(0, 500);
-        }
-    });
+    for (var k in _fbSurveyAnswers) {
+        if (k !== 'q_free_text' && _fbSurveyAnswers[k]) choiceCount++;
+    }
     if (choiceCount === 0) {
         if (typeof showToast === 'function') showToast('Responda pelo menos uma pergunta', 2000);
         return;
     }
     _hideFeedbackOverlay();
-    // Send rating + survey via single API call (no renderScreen to avoid re-trigger)
     if (typeof apiCall === 'function') {
         apiCall('/api/game/action', {
             cb: 'fb_survey_submit',
             user_id: S.userId,
-            survey: answers,
+            survey: _fbSurveyAnswers,
             rating: _fbSelectedRating
         }).catch(function(e) {
             console.error('[GAME] Survey submit error:', e);
@@ -1358,7 +1494,6 @@ function _onSurveySubmit() {
 function _hideFeedbackOverlay() {
     var overlay = document.getElementById('feedback-overlay');
     if (!overlay) return;
-    // Smooth fade-out animation
     overlay.classList.add('fb-hiding');
     setTimeout(function() {
         overlay.style.display = 'none';
