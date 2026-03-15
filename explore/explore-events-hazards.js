@@ -350,6 +350,8 @@ function applyHazardEffect(hazard, onDone) {
                 S.conditions.push({ type: 'poisoned', stepsLeft: 3 });
             }
             showTerrainToast('Envenenado! (3 turnos)', 'condition');
+            flashScreen('rgba(60,180,60,0.25)');
+            if (window.vHaptic) vHaptic.notify('error');
         }
         if (hazard.failEffect === 'prone') {
             var existProne = S.conditions.find(function(c) { return c.type === 'prone'; });
@@ -359,6 +361,8 @@ function applyHazardEffect(hazard, onDone) {
                 S.conditions.push({ type: 'prone', stepsLeft: 1 });
             }
             showTerrainToast('Escorregou!', 'condition');
+            flashScreen('rgba(200,180,60,0.25)');
+            if (window.vHaptic) vHaptic.notify('error');
         }
         updateConditionHUD();
         updateRewards();
@@ -562,6 +566,7 @@ function _attemptDisarm(trap, stat, dc, totalMod) {
                 const xp = 10 + dc * 2;
                 S.xpEarned += xp;
                 updateRewards();
+                if (window.vHaptic) vHaptic.notify('success');
                 showTerrainToast(`${trap.icon} ${trap.okText} (+${xp} XP)`, 'ranger');
             } else {
                 // Disarm failed — trigger trap
@@ -629,10 +634,41 @@ function _triggerTrap(trap) {
 
 function checkHazardCombat() {
     if (!S._hazardCombatPending) return false;
-    const data = S._hazardCombatPending;
+    var data = S._hazardCombatPending;
     S._hazardCombatPending = null;
-    showTerrainToast('O barulho atraiu criaturas!', 'danger');
-    setTimeout(() => triggerCombat({ combat: data.combat }), 1500);
+
+    // DM narration before combat transition
+    activateOverlay('dm-overlay');
+    var overlay = document.getElementById('dm-overlay');
+    var dmIcon = document.getElementById('dm-icon');
+    var dmTitle = document.getElementById('dm-title');
+    var dmType = document.getElementById('dm-type');
+    var narrEl = document.getElementById('dm-narration');
+    var choicesEl = document.getElementById('dm-choices');
+
+    if (!overlay) {
+        showTerrainToast('O barulho atraiu criaturas!', 'danger');
+        setTimeout(function() { triggerCombat({ combat: data.combat }); }, 1500);
+        return true;
+    }
+
+    if (dmIcon) dmIcon.textContent = '\u{1F43E}';
+    if (dmTitle) dmTitle.textContent = 'Barulho!';
+    if (dmType) dmType.textContent = 'perigo';
+    if (choicesEl) choicesEl.innerHTML = '';
+
+    var narr = 'O estrondo da armadilha ecoa pelas redondezas. Passos pesados se aproximam rapidamente \u2014 o barulho atraiu aten\u00e7\u00e3o indesejada.';
+    typewriter(narrEl, narr, function () {
+        var btn = document.createElement('button');
+        btn.className = 'dm-choice-btn';
+        btn.style.cssText = 'border-color:rgba(200,60,60,0.5);color:#d44;';
+        btn.innerHTML = '<span class="choice-icon">\u2694\ufe0f</span><span class="choice-label">Preparar-se!</span>';
+        btn.onclick = function () {
+            overlay.classList.remove('active');
+            triggerCombat({ combat: data.combat });
+        };
+        if (choicesEl) choicesEl.appendChild(btn);
+    });
     return true;
 }
 

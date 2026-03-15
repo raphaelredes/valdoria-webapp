@@ -1262,6 +1262,30 @@ const _OVERLAY_CHILDREN = {
 // DOM-derived: checks if ANY overlay actually has the 'active' class.
 // This is immune to desync — overlays can be dismissed by any method
 // (deactivateOverlay, classList.remove, etc.) and the mutex auto-clears.
+
+// Terrain transition narrations -- show atmospheric text when terrain type changes
+var TERRAIN_TRANSITION_NARRATIONS = {
+    'F': ['Voc\u00ea adentra a floresta. Galhos se fecham sobre o caminho, filtrando a luz.', '\u00c1rvores altas cercam voc\u00ea. O ar fica \u00famido e pesado entre a folhagem.'],
+    'C': ['As paredes de pedra se estreitam. Voc\u00ea entra nas profundezas de uma caverna.', 'A luz se esvai. O eco dos seus passos revela a vast\u00e3o subterr\u00e2nea.'],
+    'S': ['O solo se torna lamacento. O cheiro p\u00fatrido do p\u00e2ntano invade suas narinas.', '\u00c1gua turva cobre seus tornozelos. O p\u00e2ntano n\u00e3o perdoa descuidos.'],
+    'D': ['Areia quente sob os p\u00e9s. O horizonte ondula com o calor implacvel do deserto.', 'O sol castiga sem piedade. A areia parece se estender infinitamente.'],
+    'M': ['Pedras \u00edngremes bloqueiam o caminho. A subida pela montanha exige esfor\u00e7o.', 'O ar se torna rarefeito. Cada passo na montanha pesa como dez.'],
+    'N': ['Neve cobre tudo \u00e0 sua volta. O sil\u00eancio do inverno \u00e9 absoluto.', 'O frio corta como l\u00e2mina. Seus passos deixam marcas profundas na neve.'],
+    'V': ['O calor se torna insuport\u00e1vel. Fissuras incandescentes cortam o terreno vulc\u00e2nico.', 'Lava borbulha nas fendas pr\u00f3ximas. O ar tremula com o calor infernal.'],
+    'G': ['L\u00e1pides e cruzes marcam o terreno. Uma atmosfera de morte permeia tudo.', 'O ar gela. Algo neste cemit\u00e9rio observa cada movimento seu.'],
+};
+var _lastTerrainType = null;
+
+function checkTerrainTransition(col, row) {
+    var terrain = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
+    if (_lastTerrainType && terrain !== _lastTerrainType && TERRAIN_TRANSITION_NARRATIONS[terrain]) {
+        var pool = TERRAIN_TRANSITION_NARRATIONS[terrain];
+        var narr = pool[Math.floor(Math.random() * pool.length)];
+        showTerrainToast(narr, 'info');
+    }
+    _lastTerrainType = terrain;
+}
+
 const _EVENT_OVERLAY_IDS = [
     'dm-overlay', 'check-overlay', 'outcome-overlay', 'combat-overlay',
     'portal-overlay', 'encounter-overlay', 'exit-risk-overlay',

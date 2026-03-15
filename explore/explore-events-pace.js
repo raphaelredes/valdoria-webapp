@@ -45,10 +45,26 @@ function getPaceDCMod() {
 // =========================================================
 // WEATHER MECHANICAL EFFECTS (DMG Ch.5)
 // =========================================================
-let _weatherEffectSteps = 0;
+var WEATHER_NARRATIONS = [
+    'A chuva escorre pelo rosto, emba\u00e7ando a vis\u00e3o. O caminho \u00e0 frente se torna mais dif\u00edcil.',
+    'O vento assobia entre as rochas, carregando consigo promessas de tempestade.',
+    'Nuvens escuras se acumulam no horizonte. O ar pesa com a umidade.',
+    'Rel\u00e2mpagos iluminam o c\u00e9u distante. A tempestade se aproxima.',
+    'A n\u00e9voa se adensa, reduzindo a visibilidade. Cada passo exige mais cuidado.',
+];
+var _weatherNarrShown = false;
+
+var _weatherEffectSteps = 0;
 
 function _checkWeatherEffects() {
     _weatherEffectSteps++;
+
+    // Show weather narration toast once early in exploration
+    if (!_weatherNarrShown && _weatherEffectSteps === 3 && (S._weatherCONSaveDC > 0 || S._weatherLightningChance > 0)) {
+        _weatherNarrShown = true;
+        var wNarr = WEATHER_NARRATIONS[Math.floor(Math.random() * WEATHER_NARRATIONS.length)];
+        showTerrainToast(wNarr, 'info');
+    }
 
     // CON save for extreme conditions every 8 steps
     if (S._weatherCONSaveDC > 0 && _weatherEffectSteps % 8 === 0) {
@@ -313,6 +329,38 @@ function _checkStealthAvoid() {
 }
 
 // =========================================================
+// DISCOVERY OVERLAY -- reusable overlay for successful checks
+// =========================================================
+function _showDiscoveryOverlay(icon, title, narration, rewardText) {
+    activateOverlay('dm-overlay');
+    var overlay = document.getElementById('dm-overlay');
+    var dmIcon = document.getElementById('dm-icon');
+    var dmTitle = document.getElementById('dm-title');
+    var dmType = document.getElementById('dm-type');
+    var narrEl = document.getElementById('dm-narration');
+    var choicesEl = document.getElementById('dm-choices');
+
+    if (!overlay) { showTerrainToast(icon + ' ' + title + ' ' + rewardText, 'ranger'); return; }
+
+    if (dmIcon) dmIcon.textContent = icon;
+    if (dmTitle) dmTitle.textContent = title;
+    if (dmType) dmType.textContent = 'descoberta';
+    if (choicesEl) choicesEl.innerHTML = '';
+
+    typewriter(narrEl, narration, function () {
+        var badge = document.createElement('div');
+        badge.style.cssText = 'text-align:center;margin:8px 0 4px;color:var(--v-gold);font-size:15px;font-weight:bold;animation:rewardPop 0.5s ease forwards;';
+        badge.textContent = rewardText;
+        narrEl.appendChild(badge);
+        var btn = document.createElement('button');
+        btn.className = 'dm-choice-btn';
+        btn.textContent = 'Continuar...';
+        btn.onclick = function () { overlay.classList.remove('active'); };
+        if (choicesEl) choicesEl.appendChild(btn);
+    });
+}
+
+// =========================================================
 // EXPLORE AREA (Search, Forage, Observe, Rest)
 // =========================================================
 function showExploreArea() {
@@ -447,30 +495,43 @@ function _doExploreCheck(opt) {
         };
         const skipBtn = document.getElementById('check-skip-btn');
         setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finish; } }, 500);
-        setTimeout(finish, 2500);
+        var _checkDelay = typeof calcReadTime === 'function' ? calcReadTime(formulaStr + ' ' + (success ? 'Sucesso' : 'Falha'), 'overlay') : 2500;
+        setTimeout(finish, _checkDelay);
     };
 
     if (dice) { dice.roll(roll, finishCheck); }
     else { setTimeout(finishCheck, 700); }
 }
 
+var SEARCH_SUCCESS_NARRATIONS = [
+    'Sob pedras soltas, voc\u00ea encontra objetos esquecidos. O p\u00f3 dos s\u00e9culos cede lugar a um achado valioso.',
+    'Seus olhos atentos captam um brilho entre os escombros. Escondido sob folhas e musgo, um tesouro modesto.',
+    'Vasculhando com cuidado, seus dedos tocam algo s\u00f3lido. Um item \u00fatil, abandonado por um viajante anterior.',
+];
 function _exploreSearchSuccess() {
-    const xp = 15 + Math.floor(Math.random() * 20);
+    var xp = 15 + Math.floor(Math.random() * 20);
     S.xpEarned += xp;
     updateRewards();
-    showTerrainToast('\u{1F50E} Encontrou algo! +' + xp + ' XP', 'info');
-    const hiddenPoi = S.pois.find(p => !S.poisResolved.has(p.id) && p.hid);
+    var narr = SEARCH_SUCCESS_NARRATIONS[Math.floor(Math.random() * SEARCH_SUCCESS_NARRATIONS.length)];
+    _showDiscoveryOverlay('\u{1F50E}', 'Descoberta', narr, '+' + xp + ' XP');
+    var hiddenPoi = S.pois.find(function(p) { return !S.poisResolved.has(p.id) && p.hid; });
     if (hiddenPoi) {
         hiddenPoi.hid = 0;
         showTerrainToast('\u2728 Descobriu algo oculto nas proximidades!', 'info');
     }
 }
 function _exploreSearchFail() { showTerrainToast('\u{1F50E} N\u00e3o encontrou nada de especial.', 'info'); }
+var FORAGE_SUCCESS_NARRATIONS = [
+    'Entre as ra\u00edzes e arbustos, voc\u00ea identifica ervas medicinais e materiais valiosos. A natureza \u00e9 generosa para quem sabe procurar.',
+    'Cogumelos comest\u00edveis, bagas silvestres e fibras resistentes. A terra oferece seus presentes a quem tem olhos para v\u00ea-los.',
+    'Seu treinamento de sobreviv\u00eancia d\u00e1 frutos. Materiais \u00fateis e ingredientes raros enchem sua bolsa.',
+];
 function _exploreForageSuccess() {
-    const gp = 5 + Math.floor(Math.random() * 15);
+    var gp = 5 + Math.floor(Math.random() * 15);
     S.goldEarned += gp;
     updateRewards();
-    showTerrainToast('\u{1F33F} Forragear: encontrou ervas e materiais (+' + gp + ' GP)', 'info');
+    var narr = FORAGE_SUCCESS_NARRATIONS[Math.floor(Math.random() * FORAGE_SUCCESS_NARRATIONS.length)];
+    _showDiscoveryOverlay('\u{1F33F}', 'Forragear', narr, '+' + gp + ' GP');
 }
 function _exploreForageFail() { showTerrainToast('\u{1F33F} N\u00e3o encontrou nada \u00fatil.', 'info'); }
 function _exploreObserveSuccess() {
@@ -561,34 +622,41 @@ function _doSecretPassageCheck() {
         };
         const skipBtn = document.getElementById('check-skip-btn');
         setTimeout(() => { if (!_done && skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = finish; } }, 500);
-        setTimeout(finish, 2500);
+        var _secretDelay = typeof calcReadTime === 'function' ? calcReadTime('Investigação resultado passagem secreta', 'overlay') : 2500;
+        setTimeout(finish, _secretDelay);
     };
     if (dice) dice.roll(roll, finishCheck);
     else setTimeout(finishCheck, 700);
 }
 
+var SECRET_PASSAGE_NARRATIONS = [
+    'Ao tatear a parede rochosa, seus dedos encontram uma fissura que cede sob press\u00e3o. A pedra desliza revelando uma passagem oculta.',
+    'Marcas quase invis\u00edveis na rocha formam um padr\u00e3o. Ao alinhar as pe\u00e7as, um mecanismo antigo range e uma passagem se abre.',
+    'Entre ra\u00edzes retorcidas, voc\u00ea nota uma abertura camuflada. Um t\u00fanel estreito mas transit\u00e1vel se revela.',
+    'Uma inscri\u00e7\u00e3o desgastada na parede brilha ao toque. A parede se retrai com um sussurro p\u00e9treo, revelando um atalho.',
+];
+
 function _secretPassageSuccess() {
-    // Reveal a shortcut: find nearest impassable hex and make it passable
-    const neighbors = typeof getNeighbors === 'function' ? getNeighbors(S.playerCol, S.playerRow) : [];
-    const IMPASSABLE_SET = typeof IMPASSABLE !== 'undefined' ? IMPASSABLE : new Set(['#', 'W', 'M', 'L']);
-    let found = false;
-    for (const [c, r] of neighbors) {
+    var neighbors = typeof getNeighbors === 'function' ? getNeighbors(S.playerCol, S.playerRow) : [];
+    var IMPASSABLE_SET = typeof IMPASSABLE !== 'undefined' ? IMPASSABLE : new Set(['#', 'W', 'M', 'L']);
+    var found = false;
+    for (var _i = 0; _i < neighbors.length; _i++) {
+        var c = neighbors[_i][0], r = neighbors[_i][1];
         if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
-        const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
-        if (IMPASSABLE_SET.has(tile) && tile !== 'L') { // Don't open lava
-            S.grid[r][c] = '.'; // Open passage
+        var tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
+        if (IMPASSABLE_SET.has(tile) && tile !== 'L') {
+            S.grid[r][c] = '.';
             if (typeof flashHex === 'function') flashHex(c, r);
             found = true;
-            // Grant XP
             S.xpEarned += 25;
             updateRewards();
-            showTerrainToast('\u{1F6AA} Passagem secreta revelada! +25 XP', 'ranger');
             if (window.vHaptic) vHaptic.success();
-            // Trigger static redraw
             if (typeof scheduleRender === 'function') {
                 _staticDirty = true;
                 scheduleRender();
             }
+            var narr = SECRET_PASSAGE_NARRATIONS[Math.floor(Math.random() * SECRET_PASSAGE_NARRATIONS.length)];
+            _showDiscoveryOverlay('\u{1F6AA}', 'Passagem Secreta', narr, '+25 XP');
             break;
         }
     }

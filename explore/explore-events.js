@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════
 // HAZARD NARRATIONS — rich context before and after dice rolls
 // ═══════════════════════════════════════════════════════
-const HAZARD_NARRATIONS = {
+var HAZARD_NARRATIONS = {
     lava: {
         pre: "O chão racha e uma onda de calor sufocante emerge. Lava borbulha nas fendas próximas, espirrando gotas incandescentes que chiavam ao tocar a rocha.|Você precisa resistir ao calor — uma falha pode deixar marcas dolorosas.",
         ok: "Com esforço, você supera a onda de calor. Sua pele arde, mas nenhuma queimadura real. A lava recua para suas fendas enquanto você se afasta.",
@@ -18,7 +18,32 @@ const HAZARD_NARRATIONS = {
         pre: "O chão à frente brilha com uma camada fina de gelo transparente. Cristais de geada cintilam sob a luz fraca, belos e traiçoeiros.|Cada passo pode ser o último antes de escorregar. Seus reflexos serão testados — gelo não perdoa.",
         ok: "Com cuidado calculado, você atravessa a superfície congelada. Seus pés encontram tração onde parecia impossível. Um suspiro de alívio escapa dos seus lábios.",
         fail: "Seus pés deslizam sem aviso. O impacto contra o chão gelado é duro e brusco, arrancando o ar dos pulmões. Você se levanta com dificuldade, sentindo cada osso protestar."
-    }
+    },
+    desert: {
+        pre: "O calor do deserto se intensifica abruptamente. Ondas de ar quente distorcem sua visão enquanto a areia escaldante queima através das solas.|Cada respiração é como engolir brasas. Seu corpo precisa resistir.",
+        ok: "Você cobre o rosto e avança com determinação. A onda de calor passa, deixando apenas sede e exaustão suportáveis.",
+        fail: "O calor é demais. Seus músculos cedem, a visão escurece nas bordas. A desidratação cobra seu preço antes que possa encontrar sombra."
+    },
+    mountain: {
+        pre: "O terreno íngreme se torna instável. Pedras soltas se desprendem sob seus pés, e uma onda de cascalho desce a encosta em sua direção.|Agilidade e reflexos serão necessários para evitar a avalanche de rochas.",
+        ok: "Com um salto certeiro, você evita as pedras que despencam. O coração bate forte, mas você está inteiro.",
+        fail: "As pedras atingem você antes que possa reagir. O impacto é brutal — contusões e cortes marcam sua pele enquanto o cascalho se acomoda."
+    },
+    graveyard: {
+        pre: "Uma névoa sobrenatural se adensa. O ar gela em torno de você e sussurros inaudíveis parecem vir de todos os lados.|Uma presença antiga tenta drenar sua vitalidade. Resista, ou sinta a morte roçar seus ossos.",
+        ok: "Você concentra sua vontade e repele a presença. A névoa se dissipa como um suspiro de derrota.",
+        fail: "O frio penetra até os ossos. Uma fração de sua vitalidade é arrancada por mãos invisíveis. Você sente a morte como uma brisa gelada."
+    },
+    volcanic: {
+        pre: "Fissuras se abrem no chão vulcânico, liberando jatos de gás sulfuroso e fagulhas ardentes. O calor é quase insuportável.|Respirar se torna um desafio. Resistir a este inferno requer força de vontade.",
+        ok: "Você protege as vias aéreas e segue firme. O pior do vulcanismo ficou para trás — desta vez.",
+        fail: "Gás tóxico e fagulhas atingem você em cheio. Queimaduras e tosse violenta marcam sua passagem pelo terreno vulcânico."
+    },
+    snow: {
+        pre: "Uma rajada de vento gelado carrega flocos de gelo cortantes. A temperatura despenca e seus músculos começam a enrijecer.|A hipotermia ameaça. Você precisa resistir ao frio mortal.",
+        ok: "Apertando os dentes, você resiste à investida do frio. Seus dedos estão dormentes, mas funcionais.",
+        fail: "O frio vence. Seus movimentos ficam lentos e desajeitados. Cristais de gelo se formam nos cílios enquanto a hipotermia se instala."
+    },
 };
 
 // 3D DICE MANAGER (shared Dice3D instance for check overlays)
@@ -184,8 +209,9 @@ function showDamageEvent(icon, title, narration, formula, label, damageType, onD
         btn.className = 'dm-choice-btn';
         btn.textContent = 'Continuar...';
         btn.onclick = function () {
-            overlay.classList.remove('active');
+            // Activate damage overlay BEFORE closing narration to avoid black flash
             showDamageDice(formula, label, damageType, onDone);
+            overlay.classList.remove('active');
         };
         if (choicesEl) choicesEl.appendChild(btn);
     });
@@ -195,6 +221,9 @@ function showDamageEvent(icon, title, narration, formula, label, damageType, onD
 // MOVEMENT LOG (internal — sent to backend)
 // ═══════════════════════════════════════════════════════
 function logMoveEvent(events) {
+    // Check for terrain type changes to show transition narrations
+    if (typeof checkTerrainTransition === 'function') checkTerrainTransition(S.playerCol, S.playerRow);
+
     S.moveLog.push({
         s: ++S._stepCount,
         h: [S.playerCol, S.playerRow],
@@ -895,47 +924,126 @@ function closeOutcome() {
 // ═══════════════════════════════════════════════════════
 // COMBAT
 // ═══════════════════════════════════════════════════════
+
+// Biome-specific pre-combat narrations for immersive encounter buildup
+var PRE_COMBAT_NARRATIONS = {
+    forest: [
+        'Galhos estalando! Algo grande se move entre as \u00e1rvores, e voc\u00ea sente o ch\u00e3o tremer sob seus p\u00e9s.',
+        'Um rosnado baixo ecoa entre o arvoredo. Olhos brilhantes surgem na escurid\u00e3o — a ca\u00e7a come\u00e7ou.',
+        'As folhas se agitam violentamente. Uma presen\u00e7a hostil emerge das sombras da floresta.',
+    ],
+    plains: [
+        'O vento muda de dire\u00e7\u00e3o. Ao longe, uma silhueta se aproxima com passos decididos.',
+        'A grama alta se abre de repente. Algo estava esperando por voc\u00ea.',
+        'O sil\u00eancio das plan\u00edcies \u00e9 quebrado por um grito de guerra.',
+    ],
+    cave: [
+        'Pedras caem do teto. Nos t\u00faneis escuros, algo respira pesadamente.',
+        'A tocha vacila. Uma sombra se move na parede — n\u00e3o \u00e9 a sua.',
+        'O eco dos seus passos \u00e9 interrompido por um sibilo ameac\u0327ador.',
+    ],
+    swamp: [
+        'Bolhas est\u00e3o surgindo na lama. Algo emerge lentamente das \u00e1guas turvas.',
+        'O ch\u00e3o treme sob seus p\u00e9s. Uma criatura do p\u00e2ntano despertou.',
+        'N\u00e9voa t\u00f3xica se adensa. Atrav\u00e9s dela, olhos \u00e2mbar brilham com fome.',
+    ],
+    desert: [
+        'A areia se agita em esp\u00edrais. Algo sob a duna se desloca na sua dire\u00e7\u00e3o com velocidade assustadora.',
+        'O calor distorce o ar, mas n\u00e3o \u00e9 uma miragem — a criatura \u00e9 real e letal.',
+    ],
+    mountain: [
+        'Pedras rolam morro abaixo. Algo se move entre os penhascos, circundando voc\u00ea.',
+        'Um rugido ecoa pelas montanhas. A criatura salta de uma sali\u00eancia rochosa.',
+    ],
+    snow: [
+        'A neve se agita. Passos pesados se aproximam atrav\u00e9s da nevasca.',
+        'O frio se intensifica. Uma presen\u00e7a ancestral emerge do gelo.',
+    ],
+    volcanic: [
+        'Lava borbulha. Das fissuras incandescentes, algo se ergue envolvido em chamas.',
+        'O calor se torna insuport\u00e1vel. Uma criatura de fogo bloqueia seu caminho.',
+    ],
+    graveyard: [
+        'L\u00e1pides tremem. A terra se abre e m\u00e3os esquel\u00e9ticas emergem do solo.',
+        'O ar gela. Uma presen\u00e7a sobrenatural materializa diante de voc\u00ea.',
+    ],
+};
+
+function _getPreCombatNarration(biome, enemyName) {
+    var pool = PRE_COMBAT_NARRATIONS[biome] || PRE_COMBAT_NARRATIONS.forest;
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function triggerCombat(poi) {
-    const combat = poi.combat;
+    var combat = poi.combat;
     S.combatTrigger = combat;
     logMoveEvent([{ type: 'combat', enemy: combat.en || 'unknown' }]);
 
     // Screen shake on map viewport for combat
-    const viewport = document.getElementById('map-viewport');
+    var viewport = document.getElementById('map-viewport');
     if (viewport) {
         viewport.classList.add('screen-shake');
-        setTimeout(() => viewport.classList.remove('screen-shake'), 600);
+        setTimeout(function() { viewport.classList.remove('screen-shake'); }, 600);
     }
 
     // Double flash effect for combat
-    const flash = document.createElement('div');
+    var flash = document.createElement('div');
     flash.className = 'encounter-flash';
     document.body.appendChild(flash);
-    setTimeout(() => flash.remove(), 700);
+    setTimeout(function() { flash.remove(); }, 700);
 
-    const overlay = document.getElementById('combat-overlay');
+    // Show DM narration BEFORE combat overlay for dramatic buildup
+    var enemyName = combat.en || 'Inimigo';
+    var narration = _getPreCombatNarration(S.biome, enemyName);
+
+    activateOverlay('dm-overlay');
+    var dmOverlay = document.getElementById('dm-overlay');
+    var dmIcon = document.getElementById('dm-icon');
+    var dmTitle = document.getElementById('dm-title');
+    var dmType = document.getElementById('dm-type');
+    var narrEl = document.getElementById('dm-narration');
+    var choicesEl = document.getElementById('dm-choices');
+
+    if (dmIcon) dmIcon.textContent = '\u2694\ufe0f';
+    if (dmTitle) dmTitle.textContent = 'Encontro!';
+    if (dmType) dmType.textContent = 'combate';
+    if (choicesEl) choicesEl.innerHTML = '';
+
+    typewriter(narrEl, narration, function () {
+        var btn = document.createElement('button');
+        btn.className = 'dm-choice-btn';
+        btn.style.cssText = 'border-color:rgba(200,60,60,0.5);color:#d44;';
+        btn.innerHTML = '<span class="choice-icon">\u2694\ufe0f</span><span class="choice-label">Enfrentar ' + enemyName + '</span>';
+        btn.onclick = function () {
+            dmOverlay.classList.remove('active');
+            _showCombatOverlay(combat, enemyName);
+        };
+        if (choicesEl) choicesEl.appendChild(btn);
+    });
+}
+
+function _showCombatOverlay(combat, enemyName) {
+    var overlay = document.getElementById('combat-overlay');
     document.getElementById('combat-icon').textContent = '';
-    document.getElementById('combat-enemy').textContent = combat.en || 'Inimigo';
-    const _combatNarr = (combat.en || 'Inimigo') + ' se prepara para o combate!';
-    const _combatSpan = document.createElement('span');
+    document.getElementById('combat-enemy').textContent = enemyName;
+    var _combatNarr = enemyName + ' se prepara para o combate!';
+    var _combatSpan = document.createElement('span');
     _combatSpan.style.cssText = 'color:#d44;font-weight:bold;';
     _combatSpan.textContent = _combatNarr;
-    const _combatTextEl = document.getElementById('combat-text');
+    var _combatTextEl = document.getElementById('combat-text');
     _combatTextEl.innerHTML = '';
     _combatTextEl.appendChild(_combatSpan);
 
     overlay.classList.add('active');
     if (window.vHaptic) vHaptic.heavy();
 
-    // Skip button + 2000ms auto-advance
-    let _combatDone = false;
-    const skipBtn = document.getElementById('combat-skip-btn');
+    var _combatDone = false;
+    var skipBtn = document.getElementById('combat-skip-btn');
 
-    const finishCombat = () => {
+    var finishCombat = function () {
         if (_combatDone) return;
         _combatDone = true;
         if (skipBtn) { skipBtn.classList.remove('visible'); skipBtn.onclick = null; }
-        // Use transition API if available (stays in same WebView)
         if (S.apiBase) {
             transitionToArena();
         } else {
@@ -943,15 +1051,14 @@ function triggerCombat(poi) {
         }
     };
 
-    setTimeout(() => {
+    setTimeout(function () {
         if (!_combatDone && skipBtn) {
             skipBtn.classList.add('visible');
             skipBtn.onclick = finishCombat;
         }
     }, 500);
 
-    const combatText = _combatNarr;
-    const combatDelay = typeof calcReadTime === 'function' ? calcReadTime(combatText, 'combat') : 2000;
+    var combatDelay = typeof calcReadTime === 'function' ? calcReadTime(_combatNarr, 'combat') : 2000;
     setTimeout(finishCombat, combatDelay);
 }
 
