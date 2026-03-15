@@ -30,30 +30,22 @@
         }
 
         .header {
-            background: linear-gradient(135deg, var(--v-bg-raised), var(--v-bg-accent));
+            background: linear-gradient(180deg, rgba(196,149,58,0.10) 0%, rgba(196,149,58,0.03) 60%, transparent 100%);
             padding: 12px;
             text-align: center;
-            border-bottom: 2px solid var(--v-gold-dim);
+            border-bottom: 1px solid rgba(196,149,58,0.2);
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
-        }
+        /* ::before accent line removed — Game Hub style */
 
         .header h1 {
             font-size: 16px;
             color: var(--v-gold);
             margin-bottom: 4px;
-            text-shadow: 0 0 15px rgba(196, 149, 58, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .header .stats {
@@ -89,9 +81,9 @@
         }
 
         .tab.active {
-            background: var(--v-gold-dim);
-            color: #fff;
-            border-color: var(--v-gold);
+            border-color: var(--v-gold-dim);
+            background: rgba(196,149,58,0.08);
+            color: var(--v-gold);
         }
 
         .content {
