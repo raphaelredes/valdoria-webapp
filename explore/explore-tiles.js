@@ -4,15 +4,15 @@
 
 // Biome color palettes (base fill color per tile char)
 const BIOME_COLORS = {
-    forest:   {'.':'#5a3d2b','T':'#1a4a1a','g':'#2d5a2d','w':'#2a5a8a','r':'#5a5a5a','R':'#6a5a4a','p':'#6a5040','#':'#0d2e0d','W':'#1a3a6a','M':'#4a4a4a','b':'#4a3a3a','s':'#5a3d2b','m':'#3a2a1a','i':'#7aa0b0','v':'#5a3a1a','L':'#8a2a0a'},
-    plains:   {'.':'#5a4a30','T':'#3a6a2a','g':'#6a8a3a','w':'#2a5a8a','r':'#6a6a5a','R':'#5a4a3a','p':'#6a5a40','#':'#5a5a4a','W':'#1a3a6a','M':'#4a4a4a','b':'#4a3a3a','s':'#5a4a30','m':'#3a2a1a','i':'#7aa0b0','v':'#5a3a1a','L':'#8a2a0a'},
-    swamp:    {'.':'#3a3a2a','T':'#2a4a2a','g':'#3a5a2a','w':'#2a4a5a','r':'#4a4a3a','R':'#5a4a3a','p':'#4a3a2a','#':'#1a3a1a','W':'#1a3a4a','M':'#3a3a3a','m':'#3a2a1a','b':'#3a3030','s':'#3a3a2a','i':'#5a8090','v':'#4a2a1a','L':'#7a2a0a'},
-    cave:     {'.':'#1a1a2a','T':'#2a2a2a','g':'#1a1a1a','w':'#1a2a4a','r':'#3a3a3a','R':'#4a3a2a','p':'#2a2a2a','#':'#0a0a0a','W':'#0a1a3a','M':'#1a1a1a','b':'#2a1a1a','s':'#1a1a2a','m':'#1a1010','i':'#4a6a7a','v':'#3a1a0a','L':'#6a1a0a'},
-    desert:   {'.':'#8a7a4a','T':'#4a6a2a','g':'#8a7a50','w':'#2a5a8a','r':'#7a6a5a','R':'#6a5a4a','p':'#8a7a50','#':'#6a5a4a','W':'#1a3a6a','M':'#5a4a3a','s':'#9a8a5a','b':'#6a5a4a','m':'#5a4020','i':'#9abac0','v':'#7a4a1a','L':'#9a3a0a'},
-    mountain: {'.':'#5a4a3a','T':'#2a4a2a','g':'#3a5a3a','w':'#2a5a8a','r':'#6a6a6a','R':'#5a4a3a','p':'#5a4a3a','#':'#3a3a3a','W':'#1a3a6a','M':'#4a4a5a','b':'#4a3a3a','s':'#5a4a3a','m':'#3a2a1a','i':'#7a9aaa','v':'#5a3a1a','L':'#8a2a0a'},
-    snow:     {'.':'#c0c8d0','T':'#2a5a3a','g':'#b0b8c0','w':'#3a6a9a','r':'#7a7a8a','R':'#6a6a7a','p':'#b0b0b8','#':'#8a8a9a','W':'#2a4a7a','M':'#6a6a7a','i':'#9ab0c0','b':'#8a8090','s':'#c0c8d0','m':'#7a7080','v':'#8a5a3a','L':'#8a3a1a'},
-    volcanic: {'.':'#3a2a1a','T':'#2a2a2a','g':'#3a2a1a','w':'#2a3a5a','r':'#4a3a2a','R':'#5a3a2a','p':'#3a2a1a','#':'#2a1a0a','W':'#1a2a4a','M':'#3a2a1a','v':'#6a3a1a','L':'#8a2a0a','b':'#3a2020','s':'#3a2a1a','m':'#2a1a0a','i':'#5a7080'},
-    graveyard:{'.':'#3a3a3a','T':'#1a3a1a','g':'#2a3a2a','w':'#2a3a5a','r':'#4a4a4a','R':'#4a3a3a','p':'#3a3a3a','#':'#2a2a2a','W':'#1a2a4a','M':'#3a3a3a','b':'#4a3a3a','s':'#3a3a3a','m':'#2a2020','i':'#6a8090','v':'#4a2a1a','L':'#7a2a0a'},
+    forest:   {'.':'#5a3d2b','T':'#1a4a1a','g':'#2d5a2d','w':'#2a5a8a','r':'#5a5a5a','R':'#6a5a4a','p':'#6a5040','#':'#0d2e0d','W':'#1a3a6a','M':'#4a4a4a','b':'#4a3a3a','s':'#5a3d2b','m':'#3a2a1a','i':'#7aa0b0','v':'#5a3a1a','L':'#8a2a0a','C':'#6a4a2a'},
+    plains:   {'.':'#5a4a30','T':'#3a6a2a','g':'#6a8a3a','w':'#2a5a8a','r':'#6a6a5a','R':'#5a4a3a','p':'#6a5a40','#':'#5a5a4a','W':'#1a3a6a','M':'#4a4a4a','b':'#4a3a3a','s':'#5a4a30','m':'#3a2a1a','i':'#7aa0b0','v':'#5a3a1a','L':'#8a2a0a','C':'#7a5a3a'},
+    swamp:    {'.':'#3a3a2a','T':'#2a4a2a','g':'#3a5a2a','w':'#2a4a5a','r':'#4a4a3a','R':'#5a4a3a','p':'#4a3a2a','#':'#1a3a1a','W':'#1a3a4a','M':'#3a3a3a','m':'#3a2a1a','b':'#3a3030','s':'#3a3a2a','i':'#5a8090','v':'#4a2a1a','L':'#7a2a0a','C':'#5a4a2a'},
+    cave:     {'.':'#1a1a2a','T':'#2a2a2a','g':'#1a1a1a','w':'#1a2a4a','r':'#3a3a3a','R':'#4a3a2a','p':'#2a2a2a','#':'#0a0a0a','W':'#0a1a3a','M':'#1a1a1a','b':'#2a1a1a','s':'#1a1a2a','m':'#1a1010','i':'#4a6a7a','v':'#3a1a0a','L':'#6a1a0a','C':'#4a3a2a'},
+    desert:   {'.':'#8a7a4a','T':'#4a6a2a','g':'#8a7a50','w':'#2a5a8a','r':'#7a6a5a','R':'#6a5a4a','p':'#8a7a50','#':'#6a5a4a','W':'#1a3a6a','M':'#5a4a3a','s':'#9a8a5a','b':'#6a5a4a','m':'#5a4020','i':'#9abac0','v':'#7a4a1a','L':'#9a3a0a','C':'#7a6a4a'},
+    mountain: {'.':'#5a4a3a','T':'#2a4a2a','g':'#3a5a3a','w':'#2a5a8a','r':'#6a6a6a','R':'#5a4a3a','p':'#5a4a3a','#':'#3a3a3a','W':'#1a3a6a','M':'#4a4a5a','b':'#4a3a3a','s':'#5a4a3a','m':'#3a2a1a','i':'#7a9aaa','v':'#5a3a1a','L':'#8a2a0a','C':'#5a4a3a'},
+    snow:     {'.':'#c0c8d0','T':'#2a5a3a','g':'#b0b8c0','w':'#3a6a9a','r':'#7a7a8a','R':'#6a6a7a','p':'#b0b0b8','#':'#8a8a9a','W':'#2a4a7a','M':'#6a6a7a','i':'#9ab0c0','b':'#8a8090','s':'#c0c8d0','m':'#7a7080','v':'#8a5a3a','L':'#8a3a1a','C':'#6a5a4a'},
+    volcanic: {'.':'#3a2a1a','T':'#2a2a2a','g':'#3a2a1a','w':'#2a3a5a','r':'#4a3a2a','R':'#5a3a2a','p':'#3a2a1a','#':'#2a1a0a','W':'#1a2a4a','M':'#3a2a1a','v':'#6a3a1a','L':'#8a2a0a','b':'#3a2020','s':'#3a2a1a','m':'#2a1a0a','i':'#5a7080','C':'#5a3a2a'},
+    graveyard:{'.':'#3a3a3a','T':'#1a3a1a','g':'#2a3a2a','w':'#2a3a5a','r':'#4a4a4a','R':'#4a3a3a','p':'#3a3a3a','#':'#2a2a2a','W':'#1a2a4a','M':'#3a3a3a','b':'#4a3a3a','s':'#3a3a3a','m':'#2a2020','i':'#6a8090','v':'#4a2a1a','L':'#7a2a0a','C':'#4a3a3a'},
 };
 
 // Seeded random for deterministic decoration placement per tile
@@ -683,26 +683,83 @@ function drawGroundTexture(ctx, cx, cy, col, row, biome) {
     }
 }
 
-// Exit tile portal glow
+// Exit tile portal — large glowing archway with particle effects
 function drawExitDecoration(ctx, cx, cy, timestamp) {
     const t = (timestamp || 0) * 0.001;
-    const pulse = 0.4 + Math.sin(t * 2) * 0.15;
-    const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 14);
-    grad.addColorStop(0, `rgba(74,214,128,${pulse})`);
-    grad.addColorStop(0.6, `rgba(74,214,128,${pulse * 0.3})`);
-    grad.addColorStop(1, 'rgba(74,214,128,0)');
-    ctx.fillStyle = grad;
+    const pulse = 0.5 + Math.sin(t * 2) * 0.2;
+    const pulse2 = 0.4 + Math.sin(t * 1.5 + 1) * 0.15;
+
+    // Outer glow ring (large, visible from distance)
+    const outerGrad = ctx.createRadialGradient(cx, cy - 2, 4, cx, cy - 2, 22);
+    outerGrad.addColorStop(0, 'rgba(74,214,128,' + (pulse * 0.6) + ')');
+    outerGrad.addColorStop(0.4, 'rgba(74,214,128,' + (pulse * 0.25) + ')');
+    outerGrad.addColorStop(0.7, 'rgba(74,214,128,' + (pulse * 0.08) + ')');
+    outerGrad.addColorStop(1, 'rgba(74,214,128,0)');
+    ctx.fillStyle = outerGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+    ctx.arc(cx, cy - 2, 22, 0, Math.PI * 2);
     ctx.fill();
-    // Door icon (3D-ish)
-    ctx.fillStyle = `rgba(74,214,128,${0.5 + Math.sin(t * 2) * 0.2})`;
-    ctx.fillRect(cx - 3, cy - 6, 6, 11);
-    ctx.fillStyle = `rgba(50,180,100,${0.5 + Math.sin(t * 2) * 0.2})`;
-    ctx.fillRect(cx - 3, cy - 6, 2, 11);
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+
+    // Inner bright glow
+    const innerGrad = ctx.createRadialGradient(cx, cy - 2, 1, cx, cy - 2, 12);
+    innerGrad.addColorStop(0, 'rgba(120,255,160,' + (pulse * 0.7) + ')');
+    innerGrad.addColorStop(0.5, 'rgba(74,214,128,' + (pulse * 0.4) + ')');
+    innerGrad.addColorStop(1, 'rgba(74,214,128,0)');
+    ctx.fillStyle = innerGrad;
     ctx.beginPath();
-    ctx.arc(cx + 1, cy, 1, 0, Math.PI * 2);
+    ctx.arc(cx, cy - 2, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Portal archway frame (stone arch)
+    ctx.fillStyle = 'rgba(80,60,40,' + (0.7 + pulse2 * 0.2) + ')';
+    // Left pillar
+    ctx.fillRect(cx - 6, cy - 10, 3, 14);
+    // Right pillar
+    ctx.fillRect(cx + 3, cy - 10, 3, 14);
+    // Arch top
+    ctx.beginPath();
+    ctx.arc(cx, cy - 10, 6, Math.PI, 0);
+    ctx.fill();
+
+    // Portal interior (bright green energy)
+    ctx.fillStyle = 'rgba(74,214,128,' + (0.5 + Math.sin(t * 3) * 0.2) + ')';
+    ctx.fillRect(cx - 3, cy - 8, 6, 11);
+
+    // Swirling energy lines inside portal
+    ctx.strokeStyle = 'rgba(180,255,200,' + (0.3 + Math.sin(t * 4) * 0.15) + ')';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(cx - 2, cy - 6 + Math.sin(t * 3) * 3);
+    ctx.quadraticCurveTo(cx, cy - 2 + Math.cos(t * 2.5) * 2, cx + 2, cy + 1 + Math.sin(t * 3.5) * 2);
+    ctx.stroke();
+
+    // Light pillar effect (vertical beam above portal)
+    const beamGrad = ctx.createLinearGradient(cx, cy - 20, cx, cy - 8);
+    beamGrad.addColorStop(0, 'rgba(74,214,128,0)');
+    beamGrad.addColorStop(0.5, 'rgba(74,214,128,' + (pulse2 * 0.15) + ')');
+    beamGrad.addColorStop(1, 'rgba(120,255,160,' + (pulse2 * 0.25) + ')');
+    ctx.fillStyle = beamGrad;
+    ctx.fillRect(cx - 4, cy - 20, 8, 12);
+
+    // Floating sparkle particles
+    for (var sp = 0; sp < 4; sp++) {
+        var angle = t * (1.2 + sp * 0.3) + sp * 1.57;
+        var radius = 10 + Math.sin(t * 0.8 + sp) * 4;
+        var px = cx + Math.cos(angle) * radius;
+        var py = cy - 4 + Math.sin(angle) * radius * 0.5;
+        var sparkAlpha = 0.3 + Math.sin(t * 2 + sp * 2) * 0.25;
+        if (sparkAlpha > 0.1) {
+            ctx.fillStyle = 'rgba(180,255,200,' + sparkAlpha + ')';
+            ctx.beginPath();
+            ctx.arc(px, py, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Door handle glow
+    ctx.fillStyle = 'rgba(255,255,255,' + (0.4 + Math.sin(t * 2.5) * 0.2) + ')';
+    ctx.beginPath();
+    ctx.arc(cx + 1, cy - 1, 1.2, 0, Math.PI * 2);
     ctx.fill();
 }
 
@@ -1169,6 +1226,70 @@ function drawWallTileDecoration(ctx, cx, cy, col, row, biome) {
     }
 }
 
+
+// Chest tile — wooden treasure chest with gold trim and glow
+function drawChestDecoration(ctx, cx, cy, col, row, timestamp) {
+    const t = (timestamp || 0) * 0.001;
+    const pulse = 0.3 + Math.sin(t * 1.5) * 0.1;
+
+    // Shadow under chest
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.ellipse(cx + 1, cy + 2, 7, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Chest body (dark wood)
+    ctx.fillStyle = '#5a3a1a';
+    ctx.fillRect(cx - 5, cy - 4, 10, 7);
+
+    // Chest lid (lighter wood, slightly raised)
+    ctx.fillStyle = '#7a5a2a';
+    ctx.fillRect(cx - 6, cy - 7, 12, 4);
+
+    // Lid top bevel
+    ctx.fillStyle = '#8a6a3a';
+    ctx.fillRect(cx - 5, cy - 8, 10, 2);
+
+    // Gold trim bands
+    ctx.fillStyle = '#c4953a';
+    ctx.fillRect(cx - 6, cy - 4, 12, 1);  // Middle band
+    ctx.fillRect(cx - 6, cy - 7, 12, 1);  // Top band
+
+    // Lock/clasp (gold circle)
+    ctx.fillStyle = '#daa520';
+    ctx.beginPath();
+    ctx.arc(cx, cy - 4, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Subtle golden glow around chest
+    const grad = ctx.createRadialGradient(cx, cy - 3, 2, cx, cy - 3, 12);
+    grad.addColorStop(0, 'rgba(196,149,58,' + pulse + ')');
+    grad.addColorStop(0.5, 'rgba(196,149,58,' + (pulse * 0.2) + ')');
+    grad.addColorStop(1, 'rgba(196,149,58,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy - 3, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Sparkle particles (2 random positions)
+    const r1 = tileRand(col, row, 7);
+    const r2 = tileRand(col, row, 8);
+    const sparkle = Math.sin(t * 3 + r1 * 6) * 0.5 + 0.5;
+    if (sparkle > 0.6) {
+        ctx.fillStyle = 'rgba(255,215,0,' + (sparkle * 0.6) + ')';
+        ctx.beginPath();
+        ctx.arc(cx + (r1 - 0.5) * 14, cy - 8 + (r2 - 0.5) * 6, 1, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    const sparkle2 = Math.sin(t * 2.5 + r2 * 4) * 0.5 + 0.5;
+    if (sparkle2 > 0.65) {
+        ctx.fillStyle = 'rgba(255,215,0,' + (sparkle2 * 0.5) + ')';
+        ctx.beginPath();
+        ctx.arc(cx + (r2 - 0.5) * 12, cy - 6 + (r1 - 0.5) * 8, 0.8, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
 function drawTileDecoration(ctx, cx, cy, tile, biome, col, row, timestamp) {
     switch (tile) {
         case 'T': drawTreeDecoration(ctx, cx, cy, biome, col, row); break;
@@ -1188,5 +1309,6 @@ function drawTileDecoration(ctx, cx, cy, tile, biome, col, row, timestamp) {
         case '.': drawGroundTexture(ctx, cx, cy, col, row, biome); break;
         case 'D': drawDoorDecoration(ctx, cx, cy, col, row); break;
         case '#': drawWallTileDecoration(ctx, cx, cy, col, row, biome); break;
+        case 'C': drawChestDecoration(ctx, cx, cy, col, row, timestamp); break;
     }
 }

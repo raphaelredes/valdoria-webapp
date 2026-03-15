@@ -64,7 +64,7 @@ let _floatingTexts = [];
 function spawnFloatingText(col, row, text, color, type) {
     const center = hexToScreen(col, row);
     const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
-    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
     const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
     _floatingTexts.push({
         x: center.x + (Math.random() - 0.5) * 10,
@@ -563,7 +563,7 @@ function renderStaticTiles(timestamp) {
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
-            const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
             if (baseTile === 'W' || baseTile === 'L') continue;
 
             const center = hexToScreen(col, row);
@@ -577,7 +577,7 @@ function renderStaticTiles(timestamp) {
             for (const [nc, nr] of nbs) {
                 if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
                 const nTile = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
-                const nBase = nTile.match(/[0-9@E]/) ? '.' : nTile;
+                const nBase = nTile.match(/[0-9@EC]/) ? '.' : nTile;
                 if (nBase !== baseTile && nBase !== 'W' && nBase !== 'L') {
                     hasDiffNeighbor = true;
                     break;
@@ -601,7 +601,7 @@ function renderStaticTiles(timestamp) {
 // Ambient occlusion — darken tiles adjacent to taller neighbors
 function _drawHeightShadow(ctx, col, row) {
     const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
-    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
     const height = TILE_HEIGHT[baseTile] || 1;
 
     // Check neighbors for height difference
@@ -610,7 +610,7 @@ function _drawHeightShadow(ctx, col, row) {
     for (const [nc, nr] of neighbors) {
         if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
         const nt = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
-        const nBase = nt.match(/[0-9@E]/) ? '.' : nt;
+        const nBase = nt.match(/[0-9@EC]/) ? '.' : nt;
         const nHeight = TILE_HEIGHT[nBase] || 1;
         maxDiff = Math.max(maxDiff, nHeight - height);
     }
@@ -635,7 +635,7 @@ function drawTile(ctx, col, row, biome, colors, timestamp) {
     let tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
 
     // Convert special tiles to base for color lookup
-    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
     const color = colors[baseTile] || colors['.'] || '#3a3a3a';
     const height = (TILE_HEIGHT[baseTile] || 1);
     const heightPx = height * UNIT_PX;
@@ -709,7 +709,7 @@ function drawAnimatedTiles(ctx, timestamp) {
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
-            const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
             const center = hexToScreen(col, row);
 
             if (baseTile === 'w' || baseTile === 'W' || baseTile === 'L') {
@@ -776,7 +776,7 @@ function drawAdjacentHighlights(ctx, timestamp) {
         if (S.fogState[key] === 'hidden') continue;
 
         const center = hexToScreen(c, r);
-        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
         const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         const topVerts = hexTopVertices(center.x, center.y - h);
 
@@ -835,7 +835,7 @@ function drawPOIMarkers(ctx, timestamp) {
 
         const center = hexToScreen(poi.col, poi.row);
         const tile = S.grid[poi.row] && S.grid[poi.row][poi.col] ? S.grid[poi.row][poi.col] : '.';
-        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
         const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         drawPOIMarker(ctx, center.x, center.y - h, poi.icon, timestamp, poi.type);
     }
@@ -862,7 +862,7 @@ function drawHexFlashes(ctx, timestamp) {
         const alpha = 0.4 * (1 - elapsed / f.duration);
         const center = hexToScreen(f.col, f.row);
         const tile = S.grid[f.row] && S.grid[f.row][f.col] ? S.grid[f.row][f.col] : '.';
-        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
         const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         const topVerts = hexTopVertices(center.x, center.y - h);
         ctx.save();
@@ -922,7 +922,7 @@ function handleCanvasClick(e) {
 // Move player via canvas system
 function movePlayerCanvas(col, row) {
     const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
-    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
 
     // Difficult terrain check (D&D 5e)
     const difficult = isDifficultTerrain(baseTile, S.biome);
@@ -1019,61 +1019,90 @@ function onMoveComplete(col, row) {
         return;
     }
 
-    // Environmental hazard check (priority over POI/exit)
+    // ── PRIORITY 1: EXIT CHECK (highest priority — exploration ends here) ──
+    if (col === S.exitCol && row === S.exitRow) {
+        console.log('[EXPLORE] Exit reached at', col, row);
+        if (typeof flashScreen === 'function') flashScreen('rgba(196,149,58,0.2)');
+        spawnFloatingText(col, row, 'portal...', '#c4953a', 'big');
+        try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) { /* haptic optional */ }
+        setTimeout(() => showPortalOverlay(), 800);
+        return;
+    }
+
+    // ── PRIORITY 2: Environmental hazards ──
     const hazard = checkHazard(col, row);
     if (hazard) {
         revealEventSprite(col, row, 'hazard');
         spawnFloatingText(col, row, 'crack!', '#c44a2a', 'big');
-        // Haptic: heavy impact for hazard (M4)
         try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) { /* haptic optional */ }
         setTimeout(() => showHazardNarration(hazard), 200);
         return;
     }
 
-    // Trap check (chance-based, detected via PP)
+    // ── PRIORITY 3: Traps (chance-based, detected via PP) ──
     if (typeof checkTrap === 'function') {
         const trap = checkTrap(col, row);
         if (trap) {
             revealEventSprite(col, row, 'trap');
             spawnFloatingText(col, row, 'clank!', '#8a4a2a', 'big');
-            // Haptic: heavy impact for trap (M4)
             try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.impactOccurred('heavy'); } catch(e) { /* haptic optional */ }
             setTimeout(() => showTrapEvent(trap), 200);
             return;
         }
     }
 
-    // Check POI
-    
-        // PRIORITY 2.5: Trap check (D&D 5e)
-        if (typeof checkTrapAtPosition === 'function') {
-            const trap = checkTrapAtPosition(col, row);
-            if (trap) {
-                _showBackendTrapEvent(trap);
-                saveState();
-                return;
-            }
+    // ── PRIORITY 3.5: Backend-placed traps (D&D 5e) ──
+    if (typeof checkTrapAtPosition === 'function') {
+        const trap = checkTrapAtPosition(col, row);
+        if (trap) {
+            _showBackendTrapEvent(trap);
+            saveState();
+            return;
         }
-        // Check for chests
-        if (typeof checkChestAtPosition === 'function') {
-            const chest = checkChestAtPosition(col, row);
-            if (chest) showChestEvent(chest);
-        }
-        // Check for safe rooms
-        if (typeof checkSafeRoom === 'function') checkSafeRoom(col, row);
-        // Environmental hazards (lava proximity)
-        if (typeof checkEnvironmentalHazards === 'function') checkEnvironmentalHazards(col, row);
-        // Environmental storytelling flavor text (D&D exploration ambiance)
-        if (typeof checkFlavorText === 'function') checkFlavorText(col, row);
+    }
 
-const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.has(p.id));
+    // ── PRIORITY 4: Chests (backend-placed OR visible C tiles) ──
+    if (typeof checkChestAtPosition === 'function') {
+        const chest = checkChestAtPosition(col, row);
+        if (chest) {
+            showChestEvent(chest);
+            return;
+        }
+    }
+    // Visible chest tile (C) — player stepped on it
+    if (S.grid[row] && S.grid[row][col] === 'C') {
+        S.grid[row][col] = '.';  // Remove chest from map
+        _staticDirty = true;
+        scheduleRender();
+        // Generate loot based on danger level
+        const goldFound = 5 + Math.floor(Math.random() * (S.dangerLevel || 1) * 8);
+        S.goldEarned = (S.goldEarned || 0) + goldFound;
+        const xpFound = 3 + Math.floor(Math.random() * (S.dangerLevel || 1) * 4);
+        S.xpEarned = (S.xpEarned || 0) + xpFound;
+        revealEventSprite(col, row, 'discovery', '\ud83d\udcb0');
+        spawnFloatingText(col, row, '+' + goldFound + ' GP', '#daa520', 'big');
+        try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
+        if (typeof showTerrainToast === 'function') {
+            showTerrainToast('Ba\u00fa encontrado! +' + goldFound + ' GP, +' + xpFound + ' XP', 'discovery');
+        }
+        logMoveEvent([{type:'chest', gold: goldFound, xp: xpFound}]);
+        saveState();
+        return;
+    }
+
+    // ── PRIORITY 5: Safe rooms, environmental hazards (proximity), flavor text ──
+    if (typeof checkSafeRoom === 'function') checkSafeRoom(col, row);
+    if (typeof checkEnvironmentalHazards === 'function') checkEnvironmentalHazards(col, row);
+    if (typeof checkFlavorText === 'function') checkFlavorText(col, row);
+
+    // ── PRIORITY 6: POIs ──
+    const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.has(p.id));
     if (poi) {
         const spriteType = {dis:'discovery',sea:'search',dan:'danger',mys:'mystery',npc:'npc'}[poi.type] || 'discovery';
         revealEventSprite(col, row, spriteType, poi.icon);
         const poiSounds = {dis:'*brilho*', sea:'intrigante...', dan:'PERIGO!', mys:'misterioso...', npc:'alguem!'};
         const poiColors = {dis:'#c4953a', sea:'#8a9a5a', dan:'#c44a2a', mys:'#8a6aaa', npc:'#5a9a6a'};
         spawnFloatingText(col, row, poiSounds[poi.type] || '!', poiColors[poi.type] || '#c4953a', 'big');
-        // Haptic: medium for discovery, heavy for danger POI (M4)
         try {
             if (typeof tg !== 'undefined' && tg) {
                 if (poi.type === 'dan') tg.HapticFeedback.notificationOccurred('warning');
@@ -1081,16 +1110,6 @@ const poi = S.pois.find(p => p.col === col && p.row === row && !S.poisResolved.h
             }
         } catch(e) { /* canvas draw optional */ }
         setTimeout(() => showPOI(poi), 100);
-        return;
-    }
-
-    // Check exit
-    if (col === S.exitCol && row === S.exitRow) {
-        // Golden glow pulse to signal portal discovery
-        if (typeof flashScreen === 'function') flashScreen('rgba(196,149,58,0.2)');
-        spawnFloatingText(col, row, 'portal...', '#c4953a', 'big');
-        try { if (typeof tg !== 'undefined' && tg) tg.HapticFeedback.notificationOccurred('success'); } catch(e) { /* haptic optional */ }
-        setTimeout(() => showPortalOverlay(), 800);
         return;
     }
 
@@ -1146,7 +1165,7 @@ function scrollCanvasToPlayer(smooth) {
     if (!viewport) return;
     const center = hexToScreen(S.playerCol, S.playerRow);
     const tile = S.grid[S.playerRow] && S.grid[S.playerRow][S.playerCol] ? S.grid[S.playerRow][S.playerCol] : '.';
-    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
     const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
 
     const targetX = center.x - viewport.clientWidth / 2;
@@ -1174,7 +1193,7 @@ function drawVisitedTrail(ctx, timestamp) {
         if (S.fogState[key] !== 'visible') continue;
 
         const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
-        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
         const center = hexToScreen(c, r);
         const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         const x = center.x;
@@ -1251,7 +1270,7 @@ let _tapFeedbacks = [];
 function spawnTapFeedback(col, row) {
     const center = hexToScreen(col, row);
     const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
-    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
     const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
     _tapFeedbacks.push({
         x: center.x,
@@ -1269,7 +1288,7 @@ function drawHexHoverEffect(ctx, timestamp) {
     if (_hoveredHex) {
         const { x, y } = hexToScreen(_hoveredHex.col, _hoveredHex.row);
         const tile = S.grid[_hoveredHex.row] && S.grid[_hoveredHex.row][_hoveredHex.col] ? S.grid[_hoveredHex.row][_hoveredHex.col] : '.';
-        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
         const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         const age = timestamp - (_hoveredHex.time || timestamp);
         const fadeIn = Math.min(1, age / 200);
@@ -1290,7 +1309,7 @@ function drawHexHoverEffect(ctx, timestamp) {
     for (const h of _tapRevealHexes) {
         const { x, y } = hexToScreen(h.col, h.row);
         const tile = S.grid[h.row] && S.grid[h.row][h.col] ? S.grid[h.row][h.col] : '.';
-        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
         const ht = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         const age = now - h.startTime;
         const fadeOut = 1 - (age / TAP_DURATION);
@@ -1324,7 +1343,7 @@ function _drawEventSprites(ctx, timestamp) {
 
         const center = hexToScreen(sprite.col, sprite.row);
         const tile = S.grid[sprite.row] && S.grid[sprite.row][sprite.col] ? S.grid[sprite.row][sprite.col] : '.';
-        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
         const h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         const cx = center.x;
         const cy = center.y - h;
@@ -1717,7 +1736,7 @@ function _showTerrainTooltip(touch) {
     if (S.fogState[key] === 'hidden') return;
 
     const tile = S.grid[hex.row] && S.grid[hex.row][hex.col] ? S.grid[hex.row][hex.col] : '.';
-    const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+    const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
     const name = TERRAIN_NAMES[baseTile] || 'Desconhecido';
     const difficult = typeof isDifficultTerrain === 'function' && isDifficultTerrain(baseTile, S.biome);
     const impass = IMPASSABLE.has(tile);
@@ -1823,7 +1842,7 @@ function drawMinimap() {
             if (!fog || fog === 'hidden') continue;
 
             const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
-            const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
             const color = colors[baseTile] || colors['.'] || '#3a3a3a';
 
             const dist = hexDist(col, row, S.playerCol, S.playerRow);
@@ -2066,7 +2085,7 @@ function _drawMoveCostIndicators(timestamp) {
     for (const [c, r] of neighbors) {
         if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
         const tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
-        const baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        const baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
         if (IMPASSABLE_SET.has(baseTile)) continue;
 
         const isDifficult = DIFFICULT_SET.has(baseTile);
@@ -2352,7 +2371,7 @@ function drawDangerSignaling(ctx, timestamp) {
             if (!tile || IMP.has(tile)) continue;
 
             var center = hexToScreen(c, r);
-            var baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            var baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
             var h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
             var topVerts = hexTopVertices(center.x, center.y - h);
 
@@ -2417,7 +2436,7 @@ function calcReachableHexes(startCol, startRow, maxSteps) {
             var fogKey = nc + ',' + nr;
             if (S.fogState[fogKey] === 'hidden') continue;
 
-            var baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+            var baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
             var difficult = isDifficultTerrain(baseTile, S.biome);
             var ranger = typeof isRanger === 'function' && isRanger();
             var cost = (difficult && !ranger) ? 2 : 1;
@@ -2456,7 +2475,7 @@ function drawRangeHighlight(ctx, timestamp) {
         if (c === S.playerCol && r === S.playerRow) return;
 
         var tile = S.grid[r] && S.grid[r][c] ? S.grid[r][c] : '.';
-        var baseTile = tile.match(/[0-9@E]/) ? '.' : tile;
+        var baseTile = tile.match(/[0-9@EC]/) ? '.' : tile;
         var center = hexToScreen(c, r);
         var h = (TILE_HEIGHT[baseTile] || 1) * UNIT_PX;
         var topVerts = hexTopVertices(center.x, center.y - h);
