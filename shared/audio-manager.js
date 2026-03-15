@@ -94,15 +94,32 @@ const ValdoriaAudio = (() => {
         // Sync legacy mute with music mute
         if (_muted) _musicMuted = true;
 
+        // Volume 0 sem mute explícito = restaurar default 15%
+        if (_volume === 0 && !_muted && !_musicMuted) {
+            _volume = DEFAULT_VOLUME;
+            localStorage.setItem(VOLUME_KEY, _volume.toString());
+        }
+
         const unlockEvents = ['click', 'touchstart', 'keydown'];
         const unlockHandler = () => {
             _unlocked = true;
             unlockEvents.forEach(e => document.removeEventListener(e, unlockHandler, { capture: true }));
-            if (_pendingTrack && !_muted) {
+            if (_pendingTrack && !_muted && !_musicMuted) {
                 _playTrack(_pendingTrack);
             }
         };
         unlockEvents.forEach(e => document.addEventListener(e, unlockHandler, { capture: true, once: false }));
+
+        // Telegram WebApp: tentar unlock via eventos do Telegram
+        try {
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.onEvent('viewportChanged', function _tgUnlock() {
+                    Telegram.WebApp.offEvent('viewportChanged', _tgUnlock);
+                    if (!_unlocked) unlockHandler();
+                });
+            }
+        } catch(e) { /* Telegram API indisponível */ }
 
         _injectUI();
     }
