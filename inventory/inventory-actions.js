@@ -740,8 +740,13 @@ async function _navigateBack() {
         return;
     }
 
-    // No pending ops — just exit
-    await _performExit();
+    // No pending ops — show exit popup before closing
+    // [EXIT-CONFIRM] Popup only when actually exiting (modals/tabs handled above)
+    if (window.ValdoriaExitConfirm) {
+        ValdoriaExitConfirm.show();
+    } else {
+        await _performExit();
+    }
 }
 
 async function _performExit() {

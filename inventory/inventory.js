@@ -480,8 +480,9 @@ function initBackButton() {
             // exit-confirm.js popup is triggered via __valdoriaExitAction instead.
             tg.BackButton.onClick(() => { _navigateBack(); });
         }
-        // [EXIT-CONFIRM] Custom exit: inventory cleanup + transition
-        window.__valdoriaExitAction = function() { _navigateBack(); };
+        // [EXIT-CONFIRM] Custom exit: calls _performExit() directly (skip modal checks,
+        // popup already confirmed the exit intent)
+        window.__valdoriaExitAction = function() { _performExit(); };
     } catch(e) { console.warn('[INVENTORY] BackButton setup:', e); }
 }
 
