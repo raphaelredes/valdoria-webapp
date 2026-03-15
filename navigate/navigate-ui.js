@@ -292,6 +292,7 @@ function handleLocationTap(locId) {
     // Open panel in peek mode (compact), swipe up for full
     panel.classList.remove('full');
     panel.classList.add('open', 'peek');
+    document.getElementById('map-viewport').classList.add('panel-open');
     _haptic('open');
     // Check if content overflows in full mode
     requestAnimationFrame(() => {
@@ -325,6 +326,7 @@ function createActionBtn(text, className, onClick) {
 function closeInfoPanel() {
     const panel = document.getElementById('info-panel');
     panel.classList.remove('open', 'peek', 'full');
+    document.getElementById('map-viewport').classList.remove('panel-open');
     S.selectedLoc = null;
     clearHighlight();
 }
@@ -598,6 +600,9 @@ function setupSwipeDismiss() {
             dragging = false;
             panel.classList.remove('dragging');
             _haptic('tap');
+            // Scroll content to top when expanding
+            const scrollArea = panel.querySelector('.info-content-scroll');
+            if (scrollArea) scrollArea.scrollTop = 0;
         }
     }, { passive: true });
 
