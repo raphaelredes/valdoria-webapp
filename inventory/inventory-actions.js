@@ -1117,3 +1117,5 @@ function getAllyName(npcId) {
     return ally ? ally.n : npcId;
 }
 
+// ── Bootstrap (must be last file loaded) ──
+init();
