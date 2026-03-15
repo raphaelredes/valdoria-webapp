@@ -96,20 +96,80 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
     const r5 = tileRand(col, row, 5);
 
     if (biome === 'desert') {
-        // Cactus cluster
-        const tx = cx + (r1 - 0.5) * 8;
-        const ty = cy + (r2 - 0.5) * 4;
+        // Saguaro cactus with curved arms
+        var tx = cx + (r1 - 0.5) * 8;
+        var ty = cy + (r2 - 0.5) * 4;
+        // Main trunk
         ctx.fillStyle = '#3a6a2a';
         ctx.fillRect(tx - 2, ty - 10, 4, 14);
+        // Rounded top
+        ctx.beginPath();
+        ctx.arc(tx, ty - 10, 2, Math.PI, 0);
+        ctx.fill();
+        // Left arm (curved upward)
         ctx.fillRect(tx - 6, ty - 6, 4, 3);
-        ctx.fillRect(tx + 2, ty - 8, 4, 3);
-        // Second smaller cactus
+        ctx.fillRect(tx - 6, ty - 8, 2.5, 3);
+        ctx.beginPath();
+        ctx.arc(tx - 4.8, ty - 8, 1.2, Math.PI, 0);
+        ctx.fill();
+        // Right arm (curved upward)
+        ctx.fillRect(tx + 2, ty - 7, 4, 3);
+        ctx.fillRect(tx + 3.5, ty - 10, 2.5, 4);
+        ctx.beginPath();
+        ctx.arc(tx + 4.8, ty - 10, 1.2, Math.PI, 0);
+        ctx.fill();
+
+        // Shadow on trunk (left side darker)
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        ctx.fillRect(tx - 2, ty - 10, 1.5, 14);
+
+        // Spines — medium+ only
+        if (_tileDetail >= 1) {
+            ctx.strokeStyle = 'rgba(160,200,100,0.3)';
+            ctx.lineWidth = 0.3;
+            for (var si = 0; si < 4; si++) {
+                var sy = ty - 9 + si * 3;
+                ctx.beginPath();
+                ctx.moveTo(tx - 2, sy);
+                ctx.lineTo(tx - 3.5, sy - 0.5);
+                ctx.moveTo(tx + 2, sy);
+                ctx.lineTo(tx + 3.5, sy - 0.5);
+                ctx.stroke();
+            }
+        }
+
+        // Cactus flower on top — full only
+        if (_tileDetail >= 2 && r5 > 0.5) {
+            ctx.fillStyle = '#e0607a';
+            ctx.beginPath();
+            ctx.arc(tx, ty - 12, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#f0a030';
+            ctx.beginPath();
+            ctx.arc(tx, ty - 12, 0.6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Second smaller barrel cactus
         if (r3 > 0.35) {
-            const tx2 = cx + (r3 - 0.5) * 14;
-            const ty2 = cy + (r4 - 0.5) * 5;
+            var tx2 = cx + (r3 - 0.5) * 14;
+            var ty2 = cy + (r4 - 0.5) * 5;
             ctx.fillStyle = '#2a5a1a';
             ctx.fillRect(tx2 - 1.5, ty2 - 6, 3, 8);
+            ctx.beginPath();
+            ctx.arc(tx2, ty2 - 6, 1.5, Math.PI, 0);
+            ctx.fill();
+            // Vertical ribs — full only
+            if (_tileDetail >= 2) {
+                ctx.strokeStyle = 'rgba(20,40,10,0.15)';
+                ctx.lineWidth = 0.3;
+                ctx.beginPath();
+                ctx.moveTo(tx2, ty2 - 6);
+                ctx.lineTo(tx2, ty2 + 2);
+                ctx.stroke();
+            }
         }
+
         // Small rocks at base
         ctx.fillStyle = '#7a6a4a';
         ctx.beginPath();
@@ -186,11 +246,13 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
             ctx.fillStyle = '#e0e8f0';
             ctx.fill();
         }
-        // Snow mound
-        ctx.fillStyle = 'rgba(230,240,250,0.15)';
-        ctx.beginPath();
-        ctx.ellipse(cx + 3, cy + 3, 5, 2, 0, 0, Math.PI * 2);
-        ctx.fill();
+        // Snow mound — medium+ only
+        if (_tileDetail >= 1) {
+            ctx.fillStyle = 'rgba(230,240,250,0.15)';
+            ctx.beginPath();
+            ctx.ellipse(cx + 3, cy + 3, 5, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
     } else if (biome === 'plains') {
         // Rounded deciduous trees (2-3)
@@ -208,11 +270,13 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
             ctx.arc(tx, ty - 6 * s, 6 * s, 0, Math.PI * 2);
             ctx.fillStyle = i === 0 ? '#3a7a2a' : '#2a6a1a';
             ctx.fill();
-            // Highlight
-            ctx.fillStyle = 'rgba(255,255,255,0.08)';
-            ctx.beginPath();
-            ctx.arc(tx - 1 * s, ty - 7 * s, 3 * s, 0, Math.PI * 2);
-            ctx.fill();
+            // Highlight — medium+ only
+            if (_tileDetail >= 1) {
+                ctx.fillStyle = 'rgba(255,255,255,0.08)';
+                ctx.beginPath();
+                ctx.arc(tx - 1 * s, ty - 7 * s, 3 * s, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
         // Flowers
         if (r4 > 0.5) {
@@ -241,15 +305,17 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
             ctx.lineTo(sx - 0.5, sy);
             ctx.closePath();
             ctx.fill();
-            // Highlight edge
-            ctx.fillStyle = 'rgba(100,100,140,0.3)';
-            ctx.beginPath();
-            ctx.moveTo(sx - 2, sy - sLen);
-            ctx.lineTo(sx - 0.5, sy - sLen);
-            ctx.lineTo(sx - 0.2, sy);
-            ctx.lineTo(sx - 0.5, sy);
-            ctx.closePath();
-            ctx.fill();
+            // Highlight edge — medium+ only
+            if (_tileDetail >= 1) {
+                ctx.fillStyle = 'rgba(100,100,140,0.3)';
+                ctx.beginPath();
+                ctx.moveTo(sx - 2, sy - sLen);
+                ctx.lineTo(sx - 0.5, sy - sLen);
+                ctx.lineTo(sx - 0.2, sy);
+                ctx.lineTo(sx - 0.5, sy);
+                ctx.closePath();
+                ctx.fill();
+            }
         }
         // Glowing crystal cluster (1-2)
         const crystals = r5 > 0.4 ? 2 : 1;
@@ -260,11 +326,13 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
             const cy2 = cy + (tileRand(col, row, 72 + i) - 0.3) * 5;
             const cIdx = Math.floor(tileRand(col, row, 74 + i) * 3);
             const cH = 4 + tileRand(col, row, 76 + i) * 4;
-            // Glow
-            ctx.fillStyle = glowColors[cIdx];
-            ctx.beginPath();
-            ctx.arc(cx2, cy2 - cH * 0.5, cH * 1.5, 0, Math.PI * 2);
-            ctx.fill();
+            // Glow — medium+ only
+            if (_tileDetail >= 1) {
+                ctx.fillStyle = glowColors[cIdx];
+                ctx.beginPath();
+                ctx.arc(cx2, cy2 - cH * 0.5, cH * 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
             // Crystal body (angled triangle)
             ctx.fillStyle = crystalColors[cIdx];
             ctx.beginPath();
@@ -295,11 +363,13 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
             ctx.beginPath();
             ctx.ellipse(mx, my, mSize, mSize * 0.5, 0, Math.PI, 0);
             ctx.fill();
-            // Glow
-            ctx.fillStyle = 'rgba(80,200,120,0.08)';
-            ctx.beginPath();
-            ctx.arc(mx, my, mSize * 2.5, 0, Math.PI * 2);
-            ctx.fill();
+            // Glow — medium+ only
+            if (_tileDetail >= 1) {
+                ctx.fillStyle = 'rgba(80,200,120,0.08)';
+                ctx.beginPath();
+                ctx.arc(mx, my, mSize * 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
 
     } else if (biome === 'graveyard') {
@@ -324,17 +394,19 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
         ctx.moveTo(tx + 1, ty - 6);
         ctx.quadraticCurveTo(tx + 3, ty - 8, tx + 6, ty - 7);
         ctx.stroke();
-        // Thin twigs
-        ctx.lineWidth = 0.6;
-        ctx.strokeStyle = '#3a2a2a';
-        ctx.beginPath();
-        ctx.moveTo(tx + 8, ty - 12);
-        ctx.lineTo(tx + 10, ty - 14);
-        ctx.moveTo(tx - 7, ty - 11);
-        ctx.lineTo(tx - 9, ty - 13);
-        ctx.moveTo(tx + 6, ty - 7);
-        ctx.lineTo(tx + 7, ty - 9);
-        ctx.stroke();
+        // Thin twigs — medium+ only
+        if (_tileDetail >= 1) {
+            ctx.lineWidth = 0.6;
+            ctx.strokeStyle = '#3a2a2a';
+            ctx.beginPath();
+            ctx.moveTo(tx + 8, ty - 12);
+            ctx.lineTo(tx + 10, ty - 14);
+            ctx.moveTo(tx - 7, ty - 11);
+            ctx.lineTo(tx - 9, ty - 13);
+            ctx.moveTo(tx + 6, ty - 7);
+            ctx.lineTo(tx + 7, ty - 9);
+            ctx.stroke();
+        }
         // Second dead tree (smaller, 70% chance)
         if (r3 > 0.3) {
             const tx2 = cx + (r3 - 0.2) * 12;
@@ -374,10 +446,10 @@ function drawTreeDecoration(ctx, cx, cy, biome, col, row) {
         ctx.moveTo(tombX - 1.5, tombY - 1.5);
         ctx.lineTo(tombX + 1.5, tombY - 1.5);
         ctx.stroke();
-        // Tilted cross (different spot)
-        if (r1 > 0.4) {
-            const crx = cx + (r2 - 0.6) * 14;
-            const cry = cy + (r5 * 0.3) * 4;
+        // Tilted cross — medium+ only (uses save/restore/rotate)
+        if (_tileDetail >= 1 && r1 > 0.4) {
+            var crx = cx + (r2 - 0.6) * 14;
+            var cry = cy + (r5 * 0.3) * 4;
             ctx.save();
             ctx.translate(crx, cry);
             ctx.rotate(-0.15);
