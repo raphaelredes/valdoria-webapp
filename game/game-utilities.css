@@ -12,6 +12,32 @@
     margin-bottom: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     position: relative;
+    overflow: hidden;
+}
+
+/* Collapsible census body */
+.hall-census-body {
+    max-height: 200px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    opacity: 1;
+}
+.hall-census.collapsed .hall-census-body {
+    max-height: 0;
+    opacity: 0;
+}
+
+/* Toggle arrow on census title */
+.hall-census-toggle {
+    display: inline-block;
+    font-size: 10px;
+    margin-left: 6px;
+    opacity: 0.5;
+    transition: transform 0.3s ease;
+    vertical-align: middle;
+}
+.hall-census.collapsed .hall-census-toggle {
+    transform: rotate(-90deg);
 }
 
 .hall-census::before {
@@ -235,22 +261,37 @@
     margin-top: 2px;
 }
 
-.char-card-hp {
-    height: 5px;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 3px;
+.char-card-bars {
+    display: flex;
+    gap: 4px;
     margin-top: 4px;
+    align-items: center;
+}
+
+.char-card-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
     overflow: hidden;
 }
 
-.char-card-hp-fill {
+.char-card-bar-fill {
     height: 100%;
-    border-radius: 3px;
+    border-radius: 2px;
     transition: width 0.4s ease;
-    box-shadow: 0 0 4px rgba(74, 222, 128, 0.2);
 }
 
-.char-card-hp-fill.hp-critical {
+.char-card-bar-fill.bar-hp {
+    box-shadow: 0 0 4px rgba(74, 222, 128, 0.15);
+}
+
+.char-card-bar-fill.bar-mp {
+    background: var(--v-mp, #60a5fa);
+    box-shadow: 0 0 4px rgba(96, 165, 250, 0.15);
+}
+
+.char-card-bar-fill.hp-critical {
     animation: hpLowPulse 0.8s ease-in-out infinite;
 }
 
@@ -449,6 +490,17 @@
 .skeleton-line.short { width: 60%; }
 .skeleton-line.medium { width: 80%; }
 .skeleton-line.long { width: 95%; }
+.skeleton-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.04);
+    margin-top: 2px;
+}
+.skeleton-bar-row {
+    display: flex;
+    gap: 4px;
+}
+.skeleton-bar-row .skeleton-bar { flex: 1; }
 @keyframes skeletonPulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
@@ -660,28 +712,40 @@
     color: #ef4444;
     border-color: rgba(239,68,68,0.4) !important;
 }
-/* Long press indicator on char cards */
+/* Delete button on char cards — always visible on mobile */
 .char-card-delete {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 24px;
-    height: 24px;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    background: rgba(239,68,68,0.15);
-    color: #ef4444;
-    font-size: 12px;
-    display: none;
+    background: rgba(239,68,68,0.1);
+    color: rgba(239,68,68,0.4);
+    font-size: 10px;
+    display: flex;
     align-items: center;
     justify-content: center;
     border: none;
     cursor: pointer;
     z-index: 2;
+    transition: color 0.2s, background 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
-.char-card:hover .char-card-delete,
-.char-card.show-delete .char-card-delete {
-    display: flex;
+.char-card-delete.pressing {
+    color: #ef4444;
+    background: rgba(239,68,68,0.25);
 }
-.char-card {
-    position: relative;
+
+/* Card selection animation */
+.char-select-list.selecting .char-card:not(.char-card-selected) {
+    opacity: 0.4;
+    transform: scale(0.97);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.char-card-selected {
+    border-color: var(--v-gold, #c4953a) !important;
+    box-shadow: 0 0 16px rgba(196, 149, 58, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    transform: scale(1.01);
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }

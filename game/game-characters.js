@@ -80,9 +80,11 @@ function renderCharacterSelect(data) {
     let html = '<div id="ptr-indicator" class="ptr-indicator"></div>';
 
     // ─── Census Card ───
+    var _censusWasCollapsed = false;
     if (census && census.total > 0) {
         html += '<div class="hall-census">';
-        html += '<div class="hall-census-title">\ud83c\udff0 Estat\u00edsticas do Reino</div>';
+        html += '<div class="hall-census-title" id="census-toggle">\ud83c\udff0 Estat\u00edsticas do Reino <span class="hall-census-toggle">\u25bc</span></div>';
+        html += '<div class="hall-census-body">';
         html += '<div class="hall-census-grid">';
         html += '<div class="hall-census-stat"><span class="hall-census-icon">\ud83d\udc65</span><span class="hall-census-val">' + census.total + '</span><span class="hall-census-label">Aventureiros</span></div>';
         // Top races
@@ -113,7 +115,10 @@ function renderCharacterSelect(data) {
         if (highlights.length > 0) {
             html += '<div class="hall-census-highlights">' + highlights.join(' <span class="hall-sep">\u00b7</span> ') + '</div>';
         }
-        html += '</div>';
+        html += '</div>'; // close hall-census-body
+        html += '</div>'; // close hall-census
+        // Restore collapsed state from localStorage
+        try { _censusWasCollapsed = localStorage.getItem('valdoria_census_collapsed') === '1'; } catch(e) {}
     }
 
     // ─── Section Title ───
@@ -134,9 +139,11 @@ function renderCharacterSelect(data) {
             var activeClass = c.is_active ? ' char-card-active' : '';
             var activeBadge = c.is_active ? '<span class="char-card-badge">\u2b50 Ativo</span>' : '';
 
-            // HP bar percentage
+            // HP + MP bar percentages
             var hpPct = c.max_hp > 0 ? Math.round((c.hp / c.max_hp) * 100) : 100;
             var hpColor = hpPct > 50 ? 'var(--v-hp, #4ade80)' : hpPct > 25 ? '#fbbf24' : '#ef4444';
+            var mpPct = c.max_mp > 0 ? Math.round((c.mp / c.max_mp) * 100) : 0;
+            var hasMP = c.max_mp > 0;
 
             // Last played relative time
             var lastPlayed = '';
@@ -161,9 +168,14 @@ function renderCharacterSelect(data) {
             if (c.active_quests > 0) html += '<span>\ud83d\udcdc ' + c.active_quests + '</span>';
             if (lastPlayed) html += '<span>\u23f0 ' + lastPlayed + '</span>';
             html += '</div>';
-            // HP bar
+            // HP + MP bars
             var hpCritCls = hpPct <= 25 ? ' hp-critical' : '';
-            html += '<div class="char-card-hp"><div class="char-card-hp-fill' + hpCritCls + '" style="width:' + hpPct + '%;background:' + hpColor + '"></div></div>';
+            html += '<div class="char-card-bars">';
+            html += '<div class="char-card-bar"><div class="char-card-bar-fill bar-hp' + hpCritCls + '" style="width:' + hpPct + '%;background:' + hpColor + '"></div></div>';
+            if (hasMP) {
+                html += '<div class="char-card-bar"><div class="char-card-bar-fill bar-mp" style="width:' + mpPct + '%"></div></div>';
+            }
+            html += '</div>';
             html += '</div>';
             html += '<div class="char-card-arrow">\u25b8</div>';
             html += '<button class="char-card-delete" data-del-id="' + _escChar(c.char_id) + '" data-del-name="' + fullName + '" aria-label="Excluir personagem">\u2715</button>';
@@ -184,6 +196,22 @@ function renderCharacterSelect(data) {
     html += '</div>';
 
     contentEl.innerHTML = html;
+
+    // Census collapsible toggle
+    var censusToggle = document.getElementById('census-toggle');
+    var censusCard = contentEl.querySelector('.hall-census');
+    if (censusToggle && censusCard) {
+        if (_censusWasCollapsed) censusCard.classList.add('collapsed');
+        censusToggle.addEventListener('click', function() {
+            censusCard.classList.toggle('collapsed');
+            try {
+                localStorage.setItem('valdoria_census_collapsed', censusCard.classList.contains('collapsed') ? '1' : '0');
+            } catch(e) {}
+        });
+        censusToggle.style.cursor = 'pointer';
+        censusToggle.style.userSelect = 'none';
+    }
+
     _initPullToRefresh();
 
     // Bind events: character cards
@@ -289,9 +317,15 @@ async function _selectCharacter(charId) {
     _selectingChar = true;
     console.debug('[GAME] _selectCharacter:', charId);
     S.charId = charId;
-    // Animate card press before loading
+    // Haptic feedback on card tap (Telegram WebApp API)
+    if (typeof haptic === 'function') haptic('medium');
+    // Animate: selected card glows, others fade
+    var listEl = document.querySelector('.char-select-list');
     var pressedCard = document.querySelector('.char-card[data-char-id="' + charId + '"]');
-    if (pressedCard) { pressedCard.style.transform = 'scale(0.97)'; pressedCard.style.opacity = '0.7'; }
+    if (listEl) listEl.classList.add('selecting');
+    if (pressedCard) pressedCard.classList.add('char-card-selected');
+    // Brief delay for visual feedback before loading overlay
+    await new Promise(function(r) { setTimeout(r, 250); });
     showLoading();
 
     const startBody = { char_id: charId };
@@ -394,6 +428,7 @@ function _showCharSelectSkeleton() {
         html += '<div class="skeleton-line long"></div>';
         html += '<div class="skeleton-line medium"></div>';
         html += '<div class="skeleton-line short"></div>';
+        html += '<div class="skeleton-bar-row"><div class="skeleton-bar"></div><div class="skeleton-bar"></div></div>';
         html += '</div></div>';
     }
     if (contentEl) contentEl.innerHTML = html;
