@@ -837,7 +837,7 @@ function cacheScreen(screen) {
         // Don't cache screens with active text input or timers — stale state on reload
         if (screen && (screen.waiting_for_text || screen.timer)) return;
         localStorage.setItem(SCREEN_CACHE_KEY, JSON.stringify({
-            uid: S.uid, ts: Date.now(), screen,
+            uid: S.uid, charId: S.charId || '', ts: Date.now(), screen,
         }));
     } catch (e) { /* quota exceeded — ignore */ }
 }
@@ -846,9 +846,11 @@ function loadCachedScreen() {
     try {
         const raw = localStorage.getItem(SCREEN_CACHE_KEY);
         if (!raw) return null;
-        const { uid, ts, screen } = JSON.parse(raw);
-        // Validate by user ID (not token — token changes each session)
-        if (uid !== S.uid || Date.now() - ts > SCREEN_CACHE_TTL) {
+        const parsed = JSON.parse(raw);
+        const { uid, ts, screen } = parsed;
+        // Validate by user ID + charId (not token — token changes each session)
+        var charId = parsed.charId || '';
+        if (uid !== S.uid || (S.charId && charId && S.charId !== charId) || Date.now() - ts > SCREEN_CACHE_TTL) {
             localStorage.removeItem(SCREEN_CACHE_KEY);
             return null;
         }
