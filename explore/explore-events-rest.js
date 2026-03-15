@@ -83,10 +83,31 @@ function addExitOption(container, icon, title, desc, color, onClick) {
 // ═══════════════════════════════════════════════════════
 // CAMP SYSTEM (Short Rest with food)
 // ═══════════════════════════════════════════════════════
+var CAMP_ATMOSPHERE = {
+    forest: ['A fogueira crepita suavemente entre as arvores. O cheiro de musgo e terra umida preenche o ar.', 'Grilos cantam ao redor. A luz das chamas danca nas folhas, criando sombras hipnoticas.'],
+    plains: ['O vento da planicie sopra gentilmente. As estrelas brilham vastas acima de voce.', 'A grama alta sussurra ao redor. Um momento de paz na imensidao.'],
+    desert: ['O calor do dia finalmente cede. A noite do deserto traz um frio inesperado.', 'As dunas brilham prateadas sob a lua. O silencio e quase meditativo.'],
+    snow: ['A neve abafa todos os sons. Apenas o crepitar da fogueira quebra o silencio gelado.', 'Cristais de gelo brilham a luz das chamas como pequenos diamantes.'],
+    swamp: ['O ar pesado do pantano se mistura com a fumaca da fogueira. Luzes estranhas brilham ao longe.', 'Sapos coaxam na escuridao. A fogueira mantem as criaturas do pantano a distancia.'],
+    mountain: ['O vento uiva entre os picos. Daqui de cima, o mundo parece pequeno e distante.', 'A fogueira luta contra o vento da montanha. Cada rajada faz as chamas dancarem.'],
+    volcanic: ['O chao emana calor. Fissuras distantes brilham alaranjadas na escuridao.', 'O ar tremula com o calor. A fogueira parece quase desnecessaria neste lugar.'],
+    cave: ['Gotas de agua ecoam na escuridao da caverna. A fogueira projeta sombras imensas nas paredes.', 'Estalactites brilham a luz do fogo. Um refugio seguro nas profundezas.'],
+    graveyard: ['O silencio e denso entre as lapides. A fogueira e sua unica companhia neste lugar.', 'A nevoa se arrasta ao redor. Melhor descansar rapido e seguir em frente.'],
+};
+
 function showCampOverlay() {
-    const overlay = document.getElementById('camp-overlay');
-    const foodList = document.getElementById('camp-food-list');
+    var overlay = document.getElementById('camp-overlay');
+    var foodList = document.getElementById('camp-food-list');
     foodList.innerHTML = '';
+
+    // Show atmospheric narration before camp menu
+    var biome = S.biome || 'forest';
+    var pool = CAMP_ATMOSPHERE[biome] || CAMP_ATMOSPHERE.forest;
+    var atmoText = pool[Math.floor(Math.random() * pool.length)];
+    var atmoDiv = document.createElement('div');
+    atmoDiv.style.cssText = 'text-align:center;font-size:12px;color:#a09484;font-style:italic;line-height:1.5;margin-bottom:8px;padding:0 8px';
+    atmoDiv.textContent = atmoText;
+    foodList.appendChild(atmoDiv);
 
     // D&D 5e: Check remaining Hit Dice
     const maxHD = (S.charData && S.charData.mhd) || 1;
@@ -616,28 +637,62 @@ function _showCampDiceRoll(roll, conMod, bonus, total, foodName, hdType, mpRecov
 }
 
 function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpRecovered) {
-    const overlay = document.getElementById('camp-result-overlay');
-    document.getElementById('camp-result-text').textContent = `+${total} HP Restaurados`;
+    var overlay = document.getElementById('camp-result-overlay');
+    var resultText = document.getElementById('camp-result-text');
+    var detailEl = document.getElementById('camp-result-detail');
 
-    const sign = conMod >= 0 ? '+' : '';
-    let detail = `${hdType || '1d8'} = ${roll} ${sign} ${conMod} (CON) = ${roll + conMod}`;
-    if (bonus > 0) {
-        detail += `\n${foodName}: +${bonus} HP`;
-    }
-    if (mpRecovered > 0) {
-        detail += `\n\u2728 +${mpRecovered} MP recuperado`;
-    }
-    const maxHD = (S.charData && S.charData.mhd) || 1;
-    const hdRemaining = Math.max(0, maxHD - (S._hdUsed || 0));
-    detail += `\n\nHP: ${getCurrentHP()}/${getMaxHP()} \u2502 Dados de Vida: ${hdRemaining}/${maxHD}`;
-    document.getElementById('camp-result-detail').textContent = detail;
+    // Dramatic reveal: show total with animation
+    resultText.textContent = '+' + total + ' HP Restaurados';
+    resultText.style.animation = 'none';
+    resultText.offsetHeight; // force reflow
+    resultText.style.animation = 'resultReveal 0.5s var(--v-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1))';
+
+    var sign = conMod >= 0 ? '+' : '';
+    var detail = (hdType || '1d8') + ' = ' + roll + ' ' + sign + ' ' + conMod + ' (CON) = ' + (roll + conMod);
+    if (bonus > 0) detail += '\n' + foodName + ': +' + bonus + ' HP';
+    if (mpRecovered > 0) detail += '\n\u2728 +' + mpRecovered + ' MP recuperado';
+
+    var maxHD = (S.charData && S.charData.mhd) || 1;
+    var hdRemaining = Math.max(0, maxHD - (S._hdUsed || 0));
+    var currentHP = getCurrentHP();
+    var maxHP = getMaxHP();
+    var hpPct = Math.max(2, Math.round((currentHP / maxHP) * 100));
+    var hpColor = hpPct > 60 ? '#4a8' : hpPct > 25 ? '#dca028' : '#c44';
+
+    // Add HP bar visualization
+    detail += '\n';
+    detailEl.textContent = detail;
+
+    // Animated HP bar below detail
+    var barContainer = document.createElement('div');
+    barContainer.style.cssText = 'margin-top:8px;padding:0 12px';
+    barContainer.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#8a7a68">' +
+        '<span>HP</span>' +
+        '<div style="flex:1;height:8px;background:rgba(0,0,0,0.3);border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,0.08)">' +
+        '<div id="camp-hp-fill" style="height:100%;background:' + hpColor + ';border-radius:3px;transition:width 0.8s ease;width:0%"></div>' +
+        '</div>' +
+        '<span style="color:' + hpColor + '">' + currentHP + '/' + maxHP + '</span>' +
+        '</div>' +
+        '<div style="text-align:center;font-size:11px;color:#8a7a68;margin-top:4px">Dados de Vida: ' + hdRemaining + '/' + maxHD + '</div>';
+    detailEl.parentElement.appendChild(barContainer);
 
     overlay.classList.add('active');
     if (window.vHaptic) vHaptic.success();
+    if (typeof flashScreen === 'function') flashScreen('rgba(68,170,136,0.15)');
+
+    // Animate HP bar fill after a short delay
+    setTimeout(function () {
+        var fill = document.getElementById('camp-hp-fill');
+        if (fill) fill.style.width = hpPct + '%';
+    }, 200);
 }
 
 function closeCampResult() {
-    document.getElementById('camp-result-overlay').classList.remove('active');
+    var campResultOverlay = document.getElementById('camp-result-overlay');
+    // Remove dynamically added HP bar
+    var bars = campResultOverlay.querySelectorAll('div[style*="margin-top:8px"]');
+    bars.forEach(function (b) { b.remove(); });
+    campResultOverlay.classList.remove('active');
     if (typeof setCampfireActive === 'function') setCampfireActive(false);
     // Reset low HP alert flag so it can trigger again after camp
     S._lowHPAlertShown = false;
@@ -981,23 +1036,38 @@ function showDeathSaves() {
                 } else {
                     if (window.vHaptic) vHaptic.notify('error');
                 }
-                if (roll === 1) flashScreen('rgba(200,0,0,0.3)');
+                if (roll === 1) {
+                    flashScreen('rgba(200,0,0,0.4)');
+                    // Screen shake on critical fail
+                    if (typeof document.body.animate === 'function') {
+                        document.body.animate([
+                            { transform: 'translateX(-3px)' },
+                            { transform: 'translateX(3px)' },
+                            { transform: 'translateX(-2px)' },
+                            { transform: 'translateX(2px)' },
+                            { transform: 'translateX(0)' },
+                        ], { duration: 300, easing: 'ease-out' });
+                    }
+                }
 
                 if (typeof disposeDice3D === 'function') disposeDice3D();
 
                 if (successes >= 3) {
+                    if (typeof flashScreen === 'function') flashScreen('rgba(68,170,136,0.2)');
                     setTimeout(function () {
                         if (_done) return; _done = true;
                         overlay.classList.remove('active');
                         S.hpChange = -(S.charData.hp - 1);
                         updateHP(1);
                         saveState();
+                        showTerrainToast('Voce se estabiliza. A escuridao recua.', 'ranger');
                     }, 2500);
                 } else if (failures >= 3) {
+                    if (typeof flashScreen === 'function') flashScreen('rgba(100,0,0,0.4)');
                     setTimeout(function () {
                         if (_done) return; _done = true;
                         finishExploration('death');
-                    }, 2500);
+                    }, 3000);
                 } else {
                     setTimeout(rollDeathSave, 1200);
                 }

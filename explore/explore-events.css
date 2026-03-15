@@ -306,3 +306,17 @@ body.perf-medium .portal-overlay.active {
     0%, 100% { background: rgba(80, 20, 20, 0.96); }
     50% { background: rgba(90, 25, 25, 0.96); }
 }
+
+
+/* ═══════════════════════════════════════════
+   OUTCOME OVERLAY ENTRANCE
+   ═══════════════════════════════════════════ */
+.outcome-overlay.active .outcome-title {
+    animation: resultReveal 0.4s var(--v-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+}
+.outcome-overlay.active .outcome-rewards {
+    animation: fadeInUp 0.4s ease 0.15s both;
+}
+.outcome-overlay.active .v-skip-btn {
+    animation: fadeInUp 0.3s ease 0.3s both;
+}

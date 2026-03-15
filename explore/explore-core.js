@@ -568,13 +568,24 @@ function updateStepCounter() {
 
 function initBottomBar() {
     updateStepCounter();
-    const pips = document.querySelectorAll('.danger-pips .pip');
-    pips.forEach((pip, i) => {
+    var pips = document.querySelectorAll('.danger-pips .pip');
+    pips.forEach(function (pip, i) {
         if (i < S.dangerLevel) {
             pip.classList.add('filled');
             if (i === S.dangerLevel - 1) pip.classList.add('pulse');
         }
     });
+    // Danger tension visual on map
+    updateDangerTension();
+}
+
+function updateDangerTension() {
+    var viewport = document.getElementById('map-viewport');
+    if (!viewport) return;
+    var dl = S.dangerLevel || 1;
+    viewport.classList.remove('danger-high', 'danger-extreme');
+    if (dl >= 4) viewport.classList.add('danger-extreme');
+    else if (dl >= 3) viewport.classList.add('danger-high');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1015,8 +1026,9 @@ function resetStepsWithoutRest() {
 
 // Update danger pips display when danger level changes
 function updateDangerPips() {
-    const pips = document.querySelectorAll('.danger-pips .pip');
-    const lvl = Math.floor(S.dangerLevel || 1);
+    var pips = document.querySelectorAll('.danger-pips .pip');
+    var lvl = Math.floor(S.dangerLevel || 1);
+    if (typeof updateDangerTension === 'function') updateDangerTension();
     pips.forEach((pip, i) => {
         pip.classList.toggle('filled', i < lvl);
     });
@@ -1024,10 +1036,17 @@ function updateDangerPips() {
 
 // Update camp button visual hints based on exhaustion and HP
 function updateCampButtonHint() {
-    const btn = document.getElementById('btn-camp');
+    var btn = document.getElementById('btn-camp');
     if (!btn) return;
     btn.classList.toggle('has-exhaustion', S.exhaustion > 0);
-    btn.classList.toggle('low-hp', typeof getHPPercent === 'function' && getHPPercent() < 50);
+    var lowHP = typeof getHPPercent === 'function' && getHPPercent() < 50;
+    btn.classList.toggle('low-hp', lowHP);
+    // Low HP vignette on map viewport
+    var viewport = document.getElementById('map-viewport');
+    if (viewport) {
+        var criticalHP = typeof getHPPercent === 'function' && getHPPercent() <= 25;
+        viewport.classList.toggle('low-hp-active', criticalHP);
+    }
 }
 
 function getExhaustionPenalty() {
@@ -1232,18 +1251,37 @@ const FLAVOR_TEXTS = {
 // Check and trigger a flavor event (called every step)
 function checkFlavorEvent() {
     // Don't trigger while any overlay is active
-    const overlayIds = ['dm-overlay', 'check-overlay', 'outcome-overlay', 'combat-overlay', 'portal-overlay', 'encounter-overlay', 'exit-risk-overlay', 'death-overlay', 'camp-overlay', 'camp-result-overlay', 'lowhp-overlay'];
-    for (const id of overlayIds) {
-        if (document.getElementById(id)?.classList.contains('active')) return;
+    var overlayIds = ['dm-overlay', 'check-overlay', 'outcome-overlay', 'combat-overlay', 'portal-overlay', 'encounter-overlay', 'exit-risk-overlay', 'death-overlay', 'camp-overlay', 'camp-result-overlay', 'lowhp-overlay'];
+    for (var i = 0; i < overlayIds.length; i++) {
+        var el = document.getElementById(overlayIds[i]);
+        if (el && el.classList.contains('active')) return;
     }
     S._flavorSteps++;
-    // Trigger every 3-4 steps (random threshold)
-    const threshold = 3 + Math.floor(Math.random() * 2); // 3 or 4
+    // Trigger every 4-6 steps (slightly less frequent, more impactful)
+    var threshold = 4 + Math.floor(Math.random() * 3); // 4, 5, or 6
     if (S._flavorSteps < threshold) return;
     S._flavorSteps = 0;
 
-    const pool = FLAVOR_TEXTS[S.biome] || FLAVOR_TEXTS.forest;
-    const text = pool[Math.floor(Math.random() * pool.length)];
+    var pool = FLAVOR_TEXTS[S.biome] || FLAVOR_TEXTS.forest;
+    // Context-aware: add HP-based flavor occasionally
+    var hpPct = typeof getHPPercent === 'function' ? getHPPercent() : 100;
+    if (hpPct <= 25 && Math.random() < 0.4) {
+        var lowHPFlavors = [
+            'Seus ferimentos pulsam com cada passo. Voce precisa de descanso.',
+            'O sangue mancha suas roupas. Cada movimento e um esforco.',
+            'Sua visao escurece nas bordas. Quanto mais voce aguenta?',
+            'A dor e constante agora. Voce se apoia na parede para nao cair.',
+        ];
+        pool = lowHPFlavors;
+    } else if (S.exhaustion >= 2 && Math.random() < 0.3) {
+        var exhaustFlavors = [
+            'O cansaco pesa em cada musculo. Seus passos ficam mais lentos.',
+            'Voce precisa parar para recuperar o folego. A exaustao cobra seu preco.',
+            'Suas pernas tremem de fadiga. Quanto mais longe voce pode ir?',
+        ];
+        pool = exhaustFlavors;
+    }
+    var text = pool[Math.floor(Math.random() * pool.length)];
     showTerrainToast(text, 'flavor');
 }
 

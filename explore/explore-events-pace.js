@@ -421,20 +421,39 @@ function showExploreArea() {
     choicesEl.appendChild(restBtn);
 
     // Secret passage check (Investigation DC 15)
-    const secretBtn = document.createElement('button');
+    var secretBtn = document.createElement('button');
     secretBtn.className = 'dm-choice-btn';
-    const invMod2 = getAbilityMod('inv');
-    const invProf2 = S.charData && S.charData.sp && S.charData.sp.includes('inv') ? (S.charData.pb || 2) : 0;
-    const invChance2 = Math.max(5, Math.min(95, (21 - 15 + invMod2 + invProf2) * 5));
-    const invShort2 = STAT_SHORT['inv'] || 'INV';
-    secretBtn.innerHTML = `\u{1F6AA} Procurar Passagem <span class="choice-stat-badge">${invShort2}${invProf2 ? '\u2605' : ''} ${invChance2}%</span>`;
-    secretBtn.onclick = () => {
+    var invMod2 = getAbilityMod('inv');
+    var invProf2 = S.charData && S.charData.sp && S.charData.sp.includes('inv') ? (S.charData.pb || 2) : 0;
+    var invChance2 = Math.max(5, Math.min(95, (21 - 15 + invMod2 + invProf2) * 5));
+    var invShort2 = STAT_SHORT['inv'] || 'INV';
+    secretBtn.innerHTML = '\u{1F6AA} Procurar Passagem <span class="choice-stat-badge">' + invShort2 + (invProf2 ? '\u2605' : '') + ' ' + invChance2 + '%</span>';
+    secretBtn.onclick = function () {
         overlay.classList.remove('active');
         S.interactedHexes.add(key);
         _markExploreUsed();
         _doSecretPassageCheck();
     };
     choicesEl.appendChild(secretBtn);
+
+    // Social check: Call for help / Intimidate the area (Persuasion/Intimidation DC 14)
+    var socialBiomes = ['forest', 'plains', 'mountain', 'swamp', 'cave'];
+    if (socialBiomes.includes(S.biome)) {
+        var socialBtn = document.createElement('button');
+        socialBtn.className = 'dm-choice-btn';
+        var chaMod = getAbilityMod('prs');
+        var chaProf = S.charData && S.charData.sp && S.charData.sp.includes('prs') ? (S.charData.pb || 2) : 0;
+        var chaChance = Math.max(5, Math.min(95, (21 - 14 + chaMod + chaProf) * 5));
+        var chaShort = STAT_SHORT['prs'] || 'PRS';
+        socialBtn.innerHTML = '\u{1F5E3} Chamar por Ajuda <span class="choice-stat-badge">' + chaShort + (chaProf ? '\u2605' : '') + ' ' + chaChance + '%</span>';
+        socialBtn.onclick = function () {
+            overlay.classList.remove('active');
+            S.interactedHexes.add(key);
+            _markExploreUsed();
+            _doSocialCheck();
+        };
+        choicesEl.appendChild(socialBtn);
+    }
 
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'dm-choice-btn';
@@ -687,4 +706,47 @@ function _secretPassageSuccess() {
 
 function _secretPassageFail() {
     showTerrainToast('\u{1F6AA} N\u00e3o encontrou nenhuma passagem oculta.', 'info');
+}
+
+
+// =========================================================
+// SOCIAL CHECK -- Call for Help (Persuasion DC 14)
+// =========================================================
+var SOCIAL_SUCCESS_NARRATIONS = [
+    'Uma voz responde ao longe. Um viajante se aproxima e compartilha provisoes antes de seguir caminho.',
+    'Um ermitao emerge das sombras. Ele conhece este lugar e oferece informacoes valiosas sobre os perigos adiante.',
+    'Um cacador local ouve seu chamado. Ele aponta uma rota mais segura e compartilha ervas medicinais.',
+    'Um espirito da natureza atende seu apelo. A magia antiga cura levemente seus ferimentos.',
+    'Um grupo de mercadores passa por perto e oferece suprimentos em troca de protecao.',
+];
+
+var SOCIAL_FAIL_NARRATIONS = [
+    'Apenas o eco responde. Este lugar parece abandonado por completo.',
+    'Um rosnado distante e a unica resposta. Melhor nao chamar mais atencao...',
+    'O silencio que se segue e desconfortavel. Voce esta sozinho aqui.',
+    'Algo se move na escuridao, mas nao parece amigavel. Voce recua.',
+];
+
+function _doSocialCheck() {
+    var stat = 'prs';
+    var dc = 14;
+    var onOk = function () {
+        var healAmount = Math.floor(Math.random() * 4) + 2;
+        S.hpChange += healAmount;
+        S.xpEarned += 10;
+        if (typeof updateHPHUD === 'function') updateHPHUD();
+        if (typeof updateRewards === 'function') updateRewards();
+        saveState();
+        var narr = SOCIAL_SUCCESS_NARRATIONS[Math.floor(Math.random() * SOCIAL_SUCCESS_NARRATIONS.length)];
+        if (typeof _showDiscoveryOverlay === 'function') {
+            _showDiscoveryOverlay('\u{1F5E3}', 'Ajuda Encontrada!', narr, '+' + healAmount + ' HP, +10 XP');
+        } else {
+            showTerrainToast('+' + healAmount + ' HP da ajuda recebida!', 'ranger');
+        }
+    };
+    var onFail = function () {
+        var narr = SOCIAL_FAIL_NARRATIONS[Math.floor(Math.random() * SOCIAL_FAIL_NARRATIONS.length)];
+        showTerrainToast(narr, 'flavor');
+    };
+    performStatCheck(stat, dc, onOk, onFail);
 }

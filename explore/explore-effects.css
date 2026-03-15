@@ -394,3 +394,63 @@ body.perf-medium .weather-overlay.weather-blizzard {
         animation: none !important;
     }
 }
+
+
+/* ═══════════════════════════════════════════
+   LOW HP VIGNETTE (pulsing red border on map)
+   ═══════════════════════════════════════════ */
+#map-viewport.low-hp-active::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    border: 3px solid transparent;
+    border-radius: 0;
+    animation: lowHPVignette 2s ease-in-out infinite;
+    box-shadow: inset 0 0 30px rgba(180,30,30,0.15);
+}
+@keyframes lowHPVignette {
+    0%, 100% { box-shadow: inset 0 0 30px rgba(180,30,30,0.1); border-color: rgba(180,30,30,0.15); }
+    50% { box-shadow: inset 0 0 50px rgba(180,30,30,0.25); border-color: rgba(180,30,30,0.3); }
+}
+body.perf-lite #map-viewport.low-hp-active::after { animation: none; box-shadow: inset 0 0 30px rgba(180,30,30,0.15); border-color: rgba(180,30,30,0.2); }
+@media (prefers-reduced-motion: reduce) {
+    #map-viewport.low-hp-active::after { animation: none; }
+}
+
+
+/* ═══════════════════════════════════════════
+   DANGER TENSION (map border glow by danger level)
+   ═══════════════════════════════════════════ */
+#map-viewport.danger-high::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    border: 2px solid rgba(180,80,30,0.2);
+    animation: dangerTension 3s ease-in-out infinite;
+}
+@keyframes dangerTension {
+    0%, 100% { border-color: rgba(180,80,30,0.15); box-shadow: inset 0 0 20px rgba(180,80,30,0.05); }
+    50% { border-color: rgba(180,80,30,0.3); box-shadow: inset 0 0 35px rgba(180,80,30,0.1); }
+}
+#map-viewport.danger-extreme::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    border: 2px solid rgba(200,40,40,0.25);
+    animation: dangerExtreme 2s ease-in-out infinite;
+}
+@keyframes dangerExtreme {
+    0%, 100% { border-color: rgba(200,40,40,0.2); box-shadow: inset 0 0 25px rgba(200,40,40,0.08); }
+    50% { border-color: rgba(200,40,40,0.4); box-shadow: inset 0 0 40px rgba(200,40,40,0.15); }
+}
+body.perf-lite #map-viewport.danger-high::before,
+body.perf-lite #map-viewport.danger-extreme::before { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+    #map-viewport.danger-high::before, #map-viewport.danger-extreme::before { animation: none; }
+}

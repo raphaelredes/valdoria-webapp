@@ -276,6 +276,13 @@ async function loadStats() {
             raisedEl.dataset.prefix = 'R$ ';
             raisedEl.dataset.divide = '100';
         }
+        // Animate counters after data is loaded
+        if (supEl && data.total_supporters > 0) {
+            animateCounter(supEl, data.total_supporters);
+        }
+        if (raisedEl && data.total_raised_brl > 0) {
+            animateCounter(raisedEl, data.total_raised_brl);
+        }
     } catch (e) {
         console.warn('[APOIE] Stats load failed', e);
     }

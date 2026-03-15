@@ -162,3 +162,24 @@
     color: var(--v-gold, #c4953a);
     font-weight: 600;
 }
+
+
+/* ═══════════════════════════════════════════
+   OVERLAY ENTRANCE ANIMATIONS
+   ═══════════════════════════════════════════ */
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.check-result.success, .check-result.failure {
+    animation: resultReveal 0.35s var(--v-ease-spring);
+}
+.check-overlay .v-skip-btn,
+.dm-overlay .dm-choice-btn {
+    animation: fadeInUp 0.3s ease both;
+}
+/* Stagger buttons if multiple */
+.dm-overlay .dm-choices .dm-choice-btn:nth-child(2) { animation-delay: 0.05s; }
+.dm-overlay .dm-choices .dm-choice-btn:nth-child(3) { animation-delay: 0.1s; }
+.dm-overlay .dm-choices .dm-choice-btn:nth-child(4) { animation-delay: 0.15s; }
+.dm-overlay .dm-choices .dm-choice-btn:nth-child(5) { animation-delay: 0.2s; }

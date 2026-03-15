@@ -371,3 +371,31 @@ body.perf-lite .dm-narration .cursor {
 @media (prefers-reduced-motion: reduce) {
     .dm-narration .cursor { animation: none !important; }
 }
+
+
+/* ═══════════════════════════════════════════
+   DC PREVIEW BADGES (chance % on choice buttons)
+   ═══════════════════════════════════════════ */
+.choice-stat-badge {
+    display: inline-block;
+    background: rgba(196, 149, 58, 0.15);
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 11px;
+    color: var(--v-gold, #c4953a);
+    margin-left: 6px;
+    vertical-align: middle;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.choice-stat-badge.high-chance {
+    color: #4a8;
+    border-color: rgba(68, 170, 136, 0.3);
+    background: rgba(68, 170, 136, 0.1);
+}
+.choice-stat-badge.low-chance {
+    color: #c66;
+    border-color: rgba(200, 80, 80, 0.3);
+    background: rgba(200, 80, 80, 0.1);
+}

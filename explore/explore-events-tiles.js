@@ -481,33 +481,37 @@ function _applyTrapDamage(trap, success, roll) {
         if (cName) showTerrainToast('Condicao: ' + cName + '!', 'condition');
     }
 
-    // Roll trap damage
-    const dmgDice = trap.dmg || '1d6';
-    const dmgMatch = dmgDice.match(/(\d+)d(\d+)/);
-    let fullDmg = 0;
-    if (dmgMatch) {
-        const count = parseInt(dmgMatch[1]);
-        const sides = parseInt(dmgMatch[2]);
-        for (let i = 0; i < count; i++) {
-            fullDmg += Math.floor(Math.random() * sides) + 1;
-        }
-    }
-
-    // Half damage on success (D&D 5e)
-    const dmg = success ? Math.floor(fullDmg / 2) : fullDmg;
-
-    if (dmg > 0) {
-        S.hpChange -= dmg;
-        showTerrainToast(`${trap.name}: -${dmg} HP${success ? ' (metade)' : ''}`, 'damage');
-        if (typeof updateHPHUD === 'function') updateHPHUD();
-        if (typeof checkDeath === 'function') checkDeath();
-    }
+    // 3D dice damage animation
+    var dmgDice = trap.dmg || '1d6';
+    var dmgType = trap.dmgType || 'piercing';
+    var dmgLabel = trap.dmgLabel || trap.name || 'dano da armadilha';
+    var halfDmg = success; // D&D 5e: successful save = half damage
 
     S.checksPerformed.push({
         stat: trap.skill, dc: trap.dc, roll, mod: trap.mod || 0,
         ok: success, mode: 'normal',
     });
-    saveState();
+
+    if (typeof showDamageDice === 'function') {
+        showDamageDice(dmgDice, dmgLabel, dmgType, function (fullDmg) {
+            var dmg = halfDmg ? Math.floor(fullDmg / 2) : fullDmg;
+            if (dmg > 0) {
+                S.hpChange -= dmg;
+                if (halfDmg) showTerrainToast('Esquivou parcialmente! -' + dmg + ' HP', 'damage');
+                if (typeof updateHPHUD === 'function') updateHPHUD();
+                if (typeof checkDeath === 'function') checkDeath();
+            }
+            saveState();
+        });
+    } else {
+        // Fallback: silent roll
+        var match = dmgDice.match(/(\d+)d(\d+)/);
+        var fullDmg = 0;
+        if (match) { for (var i = 0; i < parseInt(match[1]); i++) fullDmg += Math.floor(Math.random() * parseInt(match[2])) + 1; }
+        var dmg = halfDmg ? Math.floor(fullDmg / 2) : fullDmg;
+        if (dmg > 0) { S.hpChange -= dmg; if (typeof updateHPHUD === 'function') updateHPHUD(); if (typeof checkDeath === 'function') checkDeath(); }
+        saveState();
+    }
 }
 
 // =============================================
