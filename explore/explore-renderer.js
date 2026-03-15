@@ -726,6 +726,7 @@ function _drawCastShadow(ctx, col, row) {
 // Occlusion fade — tall tiles above player become semi-transparent
 // Technique from Diablo/BG3: walls fade to let player be visible "behind" them
 function _drawOcclusionFade(ctx) {
+    if (_renderDetail < 1) return; // Skip occlusion fade on lite (polygon fills per frame)
     if (!S.grid || typeof playerGridCol === 'undefined') return;
     const pRow = playerGridRow;
     const pCol = playerGridCol;
@@ -866,7 +867,7 @@ function drawTile(ctx, col, row, biome, colors, timestamp) {
     // Top face fill
     fillPoly(ctx, topVerts, color);
 
-    // Subtle top-face shading (light from top-left)
+    // Top-face shading — gradient on medium+, skip on lite
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(topVerts[0].x, topVerts[0].y);
@@ -876,14 +877,15 @@ function drawTile(ctx, col, row, biome, colors, timestamp) {
     ctx.closePath();
     ctx.clip();
 
-    // Light gradient across top face
-    const grad = ctx.createLinearGradient(cx - HEX_W / 2, cy - heightPx - HEX_H / 2, cx + HEX_W / 2, cy - heightPx + HEX_H / 2);
-    grad.addColorStop(0, 'rgba(255,255,255,0.08)');
-    grad.addColorStop(0.4, 'rgba(255,255,255,0.02)');
-    grad.addColorStop(0.6, 'rgba(0,0,0,0)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.12)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(cx - HEX_W / 2, cy - heightPx - HEX_H / 2, HEX_W, HEX_H);
+    if (_renderDetail >= 1) {
+        var grad = ctx.createLinearGradient(cx - HEX_W / 2, cy - heightPx - HEX_H / 2, cx + HEX_W / 2, cy - heightPx + HEX_H / 2);
+        grad.addColorStop(0, 'rgba(255,255,255,0.08)');
+        grad.addColorStop(0.4, 'rgba(255,255,255,0.02)');
+        grad.addColorStop(0.6, 'rgba(0,0,0,0)');
+        grad.addColorStop(1, 'rgba(0,0,0,0.12)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(cx - HEX_W / 2, cy - heightPx - HEX_H / 2, HEX_W, HEX_H);
+    }
 
     // Static decorations (trees, rocks, etc. — not animated ones)
     // Skip vegetation (T, g) in wind biomes — rendered dynamically with wind animation
