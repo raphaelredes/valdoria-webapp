@@ -106,7 +106,7 @@
 /* ─── NO DATA STATE ─── */
 .no-data {
     text-align: center;
-    padding: 28px 16px;
+    padding: var(--v-space-2xl) var(--v-space-xl);
     color: var(--v-text-dim);
     flex: 1;
     display: flex;

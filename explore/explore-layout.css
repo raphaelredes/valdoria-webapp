@@ -20,11 +20,11 @@ body {
 .terrain-tooltip {
     display: none;
     position: absolute;
-    z-index: 20;
+    z-index: var(--v-z-sticky);
     background: rgba(42,36,32,0.92);
     border: 1px solid rgba(196,149,58,0.5);
-    border-radius: 6px;
-    padding: 4px 10px;
+    border-radius: var(--v-radius-sm);
+    padding: var(--v-space-sm) var(--v-space-md-lg);
     font: 12px var(--v-font, 'MedievalSharp', serif);
     color: var(--v-text, #d4c8b0);
     white-space: nowrap;
@@ -41,15 +41,15 @@ body {
     width: 50px;
     height: 50px;
     border: 2px solid rgba(196,149,58,0.55);
-    border-radius: 8px;
+    border-radius: var(--v-radius-sm);
     background: linear-gradient(135deg, #3a3028 0%, #2a2420 100%);
     box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(196,149,58,0.12),
         0 0 6px rgba(196,149,58,0.08);
-    z-index: 15;
+    z-index: var(--v-z-sticky);
     pointer-events: auto;
     cursor: pointer;
     opacity: 0.9;
-    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease, top 0.4s ease, bottom 0.4s ease;
+    transition: width var(--v-transition-base) ease, height 0.3s ease, opacity 0.3s ease, top var(--v-transition-enter) ease, bottom 0.4s ease;
 }
 #minimap.minimap-expanded {
     width: 95px;
@@ -81,16 +81,16 @@ body {
 #hud {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
+    gap: var(--v-space-sm);
+    padding: var(--v-space-sm) var(--v-space-md-lg);
     background: linear-gradient(180deg, rgba(58,48,40,0.88) 0%, rgba(42,36,32,0.85) 100%);
     border-bottom: 1px solid rgba(74,56,40,0.7);
     box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 -1px 0 rgba(0,0,0,0.2);
-    z-index: 50;
+    z-index: var(--v-z-sticky);
     flex-shrink: 0;
 }
 .hud-name {
-    font-size: 13px;
+    font-size: var(--v-font-base);
     font-weight: 700;
     color: var(--v-gold, #c4953a);
     flex-shrink: 0;
@@ -100,26 +100,26 @@ body {
     white-space: nowrap;
 }
 .hud-stat {
-    font-size: 13px;
+    font-size: var(--v-font-base);
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: var(--v-space-xs);
     white-space: nowrap;
 }
 .hp-bar {
     width: 60px;
     height: 8px;
     background: #1e1a16;
-    border-radius: 4px;
+    border-radius: var(--v-radius-xs);
     overflow: hidden;
     border: 1px solid #3a3028;
     position: relative;
 }
 .hp-fill {
     height: 100%;
-    border-radius: 4px;
+    border-radius: var(--v-radius-xs);
     width: 100%;
-    transition: transform 0.5s ease, background 0.4s ease;
+    transition: transform var(--v-transition-slow) ease, background var(--v-transition-enter) ease;
     transform-origin: left;
     position: relative;
 }
@@ -129,9 +129,9 @@ body {
     top: 0; left: 0;
     height: 100%;
     background: rgba(200, 60, 60, 0.45);
-    border-radius: 4px;
+    border-radius: var(--v-radius-xs);
     width: 100%;
-    transition: transform 1.2s ease-in 0.3s;
+    transition: transform 1.2s ease-in var(--v-transition-base);
     transform-origin: left;
     pointer-events: none;
 }
@@ -159,13 +159,13 @@ body {
 .hud-rewards {
     margin-left: auto;
     display: flex;
-    gap: 8px;
-    padding-right: 6px;
+    gap: var(--v-space-md);
+    padding-right: var(--v-space-sm);
 }
 .reward-badge {
-    font-size: 12px;
-    padding: 2px 6px;
-    border-radius: 8px;
+    font-size: var(--v-font-md);
+    padding: var(--v-space-xs) var(--v-space-sm);
+    border-radius: var(--v-radius-sm);
     background: rgba(196, 149, 58, 0.15);
     border: 1px solid rgba(196, 149, 58, 0.3);
     text-shadow: 0 1px 2px rgba(0,0,0,0.4);

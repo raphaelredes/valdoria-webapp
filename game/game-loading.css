@@ -8,7 +8,7 @@
     bottom: 30%;
     width: 3px;
     background: linear-gradient(to bottom, transparent, rgba(196,149,58,0.3), transparent);
-    z-index: 5;
+    z-index: var(--v-z-base);
     pointer-events: none;
     opacity: 0;
     animation: swipeHintPulse 2s ease-in-out 1s 2 both;
@@ -26,7 +26,7 @@
     align-items: center;
     justify-content: center;
     background: radial-gradient(ellipse at 50% 38%, #302018 0%, #1a1510 45%, #0a0805 100%);
-    z-index: 1000;
+    z-index: var(--v-z-loading);
     overflow: hidden;
 }
 /* Pause ALL animations when loading overlay is hidden — saves GPU on 23+ infinite animations */
@@ -188,7 +188,7 @@
     position: relative;
     width: clamp(180px, 60vw, 260px);
     height: clamp(180px, 60vw, 260px);
-    margin-bottom: 10px;
+    margin-bottom: var(--v-space-md-lg);
     animation: circleEntrance 2s var(--v-ease-snap) both;
 }
 @keyframes circleEntrance {
@@ -229,7 +229,7 @@
 .mc-outer {
     animation: spinCW 60s linear infinite;
 }
-.mc-rune-text { font-size: 13px; letter-spacing: 3px; font-family: serif; }
+.mc-rune-text { font-size: var(--v-font-base); letter-spacing: 3px; font-family: serif; }
 
 /* Mid energy ring — CCW — IMMUTABLE: 35s */
 .mc-mid { animation: spinCCW 35s linear infinite; }
@@ -248,7 +248,7 @@
 .mc-inner {
     animation: spinCW 45s linear infinite;
 }
-.mc-inner-text { font-size: 9.5px; letter-spacing: 5px; font-family: serif; }
+.mc-inner-text { font-size: var(--v-font-xs); letter-spacing: 5px; font-family: serif; }
 
 @keyframes spinCW  { to { transform: rotate(360deg); } }
 @keyframes spinCCW { to { transform: rotate(-360deg); } }
@@ -278,7 +278,7 @@
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 28px; height: 28px;
-    z-index: 2;
+    z-index: var(--v-z-base);
     cursor: pointer; -webkit-tap-highlight-color: transparent;
     animation: gemEntrance 1.2s var(--v-ease-snap) 0.8s both;
 }
@@ -426,7 +426,7 @@
 .loading-flash {
     position: absolute; inset: 0;
     background: radial-gradient(circle at 50% 45%, rgba(196,149,58,0.6), transparent 70%);
-    opacity: 0; pointer-events: none; z-index: 2;
+    opacity: 0; pointer-events: none; z-index: var(--v-z-base);
 }
 .loading-overlay.exit-cinematic .loading-flash {
     animation: flashBurst 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -489,7 +489,7 @@
 .loading-brand { text-align: center; animation: v-fadeIn 0.7s ease 0.6s both; }
 
 .loading-title {
-    font-size: 18px;
+    font-size: var(--v-font-2xl);
     font-weight: 900;
     color: var(--v-gold);
     letter-spacing: 6px;
@@ -504,7 +504,7 @@
 .loading-divider {
     width: 160px; height: 1px;
     background: linear-gradient(90deg, transparent, var(--v-gold-dim), var(--v-gold), var(--v-gold-dim), transparent);
-    margin: 10px auto 0; position: relative;
+    margin: var(--v-space-md-lg) auto 0;
     animation: v-fadeIn 0.5s ease 0.8s both;
 }
 .divider-rune {
@@ -523,7 +523,7 @@
     height: 100%; width: 0%; border-radius: 2px;
     background: linear-gradient(90deg, var(--v-crimson), var(--v-gold), var(--v-gold-light));
     box-shadow: 0 0 8px rgba(196,149,58,0.5);
-    transition: width 0.3s ease; position: relative;
+    transition: width var(--v-transition-base) ease; position: relative;
 }
 .loading-progress-fill::after {
     content: ''; position: absolute; right: 0; top: -2px;

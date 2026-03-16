@@ -8,43 +8,43 @@
     inset: 0;
     background: rgba(42, 36, 32, 0.92);
     /* backdrop-filter removed for mobile performance */
-    z-index: 250;
+    z-index: var(--v-z-dropdown);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 14px;
+    padding: var(--v-space-lg);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s ease;
+    transition: opacity var(--v-transition-enter) ease;
 }
 .outcome-overlay.active {
     opacity: 1;
     pointer-events: all;
 }
 .outcome-text {
-    font-size: 15px;
+    font-size: var(--v-font-lg);
     font-style: italic;
     line-height: 1.75;
     color: var(--v-text, #d4c8b0);
     text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    margin-bottom: 16px;
+    margin-bottom: var(--v-space-xl);
     text-align: center;
     max-width: 340px;
-    margin: 0 auto 16px;
+    margin: 0 auto var(--v-space-xl);
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 .outcome-rewards {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--v-space-md);
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: var(--v-space-2xl);
 }
 .outcome-reward {
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 14px;
+    padding: var(--v-space-sm) var(--v-space-lg);
+    border-radius: var(--v-radius-sm);
+    font-size: var(--v-font-body);
     font-weight: 600;
     opacity: 0;
     animation: rewardPop 0.5s ease forwards;
@@ -60,12 +60,12 @@
 .outcome-reward.damage { background: rgba(170, 68, 68, 0.15); color: #a44; text-shadow: 0 0 6px rgba(170,68,68,0.3); }
 .outcome-reward.item { background: rgba(150, 100, 200, 0.15); color: #a8a; text-shadow: 0 0 6px rgba(150,100,200,0.3); }
 .btn-continue {
-    padding: 10px 20px;
+    padding: var(--v-space-md-lg) var(--v-space-2xl);
     background: linear-gradient(180deg, rgba(196,149,58,0.2), rgba(196,149,58,0.1));
     border: 1px solid var(--v-gold-dim, #9a7530);
     color: var(--v-gold, #c4953a);
-    border-radius: 8px;
-    font-size: 15px;
+    border-radius: var(--v-radius-sm);
+    font-size: var(--v-font-lg);
     font-weight: 700;
     cursor: pointer;
     align-self: center;
@@ -80,15 +80,15 @@
     position: fixed;
     inset: 0;
     background: rgba(123, 32, 32, 0.95);
-    z-index: 400;
+    z-index: var(--v-z-tooltip);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: var(--v-space-xl);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s ease;
+    transition: opacity var(--v-transition-enter) ease;
 }
 .combat-overlay.active {
     opacity: 1;
@@ -96,7 +96,7 @@
 }
 .combat-icon { display: none; }
 .combat-text {
-    font-size: 18px;
+    font-size: var(--v-font-2xl);
     color: var(--v-text-bright, #e8dcc8);
     text-align: center;
     max-width: 280px;
@@ -127,16 +127,16 @@
     position: fixed;
     inset: 0;
     /* background set below with animation */
-    z-index: 300;
+    z-index: var(--v-z-tooltip);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: var(--v-space-xl);
     opacity: 0;
     pointer-events: none;
     background: rgba(42, 36, 32, 0.94);
-    transition: opacity 0.4s ease;
+    transition: opacity var(--v-transition-enter) ease;
 }
 .portal-overlay.active { opacity: 1; pointer-events: all; animation: portalBreathe 3s ease-in-out infinite; }
 .portal-icon { display: none; }
@@ -160,14 +160,14 @@
     position: fixed;
     inset: 0;
     background: rgba(42, 36, 32, 0.95);
-    z-index: 350;
+    z-index: var(--v-z-tooltip);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 14px;
+    padding: var(--v-space-lg);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s ease;
+    transition: opacity var(--v-transition-enter) ease;
 }
 .confirm-overlay.active { opacity: 1; pointer-events: all; }
 .confirm-icon { font-size: clamp(32px, 10vw, 40px); text-align: center; margin-bottom: 12px; }
@@ -176,13 +176,13 @@
 .confirm-buttons { display: flex; gap: 12px; }
 .btn-cancel {
     flex: 1;
-    padding: 12px;
+    padding: var(--v-space-lg);
     min-height: 44px;
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--v-border, #4a3828);
     color: var(--v-text-dim, #a09484);
-    border-radius: 8px;
-    font-size: 14px;
+    border-radius: var(--v-radius-sm);
+    font-size: var(--v-font-body);
     font-weight: 600;
     cursor: pointer;
 }
@@ -190,13 +190,13 @@
 .btn-cancel:active { transform: scale(0.96); }
 .btn-confirm {
     flex: 1;
-    padding: 12px;
+    padding: var(--v-space-lg);
     min-height: 44px;
     background: linear-gradient(180deg, rgba(123,32,32,0.3), rgba(123,32,32,0.15));
     border: 1px solid rgba(170, 68, 68, 0.5);
     color: #c88;
-    border-radius: 8px;
-    font-size: 14px;
+    border-radius: var(--v-radius-sm);
+    font-size: var(--v-font-body);
     font-weight: 700;
     cursor: pointer;
 }
@@ -210,15 +210,15 @@
     position: fixed;
     inset: 0;
     background: rgba(80, 20, 20, 0.96);
-    z-index: 400;
+    z-index: var(--v-z-tooltip);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: var(--v-space-xl);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s ease;
+    transition: opacity var(--v-transition-enter) ease;
 }
 .death-overlay.active { opacity: 1; pointer-events: all; }
 .death-icon { display: none; }
@@ -240,15 +240,15 @@
 .encounter-overlay {
     position: fixed;
     inset: 0;
-    z-index: 250;
+    z-index: var(--v-z-dropdown);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 14px;
+    padding: var(--v-space-lg);
     opacity: 0;
     pointer-events: none;
     transform: scale(0.95) translateY(10px);
-    transition: opacity 0.25s ease, transform 0.4s var(--v-ease-spring);
+    transition: opacity var(--v-transition-base) ease, transform var(--v-transition-enter) var(--v-ease-spring);
 }
 .encounter-overlay.active {
     opacity: 1;
@@ -263,7 +263,7 @@
     position: fixed;
     inset: 0;
     background: rgba(200, 50, 50, 0.4);
-    z-index: 249;
+    z-index: var(--v-z-dropdown);
     animation: encounterFlash 0.8s ease-out forwards;
     pointer-events: none;
     box-shadow: inset 0 0 80px rgba(180, 40, 40, 0.4);
@@ -286,11 +286,11 @@ body.perf-medium .portal-overlay.active {
 
 /* Death saves narration text */
 .death-summary .death-narr {
-    font-size: 13px;
+    font-size: var(--v-font-base);
     font-style: italic;
     color: #a09484;
     line-height: 1.5;
-    margin: 8px 12px;
+    margin: var(--v-space-md) var(--v-space-lg);
     text-shadow: 0 1px 3px rgba(0,0,0,0.5);
     animation: fadeInUp 0.4s ease;
 }

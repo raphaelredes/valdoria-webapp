@@ -14,16 +14,16 @@
     height: 32px;
     border: 1px solid var(--v-border);
     border-bottom: none;
-    border-radius: 12px 12px 0 0;
+    border-radius: var(--v-radius) var(--v-radius) 0 0;
     background: var(--v-bg);
     color: var(--v-text-dim);
-    font-size: 14px;
+    font-size: var(--v-font-body);
     line-height: 1;
-    padding-top: 4px;
+    padding-top: var(--v-space-sm);
     cursor: pointer;
-    z-index: 101;
+    z-index: var(--v-z-header);
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.3s ease, background var(--v-transition), color var(--v-transition);
+    transition: transform var(--v-transition-base) ease, background var(--v-transition), color var(--v-transition);
 }
 
 .immersive-toggle:active {
@@ -39,20 +39,20 @@
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 8px 18px;
+    gap: var(--v-space-sm);
+    padding: var(--v-space-md) var(--v-space-xl);
     border: 1px solid var(--v-border-gold);
     border-radius: var(--v-radius-pill);
     background: var(--v-bg-raised);
     color: var(--v-gold-dim);
-    font-size: 12px;
+    font-size: var(--v-font-md);
     letter-spacing: 0.5px;
     cursor: pointer;
-    z-index: 101;
+    z-index: var(--v-z-header);
     box-shadow: var(--v-shadow-sm);
     -webkit-tap-highlight-color: transparent;
     opacity: 0.9;
-    transition: opacity var(--v-transition), transform 0.2s ease;
+    transition: opacity var(--v-transition), transform var(--v-transition) ease;
 }
 
 .immersive-restore:active {
@@ -65,7 +65,7 @@
     transform: translateX(-50%) translateY(100%);
     opacity: 0;
     pointer-events: none;
-    transition: transform 0.3s ease, opacity 0.2s ease;
+    transition: transform var(--v-transition-base) ease, opacity var(--v-transition) ease;
 }
 
 /* Screen padding override when collapsed */

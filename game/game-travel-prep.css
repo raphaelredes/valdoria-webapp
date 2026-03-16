@@ -4,18 +4,18 @@
 .travel-prep-overlay {
     position: fixed;
     inset: 0;
-    z-index: 950;
+    z-index: var(--v-z-loading);
     display: none;
     align-items: center;
     justify-content: center;
     background: rgba(15, 12, 8, 0.88);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--v-transition-base) ease;
 }
 .travel-prep-overlay.active { opacity: 1; }
 .travel-prep-overlay.hiding {
     opacity: 0;
-    transition: opacity 0.25s ease;
+    transition: opacity var(--v-transition-base) ease;
 }
 
 /* --- Card --- */
@@ -46,9 +46,9 @@
 
 /* --- Header --- */
 .tp-header {
-    padding: 14px 16px 10px;
+    padding: var(--v-space-lg) var(--v-space-xl) var(--v-space-md-lg);
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 16px;
+    font-size: var(--v-font-xl);
     font-weight: 700;
     color: var(--v-gold-light, #dbb668);
     text-align: center;
@@ -71,7 +71,7 @@
 
 /* --- Body (scrollable) --- */
 #tp-body {
-    padding: 12px 16px 8px;
+    padding: var(--v-space-lg) var(--v-space-xl) var(--v-space-md);
     overflow-y: auto;
     max-height: 50vh;
     flex: 1;
@@ -81,12 +81,12 @@
 .tp-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 3px 0;
-    font-size: 13px;
+    gap: var(--v-space-md);
+    padding: var(--v-space-xs) 0;
+    font-size: var(--v-font-base);
     color: var(--v-text, #d4c8b0);
 }
-.tp-row-gear { font-size: 12px; }
+.tp-row-gear { font-size: var(--v-font-md); }
 
 .tp-label {
     flex: 1;
@@ -98,7 +98,7 @@
     color: var(--v-text, #d4c8b0);
 }
 .tp-value-dim {
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     font-weight: 400;
     color: var(--v-text-dim, #8a7a68);
 }
@@ -120,14 +120,14 @@
 .tp-bar-wrap {
     height: 4px;
     background: rgba(255, 255, 255, 0.08);
-    border-radius: 2px;
-    margin: 2px 0 6px;
+    border-radius: var(--v-radius-xs);
+    margin: var(--v-space-xs) 0 var(--v-space-sm);
     overflow: hidden;
 }
 .tp-bar-fill {
     height: 100%;
-    border-radius: 2px;
-    transition: width 0.4s ease;
+    border-radius: var(--v-radius-xs);
+    transition: width var(--v-transition-enter) ease;
 }
 .tp-bar-hp { background: linear-gradient(90deg, #c03030, #e04040); }
 .tp-bar-mp { background: linear-gradient(90deg, #3060c0, #4080e0); }
@@ -136,57 +136,57 @@
 .tp-divider {
     height: 1px;
     background: rgba(196, 149, 58, 0.12);
-    margin: 8px 0;
+    margin: var(--v-space-md) 0;
 }
 
 /* --- Section label --- */
 .tp-section-label {
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     font-family: var(--v-font, 'MedievalSharp', serif);
     color: var(--v-text-dim, #8a7a68);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 4px;
+    margin-bottom: var(--v-space-sm);
 }
 
 /* --- Tip --- */
 .tp-tip {
-    font-size: 12px;
+    font-size: var(--v-font-md);
     color: var(--v-text-dim, #8a7a68);
-    padding: 6px 0;
+    padding: var(--v-space-sm) 0;
     line-height: 1.4;
 }
 
 /* --- Warnings --- */
 .tp-warnings { }
 .tp-warn-item {
-    font-size: 12px;
+    font-size: var(--v-font-md);
     color: #e0a060;
-    padding: 3px 0;
+    padding: var(--v-space-xs) 0;
     line-height: 1.4;
 }
 
 /* --- Quick equip info --- */
 .tp-equip-info {
-    font-size: 13px;
+    font-size: var(--v-font-base);
     color: var(--v-text, #d4c8b0);
     line-height: 1.5;
 }
 .tp-equip-detail {
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     color: var(--v-text-dim, #8a7a68);
     font-style: italic;
-    margin-top: 2px;
+    margin-top: var(--v-space-xs);
 }
 .tp-equip-short {
-    font-size: 12px;
+    font-size: var(--v-font-md);
     color: #e07070;
-    margin-top: 4px;
+    margin-top: var(--v-space-sm);
 }
 
 /* --- Actions panel --- */
 #tp-actions {
-    padding: 8px 16px 14px;
+    padding: var(--v-space-md) var(--v-space-xl) var(--v-space-lg);
     border-top: 1px solid rgba(196, 149, 58, 0.12);
     background: rgba(30, 24, 18, 0.4);
 }
@@ -195,18 +195,18 @@
 .tp-btn {
     display: block;
     width: 100%;
-    padding: 11px 14px;
+    padding: var(--v-space-md-lg) var(--v-space-lg);
     min-height: 44px;
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius, 8px);
     background: var(--v-bg-raised, #332a22);
     color: var(--v-text, #d4c8b0);
     font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: 14px;
+    font-size: var(--v-font-body);
     cursor: pointer;
-    margin-top: 6px;
+    margin-top: var(--v-space-sm);
     -webkit-tap-highlight-color: transparent;
-    transition: all 0.15s ease;
+    transition: all var(--v-transition-fast) ease;
 }
 .tp-btn:first-child { margin-top: 0; }
 .tp-btn:active { transform: scale(0.97); opacity: 0.9; }
@@ -230,21 +230,21 @@
     background: transparent;
     border-color: rgba(196, 149, 58, 0.15);
     color: var(--v-text-dim, #8a7a68);
-    font-size: 13px;
+    font-size: var(--v-font-base);
 }
 
 .tp-btn-shop, .tp-btn-heal {
-    font-size: 13px;
+    font-size: var(--v-font-base);
 }
 
 .tp-btn-row {
     display: flex;
-    gap: 6px;
-    margin-top: 6px;
+    gap: var(--v-space-sm);
+    margin-top: var(--v-space-sm);
 }
 .tp-btn-row .tp-btn {
     flex: 1;
     margin-top: 0;
-    font-size: 12px;
-    padding: 10px 8px;
+    font-size: var(--v-font-md);
+    padding: var(--v-space-md-lg) var(--v-space-md);
 }

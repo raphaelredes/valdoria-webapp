@@ -19,7 +19,7 @@ body[data-time="night"]::after {
         rgba(5, 8, 25, 0.18) 100%
     );
     pointer-events: none;
-    z-index: 1;
+    z-index: var(--v-z-base);
     mix-blend-mode: multiply;
 }
 
@@ -34,7 +34,7 @@ body[data-time="dusk"]::after {
         rgba(80, 30, 10, 0.12) 100%
     );
     pointer-events: none;
-    z-index: 1;
+    z-index: var(--v-z-base);
     mix-blend-mode: multiply;
 }
 
@@ -49,7 +49,7 @@ body[data-time="dawn"]::after {
         rgba(30, 40, 80, 0.10) 100%
     );
     pointer-events: none;
-    z-index: 1;
+    z-index: var(--v-z-base);
     mix-blend-mode: multiply;
 }
 
@@ -70,7 +70,7 @@ body[data-time="night"] .screen-content strong {
     background: var(--v-bg-card-hover);
     border-color: var(--v-gold-dim);
     box-shadow: inset 0 0 12px rgba(196, 149, 58, 0.15);
-    transition: all 0.08s ease;
+    transition: all var(--v-transition-fast) ease;
 }
 
 /* ─── Footer Button Hover Glow (subtle) ─── */

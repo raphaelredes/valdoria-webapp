@@ -8,7 +8,7 @@
     border-radius: var(--v-radius-sm);
     overflow: hidden;
     cursor: pointer;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color var(--v-transition) ease, box-shadow 0.2s ease;
     animation: entitySlideIn 0.4s ease-out both;
 }
 .entity:nth-child(1) { animation-delay: 0s; }
@@ -49,7 +49,7 @@
 .entity.dead .bar-fill { background: var(--v-border, #4a3828) !important; animation: none !important; }
 .entity:not(.player):active {
     background: var(--v-bg-raised);
-    transition: background 80ms ease;
+    transition: background var(--v-transition-fast) ease;
 }
 .entity.enemy { border-left: 3px solid var(--v-crimson); }
 .entity.player { border-left: 3px solid var(--v-gold); cursor: default; }
@@ -84,9 +84,9 @@
 }
 .entity.active-turn .entity-header::before {
     content: '⚔';
-    font-size: 10px;
+    font-size: var(--v-font-xs);
     color: var(--v-gold);
-    margin-right: 2px;
+    margin-right: var(--v-space-xs);
     flex-shrink: 0;
 }
 .entity.active-turn.enemy .entity-header::before {
@@ -102,11 +102,11 @@
 .entity-header {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 6px;
+    gap: var(--v-space-sm);
+    padding: var(--v-space-sm) var(--v-space-sm);
 }
 .entity-icon {
-    font-size: 13px;
+    font-size: var(--v-font-base);
     flex-shrink: 0;
     line-height: 1;
     width: 18px;
@@ -127,7 +127,7 @@
 /* View creature popup button */
 .entity-view-btn {
     display: block; width: 100%; margin-top: 4px; padding: 5px 8px;
-    font-size: 12px; font-weight: 600; text-align: center;
+    font-size: var(--v-font-md); font-weight: 600; text-align: center;
     color: var(--v-gold, #c4953a); background: rgba(196,149,58,0.1);
     border: 1px solid rgba(196,149,58,0.25); border-radius: var(--v-radius-sm, 6px);
     cursor: pointer; font-family: inherit;
@@ -135,7 +135,7 @@
 .entity-view-btn:active { background: rgba(196,149,58,0.2); }
 .compact-name {
     flex: 1;
-    font-size: 13px;
+    font-size: var(--v-font-base);
     font-weight: 600;
     text-shadow: 0 1px 2px rgba(0,0,0,0.5);
     color: var(--v-text-bright);
@@ -146,7 +146,7 @@
 }
 /* Inline AC badge (visible in compact enemy header) */
 .ac-badge {
-    font-size: 10px;
+    font-size: var(--v-font-xs);
     color: var(--v-text-dim);
     white-space: nowrap;
     flex-shrink: 0;
@@ -156,7 +156,7 @@
     width: 50px;
     height: 14px;
     background: var(--v-bg-raised, #332a22);
-    border-radius: 3px;
+    border-radius: var(--v-radius-xs);
     overflow: hidden;
     flex-shrink: 0;
     border: 1px solid rgba(74,56,40,0.6);
@@ -164,9 +164,9 @@
 }
 .hp-mini-fill {
     height: 100%;
-    border-radius: 3px;
+    border-radius: var(--v-radius-xs);
     width: 100%;
-    transition: transform 0.3s ease-out;
+    transition: transform var(--v-transition-base) ease-out;
     transform-origin: left;
     position: relative;
     overflow: hidden;
@@ -178,7 +178,7 @@
     animation: hpLowPulse 1.5s ease-in-out infinite;
 }
 .hp-text-compact {
-    font-size: 12px;
+    font-size: var(--v-font-md);
     line-height: 1.35;
     color: var(--v-text-dim);
     white-space: nowrap;
@@ -186,23 +186,23 @@
     text-align: right;
 }
 .status-icons-compact {
-    font-size: 12px;
+    font-size: var(--v-font-md);
     line-height: 1.3;
     white-space: nowrap;
     max-width: 80px;
     overflow: hidden;
 }
 .status-overflow {
-    font-size: 9px;
+    font-size: var(--v-font-xs);
     color: var(--v-gold-dim);
     vertical-align: middle;
     margin-left: 1px;
 }
 /* Enemy Intent Badge (Into the Breach pattern) */
 .intent-badge {
-    font-size: 10px;
-    padding: 1px 5px;
-    border-radius: 4px;
+    font-size: var(--v-font-xs);
+    padding: 1px var(--v-space-sm);
+    border-radius: var(--v-radius-xs);
     background: rgba(200, 80, 80, 0.2);
     color: #e8a088;
     white-space: nowrap;
@@ -225,9 +225,9 @@
 }
 
 .expand-arrow {
-    font-size: 10px;
+    font-size: var(--v-font-xs);
     color: var(--v-text-dim);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform var(--v-transition-base) cubic-bezier(0.34, 1.56, 0.64, 1);
     flex-shrink: 0;
 }
 .entity.expanded .expand-arrow { transform: rotate(90deg); }
@@ -236,30 +236,30 @@
 .entity-details {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
-    padding: 0 8px;
+    transition: max-height var(--v-transition-base) cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+    padding: 0 var(--v-space-md);
 }
 .entity.expanded .entity-details {
     max-height: 250px;
-    padding: 0 8px 5px;
+    padding: 0 var(--v-space-md) var(--v-space-sm);
 }
 
 /* ─── PLAYER CARD (always shows bars) ─── */
 .player-bars {
-    padding: 1px 4px 2px;
+    padding: 1px var(--v-space-sm) var(--v-space-xs);
 }
 .bar-row {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: var(--v-space-xs);
     margin: 1px 0;
 }
-.bar-icon { font-size: 12px; flex-shrink: 0; width: 14px; text-align: center; }
+.bar-icon { font-size: var(--v-font-md); flex-shrink: 0; width: 14px; text-align: center; }
 .bar-track {
     flex: 1;
     height: var(--v-bar-height, 8px);
     background: #1e1a16;
-    border-radius: 4px;
+    border-radius: var(--v-radius-xs);
     overflow: hidden;
     border: 1px solid #3a3028;
     position: relative;
@@ -269,9 +269,9 @@
 }
 .bar-fill {
     height: 100%;
-    border-radius: 4px;
+    border-radius: var(--v-radius-xs);
     width: 100%;
-    transition: transform 0.3s ease-out;
+    transition: transform var(--v-transition-base) ease-out;
     transform-origin: left;
     background-size: 200% 100%;
     position: relative;
@@ -283,7 +283,7 @@
     left: 0;
     right: 0;
     height: 40%;
-    border-radius: 4px 4px 0 0;
+    border-radius: var(--v-radius-xs) var(--v-radius-xs) 0 0;
     background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
 }
 .bar-fill.hp-high { background: var(--v-hp-high, linear-gradient(90deg, #2d8f2d, #4caf50)); }
@@ -315,14 +315,14 @@
     left: 0;
     height: 100%;
     background: rgba(200, 60, 60, 0.45);
-    border-radius: 4px;
+    border-radius: var(--v-radius-xs);
     width: 100%;
-    transition: transform 1.2s ease-in 0.3s;
+    transition: transform 1.2s ease-in var(--v-transition-base);
     transform-origin: left;
     pointer-events: none;
 }
 .hp-mini .bar-ghost {
-    border-radius: 3px;
+    border-radius: var(--v-radius-xs);
 }
 
 /* ─── Heal Shine Sweep (GPU-composited via translateX) ─── */
@@ -340,7 +340,7 @@
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
     animation: barShineSweep 0.6s ease-out forwards;
-    z-index: 1;
+    z-index: var(--v-z-base);
     pointer-events: none;
 }
 .bar-fill.mp { background: linear-gradient(90deg, #1565c0, #42a5f5); }
@@ -366,7 +366,7 @@
     50% { opacity: 0.45; }
 }
 .bar-val {
-    font-size: 12px;
+    font-size: var(--v-font-md);
     line-height: 1.3;
     color: var(--v-text-dim);
     min-width: 36px;
@@ -376,8 +376,8 @@
 /* player-quick-stats removed (unused) */
 .player-header-stats {
     display: flex;
-    gap: 4px;
-    font-size: 10px;
+    gap: var(--v-space-sm);
+    font-size: var(--v-font-xs);
     color: var(--v-text-dim);
     white-space: nowrap;
     flex-shrink: 0;
@@ -385,14 +385,14 @@
 .player-badge-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 2px;
+    gap: var(--v-space-xs);
     padding: 0;
 }
 .mini-badge {
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     line-height: 1.3;
-    padding: 2px 5px;
-    border-radius: 10px;
+    padding: var(--v-space-xs) var(--v-space-sm);
+    border-radius: var(--v-radius);
     white-space: nowrap;
 }
 .mini-badge.status { background: rgba(123,32,32,0.2); border: 1px solid rgba(123,32,32,0.35); color: var(--v-danger-lighter); }
@@ -405,33 +405,33 @@
 .bar-label {
     display: flex;
     justify-content: space-between;
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     line-height: 1.35;
     color: var(--v-text-dim);
     margin-bottom: 1px;
 }
 .stats-row {
     display: flex;
-    gap: 8px;
-    font-size: 12px;
+    gap: var(--v-space-md);
+    font-size: var(--v-font-md);
     line-height: 1.4;
     color: var(--v-text-dim);
     flex-wrap: wrap;
-    margin-top: 3px;
+    margin-top: var(--v-space-xs);
 }
 .stat-item { display: flex; align-items: center; gap: 2px; }
 .status-pills {
     display: flex;
     flex-wrap: wrap;
-    gap: 3px;
-    margin-top: 3px;
+    gap: var(--v-space-xs);
+    margin-top: var(--v-space-xs);
 }
 .status-pill {
     text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-    font-size: 12px;
+    font-size: var(--v-font-md);
     line-height: 1.3;
-    padding: 3px 7px;
-    border-radius: 10px;
+    padding: var(--v-space-xs) 7px;
+    border-radius: var(--v-radius);
     background: rgba(123,32,32,0.3);
     color: var(--v-danger-lighter);
     border: 1px dashed rgba(123,32,32,0.5);
@@ -450,17 +450,17 @@
 }
 .legendary-row {
     display: flex;
-    gap: 8px;
-    font-size: 11px;
+    gap: var(--v-space-md);
+    font-size: var(--v-font-sm);
     line-height: 1.35;
     color: var(--v-gold-dim);
-    margin-top: 3px;
+    margin-top: var(--v-space-xs);
 }
 .entity-badge-sm {
-    font-size: 10px;
+    font-size: var(--v-font-xs);
     line-height: 1.3;
-    padding: 1px 4px;
-    border-radius: 10px;
+    padding: 1px var(--v-space-sm);
+    border-radius: var(--v-radius);
     background: var(--v-bg-raised);
     color: var(--v-text-dim);
     border: 1px solid var(--v-border);

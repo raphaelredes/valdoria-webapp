@@ -45,8 +45,8 @@
 }
 
 .timer-label {
-    margin-top: 12px;
-    font-size: 14px;
+    margin-top: var(--v-space-lg);
+    font-size: var(--v-font-body);
     color: var(--v-text-dim);
 }
 
@@ -63,7 +63,7 @@
 
 .error-content {
     text-align: center;
-    padding: 20px 18px;
+    padding: var(--v-space-2xl) var(--v-space-xl);
     max-width: min(340px, 88vw);
     background: linear-gradient(180deg, rgba(50,38,28,0.5) 0%, rgba(30,22,16,0.4) 100%);
     border: 1px solid rgba(196,149,58,0.22);
@@ -79,7 +79,7 @@
 
 .error-icon {
     font-size: clamp(36px, 10vw, 44px);
-    margin-bottom: 14px;
+    margin-bottom: var(--v-space-lg);
     animation: errorIconPulse 3s ease-in-out infinite;
 }
 @keyframes errorIconPulse {
@@ -89,14 +89,14 @@
 
 .error-msg {
     color: var(--v-text);
-    font-size: 14px;
-    margin-bottom: 6px;
+    font-size: var(--v-font-body);
+    margin-bottom: var(--v-space-sm);
     line-height: 1.5;
 }
 .error-hint {
     color: var(--v-text-dim);
-    font-size: 12px;
-    margin-bottom: 16px;
+    font-size: var(--v-font-md);
+    margin-bottom: var(--v-space-xl);
     line-height: 1.4;
     font-style: italic;
 }
@@ -109,30 +109,30 @@
 
 /* ── Debug Log Panel (inside error overlay) ── */
 .error-debug-panel {
-    margin-top: 14px;
+    margin-top: var(--v-space-lg);
     text-align: left;
 }
 .error-debug-toggle {
     background: none;
     border: none;
     color: var(--v-text-dim);
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     cursor: pointer;
     font-family: var(--v-font);
-    padding: 4px 0;
+    padding: var(--v-space-sm) 0;
     opacity: 0.7;
 }
 .error-debug-toggle:hover { opacity: 1; }
 .error-debug-log {
-    margin-top: 6px;
+    margin-top: var(--v-space-sm);
     max-height: 140px;
     overflow-y: auto;
     background: rgba(0,0,0,0.4);
     border: 1px solid rgba(196,149,58,0.1);
     border-radius: var(--v-radius-sm, 6px);
-    padding: 8px 10px;
+    padding: var(--v-space-md) var(--v-space-md-lg);
     font-family: monospace;
-    font-size: 10px;
+    font-size: var(--v-font-xs);
     line-height: 1.4;
     color: var(--v-text-dim);
     white-space: pre-wrap;
@@ -141,14 +141,14 @@
     user-select: text;
 }
 .error-debug-copy {
-    margin-top: 6px;
+    margin-top: var(--v-space-sm);
     background: rgba(196,149,58,0.1);
     border: 1px solid rgba(196,149,58,0.2);
     border-radius: var(--v-radius-sm, 6px);
     color: var(--v-text-dim);
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     font-family: var(--v-font);
-    padding: 5px 12px;
+    padding: var(--v-space-sm) var(--v-space-lg);
     cursor: pointer;
     width: 100%;
 }
@@ -192,10 +192,10 @@
 /* ── Network Status Badge ── */
 .error-network-badge {
     display: inline-block;
-    padding: 3px 10px;
+    padding: var(--v-space-xs) var(--v-space-md-lg);
     border-radius: var(--v-radius-pill, 16px);
-    font-size: 11px;
-    margin-bottom: 10px;
+    font-size: var(--v-font-sm);
+    margin-bottom: var(--v-space-md-lg);
     animation: v-fadeIn 0.3s ease;
 }
 .error-network-badge.online {
@@ -216,7 +216,7 @@
     background: var(--v-bg);
     z-index: var(--v-z-tooltip, 400);
     opacity: 0;
-    transition: opacity 0.35s ease;
+    transition: opacity var(--v-transition-base) ease;
     pointer-events: none;
 }
 

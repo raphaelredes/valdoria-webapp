@@ -15,7 +15,7 @@
    TUTORIAL OVERLAY (onboarding step-by-step)
    ═══════════════════════════════════════════ */
 .tutorial-overlay {
-    position: fixed; inset: 0; z-index: 500;
+    position: fixed; inset: 0; z-index: var(--v-z-overlay);
     pointer-events: auto;
 }
 .tutorial-overlay.tutorial-exit { animation: tutFadeOut 300ms ease forwards; }
@@ -30,17 +30,17 @@
     position: absolute; display: none;
     box-shadow: 0 0 0 9999px rgba(0,0,0,0.75);
     border: 2px solid rgba(196,149,58,0.6);
-    z-index: 501;
-    transition: all 350ms ease;
+    z-index: var(--v-z-overlay);
+    transition: all var(--v-transition-base) ease;
 }
 
 .tutorial-card {
-    position: fixed; z-index: 502;
+    position: fixed; z-index: var(--v-z-overlay);
     width: calc(100% - 40px); max-width: 340px;
     background: linear-gradient(135deg, #3a3028, #2a2420);
     border: 1px solid rgba(196,149,58,0.4);
-    border-radius: 14px;
-    padding: 18px 16px 14px;
+    border-radius: var(--v-radius-lg);
+    padding: var(--v-space-xl) var(--v-space-xl) var(--v-space-lg);
     box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(196,149,58,0.1);
 }
 .tutorial-card-enter { animation: tutCardIn 350ms ease; }
@@ -55,7 +55,7 @@
 .tutorial-card-icon { font-size: 22px; }
 .tutorial-card-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 16px; font-weight: 700;
+    font-size: var(--v-font-xl); font-weight: 700;
     color: #c4953a; flex: 1;
 }
 .tutorial-step-num {
@@ -64,9 +64,9 @@
 }
 
 .tutorial-card-text {
-    font-size: 14px; line-height: 1.6;
+    font-size: var(--v-font-body); line-height: 1.6;
     color: var(--v-text, #d4c8b0);
-    margin-bottom: 14px;
+    margin-bottom: var(--v-space-lg);
     font-family: var(--v-font, serif);
 }
 
@@ -76,7 +76,7 @@
 .tutorial-dot {
     width: 8px; height: 8px; border-radius: 50%;
     background: rgba(196,149,58,0.2);
-    transition: all 250ms ease;
+    transition: all var(--v-transition-base) ease;
 }
 .tutorial-dot.active {
     background: #c4953a; transform: scale(1.3);
@@ -109,11 +109,11 @@
     width: 44px; height: 44px; border-radius: 50%;
     background: rgba(196,149,58,0.12);
     border: 1px solid rgba(196,149,58,0.3);
-    color: #c4953a; font-size: 16px; font-weight: 700;
+    color: #c4953a; font-size: var(--v-font-xl); font-weight: 700;
     font-family: var(--v-font, serif);
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; min-width: 44px;
-    transition: background 200ms ease;
+    transition: background var(--v-transition) ease;
 }
 .btn-help-tutorial:active {
     background: rgba(196,149,58,0.25);
@@ -121,11 +121,11 @@
 
 /* ── Confirmation overlay ── */
 .tutorial-confirm-overlay {
-    position: fixed; inset: 0; z-index: 510;
+    position: fixed; inset: 0; z-index: var(--v-z-overlay);
     display: flex; align-items: center; justify-content: center;
     background: rgba(0,0,0,0.7);
     opacity: 0; pointer-events: none;
-    transition: opacity 200ms ease;
+    transition: opacity var(--v-transition) ease;
 }
 .tutorial-confirm-overlay.active {
     opacity: 1; pointer-events: auto;
@@ -134,15 +134,15 @@
     width: calc(100% - 48px); max-width: 300px;
     background: linear-gradient(135deg, #3a3028, #2a2420);
     border: 1px solid rgba(196,149,58,0.4);
-    border-radius: 14px; padding: 20px 16px 14px;
+    border-radius: var(--v-radius-lg);
     text-align: center;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
 .tutorial-confirm-icon { font-size: clamp(26px, 8vw, 32px); margin-bottom: 8px; }
 .tutorial-confirm-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 18px; font-weight: 700; color: #c4953a;
-    margin-bottom: 8px;
+    font-size: var(--v-font-2xl); font-weight: 700; color: #c4953a;
+    margin-bottom: var(--v-space-md);
 }
 .tutorial-confirm-text {
     font-size: 14px; line-height: 1.5; color: var(--v-text, #d4c8b0);
@@ -203,10 +203,10 @@
 
 /* ── Tutorial illustrations (mini-mockups inside cards) ── */
 .tutorial-card-illust {
-    margin: 0 0 12px; padding: 10px 12px;
+    margin: 0 0 var(--v-space-lg);
     background: rgba(0,0,0,0.25);
     border: 1px solid rgba(196,149,58,0.15);
-    border-radius: 8px;
+    border-radius: var(--v-radius-sm);
     display: flex; justify-content: center;
 }
 .tutorial-card-icon {
@@ -229,14 +229,14 @@
     display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
     font-size: 11px; color: var(--v-text-dim, #a09484);
     font-family: var(--v-font, serif);
-    padding: 4px 8px;
+    padding: var(--v-space-sm) var(--v-space-md);
     background: linear-gradient(180deg, #3a3028, #2a2420);
     border: 1px solid #4a3828; border-radius: 6px;
     width: 100%;
 }
-.ti-hud-name { color: #c4953a; font-weight: 700; font-size: 12px; }
+.ti-hud-name { color: #c4953a; font-weight: 700; font-size: var(--v-font-md); }
 .ti-hud-hp { display: flex; align-items: center; gap: 3px; }
-.ti-hp-label { color: #8a7a68; font-size: 10px; }
+.ti-hp-label { color: #8a7a68; font-size: var(--v-font-xs); }
 .ti-hp-bar {
     width: 40px; height: 6px; border-radius: 3px;
     background: #1e1a16; overflow: hidden;
@@ -245,9 +245,9 @@
     display: block; height: 100%; border-radius: 3px;
     background: linear-gradient(90deg, #4a8c3f, #6ab85a);
 }
-.ti-hp-val { font-size: 10px; color: #a09484; }
+.ti-hp-val { font-size: var(--v-font-xs); color: #a09484; }
 .ti-badge {
-    font-size: 10px; padding: 1px 5px; border-radius: 4px;
+    font-size: var(--v-font-xs); padding: 1px 5px; border-radius: 4px;
     background: rgba(196,149,58,0.12); color: #c4953a;
 }
 
@@ -270,7 +270,7 @@
 .ti-btn-row { display: flex; justify-content: center; gap: 10px; }
 .ti-btn-mock {
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 6px 14px; border-radius: 6px; font-size: 13px;
+    padding: 6px 14px; border-radius: 6px; font-size: var(--v-font-base);
     font-family: var(--v-font, serif); font-weight: 600;
 }
 .ti-btn-return {
@@ -280,13 +280,13 @@
 .ti-btn-explore {
     background: rgba(196,149,58,0.08);
     border: 1px solid rgba(196,149,58,0.3); color: #c4953a;
-    font-size: 18px; padding: 4px 10px;
+    font-size: var(--v-font-2xl); padding: 4px 10px;
 }
 
 /* Pace toggle mockup */
 .ti-pace-row { display: flex; gap: 4px; justify-content: center; }
 .ti-pace {
-    padding: 4px 8px; border-radius: 4px; font-size: 11px;
+    padding: 4px 8px; border-radius: 4px; font-size: var(--v-font-sm);
     font-family: var(--v-font, serif); white-space: nowrap;
 }
 .ti-pace-fast {
@@ -313,8 +313,8 @@
     display: flex; align-items: center; gap: 8px; justify-content: center;
     font-family: var(--v-font, serif);
 }
-.ti-step-count { font-size: 16px; font-weight: 700; color: #a09484; }
-.ti-step-label { font-size: 11px; color: #8a7a68; }
+.ti-step-count { font-size: var(--v-font-xl); font-weight: 700; color: #a09484; }
+.ti-step-label { font-size: var(--v-font-sm); color: #8a7a68; }
 .ti-danger-pips { display: flex; gap: 3px; align-items: center; }
 .ti-pip {
     width: 7px; height: 7px; border-radius: 50%;
@@ -335,7 +335,7 @@
 .ti-fog-hex {
     width: 44px; height: 44px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px; border: 1px solid rgba(196,149,58,0.2);
+    font-size: var(--v-font-2xl); border: 1px solid rgba(196,149,58,0.2);
 }
 .ti-fog-hidden {
     background: rgba(0,0,0,0.6); color: #555;
@@ -351,7 +351,7 @@
     border-color: rgba(196,149,58,0.4);
 }
 .ti-fog-labels {
-    display: flex; gap: 18px; font-size: 10px;
+    display: flex; gap: 18px; font-size: var(--v-font-xs);
     color: #8a7a68; font-family: var(--v-font, serif);
 }
 

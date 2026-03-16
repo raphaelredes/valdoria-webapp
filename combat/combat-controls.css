@@ -3,14 +3,14 @@
 /* ─── ACTION TOAST (inside action-bar) ─── */
 .action-toast {
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    padding: 3px 8px;
-    margin: 0 0 3px;
-    font-size: 12px;
+    padding: var(--v-space-xs) var(--v-space-md);
+    margin: 0 0 var(--v-space-xs);
+    font-size: var(--v-font-md);
     font-weight: 600;
     text-align: center;
     color: var(--v-text-dim);
     background: rgba(0,0,0,0.25);
-    border-radius: 4px;
+    border-radius: var(--v-radius-xs);
     border-left: 2px solid var(--v-border);
     white-space: nowrap;
     overflow: hidden;
@@ -24,9 +24,9 @@
 .action-toast.feed-hit { border-left-color: var(--v-gold-dim); }
 /* Toast D&D math breakdown (Solasta-style transparency) */
 .toast-detail {
-    font-size: 10px;
+    font-size: var(--v-font-xs);
     color: var(--v-text-dim);
-    margin-top: 2px;
+    margin-top: var(--v-space-xs);
     opacity: 0.8;
     letter-spacing: 0.2px;
     font-family: var(--v-font-mono, monospace);
@@ -38,8 +38,8 @@
     position: relative;
     height: 18px;
     background: rgba(0,0,0,0.4);
-    border-radius: 4px;
-    margin: 0 8px 2px;
+    border-radius: var(--v-radius-xs);
+    margin: 0 var(--v-space-md) var(--v-space-xs);
     overflow: hidden;
     flex-shrink: 0;
     border: 1px solid rgba(74,56,40,0.3);
@@ -47,7 +47,7 @@
 .timer-bar {
     height: 100%;
     background: linear-gradient(90deg, var(--v-gold-dim), var(--v-gold));
-    border-radius: 3px;
+    border-radius: var(--v-radius-xs);
     transition: width 1s linear;
 }
 .timer-bar.warning {
@@ -68,13 +68,13 @@
     transform: translate(-50%, -50%) scale(0.9);
     background: rgba(123,32,32,0.92);
     color: #fff;
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-size: 14px;
+    padding: var(--v-space-md-lg) var(--v-space-2xl);
+    border-radius: var(--v-radius);
+    font-size: var(--v-font-body);
     font-weight: 600;
     z-index: var(--v-z-dropdown, 200);
     opacity: 0;
-    transition: opacity 0.3s, transform 0.3s;
+    transition: opacity var(--v-transition-base), transform 0.3s;
     pointer-events: none;
 }
 .timer-toast.visible {
@@ -86,7 +86,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 12px;
+    font-size: var(--v-font-md);
     line-height: 1;
     font-weight: 800;
     color: var(--v-text-bright);
@@ -98,7 +98,7 @@
 }
 /* Timer text urgency — pulses and grows at critical time */
 .timer-text.critical {
-    font-size: 14px;
+    font-size: var(--v-font-body);
     font-weight: 900;
     color: var(--v-kill);
     animation: timerTextPulse 0.5s ease-in-out infinite;
@@ -117,8 +117,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 4px 0;
+    gap: var(--v-space-sm);
+    padding: var(--v-space-sm) 0;
     width: 100%;
     min-height: 80px;
 }
@@ -138,7 +138,7 @@
 .init-dice3d-particles {
     position: absolute; inset: 0;
     pointer-events: none; overflow: visible;
-    z-index: 2;
+    z-index: var(--v-z-base);
 }
 
 /* Result number (hidden, not used with Dice3D — it shows result on the die) */
@@ -147,16 +147,16 @@
 /* Initiative button */
 .init-hero-btn {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 16px; font-weight: 700;
+    font-size: var(--v-font-xl); font-weight: 700;
     letter-spacing: 1px;
     color: var(--v-gold-light, #e0c070);
     background: linear-gradient(165deg, rgba(196,149,58,0.15) 0%, rgba(42,36,32,0.95) 50%, rgba(196,149,58,0.1) 100%);
     border: 2px solid rgba(196,149,58,0.5);
-    border-radius: 8px;
-    padding: 12px 24px;
+    border-radius: var(--v-radius-sm);
+    padding: var(--v-space-lg) var(--v-space-2xl);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    transition: transform var(--v-transition) ease, box-shadow var(--v-transition-base) ease;
     text-shadow: 0 2px 8px rgba(196,149,58,0.3);
     box-shadow: 0 0 20px rgba(196,149,58,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
     animation: initBtnPulse 2.5s ease-in-out infinite;
@@ -172,7 +172,7 @@
     animation: none;
 }
 .init-hero-subtitle {
-    font-size: 12px;
+    font-size: var(--v-font-md);
     color: var(--v-text, #d4c8b0);
     font-style: italic; opacity: 0.6;
 }
@@ -181,7 +181,7 @@
 .init-hero-area.rolling .init-hero-btn {
     opacity: 0; transform: scale(0.8);
     pointer-events: none;
-    transition: all 0.4s ease;
+    transition: all var(--v-transition-enter) ease;
 }
 .init-hero-area.rolling .init-hero-subtitle {
     opacity: 0; transition: opacity 0.3s ease;
@@ -235,18 +235,18 @@
 .dmg-dice3d-particles {
     position: absolute; inset: 0;
     pointer-events: none; overflow: visible;
-    z-index: 2;
+    z-index: var(--v-z-base);
 }
 .dmg-dice3d-label {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: 15px;
+    font-size: var(--v-font-lg);
     color: var(--v-text-dim);
     letter-spacing: 1.5px;
-    margin-top: 8px;
+    margin-top: var(--v-space-md);
     text-transform: uppercase;
-    transition: all 0.3s ease;
+    transition: all var(--v-transition-base) ease;
     text-align: center;
-    padding: 0 16px;
+    padding: 0 var(--v-space-xl);
 }
 .dmg-dice3d-label.rolling {
     color: var(--v-gold-light);
@@ -254,19 +254,19 @@
 }
 .dmg-dice3d-label.hit {
     color: var(--v-success, #4caf50);
-    font-size: 18px;
+    font-size: var(--v-font-2xl);
     font-weight: 700;
     text-shadow: 0 0 12px rgba(76,175,80,0.4);
 }
 .dmg-dice3d-label.crit {
     color: var(--v-warning);
-    font-size: 18px;
+    font-size: var(--v-font-2xl);
     font-weight: 700;
     text-shadow: 0 0 14px rgba(255,152,0,0.5);
 }
 .dmg-dice3d-label.miss {
     color: var(--v-text-dim, #8a7a68);
-    font-size: 16px;
+    font-size: var(--v-font-xl);
     font-weight: 600;
     text-shadow: 0 0 8px rgba(138,122,104,0.3);
 }
@@ -276,15 +276,15 @@
     left: 50%;
     transform: translateX(-50%);
     font-family: var(--v-font, serif);
-    font-size: 13px;
+    font-size: var(--v-font-base);
     color: var(--v-text-dim);
     background: rgba(42,36,32,0.6);
     border: 1px solid rgba(196,149,58,0.3);
-    border-radius: 6px;
-    padding: 8px 28px;
+    border-radius: var(--v-radius-sm);
+    padding: var(--v-space-md) var(--v-space-2xl);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--v-transition-base) ease;
     -webkit-tap-highlight-color: transparent;
     min-height: 44px;
     min-width: 44px;
@@ -296,10 +296,10 @@
 
 /* ─── BREAKDOWN DE MODIFICADORES ─── */
 .breakdown-line {
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     font-family: var(--v-font);
     opacity: 0.8;
-    margin-top: 2px;
+    margin-top: var(--v-space-xs);
     display: block;
     letter-spacing: 0.3px;
 }

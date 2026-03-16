@@ -11,7 +11,7 @@
     align-items: center;
     justify-content: center;
     background: radial-gradient(ellipse at 50% 38%, var(--lo-bg-center, #302018) 0%, var(--lo-bg-mid, #1a1510) 45%, var(--lo-bg-edge, #0a0805) 100%);
-    z-index: 1000;
+    z-index: var(--v-z-loading);
     overflow: hidden;
     transition: opacity 0.8s ease;
 }
@@ -172,7 +172,7 @@
     position: relative;
     width: clamp(180px, 60vw, 260px);
     height: clamp(180px, 60vw, 260px);
-    margin-bottom: 10px;
+    margin-bottom: var(--v-space-md-lg);
     animation: circleEntrance 2s var(--v-ease-snap) both;
     contain: layout style;
 }
@@ -214,7 +214,7 @@
 .mc-outer {
     animation: spinCW var(--ring-outer, 60s) linear infinite;
 }
-.mc-rune-text { font-size: 13px; letter-spacing: 3px; font-family: serif; }
+.mc-rune-text { font-size: var(--v-font-base); letter-spacing: 3px; font-family: serif; }
 
 /* Mid energy ring — CCW — DEFAULT: 35s, MIN: 15s */
 .mc-mid { animation: spinCCW var(--ring-mid, 35s) linear infinite; }
@@ -233,7 +233,7 @@
 .mc-inner {
     animation: spinCW var(--ring-inner, 45s) linear infinite;
 }
-.mc-inner-text { font-size: 9.5px; letter-spacing: 5px; font-family: serif; }
+.mc-inner-text { font-size: var(--v-font-xs); letter-spacing: 5px; font-family: serif; }
 
 @keyframes spinCW  { to { transform: rotate(360deg); } }
 @keyframes spinCCW { to { transform: rotate(-360deg); } }
@@ -263,7 +263,7 @@
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 28px; height: 28px;
-    z-index: 2;
+    z-index: var(--v-z-base);
     animation: gemEntrance 1.2s var(--v-ease-snap) 0.8s both;
 }
 .mc-gem-core {
@@ -392,13 +392,13 @@
 
 /* ── Stage text (below progress bar) ── */
 .loading-stage {
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     color: rgba(196,149,58,0.5);
     text-align: center;
     font-family: var(--v-font, 'MedievalSharp'), serif;
-    margin-top: 6px;
+    margin-top: var(--v-space-sm);
     letter-spacing: 1px;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--v-transition-base) ease;
     min-height: 14px;
 }
 
@@ -449,7 +449,7 @@
 .loading-divider {
     width: clamp(120px, 40vw, 160px); height: 1px;
     background: linear-gradient(90deg, transparent, rgba(196,149,58,0.4), rgba(196,149,58,0.7), rgba(196,149,58,0.4), transparent);
-    margin: 10px auto 0; position: relative;
+    margin: var(--v-space-md-lg) auto 0;
     animation: loadFadeIn 0.5s ease 0.8s both;
 }
 .divider-rune {
@@ -468,7 +468,7 @@
     height: 100%; width: 0%; border-radius: 2px;
     background: linear-gradient(90deg, #7b2020, #c4953a, #d4aa4a);
     box-shadow: 0 0 8px rgba(196,149,58,0.5);
-    transition: width 0.3s ease; position: relative;
+    transition: width var(--v-transition-base) ease; position: relative;
 }
 .loading-progress-fill::after {
     content: ''; position: absolute; right: 0; top: -2px;
@@ -533,7 +533,7 @@
 .loading-flash {
     position: absolute; inset: 0;
     background: radial-gradient(circle at 50% 45%, rgba(196,149,58,0.6), transparent 70%);
-    opacity: 0; pointer-events: none; z-index: 2;
+    opacity: 0; pointer-events: none; z-index: var(--v-z-base);
 }
 .loading-overlay.exit-cinematic .loading-flash {
     animation: flashBurst 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -663,28 +663,28 @@
 
 /* Stage text (below progress bar) */
 .loading-stage {
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     color: var(--v-text-dim, #8a7a68);
     text-align: center;
-    margin-top: 4px;
+    margin-top: var(--v-space-sm);
     min-height: 16px;
     font-style: italic;
-    transition: opacity 0.3s;
+    transition: opacity var(--v-transition-base);
 }
 
 /* Retry button (shown after 10s slow warning) */
 .loading-retry {
     display: none;
-    margin-top: 12px;
-    padding: 8px 24px;
+    margin-top: var(--v-space-lg);
+    padding: var(--v-space-md) var(--v-space-2xl);
     background: rgba(196,149,58,0.15);
     border: 1px solid rgba(196,149,58,0.4);
-    border-radius: 6px;
+    border-radius: var(--v-radius-sm);
     color: var(--v-text, #d4c8b0);
     font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: 13px;
+    font-size: var(--v-font-base);
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
+    transition: background var(--v-transition), border-color 0.2s;
 }
 .loading-retry:active {
     background: rgba(196,149,58,0.3);
@@ -704,7 +704,7 @@
 .loading-tip-area .tip-exit {
     opacity: 0;
     transform: translateY(-6px);
-    transition: opacity 0.3s, transform 0.3s;
+    transition: opacity var(--v-transition-base), transform 0.3s;
 }
 .loading-tip-area .tip-enter {
     animation: tipEnter 0.35s ease-out;
@@ -772,7 +772,7 @@
 .backpack-anim {
     position: relative;
     width: clamp(100px, 36vw, 140px); height: clamp(115px, 42vw, 160px);
-    margin-bottom: 10px;
+    margin-bottom: var(--v-space-md-lg);
 }
 .bp-glow {
     position: absolute;

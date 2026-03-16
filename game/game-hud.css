@@ -8,9 +8,9 @@
 .v-divider {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 2px 0;
-    margin: 2px 0;
+    gap: var(--v-space-md);
+    padding: var(--v-space-xs) 0;
+    margin: var(--v-space-xs) 0;
 }
 
 .v-divider::before,
@@ -22,14 +22,14 @@
 }
 
 .v-divider span {
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     color: var(--v-gold-dim);
     flex-shrink: 0;
 }
 
 .v-divider-sm {
-    padding: 4px 0;
-    margin: 4px 0;
+    padding: var(--v-space-sm) 0;
+    margin: var(--v-space-sm) 0;
 }
 
 .v-divider-sm::before,
@@ -38,8 +38,8 @@
 }
 
 .v-divider-dot {
-    padding: 2px 0;
-    margin: 2px 0;
+    padding: var(--v-space-xs) 0;
+    margin: var(--v-space-xs) 0;
 }
 .v-divider-dot::before,
 .v-divider-dot::after {
@@ -58,20 +58,20 @@
 /* ─── Stat Badges (AC, ATK, DMG) ─── */
 .v-stat-row {
     display: flex;
-    gap: 5px;
+    gap: var(--v-space-sm);
     flex-wrap: wrap;
-    padding: 3px 0;
+    padding: var(--v-space-xs) 0;
 }
 
 .v-stat-badge {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    padding: 5px 10px;
+    gap: var(--v-space-xs);
+    padding: var(--v-space-sm) var(--v-space-md-lg);
     background: var(--v-bg-raised);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm);
-    font-size: 13px;
+    font-size: var(--v-font-base);
     font-family: var(--v-font-mono);
     color: var(--v-text);
     white-space: nowrap;
@@ -80,23 +80,23 @@
 /* ─── Resource Badges (Gold, Items) ─── */
 .v-resource-row {
     display: flex;
-    gap: 6px;
+    gap: var(--v-space-sm);
     flex-wrap: wrap;
-    padding: 3px 0;
+    padding: var(--v-space-xs) 0;
 }
 
 .v-resource-badge {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
-    padding: 5px 12px;
+    gap: var(--v-space-xs);
+    padding: var(--v-space-sm) var(--v-space-lg);
     background: var(--v-bg-card);
     border: 1px solid var(--v-border-gold);
     border-radius: var(--v-radius-pill);
-    font-size: 13px;
+    font-size: var(--v-font-base);
     color: var(--v-gold-light);
     white-space: nowrap;
-    transition: transform 0.3s ease;
+    transition: transform var(--v-transition-base) ease;
     position: relative;
 }
 .v-resource-badge.resource-pop {
@@ -112,10 +112,10 @@
 .resource-floater {
     position: fixed;
     font-family: var(--v-font);
-    font-size: 16px;
+    font-size: var(--v-font-xl);
     font-weight: 700;
     pointer-events: none;
-    z-index: 200;
+    z-index: var(--v-z-dropdown);
     transform: translateX(-50%);
     animation: resourceFloat 1.4s ease-out forwards;
     text-shadow: 0 0 8px currentColor;

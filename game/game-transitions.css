@@ -5,7 +5,7 @@
 .screen.fade-out {
     opacity: 0;
     transform: translateX(-20px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transition: opacity var(--v-transition-base) ease, transform 0.25s ease;
 }
 .screen.fade-in {
     animation: slideFromRight 0.3s var(--v-ease-snap, var(--v-ease-snap));
@@ -19,7 +19,7 @@
 .screen.slide-back-out {
     opacity: 0;
     transform: translateX(20px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transition: opacity var(--v-transition-base) ease, transform 0.25s ease;
 }
 .screen.slide-back-in {
     animation: slideFromLeft 0.3s var(--v-ease-snap, var(--v-ease-snap));
@@ -38,14 +38,14 @@
     right: -4px;
     background: var(--v-crimson, #7b2020);
     color: #fff;
-    font-size: 10px;
+    font-size: var(--v-font-xs);
     font-weight: 700;
     min-width: 16px;
     height: 16px;
     line-height: 16px;
     text-align: center;
-    border-radius: 8px;
-    padding: 0 4px;
+    border-radius: var(--v-radius-sm);
+    padding: 0 var(--v-space-sm);
     animation: badgeBounce 0.5s ease;
 }
 .btn-action[data-badge] { position: relative; overflow: visible; }
@@ -136,7 +136,7 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 1;
+    z-index: var(--v-z-base);
     opacity: 0.7;
 }
 

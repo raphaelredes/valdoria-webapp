@@ -6,48 +6,48 @@
 #bottom-bar {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--v-space-sm);
     padding: 6px 10px max(6px, env(safe-area-inset-bottom)) 10px;
     background: linear-gradient(0deg, rgba(58,48,40,0.88) 0%, rgba(42,36,32,0.85) 100%);
     border-top: 1px solid rgba(74,56,40,0.7);
     box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
-    z-index: 50;
+    z-index: var(--v-z-sticky);
     flex-shrink: 0;
 }
 #bottom-bar .bar-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--v-space-sm);
 }
 #bottom-bar .bar-info {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: var(--v-space-md-lg);
 }
 .btn-return {
-    padding: 8px 12px;
+    padding: var(--v-space-md) var(--v-space-lg);
     min-height: 44px;
     flex: 1;
     border: 1px solid var(--v-gold-dim, #9a7530);
     background: linear-gradient(180deg, rgba(196,149,58,0.15) 0%, rgba(196,149,58,0.05) 100%);
     color: var(--v-gold, #c4953a);
-    border-radius: 6px;
-    font-size: 13px;
+    border-radius: var(--v-radius-sm);
+    font-size: var(--v-font-base);
     font-weight: 600;
     cursor: pointer;
 }
 .btn-return { transition: transform 0.12s ease; }
 .btn-return:active { transform: scale(0.94); }
 .btn-inventory {
-    padding: 8px 12px;
+    padding: var(--v-space-md) var(--v-space-lg);
     min-height: 44px;
     flex: 1;
     border: 1px solid var(--v-gold-dim, #9a7530);
     background: linear-gradient(180deg, rgba(196,149,58,0.15) 0%, rgba(196,149,58,0.05) 100%);
     color: var(--v-gold, #c4953a);
-    border-radius: 6px;
-    font-size: 13px;
+    border-radius: var(--v-radius-sm);
+    font-size: var(--v-font-base);
     font-weight: 600;
     cursor: pointer;
 }
@@ -56,17 +56,17 @@
 
 /* Explore Area button */
 .btn-explore {
-    padding: 8px 12px;
+    padding: var(--v-space-md) var(--v-space-lg);
     min-height: 44px;
     flex: 1;
     border: 1px solid rgba(196,149,58,0.3);
     background: rgba(196,149,58,0.08);
     color: var(--v-gold, #c4953a);
-    border-radius: 6px;
-    font-size: 13px;
+    border-radius: var(--v-radius-sm);
+    font-size: var(--v-font-base);
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background var(--v-transition) ease;
 }
 .btn-explore:active { transform: scale(0.95); background: rgba(196,149,58,0.2); }
 .btn-explore.on-cooldown {
@@ -79,10 +79,10 @@
     width: 44px; height: 44px; border-radius: 50%;
     background: rgba(68, 170, 100, 0.12);
     border: 1px solid rgba(68, 170, 100, 0.3);
-    color: #d4c8b0; font-size: 16px;
+    color: #d4c8b0; font-size: var(--v-font-xl);
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; min-width: 44px;
-    transition: background 200ms ease, border-color 300ms ease, box-shadow 300ms ease;
+    transition: background var(--v-transition) ease, border-color var(--v-transition-base) ease, box-shadow 300ms ease;
 }
 .btn-camp-rest:active { background: rgba(68, 170, 100, 0.25); transform: scale(0.94); }
 .btn-camp-rest.has-exhaustion {
@@ -101,16 +101,16 @@
 
 /* Travel Pace toggle */
 .pace-toggle {
-    padding: 4px 8px;
+    padding: var(--v-space-sm) var(--v-space-md);
     min-height: 44px;
     min-width: 44px;
     border: 1px solid rgba(196,149,58,0.25);
     background: rgba(196,149,58,0.06);
     color: var(--v-text-dim, #a09484);
-    border-radius: 4px;
-    font-size: 16px;
+    border-radius: var(--v-radius-xs);
+    font-size: var(--v-font-xl);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--v-transition) ease;
 }
 .pace-toggle:active { transform: scale(0.92); }
 .pace-toggle.pace-fast {
@@ -126,18 +126,18 @@
 .bar-center {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--v-space-md);
     flex: 1;
     justify-content: center;
 }
 .step-counter {
-    font-size: 13px;
+    font-size: var(--v-font-base);
     color: var(--v-text-dim, #a09484);
     font-weight: 600;
 }
 .danger-pips {
     display: flex;
-    gap: 3px;
+    gap: var(--v-space-xs);
 }
 .pip {
     width: 6px;
@@ -145,7 +145,7 @@
     border-radius: 50%;
     background: rgba(255,255,255,0.12);
     border: 1px solid rgba(255,255,255,0.18);
-    transition: background 0.3s ease, box-shadow 0.3s ease;
+    transition: background var(--v-transition-base) ease, box-shadow 0.3s ease;
 }
 .pip.filled {
     background: var(--v-crimson, #7b2020);
@@ -156,7 +156,7 @@
     animation: pipPulse 1.5s infinite;
 }
 .location-info {
-    font-size: 12px;
+    font-size: var(--v-font-md);
     color: var(--v-text-dim, #a09484);
     text-align: right;
     max-width: 90px;
@@ -169,28 +169,28 @@
 .hud-xp-row {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 0 2px;
+    gap: var(--v-space-sm);
+    padding: 0 var(--v-space-xs);
     margin-top: -2px;
 }
 .xp-bar {
     flex: 1;
     height: 4px;
     background: rgba(100, 80, 60, 0.3);
-    border-radius: 2px;
+    border-radius: var(--v-radius-xs);
     overflow: hidden;
 }
 .xp-fill {
     height: 100%;
     background: linear-gradient(90deg, #6a5acd, #9370db);
-    border-radius: 2px;
+    border-radius: var(--v-radius-xs);
     width: 100%;
     transition: transform 0.6s ease;
     transform-origin: left;
     box-shadow: 0 0 4px rgba(106, 90, 205, 0.4);
 }
 .xp-label {
-    font-size: 12px;
+    font-size: var(--v-font-md);
     color: #9370db;
     font-weight: 600;
     white-space: nowrap;
@@ -200,9 +200,9 @@
 
 /* A4+C1: Fatigue visual warnings */
 .fatigue-badge {
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 10px;
+    font-size: var(--v-font-sm);
+    padding: var(--v-space-xs) var(--v-space-md);
+    border-radius: var(--v-radius);
     font-weight: 600;
     display: none;
 }
@@ -228,7 +228,7 @@ body.fatigue-1::after {
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 40;
+    z-index: var(--v-z-sticky);
     background: radial-gradient(ellipse at center, transparent 60%, rgba(196, 149, 58, 0.08) 100%);
 }
 body.fatigue-2::after {
@@ -236,7 +236,7 @@ body.fatigue-2::after {
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 40;
+    z-index: var(--v-z-sticky);
     background: radial-gradient(ellipse at center, transparent 50%, rgba(180, 100, 30, 0.15) 100%);
 }
 body.fatigue-3::after {
@@ -244,7 +244,7 @@ body.fatigue-3::after {
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 40;
+    z-index: var(--v-z-sticky);
     background: radial-gradient(ellipse at center, transparent 40%, rgba(180, 50, 30, 0.2) 100%);
     animation: fatigueVignettePulse 3s ease infinite;
 }

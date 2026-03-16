@@ -66,7 +66,7 @@
 .loc-transition {
     position: fixed;
     inset: 0;
-    z-index: 9000;
+    z-index: var(--v-z-critical);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -94,15 +94,15 @@
 .loc-transition-icon {
     font-size: clamp(36px, 12vw, 48px);
     animation: locIconPulse 1.5s ease-in-out infinite;
-    z-index: 1;
+    z-index: var(--v-z-base);
     /* drop-shadow removed for mobile performance */
 }
 /* Gold ornamental divider below icon */
 .loc-transition-icon::after {
     content: '◆';
     display: block;
-    margin-top: 12px;
-    font-size: 8px;
+    margin-top: var(--v-space-lg);
+    font-size: var(--v-font-xs);
     color: var(--v-gold, #c4953a);
     opacity: 0.5;
     letter-spacing: 8px;
@@ -113,21 +113,21 @@
     50%      { transform: scale(1.12); opacity: 1; }
 }
 .loc-transition-text {
-    margin-top: 16px;
-    font-size: 15px;
+    margin-top: var(--v-space-xl);
+    font-size: var(--v-font-lg);
     font-family: var(--v-font-display, 'Cinzel', serif);
     color: var(--v-gold-light, #dbb668);
     letter-spacing: 1.5px;
     text-transform: uppercase;
     font-weight: 600;
-    z-index: 1;
+    z-index: var(--v-z-base);
     text-shadow: 0 1px 6px rgba(0,0,0,0.5);
 }
 .loc-transition-dots {
-    margin-top: 20px;
+    margin-top: var(--v-space-2xl);
     display: flex;
-    gap: 6px;
-    z-index: 1;
+    gap: var(--v-space-sm);
+    z-index: var(--v-z-base);
 }
 .loc-transition-dots span {
     display: block;
@@ -178,10 +178,10 @@
 /* ─── Epic Medieval Gate (city transitions) ─── */
 .loc-gate {
     position: relative;
-    z-index: 1;
+    z-index: var(--v-z-base);
     width: clamp(140px, 45vw, 180px);
     height: clamp(180px, 55vw, 220px);
-    margin-bottom: 8px;
+    margin-bottom: var(--v-space-md);
     opacity: 0;
 }
 .loc-gate.opening {
@@ -245,7 +245,7 @@
     position: absolute;
     top: 6px; left: 50%;
     transform: translateX(-50%);
-    font-size: 10px;
+    font-size: var(--v-font-xs);
     color: rgba(196,149,58,0.6);
     z-index: 3;
     text-shadow: 0 0 8px rgba(196,149,58,0.4);
@@ -259,7 +259,7 @@
     background:
         repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(0,0,0,0.08) 28px, rgba(0,0,0,0.08) 29px);
     pointer-events: none;
-    z-index: 2;
+    z-index: var(--v-z-base);
     border-radius: inherit;
     opacity: 0.4;
 }
@@ -272,7 +272,7 @@
     height: 100%;
     background: linear-gradient(180deg, #3a2e20 0%, #2a1e14 60%, #1a140e 100%);
     border-right: 1px solid rgba(196,149,58,0.2);
-    z-index: 1;
+    z-index: var(--v-z-base);
 }
 /* Door wood grain (horizontal planks) */
 .loc-gate-door::before {
@@ -346,7 +346,7 @@
     height: 100%;
     background:
         repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(140,120,80,0.3) 14px, rgba(140,120,80,0.3) 15px);
-    z-index: 2;
+    z-index: var(--v-z-base);
     opacity: 0.4;
     border-radius: inherit;
 }
@@ -433,13 +433,13 @@ body.perf-medium .loc-gate-arch::after { display: none !important; }
 .text-input-wrap {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 10px;
+    gap: var(--v-space-sm);
+    margin-top: var(--v-space-md-lg);
 }
 
 .text-input-max {
     width: 100%;
-    font-size: 11px;
+    font-size: var(--v-font-sm);
     color: var(--v-gold-dim);
     text-align: right;
     margin-top: -2px;
@@ -447,13 +447,13 @@ body.perf-medium .loc-gate-arch::after { display: none !important; }
 
 .text-input {
     flex: 1;
-    padding: 11px 12px;
+    padding: var(--v-space-md-lg) var(--v-space-lg);
     min-height: 44px;
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm);
     background: var(--v-bg-raised);
     color: var(--v-text);
-    font-size: 14px;
+    font-size: var(--v-font-body);
     font-family: var(--v-font);
     outline: none;
     transition: border-color var(--v-transition);
@@ -475,7 +475,7 @@ body.perf-medium .loc-gate-arch::after { display: none !important; }
     border-radius: var(--v-radius-sm);
     background: linear-gradient(165deg, var(--v-bg-accent) 0%, #3a1515 100%);
     color: var(--v-gold-light);
-    font-size: 18px;
+    font-size: var(--v-font-2xl);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: all var(--v-transition);
@@ -493,16 +493,16 @@ body.perf-medium .loc-gate-arch::after { display: none !important; }
     transform: translateX(-50%);
     width: calc(100% - 28px);
     max-width: 400px;
-    padding: 12px;
+    padding: var(--v-space-lg);
     background: var(--v-bg-raised);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     color: var(--v-text-dim);
-    font-size: 14px;
+    font-size: var(--v-font-body);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 350;
+    transition: opacity var(--v-transition-base);
+    z-index: var(--v-z-tooltip);
 }
 
 .v-skip-btn.visible { opacity: 1; }

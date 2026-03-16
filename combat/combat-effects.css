@@ -8,7 +8,7 @@
     font-family: var(--v-font-mono, monospace);
     text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 16px currentColor;
     pointer-events: none;
-    z-index: 500;
+    z-index: var(--v-z-overlay);
     transform: translateX(-50%);
     animation: damageFloat 1.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -60,9 +60,9 @@
     top: 0; left: 0; right: 0; bottom: 0;
     background: radial-gradient(ellipse at center, rgba(180,20,20,0.35) 0%, rgba(120,10,10,0.15) 60%, transparent 100%);
     pointer-events: none;
-    z-index: 450;
+    z-index: var(--v-z-overlay);
     opacity: 0;
-    transition: opacity 0.1s ease;
+    transition: opacity var(--v-transition-fast) ease;
 }
 .viewport-flash.active {
     opacity: 1;
@@ -86,18 +86,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 410;
+    z-index: var(--v-z-tooltip);
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.12s ease;
+    transition: opacity var(--v-transition-fast) ease;
 }
 .anticipation-overlay.visible { opacity: 1; }
 .anticipation-text {
-    font-size: 17px;
+    font-size: var(--v-font-xl);
     font-weight: 700;
     letter-spacing: 1.5px;
-    padding: 10px 28px;
-    border-radius: 6px;
+    padding: var(--v-space-md-lg) var(--v-space-2xl);
+    border-radius: var(--v-radius-sm);
     color: var(--v-gold-light, #e8c95a);
     background: rgba(42,36,32,0.9);
     border: 1px solid rgba(196,149,58,0.4);
@@ -133,7 +133,7 @@
 /* ─── THEMED LOADING (CSS d20 icon + animated dots) ─── */
 .loading-d20-icon {
     width: 22px; height: 22px;
-    margin-right: 8px;
+    margin-right: var(--v-space-md);
     flex-shrink: 0;
     background: conic-gradient(from 0deg, var(--v-gold, #c4953a), var(--v-gold-dim, #8a6d30), var(--v-gold, #c4953a));
     clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
@@ -153,7 +153,7 @@
 #app.phase-fade-out {
     opacity: 0;
     transform: scale(0.97) translateY(-4px);
-    transition: opacity 200ms ease-out, transform 200ms ease-out;
+    transition: opacity var(--v-transition) ease-out, transform 200ms ease-out;
 }
 #app.phase-fade-in {
     animation: phaseFadeIn 300ms ease-out;
@@ -183,10 +183,10 @@
     font-family: var(--v-font-mono, monospace);
     color: var(--v-gold-light, #e8c95a);
     text-shadow: 0 2px 6px rgba(0,0,0,0.7), 0 0 12px rgba(196,149,58,0.4);
-    z-index: 300;
+    z-index: var(--v-z-tooltip);
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--v-transition-base) ease;
 }
 .combo-counter.combo-pop {
     opacity: 1;
@@ -201,7 +201,7 @@
 /* ─── BUTTON SCALE FEEDBACK (P2-I) ─── */
 .action-btn:active {
     transform: scale(0.95) !important;
-    transition: transform 80ms ease !important;
+    transition: transform var(--v-transition-fast) ease !important;
 }
 
 /* ─── CONCENTRATION GLOW (P2-J) ─── */
@@ -221,9 +221,9 @@
 }
 .spectator-msg {
     text-align: center;
-    padding: 10px 8px;
+    padding: var(--v-space-md-lg) var(--v-space-md);
     color: var(--v-danger-light);
-    font-size: 13px;
+    font-size: var(--v-font-base);
     font-weight: 600;
     animation: spectatePulse 2.5s ease-in-out infinite;
 }
@@ -233,15 +233,15 @@
 }
 .spectator-saves {
     text-align: center;
-    font-size: 16px;
+    font-size: var(--v-font-xl);
     letter-spacing: 2px;
-    padding: 2px 0 4px;
+    padding: var(--v-space-xs) 0 var(--v-space-sm);
 }
 .spectator-detail {
     text-align: center;
-    font-size: 12px;
+    font-size: var(--v-font-md);
     color: #a09484;
-    padding: 2px 0;
+    padding: var(--v-space-xs) 0;
 }
 
 /* ─── Performance tier overrides ─── */
