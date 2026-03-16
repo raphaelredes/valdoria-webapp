@@ -784,3 +784,135 @@ function doGemFusion(fromGem, toGem) {
     // Reopen fusion modal to show updated counts
     setTimeout(function() { showGemFusionModal(); }, 300);
 }
+
+// ══════════════════════════════════════════════════
+//  P3: Compare A vs B (without equipping)
+// ══════════════════════════════════════════════════
+function showCompareWith(itemA) {
+    var itA = getItemData(itemA);
+    if (!itA || !itA.s) return;
+    var slot = itA.s;
+    // Get all items for the same slot from inventory
+    var candidates = localInv.filter(function(inv) {
+        if (inv.q <= 0 || inv.n === itemA) return false;
+        var it = getItemData(inv.n);
+        if (!it || !it.s) return false;
+        if (it.s === slot) return true;
+        if (slot === 'ring' && (it.s === 'ring_1' || it.s === 'ring_2')) return true;
+        if ((slot === 'ring_1' || slot === 'ring_2') && it.s === 'ring') return true;
+        return false;
+    });
+    // Also include currently equipped item in that slot
+    var eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+    var eqSlot = itA.s === 'ring' ? 'ring_1' : itA.s;
+    var eqItem = eq[eqSlot];
+    if (eqItem && eqItem !== itemA) {
+        var already = candidates.some(function(c) { return c.n === eqItem; });
+        if (!already) candidates.unshift({ n: eqItem, q: 1, _eq: true });
+    }
+
+    var html = '<div class="modal-handle"></div>';
+    html += '<div class="modal-title">' + vi('sword', 16) + ' Comparar com...</div>';
+    html += '<div style="text-align:center;font-size:13px;color:var(--v-text-dim);margin-bottom:10px;">'
+        + (itA.e || '') + ' <b>' + itemA + '</b></div>';
+    if (!candidates.length) {
+        html += '<div style="text-align:center;color:var(--v-text-dim);font-size:12px;">Nenhum item compar\u00e1vel no invent\u00e1rio.</div>';
+    } else {
+        candidates.forEach(function(ci) {
+            var cit = getItemData(ci.n);
+            var rarity = cit ? (cit.r || 'common') : 'common';
+            var eqBadge = ci._eq ? '<span style="font-size:10px;color:var(--v-gold);margin-left:4px;">(Equipado)</span>' : '';
+            html += '<div class="select-item" onclick="showABComparison(\'' + esc(itemA) + '\',\'' + esc(ci.n) + '\')">'
+                + '<span class="si-emoji">' + (cit ? cit.e || '' : '') + '</span>'
+                + '<div><div class="si-name v-rarity-' + rarity + '">' + ci.n + eqBadge + '</div>'
+                + '<div class="si-desc">' + getItemShortDesc(ci.n, cit || {}) + '</div></div>'
+                + '</div>';
+        });
+    }
+    html += '<div class="detail-actions" style="margin-top:10px;">';
+    html += '<button class="btn-unequip" onclick="openItemDetail(\'' + esc(itemA) + '\')">' + vi('bag', 13) + ' Voltar</button>';
+    html += '</div>';
+    showModal(html);
+}
+
+function showABComparison(nameA, nameB) {
+    var itA = getItemData(nameA);
+    var itB = getItemData(nameB);
+    var slot = (itA.s === 'ring') ? 'ring_1' : itA.s;
+
+    var html = '<div class="modal-handle"></div>';
+    html += '<div class="modal-title">' + vi('sword', 16) + ' Compara\u00e7\u00e3o</div>';
+
+    // Side-by-side header
+    html += '<div style="display:flex;gap:8px;margin-bottom:12px;">';
+    html += '<div style="flex:1;text-align:center;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);border:1px solid var(--v-border);">';
+    html += '<div style="font-size:20px;">' + (itA.e || '') + '</div>';
+    html += '<div class="v-rarity-' + (itA.r || 'common') + '" style="font-size:12px;font-weight:600;">' + nameA + '</div>';
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;color:var(--v-text-dim);font-size:14px;font-weight:700;">VS</div>';
+    html += '<div style="flex:1;text-align:center;padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);border:1px solid var(--v-border);">';
+    html += '<div style="font-size:20px;">' + (itB.e || '') + '</div>';
+    html += '<div class="v-rarity-' + (itB.r || 'common') + '" style="font-size:12px;font-weight:600;">' + nameB + '</div>';
+    html += '</div></div>';
+
+    // Comparison using existing panel logic
+    html += _buildABPanel(itA, itB, slot);
+
+    html += '<div class="detail-actions" style="margin-top:10px;">';
+    html += '<button class="btn-unequip" onclick="showCompareWith(\'' + esc(nameA) + '\')">' + vi('bag', 13) + ' Voltar</button>';
+    html += '<button class="btn-equip" onclick="closeModal()">OK</button>';
+    html += '</div>';
+    showModal(html);
+}
+
+function _buildABPanel(itA, itB, slot) {
+    var stats = [
+        { key: 'ac', label: 'CA', icon: 'shield' },
+        { key: 'b', label: 'ATK', icon: 'sword' },
+        { key: 'hb', label: 'HP', icon: 'heart' },
+        { key: 'mb', label: 'MP', icon: 'orb' },
+    ];
+    var rows = '';
+    var totalDelta = 0;
+    stats.forEach(function(s) {
+        var va = itA[s.key] || 0;
+        var vb = itB[s.key] || 0;
+        var d = va - vb;
+        if (va === 0 && vb === 0) return;
+        totalDelta += d;
+        var cls = d > 0 ? 'cp-up' : d < 0 ? 'cp-down' : 'cp-same';
+        var sign = d > 0 ? '+' : '';
+        rows += '<div class="cp-row">'
+            + '<span class="cp-label">' + vi(s.icon, 12) + ' ' + s.label + '</span>'
+            + '<span class="cp-cur">' + va + '</span>'
+            + '<span class="cp-arrow">vs</span>'
+            + '<span class="cp-new">' + vb + '</span>'
+            + '<span class="cp-delta ' + cls + '">' + (d !== 0 ? sign + d : '\u2014') + '</span>'
+            + '</div>';
+    });
+    // Damage comparison
+    var dmgA = 0, dmgB = 0;
+    if (itA.dd) { var m = itA.dd.match(/(\d+)d(\d+)/); if (m) dmgA = parseInt(m[1]) * (parseInt(m[2]) + 1) / 2; }
+    if (itB.dd) { var m = itB.dd.match(/(\d+)d(\d+)/); if (m) dmgB = parseInt(m[1]) * (parseInt(m[2]) + 1) / 2; }
+    if (dmgA > 0 || dmgB > 0) {
+        var d = Math.round((dmgA + (itA.b || 0)) - (dmgB + (itB.b || 0)));
+        totalDelta += d;
+        var cls = d > 0 ? 'cp-up' : d < 0 ? 'cp-down' : 'cp-same';
+        var sign = d > 0 ? '+' : '';
+        rows += '<div class="cp-row">'
+            + '<span class="cp-label">' + vi('target', 12) + ' Dano</span>'
+            + '<span class="cp-cur">' + (dmgA > 0 ? itA.dd : '\u2014') + '</span>'
+            + '<span class="cp-arrow">vs</span>'
+            + '<span class="cp-new">' + (dmgB > 0 ? itB.dd : '\u2014') + '</span>'
+            + '<span class="cp-delta ' + cls + '">' + (d !== 0 ? sign + d : '\u2014') + '</span>'
+            + '</div>';
+    }
+    if (!rows) return '<div style="text-align:center;color:var(--v-text-dim);font-size:12px;">Sem stats compar\u00e1veis.</div>';
+    var sumCls = totalDelta > 0 ? 'cp-up' : totalDelta < 0 ? 'cp-down' : 'cp-same';
+    var sumText = totalDelta > 0 ? 'A \u00e9 melhor' : totalDelta < 0 ? 'B \u00e9 melhor' : 'Equivalentes';
+    var sumSign = totalDelta > 0 ? '+' : '';
+    return '<div class="comparison-panel"><div class="cp-header"><span class="cp-title">'
+        + vi('sword', 13) + ' A</span><span class="cp-vs">B</span></div>'
+        + rows
+        + '<div class="cp-summary ' + sumCls + '">' + sumText + ': <b>' + sumSign + totalDelta + '</b></div></div>';
+}
