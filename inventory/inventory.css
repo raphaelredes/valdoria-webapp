@@ -1123,3 +1123,40 @@ body { padding-bottom: 92px; }
 .item-card .ic-new-dot:has(~ .ic-lock) {
     left: auto; right: 4px;
 }
+
+/* ═══ P2: Upgrade badge on item cards ═══ */
+.ic-upgrade {
+    position: absolute; top: 3px; right: 3px;
+    font-size: 10px; color: var(--v-success);
+    opacity: 0.85; pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* ═══ P2: Quick potion in header (clickable) ═══ */
+.hs-potion {
+    cursor: pointer; border-radius: 4px;
+    padding: 1px 4px; transition: background 0.2s;
+}
+.hs-potion:active { background: rgba(255,255,255,0.1); }
+
+/* ═══ P2: Stats breakdown ═══ */
+.ss-expand-hint {
+    font-size: 10px; color: var(--v-text-dim);
+    text-align: center; margin-top: 2px;
+    opacity: 0.6;
+}
+.ss-breakdown {
+    background: var(--v-bg-card); border: 1px solid var(--v-border);
+    border-radius: var(--v-radius); margin-top: 6px; padding: 8px 10px;
+}
+.ss-bd-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 3px 0; font-size: 12px; border-bottom: 1px solid rgba(74,56,40,0.2);
+}
+.ss-bd-row:last-child { border-bottom: none; }
+.ss-bd-slot { color: var(--v-text); }
+.ss-bd-vals { color: var(--v-gold-dim); font-size: 11px; }
+
+/* ═══ P2: Upgrade filter chip ═══ */
+.filter-btn[onclick*="upgrade"] { border-color: var(--v-success); }
+.filter-btn[onclick*="upgrade"].active { background: rgba(76,175,80,0.15); border-color: var(--v-success); }

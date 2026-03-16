@@ -64,22 +64,61 @@ function doLoadLoadout(name) {
     const ldout = (D.ldout || {})[name];
     if (!ldout) return;
     _acDirty = true;
+    const results = { ok: [], noItem: [], noProf: [] };
     for (const [slot, itemName] of Object.entries(ldout)) {
         if (!itemName) continue;
         const inv = localInv.find(i => i.n === itemName && i.q > 0);
-        if (!inv) continue;
+        if (!inv) { results.noItem.push(itemName); continue; }
         const it = getItemData(itemName);
-        if (!it?.s) continue;
-        if (!checkProficiency(it, 'player', itemName)) continue;
+        if (!it?.s) { results.noItem.push(itemName); continue; }
+        if (!checkProficiency(it, 'player', itemName)) { results.noProf.push(itemName); continue; }
         addOp({ t: 'equip', item: itemName, slot, tgt: 'player' });
         localEq[slot] = itemName;
+        results.ok.push(itemName);
     }
     closeModal();
     haptic('medium');
-    toast(`${vi('sword', 13)} Loadout '${esc(name)}' aplicado`, 'ok');
     updateHeader();
     renderTab();
     updateBottomBar();
+    // Show feedback modal
+    const total = Object.values(ldout).filter(Boolean).length;
+    _showLoadoutFeedback(name, results, total);
+}
+
+function _showLoadoutFeedback(name, results, total) {
+    let html = '<div class="modal-handle"></div>';
+    html += '<div class="modal-title">' + vi('sword', 16) + ' Loadout \'' + esc(name) + '\'</div>';
+    html += '<div style="text-align:center;font-size:14px;margin-bottom:10px;">';
+    html += '<b>' + results.ok.length + '</b> de <b>' + total + '</b> itens equipados</div>';
+    if (results.ok.length > 0) {
+        html += '<div style="font-size:12px;margin-bottom:6px;">';
+        results.ok.forEach(function(n) {
+            var it = getItemData(n);
+            html += '<div style="color:var(--v-success);">' + vi_f('check', 12) + ' ' + (it.e || '') + ' ' + n + '</div>';
+        });
+        html += '</div>';
+    }
+    if (results.noItem.length > 0) {
+        html += '<div style="font-size:12px;margin-bottom:6px;">';
+        results.noItem.forEach(function(n) {
+            var it = getItemData(n);
+            html += '<div style="color:var(--v-danger);">' + vi('warn', 12) + ' ' + (it.e || '') + ' ' + n + ' — n\u00e3o encontrado</div>';
+        });
+        html += '</div>';
+    }
+    if (results.noProf.length > 0) {
+        html += '<div style="font-size:12px;margin-bottom:6px;">';
+        results.noProf.forEach(function(n) {
+            var it = getItemData(n);
+            html += '<div style="color:var(--v-warning);">' + vi('lock', 12) + ' ' + (it.e || '') + ' ' + n + ' — sem profici\u00eancia</div>';
+        });
+        html += '</div>';
+    }
+    html += '<div class="detail-actions" style="margin-top:10px;">';
+    html += '<button class="btn-equip" onclick="closeModal()">' + vi_f('check', 13) + ' OK</button>';
+    html += '</div>';
+    showModal(html);
 }
 
 function doDeleteLoadout(name) {

@@ -23,6 +23,7 @@ function renderItemsTab(c) {
         { id: 'gem', label: `${vi('gem', 13)} Gemas`, cnt: counts.gem },
         { id: 'rune', label: `${vi('orb', 13)} Runas`, cnt: counts.rune },
         { id: 'misc', label: `${vi('bag', 13)} Outros`, cnt: counts.misc },
+        { id: 'upgrade', label: '\u2B06 Upgrade', cnt: counts.upgrade },
     ];
 
     let html = '';
@@ -132,6 +133,7 @@ function renderItemsTab(c) {
                     </div>
                     ${!selectionMode && isFav(inv.n) ? `<span class="ic-fav">${vi_f('star', 14)}</span>` : ''}
                     ${isLocked(inv.n) ? `<span class="ic-lock">${vi('lock', 11)}</span>` : ''}
+                    ${(!selectionMode && it.s && _isUpgradeForSlot(inv.n, it)) ? '<span class="ic-upgrade">\u2B06</span>' : ''}
                     ${isNewItem(inv.n) ? '<span class="ic-new-dot"></span>' : ''}
                     <div class="ic-emoji">${it.e || '📦'}</div>
                     <div class="ic-name v-rarity-${rarity}">${inv.n}</div>
@@ -175,9 +177,24 @@ function setFilter(f) {
     renderTab();
 }
 
+// P2: Check if an item is an upgrade for any equipped slot
+function _isUpgradeForSlot(name, it) {
+    if (!it || !it.s) return false;
+    const slot = it.s === 'ring' ? 'ring_1' : it.s;
+    const eq = localEq;
+    const curName = eq[slot];
+    // Empty slot = always upgrade
+    if (!curName) return true;
+    if (curName === name) return false;
+    const curIt = getItemData(curName);
+    const newScore = _calcItemScore(it, slot);
+    const curScore = _calcItemScore(curIt, slot);
+    return newScore > curScore;
+}
+
 function getFilterCounts() {
     const all = localInv.filter(i => i.q > 0);
-    const counts = { all: all.length, fav: 0, equip: 0, use: 0, gem: 0, rune: 0, misc: 0 };
+    const counts = { all: all.length, fav: 0, equip: 0, use: 0, gem: 0, rune: 0, misc: 0, upgrade: 0 };
     all.forEach(inv => {
         const it = getItemData(inv.n);
         const tags = it.t || [];
@@ -186,6 +203,7 @@ function getFilterCounts() {
         if (tags.includes('consumable') || tags.includes('food') || tags.includes('potion')) counts.use++;
         if (tags.includes('gem') || tags.includes('socketable')) counts.gem++;
         if (tags.includes('rune')) counts.rune++;
+        if (it.s && _isUpgradeForSlot(inv.n, it)) counts.upgrade++;
         if (!it.s && !tags.includes('consumable') && !tags.includes('food')
             && !tags.includes('potion') && !tags.includes('gem')
             && !tags.includes('socketable') && !tags.includes('rune')) counts.misc++;
@@ -225,6 +243,7 @@ function getFilteredItems() {
         if (activeFilter === 'use') return tags.includes('consumable') || tags.includes('food') || tags.includes('potion');
         if (activeFilter === 'gem') return tags.includes('gem') || tags.includes('socketable');
         if (activeFilter === 'rune') return tags.includes('rune');
+        if (activeFilter === 'upgrade') return !!it.s && _isUpgradeForSlot(inv.n, it);
         if (activeFilter === 'misc') return !it.s && !tags.includes('consumable') && !tags.includes('food')
             && !tags.includes('potion') && !tags.includes('gem') && !tags.includes('socketable') && !tags.includes('rune');
         return true;
@@ -432,24 +451,22 @@ function _calcItemScore(it, slot) {
 
 function buildStatsSummary() {
     let totalAC = 0, totalHP = 0, totalMP = 0, totalATK = 0;
+    const slotBreakdown = [];
     for (const [slot, item] of Object.entries(localEq)) {
         if (!item) continue;
         const it = getItemData(item);
-        totalAC += it.ac || 0;
-        totalHP += it.hb || 0;
-        totalMP += it.mb || 0;
-        totalATK += it.b || 0;
+        let sAC = it.ac || 0, sATK = it.b || 0, sHP = it.hb || 0, sMP = it.mb || 0;
         // Gem bonuses
         const gems = localGems[slot] || [];
         gems.forEach(g => {
             if (!g) return;
             const gd = getItemData(g);
-            if (gd.gb) {
-                totalHP += gd.gb.hp_bonus || 0;
-                totalMP += gd.gb.mp_bonus || 0;
-                totalAC += gd.gb.ac_bonus || 0;
-            }
+            if (gd.gb) { sHP += gd.gb.hp_bonus || 0; sMP += gd.gb.mp_bonus || 0; sAC += gd.gb.ac_bonus || 0; }
         });
+        totalAC += sAC; totalATK += sATK; totalHP += sHP; totalMP += sMP;
+        if (sAC || sATK || sHP || sMP) {
+            slotBreakdown.push({ slot, item, ac: sAC, atk: sATK, hp: sHP, mp: sMP });
+        }
     }
     const parts = [];
     if (totalAC) parts.push(`${vi('shield', 13)} CA <b>+${totalAC}</b>`);
@@ -457,7 +474,43 @@ function buildStatsSummary() {
     if (totalHP) parts.push(`${vi('heart', 13)} HP <b>+${totalHP}</b>`);
     if (totalMP) parts.push(`${vi('orb', 13)} MP <b>+${totalMP}</b>`);
     if (!parts.length) return '';
-    return `<div class="stats-summary">${parts.map(p => `<div class="ss-item">${p}</div>`).join('')}</div>`;
+    // Expandable breakdown
+    let breakdown = '';
+    if (slotBreakdown.length > 0) {
+        breakdown = '<div class="ss-breakdown" id="ssBreakdown" style="display:none;">';
+        slotBreakdown.forEach(s => {
+            const label = SLOT_NAMES[s.slot] || s.slot;
+            const emoji = (getItemData(s.item) || {}).e || '\u{1F4E6}';
+            const vals = [];
+            if (s.ac) vals.push('CA+' + s.ac);
+            if (s.atk) vals.push('ATK+' + s.atk);
+            if (s.hp) vals.push('HP+' + s.hp);
+            if (s.mp) vals.push('MP+' + s.mp);
+            breakdown += '<div class="ss-bd-row">'
+                + '<span class="ss-bd-slot">' + emoji + ' ' + label + '</span>'
+                + '<span class="ss-bd-vals">' + vals.join(' ') + '</span>'
+                + '</div>';
+        });
+        breakdown += '</div>';
+    }
+    return '<div class="stats-summary" onclick="toggleStatsBreakdown()" style="cursor:pointer;" title="Toque para detalhes">'
+        + parts.map(p => '<div class="ss-item">' + p + '</div>').join('')
+        + '<div class="ss-expand-hint" id="ssExpandHint">\u25BC</div>'
+        + '</div>' + breakdown;
+}
+
+function toggleStatsBreakdown() {
+    const bd = document.getElementById('ssBreakdown');
+    const hint = document.getElementById('ssExpandHint');
+    if (!bd) return;
+    if (bd.style.display === 'none') {
+        bd.style.display = '';
+        if (hint) hint.textContent = '\u25B2';
+    } else {
+        bd.style.display = 'none';
+        if (hint) hint.textContent = '\u25BC';
+    }
+    haptic('light');
 }
 
 function buildSetProgress() {

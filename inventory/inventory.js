@@ -234,7 +234,6 @@ function init() {
     localPotions = D.p.pot || 0;
     localFavs = D.fav ? [...D.fav] : [];
     localLocked = D.lck ? [...D.lck] : [];
-    localLocked = D.lck ? [...D.lck] : [];
     localGems = {};
     if (D.gems) {
         for (const [k, v] of Object.entries(D.gems))
@@ -323,7 +322,7 @@ function getSlotForItem(itemName, eq) {
 function updateHeader() {
     calcLocalAC();
     const s = document.getElementById('headerStats');
-    const potStr = localPotions > 0 ? `<span class="hs-hp">${vi('flask', 12)} ${localPotions}</span>` : '';
+    const potStr = localPotions > 0 ? `<span class="hs-hp hs-potion" onclick="quickUsePotion()" title="Usar Poção">${vi('flask', 12)} ${localPotions}</span>` : '';
     let buffsStr = '';
     if (D.buffs && D.buffs.length > 0) {
         buffsStr = D.buffs.map(b =>
@@ -352,6 +351,22 @@ function updateHeader() {
             <span class="hs-count">${vi('backpack', 12)} ${_itemCount}</span>
             ${buffsStr}
         `;
+}
+
+function quickUsePotion() {
+    if (localPotions <= 0) return;
+    // If HP already max, toast and return
+    if (localHP >= D.p.mhp) { toast(vi('heart', 13) + ' HP já está no máximo!', 'warn'); return; }
+    addOp({ t: 'use', item: 'potion', tgt: 'player' });
+    localPotions--;
+    const oldHP = localHP;
+    localHP = Math.min(D.p.mhp, localHP + 7);
+    haptic('medium');
+    toast(vi('flask', 13) + ' Poção usada (~+' + (localHP - oldHP) + ' HP)', 'ok');
+    animateStat('hs-hp');
+    updateHeader();
+    renderTab();
+    updateBottomBar();
 }
 
 function animateStat(cls) {
@@ -445,7 +460,6 @@ function resetAllOps() {
     localMP = D.p.mp || 0;
     localPotions = D.p.pot || 0;
     localFavs = D.fav ? [...D.fav] : [];
-    localLocked = D.lck ? [...D.lck] : [];
     localLocked = D.lck ? [...D.lck] : [];
     localGems = {};
     if (D.gems) {
