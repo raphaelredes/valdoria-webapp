@@ -865,7 +865,7 @@ function _renderArenaInner(s) {
         }
         recentFeed.forEach((f, fi) => {
             var feedIdx = total - visibleCount + fi;
-            var fd = s.fd && s.fd[feedIdx] !== undefined ? s.fd[fi] : null;
+            var fd = s.fd && feedIdx < s.fd.length ? s.fd[feedIdx] : null;
             var detailStr = fd ? _formatFeedDetail(fd) : '';
             var hasDetail = detailStr.length > 0;
             html += '<div class="feed-entry ' + _classifyFeed(f) + (hasDetail ? ' has-detail' : '') + '"' + (hasDetail ? ' data-detail="' + escHtml(detailStr) + '"' : '') + '>' + escHtml(f);
