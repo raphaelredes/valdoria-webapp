@@ -72,8 +72,14 @@ function doLoadLoadout(name) {
         const it = getItemData(itemName);
         if (!it?.s) { results.noItem.push(itemName); continue; }
         if (!checkProficiency(it, 'player', itemName)) { results.noProf.push(itemName); continue; }
+        // Return old item to local inventory (if slot was occupied)
+        var oldItem = localEq[slot];
+        if (oldItem && oldItem !== itemName) {
+            addToLocalInv(oldItem);
+        }
         addOp({ t: 'equip', item: itemName, slot, tgt: 'player' });
         localEq[slot] = itemName;
+        removeFromLocalInv(itemName);
         results.ok.push(itemName);
     }
     closeModal();
