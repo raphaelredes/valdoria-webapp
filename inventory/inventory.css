@@ -1148,3 +1148,17 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .ss-bd-vals { color: var(--v-gold-dim); font-size: 11px; }
 
 
+
+/* ── Item Image Thumbnails ── */
+.ic-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid rgba(196, 149, 58, 0.25);
+    cursor: pointer;
+}
+.ic-emoji:has(.ic-thumb) {
+    overflow: hidden;
+    border-radius: 6px;
+}

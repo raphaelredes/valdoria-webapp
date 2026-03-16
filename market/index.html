@@ -16,8 +16,10 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/image-popup.css?v=' + v + '">');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/image-popup.js?v=' + v + '"><\/script>');
     </script>
     <script>
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
@@ -848,6 +850,27 @@
         .toast-ok {
             background: var(--v-success);
         }
+    
+        /* ── Item Image Thumbnails ── */
+        .sc-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid rgba(196, 149, 58, 0.25);
+        }
+        .sc-emoji:has(.sc-thumb) {
+            overflow: hidden;
+            border-radius: 6px;
+        }
+        .sr-thumb {
+            width: 24px;
+            height: 24px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid rgba(196, 149, 58, 0.2);
+            vertical-align: middle;
+        }
     </style>
     <script>
     document.write('<script src="../shared/font-apply.js?v=' + v + '"><\/script>');
@@ -1353,7 +1376,7 @@
             return `<div class="shop-card ${inCart ? 'in-cart' : ''} ${outOfStock ? 'out-of-stock' : ''}"
             onclick="openBuyDetail('${esc(npcKey)}','${esc(item.id)}')">
             <span class="sc-stock ${stockClass}">${stockText}</span>
-            <div class="sc-emoji">${item.e || '📦'}</div>
+            <div class="sc-emoji">${item.img ? '<img class="sc-thumb" src="' + item.img + '" alt="" onerror="this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'\\'"><span style="display:none">' + (item.e || '📦') + '</span>' : (item.e || '📦')}</div>
             <div class="sc-name">${esc(item.n)}</div>
             <div class="sc-price${priceClass}">💰 ${item.p} GP</div>
             ${meta ? `<div class="sc-meta">${meta}</div>` : ''}
@@ -1439,7 +1462,7 @@
                 html += `<div class="sell-row ${selected ? 'selected' : ''} ${!npcBuys ? 'no-buy' : ''}">
                 <div class="sr-main" onclick="${npcBuys ? `toggleSell('${esc(inv.id)}','${esc(inv.n)}',${inv.q},${sellPrice})` : ''}">
                     <div class="sr-check">${selected ? '✓' : ''}</div>
-                    <span class="sr-emoji">${inv.e || '📦'}</span>
+                    <span class="sr-emoji">${inv.img ? '<img class="sr-thumb" src="' + inv.img + '" alt="" onerror="this.style.display=\\'none\\';">' : (inv.e || '📦')}</span>
                     <div class="sr-info">
                         <div class="sr-name">${esc(inv.n)} ${inv.q > 1 ? '<span class="sr-qty-badge">x' + inv.q + '</span>' : ''}</div>
                         <div class="sr-price">${npcBuys ? sellPrice + ' GP' + (selected && qty > 0 ? ' · <span class="sr-total">' + (sellPrice * qty) + ' GP total</span>' : '') : '❌ NPC não compra'}</div>
@@ -1545,6 +1568,11 @@
             const stock = item.st - cartQty;
 
             let html = '<div class="modal-handle"></div>';
+            if (item.img) {
+                html += '<div style="text-align:center;margin-bottom:6px;">'
+                    + '<img src="' + item.img + '" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(196,149,58,0.3);cursor:pointer;" onclick="event.stopPropagation();showItemImage(\'' + esc(item.n) + '\',\'' + item.img + '\',\'' + (item.e||'') + '\',' + JSON.stringify(item.d||{}) + ')">'
+                    + '</div>';
+            }
             html += `<div class="modal-title">${item.e || '📦'} ${esc(item.n)}</div>`;
 
             // Tags
@@ -1853,7 +1881,27 @@
         init();
         if (window._marketLoadingCtrl) window._marketLoadingCtrl.hide();
     </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js?v=5').catch(()=>{})}</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js?v=5').catch(()=>{})}
+        // ── Item Image Popup ──
+        function showItemImage(name, imgUrl, emoji, details) {
+            if (!imgUrl || typeof showImagePopup !== 'function') return;
+            if (typeof haptic === 'function') haptic('light');
+            var stats = [];
+            if (details) {
+                if (details.s) stats.push({icon: '', label: SLOT_NAMES[details.s] || details.s, value: ''});
+                if (details.dd) stats.push({icon: '\u2694\uFE0F', label: 'Dano', value: details.dd + (details.b ? '+' + details.b : '')});
+                if (details.ac) stats.push({icon: '\u{1F6E1}\uFE0F', label: 'CA', value: '+' + details.ac});
+                if (details.hb) stats.push({icon: '\u2764\uFE0F', label: 'HP', value: '+' + details.hb});
+                if (details.mb) stats.push({icon: '\u2728', label: 'MP', value: '+' + details.mb});
+            }
+            showImagePopup({
+                src: imgUrl,
+                title: name,
+                stats: stats,
+                type: 'item'
+            });
+        }
+    </script>
 </body>
 
 </html>

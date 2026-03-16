@@ -1221,3 +1221,29 @@ function getAllyName(npcId) {
 
 // ── Bootstrap (must be last file loaded) ──
 init();
+
+
+// ══════════════════════════════════════════════════════════
+//  ITEM IMAGE POPUP
+// ══════════════════════════════════════════════════════════
+function showItemImage(name) {
+    var it = getItemData(name);
+    if (!it || !it.img) return;
+    haptic('light');
+
+    var stats = [];
+    if (it.s) stats.push({icon: '', label: SLOT_NAMES[it.s] || it.s, value: ''});
+    if (it.dd) stats.push({icon: '\u2694\uFE0F', label: 'Dano', value: it.dd + (it.b ? '+' + it.b : '')});
+    if (it.ac) stats.push({icon: '\u{1F6E1}\uFE0F', label: 'CA', value: '+' + it.ac});
+    if (it.hb) stats.push({icon: '\u2764\uFE0F', label: 'HP', value: '+' + it.hb});
+    if (it.mb) stats.push({icon: '\u2728', label: 'MP', value: '+' + it.mb});
+    if (it.v) stats.push({icon: '\u{1FA99}', label: 'Valor', value: it.v + ' GP'});
+
+    showImagePopup({
+        src: it.img,
+        title: name,
+        desc: it.desc || '',
+        stats: stats,
+        type: 'item'
+    });
+}
