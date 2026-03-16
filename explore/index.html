@@ -150,7 +150,6 @@
         }
 
         // Gem tap burst interaction
-        var gemEl = document.getElementById('mc-gem');
         if (gemEl) {
             var _tapCooldown = false;
             gemEl.addEventListener('click', function() {
@@ -160,7 +159,6 @@
                 gemEl.classList.add('tapped');
                 // Create burst element
                 var burst = document.createElement('div');
-                burst.className = 'mc-gem-burst';
                 gemEl.appendChild(burst);
                 // Haptic tap feedback
                 try {

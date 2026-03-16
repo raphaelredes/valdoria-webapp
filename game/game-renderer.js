@@ -908,7 +908,7 @@ function renderInnSelect(container, data) {
         })(a.cb);
 
         var hpPct = a.mhp > 0 ? Math.round((a.hp / a.mhp) * 100) : 0;
-        var hpCls = hpPct > 60 ? 'ally-bar-hp' : hpPct > 40 ? 'ally-bar-hp ally-bar-low' : hpPct > 20 ? 'ally-bar-hp ally-bar-low' : 'ally-bar-hp ally-bar-critical';
+        var hpCls = hpPct > 50 ? 'ally-bar-hp' : hpPct > 25 ? 'ally-bar-hp ally-bar-low' : 'ally-bar-hp ally-bar-critical';
 
         var barsHtml = '';
         if (!a.full) {
@@ -947,7 +947,7 @@ function renderMemberDetail(container, m) {
 
     // HP bar
     var hpPct = m.mhp > 0 ? Math.round((m.hp / m.mhp) * 100) : 0;
-    var hpCls = hpPct > 60 ? 'ally-bar-hp' : hpPct > 40 ? 'ally-bar-hp ally-bar-low' : hpPct > 20 ? 'ally-bar-hp ally-bar-low' : 'ally-bar-hp ally-bar-critical';
+    var hpCls = hpPct > 50 ? 'ally-bar-hp' : hpPct > 25 ? 'ally-bar-hp ally-bar-low' : 'ally-bar-hp ally-bar-critical';
     barsHtml += '<div class="ally-bar-row"><span class="member-bar-icon">❤️</span><div class="ally-bar-track"><div class="ally-bar-fill ' + hpCls + '" style="width:' + hpPct + '%"></div></div><span class="ally-bar-label">' + m.hp + '/' + m.mhp + '</span></div>';
 
     // MP bar

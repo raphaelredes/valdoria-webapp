@@ -786,6 +786,14 @@ async function doAction(callbackData) {
         return;
     }
 
+    // Quest detail popup (overlay instead of screen change)
+    if (data.quest_detail && typeof showQuestPopup === 'function') {
+        hideLocationTransition();
+        if (window.actionGuard) actionGuard.release();
+        showQuestPopup(data.quest_detail);
+        return;
+    }
+
     // Handle transitions to specialized WebApps
     // Only auto-transition if there is NO text to display
     if (data.transition && !data.text) {

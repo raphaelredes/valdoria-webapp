@@ -556,9 +556,11 @@ function initBackButton() {
             // exit-confirm.js popup is triggered via __valdoriaExitAction instead.
             tg.BackButton.onClick(() => { _navigateBack(); });
         }
-        // [EXIT-CONFIRM] Custom exit: calls _performExit() directly (skip modal checks,
-        // popup already confirmed the exit intent)
-        window.__valdoriaExitAction = function() { _performExit(); };
+        // [EXIT-CONFIRM] Custom exit: actually close the WebApp
+        // "Sair" from exit-confirm means close entirely, NOT transition
+        window.__valdoriaExitAction = function() {
+            try { if (tg) tg.close(); } catch(e) { console.warn('[INVENTORY] tg.close:', e); }
+        };
     } catch(e) { console.warn('[INVENTORY] BackButton setup:', e); }
 }
 
@@ -576,7 +578,14 @@ function _initNavBar() {
 
 function navBack() {
     haptic('light');
-    _navigateBack();
+    // If modal is open, close it first
+    if (_modalOpen) { closeModal(); return; }
+    // If viewing ally equipment, go back to allies list
+    if (activeTarget !== 'player') { switchTab('allies'); return; }
+    // If pending ops, show confirm
+    if (pendingOps.length > 0) { _showPendingOpsExitConfirm(); return; }
+    // Transition back to game hub directly (no exit-confirm popup)
+    _performExit();
 }
 
 function navCharSheet() {
