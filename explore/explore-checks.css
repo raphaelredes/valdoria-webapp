@@ -98,6 +98,14 @@
     text-shadow: 0 0 8px rgba(170, 68, 68, 0.4), 0 1px 2px rgba(0,0,0,0.5);
     animation: resultReveal 0.35s var(--v-ease-spring);
 }
+.check-result.partial {
+    color: #c8a030;
+    background: rgba(200, 160, 48, 0.15);
+    border: 1px solid rgba(200, 160, 48, 0.35);
+    box-shadow: 0 0 16px rgba(200, 160, 48, 0.25);
+    text-shadow: 0 0 8px rgba(200, 160, 48, 0.4), 0 1px 2px rgba(0,0,0,0.5);
+    animation: resultReveal 0.35s var(--v-ease-spring);
+}
 
 /* Advantage / Disadvantage dice display */
 .roll-mode-label {

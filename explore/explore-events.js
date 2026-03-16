@@ -697,16 +697,32 @@ function showChoices(poi) {
     }
 
     (poi.choices || []).forEach((ch, idx) => {
+        // Hidden proficiency option: only show if player has required proficiency
+        if (ch.hp && ch.rp) {
+            var hasProficiency = S.charData && S.charData.sp && S.charData.sp.includes(ch.rp);
+            if (!hasProficiency) return;
+        }
+
         const btn = document.createElement('button');
         var isBlue = !!ch.bl;
         btn.className = 'dm-choice-btn' + (isBlue ? ' blue-option' : '');
 
+        // Visual markers for special options
+        if (ch.bl) btn.classList.add('choice-class');
+        if (ch.rc) btn.classList.add('choice-race');
+        if (ch.hp) btn.classList.add('choice-prof');
+
+        var labelExtra = '';
+        if (ch.hp) labelExtra = ' <span class="choice-badge prof">\u2b50</span>';
+        else if (ch.bl) labelExtra = ' <span class="choice-badge class">\u2694\ufe0f</span>';
+        else if (ch.rc) labelExtra = ' <span class="choice-badge race">\u2728</span>';
+
         var html = '<span class="choice-icon">' + (ch.ic || '') + '</span>';
         // Blue Options show class badge (FTL-inspired conditional choices)
         if (isBlue && S.charData && S.charData.cn) {
-            html += '<span class="blue-badge">' + (S.charData.ci || '✨') + ' ' + S.charData.cn + '</span>';
+            html += '<span class="blue-badge">' + (S.charData.ci || '\u2728') + ' ' + S.charData.cn + '</span>';
         }
-        html += '<span class="choice-label">' + (ch.t || ch.l || 'Escolher') + '</span>';
+        html += '<span class="choice-label">' + (ch.t || ch.l || 'Escolher') + labelExtra + '</span>';
 
         // Stat check display (D&D 5e skill with proficiency + adv/dis indicator)
         if (ch.k) {
@@ -820,6 +836,7 @@ function performStatCheck(poi, choice) {
 
     const total = roll + mod;
     const success = total >= dc;
+    window._lastCheckTotal = total;
 
     // Record check
     S.checksPerformed.push({
@@ -869,8 +886,17 @@ function performStatCheck(poi, choice) {
             // Animation done — show formula and result
             formulaEl.innerHTML = buildFormula(roll, mod, statName, profMark, dc, total, r1, r2, mode);
 
-            resultEl.textContent = success ? 'Sucesso!' : 'Falha!';
-            resultEl.className = 'check-result ' + (success ? 'success' : 'failure');
+            var isNearMiss = !success && choice.pf && choice.k && (choice.k.dc - total) <= 2;
+            if (success) {
+                resultEl.textContent = 'Sucesso!';
+                resultEl.className = 'check-result success';
+            } else if (isNearMiss) {
+                resultEl.textContent = 'Quase!';
+                resultEl.className = 'check-result partial';
+            } else {
+                resultEl.textContent = 'Falha!';
+                resultEl.className = 'check-result failure';
+            }
 
             if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
 
@@ -894,9 +920,20 @@ function _showCheckSkip(overlay, success, choice, poi) {
         disposeDice3D();
         overlay.classList.remove('active');
         if (typeof setEventActive === 'function') setEventActive(false);
-        const outcome = success ? (choice.o || {}) : (choice.f || choice.o || {});
 
-        if (!success && choice.cmb_on_fail && poi.combat) {
+        // Partial failure (near-miss): total within 2 below DC
+        var isPartialFail = !success && choice.pf && choice.k &&
+            (choice.k.dc - (window._lastCheckTotal || 0)) <= 2;
+        var outcome;
+        if (success) {
+            outcome = choice.o || {};
+        } else if (isPartialFail && !choice.cmb_on_fail) {
+            outcome = choice.pf;
+        } else {
+            outcome = choice.f || choice.o || {};
+        }
+
+        if (!success && !isPartialFail && choice.cmb_on_fail && poi.combat) {
             triggerCombat(poi);
             return;
         }
