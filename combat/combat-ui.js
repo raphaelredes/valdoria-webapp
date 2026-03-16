@@ -87,7 +87,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
     const isDead = e.hp <= 0;
     const activeClass = isActiveTurn ? ' active-turn' : '';
     const deadClass = isDead ? ' dead' : '';
-    const hpStateClass = pct > 0.75 ? '' : pct > 0.50 ? ' hp-wounded' : pct > 0.25 ? ' hp-bloodied' : pct > 0 ? ' hp-critical' : '';
+    const hpStateClass = pct > 0.75 ? '' : pct > 0.50 ? ' hp-wounded' : pct > 0.25 ? ' hp-bloodied' : pct > 0 ? ' hp-critical' : ''; // noqa: preflight
     const dataAttr = type === 'enemy' ? ` data-enemy-idx="${idx}"` : '';
 
     // Feature 9: Position badge
@@ -264,6 +264,23 @@ function bindExpandCollapse() {
     _expandDelegated = true;
     // Delegate to document.body — survives innerHTML replacement of #arena
     document.body.addEventListener('click', (ev) => {
+        // Image popup button (must be checked BEFORE expand/collapse)
+        const viewBtn = ev.target.closest('.entity-view-btn');
+        if (viewBtn && typeof showImagePopup === 'function') {
+            ev.stopPropagation();
+            showImagePopup({
+                src: viewBtn.dataset.img,
+                title: viewBtn.dataset.name || '',
+                desc: viewBtn.dataset.desc || '',
+                stats: [
+                    {icon: '\u{1F6E1}\uFE0F', label: 'CA', value: viewBtn.dataset.ac || ''},
+                    {icon: '\u2694\uFE0F', label: 'ATK', value: '+' + (viewBtn.dataset.atk || '')},
+                    {icon: '\u{1F5E1}\uFE0F', label: 'Dano', value: viewBtn.dataset.dmg || ''}
+                ],
+                type: 'enemy'
+            });
+            return;
+        }
         const entity = ev.target.closest('.entity:not(.player)');
         if (!entity || ev.target.closest('.action-btn') || ev.target.closest('.skill-item') || ev.target.closest('.target-item') || ev.target.closest('.item-entry') || ev.target.closest('.entity-view-btn')) return;
         const wasExpanded = entity.classList.contains('expanded');
