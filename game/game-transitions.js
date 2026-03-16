@@ -85,7 +85,7 @@ function handleTransition(transition) {
     }
 
     // Fast redirect for WebApps with own loading; full transition for others
-    const delay = locLabel ? Math.max(LOC_TRANSITION_MS, transConfig.duration) : transConfig.duration;
+    const delay = locLabel ? Math.max(getLocTransitionMs(), transConfig.duration) : transConfig.duration;
     setTimeout(() => {
         // Set global flag to suppress close beacon during cross-WebApp transitions
         window.__valdoria_transitioning = true;

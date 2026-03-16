@@ -783,7 +783,7 @@ async function doAction(callbackData) {
     if (data.transition && !data.text) {
         // Wait remaining transition time before redirect
         const elapsed = Date.now() - t0;
-        const remaining = locCtx ? Math.max(0, LOC_TRANSITION_MS - elapsed) : 0;
+        const remaining = locCtx ? Math.max(0, getLocTransitionMs() - elapsed) : 0;
         if (remaining > 0) await sleep(remaining);
         hideLocationTransition();
         if (window.actionGuard) actionGuard.release();
@@ -824,7 +824,7 @@ async function doAction(callbackData) {
     if (data.text || data.buttons) {
         // Wait remaining transition time before rendering
         const elapsed = Date.now() - t0;
-        const remaining = locCtx ? Math.max(0, LOC_TRANSITION_MS - elapsed) : 0;
+        const remaining = locCtx ? Math.max(0, getLocTransitionMs() - elapsed) : 0;
         if (remaining > 0) await sleep(remaining);
         hideLocationTransition();
 

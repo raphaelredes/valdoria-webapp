@@ -487,11 +487,11 @@ const _LOC_TRANSITIONS = {
     trail_:          { icon: '🥾', text: 'Seguindo a trilha...' },
     explore_:        { icon: '🧭', text: 'Explorando o caminho...' },
     // Return / Arrival
-    action_city_entry: { icon: '🏰', text: 'Avistando os portões de Eldoria...' },
-    action_enter_city: { icon: '🏰', text: 'Entrando em Eldoria...' },
-    return_city:     { icon: '🏰', text: 'Retornando à cidade...' },
-    action_return:   { icon: '🏰', text: 'Retornando à cidade...' },
-    city_back:       { icon: '🏰', text: 'Voltando à praça central...' },
+    action_city_entry: { gate: true, text: 'Avistando os portões de Eldoria...' },
+    action_enter_city: { gate: true, text: 'Entrando em Eldoria...' },
+    return_city:     { gate: true, text: 'Retornando à cidade...' },
+    action_return:   { gate: true, text: 'Retornando à cidade...' },
+    city_back:       { gate: true, text: 'Voltando à praça central...' },
     // Combat end
     combat_end:      { icon: '⚔️', text: 'Recolhendo espólios...' },
     // Rest
@@ -502,7 +502,9 @@ const _LOC_TRANSITIONS = {
 const _NO_TRANSITION = /^(inv|char|status|help|settings|quest_view|action_universal_back|menu|equip|unequip|use_|sell_|buy_|deposit|withdraw|donate|skill_|feat_|spell_|npc_talk|dialogue|gossip|quest_accept|quest_deliver|shop_|inn_pay_)/;
 
 const LOC_TRANSITION_MS = 1500;
+const LOC_GATE_MS = 2200;
 let _locTransitionActive = false;
+let _locTransitionIsGate = false;
 
 function _detectLocationTransition(cb) {
     if (!cb || _NO_TRANSITION.test(cb)) return null;
@@ -516,24 +518,50 @@ function _detectLocationTransition(cb) {
 }
 
 function showLocationTransition(ctx) {
-    const el = document.getElementById('loc-transition');
+    var el = document.getElementById('loc-transition');
     if (!el) return;
     _locTransitionActive = true;
+    _locTransitionIsGate = !!ctx.gate;
     el.classList.remove('hiding');
     el.style.display = '';
-    const iconEl = document.getElementById('loc-icon');
-    const textEl = document.getElementById('loc-text');
-    if (iconEl) iconEl.textContent = ctx.icon || '🗺️';
+
+    var gateEl = document.getElementById('loc-gate');
+    var iconEl = document.getElementById('loc-icon');
+    var textEl = document.getElementById('loc-text');
+    var isCity = !!ctx.gate;
+
+    if (gateEl) gateEl.style.display = isCity ? '' : 'none';
+    if (iconEl) {
+        iconEl.style.display = isCity ? 'none' : '';
+        if (!isCity) iconEl.textContent = ctx.icon || '🗺️';
+    }
     if (textEl) textEl.textContent = ctx.text || 'Viajando...';
-    haptic('medium');
+
+    // Trigger gate opening animation
+    if (isCity && gateEl) {
+        gateEl.classList.remove('opening');
+        void gateEl.offsetWidth;
+        gateEl.classList.add('opening');
+    }
+    haptic(isCity ? 'heavy' : 'medium');
 }
 
 function hideLocationTransition() {
-    const el = document.getElementById('loc-transition');
+    var el = document.getElementById('loc-transition');
     if (!el || !_locTransitionActive) return;
     _locTransitionActive = false;
+    _locTransitionIsGate = false;
     el.classList.add('hiding');
-    setTimeout(() => { el.style.display = 'none'; el.classList.remove('hiding'); }, 400);
+    setTimeout(function() {
+        el.style.display = 'none';
+        el.classList.remove('hiding');
+        var g = document.getElementById('loc-gate');
+        if (g) g.classList.remove('opening');
+    }, 400);
+}
+
+function getLocTransitionMs() {
+    return _locTransitionIsGate ? LOC_GATE_MS : LOC_TRANSITION_MS;
 }
 
 // ─── Immersive Mode (collapsible bottom panel) ───

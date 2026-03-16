@@ -365,7 +365,7 @@ function buildTabs() {
         { id: 'items', label: `${vi('bag', 15)} Itens` },
         { id: 'equip', label: `${vi('armorTab', 15)} Equipamento` },
     ];
-    if (D.allies && D.allies.length > 0) tabs.push({ id: 'allies', label: `${vi('people', 15)} Aliados` });
+    // Allies tab removed — allies accessible via Equipment sub-nav
     if (D.bank) tabs.push({ id: 'bank', label: `${vi('vault', 15)} Cofre` });
     bar.innerHTML = tabs.map(t =>
         `<div class="tab ${t.id === activeTab ? 'active' : ''}" onclick="switchTab('${t.id}')">${t.label}</div>`
@@ -388,7 +388,7 @@ function renderTab() {
     c.classList.add('tab-entering');
     if (activeTab === 'items') renderItemsTab(c);
     else if (activeTab === 'equip') renderEquipTab(c);
-    else if (activeTab === 'allies') renderAlliesTab(c);
+    // allies tab removed
     else if (activeTab === 'bank') renderBankTab(c);
 }
 
@@ -566,16 +566,12 @@ function navCharSheet() {
         sendOps();
         return;
     }
-    if (_apiBase && _apiToken) {
-        _transitionTo('game', { action: 'action_status' });
-    } else {
-        // Fallback: send data to bot and close
-        const tg = window.Telegram?.WebApp;
-        if (tg?.sendData) {
-            try { tg.sendData(JSON.stringify({ action: 'action_status' })); } catch (e) { console.warn('[INVENTORY] sendData:', e); }
-        }
-        try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
+    // Always use sendData to let bot show character sheet
+    const tg = window.Telegram?.WebApp;
+    if (tg?.sendData) {
+        try { tg.sendData(JSON.stringify({ action: 'action_status' })); } catch (e) { console.warn('[INVENTORY] sendData:', e); }
     }
+    try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
 }
 
 function navMenu() {
@@ -718,7 +714,7 @@ function _initTabSwipe() {
     let _sx = 0, _sy = 0, _swiping = false;
     const TAB_LIST = function() {
         const t = ['items', 'equip'];
-        if (D && D.allies && D.allies.length > 0) t.push('allies');
+        // allies tab removed — accessible via Equipment sub-nav
         if (D && D.bank) t.push('bank');
         return t;
     };

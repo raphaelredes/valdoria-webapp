@@ -31,7 +31,8 @@ function updateBottomPadding() {
         if (panelEl.classList.contains('immersive-collapsed')) return;
 
         const h = Math.max(panelEl.offsetHeight, 48);
-        screenEl.style.paddingBottom = (h + 8) + 'px';
+        // +40 = 32px immersive toggle height + 8px gap
+        screenEl.style.paddingBottom = (h + 40) + 'px';
         document.documentElement.style.setProperty('--bottom-panel-h', h + 'px');
 
         // Position immersive toggle above the panel

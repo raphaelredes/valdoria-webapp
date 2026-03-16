@@ -17,9 +17,9 @@ function renderItemsTab(c) {
     const counts = getFilterCounts();
     const filters = [
         { id: 'all', label: 'Todos', cnt: counts.all },
-        { id: 'fav', label: `${vi_f('star', 13)} Favoritos`, cnt: counts.fav },
+        { id: 'fav', label: `${vi_f('star', 13)} Fav`, cnt: counts.fav },
         { id: 'equip', label: `${vi('sword', 13)} Equip`, cnt: counts.equip },
-        { id: 'use', label: `${vi('flask', 13)} Consumíveis`, cnt: counts.use },
+        { id: 'use', label: `${vi('flask', 13)} Consum.`, cnt: counts.use },
         { id: 'gem', label: `${vi('gem', 13)} Gemas`, cnt: counts.gem },
         { id: 'rune', label: `${vi('orb', 13)} Runas`, cnt: counts.rune },
         { id: 'misc', label: `${vi('bag', 13)} Outros`, cnt: counts.misc },
@@ -266,14 +266,12 @@ function renderEquipTab(c) {
         }
     }
 
-    // Auto-equip button (player only)
-    if (activeTarget === 'player') {
-        html += `<div class="auto-equip-row">
-            <button class="auto-equip-btn" onclick="doAutoEquip()">
-                ${vi('sparkle', 14)} Auto-Equipar
-            </button>
-        </div>`;
-    }
+    // Auto-equip button (all targets)
+    html += `<div class="auto-equip-row">
+        <button class="auto-equip-btn" onclick="doAutoEquip()">
+            ${vi('sparkle', 14)} Auto-Equipar
+        </button>
+    </div>`;
 
     // Body silhouette with slot positions
     html += '<div class="body-equip">';
@@ -284,80 +282,10 @@ function renderEquipTab(c) {
 }
 
 function _buildBodySilhouette(eq) {
-    // Layout: body SVG in center, slots arranged around it
-    // Left column: head, shoulders, chest, hands, legs, feet
-    // Right column: necklace, cloak, main_hand, off_hand, belt, rings
-    // The body silhouette is a CSS background, slots are positioned on a grid
-
-    const LEFT_SLOTS = [
-        { slot: 'head',      row: 1 },
-        { slot: 'shoulders', row: 2 },
-        { slot: 'chest',     row: 3 },
-        { slot: 'hands',     row: 4 },
-        { slot: 'legs',      row: 5 },
-        { slot: 'feet',      row: 6 },
-    ];
-    const RIGHT_SLOTS = [
-        { slot: 'necklace',  row: 1 },
-        { slot: 'cloak',     row: 2 },
-        { slot: 'main_hand', row: 3 },
-        { slot: 'off_hand',  row: 4 },
-        { slot: 'belt',      row: 5 },
-        { slot: 'ring_1',    row: 6 },
-    ];
-    const BOTTOM_SLOTS = ['ring_2', 'map'];
-
-    let html = '<div class="body-grid">';
-
-    // Left column
-    html += '<div class="body-col body-col-left">';
-    LEFT_SLOTS.forEach(s => { html += _buildBodySlot(s.slot, eq); });
+    // Simple 2-column grid of all equipment slots (no body SVG)
+    let html = '<div class="equip-slots-grid">';
+    SLOT_ORDER.forEach(slot => { html += _buildBodySlot(slot, eq); });
     html += '</div>';
-
-    // Center body silhouette
-    html += `<div class="body-center">
-        <svg class="body-svg" viewBox="0 0 80 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Outer glow -->
-            <defs>
-                <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            </defs>
-            <g filter="url(#glow)" opacity="0.85">
-                <!-- Head -->
-                <circle cx="40" cy="16" r="10" stroke="rgba(196,149,58,0.35)" stroke-width="1.2" fill="rgba(196,149,58,0.04)"/>
-                <!-- Neck -->
-                <line x1="40" y1="26" x2="40" y2="34" stroke="rgba(196,149,58,0.25)" stroke-width="1"/>
-                <!-- Shoulders + Torso outline -->
-                <path d="M18 38 Q22 34 40 34 Q58 34 62 38 L60 56 L56 88 L50 92 L30 92 L24 88 L20 56 Z"
-                      stroke="rgba(196,149,58,0.3)" stroke-width="1.2" fill="rgba(196,149,58,0.03)" stroke-linejoin="round"/>
-                <!-- Belt -->
-                <line x1="26" y1="86" x2="54" y2="86" stroke="rgba(196,149,58,0.2)" stroke-width="1"/>
-                <!-- Left Arm -->
-                <path d="M20 40 Q14 55 10 72 Q8 78 12 82" stroke="rgba(196,149,58,0.25)" stroke-width="1" fill="none" stroke-linecap="round"/>
-                <!-- Right Arm -->
-                <path d="M60 40 Q66 55 70 72 Q72 78 68 82" stroke="rgba(196,149,58,0.25)" stroke-width="1" fill="none" stroke-linecap="round"/>
-                <!-- Left Leg -->
-                <path d="M32 92 Q30 120 28 148 Q27 156 24 164" stroke="rgba(196,149,58,0.25)" stroke-width="1" fill="none"/>
-                <!-- Right Leg -->
-                <path d="M48 92 Q50 120 52 148 Q53 156 56 164" stroke="rgba(196,149,58,0.25)" stroke-width="1" fill="none"/>
-                <!-- Feet -->
-                <path d="M24 164 Q20 168 18 168 L30 168" stroke="rgba(196,149,58,0.2)" stroke-width="0.8" fill="none"/>
-                <path d="M56 164 Q60 168 62 168 L50 168" stroke="rgba(196,149,58,0.2)" stroke-width="0.8" fill="none"/>
-            </g>
-        </svg>
-    </div>`;
-
-    // Right column
-    html += '<div class="body-col body-col-right">';
-    RIGHT_SLOTS.forEach(s => { html += _buildBodySlot(s.slot, eq); });
-    html += '</div>';
-
-    html += '</div>'; // close body-grid
-
-    // Bottom row for remaining slots
-    html += '<div class="body-bottom-row">';
-    BOTTOM_SLOTS.forEach(s => { html += _buildBodySlot(s, eq); });
-    html += '</div>';
-
     return html;
 }
 
@@ -415,16 +343,17 @@ function _buildBodySlot(slot, eq) {
 // ─── Auto-Equip Logic ───
 function doAutoEquip() {
     _invalidateEquipCache();
-    if (activeTarget !== 'player') return;
     haptic('medium');
 
+    const isPlayer = activeTarget === 'player';
+    const eq = isPlayer ? localEq : (localAllyEq[activeTarget] || {});
     const SLOT_LIST = ['head', 'chest', 'shoulders', 'hands', 'legs', 'feet',
                        'main_hand', 'off_hand', 'necklace', 'ring_1', 'ring_2',
                        'belt', 'cloak', 'map'];
     let equipped = 0;
 
     SLOT_LIST.forEach(slot => {
-        const currentItem = localEq[slot] || null;
+        const currentItem = eq[slot] || null;
         const currentData = currentItem ? getItemData(currentItem) : { ac: 0, b: 0, hb: 0, mb: 0 };
         const compat = getCompatibleItems(slot);
         if (!compat.length) return;
@@ -436,7 +365,7 @@ function doAutoEquip() {
         compat.forEach(ci => {
             if (ci.name === currentItem) return;
             // Skip items already equipped in other slots
-            const alreadyEquipped = Object.entries(localEq).some(
+            const alreadyEquipped = Object.entries(eq).some(
                 ([s, n]) => s !== slot && n === ci.name
             );
             if (alreadyEquipped) return;
@@ -452,11 +381,11 @@ function doAutoEquip() {
         if (bestName && bestName !== currentItem) {
             // Queue equip operation
             if (currentItem) {
-                pendingOps.push({ t: 'unequip', slot, target: 'player' });
-                localEq[slot] = null;
+                pendingOps.push({ t: 'unequip', slot, target: activeTarget });
+                eq[slot] = null;
             }
-            pendingOps.push({ t: 'equip', item: bestName, slot, target: 'player' });
-            localEq[slot] = bestName;
+            pendingOps.push({ t: 'equip', item: bestName, slot, target: activeTarget });
+            eq[slot] = bestName;
             // Remove from inventory
             const invItem = localInv.find(i => i.n === bestName);
             if (invItem && invItem.q > 0) invItem.q--;
@@ -465,7 +394,7 @@ function doAutoEquip() {
     });
 
     if (equipped > 0) {
-        localAC = calcLocalAC();
+        if (isPlayer) localAC = calcLocalAC();
         updateHeader();
         renderTab();
         toast(`⚔️ ${equipped} equipamento(s) otimizado(s)!`, 'ok');

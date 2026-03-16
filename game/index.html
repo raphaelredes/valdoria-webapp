@@ -247,8 +247,19 @@
     <!-- Location transition overlay (immersive 2s travel screen) -->
     <div id="loc-transition" class="loc-transition" style="display:none">
         <div class="loc-transition-vignette"></div>
-        <div class="loc-transition-motes"><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="loc-transition-icon" id="loc-icon"></div>
+        <div class="loc-transition-motes"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <!-- Epic medieval gate (city transitions) -->
+        <div id="loc-gate" class="loc-gate" style="display:none">
+            <div class="loc-gate-beam"></div>
+            <div class="loc-gate-arch">
+                <div class="loc-gate-door loc-gate-left"></div>
+                <div class="loc-gate-door loc-gate-right"></div>
+                <div class="loc-gate-portcullis"></div>
+            </div>
+            <div class="loc-gate-dust"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <!-- Standard icon (non-city transitions) -->
+        <div class="loc-transition-icon" id="loc-icon" style="display:none"></div>
         <div class="loc-transition-text" id="loc-text">Viajando...</div>
         <div class="loc-transition-dots"><span>.</span><span>.</span><span>.</span></div>
     </div>

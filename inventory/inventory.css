@@ -105,7 +105,7 @@ body { padding-bottom: 92px; }
 }
 .filters::-webkit-scrollbar { display: none; }
 .filter-btn {
-    flex-shrink: 0; padding: 6px 12px;
+    flex-shrink: 0; padding: 6px 8px;
     min-height: 34px;
     border-radius: var(--v-radius-pill);
     font-size: 13px; border: 1px solid var(--v-border);
@@ -355,29 +355,12 @@ body { padding-bottom: 92px; }
     transform: scale(0.97);
 }
 
-/* ── Body Silhouette Equipment Layout ── */
+/* ── Equipment Slots Grid (2-column, no paper doll) ── */
 .body-equip { margin-top: 2px; }
-.body-grid {
+.equip-slots-grid {
     display: grid;
-    grid-template-columns: 1fr 60px 1fr;
-    gap: 0;
-    align-items: start;
-}
-.body-col {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: 1fr 1fr;
     gap: 4px;
-}
-.body-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 0;
-}
-.body-svg {
-    width: 60px;
-    height: auto;
-    opacity: 0.9;
 }
 .body-slot {
     display: flex;
