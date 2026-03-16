@@ -598,7 +598,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
     width: 100%; max-width: 480px; max-height: 85vh;
     overflow-y: auto; padding: 16px 16px 24px;
-    transform: translateY(100%); transition: transform var(--v-transition-base)-out;
+    transform: translateY(100%); transition: transform var(--v-transition-base);
     touch-action: pan-y;
 }
 .modal-overlay.visible .modal { transform: translateY(0); }
@@ -908,7 +908,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     letter-spacing: 0.5px; cursor: pointer; z-index: 101;
     box-shadow: var(--v-shadow-sm, 0 2px 8px rgba(0,0,0,0.3));
     -webkit-tap-highlight-color: transparent;
-    opacity: 0.9; transition: opacity var(--v-transition, 0.2s), transform 0.2s ease;
+    opacity: 0.9; transition: opacity var(--v-transition, 0.2s), transform var(--v-transition, 0.2s);
 }
 .immersive-restore:active { opacity: 1; transform: translateX(-50%) scale(0.95); }
 

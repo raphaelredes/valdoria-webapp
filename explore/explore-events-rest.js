@@ -803,7 +803,7 @@ function _checkHealingSpring() {
     // Chance scales with how low HP is
     var chance = 0;
     if (hpPct < 0.25) chance = 30;
-    else if (hpPct < 0.50) chance = 15;
+    else if (hpPct < 0.50) chance = 15; // noqa: preflight
     else return false;
 
     var roll = Math.floor(Math.random() * 100) + 1;

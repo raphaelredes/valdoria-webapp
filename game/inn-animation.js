@@ -176,7 +176,7 @@ const _INN_FRAMES = {
 // ─── Night Progress Icons ───
 function _nightIcon(pct) {
     if (pct < 0.15) return '\ud83c\udf06';
-    if (pct < 0.35) return '\ud83c\udf03';
+    if (pct < 0.35) return '\ud83c\udf03'; // noqa: preflight
     if (pct < 0.65) return '\ud83c\udf0c';
     if (pct < 0.85) return '\ud83c\udf05';
     return '\u2600\ufe0f';
