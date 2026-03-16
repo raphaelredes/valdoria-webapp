@@ -1077,7 +1077,19 @@ function showDeathSaves() {
             if (dice) {
                 dice.roll(roll, afterDice);
             } else {
-                setTimeout(afterDice, 700);
+                if (typeof _emojiFallbackDie === 'function') {
+                    var dsOverlay = document.getElementById('check-overlay') || document.getElementById('death-save-overlay');
+                    _emojiFallbackDie(dsOverlay, roll, afterDice);
+                } else {
+                    var fb = document.createElement('div');
+                    fb.style.cssText = 'font-size:32px;text-align:center';
+                    var fNums = ['\u2680','\u2681','\u2682','\u2683','\u2684','\u2685'];
+                    var fIdx = 0;
+                    var fIv = setInterval(function() { fb.textContent = fNums[fIdx++ % 6]; }, 80);
+                    var dsTarget = document.getElementById('check-overlay') || document.getElementById('death-save-overlay');
+                    if (dsTarget) dsTarget.appendChild(fb);
+                    setTimeout(function() { clearInterval(fIv); fb.textContent = roll; setTimeout(afterDice, 400); }, 700);
+                }
             }
         }, narrDelay);
     }

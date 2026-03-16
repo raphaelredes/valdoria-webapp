@@ -802,7 +802,21 @@ function _doSocialCheck() {
         if (typeof _emojiFallbackDie === 'function') {
             _emojiFallbackDie(overlay, roll, finishCheck);
         } else {
-            setTimeout(finishCheck, 700);
+            var dw = overlay.querySelector('.dice3d-wrapper');
+            if (dw) {
+                var nums = ['\u2680','\u2681','\u2682','\u2683','\u2684','\u2685'];
+                var idx = 0;
+                var iv = setInterval(function() { dw.innerHTML = '<div style="font-size:32px;text-align:center">' + nums[idx++ % 6] + '</div>'; }, 80);
+                setTimeout(function() { clearInterval(iv); dw.innerHTML = '<div style="font-size:32px;text-align:center">' + roll + '</div>'; setTimeout(finishCheck, 400); }, 700);
+            } else {
+                var fb = document.createElement('div');
+                fb.style.cssText = 'font-size:32px;text-align:center';
+                var fNums = ['\u2680','\u2681','\u2682','\u2683','\u2684','\u2685'];
+                var fIdx = 0;
+                var fIv = setInterval(function() { fb.textContent = fNums[fIdx++ % 6]; }, 80);
+                overlay.appendChild(fb);
+                setTimeout(function() { clearInterval(fIv); fb.textContent = roll; setTimeout(finishCheck, 400); }, 700);
+            }
         }
     }
 }
