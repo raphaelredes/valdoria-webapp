@@ -177,6 +177,7 @@ function doEquip(name, slot) {
     animateStat('hs-ac');
     renderTab();
     updateBottomBar();
+    _flashSlot(targetSlot, 'equip-flash');
 }
 
 function returnLocalGems(slot) {
@@ -210,6 +211,7 @@ function doUnequip(slot) {
     updateHeader();
     renderTab();
     updateBottomBar();
+    _flashSlot(slot, 'unequip-flash');
 }
 
 function doEquipSet(sid) {
@@ -387,6 +389,7 @@ function doToggleFav(name) {
 }
 
 function doSell(name, price) {
+    if (isLocked(name)) { toast(vi('lock', 13) + ' Item travado!', 'warn'); return; }
     addOp({ t: 'sell', item: name });
     removeFromLocalInv(name);
     localGold += price;
@@ -404,6 +407,7 @@ function canDiscard(it, tags) {
 }
 
 function doDiscard(name) {
+    if (isLocked(name)) { toast(vi('lock', 13) + ' Item travado!', 'warn'); return; }
     addOp({ t: 'discard', item: name });
     removeFromLocalInv(name);
     closeModal();
@@ -450,14 +454,71 @@ function updateSelectionBar() {
     if (!bar) return;
     if (selectionMode && selectedItems.size > 0) {
         bar.classList.remove('hidden');
-        bar.innerHTML = `
-                <span class="sel-count">${selectedItems.size} selecionado(s)</span>
-                <button class="btn-sell" style="padding:6px 10px;font-size:12px;" onclick="sellSelected()">${vi('coin', 12)} Vender</button>
-                <button style="padding:6px 10px;font-size:12px;background:var(--v-danger);color:#fff;border:none;border-radius:6px;cursor:pointer;" onclick="discardSelected()">${vi('trash', 12)} Descartar</button>`;
+        bar.innerHTML = '<span class="sel-count">' + selectedItems.size + ' selecionado(s)</span>'
+            + '<button class="sel-action-btn sel-btn-fav" onclick="favSelected()">' + vi_f('star', 12) + '</button>'
+            + '<button class="sel-action-btn sel-btn-lock" onclick="lockSelected()">' + vi('lock', 12) + '</button>'
+            + '<button class="sel-action-btn sel-btn-sell" onclick="sellSelected()">' + vi('coin', 12) + '</button>'
+            + '<button class="sel-action-btn sel-btn-discard" onclick="discardSelected()">' + vi('trash', 12) + '</button>';
     } else {
         bar.classList.add('hidden');
         bar.innerHTML = '';
     }
+}
+
+function favSelected() {
+    var names = [...selectedItems];
+    var added = 0, removed = 0;
+    names.forEach(function(name) {
+        if (isFav(name)) {
+            var idx = localFavs.indexOf(name);
+            if (idx >= 0) localFavs.splice(idx, 1);
+            addOp({ t: 'toggle_fav', item: name, val: false });
+            removed++;
+        } else {
+            localFavs.push(name);
+            addOp({ t: 'toggle_fav', item: name, val: true });
+            added++;
+        }
+    });
+    selectedItems.clear();
+    selectionMode = false;
+    closeModal();
+    updateSelectionBar();
+    haptic('light');
+    var msg = '';
+    if (added > 0) msg += vi_f('star', 13) + ' ' + added + ' favoritado(s) ';
+    if (removed > 0) msg += vi('star', 13) + ' ' + removed + ' removido(s)';
+    toast(msg.trim(), 'ok');
+    renderTab();
+    updateBottomBar();
+}
+
+function lockSelected() {
+    var names = [...selectedItems];
+    var locked = 0, unlocked = 0;
+    names.forEach(function(name) {
+        if (isLocked(name)) {
+            var idx = localLocked.indexOf(name);
+            if (idx >= 0) localLocked.splice(idx, 1);
+            addOp({ t: 'toggle_lock', item: name, val: false });
+            unlocked++;
+        } else {
+            localLocked.push(name);
+            addOp({ t: 'toggle_lock', item: name, val: true });
+            locked++;
+        }
+    });
+    selectedItems.clear();
+    selectionMode = false;
+    closeModal();
+    updateSelectionBar();
+    haptic('light');
+    var msg = '';
+    if (locked > 0) msg += vi('lock', 13) + ' ' + locked + ' travado(s) ';
+    if (unlocked > 0) msg += vi('unlock', 13) + ' ' + unlocked + ' desbloqueado(s)';
+    toast(msg.trim(), 'ok');
+    renderTab();
+    updateBottomBar();
 }
 
 function sellSelected() {
@@ -497,7 +558,7 @@ function confirmSellSelected() {
     [...selectedItems].forEach(name => {
         const it = getItemData(name);
         const tags = it.t || [];
-        if (isProtected(tags)) return;
+        if (isProtected(tags) || isLocked(name)) return;
         const inv = localInv.find(i => i.n === name);
         if (!inv || inv.q <= 0) return;
         const price = Math.max(1, Math.floor((it.v || 1) * 0.5));
@@ -552,7 +613,7 @@ function confirmDiscardSelected() {
     [...selectedItems].forEach(name => {
         const it = getItemData(name);
         const tags = it.t || [];
-        if (isProtected(tags)) return;
+        if (isProtected(tags) || isLocked(name)) return;
         const inv = localInv.find(i => i.n === name);
         if (!inv || inv.q <= 0) return;
         addOp({ t: 'discard', item: name });
@@ -597,6 +658,7 @@ function getJunkItems() {
         if (!tags.some(t => JUNK_TAGS.has(t))) return false;
         if (isEquippedAnywhere(inv.n)) return false;
         if (isFav(inv.n)) return false;
+        if (isLocked(inv.n)) return false;
         if (tags.some(t => SELL_PROTECTED.has(t))) return false;
         return true;
     });
@@ -692,6 +754,7 @@ function formatOp(op) {
         case 'delete_loadout': return `${vi('trash', 13)} Deletar loadout '${op.name}'`;
         case 'rune_craft': return `${vi('hammer', 13)} Forjar runa T${op.tier}`;
         case 'toggle_fav': return `${op.val ? vi_f('star', 13) : vi('star', 13)} ${op.val ? 'Favoritar' : 'Desfavoritar'} ${op.item}`;
+        case 'toggle_lock': return `${op.val ? vi('lock', 13) : vi('unlock', 13)} ${op.val ? 'Travar' : 'Destravar'} ${op.item}`;
         default: return `? ${op.t}`;
     }
 }
@@ -984,6 +1047,23 @@ function _getCompatCached(slot) {
 }
 
 function isFav(name) { return localFavs.includes(name); }
+function isLocked(name) { return localLocked.includes(name); }
+
+function doToggleLock(name) {
+    const idx = localLocked.indexOf(name);
+    if (idx >= 0) {
+        localLocked.splice(idx, 1);
+        addOp({ t: 'toggle_lock', item: name, val: false });
+        toast(vi('unlock', 13) + ' ' + esc(name) + ' desbloqueado', 'ok');
+    } else {
+        localLocked.push(name);
+        addOp({ t: 'toggle_lock', item: name, val: true });
+        toast(vi('lock', 13) + ' ' + esc(name) + ' travado', 'ok');
+    }
+    haptic('light');
+    renderTab();
+    updateBottomBar();
+}
 
 function isProtected(tags) {
     return tags.some(t => SELL_PROTECTED.has(t));
@@ -991,6 +1071,23 @@ function isProtected(tags) {
 
 function isConsumable(tags) {
     return tags.some(t => ['consumable', 'food', 'potion', 'camping'].includes(t));
+}
+
+function _flashSlot(slot, cls) {
+    // Flash animation on equipment slot after equip/unequip
+    requestAnimationFrame(function() {
+        var slotEls = document.querySelectorAll('.body-slot');
+        slotEls.forEach(function(el) {
+            if (el.getAttribute('onclick') && el.getAttribute('onclick').includes("'" + slot + "'")) {
+                el.classList.remove('equip-flash', 'unequip-flash');
+                void el.offsetWidth;
+                el.classList.add(cls);
+                el.addEventListener('animationend', function() {
+                    el.classList.remove(cls);
+                }, { once: true });
+            }
+        });
+    });
 }
 
 const SELL_PROTECTED = new Set([

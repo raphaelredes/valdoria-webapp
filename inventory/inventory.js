@@ -27,6 +27,7 @@ let localHP = 0;
 let localMP = 0;
 let localPotions = 0;       // Basic potion counter
 let localFavs = [];         // Local favorites list
+let localLocked = [];       // Local locked items list
 let localAC = 0;            // Dynamic AC (recalculated on equip/unequip)
 let activeTarget = 'player'; // 'player' or npc_id
 let selectionMode = false;
@@ -68,6 +69,7 @@ const _IC = {
     check_f: '<path d="M4 12l5 5L20 6"/>',
     sparkle: '<path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><path d="M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',
     lock: '<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.5"/>',
+    unlock: '<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M16 11V7a4 4 0 0 0-8 0"/><circle cx="12" cy="16" r="1.5"/>',
     trash: '<path d="M4 7h16"/><path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><path d="M9 4h6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
     save: '<path d="M7 3h10l4 4v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><rect x="8" y="13" width="8" height="6"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="17" x2="13" y2="17"/>',
     warn: '<path d="M12 3L2 20h20z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>',
@@ -231,6 +233,8 @@ function init() {
     localMP = D.p.mp || 0;
     localPotions = D.p.pot || 0;
     localFavs = D.fav ? [...D.fav] : [];
+    localLocked = D.lck ? [...D.lck] : [];
+    localLocked = D.lck ? [...D.lck] : [];
     localGems = {};
     if (D.gems) {
         for (const [k, v] of Object.entries(D.gems))
@@ -441,6 +445,8 @@ function resetAllOps() {
     localMP = D.p.mp || 0;
     localPotions = D.p.pot || 0;
     localFavs = D.fav ? [...D.fav] : [];
+    localLocked = D.lck ? [...D.lck] : [];
+    localLocked = D.lck ? [...D.lck] : [];
     localGems = {};
     if (D.gems) {
         for (const [k, v] of Object.entries(D.gems))

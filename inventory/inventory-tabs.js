@@ -116,12 +116,13 @@ function renderItemsTab(c) {
             const equipped = isEquippedAnywhere(inv.n);
             const setId = it.si || '';
             const tags = it.t || [];
-            const canSelect = selectionMode && !equipped && !isProtected(tags);
+            const canSelect = selectionMode && !equipped && !isProtected(tags) && !isLocked(inv.n);
             const isSelected = selectedItems.has(inv.n);
             const clickAction = canSelect
                 ? `toggleSelectItem('${esc(inv.n)}')`
                 : (selectionMode ? '' : `openItemDetail('${esc(inv.n)}')`);
-            html += `<div class="item-card rarity-${rarity} ${equipped ? 'equipped-marker' : ''} fade-in"
+            const locked = isLocked(inv.n);
+            html += `<div class="item-card rarity-${rarity} ${equipped ? 'equipped-marker' : ''} ${locked ? 'locked-marker' : ''} fade-in"
                     onclick="${clickAction}" ${selectionMode && !canSelect ? 'style="opacity:0.4;"' : ''}>
                     ${selectionMode ? `<div class="sel-check ${isSelected ? 'active' : ''}">${isSelected ? vi_f('check', 12) : ''}</div>` : ''}
                     <div class="ic-badges">
@@ -130,6 +131,7 @@ function renderItemsTab(c) {
                         ${setId ? `<span class="ic-set-badge">${getSetIcon(setId)}</span>` : ''}
                     </div>
                     ${!selectionMode && isFav(inv.n) ? `<span class="ic-fav">${vi_f('star', 14)}</span>` : ''}
+                    ${isLocked(inv.n) ? `<span class="ic-lock">${vi('lock', 11)}</span>` : ''}
                     ${isNewItem(inv.n) ? '<span class="ic-new-dot"></span>' : ''}
                     <div class="ic-emoji">${it.e || '📦'}</div>
                     <div class="ic-name v-rarity-${rarity}">${inv.n}</div>

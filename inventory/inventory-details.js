@@ -228,6 +228,10 @@ function openItemDetail(name) {
     const favIcon = isFav(name) ? vi_f('star', 16) : vi('star', 16);
     html += `<button class="btn-unequip" onclick="doToggleFav('${esc(name)}');openItemDetail('${esc(name)}')"
             style="flex:0 0 44px;padding:10px;">${favIcon}</button>`;
+    const lockIcon = isLocked(name) ? vi('lock', 16) : vi('unlock', 16);
+    const lockCls = isLocked(name) ? 'border-color:var(--v-gold-dim)!important;color:var(--v-gold);' : '';
+    html += `<button class="btn-unequip" onclick="doToggleLock('${esc(name)}');openItemDetail('${esc(name)}')"
+            style="flex:0 0 44px;padding:10px;${lockCls}">${lockIcon}</button>`;
     if (it.s && !isProtected(tags)) {
         const canEquip = checkProficiency(it, activeTarget, name);
         if (canEquip) {
@@ -249,11 +253,11 @@ function openItemDetail(name) {
             html += `<button class="btn-use" onclick="showUseConfirm('${esc(name)}')">${vi('flask', 13)} Usar</button>`;
         }
     }
-    if (canSell(it, tags) && qty > 0 && !isEquippedAnywhere(name)) {
+    if (canSell(it, tags) && qty > 0 && !isEquippedAnywhere(name) && !isLocked(name)) {
         const sellPrice = Math.max(1, Math.floor((it.v || 1) * 0.5));
         html += `<button class="btn-sell" onclick="showSellConfirm('${esc(name)}',${sellPrice})">${vi('coin', 13)} ${sellPrice}gp</button>`;
     }
-    if (canDiscard(it, tags) && qty > 0 && !isEquippedAnywhere(name)) {
+    if (canDiscard(it, tags) && qty > 0 && !isEquippedAnywhere(name) && !isLocked(name)) {
         html += `<button class="btn-discard" onclick="showDiscardConfirm('${esc(name)}')" style="flex:0 0 44px;padding:10px;">${vi('trash', 14)}</button>`;
     }
     html += '</div>';
