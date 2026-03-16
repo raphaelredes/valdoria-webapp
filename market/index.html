@@ -1877,11 +1877,6 @@
                 .replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
 
-        // ── Start ──
-        init();
-        if (window._marketLoadingCtrl) window._marketLoadingCtrl.hide();
-    </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js?v=5').catch(()=>{})}
         // ── Item Image Popup ──
         function showItemImage(name, imgUrl, emoji, details) {
             if (!imgUrl || typeof showImagePopup !== 'function') return;
@@ -1901,7 +1896,12 @@
                 type: 'item'
             });
         }
+
+        // ── Start ──
+        init();
+        if (window._marketLoadingCtrl) window._marketLoadingCtrl.hide();
     </script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js?v=5').catch(()=>{})}</script>
 </body>
 
 </html>
