@@ -76,8 +76,9 @@
     /* Structural */
     --v-border:        #4a3828;
     --v-border-gold:   rgba(196, 149, 58, 0.25);
-    --v-radius:        10px;
+    --v-radius-xs:     4px;
     --v-radius-sm:     6px;
+    --v-radius:        10px;
     --v-radius-lg:     14px;
     --v-radius-pill:   20px;
 
@@ -112,6 +113,7 @@
     --v-space-xs:   2px;
     --v-space-sm:   4px;
     --v-space-md:   8px;
+    --v-space-md-lg: 10px;
     --v-space-lg:   12px;
     --v-space-xl:   16px;
     --v-space-2xl:  24px;
