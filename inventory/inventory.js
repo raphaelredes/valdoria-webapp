@@ -673,30 +673,8 @@ async function _transitionTo(target, payload = {}) {
 
 // ── Toast ──
 function toast(msg, type) {
-    const existing = document.querySelector('.toast');
-    if (existing) existing.remove();
-    if (type === 'err') hapticNotify('error');
-    else if (type === 'warn') hapticNotify('warning');
-    const el = document.createElement('div');
-    el.className = `toast toast-${type || 'ok'}`;
-    el.innerHTML = msg;
-    // Dynamic position above bottom bar (Fix 12)
-    const panel = document.getElementById('bottomPanel');
-    const panelH = panel ? panel.offsetHeight : 80;
-    el.style.bottom = (panelH + 12) + 'px';
-    document.body.appendChild(el);
-    // Calculate reading time from text content
-    var clean = (msg || '').replace(/<[^>]*>/g, '');
-    var cat = (type === 'err' || type === 'warn') ? 'toast-warn' : 'toast';
-    var dur = (typeof calcReadTime === 'function')
-        ? calcReadTime(clean, cat)
-        : Math.max(1500, Math.min(4000, clean.split(/\s+/).length * 250));
-    // Fade-out before removal
-    setTimeout(() => {
-        el.style.opacity = '0';
-        el.style.transition = 'opacity 0.25s ease';
-        setTimeout(() => el.remove(), 250);
-    }, dur);
+    // Delegate to shared toast component (shared/toast.js)
+    vToast(msg, type || 'ok');
 }
 
 // ── Escape for onclick attributes & HTML context ──

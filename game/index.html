@@ -15,7 +15,8 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
-        document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
+document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/tabs.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game.css?v=' + v + '">');
@@ -38,7 +39,8 @@
     document.write('<script src="../shared/typewriter.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
-            document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
+document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/motion.js?v=' + v + '"><\/script>');
     </script>
 </head>
@@ -224,7 +226,7 @@
     </div>
 
     <!-- Toast notification -->
-    <div id="toast" class="toast" style="display:none"></div>
+    <!-- Toast: handled by shared/toast.js -->
 
     <!-- Timer overlay -->
     <div id="timer-overlay" class="timer-overlay" style="display:none">

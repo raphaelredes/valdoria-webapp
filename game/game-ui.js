@@ -341,30 +341,8 @@ function _stopSlowWarning() {
 }
 
 // ─── Toast Notification ───
-let _toastTimeout = null;
-
-function showToast(text, duration) {
-    const el = document.getElementById('toast');
-    if (!el) return;
-
-    if (_toastTimeout) clearTimeout(_toastTimeout);
-
-    // Calculate reading time if no explicit duration provided
-    if (duration === undefined || duration === null) {
-        duration = (typeof calcReadTime === 'function')
-            ? calcReadTime(text, 'toast')
-            : Math.max(1500, Math.min(4000, (text || '').split(/\s+/).length * 250));
-    }
-
-    el.textContent = text;
-    el.classList.remove('hiding');
-    el.style.display = '';
-
-    _toastTimeout = setTimeout(() => {
-        el.classList.add('hiding');
-        setTimeout(() => { el.style.display = 'none'; el.classList.remove('hiding'); }, 300);
-    }, duration);
-}
+// MOVED TO: ../shared/toast.js (canonical component)
+// Functions: vToast(text, type, duration), showToast(text, duration)
 
 // ─── Error Overlay — provided by shared/error-reporter.js ───
 // showError(), hideError(), showToast() are injected by ValdoriaErrors.init()

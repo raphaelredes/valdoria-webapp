@@ -1004,18 +1004,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 
 /* ── Toast ── */
-.toast {
-    position: fixed; left: 50%;
-    transform: translateX(-50%); padding: 8px 18px;
-    border-radius: var(--v-radius-pill); font-size: 13px;
-    z-index: 300; animation: v-fadeSlideUp 0.25s ease;
-    pointer-events: none; color: #fff;
-    /* Dynamic bottom: above bottom panel */
-    bottom: 100px;
-}
-.toast-warn { background: var(--v-warning); }
-.toast-err { background: var(--v-danger); }
-.toast-ok { background: var(--v-success); }
+/* Toast: handled by shared/toast.css */
 
 /* ── Vault Header ── */
 .vault-header {

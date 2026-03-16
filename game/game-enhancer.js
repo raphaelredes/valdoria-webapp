@@ -58,7 +58,7 @@ const _RE_COMBAT_FORMULA = /^[🛡🎯💥📋].*└/;
 const _RE_COMBAT_STAT  = /^📋.*Prof/;
 const _RE_DEAD_ALLY    = /^💀\s/;
 const _RE_ALLY_IDENT   = /^(?:⚔️|🧙‍♂️|🗡️|⚕️|🛡️|🏹|🪓|🎻|🌿|🙏|🔮|👁️|👤)\s/;
-const _RE_ALLY_LEVEL   = /^Lvl\s+\d+\s+\S/;
+const _RE_ALLY_LEVEL   = /^(?:Lvl|N\u00edvel)\s+\d+\s+\S/;
 
 function _isSubtitleLine(line) {
     return _RE_SUBTITLE.test(line);
