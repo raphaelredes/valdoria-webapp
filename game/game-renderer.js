@@ -92,18 +92,10 @@ function renderScreen(screen) {
     const loadingEl = document.getElementById('loading');
     const panelEl = document.getElementById('bottom-panel');
 
-    // Hide loading with narrative minimum delay, show screen
+    // Force-hide loading immediately — callers (startGame/fetchState/returnFromWebApp)
+    // already enforce MIN_LOADING_MS via hideLoadingWithDelay(). No animation needed here.
     if (loadingEl && loadingEl.style.display !== 'none') {
-        const elapsed = Date.now() - (_loadingStartTime || 0);
-        const remaining = (typeof MIN_LOADING_MS !== 'undefined' ? MIN_LOADING_MS : (window.VALDORIA_MIN_LOAD_MS || 5000)) - elapsed;
-        if (remaining > 0) {
-            // Delay hide — screen renders underneath (loading has z-index 1000)
-            setTimeout(() => {
-                if (typeof hideLoading === 'function') { hideLoading(); } else { loadingEl.style.display = 'none'; }
-            }, remaining);
-        } else {
-            if (typeof hideLoading === 'function') { hideLoading(); } else { loadingEl.style.display = 'none'; }
-        }
+        if (typeof forceHideLoading === 'function') { forceHideLoading(); } else { loadingEl.style.display = 'none'; }
     }
     screenEl.style.display = '';
 

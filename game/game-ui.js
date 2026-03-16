@@ -41,9 +41,11 @@ let _loadingProgress = 0;
 let _loadingStartTime = 0;
 
 let _isRetryLoading = false;
+let _loadingHiding = false;
 let _loadingSlowTimer = null;
 
 function showLoading(isRetry = false) {
+    _loadingHiding = false;
     const el = document.getElementById('loading');
     if (el) {
         el.style.display = '';
@@ -86,6 +88,8 @@ function showLoading(isRetry = false) {
 function hideLoading() {
     const el = document.getElementById('loading');
     if (!el || el.style.display === 'none') return;
+    if (_loadingHiding) return;
+    _loadingHiding = true;
 
     _stopLoadingProgress();
     _stopLoadingTimeout();
@@ -117,6 +121,7 @@ function hideLoading() {
         _stopLoadingTips();
         setTimeout(() => {
             el.style.display = 'none';
+            _loadingHiding = false;
             el.classList.remove('exit-cinematic');
             el.style.opacity = '';
             el.style.transition = '';
@@ -136,6 +141,7 @@ function hideLoading() {
         if (el.style.display !== 'none') {
             console.warn('[GAME] Loading force-hidden after safety net');
             el.style.display = 'none';
+            _loadingHiding = false;
             el.classList.remove('exit-cinematic');
             el.removeAttribute('data-phase');
         }
@@ -148,6 +154,33 @@ async function hideLoadingWithDelay() {
     const remaining = MIN_LOADING_MS - elapsed;
     if (remaining > 0) await sleep(remaining);
     hideLoading();
+}
+
+/** Force-hide loading immediately (no animation). Used by renderScreen(). */
+function forceHideLoading() {
+    const el = document.getElementById('loading');
+    if (!el || el.style.display === 'none') return;
+    _loadingHiding = false;
+    _stopLoadingProgress();
+    _stopLoadingTimeout();
+    _stopSlowWarning();
+    _stopLoadingTips();
+    _isRetryLoading = false;
+    el.style.display = 'none';
+    el.classList.remove('exit-cinematic', 'hidden');
+    el.style.opacity = '';
+    el.style.transition = '';
+    el.removeAttribute('data-phase');
+    const stageEl = document.getElementById('loading-stage');
+    if (stageEl) stageEl.textContent = '';
+    const circle = el.querySelector('.magic-circle');
+    if (circle) {
+        circle.style.removeProperty('--ring-outer');
+        circle.style.removeProperty('--ring-mid');
+        circle.style.removeProperty('--ring-inner');
+    }
+    const retryBtn = document.getElementById('loading-retry');
+    if (retryBtn) retryBtn.style.display = 'none';
 }
 
 // ── Ring acceleration: lerp speed based on progress ──
