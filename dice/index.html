@@ -28,6 +28,113 @@
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     </script>
     <style>
+
+        /* ─── DICE LOADING SCREEN ─── */
+        .dice-loading {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            background: radial-gradient(ellipse at center, #352a20 0%, #2a2420 40%, #1a1510 100%);
+        }
+        .dice-loading-scene {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dice-loading-glow {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(196,149,58,0.3) 0%, rgba(196,149,58,0) 70%);
+            animation: diceGlowPulse 2.5s ease-in-out infinite;
+        }
+        .dice-loading-d20 {
+            animation: diceFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 12px rgba(196,149,58,0.4));
+        }
+        .dice-loading-d20 svg {
+            animation: diceSpin 8s linear infinite;
+        }
+        .dice-loading-sparks span {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #c4953a;
+            border-radius: 50%;
+            animation: diceSpark 2s ease-out infinite;
+        }
+        .dice-loading-sparks span:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; }
+        .dice-loading-sparks span:nth-child(2) { top: 15%; right: 15%; animation-delay: 0.5s; }
+        .dice-loading-sparks span:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 1s; }
+        .dice-loading-sparks span:nth-child(4) { bottom: 15%; right: 20%; animation-delay: 1.5s; }
+        .dice-loading-title {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: 18px;
+            color: var(--v-gold, #c4953a);
+            letter-spacing: 3px;
+            text-shadow: 0 0 12px rgba(196,149,58,0.3);
+        }
+        .dice-loading-text {
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            font-size: 13px;
+            color: var(--v-text-dim, #8a7a68);
+            animation: diceFadeText 2s ease-in-out infinite;
+        }
+        @keyframes diceFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        @keyframes diceSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes diceGlowPulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        @keyframes diceSpark {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        @keyframes diceFadeText {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        /* Performance: lite */
+        body.perf-lite .dice-loading-d20 {
+            animation: diceFloat 3s ease-in-out infinite;
+        }
+        body.perf-lite .dice-loading-d20 svg {
+            animation: none;
+        }
+        body.perf-lite .dice-loading-glow {
+            animation: none;
+            opacity: 0.4;
+        }
+        body.perf-lite .dice-loading-sparks span {
+            animation: none;
+            display: none;
+        }
+        /* Performance: medium */
+        body.perf-medium .dice-loading-sparks span:nth-child(3),
+        body.perf-medium .dice-loading-sparks span:nth-child(4) {
+            display: none;
+        }
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .dice-loading-d20 { animation: none; }
+            .dice-loading-d20 svg { animation: none; }
+            .dice-loading-glow { animation: none; }
+            .dice-loading-sparks span { animation: none; display: none; }
+            .dice-loading-text { animation: none; }
+        }
         body {
             display: flex;
             flex-direction: column;
@@ -460,9 +567,45 @@
 </head>
 
 <body>
-    <div class="v-loading-overlay" id="loadingOverlay">
-        <div class="v-loading-spinner"></div>
-        <div class="v-loading-text">Preparando a mesa...</div>
+    <div class="v-loading-overlay dice-loading" id="loadingOverlay">
+        <div class="dice-loading-scene">
+            <div class="dice-loading-glow"></div>
+            <div class="dice-loading-d20">
+                <svg viewBox="0 0 100 100" width="80" height="80">
+                    <!-- D20 icosahedron face pattern -->
+                    <defs>
+                        <linearGradient id="dg1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#c4953a"/>
+                            <stop offset="100%" stop-color="#8b6914"/>
+                        </linearGradient>
+                        <linearGradient id="dg2" x1="100%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#d4a844"/>
+                            <stop offset="100%" stop-color="#7a5c10"/>
+                        </linearGradient>
+                        <filter id="dice-glow">
+                            <feGaussianBlur stdDeviation="2" result="blur"/>
+                            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                        </filter>
+                    </defs>
+                    <!-- Outer shape -->
+                    <polygon points="50,5 95,30 95,70 50,95 5,70 5,30" fill="url(#dg1)" stroke="#c4953a" stroke-width="1.5" filter="url(#dice-glow)"/>
+                    <!-- Inner faces -->
+                    <polygon points="50,5 95,30 50,50" fill="url(#dg2)" stroke="#8b6914" stroke-width="0.5" opacity="0.7"/>
+                    <polygon points="50,5 5,30 50,50" fill="#a07820" stroke="#8b6914" stroke-width="0.5" opacity="0.5"/>
+                    <polygon points="95,30 95,70 50,50" fill="#b8882a" stroke="#8b6914" stroke-width="0.5" opacity="0.6"/>
+                    <polygon points="5,30 5,70 50,50" fill="#8b6914" stroke="#7a5c10" stroke-width="0.5" opacity="0.5"/>
+                    <polygon points="50,95 95,70 50,50" fill="#9a7418" stroke="#8b6914" stroke-width="0.5" opacity="0.6"/>
+                    <polygon points="50,95 5,70 50,50" fill="#7a5c10" stroke="#6a4e0a" stroke-width="0.5" opacity="0.5"/>
+                    <!-- Number 20 in center -->
+                    <text x="50" y="56" text-anchor="middle" fill="#f5e6c8" font-family="Cinzel, serif" font-size="22" font-weight="700" opacity="0.9">20</text>
+                </svg>
+            </div>
+            <div class="dice-loading-sparks">
+                <span></span><span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="dice-loading-title">MESA DE DADOS</div>
+        <div class="dice-loading-text">Preparando a mesa...</div>
     </div>
     <div class="v-header">
         <h1 id="headerTitle">Mesa de Dados</h1>
@@ -1660,12 +1803,12 @@
             animate(performance.now());
         }
 
-        var _diceLoadStart = '20260314';
+        var _diceLoadStart = Date.now();
         init();
         // Dismiss loading overlay with minimum display time
         var lo = document.getElementById('loadingOverlay');
         if (lo) {
-            var elapsed = '20260314' - _diceLoadStart;
+            var elapsed = Date.now() - _diceLoadStart;
             var remaining = Math.max(0, 2000 - elapsed);
             setTimeout(function() {
                 lo.classList.add('v-hidden');

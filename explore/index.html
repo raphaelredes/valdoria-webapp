@@ -157,7 +157,7 @@
         if (tipEl) tipEl.textContent = TIPS[tipIndex];
         var _tipInterval, _slowTimer, _verySlowTimer;
         var _lastPct = 0;
-        var _loadStart = '20260314';
+        var _loadStart = Date.now();
         var MIN_LOAD_MS = window.VALDORIA_MIN_LOAD_MS || 5000;
 
         // Ring acceleration: lerp speed based on progress (100% = 4x faster)
@@ -261,7 +261,7 @@
                 clearTimeout(_verySlowTimer);
                 if (!overlay || overlay.classList.contains('hidden')) { if (cb) cb(); return; }
                 // Enforce minimum loading time for narrative immersion
-                var elapsed = '20260314' - _loadStart;
+                var elapsed = Date.now() - _loadStart;
                 var remaining = MIN_LOAD_MS - elapsed;
                 if (remaining > 0) {
                     var self = this;
