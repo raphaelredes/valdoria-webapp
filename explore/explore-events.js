@@ -246,9 +246,185 @@ function logMoveEvent(events) {
 // ═══════════════════════════════════════════════════════
 // POI INTERACTION
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// BARK SYSTEM — Character speech bubbles (Darkest Dungeon-inspired)
+// ═══════════════════════════════════════════════════════════
+var _barkTimeout = null;
+var _lastBarkKey = '';
+
+// Bark phrases per class x situation (PT-BR, tone matches class personality)
+var BARK_PHRASES = {
+    'Guerreiro': {
+        'low_hp':     ['Apenas um arranhão.', 'Já sofri coisa pior.', 'Não vou cair aqui.'],
+        'crit_hit':   ['Golpe certeiro!', 'Pela espada!', 'Isso é treinamento!'],
+        'miss':       ['Tsc. Errei.', 'Não de novo...', 'O próximo acerta.'],
+        'new_biome':  ['Terreno desconhecido. Atenção.', 'Reconhecimento em andamento.', 'Mantenha a guarda.'],
+        'treasure':   ['Espólios de guerra.', 'Provisões úteis.', 'Bom achado.'],
+        'danger':     ['Formação defensiva!', 'Preparem-se!', 'Inimigo à vista.'],
+        'rest':       ['Hora de afiar a lâmina.', 'Descansem enquanto podem.', 'Posição segura.'],
+    },
+    'Mago': {
+        'low_hp':     ['Preciso me concentrar...', 'Minha barreira falhou.', 'A dor nubla a mente.'],
+        'crit_hit':   ['A magia é precisa!', 'Conhecimento é poder.', 'Como previa.'],
+        'miss':       ['A fórmula falhou.', 'Interferência arcana.', 'Interessante...'],
+        'new_biome':  ['Sinto energias diferentes aqui.', 'Fascinante topografia.', 'Há magia latente neste lugar.'],
+        'treasure':   ['Componentes materiais!', 'Algo de valor acadêmico.', 'Vejamos o que temos.'],
+        'danger':     ['Detecto hostilidade.', 'Escudos arcanos!', 'Cuidado com emboscada.'],
+        'rest':       ['Hora de estudar minhas notas.', 'Meditação restaura a mente.', 'Vou reorganizar meus feitiços.'],
+    },
+    'Ladino': {
+        'low_hp':     ['Isso vai doer amanhã.', 'Preciso ser mais esperto.', 'Hora de recuar.'],
+        'crit_hit':   ['Ponto fraco encontrado!', 'Nas sombras eu prospero.', 'Nem viram vindo.'],
+        'miss':       ['Nah, muito fácil seria.', 'Escorregou...', 'Próximo golpe, certeza.'],
+        'new_biome':  ['Muitos esconderijos aqui.', 'Hora de explorar os cantos.', 'Alguém deixou rastros.'],
+        'treasure':   ['Meu tipo favorito de trabalho.', 'Achado não é roubado.', 'Muito generoso.'],
+        'danger':     ['Melhor não ser visto.', 'Tenho um mau pressentimento.', 'Hora de desaparecer.'],
+        'rest':       ['Vou verificar o perímetro.', 'Ninguém nos segue... acho.', 'Descansem, eu vigio.'],
+    },
+    'Clérigo': {
+        'low_hp':     ['A fé me sustenta.', 'Preciso de cura divina.', 'As feridas se acumulam.'],
+        'crit_hit':   ['Justiça divina!', 'A luz guia meu braço!', 'Pela fé!'],
+        'miss':       ['Nem sempre é a vontade divina.', 'Paciência é virtude.', 'Os deuses têm planos.'],
+        'new_biome':  ['Que esta terra seja abençoada.', 'Sinto presenças aqui.', 'A luz nos protegerá.'],
+        'treasure':   ['Uma bênção da providência.', 'Os deuses são generosos.', 'Servirá à causa.'],
+        'danger':     ['Protejam-se na luz!', 'O mal se aproxima.', 'Minhas preces nos guardarão.'],
+        'rest':       ['Hora de orações.', 'A cura vem com o descanso.', 'Abençoados sejam os cansados.'],
+    },
+    'Paladino': {
+        'low_hp':     ['Meu juramento me mantém de pé.', 'Não enquanto houver inocentes.', 'A dor é temporária.'],
+        'crit_hit':   ['Castigo divino!', 'Pelo meu juramento!', 'A justiça prevalece!'],
+        'miss':       ['Recalculando...', 'Até os justos erram.', 'Manterei a posição.'],
+        'new_biome':  ['Estejam vigilantes.', 'Sinto algo neste lugar.', 'Honra nos guia.'],
+        'treasure':   ['Recursos para a causa.', 'Dividiremos igualmente.', 'Providência justa.'],
+        'danger':     ['Às armas! Defendam os fracos!', 'O mal não passará.', 'Formação sagrada!'],
+        'rest':       ['Vigília e prece.', 'Restaurem forças e fé.', 'Amanhã lutamos novamente.'],
+    },
+    'Patrulheiro': {
+        'low_hp':     ['A floresta me curará.', 'Já estive pior na selva.', 'Preciso de ervas.'],
+        'crit_hit':   ['Alvo eliminado.', 'A natureza guia minha mira.', 'Um tiro, um acerto.'],
+        'miss':       ['O vento mudou.', 'Terreno difícil.', 'Ajustarei a mira.'],
+        'new_biome':  ['Novos rastros para seguir.', 'Conheço este tipo de terreno.', 'A fauna mudou.'],
+        'treasure':   ['A terra sempre provê.', 'Recursos naturais.', 'Bom local para forragear.'],
+        'danger':     ['Algo se move nas sombras.', 'Fiquem atrás de mim.', 'Pegadas frescas...'],
+        'rest':       ['Acampar aqui é seguro.', 'Vou rastrear a área.', 'A natureza nos abriga.'],
+    },
+    'Bárbaro': {
+        'low_hp':     ['DOR?! HAHAHA!', 'Sangue... bom sinal.', 'Me faz mais forte!'],
+        'crit_hit':   ['DESTRUIÇÃO!', 'Sintam minha fúria!', 'MAIS!'],
+        'miss':       ['GRR!', 'Parado demais!', 'RAIVA!'],
+        'new_biome':  ['Cheiro diferente.', 'Território novo.', 'Que venham os desafios.'],
+        'treasure':   ['Butim!', 'Bom. Mais provisões.', 'Ouro é ouro.'],
+        'danger':     ['FINALMENTE! Uma luta!', 'VENHAM!', 'Meu sangue ferve!'],
+        'rest':       ['Carne e fogo.', 'Durmo com um olho aberto.', 'Deixem-me comer.'],
+    },
+    'Bardo': {
+        'low_hp':     ['Isso vai render uma boa história...', 'Nota mental: evitar isso.', 'A balada terá um tom dramático.'],
+        'crit_hit':   ['E a multidão aplaude!', 'Que espetáculo!', 'Verso e refrão!'],
+        'miss':       ['Desafinei...', 'Nem toda nota é perfeita.', 'Erro artístico.'],
+        'new_biome':  ['Inspiração em todo lugar!', 'Novos versos nascerão aqui.', 'Que cenário magnífico!'],
+        'treasure':   ['Material para uma boa canção!', 'A fortuna sorri!', 'Excelente acorde.'],
+        'danger':     ['Hora do improviso!', 'Tenho uma música para isso.', 'A tensão dramática!'],
+        'rest':       ['Hora de compor.', 'Uma canção antes de dormir.', 'Público descansado é mais receptivo.'],
+    },
+    'Druida': {
+        'low_hp':     ['A natureza me curará.', 'Raízes profundas resistem.', 'Como folha ao vento...'],
+        'crit_hit':   ['A natureza revida!', 'O ciclo se completa.', 'Força primordial!'],
+        'miss':       ['A corrente mudou.', 'Paciência como a rocha.', 'O equilíbrio se mantém.'],
+        'new_biome':  ['A terra fala comigo aqui.', 'Sinto a vida deste lugar.', 'Novo ecossistema...'],
+        'treasure':   ['A terra provê.', 'Presente da natureza.', 'Em harmonia.'],
+        'danger':     ['A natureza se agita.', 'Predadores por perto.', 'O equilíbrio foi perturbado.'],
+        'rest':       ['Sob as estrelas.', 'A terra me restaura.', 'Comunhão com a terra.'],
+    },
+    'Monge': {
+        'low_hp':     ['A dor é ilusão.', 'Foco interior...', 'Ki restaurará meu corpo.'],
+        'crit_hit':   ['Ponto vital!', 'Fluxo perfeito.', 'Como água.'],
+        'miss':       ['Desequilíbrio.', 'Preciso mais foco.', 'A mente estava dispersa.'],
+        'new_biome':  ['Nova energia neste lugar.', 'Ki flui diferente aqui.', 'Harmonia interessante.'],
+        'treasure':   ['Desapego... mas útil.', 'Recursos para a jornada.', 'Simplicidade.'],
+        'danger':     ['Sentidos aguçados.', 'Posição defensiva.', 'Respirar. Focar.'],
+        'rest':       ['Meditação profunda.', 'O corpo descansa, a mente vigia.', 'Equilíbrio restaurado.'],
+    },
+    'Feiticeiro': {
+        'low_hp':     ['Meu sangue... brilha?', 'A magia inata me protegerá.', 'Instável...'],
+        'crit_hit':   ['PODER!', 'O caos favorece o ousado!', 'Magia selvagem!'],
+        'miss':       ['A magia é... imprevisível.', 'Surto arcano?', 'Falta de controle.'],
+        'new_biome':  ['Sinto correntes arcanas!', 'Magia bruta neste lugar.', 'Meu sangue reage.'],
+        'treasure':   ['A sorte me acompanha.', 'Catalisadores!', 'Útil para canalizar.'],
+        'danger':     ['Sinto ameaça!', 'Meu instinto grita!', 'Energia hostil!'],
+        'rest':       ['Preciso estabilizar.', 'A magia precisa recarregar.', 'Sonhos arcanos.'],
+    },
+    'Bruxo': {
+        'low_hp':     ['Meu patrono observa...', 'O pacto me sustenta.', 'Dor... alimenta o vínculo.'],
+        'crit_hit':   ['O patrono sorri.', 'Poder emprestado!', 'O pacto se fortalece!'],
+        'miss':       ['O patrono desaprova.', 'Interferência planar.', 'Preciso de mais poder.'],
+        'new_biome':  ['Meu patrono sussurra sobre este lugar.', 'Há segredos aqui.', 'Sinto olhos observando.'],
+        'treasure':   ['Oferenda para o patrono.', 'O pacto provê.', 'Relíquias interessantes.'],
+        'danger':     ['Meu patrono me adverte.', 'Hora de invocar.', 'O pacto me protegerá.'],
+        'rest':       ['Sonhos do patrono.', 'O vínculo pulsa.', 'Consultar o além-mundo.'],
+    },
+};
+
+function showBark(situation) {
+    if (!S.charData || !S.charData.cn) return;
+    var phrases = BARK_PHRASES[S.charData.cn];
+    if (!phrases || !phrases[situation]) return;
+    var pool = phrases[situation];
+    // Avoid repeating the same bark consecutively
+    var key = S.charData.cn + '_' + situation;
+    var pick;
+    if (pool.length <= 1) {
+        pick = pool[0];
+    } else {
+        do { pick = pool[Math.floor(Math.random() * pool.length)]; }
+        while (pick === _lastBarkKey && pool.length > 1);
+    }
+    _lastBarkKey = pick;
+
+    // Remove existing bark
+    var old = document.getElementById('bark-bubble');
+    if (old) old.remove();
+    if (_barkTimeout) clearTimeout(_barkTimeout);
+
+    // Create speech bubble element
+    var el = document.createElement('div');
+    el.id = 'bark-bubble';
+    el.textContent = pick;
+    document.body.appendChild(el);
+
+    // Position near player token (offset from center of screen)
+    // playerScreenX/Y are canvas coords — convert via camera offset
+    var canvas = document.getElementById('explore-canvas');
+    if (canvas) {
+        var rect = canvas.getBoundingClientRect();
+        var cx = rect.left + rect.width / 2;
+        var cy = rect.top + rect.height / 2;
+        // Bark appears above and slightly right of player
+        el.style.left = Math.max(20, Math.min(rect.width - 160, cx - 70)) + 'px';
+        el.style.top = Math.max(20, cy - 80) + 'px';
+    }
+
+    // Auto-remove after reading time
+    var words = pick.split(/\s+/).length;
+    var duration = Math.max(2000, Math.min(4000, words * 350 + 800));
+    _barkTimeout = setTimeout(function() {
+        el.classList.add('bark-fade');
+        setTimeout(function() { if (el.parentNode) el.remove(); }, 400);
+    }, duration);
+}
+
+// ═══════════════════════════════════════════════════════════
+// END BARK SYSTEM
+// ═══════════════════════════════════════════════════════════
+
 function showPOI(poi) {
+    // Bark: react to POI type
+    if (poi.type === 'dan' || poi.type === 'danger') {
+        showBark('danger');
+    } else if (poi.type === 'dis' || poi.type === 'discovery') {
+        if (Math.random() < 0.3) showBark('new_biome');
+    }
     // POI discovery flash on hex (canvas-based golden pulse, only if visible)
-    const poiKey = `${poi.col},${poi.row}`;
+    var poiKey = poi.col + ',' + poi.row;
     if (S.fogState[poiKey] !== 'hidden') flashHex(poi.col, poi.row);
 
     // Story event trigger — complex multi-stage narratives
@@ -522,25 +698,30 @@ function showChoices(poi) {
 
     (poi.choices || []).forEach((ch, idx) => {
         const btn = document.createElement('button');
-        btn.className = 'dm-choice-btn';
+        var isBlue = !!ch.bl;
+        btn.className = 'dm-choice-btn' + (isBlue ? ' blue-option' : '');
 
-        let html = `<span class="choice-icon"></span>`;
-        html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
+        var html = '<span class="choice-icon">' + (ch.ic || '') + '</span>';
+        // Blue Options show class badge (FTL-inspired conditional choices)
+        if (isBlue && S.charData && S.charData.cn) {
+            html += '<span class="blue-badge">' + (S.charData.ci || '✨') + ' ' + S.charData.cn + '</span>';
+        }
+        html += '<span class="choice-label">' + (ch.t || ch.l || 'Escolher') + '</span>';
 
         // Stat check display (D&D 5e skill with proficiency + adv/dis indicator)
         if (ch.k) {
-            const statShort = STAT_SHORT[ch.k.s] || ch.k.s.toUpperCase();
-            const proficient = S.charData && S.charData.sp && S.charData.sp.includes(ch.k.s);
-            const profMark = proficient ? '★' : '';
-            const mode = getRollMode(ch.k);
-            const modeMark = mode === 'advantage' ? ' ▲' : mode === 'disadvantage' ? ' ▼' : '';
-            const mod = ch.k.m || 0;
-            const chance = Math.max(5, Math.min(95, Math.round(((21 - ch.k.dc + mod) / 20) * 100)));
-            html += `<span class="choice-check${mode !== 'normal' ? ' ' + mode : ''}">${statShort}${profMark}${modeMark} ${chance}%</span>`;
+            var statShort = STAT_SHORT[ch.k.s] || ch.k.s.toUpperCase();
+            var proficient = S.charData && S.charData.sp && S.charData.sp.includes(ch.k.s);
+            var profMark = proficient ? '★' : '';
+            var mode = getRollMode(ch.k);
+            var modeMark = mode === 'advantage' ? ' ▲' : mode === 'disadvantage' ? ' ▼' : '';
+            var mod = ch.k.m || 0;
+            var chance = Math.max(5, Math.min(95, Math.round(((21 - ch.k.dc + mod) / 20) * 100)));
+            html += '<span class="choice-check' + (mode !== 'normal' ? ' ' + mode : '') + '">' + statShort + profMark + modeMark + ' ' + chance + '%</span>';
         }
 
         btn.innerHTML = html;
-        btn.addEventListener('click', () => handleChoice(poi, ch, idx));
+        btn.addEventListener('click', function() { handleChoice(poi, ch, idx); });
         choicesEl.appendChild(btn);
     });
 }
@@ -853,6 +1034,7 @@ function applyOutcome(poi, outcome, choice) {
     if (outcome.g) {
         S.goldEarned += outcome.g;
         addRewardBadge(rewardsEl, `+${outcome.g} Ouro`, 'gold');
+        if (typeof showBark === 'function' && outcome.g >= 5) showBark('treasure');
     }
     if (outcome.h && outcome.h > 0) {
         S.hpChange += outcome.h;
@@ -868,6 +1050,7 @@ function applyOutcome(poi, outcome, choice) {
         if (S.charData) {
             const newHP = Math.max(0, S.charData.hp + S.hpChange);
             updateHP(newHP, S.charData.mh);
+            if (typeof showBark === 'function' && newHP <= S.charData.mh * 0.3) showBark('low_hp');
         }
     }
     if (outcome.i) {

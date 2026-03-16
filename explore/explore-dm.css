@@ -184,6 +184,27 @@
     border-color: var(--v-gold-dim, #9a7530);
     box-shadow: 0 0 10px rgba(196, 149, 58, 0.1);
 }
+/* Blue Options — class/race-specific conditional choices (FTL-inspired) */
+.dm-choice-btn.blue-option {
+    border-color: rgba(70, 130, 200, 0.5);
+    background: linear-gradient(165deg, #2a3040 0%, #252a35 100%);
+    position: relative;
+}
+.dm-choice-btn.blue-option:active {
+    border-color: rgba(90, 150, 220, 0.7);
+    background: linear-gradient(165deg, #303848 0%, #2a3040 100%);
+    box-shadow: inset 0 0 12px rgba(70, 130, 200, 0.15);
+}
+.blue-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: rgba(70, 130, 200, 0.25);
+    color: #8ab4e8;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.3px;
+}
 .choice-icon { display: inline-block; font-size: 13px; flex-shrink: 0; }
 .choice-label { flex: 1; }
 .choice-check {
@@ -398,4 +419,34 @@ body.perf-lite .dm-narration .cursor {
     color: #c66;
     border-color: rgba(200, 80, 80, 0.3);
     background: rgba(200, 80, 80, 0.1);
+}
+
+/* Bark System — Character speech bubbles */
+#bark-bubble {
+    position: fixed;
+    z-index: 200;
+    max-width: 180px;
+    padding: 6px 12px;
+    border-radius: 10px 10px 10px 2px;
+    background: rgba(42, 36, 32, 0.92);
+    border: 1px solid rgba(196, 149, 58, 0.4);
+    color: var(--v-text, #d4c8b0);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: 12px;
+    line-height: 1.4;
+    font-style: italic;
+    text-align: center;
+    pointer-events: none;
+    animation: barkAppear 0.3s ease-out;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    transform: translateX(-50%);
+}
+#bark-bubble.bark-fade {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+@keyframes barkAppear {
+    from { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.9); }
+    to { opacity: 1; transform: translateX(-50%) scale(1); }
 }

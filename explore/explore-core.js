@@ -699,7 +699,8 @@ function tickConditions() {
                 updateHP(newHP, S.charData.mh);
             }
             flashScreen('rgba(60,180,60,0.2)');
-            showTerrainToast(`-${dot} HP (veneno)`, 'damage');
+            showTerrainToast('-' + dot + ' HP (veneno)', 'damage');
+            if (typeof showBark === 'function') showBark('low_hp');
             // Death check after each poison tick
             if (typeof checkDeath === 'function') checkDeath();
         }
@@ -789,6 +790,7 @@ function _consumeRation() {
     const ration = foods[0];
     ration.q--;
     showTerrainToast('\ud83c\udf56 Ra\u00e7\u00e3o consumida (' + ration.n + ')', 'info');
+    if (typeof showBark === 'function' && Math.random() < 0.5) showBark('rest');
     saveState();
 }
 
