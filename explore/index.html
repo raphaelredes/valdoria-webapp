@@ -370,6 +370,7 @@
                     <div class="dm-type-badge" id="dm-type">descoberta</div>
                 </div>
             </div>
+            <img id="dm-event-img" class="dm-event-thumb" style="display:none" alt="" loading="lazy">
             <div class="dm-narration" id="dm-narration"></div>
             <div class="dm-choices" id="dm-choices"></div>
         </div>
@@ -529,6 +530,8 @@
 
     <script>
         var v = Date.now();
+        document.write('<link rel="stylesheet" href="../shared/image-popup.css?v=' + v + '">');
+        document.write('<script src="../shared/image-popup.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');

@@ -52,6 +52,9 @@ function renderEntity(e, type, idx, isActiveTurn) {
         if (e.se && e.se.length > 0) {
             detailsHtml += '<div class="status-pills">' + e.se.map(s => `<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('') + '</div>';
         }
+        if (e.img && typeof showImagePopup === 'function') {
+            detailsHtml += '<button class="entity-view-btn" data-img="' + escHtml(e.img) + '" data-name="' + escHtml(e.n) + '" data-desc="' + escHtml(e.desc || '') + '" data-ac="' + (e.ac || '') + '" data-atk="' + (e.atk || '') + '" data-dmg="' + escHtml(e.dmg || '') + '">🔍 Ver Criatura</button>';
+        }
     } else {
         // Ally expanded — full status panel
         detailsHtml += `<div class="bar-container">
@@ -113,7 +116,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
 
     return `<div class="entity ${type}${activeClass}${deadClass}${hpStateClass}" role="group" aria-label="${escHtml(e.n)}"${dataAttr}>
         <div class="entity-header">
-            <span class="entity-icon">${e.ico || (type === 'enemy' ? '👹' : '🛡️')}</span>
+            <span class="entity-icon${e.img ? ' entity-thumb' : ''}">${e.img ? '<img src="' + escHtml(e.img) + '" loading="lazy" onerror="this.parentNode.textContent=this.dataset.fb" data-fb="' + (e.ico || (type === 'enemy' ? '👹' : '🛡️')) + '">' : (e.ico || (type === 'enemy' ? '👹' : '🛡️'))}</span>
             <span class="compact-name">${escHtml(e.n)}</span>
             ${acBadge}
             <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
@@ -262,7 +265,7 @@ function bindExpandCollapse() {
     // Delegate to document.body — survives innerHTML replacement of #arena
     document.body.addEventListener('click', (ev) => {
         const entity = ev.target.closest('.entity:not(.player)');
-        if (!entity || ev.target.closest('.action-btn') || ev.target.closest('.skill-item') || ev.target.closest('.target-item') || ev.target.closest('.item-entry')) return;
+        if (!entity || ev.target.closest('.action-btn') || ev.target.closest('.skill-item') || ev.target.closest('.target-item') || ev.target.closest('.item-entry') || ev.target.closest('.entity-view-btn')) return;
         const wasExpanded = entity.classList.contains('expanded');
         document.querySelectorAll('.entity.expanded').forEach(e => e.classList.remove('expanded'));
         if (!wasExpanded) entity.classList.add('expanded');

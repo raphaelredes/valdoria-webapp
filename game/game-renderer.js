@@ -123,6 +123,18 @@ function renderScreen(screen) {
         bannerImg.src = resolvedUrl;
         bannerImg.onerror = () => { bannerEl.style.display = 'none'; };
         bannerEl.style.display = '';
+        // Tap-to-enlarge popup
+        bannerImg.onclick = function() {
+            if (typeof showImagePopup === 'function') {
+                showImagePopup({
+                    src: resolvedUrl,
+                    title: screen.screen_title || '',
+                    desc: screen.location_desc || '',
+                    type: 'location'
+                });
+            }
+        };
+        bannerEl.style.cursor = 'pointer';
     } else {
         bannerEl.style.display = 'none';
     }

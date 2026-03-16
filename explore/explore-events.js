@@ -447,6 +447,27 @@ function showPOI(poi) {
     document.getElementById('dm-title').textContent = poi.title || 'Evento';
     document.getElementById('dm-type').textContent = POI_TYPE_LABELS[poi.type] || poi.type;
 
+    // Event image thumbnail (tap to enlarge)
+    var dmEventImg = document.getElementById('dm-event-img');
+    if (dmEventImg) {
+        if (poi.img) {
+            dmEventImg.src = poi.img;
+            dmEventImg.style.display = '';
+            dmEventImg.onclick = function() {
+                if (typeof showImagePopup === 'function') {
+                    showImagePopup({
+                        src: poi.img,
+                        title: poi.title || 'Evento',
+                        desc: poi.narration || '',
+                        type: 'event'
+                    });
+                }
+            };
+        } else {
+            dmEventImg.style.display = 'none';
+        }
+    }
+
     // Route NPC dialogue POIs to the multi-turn dialogue system
     if (poi.dialogue && poi.dialogue.length > 0) {
         if (typeof deactivateOverlay === 'function') deactivateOverlay('dm-overlay');
