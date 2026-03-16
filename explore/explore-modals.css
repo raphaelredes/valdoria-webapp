@@ -4,7 +4,7 @@
    EXHAUSTION MODAL (D&D 5e PHB)
    ═══════════════════════════════════════════ */
 .exhaustion-modal {
-    position: fixed; inset: 0; z-index: 510;
+    position: fixed; inset: 0; z-index: var(--v-z-overlay, 500);
     display: flex; align-items: center; justify-content: center;
     background: rgba(0,0,0,0.7);
     animation: fadeIn 0.3s ease;

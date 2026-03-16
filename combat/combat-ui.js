@@ -444,7 +444,7 @@ async function sendAction(actionData) {
             clearTimeout(_actionSentTimer);
             _showActionLoading(false);
             _actionSent = false;
-            if (!result) { showError('Sem resposta do servidor.'); return; }
+            if (!result) { showError('Sem resposta do servidor. Verifique sua conex\u00e3o.'); return; }
             _playCinematicResult(result, actionData.type);
         } catch (e) {
             clearTimeout(_actionSentTimer);

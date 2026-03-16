@@ -64,7 +64,10 @@
 
     /* Z-index stack (centralized) */
     --v-z-base:        1;
+    --v-z-sticky:      50;
     --v-z-header:      100;
+    --v-z-dropdown:    200;
+    --v-z-tooltip:     400;
     --v-z-overlay:     500;
     --v-z-loading:     1000;
     --v-z-modal:       5000;
@@ -90,10 +93,12 @@
     --v-shadow-glow:   0 0 20px rgba(196, 149, 58, 0.15);
 
     /* Transitions */
-    --v-transition:       0.2s ease;
-    --v-transition-fast:  0.15s ease;
-    --v-transition-slow:  0.3s ease-out;
-    --v-transition-enter: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --v-transition:        0.2s ease;
+    --v-transition-instant: 0.05s ease;
+    --v-transition-fast:   0.15s ease;
+    --v-transition-base:   0.3s ease;
+    --v-transition-slow:   0.5s ease-out;
+    --v-transition-enter:  0.4s cubic-bezier(0.16, 1, 0.3, 1);
 
     /* Spring / Bounce Easing — GPU-friendly micro-interactions */
     --v-ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);   /* overshoot bounce (buttons, cards) */

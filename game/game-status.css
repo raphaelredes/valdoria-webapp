@@ -48,7 +48,7 @@
     font-family: var(--v-font);
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--v-transition);
     white-space: nowrap;
     text-align: center;
 }
