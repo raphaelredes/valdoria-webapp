@@ -707,18 +707,26 @@ function showChoices(poi) {
         var isBlue = !!ch.bl;
         btn.className = 'dm-choice-btn' + (isBlue ? ' blue-option' : '');
 
-        // Visual markers for race/proficiency options
+        // Visual markers for race/proficiency/origin options
         if (ch.rc) btn.classList.add('choice-race');
         if (ch.hp) btn.classList.add('choice-prof');
+        if (ch.og) btn.classList.add('choice-origin');
 
         var labelExtra = '';
         if (ch.hp) labelExtra = ' <span class="choice-badge prof">\u2b50</span>';
+        else if (ch.og) labelExtra = ' <span class="choice-badge origin">\U0001f4dc</span>';
         else if (ch.rc) labelExtra = ' <span class="choice-badge race">\u2728</span>';
 
         var html = '<span class="choice-icon">' + (ch.ic || '') + '</span>';
         // Blue Options show class badge (FTL-inspired conditional choices)
         if (isBlue && S.charData && S.charData.cn) {
             html += '<span class="blue-badge">' + (S.charData.ci || '\u2728') + ' ' + S.charData.cn + '</span>';
+        }
+        // Origin options show origin badge (Battle Brothers-inspired)
+        if (ch.og && S.charData && S.charData.oc) {
+            var _oc = S.charData.oc;
+            var _oNames = {sobrevivente:'Sobrevivente',nobre:'Nobre',peregrino:'Peregrino',fugitivo:'Fugitivo',aprendiz:'Aprendiz',veterano:'Veterano',eremita:'Eremita',mercenario:'Mercen\u00e1rio',naufrago:'N\u00e1ufrago',visionario:'Vision\u00e1rio'};
+            html += '<span class="origin-badge">' + (_oNames[_oc] || _oc) + '</span>';
         }
         html += '<span class="choice-label">' + (ch.t || ch.l || 'Escolher') + labelExtra + '</span>';
 
@@ -733,6 +741,27 @@ function showChoices(poi) {
             var chance = Math.max(5, Math.min(95, Math.round(((21 - ch.k.dc + mod) / 20) * 100)));
             html += '<span class="choice-check' + (mode !== 'normal' ? ' ' + mode : '') + '">' + statShort + profMark + modeMark + ' ' + chance + '%</span>';
         }
+
+        // Risk/reward preview labels (StS/Meteorfall pattern)
+        var rewards = [];
+        var risks = [];
+        if (ch.o) {
+            if (ch.o.x) rewards.push('+' + ch.o.x + ' XP');
+            if (ch.o.g) rewards.push('+' + ch.o.g + ' GP');
+            if (ch.o.h) rewards.push('+' + ch.o.h + ' HP');
+        }
+        if (ch.f) {
+            if (ch.f.d) risks.push('-' + ch.f.d + ' HP');
+        }
+        if (ch.cmb_on_fail || ch.cmb_direct) risks.push('\u2694\ufe0f');
+        var previewHtml = '';
+        if (rewards.length || risks.length) {
+            previewHtml = '<span class="choice-preview">';
+            if (rewards.length) previewHtml += '<span class="preview-reward">' + rewards.join(' ') + '</span>';
+            if (risks.length) previewHtml += '<span class="preview-risk">' + risks.join(' ') + '</span>';
+            previewHtml += '</span>';
+        }
+        html += previewHtml;
 
         btn.innerHTML = html;
         btn.addEventListener('click', function() { handleChoice(poi, ch, idx); });

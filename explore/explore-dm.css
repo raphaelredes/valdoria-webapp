@@ -426,6 +426,44 @@ body.perf-lite .dm-narration .cursor {
 }
 .choice-badge.prof { filter: saturate(1.3); }
 .choice-badge.race { filter: saturate(1.1); }
+.choice-badge.origin { filter: saturate(1.2); }
+
+/* Origin option (amber, Battle Brothers-inspired) */
+.dm-choice-btn.choice-origin {
+    border-color: rgba(200, 150, 50, 0.5);
+    background: linear-gradient(165deg, #352e1a 0%, #2e2818 100%);
+}
+.dm-choice-btn.choice-origin:active {
+    border-color: rgba(220, 170, 60, 0.7);
+    box-shadow: inset 0 0 12px rgba(200, 150, 50, 0.15);
+}
+.origin-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: rgba(200, 150, 50, 0.25);
+    color: #dab060;
+    margin-right: 4px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Risk/reward preview labels (StS/Meteorfall-inspired) */
+.choice-preview {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+    font-size: 10px;
+    line-height: 1.2;
+}
+.preview-reward {
+    color: #7ac47a;
+    white-space: nowrap;
+}
+.preview-risk {
+    color: #d4756a;
+    white-space: nowrap;
+}
 
 
 .choice-stat-badge {
