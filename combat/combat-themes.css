@@ -113,7 +113,7 @@
     flex-direction: column;
     justify-content: center;
 }
-.no-data h2 { color: var(--v-gold); margin-bottom: 10px; }
+.no-data h2 { color: var(--v-gold); margin-bottom: var(--v-space-md-lg); }
 
 /* ─── FADE TRANSITION ─── */
 #app { opacity: 1; }

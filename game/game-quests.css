@@ -4,7 +4,7 @@
    QUEST DIARY — Rich card styles for quest screens
    ═══════════════════════════════════════════════════════════════ */
 
-.quest-diary { padding: 0 2px; }
+.quest-diary { padding: 0 var(--v-space-xs); }
 
 .quest-flash {
     padding: var(--v-space-md) var(--v-space-lg);
@@ -141,7 +141,7 @@
     margin-bottom: var(--v-space-sm);
 }
 .quest-npc-icon { font-size: var(--v-font-body); flex-shrink: 0; }
-.quest-detail-icon { font-size: clamp(20px, 5vw, 24px); display: block; margin-bottom: 2px; }
+.quest-detail-icon { font-size: clamp(20px, 5vw, 24px); display: block; margin-bottom: var(--v-space-xs); }
 .quest-title {
     font-size: var(--v-font-body);
     font-weight: 600;
@@ -187,7 +187,7 @@
     border-radius: var(--v-radius-xs);
     overflow: hidden;
 }
-.quest-progress-track--lg { height: 10px; border-radius: 5px; }
+.quest-progress-track--lg { height: 10px; border-radius: var(--v-radius-sm); }
 .quest-progress-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--v-gold-dim, #8a6914), var(--v-gold));
@@ -235,7 +235,7 @@
     text-align: center;
     padding: var(--v-space-2xl) var(--v-space-lg);
 }
-.quest-empty-icon { font-size: clamp(32px, 10vw, 40px); margin-bottom: 12px; opacity: 0.5; }
+.quest-empty-icon { font-size: clamp(32px, 10vw, 40px); margin-bottom: var(--v-space-lg); opacity: 0.5; }
 .quest-empty-text {
     font-size: var(--v-font-body);
     color: var(--v-text);
@@ -252,7 +252,7 @@
    QUEST DETAIL — Rich card styles for quest detail screen
    ═══════════════════════════════════════════════════════════════ */
 
-.quest-detail { padding: 0 2px; }
+.quest-detail { padding: 0 var(--v-space-xs); }
 
 .quest-detail-title {
     text-align: center;
@@ -308,7 +308,7 @@
     line-height: 1.4;
 }
 
-.quest-detail-progress { margin-bottom: 10px; }
+.quest-detail-progress { margin-bottom: var(--v-space-md-lg); }
 .quest-detail-progress-label {
     font-size: var(--v-font-md);
     color: var(--v-text-dim);
@@ -452,7 +452,7 @@
    QUEST TURN-IN — Reward reveal screen
    ═══════════════════════════════════════════════════════════════ */
 
-.quest-turnin { padding: 0 2px; }
+.quest-turnin { padding: 0 var(--v-space-xs); }
 
 .quest-turnin-npc {
     text-align: center;
@@ -471,7 +471,7 @@
     color: var(--v-text);
     line-height: 1.5;
 }
-.quest-turnin-list { margin-bottom: 10px; }
+.quest-turnin-list { margin-bottom: var(--v-space-md-lg); }
 .quest-turnin-item {
     padding: var(--v-space-sm) var(--v-space-md-lg);
     margin: var(--v-space-sm) 0;

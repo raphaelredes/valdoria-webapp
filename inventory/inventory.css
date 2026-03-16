@@ -14,12 +14,12 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     position: sticky; top: 0; z-index: var(--v-z-header);
 }
 /* ::before accent line removed — Game Hub style */
-.header h1 { font-size: var(--v-font-xl); color: var(--v-gold); margin-bottom: 4px;
+.header h1 { font-size: var(--v-font-xl); color: var(--v-gold); margin-bottom: var(--v-space-sm);
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     letter-spacing: 2px; text-transform: uppercase; }
 .header-stats {
     font-size: var(--v-font-base); color: var(--v-text-dim);
-    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    display: flex; justify-content: center; gap: var(--v-space-md-lg); flex-wrap: wrap;
 }
 .header-stats .hs-hp { color: var(--v-danger); }
 .header-stats .hs-mp { color: var(--v-info); }
@@ -30,7 +30,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ── Tabs ── */
 .tabs {
-    display: flex; gap: 4px; padding: 8px 10px;
+    display: flex; gap: var(--v-space-sm); padding: var(--v-space-md) var(--v-space-md-lg);
     background: var(--v-bg-raised);
     border-bottom: 1px solid var(--v-border);
 }
@@ -50,17 +50,17 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 
 /* ── Content ── */
-.content { padding: 10px; }
+.content { padding: var(--v-space-md-lg); }
 
 /* ── Search Bar ── */
 .search-bar {
-    display: flex; gap: 6px; margin-bottom: 4px; align-items: center;
+    display: flex; gap: var(--v-space-sm); margin-bottom: var(--v-space-sm); align-items: center;
 }
 .search-wrap {
     flex: 1; position: relative;
 }
 .search-bar input {
-    width: 100%; box-sizing: border-box; padding: 8px 32px 8px 12px; border-radius: var(--v-radius-pill);
+    width: 100%; box-sizing: border-box; padding: var(--v-space-md) 32px var(--v-space-md) var(--v-space-lg); border-radius: var(--v-radius-pill);
     border: 1px solid var(--v-border); background: var(--v-bg-card);
     color: var(--v-text-bright); font-size: 13px; font-family: var(--v-font);
     outline: none; transition: border-color 0.2s;
@@ -81,7 +81,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     color: var(--v-text-dim); font-size: var(--v-font-base); cursor: pointer;
     white-space: nowrap; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     min-height: 44px; min-width: 44px;
-    display: flex; align-items: center; justify-content: center; gap: 4px;
+    display: flex; align-items: center; justify-content: center; gap: var(--v-space-sm);
 }
 .sort-btn.active { border-color: var(--v-gold-dim); color: var(--v-gold); }
 .view-toggle-btn {
@@ -96,13 +96,13 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ── Filter Dropdown ── */
 .filter-row {
-    display: flex; gap: 6px; margin-bottom: 8px; align-items: center;
+    display: flex; gap: var(--v-space-sm); margin-bottom: var(--v-space-md); align-items: center;
 }
 .filter-select-wrap {
     flex: 1; position: relative;
 }
 .filter-select {
-    width: 100%; padding: 8px 32px 8px 12px;
+    width: 100%; padding: var(--v-space-md) 32px var(--v-space-md) var(--v-space-lg);
     min-height: 38px; border-radius: var(--v-radius-pill);
     border: 1px solid var(--v-border); background: var(--v-bg-card);
     color: var(--v-text-bright); font-size: 13px; font-family: var(--v-font);
@@ -118,10 +118,10 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .filter-select option {
     background: var(--v-bg-card); color: var(--v-text-bright);
-    font-family: var(--v-font); padding: 8px;
+    font-family: var(--v-font); padding: var(--v-space-md);
 }
 .filter-count {
-    font-size: var(--v-font-sm); opacity: 0.7; margin-left: 2px;
+    font-size: var(--v-font-sm); opacity: 0.7; margin-left: var(--v-space-xs);
 }
 
 /* ── Item Cards Grid ── */
@@ -162,16 +162,16 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     top: 2px; right: 3px;
 }
 .item-grid.compact-grid .item-card .ic-eq-badge {
-    font-size: var(--v-font-xs); padding: 1px 4px;
+    font-size: var(--v-font-xs); padding: 1px var(--v-space-sm);
 }
 .item-grid.compact-grid .item-card .ic-qty {
-    font-size: var(--v-font-xs); padding: 0px 4px;
+    font-size: var(--v-font-xs); padding: 0px var(--v-space-sm);
 }
 .item-grid.compact-grid .item-card .ic-fav {
     bottom: 2px; right: 3px; font-size: var(--v-font-xs);
 }
 .item-grid.compact-grid .item-card .ic-set-badge {
-    font-size: var(--v-font-xs); padding: 0px 3px;
+    font-size: var(--v-font-xs); padding: 0px var(--v-space-xs);
 }
 .item-card {
     background: linear-gradient(165deg, var(--v-bg-card) 0%, var(--v-bg-raised) 100%);
@@ -254,15 +254,15 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
 .item-card .ic-meta {
-    font-size: var(--v-font-md); color: var(--v-text-dim); margin-top: 3px;
+    font-size: var(--v-font-md); color: var(--v-text-dim); margin-top: var(--v-space-xs);
 }
 .item-card .ic-badges {
     position: absolute; top: 5px; right: 6px;
-    display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+    display: flex; flex-direction: column; align-items: flex-end; gap: var(--v-space-xs);
 }
 .item-card .ic-qty {
     font-size: var(--v-font-sm); color: var(--v-gold); font-weight: 700;
-    background: rgba(196,149,58,0.15); padding: 1px 6px;
+    background: rgba(196,149,58,0.15); padding: 1px var(--v-space-sm);
     border-radius: var(--v-radius-sm);
 }
 .item-card .ic-eq-badge {
@@ -273,7 +273,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .item-card .ic-set-badge {
     font-size: var(--v-font-xs); color: var(--v-info); font-weight: 600;
-    background: rgba(91,155,213,0.12); padding: 1px 5px;
+    background: rgba(91,155,213,0.12); padding: 1px var(--v-space-sm);
     border-radius: var(--v-radius-sm);
 }
 .item-card .ic-fav {
@@ -348,10 +348,10 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ── Auto-Equip Button ── */
 .auto-equip-row {
-    display: flex; justify-content: center; margin: 6px 0 10px;
+    display: flex; justify-content: center; margin: var(--v-space-sm) 0 var(--v-space-md-lg);
 }
 .auto-equip-btn {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: var(--v-space-sm);
     padding: var(--v-space-md) var(--v-space-2xl);
     border-radius: var(--v-radius-pill);
     border: 1px solid var(--v-gold-dim);
@@ -370,7 +370,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 
 /* ── Equipment Slots Grid (2-column, no paper doll) ── */
-.body-equip { margin-top: 2px; }
+.body-equip { margin-top: var(--v-space-xs); }
 .equip-slots-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -420,11 +420,11 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     background: var(--v-success, #4caf50);
     box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
 }
-.bs-gems { display: flex; gap: 2px; align-items: center; position: absolute; bottom: 2px; right: 4px; }
+.bs-gems { display: flex; gap: var(--v-space-xs); align-items: center; position: absolute; bottom: 2px; right: 4px; }
 .bs-gem { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); }
 .bs-gem-filled { background: #a855f7; border-color: var(--v-rarity-very-rare); box-shadow: 0 0 3px rgba(168, 85, 247, 0.4); }
 .bs-rune { opacity: 0.7; }
-.body-bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; }
+.body-bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--v-space-sm); margin-top: var(--v-space-sm); }
 
 /* ── Ally Equipment Sub-Navigation ── */
 .ally-equip-nav {
@@ -483,7 +483,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 .equip-slot {
     background: var(--v-bg-card); border: 1px solid var(--v-border);
-    border-radius: var(--v-radius); padding: 8px;
+    border-radius: var(--v-radius); padding: var(--v-space-md);
     text-align: center; cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     min-height: 50px; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -503,7 +503,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     font-size: var(--v-font-sm); color: var(--v-text-dim);
     text-transform: uppercase; letter-spacing: 0.5px;
 }
-.equip-slot .es-icon { font-size: var(--v-font-2xl); margin: 2px 0; }
+.equip-slot .es-icon { font-size: var(--v-font-2xl); margin: var(--v-space-xs) 0; }
 .equip-slot .es-item {
     font-size: var(--v-font-md); color: var(--v-text-bright);
     font-weight: 600; line-height: 1.2;
@@ -511,7 +511,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     white-space: nowrap; max-width: 100%;
 }
 .equip-slot .es-badges {
-    display: flex; gap: 3px; margin-top: 2px;
+    display: flex; gap: var(--v-space-xs); margin-top: var(--v-space-xs);
 }
 .es-gem-dot { width: 8px; height: 8px; border-radius: 50%;
     background: var(--v-border); border: 1px solid var(--v-text-dim); }
@@ -520,12 +520,12 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ── Stats Summary Bar ── */
 .stats-summary {
-    display: flex; gap: 6px; margin-bottom: 8px; padding: 10px;
+    display: flex; gap: var(--v-space-sm); margin-bottom: var(--v-space-md); padding: var(--v-space-md-lg);
     background: var(--v-bg-card); border-radius: var(--v-radius);
     border: 1px solid var(--v-border); justify-content: center; flex-wrap: wrap;
 }
 .ss-item {
-    font-size: var(--v-font-base); padding: 3px 8px; border-radius: var(--v-radius-pill);
+    font-size: var(--v-font-base); padding: var(--v-space-xs) var(--v-space-md); border-radius: var(--v-radius-pill);
     background: rgba(196,149,58,0.08); color: var(--v-text-dim);
 }
 .ss-item b { color: var(--v-text-bright); }
@@ -533,14 +533,14 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 /* ── Set Progress ── */
 .set-progress {
     background: var(--v-bg-card); border: 1px solid var(--v-border);
-    border-radius: var(--v-radius); padding: 10px; margin-bottom: 10px;
+    border-radius: var(--v-radius); padding: var(--v-space-md-lg); margin-bottom: var(--v-space-md-lg);
 }
-.set-title { font-size: var(--v-font-base); font-weight: 600; color: var(--v-gold); margin-bottom: 4px; }
+.set-title { font-size: var(--v-font-base); font-weight: 600; color: var(--v-gold); margin-bottom: var(--v-space-sm); }
 .set-pieces { font-size: var(--v-font-md); color: var(--v-text-dim); }
-.set-piece { margin: 2px 0; }
+.set-piece { margin: var(--v-space-xs) 0; }
 .set-piece.owned { color: var(--v-success); }
 .set-piece.missing { color: var(--v-text-dim); opacity: 0.5; }
-.set-bonus { font-size: var(--v-font-md); margin-top: 4px; padding: 4px 8px;
+.set-bonus { font-size: var(--v-font-md); margin-top: var(--v-space-sm); padding: var(--v-space-sm) var(--v-space-md);
     border-radius: var(--v-radius-sm); }
 .set-bonus.active { background: rgba(76,175,80,0.12); color: var(--v-success); }
 .set-bonus.inactive { background: rgba(255,255,255,0.04); color: var(--v-text-dim); opacity: 0.6; }
@@ -548,13 +548,13 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 /* ── Ally Cards ── */
 .ally-card {
     background: var(--v-bg-card); border: 1px solid var(--v-border);
-    border-radius: var(--v-radius); padding: 10px 12px;
+    border-radius: var(--v-radius); padding: var(--v-space-md-lg) var(--v-space-lg);
     margin-bottom: var(--v-space-sm);
 }
 .ally-card:active { transform: scale(0.97); }
 .ally-card.ally-dead { opacity: 0.55; }
 .ally-header {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: var(--v-space-md);
 }
 .ally-ico { font-size: 20px; flex-shrink: 0; }
 .ally-name-col { flex: 1; min-width: 0; }
@@ -562,7 +562,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .ally-class { font-size: var(--v-font-sm); color: var(--v-text-dim); display: block; }
 .ally-lvl-badge {
     font-size: var(--v-font-xs); color: var(--v-gold-dim, #b8860b);
-    background: rgba(196, 149, 58, 0.1); padding: 1px 4px;
+    background: rgba(196, 149, 58, 0.1); padding: 1px var(--v-space-sm);
     border-radius: var(--v-radius-xs);
 }
 .ally-aff-badge {
@@ -570,14 +570,14 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     margin-left: var(--v-space-sm);
 }
 .ally-ac { font-size: var(--v-font-md); color: var(--v-silver); flex-shrink: 0; }
-.ally-bars { margin-top: 6px; }
-.ally-bar-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.ally-bars { margin-top: var(--v-space-sm); }
+.ally-bar-row { display: flex; align-items: center; gap: var(--v-space-sm); margin-bottom: var(--v-space-xs); }
 .ally-bar-label { font-size: var(--v-font-xs); color: var(--v-text-dim); min-width: 55px; }
 .ally-bar-track {
     flex: 1; height: 5px; background: rgba(255,255,255,0.08);
     border-radius: var(--v-radius-xs);
 }
-.ally-bar-fill { height: 100%; border-radius: 3px; width: 100%; transition: transform var(--v-transition-base); transform-origin: left; }
+.ally-bar-fill { height: 100%; border-radius: var(--v-radius-xs); width: 100%; transition: transform var(--v-transition-base); transform-origin: left; }
 .ally-bar-fill.bar-high { background: linear-gradient(90deg, #22c55e, #4ade80); }
 .ally-bar-fill.bar-mid { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
 .ally-bar-fill.bar-low { background: linear-gradient(90deg, #ef4444, #f87171); }
@@ -594,17 +594,17 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .modal-overlay.visible { opacity: 1; pointer-events: auto; }
 .modal {
-    background: var(--v-bg-raised); border-radius: 16px 16px 0 0;
+    background: var(--v-bg-raised); border-radius: var(--v-radius-lg) var(--v-radius-lg) 0 0;
     box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
     width: 100%; max-width: 480px; max-height: 85vh;
-    overflow-y: auto; padding: 16px 16px 24px;
+    overflow-y: auto; padding: var(--v-space-xl) var(--v-space-xl) var(--v-space-2xl);
     transform: translateY(100%); transition: transform var(--v-transition-base);
     touch-action: pan-y;
 }
 .modal-overlay.visible .modal { transform: translateY(0); }
 .modal-handle {
-    width: 36px; height: 4px; border-radius: 2px;
-    background: var(--v-border); margin: 0 auto 12px;
+    width: 36px; height: 4px; border-radius: var(--v-radius-xs);
+    background: var(--v-border); margin: 0 auto var(--v-space-lg);
     cursor: grab;
 }
 .modal-title {
@@ -622,26 +622,26 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .detail-val.bonus { color: var(--v-success); }
 .detail-val.penalty { color: var(--v-danger); }
 .detail-rarity-badge {
-    display: inline-block; padding: 2px 10px; border-radius: var(--v-radius-pill);
-    font-size: var(--v-font-md); font-weight: 600; margin-bottom: 8px;
+    display: inline-block; padding: var(--v-space-xs) var(--v-space-md-lg); border-radius: var(--v-radius-pill);
+    font-size: var(--v-font-md); font-weight: 600; margin-bottom: var(--v-space-md);
 }
 .detail-desc {
     font-size: var(--v-font-base); color: var(--v-text-dim);
-    font-style: italic; margin: 8px 0; line-height: 1.5;
+    font-style: italic; margin: var(--v-space-md) 0; line-height: 1.5;
 }
 .detail-tags {
-    display: flex; gap: 4px; flex-wrap: wrap; margin: 8px 0;
+    display: flex; gap: var(--v-space-sm); flex-wrap: wrap; margin: var(--v-space-md) 0;
 }
 .detail-tag {
-    font-size: var(--v-font-sm); padding: 2px 8px; border-radius: 10px;
+    font-size: var(--v-font-sm); padding: var(--v-space-xs) var(--v-space-md); border-radius: var(--v-radius);
     background: var(--v-bg-card); color: var(--v-text-dim);
     border: 1px solid var(--v-border);
 }
 .detail-actions {
-    display: flex; gap: 8px; margin-top: 12px;
+    display: flex; gap: var(--v-space-md); margin-top: var(--v-space-lg);
 }
 .detail-actions button {
-    flex: 1; padding: 10px; border: none; border-radius: var(--v-radius);
+    flex: 1; padding: var(--v-space-md-lg); border: none; border-radius: var(--v-radius);
     font-size: var(--v-font-base); font-weight: 600; cursor: pointer;
     font-family: var(--v-font); transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
 }
@@ -707,7 +707,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     color: #fff;
 }
 .btn-sell-junk {
-    display: inline-flex; align-items: center; gap: 4px;
+    display: inline-flex; align-items: center; gap: var(--v-space-sm);
     padding: var(--v-space-sm) var(--v-space-md-lg);
     background: rgba(255,152,0,0.1); color: var(--v-warning); font-size: var(--v-font-md);
     cursor: pointer; white-space: nowrap;
@@ -719,7 +719,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ── Gem / Rune Section in Slot Modal ── */
 .gem-grid {
-    display: flex; gap: 8px; margin: 8px 0;
+    display: flex; gap: var(--v-space-md); margin: var(--v-space-md) 0;
     justify-content: center;
 }
 .gem-socket {
@@ -737,7 +737,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .gem-socket:active { transform: scale(0.9); }
 .rune-slot {
     background: var(--v-bg-card); border: 1px dashed var(--v-border);
-    border-radius: var(--v-radius); padding: 8px;
+    border-radius: var(--v-radius); padding: var(--v-space-md);
     text-align: center; cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     margin: var(--v-space-md) 0;
 }
@@ -746,11 +746,11 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 
 /* ── Compatible Items List ── */
-.compat-list { margin-top: 10px; }
+.compat-list { margin-top: var(--v-space-md-lg); }
 .compat-item {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: var(--v-space-md);
     padding: var(--v-space-md);
-    border-radius: var(--v-radius-sm); margin-bottom: 4px;
+    border-radius: var(--v-radius-sm); margin-bottom: var(--v-space-sm);
     cursor: pointer; font-size: var(--v-font-base); transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     border: 1px solid transparent;
 }
@@ -799,7 +799,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .cq-emoji { font-size: 24px; }
 .cq-name {
     font-size: var(--v-font-xs); font-weight: 600;
-    line-height: 1.2; margin-top: 2px;
+    line-height: 1.2; margin-top: var(--v-space-xs);
     overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap; max-width: 100%;
 }
@@ -813,9 +813,9 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ── Gem/Rune Select List ── */
 .select-item {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: var(--v-space-md-lg);
     padding: var(--v-space-md-lg);
-    border-radius: var(--v-radius); margin-bottom: 6px;
+    border-radius: var(--v-radius); margin-bottom: var(--v-space-sm);
     cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     border: 1px solid var(--v-border);
 }
@@ -834,7 +834,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     border-top: 1px solid var(--v-border);
     padding: var(--v-space-sm) var(--v-space-md-lg);
     padding-bottom: max(6px, env(safe-area-inset-bottom));
-    display: flex; flex-direction: column; gap: 3px;
+    display: flex; flex-direction: column; gap: var(--v-space-xs);
     transition: transform var(--v-transition-base), opacity var(--v-transition-base) ease;
 }
 .ops-section {
@@ -844,10 +844,10 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .ops-section.hidden { display: none; }
 .ops-section .ops-count {
     text-align: center; font-size: var(--v-font-base);
-    color: var(--v-text-dim); margin-bottom: 6px;
+    color: var(--v-text-dim); margin-bottom: var(--v-space-sm);
 }
 .confirm-btn {
-    width: 100%; padding: 12px; border: none;
+    width: 100%; padding: var(--v-space-lg); border: none;
     border-radius: var(--v-radius); font-size: var(--v-font-body);
     font-weight: 700; cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     font-family: var(--v-font);
@@ -859,10 +859,10 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .confirm-btn.hidden { display: none; }
 /* ── Navigation Footer ── */
 .nav-footer {
-    display: flex; gap: 3px;
+    display: flex; gap: var(--v-space-xs);
 }
 .nav-btn {
-    flex: 1; padding: 8px 3px;
+    flex: 1; padding: var(--v-space-md) var(--v-space-xs);
     min-height: 44px;
     border-radius: var(--v-radius-sm);
     border: 1px solid var(--v-border);
@@ -889,7 +889,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     border: 1px solid var(--v-border); border-bottom: none;
     border-radius: var(--v-radius) var(--v-radius) 0 0;
     background: var(--v-bg); color: var(--v-text-dim);
-    font-size: var(--v-font-body); line-height: 1; padding-top: 4px;
+    font-size: var(--v-font-body); line-height: 1; padding-top: var(--v-space-sm);
     cursor: pointer; z-index: var(--v-z-header);
     -webkit-tap-highlight-color: transparent;
     transition: transform var(--v-transition-base);
@@ -899,7 +899,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .immersive-restore {
     position: fixed; bottom: max(10px, env(safe-area-inset-bottom));
     left: 50%; transform: translateX(-50%);
-    display: flex; align-items: center; gap: 4px;
+    display: flex; align-items: center; gap: var(--v-space-sm);
     padding: var(--v-space-md) var(--v-space-xl);
     border: 1px solid var(--v-border-gold, rgba(196,149,58,0.3));
     border-radius: var(--v-radius-pill, 100px);
@@ -920,7 +920,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ── Confirm Modal ── */
 .confirm-ops-list {
-    max-height: 300px; overflow-y: auto; margin: 8px 0;
+    max-height: 300px; overflow-y: auto; margin: var(--v-space-md) 0;
 }
 .confirm-op {
     padding: var(--v-space-sm) 0;
@@ -930,9 +930,9 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ── Empty State ── */
 .empty-state {
-    text-align: center; padding: 28px 16px; color: var(--v-text-dim);
+    text-align: center; padding: 28px var(--v-space-xl); color: var(--v-text-dim);
 }
-.empty-state .icon { font-size: clamp(32px, 10vw, 40px); margin-bottom: 12px; }
+.empty-state .icon { font-size: clamp(32px, 10vw, 40px); margin-bottom: var(--v-space-lg); }
 .empty-state p { line-height: 1.5; }
 
 /* ── Section Title ── */
@@ -950,7 +950,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     position: fixed; bottom: 96px; left: 0; right: 0;
     max-width: 430px; margin: 0 auto; z-index: 90;
     background: var(--v-bg-raised); border-top: 1px solid var(--v-border);
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: var(--v-space-sm);
     padding: var(--v-space-md) var(--v-space-lg);
     box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
 }
@@ -989,7 +989,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .loading-overlay.hidden { opacity: 0; pointer-events: none; }
 .loading-spinner { font-size: 36px; animation: v-spin 1.5s linear infinite; }
-.loading-text { font-size: var(--v-font-body); color: var(--v-text-dim); margin-top: 12px; }
+.loading-text { font-size: var(--v-font-body); color: var(--v-text-dim); margin-top: var(--v-space-lg); }
 
 /* ── Animations ── */
 .fade-in { animation: v-fadeIn 0.3s ease; }
@@ -1008,7 +1008,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ── Vault Header ── */
 .vault-header {
-    text-align: center; padding: 16px 16px;
+    text-align: center; padding: var(--v-space-xl) var(--v-space-xl);
     background: linear-gradient(180deg, rgba(196,149,58,0.08), transparent);
     border-bottom: 1px solid var(--v-border);
     border-radius: var(--v-radius);
@@ -1019,7 +1019,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     text-shadow: 0 0 20px rgba(196,149,58,0.4);
 }
 .vault-sub {
-    font-size: var(--v-font-md); color: var(--v-text-dim); margin-top: 4px;
+    font-size: var(--v-font-md); color: var(--v-text-dim); margin-top: var(--v-space-sm);
 }
 
 /* ── Long-press preview tooltip (#2) ── */
@@ -1036,9 +1036,9 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     max-width: 200px; font-size: var(--v-font-md);
 }
 .lp-tooltip.visible { opacity: 1; transform: scale(1); }
-.lp-tooltip .lpt-name { font-size: var(--v-font-base); font-weight: 700; color: var(--v-text-bright); margin-bottom: 3px; }
+.lp-tooltip .lpt-name { font-size: var(--v-font-base); font-weight: 700; color: var(--v-text-bright); margin-bottom: var(--v-space-xs); }
 .lp-tooltip .lpt-stat { color: var(--v-text-dim); line-height: 1.4; }
-.lp-tooltip .lpt-rarity { font-size: var(--v-font-sm); font-weight: 600; margin-top: 2px; }
+.lp-tooltip .lpt-rarity { font-size: var(--v-font-sm); font-weight: 600; margin-top: var(--v-space-xs); }
 
 /* ── Rarity group separator (#6) ── */
 .rarity-separator {
@@ -1049,7 +1049,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     letter-spacing: 1px;
     padding: var(--v-space-sm) var(--v-space-xs) var(--v-space-xs);
     border-bottom: 1px solid var(--v-border);
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: var(--v-space-sm);
 }
 .rarity-separator .rs-dot {
     width: 8px; height: 8px; border-radius: 50%;
@@ -1124,7 +1124,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ═══ P2: Quick potion in header (clickable) ═══ */
 .hs-potion {
-    cursor: pointer; border-radius: 4px;
+    cursor: pointer; border-radius: var(--v-radius-xs);
     padding: 1px var(--v-space-sm);
 }
 .hs-potion:active { background: rgba(255,255,255,0.1); }
@@ -1132,12 +1132,12 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 /* ═══ P2: Stats breakdown ═══ */
 .ss-expand-hint {
     font-size: var(--v-font-xs); color: var(--v-text-dim);
-    text-align: center; margin-top: 2px;
+    text-align: center; margin-top: var(--v-space-xs);
     opacity: 0.6;
 }
 .ss-breakdown {
     background: var(--v-bg-card); border: 1px solid var(--v-border);
-    border-radius: var(--v-radius); margin-top: 6px; padding: 8px 10px;
+    border-radius: var(--v-radius); margin-top: var(--v-space-sm); padding: var(--v-space-md) var(--v-space-md-lg);
 }
 .ss-bd-row {
     display: flex; justify-content: space-between; align-items: center;

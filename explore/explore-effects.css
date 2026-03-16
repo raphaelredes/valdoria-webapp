@@ -66,7 +66,7 @@
 /* ═══════════════════════════════════════════
    ATMOSPHERE — Day/Night + Weather
    ═══════════════════════════════════════════ */
-.atmosphere-badge { font-size: var(--v-font-md); min-width: 24px; padding: 2px 4px; }
+.atmosphere-badge { font-size: var(--v-font-md); min-width: 24px; padding: var(--v-space-xs) var(--v-space-sm); }
 
 /* Weather overlay (covers map viewport, pointer-events: none) */
 .weather-overlay {
@@ -200,7 +200,7 @@
    ═══════════════════════════════════════════ */
 .exhaustion-hud {
     position: relative;
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: var(--v-space-sm);
     background: rgba(42,36,32,0.9);
     border: 1px solid rgba(180,60,60,0.4);
     border-radius: var(--v-radius-sm);
@@ -214,7 +214,7 @@
 }
 .exh-icon { font-size: var(--v-font-body); }
 .exh-label { color: #daa; font-size: var(--v-font-sm); }
-.exh-pips { display: flex; gap: 3px; }
+.exh-pips { display: flex; gap: var(--v-space-xs); }
 .exh-pip {
     width: 8px; height: 8px;
     border: 1px solid rgba(180,60,60,0.4);
@@ -290,7 +290,7 @@
 .activity-overlay.active { opacity: 1; pointer-events: auto; }
 .activity-overlay .dm-card { max-width: 350px; width: 90%; }
 .activity-header {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: var(--v-space-md-lg);
     margin-bottom: var(--v-space-lg);
 }
 .activity-header-icon { font-size: 24px; }
@@ -299,7 +299,7 @@
     font: 13px/1.5 var(--v-font, 'MedievalSharp', serif);
     margin-bottom: var(--v-space-lg);
 }
-.activity-choices { display: flex; flex-direction: column; gap: 6px; }
+.activity-choices { display: flex; flex-direction: column; gap: var(--v-space-sm); }
 .activity-choice-btn {
     background: rgba(42,36,32,0.8);
     border: 1px solid rgba(196,149,58,0.3);
@@ -309,7 +309,7 @@
     font: 13px/1.4 var(--v-font, 'MedievalSharp', serif);
     cursor: pointer;
     text-align: left;
-    display: flex; flex-direction: column; gap: 2px;
+    display: flex; flex-direction: column; gap: var(--v-space-xs);
     transition: transform var(--v-transition-fast) ease, border-color var(--v-transition) ease, background var(--v-transition) ease;
 }
 .activity-choice-btn:active {

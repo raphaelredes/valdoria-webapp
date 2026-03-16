@@ -50,7 +50,7 @@
 }
 
 .tutorial-card-header {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: var(--v-space-md); margin-bottom: var(--v-space-md-lg);
 }
 .tutorial-card-icon { font-size: 22px; }
 .tutorial-card-title {
@@ -71,7 +71,7 @@
 }
 
 .tutorial-dots {
-    display: flex; justify-content: center; gap: 6px; margin-bottom: 14px;
+    display: flex; justify-content: center; gap: var(--v-space-sm); margin-bottom: var(--v-space-lg);
 }
 .tutorial-dot {
     width: 8px; height: 8px; border-radius: 50%;
@@ -85,19 +85,19 @@
 .tutorial-dot.done { background: rgba(196,149,58,0.5); }
 
 .tutorial-actions {
-    display: flex; justify-content: space-between; gap: 10px;
+    display: flex; justify-content: space-between; gap: var(--v-space-md-lg);
 }
 .tutorial-btn-skip {
-    flex: 0 0 auto; padding: 8px 16px;
+    flex: 0 0 auto; padding: var(--v-space-md) var(--v-space-xl);
     background: transparent; border: 1px solid rgba(196,149,58,0.25);
     border-radius: var(--v-radius-sm);
     font-family: var(--v-font, serif); font-size: 13px;
     cursor: pointer; min-height: 44px;
 }
 .tutorial-btn-next {
-    flex: 1; padding: 8px 20px;
+    flex: 1; padding: var(--v-space-md) var(--v-space-2xl);
     background: linear-gradient(135deg, #c4953a, #a07828);
-    border: none; border-radius: 8px;
+    border: none; border-radius: var(--v-radius-sm);
     color: #1a1410; font-weight: 700;
     font-family: var(--v-font, serif); font-size: 14px;
     cursor: pointer; min-height: 44px;
@@ -138,7 +138,7 @@
     text-align: center;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
-.tutorial-confirm-icon { font-size: clamp(26px, 8vw, 32px); margin-bottom: 8px; }
+.tutorial-confirm-icon { font-size: clamp(26px, 8vw, 32px); margin-bottom: var(--v-space-md); }
 .tutorial-confirm-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-2xl); font-weight: 700; color: var(--v-gold);
@@ -146,20 +146,20 @@
 }
 .tutorial-confirm-text {
     font-size: var(--v-font-body); line-height: 1.5; color: var(--v-text, #d4c8b0);
-    font-family: var(--v-font, serif); margin-bottom: 18px;
+    font-family: var(--v-font, serif); margin-bottom: var(--v-space-xl);
 }
 .tutorial-confirm-actions {
-    display: flex; gap: 10px;
+    display: flex; gap: var(--v-space-md-lg);
 }
 .tutorial-confirm-no {
-    flex: 1; padding: 10px; border-radius: 8px;
+    flex: 1; padding: var(--v-space-md-lg); border-radius: var(--v-radius-sm);
     background: transparent; border: 1px solid rgba(196,149,58,0.3);
     color: var(--v-text-dim, #8a7a68);
     font-family: var(--v-font, serif); font-size: 14px;
     cursor: pointer; min-height: 44px;
 }
 .tutorial-confirm-yes {
-    flex: 1; padding: 10px; border-radius: 8px;
+    flex: 1; padding: var(--v-space-md-lg); border-radius: var(--v-radius-sm);
     background: linear-gradient(135deg, #c4953a, #a07828);
     border: none; color: #1a1410; font-weight: 700;
     font-family: var(--v-font, serif); font-size: 14px;
@@ -226,35 +226,35 @@
 
 /* HUD mockup */
 .ti-hud {
-    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    display: flex; align-items: center; gap: var(--v-space-sm); flex-wrap: wrap;
     font-size: var(--v-font-sm); color: var(--v-text-dim, #a09484);
     font-family: var(--v-font, serif);
     padding: var(--v-space-sm) var(--v-space-md);
     background: linear-gradient(180deg, #3a3028, #2a2420);
-    border: 1px solid var(--v-border); border-radius: 6px;
+    border: 1px solid var(--v-border); border-radius: var(--v-radius-sm);
     width: 100%;
 }
 .ti-hud-name { color: var(--v-gold); font-weight: 700; font-size: var(--v-font-md); }
-.ti-hud-hp { display: flex; align-items: center; gap: 3px; }
+.ti-hud-hp { display: flex; align-items: center; gap: var(--v-space-xs); }
 .ti-hp-label { color: #8a7a68; font-size: var(--v-font-xs); }
 .ti-hp-bar {
-    width: 40px; height: 6px; border-radius: 3px;
+    width: 40px; height: 6px; border-radius: var(--v-radius-xs);
     background: #1e1a16; overflow: hidden;
 }
 .ti-hp-fill {
-    display: block; height: 100%; border-radius: 3px;
+    display: block; height: 100%; border-radius: var(--v-radius-xs);
     background: linear-gradient(90deg, #4a8c3f, #6ab85a);
 }
 .ti-hp-val { font-size: var(--v-font-xs); color: var(--v-text-dim); }
 .ti-badge {
-    font-size: var(--v-font-xs); padding: 1px 5px; border-radius: 4px;
+    font-size: var(--v-font-xs); padding: 1px var(--v-space-sm); border-radius: var(--v-radius-xs);
     background: rgba(196,149,58,0.12); color: var(--v-gold);
 }
 
 /* Minimap mockup */
-.ti-minimap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ti-minimap { display: flex; flex-direction: column; align-items: center; gap: var(--v-space-sm); }
 .ti-minimap-box {
-    width: 52px; height: 52px; border-radius: 6px; position: relative;
+    width: 52px; height: 52px; border-radius: var(--v-radius-sm); position: relative;
     border: 2px solid rgba(196,149,58,0.5);
     background: linear-gradient(135deg, #3a3028, #2a2420);
 }
@@ -267,7 +267,7 @@
 .ti-minimap-label { font-size: 10px; color: #8a7a68; font-family: var(--v-font, serif); }
 
 /* Button mockups */
-.ti-btn-row { display: flex; justify-content: center; gap: 10px; }
+.ti-btn-row { display: flex; justify-content: center; gap: var(--v-space-md-lg); }
 .ti-btn-mock {
     display: inline-flex; align-items: center; justify-content: center;
     padding: var(--v-space-sm) var(--v-space-lg);
@@ -280,11 +280,11 @@
 .ti-btn-explore {
     background: rgba(196,149,58,0.08);
     border: 1px solid rgba(196,149,58,0.3); color: var(--v-gold);
-    font-size: var(--v-font-2xl); padding: 4px 10px;
+    font-size: var(--v-font-2xl); padding: var(--v-space-sm) var(--v-space-md-lg);
 }
 
 /* Pace toggle mockup */
-.ti-pace-row { display: flex; gap: 4px; justify-content: center; }
+.ti-pace-row { display: flex; gap: var(--v-space-sm); justify-content: center; }
 .ti-pace {
     padding: var(--v-space-sm) var(--v-space-md);
     font-family: var(--v-font, serif); white-space: nowrap;
@@ -310,12 +310,12 @@
 
 /* Steps & danger pips mockup */
 .ti-steps-row {
-    display: flex; align-items: center; gap: 8px; justify-content: center;
+    display: flex; align-items: center; gap: var(--v-space-md); justify-content: center;
     font-family: var(--v-font, serif);
 }
 .ti-step-count { font-size: var(--v-font-xl); font-weight: 700; color: var(--v-text-dim); }
 .ti-step-label { font-size: var(--v-font-sm); color: #8a7a68; }
-.ti-danger-pips { display: flex; gap: 3px; align-items: center; }
+.ti-danger-pips { display: flex; gap: var(--v-space-xs); align-items: center; }
 .ti-pip {
     width: 7px; height: 7px; border-radius: 50%;
     background: rgba(255,255,255,0.12);
@@ -329,11 +329,11 @@
 
 /* Fog of war mockup */
 .ti-fog-row {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    display: flex; flex-direction: column; align-items: center; gap: var(--v-space-sm);
 }
-.ti-fog-hexes { display: flex; gap: 8px; justify-content: center; }
+.ti-fog-hexes { display: flex; gap: var(--v-space-md); justify-content: center; }
 .ti-fog-hex {
-    width: 44px; height: 44px; border-radius: 8px;
+    width: 44px; height: 44px; border-radius: var(--v-radius-sm);
     display: flex; align-items: center; justify-content: center;
     font-size: var(--v-font-2xl); border: 1px solid rgba(196,149,58,0.2);
 }
@@ -351,18 +351,18 @@
     border-color: rgba(196,149,58,0.4);
 }
 .ti-fog-labels {
-    display: flex; gap: 18px; font-size: var(--v-font-xs);
+    display: flex; gap: var(--v-space-xl); font-size: var(--v-font-xs);
     color: #8a7a68; font-family: var(--v-font, serif);
 }
 
 /* Events mockup */
 .ti-events-row {
-    display: flex; gap: 10px; justify-content: center;
+    display: flex; gap: var(--v-space-md-lg); justify-content: center;
 }
 .ti-event-icon {
     font-size: clamp(18px, 5.5vw, 22px);
     width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-    background: rgba(196,149,58,0.06); border-radius: 8px;
+    background: rgba(196,149,58,0.06); border-radius: var(--v-radius-sm);
     border: 1px solid rgba(196,149,58,0.15);
 }
 

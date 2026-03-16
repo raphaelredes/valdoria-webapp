@@ -61,7 +61,7 @@
 }
 .action-btn.danger { border-color: rgba(123,32,32,0.5); color: var(--v-danger-light); }
 .action-btn.full-width { grid-column: 1 / -1; }
-.action-btn.full-width:not(.primary):not(.danger) { color: var(--v-text-dim); font-size: var(--v-font-sm); padding: 4px; min-height: 40px; }
+.action-btn.full-width:not(.primary):not(.danger) { color: var(--v-text-dim); font-size: var(--v-font-sm); padding: var(--v-space-sm); min-height: 40px; }
 .action-btn .action-chance { font-size: var(--v-font-sm); line-height: 1.3; opacity: 0.7; }
 .action-btn.disabled { opacity: 0.4; pointer-events: none; }
 .action-btn.loading { opacity: 0.5; pointer-events: none; animation: btnShimmer 1.5s ease-in-out infinite; }
@@ -186,18 +186,18 @@
 .skill-item, .target-item { transition: transform 0.1s ease; }
 .skill-item:active, .target-item:active { transform: scale(0.98); background: var(--v-bg-raised); }
 .skill-name { font-size: var(--v-font-base); color: var(--v-text); font-weight: 600; word-break: break-word; }
-.skill-meta { font-size: var(--v-font-md); color: var(--v-text-dim); margin-top: 2px; }
-.skill-effect { font-size: var(--v-font-md); color: var(--v-gold-dim); margin: 2px 0; }
+.skill-meta { font-size: var(--v-font-md); color: var(--v-text-dim); margin-top: var(--v-space-xs); }
+.skill-effect { font-size: var(--v-font-md); color: var(--v-gold-dim); margin: var(--v-space-xs) 0; }
     max-height: 3em;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-.sk-type { font-weight: 700; font-size: var(--v-font-xs); padding: 1px 5px; border-radius: 3px; letter-spacing: 0.5px; }
+.sk-type { font-weight: 700; font-size: var(--v-font-xs); padding: 1px var(--v-space-sm); border-radius: var(--v-radius-xs); letter-spacing: 0.5px; }
 .sk-type-st { color: rgba(100,160,220,0.9); background: rgba(100,160,220,0.12); }
 .sk-type-auto { color: rgba(196,149,58,0.9); background: rgba(196,149,58,0.12); }
 .sk-type-heal { color: rgba(80,200,120,0.9); background: rgba(80,200,120,0.12); }
-.sk-aoe { color: var(--v-danger-light); font-weight: 700; font-size: var(--v-font-xs); padding: 1px 5px; border-radius: 3px; background: rgba(220,80,80,0.12); letter-spacing: 0.5px; }
+.sk-aoe { color: var(--v-danger-light); font-weight: 700; font-size: var(--v-font-xs); padding: 1px var(--v-space-sm); border-radius: var(--v-radius-xs); background: rgba(220,80,80,0.12); letter-spacing: 0.5px; }
 /* Skill type color accents — border + tinted background */
 .skill-item.sk-heal { border-left-color: rgba(80,200,120,0.6); background: linear-gradient(90deg, rgba(80,200,120,0.06) 0%, var(--v-bg-card) 40%); }
 .skill-item.sk-damage { border-left-color: rgba(220,80,80,0.5); background: linear-gradient(90deg, rgba(220,80,80,0.06) 0%, var(--v-bg-card) 40%); }

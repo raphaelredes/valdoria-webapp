@@ -126,7 +126,7 @@
 .entity-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 /* View creature popup button */
 .entity-view-btn {
-    display: block; width: 100%; margin-top: 4px; padding: 5px 8px;
+    display: block; width: 100%; margin-top: var(--v-space-sm); padding: var(--v-space-sm) var(--v-space-md);
     font-size: var(--v-font-md); font-weight: 600; text-align: center;
     color: var(--v-gold, #c4953a); background: rgba(196,149,58,0.1);
     border: 1px solid rgba(196,149,58,0.25); border-radius: var(--v-radius-sm, 6px);
@@ -401,7 +401,7 @@
 .mini-badge.conc { background: rgba(106,27,154,0.2); border: 1px solid rgba(106,27,154,0.35); color: #ce93d8; }
 
 /* ─── EXPANDED ENTITY DETAILS (shared) ─── */
-.bar-container { margin: 2px 0; }
+.bar-container { margin: var(--v-space-xs) 0; }
 .bar-label {
     display: flex;
     justify-content: space-between;
@@ -419,7 +419,7 @@
     flex-wrap: wrap;
     margin-top: var(--v-space-xs);
 }
-.stat-item { display: flex; align-items: center; gap: 2px; }
+.stat-item { display: flex; align-items: center; gap: var(--v-space-xs); }
 .status-pills {
     display: flex;
     flex-wrap: wrap;

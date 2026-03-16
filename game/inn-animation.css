@@ -322,7 +322,7 @@
 }
 
 /* Narration text */
-.inn-text { margin-bottom: 14px; min-height: 64px; }
+.inn-text { margin-bottom: var(--v-space-lg); min-height: 64px; }
 .inn-line {
     font-family: var(--v-font, 'MedievalSharp', serif);
     font-size: var(--v-font-body);
@@ -363,7 +363,7 @@
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-.inn-bar-wrap { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+.inn-bar-wrap { display: flex; align-items: center; gap: var(--v-space-sm); margin: var(--v-space-xs) 0; }
 .inn-bar-track {
     flex: 1; height: 10px;
     background: rgba(0, 0, 0, 0.4);
@@ -371,7 +371,7 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .inn-bar-fill {
-    height: 100%; border-radius: 5px;
+    height: 100%; border-radius: var(--v-radius-sm);
     transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
 }
@@ -392,7 +392,7 @@
 .inn-allies-divider {
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-sm); color: var(--v-gold-dim, #a08050);
-    letter-spacing: 3px; text-align: center; margin: 8px 0 4px; opacity: 0.8;
+    letter-spacing: 3px; text-align: center; margin: var(--v-space-md) 0 var(--v-space-sm); opacity: 0.8;
 }
 .inn-ally-name {
     font-size: var(--v-font-md); color: var(--v-text-dim, #8a7a68);

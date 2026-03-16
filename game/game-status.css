@@ -4,7 +4,7 @@
    CHARACTER DETAILS — Tabbed layout for no-scroll viewport
    ═══════════════════════════════════════════════════════════════ */
 
-.char-details { padding: 0 2px; }
+.char-details { padding: 0 var(--v-space-xs); }
 
 /* ── Header (always visible above tabs) ─────────────────────── */
 
@@ -61,7 +61,7 @@
 
 /* ── Tab panels ─────────────────────────────────────────────── */
 
-.char-tab-panel { display: none; padding: 4px 0; }
+.char-tab-panel { display: none; padding: var(--v-space-sm) 0; }
 .char-tab-panel.active { display: block; }
 
 /* ── Overview tab ───────────────────────────────────────────── */
@@ -171,7 +171,7 @@
     border-radius: var(--v-radius-sm, 6px);
     text-align: center;
 }
-.char-attr-icon { font-size: var(--v-font-2xl); display: block; margin-bottom: 2px; }
+.char-attr-icon { font-size: var(--v-font-2xl); display: block; margin-bottom: var(--v-space-xs); }
 .char-attr-label {
     font-size: var(--v-font-xs);
     font-family: var(--v-font);
@@ -195,7 +195,7 @@
 
 /* ── Combat tab ─────────────────────────────────────────────── */
 
-.char-combat-grid { display: flex; flex-direction: column; gap: 6px; }
+.char-combat-grid { display: flex; flex-direction: column; gap: var(--v-space-sm); }
 .char-combat-card {
     padding: var(--v-space-md-lg) var(--v-space-lg);
     background: var(--v-bg-raised, #332a22);
@@ -230,7 +230,7 @@
 
 /* ── Feats tab ──────────────────────────────────────────────── */
 
-.char-feats-list { display: flex; flex-direction: column; gap: 4px; }
+.char-feats-list { display: flex; flex-direction: column; gap: var(--v-space-sm); }
 .char-feat-item {
     padding: var(--v-space-md) var(--v-space-md-lg);
     background: var(--v-bg-raised, #332a22);

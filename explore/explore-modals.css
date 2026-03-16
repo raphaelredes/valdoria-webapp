@@ -17,41 +17,41 @@
     text-align: center;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(170,68,68,0.15);
 }
-.exh-modal-icon { font-size: clamp(28px, 9vw, 36px); margin-bottom: 6px; }
+.exh-modal-icon { font-size: clamp(28px, 9vw, 36px); margin-bottom: var(--v-space-sm); }
 .exh-modal-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-2xl); color: #cc6644; font-weight: 700;
     margin-bottom: var(--v-space-md);
 }
 .exh-modal-source {
-    font-size: var(--v-font-md); color: var(--v-text-dim); margin-bottom: 10px;
+    font-size: var(--v-font-md); color: var(--v-text-dim); margin-bottom: var(--v-space-md-lg);
 }
 .exh-modal-effects {
-    text-align: left; margin: 0 4px 12px;
+    text-align: left; margin: 0 var(--v-space-sm) var(--v-space-lg);
 }
 .exh-modal-effect {
-    font-size: var(--v-font-md); color: var(--v-text-dim); padding: 3px 0;
+    font-size: var(--v-font-md); color: var(--v-text-dim); padding: var(--v-space-xs) 0;
     border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 .exh-modal-effect.current {
     color: #cc6644; font-weight: 600;
 }
 .exh-modal-impact {
-    font-size: var(--v-font-md); color: #dca028; margin: 8px 4px 10px;
+    font-size: var(--v-font-md); color: #dca028; margin: var(--v-space-md) var(--v-space-sm) var(--v-space-md-lg);
     padding: var(--v-space-md) var(--v-space-md-lg);
     background: rgba(220, 160, 40, 0.08);
     border: 1px solid rgba(220, 160, 40, 0.15);
     line-height: 1.5;
 }
 .exh-modal-tip {
-    font-size: var(--v-font-sm); color: var(--v-text-dim); margin-bottom: 12px;
+    font-size: var(--v-font-sm); color: var(--v-text-dim); margin-bottom: var(--v-space-lg);
     font-style: italic;
 }
 .exh-modal-btn {
     padding: var(--v-space-md-lg) var(--v-space-2xl);
     background: linear-gradient(180deg, rgba(170,68,68,0.25), rgba(170,68,68,0.1));
     border: 1px solid rgba(170,68,68,0.5);
-    color: #cc6644; border-radius: 8px;
+    color: #cc6644; border-radius: var(--v-radius-sm);
     font-size: var(--v-font-body); font-weight: 600;
     font-family: var(--v-font, serif);
     cursor: pointer; min-height: 44px;

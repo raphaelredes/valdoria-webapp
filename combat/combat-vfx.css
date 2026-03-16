@@ -286,7 +286,7 @@
 /* Feed expandable detail (Solasta-style combat log) */
 .feed-entry.has-detail { cursor: pointer; }
 .feed-entry.has-detail:active { background: rgba(196, 149, 58, 0.06); }
-.feed-expand-icon { font-size: var(--v-font-xs); margin-left: 4px; color: var(--v-text-dim); opacity: 0.6; }
+.feed-expand-icon { font-size: var(--v-font-xs); margin-left: var(--v-space-sm); color: var(--v-text-dim); opacity: 0.6; }
 .feed-detail-expanded {
     font-size: var(--v-font-sm);
     line-height: 1.4;
@@ -334,7 +334,7 @@
 }
 
 /* Narrative mode: feed is the primary combat display */
-.combat-feed-narrative { padding: 4px 8px; }
+.combat-feed-narrative { padding: var(--v-space-sm) var(--v-space-md); }
 .combat-feed-narrative .feed-entry {
     font-size: var(--v-font-base);
     padding: var(--v-space-xs) 0;
