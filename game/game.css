@@ -15,7 +15,8 @@
 @import url('game-cards.css'); /* Ally cards, inn members, member detail/stats/spells */
 @import url('game-quests.css'); /* Quest list, lore, member detail, category badges */
 @import url('game-quests-detail.css');
-@import url('game-status.css'); /* Character details tabbed view */ /* Quest detail view, abandon, chain, NPC */
+@import url('game-status.css'); /* Character details tabbed view */
+@import url('game-skills.css'); /* Skills list & detail compact cards */ /* Quest detail view, abandon, chain, NPC */
 @import url('game-feedback.css'); /* Feedback popup, survey, stars, pix card */
 @import url('game-ambient.css'); /* Night/day tint, button ripple, flavor atmosphere, bar shine */
 @import url('game-utilities.css'); /* Skeleton loading, debug console, char deletion, offline badge */

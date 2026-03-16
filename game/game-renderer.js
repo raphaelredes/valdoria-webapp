@@ -183,6 +183,16 @@ function renderScreen(screen) {
         renderCharDetails(contentEl, screen.char_details);
     }
 
+    // Render skills list as compact cards
+    if (screen.skills_data && typeof renderSkillsList === 'function') {
+        renderSkillsList(contentEl, screen.skills_data);
+    }
+
+    // Render skill detail as rich card
+    if (screen.skill_detail_data && typeof renderSkillDetail === 'function') {
+        renderSkillDetail(contentEl, screen.skill_detail_data);
+    }
+
     // Render quest abandon confirmation
     if (screen.quest_abandon) {
         renderQuestAbandon(contentEl, screen.quest_abandon);
