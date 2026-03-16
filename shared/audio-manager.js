@@ -78,6 +78,53 @@ const ValdoriaAudio = (() => {
     let _fading = false;
     let _uiInjected = false;
 
+    // -- Autoplay unlock system (resilient to WebView rejections) --
+    const _UNLOCK_EVENTS = ['click', 'touchstart', 'keydown'];
+    const _MAX_UNLOCK_ATTEMPTS = 5;
+    let _unlockAttempts = 0;
+    let _unlockListenersActive = false;
+    let _audioCtxWarmed = false;
+
+    function _warmUpAudioContext() {
+        if (_audioCtxWarmed) return;
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            if (ctx.state === 'suspended') ctx.resume();
+            const buf = ctx.createBuffer(1, 1, 22050);
+            const src = ctx.createBufferSource();
+            src.buffer = buf;
+            src.connect(ctx.destination);
+            src.start(0);
+            _audioCtxWarmed = true;
+            setTimeout(() => { try { ctx.close(); } catch(e) {} }, 1000);
+        } catch(e) {
+            console.debug('[AUDIO] AudioContext warmup failed:', e.message);
+        }
+    }
+
+    function _unlockHandler() {
+        _unlocked = true;
+        _removeUnlockListeners();
+        _warmUpAudioContext();
+        if (_pendingTrack && !_muted && !_musicMuted) {
+            _playTrack(_pendingTrack);
+        }
+    }
+
+    function _registerUnlockListeners() {
+        if (_unlockListenersActive) return;
+        _unlockListenersActive = true;
+        _UNLOCK_EVENTS.forEach(e => document.addEventListener(e, _unlockHandler, { capture: true }));
+    }
+
+    function _removeUnlockListeners() {
+        if (!_unlockListenersActive) return;
+        _unlockListenersActive = false;
+        _UNLOCK_EVENTS.forEach(e => document.removeEventListener(e, _unlockHandler, { capture: true }));
+    }
+
     // -- Init --
     function init() {
         _muted = localStorage.getItem(STORAGE_KEY) === '1';
@@ -100,15 +147,7 @@ const ValdoriaAudio = (() => {
             localStorage.setItem(VOLUME_KEY, _volume.toString());
         }
 
-        const unlockEvents = ['click', 'touchstart', 'keydown'];
-        const unlockHandler = () => {
-            _unlocked = true;
-            unlockEvents.forEach(e => document.removeEventListener(e, unlockHandler, { capture: true }));
-            if (_pendingTrack && !_muted && !_musicMuted) {
-                _playTrack(_pendingTrack);
-            }
-        };
-        unlockEvents.forEach(e => document.addEventListener(e, unlockHandler, { capture: true, once: false }));
+        _registerUnlockListeners();
 
         // Telegram WebApp: tentar unlock via eventos do Telegram
         try {
@@ -116,7 +155,7 @@ const ValdoriaAudio = (() => {
                 Telegram.WebApp.ready();
                 Telegram.WebApp.onEvent('viewportChanged', function _tgUnlock() {
                     Telegram.WebApp.offEvent('viewportChanged', _tgUnlock);
-                    if (!_unlocked) unlockHandler();
+                    if (!_unlocked) _unlockHandler();
                 });
             }
         } catch(e) { /* Telegram API indisponível */ }
@@ -173,12 +212,17 @@ const ValdoriaAudio = (() => {
         });
 
         audio.play().then(() => {
+            _unlockAttempts = 0;
             _crossfadeIn(audio);
             _syncUI();
         }).catch(e => {
             console.warn('[AUDIO] Play blocked:', e.message);
             _pendingTrack = trackKey;
             _unlocked = false;
+            _unlockAttempts++;
+            if (_unlockAttempts < _MAX_UNLOCK_ATTEMPTS) {
+                _registerUnlockListeners();
+            }
         });
     }
 
@@ -1053,6 +1097,7 @@ const ValdoriaAudio = (() => {
     // -- Public API --
     return {
         init,
+        _warmUp: _warmUpAudioContext,
         play,
         playBiome,
         playSFX,

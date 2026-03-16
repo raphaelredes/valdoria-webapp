@@ -251,6 +251,7 @@ function _stopLoadingTips() {
         gemEl.addEventListener('click', () => {
             if (cooldown) return;
             cooldown = true;
+            if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio._warmUp) ValdoriaAudio._warmUp();
             gemEl.classList.add('tapped');
             const burst = document.createElement('div');
             burst.className = 'mc-gem-burst';
