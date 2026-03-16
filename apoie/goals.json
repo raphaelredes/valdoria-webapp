@@ -2,27 +2,27 @@
     {
         "id": "server",
         "name": "Servidor Dedicado",
-        "desc": "Manter o bot online 24h sem interrupções",
+        "desc": "Manter o bot online 24h sem interrup\u00e7\u00f5es",
         "icon": "\ud83c\udff0",
         "target_brl": 50000,
         "current_brl": 0,
         "completed": false
     },
     {
-        "id": "art",
-        "name": "Arte de Personagens",
-        "desc": "Ilustrações para as 12 classes jogáveis",
-        "icon": "\ud83c\udfa8",
-        "target_brl": 100000,
+        "id": "infra",
+        "name": "Dom\u00ednio e Infraestrutura",
+        "desc": "Dom\u00ednio, Workers, banco de dados e ferramentas",
+        "icon": "\ud83c\udf10",
+        "target_brl": 30000,
         "current_brl": 0,
         "completed": false
     },
     {
-        "id": "music",
-        "name": "Trilha Sonora",
-        "desc": "Música ambiente para taverna e explorações",
-        "icon": "\ud83c\udfb5",
-        "target_brl": 30000,
+        "id": "content",
+        "name": "Expans\u00e3o de Conte\u00fado",
+        "desc": "Novas dungeons, quests, NPCs e regi\u00f5es",
+        "icon": "\ud83d\udcdc",
+        "target_brl": 80000,
         "current_brl": 0,
         "completed": false
     }

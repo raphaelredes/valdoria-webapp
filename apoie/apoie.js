@@ -172,7 +172,7 @@ function showQrResult(data) {
     if (data.key_type && data.key_display) {
         html += 'Chave PIX (' + escapeHtml(data.key_type) + '): ' + escapeHtml(data.key_display) + '<br>';
     }
-    html += 'Referencia: <strong>' + escapeHtml(data.txid) + '</strong>';
+    html += 'Referência: <strong>' + escapeHtml(data.txid) + '</strong>';
     if (!data.linked) {
         html += '<br><em>Guarde este código para vincular ao bot</em>';
     }
@@ -180,9 +180,9 @@ function showQrResult(data) {
     html += '<div class="ap-code-box" id="brcode-text">' + escapeHtml(data.brcode) + '</div>';
     html += '<button class="ap-btn-copy" onclick="copyBrcode()">Copiar Código PIX</button>';
     if (data.linked) {
-        html += '<div class="ap-qr-note">\u2705 Vinculado a sua conta Telegram. Recompensas serao entregues automaticamente após verificação.</div>';
+        html += '<div class="ap-qr-note">\u2705 Vinculado a sua conta Telegram. Recompensas serão entregues automaticamente após verificação.</div>';
     } else {
-        html += '<div class="ap-qr-note">\u{1F464} Doacao anonima. Para receber recompensas no jogo, use o comando <strong>/apoiar ' + escapeHtml(data.txid) + '</strong> no bot do Telegram.</div>';
+        html += '<div class="ap-qr-note">\u{1F464} Doação anônima. Para receber recompensas no jogo, use o comando <strong>/apoiar ' + escapeHtml(data.txid) + '</strong> no bot do Telegram.</div>';
     }
     html += '</div>';
 
