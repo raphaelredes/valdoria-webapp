@@ -854,7 +854,8 @@ function _makeAllyBar(current, max, type) {
     const fill = document.createElement('div');
     const pct = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0;
     fill.className = 'ally-bar-fill ally-bar-' + type;
-    fill.style.transform = 'scaleX(' + (pct / 100) + ')';
+    fill.setAttribute('data-element', 'ally-' + type + '-bar');
+    requestAnimationFrame(function() { fill.style.width = pct + '%'; });
     if (type === 'hp') {
         if (pct <= 25) fill.classList.add('ally-bar-critical');
         else if (pct <= 50) fill.classList.add('ally-bar-low');

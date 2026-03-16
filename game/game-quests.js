@@ -246,6 +246,7 @@ function _questSectionHdr(icon, label) {
 function _renderQCard(q, isDaily) {
     var card = document.createElement('div');
     card.className = 'quest-card' + (q.ready ? ' quest-card--ready' : '');
+    card.setAttribute('data-element', 'quest-card');
     card.onclick = function() { doAction(q.cb); };
 
     // Header: NPC icon + title + category badge + ready badge
