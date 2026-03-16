@@ -6,8 +6,7 @@
    ═══════════════════════════════════════════════ */
 
 /* ─── SCROLLBAR HIDING (redundancy for valdoria-design.css) ─── */
-* { scrollbar-width: none; -ms-overflow-style: none; }
-*::-webkit-scrollbar { display: none; }
+/* scrollbar hiding: handled by valdoria-design.css global rule */
 
 /* ─── FIXED VIEWPORT — NO SCROLL ─── */
 body {

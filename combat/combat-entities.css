@@ -159,10 +159,10 @@
     position: relative;
     overflow: hidden;
 }
-.hp-mini-fill.hp-high { background: linear-gradient(90deg, #388e3c, #4caf50); }
-.hp-mini-fill.hp-mid { background: linear-gradient(90deg, #e65100, #f9a825); }
+.hp-mini-fill.hp-high { background: var(--v-hp-high, linear-gradient(90deg, #2d8f2d, #4caf50)); }
+.hp-mini-fill.hp-mid { background: var(--v-hp-warn, linear-gradient(90deg, #c2410c, #f97316)); }
 .hp-mini-fill.hp-low {
-    background: linear-gradient(90deg, #b71c1c, #e53935);
+    background: var(--v-hp-crit, linear-gradient(90deg, #b91c1c, #ef4444));
     animation: hpLowPulse 1.5s ease-in-out infinite;
 }
 .hp-text-compact {
@@ -245,7 +245,7 @@
 .bar-icon { font-size: 12px; flex-shrink: 0; width: 14px; text-align: center; }
 .bar-track {
     flex: 1;
-    height: 7px;
+    height: var(--v-bar-height, 8px);
     background: #1e1a16;
     border-radius: 4px;
     overflow: hidden;
@@ -253,7 +253,7 @@
     position: relative;
 }
 .entity.player .bar-track {
-    height: 12px;
+    height: var(--v-bar-height, 8px);
 }
 .bar-fill {
     height: 100%;
@@ -274,10 +274,10 @@
     border-radius: 4px 4px 0 0;
     background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
 }
-.bar-fill.hp-high { background: linear-gradient(90deg, #388e3c, #4caf50); }
-.bar-fill.hp-mid { background: linear-gradient(90deg, #e65100, #f9a825); }
+.bar-fill.hp-high { background: var(--v-hp-high, linear-gradient(90deg, #2d8f2d, #4caf50)); }
+.bar-fill.hp-mid { background: var(--v-hp-warn, linear-gradient(90deg, #c2410c, #f97316)); box-shadow: 0 0 4px rgba(249,115,22,0.3); }
 .bar-fill.hp-low {
-    background: linear-gradient(90deg, #b71c1c, #e53935);
+    background: var(--v-hp-crit, linear-gradient(90deg, #b91c1c, #ef4444));
     animation: hpLowPulse 1.5s ease-in-out infinite;
 }
 /* hpLowPulse → shared/animations.css */

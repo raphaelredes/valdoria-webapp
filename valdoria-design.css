@@ -102,6 +102,38 @@
 
     /* Special surfaces */
     --v-parchment:     #f5f0e0;
+
+    /* ─── SPACING SCALE ─── */
+    --v-space-xs:   2px;
+    --v-space-sm:   4px;
+    --v-space-md:   8px;
+    --v-space-lg:   12px;
+    --v-space-xl:   16px;
+    --v-space-2xl:  24px;
+
+    /* ─── FONT-SIZE SCALE (matches typography classes) ─── */
+    --v-font-xs:    10px;   /* micro badges */
+    --v-font-sm:    11px;   /* .v-micro, compact labels */
+    --v-font-md:    12px;   /* .v-caption, secondary text */
+    --v-font-base:  13px;   /* .v-subtitle, body compact */
+    --v-font-body:  14px;   /* .v-body, primary readable */
+    --v-font-lg:    15px;   /* .v-title-sm */
+    --v-font-xl:    16px;   /* .v-title */
+    --v-font-2xl:   18px;   /* .v-title-lg */
+
+    /* ─── BAR HEIGHT CANONICAL ─── */
+    --v-bar-height:       8px;   /* standard resource bars */
+    --v-bar-height-sm:    6px;   /* compact / ally bars */
+    --v-bar-height-mini:  4px;   /* XP tiny, quest progress */
+
+    /* ─── HP THRESHOLD COLORS (canonical — ALL WebApps MUST use) ─── */
+    /* Thresholds: >60% green, 26-60% orange, ≤25% red */
+    --v-hp-high:       linear-gradient(90deg, #2d8f2d, #4caf50);
+    --v-hp-warn:       linear-gradient(90deg, #c2410c, #f97316);
+    --v-hp-crit:       linear-gradient(90deg, #b91c1c, #ef4444);
+    --v-hp-high-flat:  #4caf50;
+    --v-hp-warn-flat:  #f97316;
+    --v-hp-crit-flat:  #ef4444;
 }
 
 /* ─── RESET ─── */

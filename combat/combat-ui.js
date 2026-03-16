@@ -12,7 +12,7 @@ function announce(msg) {
 // ─── ENTITY CARD (COMPACT + EXPANDABLE) ───
 function renderEntity(e, type, idx, isActiveTurn) {
     const pct = e.mhp > 0 ? (e.hp / e.mhp) : 0;
-    const hpClass = pct > 0.75 ? 'hp-high' : pct > 0.40 ? 'hp-mid' : 'hp-low';
+    const hpClass = pct > 0.60 ? 'hp-high' : pct > 0.25 ? 'hp-mid' : 'hp-low';
 
     // Compact status icons (show max 3, overflow as +N badge)
     let statusIcons = '';
@@ -130,7 +130,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
 // ─── PLAYER CARD (always shows HP + resource bars unless compact) ───
 function renderPlayerCard(p, isCompact = false) {
     const hpPct = p.mhp > 0 ? (p.hp / p.mhp) : 0;
-    const hpClass = hpPct > 0.75 ? 'hp-high' : hpPct > 0.40 ? 'hp-mid' : 'hp-low';
+    const hpClass = hpPct > 0.60 ? 'hp-high' : hpPct > 0.25 ? 'hp-mid' : 'hp-low';
     const mpPct = p.mmp > 0 ? (p.mp / p.mmp) : 0;
     const resClass = RES_CLASS_MAP[p.res] || 'mp';
     const resIcon = RES_ICON_MAP[p.res] || '💧';

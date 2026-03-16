@@ -151,10 +151,9 @@ function _makeBarCustom(icon, cur, max, type, labelText) {
 }
 
 function _hpBarClass(cur, max) {
-    var pct = max > 0 ? (cur / max) : 1;
-    if (pct <= 0.25) return "hp-crit";
-    if (pct <= 0.50) return "hp-warn";
-    return "hp";
+    return typeof vBarHpClass === 'function' ? vBarHpClass(cur, max)
+        : (max > 0 ? (cur / max) : 1) > 0.60 ? 'hp'
+        : (max > 0 ? (cur / max) : 1) > 0.25 ? 'hp-warn' : 'hp-crit';
 }
 
 function _makeResourceBadge(icon, val, label) {

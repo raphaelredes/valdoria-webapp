@@ -162,7 +162,7 @@ function renderCharacterSelect(data) {
 
             // HP + MP bar percentages
             var hpPct = c.max_hp > 0 ? Math.round((c.hp / c.max_hp) * 100) : 100;
-            var hpColor = hpPct > 50 ? '#4ade80' : hpPct > 25 ? '#f97316' : '#ef4444';
+            var hpColor = hpPct > 60 ? '#4caf50' : hpPct > 25 ? '#f97316' : '#ef4444';
             var mpPct = c.max_mp > 0 ? Math.round((c.mp / c.max_mp) * 100) : 0;
             var hasMP = c.max_mp > 0;
 

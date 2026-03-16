@@ -2,8 +2,7 @@
    Uses CSS variables from valdoria-design.css */
 
 /* ─── Scrollbar hiding (mandatory redundancy) ─── */
-* { scrollbar-width: none; -ms-overflow-style: none; }
-*::-webkit-scrollbar { display: none; }
+/* scrollbar hiding: handled by valdoria-design.css global rule */
 
 /* ─── Main viewport (no scroll) ─── */
 #viewport {

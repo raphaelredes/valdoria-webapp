@@ -6,8 +6,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /* No scrollbars */
-.inn-overlay * { scrollbar-width: none; -ms-overflow-style: none; }
-.inn-overlay *::-webkit-scrollbar { display: none; }
+/* scrollbar hiding: handled by valdoria-design.css global rule */
 
 /* ─── Overlay ─── */
 .inn-overlay {

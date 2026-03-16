@@ -6,8 +6,8 @@
    ═══════════════════════════════════════════════════════════ */
 
 /* --- LAYOUT --- */
-* { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; -ms-overflow-style: none; }
-*::-webkit-scrollbar { display: none; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+/* scrollbar hiding: handled by valdoria-design.css global rule */
 body {
     overflow: hidden;
     display: flex;

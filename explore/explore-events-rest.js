@@ -20,7 +20,7 @@ function showExitRiskAssessment() {
     const risk = calculateExitRisk(distance);
 
     // HP bar
-    const hpColor = hpPct > 60 ? '#4a8' : hpPct > 25 ? '#dca028' : '#c44';
+    const hpColor = hpPct > 60 ? '#4caf50' : hpPct > 25 ? '#f97316' : '#ef4444';
     hpRow.innerHTML = `<span>HP</span>` +
         `<div class="exit-hp-bar"><div class="exit-hp-fill" style="transform:scaleX(${Math.max(0.02, hpPct/100)});background:${hpColor}"></div></div>` +
         `<span>${currentHP}/${maxHP}</span>`;
@@ -657,7 +657,7 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpR
     var currentHP = getCurrentHP();
     var maxHP = getMaxHP();
     var hpPct = Math.max(2, Math.round((currentHP / maxHP) * 100));
-    var hpColor = hpPct > 60 ? '#4a8' : hpPct > 25 ? '#dca028' : '#c44';
+    var hpColor = hpPct > 60 ? '#4caf50' : hpPct > 25 ? '#f97316' : '#ef4444';
 
     // Add HP bar visualization
     detail += '\n';

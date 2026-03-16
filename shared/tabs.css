@@ -1,0 +1,111 @@
+/* tabs.css — Canonical tab component for ALL WebApps
+   Two variants: segmented (default) and pill.
+   Import: document.write('<link rel="stylesheet" href="../shared/tabs.css?v=' + v + '">');
+*/
+
+/* ═══════════════════════════════════════════════════════════════
+   VARIANT 1: Segmented tabs (char-details, quest-filters)
+   Flat container with gold active highlight
+   ═══════════════════════════════════════════════════════════════ */
+
+.v-tabs {
+    display: flex;
+    gap: 3px;
+    padding: 2px;
+    background: rgba(42, 36, 32, 0.5);
+    border-radius: var(--v-radius-sm, 6px);
+    border: 1px solid var(--v-border, #4a3828);
+    margin-bottom: var(--v-space-lg, 10px);
+}
+
+.v-tab {
+    flex: 1;
+    padding: 7px 2px;
+    border: none;
+    background: transparent;
+    color: var(--v-text-dim, #a09484);
+    font-size: var(--v-font-sm, 11px);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all var(--v-transition, 0.2s ease);
+    white-space: nowrap;
+    text-align: center;
+}
+
+.v-tab.active {
+    background: rgba(196, 149, 58, 0.15);
+    color: var(--v-gold, #c4953a);
+    font-weight: 600;
+}
+
+.v-tab:active {
+    transform: scale(0.95);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VARIANT 2: Pill tabs (inventory)
+   Rounded pill buttons, border highlight on active
+   ═══════════════════════════════════════════════════════════════ */
+
+.v-tabs-pill {
+    display: flex;
+    gap: 4px;
+    padding: var(--v-space-md, 8px) var(--v-space-lg, 10px);
+    background: var(--v-bg-raised, #332a22);
+    border-bottom: 1px solid var(--v-border, #4a3828);
+}
+
+.v-tabs-pill .v-tab {
+    flex: 1;
+    text-align: center;
+    padding: var(--v-space-md, 8px) var(--v-space-lg, 10px);
+    border-radius: var(--v-radius-pill, 20px);
+    font-size: var(--v-font-base, 13px);
+    border: 1px solid var(--v-border, #4a3828);
+    background: transparent;
+    color: var(--v-text-dim, #a09484);
+    cursor: pointer;
+    transition: all var(--v-transition, 0.2s ease);
+    white-space: nowrap;
+}
+
+.v-tabs-pill .v-tab.active {
+    border-color: var(--v-gold-dim, #9a7530);
+    background: rgba(196, 149, 58, 0.08);
+    color: var(--v-gold, #c4953a);
+    font-weight: 600;
+}
+
+.v-tabs-pill .v-tab:active {
+    transform: scale(0.95);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Backward-compatible aliases (plain CSS selectors)
+   These ensure existing .char-tabs/.quest-filter-tabs still work.
+   New code should use .v-tabs/.v-tab.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Tab content panels ─── */
+.v-tab-panel {
+    display: none;
+}
+.v-tab-panel.active {
+    display: block;
+}
+
+/* Fade-in animation for tab switching */
+.v-tab-panel.tab-entering {
+    animation: vTabFadeIn 0.2s ease;
+}
+@keyframes vTabFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Performance tier ─── */
+body.perf-lite .v-tab-panel.tab-entering { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+    .v-tab-panel.tab-entering { animation: none !important; }
+}

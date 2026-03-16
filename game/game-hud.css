@@ -48,105 +48,12 @@
     border-style: none;
 }
 
-/* ─── Bar Group (consecutive bars wrapped together) ─── */
-.v-bar-group {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    padding: 2px 0;
-}
-
-/* ─── Progress Bars (HP, MP, XP, HD) ─── */
-.v-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 1px 0;
-}
-
-.v-bar-icon {
-    font-size: 12px;
-    width: 18px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.v-bar-track {
-    flex: 1;
-    height: 8px;
-    background: var(--v-bg);
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid var(--v-border);
-    position: relative;
-}
-
-.v-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    width: 100%;
-    transition: transform 0.4s ease;
-    transform-origin: left;
-    position: relative;
-}
-.v-bar-fill.hp, .v-bar-fill.hp-warn, .v-bar-fill.hp-crit { transition: transform 0.35s ease-out; }
-.v-bar-fill.mp { transition: transform 0.5s ease-in-out; }
-.v-bar-fill.xp { transition: transform 0.6s ease; }
-
-/* Ghost bar for damage visualization in Game Hub */
-.v-bar-track .bar-ghost {
-    position: absolute;
-    top: 0; left: 0;
-    height: 100%;
-    background: rgba(200, 60, 60, 0.6);
-    border-radius: 3px;
-    width: 100%;
-    transition: transform 1.5s ease-in 0.5s, opacity 1.5s ease-in 0.5s;
-    transform-origin: left;
-    pointer-events: none;
-}
-
-/* Shine sweep on heal in Game Hub */
-@keyframes hubShineSweep {
-    from { transform: translateX(-100%); }
-    to   { transform: translateX(350%); }
-}
-.v-bar-fill.healing::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 30%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-    animation: hubShineSweep 0.6s ease-out forwards;
-    pointer-events: none;
-}
-
-/* HP bar colors (health-based) — thresholds: >60% green, 41-60% amber, 21-40% orange, ≤20% red */
-.v-bar-fill.hp      { background: linear-gradient(90deg, #2d8f2d, #4caf50); }
-.v-bar-fill.hp-warn  { background: linear-gradient(90deg, #c2410c, #f97316); box-shadow: 0 0 4px rgba(249,115,22,0.3); }
-.v-bar-fill.hp-crit  { background: linear-gradient(90deg, #b91c1c, #ef4444); box-shadow: 0 0 6px rgba(239,68,68,0.35); animation: hpLowPulse 0.8s ease-in-out infinite; }
-
-/* Resource bar colors */
-.v-bar-fill.mp { background: linear-gradient(90deg, #1565c0, #42a5f5); }
-.v-bar-fill.xp { background: linear-gradient(90deg, #7b1fa2, #ab47bc); }
-.v-bar-fill.hd { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
-
-.v-bar-label {
-    font-size: 11px;
-    font-family: var(--v-font-mono);
-    color: var(--v-text);
-    min-width: 48px;
-    text-align: right;
-    flex-shrink: 0;
-    white-space: nowrap;
-    opacity: 0.85;
-}
-
-.v-bar-extra {
-    font-size: 11px;
-    color: var(--v-text-dim);
-    padding-left: 26px;
-}
+/* ─── Bars (HP/MP/XP/HD) ─── */
+/* MOVED TO: ../shared/status-bars.css (canonical component)
+   Classes: .v-bar, .v-bar-group, .v-bar-track, .v-bar-fill, .v-bar-label, .v-bar-extra
+   HP colors: .hp, .hp-warn, .hp-crit (thresholds: >60% / >25%)
+   Resource: .mp, .xp, .hd, .ki, .fury, .vigor, .inspiration, .pact, .energy
+   Ghost bar, heal shine, perf-lite overrides — all in status-bars.css */
 
 /* ─── Stat Badges (AC, ATK, DMG) ─── */
 .v-stat-row {
@@ -222,10 +129,4 @@
     100% { opacity: 0; transform: translateX(-50%) translateY(-45px); }
 }
 
-/* ─── Performance tier overrides ─── */
-body.perf-lite .v-bar-fill.hp-crit {
-    animation: none !important;
-}
-@media (prefers-reduced-motion: reduce) {
-    .v-bar-fill.hp-crit { animation: none !important; }
-}
+/* Performance tier bar overrides: moved to ../shared/status-bars.css */

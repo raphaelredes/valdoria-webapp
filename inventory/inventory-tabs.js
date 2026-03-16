@@ -578,7 +578,7 @@ function renderAlliesTab(c) {
     let html = '';
     D.allies.forEach(a => {
         const hpPct = a.mhp > 0 ? Math.round((a.hp / a.mhp) * 100) : 0;
-        const hpCls = hpPct > 75 ? 'bar-high' : hpPct > 40 ? 'bar-mid' : 'bar-low';
+        const hpCls = hpPct > 60 ? 'bar-high' : hpPct > 25 ? 'bar-mid' : 'bar-low';
         let mpBar = '';
         if (a.mmp > 0) {
             const mpPct = a.mmp > 0 ? Math.round((a.mp / a.mmp) * 100) : 0;
