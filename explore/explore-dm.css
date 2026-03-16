@@ -395,21 +395,8 @@ body.perf-lite .dm-narration .cursor {
 
 
 /* ═══════════════════════════════════════════
-   DC PREVIEW BADGES (chance % on choice buttons)
+   CHOICE TYPE MARKERS (race, proficiency)
    ═══════════════════════════════════════════ */
-/* ═══════════════════════════════════════════
-   CHOICE TYPE MARKERS (class, race, proficiency)
-   ═══════════════════════════════════════════ */
-
-/* Class-specific option (blue/purple accent) */
-.dm-choice-btn.choice-class {
-    border-color: rgba(100, 120, 200, 0.5);
-    background: linear-gradient(165deg, #2e2838 0%, #282230 100%);
-}
-.dm-choice-btn.choice-class:active {
-    border-color: rgba(120, 140, 220, 0.7);
-    box-shadow: inset 0 0 12px rgba(100, 120, 200, 0.15);
-}
 
 /* Race-specific option (green accent) */
 .dm-choice-btn.choice-race {
@@ -438,7 +425,6 @@ body.perf-lite .dm-narration .cursor {
     margin-left: 2px;
 }
 .choice-badge.prof { filter: saturate(1.3); }
-.choice-badge.class { filter: saturate(0.9); }
 .choice-badge.race { filter: saturate(1.1); }
 
 

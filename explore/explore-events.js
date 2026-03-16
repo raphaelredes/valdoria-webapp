@@ -707,14 +707,12 @@ function showChoices(poi) {
         var isBlue = !!ch.bl;
         btn.className = 'dm-choice-btn' + (isBlue ? ' blue-option' : '');
 
-        // Visual markers for special options
-        if (ch.bl) btn.classList.add('choice-class');
+        // Visual markers for race/proficiency options
         if (ch.rc) btn.classList.add('choice-race');
         if (ch.hp) btn.classList.add('choice-prof');
 
         var labelExtra = '';
         if (ch.hp) labelExtra = ' <span class="choice-badge prof">\u2b50</span>';
-        else if (ch.bl) labelExtra = ' <span class="choice-badge class">\u2694\ufe0f</span>';
         else if (ch.rc) labelExtra = ' <span class="choice-badge race">\u2728</span>';
 
         var html = '<span class="choice-icon">' + (ch.ic || '') + '</span>';
