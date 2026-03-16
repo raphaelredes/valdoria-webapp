@@ -3,7 +3,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 
-body { padding-bottom: 120px; }
+body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateBottomPadding() */ }
 
 /* ── Header ── */
 .header {

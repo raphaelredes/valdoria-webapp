@@ -173,6 +173,21 @@ function decodeBase64Utf8(b64) {
 }
 
 // ── Init ──
+// ── Dynamic Bottom Padding (Game Hub pattern) ──
+function updateBottomPadding() {
+    const panel = document.getElementById('bottomPanel');
+    const toggle = document.getElementById('immersive-toggle');
+    if (!panel) return;
+    requestAnimationFrame(() => {
+        if (panel.classList.contains('immersive-collapsed')) return;
+        const h = Math.max(panel.offsetHeight, 48);
+        // +40 = 32px immersive toggle height + 8px gap
+        document.body.style.paddingBottom = (h + 40) + 'px';
+        document.documentElement.style.setProperty('--bottom-panel-h', h + 'px');
+        if (toggle) toggle.style.bottom = h + 'px';
+    });
+}
+
 // ── Immersive Mode (shared pattern — localStorage 'valdoria_immersive') ──
 function initImmersive() {
     const toggle = document.getElementById('immersive-toggle');
@@ -185,20 +200,15 @@ function initImmersive() {
             panel.classList.add('immersive-collapsed');
             toggle.style.display = 'none';
             restore.style.display = '';
+            // Collapsed: minimal padding for restore pill only
+            document.body.style.paddingBottom = '48px';
         } else {
             panel.classList.remove('immersive-collapsed');
             toggle.style.display = '';
             restore.style.display = 'none';
-            // Position toggle above panel
-            requestAnimationFrame(() => {
-                toggle.style.bottom = panel.offsetHeight + 'px';
-            });
+            // Expanded: delegate to updateBottomPadding() for proper coordination
+            updateBottomPadding();
         }
-        // Update body padding
-        requestAnimationFrame(() => {
-            const h = collapsed ? 48 : (panel.offsetHeight + 12);
-            document.body.style.paddingBottom = h + 'px';
-        });
     }
 
     const saved = localStorage.getItem('valdoria_immersive') === 'true';
@@ -247,8 +257,7 @@ function init() {
     }
 
     // Dynamic body padding based on bottom panel height
-    const panel = document.getElementById('bottomPanel');
-    document.body.style.paddingBottom = (panel ? panel.offsetHeight + 12 : 80) + 'px';
+    updateBottomPadding();
 
     hideLoading();
     _initViewedItems();
@@ -449,6 +458,8 @@ function updateBottomBar() {
         btn.classList.add('hidden');
         if (section) section.classList.add('hidden');
     }
+    // Recalculate padding after ops section show/hide changes panel height
+    updateBottomPadding();
 }
 
 function resetAllOps() {
