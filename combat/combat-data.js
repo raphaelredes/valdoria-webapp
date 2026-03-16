@@ -237,6 +237,29 @@ function _weatherClass(label) {
     return 'w-clear';
 }
 
+// Format structured roll detail for combat log (Solasta-style D&D math)
+function _formatFeedDetail(d) {
+    if (!d) return '';
+    var lines = [];
+    if (d.d20 !== undefined) {
+        var modStr = d.mod ? (d.mod >= 0 ? '+' : '') + d.mod : '';
+        var hitLabel = d.hit ? (d.crit ? '\u203c\ufe0f CR\u00cdTICO!' : '\u2705 Acertou!') : '\u274c Errou';
+        lines.push('\ud83c\udfb2 d20(' + d.d20 + ')' + modStr + ' = ' + d.tot + ' vs CA ' + d.ac + ' \u2014 ' + hitLabel);
+    }
+    if (d.bk && d.bk.length > 0) {
+        var bkStr = d.bk.map(function(p) { return (p.v >= 0 ? '+' : '') + p.v + ' ' + p.l; }).join(' ');
+        lines.push('\u2699\ufe0f d20(' + (d.d20 || '?') + ') ' + bkStr + ' = ' + d.tot);
+    }
+    if (d.dr && d.dr.length > 0) {
+        var diceStr = d.dr.join(', ');
+        var dtpLabel = d.dtp || '';
+        var DT_PT = {slashing:'Cortante',piercing:'Perfurante',bludgeoning:'Contundente',fire:'Fogo',cold:'Gelo',lightning:'El\u00e9trico',poison:'Veneno',necrotic:'Necr\u00f3tico',radiant:'Radiante',force:'For\u00e7a',psychic:'Ps\u00edquico',acid:'\u00c1cido',thunder:'Trov\u00e3o',magical:'M\u00e1gico'};
+        dtpLabel = DT_PT[dtpLabel] || dtpLabel;
+        lines.push('\ud83d\udca5 ' + (d.df || '?') + ': (' + diceStr + ') = ' + d.dt + (dtpLabel ? ' [' + dtpLabel + ']' : ''));
+    }
+    return lines.join('\n');
+}
+
 // Classify feed entry text for colored left-border accent
 function _classifyFeed(f) {
     if (!f) return '';

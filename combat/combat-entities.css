@@ -186,6 +186,32 @@
     vertical-align: middle;
     margin-left: 1px;
 }
+/* Enemy Intent Badge (Into the Breach pattern) */
+.intent-badge {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(200, 80, 80, 0.2);
+    color: #e8a088;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.2px;
+    animation: intentPulse 2s ease-in-out infinite;
+}
+.intent-badge.intent-stun {
+    background: rgba(180, 180, 80, 0.2);
+    color: #d8d088;
+    animation: none;
+}
+.intent-badge.intent-skill {
+    background: rgba(140, 80, 200, 0.2);
+    color: #c8a8e8;
+}
+@keyframes intentPulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
 .expand-arrow {
     font-size: 10px;
     color: var(--v-text-dim);

@@ -854,9 +854,24 @@ function _renderArenaInner(s) {
         html += `<div class="combat-feed${narrativeCls}${autoExpand ? ' feed-expanded' : ''}" id="combatFeed">${roundBadge}`;
         if (total > visibleCount) {
             const older = s.feed.slice(0, -visibleCount);
-            older.forEach(f => { html += `<div class="feed-entry feed-hidden ${_classifyFeed(f)}">${escHtml(f)}</div>`; });
+            older.forEach((f, fi) => {
+                var fd = s.fd && fi < (s.fd.length || 0) ? s.fd[fi] : null;
+                var detailStr = fd ? _formatFeedDetail(fd) : '';
+                var hasDetail = detailStr.length > 0;
+                html += '<div class="feed-entry feed-hidden ' + _classifyFeed(f) + (hasDetail ? ' has-detail' : '') + '"' + (hasDetail ? ' data-detail="' + escHtml(detailStr) + '"' : '') + '>' + escHtml(f);
+                if (hasDetail) html += '<span class="feed-expand-icon">\u25b8</span>';
+                html += '</div>';
+            });
         }
-        recentFeed.forEach(f => { html += `<div class="feed-entry ${_classifyFeed(f)}">${escHtml(f)}</div>`; });
+        recentFeed.forEach((f, fi) => {
+            var feedIdx = total - visibleCount + fi;
+            var fd = s.fd && s.fd[feedIdx] !== undefined ? s.fd[fi] : null;
+            var detailStr = fd ? _formatFeedDetail(fd) : '';
+            var hasDetail = detailStr.length > 0;
+            html += '<div class="feed-entry ' + _classifyFeed(f) + (hasDetail ? ' has-detail' : '') + '"' + (hasDetail ? ' data-detail="' + escHtml(detailStr) + '"' : '') + '>' + escHtml(f);
+            if (hasDetail) html += '<span class="feed-expand-icon">\u25b8</span>';
+            html += '</div>';
+        });
         if (total > visibleCount) {
             const toggleLabel = autoExpand ? '▼ Recolher' : `▲ Mostrar +${total - visibleCount} anteriores`;
             html += `<div class="feed-toggle" id="feedToggle">${toggleLabel}</div>`;
@@ -885,7 +900,14 @@ function _renderArenaInner(s) {
     if (s.feed && s.feed.length > 0 && ph === 'active') {
         const lastFeed = s.feed[s.feed.length - 1];
         const cls = _classifyFeed(lastFeed);
-        _actionToastHtml = `<div class="action-toast ${cls}" id="actionToast">${escHtml(lastFeed)}</div>`;
+        // D&D math breakdown from last roll (Solasta-style transparency)
+        var toastDetail = '';
+        if (s.lr && s.lr.bk && s.lr.bk.length > 0) {
+            var bkStr = s.lr.bk.map(function(p) { return (p.v >= 0 ? '+' : '') + p.v + ' ' + p.l; }).join(' ');
+            var hitMiss = s.lr.miss ? '\u274c' : (s.lr.crit ? '\u203c\ufe0f' : '\u2705');
+            toastDetail = '<div class="toast-detail">d20(' + (s.lr.r || '?') + ') ' + bkStr + ' = ' + (s.lr.total || s.lr.r) + (s.lr.ac ? ' vs CA ' + s.lr.ac : '') + ' ' + hitMiss + '</div>';
+        }
+        _actionToastHtml = '<div class="action-toast ' + cls + '" id="actionToast">' + escHtml(lastFeed) + toastDetail + '</div>';
     }
 
     // Action Bar — phase-dependent (with D&D 5e sub-phase support)
@@ -990,6 +1012,7 @@ function _renderArenaInner(s) {
     }
     bindExpandCollapse();
     bindFeedToggle();
+    bindFeedDetail();
     // Auto-scroll turn timeline to active entry
     _scrollTimelineToActive();
     // Auto-scroll combat feed to latest entry

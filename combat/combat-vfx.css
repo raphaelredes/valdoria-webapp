@@ -283,6 +283,23 @@
     to { opacity: 1; transform: translateX(0); }
 }
 .feed-entry:last-child { color: var(--v-text); font-weight: 500; font-size: 13px; border-bottom: none; }
+/* Feed expandable detail (Solasta-style combat log) */
+.feed-entry.has-detail { cursor: pointer; }
+.feed-entry.has-detail:active { background: rgba(196, 149, 58, 0.06); }
+.feed-expand-icon { font-size: 9px; margin-left: 4px; color: var(--v-text-dim); opacity: 0.6; }
+.feed-detail-expanded {
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--v-text-dim);
+    margin-top: 2px;
+    padding: 2px 0 2px 8px;
+    border-left: 1px solid rgba(196, 149, 58, 0.2);
+    animation: feedDetailIn 0.2s ease-out;
+}
+@keyframes feedDetailIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 /* Feed entry type coloring — border accent + subtle tinted background */
 .feed-hit { border-left-color: rgba(80,180,80,0.6); background: linear-gradient(90deg, rgba(80,180,80,0.04) 0%, transparent 50%); }
 .feed-crit { border-left-color: rgba(255,180,40,0.7); color: var(--v-gold-dim); background: linear-gradient(90deg, rgba(255,180,40,0.06) 0%, transparent 50%); }

@@ -99,6 +99,15 @@ function renderEntity(e, type, idx, isActiveTurn) {
         }
     }
 
+    // Enemy intent badge (Into the Breach pattern: shows next planned action)
+    let intentBadge = '';
+    if (type === 'enemy' && e.it) {
+        const it = e.it;
+        const intentCls = it.tp === 'stun' || it.tp === 'skip' ? 'intent-stun' : it.tp === 'skill' ? 'intent-skill' : 'intent-atk';
+        const dmgLabel = it.dmg ? ' ' + it.dmg : '';
+        intentBadge = '<span class="intent-badge ' + intentCls + '">' + (it.ic || '') + dmgLabel + '</span>';
+    }
+
     // Inline AC badge for enemies (visible in compact view)
     const acBadge = type === 'enemy' && e.ac ? `<span class="ac-badge">🛡${e.ac}</span>` : '';
 
@@ -111,6 +120,7 @@ function renderEntity(e, type, idx, isActiveTurn) {
             <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
             ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
             ${posBadge}
+            ${intentBadge}
             <span class="expand-arrow">▸</span>
         </div>
         <div class="entity-details">${detailsHtml}</div>
@@ -270,6 +280,34 @@ function bindFeedToggle() {
         toggle.textContent = expanded ? '▼ Recolher' : toggle.dataset.label || '▲ Mostrar mais';
     });
     toggle.dataset.label = toggle.textContent;
+}
+
+// ─── FEED DETAIL TOGGLE (Solasta-style D&D math expand) ───
+function bindFeedDetail() {
+    document.querySelectorAll('.feed-entry.has-detail').forEach(function(el) {
+        el.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            var existing = el.querySelector('.feed-detail-expanded');
+            if (existing) {
+                existing.remove();
+                var arrow = el.querySelector('.feed-expand-icon');
+                if (arrow) arrow.textContent = '▸';
+                return;
+            }
+            var detailText = el.getAttribute('data-detail') || '';
+            if (!detailText) return;
+            var div = document.createElement('div');
+            div.className = 'feed-detail-expanded';
+            detailText.split('\n').forEach(function(line) {
+                var p = document.createElement('div');
+                p.textContent = line;
+                div.appendChild(p);
+            });
+            el.appendChild(div);
+            var arrow = el.querySelector('.feed-expand-icon');
+            if (arrow) arrow.textContent = '▾';
+        });
+    });
 }
 
 // ─── BIND ACTIONS ───

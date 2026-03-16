@@ -22,6 +22,15 @@
 .action-toast.feed-kill { border-left-color: var(--v-kill); color: var(--v-kill); }
 .action-toast.feed-heal { border-left-color: var(--v-heal); color: var(--v-success-light); }
 .action-toast.feed-hit { border-left-color: var(--v-gold-dim); }
+/* Toast D&D math breakdown (Solasta-style transparency) */
+.toast-detail {
+    font-size: 10px;
+    color: var(--v-text-dim);
+    margin-top: 2px;
+    opacity: 0.8;
+    letter-spacing: 0.2px;
+    font-family: var(--v-font-mono, monospace);
+}
 /* toastSlide → shared/animations.css */
 
 /* ─── TURN TIMER ─── */
