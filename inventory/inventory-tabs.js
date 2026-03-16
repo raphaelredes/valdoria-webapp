@@ -48,14 +48,16 @@ function renderItemsTab(c) {
             </div>
         </div>`;
 
-    // Filters with counts
-    html += '<div class="filters">';
+    // Filter dropdown
+    html += '<div class="filter-row">';
+    html += '<div class="filter-select-wrap">';
+    html += '<select class="filter-select" onchange="setFilter(this.value)">';
     filters.forEach(f => {
-        const cntBadge = f.cnt > 0 ? `<span class="filter-count">(${f.cnt})</span>` : '';
-        html += `<div class="filter-btn ${f.id === activeFilter ? 'active' : ''}"
-                onclick="setFilter('${f.id}')">${f.label}${cntBadge}</div>`;
+        const sel = f.id === activeFilter ? ' selected' : '';
+        const cnt = f.cnt > 0 ? ` (${f.cnt})` : '';
+        html += `<option value="${f.id}"${sel}>${f.label}${cnt}</option>`;
     });
-    html += '</div>';
+    html += '</select></div></div>';
 
     // Gem Fusion button (when gems are available for fusion)
     if ((activeFilter === 'all' || activeFilter === 'gem') && typeof getGemFusions === 'function') {

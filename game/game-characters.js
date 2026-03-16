@@ -162,7 +162,7 @@ function renderCharacterSelect(data) {
 
             // HP + MP bar percentages
             var hpPct = c.max_hp > 0 ? Math.round((c.hp / c.max_hp) * 100) : 100;
-            var hpColor = hpPct > 50 ? 'var(--v-hp, #4ade80)' : hpPct > 25 ? '#fbbf24' : '#ef4444';
+            var hpColor = hpPct > 60 ? '#4ade80' : hpPct > 40 ? '#e2a308' : hpPct > 20 ? '#f97316' : '#ef4444';
             var mpPct = c.max_mp > 0 ? Math.round((c.mp / c.max_mp) * 100) : 0;
             var hasMP = c.max_mp > 0;
 
@@ -191,7 +191,7 @@ function renderCharacterSelect(data) {
             if (lastPlayed) html += '<span>\u23f0 ' + lastPlayed + '</span>';
             html += '</div>';
             // HP + MP bars
-            var hpCritCls = hpPct <= 25 ? ' hp-critical' : '';
+            var hpCritCls = hpPct <= 20 ? ' hp-critical' : hpPct <= 40 ? ' hp-warn' : '';
             html += '<div class="char-card-bars">';
             html += '<div class="char-card-bar"><div class="char-card-bar-fill bar-hp' + hpCritCls + '" style="width:' + hpPct + '%;background:' + hpColor + '"></div></div>';
             if (hasMP) {

@@ -152,8 +152,8 @@ function _makeBarCustom(icon, cur, max, type, labelText) {
 
 function _hpBarClass(cur, max) {
     var pct = max > 0 ? (cur / max) : 1;
-    if (pct <= 0.25) return "hp-crit";
-    if (pct <= 0.5) return "hp-warn";
+    if (pct <= 0.20) return "hp-crit";
+    if (pct <= 0.40) return "hp-warn";
     return "hp";
 }
 

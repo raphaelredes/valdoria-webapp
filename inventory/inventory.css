@@ -3,7 +3,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 
-body { padding-bottom: 92px; }
+body { padding-bottom: 120px; }
 
 /* ── Header ── */
 .header {
@@ -94,30 +94,31 @@ body { padding-bottom: 92px; }
 }
 .view-toggle-btn.active { border-color: var(--v-gold-dim); color: var(--v-gold); }
 
-/* ── Filters ── */
-.filters {
-    display: flex; gap: 6px; margin-bottom: 8px;
-    overflow-x: auto; padding-bottom: 4px;
-    -webkit-mask-image: linear-gradient(to right, #000 90%, transparent);
-    mask-image: linear-gradient(to right, #000 90%, transparent);
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
+/* ── Filter Dropdown ── */
+.filter-row {
+    display: flex; gap: 6px; margin-bottom: 8px; align-items: center;
 }
-.filters::-webkit-scrollbar { display: none; }
-.filter-btn {
-    flex-shrink: 0; padding: 6px 8px;
-    min-height: 34px;
-    border-radius: var(--v-radius-pill);
-    font-size: 13px; border: 1px solid var(--v-border);
-    background: var(--v-bg-card); color: var(--v-text-dim);
-    cursor: pointer; transition: opacity 0.2s, transform 0.2s, background 0.2s, border-color 0.2s;
-    -webkit-tap-highlight-color: transparent;
-    scroll-snap-align: start;
+.filter-select-wrap {
+    flex: 1; position: relative;
 }
-.filter-btn.active {
-    background: var(--v-gold-dim); color: #fff;
-    border-color: var(--v-gold);
-    box-shadow: 0 0 8px rgba(196,149,58,0.2);
+.filter-select {
+    width: 100%; padding: 8px 32px 8px 12px;
+    min-height: 38px; border-radius: var(--v-radius-pill);
+    border: 1px solid var(--v-border); background: var(--v-bg-card);
+    color: var(--v-text-bright); font-size: 13px; font-family: var(--v-font);
+    cursor: pointer; outline: none;
+    -webkit-appearance: none; -moz-appearance: none; appearance: none;
+    transition: border-color 0.2s;
+}
+.filter-select:focus { border-color: var(--v-gold-dim); box-shadow: 0 0 10px rgba(196,149,58,0.15); }
+.filter-select-wrap::after {
+    content: '▼'; position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%); font-size: 10px; color: var(--v-text-dim);
+    pointer-events: none;
+}
+.filter-select option {
+    background: var(--v-bg-card); color: var(--v-text-bright);
+    font-family: var(--v-font); padding: 8px;
 }
 .filter-count {
     font-size: 11px; opacity: 0.7; margin-left: 2px;
@@ -1157,6 +1158,4 @@ body { padding-bottom: 92px; }
 .ss-bd-slot { color: var(--v-text); }
 .ss-bd-vals { color: var(--v-gold-dim); font-size: 11px; }
 
-/* ═══ P2: Upgrade filter chip ═══ */
-.filter-btn[onclick*="upgrade"] { border-color: var(--v-success); }
-.filter-btn[onclick*="upgrade"].active { background: rgba(76,175,80,0.15); border-color: var(--v-success); }
+

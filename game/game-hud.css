@@ -121,10 +121,10 @@
     pointer-events: none;
 }
 
-/* HP bar colors (health-based) */
+/* HP bar colors (health-based) — thresholds: >60% green, 41-60% amber, 21-40% orange, ≤20% red */
 .v-bar-fill.hp      { background: linear-gradient(90deg, #2d8f2d, #4caf50); }
-.v-bar-fill.hp-warn  { background: linear-gradient(90deg, #d4a017, #f5c800); }
-.v-bar-fill.hp-crit  { background: linear-gradient(90deg, #c62828, #e74c3c); animation: hpLowPulse 0.8s ease-in-out infinite; }
+.v-bar-fill.hp-warn  { background: linear-gradient(90deg, #c47a0a, #f59e0b); box-shadow: 0 0 4px rgba(245,158,11,0.25); }
+.v-bar-fill.hp-crit  { background: linear-gradient(90deg, #b91c1c, #ef4444); box-shadow: 0 0 6px rgba(239,68,68,0.35); animation: hpLowPulse 0.8s ease-in-out infinite; }
 
 /* Resource bar colors */
 .v-bar-fill.mp { background: linear-gradient(90deg, #1565c0, #42a5f5); }
