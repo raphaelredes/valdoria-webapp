@@ -3,7 +3,7 @@
 .v-img-popup-overlay {
     position: fixed;
     inset: 0;
-    z-index: 950;
+    z-index: 9900;
     background: rgba(15, 12, 8, 0.90);
     display: none;
     align-items: center;
@@ -56,8 +56,8 @@
     top: 8px;
     right: 8px;
     z-index: 2;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border: none;
     background: rgba(0, 0, 0, 0.5);
     color: var(--v-text, #d4c8b0);
