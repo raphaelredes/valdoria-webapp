@@ -57,6 +57,16 @@ function renderItemsTab(c) {
     });
     html += '</div>';
 
+    // Gem Fusion button (when gems are available for fusion)
+    if ((activeFilter === 'all' || activeFilter === 'gem') && typeof getGemFusions === 'function') {
+        var _fusions = getGemFusions();
+        if (_fusions.length > 0) {
+            html += '<div style="text-align:right;margin-bottom:6px;">'
+                + '<span class="btn-sell-junk" style="border-color:var(--v-info);" onclick="showGemFusionModal()">'
+                + vi('gem', 13) + ' Fundir Gemas (' + _fusions.length + ')</span></div>';
+        }
+    }
+
     // Quick action: Sell Junk
     const _junkItems = getJunkItems();
     const junkCount = _junkItems.reduce((sum, j) => sum + j.q, 0);

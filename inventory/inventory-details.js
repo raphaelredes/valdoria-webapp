@@ -271,6 +271,10 @@ function openItemDetail(name) {
     const lockCls = isLocked(name) ? 'border-color:var(--v-gold-dim)!important;color:var(--v-gold);' : '';
     html += `<button class="btn-unequip" onclick="doToggleLock('${esc(name)}');openItemDetail('${esc(name)}')"
             style="flex:0 0 44px;padding:10px;${lockCls}">${lockIcon}</button>`;
+    if (it.s) {
+        html += '<button class="btn-unequip" onclick="showCompareWith(\'' + esc(name) + '\')" style="flex:0 0 auto;padding:10px 12px;font-size:12px;">'
+            + vi('sword', 12) + ' vs</button>';
+    }
     if (it.s && !isProtected(tags)) {
         const canEquip = checkProficiency(it, activeTarget, name);
         if (canEquip) {
@@ -680,3 +684,103 @@ function _confirmRuneInscribe(slot, runeName) {
 }
 
 
+
+// ══════════════════════════════════════════════════
+//  P3: Gem Upgrade/Fusion (3 same gem → 1 next tier)
+// ══════════════════════════════════════════════════
+var GEM_UPGRADE_MAP = {
+    'Turquesa': 'Ametista',   // T1 HP → T2 HP
+    'Quartzo': 'Jade',         // T1 MP → T2 MP
+    '\u00d4nix': 'P\u00e9rola',         // T1 Def → T2 Def
+    'Ametista': 'Rubi',        // T2 HP → T3 HP
+    'Jade': 'Safira',          // T2 MP → T3 MP
+    'P\u00e9rola': 'Esmeralda',      // T2 Def → T3 Def
+};
+var GEM_UPGRADE_COST = 3;
+
+function getGemFusions() {
+    // Count gems in inventory (not socketed)
+    var gemCounts = {};
+    localInv.forEach(function(inv) {
+        if (inv.q <= 0) return;
+        var it = getItemData(inv.n);
+        if (!it || !(it.t || []).some(function(t) { return t === 'gem' || t === 'socketable'; })) return;
+        if (!GEM_UPGRADE_MAP[inv.n]) return; // T3 gems can't upgrade
+        gemCounts[inv.n] = (gemCounts[inv.n] || 0) + inv.q;
+    });
+    var fusions = [];
+    for (var gem in gemCounts) {
+        if (gemCounts[gem] >= GEM_UPGRADE_COST) {
+            fusions.push({ from: gem, to: GEM_UPGRADE_MAP[gem], count: gemCounts[gem] });
+        }
+    }
+    return fusions;
+}
+
+function showGemFusionModal() {
+    var fusions = getGemFusions();
+    var html = '<div class="modal-handle"></div>';
+    html += '<div class="modal-title">' + vi('gem', 16) + ' Fundir Gemas</div>';
+    html += '<div style="text-align:center;font-size:12px;color:var(--v-text-dim);margin-bottom:10px;">Combine 3 gemas iguais para criar uma gema superior.</div>';
+    if (!fusions.length) {
+        html += '<div style="text-align:center;color:var(--v-text-dim);font-size:12px;padding:16px;">Nenhuma fus\u00e3o dispon\u00edvel. Precisa de 3+ gemas iguais.</div>';
+    } else {
+        fusions.forEach(function(f) {
+            var fromIt = getItemData(f.from);
+            var toIt = getItemData(f.to);
+            var fromEmoji = fromIt ? fromIt.e || '' : '';
+            var toEmoji = toIt ? toIt.e || '' : '';
+            var fromTier = fromIt ? (fromIt.gt || 1) : 1;
+            var toTier = toIt ? (toIt.gt || 2) : 2;
+            var times = Math.floor(f.count / GEM_UPGRADE_COST);
+            html += '<div class="select-item" onclick="doGemFusion(\'' + esc(f.from) + '\',\'' + esc(f.to) + '\')" style="border-color:var(--v-gold-dim);">';
+            html += '<span class="si-emoji">' + fromEmoji + '</span>';
+            html += '<div style="flex:1;">';
+            html += '<div class="si-name">' + GEM_UPGRADE_COST + '\u00d7 ' + f.from + ' <span style="font-size:10px;color:var(--v-text-dim);">T' + fromTier + '</span></div>';
+            html += '<div class="si-desc" style="color:var(--v-success);">\u2192 ' + toEmoji + ' ' + f.to + ' <span style="font-size:10px;">T' + toTier + '</span>';
+            if (times > 1) html += ' <span style="opacity:0.7;">(at\u00e9 ' + times + 'x)</span>';
+            html += '</div></div></div>';
+        });
+    }
+    // Show gem counts
+    var gemInv = localInv.filter(function(inv) {
+        if (inv.q <= 0) return false;
+        var it = getItemData(inv.n);
+        return it && (it.t || []).some(function(t) { return t === 'gem' || t === 'socketable'; });
+    });
+    if (gemInv.length > 0) {
+        html += '<div style="margin-top:10px;font-size:11px;color:var(--v-text-dim);text-align:center;">';
+        gemInv.forEach(function(inv) {
+            var it = getItemData(inv.n);
+            html += (it ? it.e || '' : '') + ' ' + inv.n + ' x' + inv.q + '&nbsp;&nbsp;';
+        });
+        html += '</div>';
+    }
+    html += '<div class="detail-actions" style="margin-top:10px;">';
+    html += '<button class="btn-unequip" onclick="closeModal()">Fechar</button>';
+    html += '</div>';
+    showModal(html);
+}
+
+function doGemFusion(fromGem, toGem) {
+    // Remove 3 from local inventory
+    var inv = localInv.find(function(i) { return i.n === fromGem; });
+    if (!inv || inv.q < GEM_UPGRADE_COST) {
+        toast(vi('warn', 13) + ' Gemas insuficientes!', 'warn');
+        return;
+    }
+    inv.q -= GEM_UPGRADE_COST;
+    if (inv.q <= 0) localInv = localInv.filter(function(i) { return i.n !== fromGem; });
+    // Add result to inventory
+    addToLocalInv(toGem);
+    // Queue op
+    addOp({ t: 'gem_upgrade', gem: fromGem, result: toGem });
+    haptic('heavy');
+    var toIt = getItemData(toGem);
+    toast(vi('gem', 13) + ' ' + fromGem + ' \u00d73 \u2192 ' + (toIt ? toIt.e || '' : '') + ' ' + toGem + '!', 'ok');
+    updateHeader();
+    renderTab();
+    updateBottomBar();
+    // Reopen fusion modal to show updated counts
+    setTimeout(function() { showGemFusionModal(); }, 300);
+}
