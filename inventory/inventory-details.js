@@ -243,7 +243,7 @@ function openItemDetail(name) {
             + '<img src="' + it.img + '" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(196,149,58,0.3);cursor:pointer;" onclick="event.stopPropagation();showItemImage(\'' + esc(name) + '\')">'
             + '</div>';
     }
-    html += `<div class="modal-title">${it.e || '📦'} ${name}</div>`;
+    html += `<div class="modal-title">${it.e || '📦'} ${esc(name)}</div>`;
     html += `<div style="text-align:center;margin-bottom:10px;">
             <span class="detail-rarity-badge" style="background:${rarColor}22;color:${rarColor};border:1px solid ${rarColor}44;">
                 ${getRarityLabel(rarity)}

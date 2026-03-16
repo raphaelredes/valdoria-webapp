@@ -1462,7 +1462,7 @@
                 html += `<div class="sell-row ${selected ? 'selected' : ''} ${!npcBuys ? 'no-buy' : ''}">
                 <div class="sr-main" onclick="${npcBuys ? `toggleSell('${esc(inv.id)}','${esc(inv.n)}',${inv.q},${sellPrice})` : ''}">
                     <div class="sr-check">${selected ? '✓' : ''}</div>
-                    <span class="sr-emoji">${inv.img ? '<img class="sr-thumb" src="' + inv.img + '" alt="" onerror="this.style.display=\\'none\\';">' : (inv.e || '📦')}</span>
+                    <span class="sr-emoji">${inv.img ? '<img class="sr-thumb" src="' + inv.img + '" alt="" onerror="this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'\\';">' + '<span style="display:none">' + (inv.e || '📦') + '</span>' : (inv.e || '📦')}</span>
                     <div class="sr-info">
                         <div class="sr-name">${esc(inv.n)} ${inv.q > 1 ? '<span class="sr-qty-badge">x' + inv.q + '</span>' : ''}</div>
                         <div class="sr-price">${npcBuys ? sellPrice + ' GP' + (selected && qty > 0 ? ' · <span class="sr-total">' + (sellPrice * qty) + ' GP total</span>' : '') : '❌ NPC não compra'}</div>
@@ -1570,7 +1570,7 @@
             let html = '<div class="modal-handle"></div>';
             if (item.img) {
                 html += '<div style="text-align:center;margin-bottom:6px;">'
-                    + '<img src="' + item.img + '" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(196,149,58,0.3);cursor:pointer;" onclick="event.stopPropagation();showItemImage(\'' + esc(item.n) + '\',\'' + item.img + '\',\'' + (item.e||'') + '\',' + JSON.stringify(item.d||{}) + ')">'
+                    + '<img src="' + item.img + '" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(196,149,58,0.3);cursor:pointer;" onclick="event.stopPropagation();showItemImage(\'' + esc(item.n) + '\',\'' + esc(item.img) + '\',\'' + esc(item.e||'') + '\',' + JSON.stringify(item.d||{}) + ')">'
                     + '</div>';
             }
             html += `<div class="modal-title">${item.e || '📦'} ${esc(item.n)}</div>`;

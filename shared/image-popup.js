@@ -2,6 +2,10 @@
 (function () {
     "use strict";
 
+    function _esc(s) {
+        return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
     var _overlay = null;
     var _busy = false;
 
@@ -64,8 +68,8 @@
         if (cfg.stats && cfg.stats.length > 0) {
             statsEl.innerHTML = cfg.stats.map(function (s) {
                 return '<span class="v-img-popup-stat">' +
-                    (s.icon || "") + ' ' + (s.label || "") +
-                    ' <span class="v-img-popup-stat-val">' + (s.value || "") + '</span>' +
+                    _esc(s.icon) + ' ' + _esc(s.label) +
+                    ' <span class="v-img-popup-stat-val">' + _esc(s.value) + '</span>' +
                 '</span>';
             }).join("");
             statsEl.style.display = "";
