@@ -391,16 +391,15 @@ function showBark(situation) {
     el.textContent = pick;
     document.body.appendChild(el);
 
-    // Position near player token (offset from center of screen)
-    // playerScreenX/Y are canvas coords — convert via camera offset
+    // Position near player token (centered above screen center)
     var canvas = document.getElementById('explore-canvas');
     if (canvas) {
         var rect = canvas.getBoundingClientRect();
         var cx = rect.left + rect.width / 2;
         var cy = rect.top + rect.height / 2;
-        // Bark appears above and slightly right of player
-        el.style.left = Math.max(20, Math.min(rect.width - 160, cx - 70)) + 'px';
-        el.style.top = Math.max(20, cy - 80) + 'px';
+        // Bark appears centered above player token, clamped to viewport
+        el.style.left = Math.max(20, Math.min(window.innerWidth - 100, cx)) + 'px';
+        el.style.top = Math.max(20, Math.min(window.innerHeight - 60, cy - 80)) + 'px';
     }
 
     // Auto-remove after reading time
@@ -926,6 +925,12 @@ function performStatCheck(poi, choice) {
             }
 
             if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
+
+            // Bark triggers for stat check results
+            if (typeof showBark === 'function') {
+                if (roll >= 20) showBark('crit_hit');
+                else if (!success && roll <= 3) showBark('miss');
+            }
 
             _showCheckSkip(overlay, success, choice, poi);
         });
