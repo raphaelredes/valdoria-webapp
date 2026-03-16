@@ -24,7 +24,7 @@
     background: rgba(255,255,255,0.04);
     opacity: 0;
     transform: translateY(8px);
-    transition: opacity var(--v-transition-base) ease, transform 0.25s ease;
+    transition: opacity var(--v-transition-base) ease, transform var(--v-transition-base) ease;
 }
 
 .dr-entry.dr-visible {
@@ -32,9 +32,9 @@
     transform: translateY(0);
 }
 
-.dr-entry.dr-player { border-left: 3px solid #c4953a; }
-.dr-entry.dr-ally   { border-left: 3px solid #b0b8c0; }
-.dr-entry.dr-enemy  { border-left: 3px solid #7b2020; }
+.dr-entry.dr-player { border-left: 3px solid var(--v-gold); }
+.dr-entry.dr-ally   { border-left: 3px solid var(--v-silver); }
+.dr-entry.dr-enemy  { border-left: 3px solid var(--v-crimson); }
 
 /* ─── Icon column ─── */
 .dr-icon {
@@ -82,7 +82,7 @@
 }
 
 .dr-dice-value.dr-player-val { color: var(--v-gold, #c4953a); }
-.dr-dice-value.dr-ally-val   { color: #b0b8c0; }
+.dr-dice-value.dr-ally-val   { color: var(--v-silver); }
 .dr-dice-value.dr-enemy-val  { color: #c05050; }
 
 /* ─── Formula (optional, e.g. "d20+2") ─── */

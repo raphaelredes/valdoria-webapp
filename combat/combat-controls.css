@@ -74,7 +74,7 @@
     font-weight: 600;
     z-index: var(--v-z-dropdown, 200);
     opacity: 0;
-    transition: opacity var(--v-transition-base), transform 0.3s;
+    transition: opacity var(--v-transition-base), transform var(--v-transition-base);
     pointer-events: none;
 }
 .timer-toast.visible {

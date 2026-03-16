@@ -24,13 +24,13 @@
     margin-bottom: var(--v-space-md);
 }
 .exh-modal-source {
-    font-size: 12px; color: var(--v-text-dim); margin-bottom: 10px;
+    font-size: var(--v-font-md); color: var(--v-text-dim); margin-bottom: 10px;
 }
 .exh-modal-effects {
     text-align: left; margin: 0 4px 12px;
 }
 .exh-modal-effect {
-    font-size: 12px; color: var(--v-text-dim); padding: 3px 0;
+    font-size: var(--v-font-md); color: var(--v-text-dim); padding: 3px 0;
     border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 .exh-modal-effect.current {
@@ -44,7 +44,7 @@
     line-height: 1.5;
 }
 .exh-modal-tip {
-    font-size: 11px; color: var(--v-text-dim); margin-bottom: 12px;
+    font-size: var(--v-font-sm); color: var(--v-text-dim); margin-bottom: 12px;
     font-style: italic;
 }
 .exh-modal-btn {

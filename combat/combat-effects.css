@@ -153,7 +153,7 @@
 #app.phase-fade-out {
     opacity: 0;
     transform: scale(0.97) translateY(-4px);
-    transition: opacity var(--v-transition) ease-out, transform 200ms ease-out;
+    transition: opacity var(--v-transition) ease-out, transform var(--v-transition) ease-out;
 }
 #app.phase-fade-in {
     animation: phaseFadeIn 300ms ease-out;
@@ -240,7 +240,7 @@
 .spectator-detail {
     text-align: center;
     font-size: var(--v-font-md);
-    color: #a09484;
+    color: var(--v-text-dim);
     padding: var(--v-space-xs) 0;
 }
 

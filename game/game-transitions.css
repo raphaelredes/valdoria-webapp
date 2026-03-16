@@ -5,7 +5,7 @@
 .screen.fade-out {
     opacity: 0;
     transform: translateX(-20px);
-    transition: opacity var(--v-transition-base) ease, transform 0.25s ease;
+    transition: opacity var(--v-transition-base) ease, transform var(--v-transition-base) ease;
 }
 .screen.fade-in {
     animation: slideFromRight 0.3s var(--v-ease-snap, var(--v-ease-snap));
@@ -19,7 +19,7 @@
 .screen.slide-back-out {
     opacity: 0;
     transform: translateX(20px);
-    transition: opacity var(--v-transition-base) ease, transform 0.25s ease;
+    transition: opacity var(--v-transition-base) ease, transform var(--v-transition-base) ease;
 }
 .screen.slide-back-in {
     animation: slideFromLeft 0.3s var(--v-ease-snap, var(--v-ease-snap));

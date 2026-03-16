@@ -60,7 +60,7 @@
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius-sm);
     cursor: pointer;
-    transition: background var(--v-transition-fast), border-color 0.15s;
+    transition: background var(--v-transition-fast), border-color var(--v-transition-fast);
 }
 
 .skill-card:active {

@@ -455,7 +455,7 @@
 .divider-rune {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 8px; color: var(--v-gold, #c4953a);
+    font-size: var(--v-font-xs); color: var(--v-gold, #c4953a);
     background: #1a1510; padding: 0 12px;
     animation: runePulse 2s ease-in-out infinite;
 }
@@ -474,13 +474,13 @@
     content: ''; position: absolute; right: 0; top: -2px;
     width: 7px; height: 7px; border-radius: 50%;
     background: #d4aa4a;
-    box-shadow: 0 0 10px #c4953a, 0 0 20px rgba(196,149,58,0.4);
+    box-shadow: 0 0 10px var(--v-gold), 0 0 20px rgba(196,149,58,0.4);
 }
 
 /* ── Tips ── */
 .loading-tip-area { min-height: 20px; animation: loadFadeIn 0.5s ease 1s both; }
 .loading-tip {
-    font-size: 13px; color: var(--v-text-dim, #8a7a68);
+    font-size: var(--v-font-base); color: var(--v-text-dim, #8a7a68);
     text-align: center; max-width: 290px;
     line-height: 1.5; font-style: italic;
     font-family: var(--v-font, 'MedievalSharp'), serif;
@@ -684,7 +684,7 @@
     font-family: var(--v-font, 'MedievalSharp', serif);
     font-size: var(--v-font-base);
     cursor: pointer;
-    transition: background var(--v-transition), border-color 0.2s;
+    transition: background var(--v-transition), border-color var(--v-transition);
 }
 .loading-retry:active {
     background: rgba(196,149,58,0.3);
@@ -704,7 +704,7 @@
 .loading-tip-area .tip-exit {
     opacity: 0;
     transform: translateY(-6px);
-    transition: opacity var(--v-transition-base), transform 0.3s;
+    transition: opacity var(--v-transition-base), transform var(--v-transition-base);
 }
 .loading-tip-area .tip-enter {
     animation: tipEnter 0.35s ease-out;

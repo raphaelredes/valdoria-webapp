@@ -8,7 +8,7 @@
     border-radius: var(--v-radius-sm);
     overflow: hidden;
     cursor: pointer;
-    transition: border-color var(--v-transition) ease, box-shadow 0.2s ease;
+    transition: border-color var(--v-transition) ease, box-shadow var(--v-transition) ease;
     animation: entitySlideIn 0.4s ease-out both;
 }
 .entity:nth-child(1) { animation-delay: 0s; }
@@ -236,7 +236,7 @@
 .entity-details {
     max-height: 0;
     overflow: hidden;
-    transition: max-height var(--v-transition-base) cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+    transition: max-height var(--v-transition-base) cubic-bezier(0.4, 0, 0.2, 1), padding var(--v-transition-base) ease;
     padding: 0 var(--v-space-md);
 }
 .entity.expanded .entity-details {
@@ -261,7 +261,7 @@
     background: #1e1a16;
     border-radius: var(--v-radius-xs);
     overflow: hidden;
-    border: 1px solid #3a3028;
+    border: 1px solid var(--v-bg-card-hover);
     position: relative;
 }
 .entity.player .bar-track {

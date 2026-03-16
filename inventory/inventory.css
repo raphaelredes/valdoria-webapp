@@ -14,11 +14,11 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     position: sticky; top: 0; z-index: var(--v-z-header);
 }
 /* ::before accent line removed — Game Hub style */
-.header h1 { font-size: 17px; color: var(--v-gold); margin-bottom: 4px;
+.header h1 { font-size: var(--v-font-xl); color: var(--v-gold); margin-bottom: 4px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     letter-spacing: 2px; text-transform: uppercase; }
 .header-stats {
-    font-size: 13px; color: var(--v-text-dim);
+    font-size: var(--v-font-base); color: var(--v-text-dim);
     display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
 }
 .header-stats .hs-hp { color: var(--v-danger); }
@@ -36,8 +36,8 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .tab {
     flex: 1; text-align: center;
-    padding: 8px 10px; border-radius: var(--v-radius-pill);
-    font-size: 13px; border: 1px solid var(--v-border);
+    padding: var(--v-space-md) var(--v-space-md-lg);
+    font-size: var(--v-font-base); border: 1px solid var(--v-border);
     background: var(--v-bg-card); color: var(--v-text-dim);
     cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s; white-space: nowrap;
     min-height: 36px; display: flex; align-items: center; justify-content: center;
@@ -70,22 +70,22 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .search-clear {
     position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
     width: 32px; height: 32px; border-radius: 50%; border: none;
-    background: var(--v-border); color: var(--v-text-bright); font-size: 14px;
+    background: var(--v-border); color: var(--v-text-bright); font-size: var(--v-font-body);
     cursor: pointer; display: none; align-items: center; justify-content: center;
     padding: 0; line-height: 1;
 }
 .search-clear.visible { display: flex; }
 .sort-btn {
-    padding: 8px 10px; border-radius: var(--v-radius-pill);
+    padding: var(--v-space-md) var(--v-space-md-lg);
     border: 1px solid var(--v-border); background: var(--v-bg-card);
-    color: var(--v-text-dim); font-size: 13px; cursor: pointer;
+    color: var(--v-text-dim); font-size: var(--v-font-base); cursor: pointer;
     white-space: nowrap; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     min-height: 44px; min-width: 44px;
     display: flex; align-items: center; justify-content: center; gap: 4px;
 }
 .sort-btn.active { border-color: var(--v-gold-dim); color: var(--v-gold); }
 .view-toggle-btn {
-    padding: 8px 10px; border-radius: var(--v-radius-pill);
+    padding: var(--v-space-md) var(--v-space-md-lg);
     border: 1px solid var(--v-border); background: var(--v-bg-card);
     color: var(--v-text-dim); cursor: pointer;
     white-space: nowrap; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
@@ -113,7 +113,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .filter-select:focus { border-color: var(--v-gold-dim); box-shadow: 0 0 10px rgba(196,149,58,0.15); }
 .filter-select-wrap::after {
     content: '▼'; position: absolute; right: 12px; top: 50%;
-    transform: translateY(-50%); font-size: 10px; color: var(--v-text-dim);
+    transform: translateY(-50%); font-size: var(--v-font-xs); color: var(--v-text-dim);
     pointer-events: none;
 }
 .filter-select option {
@@ -176,7 +176,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .item-card {
     background: linear-gradient(165deg, var(--v-bg-card) 0%, var(--v-bg-raised) 100%);
     border: 1px solid var(--v-border); border-radius: var(--v-radius);
-    padding: 8px; cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
+    padding: var(--v-space-md);
     position: relative; overflow: hidden;
     border-left: 3px solid var(--v-border);
 }
@@ -247,21 +247,21 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 
 .item-card .ic-name {
-    font-size: 13px; font-weight: 600; color: var(--v-text-bright);
+    font-size: var(--v-font-base); font-weight: 600; color: var(--v-text-bright);
     text-shadow: 0 1px 3px rgba(0,0,0,0.4);
     margin-top: var(--v-space-xs);
     overflow: hidden; text-overflow: ellipsis;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
 .item-card .ic-meta {
-    font-size: 12px; color: var(--v-text-dim); margin-top: 3px;
+    font-size: var(--v-font-md); color: var(--v-text-dim); margin-top: 3px;
 }
 .item-card .ic-badges {
     position: absolute; top: 5px; right: 6px;
     display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
 }
 .item-card .ic-qty {
-    font-size: 11px; color: var(--v-gold); font-weight: 700;
+    font-size: var(--v-font-sm); color: var(--v-gold); font-weight: 700;
     background: rgba(196,149,58,0.15); padding: 1px 6px;
     border-radius: var(--v-radius-sm);
 }
@@ -272,7 +272,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     box-shadow: 0 1px 4px rgba(196,149,58,0.3);
 }
 .item-card .ic-set-badge {
-    font-size: 10px; color: var(--v-info); font-weight: 600;
+    font-size: var(--v-font-xs); color: var(--v-info); font-weight: 600;
     background: rgba(91,155,213,0.12); padding: 1px 5px;
     border-radius: var(--v-radius-sm);
 }
@@ -360,7 +360,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     font-size: var(--v-font-base); font-weight: 600;
     font-family: var(--v-font);
     cursor: pointer;
-    transition: opacity var(--v-transition), transform var(--v-transition), background 0.2s, border-color 0.2s;
+    transition: opacity var(--v-transition), transform var(--v-transition), background var(--v-transition), border-color var(--v-transition);
     -webkit-tap-highlight-color: transparent;
 }
 .auto-equip-btn:active {
@@ -385,7 +385,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm);
     cursor: pointer;
-    transition: opacity var(--v-transition-fast), transform 0.15s, background 0.15s, border-color 0.15s;
+    transition: opacity var(--v-transition-fast), transform var(--v-transition-fast), background var(--v-transition-fast), border-color var(--v-transition-fast);
     position: relative;
     min-height: 44px;
     -webkit-tap-highlight-color: transparent;
@@ -446,7 +446,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     font-size: var(--v-font-md);
     font-family: var(--v-font);
     cursor: pointer;
-    transition: opacity var(--v-transition), transform var(--v-transition), background 0.2s, border-color 0.2s;
+    transition: opacity var(--v-transition), transform var(--v-transition), background var(--v-transition), border-color var(--v-transition);
     text-align: center;
     -webkit-tap-highlight-color: transparent;
 }
@@ -500,12 +500,12 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .equip-slot:not(.filled) .es-icon { opacity: 0.3; }
 .equip-slot .es-label {
-    font-size: 11px; color: var(--v-text-dim);
+    font-size: var(--v-font-sm); color: var(--v-text-dim);
     text-transform: uppercase; letter-spacing: 0.5px;
 }
 .equip-slot .es-icon { font-size: var(--v-font-2xl); margin: 2px 0; }
 .equip-slot .es-item {
-    font-size: 12px; color: var(--v-text-bright);
+    font-size: var(--v-font-md); color: var(--v-text-bright);
     font-weight: 600; line-height: 1.2;
     overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap; max-width: 100%;
@@ -516,7 +516,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .es-gem-dot { width: 8px; height: 8px; border-radius: 50%;
     background: var(--v-border); border: 1px solid var(--v-text-dim); }
 .es-gem-dot.filled { background: var(--v-gold); border-color: var(--v-gold); }
-.es-rune-dot { font-size: 8px; color: var(--v-info); }
+.es-rune-dot { font-size: var(--v-font-xs); color: var(--v-info); }
 
 /* ── Stats Summary Bar ── */
 .stats-summary {
@@ -525,7 +525,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     border: 1px solid var(--v-border); justify-content: center; flex-wrap: wrap;
 }
 .ss-item {
-    font-size: 13px; padding: 3px 8px; border-radius: var(--v-radius-pill);
+    font-size: var(--v-font-base); padding: 3px 8px; border-radius: var(--v-radius-pill);
     background: rgba(196,149,58,0.08); color: var(--v-text-dim);
 }
 .ss-item b { color: var(--v-text-bright); }
@@ -535,8 +535,8 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     background: var(--v-bg-card); border: 1px solid var(--v-border);
     border-radius: var(--v-radius); padding: 10px; margin-bottom: 10px;
 }
-.set-title { font-size: 13px; font-weight: 600; color: var(--v-gold); margin-bottom: 4px; }
-.set-pieces { font-size: 12px; color: var(--v-text-dim); }
+.set-title { font-size: var(--v-font-base); font-weight: 600; color: var(--v-gold); margin-bottom: 4px; }
+.set-pieces { font-size: var(--v-font-md); color: var(--v-text-dim); }
 .set-piece { margin: 2px 0; }
 .set-piece.owned { color: var(--v-success); }
 .set-piece.missing { color: var(--v-text-dim); opacity: 0.5; }
@@ -549,7 +549,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .ally-card {
     background: var(--v-bg-card); border: 1px solid var(--v-border);
     border-radius: var(--v-radius); padding: 10px 12px;
-    margin-bottom: 6px; cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
+    margin-bottom: var(--v-space-sm);
 }
 .ally-card:active { transform: scale(0.97); }
 .ally-card.ally-dead { opacity: 0.55; }
@@ -558,21 +558,21 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .ally-ico { font-size: 20px; flex-shrink: 0; }
 .ally-name-col { flex: 1; min-width: 0; }
-.ally-name { font-size: 13px; font-weight: 600; color: var(--v-text-bright); }
-.ally-class { font-size: 11px; color: var(--v-text-dim); display: block; }
+.ally-name { font-size: var(--v-font-base); font-weight: 600; color: var(--v-text-bright); }
+.ally-class { font-size: var(--v-font-sm); color: var(--v-text-dim); display: block; }
 .ally-lvl-badge {
-    font-size: 10px; color: var(--v-gold-dim, #b8860b);
+    font-size: var(--v-font-xs); color: var(--v-gold-dim, #b8860b);
     background: rgba(196, 149, 58, 0.1); padding: 1px 4px;
     border-radius: var(--v-radius-xs);
 }
 .ally-aff-badge {
-    font-size: 10px; color: var(--v-text-dim);
+    font-size: var(--v-font-xs); color: var(--v-text-dim);
     margin-left: var(--v-space-sm);
 }
-.ally-ac { font-size: 12px; color: var(--v-silver); flex-shrink: 0; }
+.ally-ac { font-size: var(--v-font-md); color: var(--v-silver); flex-shrink: 0; }
 .ally-bars { margin-top: 6px; }
 .ally-bar-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
-.ally-bar-label { font-size: 10px; color: var(--v-text-dim); min-width: 55px; }
+.ally-bar-label { font-size: var(--v-font-xs); color: var(--v-text-dim); min-width: 55px; }
 .ally-bar-track {
     flex: 1; height: 5px; background: rgba(255,255,255,0.08);
     border-radius: var(--v-radius-xs);
@@ -608,14 +608,14 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     cursor: grab;
 }
 .modal-title {
-    font-size: 16px; font-weight: 700; color: var(--v-gold);
+    font-size: var(--v-font-xl); font-weight: 700; color: var(--v-gold);
     margin-bottom: var(--v-space-lg);
 }
 
 /* ── Modal: Item Detail ── */
 .detail-row {
     display: flex; justify-content: space-between;
-    padding: 4px 0; font-size: var(--v-font-base);
+    padding: var(--v-space-sm) 0;
 }
 .detail-label { color: var(--v-text-dim); }
 .detail-val { color: var(--v-text-bright); font-weight: 600; }
@@ -626,7 +626,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     font-size: var(--v-font-md); font-weight: 600; margin-bottom: 8px;
 }
 .detail-desc {
-    font-size: 13px; color: var(--v-text-dim);
+    font-size: var(--v-font-base); color: var(--v-text-dim);
     font-style: italic; margin: 8px 0; line-height: 1.5;
 }
 .detail-tags {
@@ -659,20 +659,20 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     margin-bottom: var(--v-space-md);
     border-bottom: 1px solid var(--v-border);
 }
-.cp-title { font-size: 12px; font-weight: 600; color: var(--v-gold); }
+.cp-title { font-size: var(--v-font-md); font-weight: 600; color: var(--v-gold); }
 .cp-vs {
-    font-size: 11px; color: var(--v-text-dim);
+    font-size: var(--v-font-sm); color: var(--v-text-dim);
     max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .cp-row {
     display: grid;
     grid-template-columns: 70px 1fr 20px 1fr 40px;
     gap: var(--v-space-sm);
-    padding: 3px 0; font-size: var(--v-font-md);
+    padding: var(--v-space-xs) 0;
 }
 .cp-label { color: var(--v-text-dim); white-space: nowrap; }
 .cp-cur { text-align: right; color: var(--v-text-dim); }
-.cp-arrow { text-align: center; color: var(--v-text-dim); font-size: 10px; }
+.cp-arrow { text-align: center; color: var(--v-text-dim); font-size: var(--v-font-xs); }
 .cp-new { text-align: left; font-weight: 600; }
 .cp-delta { text-align: right; font-weight: 700; font-size: var(--v-font-sm); }
 .cp-up { color: var(--v-success); }
@@ -708,8 +708,8 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .btn-sell-junk {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 10px; border-radius: var(--v-radius); border: 1px solid var(--v-warning);
-    background: rgba(255,152,0,0.1); color: var(--v-warning); font-size: 12px;
+    padding: var(--v-space-sm) var(--v-space-md-lg);
+    background: rgba(255,152,0,0.1); color: var(--v-warning); font-size: var(--v-font-md);
     cursor: pointer; white-space: nowrap;
 }
 .btn-disabled {
@@ -726,7 +726,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     width: 44px; height: 44px; border-radius: 50%;
     border: 2px dashed var(--v-border); display: flex;
     align-items: center; justify-content: center;
-    font-size: 18px; cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
+    font-size: var(--v-font-2xl); cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     background: var(--v-bg-card);
 }
 .gem-socket.filled {
@@ -749,9 +749,9 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .compat-list { margin-top: 10px; }
 .compat-item {
     display: flex; align-items: center; gap: 8px;
-    padding: 8px; background: var(--v-bg-card);
+    padding: var(--v-space-md);
     border-radius: var(--v-radius-sm); margin-bottom: 4px;
-    cursor: pointer; font-size: 13px; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
+    cursor: pointer; font-size: var(--v-font-base); transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     border: 1px solid transparent;
 }
 .compat-item:active { transform: scale(0.98); }
@@ -763,9 +763,9 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     box-shadow: 0 0 8px rgba(231,76,60,0.1); }
 .compat-emoji { font-size: var(--v-font-2xl); flex-shrink: 0; }
 .compat-info { flex: 1; overflow: hidden; }
-.compat-name { font-size: 13px; font-weight: 600; color: var(--v-text-bright);
+.compat-name { font-size: var(--v-font-base); font-weight: 600; color: var(--v-text-bright);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.compat-stats { font-size: 12px; color: var(--v-text-dim); }
+.compat-stats { font-size: var(--v-font-md); color: var(--v-text-dim); }
 .compat-delta {
     font-size: var(--v-font-md); font-weight: 600; flex-shrink: 0;
     padding: var(--v-space-xs) var(--v-space-sm);
@@ -814,15 +814,15 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 /* ── Gem/Rune Select List ── */
 .select-item {
     display: flex; align-items: center; gap: 10px;
-    padding: 10px; background: var(--v-bg-card);
+    padding: var(--v-space-md-lg);
     border-radius: var(--v-radius); margin-bottom: 6px;
     cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     border: 1px solid var(--v-border);
 }
 .select-item:active { transform: scale(0.98); }
 .select-item .si-emoji { font-size: 20px; }
-.select-item .si-name { font-size: 13px; color: var(--v-text-bright); font-weight: 600; }
-.select-item .si-desc { font-size: 12px; color: var(--v-text-dim); }
+.select-item .si-name { font-size: var(--v-font-base); color: var(--v-text-bright); font-weight: 600; }
+.select-item .si-desc { font-size: var(--v-font-md); color: var(--v-text-dim); }
 
 /* Navigation bar removed — uses Telegram back button instead */
 
@@ -848,7 +848,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .confirm-btn {
     width: 100%; padding: 12px; border: none;
-    border-radius: var(--v-radius); font-size: 14px;
+    border-radius: var(--v-radius); font-size: var(--v-font-body);
     font-weight: 700; cursor: pointer; transition: opacity var(--v-transition), transform 0.2s, background 0.2s, border-color 0.2s;
     font-family: var(--v-font);
     background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
@@ -923,8 +923,8 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     max-height: 300px; overflow-y: auto; margin: 8px 0;
 }
 .confirm-op {
-    padding: 6px 0; border-bottom: 1px solid var(--v-border);
-    font-size: 13px; color: var(--v-text);
+    padding: var(--v-space-sm) 0;
+    font-size: var(--v-font-base); color: var(--v-text);
 }
 .confirm-op:last-child { border-bottom: none; }
 
@@ -937,7 +937,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ── Section Title ── */
 .section-title {
-    font-size: 13px; font-weight: 600; color: var(--v-gold);
+    font-size: var(--v-font-base); font-weight: 600; color: var(--v-gold);
     margin: var(--v-space-md) 0 var(--v-space-sm);
     border-bottom: 1px solid var(--v-border);
 }
@@ -954,7 +954,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     padding: var(--v-space-md) var(--v-space-lg);
     box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
 }
-.selection-bar .sel-count { flex: 1; font-size: 13px; color: var(--v-text-dim); }
+.selection-bar .sel-count { flex: 1; font-size: var(--v-font-base); color: var(--v-text-dim); }
 .sel-action-btn {
     width: 40px; height: 36px;
     border: 1px solid var(--v-border);
@@ -973,7 +973,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 .sel-btn-discard { color: var(--v-danger); border-color: rgba(231,76,60,0.3); }
 .sel-check {
     position: absolute; top: -2px; right: -2px; width: 20px; height: 20px;
-    border-radius: 4px; border: 1.5px solid var(--v-text-dim);
+    border-radius: var(--v-radius-xs);
     display: flex; align-items: center; justify-content: center;
     background: transparent; transition: opacity 0.15s, transform 0.15s, background 0.15s, border-color 0.15s;
     padding: var(--v-space-md-lg);
@@ -989,7 +989,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .loading-overlay.hidden { opacity: 0; pointer-events: none; }
 .loading-spinner { font-size: 36px; animation: v-spin 1.5s linear infinite; }
-.loading-text { font-size: 14px; color: var(--v-text-dim); margin-top: 12px; }
+.loading-text { font-size: var(--v-font-body); color: var(--v-text-dim); margin-top: 12px; }
 
 /* ── Animations ── */
 .fade-in { animation: v-fadeIn 0.3s ease; }
@@ -1019,7 +1019,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     text-shadow: 0 0 20px rgba(196,149,58,0.4);
 }
 .vault-sub {
-    font-size: 12px; color: var(--v-text-dim); margin-top: 4px;
+    font-size: var(--v-font-md); color: var(--v-text-dim); margin-top: 4px;
 }
 
 /* ── Long-press preview tooltip (#2) ── */
@@ -1032,11 +1032,11 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
     box-shadow: 0 4px 16px rgba(0,0,0,0.5);
     pointer-events: none;
     opacity: 0; transform: scale(0.9);
-    transition: opacity var(--v-transition-fast), transform 0.15s;
+    transition: opacity var(--v-transition-fast), transform var(--v-transition-fast);
     max-width: 200px; font-size: var(--v-font-md);
 }
 .lp-tooltip.visible { opacity: 1; transform: scale(1); }
-.lp-tooltip .lpt-name { font-size: 13px; font-weight: 700; color: var(--v-text-bright); margin-bottom: 3px; }
+.lp-tooltip .lpt-name { font-size: var(--v-font-base); font-weight: 700; color: var(--v-text-bright); margin-bottom: 3px; }
 .lp-tooltip .lpt-stat { color: var(--v-text-dim); line-height: 1.4; }
 .lp-tooltip .lpt-rarity { font-size: var(--v-font-sm); font-weight: 600; margin-top: 2px; }
 
@@ -1117,7 +1117,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 /* ═══ P2: Upgrade badge on item cards ═══ */
 .ic-upgrade {
     position: absolute; top: 3px; right: 3px;
-    font-size: 10px; color: var(--v-success);
+    font-size: var(--v-font-xs); color: var(--v-success);
     opacity: 0.85; pointer-events: none;
     text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
@@ -1131,7 +1131,7 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 
 /* ═══ P2: Stats breakdown ═══ */
 .ss-expand-hint {
-    font-size: 10px; color: var(--v-text-dim);
+    font-size: var(--v-font-xs); color: var(--v-text-dim);
     text-align: center; margin-top: 2px;
     opacity: 0.6;
 }
@@ -1141,11 +1141,11 @@ body { padding-bottom: 160px; /* fallback — JS adjusts dynamically via updateB
 }
 .ss-bd-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 3px 0; font-size: var(--v-font-md); border-bottom: 1px solid rgba(74,56,40,0.2);
+    padding: var(--v-space-xs) 0;
 }
 .ss-bd-row:last-child { border-bottom: none; }
 .ss-bd-slot { color: var(--v-text); }
-.ss-bd-vals { color: var(--v-gold-dim); font-size: 11px; }
+.ss-bd-vals { color: var(--v-gold-dim); font-size: var(--v-font-sm); }
 
 
 

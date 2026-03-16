@@ -159,7 +159,7 @@
     font-size: var(--v-font-base);
     text-align: left;
     cursor: pointer;
-    transition: transform var(--v-transition-fast) ease, background var(--v-transition-fast), border-color 0.15s;
+    transition: transform var(--v-transition-fast) ease, background var(--v-transition-fast), border-color var(--v-transition-fast);
 }
 .exit-option-btn:active {
     transform: scale(0.97);
@@ -169,7 +169,7 @@
 .exit-option-icon { display: none; }
 .exit-option-info { flex: 1; }
 .exit-option-title { font-weight: 600; margin-bottom: 2px; }
-.exit-option-desc { font-size: 12px; color: var(--v-text-dim, #a09484); }
+.exit-option-desc { font-size: var(--v-font-md); color: var(--v-text-dim, #a09484); }
 
 /* ═══════════════════════════════════════════
    RETURN JOURNEY OVERLAY

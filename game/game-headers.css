@@ -236,7 +236,7 @@
 }
 
 .v-ally-card--dead {
-    border-left-color: #7b2020;
+    border-left-color: var(--v-crimson);
     opacity: 0.7;
 }
 

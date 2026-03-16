@@ -476,7 +476,7 @@
     padding: var(--v-space-sm) var(--v-space-md-lg);
     margin: var(--v-space-sm) 0;
     background: rgba(46, 125, 50, 0.08);
-    border-left: 3px solid #4caf50;
+    border-left: 3px solid var(--v-success);
     border-radius: var(--v-radius-sm, 6px);
     font-size: var(--v-font-base);
     color: var(--v-text);

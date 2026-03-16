@@ -79,10 +79,10 @@
     width: 44px; height: 44px; border-radius: 50%;
     background: rgba(68, 170, 100, 0.12);
     border: 1px solid rgba(68, 170, 100, 0.3);
-    color: #d4c8b0; font-size: var(--v-font-xl);
+    color: var(--v-text); font-size: var(--v-font-xl);
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; min-width: 44px;
-    transition: background var(--v-transition) ease, border-color var(--v-transition-base) ease, box-shadow 300ms ease;
+    transition: background var(--v-transition) ease, border-color var(--v-transition-base) ease, box-shadow var(--v-transition-base) ease;
 }
 .btn-camp-rest:active { background: rgba(68, 170, 100, 0.25); transform: scale(0.94); }
 .btn-camp-rest.has-exhaustion {
@@ -145,7 +145,7 @@
     border-radius: 50%;
     background: rgba(255,255,255,0.12);
     border: 1px solid rgba(255,255,255,0.18);
-    transition: background var(--v-transition-base) ease, box-shadow 0.3s ease;
+    transition: background var(--v-transition-base) ease, box-shadow var(--v-transition-base) ease;
 }
 .pip.filled {
     background: var(--v-crimson, #7b2020);
@@ -207,7 +207,7 @@
     display: none;
 }
 .fatigue-badge.fatigue-lv1 {
-    color: #c4953a;
+    color: var(--v-gold);
     background: rgba(196, 149, 58, 0.15);
     border: 1px solid rgba(196, 149, 58, 0.3);
 }

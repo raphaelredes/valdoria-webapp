@@ -120,7 +120,7 @@
     border: 1px solid var(--v-border-gold);
     opacity: 0;
     transform: translateY(-8px);
-    transition: opacity var(--v-transition-base), transform 0.25s;
+    transition: opacity var(--v-transition-base), transform var(--v-transition-base);
     z-index: var(--v-z-loading);
     pointer-events: none;
 }

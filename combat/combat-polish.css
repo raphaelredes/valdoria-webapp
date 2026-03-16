@@ -296,7 +296,7 @@
     border: 1px solid var(--v-border-gold);
     z-index: var(--v-z-tooltip);
     opacity: 0;
-    transition: opacity var(--v-transition-base), transform 0.25s;
+    transition: opacity var(--v-transition-base), transform var(--v-transition-base);
     pointer-events: none;
     text-align: center;
     max-width: 80%;
@@ -306,7 +306,7 @@
     transform: translateX(-50%) translateY(0);
 }
 
-.spectator-legend { font-size: 10px; color: var(--v-text-dim); margin-top: 2px; text-align: center; letter-spacing: 0.5px; }
+.spectator-legend { font-size: var(--v-font-xs); color: var(--v-text-dim); margin-top: 2px; text-align: center; letter-spacing: 0.5px; }
 
 .turn-entry.t-legendary { background: rgba(196, 149, 58, 0.2); border-color: rgba(196, 149, 58, 0.5); opacity: 0.7; min-width: 22px; }
 .turn-entry.t-legendary .turn-ico { font-size: var(--v-font-xs); }

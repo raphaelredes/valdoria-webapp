@@ -180,7 +180,7 @@
     font-size: var(--v-font-base);
     font-weight: 600;
     cursor: pointer;
-    transition: transform var(--v-transition-fast) ease, border-color var(--v-transition) ease, box-shadow 0.2s ease;
+    transition: transform var(--v-transition-fast) ease, border-color var(--v-transition) ease, box-shadow var(--v-transition) ease;
     position: relative;
     overflow: hidden;
     min-height: 44px;
@@ -309,7 +309,7 @@
     font-weight: 600;
     font-style: italic;
     cursor: pointer;
-    transition: transform var(--v-transition-fast) ease, border-color var(--v-transition) ease, color 0.2s ease;
+    transition: transform var(--v-transition-fast) ease, border-color var(--v-transition) ease, color var(--v-transition) ease;
     animation: fadeInUp 0.5s ease;
 }
 .ambient-continue-btn:active {
@@ -524,7 +524,7 @@ body.perf-lite .dm-narration .cursor {
 #bark-bubble.bark-fade {
     opacity: 0;
     transform: translateX(-50%) translateY(-8px);
-    transition: opacity var(--v-transition-enter) ease, transform 0.4s ease;
+    transition: opacity var(--v-transition-enter) ease, transform var(--v-transition-enter) ease;
 }
 @keyframes barkAppear {
     from { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.9); }

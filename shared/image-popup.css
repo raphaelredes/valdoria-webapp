@@ -130,6 +130,6 @@
 
 /* Type-specific header accents */
 .v-img-popup-card[data-type="enemy"] .v-img-popup-title { color: #e07070; }
-.v-img-popup-card[data-type="location"] .v-img-popup-title { color: #dbb668; }
+.v-img-popup-card[data-type="location"] .v-img-popup-title { color: var(--v-gold-light); }
 .v-img-popup-card[data-type="event"] .v-img-popup-title { color: #7cd47c; }
 .v-img-popup-card[data-type="item"] .v-img-popup-title { color: var(--v-gold, #c4953a); }

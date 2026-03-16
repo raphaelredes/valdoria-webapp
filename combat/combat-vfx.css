@@ -58,9 +58,9 @@
     0%, 100% { opacity: 0.85; }
     50% { opacity: 1; }
 }
-.turn-val { font-size: 10px; font-weight: 700; color: var(--v-text-bright); display: block; }
+.turn-val { font-size: var(--v-font-xs); font-weight: 700; color: var(--v-text-bright); display: block; }
 .turn-ico { font-size: var(--v-font-base); line-height: 1; }
-.turn-arrow { color: var(--v-text-dim); font-size: 9px; flex-shrink: 0; }
+.turn-arrow { color: var(--v-text-dim); font-size: var(--v-font-xs); flex-shrink: 0; }
 
 /* Turn timeline colors */
 .turn-entry.t-player { border-color: var(--v-gold); }
@@ -226,7 +226,7 @@
     min-height: 18px;
     transition: color var(--v-transition);
 }
-.dice-result.cycling { color: var(--v-text-dim); opacity: 0.6; font-size: 14px; }
+.dice-result.cycling { color: var(--v-text-dim); opacity: 0.6; font-size: var(--v-font-body); }
 .dice-result.crit { color: var(--v-warning); text-shadow: 0 0 10px rgba(255,152,0,0.5); }
 .dice-result.miss { color: var(--v-danger, #e53935); text-shadow: 0 0 8px rgba(229,57,53,0.3); }
 .dice-result.hit { color: var(--v-gold-light); text-shadow: 0 0 10px rgba(76,175,80,0.4); }
@@ -282,11 +282,11 @@
     from { opacity: 0; transform: translateX(-6px); }
     to { opacity: 1; transform: translateX(0); }
 }
-.feed-entry:last-child { color: var(--v-text); font-weight: 500; font-size: 13px; border-bottom: none; }
+.feed-entry:last-child { color: var(--v-text); font-weight: 500; font-size: var(--v-font-base); border-bottom: none; }
 /* Feed expandable detail (Solasta-style combat log) */
 .feed-entry.has-detail { cursor: pointer; }
 .feed-entry.has-detail:active { background: rgba(196, 149, 58, 0.06); }
-.feed-expand-icon { font-size: 9px; margin-left: 4px; color: var(--v-text-dim); opacity: 0.6; }
+.feed-expand-icon { font-size: var(--v-font-xs); margin-left: 4px; color: var(--v-text-dim); opacity: 0.6; }
 .feed-detail-expanded {
     font-size: var(--v-font-sm);
     line-height: 1.4;

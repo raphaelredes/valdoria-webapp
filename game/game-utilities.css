@@ -158,7 +158,7 @@
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius);
     cursor: pointer;
-    transition: border-color var(--v-transition), background 0.2s, transform 0.2s, box-shadow 0.2s;
+    transition: border-color var(--v-transition), background var(--v-transition), transform var(--v-transition), box-shadow var(--v-transition);
     text-align: left;
     width: 100%;
     font-family: var(--v-font, 'MedievalSharp', serif);
@@ -248,7 +248,7 @@
     font-size: var(--v-font-base);
     color: rgba(196, 149, 58, 0.35);
     flex-shrink: 0;
-    transition: color var(--v-transition), transform 0.2s;
+    transition: color var(--v-transition), transform var(--v-transition);
 }
 
 .char-card:active .char-card-arrow {
@@ -534,7 +534,7 @@
     color: var(--v-text-dim, #a09484);
     z-index: var(--v-z-sticky);
     cursor: pointer;
-    transition: padding var(--v-transition-base) ease, opacity 0.3s ease;
+    transition: padding var(--v-transition-base) ease, opacity var(--v-transition-base) ease;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -554,7 +554,7 @@
     white-space: nowrap;
     overflow: hidden;
     max-width: 100px;
-    transition: max-width var(--v-transition-base) ease, opacity 0.3s ease;
+    transition: max-width var(--v-transition-base) ease, opacity var(--v-transition-base) ease;
     opacity: 1;
 }
 
@@ -740,7 +740,7 @@
     cursor: pointer;
     z-index: var(--v-z-base);
     opacity: 0;
-    transition: opacity var(--v-transition) ease, transform 0.2s ease, background 0.2s;
+    transition: opacity var(--v-transition) ease, transform var(--v-transition) ease, background var(--v-transition);
     -webkit-tap-highlight-color: transparent;
 }
 .char-card-delete:active {
@@ -751,13 +751,13 @@
 .char-select-list.selecting .char-card:not(.char-card-selected) {
     opacity: 0.4;
     transform: scale(0.97);
-    transition: opacity var(--v-transition-base) ease, transform 0.3s ease;
+    transition: opacity var(--v-transition-base) ease, transform var(--v-transition-base) ease;
 }
 .char-card-selected {
     border-color: var(--v-gold, #c4953a) !important;
     box-shadow: 0 0 16px rgba(196, 149, 58, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     transform: scale(1.01);
-    transition: transform var(--v-transition) ease, box-shadow 0.2s ease !important;
+    transition: transform var(--v-transition) ease, box-shadow var(--v-transition) ease !important;
 }
 
 /* Hall entry animation */
@@ -768,5 +768,5 @@
 .hall-enter-active {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity var(--v-transition-base) ease, transform 0.3s ease;
+    transition: opacity var(--v-transition-base) ease, transform var(--v-transition-base) ease;
 }
