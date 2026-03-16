@@ -778,6 +778,14 @@ async function doAction(callbackData) {
         return;
     }
 
+    // Travel preparation overlay (overlay on top of current screen)
+    if (data.travel_prep) {
+        hideLocationTransition();
+        if (window.actionGuard) actionGuard.release();
+        if (typeof showTravelPrep === 'function') showTravelPrep(data.travel_prep);
+        return;
+    }
+
     // Handle transitions to specialized WebApps
     // Only auto-transition if there is NO text to display
     if (data.transition && !data.text) {
