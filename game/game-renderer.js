@@ -178,6 +178,11 @@ function renderScreen(screen) {
         renderQuestTurnin(contentEl, screen.quest_turnin);
     }
 
+    // Render character details as tabbed view
+    if (screen.char_details && typeof renderCharDetails === 'function') {
+        renderCharDetails(contentEl, screen.char_details);
+    }
+
     // Render quest abandon confirmation
     if (screen.quest_abandon) {
         renderQuestAbandon(contentEl, screen.quest_abandon);
