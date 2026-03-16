@@ -132,37 +132,88 @@ function doDeleteLoadout(name) {
 }
 
 // ══════════════════════════════════════════════════════════
-//  TAB 4: BANK (read-only)
+//  TAB 4: BANK (deposit/withdraw)
 // ══════════════════════════════════════════════════════════
 function renderBankTab(c) {
-    if (!D.bank) {
-        c.innerHTML = `<div class="empty-state"><div class="icon">${vi('vault', 32)}</div><p>Cofre vazio.</p></div>`;
-        return;
+    if (!D.bank) D.bank = { g: 0, i: [] };
+    var bankGold = D.bank.g || 0;
+    var bankItems = D.bank.i || [];
+
+    var html = '<div class="vault-header">'
+        + '<div class="vault-amount">' + vi('coin', 22) + ' ' + bankGold + ' GP</div>'
+        + '<div class="vault-sub">Cofre da Guilda</div>'
+        + '</div>';
+
+    // Gold deposit/withdraw
+    html += '<div style="display:flex;gap:6px;justify-content:center;margin:8px 0;">';
+    if (localGold >= 10) {
+        html += '<button class="btn-sell-junk" style="border-color:var(--v-gold-dim);" onclick="doBankGoldDeposit()">'
+            + vi('coin', 12) + ' Depositar 10 GP</button>';
     }
-    let html = `<div class="vault-header">
-            <div class="vault-amount">${vi('coin', 22)} ${D.bank.g || 0} GP</div>
-            <div class="vault-sub">Ouro guardado no cofre</div>
-        </div>`;
-    const items = D.bank.i || [];
-    if (items.length > 0) {
-        html += `<div class="section-title">${vi('bag', 14)} Itens Guardados (${items.length})</div>`;
+    if (bankGold >= 10) {
+        html += '<button class="btn-sell-junk" style="border-color:var(--v-success);" onclick="doBankGoldWithdraw()">'
+            + vi('coin', 12) + ' Sacar 10 GP</button>';
+    }
+    html += '</div>';
+
+    // Quick deposit button
+    var depositableCount = _getDepositableItems().length;
+    if (depositableCount > 0) {
+        html += '<div style="text-align:right;margin-bottom:6px;">'
+            + '<span class="btn-sell-junk" style="border-color:var(--v-info);" onclick="doBankDepositAll()">'
+            + vi('vault', 13) + ' Guardar Tudo (' + depositableCount + ')</span></div>';
+    }
+
+    // Bank items with withdraw button
+    if (bankItems.length > 0) {
+        html += '<div class="section-title">' + vi('bag', 14) + ' Itens Guardados (' + bankItems.length + ')</div>';
         html += '<div class="item-grid">';
-        items.forEach(bi => {
-            const it = getItemData(bi.n);
-            const emoji = it?.e || '📦';
-            const rarity = it?.r || 'common';
-            html += `<div class="item-card rarity-${rarity} fade-in">
-                    <div class="ic-badges">
-                        ${bi.q > 1 ? `<span class="ic-qty">x${bi.q}</span>` : ''}
-                    </div>
-                    <div class="ic-emoji">${emoji}</div>
-                    <div class="ic-name v-rarity-${rarity}">${bi.n}</div>
-                    <div class="ic-meta">${getItemShortDesc(bi.n, it || {})}</div>
-                </div>`;
+        bankItems.forEach(function(bi) {
+            var it = getItemData(bi.n);
+            var emoji = it ? (it.e || '\ud83d\udce6') : '\ud83d\udce6';
+            var rarity = it ? (it.r || 'common') : 'common';
+            html += '<div class="item-card rarity-' + rarity + ' fade-in" onclick="doBankWithdraw(\'' + esc(bi.n) + '\')">'
+                + '<div class="ic-badges">'
+                + (bi.q > 1 ? '<span class="ic-qty">x' + bi.q + '</span>' : '')
+                + '</div>'
+                + '<div class="ic-emoji">' + emoji + '</div>'
+                + '<div class="ic-name v-rarity-' + rarity + '">' + bi.n + '</div>'
+                + '<div class="ic-meta">' + getItemShortDesc(bi.n, it || {}) + '</div>'
+                + '</div>';
         });
         html += '</div>';
-    } else if (!D.bank.g) {
-        html += `<div class="empty-state"><div class="icon">${vi('vault', 32)}</div><p>Cofre vazio.</p></div>`;
+    }
+
+    // Inventory items eligible for deposit
+    var invEquippable = localInv.filter(function(inv) {
+        if (inv.q <= 0) return false;
+        if (isEquippedAnywhere(inv.n)) return false;
+        if (isLocked(inv.n)) return false;
+        var it = getItemData(inv.n);
+        return it && !(it.t || []).includes('quest');
+    });
+    if (invEquippable.length > 0) {
+        html += '<div class="section-title">' + vi('bag', 14) + ' Depositar da Mochila</div>';
+        html += '<div class="item-grid">';
+        invEquippable.forEach(function(inv) {
+            var it = getItemData(inv.n);
+            var emoji = it ? (it.e || '\ud83d\udce6') : '\ud83d\udce6';
+            var rarity = it ? (it.r || 'common') : 'common';
+            html += '<div class="item-card rarity-' + rarity + ' fade-in" onclick="doBankDeposit(\'' + esc(inv.n) + '\')"'
+                + ' style="opacity:0.7;">'
+                + '<div class="ic-badges">'
+                + (inv.q > 1 ? '<span class="ic-qty">x' + inv.q + '</span>' : '')
+                + '</div>'
+                + '<div class="ic-emoji">' + emoji + '</div>'
+                + '<div class="ic-name v-rarity-' + rarity + '">' + inv.n + '</div>'
+                + '<div class="ic-meta">Toque para guardar</div>'
+                + '</div>';
+        });
+        html += '</div>';
+    }
+
+    if (bankItems.length === 0 && bankGold === 0 && invEquippable.length === 0) {
+        html += '<div class="empty-state"><div class="icon">' + vi('vault', 32) + '</div><p>Cofre vazio.</p></div>';
     }
     c.innerHTML = html;
 }
@@ -915,4 +966,105 @@ function _buildABPanel(itA, itB, slot) {
         + vi('sword', 13) + ' A</span><span class="cp-vs">B</span></div>'
         + rows
         + '<div class="cp-summary ' + sumCls + '">' + sumText + ': <b>' + sumSign + totalDelta + '</b></div></div>';
+}
+
+// ══════════════════════════════════════════════════
+//  BANK OPERATIONS (deposit/withdraw)
+// ══════════════════════════════════════════════════
+function _getDepositableItems() {
+    return localInv.filter(function(inv) {
+        if (inv.q <= 0) return false;
+        if (isEquippedAnywhere(inv.n)) return false;
+        if (isLocked(inv.n)) return false;
+        if (isFav(inv.n)) return false;
+        var it = getItemData(inv.n);
+        if (!it) return false;
+        if ((it.t || []).includes('quest')) return false;
+        if ((it.t || []).includes('potion')) return false;
+        if ((it.t || []).includes('consumable')) return false;
+        return true;
+    });
+}
+
+function doBankDeposit(name) {
+    removeFromLocalInv(name);
+    // Add to local bank
+    if (!D.bank) D.bank = { g: 0, i: [] };
+    if (!D.bank.i) D.bank.i = [];
+    var existing = D.bank.i.find(function(bi) { return bi.n === name; });
+    if (existing) { existing.q++; }
+    else { D.bank.i.push({ n: name, q: 1 }); }
+    addOp({ t: 'deposit', item: name });
+    haptic('medium');
+    toast(vi('vault', 13) + ' ' + name + ' guardado no cofre', 'ok');
+    updateHeader();
+    renderTab();
+    updateBottomBar();
+}
+
+function doBankWithdraw(name) {
+    if (!D.bank || !D.bank.i) return;
+    var bi = D.bank.i.find(function(b) { return b.n === name; });
+    if (!bi || bi.q <= 0) return;
+    bi.q--;
+    if (bi.q <= 0) D.bank.i = D.bank.i.filter(function(b) { return b.n !== name; });
+    addToLocalInv(name);
+    addOp({ t: 'withdraw', item: name });
+    haptic('medium');
+    toast(vi('bag', 13) + ' ' + name + ' retirado do cofre', 'ok');
+    updateHeader();
+    renderTab();
+    updateBottomBar();
+}
+
+function doBankDepositAll() {
+    var items = _getDepositableItems();
+    if (!items.length) return;
+    if (!D.bank) D.bank = { g: 0, i: [] };
+    if (!D.bank.i) D.bank.i = [];
+    var count = 0;
+    items.forEach(function(inv) {
+        for (var i = 0; i < inv.q; i++) {
+            var existing = D.bank.i.find(function(bi) { return bi.n === inv.n; });
+            if (existing) { existing.q++; }
+            else { D.bank.i.push({ n: inv.n, q: 1 }); }
+            addOp({ t: 'deposit', item: inv.n });
+            count++;
+        }
+    });
+    // Clear deposited from local inventory
+    items.forEach(function(inv) {
+        localInv = localInv.filter(function(i) { return i.n !== inv.n; });
+    });
+    haptic('heavy');
+    toast(vi('vault', 13) + ' ' + count + ' itens guardados no cofre', 'ok');
+    updateHeader();
+    renderTab();
+    updateBottomBar();
+}
+
+function doBankGoldDeposit() {
+    var amount = 10;
+    if (localGold < amount) return;
+    localGold -= amount;
+    D.bank.g = (D.bank.g || 0) + amount;
+    addOp({ t: 'deposit_gold', amount: amount });
+    haptic('medium');
+    toast(vi('coin', 13) + ' ' + amount + ' GP depositados', 'ok');
+    updateHeader();
+    renderTab();
+    updateBottomBar();
+}
+
+function doBankGoldWithdraw() {
+    var amount = 10;
+    if (!D.bank || (D.bank.g || 0) < amount) return;
+    D.bank.g -= amount;
+    localGold += amount;
+    addOp({ t: 'withdraw_gold', amount: amount });
+    haptic('medium');
+    toast(vi('coin', 13) + ' ' + amount + ' GP sacados', 'ok');
+    updateHeader();
+    renderTab();
+    updateBottomBar();
 }

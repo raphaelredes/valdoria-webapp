@@ -129,9 +129,10 @@ function renderItemsTab(c) {
             const tags = it.t || [];
             const canSelect = selectionMode && !equipped && !isProtected(tags) && !isLocked(inv.n);
             const isSelected = selectedItems.has(inv.n);
+            const hasSlot = !!it.s;
             const clickAction = canSelect
                 ? `toggleSelectItem('${esc(inv.n)}')`
-                : (selectionMode ? '' : `openItemDetail('${esc(inv.n)}')`);
+                : (selectionMode ? '' : (hasSlot ? `onItemTap('${esc(inv.n)}')` : `openItemDetail('${esc(inv.n)}')`));
             const locked = isLocked(inv.n);
             html += `<div class="item-card rarity-${rarity} ${equipped ? 'equipped-marker' : ''} ${locked ? 'locked-marker' : ''} fade-in"
                     onclick="${clickAction}" ${selectionMode && !canSelect ? 'style="opacity:0.4;"' : ''}>
@@ -623,3 +624,60 @@ function switchEquipTarget(target) {
     renderTab();
 }
 
+// ── Quick-Equip (double-tap on item card) ──
+var _lastTapItem = '';
+var _lastTapTime = 0;
+
+function onItemTap(name) {
+    var now = Date.now();
+    if (name === _lastTapItem && now - _lastTapTime < 400) {
+        // Double-tap detected
+        _lastTapItem = '';
+        _lastTapTime = 0;
+        quickEquipItem(name);
+        return;
+    }
+    _lastTapItem = name;
+    _lastTapTime = now;
+    // Single tap — open detail after brief delay
+    setTimeout(function() {
+        if (_lastTapItem === name) {
+            openItemDetail(name);
+            _lastTapItem = '';
+        }
+    }, 350);
+}
+
+function quickEquipItem(name) {
+    var it = getItemData(name);
+    if (!it || !it.s) {
+        openItemDetail(name);
+        return;
+    }
+    if (!checkProficiency(it, activeTarget, name)) {
+        toast(vi('lock', 13) + ' Sem profici\u00eancia para este item', 'warn');
+        return;
+    }
+    var slot = resolveSlot(it);
+    var eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+    var current = eq[slot];
+    if (current === name) {
+        toast(vi('check', 13) + ' J\u00e1 equipado neste slot', 'ok');
+        return;
+    }
+    // Equip directly
+    _acDirty = true;
+    if (current) {
+        addOp({ t: 'unequip', slot: slot, target: activeTarget });
+        addToLocalInv(current);
+    }
+    addOp({ t: 'equip', item: name, slot: slot, tgt: activeTarget });
+    removeFromLocalInv(name);
+    eq[slot] = name;
+    if (activeTarget === 'player') localAC = calcLocalAC();
+    haptic('heavy');
+    toast(vi('sword', 13) + ' ' + name + ' equipado!', 'ok');
+    updateHeader();
+    renderTab();
+    updateBottomBar();
+}

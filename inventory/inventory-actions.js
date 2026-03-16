@@ -756,6 +756,10 @@ function formatOp(op) {
         case 'toggle_fav': return `${op.val ? vi_f('star', 13) : vi('star', 13)} ${op.val ? 'Favoritar' : 'Desfavoritar'} ${op.item}`;
         case 'toggle_lock': return `${op.val ? vi('lock', 13) : vi('unlock', 13)} ${op.val ? 'Travar' : 'Destravar'} ${op.item}`;
         case 'gem_upgrade': return `${vi('gem', 13)} Fundir ${op.gem} \u2192 ${op.result}`;
+        case 'deposit': return `${vi('vault', 13)} Guardar ${op.item}`;
+        case 'withdraw': return `${vi('bag', 13)} Retirar ${op.item}`;
+        case 'deposit_gold': return `${vi('coin', 13)} Depositar ${op.amount} GP`;
+        case 'withdraw_gold': return `${vi('coin', 13)} Sacar ${op.amount} GP`;
         default: return `? ${op.t}`;
     }
 }
