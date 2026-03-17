@@ -42,7 +42,7 @@ async function initDungeon() {
             // [EXIT-CONFIRM] BackButton handled by exit-confirm.js (shows popup, default tg.close)
         }
 
-        const params = new URLSearchParams(window.location.search);
+        const params = (function() { var p = new URLSearchParams(window.location.search); var sp = window.__spaRouteParams || {}; if (sp) { Object.keys(sp).forEach(function(k) { if (!p.has(k)) p.set(k, sp[k]); }); } return p; })();
         S.token = params.get('token') || '';
         S.api = params.get('api') || '';
         S.uid = parseInt(params.get('uid') || '0');

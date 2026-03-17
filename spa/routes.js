@@ -329,6 +329,130 @@
         },
     });
 
+    /* Pix route */
+    SpaRouter.register("pix", {
+        page: "pix/index.html",
+        css: [
+            "shared/animations.css",
+            "pix/pix.css",
+        ],
+        sharedJs: [
+            "shared/exit-confirm.js",
+        ],
+        external: [
+            "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js",
+        ],
+        js: [
+            "pix/pix-app.js",
+        ],
+        init: function () { /* pix-app.js self-initializes at module level */ },
+        cleanup: function () {},
+    });
+
+    /* Workstation (Crafting) route */
+    SpaRouter.register("workstation", {
+        page: "workstation/index.html",
+        css: [
+            "shared/animations.css",
+            "shared/loading.css",
+            "workstation/workstation.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+            "shared/fetch-utils.js",
+        ],
+        js: [
+            "workstation/workstation-loading.js",
+            "workstation/workstation-app.js",
+        ],
+        init: function () { /* workstation-app.js self-initializes at module level */ },
+        cleanup: function () {
+            if (window._craftLoadingCtrl) {
+                try { window._craftLoadingCtrl.hide(); } catch(e) {}
+            }
+        },
+    });
+
+    /* Dice route */
+    SpaRouter.register("dice", {
+        page: "dice/index.html",
+        external: [
+            "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+        ],
+        css: [
+            "shared/animations.css",
+            "dice/dice.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+        ],
+        js: [
+            "dice/dice-app.js",
+        ],
+        init: function () { /* dice-app.js self-initializes at module level */ },
+        cleanup: function () {},
+    });
+
+    /* Character Creator route */
+    SpaRouter.register("character_creator", {
+        page: "character_creator/index.html",
+        css: [
+            "shared/animations.css",
+            "shared/loading.css",
+            "character_creator/creator.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+            "shared/text-timing.js",
+        ],
+        js: [
+            "character_creator/data.js",
+            "character_creator/personality_data.js",
+            "character_creator/creator-loading.js",
+            "character_creator/creator-app.js",
+        ],
+        init: function () { /* creator-app.js self-initializes via IIFE init() */ },
+        cleanup: function () {
+            if (window._ccLoadingCtrl) {
+                try { window._ccLoadingCtrl.hide(); } catch(e) {}
+            }
+        },
+    });
+
+    /* Dungeon route */
+    SpaRouter.register("dungeon", {
+        page: "dungeon/index.html",
+        css: [
+            "shared/animations.css",
+            "shared/loading.css",
+            "dungeon/dungeon.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+            "shared/session-heartbeat.js",
+            "shared/motion.js",
+            "shared/fetch-utils.js",
+            "shared/text-timing.js",
+            "shared/api-discovery.js",
+        ],
+        js: [
+            "dungeon/dungeon-loading.js",
+            "dungeon/dungeon-core.js",
+            "dungeon/dungeon-map.js",
+            "dungeon/dungeon-ui.js",
+        ],
+        init: function () { /* dungeon-core.js self-initializes via DOMContentLoaded */ },
+        cleanup: function () {
+            if (window._dungeonLoadingCtrl) {
+                try { window._dungeonLoadingCtrl.hide(); } catch(e) {}
+            }
+        },
+    });
+
     /* Guide route */
     SpaRouter.register("guide", {
         page: "guide/index.html",
