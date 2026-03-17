@@ -17,8 +17,13 @@ const ValdoriaAudio = (() => {
     const DEFAULT_VOLUME = 0.15;
     const NO_LOOP_TRACKS = ['victory', 'defeat', 'levelup', 'sfx_hit', 'sfx_crit', 'sfx_miss', 'sfx_fire', 'sfx_cold', 'sfx_lightning', 'sfx_thunder', 'sfx_poison', 'sfx_radiant', 'sfx_necrotic', 'sfx_psychic', 'sfx_heal', 'sfx_enemy_death'];
 
-    // Base URL for audio files (relative to webapp root)
-    const AUDIO_BASE = '../shared/audio/';
+    // Base URL for audio files — dynamic: SPA shell (app.html at root) vs standalone (subdir pages)
+    const AUDIO_BASE = (function() {
+        // SPA mode: page is at webapp root, so 'shared/audio/' is correct
+        if (window.__spaRouteName) return 'shared/audio/';
+        // Standalone: page is in a subdirectory, so '../shared/audio/' is correct
+        return '../shared/audio/';
+    })();
 
     // Track catalog: biome/context -> array of variant filenames
     const TRACKS = {

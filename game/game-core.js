@@ -73,12 +73,14 @@ async function init() {
     // Initialize immersive mode (collapsible bottom panel)
     if (typeof initImmersive === 'function') initImmersive();
 
+    // SPA mode: read params from router; Standalone: read from URL
+    var _spaParams = window.__spaRouteParams || {};
     const params = new URLSearchParams(window.location.search);
-    S.token = params.get('token') || '';
+    S.token = _spaParams.token || params.get('token') || '';
     // Use ?api= param if provided, otherwise use same-origin (webapp + API share the same server)
-    S.apiBase = (params.get('api') || window.location.origin || '').replace(/\/$/, '');
-    S.uid = parseInt(params.get('uid') || '0', 10);
-    S.charId = params.get('char') || '';  // Character ID from menu (for char switch)
+    S.apiBase = (_spaParams.api || params.get('api') || window.location.origin || '').replace(/\/$/, '');
+    S.uid = parseInt(_spaParams.uid || params.get('uid') || '0', 10);
+    S.charId = _spaParams.char || params.get('char') || '';  // Character ID from menu (for char switch)
 
     // [EXIT-CONFIRM] Per-character localStorage keys (prevents cross-char data leaks)
     if (S.charId) {
@@ -359,7 +361,7 @@ async function checkHealth() {
 }
 
 // ─── API URL Discovery (auto-resolve stale tunnel URLs) ───
-const API_URL_DISCOVERY = '../api-url.json';
+const API_URL_DISCOVERY = window.__spaRouteName ? 'api-url.json' : '../api-url.json';
 
 async function _discoverApiUrl() {
     // Fetch api-url.json from GitHub Pages (same origin, no CORS issues)
@@ -1025,15 +1027,19 @@ window.addEventListener('beforeunload', () => {
 });
 
 // ─── Bootstrap ───
-document.addEventListener('DOMContentLoaded', () => {
-    console.debug('[GAME] DOMContentLoaded fired, starting init...');
-    init().catch(e => {
-        console.error('[GAME] init() CRASHED:', e.message);
-        if (typeof showError === 'function') {
-            showError('Erro ao iniciar o jogo: ' + e.message, e);
-        }
+// In SPA mode, init() is called by the route config (spa/routes.js).
+// In standalone mode, init() is called on DOMContentLoaded.
+if (!window.__spaRouteName) {
+    document.addEventListener('DOMContentLoaded', () => {
+        console.debug('[GAME] DOMContentLoaded fired, starting init...');
+        init().catch(e => {
+            console.error('[GAME] init() CRASHED:', e.message);
+            if (typeof showError === 'function') {
+                showError('Erro ao iniciar o jogo: ' + e.message, e);
+            }
+        });
     });
-});
+}
 
 
 // ─── Preload Next Screen (prefetch /api/game/start for single-char accounts) ───
