@@ -83,7 +83,7 @@ let tg = null;
 let STORAGE_KEY = 'valdoria_explore_state';
 
 function initCharKey() {
-    const charId = new URLSearchParams(window.location.search).get('char') || '';
+    const charId = (window.__spaRouteParams || {}).char || new URLSearchParams(window.location.search).get('char') || '';
     if (charId) {
         STORAGE_KEY = 'valdoria_explore_state_' + charId;
         console.debug('[EXPLORE] Per-character storage key:', STORAGE_KEY);

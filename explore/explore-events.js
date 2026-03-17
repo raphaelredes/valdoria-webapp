@@ -3,6 +3,15 @@
 // ═══════════════════════════════════════════════════════
 // HAZARD NARRATIONS — rich context before and after dice rolls
 // ═══════════════════════════════════════════════════════
+// Dual-mode: SPA route params merged into URLSearchParams
+var _spaP = window.__spaRouteParams || {};
+function _mergedParams() {
+    var p = _mergedParams();
+    if (_spaP) { Object.keys(_spaP).forEach(function(k) { if (!p.has(k)) p.set(k, _spaP[k]); }); }
+    return p;
+}
+
+
 var HAZARD_NARRATIONS = {
     lava: {
         pre: "O chão racha e uma onda de calor sufocante emerge. Lava borbulha nas fendas próximas, espirrando gotas incandescentes que chiavam ao tocar a rocha.|Você precisa resistir ao calor — uma falha pode deixar marcas dolorosas.",
@@ -1422,7 +1431,7 @@ function showPostCombatNarrative() {
 async function transitionToArena() {
     saveState();
 
-    const params = new URLSearchParams(window.location.search);
+    const params = _mergedParams();
     const mapData = params.get('data') || '';
 
     const body = {
@@ -1492,7 +1501,7 @@ async function transitionToArena() {
 async function transitionToInventory() {
     saveState();
 
-    const params = new URLSearchParams(window.location.search);
+    const params = _mergedParams();
     const mapData = params.get('data') || '';
 
     const body = {
@@ -2016,7 +2025,7 @@ function finishExploration(reason) {
     logMoveEvent([{ type: 'exit', reason: reason }]);
 
     // Include map_data so backend can save it for combat return trip
-    const params = new URLSearchParams(window.location.search);
+    const params = _mergedParams();
     const mapDataPayload = params.get('data') || '';
 
     const payload = {
@@ -2040,7 +2049,7 @@ function finishExploration(reason) {
 
     // API mode: transition to Game Hub or Navigate (stays in WebApp)
     if (S.apiBase && S.token && S.uid) {
-        const urlParams = new URLSearchParams(window.location.search);
+        const urlParams = _mergedParams();
         const returnTo = urlParams.get('return') || 'game';
         if (returnTo === 'navigate') {
             _transitionToNavigateFromExplore(payload);
@@ -2219,7 +2228,7 @@ async function initAsync() {
         if (document.visibilityState === 'hidden') saveState();
     });
 
-    const params = new URLSearchParams(window.location.search);
+    const params = _mergedParams();
     S.token = params.get('token') || '';
     S.apiBase = params.get('api') || '';
     S.uid = params.get('uid') || '';

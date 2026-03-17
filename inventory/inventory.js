@@ -5,7 +5,7 @@
 const tg = window.Telegram?.WebApp;
 const _vBg = getComputedStyle(document.documentElement)
     .getPropertyValue('--v-bg').trim() || '#2a2420';
-if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg); }
+if (tg && !window._invPopupMode) { tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg); }
 
 // ── Shared Error Reporter (lite tier — no API) ──
 if (window.ValdoriaErrors) { ValdoriaErrors.init({ appName: 'INVENTORY' }); }
@@ -190,6 +190,7 @@ function updateBottomPadding() {
 
 // ── Immersive Mode (shared pattern — localStorage 'valdoria_immersive') ──
 function initImmersive() {
+    if (window._invPopupMode) return; // Popup mode: overlay is already fullscreen
     const toggle = document.getElementById('immersive-toggle');
     const restore = document.getElementById('immersive-restore');
     const panel = document.getElementById('bottomPanel');
@@ -228,7 +229,10 @@ function init() {
     // Ambient music
     if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('city');
 
+    // Dual-mode: SPA route params or URL query params
+    const _spaP = window.__spaRouteParams || {};
     const params = new URLSearchParams(location.search);
+    if (_spaP) { Object.keys(_spaP).forEach(function(k) { if (!params.has(k)) params.set(k, _spaP[k]); }); }
     const b64 = params.get('data');
     if (!b64) { hideLoading(); _showInitError('Dados não encontrados.'); return; }
     try {
@@ -559,6 +563,7 @@ function discardAndExit() {
 }
 
 function initBackButton() {
+    if (window._invPopupMode) return; // Popup mode: no Telegram BackButton
     try {
         if (tg?.BackButton) {
             tg.BackButton.show();
@@ -601,12 +606,12 @@ function navBack() {
 
 function navCharSheet() {
     haptic('light');
-    // Auto-save pending ops before navigating
-    if (pendingOps.length > 0) {
-        sendOps();
+    if (pendingOps.length > 0) { sendOps(); return; }
+    if (window._invPopupMode && typeof hideInventoryPopup === 'function') {
+        hideInventoryPopup();
+        setTimeout(function() { if (typeof doAction === 'function') doAction('action_status'); }, 300);
         return;
     }
-    // Always use sendData to let bot show character sheet
     const tg = window.Telegram?.WebApp;
     if (tg?.sendData) {
         try { tg.sendData(JSON.stringify({ action: 'action_status' })); } catch (e) { console.warn('[INVENTORY] sendData:', e); }
@@ -616,12 +621,11 @@ function navCharSheet() {
 
 function navMenu() {
     haptic('light');
-    // Auto-save pending ops before closing
-    if (pendingOps.length > 0) {
-        sendOps();
+    if (pendingOps.length > 0) { sendOps(); return; }
+    if (window._invPopupMode && typeof hideInventoryPopup === 'function') {
+        hideInventoryPopup();
         return;
     }
-    // Close webapp to return to Telegram chat (main menu)
     try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] tg.close:', e); }
 }
 

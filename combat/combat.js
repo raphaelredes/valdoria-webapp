@@ -16,7 +16,10 @@ if (tg) {
     };
 }
 
+// Dual-mode: SPA route params or URL query params
+const _spaP = window.__spaRouteParams || {};
 const params = new URLSearchParams(window.location.search);
+if (_spaP) { Object.keys(_spaP).forEach(function(k) { if (!params.has(k)) params.set(k, _spaP[k]); }); }
 const token = params.get('token') || '';
 const apiBase = params.get('api') || '';
 const userId = parseInt(params.get('uid') || '0');

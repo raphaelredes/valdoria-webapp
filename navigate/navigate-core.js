@@ -59,7 +59,10 @@ async function initAsync() {
         }
 
         // Parse URL params
+        // Dual-mode: SPA route params or URL query params
+        const _spaP = window.__spaRouteParams || {};
         const params = new URLSearchParams(window.location.search);
+        if (_spaP) { Object.keys(_spaP).forEach(function(k) { if (!params.has(k)) params.set(k, _spaP[k]); }); }
         S.token = params.get('token') || '';
         S.api = params.get('api') || '';
         S.uid = parseInt(params.get('uid') || '0');

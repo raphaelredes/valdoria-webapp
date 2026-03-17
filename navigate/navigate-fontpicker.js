@@ -1,0 +1,105 @@
+/* Navigate font picker (extracted for SPA) */
+        // ═══ FONT PICKER — Player font preference ═══
+        var FONT_OPTIONS = [
+            { id: 'medievalsharp', name: 'MedievalSharp', family: "'MedievalSharp', serif", scale: 1.0 },
+            { id: 'cinzel',        name: 'Cinzel',        family: "'Cinzel', serif",        scale: 0.92 },
+            { id: 'imfell',        name: 'IM Fell English', family: "'IM Fell English', serif", scale: 1.0 },
+            { id: 'pirataone',     name: 'Pirata One',    family: "'Pirata One', cursive",  scale: 1.15 },
+            { id: 'almendra',      name: 'Almendra',      family: "'Almendra', serif",      scale: 1.05 },
+            { id: 'metamorphous',  name: 'Metamorphous',  family: "'Metamorphous', serif",  scale: 1.05 },
+        ];
+        var _fpOpen = false;
+        var _fpInitialized = false;
+
+        function initFontPicker() {
+            var saved = localStorage.getItem('valdoria_font') || 'medievalsharp';
+            // Migrate removed fonts
+            if (saved === 'uncial') { saved = 'medievalsharp'; localStorage.setItem('valdoria_font', saved); }
+            // Defer dropdown button creation until first open (avoids loading extra fonts)
+            applyFont(saved);
+        }
+
+        function _ensureFontPickerButtons() {
+            if (_fpInitialized) return;
+            _fpInitialized = true;
+            var dd = document.getElementById('font-picker-dropdown');
+            var saved = localStorage.getItem('valdoria_font') || 'medievalsharp';
+            FONT_OPTIONS.forEach(function(f) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'font-option' + (f.id === saved ? ' selected' : '');
+                btn.style.fontFamily = f.family;
+                btn.textContent = f.name;
+                btn.dataset.fontId = f.id;
+                btn.onclick = function() { selectFont(f.id); };
+                dd.appendChild(btn);
+            });
+        }
+
+        function toggleFontPicker() {
+            _ensureFontPickerButtons();
+            _fpOpen = !_fpOpen;
+            document.getElementById('font-picker-dropdown').classList.toggle('open', _fpOpen);
+        }
+
+        function selectFont(fontId) {
+            var opt = FONT_OPTIONS.find(function(f) { return f.id === fontId; });
+            if (!opt) return;
+            localStorage.setItem('valdoria_font', fontId);
+            applyFont(fontId);
+            // Update selected state
+            document.querySelectorAll('.font-option').forEach(function(btn) {
+                btn.classList.toggle('selected', btn.dataset.fontId === fontId);
+            });
+            _fpOpen = false;
+            document.getElementById('font-picker-dropdown').classList.remove('open');
+        }
+
+        function applyFont(fontId) {
+            var opt = FONT_OPTIONS.find(function(f) { return f.id === fontId; });
+            if (!opt) return;
+            // Set CSS variable for overrides + data attribute to activate selectors
+            document.body.style.setProperty('--user-font', opt.family);
+            document.body.dataset.font = fontId;
+            // Also set body font-family directly for non-overridden elements
+            document.body.style.fontFamily = opt.family;
+            // Scale SVG text for fonts that render smaller/larger
+            var s = opt.scale || 1;
+            document.querySelectorAll('#map-svg text, #compass-svg text').forEach(function(t) {
+                var base = parseFloat(t.getAttribute('data-base-size') || t.getAttribute('font-size') || '9.5');
+                if (!t.getAttribute('data-base-size')) t.setAttribute('data-base-size', base);
+                t.setAttribute('font-size', (base * s).toFixed(1) + 'px');
+            });
+        }
+
+        // Close dropdown when tapping outside
+        document.addEventListener('click', function(e) {
+            if (_fpOpen && !e.target.closest('#font-picker-dropdown') && !e.target.closest('#font-picker-btn')) {
+                _fpOpen = false;
+                document.getElementById('font-picker-dropdown').classList.remove('open');
+            }
+        });
+
+        // Init on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFontPicker);
+        } else {
+            initFontPicker();
+        }
+
+        // ── Idle detection: pause ALL decorative animations after 10s ──
+        (function() {
+            var _idleTimer = null;
+            var IDLE_MS = 10000;
+            function _resetIdle() {
+                document.body.classList.remove('map-idle');
+                clearTimeout(_idleTimer);
+                _idleTimer = setTimeout(function() {
+                    document.body.classList.add('map-idle');
+                }, IDLE_MS);
+            }
+            ['pointerdown', 'pointermove', 'wheel', 'keydown'].forEach(function(evt) {
+                document.addEventListener(evt, _resetIdle, { passive: true });
+            });
+            _resetIdle();
+        })();

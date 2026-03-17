@@ -149,6 +149,186 @@
         },
     });
 
+    /* Inventory route */
+    SpaRouter.register("inventory", {
+        page: "inventory/index.html",
+        css: [
+            "shared/status-bars.css",
+            "shared/toast.css",
+            "shared/tabs.css",
+            "shared/animations.css",
+            "shared/loading.css",
+            "shared/image-popup.css",
+            "inventory/inventory.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+            "shared/session-heartbeat.js",
+            "shared/fetch-utils.js",
+            "shared/text-timing.js",
+            "shared/api-discovery.js",
+            "shared/device-id.js",
+            "shared/status-bars.js",
+            "shared/toast.js",
+            "shared/image-popup.js",
+        ],
+        js: [
+            "inventory/inventory-loading.js",
+            "inventory/inventory.js",
+            "inventory/inventory-tabs.js",
+            "inventory/inventory-details.js",
+            "inventory/inventory-actions.js",
+        ],
+        init: function () {
+            /* inventory.js self-initializes at module level */
+        },
+        cleanup: function () {
+            if (window._invLoadingCtrl) {
+                try { window._invLoadingCtrl.hide(); } catch(e) {}
+            }
+        },
+    });
+
+    /* Combat route */
+    SpaRouter.register("combat", {
+        page: "combat/index.html",
+        external: [
+            "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+        ],
+        css: [
+            "shared/status-bars.css",
+            "shared/animations.css",
+            "shared/dice-roller.css",
+            "shared/loading.css",
+            "shared/image-popup.css",
+            "combat/combat.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+            "shared/session-heartbeat.js",
+            "shared/status-bars.js",
+            "shared/motion.js",
+            "shared/fetch-utils.js",
+            "shared/dice-roller.js",
+            "shared/dice-3d.js",
+            "shared/combat-vfx.js",
+            "shared/text-timing.js",
+            "shared/api-discovery.js",
+            "shared/device-id.js",
+            "shared/image-popup.js",
+        ],
+        js: [
+            "combat/combat-loading.js",
+            "combat/combat-audio.js",
+            "combat/combat-data.js",
+            "combat/combat-vfx.js",
+            "combat/combat-dice.js",
+            "combat/combat-ui.js",
+            "combat/combat.js",
+        ],
+        init: function () {
+            /* combat.js self-initializes at module level */
+        },
+        cleanup: function () {
+            if (window._combatLoadingCtrl) {
+                try { window._combatLoadingCtrl.hide(); } catch(e) {}
+            }
+        },
+    });
+
+    /* Explore route */
+    SpaRouter.register("explore", {
+        page: "explore/index.html",
+        external: [
+            "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+        ],
+        css: [
+            "shared/status-bars.css",
+            "shared/animations.css",
+            "shared/loading.css",
+            "shared/image-popup.css",
+            "explore/explore.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+            "shared/typewriter.js",
+            "shared/session-heartbeat.js",
+            "shared/status-bars.js",
+            "shared/motion.js",
+            "shared/fetch-utils.js",
+            "shared/dice-3d.js",
+            "shared/text-timing.js",
+            "shared/api-discovery.js",
+            "shared/device-id.js",
+            "shared/image-popup.js",
+        ],
+        js: [
+            "explore/explore-loading.js",
+            "explore/explore-iso.js",
+            "explore/explore-tiles.js",
+            "explore/explore-fog.js",
+            "explore/explore-travel.js",
+            "explore/explore-movement.js",
+            "explore/explore-renderer.js",
+            "explore/explore-narrations.js",
+            "explore/explore-stories.js",
+            "explore/explore-tutorial.js",
+            "explore/explore-core.js",
+            "explore/explore-events.js",
+            "explore/explore-events-pace.js",
+            "explore/explore-events-hazards.js",
+            "explore/explore-events-rest.js",
+            "explore/explore-events-tiles.js",
+            "explore/explore-particles.js",
+        ],
+        init: function () {
+            /* explore-core.js self-initializes via DOMContentLoaded */
+        },
+        cleanup: function () {
+            if (window._loadingCtrl) {
+                try { window._loadingCtrl.cleanup(); } catch(e) {}
+            }
+        },
+    });
+
+    /* Navigate route */
+    SpaRouter.register("navigate", {
+        page: "navigate/index.html",
+        css: [
+            "shared/animations.css",
+            "shared/loading.css",
+            "navigate/navigate.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+            "shared/fetch-utils.js",
+            "shared/text-timing.js",
+            "shared/api-discovery.js",
+            "shared/device-id.js",
+            "shared/session-heartbeat.js",
+        ],
+        js: [
+            "navigate/map-layout.js",
+            "navigate/navigate-core.js",
+            "navigate/navigate-map.js",
+            "navigate/navigate-map-terrain.js",
+            "navigate/navigate-map-decor.js",
+            "navigate/navigate-ambient.js",
+            "navigate/navigate-ui.js",
+            "navigate/navigate-fontpicker.js",
+        ],
+        init: function () {
+            /* navigate-core.js self-initializes via DOMContentLoaded */
+        },
+        cleanup: function () {
+            /* Navigate cleanup is handled by navigate-core.js destroy() */
+        },
+    });
+
     /* Guide route */
     SpaRouter.register("guide", {
         page: "guide/index.html",
