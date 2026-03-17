@@ -1114,6 +1114,7 @@ const ValdoriaAudio = (() => {
         getSFXVolume,
         createMuteButton,
         previewSFX: _sfxPreviewTick,
+        getCurrentTrack: function() { return _currentTrack; },
         TRACKS,
     };
 })();
@@ -1131,7 +1132,7 @@ if (typeof document !== 'undefined') {
     if (window.__valdoria_transitioning) {
         // Save current track to localStorage for resuming in next WebApp
         try {
-            var ct = ValdoriaAudio._currentTrack || ValdoriaAudio.currentTrack || '';
+            var ct = (typeof ValdoriaAudio.getCurrentTrack === 'function') ? ValdoriaAudio.getCurrentTrack() : '';
             if (ct) localStorage.setItem('valdoria_audio_resume', ct);
             localStorage.setItem('valdoria_audio_resume_ts', String(Date.now()));
         } catch(e) { /* storage optional */ }

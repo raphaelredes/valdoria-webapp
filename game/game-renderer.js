@@ -243,6 +243,10 @@ function renderScreen(screen) {
                 actionRows.push(row);
             }
         }
+        // Include Voltar in action rows when nav at top (user wants ALL buttons at top)
+        if (voltarRow) {
+            actionRows.push(voltarRow);
+        }
         // Render action buttons AFTER the header (title stays above buttons)
         if (actionRows.length > 0) {
             const wrap = document.createElement('div');
@@ -263,10 +267,6 @@ function renderScreen(screen) {
                     contentEl.appendChild(wrap);
                 }
             }
-        }
-        // Render Voltar at the END of content (after text, allies, tracker)
-        if (voltarRow) {
-            renderButtons(contentEl, [voltarRow]);
         }
     } else if (screen.screen_id !== 'city.settings') {
         // Default: action buttons after text content (skipped for settings — rendered after injections)
