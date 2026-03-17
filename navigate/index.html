@@ -145,9 +145,21 @@
         }
 
         #map-svg {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+            pointer-events: none;
+            opacity: 0;
+        }
+        #map-canvas {
             display: block;
-            position: relative;
-            contain: layout style;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 733px;
+            height: 720px;
+            pointer-events: auto;
         }
 
         #map-bg {
@@ -2211,7 +2223,10 @@
             </picture>
             <canvas id="fog-canvas" width="733" height="720"
                     style="position:absolute;top:0;left:0;pointer-events:none"></canvas>
-            <svg id="map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+            <canvas id="map-canvas" width="733" height="720"
+                    style="position:absolute;top:0;left:0;pointer-events:auto"></canvas>
+            <svg id="map-svg" xmlns="http://www.w3.org/2000/svg"
+                 style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;opacity:0"></svg>
         </div>
         <!-- Compass overlay (fixed above map, not affected by pan/zoom) -->
         <div id="compass-overlay">
@@ -2321,7 +2336,7 @@
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
-        var scripts = ['map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-map-terrain.js', 'navigate-map-decor.js', 'navigate-ambient.js', 'navigate-ui.js'];
+        var scripts = ['map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-map-terrain.js', 'navigate-map-decor.js', 'navigate-canvas-renderer.js', 'navigate-canvas-icons.js', 'navigate-ambient.js', 'navigate-ui.js'];
         scripts.forEach(function (s) { document.write('<script src="' + s + '?v=' + v + '"><\/script>'); });
     </script>
     <script>
