@@ -79,10 +79,10 @@ if(data.toast)showToast(data.toast);if(data.alert){const alertDur=(typeof calcRe
 if(data.timer){showTimerOverlay(data.timer);}
 if(data.inn_animation&&typeof playInnAnimation==='function'){hideLocationTransition();const result=await new Promise(resolve=>playInnAnimation(data.inn_animation,resolve));if(!result?.skipped&&data.inn_animation.dream_insight){try{const diRes=await apiCall('/api/game/action',{cb:'inn_dream_insight'});if(diRes?.toast)showToast(diRes.toast);}catch(e){console.warn('[GAME] dream insight action failed',e);}}
 if(data.text||data.buttons){renderScreen(data);}
-return;}
+if(window.actionGuard)actionGuard.release();return;}
 if(data.text||data.buttons){const elapsed=Date.now()-t0;const remaining=locCtx?Math.max(0,getLocTransitionMs()-elapsed):0;if(remaining>0)await sleep(remaining);hideLocationTransition();const isBack=/^(action_universal_back|city_back|back|voltar)/.test(callbackData);animateScreenTransition(()=>renderScreen(data),isBack?'back':'forward');if(data.transition&&data.text){console.debug('[GAME] Screen has WebApp link:',data.transition.to);}}else{hideLocationTransition();}
 if(window.actionGuard)actionGuard.release();}
-async function doText(text){if(S.transitioning||!text.trim())return;S.lastActionTime=Date.now();haptic('light');const data=await apiCall('/api/game/text',{text:text.trim()});if(data&&!data.error){animateScreenTransition(()=>renderScreen(data));}}
+async function doText(text){if(S.transitioning||!text.trim())return;if(window.actionGuard&&!actionGuard.acquire())return;S.lastActionTime=Date.now();haptic('light');const data=await apiCall('/api/game/text',{text:text.trim()});if(window.actionGuard)actionGuard.release();if(data&&!data.error){animateScreenTransition(()=>renderScreen(data));}}
 function cacheScreen(screen){try{if(screen&&(screen.waiting_for_text||screen.timer))return;localStorage.setItem(SCREEN_CACHE_KEY,JSON.stringify({uid:S.uid,charId:S.charId||'',ts:Date.now(),screen,}));}catch(e){}}
 function loadCachedScreen(){try{const raw=localStorage.getItem(SCREEN_CACHE_KEY);if(!raw)return null;const parsed=JSON.parse(raw);const{uid,ts,screen}=parsed;var charId=parsed.charId||'';if(uid!==S.uid||(S.charId&&charId&&S.charId!==charId)||Date.now()-ts>SCREEN_CACHE_TTL){localStorage.removeItem(SCREEN_CACHE_KEY);return null;}
 if(typeof _trackCacheHit==='function')_trackCacheHit();return screen;}catch(e){return null;}}
