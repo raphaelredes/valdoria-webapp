@@ -145,13 +145,16 @@ async function init() {
         try { Telegram.WebApp.disableVerticalSwipes(); } catch (e) { /* older clients */ }
         try { Telegram.WebApp.setHeaderColor('#2a2420'); Telegram.WebApp.setBackgroundColor('#2a2420'); } catch (e) { /* older clients */ }
 
-        // [EXIT-CONFIRM] Back button: sub-screens navigate back; root shows exit popup
+        // [EXIT-CONFIRM] Back button: close popup if open, else show exit confirm
         Telegram.WebApp.BackButton.show();
         Telegram.WebApp.BackButton.onClick(() => {
-            const sid = S.currentScreen ? S.currentScreen.screen_id || '' : '';
-            if (sid && sid !== 'city.hub') {
-                doAction('action_universal_back');
-            } else if (window.ValdoriaExitConfirm) {
+            // 1. Close any open popup first
+            if (window.vPopup && vPopup.isOpen()) {
+                vPopup.hide();
+                return;
+            }
+            // 2. Always show exit popup (never navigate back)
+            if (window.ValdoriaExitConfirm) {
                 ValdoriaExitConfirm.show();
             } else {
                 _closeGameHub();
@@ -170,10 +173,12 @@ async function init() {
     history.pushState({ screen: 'game' }, '');
     window.addEventListener('popstate', (e) => {
         history.pushState({ screen: 'game' }, '');
-        const sid = S.currentScreen ? S.currentScreen.screen_id || '' : '';
-        if (sid && sid !== 'city.hub') {
-            doAction('action_universal_back');
-        } else if (window.ValdoriaExitConfirm) {
+        // Close popup if open, else show exit confirm
+        if (window.vPopup && vPopup.isOpen()) {
+            vPopup.hide();
+            return;
+        }
+        if (window.ValdoriaExitConfirm) {
             ValdoriaExitConfirm.show();
         } else {
             _closeGameHub();
@@ -694,6 +699,41 @@ async function fetchState(silent) {
     }
 }
 
+// ─── Generic popup renderer (converts screen data → vPopup overlay) ───
+function _showGamePopup(data) {
+    var popup = data.popup || {};
+    var bodyHtml = '';
+    if (data.text) {
+        bodyHtml += '<div style="font-size:var(--v-font-body);color:var(--v-text);line-height:1.6;margin-bottom:var(--v-space-md);">'
+            + data.text + '</div>';
+    }
+    var actionsHtml = '';
+    if (data.buttons && data.buttons.length > 0) {
+        for (var r = 0; r < data.buttons.length; r++) {
+            var row = data.buttons[r];
+            if (!row || row.length === 0) continue;
+            if (row.length >= 2) {
+                actionsHtml += '<div class="v-popup-btn-row">';
+                for (var b = 0; b < row.length; b++) {
+                    actionsHtml += '<button class="v-popup-btn" data-action="' + (row[b].cb || '') + '">'
+                        + (row[b].text || '') + '</button>';
+                }
+                actionsHtml += '</div>';
+            } else {
+                actionsHtml += '<button class="v-popup-btn" data-action="' + (row[0].cb || '') + '">'
+                    + (row[0].text || '') + '</button>';
+            }
+        }
+    }
+    actionsHtml += '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">🏠 Voltar</button>';
+    vPopup.show({
+        header: popup.title || '',
+        headerClass: popup.headerClass || '',
+        body: bodyHtml,
+        actions: actionsHtml
+    });
+}
+
 // ─── Close Game Hub ───
 // Notify server to update the underlying Telegram message, then close the WebApp.
 async function _closeGameHub() {
@@ -791,6 +831,14 @@ async function doAction(callbackData) {
         hideLocationTransition();
         if (window.actionGuard) actionGuard.release();
         showQuestPopup(data.quest_detail);
+        return;
+    }
+
+    // Generic popup (locations, vínculos, inn, etc.)
+    if (data.popup && window.vPopup) {
+        hideLocationTransition();
+        if (window.actionGuard) actionGuard.release();
+        _showGamePopup(data);
         return;
     }
 

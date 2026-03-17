@@ -1,14 +1,8 @@
 /* game-quest-popup.js — Quest Detail Popup Overlay for Game Hub */
-/* Shows quest details in a popup overlay instead of changing screens */
+/* Uses shared vPopup system. Content renderers kept intact. */
 
 (function () {
     'use strict';
-
-    var _overlay = null;
-    var _currentData = null;
-    var _busy = false;
-
-    function _el(id) { return document.getElementById(id); }
 
     function _esc(text) {
         if (!text) return '';
@@ -44,17 +38,13 @@
 
         // Description
         if (q.desc) {
-            h += '<div style="font-size:13px;line-height:1.6;color:var(--v-text);margin-bottom:10px;'
-                + 'padding:8px 10px;background:rgba(74,56,40,0.15);border-radius:6px;'
-                + 'border-left:2px solid var(--v-gold-dim);">'
-                + _esc(q.desc) + '</div>';
+            h += '<div class="v-popup-desc">' + _esc(q.desc) + '</div>';
         }
 
         // Current objective
         if (q.obj && q.status === 'active') {
             h += '<div style="margin-bottom:10px;">';
-            h += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;'
-                + 'color:var(--v-gold-dim);margin-bottom:4px;">\ud83d\udcdc O que voc\u00ea sabe</div>';
+            h += '<div class="v-popup-section-label">\ud83d\udcdc O que voc\u00ea sabe</div>';
             if (q.ready) {
                 h += '<div style="font-size:13px;color:var(--v-text);font-style:italic;">'
                     + 'A miss\u00e3o est\u00e1 cumprida. Resta apenas reportar o feito.</div>';
@@ -73,8 +63,7 @@
             }
             if (hasCompleted) {
                 h += '<div style="margin-bottom:10px;padding:8px;background:rgba(74,56,40,0.1);border-radius:6px;">';
-                h += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;'
-                    + 'color:var(--v-gold-dim);margin-bottom:6px;">\ud83d\udcd6 Sua Jornada</div>';
+                h += '<div class="v-popup-section-label">\ud83d\udcd6 Sua Jornada</div>';
                 for (var i = 0; i < q.objectives.length; i++) {
                     var o = q.objectives[i];
                     if (o.state === 'future') continue;
@@ -112,8 +101,7 @@
         if (rewHtml) {
             h += '<div style="margin-top:6px;padding:8px 10px;background:rgba(196,149,58,0.08);'
                 + 'border-radius:6px;border:1px solid rgba(196,149,58,0.15);">';
-            h += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;'
-                + 'color:var(--v-gold-dim);margin-bottom:4px;">\ud83d\udc8e Recompensas</div>';
+            h += '<div class="v-popup-section-label">\ud83d\udc8e Recompensas</div>';
             h += '<div style="font-size:13px;color:var(--v-text);">' + rewHtml + '</div>';
             h += '</div>';
         }
@@ -125,74 +113,33 @@
         var h = '';
 
         if (q.can_turnin && q.turnin_cb) {
-            h += '<button class="qp-btn qp-btn--turnin" data-action="' + q.turnin_cb + '">'
+            h += '<button class="v-popup-btn v-popup-btn--success" data-action="' + q.turnin_cb + '">'
                 + '\ud83d\udcdc Entregar Miss\u00e3o</button>';
         }
 
         if (q.can_abandon && q.abandon_cb) {
-            h += '<button class="qp-btn qp-btn--abandon" data-action="' + q.abandon_cb + '">'
+            h += '<button class="v-popup-btn v-popup-btn--danger" data-action="' + q.abandon_cb + '">'
                 + '\u274c Abandonar</button>';
         }
 
-        h += '<button class="qp-btn qp-btn--close" data-action="cancel">'
+        h += '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">'
             + '\ud83c\udfe0 Voltar</button>';
 
         return h;
     }
 
     window.showQuestPopup = function (data) {
-        _currentData = data;
-        _overlay = _el('quest-popup-overlay');
-        if (!_overlay) {
-            console.warn('[QUEST-POPUP] overlay element not found');
-            return;
-        }
+        if (typeof vPopup === 'undefined') { console.warn('[QUEST-POPUP] vPopup not loaded'); return; }
 
-        _el('qp-header').innerHTML = '\u2694\uFE0F ' + _esc(data.title || 'Detalhes da Miss\u00e3o');
-        _el('qp-body').innerHTML = _renderBody(data);
-        _el('qp-actions').innerHTML = _renderActions(data);
-
-        _overlay.style.display = 'flex';
-        _overlay.classList.remove('hiding');
-        void _overlay.offsetWidth;
-        _overlay.classList.add('active');
-        _busy = false;
-
-        _overlay.querySelectorAll('[data-action]').forEach(function (btn) {
-            btn.addEventListener('click', _handleAction);
+        vPopup.show({
+            id: 'quest-popup-overlay',
+            header: '\u2694\uFE0F ' + _esc(data.title || 'Detalhes da Miss\u00e3o'),
+            body: _renderBody(data),
+            actions: _renderActions(data)
         });
-
-        _overlay.onclick = function (e) {
-            if (e.target === _overlay) hideQuestPopup();
-        };
     };
 
     window.hideQuestPopup = function () {
-        if (!_overlay) return;
-        _overlay.classList.add('hiding');
-        _overlay.classList.remove('active');
-        setTimeout(function () {
-            if (_overlay) _overlay.style.display = 'none';
-            _overlay = null;
-            _currentData = null;
-            _busy = false;
-        }, 300);
+        if (typeof vPopup !== 'undefined') vPopup.hide();
     };
-
-    function _handleAction(e) {
-        if (_busy) return;
-        var action = e.currentTarget.getAttribute('data-action');
-        if (!action) return;
-
-        if (action === 'cancel') {
-            hideQuestPopup();
-            return;
-        }
-
-        _busy = true;
-        hideQuestPopup();
-        setTimeout(function () {
-            if (typeof doAction === 'function') doAction(action);
-        }, 150);
-    }
 })();

@@ -76,6 +76,7 @@ const ValdoriaAudio = (() => {
     let _pendingTrack = '';
     let _looping = false;
     let _fading = false;
+    let _mutedAutoplay = false;
     let _uiInjected = false;
 
     // -- Autoplay unlock system (resilient to WebView rejections) --
@@ -108,6 +109,18 @@ const ValdoriaAudio = (() => {
         _unlocked = true;
         _removeUnlockListeners();
         _warmUpAudioContext();
+
+        // If muted autoplay is running, unmute it with crossfade
+        if (_mutedAutoplay && _audio && !_muted && !_musicMuted) {
+            _audio.muted = false;
+            _audio.volume = 0;
+            _crossfadeIn(_audio);
+            _mutedAutoplay = false;
+            _syncUI();
+            return;
+        }
+        _mutedAutoplay = false;
+
         if (_pendingTrack && !_muted && !_musicMuted) {
             _playTrack(_pendingTrack);
         }
@@ -123,6 +136,28 @@ const ValdoriaAudio = (() => {
         if (!_unlockListenersActive) return;
         _unlockListenersActive = false;
         _UNLOCK_EVENTS.forEach(e => document.removeEventListener(e, _unlockHandler, { capture: true }));
+    }
+
+    function _tryMutedAutoplay(trackKey) {
+        if (_mutedAutoplay) return; // already running
+        const file = _pickVariant(trackKey);
+        if (!file) return;
+
+        const audio = new Audio(AUDIO_BASE + file);
+        audio.muted = true;
+        audio.preload = 'auto';
+
+        audio.play().then(() => {
+            _audio = audio;
+            _currentTrack = trackKey;
+            _mutedAutoplay = true;
+            if (!NO_LOOP_TRACKS.includes(trackKey)) {
+                audio.addEventListener('timeupdate', _onTimeUpdate);
+            }
+            console.debug('[AUDIO] Muted autoplay started for:', trackKey, '— will unmute on first interaction');
+        }).catch(() => {
+            console.debug('[AUDIO] Even muted autoplay blocked — waiting for user interaction');
+        });
     }
 
     // -- Init --
@@ -174,9 +209,15 @@ const ValdoriaAudio = (() => {
         }
 
         _pendingTrack = trackKey;
-        if (!_unlocked || _muted || _musicMuted) return;
+        if (_muted || _musicMuted) return;
 
-        _playTrack(trackKey);
+        if (_unlocked) {
+            _playTrack(trackKey);
+            return;
+        }
+
+        // Not unlocked yet — try muted autoplay (browsers allow muted playback)
+        _tryMutedAutoplay(trackKey);
     }
 
     function _playTrack(trackKey) {
@@ -1140,24 +1181,26 @@ if (typeof document !== 'undefined') {
 }
 
 // ═══════════════════════════════════════════
-// CROSS-WEBAPP MUSIC RESUME
+// CROSS-WEBAPP MUSIC RESUME — PERSISTENT AUDIO
 // ═══════════════════════════════════════════
-// After a cross-WebApp transition, attempt to resume the previous track
-// if it was saved within the last 10 seconds.
+// Music MUST be persistent across all screen transitions.
+// Resume the saved track as fast as possible (50ms) so the player
+// perceives no interruption. The track only changes when the new
+// WebApp explicitly plays a different environment track.
 (function _tryResumeAudio() {
     try {
         var resumeTrack = localStorage.getItem('valdoria_audio_resume');
         var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts') || '0', 10);
-        if (resumeTrack && Date.now() - resumeTs < 10000) {
+        if (resumeTrack && Date.now() - resumeTs < 30000) {
             // Clear the resume data so it doesn't fire again
             localStorage.removeItem('valdoria_audio_resume');
             localStorage.removeItem('valdoria_audio_resume_ts');
-            // Schedule resume after a short delay (let the WebApp init first)
+            // Resume ASAP — minimal delay for init to complete
             setTimeout(function() {
                 if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
                     ValdoriaAudio.play(resumeTrack);
                 }
-            }, 500);
+            }, 50);
         }
     } catch(e) { /* storage or audio not available */ }
 })();

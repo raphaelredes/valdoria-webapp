@@ -16,13 +16,12 @@
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
+document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
 document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/tabs.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game-feedback.css?v=' + v + '">');
-        document.write('<link rel="stylesheet" href="game-travel-prep.css?v=' + v + '">');
-        document.write('<link rel="stylesheet" href="game-quest-popup.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="inn-animation.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/audio-manager.css?v=' + v + '">');
     </script>
@@ -314,21 +313,30 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         </div>
     </div>
 
-    <!-- Travel preparation overlay -->
-    <div id="travel-prep-overlay" class="travel-prep-overlay" style="display:none">
-        <div class="tp-card">
-            <div class="tp-header">⚠️ Preparação de Viagem</div>
-            <div id="tp-body"></div>
-            <div id="tp-actions"></div>
+    <!-- Travel preparation overlay (uses shared popup system) -->
+    <div id="travel-prep-overlay" class="v-popup-overlay" style="display:none">
+        <div class="v-popup-card">
+            <div class="v-popup-header">⚠️ Preparação de Viagem</div>
+            <div class="v-popup-body"></div>
+            <div class="v-popup-actions"></div>
         </div>
     </div>
 
-    <!-- Quest detail popup overlay -->
-    <div id="quest-popup-overlay" class="quest-popup-overlay" data-element="quest-popup" style="display:none">
-        <div class="qp-card">
-            <div class="qp-header" id="qp-header"></div>
-            <div id="qp-body"></div>
-            <div id="qp-actions"></div>
+    <!-- Quest detail popup overlay (uses shared popup system) -->
+    <div id="quest-popup-overlay" class="v-popup-overlay" style="display:none">
+        <div class="v-popup-card">
+            <div class="v-popup-header"></div>
+            <div class="v-popup-body"></div>
+            <div class="v-popup-actions"></div>
+        </div>
+    </div>
+
+    <!-- Generic game popup overlay (for inn, locations, etc.) -->
+    <div id="v-popup-overlay" class="v-popup-overlay" style="display:none">
+        <div class="v-popup-card">
+            <div class="v-popup-header"></div>
+            <div class="v-popup-body"></div>
+            <div class="v-popup-actions"></div>
         </div>
     </div>
 
@@ -342,6 +350,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/image-popup.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
         document.write('<script src="game-travel-prep.js?v=' + v + '"><\/script>');
         document.write('<script src="game-quest-popup.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
