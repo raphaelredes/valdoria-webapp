@@ -6,7 +6,7 @@
 .outcome-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(42, 36, 32, 0.92);
+    background: rgba(42, 36, 32, 0.96);
     /* backdrop-filter removed for mobile performance */
     z-index: var(--v-z-dropdown);
     display: flex;

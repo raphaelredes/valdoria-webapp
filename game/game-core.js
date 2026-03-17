@@ -794,6 +794,16 @@ async function doAction(callbackData) {
         return;
     }
 
+    // Safety net: if response has no text AND no screen_id AND no transition,
+    // it may be a stale/inline response — force hub reload to prevent navigation trap
+    if (!data.text && !data.screen_id && !data.transition && !data.error) {
+        console.warn('[GAME] Empty response from action — forcing hub reload to prevent trap');
+        if (window.actionGuard) actionGuard.release();
+        hideLocationTransition();
+        returnFromWebApp();
+        return;
+    }
+
     // Handle transitions to specialized WebApps
     // Only auto-transition if there is NO text to display
     if (data.transition && !data.text) {

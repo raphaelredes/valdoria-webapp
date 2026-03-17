@@ -1127,6 +1127,39 @@ if (typeof document !== 'undefined') {
     }
     // Fade-out on page unload (avoids abrupt audio cut)
     window.addEventListener('pagehide', function() {
-        ValdoriaAudio.stop();
-    });
+    // Skip audio stop during cross-WebApp transitions (music should persist)
+    if (window.__valdoria_transitioning) {
+        // Save current track to localStorage for resuming in next WebApp
+        try {
+            var ct = ValdoriaAudio._currentTrack || ValdoriaAudio.currentTrack || '';
+            if (ct) localStorage.setItem('valdoria_audio_resume', ct);
+            localStorage.setItem('valdoria_audio_resume_ts', String(Date.now()));
+        } catch(e) { /* storage optional */ }
+        return;
+    }
+    ValdoriaAudio.stop();
+});
 }
+
+// ═══════════════════════════════════════════
+// CROSS-WEBAPP MUSIC RESUME
+// ═══════════════════════════════════════════
+// After a cross-WebApp transition, attempt to resume the previous track
+// if it was saved within the last 10 seconds.
+(function _tryResumeAudio() {
+    try {
+        var resumeTrack = localStorage.getItem('valdoria_audio_resume');
+        var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts') || '0', 10);
+        if (resumeTrack && Date.now() - resumeTs < 10000) {
+            // Clear the resume data so it doesn't fire again
+            localStorage.removeItem('valdoria_audio_resume');
+            localStorage.removeItem('valdoria_audio_resume_ts');
+            // Schedule resume after a short delay (let the WebApp init first)
+            setTimeout(function() {
+                if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
+                    ValdoriaAudio.play(resumeTrack);
+                }
+            }, 500);
+        }
+    } catch(e) { /* storage or audio not available */ }
+})();

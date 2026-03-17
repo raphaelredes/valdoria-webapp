@@ -150,6 +150,13 @@ function renderScreen(screen) {
         if (screen.settings_data && typeof injectGameSettings === 'function') injectGameSettings(contentEl, screen.settings_data);
         if (typeof injectFontPicker === 'function') injectFontPicker(contentEl);
         if (typeof injectAudioSettings === 'function') injectAudioSettings(contentEl);
+        // Render action buttons AFTER all settings sections (Cidade/Voltar goes last)
+        renderButtons(contentEl, screen.buttons || []);
+    }
+
+    // Referral code screen (rich rendering)
+    if (screen.referral_data && typeof injectReferralScreen === 'function') {
+        injectReferralScreen(contentEl, screen.referral_data);
     }
 
     // Render structured ally cards (replaces plain text ally block)
@@ -261,8 +268,8 @@ function renderScreen(screen) {
         if (voltarRow) {
             renderButtons(contentEl, [voltarRow]);
         }
-    } else {
-        // Default: action buttons after text content
+    } else if (screen.screen_id !== 'city.settings') {
+        // Default: action buttons after text content (skipped for settings — rendered after injections)
         renderButtons(contentEl, screen.buttons || []);
     }
 

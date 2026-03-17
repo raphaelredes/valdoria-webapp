@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 @import url('game-layout.css'); /* Layout, buttons, panels, font picker */
-@import url('game-loading.css'); /* Loading overlay, magic circle, particles */
+@import url('../shared/loading.css'); /* Loading overlay, magic circle, particles */
 @import url('game-overlays.css'); /* Toast, timer, error, network status, transitions */
 @import url('game-transitions.css'); /* Screen animations, badge bounce, button entrance */
 @import url('game-travel.css'); /* Cross-webapp transitions, location travel, input, skip */

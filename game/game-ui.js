@@ -749,30 +749,45 @@ function injectAudioSettings(contentEl) {
     const musicVol = Math.round(ValdoriaAudio.getVolume() * 100);
     const sfxVol = Math.round(ValdoriaAudio.getSFXVolume() * 100);
 
-    // Header
+    // Header (accordion toggle)
     const header = document.createElement('div');
-    header.className = 'audio-settings-header';
-    header.textContent = '🔊 Som';
+    header.className = 'audio-settings-header settings-accordion-header';
+    header.innerHTML = '🔊 Som <span class="accordion-arrow">▼</span>';
+    const audioContent = document.createElement('div');
+    audioContent.className = 'settings-accordion-body';
+    // Restore collapsed state from localStorage
+    const audioCollapsed = localStorage.getItem('valdoria_settings_audio_collapsed') === '1';
+    if (audioCollapsed) {
+        audioContent.style.display = 'none';
+        header.querySelector('.accordion-arrow').textContent = '▶';
+    }
+    header.onclick = function() {
+        const isHidden = audioContent.style.display === 'none';
+        audioContent.style.display = isHidden ? '' : 'none';
+        header.querySelector('.accordion-arrow').textContent = isHidden ? '▼' : '▶';
+        localStorage.setItem('valdoria_settings_audio_collapsed', isHidden ? '0' : '1');
+    };
     section.appendChild(header);
 
     // Music row
-    section.appendChild(_audioRow(
+    audioContent.appendChild(_audioRow(
         '🎵 Música',
         !musicMuted,
         musicVol,
         (enabled) => { ValdoriaAudio.toggleMusic(); _refreshAudioSettings(contentEl); },
-        (val) => { ValdoriaAudio.setVolume(val / 100); _refreshAudioSettings(contentEl); }
+        (val) => { ValdoriaAudio.setVolume(val / 100); }
     ));
 
     // SFX row
-    section.appendChild(_audioRow(
+    audioContent.appendChild(_audioRow(
         '⚔️ Efeitos',
         !sfxMuted,
         sfxVol,
         (enabled) => { ValdoriaAudio.toggleSFX(); _refreshAudioSettings(contentEl); },
-        (val) => { ValdoriaAudio.setSFXVolume(val / 100); if (ValdoriaAudio.previewSFX) ValdoriaAudio.previewSFX(); _refreshAudioSettings(contentEl); }
+        (val) => { ValdoriaAudio.setSFXVolume(val / 100); if (ValdoriaAudio.previewSFX) ValdoriaAudio.previewSFX(); }
     ));
 
+    section.appendChild(audioContent);
     contentEl.appendChild(section);
 }
 
@@ -922,4 +937,80 @@ function triggerScreenShake(intensity) {
         screen.removeEventListener('animationend', onEnd);
     });
     if (typeof haptic === 'function') haptic(intensity === 'heavy' ? 'heavy' : 'medium');
+}
+
+// ===================================================
+// REFERRAL CODE SCREEN (rich rendering)
+// ===================================================
+function injectReferralScreen(contentEl, data) {
+    var section = document.createElement('div');
+    section.className = 'referral-screen';
+
+    // Code display (large, copyable)
+    var codeBox = document.createElement('div');
+    codeBox.className = 'referral-code-box';
+    var codeLabel = document.createElement('div');
+    codeLabel.className = 'referral-code-label';
+    codeLabel.textContent = '\ud83d\udccb Seu C\u00f3digo';
+    var codeValue = document.createElement('div');
+    codeValue.className = 'referral-code-value';
+    codeValue.textContent = data.code || '---';
+    var codeHint = document.createElement('div');
+    codeHint.className = 'referral-code-hint';
+    codeHint.textContent = 'Toque para copiar';
+    codeBox.appendChild(codeLabel);
+    codeBox.appendChild(codeValue);
+    codeBox.appendChild(codeHint);
+    codeBox.onclick = function() {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(data.code || '');
+            if (typeof vToast === 'function') vToast('C\u00f3digo copiado!', 'success');
+            haptic('success');
+        }
+    };
+    section.appendChild(codeBox);
+
+    // Stats row
+    var stats = document.createElement('div');
+    stats.className = 'referral-stats';
+    var stat1 = document.createElement('div');
+    stat1.className = 'referral-stat';
+    stat1.innerHTML = '<span class="referral-stat-value">' + (data.count || 0) + '</span>' +
+        '<span class="referral-stat-label">Indica\u00e7\u00f5es</span>';
+    var stat2 = document.createElement('div');
+    stat2.className = 'referral-stat';
+    stat2.innerHTML = '<span class="referral-stat-value">\ud83e\ude99 ' + (data.next_reward || 50) + '</span>' +
+        '<span class="referral-stat-label">Pr\u00f3xima</span>';
+    stats.appendChild(stat1);
+    stats.appendChild(stat2);
+    section.appendChild(stats);
+
+    // Reward tiers
+    var tiersBox = document.createElement('div');
+    tiersBox.className = 'referral-tiers';
+    var tiersTitle = document.createElement('div');
+    tiersTitle.className = 'referral-tiers-title';
+    tiersTitle.textContent = '\ud83d\udcca Escala de Recompensas';
+    tiersBox.appendChild(tiersTitle);
+    var tiers = data.tiers || [];
+    for (var i = 0; i < tiers.length; i++) {
+        var t = tiers[i];
+        var maxLabel = t.max >= 9999 ? '\u221e' : t.max;
+        var isCurrent = (data.count || 0) + 1 >= t.min && (data.count || 0) + 1 <= t.max;
+        var tierEl = document.createElement('div');
+        tierEl.className = 'referral-tier' + (isCurrent ? ' current' : '');
+        tierEl.innerHTML = '<span class="tier-range">' + t.min + '-' + maxLabel + '</span>' +
+            '<span class="tier-reward">\ud83e\ude99 ' + t.referrer + ' GP</span>' +
+            '<span class="tier-friend">\ud83e\udd1d ' + t.referee + ' GP</span>';
+        tiersBox.appendChild(tierEl);
+    }
+    section.appendChild(tiersBox);
+
+    // Description
+    var desc = document.createElement('div');
+    desc.className = 'referral-desc';
+    desc.textContent = 'Compartilhe seu c\u00f3digo com amigos! Quando eles criarem uma conta e inserirem o c\u00f3digo, ambos recebem ouro.';
+    section.appendChild(desc);
+
+    contentEl.appendChild(section);
 }

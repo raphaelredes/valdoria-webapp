@@ -507,7 +507,7 @@ function showAmbientEvent(poi) {
 
     const narrEl = document.getElementById('dm-narration');
     narrEl.innerHTML = '<span class="cursor"></span>';
-    typewriter(narrEl, poi.narration || '', () => {
+    typewriter(narrEl, poi.narration || 'Você observa os arredores com cautela...', () => {
         const contBtn = document.createElement('button');
         contBtn.className = 'ambient-continue-btn';
         contBtn.textContent = 'Prosseguir…';
@@ -592,7 +592,7 @@ function showNPCDialogue(poi) {
     narrEl.innerHTML = '';
 
     // Show intro narration first
-    typewriter(narrEl, poi.narration || '', () => {
+    typewriter(narrEl, poi.narration || 'O silêncio paira no ar enquanto você observa a cena...', () => {
         // Then show dialogue lines one at a time
         const dialogueLines = poi.dialogue || [];
         if (dialogueLines.length > 0) {
@@ -748,7 +748,7 @@ function showChoices(poi) {
             var _oNames = {sobrevivente:'Sobrevivente',nobre:'Nobre',peregrino:'Peregrino',fugitivo:'Fugitivo',aprendiz:'Aprendiz',veterano:'Veterano',eremita:'Eremita',mercenario:'Mercen\u00e1rio',naufrago:'N\u00e1ufrago',visionario:'Vision\u00e1rio'};
             html += '<span class="origin-badge">' + (_oNames[_oc] || _oc) + '</span>';
         }
-        html += '<span class="choice-label">' + (ch.t || ch.l || 'Escolher') + labelExtra + '</span>';
+        html += '<span class="choice-label">' + ((ch.t || ch.l || 'Escolher').replace(/_+$/g, '')) + labelExtra + '</span>';
 
         // Stat check display (D&D 5e skill with proficiency + adv/dis indicator)
         if (ch.k) {
@@ -1073,7 +1073,7 @@ function showStage2(poi, stage2) {
             const btn = document.createElement('button');
             btn.className = 'dm-choice-btn';
             let html = `<span class="choice-icon"></span>`;
-            html += `<span class="choice-label">${ch.t || ch.l || 'Escolher'}</span>`;
+            html += `<span class="choice-label">${(ch.t || ch.l || 'Escolher').replace(/_+$/g, '')}</span>`;
             if (ch.k) {
                 const statShort = STAT_SHORT[ch.k.s] || ch.k.s.toUpperCase();
                 const proficient = S.charData && S.charData.sp && S.charData.sp.includes(ch.k.s);
@@ -1693,7 +1693,7 @@ function showRandomEncounter(enc) {
             btn.className = 'dm-choice-btn';
 
             let html = `<span class="choice-icon"></span>`;
-            html += `<span class="choice-label">${ch.t || ch.l || 'Agir'}</span>`;
+            html += `<span class="choice-label">${(ch.t || ch.l || 'Agir').replace(/_+$/g, '')}</span>`;
 
             // cmb_direct choices (e.g., "Atacar") — no stat check, trigger combat
             // No-check safe choices (e.g., "Preparar Defesa") — direct outcome

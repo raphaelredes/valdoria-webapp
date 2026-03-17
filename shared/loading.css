@@ -19,6 +19,12 @@
     opacity: 0;
     pointer-events: none;
 }
+/* Pause ALL animations when loading overlay is hidden — saves GPU on 23+ infinite animations */
+.loading-overlay[style*="display: none"] *,
+.loading-overlay[style*="display:none"] *,
+.loading-overlay.hidden * {
+    animation-play-state: paused !important;
+}
 /* Vignette */
 .loading-overlay::before {
     content: '';
@@ -361,6 +367,7 @@
     background: radial-gradient(circle at 35% 35%, #ffe090, #d4aa4a 40%, #c4953a 80%, #8a5020);
     box-shadow:
         0 0 18px rgba(212,170,74,0.9),
+        0 0 40px rgba(196,149,58,0.5),
         inset 0 -3px 6px rgba(0,0,0,0.3),
         inset 0 2px 4px rgba(255,230,160,0.5);
 }
@@ -368,6 +375,8 @@
     background: radial-gradient(circle at 35% 35%, #fff4d0, #ffe080 40%, #d4aa4a 80%, #c4953a);
     box-shadow:
         0 0 24px rgba(255,224,128,0.9),
+        0 0 50px rgba(212,170,74,0.6),
+        0 0 80px rgba(196,149,58,0.3),
         inset 0 -3px 6px rgba(0,0,0,0.2),
         inset 0 2px 4px rgba(255,240,180,0.6);
 }
@@ -430,7 +439,7 @@
 }
 
 /* ── Brand Section ── */
-.loading-brand { text-align: center; animation: loadFadeIn 0.7s ease 0.6s both; }
+.loading-brand { text-align: center; animation: v-fadeIn 0.7s ease 0.6s both; }
 
 .loading-title {
     font-size: clamp(16px, 4.5vw, 18px);
@@ -450,7 +459,7 @@
     width: clamp(120px, 40vw, 160px); height: 1px;
     background: linear-gradient(90deg, transparent, rgba(196,149,58,0.4), rgba(196,149,58,0.7), rgba(196,149,58,0.4), transparent);
     margin: var(--v-space-md-lg) auto 0;
-    animation: loadFadeIn 0.5s ease 0.8s both;
+    animation: v-fadeIn 0.5s ease 0.8s both;
 }
 .divider-rune {
     position: absolute; top: 50%; left: 50%;
@@ -462,7 +471,7 @@
 @keyframes runePulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
 /* ── Progress Bar ── */
-.loading-progress-wrap { margin: var(--v-space-xl) 0 var(--v-space-lg); width: clamp(160px, 50vw, 200px); animation: loadFadeIn 0.5s ease 0.9s both; }
+.loading-progress-wrap { margin: var(--v-space-xl) 0 var(--v-space-lg); width: clamp(160px, 50vw, 200px); animation: v-fadeIn 0.5s ease 0.9s both; }
 .loading-progress-track { width: 100%; height: 3px; background: rgba(196,149,58,0.08); border-radius: var(--v-radius-xs); overflow: hidden; position: relative; }
 .loading-progress-fill {
     height: 100%; width: 0%; border-radius: var(--v-radius-xs);
@@ -478,7 +487,7 @@
 }
 
 /* ── Tips ── */
-.loading-tip-area { min-height: 20px; animation: loadFadeIn 0.5s ease 1s both; }
+.loading-tip-area { min-height: 20px; animation: v-fadeIn 0.5s ease 1s both; }
 .loading-tip {
     font-size: var(--v-font-base); color: var(--v-text-dim, #8a7a68);
     text-align: center; max-width: 290px;
@@ -563,10 +572,6 @@
     100% { opacity: 0; transform: scale(2); }
 }
 
-@keyframes loadFadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
 
 /* ═══════════════════════════════════════════════════════════
    PERFORMANCE LITE MODE
