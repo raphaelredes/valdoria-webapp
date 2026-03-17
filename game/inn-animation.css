@@ -401,6 +401,27 @@
 .inn-bar-wrap.small .inn-bar-track { height: 7px; }
 .inn-bar-wrap.small .inn-bar-label { font-size: var(--v-font-sm); min-width: 60px; }
 
+
+/* ─── Advance (next frame) button ─── */
+#inn-advance-btn {
+    position: fixed; bottom: 86px; left: 50%;
+    transform: translateX(-50%); z-index: var(--v-z-critical);
+    background: rgba(42, 36, 32, 0.7);
+    border: 1px solid var(--v-border, #4a3828);
+    color: var(--v-gold, #c4953a);
+    font-family: var(--v-font);
+    font-size: var(--v-font-body, 14px);
+    padding: var(--v-space-sm, 4px) var(--v-space-lg, 16px);
+    border-radius: var(--v-radius-pill, 20px);
+    cursor: pointer;
+    min-width: 44px; min-height: 44px;
+    animation: innSkipFadeIn 0.3s ease-out;
+    transition: background var(--v-transition, 0.2s), border-color var(--v-transition, 0.2s);
+}
+#inn-advance-btn:active {
+    background: rgba(196, 149, 58, 0.2);
+    border-color: var(--v-gold, #c4953a);
+}
 /* ─── Skip button ─── */
 #inn-skip-btn {
     position: fixed; bottom: 40px; left: 50%;

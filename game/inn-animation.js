@@ -411,6 +411,7 @@ function playInnAnimation(data, onDone) {
     const nightBarEl = document.getElementById('inn-night-bar');
     const recoveryEl = document.getElementById('inn-recovery');
     const skipBtn = document.getElementById('inn-skip-btn');
+    const advanceBtn = document.getElementById('inn-advance-btn');
 
     if (!overlay || !frameEl) {
         console.error('[INN] Overlay elements not found');
@@ -440,6 +441,8 @@ function playInnAnimation(data, onDone) {
         if (_frameTimer) clearTimeout(_frameTimer);
         skipBtn.onclick = null;
         skipBtn.style.display = 'none';
+        advanceBtn.onclick = null;
+        advanceBtn.style.display = 'none';
 
         overlay.classList.add('hiding');
         setTimeout(() => {
@@ -577,7 +580,24 @@ function playInnAnimation(data, onDone) {
                 }
             } catch (e) { /* */ }
 
-            _frameTimer = setTimeout(() => showFrame(idx + 1), frame.delay);
+            // Show advance button for non-last frames
+            if (!isLast && advanceBtn) {
+                advanceBtn.style.display = '';
+                advanceBtn.textContent = 'Avançar ›';
+                advanceBtn.onclick = function() {
+                    if (_done) return;
+                    if (_frameTimer) clearTimeout(_frameTimer);
+                    advanceBtn.style.display = 'none';
+                    showFrame(idx + 1);
+                };
+            } else if (advanceBtn) {
+                advanceBtn.style.display = 'none';
+            }
+
+            _frameTimer = setTimeout(() => {
+                if (advanceBtn) advanceBtn.style.display = 'none';
+                showFrame(idx + 1);
+            }, frame.delay);
         }, enterDelay);
     }
 
