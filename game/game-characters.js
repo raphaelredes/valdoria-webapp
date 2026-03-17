@@ -368,7 +368,7 @@ function renderCharacterSelect(data) {
 /**
  * Select a character and start the game.
  */
-let _selectingChar = false;
+var _selectingChar = false;
 async function _selectCharacter(charId) {
     if (_selectingChar) return;
     _selectingChar = true;

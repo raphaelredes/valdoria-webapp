@@ -15,7 +15,7 @@
 // Animation: die spins in place with quartic ease-out, landing on result face.
 // Visual: vertex-color gradient, flat shading, gold wireframe, floating labels.
 
-const Dice3D = (() => {
+var Dice3D = (() => {
     'use strict';
 
     // Guard: THREE.js must be loaded before Dice3D can work

@@ -2,13 +2,13 @@
 // PLAYER MOVEMENT — animation, dust particles, ripple
 // ═══════════════════════════════════════════════════════
 
-let _moving = false;
-let _moveStart = 0;
-let _moveDuration = 280;
-const MOVE_DURATION_NORMAL = 280;
-const MOVE_DURATION_DIFFICULT = 500;
-const MOVE_DURATION_FAST = 160;
-const MOVE_DURATION_CAUTIOUS = 450;
+var _moving = false;
+var _moveStart = 0;
+var _moveDuration = 280;
+var MOVE_DURATION_NORMAL = 280;
+var MOVE_DURATION_DIFFICULT = 500;
+var MOVE_DURATION_FAST = 160;
+var MOVE_DURATION_CAUTIOUS = 450;
 
 // Get movement duration based on travel pace + terrain + exhaustion
 function getMoveDuration(isDifficult) {
@@ -34,21 +34,21 @@ function getMoveDuration(isDifficult) {
 
 function setMoveDuration(ms) { _moveDuration = ms; }
 
-let _moveFrom = { x: 0, y: 0 };
-let _moveTo = { x: 0, y: 0 };
-let _moveFromHex = { col: 0, row: 0 };
-let _moveToHex = { col: 0, row: 0 };
+var _moveFrom = { x: 0, y: 0 };
+var _moveTo = { x: 0, y: 0 };
+var _moveFromHex = { col: 0, row: 0 };
+var _moveToHex = { col: 0, row: 0 };
 
 // Current interpolated player screen position
-let playerScreenX = 0;
-let playerScreenY = 0;
+var playerScreenX = 0;
+var playerScreenY = 0;
 
 // Player facing direction (angle in radians, 0=right, PI/2=down)
-let playerFacing = Math.PI / 2; // default: facing down
+var playerFacing = Math.PI / 2; // default: facing down
 
 // Effects
-let _dustParticles = [];
-let _ripples = [];
+var _dustParticles = [];
+var _ripples = [];
 
 function isMoving() { return _moving; }
 
@@ -229,8 +229,8 @@ function drawEffects(ctx) {
 // ═══════════════════════════════════════════════════════
 // CAMPFIRE VISUAL — animated fire near player during rest
 // ═══════════════════════════════════════════════════════
-let _campfireActive = false;
-let _campfireParticles = [];
+var _campfireActive = false;
+var _campfireParticles = [];
 
 function setCampfireActive(active) {
     _campfireActive = active;

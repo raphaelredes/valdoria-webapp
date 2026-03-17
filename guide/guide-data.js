@@ -3,7 +3,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 // eslint-disable-next-line no-unused-vars
-const GUIDE_TOPICS = [
+var GUIDE_TOPICS = [
     {
         id: 'city_main', cat: 'cidade', icon: '\u{1f3d8}\ufe0f', title: 'Cidade de Eldoria',
         body: '<b>\u{1f3d8}\ufe0f CIDADE DE ELDORIA - GUIA</b>\n\nSeu ref\u00fagio seguro. Onde ir?\n\n<b>\u{1f3d5}\ufe0f Aventura</b>: Explorar biomas, encontros narrativos e combates\n<b>\u{1f3e8} Estalagem</b>: Recuperar Vida/Mana (Descanso Longo)\n<b>\u{1f3ea} Mercado</b>: Comprar/Vender Equipamentos e Mapas\n<b>\u{1f37a} Taverna</b>: Rumores, Jogos, Bebidas e Mercenar\u00edos\n<b>\u{1f6e1}\ufe0f Guilda</b>: Miss\u00f5es, Recompensas e Recrutar Aventureiros\n<b>\u{1f3db}\ufe0f Banco</b>: Guardar Ouro e Itens\n<b>\u26f2 Pra\u00e7a</b>: NPCs, Cart\u00f3grafo e Chat Global\n<b>\u26ea Templo</b>: Cura, Purifica\u00e7\u00e3o e B\u00ean\u00e7\u00e3os\n<b>\u{1f3f0} Port\u00f5es</b>: Guardas e Arredores da Cidade'
@@ -166,7 +166,7 @@ const GUIDE_TOPICS = [
     }
 ];
 
-const GUIDE_CATEGORIES = {
+var GUIDE_CATEGORIES = {
     'todos': '📖 Todos',
     'cidade': '🏘️ Cidade',
     'aventura': '⚔️ Aventura',

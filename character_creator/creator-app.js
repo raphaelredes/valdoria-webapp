@@ -2235,7 +2235,7 @@ var _spaP = window.__spaRouteParams || {};
                         // Redirect to prologue WebApp if server provided URL
                         if (result.redirect) {
                             console.log('[CHAR_CREATOR] Redirecting to prologue:', result.redirect);
-                            window.location.replace(result.redirect);
+                            valdoriaSpaNav(result.redirect);
                             return;
                         }
                         // No redirect — close the WebApp (legacy fallback)

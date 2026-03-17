@@ -10,7 +10,7 @@
  * @param {Object} transition - {to: string, url: string, text?: string}
  */
 // Themed transition map: target webapp -> CSS theme class + duration
-const _TRANSITION_THEMES = {
+var _TRANSITION_THEMES = {
     explore:  { theme: 'theme-leaves', duration: 500 },
     combat:   { theme: 'theme-combat', duration: 400 },
     arena:    { theme: 'theme-combat', duration: 400 },  // backward compat
@@ -20,7 +20,7 @@ const _TRANSITION_THEMES = {
 };
 
 // Cross-webapp location labels for immersive transition
-const _WEBAPP_LOC_LABELS = {
+var _WEBAPP_LOC_LABELS = {
     explore:  { icon: '🧭', text: 'Partindo para exploração...' },
     combat:   { icon: '⚔️', text: 'Entrando em combate...' },
     arena:    { icon: '⚔️', text: 'Entrando em combate...' },  // backward compat

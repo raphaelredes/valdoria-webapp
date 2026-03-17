@@ -69,9 +69,9 @@ function _hullPath(points, pad, seed) {
 
 // ── Auto-fill: ALL landmass hexes get a biome ──
 // Cache: these are called 3x and 2x respectively but produce identical results
-let _cachedAutoFillHexes = null;
-let _cachedAllHexes = null;
-let _cachedBiomeRegions = null;
+var _cachedAutoFillHexes = null;
+var _cachedAllHexes = null;
+var _cachedBiomeRegions = null;
 
 function _getAllHexes() {
     if (_cachedAllHexes) return _cachedAllHexes;
@@ -156,7 +156,7 @@ function _buildBiomeRegions(allHexes) {
 }
 
 // ── Visibility helper (cached per render cycle) ──
-let _visCache = null;
+var _visCache = null;
 function _invalidateVisCache() { _visCache = null; }
 function _hexVisibility(col, row, knownSet, discoveredSet) {
     if (!_visCache) _visCache = {};

@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════
 
 // Biome color palettes (base fill color per tile char)
-const BIOME_COLORS = {
+var BIOME_COLORS = {
     forest:   {'.':'#5a3d2b','T':'#1a4a1a','g':'#2d5a2d','w':'#2a5a8a','r':'#5a5a5a','R':'#6a5a4a','p':'#6a5040','#':'#0d2e0d','W':'#1a3a6a','M':'#4a4a4a','b':'#4a3a3a','s':'#5a3d2b','m':'#3a2a1a','i':'#7aa0b0','v':'#5a3a1a','L':'#8a2a0a','C':'#6a4a2a'},
     plains:   {'.':'#5a4a30','T':'#3a6a2a','g':'#6a8a3a','w':'#2a5a8a','r':'#6a6a5a','R':'#5a4a3a','p':'#6a5a40','#':'#5a5a4a','W':'#1a3a6a','M':'#4a4a4a','b':'#4a3a3a','s':'#5a4a30','m':'#3a2a1a','i':'#7aa0b0','v':'#5a3a1a','L':'#8a2a0a','C':'#7a5a3a'},
     swamp:    {'.':'#3a3a2a','T':'#2a4a2a','g':'#3a5a2a','w':'#2a4a5a','r':'#4a4a3a','R':'#5a4a3a','p':'#4a3a2a','#':'#1a3a1a','W':'#1a3a4a','M':'#3a3a3a','m':'#3a2a1a','b':'#3a3030','s':'#3a3a2a','i':'#5a8090','v':'#4a2a1a','L':'#7a2a0a','C':'#5a4a2a'},
@@ -88,7 +88,7 @@ function _drawDecorationShadow(ctx, cx, cy, w, h) {
 }
 
 // Biomes where wind animates vegetation (outdoor environments)
-const WIND_BIOMES = new Set(['forest', 'plains', 'swamp', 'mountain', 'graveyard', 'ruins']);
+var WIND_BIOMES = new Set(['forest', 'plains', 'swamp', 'mountain', 'graveyard', 'ruins']);
 
 // ═══════════════════════════════════════════
 // DECORATION DRAWING FUNCTIONS

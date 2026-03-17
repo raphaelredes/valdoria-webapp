@@ -398,7 +398,7 @@ function applyHazardEffect(hazard, onDone) {
 // ═══════════════════════════════════════════════════════
 // TRAP SYSTEM (D&D 5e — Detection + Disarm)
 // ═══════════════════════════════════════════════════════
-const TRAP_TYPES = [
+var TRAP_TYPES = [
     {
         id: 'spike', label: 'Espinhos Ocultos', icon: '\u{1F5E1}',
         detectDC: 13, disarmDC: 14, disarmStat: 'dx',

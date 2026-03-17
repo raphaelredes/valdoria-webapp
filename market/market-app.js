@@ -65,7 +65,7 @@ var _spaP = window.__spaRouteParams || {};
                             }
                             const d = await r.json();
                             if (d.url) {
-                                window.location.replace(d.url);
+                                valdoriaSpaNav(d.url);
                                 return;
                             }
                         } catch (e) { console.error('[MARKET] Transition failed:', e); }

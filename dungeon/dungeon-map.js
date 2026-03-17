@@ -2,11 +2,11 @@
 // DUNGEON MAP — SVG node map rendering (Slay-the-Spire style)
 // ═══════════════════════════════════════════════════════════════
 
-const NS = 'http://www.w3.org/2000/svg';
-const NODE_R = 20;      // Node circle radius
-const COL_W = 80;       // Horizontal spacing between columns
-const ROW_H = 90;       // Vertical spacing between rows
-const MAP_PAD = 40;     // Padding around map
+var NS = 'http://www.w3.org/2000/svg';
+var NODE_R = 20;      // Node circle radius
+var COL_W = 80;       // Horizontal spacing between columns
+var ROW_H = 90;       // Vertical spacing between rows
+var MAP_PAD = 40;     // Padding around map
 
 function renderDungeonMap() {
     const svg = document.getElementById('map-svg');

@@ -9,7 +9,7 @@
 // =========================================================
 // TRAVEL PACE (D&D PHB Ch.8)
 // =========================================================
-const PACE_CONFIG = {
+var PACE_CONFIG = {
     fast:     { icon: '\u{1F3C3}', label: 'R\u00e1pido',   color: 'pace-fast',     pp: -5, dcMod: 0,  desc: '-5 Percep\u00e7\u00e3o Passiva' },
     normal:   { icon: '\u{1F6B6}', label: 'Normal',    color: '',              pp: 0,  dcMod: 0,  desc: 'Ritmo padr\u00e3o' },
     cautious: { icon: '\u{1F43E}', label: 'Cauteloso', color: 'pace-cautious', pp: +5, dcMod: -2, desc: '+5 Percep\u00e7\u00e3o, -2 DC hazards' },
@@ -191,7 +191,7 @@ function _showLightningSave(roll, totalMod, total, success, r1, r2, mode) {
 // =========================================================
 // TRAVEL ACTIVITIES (D&D PHB Ch.8)
 // =========================================================
-const ACTIVITY_CONFIG = {
+var ACTIVITY_CONFIG = {
     watch:   { icon: '\u{1F441}',  name: 'Vigiar',      stat: 'per', desc: 'Vantagem no primeiro encontro (n\u00e3o \u00e9 surpreendido)', effect: 'Percep\u00e7\u00e3o ativa durante viagem' },
     forage:  { icon: '\u{1F33F}',  name: 'Forragear',   stat: 'sur', desc: 'Encontra ervas e materiais a cada 5 passos (Sobreviv\u00eancia)', effect: 'DC 10+perigo' },
     navigate:{ icon: '\u{1F9ED}',  name: 'Navegar',     stat: 'sur', desc: 'Revela POIs ocultos em raio maior (Sobreviv\u00eancia DC 15)', effect: 'Amplia detec\u00e7\u00e3o' },

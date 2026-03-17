@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════
 
 // Per-biome visual config
-const TRAVEL_CONFIG = {
+var TRAVEL_CONFIG = {
     // ws=windStreaks, tg=torchGlow, rt=roadTracks, ap=ambientPulse(color), wl=wildlife(type)
     forest:   { bg: ['#0d2e0d','#1a4a1a'], ground: '#2d3d1d', midColor: '#1a3a1a', farColor: '#0a2a0a', silhouette: 'conifers',   icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: true,  ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: true,  dm: true,  gv: true,  ds: false, sky2: ['#1a3a0a','#2a5a1a'], rl: true,  lb: false, fb: false, sc: false, fl: 'leaf',  cr: false, rn: false, cs: true,  cn: false, tn: true,  cp: true,  ms: true,  ws: false, tg: false, rt: 'boot',   ap: null,              wl: 'rabbit' },
     plains:   { bg: ['#3a3a18','#5a5a28'], ground: '#5a4a30', midColor: '#4a4a20', farColor: '#3a3a15', silhouette: 'hills',      icon: '', horizonGlow: '196,149,58',  stars: false, celestial: 'sun',  cloud: 'thin',  sway: false, ff: false, lt: false, fa: 'bird', sh: false, au: false, lv: false, wr: false, gr: true,  dm: true,  gv: true,  ds: false, sky2: ['#4a3a10','#6a5a20'], rl: true,  lb: false, fb: false, sc: false, fl: null,    cr: false, rn: false, cs: true,  cn: false, tn: false, cp: true,  ms: true,  ws: true,  tg: false, rt: 'cart',   ap: null,              wl: 'rabbit' },
@@ -25,7 +25,7 @@ const TRAVEL_CONFIG = {
 };
 
 // Particle configs per biome
-const TRAVEL_PARTICLES = {
+var TRAVEL_PARTICLES = {
     forest:   { type: 'leaf',  n: 8,  color: 'rgba(80,140,40,0.6)' },
     plains:   { type: 'leaf',  n: 5,  color: 'rgba(160,140,60,0.5)' },
     swamp:    { type: 'mist',  n: 6,  color: 'rgba(150,170,140,0.12)' },
@@ -45,7 +45,7 @@ const TRAVEL_PARTICLES = {
     dungeon_snow:     { type: 'snow',  n: 6,  color: 'rgba(180,190,200,0.5)' },
 };
 
-let _travelRaf = 0;
+var _travelRaf = 0;
 
 /**
  * Play the travel cinematic animation.

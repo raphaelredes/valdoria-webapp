@@ -541,7 +541,7 @@ function _checkLongRestAmbush() {
     }
 }
 
-let _lrDice = null;
+var _lrDice = null;
 function _showLongRestDice(summaryHtml) {
     const overlay = document.getElementById('camp-dice-overlay');
     const canvas = document.getElementById('camp-dice-canvas');
@@ -595,7 +595,7 @@ function _showLongRestSummary(summaryHtml) {
     _checkLongRestAmbush();
 }
 
-let _campDice = null;
+var _campDice = null;
 function _showCampDiceRoll(roll, conMod, bonus, total, foodName, hdType, mpRecovered) {
     const overlay = document.getElementById('camp-dice-overlay');
     const canvas = document.getElementById('camp-dice-canvas');
@@ -1126,12 +1126,12 @@ function showDeathOverlay() {
 // ═══════════════════════════════════════════════════════
 // RETURN JOURNEY — immersive multi-step travel to city
 // ═══════════════════════════════════════════════════════
-let _returningToCity = false;
-let _returnJourney = null;
-let _returnDice = null;
+var _returningToCity = false;
+var _returnJourney = null;
+var _returnDice = null;
 
 // Biome-specific travel narrations
-const RETURN_NARRATIONS = {
+var RETURN_NARRATIONS = {
     forest: [
         'As copas das árvores se fecham sobre a trilha, criando um túnel verde onde a luz do sol mal penetra. Galhos estalam sob seus pés enquanto pássaros silenciam à sua passagem — a floresta observa quem ousa cruzá-la.',
         'Um riacho serpenteia ao lado do caminho, seu murmúrio constante acalma seus nervos. Marcas de garras em uma árvore próxima lembram que você não está sozinho nesta floresta, mas por ora o caminho está livre.',
@@ -1206,7 +1206,7 @@ const RETURN_NARRATIONS = {
 
 // Travel hazards — each has multiple choices with different skill checks
 // choices[]: i=icon, t=title, k={s:stat, dc:DC}, sNarr/fNarr/fDmg per choice
-const RETURN_HAZARDS = {
+var RETURN_HAZARDS = {
     forest: [
         { icon: '', title: 'Teias Gigantes', narr: 'Teias enormes bloqueiam a trilha entre os troncos, grossas como cordas e pegajosas ao toque. Casulos pendem dos galhos — o que as teceu é grande e ainda está por perto.', choices: [
             { i: '', t: 'Queimar as teias', k: { s: 'int', dc: 10 }, sNarr: 'Você improvisa uma tocha com galhos secos e queima as teias com precisão. As chamas consomem os fios sem se espalhar.', fNarr: 'O fogo se espalha descontrolado! Você recua, mas as chamas alcançam seu braço antes que consiga apagá-las.', fDmg: 3 },

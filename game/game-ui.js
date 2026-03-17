@@ -5,7 +5,7 @@
 
 // ─── Loading (with cycling tips, ring acceleration, gem phases, cinematic exit) ───
 // Tips separated by phase: narrative first (0-5s), then mechanics (5s+)
-const _TIPS_NARRATIVE = [
+var _TIPS_NARRATIVE = [
     'As muralhas de pedra se erguem enquanto os portões rangem ao abrir...',
     'O som de bigornas e o aroma de pão fresco preenchem as ruas empedradas...',
     'Guardas patrulham as ameias enquanto comerciantes montam suas barracas...',
@@ -15,7 +15,7 @@ const _TIPS_NARRATIVE = [
     'Mercadores ajustam suas bancas, exibindo relíquias de terras distantes...',
     'O cheiro de cerveja e carne assada escapa pelas portas da estalagem...',
 ];
-const _TIPS_MECHANICS = [
+var _TIPS_MECHANICS = [
     '⚔️ Dica: Rolagens de ataque 20 são acertos críticos — dano dobrado!',
     '🛡️ Dica: Descansar na estalagem recupera todos os dados de vida.',
     '💰 Dica: Venda itens que não usa no mercado da cidade.',
@@ -33,16 +33,16 @@ const _TIPS_MECHANICS = [
     '💠 Dica: Cada classe tem recursos únicos — conheça os seus!',
     '🏰 Dica: O ferreiro pode forjar equipamentos poderosos.',
 ];
-const _LOADING_TIPS = _TIPS_NARRATIVE.concat(_TIPS_MECHANICS);
-let _loadingTipTimer = null;
-let _loadingTipIndex = 0;
-let _loadingProgressTimer = null;
-let _loadingProgress = 0;
-let _loadingStartTime = 0;
+var _LOADING_TIPS = _TIPS_NARRATIVE.concat(_TIPS_MECHANICS);
+var _loadingTipTimer = null;
+var _loadingTipIndex = 0;
+var _loadingProgressTimer = null;
+var _loadingProgress = 0;
+var _loadingStartTime = 0;
 
-let _isRetryLoading = false;
-let _loadingHiding = false;
-let _loadingSlowTimer = null;
+var _isRetryLoading = false;
+var _loadingHiding = false;
+var _loadingSlowTimer = null;
 
 function showLoading(isRetry = false) {
     _loadingHiding = false;
@@ -415,8 +415,8 @@ function animateScreenTransition(renderFn, direction) {
 }
 
 // ─── Timer Overlay ───
-let _timerInterval = null;
-let _timerDone = false;
+var _timerInterval = null;
+var _timerDone = false;
 
 function showTimerOverlay(timer) {
     if (!timer) return;
@@ -484,7 +484,7 @@ function hideTimerOverlay() {
 }
 
 // ─── Location Transition Overlay (immersive 2s travel screen) ───
-const _LOC_TRANSITIONS = {
+var _LOC_TRANSITIONS = {
     // City locations
     city_tavern:     { icon: '🍺', text: 'Caminhando até a Taverna...' },
     city_temple:     { icon: '⛪', text: 'Seguindo ao Templo...' },
@@ -511,12 +511,12 @@ const _LOC_TRANSITIONS = {
     long_rest:       { icon: '🛏️', text: 'Descansando na estalagem...' },
 };
 // Callbacks that should NOT trigger location transition (UI panels, not travel)
-const _NO_TRANSITION = /^(inv|char|status|help|settings|quest_view|action_universal_back|menu|equip|unequip|use_|sell_|buy_|deposit|withdraw|donate|skill_|feat_|spell_|npc_talk|dialogue|gossip|quest_accept|quest_deliver|shop_|inn_pay_)/;
+var _NO_TRANSITION = /^(inv|char|status|help|settings|quest_view|action_universal_back|menu|equip|unequip|use_|sell_|buy_|deposit|withdraw|donate|skill_|feat_|spell_|npc_talk|dialogue|gossip|quest_accept|quest_deliver|shop_|inn_pay_)/;
 
-const LOC_TRANSITION_MS = 1500;
-const LOC_GATE_MS = 2200;
-let _locTransitionActive = false;
-let _locTransitionIsGate = false;
+var LOC_TRANSITION_MS = 1500;
+var LOC_GATE_MS = 2200;
+var _locTransitionActive = false;
+var _locTransitionIsGate = false;
 
 function _detectLocationTransition(cb) {
     if (!cb || _NO_TRANSITION.test(cb)) return null;
@@ -577,9 +577,9 @@ function getLocTransitionMs() {
 }
 
 // ─── Immersive Mode (collapsible bottom panel) ───
-let _immersiveCollapsed = false;
-let _immersiveEligible = false;
-const IMMERSIVE_KEY = 'valdoria_immersive';
+var _immersiveCollapsed = false;
+var _immersiveEligible = false;
+var IMMERSIVE_KEY = 'valdoria_immersive';
 
 function initImmersive() {
     try {
@@ -673,7 +673,7 @@ function updateImmersiveEligibility(screen) {
 }
 
 // ─── Font Picker (settings screen) ───
-const FONT_OPTIONS = [
+var FONT_OPTIONS = [
     { id: 'medievalsharp', name: 'MedievalSharp', family: "'MedievalSharp', serif" },
     { id: 'cinzel',        name: 'Cinzel',        family: "'Cinzel', serif" },
     { id: 'imfell',        name: 'IM Fell English', family: "'IM Fell English', serif" },
@@ -681,7 +681,7 @@ const FONT_OPTIONS = [
     { id: 'almendra',      name: 'Almendra',      family: "'Almendra', serif" },
     { id: 'metamorphous',  name: 'Metamorphous',  family: "'Metamorphous', serif" },
 ];
-const FONT_KEY = 'valdoria_font';
+var FONT_KEY = 'valdoria_font';
 
 function getSelectedFont() {
     try {

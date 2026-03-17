@@ -2,28 +2,28 @@
 // CANVAS RENDERER — main render loop, tile drawing, camera
 // ═══════════════════════════════════════════════════════
 
-let _canvas = null;
-let _ctx = null;
-let _dpr = 1;
-let _canvasLogicalW = 0;
-let _canvasLogicalH = 0;
+var _canvas = null;
+var _ctx = null;
+var _dpr = 1;
+var _canvasLogicalW = 0;
+var _canvasLogicalH = 0;
 
-let _needsRender = true;
-let _rafId = null;
-let _lastTimestamp = 0;
+var _needsRender = true;
+var _rafId = null;
+var _lastTimestamp = 0;
 
 // Static tile layer (cached for performance)
-let _staticCanvas = null;
-let _staticCtx = null;
-let _staticDirty = true;
+var _staticCanvas = null;
+var _staticCtx = null;
+var _staticDirty = true;
 
 // Hex hover/tap reveal effect
-let _hoveredHex = null;     // {col, row, time} — currently hovered hex
-let _tapRevealHexes = [];
+var _hoveredHex = null;     // {col, row, time} — currently hovered hex
+var _tapRevealHexes = [];
 
 // Event sprites revealed on the map (NPCs, objects, dangers)
-let _eventSprites = [];
-const EVENT_SPRITE_TYPES = {
+var _eventSprites = [];
+var EVENT_SPRITE_TYPES = {
     // NPC encounters
     npc: { draw: '_drawNPCSprite', color: '#c4953a' },
     npc_friendly: { draw: '_drawNPCSprite', color: '#5a9a5a' },
@@ -59,7 +59,7 @@ function clearEventSprite(col, row) {
 }
 
 // Floating text system (onomatopeias, damage numbers, status)
-let _floatingTexts = [];
+var _floatingTexts = [];
 
 function spawnFloatingText(col, row, text, color, type) {
     const center = hexToScreen(col, row);
@@ -1469,7 +1469,7 @@ function drawVisitedTrail(ctx, timestamp) {
 }
 
 // Tap feedback effect — ripple on hex touch
-let _tapFeedbacks = [];
+var _tapFeedbacks = [];
 function spawnTapFeedback(col, row) {
     const center = hexToScreen(col, row);
     const tile = S.grid[row] && S.grid[row][col] ? S.grid[row][col] : '.';
@@ -1895,14 +1895,14 @@ function drawFogRevealFlash(ctx, timestamp) {
 // ═══════════════════════════════════════════════════════
 // TERRAIN TOOLTIP — long press shows terrain info
 // ═══════════════════════════════════════════════════════
-const TERRAIN_NAMES = {
+var TERRAIN_NAMES = {
     '.': 'Terreno Aberto', 'T': 'Floresta', 'g': 'Vegetação', 'w': 'Água Rasa',
     'W': 'Água Profunda', 'r': 'Rochas', 'R': 'Ruínas', 'M': 'Montanha',
     'p': 'Trilha', 'b': 'Ossadas', '#': 'Muro', 's': 'Areia',
     'm': 'Lama', 'i': 'Gelo', 'v': 'Solo Vulcânico', 'L': 'Lava',
 };
-let _longPressTimer = null;
-let _longPressPos = null;
+var _longPressTimer = null;
+var _longPressPos = null;
 
 function initTerrainTooltip() {
     if (!_canvas) return;
@@ -1978,12 +1978,12 @@ function _hideTerrainTooltip() {
 // ═══════════════════════════════════════════════════════
 // MINIMAP — small overview in top-right corner
 // ═══════════════════════════════════════════════════════
-let _minimapCanvas = null;
-let _minimapCtx = null;
-let _minimapDirty = true;
+var _minimapCanvas = null;
+var _minimapCtx = null;
+var _minimapDirty = true;
 
 // Minimap states: 'compact' (default), 'expanded'
-let _minimapState = 'compact';
+var _minimapState = 'compact';
 
 function initMinimap() {
     _minimapCanvas = document.getElementById('minimap');
@@ -2167,13 +2167,13 @@ function invalidateStatic() {
 // ═══════════════════════════════════════════════════════
 // ATMOSPHERE — Day/Night Cycle + Weather Effects
 // ═══════════════════════════════════════════════════════
-const _DAY_PHASES = {
+var _DAY_PHASES = {
     dawn:  { icon: '', label: 'Amanhecer' },
     day:   { icon: '', label: 'Dia' },
     dusk:  { icon: '', label: 'Entardecer' },
     night: { icon: '', label: 'Noite' },
 };
-const _WEATHER_INFO = {
+var _WEATHER_INFO = {
     s: { icon: '', label: 'Limpo' },
     r: { icon: '', label: 'Chuva', css: 'weather-rain' },
     f: { icon: '', label: 'Névoa', css: 'weather-fog' },
@@ -2255,8 +2255,8 @@ function updateAtmosphere() {
 }
 
 // Weather transition system (DMG Ch.5)
-let _weatherStepCounter = 0;
-let _weatherTransitionThreshold = 15 + Math.floor(Math.random() * 6); // 15-20
+var _weatherStepCounter = 0;
+var _weatherTransitionThreshold = 15 + Math.floor(Math.random() * 6); // 15-20
 
 function _checkWeatherTransition() {
     _weatherStepCounter++;
@@ -2510,8 +2510,8 @@ function drawExitWaypoint(ctx, timestamp) {
 // ═══════════════════════════════════════════════════════
 // ROAMING DANGER MARKERS (enemy patrols)
 // ═══════════════════════════════════════════════════════
-let _dangerMarkers = [];
-let _dangerMarkersInit = false;
+var _dangerMarkers = [];
+var _dangerMarkersInit = false;
 
 function _initDangerMarkers() {
     if (_dangerMarkersInit) return;
@@ -2632,13 +2632,13 @@ function _drawDangerMarkers(ctx, timestamp) {
 // CAMERA SHAKE — trauma-based shake on hazard/trap impacts (M21)
 // ═══════════════════════════════════════════════════════
 
-let _shakeTrauma = 0;       // 0-1 trauma level (decays over time)
-let _shakeOffsetX = 0;
-let _shakeOffsetY = 0;
-let _shakeRot = 0;
-const SHAKE_MAX_OFFSET = 6; // px
-const SHAKE_MAX_ROT = 1.5;  // degrees
-const SHAKE_DECAY = 2.5;    // trauma decay per second
+var _shakeTrauma = 0;       // 0-1 trauma level (decays over time)
+var _shakeOffsetX = 0;
+var _shakeOffsetY = 0;
+var _shakeRot = 0;
+var SHAKE_MAX_OFFSET = 6; // px
+var SHAKE_MAX_ROT = 1.5;  // degrees
+var SHAKE_DECAY = 2.5;    // trauma decay per second
 
 function addShakeTrauma(amount) {
     _shakeTrauma = Math.min(1, _shakeTrauma + amount);

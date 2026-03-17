@@ -8,7 +8,7 @@
 // Each story has stages, branching paths, and meaningful consequences.
 // Stories reference chain clues (S.chainClues) for cross-POI continuity.
 
-const STORY_TEMPLATES = {
+var STORY_TEMPLATES = {
 
     // ─────────────────────────────────────────────────────
     // 1. O VIAJANTE FERIDO — Dilema moral clássico

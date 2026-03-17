@@ -2,10 +2,10 @@
 // NAVIGATE CORE - Init, state, Telegram integration
 // -----------------------------------------------------------
 
-let tg = null;
-let _navSent = false;  // Double-fire guard (matches explore _finishSent pattern)
-let _navSentTimer = null;  // Auto-reset timer for _navSent (prevents stale lock)
-const STORAGE_KEY = 'valdoria_navigate_state';
+var tg = null;
+var _navSent = false;  // Double-fire guard (matches explore _finishSent pattern)
+var _navSentTimer = null;  // Auto-reset timer for _navSent (prevents stale lock)
+var STORAGE_KEY = 'valdoria_navigate_state';
 
 // Cached helper: enable/disable all .info-btn in batch
 function _setInfoBtns(disabled) {
@@ -19,7 +19,7 @@ function _setInfoBtns(disabled) {
 
 
 // Global state
-let S = {
+var S = {
     token: '',
     api: '',
     uid: 0,
@@ -40,7 +40,7 @@ let S = {
 };
 
 // Connection graph (built from location data)
-let connectionGraph = {};  // loc_id -> [connected_loc_ids]
+var connectionGraph = {};  // loc_id -> [connected_loc_ids]
 
 // -----------------------------------------------------------
 // INITIALIZATION
@@ -274,8 +274,8 @@ function _sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 // AUTO-REFRESH ON VISIBILITY CHANGE
 // -----------------------------------------------------------
 
-let _lastRefreshTs = Date.now();
-let _refreshing = false;
+var _lastRefreshTs = Date.now();
+var _refreshing = false;
 async function _onVisibilityRefresh() {
     if (document.visibilityState !== 'visible') return;
     // Only refresh if > 30s since last load (avoid rapid refires)
@@ -570,7 +570,7 @@ function _sendNavAction(type, target, flags) {
             // Travel/Return: backend returns URL -> redirect
             if (d.url && (type === 'travel' || type === 'return')) {
                 window.__valdoria_transitioning = true;
-                window.location.replace(d.url);
+                valdoriaSpaNav(d.url);
                 return;
             }
             // Other actions (camp, explore): go to Game Hub
@@ -672,12 +672,12 @@ async function _transitionToGame() {
         });
         const d = await r.json();
         window.__valdoria_transitioning = true;
-        if (d.url) { window.location.replace(d.url); return; }
+        if (d.url) { valdoriaSpaNav(d.url); return; }
     } catch (e) { console.error('[NAVIGATE] transition error:', e); }
     // Fallback: redirect to game hub directly
     const base = window.location.href.replace(/\/navigate\/.*/, '');
     window.__valdoria_transitioning = true;
-    window.location.replace(`${base}/app.html?route=game&token=${S.token}&api=${encodeURIComponent(S.api)}&uid=${S.uid}&return=game&v=1`);
+    valdoriaSpaNav(`${base}/app.html?route=game&token=${S.token}&api=${encodeURIComponent(S.api)}&uid=${S.uid}&return=game&v=1`);
 }
 
 // -----------------------------------------------------------
@@ -690,4 +690,4 @@ async function _transitionToGame() {
 // BOOT
 // -----------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', initAsync);
+if (!window.__spaRouteName) { document.addEventListener('DOMContentLoaded', initAsync); }

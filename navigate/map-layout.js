@@ -3,26 +3,26 @@
 // ═══════════════════════════════════════════════════════
 
 // Hex geometry (flat-top orientation)
-const HEX_RADIUS = 26;
-const HEX_W = HEX_RADIUS * Math.sqrt(3);  // ~45
-const HEX_H = HEX_RADIUS * 2;             // 52
-const ROW_H = HEX_H * 0.75;               // 39
+var HEX_RADIUS = 26;
+var HEX_W = HEX_RADIUS * Math.sqrt(3);  // ~45
+var HEX_H = HEX_RADIUS * 2;             // 52
+var ROW_H = HEX_H * 0.75;               // 39
 
 // Grid dimensions
-const GRID_COLS = 14;
-const GRID_ROWS = 16;
+var GRID_COLS = 14;
+var GRID_ROWS = 16;
 
 // SVG margins
-const MAP_PAD_X = 40;
-const MAP_PAD_Y = 35;
+var MAP_PAD_X = 40;
+var MAP_PAD_Y = 35;
 
 // Total SVG size
-const SVG_W = MAP_PAD_X * 2 + GRID_COLS * HEX_W + HEX_W / 2;
-const SVG_H = MAP_PAD_Y * 2 + GRID_ROWS * ROW_H + HEX_RADIUS;
+var SVG_W = MAP_PAD_X * 2 + GRID_COLS * HEX_W + HEX_W / 2;
+var SVG_H = MAP_PAD_Y * 2 + GRID_ROWS * ROW_H + HEX_RADIUS;
 
 // ── Location coordinates (col, row) on the hex grid ──
 // Arranged geographically: North=top, South=bottom, West=left, East=right
-const LOCATION_COORDS = {
+var LOCATION_COORDS = {
     // Far North — Snow
     frozen_waste:        { col: 6,  row: 1 },
     // North — Forest
@@ -53,7 +53,7 @@ const LOCATION_COORDS = {
 };
 
 // ── Connection edges (unique pairs) ──
-const CONNECTION_EDGES = [
+var CONNECTION_EDGES = [
     ['city_gates', 'green_fields'],
     ['city_gates', 'whispering_woods'],
     ['city_gates', 'misty_marshes'],
@@ -83,7 +83,7 @@ const CONNECTION_EDGES = [
 ];
 
 // ── Biome display info ──
-const BIOME_INFO = {
+var BIOME_INFO = {
     plains:   { label: 'Planícies',       color: '#5a7a3a', hexFill: '#4a6030' },
     forest:   { label: 'Floresta',        color: '#1a5a1a', hexFill: '#1a4a1a' },
     swamp:    { label: 'Pântano',         color: '#3a5a2a', hexFill: '#2a3a20' },
@@ -97,7 +97,7 @@ const BIOME_INFO = {
 
 // ── Connection distances (turns to travel) ──
 // Mirrors Python CONNECTION_DISTANCES in map_data.py (scale 2-6)
-const CONNECTION_DISTANCES = {
+var CONNECTION_DISTANCES = {
     'city_gates|green_fields': 2,
     'city_gates|whispering_woods': 2,
     'city_gates|misty_marshes': 3,
@@ -192,7 +192,7 @@ function getDangerLabel(level) {
 // ── Terrain fill hexes (decorative, between locations) ──
 // Each entry: [col, row, biomeHint]
 // These fill the visual gaps with themed terrain
-const TERRAIN_HEXES = [
+var TERRAIN_HEXES = [
     // Plains region (west)
     [3, 10, 'plains'], [5, 10, 'plains'], [3, 11, 'plains'],
     [2, 10, 'plains'], [4, 11, 'plains'],

@@ -3,16 +3,16 @@
    Lightweight particles per location context. Max 15 particles.
    ═══════════════════════════════════════════════════════════════ */
 
-let _particleCanvas = null;
-let _particleCtx = null;
-let _particles = [];
-let _particleRafId = null;
-let _particleTheme = null;
-const _particleLite = (window._valdoriaMinLoadFactor || 1) < 1;
-let _particleFrameSkip = false;  // toggle for 30fps in lite mode
+var _particleCanvas = null;
+var _particleCtx = null;
+var _particles = [];
+var _particleRafId = null;
+var _particleTheme = null;
+var _particleLite = (window._valdoriaMinLoadFactor || 1) < 1;
+var _particleFrameSkip = false;  // toggle for 30fps in lite mode
 
 // Particle themes per location keyword
-const PARTICLE_THEMES = {
+var PARTICLE_THEMES = {
     // City locations — each with distinct atmosphere
     cidade:     { color: [196, 149, 58], count: 10, speed: 0.3,  size: [1, 2.5], drift: 0.15, glow: true },
     taverna:    { color: [220, 140, 50], count: 12, speed: 0.5,  size: [1.5, 3], drift: 0.1,  glow: true },

@@ -649,7 +649,7 @@ function doExtractAllGems(slot) {
     updateBottomBar();
 }
 
-const JUNK_TAGS = new Set(['junk', 'monster_part']);
+var JUNK_TAGS = new Set(['junk', 'monster_part']);
 function getJunkItems() {
     return localInv.filter(inv => {
         if (inv.q <= 0) return false;
@@ -765,26 +765,34 @@ function formatOp(op) {
 }
 
 // ── API communication (fetch mode) ──
-const _urlParams = new URLSearchParams(location.search);
-let _apiBase = _urlParams.get('api') || '';
-const _apiToken = _urlParams.get('token') || '';
-const _apiUid = _urlParams.get('uid') || '';
-const _returnTo = _urlParams.get('return') || '';  // 'game', 'explore', 'combat' or empty (close)
+var _urlParams = new URLSearchParams(location.search);
+var _apiBase = _urlParams.get('api') || '';
+var _apiToken = _urlParams.get('token') || '';
+var _apiUid = _urlParams.get('uid') || '';
+var _returnTo = _urlParams.get('return') || '';  // 'game', 'explore', 'combat' or empty (close)
+
+// Popup mode: override API vars from Game Hub session
+if (window._invPopupMode && window.S) {
+    _apiBase = S.apiBase || '';
+    _apiToken = S.token || '';
+    _apiUid = String(S.uid || '');
+    _returnTo = 'game';
+}
 
 // Update error reporter with API info (init was early, before URL params)
-if (window.ValdoriaErrors && _apiBase && ValdoriaErrors.updateConfig) {
+if (!window._invPopupMode && window.ValdoriaErrors && _apiBase && ValdoriaErrors.updateConfig) {
     ValdoriaErrors.updateConfig({ apiBase: _apiBase, token: _apiToken, uid: _apiUid });
 }
 
 // Periodic tunnel URL discovery
-if (_apiBase && window.ApiDiscovery) {
+if (!window._invPopupMode && _apiBase && window.ApiDiscovery) {
     ApiDiscovery.init(_apiBase, function(newUrl) { _apiBase = newUrl; });
 }
 // [EXIT-CONFIRM] Heartbeat for displacement detection during inventory
-if (window.SessionHeartbeat && _apiBase && _apiToken && _apiUid) {
+if (!window._invPopupMode && window.SessionHeartbeat && _apiBase && _apiToken && _apiUid) {
     SessionHeartbeat.init({ apiBase: _apiBase, token: _apiToken, uid: parseInt(_apiUid) || 0 });
 }
-const _combatMode = _urlParams.get('combat') === '1';
+var _combatMode = _urlParams.get('combat') === '1';
 
 async function _navigateBack() {
     // If loading overlay is active, force close to prevent getting trapped
@@ -836,6 +844,11 @@ function _showPendingOpsExitConfirm() {
 }
 
 async function _performExit() {
+    // Popup mode: close overlay
+    if (window._invPopupMode && typeof hideInventoryPopup === 'function') {
+        hideInventoryPopup();
+        return;
+    }
     // Show loading overlay so user knows transition is happening
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) {
@@ -869,7 +882,7 @@ async function _performExit() {
                 const data = await resp.json();
                 if (data.url) {
                     window.__valdoria_transitioning = true;
-                    window.location.replace(data.url);
+                    valdoriaSpaNav(data.url);
                     return;
                 }
             }
@@ -882,8 +895,8 @@ async function _performExit() {
     try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] tg.close:', e); }
 }
 
-let _sendRetries = 0;
-let _opsSending = false;
+var _sendRetries = 0;
+var _opsSending = false;
 function sendOps() {
     if (!pendingOps.length) return;
     if (_opsSending) return;
@@ -1025,7 +1038,7 @@ function getItemShortDesc(name, it) {
 }
 
 // Cached equipped set — rebuilt on demand
-let _equippedSet = null;
+var _equippedSet = null;
 function _rebuildEquippedSet() {
     _equippedSet = new Set();
     for (const v of Object.values(localEq)) { if (v) _equippedSet.add(v); }
@@ -1040,7 +1053,7 @@ function isEquippedAnywhere(name) {
 }
 
 // Cached compatible items per slot — rebuilt on equip tab render
-let _compatCache = null;
+var _compatCache = null;
 function _getCompatCached(slot) {
     if (!_compatCache) {
         _compatCache = {};
@@ -1095,7 +1108,7 @@ function _flashSlot(slot, cls) {
     });
 }
 
-const SELL_PROTECTED = new Set([
+var SELL_PROTECTED = new Set([
     'quest', 'mission_item', 'key', 'map', 'map_fragment',
     'no_sell', 'no_discard', 'story_item', 'unique'
 ]);
@@ -1220,7 +1233,8 @@ function getAllyName(npcId) {
 }
 
 // ── Bootstrap (must be last file loaded) ──
-init();
+// In popup mode, init is called by the bridge module
+if (!window._invPopupMode) init();
 
 
 // ══════════════════════════════════════════════════════════

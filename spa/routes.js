@@ -235,6 +235,10 @@
             if (window._combatLoadingCtrl) {
                 try { window._combatLoadingCtrl.hide(); } catch(e) {}
             }
+            // Clear combat intervals
+            if (typeof _timerInterval !== "undefined" && _timerInterval) { clearInterval(_timerInterval); }
+            if (typeof _heartbeatInterval !== "undefined" && _heartbeatInterval) { clearInterval(_heartbeatInterval); }
+            if (typeof _pollTimeout !== "undefined" && _pollTimeout) { clearTimeout(_pollTimeout); }
         },
     });
 
@@ -285,12 +289,16 @@
             "explore/explore-particles.js",
         ],
         init: function () {
-            /* explore-core.js self-initializes via DOMContentLoaded */
+            /* In SPA mode, DOMContentLoaded already fired — call initAsync directly */
+            if (typeof initAsync === "function") return initAsync();
         },
         cleanup: function () {
             if (window._loadingCtrl) {
                 try { window._loadingCtrl.cleanup(); } catch(e) {}
             }
+            // Cancel explore render loop and intervals
+            if (typeof _rafId !== "undefined" && _rafId) { cancelAnimationFrame(_rafId); }
+            if (typeof _travelRaf !== "undefined" && _travelRaf) { cancelAnimationFrame(_travelRaf); }
         },
     });
 
@@ -322,10 +330,12 @@
             "navigate/navigate-fontpicker.js",
         ],
         init: function () {
-            /* navigate-core.js self-initializes via DOMContentLoaded */
+            /* In SPA mode, DOMContentLoaded already fired — call initAsync directly */
+            if (typeof initAsync === "function") return initAsync();
         },
         cleanup: function () {
-            /* Navigate cleanup is handled by navigate-core.js destroy() */
+            /* Cancel navigate intervals */
+            if (typeof _ttRAF !== "undefined" && _ttRAF) { cancelAnimationFrame(_ttRAF); }
         },
     });
 
@@ -445,7 +455,10 @@
             "dungeon/dungeon-map.js",
             "dungeon/dungeon-ui.js",
         ],
-        init: function () { /* dungeon-core.js self-initializes via DOMContentLoaded */ },
+        init: function () {
+            /* In SPA mode, DOMContentLoaded already fired — call initDungeon directly */
+            if (typeof initDungeon === "function") return initDungeon();
+        },
         cleanup: function () {
             if (window._dungeonLoadingCtrl) {
                 try { window._dungeonLoadingCtrl.hide(); } catch(e) {}

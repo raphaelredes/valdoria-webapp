@@ -28,14 +28,14 @@ function _calcInnDelay(lines, category) {
 }
 
 // ─── Thematic Dividers per tier ───
-const _DIVIDERS = {
+var _DIVIDERS = {
     poor:    { night: '\u00b7 \u2726 \u00b7 \u2726 \u00b7 \u2726 \u00b7', sleep: '\u00b7 \u00b7 \u2727 \u00b7 \u00b7 \u2727 \u00b7 \u00b7', dawn: '\u00b7 \u2600 \u00b7 \u2600 \u00b7 \u2600 \u00b7' },
     modest:  { night: '\u00b7 \u2726 \u00b7 \u2726 \u00b7 \u2726 \u00b7 \u2726 \u00b7', sleep: '\u00b7 \u00b7 \u2727 \u00b7 \u00b7 \u2727 \u00b7 \u00b7 \u2727 \u00b7 \u00b7', dawn: '\u00b7 \u2600 \u00b7 \u2600 \u00b7 \u2600 \u00b7 \u2600 \u00b7', dream: '\u2727 \u00b7 \u2727 \u00b7 \u2727 \u00b7 \u2727 \u00b7 \u2727' },
     wealthy: { night: '\u2726 \u00b7 \u2605 \u00b7 \u2727 \u00b7 \u2605 \u00b7 \u2726', sleep: '\u00b7 \u00b7 \u2727 \u00b7 \u00b7 \u2727 \u00b7 \u00b7 \u2727 \u00b7 \u00b7', dawn: '\u00b7 \u2600 \u00b7 \u2600 \u00b7 \u2600 \u00b7 \u2600 \u00b7', dream: '\u2727 \u00b7 \u2727 \u00b7 \u2727 \u00b7 \u2727 \u00b7 \u2727', bath: '~ \u00b7 ~ \u00b7 \u2668 \u00b7 ~ \u00b7 ~' },
 };
 
 // ─── Frame Templates with Narrative Variety ───
-const _INN_FRAMES = {
+var _INN_FRAMES = {
     poor: [
         {
             title: 'NOITE NO EST\u00c1BULO',

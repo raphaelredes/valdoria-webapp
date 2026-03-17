@@ -3,16 +3,16 @@
 // ═══════════════════════════════════════════════
 
 // --- Translations & Lookups ---
-const ATTR_PT = {strength:'Força',dexterity:'Destreza',constitution:'Constituição',intelligence:'Inteligência',wisdom:'Sabedoria',charisma:'Carisma'};
-const ATTR_ABBR = {strength:'FOR',dexterity:'DES',constitution:'CON',intelligence:'INT',wisdom:'SAB',charisma:'CAR'};
-const SKILL_PT = {athletics:'Atletismo',acrobatics:'Acrobacia',sleight_of_hand:'Prestidigitação',stealth:'Furtividade',arcana:'Arcanismo',history:'História',investigation:'Investigação',nature:'Natureza',religion:'Religião',animal_handling:'Lidar com Animais',insight:'Intuição',medicine:'Medicina',perception:'Percepção',survival:'Sobrevivência',deception:'Enganação',intimidation:'Intimidação',performance:'Atuação',persuasion:'Persuasão'};
-const ARMOR_PT = {light_armor:'Leve',medium_armor:'Média',heavy_armor:'Pesada',shield:'Escudo'};
-const WEAPON_PT = {simple_weapon:'Simples',martial_weapon:'Marciais'};
-const SAVE_PT = ATTR_PT;
-const RECOVERY_PT = {full:'Recupera tudo no Desc. Curto',half:'Recupera 50% no Desc. Curto',third:'Recupera 33% no Desc. Curto',none:'Só recupera no Desc. Longo'};
+var ATTR_PT = {strength:'Força',dexterity:'Destreza',constitution:'Constituição',intelligence:'Inteligência',wisdom:'Sabedoria',charisma:'Carisma'};
+var ATTR_ABBR = {strength:'FOR',dexterity:'DES',constitution:'CON',intelligence:'INT',wisdom:'SAB',charisma:'CAR'};
+var SKILL_PT = {athletics:'Atletismo',acrobatics:'Acrobacia',sleight_of_hand:'Prestidigitação',stealth:'Furtividade',arcana:'Arcanismo',history:'História',investigation:'Investigação',nature:'Natureza',religion:'Religião',animal_handling:'Lidar com Animais',insight:'Intuição',medicine:'Medicina',perception:'Percepção',survival:'Sobrevivência',deception:'Enganação',intimidation:'Intimidação',performance:'Atuação',persuasion:'Persuasão'};
+var ARMOR_PT = {light_armor:'Leve',medium_armor:'Média',heavy_armor:'Pesada',shield:'Escudo'};
+var WEAPON_PT = {simple_weapon:'Simples',martial_weapon:'Marciais'};
+var SAVE_PT = ATTR_PT;
+var RECOVERY_PT = {full:'Recupera tudo no Desc. Curto',half:'Recupera 50% no Desc. Curto',third:'Recupera 33% no Desc. Curto',none:'Só recupera no Desc. Longo'};
 
 // --- Skill → Governing Attribute ---
-const SKILL_ATTR = {
+var SKILL_ATTR = {
     athletics:'strength',acrobatics:'dexterity',sleight_of_hand:'dexterity',
     stealth:'dexterity',arcana:'intelligence',history:'intelligence',
     investigation:'intelligence',nature:'intelligence',religion:'intelligence',
@@ -22,7 +22,7 @@ const SKILL_ATTR = {
 };
 
 // --- Descriptions ---
-const SKILL_DESC = {
+var SKILL_DESC = {
     athletics:'Escalar, nadar, saltar e proezas de força',
     acrobatics:'Equilíbrio, manobras acrobáticas e escapar',
     sleight_of_hand:'Truques manuais e furtar objetos',
@@ -43,7 +43,7 @@ const SKILL_DESC = {
     persuasion:'Convencer, negociar e influenciar'
 };
 
-const TOOL_DESC = {
+var TOOL_DESC = {
     smith_tools:'Criar e reparar objetos de metal, armas e armaduras',
     leatherworker_tools:'Criar e reparar itens de couro e peles',
     woodcarver_tools:'Entalhar madeira e criar objetos decorativos',
@@ -54,7 +54,7 @@ const TOOL_DESC = {
     tinker_tools:'Construir e reparar mecanismos e dispositivos'
 };
 
-const RACE_IMPACT = {
+var RACE_IMPACT = {
     Human:'A raça mais versátil. +1 em todos os atributos beneficia qualquer classe. Excelente para iniciantes ou builds equilibradas. Variante: troca +1 em tudo por +1 em 2 + perícia + feat.',
     Dwarf:'Resistente e durável. +2 CON aumenta HP de qualquer classe. Resistência a veneno é valiosa contra inimigos e armadilhas.',
     Elf:'Ágil e perceptivo. +2 DES melhora CA, ataques à distância e iniciativa. Percepção gratuita e imunidade a sono são poderosas.',
@@ -66,7 +66,7 @@ const RACE_IMPACT = {
     HalfOrc:'Dado extra em crits é devastador com armas grandes. Resistência Implacável salva de knockouts. Ideal para Bárbaro e Guerreiro.'
 };
 
-const CLASS_DESC = {
+var CLASS_DESC = {
     class_warrior:'Combatente versátil que domina todas as armas e armaduras. Alta HP e habilidades táticas como Recobrar Fôlego (cura em combate) e Surto de Ação (ação extra).',
     class_mage:'Mestre do arcano com o maior arsenal de magias. Frágil em combate corpo-a-corpo (1d6 HP), mas devastador à distância com Bola de Fogo e Mísseis Mágicos.',
     class_rogue:'Especialista em furtividade e perícias (4 no nível 1). Ataque Furtivo causa dano massivo. O mais habilidoso e versátil fora de combate.',
@@ -81,7 +81,7 @@ const CLASS_DESC = {
     class_warlock:'Pactário com recuperação TOTAL em descanso curto. Rajada Mística (1d10, escala com nível) é o melhor truque de dano do jogo.'
 };
 
-const RES_DESC = {
+var RES_DESC = {
     'Vigor':'Recurso para habilidades marciais: Recobrar Fôlego, Surto de Ação',
     'Mana':'Recurso para conjurar magias arcanas ou divinas',
     'Energia':'Recurso para manobras furtivas e habilidades de combate',
@@ -92,7 +92,7 @@ const RES_DESC = {
 };
 
 // --- Racial Traits ---
-const RACE_TRAITS = {
+var RACE_TRAITS = {
     Human:[
         {name:'Versatilidade Humana',desc:'+1 em todos os 6 atributos (FOR, DES, CON, INT, SAB, CAR). A única raça que melhora TODOS os atributos.'},
         {name:'Idioma Extra',desc:'Aprende 1 idioma adicional à escolha, além de Comum. Útil para diplomacia e compreensão de textos.'}
@@ -142,7 +142,7 @@ const RACE_TRAITS = {
 };
 
 // --- Subrace Details ---
-const SUBRACE_DETAILS = {
+var SUBRACE_DETAILS = {
     Dwarf:{
         hill:{impact:'+1 SAB melhora Percepção e magias divinas. Tenacidade Anã: +1 HP por nível — o Anão mais resistente.'},
         mountain:{impact:'+2 FOR (total +2 CON, +2 FOR). Proficiência em armaduras leve e média independente da classe. Excelente para casters que querem armadura.'}
@@ -162,7 +162,7 @@ const SUBRACE_DETAILS = {
 };
 
 // --- Dragonborn Ancestry ---
-const ANCESTRY_DETAILS = {
+var ANCESTRY_DETAILS = {
     red:{element:'Fogo',shape:'Cone (4.5m)',save:'DES'},
     blue:{element:'Relâmpago',shape:'Linha (9m)',save:'DES'},
     white:{element:'Gelo',shape:'Cone (4.5m)',save:'CON'},
@@ -176,7 +176,7 @@ const ANCESTRY_DETAILS = {
 };
 
 // --- Races ---
-const RACES = {
+var RACES = {
     Human:{name:'Humano',icon:'👤',desc:'+1 em todos os atributos',speed:30,size:'Médio',langs:['Comum','+1 à escolha'],
         bonuses:{strength:1,dexterity:1,constitution:1,intelligence:1,wisdom:1,charisma:1},
         subraces:{standard:{name:'Humano Padrão',desc:'Versátil. +1 em todos os 6 atributos.',bonuses:{}},variant:{name:'Humano Variante',desc:'+1 em 2 atributos + 1 perícia + 1 feat.',bonuses:{}}},
@@ -221,7 +221,7 @@ const RACES = {
 };
 
 // --- Classes ---
-const CLASSES = {
+var CLASSES = {
     class_warrior:{name:'Guerreiro',icon:'🛡️',role:'Tanque / DPS',hit_die:'1d10',res:'Vigor',
         stats:[15,13,14,8,12,10],armor:['light_armor','medium_armor','heavy_armor','shield'],weapons:['simple_weapon','martial_weapon'],saves:['strength','constitution'],tools:[],
         equip:['Espada de Treino','Escudo de Madeira','Cota de Malha'],skills:{count:2,opts:['acrobatics','animal_handling','athletics','history','insight','intimidation','perception','survival']},rec:'half',mp:{base:14,attr:'strength',mult:2}},
@@ -261,7 +261,7 @@ const CLASSES = {
 };
 
 // --- Backgrounds ---
-const BACKGROUNDS = {
+var BACKGROUNDS = {
     soldier:{name:'Soldado',desc:'Disciplina do campo de batalha. Veterano de guerras e treinamento militar.',skills:['athletics','intimidation'],gold:10},
     sage:{name:'Sábio',desc:'Anos dedicados a bibliotecas, academias e pesquisa arcana.',skills:['arcana','history'],gold:10},
     criminal:{name:'Criminal',desc:'Passado nas sombras do submundo. Contatos e experiência ilegal.',skills:['stealth','deception'],gold:15},
@@ -278,7 +278,7 @@ const BACKGROUNDS = {
 };
 
 // --- Artisan Tools ---
-const ARTISAN_TOOLS = {
+var ARTISAN_TOOLS = {
     smith_tools:{name:'Ferramentas de Ferreiro',icon:'⚒️'},
     leatherworker_tools:{name:'Ferramentas de Coureiro',icon:'🧵'},
     woodcarver_tools:{name:'Ferramentas de Entalhador',icon:'🪓'},
@@ -290,14 +290,14 @@ const ARTISAN_TOOLS = {
 };
 
 // --- Genders ---
-const GENDERS = [
+var GENDERS = [
     {key:'Male',icon:'🚹',name:'Masculino'},{key:'Female',icon:'🚺',name:'Feminino'},
     {key:'Non-Binary',icon:'🌈',name:'Não-Binário'},{key:'Fluid',icon:'🌊',name:'Fluido'},
     {key:'Agender',icon:'⚪',name:'Agênero'}
 ];
 
 // --- Name Generator ---
-const NAMES_DATA = {
+var NAMES_DATA = {
     pre:["Aer","Ael","Al","An","Ar","Bel","Bor","Bal","Bran","Cal","Cor","Cael","Cyr","Da","Del","Dor","Dra","El","Eom","Er","Fa","Fae","Fel","Fer","Gal","Gen","Gil","Gor","Hal","Hor","Hel","Hrod","Ian","Ith","Ir","Jar","Jen","Jor","Kal","Kel","Kor","Kyr","La","Lel","Lor","Ly","Mai","Mal","Mor","Myr","Na","Nel","Nor","Ny","Ol","Or","Oth","Pa","Per","Pol","Ra","Ren","Ror","Ry","Sa","Sel","Sol","Syl","Ta","Tel","Tor","Ty","Ul","Ur","Va","Val","Vor","Vy","Wa","Wil","Wor","Xa","Xer","Ya","Yl","Za","Zor"],
     inf:["a","e","i","o","u","ae","ai","ea","ia","io","ua","y","aa","ee","oo"],
     suf:["bar","bor","can","cen","dan","den","din","don","fan","fen","fin","gan","gen","gin","gon","han","hen","hin","hon","jan","jen","kan","ken","kin","kon","lan","len","lin","lon","man","men","min","mon","nan","nen","nin","pan","pen","ran","ren","rin","ron","san","sen","sin","son","tan","ten","tin","ton","van","ven","vin","wan","wen","zan","zen","zin"],
@@ -310,7 +310,7 @@ const NAMES_DATA = {
 // ═══════════════════════════════════════════════
 
 // --- DM Narration per screen ---
-const DM_NARRATION = {
+var DM_NARRATION = {
     0: 'Muito bem, aventureiro! Antes de tudo, preciso saber sobre suas origens. De qual povo você descende? Cada raça possui dons únicos que moldarão seu destino.',
     1: 'Agora me conte: como você luta? Qual caminho de poder escolheu trilhar? Sua classe define suas habilidades em combate e exploração.',
     2: 'Todo aventureiro tem forças e fraquezas. Distribua seus atributos — coloque os valores mais altos no que importa para sua classe!',
@@ -323,7 +323,7 @@ const DM_NARRATION = {
 };
 
 // --- Level 1 Class Features & Spells ---
-const CLASS_LV1 = {
+var CLASS_LV1 = {
     class_warrior: {
         features: [
             {name:'Retomar Fôlego', desc:'Uma vez por descanso curto, recupera 1d10 + nível de Guerreiro em HP como ação bônus.'},
@@ -453,7 +453,7 @@ const CLASS_LV1 = {
 };
 
 // --- Background Features (D&D 5e traits) ---
-const BG_FEATURES = {
+var BG_FEATURES = {
     soldier: {name:'Patente Militar', desc:'Soldados de sua antiga organização reconhecem sua autoridade e influência. Você pode invocar sua patente para requisitar equipamento simples ou acesso a fortalezas militares.'},
     sage: {name:'Pesquisador', desc:'Quando não sabe uma informação, geralmente sabe onde e de quem obtê-la. Isso pode ser uma biblioteca, universidade, ou outro sábio.'},
     criminal: {name:'Contato Criminal', desc:'Você possui um contato confiável no submundo do crime que age como intermediário para informações e trabalhos clandestinos.'},
@@ -470,7 +470,7 @@ const BG_FEATURES = {
 };
 
 // --- Race+Class Synergy Tips ---
-const RACE_CLASS_TIPS = {
+var RACE_CLASS_TIPS = {
     'Elf_class_rogue': 'Elfos com +2 DES são naturais para Ladino. Percepção gratuita e imunidade a sono complementam perfeitamente o estilo furtivo.',
     'Elf_class_ranger': 'Elfo Patrulheiro é uma combinação clássica. +2 DES melhora ataques à distância, e Percepção gratuita ajuda na exploração.',
     'Elf_class_mage': 'Altos Elfos com +1 INT são excelentes Magos. Truque extra e idioma adicional expandem suas opções arcanas.',
@@ -494,7 +494,7 @@ const RACE_CLASS_TIPS = {
 // ═══════════════════════════════════════════════
 // LANGUAGES — D&D 5e PHB p.123
 // ═══════════════════════════════════════════════
-const LANGUAGES = {
+var LANGUAGES = {
     standard: [
         {key:'Comum',name:'Comum',desc:'Língua franca de todos os povos.'},
         {key:'Anão',name:'Anão',desc:'Falada por anões. Sons guturais e sílabas pesadas.'},
@@ -519,7 +519,7 @@ const LANGUAGES = {
 // ═══════════════════════════════════════════════
 // FEATS — D&D 5e PHB (no prerequisites, for Variant Human L1)
 // ═══════════════════════════════════════════════
-const CREATION_FEATS = {
+var CREATION_FEATS = {
     tough:{name:'Resistente',desc:'+2 HP por nível (retroativo). O mais resistente.'},
     lucky:{name:'Sortudo',desc:'3×/dia re-rola um d20. Incrivelmente versátil.'},
     sentinel:{name:'Sentinela',desc:'Inimigos não fogem de você. Bônus em ataques de oportunidade.'},
@@ -539,7 +539,7 @@ const CREATION_FEATS = {
 // ═══════════════════════════════════════════════
 // ALIGNMENTS — D&D 5e PHB p.122
 // ═══════════════════════════════════════════════
-const ALIGNMENTS = {
+var ALIGNMENTS = {
     lg: {name:'Leal e Bom', abbr:'LB', icon:'⚖️✨', desc:'Segue regras e faz o bem.'},
     ng: {name:'Neutro e Bom', abbr:'NB', icon:'💛', desc:'Faz o bem sem se prender a regras.'},
     cg: {name:'Caótico e Bom', abbr:'CB', icon:'🦅✨', desc:'Liberdade e bondade acima de tudo.'},
@@ -555,7 +555,7 @@ const ALIGNMENTS = {
 // SUBCLASS DATA — L1 subclass selection (D&D 5e PHB)
 // Classes that choose subclass at Level 1: Cleric, Sorcerer, Warlock
 // ═══════════════════════════════════════════════
-const SUBCLASS_DATA = {
+var SUBCLASS_DATA = {
     class_cleric: {
         life: {name:'Domínio da Vida', icon:'❤️', desc:'Curandeiro divino supremo, mestre em restaurar e proteger a vida.',
             l1:{name:'Discípulo da Vida', desc:'Magias de cura restauram HP adicional (2 + nível da magia).'}},
@@ -577,17 +577,17 @@ const SUBCLASS_DATA = {
             l1:{name:'Mente Desperta', desc:'Conexão telepática amplifica ataques com +1d6 dano psíquico.'}}
     }
 };
-const L1_SUBCLASS_CLASSES = ['class_cleric','class_sorcerer','class_warlock'];
+var L1_SUBCLASS_CLASSES = ['class_cleric','class_sorcerer','class_warlock'];
 
 // ═══════════════════════════════════════════════
 // FIGHTING STYLES — Warrior L1 choice (D&D 5e PHB p.72)
 // ═══════════════════════════════════════════════
-const FIGHTING_STYLES = {
+var FIGHTING_STYLES = {
     fighting_style_defense: {name:'Defesa', icon:'🛡️', desc:'+1 CA enquanto vestir armadura. Ideal para tanques que querem sobreviver mais.'},
     fighting_style_dueling: {name:'Duelismo', icon:'⚔️', desc:'+2 dano com arma corpo a corpo em uma mão. Ideal para causar mais dano.'}
 };
 
-const EQUIPMENT_PACKAGES = {
+var EQUIPMENT_PACKAGES = {
     class_warrior:   {A:{name:'Espada e Escudo',icon:'🛡️',desc:'Espada + escudo + cota de malha',items:['Espada de Treino (1d8)','Escudo de Madeira (+1 CA)','Cota de Malha (6 CA)']},B:{name:'Arma Grande',icon:'⚔️',desc:'Machado grande + cota de malha',items:['Machado Grande (1d12)','Cota de Malha (6 CA)']}},
     class_paladin:   {A:{name:'Martelo e Escudo',icon:'🛡️',desc:'Martelo + escudo + cota de malha',items:['Martelo de Guerra (1d8)','Escudo de Madeira (+1 CA)','Cota de Malha (6 CA)']},B:{name:'Alabarda Sagrada',icon:'⚔️',desc:'Alabarda + cota de malha',items:['Alabarda (1d10)','Cota de Malha (6 CA)']}},
     class_barbarian: {A:{name:'Machado de Batalha',icon:'🪓',desc:'Machado + giboia de pele',items:['Machado de Batalha (1d10)','Giboia de Pele (2 CA)']},B:{name:'Machado Grande',icon:'⚔️',desc:'Machado grande + giboia de pele',items:['Machado Grande (1d12)','Giboia de Pele (2 CA)']}},
@@ -605,7 +605,7 @@ const EQUIPMENT_PACKAGES = {
 // ═══════════════════════════════════════════════
 // HELP TEXTS — Explanations for new players
 // ═══════════════════════════════════════════════
-const HELP_TEXTS = {
+var HELP_TEXTS = {
     race: {
         title: '🧬 O que é Raça?',
         text: 'Raça é a espécie do seu personagem — se ele é humano, elfo, anão, ou outra criatura fantástica.\n\nCada raça tem habilidades naturais únicas:\n• Bônus de atributos — Elfos são naturalmente ágeis (+2 Destreza)\n• Traços raciais — Anões resistem a veneno, Halflings têm sorte\n• Idiomas — Cada raça fala línguas diferentes\n\n💡 Dica: Não existe raça "errada". Escolha a que mais combina com o tipo de personagem que você quer criar!'

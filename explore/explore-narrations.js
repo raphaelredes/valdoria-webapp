@@ -6,7 +6,7 @@
 // ═══════════════════════════════════════════════════════
 
 // --- DM Intro (per biome, with '|' page breaks) ---
-const DM_INTROS = {
+var DM_INTROS = {
     forest: "Galhos estalam sob seus pés enquanto a luz do sol se filtra pelas copas das árvores antigas. O aroma de musgo e terra úmida envolve você como um abraço da própria floresta.|Pássaros silenciam à sua passagem. A mata observa, julgando se você é amigo ou intruso.",
     plains: "O vento sopra livre e incessante, trazendo o cheiro de grama selvagem e o som distante de trovões além do horizonte.|O campo se estende infinito. Aqui, nada se esconde — mas a vastidão tem seus próprios perigos.",
     swamp: "O ar úmido e pesado envolve você como uma mortalha quente. Cada passo afunda na lama escura enquanto a névoa limita sua visão a poucos metros.|Sons guturais ecoam nas águas paradas. O pântano está vivo — e observa.",
@@ -17,7 +17,7 @@ const DM_INTROS = {
     volcanic: "O calor é sufocante e implacável. Rios de lava brilham ao longe como veias da terra e o chão treme sob seus pés a cada erupção menor.|O ar cheira a enxofre e metal fundido. Poucos se aventuram aqui — e menos voltam.",
     graveyard: "Lápides cobertas de musgo emergem da névoa como dentes de uma criatura adormecida. Sussurros distantes e indecifráveis enchem o ar gelado.|O silêncio aqui é diferente — respeitoso, pesado. Os mortos têm suas próprias histórias.",
 };
-const DM_DANGER_EXT = {
+var DM_DANGER_EXT = {
     5: " O perigo é palpável — cada sombra pode esconder uma ameaça mortal. Seu corpo inteiro grita para voltar.",
     3: " Seu instinto diz para ficar alerta. Algo não está certo neste lugar.",
 };
@@ -30,7 +30,7 @@ function getDMIntro(biome, dangerLevel) {
 }
 
 // --- POI Narrations (order must match backend map_poi_narrations.py) ---
-const POI_NARRATIONS = {
+var POI_NARRATIONS = {
     discovery: {
         forest: [
             "Raios de sol filtram pelas copas e iluminam uma clareira coberta de musgos vibrantes. O ar aqui é diferente — mais denso, mais antigo.|Você se ajoelha para examinar o solo. Entre as raízes, pequenas flores azuis pulsam com uma luminosidade tênue, como se guardassem um segredo.",
@@ -366,7 +366,7 @@ const POI_NARRATIONS = {
 };
 
 // --- Random Encounter Narrations (order must match backend) ---
-const ENCOUNTER_NARRATIONS = {
+var ENCOUNTER_NARRATIONS = {
     ambush: {
         forest: [
             "Flechas voam das árvores! Emboscada!",
@@ -631,8 +631,8 @@ const ENCOUNTER_NARRATIONS = {
 };
 
 // --- Type short→full mappings ---
-const _POI_TYPE_MAP = {dis: 'discovery', sea: 'search', mys: 'mystery', dan: 'danger'};
-const _ENC_TYPE_MAP = {amb: 'ambush', trp: 'trap', hid: 'hidden', snd: 'sound'};
+var _POI_TYPE_MAP = {dis: 'discovery', sea: 'search', mys: 'mystery', dan: 'danger'};
+var _ENC_TYPE_MAP = {amb: 'ambush', trp: 'trap', hid: 'hidden', snd: 'sound'};
 
 function lookupPOINarr(typeShort, biome, idx) {
     const fullType = _POI_TYPE_MAP[typeShort];
@@ -653,7 +653,7 @@ function lookupEncNarr(typeShort, biome, idx) {
 // ═══════════════════════════════════════════════════════
 // AMBIENT NARRATIONS (atmospheric moments, no choices)
 // ═══════════════════════════════════════════════════════
-const AMBIENT_NARRATIONS = {
+var AMBIENT_NARRATIONS = {
     forest: [
         "Uma revoada de pássaros corta o céu acima das copas, seus cantos ecoando entre os troncos.|Você para por um momento. O silêncio que se segue é profundo, quase sagrado.",
         "Uma chuva fina começa a cair sem aviso, cada gota brilhando como cristal ao passar pelos raios de sol.|O cheiro de terra molhada preenche seus pulmões. A floresta parece respirar ao seu redor.",

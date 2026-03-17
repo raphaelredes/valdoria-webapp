@@ -683,7 +683,7 @@ function _openChest(chest, col, row, disarmed) {
 // INSCRIPTION INTERACTION
 // =============================================
 
-const INSCRIPTION_TEXTS = {
+var INSCRIPTION_TEXTS = {
     cave: [
         'Runas antigas marcam a pedra: "Os que buscam poder aqui encontrarao apenas escuridao."',
         'Marcas de garras profundas riscam a parede. Algo grande passou por aqui.',

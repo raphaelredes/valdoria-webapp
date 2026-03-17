@@ -5,7 +5,7 @@
    ═══════════════════════════════════════════════ */
 
 // ─── INIT ───
-const tg = window.Telegram?.WebApp;
+var tg = window.Telegram?.WebApp;
 if (tg) {
     tg.ready(); tg.expand();
     // [EXIT-CONFIRM] BackButton handled by exit-confirm.js (shows popup)
@@ -17,42 +17,42 @@ if (tg) {
 }
 
 // Dual-mode: SPA route params or URL query params
-const _spaP = window.__spaRouteParams || {};
-const params = new URLSearchParams(window.location.search);
+var _spaP = window.__spaRouteParams || {};
+var params = new URLSearchParams(window.location.search);
 if (_spaP) { Object.keys(_spaP).forEach(function(k) { if (!params.has(k)) params.set(k, _spaP[k]); }); }
-const token = params.get('token') || '';
-const apiBase = params.get('api') || '';
-const userId = parseInt(params.get('uid') || '0');
-const rawData = params.get('data');
-const originApp = params.get('origin') || (apiBase ? 'game' : '');
-const isApiMode = !!apiBase;
-let currentState = null;
-let _lastAnimatedRoll = null; // Dedup: prevents replaying same dice animation on re-render
-let _initDiceAnimated = false; // Dedup: prevents replaying initiative dice on poll re-render
-let _initAnimationInProgress = false; // Blocks poll re-render during initiative animation
+var token = params.get('token') || '';
+var apiBase = params.get('api') || '';
+var userId = parseInt(params.get('uid') || '0');
+var rawData = params.get('data');
+var originApp = params.get('origin') || (apiBase ? 'game' : '');
+var isApiMode = !!apiBase;
+var currentState = null;
+var _lastAnimatedRoll = null; // Dedup: prevents replaying same dice animation on re-render
+var _initDiceAnimated = false; // Dedup: prevents replaying initiative dice on poll re-render
+var _initAnimationInProgress = false; // Blocks poll re-render during initiative animation
 
 // ─── IMMERSION FEATURES STATE ───
-const _prevHpState = new Map(); // Feature 1: HP bar animation tracking
-const _prevStatusState = new Map(); // Status change detection for VFX
-let _prevPlayerHp = 0;          // Feature 2: detect player damage for shake
-let _lastEnemyDmgType = 'slashing'; // Track enemy damage type for VFX
-let _audioCtx = null;           // Feature 8: Web Audio (lazy init)
-let _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
-let _currentPositions = null;   // Feature 9: combat positions
-let _cinematicInProgress = false; // Blocks re-render during action cinematic
-let _cinematicWarnTimer = null;     // Warn toast timer during cinematic
-let _overlayOpen = false;          // Blocks poll re-render while target/skill overlay is open
-let _bonusHapticFired = false;     // Haptic fired for bonus_action sub-phase
-let _reactionHapticFired = false;  // Haptic fired for reaction sub-phase
-let _reactionAutoTimer = null;     // 10s auto-skip timer for reactions
-let _lastRenderedPhase = null;  // Phase transition tracking
-let _hitStreak = 0;               // P2-G: Combo streak counter
-let _initDice3d = null;           // THREE.js Dice3D instance for initiative screen
-let _dmgDice3d = null;            // THREE.js Dice3D instance for damage rolls
+var _prevHpState = new Map(); // Feature 1: HP bar animation tracking
+var _prevStatusState = new Map(); // Status change detection for VFX
+var _prevPlayerHp = 0;          // Feature 2: detect player damage for shake
+var _lastEnemyDmgType = 'slashing'; // Track enemy damage type for VFX
+var _audioCtx = null;           // Feature 8: Web Audio (lazy init)
+var _audioUnlocked = false;     // Feature 8: requires user gesture to unlock
+var _currentPositions = null;   // Feature 9: combat positions
+var _cinematicInProgress = false; // Blocks re-render during action cinematic
+var _cinematicWarnTimer = null;     // Warn toast timer during cinematic
+var _overlayOpen = false;          // Blocks poll re-render while target/skill overlay is open
+var _bonusHapticFired = false;     // Haptic fired for bonus_action sub-phase
+var _reactionHapticFired = false;  // Haptic fired for reaction sub-phase
+var _reactionAutoTimer = null;     // 10s auto-skip timer for reactions
+var _lastRenderedPhase = null;  // Phase transition tracking
+var _hitStreak = 0;               // P2-G: Combo streak counter
+var _initDice3d = null;           // THREE.js Dice3D instance for initiative screen
+var _dmgDice3d = null;            // THREE.js Dice3D instance for damage rolls
 
 
 // ─── ANIMATION TIMING CONSTANTS ───
-const TIMING = {
+var TIMING = {
     D20_ROLL: 1200,           // Duration of d20 3D roll animation (ms)
     D20_HOLD: 800,            // Hold time after d20 lands before damage phase (ms)
     MISS_HOLD: 2400,          // Hold time on miss result before closing overlay (ms)
@@ -90,11 +90,11 @@ function _showImpactFlash(targetEl, isCrit) {
 }
 
 // ─── TIMER / POLLING / HEARTBEAT STATE ───
-let _timerInterval = null;
-let _timerRemaining = 0;
-let _timerMax = 0;
-let _pollInterval = null;
-let _heartbeatInterval = null;
+var _timerInterval = null;
+var _timerRemaining = 0;
+var _timerMax = 0;
+var _pollInterval = null;
+var _heartbeatInterval = null;
 
 // ─── COMBAT API (persistent fetch mode) ───
 class CombatAPI {
@@ -158,7 +158,7 @@ class CombatAPI {
         return r.json();
     }
 }
-const api = isApiMode ? new CombatAPI(apiBase, token, userId) : null;
+var api = isApiMode ? new CombatAPI(apiBase, token, userId) : null;
 
 // Auto-discover new tunnel URL if current one dies
 if (apiBase && window.ApiDiscovery) {
@@ -178,13 +178,13 @@ function b64Decode(str) {
 }
 
 // ─── CONSTANTS ───
-const BIOME_NAMES = {
+var BIOME_NAMES = {
     forest: 'Floresta', cave: 'Caverna', graveyard: 'Cemiterio', swamp: 'Pantano',
     volcanic: 'Vulcanico', snow: 'Neve', desert: 'Deserto', mountain: 'Montanha',
     plains: 'Planicie', dungeon: 'Masmorra', city: 'Cidade', ruins: 'Ruinas',
 };
 
-const STATUS_ICONS = {
+var STATUS_ICONS = {
     poisoned: '🧪', blinded: '🌑', paralyzed: '⚡', prone: '🦶', restrained: '🕸️',
     frightened: '😱', stunned: '💫', grappled: '👐', petrified: '🪨', exhausted: '😫',
     marked: '🎯', blessed: '✨', hexed: '👁️', burning: '🔥', frozen: '❄️',
@@ -194,7 +194,7 @@ const STATUS_ICONS = {
 };
 
 // PT-BR translations for status effect keys from backend
-const STATUS_PT = {
+var STATUS_PT = {
     poisoned: 'Envenenado', blinded: 'Cego', paralyzed: 'Paralisado', prone: 'Derrubado',
     restrained: 'Preso', frightened: 'Amedrontado', stunned: 'Atordoado', grappled: 'Agarrado',
     petrified: 'Petrificado', exhausted: 'Exausto', marked: 'Marcado', blessed: 'Abençoado',
@@ -207,25 +207,25 @@ const STATUS_PT = {
     slowed: 'Lento', pushed: 'Empurrado',
 };
 // Buff vs debuff classification (buffs get green styling, debuffs get red)
-const STATUS_BUFFS = new Set([
+var STATUS_BUFFS = new Set([
     'blessed', 'inspired', 'invisible', 'raging', 'wild_shaped',
     'concentrated', 'regenerating',
 ]);
 
-const DMG_ICONS = {
+var DMG_ICONS = {
     slashing: '🗡️', piercing: '🏹', bludgeoning: '🔨', fire: '🔥', cold: '❄️',
     lightning: '⚡', necrotic: '💀', radiant: '✨', psychic: '🧠', thunder: '💥',
     poison: '🧪', acid: '🟢', force: '💠',
 };
 
-const ATK_TYPE_LABELS = { melee: 'Corpo a corpo', ranged: 'À distância', magic: 'Mágico' };
+var ATK_TYPE_LABELS = { melee: 'Corpo a corpo', ranged: 'À distância', magic: 'Mágico' };
 
-const RES_CLASS_MAP = {
+var RES_CLASS_MAP = {
     'Mana': 'mp', 'Ki': 'ki', 'Fúria': 'fury', 'Vigor': 'vigor',
     'Inspiração': 'inspiration', 'Pacto': 'pact', 'Energia': 'energy',
 };
 
-const RES_ICON_MAP = {
+var RES_ICON_MAP = {
     'Mana': '💧', 'Ki': '⚡', 'Fúria': '💢', 'Vigor': '💪',
     'Inspiração': '🎵', 'Pacto': '👁️', 'Energia': '⚡',
 };
@@ -359,7 +359,7 @@ async function transitionFromArena(result) {
             const data = await resp.json();
             if (data.url) {
                 window.__valdoria_transitioning = true;
-                window.location.replace(data.url);
+                valdoriaSpaNav(data.url);
                 return;
             }
         }
@@ -400,7 +400,7 @@ async function transitionToLevelup() {
             const data = await resp.json();
             if (data.url) {
                 window.__valdoria_transitioning = true;
-                window.location.replace(data.url);
+                valdoriaSpaNav(data.url);
                 return;
             }
         }
@@ -434,7 +434,7 @@ async function transitionToInventoryFromArena() {
             const data = await resp.json();
             if (data.url) {
                 window.__valdoria_transitioning = true;
-                window.location.replace(data.url);
+                valdoriaSpaNav(data.url);
                 return;
             }
         }
@@ -1060,7 +1060,7 @@ function renderTimerBar(s) {
     </div>`;
 }
 
-let _timerDeadline = 0; // Absolute timestamp (ms) when timer expires
+var _timerDeadline = 0; // Absolute timestamp (ms) when timer expires
 
 function startTimer(seconds) {
     stopTimer();
@@ -1199,7 +1199,7 @@ function _getPollInterval() {
     return currentState.active_turn.type === 'player' ? 8000 : 2000;
 }
 
-let _pollFailures = 0;
+var _pollFailures = 0;
 
 function startPolling() {
     stopPolling();
@@ -1645,12 +1645,12 @@ function _showProceedBar() {
 }
 
 // ─── DAMAGE-TYPE FLASH CLASS HELPER ───
-const _DMG_FLASH_TYPES = new Set(['fire','cold','lightning','necrotic','radiant','poison','acid','psychic','thunder']);
+var _DMG_FLASH_TYPES = new Set(['fire','cold','lightning','necrotic','radiant','poison','acid','psychic','thunder']);
 
 // ─── UTILS ───
 // ─── ERROR DISPLAY ───
 // showError provided by shared/error-reporter.js — keep combat-specific cleanup
-const _origShowError = window.showError;
+var _origShowError = window.showError;
 window.showError = function (msg, err) {
     _actionSent = false;
     document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('disabled'));

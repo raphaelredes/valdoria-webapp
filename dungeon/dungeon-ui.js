@@ -122,12 +122,12 @@ function closeBossReveal() {
 }
 
 // ── Dungeon ambient particles ──
-let _dPartCanvas = null;
-let _dPartCtx = null;
-let _dParticles = [];
-let _dPartRaf = null;
+var _dPartCanvas = null;
+var _dPartCtx = null;
+var _dParticles = [];
+var _dPartRaf = null;
 
-const BIOME_PARTICLES = {
+var BIOME_PARTICLES = {
     cave:     { color: [140, 130, 120], count: 12, speed: 0.15, size: [1, 2] },
     swamp:    { color: [80, 120, 80],   count: 10, speed: 0.1, size: [1, 2.5] },
     volcanic: { color: [220, 120, 40],  count: 14, speed: 0.5, size: [1.5, 3] },

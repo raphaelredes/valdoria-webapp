@@ -258,7 +258,7 @@ function renderReactionBar(acts, player, toastHtml) {
 
 
 // ─── EXPAND / COLLAPSE (accordion) — event delegation to avoid listener leaks ───
-let _expandDelegated = false;
+var _expandDelegated = false;
 function bindExpandCollapse() {
     if (_expandDelegated) return;
     _expandDelegated = true;
@@ -434,8 +434,8 @@ function _showActionLoading(show) {
 }
 
 // ─── SEND ACTION ───
-let _actionSent = false;
-let _actionSentTimer = null;
+var _actionSent = false;
+var _actionSentTimer = null;
 async function sendAction(actionData) {
     if (_actionSent || _cinematicInProgress) return;
     haptic('medium');

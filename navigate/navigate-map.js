@@ -3,7 +3,7 @@
 // Hand-drawn medieval cartography: ink on dark parchment
 // ===============================================================
 
-const NS = 'http://www.w3.org/2000/svg';
+var NS = 'http://www.w3.org/2000/svg';
 
 function srand(seed) {
     let x = Math.sin(seed * 9301 + 49297) * 49297;
@@ -11,14 +11,14 @@ function srand(seed) {
 }
 
 // Ink color constants (dark parchment palette)
-const INK = '#8a6a3a';        // Sepia ink (main strokes)
-const INK_DARK = '#3a2810';   // Dark brown ink (hatching, details)
-const INK_LIGHT = '#a08050';  // Light sepia (subtle marks)
-const PARCHMENT = '#6a5a42';  // Land parchment (warmer, lighter base)
-const MAP_BG = '#2a2420';     // Dark background outside the map
+var INK = '#8a6a3a';        // Sepia ink (main strokes)
+var INK_DARK = '#3a2810';   // Dark brown ink (hatching, details)
+var INK_LIGHT = '#a08050';  // Light sepia (subtle marks)
+var PARCHMENT = '#6a5a42';  // Land parchment (warmer, lighter base)
+var MAP_BG = '#2a2420';     // Dark background outside the map
 
 // Parchment paper outline (roughly rectangular with worn/torn edges)
-const LANDMASS_POINTS = (() => {
+var LANDMASS_POINTS = (() => {
     const m = 18;
     const w = 733, h = 720;
     const pts = [];
@@ -72,7 +72,7 @@ const LANDMASS_POINTS = (() => {
 })();
 
 // Cache: landmass path string is deterministic and called 4+ times per render
-let _cachedLandmassPath = null;
+var _cachedLandmassPath = null;
 function _landmassPath() {
     if (_cachedLandmassPath) return _cachedLandmassPath;
     const p = LANDMASS_POINTS;
@@ -94,7 +94,7 @@ function _landmassPath() {
 
 // Grid-based cache for _pointInLandmass — avoids repeated ray-cast over 112 polygon vertices.
 // Grid cells are 10px wide; each cell is tested once and cached.
-const _landmassGrid = new Map();
+var _landmassGrid = new Map();
 
 function _pointInLandmass(px, py) {
     // Quantize to 10px grid for cache lookup
@@ -118,15 +118,15 @@ function _pointInLandmassRaw(px, py) {
 }
 
 // River paths
-const RIVER_PATHS = [
+var RIVER_PATHS = [
     { pts: [[300,55],[275,105],[245,165],[215,240],[225,300],[245,350],[265,385]], w: 1.8 },
     { pts: [[475,210],[468,270],[462,330],[468,385],[478,430],[488,465]], w: 1.4 },
 ];
 
 
 // Fog state cache — invalidated by _invalidateMapCaches()
-let _cachedFogState = null;
-let _prevFogState = null; // Track previous state for reveal animations
+var _cachedFogState = null;
+var _prevFogState = null; // Track previous state for reveal animations
 
 function computeFogState(forceRecompute) {
     if (_cachedFogState && !forceRecompute) return _cachedFogState;
@@ -404,13 +404,13 @@ function _buildAllDefs(defs) {
 // ===============================================================
 
 // Discrete zoom levels: [full map, region, area, local]
-const ZOOM_LEVELS = [
+var ZOOM_LEVELS = [
     { zoom: 0.85, label: 'Mapa',       turnsPerBar: 8 },
     { zoom: 1.15, label: 'Região',     turnsPerBar: 4 },
     { zoom: 1.6,  label: 'Área',       turnsPerBar: 2 },
     { zoom: 2.2,  label: 'Local',      turnsPerBar: 1 },
 ];
-let _zoomIdx = 1; // Default to "Região" level
+var _zoomIdx = 1; // Default to "Região" level
 
 function _snapToZoomLevel(dir, focalX, focalY) {
     const oldZoom = S.zoom;
@@ -454,7 +454,7 @@ function _updateScaleBar() {
     if (ticks) ticks.style.width = BAR_PX + 'px';
 }
 
-let _panZoomInitialized = false;
+var _panZoomInitialized = false;
 function setupPanZoom() {
     const vp = document.getElementById('map-viewport');
     const wr = document.getElementById('map-wrapper');
@@ -635,8 +635,8 @@ function panToLocationSmooth(locId) {
 // MINIMAP — Compact overview (visible at zoom >= Área)
 // ===============================================================
 
-let _mmFadeTimer = null;
-let _mmClickBound = false;
+var _mmFadeTimer = null;
+var _mmClickBound = false;
 
 function _initMinimap() {
     const mm = document.getElementById('minimap');
@@ -745,7 +745,7 @@ function playArrivalAnimation() {
 // ===============================================================
 
 // Compute average px/turn from actual connection data (cached)
-let _cachedPxPerTurn = 0;
+var _cachedPxPerTurn = 0;
 function _getAvgPxPerTurn() {
     if (_cachedPxPerTurn > 0) return _cachedPxPerTurn;
     let totalPxPerTurn = 0, count = 0;
@@ -797,7 +797,7 @@ function _el(tag, attrs) {
     if (attrs) for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
     return el;
 }
-const createSVG = _el;
+var createSVG = _el;
 
 
 // ── Fog boundary shimmer (SVG overlay at explored/unknown border) ──

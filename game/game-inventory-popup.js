@@ -1,0 +1,197 @@
+/* =========================================================
+   GAME INVENTORY POPUP - Bridge module
+   Lazy-loads inventory scripts, manages fullscreen overlay,
+   adapts inventory to work inside Game Hub.
+   ========================================================= */
+
+(function() {
+    var _loaded = false;
+    var _loading = false;
+    var _overlay = null;
+
+    var INV_CSS = ['../inventory/inventory.css'];
+    var INV_JS = [
+        '../shared/fetch-utils.js',
+        '../inventory/inventory.js',
+        '../inventory/inventory-tabs.js',
+        '../inventory/inventory-details.js',
+        '../inventory/inventory-actions.js'
+    ];
+
+    function _loadCSS(href) {
+        var existing = document.querySelector('link[href*="inventory.css"]');
+        if (existing) return;
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href + '?v=' + Date.now();
+        link.onload = function() {
+            document.body.classList.add('inv-css-loaded');
+        };
+        document.head.appendChild(link);
+    }
+
+    function _loadScripts(srcs, cb) {
+        var loaded = 0;
+        var total = srcs.length;
+        function next() {
+            if (loaded >= total) { cb(); return; }
+            var s = document.createElement('script');
+            s.src = srcs[loaded] + '?v=' + Date.now();
+            s.onload = function() { loaded++; next(); };
+            s.onerror = function() {
+                console.error('[INV-POPUP] Failed to load:', srcs[loaded]);
+                loaded++; next();
+            };
+            document.head.appendChild(s);
+        }
+        next();
+    }
+
+    function _ensureLoaded(cb) {
+        if (_loaded) { cb(); return; }
+        if (_loading) {
+            var _check = setInterval(function() {
+                if (_loaded) { clearInterval(_check); cb(); }
+            }, 50);
+            return;
+        }
+        _loading = true;
+        window._invPopupMode = true;
+        INV_CSS.forEach(_loadCSS);
+        _loadScripts(INV_JS, function() {
+            _loaded = true;
+            _loading = false;
+            document.body.classList.add('inv-css-loaded');
+            cb();
+        });
+    }
+
+    window.showInventoryPopup = function(data) {
+        _overlay = document.getElementById('inventory-overlay');
+        if (!_overlay) {
+            console.error('[INV-POPUP] Overlay element not found');
+            return;
+        }
+        _overlay.classList.remove('hiding');
+        _overlay.classList.add('active');
+        var loadingEl = document.getElementById('inv-popup-loading');
+        if (loadingEl) loadingEl.style.display = 'flex';
+
+        // Hide Game Hub bottom panel while inventory is open
+        var ghPanel = document.getElementById('bottom-panel');
+        if (ghPanel) ghPanel.style.display = 'none';
+        var ghToggle = document.getElementById('immersive-toggle');
+        if (ghToggle) ghToggle.style.display = 'none';
+        var ghRestore = document.getElementById('immersive-restore');
+        if (ghRestore) ghRestore.style.display = 'none';
+
+        if (data) {
+            _ensureLoaded(function() { _initInventory(data, loadingEl); });
+        } else {
+            _fetchInventoryData(function(payload) {
+                if (!payload) {
+                    hideInventoryPopup();
+                    if (typeof showToast === 'function') showToast('Erro ao carregar mochila', 2000);
+                    return;
+                }
+                _ensureLoaded(function() { _initInventory(payload, loadingEl); });
+            });
+        }
+    };
+
+    function _fetchInventoryData(cb) {
+        if (!window.S || !S.apiBase || !S.token) {
+            console.error('[INV-POPUP] No API session');
+            cb(null);
+            return;
+        }
+        var url = S.apiBase + '/api/game/inventory?user_id=' + S.uid;
+        var headers = { 'Authorization': 'Bearer ' + S.token };
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+            headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+        }
+        fetch(url, { headers: headers })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) { console.error('[INV-POPUP] API error:', data.error); cb(null); }
+                else { cb(data.inventory_popup || null); }
+            })
+            .catch(function(e) { console.error('[INV-POPUP] Fetch error:', e); cb(null); });
+    }
+
+    function _initInventory(data, loadingEl) {
+        // Override API credentials to use Game Hub session
+        if (window.S) {
+            window._apiBase = S.apiBase || '';
+            window._apiToken = S.token || '';
+            window._apiUid = String(S.uid || '');
+            window._returnTo = 'game';
+        }
+        // Set decoded data and reset state
+        window.D = data;
+        window.activeTab = 'items';
+        window.activeFilter = 'all';
+        window.searchQuery = '';
+        window.sortMode = 'default';
+        window.pendingOps = [];
+        window.selectionMode = false;
+        window.selectedItems = new Set();
+        window.activeTarget = 'player';
+
+        // Init local state from payload
+        window.localEq = Object.assign({}, data.eq || {});
+        window.localInv = (data.inv || []).map(function(i) { return Object.assign({}, i); });
+        window.localGold = data.p ? data.p.g || 0 : 0;
+        window.localHP = data.p ? data.p.hp || 0 : 0;
+        window.localMP = data.p ? data.p.mp || 0 : 0;
+        window.localPotions = data.p ? data.p.pot || 0 : 0;
+        window.localFavs = data.fav ? data.fav.slice() : [];
+        window.localLocked = data.lck ? data.lck.slice() : [];
+        window.localGems = {};
+        if (data.gems) {
+            for (var k in data.gems) window.localGems[k] = data.gems[k].slice();
+        }
+        window.localRunes = data.runes ? Object.assign({}, data.runes) : {};
+        window.localAllyEq = {};
+        if (data.allies) {
+            for (var i = 0; i < data.allies.length; i++) {
+                var a = data.allies[i];
+                window.localAllyEq[a.id] = Object.assign({}, a.eq || {});
+            }
+        }
+        // Hide loading
+        if (loadingEl) loadingEl.style.display = 'none';
+        // Render inventory UI
+        if (typeof window.updateHeader === 'function') window.updateHeader();
+        if (typeof window.buildTabs === 'function') window.buildTabs();
+        if (typeof window.renderTab === 'function') window.renderTab();
+        if (typeof window._initViewedItems === 'function') window._initViewedItems();
+        if (typeof window._initLongPress === 'function') window._initLongPress();
+        if (typeof window._initTabSwipe === 'function') window._initTabSwipe();
+        // Skip updateBottomPadding in popup mode (body padding not needed)
+    }
+
+    window.hideInventoryPopup = function() {
+        if (!_overlay) return;
+        _overlay.classList.add('hiding');
+        _overlay.classList.remove('active');
+        setTimeout(function() {
+            if (_overlay) {
+                _overlay.classList.remove('hiding');
+            }
+            // Restore Game Hub bottom panel
+            var ghPanel = document.getElementById('bottom-panel');
+            if (ghPanel) ghPanel.style.display = '';
+            var ghToggle = document.getElementById('immersive-toggle');
+            if (ghToggle) ghToggle.style.display = '';
+            var ghRestore = document.getElementById('immersive-restore');
+            if (ghRestore) ghRestore.style.display = '';
+            // Refresh Game Hub state
+            if (typeof window.fetchState === 'function') window.fetchState();
+        }, 250);
+    };
+
+    window.isInventoryPopupOpen = function() {
+        return _overlay && _overlay.classList.contains('active');
+    };
+})();

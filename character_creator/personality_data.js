@@ -1,6 +1,6 @@
 // Personality options per background (D&D 5e PHB Chapter 4)
 // All texts are ORIGINAL — inspired by D&D themes but not copied from PHB.
-const PERSONALITY_DATA = {
+var PERSONALITY_DATA = {
     soldier: {
         traits:['Encaro cada desafio de frente, como faria num campo de batalha.','Mantenho disciplina rígida e acordo antes do amanhecer.','Conto histórias de guerra que deixam todos boquiabertos.','Avalio cada situação como um estrategista, buscando vantagem tática.'],
         ideals:['Honra — Minha palavra é meu escudo.','Proteção — Os fracos dependem de quem tem força.','Glória — Busco feitos que ecoem por gerações.','Disciplina — A ordem mantém o caos à distância.'],

@@ -19,7 +19,7 @@
  *   // For non-async (toggle) actions — debounce only, no lock:
  *   if (!actionGuard.debounce()) return;
  */
-const actionGuard = (() => {
+var actionGuard = (() => {
     'use strict';
 
     let _busy = false;

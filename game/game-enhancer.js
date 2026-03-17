@@ -5,10 +5,10 @@
    Zero server changes — purely client-side post-processing.
    ═══════════════════════════════════════════════════════════════ */
 
-const _COLOR_SQUARES = new Set(['🟩', '🟨', '🟧', '🟥', '🟦', '🟪']);
+var _COLOR_SQUARES = new Set(['🟩', '🟨', '🟧', '🟥', '🟦', '🟪']);
 
 // Biome detection from location header icons
-const _ICON_TO_BIOME = {
+var _ICON_TO_BIOME = {
     '🏔': 'mountain', '⛰': 'mountain',
     '🌲': 'forest', '🌳': 'forest', '🍃': 'forest',
     '🐍': 'swamp', '🌿': 'swamp',
@@ -31,34 +31,34 @@ function _detectBiome(text) {
 
 // ── Pattern detectors ───────────────────────────────────────────
 
-const _RE_HEADER_DIV   = /⚜️\s*[═]{4,}\s*⚜️/;
-const _RE_FOOTER_DIV   = /💎\s*[━]{4,}\s*💎/;
-const _RE_PLAIN_SEP    = /^[━]{6,}$/;
-const _RE_DOTTED_SEP   = /^[┄]{6,}$/;
-const _RE_BOLD_TITLE   = /^<b>.*<\/b>$/;
-const _RE_CHAR_LINE    = /^👤\s/;
-const _RE_CHAR_META    = /^(?:🏷️|💎)\s.*·/;
-const _RE_STATS_LINE   = /^🛡/.test.bind(/^🛡/);
-const _RE_RESOURCE     = /💰/.test.bind(/💰/);
-const _RE_PARTY_HDR    = /^━\s*<b>.*GRUPO.*<\/b>\s*━/i;
-const _RE_NOTIF        = /^📬/;
-const _RE_SOCIAL_PULSE = /^👥\s/;
-const _RE_BANNER_LINK  = /^<a\s+href="[^"]*">\s*\u200b?\s*<\/a>$/;
+var _RE_HEADER_DIV   = /⚜️\s*[═]{4,}\s*⚜️/;
+var _RE_FOOTER_DIV   = /💎\s*[━]{4,}\s*💎/;
+var _RE_PLAIN_SEP    = /^[━]{6,}$/;
+var _RE_DOTTED_SEP   = /^[┄]{6,}$/;
+var _RE_BOLD_TITLE   = /^<b>.*<\/b>$/;
+var _RE_CHAR_LINE    = /^👤\s/;
+var _RE_CHAR_META    = /^(?:🏷️|💎)\s.*·/;
+var _RE_STATS_LINE   = /^🛡/.test.bind(/^🛡/);
+var _RE_RESOURCE     = /💰/.test.bind(/💰/);
+var _RE_PARTY_HDR    = /^━\s*<b>.*GRUPO.*<\/b>\s*━/i;
+var _RE_NOTIF        = /^📬/;
+var _RE_SOCIAL_PULSE = /^👥\s/;
+var _RE_BANNER_LINK  = /^<a\s+href="[^"]*">\s*\u200b?\s*<\/a>$/;
 // Date/weather line: emoji? HH:MM | DD de Month, Ano NNN | weather
-const _RE_DATE_LINE    = /^.{0,2}\s*\d{1,2}:\d{2}\s*\|.*Ano\s+\d/;
-const _RE_FLAVOR_WRAP  = /^<i>[^<]+<\/i>$/;
-const _RE_DEPARTURE    = /^📜\s*<i>/;
-const _RE_BAR_START    = /^(?:🎲\s?)?[🟩🟨🟧🟥🟦🟪⬛]/u;
-const _RE_SUBTITLE     = /^(?:\u{1F4CD}|\u{1F7E2}|\u{1F7E1}|\u{1F7E0}|\u{1F534}|\u26A0|\u{1F6A9})\uFE0F?\s/u;
+var _RE_DATE_LINE    = /^.{0,2}\s*\d{1,2}:\d{2}\s*\|.*Ano\s+\d/;
+var _RE_FLAVOR_WRAP  = /^<i>[^<]+<\/i>$/;
+var _RE_DEPARTURE    = /^📜\s*<i>/;
+var _RE_BAR_START    = /^(?:🎲\s?)?[🟩🟨🟧🟥🟦🟪⬛]/u;
+var _RE_SUBTITLE     = /^(?:\u{1F4CD}|\u{1F7E2}|\u{1F7E1}|\u{1F7E0}|\u{1F534}|\u26A0|\u{1F6A9})\uFE0F?\s/u;
 
 // v3: Section headers, attribute pairs, combat formulas, ally cards
-const _RE_SECTION_HDR  = /^(📊|⚔️|📖|🌟|⚠️|📜)\s+(ATRIBUTOS|COMBATE|FEITOS|HABILIDADES)/i;
-const _RE_ATTR_PAIR    = /^[💪⚡🧱🧠🦉🎭].*\([+-]\d+\).*\|.*\([+-]\d+\)/;
-const _RE_COMBAT_FORMULA = /^[🛡🎯💥📋].*└/;
-const _RE_COMBAT_STAT  = /^📋.*Prof/;
-const _RE_DEAD_ALLY    = /^💀\s/;
-const _RE_ALLY_IDENT   = /^(?:⚔️|🧙‍♂️|🗡️|⚕️|🛡️|🏹|🪓|🎻|🌿|🙏|🔮|👁️|👤)\s/;
-const _RE_ALLY_LEVEL   = /^(?:Lvl|N\u00edvel)\s+\d+\s+\S/;
+var _RE_SECTION_HDR  = /^(📊|⚔️|📖|🌟|⚠️|📜)\s+(ATRIBUTOS|COMBATE|FEITOS|HABILIDADES)/i;
+var _RE_ATTR_PAIR    = /^[💪⚡🧱🧠🦉🎭].*\([+-]\d+\).*\|.*\([+-]\d+\)/;
+var _RE_COMBAT_FORMULA = /^[🛡🎯💥📋].*└/;
+var _RE_COMBAT_STAT  = /^📋.*Prof/;
+var _RE_DEAD_ALLY    = /^💀\s/;
+var _RE_ALLY_IDENT   = /^(?:⚔️|🧙‍♂️|🗡️|⚕️|🛡️|🏹|🪓|🎻|🌿|🙏|🔮|👁️|👤)\s/;
+var _RE_ALLY_LEVEL   = /^(?:Lvl|N\u00edvel)\s+\d+\s+\S/;
 
 function _isSubtitleLine(line) {
     return _RE_SUBTITLE.test(line);

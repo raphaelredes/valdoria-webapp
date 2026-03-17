@@ -158,7 +158,7 @@ function renderItemsTab(c) {
     c.innerHTML = html;
 }
 
-let _searchTimer = null;
+var _searchTimer = null;
 function onSearch(val) {
     clearTimeout(_searchTimer);
     const clearBtn = document.getElementById('searchClear');

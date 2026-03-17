@@ -6,15 +6,15 @@
 
 // ── Mood Constants ───────────────────────────────────────────
 
-const MOOD_ICONS = {
+var MOOD_ICONS = {
     happy: '\u{1F60A}', angry: '\u{1F620}', sad: '\u{1F614}',
     busy: '\u{1F610}', neutral: '\u{1F5E3}'
 };
-const MOOD_LABELS = {
+var MOOD_LABELS = {
     happy: 'Amig\u00e1vel', angry: 'Irritado', sad: 'Melanc\u00f3lico',
     busy: 'Ocupado', neutral: ''
 };
-const MOOD_GRADIENTS = {
+var MOOD_GRADIENTS = {
     happy: 'radial-gradient(ellipse at 50% 0%, #3a3225 0%, var(--v-bg) 70%)',
     angry: 'radial-gradient(ellipse at 50% 0%, #352028 0%, var(--v-bg) 70%)',
     sad: 'radial-gradient(ellipse at 50% 0%, #2a2a30 0%, var(--v-bg) 70%)',
@@ -24,10 +24,10 @@ const MOOD_GRADIENTS = {
 
 // ── Typewriter State ─────────────────────────────────────────
 
-let _twInterval = null;
-let _twCallback = null;
-let _twElement = null;
-let _twFullText = '';
+var _twInterval = null;
+var _twCallback = null;
+var _twElement = null;
+var _twFullText = '';
 
 // ── Main Render Function ─────────────────────────────────────
 

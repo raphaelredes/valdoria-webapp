@@ -1,6 +1,6 @@
 /* explore-tutorial.js — Tutorial de Exploração */
 
-const TUTORIAL_STEPS = [
+var TUTORIAL_STEPS = [
     { target: '#iso-map', title: 'Mapa de Exploração', text: 'Este é o mapa hexagonal. Toque nos hexágonos adjacentes ao seu personagem para se mover.', position: 'center', icon: '🗺️',
       illust: '<div class="ti-hex-grid"><svg viewBox="0 0 140 80" width="140" height="80"><polygon points="40,10 55,2 70,10 70,26 55,34 40,26" fill="none" stroke="rgba(196,149,58,0.3)" stroke-width="1"/><polygon points="40,34 55,26 70,34 70,50 55,58 40,50" fill="none" stroke="rgba(196,149,58,0.3)" stroke-width="1"/><polygon points="70,10 85,2 100,10 100,26 85,34 70,26" fill="none" stroke="rgba(196,149,58,0.3)" stroke-width="1"/><polygon points="70,34 85,26 100,34 100,50 85,58 70,50" fill="rgba(196,149,58,0.08)" stroke="rgba(196,149,58,0.5)" stroke-width="1.5"/><polygon points="55,50 70,42 85,50 85,66 70,74 55,66" fill="none" stroke="rgba(196,149,58,0.3)" stroke-width="1"/><circle cx="85" cy="42" r="4" fill="#c4953a"><animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/></circle></svg></div>' },
     { target: '#hud', title: 'Barra de Status', text: 'Aqui você vê o nome do personagem, vida (HP), XP e ouro acumulados, hora do dia e clima.', position: 'below', icon: '❤️',
@@ -22,11 +22,11 @@ const TUTORIAL_STEPS = [
     { target: '#map-viewport', title: 'Boa Exploração!', text: 'Descanse em acampamentos para recuperar vida, use itens do inventário e fique atento à exaustão. Que Valdoria revele seus segredos a você!', position: 'center', icon: '⚔️' }
 ];
 
-const TUTORIAL_STORAGE_KEY = 'valdoria_explore_tutorial_seen';
-let _tutorialStep = 0;
-let _tutorialActive = false;
-let _tutorialOverlay = null;
-let _tutorialPendingActivity = false;
+var TUTORIAL_STORAGE_KEY = 'valdoria_explore_tutorial_seen';
+var _tutorialStep = 0;
+var _tutorialActive = false;
+var _tutorialOverlay = null;
+var _tutorialPendingActivity = false;
 
 function shouldShowTutorial() {
     try { return !localStorage.getItem(TUTORIAL_STORAGE_KEY); }

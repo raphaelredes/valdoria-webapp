@@ -58,7 +58,7 @@ var HAZARD_NARRATIONS = {
 // 3D DICE MANAGER (shared Dice3D instance for check overlays)
 // ═══════════════════════════════════════════════════════
 
-let _dice3d = null;
+var _dice3d = null;
 
 function getDice3D() {
     const container = document.getElementById('dice3d-canvas');
@@ -542,7 +542,7 @@ function showAmbientEvent(poi) {
 // Splits text on '|' delimiter into pages. If no delimiter, auto-splits
 // long text at sentence boundaries to keep each page readable.
 // Shows a "Continuar..." button between pages, then calls onDone after the last.
-const _NARR_PAGE_MAX = 160; // Max chars per auto-page (fits dm-card on 390px)
+var _NARR_PAGE_MAX = 160; // Max chars per auto-page (fits dm-card on 390px)
 
 function _splitNarrationPages(text) {
     if (!text) return [''];
@@ -1353,7 +1353,7 @@ function _showCombatOverlay(combat, enemyName) {
 }
 
 // Post-combat narrative (brief toast after returning from combat, biome-aware)
-const POST_COMBAT_NARRATIONS = {
+var POST_COMBAT_NARRATIONS = {
     forest: [
         'O silêncio retorna à floresta. Pássaros voltam a cantar.',
         'Folhas caem sobre o campo de batalha como um véu fúnebre.',
@@ -1482,7 +1482,7 @@ async function transitionToArena() {
                 const data = await resp.json();
                 if (data.url) {
                     window.__valdoria_transitioning = true;
-                    window.location.replace(data.url);
+                    valdoriaSpaNav(data.url);
                     return;
                 }
             }
@@ -1538,7 +1538,7 @@ async function transitionToInventory() {
                 const data = await resp.json();
                 if (data.url) {
                     window.__valdoria_transitioning = true;
-                    window.location.replace(data.url);
+                    valdoriaSpaNav(data.url);
                     return;
                 }
             }
@@ -1787,7 +1787,7 @@ function showDMIntro(text) {
 // ═══════════════════════════════════════════════════════
 
 // Terrain toast color themes
-const TOAST_STYLES = {
+var TOAST_STYLES = {
     difficult: 'background:rgba(220,160,40,0.2);border:1px solid rgba(220,160,40,0.4);color:#dca028',
     ranger: 'background:rgba(68,170,100,0.2);border:1px solid rgba(68,170,100,0.4);color:#4aa664',
     damage: 'background:rgba(180,60,60,0.18);border:1px solid rgba(180,60,60,0.35);color:#b55',
@@ -1797,7 +1797,7 @@ const TOAST_STYLES = {
 };
 
 // Toast category mapping for calcReadTime
-const _TOAST_TIMING = { damage: 'toast-warn', danger: 'toast-warn', condition: 'toast-warn', flavor: 'toast' };
+var _TOAST_TIMING = { damage: 'toast-warn', danger: 'toast-warn', condition: 'toast-warn', flavor: 'toast' };
 
 // Compact toast notification for terrain effects
 
@@ -1870,7 +1870,7 @@ function flashScreen(color) {
 
 
 // Animated version: shows 3D dice roll, then calls onDone(heal)
-let _healDice = null;
+var _healDice = null;
 function useInventoryItemAnimated(item, onDone) {
     if (!item || item.q <= 0) { if (onDone) onDone(0); return; }
     // Parse formula to get die type
@@ -2002,7 +2002,7 @@ function getFoodItems() {
 }
 
 // ═══════════════════════════════════════════════════════
-let _finishSent = false;
+var _finishSent = false;
 
 function finishExploration(reason) {
     if (_finishSent) return;
@@ -2094,18 +2094,18 @@ async function _transitionToGameFromExplore(payload) {
                 console.error('[EXPLORE] Auth error on game transition:', r.status);
                 if (window.Telegram?.WebApp?.sendData) {
                     Telegram.WebApp.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'EXPLORE', reason: 'session_expired' }));
-                    setTimeout(function () { if (Telegram.WebApp.close) Telegram.WebApp.close(); }, 1000);
+                    setTimeout(function () { valdoriaSpaClose(); }, 1000);
                     return;
                 }
                 break;
             }
             const d = await r.json();
             window.__valdoria_transitioning = true;
-            if (d.url) { window.location.replace(d.url); return; }
+            if (d.url) { valdoriaSpaNav(d.url); return; }
         } catch (e) { console.error('[EXPLORE] transition error (attempt ' + attempt + '):', e); }
     }
     // Fallback: close WebApp and let user tap JOGAR from Telegram
-    if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.close(); }
+    valdoriaSpaClose();
 }
 
 async function _transitionToNavigateFromExplore(payload) {
@@ -2127,18 +2127,18 @@ async function _transitionToNavigateFromExplore(payload) {
                 console.error('[EXPLORE] Auth error on navigate transition:', r.status);
                 if (window.Telegram?.WebApp?.sendData) {
                     Telegram.WebApp.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'EXPLORE', reason: 'session_expired' }));
-                    setTimeout(function () { if (Telegram.WebApp.close) Telegram.WebApp.close(); }, 1000);
+                    setTimeout(function () { valdoriaSpaClose(); }, 1000);
                     return;
                 }
                 break;
             }
             const d = await r.json();
             window.__valdoria_transitioning = true;
-            if (d.url) { window.location.replace(d.url); return; }
+            if (d.url) { valdoriaSpaNav(d.url); return; }
         } catch (e) { console.error('[EXPLORE] navigate transition error (attempt ' + attempt + '):', e); }
     }
     // Fallback: close WebApp
-    if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.close(); }
+    valdoriaSpaClose();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2173,9 +2173,9 @@ async function zlibInflate(data) {
 // ═══════════════════════════════════════════════════════
 // HEALTH CHECK
 // ═══════════════════════════════════════════════════════
-const _EXPLORE_HEALTH_RETRIES = 3;
-const _EXPLORE_HEALTH_RETRY_MS = 1500;
-const _EXPLORE_HEALTH_TIMEOUT = 8000;
+var _EXPLORE_HEALTH_RETRIES = 3;
+var _EXPLORE_HEALTH_RETRY_MS = 1500;
+var _EXPLORE_HEALTH_TIMEOUT = 8000;
 
 async function _exploreHealthCheck() {
     const url = `${S.apiBase}/api/game/health`;
@@ -2426,7 +2426,7 @@ async function initAsync() {
 }
 
 // Start
-document.addEventListener('DOMContentLoaded', () => initAsync());
+if (!window.__spaRouteName) { document.addEventListener('DOMContentLoaded', () => initAsync()); }
 
 
 // ═══════════════════════════════════════════════════════════
@@ -2435,7 +2435,7 @@ document.addEventListener('DOMContentLoaded', () => initAsync());
 
 // ── Environmental Storytelling (Flavor Texts) ────────────
 
-const _BIOME_FLAVOR = {
+var _BIOME_FLAVOR = {
     cave: [
         'Gotas d\'agua ecoam no escuro...',
         'O ar e umido e frio. Musgo cobre as pedras.',
@@ -2497,9 +2497,9 @@ const _BIOME_FLAVOR = {
 };
 
 // Flavor text cooldown and tracking
-let _flavorCooldown = 0;
-const _FLAVOR_CHANCE = 0.12; // 12% chance per step
-const _FLAVOR_COOLDOWN_STEPS = 6; // Min 6 steps between flavor texts
+var _flavorCooldown = 0;
+var _FLAVOR_CHANCE = 0.12; // 12% chance per step
+var _FLAVOR_COOLDOWN_STEPS = 6; // Min 6 steps between flavor texts
 
 function checkFlavorText(col, row) {
     if (_flavorCooldown > 0) { _flavorCooldown--; return; }

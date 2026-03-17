@@ -3,11 +3,11 @@
 // Inspired by the world map (navigate) fog system
 // =====================================================
 
-let _fogCanvas = null;
-let _fogCtx = null;
-let _fogReveals = []; // Active reveal animations {cx, cy, progress, maxRadius}
+var _fogCanvas = null;
+var _fogCtx = null;
+var _fogReveals = []; // Active reveal animations {cx, cy, progress, maxRadius}
 
-const FOG_COLOR = '#2a2420'; // Warm dark brown (matches medieval theme)
+var FOG_COLOR = '#2a2420'; // Warm dark brown (matches medieval theme)
 
 // Deterministic pseudo-random (same seed = same result, no flicker)
 function _fogSrand(seed) {

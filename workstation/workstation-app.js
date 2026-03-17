@@ -39,7 +39,7 @@ var _spaP = window.__spaRouteParams || {};
                         body: JSON.stringify({ from: 'workstation', to: _wsReturn, user_id: parseInt(_wsUid), payload: {} })
                     });
                     const d = await r.json();
-                    if (d.url) { window.location.replace(d.url); return; }
+                    if (d.url) { valdoriaSpaNav(d.url); return; }
                 } catch (e) { console.error('[WORKSTATION] transition error:', e); }
             }
             try { if (tg) tg.close(); } catch (e) { console.warn('[WORKSTATION] tg.close:', e); }

@@ -1,15 +1,15 @@
 // ═══════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════
-let COLS = 11, ROWS = 13;
-const IMPASSABLE = new Set(['W', 'M', 'L', '#', 'D']);
+var COLS = 11, ROWS = 13;
+var IMPASSABLE = new Set(['W', 'M', 'L', '#', 'D']);
 
 // Hex neighbors (odd-r offset)
-const EVEN_OFFSETS = [[-1, -1], [0, -1], [-1, 0], [1, 0], [-1, 1], [0, 1]];
-const ODD_OFFSETS = [[0, -1], [1, -1], [-1, 0], [1, 0], [0, 1], [1, 1]];
+var EVEN_OFFSETS = [[-1, -1], [0, -1], [-1, 0], [1, 0], [-1, 1], [0, 1]];
+var ODD_OFFSETS = [[0, -1], [1, -1], [-1, 0], [1, 0], [0, 1], [1, 1]];
 
 // Full Portuguese names for dice animation display
-const STAT_NAMES = {
+var STAT_NAMES = {
     str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma',
     atl: 'Atletismo', acr: 'Acrobacia', slh: 'Prestidigitação', stl: 'Furtividade',
     arc: 'Arcanismo', his: 'História', inv: 'Investigação', nat: 'Natureza', rel: 'Religião',
@@ -18,19 +18,19 @@ const STAT_NAMES = {
     itm: 'Intimidação', prf: 'Atuação', prs: 'Persuasão',
 };
 // Compact 3-letter codes for button badges
-const STAT_SHORT = {
+var STAT_SHORT = {
     str: 'FOR', dex: 'DES', con: 'CON', int: 'INT', wis: 'SAB', cha: 'CAR',
     atl: 'ATL', acr: 'ACR', slh: 'PRE', stl: 'FUR', arc: 'ARC', his: 'HIS',
     inv: 'INV', nat: 'NAT', rel: 'REL', anh: 'ANI', ins: 'ITU', med: 'MED',
     per: 'PER', sur: 'SOB', dec: 'ENG', itm: 'ITM', prf: 'ATU', prs: 'PRS',
 };
 
-const POI_TYPE_LABELS = { dis: 'Descoberta', sea: 'Busca', dan: 'Perigo', mys: 'Mistério', npc: 'Encontro' };
+var POI_TYPE_LABELS = { dis: 'Descoberta', sea: 'Busca', dan: 'Perigo', mys: 'Mistério', npc: 'Encontro' };
 
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
-let S = {
+var S = {
     grid: [],         // 2D array [row][col]
     pois: [],         // POI data
     biome: 'forest',
@@ -78,9 +78,9 @@ let S = {
     _lowHPAlertShown: false, // Prevent repeated low HP alerts
 };
 
-let tg = null;
+var tg = null;
 // Per-character localStorage key (set in initCharKey from URL ?char= param)
-let STORAGE_KEY = 'valdoria_explore_state';
+var STORAGE_KEY = 'valdoria_explore_state';
 
 function initCharKey() {
     const charId = (window.__spaRouteParams || {}).char || new URLSearchParams(window.location.search).get('char') || '';
@@ -547,7 +547,7 @@ function updateRewards() {
     updateXPBar();
 }
 
-const _STEP_MILESTONES = {
+var _STEP_MILESTONES = {
     10: 'Seus passos ganham confiança nesta terra.',
     25: 'A paisagem revela seus segredos a você.',
     50: 'Poucos exploradores chegam tão longe.',
@@ -645,7 +645,7 @@ function hasClassDarkvision() {
 }
 
 // D&D 5e skill → ability score mapping
-const SKILL_TO_ABILITY = {
+var SKILL_TO_ABILITY = {
     atl: 'st', acr: 'dx', slh: 'dx', ste: 'dx', stl: 'dx',
     arc: 'it', his: 'it', inv: 'it', nat: 'it', rel: 'it',
     anh: 'ws', ins: 'ws', med: 'ws', per: 'ws', sur: 'ws',
@@ -796,7 +796,7 @@ function _consumeRation() {
 
 // Update condition icons in HUD
 // D&D 5e Condition effects lookup
-const CONDITION_EFFECTS = {
+var CONDITION_EFFECTS = {
     poisoned:    { icon: '\u2620', label: 'Envenenado',  css: 'condition-poisoned',    dis: ['str','dx','cn','int','ws','cha','per','ste','sur','inv','atl','acr'], dot: true },
     prone:       { icon: '🧎', label: 'Ca\u00eddo',       css: 'condition-prone',       dis: ['atl','acr'], extraMove: true },
     frightened:  { icon: '😨', label: 'Amedrontado', css: 'condition-frightened',   dis: ['str','dx','atl','acr','ste'] },
@@ -923,7 +923,7 @@ function updateConditionHUD() {
 // ═══════════════════════════════════════════════════════
 // EXHAUSTION SYSTEM (D&D 5e PHB — 6 levels)
 // ═══════════════════════════════════════════════════════
-const EXHAUSTION_EFFECTS = [
+var EXHAUSTION_EFFECTS = [
     '',
     'Desvantagem em testes de habilidade',
     'Velocidade reduzida pela metade',
@@ -1133,12 +1133,12 @@ function updateCompass() {
 // ═══════════════════════════════════════════════════════
 // LOCATION INFO (bottom bar — biome + tile type)
 // ═══════════════════════════════════════════════════════
-const _BIOME_NAMES = {
+var _BIOME_NAMES = {
     forest: 'Floresta', plains: 'Campos', swamp: 'Pântano', cave: 'Caverna',
     desert: 'Deserto', mountain: 'Montanha', snow: 'Ermo Gelado',
     volcanic: 'Vulcão', graveyard: 'Cemitério'
 };
-const _TILE_NAMES = {
+var _TILE_NAMES = {
     T: 'Árvores', g: 'Grama', w: 'Água', r: 'Rochedo', R: 'Ruínas',
     p: 'Trilha', s: 'Areia', m: 'Lama', i: 'Gelo', v: 'Cinzas',
     b: 'Ponte', L: 'Lava',
@@ -1157,7 +1157,7 @@ function updateLocationInfo() {
 // ═══════════════════════════════════════════════════════
 // FLAVOR EVENTS (biome-specific ambient mini-events)
 // ═══════════════════════════════════════════════════════
-const FLAVOR_TEXTS = {
+var FLAVOR_TEXTS = {
     forest: [
         'Pássaros cantam nas copas distantes.',
         'Uma brisa agita as folhas ao seu redor.',
@@ -1291,7 +1291,7 @@ function checkFlavorEvent() {
 // OVERLAY SAFETY — clear dynamic children before activation
 // ═══════════════════════════════════════════════════════
 // Overlay→children mapping: which containers to clear before showing
-const _OVERLAY_CHILDREN = {
+var _OVERLAY_CHILDREN = {
     'dm-overlay':        ['dm-choices', 'dm-narration'],
     'encounter-overlay': ['enc-choices', 'enc-narration'],
     'exit-risk-overlay': ['exit-options', 'exit-hp-row', 'exit-info-row'],
@@ -1326,7 +1326,7 @@ function checkTerrainTransition(col, row) {
     _lastTerrainType = terrain;
 }
 
-const _EVENT_OVERLAY_IDS = [
+var _EVENT_OVERLAY_IDS = [
     'dm-overlay', 'check-overlay', 'outcome-overlay', 'combat-overlay',
     'portal-overlay', 'encounter-overlay', 'exit-risk-overlay',
     'death-overlay', 'camp-overlay', 'camp-result-overlay', 'lowhp-overlay',
@@ -1462,7 +1462,7 @@ function calculateExitRisk(distance) {
 }
 
 // POI discovery flash — canvas-based golden pulse
-let _hexFlashes = [];
+var _hexFlashes = [];
 function flashHex(col, row) {
     _hexFlashes.push({ col, row, start: performance.now(), duration: 700 });
     scheduleRender();

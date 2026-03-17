@@ -13,8 +13,8 @@ function _escHtml(s) {
    transition detection.
    ═══════════════════════════════════════════════════════════════ */
 
-const LONG_BTN_THRESHOLD = 24; // chars — buttons longer get full width
-const HERO_KEYWORDS = ['PARTIR', 'JOGAR', 'AVENTURA', 'CONFIRMAR', 'INICIAR'];
+var LONG_BTN_THRESHOLD = 24; // chars — buttons longer get full width
+var HERO_KEYWORDS = ['PARTIR', 'JOGAR', 'AVENTURA', 'CONFIRMAR', 'INICIAR'];
 
 /**
  * Update #screen padding-bottom to match the current height of #bottom-panel.
@@ -586,7 +586,7 @@ function renderFooter(footer) {
 }
 
 // ─── Dice Roll 3D Animation ───
-let _diceInstance = null;
+var _diceInstance = null;
 
 function _getDice() {
     if (_diceInstance) return _diceInstance;

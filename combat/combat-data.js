@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════ */
 
 // ─── FEATURE 3: PARTICLE EFFECTS ───
-const _PARTICLE_COLORS = {
+var _PARTICLE_COLORS = {
     slashing: ['#e0e0e0', '#d4c060'],
     piercing: ['#b0c8e0', '#d4c060'],
     bludgeoning: ['#c0b080', '#e0d080'],
@@ -46,7 +46,7 @@ function spawnParticles(isCrit, damageType) {
 
 
 // ─── FEATURE 7: DM NARRATION ───
-const _NARR_CRIT = [
+var _NARR_CRIT = [
     'A lâmina encontra uma brecha mortal!',
     'Golpe devastador! O inimigo recua.',
     'Perfeito! Um acerto certeiro e brutal.',
@@ -58,7 +58,7 @@ const _NARR_CRIT = [
     'Atingido com força avassaladora!',
     'Vulnerabilidade exposta — golpe crítico!',
 ];
-const _NARR_NAT1 = [
+var _NARR_NAT1 = [
     'O golpe passa vergonhosamente longe!',
     'Tropeça e perde o equilíbrio por um instante.',
     'A arma escorrega da mão por um segundo.',
@@ -70,7 +70,7 @@ const _NARR_NAT1 = [
     'O peso da arma desequilibra o atacante.',
     'Nem perto — o inimigo mal precisou se mover.',
 ];
-const _NARR_MISS = [
+var _NARR_MISS = [
     'O inimigo desvia no último instante.',
     'O ataque é bloqueado pela armadura.',
     'Rápido demais — o golpe não conecta.',
@@ -85,7 +85,7 @@ const _NARR_MISS = [
     'A distância era grande demais para conectar.',
 ];
 // P1-E: Kill narrations with enemy name template ({name} is replaced at call site)
-const _NARR_KILL = [
+var _NARR_KILL = [
     '{name} tomba derrotado!',
     'Sem mais vida — {name} cai.',
     'O golpe final abate {name}.',
@@ -100,7 +100,7 @@ const _NARR_KILL = [
     '{name} sucumbe ao golpe final sem resistência.',
 ];
 // Heal narrations (shown when player or ally uses healing)
-const _NARR_HEAL = [
+var _NARR_HEAL = [
     'Energia curativa flui e fecha ferimentos.',
     'Luz restauradora envolve o corpo ferido.',
     'As feridas se fecham com um brilho quente.',
@@ -110,7 +110,7 @@ const _NARR_HEAL = [
     'Músculos se regeneram com calor reconfortante.',
     'O brilho da cura dissipa a exaustão.',
 ];
-const _NARR_BUFF = [
+var _NARR_BUFF = [
     '{name} ativado — poder reforçado!',
     'Uma aura dourada envolve o corpo — {name}!',
     '{name} concedido — prepare-se para a batalha!',
@@ -118,7 +118,7 @@ const _NARR_BUFF = [
     'O poder de {name} flui pelas veias!',
 ];
 // Enemy attack narrations (used during enemy turns)
-const _NARR_ENEMY_HIT = [
+var _NARR_ENEMY_HIT = [
     'O golpe acerta em cheio!',
     'Sem tempo para reagir — o ataque conecta.',
     'A defesa não foi suficiente.',
@@ -130,7 +130,7 @@ const _NARR_ENEMY_HIT = [
     'A criatura ataca com precisão mortal.',
     'O impacto faz seus joelhos fraquejarem.',
 ];
-const _NARR_ENEMY_CRIT = [
+var _NARR_ENEMY_CRIT = [
     'Golpe devastador do inimigo!',
     'Um acerto brutal — impossível ignorar a dor!',
     'Ataque certeiro atinge um ponto vital!',
@@ -142,7 +142,7 @@ const _NARR_ENEMY_CRIT = [
     'O inimigo concentra toda a fúria em um único golpe!',
     'Um acerto brutal que ecoa pelo campo de batalha!',
 ];
-const _NARR_ENEMY_MISS = [
+var _NARR_ENEMY_MISS = [
     'Desvio no último instante!',
     'A esquiva foi perfeita!',
     'O ataque passa sem causar dano.',
@@ -154,7 +154,7 @@ const _NARR_ENEMY_MISS = [
     'Uma abertura — mas o inimigo não a encontra.',
     'O golpe se perde no vazio.',
 ];
-const _NARR_ALLY_ACTION = [
+var _NARR_ALLY_ACTION = [
     '{name} entra em ação!',
     '{name} se posiciona e ataca!',
     '{name} não hesita e avança!',
@@ -166,7 +166,7 @@ const _NARR_ALLY_ACTION = [
     '{name} avança com determinação!',
     '{name} cobre seu flanco e contra-ataca!',
 ];
-const _NARR_ALLY_HIT = [
+var _NARR_ALLY_HIT = [
     '{name} acerta o inimigo!',
     '{name} conecta um belo golpe!',
     'Excelente! {name} causa dano!',
@@ -178,7 +178,7 @@ const _NARR_ALLY_HIT = [
     'Boa! O golpe de {name} conecta!',
     '{name} atinge o ponto fraco do inimigo!',
 ];
-const _NARR_ALLY_CRIT = [
+var _NARR_ALLY_CRIT = [
     '{name} desfere um golpe devastador!',
     'Golpe perfeito de {name}!',
     '{name} acerta um ponto vital!',
@@ -190,7 +190,7 @@ const _NARR_ALLY_CRIT = [
     'O ataque de {name} é absolutamente devastador!',
     '{name} explora uma brecha com precisão mortal!',
 ];
-const _NARR_ALLY_MISS = [
+var _NARR_ALLY_MISS = [
     '{name} erra o alvo!',
     'O ataque de {name} passa de raspão.',
     '{name} não consegue conectar.',

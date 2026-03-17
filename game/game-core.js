@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 // Global state
-const S = {
+var S = {
     token: '',
     apiBase: '',
     uid: 0,
@@ -16,7 +16,7 @@ const S = {
 
 // ─── Session persistence (survives WebApp kill/reload) ───
 // Key is suffixed with charId for per-character isolation (set in init())
-let SESSION_KEY = 'valdoria_session';
+var SESSION_KEY = 'valdoria_session';
 function _saveSession() {
     try {
         localStorage.setItem(SESSION_KEY, JSON.stringify({
@@ -46,19 +46,19 @@ function _restoreSession() {
     } catch (e) { return false; }
 }
 
-const DEBOUNCE_MS = 200;
-const RETRY_MAX = 2;
-const RETRY_BASE_MS = 1000;
-const FETCH_TIMEOUT_MS = 12000; // 12s per fetch attempt (AbortController)
-const HEALTH_TIMEOUT_MS = 3000; // 3s timeout — fast fail for instant reconnect
-const HEALTH_RETRIES = 2;       // 2 retries (3 attempts) — allows DNS propagation after discovery
-const HEALTH_RETRY_MS = 1000;   // 1s between retries
-const LOADING_TIMEOUT_MS = 15000; // 15s max loading screen before auto-error
-const MIN_LOADING_MS = window.VALDORIA_MIN_LOAD_MS || 5000; // immutable: tip readability rule
-let SCREEN_CACHE_KEY = 'valdoria_game_screen';
-const SCREEN_CACHE_TTL = 1800000; // 30 minutes
+var DEBOUNCE_MS = 200;
+var RETRY_MAX = 2;
+var RETRY_BASE_MS = 1000;
+var FETCH_TIMEOUT_MS = 12000; // 12s per fetch attempt (AbortController)
+var HEALTH_TIMEOUT_MS = 3000; // 3s timeout — fast fail for instant reconnect
+var HEALTH_RETRIES = 2;       // 2 retries (3 attempts) — allows DNS propagation after discovery
+var HEALTH_RETRY_MS = 1000;   // 1s between retries
+var LOADING_TIMEOUT_MS = 15000; // 15s max loading screen before auto-error
+var MIN_LOADING_MS = window.VALDORIA_MIN_LOAD_MS || 5000; // immutable: tip readability rule
+var SCREEN_CACHE_KEY = 'valdoria_game_screen';
+var SCREEN_CACHE_TTL = 1800000; // 30 minutes
 
-let _loadingTimeoutId = null;
+var _loadingTimeoutId = null;
 
 // ─── Connection logging alias (provided by shared/error-reporter.js) ───
 function _clog(msg) {
@@ -361,7 +361,7 @@ async function checkHealth() {
 }
 
 // ─── API URL Discovery (auto-resolve stale tunnel URLs) ───
-const API_URL_DISCOVERY = window.__spaRouteName ? 'api-url.json' : '../api-url.json';
+var API_URL_DISCOVERY = window.__spaRouteName ? 'api-url.json' : '../api-url.json';
 
 async function _discoverApiUrl() {
     // Fetch api-url.json from GitHub Pages (same origin, no CORS issues)
@@ -389,8 +389,8 @@ async function _discoverApiUrl() {
 }
 
 // ─── Health Poller (transparent retry — player sees loading, never error) ───
-const HEALTH_POLL_INTERVAL = 2000;   // 2s between polls
-const HEALTH_POLL_MAX = 3;           // Max 6s of polling before discovery attempt
+var HEALTH_POLL_INTERVAL = 2000;   // 2s between polls
+var HEALTH_POLL_MAX = 3;           // Max 6s of polling before discovery attempt
 
 async function _waitForHealthy() {
     // First try: direct health check with current ?api= URL
@@ -753,7 +753,7 @@ async function _closeGameHub() {
         }).catch(e => console.warn('[GAME] cleanup:', e));
         clearTimeout(tid);
     } catch (e) { /* never block close */ }
-    try { Telegram.WebApp.close(); } catch (e) { console.warn('[GAME] tg.close:', e); }
+    valdoriaSpaClose();
 }
 
 async function doAction(callbackData) {
@@ -808,7 +808,7 @@ async function doAction(callbackData) {
     if (data.close) {
         hideLocationTransition();
         if (window.actionGuard) actionGuard.release();
-        try { Telegram.WebApp.close(); } catch (e) { console.warn('[GAME] tg.close:', e); }
+        valdoriaSpaClose();
         return;
     }
 
@@ -990,14 +990,14 @@ function sleep(ms) {
 // ─── Server Log Relay ───
 // Intercepts console.log/warn/error and sends [GAME] entries to the server
 // so they appear in the GUI server window alongside backend logs.
-const _logQueue = [];
-let _logFlushTimer = null;
-const _LOG_FLUSH_INTERVAL = 2000; // Send batch every 2s
-const _LOG_MAX_QUEUE = 50;
+var _logQueue = [];
+var _logFlushTimer = null;
+var _LOG_FLUSH_INTERVAL = 2000; // Send batch every 2s
+var _LOG_MAX_QUEUE = 50;
 
-const _origLog = console.log.bind(console);
-const _origWarn = console.warn.bind(console);
-const _origError = console.error.bind(console);
+var _origLog = console.log.bind(console);
+var _origWarn = console.warn.bind(console);
+var _origError = console.error.bind(console);
 
 function _queueLog(level, args) {
     const msg = Array.from(args).map(a =>

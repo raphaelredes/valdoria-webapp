@@ -30,6 +30,7 @@
             });
         },
 
+        _routes: _routes,
         current: function () { return _current; },
         isLoaded: function (src) { return !!_loadedJS[src]; },
         markLoaded: function (src) { _loadedJS[src] = true; },
@@ -87,8 +88,35 @@
         if (!_current) return;
         var prev = _routes[_current];
         if (prev && prev.cleanup) try { prev.cleanup(); } catch (e) { console.warn("[SPA] Cleanup:", e); }
+        // Run registered cleanup functions (event listeners, intervals, etc.)
+        if (window._spaCleanupFns && window._spaCleanupFns.length) {
+            while (window._spaCleanupFns.length) {
+                try { window._spaCleanupFns.pop()(); } catch (e) { console.warn("[SPA] cleanup fn:", e); }
+            }
+        }
+        window._spaCleanupFns = [];
+        // Remove route CSS
         if (prev && prev.css) prev.css.forEach(function (h) {
             if (_loadedCSS[h]) { _loadedCSS[h].remove(); delete _loadedCSS[h]; }
+        });
+        // Clear route JS from cache so scripts re-load fresh on revisit
+        // (var declarations can be re-declared safely, module-level code re-runs)
+        if (prev && prev.js) prev.js.forEach(function (src) {
+            var base = src.split("?")[0];
+            delete _loadedJS[base];
+        });
+        if (prev && prev.sharedJs) prev.sharedJs.forEach(function (src) {
+            var base = src.split("?")[0];
+            delete _loadedJS[base];
+        });
+        // Remove route script elements from DOM
+        var shellSrcs = ["spa/router.js", "spa/routes.js", "spa/spa-nav.js", "spa/init.js"];
+        document.body.querySelectorAll("script[src]").forEach(function (s) {
+            var srcAttr = (s.getAttribute("src") || "").split("?")[0];
+            // Keep shell scripts and CDN externals
+            if (shellSrcs.indexOf(srcAttr) >= 0) return;
+            if (srcAttr.indexOf("://") >= 0) return;
+            s.remove();
         });
         routeRoot.innerHTML = "";
     }

@@ -3,8 +3,8 @@
 // ═══════════════════════════════════════════════════════
 
 // ── Cached weighted distance — avoids repeated Dijkstra on same currentLoc ──
-let _distCache = {};
-let _distCacheLoc = null;
+var _distCache = {};
+var _distCacheLoc = null;
 function cachedDist(fromId, toId) {
     if (fromId === toId) return 0;
     if (_distCacheLoc !== fromId) { _distCache = {}; _distCacheLoc = fromId; }
@@ -619,7 +619,7 @@ function animateTravel(fromId, toId, onComplete) {
 }
 
 // ── BFS path (returns array of location IDs, cached) ──
-const _bfsCache = {};
+var _bfsCache = {};
 function invalidateBfsCache() {
     for (const k in _bfsCache) delete _bfsCache[k];
 }
@@ -789,7 +789,7 @@ function _updateOffscreenIndicator() {
 }
 
 // ── Biome legend toggle ──
-let _legendOpen = false;
+var _legendOpen = false;
 function toggleLegendExpand() {
     _haptic('tap');
     _legendOpen = !_legendOpen;

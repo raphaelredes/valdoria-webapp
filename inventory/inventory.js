@@ -2,8 +2,8 @@
    INVENTORY WEBAPP — Lendas de Valdoria v2
    ═══════════════════════════════════════════════════════════ */
 
-const tg = window.Telegram?.WebApp;
-const _vBg = getComputedStyle(document.documentElement)
+var tg = window.Telegram?.WebApp;
+var _vBg = getComputedStyle(document.documentElement)
     .getPropertyValue('--v-bg').trim() || '#2a2420';
 if (tg && !window._invPopupMode) { tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg); }
 
@@ -11,32 +11,32 @@ if (tg && !window._invPopupMode) { tg.ready(); tg.expand(); tg.setHeaderColor(_v
 if (window.ValdoriaErrors) { ValdoriaErrors.init({ appName: 'INVENTORY' }); }
 
 // ── State ──
-let D = null;           // Decoded payload
-let activeTab = 'items';
-let activeFilter = 'all';
-let searchQuery = '';
-let sortMode = 'default'; // default, name, rarity, value
-let pendingOps = [];    // Batch operations to send
-let localEq = {};       // Local copy of equipment (player)
-let localInv = [];      // Local copy of inventory [{n,q,id}]
-let localAllyEq = {};   // npc_id → {slot: item}
-let localGems = {};     // slot → [gem|null, ...]
-let localRunes = {};    // slot → rune_name|null
-let localGold = 0;
-let localHP = 0;
-let localMP = 0;
-let localPotions = 0;       // Basic potion counter
-let localFavs = [];         // Local favorites list
-let localLocked = [];       // Local locked items list
-let localAC = 0;            // Dynamic AC (recalculated on equip/unequip)
-let activeTarget = 'player'; // 'player' or npc_id
-let selectionMode = false;
-let selectedItems = new Set(); // item names selected for batch ops
-let viewMode = localStorage.getItem('valdoria_inv_view') || 'compact'; // 'compact' or 'detailed'
-let viewedItems = null; // Set of item names the player has viewed (detail modal)
+var D = null;           // Decoded payload
+var activeTab = 'items';
+var activeFilter = 'all';
+var searchQuery = '';
+var sortMode = 'default'; // default, name, rarity, value
+var pendingOps = [];    // Batch operations to send
+var localEq = {};       // Local copy of equipment (player)
+var localInv = [];      // Local copy of inventory [{n,q,id}]
+var localAllyEq = {};   // npc_id → {slot: item}
+var localGems = {};     // slot → [gem|null, ...]
+var localRunes = {};    // slot → rune_name|null
+var localGold = 0;
+var localHP = 0;
+var localMP = 0;
+var localPotions = 0;       // Basic potion counter
+var localFavs = [];         // Local favorites list
+var localLocked = [];       // Local locked items list
+var localAC = 0;            // Dynamic AC (recalculated on equip/unequip)
+var activeTarget = 'player'; // 'player' or npc_id
+var selectionMode = false;
+var selectedItems = new Set(); // item names selected for batch ops
+var viewMode = localStorage.getItem('valdoria_inv_view') || 'compact'; // 'compact' or 'detailed'
+var viewedItems = null; // Set of item names the player has viewed (detail modal)
 
 // ── SVG Icon System (medieval line art) ──
-const _IC = {
+var _IC = {
     // Equipment slots
     helm: '<path d="M6 19h12M7 19v-3c0-5 2-9 5-11 3 2 5 6 5 11v3"/><path d="M7 12h10"/>',
     chest: '<path d="M8 4h8l2 6v10H6V10z"/><path d="M6 10h12"/><line x1="12" y1="10" x2="12" y2="20"/>',
@@ -100,7 +100,7 @@ function vi_f(name, sz) {
     const s = sz || 24;
     return `<svg class="vi" width="${s}" height="${s}" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 }
-const SLOT_ICONS = {
+var SLOT_ICONS = {
     head: 'helm', chest: 'chest', shoulders: 'pauldron',
     main_hand: 'sword', off_hand: 'shield', hands: 'gauntlet',
     legs: 'greaves', feet: 'boot', cloak: 'cloak', belt: 'belt',
@@ -108,7 +108,7 @@ const SLOT_ICONS = {
     amulet: 'pendant', map: 'scroll',
 };
 
-const SLOT_NAMES = {
+var SLOT_NAMES = {
     head: 'Cabeça', chest: 'Tronco', shoulders: 'Ombros',
     main_hand: 'M.Principal', off_hand: 'M.Secundária',
     hands: 'Mãos', legs: 'Pernas', feet: 'Botas',
@@ -116,24 +116,24 @@ const SLOT_NAMES = {
     ring_1: 'Anel 1', ring_2: 'Anel 2',
     necklace: 'Pescoço', map: 'Mapa',
 };
-const SLOT_ORDER = [
+var SLOT_ORDER = [
     'head', 'necklace', 'shoulders', 'cloak',
     'chest', 'main_hand', 'off_hand', 'belt',
     'hands', 'ring_1', 'legs', 'ring_2',
     'feet', 'map',
 ];
-const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2, very_rare: 3, legendary: 4 };
-const RARITY_FALLBACK = {
+var RARITY_ORDER = { common: 0, uncommon: 1, rare: 2, very_rare: 3, legendary: 4 };
+var RARITY_FALLBACK = {
     common: { l: 'Comum', c: '#9e9e9e' },
     uncommon: { l: 'Incomum', c: '#4caf50' },
     rare: { l: 'Raro', c: '#2196f3' },
     very_rare: { l: 'Muito Raro', c: '#9c27b0' },
     legendary: { l: 'Lendário', c: '#ff9800' },
 };
-const RUNE_ELIGIBLE = new Set([
+var RUNE_ELIGIBLE = new Set([
     'main_hand', 'off_hand', 'chest', 'head', 'hands', 'feet', 'legs', 'cloak', 'necklace'
 ]);
-const TAG_LABELS = {
+var TAG_LABELS = {
     weapon: 'Arma', simple_weapon: 'Arma Simples', martial_weapon: 'Arma Marcial',
     armor: 'Armadura', shield: 'Escudo', clothing: 'Vestimenta',
     light_armor: 'Armadura Leve', medium_armor: 'Armadura Média', heavy_armor: 'Armadura Pesada',
@@ -152,11 +152,11 @@ const TAG_LABELS = {
     melee: 'Corpo a Corpo', reach: 'Alcance', loading: 'Recarga',
     light: 'Leve', heavy: 'Pesada',
 };
-const SORT_LABELS = {
+var SORT_LABELS = {
     default: `${vi('listIcon', 13)} Padrão`, name: `${vi('abc', 13)} Nome`,
     rarity: `${vi('sparkle', 13)} Raridade`, value: `${vi('coin', 13)} Valor`,
 };
-const SORT_CYCLE = ['default', 'name', 'rarity', 'value'];
+var SORT_CYCLE = ['default', 'name', 'rarity', 'value'];
 
 // ── Rarity config (from payload or fallback) ──
 function getRarityConfig() { return D?.ref?.rar || RARITY_FALLBACK; }
@@ -299,7 +299,7 @@ function hapticNotify(type) {
 }
 
 // ── Header ──
-let _acDirty = true, _acCached = 0;
+var _acDirty = true, _acCached = 0;
 function calcLocalAC() {
     if (!_acDirty) return _acCached;
     // Base AC from server (includes DEX, class features, unarmored defense)
@@ -496,7 +496,7 @@ function resetAllOps() {
 }
 
 // ── Modal ──
-let _modalOpen = false;
+var _modalOpen = false;
 function showModal(html) {
     document.getElementById('modalContent').innerHTML = html;
     document.getElementById('modalOverlay').classList.add('visible');
@@ -581,7 +581,7 @@ function initBackButton() {
 }
 
 // ── Nav Bar Actions ──
-const _RETURN_LABELS = {
+var _RETURN_LABELS = {
     game: '🏘️ Cidade',
     explore: '🗺️ Mapa',
     combat: '⚔️ Combate',
@@ -661,7 +661,7 @@ async function _transitionTo(target, payload = {}) {
                 const data = await resp.json();
                 if (data.url) {
                     window.__valdoria_transitioning = true;
-                    window.location.replace(data.url);
+                    valdoriaSpaNav(data.url);
                     return;
                 }
             }

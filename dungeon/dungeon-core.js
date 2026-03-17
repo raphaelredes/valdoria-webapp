@@ -2,10 +2,10 @@
 // DUNGEON CORE — State management, API, initialization
 // ═══════════════════════════════════════════════════════════════
 
-let tg = null;
-let _actionSent = false;
+var tg = null;
+var _actionSent = false;
 
-const S = {
+var S = {
     token: '',
     api: '',
     uid: 0,
@@ -19,7 +19,7 @@ const S = {
 };
 
 // Room type icons
-const NODE_ICONS = {
+var NODE_ICONS = {
     combat:   '\u2694\uFE0F',  // ⚔️
     treasure: '\uD83D\uDC8E',  // 💎 (using direct emoji is fine)
     campfire: '\uD83D\uDD25',  // 🔥
@@ -182,7 +182,7 @@ function sendAction(action, nodeId) {
     .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
     .then(d => {
         window.__valdoria_transitioning = true;
-        if (d.url) { window.location.replace(d.url); return; }
+        if (d.url) { valdoriaSpaNav(d.url); return; }
         if (d.nodes) {
             S.nodes = d.nodes;
             S.paths = d.paths || S.paths;
@@ -220,7 +220,7 @@ async function _transitionToGame() {
         });
         const d = await r.json();
         window.__valdoria_transitioning = true;
-        if (d.url) { window.location.replace(d.url); return; }
+        if (d.url) { valdoriaSpaNav(d.url); return; }
     } catch (e) { console.error('[DUNGEON] transition error:', e); }
     try { tg?.close(); } catch (e) { /* Telegram API optional */ }
 }
@@ -235,4 +235,4 @@ document.getElementById('btn-inventory')?.addEventListener('click', () => {
 document.getElementById('btn-retreat')?.addEventListener('click', handleRetreat);
 
 // ── Boot ──
-document.addEventListener('DOMContentLoaded', initDungeon);
+if (!window.__spaRouteName) { document.addEventListener('DOMContentLoaded', initDungeon); }

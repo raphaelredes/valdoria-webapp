@@ -2,7 +2,7 @@
 // BIOME AMBIENT PARTICLES — Canvas-based particle system
 // ═══════════════════════════════════════════════════════
 
-const BIOME_PARTICLE_CONFIGS = {
+var BIOME_PARTICLE_CONFIGS = {
     forest:   [{ type: 'leaf', n: 4, color: 'rgba(80,140,40,0.5)', color2: 'rgba(140,100,30,0.4)' },
                { type: 'mist', n: 1, color: 'rgba(60,120,40,0.08)' }],
     plains:   [{ type: 'leaf', n: 3, color: 'rgba(160,140,60,0.4)', color2: 'rgba(120,160,50,0.3)' }],
@@ -22,9 +22,9 @@ const BIOME_PARTICLE_CONFIGS = {
                { type: 'mist', n: 1, color: 'rgba(120,100,80,0.10)' }],
 };
 
-let _particles = [];
-let _particlesInited = false;
-const _exploreLite = (window._valdoriaMinLoadFactor || 1) < 1;
+var _particles = [];
+var _particlesInited = false;
+var _exploreLite = (window._valdoriaMinLoadFactor || 1) < 1;
 
 function initBiomeParticles(biome) {
     if (window.vReducedMotion) return;
@@ -113,9 +113,9 @@ function updateParticles(dt) {
 // ═══════════════════════════════════════════════════════
 // WEATHER PARTICLES — Rain & Storm (canvas-based)
 // ═══════════════════════════════════════════════════════
-let _weatherParticles = [];
-let _currentWeather = 's';
-let _lightningAlpha = 0;
+var _weatherParticles = [];
+var _currentWeather = 's';
+var _lightningAlpha = 0;
 
 function initWeatherParticles(weather) {
     if (weather === _currentWeather && _weatherParticles.length > 0) return;

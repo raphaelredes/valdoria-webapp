@@ -5,24 +5,24 @@
 // INIT & PARAMS
 // ═══════════════════════════════════════════════════════
 
-const tg = window.Telegram?.WebApp;
+var tg = window.Telegram?.WebApp;
 if (tg) {
     tg.ready(); tg.expand();
     // [EXIT-CONFIRM] BackButton handled by exit-confirm.js (shows popup, default tg.close)
 }
 
 // Dual-mode: SPA route params or URL query params
-const _spaP = window.__spaRouteParams || {};
-const params = new URLSearchParams(location.search);
-const TOKEN = _spaP.token || params.get('token') || '';
-const API_BASE = (_spaP.api || params.get('api') || '').replace(/\/$/, '');
-const USER_ID = parseInt(_spaP.uid || params.get('uid') || '0', 10);
+var _spaP = window.__spaRouteParams || {};
+var params = new URLSearchParams(location.search);
+var TOKEN = _spaP.token || params.get('token') || '';
+var API_BASE = (_spaP.api || params.get('api') || '').replace(/\/$/, '');
+var USER_ID = parseInt(_spaP.uid || params.get('uid') || '0', 10);
 // [EXIT-CONFIRM] Heartbeat for displacement detection
 if (window.SessionHeartbeat && API_BASE && TOKEN && USER_ID) {
     SessionHeartbeat.init({ apiBase: API_BASE, token: TOKEN, uid: USER_ID });
 }
-const MODE = _spaP.mode || params.get('mode') || 'full';
-const SHOW_PREFACE = (_spaP.preface || params.get('preface')) === '1';
+var MODE = _spaP.mode || params.get('mode') || 'full';
+var SHOW_PREFACE = (_spaP.preface || params.get('preface')) === '1';
 
 // ── Shared Error Reporter ──
 if (window.ValdoriaErrors) {
@@ -34,10 +34,10 @@ if (window.ValdoriaErrors) {
     });
 }
 
-let DATA = null;       // Full prologue data from /api/prologue/init
-let screenIdx = 0;     // Current screen index in the track
-let choices = {};       // Accumulated player choices
-let rerollsLeft = 5;
+var DATA = null;       // Full prologue data from /api/prologue/init
+var screenIdx = 0;     // Current screen index in the track
+var choices = {};       // Accumulated player choices
+var rerollsLeft = 5;
 
 function haptic(type) {
     if (window.vHaptic) vHaptic.impact(type || 'light');
@@ -91,7 +91,7 @@ async function apiCall(endpoint, body = {}) {
 // SCREEN NAVIGATION
 // ═══════════════════════════════════════════════════════
 
-const track = document.getElementById('track');
+var track = document.getElementById('track');
 
 function addScreen(html) {
     const div = document.createElement('div');
@@ -213,7 +213,7 @@ function closeLoreOverlay() {
 // DICE ANIMATION (distract skill check)
 // ═══════════════════════════════════════════════════════
 
-let _prologueDice = null;
+var _prologueDice = null;
 
 function showDiceRoll(result) {
     const overlay = document.getElementById('diceOverlay');
@@ -461,7 +461,7 @@ function onGateChoice(key) {
     });
 }
 
-let _roadChoiceMade = false;
+var _roadChoiceMade = false;
 async function onRoadChoice(key) {
     // Prevent double-tap race condition (distract + fight firing simultaneously)
     if (_roadChoiceMade) return;
@@ -510,7 +510,7 @@ async function doFight() {
         if (result.combat_url || result.arena_url) {
             // Navigate to arena WebApp
             window.__valdoria_transitioning = true;
-            window.location.replace(result.combat_url || result.arena_url);
+            valdoriaSpaNav(result.combat_url || result.arena_url);
         } else {
             showError('Erro ao iniciar combate.');
         }
@@ -542,12 +542,12 @@ async function onEnterCity() {
         // Redirect to Game Hub (stays in WebApp)
         if (result && result.game_url) {
             window.__valdoria_transitioning = true;
-            window.location.replace(result.game_url);
+            valdoriaSpaNav(result.game_url);
         } else {
             // Fallback: close WebApp and let user tap JOGAR from Telegram
             // (prologue token is not valid for Game Hub sessions)
             if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.close();
+                valdoriaSpaClose();
             }
         }
     } catch (e) {

@@ -44,7 +44,7 @@ var _spaP = window.__spaRouteParams || {};
                     if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'LEVELUP', reason: 'session_expired' })); return; }
                 }
                 const d = await r.json();
-                if (d.url) { window.location.replace(d.url); return; }
+                if (d.url) { valdoriaSpaNav(d.url); return; }
             } catch (e) { console.error('[LEVELUP] transition error:', e); }
             try { if (tg) tg.close(); } catch (e) { console.warn('[LEVELUP] tg.close:', e); }
         }
@@ -903,7 +903,7 @@ var _spaP = window.__spaRouteParams || {};
                             if (data.status === 'saved' || data.ok) {
                                 // Navigate to return URL if provided (webapp transition)
                                 if (data.return_url) {
-                                    window.location.replace(data.return_url);
+                                    valdoriaSpaNav(data.return_url);
                                 } else if (returnTo && apiFallback && token) {
                                     // Use transition API to return to origin webapp
                                     _levelupTransitionBack();

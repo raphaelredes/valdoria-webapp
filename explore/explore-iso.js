@@ -3,17 +3,17 @@
 // ═══════════════════════════════════════════════════════
 
 // Hex dimensions — calculated dynamically to fit viewport width
-let HEX_W = 44;
-let HEX_H = 26;
-let UNIT_PX = 7;
-let ROW_STEP = HEX_H * 0.75;
+var HEX_W = 44;
+var HEX_H = 26;
+var UNIT_PX = 7;
+var ROW_STEP = HEX_H * 0.75;
 
 // Map offset (to center the hex grid within the canvas)
-let MAP_OFFSET_X = 0;
-let MAP_OFFSET_Y = 0;
+var MAP_OFFSET_X = 0;
+var MAP_OFFSET_Y = 0;
 
 // Tile height map (in height units)
-const TILE_HEIGHT = {
+var TILE_HEIGHT = {
     '.': 1,   'g': 1,   'p': 1,   's': 1,   'b': 1,
     'm': 0.5,
     'R': 2.5, 'r': 2,

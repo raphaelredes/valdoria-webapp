@@ -51,7 +51,7 @@ function _buildRoadPath(aPx, bPx, seed) {
 }
 
 /** Point at t (0-1) along an SVG path — cached to avoid DOM thrashing */
-let _cachedPathEl = null, _cachedPathD = null, _cachedPathLen = 0;
+var _cachedPathEl = null, _cachedPathD = null, _cachedPathLen = 0;
 function _pointOnPath(pathD, t) {
     const svg = document.getElementById('map-svg');
     if (!svg) return { x: 0, y: 0 };

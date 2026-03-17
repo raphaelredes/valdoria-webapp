@@ -11,7 +11,7 @@
  *     { sides: 20, result: 14, label: 'Lobo',   type: 'enemy',  icon: '\u{1F479}' },
  *   ], { container: '#dice-area', onComplete: () => {} });
  */
-const DiceRoller = (() => {
+var DiceRoller = (() => {
     'use strict';
 
     // ─── Haptic helpers (Telegram WebApp) ───

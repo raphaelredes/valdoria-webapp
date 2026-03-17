@@ -9,7 +9,7 @@
  */
 
 /* ─── DAMAGE TYPE PROFILES (scaled for 390px smartphone) ─── */
-const VFX_PROFILES = {
+var VFX_PROFILES = {
     fire: {
         colors: ['#ff6020', '#ff9040', '#ffe060'],
         trail: { count: 4, decay: 0.92, size: 8 },

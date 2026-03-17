@@ -77,9 +77,9 @@
         }
         if (_returnUrl) {
             window.__valdoria_transitioning = true;
-            window.location.replace(_returnUrl);
+            valdoriaSpaNav(_returnUrl);
         } else if (window.Telegram && Telegram.WebApp) {
-            try { Telegram.WebApp.close(); } catch(e) { console.warn('[GUIDE] close failed:', e); }
+            valdoriaSpaClose();
         } else {
             window.history.back();
         }

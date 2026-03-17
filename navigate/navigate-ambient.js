@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════
 
 // Biome → particle config
-const BIOME_PARTICLES = {
+var BIOME_PARTICLES = {
     volcanic: { type: 'rise',   color: '#d46030', count: 3, sizeMin: 1.5, sizeMax: 3 },
     snow:     { type: 'fall',   color: '#c8d8e8', count: 3, sizeMin: 1,   sizeMax: 2.5 },
     forest:   { type: 'pulse',  color: '#6aaa4a', count: 3, sizeMin: 1.5, sizeMax: 2.5 },
@@ -15,9 +15,9 @@ const BIOME_PARTICLES = {
     mountain: { type: 'drift',  color: '#8a8a9a', count: 2, sizeMin: 1,   sizeMax: 2 },
 };
 
-const MAX_PARTICLES = 40;
-let _ambientGroup = null;
-let _particleCount = 0;
+var MAX_PARTICLES = 40;
+var _ambientGroup = null;
+var _particleCount = 0;
 
 function initAmbientParticles() {
     const svg = document.getElementById('map-svg');
