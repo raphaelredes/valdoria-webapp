@@ -1126,20 +1126,17 @@ if (typeof document !== 'undefined') {
     } else {
         ValdoriaAudio.init();
     }
-    // Fade-out on page unload (avoids abrupt audio cut)
+    // On page unload: NEVER stop music — always save current track for resume.
+    // Music only changes when the next WebApp plays a different track for its environment.
     window.addEventListener('pagehide', function() {
-    // Skip audio stop during cross-WebApp transitions (music should persist)
-    if (window.__valdoria_transitioning) {
-        // Save current track to localStorage for resuming in next WebApp
         try {
             var ct = (typeof ValdoriaAudio.getCurrentTrack === 'function') ? ValdoriaAudio.getCurrentTrack() : '';
-            if (ct) localStorage.setItem('valdoria_audio_resume', ct);
-            localStorage.setItem('valdoria_audio_resume_ts', String(Date.now()));
+            if (ct) {
+                localStorage.setItem('valdoria_audio_resume', ct);
+                localStorage.setItem('valdoria_audio_resume_ts', String(Date.now()));
+            }
         } catch(e) { /* storage optional */ }
-        return;
-    }
-    ValdoriaAudio.stop();
-});
+    });
 }
 
 // ═══════════════════════════════════════════
