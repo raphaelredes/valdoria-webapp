@@ -6,7 +6,7 @@
     SpaRouter.register("game", {
         page: "game/index.html",
         external: [
-            "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+            { src: "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js", integrity: "sha384-qOkzR5Ke/XkQxuGVJ9hpFEpDlcoLtWwVYhnJf06cLIZa2vaIptSqaubivErzmD5O" },
         ],
         css: [
             "shared/toast.css",
@@ -49,6 +49,9 @@
             "game/inn-animation.js",
         ],
         init: function () {
+            /* Release wake lock in menu */
+            window.__spaWakeLockActive = false;
+            if (window.vWakeLock) vWakeLock.release();
             /* game-core.js registers DOMContentLoaded but it already fired.
                In SPA mode, we call init() directly. */
             if (typeof init === "function") return init();
@@ -59,7 +62,7 @@
     SpaRouter.register("prologue", {
         page: "prologue/index.html",
         external: [
-            "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+            { src: "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js", integrity: "sha384-qOkzR5Ke/XkQxuGVJ9hpFEpDlcoLtWwVYhnJf06cLIZa2vaIptSqaubivErzmD5O" },
         ],
         css: [
             "shared/animations.css",
@@ -78,9 +81,13 @@
             "prologue/prologue.js",
         ],
         init: function () {
+            window.__spaWakeLockActive = true;
+            if (window.vWakeLock) vWakeLock.request();
             /* prologue.js calls boot() at module level — self-initializing */
         },
         cleanup: function () {
+            window.__spaWakeLockActive = false;
+            if (window.vWakeLock) vWakeLock.release();
             /* Stop any timers/intervals set by prologue */
             if (window._prologueInitLoading) {
                 try { window._prologueInitLoading.hide(); } catch(e) {}
@@ -194,7 +201,7 @@
     SpaRouter.register("combat", {
         page: "combat/index.html",
         external: [
-            "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+            { src: "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js", integrity: "sha384-qOkzR5Ke/XkQxuGVJ9hpFEpDlcoLtWwVYhnJf06cLIZa2vaIptSqaubivErzmD5O" },
         ],
         css: [
             "shared/status-bars.css",
@@ -229,9 +236,13 @@
             "combat/combat.js",
         ],
         init: function () {
+            window.__spaWakeLockActive = true;
+            if (window.vWakeLock) vWakeLock.request();
             /* combat.js self-initializes at module level */
         },
         cleanup: function () {
+            window.__spaWakeLockActive = false;
+            if (window.vWakeLock) vWakeLock.release();
             if (window._combatLoadingCtrl) {
                 try { window._combatLoadingCtrl.hide(); } catch(e) {}
             }
@@ -246,7 +257,7 @@
     SpaRouter.register("explore", {
         page: "explore/index.html",
         external: [
-            "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+            { src: "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js", integrity: "sha384-qOkzR5Ke/XkQxuGVJ9hpFEpDlcoLtWwVYhnJf06cLIZa2vaIptSqaubivErzmD5O" },
         ],
         css: [
             "shared/status-bars.css",
@@ -289,10 +300,14 @@
             "explore/explore-particles.js",
         ],
         init: function () {
+            window.__spaWakeLockActive = true;
+            if (window.vWakeLock) vWakeLock.request();
             /* In SPA mode, DOMContentLoaded already fired — call initAsync directly */
             if (typeof initAsync === "function") return initAsync();
         },
         cleanup: function () {
+            window.__spaWakeLockActive = false;
+            if (window.vWakeLock) vWakeLock.release();
             if (window._loadingCtrl) {
                 try { window._loadingCtrl.cleanup(); } catch(e) {}
             }
@@ -330,10 +345,14 @@
             "navigate/navigate-fontpicker.js",
         ],
         init: function () {
+            window.__spaWakeLockActive = true;
+            if (window.vWakeLock) vWakeLock.request();
             /* In SPA mode, DOMContentLoaded already fired — call initAsync directly */
             if (typeof initAsync === "function") return initAsync();
         },
         cleanup: function () {
+            window.__spaWakeLockActive = false;
+            if (window.vWakeLock) vWakeLock.release();
             /* Cancel navigate intervals */
             if (typeof _ttRAF !== "undefined" && _ttRAF) { cancelAnimationFrame(_ttRAF); }
         },
@@ -350,7 +369,7 @@
             "shared/exit-confirm.js",
         ],
         external: [
-            "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js",
+            { src: "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js", integrity: "sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" },
         ],
         js: [
             "pix/pix-app.js",
@@ -388,7 +407,7 @@
     SpaRouter.register("dice", {
         page: "dice/index.html",
         external: [
-            "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+            { src: "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js", integrity: "sha384-qOkzR5Ke/XkQxuGVJ9hpFEpDlcoLtWwVYhnJf06cLIZa2vaIptSqaubivErzmD5O" },
         ],
         css: [
             "shared/animations.css",
@@ -456,10 +475,14 @@
             "dungeon/dungeon-ui.js",
         ],
         init: function () {
+            window.__spaWakeLockActive = true;
+            if (window.vWakeLock) vWakeLock.request();
             /* In SPA mode, DOMContentLoaded already fired — call initDungeon directly */
             if (typeof initDungeon === "function") return initDungeon();
         },
         cleanup: function () {
+            window.__spaWakeLockActive = false;
+            if (window.vWakeLock) vWakeLock.release();
             if (window._dungeonLoadingCtrl) {
                 try { window._dungeonLoadingCtrl.hide(); } catch(e) {}
             }

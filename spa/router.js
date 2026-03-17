@@ -81,6 +81,7 @@
         }).then(function () {
             _hideLoading();
             console.debug("[SPA] Route ready:", name);
+            _prefetchAdjacentRoutes(name);
         });
     }
 
@@ -152,8 +153,10 @@
     }
 
     function _loadExternals(urls) {
-        return Promise.all(urls.map(function (u) {
-            return _loadedJS[u] ? Promise.resolve() : _loadOneScript(u);
+        return Promise.all(urls.map(function (ext) {
+            var src = typeof ext === 'object' ? ext.src : ext;
+            if (_loadedJS[src]) return Promise.resolve();
+            return _loadOneScript(src, typeof ext === 'object' ? ext : null);
         }));
     }
 
@@ -167,10 +170,14 @@
         return chain;
     }
 
-    function _loadOneScript(src) {
+    function _loadOneScript(src, sriConfig) {
         return new Promise(function (resolve, reject) {
             var s = document.createElement("script");
             s.src = src;
+            if (sriConfig && sriConfig.integrity) {
+                s.integrity = sriConfig.integrity;
+                s.crossOrigin = "anonymous";
+            }
             s.onload = function () { _loadedJS[src.split("?")[0]] = true; resolve(); };
             s.onerror = function () {
                 console.error("[SPA] Script failed:", src);
@@ -204,6 +211,45 @@
             'background:var(--v-gold,#c4953a);color:#1a1612;border:none;border-radius:8px;' +
             'font-family:var(--v-font,serif);font-size:14px;cursor:pointer">' +
             'Tentar novamente</button></div>';
+    }
+
+    // ── Route Prefetch ─────────────────────────────────────
+    var _PREFETCH_MAP = {
+        'game': ['explore', 'navigate', 'combat'],
+        'explore': ['combat', 'game'],
+        'combat': ['game', 'explore'],
+        'navigate': ['game', 'explore'],
+        'dungeon': ['game']
+    };
+
+    function _prefetchAdjacentRoutes(currentRoute) {
+        var targets = _PREFETCH_MAP[currentRoute];
+        if (!targets) return;
+        var idle = window.requestIdleCallback || function (fn) { setTimeout(fn, 200); };
+        idle(function () {
+            targets.forEach(function (routeName) {
+                var route = _routes[routeName];
+                if (!route) return;
+                // Prefetch JS (SW will cache under normalized URL)
+                (route.js || []).forEach(function (src) {
+                    if (!_loadedJS[src]) {
+                        fetch(src + '?v=' + Date.now()).catch(function () {});
+                    }
+                });
+                // Prefetch CSS
+                (route.css || []).forEach(function (href) {
+                    if (!_loadedCSS[href]) {
+                        fetch(href + '?v=' + Date.now()).catch(function () {});
+                    }
+                });
+                // Prefetch shared JS
+                (route.sharedJs || []).forEach(function (src) {
+                    if (!_loadedJS[src]) {
+                        fetch(src + '?v=' + Date.now()).catch(function () {});
+                    }
+                });
+            });
+        });
     }
 
     window.SpaRouter = Router;
