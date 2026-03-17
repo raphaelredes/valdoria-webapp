@@ -15,6 +15,8 @@
             if (_navigating) return Promise.resolve();
             if (!_routes[name]) {
                 console.error("[SPA] Unknown route:", name);
+                _hideLoading();
+                _showRouteError("Rota desconhecida: " + name);
                 return Promise.resolve();
             }
             _navigating = true;
@@ -23,6 +25,8 @@
             }).catch(function (e) {
                 _navigating = false;
                 console.error("[SPA] Navigation error:", e);
+                _hideLoading();
+                _showRouteError(e.message || "Erro ao carregar o jogo");
             });
         },
 
@@ -136,22 +140,42 @@
     }
 
     function _loadOneScript(src) {
-        return new Promise(function (resolve) {
+        return new Promise(function (resolve, reject) {
             var s = document.createElement("script");
             s.src = src;
             s.onload = function () { _loadedJS[src.split("?")[0]] = true; resolve(); };
-            s.onerror = function () { console.error("[SPA] Script failed:", src); resolve(); };
+            s.onerror = function () {
+                console.error("[SPA] Script failed:", src);
+                reject(new Error("Falha ao carregar: " + src.split("?")[0]));
+            };
             document.body.appendChild(s);
         });
     }
 
     function _showLoading() {
+        if (typeof showLoading === "function") { showLoading(); return; }
         var el = document.getElementById("loading");
         if (el) el.style.display = "";
     }
     function _hideLoading() {
+        if (typeof hideLoading === "function") { hideLoading(); return; }
         var el = document.getElementById("loading");
         if (el) el.style.display = "none";
+    }
+
+    function _showRouteError(msg) {
+        var root = document.getElementById("route-root");
+        if (!root) return;
+        root.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;' +
+            'justify-content:center;height:80vh;color:var(--v-text,#d4c8b0);' +
+            'font-family:var(--v-font,serif);text-align:center;padding:24px">' +
+            '<div style="font-size:18px;margin-bottom:12px">Erro ao carregar</div>' +
+            '<div style="font-size:13px;color:var(--v-text-dim,#a09484);margin-bottom:24px;' +
+            'max-width:300px;word-break:break-word">' + (msg || '') + '</div>' +
+            '<button onclick="location.reload()" style="padding:10px 28px;' +
+            'background:var(--v-gold,#c4953a);color:#1a1612;border:none;border-radius:8px;' +
+            'font-family:var(--v-font,serif);font-size:14px;cursor:pointer">' +
+            'Tentar novamente</button></div>';
     }
 
     window.SpaRouter = Router;

@@ -15,7 +15,6 @@
             "shared/tabs.css",
             "shared/animations.css",
             "game/game.css",
-            "game/game-feedback.css",
             "game/inn-animation.css",
             "shared/image-popup.css",
         ],
