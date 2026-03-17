@@ -126,6 +126,8 @@ function buildReturnUrl() {
         return: 'game',
         v: '1',
     });
+    // SPA mode: include route param; base path already points to app.html
+    if (window.__spaRouteName) params.set('route', 'game');
     const base = window.location.origin + window.location.pathname;
     return `${base}?${params.toString()}`;
 }

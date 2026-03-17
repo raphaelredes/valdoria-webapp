@@ -674,7 +674,7 @@ async function _transitionToGame() {
     // Fallback: redirect to game hub directly
     const base = window.location.href.replace(/\/navigate\/.*/, '');
     window.__valdoria_transitioning = true;
-    window.location.replace(`${base}/game/?token=${S.token}&api=${encodeURIComponent(S.api)}&uid=${S.uid}&return=game&v=1`);
+    window.location.replace(`${base}/app.html?route=game&token=${S.token}&api=${encodeURIComponent(S.api)}&uid=${S.uid}&return=game&v=1`);
 }
 
 // -----------------------------------------------------------
