@@ -1,0 +1,66 @@
+/* Performance Tracker — coleta metricas de carregamento e API */
+(function () {
+    "use strict";
+    var _apiTimes = [];
+    var _pageLoadMs = 0;
+    var _routeLoadMs = 0;
+
+    window.vPerf = {
+        /** Registrar tempo de carregamento da pagina */
+        recordPageLoad: function (ms) { _pageLoadMs = ms; },
+
+        /** Registrar tempo de carregamento de uma rota SPA */
+        recordRouteLoad: function (ms) { _routeLoadMs = ms; },
+
+        /** Registrar chamada API (chamado pelo game-core.js) */
+        recordApi: function (endpoint, ms, status) {
+            _apiTimes.push({ e: endpoint, ms: ms, s: status });
+            if (_apiTimes.length > 30) _apiTimes.shift();
+        },
+
+        /** Exportar batch para envio */
+        getBatch: function () {
+            var conn = navigator.connection || {};
+            return {
+                load: _pageLoadMs,
+                route: _routeLoadMs,
+                tier: window._valdoriaPerformanceTier || 'unknown',
+                net: {
+                    type: conn.effectiveType || 'unknown',
+                    rtt: conn.rtt || 0,
+                    dl: conn.downlink || 0
+                },
+                device: {
+                    cores: navigator.hardwareConcurrency || 0,
+                    mem: navigator.deviceMemory || 0,
+                    platform: (window.Telegram && Telegram.WebApp) ? Telegram.WebApp.platform : 'unknown'
+                },
+                apis: _apiTimes.slice(-10),
+                mem: (performance.memory) ? {
+                    used: Math.round(performance.memory.usedJSHeapSize / 1048576),
+                    total: Math.round(performance.memory.totalJSHeapSize / 1048576)
+                } : null,
+                ts: Date.now()
+            };
+        },
+
+        /** Enviar metricas para o servidor (fire and forget) */
+        flush: function (apiBase, token) {
+            var batch = this.getBatch();
+            if (!batch.apis.length && !batch.load) return;
+            try {
+                var body = JSON.stringify(batch);
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(apiBase + '/api/game/metrics', body);
+                } else {
+                    fetch(apiBase + '/api/game/metrics', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: body
+                    }).catch(function () {});
+                }
+            } catch (e) { /* silencioso */ }
+            _apiTimes = [];
+        }
+    };
+})();

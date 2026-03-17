@@ -1027,17 +1027,14 @@ function _flushLogs() {
 
 // Start periodic flush
 _logFlushTimer = setInterval(_flushLogs, _LOG_FLUSH_INTERVAL);
+// Flush perf metrics every 10 minutes
+setInterval(function () { if (window.vPerf && S.apiBase) vPerf.flush(S.apiBase, S.token); }, 10 * 60 * 1000);
 // Flush on page unload
 window.addEventListener('beforeunload', () => {
     _flushLogs();
-    // Send perf beacon
-    if (_perfMetrics.apiCalls > 0 && S.apiBase) {
-        try {
-            navigator.sendBeacon(
-                S.apiBase + '/api/game/log',
-                JSON.stringify({ entries: [{ level: 'info', msg: '[GAME] PERF: ' + JSON.stringify(_perfMetrics) }] })
-            );
-        } catch (e) { /* best effort */ }
+    // Send perf metrics
+    if (window.vPerf && S.apiBase) {
+        vPerf.flush(S.apiBase, S.token);
     }
     // Close beacon handled by error-reporter.js (universal safety net)
 });
@@ -1227,6 +1224,7 @@ function _trackApiPerf(endpoint, elapsedMs) {
     _perfMetrics.totalMs += elapsedMs;
     _perfMetrics.avgMs = Math.round(_perfMetrics.totalMs / _perfMetrics.apiCalls);
     if (typeof _trackApiLatency === 'function') _trackApiLatency(elapsedMs, true);
+    if (window.vPerf) vPerf.recordApi(endpoint, elapsedMs, 200);
 }
 
 function _trackRender() {

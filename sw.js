@@ -31,6 +31,7 @@ var PRE_CACHE = [
     '/valdoria-webapp/shared/audio-manager.js',
     '/valdoria-webapp/shared/text-timing.js',
     '/valdoria-webapp/shared/wake-lock.js',
+    '/valdoria-webapp/shared/perf-tracker.js',
     // Shell CSS
     '/valdoria-webapp/shared/fonts.css',
     '/valdoria-webapp/shared/loading.css',
