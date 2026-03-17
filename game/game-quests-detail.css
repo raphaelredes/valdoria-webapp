@@ -115,6 +115,16 @@
     color: var(--v-text-dim);
     flex-shrink: 0;
 }
+.quest-tracker-view-all {
+    text-align: right;
+    font-size: var(--v-font-sm);
+    color: var(--v-text-dim);
+    cursor: pointer;
+    padding: var(--v-space-xs) 0 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--v-transition-fast);
+}
+.quest-tracker-view-all:active { color: var(--v-gold); }
 
 /* Chain badge (card) */
 .quest-chain-badge {

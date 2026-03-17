@@ -142,4 +142,45 @@
     window.hideQuestPopup = function () {
         if (typeof vPopup !== 'undefined') vPopup.hide();
     };
+
+    /* ═══════════════════════════════════════════════════════════════
+       QUEST DIARY POPUP — Full diary with tabs as overlay
+       Reutiliza renderQuestDiary() do game-quests.js dentro de overlay dedicado.
+       ═══════════════════════════════════════════════════════════════ */
+
+    window.showQuestDiaryPopup = function (data) {
+        var overlay = document.getElementById('quest-diary-overlay');
+        var body = document.getElementById('quest-diary-body');
+        if (!overlay || !body) {
+            console.warn('[QUEST-POPUP] quest-diary-overlay not found');
+            return;
+        }
+
+        body.innerHTML = '';
+
+        if (typeof renderQuestDiary === 'function') {
+            renderQuestDiary(body, data);
+        } else {
+            body.innerHTML = '<div style="text-align:center;color:var(--v-text-dim);padding:20px;">'
+                + 'Carregando missões...</div>';
+            console.error('[QUEST-POPUP] renderQuestDiary not available');
+        }
+
+        overlay.style.display = 'flex';
+        requestAnimationFrame(function () {
+            overlay.classList.add('active');
+        });
+    };
+
+    window.hideQuestDiaryPopup = function () {
+        var overlay = document.getElementById('quest-diary-overlay');
+        if (!overlay) return;
+        overlay.classList.add('hiding');
+        overlay.classList.remove('active');
+        setTimeout(function () {
+            overlay.style.display = 'none';
+            overlay.classList.remove('hiding');
+        }, 300);
+    };
+
 })();

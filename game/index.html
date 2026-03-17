@@ -331,6 +331,17 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         </div>
     </div>
 
+    <!-- Quest diary popup overlay (full diary with tabs) -->
+    <div id="quest-diary-overlay" class="v-popup-overlay" style="display:none">
+        <div class="v-popup-card" style="max-height:90vh">
+            <div class="v-popup-header">📜 Jornadas</div>
+            <div class="v-popup-body" id="quest-diary-body" style="max-height:75vh;padding:8px 12px"></div>
+            <div class="v-popup-actions">
+                <button class="v-popup-btn v-popup-btn--cancel" onclick="hideQuestDiaryPopup()">🏠 Voltar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Generic game popup overlay (for inn, locations, etc.) -->
     <div id="v-popup-overlay" class="v-popup-overlay" style="display:none">
         <div class="v-popup-card">

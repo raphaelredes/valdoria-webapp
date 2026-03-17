@@ -828,6 +828,14 @@ async function doAction(callbackData) {
         return;
     }
 
+    // Quest diary popup (overlay instead of full screen change)
+    if (data.quest_diary && typeof showQuestDiaryPopup === 'function') {
+        hideLocationTransition();
+        if (window.actionGuard) actionGuard.release();
+        showQuestDiaryPopup(data.quest_diary);
+        return;
+    }
+
     // Quest detail popup (overlay instead of screen change)
     if (data.quest_detail && typeof showQuestPopup === 'function') {
         hideLocationTransition();

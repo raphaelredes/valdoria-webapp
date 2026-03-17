@@ -596,6 +596,13 @@ function renderQuestTracker(container, data) {
         wrap.appendChild(row);
     }
 
+    // "Ver todas" link to open full diary popup
+    var viewAll = document.createElement('div');
+    viewAll.className = 'quest-tracker-view-all';
+    viewAll.textContent = 'Ver todas ▸';
+    viewAll.onclick = function() { doAction('action_quests'); };
+    wrap.appendChild(viewAll);
+
     // Insert after content starts
     var firstBlock = container.querySelector('.text-block, .v-bar-row');
     if (firstBlock && firstBlock.nextSibling) {
