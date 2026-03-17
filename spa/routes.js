@@ -88,6 +88,67 @@
         },
     });
 
+    /* Market route */
+    SpaRouter.register("market", {
+        page: "market/index.html",
+        css: [
+            "shared/animations.css",
+            "shared/loading.css",
+            "shared/image-popup.css",
+            "market/market.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+            "shared/session-heartbeat.js",
+            "shared/fetch-utils.js",
+            "shared/text-timing.js",
+            "shared/image-popup.js",
+        ],
+        js: [
+            "market/market-loading.js",
+            "market/market-app.js",
+        ],
+        init: function () {
+            /* market-app.js calls init() at module level */
+        },
+        cleanup: function () {
+            if (window._marketLoadingCtrl) {
+                try { window._marketLoadingCtrl.hide(); } catch(e) {}
+            }
+        },
+    });
+
+    /* LevelUp route */
+    SpaRouter.register("levelup", {
+        page: "levelup/index.html",
+        css: [
+            "shared/animations.css",
+            "shared/loading.css",
+            "levelup/levelup.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+            "shared/session-heartbeat.js",
+            "shared/fetch-utils.js",
+            "shared/text-timing.js",
+        ],
+        js: [
+            "levelup/data.js",
+            "levelup/levelup-loading.js",
+            "levelup/levelup-app.js",
+        ],
+        init: function () {
+            /* levelup-app.js self-initializes via IIFE init() */
+        },
+        cleanup: function () {
+            if (window._lvlInitLoading) {
+                try { window._lvlInitLoading.hide(); } catch(e) {}
+            }
+        },
+    });
+
     /* Guide route */
     SpaRouter.register("guide", {
         page: "guide/index.html",
