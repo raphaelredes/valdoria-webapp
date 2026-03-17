@@ -1,14 +1,1 @@
-/* ═══════════════════════════════════════════════
-   COMBAT ARENA — CSS Module Index
-   Split from monolithic combat.css for AI agent efficiency
-   ═══════════════════════════════════════════════ */
-
-@import url('combat-layout.css'); /* Arena header, viewport, zones, scrollbar reset */
-@import url('combat-entities.css'); /* Entity cards, player card, HP bars, expanded details */
-@import url('combat-vfx.css'); /* Battlefield, combat VFX animations, hit/damage/status effects */
-@import url('combat-controls.css'); /* Action toast, turn timer, initiative, damage dice overlay */
-@import url('combat-actions.css'); /* Action bar, bonus/reaction, loading, skill/target overlays */
-@import url('combat-themes.css'); /* Biome themes, atmosphere, no-data, fade transition */
-@import url('combat-screens.css'); /* Resolution screen, turn banner, poll indicator, features, position badges */
-@import url('combat-effects.css'); /* Floating damage, viewport flashes, death, combos, phase transitions */
-@import url('combat-polish.css'); /* Overlay animations, active turn, timer warnings, resolution polish, accessibility */
+@import url('combat-layout.css');@import url('combat-entities.css');@import url('combat-vfx.css');@import url('combat-controls.css');@import url('combat-actions.css');@import url('combat-themes.css');@import url('combat-screens.css');@import url('combat-effects.css');@import url('combat-polish.css');

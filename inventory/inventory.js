@@ -1,359 +1,34 @@
-/* ═══════════════════════════════════════════════════════════
-   INVENTORY WEBAPP — Lendas de Valdoria v2
-   ═══════════════════════════════════════════════════════════ */
-
-var tg = window.Telegram?.WebApp;
-var _vBg = getComputedStyle(document.documentElement)
-    .getPropertyValue('--v-bg').trim() || '#2a2420';
-if (tg && !window._invPopupMode) { tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg); }
-
-// ── Shared Error Reporter (lite tier — no API) ──
-if (window.ValdoriaErrors) { ValdoriaErrors.init({ appName: 'INVENTORY' }); }
-
-// ── State ──
-var D = null;           // Decoded payload
-var activeTab = 'items';
-var activeFilter = 'all';
-var searchQuery = '';
-var sortMode = 'default'; // default, name, rarity, value
-var pendingOps = [];    // Batch operations to send
-var localEq = {};       // Local copy of equipment (player)
-var localInv = [];      // Local copy of inventory [{n,q,id}]
-var localAllyEq = {};   // npc_id → {slot: item}
-var localGems = {};     // slot → [gem|null, ...]
-var localRunes = {};    // slot → rune_name|null
-var localGold = 0;
-var localHP = 0;
-var localMP = 0;
-var localPotions = 0;       // Basic potion counter
-var localFavs = [];         // Local favorites list
-var localLocked = [];       // Local locked items list
-var localAC = 0;            // Dynamic AC (recalculated on equip/unequip)
-var activeTarget = 'player'; // 'player' or npc_id
-var selectionMode = false;
-var selectedItems = new Set(); // item names selected for batch ops
-var viewMode = localStorage.getItem('valdoria_inv_view') || 'compact'; // 'compact' or 'detailed'
-var viewedItems = null; // Set of item names the player has viewed (detail modal)
-
-// ── SVG Icon System (medieval line art) ──
-var _IC = {
-    // Equipment slots
-    helm: '<path d="M6 19h12M7 19v-3c0-5 2-9 5-11 3 2 5 6 5 11v3"/><path d="M7 12h10"/>',
-    chest: '<path d="M8 4h8l2 6v10H6V10z"/><path d="M6 10h12"/><line x1="12" y1="10" x2="12" y2="20"/>',
-    pauldron: '<path d="M4 14c0-5 3-9 8-10 5 1 8 5 8 10"/><path d="M7 10c0-3 2-5 5-6 3 1 5 3 5 6"/>',
-    sword: '<line x1="5" y1="19" x2="19" y2="5"/><line x1="14" y1="5" x2="19" y2="10"/><line x1="5" y1="15" x2="9" y2="19"/><circle cx="7" cy="17" r="1"/>',
-    shield: '<path d="M12 3L4 7v5c0 5 3.5 9.7 8 11 4.5-1.3 8-6 8-11V7z"/>',
-    gauntlet: '<path d="M8 20V10l-2-3v-2h2l1 2h6l1-2h2v2l-2 3v10z"/><path d="M8 14h8"/>',
-    greaves: '<path d="M8 4v14l-1 3h3l1-3h2l1 3h3l-1-3V4z"/><path d="M8 10h8"/>',
-    boot: '<path d="M8 4v12l-2 2v2h12v-2l-2-4V4z"/><path d="M6 18h12"/>',
-    cloak: '<path d="M9 4c-4 3-5 8-5 12h4c0-2 1-3 4-3s4 1 4 3h4c0-4-1-9-5-12"/><path d="M10 4h4"/>',
-    belt: '<rect x="4" y="10" width="16" height="4" rx="1"/><rect x="10" y="9" width="4" height="6" rx="1"/>',
-    ring: '<circle cx="12" cy="13" r="5"/><circle cx="12" cy="8" r="2"/>',
-    pendant: '<path d="M8 4h8"/><path d="M10 4v4l2 3 2-3V4"/><circle cx="12" cy="15" r="3"/>',
-    scroll: '<path d="M7 5c-1 0-2 1-2 2v10c0 1 1 2 2 2"/><path d="M17 5c1 0 2 1 2 2v10c0 1-1 2-2 2"/><rect x="7" y="5" width="10" height="14" rx="1"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="15" x2="13" y2="15"/>',
-    // Tabs
-    bag: '<path d="M6 9h12v11H6z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/><line x1="10" y1="13" x2="14" y2="13"/>',
-    armorTab: '<path d="M8 4h8l1 4h-10zM7 8v12h10V8"/><path d="M7 12h10"/><circle cx="12" cy="16" r="1.5"/>',
-    people: '<circle cx="8" cy="8" r="3"/><path d="M3 19c0-3 2-5 5-5s5 2 5 5"/><circle cx="16" cy="8" r="3"/><path d="M13 19c0-3 2-5 5-5"/>',
-    vault: '<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M6 8V6a6 6 0 0 1 12 0v2"/><circle cx="12" cy="15" r="2"/><line x1="12" y1="17" x2="12" y2="19"/>',
-    // Stats
-    heart: '<path d="M12 21C8 17 3 13.5 3 9a4.5 4.5 0 0 1 9 0 4.5 4.5 0 0 1 9 0c0 4.5-5 8-9 12z"/>',
-    orb: '<circle cx="12" cy="12" r="7"/><path d="M12 5c-2 2-3 4-3 7s1 5 3 7"/><path d="M12 5c2 2 3 4 3 7s-1 5-3 7"/><path d="M5 12h14"/>',
-    coin: '<circle cx="12" cy="12" r="7"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="bold" fill="currentColor" stroke="none">G</text>',
-    flask: '<path d="M10 3h4v4l3 8v3a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-3l3-8z"/><line x1="9" y1="3" x2="15" y2="3"/><path d="M8 15h8"/>',
-    // Filters/Actions
-    star: '<path d="M12 3l2.5 5.5L20 9.5l-4 4 1 5.5L12 16.5 7 19l1-5.5-4-4 5.5-1z"/>',
-    star_f: '<path d="M12 3l2.5 5.5L20 9.5l-4 4 1 5.5L12 16.5 7 19l1-5.5-4-4 5.5-1z"/>',
-    gem: '<path d="M5 9l7-5 7 5-7 11z"/><path d="M5 9h14"/><line x1="12" y1="4" x2="12" y2="20"/>',
-    check: '<polyline points="4 12 9 17 20 6"/>',
-    check_f: '<path d="M4 12l5 5L20 6"/>',
-    sparkle: '<path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><path d="M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',
-    lock: '<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.5"/>',
-    unlock: '<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M16 11V7a4 4 0 0 0-8 0"/><circle cx="12" cy="16" r="1.5"/>',
-    trash: '<path d="M4 7h16"/><path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><path d="M9 4h6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
-    save: '<path d="M7 3h10l4 4v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><rect x="8" y="13" width="8" height="6"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="17" x2="13" y2="17"/>',
-    warn: '<path d="M12 3L2 20h20z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>',
-    listIcon: '<rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>',
-    abc: '<text x="4" y="16" font-size="11" font-weight="bold" fill="currentColor" stroke="none">Az</text>',
-    hammer: '<path d="M6 6h6v4H6z"/><line x1="9" y1="10" x2="9" y2="20"/><path d="M7 10h4"/>',
-    target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>',
-    person: '<circle cx="12" cy="7" r="4"/><path d="M5 21c0-4 3-7 7-7s7 3 7 7"/>',
-    backpack: '<rect x="6" y="8" width="12" height="13" rx="2"/><path d="M9 8V5a3 3 0 0 1 6 0v3"/><path d="M6 13h12"/><rect x="9" y="15" width="6" height="3" rx="1"/>',
-    quill: '<path d="M18 3c-3 1-6 5-8 10l-2 6 6-2c5-2 9-5 10-8"/><path d="M8 13l3 3"/>',
-    food: '<circle cx="10" cy="10" r="5"/><path d="M14 14l6 6"/><line x1="14" y1="7" x2="17" y2="7"/>',
-    stealth: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/><line x1="4" y1="20" x2="20" y2="4" stroke-width="2"/>',
-    tent: '<path d="M3 20L12 4l9 16z"/><line x1="12" y1="4" x2="12" y2="20"/><path d="M8 20c0-2 2-4 4-4s4 2 4 4"/>',
-    // Body silhouette (gender-neutral) for equipment view
-    gridView: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
-    listView: '<rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/>',
-    // Body silhouette (gender-neutral) for equipment view
-    body_silhouette: '<path d="M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" fill="rgba(255,255,255,0.06)" stroke-width="0.8"/>' +
-        '<path d="M8 9h8c1 0 2 1 2.5 3l1 4h-3l-.5-3H16v9h-3v-5h-2v5H8v-9h0l-.5 3H4.5l1-4C6 10 7 9 8 9z" fill="rgba(255,255,255,0.06)" stroke-width="0.8"/>',
-};
-function vi(name, sz) {
-    const p = _IC[name]; if (!p) return '';
-    const s = sz || 24;
-    return `<svg class="vi" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
-}
-function vi_f(name, sz) {
-    const p = _IC[name + '_f'] || _IC[name]; if (!p) return '';
-    const s = sz || 24;
-    return `<svg class="vi" width="${s}" height="${s}" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
-}
-var SLOT_ICONS = {
-    head: 'helm', chest: 'chest', shoulders: 'pauldron',
-    main_hand: 'sword', off_hand: 'shield', hands: 'gauntlet',
-    legs: 'greaves', feet: 'boot', cloak: 'cloak', belt: 'belt',
-    ring_1: 'ring', ring_2: 'ring', necklace: 'pendant',
-    amulet: 'pendant', map: 'scroll',
-};
-
-var SLOT_NAMES = {
-    head: 'Cabeça', chest: 'Tronco', shoulders: 'Ombros',
-    main_hand: 'M.Principal', off_hand: 'M.Secundária',
-    hands: 'Mãos', legs: 'Pernas', feet: 'Botas',
-    cloak: 'Capa', belt: 'Cinto',
-    ring_1: 'Anel 1', ring_2: 'Anel 2',
-    necklace: 'Pescoço', map: 'Mapa',
-};
-var SLOT_ORDER = [
-    'head', 'necklace', 'shoulders', 'cloak',
-    'chest', 'main_hand', 'off_hand', 'belt',
-    'hands', 'ring_1', 'legs', 'ring_2',
-    'feet', 'map',
-];
-var RARITY_ORDER = { common: 0, uncommon: 1, rare: 2, very_rare: 3, legendary: 4 };
-var RARITY_FALLBACK = {
-    common: { l: 'Comum', c: '#9e9e9e' },
-    uncommon: { l: 'Incomum', c: '#4caf50' },
-    rare: { l: 'Raro', c: '#2196f3' },
-    very_rare: { l: 'Muito Raro', c: '#9c27b0' },
-    legendary: { l: 'Lendário', c: '#ff9800' },
-};
-var RUNE_ELIGIBLE = new Set([
-    'main_hand', 'off_hand', 'chest', 'head', 'hands', 'feet', 'legs', 'cloak', 'necklace'
-]);
-var TAG_LABELS = {
-    weapon: 'Arma', simple_weapon: 'Arma Simples', martial_weapon: 'Arma Marcial',
-    armor: 'Armadura', shield: 'Escudo', clothing: 'Vestimenta',
-    light_armor: 'Armadura Leve', medium_armor: 'Armadura Média', heavy_armor: 'Armadura Pesada',
-    consumable: 'Consumível', potion: 'Poção', food: 'Alimento',
-    gem: 'Gema', socketable: 'Encaixável', rune: 'Runa',
-    tool: 'Ferramenta', camping: 'Acampamento',
-    junk: 'Sucata', bone: 'Osso', monster_part: 'Despojo', trophy: 'Troféu',
-    valuable: 'Tesouro', material: 'Material', metal: 'Metal', leather: 'Couro',
-    alchemy: 'Alquimia', accessory: 'Acessório',
-    quest: 'Missão', mission_item: 'Item de Missão', key: 'Chave',
-    map: 'Mapa', map_fragment: 'Fragmento de Mapa',
-    no_sell: 'Invendável', no_discard: 'Indescartável',
-    story_item: 'Item de História', unique: 'Único',
-    two_handed: 'Duas Mãos', versatile: 'Versátil', finesse: 'Acuidade',
-    ranged: 'À Distância', thrown: 'Arremesso', ammunition: 'Munição',
-    melee: 'Corpo a Corpo', reach: 'Alcance', loading: 'Recarga',
-    light: 'Leve', heavy: 'Pesada',
-};
-var SORT_LABELS = {
-    default: `${vi('listIcon', 13)} Padrão`, name: `${vi('abc', 13)} Nome`,
-    rarity: `${vi('sparkle', 13)} Raridade`, value: `${vi('coin', 13)} Valor`,
-};
-var SORT_CYCLE = ['default', 'name', 'rarity', 'value'];
-
-// ── Rarity config (from payload or fallback) ──
-function getRarityConfig() { return D?.ref?.rar || RARITY_FALLBACK; }
-function getRarityLabel(r) { return (getRarityConfig()[r] || RARITY_FALLBACK.common).l; }
-function getRarityColor(r) { return (getRarityConfig()[r] || RARITY_FALLBACK.common).c; }
-
-// ── UTF-8 Base64 Decode ──
-function decodeBase64Utf8(b64) {
-    const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
-    const binary = atob(raw);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return new TextDecoder().decode(bytes);
-}
-
-// ── Init ──
-// ── Dynamic Bottom Padding (Game Hub pattern) ──
-function updateBottomPadding() {
-    const panel = document.getElementById('bottomPanel');
-    const toggle = document.getElementById('immersive-toggle');
-    if (!panel) return;
-    requestAnimationFrame(() => {
-        if (panel.classList.contains('immersive-collapsed')) return;
-        const h = Math.max(panel.offsetHeight, 48);
-        // +40 = 32px immersive toggle height + 8px gap
-        document.body.style.paddingBottom = (h + 40) + 'px';
-        document.documentElement.style.setProperty('--bottom-panel-h', h + 'px');
-        if (toggle) toggle.style.bottom = h + 'px';
-    });
-}
-
-// ── Immersive Mode (shared pattern — localStorage 'valdoria_immersive') ──
-function initImmersive() {
-    if (window._invPopupMode) return; // Popup mode: overlay is already fullscreen
-    const toggle = document.getElementById('immersive-toggle');
-    const restore = document.getElementById('immersive-restore');
-    const panel = document.getElementById('bottomPanel');
-    if (!toggle || !restore || !panel) return;
-
-    function applyState(collapsed) {
-        if (collapsed) {
-            panel.classList.add('immersive-collapsed');
-            toggle.style.display = 'none';
-            restore.style.display = '';
-            // Collapsed: minimal padding for restore pill only
-            document.body.style.paddingBottom = '48px';
-        } else {
-            panel.classList.remove('immersive-collapsed');
-            toggle.style.display = '';
-            restore.style.display = 'none';
-            // Expanded: delegate to updateBottomPadding() for proper coordination
-            updateBottomPadding();
-        }
-    }
-
-    const saved = localStorage.getItem('valdoria_immersive') === 'true';
-    applyState(saved);
-
-    toggle.addEventListener('click', () => {
-        localStorage.setItem('valdoria_immersive', 'true');
-        applyState(true);
-    });
-    restore.addEventListener('click', () => {
-        localStorage.setItem('valdoria_immersive', 'false');
-        applyState(false);
-    });
-}
-
-function init() {
-    // Ambient music
-    if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('city');
-
-    // Dual-mode: SPA route params or URL query params
-    const _spaP = window.__spaRouteParams || {};
-    const params = new URLSearchParams(location.search);
-    if (_spaP) { Object.keys(_spaP).forEach(function(k) { if (!params.has(k)) params.set(k, _spaP[k]); }); }
-    const b64 = params.get('data');
-    if (!b64) { hideLoading(); _showInitError('Dados não encontrados.'); return; }
-    try {
-        D = JSON.parse(decodeBase64Utf8(b64));
-    } catch (e) { console.error('[INVENTORY] Erro ao decodificar dados', e); hideLoading(); _showInitError('Erro ao decodificar dados.'); return; }
-
-    // Init local state from payload
-    localEq = Object.assign({}, D.eq || {});
-    localInv = (D.inv || []).map(i => ({ ...i }));
-    localGold = D.p.g || 0;
-    localHP = D.p.hp || 0;
-    localMP = D.p.mp || 0;
-    localPotions = D.p.pot || 0;
-    localFavs = D.fav ? [...D.fav] : [];
-    localLocked = D.lck ? [...D.lck] : [];
-    localGems = {};
-    if (D.gems) {
-        for (const [k, v] of Object.entries(D.gems))
-            localGems[k] = [...v];
-    }
-    localRunes = D.runes ? { ...D.runes } : {};
-    localAllyEq = {};
-    if (D.allies) {
-        for (const a of D.allies)
-            localAllyEq[a.id] = Object.assign({}, a.eq || {});
-    }
-
-    // Dynamic body padding based on bottom panel height
-    updateBottomPadding();
-
-    hideLoading();
-    _initViewedItems();
-    updateHeader();
-    buildTabs();
-    renderTab();
-    initSwipeToDismiss();
-    _initTabSwipe();
-    _initLongPress();
-    initBackButton();
-    _initNavBar();
-    initImmersive();
-}
-
-function hideLoading() {
-    if (window._invLoadingCtrl) {
-        window._invLoadingCtrl.hide();
-    } else {
-        document.getElementById('loadingOverlay').classList.add('hidden');
-    }
-}
-
-function _showInitError(msg) {
-    console.error('[INVENTORY]', msg);
-    document.getElementById('mainContent').innerHTML =
-        `<div class="empty-state"><div class="icon">${vi('warn', 32)}</div><p>${msg}</p></div>`;
-}
-
-// ── Haptic feedback ──
-function haptic(type) {
-    if (window.vHaptic) vHaptic.impact(type || 'light');
-}
-function hapticNotify(type) {
-    if (window.vHaptic) vHaptic.notify(type || 'error');
-}
-
-// ── Header ──
-var _acDirty = true, _acCached = 0;
-function calcLocalAC() {
-    if (!_acDirty) return _acCached;
-    // Base AC from server (includes DEX, class features, unarmored defense)
-    // We adjust by calculating the delta between original equipment bonuses and current
-    let origEqAC = 0;
-    for (const item of Object.values(D.eq || {})) {
-        if (!item) continue;
-        const it = getItemData(item);
-        origEqAC += it.ac || 0;
-        // Original gem bonuses
-        const origGems = (D.gems || {})[getSlotForItem(item, D.eq)] || [];
-        origGems.forEach(g => { if (g) { const gd = getItemData(g); origEqAC += gd.gb?.ac_bonus || 0; } });
-    }
-    let newEqAC = 0;
-    for (const [slot, item] of Object.entries(localEq)) {
-        if (!item) continue;
-        const it = getItemData(item);
-        newEqAC += it.ac || 0;
-        const gems = localGems[slot] || [];
-        gems.forEach(g => { if (g) { const gd = getItemData(g); newEqAC += gd.gb?.ac_bonus || 0; } });
-    }
-    localAC = D.p.ac + (newEqAC - origEqAC);
-    _acCached = localAC;
-    _acDirty = false;
-    return localAC;
-}
-
-function getSlotForItem(itemName, eq) {
-    for (const [slot, name] of Object.entries(eq || {})) { if (name === itemName) return slot; }
-    return '';
-}
-
-function updateHeader() {
-    calcLocalAC();
-    const s = document.getElementById('headerStats');
-    const potStr = localPotions > 0 ? `<span class="hs-hp hs-potion" onclick="quickUsePotion()" title="Usar Poção">${vi('flask', 12)} ${localPotions}</span>` : '';
-    let buffsStr = '';
-    if (D.buffs && D.buffs.length > 0) {
-        buffsStr = D.buffs.map(b =>
-            `<span style="font-size:10px;opacity:0.8;">${b.i}${b.c}</span>`
-        ).join('');
-    }
-    const combatBadge = _combatMode ? '<span style="font-size:10px;color:#e44;font-weight:700">⚔️ COMBATE</span>' : '';
-    // #9: Item count badge
-    const _itemCount = localInv.reduce((s, i) => s + (i.q > 0 ? i.q : 0), 0) + localPotions;
-    // #3: Equipment Power Score
-    let _pwrScore = 0;
-    for (const [_ps, _pi] of Object.entries(localEq)) {
-        if (!_pi) continue;
-        const _pd = getItemData(_pi);
-        _pwrScore += (_pd.ac || 0) + (_pd.b || 0) + (_pd.hb || 0) + (_pd.mb || 0);
-    }
-    const pwrStr = _pwrScore > 0 ? `<span class="hs-power">${vi('sparkle', 12)} ${_pwrScore}</span>` : '';
-    s.innerHTML = `
+var tg=window.Telegram?.WebApp;var _vBg=getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim()||'#2a2420';if(tg&&!window._invPopupMode){tg.ready();tg.expand();tg.setHeaderColor(_vBg);tg.setBackgroundColor(_vBg);}
+if(window.ValdoriaErrors){ValdoriaErrors.init({appName:'INVENTORY'});}
+var D=null;var activeTab='items';var activeFilter='all';var searchQuery='';var sortMode='default';var pendingOps=[];var localEq={};var localInv=[];var localAllyEq={};var localGems={};var localRunes={};var localGold=0;var localHP=0;var localMP=0;var localPotions=0;var localFavs=[];var localLocked=[];var localAC=0;var activeTarget='player';var selectionMode=false;var selectedItems=new Set();var viewMode=localStorage.getItem('valdoria_inv_view')||'compact';var viewedItems=null;var _IC={helm:'<path d="M6 19h12M7 19v-3c0-5 2-9 5-11 3 2 5 6 5 11v3"/><path d="M7 12h10"/>',chest:'<path d="M8 4h8l2 6v10H6V10z"/><path d="M6 10h12"/><line x1="12" y1="10" x2="12" y2="20"/>',pauldron:'<path d="M4 14c0-5 3-9 8-10 5 1 8 5 8 10"/><path d="M7 10c0-3 2-5 5-6 3 1 5 3 5 6"/>',sword:'<line x1="5" y1="19" x2="19" y2="5"/><line x1="14" y1="5" x2="19" y2="10"/><line x1="5" y1="15" x2="9" y2="19"/><circle cx="7" cy="17" r="1"/>',shield:'<path d="M12 3L4 7v5c0 5 3.5 9.7 8 11 4.5-1.3 8-6 8-11V7z"/>',gauntlet:'<path d="M8 20V10l-2-3v-2h2l1 2h6l1-2h2v2l-2 3v10z"/><path d="M8 14h8"/>',greaves:'<path d="M8 4v14l-1 3h3l1-3h2l1 3h3l-1-3V4z"/><path d="M8 10h8"/>',boot:'<path d="M8 4v12l-2 2v2h12v-2l-2-4V4z"/><path d="M6 18h12"/>',cloak:'<path d="M9 4c-4 3-5 8-5 12h4c0-2 1-3 4-3s4 1 4 3h4c0-4-1-9-5-12"/><path d="M10 4h4"/>',belt:'<rect x="4" y="10" width="16" height="4" rx="1"/><rect x="10" y="9" width="4" height="6" rx="1"/>',ring:'<circle cx="12" cy="13" r="5"/><circle cx="12" cy="8" r="2"/>',pendant:'<path d="M8 4h8"/><path d="M10 4v4l2 3 2-3V4"/><circle cx="12" cy="15" r="3"/>',scroll:'<path d="M7 5c-1 0-2 1-2 2v10c0 1 1 2 2 2"/><path d="M17 5c1 0 2 1 2 2v10c0 1-1 2-2 2"/><rect x="7" y="5" width="10" height="14" rx="1"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="15" x2="13" y2="15"/>',bag:'<path d="M6 9h12v11H6z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/><line x1="10" y1="13" x2="14" y2="13"/>',armorTab:'<path d="M8 4h8l1 4h-10zM7 8v12h10V8"/><path d="M7 12h10"/><circle cx="12" cy="16" r="1.5"/>',people:'<circle cx="8" cy="8" r="3"/><path d="M3 19c0-3 2-5 5-5s5 2 5 5"/><circle cx="16" cy="8" r="3"/><path d="M13 19c0-3 2-5 5-5"/>',vault:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M6 8V6a6 6 0 0 1 12 0v2"/><circle cx="12" cy="15" r="2"/><line x1="12" y1="17" x2="12" y2="19"/>',heart:'<path d="M12 21C8 17 3 13.5 3 9a4.5 4.5 0 0 1 9 0 4.5 4.5 0 0 1 9 0c0 4.5-5 8-9 12z"/>',orb:'<circle cx="12" cy="12" r="7"/><path d="M12 5c-2 2-3 4-3 7s1 5 3 7"/><path d="M12 5c2 2 3 4 3 7s-1 5-3 7"/><path d="M5 12h14"/>',coin:'<circle cx="12" cy="12" r="7"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="bold" fill="currentColor" stroke="none">G</text>',flask:'<path d="M10 3h4v4l3 8v3a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-3l3-8z"/><line x1="9" y1="3" x2="15" y2="3"/><path d="M8 15h8"/>',star:'<path d="M12 3l2.5 5.5L20 9.5l-4 4 1 5.5L12 16.5 7 19l1-5.5-4-4 5.5-1z"/>',star_f:'<path d="M12 3l2.5 5.5L20 9.5l-4 4 1 5.5L12 16.5 7 19l1-5.5-4-4 5.5-1z"/>',gem:'<path d="M5 9l7-5 7 5-7 11z"/><path d="M5 9h14"/><line x1="12" y1="4" x2="12" y2="20"/>',check:'<polyline points="4 12 9 17 20 6"/>',check_f:'<path d="M4 12l5 5L20 6"/>',sparkle:'<path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><path d="M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',lock:'<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.5"/>',unlock:'<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M16 11V7a4 4 0 0 0-8 0"/><circle cx="12" cy="16" r="1.5"/>',trash:'<path d="M4 7h16"/><path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><path d="M9 4h6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',save:'<path d="M7 3h10l4 4v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><rect x="8" y="13" width="8" height="6"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="17" x2="13" y2="17"/>',warn:'<path d="M12 3L2 20h20z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>',listIcon:'<rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>',abc:'<text x="4" y="16" font-size="11" font-weight="bold" fill="currentColor" stroke="none">Az</text>',hammer:'<path d="M6 6h6v4H6z"/><line x1="9" y1="10" x2="9" y2="20"/><path d="M7 10h4"/>',target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>',person:'<circle cx="12" cy="7" r="4"/><path d="M5 21c0-4 3-7 7-7s7 3 7 7"/>',backpack:'<rect x="6" y="8" width="12" height="13" rx="2"/><path d="M9 8V5a3 3 0 0 1 6 0v3"/><path d="M6 13h12"/><rect x="9" y="15" width="6" height="3" rx="1"/>',quill:'<path d="M18 3c-3 1-6 5-8 10l-2 6 6-2c5-2 9-5 10-8"/><path d="M8 13l3 3"/>',food:'<circle cx="10" cy="10" r="5"/><path d="M14 14l6 6"/><line x1="14" y1="7" x2="17" y2="7"/>',stealth:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/><line x1="4" y1="20" x2="20" y2="4" stroke-width="2"/>',tent:'<path d="M3 20L12 4l9 16z"/><line x1="12" y1="4" x2="12" y2="20"/><path d="M8 20c0-2 2-4 4-4s4 2 4 4"/>',gridView:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',listView:'<rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/>',body_silhouette:'<path d="M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" fill="rgba(255,255,255,0.06)" stroke-width="0.8"/>'+'<path d="M8 9h8c1 0 2 1 2.5 3l1 4h-3l-.5-3H16v9h-3v-5h-2v5H8v-9h0l-.5 3H4.5l1-4C6 10 7 9 8 9z" fill="rgba(255,255,255,0.06)" stroke-width="0.8"/>',};function vi(name,sz){const p=_IC[name];if(!p)return'';const s=sz||24;return`<svg class="vi" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;}
+function vi_f(name,sz){const p=_IC[name+'_f']||_IC[name];if(!p)return'';const s=sz||24;return`<svg class="vi" width="${s}" height="${s}" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;}
+var SLOT_ICONS={head:'helm',chest:'chest',shoulders:'pauldron',main_hand:'sword',off_hand:'shield',hands:'gauntlet',legs:'greaves',feet:'boot',cloak:'cloak',belt:'belt',ring_1:'ring',ring_2:'ring',necklace:'pendant',amulet:'pendant',map:'scroll',};var SLOT_NAMES={head:'Cabeça',chest:'Tronco',shoulders:'Ombros',main_hand:'M.Principal',off_hand:'M.Secundária',hands:'Mãos',legs:'Pernas',feet:'Botas',cloak:'Capa',belt:'Cinto',ring_1:'Anel 1',ring_2:'Anel 2',necklace:'Pescoço',map:'Mapa',};var SLOT_ORDER=['head','necklace','shoulders','cloak','chest','main_hand','off_hand','belt','hands','ring_1','legs','ring_2','feet','map',];var RARITY_ORDER={common:0,uncommon:1,rare:2,very_rare:3,legendary:4};var RARITY_FALLBACK={common:{l:'Comum',c:'#9e9e9e'},uncommon:{l:'Incomum',c:'#4caf50'},rare:{l:'Raro',c:'#2196f3'},very_rare:{l:'Muito Raro',c:'#9c27b0'},legendary:{l:'Lendário',c:'#ff9800'},};var RUNE_ELIGIBLE=new Set(['main_hand','off_hand','chest','head','hands','feet','legs','cloak','necklace']);var TAG_LABELS={weapon:'Arma',simple_weapon:'Arma Simples',martial_weapon:'Arma Marcial',armor:'Armadura',shield:'Escudo',clothing:'Vestimenta',light_armor:'Armadura Leve',medium_armor:'Armadura Média',heavy_armor:'Armadura Pesada',consumable:'Consumível',potion:'Poção',food:'Alimento',gem:'Gema',socketable:'Encaixável',rune:'Runa',tool:'Ferramenta',camping:'Acampamento',junk:'Sucata',bone:'Osso',monster_part:'Despojo',trophy:'Troféu',valuable:'Tesouro',material:'Material',metal:'Metal',leather:'Couro',alchemy:'Alquimia',accessory:'Acessório',quest:'Missão',mission_item:'Item de Missão',key:'Chave',map:'Mapa',map_fragment:'Fragmento de Mapa',no_sell:'Invendável',no_discard:'Indescartável',story_item:'Item de História',unique:'Único',two_handed:'Duas Mãos',versatile:'Versátil',finesse:'Acuidade',ranged:'À Distância',thrown:'Arremesso',ammunition:'Munição',melee:'Corpo a Corpo',reach:'Alcance',loading:'Recarga',light:'Leve',heavy:'Pesada',};var SORT_LABELS={default:`${vi('listIcon', 13)} Padrão`,name:`${vi('abc', 13)} Nome`,rarity:`${vi('sparkle', 13)} Raridade`,value:`${vi('coin', 13)} Valor`,};var SORT_CYCLE=['default','name','rarity','value'];function getRarityConfig(){return D?.ref?.rar||RARITY_FALLBACK;}
+function getRarityLabel(r){return(getRarityConfig()[r]||RARITY_FALLBACK.common).l;}
+function getRarityColor(r){return(getRarityConfig()[r]||RARITY_FALLBACK.common).c;}
+function decodeBase64Utf8(b64){const raw=b64.replace(/-/g,'+').replace(/_/g,'/');const binary=atob(raw);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new TextDecoder().decode(bytes);}
+function updateBottomPadding(){const panel=document.getElementById('bottomPanel');const toggle=document.getElementById('immersive-toggle');if(!panel)return;requestAnimationFrame(()=>{if(panel.classList.contains('immersive-collapsed'))return;const h=Math.max(panel.offsetHeight,48);document.body.style.paddingBottom=(h+40)+'px';document.documentElement.style.setProperty('--bottom-panel-h',h+'px');if(toggle)toggle.style.bottom=h+'px';});}
+function initImmersive(){if(window._invPopupMode)return;const toggle=document.getElementById('immersive-toggle');const restore=document.getElementById('immersive-restore');const panel=document.getElementById('bottomPanel');if(!toggle||!restore||!panel)return;function applyState(collapsed){if(collapsed){panel.classList.add('immersive-collapsed');toggle.style.display='none';restore.style.display='';document.body.style.paddingBottom='48px';}else{panel.classList.remove('immersive-collapsed');toggle.style.display='';restore.style.display='none';updateBottomPadding();}}
+const saved=localStorage.getItem('valdoria_immersive')==='true';applyState(saved);toggle.addEventListener('click',()=>{localStorage.setItem('valdoria_immersive','true');applyState(true);});restore.addEventListener('click',()=>{localStorage.setItem('valdoria_immersive','false');applyState(false);});}
+function init(){if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');const _spaP=window.__spaRouteParams||{};const params=new URLSearchParams(location.search);if(_spaP){Object.keys(_spaP).forEach(function(k){if(!params.has(k))params.set(k,_spaP[k]);});}
+const b64=params.get('data');if(!b64){hideLoading();_showInitError('Dados não encontrados.');return;}
+try{D=JSON.parse(decodeBase64Utf8(b64));}catch(e){console.error('[INVENTORY] Erro ao decodificar dados',e);hideLoading();_showInitError('Erro ao decodificar dados.');return;}
+localEq=Object.assign({},D.eq||{});localInv=(D.inv||[]).map(i=>({...i}));localGold=D.p.g||0;localHP=D.p.hp||0;localMP=D.p.mp||0;localPotions=D.p.pot||0;localFavs=D.fav?[...D.fav]:[];localLocked=D.lck?[...D.lck]:[];localGems={};if(D.gems){for(const[k,v]of Object.entries(D.gems))
+localGems[k]=[...v];}
+localRunes=D.runes?{...D.runes}:{};localAllyEq={};if(D.allies){for(const a of D.allies)
+localAllyEq[a.id]=Object.assign({},a.eq||{});}
+updateBottomPadding();hideLoading();_initViewedItems();updateHeader();buildTabs();renderTab();initSwipeToDismiss();_initTabSwipe();_initLongPress();initBackButton();_initNavBar();initImmersive();}
+function hideLoading(){if(window._invLoadingCtrl){window._invLoadingCtrl.hide();}else{document.getElementById('loadingOverlay').classList.add('hidden');}}
+function _showInitError(msg){console.error('[INVENTORY]',msg);document.getElementById('mainContent').innerHTML=`<div class="empty-state"><div class="icon">${vi('warn', 32)}</div><p>${msg}</p></div>`;}
+function haptic(type){if(window.vHaptic)vHaptic.impact(type||'light');}
+function hapticNotify(type){if(window.vHaptic)vHaptic.notify(type||'error');}
+var _acDirty=true,_acCached=0;function calcLocalAC(){if(!_acDirty)return _acCached;let origEqAC=0;for(const item of Object.values(D.eq||{})){if(!item)continue;const it=getItemData(item);origEqAC+=it.ac||0;const origGems=(D.gems||{})[getSlotForItem(item,D.eq)]||[];origGems.forEach(g=>{if(g){const gd=getItemData(g);origEqAC+=gd.gb?.ac_bonus||0;}});}
+let newEqAC=0;for(const[slot,item]of Object.entries(localEq)){if(!item)continue;const it=getItemData(item);newEqAC+=it.ac||0;const gems=localGems[slot]||[];gems.forEach(g=>{if(g){const gd=getItemData(g);newEqAC+=gd.gb?.ac_bonus||0;}});}
+localAC=D.p.ac+(newEqAC-origEqAC);_acCached=localAC;_acDirty=false;return localAC;}
+function getSlotForItem(itemName,eq){for(const[slot,name]of Object.entries(eq||{})){if(name===itemName)return slot;}
+return'';}
+function updateHeader(){calcLocalAC();const s=document.getElementById('headerStats');const potStr=localPotions>0?`<span class="hs-hp hs-potion" onclick="quickUsePotion()" title="Usar Poção">${vi('flask', 12)} ${localPotions}</span>`:'';let buffsStr='';if(D.buffs&&D.buffs.length>0){buffsStr=D.buffs.map(b=>`<span style="font-size:10px;opacity:0.8;">${b.i}${b.c}</span>`).join('');}
+const combatBadge=_combatMode?'<span style="font-size:10px;color:#e44;font-weight:700">⚔️ COMBATE</span>':'';const _itemCount=localInv.reduce((s,i)=>s+(i.q>0?i.q:0),0)+localPotions;let _pwrScore=0;for(const[_ps,_pi]of Object.entries(localEq)){if(!_pi)continue;const _pd=getItemData(_pi);_pwrScore+=(_pd.ac||0)+(_pd.b||0)+(_pd.hb||0)+(_pd.mb||0);}
+const pwrStr=_pwrScore>0?`<span class="hs-power">${vi('sparkle', 12)} ${_pwrScore}</span>`:'';s.innerHTML=`
             <span>${D.p.n}</span>
             ${combatBadge}
             <span class="hs-hp">${vi('heart', 12)} ${localHP}/${D.p.mhp}</span>
@@ -363,474 +38,64 @@ function updateHeader() {
             ${potStr}${pwrStr}
             <span class="hs-count">${vi('backpack', 12)} ${_itemCount}</span>
             ${buffsStr}
-        `;
-}
-
-function quickUsePotion() {
-    if (localPotions <= 0) return;
-    // If HP already max, toast and return
-    if (localHP >= D.p.mhp) { toast(vi('heart', 13) + ' HP já está no máximo!', 'warn'); return; }
-    addOp({ t: 'use', item: 'potion', tgt: 'player' });
-    localPotions--;
-    const oldHP = localHP;
-    localHP = Math.min(D.p.mhp, localHP + 7);
-    haptic('medium');
-    toast(vi('flask', 13) + ' Poção usada (~+' + (localHP - oldHP) + ' HP)', 'ok');
-    animateStat('hs-hp');
-    updateHeader();
-    renderTab();
-    updateBottomBar();
-}
-
-function animateStat(cls) {
-    const el = document.querySelector(`.${cls}`);
-    if (el) {
-        el.classList.remove('stat-pop');
-        void el.offsetWidth; el.classList.add('stat-pop');
-    }
-}
-
-// ── Tabs ──
-function buildTabs() {
-    const bar = document.getElementById('tabsBar');
-    const tabs = [
-        { id: 'items', label: `${vi('bag', 15)} Itens` },
-        { id: 'equip', label: `${vi('armorTab', 15)} Equipamento` },
-    ];
-    // Allies tab removed — allies accessible via Equipment sub-nav
-    if (D.bank) tabs.push({ id: 'bank', label: `${vi('vault', 15)} Cofre` });
-    bar.innerHTML = tabs.map(t =>
-        `<div class="tab ${t.id === activeTab ? 'active' : ''}" onclick="switchTab('${t.id}')">${t.label}</div>`
-    ).join('');
-}
-
-function switchTab(id) {
-    activeTab = id;
-    activeTarget = 'player';
-    if (selectionMode) { selectionMode = false; selectedItems.clear(); updateSelectionBar(); }
-    buildTabs();
-    renderTab();
-    haptic('light');
-}
-
-function renderTab() {
-    const c = document.getElementById('mainContent');
-    c.classList.remove('tab-entering');
-    void c.offsetWidth;
-    c.classList.add('tab-entering');
-    if (activeTab === 'items') renderItemsTab(c);
-    else if (activeTab === 'equip') renderEquipTab(c);
-    // allies tab removed
-    else if (activeTab === 'bank') renderBankTab(c);
-}
-
-// ── Local inventory management ──
-function addToLocalInv(name) {
-    const existing = localInv.find(i => i.n === name);
-    if (existing) { existing.q++; }
-    else { localInv.push({ n: name, q: 1, id: 'new' }); }
-}
-
-function removeFromLocalInv(name) {
-    const existing = localInv.find(i => i.n === name);
-    if (existing) {
-        existing.q--;
-        if (existing.q <= 0) {
-            localInv = localInv.filter(i => i.n !== name);
-        }
-    } else {
-        console.warn('[INVENTORY] removeFromLocalInv: not found:', name);
-    }
-}
-
-// ── Operations ──
-function addOp(op) {
-    pendingOps.push(op);
-    updateBottomBar();
-}
-
-function updateBottomBar() {
-    const count = document.getElementById('opsCount');
-    const btn = document.getElementById('confirmBtn');
-    const section = document.getElementById('opsSection');
-    if (pendingOps.length > 0) {
-        count.innerHTML = `${vi('quill', 13)} ${pendingOps.length} alteração(ões) · <span style="color:var(--v-text-dim);cursor:pointer;text-decoration:underline;" onclick="resetAllOps()">descartar</span>`;
-        btn.classList.remove('hidden');
-        if (section) section.classList.remove('hidden');
-    } else {
-        count.textContent = '';
-        btn.classList.add('hidden');
-        if (section) section.classList.add('hidden');
-    }
-    // Recalculate padding after ops section show/hide changes panel height
-    updateBottomPadding();
-}
-
-function resetAllOps() {
-    pendingOps = [];
-    localEq = Object.assign({}, D.eq || {});
-    localInv = (D.inv || []).map(i => ({ ...i }));
-    localGold = D.p.g || 0;
-    localHP = D.p.hp || 0;
-    localMP = D.p.mp || 0;
-    localPotions = D.p.pot || 0;
-    localFavs = D.fav ? [...D.fav] : [];
-    localLocked = D.lck ? [...D.lck] : [];
-    localGems = {};
-    if (D.gems) {
-        for (const [k, v] of Object.entries(D.gems))
-            localGems[k] = [...v];
-    }
-    localRunes = D.runes ? { ...D.runes } : {};
-    localAllyEq = {};
-    if (D.allies) {
-        for (const a of D.allies)
-            localAllyEq[a.id] = Object.assign({}, a.eq || {});
-    }
-    closeModal();
-    updateHeader();
-    renderTab();
-    updateBottomBar();
-    haptic('light');
-    toast(`${vi('sparkle', 13)} Alterações descartadas`, 'warn');
-}
-
-// ── Modal ──
-var _modalOpen = false;
-function showModal(html) {
-    document.getElementById('modalContent').innerHTML = html;
-    document.getElementById('modalOverlay').classList.add('visible');
-    if (!_modalOpen) {
-        _modalOpen = true;
-    }
-}
-
-function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('visible');
-    if (_modalOpen) {
-        _modalOpen = false;
-    }
-}
-
-function closeModalOutside(e) {
-    if (e.target === document.getElementById('modalOverlay')) closeModal();
-}
-
-// ── Swipe to dismiss ──
-function initSwipeToDismiss() {
-    const modal = document.getElementById('modalContent');
-    let startY = 0, currentY = 0, isDragging = false;
-
-    modal.addEventListener('touchstart', e => {
-        const handle = modal.querySelector('.modal-handle');
-        if (!handle) return;
-        // Only activate if touching near the top (handle area)
-        const rect = modal.getBoundingClientRect();
-        const touchY = e.touches[0].clientY - rect.top;
-        if (touchY > 40) return;
-        startY = e.touches[0].clientY;
-        isDragging = true;
-        modal.style.transition = 'none';
-    }, { passive: true });
-
-    modal.addEventListener('touchmove', e => {
-        if (!isDragging) return;
-        currentY = e.touches[0].clientY;
-        const diff = currentY - startY;
-        if (diff > 0) {
-            modal.style.transform = `translateY(${diff}px)`;
-        }
-    }, { passive: true });
-
-    modal.addEventListener('touchend', () => {
-        if (!isDragging) return;
-        isDragging = false;
-        modal.style.transition = 'transform 0.3s ease-out';
-        const diff = currentY - startY;
-        if (diff > 100) {
-            closeModal();
-        }
-        modal.style.transform = '';
-    }, { passive: true });
-}
-
-
-
-function discardAndExit() {
-    pendingOps = [];
-    closeModal();
-    _performExit();
-}
-
-function initBackButton() {
-    if (window._invPopupMode) return; // Popup mode: no Telegram BackButton
-    try {
-        if (tg?.BackButton) {
-            tg.BackButton.show();
-            // [EXIT-CONFIRM] Inventory overrides BackButton because _navigateBack()
-            // has conditional logic (close modals, save pending ops, then exit).
-            // exit-confirm.js popup is triggered via __valdoriaExitAction instead.
-            tg.BackButton.onClick(() => { _navigateBack(); });
-        }
-        // [EXIT-CONFIRM] Custom exit: actually close the WebApp
-        // "Sair" from exit-confirm means close entirely, NOT transition
-        window.__valdoriaExitAction = function() {
-            try { if (tg) tg.close(); } catch(e) { console.warn('[INVENTORY] tg.close:', e); }
-        };
-    } catch(e) { console.warn('[INVENTORY] BackButton setup:', e); }
-}
-
-// ── Nav Bar Actions ──
-var _RETURN_LABELS = {
-    game: '🏘️ Cidade',
-    explore: '🗺️ Mapa',
-    combat: '⚔️ Combate',
-    arena: '⚔️ Combate',
-};
-
-function _initNavBar() {
-    // Nav bar removed — BackButton handled by initBackButton()
-}
-
-function navBack() {
-    haptic('light');
-    // If modal is open, close it first
-    if (_modalOpen) { closeModal(); return; }
-    // If viewing ally equipment, go back to allies list
-    if (activeTarget !== 'player') { switchTab('allies'); return; }
-    // If pending ops, show confirm
-    if (pendingOps.length > 0) { _showPendingOpsExitConfirm(); return; }
-    // Transition back to game hub directly (no exit-confirm popup)
-    _performExit();
-}
-
-function navCharSheet() {
-    haptic('light');
-    if (pendingOps.length > 0) { sendOps(); return; }
-    if (window._invPopupMode && typeof hideInventoryPopup === 'function') {
-        hideInventoryPopup();
-        setTimeout(function() { if (typeof doAction === 'function') doAction('action_status'); }, 300);
-        return;
-    }
-    const tg = window.Telegram?.WebApp;
-    if (tg?.sendData) {
-        try { tg.sendData(JSON.stringify({ action: 'action_status' })); } catch (e) { console.warn('[INVENTORY] sendData:', e); }
-    }
-    try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
-}
-
-function navMenu() {
-    haptic('light');
-    if (pendingOps.length > 0) { sendOps(); return; }
-    if (window._invPopupMode && typeof hideInventoryPopup === 'function') {
-        hideInventoryPopup();
-        return;
-    }
-    try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] tg.close:', e); }
-}
-
-async function _transitionTo(target, payload = {}) {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-        const _lt = overlay.querySelector('.loading-text'); if (_lt) _lt.textContent = 'Navegando...';
-        overlay.classList.remove('hidden');
-    }
-    if (_apiBase) {
-        try {
-            const _th = {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + _apiToken,
-            };
-            if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
-            _th['X-Idempotency-Key'] = crypto.randomUUID();
-            const resp = await fetchT(_apiBase + '/api/webapp/transition', {
-                method: 'POST',
-                headers: _th,
-                body: JSON.stringify({
-                    from: 'inventory', to: target,
-                    user_id: parseInt(_apiUid),
-                    payload,
-                }),
-            });
-            if (resp.status === 401 || resp.status === 403) {
-                console.error('[INVENTORY] Auth error on transition:', resp.status);
-                const tg = window.Telegram?.WebApp;
-                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' })); setTimeout(function () { if (tg.close) tg.close(); }, 1000); return; }
-            }
-            if (resp.ok) {
-                const data = await resp.json();
-                if (data.url) {
-                    window.__valdoria_transitioning = true;
-                    valdoriaSpaNav(data.url);
-                    return;
-                }
-            }
-            console.error('[INVENTORY] Nav transition failed');
-        } catch (e) {
-            console.error('[INVENTORY] Nav transition error:', e);
-        }
-    }
-    // Fallback: close
-    if (overlay) overlay.classList.add('hidden');
-    try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
-}
-
-// ── Toast ──
-function toast(msg, type) {
-    // Delegate to shared toast component (shared/toast.js)
-    vToast(msg, type || 'ok');
-}
-
-// ── Escape for onclick attributes & HTML context ──
-function esc(s) {
-    return (s || '').replace(/\\/g, '\\\\').replace(/&/g, '&amp;').replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-}
-
-// ── New Item Tracking (blue dot) ──
-function _initViewedItems() {
-    try {
-        const stored = localStorage.getItem('valdoria_inv_viewed');
-        if (stored) {
-            viewedItems = new Set(JSON.parse(stored));
-        } else {
-            // First visit: mark all current items as viewed (avoid flood of dots)
-            viewedItems = new Set(localInv.map(i => i.n));
-            _saveViewedItems();
-        }
-    } catch(e) {
-        viewedItems = new Set(localInv.map(i => i.n));
-    }
-}
-
-function _saveViewedItems() {
-    try {
-        localStorage.setItem('valdoria_inv_viewed', JSON.stringify([...viewedItems]));
-    } catch(e) {}
-}
-
-function isNewItem(name) {
-    if (!viewedItems) return false;
-    return !viewedItems.has(name);
-}
-
-function markItemViewed(name) {
-    if (!viewedItems) return;
-    if (!viewedItems.has(name)) {
-        viewedItems.add(name);
-        _saveViewedItems();
-    }
-}
-
-// ── View Mode Toggle ──
-function toggleViewMode() {
-    viewMode = viewMode === 'compact' ? 'detailed' : 'compact';
-    try { localStorage.setItem('valdoria_inv_view', viewMode); } catch(e) {}
-    haptic('light');
-    renderTab();
-}
-
-// ── #1: Swipe between tabs ──
-function _initTabSwipe() {
-    const content = document.getElementById('mainContent');
-    let _sx = 0, _sy = 0, _swiping = false;
-    const TAB_LIST = function() {
-        const t = ['items', 'equip'];
-        // allies tab removed — accessible via Equipment sub-nav
-        if (D && D.bank) t.push('bank');
-        return t;
-    };
-    content.addEventListener('touchstart', function(e) {
-        _sx = e.touches[0].clientX;
-        _sy = e.touches[0].clientY;
-        _swiping = true;
-    }, { passive: true });
-    content.addEventListener('touchend', function(e) {
-        if (!_swiping) return;
-        _swiping = false;
-        var dx = e.changedTouches[0].clientX - _sx;
-        var dy = e.changedTouches[0].clientY - _sy;
-        if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
-        var tabs = TAB_LIST();
-        var idx = tabs.indexOf(activeTab);
-        if (idx < 0) return;
-        if (dx < 0 && idx < tabs.length - 1) {
-            // Swipe left → next tab
-            content.classList.remove('swipe-left', 'swipe-right', 'tab-entering');
-            void content.offsetWidth;
-            content.classList.add('swipe-left');
-            switchTab(tabs[idx + 1]);
-        } else if (dx > 0 && idx > 0) {
-            // Swipe right → prev tab
-            content.classList.remove('swipe-left', 'swipe-right', 'tab-entering');
-            void content.offsetWidth;
-            content.classList.add('swipe-right');
-            switchTab(tabs[idx - 1]);
-        }
-    }, { passive: true });
-}
-
-// ── #2: Long-press preview tooltip ──
-var _lpTimer = null, _lpTooltip = null;
-function _initLongPress() {
-    _lpTooltip = document.createElement('div');
-    _lpTooltip.className = 'lp-tooltip';
-    document.body.appendChild(_lpTooltip);
-
-    document.addEventListener('touchstart', function(e) {
-        var card = e.target.closest('.item-card');
-        if (!card || selectionMode) return;
-        var name = _getCardName(card);
-        if (!name) return;
-        _lpTimer = setTimeout(function() {
-            _showTooltip(name, e.touches[0].clientX, e.touches[0].clientY);
-            haptic('medium');
-            // #5: Long-press favorite toggle in compact mode
-            if (viewMode === 'compact') {
-                doToggleFav(name);
-                renderTab();
-            }
-        }, 500);
-    }, { passive: true });
-    document.addEventListener('touchmove', function() { _cancelLongPress(); }, { passive: true });
-    document.addEventListener('touchend', function() { _cancelLongPress(); }, { passive: true });
-}
-
-function _getCardName(card) {
-    var nameEl = card.querySelector('.ic-name');
-    return nameEl ? nameEl.textContent.trim() : '';
-}
-
-function _showTooltip(name, x, y) {
-    var it = getItemData(name);
-    if (!it) { _cancelLongPress(); return; }
-    var rarity = it.r || 'common';
-    var rarColor = getRarityColor(rarity);
-    var stats = [];
-    if (it.s) stats.push(SLOT_NAMES[it.s] || it.s);
-    if (it.dd) stats.push('Dano: ' + it.dd + (it.b ? '+' + it.b : ''));
-    if (it.ac) stats.push('CA: +' + it.ac);
-    if (it.hb) stats.push('HP: +' + it.hb);
-    if (it.mb) stats.push('MP: +' + it.mb);
-    if (it.v) stats.push(it.v + ' GP');
-    _lpTooltip.innerHTML = '<div class="lpt-name">' + (it.e || '') + ' ' + name + '</div>'
-        + '<div class="lpt-rarity" style="color:' + rarColor + '">' + getRarityLabel(rarity) + '</div>'
-        + (stats.length ? '<div class="lpt-stat">' + stats.join(' \u00b7 ') + '</div>' : '');
-    // Position tooltip
-    var tw = 200, th = 80;
-    var tx = Math.min(x - tw / 2, window.innerWidth - tw - 8);
-    tx = Math.max(8, tx);
-    var ty = y - th - 16;
-    if (ty < 8) ty = y + 20;
-    _lpTooltip.style.left = tx + 'px';
-    _lpTooltip.style.top = ty + 'px';
-    _lpTooltip.classList.add('visible');
-}
-
-function _cancelLongPress() {
-    clearTimeout(_lpTimer);
-    _lpTimer = null;
-    if (_lpTooltip) _lpTooltip.classList.remove('visible');
-}
-
-// ── Start ── (called from index.html after all scripts load)
+        `;}
+function quickUsePotion(){if(localPotions<=0)return;if(localHP>=D.p.mhp){toast(vi('heart',13)+' HP já está no máximo!','warn');return;}
+addOp({t:'use',item:'potion',tgt:'player'});localPotions--;const oldHP=localHP;localHP=Math.min(D.p.mhp,localHP+7);haptic('medium');toast(vi('flask',13)+' Poção usada (~+'+(localHP-oldHP)+' HP)','ok');animateStat('hs-hp');updateHeader();renderTab();updateBottomBar();}
+function animateStat(cls){const el=document.querySelector(`.${cls}`);if(el){el.classList.remove('stat-pop');void el.offsetWidth;el.classList.add('stat-pop');}}
+function buildTabs(){const bar=document.getElementById('tabsBar');const tabs=[{id:'items',label:`${vi('bag', 15)} Itens`},{id:'equip',label:`${vi('armorTab', 15)} Equipamento`},];if(D.bank)tabs.push({id:'bank',label:`${vi('vault', 15)} Cofre`});bar.innerHTML=tabs.map(t=>`<div class="tab ${t.id === activeTab ? 'active' : ''}" onclick="switchTab('${t.id}')">${t.label}</div>`).join('');}
+function switchTab(id){activeTab=id;activeTarget='player';if(selectionMode){selectionMode=false;selectedItems.clear();updateSelectionBar();}
+buildTabs();renderTab();haptic('light');}
+function renderTab(){const c=document.getElementById('mainContent');c.classList.remove('tab-entering');void c.offsetWidth;c.classList.add('tab-entering');if(activeTab==='items')renderItemsTab(c);else if(activeTab==='equip')renderEquipTab(c);else if(activeTab==='bank')renderBankTab(c);}
+function addToLocalInv(name){const existing=localInv.find(i=>i.n===name);if(existing){existing.q++;}
+else{localInv.push({n:name,q:1,id:'new'});}}
+function removeFromLocalInv(name){const existing=localInv.find(i=>i.n===name);if(existing){existing.q--;if(existing.q<=0){localInv=localInv.filter(i=>i.n!==name);}}else{console.warn('[INVENTORY] removeFromLocalInv: not found:',name);}}
+function addOp(op){pendingOps.push(op);updateBottomBar();}
+function updateBottomBar(){const count=document.getElementById('opsCount');const btn=document.getElementById('confirmBtn');const section=document.getElementById('opsSection');if(pendingOps.length>0){count.innerHTML=`${vi('quill', 13)} ${pendingOps.length} alteração(ões) · <span style="color:var(--v-text-dim);cursor:pointer;text-decoration:underline;" onclick="resetAllOps()">descartar</span>`;btn.classList.remove('hidden');if(section)section.classList.remove('hidden');}else{count.textContent='';btn.classList.add('hidden');if(section)section.classList.add('hidden');}
+updateBottomPadding();}
+function resetAllOps(){pendingOps=[];localEq=Object.assign({},D.eq||{});localInv=(D.inv||[]).map(i=>({...i}));localGold=D.p.g||0;localHP=D.p.hp||0;localMP=D.p.mp||0;localPotions=D.p.pot||0;localFavs=D.fav?[...D.fav]:[];localLocked=D.lck?[...D.lck]:[];localGems={};if(D.gems){for(const[k,v]of Object.entries(D.gems))
+localGems[k]=[...v];}
+localRunes=D.runes?{...D.runes}:{};localAllyEq={};if(D.allies){for(const a of D.allies)
+localAllyEq[a.id]=Object.assign({},a.eq||{});}
+closeModal();updateHeader();renderTab();updateBottomBar();haptic('light');toast(`${vi('sparkle', 13)} Alterações descartadas`,'warn');}
+var _modalOpen=false;function showModal(html){document.getElementById('modalContent').innerHTML=html;document.getElementById('modalOverlay').classList.add('visible');if(!_modalOpen){_modalOpen=true;}}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('visible');if(_modalOpen){_modalOpen=false;}}
+function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+function initSwipeToDismiss(){const modal=document.getElementById('modalContent');let startY=0,currentY=0,isDragging=false;modal.addEventListener('touchstart',e=>{const handle=modal.querySelector('.modal-handle');if(!handle)return;const rect=modal.getBoundingClientRect();const touchY=e.touches[0].clientY-rect.top;if(touchY>40)return;startY=e.touches[0].clientY;isDragging=true;modal.style.transition='none';},{passive:true});modal.addEventListener('touchmove',e=>{if(!isDragging)return;currentY=e.touches[0].clientY;const diff=currentY-startY;if(diff>0){modal.style.transform=`translateY(${diff}px)`;}},{passive:true});modal.addEventListener('touchend',()=>{if(!isDragging)return;isDragging=false;modal.style.transition='transform 0.3s ease-out';const diff=currentY-startY;if(diff>100){closeModal();}
+modal.style.transform='';},{passive:true});}
+function discardAndExit(){pendingOps=[];closeModal();_performExit();}
+function initBackButton(){if(window._invPopupMode)return;try{if(tg?.BackButton){tg.BackButton.show();tg.BackButton.onClick(()=>{_navigateBack();});}
+window.__valdoriaExitAction=function(){try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}};}catch(e){console.warn('[INVENTORY] BackButton setup:',e);}}
+var _RETURN_LABELS={game:'🏘️ Cidade',explore:'🗺️ Mapa',combat:'⚔️ Combate',arena:'⚔️ Combate',};function _initNavBar(){}
+function navBack(){haptic('light');if(_modalOpen){closeModal();return;}
+if(activeTarget!=='player'){switchTab('allies');return;}
+if(pendingOps.length>0){_showPendingOpsExitConfirm();return;}
+_performExit();}
+function navCharSheet(){haptic('light');if(pendingOps.length>0){sendOps();return;}
+if(window._invPopupMode&&typeof hideInventoryPopup==='function'){hideInventoryPopup();setTimeout(function(){if(typeof doAction==='function')doAction('action_status');},300);return;}
+const tg=window.Telegram?.WebApp;if(tg?.sendData){try{tg.sendData(JSON.stringify({action:'action_status'}));}catch(e){console.warn('[INVENTORY] sendData:',e);}}
+try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}}
+function navMenu(){haptic('light');if(pendingOps.length>0){sendOps();return;}
+if(window._invPopupMode&&typeof hideInventoryPopup==='function'){hideInventoryPopup();return;}
+try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}}
+async function _transitionTo(target,payload={}){const overlay=document.getElementById('loadingOverlay');if(overlay){const _lt=overlay.querySelector('.loading-text');if(_lt)_lt.textContent='Navegando...';overlay.classList.remove('hidden');}
+if(_apiBase){try{const _th={'Content-Type':'application/json','Authorization':'Bearer '+_apiToken,};if(window.Telegram?.WebApp?.initData){_th['X-Telegram-Init-Data']=Telegram.WebApp.initData;}
+_th['X-Idempotency-Key']=crypto.randomUUID();const resp=await fetchT(_apiBase+'/api/webapp/transition',{method:'POST',headers:_th,body:JSON.stringify({from:'inventory',to:target,user_id:parseInt(_apiUid),payload,}),});if(resp.status===401||resp.status===403){console.error('[INVENTORY] Auth error on transition:',resp.status);const tg=window.Telegram?.WebApp;if(tg?.sendData){tg.sendData(JSON.stringify({action:'webapp_error_close',webapp:'INVENTORY',reason:'session_expired'}));setTimeout(function(){if(tg.close)tg.close();},1000);return;}}
+if(resp.ok){const data=await resp.json();if(data.url){window.__valdoria_transitioning=true;valdoriaSpaNav(data.url);return;}}
+console.error('[INVENTORY] Nav transition failed');}catch(e){console.error('[INVENTORY] Nav transition error:',e);}}
+if(overlay)overlay.classList.add('hidden');try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}}
+function toast(msg,type){vToast(msg,type||'ok');}
+function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+function _initViewedItems(){try{const stored=localStorage.getItem('valdoria_inv_viewed');if(stored){viewedItems=new Set(JSON.parse(stored));}else{viewedItems=new Set(localInv.map(i=>i.n));_saveViewedItems();}}catch(e){viewedItems=new Set(localInv.map(i=>i.n));}}
+function _saveViewedItems(){try{localStorage.setItem('valdoria_inv_viewed',JSON.stringify([...viewedItems]));}catch(e){}}
+function isNewItem(name){if(!viewedItems)return false;return!viewedItems.has(name);}
+function markItemViewed(name){if(!viewedItems)return;if(!viewedItems.has(name)){viewedItems.add(name);_saveViewedItems();}}
+function toggleViewMode(){viewMode=viewMode==='compact'?'detailed':'compact';try{localStorage.setItem('valdoria_inv_view',viewMode);}catch(e){}
+haptic('light');renderTab();}
+function _initTabSwipe(){const content=document.getElementById('mainContent');let _sx=0,_sy=0,_swiping=false;const TAB_LIST=function(){const t=['items','equip'];if(D&&D.bank)t.push('bank');return t;};content.addEventListener('touchstart',function(e){_sx=e.touches[0].clientX;_sy=e.touches[0].clientY;_swiping=true;},{passive:true});content.addEventListener('touchend',function(e){if(!_swiping)return;_swiping=false;var dx=e.changedTouches[0].clientX-_sx;var dy=e.changedTouches[0].clientY-_sy;if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)*0.7)return;var tabs=TAB_LIST();var idx=tabs.indexOf(activeTab);if(idx<0)return;if(dx<0&&idx<tabs.length-1){content.classList.remove('swipe-left','swipe-right','tab-entering');void content.offsetWidth;content.classList.add('swipe-left');switchTab(tabs[idx+1]);}else if(dx>0&&idx>0){content.classList.remove('swipe-left','swipe-right','tab-entering');void content.offsetWidth;content.classList.add('swipe-right');switchTab(tabs[idx-1]);}},{passive:true});}
+var _lpTimer=null,_lpTooltip=null;function _initLongPress(){_lpTooltip=document.createElement('div');_lpTooltip.className='lp-tooltip';document.body.appendChild(_lpTooltip);document.addEventListener('touchstart',function(e){var card=e.target.closest('.item-card');if(!card||selectionMode)return;var name=_getCardName(card);if(!name)return;_lpTimer=setTimeout(function(){_showTooltip(name,e.touches[0].clientX,e.touches[0].clientY);haptic('medium');if(viewMode==='compact'){doToggleFav(name);renderTab();}},500);},{passive:true});document.addEventListener('touchmove',function(){_cancelLongPress();},{passive:true});document.addEventListener('touchend',function(){_cancelLongPress();},{passive:true});}
+function _getCardName(card){var nameEl=card.querySelector('.ic-name');return nameEl?nameEl.textContent.trim():'';}
+function _showTooltip(name,x,y){var it=getItemData(name);if(!it){_cancelLongPress();return;}
+var rarity=it.r||'common';var rarColor=getRarityColor(rarity);var stats=[];if(it.s)stats.push(SLOT_NAMES[it.s]||it.s);if(it.dd)stats.push('Dano: '+it.dd+(it.b?'+'+it.b:''));if(it.ac)stats.push('CA: +'+it.ac);if(it.hb)stats.push('HP: +'+it.hb);if(it.mb)stats.push('MP: +'+it.mb);if(it.v)stats.push(it.v+' GP');_lpTooltip.innerHTML='<div class="lpt-name">'+(it.e||'')+' '+name+'</div>'
++'<div class="lpt-rarity" style="color:'+rarColor+'">'+getRarityLabel(rarity)+'</div>'
++(stats.length?'<div class="lpt-stat">'+stats.join(' \u00b7 ')+'</div>':'');var tw=200,th=80;var tx=Math.min(x-tw/2,window.innerWidth-tw-8);tx=Math.max(8,tx);var ty=y-th-16;if(ty<8)ty=y+20;_lpTooltip.style.left=tx+'px';_lpTooltip.style.top=ty+'px';_lpTooltip.classList.add('visible');}
+function _cancelLongPress(){clearTimeout(_lpTimer);_lpTimer=null;if(_lpTooltip)_lpTooltip.classList.remove('visible');}

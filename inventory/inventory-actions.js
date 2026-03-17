@@ -1,1263 +1,149 @@
-// ═════════════════════════════════════════════════════════
-//  INVENTORY — Actions & Operations
-//  Confirmations, equip/unequip/use/sell, selection mode,
-//  confirm&send, helpers, API communication
-//  Depends on: inventory.js (state, SVGs, haptic globals)
-// ═════════════════════════════════════════════════════════
-
-// ══════════════════════════════════════════════════════════
-//  CONFIRMATION MODALS (UX: always ask before acting)
-// ══════════════════════════════════════════════════════════
-function showPotionConfirm() {
-    if (localPotions <= 0) return;
-    const preview = Math.min(D.p.mhp, localHP + 7);
-    const gain = preview - localHP;
-    let html = '<div class="modal-handle"></div>';
-    html += `<div class="modal-title">${vi('flask', 16)} Poção de Cura</div>`;
-    html += `<div style="text-align:center;margin-bottom:12px;">`;
-    html += `<div style="font-size:clamp(22px,6vw,28px);margin-bottom:6px;">${vi('flask', 28)}</div>`;
-    html += `<div style="font-size:12px;color:var(--v-text-dim);">Restante: x${localPotions}</div>`;
-    html += `<div style="font-size:13px;color:var(--v-success);margin-top:8px;">${vi('heart', 13)} Cura 2d4+2 HP (~+${gain > 0 ? gain : 7})</div>`;
-    html += `<div style="font-size:12px;color:var(--v-text-dim);margin-top:4px;">${vi('heart', 12)} ${localHP}/${D.p.mhp} → ~${preview}/${D.p.mhp}</div>`;
-    html += `</div>`;
-    html += `<div class="detail-actions">
+function showPotionConfirm(){if(localPotions<=0)return;const preview=Math.min(D.p.mhp,localHP+7);const gain=preview-localHP;let html='<div class="modal-handle"></div>';html+=`<div class="modal-title">${vi('flask', 16)} Poção de Cura</div>`;html+=`<div style="text-align:center;margin-bottom:12px;">`;html+=`<div style="font-size:clamp(22px,6vw,28px);margin-bottom:6px;">${vi('flask', 28)}</div>`;html+=`<div style="font-size:12px;color:var(--v-text-dim);">Restante: x${localPotions}</div>`;html+=`<div style="font-size:13px;color:var(--v-success);margin-top:8px;">${vi('heart', 13)} Cura 2d4+2 HP (~+${gain > 0 ? gain : 7})</div>`;html+=`<div style="font-size:12px;color:var(--v-text-dim);margin-top:4px;">${vi('heart', 12)} ${localHP}/${D.p.mhp} → ~${preview}/${D.p.mhp}</div>`;html+=`</div>`;html+=`<div class="detail-actions">
         <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
         <button class="btn-use" onclick="doUsePotion()">${vi('flask', 13)} Usar Poção</button>
-    </div>`;
-    showModal(html);
-}
-
-function showEquipConfirm(name) {
-    const it = getItemData(name);
-    if (!it || !it.s) return;
-    const slot = resolveSlot(it);
-    const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
-    const currentItem = eq[slot];
-    const currentIt = currentItem ? getItemData(currentItem) : null;
-
-    let html = '<div class="modal-handle"></div>';
-    html += `<div class="modal-title">${vi('sword', 16)} Equipar?</div>`;
-    html += `<div style="text-align:center;margin-bottom:12px;">`;
-    html += `<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;
-    html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
-    html += `<div style="font-size:12px;color:var(--v-text-dim);">${SLOT_NAMES[slot] || slot}</div>`;
-    html += `</div>`;
-
-    if (currentItem) {
-        const delta = getStatDelta(it, currentIt || { ac:0, b:0, hb:0, mb:0 }, slot);
-        html += `<div style="padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;margin-bottom:12px;">`;
-        html += `<div style="color:var(--v-text-dim);margin-bottom:4px;">Substituindo: ${currentIt?.e || '📦'} ${currentItem}</div>`;
-        if (delta) html += `<div>${delta}</div>`;
-        else html += `<div style="color:var(--v-text-dim);">Sem diferença de stats</div>`;
-        html += `</div>`;
-    }
-
-    html += `<div class="detail-actions">
+    </div>`;showModal(html);}
+function showEquipConfirm(name){const it=getItemData(name);if(!it||!it.s)return;const slot=resolveSlot(it);const eq=activeTarget==='player'?localEq:(localAllyEq[activeTarget]||{});const currentItem=eq[slot];const currentIt=currentItem?getItemData(currentItem):null;let html='<div class="modal-handle"></div>';html+=`<div class="modal-title">${vi('sword', 16)} Equipar?</div>`;html+=`<div style="text-align:center;margin-bottom:12px;">`;html+=`<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;html+=`<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;html+=`<div style="font-size:12px;color:var(--v-text-dim);">${SLOT_NAMES[slot] || slot}</div>`;html+=`</div>`;if(currentItem){const delta=getStatDelta(it,currentIt||{ac:0,b:0,hb:0,mb:0},slot);html+=`<div style="padding:8px;background:var(--v-bg-card);border-radius:var(--v-radius);font-size:12px;margin-bottom:12px;">`;html+=`<div style="color:var(--v-text-dim);margin-bottom:4px;">Substituindo: ${currentIt?.e || '📦'} ${currentItem}</div>`;if(delta)html+=`<div>${delta}</div>`;else html+=`<div style="color:var(--v-text-dim);">Sem diferença de stats</div>`;html+=`</div>`;}
+html+=`<div class="detail-actions">
         <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
         <button class="btn-equip" onclick="doEquip('${esc(name)}','${slot}')">${vi('sword', 13)} Equipar</button>
-    </div>`;
-    showModal(html);
-}
-
-function showUseConfirm(name) {
-    const it = getItemData(name);
-    const inv = localInv.find(i => i.n === name);
-    const qty = inv ? inv.q : 0;
-
-    let html = '<div class="modal-handle"></div>';
-    html += `<div class="modal-title">${vi('flask', 16)} Usar Item?</div>`;
-    html += `<div style="text-align:center;margin-bottom:12px;">`;
-    html += `<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;
-    html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
-    if (qty > 1) html += `<div style="font-size:12px;color:var(--v-text-dim);">Restante: x${qty}</div>`;
-    if (it.heal) {
-        const avg = avgDice(it.heal);
-        const preview = Math.min(D.p.mhp, localHP + avg) - localHP;
-        html += `<div style="font-size:13px;color:var(--v-success);margin-top:6px;">${vi('heart', 13)} Cura ~${preview > 0 ? preview : avg} HP</div>`;
-    }
-    html += `</div>`;
-
-    html += `<div class="detail-actions">
+    </div>`;showModal(html);}
+function showUseConfirm(name){const it=getItemData(name);const inv=localInv.find(i=>i.n===name);const qty=inv?inv.q:0;let html='<div class="modal-handle"></div>';html+=`<div class="modal-title">${vi('flask', 16)} Usar Item?</div>`;html+=`<div style="text-align:center;margin-bottom:12px;">`;html+=`<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;html+=`<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;if(qty>1)html+=`<div style="font-size:12px;color:var(--v-text-dim);">Restante: x${qty}</div>`;if(it.heal){const avg=avgDice(it.heal);const preview=Math.min(D.p.mhp,localHP+avg)-localHP;html+=`<div style="font-size:13px;color:var(--v-success);margin-top:6px;">${vi('heart', 13)} Cura ~${preview > 0 ? preview : avg} HP</div>`;}
+html+=`</div>`;html+=`<div class="detail-actions">
         <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
         <button class="btn-use" onclick="doUse('${esc(name)}')">${vi('flask', 13)} Usar</button>
-    </div>`;
-    showModal(html);
-}
-
-function showSellConfirm(name, price) {
-    const it = getItemData(name);
-
-    let html = '<div class="modal-handle"></div>';
-    html += `<div class="modal-title">${vi('coin', 16)} Vender Item?</div>`;
-    html += `<div style="text-align:center;margin-bottom:12px;">`;
-    html += `<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;
-    html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
-    html += `<div style="font-size:13px;color:var(--v-gold);margin-top:6px;">${vi('coin', 13)} +${price} GP (50% do valor)</div>`;
-    html += `</div>`;
-
-    html += `<div class="detail-actions">
+    </div>`;showModal(html);}
+function showSellConfirm(name,price){const it=getItemData(name);let html='<div class="modal-handle"></div>';html+=`<div class="modal-title">${vi('coin', 16)} Vender Item?</div>`;html+=`<div style="text-align:center;margin-bottom:12px;">`;html+=`<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;html+=`<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;html+=`<div style="font-size:13px;color:var(--v-gold);margin-top:6px;">${vi('coin', 13)} +${price} GP (50% do valor)</div>`;html+=`</div>`;html+=`<div class="detail-actions">
         <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
         <button class="btn-sell" onclick="doSell('${esc(name)}',${price})">${vi('coin', 13)} Vender</button>
-    </div>`;
-    showModal(html);
-}
-
-function showDiscardConfirm(name) {
-    const it = getItemData(name);
-
-    let html = '<div class="modal-handle"></div>';
-    html += `<div class="modal-title">${vi('trash', 16)} Descartar Item?</div>`;
-    html += `<div style="text-align:center;margin-bottom:12px;">`;
-    html += `<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;
-    html += `<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;
-    html += `<div style="font-size:12px;color:var(--v-danger);margin-top:6px;">${vi('warn', 12)} Este item será perdido.</div>`;
-    html += `</div>`;
-
-    html += `<div class="detail-actions">
+    </div>`;showModal(html);}
+function showDiscardConfirm(name){const it=getItemData(name);let html='<div class="modal-handle"></div>';html+=`<div class="modal-title">${vi('trash', 16)} Descartar Item?</div>`;html+=`<div style="text-align:center;margin-bottom:12px;">`;html+=`<div style="font-size:clamp(18px,5vw,22px);margin-bottom:4px;">${it.e || '📦'}</div>`;html+=`<div style="font-size:14px;font-weight:600;color:var(--v-text-bright);">${name}</div>`;html+=`<div style="font-size:12px;color:var(--v-danger);margin-top:6px;">${vi('warn', 12)} Este item será perdido.</div>`;html+=`</div>`;html+=`<div class="detail-actions">
         <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
         <button class="btn-discard" onclick="doDiscard('${esc(name)}')">${vi('trash', 13)} Descartar</button>
-    </div>`;
-    showModal(html);
-}
-
-// ══════════════════════════════════════════════════════════
-//  ACTIONS: Equip / Unequip / Use
-// ══════════════════════════════════════════════════════════
-function doEquip(name, slot) {
-    _invalidateEquipCache();
-    const it = getItemData(name);
-    if (!it || !it.s) { console.warn('[INVENTORY] doEquip: invalid item or no slot', name); return; }
-
-    const targetSlot = slot || resolveSlot(it);
-    if (!targetSlot) { console.warn('[INVENTORY] doEquip: could not resolve slot', name); return; }
-
-    // Check proficiency
-    if (!checkProficiency(it, activeTarget, name)) {
-        toast(`${vi('lock', 13)} Sem proficiência`, 'err');
-        return;
-    }
-
-    const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
-
-    // Two-handed logic — auto-unequip conflicting slot (Fix 5: clear gems/runes too)
-    if ((it.t || []).includes('two_handed') && targetSlot === 'main_hand') {
-        if (eq.off_hand) {
-            addToLocalInv(eq.off_hand);
-            if (activeTarget === 'player') { returnLocalGems('off_hand'); delete localRunes['off_hand']; }
-            eq.off_hand = null;
-        }
-    } else if (targetSlot === 'off_hand') {
-        const mh = eq.main_hand;
-        if (mh) {
-            const mhData = getItemData(mh);
-            if ((mhData?.t || []).includes('two_handed')) {
-                addToLocalInv(mh);
-                if (activeTarget === 'player') { returnLocalGems('main_hand'); delete localRunes['main_hand']; }
-                eq.main_hand = null;
-            }
-        }
-    }
-
-    // Local state: return old item (Fix 3: backend handles unequip internally)
-    const old = eq[targetSlot];
-    if (old) {
-        addToLocalInv(old);
-        if (activeTarget === 'player') { returnLocalGems(targetSlot); delete localRunes[targetSlot]; }
-    }
-
-    // Single equip op — backend handles unequip of old item + gems/runes
-    addOp({ t: 'equip', item: name, slot: targetSlot, tgt: activeTarget });
-    eq[targetSlot] = name;
-
-    closeModal();
-    _acDirty = true;
-    haptic('medium');
-    toast(`${vi('sword', 13)} ${esc(name)} equipado`, 'ok');
-    updateHeader();
-    animateStat('hs-ac');
-    renderTab();
-    updateBottomBar();
-    _flashSlot(targetSlot, 'equip-flash');
-}
-
-function returnLocalGems(slot) {
-    const gems = localGems[slot] || [];
-    gems.forEach(g => { if (g) addToLocalInv(g); });
-    delete localGems[slot];
-}
-
-function doUnequip(slot) {
-    _invalidateEquipCache();
-    const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
-    const item = eq[slot];
-    if (!item) { console.warn('[INVENTORY] doUnequip: slot empty', slot); return; }
-
-    addOp({ t: 'unequip', slot, tgt: activeTarget });
-
-    // Return gems & destroy rune locally (player only)
-    // Fix 4: No explicit gem_remove ops — backend handles gems in unequip
-    if (activeTarget === 'player') {
-        returnLocalGems(slot);
-        delete localRunes[slot];
-    }
-
-    eq[slot] = null;
-    addToLocalInv(item);
-
-    closeModal();
-    _acDirty = true;
-    haptic('light');
-    toast(`${vi('bag', 13)} ${esc(item)} desequipado`, 'ok');
-    updateHeader();
-    renderTab();
-    updateBottomBar();
-    _flashSlot(slot, 'unequip-flash');
-}
-
-function doEquipSet(sid) {
-    const sdef = D.sets?.[sid];
-    if (!sdef) return;
-    _acDirty = true;
-    const equipped = new Set(Object.values(localEq).filter(Boolean));
-    const owned = new Set();
-    localInv.forEach(i => { if (i.q > 0) owned.add(i.n); });
-    let count = 0;
-    activeTarget = 'player';
-    for (const pieceName of sdef.pcs) {
-        if (owned.has(pieceName) && !equipped.has(pieceName)) {
-            const pit = getItemData(pieceName);
-            if (!pit?.s) continue;
-            if (!checkProficiency(pit, 'player', pieceName)) continue;
-            const targetSlot = pit.s === 'ring' ? (!localEq.ring_1 ? 'ring_1' : 'ring_2') : pit.s;
-            addOp({ t: 'equip', item: pieceName, slot: targetSlot, tgt: 'player' });
-            localEq[targetSlot] = pieceName;
-            count++;
-        }
-    }
-    if (count > 0) {
-        closeModal();
-        haptic('medium');
-        toast(`${vi('sword', 13)} ${count} peça(s) de ${esc(sdef.n)} equipada(s)`, 'ok');
-        updateHeader();
-        renderTab();
-        updateBottomBar();
-    }
-}
-
-function doUse(name) {
-    const it = getItemData(name);
-    const tags = it?.t || [];
-
-    // Named potion or potion tag
-    if (name === 'potion' || tags.includes('potion')) {
-        addOp({ t: 'use', item: name, tgt: activeTarget });
-        removeFromLocalInv(name);
-        const estHeal = it.heal ? avgDice(it.heal) : 7;
-        if (activeTarget === 'player') {
-            localHP = Math.min(D.p.mhp, localHP + estHeal);
-        }
-        closeModal();
-        haptic('medium');
-        toast(`${vi('flask', 13)} ${esc(name)} (~+${estHeal} HP)`, 'ok');
-        animateStat('hs-hp');
-        updateHeader();
-        renderTab();
-        updateBottomBar();
-        return;
-    }
-
-    // Other consumable/food
-    if (tags.includes('consumable') || tags.includes('food')) {
-        addOp({ t: 'use', item: name, tgt: activeTarget });
-        removeFromLocalInv(name);
-        let tgtLabel = '';
-        if (activeTarget !== 'player' && D.allies) {
-            const ally = D.allies.find(a => a.id === activeTarget);
-            if (ally) tgtLabel = ` → ${ally.n}`;
-        }
-        closeModal();
-        haptic('medium');
-        toast(`${vi('food', 13)} ${esc(name)} usado${tgtLabel}`, 'ok');
-        updateHeader();
-        renderTab();
-        updateBottomBar();
-        return;
-    }
-}
-
-function showTargetPicker(name) {
-    let html = `<div class="modal-title">${vi('target', 16)} Alvo</div>`;
-    html += `<div style="font-size:12px;color:var(--v-text-muted);text-align:center;margin-bottom:8px;">Quem vai consumir ${name}?</div>`;
-    const hpPct = Math.round(localHP / D.p.mhp * 100);
-    html += `<button class="btn-use" style="width:100%;margin-bottom:6px;" onclick="activeTarget='player';doUse('${esc(name)}')">
-            ${vi('person', 14)} ${D.p.n} <span style="opacity:0.7;font-size:11px;">${vi('heart', 11)} ${localHP}/${D.p.mhp} (${hpPct}%)</span></button>`;
-    (D.allies || []).forEach(a => {
-        const aHp = a.hp, aMhp = a.mhp;
-        const aPct = Math.round(aHp / aMhp * 100);
-        const injured = aHp < aMhp ? '' : 'opacity:0.5;';
-        html += `<button class="btn-use" style="width:100%;margin-bottom:6px;${injured}" onclick="activeTarget='${esc(a.id)}';doUse('${esc(name)}')">
-                ${vi('person', 14)} ${a.n} <span style="opacity:0.7;font-size:11px;">${vi('heart', 11)} ${aHp}/${aMhp} (${aPct}%)</span></button>`;
-    });
-    html += `<button class="btn-unequip" style="width:100%;margin-top:4px;" onclick="closeModal()">Cancelar</button>`;
-    showModal(html);
-}
-
-function doUsePotion() {
-    if (localPotions <= 0) return;
-    addOp({ t: 'use', item: 'potion', tgt: 'player' });
-    localPotions--;
-    localHP = Math.min(D.p.mhp, localHP + 7);
-    haptic('medium');
-    toast(`${vi('flask', 13)} Poção de Cura usada (~+7 HP)`, 'ok');
-    animateStat('hs-hp');
-    updateHeader();
-    renderTab();
-    updateBottomBar();
-}
-
-function showCampConfirm(name) {
-    const isTent = name === 'Barraca';
-    const tentUses = D.p.tu || 0;
-    const hpGain = D.p.mhp - localHP;
-    const mpGain = D.p.mmp - localMP;
-    const maxHD = D.p.mhd || D.p.l || 1;
-    const curHD = D.p.hd || 0;
-    const hdGain = Math.min(maxHD - curHD, Math.max(1, Math.floor((maxHD + 1) / 2)));
-
-    let html = '<div style="text-align:center;padding:12px;">';
-    html += `<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('tent', 18)} Descanso Longo</div>`;
-    if (isTent && tentUses > 0) {
-        const bars = Array.from({ length: 5 }, (_, i) =>
-            `<span style="color:${i < tentUses ? 'var(--v-success)' : 'var(--v-text-dim)'}">${i < tentUses ? '■' : '□'}</span>`
-        ).join('');
-        html += `<div style="font-size:13px;margin-bottom:8px;">Barraca: ${bars} <span style="opacity:0.7">${tentUses}/5 usos</span></div>`;
-    }
-    html += '<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">';
-    html += `Recuperação estimada:<br>`;
-    html += `${vi('heart', 12)} +${hpGain} HP &nbsp; ${vi('orb', 12)} +${mpGain} MP`;
-    if (hdGain > 0) html += ` &nbsp; 🎲 +${hdGain} HD`;
-    html += '</div>';
-    html += `<div class="detail-actions">
+    </div>`;showModal(html);}
+function doEquip(name,slot){_invalidateEquipCache();const it=getItemData(name);if(!it||!it.s){console.warn('[INVENTORY] doEquip: invalid item or no slot',name);return;}
+const targetSlot=slot||resolveSlot(it);if(!targetSlot){console.warn('[INVENTORY] doEquip: could not resolve slot',name);return;}
+if(!checkProficiency(it,activeTarget,name)){toast(`${vi('lock', 13)} Sem proficiência`,'err');return;}
+const eq=activeTarget==='player'?localEq:(localAllyEq[activeTarget]||{});if((it.t||[]).includes('two_handed')&&targetSlot==='main_hand'){if(eq.off_hand){addToLocalInv(eq.off_hand);if(activeTarget==='player'){returnLocalGems('off_hand');delete localRunes['off_hand'];}
+eq.off_hand=null;}}else if(targetSlot==='off_hand'){const mh=eq.main_hand;if(mh){const mhData=getItemData(mh);if((mhData?.t||[]).includes('two_handed')){addToLocalInv(mh);if(activeTarget==='player'){returnLocalGems('main_hand');delete localRunes['main_hand'];}
+eq.main_hand=null;}}}
+const old=eq[targetSlot];if(old){addToLocalInv(old);if(activeTarget==='player'){returnLocalGems(targetSlot);delete localRunes[targetSlot];}}
+addOp({t:'equip',item:name,slot:targetSlot,tgt:activeTarget});eq[targetSlot]=name;closeModal();_acDirty=true;haptic('medium');toast(`${vi('sword', 13)} ${esc(name)} equipado`,'ok');updateHeader();animateStat('hs-ac');renderTab();updateBottomBar();_flashSlot(targetSlot,'equip-flash');}
+function returnLocalGems(slot){const gems=localGems[slot]||[];gems.forEach(g=>{if(g)addToLocalInv(g);});delete localGems[slot];}
+function doUnequip(slot){_invalidateEquipCache();const eq=activeTarget==='player'?localEq:(localAllyEq[activeTarget]||{});const item=eq[slot];if(!item){console.warn('[INVENTORY] doUnequip: slot empty',slot);return;}
+addOp({t:'unequip',slot,tgt:activeTarget});if(activeTarget==='player'){returnLocalGems(slot);delete localRunes[slot];}
+eq[slot]=null;addToLocalInv(item);closeModal();_acDirty=true;haptic('light');toast(`${vi('bag', 13)} ${esc(item)} desequipado`,'ok');updateHeader();renderTab();updateBottomBar();_flashSlot(slot,'unequip-flash');}
+function doEquipSet(sid){const sdef=D.sets?.[sid];if(!sdef)return;_acDirty=true;const equipped=new Set(Object.values(localEq).filter(Boolean));const owned=new Set();localInv.forEach(i=>{if(i.q>0)owned.add(i.n);});let count=0;activeTarget='player';for(const pieceName of sdef.pcs){if(owned.has(pieceName)&&!equipped.has(pieceName)){const pit=getItemData(pieceName);if(!pit?.s)continue;if(!checkProficiency(pit,'player',pieceName))continue;const targetSlot=pit.s==='ring'?(!localEq.ring_1?'ring_1':'ring_2'):pit.s;addOp({t:'equip',item:pieceName,slot:targetSlot,tgt:'player'});localEq[targetSlot]=pieceName;count++;}}
+if(count>0){closeModal();haptic('medium');toast(`${vi('sword', 13)} ${count} peça(s) de ${esc(sdef.n)} equipada(s)`,'ok');updateHeader();renderTab();updateBottomBar();}}
+function doUse(name){const it=getItemData(name);const tags=it?.t||[];if(name==='potion'||tags.includes('potion')){addOp({t:'use',item:name,tgt:activeTarget});removeFromLocalInv(name);const estHeal=it.heal?avgDice(it.heal):7;if(activeTarget==='player'){localHP=Math.min(D.p.mhp,localHP+estHeal);}
+closeModal();haptic('medium');toast(`${vi('flask', 13)} ${esc(name)} (~+${estHeal} HP)`,'ok');animateStat('hs-hp');updateHeader();renderTab();updateBottomBar();return;}
+if(tags.includes('consumable')||tags.includes('food')){addOp({t:'use',item:name,tgt:activeTarget});removeFromLocalInv(name);let tgtLabel='';if(activeTarget!=='player'&&D.allies){const ally=D.allies.find(a=>a.id===activeTarget);if(ally)tgtLabel=` → ${ally.n}`;}
+closeModal();haptic('medium');toast(`${vi('food', 13)} ${esc(name)} usado${tgtLabel}`,'ok');updateHeader();renderTab();updateBottomBar();return;}}
+function showTargetPicker(name){let html=`<div class="modal-title">${vi('target', 16)} Alvo</div>`;html+=`<div style="font-size:12px;color:var(--v-text-muted);text-align:center;margin-bottom:8px;">Quem vai consumir ${name}?</div>`;const hpPct=Math.round(localHP/D.p.mhp*100);html+=`<button class="btn-use" style="width:100%;margin-bottom:6px;" onclick="activeTarget='player';doUse('${esc(name)}')">
+            ${vi('person', 14)} ${D.p.n} <span style="opacity:0.7;font-size:11px;">${vi('heart', 11)} ${localHP}/${D.p.mhp} (${hpPct}%)</span></button>`;(D.allies||[]).forEach(a=>{const aHp=a.hp,aMhp=a.mhp;const aPct=Math.round(aHp/aMhp*100);const injured=aHp<aMhp?'':'opacity:0.5;';html+=`<button class="btn-use" style="width:100%;margin-bottom:6px;${injured}" onclick="activeTarget='${esc(a.id)}';doUse('${esc(name)}')">
+                ${vi('person', 14)} ${a.n} <span style="opacity:0.7;font-size:11px;">${vi('heart', 11)} ${aHp}/${aMhp} (${aPct}%)</span></button>`;});html+=`<button class="btn-unequip" style="width:100%;margin-top:4px;" onclick="closeModal()">Cancelar</button>`;showModal(html);}
+function doUsePotion(){if(localPotions<=0)return;addOp({t:'use',item:'potion',tgt:'player'});localPotions--;localHP=Math.min(D.p.mhp,localHP+7);haptic('medium');toast(`${vi('flask', 13)} Poção de Cura usada (~+7 HP)`,'ok');animateStat('hs-hp');updateHeader();renderTab();updateBottomBar();}
+function showCampConfirm(name){const isTent=name==='Barraca';const tentUses=D.p.tu||0;const hpGain=D.p.mhp-localHP;const mpGain=D.p.mmp-localMP;const maxHD=D.p.mhd||D.p.l||1;const curHD=D.p.hd||0;const hdGain=Math.min(maxHD-curHD,Math.max(1,Math.floor((maxHD+1)/2)));let html='<div style="text-align:center;padding:12px;">';html+=`<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('tent', 18)} Descanso Longo</div>`;if(isTent&&tentUses>0){const bars=Array.from({length:5},(_,i)=>`<span style="color:${i < tentUses ? 'var(--v-success)' : 'var(--v-text-dim)'}">${i < tentUses ? '■' : '□'}</span>`).join('');html+=`<div style="font-size:13px;margin-bottom:8px;">Barraca: ${bars} <span style="opacity:0.7">${tentUses}/5 usos</span></div>`;}
+html+='<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">';html+=`Recuperação estimada:<br>`;html+=`${vi('heart', 12)} +${hpGain} HP &nbsp; ${vi('orb', 12)} +${mpGain} MP`;if(hdGain>0)html+=` &nbsp; 🎲 +${hdGain} HD`;html+='</div>';html+=`<div class="detail-actions">
             <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
             <button class="btn-use" onclick="doCamp('${esc(name)}')">${vi('tent', 13)} Acampar</button>
-        </div>`;
-    html += '</div>';
-    showModal(html);
-}
-
-function doCamp(name) {
-    addOp({ t: 'use', item: name, tgt: 'player' });
-    const hpGain = D.p.mhp - localHP;
-    const mpGain = D.p.mmp - localMP;
-    localHP = D.p.mhp;
-    localMP = D.p.mmp;
-    // Tent durability
-    if (name === 'Barraca' && D.p.tu != null) {
-        D.p.tu--;
-        if (D.p.tu <= 0) {
-            removeFromLocalInv(name);
-            // Check for another tent
-            const another = localInv.find(i => i.n === 'Barraca' && i.q > 0);
-            D.p.tu = another ? 5 : null;
-        }
-    }
-    closeModal();
-    haptic('heavy');
-    let msg = `${vi('tent', 13)} Descanso Longo: +${hpGain} HP, +${mpGain} MP`;
-    toast(msg, 'ok');
-    animateStat('hs-hp');
-    animateStat('hs-mp');
-    updateHeader();
-    renderTab();
-    updateBottomBar();
-}
-
-function doToggleFav(name) {
-    const idx = localFavs.indexOf(name);
-    if (idx >= 0) {
-        localFavs.splice(idx, 1);
-        addOp({ t: 'toggle_fav', item: name, val: false });
-        toast(`${vi('star', 13)} ${esc(name)} removido dos favoritos`, 'ok');
-    } else {
-        localFavs.push(name);
-        addOp({ t: 'toggle_fav', item: name, val: true });
-        toast(`${vi_f('star', 13)} ${esc(name)} favoritado`, 'ok');
-    }
-    haptic('light');
-    renderTab();
-    updateBottomBar();
-}
-
-function doSell(name, price) {
-    if (isLocked(name)) { toast(vi('lock', 13) + ' Item travado!', 'warn'); return; }
-    addOp({ t: 'sell', item: name });
-    removeFromLocalInv(name);
-    localGold += price;
-    closeModal();
-    haptic('medium');
-    toast(`${vi('coin', 13)} ${esc(name)} vendido por ${price} GP`, 'ok');
-    animateStat('hs-gold');
-    updateHeader();
-    renderTab();
-    updateBottomBar();
-}
-
-function canDiscard(it, tags) {
-    return !tags.some(t => SELL_PROTECTED.has(t));
-}
-
-function doDiscard(name) {
-    if (isLocked(name)) { toast(vi('lock', 13) + ' Item travado!', 'warn'); return; }
-    addOp({ t: 'discard', item: name });
-    removeFromLocalInv(name);
-    closeModal();
-    haptic('heavy');
-    toast(`${vi('trash', 13)} ${esc(name)} descartado`, 'warn');
-    updateHeader();
-    renderTab();
-    updateBottomBar();
-}
-
-// ── Selection Mode (batch discard/sell) ──
-function toggleSelectionMode() {
-    selectionMode = !selectionMode;
-    selectedItems.clear();
-    updateSelectionBar();
-    renderTab();
-}
-
-function toggleSelectItem(name) {
-    if (selectedItems.has(name)) selectedItems.delete(name);
-    else selectedItems.add(name);
-    haptic('light');
-    updateSelectionBar();
-    // Targeted update: toggle checkbox without re-rendering entire tab
-    const cards = document.querySelectorAll('.item-card');
-    let found = false;
-    cards.forEach(card => {
-        const onclick = card.getAttribute('onclick') || '';
-        if (onclick.includes(name.replace(/'/g, "\\'"))) {
-            const chk = card.querySelector('.sel-check');
-            if (chk) {
-                const isNowSelected = selectedItems.has(name);
-                chk.className = 'sel-check' + (isNowSelected ? ' active' : '');
-                chk.innerHTML = isNowSelected ? vi_f('check', 12) : '';
-                found = true;
-            }
-        }
-    });
-    if (!found) renderTab(); // fallback
-}
-
-function updateSelectionBar() {
-    const bar = document.getElementById('selectionBar');
-    if (!bar) return;
-    if (selectionMode && selectedItems.size > 0) {
-        bar.classList.remove('hidden');
-        bar.innerHTML = '<span class="sel-count">' + selectedItems.size + ' selecionado(s)</span>'
-            + '<button class="sel-action-btn sel-btn-fav" onclick="favSelected()">' + vi_f('star', 12) + '</button>'
-            + '<button class="sel-action-btn sel-btn-lock" onclick="lockSelected()">' + vi('lock', 12) + '</button>'
-            + '<button class="sel-action-btn sel-btn-sell" onclick="sellSelected()">' + vi('coin', 12) + '</button>'
-            + '<button class="sel-action-btn sel-btn-discard" onclick="discardSelected()">' + vi('trash', 12) + '</button>';
-    } else {
-        bar.classList.add('hidden');
-        bar.innerHTML = '';
-    }
-}
-
-function favSelected() {
-    var names = [...selectedItems];
-    var added = 0, removed = 0;
-    names.forEach(function(name) {
-        if (isFav(name)) {
-            var idx = localFavs.indexOf(name);
-            if (idx >= 0) localFavs.splice(idx, 1);
-            addOp({ t: 'toggle_fav', item: name, val: false });
-            removed++;
-        } else {
-            localFavs.push(name);
-            addOp({ t: 'toggle_fav', item: name, val: true });
-            added++;
-        }
-    });
-    selectedItems.clear();
-    selectionMode = false;
-    closeModal();
-    updateSelectionBar();
-    haptic('light');
-    var msg = '';
-    if (added > 0) msg += vi_f('star', 13) + ' ' + added + ' favoritado(s) ';
-    if (removed > 0) msg += vi('star', 13) + ' ' + removed + ' removido(s)';
-    toast(msg.trim(), 'ok');
-    renderTab();
-    updateBottomBar();
-}
-
-function lockSelected() {
-    var names = [...selectedItems];
-    var locked = 0, unlocked = 0;
-    names.forEach(function(name) {
-        if (isLocked(name)) {
-            var idx = localLocked.indexOf(name);
-            if (idx >= 0) localLocked.splice(idx, 1);
-            addOp({ t: 'toggle_lock', item: name, val: false });
-            unlocked++;
-        } else {
-            localLocked.push(name);
-            addOp({ t: 'toggle_lock', item: name, val: true });
-            locked++;
-        }
-    });
-    selectedItems.clear();
-    selectionMode = false;
-    closeModal();
-    updateSelectionBar();
-    haptic('light');
-    var msg = '';
-    if (locked > 0) msg += vi('lock', 13) + ' ' + locked + ' travado(s) ';
-    if (unlocked > 0) msg += vi('unlock', 13) + ' ' + unlocked + ' desbloqueado(s)';
-    toast(msg.trim(), 'ok');
-    renderTab();
-    updateBottomBar();
-}
-
-function sellSelected() {
-    const names = [...selectedItems];
-    let totalGP = 0;
-    const sellable = [];
-    names.forEach(name => {
-        const it = getItemData(name);
-        const tags = it.t || [];
-        if (isProtected(tags)) return;
-        const inv = localInv.find(i => i.n === name);
-        if (!inv || inv.q <= 0) return;
-        const price = Math.max(1, Math.floor((it.v || 1) * 0.5));
-        sellable.push({ name, price, qty: 1 });
-        totalGP += price;
-    });
-    if (!sellable.length) { toast(`${vi('warn', 13)} Nenhum item vendível`, 'warn'); return; }
-    let html = '<div style="text-align:center;padding:12px;">';
-    html += `<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('coin', 18)} Vender Selecionados</div>`;
-    html += `<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
-            Vender <b>${sellable.length}</b> item(ns) por <b>${totalGP} GP</b>? (50% do valor)</div>`;
-    html += '<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';
-    sellable.forEach(s => {
-        const it = getItemData(s.name);
-        html += `${it.e || '📦'} ${s.name} → ${s.price} GP<br>`;
-    });
-    html += '</div>';
-    html += `<div class="detail-actions">
+        </div>`;html+='</div>';showModal(html);}
+function doCamp(name){addOp({t:'use',item:name,tgt:'player'});const hpGain=D.p.mhp-localHP;const mpGain=D.p.mmp-localMP;localHP=D.p.mhp;localMP=D.p.mmp;if(name==='Barraca'&&D.p.tu!=null){D.p.tu--;if(D.p.tu<=0){removeFromLocalInv(name);const another=localInv.find(i=>i.n==='Barraca'&&i.q>0);D.p.tu=another?5:null;}}
+closeModal();haptic('heavy');let msg=`${vi('tent', 13)} Descanso Longo: +${hpGain} HP, +${mpGain} MP`;toast(msg,'ok');animateStat('hs-hp');animateStat('hs-mp');updateHeader();renderTab();updateBottomBar();}
+function doToggleFav(name){const idx=localFavs.indexOf(name);if(idx>=0){localFavs.splice(idx,1);addOp({t:'toggle_fav',item:name,val:false});toast(`${vi('star', 13)} ${esc(name)} removido dos favoritos`,'ok');}else{localFavs.push(name);addOp({t:'toggle_fav',item:name,val:true});toast(`${vi_f('star', 13)} ${esc(name)} favoritado`,'ok');}
+haptic('light');renderTab();updateBottomBar();}
+function doSell(name,price){if(isLocked(name)){toast(vi('lock',13)+' Item travado!','warn');return;}
+addOp({t:'sell',item:name});removeFromLocalInv(name);localGold+=price;closeModal();haptic('medium');toast(`${vi('coin', 13)} ${esc(name)} vendido por ${price} GP`,'ok');animateStat('hs-gold');updateHeader();renderTab();updateBottomBar();}
+function canDiscard(it,tags){return!tags.some(t=>SELL_PROTECTED.has(t));}
+function doDiscard(name){if(isLocked(name)){toast(vi('lock',13)+' Item travado!','warn');return;}
+addOp({t:'discard',item:name});removeFromLocalInv(name);closeModal();haptic('heavy');toast(`${vi('trash', 13)} ${esc(name)} descartado`,'warn');updateHeader();renderTab();updateBottomBar();}
+function toggleSelectionMode(){selectionMode=!selectionMode;selectedItems.clear();updateSelectionBar();renderTab();}
+function toggleSelectItem(name){if(selectedItems.has(name))selectedItems.delete(name);else selectedItems.add(name);haptic('light');updateSelectionBar();const cards=document.querySelectorAll('.item-card');let found=false;cards.forEach(card=>{const onclick=card.getAttribute('onclick')||'';if(onclick.includes(name.replace(/'/g,"\\'"))){const chk=card.querySelector('.sel-check');if(chk){const isNowSelected=selectedItems.has(name);chk.className='sel-check'+(isNowSelected?' active':'');chk.innerHTML=isNowSelected?vi_f('check',12):'';found=true;}}});if(!found)renderTab();}
+function updateSelectionBar(){const bar=document.getElementById('selectionBar');if(!bar)return;if(selectionMode&&selectedItems.size>0){bar.classList.remove('hidden');bar.innerHTML='<span class="sel-count">'+selectedItems.size+' selecionado(s)</span>'
++'<button class="sel-action-btn sel-btn-fav" onclick="favSelected()">'+vi_f('star',12)+'</button>'
++'<button class="sel-action-btn sel-btn-lock" onclick="lockSelected()">'+vi('lock',12)+'</button>'
++'<button class="sel-action-btn sel-btn-sell" onclick="sellSelected()">'+vi('coin',12)+'</button>'
++'<button class="sel-action-btn sel-btn-discard" onclick="discardSelected()">'+vi('trash',12)+'</button>';}else{bar.classList.add('hidden');bar.innerHTML='';}}
+function favSelected(){var names=[...selectedItems];var added=0,removed=0;names.forEach(function(name){if(isFav(name)){var idx=localFavs.indexOf(name);if(idx>=0)localFavs.splice(idx,1);addOp({t:'toggle_fav',item:name,val:false});removed++;}else{localFavs.push(name);addOp({t:'toggle_fav',item:name,val:true});added++;}});selectedItems.clear();selectionMode=false;closeModal();updateSelectionBar();haptic('light');var msg='';if(added>0)msg+=vi_f('star',13)+' '+added+' favoritado(s) ';if(removed>0)msg+=vi('star',13)+' '+removed+' removido(s)';toast(msg.trim(),'ok');renderTab();updateBottomBar();}
+function lockSelected(){var names=[...selectedItems];var locked=0,unlocked=0;names.forEach(function(name){if(isLocked(name)){var idx=localLocked.indexOf(name);if(idx>=0)localLocked.splice(idx,1);addOp({t:'toggle_lock',item:name,val:false});unlocked++;}else{localLocked.push(name);addOp({t:'toggle_lock',item:name,val:true});locked++;}});selectedItems.clear();selectionMode=false;closeModal();updateSelectionBar();haptic('light');var msg='';if(locked>0)msg+=vi('lock',13)+' '+locked+' travado(s) ';if(unlocked>0)msg+=vi('unlock',13)+' '+unlocked+' desbloqueado(s)';toast(msg.trim(),'ok');renderTab();updateBottomBar();}
+function sellSelected(){const names=[...selectedItems];let totalGP=0;const sellable=[];names.forEach(name=>{const it=getItemData(name);const tags=it.t||[];if(isProtected(tags))return;const inv=localInv.find(i=>i.n===name);if(!inv||inv.q<=0)return;const price=Math.max(1,Math.floor((it.v||1)*0.5));sellable.push({name,price,qty:1});totalGP+=price;});if(!sellable.length){toast(`${vi('warn', 13)} Nenhum item vendível`,'warn');return;}
+let html='<div style="text-align:center;padding:12px;">';html+=`<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('coin', 18)} Vender Selecionados</div>`;html+=`<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
+            Vender <b>${sellable.length}</b> item(ns) por <b>${totalGP} GP</b>? (50% do valor)</div>`;html+='<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';sellable.forEach(s=>{const it=getItemData(s.name);html+=`${it.e || '📦'} ${s.name} → ${s.price} GP<br>`;});html+='</div>';html+=`<div class="detail-actions">
             <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
             <button class="btn-sell" onclick="confirmSellSelected()">${vi('coin', 13)} Vender ${totalGP} GP</button>
-        </div></div>`;
-    showModal(html);
-}
-
-function confirmSellSelected() {
-    let totalGP = 0;
-    [...selectedItems].forEach(name => {
-        const it = getItemData(name);
-        const tags = it.t || [];
-        if (isProtected(tags) || isLocked(name)) return;
-        const inv = localInv.find(i => i.n === name);
-        if (!inv || inv.q <= 0) return;
-        const price = Math.max(1, Math.floor((it.v || 1) * 0.5));
-        addOp({ t: 'sell', item: name });
-        removeFromLocalInv(name);
-        totalGP += price;
-        localGold += price;
-    });
-    selectedItems.clear();
-    selectionMode = false;
-    closeModal();
-    updateSelectionBar();
-    haptic('medium');
-    toast(`${vi('coin', 13)} Vendidos: +${totalGP} GP`, 'ok');
-    animateStat('hs-gold');
-    updateHeader();
-    renderTab();
-    updateBottomBar();
-}
-
-function discardSelected() {
-    const names = [...selectedItems];
-    const discardable = [];
-    names.forEach(name => {
-        const it = getItemData(name);
-        const tags = it.t || [];
-        if (isProtected(tags)) return;
-        const inv = localInv.find(i => i.n === name);
-        if (!inv || inv.q <= 0) return;
-        discardable.push(name);
-    });
-    if (!discardable.length) { toast(`${vi('warn', 13)} Nenhum item descartável`, 'warn'); return; }
-    let html = '<div style="text-align:center;padding:12px;">';
-    html += `<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('trash', 18)} Descartar Selecionados</div>`;
-    html += `<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
-            Descartar <b>${discardable.length}</b> item(ns)? <b>Ação irreversível!</b></div>`;
-    html += '<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';
-    discardable.forEach(name => {
-        const it = getItemData(name);
-        html += `${it.e || '📦'} ${name}<br>`;
-    });
-    html += '</div>';
-    html += `<div class="detail-actions">
+        </div></div>`;showModal(html);}
+function confirmSellSelected(){let totalGP=0;[...selectedItems].forEach(name=>{const it=getItemData(name);const tags=it.t||[];if(isProtected(tags)||isLocked(name))return;const inv=localInv.find(i=>i.n===name);if(!inv||inv.q<=0)return;const price=Math.max(1,Math.floor((it.v||1)*0.5));addOp({t:'sell',item:name});removeFromLocalInv(name);totalGP+=price;localGold+=price;});selectedItems.clear();selectionMode=false;closeModal();updateSelectionBar();haptic('medium');toast(`${vi('coin', 13)} Vendidos: +${totalGP} GP`,'ok');animateStat('hs-gold');updateHeader();renderTab();updateBottomBar();}
+function discardSelected(){const names=[...selectedItems];const discardable=[];names.forEach(name=>{const it=getItemData(name);const tags=it.t||[];if(isProtected(tags))return;const inv=localInv.find(i=>i.n===name);if(!inv||inv.q<=0)return;discardable.push(name);});if(!discardable.length){toast(`${vi('warn', 13)} Nenhum item descartável`,'warn');return;}
+let html='<div style="text-align:center;padding:12px;">';html+=`<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('trash', 18)} Descartar Selecionados</div>`;html+=`<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
+            Descartar <b>${discardable.length}</b> item(ns)? <b>Ação irreversível!</b></div>`;html+='<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';discardable.forEach(name=>{const it=getItemData(name);html+=`${it.e || '📦'} ${name}<br>`;});html+='</div>';html+=`<div class="detail-actions">
             <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
             <button style="padding:10px 16px;font-size:13px;background:var(--v-danger);color:#fff;border:none;border-radius:8px;cursor:pointer;" onclick="confirmDiscardSelected()">${vi('trash', 13)} Descartar</button>
-        </div></div>`;
-    showModal(html);
-}
-
-function confirmDiscardSelected() {
-    let count = 0;
-    [...selectedItems].forEach(name => {
-        const it = getItemData(name);
-        const tags = it.t || [];
-        if (isProtected(tags) || isLocked(name)) return;
-        const inv = localInv.find(i => i.n === name);
-        if (!inv || inv.q <= 0) return;
-        addOp({ t: 'discard', item: name });
-        removeFromLocalInv(name);
-        count++;
-    });
-    selectedItems.clear();
-    selectionMode = false;
-    closeModal();
-    updateSelectionBar();
-    haptic('heavy');
-    toast(`${vi('trash', 13)} ${count} item(ns) descartado(s)`, 'warn');
-    updateHeader();
-    renderTab();
-    updateBottomBar();
-}
-
-function doExtractAllGems(slot) {
-    const gems = localGems[slot] || [];
-    let count = 0;
-    for (let i = 0; i < gems.length; i++) {
-        if (gems[i]) {
-            addOp({ t: 'gem_remove', slot, idx: i });
-            addToLocalInv(gems[i]);
-            count++;
-        }
-    }
-    localGems[slot] = gems.map(() => null);
-    closeModal();
-    haptic('medium');
-    toast(`${vi('gem', 13)} ${count} gema(s) extraída(s)`, 'ok');
-    renderTab();
-    updateBottomBar();
-}
-
-var JUNK_TAGS = new Set(['junk', 'monster_part']);
-function getJunkItems() {
-    return localInv.filter(inv => {
-        if (inv.q <= 0) return false;
-        const it = getItemData(inv.n);
-        const tags = it.t || [];
-        if (!tags.some(t => JUNK_TAGS.has(t))) return false;
-        if (isEquippedAnywhere(inv.n)) return false;
-        if (isFav(inv.n)) return false;
-        if (isLocked(inv.n)) return false;
-        if (tags.some(t => SELL_PROTECTED.has(t))) return false;
-        return true;
-    });
-}
-
-function doSellJunk() {
-    const junk = getJunkItems();
-    if (!junk.length) { toast('Nenhum lixo para vender.', 'warn'); return; }
-    let totalGP = 0;
-    let totalItems = 0;
-    junk.forEach(inv => {
-        const it = getItemData(inv.n);
-        const price = Math.max(1, Math.floor((it.v || 1) * 0.6));
-        totalGP += price * inv.q;
-        totalItems += inv.q;
-    });
-    // Confirm modal
-    let html = '<div style="text-align:center;padding:12px;">';
-    html += `<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('coin', 18)} Vender Lixo</div>`;
-    html += `<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
-            Vender <b>${totalItems}</b> itens de despojos por <b>${totalGP} GP</b>? (60% do valor)</div>`;
-    html += '<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';
-    junk.forEach(inv => {
-        const it = getItemData(inv.n);
-        html += `${it.e || '📦'} ${inv.n} x${inv.q}<br>`;
-    });
-    html += '</div>';
-    html += `<div class="detail-actions">
+        </div></div>`;showModal(html);}
+function confirmDiscardSelected(){let count=0;[...selectedItems].forEach(name=>{const it=getItemData(name);const tags=it.t||[];if(isProtected(tags)||isLocked(name))return;const inv=localInv.find(i=>i.n===name);if(!inv||inv.q<=0)return;addOp({t:'discard',item:name});removeFromLocalInv(name);count++;});selectedItems.clear();selectionMode=false;closeModal();updateSelectionBar();haptic('heavy');toast(`${vi('trash', 13)} ${count} item(ns) descartado(s)`,'warn');updateHeader();renderTab();updateBottomBar();}
+function doExtractAllGems(slot){const gems=localGems[slot]||[];let count=0;for(let i=0;i<gems.length;i++){if(gems[i]){addOp({t:'gem_remove',slot,idx:i});addToLocalInv(gems[i]);count++;}}
+localGems[slot]=gems.map(()=>null);closeModal();haptic('medium');toast(`${vi('gem', 13)} ${count} gema(s) extraída(s)`,'ok');renderTab();updateBottomBar();}
+var JUNK_TAGS=new Set(['junk','monster_part']);function getJunkItems(){return localInv.filter(inv=>{if(inv.q<=0)return false;const it=getItemData(inv.n);const tags=it.t||[];if(!tags.some(t=>JUNK_TAGS.has(t)))return false;if(isEquippedAnywhere(inv.n))return false;if(isFav(inv.n))return false;if(isLocked(inv.n))return false;if(tags.some(t=>SELL_PROTECTED.has(t)))return false;return true;});}
+function doSellJunk(){const junk=getJunkItems();if(!junk.length){toast('Nenhum lixo para vender.','warn');return;}
+let totalGP=0;let totalItems=0;junk.forEach(inv=>{const it=getItemData(inv.n);const price=Math.max(1,Math.floor((it.v||1)*0.6));totalGP+=price*inv.q;totalItems+=inv.q;});let html='<div style="text-align:center;padding:12px;">';html+=`<div style="font-size:clamp(16px,5vw,20px);margin-bottom:8px;">${vi('coin', 18)} Vender Lixo</div>`;html+=`<div style="font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">
+            Vender <b>${totalItems}</b> itens de despojos por <b>${totalGP} GP</b>? (60% do valor)</div>`;html+='<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:14px;">';junk.forEach(inv=>{const it=getItemData(inv.n);html+=`${it.e || '📦'} ${inv.n} x${inv.q}<br>`;});html+='</div>';html+=`<div class="detail-actions">
             <button class="btn-unequip" onclick="closeModal()">Cancelar</button>
             <button class="btn-sell" onclick="confirmSellJunk()">${vi('coin', 13)} Vender ${totalGP} GP</button>
-        </div>`;
-    html += '</div>';
-    showModal(html);
-}
-
-function confirmSellJunk() {
-    addOp({ t: 'sell_junk' });
-    const junk = getJunkItems();
-    let totalGP = 0;
-    junk.forEach(inv => {
-        const it = getItemData(inv.n);
-        const price = Math.max(1, Math.floor((it.v || 1) * 0.6));
-        totalGP += price * inv.q;
-    });
-    // Remove all junk from local inventory
-    const junkNames = new Set(junk.map(j => j.n));
-    localInv = localInv.filter(inv => !junkNames.has(inv.n));
-    localGold += totalGP;
-    closeModal();
-    haptic('medium');
-    toast(`${vi('coin', 13)} Lixo vendido: +${totalGP} GP`, 'ok');
-    animateStat('hs-gold');
-    updateHeader();
-    renderTab();
-    updateBottomBar();
-}
-
-// ══════════════════════════════════════════════════════════
-//  CONFIRM & SEND
-// ══════════════════════════════════════════════════════════
-function showConfirmModal() {
-    if (!pendingOps.length) return;
-
-    let html = '<div class="modal-handle"></div>';
-    html += `<div class="modal-title">${vi('listIcon', 16)} Confirmar Alterações</div>`;
-    html += `<div style="font-size:12px;color:var(--v-text-dim);text-align:center;margin-bottom:8px;">${pendingOps.length} operação(ões) pendentes</div>`;
-    html += '<div class="confirm-ops-list">';
-    pendingOps.forEach(op => {
-        html += `<div class="confirm-op">${formatOp(op)}</div>`;
-    });
-    html += '</div>';
-    html += `<div class="detail-actions" style="margin-top:12px;">
+        </div>`;html+='</div>';showModal(html);}
+function confirmSellJunk(){addOp({t:'sell_junk'});const junk=getJunkItems();let totalGP=0;junk.forEach(inv=>{const it=getItemData(inv.n);const price=Math.max(1,Math.floor((it.v||1)*0.6));totalGP+=price*inv.q;});const junkNames=new Set(junk.map(j=>j.n));localInv=localInv.filter(inv=>!junkNames.has(inv.n));localGold+=totalGP;closeModal();haptic('medium');toast(`${vi('coin', 13)} Lixo vendido: +${totalGP} GP`,'ok');animateStat('hs-gold');updateHeader();renderTab();updateBottomBar();}
+function showConfirmModal(){if(!pendingOps.length)return;let html='<div class="modal-handle"></div>';html+=`<div class="modal-title">${vi('listIcon', 16)} Confirmar Alterações</div>`;html+=`<div style="font-size:12px;color:var(--v-text-dim);text-align:center;margin-bottom:8px;">${pendingOps.length} operação(ões) pendentes</div>`;html+='<div class="confirm-ops-list">';pendingOps.forEach(op=>{html+=`<div class="confirm-op">${formatOp(op)}</div>`;});html+='</div>';html+=`<div class="detail-actions" style="margin-top:12px;">
             <button class="btn-unequip" style="border-color:var(--v-danger) !important; color:var(--v-danger);" onclick="discardAndExit()">Sair s/ Salvar</button>
             <button class="btn-equip" onclick="sendOps()">${vi_f('check', 13)} Salvar Tudo</button>
-        </div>`;
-    showModal(html);
-}
-
-function formatOp(op) {
-    const tgtLabel = op.tgt && op.tgt !== 'player' ? ` → ${getAllyName(op.tgt)}` : '';
-    switch (op.t) {
-        case 'equip': return `${vi('sword', 13)} Equipar ${op.item}${tgtLabel}`;
-        case 'unequip': return `${vi('bag', 13)} Desequipar ${SLOT_NAMES[op.slot] || op.slot}${tgtLabel}`;
-        case 'use': return `${vi('flask', 13)} Usar ${op.item}${tgtLabel}`;
-        case 'gem_insert': return `${vi('gem', 13)} Encaixar ${op.gem} em ${SLOT_NAMES[op.slot] || op.slot}`;
-        case 'gem_remove': return `${vi('gem', 13)} Remover gema de ${SLOT_NAMES[op.slot] || op.slot}`;
-        case 'rune_inscribe': return `${vi('orb', 13)} Inscrever ${op.rune} em ${SLOT_NAMES[op.slot] || op.slot}`;
-        case 'sell': return `${vi('coin', 13)} Vender ${op.item}`;
-        case 'discard': return `${vi('trash', 13)} Descartar ${op.item}`;
-        case 'sell_junk': return `${vi('coin', 13)} Vender lixo`;
-        case 'save_loadout': return `${vi('save', 13)} Salvar loadout '${op.name}'`;
-        case 'load_loadout': return `${vi('sword', 13)} Carregar loadout '${op.name}'`;
-        case 'delete_loadout': return `${vi('trash', 13)} Deletar loadout '${op.name}'`;
-        case 'rune_craft': return `${vi('hammer', 13)} Forjar runa T${op.tier}`;
-        case 'toggle_fav': return `${op.val ? vi_f('star', 13) : vi('star', 13)} ${op.val ? 'Favoritar' : 'Desfavoritar'} ${op.item}`;
-        case 'toggle_lock': return `${op.val ? vi('lock', 13) : vi('unlock', 13)} ${op.val ? 'Travar' : 'Destravar'} ${op.item}`;
-        case 'gem_upgrade': return `${vi('gem', 13)} Fundir ${op.gem} \u2192 ${op.result}`;
-        case 'deposit': return `${vi('vault', 13)} Guardar ${op.item}`;
-        case 'withdraw': return `${vi('bag', 13)} Retirar ${op.item}`;
-        case 'deposit_gold': return `${vi('coin', 13)} Depositar ${op.amount} GP`;
-        case 'withdraw_gold': return `${vi('coin', 13)} Sacar ${op.amount} GP`;
-        default: return `? ${op.t}`;
-    }
-}
-
-// ── API communication (fetch mode) ──
-var _urlParams = new URLSearchParams(location.search);
-var _apiBase = _urlParams.get('api') || '';
-var _apiToken = _urlParams.get('token') || '';
-var _apiUid = _urlParams.get('uid') || '';
-var _returnTo = _urlParams.get('return') || '';  // 'game', 'explore', 'combat' or empty (close)
-
-// Popup mode: override API vars from Game Hub session
-if (window._invPopupMode && window.S) {
-    _apiBase = S.apiBase || '';
-    _apiToken = S.token || '';
-    _apiUid = String(S.uid || '');
-    _returnTo = 'game';
-}
-
-// Update error reporter with API info (init was early, before URL params)
-if (!window._invPopupMode && window.ValdoriaErrors && _apiBase && ValdoriaErrors.updateConfig) {
-    ValdoriaErrors.updateConfig({ apiBase: _apiBase, token: _apiToken, uid: _apiUid });
-}
-
-// Periodic tunnel URL discovery
-if (!window._invPopupMode && _apiBase && window.ApiDiscovery) {
-    ApiDiscovery.init(_apiBase, function(newUrl) { _apiBase = newUrl; });
-}
-// [EXIT-CONFIRM] Heartbeat for displacement detection during inventory
-if (!window._invPopupMode && window.SessionHeartbeat && _apiBase && _apiToken && _apiUid) {
-    SessionHeartbeat.init({ apiBase: _apiBase, token: _apiToken, uid: parseInt(_apiUid) || 0 });
-}
-var _combatMode = _urlParams.get('combat') === '1';
-
-async function _navigateBack() {
-    // If loading overlay is active, force close to prevent getting trapped
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay && !overlay.classList.contains('hidden')) {
-        try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] close:', e); }
-        return;
-    }
-
-    // If modal is open, close it first
-    if (_modalOpen) {
-        closeModal();
-        return;
-    }
-
-    // If viewing ally equipment, go back to allies list
-    if (activeTarget !== 'player') {
-        switchTab('allies');
-        return;
-    }
-
-    // #4: Warn before exit if there are unsaved changes
-    if (pendingOps.length > 0) {
-        _showPendingOpsExitConfirm();
-        return;
-    }
-
-    // No pending ops — show exit popup before closing
-    // [EXIT-CONFIRM] Popup only when actually exiting (modals/tabs handled above)
-    if (window.ValdoriaExitConfirm) {
-        ValdoriaExitConfirm.show();
-    } else {
-        await _performExit();
-    }
-}
-
-function _showPendingOpsExitConfirm() {
-    hapticNotify('warning');
-    var html = '<div class="modal-handle"></div>';
-    html += '<div class="modal-title">' + vi('warn', 16) + ' Altera\u00e7\u00f5es Pendentes</div>';
-    html += '<div style="text-align:center;font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">';
-    html += 'Voc\u00ea tem <b style="color:var(--v-warning)">' + pendingOps.length + '</b> altera\u00e7\u00e3o(\u00f5es) n\u00e3o salvas.';
-    html += '</div>';
-    html += '<div class="detail-actions">';
-    html += '<button class="btn-discard" onclick="discardAndExit()">' + vi('trash', 13) + ' Descartar</button>';
-    html += '<button class="btn-equip" onclick="sendOps()">' + vi('save', 13) + ' Salvar e Sair</button>';
-    html += '</div>';
-    showModal(html);
-}
-
-async function _performExit() {
-    // Popup mode: close overlay
-    if (window._invPopupMode && typeof hideInventoryPopup === 'function') {
-        hideInventoryPopup();
-        return;
-    }
-    // Show loading overlay so user knows transition is happening
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-        const _lt = overlay.querySelector('.loading-text'); if (_lt) _lt.textContent = 'Saindo...';
-        overlay.classList.remove('hidden');
-    }
-
-    if (_returnTo && _apiBase) {
-        try {
-            const _th = {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + _apiToken,
-            };
-            if (window.Telegram?.WebApp?.initData) { _th['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
-            _th['X-Idempotency-Key'] = crypto.randomUUID();
-            const resp = await fetchT(_apiBase + '/api/webapp/transition', {
-                method: 'POST',
-                headers: _th,
-                body: JSON.stringify({
-                    from: 'inventory', to: _returnTo,
-                    user_id: parseInt(_apiUid),
-                    payload: {}
-                }),
-            });
-            if (resp.status === 401 || resp.status === 403) {
-                console.error('[INVENTORY] Auth error on transition:', resp.status);
-                const tg = window.Telegram?.WebApp;
-                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' })); setTimeout(function () { if (tg.close) tg.close(); }, 1000); return; }
-            }
-            if (resp.ok) {
-                const data = await resp.json();
-                if (data.url) {
-                    window.__valdoria_transitioning = true;
-                    valdoriaSpaNav(data.url);
-                    return;
-                }
-            }
-            console.error('[INVENTORY] Transition back failed');
-        } catch (e) {
-            console.error('[INVENTORY] Transition error:', e);
-        }
-    }
-    // Fallback: close webapp
-    try { if (tg) tg.close(); } catch (e) { console.warn('[INVENTORY] tg.close:', e); }
-}
-
-var _sendRetries = 0;
-var _opsSending = false;
-function sendOps() {
-    if (!pendingOps.length) return;
-    if (_opsSending) return;
-    _opsSending = true;
-
-    closeModal();
-    const overlay = document.getElementById('loadingOverlay');
-    const _lt = overlay.querySelector('.loading-text'); if (_lt) _lt.textContent = 'Aplicando alterações...';
-    overlay.classList.remove('hidden');
-
-    if (_apiBase) {
-        // API mode: send via fetch() — reliable
-        _sendViaAPI(overlay);
-    } else if (tg) {
-        // Legacy mode: sendData (may not work from inline buttons)
-        _sendViaSendData(overlay);
-    } else {
-        console.warn('[INVENTORY] sendData (dev mode):', JSON.stringify({ ops: pendingOps }).slice(0, 200));
-        overlay.classList.add('hidden');
-        toast('Dados enviados (dev)', 'ok');
-    }
-}
-
-async function _sendViaAPI(overlay) {
-    try {
-        const _ah = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + _apiToken,
-        };
-        if (window.Telegram?.WebApp?.initData) { _ah['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
-        _ah['X-Idempotency-Key'] = crypto.randomUUID();
-        const ac = new AbortController();
-        const _tid = setTimeout(() => ac.abort(), 15000);
-        const resp = await fetch(_apiBase + '/api/inventory/apply', {
-            method: 'POST',
-            headers: _ah,
-            signal: ac.signal,
-            body: JSON.stringify({ user_id: _apiUid, ops: pendingOps }),
-        });
-        clearTimeout(_tid);
-        if (resp.status === 401 || resp.status === 403) {
-            console.error('[INVENTORY] Auth error on apply:', resp.status);
-            _opsSending = false;
-            overlay.classList.add('hidden');
-            const tg = window.Telegram?.WebApp;
-            if (tg?.sendData) {
-                tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'INVENTORY', reason: 'session_expired' }));
-                setTimeout(function () { if (tg.close) tg.close(); }, 1000);
-                return;
-            }
-            toast(`${vi('warn', 13)} Sessão expirada. Feche e reabra.`, 'err');
-            return;
-        }
-        const result = await resp.json();
-        if (resp.ok && result.ok) {
-            pendingOps = [];
-            // Keep overlay active for seamless transition
-            const _lt = overlay.querySelector('.loading-text'); if (_lt) _lt.textContent = 'Voltando...';
-            if (result.summary) toast(result.summary, 'ok');
-            else toast(`${vi('check', 13)} Alterações salvas!`, 'ok');
-            updateBottomBar();
-            // Exit immediately
-            setTimeout(() => _performExit(), 500);
-        } else {
-            console.error('[INVENTORY] API error:', result.error || resp.status);
-            _opsSending = false;
-            overlay.classList.add('hidden');
-            toast(`${vi('warn', 13)} Erro: ${result.error || 'falha no servidor'}`, 'err');
-        }
-    } catch (e) {
-        console.error('[INVENTORY] fetch failed:', e);
-        _opsSending = false;
-        overlay.classList.add('hidden');
-        const msg = e.name === 'AbortError' ? 'Timeout. Tente novamente.' : 'Sem conexão. Tente novamente.';
-        toast(`${vi('warn', 13)} ${msg}`, 'err');
-    }
-}
-
-function _sendViaSendData(overlay) {
-    const token = _urlParams.get('token') || '';
-    const data = {
-        action: 'inventory_batch',
-        token: token,
-        ops: pendingOps,
-    };
-    try {
-        tg.sendData(JSON.stringify(data));
-        _sendRetries = 0;
-        // Safety: close webapp if sendData didn't auto-close
-        setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[INVENTORY] tg.close:', e); } }, 1000);
-        // Extra safety: if still open after 2s, hide overlay and inform user
-        setTimeout(() => {
-            if (document.visibilityState !== 'hidden') {
-                overlay.classList.add('hidden');
-                pendingOps = [];
-                updateBottomBar();
-                toast(`${vi('check', 13)} Enviado! Feche a mochila.`, 'ok');
-            }
-        }, 2000);
-    } catch (e) {
-        console.error('[INVENTORY] sendData failed (attempt ' + (_sendRetries + 1) + ')', e);
-        overlay.classList.add('hidden');
-        _sendRetries++;
-        if (_sendRetries >= 3) {
-            toast(`${vi('warn', 13)} Falha ao enviar. Feche e reabra a mochila.`, 'err');
-        } else {
-            toast(`${vi('warn', 13)} Erro ao enviar. Toque em Confirmar para tentar novamente.`, 'err');
-        }
-    }
-}
-
-// ══════════════════════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════════════════════
-function getItemData(name) {
-    const d = (D.items || {})[name];
-    if (!d && name) console.warn('[INVENTORY] Item not in DB:', name);
-    return d || {};
-}
-
-function avgDice(formula) {
-    const m = (formula || '').match(/(\d+)d(\d+)\+?(\d+)?/);
-    if (!m) return 4;
-    return Math.round(parseInt(m[1]) * (parseInt(m[2]) + 1) / 2 + parseInt(m[3] || 0));
-}
-
-function getItemShortDesc(name, it) {
-    let parts = [];
-    if (it.dd) parts.push(it.dd + (it.b ? `+${it.b}` : ''));
-    if (it.ac) parts.push(`CA+${it.ac}`);
-    if (it.hb) parts.push(`HP+${it.hb}`);
-    if (it.mb) parts.push(`MP+${it.mb}`);
-    if (it.ib) parts.push(`INT+${it.ib}`);
-    if (it.sb) parts.push(`Salv.+${it.sb}`);
-    if (it.sp) parts.push(`Furt${vi('stealth', 11)}`);
-    if (it.heal) parts.push(it.heal);
-    if (!parts.length && it.v) parts.push(`${it.v}gp`);
-    return parts.join(' · ');
-}
-
-// Cached equipped set — rebuilt on demand
-var _equippedSet = null;
-function _rebuildEquippedSet() {
-    _equippedSet = new Set();
-    for (const v of Object.values(localEq)) { if (v) _equippedSet.add(v); }
-    for (const aeq of Object.values(localAllyEq)) {
-        for (const v of Object.values(aeq)) { if (v) _equippedSet.add(v); }
-    }
-}
-function _invalidateEquipCache() { _equippedSet = null; _compatCache = null; }
-function isEquippedAnywhere(name) {
-    if (!_equippedSet) _rebuildEquippedSet();
-    return _equippedSet.has(name);
-}
-
-// Cached compatible items per slot — rebuilt on equip tab render
-var _compatCache = null;
-function _getCompatCached(slot) {
-    if (!_compatCache) {
-        _compatCache = {};
-        const ALL_SLOTS = ['head','shoulders','torso','hands','legs','feet',
-            'necklace','cloak','main_hand','off_hand','belt','ring_1','ring_2','map'];
-        ALL_SLOTS.forEach(s => { _compatCache[s] = getCompatibleItems(s); });
-    }
-    return _compatCache[slot] || [];
-}
-
-function isFav(name) { return localFavs.includes(name); }
-function isLocked(name) { return localLocked.includes(name); }
-
-function doToggleLock(name) {
-    const idx = localLocked.indexOf(name);
-    if (idx >= 0) {
-        localLocked.splice(idx, 1);
-        addOp({ t: 'toggle_lock', item: name, val: false });
-        toast(vi('unlock', 13) + ' ' + esc(name) + ' desbloqueado', 'ok');
-    } else {
-        localLocked.push(name);
-        addOp({ t: 'toggle_lock', item: name, val: true });
-        toast(vi('lock', 13) + ' ' + esc(name) + ' travado', 'ok');
-    }
-    haptic('light');
-    renderTab();
-    updateBottomBar();
-}
-
-function isProtected(tags) {
-    return tags.some(t => SELL_PROTECTED.has(t));
-}
-
-function isConsumable(tags) {
-    return tags.some(t => ['consumable', 'food', 'potion', 'camping'].includes(t));
-}
-
-function _flashSlot(slot, cls) {
-    // Flash animation on equipment slot after equip/unequip
-    requestAnimationFrame(function() {
-        var slotEls = document.querySelectorAll('.body-slot');
-        slotEls.forEach(function(el) {
-            if (el.getAttribute('onclick') && el.getAttribute('onclick').includes("'" + slot + "'")) {
-                el.classList.remove('equip-flash', 'unequip-flash');
-                void el.offsetWidth;
-                el.classList.add(cls);
-                el.addEventListener('animationend', function() {
-                    el.classList.remove(cls);
-                }, { once: true });
-            }
-        });
-    });
-}
-
-var SELL_PROTECTED = new Set([
-    'quest', 'mission_item', 'key', 'map', 'map_fragment',
-    'no_sell', 'no_discard', 'story_item', 'unique'
-]);
-function canSell(it, tags) {
-    if (!it.v || it.v <= 0) return false;
-    return !tags.some(t => SELL_PROTECTED.has(t));
-}
-
-function checkProficiency(it, target, itemName) {
-    const tags = it.t || [];
-    if (tags.includes('clothing')) return true;
-    if (!tags.includes('armor') && !tags.includes('weapon')) return true;
-
-    let profs = [];
-    if (target === 'player') {
-        profs = D.p.prof || [];
-    } else {
-        const ally = (D.allies || []).find(a => a.id === target);
-        profs = ally ? (ally.prof || []) : [];
-    }
-    // Match tag (category) OR specific weapon/item name
-    return tags.some(t => profs.includes(t)) || (itemName && profs.includes(itemName));
-}
-
-function resolveSlot(it) {
-    const slot = it.s;
-    if (!slot) return null;
-    if (slot === 'ring') {
-        const eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
-        if (!eq.ring_1) return 'ring_1';
-        if (!eq.ring_2) return 'ring_2';
-        return 'ring_1';
-    }
-    return slot;
-}
-
-function getCompatibleItems(slot) {
-    const result = [];
-    const targetProfs = activeTarget === 'player'
-        ? (D.p.prof || [])
-        : ((D.allies || []).find(a => a.id === activeTarget)?.prof || []);
-
-    localInv.forEach(inv => {
-        if (inv.q <= 0) return;
-        const it = getItemData(inv.n);
-        if (!it.s) return;
-
-        // Slot match
-        let slotMatch = false;
-        if (it.s === 'ring' && (slot === 'ring_1' || slot === 'ring_2')) slotMatch = true;
-        else if (it.s === slot) slotMatch = true;
-        if (!slotMatch) return;
-
-        // Proficiency
-        const tags = it.t || [];
-        if (tags.includes('clothing')) { result.push({ name: inv.n }); return; }
-        if (!tags.includes('armor') && !tags.includes('weapon')) { result.push({ name: inv.n }); return; }
-        if (tags.some(t => targetProfs.includes(t))) result.push({ name: inv.n });
-    });
-    return result;
-}
-
-function compareItemsDetailed(newIt, oldIt, slot) {
-    if (!newIt) return { cls: '', delta: '', score: 0 };
-    if (!oldIt) oldIt = { ac: 0, b: 0, hb: 0, mb: 0 };
-
-    // Calculate stat differences
-    const diffs = [];
-    const acDiff = (newIt.ac || 0) - (oldIt.ac || 0);
-    const atkDiff = (newIt.b || 0) - (oldIt.b || 0);
-    const hpDiff = (newIt.hb || 0) - (oldIt.hb || 0);
-    const mpDiff = (newIt.mb || 0) - (oldIt.mb || 0);
-
-    const dmgDiff = (newIt.dd ? avgDice(newIt.dd) : 0) - (oldIt.dd ? avgDice(oldIt.dd) : 0);
-
-    if (dmgDiff !== 0) diffs.push({ label: 'Dano', val: dmgDiff });
-    if (acDiff !== 0) diffs.push({ label: 'CA', val: acDiff });
-    if (atkDiff !== 0) diffs.push({ label: 'ATK', val: atkDiff });
-    if (hpDiff !== 0) diffs.push({ label: 'HP', val: hpDiff });
-    if (mpDiff !== 0) diffs.push({ label: 'MP', val: mpDiff });
-
-    if (!diffs.length) return { cls: '', delta: '', score: 0 };
-
-    // Overall assessment: sum of positive and negative
-    const totalVal = diffs.reduce((s, d) => s + d.val, 0);
-    const cls = totalVal > 0 ? 'better' : totalVal < 0 ? 'worse' : '';
-
-    // Build delta badge
-    const deltaHtml = diffs.map(d => {
-        const sign = d.val > 0 ? '+' : '';
-        const dcls = d.val > 0 ? 'up' : 'down';
-        return `<span class="compat-delta ${dcls}">${sign}${d.val} ${d.label}</span>`;
-    }).join(' ');
-
-    return { cls, delta: `<div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;">${deltaHtml}</div>`, score: totalVal };
-}
-
-function getStatDelta(newIt, oldIt, slot) {
-    const diffs = [];
-    const check = (label, nv, ov) => { if (nv !== ov) diffs.push({ label, val: nv - ov }); };
-    check('Dano', newIt.dd ? avgDice(newIt.dd) : 0, oldIt.dd ? avgDice(oldIt.dd) : 0);
-    check('CA', newIt.ac || 0, oldIt.ac || 0);
-    check('ATK', newIt.b || 0, oldIt.b || 0);
-    check('HP', newIt.hb || 0, oldIt.hb || 0);
-    check('MP', newIt.mb || 0, oldIt.mb || 0);
-    if (!diffs.length) return '';
-    return diffs.map(d => {
-        const sign = d.val > 0 ? '+' : '';
-        const color = d.val > 0 ? 'var(--v-success)' : 'var(--v-danger)';
-        return `<span style="color:${color};font-weight:600;">${sign}${d.val} ${d.label}</span>`;
-    }).join(' ');
-}
-
-function getSetIcon(setId) {
-    if (D.sets && D.sets[setId]) return D.sets[setId].i;
-    return '🔗';
-}
-
-function getAllyName(npcId) {
-    const ally = (D.allies || []).find(a => a.id === npcId);
-    return ally ? ally.n : npcId;
-}
-
-// ── Bootstrap (must be last file loaded) ──
-// In popup mode, init is called by the bridge module
-if (!window._invPopupMode) init();
-
-
-// ══════════════════════════════════════════════════════════
-//  ITEM IMAGE POPUP
-// ══════════════════════════════════════════════════════════
-function showItemImage(name) {
-    var it = getItemData(name);
-    if (!it || !it.img) return;
-    haptic('light');
-
-    var stats = [];
-    if (it.s) stats.push({icon: '', label: SLOT_NAMES[it.s] || it.s, value: ''});
-    if (it.dd) stats.push({icon: '\u2694\uFE0F', label: 'Dano', value: it.dd + (it.b ? '+' + it.b : '')});
-    if (it.ac) stats.push({icon: '\u{1F6E1}\uFE0F', label: 'CA', value: '+' + it.ac});
-    if (it.hb) stats.push({icon: '\u2764\uFE0F', label: 'HP', value: '+' + it.hb});
-    if (it.mb) stats.push({icon: '\u2728', label: 'MP', value: '+' + it.mb});
-    if (it.v) stats.push({icon: '\u{1FA99}', label: 'Valor', value: it.v + ' GP'});
-
-    showImagePopup({
-        src: it.img,
-        title: name,
-        desc: it.desc || '',
-        stats: stats,
-        type: 'item'
-    });
-}
+        </div>`;showModal(html);}
+function formatOp(op){const tgtLabel=op.tgt&&op.tgt!=='player'?` → ${getAllyName(op.tgt)}`:'';switch(op.t){case'equip':return`${vi('sword', 13)} Equipar ${op.item}${tgtLabel}`;case'unequip':return`${vi('bag', 13)} Desequipar ${SLOT_NAMES[op.slot] || op.slot}${tgtLabel}`;case'use':return`${vi('flask', 13)} Usar ${op.item}${tgtLabel}`;case'gem_insert':return`${vi('gem', 13)} Encaixar ${op.gem} em ${SLOT_NAMES[op.slot] || op.slot}`;case'gem_remove':return`${vi('gem', 13)} Remover gema de ${SLOT_NAMES[op.slot] || op.slot}`;case'rune_inscribe':return`${vi('orb', 13)} Inscrever ${op.rune} em ${SLOT_NAMES[op.slot] || op.slot}`;case'sell':return`${vi('coin', 13)} Vender ${op.item}`;case'discard':return`${vi('trash', 13)} Descartar ${op.item}`;case'sell_junk':return`${vi('coin', 13)} Vender lixo`;case'save_loadout':return`${vi('save', 13)} Salvar loadout '${op.name}'`;case'load_loadout':return`${vi('sword', 13)} Carregar loadout '${op.name}'`;case'delete_loadout':return`${vi('trash', 13)} Deletar loadout '${op.name}'`;case'rune_craft':return`${vi('hammer', 13)} Forjar runa T${op.tier}`;case'toggle_fav':return`${op.val ? vi_f('star', 13) : vi('star', 13)} ${op.val ? 'Favoritar' : 'Desfavoritar'} ${op.item}`;case'toggle_lock':return`${op.val ? vi('lock', 13) : vi('unlock', 13)} ${op.val ? 'Travar' : 'Destravar'} ${op.item}`;case'gem_upgrade':return`${vi('gem', 13)} Fundir ${op.gem} \u2192 ${op.result}`;case'deposit':return`${vi('vault', 13)} Guardar ${op.item}`;case'withdraw':return`${vi('bag', 13)} Retirar ${op.item}`;case'deposit_gold':return`${vi('coin', 13)} Depositar ${op.amount} GP`;case'withdraw_gold':return`${vi('coin', 13)} Sacar ${op.amount} GP`;default:return`? ${op.t}`;}}
+var _urlParams=new URLSearchParams(location.search);var _apiBase=_urlParams.get('api')||'';var _apiToken=_urlParams.get('token')||'';var _apiUid=_urlParams.get('uid')||'';var _returnTo=_urlParams.get('return')||'';if(window._invPopupMode&&window.S){_apiBase=S.apiBase||'';_apiToken=S.token||'';_apiUid=String(S.uid||'');_returnTo='game';}
+if(!window._invPopupMode&&window.ValdoriaErrors&&_apiBase&&ValdoriaErrors.updateConfig){ValdoriaErrors.updateConfig({apiBase:_apiBase,token:_apiToken,uid:_apiUid});}
+if(!window._invPopupMode&&_apiBase&&window.ApiDiscovery){ApiDiscovery.init(_apiBase,function(newUrl){_apiBase=newUrl;});}
+if(!window._invPopupMode&&window.SessionHeartbeat&&_apiBase&&_apiToken&&_apiUid){SessionHeartbeat.init({apiBase:_apiBase,token:_apiToken,uid:parseInt(_apiUid)||0});}
+var _combatMode=_urlParams.get('combat')==='1';async function _navigateBack(){const overlay=document.getElementById('loadingOverlay');if(overlay&&!overlay.classList.contains('hidden')){try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}
+return;}
+if(_modalOpen){closeModal();return;}
+if(activeTarget!=='player'){switchTab('allies');return;}
+if(pendingOps.length>0){_showPendingOpsExitConfirm();return;}
+if(window.ValdoriaExitConfirm){ValdoriaExitConfirm.show();}else{await _performExit();}}
+function _showPendingOpsExitConfirm(){hapticNotify('warning');var html='<div class="modal-handle"></div>';html+='<div class="modal-title">'+vi('warn',16)+' Altera\u00e7\u00f5es Pendentes</div>';html+='<div style="text-align:center;font-size:13px;color:var(--v-text-dim);margin-bottom:12px;">';html+='Voc\u00ea tem <b style="color:var(--v-warning)">'+pendingOps.length+'</b> altera\u00e7\u00e3o(\u00f5es) n\u00e3o salvas.';html+='</div>';html+='<div class="detail-actions">';html+='<button class="btn-discard" onclick="discardAndExit()">'+vi('trash',13)+' Descartar</button>';html+='<button class="btn-equip" onclick="sendOps()">'+vi('save',13)+' Salvar e Sair</button>';html+='</div>';showModal(html);}
+async function _performExit(){if(window._invPopupMode&&typeof hideInventoryPopup==='function'){hideInventoryPopup();return;}
+const overlay=document.getElementById('loadingOverlay');if(overlay){const _lt=overlay.querySelector('.loading-text');if(_lt)_lt.textContent='Saindo...';overlay.classList.remove('hidden');}
+if(_returnTo&&_apiBase){try{const _th={'Content-Type':'application/json','Authorization':'Bearer '+_apiToken,};if(window.Telegram?.WebApp?.initData){_th['X-Telegram-Init-Data']=Telegram.WebApp.initData;}
+_th['X-Idempotency-Key']=crypto.randomUUID();const resp=await fetchT(_apiBase+'/api/webapp/transition',{method:'POST',headers:_th,body:JSON.stringify({from:'inventory',to:_returnTo,user_id:parseInt(_apiUid),payload:{}}),});if(resp.status===401||resp.status===403){console.error('[INVENTORY] Auth error on transition:',resp.status);const tg=window.Telegram?.WebApp;if(tg?.sendData){tg.sendData(JSON.stringify({action:'webapp_error_close',webapp:'INVENTORY',reason:'session_expired'}));setTimeout(function(){if(tg.close)tg.close();},1000);return;}}
+if(resp.ok){const data=await resp.json();if(data.url){window.__valdoria_transitioning=true;valdoriaSpaNav(data.url);return;}}
+console.error('[INVENTORY] Transition back failed');}catch(e){console.error('[INVENTORY] Transition error:',e);}}
+try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}}
+var _sendRetries=0;var _opsSending=false;function sendOps(){if(!pendingOps.length)return;if(_opsSending)return;_opsSending=true;closeModal();const overlay=document.getElementById('loadingOverlay');const _lt=overlay.querySelector('.loading-text');if(_lt)_lt.textContent='Aplicando alterações...';overlay.classList.remove('hidden');if(_apiBase){_sendViaAPI(overlay);}else if(tg){_sendViaSendData(overlay);}else{console.warn('[INVENTORY] sendData (dev mode):',JSON.stringify({ops:pendingOps}).slice(0,200));overlay.classList.add('hidden');toast('Dados enviados (dev)','ok');}}
+async function _sendViaAPI(overlay){try{const _ah={'Content-Type':'application/json','Authorization':'Bearer '+_apiToken,};if(window.Telegram?.WebApp?.initData){_ah['X-Telegram-Init-Data']=Telegram.WebApp.initData;}
+_ah['X-Idempotency-Key']=crypto.randomUUID();const ac=new AbortController();const _tid=setTimeout(()=>ac.abort(),15000);const resp=await fetch(_apiBase+'/api/inventory/apply',{method:'POST',headers:_ah,signal:ac.signal,body:JSON.stringify({user_id:_apiUid,ops:pendingOps}),});clearTimeout(_tid);if(resp.status===401||resp.status===403){console.error('[INVENTORY] Auth error on apply:',resp.status);_opsSending=false;overlay.classList.add('hidden');const tg=window.Telegram?.WebApp;if(tg?.sendData){tg.sendData(JSON.stringify({action:'webapp_error_close',webapp:'INVENTORY',reason:'session_expired'}));setTimeout(function(){if(tg.close)tg.close();},1000);return;}
+toast(`${vi('warn', 13)} Sessão expirada. Feche e reabra.`,'err');return;}
+const result=await resp.json();if(resp.ok&&result.ok){pendingOps=[];const _lt=overlay.querySelector('.loading-text');if(_lt)_lt.textContent='Voltando...';if(result.summary)toast(result.summary,'ok');else toast(`${vi('check', 13)} Alterações salvas!`,'ok');updateBottomBar();setTimeout(()=>_performExit(),500);}else{console.error('[INVENTORY] API error:',result.error||resp.status);_opsSending=false;overlay.classList.add('hidden');toast(`${vi('warn', 13)} Erro: ${result.error || 'falha no servidor'}`,'err');}}catch(e){console.error('[INVENTORY] fetch failed:',e);_opsSending=false;overlay.classList.add('hidden');const msg=e.name==='AbortError'?'Timeout. Tente novamente.':'Sem conexão. Tente novamente.';toast(`${vi('warn', 13)} ${msg}`,'err');}}
+function _sendViaSendData(overlay){const token=_urlParams.get('token')||'';const data={action:'inventory_batch',token:token,ops:pendingOps,};try{tg.sendData(JSON.stringify(data));_sendRetries=0;setTimeout(()=>{try{tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}},1000);setTimeout(()=>{if(document.visibilityState!=='hidden'){overlay.classList.add('hidden');pendingOps=[];updateBottomBar();toast(`${vi('check', 13)} Enviado! Feche a mochila.`,'ok');}},2000);}catch(e){console.error('[INVENTORY] sendData failed (attempt '+(_sendRetries+1)+')',e);overlay.classList.add('hidden');_sendRetries++;if(_sendRetries>=3){toast(`${vi('warn', 13)} Falha ao enviar. Feche e reabra a mochila.`,'err');}else{toast(`${vi('warn', 13)} Erro ao enviar. Toque em Confirmar para tentar novamente.`,'err');}}}
+function getItemData(name){const d=(D.items||{})[name];if(!d&&name)console.warn('[INVENTORY] Item not in DB:',name);return d||{};}
+function avgDice(formula){const m=(formula||'').match(/(\d+)d(\d+)\+?(\d+)?/);if(!m)return 4;return Math.round(parseInt(m[1])*(parseInt(m[2])+1)/2+parseInt(m[3]||0));}
+function getItemShortDesc(name,it){let parts=[];if(it.dd)parts.push(it.dd+(it.b?`+${it.b}`:''));if(it.ac)parts.push(`CA+${it.ac}`);if(it.hb)parts.push(`HP+${it.hb}`);if(it.mb)parts.push(`MP+${it.mb}`);if(it.ib)parts.push(`INT+${it.ib}`);if(it.sb)parts.push(`Salv.+${it.sb}`);if(it.sp)parts.push(`Furt${vi('stealth', 11)}`);if(it.heal)parts.push(it.heal);if(!parts.length&&it.v)parts.push(`${it.v}gp`);return parts.join(' · ');}
+var _equippedSet=null;function _rebuildEquippedSet(){_equippedSet=new Set();for(const v of Object.values(localEq)){if(v)_equippedSet.add(v);}
+for(const aeq of Object.values(localAllyEq)){for(const v of Object.values(aeq)){if(v)_equippedSet.add(v);}}}
+function _invalidateEquipCache(){_equippedSet=null;_compatCache=null;}
+function isEquippedAnywhere(name){if(!_equippedSet)_rebuildEquippedSet();return _equippedSet.has(name);}
+var _compatCache=null;function _getCompatCached(slot){if(!_compatCache){_compatCache={};const ALL_SLOTS=['head','shoulders','torso','hands','legs','feet','necklace','cloak','main_hand','off_hand','belt','ring_1','ring_2','map'];ALL_SLOTS.forEach(s=>{_compatCache[s]=getCompatibleItems(s);});}
+return _compatCache[slot]||[];}
+function isFav(name){return localFavs.includes(name);}
+function isLocked(name){return localLocked.includes(name);}
+function doToggleLock(name){const idx=localLocked.indexOf(name);if(idx>=0){localLocked.splice(idx,1);addOp({t:'toggle_lock',item:name,val:false});toast(vi('unlock',13)+' '+esc(name)+' desbloqueado','ok');}else{localLocked.push(name);addOp({t:'toggle_lock',item:name,val:true});toast(vi('lock',13)+' '+esc(name)+' travado','ok');}
+haptic('light');renderTab();updateBottomBar();}
+function isProtected(tags){return tags.some(t=>SELL_PROTECTED.has(t));}
+function isConsumable(tags){return tags.some(t=>['consumable','food','potion','camping'].includes(t));}
+function _flashSlot(slot,cls){requestAnimationFrame(function(){var slotEls=document.querySelectorAll('.body-slot');slotEls.forEach(function(el){if(el.getAttribute('onclick')&&el.getAttribute('onclick').includes("'"+slot+"'")){el.classList.remove('equip-flash','unequip-flash');void el.offsetWidth;el.classList.add(cls);el.addEventListener('animationend',function(){el.classList.remove(cls);},{once:true});}});});}
+var SELL_PROTECTED=new Set(['quest','mission_item','key','map','map_fragment','no_sell','no_discard','story_item','unique']);function canSell(it,tags){if(!it.v||it.v<=0)return false;return!tags.some(t=>SELL_PROTECTED.has(t));}
+function checkProficiency(it,target,itemName){const tags=it.t||[];if(tags.includes('clothing'))return true;if(!tags.includes('armor')&&!tags.includes('weapon'))return true;let profs=[];if(target==='player'){profs=D.p.prof||[];}else{const ally=(D.allies||[]).find(a=>a.id===target);profs=ally?(ally.prof||[]):[];}
+return tags.some(t=>profs.includes(t))||(itemName&&profs.includes(itemName));}
+function resolveSlot(it){const slot=it.s;if(!slot)return null;if(slot==='ring'){const eq=activeTarget==='player'?localEq:(localAllyEq[activeTarget]||{});if(!eq.ring_1)return'ring_1';if(!eq.ring_2)return'ring_2';return'ring_1';}
+return slot;}
+function getCompatibleItems(slot){const result=[];const targetProfs=activeTarget==='player'?(D.p.prof||[]):((D.allies||[]).find(a=>a.id===activeTarget)?.prof||[]);localInv.forEach(inv=>{if(inv.q<=0)return;const it=getItemData(inv.n);if(!it.s)return;let slotMatch=false;if(it.s==='ring'&&(slot==='ring_1'||slot==='ring_2'))slotMatch=true;else if(it.s===slot)slotMatch=true;if(!slotMatch)return;const tags=it.t||[];if(tags.includes('clothing')){result.push({name:inv.n});return;}
+if(!tags.includes('armor')&&!tags.includes('weapon')){result.push({name:inv.n});return;}
+if(tags.some(t=>targetProfs.includes(t)))result.push({name:inv.n});});return result;}
+function compareItemsDetailed(newIt,oldIt,slot){if(!newIt)return{cls:'',delta:'',score:0};if(!oldIt)oldIt={ac:0,b:0,hb:0,mb:0};const diffs=[];const acDiff=(newIt.ac||0)-(oldIt.ac||0);const atkDiff=(newIt.b||0)-(oldIt.b||0);const hpDiff=(newIt.hb||0)-(oldIt.hb||0);const mpDiff=(newIt.mb||0)-(oldIt.mb||0);const dmgDiff=(newIt.dd?avgDice(newIt.dd):0)-(oldIt.dd?avgDice(oldIt.dd):0);if(dmgDiff!==0)diffs.push({label:'Dano',val:dmgDiff});if(acDiff!==0)diffs.push({label:'CA',val:acDiff});if(atkDiff!==0)diffs.push({label:'ATK',val:atkDiff});if(hpDiff!==0)diffs.push({label:'HP',val:hpDiff});if(mpDiff!==0)diffs.push({label:'MP',val:mpDiff});if(!diffs.length)return{cls:'',delta:'',score:0};const totalVal=diffs.reduce((s,d)=>s+d.val,0);const cls=totalVal>0?'better':totalVal<0?'worse':'';const deltaHtml=diffs.map(d=>{const sign=d.val>0?'+':'';const dcls=d.val>0?'up':'down';return`<span class="compat-delta ${dcls}">${sign}${d.val} ${d.label}</span>`;}).join(' ');return{cls,delta:`<div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;">${deltaHtml}</div>`,score:totalVal};}
+function getStatDelta(newIt,oldIt,slot){const diffs=[];const check=(label,nv,ov)=>{if(nv!==ov)diffs.push({label,val:nv-ov});};check('Dano',newIt.dd?avgDice(newIt.dd):0,oldIt.dd?avgDice(oldIt.dd):0);check('CA',newIt.ac||0,oldIt.ac||0);check('ATK',newIt.b||0,oldIt.b||0);check('HP',newIt.hb||0,oldIt.hb||0);check('MP',newIt.mb||0,oldIt.mb||0);if(!diffs.length)return'';return diffs.map(d=>{const sign=d.val>0?'+':'';const color=d.val>0?'var(--v-success)':'var(--v-danger)';return`<span style="color:${color};font-weight:600;">${sign}${d.val} ${d.label}</span>`;}).join(' ');}
+function getSetIcon(setId){if(D.sets&&D.sets[setId])return D.sets[setId].i;return'🔗';}
+function getAllyName(npcId){const ally=(D.allies||[]).find(a=>a.id===npcId);return ally?ally.n:npcId;}
+if(!window._invPopupMode)init();function showItemImage(name){var it=getItemData(name);if(!it||!it.img)return;haptic('light');var stats=[];if(it.s)stats.push({icon:'',label:SLOT_NAMES[it.s]||it.s,value:''});if(it.dd)stats.push({icon:'\u2694\uFE0F',label:'Dano',value:it.dd+(it.b?'+'+it.b:'')});if(it.ac)stats.push({icon:'\u{1F6E1}\uFE0F',label:'CA',value:'+'+it.ac});if(it.hb)stats.push({icon:'\u2764\uFE0F',label:'HP',value:'+'+it.hb});if(it.mb)stats.push({icon:'\u2728',label:'MP',value:'+'+it.mb});if(it.v)stats.push({icon:'\u{1FA99}',label:'Valor',value:it.v+' GP'});showImagePopup({src:it.img,title:name,desc:it.desc||'',stats:stats,type:'item'});}

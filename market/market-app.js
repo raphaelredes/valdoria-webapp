@@ -1,303 +1,33 @@
-// Dual-mode: SPA route params or URL query params
-var _spaP = window.__spaRouteParams || {};
-
-        /* ═══════════════════════════════════════════════════════════
-           MARKET WEBAPP — Lendas de Valdoria
-           ═══════════════════════════════════════════════════════════ */
-
-        const tg = window.Telegram?.WebApp;
-
-        // ── Immersive Mode ──
-        function initImmersive() {
-            const toggle = document.getElementById('immersive-toggle');
-            const restore = document.getElementById('immersive-restore');
-            const panel = document.getElementById('cartBar');
-            if (!toggle || !restore || !panel) return;
-            function applyState(collapsed) {
-                if (collapsed) {
-                    panel.classList.add('immersive-collapsed');
-                    toggle.style.display = 'none';
-                    restore.style.display = '';
-                } else {
-                    panel.classList.remove('immersive-collapsed');
-                    toggle.style.display = '';
-                    restore.style.display = 'none';
-                    requestAnimationFrame(() => { toggle.style.bottom = panel.offsetHeight + 'px'; });
-                }
-                requestAnimationFrame(() => {
-                    document.body.style.paddingBottom = (collapsed ? 48 : (panel.offsetHeight + 12)) + 'px';
-                });
-            }
-            applyState(localStorage.getItem('valdoria_immersive') === 'true');
-            toggle.addEventListener('click', () => { localStorage.setItem('valdoria_immersive', 'true'); applyState(true); });
-            restore.addEventListener('click', () => { localStorage.setItem('valdoria_immersive', 'false'); applyState(false); });
-        }
-        const _vBg = getComputedStyle(document.documentElement)
-            .getPropertyValue('--v-bg').trim() || '#2a2420';
-        if (tg) {
-            tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg);
-            if (tg.BackButton) {
-                tg.BackButton.show();
-                tg.BackButton.onClick(async () => {
-                    const params = new URLSearchParams(window.location.search);
-                    const apiBase = params.get('api');
-                    const token = params.get('token');
-                    const uid = params.get('uid');
-                    // [EXIT-CONFIRM] Heartbeat for displacement detection
-                    if (window.SessionHeartbeat && apiBase && token && uid) {
-                        SessionHeartbeat.init({ apiBase: apiBase, token: token, uid: parseInt(uid) || 0 });
-                    }
-
-                    if (apiBase && token && uid && typeof crypto !== 'undefined') {
-                        try {
-                            const h = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
-                            if (tg.initData) h['X-Telegram-Init-Data'] = tg.initData;
-                            h['X-Idempotency-Key'] = crypto.randomUUID();
-
-                            const returnTo = params.get('return') || 'game';
-                            const r = await fetchT(`${apiBase}/api/webapp/transition`, {
-                                method: 'POST', headers: h,
-                                body: JSON.stringify({ from: 'market', to: returnTo, user_id: parseInt(uid), payload: {} })
-                            });
-                            if (r.status === 401 || r.status === 403) {
-                                console.error('[MARKET] Auth error on transition:', r.status);
-                                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'MARKET', reason: 'session_expired' })); return; }
-                            }
-                            const d = await r.json();
-                            if (d.url) {
-                                valdoriaSpaNav(d.url);
-                                return;
-                            }
-                        } catch (e) { console.error('[MARKET] Transition failed:', e); }
-                    }
-                    // Fallback
-                    try { tg.close(); } catch (e) { }
-                });
-            }
-        }
-
-        // ── Shared Error Reporter (lite tier — no API) ──
-        if (window.ValdoriaErrors) { ValdoriaErrors.init({ appName: 'MARKET' }); }
-
-        // ── Ambient music ──
-        if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('tavern');
-
-        // ── State ──
-        let D = null;
-        let activeTab = 'buy';
-        let activeNpc = null;
-        let sellNpcKey = null;
-        let sellFilter = 'all';
-
-        // Cart: buy items — item_id → {npc, qty, cost}
-        let buyCart = {};
-        // Cart: sell items — inv_id → {npc, item, qty, maxQty, unitPrice}
-        let sellCart = {};
-
-        let localGold = 0;
-        // Cached URL params (parsed once)
-        const _urlParams = new URLSearchParams(location.search);
-        // SPA mode: merge route params into URL params
-        if (_spaP) { Object.keys(_spaP).forEach(function(k) { if (!_urlParams.has(k)) _urlParams.set(k, _spaP[k]); }); }
-        const _urlApi = _urlParams.get('api') || '';
-        const _urlToken = _urlParams.get('token') || '';
-        const _urlUid = _urlParams.get('uid') || '';
-
-        // Update error reporter with API info (init was early, before URL params)
-        if (window.ValdoriaErrors && _urlApi && ValdoriaErrors.updateConfig) {
-            ValdoriaErrors.updateConfig({ apiBase: _urlApi, token: _urlToken, uid: _urlUid });
-        }
-
-        // Tag display names
-        const TAG_LABELS = {
-            weapon: 'Armas', simple_weapon: 'Armas Simples', martial_weapon: 'Armas Marciais',
-            armor: 'Armaduras', shield: 'Escudos',
-            light_armor: 'Arm. Leve', medium_armor: 'Arm. Média', heavy_armor: 'Arm. Pesada',
-            consumable: 'Consumíveis', potion: 'Poções', food: 'Alimentos',
-            gem: 'Gemas', socketable: 'Encaixável', rune: 'Runa',
-            tool: 'Ferramentas', camping: 'Acampamento',
-            clothing: 'Vestimentas', accessory: 'Acessórios',
-            junk: 'Sucata', bone: 'Ossos', monster_part: 'Despojos', trophy: 'Troféu',
-            valuable: 'Tesouros', material: 'Materiais',
-            alchemy: 'Alquimia', leather: 'Couros', metal: 'Metais',
-            quest: 'Missão', mission_item: 'Item de Missão', key: 'Chave',
-            map: 'Mapa', map_fragment: 'Fragmento',
-            no_sell: 'Invendável', no_discard: 'Indescartável',
-            story_item: 'Item de História', unique: 'Único',
-            two_handed: 'Duas Mãos', versatile: 'Versátil', finesse: 'Acuidade',
-            ranged: 'À Distância', thrown: 'Arremesso', ammunition: 'Munição',
-            melee: 'Corpo a Corpo', reach: 'Alcance', loading: 'Recarga',
-            light: 'Leve', heavy: 'Pesada',
-        };
-
-        // Category grouping for buy tab
-        const CAT_ORDER = [
-            { key: 'weapon', icon: '⚔️', label: 'Armas', tags: ['weapon'] },
-            { key: 'armor', icon: '🛡️', label: 'Armaduras & Escudos', tags: ['armor', 'shield'] },
-            { key: 'potion', icon: '🧪', label: 'Poções & Consumíveis', tags: ['potion', 'consumable', 'alchemy'] },
-            { key: 'gem', icon: '💎', label: 'Gemas', tags: ['gem'] },
-            { key: 'tool', icon: '🔧', label: 'Ferramentas & Equipamento', tags: ['tool', 'camping'] },
-            { key: 'misc', icon: '📦', label: 'Outros', tags: [] },
-        ];
-
-        // ── UTF-8 Base64 Decode ──
-        function decodeBase64Utf8(b64) {
-            const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
-            const binary = atob(raw);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-            return new TextDecoder().decode(bytes);
-        }
-
-        // ── Init ──
-        function init() {
-            const params = new URLSearchParams(location.search);
-            const b64 = params.get('data');
-            if (!b64) { _showInitError('Dados não encontrados.'); return; }
-            try {
-                D = JSON.parse(decodeBase64Utf8(b64));
-            } catch (e) { console.error('[MARKET] Erro ao decodificar dados', e); _showInitError('Erro ao decodificar dados.'); return; }
-
-            localGold = D.p.g || 0;
-            if (D.npcs && D.npcs.length > 0) {
-                activeNpc = D.npcs[0].k;
-                sellNpcKey = D.npcs[0].k;
-            }
-            updateHeader();
-            buildTabs();
-            renderTab();
-            initImmersive();
-        }
-
-        function _showInitError(msg) {
-            console.error('[MARKET]', msg);
-            document.getElementById('mainContent').innerHTML =
-                `<div class="empty-state"><div class="icon">⚠️</div><p>${esc(msg)}</p></div>`;
-        }
-
-        function updateHeader() {
-            document.getElementById('headerGold').textContent = `💰 ${localGold} GP`;
-            const lvl = document.getElementById('headerLevel');
-            if (D && D.p.n) lvl.textContent = `${esc(D.p.n)} (Nv.${D.p.l})`;
-        }
-
-        // ── Tabs ──
-        function buildTabs() {
-            const buyCount = Object.values(buyCart).reduce((a, b) => a + b.qty, 0);
-            const sellCount = Object.values(sellCart).reduce((a, b) => a + b.qty, 0);
-            const bar = document.getElementById('tabsBar');
-            bar.innerHTML = [
-                { id: 'buy', label: '🛒 Comprar', badge: buyCount },
-                { id: 'sell', label: '💰 Vender', badge: sellCount },
-            ].map(t => {
-                const badge = t.badge > 0 ? `<span class="tab-badge">${t.badge}</span>` : '';
-                return `<div class="tab ${t.id === activeTab ? 'active' : ''}" onclick="switchTab('${t.id}')">${t.label}${badge}</div>`;
-            }).join('');
-        }
-
-        function switchTab(id) {
-            activeTab = id;
-            buildTabs();
-            renderTab();
-        }
-
-        function renderTab() {
-            const c = document.getElementById('mainContent');
-            if (activeTab === 'buy') renderBuyTab(c);
-            else renderSellTab(c);
-            updateCartBar();
-        }
-
-        // ══════════════════════════════════════════════════════════
-        //  TAB: COMPRAR
-        // ══════════════════════════════════════════════════════════
-        function renderBuyTab(c) {
-            if (!D.npcs || !D.npcs.length) {
-                c.innerHTML = '<div class="empty-state"><div class="icon">🏪</div><p>Nenhum comerciante disponível.</p></div>';
-                return;
-            }
-
-            // NPC pills
-            let html = '<div class="npc-pills">';
-            D.npcs.forEach(npc => {
-                const act = npc.k === activeNpc ? 'active' : '';
-                html += `<div class="npc-pill ${act}" onclick="selectNpc('${esc(npc.k)}')">${npc.e || '🏪'} ${esc(npc.n)}</div>`;
-            });
-            html += '</div>';
-
-            // NPC greeting
-            const npc = D.npcs.find(n => n.k === activeNpc);
-            if (npc && npc.gr) {
-                html += `<div class="npc-greeting">"${esc(npc.gr)}"<br><span style="font-size:11px;color:var(--v-text-dim);">— ${esc(npc.n)}, ${esc(npc.r || '')}</span></div>`;
-            }
-
-            if (!npc || !npc.items.length) {
-                html += '<div class="empty-state"><div class="icon">📦</div><p>Este comerciante não tem itens.</p></div>';
-                c.innerHTML = html;
-                return;
-            }
-
-            // Group items by category
-            const groups = groupItemsByCategory(npc.items);
-            groups.forEach(grp => {
-                if (!grp.items.length) return;
-                html += `<div class="cat-section fade-in">`;
-                html += `<div class="cat-header">${grp.icon} ${grp.label}</div>`;
-                html += '<div class="shop-grid">';
-                grp.items.forEach(item => {
-                    html += renderShopCard(npc.k, item);
-                });
-                html += '</div></div>';
-            });
-
-            c.innerHTML = html;
-        }
-
-        function groupItemsByCategory(items) {
-            const groups = CAT_ORDER.map(cat => ({ ...cat, items: [] }));
-            const misc = groups[groups.length - 1];
-
-            items.forEach(item => {
-                const tags = (item.d && item.d.t) || [];
-                let placed = false;
-                for (let i = 0; i < groups.length - 1; i++) {
-                    if (groups[i].tags.some(t => tags.includes(t))) {
-                        groups[i].items.push(item);
-                        placed = true;
-                        break;
-                    }
-                }
-                if (!placed) misc.items.push(item);
-            });
-
-            return groups.filter(g => g.items.length > 0);
-        }
-
-        function renderShopCard(npcKey, item) {
-            const inCart = buyCart[item.id];
-            const cartQty = inCart ? inCart.qty : 0;
-            const stock = item.st - cartQty;
-            const outOfStock = stock <= 0;
-            const canAfford = localGold >= item.p;
-
-            let stockClass = '';
-            let stockText = `${stock}/${item.mx}`;
-            if (outOfStock) { stockClass = 'out'; stockText = 'Esgotado'; }
-            else if (stock <= 1) { stockClass = 'low'; }
-
-            let meta = '';
-            if (item.d) {
-                let parts = [];
-                if (item.d.dd) parts.push(item.d.dd + (item.d.b ? `+${item.d.b}` : ''));
-                if (item.d.ac) parts.push(`CA+${item.d.ac}`);
-                if (item.d.hb) parts.push(`HP+${item.d.hb}`);
-                if (item.d.mb) parts.push(`MP+${item.d.mb}`);
-                meta = parts.join(' · ');
-            }
-
-            const priceClass = !canAfford && !outOfStock ? ' cant-afford' : '';
-
-            return `<div class="shop-card ${inCart ? 'in-cart' : ''} ${outOfStock ? 'out-of-stock' : ''}"
+var _spaP=window.__spaRouteParams||{};const tg=window.Telegram?.WebApp;function initImmersive(){const toggle=document.getElementById('immersive-toggle');const restore=document.getElementById('immersive-restore');const panel=document.getElementById('cartBar');if(!toggle||!restore||!panel)return;function applyState(collapsed){if(collapsed){panel.classList.add('immersive-collapsed');toggle.style.display='none';restore.style.display='';}else{panel.classList.remove('immersive-collapsed');toggle.style.display='';restore.style.display='none';requestAnimationFrame(()=>{toggle.style.bottom=panel.offsetHeight+'px';});}
+requestAnimationFrame(()=>{document.body.style.paddingBottom=(collapsed?48:(panel.offsetHeight+12))+'px';});}
+applyState(localStorage.getItem('valdoria_immersive')==='true');toggle.addEventListener('click',()=>{localStorage.setItem('valdoria_immersive','true');applyState(true);});restore.addEventListener('click',()=>{localStorage.setItem('valdoria_immersive','false');applyState(false);});}
+const _vBg=getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim()||'#2a2420';if(tg){tg.ready();tg.expand();tg.setHeaderColor(_vBg);tg.setBackgroundColor(_vBg);if(tg.BackButton){tg.BackButton.show();tg.BackButton.onClick(async()=>{const params=new URLSearchParams(window.location.search);const apiBase=params.get('api');const token=params.get('token');const uid=params.get('uid');if(window.SessionHeartbeat&&apiBase&&token&&uid){SessionHeartbeat.init({apiBase:apiBase,token:token,uid:parseInt(uid)||0});}
+if(apiBase&&token&&uid&&typeof crypto!=='undefined'){try{const h={'Content-Type':'application/json','Authorization':`Bearer ${token}`};if(tg.initData)h['X-Telegram-Init-Data']=tg.initData;h['X-Idempotency-Key']=crypto.randomUUID();const returnTo=params.get('return')||'game';const r=await fetchT(`${apiBase}/api/webapp/transition`,{method:'POST',headers:h,body:JSON.stringify({from:'market',to:returnTo,user_id:parseInt(uid),payload:{}})});if(r.status===401||r.status===403){console.error('[MARKET] Auth error on transition:',r.status);if(tg?.sendData){tg.sendData(JSON.stringify({action:'webapp_error_close',webapp:'MARKET',reason:'session_expired'}));return;}}
+const d=await r.json();if(d.url){valdoriaSpaNav(d.url);return;}}catch(e){console.error('[MARKET] Transition failed:',e);}}
+try{tg.close();}catch(e){}});}}
+if(window.ValdoriaErrors){ValdoriaErrors.init({appName:'MARKET'});}
+if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('tavern');let D=null;let activeTab='buy';let activeNpc=null;let sellNpcKey=null;let sellFilter='all';let buyCart={};let sellCart={};let localGold=0;const _urlParams=new URLSearchParams(location.search);if(_spaP){Object.keys(_spaP).forEach(function(k){if(!_urlParams.has(k))_urlParams.set(k,_spaP[k]);});}
+const _urlApi=_urlParams.get('api')||'';const _urlToken=_urlParams.get('token')||'';const _urlUid=_urlParams.get('uid')||'';if(window.ValdoriaErrors&&_urlApi&&ValdoriaErrors.updateConfig){ValdoriaErrors.updateConfig({apiBase:_urlApi,token:_urlToken,uid:_urlUid});}
+const TAG_LABELS={weapon:'Armas',simple_weapon:'Armas Simples',martial_weapon:'Armas Marciais',armor:'Armaduras',shield:'Escudos',light_armor:'Arm. Leve',medium_armor:'Arm. Média',heavy_armor:'Arm. Pesada',consumable:'Consumíveis',potion:'Poções',food:'Alimentos',gem:'Gemas',socketable:'Encaixável',rune:'Runa',tool:'Ferramentas',camping:'Acampamento',clothing:'Vestimentas',accessory:'Acessórios',junk:'Sucata',bone:'Ossos',monster_part:'Despojos',trophy:'Troféu',valuable:'Tesouros',material:'Materiais',alchemy:'Alquimia',leather:'Couros',metal:'Metais',quest:'Missão',mission_item:'Item de Missão',key:'Chave',map:'Mapa',map_fragment:'Fragmento',no_sell:'Invendável',no_discard:'Indescartável',story_item:'Item de História',unique:'Único',two_handed:'Duas Mãos',versatile:'Versátil',finesse:'Acuidade',ranged:'À Distância',thrown:'Arremesso',ammunition:'Munição',melee:'Corpo a Corpo',reach:'Alcance',loading:'Recarga',light:'Leve',heavy:'Pesada',};const CAT_ORDER=[{key:'weapon',icon:'⚔️',label:'Armas',tags:['weapon']},{key:'armor',icon:'🛡️',label:'Armaduras & Escudos',tags:['armor','shield']},{key:'potion',icon:'🧪',label:'Poções & Consumíveis',tags:['potion','consumable','alchemy']},{key:'gem',icon:'💎',label:'Gemas',tags:['gem']},{key:'tool',icon:'🔧',label:'Ferramentas & Equipamento',tags:['tool','camping']},{key:'misc',icon:'📦',label:'Outros',tags:[]},];function decodeBase64Utf8(b64){const raw=b64.replace(/-/g,'+').replace(/_/g,'/');const binary=atob(raw);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new TextDecoder().decode(bytes);}
+function init(){const params=new URLSearchParams(location.search);const b64=params.get('data');if(!b64){_showInitError('Dados não encontrados.');return;}
+try{D=JSON.parse(decodeBase64Utf8(b64));}catch(e){console.error('[MARKET] Erro ao decodificar dados',e);_showInitError('Erro ao decodificar dados.');return;}
+localGold=D.p.g||0;if(D.npcs&&D.npcs.length>0){activeNpc=D.npcs[0].k;sellNpcKey=D.npcs[0].k;}
+updateHeader();buildTabs();renderTab();initImmersive();}
+function _showInitError(msg){console.error('[MARKET]',msg);document.getElementById('mainContent').innerHTML=`<div class="empty-state"><div class="icon">⚠️</div><p>${esc(msg)}</p></div>`;}
+function updateHeader(){document.getElementById('headerGold').textContent=`💰 ${localGold} GP`;const lvl=document.getElementById('headerLevel');if(D&&D.p.n)lvl.textContent=`${esc(D.p.n)} (Nv.${D.p.l})`;}
+function buildTabs(){const buyCount=Object.values(buyCart).reduce((a,b)=>a+b.qty,0);const sellCount=Object.values(sellCart).reduce((a,b)=>a+b.qty,0);const bar=document.getElementById('tabsBar');bar.innerHTML=[{id:'buy',label:'🛒 Comprar',badge:buyCount},{id:'sell',label:'💰 Vender',badge:sellCount},].map(t=>{const badge=t.badge>0?`<span class="tab-badge">${t.badge}</span>`:'';return`<div class="tab ${t.id === activeTab ? 'active' : ''}" onclick="switchTab('${t.id}')">${t.label}${badge}</div>`;}).join('');}
+function switchTab(id){activeTab=id;buildTabs();renderTab();}
+function renderTab(){const c=document.getElementById('mainContent');if(activeTab==='buy')renderBuyTab(c);else renderSellTab(c);updateCartBar();}
+function renderBuyTab(c){if(!D.npcs||!D.npcs.length){c.innerHTML='<div class="empty-state"><div class="icon">🏪</div><p>Nenhum comerciante disponível.</p></div>';return;}
+let html='<div class="npc-pills">';D.npcs.forEach(npc=>{const act=npc.k===activeNpc?'active':'';html+=`<div class="npc-pill ${act}" onclick="selectNpc('${esc(npc.k)}')">${npc.e || '🏪'} ${esc(npc.n)}</div>`;});html+='</div>';const npc=D.npcs.find(n=>n.k===activeNpc);if(npc&&npc.gr){html+=`<div class="npc-greeting">"${esc(npc.gr)}"<br><span style="font-size:11px;color:var(--v-text-dim);">— ${esc(npc.n)}, ${esc(npc.r || '')}</span></div>`;}
+if(!npc||!npc.items.length){html+='<div class="empty-state"><div class="icon">📦</div><p>Este comerciante não tem itens.</p></div>';c.innerHTML=html;return;}
+const groups=groupItemsByCategory(npc.items);groups.forEach(grp=>{if(!grp.items.length)return;html+=`<div class="cat-section fade-in">`;html+=`<div class="cat-header">${grp.icon} ${grp.label}</div>`;html+='<div class="shop-grid">';grp.items.forEach(item=>{html+=renderShopCard(npc.k,item);});html+='</div></div>';});c.innerHTML=html;}
+function groupItemsByCategory(items){const groups=CAT_ORDER.map(cat=>({...cat,items:[]}));const misc=groups[groups.length-1];items.forEach(item=>{const tags=(item.d&&item.d.t)||[];let placed=false;for(let i=0;i<groups.length-1;i++){if(groups[i].tags.some(t=>tags.includes(t))){groups[i].items.push(item);placed=true;break;}}
+if(!placed)misc.items.push(item);});return groups.filter(g=>g.items.length>0);}
+function renderShopCard(npcKey,item){const inCart=buyCart[item.id];const cartQty=inCart?inCart.qty:0;const stock=item.st-cartQty;const outOfStock=stock<=0;const canAfford=localGold>=item.p;let stockClass='';let stockText=`${stock}/${item.mx}`;if(outOfStock){stockClass='out';stockText='Esgotado';}
+else if(stock<=1){stockClass='low';}
+let meta='';if(item.d){let parts=[];if(item.d.dd)parts.push(item.d.dd+(item.d.b?`+${item.d.b}`:''));if(item.d.ac)parts.push(`CA+${item.d.ac}`);if(item.d.hb)parts.push(`HP+${item.d.hb}`);if(item.d.mb)parts.push(`MP+${item.d.mb}`);meta=parts.join(' · ');}
+const priceClass=!canAfford&&!outOfStock?' cant-afford':'';return`<div class="shop-card ${inCart ? 'in-cart' : ''} ${outOfStock ? 'out-of-stock' : ''}"
             onclick="openBuyDetail('${esc(npcKey)}','${esc(item.id)}')">
             <span class="sc-stock ${stockClass}">${stockText}</span>
             <div class="sc-emoji">${item.img ? '<img class="sc-thumb" src="' + item.img + '" alt="" onerror="this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'\\'"><span style="display:none">' + (item.e || '📦') + '</span>' : (item.e || '📦')}</div>
@@ -305,85 +35,15 @@ var _spaP = window.__spaRouteParams || {};
             <div class="sc-price${priceClass}">💰 ${item.p} GP</div>
             ${meta ? `<div class="sc-meta">${meta}</div>` : ''}
             ${cartQty > 0 ? `<span class="sc-cart-badge">🛒 x${cartQty}</span>` : ''}
-        </div>`;
-        }
-
-        function selectNpc(key) {
-            activeNpc = key;
-            renderTab();
-        }
-
-        // ══════════════════════════════════════════════════════════
-        //  TAB: VENDER
-        // ══════════════════════════════════════════════════════════
-        function renderSellTab(c) {
-            if (!D.inv || !D.inv.length) {
-                c.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>Nenhum item para vender.</p></div>';
-                return;
-            }
-
-            // NPC selector for sell
-            let html = '<div class="sell-npc-selector">';
-            html += '<span>Vender para:</span>';
-            html += '<select onchange="changeSellNpc(this.value)">';
-            D.npcs.forEach(npc => {
-                const sel = npc.k === sellNpcKey ? 'selected' : '';
-                html += `<option value="${esc(npc.k)}" ${sel}>${npc.e || '🏪'} ${esc(npc.n)}</option>`;
-            });
-            html += '</select>';
-            const sellNpc = D.npcs.find(n => n.k === sellNpcKey);
-            const mul = sellNpc ? sellNpc.mul : 0.8;
-            html += `<span class="sell-multiplier">${Math.round(mul * 100)}%</span>`;
-            html += '</div>';
-
-            // Filters
-            const filters = [
-                { id: 'all', label: 'Todos' },
-                { id: 'weapon', label: '⚔️ Armas' },
-                { id: 'armor', label: '🛡️ Armad.' },
-                { id: 'junk', label: '🦴 Sucata' },
-                { id: 'food', label: '🍖 Comida' },
-                { id: 'misc', label: '📦 Outros' },
-            ];
-            html += '<div class="filters">';
-            filters.forEach(f => {
-                html += `<div class="filter-btn ${f.id === sellFilter ? 'active' : ''}"
-                onclick="setSellFilter('${f.id}')">${f.label}</div>`;
-            });
-            html += '</div>';
-
-            // Sellable items
-            const items = getFilteredSellItems();
-            if (!items.length) {
-                html += '<div class="empty-state"><div class="icon">📦</div><p>Nenhum item nesta categoria.</p></div>';
-                c.innerHTML = html;
-                return;
-            }
-
-            // Check NPC buy tags
-            const buyTags = new Set(sellNpc ? sellNpc.buys : []);
-
-            // Sell-all button (only for junk/bone/monster_part filter or all with sellable junk)
-            const sellableItems = items.filter(inv => {
-                const itemTags = (inv.t || []);
-                return buyTags.has('all') || [...itemTags].some(t => buyTags.has(t));
-            });
-            if (sellableItems.length > 1) {
-                html += `<div class="sell-all-row">
+        </div>`;}
+function selectNpc(key){activeNpc=key;renderTab();}
+function renderSellTab(c){if(!D.inv||!D.inv.length){c.innerHTML='<div class="empty-state"><div class="icon">📦</div><p>Nenhum item para vender.</p></div>';return;}
+let html='<div class="sell-npc-selector">';html+='<span>Vender para:</span>';html+='<select onchange="changeSellNpc(this.value)">';D.npcs.forEach(npc=>{const sel=npc.k===sellNpcKey?'selected':'';html+=`<option value="${esc(npc.k)}" ${sel}>${npc.e || '🏪'} ${esc(npc.n)}</option>`;});html+='</select>';const sellNpc=D.npcs.find(n=>n.k===sellNpcKey);const mul=sellNpc?sellNpc.mul:0.8;html+=`<span class="sell-multiplier">${Math.round(mul * 100)}%</span>`;html+='</div>';const filters=[{id:'all',label:'Todos'},{id:'weapon',label:'⚔️ Armas'},{id:'armor',label:'🛡️ Armad.'},{id:'junk',label:'🦴 Sucata'},{id:'food',label:'🍖 Comida'},{id:'misc',label:'📦 Outros'},];html+='<div class="filters">';filters.forEach(f=>{html+=`<div class="filter-btn ${f.id === sellFilter ? 'active' : ''}"
+                onclick="setSellFilter('${f.id}')">${f.label}</div>`;});html+='</div>';const items=getFilteredSellItems();if(!items.length){html+='<div class="empty-state"><div class="icon">📦</div><p>Nenhum item nesta categoria.</p></div>';c.innerHTML=html;return;}
+const buyTags=new Set(sellNpc?sellNpc.buys:[]);const sellableItems=items.filter(inv=>{const itemTags=(inv.t||[]);return buyTags.has('all')||[...itemTags].some(t=>buyTags.has(t));});if(sellableItems.length>1){html+=`<div class="sell-all-row">
                 <button class="sell-all-btn" onclick="sellAllVisible()">📦 Selecionar tudo (${sellableItems.length})</button>
-            </div>`;
-            }
-
-            html += '<div class="sell-list">';
-            items.forEach(inv => {
-                const sellPrice = Math.floor(inv.v * mul);
-                const selected = !!sellCart[inv.id];
-                const qty = sellCart[inv.id]?.qty || 0;
-
-                // Check if NPC buys this item
-                const npcBuys = buyTags.has('all') || (inv.t || []).some(t => buyTags.has(t));
-
-                html += `<div class="sell-row ${selected ? 'selected' : ''} ${!npcBuys ? 'no-buy' : ''}">
+            </div>`;}
+html+='<div class="sell-list">';items.forEach(inv=>{const sellPrice=Math.floor(inv.v*mul);const selected=!!sellCart[inv.id];const qty=sellCart[inv.id]?.qty||0;const npcBuys=buyTags.has('all')||(inv.t||[]).some(t=>buyTags.has(t));html+=`<div class="sell-row ${selected ? 'selected' : ''} ${!npcBuys ? 'no-buy' : ''}">
                 <div class="sr-main" onclick="${npcBuys ? `toggleSell('${esc(inv.id)}','${esc(inv.n)}',${inv.q},${sellPrice})` : ''}">
                     <div class="sr-check">${selected ? '✓' : ''}</div>
                     <span class="sr-emoji">${inv.img ? '<img class="sr-thumb" src="' + inv.img + '" alt="" onerror="this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'\\';">' + '<span style="display:none">' + (inv.e || '📦') + '</span>' : (inv.e || '📦')}</span>
@@ -392,435 +52,69 @@ var _spaP = window.__spaRouteParams || {};
                         <div class="sr-price">${npcBuys ? sellPrice + ' GP' + (selected && qty > 0 ? ' · <span class="sr-total">' + (sellPrice * qty) + ' GP total</span>' : '') : '❌ NPC não compra'}</div>
                     </div>
                 </div>
-                ${selected && inv.q > 1 ? `<div class="sr-qty-row" onclick="event.stopPropagation()">
-                    <span class="sr-qty-label">Qtd:</span>
-                    <button class="qty-btn" aria-label="Diminuir quantidade" onclick="adjSellQty('${esc(inv.id)}',-1)" ${qty <= 1 ? 'disabled' : ''}>−</button>
-                    <span class="qty-val">${qty}/${inv.q}</span>
-                    <button class="qty-btn" aria-label="Aumentar quantidade" onclick="adjSellQty('${esc(inv.id)}',1)" ${qty >= inv.q ? 'disabled' : ''}>+</button>
-                    <button class="qty-btn-all" onclick="adjSellQty('${esc(inv.id)}',${inv.q})">Todos</button>
-                </div>` : ''}
-            </div>`;
-            });
-            html += '</div>';
-            c.innerHTML = html;
-        }
-
-        function changeSellNpc(key) {
-            sellNpcKey = key;
-            sellCart = {};
-            renderTab();
-        }
-
-        function setSellFilter(f) {
-            sellFilter = f;
-            renderTab();
-        }
-
-        function getFilteredSellItems() {
-            let items = D.inv || [];
-            if (sellFilter === 'all') return items;
-            return items.filter(inv => {
-                const tags = inv.t || [];
-                if (sellFilter === 'weapon') return tags.includes('weapon');
-                if (sellFilter === 'armor') return tags.includes('armor') || tags.includes('shield');
-                if (sellFilter === 'junk') return tags.some(t => ['junk', 'bone', 'monster_part', 'trophy'].includes(t));
-                if (sellFilter === 'food') return tags.some(t => ['food', 'consumable', 'potion'].includes(t));
-                if (sellFilter === 'misc') return !tags.includes('weapon') && !tags.includes('armor') && !tags.includes('shield')
-                    && !tags.includes('junk') && !tags.includes('bone') && !tags.includes('monster_part') && !tags.includes('trophy')
-                    && !tags.includes('food') && !tags.includes('consumable') && !tags.includes('potion');
-                return true;
-            });
-        }
-
-        function toggleSell(invId, itemName, maxQty, unitPrice) {
-            if (sellCart[invId]) {
-                delete sellCart[invId];
-            } else {
-                sellCart[invId] = { npc: sellNpcKey, item: itemName, qty: maxQty, maxQty, unitPrice };
-            }
-            buildTabs();
-            renderTab();
-        }
-
-        function adjSellQty(invId, delta) {
-            const entry = sellCart[invId];
-            if (!entry) return;
-            // Large delta = "set to max" (Todos button)
-            if (delta >= entry.maxQty) {
-                entry.qty = entry.maxQty;
-            } else {
-                entry.qty = Math.max(1, Math.min(entry.maxQty, entry.qty + delta));
-            }
-            buildTabs();
-            renderTab();
-        }
-
-        function sellAllVisible() {
-            const sellNpc = D.npcs.find(n => n.k === sellNpcKey);
-            const buyTags = new Set(sellNpc ? sellNpc.buys : []);
-            const mul = sellNpc ? sellNpc.mul : 0.8;
-            const items = getFilteredSellItems();
-
-            let added = 0;
-            items.forEach(inv => {
-                if (sellCart[inv.id]) return; // already in cart
-                const npcBuys = buyTags.has('all') || (inv.t || []).some(t => buyTags.has(t));
-                if (!npcBuys) return;
-                const sellPrice = Math.floor(inv.v * mul);
-                sellCart[inv.id] = { npc: sellNpcKey, item: inv.n, qty: inv.q, maxQty: inv.q, unitPrice: sellPrice };
-                added++;
-            });
-
-            if (added > 0) {
-                toast(`📦 ${added} item(ns) selecionado(s)`, 'ok');
-            }
-            buildTabs();
-            renderTab();
-        }
-
-        // ══════════════════════════════════════════════════════════
-        //  BUY DETAIL MODAL
-        // ══════════════════════════════════════════════════════════
-        function openBuyDetail(npcKey, itemId) {
-            const npc = D.npcs.find(n => n.k === npcKey);
-            if (!npc) return;
-            const item = npc.items.find(i => i.id === itemId);
-            if (!item) return;
-
-            const inCart = buyCart[itemId];
-            const cartQty = inCart ? inCart.qty : 0;
-            const stock = item.st - cartQty;
-
-            let html = '<div class="modal-handle"></div>';
-            if (item.img) {
-                html += '<div style="text-align:center;margin-bottom:6px;">'
-                    + '<img src="' + item.img + '" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(196,149,58,0.3);cursor:pointer;" onerror="this.style.display=\'none\'" onclick="event.stopPropagation();showItemImage(\'' + esc(item.n) + '\',\'' + esc(item.img) + '\',\'' + esc(item.e||'') + '\',' + JSON.stringify(item.d||{}) + ')">'
-                    + '</div>';
-            }
-            html += `<div class="modal-title">${item.e || '📦'} ${esc(item.n)}</div>`;
-
-            // Tags
-            if (item.d && item.d.t && item.d.t.length) {
-                html += '<div class="modal-tags">';
-                item.d.t.forEach(t => {
-                    const label = TAG_LABELS[t] || t;
-                    html += `<span class="modal-tag">${label}</span>`;
-                });
-                html += '</div>';
-            }
-
-            // Stats
-            if (item.d) {
-                if (item.d.s) html += dRow('Slot', getSlotName(item.d.s));
-                if (item.d.dd) html += dRow('Dano', item.d.dd + (item.d.b ? ` +${item.d.b}` : ''));
-                if (item.d.ac) html += dRow('CA', `+${item.d.ac}`);
-                if (item.d.hb) html += dRow('HP Bônus', `+${item.d.hb}`);
-                if (item.d.mb) html += dRow('MP Bônus', `+${item.d.mb}`);
-            }
-            html += dRow('Preço', `${item.p} GP`);
-            html += dRow('Estoque', `${stock}/${item.mx}`);
-
-            // Quantity selector
-            const maxBuy = Math.min(stock, item.p > 0 ? Math.floor(localGold / item.p) : 0);
-            let modalQty = Math.max(1, Math.min(cartQty || 1, maxBuy));
-
-            html += `<div class="qty-row">
+                ${selected && inv.q > 1 ? `<div class="sr-qty-row"onclick="event.stopPropagation()"><span class="sr-qty-label">Qtd:</span><button class="qty-btn"aria-label="Diminuir quantidade"onclick="adjSellQty('${esc(inv.id)}',-1)"${qty<=1?'disabled':''}>−</button><span class="qty-val">${qty}/${inv.q}</span><button class="qty-btn"aria-label="Aumentar quantidade"onclick="adjSellQty('${esc(inv.id)}',1)"${qty>=inv.q?'disabled':''}>+</button><button class="qty-btn-all"onclick="adjSellQty('${esc(inv.id)}',${inv.q})">Todos</button></div>` : ''}
+            </div>`;});html+='</div>';c.innerHTML=html;}
+function changeSellNpc(key){sellNpcKey=key;sellCart={};renderTab();}
+function setSellFilter(f){sellFilter=f;renderTab();}
+function getFilteredSellItems(){let items=D.inv||[];if(sellFilter==='all')return items;return items.filter(inv=>{const tags=inv.t||[];if(sellFilter==='weapon')return tags.includes('weapon');if(sellFilter==='armor')return tags.includes('armor')||tags.includes('shield');if(sellFilter==='junk')return tags.some(t=>['junk','bone','monster_part','trophy'].includes(t));if(sellFilter==='food')return tags.some(t=>['food','consumable','potion'].includes(t));if(sellFilter==='misc')return!tags.includes('weapon')&&!tags.includes('armor')&&!tags.includes('shield')&&!tags.includes('junk')&&!tags.includes('bone')&&!tags.includes('monster_part')&&!tags.includes('trophy')&&!tags.includes('food')&&!tags.includes('consumable')&&!tags.includes('potion');return true;});}
+function toggleSell(invId,itemName,maxQty,unitPrice){if(sellCart[invId]){delete sellCart[invId];}else{sellCart[invId]={npc:sellNpcKey,item:itemName,qty:maxQty,maxQty,unitPrice};}
+buildTabs();renderTab();}
+function adjSellQty(invId,delta){const entry=sellCart[invId];if(!entry)return;if(delta>=entry.maxQty){entry.qty=entry.maxQty;}else{entry.qty=Math.max(1,Math.min(entry.maxQty,entry.qty+delta));}
+buildTabs();renderTab();}
+function sellAllVisible(){const sellNpc=D.npcs.find(n=>n.k===sellNpcKey);const buyTags=new Set(sellNpc?sellNpc.buys:[]);const mul=sellNpc?sellNpc.mul:0.8;const items=getFilteredSellItems();let added=0;items.forEach(inv=>{if(sellCart[inv.id])return;const npcBuys=buyTags.has('all')||(inv.t||[]).some(t=>buyTags.has(t));if(!npcBuys)return;const sellPrice=Math.floor(inv.v*mul);sellCart[inv.id]={npc:sellNpcKey,item:inv.n,qty:inv.q,maxQty:inv.q,unitPrice:sellPrice};added++;});if(added>0){toast(`📦 ${added} item(ns) selecionado(s)`,'ok');}
+buildTabs();renderTab();}
+function openBuyDetail(npcKey,itemId){const npc=D.npcs.find(n=>n.k===npcKey);if(!npc)return;const item=npc.items.find(i=>i.id===itemId);if(!item)return;const inCart=buyCart[itemId];const cartQty=inCart?inCart.qty:0;const stock=item.st-cartQty;let html='<div class="modal-handle"></div>';if(item.img){html+='<div style="text-align:center;margin-bottom:6px;">'
++'<img src="'+item.img+'" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(196,149,58,0.3);cursor:pointer;" onerror="this.style.display=\'none\'" onclick="event.stopPropagation();showItemImage(\''+esc(item.n)+'\',\''+esc(item.img)+'\',\''+esc(item.e||'')+'\','+JSON.stringify(item.d||{})+')">'
++'</div>';}
+html+=`<div class="modal-title">${item.e || '📦'} ${esc(item.n)}</div>`;if(item.d&&item.d.t&&item.d.t.length){html+='<div class="modal-tags">';item.d.t.forEach(t=>{const label=TAG_LABELS[t]||t;html+=`<span class="modal-tag">${label}</span>`;});html+='</div>';}
+if(item.d){if(item.d.s)html+=dRow('Slot',getSlotName(item.d.s));if(item.d.dd)html+=dRow('Dano',item.d.dd+(item.d.b?` +${item.d.b}`:''));if(item.d.ac)html+=dRow('CA',`+${item.d.ac}`);if(item.d.hb)html+=dRow('HP Bônus',`+${item.d.hb}`);if(item.d.mb)html+=dRow('MP Bônus',`+${item.d.mb}`);}
+html+=dRow('Preço',`${item.p} GP`);html+=dRow('Estoque',`${stock}/${item.mx}`);const maxBuy=Math.min(stock,item.p>0?Math.floor(localGold/item.p):0);let modalQty=Math.max(1,Math.min(cartQty||1,maxBuy));html+=`<div class="qty-row">
             <button class="qty-btn-lg" aria-label="Diminuir quantidade" onclick="adjModalQty(-1)">−</button>
             <span class="qty-display" id="modalQty">${modalQty}</span>
             <button class="qty-btn-lg" aria-label="Aumentar quantidade" onclick="adjModalQty(1)">+</button>
-        </div>`;
-            html += `<div style="text-align:center;font-size:13px;color:var(--v-gold);" id="modalTotal">
+        </div>`;html+=`<div style="text-align:center;font-size:13px;color:var(--v-gold);" id="modalTotal">
             Total: ${modalQty * item.p} GP
-        </div>`;
-
-            // Store modal context
-            window._modalBuy = { npcKey, itemId, item, maxBuy, qty: modalQty };
-
-            // Actions
-            html += '<div class="detail-actions" style="margin-top:12px;">';
-            html += `<button class="btn-cancel" onclick="closeModal()">Cancelar</button>`;
-            if (maxBuy > 0) {
-                html += `<button class="btn-buy" onclick="addToCart()">🛒 Adicionar</button>`;
-            } else if (stock <= 0) {
-                html += `<button class="btn-disabled" disabled>Esgotado</button>`;
-            } else {
-                html += `<button class="btn-disabled" disabled>Ouro insuficiente</button>`;
-            }
-            html += '</div>';
-
-            if (cartQty > 0) {
-                html += `<div style="text-align:center;margin-top:8px;">
+        </div>`;window._modalBuy={npcKey,itemId,item,maxBuy,qty:modalQty};html+='<div class="detail-actions" style="margin-top:12px;">';html+=`<button class="btn-cancel" onclick="closeModal()">Cancelar</button>`;if(maxBuy>0){html+=`<button class="btn-buy" onclick="addToCart()">🛒 Adicionar</button>`;}else if(stock<=0){html+=`<button class="btn-disabled" disabled>Esgotado</button>`;}else{html+=`<button class="btn-disabled" disabled>Ouro insuficiente</button>`;}
+html+='</div>';if(cartQty>0){html+=`<div style="text-align:center;margin-top:8px;">
                 <button class="btn-cancel" style="padding:6px 12px;font-size:12px;" onclick="removeFromCart('${esc(itemId)}')">
                     🗑️ Remover do carrinho
                 </button>
-            </div>`;
-            }
-
-            showModal(html);
-        }
-
-        function adjModalQty(delta) {
-            const ctx = window._modalBuy;
-            if (!ctx) return;
-            ctx.qty = Math.max(1, Math.min(ctx.maxBuy, ctx.qty + delta));
-            document.getElementById('modalQty').textContent = ctx.qty;
-            document.getElementById('modalTotal').textContent = `Total: ${ctx.qty * ctx.item.p} GP`;
-        }
-
-        function addToCart() {
-            const ctx = window._modalBuy;
-            if (!ctx || ctx.qty <= 0) return;
-
-            // If already in cart, refund old cost first
-            const old = buyCart[ctx.itemId];
-            if (old) localGold += old.cost;
-
-            const totalCost = ctx.qty * ctx.item.p;
-            buyCart[ctx.itemId] = { npc: ctx.npcKey, qty: ctx.qty, cost: totalCost };
-            localGold -= totalCost;
-            updateHeader();
-            closeModal();
-            toast(`🛒 ${ctx.item.n} x${ctx.qty} adicionado`, 'ok');
-            buildTabs();
-            renderTab();
-        }
-
-        function removeFromCart(itemId) {
-            const entry = buyCart[itemId];
-            if (entry) {
-                localGold += entry.cost;
-                delete buyCart[itemId];
-                updateHeader();
-            }
-            closeModal();
-            buildTabs();
-            renderTab();
-        }
-
-        // ══════════════════════════════════════════════════════════
-        //  CART & CONFIRM
-        // ══════════════════════════════════════════════════════════
-        function updateCartBar() {
-            const buyCount = Object.values(buyCart).reduce((a, b) => a + b.qty, 0);
-            const buyTotal = Object.values(buyCart).reduce((a, b) => a + b.cost, 0);
-            const sellCount = Object.values(sellCart).reduce((a, b) => a + b.qty, 0);
-            const sellTotal = Object.values(sellCart).reduce((a, b) => a + b.qty * b.unitPrice, 0);
-            const balance = D.p.g - buyTotal + sellTotal;
-
-            const summary = document.getElementById('cartSummary');
-            const btn = document.getElementById('confirmBtn');
-            let parts = [];
-            if (buyCount > 0) parts.push(`<span class="cs-buy">🛒 ${buyCount} compra(s): -${buyTotal} GP</span>`);
-            if (sellCount > 0) parts.push(`<span class="cs-sell">💰 ${sellCount} venda(s): +${sellTotal} GP</span>`);
-            if (buyCount > 0 || sellCount > 0) {
-                parts.push(`<span class="cs-balance">Saldo: ${balance} GP</span>`);
-            }
-
-            summary.innerHTML = parts.join('<br>');
-
-            if (buyCount > 0 || sellCount > 0) {
-                btn.classList.remove('hidden');
-                if (balance < 0) {
-                    btn.classList.add('disabled');
-                    btn.disabled = true;
-                    btn.textContent = '❌ Ouro insuficiente';
-                } else {
-                    btn.classList.remove('disabled');
-                    btn.disabled = false;
-                    btn.textContent = `✅ Confirmar (${buyCount + sellCount} ops)`;
-                }
-            } else {
-                btn.classList.add('hidden');
-            }
-        }
-
-        function showConfirmModal() {
-            const buyOps = [];
-            const sellOps = [];
-            let buyTotal = 0;
-            let sellTotal = 0;
-
-            for (const [itemId, entry] of Object.entries(buyCart)) {
-                const npc = D.npcs.find(n => n.k === entry.npc);
-                const item = npc ? npc.items.find(i => i.id === itemId) : null;
-                buyOps.push({ npc: entry.npc, itemId, name: item?.n || itemId, qty: entry.qty, cost: entry.cost });
-                buyTotal += entry.cost;
-            }
-            for (const [invId, entry] of Object.entries(sellCart)) {
-                sellOps.push({ npc: entry.npc, invId, name: entry.item, qty: entry.qty, earn: entry.qty * entry.unitPrice });
-                sellTotal += entry.qty * entry.unitPrice;
-            }
-
-            let html = '<div class="modal-handle"></div>';
-            html += '<div class="modal-title">📋 Confirmar Transação</div>';
-
-            if (sellOps.length) {
-                html += '<div class="section-title">💰 Vendas</div>';
-                sellOps.forEach(op => {
-                    html += `<div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--v-border);">
+            </div>`;}
+showModal(html);}
+function adjModalQty(delta){const ctx=window._modalBuy;if(!ctx)return;ctx.qty=Math.max(1,Math.min(ctx.maxBuy,ctx.qty+delta));document.getElementById('modalQty').textContent=ctx.qty;document.getElementById('modalTotal').textContent=`Total: ${ctx.qty * ctx.item.p} GP`;}
+function addToCart(){const ctx=window._modalBuy;if(!ctx||ctx.qty<=0)return;const old=buyCart[ctx.itemId];if(old)localGold+=old.cost;const totalCost=ctx.qty*ctx.item.p;buyCart[ctx.itemId]={npc:ctx.npcKey,qty:ctx.qty,cost:totalCost};localGold-=totalCost;updateHeader();closeModal();toast(`🛒 ${ctx.item.n} x${ctx.qty} adicionado`,'ok');buildTabs();renderTab();}
+function removeFromCart(itemId){const entry=buyCart[itemId];if(entry){localGold+=entry.cost;delete buyCart[itemId];updateHeader();}
+closeModal();buildTabs();renderTab();}
+function updateCartBar(){const buyCount=Object.values(buyCart).reduce((a,b)=>a+b.qty,0);const buyTotal=Object.values(buyCart).reduce((a,b)=>a+b.cost,0);const sellCount=Object.values(sellCart).reduce((a,b)=>a+b.qty,0);const sellTotal=Object.values(sellCart).reduce((a,b)=>a+b.qty*b.unitPrice,0);const balance=D.p.g-buyTotal+sellTotal;const summary=document.getElementById('cartSummary');const btn=document.getElementById('confirmBtn');let parts=[];if(buyCount>0)parts.push(`<span class="cs-buy">🛒 ${buyCount} compra(s): -${buyTotal} GP</span>`);if(sellCount>0)parts.push(`<span class="cs-sell">💰 ${sellCount} venda(s): +${sellTotal} GP</span>`);if(buyCount>0||sellCount>0){parts.push(`<span class="cs-balance">Saldo: ${balance} GP</span>`);}
+summary.innerHTML=parts.join('<br>');if(buyCount>0||sellCount>0){btn.classList.remove('hidden');if(balance<0){btn.classList.add('disabled');btn.disabled=true;btn.textContent='❌ Ouro insuficiente';}else{btn.classList.remove('disabled');btn.disabled=false;btn.textContent=`✅ Confirmar (${buyCount + sellCount} ops)`;}}else{btn.classList.add('hidden');}}
+function showConfirmModal(){const buyOps=[];const sellOps=[];let buyTotal=0;let sellTotal=0;for(const[itemId,entry]of Object.entries(buyCart)){const npc=D.npcs.find(n=>n.k===entry.npc);const item=npc?npc.items.find(i=>i.id===itemId):null;buyOps.push({npc:entry.npc,itemId,name:item?.n||itemId,qty:entry.qty,cost:entry.cost});buyTotal+=entry.cost;}
+for(const[invId,entry]of Object.entries(sellCart)){sellOps.push({npc:entry.npc,invId,name:entry.item,qty:entry.qty,earn:entry.qty*entry.unitPrice});sellTotal+=entry.qty*entry.unitPrice;}
+let html='<div class="modal-handle"></div>';html+='<div class="modal-title">📋 Confirmar Transação</div>';if(sellOps.length){html+='<div class="section-title">💰 Vendas</div>';sellOps.forEach(op=>{html+=`<div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--v-border);">
                     ${esc(op.name)} x${op.qty}: <span style="color:var(--v-success)">+${op.earn} GP</span>
-                </div>`;
-                });
-            }
-            if (buyOps.length) {
-                html += '<div class="section-title">🛒 Compras</div>';
-                buyOps.forEach(op => {
-                    html += `<div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--v-border);">
+                </div>`;});}
+if(buyOps.length){html+='<div class="section-title">🛒 Compras</div>';buyOps.forEach(op=>{html+=`<div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--v-border);">
                     ${esc(op.name)} x${op.qty}: <span style="color:var(--v-danger)">-${op.cost} GP</span>
-                </div>`;
-                });
-            }
-
-            const finalBalance = D.p.g - buyTotal + sellTotal;
-            html += `<div style="text-align:center;margin-top:12px;font-size:14px;">
+                </div>`;});}
+const finalBalance=D.p.g-buyTotal+sellTotal;html+=`<div style="text-align:center;margin-top:12px;font-size:14px;">
             <span style="color:var(--v-gold);font-weight:700;">Saldo final: ${finalBalance} GP</span>
-        </div>`;
-
-            html += `<div class="detail-actions" style="margin-top:12px;">
+        </div>`;html+=`<div class="detail-actions" style="margin-top:12px;">
             <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
             <button class="btn-buy" onclick="sendTransaction()">✅ Confirmar</button>
-        </div>`;
-
-            showModal(html);
-        }
-
-        let _txSending = false;
-        async function sendTransaction() {
-            if (_txSending) return;
-            _txSending = true;
-            const ops = [];
-
-            // Sells first
-            for (const [invId, entry] of Object.entries(sellCart)) {
-                ops.push({ t: 'sell', npc: entry.npc, item: entry.item, qty: entry.qty });
-            }
-            // Then buys
-            for (const [itemId, entry] of Object.entries(buyCart)) {
-                ops.push({ t: 'buy', npc: entry.npc, item: itemId, qty: entry.qty });
-            }
-
-            if (!ops.length) { _txSending = false; return; }
-
-            const token = _urlToken;
-            const _apiBase = _urlApi;
-            const _apiUid = _urlUid;
-
-            const data = {
-                action: 'market_transaction',
-                token: token,
-                ops: ops,
-            };
-
-            // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)
-            if (_apiBase && token && _apiUid) {
-                try {
-                    const _ch = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
-                    if (tg?.initData) _ch['X-Telegram-Init-Data'] = tg.initData;
-                    _ch['X-Idempotency-Key'] = crypto.randomUUID();
-                    const resp = await fetchT(`${_apiBase}/api/market/apply`, {
-                        method: 'POST', headers: _ch,
-                        body: JSON.stringify({ user_id: parseInt(_apiUid), token, ops })
-                    });
-                    if (resp.status === 401 || resp.status === 403) {
-                        console.error('[MARKET] Auth error on apply:', resp.status);
-                        _txSending = false;
-                        if (tg?.sendData) {
-                            tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'MARKET', reason: 'session_expired' }));
-                            return;
-                        }
-                    }
-                    if (resp.ok) {
-                        console.log('[MARKET] Transaction submitted via API');
-                        setTimeout(() => { try { tg?.close(); } catch (e) { } }, 300);
-                        return;
-                    }
-                    console.warn('[MARKET] API returned', resp.status, '— falling back to sendData');
-                } catch (e) {
-                    console.warn('[MARKET] API fetch failed — falling back to sendData', e);
-                    _txSending = false;
-                }
-            }
-
-            // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
-            if (tg) {
-                tg.sendData(JSON.stringify(data));
-                setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[MARKET] tg.close:', e); } }, 300);
-            } else {
-                console.log('sendData:', data);
-                toast('Dados enviados (dev)', 'ok');
-            }
-        }
-
-        // ══════════════════════════════════════════════════════════
-        //  HELPERS
-        // ══════════════════════════════════════════════════════════
-        function dRow(label, val) {
-            return `<div class="detail-row"><span class="detail-label">${label}</span><span class="detail-val">${val}</span></div>`;
-        }
-
-        const SLOT_NAMES = {
-            head: 'Cabeça', chest: 'Tronco', shoulders: 'Ombros',
-            main_hand: 'M.Principal', off_hand: 'M.Secundária',
-            hands: 'Mãos', legs: 'Pernas', feet: 'Botas',
-            cloak: 'Capa', belt: 'Cinto', ring: 'Anel', ring_1: 'Anel 1', ring_2: 'Anel 2',
-            necklace: 'Pescoço', map: 'Mapa',
-        };
-        function getSlotName(s) { return SLOT_NAMES[s] || s; }
-
-        // ── Modal ──
-        function showModal(html) {
-            document.getElementById('modalContent').innerHTML = html;
-            document.getElementById('modalOverlay').classList.add('visible');
-        }
-        function closeModal() {
-            document.getElementById('modalOverlay').classList.remove('visible');
-        }
-        function closeModalOutside(e) {
-            if (e.target === document.getElementById('modalOverlay')) closeModal();
-        }
-
-        function toast(msg, type) {
-            const existing = document.querySelector('.toast');
-            if (existing) existing.remove();
-            const el = document.createElement('div');
-            el.className = `toast toast-${type || 'ok'}`;
-            el.textContent = msg;
-            document.body.appendChild(el);
-            var cat = (type === 'err' || type === 'warn') ? 'toast-warn' : 'toast';
-            var dur = (typeof calcReadTime === 'function') ? calcReadTime(msg, cat) : 2000;
-            // Fade-out before removal
-            setTimeout(() => {
-                el.style.opacity = '0';
-                el.style.transition = 'opacity 0.25s ease';
-                setTimeout(() => el.remove(), 250);
-            }, dur);
-        }
-
-        function esc(s) {
-            return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        }
-
-        // ── Item Image Popup ──
-        function showItemImage(name, imgUrl, emoji, details) {
-            if (!imgUrl || typeof showImagePopup !== 'function') return;
-            if (typeof haptic === 'function') haptic('light');
-            var stats = [];
-            if (details) {
-                if (details.s) stats.push({icon: '', label: SLOT_NAMES[details.s] || details.s, value: ''});
-                if (details.dd) stats.push({icon: '\u2694\uFE0F', label: 'Dano', value: details.dd + (details.b ? '+' + details.b : '')});
-                if (details.ac) stats.push({icon: '\u{1F6E1}\uFE0F', label: 'CA', value: '+' + details.ac});
-                if (details.hb) stats.push({icon: '\u2764\uFE0F', label: 'HP', value: '+' + details.hb});
-                if (details.mb) stats.push({icon: '\u2728', label: 'MP', value: '+' + details.mb});
-            }
-            showImagePopup({
-                src: imgUrl,
-                title: name,
-                stats: stats,
-                type: 'item'
-            });
-        }
-
-        // ── Start ──
-        init();
-        if (window._marketLoadingCtrl) window._marketLoadingCtrl.hide();
+        </div>`;showModal(html);}
+let _txSending=false;async function sendTransaction(){if(_txSending)return;_txSending=true;const ops=[];for(const[invId,entry]of Object.entries(sellCart)){ops.push({t:'sell',npc:entry.npc,item:entry.item,qty:entry.qty});}
+for(const[itemId,entry]of Object.entries(buyCart)){ops.push({t:'buy',npc:entry.npc,item:itemId,qty:entry.qty});}
+if(!ops.length){_txSending=false;return;}
+const token=_urlToken;const _apiBase=_urlApi;const _apiUid=_urlUid;const data={action:'market_transaction',token:token,ops:ops,};if(_apiBase&&token&&_apiUid){try{const _ch={'Content-Type':'application/json','Authorization':`Bearer ${token}`};if(tg?.initData)_ch['X-Telegram-Init-Data']=tg.initData;_ch['X-Idempotency-Key']=crypto.randomUUID();const resp=await fetchT(`${_apiBase}/api/market/apply`,{method:'POST',headers:_ch,body:JSON.stringify({user_id:parseInt(_apiUid),token,ops})});if(resp.status===401||resp.status===403){console.error('[MARKET] Auth error on apply:',resp.status);_txSending=false;if(tg?.sendData){tg.sendData(JSON.stringify({action:'webapp_error_close',webapp:'MARKET',reason:'session_expired'}));return;}}
+if(resp.ok){console.log('[MARKET] Transaction submitted via API');setTimeout(()=>{try{tg?.close();}catch(e){}},300);return;}
+console.warn('[MARKET] API returned',resp.status,'— falling back to sendData');}catch(e){console.warn('[MARKET] API fetch failed — falling back to sendData',e);_txSending=false;}}
+if(tg){tg.sendData(JSON.stringify(data));setTimeout(()=>{try{tg.close();}catch(e){console.warn('[MARKET] tg.close:',e);}},300);}else{console.log('sendData:',data);toast('Dados enviados (dev)','ok');}}
+function dRow(label,val){return`<div class="detail-row"><span class="detail-label">${label}</span><span class="detail-val">${val}</span></div>`;}
+const SLOT_NAMES={head:'Cabeça',chest:'Tronco',shoulders:'Ombros',main_hand:'M.Principal',off_hand:'M.Secundária',hands:'Mãos',legs:'Pernas',feet:'Botas',cloak:'Capa',belt:'Cinto',ring:'Anel',ring_1:'Anel 1',ring_2:'Anel 2',necklace:'Pescoço',map:'Mapa',};function getSlotName(s){return SLOT_NAMES[s]||s;}
+function showModal(html){document.getElementById('modalContent').innerHTML=html;document.getElementById('modalOverlay').classList.add('visible');}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('visible');}
+function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+function toast(msg,type){const existing=document.querySelector('.toast');if(existing)existing.remove();const el=document.createElement('div');el.className=`toast toast-${type || 'ok'}`;el.textContent=msg;document.body.appendChild(el);var cat=(type==='err'||type==='warn')?'toast-warn':'toast';var dur=(typeof calcReadTime==='function')?calcReadTime(msg,cat):2000;setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity 0.25s ease';setTimeout(()=>el.remove(),250);},dur);}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+function showItemImage(name,imgUrl,emoji,details){if(!imgUrl||typeof showImagePopup!=='function')return;if(typeof haptic==='function')haptic('light');var stats=[];if(details){if(details.s)stats.push({icon:'',label:SLOT_NAMES[details.s]||details.s,value:''});if(details.dd)stats.push({icon:'\u2694\uFE0F',label:'Dano',value:details.dd+(details.b?'+'+details.b:'')});if(details.ac)stats.push({icon:'\u{1F6E1}\uFE0F',label:'CA',value:'+'+details.ac});if(details.hb)stats.push({icon:'\u2764\uFE0F',label:'HP',value:'+'+details.hb});if(details.mb)stats.push({icon:'\u2728',label:'MP',value:'+'+details.mb});}
+showImagePopup({src:imgUrl,title:name,stats:stats,type:'item'});}
+init();if(window._marketLoadingCtrl)window._marketLoadingCtrl.hide();
