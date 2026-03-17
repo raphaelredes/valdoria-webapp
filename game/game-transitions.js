@@ -91,7 +91,24 @@ function handleTransition(transition) {
     // Fast redirect for WebApps with own loading; full transition for others
     const delay = locLabel ? Math.max(getLocTransitionMs(), transConfig.duration) : transConfig.duration;
     setTimeout(() => {
-        // Set global flag to suppress close beacon during cross-WebApp transitions
+        // SPA mode: navigate internally for registered SPA routes
+        if (window.SpaRouter && window.__spaRouteName && SpaRouter._routes && SpaRouter._routes[transition.to]) {
+            // Extract params from transition URL
+            var spaParams = {};
+            try {
+                var u = new URL(transition.url, window.location.origin);
+                u.searchParams.forEach(function(v, k) { if (k !== 'route') spaParams[k] = v; });
+            } catch(e) { /* fallback: no params */ }
+            // Add Game Hub return context
+            spaParams.token = spaParams.token || S.token || '';
+            spaParams.api = spaParams.api || S.apiBase || '';
+            spaParams.uid = spaParams.uid || (S.uid ? S.uid.toString() : '');
+            S.transitioning = false;
+            if (overlay) { overlay.style.display = 'none'; overlay.classList.remove('active'); }
+            SpaRouter.navigate(transition.to, spaParams);
+            return;
+        }
+        // External mode: full page navigation
         window.__valdoria_transitioning = true;
         let targetUrl = transition.url;
         // Append Game Hub return params to guide URL so it can navigate back

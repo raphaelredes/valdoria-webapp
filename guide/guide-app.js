@@ -66,6 +66,15 @@
     var _returnUrl = null;
 
     function _goBack() {
+        // SPA mode: navigate back to game route
+        if (window.SpaRouter && window.__spaRouteName) {
+            var rp = window.__spaRouteParams || {};
+            SpaRouter.navigate('game', {
+                token: rp.token || '', api: rp.api || '',
+                uid: rp.uid || '', return: 'game', v: '1'
+            });
+            return;
+        }
         if (_returnUrl) {
             window.__valdoria_transitioning = true;
             window.location.replace(_returnUrl);
@@ -77,8 +86,12 @@
     }
 
     function init() {
-        // Detect return URL from Game Hub transition
+        // Detect params: SPA route params or URL query params
+        var spaP = window.__spaRouteParams || {};
         var params = new URLSearchParams(window.location.search);
+        // Merge SPA params into URLSearchParams-like interface
+        if (spaP.ctx && !params.get('ctx')) params.set('ctx', spaP.ctx);
+        if (spaP.ret && !params.get('ret')) params.set('ret', spaP.ret);
         var ret = params.get('ret');
         if (ret) {
             _returnUrl = ret;
@@ -412,5 +425,10 @@
     }
 
     /* ─── START ─── */
-    document.addEventListener('DOMContentLoaded', init);
+    // SPA mode: DOM already exists, init immediately
+    if (window.__spaRouteName) {
+        init();
+    } else {
+        document.addEventListener('DOMContentLoaded', init);
+    }
 })();

@@ -55,4 +55,59 @@
         },
     });
 
+    /* Prologue route */
+    SpaRouter.register("prologue", {
+        page: "prologue/index.html",
+        external: [
+            "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+        ],
+        css: [
+            "shared/animations.css",
+            "shared/loading.css",
+            "prologue/prologue.css",
+        ],
+        sharedJs: [
+            "shared/bounce-back.js",
+            "shared/exit-confirm.js",
+            "shared/session-heartbeat.js",
+            "shared/fetch-utils.js",
+            "shared/dice-3d.js",
+            "shared/text-timing.js",
+        ],
+        js: [
+            "prologue/prologue.js",
+        ],
+        init: function () {
+            /* prologue.js calls boot() at module level — self-initializing */
+        },
+        cleanup: function () {
+            /* Stop any timers/intervals set by prologue */
+            if (window._prologueInitLoading) {
+                try { window._prologueInitLoading.hide(); } catch(e) {}
+            }
+        },
+    });
+
+    /* Guide route */
+    SpaRouter.register("guide", {
+        page: "guide/index.html",
+        css: [
+            "shared/animations.css",
+            "guide/guide.css",
+        ],
+        sharedJs: [
+            "shared/exit-confirm.js",
+        ],
+        js: [
+            "guide/guide-data.js",
+            "guide/guide-app.js",
+        ],
+        init: function (params) {
+            /* guide-app.js self-initializes via __spaRouteName check */
+        },
+        cleanup: function () {
+            /* guide-app.js IIFE state is scoped; DOM cleanup via routeRoot.innerHTML = "" */
+        },
+    });
+
 })();
