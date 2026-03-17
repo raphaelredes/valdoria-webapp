@@ -55,6 +55,12 @@ function renderScreen(screen) {
         return;
     }
 
+    // After dice animation, check for quest board popup
+    if (screen.quest_board && typeof showQuestBoard === 'function') {
+        showQuestBoard(screen.quest_board);
+        return;
+    }
+
     console.debug('[GAME] renderScreen() keys:', Object.keys(screen).join(','),
         'text_len:', (screen.text || '').length,
         'buttons:', (screen.buttons || []).length,
@@ -555,7 +561,9 @@ function renderFooter(footer) {
             }
         } else if (btn.transition) {
             const transData = btn.transition_data || null;
-            if (transData && typeof transData === 'object' && transData.url) {
+            if (transData && typeof transData === 'object' && transData.to === 'inventory' && typeof showInventoryPopup === 'function') {
+                el.onclick = () => showInventoryPopup(null);
+            } else if (transData && typeof transData === 'object' && transData.url) {
                 el.onclick = () => handleTransition(transData);
             } else {
                 const target = typeof btn.transition === 'string' ? btn.transition : null;

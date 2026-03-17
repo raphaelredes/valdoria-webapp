@@ -1,0 +1,400 @@
+/* game-quest-board.js — Guild Quest Board Popup for Game Hub */
+/* Uses shared vPopup system. Three views: list, detail, accepted. */
+
+(function () {
+    'use strict';
+
+    var _cachedData = null;
+    var _currentView = 'list';
+    var _activeFilter = 'all';
+
+    function _esc(text) {
+        if (!text) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  LIST VIEW — Quest cards with filters
+    // ═══════════════════════════════════════════════════════
+
+    function _renderListBody(d) {
+        var h = '';
+
+        // Status bar: reputation + daily counter
+        h += '<div class="qb-status">';
+        h += '<span class="qb-rep">\u2694\uFE0F ' + _esc(d.attitude) + ' (' + (d.rep || 0) + ')</span>';
+        h += '<span class="qb-daily">\ud83d\udccb ' + _esc(d.daily) + ' Di\u00e1rias</span>';
+        h += '</div>';
+
+        // Active count
+        if (d.active_count > 0) {
+            h += '<div class="qb-active-count">\ud83d\udccc ' + d.active_count + ' em andamento</div>';
+        }
+
+        // Filter pills
+        var filters = [
+            { key: 'all', label: 'Todas' },
+            { key: 'daily', label: 'Di\u00e1rias' },
+            { key: 'side', label: 'Aventuras' }
+        ];
+        h += '<div class="v-tabs-pill qb-filters">';
+        for (var f = 0; f < filters.length; f++) {
+            var cls = _activeFilter === filters[f].key ? ' active' : '';
+            h += '<button class="v-tab' + cls + '" data-qb-filter="' + filters[f].key + '">'
+                + filters[f].label + '</button>';
+        }
+        h += '</div>';
+
+        // Warning if capped
+        if (d.is_capped) {
+            h += '<div class="qb-capped">\u26A0\uFE0F Limite di\u00e1rio alcan\u00e7ado. Volte amanh\u00e3.</div>';
+        }
+
+        // Quest cards
+        var quests = d.quests || [];
+        var shown = 0;
+        for (var i = 0; i < quests.length; i++) {
+            var q = quests[i];
+            var cat = q.cat || 'daily';
+            if (_activeFilter !== 'all') {
+                // 'side' filter matches both 'side' and 'story'
+                if (_activeFilter === 'daily' && cat !== 'daily') continue;
+                if (_activeFilter === 'side' && cat === 'daily') continue;
+            }
+            shown++;
+
+            h += '<div class="qb-card" data-qb-quest="' + _esc(q.id) + '">';
+
+            // Top row: difficulty + title + category badge
+            h += '<div class="qb-card-top">';
+            h += '<span class="qb-diff">' + (q.diff || '\ud83d\udfe2') + '</span>';
+            h += '<span class="qb-title">' + _esc(q.title) + '</span>';
+
+            var catLabel = cat === 'daily' ? 'Di\u00e1ria' : (cat === 'story' ? 'Hist\u00f3ria' : 'Aventura');
+            h += '<span class="qb-cat-badge qb-cat-' + cat + '">' + catLabel + '</span>';
+            h += '</div>';
+
+            // Rewards row
+            h += '<div class="qb-card-rewards">';
+            if (q.gold) h += '<span>\ud83d\udcb0 ' + q.gold + ' GP</span>';
+            if (q.xp) h += '<span>\u2728 ' + q.xp + ' XP</span>';
+            h += '<span class="qb-card-npc">' + (q.npc_icon || '\ud83d\udcdc') + ' ' + _esc(q.npc) + '</span>';
+            h += '</div>';
+
+            // Status badges
+            if (q.active) {
+                h += '<div class="qb-card-badge qb-badge-active">\ud83d\udccc Em Andamento</div>';
+            }
+            if (q.inv) {
+                h += '<span class="qb-card-badge qb-badge-inv">\ud83d\udd0d</span>';
+            }
+            if (q.neg) {
+                h += '<span class="qb-card-badge qb-badge-neg">\ud83d\udcac</span>';
+            }
+
+            h += '</div>';
+        }
+
+        if (shown === 0) {
+            h += '<div class="qb-empty">';
+            h += '<div style="font-size:32px;margin-bottom:8px;">\ud83d\udcdc</div>';
+            h += '<div>Quadro vazio no momento.</div>';
+            h += '<div style="font-size:12px;margin-top:4px;color:var(--v-text-dim);">Volte mais tarde para novas miss\u00f5es.</div>';
+            h += '</div>';
+        }
+
+        // Flavor text
+        if (d.flavor) {
+            h += '<div class="qb-flavor">' + _esc(d.flavor) + '</div>';
+        }
+
+        return h;
+    }
+
+    function _renderListActions() {
+        return '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">'
+            + '\ud83c\udfe0 Voltar</button>';
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  DETAIL VIEW — Single quest with skill checks
+    // ═══════════════════════════════════════════════════════
+
+    function _renderDetailBody(d, q) {
+        var h = '';
+
+        // NPC icon centered
+        h += '<div style="text-align:center;margin-bottom:var(--v-space-sm);">';
+        h += '<span style="font-size:28px;">' + (q.npc_icon || '\ud83d\udcdc') + '</span>';
+        h += '</div>';
+
+        // NPC name
+        if (q.npc) {
+            h += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim);text-align:center;margin-bottom:var(--v-space-md);">';
+            h += '\ud83d\udcdc Solicitante: ' + _esc(q.npc) + '</div>';
+        }
+
+        // Category + difficulty badge
+        var catLabel = q.cat === 'daily' ? 'Di\u00e1ria' : (q.cat === 'story' ? 'Hist\u00f3ria' : 'Aventura');
+        h += '<div style="display:flex;justify-content:center;gap:var(--v-space-md);margin-bottom:var(--v-space-md);">';
+        h += '<span class="qb-cat-badge qb-cat-' + (q.cat || 'daily') + '">' + catLabel + '</span>';
+        h += '<span style="font-size:var(--v-font-sm);color:var(--v-text-dim);">' + (q.diff || '') + ' N\u00edvel ' + (q.min_lv || 1) + '</span>';
+        h += '</div>';
+
+        // Description
+        if (q.desc) {
+            h += '<div class="v-popup-desc">' + _esc(q.desc) + '</div>';
+        }
+
+        // Objectives
+        if (q.objs && q.objs.length > 0) {
+            h += '<div class="v-popup-section-label">\ud83c\udfaf Objetivos</div>';
+            for (var i = 0; i < q.objs.length; i++) {
+                h += '<div style="font-size:var(--v-font-md);color:var(--v-text);padding:2px 0;">';
+                h += (i + 1) + '. <em>' + _esc(q.objs[i]) + '</em></div>';
+            }
+        }
+
+        h += '<div class="v-popup-divider"></div>';
+
+        // Rewards
+        h += '<div class="qb-detail-rewards">';
+        h += '<div class="v-popup-section-label">\ud83d\udc8e Recompensas</div>';
+        var rew = '';
+        if (q.gold) rew += '<span style="margin-right:var(--v-space-lg);">\ud83d\udcb0 ' + q.gold + ' GP</span>';
+        if (q.xp) rew += '<span>\u2728 ' + q.xp + ' XP</span>';
+        h += '<div style="font-size:var(--v-font-md);color:var(--v-text);">' + rew + '</div>';
+        h += '</div>';
+
+        // Investigation result
+        if (q.inv === 'success' || q.inv === 'crit_success') {
+            if (q.hint) {
+                h += '<div class="qb-check-result qb-check-success">';
+                h += '\ud83d\udd0d ' + _esc(q.hint) + '</div>';
+            }
+        } else if (q.inv === 'fail') {
+            h += '<div class="qb-check-result qb-check-fail">';
+            h += '\ud83d\udd0d Nada al\u00e9m do \u00f3bvio.</div>';
+        }
+
+        // Negotiation result
+        if (q.neg === 'success' || q.neg === 'crit_success') {
+            if (q.neg_bonus) {
+                h += '<div class="qb-check-result qb-check-success">';
+                h += '\ud83d\udcac Negocia\u00e7\u00e3o: ' + _esc(q.neg_bonus) + '</div>';
+            }
+        } else if (q.neg === 'fail') {
+            h += '<div class="qb-check-result qb-check-fail">';
+            h += '\ud83d\udcac Negocia\u00e7\u00e3o recusada.</div>';
+        }
+
+        // Reputation requirement
+        if (q.rep_req) {
+            h += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim);margin-top:var(--v-space-sm);">';
+            h += '\u2694\uFE0F Reputa\u00e7\u00e3o Necess\u00e1ria: ' + q.rep_req + '</div>';
+        }
+
+        // Flash from skill check
+        if (d.flash) {
+            h += '<div class="qb-flash">' + d.flash + '</div>';
+        }
+
+        return h;
+    }
+
+    function _renderDetailActions(d, q) {
+        var h = '';
+
+        // Accept button
+        if (q.active) {
+            h += '<button class="v-popup-btn" disabled>\ud83d\udccc Miss\u00e3o em Andamento</button>';
+        } else if (q.can && !d.is_capped) {
+            h += '<button class="v-popup-btn v-popup-btn--success" data-action="guild_quest_accept_' + q.id + '">'
+                + '\u2705 Aceitar Miss\u00e3o</button>';
+        }
+
+        // Skill check buttons (side-by-side if both available)
+        var checkBtns = '';
+        if (!q.inv && q.inv_mod) {
+            checkBtns += '<button class="v-popup-btn" data-action="guild_quest_investigate_' + q.id + '">'
+                + '\ud83d\udd0d Investigar ' + _esc(q.inv_mod) + '</button>';
+        }
+        if (!q.neg && q.neg_mod && !d.is_capped) {
+            checkBtns += '<button class="v-popup-btn" data-action="guild_quest_negotiate_' + q.id + '">'
+                + '\ud83d\udcac Negociar ' + _esc(q.neg_mod) + '</button>';
+        }
+        if (checkBtns) {
+            h += '<div class="v-popup-btn-row">' + checkBtns + '</div>';
+        }
+
+        h += '<button class="v-popup-btn v-popup-btn--cancel" data-action="qb_back">'
+            + '\ud83d\udccb Voltar ao Quadro</button>';
+        return h;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  ACCEPTED VIEW — Quest acceptance result
+    // ═══════════════════════════════════════════════════════
+
+    function _renderAcceptedBody(d) {
+        var a = d.accepted || {};
+        var h = '';
+
+        if (a.ok) {
+            // Success
+            h += '<div style="text-align:center;margin-bottom:var(--v-space-md-lg);">';
+            h += '<span style="font-size:32px;">\u2705</span>';
+            h += '<div style="color:#81c784;font-weight:700;font-size:var(--v-font-lg);margin-top:var(--v-space-xs);">'
+                + 'Miss\u00e3o Aceita!</div>';
+            h += '</div>';
+
+            if (a.dialogue) {
+                h += '<div style="text-align:center;font-style:italic;color:var(--v-text-dim);margin-bottom:var(--v-space-md);'
+                    + 'font-size:var(--v-font-md);">\ud83d\udcac \u201c' + _esc(a.dialogue) + '\u201d</div>';
+            }
+
+            h += '<div class="v-popup-desc">Voc\u00ea arranca o pergaminho do quadro e o guarda cuidadosamente. '
+                + 'O papel ainda cheira a tinta fresca.</div>';
+
+            h += '<div style="margin-top:var(--v-space-md);">';
+            h += '\ud83d\udcdc <strong>' + _esc(a.title) + '</strong>';
+            h += '</div>';
+            if (a.obj) {
+                h += '<div style="font-size:var(--v-font-md);color:var(--v-text-dim);margin-top:var(--v-space-xs);">'
+                    + '\ud83c\udfaf ' + _esc(a.obj) + '</div>';
+            }
+
+            h += '<div style="font-size:var(--v-font-md);color:var(--v-text-dim);font-style:italic;margin-top:var(--v-space-md);">'
+                + 'Boa sorte, aventureiro.</div>';
+        } else {
+            // Failure
+            h += '<div style="text-align:center;margin-bottom:var(--v-space-md);">';
+            h += '<span style="font-size:32px;">\u274c</span>';
+            h += '<div style="color:#e07070;font-weight:700;font-size:var(--v-font-lg);margin-top:var(--v-space-xs);">'
+                + 'N\u00e3o foi poss\u00edvel aceitar</div>';
+            h += '</div>';
+            h += '<div class="v-popup-desc">' + _esc(a.reason || 'Requisitos n\u00e3o atendidos.') + '</div>';
+        }
+
+        return h;
+    }
+
+    function _renderAcceptedActions(d) {
+        var a = d.accepted || {};
+        var h = '';
+        if (a.ok) {
+            h += '<button class="v-popup-btn v-popup-btn--success" data-action="cancel">'
+                + '\ud83c\udfe0 Continuar</button>';
+        } else {
+            h += '<button class="v-popup-btn v-popup-btn--cancel" data-action="qb_back">'
+                + '\ud83d\udccb Voltar ao Quadro</button>';
+        }
+        return h;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  SHOW / RENDER
+    // ═══════════════════════════════════════════════════════
+
+    window.showQuestBoard = function (data) {
+        if (typeof vPopup === 'undefined') {
+            console.warn('[QUEST-BOARD] vPopup not loaded');
+            return;
+        }
+        _cachedData = data;
+        _currentView = data.view || 'list';
+        _render(data);
+    };
+
+    function _render(d) {
+        var header, body, actions, headerClass = '';
+
+        if (_currentView === 'accepted') {
+            var isOk = d.accepted && d.accepted.ok;
+            header = isOk ? '\u2705 Miss\u00e3o Aceita' : '\u274c Quadro de Miss\u00f5es';
+            headerClass = isOk ? 'v-popup-header--success' : 'v-popup-header--danger';
+            body = _renderAcceptedBody(d);
+            actions = _renderAcceptedActions(d);
+        } else if (_currentView === 'detail' && d.sel) {
+            var quest = null;
+            var quests = d.quests || [];
+            for (var i = 0; i < quests.length; i++) {
+                if (quests[i].id === d.sel) { quest = quests[i]; break; }
+            }
+            if (!quest) {
+                _currentView = 'list';
+                _render(d);
+                return;
+            }
+            header = '\ud83d\udcdc ' + _esc(quest.title);
+            body = _renderDetailBody(d, quest);
+            actions = _renderDetailActions(d, quest);
+        } else {
+            header = '\ud83d\udccb Quadro de Miss\u00f5es';
+            body = _renderListBody(d);
+            actions = _renderListActions();
+        }
+
+        vPopup.show({
+            id: 'quest-board-overlay',
+            header: header,
+            headerClass: headerClass,
+            body: body,
+            actions: actions,
+            onAction: _handleAction,
+            closeOnOutside: (_currentView === 'list')
+        });
+
+        // Bind filter tabs and quest card clicks (after DOM is ready)
+        _bindListeners();
+    }
+
+    function _bindListeners() {
+        // Filter tabs
+        var tabs = document.querySelectorAll('.qb-filters .v-tab');
+        for (var t = 0; t < tabs.length; t++) {
+            tabs[t].addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                _activeFilter = e.currentTarget.getAttribute('data-qb-filter') || 'all';
+                _render(_cachedData);
+            });
+        }
+
+        // Quest cards (click to view detail)
+        var cards = document.querySelectorAll('.qb-card');
+        for (var c = 0; c < cards.length; c++) {
+            cards[c].addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var qid = e.currentTarget.getAttribute('data-qb-quest');
+                if (qid) {
+                    _cachedData.sel = qid;
+                    _currentView = 'detail';
+                    _render(_cachedData);
+                }
+            });
+        }
+    }
+
+    function _handleAction(action, btn) {
+        // Internal navigation (don't close popup, don't send to server)
+        if (action === 'qb_back') {
+            _currentView = 'list';
+            _cachedData.sel = null;
+            _cachedData.flash = null;
+            _render(_cachedData);
+            return true; // prevent default close + doAction
+        }
+
+        // Server actions: investigate, negotiate, accept
+        // These close the popup and send doAction to the server
+        // The server returns new quest_board data which re-opens the popup
+        return false;
+    }
+
+    window.hideQuestBoard = function () {
+        if (typeof vPopup !== 'undefined') vPopup.hide();
+    };
+
+})();

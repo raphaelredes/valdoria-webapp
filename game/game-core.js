@@ -844,6 +844,14 @@ async function doAction(callbackData) {
         return;
     }
 
+    // Guild quest board popup (list + detail + accepted)
+    if (data.quest_board && typeof showQuestBoard === 'function') {
+        hideLocationTransition();
+        if (window.actionGuard) actionGuard.release();
+        showQuestBoard(data.quest_board);
+        return;
+    }
+
     // Generic popup (locations, vínculos, inn, etc.)
     if (data.popup && window.vPopup) {
         hideLocationTransition();

@@ -1,0 +1,190 @@
+/* game-quest-board.css — Guild Quest Board Popup Styles */
+/* Uses design tokens from valdoria-design.css */
+
+/* ─── Status Bar ─────────────────────────────── */
+.qb-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--v-space-xs) 0;
+    margin-bottom: var(--v-space-xs);
+    font-size: var(--v-font-md);
+    color: var(--v-text-dim);
+}
+.qb-rep {
+    color: var(--v-gold-light, #e8c56d);
+    font-weight: 600;
+}
+.qb-daily {
+    font-size: var(--v-font-sm);
+}
+.qb-active-count {
+    font-size: var(--v-font-sm);
+    color: var(--v-gold-light, #e8c56d);
+    margin-bottom: var(--v-space-sm);
+}
+
+/* ─── Filter Pills ───────────────────────────── */
+.qb-filters {
+    margin-bottom: var(--v-space-md);
+}
+
+/* ─── Quest Cards ────────────────────────────── */
+.qb-card {
+    padding: var(--v-space-md);
+    margin-bottom: var(--v-space-sm);
+    background: rgba(74, 56, 40, 0.12);
+    border: 1px solid rgba(196, 149, 58, 0.12);
+    border-radius: var(--v-radius-sm);
+    cursor: pointer;
+    transition: background var(--v-transition-fast, 0.15s),
+                border-color var(--v-transition-fast, 0.15s);
+    -webkit-tap-highlight-color: transparent;
+}
+.qb-card:active {
+    background: rgba(74, 56, 40, 0.28);
+    border-color: rgba(196, 149, 58, 0.25);
+}
+
+.qb-card-top {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-sm);
+}
+.qb-diff {
+    flex-shrink: 0;
+    font-size: var(--v-font-body);
+}
+.qb-title {
+    flex: 1;
+    font-family: var(--v-font);
+    font-size: var(--v-font-body);
+    color: var(--v-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+/* ─── Category Badges ────────────────────────── */
+.qb-cat-badge {
+    font-size: var(--v-font-xs);
+    padding: 1px 6px;
+    border-radius: var(--v-radius-pill);
+    font-family: var(--v-font);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.qb-cat-daily {
+    background: rgba(76, 175, 80, 0.12);
+    color: #81c784;
+}
+.qb-cat-side {
+    background: rgba(100, 149, 237, 0.12);
+    color: #90b4f0;
+}
+.qb-cat-story {
+    background: rgba(196, 149, 58, 0.15);
+    color: var(--v-gold-light, #e8c56d);
+}
+
+/* ─── Card Details ───────────────────────────── */
+.qb-card-rewards {
+    display: flex;
+    gap: var(--v-space-md);
+    margin-top: var(--v-space-xs);
+    font-size: var(--v-font-sm);
+    color: var(--v-text-dim);
+    align-items: center;
+    flex-wrap: wrap;
+}
+.qb-card-npc {
+    margin-left: auto;
+    font-size: var(--v-font-xs);
+    color: var(--v-text-dim);
+    opacity: 0.8;
+}
+.qb-card-badge {
+    display: inline-block;
+    font-size: var(--v-font-xs);
+    margin-top: var(--v-space-xs);
+    margin-right: var(--v-space-xs);
+}
+.qb-badge-active {
+    color: #e0a060;
+}
+.qb-badge-inv,
+.qb-badge-neg {
+    color: var(--v-text-dim);
+    opacity: 0.6;
+}
+
+/* ─── Capped Warning ─────────────────────────── */
+.qb-capped {
+    text-align: center;
+    padding: var(--v-space-sm) var(--v-space-md);
+    margin-bottom: var(--v-space-md);
+    background: rgba(224, 112, 112, 0.08);
+    border: 1px solid rgba(224, 112, 112, 0.2);
+    border-radius: var(--v-radius-sm);
+    font-size: var(--v-font-md);
+    color: #e07070;
+}
+
+/* ─── Empty State ────────────────────────────── */
+.qb-empty {
+    text-align: center;
+    padding: var(--v-space-2xl) var(--v-space-md);
+    color: var(--v-text-dim);
+    font-style: italic;
+    font-size: var(--v-font-md);
+}
+
+/* ─── Flavor Text ────────────────────────────── */
+.qb-flavor {
+    text-align: center;
+    font-size: var(--v-font-sm);
+    color: var(--v-text-dim);
+    font-style: italic;
+    margin-top: var(--v-space-md);
+    padding: var(--v-space-xs) 0;
+    opacity: 0.7;
+}
+
+/* ─── Detail View ────────────────────────────── */
+.qb-detail-rewards {
+    margin-top: var(--v-space-sm);
+    padding: var(--v-space-sm) var(--v-space-md);
+    background: rgba(196, 149, 58, 0.08);
+    border-radius: var(--v-radius-sm);
+    border: 1px solid rgba(196, 149, 58, 0.15);
+}
+
+/* ─── Skill Check Results ────────────────────── */
+.qb-check-result {
+    font-size: var(--v-font-sm);
+    font-style: italic;
+    margin-top: var(--v-space-sm);
+    padding: var(--v-space-sm) var(--v-space-md);
+    border-radius: var(--v-radius-sm);
+}
+.qb-check-success {
+    color: var(--v-info, #5b9bd5);
+    background: rgba(91, 155, 213, 0.08);
+}
+.qb-check-fail {
+    color: var(--v-text-dim);
+    background: rgba(160, 148, 132, 0.06);
+}
+
+/* ─── Flash Message ──────────────────────────── */
+.qb-flash {
+    margin-top: var(--v-space-md);
+    padding: var(--v-space-md);
+    background: rgba(196, 149, 58, 0.06);
+    border-radius: var(--v-radius-sm);
+    font-size: var(--v-font-md);
+    color: var(--v-text);
+    line-height: 1.6;
+    border-left: 3px solid var(--v-gold, #c4953a);
+}

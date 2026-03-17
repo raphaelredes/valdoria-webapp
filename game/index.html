@@ -22,6 +22,8 @@ document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v +
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game-feedback.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="game-inventory-popup.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="game-quest-board.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="inn-animation.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/audio-manager.css?v=' + v + '">');
     </script>
@@ -342,6 +344,16 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         </div>
     </div>
 
+
+    <!-- Guild quest board popup overlay (uses shared popup system) -->
+    <div id="quest-board-overlay" class="v-popup-overlay" style="display:none">
+        <div class="v-popup-card">
+            <div class="v-popup-header"></div>
+            <div class="v-popup-body"></div>
+            <div class="v-popup-actions"></div>
+        </div>
+    </div>
+
     <!-- Generic game popup overlay (for inn, locations, etc.) -->
     <div id="v-popup-overlay" class="v-popup-overlay" style="display:none">
         <div class="v-popup-card">
@@ -351,7 +363,50 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         </div>
     </div>
 
-        <!-- Transition animation overlay -->
+    
+    <!-- Inventory popup overlay (fullscreen, lazy-loaded) -->
+    <div id="inventory-overlay">
+        <!-- Loading spinner -->
+        <div id="inv-popup-loading" style="display:none">
+            <div class="inv-spinner"></div>
+            <span>Abrindo mochila...</span>
+        </div>
+        <!-- Inventory header -->
+        <div class="header">
+            <h1><svg class="vi" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="6" y="8" width="12" height="13" rx="2" />
+                    <path d="M9 8V5a3 3 0 0 1 6 0v3" />
+                    <path d="M6 13h12" />
+                    <rect x="9" y="15" width="6" height="3" rx="1" />
+                </svg> MOCHILA</h1>
+            <button id="inv-close-btn" onclick="hideInventoryPopup()" aria-label="Fechar mochila">&times;</button>
+        </div>
+        <div class="header-stats" id="headerStats"></div>
+        <div class="tabs" id="tabsBar"></div>
+        <div class="content" id="mainContent"></div>
+        <div class="selection-bar hidden" id="selectionBar"></div>
+        <div class="bottom-panel" id="bottomPanel" style="display:block">
+            <div class="ops-section hidden" id="opsSection">
+                <div class="ops-count" id="opsCount"></div>
+                <button class="confirm-btn hidden" id="confirmBtn" onclick="showConfirmModal()">
+                    Confirmar Alteracoes
+                </button>
+            </div>
+            <div class="nav-footer">
+                <button class="nav-btn" onclick="navBack()">&#8617; Voltar</button>
+            </div>
+        </div>
+        <!-- Modal Overlay (inside inventory) -->
+        <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+            <div class="modal" id="modalContent"></div>
+        </div>
+        <!-- Loading overlay for inventory operations -->
+        <div id="loadingOverlay" class="loading-overlay hidden">
+            <div class="loading-text"></div>
+        </div>
+    </div>
+    <!-- Transition animation overlay -->
     <div id="transition-overlay" class="transition-overlay" style="display:none"></div>
 
     <script>
@@ -364,6 +419,8 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
         document.write('<script src="game-travel-prep.js?v=' + v + '"><\/script>');
         document.write('<script src="game-quest-popup.js?v=' + v + '"><\/script>');
+        document.write('<script src="game-quest-board.js?v=' + v + '"><\/script>');
+        document.write('<script src="game-inventory-popup.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
