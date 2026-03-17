@@ -116,7 +116,7 @@ async function networkFirst(request) {
 
         // Fallback for HTML requests when offline
         if (request.headers.get('accept')?.includes('text/html')) {
-            const fallback = await caches.match('/valdoria-webapp/');
+            const fallback = await caches.match('/valdoria-webapp/app.html');
             if (fallback) return fallback;
         }
 

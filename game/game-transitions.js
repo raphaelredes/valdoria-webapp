@@ -47,6 +47,10 @@ function _detect_webapp_target_js(url) {
     if (u.includes('/prologue/')) return 'prologue';
     if (u.includes('/guide/')) return 'guide';
     if (u.includes('/game/')) return 'game';
+    // SPA mode: app.html?route=X
+    if (u.includes('app.html')) {
+        try { return new URL(u, 'http://x').searchParams.get('route') || 'game'; } catch(e) {}
+    }
     return 'unknown';
 }
 
