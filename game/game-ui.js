@@ -631,11 +631,31 @@ function _applyImmersive() {
         if (restore) restore.style.display = '';
         if (screen) screen.classList.add('immersive-full');
     } else {
+        // Capture collapsed padding before expanding
+        var collapsedPad = screen ? parseFloat(getComputedStyle(screen).paddingBottom) || 48 : 48;
+        var prevScroll = screen ? screen.scrollTop : 0;
+
         if (panel) panel.classList.remove('immersive-collapsed');
         if (toggle) toggle.style.display = '';
         if (restore) restore.style.display = 'none';
         if (screen) screen.classList.remove('immersive-full');
         updateBottomPadding();
+
+        // Adjust scroll so the expanded panel doesn't cover content at the bottom
+        if (screen && prevScroll > 0) {
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    var expandedPad = parseFloat(screen.style.paddingBottom) || 120;
+                    var delta = expandedPad - collapsedPad;
+                    if (delta > 0) {
+                        screen.scrollTop = Math.min(
+                            prevScroll + delta,
+                            screen.scrollHeight - screen.clientHeight
+                        );
+                    }
+                });
+            });
+        }
     }
 }
 
