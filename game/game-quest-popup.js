@@ -34,4 +34,12 @@ window.showQuestPopup=function(data){if(typeof vPopup==='undefined'){console.war
 vPopup.show({id:'quest-popup-overlay',header:'\u2694\uFE0F '+_esc(data.title||'Detalhes da Miss\u00e3o'),body:_renderBody(data),actions:_renderActions(data)});};window.hideQuestPopup=function(){if(typeof vPopup!=='undefined')vPopup.hide();};window.showQuestDiaryPopup=function(data){var overlay=document.getElementById('quest-diary-overlay');var body=document.getElementById('quest-diary-body');if(!overlay||!body){console.warn('[QUEST-POPUP] quest-diary-overlay not found');return;}
 body.innerHTML='';if(typeof renderQuestDiary==='function'){renderQuestDiary(body,data);}else{body.innerHTML='<div style="text-align:center;color:var(--v-text-dim);padding:20px;">'
 +'Carregando missões...</div>';console.error('[QUEST-POPUP] renderQuestDiary not available');}
-overlay.style.display='flex';requestAnimationFrame(function(){overlay.classList.add('active');});};window.hideQuestDiaryPopup=function(){var overlay=document.getElementById('quest-diary-overlay');if(!overlay)return;overlay.classList.add('hiding');overlay.classList.remove('active');setTimeout(function(){overlay.style.display='none';overlay.classList.remove('hiding');},300);};})();
+overlay.style.display='flex';requestAnimationFrame(function(){overlay.classList.add('active');});};window.hideQuestDiaryPopup=function(){var overlay=document.getElementById('quest-diary-overlay');if(!overlay)return;overlay.classList.add('hiding');overlay.classList.remove('active');setTimeout(function(){overlay.style.display='none';overlay.classList.remove('hiding');},300);};window.showQuestAbandonPopup=function(data){if(typeof vPopup==='undefined'){console.warn('[QUEST-POPUP] vPopup not loaded');return;}
+var warnText=data.is_daily?'Ao desistir, tudo que foi feito se perderá. Tarefas diárias abandonadas contam para o limite do dia.':'Ao desistir, você perderá tudo que conquistou nesta jornada. Poderá retomá-la mais tarde.';
+var bodyHtml='<div style="text-align:center;margin-bottom:12px;"><span style="font-size:32px;">⚠️</span></div>'
++'<div style="text-align:center;font-size:14px;color:var(--v-text);margin-bottom:12px;">📜 <b>'+_esc(data.title)+'</b></div>'
++'<div style="font-size:13px;color:var(--v-text-dim);text-align:center;line-height:1.5;">'+warnText+'</div>';
+var actionsHtml='<button class="v-popup-btn v-popup-btn--danger" data-action="'+data.confirm_cb+'">✅ Sim, Abandonar</button>'
++'<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">🔙 Cancelar</button>';
+vPopup.show({id:'quest-abandon-popup',header:'⚠️ Abandonar Missão',body:bodyHtml,actions:actionsHtml});};
+})();

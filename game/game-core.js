@@ -74,6 +74,7 @@ if(data.char_select){hideLocationTransition();if(window.actionGuard)actionGuard.
 if(data.travel_prep){hideLocationTransition();if(window.actionGuard)actionGuard.release();if(typeof showTravelPrep==='function')showTravelPrep(data.travel_prep);return;}
 if(data.quest_diary&&typeof showQuestDiaryPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestDiaryPopup(data.quest_diary);return;}
 if(data.quest_detail&&typeof showQuestPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestPopup(data.quest_detail);return;}
+if(data.quest_abandon&&window.vPopup){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestAbandonPopup(data.quest_abandon);return;}
 if(data.quest_board&&typeof showQuestBoard==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestBoard(data.quest_board);return;}
 if(data.popup&&window.vPopup){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showGamePopup(data);return;}
 if(!data.text&&!data.screen_id&&!data.transition&&!data.error){console.warn('[GAME] Empty response from action — forcing hub reload to prevent trap');if(window.actionGuard)actionGuard.release();hideLocationTransition();returnFromWebApp();return;}
