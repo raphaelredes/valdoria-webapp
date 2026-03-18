@@ -41,5 +41,5 @@ var bodyHtml='<div style="text-align:center;margin-bottom:12px;"><span style="fo
 +'<div style="font-size:13px;color:var(--v-text-dim);text-align:center;line-height:1.5;">'+warnText+'</div>';
 var actionsHtml='<button class="v-popup-btn v-popup-btn--danger" data-action="'+data.confirm_cb+'">✅ Sim, Abandonar</button>'
 +'<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">🔙 Cancelar</button>';
-vPopup.show({id:'quest-abandon-popup',header:'⚠️ Abandonar Missão',body:bodyHtml,actions:actionsHtml});};
+vPopup.show({id:'quest-popup-overlay',header:'⚠️ Abandonar Missão',body:bodyHtml,actions:actionsHtml});};
 })();
