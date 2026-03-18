@@ -1,0 +1,15 @@
+/* game-daily.css -- Daily login reward styles */
+.daily-popup{text-align:center;padding:var(--v-space-md)}
+.daily-streak{font-size:var(--v-font-lg);color:var(--v-gold);margin-bottom:var(--v-space-md)}
+.daily-cycle{display:flex;justify-content:center;gap:var(--v-space-xs);margin-bottom:var(--v-space-lg)}
+.daily-dot{width:28px;height:28px;border-radius:50%;background:var(--v-bg-raised);border:2px solid var(--v-border);display:flex;align-items:center;justify-content:center;font-size:var(--v-font-xs);color:var(--v-text-dim)}
+.daily-dot.done{background:var(--v-gold);border-color:var(--v-gold);color:var(--v-bg)}
+.daily-dot.current{background:var(--v-bg);border-color:var(--v-gold);color:var(--v-gold);animation:v-ctaPulse 1.5s ease-in-out infinite}
+.daily-gold{font-size:var(--v-font-xl);color:var(--v-gold);font-weight:bold;margin:var(--v-space-md) 0;animation:v-coinBounce 0.6s ease-out}
+.daily-item{color:var(--v-text);font-size:var(--v-font-body);margin:var(--v-space-xs) 0}
+.daily-multiplier{color:var(--v-gold);font-size:var(--v-font-sm);margin-top:var(--v-space-sm)}
+.daily-record{color:#4ade80;font-size:var(--v-font-body);margin-top:var(--v-space-sm);animation:badgeBounce 0.5s ease-out}
+.daily-header{background:linear-gradient(135deg,rgba(196,149,58,0.3),rgba(196,149,58,0.1))!important}
+.streak-badge{position:absolute;top:var(--v-space-sm);right:var(--v-space-sm);background:linear-gradient(135deg,#c4953a,#8b6914);color:var(--v-bg);padding:var(--v-space-xs) var(--v-space-md);border-radius:var(--v-radius-pill);font-size:var(--v-font-sm);font-weight:bold;z-index:var(--v-z-dropdown);cursor:default}
+.streak-badge.streak-has-reward{animation:v-ctaPulse 2s ease-in-out infinite;cursor:pointer}
+@media(prefers-reduced-motion:reduce){.daily-dot.current,.streak-badge.streak-has-reward,.daily-gold,.daily-record{animation:none}}

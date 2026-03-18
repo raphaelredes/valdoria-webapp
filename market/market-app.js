@@ -30,7 +30,7 @@ let meta='';if(item.d){let parts=[];if(item.d.dd)parts.push(item.d.dd+(item.d.b?
 const priceClass=!canAfford&&!outOfStock?' cant-afford':'';return`<div class="shop-card ${inCart ? 'in-cart' : ''} ${outOfStock ? 'out-of-stock' : ''}"
             onclick="openBuyDetail('${esc(npcKey)}','${esc(item.id)}')">
             <span class="sc-stock ${stockClass}">${stockText}</span>
-            <div class="sc-emoji">${item.img ? '<img class="sc-thumb" src="' + item.img + '" alt="" onerror="this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'\\'"><span style="display:none">' + (item.e || '📦') + '</span>' : (item.e || '📦')}</div>
+            <div class="sc-emoji">${item.img ? '<img class="sc-thumb" src="' + item.img + '" alt="" onerror="this.style.display=&apos;none&apos;;this.nextElementSibling.style.display=&apos;&apos;"><span style="display:none">' + (item.e || '📦') + '</span>' : (item.e || '📦')}</div>
             <div class="sc-name">${esc(item.n)}</div>
             <div class="sc-price${priceClass}">💰 ${item.p} GP</div>
             ${meta ? `<div class="sc-meta">${meta}</div>` : ''}
@@ -46,7 +46,7 @@ const buyTags=new Set(sellNpc?sellNpc.buys:[]);const sellableItems=items.filter(
 html+='<div class="sell-list">';items.forEach(inv=>{const sellPrice=Math.floor(inv.v*mul);const selected=!!sellCart[inv.id];const qty=sellCart[inv.id]?.qty||0;const npcBuys=buyTags.has('all')||(inv.t||[]).some(t=>buyTags.has(t));html+=`<div class="sell-row ${selected ? 'selected' : ''} ${!npcBuys ? 'no-buy' : ''}">
                 <div class="sr-main" onclick="${npcBuys ? `toggleSell('${esc(inv.id)}','${esc(inv.n)}',${inv.q},${sellPrice})` : ''}">
                     <div class="sr-check">${selected ? '✓' : ''}</div>
-                    <span class="sr-emoji">${inv.img ? '<img class="sr-thumb" src="' + inv.img + '" alt="" onerror="this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'\\';">' + '<span style="display:none">' + (inv.e || '📦') + '</span>' : (inv.e || '📦')}</span>
+                    <span class="sr-emoji">${inv.img ? '<img class="sr-thumb" src="' + inv.img + '" alt="" onerror="this.style.display=&apos;none&apos;;this.nextElementSibling.style.display=&apos;&apos;;">' + '<span style="display:none">' + (inv.e || '📦') + '</span>' : (inv.e || '📦')}</span>
                     <div class="sr-info">
                         <div class="sr-name">${esc(inv.n)} ${inv.q > 1 ? '<span class="sr-qty-badge">x' + inv.q + '</span>' : ''}</div>
                         <div class="sr-price">${npcBuys ? sellPrice + ' GP' + (selected && qty > 0 ? ' · <span class="sr-total">' + (sellPrice * qty) + ' GP total</span>' : '') : '❌ NPC não compra'}</div>
@@ -114,7 +114,7 @@ function showModal(html){document.getElementById('modalContent').innerHTML=html;
 function closeModal(){document.getElementById('modalOverlay').classList.remove('visible');}
 function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
 function toast(msg,type){const existing=document.querySelector('.toast');if(existing)existing.remove();const el=document.createElement('div');el.className=`toast toast-${type || 'ok'}`;el.textContent=msg;document.body.appendChild(el);var cat=(type==='err'||type==='warn')?'toast-warn':'toast';var dur=(typeof calcReadTime==='function')?calcReadTime(msg,cat):2000;setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity 0.25s ease';setTimeout(()=>el.remove(),250);},dur);}
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"&apos;").replace(/"/g,'&quot;');}
 function showItemImage(name,imgUrl,emoji,details){if(!imgUrl||typeof showImagePopup!=='function')return;if(typeof haptic==='function')haptic('light');var stats=[];if(details){if(details.s)stats.push({icon:'',label:SLOT_NAMES[details.s]||details.s,value:''});if(details.dd)stats.push({icon:'\u2694\uFE0F',label:'Dano',value:details.dd+(details.b?'+'+details.b:'')});if(details.ac)stats.push({icon:'\u{1F6E1}\uFE0F',label:'CA',value:'+'+details.ac});if(details.hb)stats.push({icon:'\u2764\uFE0F',label:'HP',value:'+'+details.hb});if(details.mb)stats.push({icon:'\u2728',label:'MP',value:'+'+details.mb});}
 showImagePopup({src:imgUrl,title:name,stats:stats,type:'item'});}
 init();if(window._marketLoadingCtrl)window._marketLoadingCtrl.hide();

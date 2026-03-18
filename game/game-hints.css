@@ -1,0 +1,3 @@
+/* game-hints.css -- Onboarding hint styles */
+.hint-header{background:linear-gradient(135deg,rgba(74,222,128,0.2),rgba(74,222,128,0.05))!important}
+.hint-body{font-size:var(--v-font-body);line-height:1.6;color:var(--v-text);padding:var(--v-space-sm)}
