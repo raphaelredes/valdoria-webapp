@@ -233,6 +233,7 @@
             .catch(function (err) {
                 console.error('[CODEX] fetch list error:', err);
                 showError('Erro ao carregar compêndio', err);
+                _hideLoading();
             });
     }
 
@@ -275,6 +276,8 @@
 
     function showError(msg, err) {
         console.error('[CODEX]', msg, err || '');
+        // Always show the app (with back button) even on error
+        _hideLoading();
         if (typeof vToast === 'function') {
             vToast(msg, 'error');
         }
