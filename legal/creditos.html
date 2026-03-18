@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a2420">
+    <title>Creditos e Atribuicoes - Lendas de Valdoria</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../shared/fonts.css">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+    </script>
+    <style>
+        * { scrollbar-width: thin; scrollbar-color: var(--v-gold-dim, #705214) transparent; }
+        *::-webkit-scrollbar { width: 4px; }
+        *::-webkit-scrollbar-thumb { background: var(--v-gold-dim, #705214); border-radius: 4px; }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .legal-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--v-bg, #2a2420);
+            padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+            border-bottom: 1px solid var(--v-border, #4a3828);
+            text-align: center;
+        }
+
+        .legal-title {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            color: var(--v-gold, #c8a84e);
+            font-size: var(--v-font-lg, 16px);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .legal-subtitle {
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            color: var(--v-text-dim, #a09484);
+            font-size: var(--v-font-sm, 12px);
+            margin: var(--v-space-xs, 2px) 0 0;
+        }
+
+        .legal-content {
+            padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px);
+            padding-bottom: 80px;
+        }
+
+        .legal-content h2 {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            color: var(--v-gold, #c8a84e);
+            font-size: var(--v-font-md, 14px);
+            margin: var(--v-space-xl, 16px) 0 var(--v-space-sm, 4px);
+            border-bottom: 1px solid var(--v-border, #4a3828);
+            padding-bottom: var(--v-space-xs, 2px);
+        }
+
+        .legal-content h3 {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            color: var(--v-text, #d4c8b0);
+            font-size: var(--v-font-body, 14px);
+            margin: var(--v-space-lg, 12px) 0 var(--v-space-xs, 2px);
+        }
+
+        .legal-content p, .legal-content li {
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            color: var(--v-text, #d4c8b0);
+            font-size: var(--v-font-body, 14px);
+            line-height: 1.6;
+            margin: var(--v-space-sm, 4px) 0;
+        }
+
+        .legal-content ul {
+            padding-left: var(--v-space-xl, 16px);
+            margin: var(--v-space-sm, 4px) 0;
+        }
+
+        .legal-content li {
+            margin-bottom: var(--v-space-xs, 2px);
+        }
+
+        .legal-content strong {
+            color: var(--v-gold-light, #e8d48e);
+        }
+
+        .attribution-block {
+            background: var(--v-bg-raised, #332a22);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: var(--v-radius, 10px);
+            padding: var(--v-space-lg, 12px);
+            margin: var(--v-space-md, 8px) 0;
+        }
+
+        .attribution-block p {
+            font-size: var(--v-font-sm, 12px);
+            line-height: 1.5;
+            margin: var(--v-space-xs, 2px) 0;
+        }
+
+        .attribution-block .attr-title {
+            color: var(--v-gold, #c8a84e);
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: var(--v-font-body, 14px);
+            margin-bottom: var(--v-space-sm, 4px);
+        }
+
+        .license-tag {
+            display: inline-block;
+            background: rgba(200, 168, 78, 0.15);
+            color: var(--v-gold, #c8a84e);
+            font-size: var(--v-font-xs, 10px);
+            padding: 1px 6px;
+            border-radius: var(--v-radius-sm, 6px);
+            margin-left: var(--v-space-xs, 2px);
+        }
+
+        .legal-date {
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            color: var(--v-text-dim, #a09484);
+            font-size: var(--v-font-xs, 10px);
+            text-align: center;
+            margin-top: var(--v-space-xl, 16px);
+        }
+
+        .legal-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--v-bg, #2a2420);
+            border-top: 1px solid var(--v-border, #4a3828);
+            padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+            display: flex;
+            gap: var(--v-space-md, 8px);
+            justify-content: center;
+            max-width: 430px;
+            margin: 0 auto;
+        }
+
+        .legal-nav a {
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            color: var(--v-gold, #c8a84e);
+            text-decoration: none;
+            font-size: var(--v-font-sm, 12px);
+            padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: var(--v-radius-sm, 6px);
+            background: var(--v-bg-raised, #332a22);
+        }
+
+        .legal-nav a:active {
+            background: var(--v-bg-card, #2e2520);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="legal-header">
+        <h1 class="legal-title">Creditos e Atribuicoes</h1>
+        <p class="legal-subtitle">Lendas de Valdoria</p>
+    </div>
+
+    <div class="legal-content">
+        <p><strong>Lendas de Valdoria</strong> foi criado por <strong>Raphael Redes</strong> e utiliza os seguintes conteudos e tecnologias de terceiros.</p>
+
+        <h2>1. System Reference Document 5.1 (SRD 5.1)</h2>
+        <div class="attribution-block">
+            <p class="attr-title">Wizards of the Coast SRD 5.1 <span class="license-tag">CC-BY-4.0</span></p>
+            <p>This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at <a href="https://www.dndbeyond.com/resources/1781-systems-reference-document-srd" style="color: var(--v-gold);">https://www.dndbeyond.com/resources/1781-systems-reference-document-srd</a>. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at <a href="https://creativecommons.org/licenses/by/4.0/legalcode" style="color: var(--v-gold);">https://creativecommons.org/licenses/by/4.0/legalcode</a>.</p>
+        </div>
+        <p>O jogo utiliza mecanicas, criaturas, magias, classes, racas e regras do SRD 5.1. Todo o conteudo narrativo original (personagens, locais, historia de Valdoria) e criacao propria.</p>
+
+        <h2>2. Fontes Tipograficas</h2>
+        <p>Todas as fontes sao licenciadas sob <strong>SIL Open Font License 1.1</strong>:</p>
+
+        <div class="attribution-block">
+            <p class="attr-title">MedievalSharp <span class="license-tag">SIL OFL 1.1</span></p>
+            <p>Autor: Wojciech Kalinowski. Fonte principal da interface do jogo.</p>
+        </div>
+
+        <div class="attribution-block">
+            <p class="attr-title">Cinzel <span class="license-tag">SIL OFL 1.1</span></p>
+            <p>Autor: Natanael Gama. Usada em titulos e cabecalhos.</p>
+        </div>
+
+        <div class="attribution-block">
+            <p class="attr-title">IM Fell English <span class="license-tag">SIL OFL 1.1</span></p>
+            <p>Autor: Igino Marini. Fonte alternativa de leitura.</p>
+        </div>
+
+        <div class="attribution-block">
+            <p class="attr-title">Pirata One <span class="license-tag">SIL OFL 1.1</span></p>
+            <p>Autor: Rodrigo Fuenzalida, Daniel Hernandez. Fonte alternativa tematica.</p>
+        </div>
+
+        <div class="attribution-block">
+            <p class="attr-title">Almendra <span class="license-tag">SIL OFL 1.1</span></p>
+            <p>Autora: Ana Sanfelippo. Fonte alternativa medieval.</p>
+        </div>
+
+        <div class="attribution-block">
+            <p class="attr-title">Metamorphous <span class="license-tag">SIL OFL 1.1</span></p>
+            <p>Autora: Sorkin Type Co (James Grieshaber). Fonte alternativa fantasy.</p>
+        </div>
+
+        <h2>3. Bibliotecas JavaScript</h2>
+
+        <div class="attribution-block">
+            <p class="attr-title">Three.js <span class="license-tag">MIT</span></p>
+            <p>Autor: mrdoob (Ricardo Cabello) e contribuidores. Usada para renderizacao 3D dos dados.</p>
+        </div>
+
+        <div class="attribution-block">
+            <p class="attr-title">qrcode.js <span class="license-tag">MIT</span></p>
+            <p>Autor: davidshimjs. Usada para geracao de QR codes na tela de PIX.</p>
+        </div>
+
+        <h2>4. Plataforma</h2>
+
+        <div class="attribution-block">
+            <p class="attr-title">Telegram Bot API e Mini Apps SDK</p>
+            <p>O jogo e distribuido atraves da plataforma Telegram, utilizando a Bot API e o Mini Apps SDK. Telegram e marca registrada da Telegram FZ-LLC.</p>
+        </div>
+
+        <h2>5. Imagens e Arte</h2>
+
+        <div class="attribution-block">
+            <p class="attr-title">Imagens geradas por IA <span class="license-tag">DALL-E 3</span></p>
+            <p>Parte da arte do jogo (retratos de NPCs, cenarios, itens) foi gerada utilizando DALL-E 3 (OpenAI). Conforme os termos de uso da OpenAI, imagens geradas podem ser utilizadas comercialmente pelo usuario que as criou.</p>
+        </div>
+
+        <h2>6. Tecnologias de Infraestrutura</h2>
+        <ul>
+            <li><strong>Python</strong> — Linguagem principal do backend (PSF License)</li>
+            <li><strong>python-telegram-bot</strong> — Framework do bot (LGPL-3.0)</li>
+            <li><strong>aiohttp</strong> — Servidor HTTP async (Apache 2.0)</li>
+            <li><strong>aiosqlite</strong> — Acesso async ao SQLite (MIT)</li>
+            <li><strong>Cloudflare Workers</strong> — Hospedagem de paginas e proxy</li>
+            <li><strong>GitHub Pages</strong> — Hospedagem dos WebApps</li>
+            <li><strong>Google Cloud Run</strong> — Hospedagem do bot em producao</li>
+        </ul>
+
+        <h2>7. Agradecimentos</h2>
+        <p>A toda comunidade de jogadores de RPG de mesa que inspira este projeto, e a todos os contribuidores das bibliotecas e ferramentas de codigo aberto que tornam este jogo possivel.</p>
+
+        <p class="legal-date">Ultima atualizacao: 18 de marco de 2026</p>
+    </div>
+
+    <nav class="legal-nav">
+        <a href="privacidade.html">Privacidade</a>
+        <a href="termos.html">Termos de Uso</a>
+    </nav>
+</body>
+
+</html>

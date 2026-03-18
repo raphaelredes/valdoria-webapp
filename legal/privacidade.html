@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a2420">
+    <title>Politica de Privacidade - Lendas de Valdoria</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../shared/fonts.css">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+    </script>
+    <style>
+        * { scrollbar-width: thin; scrollbar-color: var(--v-gold-dim, #705214) transparent; }
+        *::-webkit-scrollbar { width: 4px; }
+        *::-webkit-scrollbar-thumb { background: var(--v-gold-dim, #705214); border-radius: 4px; }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .legal-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--v-bg, #2a2420);
+            padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+            border-bottom: 1px solid var(--v-border, #4a3828);
+            text-align: center;
+        }
+
+        .legal-title {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            color: var(--v-gold, #c8a84e);
+            font-size: var(--v-font-lg, 16px);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .legal-subtitle {
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            color: var(--v-text-dim, #a09484);
+            font-size: var(--v-font-sm, 12px);
+            margin: var(--v-space-xs, 2px) 0 0;
+        }
+
+        .legal-content {
+            padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px);
+            padding-bottom: 80px;
+        }
+
+        .legal-content h2 {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            color: var(--v-gold, #c8a84e);
+            font-size: var(--v-font-md, 14px);
+            margin: var(--v-space-xl, 16px) 0 var(--v-space-sm, 4px);
+            border-bottom: 1px solid var(--v-border, #4a3828);
+            padding-bottom: var(--v-space-xs, 2px);
+        }
+
+        .legal-content p, .legal-content li {
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            color: var(--v-text, #d4c8b0);
+            font-size: var(--v-font-body, 14px);
+            line-height: 1.6;
+            margin: var(--v-space-sm, 4px) 0;
+        }
+
+        .legal-content ul {
+            padding-left: var(--v-space-xl, 16px);
+            margin: var(--v-space-sm, 4px) 0;
+        }
+
+        .legal-content li {
+            margin-bottom: var(--v-space-xs, 2px);
+        }
+
+        .legal-content strong {
+            color: var(--v-gold-light, #e8d48e);
+        }
+
+        .legal-date {
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            color: var(--v-text-dim, #a09484);
+            font-size: var(--v-font-xs, 10px);
+            text-align: center;
+            margin-top: var(--v-space-xl, 16px);
+        }
+
+        .legal-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--v-bg, #2a2420);
+            border-top: 1px solid var(--v-border, #4a3828);
+            padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+            display: flex;
+            gap: var(--v-space-md, 8px);
+            justify-content: center;
+            max-width: 430px;
+            margin: 0 auto;
+        }
+
+        .legal-nav a {
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            color: var(--v-gold, #c8a84e);
+            text-decoration: none;
+            font-size: var(--v-font-sm, 12px);
+            padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: var(--v-radius-sm, 6px);
+            background: var(--v-bg-raised, #332a22);
+        }
+
+        .legal-nav a:active {
+            background: var(--v-bg-card, #2e2520);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="legal-header">
+        <h1 class="legal-title">Politica de Privacidade</h1>
+        <p class="legal-subtitle">Lendas de Valdoria</p>
+    </div>
+
+    <div class="legal-content">
+        <p>Esta Politica de Privacidade descreve como o jogo <strong>Lendas de Valdoria</strong> coleta, utiliza, armazena e protege os dados pessoais dos jogadores, em conformidade com a Lei Geral de Protecao de Dados Pessoais (LGPD - Lei n. 13.709/2018).</p>
+
+        <h2>1. Controlador dos Dados</h2>
+        <p><strong>Responsavel:</strong> Raphael Redes (desenvolvedor independente)<br>
+        <strong>Contato:</strong> <a href="mailto:contato@lendasdevaldoria.com.br" style="color: var(--v-gold);">contato@lendasdevaldoria.com.br</a><br>
+        <strong>Localizacao:</strong> Brasil</p>
+
+        <h2>2. Dados Coletados</h2>
+        <p>Coletamos os seguintes dados atraves da interacao com o bot do Telegram:</p>
+        <ul>
+            <li><strong>Identificador do Telegram (user ID):</strong> Numero unico atribuido pelo Telegram, usado para vincular seus dados de jogo</li>
+            <li><strong>Nome de usuario do Telegram:</strong> Usado apenas para exibicao no jogo</li>
+            <li><strong>Dados de personagem:</strong> Nome, classe, raca, atributos, inventario, progresso de missoes, historico de combate e demais informacoes de jogo</li>
+            <li><strong>Historico de jogo:</strong> Acoes realizadas, conquistas, estatisticas de combate, exploracoes e interacoes com NPCs</li>
+            <li><strong>Dados de sessao:</strong> Informacoes temporarias de navegacao dentro do jogo (tela atual, estado de combate, etc.)</li>
+            <li><strong>Dados de compra:</strong> Registros de transacoes via Telegram Stars (nenhum dado financeiro e armazenado por nos)</li>
+        </ul>
+
+        <h2>3. Dados NAO Coletados</h2>
+        <ul>
+            <li>Nao coletamos dados financeiros (cartoes, contas bancarias)</li>
+            <li>Nao coletamos dados de localizacao geografica</li>
+            <li>Nao coletamos contatos ou agenda do dispositivo</li>
+            <li>Nao coletamos fotos, arquivos ou midias do dispositivo</li>
+            <li>Nao compartilhamos dados com terceiros para fins publicitarios</li>
+        </ul>
+
+        <h2>4. Finalidade do Tratamento</h2>
+        <p>Os dados sao utilizados exclusivamente para:</p>
+        <ul>
+            <li>Funcionamento do jogo (salvar progresso, personagens, inventario)</li>
+            <li>Identificacao do jogador dentro do sistema do jogo</li>
+            <li>Suporte tecnico e resolucao de problemas</li>
+            <li>Melhorias no jogo baseadas em dados agregados e anonimizados</li>
+        </ul>
+
+        <h2>5. Base Legal (Art. 7, LGPD)</h2>
+        <p>O tratamento de dados e realizado com base no <strong>consentimento do titular</strong> (Art. 7, I), manifestado ao iniciar o uso do bot com o comando /start, e para <strong>execucao de contrato</strong> (Art. 7, V), sendo necessario para a prestacao do servico de jogo.</p>
+
+        <h2>6. Armazenamento e Seguranca</h2>
+        <ul>
+            <li>Os dados sao armazenados em banco de dados SQLite com criptografia em repouso</li>
+            <li>Backups automaticos sao realizados periodicamente</li>
+            <li>O acesso aos dados e restrito ao desenvolvedor e a sistemas automatizados do jogo</li>
+            <li>A comunicacao entre o bot e o Telegram utiliza HTTPS (criptografia em transito)</li>
+        </ul>
+
+        <h2>7. Retencao dos Dados</h2>
+        <p>Os dados de jogo sao mantidos enquanto o jogador possuir uma conta ativa. Apos solicitacao de exclusao, os dados sao removidos em ate <strong>30 dias uteis</strong>, exceto quando houver obrigacao legal de retencao.</p>
+
+        <h2>8. Direitos do Titular (Art. 18, LGPD)</h2>
+        <p>Voce tem direito a:</p>
+        <ul>
+            <li><strong>Confirmacao e acesso:</strong> Saber quais dados temos sobre voce</li>
+            <li><strong>Correcao:</strong> Solicitar correcao de dados incompletos ou desatualizados</li>
+            <li><strong>Exclusao:</strong> Solicitar a exclusao dos seus dados pessoais</li>
+            <li><strong>Portabilidade:</strong> Solicitar seus dados em formato estruturado</li>
+            <li><strong>Revogacao do consentimento:</strong> Retirar o consentimento a qualquer momento</li>
+            <li><strong>Oposicao:</strong> Opor-se ao tratamento de dados em determinadas situacoes</li>
+        </ul>
+        <p>Para exercer seus direitos, entre em contato pelo e-mail: <a href="mailto:contato@lendasdevaldoria.com.br" style="color: var(--v-gold);">contato@lendasdevaldoria.com.br</a></p>
+
+        <h2>9. Cookies e Armazenamento Local</h2>
+        <p>O jogo utiliza <strong>localStorage</strong> do navegador (dentro do Telegram Mini App) para:</p>
+        <ul>
+            <li>Salvar preferencias de interface (aba ativa, modo imersivo, volume)</li>
+            <li>Cache de dados de sessao para melhorar desempenho</li>
+            <li>Identificacao de sessao do dispositivo (device lock)</li>
+        </ul>
+        <p>Nao utilizamos cookies de rastreamento ou analiticos de terceiros.</p>
+
+        <h2>10. Transferencia Internacional</h2>
+        <p>Os dados podem ser processados em servidores localizados fora do Brasil (Google Cloud, Cloudflare). Nesses casos, garantimos que os provedores adotam medidas de protecao equivalentes as exigidas pela LGPD.</p>
+
+        <h2>11. Menores de Idade</h2>
+        <p>O jogo e destinado a maiores de <strong>16 anos</strong>. Nao coletamos intencionalmente dados de menores de 16 anos. Caso tome conhecimento de que um menor utilizou o servico sem consentimento dos responsaveis, entre em contato para que possamos tomar as providencias cabiveis.</p>
+
+        <h2>12. Alteracoes nesta Politica</h2>
+        <p>Esta politica pode ser atualizada periodicamente. Alteracoes significativas serao comunicadas atraves do bot do Telegram. A continuidade de uso apos as alteracoes constitui aceitacao da nova versao.</p>
+
+        <h2>13. Contato e Encarregado de Dados (DPO)</h2>
+        <p><strong>E-mail:</strong> <a href="mailto:contato@lendasdevaldoria.com.br" style="color: var(--v-gold);">contato@lendasdevaldoria.com.br</a><br>
+        <strong>Telegram:</strong> @lendasdevaldoria</p>
+
+        <p class="legal-date">Ultima atualizacao: 18 de marco de 2026</p>
+    </div>
+
+    <nav class="legal-nav">
+        <a href="termos.html">Termos de Uso</a>
+        <a href="creditos.html">Creditos</a>
+    </nav>
+</body>
+
+</html>

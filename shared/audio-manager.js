@@ -28,7 +28,10 @@ function _crossfadeOut(audio){if(!audio)return;_fadeAudio=audio;const startVol=a
 clearInterval(timer);if(_fadeAudio===audio)_fadeAudio=null;}else{try{audio.volume=current;}catch(e){clearInterval(timer);}}},stepMs);}
 function stop(){if(_audio){_crossfadeOut(_audio);_audio=null;}
 _currentTrack='';_pendingTrack='';_looping=false;_syncUI();}
-function playSFX(trackKey){if(_muted||_sfxMuted||!_unlocked)return;const file=_pickVariant(trackKey);if(!file)return;const url=AUDIO_BASE+file;const sfx=new Audio(url);sfx.volume=Math.min(1,_sfxVolume*1.5);sfx.play().catch(()=>{});}
+const _SFX_POOL_SIZE=3;const _sfxPool={};function _getSfxAudio(url){if(!_sfxPool[url]){_sfxPool[url]=[];for(let i=0;i<_SFX_POOL_SIZE;i++){const a=new Audio();a.preload='auto';a.src=url;_sfxPool[url].push(a);}}
+const pool=_sfxPool[url];for(let i=0;i<pool.length;i++){const a=pool[i];if(a.paused||a.ended){a.currentTime=0;return a;}}
+const a=pool[0];try{a.pause();a.currentTime=0;}catch(e){}return a;}
+function playSFX(trackKey){if(_muted||_sfxMuted||!_unlocked)return;if(window.vReducedMotion)return;const file=_pickVariant(trackKey);if(!file)return;const url=AUDIO_BASE+file;const sfx=_getSfxAudio(url);sfx.volume=Math.min(1,_sfxVolume*1.5);sfx.play().catch(()=>{});}
 function toggleMute(){_muted=!_muted;localStorage.setItem(STORAGE_KEY,_muted?'1':'0');_musicMuted=_muted;localStorage.setItem(MUSIC_MUTED_KEY,_musicMuted?'1':'0');if(_muted){if(_audio)_audio.volume=0;}else{if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack){_playTrack(_pendingTrack);}}
 _syncUI();return _muted;}
 function isMuted(){return _muted;}
