@@ -48,9 +48,16 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     </script>
 </head>
 
-<body>
-    <!-- Loading overlay -->
-    <div id="loading" class="loading-overlay">
+<body style="background:#2a2420">
+    <!-- Loading overlay - starts invisible, revealed by game.css -->
+    <div id="loading" class="loading-overlay" style="opacity:0">
+    <script>
+        // Reveal loading screen after a microtask (CSS parsed but before paint)
+        requestAnimationFrame(function(){
+            var el = document.getElementById('loading');
+            if (el) el.style.opacity = '';
+        });
+    </script>
         <!-- Floating particles (embers + sparks + elemental) -->
         <div class="loading-particles">
             <div class="particle ember p1"></div>
