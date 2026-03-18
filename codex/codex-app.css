@@ -1,0 +1,264 @@
+/* Codex / Compêndio de Valdoria */
+
+.codex-header {
+    text-align: center;
+    padding: var(--v-space-md) var(--v-space-lg);
+    border-bottom: 1px solid var(--v-border);
+}
+
+.codex-title {
+    font-family: var(--v-font-display);
+    font-size: var(--v-font-xl);
+    color: var(--v-gold);
+    margin: 0 0 var(--v-space-sm) 0;
+}
+
+/* Progress bar */
+.codex-progress {
+    position: relative;
+    height: var(--v-bar-height, 8px);
+    background: var(--v-bg-card);
+    border-radius: var(--v-radius-pill);
+    border: 1px solid var(--v-border);
+    overflow: hidden;
+}
+
+.codex-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--v-gold-dark, #8b6914), var(--v-gold));
+    border-radius: var(--v-radius-pill);
+    transition: width var(--v-transition, 0.3s) ease;
+}
+
+.codex-progress-text {
+    position: absolute;
+    right: var(--v-space-sm);
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--v-font-xs);
+    color: var(--v-text-dim);
+}
+
+/* Search */
+.codex-search {
+    padding: var(--v-space-sm) var(--v-space-lg);
+}
+
+.codex-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: var(--v-space-sm) var(--v-space-md);
+    background: var(--v-bg-card);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius);
+    color: var(--v-text);
+    font-family: var(--v-font);
+    font-size: var(--v-font-body);
+    outline: none;
+}
+
+.codex-search-input:focus {
+    border-color: var(--v-gold);
+}
+
+.codex-search-input::placeholder {
+    color: var(--v-text-dim);
+}
+
+/* Entry list */
+.codex-list {
+    padding: var(--v-space-sm) var(--v-space-lg);
+    overflow-y: auto;
+    max-height: calc(100dvh - 230px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--v-space-xs);
+}
+
+/* Entry card */
+.codex-card {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-md);
+    padding: var(--v-space-sm) var(--v-space-md);
+    background: var(--v-bg-card);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    cursor: pointer;
+    transition: border-color var(--v-transition, 0.2s);
+}
+
+.codex-card:active {
+    transform: scale(0.98);
+}
+
+.codex-card.unlocked:hover,
+.codex-card.unlocked:active {
+    border-color: var(--v-gold);
+}
+
+.codex-card.locked {
+    opacity: 0.5;
+}
+
+.codex-card-icon {
+    font-size: var(--v-font-xl);
+    min-width: 32px;
+    text-align: center;
+}
+
+.codex-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.codex-card-title {
+    font-family: var(--v-font);
+    font-size: var(--v-font-body);
+    color: var(--v-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.codex-card.locked .codex-card-title {
+    color: var(--v-text-dim);
+    font-style: italic;
+}
+
+.codex-card-desc {
+    font-size: var(--v-font-sm);
+    color: var(--v-text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.codex-card-badge {
+    font-size: var(--v-font-xs);
+    color: var(--v-gold);
+}
+
+/* Footer */
+.codex-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 430px;
+    margin: 0 auto;
+    padding: var(--v-space-sm) var(--v-space-lg);
+    background: var(--v-bg);
+    border-top: 1px solid var(--v-border);
+}
+
+.codex-back-btn {
+    width: 100%;
+    padding: var(--v-space-sm) var(--v-space-md);
+    background: var(--v-bg-card);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    color: var(--v-text);
+    font-family: var(--v-font);
+    font-size: var(--v-font-body);
+    cursor: pointer;
+}
+
+.codex-back-btn:active {
+    background: var(--v-bg-raised);
+}
+
+/* Detail overlay */
+.codex-detail-overlay {
+    position: fixed;
+    inset: 0;
+    max-width: 430px;
+    margin: 0 auto;
+    background: var(--v-bg);
+    z-index: var(--v-z-overlay, 500);
+    overflow-y: auto;
+    padding: var(--v-space-lg);
+    animation: fadeInUp 0.2s ease;
+}
+
+.codex-detail-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--v-space-md);
+    min-height: calc(100dvh - 48px);
+}
+
+.codex-detail-header {
+    text-align: center;
+    padding: var(--v-space-lg) 0;
+    border-bottom: 1px solid var(--v-border);
+}
+
+.codex-detail-header .icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: var(--v-space-sm);
+}
+
+.codex-detail-header .title {
+    font-family: var(--v-font-display);
+    font-size: var(--v-font-xl);
+    color: var(--v-gold);
+}
+
+.codex-detail-header .category {
+    font-size: var(--v-font-sm);
+    color: var(--v-text-dim);
+    margin-top: var(--v-space-xs);
+}
+
+.codex-detail-body {
+    font-size: var(--v-font-body);
+    line-height: 1.6;
+    color: var(--v-text);
+    padding: var(--v-space-md) 0;
+}
+
+.codex-detail-meta {
+    font-size: var(--v-font-sm);
+    color: var(--v-text-dim);
+    border-top: 1px solid var(--v-border);
+    padding-top: var(--v-space-md);
+}
+
+.codex-detail-meta .meta-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--v-space-xs) 0;
+}
+
+.codex-detail-close {
+    width: 100%;
+    padding: var(--v-space-md);
+    background: var(--v-bg-card);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    color: var(--v-text);
+    font-family: var(--v-font);
+    font-size: var(--v-font-body);
+    cursor: pointer;
+    margin-top: auto;
+}
+
+.codex-detail-close:active {
+    background: var(--v-bg-raised);
+}
+
+/* Empty state */
+.codex-empty {
+    text-align: center;
+    padding: var(--v-space-2xl) var(--v-space-lg);
+    color: var(--v-text-dim);
+    font-style: italic;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .codex-detail-overlay { animation: none; }
+    .codex-card:active { transform: none; }
+}
