@@ -30,6 +30,7 @@ if(screen.progress_strip){renderProgressStrip(contentEl,screen.progress_strip);}
 if(screen.player_stats&&screen.player_stats.kills>0){_renderPlayerStats(contentEl,screen.player_stats);}
 if(screen.quest_tracker){renderQuestTracker(contentEl,screen.quest_tracker);}
 if(screen.suggested_action){_renderSuggestedAction(contentEl,screen.suggested_action);}
+if(screen.first_visit&&screen.screen_title&&screen.breadcrumb&&screen.breadcrumb.length>1){_showFirstVisitToast(screen.screen_title);}
 if(screen.combat_summary){_showCombatSummaryToast(screen.combat_summary);}
 if(screen.notifications&&screen.notifications.length>0){_showNotifications(screen.notifications);}
 if(screen.feedback_popup&&!_fbActive){setTimeout(()=>_showFeedbackOverlay(screen.feedback_popup),800);}
@@ -159,4 +160,5 @@ function _renderPlayerStats(container,stats){var el=document.createElement('div'
 function _renderDmTip(container,tip){var el=document.createElement('div');el.className='dm-tip';el.innerHTML='<span class="dm-tip-icon">📜</span> <span class="dm-tip-text">'+_escHtml(tip)+'</span>';container.appendChild(el);}
 function _renderReturnNarrative(container,text){var el=document.createElement('div');el.className='return-narrative';el.textContent=text;container.insertBefore(el,container.firstChild);setTimeout(function(){el.classList.add('fade-out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1500);},4000);}
 function _renderSuggestedAction(container,action){var el=document.createElement('div');el.className='suggested-action suggested-'+action.type;el.innerHTML=_escHtml(action.text);el.style.cursor='pointer';el.onclick=function(){if(action.cb&&typeof doAction==='function')doAction(action.cb);};container.appendChild(el);}
+function _showFirstVisitToast(title){var text='✨ Nova área descoberta: '+title;var dur=(typeof calcReadTime==='function')?calcReadTime(text,'toast'):2500;setTimeout(function(){if(typeof showToast==='function')showToast(text,dur);},500);}
 function _showCombatSummaryToast(summary){if(!summary||!summary.enemy)return;var text='\u2694\ufe0f Vitória! '+summary.enemy+' derrotado em '+summary.turns+' rodada'+(summary.turns>1?'s':'')+'. +'+summary.xp+' XP, +'+summary.gold+' GP';var dur=(typeof calcReadTime==='function')?calcReadTime(text,'toast'):3500;setTimeout(function(){if(typeof showToast==='function')showToast(text,dur);},300);}
