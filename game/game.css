@@ -6,6 +6,13 @@
 .v-bc-item[data-cb]:hover,.v-bc-item[data-cb]:active{color:var(--v-gold,#c8a84e);}
 .v-bc-active{color:var(--v-gold,#c8a84e);font-weight:600;flex-shrink:0;}
 .v-bc-dots{color:var(--v-text-dim,#a09484);opacity:0.5;}
+/* Progress Strip (league + achievements compact card) */
+.progress-strip{display:flex;gap:var(--v-space-xs,2px);margin:var(--v-space-sm,4px) 0;border:1px solid rgba(200,168,78,0.3);border-radius:var(--v-radius-sm,6px);overflow:hidden;background:var(--v-bg-card,#2e2520);}
+.progress-strip-item{flex:1;display:flex;align-items:center;justify-content:center;gap:var(--v-space-xs,2px);min-height:44px;padding:var(--v-space-xs,2px) var(--v-space-sm,4px);cursor:pointer;font-size:var(--v-font-sm,13px);font-family:var(--v-font,'MedievalSharp',serif);color:var(--v-text,#d4c8b0);transition:background var(--v-transition,0.2s) ease;-webkit-tap-highlight-color:transparent;}
+.progress-strip-item:active{background:rgba(200,168,78,0.12);}
+.progress-strip-league{border-right:1px solid rgba(200,168,78,0.2);}
+.ps-label{font-size:var(--v-font-xs,11px);color:var(--v-text-dim,#a09484);}
+.ps-xp{font-size:var(--v-font-xs,11px);color:var(--v-gold,#c8a84e);font-weight:600;}
 /* Directional transitions (Fire Emblem Heroes-inspired) */
 .slide-left-out{animation:slideLeftOut 0.22s ease-in forwards;}
 .slide-left-in{animation:slideLeftIn 0.25s ease-out forwards;}
