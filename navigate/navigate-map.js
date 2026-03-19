@@ -315,6 +315,8 @@ onStage?.('Revelando territórios...');
 _renderFogOverlay(svg,fogState);onProgress?.(40);
 onStage?.('Traçando estradas...');
 if(typeof initCanvasRenderer==='function')initCanvasRenderer();onProgress?.(80);
+// Fog reveal for newly discovered locations (Phase 3.2)
+try{var _pendRev=JSON.parse(localStorage.getItem('valdoria_reveal_locs'));if(_pendRev&&_pendRev.length){localStorage.removeItem('valdoria_reveal_locs');for(var _ri=0;_ri<_pendRev.length;_ri++){var _rId=_pendRev[_ri];if(typeof cvTriggerReveal==='function')cvTriggerReveal(_rId);var _rC=LOCATION_COORDS[_rId];if(_rC){var _rPx=hexToPixel(_rC.col,_rC.row);var _burst=_el('circle',{cx:_rPx.x,cy:_rPx.y,r:0,class:'fog-reveal-burst'});svg.appendChild(_burst);}}}}catch(e){}
 onStage?.('Finalizando...');
 renderCompassRose();setupPanZoom();
 if(typeof setupCanvasClickHandler==='function')setupCanvasClickHandler();

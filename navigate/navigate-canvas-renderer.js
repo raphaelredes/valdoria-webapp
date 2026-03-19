@@ -659,6 +659,12 @@ function cvClearSelection() {
     _cvSelPathIds = null;
 }
 
+// Trigger dramatic fog reveal for a newly discovered location
+function cvTriggerReveal(locId) {
+    _cvRevealAlpha[locId] = 0;
+    _dirtyStatic = true;
+}
+
 // Danger-color lookup for path segments
 function _cvDangerColor(danger) {
     if (danger >= 7) return '#cc4040';
@@ -690,6 +696,7 @@ function _cvDrawSelection(ctx, now) {
     if (_cvSelPathIds && _cvSelPathIds.length >= 2) {
         ctx.lineCap = 'round';
         ctx.setLineDash([8, 4]);
+        ctx.lineDashOffset = -_antMarchOffset;
 
         for (var i = 0; i < _cvSelPathIds.length - 1; i++) {
             var aC = LOCATION_COORDS[_cvSelPathIds[i]];
@@ -720,8 +727,16 @@ function _cvDrawSelection(ctx, now) {
                 ctx.strokeStyle = segColor;
             }
 
+            // Glow pass (medium/full only)
+            if (_cvDetail >= 1) {
+                ctx.lineWidth = 8;
+                ctx.globalAlpha = 0.15;
+                ctx.beginPath();
+                _cvRoadSegment(ctx, aP, bP, seed);
+                ctx.stroke();
+            }
             ctx.lineWidth = 4;
-            ctx.globalAlpha = 0.5;
+            ctx.globalAlpha = 0.55;
             ctx.beginPath();
             _cvRoadSegment(ctx, aP, bP, seed);
             ctx.stroke();

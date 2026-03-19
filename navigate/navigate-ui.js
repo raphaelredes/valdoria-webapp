@@ -354,6 +354,24 @@ function handleLocationTap(locId) {
                 () => finishNavigation('camp')
             );
             actionsEl.appendChild(campBtn);
+            // Camp context: show what rest restores (3.3)
+            if (S.charData) {
+                var cd = S.charData;
+                var hpPct = cd.mh > 0 ? Math.round(cd.hp / cd.mh * 100) : 100;
+                var mpPct = cd.mm > 0 ? Math.round(cd.mp / cd.mm * 100) : 100;
+                var needsRest = hpPct < 100 || mpPct < 100;
+                if (needsRest) {
+                    var campInfo = document.createElement('div');
+                    campInfo.className = 'camp-context';
+                    var lines = [];
+                    if (hpPct < 100) lines.push('❤️ HP: ' + cd.hp + '/' + cd.mh + ' (' + hpPct + '%)');
+                    if (mpPct < 100) lines.push('✨ MP: ' + cd.mp + '/' + cd.mm + ' (' + mpPct + '%)');
+                    lines.push('🏕️ Curto: recupera Dados de Vida');
+                    lines.push('🌙 Longo: recupera HP + recursos');
+                    campInfo.innerHTML = lines.join('<br>');
+                    actionsEl.appendChild(campInfo);
+                }
+            }
         }
     } else if (connected) {
         const edgeDist = getConnectionDistance(S.currentLoc, locId);
