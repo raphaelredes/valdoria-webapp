@@ -115,6 +115,7 @@
         var stageEl = document.getElementById('loading-stage');
         var overlay = document.getElementById('loading');
         var circle = overlay ? overlay.querySelector('.magic-circle') : null;
+        var gemEl = overlay ? overlay.querySelector('.mc-gem') : null;
         var tipIndex = Math.floor(Math.random() * TIPS.length);
         if (tipEl) tipEl.textContent = TIPS[tipIndex];
         var _tipInterval, _slowTimer, _verySlowTimer;
