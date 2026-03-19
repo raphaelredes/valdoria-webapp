@@ -400,6 +400,58 @@
             font-family: 'MedievalSharp', serif;
         }
 
+        /* Travel options (pace + activity selectors) */
+        .travel-options {
+            display: none;
+            margin: 6px 0 2px;
+            padding: 6px 8px;
+            background: rgba(42, 36, 32, 0.5);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: var(--v-radius-sm, 6px);
+        }
+        .travel-options.visible { display: block; }
+        .travel-opt-label {
+            font-size: 11px;
+            color: var(--v-text-dim, #a09484);
+            font-family: 'Cinzel', serif;
+            margin-bottom: 4px;
+            letter-spacing: 0.3px;
+        }
+        .travel-opt-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        .travel-opt-row:last-child { margin-bottom: 0; }
+        .travel-opt-btn {
+            flex: 1;
+            padding: 6px 2px;
+            border: 1px solid rgba(112, 66, 20, 0.3);
+            border-radius: 4px;
+            background: rgba(42, 36, 32, 0.6);
+            color: var(--v-text-dim, #a09484);
+            font-size: 10px;
+            font-family: 'MedievalSharp', serif;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+            line-height: 1.2;
+            min-height: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .travel-opt-btn.active {
+            background: rgba(112, 66, 20, 0.35);
+            border-color: #c4953a;
+            color: #c4953a;
+        }
+        .travel-opt-btn:active { transform: scale(0.96); }
+        .travel-opt-icon { font-size: 14px; margin-bottom: 1px; }
+        .travel-opt-name { font-weight: 600; font-size: 11px; }
+        .travel-opt-detail { font-size: 9px; opacity: 0.7; margin-top: 1px; }
+
         .info-actions {
             display: flex;
             flex-direction: column;
@@ -2293,6 +2345,7 @@
             <div class="info-quests" id="info-quests"></div>
             <div class="info-dungeons" id="info-dungeons"></div>
             <div class="info-note" id="info-note"></div>
+            <div class="travel-options" id="travel-options"></div>
         </div>
         <div class="info-actions" id="info-actions"></div>
     </div>

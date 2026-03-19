@@ -659,6 +659,14 @@ function cvClearSelection() {
     _cvSelPathIds = null;
 }
 
+// Danger-color lookup for path segments
+function _cvDangerColor(danger) {
+    if (danger >= 7) return '#cc4040';
+    if (danger >= 5) return '#cc6633';
+    if (danger >= 3) return '#c4953a';
+    return '#4a8a4a';
+}
+
 function _cvDrawSelection(ctx, now) {
     if (!_cvSelLoc) return;
     var coords = LOCATION_COORDS[_cvSelLoc];
@@ -666,20 +674,20 @@ function _cvDrawSelection(ctx, now) {
     var p = hexToPixel(coords.col, coords.row);
 
     ctx.save();
-    // Selection ring (pulsing)
+    // Selection ring (pulsing) — colored by destination danger
+    var destLd = S.locations ? S.locations[_cvSelLoc] : null;
+    var destDanger = destLd ? (destLd.d || 0) : 0;
+    var selColor = _cvDangerColor(destDanger);
     var pulseAlpha = 0.4 + 0.2 * Math.sin(now * 0.004);
     ctx.beginPath();
     ctx.arc(p.x, p.y, HEX_RADIUS + 5, 0, Math.PI * 2);
-    ctx.strokeStyle = '#c4953a';
+    ctx.strokeStyle = selColor;
     ctx.lineWidth = 2;
     ctx.globalAlpha = pulseAlpha;
     ctx.stroke();
 
-    // Path highlight
+    // Path highlight — each segment colored by destination node danger
     if (_cvSelPathIds && _cvSelPathIds.length >= 2) {
-        ctx.strokeStyle = '#c4953a';
-        ctx.lineWidth = 4;
-        ctx.globalAlpha = 0.5;
         ctx.lineCap = 'round';
         ctx.setLineDash([8, 4]);
 
@@ -690,11 +698,35 @@ function _cvDrawSelection(ctx, now) {
             var aP = hexToPixel(aC.col, aC.row);
             var bP = hexToPixel(bC.col, bC.row);
             var seed = (aC.col * 31 + aC.row * 17 + bC.col * 13 + bC.row * 7);
+
+            // Determine danger color for this segment (based on destination node)
+            var segLocId = _cvSelPathIds[i + 1];
+            var segLd = S.locations ? S.locations[segLocId] : null;
+            var segDanger = segLd ? (segLd.d || 0) : 0;
+            var segColor = _cvDangerColor(segDanger);
+
+            // Medium/Full: gradient from source danger to dest danger along the segment
+            if (_cvDetail >= 1) {
+                var srcLocId = _cvSelPathIds[i];
+                var srcLd = S.locations ? S.locations[srcLocId] : null;
+                var srcDanger = srcLd ? (srcLd.d || 0) : 0;
+                var srcColor = _cvDangerColor(srcDanger);
+                var grad = ctx.createLinearGradient(aP.x, aP.y, bP.x, bP.y);
+                grad.addColorStop(0, srcColor);
+                grad.addColorStop(1, segColor);
+                ctx.strokeStyle = grad;
+            } else {
+                // Lite: flat color (no gradient)
+                ctx.strokeStyle = segColor;
+            }
+
+            ctx.lineWidth = 4;
+            ctx.globalAlpha = 0.5;
             ctx.beginPath();
             _cvRoadSegment(ctx, aP, bP, seed);
             ctx.stroke();
 
-            // Direction arrow at midpoint
+            // Direction arrow at midpoint — colored by segment danger
             var pathD = _buildRoadPath(aP, bP, seed);
             var midPt = _pointOnPath(pathD, 0.5);
             var preP = _pointOnPath(pathD, 0.45);
@@ -703,7 +735,7 @@ function _cvDrawSelection(ctx, now) {
             ctx.translate(midPt.x, midPt.y);
             ctx.rotate(angle);
             ctx.globalAlpha = 0.6;
-            ctx.fillStyle = '#c4953a';
+            ctx.fillStyle = segColor;
             ctx.beginPath();
             ctx.moveTo(0, -4);
             ctx.lineTo(8, 0);

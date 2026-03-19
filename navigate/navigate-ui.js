@@ -2,6 +2,131 @@
 // NAVIGATE UI — Info panel, actions, interactions
 // ═══════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════
+// TRAVEL PACE & ACTIVITY — D&D 5e Travel Pace System
+// ═══════════════════════════════════════════════════════
+
+var _travelPace = localStorage.getItem('valdoria_travel_pace') || 'normal';
+var _travelActivity = localStorage.getItem('valdoria_travel_activity') || 'watch';
+
+// Pace multipliers: fast = 0.75x turns (round up), cautious = 1.5x turns (round up)
+function _getAdjustedTurns(baseDist) {
+    if (_travelPace === 'fast') return Math.max(1, Math.ceil(baseDist * 0.75));
+    if (_travelPace === 'cautious') return Math.max(1, Math.ceil(baseDist * 1.5));
+    return baseDist;
+}
+
+// Build travel options UI (pace + activity selectors)
+var _currentBaseDist = 0;
+function _buildTravelOptions(baseDist) {
+    _currentBaseDist = baseDist;
+    var container = document.getElementById('travel-options');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Pace row
+    var paceLabel = document.createElement('div');
+    paceLabel.className = 'travel-opt-label';
+    paceLabel.textContent = 'Ritmo de Viagem';
+    container.appendChild(paceLabel);
+
+    var paceRow = document.createElement('div');
+    paceRow.className = 'travel-opt-row';
+
+    var paces = [
+        { id: 'fast', icon: '🏃', name: 'Rápido', detail: '×0.75 turnos · −5 PP' },
+        { id: 'normal', icon: '🚶', name: 'Normal', detail: 'Padrão' },
+        { id: 'cautious', icon: '🐢', name: 'Cauteloso', detail: '×1.5 turnos · +5 PP' }
+    ];
+
+    paces.forEach(function(p) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'travel-opt-btn' + (_travelPace === p.id ? ' active' : '');
+        btn.innerHTML = '<span class="travel-opt-icon">' + p.icon + '</span>' +
+            '<span class="travel-opt-name">' + p.name + '</span>' +
+            '<span class="travel-opt-detail">' + p.detail + '</span>';
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            _travelPace = p.id;
+            localStorage.setItem('valdoria_travel_pace', p.id);
+            paceRow.querySelectorAll('.travel-opt-btn').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            _updateTravelBtnAndNote(baseDist);
+            if (typeof _haptic === 'function') _haptic('tap');
+        });
+        paceRow.appendChild(btn);
+    });
+    container.appendChild(paceRow);
+
+    // Activity row
+    var actLabel = document.createElement('div');
+    actLabel.className = 'travel-opt-label';
+    actLabel.textContent = 'Atividade de Viagem';
+    container.appendChild(actLabel);
+
+    var actRow = document.createElement('div');
+    actRow.className = 'travel-opt-row';
+
+    var activities = [
+        { id: 'watch', icon: '👁️', name: 'Vigiar', detail: 'Percepção' },
+        { id: 'navigate', icon: '🧭', name: 'Navegar', detail: 'Sobrevivência' },
+        { id: 'forage', icon: '🌿', name: 'Forragear', detail: 'Sobrevivência' },
+        { id: 'cartograph', icon: '🗺️', name: 'Cartografar', detail: 'Sobrevivência' }
+    ];
+
+    activities.forEach(function(a) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'travel-opt-btn' + (_travelActivity === a.id ? ' active' : '');
+        btn.innerHTML = '<span class="travel-opt-icon">' + a.icon + '</span>' +
+            '<span class="travel-opt-name">' + a.name + '</span>' +
+            (a.detail ? '<span class="travel-opt-detail">' + a.detail + '</span>' : '');
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            _travelActivity = a.id;
+            localStorage.setItem('valdoria_travel_activity', a.id);
+            actRow.querySelectorAll('.travel-opt-btn').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            if (typeof _haptic === 'function') _haptic('tap');
+        });
+        actRow.appendChild(btn);
+    });
+    container.appendChild(actRow);
+
+    container.classList.add('visible');
+
+    // Apply initial pace to button label and note
+    _updateTravelBtnAndNote(baseDist);
+}
+
+// Update the travel button label AND the info-note turn count when pace changes
+function _updateTravelBtnAndNote(baseDist) {
+    // Update button label via _baseLabelFn
+    var travelBtn = document.querySelector('.info-btn-travel');
+    if (travelBtn && typeof travelBtn._baseLabelFn === 'function') {
+        travelBtn._baseLabelFn(baseDist);
+    }
+    // Update the info-note turn count
+    var noteEl = document.getElementById('info-note');
+    if (!noteEl) return;
+    var adjTurns = _getAdjustedTurns(baseDist);
+    var turnText = adjTurns + ' turno' + (adjTurns !== 1 ? 's' : '');
+    // Replace the turn count in the note HTML (pattern: N turno/turnos)
+    noteEl.innerHTML = noteEl.innerHTML.replace(
+        /\d+ turno[s]?/,
+        turnText
+    );
+}
+
+function _hideTravelOptions() {
+    var container = document.getElementById('travel-options');
+    if (container) {
+        container.classList.remove('visible');
+        container.innerHTML = '';
+    }
+}
+
 // ── Cached weighted distance — avoids repeated Dijkstra on same currentLoc ──
 var _distCache = {};
 var _distCacheLoc = null;
@@ -229,34 +354,52 @@ function handleLocationTap(locId) {
             noteEl.innerHTML = `🕐 <b>${edgeDist} turno${edgeDist !== 1 ? 's' : ''}</b> de viagem${riskHint}`;
             noteEl.style.display = 'block';
             noteEl.style.color = '';
+            const adjTurns = _getAdjustedTurns(edgeDist);
             const travelBtn = createActionBtn(
-                `🚶 Viajar para ${locData.n || 'lá'} (${edgeDist}🕐)`,
+                '🚶 Viajar para ' + (locData.n || 'lá') + ' (' + adjTurns + '🕐)',
                 'info-btn-travel',
-                () => finishNavigation('travel', locId)
+                function() { finishNavigation('travel', locId, { pace: _travelPace, activity: _travelActivity }); }
             );
+            travelBtn._baseLabelFn = function(bd) {
+                var t = _getAdjustedTurns(bd);
+                travelBtn.textContent = '🚶 Viajar para ' + (locData.n || 'lá') + ' (' + t + '🕐)';
+            };
             actionsEl.appendChild(travelBtn);
+            _buildTravelOptions(edgeDist);
         } else if (isKnownMapped) {
             // Has map but never visited: expedition with map
             noteEl.innerHTML = `⚠️ <b>Primeira Expedição</b> — ${edgeDist} turno${edgeDist !== 1 ? 's' : ''}, encontros e riscos no caminho`;
             noteEl.style.display = 'block';
             noteEl.style.color = '#c4953a';
+            const adjTurns = _getAdjustedTurns(edgeDist);
             const travelBtn = createActionBtn(
-                `🧭 Expedição para ${locData.n || 'lá'} (${edgeDist}🕐) ⚠️`,
+                '🧭 Expedição para ' + (locData.n || 'lá') + ' (' + adjTurns + '🕐) ⚠️',
                 'info-btn-travel info-btn-risky',
-                () => finishNavigation('travel', locId, { firstVisit: true })
+                function() { finishNavigation('travel', locId, { firstVisit: true, pace: _travelPace, activity: _travelActivity }); }
             );
+            travelBtn._baseLabelFn = function(bd) {
+                var t = _getAdjustedTurns(bd);
+                travelBtn.textContent = '🧭 Expedição para ' + (locData.n || 'lá') + ' (' + t + '🕐) ⚠️';
+            };
             actionsEl.appendChild(travelBtn);
+            _buildTravelOptions(edgeDist);
         } else {
             // No map, never visited: blind expedition
             noteEl.innerHTML = `⚠️ <b>Expedição às Cegas</b> — ${edgeDist} turno${edgeDist !== 1 ? 's' : ''}, sem mapa, alta chance de se perder`;
             noteEl.style.display = 'block';
             noteEl.style.color = '#c4953a';
+            const adjTurns = _getAdjustedTurns(edgeDist);
             const travelBtn = createActionBtn(
-                `🧭 Expedição (${edgeDist}🕐 Sem Mapa) ⚠️⚠️`,
+                '🧭 Expedição (' + adjTurns + '🕐 Sem Mapa) ⚠️⚠️',
                 'info-btn-travel info-btn-risky',
-                () => finishNavigation('travel', locId, { noMap: true, firstVisit: true })
+                function() { finishNavigation('travel', locId, { noMap: true, firstVisit: true, pace: _travelPace, activity: _travelActivity }); }
             );
+            travelBtn._baseLabelFn = function(bd) {
+                var t = _getAdjustedTurns(bd);
+                travelBtn.textContent = '🧭 Expedição (' + t + '🕐 Sem Mapa) ⚠️⚠️';
+            };
             actionsEl.appendChild(travelBtn);
+            _buildTravelOptions(edgeDist);
         }
     } else if (wDist > 0) {
         // Show route hint via BFS path with total turn cost
@@ -324,6 +467,7 @@ function createActionBtn(text, className, onClick) {
 
 // ── Close info panel ──
 function closeInfoPanel() {
+    _hideTravelOptions();
     const panel = document.getElementById('info-panel');
     panel.classList.remove('open', 'peek', 'full');
     document.getElementById('map-viewport').classList.remove('panel-open');
