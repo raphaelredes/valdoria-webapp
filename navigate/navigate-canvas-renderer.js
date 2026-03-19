@@ -786,18 +786,32 @@ function cvStartTravel(fromId, toId, onComplete) {
         var dx = bP.x - aP.x, dy = bP.y - aP.y;
         var len = Math.sqrt(dx * dx + dy * dy);
         var pathD = _buildRoadPath(aP, bP, seed);
-        segments.push({ pathD: pathD, aP: aP, bP: bP, seed: seed, len: len });
+        segments.push({ pathD: pathD, aP: aP, bP: bP, seed: seed, len: len, locId: pathIds[i + 1] });
         totalLen += len;
     }
 
-    var duration = Math.max(1500, Math.min(4000, pathIds.length * 800));
+    // Phase-based timing: each segment gets travel time + waypoint pause (except last)
+    var msPerSeg = Math.max(600, Math.min(1200, 3000 / Math.max(1, pathIds.length)));
+    var wpPause = 200;
+    var phases = [];
+    for (var j = 0; j < segments.length; j++) {
+        phases.push({ type: 'move', segIdx: j, duration: msPerSeg });
+        if (j < segments.length - 1) {
+            phases.push({ type: 'pause', segIdx: j, duration: wpPause });
+        }
+    }
+    var totalDur = 0;
+    for (var k = 0; k < phases.length; k++) totalDur += phases[k].duration;
+
     _cvTravelState = {
         segments: segments,
         totalLen: totalLen,
         startTime: performance.now(),
-        duration: duration,
+        duration: totalDur,
+        phases: phases,
         onComplete: onComplete,
         pathProgress: 0,
+        waypointPulse: 0,
     };
 }
 
@@ -805,56 +819,74 @@ function _cvDrawTravel(ctx, now) {
     var ts = _cvTravelState;
     if (!ts) return;
     var elapsed = now - ts.startTime;
-    var t = Math.min(elapsed / ts.duration, 1);
-    ts.pathProgress = t;
+
+    // Determine current phase (move or waypoint pause)
+    var phaseElapsed = elapsed;
+    var currentPhase = null;
+    var phaseLocalT = 0;
+    for (var pi = 0; pi < ts.phases.length; pi++) {
+        if (phaseElapsed <= ts.phases[pi].duration) {
+            currentPhase = ts.phases[pi];
+            phaseLocalT = Math.min(1, phaseElapsed / ts.phases[pi].duration);
+            break;
+        }
+        phaseElapsed -= ts.phases[pi].duration;
+    }
+
+    if (!currentPhase) {
+        var cb = ts.onComplete;
+        _cvTravelState = null;
+        if (cb) cb();
+        return;
+    }
 
     ctx.save();
-    // Draw travel path (stroke dash reveal)
     ctx.strokeStyle = '#c4953a';
     ctx.lineWidth = 3;
     ctx.globalAlpha = 0.6;
     ctx.lineCap = 'round';
     ctx.setLineDash([]);
 
-    var drawnLen = 0;
-    for (var i = 0; i < ts.segments.length; i++) {
+    // Draw completed segments
+    var completedUpTo = currentPhase.segIdx;
+    if (currentPhase.type === 'pause') completedUpTo = currentPhase.segIdx + 1;
+    for (var i = 0; i < Math.min(completedUpTo, ts.segments.length); i++) {
         var seg = ts.segments[i];
-        var segT = Math.max(0, Math.min(1, (t * ts.totalLen - drawnLen) / seg.len));
-        if (segT <= 0) break;
-
-        // Draw path segment up to segT
         ctx.beginPath();
         _cvRoadSegment(ctx, seg.aP, seg.bP, seg.seed);
         ctx.stroke();
-        drawnLen += seg.len;
     }
 
-    // Draw traveler marker at current position
-    var targetLen = t * ts.totalLen;
-    var accum = 0;
-    for (var j = 0; j < ts.segments.length; j++) {
-        var s = ts.segments[j];
-        if (accum + s.len >= targetLen || j === ts.segments.length - 1) {
-            var sT = Math.min((targetLen - accum) / s.len, 1);
-            var pt = _pointOnPath(s.pathD, sT);
-            // Draw simple traveler circle
-            _cvCircle(ctx, pt.x, pt.y, 5, '#7b2020', 0.85, INK_DARK, 1.5, 0.8);
-            // Glow ring
-            _cvCircle(ctx, pt.x, pt.y, 10, null, 0, 'rgba(196,149,58,0.3)', 1.8, 0.5);
-            break;
+    // Draw current segment + find marker position
+    var markerPt = null;
+    if (currentPhase.type === 'move') {
+        var seg2 = ts.segments[currentPhase.segIdx];
+        // Ease-in-out
+        var easeT = phaseLocalT < 0.5 ? 2 * phaseLocalT * phaseLocalT : 1 - Math.pow(-2 * phaseLocalT + 2, 2) / 2;
+        ctx.beginPath();
+        _cvRoadSegment(ctx, seg2.aP, seg2.bP, seg2.seed);
+        ctx.stroke();
+        markerPt = _pointOnPath(seg2.pathD, easeT);
+    } else {
+        // Pause at waypoint
+        var pauseSeg = ts.segments[currentPhase.segIdx];
+        markerPt = { x: pauseSeg.bP.x, y: pauseSeg.bP.y };
+        ts.waypointPulse = phaseLocalT;
+    }
+
+    // Draw traveler marker
+    if (markerPt) {
+        if (currentPhase.type === 'pause') {
+            var pulseR = 8 + ts.waypointPulse * 12;
+            var pulseOp = 0.4 * (1 - ts.waypointPulse);
+            _cvCircle(ctx, markerPt.x, markerPt.y, pulseR, null, 0, '#c4953a', 1.5, pulseOp);
         }
-        accum += s.len;
+        _cvCircle(ctx, markerPt.x, markerPt.y, 5, '#7b2020', 0.85, INK_DARK, 1.5, 0.8);
+        _cvCircle(ctx, markerPt.x, markerPt.y, 10, null, 0, 'rgba(196,149,58,0.3)', 1.8, 0.5);
     }
 
     ctx.setLineDash([]);
     ctx.restore();
-
-    // Complete
-    if (t >= 1) {
-        var cb = ts.onComplete;
-        _cvTravelState = null;
-        if (cb) cb();
-    }
 }
 
 // ═══════════════════════════════════════════════════════

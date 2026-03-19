@@ -786,35 +786,9 @@ function toggleLegendExpand() {
     }
 }
 
-// ── Long-press path preview (500ms hold shows BFS path, release clears) ──
+// ── Long-press tooltip (handled by canvas click handler) ──
 function setupLongPress() {
-    const vp = document.getElementById('map-viewport');
-    if (!vp) return;
-    let _lpTimer = null, _lpStartX = 0, _lpStartY = 0;
-
-    function _clearTooltip() {
-        document.querySelectorAll('.lp-tooltip').forEach(t => t.remove());
-    }
-
-    vp.addEventListener('pointerdown', e => {
-        const loc = e.target.closest?.('.loc-node');
-        if (!loc) return;
-        const locId = loc.getAttribute('data-loc');
-        if (!locId || locId === S.currentLoc) return;
-        _lpStartX = e.clientX; _lpStartY = e.clientY;
-        _lpTimer = setTimeout(() => {
-            _showQuickTooltip(locId, e.clientX, e.clientY);
-            _haptic('tap');
-        }, 500);
-    });
-    vp.addEventListener('pointermove', e => {
-        if (_lpTimer) {
-            const dx = e.clientX - _lpStartX, dy = e.clientY - _lpStartY;
-            if (dx * dx + dy * dy > 400) { clearTimeout(_lpTimer); _lpTimer = null; }
-        }
-    }, { passive: true });
-    vp.addEventListener('pointerup', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearTooltip(); });
-    vp.addEventListener('pointercancel', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearTooltip(); });
+    // No-op: long-press is now handled in setupCanvasClickHandler
 }
 
 function _showQuickTooltip(locId, cx, cy) {
@@ -1091,79 +1065,85 @@ if (document.readyState === 'loading') {
 }
 
 // ═══════════════════════════════════════════════════════
-// CANVAS CLICK HANDLER (replaces SVG pointer events)
+// CANVAS CLICK HANDLER (replaces SVG pointer events + long-press tooltip)
 // ═══════════════════════════════════════════════════════
 
 function setupCanvasClickHandler() {
     var canvas = document.getElementById('map-canvas');
-    if (!canvas) return;
+    if (\!canvas) return;
 
-    canvas.addEventListener('click', function(e) {
-        // Convert click coords to canvas space
-        var rect = canvas.getBoundingClientRect();
-        var scaleX = canvas.width / rect.width;
-        var scaleY = canvas.height / rect.height;
-        var cx = (e.clientX - rect.left) * scaleX;
-        var cy = (e.clientY - rect.top) * scaleY;
+    var _lpTimer = null, _lpStartX = 0, _lpStartY = 0, _lpFired = false;
 
-        // Account for pan/zoom transform on map-wrapper
-        var wrapper = document.getElementById('map-wrapper');
-        if (wrapper) {
-            // Get the current transform
-            var zoom = S.zoom || 1;
-            var panX = S.panX || 0;
-            var panY = S.panY || 0;
-            // The wrapper is transformed: translate(panX, panY) scale(zoom)
-            // The canvas is inside the wrapper, so click coords in viewport space
-            // need to be converted to canvas (map) space
-            var vpRect = document.getElementById('map-viewport').getBoundingClientRect();
-            var mapX = (e.clientX - vpRect.left - panX) / zoom;
-            var mapY = (e.clientY - vpRect.top - panY) / zoom;
-            cx = mapX;
-            cy = mapY;
+    function _clearTooltip() {
+        document.querySelectorAll('.lp-tooltip').forEach(function(t) { t.remove(); });
+    }
+
+    function _coordsToMap(e) {
+        var zoom = S.zoom || 1, panX = S.panX || 0, panY = S.panY || 0;
+        var vpRect = document.getElementById('map-viewport').getBoundingClientRect();
+        return {
+            x: (e.clientX - vpRect.left - panX) / zoom,
+            y: (e.clientY - vpRect.top - panY) / zoom
+        };
+    }
+
+    // Pointer down: start long-press timer
+    canvas.addEventListener('pointerdown', function(e) {
+        _lpFired = false;
+        _lpStartX = e.clientX;
+        _lpStartY = e.clientY;
+        var pt = _coordsToMap(e);
+        if (typeof cvHitTest \!== 'function') return;
+        var locId = cvHitTest(pt.x, pt.y);
+        if (\!locId || locId === S.currentLoc) return;
+
+        _lpTimer = setTimeout(function() {
+            _lpFired = true;
+            _showQuickTooltip(locId, e.clientX, e.clientY);
+            if (typeof _haptic === 'function') _haptic('tap');
+            // Auto-hide tooltip after 2.5s
+            setTimeout(_clearTooltip, 2500);
+        }, 300);
+    });
+
+    // Pointer move: cancel if finger moved > 20px, update cursor on desktop
+    canvas.addEventListener('pointermove', function(e) {
+        if (_lpTimer) {
+            var dx = e.clientX - _lpStartX, dy = e.clientY - _lpStartY;
+            if (dx * dx + dy * dy > 400) {
+                clearTimeout(_lpTimer);
+                _lpTimer = null;
+            }
         }
-
-        if (typeof cvHitTest === 'function') {
-            var locId = cvHitTest(cx, cy);
-            if (locId) {
-                handleLocationTap(locId);
+        // Desktop cursor change
+        if (e.pointerType === 'mouse') {
+            var pt = _coordsToMap(e);
+            if (typeof cvHitTest === 'function') {
+                var locId = cvHitTest(pt.x, pt.y);
+                canvas.style.cursor = locId ? 'pointer' : '';
             }
         }
     });
 
-    // Cursor change on mousemove
-    canvas.addEventListener('mousemove', function(e) {
-        var wrapper = document.getElementById('map-wrapper');
-        var zoom = S.zoom || 1;
-        var panX = S.panX || 0;
-        var panY = S.panY || 0;
-        var vpRect = document.getElementById('map-viewport').getBoundingClientRect();
-        var mapX = (e.clientX - vpRect.left - panX) / zoom;
-        var mapY = (e.clientY - vpRect.top - panY) / zoom;
-
+    // Pointer up: if long-press fired, just clear; otherwise treat as tap
+    canvas.addEventListener('pointerup', function(e) {
+        clearTimeout(_lpTimer);
+        _lpTimer = null;
+        if (_lpFired) {
+            _lpFired = false;
+            return;
+        }
+        // Short tap - handle location tap
+        var pt = _coordsToMap(e);
         if (typeof cvHitTest === 'function') {
-            var locId = cvHitTest(mapX, mapY);
-            canvas.style.cursor = locId ? 'pointer' : '';
+            var locId = cvHitTest(pt.x, pt.y);
+            if (locId) handleLocationTap(locId);
         }
     });
+
+    canvas.addEventListener('pointercancel', function() {
+        clearTimeout(_lpTimer);
+        _lpTimer = null;
+        _lpFired = false;
+    });
 }
-function setupCanvasClickHandler(){
-var canvas=document.getElementById('map-canvas');
-if(!canvas)return;
-canvas.addEventListener('click',function(e){
-var wrapper=document.getElementById('map-wrapper');
-var zoom=S.zoom||1;var panX=S.panX||0;var panY=S.panY||0;
-var vpRect=document.getElementById('map-viewport').getBoundingClientRect();
-var mapX=(e.clientX-vpRect.left-panX)/zoom;
-var mapY=(e.clientY-vpRect.top-panY)/zoom;
-if(typeof cvHitTest==='function'){
-var locId=cvHitTest(mapX,mapY);
-if(locId)handleLocationTap(locId);}});
-canvas.addEventListener('mousemove',function(e){
-var zoom=S.zoom||1;var panX=S.panX||0;var panY=S.panY||0;
-var vpRect=document.getElementById('map-viewport').getBoundingClientRect();
-var mapX=(e.clientX-vpRect.left-panX)/zoom;
-var mapY=(e.clientY-vpRect.top-panY)/zoom;
-if(typeof cvHitTest==='function'){
-var locId=cvHitTest(mapX,mapY);
-canvas.style.cursor=locId?'pointer':'';}});}
