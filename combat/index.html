@@ -30,6 +30,7 @@
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
             document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/motion.js?v=' + v + '"><\/script>');
     </script>
@@ -124,7 +125,7 @@
         </div>
     </div>
 
-    <!-- Loading controller (narrative tips + min load) -->
+    <!-- Loading controller -->
     <script>
     (function() {
         var TIPS = [
@@ -145,61 +146,10 @@
             '⚔️ Dica: Habilidades de classe têm usos limitados — use com sabedoria.',
             '🛡️ Dica: Resistência a dano reduz o dano recebido pela metade.',
         ];
-        var tipEl = document.getElementById('loading-tip');
-        var progressEl = document.getElementById('loading-progress');
-        var overlay = document.getElementById('combatLoading');
-        var tipIndex = Math.floor(Math.random() * TIPS.length);
-        if (tipEl) tipEl.textContent = TIPS[tipIndex];
-        var _tipInterval;
-        var _loadStart = Date.now();
-        var MIN_LOAD_MS = window.VALDORIA_MIN_LOAD_MS || 5000;
-        var _progress = 0;
-
-        var _progressTimer = setInterval(function() {
-            _progress += (90 - _progress) * 0.08;
-            if (progressEl) progressEl.style.width = _progress + '%';
-        }, 200);
-
-        _tipInterval = setInterval(function() {
-            tipIndex = (tipIndex + 1) % TIPS.length;
-            if (tipEl) {
-                tipEl.classList.add('tip-exit');
-                setTimeout(function() {
-                    tipEl.textContent = TIPS[tipIndex];
-                    tipEl.classList.remove('tip-exit');
-                    tipEl.classList.add('tip-enter');
-                    setTimeout(function() { tipEl.classList.remove('tip-enter'); }, 350);
-                }, 300);
-            }
-        }, 5000);
-
-        window._combatLoadingCtrl = {
-            hide: function() {
-                clearInterval(_tipInterval);
-                clearInterval(_progressTimer);
-                if (!overlay || overlay.classList.contains('hidden')) return;
-                var elapsed = Date.now() - _loadStart;
-                var remaining = MIN_LOAD_MS - elapsed;
-                if (remaining > 0) {
-                    setTimeout(function() { window._combatLoadingCtrl.hide(); }, remaining);
-                    return;
-                }
-                if (progressEl) progressEl.style.width = '100%';
-                var waves = overlay.querySelectorAll('.mc-completion-wave');
-                waves.forEach(function(w) { w.classList.add('active'); });
-                try {
-                    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-                        Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
-                    }
-                } catch(_) {}
-                setTimeout(function() {
-                    overlay.classList.add('exit-cinematic');
-                    setTimeout(function() {
-                        overlay.classList.add('hidden');
-                    }, 950);
-                }, 150);
-            }
-        };
+        window._combatLoadingCtrl = ValdoriaLoadingController({
+            overlayId: 'combatLoading',
+            tips: TIPS
+        });
     })();
     </script>
 
