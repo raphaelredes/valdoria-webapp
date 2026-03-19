@@ -1,6 +1,7 @@
 (function(){"use strict";var tg=window.Telegram&&Telegram.WebApp;if(!tg)return;try{tg.ready();}catch(_){}
 try{tg.expand();}catch(_){}
 try{tg.disableVerticalSwipes();}catch(_){}
+try{tg.enableClosingConfirmation();}catch(_){}
 var BG='#2a2420';try{tg.setHeaderColor(BG);}catch(_){}
 try{tg.setBackgroundColor(BG);}catch(_){}
 function applySafeArea(){var root=document.documentElement;try{var csa=tg.contentSafeAreaInset;if(csa){root.style.setProperty('--tg-safe-top',(csa.top||0)+'px');root.style.setProperty('--tg-safe-bottom',(csa.bottom||0)+'px');root.style.setProperty('--tg-safe-left',(csa.left||0)+'px');root.style.setProperty('--tg-safe-right',(csa.right||0)+'px');}}catch(_){}
