@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://telegra.ph https://i.ibb.co; media-src 'self'; connect-src 'self' https: wss:; frame-src 'none'; object-src 'none'; base-uri 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a2420">
+    <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../shared/fonts.css">
+    <title>Guilda - Lendas de Valdoria</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
+document.write('<link rel="stylesheet" href="../shared/tabs.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="guild.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/image-popup.css?v=' + v + '">');
+    </script>
+    <script>
+    document.write('<script src="../shared/font-apply.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/bounce-back.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
+document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
+    </script>
+</head>
+
+<body>
+
+    <!-- Loading overlay (backpack opening) -->
+    <div id="loadingOverlay" class="loading-overlay" aria-busy="true">
+        <!-- Guild loading particles -->
+            <div class="bp-glow"></div>
+            <svg class="bp-icon" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Strap -->
+                <path d="M35 10 Q35 2 50 2 Q65 2 65 10" stroke="rgba(196,149,58,0.5)" stroke-width="2" fill="none"/>
+                <!-- Backpack body -->
+                <rect x="20" y="25" width="60" height="70" rx="8" fill="rgba(80,50,25,0.6)" stroke="rgba(196,149,58,0.4)" stroke-width="1.5"/>
+                <!-- Flap (opens) -->
+                <path class="bp-flap" d="M20 40 Q20 25 50 20 Q80 25 80 40" fill="rgba(100,60,30,0.7)" stroke="rgba(196,149,58,0.5)" stroke-width="1.5"/>
+                <!-- Buckle -->
+                <rect x="44" y="42" width="12" height="8" rx="2" fill="rgba(196,149,58,0.3)" stroke="rgba(196,149,58,0.5)" stroke-width="1"/>
+                <!-- Pocket -->
+                <rect x="32" y="60" width="36" height="20" rx="4" fill="rgba(60,40,20,0.5)" stroke="rgba(196,149,58,0.2)" stroke-width="1"/>
+                <!-- Golden sparkles (appear when opening) -->
+                <circle class="bp-sparkle s1" cx="40" cy="30" r="2" fill="rgba(196,149,58,0.8)"/>
+                <circle class="bp-sparkle s2" cx="60" cy="28" r="1.5" fill="rgba(196,149,58,0.6)"/>
+                <circle class="bp-sparkle s3" cx="50" cy="22" r="2.5" fill="rgba(196,149,58,0.7)"/>
+                <circle class="bp-sparkle s4" cx="35" cy="25" r="1" fill="rgba(255,220,120,0.8)"/>
+                <circle class="bp-sparkle s5" cx="65" cy="24" r="1.5" fill="rgba(255,220,120,0.6)"/>
+            </svg>
+        </div>
+        <div class="loading-brand">
+            <div class="loading-title">GUILDA</div>
+            <div class="loading-divider"><span class="divider-rune">&#9670;</span></div>
+        </div>
+        <div class="loading-progress-wrap">
+            <div class="loading-progress-track">
+                <div id="loading-progress" class="loading-progress-fill"></div>
+            </div>
+        </div>
+        <div class="loading-text" style="display:none"></div>
+        <div class="loading-tip-area">
+            <div id="loading-tip" class="loading-tip" role="status" aria-live="polite">Abrindo o registro da guilda...</div>
+        </div>
+    </div>
+
+    <!-- Loading controller -->
+    <script>
+    (function() {
+        var TIPS = [
+            'O cheiro de couro e tinta de pergaminho permeia o salao da guilda...',
+            'Aventureiros conversam aos sussurros sobre tesouros escondidos...',
+            'O quadro de missoes esta repleto de pedidos de ajuda...',
+            'Armas e escudos adornam as paredes do salao como trofeus...',
+            'Uma lareira crepita no centro, aquecendo os bravos aventureiros...',
+            'O registro da guilda guarda historias de incontaveis jornadas...',
+            'Mapas antigos e diarios de campo cobrem a grande mesa central...',
+            'O mestre da guilda examina os contratos com olhar atento...',
+        ];
+        window._guildLoadingCtrl = ValdoriaLoadingController({
+            overlayId: 'loading',
+            tips: TIPS
+        });
+    })();
+    </script>
+
+    <div class="guild-header">
+        <h1 class="guild-title">GUILDA DE AVENTUREIROS</h1>
+        <div class="guild-ornament">&#x2E31; &#x2726; &#x2E31;</div>
+        <div id="guild-player-info" class="guild-player-info"></div>
+    </div>
+
+    <div class="guild-tabs v-tabs">
+        <button class="v-tab active" data-tab="salao">&#x1F3DB;&#xFE0F; Grupo</button>
+        <button class="v-tab" data-tab="recrutar">&#x1F4DC; Recrutar</button>
+        <button class="v-tab" data-tab="missoes">&#x1F4CB; Quadro</button>
+        <button class="v-tab" data-tab="npcs">&#x1F9D3; NPCs</button>
+        <button class="v-tab" data-tab="treinar">&#x1F4DA; Treinar</button>
+    </div>
+
+    <div id="guild-content" class="guild-content">
+        <div id="tab-salao" class="guild-panel active">
+            <div id="guild-party-list"></div>
+        </div>
+        <div id="tab-recrutar" class="guild-panel" style="display:none">
+            <div id="guild-recruit-filters"></div>
+            <div id="guild-recruit-list"></div>
+            <div id="guild-recruit-pagination"></div>
+        </div>
+        <div id="tab-missoes" class="guild-panel" style="display:none">
+            <div id="guild-quest-board"></div>
+            <div id="guild-bounties"></div>
+        </div>
+        <div id="tab-npcs" class="guild-panel" style="display:none">
+            <div id="guild-npc-list"></div>
+        </div>
+        <div id="tab-treinar" class="guild-panel" style="display:none">
+            <div id="guild-training"></div>
+        </div>
+    </div>
+
+    <div id="guild-detail-overlay" class="guild-detail-overlay sub-screen" style="display:none">
+        <div id="guild-detail-content" class="guild-detail-content"></div>
+        <button class="guild-detail-close" id="guildDetailClose">&#x2190; Voltar</button>
+    </div>
+
+    <button id="immersive-toggle" class="immersive-toggle" style="display:none"
+        aria-label="Recolher menu">&middot;</button>
+    <div id="bottom-panel" class="bottom-panel" style="display:none">
+        <div id="guild-actions" class="guild-actions"></div>
+        <div class="nav-footer">
+            <button class="nav-btn" onclick="guildNavBack()">&#x21A9; Voltar</button>
+            <button class="nav-btn" onclick="guildNavSheet()">&#x1F4DC; Ficha</button>
+            <button class="nav-btn" onclick="guildNavCity()">&#x1F3D8;&#xFE0F; Cidade</button>
+        </div>
+    </div>
+    <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
+
+    <script>
+        var v = Date.now();
+        document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
+        document.write('<script src="guild-loading.js?v=' + v + '"><\/script>');
+        document.write('<script src="guild-core.js?v=' + v + '"><\/script>');
+        document.write('<script src="guild-party.js?v=' + v + '"><\/script>');
+        document.write('<script src="guild-recruit.js?v=' + v + '"><\/script>');
+        document.write('<script src="guild-quests.js?v=' + v + '"><\/script>');
+        document.write('<script src="guild-npcs.js?v=' + v + '"><\/script>');
+        document.write('<script src="guild-training.js?v=' + v + '"><\/script>');
+    </script>
+<script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("GUILD")</script>
+</body>
+
+</html>
