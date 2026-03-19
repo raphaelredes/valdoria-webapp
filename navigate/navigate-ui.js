@@ -250,6 +250,20 @@ function handleLocationTap(locId) {
         biomeEl.innerHTML = biomeHtml;
         biomeEl.style.color = biomeColors[locData.b] || '#a09484';
     }
+    // Difficult terrain tag (DMG p.106)
+    var dtTag = document.getElementById('info-terrain-tag');
+    if (!dtTag) {
+        dtTag = document.createElement('div');
+        dtTag.id = 'info-terrain-tag';
+        dtTag.className = 'info-terrain-tag';
+        biomeEl.parentNode.insertBefore(dtTag, biomeEl.nextSibling);
+    }
+    if (locData.dt && !isKnownUnmapped) {
+        dtTag.innerHTML = '⛰️ Terreno Difícil (×2 turnos)';
+        dtTag.style.display = '';
+    } else {
+        dtTag.style.display = 'none';
+    }
 
     // Description
     if (isExplored) {
