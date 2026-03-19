@@ -7,7 +7,7 @@ if(endpoint.includes('/reroll')||endpoint.includes('/fight')||endpoint.includes(
 const resp=await fetchT(`${API_BASE}${endpoint}`,{method:'POST',headers,body:JSON.stringify({user_id:USER_ID,...body}),});if(resp.status===401||resp.status===403){console.error('[PROLOGUE] Auth error:',resp.status);const tg=window.Telegram?.WebApp;if(tg?.sendData){tg.sendData(JSON.stringify({action:'webapp_error_close',webapp:'PROLOGUE',reason:resp.status===401?'session_expired':'invalid_init_data',}));setTimeout(function(){if(tg.close)tg.close();},1000);}
 throw new Error('session_expired');}
 if(!resp.ok){const errData=await resp.json().catch(()=>({}));throw new Error(errData.error||`HTTP ${resp.status}`);}
-return resp.json();}
+return resp.json().catch(function(){throw new Error('Resposta inválida do servidor');});}
 var track=document.getElementById('track');function addScreen(html){const div=document.createElement('div');div.className='screen fade-in';div.innerHTML=html;track.appendChild(div);return track.children.length-1;}
 function goToScreen(idx){screenIdx=idx;track.style.transform=`translateX(-${idx * 100}%)`;}
 function nextScreen(html){const idx=addScreen(html);setTimeout(()=>goToScreen(idx),50);}

@@ -1110,9 +1110,9 @@
                     document.body.style.paddingBottom = (collapsed ? 48 : (panel.offsetHeight + 12)) + 'px';
                 });
             }
-            applyState(localStorage.getItem('valdoria_immersive') === 'true');
-            toggle.addEventListener('click', () => { localStorage.setItem('valdoria_immersive', 'true'); applyState(true); });
-            restore.addEventListener('click', () => { localStorage.setItem('valdoria_immersive', 'false'); applyState(false); });
+            applyState(localStorage.getItem('valdoria_immersive') === '1');
+            toggle.addEventListener('click', () => { localStorage.setItem('valdoria_immersive', '1'); applyState(true); });
+            restore.addEventListener('click', () => { localStorage.setItem('valdoria_immersive', '0'); applyState(false); });
         }
         const _vBg = getComputedStyle(document.documentElement)
             .getPropertyValue('--v-bg').trim() || '#2a2420';

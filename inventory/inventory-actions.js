@@ -23,7 +23,8 @@ function showDiscardConfirm(name){const it=getItemData(name);let html='<div clas
 function doEquip(name,slot){_invalidateEquipCache();const it=getItemData(name);if(!it||!it.s){console.warn('[INVENTORY] doEquip: invalid item or no slot',name);return;}
 const targetSlot=slot||resolveSlot(it);if(!targetSlot){console.warn('[INVENTORY] doEquip: could not resolve slot',name);return;}
 if(!checkProficiency(it,activeTarget,name)){toast(`${vi('lock', 13)} Sem proficiência`,'err');return;}
-const eq=activeTarget==='player'?localEq:(localAllyEq[activeTarget]||{});if((it.t||[]).includes('two_handed')&&targetSlot==='main_hand'){if(eq.off_hand){addToLocalInv(eq.off_hand);if(activeTarget==='player'){returnLocalGems('off_hand');delete localRunes['off_hand'];}
+const eq=activeTarget==='player'?localEq:(localAllyEq[activeTarget]||{});for(const [existingSlot, existingItem] of Object.entries(eq)){if(existingItem===name&&existingSlot!==targetSlot){toast(`${vi('warn', 13)} Este item já está equipado em ${SLOT_NAMES[existingSlot]||existingSlot}`,'warn');return;}}
+if((it.t||[]).includes('two_handed')&&targetSlot==='main_hand'){if(eq.off_hand){addToLocalInv(eq.off_hand);if(activeTarget==='player'){returnLocalGems('off_hand');delete localRunes['off_hand'];}
 eq.off_hand=null;}}else if(targetSlot==='off_hand'){const mh=eq.main_hand;if(mh){const mhData=getItemData(mh);if((mhData?.t||[]).includes('two_handed')){addToLocalInv(mh);if(activeTarget==='player'){returnLocalGems('main_hand');delete localRunes['main_hand'];}
 eq.main_hand=null;}}}
 const old=eq[targetSlot];if(old){addToLocalInv(old);if(activeTarget==='player'){returnLocalGems(targetSlot);delete localRunes[targetSlot];}}
