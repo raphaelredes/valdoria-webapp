@@ -19,7 +19,9 @@ hintEl.textContent='Feche o mini app e selecione seu personagem novamente.';else
 hintEl.textContent='Feche o mini app e selecione um personagem novamente.';else if(msg.indexOf('Resposta inválida')>=0)
 hintEl.textContent='Resposta inesperada do servidor. O erro foi registrado e será analisado.';else
 hintEl.textContent='';}
-_updateNetworkBadge();var loadIds=['loading','loadingOverlay'];for(var li=0;li<loadIds.length;li++){var loadEl=document.getElementById(loadIds[li]);if(loadEl){loadEl.style.display='none';loadEl.classList.remove('active');}}
+_updateNetworkBadge();var _minErrorDelay=window.VALDORIA_MIN_ERROR_DELAY||2500;var loadIds=['loading','loadingOverlay'];var loadingVisible=false;for(var _li=0;_li<loadIds.length;_li++){var _lEl=document.getElementById(loadIds[_li]);if(_lEl&&_lEl.style.display!=='none'&&!_lEl.classList.contains('hidden')){loadingVisible=true;}}
+var elapsed=Date.now()-_sessionStartTime;if(loadingVisible&&elapsed<_minErrorDelay&&!window.__valdoria_error_pending){window.__valdoria_error_pending=true;setTimeout(function(){window.__valdoria_error_pending=false;showError(msg,err);},_minErrorDelay-elapsed);return;}
+window.__valdoria_error_pending=false;for(var li2=0;li2<loadIds.length;li2++){var loadEl2=document.getElementById(loadIds[li2]);if(loadEl2){loadEl2.style.display='none';loadEl2.classList.remove('active');}}
 if(_autoRetryTimer){clearInterval(_autoRetryTimer);_autoRetryTimer=null;}
 var hasApi=!!_cfg.apiBase;if(retryBtn){if(hasApi||_cfg.onRetry){retryBtn.style.display='';retryBtn.textContent='Tentar Novamente';retryBtn.disabled=false;retryBtn.onclick=function(){_retryAttempt=0;if(_els.progress){_els.progress.style.transition='none';_els.progress.style.width='0%';}
 _doRetry();};}else{retryBtn.style.display='none';}}
