@@ -1258,7 +1258,17 @@
             // NPC greeting
             const npc = D.npcs.find(n => n.k === activeNpc);
             if (npc && npc.gr) {
-                html += `<div class="npc-greeting">"${esc(npc.gr)}"<br><span style="font-size:11px;color:var(--v-text-dim);">— ${esc(npc.n)}, ${esc(npc.r || '')}</span></div>`;
+                let greetHtml = `<div class="npc-greeting">"${esc(npc.gr)}"<br><span style="font-size:11px;color:var(--v-text-dim);">— ${esc(npc.n)}, ${esc(npc.r || '')}`;
+                if (npc.att) greetHtml += ` • ${esc(npc.att)}`;
+                if (npc.pm && npc.pm !== 0) {
+                    const sign = npc.pm > 0 ? '+' : '';
+                    greetHtml += ` <span style="color:${npc.pm < 0 ? 'var(--v-hp-high)' : 'var(--v-hp-crit)'};font-weight:600;">(${sign}${npc.pm}% preços)</span>`;
+                }
+                greetHtml += `</span></div>`;
+                if (npc.hg === 1) {
+                    greetHtml += `<button class="haggle-btn" onclick="doHaggle('${esc(npc.k)}')">🎲 Pechinchar</button>`;
+                }
+                html += greetHtml;
             }
 
             if (!npc || !npc.items.length) {
@@ -1404,9 +1414,10 @@
             </div>`;
             }
 
+            html += renderBuybackSection();
             html += '<div class="sell-list">';
             items.forEach(inv => {
-                const sellPrice = Math.floor(inv.v * mul);
+                const sellPrice = Math.max(1, Math.floor(inv.v * getCategoryMul(inv.t)));
                 const selected = !!sellCart[inv.id];
                 const qty = sellCart[inv.id]?.qty || 0;
 
@@ -1547,8 +1558,14 @@
                 if (item.d.hb) html += dRow('HP Bônus', `+${item.d.hb}`);
                 if (item.d.mb) html += dRow('MP Bônus', `+${item.d.mb}`);
             }
-            html += dRow('Preço', `${item.p} GP`);
+            if (npc.pm && npc.pm !== 0) {
+                const baseP = Math.round(item.p / (1 + npc.pm / 100));
+                html += dRow('Preço', `<s style="color:var(--v-text-dim)">${baseP}</s> ${item.p} GP <span style="color:${npc.pm < 0 ? 'var(--v-hp-high)' : 'var(--v-hp-crit)'}">(${npc.pm > 0 ? + : }${npc.pm}%)</span>`);
+            } else {
+                html += dRow('Preço', `${item.p} GP`);
+            }
             html += dRow('Estoque', `${stock}/${item.mx}`);
+            html += getComparisonHtml(item);
 
             // Quantity selector
             const maxBuy = Math.min(stock, item.p > 0 ? Math.floor(localGold / item.p) : 0);
@@ -1728,6 +1745,10 @@
             for (const [itemId, entry] of Object.entries(buyCart)) {
                 ops.push({ t: 'buy', npc: entry.npc, item: itemId, qty: entry.qty });
             }
+            // Then buybacks
+            if (buybackOps && buybackOps.length) {
+                buybackOps.forEach(function(bb) { ops.push(bb); });
+            }
 
             if (!ops.length) { _txSending = false; return; }
 
@@ -1849,6 +1870,127 @@
                 stats: stats,
                 type: 'item'
             });
+        }
+
+        // ── Haggle ──
+        async function doHaggle(npcKey) {
+            const btn = document.querySelector('.haggle-btn');
+            if (btn) btn.disabled = true;
+            const token = _urlToken;
+            const _apiBase = _urlApi;
+            const _apiUid = _urlUid;
+            if (!_apiBase || !token || !_apiUid) {
+                toast('Sessão expirada', 'error');
+                return;
+            }
+            try {
+                const h = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+                if (tg && tg.initData) h['X-Telegram-Init-Data'] = tg.initData;
+                const resp = await fetchT(_apiBase + '/api/market/haggle', {
+                    method: 'POST', headers: h,
+                    body: JSON.stringify({ user_id: parseInt(_apiUid), token: token, npc_key: npcKey })
+                });
+                if (!resp.ok) { toast('Erro ao pechinchar', 'error'); return; }
+                const r = await resp.json();
+                showHaggleResult(npcKey, r);
+            } catch (e) {
+                console.error('[MARKET] Haggle failed:', e);
+                toast('Erro de conexão', 'error');
+            }
+        }
+
+        function showHaggleResult(npcKey, r) {
+            const npc = D.npcs.find(n => n.k === npcKey);
+            if (!npc) return;
+            npc.hg = 0;
+            let html = '<div class="modal-handle"></div>';
+            html += '<div class="modal-title">🎲 Pechinchar</div>';
+            html += '<div class="haggle-roll">';
+            html += '<div class="hr-dice">d20(' + r.roll + ') + Mod(' + (r.mod >= 0 ? '+' : '') + r.mod + ') = ' + r.total + '</div>';
+            html += '<div class="hr-detail">DC ' + r.dc + ' (' + (npc.att || 'Indiferente') + ')</div>';
+            html += '</div>';
+            html += '<div class="haggle-result ' + (r.success ? 'success' : (r.discount < 0 ? 'crit-fail' : 'fail')) + '">';
+            html += r.message;
+            html += '</div>';
+            if (r.success && r.discount > 0) {
+                npc.items.forEach(function(it) {
+                    it.p = Math.max(1, Math.round(it.p * (1 - r.discount / 100)));
+                });
+            } else if (r.discount < 0) {
+                npc.items.forEach(function(it) {
+                    it.p = Math.round(it.p * (1 + Math.abs(r.discount) / 100));
+                });
+            }
+            html += '<div class="detail-actions" style="margin-top:12px;">';
+            html += '<button class="btn-buy" onclick="closeModal();renderTab();">Continuar</button>';
+            html += '</div>';
+            showModal(html);
+        }
+
+        function getCategoryMul(tags) {
+            if (!D.sm) return D.smd || 0.5;
+            let best = D.smd || 0.5;
+            if (!tags) return best;
+            for (let i = 0; i < tags.length; i++) {
+                const m = D.sm[tags[i]];
+                if (m !== undefined && m > best) best = m;
+            }
+            return best;
+        }
+
+        function renderBuybackSection() {
+            if (!D.bb || !D.bb.length) return '';
+            let html = '<div class="bb-section">';
+            html += '<div class="bb-title">🔄 Recomprar</div>';
+            D.bb.forEach(function(entry, idx) {
+                html += '<div class="bb-row">';
+                html += '<span class="bb-emoji">' + (entry.e || '📦') + '</span>';
+                html += '<span class="bb-name">' + esc(entry.n) + (entry.q > 1 ? ' x' + entry.q : '') + '</span>';
+                html += '<span class="bb-price">' + entry.p + ' GP</span>';
+                html += '<button class="bb-btn" onclick="addBuyback(' + idx + ',' + entry.p + ')">Recomprar</button>';
+                html += '</div>';
+            });
+            html += '</div>';
+            return html;
+        }
+
+        var buybackOps = [];
+        function addBuyback(idx, cost) {
+            if (localGold < cost) { toast('Ouro insuficiente', 'error'); return; }
+            buybackOps.push({ t: 'buyback', idx: idx });
+            localGold -= cost;
+            D.bb.splice(idx, 1);
+            toast('🔄 Item adicionado para recompra', 'ok');
+            renderTab();
+            updateCartBar();
+        }
+
+        function getComparisonHtml(item) {
+            if (!item.d || !item.d.s || !D.eq) return '';
+            var slot = item.d.s;
+            var equipped = D.eq[slot];
+            var html = '<div class="cmp-panel">';
+            html += '<div class="cmp-header">Comparação</div>';
+            function cmpRow(label, newVal, oldVal) {
+                if (!newVal && !oldVal) return '';
+                var nv = newVal || 0, ov = oldVal || 0;
+                var arrow = nv > ov ? '<span class="cmp-arrow up">▲</span>' : (nv < ov ? '<span class="cmp-arrow down">▼</span>' : '<span class="cmp-arrow eq">=</span>');
+                return '<div class="cmp-row"><span class="cmp-label">' + label + '</span><span class="cmp-eq">' + ov + '</span>' + arrow + '<span class="cmp-new">' + nv + '</span></div>';
+            }
+            if (equipped) {
+                html += cmpRow('CA', item.d.ac, equipped.ac);
+                html += cmpRow('Dano', item.d.b, equipped.b);
+                html += cmpRow('HP', item.d.hb, equipped.hb);
+                html += cmpRow('MP', item.d.mb, equipped.mb);
+            } else {
+                html += '<div class="cmp-row" style="color:var(--v-text-dim);font-size:12px;">Slot vazio — upgrade puro</div>';
+                if (item.d.ac) html += cmpRow('CA', item.d.ac, 0);
+                if (item.d.b) html += cmpRow('Dano', item.d.b, 0);
+                if (item.d.hb) html += cmpRow('HP', item.d.hb, 0);
+                if (item.d.mb) html += cmpRow('MP', item.d.mb, 0);
+            }
+            html += '</div>';
+            return html;
         }
 
         // ── Start ──
