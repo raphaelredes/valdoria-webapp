@@ -37,7 +37,7 @@
 
 <body>
     <!-- Loading overlay (magic circle) -->
-    <div id="combatLoading" class="loading-overlay">
+    <div id="combatLoading" class="loading-overlay" aria-busy="true">
         <div class="loading-particles">
             <div class="particle ember p1"></div>
             <div class="particle ember p2"></div>
@@ -120,7 +120,7 @@
             </div>
         </div>
         <div class="loading-tip-area">
-            <div id="loading-tip" class="loading-tip">Preparando para o combate...</div>
+            <div id="loading-tip" class="loading-tip" role="status" aria-live="polite">Preparando para o combate...</div>
         </div>
     </div>
 

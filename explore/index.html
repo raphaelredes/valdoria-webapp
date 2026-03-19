@@ -45,7 +45,7 @@
     </div>
 
     <!-- Loading Screen (magic summoning circle) -->
-    <div id="loading" class="loading-overlay">
+    <div id="loading" class="loading-overlay" aria-busy="true">
         <div class="loading-flash"></div>
         <div class="loading-particles">
             <div class="particle ember p1"></div>
@@ -83,7 +83,7 @@
             <div id="loading-stage" class="loading-stage"></div>
         </div>
         <div class="loading-tip-area">
-            <div id="loading-tip" class="loading-tip">Gerando mapa...</div>
+            <div id="loading-tip" class="loading-tip" role="status" aria-live="polite">Gerando mapa...</div>
         </div>
     </div>
 

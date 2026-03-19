@@ -50,7 +50,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
 
 <body style="background:#2a2420">
     <!-- Loading overlay - hidden until CSS fully parsed -->
-    <div id="loading" class="loading-overlay" style="visibility:hidden">
+    <div id="loading" class="loading-overlay" aria-busy="true" style="visibility:hidden">
         <!-- Floating particles (embers + sparks + elemental) -->
         <div class="loading-particles">
             <div class="particle ember p1"></div>
@@ -162,7 +162,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
 
         <!-- Tip -->
         <div class="loading-tip-area">
-            <div id="loading-tip" class="loading-tip">Preparando sua aventura...</div>
+            <div id="loading-tip" class="loading-tip" role="status" aria-live="polite">Preparando sua aventura...</div>
         </div>
     </div>
 
@@ -420,7 +420,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
             <div class="modal" id="modalContent"></div>
         </div>
         <!-- Loading overlay for inventory operations -->
-        <div id="loadingOverlay" class="loading-overlay hidden">
+        <div id="loadingOverlay" class="loading-overlay hidden" aria-busy="true">
             <div class="loading-text"></div>
         </div>
     </div>
