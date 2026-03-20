@@ -49,7 +49,7 @@
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     body += _renderRewards(d.rewards);
-    if (d.leveled) body += "<div class=\"v-popup-row\" style=\"margin-top:8px\">🎉 <b>Nível acima!</b></div>";
+    if (d.leveled) body += "<div class=\"v-popup-row\" class=\"v-popup-level-up\">🎉 <b>Nível acima!</b></div>";
     vPopup.show({ id: "plaza-event", header: d.title || "Resultado", headerClass: cls, body: body,
       actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: false });
   }
@@ -141,7 +141,7 @@
       body += "<div class=\"v-popup-section-label\">🛒 Itens</div>";
       for (var i = 0; i < d.items.length; i++) {
         var it = d.items[i];
-        var afford = (d.gold != null && it.price > d.gold) ? " style=\"opacity:0.5\"" : "";
+        var afford = (d.gold != null && it.price > d.gold) ? " class=\"v-popup-unaffordable\"" : "";
         body += "<div class=\"v-popup-row\"" + afford + ">";
         body += (it.emoji || "📦") + " " + _esc(it.name) + " — " + it.price + " GP";
         body += "</div>";
@@ -207,7 +207,7 @@
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     if (d.job_name) body += "<div class=\"v-popup-row\">⚒️ " + _esc(d.job_name) + "</div>";
     body += _renderRewards(d.rewards);
-    if (d.leveled) body += "<div class=\"v-popup-row\" style=\"margin-top:8px\">🎉 <b>Nível acima!</b></div>";
+    if (d.leveled) body += "<div class=\"v-popup-row\" class=\"v-popup-level-up\">🎉 <b>Nível acima!</b></div>";
     vPopup.show({ id: "plaza-event", header: d.title || "Trabalho", headerClass: cls, body: body,
       actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" }], closeOnOutside: false });
   }
@@ -246,7 +246,7 @@
           body += "<div class=\"v-popup-section-label\">" + (tier.icon || "") + " " + _esc(tier.label) + "</div>";
           for (var j = 0; j < tier.items.length; j++) {
             var it = tier.items[j];
-            var afford = (!it.affordable) ? " style=\"opacity:0.5\"" : "";
+            var afford = (!it.affordable) ? " class=\"v-popup-unaffordable\"" : "";
             var hint = "";
             if (it.stat_hint) {
               var pct = (typeof it.stat_hint === "string") ? (parseInt(it.stat_hint.replace(/[^0-9]/g, ""), 10) || 50) : 50;
@@ -261,7 +261,7 @@
       if (d.master) {
         body += "<div class=\"v-popup-divider\"></div>";
         body += "<div class=\"v-popup-section-label\">\ud83c\udf0d Mapa Mestre</div>";
-        var mAfford = (!d.master.affordable) ? " style=\"opacity:0.5\"" : "";
+        var mAfford = (!d.master.affordable) ? " class=\"v-popup-unaffordable\"" : "";
         body += "<div class=\"v-popup-row\"" + mAfford + ">\ud83c\udf0d Mapa Mestre \u2014 " + d.master.price + " GP</div>";
       }
     }
