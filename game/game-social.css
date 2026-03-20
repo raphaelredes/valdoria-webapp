@@ -14,7 +14,7 @@
     max-height: 280px;
     overflow-y: auto;
     padding: var(--v-space-sm);
-    background: rgba(0, 0, 0, 0.15);
+    background: rgba(74, 56, 40, 0.12);
     border-radius: var(--v-radius-sm);
     margin-bottom: var(--v-space-sm);
 }
@@ -22,7 +22,7 @@
 /* 3. Chat Messages */
 .social-msg {
     font-size: var(--v-font-base);
-    line-height: 1.4;
+    line-height: 1.5;
     padding: var(--v-space-xs) 0;
     border-bottom: 1px solid rgba(74, 56, 40, 0.15);
     color: var(--v-text);
@@ -51,12 +51,12 @@
     margin-bottom: var(--v-space-sm);
 }
 .social-emote-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--v-radius);
     background: var(--v-bg-raised);
     border: 1px solid var(--v-border);
-    font-size: 18px;
+    font-size: var(--v-font-2xl);
     cursor: pointer;
     transition: background var(--v-transition-base);
 }
@@ -88,13 +88,13 @@
     border-color: var(--v-gold);
 }
 .social-send-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--v-radius-sm);
     background: linear-gradient(135deg, var(--v-gold-dim), var(--v-gold));
     border: none;
     color: var(--v-bg);
-    font-size: 16px;
+    font-size: var(--v-font-xl);
     font-weight: 700;
     cursor: pointer;
 }
@@ -113,7 +113,7 @@
     border: 1px solid var(--v-border);
 }
 .social-player-icon {
-    font-size: 20px;
+    font-size: var(--v-font-2xl);
     flex-shrink: 0;
 }
 .social-player-info {
@@ -135,12 +135,12 @@
     color: var(--v-text-dim);
 }
 .social-interact-btn {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--v-radius-sm);
     background: var(--v-bg-card);
     border: 1px solid var(--v-border);
-    font-size: 16px;
+    font-size: var(--v-font-xl);
     cursor: pointer;
     flex-shrink: 0;
 }
@@ -163,27 +163,27 @@
     color: var(--v-text);
 }
 .social-request-icon {
-    font-size: 18px;
+    font-size: var(--v-font-2xl);
     margin-right: var(--v-space-xs);
 }
 .social-request-age {
     display: block;
     font-size: var(--v-font-xs);
     color: var(--v-text-dim);
-    margin-top: 2px;
+    margin-top: var(--v-space-xs);
 }
 .social-request-actions {
     display: flex;
     gap: var(--v-space-xs);
     flex-shrink: 0;
 }
-.social-req-btn {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: unset !important;
-    padding: 0 !important;
-    font-size: 16px !important;
-    border-radius: var(--v-radius-sm) !important;
+.v-popup-body .social-req-btn {
+    width: 44px;
+    height: 44px;
+    min-width: unset;
+    padding: 0;
+    font-size: var(--v-font-xl);
+    border-radius: var(--v-radius-sm);
 }
 /* 8. NPC Relationship Cards (List View) */
 .social-npc {
@@ -202,7 +202,7 @@
     background: var(--v-bg-card);
 }
 .social-npc-mood {
-    font-size: 20px;
+    font-size: var(--v-font-2xl);
     flex-shrink: 0;
 }
 .social-npc-info {
@@ -223,14 +223,14 @@
     width: 50px;
     height: var(--v-bar-height-sm);
     background: rgba(0, 0, 0, 0.3);
-    border-radius: 3px;
+    border-radius: var(--v-radius-xs, 4px);
     overflow: hidden;
     flex-shrink: 0;
 }
 .social-npc-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--v-gold-dim), var(--v-gold-light));
-    border-radius: 3px;
+    border-radius: var(--v-radius-xs, 4px);
     transition: width var(--v-transition-base);
 }
 .social-npc-aff {
@@ -270,18 +270,18 @@
     width: 80px;
     height: var(--v-bar-height-sm);
     background: rgba(0, 0, 0, 0.3);
-    border-radius: 3px;
+    border-radius: var(--v-radius-xs, 4px);
     overflow: hidden;
 }
 .social-stat-bar-fill {
     height: 100%;
-    border-radius: 3px;
+    border-radius: var(--v-radius-xs, 4px);
 }
 .social-stat-bar-fill--aff {
     background: linear-gradient(90deg, var(--v-gold-dim), var(--v-gold-light));
 }
 .social-stat-bar-fill--patience {
-    background: linear-gradient(90deg, #4a8b5c, #81c784);
+    background: linear-gradient(90deg, var(--v-success, #4caf50), var(--v-success-light, #66dd88));
 }
 .social-emo-row {
     display: flex;
@@ -289,19 +289,19 @@
     align-items: center;
     font-size: var(--v-font-xs);
     color: var(--v-text-dim);
-    padding: 2px 0;
+    padding: var(--v-space-xs) 0;
 }
 .social-emo-bar {
     width: 60px;
     height: var(--v-bar-height-mini);
     background: rgba(0, 0, 0, 0.3);
-    border-radius: 2px;
+    border-radius: var(--v-radius-xs, 4px);
     overflow: hidden;
 }
 .social-emo-bar-fill {
     height: 100%;
     background: var(--v-gold);
-    border-radius: 2px;
+    border-radius: var(--v-radius-xs, 4px);
 }
 .social-memory {
     font-size: var(--v-font-xs);
@@ -343,15 +343,15 @@
 /* 12. Inbox Badge in Tab */
 .social-tab-badge {
     display: inline-block;
-    background: #c0392b;
-    color: #fff;
-    font-size: 9px;
+    background: var(--v-danger, #e74c3c);
+    color: var(--v-parchment, #f5f0e0);
+    font-size: var(--v-font-xs);
     font-weight: 700;
     min-width: 14px;
     height: 14px;
     line-height: 14px;
     text-align: center;
-    border-radius: 7px;
-    margin-left: 2px;
+    border-radius: var(--v-radius-sm);
+    margin-left: var(--v-space-xs);
     vertical-align: middle;
 }

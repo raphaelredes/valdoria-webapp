@@ -11,10 +11,11 @@ var _pollTimer = null;
 var _detailNpc = null;
 var _detailData = null;
 var _detailLoading = false;
+var _sending = false;
 
 function _esc(t) {
     if (!t) return '';
-    return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function _ago(ts) {
@@ -50,6 +51,7 @@ function _startPoll() {
             if (!data || !data.messages) return;
             if (data.messages.length > 0 && _cachedData && _cachedData.chat) {
                 _cachedData.chat.messages = _cachedData.chat.messages.concat(data.messages);
+                if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
                 if (data.msg_count !== undefined) _cachedData.chat.msg_count = data.msg_count;
                 _renderChatMessages();
             }
@@ -111,7 +113,7 @@ function _buildChatMessages() {
             if (m.time) h += '[' + _esc(m.time) + '] ';
             if (m.icon) h += m.icon + ' ';
             h += _esc(m.name);
-            if (m.level) h += ' Lv' + m.level;
+            if (m.level) h += ' Nv' + m.level;
             h += '</span> <span class="social-msg-text">' + _esc(m.text) + '</span></div>';
         }
     }
@@ -133,7 +135,7 @@ function _renderOnline() {
         var p = players[i];
         var nd = (p.badge ? p.badge + ' ' : '') + _esc(p.name);
         h += '<div class="social-player"><span class="social-player-icon">' + (p.class_icon || '\ud83d\udc64') + '</span>';
-        h += '<span class="social-player-info"><b>' + nd + '</b> <small>Lv.' + (p.level || '?') + '</small>';
+        h += '<span class="social-player-info"><b>' + nd + '</b> <small>Nv.' + (p.level || '?') + '</small>';
         if (p.location) h += '<span class="social-player-loc">\ud83d\udccd ' + _esc(p.location) + '</span>';
         h += '</span><button class="social-interact-btn" data-target="' + p.user_id + '" title="Acenar">\ud83d\udc4b</button></div>';
     }
@@ -240,7 +242,12 @@ function _render() {
         actions: _renderActions(),
         onAction: _handleAction,
         closeOnOutside: !_detailNpc,
-        onHide: function() { _stopPoll(); },
+        onHide: function() {
+            _stopPoll();
+            _detailNpc = null;
+            _detailData = null;
+            _fetchSocial({action: 'close'});
+        },
     });
     _bindListeners();
     if (_activeTab === 'chat') {
@@ -285,16 +292,19 @@ function _bindListeners() {
 }
 
 function _chatSend(text) {
-    if (!text || !text.trim()) return;
+    if (!text || !text.trim() || _sending) return;
+    _sending = true;
     var input = document.getElementById('social-chat-input');
     if (input) input.value = '';
     if (typeof haptic === 'function') haptic('light');
     _fetchSocial({ action: 'chat_send', text: text.trim() }).then(function(data) {
+        _sending = false;
         if (data && data.ok) {
             var mc = (_cachedData && _cachedData.chat) ? _cachedData.chat.msg_count || 0 : 0;
             _fetchSocial({ action: 'chat_poll', msg_count: mc }).then(function(pd) {
                 if (pd && pd.messages && _cachedData && _cachedData.chat) {
                     _cachedData.chat.messages = _cachedData.chat.messages.concat(pd.messages);
+                    if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
                     if (pd.msg_count !== undefined) _cachedData.chat.msg_count = pd.msg_count;
                     _renderChatMessages();
                 }
@@ -303,7 +313,7 @@ function _chatSend(text) {
             var msg = data.error === 'cooldown' ? '\u23f3 Aguarde um momento...' : data.error;
             if (typeof showToast === 'function') showToast(msg, 2000);
         }
-    });
+    }).catch(function() { _sending = false; });
 }
 
 function _chatEmote(key) {
@@ -314,6 +324,7 @@ function _chatEmote(key) {
             _fetchSocial({ action: 'chat_poll', msg_count: mc }).then(function(pd) {
                 if (pd && pd.messages && _cachedData && _cachedData.chat) {
                     _cachedData.chat.messages = _cachedData.chat.messages.concat(pd.messages);
+                    if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
                     if (pd.msg_count !== undefined) _cachedData.chat.msg_count = pd.msg_count;
                     _renderChatMessages();
                 }
