@@ -1070,7 +1070,7 @@ if (document.readyState === 'loading') {
 
 function setupCanvasClickHandler() {
     var canvas = document.getElementById('map-canvas');
-    if (\!canvas) return;
+    if (!canvas) return;
 
     var _lpTimer = null, _lpStartX = 0, _lpStartY = 0, _lpFired = false;
 
@@ -1093,9 +1093,9 @@ function setupCanvasClickHandler() {
         _lpStartX = e.clientX;
         _lpStartY = e.clientY;
         var pt = _coordsToMap(e);
-        if (typeof cvHitTest \!== 'function') return;
+        if (typeof cvHitTest !== 'function') return;
         var locId = cvHitTest(pt.x, pt.y);
-        if (\!locId || locId === S.currentLoc) return;
+        if (!locId || locId === S.currentLoc) return;
 
         _lpTimer = setTimeout(function() {
             _lpFired = true;
