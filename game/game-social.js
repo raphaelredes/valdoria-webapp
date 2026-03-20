@@ -93,10 +93,10 @@ function _renderChat() {
     var h = '<div class="social-chat-area" id="social-chat-area">' + _buildChatMessages() + '</div>';
     h += '<div class="social-emotes">';
     var em = [{k:'wave',i:'\ud83d\udc4b'},{k:'cheer',i:'\ud83c\udf7b'},{k:'laugh',i:'\ud83d\ude02'},{k:'bow',i:'\ud83d\ude47'}];
-    for (var i = 0; i < em.length; i++) h += '<button class="social-emote-btn" data-emote="' + em[i].k + '">' + em[i].i + '</button>';
+    for (var i = 0; i < em.length; i++) h += '<button class="social-emote-btn" data-emote="' + em[i].k + '" aria-label="' + em[i].a + '">' + em[i].i + '</button>';
     h += '</div>';
     h += '<div class="social-chat-input-wrap">';
-    h += '<input type="text" id="social-chat-input" class="social-chat-input" placeholder="Escreva sua mensagem..." maxlength="200" autocomplete="off">';
+    h += '<input type="text" id="social-chat-input" class="social-chat-input" placeholder="Escreva sua mensagem..." aria-label="Mensagem do chat" maxlength="200" autocomplete="off">';
     h += '<button class="social-send-btn" id="social-send-btn">\u27a4</button></div>';
     return h;
 }
@@ -129,7 +129,7 @@ function _renderChatMessages() {
 
 function _renderOnline() {
     var players = (_cachedData && _cachedData.online) || [];
-    if (players.length === 0) return '<div class="social-empty"><div class="social-empty-icon">\ud83c\udf10</div>Nenhum viajante nas proximidades.</div>';
+    if (players.length === 0) return '<div class="social-empty"><div class="social-empty-icon">\ud83c\udf10</div>Nenhum viajante nas proximidades.</div><div style="font-size:var(--v-font-sm);color:var(--v-text-dim);margin-top:var(--v-space-xs);">Outros aventureiros aparecerão quando estiverem online.</div>';
     var h = '<div class="social-section-label">' + players.length + ' viajante' + (players.length !== 1 ? 's' : '') + ' online</div>';
     for (var i = 0; i < players.length; i++) {
         var p = players[i];
@@ -311,7 +311,7 @@ function _chatSend(text) {
             });
         } else if (data && data.error) {
             var msg = data.error === 'cooldown' ? '\u23f3 Aguarde um momento...' : data.error;
-            if (typeof showToast === 'function') showToast(msg, 2000);
+            if (typeof vToast === 'function') vToast(msg, 'warn');
         }
     }).catch(function() { _sending = false; });
 }
@@ -330,7 +330,7 @@ function _chatEmote(key) {
                 }
             });
         } else if (data && data.error === 'cooldown') {
-            if (typeof showToast === 'function') showToast('\u23f3 Aguarde um momento...', 2000);
+            if (typeof vToast === 'function') vToast('\u23f3 Aguarde um momento...', 'warn');
         }
     });
 }
@@ -338,8 +338,8 @@ function _chatEmote(key) {
 function _socialSend(targetUid, type) {
     if (typeof haptic === 'function') haptic('light');
     _fetchSocial({ action: 'social_send', target_uid: targetUid, type: type }).then(function(data) {
-        if (data && data.ok) { if (typeof showToast === 'function') showToast(data.message || '\u2705 Enviado!', 2000); }
-        else if (data && data.message) { if (typeof showToast === 'function') showToast('\u274c ' + data.message, 3000); }
+        if (data && data.ok) { if (typeof vToast === 'function') vToast(data.message || '\u2705 Enviado!', 'ok'); }
+        else if (data && data.message) { if (typeof vToast === 'function') vToast('\u274c ' + data.message, 'err'); }
     });
 }
 
@@ -347,10 +347,10 @@ function _socialAction(action, requestId) {
     if (typeof haptic === 'function') haptic('light');
     _fetchSocial({ action: action, request_id: requestId }).then(function(data) {
         if (data && data.ok) {
-            if (typeof showToast === 'function') showToast(data.message || '\u2705', 2000);
+            if (typeof vToast === 'function') vToast(data.message || '\u2705', 'ok');
             _fetchSocial({ action: 'load' }).then(function(fd) { if (fd) { _cachedData = fd; _render(); } });
         } else if (data && data.message) {
-            if (typeof showToast === 'function') showToast('\u274c ' + data.message, 3000);
+            if (typeof vToast === 'function') vToast('\u274c ' + data.message, 'err');
         }
     });
 }
@@ -363,11 +363,15 @@ window.showSocialPopup = function(data) {
 };
 
 window.openSocialPopup = function() {
-    if (typeof showToast === 'function') showToast('Carregando...', 1500);
+    if (typeof vToast === 'function') vToast('Carregando...', 'warn');
     _fetchSocial({ action: 'load' }).then(function(data) {
         if (data && !data.error) window.showSocialPopup(data);
-        else if (typeof showToast === 'function') showToast('Erro ao carregar social.', 2000);
+        else console.error('[SOCIAL]', data && data.message || 'error'); if (typeof vToast === 'function') vToast('Erro ao carregar social.', 'err');
     });
+};
+
+window.hideSocialPopup = function() {
+    if (typeof vPopup !== 'undefined') vPopup.hide('social-popup-overlay');
 };
 
 })();

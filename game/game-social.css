@@ -11,7 +11,7 @@
 
 /* 2. Chat Messages Area */
 .social-chat-area {
-    max-height: 280px;
+    max-height: min(280px, 40vh);
     overflow-y: auto;
     padding: var(--v-space-sm);
     background: rgba(74, 56, 40, 0.12);
@@ -78,6 +78,7 @@
     color: var(--v-text);
     font-family: var(--v-font);
     font-size: var(--v-font-base);
+    min-height: 44px;
     outline: none;
 }
 .social-chat-input::placeholder {
@@ -124,6 +125,11 @@
 }
 .social-player-info b {
     color: var(--v-gold-light);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
 }
 .social-player-info small {
     color: var(--v-text-dim);
@@ -143,6 +149,10 @@
     font-size: var(--v-font-xl);
     cursor: pointer;
     flex-shrink: 0;
+}
+.social-interact-btn:active {
+    transform: scale(0.95);
+    opacity: 0.8;
 }
 
 /* 7. Inbox Request Cards */
@@ -185,6 +195,10 @@
     font-size: var(--v-font-xl);
     border-radius: var(--v-radius-sm);
 }
+.social-req-btn:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+}
 /* 8. NPC Relationship Cards (List View) */
 .social-npc {
     display: flex;
@@ -200,6 +214,7 @@
 }
 .social-npc:active {
     background: var(--v-bg-card);
+    border-color: var(--v-gold-dim, rgba(196, 149, 58, 0.4));
 }
 .social-npc-mood {
     font-size: var(--v-font-2xl);
@@ -213,6 +228,11 @@
 }
 .social-npc-info b {
     color: var(--v-gold-light);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
 }
 .social-npc-info small {
     color: var(--v-text-dim);
