@@ -7,7 +7,7 @@
 .guild-player-info { font-family: var(--v-font); font-size: var(--v-font-sm); color: var(--v-text-dim); }
 
 /* Tabs 5-tab override */
-.guild-tabs.v-tabs { padding: 0 var(--v-space-sm); gap: 2px; }
+.guild-tabs.v-tabs { padding: 0 var(--v-space-sm); gap: var(--v-space-xs); }
 .guild-tabs .v-tab { font-size: var(--v-font-xs); padding: var(--v-space-xs) var(--v-space-sm); min-width: 0; flex: 1; white-space: nowrap; }
 
 /* Content area */
@@ -25,7 +25,7 @@
 .guild-card:active { border-color: var(--v-gold-dim); }
 .guild-card-icon { font-size: 28px; flex-shrink: 0; width: 36px; text-align: center; }
 .guild-card-info { flex: 1; min-width: 0; }
-.guild-card-name { font-family: var(--v-font); font-size: var(--v-font-body); color: var(--v-text-bright); margin-bottom: 2px; }
+.guild-card-name { font-family: var(--v-font); font-size: var(--v-font-body); color: var(--v-text-bright); margin-bottom: var(--v-space-xs); }
 .guild-card-sub { font-family: var(--v-font); font-size: var(--v-font-sm); color: var(--v-text-dim); }
 .guild-card-arrow { color: var(--v-text-dim); font-size: var(--v-font-xs); flex-shrink: 0; }
 .guild-card-hp { margin-top: var(--v-space-xs); }
@@ -39,8 +39,8 @@
 .guild-approval-badge.tier-warm    { background: rgba(100,160,80,0.2); color: #7ab85a; }
 .guild-approval-badge.tier-loyal   { background: rgba(80,140,200,0.2); color: #5aa0d4; }
 .guild-approval-badge.tier-devoted { background: rgba(196,149,58,0.25); color: var(--v-gold); }
-.guild-approval-bar { margin-top: var(--v-space-xs); height: 4px; background: var(--v-bg); border-radius: 2px; overflow: hidden; }
-.guild-approval-fill { height: 100%; border-radius: 2px; transition: width var(--v-transition); }
+.guild-approval-bar { margin-top: var(--v-space-xs); height: var(--v-bar-height-mini); background: var(--v-bg); border-radius: var(--v-radius-xs, 2px); overflow: hidden; }
+.guild-approval-fill { height: 100%; border-radius: var(--v-radius-xs, 2px); transition: width var(--v-transition); }
 
 /* Detail overlay */
 .guild-detail-overlay { position: fixed; inset: 0; z-index: var(--v-z-overlay, 100); background: var(--v-bg); overflow-y: auto; padding: var(--v-space-md); padding-bottom: 80px; }
@@ -70,7 +70,7 @@
 /* Quest cards */
 .guild-quest-card { background: var(--v-bg-card); border: 1px solid var(--v-border); border-radius: var(--v-radius); padding: var(--v-space-md); margin-bottom: var(--v-space-sm); cursor: pointer; transition: border-color var(--v-transition); min-height: 44px; }
 .guild-quest-card:active { border-color: var(--v-gold-dim); }
-.guild-quest-title { font-family: var(--v-font); font-size: var(--v-font-body); color: var(--v-text-bright); margin-bottom: 2px; }
+.guild-quest-title { font-family: var(--v-font); font-size: var(--v-font-body); color: var(--v-text-bright); margin-bottom: var(--v-space-xs); }
 .guild-quest-meta { font-family: var(--v-font); font-size: var(--v-font-sm); color: var(--v-text-dim); }
 .guild-quest-group-title { font-family: var(--v-font); font-size: var(--v-font-label); color: var(--v-gold-dim); text-transform: uppercase; letter-spacing: 1px; margin: var(--v-space-md) 0 var(--v-space-xs); }
 
@@ -101,8 +101,8 @@
 .guild-training-card.active-training { border-color: var(--v-gold-dim); background: rgba(196,149,58,0.05); }
 .guild-training-name { font-family: var(--v-font); font-size: var(--v-font-body); color: var(--v-text-bright); }
 .guild-training-meta { font-family: var(--v-font); font-size: var(--v-font-sm); color: var(--v-text-dim); }
-.guild-training-progress { margin-top: var(--v-space-xs); height: 4px; background: var(--v-bg); border-radius: 2px; overflow: hidden; }
-.guild-training-progress-fill { height: 100%; background: var(--v-gold); border-radius: 2px; transition: width var(--v-transition); }
+.guild-training-progress { margin-top: var(--v-space-xs); height: var(--v-bar-height-mini); background: var(--v-bg); border-radius: var(--v-radius-xs, 2px); overflow: hidden; }
+.guild-training-progress-fill { height: 100%; background: var(--v-gold); border-radius: var(--v-radius-xs, 2px); transition: width var(--v-transition); }
 .guild-training-group-title { font-family: var(--v-font); font-size: var(--v-font-label); color: var(--v-gold-dim); text-transform: uppercase; letter-spacing: 1px; margin: var(--v-space-md) 0 var(--v-space-xs); }
 
 /* Action buttons */
