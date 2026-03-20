@@ -13,6 +13,8 @@ var _detailData = null;
 var _detailLoading = false;
 var _sending = false;
 
+function _idemKey() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
+
 function _esc(t) {
     if (!t) return '';
     return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -337,7 +339,7 @@ function _chatEmote(key) {
 
 function _socialSend(targetUid, type) {
     if (typeof haptic === 'function') haptic('light');
-    _fetchSocial({ action: 'social_send', target_uid: targetUid, type: type }).then(function(data) {
+    _fetchSocial({ action: 'social_send', target_uid: targetUid, type: type, idem_key: _idemKey() }).then(function(data) {
         if (data && data.ok) { if (typeof vToast === 'function') vToast(data.message || '\u2705 Enviado!', 'ok'); }
         else if (data && data.message) { if (typeof vToast === 'function') vToast('\u274c ' + data.message, 'err'); }
     });
@@ -345,7 +347,7 @@ function _socialSend(targetUid, type) {
 
 function _socialAction(action, requestId) {
     if (typeof haptic === 'function') haptic('light');
-    _fetchSocial({ action: action, request_id: requestId }).then(function(data) {
+    _fetchSocial({ action: action, request_id: requestId, idem_key: _idemKey() }).then(function(data) {
         if (data && data.ok) {
             if (typeof vToast === 'function') vToast(data.message || '\u2705', 'ok');
             _fetchSocial({ action: 'load' }).then(function(fd) { if (fd) { _cachedData = fd; _render(); } });
