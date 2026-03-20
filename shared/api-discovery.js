@@ -1,4 +1,4 @@
-var ApiDiscovery=(function(){var _interval=null;var _apiBase='';var _onUrlChange=null;var _checking=false;var INTERVAL_MS=30000;function init(apiBase,onUrlChange){_apiBase=(apiBase||'').replace(/\/$/,'');_onUrlChange=onUrlChange;if(_interval)clearInterval(_interval);_interval=setInterval(_check,INTERVAL_MS);}
+var ApiDiscovery=(function(){var _interval=null;var _apiBase='';var _onUrlChange=null;var _checking=false;var INTERVAL_MS=30000;function init(apiBase,onUrlChange){_apiBase=(apiBase||'').replace(/\/$/,'');_onUrlChange=onUrlChange;if(_interval)clearInterval(_interval);_interval=setInterval(_check,INTERVAL_MS);window.addEventListener('pagehide',function(){if(_interval){clearInterval(_interval);_interval=null;}});}
 function stop(){if(_interval){clearInterval(_interval);_interval=null;}}
 function updateBase(newUrl){_apiBase=(newUrl||'').replace(/\/$/,'');}
 async function _check(){if(_checking||!_apiBase)return;_checking=true;try{var _acH=new AbortController();var _tidH=setTimeout(function(){_acH.abort();},5000);var resp=await fetch(_apiBase+'/api/game/health',{signal:_acH.signal,});clearTimeout(_tidH);if(resp.ok){_checking=false;return;}}catch(e){}

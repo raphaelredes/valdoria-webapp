@@ -21,7 +21,7 @@ _looping=false;const audio=new Audio(url);audio.volume=0;audio.preload='auto';_a
 audio.addEventListener('volumechange',()=>{if(audio!==_audio||_fading)return;const newVol=audio.volume;if(Math.abs(newVol-_volume)>0.01&&!_muted){_volume=Math.max(0,Math.min(1,newVol));localStorage.setItem(VOLUME_KEY,_volume.toString());_syncUI();}});audio.play().then(()=>{_unlockAttempts=0;_crossfadeIn(audio);_syncUI();}).catch(e=>{console.warn('[AUDIO] Play blocked:',e.message);_pendingTrack=trackKey;_unlocked=false;_unlockAttempts++;if(_unlockAttempts<_MAX_UNLOCK_ATTEMPTS){_registerUnlockListeners();}});}
 function _onTimeUpdate(){const audio=_audio;if(!audio||_looping)return;const remaining=audio.duration-audio.currentTime;if(!isFinite(remaining))return;const fadeSeconds=CROSSFADE_MS/1000;if(remaining<=fadeSeconds+0.1){_looping=true;_loopCrossfade(audio);}}
 function _loopCrossfade(oldAudio){const trackKey=_currentTrack;const file=_pickVariant(trackKey);if(!file)return;const url=AUDIO_BASE+file;const newAudio=new Audio(url);newAudio.volume=0;newAudio.preload='auto';if(!NO_LOOP_TRACKS.includes(trackKey)){newAudio.addEventListener('timeupdate',_onTimeUpdate);}
-newAudio.play().then(()=>{_crossfadeOut(oldAudio);_crossfadeIn(newAudio);_audio=newAudio;_looping=false;}).catch(()=>{oldAudio.currentTime=0;oldAudio.play().catch(()=>{});_looping=false;});}
+newAudio.play().then(()=>{_crossfadeOut(oldAudio);_crossfadeIn(newAudio);_audio=newAudio;_looping=false;}).catch(()=>{oldAudio.currentTime=0;oldAudio.play().catch(function(e){console.debug('[AUDIO]',e.message||e);});_looping=false;});}
 function _crossfadeIn(audio){if(!audio)return;_fading=true;const target=_volume;const steps=20;const stepMs=CROSSFADE_MS/steps;const increment=target/steps;let current=0;const timer=setInterval(()=>{current+=increment;if(current>=target||audio!==_audio){try{audio.volume=(audio===_audio)?target:0;}catch(e){}
 _fading=false;clearInterval(timer);}else{try{audio.volume=current;}catch(e){clearInterval(timer);}}},stepMs);}
 function _crossfadeOut(audio){if(!audio)return;_fadeAudio=audio;const startVol=audio.volume;const steps=15;const stepMs=CROSSFADE_MS/steps;const decrement=startVol/steps;let current=startVol;const timer=setInterval(()=>{current-=decrement;if(current<=0){try{audio.volume=0;audio.pause();audio.removeEventListener('timeupdate',_onTimeUpdate);audio.src='';}catch(e){}
@@ -31,7 +31,7 @@ _currentTrack='';_pendingTrack='';_looping=false;_syncUI();}
 const _SFX_POOL_SIZE=3;const _sfxPool={};function _getSfxAudio(url){if(!_sfxPool[url]){_sfxPool[url]=[];for(let i=0;i<_SFX_POOL_SIZE;i++){const a=new Audio();a.preload='auto';a.src=url;_sfxPool[url].push(a);}}
 const pool=_sfxPool[url];for(let i=0;i<pool.length;i++){const a=pool[i];if(a.paused||a.ended){a.currentTime=0;return a;}}
 const a=pool[0];try{a.pause();a.currentTime=0;}catch(e){}return a;}
-function playSFX(trackKey){if(_muted||_sfxMuted||!_unlocked)return;if(window.vReducedMotion)return;const file=_pickVariant(trackKey);if(!file)return;const url=AUDIO_BASE+file;const sfx=_getSfxAudio(url);sfx.volume=Math.min(1,_sfxVolume*1.5);sfx.play().catch(()=>{});}
+function playSFX(trackKey){if(_muted||_sfxMuted||!_unlocked)return;if(window.vReducedMotion)return;const file=_pickVariant(trackKey);if(!file)return;const url=AUDIO_BASE+file;const sfx=_getSfxAudio(url);sfx.volume=Math.min(1,_sfxVolume*1.5);sfx.play().catch(function(e){console.debug('[AUDIO]',e.message||e);});}
 function toggleMute(){_muted=!_muted;localStorage.setItem(STORAGE_KEY,_muted?'1':'0');_musicMuted=_muted;localStorage.setItem(MUSIC_MUTED_KEY,_musicMuted?'1':'0');if(_muted){if(_audio)_audio.volume=0;}else{if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack){_playTrack(_pendingTrack);}}
 _syncUI();return _muted;}
 function isMuted(){return _muted;}
@@ -263,6 +263,8 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
             .va-float-btn.va-playing {
                 animation: vaBreathing 3s ease-in-out infinite;
             }
+            body.perf-lite .va-footer-btn.va-playing,body.perf-lite .va-float-btn.va-playing{animation:none !important;}
+            body.perf-lite .va-hint-pulse{animation:none !important;}
         `;document.head.appendChild(style);}
 let _isEmbedded=false;function _tryEmbedInFooter(){const footerEl=document.getElementById('footer-quick');if(footerEl&&footerEl.children.length>0){_embedInFooter(footerEl);return;}
 const observer=new MutationObserver(()=>{const el=document.getElementById('footer-quick');if(el&&el.children.length>0&&!_isEmbedded){const floatEl=document.getElementById('va-float');if(floatEl)floatEl.remove();const oldBtn=document.getElementById('va-btn');if(oldBtn)oldBtn.remove();_embedInFooter(el);}});observer.observe(document.body,{childList:true,subtree:true});setTimeout(()=>{if(!document.getElementById('va-btn')){_createFloatingBtn();}},3000);}

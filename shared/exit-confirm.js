@@ -2,7 +2,7 @@
 function _resolveHeartbeatCfg(){var api='',tk='',uid=0;if(window.S){api=S.apiBase||S.api||'';tk=S.token||'';uid=parseInt(S.uid)||0;}
 if(!api&&typeof apiBase!=='undefined')api=apiBase;if(!tk&&typeof token!=='undefined')tk=token;if(!uid&&typeof userId!=='undefined')uid=parseInt(userId)||0;if(api&&tk&&uid)return{apiBase:api,token:tk,uid:uid};return null;}
 function _show(){_ensureDOM();_overlay.style.display='';_popupVisible=true;if(window.vHaptic)vHaptic.medium();if(window.SessionHeartbeat){_savedHeartbeatCfg=_resolveHeartbeatCfg();SessionHeartbeat.stop();}}
-function _hide(){if(!_overlay)return;_overlay.style.display='none';_popupVisible=false;if(window.SessionHeartbeat&&_savedHeartbeatCfg){try{SessionHeartbeat.init(_savedHeartbeatCfg);}catch(e){}
+function _hide(){if(!_overlay)return;_overlay.style.display='none';_popupVisible=false;if(window.SessionHeartbeat&&_savedHeartbeatCfg){try{SessionHeartbeat.init(_savedHeartbeatCfg);}catch(e){console.warn('[EXIT-CONFIRM] Heartbeat reinit failed:',e);}
 _savedHeartbeatCfg=null;}}
 function _doExit(){if(window.__valdoriaExitAction){try{window.__valdoriaExitAction();}catch(e){console.warn('[EXIT-CONFIRM] custom exit failed:',e);}
 return;}
