@@ -370,7 +370,15 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
             <div class="v-popup-header"></div>
             <div class="v-popup-body"></div>
             <div class="v-popup-actions"></div>
+
+    <!-- Plaza event popup overlay (investigation + entry events) -->
+    <div id="plaza-event-overlay" class="v-popup-overlay" style="display:none">
+        <div class="v-popup-card">
+            <div class="v-popup-header"></div>
+            <div class="v-popup-body"></div>
+            <div class="v-popup-actions"></div>
         </div>
+    </div>        </div>
     </div>
 
     <!-- Generic game popup overlay (for inn, locations, etc.) -->
@@ -442,6 +450,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         document.write('<script src="game-inventory-popup.js?v=' + v + '"><\/script>');
         document.write('<script src="game-daily.js?v=' + v + '"><\/script>');
         document.write('<script src="game-hints.js?v=' + v + '"><\/script>');
+        document.write('<script src="game-plaza-event.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
