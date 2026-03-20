@@ -49,7 +49,7 @@
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     body += _renderRewards(d.rewards);
-    if (d.leveled) body += "<div class=\"v-popup-row\" class=\"v-popup-level-up\">🎉 <b>Nível acima!</b></div>";
+    if (d.leveled) body += "<div class=\"v-popup-row v-popup-level-up\">🎉 <b>Nível acima!</b></div>";
     vPopup.show({ id: "plaza-event", header: d.title || "Resultado", headerClass: cls, body: body,
       actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: false });
   }
@@ -109,9 +109,9 @@
       for (var i = 0; i < d.notices.length; i++) {
         var n = d.notices[i];
         var icon = n.type === "bounty" ? "⚔️" : n.type === "help" ? "🤝" : "📋";
-        body += "<div class=\"v-popup-row\" style=\"cursor:pointer\" data-action=\"" + _esc(n.cb) + "\">";
+        body += "<div class=\"v-popup-row\" data-action=\"" + _esc(n.cb) + "\">";
         body += icon + " <b>" + _esc(n.title) + "</b>";
-        if (n.reward_hint) body += " <small style=\"opacity:0.7\">" + _esc(n.reward_hint) + "</small>";
+        if (n.reward_hint) body += " <small class=\"v-popup-value--dim\">" + _esc(n.reward_hint) + "</small>";
         body += "</div>";
       }
     } else {
@@ -207,7 +207,7 @@
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     if (d.job_name) body += "<div class=\"v-popup-row\">⚒️ " + _esc(d.job_name) + "</div>";
     body += _renderRewards(d.rewards);
-    if (d.leveled) body += "<div class=\"v-popup-row\" class=\"v-popup-level-up\">🎉 <b>Nível acima!</b></div>";
+    if (d.leveled) body += "<div class=\"v-popup-row v-popup-level-up\">🎉 <b>Nível acima!</b></div>";
     vPopup.show({ id: "plaza-event", header: d.title || "Trabalho", headerClass: cls, body: body,
       actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" }], closeOnOutside: false });
   }
