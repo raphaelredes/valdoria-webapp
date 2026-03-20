@@ -157,7 +157,7 @@ function renderTerrainRegions(svg, fogState) {
                 regG.appendChild(_el('path', {
                     d: hullD, fill: 'none',
                     stroke: INK_DARK, 'stroke-width': 0.5,
-                    'stroke-opacity': vis * 0.18,
+                    'stroke-opacity': vis * 0.32,
                     'stroke-dasharray': '4 6',
                 }));
             }
