@@ -27,6 +27,7 @@
   /* ===== INVESTIGATION ===== */
 
   function _showChoices(d) {
+    if (!d.choices || !d.choices.length) { console.error("[PLAZA] _showChoices: missing choices", d); return; }
     var body = "<div class=\"v-popup-desc\">" + _esc(d.desc) + "</div>";
     body += "<div class=\"v-popup-divider\"></div>";
     var actions = [];
@@ -34,7 +35,7 @@
       var c = d.choices[i];
       var label = _esc(c.label);
       if (c.stat_hint) {
-        var pct = parseInt(c.stat_hint.replace(/[^0-9]/g, ""), 10) || 50;
+        var pct = (typeof c.stat_hint === "string") ? (parseInt(c.stat_hint.replace(/[^0-9]/g, ""), 10) || 50) : 50;
         label += " " + _diffDot(pct) + " <small>" + _esc(c.stat_hint) + "</small>";
       }
       actions.push({ html: label, action: c.cb, cls: "v-popup-btn" });
@@ -44,6 +45,7 @@
   }
 
   function _showResult(d) {
+    if (!d.narrative) { console.error("[PLAZA] _showResult: missing narrative", d); }
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     body += _renderRewards(d.rewards);
@@ -68,6 +70,7 @@
   /* ===== GAMBLE ===== */
 
   function _showGambleMenu(d) {
+    if (!d.bets || !d.bets.length) { console.error("[PLAZA] _showGambleMenu: missing bets", d); }
     var body = "<div class=\"v-popup-desc\">" + _esc(d.desc || "Escolha sua aposta para o jogo de dados.") + "</div>";
     if (d.gold != null) body += "<div class=\"v-popup-row\">💰 Ouro: " + d.gold + " GP</div>";
     if (d.remaining != null) body += "<div class=\"v-popup-row\">🎲 Apostas restantes: " + d.remaining + "</div>";
@@ -84,6 +87,7 @@
   }
 
   function _showGambleResult(d) {
+    if (d.won == null) { console.error("[PLAZA] _showGambleResult: missing won", d); }
     var cls = d.won ? "v-popup-header--success" : "v-popup-header--warning";
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     body += "<div class=\"v-popup-divider\"></div>";
@@ -99,6 +103,7 @@
   /* ===== BULLETIN ===== */
 
   function _showBulletin(d) {
+    if (!d.notices) { console.error("[PLAZA] _showBulletin: missing notices", d); }
     var body = "";
     if (d.notices && d.notices.length) {
       for (var i = 0; i < d.notices.length; i++) {
@@ -117,6 +122,7 @@
   }
 
   function _showBulletinResult(d) {
+    if (!d.narrative) { console.error("[PLAZA] _showBulletinResult: missing narrative", d); }
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     body += _renderRewards(d.rewards);
@@ -127,6 +133,7 @@
   /* ===== VENDOR ===== */
 
   function _showVendor(d) {
+    if (!d.items) { console.error("[PLAZA] _showVendor: missing items", d); }
     var body = "";
     if (d.greeting) body += "<div class=\"v-popup-desc\">" + _esc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
     if (d.gold != null) body += "<div class=\"v-popup-row\">💰 Ouro: " + d.gold + " GP</div>";
@@ -156,6 +163,7 @@
   }
 
   function _showVendorResult(d) {
+    if (!d.narrative) { console.error("[PLAZA] _showVendorResult: missing narrative", d); }
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     if (d.item_name) body += "<div class=\"v-popup-row\">📦 " + _esc(d.item_name) + (d.price ? " — " + d.price + " GP" : "") + "</div>";
@@ -167,6 +175,7 @@
   /* ===== WORK ===== */
 
   function _showWork(d) {
+    if (!d.jobs) { console.error("[PLAZA] _showWork: missing jobs", d); }
     var body = "";
     if (d.desc) body += "<div class=\"v-popup-desc\">" + _esc(d.desc) + "</div><div class=\"v-popup-divider\"></div>";
     if (d.jobs && d.jobs.length) {
@@ -174,7 +183,7 @@
         var j = d.jobs[i];
         var hint = "";
         if (j.stat_hint) {
-          var pct = parseInt(j.stat_hint.replace(/[^0-9]/g, ""), 10) || 50;
+          var pct = (typeof j.stat_hint === "string") ? (parseInt(j.stat_hint.replace(/[^0-9]/g, ""), 10) || 50) : 50;
           hint = " " + _diffDot(pct) + " <small>" + _esc(j.stat_hint) + "</small>";
         }
         body += "<div class=\"v-popup-row\">" + _esc(j.title) + hint + "</div>";
@@ -193,6 +202,7 @@
   }
 
   function _showWorkResult(d) {
+    if (!d.narrative) { console.error("[PLAZA] _showWorkResult: missing narrative", d); }
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     if (d.job_name) body += "<div class=\"v-popup-row\">⚒️ " + _esc(d.job_name) + "</div>";
@@ -206,6 +216,7 @@
   /* ===== CARTOGRAPHER ===== */
 
   function _showCartographer(d) {
+    if (!d.tiers && !d.all_owned) { console.error("[PLAZA] _showCartographer: missing tiers/all_owned", d); }
     var body = "";
     if (d.greeting) body += "<div class=\"v-popup-desc\">" + _esc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
     body += "<div class=\"v-popup-row\">\ud83d\udcb0 Ouro: " + (d.gold || 0) + " GP</div>";
@@ -238,7 +249,7 @@
             var afford = (!it.affordable) ? " style=\"opacity:0.5\"" : "";
             var hint = "";
             if (it.stat_hint) {
-              var pct = parseInt(it.stat_hint.replace(/[^0-9]/g, ""), 10) || 50;
+              var pct = (typeof it.stat_hint === "string") ? (parseInt(it.stat_hint.replace(/[^0-9]/g, ""), 10) || 50) : 50;
               hint = " " + _diffDot(pct) + " <small>" + _esc(it.stat_hint) + "</small>";
             }
             body += "<div class=\"v-popup-row\"" + afford + ">";
@@ -280,6 +291,7 @@
   /* ===== ENTRY CHOICE ===== */
 
   function _showEntryChoice(d) {
+    if (!d.choices || !d.choices.length) { console.error("[PLAZA] _showEntryChoice: missing choices", d); return; }
     var body = "<div class=\"v-popup-desc\">" + _esc(d.desc) + "</div>";
     body += "<div class=\"v-popup-divider\"></div>";
     var actions = [];
@@ -287,7 +299,7 @@
       var c = d.choices[i];
       var label = _esc(c.label);
       if (c.stat_hint) {
-        var pct = parseInt(c.stat_hint.replace(/[^0-9]/g, ""), 10) || 50;
+        var pct = (typeof c.stat_hint === "string") ? (parseInt(c.stat_hint.replace(/[^0-9]/g, ""), 10) || 50) : 50;
         label += " " + _diffDot(pct) + " <small>" + _esc(c.stat_hint) + "</small>";
       }
       actions.push({ html: label, action: c.cb, cls: "v-popup-btn" });
