@@ -60,6 +60,9 @@
     cursor: pointer;
     transition: background var(--v-transition-base);
 }
+.social-emote-btn:hover {
+    background: rgba(196, 149, 58, 0.1);
+}
 .social-emote-btn:active {
     background: rgba(196, 149, 58, 0.2);
 }
@@ -80,6 +83,7 @@
     font-size: var(--v-font-base);
     min-height: 44px;
     outline: none;
+    transition: border-color var(--v-transition-base);
 }
 .social-chat-input::placeholder {
     color: var(--v-text-dim);
@@ -98,6 +102,9 @@
     font-size: var(--v-font-xl);
     font-weight: 700;
     cursor: pointer;
+}
+.social-send-btn:hover {
+    box-shadow: 0 0 8px rgba(196, 149, 58, 0.3);
 }
 .social-send-btn:active {
     opacity: 0.8;
@@ -150,6 +157,10 @@
     cursor: pointer;
     flex-shrink: 0;
 }
+.social-interact-btn:hover {
+    background: var(--v-bg-raised);
+    border-color: var(--v-gold-dim, rgba(196, 149, 58, 0.4));
+}
 .social-interact-btn:active {
     transform: scale(0.95);
     opacity: 0.8;
@@ -194,6 +205,9 @@
     padding: 0;
     font-size: var(--v-font-xl);
     border-radius: var(--v-radius-sm);
+}
+.social-req-btn:hover {
+    opacity: 0.9;
 }
 .social-req-btn:active {
     transform: scale(0.95);
@@ -384,4 +398,12 @@
 .social-chat-input:focus-visible {
     outline: 2px solid var(--v-gold);
     outline-offset: 2px;
+}
+/* 14. Performance tier: disable transitions on lite */
+body.perf-lite .social-npc,
+body.perf-lite .social-emote-btn,
+body.perf-lite .social-npc-bar-fill,
+body.perf-lite .social-stat-bar-fill,
+body.perf-lite .social-chat-input {
+    transition: none;
 }
