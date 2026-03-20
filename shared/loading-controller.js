@@ -39,6 +39,7 @@ window.ValdoriaLoadingController = function(config) {
     var _timers = {};
     var _hideCb = null;
     var _cinematicTimers = [];
+    var _animEndHandler = null;
 
     if (!retryBtn && overlay) {
         retryBtn = document.createElement('button');
@@ -72,10 +73,14 @@ window.ValdoriaLoadingController = function(config) {
             tipEl.classList.add('tip-exit');
             setTimeout(function() {
                 if (_state === 'hiding' || _state === 'hidden') return;
+                if (!tipEl) return;
                 tipEl.textContent = tips[tipIndex];
                 tipEl.classList.remove('tip-exit');
                 tipEl.classList.add('tip-enter');
-                setTimeout(function() { tipEl.classList.remove('tip-enter'); }, 350);
+                setTimeout(function() {
+                    if (_state === 'hiding' || _state === 'hidden') return;
+                    if (tipEl) tipEl.classList.remove('tip-enter');
+                }, 350);
             }, 300);
         }
     }, TIP_INTERVAL);
@@ -163,12 +168,14 @@ window.ValdoriaLoadingController = function(config) {
                 _cinematicTimers = [];
                 if (cb) cb();
             }
-            overlay.addEventListener('animationend', function onEnd(e) {
+            _animEndHandler = function(e) {
                 if (e.target === overlay) {
-                    overlay.removeEventListener('animationend', onEnd);
+                    overlay.removeEventListener('animationend', _animEndHandler);
+                    _animEndHandler = null;
                     _finishCinematic();
                 }
-            });
+            };
+            overlay.addEventListener('animationend', _animEndHandler);
             _cinematicTimers.push(setTimeout(_finishCinematic, 950));
         }, 350));
     }
@@ -197,6 +204,10 @@ window.ValdoriaLoadingController = function(config) {
             _cleanup();
             _cinematicTimers.forEach(function(t) { clearTimeout(t); });
             _cinematicTimers = [];
+            if (_animEndHandler && overlay) {
+                overlay.removeEventListener('animationend', _animEndHandler);
+                _animEndHandler = null;
+            }
             if (overlay) {
                 overlay.classList.add('hidden');
                 overlay.classList.remove('exit-cinematic');
@@ -251,10 +262,14 @@ window.ValdoriaLoadingController = function(config) {
                     tipEl.classList.add('tip-exit');
                     setTimeout(function() {
                         if (_state === 'hiding' || _state === 'hidden') return;
+                        if (!tipEl) return;
                         tipEl.textContent = tips[tipIndex];
                         tipEl.classList.remove('tip-exit');
                         tipEl.classList.add('tip-enter');
-                        setTimeout(function() { tipEl.classList.remove('tip-enter'); }, 350);
+                        setTimeout(function() {
+                            if (_state === 'hiding' || _state === 'hidden') return;
+                            if (tipEl) tipEl.classList.remove('tip-enter');
+                        }, 350);
                     }, 300);
                 }
             }, TIP_INTERVAL);
@@ -286,7 +301,10 @@ window.ValdoriaLoadingController = function(config) {
                 var gemEl = overlay ? overlay.querySelector('.mc-gem') : null;
                 if (gemEl) {
                     gemEl.classList.add('gem-hint');
-                    setTimeout(function() { gemEl.classList.remove('gem-hint'); }, 1500);
+                    setTimeout(function() {
+                        if (_state === 'hiding' || _state === 'hidden') return;
+                        gemEl.classList.remove('gem-hint');
+                    }, 1500);
                 }
             }, 4000);
         },
