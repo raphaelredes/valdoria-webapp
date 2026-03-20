@@ -52,14 +52,25 @@
                     Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
                 }
             } catch (_) {}
+            var waves = overlay.querySelectorAll('.mc-completion-wave');
+            waves.forEach(function(w) { w.classList.add('active'); });
             window._guildLoadingHiding = true;
             setTimeout(function() {
                 overlay.classList.add('exit-cinematic');
-                setTimeout(function() {
+                var _exitDone = false;
+                function _finish() {
+                    if (_exitDone) return;
+                    _exitDone = true;
                     overlay.classList.add('hidden');
                     window._guildLoadingHiding = false;
-                }, 800);
-            }, 250);
+                }
+                overlay.addEventListener('animationend', function handler(e) {
+                    if (e.target !== overlay) return;
+                    overlay.removeEventListener('animationend', handler);
+                    _finish();
+                });
+                setTimeout(_finish, 950);
+            }, 350);
         }
     };
 })();

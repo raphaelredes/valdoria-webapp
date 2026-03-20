@@ -64,11 +64,12 @@ window.ValdoriaLoadingController = function(config) {
     }, 200);
 
     _timers.tip = setInterval(function() {
-        if (!tips.length) return;
+        if (!tips.length || _state === 'hiding' || _state === 'hidden') return;
         tipIndex = (tipIndex + 1) % tips.length;
         if (tipEl) {
             tipEl.classList.add('tip-exit');
             setTimeout(function() {
+                if (_state === 'hiding' || _state === 'hidden') return;
                 tipEl.textContent = tips[tipIndex];
                 tipEl.classList.remove('tip-exit');
                 tipEl.classList.add('tip-enter');
@@ -207,6 +208,9 @@ window.ValdoriaLoadingController = function(config) {
                 overlay.classList.remove('hidden', 'exit-cinematic');
                 var waves = overlay.querySelectorAll('.mc-completion-wave');
                 waves.forEach(function(w) { w.classList.remove('active'); });
+                overlay.style.animation = 'none'; void overlay.offsetHeight; overlay.style.animation = '';
+                var _rings = overlay.querySelectorAll('.mc-ring');
+                _rings.forEach(function(r) { r.style.animationDuration = ''; r.style.animation = 'none'; void r.offsetHeight; r.style.animation = ''; });
             }
             if (progressEl) progressEl.style.width = '0%';
             if (retryBtn) retryBtn.style.display = 'none';
@@ -232,11 +236,12 @@ window.ValdoriaLoadingController = function(config) {
                 if (HAS_GEM_PHASE) _updateGemPhase(_progress);
             }, 200);
             _timers.tip = setInterval(function() {
-                if (!tips.length) return;
+                if (!tips.length || _state === 'hiding' || _state === 'hidden') return;
                 tipIndex = (tipIndex + 1) % tips.length;
                 if (tipEl) {
                     tipEl.classList.add('tip-exit');
                     setTimeout(function() {
+                        if (_state === 'hiding' || _state === 'hidden') return;
                         tipEl.textContent = tips[tipIndex];
                         tipEl.classList.remove('tip-exit');
                         tipEl.classList.add('tip-enter');
@@ -267,6 +272,14 @@ window.ValdoriaLoadingController = function(config) {
                 if (retryBtn) retryBtn.style.display = '';
                 if (typeof onTimeout === 'function') onTimeout();
             }, TIMEOUT_MS);
+            _timers.gemHint = setTimeout(function() {
+                if (_state === 'hiding' || _state === 'hidden') return;
+                var gemEl = overlay ? overlay.querySelector('.mc-gem') : null;
+                if (gemEl) {
+                    gemEl.classList.add('gem-hint');
+                    setTimeout(function() { gemEl.classList.remove('gem-hint'); }, 1500);
+                }
+            }, 4000);
         },
 
         setProgress: function(pct, stageName) {
