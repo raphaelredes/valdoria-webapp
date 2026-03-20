@@ -5,10 +5,12 @@
 
 // ── Icon cache (offscreen canvases) ──
 var _cvIconCache = {};
+var _cvIconCacheCount = 0;
 
 function _cvGetIcon(biome, locName, sz, isSett) {
     var key = (isSett ? 'S_' : 'B_') + biome + '_' + (locName || '').substring(0, 10) + '_' + sz;
     if (_cvIconCache[key]) return _cvIconCache[key];
+    if (_cvIconCacheCount > 150) { _cvIconCache = {}; _cvIconCacheCount = 0; }
     var pad = 4;
     var oc = document.createElement('canvas');
     oc.width = sz * 4 + pad * 2;
@@ -17,7 +19,7 @@ function _cvGetIcon(biome, locName, sz, isSett) {
     ctx.translate(oc.width / 2, oc.height / 2 + sz * 0.3);
     if (isSett) _cvDrawSettlementIcon(ctx, 0, 0, sz);
     else _cvDrawBiomeIcon(ctx, 0, 0, biome, sz, locName);
-    _cvIconCache[key] = oc;
+    _cvIconCache[key] = oc; _cvIconCacheCount++;
     return oc;
 }
 
@@ -408,6 +410,7 @@ function _cvDrawMarkers(ctx, fogState) {
         }
 
         // Labels
+        ctx.globalAlpha = alpha;
         var showBadges = typeof _zoomIdx === 'undefined' || _zoomIdx >= 1;
         if (isExp || isCurr) {
             var lines = _wrapLabel(name, 14);
@@ -436,6 +439,7 @@ function _cvDrawMarkers(ctx, fogState) {
         }
 
         // Quest badge (mini scroll)
+        ctx.globalAlpha = alpha;
         if (isExp && showBadges) {
             var locQuests = (S.quests || []).filter(function(q) { return q.loc === locId; });
             if (locQuests.length > 0) {
@@ -452,6 +456,7 @@ function _cvDrawMarkers(ctx, fogState) {
         }
 
         // Dungeon indicators
+        ctx.globalAlpha = alpha;
         if (isExp && showBadges) {
             var locDg = (S.dungeons || {})[locId] || [];
             if (locDg.length > 0) {

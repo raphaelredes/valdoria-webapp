@@ -228,7 +228,7 @@ function handleLocationTap(locId) {
     const connCount = (connectionGraph[locId] || []).length;
 
     // Biome + inline meta (distance, routes)
-    const biomeInfo = BIOME_INFO[locData.b] || BIOME_INFO.plains;
+    const biomeInfo = BIOME_INFO[(locData && locData.b) || 'plains'] || BIOME_INFO.plains;
     const biomeLabel = biomeInfo.label || locData.b;
     const biomeEl = document.getElementById('info-biome');
     const biomeColors = {
@@ -240,7 +240,7 @@ function handleLocationTap(locId) {
         biomeEl.innerHTML = '🌫️ Região Desconhecida';
         biomeEl.style.color = '';
     } else {
-        let biomeHtml = `${locData.s ? '🏘️ Assentamento' : '🌍 Região'} — ${biomeLabel}`;
+        let biomeHtml = `${(locData && locData.s) ? '🏘️ Assentamento' : '🌍 Região'} — ${biomeLabel}`;
         if (!isCurrent && wDist >= 0) {
             biomeHtml += ` <span class="meta-sep">·</span> 🕐 ${wDist} turno${wDist !== 1 ? 's' : ''}`;
         }
@@ -248,7 +248,7 @@ function handleLocationTap(locId) {
             biomeHtml += ` <span class="meta-sep">·</span> 🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}`;
         }
         biomeEl.innerHTML = biomeHtml;
-        biomeEl.style.color = biomeColors[locData.b] || '#a09484';
+        biomeEl.style.color = biomeColors[(locData && locData.b) || ''] || '#a09484';
     }
     // Difficult terrain tag (DMG p.106)
     var dtTag = document.getElementById('info-terrain-tag');
@@ -258,7 +258,7 @@ function handleLocationTap(locId) {
         dtTag.className = 'info-terrain-tag';
         biomeEl.parentNode.insertBefore(dtTag, biomeEl.nextSibling);
     }
-    if (locData.dt && !isKnownUnmapped) {
+    if (locData && locData.dt && !isKnownUnmapped) {
         dtTag.innerHTML = '⛰️ Terreno Difícil (×2 turnos)';
         dtTag.style.display = '';
     } else {
@@ -267,7 +267,7 @@ function handleLocationTap(locId) {
 
     // Description
     if (isExplored) {
-        document.getElementById('info-desc').textContent = locData.ds || '';
+        document.getElementById('info-desc').textContent = (locData && locData.ds) || '';
     } else if (isKnownMapped) {
         document.getElementById('info-desc').textContent =
             'Você ouviu relatos sobre este lugar, mas nunca esteve lá...';
