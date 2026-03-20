@@ -18,6 +18,7 @@
     h += "<div class=\"v-popup-section-label\">Recompensas</div>";
     for (var i = 0; i < rewards.length; i++) {
       var r = rewards[i];
+      if (!r || !r.text) continue;
       h += "<div class=\"v-popup-row\">" + (r.emoji || "") + " " + _esc(r.text) + "</div>";
     }
     return h;
@@ -157,6 +158,7 @@
   function _showVendorResult(d) {
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
+    if (d.item_name) body += "<div class=\"v-popup-row\">📦 " + _esc(d.item_name) + (d.price ? " — " + d.price + " GP" : "") + "</div>";
     body += _renderRewards(d.rewards);
     vPopup.show({ id: "plaza-event", header: d.title || "Compra", headerClass: cls, body: body,
       actions: [{ label: "🔙 Voltar ao Vendedor", action: d.back_cb || "square_vendor", cls: "v-popup-btn" }], closeOnOutside: false });
@@ -193,6 +195,7 @@
   function _showWorkResult(d) {
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
+    if (d.job_name) body += "<div class=\"v-popup-row\">⚒️ " + _esc(d.job_name) + "</div>";
     body += _renderRewards(d.rewards);
     if (d.leveled) body += "<div class=\"v-popup-row\" style=\"margin-top:8px\">🎉 <b>Nível acima!</b></div>";
     vPopup.show({ id: "plaza-event", header: d.title || "Trabalho", headerClass: cls, body: body,
@@ -237,9 +240,9 @@
   };
 
   function _dispatch(data) {
-    if (!data || !data.phase) return;
+    if (!data || !data.phase) { console.warn("[PLAZA] Missing data or phase", data); return; }
     var fn = _phases[data.phase];
-    if (fn) fn(data);
+    if (fn) { try { fn(data); } catch(e) { console.error("[PLAZA] Error in phase", data.phase, e); } }
     else console.warn("[PLAZA] Unknown phase:", data.phase);
   }
 
