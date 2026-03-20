@@ -48,20 +48,20 @@
     body += _renderRewards(d.rewards);
     if (d.leveled) body += "<div class=\"v-popup-row\" style=\"margin-top:8px\">🎉 <b>Nível acima!</b></div>";
     vPopup.show({ id: "plaza-event", header: d.title || "Resultado", headerClass: cls, body: body,
-      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: true });
+      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: false });
   }
 
   function _showEntry(d) {
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative || d.message) + "</div>";
     body += _renderRewards(d.rewards);
     vPopup.show({ id: "plaza-event", header: "🏛️ Praça Central", body: body,
-      actions: [{ label: "Continuar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: true });
+      actions: [{ label: "Continuar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: false });
   }
 
   function _showCooldown(d) {
     var body = "<div class=\"v-popup-desc\">⏳ " + _esc(d.message) + "</div>";
     vPopup.show({ id: "plaza-event", header: "Aguarde", headerClass: "v-popup-header--warning", body: body,
-      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: true });
+      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: false });
   }
 
   /* ===== GAMBLE ===== */
@@ -92,7 +92,7 @@
     var actions = [];
     if (d.can_play_again) actions.push({ label: "🎲 Jogar Novamente", action: d.play_again_cb || "square_gamble", cls: "v-popup-btn" });
     actions.push({ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" });
-    vPopup.show({ id: "plaza-event", header: "🎲 Resultado", headerClass: cls, body: body, actions: actions, closeOnOutside: true });
+    vPopup.show({ id: "plaza-event", header: "🎲 Resultado", headerClass: cls, body: body, actions: actions, closeOnOutside: false });
   }
 
   /* ===== BULLETIN ===== */
@@ -112,7 +112,7 @@
       body += "<div class=\"v-popup-desc\">Nenhum aviso no momento.</div>";
     }
     vPopup.show({ id: "plaza-event", header: "📋 Mural de Avisos", body: body,
-      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" }], closeOnOutside: true });
+      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" }], closeOnOutside: false });
   }
 
   function _showBulletinResult(d) {
@@ -120,7 +120,7 @@
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     body += _renderRewards(d.rewards);
     vPopup.show({ id: "plaza-event", header: d.title || "Mural", headerClass: cls, body: body,
-      actions: [{ label: "🔙 Voltar ao Mural", action: d.back_cb || "square_bulletin", cls: "v-popup-btn" }], closeOnOutside: true });
+      actions: [{ label: "🔙 Voltar ao Mural", action: d.back_cb || "square_bulletin", cls: "v-popup-btn" }], closeOnOutside: false });
   }
 
   /* ===== VENDOR ===== */
@@ -159,7 +159,7 @@
     var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
     body += _renderRewards(d.rewards);
     vPopup.show({ id: "plaza-event", header: d.title || "Compra", headerClass: cls, body: body,
-      actions: [{ label: "🔙 Voltar ao Vendedor", action: d.back_cb || "square_vendor", cls: "v-popup-btn" }], closeOnOutside: true });
+      actions: [{ label: "🔙 Voltar ao Vendedor", action: d.back_cb || "square_vendor", cls: "v-popup-btn" }], closeOnOutside: false });
   }
 
   /* ===== WORK ===== */
@@ -196,7 +196,26 @@
     body += _renderRewards(d.rewards);
     if (d.leveled) body += "<div class=\"v-popup-row\" style=\"margin-top:8px\">🎉 <b>Nível acima!</b></div>";
     vPopup.show({ id: "plaza-event", header: d.title || "Trabalho", headerClass: cls, body: body,
-      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" }], closeOnOutside: true });
+      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" }], closeOnOutside: false });
+  }
+
+
+  /* ===== ENTRY CHOICE ===== */
+
+  function _showEntryChoice(d) {
+    var body = "<div class=\"v-popup-desc\">" + _esc(d.desc) + "</div>";
+    body += "<div class=\"v-popup-divider\"></div>";
+    var actions = [];
+    for (var i = 0; i < d.choices.length; i++) {
+      var c = d.choices[i];
+      var label = _esc(c.label);
+      if (c.stat_hint) {
+        var pct = parseInt(c.stat_hint.replace(/[^0-9]/g, ""), 10) || 50;
+        label += " " + _diffDot(pct) + " <small>" + _esc(c.stat_hint) + "</small>";
+      }
+      actions.push({ html: label, action: c.cb, cls: "v-popup-btn" });
+    }
+    vPopup.show({ id: "plaza-event", header: d.title || "Acontecimento", body: body, actions: actions, closeOnOutside: false });
   }
 
   /* ===== DISPATCHER ===== */
@@ -213,7 +232,8 @@
     vendor: _showVendor,
     vendor_result: _showVendorResult,
     work: _showWork,
-    work_result: _showWorkResult
+    work_result: _showWorkResult,
+    entry_choice: _showEntryChoice
   };
 
   function _dispatch(data) {

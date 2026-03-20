@@ -136,7 +136,7 @@ window.ValdoriaLoadingController = function(config) {
     }
 
     function _cinematicExit(cb) {
-        if (!overlay) { if (cb) cb(); return; }
+        if (!overlay || overlay.classList.contains('hidden')) { if (cb) cb(); return; }
         if (progressEl) progressEl.style.width = '100%';
         if (HAS_RING_ACCEL) _updateRingSpeed(100);
         if (HAS_GEM_PHASE) _updateGemPhase(100);
@@ -199,6 +199,7 @@ window.ValdoriaLoadingController = function(config) {
         },
 
         show: function(isRetry) {
+            if (_state === 'hiding') this.forceHide();
             _cleanup();
             _state = 'loading';
             _loadStart = Date.now();
@@ -283,7 +284,9 @@ window.ValdoriaLoadingController = function(config) {
         },
 
         setProgress: function(pct, stageName) {
-            _realProgress = Math.min(100, pct);
+            pct = Math.max(0, Math.min(100, pct || 0));
+            if (isNaN(pct)) pct = 0;
+            _realProgress = pct;
             _progress = _realProgress;
             if (progressEl) { progressEl.style.width = _progress + '%'; progressEl.setAttribute('aria-valuenow', Math.round(_progress)); }
             if (stageEl && stageName) stageEl.textContent = stageName;
