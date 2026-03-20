@@ -225,14 +225,22 @@ function _renderFogOverlay(svg, fogState) {
     // ── Step 4: Punch reveal holes ──
     ctx.globalCompositeOperation = 'destination-out';
     for (const { x, y, radius, strength, flatZone } of reveals) {
-        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
-        grad.addColorStop(0, `rgba(0,0,0,${strength})`);
-        grad.addColorStop(flatZone, `rgba(0,0,0,${strength})`);
-        grad.addColorStop(flatZone + 0.2, `rgba(0,0,0,${strength * 0.4})`);
-        grad.addColorStop(flatZone + 0.35, `rgba(0,0,0,${strength * 0.08})`);
-        grad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        if (typeof _cvDetail !== 'undefined' && _cvDetail < 1) {
+            // Lite: flat circle instead of gradient (much cheaper)
+            ctx.fillStyle = `rgba(0,0,0,${strength})`;
+            ctx.beginPath();
+            ctx.arc(x, y, radius * (flatZone + 0.2), 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            grad.addColorStop(0, `rgba(0,0,0,${strength})`);
+            grad.addColorStop(flatZone, `rgba(0,0,0,${strength})`);
+            grad.addColorStop(flatZone + 0.2, `rgba(0,0,0,${strength * 0.4})`);
+            grad.addColorStop(flatZone + 0.35, `rgba(0,0,0,${strength * 0.08})`);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        }
     }
 
     // ── Step 5: Organic edge splotches around reveal boundaries ──

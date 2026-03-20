@@ -1066,7 +1066,7 @@
             padding: 8px 16px;
             border-radius: 4px;
             font-size: 13px;
-            z-index: 300;
+            z-index: var(--v-z-dropdown, 200);
             animation: fadeInUp 0.3s ease;
             font-family: 'MedievalSharp', serif;
         }
@@ -2119,6 +2119,29 @@
         @keyframes dotPulse {
             0%, 100% { opacity: 0.2; }
             50% { opacity: 1; }
+        }
+
+        /* Skip button for travel/journal overlays */
+        .travel-overlay .v-skip-btn,
+        .travel-journal-overlay .v-skip-btn {
+            position: absolute;
+            bottom: max(24px, env(safe-area-inset-bottom, 0px));
+            left: 50%;
+            transform: translateX(-50%);
+            background: none;
+            border: none;
+            color: var(--v-text-dim, #a09484);
+            font-size: 12px;
+            font-family: 'Cinzel', serif;
+            cursor: pointer;
+            padding: 8px 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+        .travel-overlay .v-skip-btn.visible,
+        .travel-journal-overlay .v-skip-btn.visible {
+            opacity: 1;
         }
 
         /* Font override — applied via JS on body[data-font] */
