@@ -37,6 +37,8 @@ window.ValdoriaLoadingController = function(config) {
     var _progress = 0;
     var _realProgress = -1;
     var _timers = {};
+    var _hideCb = null;
+    var _cinematicTimers = [];
 
     if (!retryBtn && overlay) {
         retryBtn = document.createElement('button');
@@ -136,6 +138,7 @@ window.ValdoriaLoadingController = function(config) {
     }
 
     function _cinematicExit(cb) {
+        _hideCb = cb;
         if (!overlay || overlay.classList.contains('hidden')) { if (cb) cb(); return; }
         if (progressEl) progressEl.style.width = '100%';
         if (HAS_RING_ACCEL) _updateRingSpeed(100);
@@ -147,7 +150,7 @@ window.ValdoriaLoadingController = function(config) {
                 Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
             }
         } catch (_) {}
-        setTimeout(function() {
+        _cinematicTimers.push(setTimeout(function() {
             overlay.classList.add('exit-cinematic');
             var _exitDone = false;
             function _finishCinematic() {
@@ -156,6 +159,8 @@ window.ValdoriaLoadingController = function(config) {
                 overlay.classList.add('hidden');
                 _state = 'hidden';
                 if (retryBtn) retryBtn.style.display = 'none';
+                _hideCb = null;
+                _cinematicTimers = [];
                 if (cb) cb();
             }
             overlay.addEventListener('animationend', function onEnd(e) {
@@ -164,8 +169,8 @@ window.ValdoriaLoadingController = function(config) {
                     _finishCinematic();
                 }
             });
-            setTimeout(_finishCinematic, 950);
-        }, 350);
+            _cinematicTimers.push(setTimeout(_finishCinematic, 950));
+        }, 350));
     }
 
     return {
@@ -190,12 +195,15 @@ window.ValdoriaLoadingController = function(config) {
 
         forceHide: function() {
             _cleanup();
+            _cinematicTimers.forEach(function(t) { clearTimeout(t); });
+            _cinematicTimers = [];
             if (overlay) {
                 overlay.classList.add('hidden');
                 overlay.classList.remove('exit-cinematic');
             }
             if (retryBtn) retryBtn.style.display = 'none';
             _state = 'hidden';
+            if (_hideCb) { try { _hideCb(); } catch(e) {} _hideCb = null; }
         },
 
         show: function(isRetry) {
