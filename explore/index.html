@@ -314,6 +314,7 @@
             <div class="camp-dice-title" id="heal-dice-title"></div>
             <div class="dice3d-canvas camp-dice-canvas" id="heal-dice-canvas"></div>
             <div class="camp-dice-label" id="heal-dice-label"></div>
+            <button class="v-skip-btn" id="heal-dice-skip" style="display:none">Continuar >></button>
         </div>
     </div>
 
@@ -346,6 +347,7 @@
             <div class="lowhp-hp-row" id="lowhp-hp-row"></div>
             <div class="lowhp-desc">Seus ferimentos são graves. O que deseja fazer?</div>
             <div class="lowhp-options" id="lowhp-options"></div>
+            <button class="v-skip-btn" onclick="document.getElementById('lowhp-overlay').classList.remove('active')">Continuar >></button>
         </div>
     </div>
 
@@ -368,6 +370,7 @@
             </div>
             <div class="return-journey-check" id="return-journey-check"></div>
             <div class="return-journey-actions" id="return-journey-actions"></div>
+            <button class="v-skip-btn" onclick="if(typeof _closeReturnJourney==='function')_closeReturnJourney();else document.getElementById('return-journey-overlay').classList.remove('active')">Continuar >></button>
         </div>
     </div>
 
