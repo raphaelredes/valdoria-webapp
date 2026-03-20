@@ -1093,7 +1093,7 @@
                             });
                             if (r.status === 401 || r.status === 403) {
                                 console.error('[MARKET] Auth error on transition:', r.status);
-                                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'MARKET', reason: 'session_expired' })); return; }
+                                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'MARKET', reason: 'session_expired' })); return; }
                             }
                             const d = await r.json();
                             if (d.url) {
@@ -1776,7 +1776,7 @@
                         console.error('[MARKET] Auth error on apply:', resp.status);
                         _txSending = false;
                         if (tg?.sendData) {
-                            tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'MARKET', reason: 'session_expired' }));
+                            tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'MARKET', reason: 'session_expired' }));
                             return;
                         }
                     }

@@ -1040,7 +1040,7 @@
                 });
                 if (r.status === 401 || r.status === 403) {
                     console.error('[LEVELUP] Auth error on transition:', r.status);
-                    if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'LEVELUP', reason: 'session_expired' })); return; }
+                    if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'LEVELUP', reason: 'session_expired' })); return; }
                 }
                 const d = await r.json();
                 if (d.url) { window.location.replace(d.url); return; }
@@ -1888,7 +1888,7 @@
                             console.error('[LEVELUP] Auth error on apply:', res.status);
                             document.getElementById('loadingOverlay').classList.remove('active');
                             if (tg?.sendData) {
-                                tg.sendData(JSON.stringify({ action: 'webapp_error_close', webapp: 'LEVELUP', reason: 'session_expired' }));
+                                tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'LEVELUP', reason: 'session_expired' }));
                                 return null;
                             }
                             showFatalError('Sessão expirada. Feche e reabra.');
