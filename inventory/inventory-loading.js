@@ -8,4 +8,4 @@
             'O couro da mochila range enquanto você vasculha seus pertences...',];window._invLoadingCtrl=ValdoriaLoadingController({overlayId: 'loadingOverlay',
             tips: TIPS,
             hasRingAccel: false,
-            hasGemPhase: false});})();
+            hasGemPhase: false,onTimeout:function(){console.error("[INVENTORY] Loading timeout");}});})();

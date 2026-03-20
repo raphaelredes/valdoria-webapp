@@ -27,7 +27,7 @@
     height: 100%;
     background: linear-gradient(90deg, var(--v-gold-dark, #8b6914), var(--v-gold));
     border-radius: var(--v-radius-pill);
-    transition: width var(--v-transition, 0.3s) ease;
+    transition: width var(--v-transition, var(--v-transition-base)) ease;
 }
 
 .codex-progress-text {
@@ -85,7 +85,7 @@
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm);
     cursor: pointer;
-    transition: border-color var(--v-transition, 0.2s);
+    transition: border-color var(--v-transition, var(--v-transition));
 }
 
 .codex-card:active {

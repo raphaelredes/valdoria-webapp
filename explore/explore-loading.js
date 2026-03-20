@@ -15,4 +15,4 @@
             '🗡️ Dica: Ladinos causam dano extra com Ataque Furtivo',
             '🎵 Dica: Bardos inspiram aliados com Inspiração Bárdica',
             '📜 Dica: Explore cada sala — tesouros escondidos aguardam',
-            '🧙 Dica: Magos podem preparar magias diferentes a cada descanso',];window._loadingCtrl=ValdoriaLoadingController({overlayId:"loading",tips:TIPS});})();
+            '🧙 Dica: Magos podem preparar magias diferentes a cada descanso',];window._loadingCtrl=ValdoriaLoadingController({overlayId:"loading",tips:TIPS,onTimeout:function(){console.error("[EXPLORE] Loading timeout");}});})();
