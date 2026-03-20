@@ -136,7 +136,7 @@
 .nav-btn:active { border-color: var(--v-gold-dim); }
 
 /* Immersive toggle */
-.immersive-toggle { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); background: var(--v-bg-raised); border: 1px solid var(--v-border); border-radius: var(--v-radius-pill); color: var(--v-text-dim); font-size: 18px; padding: 2px 16px; cursor: pointer; z-index: var(--v-z-sticky, 50); min-height: 28px; min-width: 44px; }
+.immersive-toggle { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); background: var(--v-bg-raised); border: 1px solid var(--v-border); border-radius: var(--v-radius-pill); color: var(--v-text-dim); font-size: var(--v-font-2xl); padding: 2px 16px; cursor: pointer; z-index: var(--v-z-sticky, 50); min-height: 28px; min-width: 44px; }
 .immersive-restore { position: fixed; bottom: var(--v-space-md); left: 50%; transform: translateX(-50%); background: var(--v-bg-raised); border: 1px solid var(--v-border); border-radius: var(--v-radius-pill); color: var(--v-text-dim); font-family: var(--v-font); font-size: var(--v-font-sm); padding: var(--v-space-xs) var(--v-space-lg); cursor: pointer; z-index: var(--v-z-sticky, 50); min-height: 36px; }
 
 /* Scrollbar hide */
