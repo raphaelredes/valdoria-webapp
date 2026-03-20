@@ -79,12 +79,12 @@ function _cvDrawSettlementIcon(ctx, x, y, sz) {
 
 function _cvDrawBiomeIcon(ctx, x, y, biome, sz, locName) {
     var nm = (locName || '').toLowerCase();
-    var _sw = 0.5, _so = 0.55;
+    var _sw = 0.8, _so = 0.80;
 
     // Fort
     if (nm.includes('forte') || nm.includes('fortaleza') || nm.includes('basti')) {
-        _cvRect(ctx, x-sz*0.6, y-sz*0.3, sz*1.2, sz*0.5, INK_DARK, 0.12, INK_DARK, _sw, _so);
-        _cvRect(ctx, x-sz*0.25, y-sz*1.1, sz*0.5, sz*1.3, INK_DARK, 0.14, INK_DARK, _sw, _so);
+        _cvRect(ctx, x-sz*0.6, y-sz*0.3, sz*1.2, sz*0.5, INK_DARK, 0.22, INK_DARK, _sw, _so);
+        _cvRect(ctx, x-sz*0.25, y-sz*1.1, sz*0.5, sz*1.3, INK_DARK, 0.25, INK_DARK, _sw, _so);
         for (var c = 0; c < 3; c++) {
             _cvRect(ctx, x-sz*0.25 + c * sz*0.18, y-sz*1.2, sz*0.12, sz*0.12, INK_DARK, 0.18, null, 0, 0);
         }
@@ -186,7 +186,7 @@ function _cvDrawBiomeIcon(ctx, x, y, biome, sz, locName) {
     }
     // Crater
     if (nm.includes('cratera') || nm.includes('vulc\u00e3')) {
-        _cvEllipse(ctx, x, y-sz*0.2, sz*0.8, sz*0.4, INK_DARK, 0.14, INK_DARK, _sw, _so);
+        _cvEllipse(ctx, x, y-sz*0.2, sz*0.8, sz*0.4, INK_DARK, 0.25, INK_DARK, _sw, _so);
         _cvEllipse(ctx, x, y-sz*0.2, sz*0.5, sz*0.25, INK_DARK, 0.15, null, 0, 0);
         for (var si2 = 0; si2 < 3; si2++) {
             var sx = x + (si2-1)*sz*0.3;
@@ -228,11 +228,11 @@ function _cvDrawBiomeIcon(ctx, x, y, biome, sz, locName) {
             for (var ti = -1; ti <= 1; ti++) {
                 var tx = x + ti * sz * 0.5, tsz = sz * (ti === 0 ? 0.7 : 0.5);
                 _cvLine(ctx, tx, y+2, tx, y-sz*0.8, INK_DARK, 0.4, _so);
-                _cvCircle(ctx, tx, y-sz*(ti===0?1.2:1.0), tsz, INK_DARK, 0.14, INK_DARK, 0.4, _so);
+                _cvCircle(ctx, tx, y-sz*(ti===0?1.2:1.0), tsz, INK_DARK, 0.25, INK_DARK, 0.4, _so);
             }
             break;
         case 'mountain':
-            _cvPolygon(ctx, [[x-sz, y+3], [x-sz*0.2, y-sz*1.3], [x-sz*0.2, y+3]], INK_DARK, 0.14, null, 0, 0);
+            _cvPolygon(ctx, [[x-sz, y+3], [x-sz*0.2, y-sz*1.3], [x-sz*0.2, y+3]], INK_DARK, 0.25, null, 0, 0);
             _cvLine(ctx, x-sz, y+3, x-sz*0.2, y-sz*1.3, INK_DARK, 0.65, _so);
             _cvLine(ctx, x-sz*0.2, y-sz*1.3, x+sz, y+3, INK_DARK, _sw, _so);
             _cvLine(ctx, x+sz*0.2, y+1, x+sz*0.6, y-sz*0.7, INK_DARK, 0.4, _so);
@@ -290,7 +290,7 @@ function _cvDrawBiomeIcon(ctx, x, y, biome, sz, locName) {
             break;
         case 'volcanic':
             _cvPolygon(ctx, [[x-sz*0.9, y+3], [x-1.5, y-sz], [x+1.5, y-sz], [x+sz*0.9, y+3]],
-                INK_DARK, 0.12, INK_DARK, _sw, _so);
+                INK_DARK, 0.25, INK_DARK, _sw, _so);
             ctx.beginPath();
             ctx.moveTo(x-2, y-sz); ctx.quadraticCurveTo(x, y-sz+2, x+2, y-sz);
             ctx.globalAlpha = 0.18; ctx.fillStyle = INK_DARK; ctx.fill();
@@ -301,11 +301,11 @@ function _cvDrawBiomeIcon(ctx, x, y, biome, sz, locName) {
             break;
         case 'snow':
             _cvPolygon(ctx, [[x-sz*0.15, y+1], [x, y-sz], [x+sz*0.15, y+1]],
-                INK_LIGHT, 0.12, INK_LIGHT, 0.3, 0.45);
+                INK_LIGHT, 0.22, INK_LIGHT, 0.5, 0.70);
             _cvPolygon(ctx, [[x-sz*0.5, y+1], [x-sz*0.3, y-sz*0.6], [x-sz*0.15, y+1]],
-                INK_LIGHT, 0.08, INK_LIGHT, 0.25, 0.4);
+                INK_LIGHT, 0.18, INK_LIGHT, 0.4, 0.65);
             _cvPolygon(ctx, [[x+sz*0.15, y+1], [x+sz*0.35, y-sz*0.5], [x+sz*0.55, y+1]],
-                INK_LIGHT, 0.08, INK_LIGHT, 0.25, 0.4);
+                INK_LIGHT, 0.18, INK_LIGHT, 0.4, 0.65);
             break;
         default:
             // Signpost
@@ -313,7 +313,7 @@ function _cvDrawBiomeIcon(ctx, x, y, biome, sz, locName) {
             ctx.beginPath();
             ctx.moveTo(x, y-sz*0.7); ctx.lineTo(x+sz*0.6, y-sz*0.8);
             ctx.lineTo(x+sz*0.6, y-sz*0.5); ctx.lineTo(x, y-sz*0.4); ctx.closePath();
-            ctx.globalAlpha = 0.14; ctx.fillStyle = INK_DARK; ctx.fill();
+            ctx.globalAlpha = 0.25; ctx.fillStyle = INK_DARK; ctx.fill();
             ctx.globalAlpha = _so; ctx.strokeStyle = INK_DARK; ctx.lineWidth = 0.3; ctx.stroke();
     }
 }
@@ -323,6 +323,7 @@ function _cvDrawBiomeIcon(ctx, x, y, biome, sz, locName) {
 // ═══════════════════════════════════════════════════════
 
 function _cvDrawMarkers(ctx, fogState) {
+    console.debug('[NAVIGATE] Drawing markers:', Object.keys(S.locations).length, 'locations');
     var currentAdj = new Set();
     for (var ei = 0; ei < CONNECTION_EDGES.length; ei++) {
         var a = CONNECTION_EDGES[ei][0], b = CONNECTION_EDGES[ei][1];
@@ -354,10 +355,10 @@ function _cvDrawMarkers(ctx, fogState) {
             var pulseA = 0.3 + 0.1 * Math.sin((_bannerSwayTime || 0) * 0.003);
             _cvCircle(ctx, x, y, R + 4, null, 0, '#c4953a', 1.5, pulseA);
             // Breathing scale — just draw normally (subtle)
-            var iconOc = _cvGetIcon(biome, name, 9, isSett);
+            var iconOc = _cvGetIcon(biome, name, 14, isSett);
             ctx.drawImage(iconOc, x - iconOc.width/2, y + 4 - iconOc.height/2);
         } else if (isExp) {
-            var iconOc2 = _cvGetIcon(biome, name, isSett ? 9 : 8, isSett);
+            var iconOc2 = _cvGetIcon(biome, name, isSett ? 12 : 12, isSett);
             ctx.drawImage(iconOc2, x - iconOc2.width/2, y + (isSett ? 4 : 2) - iconOc2.height/2);
         } else if (fog === 'known_mapped') {
             ctx.globalAlpha = alpha * 0.45;

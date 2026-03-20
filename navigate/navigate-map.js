@@ -203,11 +203,11 @@ function _renderFogOverlay(svg, fogState) {
 
         let radius, strength, flatZone;
         if (state === 'explored') {
-            radius = HEX_RADIUS * 8;
+            radius = HEX_RADIUS * 10;
             strength = 1.0;
             flatZone = 0.5;
         } else if (state === 'known_mapped') {
-            radius = HEX_RADIUS * 5.5;
+            radius = HEX_RADIUS * 7;
             strength = 0.88;
             flatZone = 0.4;
         } else if (state === 'known_unmapped') {
