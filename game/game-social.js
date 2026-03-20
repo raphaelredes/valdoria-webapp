@@ -113,7 +113,7 @@ function _buildChatMessages() {
         else {
             h += '<div class="social-msg"><span class="social-msg-meta">';
             if (m.time) h += '[' + _esc(m.time) + '] ';
-            if (m.icon) h += m.icon + ' ';
+            if (m.icon) h += _esc(m.icon) + ' ';
             h += _esc(m.name);
             if (m.level) h += ' Nv' + m.level;
             h += '</span> <span class="social-msg-text">' + _esc(m.text) + '</span></div>';
@@ -225,7 +225,7 @@ function _loadRelDetail(npcId) {
         _detailLoading = false;
         if (data && !data.error) _detailData = data;
         _render();
-    });
+    }).catch(function(e) { _detailLoading = false; console.error("[SOCIAL] rel_detail", e); _render(); });
 }
 
 function _renderActions() {
@@ -264,33 +264,28 @@ function _handleAction(action) {
     return false;
 }
 
+var _delegateSet = false;
 function _bindListeners() {
-    var tabs = document.querySelectorAll('.social-tabs .v-tab');
-    for (var t = 0; t < tabs.length; t++) {
-        tabs[t].addEventListener('click', function(e) {
-            e.preventDefault(); e.stopPropagation();
-            var tab = e.currentTarget.getAttribute('data-social-tab');
-            if (tab && tab !== _activeTab) {
-                _activeTab = tab; _detailNpc = null; _detailData = null;
-                try { localStorage.setItem('valdoria_social_tab', tab); } catch (ex) {}
-                _render();
-            }
-        });
-    }
-    var sendBtn = document.getElementById('social-send-btn');
-    var chatInput = document.getElementById('social-chat-input');
-    if (sendBtn) sendBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); if (chatInput) _chatSend(chatInput.value); });
-    if (chatInput) chatInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); _chatSend(chatInput.value); } });
-    var emBtns = document.querySelectorAll('.social-emote-btn');
-    for (var i = 0; i < emBtns.length; i++) emBtns[i].addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); var em = e.currentTarget.getAttribute('data-emote'); if (em) _chatEmote(em); });
-    var intBtns = document.querySelectorAll('.social-interact-btn');
-    for (var j = 0; j < intBtns.length; j++) intBtns[j].addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); var uid = parseInt(e.currentTarget.getAttribute('data-target'), 10); if (uid) _socialSend(uid, 'wave'); });
-    var accBtns = document.querySelectorAll('[data-accept]');
-    for (var a = 0; a < accBtns.length; a++) accBtns[a].addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); var rid = e.currentTarget.getAttribute('data-accept'); if (rid) _socialAction('social_accept', rid); });
-    var decBtns = document.querySelectorAll('[data-decline]');
-    for (var dd = 0; dd < decBtns.length; dd++) decBtns[dd].addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); var rid = e.currentTarget.getAttribute('data-decline'); if (rid) _socialAction('social_decline', rid); });
-    var npcCards = document.querySelectorAll('.social-npc');
-    for (var n = 0; n < npcCards.length; n++) npcCards[n].addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); var nid = e.currentTarget.getAttribute('data-npc'); if (nid) _loadRelDetail(nid); });
+    if (_delegateSet) return;
+    _delegateSet = true;
+    document.addEventListener('click', function(e) {
+        var t = e.target.closest('[data-social-tab]');
+        if (t) { e.preventDefault(); e.stopPropagation(); var tab = t.getAttribute('data-social-tab'); if (tab && tab !== _activeTab) { _activeTab = tab; _detailNpc = null; _detailData = null; try { localStorage.setItem('valdoria_social_tab', tab); } catch(ex){} _render(); } return; }
+        if (e.target.closest('#social-send-btn')) { e.preventDefault(); e.stopPropagation(); var inp = document.getElementById('social-chat-input'); if (inp) _chatSend(inp.value); return; }
+        var em = e.target.closest('.social-emote-btn');
+        if (em) { e.preventDefault(); e.stopPropagation(); var ek = em.getAttribute('data-emote'); if (ek) _chatEmote(ek); return; }
+        var ib = e.target.closest('.social-interact-btn');
+        if (ib) { e.preventDefault(); e.stopPropagation(); var uid = parseInt(ib.getAttribute('data-target'), 10); if (uid) _socialSend(uid, 'wave'); return; }
+        var ab = e.target.closest('[data-accept]');
+        if (ab) { e.preventDefault(); e.stopPropagation(); var rid = ab.getAttribute('data-accept'); if (rid) _socialAction('social_accept', rid); return; }
+        var db = e.target.closest('[data-decline]');
+        if (db) { e.preventDefault(); e.stopPropagation(); var rid2 = db.getAttribute('data-decline'); if (rid2) _socialAction('social_decline', rid2); return; }
+        var nc = e.target.closest('.social-npc[data-npc]');
+        if (nc) { e.preventDefault(); e.stopPropagation(); var nid = nc.getAttribute('data-npc'); if (nid) _loadRelDetail(nid); return; }
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target && e.target.id === 'social-chat-input') { e.preventDefault(); _chatSend(e.target.value); }
+    });
 }
 
 function _chatSend(text) {
@@ -319,6 +314,8 @@ function _chatSend(text) {
 }
 
 function _chatEmote(key) {
+    if (_sending) return;
+    _sending = true;
     if (typeof haptic === 'function') haptic('light');
     _fetchSocial({ action: 'chat_emote', emote: key }).then(function(data) {
         if (data && data.ok) {
@@ -334,7 +331,8 @@ function _chatEmote(key) {
         } else if (data && data.error === 'cooldown') {
             if (typeof vToast === 'function') vToast('\u23f3 Aguarde um momento...', 'warn');
         }
-    });
+        _sending = false;
+    }).catch(function() { _sending = false; });
 }
 
 function _socialSend(targetUid, type) {

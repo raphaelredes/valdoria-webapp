@@ -266,7 +266,7 @@
     margin-bottom: var(--v-space-md);
 }
 .social-npc-detail-header .mood-big {
-    font-size: 32px;
+    font-size: var(--v-font-2xl, 18px);
 }
 .social-npc-detail-header .tier-badge {
     display: inline-block;
@@ -345,7 +345,7 @@
     font-size: var(--v-font-base);
 }
 .social-empty-icon {
-    font-size: 32px;
+    font-size: var(--v-font-2xl, 18px);
     margin-bottom: var(--v-space-sm);
 }
 
@@ -374,4 +374,14 @@
     border-radius: var(--v-radius-sm);
     margin-left: var(--v-space-xs);
     vertical-align: middle;
+}
+/* 13. Focus-visible for accessibility */
+.social-emote-btn:focus-visible,
+.social-send-btn:focus-visible,
+.social-interact-btn:focus-visible,
+.social-req-btn:focus-visible,
+.social-npc:focus-visible,
+.social-chat-input:focus-visible {
+    outline: 2px solid var(--v-gold);
+    outline-offset: 2px;
 }
