@@ -80,24 +80,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
 
     <!-- Loading controller -->
     <script>
-    (function() {
-        var TIPS = [
-            'O cheiro de couro e tinta de pergaminho permeia o salao da guilda...',
-            'Aventureiros conversam aos sussurros sobre tesouros escondidos...',
-            'O quadro de missoes esta repleto de pedidos de ajuda...',
-            'Armas e escudos adornam as paredes do salao como trofeus...',
-            'Uma lareira crepita no centro, aquecendo os bravos aventureiros...',
-            'O registro da guilda guarda historias de incontaveis jornadas...',
-            'Mapas antigos e diarios de campo cobrem a grande mesa central...',
-            'O mestre da guilda examina os contratos com olhar atento...',
-        ];
-        window._guildLoadingCtrl = ValdoriaLoadingController({
-            overlayId: 'loadingOverlay',
-            tips: TIPS,
-            hasRingAccel: false,
-            hasGemPhase: false
-        });
-    })();
+    document.write('<script src="guild-loading.js?v=' + v + '"><\/script>');
     </script>
 
     <div class="guild-header">

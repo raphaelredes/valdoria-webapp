@@ -608,8 +608,11 @@
             </div>
         </div>
         <div class="dice-loading-title">MESA DE DADOS</div>
-        <div class="dice-loading-text">Preparando a mesa...</div>
+        <div class="dice-loading-text" id="dice-loading-tip">Preparando a mesa...</div>
     </div>
+    <script>
+    document.write('<script src="dice-loading.js?v=' + v + '"><\/script>');
+    </script>
     <div class="v-header">
         <h1 id="headerTitle">Mesa de Dados</h1>
         <div class="v-progress-label" id="headerLabel"></div>
@@ -1808,15 +1811,19 @@
 
         var _diceLoadStart = Date.now();
         init();
-        // Dismiss loading overlay with minimum display time
-        var lo = document.getElementById('loadingOverlay');
-        if (lo) {
-            var elapsed = Date.now() - _diceLoadStart;
-            var remaining = Math.max(0, 2000 - elapsed);
-            setTimeout(function() {
-                lo.classList.add('v-hidden');
-                setTimeout(function () { lo.remove(); }, 500);
-            }, remaining);
+        // Dismiss loading overlay via ValdoriaLoadingController
+        if (window._diceLoadingCtrl) {
+            window._diceLoadingCtrl.hide();
+        } else {
+            var lo = document.getElementById('loadingOverlay');
+            if (lo) {
+                var elapsed = Date.now() - _diceLoadStart;
+                var remaining = Math.max(0, 2000 - elapsed);
+                setTimeout(function() {
+                    lo.classList.add('v-hidden');
+                    setTimeout(function () { lo.remove(); }, 500);
+                }, remaining);
+            }
         }
     </script>
 <script>document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');</script>

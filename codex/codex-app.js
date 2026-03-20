@@ -264,21 +264,16 @@
     // ── Helpers ───────────────────────────────────────────────────────
 
     function _hideLoading() {
-        var overlay = document.getElementById('loadingOverlay');
         var app = document.getElementById('app');
-        var minLoad = window.VALDORIA_MIN_LOAD_MS || 5000;
-        var elapsed = Date.now() - (window._loadStart || Date.now());
-        var remaining = minLoad - elapsed;
-
-        function doHide() {
-            if (overlay) overlay.style.display = 'none';
+        function doShow() {
             if (app) app.style.display = 'block';
         }
-
-        if (remaining > 0) {
-            setTimeout(doHide, remaining);
+        if (window._codexLoadingCtrl) {
+            window._codexLoadingCtrl.hide(doShow);
         } else {
-            doHide();
+            var overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'none';
+            doShow();
         }
     }
 

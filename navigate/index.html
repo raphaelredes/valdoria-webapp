@@ -2268,6 +2268,19 @@
             <div class="mc-completion-wave wave-2"></div>
         </div>
 
+        <div class="loading-brand">
+            <div class="loading-title">MAPA DO MUNDO</div>
+            <div class="loading-divider"><span class="divider-rune">&#9670;</span></div>
+        </div>
+        <div class="loading-progress-wrap">
+            <div class="loading-progress-track">
+                <div id="loading-progress" class="loading-progress-fill"></div>
+            </div>
+        </div>
+        <div class="loading-tip-area">
+            <div id="loading-tip" class="loading-tip" role="status" aria-live="polite">Preparando o mapa...</div>
+            <div id="loading-stage" class="loading-stage"></div>
+        </div>
         <div class="loading-flash"></div>
     </div>
 
@@ -2415,7 +2428,7 @@
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
-        var scripts = ['map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-map-terrain.js', 'navigate-map-decor.js', 'navigate-canvas-renderer.js', 'navigate-canvas-icons.js', 'navigate-ambient.js', 'navigate-ui.js'];
+        var scripts = ['navigate-loading.js', 'map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-map-terrain.js', 'navigate-map-decor.js', 'navigate-canvas-renderer.js', 'navigate-canvas-icons.js', 'navigate-ambient.js', 'navigate-ui.js'];
         scripts.forEach(function (s) { document.write('<script src="' + s + '?v=' + v + '"><\/script>'); });
     </script>
     <script>
