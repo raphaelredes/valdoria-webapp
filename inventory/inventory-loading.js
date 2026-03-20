@@ -1,0 +1,11 @@
+(function(){var TIPS=['Você desamarra as fivelas da mochila de couro surrado...',
+            'O cheiro de ervas secas e metal se mistura ao abrir o alforje...',
+            'Seus dedos percorrem os compartimentos, catalogando seus pertences...',
+            'Frascos tilintam contra lâminas enquanto você organiza seus itens...',
+            'A luz da tocha revela o brilho de uma gema esquecida no fundo...',
+            'Cordas, tochas e rações — tudo que um aventureiro precisa...',
+            'Cada item carrega uma história das aventuras que você viveu...',
+            'O couro da mochila range enquanto você vasculha seus pertences...',];window._invLoadingCtrl=ValdoriaLoadingController({overlayId: 'loadingOverlay',
+            tips: TIPS,
+            hasRingAccel: false,
+            hasGemPhase: false});})();
