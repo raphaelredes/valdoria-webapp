@@ -1097,7 +1097,7 @@
                             }
                             const d = await r.json();
                             if (d.url) {
-                                window.location.replace(d.url);
+                                window.__valdoria_transitioning = true; window.location.replace(d.url);
                                 return;
                             }
                         } catch (e) { console.error('[MARKET] Transition failed:', e); }
