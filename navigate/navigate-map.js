@@ -236,8 +236,8 @@ function _renderFogOverlay(svg, fogState) {
     }
 
     // ── Step 5: Organic edge splotches around reveal boundaries ──
-    // Place small irregular blobs at the edge of each reveal circle
-    // (no getImageData needed — we know the boundary radius)
+    // (Medium+ only — expensive blob shapes, skipped on lite devices)
+    if (typeof _cvDetail !== 'undefined' && _cvDetail >= 1) {
     ctx.globalCompositeOperation = 'destination-out';
     for (const { x, y, radius, strength, flatZone } of reveals) {
         const edgeR = radius * (flatZone + 0.25); // outer boundary zone
@@ -266,8 +266,11 @@ function _renderFogOverlay(svg, fogState) {
             ctx.fill();
         }
     }
+    } // end _cvDetail >= 1 (Step 5)
 
     // ── Step 6: Parchment texture on fog ──
+    // (Full detail only — stipple dots + crosshatch, skipped on lite/medium)
+    if (typeof _cvDetail !== 'undefined' && _cvDetail >= 2) {
     ctx.globalCompositeOperation = 'source-atop';
 
     // Fine stipple dots (medieval parchment feel)
@@ -294,6 +297,7 @@ function _renderFogOverlay(svg, fogState) {
         ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len);
         ctx.stroke();
     }
+    } // end _cvDetail >= 2 (Step 6)
 }
 
 // ===============================================================
