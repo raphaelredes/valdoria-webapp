@@ -203,6 +203,80 @@
   }
 
 
+  /* ===== CARTOGRAPHER ===== */
+
+  function _showCartographer(d) {
+    var body = "";
+    if (d.greeting) body += "<div class=\"v-popup-desc\">" + _esc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
+    body += "<div class=\"v-popup-row\">\ud83d\udcb0 Ouro: " + (d.gold || 0) + " GP</div>";
+
+    if (d.all_owned) {
+      body += "<div class=\"v-popup-divider\"></div>";
+      body += "<div class=\"v-popup-section-label\">\u2705 Cole\u00e7\u00e3o Completa!</div>";
+      if (d.owned && d.owned.length) {
+        for (var i = 0; i < d.owned.length; i++) {
+          var o = d.owned[i];
+          body += "<div class=\"v-popup-row\">" + (o.emoji || "\ud83d\uddfa\ufe0f") + " " + _esc(o.name) + "</div>";
+        }
+      }
+    } else {
+      if (d.owned && d.owned.length) {
+        body += "<div class=\"v-popup-divider\"></div>";
+        body += "<div class=\"v-popup-section-label\">\u2705 Adquiridos</div>";
+        for (var i = 0; i < d.owned.length; i++) {
+          var o = d.owned[i];
+          body += "<div class=\"v-popup-row\">" + (o.emoji || "\ud83d\uddfa\ufe0f") + " " + _esc(o.name) + "</div>";
+        }
+      }
+      if (d.tiers && d.tiers.length) {
+        for (var t = 0; t < d.tiers.length; t++) {
+          var tier = d.tiers[t];
+          body += "<div class=\"v-popup-divider\"></div>";
+          body += "<div class=\"v-popup-section-label\">" + (tier.icon || "") + " " + _esc(tier.label) + "</div>";
+          for (var j = 0; j < tier.items.length; j++) {
+            var it = tier.items[j];
+            var afford = (!it.affordable) ? " style=\"opacity:0.5\"" : "";
+            var hint = "";
+            if (it.stat_hint) {
+              var pct = parseInt(it.stat_hint.replace(/[^0-9]/g, ""), 10) || 50;
+              hint = " " + _diffDot(pct) + " <small>" + _esc(it.stat_hint) + "</small>";
+            }
+            body += "<div class=\"v-popup-row\"" + afford + ">";
+            body += (it.emoji || "\ud83d\uddfa\ufe0f") + " " + _esc(it.name) + " \u2014 " + it.price + " GP" + hint;
+            body += "</div>";
+          }
+        }
+      }
+      if (d.master) {
+        body += "<div class=\"v-popup-divider\"></div>";
+        body += "<div class=\"v-popup-section-label\">\ud83c\udf0d Mapa Mestre</div>";
+        var mAfford = (!d.master.affordable) ? " style=\"opacity:0.5\"" : "";
+        body += "<div class=\"v-popup-row\"" + mAfford + ">\ud83c\udf0d Mapa Mestre \u2014 " + d.master.price + " GP</div>";
+      }
+    }
+
+    var actions = [];
+    if (!d.all_owned) {
+      if (d.tiers) {
+        for (var t = 0; t < d.tiers.length; t++) {
+          var tier = d.tiers[t];
+          for (var j = 0; j < tier.items.length; j++) {
+            var it = tier.items[j];
+            if (it.affordable) {
+              var lbl = (it.emoji || "\ud83d\uddfa\ufe0f") + " " + _esc(it.name) + " (" + it.price + " GP)";
+              actions.push({ html: lbl, action: it.cb, cls: "v-popup-btn" });
+            }
+          }
+        }
+      }
+      if (d.master && d.master.affordable) {
+        actions.push({ label: "\ud83c\udf0d Mapa Mestre (" + d.master.price + " GP)", action: d.master.cb, cls: "v-popup-btn" });
+      }
+    }
+    actions.push({ label: "\ud83d\udd19 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" });
+    vPopup.show({ id: "plaza-event", header: "\ud83d\uddfa\ufe0f " + _esc(d.npc_name || "Cart\u00f3grafo"), body: body, actions: actions, closeOnOutside: false });
+  }
+
   /* ===== ENTRY CHOICE ===== */
 
   function _showEntryChoice(d) {
@@ -236,7 +310,8 @@
     vendor_result: _showVendorResult,
     work: _showWork,
     work_result: _showWorkResult,
-    entry_choice: _showEntryChoice
+    entry_choice: _showEntryChoice,
+    cartographer_menu: _showCartographer
   };
 
   function _dispatch(data) {
