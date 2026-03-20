@@ -89,10 +89,11 @@ _lastTerrainType=terrain;}
 var _EVENT_OVERLAY_IDS=['dm-overlay','check-overlay','outcome-overlay','combat-overlay','portal-overlay','encounter-overlay','exit-risk-overlay','death-overlay','camp-overlay','camp-result-overlay','lowhp-overlay','activity-overlay','heal-dice-overlay','camp-dice-overlay','return-journey-overlay',];function isEventActive(){for(let i=0;i<_EVENT_OVERLAY_IDS.length;i++){const el=document.getElementById(_EVENT_OVERLAY_IDS[i]);if(el&&el.classList.contains('active'))return true;}
 return false;}
 function setEventActive(val){}
-function activateOverlay(overlayId){const children=_OVERLAY_CHILDREN[overlayId];if(children){for(const childId of children){const el=document.getElementById(childId);if(el)el.innerHTML='';}}
+var _overlayTimestamps={};function _startOverlayWatchdog(){setInterval(function(){var now=Date.now();for(var id in _overlayTimestamps){var el=document.getElementById(id);if(!el||!el.classList.contains('active')){delete _overlayTimestamps[id];continue;}if(now-_overlayTimestamps[id]>30000){console.warn('[EXPLORE] Stuck overlay detected, force-dismissing:',id);el.classList.remove('active');delete _overlayTimestamps[id];}}},15000);}
+setTimeout(_startOverlayWatchdog,5000);function activateOverlay(overlayId){_overlayTimestamps[overlayId]=Date.now();const children=_OVERLAY_CHILDREN[overlayId];if(children){for(const childId of children){const el=document.getElementById(childId);if(el)el.innerHTML='';}}
 const overlay=document.getElementById(overlayId);if(overlay)overlay.removeAttribute('data-event');if(!overlay){console.error('[EXPLORE] activateOverlay: element not found:',overlayId);return null;}
 overlay.classList.add('active');return overlay;}
-function deactivateOverlay(overlayId){const overlay=document.getElementById(overlayId);if(overlay)overlay.classList.remove('active');}
+function deactivateOverlay(overlayId){delete _overlayTimestamps[overlayId];const overlay=document.getElementById(overlayId);if(overlay)overlay.classList.remove('active');}
 function getNeighbors(col,row){const offsets=row%2===0?EVEN_OFFSETS:ODD_OFFSETS;return offsets.map(([dc,dr])=>[col+dc,row+dr]).filter(([c,r])=>c>=0&&c<COLS&&r>=0&&r<ROWS);}
 function isAdjacent(c1,r1,c2,r2){return getNeighbors(c1,r1).some(([c,r])=>c===c2&&r===r2);}
 function hexDist(c1,r1,c2,r2){function toCube(col,row){const x=col-(row-(row&1))/2;const z=row;const y=-x-z;return[x,y,z];}
