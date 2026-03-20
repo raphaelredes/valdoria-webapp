@@ -58,7 +58,7 @@ window.ValdoriaLoadingController = function(config) {
     _timers.progress = setInterval(function() {
         if (_realProgress >= 0) return;
         _progress += (90 - _progress) * 0.08;
-        if (progressEl) progressEl.style.width = _progress + '%';
+        if (progressEl) { progressEl.style.width = _progress + '%'; progressEl.setAttribute('aria-valuenow', Math.round(_progress)); }
         if (HAS_RING_ACCEL) _updateRingSpeed(_progress);
         if (HAS_GEM_PHASE) _updateGemPhase(_progress);
     }, 200);
@@ -231,7 +231,7 @@ window.ValdoriaLoadingController = function(config) {
             _timers.progress = setInterval(function() {
                 if (_realProgress >= 0) return;
                 _progress += (90 - _progress) * 0.08;
-                if (progressEl) progressEl.style.width = _progress + '%';
+                if (progressEl) { progressEl.style.width = _progress + '%'; progressEl.setAttribute('aria-valuenow', Math.round(_progress)); }
                 if (HAS_RING_ACCEL) _updateRingSpeed(_progress);
                 if (HAS_GEM_PHASE) _updateGemPhase(_progress);
             }, 200);
@@ -285,7 +285,7 @@ window.ValdoriaLoadingController = function(config) {
         setProgress: function(pct, stageName) {
             _realProgress = Math.min(100, pct);
             _progress = _realProgress;
-            if (progressEl) progressEl.style.width = _progress + '%';
+            if (progressEl) { progressEl.style.width = _progress + '%'; progressEl.setAttribute('aria-valuenow', Math.round(_progress)); }
             if (stageEl && stageName) stageEl.textContent = stageName;
             if (HAS_RING_ACCEL) _updateRingSpeed(_progress);
             if (HAS_GEM_PHASE) _updateGemPhase(_progress);

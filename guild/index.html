@@ -92,8 +92,10 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
             'O mestre da guilda examina os contratos com olhar atento...',
         ];
         window._guildLoadingCtrl = ValdoriaLoadingController({
-            overlayId: 'loading',
-            tips: TIPS
+            overlayId: 'loadingOverlay',
+            tips: TIPS,
+            hasRingAccel: false,
+            hasGemPhase: false
         });
     })();
     </script>
@@ -157,7 +159,6 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
-        document.write('<script src="guild-loading.js?v=' + v + '"><\/script>');
         document.write('<script src="guild-core.js?v=' + v + '"><\/script>');
         document.write('<script src="guild-party.js?v=' + v + '"><\/script>');
         document.write('<script src="guild-recruit.js?v=' + v + '"><\/script>');

@@ -90,8 +90,10 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
             'O couro da mochila range enquanto você vasculha seus pertences...',
         ];
         window._invLoadingCtrl = ValdoriaLoadingController({
-            overlayId: 'loading',
-            tips: TIPS
+            overlayId: 'loadingOverlay',
+            tips: TIPS,
+            hasRingAccel: false,
+            hasGemPhase: false
         });
     })();
     </script>
