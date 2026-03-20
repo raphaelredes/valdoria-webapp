@@ -92,7 +92,7 @@ function _renderBody() {
 }
 
 function _renderChat() {
-    var h = '<div class="social-chat-area" id="social-chat-area">' + _buildChatMessages() + '</div>';
+    var h = '<div class="social-chat-area" id="social-chat-area" role="log" aria-live="polite">' + _buildChatMessages() + '</div>';
     h += '<div class="social-emotes">';
     var em = [{k:'wave',i:'\ud83d\udc4b',a:'Acenar'},{k:'cheer',i:'\ud83c\udf7b',a:'Comemorar'},{k:'laugh',i:'\ud83d\ude02',a:'Rir'},{k:'bow',i:'\ud83d\ude47',a:'Reverenciar'}];
     for (var i = 0; i < em.length; i++) h += '<button class="social-emote-btn" data-emote="' + em[i].k + '" aria-label="' + em[i].a + '">' + em[i].i + '</button>';
@@ -254,8 +254,10 @@ function _render() {
     _bindListeners();
     if (_activeTab === 'chat') {
         _startPoll();
-        var area = document.getElementById('social-chat-area');
-        if (area) area.scrollTop = area.scrollHeight;
+        requestAnimationFrame(function() {
+            var area = document.getElementById('social-chat-area');
+            if (area) area.scrollTop = area.scrollHeight;
+        });
     } else { _stopPoll(); }
 }
 
@@ -292,7 +294,7 @@ function _chatSend(text) {
     if (!text || !text.trim() || _sending) return;
     _sending = true;
     var input = document.getElementById('social-chat-input');
-    if (input) input.value = '';
+    if (input) { input.value = ''; input.focus(); }
     if (typeof haptic === 'function') haptic('light');
     _fetchSocial({ action: 'chat_send', text: text.trim() }).then(function(data) {
         _sending = false;
