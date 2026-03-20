@@ -32,11 +32,11 @@ const _SFX_POOL_SIZE=3;const _sfxPool={};function _getSfxAudio(url){if(!_sfxPool
 const pool=_sfxPool[url];for(let i=0;i<pool.length;i++){const a=pool[i];if(a.paused||a.ended){a.currentTime=0;return a;}}
 const a=pool[0];try{a.pause();a.currentTime=0;}catch(e){}return a;}
 function playSFX(trackKey){if(_muted||_sfxMuted||!_unlocked)return;if(window.vReducedMotion)return;const file=_pickVariant(trackKey);if(!file)return;const url=AUDIO_BASE+file;const sfx=_getSfxAudio(url);sfx.volume=Math.min(1,_sfxVolume*1.5);sfx.play().catch(function(e){console.debug('[AUDIO]',e.message||e);});}
-function toggleMute(){_muted=!_muted;localStorage.setItem(STORAGE_KEY,_muted?'1':'0');_musicMuted=_muted;localStorage.setItem(MUSIC_MUTED_KEY,_musicMuted?'1':'0');if(_muted){if(_audio)_audio.volume=0;}else{if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack){_playTrack(_pendingTrack);}}
+function toggleMute(){_muted=!_muted;try{localStorage.setItem(STORAGE_KEY,_muted?'1':'0');}catch(e){}_musicMuted=_muted;try{localStorage.setItem(MUSIC_MUTED_KEY,_musicMuted?'1':'0');}catch(e){}if(_muted){if(_audio)_audio.volume=0;}else{if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack){_playTrack(_pendingTrack);}}
 _syncUI();return _muted;}
 function isMuted(){return _muted;}
 function setVolume(val){_volume=Math.max(0,Math.min(1,val));localStorage.setItem(VOLUME_KEY,_volume.toString());if(_audio&&!_muted){_smoothVol(_audio,_volume);}
-if(_volume>0&&(_muted||_musicMuted)){_muted=false;_musicMuted=false;localStorage.setItem(STORAGE_KEY,'0');localStorage.setItem(MUSIC_MUTED_KEY,'0');if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack||_currentTrack){_playTrack(_pendingTrack||_currentTrack);}}
+if(_volume>0&&(_muted||_musicMuted)){_muted=false;_musicMuted=false;try{localStorage.setItem(STORAGE_KEY,'0');}catch(e){}try{localStorage.setItem(MUSIC_MUTED_KEY,'0');}catch(e){}if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack||_currentTrack){_playTrack(_pendingTrack||_currentTrack);}}
 _syncUI();}
 function getVolume(){return _volume;}
 function playBiome(biome){const biomeMap={'plains':'city','forest':'forest','swamp':'swamp','mountain':'mountain','cave':'dungeon','desert':'desert','snow':'snow','volcanic':'dungeon','city_gates':'city',};const track=biomeMap[biome]||'forest';play(track);}
@@ -300,14 +300,14 @@ if(btn)btn.classList.remove('va-hint-pulse');}
 function _updateBtnIcon(btn){if(!btn)return;if(_muted||_musicMuted||_volume===0){btn.innerHTML=_SVG_MUTED;btn.title='Som desativado';btn.classList.remove('va-playing');}else if(_volume<0.5){btn.innerHTML=_SVG_LOW;btn.title='Volume: '+Math.round(_volume*100)+'%';btn.classList.toggle('va-playing',!!(_audio&&!_audio.paused));}else{btn.innerHTML=_SVG_HIGH;btn.title='Volume: '+Math.round(_volume*100)+'%';btn.classList.toggle('va-playing',!!(_audio&&!_audio.paused));}}
 function _syncUI(){const btn=document.getElementById('va-btn');_updateBtnIcon(btn);if(_popupOpen)_updatePopupUI();}
 function createMuteButton(){const span=document.createElement('span');span.style.display='none';return span;}
-function toggleMusic(){_musicMuted=!_musicMuted;localStorage.setItem(MUSIC_MUTED_KEY,_musicMuted?'1':'0');if(_musicMuted){if(_audio)_audio.volume=0;_muted=true;localStorage.setItem(STORAGE_KEY,'1');}else{_muted=false;localStorage.setItem(STORAGE_KEY,'0');if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack){_playTrack(_pendingTrack);}}
+function toggleMusic(){_musicMuted=!_musicMuted;try{localStorage.setItem(MUSIC_MUTED_KEY,_musicMuted?'1':'0');}catch(e){}if(_musicMuted){if(_audio)_audio.volume=0;_muted=true;try{localStorage.setItem(STORAGE_KEY,'1');}catch(e){}}else{_muted=false;try{localStorage.setItem(STORAGE_KEY,'0');}catch(e){}if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack){_playTrack(_pendingTrack);}}
 _syncUI();return _musicMuted;}
-function toggleSFX(){_sfxMuted=!_sfxMuted;localStorage.setItem(SFX_MUTED_KEY,_sfxMuted?'1':'0');return _sfxMuted;}
+function toggleSFX(){_sfxMuted=!_sfxMuted;try{localStorage.setItem(SFX_MUTED_KEY,_sfxMuted?'1':'0');}catch(e){}return _sfxMuted;}
 function isMusicMuted(){return _musicMuted;}
 function isSFXMuted(){return _sfxMuted;}
-function setSFXVolume(val){_sfxVolume=Math.max(0,Math.min(1,val));localStorage.setItem(SFX_VOLUME_KEY,_sfxVolume.toString());if(_sfxVolume===0&&!_sfxMuted){_sfxMuted=true;localStorage.setItem(SFX_MUTED_KEY,'1');}
-if(_sfxVolume>0&&_sfxMuted){_sfxMuted=false;localStorage.setItem(SFX_MUTED_KEY,'0');}}
+function setSFXVolume(val){_sfxVolume=Math.max(0,Math.min(1,val));localStorage.setItem(SFX_VOLUME_KEY,_sfxVolume.toString());if(_sfxVolume===0&&!_sfxMuted){_sfxMuted=true;try{localStorage.setItem(SFX_MUTED_KEY,'1');}catch(e){}}
+if(_sfxVolume>0&&_sfxMuted){_sfxMuted=false;try{localStorage.setItem(SFX_MUTED_KEY,'0');}catch(e){}}}
 function getSFXVolume(){return _sfxVolume;}
 return{init,_warmUp:_warmUpAudioContext,play,playBiome,playSFX,stop,toggleMute,isMuted,setVolume,getVolume,toggleMusic,toggleSFX,isMusicMuted,isSFXMuted,setSFXVolume,getSFXVolume,createMuteButton,previewSFX:_sfxPreviewTick,getCurrentTrack:function(){return _currentTrack;},TRACKS,};})();if(typeof document!=='undefined'){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',ValdoriaAudio.init);}else{ValdoriaAudio.init();}
-window.addEventListener('pagehide',function(){try{var ct=(typeof ValdoriaAudio.getCurrentTrack==='function')?ValdoriaAudio.getCurrentTrack():'';if(ct){localStorage.setItem('valdoria_audio_resume',ct);localStorage.setItem('valdoria_audio_resume_ts',String(Date.now()));}}catch(e){}});}
+window.addEventListener('pagehide',function(){try{var ct=(typeof ValdoriaAudio.getCurrentTrack==='function')?ValdoriaAudio.getCurrentTrack():'';if(ct){try{localStorage.setItem('valdoria_audio_resume',ct);}catch(e){}localStorage.setItem('valdoria_audio_resume_ts',String(Date.now()));}}catch(e){}});}
 (function _tryResumeAudio(){try{var resumeTrack=localStorage.getItem('valdoria_audio_resume');var resumeTs=parseInt(localStorage.getItem('valdoria_audio_resume_ts')||'0',10);if(resumeTrack&&Date.now()-resumeTs<30000){localStorage.removeItem('valdoria_audio_resume');localStorage.removeItem('valdoria_audio_resume_ts');setTimeout(function(){if(typeof ValdoriaAudio!=='undefined'&&ValdoriaAudio.play){ValdoriaAudio.play(resumeTrack);}},50);}}catch(e){}})();

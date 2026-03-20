@@ -75,7 +75,7 @@
             btn.setAttribute('data-cat', cat.id);
             btn.addEventListener('click', function () {
                 _currentCategory = cat.id;
-                localStorage.setItem('codex_category', cat.id);
+                try{localStorage.setItem('codex_category', cat.id);}catch(e){}
                 _updateTabActive();
                 _fetchEntries(cat.id);
             });

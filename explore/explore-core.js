@@ -107,3 +107,4 @@ function bfsDistanceToExit(fromCol,fromRow){const target=`${S.exitCol},${S.exitR
 return-1;}
 function calculateExitRisk(distance){if(distance<=0)return{chance:5,label:'Seguro',color:'#4a8'};const chance=Math.min(80,15+distance*6+S.dangerLevel*4);if(chance<=25)return{chance,label:'Baixo',color:'#4a8'};if(chance<=50)return{chance,label:'Moderado',color:'#dca028'};if(chance<=65)return{chance,label:'Alto',color:'#c44'};return{chance,label:'Perigoso',color:'#a22'};}
 var _hexFlashes=[];function flashHex(col,row){_hexFlashes.push({col,row,start:performance.now(),duration:700});scheduleRender();}
+window.addEventListener('pagehide',function(){if(_overlayWatchdogTimer){clearInterval(_overlayWatchdogTimer);_overlayWatchdogTimer=null;}});

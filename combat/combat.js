@@ -161,6 +161,7 @@ function _showPollUpdateIndicator(){const el=document.createElement('div');el.cl
 function startHeartbeat(){stopHeartbeat();if(!isApiMode||!api)return;_heartbeatInterval=setInterval(async()=>{try{const state=await api.getState();if(state&&state.error==='invalid_session'){showError('Sessão expirada — feche e reabra o combate');stopHeartbeat();}}catch(e){if(e.message&&e.message.includes('401')){showError('Sessão expirada — feche e reabra o combate');stopHeartbeat();}}},600000);}
 function stopHeartbeat(){if(_heartbeatInterval){clearInterval(_heartbeatInterval);_heartbeatInterval=null;}}
 function stopAllIntervals(){stopTimer();stopPolling();stopHeartbeat();if(_reactionAutoTimer){clearTimeout(_reactionAutoTimer);_reactionAutoTimer=null;}
+window.addEventListener('pagehide',function(){stopAllIntervals();});
 if(_cinematicWarnTimer){clearTimeout(_cinematicWarnTimer);_cinematicWarnTimer=null;}
 if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
 if(_initDice3d){_initDice3d.dispose();_initDice3d=null;}

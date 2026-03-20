@@ -2447,7 +2447,7 @@
         function initFontPicker() {
             var saved = localStorage.getItem('valdoria_font') || 'medievalsharp';
             // Migrate removed fonts
-            if (saved === 'uncial') { saved = 'medievalsharp'; localStorage.setItem('valdoria_font', saved); }
+            if (saved === 'uncial') { saved = 'medievalsharp'; try{localStorage.setItem('valdoria_font', saved);}catch(e){} }
             // Defer dropdown button creation until first open (avoids loading extra fonts)
             applyFont(saved);
         }
@@ -2478,7 +2478,7 @@
         function selectFont(fontId) {
             var opt = FONT_OPTIONS.find(function(f) { return f.id === fontId; });
             if (!opt) return;
-            localStorage.setItem('valdoria_font', fontId);
+            try{localStorage.setItem('valdoria_font', fontId);}catch(e){}
             applyFont(fontId);
             // Update selected state
             document.querySelectorAll('.font-option').forEach(function(btn) {

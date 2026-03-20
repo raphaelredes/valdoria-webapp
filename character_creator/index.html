@@ -1096,7 +1096,7 @@
             if (currentSlide < totalSlides - 1) {
                 goSlide(currentSlide + 1);
             } else {
-                localStorage.setItem('valdoria_onboarding_seen', 'true');
+                try{localStorage.setItem('valdoria_onboarding_seen', 'true');}catch(e){}
                 overlay.style.opacity = '0';
                 overlay.style.transition = 'opacity 0.3s ease';
                 setTimeout(function() { overlay.style.display = 'none'; }, 300);

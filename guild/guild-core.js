@@ -113,7 +113,7 @@ window.showGuildError = showGuildError;
 
 function _switchTab(tabId) {
     G.tab = tabId;
-    localStorage.setItem('valdoria_guild_tab', tabId);
+    try{localStorage.setItem('valdoria_guild_tab', tabId);}catch(e){}
     var tabs = document.querySelectorAll('.guild-tabs .v-tab');
     for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab') === tabId);
     var panels = document.querySelectorAll('.guild-panel');
@@ -183,8 +183,8 @@ function initImmersive() {
         restore.style.display = c ? '' : 'none';
     }
     apply(localStorage.getItem('valdoria_immersive') === '1');
-    toggle.addEventListener('click', function() { localStorage.setItem('valdoria_immersive', '1'); apply(true); });
-    restore.addEventListener('click', function() { localStorage.setItem('valdoria_immersive', '0'); apply(false); });
+    toggle.addEventListener('click', function() { try{localStorage.setItem('valdoria_immersive', '1');}catch(e){} apply(true); });
+    restore.addEventListener('click', function() { try{localStorage.setItem('valdoria_immersive', '0');}catch(e){} apply(false); });
 }
 
 function _navTo(goto) {

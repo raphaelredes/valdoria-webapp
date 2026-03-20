@@ -1061,8 +1061,8 @@
                 });
             }
             applyState(localStorage.getItem('valdoria_immersive') === '1');
-            toggle.addEventListener('click', () => { localStorage.setItem('valdoria_immersive', '1'); applyState(true); });
-            restore.addEventListener('click', () => { localStorage.setItem('valdoria_immersive', '0'); applyState(false); });
+            toggle.addEventListener('click', () => { try{localStorage.setItem('valdoria_immersive', '1');}catch(e){} applyState(true); });
+            restore.addEventListener('click', () => { try{localStorage.setItem('valdoria_immersive', '0');}catch(e){} applyState(false); });
         }
         const _vBg = getComputedStyle(document.documentElement)
             .getPropertyValue('--v-bg').trim() || '#2a2420';

@@ -49,7 +49,7 @@ function _buildTravelOptions(baseDist) {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
             _travelPace = p.id;
-            localStorage.setItem('valdoria_travel_pace', p.id);
+            try{localStorage.setItem('valdoria_travel_pace', p.id);}catch(e){}
             paceRow.querySelectorAll('.travel-opt-btn').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             _updateTravelBtnAndNote(baseDist);
@@ -85,7 +85,7 @@ function _buildTravelOptions(baseDist) {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
             _travelActivity = a.id;
-            localStorage.setItem('valdoria_travel_activity', a.id);
+            try{localStorage.setItem('valdoria_travel_activity', a.id);}catch(e){}
             actRow.querySelectorAll('.travel-opt-btn').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             if (typeof _haptic === 'function') _haptic('tap');
@@ -955,8 +955,8 @@ function openQuickList() {
     btnName.type = 'button';
     btnName.className = 'ql-sort-btn' + (sortMode === 'name' ? ' active' : '');
     btnName.textContent = 'Por Nome';
-    btnDist.addEventListener('click', () => { sortMode = 'dist'; localStorage.setItem('valdoria_ql_sort', 'dist'); btnDist.classList.add('active'); btnName.classList.remove('active'); renderItems(); });
-    btnName.addEventListener('click', () => { sortMode = 'name'; localStorage.setItem('valdoria_ql_sort', 'name'); btnName.classList.add('active'); btnDist.classList.remove('active'); renderItems(); });
+    btnDist.addEventListener('click', () => { sortMode = 'dist'; try{localStorage.setItem('valdoria_ql_sort', 'dist');}catch(e){} btnDist.classList.add('active'); btnName.classList.remove('active'); renderItems(); });
+    btnName.addEventListener('click', () => { sortMode = 'name'; try{localStorage.setItem('valdoria_ql_sort', 'name');}catch(e){} btnName.classList.add('active'); btnDist.classList.remove('active'); renderItems(); });
     sortBar.appendChild(btnDist);
     sortBar.appendChild(btnName);
     items.appendChild(sortBar);
@@ -1043,7 +1043,7 @@ function showGestureTutorial() {
     // Auto-dismiss after 6s (more hints to read now)
     const dismiss = () => {
         gt.classList.remove('visible');
-        localStorage.setItem('valdoria_nav_tutorial_v2', '1');
+        try{localStorage.setItem('valdoria_nav_tutorial_v2', '1');}catch(e){}
     };
     gt.addEventListener('click', dismiss, { once: true });
     const TUTORIAL_AUTO_DISMISS_MS = 12000;
