@@ -87,7 +87,6 @@ function guildFetch(endpoint, body) {
     }).catch(function(e) {
         console.error('[GUILD] Erro:', endpoint, e);
         showGuildError('Falha na comunicacao com o servidor.');
-        throw e;
     });
 }
 window.guildFetch = guildFetch;

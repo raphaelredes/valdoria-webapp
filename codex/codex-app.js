@@ -250,7 +250,7 @@
             '?token=' + encodeURIComponent(_token);
 
         fetch(url)
-            .then(function (r) { return r.json(); })
+            .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(function (data) {
                 if (data.entry) {
                     _renderDetail(data.entry);
