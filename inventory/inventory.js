@@ -65,7 +65,7 @@ function initSwipeToDismiss(){const modal=document.getElementById('modalContent'
 modal.style.transform='';},{passive:true});}
 function discardAndExit(){pendingOps=[];closeModal();_performExit();}
 function initBackButton(){if(window._invPopupMode)return;try{if(tg?.BackButton){tg.BackButton.show();tg.BackButton.onClick(()=>{_navigateBack();});}
-window.__valdoriaExitAction=function(){try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}};}catch(e){console.warn('[INVENTORY] BackButton setup:',e);}}
+window.__valdoriaExitAction=function(){try{window.__valdoria_transitioning=true;if(tg)tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}};}catch(e){console.warn('[INVENTORY] BackButton setup:',e);}}
 var _RETURN_LABELS={game:'🏘️ Cidade',explore:'🗺️ Mapa',combat:'⚔️ Combate',arena:'⚔️ Combate',};function _initNavBar(){}
 function navBack(){haptic('light');if(_modalOpen){closeModal();return;}
 if(activeTarget!=='player'){switchTab('allies');return;}
@@ -73,17 +73,17 @@ if(pendingOps.length>0){_showPendingOpsExitConfirm();return;}
 _performExit();}
 function navCharSheet(){haptic('light');if(pendingOps.length>0){sendOps();return;}
 if(window._invPopupMode&&typeof hideInventoryPopup==='function'){hideInventoryPopup();setTimeout(function(){if(typeof doAction==='function')doAction('action_status');},300);return;}
-const tg=window.Telegram?.WebApp;if(tg?.sendData){try{tg.sendData(JSON.stringify({action:'action_status'}));}catch(e){console.warn('[INVENTORY] sendData:',e);}}
-try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}}
+const tg=window.Telegram?.WebApp;if(tg?.sendData){try{window.__valdoria_transitioning=true;tg.sendData(JSON.stringify({action:'action_status'}));}catch(e){console.warn('[INVENTORY] sendData:',e);}}
+try{window.__valdoria_transitioning=true;if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}}
 function navMenu(){haptic('light');if(pendingOps.length>0){sendOps();return;}
 if(window._invPopupMode&&typeof hideInventoryPopup==='function'){hideInventoryPopup();return;}
-try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}}
+try{window.__valdoria_transitioning=true;if(tg)tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}}
 async function _transitionTo(target,payload={}){const overlay=document.getElementById('loadingOverlay');if(overlay){const _lt=overlay.querySelector('.loading-text');if(_lt)_lt.textContent='Navegando...';overlay.classList.remove('hidden');}
 if(_apiBase){try{const _th={'Content-Type':'application/json','Authorization':'Bearer '+_apiToken,};if(window.Telegram?.WebApp?.initData){_th['X-Telegram-Init-Data']=Telegram.WebApp.initData;}
-_th['X-Idempotency-Key']=crypto.randomUUID();const resp=await fetchT(_apiBase+'/api/webapp/transition',{method:'POST',headers:_th,body:JSON.stringify({from:'inventory',to:target,user_id:parseInt(_apiUid),payload,}),});if(resp.status===401||resp.status===403){console.error('[INVENTORY] Auth error on transition:',resp.status);const tg=window.Telegram?.WebApp;if(tg?.sendData){tg.sendData(JSON.stringify({action:'webapp_error_close',webapp:'INVENTORY',reason:'session_expired'}));setTimeout(function(){if(tg.close)tg.close();},1000);return;}}
+_th['X-Idempotency-Key']=crypto.randomUUID();const resp=await fetchT(_apiBase+'/api/webapp/transition',{method:'POST',headers:_th,body:JSON.stringify({from:'inventory',to:target,user_id:parseInt(_apiUid),payload,}),});if(resp.status===401||resp.status===403){console.error('[INVENTORY] Auth error on transition:',resp.status);const tg=window.Telegram?.WebApp;if(tg?.sendData){window.__valdoria_transitioning=true;tg.sendData(JSON.stringify({action:'webapp_error_close',webapp:'INVENTORY',reason:'session_expired'}));setTimeout(function(){if(tg.close)tg.close();},1000);return;}}
 if(resp.ok){const data=await resp.json();if(data.url){window.__valdoria_transitioning=true;valdoriaSpaNav(data.url);return;}}
 console.error('[INVENTORY] Nav transition failed');}catch(e){console.error('[INVENTORY] Nav transition error:',e);}}
-if(overlay)overlay.classList.add('hidden');try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}}
+if(overlay)overlay.classList.add('hidden');try{window.__valdoria_transitioning=true;if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}}
 function toast(msg,type){vToast(msg,type||'ok');}
 function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 function _initViewedItems(){try{const stored=localStorage.getItem('valdoria_inv_viewed');if(stored){viewedItems=new Set(JSON.parse(stored));}else{viewedItems=new Set(localInv.map(i=>i.n));_saveViewedItems();}}catch(e){viewedItems=new Set(localInv.map(i=>i.n));}}
