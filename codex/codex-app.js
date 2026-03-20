@@ -124,10 +124,14 @@
     function _renderProgress(progress) {
         if (!progress) return;
 
+        var unlocked = progress.unlocked || 0;
+        var total = progress.total || 0;
+        var pct = progress.pct || 0;
+
         var fill = document.getElementById('progressFill');
         var text = document.getElementById('progressText');
-        if (fill) fill.style.width = (progress.pct || 0) + '%';
-        if (text) text.textContent = progress.unlocked + '/' + progress.total + ' (' + progress.pct + '%)';
+        if (fill) fill.style.width = pct + '%';
+        if (text) text.textContent = unlocked + '/' + total + ' (' + pct + '%)';
     }
 
     function _renderDetail(entry) {
@@ -222,7 +226,10 @@
         if (search) url += '&search=' + encodeURIComponent(search);
 
         fetch(url)
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
             .then(function (data) {
                 _entries = data.entries || [];
                 _progress = data.progress || {};
@@ -233,6 +240,7 @@
             .catch(function (err) {
                 console.error('[CODEX] fetch list error:', err);
                 showError('Erro ao carregar compêndio', err);
+                _renderProgress({ unlocked: 0, total: 0, pct: 0 });
                 _hideLoading();
             });
     }
