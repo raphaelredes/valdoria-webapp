@@ -92,7 +92,7 @@ function _renderBody() {
 function _renderChat() {
     var h = '<div class="social-chat-area" id="social-chat-area">' + _buildChatMessages() + '</div>';
     h += '<div class="social-emotes">';
-    var em = [{k:'wave',i:'\ud83d\udc4b'},{k:'cheer',i:'\ud83c\udf7b'},{k:'laugh',i:'\ud83d\ude02'},{k:'bow',i:'\ud83d\ude47'}];
+    var em = [{k:'wave',i:'\ud83d\udc4b',a:'Acenar'},{k:'cheer',i:'\ud83c\udf7b',a:'Comemorar'},{k:'laugh',i:'\ud83d\ude02',a:'Rir'},{k:'bow',i:'\ud83d\ude47',a:'Reverenciar'}];
     for (var i = 0; i < em.length; i++) h += '<button class="social-emote-btn" data-emote="' + em[i].k + '" aria-label="' + em[i].a + '">' + em[i].i + '</button>';
     h += '</div>';
     h += '<div class="social-chat-input-wrap">';
@@ -363,10 +363,24 @@ window.showSocialPopup = function(data) {
 };
 
 window.openSocialPopup = function() {
-    if (typeof vToast === 'function') vToast('Carregando...', 'warn');
-    _fetchSocial({ action: 'load' }).then(function(data) {
-        if (data && !data.error) window.showSocialPopup(data);
-        else console.error('[SOCIAL]', data && data.message || 'error'); if (typeof vToast === 'function') vToast('Erro ao carregar social.', 'err');
+    if (typeof vPopup !== "undefined") {
+        vPopup.show({
+            id: "social-popup-overlay",
+            header: "👥 Social",
+            body: '<div class="social-empty"><div class="social-empty-icon">⏳</div><div>Carregando...</div></div>',
+            actions: "",
+            closeOnOutside: true,
+            onHide: function() { _stopPoll(); _detailNpc = null; _detailData = null; _fetchSocial({action: "close"}); },
+        });
+    }
+    _fetchSocial({ action: "load" }).then(function(data) {
+        if (data && !data.error) {
+            window.showSocialPopup(data);
+        } else {
+            console.error("[SOCIAL] Failed to load", data);
+            if (typeof vToast === "function") vToast("Erro ao carregar social.", "err");
+            if (typeof vPopup !== "undefined") vPopup.hide("social-popup-overlay");
+        }
     });
 };
 
