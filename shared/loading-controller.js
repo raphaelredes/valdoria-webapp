@@ -148,12 +148,22 @@ window.ValdoriaLoadingController = function(config) {
         } catch (_) {}
         setTimeout(function() {
             overlay.classList.add('exit-cinematic');
-            setTimeout(function() {
+            var _exitDone = false;
+            function _finishCinematic() {
+                if (_exitDone) return;
+                _exitDone = true;
                 overlay.classList.add('hidden');
                 _state = 'hidden';
                 if (retryBtn) retryBtn.style.display = 'none';
                 if (cb) cb();
-            }, 950);
+            }
+            overlay.addEventListener('animationend', function onEnd(e) {
+                if (e.target === overlay) {
+                    overlay.removeEventListener('animationend', onEnd);
+                    _finishCinematic();
+                }
+            });
+            setTimeout(_finishCinematic, 950);
         }, 350);
     }
 
