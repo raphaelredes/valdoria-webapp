@@ -225,7 +225,7 @@
             '&category=' + encodeURIComponent(category || '');
         if (search) url += '&search=' + encodeURIComponent(search);
 
-        fetch(url)
+        fetchT(url)
             .then(function (r) {
                 if (!r.ok) throw new Error('HTTP ' + r.status);
                 return r.json();
@@ -249,7 +249,7 @@
         var url = _apiBase + '/entry/' + encodeURIComponent(entryId) +
             '?token=' + encodeURIComponent(_token);
 
-        fetch(url)
+        fetchT(url)
             .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(function (data) {
                 if (data.entry) {

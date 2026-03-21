@@ -28,7 +28,7 @@ function _crossfadeOut(audio){if(!audio)return;_fadeAudio=audio;const startVol=a
 clearInterval(timer);if(_fadeAudio===audio)_fadeAudio=null;}else{try{audio.volume=current;}catch(e){clearInterval(timer);}}},stepMs);}
 function stop(){if(_audio){_crossfadeOut(_audio);_audio=null;}
 _currentTrack='';_pendingTrack='';_looping=false;_syncUI();}
-const _SFX_POOL_SIZE=3;const _MAX_SFX_POOLS=30;const _sfxPool={};function _getSfxAudio(url){if(!_sfxPool[url]){var _ks=Object.keys(_sfxPool);if(_ks.length>=_MAX_SFX_POOLS){delete _sfxPool[_ks[0]];}_sfxPool[url]=[];for(let i=0;i<_SFX_POOL_SIZE;i++){const a=new Audio();a.preload='auto';a.src=url;_sfxPool[url].push(a);}}
+const _SFX_POOL_SIZE=3;const _MAX_SFX_POOLS=30;const _sfxPool={};function _getSfxAudio(url){if(!_sfxPool[url]){var _ks=Object.keys(_sfxPool);if(_ks.length>=_MAX_SFX_POOLS){var _oldUrl=_ks[0];var _oldPool=_sfxPool[_oldUrl];if(_oldPool){_oldPool.forEach(function(a){try{a.pause();a.src="";}catch(e){}});}delete _sfxPool[_oldUrl];}_sfxPool[url]=[];for(let i=0;i<_SFX_POOL_SIZE;i++){const a=new Audio();a.preload='auto';a.src=url;_sfxPool[url].push(a);}}
 const pool=_sfxPool[url];for(let i=0;i<pool.length;i++){const a=pool[i];if(a.paused||a.ended){a.currentTime=0;return a;}}
 const a=pool[0];try{a.pause();a.currentTime=0;}catch(e){}return a;}
 function playSFX(trackKey){if(_muted||_sfxMuted||!_unlocked)return;if(window.vReducedMotion)return;const file=_pickVariant(trackKey);if(!file)return;const url=AUDIO_BASE+file;const sfx=_getSfxAudio(url);sfx.volume=Math.min(1,_sfxVolume*1.5);sfx.play().catch(function(e){console.debug('[AUDIO]',e.message||e);});}
