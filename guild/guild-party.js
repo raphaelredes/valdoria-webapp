@@ -7,7 +7,7 @@ window.renderPartyTab = function() {
     if (!el) return;
     var party = (G.data && G.data.party) || [];
     if (!party.length) {
-        el.innerHTML = '<div class="guild-empty"><span class="guild-empty-icon">&#x1F6E1;</span>Seu grupo esta vazio.<br>Recrute aventureiros na aba Recrutar!</div>';
+        el.innerHTML = '<div class="guild-empty"><span class="guild-empty-icon">&#x1F6E1;</span>Seu grupo está vazio.<br>Recrute aventureiros na aba Recrutar!</div>';
         return;
     }
     var html = '';
