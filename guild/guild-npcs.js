@@ -29,7 +29,7 @@ window._openBraun = function() {
         if (!resp || resp.error) return;
         _braun = resp;
         _renderBraunDetail();
-    });
+    }).catch(function(e) { console.error('[GUILD]', e); });
 };
 
 function _renderBraunDetail() {
@@ -54,7 +54,7 @@ window._openTavira = function() {
         if (!resp || resp.error) return;
         _tavira = resp;
         _renderTaviraDetail();
-    });
+    }).catch(function(e) { console.error('[GUILD]', e); });
 };
 
 function _renderTaviraDetail() {
@@ -93,6 +93,7 @@ function _typewriteText(text) {
     box.innerHTML = '<span class="typewriter-cursor"></span>';
     var idx = 0;
     _typewriterTimer = setInterval(function() {
+        if (document.visibilityState === 'hidden') return;
         if (idx >= text.length) {
             clearInterval(_typewriterTimer);
             _typewriterTimer = null;

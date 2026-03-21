@@ -9,7 +9,7 @@ window.renderQuestsTab = function() {
         if (!resp || resp.error) return;
         _questData = resp;
         _renderQuestBoard();
-    });
+    }).catch(function(e) { console.error('[GUILD]', e); });
 };
 
 function _renderQuestBoard() {
@@ -87,7 +87,7 @@ window.showQuestDetail = function(qid) {
 window._acceptQuest = function(qid) {
     guildAction('quest_accept_' + qid).then(function(d) {
         if (d && d.ok) hideGuildDetail();
-    });
+    }).catch(function(e) { console.error('[GUILD]', e); });
 };
 
 })();

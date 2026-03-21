@@ -35,7 +35,7 @@ window.showPartyMemberDetail = function(npcId) {
     guildAction('member_detail_' + npcId).then(function(resp) {
         if (!resp || resp.error) { showGuildError(resp && resp.msg || 'Erro ao carregar detalhes.'); return; }
         _renderMemberDetail(_mapNpc(resp));
-    });
+    }).catch(function(e) { console.error('[GUILD]', e); });
 };
 
 function _renderMemberDetail(m) {
@@ -99,11 +99,11 @@ window._dismissMember = function(npcId, npcName) {
             body: 'Tem certeza que deseja dispensar <b>' + _esc(npcName) + '</b> do grupo?',
             confirm: 'Dispensar', cancel: 'Cancelar', danger: true,
             onConfirm: function() {
-                guildAction('fire_' + npcId).then(function() { hideGuildDetail(); });
+                guildAction('fire_' + npcId).then(function() { hideGuildDetail(); }).catch(function(e) { console.error('[GUILD]', e); });
             }
         });
     } else if (confirm('Dispensar ' + npcName + ' do grupo?')) {
-        guildAction('fire_' + npcId).then(function() { hideGuildDetail(); });
+        guildAction('fire_' + npcId).then(function() { hideGuildDetail(); }).catch(function(e) { console.error('[GUILD]', e); });
     }
 };
 

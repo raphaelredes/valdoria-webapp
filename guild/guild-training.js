@@ -9,7 +9,7 @@ window.renderTrainingTab = function() {
         if (!resp || resp.error) return;
         _trainingData = resp;
         _renderTraining();
-    });
+    }).catch(function(e) { console.error('[GUILD]', e); });
 };
 
 function _renderTraining() {
@@ -88,13 +88,13 @@ window._startTraining = function(category, itemId, name) {
             onConfirm: function() {
                 guildAction('train_start_' + category, { name: name }).then(function(d) {
                     if (d && d.ok) renderTrainingTab();
-                });
+                }).catch(function(e) { console.error('[GUILD]', e); });
             }
         });
     } else {
         guildAction('train_start_' + category, { name: name }).then(function(d) {
             if (d && d.ok) renderTrainingTab();
-        });
+        }).catch(function(e) { console.error('[GUILD]', e); });
     }
 };
 
@@ -106,7 +106,7 @@ window._advanceTraining = function() {
             renderTrainingTab();
             if (window._renderPlayerInfo) _renderPlayerInfo();
         }
-    });
+    }).catch(function(e) { console.error('[GUILD]', e); });
 };
 
 window._abandonTraining = function() {
@@ -116,11 +116,11 @@ window._abandonTraining = function() {
             body: 'Tem certeza? Todo o progresso sera perdido.',
             confirm: 'Abandonar', cancel: 'Cancelar', danger: true,
             onConfirm: function() {
-                guildAction('train_start_abandon').then(function() { renderTrainingTab(); });
+                guildAction('train_start_abandon').then(function() { renderTrainingTab(); }).catch(function(e) { console.error('[GUILD]', e); });
             }
         });
     } else if (confirm('Abandonar treinamento?')) {
-        guildAction('train_start_abandon').then(function() { renderTrainingTab(); });
+        guildAction('train_start_abandon').then(function() { renderTrainingTab(); }).catch(function(e) { console.error('[GUILD]', e); });
     }
 };
 

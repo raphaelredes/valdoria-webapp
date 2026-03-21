@@ -80,7 +80,10 @@ function guildFetch(endpoint, body) {
     var S = window.S || {};
     var url = (S.apiBase || '') + endpoint + (endpoint.indexOf('?') >= 0 ? '&' : '?') + 'token=' + encodeURIComponent(S.token || '');
     var opts = { method: 'POST', headers: { 'Content-Type': 'application/json' } };
-    if (body) opts.body = JSON.stringify(body);
+    if (body) {
+        opts.headers['X-Idempotency-Key'] = Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+        opts.body = JSON.stringify(body);
+    }
     return fetch(url, opts).then(function(r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();

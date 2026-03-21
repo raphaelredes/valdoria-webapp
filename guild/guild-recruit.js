@@ -10,7 +10,7 @@ window.renderRecruitTab = function() {
         _recruitData = resp;
         _recruitData.items = _mapArray(resp.items || []);
         _renderRecruitList();
-    });
+    }).catch(function(e) { console.error('[GUILD]', e); });
 };
 
 function _renderRecruitList() {
@@ -110,7 +110,7 @@ window._hireRecruit = function(npcId) {
             hideGuildDetail();
             renderRecruitTab();
         }
-    });
+    }).catch(function(e) { console.error('[GUILD]', e); });
 };
 
 })();

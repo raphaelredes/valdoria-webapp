@@ -135,7 +135,7 @@ return;}}catch(e){console.warn('[COMBAT] Timer poll retry',i,e.message);}
 await new Promise(r=>setTimeout(r,interval));}
 startPolling();}
 function _getPollInterval(){if(!currentState||!currentState.active_turn)return 5000;if(currentState.unconscious||(currentState.p&&currentState.p.hp<=0))return 2000;return currentState.active_turn.type==='player'?8000:2000;}
-var _pollFailures=0;function startPolling(){stopPolling();if(!isApiMode||!api)return;const poll=async()=>{try{const state=await api.getState();_pollFailures=0;if(!state||state.error){if(state&&state.error==='invalid_session'){showError('Sessão expirada — feche e reabra o combate');stopPolling();return;}
+var _pollFailures=0;function startPolling(){stopPolling();if(!isApiMode||!api)return;const poll=async()=>{if(document.visibilityState==="hidden"){_pollInterval=setTimeout(poll,_getPollInterval());return;}try{const state=await api.getState();_pollFailures=0;if(!state||state.error){if(state&&state.error==='invalid_session'){showError('Sessão expirada — feche e reabra o combate');stopPolling();return;}
 if(state&&(state.error==='no_combat'||state.phase==='ended')){showCombatEnded();}
 _pollInterval=setTimeout(poll,_getPollInterval());return;}
 if(!state){_pollInterval=setTimeout(poll,8000);return;}
@@ -158,7 +158,7 @@ _pollFailures=0;}}
 _pollInterval=setTimeout(poll,_getPollInterval());};_pollInterval=setTimeout(poll,_getPollInterval());}
 function stopPolling(){if(_pollInterval){clearTimeout(_pollInterval);_pollInterval=null;}}
 function _showPollUpdateIndicator(){const el=document.createElement('div');el.className='poll-update-indicator';el.textContent='🔄 Estado atualizado';document.body.appendChild(el);setTimeout(()=>el.classList.add('visible'),20);setTimeout(()=>{el.classList.remove('visible');setTimeout(()=>el.remove(),300);},1500);}
-function startHeartbeat(){stopHeartbeat();if(!isApiMode||!api)return;_heartbeatInterval=setInterval(async()=>{try{const state=await api.getState();if(state&&state.error==='invalid_session'){showError('Sessão expirada — feche e reabra o combate');stopHeartbeat();}}catch(e){if(e.message&&e.message.includes('401')){showError('Sessão expirada — feche e reabra o combate');stopHeartbeat();}}},600000);}
+function startHeartbeat(){stopHeartbeat();if(!isApiMode||!api)return;_heartbeatInterval=setInterval(async()=>{if(document.visibilityState==="hidden")return;try{const state=await api.getState();if(state&&state.error==='invalid_session'){showError('Sessão expirada — feche e reabra o combate');stopHeartbeat();}}catch(e){if(e.message&&e.message.includes('401')){showError('Sessão expirada — feche e reabra o combate');stopHeartbeat();}}},600000);}
 function stopHeartbeat(){if(_heartbeatInterval){clearInterval(_heartbeatInterval);_heartbeatInterval=null;}}
 function stopAllIntervals(){stopTimer();stopPolling();stopHeartbeat();if(_reactionAutoTimer){clearTimeout(_reactionAutoTimer);_reactionAutoTimer=null;}
 window.addEventListener('pagehide',function(){stopAllIntervals();});
