@@ -36,13 +36,13 @@ function renderGroundCover(svg, insertBefore) {
     }
 
     // Emit batched paths (one per visual style)
-    if (batches.darkCircles) gG.appendChild(_el('path', { d: batches.darkCircles, fill: INK_DARK, 'fill-opacity': 0.16, stroke: 'none' }));
-    if (batches.darkChevrons) gG.appendChild(_el('path', { d: batches.darkChevrons, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.2 }));
-    if (batches.lightLines) gG.appendChild(_el('path', { d: batches.lightLines, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.3, 'stroke-opacity': 0.12 }));
-    if (batches.inkDashes) gG.appendChild(_el('path', { d: batches.inkDashes, fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.15, 'stroke-dasharray': '2 2' }));
-    if (batches.inkWaves) gG.appendChild(_el('path', { d: batches.inkWaves, fill: 'none', stroke: INK, 'stroke-width': 0.35, 'stroke-opacity': 0.18 }));
-    if (batches.darkLines) gG.appendChild(_el('path', { d: batches.darkLines, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.15 }));
-    if (batches.grassLines) gG.appendChild(_el('path', { d: batches.grassLines, fill: 'none', stroke: INK, 'stroke-width': 0.35, 'stroke-opacity': 0.22, 'stroke-linecap': 'round' }));
+    if (batches.darkCircles) gG.appendChild(_el('path', { d: batches.darkCircles, fill: INK_DARK, 'fill-opacity': 0.28, stroke: 'none' }));
+    if (batches.darkChevrons) gG.appendChild(_el('path', { d: batches.darkChevrons, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.65, 'stroke-opacity': 0.5 }));
+    if (batches.lightLines) gG.appendChild(_el('path', { d: batches.lightLines, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.4, 'stroke-opacity': 0.22 }));
+    if (batches.inkDashes) gG.appendChild(_el('path', { d: batches.inkDashes, fill: 'none', stroke: INK, 'stroke-width': 0.4, 'stroke-opacity': 0.28 , 'stroke-dasharray': '2 2' }));
+    if (batches.inkWaves) gG.appendChild(_el('path', { d: batches.inkWaves, fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.30 }));
+    if (batches.darkLines) gG.appendChild(_el('path', { d: batches.darkLines, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.28 }));
+    if (batches.grassLines) gG.appendChild(_el('path', { d: batches.grassLines, fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.35, 'stroke-linecap': 'round' }));
 
     if (insertBefore) svg.insertBefore(gG, insertBefore);
     else svg.appendChild(gG);
@@ -114,15 +114,15 @@ function _groundCoverBatch(x, y, biome, seed, b) {
 
 // Biome fill colors (muted, parchment-friendly — 2D flat fills)
 const BIOME_FILLS = {
-    plains:    { fill: '#7a9a50', op: 0.08 }, // Subtle green tint
-    forest:    { fill: '#3a6a2a', op: 0.22 }, // Rich green
-    mountain:  { fill: '#6a6050', op: 0.14 }, // Gray-brown
-    snow:      { fill: '#d0c8b0', op: 0.2 },  // Light parchment (snow effect)
-    swamp:     { fill: '#4a5a3a', op: 0.16 }, // Dark olive green
-    desert:    { fill: '#b09858', op: 0.14 }, // Sandy tan
-    volcanic:  { fill: '#5a3a2a', op: 0.16 }, // Dark brown-red
-    cave:      { fill: '#3a3028', op: 0.18 }, // Very dark brown
-    graveyard: { fill: '#4a4238', op: 0.14 }, // Ashen gray
+    plains:    { fill: '#7a9a50', op: 0.12 }, // Subtle green tint
+    forest:    { fill: '#3a6a2a', op: 0.30 }, // Rich green
+    mountain:  { fill: '#6a6050', op: 0.22 }, // Gray-brown
+    snow:      { fill: '#d0c8b0', op: 0.28 },  // Light parchment (snow effect)
+    swamp:     { fill: '#4a5a3a', op: 0.24 }, // Dark olive green
+    desert:    { fill: '#b09858', op: 0.22 }, // Sandy tan
+    volcanic:  { fill: '#5a3a2a', op: 0.24 }, // Dark brown-red
+    cave:      { fill: '#3a3028', op: 0.26 }, // Very dark brown
+    graveyard: { fill: '#4a4238', op: 0.22 }, // Ashen gray
 };
 
 function renderTerrainRegions(svg, fogState) {
@@ -270,10 +270,10 @@ function _drawMountains(g, cluster) {
         }
     }
     // Emit 4 compound paths instead of 5-7 per peak
-    if (bodyD) g.appendChild(_el('path', { d: bodyD, fill: INK_DARK, 'fill-opacity': 0.07, stroke: 'none' }));
-    if (shadowD) g.appendChild(_el('path', { d: shadowD, fill: INK_DARK, 'fill-opacity': 0.2, stroke: 'none' }));
-    if (outlineD) g.appendChild(_el('path', { d: outlineD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-linecap': 'round', 'stroke-opacity': 0.65 }));
-    if (detailD) g.appendChild(_el('path', { d: detailD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.2, 'stroke-opacity': 0.18 }));
+    if (bodyD) g.appendChild(_el('path', { d: bodyD, fill: INK_DARK, 'fill-opacity': 0.28, stroke: 'none' }));
+    if (shadowD) g.appendChild(_el('path', { d: shadowD, fill: INK_DARK, 'fill-opacity': 0.35, stroke: 'none' }));
+    if (outlineD) g.appendChild(_el('path', { d: outlineD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.9, 'stroke-linecap': 'round', 'stroke-opacity': 0.8 }));
+    if (detailD) g.appendChild(_el('path', { d: detailD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.35 }));
 }
 
 // ══════════════════════════════════════════════════════════
@@ -326,9 +326,9 @@ function _drawForest(g, cluster) {
         }
     }
     // 3 compound paths instead of 2-4 per tree
-    if (canopyD) g.appendChild(_el('path', { d: canopyD, fill: INK_DARK, 'fill-opacity': 0.22, stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.55 }));
-    if (tierD) g.appendChild(_el('path', { d: tierD, fill: INK_DARK, 'fill-opacity': 0.19, stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.5 }));
-    if (trunkD) g.appendChild(_el('path', { d: trunkD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.6, 'stroke-linecap': 'round' }));
+    if (canopyD) g.appendChild(_el('path', { d: canopyD, fill: INK_DARK, 'fill-opacity': 0.35, stroke: INK_DARK, 'stroke-width': 0.65, 'stroke-opacity': 0.7 }));
+    if (tierD) g.appendChild(_el('path', { d: tierD, fill: INK_DARK, 'fill-opacity': 0.32, stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.65 }));
+    if (trunkD) g.appendChild(_el('path', { d: trunkD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.7, 'stroke-opacity': 0.75, 'stroke-linecap': 'round' }));
 }
 
 // ══════════════════════════════════════════════════════════
@@ -393,10 +393,10 @@ function _drawSnow(g, cluster) {
             stippleD += `M${sx-r},${sy}a${r},${r} 0 1,0 ${r*2},0a${r},${r} 0 1,0 ${-r*2},0`;
         }
     }
-    if (crackD) g.appendChild(_el('path', { d: crackD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.4, 'stroke-opacity': 0.3 }));
-    if (crystalFillD) g.appendChild(_el('path', { d: crystalFillD, fill: INK_LIGHT, 'fill-opacity': 0.14, stroke: INK_LIGHT, 'stroke-width': 0.5, 'stroke-opacity': 0.35 }));
-    if (crystalFacetD) g.appendChild(_el('path', { d: crystalFacetD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.25, 'stroke-opacity': 0.2 }));
-    if (driftD) g.appendChild(_el('path', { d: driftD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.5, 'stroke-opacity': 0.25 }));
+    if (crackD) g.appendChild(_el('path', { d: crackD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.55, 'stroke-opacity': 0.45 }));
+    if (crystalFillD) g.appendChild(_el('path', { d: crystalFillD, fill: INK_LIGHT, 'fill-opacity': 0.28, stroke: INK_LIGHT, 'stroke-width': 0.65, 'stroke-opacity': 0.5 }));
+    if (crystalFacetD) g.appendChild(_el('path', { d: crystalFacetD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.35, 'stroke-opacity': 0.35 }));
+    if (driftD) g.appendChild(_el('path', { d: driftD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.65, 'stroke-opacity': 0.4 }));
     if (frostD) g.appendChild(_el('path', { d: frostD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.3, 'stroke-opacity': 0.25 }));
     if (windD) g.appendChild(_el('path', { d: windD, fill: 'none', stroke: INK_LIGHT, 'stroke-width': 0.25, 'stroke-opacity': 0.18, 'stroke-dasharray': '4 3' }));
     if (stippleD) g.appendChild(_el('path', { d: stippleD, fill: INK_LIGHT, 'fill-opacity': 0.15, stroke: 'none' }));
@@ -466,16 +466,16 @@ function _drawSwamp(g, cluster) {
             fogD += `M${fx-r},${fy}a${r},${r} 0 1,0 ${r*2},0a${r},${r} 0 1,0 ${-r*2},0`;
         }
     }
-    if (poolFillD) g.appendChild(_el('path', { d: poolFillD, fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.25 }));
-    if (rippleD) g.appendChild(_el('path', { d: rippleD, fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.2 }));
-    if (padFillD) g.appendChild(_el('path', { d: padFillD, fill: INK_DARK, 'fill-opacity': 0.14, stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.3 }));
-    if (padVeinD) g.appendChild(_el('path', { d: padVeinD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.15, 'stroke-opacity': 0.2 }));
-    if (trunkThickD) g.appendChild(_el('path', { d: trunkThickD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-opacity': 0.6, 'stroke-linecap': 'round' }));
-    if (trunkThinD) g.appendChild(_el('path', { d: trunkThinD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.5, 'stroke-linecap': 'round' }));
-    if (rootD) g.appendChild(_el('path', { d: rootD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.5 }));
-    if (mossD) g.appendChild(_el('path', { d: mossD, fill: 'none', stroke: INK, 'stroke-width': 0.25, 'stroke-opacity': 0.3 }));
-    if (grassD) g.appendChild(_el('path', { d: grassD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.35, 'stroke-linecap': 'round' }));
-    if (fogD) g.appendChild(_el('path', { d: fogD, fill: INK, 'fill-opacity': 0.1, stroke: 'none' }));
+    if (poolFillD) g.appendChild(_el('path', { d: poolFillD, fill: INK_DARK, 'fill-opacity': 0.22, stroke: INK, 'stroke-width': 0.45, 'stroke-opacity': 0.4 }));
+    if (rippleD) g.appendChild(_el('path', { d: rippleD, fill: 'none', stroke: INK, 'stroke-width': 0.4, 'stroke-opacity': 0.35 }));
+    if (padFillD) g.appendChild(_el('path', { d: padFillD, fill: INK_DARK, 'fill-opacity': 0.25, stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.45 }));
+    if (padVeinD) g.appendChild(_el('path', { d: padVeinD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.25, 'stroke-opacity': 0.35 }));
+    if (trunkThickD) g.appendChild(_el('path', { d: trunkThickD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.8, 'stroke-opacity': 0.75, 'stroke-linecap': 'round' }));
+    if (trunkThinD) g.appendChild(_el('path', { d: trunkThinD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.65, 'stroke-linecap': 'round' }));
+    if (rootD) g.appendChild(_el('path', { d: rootD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.65, 'stroke-opacity': 0.65 }));
+    if (mossD) g.appendChild(_el('path', { d: mossD, fill: 'none', stroke: INK, 'stroke-width': 0.35, 'stroke-opacity': 0.45 }));
+    if (grassD) g.appendChild(_el('path', { d: grassD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.5, 'stroke-linecap': 'round' }));
+    if (fogD) g.appendChild(_el('path', { d: fogD, fill: INK, 'fill-opacity': 0.28, stroke: 'none' }));
 }
 
 // ── Desert — Crescent dunes with shading + stipple + wind marks ──
@@ -506,10 +506,10 @@ function _drawDesert(g, cluster) {
             windD += `M${wx},${wy}L${wx+wl},${wy-0.5}`;
         }
     }
-    if (duneD) g.appendChild(_el('path', { d: duneD, fill: 'none', stroke: INK, 'stroke-width': 0.7, 'stroke-opacity': 0.4 }));
-    if (shadowD) g.appendChild(_el('path', { d: shadowD, fill: 'none', stroke: INK, 'stroke-width': 0.25, 'stroke-opacity': 0.18 }));
-    if (stippleD) g.appendChild(_el('path', { d: stippleD, fill: INK, 'fill-opacity': 0.14, stroke: 'none' }));
-    if (windD) g.appendChild(_el('path', { d: windD, fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.15, 'stroke-dasharray': '3 2' }));
+    if (duneD) g.appendChild(_el('path', { d: duneD, fill: 'none', stroke: INK, 'stroke-width': 0.9, 'stroke-opacity': 0.55 }));
+    if (shadowD) g.appendChild(_el('path', { d: shadowD, fill: 'none', stroke: INK, 'stroke-width': 0.35, 'stroke-opacity': 0.3 }));
+    if (stippleD) g.appendChild(_el('path', { d: stippleD, fill: INK, 'fill-opacity': 0.25, stroke: 'none' }));
+    if (windD) g.appendChild(_el('path', { d: windD, fill: 'none', stroke: INK, 'stroke-width': 0.4, 'stroke-opacity': 0.28, 'stroke-dasharray': '3 2' }));
 }
 
 // ── Volcanic — Mountain peak + crater + lava flows + smoke ──
@@ -540,12 +540,12 @@ function _drawVolcanic(g, cluster) {
         }
     }
     if (shadowFillD) g.appendChild(_el('path', { d: shadowFillD, fill: INK_DARK, 'fill-opacity': 0.15, stroke: 'none' }));
-    if (slopeThickD) g.appendChild(_el('path', { d: slopeThickD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.7, 'stroke-opacity': 0.65, 'stroke-linecap': 'round' }));
-    if (slopeThinD) g.appendChild(_el('path', { d: slopeThinD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.55, 'stroke-linecap': 'round' }));
-    if (craterD) g.appendChild(_el('path', { d: craterD, fill: INK_DARK, 'fill-opacity': 0.2, stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.6 }));
-    if (hatchD) g.appendChild(_el('path', { d: hatchD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.2, 'stroke-opacity': 0.28 }));
-    if (lavaD) g.appendChild(_el('path', { d: lavaD, fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-opacity': 0.3 }));
-    if (smokeD) g.appendChild(_el('path', { d: smokeD, fill: 'none', stroke: INK, 'stroke-width': 0.4, 'stroke-opacity': 0.2 }));
+    if (slopeThickD) g.appendChild(_el('path', { d: slopeThickD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.9, 'stroke-opacity': 0.8, 'stroke-linecap': 'round' }));
+    if (slopeThinD) g.appendChild(_el('path', { d: slopeThinD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.7, 'stroke-opacity': 0.7, 'stroke-linecap': 'round' }));
+    if (craterD) g.appendChild(_el('path', { d: craterD, fill: INK_DARK, 'fill-opacity': 0.35, stroke: INK_DARK, 'stroke-width': 0.65, 'stroke-opacity': 0.75 }));
+    if (hatchD) g.appendChild(_el('path', { d: hatchD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.42 }));
+    if (lavaD) g.appendChild(_el('path', { d: lavaD, fill: 'none', stroke: INK, 'stroke-width': 0.65, 'stroke-opacity': 0.45 }));
+    if (smokeD) g.appendChild(_el('path', { d: smokeD, fill: 'none', stroke: INK, 'stroke-width': 0.55, 'stroke-opacity': 0.35 }));
 }
 
 // ── Cave — Rocky ground with scattered boulders, dark crevices, sparse entrance ──
@@ -586,12 +586,12 @@ function _drawCave(g, cluster) {
             }
         }
     }
-    if (boulderFillD) g.appendChild(_el('path', { d: boulderFillD, fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': 0.3, 'stroke-opacity': 0.28 }));
-    if (boulderShadowD) g.appendChild(_el('path', { d: boulderShadowD, fill: INK_DARK, 'fill-opacity': 0.12, stroke: 'none' }));
+    if (boulderFillD) g.appendChild(_el('path', { d: boulderFillD, fill: INK_DARK, 'fill-opacity': 0.22, stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.42 }));
+    if (boulderShadowD) g.appendChild(_el('path', { d: boulderShadowD, fill: INK_DARK, 'fill-opacity': 0.22, stroke: 'none' }));
     if (creviceD) g.appendChild(_el('path', { d: creviceD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.35 }));
     if (stippleD) g.appendChild(_el('path', { d: stippleD, fill: INK_DARK, 'fill-opacity': 0.18, stroke: 'none' }));
-    if (entranceFillD) g.appendChild(_el('path', { d: entranceFillD, fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.55 }));
-    if (stalactiteD) g.appendChild(_el('path', { d: stalactiteD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.35, 'stroke-opacity': 0.4 }));
+    if (entranceFillD) g.appendChild(_el('path', { d: entranceFillD, fill: INK_DARK, 'fill-opacity': 0.22, stroke: INK_DARK, 'stroke-width': 0.65, 'stroke-opacity': 0.7 }));
+    if (stalactiteD) g.appendChild(_el('path', { d: stalactiteD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.5, 'stroke-opacity': 0.55 }));
 }
 
 // ── Graveyard — Tombstones + crosses + dead trees + fog ──
@@ -638,10 +638,10 @@ function _drawGraveyard(g, cluster) {
             }
         }
     }
-    if (moundD) g.appendChild(_el('path', { d: moundD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.4, 'stroke-opacity': 0.25 }));
-    if (tombD) g.appendChild(_el('path', { d: tombD, fill: INK_DARK, 'fill-opacity': 0.12, stroke: INK_DARK, 'stroke-width': 0.45, 'stroke-opacity': 0.55 }));
-    if (crossD) g.appendChild(_el('path', { d: crossD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.55, 'stroke-opacity': 0.58 }));
-    if (treeD) g.appendChild(_el('path', { d: treeD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.55, 'stroke-opacity': 0.55, 'stroke-linecap': 'round' }));
+    if (moundD) g.appendChild(_el('path', { d: moundD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.55, 'stroke-opacity': 0.4 }));
+    if (tombD) g.appendChild(_el('path', { d: tombD, fill: INK_DARK, 'fill-opacity': 0.25, stroke: INK_DARK, 'stroke-width': 0.6, 'stroke-opacity': 0.7 }));
+    if (crossD) g.appendChild(_el('path', { d: crossD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.75, 'stroke-opacity': 0.72 }));
+    if (treeD) g.appendChild(_el('path', { d: treeD, fill: 'none', stroke: INK_DARK, 'stroke-width': 0.75, 'stroke-opacity': 0.7, 'stroke-linecap': 'round' }));
 }
 
 // ── Grassland — Curved grass blades ──
@@ -660,7 +660,7 @@ function _drawGrassland(g, cluster) {
             }
         }
     }
-    if (grassD) g.appendChild(_el('path', { d: grassD, fill: 'none', stroke: INK, 'stroke-width': 0.3, 'stroke-opacity': 0.22, 'stroke-linecap': 'round' }));
+    if (grassD) g.appendChild(_el('path', { d: grassD, fill: 'none', stroke: INK, 'stroke-width': 0.45, 'stroke-opacity': 0.35, 'stroke-linecap': 'round' }));
 }
 
 
