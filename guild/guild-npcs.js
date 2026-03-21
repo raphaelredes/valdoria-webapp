@@ -84,7 +84,7 @@ function _renderTaviraDetail() {
     html += '<div class="guild-detail-section"><div class="guild-detail-section-title">Recompensas completadas: ' + (_tavira.bounties || 0) + '</div></div>';
 
     showGuildDetail(html);
-    setTimeout(function() { _typewriteText(_tavira.greeting || 'Trabalho nao falta por aqui.'); }, 200);
+    setTimeout(function() { _typewriteText(_tavira.greeting || 'Trabalho não falta por aqui.'); }, 200);
 }
 
 function _typewriteText(text) {

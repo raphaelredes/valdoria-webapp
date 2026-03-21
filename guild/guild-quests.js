@@ -18,7 +18,7 @@ function _renderQuestBoard() {
 
     var quests = _questData.quests || [];
     if (!quests.length) {
-        boardEl.innerHTML = '<div class="guild-empty"><span class="guild-empty-icon">&#x1F4CB;</span>O quadro de missoes esta vazio.<br>Volte mais tarde para novas oportunidades.</div>';
+        boardEl.innerHTML = '<div class="guild-empty"><span class="guild-empty-icon">&#x1F4CB;</span>O quadro de missoes está vazio.<br>Volte mais tarde para novas oportunidades.</div>';
         return;
     }
 

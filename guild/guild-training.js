@@ -75,7 +75,7 @@ function _renderTraining() {
         }
     }
 
-    if (!html) html = '<div class="guild-empty"><span class="guild-empty-icon">&#x1F4DA;</span>Nenhuma opcao de treinamento disponivel.</div>';
+    if (!html) html = '<div class="guild-empty"><span class="guild-empty-icon">&#x1F4DA;</span>Nenhuma opção de treinamento disponivel.</div>';
     el.innerHTML = html;
 }
 
@@ -101,8 +101,8 @@ window._startTraining = function(category, itemId, name) {
 window._advanceTraining = function() {
     guildAction('train_session').then(function(d) {
         if (d) {
-            if (d.completed && typeof vToast === 'function') vToast('Treinamento concluido!', 'success', 3000);
-            if (d.complication && typeof vToast === 'function') vToast('Complicacao! ' + d.complication, 'warning', 4000);
+            if (d.completed && typeof vToast === 'function') vToast('Treinamento concluído!', 'success', 3000);
+            if (d.complication && typeof vToast === 'function') vToast('Complicação! ' + d.complication, 'warning', 4000);
             renderTrainingTab();
             if (window._renderPlayerInfo) _renderPlayerInfo();
         }
@@ -113,7 +113,7 @@ window._abandonTraining = function() {
     if (typeof vPopup !== 'undefined') {
         vPopup.show({
             title: 'Abandonar Treinamento',
-            body: 'Tem certeza? Todo o progresso sera perdido.',
+            body: 'Tem certeza? Todo o progresso será perdido.',
             confirm: 'Abandonar', cancel: 'Cancelar', danger: true,
             onConfirm: function() {
                 guildAction('train_start_abandon').then(function() { renderTrainingTab(); }).catch(function(e) { console.error('[GUILD]', e); });

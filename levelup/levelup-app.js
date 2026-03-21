@@ -11,7 +11,7 @@ returnTo=params.get('return')||'';if(window.ValdoriaErrors){ValdoriaErrors.init(
 try{const raw=params.get('p')||'';P=JSON.parse(decodeBase64Utf8(raw));}catch(e){showFatalError('Dados invalidos',e);return;}
 if(!P||!P.hero_class||!P.stats||typeof P.level!=='number'){showFatalError('Dados do personagem incompletos');return;}
 for(const[k,v]of Object.entries(P.stats)){if(typeof v!=='number'||v<1||v>20){showFatalError('Atributos invalidos');return;}}
-if(typeof CLASS_SKILLS==='undefined'||typeof FEATS==='undefined'){showFatalError('Dados do jogo nao carregaram');return;}
+if(typeof CLASS_SKILLS==='undefined'||typeof FEATS==='undefined'){showFatalError('Dados do jogo não carregaram');return;}
 buildScreens();if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('levelup');if(window._lvlInitLoading)window._lvlInitLoading.hide();})();function buildScreens(){screens.length=0;screens.push({id:'summary',build:buildSummary,validate:()=>null});if(P.needs_subclass){screens.push({id:'subclass',build:buildSubclass,validate:validateSubclass,hasSub:true});}
 if(P.pending_asi>0){screens.push({id:'asi',build:buildASI,validate:validateASI,hasSub:true});}
 if(P.pending_skills>0){const skills=getAvailableSkills();if(skills.length>0){screens.push({id:'skills',build:buildSkills,validate:validateSkills,hasSub:true});}}
@@ -43,7 +43,7 @@ function _showValidation(msg){console.warn('[LEVELUP]',msg);hapticNotify('error'
 function showFatalError(msg,err=null){console.error('[LEVELUP][FATAL]',msg,err||'');if(window.ValdoriaErrors){ValdoriaErrors.showError(msg,err);}else{const el=document.getElementById('fatalError');document.getElementById('fatalMsg').textContent=msg;el.classList.add('active');}}
 function calcDmgRange(effect){if(!effect)return'';const m=effect.match(/(\d+)d(\d+)(?:\s*\+\s*(\d+))?/);if(!m)return'';const n=parseInt(m[1]),d=parseInt(m[2]),b=m[3]?parseInt(m[3]):0;return`${n + b}~${n * d + b}`;}
 function buildSummary(el){const info=CLASS_INFO[P.hero_class]||{name:'Aventureiro',resource:'MP'};let html=`
-        <div class="dm-bubble">${P.name}, a energia do seu crescimento se manifesta. Voce sente o poder fluindo...</div>
+        <div class="dm-bubble">${P.name}, a energia do seu crescimento se manifesta. Você sente o poder fluindo...</div>
         <div class="lvl-banner">
             <div class="lvl-banner-level">${P.level}</div>
             <div class="lvl-banner-title">Novo Nivel Alcancado!</div>
@@ -57,7 +57,7 @@ function buildSummary(el){const info=CLASS_INFO[P.hero_class]||{name:'Aventureir
         <div class="pending-list">
     `;if(P.needs_subclass){html+=`<div class="pending-item">
             <div class="pending-icon">\ud83c\udff0</div>
-            <div class="pending-text"><b>Subclasse</b><small>Escolha obrigatoria no nivel 3+</small></div>
+            <div class="pending-text"><b>Subclasse</b><small>Escolha obrigatória no nivel 3+</small></div>
             <div class="pending-badge">1</div>
         </div>`;}
 if(P.pending_asi>0){html+=`<div class="pending-item">
@@ -74,7 +74,7 @@ html+='</div><div class="hint">Prossiga para fazer suas escolhas</div>';el.inner
 function buildSubclass(el){const subs=SUBCLASSES[P.hero_class]||{};const info=CLASS_INFO[P.hero_class]||{name:'Classe'};let html=`<div class="dm-bubble">Chegou a hora de definir seu caminho. Cada especializacao oferece poderes unicos...</div>
         <div class="section-title">\ud83c\udff0 Subclasse: ${info.name}</div>
         <div class="hint">Escolha sua especializacao</div>
-        <div id="subclassList">`;const subEntries=Object.entries(subs);if(subEntries.length===0){html+='<div class="empty-msg">Subclasses nao disponiveis para este nivel.</div>';}else{for(const[scId,sc]of subEntries){const isSel=sel.subclass===scId;html+=`<div class="choice-card${isSel ? ' selected' : ''}" onclick="selectSubclass('${scId}')">
+        <div id="subclassList">`;const subEntries=Object.entries(subs);if(subEntries.length===0){html+='<div class="empty-msg">Subclasses não disponíveis para este nivel.</div>';}else{for(const[scId,sc]of subEntries){const isSel=sel.subclass===scId;html+=`<div class="choice-card${isSel ? ' selected' : ''}" onclick="selectSubclass('${scId}')">
                 <div class="choice-card-header">
                     <div class="choice-card-icon">\ud83c\udff0</div>
                     <div class="choice-card-name">${sc.name}</div>
