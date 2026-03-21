@@ -47,6 +47,7 @@ function _fetchSocial(body) {
 function _startPoll() {
     _stopPoll();
     _pollTimer = setInterval(function() {
+        if (document.visibilityState === 'hidden') return;
         if (_activeTab !== 'chat') { _stopPoll(); return; }
         var mc = (_cachedData && _cachedData.chat) ? _cachedData.chat.msg_count || 0 : 0;
         _fetchSocial({ action: 'chat_poll', msg_count: mc }).then(function(data) {
