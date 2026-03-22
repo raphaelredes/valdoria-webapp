@@ -18,11 +18,13 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
     </script>
     <script>
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/motion.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
     </script>
     <style>
         * {
@@ -562,7 +564,7 @@
         }
 
         /* ═══ BOTTOM BAR ═══ */
-        #bottom-bar {
+        #bottom-panel {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
@@ -571,6 +573,59 @@
             border-top: 2px solid #70501e;
             z-index: 60;
             flex-shrink: 0;
+        }
+
+        /* Immersive mode */
+        .immersive-toggle {
+            position: fixed;
+            bottom: 52px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 52px;
+            height: 32px;
+            border: 1px solid var(--v-border);
+            border-bottom: none;
+            border-radius: var(--v-radius, 10px) var(--v-radius, 10px) 0 0;
+            background: var(--v-bg, #2a2420);
+            color: var(--v-text-dim, #a09484);
+            font-size: var(--v-font-body, 14px);
+            line-height: 1;
+            padding-top: var(--v-space-sm, 4px);
+            cursor: pointer;
+            z-index: 61;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .immersive-toggle:active {
+            background: var(--v-bg-raised, #332a22);
+            color: var(--v-gold, #c4953a);
+        }
+        .immersive-restore {
+            position: fixed;
+            bottom: max(10px, env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: var(--v-space-sm, 4px);
+            padding: 8px 20px;
+            border: 1px solid rgba(196, 149, 58, 0.3);
+            border-radius: 20px;
+            background: var(--v-bg-raised, #332a22);
+            color: var(--v-gold, #c4953a);
+            font-size: var(--v-font-md, 13px);
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            z-index: 61;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            -webkit-tap-highlight-color: transparent;
+            opacity: 0.9;
+        }
+        .immersive-restore:active {
+            opacity: 1;
+            transform: translateX(-50%) scale(0.95);
+        }
+        #bottom-panel.immersive-collapsed {
+            display: none !important;
         }
 
         .bar-btn {
@@ -2315,8 +2370,10 @@
         <div class="gt-dismiss">Toque em qualquer lugar para continuar</div>
     </div>
 
+    <button id="immersive-toggle" class="immersive-toggle" style="display:none" aria-label="Recolher menu">&middot;</button>
+
     <!-- Bottom Bar -->
-    <div id="bottom-bar">
+    <div id="bottom-panel" class="bottom-panel" style="display:none">
         <button type="button" class="bar-btn bar-btn-return" id="btn-return" onclick="handleReturn()">
             Retornar a Eldoria
         </button>
@@ -2327,6 +2384,8 @@
             Fechar Mapa
         </button>
     </div>
+
+    <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
 
     <script>
         var v = Date.now();
