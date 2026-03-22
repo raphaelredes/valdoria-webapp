@@ -43,9 +43,9 @@
 .guild-approval-fill { height: 100%; border-radius: var(--v-radius-xs, 2px); transition: width var(--v-transition); }
 
 /* Detail overlay */
-.guild-detail-overlay { position: fixed; inset: 0; z-index: var(--v-z-overlay, 100); background: var(--v-bg); overflow-y: auto; padding: var(--v-space-md); padding-bottom: 80px; }
+.guild-detail-overlay { position: fixed; inset: 0; z-index: var(--v-z-overlay, 500); background: var(--v-bg); overflow-y: auto; padding: var(--v-space-md); padding-bottom: 80px; }
 .guild-detail-content { max-width: 430px; margin: 0 auto; }
-.guild-detail-close { position: fixed; bottom: var(--v-space-md); left: 50%; transform: translateX(-50%); padding: var(--v-space-sm) var(--v-space-xl); background: var(--v-bg-raised); border: 1px solid var(--v-border); border-radius: var(--v-radius-pill); color: var(--v-text); font-family: var(--v-font); font-size: var(--v-font-sm); cursor: pointer; min-height: 44px; min-width: 44px; z-index: var(--v-z-overlay, 100); }
+.guild-detail-close { position: fixed; bottom: var(--v-space-md); left: 50%; transform: translateX(-50%); padding: var(--v-space-sm) var(--v-space-xl); background: var(--v-bg-raised); border: 1px solid var(--v-border); border-radius: var(--v-radius-pill); color: var(--v-text); font-family: var(--v-font); font-size: var(--v-font-sm); cursor: pointer; min-height: 44px; min-width: 44px; z-index: var(--v-z-overlay, 500); }
 .guild-detail-close:active { background: var(--v-bg-card-hover); }
 
 /* Detail sections */

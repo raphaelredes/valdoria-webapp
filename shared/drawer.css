@@ -1,0 +1,10 @@
+/* Shared Drawer / Sub-screen — valdoria-webapp/shared/drawer.css */
+.v-drawer{position:absolute;top:0;left:0;width:100%;height:100%;background:var(--v-bg);transform:translateX(100%);transition:transform var(--v-transition-base) var(--v-ease-snap,cubic-bezier(0.16,1,0.3,1));overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:10}
+.v-drawer.active{transform:translateX(0)}
+.v-drawer .screen-content{padding-top:var(--v-space-md,8px);padding-bottom:var(--v-space-xl,16px)}
+.sub-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:var(--v-bg);transform:translateX(100%);transition:transform var(--v-transition-base) var(--v-ease-snap,cubic-bezier(0.16,1,0.3,1));overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:10}
+.sub-screen.active{transform:translateX(0)}
+.sub-screen .screen-content{padding-top:var(--v-space-md,8px)}
+.screen.sub-open{overflow:hidden}
+body.perf-lite .v-drawer,body.perf-lite .sub-screen{transition:none}
+@media (prefers-reduced-motion:reduce){.v-drawer,.sub-screen{transition:none!important}}
