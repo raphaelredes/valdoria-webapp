@@ -32,7 +32,7 @@
         .guide-header {
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: var(--v-z-sticky, 10);
             background: var(--v-bg);
             padding: 8px 12px 0;
             border-bottom: 1px solid var(--v-border);
@@ -340,7 +340,7 @@
             font-family: var(--v-font);
             font-size: 13px;
             cursor: pointer;
-            z-index: 20;
+            z-index: var(--v-z-sticky, 20);
             box-shadow: var(--v-shadow-md);
             min-height: 44px;
             min-width: 44px;
