@@ -1,5 +1,10 @@
+function _seKey(s){return typeof s==='object'?s.k:s;}
+function _seIcon(s){return typeof s==='object'?s.i:(STATUS_ICONS[s]||'');}
+function _seName(s){return typeof s==='object'?s.n:(STATUS_PT[s]||s);}
+function _seIsBuff(s){return typeof s==='object'?(s.cat==='buff'):STATUS_BUFFS.has(s);}
+function _seDcLabel(s){if(typeof s!=='object'||!s.dc||!s.sa)return '';var saShort={'strength':'FOR','dexterity':'DES','constitution':'CON','intelligence':'INT','wisdom':'SAB','charisma':'CAR'};return ' CD'+s.dc+(saShort[s.sa]||'');}
 function announce(msg){var el=document.getElementById('combatAnnouncer');if(el){el.textContent='';setTimeout(function(){el.textContent=msg;},50);}}
-function renderEntity(e,type,idx,isActiveTurn){const pct=e.mhp>0?(e.hp/e.mhp):0;const hpClass=pct>0.60?'hp-high':pct>0.25?'hp-mid':'hp-low';let statusIcons='';if(e.se&&e.se.length>0){if(e.se.length>3){statusIcons=e.se.slice(0,3).map(s=>STATUS_ICONS[s]||'').join('')+`<span class="status-overflow">+${e.se.length - 3}</span>`;}else{statusIcons=e.se.map(s=>STATUS_ICONS[s]||'').join('');}}
+function renderEntity(e,type,idx,isActiveTurn){const pct=e.mhp>0?(e.hp/e.mhp):0;const hpClass=pct>0.60?'hp-high':pct>0.25?'hp-mid':'hp-low';let statusIcons='';if(e.se&&e.se.length>0){if(e.se.length>3){statusIcons=e.se.slice(0,3).map(s=>_seIcon(s)).join('')+`<span class="status-overflow">+${e.se.length - 3}</span>`;}else{statusIcons=e.se.map(s=>_seIcon(s)).join('');}}
 let detailsHtml='';if(type==='enemy'){const atkLabel=ATK_TYPE_LABELS[e.at]||e.at||'';const dmgIcon=DMG_ICONS[e.dt]||'';detailsHtml+=`<div class="bar-container">
             <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
             <div class="bar-track"><div class="bar-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
@@ -9,7 +14,7 @@ let detailsHtml='';if(type==='enemy'){const atkLabel=ATK_TYPE_LABELS[e.at]||e.at
             <span class="stat-item">${dmgIcon} ${e.dmg}</span>
             <span class="entity-badge-sm">${atkLabel}</span>
         </div>`;if(e.leg){detailsHtml+='<div class="legendary-row">';detailsHtml+='<span>👑 Boss</span>';if(e.leg.lrm>0)detailsHtml+=`<span title="Anula falha em salvaguarda">⭐ Resist. Lend. ${e.leg.lr}/${e.leg.lrm}</span>`;if(e.leg.lam>0)detailsHtml+=`<span>⚡ Ações ${e.leg.la}/${e.leg.lam}</span>`;detailsHtml+='</div>';}
-if(e.se&&e.se.length>0){detailsHtml+='<div class="status-pills">'+e.se.map(s=>`<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('')+'</div>';}
+if(e.se&&e.se.length>0){detailsHtml+='<div class="status-pills">'+e.se.map(s=>`<span class="status-pill${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}</span>`).join('')+'</div>';}
 if(e.img&&typeof showImagePopup==='function'){detailsHtml+='<button class="entity-view-btn" data-img="'+escHtml(e.img)+'" data-name="'+escHtml(e.n)+'" data-desc="'+escHtml(e.desc||'')+'" data-ac="'+(e.ac||'')+'" data-atk="'+(e.atk||'')+'" data-dmg="'+escHtml(e.dmg||'')+'">🔍 Ver Criatura</button>';}}else{detailsHtml+=`<div class="bar-container">
             <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
             <div class="bar-track"><div class="bar-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
@@ -19,7 +24,7 @@ if(e.img&&typeof showImagePopup==='function'){detailsHtml+='<button class="entit
             </div>`;}
 const allyStats=[];if(e.ac)allyStats.push(`🛡️ CA ${e.ac}`);if(e.atk)allyStats.push(`⚔️ +${e.atk}`);if(e.dmg)allyStats.push(`🗡️ ${e.dmg}`);if(e.pot>0)allyStats.push(`🧪 ${e.pot}`);if(allyStats.length>0){detailsHtml+='<div class="stats-row">'+allyStats.map(s=>`<span class="stat-item">${s}</span>`).join('')+'</div>';}
 if(e.conc){detailsHtml+=`<div class="stats-row"><span class="stat-item conc-badge">🔮 Conc.: ${escHtml(e.conc)}</span></div>`;}
-if(e.se&&e.se.length>0){detailsHtml+='<div class="status-pills">'+e.se.map(s=>`<span class="status-pill${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`).join('')+'</div>';}}
+if(e.se&&e.se.length>0){detailsHtml+='<div class="status-pills">'+e.se.map(s=>`<span class="status-pill${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}</span>`).join('')+'</div>';}}
 const isDead=e.hp<=0;const activeClass=isActiveTurn?' active-turn':'';const deadClass=isDead?' dead':'';const hpStateClass=pct>0.60?'':pct>0.25?' hp-wounded':' hp-critical' /* noqa: preflight */;const dataAttr=type==='enemy'?` data-enemy-idx="${idx}"`:'';let posBadge='';if(type==='enemy'&&_currentPositions){const pPos=_currentPositions['player'];const ePos=_currentPositions[`enemy_${idx}`];if(pPos&&ePos){const dx=(pPos.x||0)-(ePos.x||0),dy=(pPos.y||0)-(ePos.y||0);const near=Math.sqrt(dx*dx+dy*dy)<=1.5;posBadge=`<span class="pos-badge ${near ? 'near' : 'far'}">${near ? '⚔ Perto' : '🏹 Longe'}</span>`;}}
 let intentBadge='';if(type==='enemy'&&e.it){const it=e.it;const intentCls=it.tp==='stun'||it.tp==='skip'?'intent-stun':it.tp==='skill'?'intent-skill':'intent-atk';const dmgLabel=it.dmg?' '+it.dmg:'';intentBadge='<span class="intent-badge '+intentCls+'">'+(it.ic||'')+dmgLabel+'</span>';}
 const acBadge=type==='enemy'&&e.ac?`<span class="ac-badge">🛡${e.ac}</span>`:'';return`<div class="entity ${type}${activeClass}${deadClass}${hpStateClass}" role="group" aria-label="${escHtml(e.n)}"${dataAttr}>
@@ -36,7 +41,7 @@ const acBadge=type==='enemy'&&e.ac?`<span class="ac-badge">🛡${e.ac}</span>`:'
         </div>
         <div class="entity-details">${detailsHtml}</div>
     </div>`;}
-function renderPlayerCard(p,isCompact=false){const hpPct=p.mhp>0?(p.hp/p.mhp):0;const hpClass=hpPct>0.60?'hp-high':hpPct>0.25?'hp-mid':'hp-low';const mpPct=p.mmp>0?(p.mp/p.mmp):0;const resClass=RES_CLASS_MAP[p.res]||'mp';const resIcon=RES_ICON_MAP[p.res]||'💧';const resLowCls=mpPct<=0.10&&mpPct>0?' res-critical':mpPct<=0.25&&mpPct>0?' res-low':'';const badges=[];if(p.se&&p.se.length>0){p.se.forEach(s=>badges.push(`<span class="mini-badge status${STATUS_BUFFS.has(s) ? ' buff status-buff' : ' status-debuff'}">${STATUS_ICONS[s] || ''} ${STATUS_PT[s] || s}</span>`));}
+function renderPlayerCard(p,isCompact=false){const hpPct=p.mhp>0?(p.hp/p.mhp):0;const hpClass=hpPct>0.60?'hp-high':hpPct>0.25?'hp-mid':'hp-low';const mpPct=p.mmp>0?(p.mp/p.mmp):0;const resClass=RES_CLASS_MAP[p.res]||'mp';const resIcon=RES_ICON_MAP[p.res]||'💧';const resLowCls=mpPct<=0.10&&mpPct>0?' res-critical':mpPct<=0.25&&mpPct>0?' res-low':'';const badges=[];if(p.se&&p.se.length>0){p.se.forEach(s=>badges.push(`<span class="mini-badge status${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}</span>`));}
 if(p.cov){badges.push(`<span class="mini-badge cover">${p.cov.ico} +${p.cov.ac} CA</span>`);}
 if(p.conc){badges.push(`<span class="mini-badge conc">🔮 ${escHtml(p.conc)}</span>`);}
 const badgesHtml=badges.length>0?`<div class="player-badge-row">${badges.join('')}</div>`:'';const concClass=p.conc?' concentrating':'';const dangerClass=hpPct<=0.25&&hpPct>0?' hp-danger':'';return`<div class="entity player${concClass}${dangerClass}">
