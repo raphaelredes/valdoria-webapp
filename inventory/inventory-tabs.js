@@ -49,7 +49,7 @@ const it=getItemData(inv.n);const rarity=it.r||'common';const equipped=isEquippe
                     ${(!selectionMode && it.s && _isUpgradeForSlot(inv.n, it)) ? '<span class="ic-upgrade">\u2B06</span>' : ''}
                     ${isNewItem(inv.n) ? '<span class="ic-new-dot"></span>' : ''}
                     <div class="ic-emoji">${it.img ? '<img class="ic-thumb" src="' + it.img + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'\'"><span style="display:none">' + (it.e || '📦') + '</span>' : (it.e || '📦')}</div>
-                    <div class="ic-name v-rarity-${rarity}">${inv.n}</div>
+                    <div class="ic-name v-rarity-${rarity}">${esc(inv.n)}</div>
                     <div class="ic-meta">${getItemShortDesc(inv.n, it)}</div>
                 </div>`;});html+='</div>';}
 c.innerHTML=html;}
@@ -110,7 +110,7 @@ html+='</div>';}
 return html;}
 function getSlotEmptyIcon(slot){return vi(SLOT_ICONS[slot]||'bag',20);}
 function renderAlliesTab(c){if(!D.allies||!D.allies.length){c.innerHTML=`<div class="empty-state"><div class="icon">${vi('people', 32)}</div><p>Nenhum aliado no grupo.</p></div>`;return;}
-let html='';D.allies.forEach(a=>{const hpPct=a.mhp>0?Math.round((a.hp/a.mhp)*100):0;const hpCls=hpPct>60?'bar-high':hpPct>25?'bar-mid':'bar-low';let mpBar='';if(a.mmp>0){const mpPct=a.mmp>0?Math.round((a.mp/a.mmp)*100):0;mpBar=`<div class="ally-bar-row">
+let html='';D.allies.forEach(a=>{const hpPct=(a.mhp||0)>0?Math.round(((a.hp||0)/(a.mhp||1))*100):0;const hpCls=typeof vBarHpClass==='function'?vBarHpClass(hpPct):(hpPct>60?'bar-high':hpPct>25?'bar-mid':'bar-low');let mpBar='';if(a.mmp>0){const mpPct=a.mmp>0?Math.round((a.mp/a.mmp)*100):0;mpBar=`<div class="ally-bar-row">
                 <span class="ally-bar-label">${a.res || '💧'} ${a.mp}/${a.mmp}</span>
                 <div class="ally-bar-track"><div class="ally-bar-fill ally-bar-mp" style="transform:scaleX(${mpPct/100})"></div></div>
             </div>`;}
@@ -118,7 +118,7 @@ const lvlBadge=a.l>0?`<span class="ally-lvl-badge">Lv${a.l}</span>`:'';const aff
                 <div class="ally-header">
                     <span class="ally-ico">${a.ico || '⚔️'}</span>
                     <div class="ally-name-col">
-                        <span class="ally-name">${a.n} ${lvlBadge}${affBadge}</span>
+                        <span class="ally-name">${esc(a.n)} ${lvlBadge}${affBadge}</span>
                         <span class="ally-class">${a.c || 'Aliado'}</span>
                     </div>
                     ${a.ac != null ? '<span class="ally-ac">' + vi('shield', 12) + ' ' + a.ac + '</span>' : ''}

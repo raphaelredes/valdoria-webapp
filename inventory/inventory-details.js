@@ -44,7 +44,7 @@ if(bankItems.length>0){html+='<div class="section-title">'+vi('bag',14)+' Itens 
 +(bi.q>1?'<span class="ic-qty">x'+bi.q+'</span>':'')
 +'</div>'
 +'<div class="ic-emoji">'+emoji+'</div>'
-+'<div class="ic-name v-rarity-'+rarity+'">'+bi.n+'</div>'
++'<div class="ic-name v-rarity-'+rarity+'">'+esc(bi.n)+'</div>'
 +'<div class="ic-meta">'+getItemShortDesc(bi.n,it||{})+'</div>'
 +'</div>';});html+='</div>';}
 var invEquippable=localInv.filter(function(inv){if(inv.q<=0)return false;if(isEquippedAnywhere(inv.n))return false;if(isLocked(inv.n))return false;var it=getItemData(inv.n);return it&&!(it.t||[]).includes('quest');});if(invEquippable.length>0){html+='<div class="section-title">'+vi('bag',14)+' Depositar da Mochila</div>';html+='<div class="item-grid">';invEquippable.forEach(function(inv){var it=getItemData(inv.n);var emoji=it?(it.e||'\ud83d\udce6'):'\ud83d\udce6';var rarity=it?(it.r||'common'):'common';html+='<div class="item-card rarity-'+rarity+' fade-in" onclick="doBankDeposit(\''+esc(inv.n)+'\')"'
@@ -53,7 +53,7 @@ var invEquippable=localInv.filter(function(inv){if(inv.q<=0)return false;if(isEq
 +(inv.q>1?'<span class="ic-qty">x'+inv.q+'</span>':'')
 +'</div>'
 +'<div class="ic-emoji">'+emoji+'</div>'
-+'<div class="ic-name v-rarity-'+rarity+'">'+inv.n+'</div>'
++'<div class="ic-name v-rarity-'+rarity+'">'+esc(inv.n)+'</div>'
 +'<div class="ic-meta">Toque para guardar</div>'
 +'</div>';});html+='</div>';}
 if(bankItems.length===0&&bankGold===0&&invEquippable.length===0){html+='<div class="empty-state"><div class="icon">'+vi('vault',32)+'</div><p>Cofre vazio.</p></div>';}

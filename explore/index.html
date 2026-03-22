@@ -28,6 +28,7 @@
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/typewriter.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
             document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
@@ -46,48 +47,7 @@
         <button class="v-skip-btn" id="travel-skip-btn">Pular >></button>
     </div>
 
-    <!-- Loading Screen (magic summoning circle) -->
-    <div id="loading" class="loading-overlay" style="opacity:0" aria-busy="true">
-        <div class="loading-flash"></div>
-        <div class="loading-particles">
-            <div class="particle ember p1"></div>
-            <div class="particle ember p2"></div>
-            <div class="particle ember p3"></div>
-            <div class="particle ember p4"></div>
-            <div class="particle ember p5"></div>
-            <div class="particle ember p6"></div>
-            <div class="particle spark s1"></div>
-            <div class="particle spark s2"></div>
-            <div class="particle spark s3"></div>
-            <div class="particle spark s4"></div>
-            <div class="particle mote m1"></div>
-            <div class="particle mote m2"></div>
-            <div class="particle flame fl1"></div>
-            <div class="particle flame fl2"></div>
-            <div class="particle flame fl3"></div>
-            <div class="particle frost fr1"></div>
-            <div class="particle frost fr2"></div>
-            <div class="particle frost fr3"></div>
-            <div class="particle lightning lt1"></div>
-            <div class="particle lightning lt2"></div>
-            <div class="particle arcane ar1"></div>
-            <div class="particle arcane ar2"></div>
-            <div class="particle arcane ar3"></div>
-        </div>
-        <div class="loading-brand">
-            <div class="loading-title">EXPLORAR</div>
-            <div class="loading-divider"><span class="divider-rune">&#9670;</span></div>
-        </div>
-        <div class="loading-progress-wrap">
-            <div class="loading-progress-track">
-                <div id="loading-progress" class="loading-progress-fill" style="width:0%"></div>
-            </div>
-            <div id="loading-stage" class="loading-stage"></div>
-        </div>
-        <div class="loading-tip-area">
-            <div id="loading-tip" class="loading-tip" role="status" aria-live="polite">Gerando mapa...</div>
-        </div>
-    </div>
+    <script>document.write(ValdoriaLoadingHTML({ title: 'EXPLORAR', particleSet: 'standard', defaultTip: 'Gerando mapa...' }));</script>
 
 
 

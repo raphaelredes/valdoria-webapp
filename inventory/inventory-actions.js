@@ -39,7 +39,7 @@ function doUse(name){const it=getItemData(name);const tags=it?.t||[];if(name==='
 closeModal();haptic('medium');toast(`${vi('flask', 13)} ${esc(name)} (~+${estHeal} HP)`,'ok');animateStat('hs-hp');updateHeader();renderTab();updateBottomBar();return;}
 if(tags.includes('consumable')||tags.includes('food')){addOp({t:'use',item:name,tgt:activeTarget});removeFromLocalInv(name);let tgtLabel='';if(activeTarget!=='player'&&D.allies){const ally=D.allies.find(a=>a.id===activeTarget);if(ally)tgtLabel=` → ${ally.n}`;}
 closeModal();haptic('medium');toast(`${vi('food', 13)} ${esc(name)} usado${tgtLabel}`,'ok');updateHeader();renderTab();updateBottomBar();return;}}
-function showTargetPicker(name){let html=`<div class="modal-title">${vi('target', 16)} Alvo</div>`;html+=`<div style="font-size:12px;color:var(--v-text-muted);text-align:center;margin-bottom:8px;">Quem vai consumir ${name}?</div>`;const hpPct=Math.round(localHP/D.p.mhp*100);html+=`<button class="btn-use" style="width:100%;margin-bottom:6px;" onclick="activeTarget='player';doUse('${esc(name)}')">
+function showTargetPicker(name){let html=`<div class="modal-title">${vi('target', 16)} Alvo</div>`;html+=`<div style="font-size:12px;color:var(--v-text-muted);text-align:center;margin-bottom:8px;">Quem vai consumir ${esc(name)}?</div>`;const hpPct=Math.round(localHP/D.p.mhp*100);html+=`<button class="btn-use" style="width:100%;margin-bottom:6px;" onclick="activeTarget='player';doUse('${esc(name)}')">
             ${vi('person', 14)} ${D.p.n} <span style="opacity:0.7;font-size:11px;">${vi('heart', 11)} ${localHP}/${D.p.mhp} (${hpPct}%)</span></button>`;(D.allies||[]).forEach(a=>{const aHp=a.hp,aMhp=a.mhp;const aPct=Math.round(aHp/aMhp*100);const injured=aHp<aMhp?'':'opacity:0.5;';html+=`<button class="btn-use" style="width:100%;margin-bottom:6px;${injured}" onclick="activeTarget='${esc(a.id)}';doUse('${esc(name)}')">
                 ${vi('person', 14)} ${a.n} <span style="opacity:0.7;font-size:11px;">${vi('heart', 11)} ${aHp}/${aMhp} (${aPct}%)</span></button>`;});html+=`<button class="btn-unequip" style="width:100%;margin-top:4px;" onclick="closeModal()">Cancelar</button>`;showModal(html);}
 function doUsePotion(){if(localPotions<=0)return;addOp({t:'use',item:'potion',tgt:'player'});localPotions--;localHP=Math.min(D.p.mhp,localHP+7);haptic('medium');toast(`${vi('flask', 13)} Poção de Cura usada (~+7 HP)`,'ok');animateStat('hs-hp');updateHeader();renderTab();updateBottomBar();}
@@ -101,7 +101,7 @@ if(!window._invPopupMode&&_apiBase&&window.ApiDiscovery){ApiDiscovery.init(_apiB
 if(!window._invPopupMode&&window.SessionHeartbeat&&_apiBase&&_apiToken&&_apiUid){SessionHeartbeat.init({apiBase:_apiBase,token:_apiToken,uid:parseInt(_apiUid)||0});}
 var _combatMode=_urlParams.get('combat')==='1';async function _navigateBack(){const overlay=document.getElementById('loadingOverlay');if(overlay&&!overlay.classList.contains('hidden')){try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}
 return;}
-if(_modalOpen){closeModal();return;}
+if(typeof vPopup!=='undefined'&&vPopup.isOpen()){closeModal();return;}
 if(activeTarget!=='player'){switchTab('allies');return;}
 if(pendingOps.length>0){_showPendingOpsExitConfirm();return;}
 if(window.ValdoriaExitConfirm){ValdoriaExitConfirm.show();}else{await _performExit();}}
