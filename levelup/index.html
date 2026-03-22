@@ -909,9 +909,16 @@
         </div>
     </div>
 
-    <div class="nav-bar">
+    <!-- Immersive mode toggle (collapse bottom panel) -->
+    <button id="immersive-toggle" class="immersive-toggle" style="display:none"
+        aria-label="Recolher menu">&middot;</button>
+
+    <div id="bottom-panel" class="nav-bar">
         <button id="btnNext" class="v-btn v-btn-primary" onclick="goNext()">Continuar</button>
     </div>
+
+    <!-- Immersive mode restore pill (when panel collapsed) -->
+    <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
 
     <script>
         // ═══════════════════════════════════════════════
