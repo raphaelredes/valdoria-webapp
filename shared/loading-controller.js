@@ -154,7 +154,7 @@ window.ValdoriaLoadingController = function(config) {
             if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
             }
-        } catch (_) {}
+        } catch(_){console.warn('[LOADING]',_);}
         _cinematicTimers.push(setTimeout(function() {
             overlay.classList.add('exit-cinematic');
             var _exitDone = false;

@@ -369,7 +369,7 @@ function _chatEmote(key) {
                 }
             });
         } else if (data && data.error === 'cooldown') {
-            if (typeof vToast === 'function') vToast('\u23f3 Aguarde um momento...', 'warn');
+            if (typeof vToast === 'function') vToast('\u23f3 Aguarde um momento...', 'warn', 2000);
         }
         _sending = false;
     }).catch(function(err) { _sending = false; console.error('[SOCIAL] chatEmote failed', err); if (typeof vToast === 'function') vToast('Erro ao enviar emote.', 'warn', 2000); });
@@ -409,7 +409,7 @@ function _socialAction(action, requestId) {
 
 window.showSocialPopup = function(data) {
     _cachedData = data || {};
-    try { var sv = localStorage.getItem('valdoria_social_tab'); if (sv && ['chat','online','inbox','rel'].indexOf(sv) !== -1) _activeTab = sv; } catch (e) {}
+    try { var sv = localStorage.getItem('valdoria_social_tab'); if (sv && ['chat','online','inbox','rel'].indexOf(sv) !== -1) _activeTab = sv; } catch(e){console.warn('[SOCIAL]',e);}
     _detailNpc = null; _detailData = null; _selectedPlayer = null;
     _render();
 };

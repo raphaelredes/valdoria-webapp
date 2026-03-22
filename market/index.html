@@ -935,6 +935,7 @@
             if (tg.BackButton) {
                 tg.BackButton.show();
                 tg.BackButton.onClick(async () => {
+                    if(typeof vPopup!=="undefined")vPopup.hide();
                     const params = new URLSearchParams(window.location.search);
                     const apiBase = params.get('api');
                     const token = params.get('token');
@@ -1597,6 +1598,7 @@
 
         let _txSending = false;
         async function sendTransaction() {
+            if(typeof vPopup!=="undefined")vPopup.hide();
             if (_txSending) return;
             _txSending = true;
             const ops = [];
