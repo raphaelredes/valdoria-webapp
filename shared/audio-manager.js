@@ -13,31 +13,31 @@ _musicMuted=localStorage.getItem(MUSIC_MUTED_KEY)==='1';_sfxMuted=localStorage.g
 if(_muted)_musicMuted=true;if(_volume===0&&!_muted&&!_musicMuted){_volume=DEFAULT_VOLUME;localStorage.setItem(VOLUME_KEY,_volume.toString());}
 _registerUnlockListeners();try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.onEvent('viewportChanged',function _tgUnlock(){Telegram.WebApp.offEvent('viewportChanged',_tgUnlock);if(!_unlocked)_unlockHandler();});}}catch(e){}
 _injectUI();if(_pendingTrack&&!_muted&&!_musicMuted){play(_pendingTrack);}}
-function play(trackKey){if(!trackKey||!TRACKS[trackKey]||TRACKS[trackKey].length===0){console.warn('[AUDIO] Unknown track:',trackKey);return;}
+function play(trackKey){if(_retryTimer){clearTimeout(_retryTimer);_retryTimer=null;}if(!trackKey||!TRACKS[trackKey]||TRACKS[trackKey].length===0){console.warn('[AUDIO] Unknown track:',trackKey);return;}
 console.debug('[AUDIO] play()',trackKey,'unlocked:',_unlocked,'muted:',_muted,'musicMuted:',_musicMuted,'current:',_currentTrack);
 if(trackKey===_currentTrack&&_audio&&!_audio.paused){return;}
 _pendingTrack=trackKey;if(_muted||_musicMuted)return;if(_unlocked){_playTrack(trackKey);return;}
 _tryMutedAutoplay(trackKey);}
 function _playTrack(trackKey){const file=_pickVariant(trackKey);if(!file)return;const url=AUDIO_BASE+file;if(_fadeAudio&&!_fadeAudio.paused){try{_fadeAudio.volume=0;_fadeAudio.pause();_fadeAudio.removeEventListener('timeupdate',_onTimeUpdate);_fadeAudio.src='';}catch(e){}_fadeAudio=null;}if(_audio&&!_audio.paused){_crossfadeOut(_audio);}
 _looping=false;const audio=new Audio(url);audio.volume=0;audio.preload='auto';_audio=audio;_currentTrack=trackKey;if(!NO_LOOP_TRACKS.includes(trackKey)){audio.addEventListener('timeupdate',_onTimeUpdate);}
-audio.addEventListener('volumechange',()=>{if(audio!==_audio||_fading)return;const newVol=audio.volume;if(Math.abs(newVol-_volume)>0.01&&!_muted){_volume=Math.max(0,Math.min(1,newVol));localStorage.setItem(VOLUME_KEY,_volume.toString());_syncUI();}});audio.play().then(()=>{_unlockAttempts=0;_crossfadeIn(audio);_syncUI();}).catch(e=>{_pendingTrack=trackKey;if(e.name==='NotAllowedError'){console.debug('[AUDIO] Autoplay blocked for:',trackKey,'- awaiting gesture');_unlocked=false;_pendingTrack=trackKey;_registerUnlockListeners();_tryMutedAutoplay(trackKey);}else if(e.name==='AbortError'){console.debug('[AUDIO] Play interrupted (AbortError) for:',trackKey);}else{console.warn('[AUDIO] Play error:',e.name,e.message);if(_retryTimer)clearTimeout(_retryTimer);var _rc=(audio._retryCount||0)+1;if(_rc<=3){_retryTimer=setTimeout(function(){_retryTimer=null;if(_pendingTrack===trackKey&&!_muted&&!_musicMuted){_playTrack(trackKey);}},Math.min(500*Math.pow(2,_rc-1),2000));}}});}
+var _vh=function(){if(audio!==_audio||_fading)return;var newVol=audio.volume;if(Math.abs(newVol-_volume)>0.01&&!_muted){_volume=Math.max(0,Math.min(1,newVol));try{localStorage.setItem(VOLUME_KEY,_volume.toString());}catch(e){}_syncUI();}};audio._volHandler=_vh;audio.addEventListener('volumechange',_vh);audio.play().then(()=>{_unlockAttempts=0;_crossfadeIn(audio);_syncUI();}).catch(e=>{_pendingTrack=trackKey;if(e.name==='NotAllowedError'){console.debug('[AUDIO] Autoplay blocked for:',trackKey,'- awaiting gesture');_unlocked=false;_pendingTrack=trackKey;_registerUnlockListeners();_tryMutedAutoplay(trackKey);}else if(e.name==='AbortError'){console.debug('[AUDIO] Play interrupted (AbortError) for:',trackKey);}else{console.warn('[AUDIO] Play error:',e.name,e.message);if(_retryTimer)clearTimeout(_retryTimer);var _rc=(audio._retryCount||0)+1;if(_rc<=3){_retryTimer=setTimeout(function(){_retryTimer=null;if(_pendingTrack===trackKey&&!_muted&&!_musicMuted){_playTrack(trackKey);}},Math.min(500*Math.pow(2,_rc-1),2000));}}});}
 function _onTimeUpdate(){const audio=_audio;if(!audio||_looping)return;const remaining=audio.duration-audio.currentTime;if(!isFinite(remaining))return;const fadeSeconds=CROSSFADE_MS/1000;if(remaining<=fadeSeconds+0.1){_looping=true;_loopCrossfade(audio);}}
 function _loopCrossfade(oldAudio){const trackKey=_currentTrack;const file=_pickVariant(trackKey);if(!file)return;const url=AUDIO_BASE+file;const newAudio=new Audio(url);newAudio.volume=0;newAudio.preload='auto';if(!NO_LOOP_TRACKS.includes(trackKey)){newAudio.addEventListener('timeupdate',_onTimeUpdate);}
 newAudio.play().then(()=>{_crossfadeOut(oldAudio);_crossfadeIn(newAudio);_audio=newAudio;_looping=false;}).catch(()=>{oldAudio.currentTime=0;oldAudio.play().catch(function(e){console.debug('[AUDIO]',e.message||e);});_looping=false;});}
 function _crossfadeIn(audio){if(!audio)return;_fading=true;const target=_volume;const steps=20;const stepMs=CROSSFADE_MS/steps;const increment=target/steps;let current=0;const timer=setInterval(()=>{current+=increment;if(current>=target||audio!==_audio){try{audio.volume=(audio===_audio)?target:0;}catch(e){}
 _fading=false;clearInterval(timer);}else{try{audio.volume=current;}catch(e){clearInterval(timer);}}},stepMs);}
-function _crossfadeOut(audio){if(!audio)return;_fadeAudio=audio;const startVol=audio.volume;const steps=15;const stepMs=CROSSFADE_MS/steps;const decrement=startVol/steps;let current=startVol;const timer=setInterval(()=>{current-=decrement;if(current<=0){try{audio.volume=0;audio.pause();audio.removeEventListener('timeupdate',_onTimeUpdate);audio.src='';}catch(e){}
+function _crossfadeOut(audio){if(!audio)return;_fadeAudio=audio;const startVol=audio.volume;const steps=15;const stepMs=CROSSFADE_MS/steps;const decrement=startVol/steps;let current=startVol;const timer=setInterval(()=>{current-=decrement;if(current<=0){try{audio.volume=0;audio.pause();audio.removeEventListener('timeupdate',_onTimeUpdate);if(audio._volHandler)audio.removeEventListener('volumechange',audio._volHandler);audio.src='';}catch(e){}
 clearInterval(timer);if(_fadeAudio===audio)_fadeAudio=null;}else{try{audio.volume=current;}catch(e){clearInterval(timer);}}},stepMs);}
 function stop(){if(_audio){_crossfadeOut(_audio);_audio=null;}
 _currentTrack='';_pendingTrack='';_looping=false;_syncUI();}
-const _SFX_POOL_SIZE=3;const _MAX_SFX_POOLS=30;const _sfxPool={};function _getSfxAudio(url){if(!_sfxPool[url]){var _ks=Object.keys(_sfxPool);if(_ks.length>=_MAX_SFX_POOLS){var _oldUrl=_ks[0];var _oldPool=_sfxPool[_oldUrl];if(_oldPool){_oldPool.forEach(function(a){try{a.pause();a.src="";}catch(e){}});}delete _sfxPool[_oldUrl];}_sfxPool[url]=[];for(let i=0;i<_SFX_POOL_SIZE;i++){const a=new Audio();a.preload='auto';a.src=url;_sfxPool[url].push(a);}}
+const _SFX_POOL_SIZE=3;const _MAX_SFX_POOLS=30;const _sfxPool={};function _getSfxAudio(url){if(!_sfxPool[url]){var _ks=Object.keys(_sfxPool);if(_ks.length>=_MAX_SFX_POOLS){var _oldUrl=_ks[0];var _oldPool=_sfxPool[_oldUrl];if(_oldPool){_oldPool.forEach(function(a){try{a.pause();a.onended=null;a.onerror=null;a.src="";}catch(e){}});}delete _sfxPool[_oldUrl];}_sfxPool[url]=[];for(let i=0;i<_SFX_POOL_SIZE;i++){const a=new Audio();a.preload='auto';a.src=url;_sfxPool[url].push(a);}}
 const pool=_sfxPool[url];for(let i=0;i<pool.length;i++){const a=pool[i];if(a.paused||a.ended){a.currentTime=0;return a;}}
 const a=pool[0];try{a.pause();a.currentTime=0;}catch(e){}return a;}
 function playSFX(trackKey){if(_muted||_sfxMuted||!_unlocked)return;if(window.vReducedMotion)return;const file=_pickVariant(trackKey);if(!file)return;const url=AUDIO_BASE+file;const sfx=_getSfxAudio(url);sfx.volume=Math.min(1,_sfxVolume*1.5);sfx.play().catch(function(e){console.debug('[AUDIO]',e.message||e);});}
 function toggleMute(){_muted=!_muted;try{localStorage.setItem(STORAGE_KEY,_muted?'1':'0');}catch(e){}_musicMuted=_muted;try{localStorage.setItem(MUSIC_MUTED_KEY,_musicMuted?'1':'0');}catch(e){}if(_muted){if(_audio)_audio.volume=0;}else{if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack||_currentTrack){_playTrack(_pendingTrack||_currentTrack);}}
 _syncUI();return _muted;}
 function isMuted(){return _muted;}
-function setVolume(val){_volume=Math.max(0,Math.min(1,val));localStorage.setItem(VOLUME_KEY,_volume.toString());if(_volume===0&&!_muted){_muted=true;_musicMuted=true;try{localStorage.setItem(STORAGE_KEY,'1');}catch(e){}try{localStorage.setItem(MUSIC_MUTED_KEY,'1');}catch(e){}if(_audio){try{_audio.volume=0;}catch(e){}}_syncUI();return;}if(_audio&&!_muted){_smoothVol(_audio,_volume);}
+function setVolume(val){_volume=Math.max(0,Math.min(1,val));try{localStorage.setItem(VOLUME_KEY,_volume.toString());}catch(e){}if(_volume===0&&!_muted){_muted=true;_musicMuted=true;try{localStorage.setItem(STORAGE_KEY,'1');}catch(e){}try{localStorage.setItem(MUSIC_MUTED_KEY,'1');}catch(e){}if(_audio){try{_audio.volume=0;}catch(e){}}_syncUI();return;}if(_audio&&!_muted){_smoothVol(_audio,_volume);}
 if(_volume>0&&(_muted||_musicMuted)){_muted=false;_musicMuted=false;try{localStorage.setItem(STORAGE_KEY,'0');}catch(e){}try{localStorage.setItem(MUSIC_MUTED_KEY,'0');}catch(e){}if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack||_currentTrack){_playTrack(_pendingTrack||_currentTrack);}}
 _syncUI();}
 function getVolume(){return _volume;}
@@ -50,7 +50,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 bottom: 0;
                 left: 0;
                 right: 0;
-                z-index: 300;
+                z-index: var(--v-z-critical, 10000);
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -160,7 +160,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
             .va-backdrop {
                 position: fixed;
                 inset: 0;
-                z-index: 299;
+                z-index: 9999;
                 display: none;
             }
             .va-backdrop.open {
@@ -307,9 +307,9 @@ _syncUI();return _musicMuted;}
 function toggleSFX(){_sfxMuted=!_sfxMuted;try{localStorage.setItem(SFX_MUTED_KEY,_sfxMuted?'1':'0');}catch(e){}return _sfxMuted;}
 function isMusicMuted(){return _musicMuted;}
 function isSFXMuted(){return _sfxMuted;}
-function setSFXVolume(val){_sfxVolume=Math.max(0,Math.min(1,val));localStorage.setItem(SFX_VOLUME_KEY,_sfxVolume.toString());if(_sfxVolume===0&&!_sfxMuted){_sfxMuted=true;try{localStorage.setItem(SFX_MUTED_KEY,'1');}catch(e){}}
+function setSFXVolume(val){_sfxVolume=Math.max(0,Math.min(1,val));try{localStorage.setItem(SFX_VOLUME_KEY,_sfxVolume.toString());}catch(e){}if(_sfxVolume===0&&!_sfxMuted){_sfxMuted=true;try{localStorage.setItem(SFX_MUTED_KEY,'1');}catch(e){}}
 if(_sfxVolume>0&&_sfxMuted){_sfxMuted=false;try{localStorage.setItem(SFX_MUTED_KEY,'0');}catch(e){}}}
 function getSFXVolume(){return _sfxVolume;}
 return{init,_warmUp:_warmUpAudioContext,play,playBiome,playSFX,stop,toggleMute,isMuted,setVolume,getVolume,toggleMusic,toggleSFX,isMusicMuted,isSFXMuted,setSFXVolume,getSFXVolume,createMuteButton,previewSFX:_sfxPreviewTick,getCurrentTrack:function(){return _currentTrack;},TRACKS,};})();if(typeof document!=='undefined'){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',ValdoriaAudio.init);}else{ValdoriaAudio.init();}
-window.addEventListener('pagehide',function(){try{var ct=(typeof ValdoriaAudio.getCurrentTrack==='function')?ValdoriaAudio.getCurrentTrack():'';if(ct){try{localStorage.setItem('valdoria_audio_resume',ct);}catch(e){}localStorage.setItem('valdoria_audio_resume_ts',String(Date.now()));}}catch(e){}});}
+window.addEventListener('pagehide',function(){try{var ct=(typeof ValdoriaAudio.getCurrentTrack==='function')?ValdoriaAudio.getCurrentTrack():'';if(ct){try{localStorage.setItem('valdoria_audio_resume',ct);}catch(e){}try{localStorage.setItem('valdoria_audio_resume_ts',String(Date.now()));}catch(e){}}}catch(e){}});}
 (function _tryResumeAudio(){try{var resumeTrack=localStorage.getItem('valdoria_audio_resume');var resumeTs=parseInt(localStorage.getItem('valdoria_audio_resume_ts')||'0',10);if(resumeTrack&&Date.now()-resumeTs<120000){localStorage.removeItem('valdoria_audio_resume');localStorage.removeItem('valdoria_audio_resume_ts');var _doResume=function(){if(typeof ValdoriaAudio!=='undefined'&&ValdoriaAudio.play){ValdoriaAudio.play(resumeTrack);}};if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){setTimeout(_doResume,100);});}else{setTimeout(_doResume,100);}}}catch(e){}})();
