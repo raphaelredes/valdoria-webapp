@@ -24,6 +24,7 @@
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/encoding-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/image-popup.js?v=' + v + '"><\/script>');
     </script>
     <script>
@@ -1035,14 +1036,7 @@
             { key: 'misc', icon: '📦', label: 'Outros', tags: [] },
         ];
 
-        // ── UTF-8 Base64 Decode ──
-        function decodeBase64Utf8(b64) {
-            const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
-            const binary = atob(raw);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-            return new TextDecoder().decode(bytes);
-        }
+
 
         // ── Init ──
         function init() {
