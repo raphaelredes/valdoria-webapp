@@ -6,3 +6,8 @@
 .v-popup-text-dim{font-size:var(--v-font-sm);color:var(--v-text-dim,#a09484)}
 .v-popup-mt-lg{margin-top:var(--v-space-lg)}
 .v-popup-disabled{opacity:0.5;pointer-events:none}
+
+/* Popup scroll hint + readable line-height (Round 2) */
+.v-popup-body{scrollbar-width:thin;scrollbar-color:var(--v-border) transparent}
+.v-popup-body::-webkit-scrollbar{width:4px}
+.v-popup-body::-webkit-scrollbar-thumb{background:var(--v-border);border-radius:2px}

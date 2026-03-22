@@ -423,7 +423,7 @@
 .social-tab-badge {
     display: inline-block;
     background: var(--v-danger, #e74c3c);
-    color: var(--v-parchment, #f5f0e0);
+    color: var(--v-text, #d4c8b0);
     font-size: var(--v-font-xs);
     font-weight: 700;
     min-width: 14px;
