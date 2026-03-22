@@ -398,13 +398,6 @@
         };
 
         // ── Parse URL params ──
-        function decodeBase64Utf8(b64) {
-            const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
-            const binary = atob(raw);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-            return new TextDecoder().decode(bytes);
-        }
 
         function init() {
             const params = new URLSearchParams(window.location.search);
