@@ -63,16 +63,8 @@ function _approvalPct(v) {
 }
 window._approvalPct = _approvalPct;
 
-var _escEl = document.createElement('span');
-function _esc(s) {
-    if (s == null) return '';
-    _escEl.textContent = String(s);
-    return _escEl.innerHTML;
-}
-window._esc = _esc;
-
 function _statItem(label, value) {
-    return '<div class="guild-stat-item"><span class="guild-stat-label">' + _esc(label) + '</span><span class="guild-stat-value">' + _esc(value) + '</span></div>';
+    return '<div class="guild-stat-item"><span class="guild-stat-label">' + vEsc(label) + '</span><span class="guild-stat-value">' + vEsc(value) + '</span></div>';
 }
 window._statItem = _statItem;
 

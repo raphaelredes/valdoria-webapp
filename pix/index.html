@@ -220,6 +220,7 @@
         }
     </style>
     <script>
+    document.write('<script src="../shared/escape.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/font-apply.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
@@ -274,22 +275,22 @@
             html += '<div class="qr-wrapper"><div id="qr-container"></div></div>';
             html += '<div class="scan-hint">Aponte a camera do app do banco para o QR acima</div>';
             if (amount) {
-                html += '<div class="amount-display">' + escapeHtml(amount) + '</div>';
+                html += '<div class="amount-display">' + vEsc(amount) + '</div>';
             }
             html += '<div class="info-card">';
             if (keyType && keyDisplay) {
                 html += '<div class="info-row"><span class="info-label">Chave PIX (' +
-                    escapeHtml(keyType) + ')</span><span class="info-value">' +
-                    escapeHtml(keyDisplay) + '</span></div>';
+                    vEsc(keyType) + ')</span><span class="info-value">' +
+                    vEsc(keyDisplay) + '</span></div>';
             }
             if (txid) {
                 html += '<div class="info-row"><span class="info-label">Referencia</span>' +
-                    '<span class="info-value">' + escapeHtml(txid) + '</span></div>';
+                    '<span class="info-value">' + vEsc(txid) + '</span></div>';
             }
             html += '</div>';
             html += '<div class="copy-section">' +
                 '<div class="copy-label">Codigo Pix Copia e Cola</div>' +
-                '<div class="code-box" id="code-text">' + escapeHtml(brcode) + '</div>' +
+                '<div class="code-box" id="code-text">' + vEsc(brcode) + '</div>' +
                 '</div>';
             html += '<button class="btn btn-copy" id="btn-copy" onclick="copyCode()">Copiar Codigo PIX</button>';
             html += '<button class="btn btn-close" onclick="closePage()">Fechar</button>';
@@ -363,11 +364,7 @@
                 }
             };
 
-            function escapeHtml(text) {
-                var div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
+
         })();
     </script>
 <script>document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');</script>
