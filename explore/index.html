@@ -41,6 +41,11 @@
     <!-- Toast container (outside overflow:hidden body flow) -->
     <div id="toast-layer"></div>
 
+    <!-- Popup overlay container -->
+    <div id="v-popup-overlay" class="v-popup-overlay" style="display:none">
+        <div class="v-popup-card"><div class="v-popup-header"></div><div class="v-popup-body"></div><div class="v-popup-actions"></div></div>
+    </div>
+
     <!-- Travel Animation Overlay -->
     <div id="travel-overlay">
         <canvas id="travel-canvas"></canvas>
@@ -325,7 +330,9 @@
 
     <script>
         var v = Date.now();
+        document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/image-popup.css?v=' + v + '">');
+        document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/image-popup.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
