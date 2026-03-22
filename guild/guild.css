@@ -12,8 +12,8 @@
 
 /* Content area */
 .guild-content { flex: 1; overflow-y: auto; padding: var(--v-space-sm) var(--v-space-md); padding-bottom: 140px; }
-.guild-panel { display: none; }
-.guild-panel.active { display: block; }
+/* guild-panel rules removed - shared/tabs.css v-tab-panel handles this */
+
 
 /* Cards */
 .guild-card {
@@ -38,7 +38,7 @@
 .guild-approval-badge.tier-neutral { background: rgba(160,148,132,0.2); color: var(--v-text-dim); }
 .guild-approval-badge.tier-warm    { background: rgba(100,160,80,0.2); color: #7ab85a; }
 .guild-approval-badge.tier-loyal   { background: rgba(80,140,200,0.2); color: #5aa0d4; }
-.guild-approval-badge.tier-devoted { background: rgba(196,149,58,0.25); color: var(--v-gold); }
+.guild-approval-badge.tier-devoted { background: var(--v-gold-25); color: var(--v-gold); }
 .guild-approval-bar { margin-top: var(--v-space-xs); height: var(--v-bar-height-mini); background: var(--v-bg); border-radius: var(--v-radius-xs, 2px); overflow: hidden; }
 .guild-approval-fill { height: 100%; border-radius: var(--v-radius-xs, 2px); transition: width var(--v-transition); }
 
@@ -98,7 +98,7 @@
 /* Training cards */
 .guild-training-card { background: var(--v-bg-card); border: 1px solid var(--v-border); border-radius: var(--v-radius); padding: var(--v-space-md); margin-bottom: var(--v-space-sm); cursor: pointer; transition: border-color var(--v-transition); min-height: 44px; }
 .guild-training-card:active { border-color: var(--v-gold-dim); }
-.guild-training-card.active-training { border-color: var(--v-gold-dim); background: rgba(196,149,58,0.05); }
+.guild-training-card.active-training { border-color: var(--v-gold-dim); background: var(--v-gold-5); }
 .guild-training-name { font-family: var(--v-font); font-size: var(--v-font-body); color: var(--v-text-bright); }
 .guild-training-meta { font-family: var(--v-font); font-size: var(--v-font-sm); color: var(--v-text-dim); }
 .guild-training-progress { margin-top: var(--v-space-xs); height: var(--v-bar-height-mini); background: var(--v-bg); border-radius: var(--v-radius-xs, 2px); overflow: hidden; }
@@ -108,7 +108,7 @@
 /* Action buttons */
 .guild-action-btn { display: block; width: 100%; padding: var(--v-space-sm) var(--v-space-md); margin-top: var(--v-space-sm); background: var(--v-bg-raised); border: 1px solid var(--v-border); border-radius: var(--v-radius); color: var(--v-text); font-family: var(--v-font); font-size: var(--v-font-body); cursor: pointer; min-height: 44px; transition: border-color var(--v-transition); text-align: center; }
 .guild-action-btn:active { border-color: var(--v-gold-dim); }
-.guild-action-btn.primary { background: rgba(196,149,58,0.15); border-color: var(--v-gold-dim); color: var(--v-gold); }
+.guild-action-btn.primary { background: var(--v-gold-15); border-color: var(--v-gold-dim); color: var(--v-gold); }
 .guild-action-btn.danger { border-color: rgba(180,40,40,0.4); color: #e05555; }
 .guild-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -119,7 +119,7 @@
 /* Recruit filters */
 .guild-recruit-filters { display: flex; flex-wrap: wrap; gap: var(--v-space-xs); margin-bottom: var(--v-space-sm); }
 .guild-filter-pill { padding: var(--v-space-xs) var(--v-space-sm); background: var(--v-bg-raised); border: 1px solid var(--v-border); border-radius: var(--v-radius-pill); color: var(--v-text-dim); font-family: var(--v-font); font-size: var(--v-font-label); cursor: pointer; min-height: 32px; transition: background var(--v-transition), border-color var(--v-transition), color var(--v-transition); }
-.guild-filter-pill.active { background: rgba(196,149,58,0.15); border-color: var(--v-gold-dim); color: var(--v-gold); }
+.guild-filter-pill.active { background: var(--v-gold-15); border-color: var(--v-gold-dim); color: var(--v-gold); }
 
 /* Pagination */
 .guild-recruit-pagination { display: flex; justify-content: center; align-items: center; gap: var(--v-space-md); padding: var(--v-space-sm) 0; font-family: var(--v-font); font-size: var(--v-font-sm); color: var(--v-text-dim); }

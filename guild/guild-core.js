@@ -111,7 +111,7 @@ function _switchTab(tabId) {
     try{localStorage.setItem('valdoria_guild_tab', tabId);}catch(e){console.warn('[GUILD]',e);}
     var tabs = document.querySelectorAll('.guild-tabs .v-tab');
     for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab') === tabId);
-    var panels = document.querySelectorAll('.guild-panel');
+    var panels = document.querySelectorAll('.v-tab-panel');
     for (var j = 0; j < panels.length; j++) {
         var on = panels[j].id === 'tab-' + tabId;
         panels[j].classList.toggle('active', on);

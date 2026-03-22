@@ -65,10 +65,10 @@
     transition: background var(--v-transition-base);
 }
 .social-emote-btn:hover {
-    background: rgba(196, 149, 58, 0.1);
+    background: var(--v-gold-10);
 }
 .social-emote-btn:active {
-    background: rgba(196, 149, 58, 0.2);
+    background: var(--v-gold-20);
 }
 
 /* 5. Chat Input */
@@ -127,7 +127,7 @@
 }
 .social-player--selected {
     border-color: var(--v-gold-dim, rgba(196, 149, 58, 0.4));
-    background: rgba(196, 149, 58, 0.05);
+    background: var(--v-gold-5);
 }
 .social-player-icon {
     font-size: var(--v-font-2xl);
@@ -203,7 +203,7 @@
     transition: background var(--v-transition-base), border-color var(--v-transition-base);
 }
 .social-action-btn:hover {
-    background: rgba(196, 149, 58, 0.1);
+    background: var(--v-gold-10);
     border-color: var(--v-gold-dim, rgba(196, 149, 58, 0.4));
 }
 .social-action-btn:active {
@@ -330,7 +330,7 @@
 .social-npc-detail-header .tier-badge {
     display: inline-block;
     padding: var(--v-space-xs) var(--v-space-md);
-    background: rgba(196, 149, 58, 0.15);
+    background: var(--v-gold-15);
     border: 1px solid var(--v-border-gold, rgba(196, 149, 58, 0.3));
     border-radius: var(--v-radius-pill);
     font-size: var(--v-font-xs);
