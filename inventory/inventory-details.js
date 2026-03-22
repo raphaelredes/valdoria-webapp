@@ -1,9 +1,9 @@
 function buildLoadoutBar(){const ldout=D.ldout||{};const names=Object.keys(ldout);let html='<div style="display:flex;gap:4px;margin:6px 0;flex-wrap:wrap;align-items:center;">';html+=`<span class="btn-sell-junk" onclick="promptSaveLoadout()" style="border-color:var(--v-gold);">${vi('save', 13)} Salvar</span>`;names.forEach(n=>{html+=`<span class="btn-sell-junk" style="border-color:var(--v-text-dim);display:inline-flex;align-items:center;gap:2px;">
                 <span onclick="doLoadLoadout('${esc(n)}')" style="cursor:pointer;">${vi('sword', 13)} ${n}</span>
                 <span onclick="event.stopPropagation();doDeleteLoadout('${esc(n)}')" style="cursor:pointer;color:var(--v-danger);opacity:0.6;font-size:14px;padding:0 2px;">×</span>
-            </span>`;});html+='</div>';return names.length>0||true?html:'';}
-function promptSaveLoadout(){const ldout=D.ldout=D.ldout||{};if(Object.keys(ldout).length>=5){toast(`${vi('warn', 13)} Máximo 5 loadouts`,'err');return;}
-showInputModal('Salvar Loadout','Nome do loadout',20,(name)=>{ldout[name]=Object.assign({},localEq);addOp({t:'save_loadout',name});haptic('medium');toast(`${vi('save', 13)} '${esc(name)}' salvo`,'ok');renderTab();updateBottomBar();});}
+            </span>`;});html+='</div>';return html;}
+function promptSaveLoadout(){const ldout=D.ldout=D.ldout||{};if(Object.keys(ldout).length>=5){toast(`${vi('warn', 13)} Máximo 5 equipamentos salvos`,'err');return;}
+showInputModal('Salvar Equipamento','Nome do equipamento',20,(name)=>{ldout[name]=Object.assign({},localEq);addOp({t:'save_loadout',name});haptic('medium');toast(`${vi('save', 13)} '${esc(name)}' salvo`,'ok');renderTab();updateBottomBar();});}
 function showInputModal(title,placeholder,maxLen,onConfirm){const html=`<div class="modal-handle"></div>
             <div class="modal-title">${vi('save', 16)} ${title}</div>
             <div style="padding:0 4px;">
@@ -24,11 +24,11 @@ if(!checkProficiency(it,'player',itemName)){results.noProf.push(itemName);contin
 var oldItem=localEq[slot];if(oldItem&&oldItem!==itemName){addToLocalInv(oldItem);}
 addOp({t:'equip',item:itemName,slot,tgt:'player'});localEq[slot]=itemName;removeFromLocalInv(itemName);results.ok.push(itemName);}
 closeModal();haptic('medium');updateHeader();renderTab();updateBottomBar();const total=Object.values(ldout).filter(Boolean).length;_showLoadoutFeedback(name,results,total);}
-function _showLoadoutFeedback(name,results,total){let html='<div class="modal-handle"></div>';html+='<div class="modal-title">'+vi('sword',16)+' Loadout \''+esc(name)+'\'</div>';html+='<div style="text-align:center;font-size:14px;margin-bottom:10px;">';html+='<b>'+results.ok.length+'</b> de <b>'+total+'</b> itens equipados</div>';if(results.ok.length>0){html+='<div style="font-size:12px;margin-bottom:6px;">';results.ok.forEach(function(n){var it=getItemData(n);html+='<div style="color:var(--v-success);">'+vi_f('check',12)+' '+(it.e||'')+' '+n+'</div>';});html+='</div>';}
+function _showLoadoutFeedback(name,results,total){let html='<div class="modal-handle"></div>';html+='<div class="modal-title">'+vi('sword',16)+' Equipamento \''+esc(name)+'\'</div>';html+='<div style="text-align:center;font-size:14px;margin-bottom:10px;">';html+='<b>'+results.ok.length+'</b> de <b>'+total+'</b> itens equipados</div>';if(results.ok.length>0){html+='<div style="font-size:12px;margin-bottom:6px;">';results.ok.forEach(function(n){var it=getItemData(n);html+='<div style="color:var(--v-success);">'+vi_f('check',12)+' '+(it.e||'')+' '+n+'</div>';});html+='</div>';}
 if(results.noItem.length>0){html+='<div style="font-size:12px;margin-bottom:6px;">';results.noItem.forEach(function(n){var it=getItemData(n);html+='<div style="color:var(--v-danger);">'+vi('warn',12)+' '+(it.e||'')+' '+n+' — n\u00e3o encontrado</div>';});html+='</div>';}
 if(results.noProf.length>0){html+='<div style="font-size:12px;margin-bottom:6px;">';results.noProf.forEach(function(n){var it=getItemData(n);html+='<div style="color:var(--v-warning);">'+vi('lock',12)+' '+(it.e||'')+' '+n+' — sem profici\u00eancia</div>';});html+='</div>';}
 html+='<div class="detail-actions" style="margin-top:10px;">';html+='<button class="btn-equip" onclick="closeModal()">'+vi_f('check',13)+' OK</button>';html+='</div>';showModal(html);}
-function doDeleteLoadout(name){if(!D.ldout||!D.ldout[name])return;delete D.ldout[name];addOp({t:'delete_loadout',name});haptic('medium');toast(`${vi('trash', 13)} Loadout '${esc(name)}' removido`,'ok');renderTab();updateBottomBar();}
+function doDeleteLoadout(name){if(!D.ldout||!D.ldout[name])return;delete D.ldout[name];addOp({t:'delete_loadout',name});haptic('medium');toast(`${vi('trash', 13)} Equipamento '${esc(name)}' removido`,'ok');renderTab();updateBottomBar();}
 function renderBankTab(c){if(!D.bank)D.bank={g:0,i:[]};var bankGold=D.bank.g||0;var bankItems=D.bank.i||[];var html='<div class="vault-header">'
 +'<div class="vault-amount">'+vi('coin',22)+' '+bankGold+' GP</div>'
 +'<div class="vault-sub">Cofre da Guilda</div>'

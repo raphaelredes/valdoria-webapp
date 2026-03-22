@@ -65,7 +65,7 @@ modal.style.transform='';},{passive:true});}
 function discardAndExit(){pendingOps=[];closeModal();_performExit();}
 function initBackButton(){if(window._invPopupMode)return;try{if(tg?.BackButton){tg.BackButton.show();tg.BackButton.onClick(()=>{_navigateBack();});}
 window.__valdoriaExitAction=function(){try{window.__valdoria_transitioning=true;if(tg)tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}};}catch(e){console.warn('[INVENTORY] BackButton setup:',e);}}
-var _RETURN_LABELS={game:'🏘️ Cidade',explore:'🗺️ Mapa',combat:'⚔️ Combate',arena:'⚔️ Combate',};function _initNavBar(){}
+function _initNavBar(){}
 function navBack(){haptic('light');if(typeof vPopup!=='undefined'&&vPopup.isOpen()){closeModal();return;}
 if(activeTarget!=='player'){switchTab('allies');return;}
 if(pendingOps.length>0){_showPendingOpsExitConfirm();return;}
