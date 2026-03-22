@@ -23,7 +23,7 @@
     -webkit-tap-highlight-color: transparent; min-height: 44px;
 }
 .guild-card:active { border-color: var(--v-gold-dim); }
-.guild-card-icon { font-size: 28px; flex-shrink: 0; width: 36px; text-align: center; }
+.guild-card-icon { font-size: var(--v-font-icon, 28px); flex-shrink: 0; width: 36px; text-align: center; }
 .guild-card-info { flex: 1; min-width: 0; }
 .guild-card-name { font-family: var(--v-font); font-size: var(--v-font-body); color: var(--v-text-bright); margin-bottom: var(--v-space-xs); }
 .guild-card-sub { font-family: var(--v-font); font-size: var(--v-font-sm); color: var(--v-text-dim); }
@@ -50,7 +50,7 @@
 
 /* Detail sections */
 .guild-detail-header { text-align: center; margin-bottom: var(--v-space-md); }
-.guild-detail-icon { font-size: 48px; }
+.guild-detail-icon { font-size: var(--v-font-icon-xl, 48px); }
 .guild-detail-name { font-family: var(--v-font-display); font-size: var(--v-font-xl); color: var(--v-gold); margin: var(--v-space-xs) 0; }
 .guild-detail-role { font-family: var(--v-font); font-size: var(--v-font-sm); color: var(--v-text-dim); }
 .guild-detail-section { margin-bottom: var(--v-space-md); }
@@ -81,7 +81,7 @@
 /* NPC cards */
 .guild-npc-card { background: var(--v-bg-card); border: 1px solid var(--v-border); border-radius: var(--v-radius); padding: var(--v-space-md); margin-bottom: var(--v-space-sm); display: flex; align-items: center; gap: var(--v-space-md); cursor: pointer; transition: border-color var(--v-transition); min-height: 44px; }
 .guild-npc-card:active { border-color: var(--v-gold-dim); }
-.guild-npc-icon { font-size: 28px; flex-shrink: 0; }
+.guild-npc-icon { font-size: var(--v-font-icon, 28px); flex-shrink: 0; }
 .guild-npc-name { font-family: var(--v-font); font-size: var(--v-font-body); color: var(--v-text-bright); }
 .guild-npc-role { font-family: var(--v-font); font-size: var(--v-font-sm); color: var(--v-text-dim); }
 
@@ -114,7 +114,7 @@
 
 /* Empty state */
 .guild-empty { text-align: center; padding: var(--v-space-xl) var(--v-space-md); color: var(--v-text-dim); font-family: var(--v-font); font-size: var(--v-font-body); }
-.guild-empty-icon { font-size: 32px; display: block; margin-bottom: var(--v-space-sm); }
+.guild-empty-icon { font-size: var(--v-font-icon-lg, 32px); display: block; margin-bottom: var(--v-space-sm); }
 
 /* Recruit filters */
 .guild-recruit-filters { display: flex; flex-wrap: wrap; gap: var(--v-space-xs); margin-bottom: var(--v-space-sm); }

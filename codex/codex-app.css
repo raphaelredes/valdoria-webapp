@@ -195,7 +195,7 @@
 }
 
 .codex-detail-header .icon {
-    font-size: 48px;
+    font-size: var(--v-font-icon-xl, 48px);
     display: block;
     margin-bottom: var(--v-space-sm);
 }

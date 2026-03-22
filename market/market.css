@@ -12,7 +12,7 @@ body{padding-bottom:80px}.header{background:linear-gradient(180deg,rgba(196,149,
 .haggle-btn{padding:var(--v-space-md) var(--v-space-xl);border-radius:var(--v-radius-pill);border:1px solid var(--v-gold-dim);background:rgba(196,149,58,0.08);color:var(--v-gold);font-size:var(--v-font-md);font-family:var(--v-font);cursor:pointer;transition:all var(--v-transition)}
 .haggle-btn:active{background:var(--v-gold-dim);color:#fff}
 .haggle-roll{text-align:center;margin:var(--v-space-lg) 0}
-.hr-dice{font-size:28px;margin-bottom:var(--v-space-xs)}
+.hr-dice{font-size:var(--v-font-icon,28px);margin-bottom:var(--v-space-xs)}
 .hr-detail{font-size:var(--v-font-md);color:var(--v-text-dim)}
 .haggle-result{text-align:center;padding:var(--v-space-md-lg);border-radius:var(--v-radius);font-size:var(--v-font-body);font-weight:600;margin:var(--v-space-md) 0}
 .haggle-result.success{background:rgba(76,175,80,0.1);color:var(--v-success);border:1px solid rgba(76,175,80,0.3)}
