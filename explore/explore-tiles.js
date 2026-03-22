@@ -48,6 +48,70 @@ var CT_PLAINS_TREE_B = '#2a6a1a';
 var CT_BRANCH_GRAY = '#3a2a2a';
 var CT_RUBBLE_STONE = '#7a6a5a';
 var CT_RUBBLE_DEBRIS = '#6a5a3a';
+/* Bark & wood */
+var CT_BARK_BROWN = '#4a3020';
+var CT_BARK_MID = '#5a3a28';
+var CT_BARK_DEEP = '#3a2018';
+var CT_BARK_SHADOW = '#2a1a10';
+var CT_WOOD_WARM = '#6a4a2a';
+var CT_WOOD_DARK = '#3a2a18';
+var CT_WOOD_MID = '#5a3a20';
+var CT_WOOD_LIGHT = '#7a5a3a';
+var CT_WOOD_PALE = '#8a6a4a';
+var CT_WOOD_PLANK = '#6a5030';
+var CT_WOOD_TAN = '#7a6040';
+var CT_WARM_BROWN = '#5a4030';
+var CT_DARK_WARM = '#3a2a1a';
+var CT_DARK_SOIL = '#2a2018';
+/* Greens & vegetation */
+var CT_DEEP_GREEN = '#1a4020';
+var CT_DEEP_GREEN_DARK = '#0a3010';
+var CT_DARK_OLIVE = '#2a3a1a';
+var CT_DARK_MOSS = '#2a3a20';
+var CT_MID_GREEN = '#3a6a2a';
+var CT_MID_GREEN_WARM = '#4a6a30';
+var CT_MID_GREEN_NEUTRAL = '#3a5a2a';
+var CT_BRIGHT_GREEN = '#5a8a3a';
+var CT_MOSS_GREEN = '#2a5a2a';
+var CT_CAVE_MOSS = '#1a4a2a';
+var CT_CAVE_MOSS_DARK = '#0a3a1a';
+var CT_LEAF_MID = '#2a5a1a';
+var CT_LEAF_BRIGHT = '#4a7a2a';
+var CT_LEAF_LIME = '#5a8a30';
+var CT_LEAF_PALE = '#6a9a4a';
+var CT_LEAF_SHADOW = '#1a3a10';
+var CT_VINE_BRIGHT = '#4a7a30';
+var CT_NPC_GREEN = '#5a9a6a';
+/* Flowers */
+var CT_FLOWER_ROSE = '#d44a60';
+var CT_FLOWER_CRIMSON = '#aa3040';
+var CT_FLOWER_BLUSH = '#c06080';
+var CT_FIRE_ORANGE = '#c87a30';
+/* Snow & ice */
+var CT_SNOW_BRIGHT = '#e0e8f0';
+var CT_SNOW_MID = '#c0c8d0';
+var CT_SNOW_DIM = '#a0a8b0';
+var CT_SNOW_WARM = '#d0d0c0';
+var CT_CRYSTAL_BLUE = '#6a9ac0';
+/* Stone variants */
+var CT_STONE_WARM = '#6a5a4a';
+var CT_STONE_PALE = '#8a7a6a';
+var CT_STONE_FADED = '#7a7a7a';
+var CT_STONE_LIGHT_ALT = '#7a6a5a';
+var CT_PILLAR_STONE = '#5a5a5a';
+var CT_PEAK_MID = '#5a5a6a';
+var CT_MTN_PEAK_LIGHT = '#6a6a7a';
+/* Sand */
+var CT_SAND_WARM = '#9a8a5a';
+var CT_SAND_LIGHT = '#b0a070';
+/* Misc */
+var CT_RUBBLE_LIGHT = '#8a7a5a';
+var CT_AMBER = '#c4953a';
+var CT_DANGER = '#c44a2a';
+var CT_POI_SEARCH = '#8a9a5a';
+var CT_POI_MYSTERY = '#8a6aaa';
+var CT_BLACK_NEAR = '#0a0a0a';
+var CT_WHITE = '#ffffff';
 var BIOME_COLORS={forest:{'.':'#5a3d2b','T':'#1a4a1a','g':'#2d5a2d','w':'#2a5a8a','r':'#5a5a5a','R':'#6a5a4a','p':'#6a5040','#':'#0d2e0d','W':'#1a3a6a','M':'#4a4a4a','b':'#4a3a3a','s':'#5a3d2b','m':'#3a2a1a','i':'#7aa0b0','v':'#5a3a1a','L':'#8a2a0a','C':'#6a4a2a'},plains:{'.':'#5a4a30','T':'#3a6a2a','g':'#6a8a3a','w':'#2a5a8a','r':'#6a6a5a','R':'#5a4a3a','p':'#6a5a40','#':'#5a5a4a','W':'#1a3a6a','M':'#4a4a4a','b':'#4a3a3a','s':'#5a4a30','m':'#3a2a1a','i':'#7aa0b0','v':'#5a3a1a','L':'#8a2a0a','C':'#7a5a3a'},swamp:{'.':'#3a3a2a','T':'#2a4a2a','g':'#3a5a2a','w':'#2a4a5a','r':'#4a4a3a','R':'#5a4a3a','p':'#4a3a2a','#':'#1a3a1a','W':'#1a3a4a','M':'#3a3a3a','m':'#3a2a1a','b':'#3a3030','s':'#3a3a2a','i':'#5a8090','v':'#4a2a1a','L':'#7a2a0a','C':'#5a4a2a'},cave:{'.':'#1a1a2a','T':'#2a2a2a','g':'#1a1a1a','w':'#1a2a4a','r':'#3a3a3a','R':'#4a3a2a','p':'#2a2a2a','#':'#0a0a0a','W':'#0a1a3a','M':'#1a1a1a','b':'#2a1a1a','s':'#1a1a2a','m':'#1a1010','i':'#4a6a7a','v':'#3a1a0a','L':'#6a1a0a','C':'#4a3a2a'},desert:{'.':'#8a7a4a','T':'#4a6a2a','g':'#8a7a50','w':'#2a5a8a','r':'#7a6a5a','R':'#6a5a4a','p':'#8a7a50','#':'#6a5a4a','W':'#1a3a6a','M':'#5a4a3a','s':'#9a8a5a','b':'#6a5a4a','m':'#5a4020','i':'#9abac0','v':'#7a4a1a','L':'#9a3a0a','C':'#7a6a4a'},mountain:{'.':'#5a4a3a','T':'#2a4a2a','g':'#3a5a3a','w':'#2a5a8a','r':'#6a6a6a','R':'#5a4a3a','p':'#5a4a3a','#':'#3a3a3a','W':'#1a3a6a','M':'#4a4a5a','b':'#4a3a3a','s':'#5a4a3a','m':'#3a2a1a','i':'#7a9aaa','v':'#5a3a1a','L':'#8a2a0a','C':'#5a4a3a'},snow:{'.':'#c0c8d0','T':'#2a5a3a','g':'#b0b8c0','w':'#3a6a9a','r':'#7a7a8a','R':'#6a6a7a','p':'#b0b0b8','#':'#8a8a9a','W':'#2a4a7a','M':'#6a6a7a','i':'#9ab0c0','b':'#8a8090','s':'#c0c8d0','m':'#7a7080','v':'#8a5a3a','L':'#8a3a1a','C':'#6a5a4a'},volcanic:{'.':'#3a2a1a','T':'#2a2a2a','g':'#3a2a1a','w':'#2a3a5a','r':'#4a3a2a','R':'#5a3a2a','p':'#3a2a1a','#':'#2a1a0a','W':'#1a2a4a','M':'#3a2a1a','v':'#6a3a1a','L':'#8a2a0a','b':'#3a2020','s':'#3a2a1a','m':'#2a1a0a','i':'#5a7080','C':'#5a3a2a'},graveyard:{'.':'#3a3a3a','T':'#1a3a1a','g':'#2a3a2a','w':'#2a3a5a','r':'#4a4a4a','R':'#4a3a3a','p':'#3a3a3a','#':'#2a2a2a','W':'#1a2a4a','M':'#3a3a3a','b':'#4a3a3a','s':'#3a3a3a','m':'#2a2020','i':'#6a8090','v':'#4a2a1a','L':'#7a2a0a','C':'#4a3a3a'},};function tileRand(col,row,seed){let h=(col*374761+row*668265+seed*982451)&0x7fffffff;h=((h>>16)^h)*0x45d9f3b;h=((h>>16)^h)*0x45d9f3b;h=(h>>16)^h;return(h&0xffff)/0x10000;}
 var _tileDetail=(function(){var tier=window._valdoriaPerformanceTier||'full';return tier==='lite'?0:tier==='medium'?1:2;})();function _drawConifer(ctx,tx,ty,scale,darkColor,lightColor){var s=scale||1;ctx.fillStyle=CT_TRUNK;ctx.fillRect(tx-1*s,ty-2*s,2*s,5*s);ctx.beginPath();ctx.moveTo(tx,ty-12*s);ctx.lineTo(tx+5*s,ty-1*s);ctx.lineTo(tx,ty-1*s);ctx.closePath();ctx.fillStyle=darkColor||CT_CONIFER_DARK;ctx.fill();ctx.beginPath();ctx.moveTo(tx,ty-12*s);ctx.lineTo(tx-5*s,ty-1*s);ctx.lineTo(tx,ty-1*s);ctx.closePath();ctx.fillStyle=lightColor||CT_CONIFER_LIGHT;ctx.fill();ctx.beginPath();ctx.moveTo(tx,ty-14*s);ctx.lineTo(tx+3.5*s,ty-7*s);ctx.lineTo(tx-3.5*s,ty-7*s);ctx.closePath();ctx.fillStyle=darkColor||CT_CONIFER_DARK;ctx.fill();}
 function _drawBush(ctx,bx,by,size,color){ctx.fillStyle=color||CT_BUSH_MID;ctx.beginPath();ctx.arc(bx,by,size,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.06)';ctx.beginPath();ctx.arc(bx-size*0.2,by-size*0.3,size*0.5,0,Math.PI*2);ctx.fill();}

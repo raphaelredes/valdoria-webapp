@@ -327,7 +327,7 @@ function _cvDrawRoads(ctx, fogState) {
     }
 
     // Distance labels
-    var showLabels = typeof _zoomIdx === 'undefined' || _zoomIdx >= 1;
+    var showLabels = _cvDetail >= 1 && (typeof _zoomIdx === 'undefined' || _zoomIdx >= 1);
     if (showLabels) {
         for (var oi2 = 0; oi2 < order.length; oi2++) {
             var list2 = segs[order[oi2]];
@@ -443,7 +443,8 @@ function _cvDrawBreadcrumb(ctx) {
         ctx.stroke();
     }
 
-    // Footprint dots
+    // Footprint dots (medium+ only — micro-detail)
+    if (_cvDetail >= 1) {
     ctx.globalAlpha = 0.11;
     ctx.fillStyle = CV_GOLD;
     for (var j = 0; j < discovered.length; j++) {
@@ -456,6 +457,7 @@ function _cvDrawBreadcrumb(ctx) {
         ctx.beginPath();
         ctx.arc(p.x - 2, p.y + 10, 1.0, 0, Math.PI * 2);
         ctx.fill();
+    }
     }
     ctx.restore();
 }
@@ -758,7 +760,8 @@ function _cvDrawSelection(ctx, now) {
             _cvRoadSegment(ctx, aP, bP, seed);
             ctx.stroke();
 
-            // Direction arrow at midpoint — colored by segment danger
+            // Direction arrow at midpoint (medium+ only — expensive transform)
+            if (_cvDetail >= 1) {
             var pathD = _buildRoadPath(aP, bP, seed);
             var midPt = _pointOnPath(pathD, 0.5);
             var preP = _pointOnPath(pathD, 0.45);
@@ -775,6 +778,7 @@ function _cvDrawSelection(ctx, now) {
             ctx.closePath();
             ctx.fill();
             ctx.restore();
+            }
         }
     }
     ctx.setLineDash([]);
