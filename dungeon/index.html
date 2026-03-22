@@ -38,7 +38,7 @@
             padding: 8px 12px;
             background: linear-gradient(180deg, #251a2a 0%, #2a2420 100%);
             border-bottom: 1px solid rgba(112, 66, 20, 0.3);
-            z-index: 50; flex-shrink: 0;
+            z-index: var(--v-z-sticky, 50); flex-shrink: 0;
         }
         .hud-dungeon-name {
             font-size: 14px; font-weight: 700; color: #c4953a;
@@ -59,7 +59,7 @@
         #dungeon-map::after {
             content: ''; position: absolute; inset: 0;
             box-shadow: inset 0 0 60px 20px rgba(0, 0, 0, 0.6);
-            pointer-events: none; z-index: 5;
+            pointer-events: none; z-index: var(--v-z-base, 5);
         }
 
         /* ═══ SVG NODE MAP ═══ */
@@ -121,7 +121,7 @@
         #event-overlay {
             position: fixed; inset: 0;
             background: rgba(0, 0, 0, 0.75);
-            z-index: 100; display: none;
+            z-index: var(--v-z-header, 100); display: none;
             flex-direction: column; align-items: center; justify-content: center;
         }
         #event-overlay.open { display: flex; }
@@ -162,7 +162,7 @@
         /* ═══ BOSS REVEAL ═══ */
         #boss-overlay {
             position: fixed; inset: 0;
-            background: rgba(0, 0, 0, 0); z-index: 150;
+            background: rgba(0, 0, 0, 0); z-index: var(--v-z-dropdown, 150);
             display: none; flex-direction: column;
             align-items: center; justify-content: center;
         }
@@ -209,7 +209,7 @@
         /* ═══ DUNGEON PARTICLES (Canvas) ═══ */
         #dungeon-particles {
             position: fixed; inset: 0;
-            pointer-events: none; z-index: 1;
+            pointer-events: none; z-index: var(--v-z-base, 1);
             opacity: 0.6;
         }
 
@@ -218,7 +218,7 @@
             display: flex; gap: 6px; padding: 8px 10px;
             background: linear-gradient(0deg, #2a2420, #251a2a);
             border-top: 1px solid rgba(112, 66, 20, 0.2);
-            z-index: 50; flex-shrink: 0;
+            z-index: var(--v-z-sticky, 50); flex-shrink: 0;
         }
         .bar-btn {
             flex: 1; padding: 8px 4px;
@@ -236,7 +236,7 @@
             transform: translateX(-50%);
             background: #7b2020; color: #fff;
             padding: 8px 12px; border-radius: 4px;
-            font-size: 13px; z-index: 300;
+            font-size: 13px; z-index: var(--v-z-overlay, 300);
             animation: fadeInUp 0.3s ease;
         }
         @keyframes fadeInUp {

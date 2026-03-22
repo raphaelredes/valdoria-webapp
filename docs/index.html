@@ -46,7 +46,7 @@
             background: var(--v-bg-raised);
             border-right: 1px solid var(--v-border);
             display: flex; flex-direction: column;
-            overflow: hidden; transition: transform 0.3s ease; z-index: 100;
+            overflow: hidden; transition: transform 0.3s ease; z-index: var(--v-z-header, 100);
         }
         .sidebar-header {
             padding: 20px 16px 12px;
@@ -187,7 +187,7 @@
             display: none; background: var(--v-bg-raised);
             border-bottom: 1px solid var(--v-border);
             padding: 10px 16px; align-items: center; gap: 12px;
-            position: sticky; top: 0; z-index: 50;
+            position: sticky; top: 0; z-index: var(--v-z-sticky, 50);
         }
         .topbar .menu-btn {
             background: none; border: 1px solid var(--v-border);
@@ -198,7 +198,7 @@
 
         .sidebar-overlay {
             display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6); z-index: 99;
+            background: rgba(0,0,0,0.6); z-index: var(--v-z-sticky, 99);
         }
 
         /* TOC — right sidebar, flows in flex layout */
@@ -241,7 +241,7 @@
             background: var(--v-bg-raised); border: 1px solid var(--v-border);
             border-radius: 50%; color: var(--v-gold); font-size: 18px;
             cursor: pointer; display: none; align-items: center;
-            justify-content: center; transition: opacity 0.2s; z-index: 50;
+            justify-content: center; transition: opacity 0.2s; z-index: var(--v-z-sticky, 50);
         }
         .back-to-top.visible { display: flex; }
 

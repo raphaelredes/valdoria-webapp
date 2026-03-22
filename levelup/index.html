@@ -74,7 +74,7 @@
             transition: transform 300ms ease-out;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            z-index: 10;
+            z-index: var(--v-z-sticky, 10);
         }
 
         .sub-screen.active {
@@ -99,7 +99,7 @@
             margin-bottom: 8px;
             position: sticky;
             top: 0;
-            z-index: 5;
+            z-index: var(--v-z-base, 5);
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -111,7 +111,7 @@
             background: var(--v-bg);
             position: sticky;
             top: 0;
-            z-index: 20;
+            z-index: var(--v-z-sticky, 20);
         }
 
         .progress-bar.visible {
@@ -658,7 +658,7 @@
             margin: 0 auto;
             padding: 12px;
             background: linear-gradient(to bottom, transparent, var(--v-bg) 30%);
-            z-index: 30;
+            z-index: var(--v-z-sticky, 30);
             transition: opacity 200ms;
         }
 
@@ -686,7 +686,7 @@
             font-size: 13px;
             font-weight: 600;
             text-align: center;
-            z-index: 100;
+            z-index: var(--v-z-header, 100);
             transform: translateY(-120%);
             transition: transform 300ms;
         }
@@ -700,7 +700,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            z-index: 300;
+            z-index: var(--v-z-overlay, 300);
             background: var(--v-bg);
             flex-direction: column;
             align-items: center;
@@ -762,7 +762,7 @@
             position: absolute;
             inset: 0;
             background: rgba(0, 0, 0, 0.3);
-            z-index: 5;
+            z-index: var(--v-z-base, 5);
             animation: v-fadeIn 200ms ease forwards;
         }
 
@@ -810,7 +810,7 @@
         #loadingOverlay {
             position: fixed;
             inset: 0;
-            z-index: 200;
+            z-index: var(--v-z-dropdown, 200);
             background: rgba(42, 36, 32, 0.85);
             display: flex;
             flex-direction: column;

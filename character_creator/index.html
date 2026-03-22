@@ -84,7 +84,7 @@
             transition: transform 300ms ease-out;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            z-index: 10;
+            z-index: var(--v-z-sticky, 10);
         }
 
         .sub-screen.active {
@@ -252,7 +252,7 @@
         .confirm-btn {
             position: sticky;
             bottom: 8px;
-            z-index: 5;
+            z-index: var(--v-z-base, 5);
             margin-top: 12px;
             margin-bottom: 6px;
             width: 100%;
@@ -455,7 +455,7 @@
         .btn-sticky {
             position: sticky;
             bottom: 8px;
-            z-index: 5;
+            z-index: var(--v-z-base, 5);
             margin-top: 12px;
             width: 100%;
         }
@@ -931,7 +931,7 @@
 
     <style>
         .onboarding-overlay {
-            position: fixed; inset: 0; z-index: 9999;
+            position: fixed; inset: 0; z-index: var(--v-z-critical, 10000);
             background: var(--v-bg, #2a2420);
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;

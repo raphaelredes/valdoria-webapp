@@ -39,7 +39,7 @@
             border-bottom: 1px solid rgba(196,149,58,0.2);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: var(--v-z-header, 100);
         }
 
         /* ::before accent line removed — Game Hub style */
@@ -530,7 +530,7 @@
             max-width: 430px;
             padding: 6px 10px;
             padding-bottom: max(6px, env(safe-area-inset-bottom));
-            z-index: 100;
+            z-index: var(--v-z-header, 100);
             background: var(--v-bg);
             border-top: 1px solid var(--v-border);
             display: flex;
@@ -556,7 +556,7 @@
             line-height: 1;
             padding-top: 4px;
             cursor: pointer;
-            z-index: 101;
+            z-index: var(--v-z-header, 100);
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.3s ease;
         }
@@ -579,7 +579,7 @@
             font-family: var(--v-font);
             letter-spacing: 0.5px;
             cursor: pointer;
-            z-index: 101;
+            z-index: var(--v-z-header, 100);
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             -webkit-tap-highlight-color: transparent;
             opacity: 0.9;
@@ -840,7 +840,7 @@
             padding: 8px 18px;
             border-radius: var(--v-radius-pill);
             font-size: 13px;
-            z-index: 300;
+            z-index: var(--v-z-overlay, 300);
             animation: v-fadeSlideUp 0.25s ease;
             pointer-events: none;
             color: #fff;
