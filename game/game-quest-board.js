@@ -13,12 +13,12 @@ if(d.flavor){h+='<div class="qb-flavor">'+vEsc(d.flavor)+'</div>';}
 return h;}
 function _renderListActions(){return'<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">'
 +'Fechar</button>';}
-function _renderDetailBody(d,q){var h='';h+='<div style="text-align:center;margin-bottom:var(--v-space-sm);">';h+='<span style="font-size:28px;">'+(q.npc_icon||'\ud83d\udcdc')+'</span>';h+='</div>';if(q.npc){h+='<div style="font-size:var(--v-font-sm);color:var(--v-text-dim);text-align:center;margin-bottom:var(--v-space-md);">';h+='\ud83d\udcdc Solicitante: '+vEsc(q.npc)+'</div>';}
-var catLabel=q.cat==='daily'?'Di\u00e1ria':(q.cat==='story'?'Hist\u00f3ria':'Aventura');h+='<div style="display:flex;justify-content:center;gap:var(--v-space-md);margin-bottom:var(--v-space-md);">';h+='<span class="qb-cat-badge qb-cat-'+(q.cat||'daily')+'">'+catLabel+'</span>';h+='<span style="font-size:var(--v-font-sm);color:var(--v-text-dim);">'+(q.diff||'')+' N\u00edvel '+(q.min_lv||1)+'</span>';h+='</div>';if(q.desc){h+='<div class="v-popup-desc">'+vEsc(q.desc)+'</div>';}
-if(q.objs&&q.objs.length>0){h+='<div class="v-popup-section-label">\ud83c\udfaf Objetivos</div>';for(var i=0;i<q.objs.length;i++){h+='<div style="font-size:var(--v-font-md);color:var(--v-text);padding:var(--v-space-xs) 0;">';h+=(i+1)+'. <em>'+vEsc(q.objs[i])+'</em></div>';}}
-h+='<div class="v-popup-divider"></div>';h+='<div class="qb-detail-rewards">';h+='<div class="v-popup-section-label">\ud83d\udc8e Recompensas</div>';var rew='';if(q.gold)rew+='<span style="margin-right:var(--v-space-lg);">\ud83d\udcb0 '+q.gold+' GP</span>';if(q.xp)rew+='<span>\u2728 '+q.xp+' XP</span>';h+='<div style="font-size:var(--v-font-md);color:var(--v-text);">'+rew+'</div>';h+='</div>';if(q.inv==='success'||q.inv==='crit_success'){if(q.hint){h+='<div class="qb-check-result qb-check-success">';h+='\ud83d\udd0d '+vEsc(q.hint)+'</div>';}}else if(q.inv==='fail'){h+='<div class="qb-check-result qb-check-fail">';h+=_T.invFail+'</div>';}
+function _renderDetailBody(d,q){var h='';h+='<div class="qb-detail-icon">';h+='<span class="qb-detail-icon-emoji">'+(q.npc_icon||'\ud83d\udcdc')+'</span>';h+='</div>';if(q.npc){h+='<div class="qb-detail-npc">';h+='\ud83d\udcdc Solicitante: '+vEsc(q.npc)+'</div>';}
+var catLabel=q.cat==='daily'?'Di\u00e1ria':(q.cat==='story'?'Hist\u00f3ria':'Aventura');h+='<div class="qb-detail-meta">';h+='<span class="qb-cat-badge qb-cat-'+(q.cat||'daily')+'">'+catLabel+'</span>';h+='<span class="qb-detail-diff">'+(q.diff||'')+' N\u00edvel '+(q.min_lv||1)+'</span>';h+='</div>';if(q.desc){h+='<div class="v-popup-desc">'+vEsc(q.desc)+'</div>';}
+if(q.objs&&q.objs.length>0){h+='<div class="v-popup-section-label">\ud83c\udfaf Objetivos</div>';for(var i=0;i<q.objs.length;i++){h+='<div class="qb-detail-obj">';h+=(i+1)+'. <em>'+vEsc(q.objs[i])+'</em></div>';}}
+h+='<div class="v-popup-divider"></div>';h+='<div class="qb-detail-rewards">';h+='<div class="v-popup-section-label">\ud83d\udc8e Recompensas</div>';var rew='';if(q.gold)rew+='<span class="qb-detail-rew-gold">\ud83d\udcb0 '+q.gold+' GP</span>';if(q.xp)rew+='<span>\u2728 '+q.xp+' XP</span>';h+='<div class="qb-detail-rew">'+rew+'</div>';h+='</div>';if(q.inv==='success'||q.inv==='crit_success'){if(q.hint){h+='<div class="qb-check-result qb-check-success">';h+='\ud83d\udd0d '+vEsc(q.hint)+'</div>';}}else if(q.inv==='fail'){h+='<div class="qb-check-result qb-check-fail">';h+=_T.invFail+'</div>';}
 if(q.neg==='success'||q.neg==='crit_success'){if(q.neg_bonus){h+='<div class="qb-check-result qb-check-success">';h+='\ud83d\udcac Negocia\u00e7\u00e3o: '+vEsc(q.neg_bonus)+'</div>';}}else if(q.neg==='fail'){h+='<div class="qb-check-result qb-check-fail">';h+=_T.negFail+'</div>';}
-if(q.rep_req){h+='<div style="font-size:var(--v-font-sm);color:var(--v-text-dim);margin-top:var(--v-space-sm);">';h+='\u2694\uFE0F Reputa\u00e7\u00e3o Necess\u00e1ria: '+q.rep_req+'</div>';}
+if(q.rep_req){h+='<div class="qb-detail-rep">';h+='\u2694\uFE0F Reputa\u00e7\u00e3o Necess\u00e1ria: '+q.rep_req+'</div>';}
 if(d.flash){h+='<div class="qb-flash">'+vEsc(d.flash)+'</div>';}
 return h;}
 function _renderDetailActions(d,q){var h='';if(q.active){h+='<button class="v-popup-btn" disabled>\ud83d\udccc Miss\u00e3o em Andamento</button>';}else if(q.can&&!d.is_capped){h+='<button class="v-popup-btn v-popup-btn--success" data-action="guild_quest_accept_'+q.id+'">'
@@ -30,13 +30,12 @@ if(!q.neg&&q.neg_mod&&!d.is_capped){checkBtns+='<button class="v-popup-btn" data
 if(checkBtns){h+='<div class="v-popup-btn-row">'+checkBtns+'</div>';}
 h+='<button class="v-popup-btn v-popup-btn--cancel" data-action="qb_back">'
 +'\ud83d\udccb Voltar ao Quadro</button>';return h;}
-function _renderAcceptedBody(d){var a=d.accepted||{};var h='';if(a.ok){h+='<div style="text-align:center;margin-bottom:var(--v-space-md-lg);">';h+='<span class="qb-accepted-icon">\u2705</span>';h+='<div class="qb-accepted-ok">'
-+'Miss\u00e3o Aceita!</div>';h+='</div>';if(a.dialogue){h+='<div style="text-align:center;font-style:italic;color:var(--v-text-dim);margin-bottom:var(--v-space-md);'
-+'font-size:var(--v-font-md);">\ud83d\udcac \u201c'+vEsc(a.dialogue)+'\u201d</div>';}
-h+='<div class="v-popup-desc">'+_T.acceptNarr+'</div>';h+='<div style="margin-top:var(--v-space-md);">';h+='\ud83d\udcdc <strong>'+vEsc(a.title)+'</strong>';h+='</div>';if(a.obj){h+='<div style="font-size:var(--v-font-md);color:var(--v-text-dim);margin-top:var(--v-space-xs);">'
+function _renderAcceptedBody(d){var a=d.accepted||{};var h='';if(a.ok){h+='<div class="qb-accepted-header">';h+='<span class="qb-accepted-icon">\u2705</span>';h+='<div class="qb-accepted-ok">'
++'Miss\u00e3o Aceita!</div>';h+='</div>';if(a.dialogue){h+='<div class="qb-accepted-dialogue">\ud83d\udcac \u201c'+vEsc(a.dialogue)+'\u201d</div>';}
+h+='<div class="v-popup-desc">'+_T.acceptNarr+'</div>';h+='<div class="qb-accepted-quest">';h+='\ud83d\udcdc <strong>'+vEsc(a.title)+'</strong>';h+='</div>';if(a.obj){h+='<div class="qb-accepted-obj">'
 +'\ud83c\udfaf '+vEsc(a.obj)+'</div>';}
-h+='<div style="font-size:var(--v-font-md);color:var(--v-text-dim);font-style:italic;margin-top:var(--v-space-md);">'
-+_T.acceptFarewell+'</div>';}else{h+='<div style="text-align:center;margin-bottom:var(--v-space-md);">';h+='<span class="qb-accepted-icon">\u274c</span>';h+='<div class="qb-accepted-fail">'
+h+='<div class="qb-accepted-farewell">'
++_T.acceptFarewell+'</div>';}else{h+='<div class="qb-accepted-header">';h+='<span class="qb-accepted-icon">\u274c</span>';h+='<div class="qb-accepted-fail">'
 +'N\u00e3o foi poss\u00edvel aceitar</div>';h+='</div>';h+='<div class="v-popup-desc">'+vEsc(a.reason||_T.reqFallback)+'</div>';}
 return h;}
 function _renderAcceptedActions(d){var a=d.accepted||{};var h='';if(a.ok){h+='<button class="v-popup-btn v-popup-btn--success" data-action="cancel">'
