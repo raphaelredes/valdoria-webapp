@@ -31,6 +31,7 @@ document.write('<link rel="stylesheet" href="../shared/tabs.css?v=' + v + '">');
     document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
@@ -42,43 +43,15 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
 
 <body>
 
-    <!-- Loading overlay (backpack opening) -->
-    <div id="loadingOverlay" class="loading-overlay" style="opacity:0" aria-busy="true">
-        <!-- Guild loading particles -->
-            <div class="bp-glow"></div>
-            <svg class="bp-icon" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Strap -->
-                <path d="M35 10 Q35 2 50 2 Q65 2 65 10" stroke="rgba(196,149,58,0.5)" stroke-width="2" fill="none"/>
-                <!-- Backpack body -->
-                <rect x="20" y="25" width="60" height="70" rx="8" fill="rgba(80,50,25,0.6)" stroke="rgba(196,149,58,0.4)" stroke-width="1.5"/>
-                <!-- Flap (opens) -->
-                <path class="bp-flap" d="M20 40 Q20 25 50 20 Q80 25 80 40" fill="rgba(100,60,30,0.7)" stroke="rgba(196,149,58,0.5)" stroke-width="1.5"/>
-                <!-- Buckle -->
-                <rect x="44" y="42" width="12" height="8" rx="2" fill="rgba(196,149,58,0.3)" stroke="rgba(196,149,58,0.5)" stroke-width="1"/>
-                <!-- Pocket -->
-                <rect x="32" y="60" width="36" height="20" rx="4" fill="rgba(60,40,20,0.5)" stroke="rgba(196,149,58,0.2)" stroke-width="1"/>
-                <!-- Golden sparkles (appear when opening) -->
-                <circle class="bp-sparkle s1" cx="40" cy="30" r="2" fill="rgba(196,149,58,0.8)"/>
-                <circle class="bp-sparkle s2" cx="60" cy="28" r="1.5" fill="rgba(196,149,58,0.6)"/>
-                <circle class="bp-sparkle s3" cx="50" cy="22" r="2.5" fill="rgba(196,149,58,0.7)"/>
-                <circle class="bp-sparkle s4" cx="35" cy="25" r="1" fill="rgba(255,220,120,0.8)"/>
-                <circle class="bp-sparkle s5" cx="65" cy="24" r="1.5" fill="rgba(255,220,120,0.6)"/>
-            </svg>
-        </div>
-        <div class="loading-brand">
-            <div class="loading-title">GUILDA</div>
-            <div class="loading-divider"><span class="divider-rune">&#9670;</span></div>
-        </div>
-        <div class="loading-progress-wrap">
-            <div class="loading-progress-track">
-                <div id="loading-progress" class="loading-progress-fill"></div>
-            </div>
-        </div>
-        <div class="loading-text" style="display:none"></div>
-        <div class="loading-tip-area">
-            <div id="loading-tip" class="loading-tip" role="status" aria-live="polite">Abrindo o registro da guilda...</div>
-        </div>
-    </div>
+    <!-- Loading overlay (backpack icon via shared template) -->
+    <script>
+    document.write(ValdoriaLoadingHTML({
+        overlayId: 'loadingOverlay',
+        title: 'GUILDA',
+        icon: 'backpack',
+        defaultTip: 'Abrindo o registro da guilda...'
+    }));
+    </script>
 
     <!-- Loading controller -->
     <script>
