@@ -25,6 +25,7 @@ function goNext(){const err=screens[cur].validate();if(err){_showValidation(err)
 if(cur===screens.length-1){submit();}else{goTo(cur+1);}}
 function goBack(){if(cur>0){goTo(cur-1);return;}
 try{window.__valdoria_transitioning=true;tg.close();}catch(e){console.warn('[LEVELUP] close failed:',e);}}
+if(typeof vEscapeKey!=='undefined'){vEscapeKey.register(function(){return typeof vDrawer!=='undefined'&&vDrawer.isOpen();},function(){var top=typeof vDrawer!=='undefined'&&vDrawer.getTopOpen();if(top)vDrawer.close(top.id);});}
 function updateNavBtn(){const btn=document.getElementById('btnNext');if(cur===screens.length-1){btn.textContent='\u2694\ufe0f Confirmar Evolucao';btn.className='v-btn v-btn-primary';}else{btn.textContent='Continuar \u25b6';btn.className='v-btn v-btn-primary';}
 if(tg&&tg.BackButton){const hasOpenSub=document.querySelector('.sub-screen.active');tg.BackButton.show();}}
 function openSubScreen(subId){if(isTransitioning)return;const sub=document.getElementById(subId);if(!sub)return;isTransitioning=true;sub.classList.add('active');const parentScreen=sub.closest('.screen');if(parentScreen){parentScreen.scrollTop=0;parentScreen.classList.add('sub-open');}

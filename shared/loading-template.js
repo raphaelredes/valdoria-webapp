@@ -98,6 +98,8 @@ window.ValdoriaLoadingHTML = function(opts) {
       + '<circle cx="150" cy="150" r="75" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="0.5"/>'
       + '<text class="mc-inner-text" fill="rgba(196,149,58,0.35)"><textPath href="#runeInner" startOffset="0%">\u25C6 VALDORIA \u25C6 LENDAS \u25C6 VALDORIA \u25C6 LENDAS </textPath></text>'
       + '</svg>'
+      // Gem (central interactive element)
+      + '<div class="mc-gem" id="mc-gem"><div class="mc-gem-flare"></div><div class="mc-gem-core">◆</div></div>'
       // Pulses
       + '<div class="mc-pulse"></div><div class="mc-pulse mc-pulse-2"></div>'
       + '<div class="mc-completion-wave"></div><div class="mc-completion-wave wave-2"></div>'

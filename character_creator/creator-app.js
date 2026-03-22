@@ -36,6 +36,7 @@ function setupBackButton(){if(!tg||!tg.BackButton)return;tg.BackButton.onClick((
 closeSubScreen(openSub.id);return;}
 if(currentScreen>0){goScreen(currentScreen-1);return;}
 try{window.__valdoria_transitioning=true;tg.close();}catch(e){console.warn('[CHAR_CREATOR] close failed:',e);}});}
+if(typeof vEscapeKey!=='undefined'){vEscapeKey.register(function(){return typeof vDrawer!=='undefined'&&vDrawer.isOpen();},function(){var top=typeof vDrawer!=='undefined'&&vDrawer.getTopOpen();if(top)vDrawer.close(top.id);});}
 function updateBackButton(){if(!tg||!tg.BackButton)return;const hasOpenSub=document.querySelector('.sub-screen.active');tg.BackButton.show();}
 function validateCurrentScreen(){if(currentScreen===0){if(!sel.race)return'Selecione uma raça.';const r=RACES[sel.race];if(r.subraces&&!sel.subrace)return'Selecione uma sub-raça.';if(r.halfelf&&!sel.subrace)return'Selecione os 2 bônus de atributo.';}
 if(currentScreen===1&&!sel.classKey)return'Selecione uma classe.';if(currentScreen===2){const attrs=['strength','dexterity','constitution','intelligence','wisdom','charisma'];const assigned=attrs.filter(a=>sel.statAssignment[a]);if(assigned.length<6)return'Distribua todos os 6 atributos.';}
