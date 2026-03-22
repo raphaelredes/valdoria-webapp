@@ -9,13 +9,22 @@ var ValdoriaDice = (function () {
     /* -- Constants -- */
 
     /** Recommended canvas sizes by die count */
-    var CANVAS_SIZES = { 1: 180, 2: 220, 3: 260, 4: 300, 5: 340 };
+    var CANVAS_SIZES = { 1: 180, 2: 260, 3: 300, 4: 340, 5: 370 };
+
+    /** Canvas size for solo d20 (attack, save, check) */
+    var D20_SIZE = 220;
+
+    /** Canvas size for advantage/disadvantage (2d20 compact) */
+    var D20_ADV_SIZE = 140;
 
     /** Standardized animation timing (ms) */
     var TIMING = {
         FUSION_HOLD: 600,
         RESULT_HOLD: 2000,
-        SKIP_DELAY: 500
+        SKIP_DELAY: 500,
+        D20_ROLL_MS: 1200,
+        DAMAGE_ROLL_MS: 1500,
+        DEATH_SAVE_MS: 1800
     };
 
     /* -- distributeTotal -- */
@@ -100,6 +109,8 @@ var ValdoriaDice = (function () {
         parseDiceFormula: parseDiceFormula,
         textFallback: textFallback,
         CANVAS_SIZES: CANVAS_SIZES,
+        D20_SIZE: D20_SIZE,
+        D20_ADV_SIZE: D20_ADV_SIZE,
         TIMING: TIMING
     };
 })();
