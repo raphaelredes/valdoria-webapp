@@ -8,7 +8,7 @@ _ensureRunning(){if(this._running)return;this._running=true;const tick=()=>{if(!
 _tick(){const ctx=this.ctx;const w=window.innerWidth;const h=window.innerHeight;ctx.clearRect(0,0,w,h);const now=performance.now();for(let i=this.flashes.length-1;i>=0;i--){const f=this.flashes[i];const t=(now-f.start)/f.duration;if(t>=1){this.flashes.splice(i,1);continue;}
 ctx.save();ctx.globalAlpha=(1-_easeOutCubic(t))*f.alpha;ctx.fillStyle=f.color;ctx.fillRect(0,0,w,h);ctx.restore();}
 for(let i=this.projectiles.length-1;i>=0;i--){const p=this.projectiles[i];const t=Math.min((now-p.start)/p.duration,1);if(t>=1){if(p.onImpact)p.onImpact();this.projectiles.splice(i,1);continue;}
-const pos=this._getProjectilePos(p,t);const _trailCount=this._lite?Math.ceil(p.prof.trail.count/2):p.prof.trail.count;if(_trailCount>0&&Math.random()<0.7){for(let j=0;j<_trailCount;j++){this._spawnTrailParticle(pos,p.prof);}}
+const pos=this._getProjectilePos(p,t);const _trailCount=this._lite?Math.ceil(p.prof.trail.count/2):this._medium?Math.ceil(p.prof.trail.count*0.7):p.prof.trail.count;if(_trailCount>0&&Math.random()<0.7){for(let j=0;j<_trailCount;j++){this._spawnTrailParticle(pos,p.prof);}}
 this._drawHead(ctx,pos,p.prof,p.crit,t);}
 for(let i=this.extras.length-1;i>=0;i--){const e=this.extras[i];const t=(now-e.start)/e.duration;if(t>=1){this.extras.splice(i,1);continue;}
 e.draw(ctx,e.x,e.y,t,e);}
