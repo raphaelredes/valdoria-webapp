@@ -9,7 +9,7 @@
 .daily-item{color:var(--v-text);font-size:var(--v-font-body);margin:var(--v-space-xs) 0}
 .daily-multiplier{color:var(--v-gold);font-size:var(--v-font-sm);margin-top:var(--v-space-sm)}
 .daily-record{color:#4ade80;font-size:var(--v-font-body);margin-top:var(--v-space-sm);animation:badgeBounce 0.5s ease-out}
-.daily-header{background:linear-gradient(135deg,var(--v-gold-30),var(--v-gold-10))!important}
+.daily-header{background:linear-gradient(135deg,var(--v-gold-30),var(--v-gold-10))}
 .streak-badge{position:absolute;top:var(--v-space-sm);right:var(--v-space-sm);background:linear-gradient(135deg,var(--v-gold),#8b6914);color:var(--v-bg);padding:var(--v-space-xs) var(--v-space-md);border-radius:var(--v-radius-pill);font-size:var(--v-font-sm);font-weight:bold;z-index:var(--v-z-dropdown);cursor:default}
 .streak-badge.streak-has-reward{animation:v-ctaPulse 2s ease-in-out infinite;cursor:pointer}
 @media(prefers-reduced-motion:reduce){.daily-dot.current,.streak-badge.streak-has-reward,.daily-gold,.daily-record{animation:none}}
