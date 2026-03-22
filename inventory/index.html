@@ -16,6 +16,7 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
 document.write('<link rel="stylesheet" href="../shared/tabs.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
@@ -32,6 +33,7 @@ document.write('<link rel="stylesheet" href="../shared/tabs.css?v=' + v + '">');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
 document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
     </script>
@@ -112,9 +114,13 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     <!-- Immersive mode restore pill -->
     <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
 
-    <!-- Modal Overlay -->
-    <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
-        <div class="modal" id="modalContent"></div>
+    <!-- vPopup Overlay (shared popup system) -->
+    <div id="v-popup-overlay" class="v-popup-overlay" style="display:none">
+        <div class="v-popup-card">
+            <div class="v-popup-header" id="v-popup-header"></div>
+            <div class="v-popup-body" id="v-popup-body"></div>
+            <div class="v-popup-actions" id="v-popup-actions"></div>
+        </div>
     </div>
 
     <script>

@@ -106,8 +106,8 @@ window._startTraining = function(category, itemId, name) {
 window._advanceTraining = function() {
     guildAction('train_session').then(function(d) {
         if (d) {
-            if (d.completed && typeof vToast === 'function') vToast('Treinamento concluído!', 'success', 3000);
-            if (d.complication && typeof vToast === 'function') vToast('Complicação! ' + d.complication, 'warning', 4000);
+            if (d.completed && typeof vToast === 'function') vToast('Treinamento concluído!', 'success');
+            if (d.complication && typeof vToast === 'function') vToast('Complicação! ' + d.complication, 'warning');
             renderTrainingTab();
             if (window._renderPlayerInfo) _renderPlayerInfo();
         }

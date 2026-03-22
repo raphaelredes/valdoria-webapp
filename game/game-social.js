@@ -347,7 +347,7 @@ function _chatSend(text) {
             });
         } else if (data && data.error) {
             var msg = data.error === 'cooldown' ? '\u23f3 Aguarde um momento...' : data.error;
-            if (typeof vToast === 'function') vToast(msg, 'warn', 2000);
+            if (typeof vToast === 'function') vToast(msg, 'warn');
         }
     }).catch(function() { _sending = false; });
 }
@@ -368,7 +368,7 @@ function _chatEmote(key) {
                 }
             });
         } else if (data && data.error === 'cooldown') {
-            if (typeof vToast === 'function') vToast('\u23f3 Aguarde um momento...', 'warn', 2000);
+            if (typeof vToast === 'function') vToast('\u23f3 Aguarde um momento...', 'warn');
         }
         _sending = false;
     }).catch(function() { _sending = false; });
@@ -429,7 +429,7 @@ window.openSocialPopup = function() {
             window.showSocialPopup(data);
         } else {
             console.error("[SOCIAL] Failed to load", data);
-            if (typeof vToast === "function") vToast("Erro ao carregar social.", "err", 2000);
+            if (typeof vToast === "function") vToast("Erro ao carregar social.", "err");
             if (typeof vPopup !== "undefined") vPopup.hide("social-popup-overlay");
         }
     });

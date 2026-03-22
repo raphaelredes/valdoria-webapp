@@ -93,7 +93,7 @@ function guildAction(action, body) {
         if (G.data && resp.gold != null) G.data.gold = resp.gold;
         if (G.data && resp.party) G.data.party = _mapArray(resp.party);
         if (resp.msg && typeof vToast === 'function') {
-            vToast(resp.msg, resp.ok ? 'success' : (resp.error ? 'error' : 'info'), 3000);
+            vToast(resp.msg, resp.ok ? 'success' : (resp.error ? 'error' : 'info'));
         }
         return resp;
     });
