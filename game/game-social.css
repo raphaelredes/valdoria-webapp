@@ -43,6 +43,10 @@
 .social-msg-text {
     color: var(--v-text);
 }
+.social-msg-text em {
+    font-style: italic;
+    color: var(--v-gold-light);
+}
 /* 4. Emote Buttons Row */
 .social-emotes {
     display: flex;
@@ -119,6 +123,11 @@
     border-radius: var(--v-radius-sm);
     margin-bottom: var(--v-space-xs);
     border: 1px solid var(--v-border);
+    transition: border-color var(--v-transition-base);
+}
+.social-player--selected {
+    border-color: var(--v-gold-dim, rgba(196, 149, 58, 0.4));
+    background: rgba(196, 149, 58, 0.05);
 }
 .social-player-icon {
     font-size: var(--v-font-2xl);
@@ -156,6 +165,7 @@
     font-size: var(--v-font-xl);
     cursor: pointer;
     flex-shrink: 0;
+    transition: border-color var(--v-transition-base);
 }
 .social-interact-btn:hover {
     background: var(--v-bg-raised);
@@ -163,6 +173,41 @@
 }
 .social-interact-btn:active {
     transform: scale(0.95);
+    opacity: 0.8;
+}
+
+/* 6b. Player Action Panel (interaction menu) */
+.social-player-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--v-space-xs);
+    padding: var(--v-space-sm) var(--v-space-md);
+    margin-bottom: var(--v-space-xs);
+    background: rgba(74, 56, 40, 0.15);
+    border-radius: 0 0 var(--v-radius-sm) var(--v-radius-sm);
+    margin-top: calc(-1 * var(--v-space-xs));
+    border: 1px solid var(--v-border);
+    border-top: none;
+}
+.social-action-btn {
+    padding: var(--v-space-sm) var(--v-space-xs);
+    background: var(--v-bg-raised);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    color: var(--v-text);
+    font-family: var(--v-font);
+    font-size: var(--v-font-xs);
+    cursor: pointer;
+    text-align: center;
+    min-height: 36px;
+    transition: background var(--v-transition-base), border-color var(--v-transition-base);
+}
+.social-action-btn:hover {
+    background: rgba(196, 149, 58, 0.1);
+    border-color: var(--v-gold-dim, rgba(196, 149, 58, 0.4));
+}
+.social-action-btn:active {
+    transform: scale(0.97);
     opacity: 0.8;
 }
 
@@ -395,6 +440,7 @@
 .social-interact-btn:focus-visible,
 .social-req-btn:focus-visible,
 .social-npc:focus-visible,
+.social-action-btn:focus-visible,
 .social-chat-input:focus-visible {
     outline: 2px solid var(--v-gold);
     outline-offset: 2px;
@@ -404,6 +450,9 @@ body.perf-lite .social-npc,
 body.perf-lite .social-emote-btn,
 body.perf-lite .social-npc-bar-fill,
 body.perf-lite .social-stat-bar-fill,
-body.perf-lite .social-chat-input {
+body.perf-lite .social-chat-input,
+body.perf-lite .social-player,
+body.perf-lite .social-interact-btn,
+body.perf-lite .social-action-btn {
     transition: none;
 }

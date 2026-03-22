@@ -12,12 +12,23 @@ var _detailNpc = null;
 var _detailData = null;
 var _detailLoading = false;
 var _sending = false;
+var _selectedPlayer = null;
 
 function _idemKey() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
 
 function _esc(t) {
     if (!t) return '';
     return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function _rpFormat(t) {
+    if (!t) return '';
+    return _esc(t).replace(/\*([^*]+)\*/g, '<em>$1</em>');
+}
+
+function _calcToastDuration(text) {
+    var words = String(text || '').replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(1500, Math.min(4000, words * 250));
 }
 
 function _ago(ts) {
@@ -117,7 +128,7 @@ function _buildChatMessages() {
             if (m.icon) h += _esc(m.icon) + ' ';
             h += _esc(m.name);
             if (m.level) h += ' Nv' + m.level;
-            h += '</span> <span class="social-msg-text">' + _esc(m.text) + '</span></div>';
+            h += '</span> <span class="social-msg-text">' + _rpFormat(m.text) + '</span></div>';
         }
     }
     return h;
@@ -132,15 +143,25 @@ function _renderChatMessages() {
 
 function _renderOnline() {
     var players = (_cachedData && _cachedData.online) || [];
-    if (players.length === 0) return '<div class="social-empty"><div class="social-empty-icon">\ud83c\udf10</div>Nenhum viajante nas proximidades.</div><div style="font-size:var(--v-font-sm);color:var(--v-text-dim);margin-top:var(--v-space-xs);">Outros aventureiros aparecerão quando estiverem online.</div>';
+    if (players.length === 0) return '<div class="social-empty"><div class="social-empty-icon">🌐</div>Nenhum viajante nas proximidades.</div><div style="font-size:var(--v-font-sm);color:var(--v-text-dim);margin-top:var(--v-space-xs);">Outros aventureiros aparecerão quando estiverem online.</div>';
     var h = '<div class="social-section-label">' + players.length + ' viajante' + (players.length !== 1 ? 's' : '') + ' online</div>';
     for (var i = 0; i < players.length; i++) {
         var p = players[i];
+        var isSelected = _selectedPlayer === p.user_id;
         var nd = (p.badge ? p.badge + ' ' : '') + _esc(p.name);
-        h += '<div class="social-player"><span class="social-player-icon">' + (p.class_icon || '\ud83d\udc64') + '</span>';
+        h += '<div class="social-player' + (isSelected ? ' social-player--selected' : '') + '" data-player-uid="' + p.user_id + '">';
+        h += '<span class="social-player-icon">' + (p.class_icon || '👤') + '</span>';
         h += '<span class="social-player-info"><b>' + nd + '</b> <small>Nv.' + (p.level || '?') + '</small>';
-        if (p.location) h += '<span class="social-player-loc">\ud83d\udccd ' + _esc(p.location) + '</span>';
-        h += '</span><button class="social-interact-btn" data-target="' + p.user_id + '" title="Acenar">\ud83d\udc4b</button></div>';
+        if (p.location) h += '<span class="social-player-loc">📍 ' + _esc(p.location) + '</span>';
+        h += '</span><button class="social-interact-btn" data-target="' + p.user_id + '" title="Interações">✦</button></div>';
+        if (isSelected) {
+            h += '<div class="social-player-actions">';
+            h += '<button class="social-action-btn" data-action-uid="' + p.user_id + '" data-action-type="wave">👋 Acenar</button>';
+            h += '<button class="social-action-btn" data-action-uid="' + p.user_id + '" data-action-type="duel_challenge">⚔️ Duelo</button>';
+            h += '<button class="social-action-btn" data-action-uid="' + p.user_id + '" data-action-type="trade_invite">🤝 Trocar</button>';
+            h += '<button class="social-action-btn" data-action-uid="' + p.user_id + '" data-action-type="party_invite">🏠 Grupo</button>';
+            h += '</div>';
+        }
     }
     return h;
 }
@@ -249,6 +270,7 @@ function _render() {
             _stopPoll();
             _detailNpc = null;
             _detailData = null;
+            _selectedPlayer = null;
             _fetchSocial({action: 'close'});
         },
     });
@@ -273,12 +295,30 @@ function _bindListeners() {
     _delegateSet = true;
     document.addEventListener('click', function(e) {
         var t = e.target.closest('[data-social-tab]');
-        if (t) { e.preventDefault(); e.stopPropagation(); var tab = t.getAttribute('data-social-tab'); if (tab && tab !== _activeTab) { _activeTab = tab; _detailNpc = null; _detailData = null; try { localStorage.setItem('valdoria_social_tab', tab); } catch(ex){} _render(); } return; }
+        if (t) { e.preventDefault(); e.stopPropagation(); var tab = t.getAttribute('data-social-tab'); if (tab && tab !== _activeTab) { _activeTab = tab; _detailNpc = null; _detailData = null; _selectedPlayer = null; try { localStorage.setItem('valdoria_social_tab', tab); } catch(ex){} _render(); } return; }
         if (e.target.closest('#social-send-btn')) { e.preventDefault(); e.stopPropagation(); var inp = document.getElementById('social-chat-input'); if (inp) _chatSend(inp.value); return; }
         var em = e.target.closest('.social-emote-btn');
         if (em) { e.preventDefault(); e.stopPropagation(); var ek = em.getAttribute('data-emote'); if (ek) _chatEmote(ek); return; }
+        // Action buttons in player interaction menu
+        var actionBtn = e.target.closest('.social-action-btn');
+        if (actionBtn) {
+            e.preventDefault(); e.stopPropagation();
+            var aUid = parseInt(actionBtn.getAttribute('data-action-uid'), 10);
+            var aType = actionBtn.getAttribute('data-action-type');
+            if (aUid && aType) _socialSend(aUid, aType);
+            return;
+        }
+        // Toggle player interaction panel
         var ib = e.target.closest('.social-interact-btn');
-        if (ib) { e.preventDefault(); e.stopPropagation(); var uid = parseInt(ib.getAttribute('data-target'), 10); if (uid) _socialSend(uid, 'wave'); return; }
+        if (ib) {
+            e.preventDefault(); e.stopPropagation();
+            var uid = parseInt(ib.getAttribute('data-target'), 10);
+            if (uid) {
+                _selectedPlayer = (_selectedPlayer === uid) ? null : uid;
+                _render();
+            }
+            return;
+        }
         var ab = e.target.closest('[data-accept]');
         if (ab) { e.preventDefault(); e.stopPropagation(); var rid = ab.getAttribute('data-accept'); if (rid) _socialAction('social_accept', rid); return; }
         var db = e.target.closest('[data-decline]');
@@ -311,7 +351,7 @@ function _chatSend(text) {
             });
         } else if (data && data.error) {
             var msg = data.error === 'cooldown' ? '\u23f3 Aguarde um momento...' : data.error;
-            if (typeof vToast === 'function') vToast(msg, 'warn');
+            if (typeof vToast === 'function') vToast(msg, 'warn', 2000);
         }
     }).catch(function() { _sending = false; });
 }
@@ -332,7 +372,7 @@ function _chatEmote(key) {
                 }
             });
         } else if (data && data.error === 'cooldown') {
-            if (typeof vToast === 'function') vToast('\u23f3 Aguarde um momento...', 'warn');
+            if (typeof vToast === 'function') vToast('\u23f3 Aguarde um momento...', 'warn', 2000);
         }
         _sending = false;
     }).catch(function() { _sending = false; });
@@ -341,8 +381,13 @@ function _chatEmote(key) {
 function _socialSend(targetUid, type) {
     if (typeof haptic === 'function') haptic('light');
     _fetchSocial({ action: 'social_send', target_uid: targetUid, type: type, idem_key: _idemKey() }).then(function(data) {
-        if (data && data.ok) { if (typeof vToast === 'function') vToast(data.message || '\u2705 Enviado!', 'ok'); }
-        else if (data && data.message) { if (typeof vToast === 'function') vToast('\u274c ' + data.message, 'err'); }
+        if (data && data.ok) {
+            var msg = data.message || '\u2705 Enviado!';
+            if (typeof vToast === 'function') vToast(msg, 'ok', _calcToastDuration(msg));
+        } else if (data && data.message) {
+            var errMsg = '\u274c ' + data.message;
+            if (typeof vToast === 'function') vToast(errMsg, 'err', _calcToastDuration(errMsg));
+        }
     });
 }
 
@@ -350,10 +395,17 @@ function _socialAction(action, requestId) {
     if (typeof haptic === 'function') haptic('light');
     _fetchSocial({ action: action, request_id: requestId, idem_key: _idemKey() }).then(function(data) {
         if (data && data.ok) {
-            if (typeof vToast === 'function') vToast(data.message || '\u2705', 'ok');
+            var msg = data.message || '\u2705';
+            if (typeof vToast === 'function') vToast(msg, 'ok', _calcToastDuration(msg));
+            // If a session was started (duel/coop/trade), close popup
+            if (data.started) {
+                if (typeof vPopup !== 'undefined') vPopup.hide('social-popup-overlay');
+                return;
+            }
             _fetchSocial({ action: 'load' }).then(function(fd) { if (fd) { _cachedData = fd; _render(); } });
         } else if (data && data.message) {
-            if (typeof vToast === 'function') vToast('\u274c ' + data.message, 'err');
+            var errMsg = '\u274c ' + data.message;
+            if (typeof vToast === 'function') vToast(errMsg, 'err', _calcToastDuration(errMsg));
         }
     });
 }
@@ -361,7 +413,7 @@ function _socialAction(action, requestId) {
 window.showSocialPopup = function(data) {
     _cachedData = data || {};
     try { var sv = localStorage.getItem('valdoria_social_tab'); if (sv && ['chat','online','inbox','rel'].indexOf(sv) !== -1) _activeTab = sv; } catch (e) {}
-    _detailNpc = null; _detailData = null;
+    _detailNpc = null; _detailData = null; _selectedPlayer = null;
     _render();
 };
 
@@ -373,7 +425,7 @@ window.openSocialPopup = function() {
             body: '<div class="social-empty"><div class="social-empty-icon">⏳</div><div>Carregando...</div></div>',
             actions: "",
             closeOnOutside: true,
-            onHide: function() { _stopPoll(); _detailNpc = null; _detailData = null; _fetchSocial({action: "close"}); },
+            onHide: function() { _stopPoll(); _detailNpc = null; _detailData = null; _selectedPlayer = null; _fetchSocial({action: "close"}); },
         });
     }
     _fetchSocial({ action: "load" }).then(function(data) {
@@ -381,7 +433,7 @@ window.openSocialPopup = function() {
             window.showSocialPopup(data);
         } else {
             console.error("[SOCIAL] Failed to load", data);
-            if (typeof vToast === "function") vToast("Erro ao carregar social.", "err");
+            if (typeof vToast === "function") vToast("Erro ao carregar social.", "err", 2000);
             if (typeof vPopup !== "undefined") vPopup.hide("social-popup-overlay");
         }
     });
