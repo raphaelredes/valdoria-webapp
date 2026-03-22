@@ -56,4 +56,4 @@ let html='';entries.forEach(([name,qty])=>{html+=`<div class="material-row fade-
                 <span>${name}</span>
                 <span class="material-qty">×${qty}</span>
             </div>`;});content.innerHTML=html;}
-init();if(window._wsLoadingCtrl)window._wsLoadingCtrl.hide();
+init();if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');if(window._wsLoadingCtrl)window._wsLoadingCtrl.hide();

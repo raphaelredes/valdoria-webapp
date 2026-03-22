@@ -56,6 +56,7 @@
             }
 
             _fetchEntries(_currentCategory);
+if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
         } catch (e) {
             console.error('[CODEX]', e);
             showError('Erro ao inicializar', e);

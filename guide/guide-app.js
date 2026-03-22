@@ -5,7 +5,8 @@ function init(){var spaP=window.__spaRouteParams||{};var params=new URLSearchPar
 if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();try{Telegram.WebApp.headerColor='#2a2420';}catch(e){}
 try{Telegram.WebApp.backgroundColor='#2a2420';}catch(e){}
 window.__valdoriaExitAction=function(){_goBack();};}
-buildCategoryFilters();buildTopics();var ctx=params.get('ctx');if(ctx){var target=findTopicForCtx(ctx);if(target){setTimeout(function(){openAndScrollTo(target.id);},200);}}
+buildCategoryFilters();buildTopics();
+if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');var ctx=params.get('ctx');if(ctx){var target=findTopicForCtx(ctx);if(target){setTimeout(function(){openAndScrollTo(target.id);},200);}}
 searchInput.addEventListener('input',function(){clearTimeout(_debounceTimer);_debounceTimer=setTimeout(onSearch,180);});searchClear.addEventListener('click',clearSearch);topicsEl.addEventListener('touchmove',function(){if(document.activeElement===searchInput)searchInput.blur();},{passive:true});closeBtn.addEventListener('click',_goBack);}
 function findTopicForCtx(ctx){if(_topicMap[ctx])return _topicMap[ctx];for(var j=0;j<_index.length;j++){if(ctx.indexOf(_index[j].id)===0)return _index[j].topic;}
 return null;}
