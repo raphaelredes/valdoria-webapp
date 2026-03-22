@@ -16,7 +16,7 @@ localGems[k]=[...v];}
 localRunes=D.runes?{...D.runes}:{};localAllyEq={};if(D.allies){for(const a of D.allies)
 localAllyEq[a.id]=Object.assign({},a.eq||{});}
 if(D.gfm&&typeof GEM_UPGRADE_MAP!=='undefined')GEM_UPGRADE_MAP=D.gfm;if(D.rsl)RUNE_ELIGIBLE=new Set(D.rsl);
-updateBottomPadding();hideLoading();_initViewedItems();updateHeader();buildTabs();renderTab();initSwipeToDismiss();_initTabSwipe();_initLongPress();initBackButton();_initNavBar();initImmersive();}
+updateBottomPadding();hideLoading();_initViewedItems();updateHeader();buildTabs();renderTab();initSwipeToDismiss();_initTabSwipe();_initLongPress();initBackButton();initImmersive();}
 function hideLoading(){if(window._invLoadingCtrl){window._invLoadingCtrl.hide();}else{document.getElementById('loadingOverlay').classList.add('hidden');}}
 function _showInitError(msg){console.error('[INVENTORY]',msg);document.getElementById('mainContent').innerHTML=`<div class="empty-state"><div class="icon">${vi('warn', 32)}</div><p>${msg}</p></div>`;}
 function haptic(type){if(window.vHaptic)vHaptic.impact(type||'light');}
@@ -64,7 +64,7 @@ modal.style.transform='';},{passive:true});}
 function discardAndExit(){pendingOps=[];closeModal();_performExit();}
 function initBackButton(){if(window._invPopupMode)return;try{if(tg?.BackButton){tg.BackButton.show();tg.BackButton.onClick(()=>{_navigateBack();});}
 window.__valdoriaExitAction=function(){try{window.__valdoria_transitioning=true;if(tg)tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}};}catch(e){console.warn('[INVENTORY] BackButton setup:',e);}}
-function _initNavBar(){}
+
 function navBack(){haptic('light');if(typeof vPopup!=='undefined'&&vPopup.isOpen()){closeModal();return;}
 if(activeTarget!=='player'){switchTab('allies');return;}
 if(pendingOps.length>0){_showPendingOpsExitConfirm();return;}
