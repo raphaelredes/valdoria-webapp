@@ -449,6 +449,11 @@ function setupPanZoom() {
         return;
     }
     _panZoomInitialized = true;
+    if (_mapAbort) _mapAbort.abort();
+    _mapAbort = new AbortController();
+    var _sig = { signal: _mapAbort.signal };
+    var _sigPassive = { signal: _mapAbort.signal, passive: true };
+    var _sigActive = { signal: _mapAbort.signal, passive: false };
     let pan = false, moved = false, sx = 0, sy = 0, scx = 0, scy = 0, ipd = 0, iIdx = 0;
     // Velocity tracking for inertia
     let _velX = 0, _velY = 0, _lastMoveT = 0, _lastMoveX = 0, _lastMoveY = 0;
@@ -490,7 +495,7 @@ function setupPanZoom() {
         scx = e.clientX; scy = e.clientY;
         _velX = 0; _velY = 0;
         _lastMoveX = e.clientX; _lastMoveY = e.clientY; _lastMoveT = performance.now();
-    });
+    }, _sig);
     vp.addEventListener('pointermove', e => {
         if (!pan) return;
         if (Math.abs(e.clientX - scx) > 5 || Math.abs(e.clientY - scy) > 5) moved = true;
@@ -508,7 +513,7 @@ function setupPanZoom() {
             S.panX = e.clientX - sx; S.panY = e.clientY - sy;
             clamp(); apply(); _debouncedMinimap();
         }
-    }, { passive: true });
+    }, _sigPassive);
     vp.addEventListener('pointerup', () => {
         if (!pan) return;
         pan = false; wr.classList.remove('panning');
@@ -524,8 +529,8 @@ function setupPanZoom() {
             _debouncedMinimap();
             setTimeout(() => wr.classList.remove('inertia'), 650);
         }
-    });
-    vp.addEventListener('pointercancel', () => { pan = false; wr.classList.remove('panning'); wr.classList.remove('inertia'); });
+    }, _sig);
+    vp.addEventListener('pointercancel', () => { pan = false; wr.classList.remove('panning'); wr.classList.remove('inertia'); }, _sig);
     // Double-tap to zoom in (single finger, < 300ms gap) — centered on tap point
     let _lastTapTime = 0;
     vp.addEventListener('pointerup', e => {
@@ -539,10 +544,10 @@ function setupPanZoom() {
         } else {
             _lastTapTime = now;
         }
-    });
+    }, _sig);
     // Pinch zoom: snap to discrete levels
-    vp.addEventListener('touchstart', e => { if (e.touches.length === 2) { ipd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); iIdx = _zoomIdx; } }, { passive: true });
-    vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; const vpR = vp.getBoundingClientRect(); const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - vpR.left; const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - vpR.top; if (ratio > 1.3 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1, midX, midY); ipd = d; clamp(); apply(); } else if (ratio < 0.7 && _zoomIdx > 0) { _snapToZoomLevel(-1, midX, midY); ipd = d; clamp(); apply(); } } }, { passive: true });
+    vp.addEventListener('touchstart', e => { if (e.touches.length === 2) { ipd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); iIdx = _zoomIdx; } }, _sigPassive);
+    vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; const vpR = vp.getBoundingClientRect(); const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - vpR.left; const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - vpR.top; if (ratio > 1.3 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1, midX, midY); ipd = d; clamp(); apply(); } else if (ratio < 0.7 && _zoomIdx > 0) { _snapToZoomLevel(-1, midX, midY); ipd = d; clamp(); apply(); } } }, _sigPassive);
     // Mouse wheel: snap to discrete levels (debounced to prevent jitter)
     let _wheelTimer = null;
     vp.addEventListener('wheel', e => {
@@ -552,8 +557,8 @@ function setupPanZoom() {
         _snapToZoomLevel(e.deltaY > 0 ? -1 : 1, e.clientX - vpR.left, e.clientY - vpR.top);
         clamp(); apply();
         _wheelTimer = setTimeout(() => { _wheelTimer = null; }, 200);
-    }, { passive: false });
-    vp.addEventListener('click', e => { if (e.target === vp || e.target === wr || e.target.tagName === 'rect') closeInfoPanel(); });
+    }, _sigActive);
+    vp.addEventListener('click', e => { if (e.target === vp || e.target === wr || e.target.tagName === 'rect') closeInfoPanel(); }, _sig);
     apply();
 
     // --- Zoom +/- buttons ---
@@ -564,9 +569,9 @@ function setupPanZoom() {
         if (btnIn) btnIn.disabled = _zoomIdx >= ZOOM_LEVELS.length - 1;
         if (btnOut) btnOut.disabled = _zoomIdx <= 0;
     }
-    if (btnIn) btnIn.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); btnIn.classList.add('flash'); setTimeout(() => btnIn.classList.remove('flash'), 300); });
-    if (btnOut) btnOut.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(-1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); btnOut.classList.add('flash'); setTimeout(() => btnOut.classList.remove('flash'), 300); });
-    if (btnRec) btnRec.addEventListener('click', e => { e.stopPropagation(); centerOnLocation(S.currentLoc); apply(); _updateMinimap(); if (typeof _haptic === 'function') _haptic('tap'); });
+    if (btnIn) btnIn.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); btnIn.classList.add('flash'); setTimeout(() => btnIn.classList.remove('flash'), 300); }, _sig);
+    if (btnOut) btnOut.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(-1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); btnOut.classList.add('flash'); setTimeout(() => btnOut.classList.remove('flash'), 300); }, _sig);
+    if (btnRec) btnRec.addEventListener('click', e => { e.stopPropagation(); centerOnLocation(S.currentLoc); apply(); _updateMinimap(); if (typeof _haptic === 'function') _haptic('tap'); }, _sig);
     _updateZoomBtns();
     // Update buttons on any zoom change
     const origSnap = _snapToZoomLevel;
@@ -612,6 +617,8 @@ function panToLocationSmooth(locId) {
 
 var _mmFadeTimer = null;
 var _mmClickBound = false;
+var _mapAbort = null;
+function _destroyMapListeners() { if (_mapAbort) { _mapAbort.abort(); _mapAbort = null; } }
 
 function _initMinimap() {
     const mm = document.getElementById('minimap');
@@ -637,9 +644,7 @@ function _initMinimap() {
     }
     // Viewport rectangle (updated dynamically)
     svg.appendChild(_el('rect', { class: 'mm-viewport', x: 0, y: 0, width: 100, height: 100 }));
-    // Tap on minimap to recenter (bind only once)
-    if (_mmClickBound) { _updateMinimap(); return; }
-    _mmClickBound = true;
+    // Tap on minimap to recenter (AbortController handles cleanup)
     mm.addEventListener('click', e => {
         const r = svg.getBoundingClientRect();
         const mx = (e.clientX - r.left) / r.width * SVG_W;
@@ -655,9 +660,11 @@ function _initMinimap() {
         document.getElementById('map-wrapper').style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
         saveViewport();
         _updateMinimap();
-    });
+    }, _mapAbort ? { signal: _mapAbort.signal } : {});
     _updateMinimap();
 }
+
+window.addEventListener('pagehide', function() { _destroyMapListeners(); });
 
 function _updateMinimap() {
     const mm = document.getElementById('minimap');
