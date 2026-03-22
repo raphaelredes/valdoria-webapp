@@ -203,11 +203,11 @@ function _renderFogOverlay(svg, fogState) {
 
         let radius, strength, flatZone;
         if (state === 'explored') {
-            radius = HEX_RADIUS * 10;
+            radius = HEX_RADIUS * 8;
             strength = 1.0;
             flatZone = 0.5;
         } else if (state === 'known_mapped') {
-            radius = HEX_RADIUS * 7;
+            radius = HEX_RADIUS * 5.5;
             strength = 0.88;
             flatZone = 0.4;
         } else if (state === 'known_unmapped') {
@@ -225,47 +225,19 @@ function _renderFogOverlay(svg, fogState) {
     // ── Step 4: Punch reveal holes ──
     ctx.globalCompositeOperation = 'destination-out';
     for (const { x, y, radius, strength, flatZone } of reveals) {
-        if (typeof _cvDetail !== 'undefined' && _cvDetail < 1) {
-            // Lite: flat circle instead of gradient (much cheaper)
-            ctx.fillStyle = `rgba(0,0,0,${strength})`;
-            ctx.beginPath();
-            ctx.arc(x, y, radius * (flatZone + 0.2), 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            // Medium+: noise-modulated reveal for organic fog edges
-            // Paint main gradient first
-            const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
-            grad.addColorStop(0, `rgba(0,0,0,${strength})`);
-            grad.addColorStop(flatZone, `rgba(0,0,0,${strength})`);
-            grad.addColorStop(flatZone + 0.2, `rgba(0,0,0,${strength * 0.4})`);
-            grad.addColorStop(flatZone + 0.35, `rgba(0,0,0,${strength * 0.08})`);
-            grad.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.fillStyle = grad;
-            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-            // Add 10 small offset gradients to break circular symmetry
-            const nSegs = 10;
-            const noiseAmp = radius * 0.18;
-            const seed = Math.round(x * 127 + y * 311);
-            for (let s = 0; s < nSegs; s++) {
-                const angle = (s / nSegs) * Math.PI * 2;
-                const nv = srand(seed + s * 73) * 2 - 1; // -1 to 1
-                const offset = noiseAmp * nv;
-                const ox = x + Math.cos(angle) * offset;
-                const oy = y + Math.sin(angle) * offset;
-                const sr = radius * (0.3 + srand(seed + s * 41) * 0.15);
-                const sg = ctx.createRadialGradient(ox, oy, 0, ox, oy, sr);
-                sg.addColorStop(0, `rgba(0,0,0,${strength * 0.25})`);
-                sg.addColorStop(0.6, `rgba(0,0,0,${strength * 0.1})`);
-                sg.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = sg;
-                ctx.fillRect(ox - sr, oy - sr, sr * 2, sr * 2);
-            }
-        }
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        grad.addColorStop(0, `rgba(0,0,0,${strength})`);
+        grad.addColorStop(flatZone, `rgba(0,0,0,${strength})`);
+        grad.addColorStop(flatZone + 0.2, `rgba(0,0,0,${strength * 0.4})`);
+        grad.addColorStop(flatZone + 0.35, `rgba(0,0,0,${strength * 0.08})`);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
     }
 
     // ── Step 5: Organic edge splotches around reveal boundaries ──
-    // (Medium+ only — expensive blob shapes, skipped on lite devices)
-    if (typeof _cvDetail !== 'undefined' && _cvDetail >= 1) {
+    // Place small irregular blobs at the edge of each reveal circle
+    // (no getImageData needed — we know the boundary radius)
     ctx.globalCompositeOperation = 'destination-out';
     for (const { x, y, radius, strength, flatZone } of reveals) {
         const edgeR = radius * (flatZone + 0.25); // outer boundary zone
@@ -294,11 +266,8 @@ function _renderFogOverlay(svg, fogState) {
             ctx.fill();
         }
     }
-    } // end _cvDetail >= 1 (Step 5)
 
     // ── Step 6: Parchment texture on fog ──
-    // (Full detail only — stipple dots + crosshatch, skipped on lite/medium)
-    if (typeof _cvDetail !== 'undefined' && _cvDetail >= 2) {
     ctx.globalCompositeOperation = 'source-atop';
 
     // Fine stipple dots (medieval parchment feel)
@@ -325,7 +294,6 @@ function _renderFogOverlay(svg, fogState) {
         ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len);
         ctx.stroke();
     }
-    } // end _cvDetail >= 2 (Step 6)
 }
 
 // ===============================================================
@@ -336,23 +304,39 @@ function _renderFogOverlay(svg, fogState) {
 // Strategy: render functional map first (landmass + terrain + roads + locations),
 // show to player, then add expensive decorative layers (worn edges, aging,
 // SVG filters) in the background after loading screen hides.
-async function renderMapAsync(onProgress,onStage){
-const svg=document.getElementById('map-svg');
-svg.setAttribute('width',SVG_W);svg.setAttribute('height',SVG_H);
-svg.setAttribute('viewBox','0 0 '+SVG_W+' '+SVG_H);svg.innerHTML='';
-const fogState=computeFogState(true);
-onStage?.('Preparando pergaminho...');
-const defs=_el('defs');_buildAllDefs(defs);svg.appendChild(defs);onProgress?.(20);
-onStage?.('Revelando territórios...');
-_renderFogOverlay(svg,fogState);onProgress?.(40);
-onStage?.('Traçando estradas...');
-if(typeof initCanvasRenderer==='function')initCanvasRenderer();onProgress?.(80);
-// Fog reveal for newly discovered locations (Phase 3.2)
-try{var _pendRev=JSON.parse(localStorage.getItem('valdoria_reveal_locs'));if(_pendRev&&_pendRev.length){localStorage.removeItem('valdoria_reveal_locs');for(var _ri=0;_ri<_pendRev.length;_ri++){var _rId=_pendRev[_ri];if(typeof cvTriggerReveal==='function')cvTriggerReveal(_rId);var _rC=LOCATION_COORDS[_rId];if(_rC){var _rPx=hexToPixel(_rC.col,_rC.row);var _burst=_el('circle',{cx:_rPx.x,cy:_rPx.y,r:0,class:'fog-reveal-burst'});svg.appendChild(_burst);}}}}catch(e){console.warn('[NAVIGATE]',e);}
-onStage?.('Finalizando...');
-renderCompassRose();setupPanZoom();
-if(typeof setupCanvasClickHandler==='function')setupCanvasClickHandler();
-onProgress?.(100);}
+async function renderMapAsync(onProgress, onStage) {
+    // Hidden SVG for path math utilities (_pointOnPath)
+    const svg = document.getElementById('map-svg');
+    svg.setAttribute('width', SVG_W);
+    svg.setAttribute('height', SVG_H);
+    svg.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
+    svg.innerHTML = '';
+    const fogState = computeFogState(true);
+
+    // Phase 1: SVG defs (landmass clip for fog overlay)
+    onStage?.('Preparando pergaminho...');
+    const defs = _el('defs');
+    _buildAllDefs(defs);
+    svg.appendChild(defs);
+    onProgress?.(20);
+
+    // Phase 2: Fog overlay (already Canvas 2D — stays as-is)
+    onStage?.('Revelando territórios...');
+    _renderFogOverlay(svg, fogState);
+    onProgress?.(40);
+
+    // Phase 3: Initialize Canvas 2D renderer (roads, markers, rings, banner, particles)
+    onStage?.('Traçando estradas...');
+    if (typeof initCanvasRenderer === 'function') initCanvasRenderer();
+    onProgress?.(80);
+
+    // Phase 4: Compass (separate SVG, stays as-is) + interactivity
+    onStage?.('Finalizando...');
+    renderCompassRose();
+    setupPanZoom();
+    if (typeof setupCanvasClickHandler === 'function') setupCanvasClickHandler();
+    onProgress?.(100);
+}
 
 
 // Synchronous render — used for re-renders (visibility refresh, no loading screen)
@@ -361,12 +345,18 @@ function renderMap() {
 }
 
 // Lightweight re-render: only dynamic layers (fog, roads, markers, player)
-function refreshDynamicLayers(){
-const svg=document.getElementById('map-svg');
-const fogState=computeFogState(true);
-_renderFogOverlay(svg,fogState);
-if(typeof canvasSetDirty==='function')canvasSetDirty();
-renderCompassRose();}
+function refreshDynamicLayers() {
+    // Re-render fog overlay (Canvas)
+    const svg = document.getElementById('map-svg');
+    const fogState = computeFogState(true);
+    _renderFogOverlay(svg, fogState);
+
+    // Trigger canvas re-render of all dynamic layers
+    if (typeof canvasSetDirty === 'function') canvasSetDirty();
+
+    // Re-render compass (separate SVG)
+    renderCompassRose();
+}
 
 // ===============================================================
 // SVG DEFS — Minimal set for hand-drawn ink style
@@ -552,7 +542,7 @@ function setupPanZoom() {
     });
     // Pinch zoom: snap to discrete levels
     vp.addEventListener('touchstart', e => { if (e.touches.length === 2) { ipd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); iIdx = _zoomIdx; } }, { passive: true });
-    vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; const vpR = vp.getBoundingClientRect(); const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - vpR.left; const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - vpR.top; if (ratio > 1.15 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1, midX, midY); ipd = d; clamp(); apply(); } else if (ratio < 0.85 && _zoomIdx > 0) { _snapToZoomLevel(-1, midX, midY); ipd = d; clamp(); apply(); } } }, { passive: true });
+    vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; const vpR = vp.getBoundingClientRect(); const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - vpR.left; const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - vpR.top; if (ratio > 1.3 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1, midX, midY); ipd = d; clamp(); apply(); } else if (ratio < 0.7 && _zoomIdx > 0) { _snapToZoomLevel(-1, midX, midY); ipd = d; clamp(); apply(); } } }, { passive: true });
     // Mouse wheel: snap to discrete levels (debounced to prevent jitter)
     let _wheelTimer = null;
     vp.addEventListener('wheel', e => {
@@ -786,4 +776,6 @@ var createSVG = _el;
 
 
 // ── Fog boundary shimmer (SVG overlay at explored/unknown border) ──
-function _renderFogShimmer(svg, fogState) {/* Canvas */}
+function _renderFogShimmer(svg, fogState) {
+    // Shimmer now rendered by canvas renderer
+}

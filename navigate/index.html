@@ -6,7 +6,6 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://telegra.ph https://i.ibb.co; media-src 'self'; connect-src 'self' https: wss:; frame-src 'none'; object-src 'none'; base-uri 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#2a2420">
-    <style>html{opacity:0}</style>
     <title>Mapa do Mundo - Lendas de Valdoria</title>
     <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../shared/fonts/cinzel.woff2" as="font" type="font/woff2" crossorigin>
@@ -18,16 +17,12 @@
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
-        document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
     </script>
     <script>
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
-    document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
-    document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/motion.js?v=' + v + '"><\/script>');
-    document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
     </script>
     <style>
         * {
@@ -57,7 +52,7 @@
             padding: 6px 10px;
             background: linear-gradient(180deg, #3a3028 0%, #2a2420 100%);
             border-bottom: 1px solid rgba(112, 66, 20, 0.4);
-            z-index: var(--v-z-sticky, 50);
+            z-index: 50;
             flex-shrink: 0;
         }
 
@@ -89,7 +84,7 @@
             width: 45px;
             height: 10px;
             background: #1a1510;
-            border-radius: var(--v-radius-sm);
+            border-radius: 3px;
             overflow: hidden;
             border: 1px solid #4a3828;
             box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -98,8 +93,8 @@
         .hud-bar-fill {
             height: 100%;
             width: 100%;
-            border-radius: var(--v-radius-sm);
-            transition: transform var(--v-transition-slow);
+            border-radius: 2px;
+            transition: transform 0.4s ease;
             transform-origin: left;
         }
 
@@ -135,7 +130,7 @@
             inset: 0;
             box-shadow: inset 0 0 40px 15px rgba(20, 16, 10, 0.45);
             pointer-events: none;
-            z-index: var(--v-z-sticky, 30);
+            z-index: 30;
         }
 
         #map-wrapper {
@@ -143,7 +138,7 @@
             transform-origin: 0 0;
             will-change: transform;
             contain: layout style;
-            transition: transform var(--v-transition-fast);
+            transition: transform 0.15s ease;
         }
         #map-wrapper.panning {
             transition: none;
@@ -165,7 +160,6 @@
             width: 733px;
             height: 720px;
             pointer-events: auto;
-            z-index: var(--v-z-base, 2);
         }
 
         #map-bg {
@@ -178,7 +172,6 @@
             display: block;
             width: 733px;
             height: 720px;
-            z-index: var(--v-z-base, 1);
         }
 
 
@@ -192,12 +185,12 @@
             margin: 0 auto;
             background: linear-gradient(180deg, #3a3028 0%, #2a2420 100%);
             border-top: 2px solid #704214;
-            border-radius: var(--v-radius-sm) var(--v-radius-sm) 0 0;
+            border-radius: 4px 4px 0 0;
             padding: 10px 12px max(12px, env(safe-area-inset-bottom));
-            z-index: var(--v-z-header, 100);
+            z-index: 100;
             transform: translateY(100%);
-            transition: transform var(--v-transition-base)-out;
-            max-height: calc(100vh - 100px - env(safe-area-inset-bottom, 0px));
+            transition: transform 0.35s ease-out;
+            max-height: calc(100vh - 100px);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -277,7 +270,7 @@
             justify-content: space-between;
             margin-bottom: 2px;
             flex-shrink: 0;
-            min-height: 44px;
+            min-height: 32px;
         }
 
         .info-icon {
@@ -299,7 +292,7 @@
         .info-danger {
             font-size: 13px;
             padding: 4px 10px;
-            border-radius: var(--v-radius-sm);
+            border-radius: 4px;
             background: rgba(80, 30, 20, 0.7);
             border: 1px solid rgba(140, 40, 40, 0.5);
             color: #e8b0b0;
@@ -311,7 +304,7 @@
         .info-close {
             background: none;
             border: 1px solid rgba(112, 66, 20, 0.3);
-            border-radius: var(--v-radius-sm);
+            border-radius: 4px;
             color: #a09484;
             font-size: 16px;
             width: 40px;
@@ -366,7 +359,7 @@
             color: #a09484;
             background: rgba(112, 66, 20, 0.18);
             padding: 3px 8px;
-            border-radius: var(--v-radius-sm);
+            border-radius: 4px;
             border: 1px solid rgba(112, 66, 20, 0.25);
             font-family: 'MedievalSharp', serif;
             transition: background 0.2s ease;
@@ -407,58 +400,6 @@
             font-family: 'MedievalSharp', serif;
         }
 
-        /* Travel options (pace + activity selectors) */
-        .travel-options {
-            display: none;
-            margin: 6px 0 2px;
-            padding: 6px 8px;
-            background: rgba(42, 36, 32, 0.5);
-            border: 1px solid var(--v-border, #4a3828);
-            border-radius: var(--v-radius-sm, 6px);
-        }
-        .travel-options.visible { display: block; }
-        .travel-opt-label {
-            font-size: 11px;
-            color: var(--v-text-dim, #a09484);
-            font-family: 'Cinzel', serif;
-            margin-bottom: 4px;
-            letter-spacing: 0.3px;
-        }
-        .travel-opt-row {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 6px;
-        }
-        .travel-opt-row:last-child { margin-bottom: 0; }
-        .travel-opt-btn {
-            flex: 1;
-            padding: 6px 2px;
-            border: 1px solid rgba(112, 66, 20, 0.3);
-            border-radius: var(--v-radius-sm);
-            background: rgba(42, 36, 32, 0.6);
-            color: var(--v-text-dim, #a09484);
-            font-size: 10px;
-            font-family: 'MedievalSharp', serif;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.15s;
-            line-height: 1.2;
-            min-height: 44px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .travel-opt-btn.active {
-            background: rgba(112, 66, 20, 0.35);
-            border-color: #c4953a;
-            color: #c4953a;
-        }
-        .travel-opt-btn:active { transform: scale(0.96); }
-        .travel-opt-icon { font-size: 14px; margin-bottom: 1px; }
-        .travel-opt-name { font-weight: 600; font-size: 11px; }
-        .travel-opt-detail { font-size: 9px; opacity: 0.7; margin-top: 1px; }
-
         .info-actions {
             display: flex;
             flex-direction: column;
@@ -471,7 +412,7 @@
             width: 100%;
             padding: 12px 16px;
             border: none;
-            border-radius: var(--v-radius-sm);
+            border-radius: 6px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -628,7 +569,7 @@
             padding: 6px 10px max(6px, env(safe-area-inset-bottom));
             background: linear-gradient(0deg, #2e2620 0%, #3a3028 100%);
             border-top: 2px solid #70501e;
-            z-index: var(--v-z-sticky, 60);
+            z-index: 60;
             flex-shrink: 0;
         }
 
@@ -636,7 +577,7 @@
             flex: 1;
             padding: 10px 12px;
             border: 1.5px solid #5a4430;
-            border-radius: var(--v-radius-sm);
+            border-radius: 5px;
             background: linear-gradient(180deg, #4a3e32 0%, #3a3028 100%);
             color: #e0d4bc;
             font-size: 12px;
@@ -941,14 +882,14 @@
             right: 12px;
             background: rgba(42, 36, 32, 0.92);
             border: 1px solid rgba(112, 66, 20, 0.3);
-            border-radius: var(--v-radius-sm);
+            border-radius: 4px;
             padding: 6px 10px;
             display: flex;
             align-items: center;
             gap: 6px;
             font-size: 12px;
             color: #d4c8b0;
-            z-index: var(--v-z-sticky, 40);
+            z-index: 40;
             pointer-events: none;
             font-family: 'Cinzel', serif;
             box-shadow: inset 0 1px 4px rgba(40, 30, 15, 0.3);
@@ -978,11 +919,11 @@
             left: 8px;
             background: rgba(42, 36, 32, 0.88);
             border: 1px solid rgba(112, 66, 20, 0.25);
-            border-radius: var(--v-radius-sm);
+            border-radius: 3px;
             padding: 5px 10px;
             font-size: 11px;
             color: #8a7060;
-            z-index: var(--v-z-sticky, 40);
+            z-index: 40;
             display: flex;
             gap: 10px;
             font-family: 'MedievalSharp', serif;
@@ -1009,11 +950,11 @@
             left: 8px;
             background: rgba(42, 36, 32, 0.88);
             border: 1px solid rgba(112, 66, 20, 0.25);
-            border-radius: var(--v-radius-sm);
+            border-radius: 3px;
             padding: 4px 10px;
             font-size: 11px;
             color: #a08050;
-            z-index: var(--v-z-sticky, 40);
+            z-index: 40;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -1068,9 +1009,9 @@
             background: #7b2020;
             color: #fff;
             padding: 8px 16px;
-            border-radius: var(--v-radius-sm);
+            border-radius: 4px;
             font-size: 13px;
-            z-index: var(--v-z-dropdown, 200);
+            z-index: 300;
             animation: fadeInUp 0.3s ease;
             font-family: 'MedievalSharp', serif;
         }
@@ -1299,10 +1240,10 @@
         /* === LONG-PRESS TOOLTIP === */
         .lp-tooltip {
             position: absolute;
-            z-index: var(--v-z-sticky, 45);
+            z-index: 45;
             background: rgba(42, 36, 32, 0.95);
             border: 1px solid rgba(112, 66, 20, 0.5);
-            border-radius: var(--v-radius-sm);
+            border-radius: 6px;
             padding: 8px 12px;
             pointer-events: none;
             max-width: 180px;
@@ -1416,16 +1357,16 @@
             width: 120px;
             height: 4px;
             background: rgba(112, 66, 20, 0.2);
-            border-radius: var(--v-radius-sm);
+            border-radius: 2px;
             margin: 12px auto 0;
             overflow: hidden;
         }
         .travel-overlay-progress-fill {
             height: 100%;
             background: #c4953a;
-            border-radius: var(--v-radius-sm);
+            border-radius: 2px;
             width: 0%;
-            transition: width 3s linear;
+            transition: width 0.3s linear;
         }
         .travel-overlay-danger {
             font-size: 11px;
@@ -1459,9 +1400,9 @@
             cursor: pointer;
             font-family: 'Cinzel', serif;
             transition: color 0.15s, border-color 0.15s, background 0.15s;
-            min-height: 44px;
+            min-height: 32px;
         }
-        .ql-sort-btn:first-child { border-radius: var(--v-radius-sm) 0 0 var(--v-radius-sm); }
+        .ql-sort-btn:first-child { border-radius: 4px 0 0 4px; }
         .ql-sort-btn:last-child { border-radius: 0 4px 4px 0; }
         .ql-sort-btn.active {
             color: #c4953a;
@@ -1515,7 +1456,7 @@
             right: 8px;
             width: 70px;
             height: 70px;
-            z-index: var(--v-z-sticky, 15);
+            z-index: 15;
             pointer-events: none;
             /* drop-shadow removed for mobile performance */
         }
@@ -1558,11 +1499,11 @@
             left: 8px;
             background: rgba(42, 36, 32, 0.94);
             border: 1px solid rgba(112, 66, 20, 0.25);
-            border-radius: var(--v-radius-sm);
+            border-radius: 3px;
             padding: 0 10px;
             font-size: 10px;
             color: #8a7060;
-            z-index: var(--v-z-sticky, 41);
+            z-index: 41;
             font-family: 'MedievalSharp', serif;
             box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
             max-height: 0;
@@ -1577,7 +1518,7 @@
         /* ═══ OFF-SCREEN INDICATOR ═══ */
         #offscreen-indicator {
             position: absolute;
-            z-index: var(--v-z-sticky, 35);
+            z-index: 35;
             pointer-events: none;
             display: none;
             font-size: 14px;
@@ -1603,12 +1544,12 @@
         /* ═══ HOVER TOOLTIP ═══ */
         #map-tooltip {
             position: absolute;
-            z-index: var(--v-z-sticky, 45);
+            z-index: 45;
             pointer-events: none;
             display: none;
             background: rgba(42, 36, 32, 0.94);
             border: 1px solid rgba(112, 66, 20, 0.4);
-            border-radius: var(--v-radius-sm);
+            border-radius: 3px;
             padding: 4px 8px;
             font-size: 11px;
             color: #d4c8b0;
@@ -1631,8 +1572,8 @@
             height: 48px;
             background: rgba(42, 36, 32, 0.92);
             border: 1px solid rgba(112, 66, 20, 0.35);
-            border-radius: var(--v-radius-sm);
-            z-index: var(--v-z-sticky, 42);
+            border-radius: 3px;
+            z-index: 42;
             overflow: hidden;
             display: none;
             cursor: pointer;
@@ -1693,7 +1634,7 @@
             right: 8px;
             top: 50%;
             transform: translateY(-50%);
-            z-index: var(--v-z-sticky, 42);
+            z-index: 42;
             display: flex;
             flex-direction: column;
             gap: 6px;
@@ -1701,7 +1642,7 @@
         .zoom-btn {
             width: 44px;
             height: 44px;
-            border-radius: var(--v-radius-sm);
+            border-radius: 6px;
             border: 1px solid rgba(112, 66, 20, 0.35);
             background: rgba(42, 36, 32, 0.92);
             color: #c4953a;
@@ -1757,8 +1698,8 @@
             max-height: 55%;
             background: rgba(42, 36, 32, 0.96);
             border-top: 1px solid rgba(112, 66, 20, 0.4);
-            border-radius: var(--v-radius-sm) var(--v-radius-sm) 0 0;
-            z-index: var(--v-z-sticky, 70);
+            border-radius: 8px 8px 0 0;
+            z-index: 70;
             overflow-y: auto;
             padding: 0;
             box-shadow: 0 -4px 16px rgba(0,0,0,0.5);
@@ -1778,7 +1719,7 @@
             padding: 8px 12px 6px;
             background: rgba(42, 36, 32, 0.98);
             border-bottom: 1px solid rgba(112, 66, 20, 0.2);
-            z-index: var(--v-z-base, 1);
+            z-index: 1;
         }
         .ql-title {
             font-family: 'Cinzel', serif;
@@ -1803,7 +1744,7 @@
             cursor: pointer;
             border: 1px solid rgba(112, 66, 20, 0.3);
             border-left: 3px solid rgba(112, 66, 20, 0.2);
-            border-radius: var(--v-radius-sm);
+            border-radius: 6px;
             background: linear-gradient(135deg, #332a22 0%, #2e2520 100%);
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
             transition: background 0.15s, border-color 0.2s, transform 0.1s;
@@ -1844,7 +1785,7 @@
         .ql-badge {
             font-size: 10px;
             padding: 2px 5px;
-            border-radius: var(--v-radius-sm);
+            border-radius: 3px;
             background: rgba(112, 66, 20, 0.18);
             border: 1px solid rgba(112, 66, 20, 0.12);
             color: #a08050;
@@ -1870,7 +1811,7 @@
         .cycle-btn {
             background: none;
             border: 1px solid rgba(112, 66, 20, 0.2);
-            border-radius: var(--v-radius-sm);
+            border-radius: 4px;
             color: #a09484;
             font-size: 18px;
             cursor: pointer;
@@ -1951,7 +1892,7 @@
             display: none;
             position: absolute;
             inset: 0;
-            z-index: var(--v-z-header, 100);
+            z-index: 100;
             background: rgba(10, 8, 6, 0.75);
             pointer-events: auto;
         }
@@ -1992,13 +1933,13 @@
             height: 24px;
             background: rgba(42, 36, 32, 0.88);
             border: 1px solid rgba(112, 66, 20, 0.25);
-            border-radius: var(--v-radius-sm);
+            border-radius: 3px;
             color: #a08050;
             font-size: 12px;
             font-weight: 700;
             font-family: 'Cinzel', serif;
             cursor: pointer;
-            z-index: var(--v-z-sticky, 40);
+            z-index: 40;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -2017,8 +1958,8 @@
             overflow-y: auto;
             background: rgba(42, 36, 32, 0.96);
             border: 1px solid rgba(112, 66, 20, 0.4);
-            border-radius: var(--v-radius-sm);
-            z-index: var(--v-z-sticky, 45);
+            border-radius: 4px;
+            z-index: 45;
             box-shadow: 0 -4px 16px rgba(0,0,0,0.4), inset 0 1px 4px rgba(40, 30, 15, 0.3);
             padding: 4px 0;
         }
@@ -2067,7 +2008,7 @@
         .travel-overlay {
             position: fixed;
             inset: 0;
-            z-index: var(--v-z-dropdown, 200);
+            z-index: 200;
             background: rgba(10, 8, 6, 0);
             display: flex;
             align-items: center;
@@ -2125,29 +2066,6 @@
             50% { opacity: 1; }
         }
 
-        /* Skip button for travel/journal overlays */
-        .travel-overlay .v-skip-btn,
-        .travel-journal-overlay .v-skip-btn {
-            position: absolute;
-            bottom: max(24px, env(safe-area-inset-bottom, 0px));
-            left: 50%;
-            transform: translateX(-50%);
-            background: none;
-            border: none;
-            color: var(--v-text-dim, #a09484);
-            font-size: 12px;
-            font-family: 'Cinzel', serif;
-            cursor: pointer;
-            padding: 8px 16px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: var(--v-z-base, 1);
-        }
-        .travel-overlay .v-skip-btn.visible,
-        .travel-journal-overlay .v-skip-btn.visible {
-            opacity: 1;
-        }
-
         /* Font override — applied via JS on body[data-font] */
         body[data-font] .loc-label,
         body[data-font] .map-deco-text,
@@ -2180,14 +2098,100 @@
     document.write('<script src="../shared/font-apply.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/bounce-back.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
-    document.write('<script src="../shared/action-guard.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     </script>
 </head>
 
 <body>
-    <script>document.write(ValdoriaLoadingHTML({ overlayId: 'loading', title: 'MAPA DO MUNDO', particleSet: 'standard', defaultTip: 'Carregando mapa...' }));</script>
+    <!-- Loading Screen (magic summoning circle) -->
+    <div id="loading" class="loading-overlay">
+        <!-- Floating particles (embers + sparks + elemental) -->
+        <div class="loading-particles">
+            <div class="particle ember p1"></div>
+            <div class="particle ember p2"></div>
+            <div class="particle ember p3"></div>
+            <div class="particle ember p4"></div>
+            <div class="particle ember p5"></div>
+            <div class="particle ember p6"></div>
+            <div class="particle spark s1"></div>
+            <div class="particle spark s2"></div>
+            <div class="particle spark s3"></div>
+            <div class="particle spark s4"></div>
+            <div class="particle mote m1"></div>
+            <div class="particle mote m2"></div>
+            <div class="particle flame fl1"></div>
+            <div class="particle flame fl2"></div>
+            <div class="particle flame fl3"></div>
+            <div class="particle frost fr1"></div>
+            <div class="particle frost fr2"></div>
+            <div class="particle frost fr3"></div>
+            <div class="particle lightning lt1"></div>
+            <div class="particle lightning lt2"></div>
+            <div class="particle arcane ar1"></div>
+            <div class="particle arcane ar2"></div>
+            <div class="particle arcane ar3"></div>
+        </div>
+<!-- Flash overlay for cinematic exit -->
+                <!-- Magic summoning circle -->
+        <div class="magic-circle">
+            <!-- Aura glow layers -->
+            <div class="mc-aura"></div>
+            <div class="mc-aura mc-aura-2"></div>
+
+            <!-- Outer rune ring (Elder Futhark runes rotating CW) -->
+            <svg class="mc-ring mc-outer" viewBox="0 0 300 300">
+                <defs>
+                    <path id="runeOuter" d="M150,150 m-125,0 a125,125 0 1,1 250,0 a125,125 0 1,1 -250,0"/>
+                </defs>
+                <circle cx="150" cy="150" r="125" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="1"/>
+                <circle cx="150" cy="150" r="127" fill="none" stroke="rgba(196,149,58,0.04)" stroke-width="0.5" stroke-dasharray="4 8"/>
+                <text class="mc-rune-text" fill="rgba(196,149,58,0.5)">
+                    <textPath href="#runeOuter" startOffset="0%">&#5792; &#5794; &#5798; &#5800; &#5809; &#5810; &#5815; &#5817; &#5818; &#5822; &#5825; &#5827; &#5831; &#5832; &#5833; &#5834; &#5839; &#5842; &#5846; &#5848; &#5850; &#5852; &#5853; &#5855;</textPath>
+                </text>
+            </svg>
+
+            <!-- Mid energy ring (arcs rotating CCW) -->
+            <svg class="mc-ring mc-mid" viewBox="0 0 300 300">
+                <circle cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.05)" stroke-width="0.5"/>
+                <circle class="mc-energy-arc mc-arc-1" cx="150" cy="150" r="102" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+                <circle class="mc-energy-arc mc-arc-2" cx="150" cy="150" r="96" fill="none" stroke="rgba(123,32,32,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+                <!-- Geometric marks at cardinal points -->
+                <g opacity="0.3" fill="none" stroke="rgba(196,149,58,0.6)" stroke-width="1">
+                    <line x1="150" y1="44" x2="150" y2="54"/>
+                    <line x1="150" y1="246" x2="150" y2="256"/>
+                    <line x1="44" y1="150" x2="54" y2="150"/>
+                    <line x1="246" y1="150" x2="256" y2="150"/>
+                    <!-- Diagonal marks -->
+                    <line x1="78" y1="78" x2="85" y2="85" opacity="0.5"/>
+                    <line x1="222" y1="78" x2="215" y2="85" opacity="0.5"/>
+                    <line x1="78" y1="222" x2="85" y2="215" opacity="0.5"/>
+                    <line x1="222" y1="222" x2="215" y2="215" opacity="0.5"/>
+                </g>
+            </svg>
+
+            <!-- Inner text ring (VALDORIA rotating CW faster) -->
+            <svg class="mc-ring mc-inner" viewBox="0 0 300 300">
+                <defs>
+                    <path id="runeInner" d="M150,150 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0"/>
+                </defs>
+                <circle cx="150" cy="150" r="75" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="0.5"/>
+                <text class="mc-inner-text" fill="rgba(196,149,58,0.35)">
+                    <textPath href="#runeInner" startOffset="0%">&#9670; VALDORIA &#9670; LENDAS &#9670; VALDORIA &#9670; LENDAS </textPath>
+                </text>
+            </svg>
+
+            <!-- Magic pulse (periodic radial flash) -->
+            <div class="mc-pulse"></div>
+            <div class="mc-pulse mc-pulse-2"></div>
+
+            <!-- Completion pulse waves (triggered at 100%) -->
+            <div class="mc-completion-wave"></div>
+            <div class="mc-completion-wave wave-2"></div>
+        </div>
+
+        <div class="loading-flash"></div>
+    </div>
 
     <!-- HUD -->
     <div id="hud">
@@ -2289,7 +2293,6 @@
             <div class="info-quests" id="info-quests"></div>
             <div class="info-dungeons" id="info-dungeons"></div>
             <div class="info-note" id="info-note"></div>
-            <div class="travel-options" id="travel-options"></div>
         </div>
         <div class="info-actions" id="info-actions"></div>
     </div>
@@ -2333,10 +2336,7 @@
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
-        document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
-        document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
-        document.write('<script src="../shared/encoding-utils.js?v=' + v + '"><\/script>');
-        var scripts = ['navigate-loading.js', 'map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-map-terrain.js', 'navigate-map-decor.js', 'navigate-canvas-renderer.js', 'navigate-canvas-icons.js', 'navigate-ambient.js', 'navigate-ui.js'];
+        var scripts = ['map-layout.js', 'navigate-core.js', 'navigate-map.js', 'navigate-map-terrain.js', 'navigate-map-decor.js', 'navigate-canvas-renderer.js', 'navigate-canvas-icons.js', 'navigate-ambient.js', 'navigate-ui.js'];
         scripts.forEach(function (s) { document.write('<script src="' + s + '?v=' + v + '"><\/script>'); });
     </script>
     <script>
@@ -2355,7 +2355,7 @@
         function initFontPicker() {
             var saved = localStorage.getItem('valdoria_font') || 'medievalsharp';
             // Migrate removed fonts
-            if (saved === 'uncial') { saved = 'medievalsharp'; try{localStorage.setItem('valdoria_font', saved);}catch(e){} }
+            if (saved === 'uncial') { saved = 'medievalsharp'; localStorage.setItem('valdoria_font', saved); }
             // Defer dropdown button creation until first open (avoids loading extra fonts)
             applyFont(saved);
         }
@@ -2386,7 +2386,7 @@
         function selectFont(fontId) {
             var opt = FONT_OPTIONS.find(function(f) { return f.id === fontId; });
             if (!opt) return;
-            try{localStorage.setItem('valdoria_font', fontId);}catch(e){}
+            localStorage.setItem('valdoria_font', fontId);
             applyFont(fontId);
             // Update selected state
             document.querySelectorAll('.font-option').forEach(function(btn) {
@@ -2445,7 +2445,6 @@
             _resetIdle();
         })();
     </script>
-<script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("NAVIGATE")</script>
 </body>
 
 </html>

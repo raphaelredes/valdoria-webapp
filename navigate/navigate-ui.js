@@ -2,131 +2,6 @@
 // NAVIGATE UI — Info panel, actions, interactions
 // ═══════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════
-// TRAVEL PACE & ACTIVITY — D&D 5e Travel Pace System
-// ═══════════════════════════════════════════════════════
-
-var _travelPace = null;try{_travelPace=localStorage.getItem('valdoria_travel_pace') || 'normal';}catch(e){console.warn('[NAVIGATE]',e);}
-var _travelActivity = null;try{_travelActivity=localStorage.getItem('valdoria_travel_activity') || 'watch';}catch(e){console.warn('[NAVIGATE]',e);}
-
-// Pace multipliers: fast = 0.75x turns (round up), cautious = 1.5x turns (round up)
-function _getAdjustedTurns(baseDist) {
-    if (_travelPace === 'fast') return Math.max(1, Math.ceil(baseDist * 0.75));
-    if (_travelPace === 'cautious') return Math.max(1, Math.ceil(baseDist * 1.5));
-    return baseDist;
-}
-
-// Build travel options UI (pace + activity selectors)
-var _currentBaseDist = 0;
-function _buildTravelOptions(baseDist) {
-    _currentBaseDist = baseDist;
-    var container = document.getElementById('travel-options');
-    if (!container) return;
-    container.innerHTML = '';
-
-    // Pace row
-    var paceLabel = document.createElement('div');
-    paceLabel.className = 'travel-opt-label';
-    paceLabel.textContent = 'Ritmo de Viagem';
-    container.appendChild(paceLabel);
-
-    var paceRow = document.createElement('div');
-    paceRow.className = 'travel-opt-row';
-
-    var paces = [
-        { id: 'fast', icon: '🏃', name: 'Rápido', detail: '×0.75 turnos · −5 PP' },
-        { id: 'normal', icon: '🚶', name: 'Normal', detail: 'Padrão' },
-        { id: 'cautious', icon: '🐢', name: 'Cauteloso', detail: '×1.5 turnos · +5 PP' }
-    ];
-
-    paces.forEach(function(p) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'travel-opt-btn' + (_travelPace === p.id ? ' active' : '');
-        btn.innerHTML = '<span class="travel-opt-icon">' + p.icon + '</span>' +
-            '<span class="travel-opt-name">' + p.name + '</span>' +
-            '<span class="travel-opt-detail">' + p.detail + '</span>';
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            _travelPace = p.id;
-            try{localStorage.setItem('valdoria_travel_pace', p.id);}catch(e){console.warn('[NAVIGATE]',e);}
-            paceRow.querySelectorAll('.travel-opt-btn').forEach(function(b) { b.classList.remove('active'); });
-            btn.classList.add('active');
-            _updateTravelBtnAndNote(baseDist);
-            if (typeof _haptic === 'function') _haptic('tap');
-        });
-        paceRow.appendChild(btn);
-    });
-    container.appendChild(paceRow);
-
-    // Activity row
-    var actLabel = document.createElement('div');
-    actLabel.className = 'travel-opt-label';
-    actLabel.textContent = 'Atividade de Viagem';
-    container.appendChild(actLabel);
-
-    var actRow = document.createElement('div');
-    actRow.className = 'travel-opt-row';
-
-    var activities = [
-        { id: 'watch', icon: '👁️', name: 'Vigiar', detail: 'Percepção' },
-        { id: 'navigate', icon: '🧭', name: 'Navegar', detail: 'Sobrevivência' },
-        { id: 'forage', icon: '🌿', name: 'Forragear', detail: 'Sobrevivência' },
-        { id: 'cartograph', icon: '🗺️', name: 'Cartografar', detail: 'Sobrevivência' }
-    ];
-
-    activities.forEach(function(a) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'travel-opt-btn' + (_travelActivity === a.id ? ' active' : '');
-        btn.innerHTML = '<span class="travel-opt-icon">' + a.icon + '</span>' +
-            '<span class="travel-opt-name">' + a.name + '</span>' +
-            (a.detail ? '<span class="travel-opt-detail">' + a.detail + '</span>' : '');
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            _travelActivity = a.id;
-            try{localStorage.setItem('valdoria_travel_activity', a.id);}catch(e){console.warn('[NAVIGATE]',e);}
-            actRow.querySelectorAll('.travel-opt-btn').forEach(function(b) { b.classList.remove('active'); });
-            btn.classList.add('active');
-            if (typeof _haptic === 'function') _haptic('tap');
-        });
-        actRow.appendChild(btn);
-    });
-    container.appendChild(actRow);
-
-    container.classList.add('visible');
-
-    // Apply initial pace to button label and note
-    _updateTravelBtnAndNote(baseDist);
-}
-
-// Update the travel button label AND the info-note turn count when pace changes
-function _updateTravelBtnAndNote(baseDist) {
-    // Update button label via _baseLabelFn
-    var travelBtn = document.querySelector('.info-btn-travel');
-    if (travelBtn && typeof travelBtn._baseLabelFn === 'function') {
-        travelBtn._baseLabelFn(baseDist);
-    }
-    // Update the info-note turn count
-    var noteEl = document.getElementById('info-note');
-    if (!noteEl) return;
-    var adjTurns = _getAdjustedTurns(baseDist);
-    var turnText = adjTurns + ' turno' + (adjTurns !== 1 ? 's' : '');
-    // Replace the turn count in the note HTML (pattern: N turno/turnos)
-    noteEl.innerHTML = noteEl.innerHTML.replace(
-        /\d+ turno[s]?/,
-        turnText
-    );
-}
-
-function _hideTravelOptions() {
-    var container = document.getElementById('travel-options');
-    if (container) {
-        container.classList.remove('visible');
-        container.innerHTML = '';
-    }
-}
-
 // ── Cached weighted distance — avoids repeated Dijkstra on same currentLoc ──
 var _distCache = {};
 var _distCacheLoc = null;
@@ -228,7 +103,7 @@ function handleLocationTap(locId) {
     const connCount = (connectionGraph[locId] || []).length;
 
     // Biome + inline meta (distance, routes)
-    const biomeInfo = BIOME_INFO[(locData && locData.b) || 'plains'] || BIOME_INFO.plains;
+    const biomeInfo = BIOME_INFO[locData.b] || BIOME_INFO.plains;
     const biomeLabel = biomeInfo.label || locData.b;
     const biomeEl = document.getElementById('info-biome');
     const biomeColors = {
@@ -240,7 +115,7 @@ function handleLocationTap(locId) {
         biomeEl.innerHTML = '🌫️ Região Desconhecida';
         biomeEl.style.color = '';
     } else {
-        let biomeHtml = `${(locData && locData.s) ? '🏘️ Assentamento' : '🌍 Região'} — ${biomeLabel}`;
+        let biomeHtml = `${locData.s ? '🏘️ Assentamento' : '🌍 Região'} — ${biomeLabel}`;
         if (!isCurrent && wDist >= 0) {
             biomeHtml += ` <span class="meta-sep">·</span> 🕐 ${wDist} turno${wDist !== 1 ? 's' : ''}`;
         }
@@ -248,26 +123,12 @@ function handleLocationTap(locId) {
             biomeHtml += ` <span class="meta-sep">·</span> 🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}`;
         }
         biomeEl.innerHTML = biomeHtml;
-        biomeEl.style.color = biomeColors[(locData && locData.b) || ''] || '#a09484';
-    }
-    // Difficult terrain tag (DMG p.106)
-    var dtTag = document.getElementById('info-terrain-tag');
-    if (!dtTag) {
-        dtTag = document.createElement('div');
-        dtTag.id = 'info-terrain-tag';
-        dtTag.className = 'info-terrain-tag';
-        biomeEl.parentNode.insertBefore(dtTag, biomeEl.nextSibling);
-    }
-    if (locData && locData.dt && !isKnownUnmapped) {
-        dtTag.innerHTML = '⛰️ Terreno Difícil (×2 turnos)';
-        dtTag.style.display = '';
-    } else {
-        dtTag.style.display = 'none';
+        biomeEl.style.color = biomeColors[locData.b] || '#a09484';
     }
 
     // Description
     if (isExplored) {
-        document.getElementById('info-desc').textContent = (locData && locData.ds) || '';
+        document.getElementById('info-desc').textContent = locData.ds || '';
     } else if (isKnownMapped) {
         document.getElementById('info-desc').textContent =
             'Você ouviu relatos sobre este lugar, mas nunca esteve lá...';
@@ -354,24 +215,6 @@ function handleLocationTap(locId) {
                 () => finishNavigation('camp')
             );
             actionsEl.appendChild(campBtn);
-            // Camp context: show what rest restores (3.3)
-            if (S.charData) {
-                var cd = S.charData;
-                var hpPct = cd.mh > 0 ? Math.round(cd.hp / cd.mh * 100) : 100;
-                var mpPct = cd.mm > 0 ? Math.round(cd.mp / cd.mm * 100) : 100;
-                var needsRest = hpPct < 100 || mpPct < 100;
-                if (needsRest) {
-                    var campInfo = document.createElement('div');
-                    campInfo.className = 'camp-context';
-                    var lines = [];
-                    if (hpPct < 100) lines.push('❤️ HP: ' + cd.hp + '/' + cd.mh + ' (' + hpPct + '%)');
-                    if (mpPct < 100) lines.push('✨ MP: ' + cd.mp + '/' + cd.mm + ' (' + mpPct + '%)');
-                    lines.push('🏕️ Curto: recupera Dados de Vida');
-                    lines.push('🌙 Longo: recupera HP + recursos');
-                    campInfo.innerHTML = lines.join('<br>');
-                    actionsEl.appendChild(campInfo);
-                }
-            }
         }
     } else if (connected) {
         const edgeDist = getConnectionDistance(S.currentLoc, locId);
@@ -386,52 +229,34 @@ function handleLocationTap(locId) {
             noteEl.innerHTML = `🕐 <b>${edgeDist} turno${edgeDist !== 1 ? 's' : ''}</b> de viagem${riskHint}`;
             noteEl.style.display = 'block';
             noteEl.style.color = '';
-            const adjTurns = _getAdjustedTurns(edgeDist);
             const travelBtn = createActionBtn(
-                '🚶 Viajar para ' + (locData.n || 'lá') + ' (' + adjTurns + '🕐)',
+                `🚶 Viajar para ${locData.n || 'lá'} (${edgeDist}🕐)`,
                 'info-btn-travel',
-                function() { finishNavigation('travel', locId, { pace: _travelPace, activity: _travelActivity }); }
+                () => finishNavigation('travel', locId)
             );
-            travelBtn._baseLabelFn = function(bd) {
-                var t = _getAdjustedTurns(bd);
-                travelBtn.textContent = '🚶 Viajar para ' + (locData.n || 'lá') + ' (' + t + '🕐)';
-            };
             actionsEl.appendChild(travelBtn);
-            _buildTravelOptions(edgeDist);
         } else if (isKnownMapped) {
             // Has map but never visited: expedition with map
             noteEl.innerHTML = `⚠️ <b>Primeira Expedição</b> — ${edgeDist} turno${edgeDist !== 1 ? 's' : ''}, encontros e riscos no caminho`;
             noteEl.style.display = 'block';
             noteEl.style.color = '#c4953a';
-            const adjTurns = _getAdjustedTurns(edgeDist);
             const travelBtn = createActionBtn(
-                '🧭 Expedição para ' + (locData.n || 'lá') + ' (' + adjTurns + '🕐) ⚠️',
+                `🧭 Expedição para ${locData.n || 'lá'} (${edgeDist}🕐) ⚠️`,
                 'info-btn-travel info-btn-risky',
-                function() { finishNavigation('travel', locId, { firstVisit: true, pace: _travelPace, activity: _travelActivity }); }
+                () => finishNavigation('travel', locId, { firstVisit: true })
             );
-            travelBtn._baseLabelFn = function(bd) {
-                var t = _getAdjustedTurns(bd);
-                travelBtn.textContent = '🧭 Expedição para ' + (locData.n || 'lá') + ' (' + t + '🕐) ⚠️';
-            };
             actionsEl.appendChild(travelBtn);
-            _buildTravelOptions(edgeDist);
         } else {
             // No map, never visited: blind expedition
             noteEl.innerHTML = `⚠️ <b>Expedição às Cegas</b> — ${edgeDist} turno${edgeDist !== 1 ? 's' : ''}, sem mapa, alta chance de se perder`;
             noteEl.style.display = 'block';
             noteEl.style.color = '#c4953a';
-            const adjTurns = _getAdjustedTurns(edgeDist);
             const travelBtn = createActionBtn(
-                '🧭 Expedição (' + adjTurns + '🕐 Sem Mapa) ⚠️⚠️',
+                `🧭 Expedição (${edgeDist}🕐 Sem Mapa) ⚠️⚠️`,
                 'info-btn-travel info-btn-risky',
-                function() { finishNavigation('travel', locId, { noMap: true, firstVisit: true, pace: _travelPace, activity: _travelActivity }); }
+                () => finishNavigation('travel', locId, { noMap: true, firstVisit: true })
             );
-            travelBtn._baseLabelFn = function(bd) {
-                var t = _getAdjustedTurns(bd);
-                travelBtn.textContent = '🧭 Expedição (' + t + '🕐 Sem Mapa) ⚠️⚠️';
-            };
             actionsEl.appendChild(travelBtn);
-            _buildTravelOptions(edgeDist);
         }
     } else if (wDist > 0) {
         // Show route hint via BFS path with total turn cost
@@ -499,7 +324,6 @@ function createActionBtn(text, className, onClick) {
 
 // ── Close info panel ──
 function closeInfoPanel() {
-    _hideTravelOptions();
     const panel = document.getElementById('info-panel');
     panel.classList.remove('open', 'peek', 'full');
     document.getElementById('map-viewport').classList.remove('panel-open');
@@ -508,13 +332,21 @@ function closeInfoPanel() {
 }
 
 // ── Highlight selected location ──
-function highlightSelected(locId){clearHighlight();if(typeof cvSetSelection==='function')cvSetSelection(locId);}
+function highlightSelected(locId) {
+    clearHighlight();
+    // Canvas-based selection
+    if (typeof cvSetSelection === 'function') cvSetSelection(locId);
+}
 
 // ── Clear all highlights ──
-function clearHighlight(){if(typeof cvClearSelection==='function')cvClearSelection();}
+function clearHighlight() {
+    if (typeof cvClearSelection === 'function') cvClearSelection();
+}
 
 // ── Highlight BFS path between two locations (curved, matching connection paths) ──
-function highlightPath(fromId, toId) {/* Canvas */}
+function highlightPath(fromId, toId) {
+    // Path highlight now handled by canvas renderer via cvSetSelection
+}
 
 // ── Travel marker — Hooded traveler silhouette (SVG) ──
 function _createTravelerMarker() {
@@ -588,7 +420,13 @@ function _createTravelerMarker() {
 }
 
 // ── Travel animation (path drawing + marker movement) ──
-function animateTravel(fromId,toId,onComplete){if(typeof cvStartTravel==='function'){cvStartTravel(fromId,toId,onComplete);}else{if(onComplete)onComplete();}}
+function animateTravel(fromId, toId, onComplete) {
+    if (typeof cvStartTravel === 'function') {
+        cvStartTravel(fromId, toId, onComplete);
+    } else {
+        if (onComplete) onComplete();
+    }
+}
 
 // ── BFS path (returns array of location IDs, cached) ──
 var _bfsCache = {};
@@ -786,9 +624,35 @@ function toggleLegendExpand() {
     }
 }
 
-// ── Long-press tooltip (handled by canvas click handler) ──
+// ── Long-press path preview (500ms hold shows BFS path, release clears) ──
 function setupLongPress() {
-    // No-op: long-press is now handled in setupCanvasClickHandler
+    const vp = document.getElementById('map-viewport');
+    if (!vp) return;
+    let _lpTimer = null, _lpStartX = 0, _lpStartY = 0;
+
+    function _clearTooltip() {
+        document.querySelectorAll('.lp-tooltip').forEach(t => t.remove());
+    }
+
+    vp.addEventListener('pointerdown', e => {
+        const loc = e.target.closest?.('.loc-node');
+        if (!loc) return;
+        const locId = loc.getAttribute('data-loc');
+        if (!locId || locId === S.currentLoc) return;
+        _lpStartX = e.clientX; _lpStartY = e.clientY;
+        _lpTimer = setTimeout(() => {
+            _showQuickTooltip(locId, e.clientX, e.clientY);
+            _haptic('tap');
+        }, 500);
+    });
+    vp.addEventListener('pointermove', e => {
+        if (_lpTimer) {
+            const dx = e.clientX - _lpStartX, dy = e.clientY - _lpStartY;
+            if (dx * dx + dy * dy > 400) { clearTimeout(_lpTimer); _lpTimer = null; }
+        }
+    }, { passive: true });
+    vp.addEventListener('pointerup', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearTooltip(); });
+    vp.addEventListener('pointercancel', () => { clearTimeout(_lpTimer); _lpTimer = null; _clearTooltip(); });
 }
 
 function _showQuickTooltip(locId, cx, cy) {
@@ -833,7 +697,9 @@ function _showQuickTooltip(locId, cx, cy) {
     document.getElementById('map-viewport').appendChild(tt);
 }
 
-function _showPathPreview(toId) {/* Canvas */}
+function _showPathPreview(toId) {
+    // Path preview now handled by canvas selection
+}
 
 // ── Cycle adjacent locations (◂ ▸ arrows in info panel) ──
 function _setupCycleButtons() {
@@ -913,7 +779,7 @@ function openQuickList() {
     const discoveredSet = new Set(S.discoveredLocs || []);
 
     // Restore sort preference
-    let sortMode = null;try{sortMode=localStorage.getItem('valdoria_ql_sort') || 'dist';}catch(e){console.warn('[NAVIGATE]',e);}
+    let sortMode = localStorage.getItem('valdoria_ql_sort') || 'dist';
 
     // Build location data
     const locs = S.knownLocs
@@ -955,8 +821,8 @@ function openQuickList() {
     btnName.type = 'button';
     btnName.className = 'ql-sort-btn' + (sortMode === 'name' ? ' active' : '');
     btnName.textContent = 'Por Nome';
-    btnDist.addEventListener('click', () => { sortMode = 'dist'; try{localStorage.setItem('valdoria_ql_sort', 'dist');}catch(e){console.warn('[NAVIGATE]',e);} btnDist.classList.add('active'); btnName.classList.remove('active'); renderItems(); });
-    btnName.addEventListener('click', () => { sortMode = 'name'; try{localStorage.setItem('valdoria_ql_sort', 'name');}catch(e){console.warn('[NAVIGATE]',e);} btnName.classList.add('active'); btnDist.classList.remove('active'); renderItems(); });
+    btnDist.addEventListener('click', () => { sortMode = 'dist'; localStorage.setItem('valdoria_ql_sort', 'dist'); btnDist.classList.add('active'); btnName.classList.remove('active'); renderItems(); });
+    btnName.addEventListener('click', () => { sortMode = 'name'; localStorage.setItem('valdoria_ql_sort', 'name'); btnName.classList.add('active'); btnDist.classList.remove('active'); renderItems(); });
     sortBar.appendChild(btnDist);
     sortBar.appendChild(btnName);
     items.appendChild(sortBar);
@@ -1043,7 +909,7 @@ function showGestureTutorial() {
     // Auto-dismiss after 6s (more hints to read now)
     const dismiss = () => {
         gt.classList.remove('visible');
-        try{localStorage.setItem('valdoria_nav_tutorial_v2', '1');}catch(e){console.warn('[NAVIGATE]',e);}
+        localStorage.setItem('valdoria_nav_tutorial_v2', '1');
     };
     gt.addEventListener('click', dismiss, { once: true });
     const TUTORIAL_AUTO_DISMISS_MS = 12000;
@@ -1065,85 +931,59 @@ if (document.readyState === 'loading') {
 }
 
 // ═══════════════════════════════════════════════════════
-// CANVAS CLICK HANDLER (replaces SVG pointer events + long-press tooltip)
+// CANVAS CLICK HANDLER (replaces SVG pointer events)
 // ═══════════════════════════════════════════════════════
 
 function setupCanvasClickHandler() {
     var canvas = document.getElementById('map-canvas');
     if (!canvas) return;
 
-    var _lpTimer = null, _lpStartX = 0, _lpStartY = 0, _lpFired = false;
+    canvas.addEventListener('click', function(e) {
+        // Convert click coords to canvas space
+        var rect = canvas.getBoundingClientRect();
+        var scaleX = canvas.width / rect.width;
+        var scaleY = canvas.height / rect.height;
+        var cx = (e.clientX - rect.left) * scaleX;
+        var cy = (e.clientY - rect.top) * scaleY;
 
-    function _clearTooltip() {
-        document.querySelectorAll('.lp-tooltip').forEach(function(t) { t.remove(); });
-    }
-
-    function _coordsToMap(e) {
-        var zoom = S.zoom || 1, panX = S.panX || 0, panY = S.panY || 0;
-        var vpRect = document.getElementById('map-viewport').getBoundingClientRect();
-        return {
-            x: (e.clientX - vpRect.left - panX) / zoom,
-            y: (e.clientY - vpRect.top - panY) / zoom
-        };
-    }
-
-    // Pointer down: start long-press timer
-    canvas.addEventListener('pointerdown', function(e) {
-        _lpFired = false;
-        _lpStartX = e.clientX;
-        _lpStartY = e.clientY;
-        var pt = _coordsToMap(e);
-        if (typeof cvHitTest !== 'function') return;
-        var locId = cvHitTest(pt.x, pt.y);
-        if (!locId || locId === S.currentLoc) return;
-
-        _lpTimer = setTimeout(function() {
-            _lpFired = true;
-            _showQuickTooltip(locId, e.clientX, e.clientY);
-            if (typeof _haptic === 'function') _haptic('tap');
-            // Auto-hide tooltip after 2.5s
-            setTimeout(_clearTooltip, 2500);
-        }, 300);
-    });
-
-    // Pointer move: cancel if finger moved > 20px, update cursor on desktop
-    canvas.addEventListener('pointermove', function(e) {
-        if (_lpTimer) {
-            var dx = e.clientX - _lpStartX, dy = e.clientY - _lpStartY;
-            if (dx * dx + dy * dy > 400) {
-                clearTimeout(_lpTimer);
-                _lpTimer = null;
-            }
+        // Account for pan/zoom transform on map-wrapper
+        var wrapper = document.getElementById('map-wrapper');
+        if (wrapper) {
+            // Get the current transform
+            var zoom = S.zoom || 1;
+            var panX = S.panX || 0;
+            var panY = S.panY || 0;
+            // The wrapper is transformed: translate(panX, panY) scale(zoom)
+            // The canvas is inside the wrapper, so click coords in viewport space
+            // need to be converted to canvas (map) space
+            var vpRect = document.getElementById('map-viewport').getBoundingClientRect();
+            var mapX = (e.clientX - vpRect.left - panX) / zoom;
+            var mapY = (e.clientY - vpRect.top - panY) / zoom;
+            cx = mapX;
+            cy = mapY;
         }
-        // Desktop cursor change
-        if (e.pointerType === 'mouse') {
-            var pt = _coordsToMap(e);
-            if (typeof cvHitTest === 'function') {
-                var locId = cvHitTest(pt.x, pt.y);
-                canvas.style.cursor = locId ? 'pointer' : '';
-            }
-        }
-    });
 
-    // Pointer up: if long-press fired, just clear; otherwise treat as tap
-    canvas.addEventListener('pointerup', function(e) {
-        clearTimeout(_lpTimer);
-        _lpTimer = null;
-        if (_lpFired) {
-            _lpFired = false;
-            return;
-        }
-        // Short tap - handle location tap
-        var pt = _coordsToMap(e);
         if (typeof cvHitTest === 'function') {
-            var locId = cvHitTest(pt.x, pt.y);
-            if (locId) handleLocationTap(locId);
+            var locId = cvHitTest(cx, cy);
+            if (locId) {
+                handleLocationTap(locId);
+            }
         }
     });
 
-    canvas.addEventListener('pointercancel', function() {
-        clearTimeout(_lpTimer);
-        _lpTimer = null;
-        _lpFired = false;
+    // Cursor change on mousemove
+    canvas.addEventListener('mousemove', function(e) {
+        var wrapper = document.getElementById('map-wrapper');
+        var zoom = S.zoom || 1;
+        var panX = S.panX || 0;
+        var panY = S.panY || 0;
+        var vpRect = document.getElementById('map-viewport').getBoundingClientRect();
+        var mapX = (e.clientX - vpRect.left - panX) / zoom;
+        var mapY = (e.clientY - vpRect.top - panY) / zoom;
+
+        if (typeof cvHitTest === 'function') {
+            var locId = cvHitTest(mapX, mapY);
+            canvas.style.cursor = locId ? 'pointer' : '';
+        }
     });
 }

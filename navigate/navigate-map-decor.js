@@ -73,23 +73,35 @@ function _clearPathCache() {
     _cachedPathEl = null; _cachedPathD = null; _cachedPathLen = 0;
 }
 
-function renderRoads(group, fogState) {/* Canvas */}
+function renderRoads(group, fogState) {
+    // SVG rendering removed — now handled by Canvas renderer
+}
 
 // ── LOCATION MARKERS (ink-drawn symbols) ──
 
-function _drawSettlementIcon(g, x, y, sz) {/* Canvas */}
+function _drawSettlementIcon(g, x, y, sz) {
+    // Removed — Canvas renderer handles this
+}
 
-function _drawBiomeIcon(g, x, y, biome, sz, locName) {/* Canvas */}
+function _drawBiomeIcon(g, x, y, biome, sz, locName) {
+    // Removed — Canvas renderer handles this
+}
 
-function renderLocationMarkers(group, fogState) {/* Canvas */}
+function renderLocationMarkers(group, fogState) {
+    // SVG rendering removed — now handled by Canvas renderer
+}
 
 // ── BREADCRUMB TRAIL (dotted path through discovered locations) ──
 
-function renderBreadcrumbTrail(svg) {/* Canvas */}
+function renderBreadcrumbTrail(svg) {
+    // SVG rendering removed — now handled by Canvas renderer (navigate-canvas-renderer.js)
+}
 
 // ── PLAYER MARKER (simple pennant on pole) ──
 
-function renderPlayerBanner(svg) {/* Canvas */}
+function renderPlayerBanner(svg) {
+    // SVG rendering removed — now handled by Canvas renderer (navigate-canvas-renderer.js)
+}
 
 // ── FOG WISPS ──
 
