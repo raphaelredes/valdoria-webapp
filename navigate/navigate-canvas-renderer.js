@@ -3,6 +3,15 @@
 // Replaces SVG overlay for roads, markers, particles, etc.
 // ═══════════════════════════════════════════════════════
 
+// ── Canvas Color Constants (match valdoria-design.css tokens) ──
+var CV_GOLD = '#c4953a';
+var CV_GOLD_30 = 'rgba(196,149,58,0.3)';
+var CV_BANNER_RED = '#7b2020';
+var CV_TEXT = '#d4c8b0';
+var CV_DANGER_HIGH = '#cc4040';
+var CV_DANGER_MED = '#cc6633';
+var CV_DANGER_LOW = '#4a8a4a';
+
 // ── Canvas elements ──
 var _mapCanvas = null, _mapCtx = null;
 var _staticCanvas = null, _staticCtx = null;  // offscreen for static layers
@@ -337,7 +346,7 @@ function _cvDrawRoads(ctx, fogState) {
 function _cvDrawActiveRoads(ctx, now) {
     if (_activeRoadSegs.length === 0) return;
     ctx.save();
-    ctx.strokeStyle = '#c4953a';
+    ctx.strokeStyle = CV_GOLD;
     ctx.lineWidth = 2.5;
     ctx.globalAlpha = 0.35;
     ctx.lineCap = 'round';
@@ -408,7 +417,7 @@ function _cvDrawBreadcrumb(ctx) {
     if (discovered.length < 2) return;
 
     ctx.save();
-    ctx.strokeStyle = '#c4953a';
+    ctx.strokeStyle = CV_GOLD;
     ctx.lineWidth = 1;
     ctx.globalAlpha = 0.15;
     ctx.lineCap = 'round';
@@ -428,7 +437,7 @@ function _cvDrawBreadcrumb(ctx) {
 
     // Footprint dots
     ctx.globalAlpha = 0.11;
-    ctx.fillStyle = '#c4953a';
+    ctx.fillStyle = CV_GOLD;
     for (var j = 0; j < discovered.length; j++) {
         var c = LOCATION_COORDS[discovered[j]];
         if (!c) continue;
@@ -469,7 +478,7 @@ function _cvDrawBanner(ctx, now) {
     ctx.lineTo(x, topY + fh);
     ctx.closePath();
     ctx.globalAlpha = 0.85;
-    ctx.fillStyle = '#7b2020';
+    ctx.fillStyle = CV_BANNER_RED;
     ctx.fill();
     ctx.globalAlpha = 1;
     ctx.strokeStyle = INK_DARK;
@@ -598,7 +607,7 @@ function _cvDrawParticles(ctx) {
     for (var j = 0; j < _cvClouds.length; j++) {
         var c = _cvClouds[j];
         ctx.globalAlpha = 0.06;
-        ctx.fillStyle = '#d4c8b0';
+        ctx.fillStyle = CV_TEXT;
         ctx.beginPath();
         ctx.ellipse(c.x, c.y, c.rx, c.ry, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -627,7 +636,7 @@ function _cvDrawShimmer(ctx, now) {
             ctx.beginPath();
             ctx.arc(p.x, p.y, HEX_RADIUS + 8, 0, Math.PI * 2);
             ctx.setLineDash([12, 8]);
-            ctx.strokeStyle = '#c4953a';
+            ctx.strokeStyle = CV_GOLD;
             ctx.lineWidth = 1;
             ctx.globalAlpha = shimAlpha;
             ctx.stroke();
@@ -667,10 +676,10 @@ function cvTriggerReveal(locId) {
 
 // Danger-color lookup for path segments
 function _cvDangerColor(danger) {
-    if (danger >= 7) return '#cc4040';
-    if (danger >= 5) return '#cc6633';
-    if (danger >= 3) return '#c4953a';
-    return '#4a8a4a';
+    if (danger >= 7) return CV_DANGER_HIGH;
+    if (danger >= 5) return CV_DANGER_MED;
+    if (danger >= 3) return CV_GOLD;
+    return CV_DANGER_LOW;
 }
 
 function _cvDrawSelection(ctx, now) {
@@ -841,7 +850,7 @@ function _cvDrawTravel(ctx, now) {
     }
 
     ctx.save();
-    ctx.strokeStyle = '#c4953a';
+    ctx.strokeStyle = CV_GOLD;
     ctx.lineWidth = 3;
     ctx.globalAlpha = 0.6;
     ctx.lineCap = 'round';
@@ -879,10 +888,10 @@ function _cvDrawTravel(ctx, now) {
         if (currentPhase.type === 'pause') {
             var pulseR = 8 + ts.waypointPulse * 12;
             var pulseOp = 0.4 * (1 - ts.waypointPulse);
-            _cvCircle(ctx, markerPt.x, markerPt.y, pulseR, null, 0, '#c4953a', 1.5, pulseOp);
+            _cvCircle(ctx, markerPt.x, markerPt.y, pulseR, null, 0, CV_GOLD, 1.5, pulseOp);
         }
-        _cvCircle(ctx, markerPt.x, markerPt.y, 5, '#7b2020', 0.85, INK_DARK, 1.5, 0.8);
-        _cvCircle(ctx, markerPt.x, markerPt.y, 10, null, 0, 'rgba(196,149,58,0.3)', 1.8, 0.5);
+        _cvCircle(ctx, markerPt.x, markerPt.y, 5, CV_BANNER_RED, 0.85, INK_DARK, 1.5, 0.8);
+        _cvCircle(ctx, markerPt.x, markerPt.y, 10, null, 0, CV_GOLD_30, 1.8, 0.5);
     }
 
     ctx.setLineDash([]);
