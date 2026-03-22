@@ -53,7 +53,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
 
 <body style="background:#2a2420">
     <!-- Loading overlay - hidden until CSS fully parsed -->
-    <div id="loading" class="loading-overlay" aria-busy="true" style="visibility:hidden">
+    <div id="loading" class="loading-overlay" style="opacity:0" aria-busy="true" style="visibility:hidden">
         <!-- Floating particles (embers + sparks + elemental) -->
         <div class="loading-particles">
             <div class="particle ember p1"></div>
@@ -341,7 +341,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     <!-- Quest diary popup overlay (full diary with tabs) -->
     <div id="quest-diary-overlay" class="v-popup-overlay" style="display:none">
         <div class="v-popup-card" style="max-height:90vh">
-            <div class="v-popup-header">📜 Jornadas</div>
+            <div class="v-popup-header">📜 Missões</div>
             <div class="v-popup-body" id="quest-diary-body" style="max-height:75vh;padding:8px 12px"></div>
             <div class="v-popup-actions">
                 <button class="v-popup-btn v-popup-btn--cancel" onclick="hideQuestDiaryPopup()">🏠 Voltar</button>
@@ -456,6 +456,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         document.write('<script src="game-daily.js?v=' + v + '"><\/script>');
         document.write('<script src="game-hints.js?v=' + v + '"><\/script>');
         document.write('<script src="game-plaza-event.js?v=' + v + '"><\/script>');
+        document.write('<script src="game-popups.js?v=' + v + '"><\/script>');
         document.write('<script src="game-social.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
