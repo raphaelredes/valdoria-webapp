@@ -682,9 +682,6 @@
             }
         }
 
-        // Ambient music
-        if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('tavern');
-
         function decodeBase64Utf8(b64) {
             const raw = b64.replace(/-/g, '+').replace(/_/g, '/');
             const binary = atob(raw);

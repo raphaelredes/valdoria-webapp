@@ -1085,8 +1085,6 @@
                 showFatalError('Dados do jogo nao carregaram'); return;
             }
             buildScreens();
-            // Play level up fanfare
-            if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('levelup');
             // Hide initial loading with narrative delay
             if (window._lvlInitLoading) window._lvlInitLoading.hide();
         })();
