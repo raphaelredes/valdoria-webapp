@@ -145,22 +145,17 @@ function renderCurrentTab() {
 window.renderCurrentTab = renderCurrentTab;
 
 function showGuildDetail(html) {
-    var o = document.getElementById('guild-detail-overlay');
     var c = document.getElementById('guild-detail-content');
-    if (!o || !c) return;
+    if (!c) return;
     c.innerHTML = html;
-    o.style.display = '';
-    o.classList.add('active');
+    vDrawer.open('guild-detail-overlay');
     var bp = document.getElementById('bottom-panel');
     if (bp) bp.style.display = 'none';
 }
 window.showGuildDetail = showGuildDetail;
 
 function hideGuildDetail() {
-    var o = document.getElementById('guild-detail-overlay');
-    if (!o) return;
-    o.classList.remove('active');
-    o.style.display = 'none';
+    vDrawer.close('guild-detail-overlay');
     var bp = document.getElementById('bottom-panel');
     if (bp) bp.style.display = '';
     renderCurrentTab();
