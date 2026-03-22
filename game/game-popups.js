@@ -5,33 +5,12 @@ var _activeFooterPopup = null;
 
 window._isFooterPopupActive = function(id) {
     return _activeFooterPopup === id && vPopup.isOpen();
-}
+};
 
 window._closeFooterPopup = function() {
     _activeFooterPopup = null;
     vPopup.hide();
-}
-
-function _renderToHtml(renderFn, data) {
-    var container = document.createElement("div");
-    renderFn(container, data);
-    return container.innerHTML;
-}
-
-function _attachActionClicks(popupEl) {
-    if (!popupEl) return;
-    var btns = popupEl.querySelectorAll("[data-cb]");
-    for (var i = 0; i < btns.length; i++) {
-        (function(btn) {
-            var cb = btn.getAttribute("data-cb");
-            if (cb) {
-                btn.onclick = function() {
-                    if (typeof doAction === "function") doAction(cb);
-                };
-            }
-        })(btns[i]);
-    }
-}
+};
 
 function _buildActionsHtml(data) {
     var html = "";
@@ -40,175 +19,185 @@ function _buildActionsHtml(data) {
             var a = data.actions[i];
             var label = a.label || a.text || a.name || "???";
             var cb = a.cb || a.callback || a.callback_data || "";
-            html += "<button class=\"v-popup-btn\" data-cb=\"" + cb + "\">" + label + "</button>";
+            html += '<button class="v-popup-btn" data-action="' + cb + '">' + label + '</button>';
         }
     }
-    html += "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>";
+    html += '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>';
     return html;
+}
+
+function _onActionOrDispatch(action) {
+    if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
 }
 
 /* ====== SKILLS LIST ====== */
 window._showSkillsPopup = function(data) {
-    var body = _renderToHtml(renderSkillsList, data.skills_data);
+    var bodyEl = document.createElement("div");
+    renderSkillsList(bodyEl, data.skills_data);
     _activeFooterPopup = "skills";
     vPopup.show({
         header: "Habilidades",
-        body: body,
-        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>",
-        onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
-        },
-        onHide: function() { _activeFooterPopup = null; },
-        onReady: function(el) {
-            var cards = el.querySelectorAll(".skill-card");
-            for (var i = 0; i < cards.length; i++) {
-                (function(card) {
-                    var cb = card.getAttribute("data-cb");
-                    if (cb) {
-                        card.onclick = function() {
-                            if (typeof doAction === "function") doAction(cb);
-                        };
-                    }
-                })(cards[i]);
-            }
-        }
+        bodyEl: bodyEl,
+        actions: '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>',
+        onAction: _onActionOrDispatch,
+        onHide: function() { _activeFooterPopup = null; }
     });
 };
 
 /* ====== SKILL DETAIL ====== */
 window._showSkillDetailPopup = function(data) {
     var d = data.skill_detail_data;
-    var body = _renderToHtml(renderSkillDetail, d);
+    var bodyEl = document.createElement("div");
+    renderSkillDetail(bodyEl, d);
     var headerText = (d.icon || "") + " " + (d.name || "Habilidade");
     vPopup.show({
         header: headerText,
-        body: body,
-        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>",
-        onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
-        }
+        bodyEl: bodyEl,
+        actions: '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>',
+        onAction: _onActionOrDispatch
     });
 };
 
 /* ====== CHARACTER DETAILS (FICHA) ====== */
 window._showCharDetailsPopup = function(data) {
-    var body = "";
+    var bodyEl = document.createElement("div");
     if (typeof renderCharDetails === "function") {
-        body = _renderToHtml(renderCharDetails, data.char_details);
+        renderCharDetails(bodyEl, data.char_details);
     } else {
-        body = "<div style=\"padding:12px;color:var(--v-text);\">Dados do personagem indisponíveis.</div>";
+        bodyEl.className = "v-popup-desc";
+        bodyEl.textContent = "Dados do personagem indisponíveis.";
     }
     _activeFooterPopup = "char-details";
     vPopup.show({
         header: "Ficha do Personagem",
-        body: body,
-        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>",
-        onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
-        },
-        onHide: function() { _activeFooterPopup = null; },
-        onReady: function(el) { _attachActionClicks(el); }
+        bodyEl: bodyEl,
+        actions: '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>',
+        onAction: _onActionOrDispatch,
+        onHide: function() { _activeFooterPopup = null; }
     });
 };
 
 /* ====== ALLIES / PARTY (GRUPO) ====== */
 window._showAlliesPopup = function(data) {
-    var body = "";
+    var bodyEl = document.createElement("div");
     if (typeof renderAllies === "function") {
-        body = _renderToHtml(renderAllies, data);
+        renderAllies(bodyEl, data);
     } else {
-        body = "<div style=\"padding:12px;\">";
+        bodyEl.className = "v-popup-body-inner";
         for (var i = 0; i < data.allies.length; i++) {
             var a = data.allies[i];
-            body += "<div style=\"padding:6px 0;border-bottom:1px solid var(--v-border,#4a3828);\">";
-            body += "<b>" + (a.name || "Aliado") + "</b>";
-            if (a.class_name) body += " - " + a.class_name;
-            if (a.level) body += " Nv." + a.level;
-            body += "</div>";
+            var row = document.createElement("div");
+            row.className = "v-popup-row";
+            var text = a.name || "Aliado";
+            if (a.class_name) text += " - " + a.class_name;
+            if (a.level) text += " Nv." + a.level;
+            row.innerHTML = "<b>" + text + "</b>";
+            bodyEl.appendChild(row);
         }
-        body += "</div>";
     }
     var actionsHtml = _buildActionsHtml(data);
     _activeFooterPopup = "allies";
     vPopup.show({
         header: "Grupo",
-        body: body,
+        bodyEl: bodyEl,
         actions: actionsHtml,
-        onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
-        },
-        onHide: function() { _activeFooterPopup = null; },
-        onReady: function(el) { _attachActionClicks(el); }
+        onAction: _onActionOrDispatch,
+        onHide: function() { _activeFooterPopup = null; }
     });
 };
 
 /* ====== MEMBER DETAIL ====== */
 window._showMemberDetailPopup = function(data) {
     var d = data.member_detail;
-    var body = "";
+    var bodyEl = document.createElement("div");
     if (typeof renderMemberDetail === "function") {
-        body = _renderToHtml(renderMemberDetail, d);
+        renderMemberDetail(bodyEl, d);
     } else {
-        body = "<div style=\"padding:12px;color:var(--v-text);\">";
-        body += "<div><b>" + (d.name || "Membro") + "</b></div>";
-        if (d.class_name) body += "<div>" + d.class_name + " Nv." + (d.level || "?") + "</div>";
-        if (d.hp !== undefined) body += "<div>HP: " + d.hp + "/" + (d.max_hp || d.hp) + "</div>";
-        body += "</div>";
+        bodyEl.className = "v-popup-desc";
+        var text = (d.name || "Membro");
+        if (d.class_name) text += " - " + d.class_name + " Nv." + (d.level || "?");
+        if (d.hp !== undefined) text += " | HP: " + d.hp + "/" + (d.max_hp || d.hp);
+        bodyEl.textContent = text;
     }
     var actionsHtml = _buildActionsHtml(data);
     vPopup.show({
         header: (d.name || "Membro do Grupo"),
-        body: body,
+        bodyEl: bodyEl,
         actions: actionsHtml,
-        onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
-        },
-        onReady: function(el) { _attachActionClicks(el); }
+        onAction: _onActionOrDispatch
     });
 };
 
 /* ====== INN SELECT ====== */
 window._showInnSelectPopup = function(data) {
     var d = data.inn_select;
-    var body = "<div style=\"padding:12px;color:var(--v-text);\">";
-    if (d.text) body += "<div style=\"margin-bottom:12px;line-height:1.5;\">" + d.text + "</div>";
-    if (d.options && d.options.length > 0) {
-        for (var i = 0; i < d.options.length; i++) {
-            var opt = d.options[i];
-            body += "<div data-cb=\"" + (opt.cb || "") + "\" style=\"padding:10px;margin:6px 0;background:var(--v-bg-card,#2e2520);border:1px solid var(--v-border,#4a3828);border-radius:8px;cursor:pointer;\">";
-            body += "<b>" + (opt.label || opt.name || opt.text || "") + "</b>";
-            if (opt.price) body += " <span style=\"color:var(--v-gold,#c8a84e);\">" + opt.price + " GP</span>";
-            if (opt.desc) body += "<div style=\"font-size:12px;color:var(--v-text-dim,#a09484);margin-top:4px;\">" + opt.desc + "</div>";
-            body += "</div>";
+    var bodyEl = document.createElement("div");
+    if (typeof renderInnSelect === "function") {
+        renderInnSelect(bodyEl, d);
+    } else {
+        bodyEl.className = "v-popup-body-inner";
+        if (d.text) {
+            var intro = document.createElement("div");
+            intro.className = "v-popup-desc";
+            intro.textContent = d.text;
+            bodyEl.appendChild(intro);
+        }
+        if (d.options && d.options.length > 0) {
+            for (var i = 0; i < d.options.length; i++) {
+                var opt = d.options[i];
+                var card = document.createElement("div");
+                card.className = "v-popup-row";
+                card.style.cursor = "pointer";
+                var label = opt.label || opt.name || opt.text || "";
+                var html = "<b>" + label + "</b>";
+                if (opt.price) html += ' <span class="v-popup-gold">' + opt.price + " GP</span>";
+                if (opt.desc) html += '<div class="v-popup-subdesc">' + opt.desc + "</div>";
+                card.innerHTML = html;
+                (function(cb) {
+                    card.onclick = function() {
+                        if (cb && typeof doAction === "function") doAction(cb);
+                    };
+                })(opt.cb);
+                bodyEl.appendChild(card);
+            }
         }
     }
-    body += "</div>";
     vPopup.show({
         header: "Estalagem",
-        body: body,
-        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>",
-        onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
-        },
-        onReady: function(el) { _attachActionClicks(el); }
+        bodyEl: bodyEl,
+        actions: '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>',
+        onAction: _onActionOrDispatch
     });
 };
 
 /* ====== REFERRAL ====== */
 window._showReferralPopup = function(data) {
     var d = data.referral_data;
-    var body = "<div style=\"padding:12px;color:var(--v-text);\">";
-    if (d.text) body += "<div style=\"margin-bottom:12px;line-height:1.5;\">" + d.text + "</div>";
-    if (d.code) body += "<div style=\"text-align:center;padding:12px;margin:8px 0;background:rgba(0,0,0,0.3);border-radius:8px;font-size:18px;font-weight:bold;color:var(--v-gold,#c8a84e);\">" + d.code + "</div>";
-    if (d.stats) body += "<div style=\"margin-top:8px;font-size:13px;color:var(--v-text-dim,#a09484);\">" + d.stats + "</div>";
-    body += "</div>";
+    var bodyEl = document.createElement("div");
+    bodyEl.className = "v-popup-body-inner";
+    if (d.text) {
+        var intro = document.createElement("div");
+        intro.className = "v-popup-desc";
+        intro.textContent = d.text;
+        bodyEl.appendChild(intro);
+    }
+    if (d.code) {
+        var codeEl = document.createElement("div");
+        codeEl.className = "v-popup-highlight";
+        codeEl.textContent = d.code;
+        bodyEl.appendChild(codeEl);
+    }
+    if (d.stats) {
+        var statsEl = document.createElement("div");
+        statsEl.className = "v-popup-subdesc";
+        statsEl.textContent = d.stats;
+        bodyEl.appendChild(statsEl);
+    }
     vPopup.show({
         header: "Convite",
-        body: body,
-        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>",
-        onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
-        }
+        bodyEl: bodyEl,
+        actions: '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>',
+        onAction: _onActionOrDispatch
     });
 };
 

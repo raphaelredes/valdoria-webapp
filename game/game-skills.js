@@ -1,8 +1,8 @@
 function renderSkillsList(container,data){if(!container||!data)return;container.innerHTML="";var wrap=document.createElement("div");wrap.className="skills-view";var hdr=document.createElement("div");hdr.className="skills-header";hdr.innerHTML='<div class="skills-title">📖 HABILIDADES</div>'
-+'<div class="skills-char">'+_escSkill(data.name)+' Lv.'+data.level+' '+_escSkill(data.class_name)+'</div>';wrap.appendChild(hdr);var statsRow=document.createElement("div");statsRow.className="skills-stats-row";statsRow.innerHTML='<span>🎯 Ataque <b>+'+data.spell_atk+'</b></span>'
++'<div class="skills-char">'+vEsc(data.name)+' Lv.'+data.level+' '+vEsc(data.class_name)+'</div>';wrap.appendChild(hdr);var statsRow=document.createElement("div");statsRow.className="skills-stats-row";statsRow.innerHTML='<span>🎯 Ataque <b>+'+data.spell_atk+'</b></span>'
 +'<span>🛡️ CD <b>'+data.save_dc+'</b></span>'
 +'<span>📋 Prof. <b>+'+data.prof+'</b></span>';wrap.appendChild(statsRow);if(!data.skills||data.skills.length===0){var empty=document.createElement("div");empty.className="skills-empty";empty.textContent="✨ Nenhuma habilidade aprendida.";wrap.appendChild(empty);}else{var list=document.createElement("div");list.className="skills-list";for(var i=0;i<data.skills.length;i++){var sk=data.skills[i];var card=document.createElement("div");card.className="skill-card";card.setAttribute("data-cb",sk.cb);var left=document.createElement("div");left.className="skill-card-left";left.innerHTML='<span class="skill-card-icon">'+sk.icon+'</span>'
-+'<span class="skill-card-name">'+_escSkill(sk.name)+'</span>';card.appendChild(left);var right=document.createElement("div");right.className="skill-card-right";if(sk.level>0){right.innerHTML+='<span class="skill-card-lv">Nv.'+sk.level+'</span>';}
++'<span class="skill-card-name">'+vEsc(sk.name)+'</span>';card.appendChild(left);var right=document.createElement("div");right.className="skill-card-right";if(sk.level>0){right.innerHTML+='<span class="skill-card-lv">Nv.'+sk.level+'</span>';}
 if(sk.cost>0){right.innerHTML+='<span class="skill-card-cost">💧'+sk.cost+'</span>';}else{right.innerHTML+='<span class="skill-card-free">🔄</span>';}
 card.appendChild(right);(function(cb){card.onclick=function(){if(typeof doAction==="function")doAction(cb);};})(sk.cb);list.appendChild(card);}
 wrap.appendChild(list);}
@@ -10,19 +10,18 @@ if(data.upcoming&&data.upcoming.length>0){var upDiv=document.createElement("div"
 wrap.appendChild(upDiv);}
 container.appendChild(wrap);}
 function renderSkillDetail(container,data){if(!container||!data)return;container.innerHTML="";var wrap=document.createElement("div");wrap.className="skill-detail-view";var hdr=document.createElement("div");hdr.className="skill-detail-header";hdr.innerHTML='<span class="skill-detail-icon">'+data.icon+'</span>'
-+'<span class="skill-detail-name">'+_escSkill(data.name)+'</span>';if(data.level>0){hdr.innerHTML+='<span class="skill-detail-lv">[Nv.'+data.level+']</span>';}
++'<span class="skill-detail-name">'+vEsc(data.name)+'</span>';if(data.level>0){hdr.innerHTML+='<span class="skill-detail-lv">[Nv.'+data.level+']</span>';}
 wrap.appendChild(hdr);if(data.tags&&data.tags.length>0){var tagRow=document.createElement("div");tagRow.className="skill-detail-tags";for(var i=0;i<data.tags.length;i++){var tag=document.createElement("span");tag.className="skill-detail-tag";tag.textContent=data.tags[i];tagRow.appendChild(tag);}
 wrap.appendChild(tagRow);}
 var grid=document.createElement("div");grid.className="skill-detail-grid";grid.appendChild(_makeSkillInfoCell("🏷️","Categoria",data.category));grid.appendChild(_makeSkillInfoCell("📏","Alcance",data.range));grid.appendChild(_makeSkillInfoCell("✨","Efeito",data.effect));grid.appendChild(_makeSkillInfoCell("💧","Custo",data.cost_str));if(data.dmg_range){grid.appendChild(_makeSkillInfoCell("💥","Dano",data.dmg_range));}
 wrap.appendChild(grid);if(data.description){var descDiv=document.createElement("div");descDiv.className="skill-detail-desc";descDiv.innerHTML='<div class="skill-detail-desc-title">📜 Descrição</div>'
-+'<div class="skill-detail-desc-text">'+_escSkill(data.description)+'</div>';wrap.appendChild(descDiv);}
++'<div class="skill-detail-desc-text">'+vEsc(data.description)+'</div>';wrap.appendChild(descDiv);}
 if(data.current){var curDiv=document.createElement("div");curDiv.className="skill-detail-current";curDiv.innerHTML='<div class="skill-detail-section-title">⚔️ Valores Atuais</div>';var c=data.current;var vals=[];vals.push("📋 Prof.: +"+c.prof);if(c.spell_atk!==undefined)vals.push("🎯 Ataque Mágico: +"+c.spell_atk);if(c.atk_bonus!==undefined)vals.push("🎯 Bônus Ataque: +"+c.atk_bonus);if(c.save_dc!==undefined)vals.push("🛡️ CD Resistência: "+c.save_dc);if(c.save_attr)vals.push("🎯 Salvaguarda: "+c.save_attr);curDiv.innerHTML+='<div class="skill-detail-vals">'+vals.join(" · ")+'</div>';wrap.appendChild(curDiv);}
 if(data.scaling&&data.scaling.length>0){var scDiv=document.createElement("div");scDiv.className="skill-detail-scaling";scDiv.innerHTML='<div class="skill-detail-section-title">📈 Progressão</div>';for(var j=0;j<data.scaling.length;j++){var sline=document.createElement("div");sline.className="skill-detail-scale-line";sline.textContent=data.scaling[j];scDiv.appendChild(sline);}
 wrap.appendChild(scDiv);}
 if(data.technical){var rulesDiv=document.createElement("div");rulesDiv.className="skill-detail-rules";var rulesToggle=document.createElement("div");rulesToggle.className="skill-detail-rules-toggle";rulesToggle.textContent="🛠️ Regras D&D 5e ▸";var rulesContent=document.createElement("div");rulesContent.className="skill-detail-rules-content";rulesContent.textContent=data.technical;rulesContent.style.display="none";rulesToggle.onclick=function(){var show=rulesContent.style.display==="none";rulesContent.style.display=show?"block":"none";rulesToggle.textContent=show?"🛠️ Regras D&D 5e ▾":"🛠️ Regras D&D 5e ▸";};rulesDiv.appendChild(rulesToggle);rulesDiv.appendChild(rulesContent);wrap.appendChild(rulesDiv);}
-if(data.tactical){var tipDiv=document.createElement("div");tipDiv.className="skill-detail-tip";tipDiv.innerHTML='<span class="skill-detail-tip-icon">💡</span> '+_escSkill(data.tactical);wrap.appendChild(tipDiv);}
+if(data.tactical){var tipDiv=document.createElement("div");tipDiv.className="skill-detail-tip";tipDiv.innerHTML='<span class="skill-detail-tip-icon">💡</span> '+vEsc(data.tactical);wrap.appendChild(tipDiv);}
 container.appendChild(wrap);}
 function _makeSkillInfoCell(icon,label,value){var cell=document.createElement("div");cell.className="skill-info-cell";cell.innerHTML='<span class="skill-info-icon">'+icon+'</span>'
 +'<span class="skill-info-label">'+label+'</span>'
-+'<span class="skill-info-val">'+_escSkill(String(value))+'</span>';return cell;}
-function _escSkill(s){if(!s)return"";var d=document.createElement("span");d.textContent=s;return d.innerHTML;}
++'<span class="skill-info-val">'+vEsc(String(value))+'</span>';return cell;}

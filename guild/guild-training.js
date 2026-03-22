@@ -80,15 +80,20 @@ function _renderTraining() {
 }
 
 window._startTraining = function(category, itemId, name) {
+    var _cat = category, _name = name;
     if (typeof vPopup !== 'undefined') {
         vPopup.show({
-            title: 'Iniciar Treinamento',
+            header: 'Iniciar Treinamento',
             body: 'Treinar <b>' + _esc(name) + '</b>?<br>Sessoes: ' + (_trainingData && _trainingData.sessions_total || '?') + '<br>Custo por sessao: ' + (_trainingData && _trainingData.cost || 25) + ' GP',
-            confirm: 'Iniciar', cancel: 'Cancelar',
-            onConfirm: function() {
-                guildAction('train_start_' + category, { name: name }).then(function(d) {
-                    if (d && d.ok) renderTrainingTab();
-                }).catch(function(e) { console.error('[GUILD]', e); });
+            actions: '<button class="v-popup-btn v-popup-btn--success" data-action="confirm">Iniciar</button>'
+                   + '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Cancelar</button>',
+            onAction: function(action) {
+                if (action === 'confirm') {
+                    guildAction('train_start_' + _cat, { name: _name }).then(function(d) {
+                        if (d && d.ok) renderTrainingTab();
+                    }).catch(function(e) { console.error('[GUILD]', e); });
+                    return true;
+                }
             }
         });
     } else {
@@ -112,11 +117,16 @@ window._advanceTraining = function() {
 window._abandonTraining = function() {
     if (typeof vPopup !== 'undefined') {
         vPopup.show({
-            title: 'Abandonar Treinamento',
+            header: '⚠️ Abandonar Treinamento',
+            headerClass: 'v-popup-header--danger',
             body: 'Tem certeza? Todo o progresso será perdido.',
-            confirm: 'Abandonar', cancel: 'Cancelar', danger: true,
-            onConfirm: function() {
-                guildAction('train_start_abandon').then(function() { renderTrainingTab(); }).catch(function(e) { console.error('[GUILD]', e); });
+            actions: '<button class="v-popup-btn v-popup-btn--danger" data-action="confirm">Abandonar</button>'
+                   + '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Cancelar</button>',
+            onAction: function(action) {
+                if (action === 'confirm') {
+                    guildAction('train_start_abandon').then(function() { renderTrainingTab(); }).catch(function(e) { console.error('[GUILD]', e); });
+                    return true;
+                }
             }
         });
     } else if (confirm('Abandonar treinamento?')) {

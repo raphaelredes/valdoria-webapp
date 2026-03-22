@@ -16,14 +16,10 @@ var _selectedPlayer = null;
 
 function _idemKey() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
 
-function _esc(t) {
-    if (!t) return '';
-    return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 
 function _rpFormat(t) {
     if (!t) return '';
-    return _esc(t).replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    return vEsc(t).replace(/\*([^*]+)\*/g, '<em>$1</em>');
 }
 
 function _calcToastDuration(text) {
@@ -121,12 +117,12 @@ function _buildChatMessages() {
     var h = '';
     for (var i = 0; i < msgs.length; i++) {
         var m = msgs[i];
-        if (m.system) { h += '<div class="social-msg social-msg--system">' + _esc(m.text) + '</div>'; }
+        if (m.system) { h += '<div class="social-msg social-msg--system">' + vEsc(m.text) + '</div>'; }
         else {
             h += '<div class="social-msg"><span class="social-msg-meta">';
-            if (m.time) h += '[' + _esc(m.time) + '] ';
-            if (m.icon) h += _esc(m.icon) + ' ';
-            h += _esc(m.name);
+            if (m.time) h += '[' + vEsc(m.time) + '] ';
+            if (m.icon) h += vEsc(m.icon) + ' ';
+            h += vEsc(m.name);
             if (m.level) h += ' Nv' + m.level;
             h += '</span> <span class="social-msg-text">' + _rpFormat(m.text) + '</span></div>';
         }
@@ -148,11 +144,11 @@ function _renderOnline() {
     for (var i = 0; i < players.length; i++) {
         var p = players[i];
         var isSelected = _selectedPlayer === p.user_id;
-        var nd = (p.badge ? p.badge + ' ' : '') + _esc(p.name);
+        var nd = (p.badge ? p.badge + ' ' : '') + vEsc(p.name);
         h += '<div class="social-player' + (isSelected ? ' social-player--selected' : '') + '" data-player-uid="' + p.user_id + '">';
         h += '<span class="social-player-icon">' + (p.class_icon || '👤') + '</span>';
         h += '<span class="social-player-info"><b>' + nd + '</b> <small>Nv.' + (p.level || '?') + '</small>';
-        if (p.location) h += '<span class="social-player-loc">📍 ' + _esc(p.location) + '</span>';
+        if (p.location) h += '<span class="social-player-loc">📍 ' + vEsc(p.location) + '</span>';
         h += '</span><button class="social-interact-btn" data-target="' + p.user_id + '" title="Interações">✦</button></div>';
         if (isSelected) {
             h += '<div class="social-player-actions">';
@@ -174,11 +170,11 @@ function _renderInbox() {
         var r = items[i];
         h += '<div class="social-request"><div class="social-request-info">';
         h += '<span class="social-request-icon">' + (r.icon || '\ud83d\udce8') + '</span>';
-        h += '<b>' + _esc(r.sender_name) + '</b> ' + _esc(r.desc);
+        h += '<b>' + vEsc(r.sender_name) + '</b> ' + vEsc(r.desc);
         if (r.created_at) h += '<small class="social-request-age">' + _ago(r.created_at) + '</small>';
         h += '</div><div class="social-request-actions">';
-        h += '<button class="v-popup-btn v-popup-btn--success social-req-btn" data-accept="' + _esc(r.request_id) + '">\u2705</button>';
-        h += '<button class="v-popup-btn v-popup-btn--danger social-req-btn" data-decline="' + _esc(r.request_id) + '">\u274c</button>';
+        h += '<button class="v-popup-btn v-popup-btn--success social-req-btn" data-accept="' + vEsc(r.request_id) + '">\u2705</button>';
+        h += '<button class="v-popup-btn v-popup-btn--danger social-req-btn" data-decline="' + vEsc(r.request_id) + '">\u274c</button>';
         h += '</div></div>';
     }
     return h;
@@ -191,9 +187,9 @@ function _renderRel() {
     var h = '<div class="social-section-label">' + npcs.length + ' v\u00ednculo' + (npcs.length !== 1 ? 's' : '') + '</div>';
     for (var i = 0; i < npcs.length; i++) {
         var n = npcs[i];
-        h += '<div class="social-npc" data-npc="' + _esc(n.npc_id) + '">';
+        h += '<div class="social-npc" data-npc="' + vEsc(n.npc_id) + '">';
         h += '<span class="social-npc-mood">' + (n.mood_emoji || '\ud83d\ude10') + '</span>';
-        h += '<span class="social-npc-info"><b>' + _esc(n.name) + '</b><small>' + _esc(n.role) + '</small></span>';
+        h += '<span class="social-npc-info"><b>' + vEsc(n.name) + '</b><small>' + vEsc(n.role) + '</small></span>';
         h += '<div class="social-npc-bar"><div class="social-npc-bar-fill" style="width:' + Math.min(100, n.aff || 0) + '%"></div></div>';
         h += '<span class="social-npc-aff">' + (n.aff || 0) + '</span></div>';
     }
@@ -206,9 +202,9 @@ function _renderRelDetail() {
     var d = _detailData;
     var h = '<div class="social-npc-detail-header">';
     h += '<div class="mood-big">' + (d.mood_emoji || '\ud83d\ude10') + '</div>';
-    h += '<div style="font-size:var(--v-font-lg);color:var(--v-gold-light);font-weight:700;">' + _esc(d.name) + '</div>';
-    h += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim);">' + _esc(d.role) + '</div>';
-    h += '<div class="tier-badge">' + _esc(d.tier) + '</div></div>';
+    h += '<div style="font-size:var(--v-font-lg);color:var(--v-gold-light);font-weight:700;">' + vEsc(d.name) + '</div>';
+    h += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim);">' + vEsc(d.role) + '</div>';
+    h += '<div class="tier-badge">' + vEsc(d.tier) + '</div></div>';
     h += '<div class="social-stat-row"><span>Afinidade</span>';
     h += '<div class="social-stat-bar"><div class="social-stat-bar-fill social-stat-bar-fill--aff" style="width:' + (d.aff||0) + '%"></div></div>';
     h += '<span>' + (d.aff||0) + '/100</span></div>';
@@ -217,13 +213,13 @@ function _renderRelDetail() {
     h += '<div class="social-stat-bar"><div class="social-stat-bar-fill social-stat-bar-fill--patience" style="width:' + pp + '%"></div></div>';
     h += '<span>' + (d.patience||0) + '/' + (d.patience_max||10) + '</span></div>';
     h += '<div class="social-stat-row"><span>Encontros</span><span>' + (d.encounters||0) + 'x</span></div>';
-    h += '<div class="social-stat-row"><span>Humor</span><span>' + (d.mood_emoji||'\ud83d\ude10') + ' ' + _esc(d.mood) + '</span></div>';
+    h += '<div class="social-stat-row"><span>Humor</span><span>' + (d.mood_emoji||'\ud83d\ude10') + ' ' + vEsc(d.mood) + '</span></div>';
     if (d.emotions && d.emotions.length > 0) {
         h += '<div class="social-section-label">Emo\u00e7\u00f5es</div>';
         for (var i = 0; i < d.emotions.length; i++) {
             var e = d.emotions[i];
             var pct = Math.round((e.value||0)*100);
-            h += '<div class="social-emo-row"><span>' + _esc(e.label) + '</span>';
+            h += '<div class="social-emo-row"><span>' + vEsc(e.label) + '</span>';
             h += '<div class="social-emo-bar"><div class="social-emo-bar-fill" style="width:' + pct + '%"></div></div>';
             h += '<span>' + (e.value||0).toFixed(2) + '</span></div>';
         }
@@ -232,8 +228,8 @@ function _renderRelDetail() {
         h += '<div class="social-section-label">Lembran\u00e7as Recentes</div>';
         for (var j = 0; j < d.memories.length; j++) {
             var m = d.memories[j];
-            h += '<div class="social-memory">\u2022 ' + _esc(m.summary);
-            if (m.emotion && m.emotion !== 'neutral') h += ' <span class="social-memory-emo">(' + _esc(m.emotion) + ')</span>';
+            h += '<div class="social-memory">\u2022 ' + vEsc(m.summary);
+            if (m.emotion && m.emotion !== 'neutral') h += ' <span class="social-memory-emo">(' + vEsc(m.emotion) + ')</span>';
             h += '</div>';
         }
     }

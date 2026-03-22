@@ -93,13 +93,19 @@ function _approvalColor(cls) {
 }
 
 window._dismissMember = function(npcId, npcName) {
+    var _npcId = npcId;
     if (typeof vPopup !== 'undefined') {
         vPopup.show({
-            title: 'Dispensar Membro',
+            header: '⚠️ Dispensar Membro',
+            headerClass: 'v-popup-header--danger',
             body: 'Tem certeza que deseja dispensar <b>' + _esc(npcName) + '</b> do grupo?',
-            confirm: 'Dispensar', cancel: 'Cancelar', danger: true,
-            onConfirm: function() {
-                guildAction('fire_' + npcId).then(function() { hideGuildDetail(); }).catch(function(e) { console.error('[GUILD]', e); });
+            actions: '<button class="v-popup-btn v-popup-btn--danger" data-action="confirm">Dispensar</button>'
+                   + '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Cancelar</button>',
+            onAction: function(action) {
+                if (action === 'confirm') {
+                    guildAction('fire_' + _npcId).then(function() { hideGuildDetail(); }).catch(function(e) { console.error('[GUILD]', e); });
+                    return true;
+                }
             }
         });
     } else if (confirm('Dispensar ' + npcName + ' do grupo?')) {

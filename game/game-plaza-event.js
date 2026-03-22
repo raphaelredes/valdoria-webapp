@@ -4,8 +4,6 @@
 (function() {
   "use strict";
 
-  function _esc(s) { return s ? String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") : ""; }
-
   function _diffDot(chance) {
     if (chance >= 70) return "<span class=\"v-popup-dot v-popup-dot--ok\"></span>";
     if (chance >= 40) return "<span class=\"v-popup-dot v-popup-dot--warn\"></span>";
@@ -19,7 +17,7 @@
     for (var i = 0; i < rewards.length; i++) {
       var r = rewards[i];
       if (!r || !r.text) continue;
-      h += "<div class=\"v-popup-row\">" + (r.emoji || "") + " " + _esc(r.text) + "</div>";
+      h += "<div class=\"v-popup-row\">" + (r.emoji || "") + " " + vEsc(r.text) + "</div>";
     }
     return h;
   }
@@ -28,15 +26,15 @@
 
   function _showChoices(d) {
     if (!d.choices || !d.choices.length) { console.error("[PLAZA] _showChoices: missing choices", d); return; }
-    var body = "<div class=\"v-popup-desc\">" + _esc(d.desc) + "</div>";
+    var body = "<div class=\"v-popup-desc\">" + vEsc(d.desc) + "</div>";
     body += "<div class=\"v-popup-divider\"></div>";
     var actions = [];
     for (var i = 0; i < d.choices.length; i++) {
       var c = d.choices[i];
-      var label = _esc(c.label);
+      var label = vEsc(c.label);
       if (c.stat_hint) {
         var pct = (typeof c.stat_hint === "string") ? (parseInt(c.stat_hint.replace(/[^0-9]/g, ""), 10) || 50) : 50;
-        label += " " + _diffDot(pct) + " <small>" + _esc(c.stat_hint) + "</small>";
+        label += " " + _diffDot(pct) + " <small>" + vEsc(c.stat_hint) + "</small>";
       }
       actions.push({ html: label, action: c.cb, cls: "v-popup-btn" });
     }
@@ -47,31 +45,31 @@
   function _showResult(d) {
     if (!d.narrative) { console.error("[PLAZA] _showResult: missing narrative", d); }
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
-    var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
+    var body = "<div class=\"v-popup-desc\">" + vEsc(d.narrative) + "</div>";
     body += _renderRewards(d.rewards);
     if (d.leveled) body += "<div class=\"v-popup-row v-popup-level-up\">🎉 <b>Nível acima!</b></div>";
     vPopup.show({ id: "plaza-event", header: d.title || "Resultado", headerClass: cls, body: body,
-      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: false });
+      actions: [{ label: "Fechar", action: "cancel", cls: "v-popup-btn v-popup-btn--cancel" }], closeOnOutside: false });
   }
 
   function _showEntry(d) {
-    var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative || d.message) + "</div>";
+    var body = "<div class=\"v-popup-desc\">" + vEsc(d.narrative || d.message) + "</div>";
     body += _renderRewards(d.rewards);
     vPopup.show({ id: "plaza-event", header: "🏛️ Praça Central", body: body,
-      actions: [{ label: "Continuar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: false });
+      actions: [{ label: "Fechar", action: "cancel", cls: "v-popup-btn v-popup-btn--cancel" }], closeOnOutside: false });
   }
 
   function _showCooldown(d) {
-    var body = "<div class=\"v-popup-desc\">⏳ " + _esc(d.message) + "</div>";
+    var body = "<div class=\"v-popup-desc\">⏳ " + vEsc(d.message) + "</div>";
     vPopup.show({ id: "plaza-event", header: "Aguarde", headerClass: "v-popup-header--warning", body: body,
-      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn" }], closeOnOutside: false });
+      actions: [{ label: "Fechar", action: "cancel", cls: "v-popup-btn v-popup-btn--cancel" }], closeOnOutside: false });
   }
 
   /* ===== GAMBLE ===== */
 
   function _showGambleMenu(d) {
     if (!d.bets || !d.bets.length) { console.error("[PLAZA] _showGambleMenu: missing bets", d); }
-    var body = "<div class=\"v-popup-desc\">" + _esc(d.desc || "Escolha sua aposta para o jogo de dados.") + "</div>";
+    var body = "<div class=\"v-popup-desc\">" + vEsc(d.desc || "Escolha sua aposta para o jogo de dados.") + "</div>";
     if (d.gold != null) body += "<div class=\"v-popup-row\">💰 Ouro: " + d.gold + " GP</div>";
     if (d.remaining != null) body += "<div class=\"v-popup-row\">🎲 Apostas restantes: " + d.remaining + "</div>";
     body += "<div class=\"v-popup-divider\"></div>";
@@ -89,7 +87,7 @@
   function _showGambleResult(d) {
     if (d.won == null) { console.error("[PLAZA] _showGambleResult: missing won", d); }
     var cls = d.won ? "v-popup-header--success" : "v-popup-header--warning";
-    var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
+    var body = "<div class=\"v-popup-desc\">" + vEsc(d.narrative) + "</div>";
     body += "<div class=\"v-popup-divider\"></div>";
     body += "<div class=\"v-popup-row\">Você: " + (d.player_total || "?") + "</div>";
     body += "<div class=\"v-popup-row\">Casa: " + (d.house_total || "?") + "</div>";
@@ -109,22 +107,22 @@
       for (var i = 0; i < d.notices.length; i++) {
         var n = d.notices[i];
         var icon = n.type === "bounty" ? "⚔️" : n.type === "help" ? "🤝" : "📋";
-        body += "<div class=\"v-popup-row\" data-action=\"" + _esc(n.cb) + "\">";
-        body += icon + " <b>" + _esc(n.title) + "</b>";
-        if (n.reward_hint) body += " <small class=\"v-popup-value--dim\">" + _esc(n.reward_hint) + "</small>";
+        body += "<div class=\"v-popup-row\" data-action=\"" + vEsc(n.cb) + "\">";
+        body += icon + " <b>" + vEsc(n.title) + "</b>";
+        if (n.reward_hint) body += " <small class=\"v-popup-value--dim\">" + vEsc(n.reward_hint) + "</small>";
         body += "</div>";
       }
     } else {
       body += "<div class=\"v-popup-desc\">Nenhum aviso no momento.</div>";
     }
     vPopup.show({ id: "plaza-event", header: "📋 Mural de Avisos", body: body,
-      actions: [{ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" }], closeOnOutside: false });
+      actions: [{ label: "Fechar", action: "cancel", cls: "v-popup-btn v-popup-btn--cancel" }], closeOnOutside: false });
   }
 
   function _showBulletinResult(d) {
     if (!d.narrative) { console.error("[PLAZA] _showBulletinResult: missing narrative", d); }
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
-    var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
+    var body = "<div class=\"v-popup-desc\">" + vEsc(d.narrative) + "</div>";
     body += _renderRewards(d.rewards);
     vPopup.show({ id: "plaza-event", header: d.title || "Mural", headerClass: cls, body: body,
       actions: [{ label: "🔙 Voltar ao Mural", action: d.back_cb || "square_bulletin", cls: "v-popup-btn" }], closeOnOutside: false });
@@ -135,7 +133,7 @@
   function _showVendor(d) {
     if (!d.items) { console.error("[PLAZA] _showVendor: missing items", d); }
     var body = "";
-    if (d.greeting) body += "<div class=\"v-popup-desc\">" + _esc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
+    if (d.greeting) body += "<div class=\"v-popup-desc\">" + vEsc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
     if (d.gold != null) body += "<div class=\"v-popup-row\">💰 Ouro: " + d.gold + " GP</div>";
     if (d.items && d.items.length) {
       body += "<div class=\"v-popup-section-label\">🛒 Itens</div>";
@@ -143,7 +141,7 @@
         var it = d.items[i];
         var afford = (d.gold != null && it.price > d.gold) ? " class=\"v-popup-unaffordable\"" : "";
         body += "<div class=\"v-popup-row\"" + afford + ">";
-        body += (it.emoji || "📦") + " " + _esc(it.name) + " — " + it.price + " GP";
+        body += (it.emoji || "📦") + " " + vEsc(it.name) + " — " + it.price + " GP";
         body += "</div>";
       }
     } else {
@@ -154,19 +152,19 @@
       for (var i = 0; i < d.items.length; i++) {
         var it = d.items[i];
         if (d.gold == null || it.price <= d.gold) {
-          actions.push({ label: (it.emoji || "") + " Comprar " + _esc(it.name), action: it.cb, cls: "v-popup-btn" });
+          actions.push({ label: (it.emoji || "") + " Comprar " + vEsc(it.name), action: it.cb, cls: "v-popup-btn" });
         }
       }
     }
     actions.push({ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" });
-    vPopup.show({ id: "plaza-event", header: "🏪 " + _esc(d.npc_name || "Vendedor"), body: body, actions: actions, closeOnOutside: false });
+    vPopup.show({ id: "plaza-event", header: "🏪 " + vEsc(d.npc_name || "Vendedor"), body: body, actions: actions, closeOnOutside: false });
   }
 
   function _showVendorResult(d) {
     if (!d.narrative) { console.error("[PLAZA] _showVendorResult: missing narrative", d); }
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
-    var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
-    if (d.item_name) body += "<div class=\"v-popup-row\">📦 " + _esc(d.item_name) + (d.price ? " — " + d.price + " GP" : "") + "</div>";
+    var body = "<div class=\"v-popup-desc\">" + vEsc(d.narrative) + "</div>";
+    if (d.item_name) body += "<div class=\"v-popup-row\">📦 " + vEsc(d.item_name) + (d.price ? " — " + d.price + " GP" : "") + "</div>";
     body += _renderRewards(d.rewards);
     vPopup.show({ id: "plaza-event", header: d.title || "Compra", headerClass: cls, body: body,
       actions: [{ label: "🔙 Voltar ao Vendedor", action: d.back_cb || "square_vendor", cls: "v-popup-btn" }], closeOnOutside: false });
@@ -177,24 +175,24 @@
   function _showWork(d) {
     if (!d.jobs) { console.error("[PLAZA] _showWork: missing jobs", d); }
     var body = "";
-    if (d.desc) body += "<div class=\"v-popup-desc\">" + _esc(d.desc) + "</div><div class=\"v-popup-divider\"></div>";
+    if (d.desc) body += "<div class=\"v-popup-desc\">" + vEsc(d.desc) + "</div><div class=\"v-popup-divider\"></div>";
     if (d.jobs && d.jobs.length) {
       for (var i = 0; i < d.jobs.length; i++) {
         var j = d.jobs[i];
         var hint = "";
         if (j.stat_hint) {
           var pct = (typeof j.stat_hint === "string") ? (parseInt(j.stat_hint.replace(/[^0-9]/g, ""), 10) || 50) : 50;
-          hint = " " + _diffDot(pct) + " <small>" + _esc(j.stat_hint) + "</small>";
+          hint = " " + _diffDot(pct) + " <small>" + vEsc(j.stat_hint) + "</small>";
         }
-        body += "<div class=\"v-popup-row\">" + _esc(j.title) + hint + "</div>";
-        if (j.desc) body += "<div class=\"v-popup-tip\">" + _esc(j.desc) + "</div>";
+        body += "<div class=\"v-popup-row\">" + vEsc(j.title) + hint + "</div>";
+        if (j.desc) body += "<div class=\"v-popup-tip\">" + vEsc(j.desc) + "</div>";
       }
     }
     var actions = [];
     if (d.jobs) {
       for (var i = 0; i < d.jobs.length; i++) {
         var j = d.jobs[i];
-        actions.push({ label: "⚒️ " + _esc(j.title), action: j.cb, cls: "v-popup-btn" });
+        actions.push({ label: "⚒️ " + vEsc(j.title), action: j.cb, cls: "v-popup-btn" });
       }
     }
     actions.push({ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" });
@@ -204,8 +202,8 @@
   function _showWorkResult(d) {
     if (!d.narrative) { console.error("[PLAZA] _showWorkResult: missing narrative", d); }
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
-    var body = "<div class=\"v-popup-desc\">" + _esc(d.narrative) + "</div>";
-    if (d.job_name) body += "<div class=\"v-popup-row\">⚒️ " + _esc(d.job_name) + "</div>";
+    var body = "<div class=\"v-popup-desc\">" + vEsc(d.narrative) + "</div>";
+    if (d.job_name) body += "<div class=\"v-popup-row\">⚒️ " + vEsc(d.job_name) + "</div>";
     body += _renderRewards(d.rewards);
     if (d.leveled) body += "<div class=\"v-popup-row v-popup-level-up\">🎉 <b>Nível acima!</b></div>";
     vPopup.show({ id: "plaza-event", header: d.title || "Trabalho", headerClass: cls, body: body,
@@ -218,7 +216,7 @@
   function _showCartographer(d) {
     if (!d.tiers && !d.all_owned) { console.error("[PLAZA] _showCartographer: missing tiers/all_owned", d); }
     var body = "";
-    if (d.greeting) body += "<div class=\"v-popup-desc\">" + _esc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
+    if (d.greeting) body += "<div class=\"v-popup-desc\">" + vEsc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
     body += "<div class=\"v-popup-row\">\ud83d\udcb0 Ouro: " + (d.gold || 0) + " GP</div>";
 
     if (d.all_owned) {
@@ -227,7 +225,7 @@
       if (d.owned && d.owned.length) {
         for (var i = 0; i < d.owned.length; i++) {
           var o = d.owned[i];
-          body += "<div class=\"v-popup-row\">" + (o.emoji || "\ud83d\uddfa\ufe0f") + " " + _esc(o.name) + "</div>";
+          body += "<div class=\"v-popup-row\">" + (o.emoji || "\ud83d\uddfa\ufe0f") + " " + vEsc(o.name) + "</div>";
         }
       }
     } else {
@@ -236,24 +234,24 @@
         body += "<div class=\"v-popup-section-label\">\u2705 Adquiridos</div>";
         for (var i = 0; i < d.owned.length; i++) {
           var o = d.owned[i];
-          body += "<div class=\"v-popup-row\">" + (o.emoji || "\ud83d\uddfa\ufe0f") + " " + _esc(o.name) + "</div>";
+          body += "<div class=\"v-popup-row\">" + (o.emoji || "\ud83d\uddfa\ufe0f") + " " + vEsc(o.name) + "</div>";
         }
       }
       if (d.tiers && d.tiers.length) {
         for (var t = 0; t < d.tiers.length; t++) {
           var tier = d.tiers[t];
           body += "<div class=\"v-popup-divider\"></div>";
-          body += "<div class=\"v-popup-section-label\">" + (tier.icon || "") + " " + _esc(tier.label) + "</div>";
+          body += "<div class=\"v-popup-section-label\">" + (tier.icon || "") + " " + vEsc(tier.label) + "</div>";
           for (var j = 0; j < tier.items.length; j++) {
             var it = tier.items[j];
             var afford = (!it.affordable) ? " class=\"v-popup-unaffordable\"" : "";
             var hint = "";
             if (it.stat_hint) {
               var pct = (typeof it.stat_hint === "string") ? (parseInt(it.stat_hint.replace(/[^0-9]/g, ""), 10) || 50) : 50;
-              hint = " " + _diffDot(pct) + " <small>" + _esc(it.stat_hint) + "</small>";
+              hint = " " + _diffDot(pct) + " <small>" + vEsc(it.stat_hint) + "</small>";
             }
             body += "<div class=\"v-popup-row\"" + afford + ">";
-            body += (it.emoji || "\ud83d\uddfa\ufe0f") + " " + _esc(it.name) + " \u2014 " + it.price + " GP" + hint;
+            body += (it.emoji || "\ud83d\uddfa\ufe0f") + " " + vEsc(it.name) + " \u2014 " + it.price + " GP" + hint;
             body += "</div>";
           }
         }
@@ -274,7 +272,7 @@
           for (var j = 0; j < tier.items.length; j++) {
             var it = tier.items[j];
             if (it.affordable) {
-              var lbl = (it.emoji || "\ud83d\uddfa\ufe0f") + " " + _esc(it.name) + " (" + it.price + " GP)";
+              var lbl = (it.emoji || "\ud83d\uddfa\ufe0f") + " " + vEsc(it.name) + " (" + it.price + " GP)";
               actions.push({ html: lbl, action: it.cb, cls: "v-popup-btn" });
             }
           }
@@ -285,22 +283,22 @@
       }
     }
     actions.push({ label: "\ud83d\udd19 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" });
-    vPopup.show({ id: "plaza-event", header: "\ud83d\uddfa\ufe0f " + _esc(d.npc_name || "Cart\u00f3grafo"), body: body, actions: actions, closeOnOutside: false });
+    vPopup.show({ id: "plaza-event", header: "\ud83d\uddfa\ufe0f " + vEsc(d.npc_name || "Cart\u00f3grafo"), body: body, actions: actions, closeOnOutside: false });
   }
 
   /* ===== ENTRY CHOICE ===== */
 
   function _showEntryChoice(d) {
     if (!d.choices || !d.choices.length) { console.error("[PLAZA] _showEntryChoice: missing choices", d); return; }
-    var body = "<div class=\"v-popup-desc\">" + _esc(d.desc) + "</div>";
+    var body = "<div class=\"v-popup-desc\">" + vEsc(d.desc) + "</div>";
     body += "<div class=\"v-popup-divider\"></div>";
     var actions = [];
     for (var i = 0; i < d.choices.length; i++) {
       var c = d.choices[i];
-      var label = _esc(c.label);
+      var label = vEsc(c.label);
       if (c.stat_hint) {
         var pct = (typeof c.stat_hint === "string") ? (parseInt(c.stat_hint.replace(/[^0-9]/g, ""), 10) || 50) : 50;
-        label += " " + _diffDot(pct) + " <small>" + _esc(c.stat_hint) + "</small>";
+        label += " " + _diffDot(pct) + " <small>" + vEsc(c.stat_hint) + "</small>";
       }
       actions.push({ html: label, action: c.cb, cls: "v-popup-btn" });
     }
