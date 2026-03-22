@@ -50,7 +50,7 @@
             _bindEvents();
 
             // Restore last category from localStorage
-            var saved = null;try{saved=localStorage.getItem('valdoria_codex_category');}catch(e){}
+            var saved = null;try{saved=localStorage.getItem('valdoria_codex_category');}catch(e){console.warn('[CODEX]',e);}
             if (saved && CATEGORIES.find(function (c) { return c.id === saved; })) {
                 _currentCategory = saved;
             }

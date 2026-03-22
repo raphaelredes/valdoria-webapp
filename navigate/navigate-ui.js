@@ -6,8 +6,8 @@
 // TRAVEL PACE & ACTIVITY — D&D 5e Travel Pace System
 // ═══════════════════════════════════════════════════════
 
-var _travelPace = null;try{_travelPace=localStorage.getItem('valdoria_travel_pace') || 'normal';}catch(e){}
-var _travelActivity = null;try{_travelActivity=localStorage.getItem('valdoria_travel_activity') || 'watch';}catch(e){}
+var _travelPace = null;try{_travelPace=localStorage.getItem('valdoria_travel_pace') || 'normal';}catch(e){console.warn('[NAVIGATE]',e);}
+var _travelActivity = null;try{_travelActivity=localStorage.getItem('valdoria_travel_activity') || 'watch';}catch(e){console.warn('[NAVIGATE]',e);}
 
 // Pace multipliers: fast = 0.75x turns (round up), cautious = 1.5x turns (round up)
 function _getAdjustedTurns(baseDist) {
@@ -913,7 +913,7 @@ function openQuickList() {
     const discoveredSet = new Set(S.discoveredLocs || []);
 
     // Restore sort preference
-    let sortMode = null;try{sortMode=localStorage.getItem('valdoria_ql_sort') || 'dist';}catch(e){}
+    let sortMode = null;try{sortMode=localStorage.getItem('valdoria_ql_sort') || 'dist';}catch(e){console.warn('[NAVIGATE]',e);}
 
     // Build location data
     const locs = S.knownLocs
