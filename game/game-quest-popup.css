@@ -1,0 +1,19 @@
+/* Quest Popup Styles — uses design tokens from valdoria-design.css */
+.qp-icon{text-align:center;margin-bottom:var(--v-space-md);font-size:28px;line-height:1}
+.qp-ready-badge{text-align:center;padding:var(--v-space-sm) var(--v-space-lg);margin-bottom:var(--v-space-md-lg);background:rgba(76,175,80,0.12);border:1px solid rgba(76,175,80,0.3);border-radius:var(--v-radius-sm);color:#81c784;font-size:var(--v-font-md);font-weight:600}
+.qp-chain-info{text-align:center;font-size:var(--v-font-sm);color:var(--v-text-dim);margin-bottom:var(--v-space-md)}
+.qp-chain-info em{font-style:italic}
+.qp-section{margin-bottom:var(--v-space-md-lg)}
+.qp-obj-text{font-size:var(--v-font-md);color:var(--v-text);font-style:italic}
+.qp-objectives{margin-bottom:var(--v-space-md-lg);padding:var(--v-space-md);background:rgba(74,56,40,0.1);border-radius:var(--v-radius-sm)}
+.qp-objective{font-size:var(--v-font-sm);padding:var(--v-space-xs) 0}
+.qp-objective--done{color:var(--v-text-dim)}
+.qp-objective--current{color:var(--v-text)}
+.qp-hint{font-size:var(--v-font-sm);color:var(--v-info,#5b9bd5);font-style:italic;margin-bottom:var(--v-space-md-lg);padding:var(--v-space-sm) var(--v-space-md-lg);background:rgba(91,155,213,0.08);border-radius:var(--v-radius-sm)}
+.qp-npc{font-size:var(--v-font-sm);color:var(--v-text-dim);margin-bottom:var(--v-space-md-lg)}
+.qp-rewards{margin-top:var(--v-space-sm);padding:var(--v-space-md) var(--v-space-md-lg);background:rgba(196,149,58,0.08);border-radius:var(--v-radius-sm);border:1px solid rgba(196,149,58,0.15)}
+.qp-rewards-list{font-size:var(--v-font-md);color:var(--v-text)}
+.qp-rewards-list span{margin-right:var(--v-space-md-lg)}
+.qp-abandon-icon{text-align:center;margin:var(--v-space-xl) 0 var(--v-space-lg);font-size:32px;line-height:1}
+.qp-abandon-title{text-align:center;font-size:var(--v-font-body);color:var(--v-text);margin-bottom:var(--v-space-lg)}
+.qp-abandon-warn{font-size:var(--v-font-md);color:var(--v-text-dim);text-align:center;line-height:1.5}
