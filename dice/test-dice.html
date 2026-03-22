@@ -78,11 +78,11 @@
             font-weight: 700;
             padding: 8px 18px;
             border: 2px solid var(--v-border);
-            border-radius: 8px;
+            border-radius: var(--v-radius-sm);
             background: var(--v-bg-card);
             color: var(--v-text-dim);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
             min-width: 56px;
         }
 
@@ -105,7 +105,7 @@
             width: 280px;
             height: 280px;
             border: 2px solid var(--v-border);
-            border-radius: 16px;
+            border-radius: var(--v-radius-lg);
             background: radial-gradient(circle at 50% 40%, #3a3028, var(--v-bg));
             margin-bottom: 16px;
             overflow: hidden;
@@ -134,7 +134,7 @@
             text-align: center;
             min-height: 48px;
             margin-bottom: 12px;
-            transition: all 0.3s;
+            transition: all var(--v-transition-base);
         }
 
         .result-display.crit {
@@ -162,11 +162,11 @@
             font-weight: 700;
             padding: 14px 48px;
             border: 2px solid var(--v-gold);
-            border-radius: 12px;
+            border-radius: var(--v-radius);
             background: linear-gradient(135deg, rgba(196, 149, 58, 0.15), rgba(196, 149, 58, 0.05));
             color: var(--v-gold);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
             letter-spacing: 1px;
             text-transform: uppercase;
         }
@@ -206,11 +206,11 @@
             width: 36px;
             height: 36px;
             border: 2px solid var(--v-border);
-            border-radius: 8px;
+            border-radius: var(--v-radius-sm);
             background: var(--v-bg-card);
             color: var(--v-text);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
         }
 
         .modifier-row button:hover {
@@ -253,7 +253,7 @@
             align-items: center;
             gap: 8px;
             padding: 6px 12px;
-            border-radius: 6px;
+            border-radius: var(--v-radius-sm);
             background: rgba(255, 255, 255, 0.03);
             border-left: 3px solid var(--v-border);
             font-size: 0.85rem;
@@ -330,7 +330,7 @@
             width: 56px;
             padding: 6px 8px;
             border: 2px solid var(--v-border);
-            border-radius: 6px;
+            border-radius: var(--v-radius-sm);
             background: var(--v-bg-card);
             color: var(--v-text);
             text-align: center;

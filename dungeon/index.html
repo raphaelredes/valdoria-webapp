@@ -66,11 +66,11 @@
         #map-svg { display: block; width: 100%; }
 
         /* Node styles */
-        .node-group { cursor: pointer; transition: filter 0.2s ease; }
+        .node-group { cursor: pointer; transition: filter var(--v-transition); }
         .node-group:active { opacity: 0.85; }
 
         .node-bg {
-            transition: fill 0.3s ease, stroke 0.3s ease;
+            transition: fill var(--v-transition-base), stroke var(--v-transition-base);
         }
 
         /* Node states */
@@ -130,7 +130,7 @@
             max-width: 360px; width: calc(100% - 32px);
             background: linear-gradient(180deg, #2a2030 0%, #2a2420 100%);
             border: 1px solid rgba(112, 66, 20, 0.3);
-            border-radius: 8px; padding: 16px;
+            border-radius: var(--v-radius-sm); padding: 16px;
             animation: eventAppear 0.35s ease-out;
         }
         @keyframes eventAppear {
@@ -149,7 +149,7 @@
         .event-actions { display: flex; flex-direction: column; gap: 8px; }
         .event-btn {
             width: 100%; padding: 10px; border: 1px solid rgba(112, 66, 20, 0.3);
-            border-radius: 4px; background: rgba(112, 66, 20, 0.15);
+            border-radius: var(--v-radius-sm); background: rgba(112, 66, 20, 0.15);
             color: #d4c8b0; font-size: 14px; font-family: 'Cinzel', serif;
             cursor: pointer; transition: opacity 0.15s, transform 0.15s;
         }
@@ -199,7 +199,7 @@
         .boss-btn {
             margin-top: 16px; padding: 12px 28px;
             background: linear-gradient(135deg, #7b2020 0%, #5a1010 100%);
-            border: 1px solid #a04040; border-radius: 4px;
+            border: 1px solid #a04040; border-radius: var(--v-radius-sm);
             color: #fff; font-size: 15px; font-weight: 700;
             font-family: 'Cinzel', serif; cursor: pointer;
             opacity: 0; animation: bossSlideUp 0.3s ease 1.2s forwards;
@@ -222,7 +222,7 @@
         }
         .bar-btn {
             flex: 1; padding: 8px 4px;
-            border: 1px solid rgba(112, 66, 20, 0.25); border-radius: 4px;
+            border: 1px solid rgba(112, 66, 20, 0.25); border-radius: var(--v-radius-sm);
             background: rgba(112, 66, 20, 0.08);
             color: #d4c8b0; font-size: 12px; font-weight: 600;
             text-align: center; cursor: pointer; font-family: 'Cinzel', serif;
@@ -235,7 +235,7 @@
             position: fixed; bottom: 80px; left: 50%;
             transform: translateX(-50%);
             background: #7b2020; color: #fff;
-            padding: 8px 12px; border-radius: 4px;
+            padding: 8px 12px; border-radius: var(--v-radius-sm);
             font-size: 13px; z-index: var(--v-z-overlay, 300);
             animation: fadeInUp 0.3s ease;
         }

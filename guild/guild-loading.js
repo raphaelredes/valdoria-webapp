@@ -1,1 +1,30 @@
-(function(){var TIPS=['O cheiro de couro e tinta de pergaminho permeia o salão da guilda...','Aventureiros conversam aos sussurros sobre tesouros escondidos...','O quadro de missões está repleto de pedidos de ajuda...','Armas e escudos adornam as paredes do salão como trofeús...','Uma lareira crepita no centro, aquecendo os bravos aventureiros...','O registro da guilda guarda histórias de incontáveis jornadas...','Mapas antigos e diários de campo cobrem a grande mesa central...','O mestre da guilda examina os contratos com olhar atento...','⚔️ Dica: Membros da guilda podem compartilhar recursos e estratégias.','🛡️ Dica: Recrutar aliados com habilidades complementares fortalece o grupo.','⚔️ Dica: Missões de guilda oferecem recompensas exclusivas.','🛡️ Dica: Treinar com mestres da guilda pode desbloquear novas técnicas.','⚔️ Dica: Aliados com classes complementares cobrem fraquezas do grupo.','🛡️ Dica: Aprovação alta desbloqueia habilidades especiais dos companheiros.','⚔️ Dica: Posicione aliados corpo-a-corpo na frente e conjuradores atrás.','🛡️ Dica: Missões de guilda concedem recompensas exclusivas e reputação.',];window._guildLoadingCtrl=ValdoriaLoadingController({overlayId:'loadingOverlay',tips:TIPS,hasRingAccel:false,hasGemPhase:false,onTimeout:function(){console.error("[GUILD] Loading timeout");}});})();
+(function() {
+var TIPS = [
+    // Narrativas imersivas
+    'O cheiro de couro e tinta de pergaminho permeia o salão da guilda...',
+    'Aventureiros conversam aos sussurros sobre tesouros escondidos...',
+    'O quadro de missões está repleto de pedidos de ajuda...',
+    'Armas e escudos adornam as paredes do salão como trofeús...',
+    'Uma lareira crepita no centro, aquecendo os bravos aventureiros...',
+    'O registro da guilda guarda histórias de incontáveis jornadas...',
+    'Mapas antigos e diários de campo cobrem a grande mesa central...',
+    'O mestre da guilda examina os contratos com olhar atento...',
+
+    // Dicas de gameplay
+    '⚔️ Dica: Membros da guilda podem compartilhar recursos e estratégias.',
+    '🛡️ Dica: Recrutar aliados com habilidades complementares fortalece o grupo.',
+    '⚔️ Dica: Missões de guilda oferecem recompensas exclusivas.',
+    '🛡️ Dica: Treinar com mestres da guilda pode desbloquear novas técnicas.',
+    '⚔️ Dica: Aliados com classes complementares cobrem fraquezas do grupo.',
+    '🛡️ Dica: Aprovação alta desbloqueia habilidades especiais dos companheiros.',
+    '⚔️ Dica: Posicione aliados corpo-a-corpo na frente e conjuradores atrás.',
+    '🛡️ Dica: Missões de guilda concedem recompensas exclusivas e reputação.',
+];
+window._guildLoadingCtrl = ValdoriaLoadingController({
+    overlayId: 'loadingOverlay',
+    tips: TIPS,
+    hasRingAccel: false,
+    hasGemPhase: false,
+    onTimeout: function() { console.error("[GUILD] Loading timeout"); }
+});
+})();

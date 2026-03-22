@@ -30,6 +30,7 @@
         document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/drawer.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/escape-key.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
     </script>
     <script>
     document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
@@ -49,7 +50,7 @@
         .screen-track {
             display: flex;
             height: 100%;
-            transition: transform 300ms ease-out;
+            transition: transform var(--v-transition-base)-out;
             will-change: transform;
         }
 
@@ -81,7 +82,7 @@
             height: 100%;
             background: var(--v-bg);
             transform: translateX(100%);
-            transition: transform 300ms ease-out;
+            transition: transform var(--v-transition-base)-out;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             z-index: var(--v-z-sticky, 10);
@@ -169,7 +170,7 @@
         .bonus-chip {
             background: rgba(196, 149, 58, 0.12);
             border: 1px solid rgba(196, 149, 58, 0.35);
-            border-radius: 12px;
+            border-radius: var(--v-radius);
             padding: 3px 10px;
             font-size: 12px;
             font-weight: 600;
@@ -214,7 +215,7 @@
             border-radius: var(--v-radius);
             padding: 10px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--v-transition);
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
 
@@ -294,10 +295,10 @@
         .lang-option {
             background: var(--v-bg-card);
             border: 1px solid var(--v-border);
-            border-radius: 20px;
+            border-radius: var(--v-radius-pill);
             padding: 6px 14px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--v-transition);
             font-size: 12px;
             font-weight: 600;
             color: var(--v-text-bright);
@@ -379,15 +380,15 @@
             flex: 1;
             height: 6px;
             background: rgba(62, 56, 69, 0.6);
-            border-radius: 3px;
+            border-radius: var(--v-radius-sm);
             overflow: hidden;
         }
 
         .stat-bar-fill {
             height: 100%;
-            border-radius: 3px;
+            border-radius: var(--v-radius-sm);
             background: linear-gradient(90deg, var(--v-gold-dim), var(--v-gold));
-            transition: width 0.3s ease;
+            transition: width var(--v-transition-base);
             box-shadow: 0 0 6px rgba(196,149,58,0.35);
         }
 
@@ -408,7 +409,7 @@
             font-size: 15px;
             margin-bottom: 8px;
             letter-spacing: 0.5px;
-            transition: all 0.2s ease;
+            transition: all var(--v-transition);
         }
 
         .v-btn-random:active {
@@ -477,7 +478,7 @@
         .toggle-arrow {
             font-size: 11px;
             color: var(--v-text-dim);
-            transition: transform 0.2s ease;
+            transition: transform var(--v-transition);
             flex-shrink: 0;
             margin-left: 8px;
         }
@@ -537,7 +538,7 @@
             display: inline-block;
             background: rgba(196, 149, 58, 0.12);
             border: 1px solid rgba(196, 149, 58, 0.25);
-            border-radius: 8px;
+            border-radius: var(--v-radius-sm);
             padding: 1px 7px;
             font-size: 9px;
             font-weight: 600;
@@ -748,7 +749,7 @@
             cursor: pointer;
             margin-left: 6px;
             border: 1px solid rgba(196, 149, 58, 0.3);
-            transition: all 0.2s ease;
+            transition: all var(--v-transition);
             vertical-align: middle;
             text-decoration: none;
             line-height: 1;
@@ -774,7 +775,7 @@
             padding: 8px 6px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--v-transition);
         }
 
         .align-option:active {
@@ -815,7 +816,7 @@
             padding: 8px 10px;
             margin-bottom: 5px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--v-transition);
         }
 
         .stat-slot:active {
@@ -864,13 +865,13 @@
         .stat-pool-chip {
             background: rgba(196, 149, 58, 0.12);
             border: 1px solid rgba(196, 149, 58, 0.35);
-            border-radius: 12px;
+            border-radius: var(--v-radius);
             padding: 6px 14px;
             font-size: 15px;
             font-weight: 700;
             color: var(--v-gold);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--v-transition);
         }
 
         .stat-pool-chip:active {
@@ -943,7 +944,7 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             text-align: center; padding: 40px 24px;
-            opacity: 0; transition: opacity 0.4s ease, transform 0.4s ease;
+            opacity: 0; transition: opacity var(--v-transition-slow), transform var(--v-transition-slow);
             transform: translateX(40px);
             pointer-events: none;
         }
@@ -993,14 +994,14 @@
         .onboarding-dot {
             width: 8px; height: 8px; border-radius: 50%;
             background: rgba(196, 149, 58, 0.2);
-            transition: background 0.3s ease, transform 0.3s ease;
+            transition: background var(--v-transition-base), transform var(--v-transition-base);
         }
         .onboarding-dot.active {
             background: var(--v-gold, #c4953a);
             transform: scale(1.3);
         }
         @media (prefers-reduced-motion: reduce) {
-            .onboarding-slide { transition: opacity 0.15s ease; transform: none !important; }
+            .onboarding-slide { transition: opacity var(--v-transition-fast); transform: none !important; }
             .onboarding-slide.exit { transform: none !important; }
         }
     </style>
@@ -1039,7 +1040,7 @@
             } else {
                 try{localStorage.setItem('valdoria_onboarding_seen', 'true');}catch(e){}
                 overlay.style.opacity = '0';
-                overlay.style.transition = 'opacity 0.3s ease';
+                overlay.style.transition = 'opacity var(--v-transition-base)';
                 setTimeout(function() { overlay.style.display = 'none'; }, 300);
             }
         });
@@ -1655,7 +1656,7 @@
             track.style.transition = 'none';
             track.style.transform = `translateX(${-100 * currentScreen}vw)`;
             track.offsetHeight;
-            track.style.transition = 'transform 300ms ease-out';
+            track.style.transition = 'transform var(--v-transition-base)-out';
             goScreen(idx);
         }
 
@@ -1785,7 +1786,7 @@
                 document.body.appendChild(toast);
                 setTimeout(() => {
                     toast.style.opacity = '0';
-                    toast.style.transition = 'opacity 0.25s ease';
+                    toast.style.transition = 'opacity var(--v-transition-base)';
                     setTimeout(() => toast.remove(), 250);
                 }, dur);
             }

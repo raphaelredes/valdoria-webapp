@@ -16,9 +16,13 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/image-popup.css?v=' + v + '">');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/image-popup.js?v=' + v + '"><\/script>');
     </script>
     <script>
@@ -86,7 +90,7 @@
             background: var(--v-bg-card);
             color: var(--v-text-dim);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
             white-space: nowrap;
         }
 
@@ -138,7 +142,7 @@
             background: var(--v-bg-card);
             color: var(--v-text-dim);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
             white-space: nowrap;
         }
 
@@ -192,7 +196,7 @@
             border-radius: var(--v-radius);
             padding: 8px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
             position: relative;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
@@ -250,7 +254,7 @@
             right: 8px;
             font-size: 10px;
             padding: 2px 6px;
-            border-radius: 8px;
+            border-radius: var(--v-radius-sm);
             background: var(--v-bg-raised);
             color: var(--v-text-dim);
         }
@@ -329,7 +333,7 @@
             background: var(--v-bg-card);
             color: var(--v-text-dim);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
         }
 
         .filter-btn.active {
@@ -354,7 +358,7 @@
             background: transparent;
             color: var(--v-gold);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
             font-family: var(--v-font);
         }
 
@@ -374,7 +378,7 @@
             background: var(--v-bg-card);
             border-radius: var(--v-radius);
             border: 1px solid var(--v-border);
-            transition: all 0.2s;
+            transition: all var(--v-transition);
             overflow: hidden;
         }
 
@@ -400,14 +404,14 @@
         .sell-row .sr-check {
             width: 20px;
             height: 20px;
-            border-radius: 4px;
+            border-radius: var(--v-radius-sm);
             border: 2px solid var(--v-border);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
             font-size: 12px;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
         }
 
         .sell-row.selected .sr-check {
@@ -478,7 +482,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.15s;
+            transition: all var(--v-transition-fast);
             font-family: var(--v-font);
             -webkit-tap-highlight-color: transparent;
         }
@@ -503,7 +507,7 @@
             font-size: 12px;
             cursor: pointer;
             font-family: var(--v-font);
-            transition: all 0.15s;
+            transition: all var(--v-transition-fast);
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -536,7 +540,7 @@
             display: flex;
             flex-direction: column;
             gap: 3px;
-            transition: transform 0.3s ease, opacity 0.25s ease;
+            transition: transform var(--v-transition-base), opacity var(--v-transition-base);
         }
 
         /* ── Immersive Mode ── */
@@ -549,7 +553,7 @@
             height: 32px;
             border: 1px solid var(--v-border);
             border-bottom: none;
-            border-radius: 12px 12px 0 0;
+            border-radius: var(--v-radius) var(--v-radius) 0 0;
             background: var(--v-bg);
             color: var(--v-text-dim);
             font-size: 14px;
@@ -558,7 +562,7 @@
             cursor: pointer;
             z-index: var(--v-z-header, 100);
             -webkit-tap-highlight-color: transparent;
-            transition: transform 0.3s ease;
+            transition: transform var(--v-transition-base);
         }
         .immersive-toggle:active { background: var(--v-bg-raised); color: var(--v-gold-dim); }
 
@@ -583,7 +587,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             -webkit-tap-highlight-color: transparent;
             opacity: 0.9;
-            transition: opacity 0.2s, transform 0.2s ease;
+            transition: opacity var(--v-transition), transform var(--v-transition);
         }
         .immersive-restore:active { opacity: 1; transform: translateX(-50%) scale(0.95); }
 
@@ -591,7 +595,7 @@
             transform: translateX(-50%) translateY(100%);
             opacity: 0;
             pointer-events: none;
-            transition: transform 0.3s ease, opacity 0.2s ease;
+            transition: transform var(--v-transition-base), opacity var(--v-transition);
         }
 
         .cart-summary {
@@ -623,7 +627,7 @@
             font-size: 15px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
             font-family: var(--v-font);
             background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
             color: var(--v-bg);
@@ -645,47 +649,11 @@
             box-shadow: none;
         }
 
-        /* ── Item Detail Modal ── */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: var(--v-z-modal, 5000);
-            background: rgba(0, 0, 0, 0.7);
-            /* backdrop-filter removed for mobile performance */
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-
-        .modal-overlay.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal {
-            background: var(--v-bg-raised);
-            border-radius: 16px 16px 0 0;
-            box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
-            width: 100%;
-            max-width: 480px;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 16px 14px 20px;
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-        }
-
-        .modal-overlay.visible .modal {
-            transform: translateY(0);
-        }
 
         .modal-handle {
             width: 36px;
             height: 4px;
-            border-radius: 2px;
+            border-radius: var(--v-radius-sm);
             background: var(--v-border);
             margin: 0 auto 12px;
         }
@@ -746,7 +714,7 @@
             font-weight: 600;
             cursor: pointer;
             font-family: var(--v-font);
-            transition: all 0.2s;
+            transition: all var(--v-transition);
         }
 
         .detail-actions button:active {
@@ -792,7 +760,7 @@
             align-items: center;
             justify-content: center;
             font-family: var(--v-font);
-            transition: all 0.2s;
+            transition: all var(--v-transition);
         }
 
         .qty-row .qty-btn-lg:active {
@@ -832,49 +800,24 @@
             animation: v-fadeIn 0.3s ease;
         }
 
-        .toast {
-            position: fixed;
-            bottom: 110px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 8px 18px;
-            border-radius: var(--v-radius-pill);
-            font-size: 13px;
-            z-index: var(--v-z-overlay, 300);
-            animation: v-fadeSlideUp 0.25s ease;
-            pointer-events: none;
-            color: #fff;
-        }
-
-        .toast-warn {
-            background: var(--v-warning);
-        }
-
-        .toast-err {
-            background: var(--v-danger);
-        }
-
-        .toast-ok {
-            background: var(--v-success);
-        }
     
         /* ── Item Image Thumbnails ── */
         .sc-thumb {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 6px;
+            border-radius: var(--v-radius-sm);
             border: 1px solid rgba(196, 149, 58, 0.25);
         }
         .sc-emoji:has(.sc-thumb) {
             overflow: hidden;
-            border-radius: 6px;
+            border-radius: var(--v-radius-sm);
         }
         .sr-thumb {
             width: 24px;
             height: 24px;
             object-fit: cover;
-            border-radius: 4px;
+            border-radius: var(--v-radius-sm);
             border: 1px solid rgba(196, 149, 58, 0.2);
             vertical-align: middle;
         }
@@ -941,8 +884,12 @@
     </div>
     <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
 
-    <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
-        <div class="modal" id="modalContent"></div>
+    <div id="v-popup-overlay" class="v-popup-overlay" style="display:none">
+      <div class="v-popup-card">
+        <div class="v-popup-header"></div>
+        <div class="v-popup-body"></div>
+        <div class="v-popup-actions"></div>
+      </div>
     </div>
 
     <script>
@@ -1451,7 +1398,7 @@
             let html = '<div class="modal-handle"></div>';
             if (item.img) {
                 html += '<div style="text-align:center;margin-bottom:6px;">'
-                    + '<img src="' + item.img + '" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(196,149,58,0.3);cursor:pointer;" onerror="this.style.display=\'none\'" onclick="event.stopPropagation();showItemImage(\'' + esc(item.n) + '\',\'' + esc(item.img) + '\',\'' + esc(item.e||'') + '\',' + JSON.stringify(item.d||{}) + ')">'
+                    + '<img src="' + item.img + '" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:var(--v-radius-sm);border:1px solid rgba(196,149,58,0.3);cursor:pointer;" onerror="this.style.display=\'none\'" onclick="event.stopPropagation();showItemImage(\'' + esc(item.n) + '\',\'' + esc(item.img) + '\',\'' + esc(item.e||'') + '\',' + JSON.stringify(item.d||{}) + ')">'
                     + '</div>';
             }
             html += `<div class="modal-title">${item.e || '📦'} ${esc(item.n)}</div>`;
@@ -1734,33 +1681,19 @@
         };
         function getSlotName(s) { return SLOT_NAMES[s] || s; }
 
-        // ── Modal ──
+        // ── Modal (delegated to shared vPopup) ──
         function showModal(html) {
-            document.getElementById('modalContent').innerHTML = html;
-            document.getElementById('modalOverlay').classList.add('visible');
+            vPopup.show({ body: html });
         }
         function closeModal() {
-            document.getElementById('modalOverlay').classList.remove('visible');
+            if (typeof vPopup !== 'undefined' && vPopup.isOpen()) vPopup.hide();
         }
         function closeModalOutside(e) {
-            if (e.target === document.getElementById('modalOverlay')) closeModal();
+            // handled by vPopup internally
         }
 
         function toast(msg, type) {
-            const existing = document.querySelector('.toast');
-            if (existing) existing.remove();
-            const el = document.createElement('div');
-            el.className = `toast toast-${type || 'ok'}`;
-            el.textContent = msg;
-            document.body.appendChild(el);
-            var cat = (type === 'err' || type === 'warn') ? 'toast-warn' : 'toast';
-            var dur = (typeof calcReadTime === 'function') ? calcReadTime(msg, cat) : 2000;
-            // Fade-out before removal
-            setTimeout(() => {
-                el.style.opacity = '0';
-                el.style.transition = 'opacity 0.25s ease';
-                setTimeout(() => el.remove(), 250);
-            }, dur);
+            vToast(msg, type === 'err' ? 'err' : type === 'warn' ? 'warn' : 'ok');
         }
 
         function esc(s) {

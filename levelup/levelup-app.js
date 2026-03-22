@@ -28,19 +28,16 @@ try{window.__valdoria_transitioning=true;tg.close();}catch(e){console.warn('[LEV
 if(typeof vEscapeKey!=='undefined'){vEscapeKey.register(function(){return typeof vDrawer!=='undefined'&&vDrawer.isOpen();},function(){var top=typeof vDrawer!=='undefined'&&vDrawer.getTopOpen();if(top)vDrawer.close(top.id);});}
 function updateNavBtn(){const btn=document.getElementById('btnNext');if(cur===screens.length-1){btn.textContent='\u2694\ufe0f Confirmar Evolucao';btn.className='v-btn v-btn-primary';}else{btn.textContent='Continuar \u25b6';btn.className='v-btn v-btn-primary';}
 if(tg&&tg.BackButton){const hasOpenSub=document.querySelector('.sub-screen.active');tg.BackButton.show();}}
-function openSubScreen(subId){if(isTransitioning)return;const sub=document.getElementById(subId);if(!sub)return;isTransitioning=true;sub.classList.add('active');const parentScreen=sub.closest('.screen');if(parentScreen){parentScreen.scrollTop=0;parentScreen.classList.add('sub-open');}
-sub.scrollTop=0;document.querySelector('.nav-bar').classList.add('hidden');updateNavBtn();setTimeout(()=>{isTransitioning=false;},350);}
-function closeSubScreen(subId){const sub=document.getElementById(subId);if(!sub)return;sub.classList.remove('active');const parentScreen=sub.closest('.screen');if(parentScreen&&!parentScreen.querySelector('.sub-screen.active')){parentScreen.classList.remove('sub-open');}
-if(!document.querySelector('.sub-screen.active')){document.querySelector('.nav-bar').classList.remove('hidden');}
-updateNavBtn();}
-function closeAllSubScreens(){document.querySelectorAll('.sub-screen.active').forEach(s=>{s.classList.remove('active');const parentScreen=s.closest('.screen');if(parentScreen)parentScreen.classList.remove('sub-open');});}
+function openSubScreen(subId){vDrawer.open(subId);var sub=document.getElementById(subId);if(sub)sub.scrollTop=0;document.querySelector('.nav-bar').classList.add('hidden');updateNavBtn();}
+function closeSubScreen(subId){vDrawer.close(subId);if(!document.querySelector('.sub-screen.active')){document.querySelector('.nav-bar').classList.remove('hidden');}updateNavBtn();}
+function closeAllSubScreens(){vDrawer.closeAll();}
 if(tg&&tg.BackButton){tg.BackButton.onClick(()=>{const openSub=document.querySelector('.sub-screen.active');if(openSub){closeSubScreen(openSub.id);return;}
 goBack();});}
 function getMod(val){return Math.floor((val-10)/2);}
 function fmtMod(val){const m=getMod(val);return m>=0?'+'+m:''+m;}
 function getAvailableSkills(){const pool=CLASS_SKILLS[P.hero_class]||{};const result=[];for(const[lv,skills]of Object.entries(pool)){if(parseInt(lv, 10)<=P.level){for(const s of skills){if(!P.acquired_skills.includes(s.id)){result.push({...s,level:parseInt(lv, 10)});}}}}
 return result;}
-function _showValidation(msg){console.warn('[LEVELUP]',msg);hapticNotify('error');var _dur=Math.max(2000,msg.split(/\s+/).length*250);if(window.ValdoriaErrors){ValdoriaErrors.showToast(msg,_dur);}else{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),_dur);}}
+function _showValidation(msg){console.warn('[LEVELUP]',msg);hapticNotify('error');var _dur=Math.max(2000,msg.split(/\s+/).length*250);if(window.ValdoriaErrors){ValdoriaErrors.showToast(msg,_dur);}else{vToast(msg,'err',_dur);}}
 function showFatalError(msg,err=null){console.error('[LEVELUP][FATAL]',msg,err||'');if(window.ValdoriaErrors){ValdoriaErrors.showError(msg,err);}else{const el=document.getElementById('fatalError');document.getElementById('fatalMsg').textContent=msg;el.classList.add('active');}}
 function calcDmgRange(effect){if(!effect)return'';const m=effect.match(/(\d+)d(\d+)(?:\s*\+\s*(\d+))?/);if(!m)return'';const n=parseInt(m[1], 10),d=parseInt(m[2], 10),b=m[3]?parseInt(m[3], 10):0;return`${n + b}~${n * d + b}`;}
 function buildSummary(el){const info=CLASS_INFO[P.hero_class]||{name:'Aventureiro',resource:'MP'};let html=`

@@ -57,7 +57,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 pointer-events: none;
                 opacity: 0;
                 transform: translateY(8px);
-                transition: opacity 0.2s ease, transform 0.2s ease;
+                transition: opacity var(--v-transition), transform var(--v-transition);
             }
             .va-popup.open {
                 opacity: 1;
@@ -90,7 +90,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 flex-shrink: 0;
                 padding: 0;
                 font-size: 14px;
-                transition: color 0.2s, border-color 0.2s;
+                transition: color var(--v-transition), border-color var(--v-transition);
                 -webkit-tap-highlight-color: transparent;
             }
             .va-popup-icon.unmuted {
@@ -160,7 +160,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
             .va-backdrop {
                 position: fixed;
                 inset: 0;
-                z-index: 9999;
+                z-index: calc(var(--v-z-critical, 10000) - 1);
                 display: none;
             }
             .va-backdrop.open {
@@ -180,7 +180,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 min-height: 40px;
                 font-size: 14px;
                 flex: 0 0 40px;
-                transition: color 0.2s, border-color 0.2s;
+                transition: color var(--v-transition), border-color var(--v-transition);
             }
             .va-footer-btn.va-playing {
                 color: var(--v-gold, #c4953a);
@@ -194,8 +194,8 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 position: fixed;
                 bottom: var(--va-bottom-offset, 8px);
                 right: 8px;
-                z-index: 200;
-                transition: bottom 0.3s ease;
+                z-index: var(--v-z-dropdown, 200);
+                transition: bottom var(--v-transition-base);
             }
             .va-float-btn {
                 width: 36px;
@@ -210,7 +210,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 cursor: pointer;
                 padding: 0;
                 box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                transition: color 0.2s, border-color 0.2s, transform 0.15s;
+                transition: color var(--v-transition), border-color var(--v-transition), transform var(--v-transition-fast);
             }
             .va-float-btn.va-playing {
                 color: var(--v-gold, #c4953a);

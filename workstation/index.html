@@ -80,7 +80,7 @@
             background: var(--v-bg-card);
             color: var(--v-text-dim);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
             white-space: nowrap;
         }
 
@@ -102,7 +102,7 @@
             padding: 10px;
             margin-bottom: 8px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
         }
 
         .recipe-card:active {
@@ -138,7 +138,7 @@
         .recipe-badge {
             font-size: 11px;
             padding: 2px 8px;
-            border-radius: 12px;
+            border-radius: var(--v-radius);
             font-weight: 600;
         }
 
@@ -234,7 +234,7 @@
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
         }
 
         .craft-btn.enabled {
@@ -259,7 +259,7 @@
             align-items: center;
             padding: 10px 12px;
             background: var(--v-bg-card);
-            border-radius: 8px;
+            border-radius: var(--v-radius-sm);
             margin-bottom: 6px;
             font-size: 14px;
         }

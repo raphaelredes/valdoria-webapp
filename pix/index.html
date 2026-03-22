@@ -75,7 +75,7 @@
         .qr-wrapper {
             background: var(--v-parchment);
             border: 2px solid var(--v-gold);
-            border-radius: 12px;
+            border-radius: var(--v-radius);
             padding: 12px;
             box-shadow: var(--v-shadow-glow);
         }
@@ -109,7 +109,7 @@
             width: 100%;
             background: var(--v-bg-card);
             border: 1px solid var(--v-border-gold);
-            border-radius: 8px;
+            border-radius: var(--v-radius-sm);
             padding: 10px;
         }
 
@@ -171,11 +171,11 @@
             width: 100%;
             padding: 10px;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--v-radius-sm);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--v-transition);
             -webkit-tap-highlight-color: transparent;
         }
 

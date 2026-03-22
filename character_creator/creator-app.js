@@ -26,12 +26,10 @@ buildSkillGrid();}
 if(idx===6){const tc=getToolChoiceCount();if(tc===0){isTransitioning=false;skipToScreen(idx+(idx>currentScreen?1:-1));return;}
 buildToolGrid();}
 if(idx===8)buildSummary();closeAllSubScreens();currentScreen=idx;document.getElementById('screenTrack').style.transform=`translateX(${-100 * idx}vw)`;SCREENS.forEach((s,i)=>{const dot=document.getElementById('pdot-'+i);dot.className='v-progress-dot'+(i<idx?' done':i===idx?' active':'');});document.getElementById('progressLabel').textContent=`${idx + 1}/${SCREENS.length} - ${SCREEN_NAMES[idx]}`;document.getElementById(SCREENS[idx]).scrollTop=0;updateBackButton();haptic();}
-function skipToScreen(idx){const track=document.getElementById('screenTrack');track.style.transition='none';track.style.transform=`translateX(${-100 * currentScreen}vw)`;track.offsetHeight;track.style.transition='transform 300ms ease-out';goScreen(idx);}
-function openSubScreen(subId){if(isTransitioning)return;const sub=document.getElementById(subId);if(sub){isTransitioning=true;sub.classList.add('active');const parentScreen=sub.closest('.screen');if(parentScreen){parentScreen.scrollTop=0;parentScreen.classList.add('sub-open');}
-sub.scrollTop=0;updateBackButton();haptic();setTimeout(()=>{isTransitioning=false;},350);}}
-function closeSubScreen(subId){const sub=document.getElementById(subId);if(sub){sub.classList.remove('active');const parentScreen=sub.closest('.screen');if(parentScreen&&!parentScreen.querySelector('.sub-screen.active')){parentScreen.classList.remove('sub-open');}}
-if(subId==='sub-race-detail')currentRaceDetailKey='';updateBackButton();}
-function closeAllSubScreens(){document.querySelectorAll('.sub-screen.active').forEach(s=>{s.classList.remove('active');const parentScreen=s.closest('.screen');if(parentScreen)parentScreen.classList.remove('sub-open');});}
+function skipToScreen(idx){const track=document.getElementById('screenTrack');track.style.transition='none';track.style.transform=`translateX(${-100 * currentScreen}vw)`;track.offsetHeight;track.style.transition='transform var(--v-transition-base)-out';goScreen(idx);}
+function openSubScreen(subId){vDrawer.open(subId);var sub=document.getElementById(subId);if(sub)sub.scrollTop=0;updateBackButton();haptic();}
+function closeSubScreen(subId){vDrawer.close(subId);if(subId==='sub-race-detail')currentRaceDetailKey='';updateBackButton();}
+function closeAllSubScreens(){vDrawer.closeAll();}
 function setupBackButton(){if(!tg||!tg.BackButton)return;tg.BackButton.onClick(()=>{const openSub=document.querySelector('.sub-screen.active');if(openSub){if(openSub.id==='sub-race-detail'&&currentRaceDetailKey&&isRaceSelectionPhase()){buildRaceDetail(currentRaceDetailKey);return;}
 closeSubScreen(openSub.id);return;}
 if(currentScreen>0){goScreen(currentScreen-1);return;}
@@ -44,7 +42,7 @@ if(currentScreen===3&&!sel.bg)return'Selecione um antecedente.';if(currentScreen
 if(currentScreen===6){const tc=getToolChoiceCount();if(sel.toolProfs.length!==tc)return`Selecione ${tc} ferramenta(s).`;}
 if(currentScreen===7||(currentScreen===8&&sel._wasRandom)){if(!sel.gender)return'Selecione um gênero.';if(!sel.name||sel.name.length>15)return'Nome deve ter 1-15 caracteres.';if(sel.surname.length>15)return'Sobrenome máximo 15 caracteres.';const full=`${sel.name} ${sel.surname}`.trim().toLowerCase();if(existingNames.includes(full))return'Já existe um personagem com esse nome.';}
 return null;}
-function _showValidation(msg){console.warn('[CHAR_CREATOR]',msg);const dur=typeof calcReadTime==='function'?calcReadTime(msg,'toast-warn'):3000;if(currentScreen===7){const el=document.getElementById('nameError');el.textContent=msg;el.style.display='block';setTimeout(()=>{el.style.display='none';},dur);}else if(window.ValdoriaErrors){ValdoriaErrors.showToast(msg);}else{const toast=document.createElement('div');toast.className='v-toast v-toast-error';toast.textContent=msg;document.body.appendChild(toast);setTimeout(()=>{toast.style.opacity='0';toast.style.transition='opacity 0.25s ease';setTimeout(()=>toast.remove(),250);},dur);}
+function _showValidation(msg){console.warn('[CHAR_CREATOR]',msg);const dur=typeof calcReadTime==='function'?calcReadTime(msg,'toast-warn'):3000;if(currentScreen===7){const el=document.getElementById('nameError');el.textContent=msg;el.style.display='block';setTimeout(()=>{el.style.display='none';},dur);}else if(window.ValdoriaErrors){ValdoriaErrors.showToast(msg);}else{vToast(msg,'err',dur);}
 haptic();}
 function showHelp(ctx){const data=HELP_TEXTS[ctx];if(!data)return;document.getElementById('helpTitle').textContent=data.title;document.getElementById('helpBody').textContent=data.text;document.getElementById('helpOverlay').classList.add('active');haptic();}
 function closeHelp(event){if(event&&event.target!==document.getElementById('helpOverlay')&&event.type==='click')return;document.getElementById('helpOverlay').classList.remove('active');}
