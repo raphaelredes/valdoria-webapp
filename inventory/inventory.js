@@ -58,16 +58,16 @@ localGems[k]=[...v];}
 localRunes=D.runes?{...D.runes}:{};localAllyEq={};if(D.allies){for(const a of D.allies)
 localAllyEq[a.id]=Object.assign({},a.eq||{});}
 closeModal();updateHeader();renderTab();updateBottomBar();haptic('light');toast(`${vi('sparkle', 13)} Alterações descartadas`,'warn');}
-var _modalOpen=false;function showModal(html){document.getElementById('modalContent').innerHTML=html;document.getElementById('modalOverlay').classList.add('visible');if(!_modalOpen){_modalOpen=true;}}
-function closeModal(){document.getElementById('modalOverlay').classList.remove('visible');if(_modalOpen){_modalOpen=false;}}
-function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
-function initSwipeToDismiss(){const modal=document.getElementById('modalContent');let startY=0,currentY=0,isDragging=false;modal.addEventListener('touchstart',e=>{const handle=modal.querySelector('.modal-handle');if(!handle)return;const rect=modal.getBoundingClientRect();const touchY=e.touches[0].clientY-rect.top;if(touchY>40)return;startY=e.touches[0].clientY;isDragging=true;modal.style.transition='none';},{passive:true});modal.addEventListener('touchmove',e=>{if(!isDragging)return;currentY=e.touches[0].clientY;const diff=currentY-startY;if(diff>0){modal.style.transform=`translateY(${diff}px)`;}},{passive:true});modal.addEventListener('touchend',()=>{if(!isDragging)return;isDragging=false;modal.style.transition='transform 0.3s ease-out';const diff=currentY-startY;if(diff>100){closeModal();}
+var _modalOpen=false;function showModal(html){if(typeof vPopup!=='undefined'){vPopup.show({body:html,onHide:function(){_modalOpen=false;}});_modalOpen=true;}else{console.warn('[INVENTORY] vPopup not loaded');}}
+function closeModal(){if(typeof vPopup!=='undefined'){vPopup.hide();}_modalOpen=false;}
+function closeModalOutside(e){}
+function initSwipeToDismiss(){const modal=document.querySelector('.v-popup-card');if(!modal)return;let startY=0,currentY=0,isDragging=false;modal.addEventListener('touchstart',e=>{const rect=modal.getBoundingClientRect();const touchY=e.touches[0].clientY-rect.top;if(touchY>40)return;startY=e.touches[0].clientY;isDragging=true;modal.style.transition='none';},{passive:true});modal.addEventListener('touchmove',e=>{if(!isDragging)return;currentY=e.touches[0].clientY;const diff=currentY-startY;if(diff>0){modal.style.transform='translateY('+diff+'px)';}},{passive:true});modal.addEventListener('touchend',()=>{if(!isDragging)return;isDragging=false;modal.style.transition='transform 0.3s ease-out';const diff=currentY-startY;if(diff>100){closeModal();}
 modal.style.transform='';},{passive:true});}
 function discardAndExit(){pendingOps=[];closeModal();_performExit();}
 function initBackButton(){if(window._invPopupMode)return;try{if(tg?.BackButton){tg.BackButton.show();tg.BackButton.onClick(()=>{_navigateBack();});}
 window.__valdoriaExitAction=function(){try{window.__valdoria_transitioning=true;if(tg)tg.close();}catch(e){console.warn('[INVENTORY] tg.close:',e);}};}catch(e){console.warn('[INVENTORY] BackButton setup:',e);}}
 var _RETURN_LABELS={game:'🏘️ Cidade',explore:'🗺️ Mapa',combat:'⚔️ Combate',arena:'⚔️ Combate',};function _initNavBar(){}
-function navBack(){haptic('light');if(_modalOpen){closeModal();return;}
+function navBack(){haptic('light');if(typeof vPopup!=='undefined'&&vPopup.isOpen()){closeModal();return;}
 if(activeTarget!=='player'){switchTab('allies');return;}
 if(pendingOps.length>0){_showPendingOpsExitConfirm();return;}
 _performExit();}
