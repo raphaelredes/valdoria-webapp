@@ -19,6 +19,7 @@
         document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/dice-roller.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="combat.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
@@ -28,6 +29,7 @@
     document.write('<script src="../shared/bounce-back.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/haptic.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
@@ -102,7 +104,15 @@
         document.write('<script src="combat-ui.js?v=' + v + '"><\/script>');
         document.write('<script src="combat.js?v=' + v + '"><\/script>');
     </script>
-    <div id="combatAnnouncer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+    <!-- vPopup Overlay (shared popup system) -->
+<div id="v-popup-overlay" class="v-popup-overlay" style="display:none">
+    <div class="v-popup-card">
+        <div class="v-popup-header" id="v-popup-header"></div>
+        <div class="v-popup-body" id="v-popup-body"></div>
+        <div class="v-popup-actions" id="v-popup-actions"></div>
+    </div>
+</div>
+<div id="combatAnnouncer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("COMBAT")</script>
 </body>
 

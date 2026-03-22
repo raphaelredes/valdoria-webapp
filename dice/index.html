@@ -172,7 +172,7 @@
             color: var(--v-text-dim);
             border: 1px solid var(--v-border);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--v-transition);
             white-space: nowrap;
             -webkit-tap-highlight-color: transparent;
             box-shadow: var(--v-shadow-sm);
@@ -230,7 +230,7 @@
             align-items: center;
             justify-content: center;
             -webkit-tap-highlight-color: transparent;
-            transition: all 0.2s ease;
+            transition: all var(--v-transition);
             box-shadow: var(--v-shadow-sm);
         }
 
@@ -396,7 +396,7 @@
             text-align: center;
             opacity: 0;
             transform: translateY(20px);
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            transition: opacity var(--v-transition-slow), transform var(--v-transition-slow);
         }
 
         .result-panel.visible {
