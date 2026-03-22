@@ -81,4 +81,5 @@ function renderQuestTracker(container,data){if(!data.quests||data.quests.length=
 +'<span class="quest-tracker-status">'+(q.ready?'\u2705':'\u25b8')+'</span>';wrap.appendChild(row);}
 var viewAll=document.createElement('div');viewAll.className='quest-tracker-view-all';viewAll.textContent='Ver todas ▸';viewAll.onclick=function(){doAction('action_quests');};wrap.appendChild(viewAll);var firstBlock=container.querySelector('.text-block, .v-bar-row');if(firstBlock&&firstBlock.nextSibling){container.insertBefore(wrap,firstBlock.nextSibling.nextSibling||null);}else{container.appendChild(wrap);}}
 function _escQ(text){if(!text)return'';return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+window._questEsc=_escQ;
 function _safeQ(text){if(!text)return'';var s=_escQ(text);s=s.replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>');s=s.replace(/&lt;i&gt;/g,'<i>').replace(/&lt;\/i&gt;/g,'</i>');return s;}

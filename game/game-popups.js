@@ -43,7 +43,7 @@ function _buildActionsHtml(data) {
             html += "<button class=\"v-popup-btn\" data-cb=\"" + cb + "\">" + label + "</button>";
         }
     }
-    html += "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Voltar</button>";
+    html += "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>";
     return html;
 }
 
@@ -54,9 +54,9 @@ window._showSkillsPopup = function(data) {
     vPopup.show({
         header: "Habilidades",
         body: body,
-        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Voltar</button>",
+        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>",
         onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") doAction(action);
+            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
         },
         onHide: function() { _activeFooterPopup = null; },
         onReady: function(el) {
@@ -83,9 +83,9 @@ window._showSkillDetailPopup = function(data) {
     vPopup.show({
         header: headerText,
         body: body,
-        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Voltar</button>",
+        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>",
         onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") doAction(action);
+            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
         }
     });
 };
@@ -102,9 +102,9 @@ window._showCharDetailsPopup = function(data) {
     vPopup.show({
         header: "Ficha do Personagem",
         body: body,
-        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Voltar</button>",
+        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>",
         onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") doAction(action);
+            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
         },
         onHide: function() { _activeFooterPopup = null; },
         onReady: function(el) { _attachActionClicks(el); }
@@ -135,7 +135,7 @@ window._showAlliesPopup = function(data) {
         body: body,
         actions: actionsHtml,
         onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") doAction(action);
+            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
         },
         onHide: function() { _activeFooterPopup = null; },
         onReady: function(el) { _attachActionClicks(el); }
@@ -161,38 +161,7 @@ window._showMemberDetailPopup = function(data) {
         body: body,
         actions: actionsHtml,
         onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") doAction(action);
-        },
-        onReady: function(el) { _attachActionClicks(el); }
-    });
-};
-
-/* ====== QUEST TURNIN ====== */
-window._showQuestTurninPopup = function(data) {
-    var d = data.quest_turnin;
-    var body = "<div style=\"padding:12px;color:var(--v-text);\">";
-    if (d.title) body += "<div style=\"font-size:16px;font-weight:bold;margin-bottom:8px;\">" + d.title + "</div>";
-    if (d.text) body += "<div style=\"margin-bottom:12px;line-height:1.5;\">" + d.text + "</div>";
-    if (d.rewards) {
-        body += "<div style=\"margin-top:8px;padding:8px;background:rgba(0,0,0,0.2);border-radius:8px;\">";
-        body += "<div style=\"font-weight:bold;margin-bottom:4px;\">Recompensas:</div>";
-        if (typeof d.rewards === "string") {
-            body += "<div>" + d.rewards + "</div>";
-        } else if (Array.isArray(d.rewards)) {
-            for (var i = 0; i < d.rewards.length; i++) {
-                body += "<div>" + d.rewards[i] + "</div>";
-            }
-        }
-        body += "</div>";
-    }
-    body += "</div>";
-    var actionsHtml = _buildActionsHtml(data);
-    vPopup.show({
-        header: "Entrega de Missão",
-        body: body,
-        actions: actionsHtml,
-        onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") doAction(action);
+            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
         },
         onReady: function(el) { _attachActionClicks(el); }
     });
@@ -217,9 +186,9 @@ window._showInnSelectPopup = function(data) {
     vPopup.show({
         header: "Estalagem",
         body: body,
-        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Voltar</button>",
+        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>",
         onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") doAction(action);
+            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
         },
         onReady: function(el) { _attachActionClicks(el); }
     });
@@ -236,9 +205,9 @@ window._showReferralPopup = function(data) {
     vPopup.show({
         header: "Convite",
         body: body,
-        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Voltar</button>",
+        actions: "<button class=\"v-popup-btn v-popup-btn--cancel\" data-action=\"cancel\">Fechar</button>",
         onAction: function(action) {
-            if (action !== "cancel" && typeof doAction === "function") doAction(action);
+            if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
         }
     });
 };

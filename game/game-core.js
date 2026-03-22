@@ -59,7 +59,7 @@ var actionsHtml='';if(data.buttons&&data.buttons.length>0){for(var r=0;r<data.bu
 +(row[b].text||'')+'</button>';}
 actionsHtml+='</div>';}else{actionsHtml+='<button class="v-popup-btn" data-action="'+(row[0].cb||'')+'">'
 +(row[0].text||'')+'</button>';}}}
-actionsHtml+='<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">🏠 Voltar</button>';vPopup.show({header:popup.title||'',headerClass:popup.headerClass||'',body:bodyHtml,actions:actionsHtml});}
+actionsHtml+='<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>';vPopup.show({header:popup.title||'',headerClass:popup.headerClass||'',body:bodyHtml,actions:actionsHtml});}
 async function _closeGameHub(){window.__valdoria_close_sent=true;if(window.SessionHeartbeat)SessionHeartbeat.stop();try{const controller=new AbortController();const tid=setTimeout(()=>controller.abort(),2000);await fetch(S.apiBase+'/api/game/close',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.token},body:JSON.stringify({user_id:S.uid}),signal:controller.signal,}).catch(e=>console.warn('[GAME] cleanup:',e));clearTimeout(tid);}catch(e){}
 valdoriaSpaClose();}
 
@@ -86,7 +86,6 @@ if(data.skill_detail_data&&typeof _showSkillDetailPopup==='function'){hideLocati
 if(data.char_details&&typeof _showCharDetailsPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showCharDetailsPopup(data);return;}
 if(data.allies&&data.allies.length>0&&!(data.text&&data.text.length>50)&&typeof _showAlliesPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showAlliesPopup(data);return;}
 if(data.member_detail&&typeof _showMemberDetailPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showMemberDetailPopup(data);return;}
-if(data.quest_turnin&&typeof _showQuestTurninPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showQuestTurninPopup(data);return;}
 if(data.inn_select&&typeof _showInnSelectPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showInnSelectPopup(data);return;}
 if(data.referral_data&&typeof _showReferralPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showReferralPopup(data);return;}
 if(!data.text&&!data.screen_id&&!data.transition&&!data.error){console.warn('[GAME] Empty response from action');if(window.actionGuard)actionGuard.release();hideLocationTransition();if(window._emptyRespGuard){window._emptyRespGuard=false;console.error('[GAME] Repeated empty response — aborting retry');showError('Erro ao carregar tela. Feche e reabra o jogo.');return;}window._emptyRespGuard=true;returnFromWebApp();return;}
