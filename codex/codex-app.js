@@ -212,6 +212,7 @@
                     Telegram.WebApp.sendData(JSON.stringify({ type: 'codex_close' }));
                 } else {
                     // Direct navigation to game hub
+                    window.__valdoria_transitioning = true;
                     window.location.replace(baseUrl + '/game/?token=' + _token);
                 }
             });

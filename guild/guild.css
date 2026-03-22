@@ -35,7 +35,7 @@
 .guild-approval-badge { display: inline-block; padding: 1px 6px; border-radius: var(--v-radius-pill); font-family: var(--v-font); font-size: var(--v-font-micro); font-weight: bold; }
 .guild-approval-badge.tier-hostile  { background: rgba(180,40,40,0.25); color: #e05555; }
 .guild-approval-badge.tier-cold    { background: rgba(180,100,40,0.2); color: #d4935a; }
-.guild-approval-badge.tier-neutral { background: rgba(160,148,132,0.2); color: #a09484; }
+.guild-approval-badge.tier-neutral { background: rgba(160,148,132,0.2); color: var(--v-text-dim); }
 .guild-approval-badge.tier-warm    { background: rgba(100,160,80,0.2); color: #7ab85a; }
 .guild-approval-badge.tier-loyal   { background: rgba(80,140,200,0.2); color: #5aa0d4; }
 .guild-approval-badge.tier-devoted { background: rgba(196,149,58,0.25); color: var(--v-gold); }
