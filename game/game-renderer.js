@@ -154,7 +154,7 @@ _hideFeedbackOverlay();if(typeof apiCall==='function'){apiCall('/api/game/action
 if(typeof showToast==='function'){showToast('\u2728 Obrigado pelo feedback! Suas respostas ajudam muito.',3500);}}
 function _hideFeedbackOverlay(){var overlay=document.getElementById('feedback-overlay');if(!overlay)return;overlay.classList.add('fb-hiding');setTimeout(function(){overlay.style.display='none';overlay.classList.remove('fb-hiding');},300);}
 function _haptic(){if(window.vHaptic)vHaptic.tap();}
-function _applyTimeTint(screen){if(screen.is_night){document.body.setAttribute('data-time','night');}else{const h=new Date().getHours();if(h>=5&&h<7){document.body.setAttribute('data-time','dawn');}else if(h>=18&&h<20){document.body.setAttribute('data-time','dusk');}else{document.body.removeAttribute('data-time');}}}
+function _applyTimeTint(screen){var period=screen.time_period||(screen.is_night?'night':'');if(period&&period!=='day'){document.body.setAttribute('data-time',period);}else{document.body.removeAttribute('data-time');}}
 function _updateAmbientMusic(screenId){if(!screenId||typeof ValdoriaAudio==='undefined')return;const SCREEN_MUSIC={'city.hub':'city','city.locations':'city','city.guild':'city','city.market':'city','city.bank':'city','city.temple':'city','city.cartographer':'city','city.arena':'combat','city.tavern':'tavern','char.status':'city','char.inventory':'city','char.skills':'city','explore':'forest',};let track=SCREEN_MUSIC[screenId];if(!track){const prefix=screenId.split('.').slice(0,2).join('.');track=SCREEN_MUSIC[prefix];}
 if(!track){track='city';}
 ValdoriaAudio.play(track);

@@ -11,6 +11,14 @@ var CV_TEXT = '#d4c8b0';
 var CV_DANGER_HIGH = '#cc4040';
 var CV_DANGER_MED = '#cc6633';
 var CV_DANGER_LOW = '#4a8a4a';
+var CV_BIOME_VOLCANIC = '#d46030';
+var CV_BIOME_SNOW = '#c8d8e8';
+var CV_BIOME_FOREST = '#6aaa4a';
+var CV_BIOME_SWAMP = '#5a7a4a';
+var CV_BIOME_DESERT = '#c4a060';
+var CV_BIOME_GRAVEYARD = '#7a6a7a';
+var CV_BIOME_CAVE = '#5a6a8a';
+var CV_BIOME_MOUNTAIN = '#8a8a9a';
 
 // ── Canvas elements ──
 var _mapCanvas = null, _mapCtx = null;
@@ -496,14 +504,14 @@ var _cvClouds = [];
 var CV_MAX_PARTICLES = 40;
 
 var CV_BIOME_PARTICLES = {
-    volcanic: { type: 'rise',   color: '#d46030', count: 3, sMin: 1.5, sMax: 3 },
-    snow:     { type: 'fall',   color: '#c8d8e8', count: 3, sMin: 1,   sMax: 2.5 },
-    forest:   { type: 'pulse',  color: '#6aaa4a', count: 3, sMin: 1.5, sMax: 2.5 },
-    swamp:    { type: 'breath', color: '#5a7a4a', count: 2, sMin: 3,   sMax: 5 },
-    desert:   { type: 'drift',  color: '#c4a060', count: 2, sMin: 1,   sMax: 2 },
-    graveyard:{ type: 'pulse',  color: '#7a6a7a', count: 2, sMin: 2,   sMax: 3.5 },
-    cave:     { type: 'pulse',  color: '#5a6a8a', count: 2, sMin: 1.5, sMax: 2.5 },
-    mountain: { type: 'drift',  color: '#8a8a9a', count: 2, sMin: 1,   sMax: 2 },
+    volcanic: { type: 'rise',   color: CV_BIOME_VOLCANIC, count: 3, sMin: 1.5, sMax: 3 },
+    snow:     { type: 'fall',   color: CV_BIOME_SNOW, count: 3, sMin: 1,   sMax: 2.5 },
+    forest:   { type: 'pulse',  color: CV_BIOME_FOREST, count: 3, sMin: 1.5, sMax: 2.5 },
+    swamp:    { type: 'breath', color: CV_BIOME_SWAMP, count: 2, sMin: 3,   sMax: 5 },
+    desert:   { type: 'drift',  color: CV_BIOME_DESERT, count: 2, sMin: 1,   sMax: 2 },
+    graveyard:{ type: 'pulse',  color: CV_BIOME_GRAVEYARD, count: 2, sMin: 2,   sMax: 3.5 },
+    cave:     { type: 'pulse',  color: CV_BIOME_CAVE, count: 2, sMin: 1.5, sMax: 2.5 },
+    mountain: { type: 'drift',  color: CV_BIOME_MOUNTAIN, count: 2, sMin: 1,   sMax: 2 },
 };
 
 function _cvInitParticles() {

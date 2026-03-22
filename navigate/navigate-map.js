@@ -16,6 +16,9 @@ var INK_DARK = '#3a2810';   // Dark brown ink (hatching, details)
 var INK_LIGHT = '#a08050';  // Light sepia (subtle marks)
 var PARCHMENT = '#6a5a42';  // Land parchment (warmer, lighter base)
 var MAP_BG = '#2a2420';     // Dark background outside the map
+var GOLD = '#c4953a';          // Gold accent (current loc, highlights)
+var FOG_STIPPLE = 'rgba(58, 40, 16, 0.04)';  // Fine dots on fog texture
+var FOG_HATCH = 'rgba(58, 40, 16, 0.03)';    // Crosshatch lines on fog
 
 // Parchment paper outline (roughly rectangular with worn/torn edges)
 var LANDMASS_POINTS = (() => {
@@ -271,7 +274,7 @@ function _renderFogOverlay(svg, fogState) {
     ctx.globalCompositeOperation = 'source-atop';
 
     // Fine stipple dots (medieval parchment feel)
-    ctx.fillStyle = 'rgba(58, 40, 16, 0.04)';
+    ctx.fillStyle = FOG_STIPPLE;
     for (let i = 0; i < 250; i++) {
         const nx = srand(i * 73 + 11) * W;
         const ny = srand(i * 79 + 17) * H;
@@ -282,7 +285,7 @@ function _renderFogOverlay(svg, fogState) {
     }
 
     // Crosshatch lines
-    ctx.strokeStyle = 'rgba(58, 40, 16, 0.03)';
+    ctx.strokeStyle = FOG_HATCH;
     ctx.lineWidth = 0.5;
     for (let i = 0; i < 40; i++) {
         const sx = srand(i * 113 + 7) * W;
@@ -638,7 +641,7 @@ function _initMinimap() {
         const isExp = discoveredSet.has(locId);
         svg.appendChild(_el('circle', {
             cx: x, cy: y, r: isCurr ? 8 : 4,
-            fill: isCurr ? '#c4953a' : isExp ? INK_LIGHT : INK_DARK,
+            fill: isCurr ? GOLD : isExp ? INK_LIGHT : INK_DARK,
             'fill-opacity': isCurr ? 0.9 : isExp ? 0.5 : 0.25,
         }));
     }

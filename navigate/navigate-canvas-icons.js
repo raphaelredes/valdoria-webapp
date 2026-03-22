@@ -3,6 +3,11 @@
 // All icon drawing uses Canvas 2D primitives
 // ═══════════════════════════════════════════════════════
 
+// ── Canvas Color Constants (match valdoria-design.css tokens) ──
+// NOTE: INK, INK_DARK, INK_LIGHT, PARCHMENT defined in navigate-map.js (globals)
+var CVI_GOLD = '#c4953a';
+var CVI_CHECK_GREEN = '#6a8a5a';
+
 // ── Icon cache (offscreen canvases) ──
 var _cvIconCache = {};
 var _cvIconCacheCount = 0;
@@ -355,7 +360,7 @@ function _cvDrawMarkers(ctx, fogState) {
         if (isCurr) {
             // Current location — pulsing ring
             var pulseA = 0.3 + 0.1 * Math.sin((_bannerSwayTime || 0) * 0.003);
-            _cvCircle(ctx, x, y, R + 4, null, 0, '#c4953a', 1.5, pulseA);
+            _cvCircle(ctx, x, y, R + 4, null, 0, CVI_GOLD, 1.5, pulseA);
             // Breathing scale — just draw normally (subtle)
             var iconOc = _cvGetIcon(biome, name, 14, isSett);
             ctx.drawImage(iconOc, x - iconOc.width/2, y + 4 - iconOc.height/2);
@@ -368,7 +373,7 @@ function _cvDrawMarkers(ctx, fogState) {
             ctx.drawImage(iconOc3, x - iconOc3.width/2, y + 2 - iconOc3.height/2);
             // Pulsing discover ring
             var discAlpha = 0.2 + 0.15 * Math.sin((_bannerSwayTime || 0) * 0.004 + coords.col);
-            _cvCircle(ctx, x, y, R - 4, null, 0, '#c4953a', 1.2, discAlpha);
+            _cvCircle(ctx, x, y, R - 4, null, 0, CVI_GOLD, 1.2, discAlpha);
         } else if (fog === 'known_unmapped') {
             ctx.globalAlpha = alpha * 0.3;
             _cvCircle(ctx, x, y, 2.5, INK_DARK, 0.35, null, 0, 0);
@@ -399,7 +404,7 @@ function _cvDrawMarkers(ctx, fogState) {
             var locQ = (S.quests || []).filter(function(q) { return q.loc === locId; });
             if (locQ.length > 0) {
                 var qAlpha = 0.2 + 0.1 * Math.sin((_bannerSwayTime || 0) * 0.003 + coords.row);
-                _cvCircle(ctx, x, y, R - 1, null, 0, '#c4953a', 2, qAlpha);
+                _cvCircle(ctx, x, y, R - 1, null, 0, CVI_GOLD, 2, qAlpha);
             }
         }
 
@@ -416,7 +421,7 @@ function _cvDrawMarkers(ctx, fogState) {
             var lines = _wrapLabel(name, 14);
             var fontSize = isSett ? 10.5 : 9;
             var fontW = isSett ? '700 ' : '';
-            var fontColor = isSett ? '#c4953a' : INK;
+            var fontColor = isSett ? CVI_GOLD : INK;
             for (var li = 0; li < lines.length; li++) {
                 _cvText(ctx, lines[li], x, y + R + 10 + li * 10,
                     fontW + fontSize + 'px ' + _cvFontFamily, fontColor, 1, 'center');
@@ -425,13 +430,13 @@ function _cvDrawMarkers(ctx, fogState) {
             var lastLine = lines[lines.length - 1];
             var lw = lastLine.length * 3.5;
             var uy = y + R + 14 + (lines.length - 1) * 10;
-            var fColor = isSett ? '#c4953a' : INK;
+            var fColor = isSett ? CVI_GOLD : INK;
             var fOp = isSett ? 0.35 : 0.2;
             _cvLine(ctx, x - lw, uy, x + lw, uy, fColor, isSett ? 0.5 : 0.3, fOp);
         } else if (fog === 'known_mapped') {
             var lines2 = _wrapLabel(name, 14);
             var fs2 = isSett ? 10 : 9;
-            var fc2 = isSett ? '#c4953a' : INK;
+            var fc2 = isSett ? CVI_GOLD : INK;
             for (var li2 = 0; li2 < lines2.length; li2++) {
                 _cvText(ctx, lines2[li2], x, y + R + 8 + li2 * 10,
                     fs2 + 'px ' + _cvFontFamily, fc2, 0.4, 'center');
@@ -475,13 +480,13 @@ function _cvDrawMarkers(ctx, fogState) {
                         ctx.lineTo(ddx + Math.cos(innerA) * ir, ddy + Math.sin(innerA) * ir);
                     }
                     ctx.closePath();
-                    ctx.globalAlpha = 0.6; ctx.fillStyle = '#c4953a'; ctx.fill();
+                    ctx.globalAlpha = 0.6; ctx.fillStyle = CVI_GOLD; ctx.fill();
                     ctx.globalAlpha = 0.5; ctx.strokeStyle = INK_DARK; ctx.lineWidth = 0.4; ctx.stroke();
                 } else {
                     // Checkmark
                     ctx.beginPath();
                     ctx.moveTo(ddx - 3, ddy); ctx.lineTo(ddx - 1, ddy + 2.5); ctx.lineTo(ddx + 3, ddy - 2.5);
-                    ctx.globalAlpha = 0.7; ctx.strokeStyle = '#6a8a5a'; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; ctx.stroke();
+                    ctx.globalAlpha = 0.7; ctx.strokeStyle = CVI_CHECK_GREEN; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; ctx.stroke();
                 }
             }
         }
