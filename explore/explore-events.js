@@ -156,7 +156,7 @@ async function _transitionToNavigateFromExplore(payload){const h={'Content-Type'
 break;}
 if(!r.ok)throw new Error('HTTP '+r.status);let d;try{d=await r.json();}catch(_je){console.error('[EXPLORE] Invalid JSON in navigate transition:',_je);continue;}window.__valdoria_transitioning=true;if(d.url){valdoriaSpaNav(d.url);return;}}catch(e){console.error('[EXPLORE] navigate transition error (attempt '+attempt+'):',e);}}
 valdoriaSpaClose();}
-async function zlibInflate(data){if(typeof DecompressionStream==='undefined'){throw new Error('DecompressionStream not supported');}
+async function zlibInflate(data){if(typeof DecompressionStream==='undefined'){throw new Error('DecompressionStream não suportado');}
 const ds=new DecompressionStream('deflate');const writer=ds.writable.getWriter();writer.write(data);writer.close();const reader=ds.readable.getReader();const chunks=[];while(true){const{done,value}=await reader.read();if(done)break;chunks.push(value);}
 const totalLen=chunks.reduce((a,c)=>a+c.length,0);const result=new Uint8Array(totalLen);let offset=0;for(const chunk of chunks){result.set(chunk,offset);offset+=chunk.length;}
 return result;}
