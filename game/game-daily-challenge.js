@@ -77,18 +77,18 @@ function _buildAvailable(body, d, t) {
     body.appendChild(_divider());
 
     body.appendChild(_section(t.rewards_section || 'Recompensas Estimadas'));
-    body.appendChild(_row('\u2728 ' + (t.xp_label || 'XP'), '~' + (d.xp_est || 0)));
-    body.appendChild(_row('\U0001f4b0 ' + (t.gold_label || 'GP'), '~' + (d.gold_est || 0) + ' GP'));
+    body.appendChild(_row('✨ ' + (t.xp_label || 'XP'), '~' + (d.xp_est || 0)));
+    body.appendChild(_row('💰 ' + (t.gold_label || 'GP'), '~' + (d.gold_est || 0) + ' GP'));
 
     body.appendChild(_divider());
 
-    body.appendChild(_section(t.bonus_section || 'B\u00f4nus por Desempenho'));
-    body.appendChild(_tip('\u2764\ufe0f ' + (t.bonus_hp_high || 'HP > 75%: +50% recompensas')));
-    body.appendChild(_tip('\U0001fa79 ' + (t.bonus_hp_mid || 'HP > 50%: +25% recompensas')));
+    body.appendChild(_section(t.bonus_section || 'Bônus por Desempenho'));
+    body.appendChild(_tip('❤️ ' + (t.bonus_hp_high || 'HP > 75%: +50% recompensas')));
+    body.appendChild(_tip('🩹 ' + (t.bonus_hp_mid || 'HP > 50%: +25% recompensas')));
 }
 
 function _buildCompleted(body, d, t) {
-    body.appendChild(_highlight(d.theme_icon || '\U0001f3f0'));
+    body.appendChild(_highlight(d.theme_icon || '🏰'));
     body.appendChild(_centerText(d.dungeon_name || ''));
     body.appendChild(_divider());
 
@@ -98,20 +98,20 @@ function _buildCompleted(body, d, t) {
     body.appendChild(_divider());
 
     body.appendChild(_row(t.completed_total_label || 'Total Completados', String(d.total_completed || 0), 'v-popup-gold'));
-    body.appendChild(_tip(t.completed_return_msg || 'Volte amanh\u00e3 para um novo desafio!'));
+    body.appendChild(_tip(t.completed_return_msg || 'Volte amanhã para um novo desafio!'));
 }
 
 function _buildLocked(body, d, t) {
-    body.appendChild(_highlight(d.theme_icon || '\U0001f3f0'));
+    body.appendChild(_highlight(d.theme_icon || '🏰'));
 
     var warn = document.createElement('div');
     warn.className = 'v-popup-warn-item';
-    warn.textContent = t.level_too_low || 'N\u00edvel insuficiente para o desafio de hoje.';
+    warn.textContent = t.level_too_low || 'Nível insuficiente para o desafio de hoje.';
     body.appendChild(warn);
     body.appendChild(_divider());
 
-    body.appendChild(_row(t.level_required_label || 'N\u00edvel M\u00ednimo', String(d.min_level || '?')));
-    body.appendChild(_row(t.level_current_label || 'Seu N\u00edvel', String(d.player_level || '?')));
+    body.appendChild(_row(t.level_required_label || 'Nível Mínimo', String(d.min_level || '?')));
+    body.appendChild(_row(t.level_current_label || 'Seu Nível', String(d.player_level || '?')));
 }
 
 window._showDailyChallengePopup = function(data) {
@@ -126,20 +126,20 @@ window._showDailyChallengePopup = function(data) {
 
     if (d.state === 'completed') {
         _buildCompleted(bodyEl, d, t);
-        header = '\U0001f3f0 ' + vEsc(t.completed_title || 'Desafio Conclu\u00eddo!');
+        header = '🏰 ' + vEsc(t.completed_title || 'Desafio Concluído!');
         headerClass = 'v-popup-header--success';
         actionsHtml = '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>';
     } else if (d.state === 'locked') {
         _buildLocked(bodyEl, d, t);
-        header = '\U0001f3f0 ' + vEsc(t.title || 'Desafio Di\u00e1rio');
+        header = '🏰 ' + vEsc(t.title || 'Desafio Diário');
         headerClass = 'v-popup-header--warning';
         actionsHtml = '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>';
     } else {
         _buildAvailable(bodyEl, d, t);
-        header = (d.theme_icon || '\U0001f3f0') + ' ' + vEsc(t.title || 'Desafio Di\u00e1rio');
+        header = (d.theme_icon || '🏰') + ' ' + vEsc(t.title || 'Desafio Diário');
         actionsHtml = '<button class="v-popup-btn v-popup-btn--primary" data-action="' +
             vEsc(d.start_cb || 'action_dungeon_enter') + '">' +
-            vEsc(t.start_btn || '\u2694\ufe0f Iniciar Desafio') + '</button>' +
+            vEsc(t.start_btn || '⚔️ Iniciar Desafio') + '</button>' +
             '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>';
     }
 

@@ -13,6 +13,7 @@ var _detailData = null;
 var _detailLoading = false;
 var _sending = false;
 var _selectedPlayer = null;
+var _POLL_INTERVAL_MS = 7000;
 
 function _idemKey() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
 
@@ -66,7 +67,7 @@ function _startPoll() {
                 _renderChatMessages();
             }
         });
-    }, 7000);
+    }, _POLL_INTERVAL_MS);
 }
 function _stopPoll() { if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; } }
 
@@ -291,7 +292,7 @@ function _bindListeners() {
     _delegateSet = true;
     document.addEventListener('click', function(e) {
         var t = e.target.closest('[data-social-tab]');
-        if (t) { e.preventDefault(); e.stopPropagation(); var tab = t.getAttribute('data-social-tab'); if (tab && tab !== _activeTab) { _activeTab = tab; _detailNpc = null; _detailData = null; _selectedPlayer = null; try { localStorage.setItem('valdoria_social_tab', tab); } catch(ex){console.warn('[GAME]',ex);} _render(); } return; }
+        if (t) { e.preventDefault(); e.stopPropagation(); var tab = t.getAttribute('data-social-tab'); if (tab && tab !== _activeTab) { _activeTab = tab; _detailNpc = null; _detailData = null; _selectedPlayer = null; try { localStorage.setItem('valdoria_social_tab', tab); } catch(ex){console.warn('[SOCIAL]',ex);} _render(); } return; }
         if (e.target.closest('#social-send-btn')) { e.preventDefault(); e.stopPropagation(); var inp = document.getElementById('social-chat-input'); if (inp) _chatSend(inp.value); return; }
         var em = e.target.closest('.social-emote-btn');
         if (em) { e.preventDefault(); e.stopPropagation(); var ek = em.getAttribute('data-emote'); if (ek) _chatEmote(ek); return; }

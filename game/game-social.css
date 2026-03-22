@@ -108,7 +108,7 @@
     cursor: pointer;
 }
 .social-send-btn:hover {
-    box-shadow: 0 0 8px rgba(196, 149, 58, 0.3);
+    box-shadow: 0 0 8px var(--v-gold-glow);
 }
 .social-send-btn:active {
     opacity: 0.8;
@@ -331,7 +331,7 @@
     display: inline-block;
     padding: var(--v-space-xs) var(--v-space-md);
     background: rgba(196, 149, 58, 0.15);
-    border: 1px solid rgba(196, 149, 58, 0.3);
+    border: 1px solid var(--v-border-gold, rgba(196, 149, 58, 0.3));
     border-radius: var(--v-radius-pill);
     font-size: var(--v-font-xs);
     color: var(--v-gold-light);
