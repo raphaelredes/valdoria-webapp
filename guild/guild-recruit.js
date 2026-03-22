@@ -33,7 +33,7 @@ function _renderRecruitList() {
     filtersEl.innerHTML = fHtml;
 
     if (!recruits.length) {
-        listEl.innerHTML = '<div class="guild-empty"><span class="guild-empty-icon">&#x1F4DC;</span>Nenhum aventureiro disponivel.</div>';
+        listEl.innerHTML = '<div class="guild-empty"><span class="guild-empty-icon">&#x1F4DC;</span>Nenhum aventureiro disponível.</div>';
         if (pagEl) pagEl.innerHTML = '';
         return;
     }

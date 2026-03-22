@@ -28,7 +28,7 @@ function _renderTraining() {
         html += '<div class="guild-training-progress"><div class="guild-training-progress-fill" style="width:' + pct + '%"></div></div>';
         html += '</div>';
         var canPay = (G.data && G.data.gold || 0) >= (d.cost || 25);
-        html += '<button class="guild-action-btn primary"' + (!canPay ? ' disabled title="Ouro insuficiente"' : '') + ' onclick="_advanceTraining()">&#x23E9; Avancar (' + (d.cost || 25) + ' GP)</button>';
+        html += '<button class="guild-action-btn primary"' + (!canPay ? ' disabled title="Ouro insuficiente"' : '') + ' onclick="_advanceTraining()">&#x23E9; Avançar (' + (d.cost || 25) + ' GP)</button>';
         html += '<button class="guild-action-btn danger" onclick="_abandonTraining()">&#x274C; Abandonar</button>';
         html += '</div>';
     }
@@ -75,7 +75,7 @@ function _renderTraining() {
         }
     }
 
-    if (!html) html = '<div class="guild-empty"><span class="guild-empty-icon">&#x1F4DA;</span>Nenhuma opção de treinamento disponivel.</div>';
+    if (!html) html = '<div class="guild-empty"><span class="guild-empty-icon">&#x1F4DA;</span>Nenhuma opção de treinamento disponível.</div>';
     el.innerHTML = html;
 }
 
