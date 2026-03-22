@@ -79,7 +79,7 @@ if(data.quest_diary&&typeof showQuestDiaryPopup==='function'){hideLocationTransi
 if(data.quest_detail&&typeof showQuestPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestPopup(data.quest_detail);return;}
 if(data.quest_abandon&&window.vPopup){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestAbandonPopup(data.quest_abandon);return;}
 if(data.quest_board&&typeof showQuestBoard==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestBoard(data.quest_board);return;}
-if(data.popup&&window.vPopup){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showGamePopup(data);return;}
+console.debug('[GAME] doAction popup check:',!!data.popup,'vPopup:',!!window.vPopup,'keys:',Object.keys(data).filter(k=>data[k]).join(','));if(data.popup&&window.vPopup){console.debug('[GAME] showing popup for action:',callbackData);hideLocationTransition();if(window.actionGuard)actionGuard.release();_showGamePopup(data);return;}
 /* === NON-LOCATION POPUP INTERCEPTORS === */
 if(data.skills_data&&typeof _showSkillsPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showSkillsPopup(data);return;}
 if(data.skill_detail_data&&typeof _showSkillDetailPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showSkillDetailPopup(data);return;}
