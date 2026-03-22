@@ -91,7 +91,7 @@ window._showAlliesPopup = function(data) {
             var text = a.name || "Aliado";
             if (a.class_name) text += " - " + a.class_name;
             if (a.level) text += " Nv." + a.level;
-            row.innerHTML = "<b>" + text + "</b>";
+            row.innerHTML = "<b>" + vEsc(text) + "</b>";
             bodyEl.appendChild(row);
         }
     }
@@ -149,9 +149,9 @@ window._showInnSelectPopup = function(data) {
                 card.className = "v-popup-row";
                 card.style.cursor = "pointer";
                 var label = opt.label || opt.name || opt.text || "";
-                var html = "<b>" + label + "</b>";
-                if (opt.price) html += ' <span class="v-popup-gold">' + opt.price + " GP</span>";
-                if (opt.desc) html += '<div class="v-popup-subdesc">' + opt.desc + "</div>";
+                var html = "<b>" + vEsc(label) + "</b>";
+                if (opt.price) html += ' <span class="v-popup-gold">' + vEsc(opt.price) + " GP</span>";
+                if (opt.desc) html += '<div class="v-popup-subdesc">' + vEsc(opt.desc) + "</div>";
                 card.innerHTML = html;
                 (function(cb) {
                     card.onclick = function() {
