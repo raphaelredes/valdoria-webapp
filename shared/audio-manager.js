@@ -11,7 +11,7 @@ function init(){_muted=localStorage.getItem(STORAGE_KEY)==='1';const savedVol=pa
 _musicMuted=localStorage.getItem(MUSIC_MUTED_KEY)==='1';_sfxMuted=localStorage.getItem(SFX_MUTED_KEY)==='1';const savedSfxVol=parseFloat(localStorage.getItem(SFX_VOLUME_KEY));if(!isNaN(savedSfxVol)&&savedSfxVol>=0&&savedSfxVol<=1){_sfxVolume=savedSfxVol;}
 if(_muted)_musicMuted=true;if(_volume===0&&!_muted&&!_musicMuted){_volume=DEFAULT_VOLUME;localStorage.setItem(VOLUME_KEY,_volume.toString());}
 _registerUnlockListeners();try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.onEvent('viewportChanged',function _tgUnlock(){Telegram.WebApp.offEvent('viewportChanged',_tgUnlock);if(!_unlocked)_unlockHandler();});}}catch(e){}
-_injectUI();}
+_injectUI();if(_pendingTrack&&!_muted&&!_musicMuted){play(_pendingTrack);}}
 function play(trackKey){if(!trackKey||!TRACKS[trackKey]||TRACKS[trackKey].length===0){console.warn('[AUDIO] Unknown track:',trackKey);return;}
 if(trackKey===_currentTrack&&_audio&&!_audio.paused){return;}
 _pendingTrack=trackKey;if(_muted||_musicMuted)return;if(_unlocked){_playTrack(trackKey);return;}
@@ -35,7 +35,7 @@ function playSFX(trackKey){if(_muted||_sfxMuted||!_unlocked)return;if(window.vRe
 function toggleMute(){_muted=!_muted;try{localStorage.setItem(STORAGE_KEY,_muted?'1':'0');}catch(e){}_musicMuted=_muted;try{localStorage.setItem(MUSIC_MUTED_KEY,_musicMuted?'1':'0');}catch(e){}if(_muted){if(_audio)_audio.volume=0;}else{if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack){_playTrack(_pendingTrack);}}
 _syncUI();return _muted;}
 function isMuted(){return _muted;}
-function setVolume(val){_volume=Math.max(0,Math.min(1,val));localStorage.setItem(VOLUME_KEY,_volume.toString());if(_audio&&!_muted){_smoothVol(_audio,_volume);}
+function setVolume(val){_volume=Math.max(0,Math.min(1,val));localStorage.setItem(VOLUME_KEY,_volume.toString());if(_volume===0&&!_muted){_muted=true;_musicMuted=true;try{localStorage.setItem(STORAGE_KEY,'1');}catch(e){}try{localStorage.setItem(MUSIC_MUTED_KEY,'1');}catch(e){}if(_audio){try{_audio.volume=0;}catch(e){}}_syncUI();return;}if(_audio&&!_muted){_smoothVol(_audio,_volume);}
 if(_volume>0&&(_muted||_musicMuted)){_muted=false;_musicMuted=false;try{localStorage.setItem(STORAGE_KEY,'0');}catch(e){}try{localStorage.setItem(MUSIC_MUTED_KEY,'0');}catch(e){}if(_audio&&!_audio.paused){_audio.volume=_volume;}else if(_pendingTrack||_currentTrack){_playTrack(_pendingTrack||_currentTrack);}}
 _syncUI();}
 function getVolume(){return _volume;}
