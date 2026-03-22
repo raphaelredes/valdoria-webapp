@@ -348,9 +348,9 @@ function _chatSend(text) {
             });
         } else if (data && data.error) {
             var msg = data.error === 'cooldown' ? '\u23f3 Aguarde um momento...' : data.error;
-            if (typeof vToast === 'function') vToast(msg, 'warn');
+            if (typeof vToast === 'function') vToast(msg, 'warn', _calcToastDuration(msg));
         }
-    }).catch(function() { _sending = false; });
+    }).catch(function(err) { _sending = false; console.error('[SOCIAL] chatSend failed', err); if (typeof vToast === 'function') vToast('Erro ao enviar mensagem.', 'warn', 2500); });
 }
 
 function _chatEmote(key) {
@@ -372,7 +372,7 @@ function _chatEmote(key) {
             if (typeof vToast === 'function') vToast('\u23f3 Aguarde um momento...', 'warn');
         }
         _sending = false;
-    }).catch(function() { _sending = false; });
+    }).catch(function(err) { _sending = false; console.error('[SOCIAL] chatEmote failed', err); if (typeof vToast === 'function') vToast('Erro ao enviar emote.', 'warn', 2000); });
 }
 
 function _socialSend(targetUid, type) {
@@ -425,12 +425,24 @@ window.openSocialPopup = function() {
             onHide: function() { _stopPoll(); _detailNpc = null; _detailData = null; _selectedPlayer = null; _fetchSocial({action: "close"}); },
         });
     }
+    var _loadDone = false;
+    var _loadTimeout = setTimeout(function() {
+        if (!_loadDone) {
+            _loadDone = true;
+            console.error('[SOCIAL] Load timeout after 10s');
+            if (typeof vToast === 'function') vToast('Erro: tempo esgotado ao carregar.', 'warn', 3000);
+            if (typeof vPopup !== 'undefined') vPopup.hide('social-popup-overlay');
+        }
+    }, 10000);
     _fetchSocial({ action: "load" }).then(function(data) {
+        if (_loadDone) return;
+        _loadDone = true;
+        clearTimeout(_loadTimeout);
         if (data && !data.error) {
             window.showSocialPopup(data);
         } else {
             console.error("[SOCIAL] Failed to load", data);
-            if (typeof vToast === "function") vToast("Erro ao carregar social.", "err");
+            if (typeof vToast === "function") vToast("Erro ao carregar social.", "err", 2500);
             if (typeof vPopup !== "undefined") vPopup.hide("social-popup-overlay");
         }
     });
@@ -439,5 +451,8 @@ window.openSocialPopup = function() {
 window.hideSocialPopup = function() {
     if (typeof vPopup !== 'undefined') vPopup.hide('social-popup-overlay');
 };
+
+// Cleanup poll timer on page transitions (WebApp switch, close)
+window.addEventListener('pagehide', function() { _stopPoll(); });
 
 })();
