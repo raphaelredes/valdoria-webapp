@@ -214,7 +214,7 @@ window.ValdoriaLoadingController = function(config) {
             }
             if (retryBtn) retryBtn.style.display = 'none';
             _state = 'hidden';
-            if (_hideCb) { try { _hideCb(); } catch(e) {} _hideCb = null; }
+            if (_hideCb) { try { _hideCb(); } catch(e){console.warn('[LOADING_CONTROLLER]',e);} _hideCb = null; }
         },
 
         show: function(isRetry) {

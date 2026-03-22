@@ -6,8 +6,8 @@
 // TRAVEL PACE & ACTIVITY — D&D 5e Travel Pace System
 // ═══════════════════════════════════════════════════════
 
-var _travelPace = localStorage.getItem('valdoria_travel_pace') || 'normal';
-var _travelActivity = localStorage.getItem('valdoria_travel_activity') || 'watch';
+var _travelPace = null;try{_travelPace=localStorage.getItem('valdoria_travel_pace') || 'normal';}catch(e){}
+var _travelActivity = null;try{_travelActivity=localStorage.getItem('valdoria_travel_activity') || 'watch';}catch(e){}
 
 // Pace multipliers: fast = 0.75x turns (round up), cautious = 1.5x turns (round up)
 function _getAdjustedTurns(baseDist) {
@@ -49,7 +49,7 @@ function _buildTravelOptions(baseDist) {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
             _travelPace = p.id;
-            try{localStorage.setItem('valdoria_travel_pace', p.id);}catch(e){}
+            try{localStorage.setItem('valdoria_travel_pace', p.id);}catch(e){console.warn('[NAVIGATE]',e);}
             paceRow.querySelectorAll('.travel-opt-btn').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             _updateTravelBtnAndNote(baseDist);
@@ -85,7 +85,7 @@ function _buildTravelOptions(baseDist) {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
             _travelActivity = a.id;
-            try{localStorage.setItem('valdoria_travel_activity', a.id);}catch(e){}
+            try{localStorage.setItem('valdoria_travel_activity', a.id);}catch(e){console.warn('[NAVIGATE]',e);}
             actRow.querySelectorAll('.travel-opt-btn').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             if (typeof _haptic === 'function') _haptic('tap');
@@ -913,7 +913,7 @@ function openQuickList() {
     const discoveredSet = new Set(S.discoveredLocs || []);
 
     // Restore sort preference
-    let sortMode = localStorage.getItem('valdoria_ql_sort') || 'dist';
+    let sortMode = null;try{sortMode=localStorage.getItem('valdoria_ql_sort') || 'dist';}catch(e){}
 
     // Build location data
     const locs = S.knownLocs
@@ -955,8 +955,8 @@ function openQuickList() {
     btnName.type = 'button';
     btnName.className = 'ql-sort-btn' + (sortMode === 'name' ? ' active' : '');
     btnName.textContent = 'Por Nome';
-    btnDist.addEventListener('click', () => { sortMode = 'dist'; try{localStorage.setItem('valdoria_ql_sort', 'dist');}catch(e){} btnDist.classList.add('active'); btnName.classList.remove('active'); renderItems(); });
-    btnName.addEventListener('click', () => { sortMode = 'name'; try{localStorage.setItem('valdoria_ql_sort', 'name');}catch(e){} btnName.classList.add('active'); btnDist.classList.remove('active'); renderItems(); });
+    btnDist.addEventListener('click', () => { sortMode = 'dist'; try{localStorage.setItem('valdoria_ql_sort', 'dist');}catch(e){console.warn('[NAVIGATE]',e);} btnDist.classList.add('active'); btnName.classList.remove('active'); renderItems(); });
+    btnName.addEventListener('click', () => { sortMode = 'name'; try{localStorage.setItem('valdoria_ql_sort', 'name');}catch(e){console.warn('[NAVIGATE]',e);} btnName.classList.add('active'); btnDist.classList.remove('active'); renderItems(); });
     sortBar.appendChild(btnDist);
     sortBar.appendChild(btnName);
     items.appendChild(sortBar);
@@ -1043,7 +1043,7 @@ function showGestureTutorial() {
     // Auto-dismiss after 6s (more hints to read now)
     const dismiss = () => {
         gt.classList.remove('visible');
-        try{localStorage.setItem('valdoria_nav_tutorial_v2', '1');}catch(e){}
+        try{localStorage.setItem('valdoria_nav_tutorial_v2', '1');}catch(e){console.warn('[NAVIGATE]',e);}
     };
     gt.addEventListener('click', dismiss, { once: true });
     const TUTORIAL_AUTO_DISMISS_MS = 12000;

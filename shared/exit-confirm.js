@@ -12,6 +12,6 @@ if(_popupVisible){_hide();return;}
 _show();}
 function isExitPopupVisible(){return _popupVisible;}
 function hideExitConfirm(){_hide();}
-window.ValdoriaExitConfirm={show:showExitConfirm,hide:hideExitConfirm,isVisible:isExitPopupVisible,};if(tg&&tg.BackButton){try{tg.BackButton.show();}catch(e){}
-try{tg.BackButton.onClick(function(){showExitConfirm();});}catch(e){}}
+window.ValdoriaExitConfirm={show:showExitConfirm,hide:hideExitConfirm,isVisible:isExitPopupVisible,};if(tg&&tg.BackButton){try{tg.BackButton.show();}catch(e){console.warn('[EXIT_CONFIRM]',e);}
+try{tg.BackButton.onClick(function(){showExitConfirm();});}catch(e){console.warn('[EXIT_CONFIRM]',e);}}
 if(!window.__valdoriaPopstateTrap){window.__valdoriaPopstateTrap=true;history.replaceState({screen:'valdoria_init'},'');history.pushState({screen:'valdoria_app'},'');window.addEventListener('popstate',function(){history.pushState({screen:'valdoria_app'},'');if(window.__valdoria_transitioning)return;showExitConfirm();});}})();
