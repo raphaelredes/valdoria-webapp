@@ -76,10 +76,7 @@ function guildFetch(endpoint, body) {
         opts.headers['X-Idempotency-Key'] = Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
         opts.body = JSON.stringify(body);
     }
-    return fetchT(url, opts).then(function(r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-    }).catch(function(e) {
+    return fetchJSON(url, opts).catch(function(e) {
         console.error('[GUILD] Erro:', endpoint, e);
         showGuildError('Falha na comunicacao com o servidor.');
     });

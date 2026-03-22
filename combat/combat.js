@@ -10,7 +10,7 @@ return h;}
 async getState(){const r=await fetchT(`${this.base}/api/combat/state`,{method:'POST',headers:this._baseHeaders(),body:JSON.stringify({user_id:this.userId}),});if(!r.ok){const body=await r.json().catch(()=>({}));if(body.status==='displaced'&&window.SessionHeartbeat){SessionHeartbeat.handleDisplaced(body.device||'');throw new Error('displaced');}
 const err=new Error(body.error||`API ${r.status}`);err.status=r.status;throw err;}
 return r.json();}
-async checkHealth(){try{const r=await fetchT(`${this.base}/api/combat/health`,{method:'GET'});if(!r.ok)return{status:'unreachable'};return r.json();}catch(e){return{status:'unreachable'};}}
+async checkHealth(){try{return await fetchJSON(`${this.base}/api/combat/health`,{method:'GET'});}catch(e){return{status:'unreachable'};}}
 async sendAction(data){const h=this._baseHeaders();h['X-Idempotency-Key']=crypto.randomUUID();const r=await fetchT(`${this.base}/api/combat/action`,{method:'POST',headers:h,body:JSON.stringify({user_id:this.userId,...data}),});if(!r.ok){const body=await r.json().catch(()=>({}));if(body.status==='displaced'&&window.SessionHeartbeat){SessionHeartbeat.handleDisplaced(body.device||'');throw new Error('displaced');}
 const err=new Error(body.error||`API ${r.status}`);err.status=r.status;throw err;}
 return r.json();}}

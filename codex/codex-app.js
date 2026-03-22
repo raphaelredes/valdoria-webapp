@@ -174,7 +174,7 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
             meta.innerHTML = metaRows;
         }
 
-        overlay.style.display = 'block';
+        vDrawer.open('detailOverlay');
     }
 
     // ── Events ───────────────────────────────────────────────────────
@@ -196,7 +196,7 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
         if (detailClose) {
             detailClose.addEventListener('click', function () {
                 var overlay = document.getElementById('detailOverlay');
-                if (overlay) overlay.style.display = 'none';
+                if (overlay) vDrawer.close('detailOverlay');
             });
         }
 

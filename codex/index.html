@@ -19,6 +19,7 @@
         document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/drawer.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="codex-app.css?v=' + v + '">');
     </script>
     <script>
@@ -33,6 +34,7 @@
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/drawer.js?v=' + v + '"><\/script>');
     </script>
 </head>
 
@@ -82,7 +84,7 @@
     </div>
 
     <!-- Detail overlay (sub-screen) -->
-    <div class="codex-detail-overlay" id="detailOverlay" style="display:none">
+    <div class="codex-detail-overlay sub-screen" id="detailOverlay">
         <div class="codex-detail-card">
             <div class="codex-detail-header" id="detailHeader"></div>
             <div class="codex-detail-body" id="detailBody"></div>

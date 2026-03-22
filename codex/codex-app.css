@@ -168,17 +168,13 @@
     background: var(--v-bg-raised);
 }
 
-/* Detail overlay */
+/* Detail overlay — positioning handled by shared/drawer.css (.sub-screen) */
 .codex-detail-overlay {
-    position: fixed;
-    inset: 0;
     max-width: 430px;
     margin: 0 auto;
     background: var(--v-bg);
-    z-index: var(--v-z-overlay, 500);
     overflow-y: auto;
     padding: var(--v-space-lg);
-    animation: fadeInUp 0.2s ease;
 }
 
 .codex-detail-card {
@@ -259,6 +255,5 @@
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    .codex-detail-overlay { animation: none; }
     .codex-card:active { transform: none; }
 }
