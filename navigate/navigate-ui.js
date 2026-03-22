@@ -2,6 +2,16 @@
 // NAVIGATE UI — Info panel, actions, interactions
 // ═══════════════════════════════════════════════════════
 
+// ── Danger pip colors (green→red, unified across all UI) ──
+var NV_DANGER_COLORS = ['#5a9a3a', '#9a9a2a', '#cc7a2a', '#cc3a2a', '#8a1a1a'];
+// ── Inline style colors for danger/risk context ──
+var NV_COLOR_DANGER_HIGH = '#8a4a3a';
+var NV_COLOR_DANGER_MED  = '#8a6a3a';
+var NV_COLOR_GOLD        = '#c4953a';
+var NV_COLOR_RISK_EXTREME = '#cc4040';
+var NV_COLOR_RISK_HIGH    = '#cc8844';
+var NV_COLOR_RISK_MODERATE = '#aa9a5a';
+
 // ── Cached weighted distance — avoids repeated Dijkstra on same currentLoc ──
 var _distCache = {};
 var _distCacheLoc = null;
@@ -77,13 +87,13 @@ function handleLocationTap(locId) {
     } else if (isKnownMapped) {
         if (danger >= 5) {
             dangerEl.innerHTML = '<span class="danger-meter" role="img" aria-label="Perigo desconhecido: alto"><span class="danger-pip filled-4"></span><span class="danger-pip filled-5"></span><span class="danger-pip empty"></span></span> ???';
-            dangerEl.style.borderColor = '#8a4a3a';
-            dangerEl.style.color = '#8a4a3a';
+            dangerEl.style.borderColor = NV_COLOR_DANGER_HIGH;
+            dangerEl.style.color = NV_COLOR_DANGER_HIGH;
             dangerEl.style.display = '';
         } else if (danger >= 3) {
             dangerEl.innerHTML = '<span class="danger-meter" role="img" aria-label="Perigo desconhecido: moderado"><span class="danger-pip filled-2"></span><span class="danger-pip filled-3"></span><span class="danger-pip empty"></span></span> ???';
-            dangerEl.style.borderColor = '#8a6a3a';
-            dangerEl.style.color = '#8a6a3a';
+            dangerEl.style.borderColor = NV_COLOR_DANGER_MED;
+            dangerEl.style.color = NV_COLOR_DANGER_MED;
             dangerEl.style.display = '';
         } else {
             dangerEl.style.display = 'none';
@@ -106,11 +116,7 @@ function handleLocationTap(locId) {
     const biomeInfo = BIOME_INFO[locData.b] || BIOME_INFO.plains;
     const biomeLabel = biomeInfo.label || locData.b;
     const biomeEl = document.getElementById('info-biome');
-    const biomeColors = {
-        plains: '#8aaa5a', forest: '#5aaa4a', swamp: '#6a9a5a',
-        cave: '#7a7a9a', graveyard: '#8a6a6a', desert: '#caa85a',
-        mountain: '#8a8a9a', snow: '#9abacc', volcanic: '#cc6a3a'
-    };
+    // biomeColors derived from BIOME_INFO (no duplication)
     if (isKnownUnmapped) {
         biomeEl.innerHTML = '🌫️ Região Desconhecida';
         biomeEl.style.color = '';
@@ -123,7 +129,7 @@ function handleLocationTap(locId) {
             biomeHtml += ` <span class="meta-sep">·</span> 🔗 ${connCount} rota${connCount !== 1 ? 's' : ''}`;
         }
         biomeEl.innerHTML = biomeHtml;
-        biomeEl.style.color = biomeColors[locData.b] || '#a09484';
+        biomeEl.style.color = (BIOME_INFO[locData.b] || BIOME_INFO.plains).hexFill || '#a09484';
     }
 
     // Description
@@ -223,9 +229,9 @@ function handleLocationTap(locId) {
             // Explored + has map: safe direct travel + encounter risk hint
             const danger = locData.d || 0;
             let riskHint = '';
-            if (danger >= 7) riskHint = ' · <span style="color:#cc4040">☠️ Perigo extremo</span>';
-            else if (danger >= 5) riskHint = ' · <span style="color:#cc8844">⚠️ Alta chance de encontros</span>';
-            else if (danger >= 3) riskHint = ' · <span style="color:#aa9a5a">⚠️ Encontros prováveis</span>';
+            if (danger >= 7) riskHint = ' · <span style="color:' + NV_COLOR_RISK_EXTREME + '">☠️ Perigo extremo</span>';
+            else if (danger >= 5) riskHint = ' · <span style="color:' + NV_COLOR_RISK_HIGH + '">⚠️ Alta chance de encontros</span>';
+            else if (danger >= 3) riskHint = ' · <span style="color:' + NV_COLOR_RISK_MODERATE + '">⚠️ Encontros prováveis</span>';
             noteEl.innerHTML = `🕐 <b>${edgeDist} turno${edgeDist !== 1 ? 's' : ''}</b> de viagem${riskHint}`;
             noteEl.style.display = 'block';
             noteEl.style.color = '';
@@ -239,7 +245,7 @@ function handleLocationTap(locId) {
             // Has map but never visited: expedition with map
             noteEl.innerHTML = `⚠️ <b>Primeira Expedição</b> — ${edgeDist} turno${edgeDist !== 1 ? 's' : ''}, encontros e riscos no caminho`;
             noteEl.style.display = 'block';
-            noteEl.style.color = '#c4953a';
+            noteEl.style.color = NV_COLOR_GOLD;
             const travelBtn = createActionBtn(
                 `🧭 Expedição para ${locData.n || 'lá'} (${edgeDist}🕐) ⚠️`,
                 'info-btn-travel info-btn-risky',
@@ -250,7 +256,7 @@ function handleLocationTap(locId) {
             // No map, never visited: blind expedition
             noteEl.innerHTML = `⚠️ <b>Expedição às Cegas</b> — ${edgeDist} turno${edgeDist !== 1 ? 's' : ''}, sem mapa, alta chance de se perder`;
             noteEl.style.display = 'block';
-            noteEl.style.color = '#c4953a';
+            noteEl.style.color = NV_COLOR_GOLD;
             const travelBtn = createActionBtn(
                 `🧭 Expedição (${edgeDist}🕐 Sem Mapa) ⚠️⚠️`,
                 'info-btn-travel info-btn-risky',
@@ -286,7 +292,7 @@ function handleLocationTap(locId) {
             noteEl.innerHTML = '⛔ <b>Inacessível</b> — Explore locais vizinhos para descobrir novas rotas';
         }
         noteEl.style.display = 'block';
-        noteEl.style.color = '#8a4a3a';
+        noteEl.style.color = NV_COLOR_DANGER_HIGH;
     }
 
     // Open panel in peek mode (compact), swipe up for full
@@ -672,7 +678,7 @@ function _showQuickTooltip(locId, cx, cy) {
     let dangerHtml = '';
     if (isExp && danger > 0) {
         const pips = Math.min(5, Math.ceil(danger / 2));
-        const colors = ['#6aaa3a', '#caaa3a', '#cc8a2a', '#cc4a2a', '#aa2a2a'];
+        const colors = NV_DANGER_COLORS;
         dangerHtml = '<span class="lp-tooltip-danger">';
         for (let i = 0; i < 5; i++) {
             const bg = i < pips ? colors[Math.min(i, colors.length - 1)] : 'transparent';
@@ -858,7 +864,7 @@ function openQuickList() {
             const danger = loc.ld.d || 0;
             if (loc.isExp && danger > 0) {
                 const pips = Math.min(5, Math.ceil(danger / 2));
-                const colors = ['#5a9a3a', '#9a9a2a', '#cc7a2a', '#cc3a2a', '#8a1a1a'];
+                const colors = NV_DANGER_COLORS;
                 dangerHtml = '<span class="ql-danger-pips">';
                 for (let i = 0; i < pips; i++) {
                     dangerHtml += '<span class="ql-danger-pip" style="background:' + colors[Math.min(i, colors.length - 1)] + '"></span>';
