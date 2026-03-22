@@ -50,7 +50,7 @@
             _bindEvents();
 
             // Restore last category from localStorage
-            var saved = localStorage.getItem('codex_category');
+            var saved = localStorage.getItem('valdoria_codex_category');
             if (saved && CATEGORIES.find(function (c) { return c.id === saved; })) {
                 _currentCategory = saved;
             }
@@ -76,7 +76,7 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
             btn.setAttribute('data-cat', cat.id);
             btn.addEventListener('click', function () {
                 _currentCategory = cat.id;
-                try{localStorage.setItem('codex_category', cat.id);}catch(e){}
+                try{localStorage.setItem('valdoria_codex_category', cat.id);}catch(e){}
                 _updateTabActive();
                 _fetchEntries(cat.id);
             });
