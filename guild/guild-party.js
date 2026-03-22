@@ -51,10 +51,10 @@ function _renderMemberDetail(m) {
     html += '<div class="guild-detail-role">' + _esc(m.class_name || '') + ' - Nivel ' + (m.level || 1) + '</div></div>';
 
     html += '<div class="guild-detail-section"><div class="guild-detail-section-title">Vitalidade</div>';
-    html += '<div style="margin-bottom:4px;font-size:var(--v-font-sm);color:var(--v-text-dim)">HP ' + (m.hp || 0) + '/' + (m.hp_max || 0) + '</div>';
+    html += '<div class="v-popup-text-dim">HP ' + (m.hp || 0) + '/' + (m.hp_max || 0) + '</div>';
     html += '<div class="v-bar-track"><div class="v-bar-fill" style="width:' + hpPct + '%;background:' + hpColor + '"></div></div>';
     if (m.mp_max) {
-        html += '<div style="margin-top:6px;margin-bottom:4px;font-size:var(--v-font-sm);color:var(--v-text-dim)">MP ' + (m.mp || 0) + '/' + (m.mp_max || 0) + '</div>';
+        html += '<div class="v-popup-text-dim" style="margin-top:6px">MP ' + (m.mp || 0) + '/' + (m.mp_max || 0) + '</div>';
         html += '<div class="v-bar-track"><div class="v-bar-fill" style="width:' + mpPct + '%;background:var(--v-mp,#5577bb)"></div></div>';
     }
     html += '</div>';

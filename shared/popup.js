@@ -10,7 +10,7 @@ if(existing>=0){_stack[existing].onHide=opts.onHide||null;}else{_zBase+=10;_stac
 overlay.style.zIndex=_zBase;overlay.style.display='flex';overlay.classList.remove('hiding');void overlay.offsetWidth;overlay.classList.add('active');_busy=false;if(opts.onReady&&typeof opts.onReady==='function'){opts.onReady(overlay);}
 if(opts.closeOnOutside!==false){overlay.onclick=function(e){if(e.target===overlay)hide();};}
 if(_stack.length===1)document.addEventListener('keydown',_escHandler);}
-function hide(){if(_stack.length===0)return;var top=_stack[_stack.length-1];var ov=top.el;var cb=top.onHide;ov.classList.add('hiding');ov.classList.remove('active');setTimeout(function(){if(ov)ov.style.display='none';_stack.pop();if(_stack.length>0){_zBase=_stack[_stack.length-1].z;}else{_zBase=1000;document.removeEventListener('keydown',_escHandler);}
+function hide(){if(_stack.length===0)return;var top=_stack[_stack.length-1];var ov=top.el;var cb=top.onHide;ov.classList.add('hiding');ov.classList.remove('active');setTimeout(function(){if(ov&&!ov.classList.contains('active'))ov.style.display='none';_stack.pop();if(_stack.length>0){_zBase=_stack[_stack.length-1].z;}else{_zBase=1000;document.removeEventListener('keydown',_escHandler);}
 _busy=false;if(cb)cb();},300);}
 function isOpen(){return _stack.length>0&&_stack[_stack.length-1].el.classList.contains('active');}
 function _makeHandler(customHandler){return function(e){if(_busy)return;var action=e.currentTarget.getAttribute('data-action');if(!action)return;if(typeof haptic==='function')haptic('light');if(action==='cancel'||action==='v-popup-close'){hide();return;}

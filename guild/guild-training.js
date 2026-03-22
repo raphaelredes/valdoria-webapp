@@ -66,9 +66,9 @@ function _renderTraining() {
             for (var k = 0; k < ki.length; k++) known.push({ label: cats[c2].label, item: ki[k] });
         }
         if (known.length) {
-            html += '<div class="guild-training-group-title" style="margin-top:var(--v-space-lg)">Ja aprendidos</div>';
+            html += '<div class="guild-training-group-title v-popup-mt-lg">Ja aprendidos</div>';
             for (var kk = 0; kk < known.length; kk++) {
-                html += '<div class="guild-training-card" style="opacity:0.5;pointer-events:none">';
+                html += '<div class="guild-training-card v-popup-disabled">';
                 html += '<div class="guild-training-name">&#x2705; ' + _esc(known[kk].item.n || known[kk].item.name || '') + '</div>';
                 html += '<div class="guild-training-meta">' + _esc(known[kk].label) + '</div></div>';
             }
