@@ -16,7 +16,7 @@
 .guide-bubble{display:flex;gap:var(--v-space-md,8px);padding:var(--v-space-md,8px) var(--v-space-lg,12px);background:rgba(74,56,40,0.3);border:1px solid rgba(196,149,58,0.15);border-radius:var(--v-radius,10px);margin:var(--v-space-md,8px) 0;position:relative;transition:opacity var(--v-transition,var(--v-transition)) ease}
 .guide-npc{font-size:20px;flex-shrink:0;line-height:1}
 .guide-text{flex:1;font-size:var(--v-font-md,13px);color:var(--v-text,#d4c8b0);font-style:italic;line-height:1.5}
-.guide-name{font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-sm,12px);color:var(--v-gold-dim,rgba(196,149,58,0.5));display:block;margin-bottom:2px;font-style:normal}
+.guide-name{font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-sm,12px);color:var(--v-gold-dim,rgba(196,149,58,0.5));display:block;margin-bottom:var(--v-space-xs);font-style:normal}
 .guide-dismiss{position:absolute;top:var(--v-space-xs,2px);right:var(--v-space-sm,4px);background:none;border:none;color:var(--v-text-dim,#a09484);font-size:var(--v-font-body);cursor:pointer;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
 .guide-dismiss:active{color:var(--v-text,#d4c8b0)}
 @media(prefers-reduced-motion:reduce){.opp-card{transition:none!important}.guide-bubble{transition:none!important}}

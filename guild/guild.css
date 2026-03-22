@@ -87,7 +87,7 @@
 
 /* NPC dialogue */
 .guild-npc-dialogue { background: var(--v-bg-raised); border: 1px solid var(--v-border); border-radius: var(--v-radius); padding: var(--v-space-md); margin: var(--v-space-md) 0; font-family: var(--v-font); font-size: var(--v-font-body); color: var(--v-text); line-height: 1.6; font-style: italic; min-height: 60px; }
-.guild-npc-dialogue .typewriter-cursor { display: inline-block; width: 2px; height: 1em; background: var(--v-gold); margin-left: 2px; animation: blink-cursor 0.8s steps(1) infinite; }
+.guild-npc-dialogue .typewriter-cursor { display: inline-block; width: 2px; height: 1em; background: var(--v-gold); margin-left:var(--v-space-xs); animation: blink-cursor 0.8s steps(1) infinite; }
 @keyframes blink-cursor { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
 
 /* NPC topic pills */
