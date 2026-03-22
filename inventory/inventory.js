@@ -84,7 +84,7 @@ _th['X-Idempotency-Key']=crypto.randomUUID();const resp=await fetchT(_apiBase+'/
 if(resp.ok){const data=await resp.json();if(data.url){window.__valdoria_transitioning=true;valdoriaSpaNav(data.url);return;}}
 console.error('[INVENTORY] Nav transition failed');}catch(e){console.error('[INVENTORY] Nav transition error:',e);}}
 if(overlay)overlay.classList.add('hidden');try{window.__valdoria_transitioning=true;if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}}
-function toast(msg,type){vToast(msg,type||'ok');}
+function toast(msg,type){var dur=typeof calcReadTime==='function'?calcReadTime(msg,'toast'):2000;vToast(msg,type||'ok',dur);}
 function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 function _initViewedItems(){try{const stored=localStorage.getItem('valdoria_inv_viewed');if(stored){viewedItems=new Set(JSON.parse(stored));}else{viewedItems=new Set(localInv.map(i=>i.n));_saveViewedItems();}}catch(e){console.warn('[INVENTORY] localStorage read failed:',e);viewedItems=new Set(localInv.map(i=>i.n));}}
 function _saveViewedItems(){try{localStorage.setItem('valdoria_inv_viewed',JSON.stringify([...viewedItems]));}catch(e){console.warn('[INVENTORY] localStorage write failed:',e);}}
