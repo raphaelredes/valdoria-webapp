@@ -509,33 +509,55 @@ function initPursuer() {
   S._pursuerData = { col: startCol, row: startRow, speed: 2 };
 }
 
+/* BFS shortest-path from pursuer to player (11x13 grid = microseconds) */
+function _bfsNextStep(fromCol, fromRow, toCol, toRow) {
+  if (fromCol === toCol && fromRow === toRow) return null;
+  var queue = [[fromCol, fromRow]];
+  var visited = {};
+  var parent = {};
+  var key = fromCol + ',' + fromRow;
+  visited[key] = true;
+  while (queue.length > 0) {
+    var cur = queue.shift();
+    var cc = cur[0], cr = cur[1];
+    var offsets = (cr % 2 === 0) ? EVEN_OFFSETS : ODD_OFFSETS;
+    for (var i = 0; i < offsets.length; i++) {
+      var nc = cc + offsets[i][0];
+      var nr = cr + offsets[i][1];
+      if (nc < 0 || nc >= COLS || nr < 0 || nr >= ROWS) continue;
+      var nk = nc + ',' + nr;
+      if (visited[nk]) continue;
+      var tile = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
+      if (IMPASSABLE.has(tile)) continue;
+      visited[nk] = true;
+      parent[nk] = key;
+      if (nc === toCol && nr === toRow) {
+        /* Trace back to find first step */
+        var stepKey = nk;
+        var startKey = fromCol + ',' + fromRow;
+        while (parent[stepKey] && parent[stepKey] !== startKey) {
+          stepKey = parent[stepKey];
+        }
+        var parts = stepKey.split(',');
+        return { col: parseInt(parts[0]), row: parseInt(parts[1]) };
+      }
+      queue.push([nc, nr]);
+    }
+    key = cc + ',' + cr;
+  }
+  return null; /* No path found */
+}
+
 function tickPursuer() {
   if (!S._pursuerData) return;
   var pur = S._pursuerData;
   for (var step = 0; step < pur.speed; step++) {
-    /* Simple pathfinding: move toward player greedily */
-    var bestCol = pur.col;
-    var bestRow = pur.row;
-    var bestDist = typeof hexDist === 'function'
-      ? hexDist(pur.col, pur.row, S.playerCol, S.playerRow) : 99;
-
-    var offsets = (pur.row % 2 === 0) ? EVEN_OFFSETS : ODD_OFFSETS;
-    for (var i = 0; i < offsets.length; i++) {
-      var nc = pur.col + offsets[i][0];
-      var nr = pur.row + offsets[i][1];
-      if (nc < 0 || nc >= COLS || nr < 0 || nr >= ROWS) continue;
-      var tile = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
-      if (IMPASSABLE.has(tile)) continue;
-      var d = typeof hexDist === 'function'
-        ? hexDist(nc, nr, S.playerCol, S.playerRow) : 99;
-      if (d < bestDist) {
-        bestDist = d;
-        bestCol = nc;
-        bestRow = nr;
-      }
+    /* BFS pathfinding: optimal shortest path to player */
+    var next = _bfsNextStep(pur.col, pur.row, S.playerCol, S.playerRow);
+    if (next) {
+      pur.col = next.col;
+      pur.row = next.row;
     }
-    pur.col = bestCol;
-    pur.row = bestRow;
 
     /* If pursuer reaches player, trigger forced combat encounter */
     if (pur.col === S.playerCol && pur.row === S.playerRow) {

@@ -232,6 +232,8 @@ function _renderFogOverlay(svg, fogState) {
             ctx.arc(x, y, radius * (flatZone + 0.2), 0, Math.PI * 2);
             ctx.fill();
         } else {
+            // Medium+: noise-modulated reveal for organic fog edges
+            // Paint main gradient first
             const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
             grad.addColorStop(0, `rgba(0,0,0,${strength})`);
             grad.addColorStop(flatZone, `rgba(0,0,0,${strength})`);
@@ -240,6 +242,24 @@ function _renderFogOverlay(svg, fogState) {
             grad.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.fillStyle = grad;
             ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+            // Add 10 small offset gradients to break circular symmetry
+            const nSegs = 10;
+            const noiseAmp = radius * 0.18;
+            const seed = Math.round(x * 127 + y * 311);
+            for (let s = 0; s < nSegs; s++) {
+                const angle = (s / nSegs) * Math.PI * 2;
+                const nv = srand(seed + s * 73) * 2 - 1; // -1 to 1
+                const offset = noiseAmp * nv;
+                const ox = x + Math.cos(angle) * offset;
+                const oy = y + Math.sin(angle) * offset;
+                const sr = radius * (0.3 + srand(seed + s * 41) * 0.15);
+                const sg = ctx.createRadialGradient(ox, oy, 0, ox, oy, sr);
+                sg.addColorStop(0, `rgba(0,0,0,${strength * 0.25})`);
+                sg.addColorStop(0.6, `rgba(0,0,0,${strength * 0.1})`);
+                sg.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = sg;
+                ctx.fillRect(ox - sr, oy - sr, sr * 2, sr * 2);
+            }
         }
     }
 
@@ -532,7 +552,7 @@ function setupPanZoom() {
     });
     // Pinch zoom: snap to discrete levels
     vp.addEventListener('touchstart', e => { if (e.touches.length === 2) { ipd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); iIdx = _zoomIdx; } }, { passive: true });
-    vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; const vpR = vp.getBoundingClientRect(); const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - vpR.left; const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - vpR.top; if (ratio > 1.3 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1, midX, midY); ipd = d; clamp(); apply(); } else if (ratio < 0.7 && _zoomIdx > 0) { _snapToZoomLevel(-1, midX, midY); ipd = d; clamp(); apply(); } } }, { passive: true });
+    vp.addEventListener('touchmove', e => { if (e.touches.length === 2 && ipd > 0) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const ratio = d / ipd; const vpR = vp.getBoundingClientRect(); const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - vpR.left; const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - vpR.top; if (ratio > 1.15 && _zoomIdx < ZOOM_LEVELS.length - 1) { _snapToZoomLevel(1, midX, midY); ipd = d; clamp(); apply(); } else if (ratio < 0.85 && _zoomIdx > 0) { _snapToZoomLevel(-1, midX, midY); ipd = d; clamp(); apply(); } } }, { passive: true });
     // Mouse wheel: snap to discrete levels (debounced to prevent jitter)
     let _wheelTimer = null;
     vp.addEventListener('wheel', e => {
