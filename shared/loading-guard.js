@@ -17,7 +17,7 @@ if(typeof window.hideLoading==='function'&&!window.hideLoading._guarded){var ori
 patchShowHide();setTimeout(patchShowHide,100);setTimeout(patchShowHide,500);})();(function(){'use strict';var LITE_KEY='valdoria_loading_lite';function detectPerformanceTier(){var cores=navigator.hardwareConcurrency||8;var mem=navigator.deviceMemory||8;if(cores<=2||mem<=2)return'lite';if(cores<=4&&mem<=4)return'lite';if(cores<=8&&mem<=8)return'medium';return'full';}
 function isLowEndDevice(){return detectPerformanceTier()==='lite';}
 function applyPerformanceMode(tier){var overlays=document.querySelectorAll('.loading-overlay');for(var i=0;i<overlays.length;i++){if(tier==='lite'){overlays[i].classList.add('loading-lite');}else if(tier==='medium'){overlays[i].classList.add('loading-medium');}}
-if(tier!=='full'){console.debug('[LOADING] '+tier+' mode active');}}
+if(tier!=='full'){}}
 function getEffectiveTier(){try{var pref=localStorage.getItem(LITE_KEY);if(pref==='1')return'lite';if(pref==='0')return'full';}catch(e){console.warn('[LOADING_GUARD]',e);}
 return detectPerformanceTier();}
 function initPerformanceMode(){var tier=getEffectiveTier();if(tier!=='full'){applyPerformanceMode(tier);var observer=new MutationObserver(function(mutations){for(var i=0;i<mutations.length;i++){var nodes=mutations[i].addedNodes;for(var j=0;j<nodes.length;j++){var node=nodes[j];if(node.nodeType===1&&node.classList&&node.classList.contains('loading-overlay')){if(tier==='lite')node.classList.add('loading-lite');else if(tier==='medium')node.classList.add('loading-medium');}}}});observer.observe(document.body||document.documentElement,{childList:true,subtree:true});window._perfModeObserver=observer;}}

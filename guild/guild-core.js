@@ -71,14 +71,23 @@ window._statItem = _statItem;
 function guildFetch(endpoint, body) {
     var S = window.S || {};
     var url = (S.apiBase || '') + endpoint + (endpoint.indexOf('?') >= 0 ? '&' : '?') + 'token=' + encodeURIComponent(S.token || '');
-    var opts = { method: 'POST', headers: { 'Content-Type': 'application/json' } };
+    var headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (S.token || '') };
     if (body) {
-        opts.headers['X-Idempotency-Key'] = Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
-        opts.body = JSON.stringify(body);
+        headers['X-Idempotency-Key'] = Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
     }
+    var opts = { method: 'POST', headers: headers, body: body ? JSON.stringify(body) : undefined };
     return fetchJSON(url, opts).catch(function(e) {
-        console.error('[GUILD] Erro:', endpoint, e);
+        console.warn('[GUILD] fetch failed:', endpoint, e.message || e);
+        // Fallback: sendData when fetch fails (InlineKeyboardButton Mini Apps)
+        var tg = window.Telegram && Telegram.WebApp;
+        if (tg && tg.sendData) {
+            try {
+                var fallback = Object.assign({ endpoint: endpoint, webapp: 'GUILD' }, body || {});
+                tg.sendData(JSON.stringify(fallback));
+            } catch (se) { console.error('[GUILD] sendData fallback failed:', se); }
+        }
         showGuildError('Falha na comunicacao com o servidor.');
+        return null;
     });
 }
 window.guildFetch = guildFetch;

@@ -330,7 +330,7 @@ function _cvDrawBiomeIcon(ctx, x, y, biome, sz, locName) {
 // ═══════════════════════════════════════════════════════
 
 function _cvDrawMarkers(ctx, fogState) {
-    console.debug('[NAVIGATE] Drawing markers:', Object.keys(S.locations).length, 'locations');
+    
     var currentAdj = new Set();
     for (var ei = 0; ei < CONNECTION_EDGES.length; ei++) {
         var a = CONNECTION_EDGES[ei][0], b = CONNECTION_EDGES[ei][1];
