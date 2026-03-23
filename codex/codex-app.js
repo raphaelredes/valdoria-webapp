@@ -37,7 +37,7 @@
                         var payload = JSON.parse(atob(hash));
                         _apiBase = payload.api || _apiBase;
                         _token = payload.token || _token;
-                    } catch (e) { /* ignore */ }
+                    } catch (e) { console.warn('[CODEX]', 'hash parse:', e); }
                 }
             }
 
