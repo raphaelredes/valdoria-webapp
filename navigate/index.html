@@ -10,8 +10,7 @@
     <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../shared/fonts/cinzel.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="../shared/fonts.css">
-    <link rel="preload" href="map-static-2x.webp" as="image" type="image/webp">
-    <link rel="preload" href="map-static-2x.png" as="image">
+    <!-- map bg: src set by JS to support SPA + standalone -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         var v = Date.now();
@@ -149,13 +148,10 @@
     <!-- Map Viewport -->
     <div id="map-viewport" role="application" aria-label="Mapa mundo de Valdoria">
         <div id="map-wrapper">
-            <picture>
-                <source srcset="map-static-2x.webp" type="image/webp">
-                <img id="map-bg" src="map-static-2x.png" draggable="false"
+            <img id="map-bg" draggable="false"
                  width="733" height="720"
                  style="position:absolute;top:0;left:0;pointer-events:none;image-rendering:auto"
                  alt="">
-            </picture>
             <canvas id="fog-canvas" width="733" height="720"
                     style="position:absolute;top:0;left:0;pointer-events:none"></canvas>
             <canvas id="map-canvas" width="733" height="720"
