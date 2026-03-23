@@ -80,7 +80,7 @@
         var unaffordable = d.gold < it.cost;
         h += '<div class="v-popup-row ';
         if (unaffordable) h += ' v-popup-unaffordable';
-        h += '" data-action="prep_buy_' + i + '">';
+        h += '" data-action="prep_buy_' + i + '" role="button">';
         var lbl = it.name;
         if (it.qty && it.qty > 1) lbl += ' x' + it.qty;
         h += '<span class="v-popup-label">' + lbl + '</span>';
@@ -96,6 +96,23 @@
     if (d.biome_tip) {
       h += '<div class="v-popup-divider"></div>';
       h += '<div class="v-popup-tip">' + (d.biome_tip.emoji || '') + ' ' + (d.biome_tip.text || d.biome_tip) + '</div>';
+    }
+
+    /* Field gear */
+    var gear = d.field_gear || [];
+    if (gear.length > 0) {
+      h += '<div class="v-popup-divider"></div>';
+      h += '<div class="v-popup-section-label">Equipamento de Campo</div>';
+      for (var g = 0; g < gear.length; g++) {
+        var gi = gear[g];
+        var gSt = gi.has ? 'ok' : (gi.relevant ? 'crit' : 'warn');
+        var gCls = 'v-popup-row';
+        if (!gi.has && gi.relevant) gCls += ' v-popup-warn-item';
+        h += '<div class="' + gCls + '">';
+        h += '<span class="v-popup-label"><span class="' + _dotCls(gSt) + '"></span>' + (gi.emoji || '') + ' ' + gi.name + '</span>';
+        h += '<span class="v-popup-value">' + (gi.has ? 'Sim' : 'N' + String.fromCharCode(227) + 'o') + (gi.relevant ? ' ' + String.fromCharCode(11088) : '') + '</span>';
+        h += '</div>';
+      }
     }
 
     /* Warnings */
@@ -120,16 +137,16 @@
       h += '<div class="v-popup-divider"></div>';
       h += '<div class="v-popup-section-label">Recuperar HP</div>';
       if (d.has_healing_potion) {
-        h += '<div class="v-popup-row" data-action="action_quick_potion">';
+        h += '<div class="v-popup-row" data-action="action_quick_potion" role="button">';
         h += '<span class="v-popup-label">🧪 Beber Poção</span>';
         h += '</div>';
       }
       if (d.has_hit_dice) {
-        h += '<div class="v-popup-row" data-action="action_field_rest">';
+        h += '<div class="v-popup-row" data-action="action_field_rest" role="button">';
         h += '<span class="v-popup-label">💤 Descanso Curto</span>';
         h += '</div>';
       }
-      h += '<div class="v-popup-row" data-action="open_inn">';
+      h += '<div class="v-popup-row" data-action="open_inn" role="button">';
       h += '<span class="v-popup-label">🏨 Ir para Estalagem</span>';
       h += '</div>';
     }
@@ -186,7 +203,7 @@
       return true;
     }
     if (action === 'action_quick_potion' || action === 'action_field_rest' || action === 'open_inn') {
-      vPopup.hide();
+      if (typeof vPopup !== 'undefined') vPopup.hide();
       setTimeout(function () {
         if (typeof doAction === 'function') doAction(action);
       }, 200);
@@ -196,30 +213,30 @@
   }
 
   function _doBuyItem(el, idx) {
-    if (el) {
-      el.style.opacity = '0.5';
-      el.style.pointerEvents = 'none';
-    }
+    /* Disable ALL buy rows to prevent race conditions */
+    var popup = document.getElementById('travel-prep-overlay');
+    var rows = popup ? popup.querySelectorAll('[data-action^="prep_buy_"]') : [];
+    for (var r = 0; r < rows.length; r++) rows[r].classList.add('v-popup-disabled');
+    if (el) el.classList.add('v-popup-disabled');
+
     var cb = 'action_quick_equip_item_' + idx;
     if (typeof apiCall === 'function') {
       apiCall('/api/game/action', { cb: cb }).then(function (resp) {
-        var prep = resp.travel_prep || (resp.screen && resp.screen.travel_prep);
+        if (!resp) return;
+        var prep = resp.travel_prep || (resp.screen ? resp.screen.travel_prep : null);
         if (prep) showTravelPrep(prep);
       }).catch(function (err) {
         console.error('[TRAVEL-PREP] buy item error', err);
-        if (el) {
-          el.style.opacity = '';
-          el.style.pointerEvents = '';
-        }
+        for (var r = 0; r < rows.length; r++) rows[r].classList.remove('v-popup-disabled');
       });
     } else if (typeof doAction === 'function') {
-      vPopup.hide();
+      if (typeof vPopup !== 'undefined') vPopup.hide();
       setTimeout(function () { doAction(cb); }, 200);
     }
   }
 
   window.showTravelPrep = function (data) {
-    if (!data) return;
+    if (!data || typeof vPopup === 'undefined') return;
     _currentData = data;
     var bodyEl = _renderBody(data);
     var actions = _renderActions(data);
