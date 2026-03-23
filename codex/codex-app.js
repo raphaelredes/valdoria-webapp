@@ -1,3 +1,4 @@
+// MIN_LOAD_MS enforced by loading-guard.js
 /**
  * Codex / Compêndio de Valdoria
  * WebApp para visualizar entradas descobertas do jogo.

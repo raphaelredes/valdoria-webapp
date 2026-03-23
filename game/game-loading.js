@@ -80,7 +80,7 @@
     };
 
     /**
-     * Hide the loading overlay with cinematic exit, respecting MIN_LOADING_MS.
+     * Hide the loading overlay with cinematic exit, respecting VALDORIA_MIN_LOAD_MS.
      */
     window.hideLoading = function hideLoading() {
         if (!_ctrl) return;

@@ -700,7 +700,7 @@ function _updateMinimap() {
     // Auto-fade after 3s of no interaction
     mm.classList.remove('fading');
     clearTimeout(_mmFadeTimer);
-    _mmFadeTimer = setTimeout(() => { mm.classList.add('fading'); }, 3000);
+    _mmFadeTimer = /*transition*/setTimeout(() => { mm.classList.add('fading'); }, 3000);
 }
 
 // ===============================================================

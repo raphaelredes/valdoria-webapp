@@ -2,6 +2,7 @@ function _cleanupOverlays(){var ids=['v-popup-overlay','travel-prep-overlay','qu
 var LONG_BTN_THRESHOLD=24;var HERO_KEYWORDS=['PARTIR','JOGAR','AVENTURA','CONFIRMAR','INICIAR'];function updateBottomPadding(){const screenEl=document.getElementById('screen');const panelEl=document.getElementById('bottom-panel');if(!screenEl||!panelEl)return;requestAnimationFrame(()=>{if(panelEl.classList.contains('immersive-collapsed'))return;const h=Math.max(panelEl.offsetHeight,48);screenEl.style.paddingBottom=(h+40)+'px';document.documentElement.style.setProperty('--bottom-panel-h',h+'px');const toggle=document.getElementById('immersive-toggle');if(toggle)toggle.style.bottom=h+'px';});}
 function renderScreen(screen){try{if(!screen){console.warn('[GAME] renderScreen() called with null/undefined screen');return;}
 if(screen.popup&&window.vPopup&&typeof _showGamePopup==='function'){console.debug('[GAME] renderScreen intercepted popup, showing as overlay');_showGamePopup(screen);return;}
+if(screen.travel_prep&&typeof showTravelPrep==='function'){console.debug('[GAME] renderScreen intercepted travel_prep, showing as popup');showTravelPrep(screen.travel_prep);return;}
 _cleanupOverlays();
 if(screen.dice_roll&&!screen._diceShown){_showDiceAnimation(screen);return;}
 if(screen.quest_board&&typeof showQuestBoard==='function'){showQuestBoard(screen.quest_board);return;}
