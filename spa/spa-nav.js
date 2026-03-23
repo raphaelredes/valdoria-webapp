@@ -1,5 +1,5 @@
 (function(){"use strict";window.valdoriaSpaNav=function(url){if(!url)return;if(window.SpaRouter&&window.__spaRouteName){var route=_detectRoute(url);if(route&&SpaRouter._routes&&SpaRouter._routes[route]){var params=_extractParams(url);SpaRouter.navigate(route,params);return;}}
-window.__valdoria_transitioning=true;window.location.replace(url);};window.valdoriaSpaClose=function(){if(window.__spaRouteName&&window.SpaRouter){SpaRouter.navigate("game",{});return;}
+window.__valdoria_transitioning=true;window.location.replace(url);};window.valdoriaSpaClose=function(){window.__valdoria_transitioning=true;
 if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.close){Telegram.WebApp.close();}};function _detectRoute(url){try{var u=new URL(url,window.location.origin);return u.searchParams.get("route")||null;}catch(e){var m=url.match(/[?&]route=([^&#]+)/);return m?m[1]:null;}}
 function _extractParams(url){var params={};try{var u=new URL(url,window.location.origin);u.searchParams.forEach(function(v,k){if(k!=="route"&&k!=="v")params[k]=v;});}catch(e){var pairs=url.split(/[?&]/);for(var i=0;i<pairs.length;i++){var kv=pairs[i].split("=");if(kv.length===2&&kv[0]!=="route"&&kv[0]!=="v"){params[kv[0]]=decodeURIComponent(kv[1]||"");}}}
 return params;}})();
