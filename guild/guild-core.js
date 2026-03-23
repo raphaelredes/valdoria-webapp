@@ -86,7 +86,7 @@ function guildFetch(endpoint, body) {
                 tg.sendData(JSON.stringify(fallback));
             } catch (se) { console.error('[GUILD] sendData fallback failed:', se); }
         }
-        showGuildError('Falha na comunicacao com o servidor.');
+        showGuildError('Falha na comunicação com o servidor.');
         return null;
     });
 }
