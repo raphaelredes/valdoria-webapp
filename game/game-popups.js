@@ -1,7 +1,7 @@
 (function(){
 "use strict";
 
-var _activeFooterPopup = null;
+window._activeFooterPopup = null;
 
 window._isFooterPopupActive = function(id) {
     return _activeFooterPopup === id && vPopup.isOpen();
@@ -29,6 +29,7 @@ function _buildActionsHtml(data) {
 function _onActionOrDispatch(action) {
     if (action !== "cancel" && typeof doAction === "function") { doAction(action); return true; }
 }
+window._onActionOrDispatch = _onActionOrDispatch;
 
 /* ====== SKILLS LIST ====== */
 window._showSkillsPopup = function(data) {

@@ -143,14 +143,14 @@ window._showDailyChallengePopup = function(data) {
             '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>';
     }
 
-    if (typeof _activeFooterPopup !== 'undefined') _activeFooterPopup = 'daily-challenge';
+    if (typeof window._activeFooterPopup !== 'undefined') window._activeFooterPopup = 'daily-challenge';
     vPopup.show({
         header: header,
         headerClass: headerClass,
         bodyEl: bodyEl,
         actions: actionsHtml,
-        onAction: _onActionOrDispatch,
-        onHide: function() { if (typeof _activeFooterPopup !== 'undefined') _activeFooterPopup = null; }
+        onAction: window._onActionOrDispatch,
+        onHide: function() { if (typeof window._activeFooterPopup !== 'undefined') window._activeFooterPopup = null; }
     });
 
     if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_quest');
