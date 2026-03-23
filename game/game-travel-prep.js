@@ -1,27 +1,237 @@
-(function(){'use strict';var _currentData=null;function _dotCls(status){return'v-popup-dot v-popup-dot--'+status;}
-function _pctStatus(pct,good,warn){if(pct>=good)return'ok';if(pct>=warn)return'warn';return'crit';}
-function _bar(pct,cls){return'<div class="v-popup-bar-wrap">'+'<div class="v-popup-bar-fill v-popup-bar--'+cls+'" style="width:'+Math.max(2,pct)+'%"></div>'+'</div>';}
-function _renderBody(d){var h='';h+='<div class="v-popup-row">';h+='<span class="'+_dotCls(_pctStatus(d.hp.pct,60,30))+'"></span>';h+='<span class="v-popup-label">HP</span>';h+='<span class="v-popup-value">'+d.hp.current+'/'+d.hp.max+'</span>';h+='</div>';h+=_bar(d.hp.pct,'hp');if(d.mp){h+='<div class="v-popup-row">';h+='<span class="'+_dotCls(_pctStatus(d.mp.pct,50,25))+'"></span>';h+='<span class="v-popup-label">MP</span>';h+='<span class="v-popup-value">'+d.mp.current+'/'+d.mp.max+'</span>';h+='</div>';h+=_bar(d.mp.pct,'mp');}
-h+='<div class="v-popup-divider"></div>';var foodSt=d.food.count>=d.food.recommended?'ok':(d.food.count>0?'warn':'crit');var foodLbl=d.party_size>1?d.food.count+'/'+d.food.recommended:''+d.food.count;h+='<div class="v-popup-row">';h+='<span class="'+_dotCls(foodSt)+'"></span>';h+='<span class="v-popup-label">\uD83C\uDF5E Ra\u00e7\u00f5es</span>';h+='<span class="v-popup-value">'+foodLbl+'</span>';h+='</div>';h+='<div class="v-popup-row">';h+='<span class="'+_dotCls(d.tent?'ok':'crit')+'"></span>';h+='<span class="v-popup-label">\u26FA Barraca</span>';h+='<span class="v-popup-value">'+(d.tent?'Sim':'N\u00e3o')+'</span>';h+='</div>';var potSt=d.potions>=2?'ok':(d.potions>0?'warn':'crit');h+='<div class="v-popup-row">';h+='<span class="'+_dotCls(potSt)+'"></span>';h+='<span class="v-popup-label">\uD83E\uDDEA Po\u00e7\u00f5es</span>';h+='<span class="v-popup-value">'+d.potions+'</span>';h+='</div>';h+='<div class="v-popup-row">';h+='<span class="'+_dotCls('ok')+'"></span>';h+='<span class="v-popup-label">\uD83D\uDCB0 Ouro</span>';h+='<span class="v-popup-value">'+d.gold+' PO</span>';h+='</div>';if(d.party_size>1){h+='<div class="v-popup-row">';h+='<span class="'+_dotCls('ok')+'"></span>';h+='<span class="v-popup-label">\uD83D\uDC64 Grupo</span>';h+='<span class="v-popup-value">'+d.party_size+' membros</span>';h+='</div>';}
-if(d.field_gear&&d.field_gear.length>0){h+='<div class="v-popup-divider"></div>';h+='<div class="v-popup-section-label">Equipamento de Campo</div>';for(var i=0;i<d.field_gear.length;i++){var g=d.field_gear[i];var gSt=g.has?'ok':(g.relevant?'warn':'dim');var star=(g.relevant&&!g.has)?' \u2B50':'';h+='<div class="v-popup-row" style="font-size:var(--v-font-md)">';h+='<span class="'+_dotCls(gSt)+'"></span>';h+='<span class="v-popup-label">'+g.emoji+' '+g.name+star+'</span>';if(g.has)h+='<span class="v-popup-value v-popup-value--dim">'+g.bonus+'</span>';h+='</div>';}}
-if(d.biome_tip){h+='<div class="v-popup-tip">'+d.biome_tip.emoji+' <em>'+d.biome_tip.text+'</em></div>';}
-if(d.warnings&&d.warnings.length>0){h+='<div class="v-popup-divider"></div>';var wm={'low_hp':'\uD83E\uDE78 HP perigosamente baixo \u2014 um golpe pode ser fatal','no_food':'\uD83C\uDF5E Sem ra\u00e7\u00f5es \u2014 imposs\u00edvel Descanso Longo no campo','low_food':'\uD83C\uDF5E Poucas ra\u00e7\u00f5es \u2014 podem acabar r\u00e1pido','no_tent':'\u26FA Sem barraca \u2014 imposs\u00edvel Descanso Longo no campo','no_potions':'\uD83E\uDDEA Sem po\u00e7\u00f5es de cura \u2014 sem recupera\u00e7\u00e3o em emerg\u00eancia'};for(var w=0;w<d.warnings.length;w++){h+='<div class="v-popup-warn-item">'+(wm[d.warnings[w]]||d.warnings[w])+'</div>';}}
-if(d.quick_equip&&d.quick_equip.available){h+='<div class="v-popup-divider"></div>';h+='<div class="v-popup-equip-info">';h+='\uD83D\uDED2 Kit r\u00e1pido: <strong>'+d.quick_equip.cost+' PO</strong>';var parts=[];for(var q=0;q<d.quick_equip.items.length;q++){var it=d.quick_equip.items[q];parts.push(it.name+(it.qty>1?' x'+it.qty:'')+' '+it.cost+' PO');}
-h+='<div class="v-popup-equip-detail">'+parts.join(' + ')+'</div>';if(!d.quick_equip.affordable){h+='<div class="v-popup-equip-short">\u26A0\uFE0F Faltam '+d.quick_equip.shortfall+' PO</div>';}
-h+='</div>';}
-return h;}
-function _renderActions(d){var h='';var isLowHp=d.warnings&&d.warnings.indexOf('low_hp')!==-1;if(d.quick_equip&&d.quick_equip.available&&d.quick_equip.affordable){h+='<button class="v-popup-btn v-popup-btn--equip" data-action="quick_equip">';h+='\uD83D\uDED2 Equipar-se R\u00e1pido ('+d.quick_equip.cost+' PO)';h+='</button>';}
-var shops='';if(d.warnings&&(d.warnings.indexOf('no_food')!==-1||d.warnings.indexOf('low_food')!==-1||d.warnings.indexOf('no_tent')!==-1)){shops+='<button class="v-popup-btn" data-action="market_interact_menu_tentmaker">\u26FA Bjorn (Seleiro)</button>';}
-if(d.warnings&&d.warnings.indexOf('no_potions')!==-1){shops+='<button class="v-popup-btn" data-action="market_interact_menu_alchemist">\uD83E\uDDEA Mirena (Alquimista)</button>';}
-if(shops)h+='<div class="v-popup-btn-row">'+shops+'</div>';if(isLowHp){var hpBtns='';if(d.has_healing_potion){hpBtns+='<button class="v-popup-btn" data-action="action_quick_potion">\uD83E\uDDEA Beber Po\u00e7\u00e3o</button>';}
-if(d.has_hit_dice){hpBtns+='<button class="v-popup-btn" data-action="action_field_rest">\uD83D\uDCA4 Descanso Curto</button>';}
-if(hpBtns)h+='<div class="v-popup-btn-row">'+hpBtns+'</div>';h+='<button class="v-popup-btn" data-action="open_inn">\uD83C\uDFE8 Ir para Estalagem</button>';}
-h+='<div class="v-popup-divider"></div>';h+='<button class="v-popup-btn v-popup-btn--primary" data-action="proceed">\u2694\uFE0F Prosseguir Mesmo Assim</button>';h+='<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">\uD83C\uDFD8\uFE0F Voltar para Eld\u00f3ria</button>';return h;}
-window.showTravelPrep=function(data){_currentData=data;if(typeof vPopup==='undefined'){console.warn('[TRAVEL_PREP] vPopup not loaded');return;}
-var headerText,headerClass='';if(data.equip_result==='success'){headerText='\u2705 Equipado para a Viagem!';headerClass='v-popup-header--success';}else if(data.equip_result==='insufficient'){headerText='\uD83D\uDCB0 Ouro Insuficiente';headerClass='v-popup-header--warning';}else{var hasLowHp=data.warnings&&data.warnings.indexOf('low_hp')!==-1;headerText='\u26A0\uFE0F Prepara\u00e7\u00e3o de Viagem';headerClass=hasLowHp?'v-popup-header--danger':'';}
-vPopup.show({id:'travel-prep-overlay',header:headerText,headerClass:headerClass,body:_renderBody(data),actions:_renderActions(data),onAction:function(action,btn){if(action==='proceed'){vPopup.hide();setTimeout(function(){if(typeof doAction==='function')doAction('action_explore_confirmed');},150);return true;}
-if(action==='quick_equip'){_doQuickEquip(btn);return true;}
-return false;}});};window.hideTravelPrep=function(){if(typeof vPopup!=='undefined')vPopup.hide();};async function _doQuickEquip(btn){btn.disabled=true;btn.textContent='Comprando...';try{var data=await apiCall('/api/game/action',{cb:'action_quick_equip',sv:S.screenVersion});if(!data){btn.disabled=false;btn.textContent='\uD83D\uDED2 Tentar Novamente';return;}
-if(data.sv!==undefined)S.screenVersion=data.sv;if(data.travel_prep){showTravelPrep(data.travel_prep);if(data.travel_prep.equip_result==='success'){if(typeof showToast==='function')showToast('\u2705 Itens adquiridos!',2000);}else if(data.travel_prep.equip_result==='insufficient'){if(typeof showToast==='function')showToast('\uD83D\uDCB0 Ouro insuficiente!',2500);}
-return;}
-vPopup.hide();if(data.text||data.buttons){if(typeof renderScreen==='function')renderScreen(data);}}catch(err){console.error('[TRAVEL_PREP] quick equip error:',err);btn.disabled=false;btn.textContent='\uD83D\uDED2 Tentar Novamente';}}})();
+(function () {
+  'use strict';
+
+  var _currentData = null;
+
+  function _dotCls(st) {
+    return 'v-popup-dot v-popup-dot--' + st;
+  }
+
+  function _pctStatus(pct, good, warn) {
+    if (pct >= good) return 'ok';
+    if (pct >= warn) return 'warn';
+    return 'crit';
+  }
+
+  function _renderBody(d) {
+    var el = document.createElement('div');
+    el.className = 'v-popup-body-inner';
+    var h = '';
+
+    /* HP row */
+    var hpPct = d.hp.pct || 0;
+    var hpSt = _pctStatus(hpPct, 60, 30);
+    h += '<div class="v-popup-row">';
+    h += '<span class="v-popup-label"><span class="' + _dotCls(hpSt) + '"></span>HP</span>';
+    h += '<span class="v-popup-value">' + d.hp.current + ' / ' + d.hp.max + '</span>';
+    h += '</div>';
+    h += '<div class="v-popup-bar-wrap"><div class="v-popup-bar-fill v-popup-bar--hp" style="width:' + hpPct + '%"></div></div>';
+
+    /* MP row (optional) */
+    if (d.mp) {
+      var mpPct = d.mp.pct || 0;
+      var mpSt = _pctStatus(mpPct, 50, 20);
+      h += '<div class="v-popup-row">';
+      h += '<span class="v-popup-label"><span class="' + _dotCls(mpSt) + '"></span>MP</span>';
+      h += '<span class="v-popup-value">' + d.mp.current + ' / ' + d.mp.max + '</span>';
+      h += '</div>';
+      h += '<div class="v-popup-bar-wrap"><div class="v-popup-bar-fill v-popup-bar--mp" style="width:' + mpPct + '%"></div></div>';
+    }
+
+    /* Suprimentos */
+    h += '<div class="v-popup-divider"></div>';
+    h += '<div class="v-popup-section-label">Suprimentos</div>';
+
+    /* Food */
+    var foodSt = d.food.count >= d.food.recommended ? 'ok' : (d.food.count > 0 ? 'warn' : 'crit');
+    h += '<div class="v-popup-row">';
+    h += '<span class="v-popup-label"><span class="' + _dotCls(foodSt) + '"></span>Rações</span>';
+    h += '<span class="v-popup-value">' + d.food.count + ' / ' + d.food.recommended + '</span>';
+    h += '</div>';
+
+    /* Tent */
+    var tentSt = d.tent ? 'ok' : 'crit';
+    h += '<div class="v-popup-row">';
+    h += '<span class="v-popup-label"><span class="' + _dotCls(tentSt) + '"></span>Barraca</span>';
+    h += '<span class="v-popup-value">' + (d.tent ? 'Sim' : 'Não') + '</span>';
+    h += '</div>';
+
+    /* Potions */
+    var potSt = d.potions >= 2 ? 'ok' : (d.potions > 0 ? 'warn' : 'crit');
+    h += '<div class="v-popup-row">';
+    h += '<span class="v-popup-label"><span class="' + _dotCls(potSt) + '"></span>Poções</span>';
+    h += '<span class="v-popup-value">' + d.potions + '</span>';
+    h += '</div>';
+
+    /* Gold */
+    h += '<div class="v-popup-row">';
+    h += '<span class="v-popup-label">Ouro</span>';
+    h += '<span class="v-popup-value">' + d.gold + ' PO</span>';
+    h += '</div>';
+
+    /* Quick buy */
+    var qe = d.quick_equip || {};
+    var items = qe.items || [];
+    if (qe.available && items.length > 0) {
+      h += '<div class="v-popup-divider"></div>';
+      h += '<div class="v-popup-section-label">Compra Rápida</div>';
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var unaffordable = d.gold < it.cost;
+        h += '<div class="v-popup-row ';
+        if (unaffordable) h += ' v-popup-unaffordable';
+        h += '" data-action="prep_buy_' + i + '">';
+        var lbl = it.name;
+        if (it.qty && it.qty > 1) lbl += ' x' + it.qty;
+        h += '<span class="v-popup-label">' + lbl + '</span>';
+        h += '<span class="v-popup-value v-popup-gold">' + it.cost + ' PO</span>';
+        h += '</div>';
+      }
+      if (qe.shortfall > 0) {
+        h += '<div class="v-popup-tip">Faltam ' + qe.shortfall + ' PO para comprar tudo</div>';
+      }
+    }
+
+    /* Biome tip */
+    if (d.biome_tip) {
+      h += '<div class="v-popup-divider"></div>';
+      h += '<div class="v-popup-tip">' + (d.biome_tip.emoji || '') + ' ' + (d.biome_tip.text || d.biome_tip) + '</div>';
+    }
+
+    /* Warnings */
+    var warnings = d.warnings || [];
+    if (warnings.length > 0) {
+      var warnMap = {
+        low_hp: 'HP baixo — considere descansar ou beber poção',
+        no_food: 'Sem rações! Fome causa Exaustão',
+        low_food: 'Poucas rações para o grupo',
+        no_tent: 'Sem barraca — descanso longo impossível',
+        no_potions: 'Sem poções de cura'
+      };
+      h += '<div class="v-popup-divider"></div>';
+      for (var w = 0; w < warnings.length; w++) {
+        var msg = warnMap[warnings[w]] || warnings[w];
+        h += '<div class="v-popup-warn-item">⚠️ ' + msg + '</div>';
+      }
+    }
+
+    /* Low HP actions */
+    if (warnings.indexOf('low_hp') !== -1) {
+      h += '<div class="v-popup-divider"></div>';
+      h += '<div class="v-popup-section-label">Recuperar HP</div>';
+      if (d.has_healing_potion) {
+        h += '<div class="v-popup-row" data-action="action_quick_potion">';
+        h += '<span class="v-popup-label">🧪 Beber Poção</span>';
+        h += '</div>';
+      }
+      if (d.has_hit_dice) {
+        h += '<div class="v-popup-row" data-action="action_field_rest">';
+        h += '<span class="v-popup-label">💤 Descanso Curto</span>';
+        h += '</div>';
+      }
+      h += '<div class="v-popup-row" data-action="open_inn">';
+      h += '<span class="v-popup-label">🏨 Ir para Estalagem</span>';
+      h += '</div>';
+    }
+
+    /* Equip result toast */
+    if (d.equip_result === 'success') {
+      h += '<div class="v-popup-divider"></div>';
+      h += '<div class="v-popup-success-msg v-popup-center-text">✅ Item comprado!</div>';
+    } else if (d.equip_result === 'insufficient') {
+      h += '<div class="v-popup-divider"></div>';
+      h += '<div class="v-popup-error-msg v-popup-center-text">❌ Ouro insuficiente!</div>';
+    }
+
+    el.innerHTML = h;
+    return el;
+  }
+
+  function _renderActions(d) {
+    var actions = [];
+    var qe = d.quick_equip || {};
+    var items = qe.items || [];
+    var warnings = d.warnings || [];
+
+    /* Buy all button */
+    if (qe.available && qe.affordable && items.length > 1) {
+        actions.push({
+          label: 'Comprar Tudo (' + (qe.cost || 0) + ' PO)',
+          action: 'action_quick_equip',
+          cls: 'v-popup-btn v-popup-btn--equip'
+        });
+    }
+
+    /* Primary action */
+    actions.push({
+      label: warnings.length > 0 ? 'Prosseguir Mesmo Assim' : 'Partir para Aventura',
+      action: 'action_explore_confirmed',
+      cls: 'v-popup-btn v-popup-btn--primary'
+    });
+
+    /* Cancel */
+    actions.push({
+      label: 'Voltar para Eldória',
+      action: 'action_city_entry',
+      cls: 'v-popup-btn v-popup-btn--cancel'
+    });
+
+    return actions;
+  }
+
+  function _onAction(action, el) {
+    if (action.indexOf('prep_buy_') === 0) {
+      var idx = parseInt(action.replace('prep_buy_', ''), 10);
+      _doBuyItem(el, idx);
+      return true;
+    }
+    if (action === 'action_quick_potion' || action === 'action_field_rest' || action === 'open_inn') {
+      vPopup.hide();
+      setTimeout(function () {
+        if (typeof doAction === 'function') doAction(action);
+      }, 200);
+      return true;
+    }
+    return false;
+  }
+
+  function _doBuyItem(el, idx) {
+    if (el) {
+      el.style.opacity = '0.5';
+      el.style.pointerEvents = 'none';
+    }
+    var cb = 'action_quick_equip_item_' + idx;
+    if (typeof apiCall === 'function') {
+      apiCall('/api/game/action', { cb: cb }).then(function (resp) {
+        var prep = resp.travel_prep || (resp.screen && resp.screen.travel_prep);
+        if (prep) showTravelPrep(prep);
+      }).catch(function (err) {
+        console.error('[TRAVEL-PREP] buy item error', err);
+        if (el) {
+          el.style.opacity = '';
+          el.style.pointerEvents = '';
+        }
+      });
+    } else if (typeof doAction === 'function') {
+      vPopup.hide();
+      setTimeout(function () { doAction(cb); }, 200);
+    }
+  }
+
+  window.showTravelPrep = function (data) {
+    if (!data) return;
+    _currentData = data;
+    var bodyEl = _renderBody(data);
+    var actions = _renderActions(data);
+    var warnings = data.warnings || [];
+    vPopup.show({
+      id: 'travel-prep-overlay',
+      header: 'Preparação de Viagem',
+      headerClass: warnings.length > 0 ? 'v-popup-header--warning' : '',
+      bodyEl: bodyEl,
+      actions: actions,
+      onAction: _onAction,
+      closeOnOutside: false
+    });
+  };
+})();
