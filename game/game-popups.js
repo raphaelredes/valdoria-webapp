@@ -41,7 +41,7 @@ window._showSkillsPopup = function(data) {
         bodyEl: bodyEl,
         actions: '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>',
         onAction: _onActionOrDispatch,
-        onHide: function() { _activeFooterPopup = null; }
+        onHide: function() { _activeFooterPopup = null; if(typeof fetchState==="function")fetchState(true); }
     });
 };
 
@@ -74,7 +74,7 @@ window._showCharDetailsPopup = function(data) {
         bodyEl: bodyEl,
         actions: '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Fechar</button>',
         onAction: _onActionOrDispatch,
-        onHide: function() { _activeFooterPopup = null; }
+        onHide: function() { _activeFooterPopup = null; if(typeof fetchState==="function")fetchState(true); }
     });
 };
 
@@ -103,7 +103,7 @@ window._showAlliesPopup = function(data) {
         bodyEl: bodyEl,
         actions: actionsHtml,
         onAction: _onActionOrDispatch,
-        onHide: function() { _activeFooterPopup = null; }
+        onHide: function() { _activeFooterPopup = null; if(typeof fetchState==="function")fetchState(true); }
     });
 };
 
