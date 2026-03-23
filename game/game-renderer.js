@@ -1,3 +1,31 @@
+var _prevPlayerLevel = 0;
+function _checkLevelUp(screen) {
+    if (!screen || !screen.char_details) return;
+    var lvl = screen.char_details.level || 0;
+    if (_prevPlayerLevel > 0 && lvl > _prevPlayerLevel) {
+        _showLevelUpCelebration(lvl);
+    }
+    if (lvl > 0) _prevPlayerLevel = lvl;
+}
+function _showLevelUpCelebration(level) {
+    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+        ValdoriaAudio.playSFX('sfx_levelup');
+    }
+    var overlay = document.createElement('div');
+    overlay.className = 'levelup-celebration';
+    overlay.innerHTML = '<div class="levelup-inner">'
+        + '<div class="levelup-icon">✨</div>'
+        + '<div class="levelup-title">Nível ' + level + '!</div>'
+        + '<div class="levelup-sub">Seu personagem ficou mais forte</div>'
+        + '</div>';
+    document.body.appendChild(overlay);
+    requestAnimationFrame(function() { overlay.classList.add('active'); });
+    var readTime = (typeof calcReadTime === 'function') ? calcReadTime('Nivel ' + level + ' Seu personagem ficou mais forte', 'overlay') : 2500;
+    setTimeout(function() {
+        overlay.classList.add('hiding');
+        setTimeout(function() { overlay.remove(); }, 600);
+    }, readTime);
+}
 function _cleanupOverlays(){var ids=['v-popup-overlay','travel-prep-overlay','quest-popup-overlay','quest-diary-overlay','quest-board-overlay','plaza-event-overlay'];for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el&&(el.classList.contains('active')||el.style.display==='flex')){el.classList.remove('active','hiding');el.style.display='none';}}if(typeof vPopup!=='undefined'&&vPopup.isOpen&&vPopup.isOpen()){vPopup.hide();}}
 var LONG_BTN_THRESHOLD=24;var HERO_KEYWORDS=['PARTIR','JOGAR','AVENTURA','CONFIRMAR','INICIAR'];function updateBottomPadding(){const screenEl=document.getElementById('screen');const panelEl=document.getElementById('bottom-panel');if(!screenEl||!panelEl)return;requestAnimationFrame(()=>{if(panelEl.classList.contains('immersive-collapsed'))return;const h=Math.max(panelEl.offsetHeight,48);screenEl.style.paddingBottom=(h+40)+'px';document.documentElement.style.setProperty('--bottom-panel-h',h+'px');const toggle=document.getElementById('immersive-toggle');if(toggle)toggle.style.bottom=h+'px';});}
 function renderScreen(screen){try{if(!screen){console.warn('[GAME] renderScreen() called with null/undefined screen');return;}
@@ -25,6 +53,7 @@ if(screen.quest_diary){renderQuestDiary(contentEl,screen.quest_diary);}
 if(screen.quest_detail){renderQuestDetail(contentEl,screen.quest_detail);}
 if(screen.quest_turnin){renderQuestTurnin(contentEl,screen.quest_turnin);}
 if(screen.char_details&&typeof renderCharDetails==='function'){renderCharDetails(contentEl,screen.char_details);}
+_checkLevelUp(screen);
 if(screen.skills_data&&typeof renderSkillsList==='function'){renderSkillsList(contentEl,screen.skills_data);}
 if(screen.skill_detail_data&&typeof renderSkillDetail==='function'){renderSkillDetail(contentEl,screen.skill_detail_data);}
 if(screen.quest_abandon){renderQuestAbandon(contentEl,screen.quest_abandon);}

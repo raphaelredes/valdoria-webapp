@@ -147,4 +147,34 @@ function compareItemsDetailed(newIt,oldIt,slot){if(!newIt)return{cls:'',delta:''
 function getStatDelta(newIt,oldIt,slot){const diffs=[];const check=(label,nv,ov)=>{if(nv!==ov)diffs.push({label,val:nv-ov});};check('Dano',newIt.dd?avgDice(newIt.dd):0,oldIt.dd?avgDice(oldIt.dd):0);check('CA',newIt.ac||0,oldIt.ac||0);check('ATK',newIt.b||0,oldIt.b||0);check('HP',newIt.hb||0,oldIt.hb||0);check('MP',newIt.mb||0,oldIt.mb||0);if(!diffs.length)return'';return diffs.map(d=>{const sign=d.val>0?'+':'';const color=d.val>0?'var(--v-success)':'var(--v-danger)';return`<span style="color:${color};font-weight:600;">${sign}${d.val} ${d.label}</span>`;}).join(' ');}
 function getSetIcon(setId){if(D.sets&&D.sets[setId])return D.sets[setId].i;return'🔗';}
 function getAllyName(npcId){const ally=(D.allies||[]).find(a=>a.id===npcId);return ally?ally.n:npcId;}
+
+function _getCardDelta(name, it) {
+    if (!it || !it.s) return '';
+    var slot = it.s === 'ring' ? 'ring_1' : it.s;
+    var eq = activeTarget === 'player' ? localEq : (localAllyEq[activeTarget] || {});
+    var curName = eq[slot];
+    if (!curName || curName === name) return '';
+    var curIt = getItemData(curName);
+    if (!curIt) return '';
+    var cmp = compareItemsDetailed(it, curIt, slot);
+    if (!cmp.score || cmp.score === 0) return '';
+    var diffs = [];
+    var acD = (it.ac || 0) - (curIt.ac || 0);
+    var atkD = (it.b || 0) - (curIt.b || 0);
+    var dmgD = (it.dd ? avgDice(it.dd) : 0) - (curIt.dd ? avgDice(curIt.dd) : 0);
+    var hpD = (it.hb || 0) - (curIt.hb || 0);
+    if (acD) diffs.push({ l: 'CA', v: acD });
+    if (atkD) diffs.push({ l: 'ATK', v: atkD });
+    if (dmgD) diffs.push({ l: 'Dano', v: Math.round(dmgD) });
+    if (hpD) diffs.push({ l: 'HP', v: hpD });
+    if (!diffs.length) return '';
+    diffs.sort(function(a, b) { return Math.abs(b.v) - Math.abs(a.v); });
+    var top = diffs.slice(0, 2);
+    var parts = top.map(function(d) {
+        var sign = d.v > 0 ? '+' : '';
+        return sign + d.v + ' ' + d.l;
+    });
+    var cls = cmp.score > 0 ? 'delta-up' : 'delta-down';
+    return '<span class="ic-delta ' + cls + '">' + parts.join(' ') + '</span>';
+}
 if(!window._invPopupMode)init();function showItemImage(name){var it=getItemData(name);if(!it||!it.img)return;haptic('light');var stats=[];if(it.s)stats.push({icon:'',label:SLOT_NAMES[it.s]||it.s,value:''});if(it.dd)stats.push({icon:'\u2694\uFE0F',label:'Dano',value:it.dd+(it.b?'+'+it.b:'')});if(it.ac)stats.push({icon:'\u{1F6E1}\uFE0F',label:'CA',value:'+'+it.ac});if(it.hb)stats.push({icon:'\u2764\uFE0F',label:'HP',value:'+'+it.hb});if(it.mb)stats.push({icon:'\u2728',label:'MP',value:'+'+it.mb});if(it.v)stats.push({icon:'\u{1FA99}',label:'Valor',value:it.v+' GP'});showImagePopup({src:it.img,title:name,desc:it.desc||'',stats:stats,type:'item'});}

@@ -30,3 +30,15 @@
 .immersive-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);background:var(--v-bg-card,#2e2520);border:1px solid var(--v-gold,#c8a84e);color:var(--v-text,#d4c8b0);font-size:var(--v-font-xs,11px);padding:var(--v-space-xs,2px) var(--v-space-md,8px);border-radius:var(--v-radius-pill,20px);white-space:nowrap;opacity:0;transition:opacity var(--v-transition-base) ease,transform var(--v-transition-base);pointer-events:none;z-index:var(--v-z-dropdown,200);}
 /* Swipe-back hint indicator */
 .swipe-back-hint{position:fixed;left:0;top:50%;transform:translateY(-50%);width:4px;height:60px;background:linear-gradient(to bottom,transparent,var(--v-gold,#c8a84e),transparent);border-radius:0 4px 4px 0;opacity:0.6;transition:opacity var(--v-transition-base);pointer-events:none;z-index:var(--v-z-base,1);}
+
+/* Level-up celebration overlay */
+.levelup-celebration{position:fixed;inset:0;z-index:var(--v-z-loading,1000);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);opacity:0;transition:opacity 0.4s ease;pointer-events:none;}
+.levelup-celebration.active{opacity:1;pointer-events:auto;}
+.levelup-celebration.hiding{opacity:0;}
+.levelup-inner{text-align:center;transform:scale(0.7);transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+.levelup-celebration.active .levelup-inner{transform:scale(1);}
+.levelup-icon{font-size:48px;margin-bottom:8px;animation:levelupPulse 1s ease-in-out infinite;}
+.levelup-title{font-family:var(--v-font-display,serif);font-size:28px;color:var(--v-gold,#d4a54a);text-shadow:0 0 20px rgba(212,165,74,0.5);margin-bottom:4px;}
+.levelup-sub{font-size:14px;color:var(--v-text-dim,#a09484);}
+@keyframes levelupPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+@media(prefers-reduced-motion:reduce){.levelup-icon{animation:none;}.levelup-inner{transition:none;}}

@@ -47,6 +47,7 @@ const it=getItemData(inv.n);const rarity=it.r||'common';const equipped=isEquippe
                     ${!selectionMode && isFav(inv.n) ? `<span class="ic-fav">${vi_f('star',14)}</span>` : ''}
                     ${isLocked(inv.n) ? `<span class="ic-lock">${vi('lock',11)}</span>` : ''}
                     ${(!selectionMode && it.s && _isUpgradeForSlot(inv.n, it)) ? '<span class="ic-upgrade">\u2B06</span>' : ''}
+                    ${(!selectionMode && it.s && typeof _getCardDelta==='function') ? _getCardDelta(inv.n, it) : ''}
                     ${isNewItem(inv.n) ? '<span class="ic-new-dot"></span>' : ''}
                     <div class="ic-emoji">${it.img ? '<img class="ic-thumb" src="' + it.img + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'\'"><span style="display:none">' + (it.e || '📦') + '</span>' : (it.e || '📦')}</div>
                     <div class="ic-name v-rarity-${rarity}">${esc(inv.n)}</div>
