@@ -61,7 +61,10 @@ function _startPoll() {
         _fetchSocial({ action: 'chat_poll', msg_count: mc }).then(function(data) {
             if (!data || !data.messages) return;
             if (data.messages.length > 0 && _cachedData && _cachedData.chat) {
-                _cachedData.chat.messages = _cachedData.chat.messages.concat(data.messages);
+                var existing = _cachedData.chat.messages;
+                var lastTs = existing.length > 0 ? existing[existing.length - 1].ts : null;
+                var newMsgs = lastTs ? data.messages.filter(function(m) { return m.ts > lastTs; }) : data.messages;
+                _cachedData.chat.messages = existing.concat(newMsgs);
                 if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
                 if (data.msg_count !== undefined) _cachedData.chat.msg_count = data.msg_count;
                 _renderChatMessages();
@@ -79,13 +82,13 @@ function _renderTabs() {
         { key: 'rel', label: '\ud83e\udd1d V\u00ednculos' },
     ];
     var ic = (_cachedData && _cachedData.inbox_count) ? _cachedData.inbox_count : 0;
-    var h = '<div class="v-tabs-pill social-tabs">';
+    var h = '<div class="v-tabs-pill social-tabs" role="tablist">';
     for (var i = 0; i < tabs.length; i++) {
         var t = tabs[i];
         var cls = _activeTab === t.key ? ' active' : '';
         var label = t.label;
         if (t.key === 'inbox' && ic > 0) label += ' <span class="social-tab-badge">' + ic + '</span>';
-        h += '<button class="v-tab' + cls + '" data-social-tab="' + t.key + '">' + label + '</button>';
+        h += '<button class="v-tab' + cls + '" data-social-tab="' + t.key + '" role="tab" aria-selected="' + (_activeTab === t.key) + '">' + label + '</button>';
     }
     h += '</div>';
     return h;
@@ -328,19 +331,31 @@ function _bindListeners() {
     });
 }
 
+function _enableChatInput() {
+    var sendBtn = document.getElementById('social-send-btn');
+    var input = document.getElementById('social-chat-input');
+    if (sendBtn) sendBtn.disabled = false;
+    if (input) { input.disabled = false; input.focus(); }
+}
+
 function _chatSend(text) {
     if (!text || !text.trim() || _sending) return;
     _sending = true;
     var input = document.getElementById('social-chat-input');
-    if (input) { input.value = ''; input.focus(); }
+    var sendBtn = document.getElementById('social-send-btn');
+    if (sendBtn) sendBtn.disabled = true;
+    if (input) { input.value = ''; input.disabled = true; }
     if (typeof haptic === 'function') haptic('light');
     _fetchSocial({ action: 'chat_send', text: text.trim() }).then(function(data) {
-        _sending = false;
+        _sending = false; _enableChatInput();
         if (data && data.ok) {
             var mc = (_cachedData && _cachedData.chat) ? _cachedData.chat.msg_count || 0 : 0;
             _fetchSocial({ action: 'chat_poll', msg_count: mc }).then(function(pd) {
                 if (pd && pd.messages && _cachedData && _cachedData.chat) {
-                    _cachedData.chat.messages = _cachedData.chat.messages.concat(pd.messages);
+                    var ex = _cachedData.chat.messages;
+                    var lt = ex.length > 0 ? ex[ex.length - 1].ts : null;
+                    var nm = lt ? pd.messages.filter(function(m) { return m.ts > lt; }) : pd.messages;
+                    _cachedData.chat.messages = ex.concat(nm);
                     if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
                     if (pd.msg_count !== undefined) _cachedData.chat.msg_count = pd.msg_count;
                     _renderChatMessages();
@@ -350,19 +365,26 @@ function _chatSend(text) {
             var msg = data.error === 'cooldown' ? '\u23f3 Aguarde um momento...' : data.error;
             if (typeof vToast === 'function') vToast(msg, 'warn', _calcToastDuration(msg));
         }
-    }).catch(function(err) { _sending = false; console.error('[SOCIAL] chatSend failed', err); if (typeof vToast === 'function') vToast('Erro ao enviar mensagem.', 'warn', 2500); });
+    }).catch(function(err) { _sending = false; _enableChatInput(); console.error('[SOCIAL] chatSend failed', err); if (typeof vToast === 'function') vToast('Erro ao enviar mensagem.', 'warn', 2500); });
 }
 
 function _chatEmote(key) {
     if (_sending) return;
     _sending = true;
+    var sendBtn = document.getElementById('social-send-btn');
+    var input = document.getElementById('social-chat-input');
+    if (sendBtn) sendBtn.disabled = true;
+    if (input) input.disabled = true;
     if (typeof haptic === 'function') haptic('light');
     _fetchSocial({ action: 'chat_emote', emote: key }).then(function(data) {
         if (data && data.ok) {
             var mc = (_cachedData && _cachedData.chat) ? _cachedData.chat.msg_count || 0 : 0;
             _fetchSocial({ action: 'chat_poll', msg_count: mc }).then(function(pd) {
                 if (pd && pd.messages && _cachedData && _cachedData.chat) {
-                    _cachedData.chat.messages = _cachedData.chat.messages.concat(pd.messages);
+                    var ex = _cachedData.chat.messages;
+                    var lt = ex.length > 0 ? ex[ex.length - 1].ts : null;
+                    var nm = lt ? pd.messages.filter(function(m) { return m.ts > lt; }) : pd.messages;
+                    _cachedData.chat.messages = ex.concat(nm);
                     if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
                     if (pd.msg_count !== undefined) _cachedData.chat.msg_count = pd.msg_count;
                     _renderChatMessages();
@@ -371,8 +393,8 @@ function _chatEmote(key) {
         } else if (data && data.error === 'cooldown') {
             if (typeof vToast === 'function') vToast('\u23f3 Aguarde um momento...', 'warn', 2000);
         }
-        _sending = false;
-    }).catch(function(err) { _sending = false; console.error('[SOCIAL] chatEmote failed', err); if (typeof vToast === 'function') vToast('Erro ao enviar emote.', 'warn', 2000); });
+        _sending = false; _enableChatInput();
+    }).catch(function(err) { _sending = false; _enableChatInput(); console.error('[SOCIAL] chatEmote failed', err); if (typeof vToast === 'function') vToast('Erro ao enviar emote.', 'warn', 2000); });
 }
 
 function _socialSend(targetUid, type) {

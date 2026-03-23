@@ -14,7 +14,7 @@
     max-height: min(280px, 40vh);
     overflow-y: auto;
     padding: var(--v-space-sm);
-    background: var(--v-bg-overlay, rgba(74, 56, 40, 0.12));
+    background: var(--v-bg-overlay);
     border-radius: var(--v-radius-sm);
     margin-bottom: var(--v-space-sm);
 }
@@ -24,7 +24,7 @@
     font-size: var(--v-font-base);
     line-height: 1.5;
     padding: var(--v-space-xs) 0;
-    border-bottom: 1px solid var(--v-border-dim, rgba(74, 56, 40, 0.15));
+    border-bottom: 1px solid var(--v-border-dim);
     color: var(--v-text);
 }
 .social-msg:last-child {
@@ -125,8 +125,12 @@
     border: 1px solid var(--v-border);
     transition: border-color var(--v-transition-base);
 }
+.social-player:hover {
+    background: var(--v-bg-overlay);
+    border-color: var(--v-gold-dim);
+}
 .social-player--selected {
-    border-color: var(--v-gold-dim, rgba(196, 149, 58, 0.4));
+    border-color: var(--v-gold-dim);
     background: var(--v-gold-5);
 }
 .social-player-icon {
@@ -169,7 +173,7 @@
 }
 .social-interact-btn:hover {
     background: var(--v-bg-raised);
-    border-color: var(--v-gold-dim, rgba(196, 149, 58, 0.4));
+    border-color: var(--v-gold-dim);
 }
 .social-interact-btn:active {
     transform: scale(0.95);
@@ -183,7 +187,7 @@
     gap: var(--v-space-xs);
     padding: var(--v-space-sm) var(--v-space-md);
     margin-bottom: var(--v-space-xs);
-    background: var(--v-bg-overlay, rgba(74, 56, 40, 0.15));
+    background: var(--v-bg-overlay);
     border-radius: 0 0 var(--v-radius-sm) var(--v-radius-sm);
     margin-top: calc(-1 * var(--v-space-xs));
     border: 1px solid var(--v-border);
@@ -204,7 +208,7 @@
 }
 .social-action-btn:hover {
     background: var(--v-gold-10);
-    border-color: var(--v-gold-dim, rgba(196, 149, 58, 0.4));
+    border-color: var(--v-gold-dim);
 }
 .social-action-btn:active {
     transform: scale(0.97);
@@ -221,6 +225,9 @@
     border-radius: var(--v-radius-sm);
     margin-bottom: var(--v-space-xs);
     border: 1px solid var(--v-border);
+}
+.social-request:hover {
+    background: var(--v-bg-overlay);
 }
 .social-request-info {
     flex: 1;
@@ -240,7 +247,7 @@
 }
 .social-request-actions {
     display: flex;
-    gap: var(--v-space-xs);
+    gap: var(--v-space-sm);
     flex-shrink: 0;
 }
 .v-popup-body .social-req-btn {
@@ -273,7 +280,11 @@
 }
 .social-npc:active {
     background: var(--v-bg-card);
-    border-color: var(--v-gold-dim, rgba(196, 149, 58, 0.4));
+    border-color: var(--v-gold-dim);
+}
+.social-npc:hover {
+    background: var(--v-bg-overlay);
+    border-color: var(--v-gold-dim);
 }
 .social-npc-mood {
     font-size: var(--v-font-2xl);
@@ -301,7 +312,7 @@
 .social-npc-bar {
     width: 50px;
     height: var(--v-bar-height-sm);
-    background: var(--v-bar-bg, rgba(0, 0, 0, 0.3));
+    background: var(--v-bar-bg);
     border-radius: var(--v-radius-xs, 4px);
     overflow: hidden;
     flex-shrink: 0;
@@ -331,7 +342,7 @@
     display: inline-block;
     padding: var(--v-space-xs) var(--v-space-md);
     background: var(--v-gold-15);
-    border: 1px solid var(--v-border-gold, rgba(196, 149, 58, 0.3));
+    border: 1px solid var(--v-border-gold);
     border-radius: var(--v-radius-pill);
     font-size: var(--v-font-xs);
     color: var(--v-gold-light);
@@ -348,7 +359,7 @@
 .social-stat-bar {
     width: 80px;
     height: var(--v-bar-height-sm);
-    background: var(--v-bar-bg, rgba(0, 0, 0, 0.3));
+    background: var(--v-bar-bg);
     border-radius: var(--v-radius-xs, 4px);
     overflow: hidden;
 }
@@ -373,7 +384,7 @@
 .social-emo-bar {
     width: 60px;
     height: var(--v-bar-height-mini);
-    background: var(--v-bar-bg, rgba(0, 0, 0, 0.3));
+    background: var(--v-bar-bg);
     border-radius: var(--v-radius-xs, 4px);
     overflow: hidden;
 }
@@ -387,7 +398,7 @@
     color: var(--v-text-dim);
     font-style: italic;
     padding: var(--v-space-xs) 0;
-    border-bottom: 1px solid var(--v-border-dim, rgba(74, 56, 40, 0.1));
+    border-bottom: 1px solid var(--v-border-dim);
 }
 .social-memory:last-child {
     border-bottom: none;
@@ -416,7 +427,7 @@
     letter-spacing: 0.5px;
     margin: var(--v-space-md) 0 var(--v-space-xs);
     padding-bottom: var(--v-space-xs);
-    border-bottom: 1px solid var(--v-border-dim, rgba(74, 56, 40, 0.2));
+    border-bottom: 1px solid var(--v-border-dim);
 }
 
 /* 12. Inbox Badge in Tab */
@@ -455,4 +466,18 @@ body.perf-lite .social-player,
 body.perf-lite .social-interact-btn,
 body.perf-lite .social-action-btn {
     transition: none;
+}
+
+/* 15. Tab panel fade animation */
+@keyframes socialFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.social-chat-area,
+.social-section-label {
+    animation: socialFadeIn 0.2s ease;
+}
+body.perf-lite .social-chat-area,
+body.perf-lite .social-section-label {
+    animation: none;
 }
