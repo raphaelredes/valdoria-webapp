@@ -104,7 +104,7 @@ function bfsDistanceToExit(fromCol,fromRow){const target=`${S.exitCol},${S.exitR
 return-1;}
 function calculateExitRisk(distance){if(distance<=0)return{chance:5,label:'Seguro',color:'#4a8'};const chance=Math.min(80,15+distance*6+S.dangerLevel*4);if(chance<=25)return{chance,label:'Baixo',color:'#4a8'};if(chance<=50)return{chance,label:'Moderado',color:'#dca028'};if(chance<=65)return{chance,label:'Alto',color:'#c44'};return{chance,label:'Perigoso',color:'#a22'};}
 var _hexFlashes=[];function flashHex(col,row){_hexFlashes.push({col,row,start:performance.now(),duration:700});scheduleRender();}
-window.addEventListener('pagehide',function(){if(_overlayWatchdogTimer){clearInterval(_overlayWatchdogTimer);_overlayWatchdogTimer=null;}});
+var _onPageHideWatchdog=function(){if(_overlayWatchdogTimer){clearInterval(_overlayWatchdogTimer);_overlayWatchdogTimer=null;}};window.addEventListener('pagehide',_onPageHideWatchdog);if(!window._spaCleanupFns)window._spaCleanupFns=[];window._spaCleanupFns.push(function(){window.removeEventListener('pagehide',_onPageHideWatchdog);if(_overlayWatchdogTimer){clearInterval(_overlayWatchdogTimer);_overlayWatchdogTimer=null;}});
 
 var IMMERSIVE_KEY='valdoria_immersive';var _immersiveCollapsed=false;
 function initImmersive(){var toggle=document.getElementById('immersive-toggle');var panel=document.getElementById('bottom-panel');var restore=document.getElementById('immersive-restore');if(!toggle||!panel||!restore)return;
