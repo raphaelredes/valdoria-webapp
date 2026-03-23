@@ -231,6 +231,10 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
         fetchT(url)
             .then(function (r) {
                 if (!r.ok) throw new Error('HTTP ' + r.status);
+                var ct = (r.headers.get('content-type') || '');
+                if (ct.indexOf('application/json') < 0) {
+                    throw new Error('Servidor retornou resposta inesperada (tunnel indisponível?)');
+                }
                 return r.json();
             })
             .then(function (data) {
@@ -253,7 +257,14 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
             '?token=' + encodeURIComponent(_token);
 
         fetchT(url)
-            .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                var ct = (r.headers.get('content-type') || '');
+                if (ct.indexOf('application/json') < 0) {
+                    throw new Error('Servidor retornou resposta inesperada (tunnel indisponível?)');
+                }
+                return r.json();
+            })
             .then(function (data) {
                 if (data.entry) {
                     _renderDetail(data.entry);
