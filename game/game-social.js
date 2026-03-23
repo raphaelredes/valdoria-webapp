@@ -42,7 +42,7 @@ function _ago(ts) {
 }
 
 function _fetchSocial(body) {
-    if (!window.S || !S.apiBase || !S.token) return Promise.resolve(null);
+    if (!window.S || !S.apiBase || !S.token) { console.warn('[SOCIAL] Missing API config'); return Promise.resolve(null); }
     return fetch(S.apiBase + '/api/game/social', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token },
@@ -433,7 +433,7 @@ window.openSocialPopup = function() {
             if (typeof vToast === 'function') vToast('Erro: tempo esgotado ao carregar.', 'warn', 3000);
             if (typeof vPopup !== 'undefined') vPopup.hide('social-popup-overlay');
         }
-    }, 10000);
+    }, 6000);
     _fetchSocial({ action: "load" }).then(function(data) {
         if (_loadDone) return;
         _loadDone = true;
@@ -445,6 +445,13 @@ window.openSocialPopup = function() {
             if (typeof vToast === "function") vToast("Erro ao carregar social.", "err", 2500);
             if (typeof vPopup !== "undefined") vPopup.hide("social-popup-overlay");
         }
+    }).catch(function(err) {
+        if (_loadDone) return;
+        _loadDone = true;
+        clearTimeout(_loadTimeout);
+        console.error("[SOCIAL] Fetch error", err);
+        if (typeof vToast === "function") vToast("Erro ao carregar social.", "err", 2500);
+        if (typeof vPopup !== "undefined") vPopup.hide("social-popup-overlay");
     });
 };
 

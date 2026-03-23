@@ -5,8 +5,8 @@
     margin-bottom: var(--v-space-sm);
 }
 .social-tabs .v-tab {
-    font-size: var(--v-font-xs);
-    padding: var(--v-space-xs) var(--v-space-sm);
+    font-size: var(--v-font-sm);
+    padding: var(--v-space-sm) var(--v-space-md);
 }
 
 /* 2. Chat Messages Area */
