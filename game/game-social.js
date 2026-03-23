@@ -13,7 +13,8 @@ var _detailData = null;
 var _detailLoading = false;
 var _sending = false;
 var _selectedPlayer = null;
-var _POLL_INTERVAL_MS = 7000;
+var _closed = false;
+var _POLL_INTERVAL_MS = 4000;
 
 function _idemKey() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
 
@@ -55,18 +56,15 @@ function _fetchSocial(body) {
 function _startPoll() {
     _stopPoll();
     _pollTimer = setInterval(function() {
-        if (document.visibilityState === 'hidden') return;
+        if (_closed || document.visibilityState === 'hidden') return;
         if (_activeTab !== 'chat') { _stopPoll(); return; }
-        var mc = (_cachedData && _cachedData.chat) ? _cachedData.chat.msg_count || 0 : 0;
-        _fetchSocial({ action: 'chat_poll', msg_count: mc }).then(function(data) {
-            if (!data || !data.messages) return;
+        var seq = (_cachedData && _cachedData.chat) ? _cachedData.chat.msg_seq || 0 : 0;
+        _fetchSocial({ action: 'chat_poll', since_seq: seq }).then(function(data) {
+            if (_closed || !data || !data.messages) return;
             if (data.messages.length > 0 && _cachedData && _cachedData.chat) {
-                var existing = _cachedData.chat.messages;
-                var lastTs = existing.length > 0 ? existing[existing.length - 1].ts : null;
-                var newMsgs = lastTs ? data.messages.filter(function(m) { return m.ts > lastTs; }) : data.messages;
-                _cachedData.chat.messages = existing.concat(newMsgs);
+                _cachedData.chat.messages = _cachedData.chat.messages.concat(data.messages);
                 if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
-                if (data.msg_count !== undefined) _cachedData.chat.msg_count = data.msg_count;
+                if (data.msg_seq !== undefined) _cachedData.chat.msg_seq = data.msg_seq;
                 _renderChatMessages();
             }
         });
@@ -267,6 +265,7 @@ function _render() {
         onAction: _handleAction,
         closeOnOutside: !_detailNpc,
         onHide: function() {
+            _closed = true;
             _stopPoll();
             _detailNpc = null;
             _detailData = null;
@@ -346,18 +345,31 @@ function _chatSend(text) {
     if (sendBtn) sendBtn.disabled = true;
     if (input) { input.value = ''; input.disabled = true; }
     if (typeof haptic === 'function') haptic('light');
+    // Optimistic UI: show message immediately
+    if (_cachedData && _cachedData.chat) {
+        var now = new Date();
+        var hh = (now.getHours()<10?'0':'') + now.getHours();
+        var mm = (now.getMinutes()<10?'0':'') + now.getMinutes();
+        _cachedData.chat.messages.push({
+            system: false, time: hh + ':' + mm,
+            icon: (window.S && S.classIcon) || '👤', name: (window.S && S.playerName) || '???',
+            level: (window.S && S.playerLevel) || 1, text: text.trim(),
+            ts: now.toISOString(), _optimistic: true
+        });
+        if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
+        _renderChatMessages();
+    }
     _fetchSocial({ action: 'chat_send', text: text.trim() }).then(function(data) {
         _sending = false; _enableChatInput();
         if (data && data.ok) {
-            var mc = (_cachedData && _cachedData.chat) ? _cachedData.chat.msg_count || 0 : 0;
-            _fetchSocial({ action: 'chat_poll', msg_count: mc }).then(function(pd) {
+            var seq = (_cachedData && _cachedData.chat) ? _cachedData.chat.msg_seq || 0 : 0;
+            _fetchSocial({ action: 'chat_poll', since_seq: seq }).then(function(pd) {
+                if (_closed) return;
                 if (pd && pd.messages && _cachedData && _cachedData.chat) {
-                    var ex = _cachedData.chat.messages;
-                    var lt = ex.length > 0 ? ex[ex.length - 1].ts : null;
-                    var nm = lt ? pd.messages.filter(function(m) { return m.ts > lt; }) : pd.messages;
-                    _cachedData.chat.messages = ex.concat(nm);
+                    _cachedData.chat.messages = _cachedData.chat.messages.filter(function(m) { return !m._optimistic; });
+                    _cachedData.chat.messages = _cachedData.chat.messages.concat(pd.messages);
                     if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
-                    if (pd.msg_count !== undefined) _cachedData.chat.msg_count = pd.msg_count;
+                    if (pd.msg_seq !== undefined) _cachedData.chat.msg_seq = pd.msg_seq;
                     _renderChatMessages();
                 }
             });
@@ -378,15 +390,13 @@ function _chatEmote(key) {
     if (typeof haptic === 'function') haptic('light');
     _fetchSocial({ action: 'chat_emote', emote: key }).then(function(data) {
         if (data && data.ok) {
-            var mc = (_cachedData && _cachedData.chat) ? _cachedData.chat.msg_count || 0 : 0;
-            _fetchSocial({ action: 'chat_poll', msg_count: mc }).then(function(pd) {
+            var seq = (_cachedData && _cachedData.chat) ? _cachedData.chat.msg_seq || 0 : 0;
+            _fetchSocial({ action: 'chat_poll', since_seq: seq }).then(function(pd) {
+                if (_closed) return;
                 if (pd && pd.messages && _cachedData && _cachedData.chat) {
-                    var ex = _cachedData.chat.messages;
-                    var lt = ex.length > 0 ? ex[ex.length - 1].ts : null;
-                    var nm = lt ? pd.messages.filter(function(m) { return m.ts > lt; }) : pd.messages;
-                    _cachedData.chat.messages = ex.concat(nm);
+                    _cachedData.chat.messages = _cachedData.chat.messages.concat(pd.messages);
                     if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
-                    if (pd.msg_count !== undefined) _cachedData.chat.msg_count = pd.msg_count;
+                    if (pd.msg_seq !== undefined) _cachedData.chat.msg_seq = pd.msg_seq;
                     _renderChatMessages();
                 }
             });
@@ -437,6 +447,7 @@ window.showSocialPopup = function(data) {
 };
 
 window.openSocialPopup = function() {
+    _closed = false;
     if (typeof vPopup !== "undefined") {
         vPopup.show({
             id: "social-popup-overlay",
@@ -451,11 +462,11 @@ window.openSocialPopup = function() {
     var _loadTimeout = setTimeout(function() {
         if (!_loadDone) {
             _loadDone = true;
-            console.error('[SOCIAL] Load timeout after 10s');
+            console.error('[SOCIAL] Load timeout after 8s');
             if (typeof vToast === 'function') vToast('Erro: tempo esgotado ao carregar.', 'warn', 3000);
             if (typeof vPopup !== 'undefined') vPopup.hide('social-popup-overlay');
         }
-    }, 6000);
+    }, 8000);
     _fetchSocial({ action: "load" }).then(function(data) {
         if (_loadDone) return;
         _loadDone = true;
