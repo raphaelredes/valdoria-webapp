@@ -1,6 +1,6 @@
 function _cleanupOverlays(){var ids=['v-popup-overlay','travel-prep-overlay','quest-popup-overlay','quest-diary-overlay','quest-board-overlay','plaza-event-overlay'];for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el&&(el.classList.contains('active')||el.style.display==='flex')){el.classList.remove('active','hiding');el.style.display='none';}}if(typeof vPopup!=='undefined'&&vPopup.isOpen&&vPopup.isOpen()){vPopup.hide();}}
 var LONG_BTN_THRESHOLD=24;var HERO_KEYWORDS=['PARTIR','JOGAR','AVENTURA','CONFIRMAR','INICIAR'];function updateBottomPadding(){const screenEl=document.getElementById('screen');const panelEl=document.getElementById('bottom-panel');if(!screenEl||!panelEl)return;requestAnimationFrame(()=>{if(panelEl.classList.contains('immersive-collapsed'))return;const h=Math.max(panelEl.offsetHeight,48);screenEl.style.paddingBottom=(h+40)+'px';document.documentElement.style.setProperty('--bottom-panel-h',h+'px');const toggle=document.getElementById('immersive-toggle');if(toggle)toggle.style.bottom=h+'px';});}
-function renderScreen(screen){if(!screen){console.warn('[GAME] renderScreen() called with null/undefined screen');return;}
+function renderScreen(screen){try{if(!screen){console.warn('[GAME] renderScreen() called with null/undefined screen');return;}
 if(screen.popup&&window.vPopup&&typeof _showGamePopup==='function'){console.debug('[GAME] renderScreen intercepted popup, showing as overlay');_showGamePopup(screen);return;}
 _cleanupOverlays();
 if(screen.dice_roll&&!screen._diceShown){_showDiceAnimation(screen);return;}
@@ -44,7 +44,7 @@ renderTextInput(screen);const hasFooter=screen.footer&&(screen.footer.quick||scr
 const hasTextInput=!!screen.waiting_for_text;if(panelEl){if(hasTextInput||hasFooter){panelEl.style.display='';}else{panelEl.style.display='none';}}
 hideError();updateBottomPadding();if(typeof updateImmersiveEligibility==='function'){updateImmersiveEligibility(screen);}
 if(screen._plazaEventPending){setTimeout(function(){showPlazaEventPopup(screen._plazaEventPending);},100);}
-if(typeof showImmersiveTooltip==='function')showImmersiveTooltip();if(typeof showSwipeBackHint==='function')showSwipeBackHint();if(typeof _focusFirstAction==='function')_focusFirstAction();if(typeof _trackRender==='function')_trackRender();}
+if(typeof showImmersiveTooltip==='function')showImmersiveTooltip();if(typeof showSwipeBackHint==='function')showSwipeBackHint();if(typeof _focusFirstAction==='function')_focusFirstAction();if(typeof _trackRender==='function')_trackRender();}catch(e){console.error('[GAME] renderScreen error:',e);var _errEl=document.getElementById('content');if(_errEl)_errEl.innerHTML='<div style="padding:20px;text-align:center;color:var(--v-text-dim)">Erro ao carregar tela. Tente novamente.</div>';}}
 function renderButtons(container,rows){for(const row of rows){if(!row||!row.length)continue;const rowEl=document.createElement('div');rowEl.className='btn-row';const hasLong=row.some(b=>(b.text||'').length>LONG_BTN_THRESHOLD);const isHeroRow=row.length===1&&HERO_KEYWORDS.some(k=>(row[0].text||'').toUpperCase().includes(k));if(row.length===1||hasLong){rowEl.classList.add('cols-1');}else if(row.length===2){rowEl.classList.add('cols-2');}else{rowEl.classList.add('cols-3');}
 for(const btn of row){const el=createButton(btn,isHeroRow);rowEl.appendChild(el);}
 container.appendChild(rowEl);}}
