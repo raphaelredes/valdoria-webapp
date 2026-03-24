@@ -64,7 +64,7 @@ showFatalError('Dados de evolução não encontrados. Feche e tente novamente.')
 }
 P = JSON.parse(decodeBase64Utf8(raw));
 } catch (e) {
-console.error('[LEVELUP] Payload decode failed. p length:', ((params.get('p')||'').length), 'error:', e.message);
+console.error('[LEVELUP] Payload decode failed. raw length:', raw.length, 'isSpa:', _isSpa, 'spaP.p:', !!(_spaP&&_spaP.p), 'url.p:', !!(params.get('p')), 'error:', e.message);
 showFatalError('Erro ao carregar dados de evolução. Feche e tente novamente.', e); return;
 }
 if (!P || !P.hero_class || !P.stats || typeof P.level !== 'number') {
