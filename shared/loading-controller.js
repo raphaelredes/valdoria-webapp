@@ -163,6 +163,7 @@ window.ValdoriaLoadingController = function(config) {
                 if (_exitDone) return;
                 _exitDone = true;
                 overlay.classList.add('hidden');
+                overlay.style.display = 'none';
                 _state = 'hidden';
                 if (retryBtn) retryBtn.style.display = 'none';
                 _hideCb = null;
@@ -212,6 +213,7 @@ window.ValdoriaLoadingController = function(config) {
             if (overlay) {
                 overlay.classList.add('hidden');
                 overlay.classList.remove('exit-cinematic');
+                overlay.style.display = 'none';
             }
             if (retryBtn) retryBtn.style.display = 'none';
             _state = 'hidden';
