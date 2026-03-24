@@ -43,20 +43,21 @@ var screens = [];
 var cur = 0;
 var asiMode = 'asi';
 (function init() {
-const params = new URLSearchParams(location.search);if(_spaP){Object.keys(_spaP).forEach(function(k){params.set(k,_spaP[k]);});}
-token = params.get('token') || '';
-apiFallback = params.get('api') || '';
-userId = params.get('uid') || '';
-console.log('[LEVELUP] INIT token=' + (token ? token.substring(0, 12) + '...' : '(empty)') + ' spaP.token=' + ((_spaP && _spaP.token) ? _spaP.token.substring(0, 12) + '...' : '(none)') + ' url.token=' + (new URLSearchParams(location.search).get('token') || '(none)').substring(0, 12));
+const params = new URLSearchParams(location.search);
+// SPA mode: _spaP is authoritative — location.search has stale Game Hub params (including wrong token!)
+var _isSpa = _spaP && Object.keys(_spaP).length > 0;
+if (_isSpa) { token = _spaP.token || ''; apiFallback = _spaP.api || ''; userId = _spaP.uid || ''; }
+else { token = params.get('token') || ''; apiFallback = params.get('api') || ''; userId = params.get('uid') || ''; }
+console.log('[LEVELUP] INIT token=' + (token ? token.substring(0, 12) + '...' : '(empty)') + ' spaP.token=' + ((_spaP && _spaP.token) ? _spaP.token.substring(0, 12) + '...' : '(none)') + ' url.token=' + (new URLSearchParams(location.search).get('token') || '(none)').substring(0, 12) + ' spaP_keys=' + (_spaP ? Object.keys(_spaP).join(',') : 'null'));
 if (window.SessionHeartbeat && apiFallback && token && userId) {
 SessionHeartbeat.init({ apiBase: apiFallback, token: token, uid: parseInt(userId) || 0 });
 }
-returnTo = params.get('return') || '';
+returnTo = _isSpa ? (_spaP.return || '') : (params.get('return') || '');
 if (window.ValdoriaErrors) {
 ValdoriaErrors.init({ appName: 'LEVELUP', apiBase: apiFallback, token: token, uid: userId });
 }
 try {
-const raw = params.get('p') || '';
+const raw = _isSpa ? (_spaP.p || '') : (params.get('p') || '');
 if (!raw) {
 console.error('[LEVELUP] Empty p param');
 showFatalError('Dados de evolução não encontrados. Feche e tente novamente.'); return;
