@@ -1,6 +1,6 @@
 /* =============================================
    Lendas de Valdoria — Web Login Styles
-   Medieval theme using valdoria-design.css tokens
+   Medieval carved wood frame + parchment interior
    ============================================= */
 
 /* ----- Screen Management ----- */
@@ -19,97 +19,159 @@
     display: flex;
 }
 
-/* ----- Login Card ----- */
+/* =============================================
+   Carved Wood Frame — simulates a thick wooden
+   tablet border around the login card
+   ============================================= */
+
+.wa-wood-frame {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    /* Outer wood frame */
+    background:
+        linear-gradient(175deg, #5a4530 0%, #3e2e1e 30%, #2c1f14 70%, #1e1510 100%);
+    border-radius: 18px;
+    padding: 14px;
+    /* Carved depth — multiple shadow layers */
+    box-shadow:
+        /* outer shadow */
+        0 8px 40px rgba(0, 0, 0, 0.7),
+        0 2px 10px rgba(0, 0, 0, 0.5),
+        /* outer bevel — light top, dark bottom */
+        inset 0 2px 0 rgba(120, 90, 55, 0.5),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.6),
+        inset 2px 0 0 rgba(100, 75, 45, 0.3),
+        inset -2px 0 0 rgba(0, 0, 0, 0.4),
+        /* inner carved groove */
+        inset 0 0 0 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Wood grain texture overlay */
+.wa-wood-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    background:
+        /* subtle horizontal grain lines */
+        repeating-linear-gradient(
+            2deg,
+            transparent,
+            transparent 8px,
+            rgba(90, 65, 35, 0.08) 8px,
+            rgba(90, 65, 35, 0.08) 9px
+        ),
+        /* knot/ring patterns */
+        radial-gradient(ellipse at 15% 20%, rgba(70, 50, 25, 0.15) 0%, transparent 25%),
+        radial-gradient(ellipse at 85% 75%, rgba(70, 50, 25, 0.12) 0%, transparent 20%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Gold-leaf inlay on outer edge of frame */
+.wa-wood-frame::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 14px;
+    border: 1px solid rgba(196, 149, 58, 0.2);
+    box-shadow:
+        inset 0 0 8px rgba(0, 0, 0, 0.4),
+        0 0 4px rgba(196, 149, 58, 0.1);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ----- Inner carved groove (between wood and card) ----- */
+
+.wa-wood-inner {
+    position: relative;
+    border-radius: 10px;
+    /* Carved channel around the parchment */
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.5),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.3),
+        0 1px 0 rgba(120, 90, 55, 0.25);
+    z-index: 1;
+}
+
+/* Gold filigree on the carved edge */
+.wa-wood-inner::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 11px;
+    border: 1px solid rgba(196, 149, 58, 0.25);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* ----- Corner Metal Rivets ----- */
+
+.wa-rivet {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%,
+        #8a7550 0%,
+        #6a5535 40%,
+        #4a3a22 80%,
+        #3a2a18 100%);
+    box-shadow:
+        inset 0 1px 2px rgba(180, 140, 80, 0.5),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.6),
+        0 1px 3px rgba(0, 0, 0, 0.5);
+    z-index: 3;
+    pointer-events: none;
+}
+
+.wa-rivet::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 3px;
+    height: 2px;
+    border-radius: 50%;
+    background: rgba(200, 160, 90, 0.4);
+}
+
+.wa-rivet-tl { top: 8px; left: 8px; }
+.wa-rivet-tr { top: 8px; right: 8px; }
+.wa-rivet-bl { bottom: 8px; left: 8px; }
+.wa-rivet-br { bottom: 8px; right: 8px; }
+
+/* ----- Login Card (parchment interior) ----- */
 
 .wa-login-card {
     width: 100%;
-    max-width: 380px;
-    background: linear-gradient(170deg, #352a20 0%, #241e16 50%, #1a1510 100%);
-    border: 2px solid var(--v-gold-25);
-    border-radius: var(--v-radius-lg);
-    padding: 32px 24px 28px;
+    background: linear-gradient(170deg, #302418 0%, #241c14 50%, #1a1510 100%);
+    border-radius: 8px;
+    padding: 28px 20px 24px;
     text-align: center;
     position: relative;
-    box-shadow:
-        0 0 30px rgba(0, 0, 0, 0.6),
-        0 0 60px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 var(--v-gold-10),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    z-index: 1;
 }
 
-/* Top ornamental border — gold-crimson gradient */
+/* Top gold inlay line */
 .wa-login-card::before {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
+    left: 12px;
+    right: 12px;
+    height: 2px;
     background: linear-gradient(90deg,
-        transparent 5%,
+        transparent,
         var(--v-crimson) 20%,
         var(--v-gold) 50%,
         var(--v-crimson) 80%,
-        transparent 95%);
-    border-radius: var(--v-radius-lg) var(--v-radius-lg) 0 0;
+        transparent);
+    border-radius: 2px;
+    z-index: 1;
 }
-
-/* Bottom ornamental border */
-.wa-login-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg,
-        transparent 10%,
-        var(--v-gold-20) 30%,
-        var(--v-gold-40) 50%,
-        var(--v-gold-20) 70%,
-        transparent 90%);
-    border-radius: 0 0 var(--v-radius-lg) var(--v-radius-lg);
-}
-
-/* ----- Corner Ornaments ----- */
-
-.wa-login-card .wa-corner {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    pointer-events: none;
-}
-
-.wa-login-card .wa-corner::before,
-.wa-login-card .wa-corner::after {
-    content: '';
-    position: absolute;
-    background: var(--v-gold-30);
-}
-
-.wa-login-card .wa-corner::before {
-    width: 16px;
-    height: 1px;
-}
-
-.wa-login-card .wa-corner::after {
-    width: 1px;
-    height: 16px;
-}
-
-.wa-corner-tl { top: 8px; left: 8px; }
-.wa-corner-tr { top: 8px; right: 8px; }
-.wa-corner-bl { bottom: 8px; left: 8px; }
-.wa-corner-br { bottom: 8px; right: 8px; }
-
-.wa-corner-tl::before { top: 0; left: 0; }
-.wa-corner-tl::after  { top: 0; left: 0; }
-.wa-corner-tr::before { top: 0; right: 0; }
-.wa-corner-tr::after  { top: 0; right: 0; }
-.wa-corner-bl::before { bottom: 0; left: 0; }
-.wa-corner-bl::after  { bottom: 0; left: 0; }
-.wa-corner-br::before { bottom: 0; right: 0; }
-.wa-corner-br::after  { bottom: 0; right: 0; }
 
 /* ----- Logo ----- */
 
@@ -126,7 +188,7 @@
 
 @keyframes wa-icon-glow {
     0%, 100% { filter: drop-shadow(0 0 12px var(--v-gold-30)); }
-    50% { filter: drop-shadow(0 0 20px var(--v-gold-50)); }
+    50% { filter: drop-shadow(0 0 22px var(--v-gold-55)); }
 }
 
 .wa-title {
@@ -164,14 +226,14 @@
 }
 
 .wa-divider::after {
-    content: '◆';
+    content: '\25C6';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 8px;
     color: var(--v-gold-dim);
-    background: #2a2218;
+    background: #281e16;
     padding: 0 var(--v-space-md);
 }
 
@@ -275,32 +337,27 @@
 .wa-chars-card {
     width: 100%;
     max-width: 380px;
-    background: linear-gradient(170deg, #352a20 0%, #241e16 50%, #1a1510 100%);
-    border: 2px solid var(--v-gold-25);
-    border-radius: var(--v-radius-lg);
+    background: linear-gradient(170deg, #302418 0%, #241c14 50%, #1a1510 100%);
+    border-radius: 8px;
     padding: 28px 20px 24px;
     position: relative;
-    box-shadow:
-        0 0 30px rgba(0, 0, 0, 0.6),
-        0 0 60px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 var(--v-gold-10);
+    z-index: 1;
 }
 
-/* Top ornament */
 .wa-chars-card::before {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
+    left: 12px;
+    right: 12px;
+    height: 2px;
     background: linear-gradient(90deg,
-        transparent 5%,
+        transparent,
         var(--v-crimson) 20%,
         var(--v-gold) 50%,
         var(--v-crimson) 80%,
-        transparent 95%);
-    border-radius: var(--v-radius-lg) var(--v-radius-lg) 0 0;
+        transparent);
+    border-radius: 2px;
 }
 
 .wa-chars-title {
@@ -477,7 +534,7 @@
     transform: scale(0.97);
 }
 
-/* ----- Google button override (dark theme) ----- */
+/* ----- Google button override ----- */
 
 .g_id_signin {
     display: flex;
@@ -516,7 +573,7 @@
     transform: scale(0.97);
 }
 
-/* ----- Ambient Particles (subtle) ----- */
+/* ----- Ambient Particles ----- */
 
 @keyframes wa-float {
     0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
