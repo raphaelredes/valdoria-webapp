@@ -6,7 +6,7 @@ return false;}
 function validateCSSVariables(){var circle=document.querySelector('.magic-circle');if(!circle)return;var style=circle.style;var corrected=false;for(var varName in VAR_MINIMUMS){var val=style.getPropertyValue(varName);if(val){var seconds=parseDuration(val);if(seconds>0&&seconds<VAR_MINIMUMS[varName]){console.warn('[LOADING-GUARD] CSS var '+varName+' too fast: '+
 seconds.toFixed(1)+'s (min: '+VAR_MINIMUMS[varName]+'s). Removing override.');style.removeProperty(varName);corrected=true;}}}
 return corrected;}
-function validateAll(){var corrected=false;for(var selector in CANONICAL){if(validateElement(selector,CANONICAL[selector]))corrected=true;}
+function validateAll(){if(window._loadingGuardBypass)return false;var overlay=document.getElementById("loading")||document.querySelector(".loading-overlay");if(!overlay||overlay.style.display==="none"||overlay.classList.contains("hidden")){if(_guardInterval){clearInterval(_guardInterval);_guardInterval=null;}return false;}var corrected=false;for(var selector in CANONICAL){if(validateElement(selector,CANONICAL[selector]))corrected=true;}
 if(validateCSSVariables())corrected=true;return corrected;}
 function observeCircle(){var circle=document.querySelector('.magic-circle');if(!circle)return;var observer=window._valdoriaPerfObserver=new MutationObserver(function(mutations){var needsCheck=false;for(var i=0;i<mutations.length;i++){var m=mutations[i];if(m.type==='attributes'&&(m.attributeName==='style'||m.attributeName==='class')){needsCheck=true;break;}}
 if(needsCheck){validateAll();}});observer.observe(circle,{attributes:true,attributeFilter:['style','class'],subtree:true,});}

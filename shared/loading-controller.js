@@ -13,6 +13,7 @@ window.ValdoriaLoadingController = function(config) {
     'use strict';
 
     var _state = 'loading';
+    window._loadingGuardBypass = true;
     var tips = config.tips || [];
     var tipEl = document.getElementById(config.tipId || 'loading-tip');
     var progressEl = document.getElementById(config.progressId || 'loading-progress');
