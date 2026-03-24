@@ -12,6 +12,7 @@
     align-items: center;
     justify-content: center;
     padding: var(--v-space-xl);
+    background: radial-gradient(ellipse at 50% 30%, #3a3028 0%, var(--v-bg) 70%);
 }
 
 .wa-screen.wa-active {
@@ -22,26 +23,93 @@
 
 .wa-login-card {
     width: 100%;
-    max-width: 360px;
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
-    border: 1px solid var(--v-border-gold);
+    max-width: 380px;
+    background: linear-gradient(170deg, #352a20 0%, #241e16 50%, #1a1510 100%);
+    border: 2px solid var(--v-gold-25);
     border-radius: var(--v-radius-lg);
-    padding: var(--v-space-2xl) var(--v-space-xl);
-    box-shadow: var(--v-shadow-md), var(--v-shadow-glow);
+    padding: 32px 24px 28px;
     text-align: center;
     position: relative;
-    overflow: hidden;
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 var(--v-gold-10),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
+/* Top ornamental border — gold-crimson gradient */
 .wa-login-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
+    height: 3px;
+    background: linear-gradient(90deg,
+        transparent 5%,
+        var(--v-crimson) 20%,
+        var(--v-gold) 50%,
+        var(--v-crimson) 80%,
+        transparent 95%);
+    border-radius: var(--v-radius-lg) var(--v-radius-lg) 0 0;
 }
+
+/* Bottom ornamental border */
+.wa-login-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+        transparent 10%,
+        var(--v-gold-20) 30%,
+        var(--v-gold-40) 50%,
+        var(--v-gold-20) 70%,
+        transparent 90%);
+    border-radius: 0 0 var(--v-radius-lg) var(--v-radius-lg);
+}
+
+/* ----- Corner Ornaments ----- */
+
+.wa-login-card .wa-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+.wa-login-card .wa-corner::before,
+.wa-login-card .wa-corner::after {
+    content: '';
+    position: absolute;
+    background: var(--v-gold-30);
+}
+
+.wa-login-card .wa-corner::before {
+    width: 16px;
+    height: 1px;
+}
+
+.wa-login-card .wa-corner::after {
+    width: 1px;
+    height: 16px;
+}
+
+.wa-corner-tl { top: 8px; left: 8px; }
+.wa-corner-tr { top: 8px; right: 8px; }
+.wa-corner-bl { bottom: 8px; left: 8px; }
+.wa-corner-br { bottom: 8px; right: 8px; }
+
+.wa-corner-tl::before { top: 0; left: 0; }
+.wa-corner-tl::after  { top: 0; left: 0; }
+.wa-corner-tr::before { top: 0; right: 0; }
+.wa-corner-tr::after  { top: 0; right: 0; }
+.wa-corner-bl::before { bottom: 0; left: 0; }
+.wa-corner-bl::after  { bottom: 0; left: 0; }
+.wa-corner-br::before { bottom: 0; right: 0; }
+.wa-corner-br::after  { bottom: 0; right: 0; }
 
 /* ----- Logo ----- */
 
@@ -50,19 +118,28 @@
 }
 
 .wa-logo-icon {
-    font-size: 48px;
+    font-size: 52px;
     margin-bottom: var(--v-space-md);
-    filter: drop-shadow(0 0 12px var(--v-gold-40));
+    filter: drop-shadow(0 0 16px var(--v-gold-40));
+    animation: wa-icon-glow 4s ease-in-out infinite;
+}
+
+@keyframes wa-icon-glow {
+    0%, 100% { filter: drop-shadow(0 0 12px var(--v-gold-30)); }
+    50% { filter: drop-shadow(0 0 20px var(--v-gold-50)); }
 }
 
 .wa-title {
     font-family: var(--v-font-display);
-    font-size: var(--v-font-2xl);
+    font-size: 20px;
     font-weight: 700;
     color: var(--v-gold);
-    letter-spacing: 3px;
+    letter-spacing: 4px;
     text-transform: uppercase;
-    text-shadow: 0 0 15px var(--v-gold-40), 0 2px 4px rgba(0, 0, 0, 0.5);
+    text-shadow:
+        0 0 15px var(--v-gold-40),
+        0 0 30px var(--v-gold-20),
+        0 2px 4px rgba(0, 0, 0, 0.6);
     margin: 0 0 var(--v-space-md);
     line-height: 1.3;
 }
@@ -73,6 +150,8 @@
     color: var(--v-text-dim);
     margin: 0;
     line-height: 1.5;
+    letter-spacing: 0.5px;
+    font-style: italic;
 }
 
 /* ----- Divider ----- */
@@ -80,7 +159,7 @@
 .wa-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--v-gold-dim), transparent);
-    margin: var(--v-space-xl) 0;
+    margin: 20px 0;
     position: relative;
 }
 
@@ -92,7 +171,7 @@
     transform: translate(-50%, -50%);
     font-size: 8px;
     color: var(--v-gold-dim);
-    background: var(--v-bg-card);
+    background: #2a2218;
     padding: 0 var(--v-space-md);
 }
 
@@ -124,7 +203,7 @@
 .wa-separator-line {
     flex: 1;
     height: 1px;
-    background: var(--v-border);
+    background: linear-gradient(90deg, transparent, var(--v-border), transparent);
 }
 
 .wa-separator-text {
@@ -132,6 +211,7 @@
     font-size: var(--v-font-md);
     color: var(--v-text-dim);
     text-transform: lowercase;
+    letter-spacing: 1px;
 }
 
 /* ----- Error Message ----- */
@@ -194,8 +274,33 @@
 
 .wa-chars-card {
     width: 100%;
-    max-width: 390px;
-    padding: var(--v-space-xl);
+    max-width: 380px;
+    background: linear-gradient(170deg, #352a20 0%, #241e16 50%, #1a1510 100%);
+    border: 2px solid var(--v-gold-25);
+    border-radius: var(--v-radius-lg);
+    padding: 28px 20px 24px;
+    position: relative;
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 var(--v-gold-10);
+}
+
+/* Top ornament */
+.wa-chars-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg,
+        transparent 5%,
+        var(--v-crimson) 20%,
+        var(--v-gold) 50%,
+        var(--v-crimson) 80%,
+        transparent 95%);
+    border-radius: var(--v-radius-lg) var(--v-radius-lg) 0 0;
 }
 
 .wa-chars-title {
@@ -206,6 +311,7 @@
     text-align: center;
     margin: 0 0 var(--v-space-xl);
     text-shadow: 0 0 10px var(--v-gold-30);
+    letter-spacing: 1px;
 }
 
 /* ----- Character List ----- */
@@ -294,7 +400,7 @@
 }
 
 .wa-char-card.selected .wa-char-check::after {
-    content: '✓';
+    content: '\2713';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -378,7 +484,6 @@
     justify-content: center;
 }
 
-/* Ensure Google iframe doesn't overflow */
 .g_id_signin iframe {
     max-width: 100% !important;
 }
@@ -390,22 +495,53 @@
     width: 100%;
     max-width: 300px;
     padding: 12px var(--v-space-xl);
-    background: transparent;
-    border: 1px solid var(--v-border);
+    background: rgba(196, 149, 58, 0.06);
+    border: 1px dashed var(--v-gold-25);
     border-radius: var(--v-radius);
     font-family: var(--v-font);
     font-size: var(--v-font-base);
     color: var(--v-text-dim);
     cursor: pointer;
-    transition: border-color var(--v-transition), color var(--v-transition);
+    transition: border-color var(--v-transition), color var(--v-transition), background var(--v-transition);
     min-height: 44px;
 }
 
 .wa-btn-dev:hover {
     border-color: var(--v-gold-dim);
     color: var(--v-gold);
+    background: rgba(196, 149, 58, 0.1);
 }
 
 .wa-btn-dev:active {
     transform: scale(0.97);
+}
+
+/* ----- Ambient Particles (subtle) ----- */
+
+@keyframes wa-float {
+    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.3; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+}
+
+.wa-particle {
+    position: fixed;
+    width: 2px;
+    height: 2px;
+    background: var(--v-gold-30);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: wa-float linear infinite;
+}
+
+.wa-particle:nth-child(1) { left: 15%; animation-duration: 12s; animation-delay: 0s; }
+.wa-particle:nth-child(2) { left: 35%; animation-duration: 15s; animation-delay: 2s; }
+.wa-particle:nth-child(3) { left: 55%; animation-duration: 11s; animation-delay: 4s; }
+.wa-particle:nth-child(4) { left: 75%; animation-duration: 14s; animation-delay: 1s; }
+.wa-particle:nth-child(5) { left: 90%; animation-duration: 13s; animation-delay: 3s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .wa-particle { display: none; }
+    .wa-logo-icon { animation: none; }
 }
