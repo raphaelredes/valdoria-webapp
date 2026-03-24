@@ -570,6 +570,7 @@
 
         /* ─── Toast ─── */
         .toast {
+            display: none;
             position: fixed;
             top: 12px;
             left: 12px;
@@ -584,12 +585,10 @@
             font-weight: 600;
             text-align: center;
             z-index: var(--v-z-header, 100);
-            transform: translateY(-120%);
-            transition: transform var(--v-transition-base);
         }
 
         .toast.show {
-            transform: translateY(0);
+            display: block;
         }
 
         /* ─── Fatal error (full screen) ─── */
