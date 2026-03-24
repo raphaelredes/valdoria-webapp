@@ -47,6 +47,7 @@ const params = new URLSearchParams(location.search);if(_spaP){Object.keys(_spaP)
 token = params.get('token') || '';
 apiFallback = params.get('api') || '';
 userId = params.get('uid') || '';
+console.log('[LEVELUP] INIT token=' + (token ? token.substring(0, 12) + '...' : '(empty)') + ' spaP.token=' + ((_spaP && _spaP.token) ? _spaP.token.substring(0, 12) + '...' : '(none)') + ' url.token=' + (new URLSearchParams(location.search).get('token') || '(none)').substring(0, 12));
 if (window.SessionHeartbeat && apiFallback && token && userId) {
 SessionHeartbeat.init({ apiBase: apiFallback, token: token, uid: parseInt(userId) || 0 });
 }
@@ -692,6 +693,7 @@ document.getElementById('loadingOverlay').classList.add('active');
 try {
 if (apiFallback) {
 payload.user_id = parseInt(userId);
+console.log('[LEVELUP] SUBMIT token=' + (token ? token.substring(0, 12) + '...' : '(empty)') + ' api=' + apiFallback + ' uid=' + userId);
 const _lh = {
 'Content-Type': 'application/json',
 'Authorization': 'Bearer ' + token
