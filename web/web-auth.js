@@ -16,6 +16,7 @@ var _authToken = '';
 var _userId = 0;
 var _characters = [];
 var _selectedCharId = '';
+var _isDevLogin = false;
 
 /* ----- API Base Discovery ----- */
 
@@ -214,6 +215,21 @@ async function onPlay() {
     hideCharError();
 
     try {
+        if (_isDevLogin) {
+            // DEV mode: create a new session with the selected char_id
+            var devResp = await fetch(_apiBase + '/api/game/_dev_session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: _userId, char_id: _selectedCharId })
+            });
+            if (!devResp.ok) throw new Error('Erro ao criar sessão DEV');
+            var devData = await devResp.json();
+            _authToken = devData.token || _authToken;
+            localStorage.setItem(WEB_TOKEN_KEY, _authToken);
+            redirectToGame(_selectedCharId, false, _authToken);
+            return;
+        }
+
         var resp = await fetch(_apiBase + '/api/auth/select-character', {
             method: 'POST',
             headers: {
@@ -351,6 +367,62 @@ async function fetchCharacters() {
         showAuthLoading(false);
     }
 }
+
+/* ----- DEV Login (bypass auth) ----- */
+
+window.onDevLogin = async function() {
+    showAuthLoading(true);
+    hideAuthError();
+    try {
+        var ok = await discoverApiBase();
+        if (!ok) {
+            showAuthError('Configure a URL do servidor primeiro.');
+            return;
+        }
+        // Step 1: Create dev session
+        var resp = await fetch(_apiBase + '/api/game/_dev_session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: 7685169782, char_id: '' })
+        });
+        if (!resp.ok) {
+            var err = await resp.json().catch(function() { return {}; });
+            throw new Error(err.error || 'Erro no login DEV (' + resp.status + ')');
+        }
+        var data = await resp.json();
+        _authToken = data.token || '';
+        _userId = data.user_id || 0;
+        _isDevLogin = true;
+        localStorage.setItem(WEB_TOKEN_KEY, _authToken);
+        localStorage.setItem(WEB_USER_KEY, String(_userId));
+        localStorage.setItem(WEB_API_KEY, _apiBase);
+
+        // Step 2: Fetch character list
+        var charsResp = await fetch(_apiBase + '/api/game/characters?user_id=' + _userId, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + _authToken }
+        });
+        if (charsResp.ok) {
+            var charsData = await charsResp.json();
+            _characters = charsData.characters || [];
+        }
+
+        if (_characters.length === 0) {
+            // No characters — go to game (will create)
+            redirectToGame('', true);
+        } else if (_characters.length === 1) {
+            _selectedCharId = _characters[0].id || _characters[0].char_id || '';
+            redirectToGame(_selectedCharId, false);
+        } else {
+            showCharacterSelect();
+        }
+    } catch (e) {
+        console.error('[WEB-AUTH] DEV login error:', e);
+        showAuthError(e.message || 'Erro no login DEV');
+    } finally {
+        showAuthLoading(false);
+    }
+};
 
 /* ----- Init ----- */
 

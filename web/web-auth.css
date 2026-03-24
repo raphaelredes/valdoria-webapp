@@ -382,3 +382,30 @@
 .g_id_signin iframe {
     max-width: 100% !important;
 }
+
+/* ----- DEV Login Button ----- */
+
+.wa-btn-dev {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    padding: 12px var(--v-space-xl);
+    background: transparent;
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius);
+    font-family: var(--v-font);
+    font-size: var(--v-font-base);
+    color: var(--v-text-dim);
+    cursor: pointer;
+    transition: border-color var(--v-transition), color var(--v-transition);
+    min-height: 44px;
+}
+
+.wa-btn-dev:hover {
+    border-color: var(--v-gold-dim);
+    color: var(--v-gold);
+}
+
+.wa-btn-dev:active {
+    transform: scale(0.97);
+}
