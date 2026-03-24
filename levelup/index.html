@@ -32,110 +32,27 @@
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     </script>
     <style>
-        /* ─── Screen transition system ─── */
-        .screen-viewport {
-            position: relative;
-            width: 100%;
-            height: calc(var(--tg-viewport-height, 100vh) - 60px);
-            overflow: hidden;
-        }
-
-        .screen-track {
-            display: flex;
-            height: 100%;
-            transition: transform var(--v-transition-base)-out;
-            will-change: transform;
-        }
-
-        .screen {
-            position: relative;
-            flex: 0 0 100vw;
-            width: 100vw;
-            height: 100%;
-            overflow-y: hidden;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .screen.sub-open {
-            overflow: hidden !important;
-        }
-
-        .screen-content {
-            padding: 10px;
-            padding-bottom: 60px;
-        }
-
-        /* Sub-screen overlay (CAN scroll) */
-        .sub-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--v-bg);
-            transform: translateX(100%);
-            transition: transform var(--v-transition-base)-out;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            z-index: var(--v-z-sticky, 10);
-        }
-
-        .sub-screen.active {
-            transform: translateX(0);
-        }
-
-        .sub-screen .screen-content {
-            padding-top: 8px;
-        }
-
-        .sub-back-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--v-bg);
-            border: none;
-            color: var(--v-gold);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 12px 0 8px;
-            margin-bottom: 8px;
-            position: sticky;
-            top: 0;
-            z-index: var(--v-z-base, 5);
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* ─── Progress bar ─── */
-        .progress-bar {
-            display: none;
-            gap: 4px;
-            padding: 8px 12px;
-            background: var(--v-bg);
-            position: sticky;
-            top: 0;
-            z-index: var(--v-z-sticky, 20);
-        }
-
-        .progress-bar.visible {
-            display: flex;
-        }
-
-        .progress-step {
-            flex: 1;
-            height: 4px;
-            border-radius: var(--v-radius-sm);
-            background: var(--v-border);
-            transition: background var(--v-transition-base);
-        }
-
-        .progress-step.active {
-            background: var(--v-gold);
-        }
-
-        .progress-step.done {
-            background: #4a9;
-        }
+        /* ─── Popup Card Layout ─── */
+        .lu-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: var(--v-z-base, 1); }
+        .lu-card { position: relative; width: 95%; max-width: 400px; max-height: 88dvh; background: var(--v-bg-card, #2e2520); border: 1px solid rgba(196,149,58,0.3); border-radius: var(--v-radius-lg, 14px); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 60px rgba(196,149,58,0.08); }
+        .lu-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--v-border, #4a3828); background: linear-gradient(180deg, rgba(196,149,58,0.1) 0%, transparent 100%); flex-shrink: 0; }
+        .lu-back { background: none; border: none; color: var(--v-gold, #c4953a); font-size: 16px; cursor: pointer; padding: 4px 8px; -webkit-tap-highlight-color: transparent; transition: opacity 0.2s; }
+        .lu-back:active { opacity: 0.5; }
+        .lu-back.hidden { visibility: hidden; pointer-events: none; }
+        .lu-title { flex: 1; font-size: 15px; font-weight: 700; color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px; }
+        .lu-dots { display: flex; gap: 6px; align-items: center; }
+        .lu-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--v-border, #4a3828); transition: all 0.2s; }
+        .lu-dot.active { background: var(--v-gold, #c4953a); box-shadow: 0 0 6px rgba(196,149,58,0.5); }
+        .lu-dot.done { background: #4a9; }
+        .lu-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 10px; }
+        .lu-body > div { animation: luFadeIn 250ms ease; }
+        @keyframes luFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .lu-footer { padding: 10px 12px; border-top: 1px solid var(--v-border, #4a3828); flex-shrink: 0; background: var(--v-bg-card, #2e2520); }
+        .lu-footer .v-btn { width: 100%; }
+        .lu-sub { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--v-bg-card, #2e2520); transform: translateX(100%); transition: transform 0.25s ease-out; z-index: var(--v-z-sticky, 10); display: flex; flex-direction: column; }
+        .lu-sub.active { transform: translateX(0); }
+        .lu-sub-content { flex: 1; padding: 10px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .lu-sub-back { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--v-gold, #c4953a); font-size: 14px; font-weight: 600; cursor: pointer; padding: 12px 10px 8px; -webkit-tap-highlight-color: transparent; }
 
         /* ─── Level up banner ─── */
         .lvl-banner {
@@ -651,29 +568,6 @@
             font-weight: 600;
         }
 
-        /* ─── Navigation ─── */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-width: 430px;
-            margin: 0 auto;
-            padding: 12px;
-            background: linear-gradient(to bottom, transparent, var(--v-bg) 30%);
-            z-index: var(--v-z-sticky, 30);
-            transition: opacity var(--v-transition);
-        }
-
-        .nav-bar.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .nav-bar .v-btn {
-            width: 100%;
-        }
-
         /* ─── Toast ─── */
         .toast {
             position: fixed;
@@ -759,20 +653,7 @@
             font-size: 13px;
         }
 
-        /* ─── Sub-screen backdrop ─── */
-        .screen.sub-open::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: var(--v-z-base, 5);
-            animation: v-fadeIn 200ms ease forwards;
-        }
-
-        /* ─── Content fade-in ─── */
-        .screen-content {
-            animation: v-fadeIn 300ms ease;
-        }
+        
 
         /* ─── ASI boost animation ─── */
         .asi-card .asi-boost {
@@ -901,24 +782,22 @@
         <div class="loading-text">Confirmando evolucao...</div>
     </div>
 
-    <div id="progressBar" class="progress-bar"></div>
-
-    <div class="screen-viewport">
-        <div id="screenTrack" class="screen-track">
-            <!-- Screens are built dynamically -->
+    <div class="lu-backdrop" id="luBackdrop" style="display:none">
+        <div class="lu-card">
+            <div class="lu-header">
+                <button id="btnBack" class="lu-back hidden" onclick="goBack()">&#9664;</button>
+                <span class="lu-title" id="luTitle">Evolu&#231;&#227;o</span>
+                <div class="lu-dots" id="luDots"></div>
+            </div>
+            <div class="lu-body" id="luBody"></div>
+            <div class="lu-sub" id="luSub">
+                <div class="lu-sub-content" id="luSubContent"></div>
+            </div>
+            <div class="lu-footer" id="luFooter">
+                <button id="btnNext" class="v-btn v-btn-primary" onclick="goNext()">Continuar &#9654;</button>
+            </div>
         </div>
     </div>
-
-    <!-- Immersive mode toggle (collapse bottom panel) -->
-    <button id="immersive-toggle" class="immersive-toggle" style="display:none"
-        aria-label="Recolher menu">&middot;</button>
-
-    <div id="bottom-panel" class="nav-bar">
-        <button id="btnNext" class="v-btn v-btn-primary" onclick="goNext()">Continuar</button>
-    </div>
-
-    <!-- Immersive mode restore pill (when panel collapsed) -->
-    <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
 
     <script>
         // ═══════════════════════════════════════════════
@@ -972,11 +851,9 @@
         // ═══════════════════════════════════════════════
         // SCREEN MANAGEMENT
         // ═══════════════════════════════════════════════
-        const screens = [];
-        let cur = 0;
-        let asiMode = 'asi'; // 'asi' or 'feat'
-        let isTransitioning = false;
-
+        var screens = [];
+        var cur = 0;
+        var asiMode = 'asi';
 
 
         (function init() {
@@ -1019,78 +896,72 @@
             }
             buildScreens();
             // Hide initial loading with narrative delay
+            document.getElementById('luBackdrop').style.display = '';
             if (window._lvlInitLoading) window._lvlInitLoading.hide();
         })();
 
         function buildScreens() {
             screens.length = 0;
-            screens.push({ id: 'summary', build: buildSummary, validate: () => null });
-
+            screens.push({ id: 'summary', build: buildSummary, validate: function() { return null; } });
             if (P.needs_subclass) {
-                screens.push({ id: 'subclass', build: buildSubclass, validate: validateSubclass, hasSub: true });
+                screens.push({ id: 'subclass', build: buildSubclass, validate: validateSubclass });
             }
             if (P.pending_asi > 0) {
-                screens.push({ id: 'asi', build: buildASI, validate: validateASI, hasSub: true });
+                screens.push({ id: 'asi', build: buildASI, validate: validateASI });
             }
             if (P.pending_skills > 0) {
-                const skills = getAvailableSkills();
+                var skills = getAvailableSkills();
                 if (skills.length > 0) {
-                    screens.push({ id: 'skills', build: buildSkills, validate: validateSkills, hasSub: true });
+                    screens.push({ id: 'skills', build: buildSkills, validate: validateSkills });
                 }
             }
-            screens.push({ id: 'review', build: buildReview, validate: () => null });
-
-            buildProgress();
-            renderAllScreens();
+            screens.push({ id: 'review', build: buildReview, validate: function() { return null; } });
+            buildDots();
             goTo(0);
         }
 
-        function buildProgress() {
-            const bar = document.getElementById('progressBar');
-            bar.innerHTML = screens.map((s, i) =>
-                `<div class="progress-step" id="pstep_${i}"></div>`
-            ).join('');
+        function buildDots() {
+            var dotsEl = document.getElementById('luDots');
+            var html = '';
+            for (var i = 0; i < screens.length; i++) html += '<span class="lu-dot" id="dot_' + i + '"></span>';
+            dotsEl.innerHTML = html;
         }
 
-        function updateProgress() {
-            screens.forEach((_, i) => {
-                const el = document.getElementById('pstep_' + i);
-                if (!el) return;
-                el.className = 'progress-step' + (i < cur ? ' done' : i === cur ? ' active' : '');
-            });
-        }
-
-        function renderAllScreens() {
-            const track = document.getElementById('screenTrack');
-            track.innerHTML = screens.map((s, i) => {
-                let subHtml = '';
-                if (s.hasSub) {
-                    subHtml = `<div class="sub-screen" id="sub_${s.id}"><div class="screen-content" id="sub_content_${s.id}"></div></div>`;
-                }
-                return `<div class="screen" id="screen_${i}"><div class="screen-content" id="content_${i}"></div>${subHtml}</div>`;
-            }).join('');
-            screens.forEach((s, i) => s.build(document.getElementById('content_' + i)));
+        function updateDots() {
+            for (var i = 0; i < screens.length; i++) {
+                var el = document.getElementById('dot_' + i);
+                if (!el) continue;
+                el.className = 'lu-dot' + (i < cur ? ' done' : i === cur ? ' active' : '');
+            }
         }
 
         function goTo(idx) {
             if (idx < 0 || idx >= screens.length) return;
             haptic('light');
-            closeAllSubScreens();
+            closeSubScreen();
             cur = idx;
-            document.getElementById('screenTrack').style.transform = `translateX(-${idx * 100}vw)`;
-            // Show progress bar only after the summary screen
-            const bar = document.getElementById('progressBar');
-            if (idx > 0) bar.classList.add('visible');
-            else bar.classList.remove('visible');
-            updateProgress();
+            var body = document.getElementById('luBody');
+            var wrapper = document.createElement('div');
+            screens[cur].build(wrapper);
+            body.innerHTML = '';
+            body.appendChild(wrapper);
+            body.scrollTop = 0;
+            updateDots();
             updateNavBtn();
-            if (screens[cur].id === 'review') {
-                screens[cur].build(document.getElementById('content_' + cur));
-            }
+        }
+
+        function _rebuildCurrentScreen() {
+            var wrapper = document.createElement('div');
+            screens[cur].build(wrapper);
+            var body = document.getElementById('luBody');
+            var st = body.scrollTop;
+            body.innerHTML = '';
+            body.appendChild(wrapper);
+            body.scrollTop = st;
         }
 
         function goNext() {
-            const err = screens[cur].validate();
+            var err = screens[cur].validate();
             if (err) { _showValidation(err); return; }
             if (cur === screens.length - 1) {
                 submit();
@@ -1106,66 +977,44 @@
         }
 
         function updateNavBtn() {
-            const btn = document.getElementById('btnNext');
+            var btn = document.getElementById('btnNext');
+            var backBtn = document.getElementById('btnBack');
             if (cur === screens.length - 1) {
-                btn.textContent = '\u2694\ufe0f Confirmar Evolucao';
-                btn.className = 'v-btn v-btn-primary';
+                btn.textContent = '⚔️ Confirmar Evolucao';
             } else {
-                btn.textContent = 'Continuar \u25b6';
-                btn.className = 'v-btn v-btn-primary';
+                btn.textContent = 'Continuar ▶';
             }
-            if (tg && tg.BackButton) {
-                const hasOpenSub = document.querySelector('.sub-screen.active');
-                tg.BackButton.show(); // Always visible — closes WebApp from screen 0
-            }
+            btn.className = 'v-btn v-btn-primary';
+            if (cur === 0) backBtn.classList.add('hidden');
+            else backBtn.classList.remove('hidden');
+            if (tg && tg.BackButton) tg.BackButton.show();
         }
 
         // ═══════════════════════════════════════════════
-        // SUB-SCREEN MANAGEMENT
+        // SUB-SCREEN MANAGEMENT (single overlay within card)
         // ═══════════════════════════════════════════════
-        function openSubScreen(subId) {
-            if (isTransitioning) return;
-            const sub = document.getElementById(subId);
-            if (!sub) return;
-            isTransitioning = true;
+        function openSubScreen(html) {
+            var sub = document.getElementById('luSub');
+            var content = document.getElementById('luSubContent');
+            content.innerHTML = html;
             sub.classList.add('active');
-            const parentScreen = sub.closest('.screen');
-            if (parentScreen) { parentScreen.scrollTop = 0; parentScreen.classList.add('sub-open'); }
             sub.scrollTop = 0;
-            document.querySelector('.nav-bar').classList.add('hidden');
-            updateNavBtn();
-            setTimeout(() => { isTransitioning = false; }, 350);
+            document.getElementById('luFooter').style.display = 'none';
         }
 
-        function closeSubScreen(subId) {
-            const sub = document.getElementById(subId);
-            if (!sub) return;
+        function closeSubScreen() {
+            var sub = document.getElementById('luSub');
             sub.classList.remove('active');
-            const parentScreen = sub.closest('.screen');
-            if (parentScreen && !parentScreen.querySelector('.sub-screen.active')) {
-                parentScreen.classList.remove('sub-open');
-            }
-            if (!document.querySelector('.sub-screen.active')) {
-                document.querySelector('.nav-bar').classList.remove('hidden');
-            }
-            updateNavBtn();
-        }
-
-        function closeAllSubScreens() {
-            document.querySelectorAll('.sub-screen.active').forEach(s => {
-                s.classList.remove('active');
-                const parentScreen = s.closest('.screen');
-                if (parentScreen) parentScreen.classList.remove('sub-open');
-            });
+            document.getElementById('luFooter').style.display = '';
         }
 
         // ═══════════════════════════════════════════════
         // TELEGRAM BACK BUTTON
         // ═══════════════════════════════════════════════
         if (tg && tg.BackButton) {
-            tg.BackButton.onClick(() => {
-                const openSub = document.querySelector('.sub-screen.active');
-                if (openSub) { closeSubScreen(openSub.id); return; }
+            tg.BackButton.onClick(function() {
+                var sub = document.getElementById('luSub');
+                if (sub.classList.contains('active')) { closeSubScreen(); return; }
                 goBack();
             });
         }
@@ -1313,10 +1162,7 @@
             const sc = subs[scId];
             if (!sc) return;
 
-            const container = document.getElementById('sub_content_subclass');
-            if (!container) return;
-
-            let html = `<button class="sub-back-btn" onclick="closeSubScreen('sub_subclass')">\u25c0 Voltar</button>`;
+            let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
             html += `<div class="section-title">\ud83c\udff0 ${sc.name}</div>`;
             html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:12px;line-height:1.4">${sc.desc}</div>`;
 
@@ -1336,19 +1182,17 @@
 
             const isSel = sel.subclass === scId;
             html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%;margin-top:16px"
-        onclick="selectSubclass('${scId}'); closeSubScreen('sub_subclass')">
+        onclick="selectSubclass('${scId}'); closeSubScreen()">
         ${isSel ? '\u2713 Selecionada' : `Selecionar ${sc.name}`}
     </button>`;
 
-            container.innerHTML = html;
-            openSubScreen('sub_subclass');
+            openSubScreen(html);
         }
 
         function selectSubclass(scId) {
             haptic('light');
             sel.subclass = sel.subclass === scId ? '' : scId;
-            const screen = screens.findIndex(s => s.id === 'subclass');
-            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+            _rebuildCurrentScreen();
         }
 
         function validateSubclass() {
@@ -1480,10 +1324,8 @@
             const f = FEATS[fid];
             if (!f) return;
 
-            const container = document.getElementById('sub_content_asi');
-            if (!container) return;
 
-            let html = `<button class="sub-back-btn" onclick="closeSubScreen('sub_asi')">\u25c0 Voltar</button>`;
+            let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
             html += `<div class="section-title">\ud83c\udf96\ufe0f ${f.name}</div>`;
             html += `<div style="font-size:13px;color:var(--v-text);margin-bottom:8px;line-height:1.4">${f.desc}</div>`;
 
@@ -1500,10 +1342,9 @@
             html += `<div style="font-size:11px;color:var(--v-text-dim);margin-top:4px">Custo: 2 pontos de atributo</div>`;
 
             html += `<button class="v-btn v-btn-primary" style="width:100%;margin-top:16px"
-        onclick="selectFeat('${fid}'); closeSubScreen('sub_asi')">Selecionar ${f.name}</button>`;
+        onclick="selectFeat('${fid}'); closeSubScreen()">Selecionar ${f.name}</button>`;
 
-            container.innerHTML = html;
-            openSubScreen('sub_asi');
+            openSubScreen(html);
         }
 
         function getAvailableFeats() {
@@ -1519,8 +1360,7 @@
 
         function setAsiMode(mode) {
             asiMode = mode;
-            const screen = screens.findIndex(s => s.id === 'asi');
-            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+            _rebuildCurrentScreen();
         }
 
         function asiChange(attr, delta) {
@@ -1536,8 +1376,7 @@
 
             if (boost === 0) { delete sel.asi[attr]; } else { sel.asi[attr] = boost; }
 
-            const screen = screens.findIndex(s => s.id === 'asi');
-            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+            _rebuildCurrentScreen();
         }
 
         function selectFeat(fid) {
@@ -1551,15 +1390,13 @@
                 const allocated = Object.values(sel.asi).reduce((a, b) => a + b, 0);
                 if (allocated > asiPts) { sel.asi = {}; }
             }
-            const screen = screens.findIndex(s => s.id === 'asi');
-            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+            _rebuildCurrentScreen();
         }
 
         function selectFeatStat(attr) {
             haptic('light');
             sel.featStat = sel.featStat === attr ? '' : attr;
-            const screen = screens.findIndex(s => s.id === 'asi');
-            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+            _rebuildCurrentScreen();
         }
 
         function validateASI() {
@@ -1617,11 +1454,8 @@
             if (!s) return;
             const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
 
-            const container = document.getElementById('sub_content_skills');
-            if (!container) return;
-
             const dmg = calcDmgRange(s.effect);
-            let html = `<button class="sub-back-btn" onclick="closeSubScreen('sub_skills')">\u25c0 Voltar</button>`;
+            let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
             html += `<div class="section-title">\u26a1 ${s.name}</div>`;
 
             html += `<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">`;
@@ -1640,12 +1474,11 @@
 
             const isSel = sel.skills.includes(sid);
             html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%;margin-top:16px"
-        onclick="toggleSkill('${sid}'); closeSubScreen('sub_skills')">
+        onclick="toggleSkill('${sid}'); closeSubScreen()">
         ${isSel ? '\u2713 Selecionada' : 'Selecionar Habilidade'}
     </button>`;
 
-            container.innerHTML = html;
-            openSubScreen('sub_skills');
+            openSubScreen(html);
         }
 
         function toggleSkill(sid) {
@@ -1664,8 +1497,7 @@
                 sel.skills.push(sid);
             }
 
-            const screen = screens.findIndex(s => s.id === 'skills');
-            if (screen >= 0) screens[screen].build(document.getElementById('content_' + screen));
+            _rebuildCurrentScreen();
         }
 
         function validateSkills() {
@@ -1762,7 +1594,15 @@
         // ═══════════════════════════════════════════════
         // SUBMIT
         // ═══════════════════════════════════════════════
-        let _submitted = false;
+        function resetSubmitState() {
+            _submitted = false;
+            var btn = document.getElementById('btnNext');
+            btn.disabled = false;
+            btn.textContent = '⚔️ Confirmar Evolucao';
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        var _submitted = false;
         function submit() {
             if (_submitted) return;
             _submitted = true;
@@ -1804,12 +1644,8 @@
                     }).then(res => {
                         if (res.status === 401 || res.status === 403) {
                             console.error('[LEVELUP] Auth error on apply:', res.status);
-                            document.getElementById('loadingOverlay').classList.remove('active');
-                            if (tg?.sendData) {
-                                tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'LEVELUP', reason: 'session_expired' }));
-                                return null;
-                            }
-                            showFatalError('Sessão expirada. Feche e reabra.');
+                            resetSubmitState();
+                            showFatalError('Sessão expirada. Feche e reabra o level up.');
                             return null;
                         }
                         return res.json();
@@ -1828,15 +1664,11 @@
                                     alert('Evolucao confirmada!');
                                 }
                             } else {
-                                document.getElementById('loadingOverlay').classList.remove('active');
-                                btn.disabled = false;
-                                btn.textContent = 'Confirmar';
+                                resetSubmitState();
                                 showFatalError('Erro ao aplicar evolucao: ' + (data.error || 'Desconhecido'));
                             }
-                        }).catch(e => {
-                            document.getElementById('loadingOverlay').classList.remove('active');
-                            btn.disabled = false;
-                            btn.textContent = 'Confirmar';
+                        }).catch(function(e) {
+                            resetSubmitState();
                             showFatalError('Erro de conexao com servidor.', e);
                         });
                 }
@@ -1846,25 +1678,18 @@
                         // Safety: close webapp if sendData didn't auto-close
                         setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[LEVELUP] tg.close:', e); } }, 300);
                     }, 300);
-                    // Safety timeout: if webapp is still open after 5s, recover UI
-                    setTimeout(() => {
-                        if (document.visibilityState !== 'hidden') {
-                            document.getElementById('loadingOverlay').classList.remove('active');
-                            btn.disabled = false;
-                            btn.textContent = 'Confirmar';
-                        }
+                    setTimeout(function() {
+                        if (document.visibilityState !== 'hidden') { resetSubmitState(); }
                     }, 5000);
                 } else {
                     console.log('Level-up payload:', JSON.stringify(payload, null, 2));
-                    setTimeout(() => {
-                        document.getElementById('loadingOverlay').classList.remove('active');
-                        btn.disabled = false;
+                    setTimeout(function() {
+                        resetSubmitState();
                         alert('Evolucao confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
                     }, 800);
                 }
             } catch (e) {
-                document.getElementById('loadingOverlay').classList.remove('active');
-                btn.disabled = false;
+                resetSubmitState();
                 showFatalError('Erro ao enviar dados. Tente novamente.', e);
             }
         }
