@@ -1,0 +1,384 @@
+/* =============================================
+   Lendas de Valdoria — Web Login Styles
+   Medieval theme using valdoria-design.css tokens
+   ============================================= */
+
+/* ----- Screen Management ----- */
+
+.wa-screen {
+    display: none;
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: center;
+    justify-content: center;
+    padding: var(--v-space-xl);
+}
+
+.wa-screen.wa-active {
+    display: flex;
+}
+
+/* ----- Login Card ----- */
+
+.wa-login-card {
+    width: 100%;
+    max-width: 360px;
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
+    border: 1px solid var(--v-border-gold);
+    border-radius: var(--v-radius-lg);
+    padding: var(--v-space-2xl) var(--v-space-xl);
+    box-shadow: var(--v-shadow-md), var(--v-shadow-glow);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.wa-login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
+}
+
+/* ----- Logo ----- */
+
+.wa-logo {
+    margin-bottom: var(--v-space-xl);
+}
+
+.wa-logo-icon {
+    font-size: 48px;
+    margin-bottom: var(--v-space-md);
+    filter: drop-shadow(0 0 12px var(--v-gold-40));
+}
+
+.wa-title {
+    font-family: var(--v-font-display);
+    font-size: var(--v-font-2xl);
+    font-weight: 700;
+    color: var(--v-gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow: 0 0 15px var(--v-gold-40), 0 2px 4px rgba(0, 0, 0, 0.5);
+    margin: 0 0 var(--v-space-md);
+    line-height: 1.3;
+}
+
+.wa-subtitle {
+    font-family: var(--v-font);
+    font-size: var(--v-font-body);
+    color: var(--v-text-dim);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ----- Divider ----- */
+
+.wa-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--v-gold-dim), transparent);
+    margin: var(--v-space-xl) 0;
+    position: relative;
+}
+
+.wa-divider::after {
+    content: '◆';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+    color: var(--v-gold-dim);
+    background: var(--v-bg-card);
+    padding: 0 var(--v-space-md);
+}
+
+/* ----- Auth Buttons Area ----- */
+
+.wa-auth-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-xl);
+}
+
+.wa-tg-widget {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ----- Separator ----- */
+
+.wa-separator {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-md);
+    width: 100%;
+}
+
+.wa-separator-line {
+    flex: 1;
+    height: 1px;
+    background: var(--v-border);
+}
+
+.wa-separator-text {
+    font-family: var(--v-font);
+    font-size: var(--v-font-md);
+    color: var(--v-text-dim);
+    text-transform: lowercase;
+}
+
+/* ----- Error Message ----- */
+
+.wa-error {
+    background: rgba(231, 76, 60, 0.12);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: var(--v-radius-sm);
+    color: var(--v-danger-light);
+    font-size: var(--v-font-base);
+    padding: var(--v-space-md) var(--v-space-lg);
+    margin-top: var(--v-space-lg);
+    line-height: 1.4;
+}
+
+/* ----- Loading ----- */
+
+.wa-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--v-space-md);
+    margin-top: var(--v-space-lg);
+    font-size: var(--v-font-base);
+    color: var(--v-text-dim);
+}
+
+.wa-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--v-border);
+    border-top-color: var(--v-gold);
+    border-radius: 50%;
+    animation: v-spin 0.8s linear infinite;
+}
+
+/* ----- Footer Note ----- */
+
+.wa-footer-note {
+    font-size: var(--v-font-md);
+    color: var(--v-text-dim);
+    margin-top: var(--v-space-2xl);
+    line-height: 1.4;
+}
+
+.wa-footer-note a {
+    color: var(--v-gold);
+    text-decoration: none;
+    border-bottom: 1px solid var(--v-gold-30);
+    transition: border-color var(--v-transition);
+}
+
+.wa-footer-note a:hover {
+    border-color: var(--v-gold);
+}
+
+/* =============================================
+   Character Selection Screen
+   ============================================= */
+
+.wa-chars-card {
+    width: 100%;
+    max-width: 390px;
+    padding: var(--v-space-xl);
+}
+
+.wa-chars-title {
+    font-family: var(--v-font-display);
+    font-size: var(--v-font-xl);
+    font-weight: 700;
+    color: var(--v-gold);
+    text-align: center;
+    margin: 0 0 var(--v-space-xl);
+    text-shadow: 0 0 10px var(--v-gold-30);
+}
+
+/* ----- Character List ----- */
+
+.wa-char-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--v-space-md);
+    margin-bottom: var(--v-space-xl);
+}
+
+.wa-char-card {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-lg);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius);
+    padding: var(--v-space-lg) var(--v-space-xl);
+    cursor: pointer;
+    transition: border-color var(--v-transition), box-shadow var(--v-transition), transform var(--v-transition);
+    position: relative;
+}
+
+.wa-char-card:active {
+    transform: scale(0.97);
+}
+
+.wa-char-card.selected {
+    border-color: var(--v-gold);
+    background: linear-gradient(165deg, #382a20 0%, #2a2018 100%);
+    box-shadow: 0 0 15px var(--v-gold-20), inset 0 1px 0 var(--v-gold-10);
+}
+
+.wa-char-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--v-gold-06);
+    border-radius: var(--v-radius-sm);
+    border: 1px solid var(--v-border);
+}
+
+.wa-char-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.wa-char-name {
+    font-family: var(--v-font);
+    font-size: var(--v-font-body);
+    font-weight: 700;
+    color: var(--v-text-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wa-char-meta {
+    font-size: var(--v-font-md);
+    color: var(--v-text-dim);
+    margin-top: var(--v-space-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wa-char-check {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--v-border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all var(--v-transition);
+    position: relative;
+}
+
+.wa-char-card.selected .wa-char-check {
+    border-color: var(--v-gold);
+    background: var(--v-gold);
+    box-shadow: 0 0 8px var(--v-gold-40);
+}
+
+.wa-char-card.selected .wa-char-check::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a1410;
+}
+
+.wa-char-empty {
+    text-align: center;
+    font-size: var(--v-font-body);
+    color: var(--v-text-dim);
+    padding: var(--v-space-2xl) 0;
+}
+
+/* ----- Play Button ----- */
+
+.wa-btn-play {
+    display: block;
+    width: 100%;
+    padding: 14px var(--v-space-xl);
+    background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
+    color: #1a1410;
+    border: none;
+    border-radius: var(--v-radius);
+    font-family: var(--v-font-display);
+    font-size: var(--v-font-lg);
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 3px 12px var(--v-gold-30), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: opacity var(--v-transition), transform var(--v-transition), box-shadow var(--v-transition);
+    min-height: 48px;
+}
+
+.wa-btn-play:hover:not(:disabled) {
+    box-shadow: 0 4px 18px var(--v-gold-40), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.wa-btn-play:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.wa-btn-play:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* ----- Logout Button ----- */
+
+.wa-btn-logout {
+    display: block;
+    width: 100%;
+    margin-top: var(--v-space-lg);
+    padding: var(--v-space-md) var(--v-space-xl);
+    background: transparent;
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius);
+    font-family: var(--v-font);
+    font-size: var(--v-font-base);
+    color: var(--v-text-dim);
+    cursor: pointer;
+    transition: border-color var(--v-transition), color var(--v-transition);
+    min-height: 44px;
+}
+
+.wa-btn-logout:hover {
+    border-color: var(--v-text-dim);
+    color: var(--v-text);
+}
+
+.wa-btn-logout:active {
+    transform: scale(0.97);
+}
+
+/* ----- Google button override (dark theme) ----- */
+
+.g_id_signin {
+    display: flex;
+    justify-content: center;
+}
+
+/* Ensure Google iframe doesn't overflow */
+.g_id_signin iframe {
+    max-width: 100% !important;
+}

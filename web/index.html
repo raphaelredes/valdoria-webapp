@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Lendas de Valdoria</title>
+    <meta name="theme-color" content="#2a2420">
+    <style>html{opacity:0}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../shared/fonts.css">
+    <script>
+        var v = Date.now();
+        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="web-auth.css?v=' + v + '">');
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="screen-login" class="wa-screen wa-active">
+        <div class="wa-login-card">
+            <div class="wa-logo">
+                <div class="wa-logo-icon">⚔️</div>
+                <h1 class="wa-title">Lendas de Valdoria</h1>
+                <p class="wa-subtitle">Aventure-se no mundo de Valdoria</p>
+            </div>
+
+            <div class="wa-divider"></div>
+
+            <div class="wa-auth-buttons">
+                <!-- Telegram Login Widget -->
+                <div id="tg-widget" class="wa-tg-widget"></div>
+
+                <div class="wa-separator">
+                    <span class="wa-separator-line"></span>
+                    <span class="wa-separator-text">ou</span>
+                    <span class="wa-separator-line"></span>
+                </div>
+
+                <!-- Google Sign-In -->
+                <div id="g_id_onload"
+                     data-client_id=""
+                     data-callback="onGoogleAuth"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="rectangular"
+                     data-theme="filled_black"
+                     data-text="signin_with"
+                     data-size="large"
+                     data-logo_alignment="left"
+                     data-width="300">
+                </div>
+            </div>
+
+            <div id="auth-error" class="wa-error" style="display:none"></div>
+            <div id="auth-loading" class="wa-loading" style="display:none">
+                <div class="wa-spinner"></div>
+                <span>Autenticando...</span>
+            </div>
+
+            <p class="wa-footer-note">
+                Jogue também pelo <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener">Telegram</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Character Selection Screen -->
+    <div id="screen-chars" class="wa-screen">
+        <div class="wa-chars-card">
+            <h2 class="wa-chars-title">📜 Selecione seu Personagem</h2>
+            <div id="char-list" class="wa-char-list"></div>
+            <div id="char-error" class="wa-error" style="display:none"></div>
+            <button id="btn-play" class="wa-btn-play" disabled onclick="onPlay()">
+                ⚔️ Jogar
+            </button>
+            <button class="wa-btn-logout" onclick="onLogout()">Sair</button>
+        </div>
+    </div>
+
+    <script>
+    document.write('<script src="web-auth.js?v=' + v + '"><\/script>');
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.classList.add('v-ready');
+        });
+    </script>
+</body>
+</html>
