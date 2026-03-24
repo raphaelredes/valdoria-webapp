@@ -16,7 +16,8 @@ window.ValdoriaLoadingController = function(config) {
     var tips = config.tips || [];
     var tipEl = document.getElementById(config.tipId || 'loading-tip');
     var progressEl = document.getElementById(config.progressId || 'loading-progress');
-    var overlay = document.getElementById(config.overlayId || 'loading');
+    var overlay = document.getElementById(config.overlayId || 'loading')
+        || document.getElementById('loading');
     var stageEl = document.getElementById(config.stageId || 'loading-stage');
     var retryBtn = document.getElementById(config.retryId || 'loading-retry');
 
