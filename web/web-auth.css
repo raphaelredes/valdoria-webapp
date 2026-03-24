@@ -3,13 +3,6 @@
    Medieval theme using valdoria-design.css tokens
    ============================================= */
 
-/* ----- FOUC Prevention ----- */
-
-html.v-ready {
-    opacity: 1 !important;
-    transition: opacity 0.15s ease;
-}
-
 /* ----- Screen Management ----- */
 
 .wa-screen {
