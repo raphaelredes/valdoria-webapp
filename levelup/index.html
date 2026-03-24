@@ -997,9 +997,14 @@
 
             try {
                 const raw = params.get('p') || '';
+                if (!raw) {
+                    console.error('[LEVELUP] Empty p param');
+                    showFatalError('Dados de evolução não encontrados. Feche e tente novamente.'); return;
+                }
                 P = JSON.parse(decodeBase64Utf8(raw));
             } catch (e) {
-                showFatalError('Dados invalidos', e); return;
+                console.error('[LEVELUP] Payload decode failed. p length:', ((params.get('p')||'').length), 'error:', e.message);
+                showFatalError('Erro ao carregar dados de evolução. Feche e tente novamente.', e); return;
             }
             if (!P || !P.hero_class || !P.stats || typeof P.level !== 'number') {
                 showFatalError('Dados do personagem incompletos'); return;

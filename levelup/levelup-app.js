@@ -8,7 +8,7 @@ const screens=[];let cur=0;let asiMode='asi';let isTransitioning=false;
 (function init(){const params=new URLSearchParams(location.search);if(_spaP){Object.keys(_spaP).forEach(function(k){if(!params.has(k))params.set(k,_spaP[k]);});}
 token=params.get('token')||'';apiFallback=params.get('api')||'';userId=params.get('uid')||'';if(window.SessionHeartbeat&&apiFallback&&token&&userId){SessionHeartbeat.init({apiBase:apiFallback,token:token,uid:parseInt(userId, 10)||0});}
 returnTo=params.get('return')||'';if(window.ValdoriaErrors){ValdoriaErrors.init({appName:'LEVELUP',apiBase:apiFallback,token:token,uid:userId});}
-try{const raw=params.get('p')||'';P=JSON.parse(decodeBase64Utf8(raw));}catch(e){showFatalError('Dados invalidos',e);return;}
+try{const raw=params.get('p')||'';if(!raw){console.error('[LEVELUP] Empty p param. SPA:',!!window.__spaRouteName,'spaP keys:',Object.keys(_spaP||{}));showFatalError('Dados de evolução não encontrados. Feche e tente novamente.');return;}P=JSON.parse(decodeBase64Utf8(raw));}catch(e){console.error('[LEVELUP] Payload decode failed. p length:',((params.get('p')||'').length),'error:',e.message);showFatalError('Erro ao carregar dados de evolução. Feche e tente novamente.',e);return;}
 if(!P||!P.hero_class||!P.stats||typeof P.level!=='number'){showFatalError('Dados do personagem incompletos');return;}
 for(const[k,v]of Object.entries(P.stats)){if(typeof v!=='number'||v<1||v>20){showFatalError('Atributos invalidos');return;}}
 if(typeof CLASS_SKILLS==='undefined'||typeof FEATS==='undefined'){showFatalError('Dados do jogo não carregaram');return;}

@@ -86,6 +86,7 @@ if(data.sv!==undefined)S.screenVersion=data.sv;window._emptyRespGuard=false;if(d
 if(data.error==='action_rejected'){window._svRecovering=true;if(data.sv!==undefined)S.screenVersion=data.sv;hideLocationTransition();if(window.actionGuard)actionGuard.release();if(typeof showToast==='function')showToast('Atualizando...',1500);fetchState(true).then(function(){window._svRecovering=false;}).catch(function(){window._svRecovering=false;});return;}
 if(data.close){hideLocationTransition();if(window.actionGuard)actionGuard.release();S.transitioning=false;valdoriaSpaClose();return;}
 if(data.char_select){hideLocationTransition();if(window.actionGuard)actionGuard.release();if(typeof showCharacterSelect==='function')showCharacterSelect();return;}
+if(data.social_open){hideLocationTransition();if(window.actionGuard)actionGuard.release();if(typeof openSocialPopup==='function'){openSocialPopup();}else if(typeof vToast==='function'){vToast('Erro ao abrir Social. Recarregue o jogo.','err',3000);}return;}
 if(data.travel_prep){hideLocationTransition();if(window.actionGuard)actionGuard.release();if(typeof showTravelPrep==='function')showTravelPrep(data.travel_prep);return;}
 if(data.quest_diary&&typeof showQuestDiaryPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestDiaryPopup(data.quest_diary);return;}
 if(data.quest_detail&&typeof showQuestPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestPopup(data.quest_detail);return;}
