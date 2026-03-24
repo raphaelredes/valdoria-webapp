@@ -16,6 +16,7 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="web-auth.css?v=' + v + '">');
     </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
     <!-- Login Screen -->
@@ -32,6 +33,28 @@
             <div class="wa-auth-buttons">
                 <!-- Telegram Login Widget -->
                 <div id="tg-widget" class="wa-tg-widget"></div>
+
+                <div class="wa-separator">
+                    <span class="wa-separator-line"></span>
+                    <span class="wa-separator-text">ou</span>
+                    <span class="wa-separator-line"></span>
+                </div>
+
+                <!-- Google Sign-In -->
+                <div id="g_id_onload"
+                     data-client_id="717031857989-gu6hh4h9mgl3gikua705ov1fnbm57lg9.apps.googleusercontent.com"
+                     data-callback="onGoogleAuth"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="rectangular"
+                     data-theme="filled_black"
+                     data-text="signin_with"
+                     data-size="large"
+                     data-logo_alignment="left"
+                     data-width="300">
+                </div>
             </div>
 
             <div id="auth-error" class="wa-error" style="display:none"></div>
