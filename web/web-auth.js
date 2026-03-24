@@ -1,7 +1,7 @@
 'use strict';
 
 /* =============================================
-   Lendas de Valdoria — Web Login
+   Lendas de Valdoria — Web Login (v2)
    ============================================= */
 
 var BOT_USERNAME = 'ValdoriaDevBot';
