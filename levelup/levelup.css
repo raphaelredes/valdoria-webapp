@@ -81,7 +81,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            margin: 12px 0;
+            margin: var(--v-space-lg) 0;
         }
 
         .pending-item {
@@ -273,8 +273,8 @@
             background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
-            padding: 8px 10px;
-            margin-bottom: 4px;
+            padding: var(--v-space-md) 10px;
+            margin-bottom: var(--v-space-sm);
             cursor: pointer;
             transition: all var(--v-transition);
             -webkit-tap-highlight-color: transparent;
@@ -452,13 +452,13 @@
         }
 
         .skill-compact-icon {
-            font-size: 16px;
+            font-size: var(--v-font-xl);
             flex-shrink: 0;
         }
 
         .skill-compact-name {
             flex: 1;
-            font-size: 13px;
+            font-size: var(--v-font-md);
             font-weight: 600;
             color: var(--v-text);
         }
@@ -472,7 +472,7 @@
 
         /* ─── Subclass detail (inside sub-screen) ─── */
         .sc-feature {
-            padding: 8px 0;
+            padding: var(--v-space-md) 0;
             border-bottom: 1px solid var(--v-border);
         }
 
@@ -481,22 +481,22 @@
         }
 
         .sc-feature-level {
-            font-size: 12px;
+            font-size: var(--v-font-label);
             font-weight: 700;
             color: var(--v-gold);
-            margin-bottom: 2px;
+            margin-bottom: var(--v-space-xs);
         }
 
         .sc-feature-name {
-            font-size: 14px;
+            font-size: var(--v-font-body);
             font-weight: 600;
             color: var(--v-text);
         }
 
         .sc-feature-desc {
-            font-size: 12px;
+            font-size: var(--v-font-label);
             color: var(--v-text-dim);
-            margin-top: 2px;
+            margin-top: var(--v-space-xs);
         }
 
         /* ─── Review section ─── */
@@ -504,13 +504,13 @@
             background: var(--v-bg-card);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
-            padding: 10px 12px;
-            margin-bottom: 8px;
+            padding: 10px var(--v-space-lg);
+            margin-bottom: var(--v-space-md);
             box-shadow: 0 2px 6px rgba(0,0,0,0.35);
         }
 
         .review-section-title {
-            font-size: 12px;
+            font-size: var(--v-font-label);
             font-weight: 700;
             color: var(--v-gold);
             text-transform: uppercase;
@@ -522,7 +522,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 3px 0;
-            font-size: 12px;
+            font-size: var(--v-font-label);
         }
 
         .review-label {
@@ -538,16 +538,16 @@
         .toast {
             display: none;
             position: fixed;
-            top: 12px;
-            left: 12px;
-            right: 12px;
+            top: var(--v-space-lg);
+            left: var(--v-space-lg);
+            right: var(--v-space-lg);
             max-width: 406px;
             margin: 0 auto;
             background: #c33;
             color: #fff;
-            padding: 10px 16px;
+            padding: 10px var(--v-space-xl);
             border-radius: var(--v-radius-sm);
-            font-size: 13px;
+            font-size: var(--v-font-md);
             font-weight: 600;
             text-align: center;
             z-index: var(--v-z-header, 100);
@@ -567,7 +567,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: var(--v-space-lg);
             text-align: center;
             padding: 18px;
         }
@@ -582,29 +582,29 @@
         }
 
         .fatal-error .err-msg {
-            font-size: 14px;
+            font-size: var(--v-font-body);
             color: var(--v-text-dim);
         }
 
         .fatal-error .err-hint {
-            font-size: 12px;
+            font-size: var(--v-font-label);
             color: var(--v-text-dim);
             opacity: 0.6;
         }
 
         /* ─── Misc ─── */
         .section-title {
-            font-size: 13px;
+            font-size: var(--v-font-md);
             font-weight: 700;
             color: var(--v-gold);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin: 12px 0 6px;
+            margin: var(--v-space-lg) 0 6px;
             text-shadow: 0 1px 3px rgba(0,0,0,0.6);
         }
 
         .hint {
-            font-size: 11px;
+            font-size: var(--v-font-sm);
             color: var(--v-text-dim);
             text-align: center;
             margin: 6px 0;
@@ -613,9 +613,9 @@
 
         .empty-msg {
             text-align: center;
-            padding: 24px;
+            padding: var(--v-space-2xl);
             color: var(--v-text-dim);
-            font-size: 13px;
+            font-size: var(--v-font-md);
         }
 
         
@@ -634,9 +634,9 @@
             position: relative;
             background: linear-gradient(165deg, var(--v-gold-08) 0%, var(--v-gold-02) 100%);
             border-left: 3px solid var(--v-gold);
-            border-radius: 0 8px 8px 0;
-            padding: 10px 12px 10px 14px;
-            font-size: 12px;
+            border-radius: 0 var(--v-space-md) var(--v-space-md) 0;
+            padding: 10px var(--v-space-lg) 10px 14px;
+            font-size: var(--v-font-label);
             color: var(--v-text);
             font-style: italic;
             margin-bottom: 10px;
@@ -646,10 +646,10 @@
         .dm-bubble::before {
             content: '\1F3B2 Mestre';
             display: block;
-            font-size: 10px;
+            font-size: var(--v-font-xs);
             font-weight: 700;
             color: var(--v-gold);
-            margin-bottom: 4px;
+            margin-bottom: var(--v-space-sm);
             font-style: normal;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -685,8 +685,8 @@
         }
 
         .loading-text {
-            margin-top: 12px;
-            font-size: 14px;
+            margin-top: var(--v-space-lg);
+            font-size: var(--v-font-body);
             color: var(--v-gold);
             font-weight: 600;
         }
@@ -694,7 +694,7 @@
         /* ─── Review visual diff ─── */
         .review-value .arrow {
             color: var(--v-text-dim);
-            margin: 0 4px;
+            margin: 0 var(--v-space-sm);
         }
 
         .review-value .changed {
