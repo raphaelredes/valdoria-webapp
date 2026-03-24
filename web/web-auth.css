@@ -1,155 +1,206 @@
 /* =============================================
-   Lendas de Valdoria — Web Login Styles
-   Medieval carved wood frame + parchment interior
+   Lendas de Valdoria — Web Login Portal
+   Desktop-first immersive game portal design
    ============================================= */
 
-/* ----- Screen Management ----- */
+/* ----- Screen / Full-page background ----- */
 
 .wa-screen {
     display: none;
     min-height: 100vh;
     min-height: 100dvh;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
-    padding: var(--v-space-xl);
-    background: radial-gradient(ellipse at 50% 30%, #3a3028 0%, var(--v-bg) 70%);
+    padding: 0;
+    /* Dramatic radial spotlight from above */
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 15%, rgba(196, 149, 58, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 120% 80% at 50% 40%, #3a3028 0%, #2a2420 40%, #1a1510 100%);
+    position: relative;
+    overflow: hidden;
 }
 
 .wa-screen.wa-active {
     display: flex;
 }
 
+/* Dark edge vignette */
+.wa-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 70% at 50% 45%, transparent 30%, rgba(10, 8, 5, 0.65) 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Subtle stone texture */
+.wa-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(60, 45, 25, 0.02) 3px, rgba(60, 45, 25, 0.02) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 5px, rgba(60, 45, 25, 0.015) 5px, rgba(60, 45, 25, 0.015) 6px);
+    pointer-events: none;
+    z-index: 0;
+}
+
 /* =============================================
-   Carved Wood Frame — simulates a thick wooden
-   tablet border around the login card
+   Carved Wood Frame — thick ornamental border
    ============================================= */
 
 .wa-wood-frame {
     position: relative;
     width: 100%;
-    max-width: 400px;
-    /* Outer wood frame */
+    max-width: 430px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    /* Wood base with depth */
     background:
-        linear-gradient(175deg, #5a4530 0%, #3e2e1e 30%, #2c1f14 70%, #1e1510 100%);
-    border-radius: 18px;
-    padding: 14px;
-    /* Carved depth — multiple shadow layers */
+        linear-gradient(175deg,
+            #6a5038 0%,
+            #5a4530 15%,
+            #4a3820 40%,
+            #3e2e1e 60%,
+            #2c1f14 85%,
+            #1e1510 100%);
+    border-radius: 0;
+    padding: 18px;
+    /* Carved depth — beveled edges */
     box-shadow:
-        /* outer shadow */
-        0 8px 40px rgba(0, 0, 0, 0.7),
-        0 2px 10px rgba(0, 0, 0, 0.5),
-        /* outer bevel — light top, dark bottom */
-        inset 0 2px 0 rgba(120, 90, 55, 0.5),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.6),
-        inset 2px 0 0 rgba(100, 75, 45, 0.3),
-        inset -2px 0 0 rgba(0, 0, 0, 0.4),
-        /* inner carved groove */
-        inset 0 0 0 4px rgba(0, 0, 0, 0.15);
+        /* Side shadows on desktop */
+        12px 0 60px rgba(0, 0, 0, 0.8),
+        -12px 0 60px rgba(0, 0, 0, 0.8),
+        /* Outer bevel — illuminated top/left */
+        inset 0 3px 0 rgba(140, 105, 60, 0.5),
+        inset 0 -3px 0 rgba(0, 0, 0, 0.7),
+        inset 4px 0 0 rgba(120, 90, 50, 0.35),
+        inset -4px 0 0 rgba(0, 0, 0, 0.5),
+        /* Inner groove */
+        inset 0 0 0 6px rgba(0, 0, 0, 0.12);
 }
 
-/* Wood grain texture overlay */
+/* Wood grain texture */
 .wa-wood-frame::before {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: 18px;
+    border-radius: 0;
     background:
-        /* subtle horizontal grain lines */
+        /* Horizontal grain */
         repeating-linear-gradient(
             2deg,
             transparent,
-            transparent 8px,
-            rgba(90, 65, 35, 0.08) 8px,
-            rgba(90, 65, 35, 0.08) 9px
+            transparent 6px,
+            rgba(100, 75, 40, 0.07) 6px,
+            rgba(100, 75, 40, 0.07) 7px
         ),
-        /* knot/ring patterns */
-        radial-gradient(ellipse at 15% 20%, rgba(70, 50, 25, 0.15) 0%, transparent 25%),
-        radial-gradient(ellipse at 85% 75%, rgba(70, 50, 25, 0.12) 0%, transparent 20%);
+        /* Wood knots */
+        radial-gradient(ellipse 30% 20% at 12% 18%, rgba(80, 55, 30, 0.18) 0%, transparent 100%),
+        radial-gradient(ellipse 25% 15% at 88% 82%, rgba(80, 55, 30, 0.14) 0%, transparent 100%),
+        radial-gradient(ellipse 20% 12% at 50% 50%, rgba(80, 55, 30, 0.08) 0%, transparent 100%);
     pointer-events: none;
     z-index: 0;
 }
 
-/* Gold-leaf inlay on outer edge of frame */
+/* Gold-leaf inlay border */
 .wa-wood-frame::after {
     content: '';
     position: absolute;
-    inset: 5px;
-    border-radius: 14px;
-    border: 1px solid rgba(196, 149, 58, 0.2);
+    inset: 6px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(196, 149, 58, 0.25);
     box-shadow:
-        inset 0 0 8px rgba(0, 0, 0, 0.4),
-        0 0 4px rgba(196, 149, 58, 0.1);
+        inset 0 0 12px rgba(0, 0, 0, 0.5),
+        0 0 6px rgba(196, 149, 58, 0.08);
     pointer-events: none;
     z-index: 0;
 }
 
-/* ----- Inner carved groove (between wood and card) ----- */
+/* ----- Inner groove ----- */
 
 .wa-wood-inner {
     position: relative;
-    border-radius: 10px;
-    /* Carved channel around the parchment */
+    border-radius: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     box-shadow:
-        inset 0 2px 6px rgba(0, 0, 0, 0.5),
-        inset 0 -1px 3px rgba(0, 0, 0, 0.3),
-        0 1px 0 rgba(120, 90, 55, 0.25);
+        inset 0 3px 8px rgba(0, 0, 0, 0.6),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.35),
+        0 1px 0 rgba(140, 105, 60, 0.3);
     z-index: 1;
 }
 
-/* Gold filigree on the carved edge */
+/* Gold filigree edge */
 .wa-wood-inner::before {
     content: '';
     position: absolute;
     inset: -1px;
-    border-radius: 11px;
-    border: 1px solid rgba(196, 149, 58, 0.25);
+    border-radius: 13px;
+    border: 1px solid rgba(196, 149, 58, 0.2);
     pointer-events: none;
     z-index: 2;
 }
 
-/* ----- Corner Metal Rivets ----- */
+/* ----- Corner Rivets (larger, more visible) ----- */
 
 .wa-rivet {
     position: absolute;
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 35%,
-        #8a7550 0%,
-        #6a5535 40%,
-        #4a3a22 80%,
-        #3a2a18 100%);
+        #a08860 0%,
+        #8a7550 30%,
+        #6a5535 60%,
+        #4a3a22 90%);
     box-shadow:
-        inset 0 1px 2px rgba(180, 140, 80, 0.5),
-        inset 0 -1px 2px rgba(0, 0, 0, 0.6),
-        0 1px 3px rgba(0, 0, 0, 0.5);
+        inset 0 2px 3px rgba(200, 160, 90, 0.6),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.7),
+        0 1px 4px rgba(0, 0, 0, 0.6),
+        0 0 8px rgba(196, 149, 58, 0.08);
     z-index: 3;
     pointer-events: none;
 }
 
+/* Light reflection spot */
 .wa-rivet::after {
     content: '';
     position: absolute;
     top: 3px;
-    left: 3px;
-    width: 3px;
-    height: 2px;
+    left: 4px;
+    width: 4px;
+    height: 3px;
     border-radius: 50%;
-    background: rgba(200, 160, 90, 0.4);
+    background: rgba(220, 180, 100, 0.5);
 }
 
-.wa-rivet-tl { top: 8px; left: 8px; }
-.wa-rivet-tr { top: 8px; right: 8px; }
-.wa-rivet-bl { bottom: 8px; left: 8px; }
-.wa-rivet-br { bottom: 8px; right: 8px; }
+.wa-rivet-tl { top: 9px; left: 9px; }
+.wa-rivet-tr { top: 9px; right: 9px; }
+.wa-rivet-bl { bottom: 9px; left: 9px; }
+.wa-rivet-br { bottom: 9px; right: 9px; }
 
-/* ----- Login Card (parchment interior) ----- */
+/* =============================================
+   Login Card (dark parchment interior)
+   ============================================= */
 
 .wa-login-card {
     width: 100%;
-    background: linear-gradient(170deg, #302418 0%, #241c14 50%, #1a1510 100%);
-    border-radius: 8px;
-    padding: 28px 20px 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(70, 50, 30, 0.25) 0%, transparent 70%),
+        linear-gradient(170deg, #302418 0%, #261e14 40%, #1c1610 100%);
+    border-radius: 10px;
+    padding: 36px 28px 30px;
     text-align: center;
     position: relative;
     z-index: 1;
@@ -160,48 +211,65 @@
     content: '';
     position: absolute;
     top: 0;
-    left: 12px;
-    right: 12px;
+    left: 16px;
+    right: 16px;
     height: 2px;
     background: linear-gradient(90deg,
         transparent,
-        var(--v-crimson) 20%,
+        var(--v-crimson) 15%,
         var(--v-gold) 50%,
-        var(--v-crimson) 80%,
+        var(--v-crimson) 85%,
         transparent);
     border-radius: 2px;
     z-index: 1;
 }
 
+/* Bottom gold inlay line */
+.wa-login-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(196, 149, 58, 0.15) 30%,
+        rgba(196, 149, 58, 0.25) 50%,
+        rgba(196, 149, 58, 0.15) 70%,
+        transparent);
+    border-radius: 2px;
+}
+
 /* ----- Logo ----- */
 
 .wa-logo {
-    margin-bottom: var(--v-space-xl);
+    margin-bottom: 28px;
 }
 
 .wa-logo-icon {
-    font-size: 52px;
-    margin-bottom: var(--v-space-md);
-    filter: drop-shadow(0 0 16px var(--v-gold-40));
+    font-size: 64px;
+    margin-bottom: var(--v-space-lg);
+    filter: drop-shadow(0 0 20px var(--v-gold-40));
     animation: wa-icon-glow 4s ease-in-out infinite;
 }
 
 @keyframes wa-icon-glow {
-    0%, 100% { filter: drop-shadow(0 0 12px var(--v-gold-30)); }
-    50% { filter: drop-shadow(0 0 22px var(--v-gold-55)); }
+    0%, 100% { filter: drop-shadow(0 0 16px var(--v-gold-30)); }
+    50% { filter: drop-shadow(0 0 30px var(--v-gold-55)); }
 }
 
 .wa-title {
     font-family: var(--v-font-display);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     color: var(--v-gold);
-    letter-spacing: 4px;
+    letter-spacing: 5px;
     text-transform: uppercase;
     text-shadow:
-        0 0 15px var(--v-gold-40),
-        0 0 30px var(--v-gold-20),
-        0 2px 4px rgba(0, 0, 0, 0.6);
+        0 0 20px var(--v-gold-40),
+        0 0 40px var(--v-gold-20),
+        0 2px 6px rgba(0, 0, 0, 0.7);
     margin: 0 0 var(--v-space-md);
     line-height: 1.3;
 }
@@ -216,13 +284,26 @@
     font-style: italic;
 }
 
-/* ----- Divider ----- */
+/* ----- Ornamental Divider ----- */
 
 .wa-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--v-gold-dim), transparent);
-    margin: 20px 0;
+    margin: 24px 0;
     position: relative;
+}
+
+.wa-divider::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 9px;
+    background: linear-gradient(90deg, transparent, var(--v-gold-25) 30%, var(--v-gold-30) 50%, var(--v-gold-25) 70%, transparent);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 9'%3E%3Cpath d='M0 4.5Q15 0 30 4.5Q45 9 60 4.5' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 9'%3E%3Cpath d='M0 4.5Q15 0 30 4.5Q45 9 60 4.5' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;
 }
 
 .wa-divider::after {
@@ -234,7 +315,7 @@
     font-size: 8px;
     color: var(--v-gold-dim);
     background: #281e16;
-    padding: 0 var(--v-space-md);
+    padding: 0 var(--v-space-lg);
 }
 
 /* ----- Auth Buttons Area ----- */
@@ -336,9 +417,15 @@
 
 .wa-chars-card {
     width: 100%;
-    max-width: 380px;
-    background: linear-gradient(170deg, #302418 0%, #241c14 50%, #1a1510 100%);
-    border-radius: 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(70, 50, 30, 0.25) 0%, transparent 70%),
+        linear-gradient(170deg, #302418 0%, #261e14 40%, #1c1610 100%);
+    border-radius: 10px;
     padding: 28px 20px 24px;
     position: relative;
     z-index: 1;
@@ -348,14 +435,14 @@
     content: '';
     position: absolute;
     top: 0;
-    left: 12px;
-    right: 12px;
+    left: 16px;
+    right: 16px;
     height: 2px;
     background: linear-gradient(90deg,
         transparent,
-        var(--v-crimson) 20%,
+        var(--v-crimson) 15%,
         var(--v-gold) 50%,
-        var(--v-crimson) 80%,
+        var(--v-crimson) 85%,
         transparent);
     border-radius: 2px;
 }
@@ -391,6 +478,11 @@
     cursor: pointer;
     transition: border-color var(--v-transition), box-shadow var(--v-transition), transform var(--v-transition);
     position: relative;
+}
+
+.wa-char-card:hover {
+    border-color: rgba(196, 149, 58, 0.4);
+    box-shadow: 0 0 10px rgba(196, 149, 58, 0.08);
 }
 
 .wa-char-card:active {
@@ -573,32 +665,43 @@
     transform: scale(0.97);
 }
 
-/* ----- Ambient Particles ----- */
+/* =============================================
+   Ambient Floating Particles (embers)
+   ============================================= */
 
 @keyframes wa-float {
-    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
-    10% { opacity: 0.3; }
-    90% { opacity: 0.3; }
-    100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    0% { transform: translateY(20px) scale(0); opacity: 0; }
+    10% { opacity: 0.6; transform: translateY(0) scale(1); }
+    80% { opacity: 0.4; }
+    100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+}
+
+@keyframes wa-drift {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(15px); }
+    100% { transform: translateX(0); }
 }
 
 .wa-particle {
     position: fixed;
-    width: 2px;
-    height: 2px;
-    background: var(--v-gold-30);
+    width: 3px;
+    height: 3px;
+    background: var(--v-gold);
     border-radius: 50%;
     pointer-events: none;
-    animation: wa-float linear infinite;
+    animation: wa-float linear infinite, wa-drift ease-in-out infinite;
+    box-shadow: 0 0 6px var(--v-gold-40), 0 0 12px var(--v-gold-20);
+    bottom: -10px;
 }
 
-.wa-particle:nth-child(1) { left: 15%; animation-duration: 12s; animation-delay: 0s; }
-.wa-particle:nth-child(2) { left: 35%; animation-duration: 15s; animation-delay: 2s; }
-.wa-particle:nth-child(3) { left: 55%; animation-duration: 11s; animation-delay: 4s; }
-.wa-particle:nth-child(4) { left: 75%; animation-duration: 14s; animation-delay: 1s; }
-.wa-particle:nth-child(5) { left: 90%; animation-duration: 13s; animation-delay: 3s; }
+.wa-particle:nth-child(1) { left: 10%; animation-duration: 10s, 5s; animation-delay: 0s, 0s; width: 2px; height: 2px; }
+.wa-particle:nth-child(2) { left: 25%; animation-duration: 13s, 7s; animation-delay: 1.5s, 0.5s; }
+.wa-particle:nth-child(3) { left: 45%; animation-duration: 11s, 6s; animation-delay: 3s, 1s; width: 4px; height: 4px; }
+.wa-particle:nth-child(4) { left: 65%; animation-duration: 14s, 8s; animation-delay: 0.5s, 2s; width: 2px; height: 2px; }
+.wa-particle:nth-child(5) { left: 85%; animation-duration: 12s, 5s; animation-delay: 2s, 0s; }
 
 @media (prefers-reduced-motion: reduce) {
     .wa-particle { display: none; }
     .wa-logo-icon { animation: none; }
+    .wa-screen::before, .wa-screen::after { display: none; }
 }
