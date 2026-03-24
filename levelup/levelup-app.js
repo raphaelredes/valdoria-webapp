@@ -43,7 +43,7 @@ var screens = [];
 var cur = 0;
 var asiMode = 'asi';
 (function init() {
-const params = new URLSearchParams(location.search);if(_spaP){Object.keys(_spaP).forEach(function(k){if(!params.has(k))params.set(k,_spaP[k]);});}
+const params = new URLSearchParams(location.search);if(_spaP){Object.keys(_spaP).forEach(function(k){params.set(k,_spaP[k]);});}
 token = params.get('token') || '';
 apiFallback = params.get('api') || '';
 userId = params.get('uid') || '';
