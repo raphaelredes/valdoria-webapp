@@ -364,6 +364,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         if (_ld) _ld.style.visibility = '';
     </script>
 <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("GAME")</script>
+<script>(function(){var expected=["ValdoriaErrors","showLoading","hideLoading","renderScreen","SessionHeartbeat"];var missing=expected.filter(function(g){return typeof window[g]==="undefined";});if(missing.length)console.error("[GAME] Missing globals after script load:",missing.join(", "));})()</script>
 </body>
 
 </html>

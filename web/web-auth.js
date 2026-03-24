@@ -4,7 +4,7 @@
    Lendas de Valdoria — Web Login
    ============================================= */
 
-var BOT_USERNAME = 'LendasDeValdoriaBOT';
+var BOT_USERNAME = 'ValdoriaDevBot';
 
 // Storage keys
 var WEB_TOKEN_KEY = 'valdoria_web_token';
