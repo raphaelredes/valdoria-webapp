@@ -1,6 +1,6 @@
 var _spaP=window.__spaRouteParams||{};
-const _vBg = '#2a2420';
-const tg = window.Telegram?.WebApp;
+var _vBg = '#2a2420';
+var tg = window.Telegram?.WebApp;
 if (tg) {
 tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg);
 if (tg.onEvent) {
@@ -9,12 +9,12 @@ document.documentElement.style.setProperty('--tg-viewport-height', tg.viewportHe
 });
 }
 }
-let token = '';
-let P = null; // player data
-let apiFallback = '';
-let userId = '';
-let returnTo = ''; // webapp to return to after levelup (e.g., 'explore')
-const sel = { asi: {}, feat: '', featStat: '', skills: [], subclass: '' };
+var token = '';
+var P = null; // player data
+var apiFallback = '';
+var userId = '';
+var returnTo = ''; // webapp to return to after levelup (e.g., 'explore')
+var sel = { asi: {}, feat: '', featStat: '', skills: [], subclass: '' };
 function haptic(type = 'light') {
 try { tg?.HapticFeedback?.impactOccurred(type); } catch (e) { console.warn('[LEVELUP] haptic:', e); }
 }
