@@ -69,7 +69,7 @@
             #2c1f14 85%,
             #1e1510 100%);
     border-radius: 0;
-    padding: 18px;
+    padding: 24px 22px;
     /* Carved depth — beveled edges */
     box-shadow:
         /* Side shadows on desktop */
@@ -96,8 +96,8 @@
             2deg,
             transparent,
             transparent 6px,
-            rgba(100, 75, 40, 0.07) 6px,
-            rgba(100, 75, 40, 0.07) 7px
+            rgba(100, 75, 40, 0.10) 6px,
+            rgba(100, 75, 40, 0.10) 7px
         ),
         /* Wood knots */
         radial-gradient(ellipse 30% 20% at 12% 18%, rgba(80, 55, 30, 0.18) 0%, transparent 100%),
@@ -113,10 +113,10 @@
     position: absolute;
     inset: 6px;
     border-radius: 6px;
-    border: 1.5px solid rgba(196, 149, 58, 0.25);
+    border: 1.5px solid rgba(196, 149, 58, 0.35);
     box-shadow:
         inset 0 0 12px rgba(0, 0, 0, 0.5),
-        0 0 6px rgba(196, 149, 58, 0.08);
+        0 0 8px rgba(196, 149, 58, 0.12);
     pointer-events: none;
     z-index: 0;
 }
