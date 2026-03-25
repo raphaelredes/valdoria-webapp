@@ -1,0 +1,62 @@
+/* game-popup-unified.css -- Estilos do sistema de popup unificado */
+
+/* Popup body container */
+.unified-popup-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--v-space-sm, 6px);
+}
+
+/* Banner image inside popup */
+.unified-popup-banner {
+    width: 100%;
+    max-height: 140px;
+    object-fit: cover;
+    border-radius: var(--v-radius-sm, 6px);
+    margin-bottom: var(--v-space-xs, 2px);
+}
+
+/* Text content */
+.unified-popup-text {
+    font-size: var(--v-font-body, 14px);
+    line-height: 1.6;
+    color: var(--v-text, #d4c8b0);
+    padding: 0 var(--v-space-xs, 2px);
+}
+
+/* Toast notification inside popup */
+.unified-popup-toast {
+    background: var(--v-bg-raised, #332a22);
+    border-left: 3px solid var(--v-gold, #c8a84e);
+    padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
+    border-radius: var(--v-radius-sm, 6px);
+    font-size: var(--v-font-sm, 13px);
+    color: var(--v-gold-light, #e8d48b);
+    margin-bottom: var(--v-space-xs, 2px);
+}
+
+/* Action buttons container */
+.unified-popup-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--v-space-sm, 6px);
+    margin-top: var(--v-space-sm, 6px);
+}
+
+/* Button row -- 2 per row grid */
+.unified-popup-btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--v-space-sm, 6px);
+}
+
+/* Single button row -- full width */
+.unified-popup-btn-row--single {
+    grid-template-columns: 1fr;
+}
+
+/* Override popup body max-height for unified popups (more content space) */
+#unified-popup-overlay .v-popup-body {
+    max-height: 65vh;
+    overflow-y: auto;
+}

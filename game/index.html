@@ -34,6 +34,7 @@ document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v +
         document.write('<link rel="stylesheet" href="game-guide.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="inn-animation.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game-social.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="game-popup-unified.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/audio-manager.css?v=' + v + '">');
     </script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -261,6 +262,15 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         </div>
     </div>
 
+    <!-- Unified popup overlay (server-marked popups with stack navigation) -->
+    <div id="unified-popup-overlay" class="v-popup-overlay" style="display:none">
+        <div class="v-popup-card">
+            <div class="v-popup-header"></div>
+            <div class="v-popup-body"></div>
+            <div class="v-popup-actions"></div>
+        </div>
+    </div>
+
     <!-- Generic game popup overlay (for inn, locations, etc.) -->
     <div id="v-popup-overlay" class="v-popup-overlay" style="display:none">
         <div class="v-popup-card">
@@ -359,6 +369,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         document.write('<script src="game-hints.js?v=' + v + '"><\/script>');
         document.write('<script src="game-plaza-event.js?v=' + v + '"><\/script>');
         document.write('<script src="game-popups.js?v=' + v + '"><\/script>');
+        document.write('<script src="game-popup-unified.js?v=' + v + '"><\/script>');
         document.write('<script src="game-daily-challenge.js?v=' + v + '"><\/script>');
         document.write('<script src="game-social.js?v=' + v + '"><\/script>');
         document.write('<script src="../guide/guide-data.js?v=' + v + '"><\/script>');
