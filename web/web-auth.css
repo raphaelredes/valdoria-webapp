@@ -14,7 +14,7 @@
     padding: 0;
     /* Dramatic radial spotlight from above */
     background:
-        radial-gradient(ellipse 80% 60% at 50% 15%, rgba(196, 149, 58, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 15%, var(--v-gold-06) 0%, transparent 60%),
         radial-gradient(ellipse 120% 80% at 50% 40%, #3a3028 0%, #2a2420 40%, #1a1510 100%);
     position: relative;
     overflow: hidden;
@@ -113,10 +113,10 @@
     position: absolute;
     inset: 6px;
     border-radius: 6px;
-    border: 1.5px solid rgba(196, 149, 58, 0.35);
+    border: 1.5px solid var(--v-gold-35);
     box-shadow:
         inset 0 0 12px rgba(0, 0, 0, 0.5),
-        0 0 8px rgba(196, 149, 58, 0.12);
+        0 0 8px var(--v-gold-12);
     pointer-events: none;
     z-index: 0;
 }
@@ -142,7 +142,7 @@
     position: absolute;
     inset: -1px;
     border-radius: 13px;
-    border: 1px solid rgba(196, 149, 58, 0.2);
+    border: 1px solid var(--v-gold-20);
     pointer-events: none;
     z-index: 2;
 }
@@ -163,7 +163,7 @@
         inset 0 2px 3px rgba(200, 160, 90, 0.6),
         inset 0 -2px 3px rgba(0, 0, 0, 0.7),
         0 1px 4px rgba(0, 0, 0, 0.6),
-        0 0 8px rgba(196, 149, 58, 0.08);
+        0 0 8px var(--v-gold-08);
     z-index: 3;
     pointer-events: none;
 }
@@ -234,9 +234,9 @@
     height: 1px;
     background: linear-gradient(90deg,
         transparent,
-        rgba(196, 149, 58, 0.15) 30%,
-        rgba(196, 149, 58, 0.25) 50%,
-        rgba(196, 149, 58, 0.15) 70%,
+        var(--v-gold-15) 30%,
+        var(--v-gold-25) 50%,
+        var(--v-gold-15) 70%,
         transparent);
     border-radius: 2px;
 }
@@ -481,8 +481,8 @@
 }
 
 .wa-char-card:hover {
-    border-color: rgba(196, 149, 58, 0.4);
-    box-shadow: 0 0 10px rgba(196, 149, 58, 0.08);
+    border-color: var(--v-gold-40);
+    box-shadow: 0 0 10px var(--v-gold-08);
 }
 
 .wa-char-card:active {
@@ -554,7 +554,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 12px;
+    font-size: var(--v-font-md);
     font-weight: 700;
     color: #1a1410;
 }
@@ -644,7 +644,7 @@
     width: 100%;
     max-width: 300px;
     padding: 12px var(--v-space-xl);
-    background: rgba(196, 149, 58, 0.06);
+    background: var(--v-gold-06);
     border: 1px dashed var(--v-gold-25);
     border-radius: var(--v-radius);
     font-family: var(--v-font);
@@ -658,7 +658,7 @@
 .wa-btn-dev:hover {
     border-color: var(--v-gold-dim);
     color: var(--v-gold);
-    background: rgba(196, 149, 58, 0.1);
+    background: var(--v-gold-10);
 }
 
 .wa-btn-dev:active {

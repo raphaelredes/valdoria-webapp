@@ -35,7 +35,7 @@
 .levelup-celebration{position:fixed;inset:0;z-index:var(--v-z-loading);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);opacity:0;transition:opacity var(--v-transition-slow);pointer-events:none;}
 .levelup-celebration.active{opacity:1;pointer-events:auto;}
 .levelup-celebration.hiding{opacity:0;}
-.levelup-inner{text-align:center;transform:scale(0.7);transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+.levelup-inner{text-align:center;transform:scale(0.7);transition:transform var(--v-transition-slow);}
 .levelup-celebration.active .levelup-inner{transform:scale(1);}
 .levelup-icon{font-size:48px;margin-bottom:var(--v-space-md);animation:levelupPulse 1s ease-in-out infinite;}
 .levelup-title{font-family:var(--v-font-display,serif);font-size:28px;color:var(--v-gold);text-shadow:0 0 20px rgba(212,165,74,0.5);margin-bottom:var(--v-space-sm);}
