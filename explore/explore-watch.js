@@ -220,7 +220,7 @@ function checkNavigation(targetCol, targetRow) {
   /* Skip if: ranger natural explorer, navigate activity, or insufficient steps */
   if (typeof isRanger === 'function' && isRanger()) return { veered: false };
   if (S.travelActivity === 'navigate') return { veered: false };
-  if ((S._stepCount || 0) < 3) return { veered: false };
+  if ((S._stepCount || 0) < 5) return { veered: false };
 
   var biome = S.biome || 'forest';
   var baseDC = NAV_DC_BY_BIOME[biome] || 12;
@@ -261,6 +261,8 @@ function getVeerTarget(fromCol, fromRow, toCol, toRow) {
     var nr = fromRow + offsets[i][1];
     if (nc < 0 || nc >= COLS || nr < 0 || nr >= ROWS) continue;
     if (nc === toCol && nr === toRow) continue;
+    /* Exclude current position to prevent "snapback" feeling */
+    if (nc === fromCol && nr === fromRow) continue;
     var tile = S.grid[nr] && S.grid[nr][nc] ? S.grid[nr][nc] : '.';
     if (IMPASSABLE.has(tile)) continue;
     candidates.push([nc, nr]);
@@ -318,8 +320,8 @@ function _buildSocialChoices(enc, choicesEl, dmOverlay) {
   var skillLabel = (typeof STAT_NAMES !== 'undefined' && STAT_NAMES[enc.skill])
     ? STAT_NAMES[enc.skill] : enc.skill;
   var checkBtn = document.createElement('button');
-  checkBtn.className = 'choice-btn';
-  checkBtn.innerHTML = '\ud83c\udfb2 ' + skillLabel + ' (DC ' + enc.dc + ')';
+  checkBtn.className = 'dm-choice-btn';
+  checkBtn.innerHTML = '<span class="choice-icon">\ud83c\udfb2</span>' + '<span class="choice-label">' + skillLabel + '</span>' + '<span class="choice-check">' + skillLabel + ' (DC ' + enc.dc + ')</span>';
   checkBtn.addEventListener('click', function() {
     checkBtn.disabled = true;
     var fakePoi = {
@@ -340,6 +342,8 @@ function _buildSocialChoices(enc, choicesEl, dmOverlay) {
       }],
       combat: null
     };
+    if (typeof deactivateOverlay === 'function') deactivateOverlay('dm-overlay');
+    else if (dmOverlay) dmOverlay.classList.remove('active');
     if (typeof performStatCheck === 'function') {
       performStatCheck(fakePoi, fakePoi.choices[0]);
     }
@@ -348,8 +352,8 @@ function _buildSocialChoices(enc, choicesEl, dmOverlay) {
 
   /* Ignore button */
   var ignoreBtn = document.createElement('button');
-  ignoreBtn.className = 'choice-btn choice-btn--secondary';
-  ignoreBtn.textContent = 'Ignorar';
+  ignoreBtn.className = 'dm-choice-btn';
+  ignoreBtn.innerHTML = '<span class="choice-icon"></span><span class="choice-label">Ignorar</span>';
   ignoreBtn.addEventListener('click', function() {
     if (typeof deactivateOverlay === 'function') deactivateOverlay('dm-overlay');
     else if (dmOverlay) dmOverlay.classList.remove('active');
