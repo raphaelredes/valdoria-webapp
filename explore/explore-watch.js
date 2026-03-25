@@ -191,14 +191,16 @@ function _pickNextWeather(current) {
 
 function _applyWatchWeather() {
   var idx = S._currentWatch || 0;
+  var _prevW = S.weather;
   if (S._weatherSchedule && S._weatherSchedule[idx]) {
     S.weather = S._weatherSchedule[idx];
   }
+  if (S.weather !== _prevW) { if (typeof _weatherNarrShown !== "undefined") _weatherNarrShown = false; if (typeof _weatherEffectSteps !== "undefined") _weatherEffectSteps = 0; }
   var eff = WEATHER_EFFECTS[S.weather] || {};
   S._weatherNavDCMod = eff.navDCMod || 0;
   S._weatherDifficultAll = !!eff.difficultAll;
   S._weatherPPMod = eff.ppMod || 0;
-  S._weatherConDC = eff.conDC || 0;
+  S._weatherCONSaveDC = eff.conDC || 0;
   S._weatherLightningChance = eff.lightningChance || 0;
   S._effectiveVisibility = Math.max(1, (S.visibility || 3) + (eff.visMod || 0));
 }
