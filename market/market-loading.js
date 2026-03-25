@@ -20,6 +20,7 @@ var TIPS = [
     '💰 Dica: Alguns NPCs aparecem temporariamente — aproveite suas ofertas únicas.',
     '🛡️ Dica: Equipar itens melhores pode fazer toda a diferença no combate.',
 ];
+if(window._loadDbgSetApp)_loadDbgSetApp('MARKET');
 window._marketLoadingCtrl = ValdoriaLoadingController({
     overlayId: 'marketLoading',
     tips: TIPS,

@@ -20,6 +20,7 @@ var TIPS = [
     '🎲 Dica: Um 1 natural em ataque é sempre uma falha crítica.',
     '🎲 Dica: Proficiência adiciona bônus aos testes em que você é treinado.',
 ];
+if(window._loadDbgSetApp)_loadDbgSetApp('DICE');
 window._diceLoadingCtrl = ValdoriaLoadingController({
     overlayId: 'loadingOverlay',
     tipId: 'dice-loading-tip',

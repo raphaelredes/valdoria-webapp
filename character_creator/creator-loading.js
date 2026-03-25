@@ -20,6 +20,7 @@ var TIPS = [
     '⚔️ Dica: A origem do personagem define suas perícias iniciais.',
     '🛡️ Dica: Não existe escolha errada — cada combinação é viável!',
 ];
+if(window._loadDbgSetApp)_loadDbgSetApp('CREATOR');
 window._creatorLoadingCtrl = ValdoriaLoadingController({
     overlayId: 'creatorLoading',
     tips: TIPS,

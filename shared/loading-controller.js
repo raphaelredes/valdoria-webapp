@@ -1,3 +1,12 @@
+// == LOAD-DBG Relay Engine ==
+(function(){var _q=[],_api='',_flushing=false,_t0=Date.now(),_app='';
+window._loadDbg=function(msg){var el=Date.now()-_t0;var full='[LOAD-DBG] ['+(_app||'?')+'] +'+el+'ms '+msg;console.warn(full);_q.push({level:'warn',msg:full.substring(0,500)});if(_q.length>80)_q.shift();if(_api&&_q.length>=20)_flush();};
+window._loadDbgSetApp=function(n){_app=n;};
+window._loadDbgSetApi=function(b){_api=(b||'').replace(/\/$/,'');if(_api&&_q.length)_flush();};
+function _flush(){if(_flushing||!_api||!_q.length)return;if(document.visibilityState==='hidden')return;_flushing=true;var entries=_q.splice(0,25);fetch(_api+'/api/game/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entries:entries})}).catch(function(){_q=entries.concat(_q);if(_q.length>80)_q.length=80;}).finally(function(){_flushing=false;});}
+window.addEventListener('pagehide',function(){if(!_api||!_q.length)return;try{navigator.sendBeacon(_api+'/api/game/log',JSON.stringify({entries:_q.splice(0,25)}));}catch(e){}});
+setInterval(function(){if(_api&&_q.length)_flush();},3000);
+})();
 /**
  * ValdoriaLoadingController v2.0 - Unified loading system
  * State machine + retry + timeout + ring/gem effects + stage text
@@ -36,6 +45,7 @@ window.ValdoriaLoadingController = function(config) {
     var MIN_LOAD_MS = window.__spaRevisit
         ? (window.VALDORIA_SPA_RETURN_MS || 1500)
         : (window.VALDORIA_MIN_LOAD_MS || 5000);
+    if(window._loadDbg)_loadDbg('ctrl.init overlay='+(config.overlayId||'loading')+' tier='+(window._valdoriaPerformanceTier||'?')+' minLoad='+MIN_LOAD_MS+'ms');
     var _progress = 0;
     var _realProgress = -1;
     var _timers = {};
@@ -90,6 +100,7 @@ window.ValdoriaLoadingController = function(config) {
     _timers.slow = setTimeout(function() {
         if (_state !== 'loading') return;
         _state = 'slow';
+        if(window._loadDbg)_loadDbg('state: loading->slow (8s)');
         if (tipEl) {
             tipEl.classList.add('loading-tip-slow');
             tipEl.textContent = 'Demorando um pouco mais que o esperado...';
@@ -99,6 +110,7 @@ window.ValdoriaLoadingController = function(config) {
     _timers.verySlow = setTimeout(function() {
         if (_state !== 'slow' && _state !== 'loading') return;
         _state = 'very_slow';
+        if(window._loadDbg)_loadDbg('state: slow->very_slow (12s)');
         if (tipEl) tipEl.textContent = '\u23F3 Conex\u00e3o lenta \u2014 verifique seu sinal ou tente novamente';
     }, 12000);
 
@@ -109,6 +121,7 @@ window.ValdoriaLoadingController = function(config) {
 
     _timers.timeout = setTimeout(function() {
         if (_state === 'hiding' || _state === 'hidden') return;
+        if(window._loadDbg)_loadDbg('state: TIMEOUT ('+TIMEOUT_MS+'ms)');
         if (tipEl) tipEl.textContent = '\u26A0\uFE0F Tempo esgotado. Tente novamente.';
         if (retryBtn) retryBtn.style.display = '';
         if (typeof onTimeout === 'function') onTimeout();
@@ -163,6 +176,7 @@ window.ValdoriaLoadingController = function(config) {
             function _finishCinematic() {
                 if (_exitDone) return;
                 _exitDone = true;
+                if(window._loadDbg)_loadDbg('hidden total='+(Date.now()-_loadStart)+'ms');
                 overlay.classList.add('hidden');
                 overlay.style.display = 'none';
                 _state = 'hidden';
@@ -186,6 +200,7 @@ window.ValdoriaLoadingController = function(config) {
     return {
         hide: function(cb) {
             if (_state === 'hiding' || _state === 'hidden') return;
+            if(window._loadDbg){var _el=Date.now()-_loadStart;_loadDbg('hide() state='+_state+' elapsed='+_el+'ms remaining='+(MIN_LOAD_MS-_el)+'ms');}
             _cleanup();
             if (!overlay || overlay.classList.contains('hidden')) {
                 _state = 'hidden';
@@ -204,6 +219,7 @@ window.ValdoriaLoadingController = function(config) {
         },
 
         forceHide: function() {
+            if(window._loadDbg)_loadDbg('forceHide() total='+(Date.now()-_loadStart)+'ms');
             _cleanup();
             _cinematicTimers.forEach(function(t) { clearTimeout(t); });
             _cinematicTimers = [];
@@ -222,6 +238,7 @@ window.ValdoriaLoadingController = function(config) {
         },
 
         show: function(isRetry) {
+            if(window._loadDbg)_loadDbg('show('+(isRetry?'retry':'init')+')');
             if (_state === 'hiding') this.forceHide();
             _cleanup();
             _state = 'loading';
@@ -319,7 +336,7 @@ window.ValdoriaLoadingController = function(config) {
             _realProgress = pct;
             _progress = _realProgress;
             if (progressEl) { progressEl.style.width = _progress + '%'; progressEl.setAttribute('aria-valuenow', Math.round(_progress)); }
-            if (stageEl && stageName) stageEl.textContent = stageName;
+            if (stageEl && stageName){stageEl.textContent = stageName;if(window._loadDbg)_loadDbg('progress='+Math.round(pct)+'% stage='+stageName);}
             if (HAS_RING_ACCEL) _updateRingSpeed(_progress);
             if (HAS_GEM_PHASE) _updateGemPhase(_progress);
         },

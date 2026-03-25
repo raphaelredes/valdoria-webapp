@@ -1,3 +1,4 @@
+if(window._loadDbgSetApp)_loadDbgSetApp('INVENTORY');
 (function(){var TIPS=['Você desamarra as fivelas da mochila de couro surrado...',
             'O cheiro de ervas secas e metal se mistura ao abrir o alforje...',
             'Seus dedos percorrem os compartimentos, catalogando seus pertences...',

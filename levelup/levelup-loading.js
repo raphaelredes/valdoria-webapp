@@ -19,6 +19,7 @@ var TIPS = [
     '⬆️ Dica: Cantrips escalam automaticamente nos níveis 5, 11 e 17.',
     '⬆️ Dica: Subclasses definem seu estilo — cada uma tem mecânicas únicas.',
 ];
+if(window._loadDbgSetApp)_loadDbgSetApp('LEVELUP');
 window._lvlInitLoading = ValdoriaLoadingController({
     overlayId: 'initLoading',
     tipId: 'init-loading-tip',

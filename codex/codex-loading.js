@@ -20,6 +20,7 @@ var TIPS = [
     '📖 Dica: Vulnerabilidades dobram o dano — consulte o bestiário.',
     '📖 Dica: Cada criatura tem um CR — compare com seu nível antes de lutar.',
 ];
+if(window._loadDbgSetApp)_loadDbgSetApp('CODEX');
 window._codexLoadingCtrl = ValdoriaLoadingController({
     overlayId: 'loadingOverlay',
     tips: TIPS,

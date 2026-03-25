@@ -20,6 +20,7 @@ var TIPS = [
     '📜 Dica: Proficiência em uma skill adiciona seu bônus ao teste.',
     '💡 Dica: Cada classe tem recursos únicos — explore suas habilidades.',
 ];
+if(window._loadDbgSetApp)_loadDbgSetApp('PROLOGUE');
 window._prologueInitLoading = ValdoriaLoadingController({
     overlayId: 'initLoading',
     tips: TIPS,

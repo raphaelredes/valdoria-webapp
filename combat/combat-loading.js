@@ -20,6 +20,7 @@ var TIPS = [
     '\u2694\ufe0f Dica: Habilidades de classe t\u00eam usos limitados \u2014 use com sabedoria.',
     '\ud83d\udee1\ufe0f Dica: Resist\u00eancia a dano reduz o dano recebido pela metade.',
 ];
+if(window._loadDbgSetApp)_loadDbgSetApp('COMBAT');
 window._combatLoadingCtrl = ValdoriaLoadingController({
     overlayId: 'combatLoading',
     tips: TIPS,

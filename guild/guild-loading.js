@@ -20,6 +20,7 @@ var TIPS = [
     '⚔️ Dica: Posicione aliados corpo-a-corpo na frente e conjuradores atrás.',
     '🛡️ Dica: Missões de guilda concedem recompensas exclusivas e reputação.',
 ];
+if(window._loadDbgSetApp)_loadDbgSetApp('GUILD');
 window._guildLoadingCtrl = ValdoriaLoadingController({
     overlayId: 'loadingOverlay',
     tips: TIPS,

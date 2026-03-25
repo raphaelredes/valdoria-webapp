@@ -1,3 +1,4 @@
+if(window._loadDbgSetApp)_loadDbgSetApp('EXPLORE');
 (function(){var TIPS=[// Narrativas imersivas — exploração
             'Você ajusta a mochila e dá os primeiros passos pela trilha...',
             'O vento traz o cheiro de terra molhada e folhas secas...',

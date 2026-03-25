@@ -28,6 +28,7 @@ if (!_navLoadEl) {
     var _navRoot = document.getElementById('route-root') || document.body;
     _navRoot.appendChild(_navLoadEl);
 }
+if(window._loadDbgSetApp)_loadDbgSetApp('NAVIGATE');
 window._navLoadingCtrl = ValdoriaLoadingController({
     overlayId: 'loading',
     tips: TIPS,

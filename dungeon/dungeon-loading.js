@@ -20,6 +20,7 @@ var TIPS = [
     '⚔️ Dica: O chefe da masmorra tem habilidades lendárias únicas.',
     '🛡️ Dica: Fugir da masmorra preserva metade do ouro coletado.',
 ];
+if(window._loadDbgSetApp)_loadDbgSetApp('DUNGEON');
 window._dungeonLoadingCtrl = ValdoriaLoadingController({
     overlayId: 'loading',
     tips: TIPS,

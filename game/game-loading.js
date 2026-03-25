@@ -42,6 +42,7 @@
 
     function _ensureCtrl() {
         if (_ctrl) return _ctrl;
+if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
         _ctrl = ValdoriaLoadingController({
             overlayId: 'loading',
             tips: _LOADING_TIPS,

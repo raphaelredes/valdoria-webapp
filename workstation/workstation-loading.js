@@ -20,6 +20,7 @@ var TIPS = [
     '🔨 Dica: Materiais raros podem ser encontrados em masmorras e trilhas.',
     '🛡️ Dica: Equipamentos forjados são sempre melhores que os comprados.',
 ];
+if(window._loadDbgSetApp)_loadDbgSetApp('WORKSTATION');
 window._wsLoadingCtrl = ValdoriaLoadingController({
     overlayId: 'wsLoading',
     tips: TIPS,
