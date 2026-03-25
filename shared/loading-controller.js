@@ -4,7 +4,7 @@ window._loadDbg=function(msg){var el=Date.now()-_t0;var full='[LOAD-DBG] ['+(_ap
 window._loadDbgSetApp=function(n){_app=n;};
 window._loadDbgSetApi=function(b){_api=(b||'').replace(/\/$/,'');if(_api&&_q.length)_flush();};
 function _flush(){if(_flushing||!_api||!_q.length)return;if(document.visibilityState==='hidden')return;_flushing=true;var entries=_q.splice(0,25);fetch(_api+'/api/game/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entries:entries})}).catch(function(){_q=entries.concat(_q);if(_q.length>80)_q.length=80;}).finally(function(){_flushing=false;});}
-window.addEventListener('pagehide',function(){if(!_api||!_q.length)return;try{navigator.sendBeacon(_api+'/api/game/log',JSON.stringify({entries:_q.splice(0,25)}));}catch(e){}});
+window.addEventListener('pagehide',function(){if(!_api||!_q.length)return;try{navigator.sendBeacon(_api+'/api/game/log',JSON.stringify({entries:_q.splice(0,25)}));}catch(e){/* sendBeacon on pagehide - intentionally silent */}});
 setInterval(function(){if(_api&&_q.length)_flush();},3000);
 })();
 /**
