@@ -11,3 +11,8 @@
 .v-popup-body{scrollbar-width:thin;scrollbar-color:var(--v-border) transparent}
 .v-popup-body::-webkit-scrollbar{width:4px}
 .v-popup-body::-webkit-scrollbar-thumb{background:var(--v-border);border-radius:2px}
+
+/* Header ornamental separator (medieval RPG style) */
+.v-popup-header::after{content:'◆';display:block;text-align:center;color:var(--v-gold-30);font-size:8px;letter-spacing:12px;margin-top:var(--v-space-xs);opacity:0.5}
+/* Scroll fade hint when popup body overflows */
+.v-popup-body.has-scroll{-webkit-mask-image:linear-gradient(to bottom,black 85%,transparent 100%);mask-image:linear-gradient(to bottom,black 85%,transparent 100%)}

@@ -15,6 +15,7 @@
 
 var _popupStack = [];
 var _overlayId = 'unified-popup-overlay';
+var _MAX_DEPTH = 8;
 
 /**
  * Show a unified popup from server response data.
@@ -25,6 +26,9 @@ window._showUnifiedPopup = function (data) {
         var top = _popupStack[_popupStack.length - 1];
         // Same screen re-render (e.g. after using a consumable) — replace top
         if (top._popup_title === data._popup_title && top.screen_id === data.screen_id) {
+            _popupStack[_popupStack.length - 1] = data;
+        } else if (_popupStack.length >= _MAX_DEPTH) {
+            console.warn('[POPUP-UNIFIED] Max depth reached (' + _MAX_DEPTH + '), replacing top');
             _popupStack[_popupStack.length - 1] = data;
         } else {
             _popupStack.push(data);

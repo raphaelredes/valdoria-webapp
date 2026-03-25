@@ -60,3 +60,21 @@
     max-height: 65vh;
     overflow-y: auto;
 }
+
+/* Fechar button — parchment-subtle style */
+#unified-popup-overlay .v-popup-btn--cancel {
+    border-style: dashed;
+    border-color: var(--v-gold-12);
+    font-size: var(--v-font-sm, 13px);
+    opacity: 0.7;
+    transition: opacity var(--v-transition-fast, 0.15s);
+}
+#unified-popup-overlay .v-popup-btn--cancel:active {
+    opacity: 1;
+}
+
+/* Action buttons inside popup body — align emoji + text */
+.unified-popup-buttons .v-popup-btn {
+    text-align: left;
+    padding-left: var(--v-space-xl, 16px);
+}

@@ -217,7 +217,7 @@ function _renderRelDetail() {
     h += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim);">' + vEsc(d.role) + '</div>';
     h += '<div class="tier-badge">' + vEsc(d.tier) + '</div></div>';
     h += '<div class="social-stat-row"><span>Afinidade</span>';
-    h += '<div class="social-stat-bar"><div class="social-stat-bar-fill social-stat-bar-fill--aff" style="width:' + (d.aff||0) + '%"></div></div>';
+    h += '<div class="social-stat-bar"><div class="social-stat-bar-fill social-stat-bar-fill--aff" style="width:' + Math.min(100, Math.max(0, d.aff||0)) + '%"></div></div>';
     h += '<span>' + (d.aff||0) + '/100</span></div>';
     h += '<div class="social-stat-row"><span>Paci\u00eancia</span>';
     var pp = d.patience_max ? Math.round((d.patience/d.patience_max)*100) : 0;
@@ -252,9 +252,10 @@ function _loadRelDetail(npcId) {
     _render();
     _fetchSocial({ action: 'rel_detail', npc_id: npcId }).then(function(data) {
         _detailLoading = false;
+        if (_closed) return;
         if (data && !data.error) _detailData = data;
         _render();
-    }).catch(function(e) { _detailLoading = false; console.error("[SOCIAL] rel_detail", e); _render(); });
+    }).catch(function(e) { _detailLoading = false; if (_closed) return; console.error("[SOCIAL] rel_detail", e); _render(); });
 }
 
 function _renderActions() {
@@ -279,6 +280,8 @@ function _render() {
             _detailNpc = null;
             _detailData = null;
             _selectedPlayer = null;
+            _delegateSet = false;
+            _chatScrollBound = false;
             _fetchSocial({action: 'close'});
         },
     });
