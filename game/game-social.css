@@ -11,7 +11,7 @@
 
 /* 2. Chat Messages Area */
 .social-chat-area {
-    max-height: min(280px, 40vh);
+    max-height: min(320px, 46vh);
     overflow-y: auto;
     padding: var(--v-space-sm);
     background: var(--v-bg-overlay);
@@ -22,18 +22,22 @@
 /* 3. Chat Messages */
 .social-msg {
     font-size: var(--v-font-base);
-    line-height: 1.5;
-    padding: var(--v-space-xs) 0;
-    border-bottom: 1px solid var(--v-border-dim);
+    line-height: 1.45;
+    padding: 1px 0;
     color: var(--v-text);
 }
-.social-msg:last-child {
-    border-bottom: none;
+.social-msg + .social-msg {
+    margin-top: 1px;
 }
 .social-msg--system {
-    color: var(--v-text-dim);
+    color: var(--v-gold-dim);
     font-style: italic;
     font-size: var(--v-font-xs);
+    text-align: center;
+    background: var(--v-gold-05, rgba(196,149,58,0.05));
+    border-radius: var(--v-radius-pill);
+    padding: var(--v-space-xs) var(--v-space-sm);
+    margin: var(--v-space-xs) 0;
 }
 .social-msg-meta {
     color: var(--v-gold-light);
@@ -47,18 +51,57 @@
     font-style: italic;
     color: var(--v-gold-light);
 }
-/* 4. Emote Buttons Row */
-.social-emotes {
-    display: flex;
-    gap: var(--v-space-sm);
-    justify-content: center;
-    margin-bottom: var(--v-space-sm);
+.social-msg--emote {
+    background: var(--v-gold-03, rgba(196,149,58,0.03));
+    border-radius: var(--v-radius-xs);
+    padding: 1px var(--v-space-xs);
 }
-.social-emote-btn {
+.social-msg-name {
+    cursor: pointer;
+    text-decoration: none;
+}
+.social-msg-name:active {
+    text-decoration: underline;
+}
+/* 4. Emote Grid Toggle */
+.social-emote-toggle {
     width: 44px;
     height: 44px;
-    border-radius: var(--v-radius);
+    border-radius: var(--v-radius-sm);
     background: var(--v-bg-raised);
+    border: 1px solid var(--v-border);
+    font-size: var(--v-font-xl);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background var(--v-transition-base), border-color var(--v-transition-base);
+}
+.social-emote-toggle:hover {
+    background: var(--v-gold-10);
+    border-color: var(--v-gold-dim);
+}
+.social-emote-toggle:active {
+    background: var(--v-gold-20);
+}
+.social-emote-toggle--open {
+    background: var(--v-gold-10);
+    border-color: var(--v-gold-dim);
+}
+.social-emote-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--v-space-xs);
+    padding: var(--v-space-sm);
+    background: var(--v-bg-raised);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    margin-bottom: var(--v-space-xs);
+    animation: socialFadeIn 0.15s ease;
+}
+.social-emote-btn {
+    width: auto;
+    height: 40px;
+    border-radius: var(--v-radius-sm);
+    background: var(--v-bg-card);
     border: 1px solid var(--v-border);
     font-size: var(--v-font-2xl);
     cursor: pointer;
@@ -69,6 +112,7 @@
 }
 .social-emote-btn:active {
     background: var(--v-gold-20);
+    transform: scale(0.95);
 }
 
 /* 5. Chat Input */
@@ -123,15 +167,47 @@
     border-radius: var(--v-radius-sm);
     margin-bottom: var(--v-space-xs);
     border: 1px solid var(--v-border);
-    transition: border-color var(--v-transition-base);
+    border-left: 3px solid var(--v-gold-25, rgba(196,149,58,0.25));
+    transition: border-color var(--v-transition-base), background var(--v-transition-base);
+    animation: socialFadeIn 0.25s ease-out both;
 }
+.social-player:nth-child(2) { animation-delay: 0.05s; }
+.social-player:nth-child(3) { animation-delay: 0.1s; }
+.social-player:nth-child(4) { animation-delay: 0.15s; }
+.social-player:nth-child(5) { animation-delay: 0.2s; }
+.social-player:nth-child(6) { animation-delay: 0.25s; }
 .social-player:hover {
     background: var(--v-bg-overlay);
     border-color: var(--v-gold-dim);
+    border-left-color: var(--v-gold-dim);
 }
 .social-player--selected {
     border-color: var(--v-gold-dim);
+    border-left-color: var(--v-gold);
     background: var(--v-gold-5);
+}
+
+/* 6a. Status Dot */
+.social-status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-right: var(--v-space-xs);
+    vertical-align: middle;
+}
+.social-status-dot--online {
+    background: #50b450;
+    box-shadow: 0 0 4px rgba(80,180,80,0.5);
+}
+.social-status-dot--idle {
+    background: #d4a020;
+    box-shadow: 0 0 4px rgba(212,160,32,0.3);
+}
+.social-status-dot--offline {
+    background: var(--v-text-dim);
+    opacity: 0.5;
 }
 .social-player-icon {
     font-size: var(--v-font-2xl);
@@ -192,6 +268,7 @@
     margin-top: calc(-1 * var(--v-space-xs));
     border: 1px solid var(--v-border);
     border-top: none;
+    animation: socialFadeIn 0.15s ease;
 }
 .social-action-btn {
     padding: var(--v-space-sm) var(--v-space-xs);
@@ -225,7 +302,12 @@
     border-radius: var(--v-radius-sm);
     margin-bottom: var(--v-space-xs);
     border: 1px solid var(--v-border);
+    border-left: 3px solid var(--v-gold-25, rgba(196,149,58,0.25));
+    animation: socialFadeIn 0.25s ease-out both;
 }
+.social-request:nth-child(2) { animation-delay: 0.05s; }
+.social-request:nth-child(3) { animation-delay: 0.1s; }
+.social-request:nth-child(4) { animation-delay: 0.15s; }
 .social-request:hover {
     background: var(--v-bg-overlay);
 }
@@ -275,9 +357,15 @@
     border-radius: var(--v-radius-sm);
     margin-bottom: var(--v-space-xs);
     border: 1px solid var(--v-border);
+    border-left: 3px solid var(--v-text-dim);
     cursor: pointer;
-    transition: background var(--v-transition-base);
+    transition: background var(--v-transition-base), border-color var(--v-transition-base);
+    animation: socialFadeIn 0.25s ease-out both;
 }
+.social-npc:nth-child(2) { animation-delay: 0.05s; }
+.social-npc:nth-child(3) { animation-delay: 0.1s; }
+.social-npc:nth-child(4) { animation-delay: 0.15s; }
+.social-npc:nth-child(5) { animation-delay: 0.2s; }
 .social-npc:active {
     background: var(--v-bg-card);
     border-color: var(--v-gold-dim);
@@ -347,6 +435,10 @@
     font-size: var(--v-font-xs);
     color: var(--v-gold-light);
     margin-top: var(--v-space-xs);
+}
+.social-detail-scroll {
+    max-height: calc(55vh - 130px);
+    overflow-y: auto;
 }
 .social-stat-row {
     display: flex;
@@ -445,30 +537,92 @@
     margin-left: var(--v-space-xs);
     vertical-align: middle;
 }
-/* 13. Focus-visible for accessibility */
+/* 13. Mini-Profile Card */
+.social-mini-profile {
+    position: absolute;
+    width: 200px;
+    background: var(--v-bg-card);
+    border: 1px solid var(--v-gold-25, rgba(196,149,58,0.25));
+    border-radius: var(--v-radius);
+    padding: var(--v-space-md);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    z-index: 5;
+    animation: socialFadeIn 0.15s ease;
+}
+.social-mini-profile-name {
+    color: var(--v-gold-light);
+    font-weight: 700;
+    font-size: var(--v-font-base);
+    margin-bottom: var(--v-space-xs);
+}
+.social-mini-profile-meta {
+    font-size: var(--v-font-xs);
+    color: var(--v-text-dim);
+    margin-bottom: var(--v-space-sm);
+}
+.social-mini-profile-actions {
+    display: flex;
+    gap: var(--v-space-xs);
+}
+.social-mini-profile-btn {
+    flex: 1;
+    padding: var(--v-space-sm);
+    background: var(--v-bg-raised);
+    border: 1px solid var(--v-border);
+    border-radius: var(--v-radius-sm);
+    color: var(--v-text);
+    font-family: var(--v-font);
+    font-size: var(--v-font-xs);
+    cursor: pointer;
+    text-align: center;
+    min-height: 36px;
+    transition: background var(--v-transition-base);
+}
+.social-mini-profile-btn:hover {
+    background: var(--v-gold-10);
+    border-color: var(--v-gold-dim);
+}
+.social-mini-profile-btn:active {
+    transform: scale(0.97);
+}
+
+/* 14. Focus-visible for accessibility */
 .social-emote-btn:focus-visible,
+.social-emote-toggle:focus-visible,
 .social-send-btn:focus-visible,
 .social-interact-btn:focus-visible,
 .social-req-btn:focus-visible,
 .social-npc:focus-visible,
 .social-action-btn:focus-visible,
-.social-chat-input:focus-visible {
+.social-chat-input:focus-visible,
+.social-mini-profile-btn:focus-visible {
     outline: 2px solid var(--v-gold);
     outline-offset: 2px;
 }
-/* 14. Performance tier: disable transitions on lite */
+/* 15. Performance tier: disable transitions on lite */
 body.perf-lite .social-npc,
 body.perf-lite .social-emote-btn,
+body.perf-lite .social-emote-toggle,
 body.perf-lite .social-npc-bar-fill,
 body.perf-lite .social-stat-bar-fill,
 body.perf-lite .social-chat-input,
 body.perf-lite .social-player,
 body.perf-lite .social-interact-btn,
-body.perf-lite .social-action-btn {
+body.perf-lite .social-action-btn,
+body.perf-lite .social-request,
+body.perf-lite .social-mini-profile {
     transition: none;
 }
+body.perf-lite .social-player,
+body.perf-lite .social-npc,
+body.perf-lite .social-request,
+body.perf-lite .social-player-actions,
+body.perf-lite .social-emote-grid,
+body.perf-lite .social-mini-profile {
+    animation: none;
+}
 
-/* 15. Tab panel fade animation */
+/* 16. Tab panel fade animation */
 @keyframes socialFadeIn {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }

@@ -341,6 +341,13 @@ window.ValdoriaLoadingController = function(config) {
             if (HAS_GEM_PHASE) _updateGemPhase(_progress);
         },
 
+        setTips: function(newTips) {
+            if (!newTips || !newTips.length) return;
+            tips = newTips;
+            tipIndex = Math.floor(Math.random() * tips.length);
+            if (tipEl && tips.length) tipEl.textContent = tips[tipIndex];
+        },
+
         getState: function() { return _state; },
 
         cleanup: _cleanup,

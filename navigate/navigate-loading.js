@@ -20,14 +20,6 @@ var TIPS = [
     '⚔️ Dica: Encontros aleatórios são mais comuns em territórios perigosos.',
     '🛡️ Dica: Descanso longo restaura todos os HP e recursos gastos.',
 ];
-var _navLoadEl = document.getElementById('loading');
-if (!_navLoadEl) {
-    _navLoadEl = document.createElement('div');
-    _navLoadEl.id = 'loading';
-    _navLoadEl.className = 'loading-overlay';
-    var _navRoot = document.getElementById('route-root') || document.body;
-    _navRoot.appendChild(_navLoadEl);
-}
 if(window._loadDbgSetApp)_loadDbgSetApp('NAVIGATE');
 window._navLoadingCtrl = ValdoriaLoadingController({
     overlayId: 'loading',

@@ -37,6 +37,45 @@
 
     var _LOADING_TIPS = _TIPS_NARRATIVE.concat(_TIPS_MECHANICS);
 
+    // Contextual tip sets (inspired by Skyrim/BG3 — show relevant tips for destination)
+    var _TIPS_COMBAT = [
+        'Sua mão encontra o cabo da arma enquanto você se posiciona...',
+        'Adrenalina percorre suas veias enquanto o confronto se aproxima...',
+        'Você analisa o terreno, buscando vantagem tática...',
+        '⚔️ Dica: Rolagens de ataque 20 são acertos críticos — dano dobrado!',
+        '🛡️ Dica: Posicionamento pode garantir ataques de oportunidade.',
+        '⚔️ Dica: Habilidades de classe têm usos limitados — use com sabedoria.',
+        '🧪 Dica: Poções podem ser usadas durante o combate como ação bônus.',
+        '🛡️ Dica: Resistência a dano reduz o dano recebido pela metade.',
+    ];
+    var _TIPS_EXPLORE = [
+        'O vento sussurra segredos sobre os caminhos à frente...',
+        'Trilhas pouco usadas frequentemente escondem tesouros esquecidos...',
+        'A natureza ao redor observa seus passos com curiosidade...',
+        '🗺️ Dica: O ritmo de viagem afeta percepção e furtividade.',
+        '⚔️ Dica: Viagem em ritmo rápido impõe -5 na Percepção Passiva.',
+        '🛡️ Dica: Ritmo cauteloso permite se mover furtivamente.',
+        '📜 Dica: Atividades de viagem incluem vigiar, forragear e navegar.',
+        '💡 Dica: Terreno difícil reduz a velocidade pela metade.',
+    ];
+    var _TIPS_NAVIGATE = [
+        'Você desenrola o pergaminho e estuda as rotas...',
+        'A bússola arcana gira lentamente, apontando para o norte...',
+        'Montanhas, florestas e rios se revelam no mapa desgastado...',
+        '🗺️ Dica: Explore regiões desconhecidas para revelar locais ocultos.',
+        '⚔️ Dica: Encontros aleatórios são mais comuns em territórios perigosos.',
+        '🛡️ Dica: Descanso longo restaura todos os HP e recursos gastos.',
+        '🏰 Dica: A Guilda de Aventureiros oferece missões com boas recompensas.',
+        '💰 Dica: Venda itens que não usa no mercado da cidade.',
+    ];
+    var _CONTEXTUAL_TIPS = {
+        combat: _TIPS_COMBAT,
+        arena: _TIPS_COMBAT,
+        explore: _TIPS_EXPLORE,
+        navigate: _TIPS_NAVIGATE,
+        dungeon: _TIPS_EXPLORE,
+    };
+
     // Controller instance (created lazily on first showLoading)
     var _ctrl = null;
 
@@ -118,5 +157,26 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
         _ctrl.forceHide();
         var el = document.getElementById('loading');
         if (el) el.style.display = 'none';
+    };
+    /**
+     * Switch tips to match the destination WebApp (contextual loading tips).
+     * @param {string} destination - transition target: 'combat', 'explore', 'navigate', etc.
+     */
+    window.setLoadingContext = function setLoadingContext(destination) {
+        var ctrl = _ensureCtrl();
+        var contextTips = _CONTEXTUAL_TIPS[destination];
+        if (contextTips && ctrl.setTips) {
+            ctrl.setTips(contextTips);
+        }
+    };
+
+    /**
+     * Set progress stage label (stage feedback during loading).
+     * @param {number} pct - Progress percentage (0-100).
+     * @param {string} label - Stage label text.
+     */
+    window.setLoadingStage = function setLoadingStage(pct, label) {
+        var ctrl = _ensureCtrl();
+        if (ctrl.setProgress) ctrl.setProgress(pct, label);
     };
 })();
