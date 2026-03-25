@@ -15,6 +15,7 @@ var _sending = false;
 var _selectedPlayer = null;
 var _closed = false;
 var _POLL_INTERVAL_MS = 4000;
+var _userScrolledUp = false;
 
 function _idemKey() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
 
@@ -132,11 +133,19 @@ function _buildChatMessages() {
     return h;
 }
 
-function _renderChatMessages() {
+function _isNearBottom(el) {
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+}
+
+function _renderChatMessages(forceScroll) {
     var area = document.getElementById('social-chat-area');
     if (!area) return;
+    var wasNear = _isNearBottom(area);
     area.innerHTML = _buildChatMessages();
-    area.scrollTop = area.scrollHeight;
+    if (forceScroll || !_userScrolledUp || wasNear) {
+        area.scrollTop = area.scrollHeight;
+        _userScrolledUp = false;
+    }
 }
 
 function _renderOnline() {
@@ -278,9 +287,21 @@ function _render() {
         _startPoll();
         requestAnimationFrame(function() {
             var area = document.getElementById('social-chat-area');
-            if (area) area.scrollTop = area.scrollHeight;
+            if (area) {
+                if (!_userScrolledUp) area.scrollTop = area.scrollHeight;
+                _bindChatScroll(area);
+            }
         });
     } else { _stopPoll(); }
+}
+
+var _chatScrollBound = false;
+function _bindChatScroll(area) {
+    if (_chatScrollBound || !area) return;
+    _chatScrollBound = true;
+    area.addEventListener('scroll', function() {
+        _userScrolledUp = !_isNearBottom(area);
+    }, { passive: true });
 }
 
 function _handleAction(action) {
@@ -294,7 +315,7 @@ function _bindListeners() {
     _delegateSet = true;
     document.addEventListener('click', function(e) {
         var t = e.target.closest('[data-social-tab]');
-        if (t) { e.preventDefault(); e.stopPropagation(); var tab = t.getAttribute('data-social-tab'); if (tab && tab !== _activeTab) { _activeTab = tab; _detailNpc = null; _detailData = null; _selectedPlayer = null; try { localStorage.setItem('valdoria_social_tab', tab); } catch(ex){console.warn('[SOCIAL]',ex);} _render(); } return; }
+        if (t) { e.preventDefault(); e.stopPropagation(); var tab = t.getAttribute('data-social-tab'); if (tab && tab !== _activeTab) { _activeTab = tab; _detailNpc = null; _detailData = null; _selectedPlayer = null; _userScrolledUp = false; _chatScrollBound = false; try { localStorage.setItem('valdoria_social_tab', tab); } catch(ex){console.warn('[SOCIAL]',ex);} _render(); } return; }
         if (e.target.closest('#social-send-btn')) { e.preventDefault(); e.stopPropagation(); var inp = document.getElementById('social-chat-input'); if (inp) _chatSend(inp.value); return; }
         var em = e.target.closest('.social-emote-btn');
         if (em) { e.preventDefault(); e.stopPropagation(); var ek = em.getAttribute('data-emote'); if (ek) _chatEmote(ek); return; }
@@ -357,7 +378,7 @@ function _chatSend(text) {
             ts: now.toISOString(), _optimistic: true
         });
         if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
-        _renderChatMessages();
+        _renderChatMessages(true);
     }
     _fetchSocial({ action: 'chat_send', text: text.trim() }).then(function(data) {
         _sending = false; _enableChatInput();
@@ -442,7 +463,7 @@ function _socialAction(action, requestId) {
 window.showSocialPopup = function(data) {console.warn('[SOCIAL-DBG] showSocialPopup() data keys=' + (data?Object.keys(data).join(','):'NULL') + ' chat=' + !!(data&&data.chat) + ' online=' + (data&&data.online?data.online.length:0));
     _cachedData = data || {};
     try { var sv = localStorage.getItem('valdoria_social_tab'); if (sv && ['chat','online','inbox','rel'].indexOf(sv) !== -1) _activeTab = sv; } catch(e){console.warn('[SOCIAL]',e);}
-    _detailNpc = null; _detailData = null; _selectedPlayer = null;
+    _detailNpc = null; _detailData = null; _selectedPlayer = null; _userScrolledUp = false; _chatScrollBound = false;
     _render();
 };
 
