@@ -16,6 +16,7 @@ var _selectedPlayer = null;
 var _closed = false;
 var _POLL_INTERVAL_MS = 4000;
 var _userScrolledUp = false;
+var _emoteGridOpen = false;
 
 function _idemKey() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
 
@@ -104,11 +105,14 @@ function _renderBody() {
 
 function _renderChat() {
     var h = '<div class="social-chat-area" id="social-chat-area" role="log" aria-live="polite">' + _buildChatMessages() + '</div>';
-    h += '<div class="social-emotes">';
-    var em = [{k:'wave',i:'\ud83d\udc4b',a:'Acenar'},{k:'cheer',i:'\ud83c\udf7b',a:'Comemorar'},{k:'laugh',i:'\ud83d\ude02',a:'Rir'},{k:'bow',i:'\ud83d\ude47',a:'Reverenciar'}];
-    for (var i = 0; i < em.length; i++) h += '<button class="social-emote-btn" data-emote="' + em[i].k + '" aria-label="' + em[i].a + '">' + em[i].i + '</button>';
-    h += '</div>';
+    if (_emoteGridOpen) {
+        h += '<div class="social-emote-grid" id="social-emote-grid">';
+        var em = [{k:'wave',i:'\ud83d\udc4b',a:'Acenar'},{k:'cheer',i:'\ud83c\udf7b',a:'Comemorar'},{k:'laugh',i:'\ud83d\ude02',a:'Rir'},{k:'bow',i:'\ud83d\ude47',a:'Reverenciar'},{k:'toast',i:'\ud83c\udf7a',a:'Brindar'},{k:'clap',i:'\ud83d\udc4f',a:'Aplaudir'},{k:'shrug',i:'\ud83e\udd37',a:'Dar de ombros'},{k:'pray',i:'\ud83d\ude4f',a:'Orar'}];
+        for (var i = 0; i < em.length; i++) h += '<button class="social-emote-btn" data-emote="' + em[i].k + '" aria-label="' + em[i].a + '">' + em[i].i + '</button>';
+        h += '</div>';
+    }
     h += '<div class="social-chat-input-wrap">';
+    h += '<button class="social-emote-toggle" id="social-emote-toggle" aria-label="Emotes">\ud83d\ude0a</button>';
     h += '<input type="text" id="social-chat-input" class="social-chat-input" placeholder="Escreva sua mensagem..." aria-label="Mensagem do chat" maxlength="200" autocomplete="off">';
     h += '<button class="social-send-btn" id="social-send-btn">\u27a4</button></div>';
     return h;
@@ -122,10 +126,12 @@ function _buildChatMessages() {
         var m = msgs[i];
         if (m.system) { h += '<div class="social-msg social-msg--system">' + vEsc(m.text) + '</div>'; }
         else {
-            h += '<div class="social-msg"><span class="social-msg-meta">';
+            var eCls = m.emote ? ' social-msg--emote' : '';
+            h += '<div class="social-msg' + eCls + '"><span class="social-msg-meta">';
             if (m.time) h += '[' + vEsc(m.time) + '] ';
             if (m.icon) h += vEsc(m.icon) + ' ';
-            h += vEsc(m.name);
+            if (m.uid) h += '<span class="social-msg-name" data-uid="' + m.uid + '">' + vEsc(m.name) + '</span>';
+            else h += vEsc(m.name);
             if (m.level) h += ' Nv' + m.level;
             h += '</span> <span class="social-msg-text">' + _rpFormat(m.text) + '</span></div>';
         }
@@ -157,7 +163,8 @@ function _renderOnline() {
         var isSelected = _selectedPlayer === p.user_id;
         var nd = (p.badge ? p.badge + ' ' : '') + vEsc(p.name);
         h += '<div class="social-player' + (isSelected ? ' social-player--selected' : '') + '" data-player-uid="' + p.user_id + '">';
-        h += '<span class="social-player-icon">' + (p.class_icon || '👤') + '</span>';
+        var dotCls = (p.status === 'idle') ? 'social-status-dot social-status-dot--idle' : 'social-status-dot social-status-dot--online';
+        h += '<span class="social-player-icon">' + (p.class_icon || '👤') + '<span class="' + dotCls + '">' + '</span></span>';
         h += '<span class="social-player-info"><b>' + nd + '</b> <small>Nv.' + (p.level || '?') + '</small>';
         if (p.location) h += '<span class="social-player-loc">📍 ' + vEsc(p.location) + '</span>';
         h += '</span><button class="social-interact-btn" data-target="' + p.user_id + '" title="Interações">✦</button></div>';
@@ -179,7 +186,9 @@ function _renderInbox() {
     var h = '<div class="social-section-label">' + items.length + ' intera\u00e7\u00e3o(es) pendente(s)</div>';
     for (var i = 0; i < items.length; i++) {
         var r = items[i];
-        h += '<div class="social-request"><div class="social-request-info">';
+        var _typeColor = {'wave':'var(--v-gold)','duel_challenge':'var(--v-danger)','trade_invite':'var(--v-success)','party_invite':'var(--v-info)'};
+        var _bColor = _typeColor[r.type] || 'var(--v-border)';
+        h += '<div class="social-request" style="border-left:3px solid ' + _bColor + '"><div class="social-request-info">';
         h += '<span class="social-request-icon">' + (r.icon || '\ud83d\udce8') + '</span>';
         h += '<b>' + vEsc(r.sender_name) + '</b> ' + vEsc(r.desc);
         if (r.created_at) h += '<small class="social-request-age">' + _ago(r.created_at) + '</small>';
@@ -191,6 +200,13 @@ function _renderInbox() {
     return h;
 }
 
+function _affBorderColor(aff) {
+    if (aff >= 75) return 'var(--v-success)';
+    if (aff >= 50) return 'var(--v-gold)';
+    if (aff >= 25) return 'var(--v-info)';
+    return 'var(--v-text-dim)';
+}
+
 function _renderRel() {
     if (_detailNpc) return _renderRelDetail();
     var npcs = (_cachedData && _cachedData.relationships) || [];
@@ -198,7 +214,7 @@ function _renderRel() {
     var h = '<div class="social-section-label">' + npcs.length + ' v\u00ednculo' + (npcs.length !== 1 ? 's' : '') + '</div>';
     for (var i = 0; i < npcs.length; i++) {
         var n = npcs[i];
-        h += '<div class="social-npc" data-npc="' + vEsc(n.npc_id) + '">';
+        h += '<div class="social-npc" data-npc="' + vEsc(n.npc_id) + '" style="border-left:3px solid ' + _affBorderColor(n.aff || 0) + '">';
         h += '<span class="social-npc-mood">' + (n.mood_emoji || '\ud83d\ude10') + '</span>';
         h += '<span class="social-npc-info"><b>' + vEsc(n.name) + '</b><small>' + vEsc(n.role) + '</small></span>';
         h += '<div class="social-npc-bar"><div class="social-npc-bar-fill" style="width:' + Math.min(100, n.aff || 0) + '%"></div></div>';
@@ -225,6 +241,7 @@ function _renderRelDetail() {
     h += '<span>' + (d.patience||0) + '/' + (d.patience_max||10) + '</span></div>';
     h += '<div class="social-stat-row"><span>Encontros</span><span>' + (d.encounters||0) + 'x</span></div>';
     h += '<div class="social-stat-row"><span>Humor</span><span>' + (d.mood_emoji||'\ud83d\ude10') + ' ' + vEsc(d.mood) + '</span></div>';
+    h += '<div class="social-detail-scroll">';
     if (d.emotions && d.emotions.length > 0) {
         h += '<div class="social-section-label">Emo\u00e7\u00f5es</div>';
         for (var i = 0; i < d.emotions.length; i++) {
@@ -244,7 +261,46 @@ function _renderRelDetail() {
             h += '</div>';
         }
     }
+    h += '</div>';
     return h;
+}
+
+function _showMiniProfile(uid, anchorEl) {
+    _dismissMiniProfile();
+    var players = (_cachedData && _cachedData.online) || [];
+    var info = null;
+    for (var i = 0; i < players.length; i++) { if (players[i].user_id == uid) { info = players[i]; break; } }
+    var card = document.createElement("div");
+    card.className = "social-mini-profile";
+    card.id = "social-mini-profile";
+    var ch = '<div style="font-weight:700;color:var(--v-gold-light)">';
+    if (info) {
+        ch += (info.class_icon || '') + ' ' + vEsc(info.name) + '</div>';
+        ch += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim)">Nv.' + (info.level || '?') + '</div>';
+        if (info.location) ch += '<div style="font-size:var(--v-font-xs);color:var(--v-text-dim)">' + vEsc(info.location) + '</div>';
+        ch += '<div style="margin-top:var(--v-space-xs);display:flex;gap:var(--v-space-xs)">';
+        ch += '<button class="social-action-btn social-mp-action" data-action-uid="' + uid + '" data-action-type="wave">\ud83d\udc4b Acenar</button>';
+        ch += '<button class="social-mp-action social-mp-tab-btn" data-mp-tab="online">\ud83c\udf10 Ver Online</button>';
+        ch += '</div>';
+    } else {
+        ch += 'Jogador #' + uid + '</div>';
+        ch += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim)">Offline ou desconhecido</div>';
+    }
+    card.innerHTML = ch;
+    if (anchorEl) {
+        var rect = anchorEl.getBoundingClientRect();
+        var popup = document.getElementById("social-popup-overlay");
+        var pRect = popup ? popup.getBoundingClientRect() : {left:0,top:0};
+        card.style.left = Math.max(4, rect.left - pRect.left) + "px";
+        card.style.top = Math.max(4, rect.bottom - pRect.top + 4) + "px";
+    }
+    var container = document.querySelector(".v-popup-body") || document.body;
+    container.appendChild(card);
+}
+
+function _dismissMiniProfile() {
+    var el = document.getElementById("social-mini-profile");
+    if (el) el.remove();
 }
 
 function _loadRelDetail(npcId) {
@@ -282,6 +338,8 @@ function _render() {
             _selectedPlayer = null;
             _delegateSet = false;
             _chatScrollBound = false;
+            _emoteGridOpen = false;
+            _dismissMiniProfile();
             _fetchSocial({action: 'close'});
         },
     });
@@ -318,8 +376,13 @@ function _bindListeners() {
     _delegateSet = true;
     document.addEventListener('click', function(e) {
         var t = e.target.closest('[data-social-tab]');
-        if (t) { e.preventDefault(); e.stopPropagation(); var tab = t.getAttribute('data-social-tab'); if (tab && tab !== _activeTab) { _activeTab = tab; _detailNpc = null; _detailData = null; _selectedPlayer = null; _userScrolledUp = false; _chatScrollBound = false; try { localStorage.setItem('valdoria_social_tab', tab); } catch(ex){console.warn('[SOCIAL]',ex);} _render(); } return; }
+        if (t) { e.preventDefault(); e.stopPropagation(); var tab = t.getAttribute('data-social-tab'); if (tab && tab !== _activeTab) { _activeTab = tab; _detailNpc = null; _detailData = null; _selectedPlayer = null; _userScrolledUp = false; _chatScrollBound = false; _emoteGridOpen = false; _dismissMiniProfile(); try { localStorage.setItem('valdoria_social_tab', tab); } catch(ex){console.warn('[SOCIAL]',ex);} _render(); } return; }
         if (e.target.closest('#social-send-btn')) { e.preventDefault(); e.stopPropagation(); var inp = document.getElementById('social-chat-input'); if (inp) _chatSend(inp.value); return; }
+        if (e.target.closest('#social-emote-toggle')) { e.preventDefault(); e.stopPropagation(); _emoteGridOpen = !_emoteGridOpen; _render(); return; }
+        var nameEl = e.target.closest('.social-msg-name');
+        if (nameEl) { e.preventDefault(); e.stopPropagation(); var nUid = nameEl.getAttribute('data-uid'); if (nUid) _showMiniProfile(parseInt(nUid,10), nameEl); return; }
+        var mpTab = e.target.closest('.social-mp-tab-btn');
+        if (mpTab) { e.preventDefault(); e.stopPropagation(); _dismissMiniProfile(); var tb = mpTab.getAttribute('data-mp-tab'); if (tb) { _activeTab = tb; _render(); } return; }
         var em = e.target.closest('.social-emote-btn');
         if (em) { e.preventDefault(); e.stopPropagation(); var ek = em.getAttribute('data-emote'); if (ek) _chatEmote(ek); return; }
         // Action buttons in player interaction menu
@@ -346,6 +409,7 @@ function _bindListeners() {
         if (ab) { e.preventDefault(); e.stopPropagation(); var rid = ab.getAttribute('data-accept'); if (rid) _socialAction('social_accept', rid); return; }
         var db = e.target.closest('[data-decline]');
         if (db) { e.preventDefault(); e.stopPropagation(); var rid2 = db.getAttribute('data-decline'); if (rid2) _socialAction('social_decline', rid2); return; }
+        if (!e.target.closest('#social-mini-profile') && !e.target.closest('.social-msg-name')) _dismissMiniProfile();
         var nc = e.target.closest('.social-npc[data-npc]');
         if (nc) { e.preventDefault(); e.stopPropagation(); var nid = nc.getAttribute('data-npc'); if (nid) _loadRelDetail(nid); return; }
     });
@@ -378,7 +442,7 @@ function _chatSend(text) {
             system: false, time: hh + ':' + mm,
             icon: (window.S && S.classIcon) || '👤', name: (window.S && S.playerName) || '???',
             level: (window.S && S.playerLevel) || 1, text: text.trim(),
-            ts: now.toISOString(), _optimistic: true
+            ts: now.toISOString(), uid: (window.S && S.uid) || 0, _optimistic: true
         });
         if (_cachedData.chat.messages.length > 50) _cachedData.chat.messages = _cachedData.chat.messages.slice(-50);
         _renderChatMessages(true);
@@ -466,7 +530,7 @@ function _socialAction(action, requestId) {
 window.showSocialPopup = function(data) {console.warn('[SOCIAL-DBG] showSocialPopup() data keys=' + (data?Object.keys(data).join(','):'NULL') + ' chat=' + !!(data&&data.chat) + ' online=' + (data&&data.online?data.online.length:0));
     _cachedData = data || {};
     try { var sv = localStorage.getItem('valdoria_social_tab'); if (sv && ['chat','online','inbox','rel'].indexOf(sv) !== -1) _activeTab = sv; } catch(e){console.warn('[SOCIAL]',e);}
-    _detailNpc = null; _detailData = null; _selectedPlayer = null; _userScrolledUp = false; _chatScrollBound = false;
+    _detailNpc = null; _detailData = null; _selectedPlayer = null; _userScrolledUp = false; _chatScrollBound = false; _emoteGridOpen = false;
     _render();
 };
 
@@ -480,7 +544,7 @@ window.openSocialPopup = function() {console.warn('[SOCIAL-DBG] openSocialPopup(
             body: '<div class="social-empty"><div class="social-empty-icon">⏳</div><div>Carregando...</div></div>',
             actions: "",
             closeOnOutside: true,
-            onHide: function() { _stopPoll(); _detailNpc = null; _detailData = null; _selectedPlayer = null; _fetchSocial({action: "close"}); },
+            onHide: function() { _stopPoll(); _detailNpc = null; _detailData = null; _selectedPlayer = null; _emoteGridOpen = false; _fetchSocial({action: "close"}); },
         });
     } else {
         console.error('[SOCIAL-DBG] vPopup is undefined! Cannot show popup');
