@@ -445,7 +445,7 @@ function _obTransitionToDungeon() {
         fetch(apiBase + '/api/webapp/transition', {
             method: 'POST',
             headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
-            body: JSON.stringify({from: 'explore', to: 'dungeon', context: {daily_challenge: true, dungeon_id: j.dungeonId}})
+            body: JSON.stringify({from: 'explore', to: 'dungeon', user_id: parseInt(params.uid || (params.get && params.get('uid')) || '0'), payload: {daily_challenge: true, dungeon_id: j.dungeonId}})
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -472,7 +472,7 @@ function _obFallbackToGame(apiBase, token) {
     fetch(apiBase + '/api/webapp/transition', {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
-        body: JSON.stringify({from: 'explore', to: 'game'})
+        body: JSON.stringify({from: 'explore', to: 'game', user_id: parseInt(params.uid || (params.get && params.get('uid')) || '0')})
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -482,4 +482,49 @@ function _obFallbackToGame(apiBase, token) {
         }
     })
     .catch(function(e) { console.error('[OUTBOUND] Fallback failed:', e); });
+}
+
+
+/* ═══════════════════════════════════════════════
+   Return Journey from Dungeon
+   ═══════════════════════════════════════════════ */
+function startDungeonReturn(biome, steps, charData) {
+    console.info('[RETURN] Starting dungeon return journey:', {biome: biome, steps: steps});
+
+    /* Hide hex map UI elements */
+    var mapEl = document.getElementById('hex-canvas') || document.getElementById('map-canvas');
+    if (mapEl) mapEl.style.display = 'none';
+    var hudEl = document.getElementById('bottom-bar');
+    if (hudEl) hudEl.style.display = 'none';
+
+    /* Set minimal explore state for return journey */
+    S.biome = biome;
+    S.hpChange = 0;
+    if (charData) {
+        S.charData = charData;
+        S.inventory = (charData.inv || []).slice();
+        S.level = charData.lv || 1;
+    }
+
+    /* Initialize return journey state */
+    _returningToCity = true;
+    _returnJourney = {
+        totalSteps: steps,
+        currentStep: 0,
+        riskChance: 30,
+        usedNarrations: new Set(),
+        usedHazards: new Set(),
+    };
+
+    /* Setup HUD if charData available */
+    if (charData && typeof setupHUD === 'function') {
+        setupHUD();
+    }
+
+    /* Start the step-by-step return journey */
+    if (typeof showReturnJourneyStep === 'function') {
+        showReturnJourneyStep();
+    } else {
+        console.error('[RETURN] showReturnJourneyStep not loaded');
+    }
 }
