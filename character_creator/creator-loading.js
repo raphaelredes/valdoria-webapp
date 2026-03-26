@@ -1,29 +1,17 @@
-(function() {
-var TIPS = [
-    // Narrativas imersivas
-    'Os deuses observam enquanto uma nova alma se prepara para nascer...',
-    'As estrelas se alinham, aguardando a escolha do destino do aventureiro...',
-    'Pergaminhos antigos se desenrolam, revelando raças e linhagens...',
-    'O fogo da forja crepita, pronto para moldar um novo campeão...',
-    'Ecos de lendas passadas sussurram conselhos ao novo aventureiro...',
-    'Runas ancestrais brilham, canalizando o poder da criação...',
-    'O livro de classes se abre, revelando caminhos de poder...',
-    'Uma nova página na história de Valdoria está prestes a ser escrita...',
-
-    // Dicas de gameplay
-    '⚔️ Dica: Cada raça oferece bônus únicos de atributo e habilidades.',
-    '🛡️ Dica: Escolha uma classe que combine com seu estilo de jogo.',
-    '⚔️ Dica: Atributos altos em Força ou Destreza melhoram seu ataque.',
-    '🛡️ Dica: Constituição alta significa mais pontos de vida.',
-    '⚔️ Dica: Magos usam Inteligência, Clérigos usam Sabedoria.',
-    '🛡️ Dica: Carisma é essencial para Bardos, Feiticeiros e Bruxos.',
-    '⚔️ Dica: A origem do personagem define suas perícias iniciais.',
-    '🛡️ Dica: Não existe escolha errada — cada combinação é viável!',
-];
+// CREATOR Loading — delegates to vProcessing (processing overlay)
 if(window._loadDbgSetApp)_loadDbgSetApp('CREATOR');
-window._creatorLoadingCtrl = ValdoriaLoadingController({
-    overlayId: 'creatorLoading',
-    tips: TIPS,
-    onTimeout: function() { console.error('[CREATOR] Loading timeout'); }
-});
+(function(){
+var _defaultText = 'Preparando a forja de aventureiros...';
+var _ctrl = {
+    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText}); },
+    hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
+    forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
+    setProgress: function(pct, label) { if(window.vProcessing && label) vProcessing.setText(label); },
+    setTips: function() {},
+    getState: function() { return (window.vProcessing && vProcessing.isActive()) ? 'loading' : 'hidden'; },
+    cleanup: function() { if(window.vProcessing) vProcessing.hide(); },
+    hideLoading: function(cb) { this.hide(cb); },
+    hideQuick: function() { this.forceHide(); }
+};
+window._creatorLoadingCtrl = _ctrl;
 })();

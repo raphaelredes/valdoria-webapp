@@ -32,10 +32,12 @@ document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v +
         document.write('<link rel="stylesheet" href="game-daily.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game-hints.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game-guide.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="game-settings-popup.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="inn-animation.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game-social.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="game-popup-unified.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/audio-manager.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
     </script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -344,10 +346,8 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     <!-- Guide overlay (in-game popup, lazy-built by game-guide.js) -->
     <div id="guide-overlay" style="display:none"></div>
 
-    <!-- Action spinner (lightweight, appears if server takes >2s) -->
-    <div id="action-spinner" class="action-spinner" style="display:none">
-        <div class="action-spinner-ring"></div>
-    </div>
+    <!-- Settings overlay (in-game popup, lazy-built by game-settings-popup.js) -->
+    <div id="settings-overlay" style="display:none"></div>
 
     <!-- Transition animation overlay -->
     <div id="transition-overlay" class="transition-overlay" style="display:none"></div>
@@ -360,6 +360,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/processing-overlay.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/escape-key.js?v=' + v + '"><\/script>');
         document.write('<script src="game-travel-prep.js?v=' + v + '"><\/script>');
         document.write('<script src="game-quest-popup.js?v=' + v + '"><\/script>');
@@ -374,6 +375,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         document.write('<script src="game-social.js?v=' + v + '"><\/script>');
         document.write('<script src="../guide/guide-data.js?v=' + v + '"><\/script>');
         document.write('<script src="game-guide.js?v=' + v + '"><\/script>');
+        document.write('<script src="game-settings-popup.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');

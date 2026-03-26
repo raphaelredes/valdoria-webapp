@@ -1,20 +1,17 @@
+// INVENTORY Loading — delegates to vProcessing (processing overlay)
 if(window._loadDbgSetApp)_loadDbgSetApp('INVENTORY');
-(function(){var TIPS=['Você desamarra as fivelas da mochila de couro surrado...',
-            'O cheiro de ervas secas e metal se mistura ao abrir o alforje...',
-            'Seus dedos percorrem os compartimentos, catalogando seus pertences...',
-            'Frascos tilintam contra lâminas enquanto você organiza seus itens...',
-            'A luz da tocha revela o brilho de uma gema esquecida no fundo...',
-            'Cordas, tochas e rações — tudo que um aventureiro precisa...',
-            'Cada item carrega uma história das aventuras que você viveu...',
-            'O couro da mochila range enquanto você vasculha seus pertences...',
-            '🎒 Dica: Itens vendem por 50% do valor — negocie no mercado para melhores preços.',
-            '🎒 Dica: Poções de cura restauram 2d4+2 HP — essenciais para exploração.',
-            '🎒 Dica: Equipamentos com sockets aceitam gemas e runas para bônus extras.',
-            '🎒 Dica: Itens raros brilham com bordas douradas — fique atento ao loot.',
-            '🎒 Dica: Peso importa — verifique sua capacidade antes de explorar.',
-            '🎒 Dica: Sets de equipamento concedem bônus especiais quando completos.',
-            '🎒 Dica: Desmontar itens na oficina recupera materiais de crafting.',
-            '🎒 Dica: Mantenha sempre uma tocha e rações — dungeons consomem recursos.',];window._invLoadingCtrl=ValdoriaLoadingController({overlayId: 'loadingOverlay',
-            tips: TIPS,
-            hasRingAccel: false,
-            hasGemPhase: false,onTimeout:function(){console.error("[INVENTORY] Loading timeout");}});})();
+(function(){
+var _defaultText = 'Abrindo sua mochila...';
+var _ctrl = {
+    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText}); },
+    hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
+    forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
+    setProgress: function(pct, label) { if(window.vProcessing && label) vProcessing.setText(label); },
+    setTips: function() {},
+    getState: function() { return (window.vProcessing && vProcessing.isActive()) ? 'loading' : 'hidden'; },
+    cleanup: function() { if(window.vProcessing) vProcessing.hide(); },
+    hideLoading: function(cb) { this.hide(cb); },
+    hideQuick: function() { this.forceHide(); }
+};
+window._invLoadingCtrl = _ctrl;
+})();

@@ -1,31 +1,17 @@
-(function() {
-var TIPS = [
-    // Narrativas imersivas
-    'Páginas amareladas revelam segredos esquecidos por séculos...',
-    'A tinta de escribas antigos ainda brilha sob a luz das velas...',
-    'Tomos empoeirados guardam o conhecimento de eras passadas...',
-    'O compêndio sussurra histórias de criaturas lendárias...',
-    'Mapas antigos mostram terras que poucos ousaram explorar...',
-    'O aroma de pergaminho velho preenche a biblioteca silenciosa...',
-    'Cada verbete esconde pistas sobre os mistérios de Valdoria...',
-    'Runas ancestrais adornam as capas dos livros mais antigos...',
-
-    // Dicas de gameplay
-    '📖 Dica: O bestiário revela fraquezas e resistências dos inimigos.',
-    '📖 Dica: Conhecer os itens disponíveis ajuda a planejar suas compras.',
-    '📖 Dica: Cada raça possui traços únicos que influenciam o gameplay.',
-    '📖 Dica: Classes diferentes oferecem estilos de combate distintos.',
-    '📖 Dica: Inimigos com resistências recebem metade do dano daquele tipo.',
-    '📖 Dica: Ações Lendárias permitem que bosses ajam fora do turno.',
-    '📖 Dica: Vulnerabilidades dobram o dano — consulte o bestiário.',
-    '📖 Dica: Cada criatura tem um CR — compare com seu nível antes de lutar.',
-];
+// CODEX Loading — delegates to vProcessing (processing overlay)
 if(window._loadDbgSetApp)_loadDbgSetApp('CODEX');
-window._codexLoadingCtrl = ValdoriaLoadingController({
-    overlayId: 'loadingOverlay',
-    tips: TIPS,
-    hasRingAccel: false,
-    hasGemPhase: false,
-    onTimeout: function() { console.error("[CODEX] Loading timeout"); }
-});
+(function(){
+var _defaultText = 'Carregando conhecimentos ancestrais...';
+var _ctrl = {
+    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText}); },
+    hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
+    forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
+    setProgress: function(pct, label) { if(window.vProcessing && label) vProcessing.setText(label); },
+    setTips: function() {},
+    getState: function() { return (window.vProcessing && vProcessing.isActive()) ? 'loading' : 'hidden'; },
+    cleanup: function() { if(window.vProcessing) vProcessing.hide(); },
+    hideLoading: function(cb) { this.hide(cb); },
+    hideQuick: function() { this.forceHide(); }
+};
+window._codexLoadingCtrl = _ctrl;
 })();

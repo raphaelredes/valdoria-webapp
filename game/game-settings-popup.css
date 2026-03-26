@@ -1,0 +1,13 @@
+/* Settings overlay (in-game popup) */
+#settings-overlay{position:fixed;inset:0;background:var(--v-bg,#2a2420);z-index:var(--v-z-popup,500);display:none;flex-direction:column;overflow:hidden;opacity:0;transition:opacity var(--v-transition-base,0.2s) ease}
+#settings-overlay.active{display:flex;opacity:1}
+#settings-overlay.hiding{opacity:0}
+.settings-popup-header{position:sticky;top:0;z-index:var(--v-z-sticky,10);background:var(--v-bg,#2a2420);padding:var(--v-space-md,8px) var(--v-space-md-lg,12px);border-bottom:1px solid var(--v-border,#4a3828);display:flex;align-items:center;justify-content:center;min-height:44px}
+.settings-popup-title{font-family:var(--v-font-display);color:var(--v-gold,#c4953a);font-size:var(--v-font-lg,15px);text-align:center;letter-spacing:1px}
+.settings-close-btn{position:absolute;right:var(--v-space-md,8px);top:50%;transform:translateY(-50%);background:none;border:none;color:var(--v-text-dim,#a09484);font-size:var(--v-font-2xl,18px);cursor:pointer;padding:var(--v-space-sm,6px);min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+.settings-close-btn:active{color:var(--v-text,#d4c8b0)}
+#settings-popup-content{padding:var(--v-space-md,8px) var(--v-space-md-lg,12px) 80px;overflow-y:auto;flex:1;scrollbar-width:none;-ms-overflow-style:none}
+#settings-popup-content::-webkit-scrollbar{display:none}
+.settings-loading{text-align:center;padding:28px 16px;color:var(--v-text-dim,#a09484);font-family:var(--v-font);font-size:var(--v-font-body,14px)}
+.settings-popup-close-bottom{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);padding:9px 28px;background:var(--v-bg-raised,#332a22);border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-pill,20px);color:var(--v-text,#d4c8b0);font-family:var(--v-font);font-size:var(--v-font-md,13px);cursor:pointer;z-index:calc(var(--v-z-popup,500) + 1);box-shadow:var(--v-shadow-md);min-height:44px;min-width:44px}
+.settings-popup-close-bottom:active{background:var(--v-bg-card-hover)}

@@ -1,29 +1,17 @@
-(function() {
-var TIPS = [
-    // Narrativas imersivas
-    'O aroma de especiarias e couro curtido preenche o ar do mercado...',
-    'Comerciantes ajustam suas barracas enquanto você se aproxima...',
-    'Moedas de ouro tilintam nos balcões dos mercadores mais prósperos...',
-    'Um mercador exótico desfaz os nós de um fardo de mercadorias raras...',
-    'Vozes regateando preços se misturam ao som de martelos na forja...',
-    'Tecidos coloridos balançam ao vento, atraindo olhares curiosos...',
-    'O brilho de armas polidas reflete a luz do sol entre as tendas...',
-    'Um anão examina gemas com uma lupa, murmurando valores...',
-
-    // Dicas de gameplay
-    '💰 Dica: Preços variam conforme seu Carisma e reputação com o NPC.',
-    '🛡️ Dica: Equipamentos mágicos são raros — quando encontrar, considere investir.',
-    '💰 Dica: Itens vendidos rendem metade do valor de compra.',
-    '🛡️ Dica: Poções de cura são essenciais antes de aventuras perigosas.',
-    '💰 Dica: Gemas e materiais raros podem ser usados na oficina de artesanato.',
-    '🛡️ Dica: Verifique as ofertas de todos os NPCs antes de comprar.',
-    '💰 Dica: Alguns NPCs aparecem temporariamente — aproveite suas ofertas únicas.',
-    '🛡️ Dica: Equipar itens melhores pode fazer toda a diferença no combate.',
-];
+// MARKET Loading — delegates to vProcessing (processing overlay)
 if(window._loadDbgSetApp)_loadDbgSetApp('MARKET');
-window._marketLoadingCtrl = ValdoriaLoadingController({
-    overlayId: 'marketLoading',
-    tips: TIPS,
-    onTimeout: function() { console.error('[MARKET] Loading timeout'); }
-});
+(function(){
+var _defaultText = 'Preparando o mercado...';
+var _ctrl = {
+    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText}); },
+    hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
+    forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
+    setProgress: function(pct, label) { if(window.vProcessing && label) vProcessing.setText(label); },
+    setTips: function() {},
+    getState: function() { return (window.vProcessing && vProcessing.isActive()) ? 'loading' : 'hidden'; },
+    cleanup: function() { if(window.vProcessing) vProcessing.hide(); },
+    hideLoading: function(cb) { this.hide(cb); },
+    hideQuick: function() { this.forceHide(); }
+};
+window._marketLoadingCtrl = _ctrl;
 })();

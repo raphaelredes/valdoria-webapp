@@ -12,6 +12,31 @@ window._closeFooterPopup = function() {
     vPopup.hide();
 };
 
+/* ====== UNIFIED FOOTER POPUP TOGGLE ====== */
+window._isAnyFooterPopupOpen = function(id) {
+    if ((id === 'char-details' || id === 'skills' || id === 'allies') && _activeFooterPopup === id && vPopup.isOpen()) return true;
+    if (id === 'inventory' && typeof isInventoryPopupOpen === 'function' && isInventoryPopupOpen()) return true;
+    if (id === 'guide' && typeof isGuidePopupOpen === 'function' && isGuidePopupOpen()) return true;
+    if (id === 'settings' && typeof isSettingsPopupOpen === 'function' && isSettingsPopupOpen()) return true;
+    return false;
+};
+
+window._closeAnyFooterPopup = function() {
+    if (_activeFooterPopup && typeof vPopup !== 'undefined' && vPopup.isOpen()) {
+        _activeFooterPopup = null;
+        vPopup.hide();
+    }
+    if (typeof isInventoryPopupOpen === 'function' && isInventoryPopupOpen()) {
+        hideInventoryPopup();
+    }
+    if (typeof isGuidePopupOpen === 'function' && isGuidePopupOpen()) {
+        hideGuidePopup();
+    }
+    if (typeof isSettingsPopupOpen === 'function' && isSettingsPopupOpen()) {
+        hideSettingsPopup();
+    }
+};
+
 function _buildActionsHtml(data) {
     var html = "";
     if (data.actions && data.actions.length > 0) {

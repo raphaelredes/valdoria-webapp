@@ -1,29 +1,17 @@
-(function() {
-var TIPS = [
-    // Narrativas imersivas
-    'A escuridão engole a luz da sua tocha poucos metros à frente...',
-    'Goteiras ecoam nas paredes de pedra úmida enquanto você desce...',
-    'O ar fica mais pesado a cada andar — algo antigo habita estas profundezas...',
-    'Runas desgastadas nas paredes sussurram avisos esquecidos...',
-    'O cheiro de mofo e ferro enferrujado invade suas narinas...',
-    'Correntes rangem em algum lugar além da curva do corredor...',
-    'Seus passos ecoam no silêncio opressor da masmorra...',
-    'Teias de aranha cobrem as tochas apagadas nas paredes...',
-
-    // Dicas de gameplay
-    '⚔️ Dica: Masmorras ficam mais perigosas a cada andar — esteja preparado.',
-    '🛡️ Dica: Armadilhas podem ser detectadas com Percepção Passiva alta.',
-    '⚔️ Dica: Guarde seus recursos para o chefe da masmorra.',
-    '🛡️ Dica: Salas de descanso permitem recuperar dados de vida.',
-    '⚔️ Dica: Inimigos de masmorra podem ter resistências incomuns.',
-    '🛡️ Dica: Baús podem conter equipamentos raros — ou armadilhas.',
-    '⚔️ Dica: O chefe da masmorra tem habilidades lendárias únicas.',
-    '🛡️ Dica: Fugir da masmorra preserva metade do ouro coletado.',
-];
+// DUNGEON Loading — delegates to vProcessing (processing overlay)
 if(window._loadDbgSetApp)_loadDbgSetApp('DUNGEON');
-window._dungeonLoadingCtrl = ValdoriaLoadingController({
-    overlayId: 'loading',
-    tips: TIPS,
-    onTimeout: function() { console.error('[DUNGEON] Loading timeout'); }
-});
+(function(){
+var _defaultText = 'Entrando na masmorra...';
+var _ctrl = {
+    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText}); },
+    hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
+    forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
+    setProgress: function(pct, label) { if(window.vProcessing && label) vProcessing.setText(label); },
+    setTips: function() {},
+    getState: function() { return (window.vProcessing && vProcessing.isActive()) ? 'loading' : 'hidden'; },
+    cleanup: function() { if(window.vProcessing) vProcessing.hide(); },
+    hideLoading: function(cb) { this.hide(cb); },
+    hideQuick: function() { this.forceHide(); }
+};
+window._dungeonLoadingCtrl = _ctrl;
 })();

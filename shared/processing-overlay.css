@@ -1,0 +1,46 @@
+/* Processing Overlay v1.0 — Runa Giratoria
+ * Lightweight loading overlay for in-game transitions and API calls.
+ * Full loading (magic circle) is ONLY for Game Hub initial load + Navigate.
+ */
+
+/* -- Overlay container -- */
+.v-processing{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,12,8,0.88);z-index:var(--v-z-overlay,500);opacity:0;pointer-events:none;transition:opacity 0.2s ease}
+.v-processing.active{opacity:1;pointer-events:auto}
+.v-processing.hiding{opacity:0;pointer-events:none}
+
+/* -- Rune ring (SVG container) -- */
+.v-processing-rune{width:80px;height:80px;animation:vProcSpin 6s linear infinite}
+
+/* -- Central gem -- */
+.v-processing-gem{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;color:var(--v-gold,#c4953a);text-shadow:0 0 8px rgba(196,149,58,0.5);animation:vProcPulse 2.5s ease-in-out infinite}
+
+/* -- Rune ring + gem wrapper -- */
+.v-processing-icon{position:relative;width:80px;height:80px;margin-bottom:var(--v-space-lg,12px)}
+
+/* -- Status text -- */
+.v-processing-text{font-family:var(--v-font,"MedievalSharp",serif);font-size:var(--v-font-body,14px);color:var(--v-text-dim,#a09484);text-align:center;max-width:280px;line-height:1.5;transition:opacity 0.2s ease}
+.v-processing-text--slow{color:var(--v-gold,#c4953a)}
+
+/* -- Retry button -- */
+.v-processing-retry{display:none;margin-top:var(--v-space-lg,12px);padding:var(--v-space-md,8px) var(--v-space-xl,16px);min-height:44px;border:1px solid var(--v-gold-25);border-radius:var(--v-radius,8px);background:var(--v-bg-raised,#332a22);color:var(--v-gold-light,#dbb668);font-family:var(--v-font,"MedievalSharp",serif);font-size:var(--v-font-body,14px);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all var(--v-transition-fast,0.15s) ease}
+.v-processing-retry:active{transform:scale(0.97);opacity:0.9}
+.v-processing-retry.visible{display:block}
+
+/* -- Animations -- */
+@keyframes vProcSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes vProcPulse{0%,100%{opacity:0.7;text-shadow:0 0 8px rgba(196,149,58,0.4)}50%{opacity:1;text-shadow:0 0 16px rgba(196,149,58,0.7),0 0 32px rgba(196,149,58,0.3)}}
+
+/* -- Performance: Lite -- */
+body.perf-lite .v-processing-rune{animation:none}
+body.perf-lite .v-processing-gem{animation:vProcPulseLite 3s ease-in-out infinite}
+@keyframes vProcPulseLite{0%,100%{opacity:0.6}50%{opacity:1}}
+
+/* -- Performance: Medium -- */
+body.perf-medium .v-processing-rune{animation-duration:8s}
+
+/* -- Reduced motion -- */
+@media(prefers-reduced-motion:reduce){
+.v-processing-rune{animation:none}
+.v-processing-gem{animation:none;opacity:0.9}
+.v-processing{transition:none}
+}
