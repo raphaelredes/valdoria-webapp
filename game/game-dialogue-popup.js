@@ -200,4 +200,5 @@ function _extractText(rawText) {
     return rawText.replace(/<[^>]+>/g, '').trim();
 }
 
+console.log('[DLG-POPUP] loaded, showDialoguePopup=' + typeof window.showDialoguePopup);
 })();
