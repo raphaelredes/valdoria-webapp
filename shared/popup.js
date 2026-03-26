@@ -13,7 +13,7 @@ if(_stack.length===1)document.addEventListener('keydown',_escHandler);}
 function hide(){if(_stack.length===0)return;var top=_stack[_stack.length-1];var ov=top.el;var cb=top.onHide;ov.classList.add('hiding');ov.classList.remove('active');setTimeout(function(){if(ov.classList.contains('active')){_busy=false;return;}ov.style.display='none';_stack.pop();if(_stack.length>0){_zBase=_stack[_stack.length-1].z;}else{_zBase=1000;document.removeEventListener('keydown',_escHandler);}
 _busy=false;if(cb)cb();},300);}
 function isOpen(){return _stack.length>0&&_stack[_stack.length-1].el.classList.contains('active');}
-function _makeHandler(customHandler){return function(e){if(_busy)return;var action=e.currentTarget.getAttribute('data-action');if(!action)return;if(typeof haptic==='function')haptic('light');if(action==='cancel'||action==='v-popup-close'){hide();return;}
+function _makeHandler(customHandler){return function(e){if(_busy)return;var action=e.currentTarget.getAttribute('data-action');if(!action)return;if(typeof haptic==='function')haptic('light');if(action==='cancel'||action==='dismiss'||action==='v-popup-close'){hide();return;}
 if(customHandler){var handled=customHandler(action,e.currentTarget);if(handled)return;}
 _busy=true;hide();setTimeout(function(){if(typeof doAction==='function')doAction(action);},150);};}
 window.vPopup={show:show,hide:hide,isOpen:isOpen};})();

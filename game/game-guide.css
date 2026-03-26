@@ -3,7 +3,7 @@
 #guide-overlay.active{display:flex;opacity:1}
 #guide-overlay.hiding{opacity:0}
 .guide-header{position:sticky;top:0;z-index:var(--v-z-sticky,10);background:var(--v-bg,#2a2420);padding:var(--v-space-md,8px) var(--v-space-md-lg,12px) 0;border-bottom:1px solid var(--v-border,#4a3828)}
-.guide-title{font-family:var(--v-font-display);color:var(--v-gold,#c4953a);font-size:15px;text-align:center;margin:0 0 var(--v-space-sm,6px);letter-spacing:1px}
+.guide-title{font-family:var(--v-font-display);color:var(--v-gold,#c4953a);font-size:var(--v-font-lg,15px);text-align:center;margin:0 0 var(--v-space-sm,6px);letter-spacing:1px}
 .guide-ornament{text-align:center;color:var(--v-gold-dim);font-size:11px;letter-spacing:6px;margin:-2px 0 4px;opacity:0.6}
 .guide-search-wrap{position:relative}
 .guide-search-input{width:100%;box-sizing:border-box;padding:var(--v-space-md,8px) 34px var(--v-space-md,8px) 32px;background:var(--v-bg-raised,#332a22);border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius,10px);color:var(--v-text,#d4c8b0);font-family:var(--v-font);font-size:var(--v-font-body,14px);outline:none;transition:border-color var(--v-transition,0.2s)}
@@ -20,12 +20,12 @@
 .guide-cat-filters{display:flex;gap:4px;padding:4px 0 6px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;-ms-overflow-style:none}
 .guide-cat-filters::-webkit-scrollbar{display:none}
 .guide-cat-pill{flex-shrink:0;padding:4px 10px;border-radius:var(--v-radius-pill,20px);background:var(--v-bg-raised,#332a22);border:1px solid var(--v-border,#4a3828);color:var(--v-text-dim,#a09484);font-family:var(--v-font);font-size:12px;cursor:pointer;transition:background var(--v-transition-fast,0.1s),border-color var(--v-transition-fast,0.1s),color var(--v-transition-fast,0.1s);user-select:none;-webkit-tap-highlight-color:transparent;min-height:32px}
-.guide-cat-pill.active{background:rgba(196,149,58,0.15);border-color:var(--v-gold-dim);color:var(--v-gold,#c4953a)}
+.guide-cat-pill.active{background:var(--v-gold-15);border-color:var(--v-gold-dim);color:var(--v-gold,#c4953a)}
 .guide-topics{padding:4px 10px 80px;overflow-y:auto;flex:1;scrollbar-width:none;-ms-overflow-style:none;scroll-behavior:smooth}
 .guide-topics::-webkit-scrollbar{display:none}
 .guide-topic-card{background:var(--v-bg-card,#2e2520);border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius,10px);margin-bottom:4px;overflow:hidden;transition:border-color var(--v-transition,0.2s),box-shadow var(--v-transition,0.2s)}
 .guide-topic-card.hidden{display:none}
-.guide-topic-card.open{border-color:var(--v-gold-dim);box-shadow:0 0 8px rgba(196,149,58,0.1)}
+.guide-topic-card.open{border-color:var(--v-gold-dim);box-shadow:0 0 8px var(--v-gold-10)}
 .guide-topic-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;min-height:44px;box-sizing:border-box}
 .guide-topic-header:active{background:var(--v-bg-card-hover)}
 .guide-topic-name{font-family:var(--v-font);font-size:var(--v-font-body,14px);color:var(--v-text-bright,#e8dcc8);flex:1}
@@ -39,8 +39,8 @@
 .guide-topic-content i{color:var(--v-text-dim,#a09484)}
 .guide-topic-content code{font-family:var(--v-font-mono);background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:var(--v-radius-sm,6px);font-size:12px}
 .guide-topic-content ul{padding-left:16px;margin:4px 0}
-#guide-overlay mark.search-hl{background:rgba(196,149,58,0.3);color:var(--v-gold-light);border-radius:var(--v-radius-sm,6px);padding:0 1px}
-@keyframes guideMatchPulse{0%{box-shadow:0 0 0 0 rgba(196,149,58,0.35)}50%{box-shadow:0 0 10px 2px rgba(196,149,58,0.2)}100%{box-shadow:0 0 0 0 rgba(196,149,58,0)}}
+#guide-overlay mark.search-hl{background:var(--v-gold-30);color:var(--v-gold-light);border-radius:var(--v-radius-sm,6px);padding:0 1px}
+@keyframes guideMatchPulse{0%{box-shadow:0 0 0 0 var(--v-gold-35)}50%{box-shadow:0 0 10px 2px var(--v-gold-20)}100%{box-shadow:0 0 0 0 rgba(196,149,58,0)}}
 .guide-topic-card.search-match{animation:guideMatchPulse 1s ease-out;border-color:var(--v-gold-dim)}
 .guide-topic-related{margin-top:var(--v-space-md,8px);padding-top:6px;border-top:1px solid var(--v-border,#4a3828);font-size:11px;color:var(--v-text-dim,#a09484)}
 .guide-topic-related a{color:var(--v-gold-dim);text-decoration:none;cursor:pointer}
