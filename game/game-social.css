@@ -88,6 +88,47 @@
 .social-msg-name:active {
     text-decoration: underline;
 }
+/* 3a. Grouped messages (same sender, Discord/FFXIV pattern) */
+.social-msg--grouped {
+    padding-left: 0;
+}
+.social-msg--grouped .social-msg-meta {
+    display: none;
+}
+.social-msg + .social-msg--grouped {
+    margin-top: 0;
+}
+
+/* 3b. New messages pill (scroll-to-bottom indicator) */
+.social-new-msgs {
+    position: sticky;
+    bottom: 0;
+    text-align: center;
+    padding: var(--v-space-xs) var(--v-space-md);
+    cursor: pointer;
+    z-index: 2;
+    display: none;
+}
+.social-new-msgs.visible {
+    display: block;
+}
+.social-new-msgs-pill {
+    display: inline-block;
+    padding: var(--v-space-xs) var(--v-space-md-lg);
+    background: var(--v-gold-20);
+    border: 1px solid var(--v-gold-dim);
+    border-radius: var(--v-radius-pill);
+    color: var(--v-gold-light);
+    font-size: var(--v-font-xs);
+    font-family: var(--v-font);
+    backdrop-filter: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: background var(--v-transition-base);
+}
+.social-new-msgs-pill:active {
+    background: var(--v-gold-30);
+}
+
 /* 4. Emote Grid Toggle */
 .social-emote-toggle {
     width: 44px;
@@ -125,7 +166,7 @@
 }
 .social-emote-btn {
     width: auto;
-    height: 40px;
+    height: 44px;
     border-radius: var(--v-radius-sm);
     background: var(--v-bg-card);
     border: 1px solid var(--v-border);
@@ -152,7 +193,7 @@
     background: var(--v-bg);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius-sm);
-    padding: var(--v-space-sm) var(--v-space-md);
+    padding: var(--v-space-md) var(--v-space-md-lg);
     color: var(--v-text);
     font-family: var(--v-font);
     font-size: var(--v-font-base);
@@ -464,7 +505,8 @@
     margin-top: var(--v-space-xs);
 }
 .social-detail-scroll {
-    max-height: calc(55vh - 130px);
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
 }
 .social-stat-row {
@@ -535,7 +577,7 @@
 }
 .social-empty-icon {
     font-size: var(--v-font-2xl, 18px);
-    margin-bottom: var(--v-space-sm);
+    margin-bottom: var(--v-space-md);
 }
 
 /* 11. Section Labels */
@@ -568,6 +610,7 @@
 .social-mini-profile {
     position: absolute;
     width: 200px;
+    max-width: calc(100% - 16px);
     background: var(--v-bg-card);
     border: 1px solid var(--v-gold-25, rgba(196,149,58,0.25));
     border-radius: var(--v-radius);
