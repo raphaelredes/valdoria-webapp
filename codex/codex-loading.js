@@ -14,4 +14,6 @@ var _ctrl = {
     hideQuick: function() { this.forceHide(); }
 };
 window._codexLoadingCtrl = _ctrl;
+// Auto-show loading on startup
+_ctrl.show(false);
 })();
