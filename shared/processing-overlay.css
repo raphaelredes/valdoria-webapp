@@ -12,7 +12,7 @@
 .v-processing-rune{width:80px;height:80px;animation:vProcSpin 6s linear infinite}
 
 /* -- Central gem -- */
-.v-processing-gem{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;color:var(--v-gold,#c4953a);text-shadow:0 0 8px rgba(196,149,58,0.5);animation:vProcPulse 2.5s ease-in-out infinite}
+.v-processing-gem{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;color:var(--v-gold,#c4953a);text-shadow:0 0 8px var(--v-gold-50);animation:vProcPulse 2.5s ease-in-out infinite}
 
 /* -- Rune ring + gem wrapper -- */
 .v-processing-icon{position:relative;width:80px;height:80px;margin-bottom:var(--v-space-lg,12px)}
@@ -28,7 +28,7 @@
 
 /* -- Animations -- */
 @keyframes vProcSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes vProcPulse{0%,100%{opacity:0.7;text-shadow:0 0 8px rgba(196,149,58,0.4)}50%{opacity:1;text-shadow:0 0 16px rgba(196,149,58,0.7),0 0 32px rgba(196,149,58,0.3)}}
+@keyframes vProcPulse{0%,100%{opacity:0.7;text-shadow:0 0 8px var(--v-gold-40)}50%{opacity:1;text-shadow:0 0 16px var(--v-gold-70),0 0 32px var(--v-gold-30)}}
 
 /* -- Performance: Lite -- */
 body.perf-lite .v-processing-rune{animation:none}

@@ -28,7 +28,7 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">')
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
-        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');;
+        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
     </script>
     <script>
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
@@ -582,46 +582,7 @@
 </head>
 
 <body>
-    <div class="v-loading-overlay dice-loading" id="loadingOverlay" aria-busy="true">
-        <div class="dice-loading-scene">
-            <div class="dice-loading-glow"></div>
-            <div class="dice-loading-d20">
-                <svg viewBox="0 0 100 100" width="80" height="80">
-                    <!-- D20 icosahedron face pattern -->
-                    <defs>
-                        <linearGradient id="dg1" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#c4953a"/>
-                            <stop offset="100%" stop-color="#8b6914"/>
-                        </linearGradient>
-                        <linearGradient id="dg2" x1="100%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stop-color="#d4a844"/>
-                            <stop offset="100%" stop-color="#7a5c10"/>
-                        </linearGradient>
-                        <filter id="dice-glow">
-                            <feGaussianBlur stdDeviation="2" result="blur"/>
-                            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                        </filter>
-                    </defs>
-                    <!-- Outer shape -->
-                    <polygon points="50,5 95,30 95,70 50,95 5,70 5,30" fill="url(#dg1)" stroke="#c4953a" stroke-width="1.5" filter="url(#dice-glow)"/>
-                    <!-- Inner faces -->
-                    <polygon points="50,5 95,30 50,50" fill="url(#dg2)" stroke="#8b6914" stroke-width="0.5" opacity="0.7"/>
-                    <polygon points="50,5 5,30 50,50" fill="#a07820" stroke="#8b6914" stroke-width="0.5" opacity="0.5"/>
-                    <polygon points="95,30 95,70 50,50" fill="#b8882a" stroke="#8b6914" stroke-width="0.5" opacity="0.6"/>
-                    <polygon points="5,30 5,70 50,50" fill="#8b6914" stroke="#7a5c10" stroke-width="0.5" opacity="0.5"/>
-                    <polygon points="50,95 95,70 50,50" fill="#9a7418" stroke="#8b6914" stroke-width="0.5" opacity="0.6"/>
-                    <polygon points="50,95 5,70 50,50" fill="#7a5c10" stroke="#6a4e0a" stroke-width="0.5" opacity="0.5"/>
-                    <!-- Number 20 in center -->
-                    <text x="50" y="56" text-anchor="middle" fill="#f5e6c8" font-family="Cinzel, serif" font-size="22" font-weight="700" opacity="0.9">20</text>
-                </svg>
-            </div>
-            <div class="dice-loading-sparks">
-                <span></span><span></span><span></span><span></span>
-            </div>
-        </div>
-        <div class="dice-loading-title">MESA DE DADOS</div>
-        <div class="dice-loading-text" id="dice-loading-tip" role="status" aria-live="polite">Preparando a mesa...</div>
-    </div>
+    <!-- Processing overlay injected by shared/processing-overlay.js -->
     <script>
     document.write('<script src="dice-loading.js?v=' + v + '"><\/script>');
     </script>
