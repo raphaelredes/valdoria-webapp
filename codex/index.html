@@ -22,6 +22,7 @@
         document.write('<link rel="stylesheet" href="../shared/tabs.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/drawer.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="codex-app.css?v=' + v + '">');
@@ -33,6 +34,7 @@
     document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/processing-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
@@ -44,15 +46,7 @@
 
 <body>
     <!-- Loading overlay (emoji icon via shared template) -->
-    <script>
-    document.write(ValdoriaLoadingHTML({
-        overlayId: 'loadingOverlay',
-        title: 'Compêndio de Valdoria',
-        icon: 'emoji',
-        iconEmoji: '📖',
-        defaultTip: 'Carregando conhecimentos ancestrais...'
-    }));
-    </script>
+    <!-- Processing overlay injected by shared/processing-overlay.js -->
 
     <script>
     document.write('<script src="codex-loading.js?v=' + v + '"><\/script>');

@@ -21,6 +21,7 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/image-popup.css?v=' + v + '">');
@@ -34,6 +35,7 @@
     <script>
     document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/processing-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     </script>
     <style>
@@ -841,7 +843,7 @@
 </head>
 
 <body>
-    <script>document.write(ValdoriaLoadingHTML({ overlayId: 'marketLoading', title: 'MERCADO', particleSet: 'standard', defaultTip: 'Preparando o mercado...' }));</script>
+    <!-- Processing overlay injected by shared/processing-overlay.js -->
 
     <!-- Loading controller (narrative tips + min load) -->
     <script>

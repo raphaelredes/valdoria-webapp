@@ -21,6 +21,7 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/drawer.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="prologue.css?v=' + v + '">');
     </script>
@@ -34,6 +35,7 @@
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/processing-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
     </script>
@@ -78,7 +80,7 @@
     </div>
 
     <!-- Initial loading (magic circle with narrative) -->
-    <script>document.write(ValdoriaLoadingHTML({ overlayId: 'initLoading', title: 'PRÓLOGO', particleSet: 'lite', progressId: 'init-loading-progress', tipId: 'init-loading-tip', defaultTip: 'O destino começa a tecer sua história...', hasStage: false, hasRetry: false }));</script>
+    <!-- Processing overlay injected by shared/processing-overlay.js -->
     <!-- Loading controller -->
     <script>
     document.write('<script src="prologue-loading.js?v=' + v + '"><\/script>');

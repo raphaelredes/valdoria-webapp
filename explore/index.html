@@ -22,6 +22,7 @@
         document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="explore.css?v=' + v + '">');
     </script>
     <script>
@@ -35,6 +36,7 @@
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/processing-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
             document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/motion.js?v=' + v + '"><\/script>');
@@ -57,7 +59,7 @@
         <button class="v-skip-btn" id="travel-skip-btn">Pular >></button>
     </div>
 
-    <script>document.write(ValdoriaLoadingHTML({ title: 'EXPLORAR', particleSet: 'standard', defaultTip: 'Gerando mapa...' }));</script>
+    <!-- Processing overlay injected by shared/processing-overlay.js -->
 
 
 

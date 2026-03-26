@@ -25,11 +25,13 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
     </script>
     <script>
     document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/processing-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
     </script>
@@ -305,7 +307,7 @@
 </head>
 
 <body>
-    <script>document.write(ValdoriaLoadingHTML({ overlayId: 'wsLoading', title: 'OFICINA', particleSet: 'standard', defaultTip: 'Preparando a oficina...' }));</script>
+    <!-- Processing overlay injected by shared/processing-overlay.js -->
 
     <!-- Loading controller -->
     <script>

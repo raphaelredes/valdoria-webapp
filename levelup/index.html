@@ -22,6 +22,7 @@
         document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/drawer.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
@@ -33,6 +34,7 @@
     <script>
     document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/processing-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     </script>
     <style>
@@ -773,7 +775,7 @@
         <div class="err-msg" id="fatalMsg">Dados invalidos</div>
         <div class="err-hint">Volte ao bot e tente novamente.</div>
     </div>
-    <script>document.write(ValdoriaLoadingHTML({ overlayId: 'initLoading', title: 'EVOLUÇÃO', particleSet: 'standard', progressId: 'init-loading-progress', defaultTip: 'Preparando evolução...' }));</script>
+    <!-- Processing overlay injected by shared/processing-overlay.js -->
     <!-- Loading controller -->
     <script>
     document.write('<script src="levelup-loading.js?v=' + v + '"><\/script>');

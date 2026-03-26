@@ -26,6 +26,7 @@
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/drawer.css?v=' + v + '">');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
@@ -41,6 +42,7 @@
     <script>
     document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/processing-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
     </script>
@@ -1055,7 +1057,7 @@
     </script>
 
     <!-- Loading overlay (magic circle) -->
-    <script>document.write(ValdoriaLoadingHTML({ overlayId: 'creatorLoading', title: 'FORJAR AVENTUREIRO', particleSet: 'lite', defaultTip: 'Preparando a forja de aventureiros...', hasStage: false, hasRetry: false }));</script>
+    <!-- Processing overlay injected by shared/processing-overlay.js -->
     <!-- Loading controller -->
     <script>
     (function() {

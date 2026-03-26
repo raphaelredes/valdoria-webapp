@@ -28,6 +28,7 @@
         document.write('<link rel="stylesheet" href="../shared/dice-roller.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="combat.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
     </script>
     <script>
     document.write('<script src="../shared/font-apply.js?v=' + v + '"><\/script>');
@@ -40,6 +41,7 @@
     document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+    document.write('<script src="../shared/processing-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
             document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/motion.js?v=' + v + '"><\/script>');
@@ -47,7 +49,7 @@
 </head>
 
 <body>
-    <script>document.write(ValdoriaLoadingHTML({ overlayId: 'combatLoading', title: 'COMBATE', particleSet: 'standard', defaultTip: 'Preparando para o combate...' }));</script>
+    <!-- Processing overlay injected by shared/processing-overlay.js -->
 
     <!-- Loading controller -->
     <script>
