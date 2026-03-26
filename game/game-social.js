@@ -96,10 +96,12 @@ function _renderTabs() {
 
 function _renderBody() {
     var h = _renderTabs();
+    h += '<div class="social-tab-content">';
     if (_activeTab === 'chat') h += _renderChat();
-    else if (_activeTab === 'online') h += _renderOnline();
-    else if (_activeTab === 'inbox') h += _renderInbox();
-    else if (_activeTab === 'rel') h += _renderRel();
+    else if (_activeTab === 'online') h += '<div class="social-tab-scroll">' + _renderOnline() + '</div>';
+    else if (_activeTab === 'inbox') h += '<div class="social-tab-scroll">' + _renderInbox() + '</div>';
+    else if (_activeTab === 'rel') h += '<div class="social-tab-scroll">' + _renderRel() + '</div>';
+    h += '</div>';
     return h;
 }
 
