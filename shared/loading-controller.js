@@ -199,7 +199,7 @@ window.ValdoriaLoadingController = function(config) {
 
     return {
         hide: function(cb) {
-            if (_state === 'hiding' || _state === 'hidden') return;
+            if (_state === 'hiding' || _state === 'hidden') { if (cb) cb(); return; }
             if(window._loadDbg){var _el=Date.now()-_loadStart;_loadDbg('hide() state='+_state+' elapsed='+_el+'ms remaining='+(MIN_LOAD_MS-_el)+'ms');}
             _cleanup();
             if (!overlay || overlay.classList.contains('hidden')) {
