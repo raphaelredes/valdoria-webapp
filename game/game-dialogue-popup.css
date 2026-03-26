@@ -1,0 +1,67 @@
+/* game-dialogue-popup.css -- Popup fullscreen para conversas NPC */
+
+.dlg-popup-overlay{position:fixed;inset:0;z-index:var(--v-z-loading,1000);display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,12,8,0.92);opacity:0;transition:opacity var(--v-transition-base,0.2s) ease}
+.dlg-popup-overlay.active{display:flex;opacity:1}
+.dlg-popup-overlay.hiding{opacity:0;pointer-events:none}
+
+.dlg-popup-card{width:calc(100% - 16px);max-width:400px;max-height:calc(100dvh - 24px);display:flex;flex-direction:column;background:var(--v-bg-card,#2e2520);border:1px solid var(--v-gold-25);border-radius:var(--v-radius-lg,12px);box-shadow:0 8px 32px rgba(0,0,0,0.6),inset 0 1px 0 var(--v-gold-08);overflow:hidden;animation:dlgPopupIn 0.35s var(--v-ease-snap,cubic-bezier(0.16,1,0.3,1)) both}
+.dlg-popup-overlay.hiding .dlg-popup-card{animation:dlgPopupOut 0.3s ease-in both}
+@keyframes dlgPopupIn{from{opacity:0;transform:scale(0.92) translateY(16px)}60%{opacity:1;transform:scale(1.01) translateY(-2px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes dlgPopupOut{from{opacity:1;transform:scale(1) translateY(0)}to{opacity:0;transform:scale(0.94) translateY(10px)}}
+
+.dlg-popup-header{display:flex;align-items:center;gap:var(--v-space-md,8px);padding:var(--v-space-lg,12px) var(--v-space-xl,16px) var(--v-space-md,8px);border-bottom:1px solid var(--v-gold-15);background:linear-gradient(180deg,rgba(74,56,40,0.4) 0%,transparent 100%);flex-shrink:0}
+.dlg-popup-mood-icon{font-size:clamp(20px,6vw,26px);flex-shrink:0;line-height:1}
+.dlg-popup-npc-info{flex:1;min-width:0}
+.dlg-popup-speaker{font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-xl,16px);font-weight:700;color:var(--v-gold-light,#dbb668);letter-spacing:0.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dlg-popup-title{font-family:var(--v-font,'MedievalSharp',serif);font-size:var(--v-font-sm,12px);color:var(--v-text-dim,#a09484);font-style:italic;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dlg-popup-mood-badge{flex-shrink:0;font-family:var(--v-font,'MedievalSharp',serif);font-size:var(--v-font-xs,10px);color:var(--v-text-dim,#a09484);background:var(--v-gold-08);border:1px solid var(--v-gold-15);border-radius:var(--v-radius-pill,20px);padding:2px var(--v-space-md,8px);text-transform:uppercase;letter-spacing:0.8px}
+
+.dlg-popup-body{flex:1;padding:var(--v-space-lg,12px) var(--v-space-xl,16px);min-height:80px;max-height:40vh;overflow-y:auto;position:relative;scrollbar-width:thin;scrollbar-color:var(--v-border,#4a3828) transparent}
+.dlg-popup-body::-webkit-scrollbar{width:3px}
+.dlg-popup-body::-webkit-scrollbar-thumb{background:var(--v-border,#4a3828);border-radius:2px}
+.dlg-popup-text{font-family:var(--v-font,'MedievalSharp',serif);font-size:var(--v-font-body,14px);line-height:1.65;color:var(--v-text,#d4c8b0);white-space:pre-line}
+.dlg-popup-text .dlg-cursor{display:inline-block;width:2px;height:14px;background:var(--v-gold,#c8a84e);vertical-align:text-bottom;margin-left:var(--v-space-xs,2px);animation:dlgCursorBlink 0.6s step-end infinite}
+@keyframes dlgCursorBlink{0%,50%{opacity:1}51%,100%{opacity:0}}
+.dlg-popup-skip-hint{position:absolute;bottom:var(--v-space-sm,4px);right:var(--v-space-md,8px);font-family:var(--v-font,'MedievalSharp',serif);font-size:var(--v-font-sm,12px);color:var(--v-text-dim,#a09484);opacity:0;animation:dlgSkipIn 0.3s ease 0.8s forwards;pointer-events:none}
+@keyframes dlgSkipIn{to{opacity:0.5}}
+
+.dlg-popup-choices{display:flex;flex-direction:column;gap:var(--v-space-sm,6px);padding:var(--v-space-md,8px) var(--v-space-xl,16px);max-height:45vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--v-border,#4a3828) transparent}
+.dlg-popup-choices::-webkit-scrollbar{width:3px}
+.dlg-popup-choices::-webkit-scrollbar-thumb{background:var(--v-border,#4a3828);border-radius:2px}
+.dlg-popup-choice{display:block;width:100%;min-height:48px;padding:var(--v-space-md-lg,10px) var(--v-space-xl,16px);border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius,8px);background:var(--v-bg-raised,#332a22);color:var(--v-text,#d4c8b0);font-family:var(--v-font,'MedievalSharp',serif);font-size:var(--v-font-body,14px);line-height:1.4;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all var(--v-transition-fast,0.15s) ease;opacity:0;transform:translateY(6px)}
+.dlg-popup-choice.visible{opacity:1;transform:translateY(0)}
+.dlg-popup-choice:active{transform:scale(0.97);background:var(--v-gold-08);border-color:var(--v-gold-30)}
+
+.dlg-popup-footer{display:flex;flex-direction:column;gap:var(--v-space-sm,6px);padding:var(--v-space-sm,6px) var(--v-space-xl,16px) var(--v-space-lg,12px);border-top:1px solid var(--v-gold-12);background:rgba(30,24,18,0.4);flex-shrink:0}
+.dlg-popup-footer-btn{display:block;width:100%;min-height:40px;padding:var(--v-space-md,8px) var(--v-space-lg,12px);border:1px dashed var(--v-gold-12);border-radius:var(--v-radius,8px);background:transparent;color:var(--v-text-dim,#8a7a68);font-family:var(--v-font,'MedievalSharp',serif);font-size:var(--v-font-sm,13px);text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;opacity:0.7;transition:opacity var(--v-transition-fast,0.15s)}
+.dlg-popup-footer-btn:active{opacity:1}
+
+/* Mood: Happy */
+.dlg-popup-card.dlg-popup-mood-happy{border-color:var(--v-gold-30);box-shadow:0 8px 32px rgba(0,0,0,0.6),inset 0 0 30px var(--v-gold-08)}
+.dlg-popup-mood-happy .dlg-popup-speaker{color:var(--v-gold-light,#e8d48b)}
+.dlg-popup-mood-happy .dlg-popup-mood-icon{animation:dlgMoodPulse 2s ease infinite}
+@keyframes dlgMoodPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+/* Mood: Angry */
+.dlg-popup-card.dlg-popup-mood-angry{border-color:rgba(180,60,60,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.6),inset 0 0 30px rgba(123,32,32,0.1)}
+.dlg-popup-mood-angry .dlg-popup-header{background:linear-gradient(180deg,rgba(123,32,32,0.25) 0%,transparent 100%)}
+.dlg-popup-mood-angry .dlg-popup-speaker{color:var(--v-crimson-light,#e07070)}
+.dlg-popup-mood-angry .dlg-popup-text .dlg-cursor{background:var(--v-crimson-light,#e07070)}
+.dlg-popup-mood-angry .dlg-popup-mood-icon{animation:dlgMoodShake 0.4s ease 0s 2}
+@keyframes dlgMoodShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+/* Mood: Sad */
+.dlg-popup-card.dlg-popup-mood-sad{border-color:var(--v-silver-dim,#707880);box-shadow:0 8px 32px rgba(0,0,0,0.6),inset 0 0 30px rgba(112,120,128,0.06)}
+.dlg-popup-mood-sad .dlg-popup-speaker{color:var(--v-silver,#b0b8c0)}
+.dlg-popup-mood-sad .dlg-popup-text{color:var(--v-text-dim,#a09484)}
+.dlg-popup-mood-sad .dlg-popup-text .dlg-cursor{background:var(--v-silver-dim,#707880);animation:dlgCursorBlink 1.2s step-end infinite}
+/* Mood: Busy */
+.dlg-popup-card.dlg-popup-mood-busy{border-color:var(--v-border,#4a3828)}
+.dlg-popup-mood-busy .dlg-popup-speaker{color:var(--v-text,#d4c8b0)}
+/* Mood: Neutral */
+.dlg-popup-card.dlg-popup-mood-neutral{box-shadow:0 8px 32px rgba(0,0,0,0.6),0 0 8px var(--v-gold-05)}
+
+/* Performance */
+body.perf-lite .dlg-popup-card{animation:none!important}
+body.perf-lite .dlg-popup-mood-icon{animation:none!important}
+body.perf-lite .dlg-popup-choice{transition:none!important}
+body.perf-lite .dlg-popup-text .dlg-cursor{animation:none!important}
+@media(prefers-reduced-motion:reduce){.dlg-popup-card,.dlg-popup-mood-icon,.dlg-popup-choice,.dlg-popup-text .dlg-cursor{animation:none!important}.dlg-popup-overlay{transition:none!important}}

@@ -54,7 +54,7 @@ if(attempt===retries){const cached=loadCachedScreen();if(cached&&!S.currentScree
 if(typeof _trackApiLatency==='function')_trackApiLatency(0,false);showError(isTimeout?(navigator.onLine?'O servidor demorou demais para responder. Pode estar sobrecarregado.':'Sem conexão com a internet. Verifique seu Wi-Fi ou dados móveis.'):(navigator.onLine?'Não foi possível conectar. Verifique sua internet e tente novamente.':'Sem conexão. Verifique sua internet.'));return null;}
 const backoff=RETRY_BASE_MS*Math.pow(2,attempt);const jitter=Math.random()*500;await sleep(backoff+jitter);}}
 return null;}
-function _maybeShowPopup(data){if(data._is_popup&&typeof _showUnifiedPopup==='function'){_showUnifiedPopup(data);return true;}
+function _maybeShowPopup(data){if(data.dialogue&&typeof showDialoguePopup==='function'){showDialoguePopup(data);return true;}if(data._is_popup&&typeof _showUnifiedPopup==='function'){_showUnifiedPopup(data);return true;}
 if(data.quest_diary&&typeof showQuestDiaryPopup==='function'){showQuestDiaryPopup(data.quest_diary);return true;}
 if(data.quest_detail&&typeof showQuestPopup==='function'){showQuestPopup(data.quest_detail);return true;}
 if(data.quest_abandon&&window.vPopup){showQuestAbandonPopup(data.quest_abandon);return true;}
@@ -115,7 +115,7 @@ if(data.timer){showTimerOverlay(data.timer);}
 if(data.inn_animation&&typeof playInnAnimation==='function'){hideLocationTransition();const result=await new Promise(resolve=>playInnAnimation(data.inn_animation,resolve));if(!result?.skipped&&data.inn_animation.dream_insight){try{const diRes=await apiCall('/api/game/action',{cb:'inn_dream_insight'});if(diRes?.toast)showToast(diRes.toast);}catch(e){console.warn('[GAME] dream insight action failed',e);}}
 if(data.text||data.buttons){renderScreen(data);}
 if(window.actionGuard)actionGuard.release();return;}
-if(data._is_popup&&typeof _showUnifiedPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showUnifiedPopup(data);return;}
+if(data.dialogue&&typeof showDialoguePopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();showDialoguePopup(data);return;}if(data._is_popup&&typeof _showUnifiedPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showUnifiedPopup(data);return;}
 if(data.text||data.buttons){const elapsed=Date.now()-t0;const remaining=locCtx?Math.max(0,getLocTransitionMs()-elapsed):0;if(remaining>0)await sleep(remaining);hideLocationTransition();const isBack=/^(action_universal_back|city_back|back|voltar)/.test(callbackData);var _dir='forward';if(isBack){_dir='back';}else if(S.currentScreen&&S.currentScreen.screen_id&&data.screen_id){var _oz=(S.currentScreen.screen_id.split('.')||[])[0];var _nz=(data.screen_id.split('.')||[])[0];if(_oz&&_nz&&_oz!==_nz)_dir='zone';}animateScreenTransition(()=>renderScreen(data),_dir);if(data.transition&&data.text){}}else{hideLocationTransition();}
 if(window.actionGuard)actionGuard.release();}
 async function doText(text){if(S.transitioning||!text.trim())return;if(window.actionGuard&&!actionGuard.acquire())return;S.lastActionTime=Date.now();haptic('light');const data=await apiCall('/api/game/text',{text:text.trim()});if(window.actionGuard)actionGuard.release();if(data&&!data.error){animateScreenTransition(()=>renderScreen(data));}}
