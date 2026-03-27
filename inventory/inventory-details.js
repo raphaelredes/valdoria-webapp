@@ -65,7 +65,7 @@ html+=`<div class="modal-title">${it.e || '📦'} ${esc(name)}</div>`;html+=`<di
             <span class="detail-rarity-badge" style="background:${rarColor}22;color:${rarColor};border:1px solid ${rarColor}44;">
                 ${getRarityLabel(rarity)}
             </span></div>`;if(it.desc)html+=`<div class="detail-desc">"${it.desc}"</div>`;if(it.s)html+=detailRow('Slot',SLOT_NAMES[it.s]||it.s);if(it.dd){let dmgStr=it.dd+(it.b?` +${it.b}`:'');if(it.dt)dmgStr+=` (${it.dt})`;html+=detailRow('Dano',dmgStr,it.b?'bonus':'');}
-if(it.vd)html+=detailRow('Versátil',it.vd);if(it.ac)html+=detailRow('CA',`+${it.ac}`,'bonus');if(it.hb)html+=detailRow('HP Bônus',`+${it.hb}`,'bonus');if(it.mb)html+=detailRow('MP Bônus',`+${it.mb}`,'bonus');if(it.ib)html+=detailRow('INT Bônus',`+${it.ib}`,'bonus');if(it.sb)html+=detailRow('Bônus de Salvaguarda',`+${it.sb}`,'bonus');if(it.sk)html+=detailRow('Engastes',`${it.sk} ${vi('gem', 13)}`);if(it.sr)html+=detailRow('Força Req.',it.sr);if(it.th)html+=detailRow('Duas Mãos','Sim');if(it.heal){const avg=avgDice(it.heal);const m=(it.heal||'').match(/(\d+)d(\d+)\+?(\d+)?/);const lo=m?parseInt(m[1])+parseInt(m[3]||0):avg;const hi=m?parseInt(m[1])*parseInt(m[2])+parseInt(m[3]||0):avg;const preview=Math.min(D.p.mhp,localHP+avg)-localHP;html+=detailRow('Cura',`${it.heal} (${lo}–${hi})`);if(preview>0)html+=detailRow('Preview',`${vi('heart', 12)} ${localHP} → ~${localHP + preview}`,'bonus');}
+if(it.vd)html+=detailRow('Versátil',it.vd);if(it.ac)html+=detailRow('CA',`+${it.ac}`,'bonus');if(it.hb)html+=detailRow('HP Bônus',`+${it.hb}`,'bonus');if(it.mb)html+=detailRow('MP Bônus',`+${it.mb}`,'bonus');if(it.ib)html+=detailRow('INT Bônus',`+${it.ib}`,'bonus');if(it.sb)html+=detailRow('Bônus de Salvaguarda',`+${it.sb}`,'bonus');if(it.sk)html+=detailRow('Engastes',`${it.sk} ${vi('gem', 13)}`);if(it.sr)html+=detailRow('Força Req.',it.sr);if(it.th)html+=detailRow('Duas Mãos','Sim');if(it.heal){const avg=avgDice(it.heal);const m=(it.heal||'').match(/(\d+)d(\d+)\+?(\d+)?/);const lo=m?parseInt(m[1],10)+parseInt(m[3]||0,10):avg;const hi=m?parseInt(m[1],10)*parseInt(m[2],10)+parseInt(m[3]||0,10):avg;const preview=Math.min(D.p.mhp,localHP+avg)-localHP;html+=detailRow('Cura',`${it.heal} (${lo}–${hi})`);if(preview>0)html+=detailRow('Preview',`${vi('heart', 12)} ${localHP} → ~${localHP + preview}`,'bonus');}
 if(it.v)html+=detailRow('Valor',`${it.v} GP`);if(qty>1)html+=detailRow('Quantidade',`x${qty}`);if(it.gb){let parts=[];if(it.gb.hp_bonus)parts.push(`+${it.gb.hp_bonus} HP`);if(it.gb.mp_bonus)parts.push(`+${it.gb.mp_bonus} MP`);if(it.gb.ac_bonus)parts.push(`+${it.gb.ac_bonus} CA`);if(it.gb.save_bonus)parts.push(`+${it.gb.save_bonus} Salv.`);if(parts.length)html+=detailRow('Bônus Gema',parts.join(', '),'bonus');}
 if(it.re){html+=detailRow('Runa',`${it.re.tr}: ${it.re.ch}% ${it.re.ef}`);}
 if(it.si&&D.sets&&D.sets[it.si]){const sdef=D.sets[it.si];const owned=sdef.pcs.filter(p=>Object.values(localEq).includes(p)||localInv.some(i=>i.n===p&&i.q>0)).length;html+=detailRow('Conjunto',`${sdef.i} ${sdef.n} (${owned}/${sdef.pcs.length})`);}
@@ -82,8 +82,8 @@ if(isConsumable(tags)&&qty>0){const isCamping=tags.includes('camping');const isF
 if(canSell(it,tags)&&qty>0&&!isEquippedAnywhere(name)&&!isLocked(name)){const sellPrice=Math.max(1,Math.floor((it.v||1)*0.5));html+=`<button class="btn-sell" onclick="showSellConfirm('${esc(name)}',${sellPrice})">${vi('coin', 13)} ${sellPrice}gp</button>`;}
 if(canDiscard(it,tags)&&qty>0&&!isEquippedAnywhere(name)&&!isLocked(name)){html+=`<button class="btn-discard" onclick="showDiscardConfirm('${esc(name)}')" style="flex:0 0 44px;padding:10px;">${vi('trash', 14)}</button>`;}
 html+='</div>';showModal(html);}
-function _buildComparisonPanel(newIt,currentItemName,slot){const curIt=currentItemName?getItemData(currentItemName):null;const stats=[{key:'ac',label:'CA',icon:'shield'},{key:'b',label:'ATK',icon:'sword'},{key:'hb',label:'HP',icon:'heart'},{key:'mb',label:'MP',icon:'orb'},];let newDmg=0,curDmg=0;if(newIt.dd){const m=newIt.dd.match(/(\d+)d(\d+)/);if(m)newDmg=parseInt(m[1])*(parseInt(m[2])+1)/2;}
-if(curIt&&curIt.dd){const m=curIt.dd.match(/(\d+)d(\d+)/);if(m)curDmg=parseInt(m[1])*(parseInt(m[2])+1)/2;}
+function _buildComparisonPanel(newIt,currentItemName,slot){const curIt=currentItemName?getItemData(currentItemName):null;const stats=[{key:'ac',label:'CA',icon:'shield'},{key:'b',label:'ATK',icon:'sword'},{key:'hb',label:'HP',icon:'heart'},{key:'mb',label:'MP',icon:'orb'},];let newDmg=0,curDmg=0;if(newIt.dd){const m=newIt.dd.match(/(\d+)d(\d+)/);if(m)newDmg=parseInt(m[1],10)*(parseInt(m[2],10)+1)/2;}
+if(curIt&&curIt.dd){const m=curIt.dd.match(/(\d+)d(\d+)/);if(m)curDmg=parseInt(m[1],10)*(parseInt(m[2],10)+1)/2;}
 const showDmg=newDmg>0||curDmg>0;let totalDelta=0;let rows='';stats.forEach(s=>{const nv=newIt[s.key]||0;const cv=curIt?(curIt[s.key]||0):0;const d=nv-cv;if(nv===0&&cv===0)return;totalDelta+=d;const cls=d>0?'cp-up':d<0?'cp-down':'cp-same';const sign=d>0?'+':'';rows+=`<div class="cp-row">
             <span class="cp-label">${vi(s.icon, 12)} ${s.label}</span>
             <span class="cp-cur">${cv}</span>
@@ -205,8 +205,8 @@ function _buildABPanel(itA,itB,slot){var stats=[{key:'ac',label:'CA',icon:'shiel
 +'<span class="cp-arrow">vs</span>'
 +'<span class="cp-new">'+vb+'</span>'
 +'<span class="cp-delta '+cls+'">'+(d!==0?sign+d:'\u2014')+'</span>'
-+'</div>';});var dmgA=0,dmgB=0;if(itA.dd){var m=itA.dd.match(/(\d+)d(\d+)/);if(m)dmgA=parseInt(m[1])*(parseInt(m[2])+1)/2;}
-if(itB.dd){var m=itB.dd.match(/(\d+)d(\d+)/);if(m)dmgB=parseInt(m[1])*(parseInt(m[2])+1)/2;}
++'</div>';});var dmgA=0,dmgB=0;if(itA.dd){var m=itA.dd.match(/(\d+)d(\d+)/);if(m)dmgA=parseInt(m[1],10)*(parseInt(m[2],10)+1)/2;}
+if(itB.dd){var m=itB.dd.match(/(\d+)d(\d+)/);if(m)dmgB=parseInt(m[1],10)*(parseInt(m[2],10)+1)/2;}
 if(dmgA>0||dmgB>0){var d=Math.round((dmgA+(itA.b||0))-(dmgB+(itB.b||0)));totalDelta+=d;var cls=d>0?'cp-up':d<0?'cp-down':'cp-same';var sign=d>0?'+':'';rows+='<div class="cp-row">'
 +'<span class="cp-label">'+vi('target',12)+' Dano</span>'
 +'<span class="cp-cur">'+(dmgA>0?itA.dd:'\u2014')+'</span>'

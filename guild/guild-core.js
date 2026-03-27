@@ -83,7 +83,7 @@ function guildFetch(endpoint, body) {
         if (tg && tg.sendData) {
             try {
                 var fallback = Object.assign({ endpoint: endpoint, webapp: 'GUILD' }, body || {});
-                tg.sendData(JSON.stringify(fallback));
+                window.__valdoria_transitioning=true;tg.sendData(JSON.stringify(fallback));
             } catch (se) { console.error('[GUILD] sendData fallback failed:', se); }
         }
         showGuildError('Falha na comunicação com o servidor.');
@@ -191,7 +191,7 @@ function _navTo(goto) {
         if (goto) url += '&goto=' + goto;
         window.location.replace(url);
     } else if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.sendData(JSON.stringify({ action: 'guild_back' }));
+        window.__valdoria_transitioning=true;Telegram.WebApp.sendData(JSON.stringify({ action: 'guild_back' }));
         Telegram.WebApp.close();
     }
 }

@@ -445,7 +445,7 @@ function _obTransitionToDungeon() {
         fetch(apiBase + '/api/webapp/transition', {
             method: 'POST',
             headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
-            body: JSON.stringify({from: 'explore', to: 'dungeon', user_id: parseInt(params.uid || (params.get && params.get('uid')) || '0'), payload: {daily_challenge: true, dungeon_id: j.dungeonId}})
+            body: JSON.stringify({from: 'explore', to: 'dungeon', user_id: parseInt(params.uid || (params.get && params.get('uid')) || '0',10), payload: {daily_challenge: true, dungeon_id: j.dungeonId}})
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -463,7 +463,7 @@ function _obTransitionToDungeon() {
         });
     } else {
         if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-            Telegram.WebApp.sendData(JSON.stringify({type: 'daily_dungeon_enter', dungeon_id: j.dungeonId}));
+            window.__valdoria_transitioning=true;Telegram.WebApp.sendData(JSON.stringify({type: 'daily_dungeon_enter', dungeon_id: j.dungeonId}));
         }
     }
 }
@@ -472,7 +472,7 @@ function _obFallbackToGame(apiBase, token) {
     fetch(apiBase + '/api/webapp/transition', {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
-        body: JSON.stringify({from: 'explore', to: 'game', user_id: parseInt(params.uid || (params.get && params.get('uid')) || '0')})
+        body: JSON.stringify({from: 'explore', to: 'game', user_id: parseInt(params.uid || (params.get && params.get('uid')) || '0',10)})
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {

@@ -99,7 +99,7 @@ const[x1,y1,z1]=toCube(c1,r1);const[x2,y2,z2]=toCube(c2,r2);return Math.max(Math
 function getCurrentHP(){return S.charData?S.charData.hp+S.hpChange:0;}
 function getMaxHP(){return S.charData?S.charData.mh:1;}
 function getHPPercent(){return(getCurrentHP()/getMaxHP())*100;}
-function rollDiceFormula(formula){if(typeof formula==='number')return formula;if(!formula||formula==='0')return 0;const match=formula.match(/^(\d+)d(\d+)([+-]\d+)?$/);if(!match)return parseInt(formula,10)||0;const[,count,sides,bonus]=match;let total=0;for(let i=0;i<parseInt(count);i++){total+=Math.floor(Math.random()*parseInt(sides))+1;}
+function rollDiceFormula(formula){if(typeof formula==='number')return formula;if(!formula||formula==='0')return 0;const match=formula.match(/^(\d+)d(\d+)([+-]\d+)?$/);if(!match)return parseInt(formula,10)||0;const[,count,sides,bonus]=match;let total=0;for(let i=0;i<parseInt(count,10);i++){total+=Math.floor(Math.random()*parseInt(sides,10))+1;}
 return total+(parseInt(bonus,10)||0);}
 function bfsDistanceToExit(fromCol,fromRow){const target=`${S.exitCol},${S.exitRow}`;const start=`${fromCol},${fromRow}`;if(start===target)return 0;const visited=new Set([start]);const queue=[[fromCol,fromRow,0]];while(queue.length>0){const[col,row,dist]=queue.shift();const neighbors=getNeighbors(col,row);for(const[nc,nr]of neighbors){const key=`${nc},${nr}`;if(visited.has(key))continue;visited.add(key);const tile=S.grid[nr]&&S.grid[nr][nc]?S.grid[nr][nc]:'.';if(IMPASSABLE.has(tile))continue;if(key===target)return dist+1;queue.push([nc,nr,dist+1]);}}
 return-1;}

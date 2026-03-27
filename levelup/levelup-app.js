@@ -28,11 +28,11 @@ h['X-Idempotency-Key'] = crypto.randomUUID();
 try {
 const r = await fetchT(apiFallback + '/api/webapp/transition', {
 method: 'POST', headers: h,
-body: JSON.stringify({ from: 'levelup', to: returnTo, user_id: parseInt(userId), payload: {} })
+body: JSON.stringify({ from: 'levelup', to: returnTo, user_id: parseInt(userId,10), payload: {} })
 });
 if (r.status === 401 || r.status === 403) {
 console.error('[LEVELUP] Auth error on transition:', r.status);
-if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'LEVELUP', reason: 'session_expired' })); return; }
+if (tg?.sendData) { window.__valdoria_transitioning=true;tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'LEVELUP', reason: 'session_expired' })); return; }
 }
 const d = await r.json();
 if (d.url) { window.__valdoria_transitioning = true; window.location.replace(d.url); return; }
@@ -50,7 +50,7 @@ if (_isSpa) { token = _spaP.token || ''; apiFallback = _spaP.api || ''; userId =
 else { token = params.get('token') || ''; apiFallback = params.get('api') || ''; userId = params.get('uid') || ''; }
 console.log('[LEVELUP] INIT token=' + (token ? token.substring(0, 12) + '...' : '(empty)') + ' spaP.token=' + ((_spaP && _spaP.token) ? _spaP.token.substring(0, 12) + '...' : '(none)') + ' url.token=' + (new URLSearchParams(location.search).get('token') || '(none)').substring(0, 12) + ' spaP_keys=' + (_spaP ? Object.keys(_spaP).join(',') : 'null'));
 if (window.SessionHeartbeat && apiFallback && token && userId) {
-SessionHeartbeat.init({ apiBase: apiFallback, token: token, uid: parseInt(userId) || 0 });
+SessionHeartbeat.init({ apiBase: apiFallback, token: token, uid: parseInt(userId,10) || 0 });
 }
 returnTo = _isSpa ? (_spaP.return || '') : (params.get('return') || '');
 if (window.ValdoriaErrors) {
@@ -195,10 +195,10 @@ function getAvailableSkills() {
 const pool = CLASS_SKILLS[P.hero_class] || {};
 const result = [];
 for (const [lv, skills] of Object.entries(pool)) {
-if (parseInt(lv) <= P.level) {
+if (parseInt(lv,10) <= P.level) {
 for (const s of skills) {
 if (!P.acquired_skills.includes(s.id)) {
-result.push({ ...s, level: parseInt(lv) });
+result.push({ ...s, level: parseInt(lv,10) });
 }
 }
 }
@@ -231,7 +231,7 @@ function calcDmgRange(effect) {
 if (!effect) return '';
 const m = effect.match(/(\d+)d(\d+)(?:\s*\+\s*(\d+))?/);
 if (!m) return '';
-const n = parseInt(m[1]), d = parseInt(m[2]), b = m[3] ? parseInt(m[3]) : 0;
+const n = parseInt(m[1],10), d = parseInt(m[2],10), b = m[3] ? parseInt(m[3],10) : 0;
 return `${n + b}~${n * d + b}`;
 }
 function buildSummary(el) {
@@ -309,7 +309,7 @@ let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar
 html += `<div class="section-title">\ud83c\udff0 ${sc.name}</div>`;
 html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:12px;line-height:1.4">${sc.desc}</div>`;
 const feats = sc.features || {};
-const levels = Object.keys(feats).sort((a, b) => parseInt(a) - parseInt(b));
+const levels = Object.keys(feats).sort((a, b) => parseInt(a,10) - parseInt(b,10));
 if (levels.length > 0) {
 html += '<div class="section-title">Habilidades por Nivel</div>';
 for (const lv of levels) {
@@ -693,7 +693,7 @@ btn.textContent = 'Enviando...';
 document.getElementById('loadingOverlay').classList.add('active');
 try {
 if (apiFallback) {
-payload.user_id = parseInt(userId);
+payload.user_id = parseInt(userId,10);
 console.log('[LEVELUP] SUBMIT token=' + (token ? token.substring(0, 12) + '...' : '(empty)') + ' api=' + apiFallback + ' uid=' + userId);
 const _lh = {
 'Content-Type': 'application/json',
@@ -738,7 +738,7 @@ showFatalError('Erro de conexao com servidor.', e);
 }
 else if (tg && tg.sendData) {
 setTimeout(() => {
-tg.sendData(JSON.stringify(payload));
+window.__valdoria_transitioning=true;tg.sendData(JSON.stringify(payload));
 setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[LEVELUP] tg.close:', e); } }, 300);
 }, 300);
 setTimeout(function() {
