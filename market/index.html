@@ -965,17 +965,17 @@
                             });
                             if (r.status === 401 || r.status === 403) {
                                 console.error('[MARKET] Auth error on transition:', r.status);
-                                if (tg?.sendData) { tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'MARKET', reason: 'session_expired' })); return; }
+                                if (tg?.sendData) { window.__valdoria_transitioning=true;tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'MARKET', reason: 'session_expired' })); return; }
                             }
                             const d = await r.json();
                             if (d.url) {
                                 window.__valdoria_transitioning = true; window.location.replace(d.url);
                                 return;
                             }
-                        } catch (e) { console.error('[MARKET] Transition failed:', e); }
+                        } catch (e) { console.error('[MARKET] Transition failed:', e);if(typeof toast==='function')toast('Erro ao navegar','err'); }
                     }
                     // Fallback
-                    try { tg.close(); } catch (e) { }
+                    window.__valdoria_transitioning=true;try { tg.close(); } catch (e) { }
                 });
             }
         }
@@ -1642,13 +1642,13 @@
                         console.error('[MARKET] Auth error on apply:', resp.status);
                         _txSending = false;
                         if (tg?.sendData) {
-                            tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'MARKET', reason: 'session_expired' }));
+                            window.__valdoria_transitioning=true;tg.sendData(JSON.stringify({ action: 'webapp_reconnect', webapp: 'MARKET', reason: 'session_expired' }));
                             return;
                         }
                     }
                     if (resp.ok) {
-                        console.log('[MARKET] Transaction submitted via API');
-                        setTimeout(() => { try { tg?.close(); } catch (e) { } }, 300);
+                        console.debug('[MARKET] Transaction submitted via API');
+                        window.__valdoria_transitioning=true;setTimeout(() => { try { tg?.close(); } catch (e) { } }, 300);
                         return;
                     }
                     console.warn('[MARKET] API returned', resp.status, '— falling back to sendData');
@@ -1660,10 +1660,10 @@
 
             // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
             if (tg) {
-                tg.sendData(JSON.stringify(data));
+                window.__valdoria_transitioning=true;tg.sendData(JSON.stringify(data));
                 setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[MARKET] tg.close:', e); } }, 300);
             } else {
-                console.log('sendData:', data);
+                console.debug('[MARKET] sendData:', data);
                 toast('Dados enviados (dev)', 'ok');
             }
         }

@@ -81,7 +81,7 @@ async function _transitionTo(target,payload={}){const overlay=document.getElemen
 if(_apiBase){try{const _th={'Content-Type':'application/json','Authorization':'Bearer '+_apiToken,};if(window.Telegram?.WebApp?.initData){_th['X-Telegram-Init-Data']=Telegram.WebApp.initData;}
 _th['X-Idempotency-Key']=crypto.randomUUID();const resp=await fetchT(_apiBase+'/api/webapp/transition',{method:'POST',headers:_th,body:JSON.stringify({from:'inventory',to:target,user_id:parseInt(_apiUid,10),payload,}),});if(resp.status===401||resp.status===403){console.error('[INVENTORY] Auth error on transition:',resp.status);const tg=window.Telegram?.WebApp;if(tg?.sendData){window.__valdoria_transitioning=true;tg.sendData(JSON.stringify({action:'webapp_reconnect',webapp:'INVENTORY',reason:'session_expired'}));setTimeout(function(){if(tg.close)tg.close();},1000);return;}}
 if(resp.ok){const data=await resp.json();if(data.url){window.__valdoria_transitioning=true;valdoriaSpaNav(data.url);return;}}
-console.error('[INVENTORY] Nav transition failed');}catch(e){console.error('[INVENTORY] Nav transition error:',e);}}
+console.error('[INVENTORY] Nav transition failed');toast(vi('warn',13)+' Erro ao navegar','err');}catch(e){console.error('[INVENTORY] Nav transition error:',e);}}
 if(overlay)overlay.classList.add('hidden');try{window.__valdoria_transitioning=true;if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}}
 function toast(msg,type){vToast(msg,type||'ok');}
 function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
