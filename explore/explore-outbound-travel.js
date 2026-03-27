@@ -442,7 +442,7 @@ function _obTransitionToDungeon() {
     var apiBase = params.api || '';
     var token = params.token || '';
     if (apiBase && token) {
-        fetch(apiBase + '/api/webapp/transition', {
+        fetchT(apiBase + '/api/webapp/transition', {
             method: 'POST',
             headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
             body: JSON.stringify({from: 'explore', to: 'dungeon', user_id: parseInt(params.uid || (params.get && params.get('uid')) || '0',10), payload: {daily_challenge: true, dungeon_id: j.dungeonId}})
@@ -469,7 +469,7 @@ function _obTransitionToDungeon() {
 }
 
 function _obFallbackToGame(apiBase, token) {
-    fetch(apiBase + '/api/webapp/transition', {
+    fetchT(apiBase + '/api/webapp/transition', {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
         body: JSON.stringify({from: 'explore', to: 'game', user_id: parseInt(S.uid||0,10)})

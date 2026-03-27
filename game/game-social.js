@@ -47,12 +47,13 @@ function _ago(ts) {
 
 function _fetchSocial(body) {console.debug('[SOCIAL-DBG] _fetchSocial action=' + (body&&body.action||'?') + ' apiBase=' + (window.S&&S.apiBase||'EMPTY').substring(0,40) + ' token=' + (window.S&&S.token?'YES('+S.token.substring(0,8)+')':'NO') + ' uid=' + (window.S&&S.uid||0));
     if (!window.S || !S.apiBase || !S.token) { console.warn('[SOCIAL] Missing API config'); return Promise.resolve(null); }
-    return fetch(S.apiBase + '/api/game/social', {
+    var _acS=new AbortController();var _tidS=setTimeout(function(){_acS.abort();},15000);return fetch(S.apiBase + '/api/game/social', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token },
         body: JSON.stringify(Object.assign({ user_id: S.uid }, body)),
-    }).then(function(r) { console.debug('[SOCIAL-DBG] fetch resp status=' + r.status + ' ok=' + r.ok);if(r.status===401||r.status===403){console.warn('[SOCIAL] Auth error:',r.status);if(typeof vToast==='function')vToast('Sessão expirada. Feche e reabra.','warn',3000);return null;} if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).catch(function(e) {
-        console.error('[SOCIAL]', e); return null;
+        signal: _acS.signal,
+    }).then(function(r) { clearTimeout(_tidS);console.debug('[SOCIAL-DBG] fetch resp status=' + r.status + ' ok=' + r.ok);if(r.status===401||r.status===403){console.warn('[SOCIAL] Auth error:',r.status);if(typeof vToast==='function')vToast('Sessão expirada. Feche e reabra.','warn',3000);return null;} if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).catch(function(e) {
+        clearTimeout(_tidS);console.error('[SOCIAL]', e); return null;
     });
 }
 
