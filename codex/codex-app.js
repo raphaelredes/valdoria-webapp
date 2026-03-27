@@ -12,6 +12,7 @@
     var _progress = {};
     var _currentCategory = 'enemy';
     var _searchTimeout = null;
+    var _e = function(t) { var d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; };
 
     var CATEGORIES = [
         { id: 'enemy', label: 'Inimigos', icon: '⚔️' },
@@ -106,7 +107,6 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
             var card = document.createElement('div');
             card.className = 'codex-card ' + (entry.unlocked ? 'unlocked' : 'locked');
 
-            var _e = function(t) { var d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; };
             card.innerHTML =
                 '<span class="codex-card-icon">' + _e(entry.icon) + '</span>' +
                 '<div class="codex-card-info">' +
@@ -159,7 +159,7 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
                 '<div class="title">' + _e(entry.title) + '</div>' +
                 '<div class="category">' + _e(catLabel) + '</div>';
 
-            body.innerHTML = entry.long_desc || entry.short_desc || '';
+            body.innerHTML = _e(entry.long_desc || entry.short_desc || '');
 
             var metaRows = '';
             if (entry.discovered_via) {
