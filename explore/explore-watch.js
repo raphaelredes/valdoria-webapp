@@ -120,7 +120,7 @@ function initWatchSystem() {
   _watchStepCount = S._watchStepCount || 0;
   _applyWatchWeather();
   updateWatchHUD();
-  console.log("[EXPLORE] initWatch", {watch: S._currentWatch, day: S._currentDay, weather: S.weather, schedule: (S._weatherSchedule || []).length});
+  console.debug("[EXPLORE] initWatch", {watch: S._currentWatch, day: S._currentDay, weather: S.weather, schedule: (S._weatherSchedule || []).length});
 }
 
 function tickWatch() {
@@ -141,7 +141,7 @@ function tickWatch() {
 
     _applyWatchWeather();
     updateWatchHUD();
-    console.log("[EXPLORE] watchAdvance", {watch: S._currentWatch, day: S._currentDay, weather: S.weather});
+    console.debug("[EXPLORE] watchAdvance", {watch: S._currentWatch, day: S._currentDay, weather: S.weather});
 
     if (typeof tickPursuer === 'function') tickPursuer();
 
@@ -205,7 +205,7 @@ function _applyWatchWeather() {
   S._weatherCONSaveDC = eff.conDC || 0;
   S._weatherLightningChance = eff.lightningChance || 0;
   S._effectiveVisibility = Math.max(1, (S.visibility || 3) + (eff.visMod || 0));
-  console.log("[EXPLORE] weatherApply", {weather: S.weather, prev: _prevW, conDC: S._weatherCONSaveDC, lightning: S._weatherLightningChance, vis: S._effectiveVisibility, changed: S.weather !== _prevW});
+  console.debug("[EXPLORE] weatherApply", {weather: S.weather, prev: _prevW, conDC: S._weatherCONSaveDC, lightning: S._weatherLightningChance, vis: S._effectiveVisibility, changed: S.weather !== _prevW});
 }
 
 function updateWatchHUD() {
@@ -246,7 +246,7 @@ function checkNavigation(targetCol, targetRow) {
   var roll = Math.floor(Math.random() * 20) + 1;
   var total = roll + wisMod + profBonus;
 
-  console.log("[EXPLORE] navCheck", {biome: biome, dc: dc, roll: roll, total: total, veered: total < dc});
+  console.debug("[EXPLORE] navCheck", {biome: biome, dc: dc, roll: roll, total: total, veered: total < dc});
   if (total >= dc) return { veered: false };
 
   /* Alexandrian: 20% chance of NOT veering even on failure */
@@ -289,7 +289,7 @@ function checkSocialEncounter() {
   var pool = SOCIAL_ENCOUNTER_POOL;
   if (!pool || pool.length === 0) return null;
   var enc = pool[Math.floor(Math.random() * pool.length)];
-  console.log("[EXPLORE] socialEncounter", {title: enc.title, skill: enc.skill, dc: enc.dc, step: S._stepCount});
+  console.debug("[EXPLORE] socialEncounter", {title: enc.title, skill: enc.skill, dc: enc.dc, step: S._stepCount});
   return enc;
 }
 
@@ -519,7 +519,7 @@ function initPursuer() {
     attempts++;
   }
   S._pursuerData = { col: startCol, row: startRow, speed: 2 };
-  console.log("[EXPLORE] pursuerSpawn", {col: startCol, row: startRow, dangerLevel: S.dangerLevel});
+  console.debug("[EXPLORE] pursuerSpawn", {col: startCol, row: startRow, dangerLevel: S.dangerLevel});
 }
 
 /* BFS shortest-path from pursuer to player (11x13 grid = microseconds) */
@@ -573,7 +573,7 @@ function tickPursuer() {
     }
 
     /* If pursuer reaches player, trigger forced combat encounter */
-    console.log("[EXPLORE] pursuerTick", {col: pur.col, row: pur.row, playerDist: typeof hexDist === "function" ? hexDist(pur.col, pur.row, S.playerCol, S.playerRow) : "?"});
+    console.debug("[EXPLORE] pursuerTick", {col: pur.col, row: pur.row, playerDist: typeof hexDist === "function" ? hexDist(pur.col, pur.row, S.playerCol, S.playerRow) : "?"});
     if (pur.col === S.playerCol && pur.row === S.playerRow) {
       if (typeof showTerrainToast === 'function') {
         showTerrainToast('\u26a0\ufe0f O perseguidor alcan\u00e7ou voc\u00ea!', 'damage');

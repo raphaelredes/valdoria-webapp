@@ -1,7 +1,7 @@
 var _fogCanvas=null;var _fogCtx=null;var _fogReveals=[];var FOG_COLOR=(function(){try{return getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim()||'#2a2420';}catch(e){return '#2a2420';}})();function _fogSrand(seed){let x=Math.sin(seed*9301+49297)*49297;return x-Math.floor(x);}
 function initFog(width,height){_fogCanvas=document.createElement('canvas');_fogCanvas.width=width;_fogCanvas.height=height;_fogCtx=_fogCanvas.getContext('2d');}
 function resizeFog(width,height){if(_fogCanvas){_fogCanvas.width=width;_fogCanvas.height=height;}}
-function revealFogAt(cx,cy,radius,fogState,grid,animate){console.log("[EXPLORE] revealFogAt",{center:[cx,cy],radius:radius,animate:!!animate});for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){const dist=hexDist(c,r,cx,cy);const key=`${c},${r}`;if(dist<=radius){if(fogState[key]!=='visible'&&animate){const center=hexToScreen(c,r);_fogReveals.push({x:center.x,y:center.y,progress:0,maxRadius:HEX_W*0.6,});}
+function revealFogAt(cx,cy,radius,fogState,grid,animate){console.debug("[EXPLORE] revealFogAt",{center:[cx,cy],radius:radius,animate:!!animate});for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){const dist=hexDist(c,r,cx,cy);const key=`${c},${r}`;if(dist<=radius){if(fogState[key]!=='visible'&&animate){const center=hexToScreen(c,r);_fogReveals.push({x:center.x,y:center.y,progress:0,maxRadius:HEX_W*0.6,});}
 fogState[key]='visible';}else if(dist<=radius+1&&fogState[key]!=='visible'){fogState[key]='dim';}}}}
 function updateFogAnimations(dt){if(_fogReveals.length===0)return false;for(let i=_fogReveals.length-1;i>=0;i--){_fogReveals[i].progress+=dt*1.4;if(_fogReveals[i].progress>=1){_fogReveals.splice(i,1);}}
 return _fogReveals.length>0;}
