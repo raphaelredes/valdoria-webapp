@@ -228,6 +228,7 @@
       }).catch(function (err) {
         console.error('[TRAVEL-PREP] buy item error', err);
         for (var r = 0; r < rows.length; r++) rows[r].classList.remove('v-popup-disabled');
+        if(typeof vToast==='function')vToast('Erro ao comprar item. Tente novamente.','error');
       });
     } else if (typeof doAction === 'function') {
       if (typeof vPopup !== 'undefined') vPopup.hide();

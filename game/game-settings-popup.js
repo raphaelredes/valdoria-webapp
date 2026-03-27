@@ -29,7 +29,6 @@ window.showSettingsPopup = function() {
     _overlay.style.display = 'flex';
     requestAnimationFrame(function() { _overlay.style.opacity = '1'; });
     _fetchSettings();
-    if (window.vEscapeKey) vEscapeKey.push(function() { window.hideSettingsPopup(); });
 };
 
 function _fetchSettings() {
@@ -65,7 +64,6 @@ window.hideSettingsPopup = function() {
         if (it) it.style.display = '';
         if (ir) ir.style.display = '';
     }, 220);
-    if (window.vEscapeKey) vEscapeKey.pop();
 };
 
 window.isSettingsPopupOpen = function() {

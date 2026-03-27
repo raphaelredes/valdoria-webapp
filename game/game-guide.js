@@ -262,7 +262,7 @@ window.showGuidePopup=function(ctx){
   var tid=_findTopicForCtx(ctx);
   if(tid)setTimeout(function(){_openAndScrollTo(tid);},300);
  }
- if(window.vEscapeKey)vEscapeKey.push(function(){window.hideGuidePopup();});
+
 };
 
 window.hideGuidePopup=function(){
@@ -279,7 +279,7 @@ window.hideGuidePopup=function(){
   if(it)it.style.display='';
   if(ir)ir.style.display='';
  },220);
- if(window.vEscapeKey)vEscapeKey.pop();
+
 };
 
 window.isGuidePopupOpen=function(){
@@ -289,4 +289,5 @@ window.isGuidePopupOpen=function(){
 window._guideOpenTopic=function(tid){
  _openAndScrollTo(tid);
 };
+if(typeof vEscapeKey!=='undefined'){vEscapeKey.register(function(){return typeof window.isGuidePopupOpen==='function'&&window.isGuidePopupOpen();},function(){if(typeof window.hideGuidePopup==='function')window.hideGuidePopup();});}
 })();
