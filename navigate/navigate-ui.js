@@ -767,7 +767,7 @@ function _updateCycleButtons() {
     }
     if (counter) {
         if (hasMultiple) {
-            var idx = list.indexOf(_selectedLoc);
+            var idx = list.indexOf(S.selectedLoc);
             counter.textContent = (idx + 1) + '/' + list.length;
             counter.style.display = '';
         } else {
