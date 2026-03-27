@@ -100,12 +100,16 @@ function _render() {
                 onDone: function () {
                     if (skipEl) skipEl.style.display = 'none';
                     _revealChoices(choicesEl);
+                    var _fc = choicesEl && choicesEl.querySelector('.dlg-popup-choice');
+                    if (_fc) setTimeout(function(){ _fc.focus(); }, 100);
                 }
             });
         } else {
             textEl.textContent = dialogueText;
             if (skipEl) skipEl.style.display = 'none';
             _revealChoices(choicesEl);
+            var _fc2 = choicesEl && choicesEl.querySelector('.dlg-popup-choice');
+            if (_fc2) setTimeout(function(){ _fc2.focus(); }, 100);
         }
     }
 
@@ -179,7 +183,7 @@ function _buildFooter(container) {
     var closeBtn = document.createElement('button');
     closeBtn.className = 'dlg-popup-footer-btn';
     closeBtn.textContent = '\ud83c\udfe0 Fechar';
-    closeBtn.addEventListener('click', function () { window.hideDialoguePopup(); });
+    closeBtn.addEventListener('click', function () { window.hideDialoguePopup(); if (typeof doAction === 'function') doAction('action_universal_back'); });
     container.appendChild(closeBtn);
 }
 
@@ -199,6 +203,13 @@ function _extractText(rawText) {
     if (typeof extractDialogueText === 'function') return extractDialogueText(rawText);
     return rawText.replace(/<[^>]+>/g, '').trim();
 }
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && window.isDialoguePopupOpen && isDialoguePopupOpen()) {
+        window.hideDialoguePopup();
+        if (typeof doAction === 'function') doAction('action_universal_back');
+    }
+});
 
 console.log('[DLG-POPUP] loaded, showDialoguePopup=' + typeof window.showDialoguePopup);
 })();
