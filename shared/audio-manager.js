@@ -294,7 +294,7 @@ function _resetCloseTimer(){if(_closeTimer)clearTimeout(_closeTimer);_closeTimer
 function _updatePopupUI(){const tn=document.getElementById('va-track-name');if(tn)tn.textContent=_currentTrack?('♫ '+(_TRACK_NAMES[_currentTrack]||_currentTrack)):'';const mi=document.getElementById('va-music-icon');const ms=document.getElementById('va-music-slider');const mp=document.getElementById('va-music-pct');const mv=(_muted||_musicMuted)?0:Math.round(_volume*100);if(mi)mi.classList.toggle('unmuted',!_musicMuted&&!_muted);if(ms){ms.value=String(mv);_updateSliderFill(ms,mv);}
 if(mp)mp.textContent=mv+'%';const si=document.getElementById('va-sfx-icon');const ss=document.getElementById('va-sfx-slider');const sp=document.getElementById('va-sfx-pct');const sv=_sfxMuted?0:Math.round(_sfxVolume*100);if(si)si.classList.toggle('unmuted',!_sfxMuted);if(ss){ss.value=String(sv);_updateSliderFill(ss,sv);}
 if(sp)sp.textContent=sv+'%';}
-let _hintDismissed=false;function _showFirstTimeHint(btn){try{if(localStorage.getItem(HINT_KEY))return;}catch(e){return;}
+let _hintDismissed=false;function _showFirstTimeHint(btn){try{if(localStorage.getItem(HINT_KEY))return;}catch(e){console.warn('[AUDIO_MANAGER] hint check:',e);return;}
 const _tryShow=()=>{const loading=document.querySelector('.loading:not(.hidden), .loading-overlay:not(.hidden), #loading:not([style*="display: none"]), #v-err-overlay:not([style*="display: none"])');if(loading){setTimeout(_tryShow,1000);return;}
 if(_hintDismissed)return;if(btn)btn.classList.add('va-hint-pulse');setTimeout(()=>{_dismissHint(btn);},5000);};setTimeout(_tryShow,1500);}
 function _dismissHint(btn){if(_hintDismissed)return;_hintDismissed=true;try{localStorage.setItem(HINT_KEY,'1');}catch(e){console.warn('[AUDIO_MANAGER]',e);}
