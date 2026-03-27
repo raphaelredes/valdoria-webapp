@@ -38,6 +38,7 @@ window.showDialoguePopup = function (data) {
 
 window.hideDialoguePopup = function () {
     _dlgStack = [];
+    _skipBound = false;
     _hide();
     if (typeof clearMoodAmbient === 'function') clearMoodAmbient();
 };
@@ -211,5 +212,5 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-console.log('[DLG-POPUP] loaded, showDialoguePopup=' + typeof window.showDialoguePopup);
+console.debug('[DLG-POPUP] loaded, showDialoguePopup=' + typeof window.showDialoguePopup);
 })();
