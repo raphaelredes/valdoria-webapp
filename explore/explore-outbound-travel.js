@@ -472,7 +472,7 @@ function _obFallbackToGame(apiBase, token) {
     fetch(apiBase + '/api/webapp/transition', {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
-        body: JSON.stringify({from: 'explore', to: 'game', user_id: parseInt(params.uid || (params.get && params.get('uid')) || '0',10)})
+        body: JSON.stringify({from: 'explore', to: 'game', user_id: parseInt(S.uid||0,10)})
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
