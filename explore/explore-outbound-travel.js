@@ -172,6 +172,7 @@ function _showDepartureScreen() {
     var diceEl = document.getElementById('return-journey-dice');
     var checkEl = document.getElementById('return-journey-check');
     var actionsEl = document.getElementById('return-journey-actions');
+    if (!titleEl||!subtitleEl||!iconEl||!hpEl||!progressEl||!narrEl||!diceEl||!checkEl||!actionsEl) return;
     diceEl.classList.remove('active');
     checkEl.innerHTML = '';
     actionsEl.innerHTML = '';
@@ -245,6 +246,7 @@ function _renderOutboundStep() {
     var subtitleEl = document.getElementById('return-journey-subtitle');
     var iconEl = document.getElementById('return-journey-icon');
     var titleEl = document.getElementById('return-journey-title');
+    if (!overlay||!hpEl||!progressEl||!narrEl||!diceEl||!checkEl||!actionsEl||!subtitleEl||!iconEl||!titleEl) return;
     diceEl.classList.remove('active');
     checkEl.innerHTML = '';
     actionsEl.innerHTML = '';
@@ -355,7 +357,7 @@ function _obResolveHazard(hazard, choice, roll, mod, total, success, r1, r2, mod
     var remaining = _outboundJourney ? _outboundJourney.totalSteps - _outboundJourney.currentStep : 0;
     setTimeout(function() {
         if (typeof _disposeReturnDice === 'function') _disposeReturnDice();
-        document.getElementById('return-journey-dice').classList.remove('active');
+        var _djEl=document.getElementById('return-journey-dice');if(_djEl)_djEl.classList.remove('active');
         if (typeof getCurrentHP === 'function' && getCurrentHP() <= 0) {
             actionsEl.innerHTML = '';
             _obAddBtn(actionsEl, '', 'Você sucumbiu...', 'Seus ferimentos foram fatais', '#c44', function() {
@@ -409,6 +411,7 @@ function _showDungeonArrival() {
     var diceEl = document.getElementById('return-journey-dice');
     var checkEl = document.getElementById('return-journey-check');
     var actionsEl = document.getElementById('return-journey-actions');
+    if (!titleEl||!subtitleEl||!iconEl||!hpEl||!progressEl||!narrEl||!diceEl||!checkEl||!actionsEl) return;
     diceEl.classList.remove('active');
     checkEl.innerHTML = '';
     actionsEl.innerHTML = '';

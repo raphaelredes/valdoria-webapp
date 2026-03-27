@@ -298,7 +298,7 @@ function handleLocationTap(locId) {
     // Open panel in peek mode (compact), swipe up for full
     panel.classList.remove('full');
     panel.classList.add('open', 'peek');
-    document.getElementById('map-viewport').classList.add('panel-open');
+    var _mv2=document.getElementById('map-viewport');if(_mv2)_mv2.classList.add('panel-open');
     _haptic('open');
     // Check if content overflows in full mode
     requestAnimationFrame(() => {
@@ -332,7 +332,7 @@ function createActionBtn(text, className, onClick) {
 function closeInfoPanel() {
     const panel = document.getElementById('info-panel');
     panel.classList.remove('open', 'peek', 'full');
-    document.getElementById('map-viewport').classList.remove('panel-open');
+    var _mv=document.getElementById('map-viewport');if(_mv)_mv.classList.remove('panel-open');
     S.selectedLoc = null;
     clearHighlight();
 }
@@ -597,8 +597,8 @@ function _updateOffscreenIndicator() {
     else if (deg > -157 && deg <= -112) arrow = '↖';
     else if (deg > -112 && deg <= -67) arrow = '↑';
     else arrow = '↗';
-    osi.querySelector('.osi-arrow').textContent = arrow;
-    osi.querySelector('.osi-label').textContent = S.locations[S.currentLoc]?.n || '';
+    var _oa=osi.querySelector('.osi-arrow');if(_oa)_oa.textContent=arrow;
+    var _ol=osi.querySelector('.osi-label');if(_ol)_ol.textContent=S.locations[S.currentLoc]?.n||'';
     osi.style.left = ex + 'px';
     osi.style.top = ey + 'px';
     osi.style.display = 'block';
@@ -693,14 +693,14 @@ function _showQuickTooltip(locId, cx, cy) {
         (wDist > 0 ? ' \u00b7 ' + wDist + ' turno' + (wDist !== 1 ? 's' : '') : '') +
         dangerHtml + '</div>';
 
-    const vpRect = document.getElementById('map-viewport').getBoundingClientRect();
+    var _vpEl=document.getElementById('map-viewport');if(!_vpEl)return;const vpRect=_vpEl.getBoundingClientRect();
     let tx = cx - vpRect.left + 12;
     let ty = cy - vpRect.top - 50;
     if (tx + 180 > vpRect.width) tx = cx - vpRect.left - 180;
     if (ty < 0) ty = cy - vpRect.top + 16;
     tt.style.left = tx + 'px';
     tt.style.top = ty + 'px';
-    document.getElementById('map-viewport').appendChild(tt);
+    _vpEl.appendChild(tt);
 }
 
 function _showPathPreview(toId) {
