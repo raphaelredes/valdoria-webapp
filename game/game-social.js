@@ -45,13 +45,13 @@ function _ago(ts) {
     } catch (e) { return ''; }
 }
 
-function _fetchSocial(body) {console.warn('[SOCIAL-DBG] _fetchSocial action=' + (body&&body.action||'?') + ' apiBase=' + (window.S&&S.apiBase||'EMPTY').substring(0,40) + ' token=' + (window.S&&S.token?'YES('+S.token.substring(0,8)+')':'NO') + ' uid=' + (window.S&&S.uid||0));
+function _fetchSocial(body) {console.debug('[SOCIAL-DBG] _fetchSocial action=' + (body&&body.action||'?') + ' apiBase=' + (window.S&&S.apiBase||'EMPTY').substring(0,40) + ' token=' + (window.S&&S.token?'YES('+S.token.substring(0,8)+')':'NO') + ' uid=' + (window.S&&S.uid||0));
     if (!window.S || !S.apiBase || !S.token) { console.warn('[SOCIAL] Missing API config'); return Promise.resolve(null); }
     return fetch(S.apiBase + '/api/game/social', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token },
         body: JSON.stringify(Object.assign({ user_id: S.uid }, body)),
-    }).then(function(r) { console.warn('[SOCIAL-DBG] fetch resp status=' + r.status + ' ok=' + r.ok);if(r.status===401||r.status===403){console.warn('[SOCIAL] Auth error:',r.status);if(typeof vToast==='function')vToast('Sessão expirada. Feche e reabra.','warn',3000);return null;} if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).catch(function(e) {
+    }).then(function(r) { console.debug('[SOCIAL-DBG] fetch resp status=' + r.status + ' ok=' + r.ok);if(r.status===401||r.status===403){console.warn('[SOCIAL] Auth error:',r.status);if(typeof vToast==='function')vToast('Sessão expirada. Feche e reabra.','warn',3000);return null;} if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).catch(function(e) {
         console.error('[SOCIAL]', e); return null;
     });
 }
@@ -367,7 +367,6 @@ function _render() {
             _detailNpc = null;
             _detailData = null;
             _selectedPlayer = null;
-            _delegateSet = false;
             _chatScrollBound = false;
             _emoteGridOpen = false;
             _dismissMiniProfile();
@@ -560,17 +559,17 @@ function _socialAction(action, requestId) {
     });
 }
 
-window.showSocialPopup = function(data) {console.warn('[SOCIAL-DBG] showSocialPopup() data keys=' + (data?Object.keys(data).join(','):'NULL') + ' chat=' + !!(data&&data.chat) + ' online=' + (data&&data.online?data.online.length:0));
+window.showSocialPopup = function(data) {console.debug('[SOCIAL-DBG] showSocialPopup() data keys=' + (data?Object.keys(data).join(','):'NULL') + ' chat=' + !!(data&&data.chat) + ' online=' + (data&&data.online?data.online.length:0));
     _cachedData = data || {};
     try { var sv = localStorage.getItem('valdoria_social_tab'); if (sv && ['chat','online','inbox','rel'].indexOf(sv) !== -1) _activeTab = sv; } catch(e){console.warn('[SOCIAL]',e);}
     _detailNpc = null; _detailData = null; _selectedPlayer = null; _userScrolledUp = false; _chatScrollBound = false; _emoteGridOpen = false;
     _render();
 };
 
-window.openSocialPopup = function() {console.warn('[SOCIAL-DBG] openSocialPopup() called, vPopup=' + (typeof vPopup) + ', S.apiBase=' + (window.S&&S.apiBase||'EMPTY').substring(0,40) + ', S.token=' + (window.S&&S.token?'YES':'NO'));
+window.openSocialPopup = function() {console.debug('[SOCIAL-DBG] openSocialPopup() called, vPopup=' + (typeof vPopup) + ', S.apiBase=' + (window.S&&S.apiBase||'EMPTY').substring(0,40) + ', S.token=' + (window.S&&S.token?'YES':'NO'));
     _closed = false;
     if (typeof vPopup !== "undefined") {
-        console.warn('[SOCIAL-DBG] vPopup.show() calling');
+        console.debug('[SOCIAL-DBG] vPopup.show() calling');
         vPopup.show({
             id: "social-popup-overlay",
             header: "👥 Social",
