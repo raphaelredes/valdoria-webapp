@@ -106,11 +106,12 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
             var card = document.createElement('div');
             card.className = 'codex-card ' + (entry.unlocked ? 'unlocked' : 'locked');
 
+            var _e = function(t) { var d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; };
             card.innerHTML =
-                '<span class="codex-card-icon">' + entry.icon + '</span>' +
+                '<span class="codex-card-icon">' + _e(entry.icon) + '</span>' +
                 '<div class="codex-card-info">' +
-                '  <div class="codex-card-title">' + entry.title + '</div>' +
-                '  <div class="codex-card-desc">' + entry.short_desc + '</div>' +
+                '  <div class="codex-card-title">' + _e(entry.title) + '</div>' +
+                '  <div class="codex-card-desc">' + _e(entry.short_desc) + '</div>' +
                 '</div>' +
                 (entry.unlocked ? '<span class="codex-card-badge">✅</span>' : '<span class="codex-card-badge">🔒</span>');
 
@@ -205,18 +206,17 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
         var backBtn = document.getElementById('backBtn');
         if (backBtn) {
             backBtn.addEventListener('click', function () {
-                window.__valdoria_transitioning = true;
-                var gameUrl = _apiBase.replace('/api/codex', '').replace('/api/game', '');
-                // Navigate back to game hub
-                var baseUrl = gameUrl.replace(/\/+$/, '');
-                // Try transition via sendData
-                if (window.Telegram && Telegram.WebApp && Telegram.WebApp.sendData) {
-                    Telegram.WebApp.sendData(JSON.stringify({ type: 'codex_close' }));
-                } else {
-                    // Direct navigation to game hub
-                    window.__valdoria_transitioning = true;
-                    window.location.replace(baseUrl + '/game/?token=' + _token);
+                // SPA mode: navigate back via router
+                if (window.SpaRouter && window.__spaRouteName) {
+                    SpaRouter.navigate('game', { token: _token });
+                    return;
                 }
+                window.__valdoria_transitioning = true;
+                // Derive game hub URL from current page (GitHub Pages), not _apiBase (server)
+                var loc = window.location;
+                var gamePath = loc.pathname.replace(/\/codex\/.*/, '/game/');
+                var gameUrl = loc.origin + gamePath + '?token=' + encodeURIComponent(_token) + '&api=' + encodeURIComponent(_apiBase.replace('/api/codex', ''));
+                window.location.replace(gameUrl);
             });
         }
     }
