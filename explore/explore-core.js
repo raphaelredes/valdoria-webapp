@@ -100,7 +100,7 @@ function getCurrentHP(){return S.charData?S.charData.hp+S.hpChange:0;}
 function getMaxHP(){return S.charData?S.charData.mh:1;}
 function getHPPercent(){return(getCurrentHP()/getMaxHP())*100;}
 function rollDiceFormula(formula){if(typeof formula==='number')return formula;if(!formula||formula==='0')return 0;const match=formula.match(/^(\d+)d(\d+)([+-]\d+)?$/);if(!match)return parseInt(formula,10)||0;const[,count,sides,bonus]=match;let total=0;for(let i=0;i<parseInt(count);i++){total+=Math.floor(Math.random()*parseInt(sides))+1;}
-return total+(parseInt(bonus)||0);}
+return total+(parseInt(bonus,10)||0);}
 function bfsDistanceToExit(fromCol,fromRow){const target=`${S.exitCol},${S.exitRow}`;const start=`${fromCol},${fromRow}`;if(start===target)return 0;const visited=new Set([start]);const queue=[[fromCol,fromRow,0]];while(queue.length>0){const[col,row,dist]=queue.shift();const neighbors=getNeighbors(col,row);for(const[nc,nr]of neighbors){const key=`${nc},${nr}`;if(visited.has(key))continue;visited.add(key);const tile=S.grid[nr]&&S.grid[nr][nc]?S.grid[nr][nc]:'.';if(IMPASSABLE.has(tile))continue;if(key===target)return dist+1;queue.push([nc,nr,dist+1]);}}
 return-1;}
 function calculateExitRisk(distance){if(distance<=0)return{chance:5,label:'Seguro',color:'#4a8'};const chance=Math.min(80,15+distance*6+S.dangerLevel*4);if(chance<=25)return{chance,label:'Baixo',color:'#4a8'};if(chance<=50)return{chance,label:'Moderado',color:'#dca028'};if(chance<=65)return{chance,label:'Alto',color:'#c44'};return{chance,label:'Perigoso',color:'#a22'};}

@@ -63,14 +63,14 @@ var ValdoriaDice = (function () {
         if (!formula) return { count: 1, type: 'd6', sides: 6, modifier: 0 };
         var m = formula.match(/(\d*)d(\d+)/i);
         if (!m) return { count: 1, type: 'd6', sides: 6, modifier: 0 };
-        var count = parseInt(m[1]) || 1;
-        var sides = parseInt(m[2]);
+        var count = parseInt(m[1], 10) || 1;
+        var sides = parseInt(m[2], 10);
         var valid = [4, 6, 8, 10, 12, 20];
         var type = valid.indexOf(sides) !== -1 ? 'd' + sides : 'd6';
         var actualSides = valid.indexOf(sides) !== -1 ? sides : 6;
         var rest = formula.slice(m.index + m[0].length);
         var modMatch = rest.match(/([+-]\d+)/);
-        var modifier = modMatch ? parseInt(modMatch[1]) : 0;
+        var modifier = modMatch ? parseInt(modMatch[1], 10) : 0;
         return { count: Math.min(count, 5), type: type, sides: actualSides, modifier: modifier };
     }
 

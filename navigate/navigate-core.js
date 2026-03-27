@@ -5,7 +5,7 @@ var _bgReady=_bg?_bg.decode().catch(function(e){console.warn('[NAVIGATE] img.dec
 tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();try{tg.disableVerticalSwipes();}catch(e){console.warn('[NAVIGATE] disableVerticalSwipes:',e);}
 window.__valdoriaExitAction=function(){handleClose();};}
 const _spaP=window.__spaRouteParams||{};const params=new URLSearchParams(window.location.search);if(_spaP){Object.keys(_spaP).forEach(function(k){params.set(k,_spaP[k]);});}
-S.token=params.get('token')||'';S.api=params.get('api')||'';S.uid=parseInt(params.get('uid')||'0');S.returnTo=params.get('return')||'game';if(window.ValdoriaErrors){ValdoriaErrors.init({appName:'NAVIGATE',apiBase:S.api,token:S.token,uid:S.uid});}
+S.token=params.get('token')||'';S.api=params.get('api')||'';S.uid=parseInt(params.get('uid')||'0',10);S.returnTo=params.get('return')||'game';if(window.ValdoriaErrors){ValdoriaErrors.init({appName:'NAVIGATE',apiBase:S.api,token:S.token,uid:S.uid});}
 if(S.api&&window.ApiDiscovery){ApiDiscovery.init(S.api,function(newUrl){S.api=newUrl;});}
 if(S.api&&S.token&&S.uid&&window.SessionHeartbeat){SessionHeartbeat.init({apiBase:S.api,token:S.token,uid:S.uid});}
 let dataB64=params.get('data')||'';if(!dataB64&&S.api&&S.token){dataB64=await fetchPayloadFromAPI();}

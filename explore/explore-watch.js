@@ -552,7 +552,7 @@ function _bfsNextStep(fromCol, fromRow, toCol, toRow) {
           stepKey = parent[stepKey];
         }
         var parts = stepKey.split(',');
-        return { col: parseInt(parts[0]), row: parseInt(parts[1]) };
+        return { col: parseInt(parts[0],10), row: parseInt(parts[1],10) };
       }
       queue.push([nc, nr]);
     }

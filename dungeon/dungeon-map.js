@@ -9,7 +9,7 @@ nodeGroup.appendChild(g);}
 svg.appendChild(nodeGroup);scrollToCurrentNode();}
 function layoutNodes(){const hasLayout=S.nodes.some(n=>n.row!==undefined&&n.col!==undefined);if(hasLayout)return;const nodeMap={};for(const n of S.nodes)nodeMap[n.id]=n;const adj={};for(const n of S.nodes)adj[n.id]=[];for(const[a,b]of S.paths){if(adj[a])adj[a].push(b);if(adj[b])adj[b].push(a);}
 const entrance=S.nodes.find(n=>n.type==='entrance')||S.nodes[0];if(!entrance)return;const visited=new Set();const queue=[{id:entrance.id,row:0}];visited.add(entrance.id);const layers={};while(queue.length>0){const{id,row}=queue.shift();if(!layers[row])layers[row]=[];layers[row].push(id);for(const nb of(adj[id]||[])){if(!visited.has(nb)){visited.add(nb);queue.push({id:nb,row:row+1});}}}
-const maxRow=Math.max(...Object.keys(layers).map(Number));for(const[rowStr,ids]of Object.entries(layers)){const row=maxRow-parseInt(rowStr);const totalCols=ids.length;for(let i=0;i<ids.length;i++){const node=nodeMap[ids[i]];if(node){node.row=row;node.col=i-(totalCols-1)/2+2;}}}}
+const maxRow=Math.max(...Object.keys(layers).map(Number));for(const[rowStr,ids]of Object.entries(layers)){const row=maxRow-parseInt(rowStr,10);const totalCols=ids.length;for(let i=0;i<ids.length;i++){const node=nodeMap[ids[i]];if(node){node.row=row;node.col=i-(totalCols-1)/2+2;}}}}
 function nodeX(node){return MAP_PAD+(node.col||0)*COL_W+COL_W/2;}
 function nodeY(node){return MAP_PAD+(node.row||0)*ROW_H+ROW_H/2;}
 function scrollToCurrentNode(){const current=S.nodes.find(n=>n.current);if(!current)return;const mapEl=document.getElementById('dungeon-map');const y=nodeY(current);const viewH=mapEl.clientHeight;requestAnimationFrame(()=>{mapEl.scrollTop=Math.max(0,y-viewH/2);});}
