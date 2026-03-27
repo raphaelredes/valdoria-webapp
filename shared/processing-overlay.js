@@ -86,12 +86,15 @@ function show(opts) {
         if (_retryEl && _onRetry) _retryEl.classList.add('visible');
     }, 8000);
 
-    // Timeout at configured time
-    if (opts.onTimeout) {
-        _timers.timeout = setTimeout(function() {
+    // Timeout at configured time — auto-hide if no callback
+    _timers.timeout = setTimeout(function() {
+        if (opts.onTimeout) {
             opts.onTimeout();
-        }, timeoutMs);
-    }
+        } else {
+            console.warn('[PROCESSING] auto-hide after timeout (' + timeoutMs + 'ms)');
+            hide();
+        }
+    }, timeoutMs);
 }
 
 function hide() {
