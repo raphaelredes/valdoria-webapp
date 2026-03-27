@@ -37,7 +37,7 @@ if (tg?.sendData) { window.__valdoria_transitioning=true;tg.sendData(JSON.string
 const d = await r.json();
 if (d.url) { window.__valdoria_transitioning = true; window.location.replace(d.url); return; }
 } catch (e) { console.error('[LEVELUP] transition error:', e); }
-try { if (tg) tg.close(); } catch (e) { console.warn('[LEVELUP] tg.close:', e); }
+window.__valdoria_transitioning=true;try { if (tg) tg.close(); } catch (e) { console.warn('[LEVELUP] tg.close:', e); }
 }
 var screens = [];
 var cur = 0;
@@ -148,7 +148,7 @@ goTo(cur + 1);
 }
 function goBack() {
 if (cur > 0) { goTo(cur - 1); return; }
-try { tg.close(); } catch (e) { console.warn('[LEVELUP] close failed:', e); }
+window.__valdoria_transitioning=true;try { tg.close(); } catch (e) { console.warn('[LEVELUP] close failed:', e); }
 }
 function updateNavBtn() {
 var btn = document.getElementById('btnNext');
@@ -723,7 +723,7 @@ window.__valdoria_transitioning = true;
 _levelupTransitionBack();
 return;
 } else if (tg && tg.close) {
-tg.close();
+window.__valdoria_transitioning=true;tg.close();
 } else {
 alert('Evolucao confirmada!');
 }

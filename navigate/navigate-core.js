@@ -60,7 +60,7 @@ compassSvg+'<div class="travel-overlay-text">'+vEsc(text)+'</div>'+
 function _hideTravelOverlay(){const overlay=document.getElementById('travel-overlay');if(overlay){overlay.classList.remove('visible');}}
 function handleReturn(){finishNavigation('return');}
 function handleClose(){_transitionToGame();}
-async function _transitionToGame(){if(!S.api||!S.token){try{tg?.close();}catch(e){console.warn('[NAVIGATE] Close:',e);}return;}
+async function _transitionToGame(){if(!S.api||!S.token){window.__valdoria_transitioning=true;try{tg?.close();}catch(e){console.warn('[NAVIGATE] Close:',e);}return;}
 var _transSafety=setTimeout(function(){console.warn('[NAVIGATE] transition safety timeout');_hideTravelOverlay();_navSent=false;clearTimeout(_navSentTimer);},8000);
 var h={'Content-Type':'application/json','Authorization':'Bearer '+S.token};if(window.Telegram?.WebApp?.initData)h['X-Telegram-Init-Data']=Telegram.WebApp.initData;h['X-Idempotency-Key']=crypto.randomUUID();try{var r=await fetchT(S.api+'/api/webapp/transition',{method:'POST',headers:h,body:JSON.stringify({from:'navigate',to:(S.returnTo||'game'),user_id:S.uid,payload:{}})});var d=await r.json();window.__valdoria_transitioning=true;if(d.url){clearTimeout(_transSafety);clearTimeout(_navSentTimer);_navSent=false;valdoriaSpaNav(d.url);return;}}catch(e){console.error('[NAVIGATE] transition error:',e);clearTimeout(_transSafety);_hideTravelOverlay();_navSent=false;clearTimeout(_navSentTimer);}
 clearTimeout(_transSafety);var base=window.location.href.replace(/\/navigate\/.*/,'');window.__valdoria_transitioning=true;valdoriaSpaNav(base+'/app.html?route=game&token='+S.token+'&api='+encodeURIComponent(S.api)+'&uid='+S.uid+'&return=game&v=1');}

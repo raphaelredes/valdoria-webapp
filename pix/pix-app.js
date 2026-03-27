@@ -9,4 +9,4 @@ html+='</div>';html+='<div class="copy-section">'+'<div class="copy-label">Codig
 window.copyCode=function(){var btn=document.getElementById('btn-copy');if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(brcode).then(function(){showCopied(btn);}).catch(function(err){console.warn('[PIX] Clipboard API failed, using fallback',err);fallbackCopy(btn);});}else{fallbackCopy(btn);}};function fallbackCopy(btn){var textarea=document.createElement('textarea');textarea.value=brcode;textarea.style.position='fixed';textarea.style.left='-9999px';document.body.appendChild(textarea);textarea.select();try{document.execCommand('copy');showCopied(btn);}catch(e){console.error('[PIX] Erro ao copiar',e);btn.textContent='Erro ao copiar';}
 document.body.removeChild(textarea);}
 function showCopied(btn){btn.textContent='Copiado!';btn.classList.add('copied');/*transition*/setTimeout(function(){btn.textContent='Copiar Codigo PIX';btn.classList.remove('copied');},2000);}
-window.closePage=function(){if(tg){tg.close();}else{window.close();}};})();
+window.closePage=function(){window.__valdoria_transitioning=true;if(tg){tg.close();}else{window.close();}};})();
