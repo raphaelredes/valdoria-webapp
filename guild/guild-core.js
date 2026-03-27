@@ -126,7 +126,10 @@ function _switchTab(tabId) {
     renderCurrentTab();
 }
 
+var _tabsBound = false;
 function _initTabs() {
+    if (_tabsBound) return;
+    _tabsBound = true;
     var tabs = document.querySelectorAll('.guild-tabs .v-tab');
     for (var i = 0; i < tabs.length; i++) {
         (function(t) {
@@ -168,7 +171,10 @@ function hideGuildDetail() {
 }
 window.hideGuildDetail = hideGuildDetail;
 
+var _immBound = false;
 function initImmersive() {
+    if (_immBound) return;
+    _immBound = true;
     var toggle = document.getElementById('immersive-toggle');
     var panel = document.getElementById('bottom-panel');
     var restore = document.getElementById('immersive-restore');
