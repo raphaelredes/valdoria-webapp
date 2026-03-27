@@ -155,15 +155,15 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
         } else {
             var catLabel = (CATEGORIES.find(function (c) { return c.id === entry.category; }) || {}).label || entry.category;
             header.innerHTML =
-                '<span class="icon">' + entry.icon + '</span>' +
-                '<div class="title">' + entry.title + '</div>' +
-                '<div class="category">' + catLabel + '</div>';
+                '<span class="icon">' + _e(entry.icon) + '</span>' +
+                '<div class="title">' + _e(entry.title) + '</div>' +
+                '<div class="category">' + _e(catLabel) + '</div>';
 
             body.innerHTML = entry.long_desc || entry.short_desc || '';
 
             var metaRows = '';
             if (entry.discovered_via) {
-                metaRows += '<div class="meta-row"><span>Descoberto via:</span><span>' + entry.discovered_via + '</span></div>';
+                metaRows += '<div class="meta-row"><span>Descoberto via:</span><span>' + _e(entry.discovered_via) + '</span></div>';
             }
             if (entry.views !== undefined) {
                 metaRows += '<div class="meta-row"><span>Visualizações:</span><span>' + entry.views + '</span></div>';
