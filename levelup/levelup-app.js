@@ -719,7 +719,9 @@ if (data.status === 'saved' || data.ok) {
 if (data.return_url) {
 window.__valdoria_transitioning = true; window.location.replace(data.return_url);
 } else if (returnTo && apiFallback && token) {
+window.__valdoria_transitioning = true;
 _levelupTransitionBack();
+return;
 } else if (tg && tg.close) {
 tg.close();
 } else {
