@@ -216,7 +216,7 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
                 var loc = window.location;
                 var gamePath = loc.pathname.replace(/\/codex\/.*/, '/game/');
                 var gameUrl = loc.origin + gamePath + '?token=' + encodeURIComponent(_token) + '&api=' + encodeURIComponent(_apiBase.replace('/api/codex', ''));
-                window.location.replace(gameUrl);
+                window.__valdoria_transitioning=true;window.location.replace(gameUrl);
             });
         }
     }

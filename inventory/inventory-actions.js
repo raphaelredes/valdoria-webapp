@@ -99,7 +99,7 @@ var _urlParams=new URLSearchParams(location.search);var _apiBase=_urlParams.get(
 if(!window._invPopupMode&&window.ValdoriaErrors&&_apiBase&&ValdoriaErrors.updateConfig){ValdoriaErrors.updateConfig({apiBase:_apiBase,token:_apiToken,uid:_apiUid});}
 if(!window._invPopupMode&&_apiBase&&window.ApiDiscovery){ApiDiscovery.init(_apiBase,function(newUrl){_apiBase=newUrl;});}
 if(!window._invPopupMode&&window.SessionHeartbeat&&_apiBase&&_apiToken&&_apiUid){SessionHeartbeat.init({apiBase:_apiBase,token:_apiToken,uid:parseInt(_apiUid,10)||0});}
-var _combatMode=_urlParams.get('combat')==='1';async function _navigateBack(){const overlay=document.getElementById('loadingOverlay');if(overlay&&!overlay.classList.contains('hidden')){try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}
+var _combatMode=_urlParams.get('combat')==='1';async function _navigateBack(){const overlay=document.getElementById('loadingOverlay');if(overlay&&!overlay.classList.contains('hidden')){window.__valdoria_transitioning=true;try{if(tg)tg.close();}catch(e){console.warn('[INVENTORY] close:',e);}
 return;}
 if(typeof vPopup!=='undefined'&&vPopup.isOpen()){closeModal();return;}
 if(activeTarget!=='player'){switchTab('allies');return;}
