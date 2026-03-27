@@ -272,6 +272,7 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
             })
             .catch(function (err) {
                 console.error('[CODEX] fetch detail error:', err);
+                if(typeof vToast==='function')vToast('Erro ao carregar detalhes.','err',2500);
             });
     }
 
