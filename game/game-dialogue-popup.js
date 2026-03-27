@@ -39,6 +39,7 @@ window.showDialoguePopup = function (data) {
 window.hideDialoguePopup = function () {
     _dlgStack = [];
     _skipBound = false;
+    console.debug('[DLG-POPUP] skipBound reset, stack cleared');
     _hide();
     if (typeof clearMoodAmbient === 'function') clearMoodAmbient();
 };
