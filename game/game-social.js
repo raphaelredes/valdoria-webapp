@@ -51,7 +51,7 @@ function _fetchSocial(body) {console.warn('[SOCIAL-DBG] _fetchSocial action=' + 
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token },
         body: JSON.stringify(Object.assign({ user_id: S.uid }, body)),
-    }).then(function(r) { console.warn('[SOCIAL-DBG] fetch resp status=' + r.status + ' ok=' + r.ok);if(r.status===401||r.status===403){console.warn('[SOCIAL] Auth error:',r.status);return null;} if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).catch(function(e) {
+    }).then(function(r) { console.warn('[SOCIAL-DBG] fetch resp status=' + r.status + ' ok=' + r.ok);if(r.status===401||r.status===403){console.warn('[SOCIAL] Auth error:',r.status);if(typeof vToast==='function')vToast('Sessão expirada. Feche e reabra.','warn',3000);return null;} if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).catch(function(e) {
         console.error('[SOCIAL]', e); return null;
     });
 }
