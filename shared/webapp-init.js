@@ -9,5 +9,5 @@ try{var sa=tg.safeAreaInset;if(sa){root.style.setProperty('--tg-device-safe-top'
 applySafeArea();try{tg.onEvent('viewportChanged',applySafeArea);}catch(_){console.warn('[WEBAPP_INIT]',_);}
 try{tg.onEvent('safeAreaChanged',applySafeArea);}catch(_){console.warn('[WEBAPP_INIT]',_);}
 try{tg.onEvent('contentSafeAreaChanged',applySafeArea);}catch(_){console.warn('[WEBAPP_INIT]',_);}
-if(window.vHaptic){document.addEventListener('click',function(e){var el=e.target.closest('button, [role="button"], .btn-action, .btn-hero, .footer-row .btn-action');if(el){if(el.classList.contains('btn-hero')){vHaptic.medium();}else{vHaptic.tap();}}},{passive:true});}
+if(window.vHaptic){document.addEventListener('click',function(e){var el=e.target.closest('button, [role="button"], .btn-action, .btn-hero, .footer-row .btn-action, .v-popup-btn');if(el){if(el.classList.contains('btn-hero')){vHaptic.medium();}else{vHaptic.tap();}}},{passive:true});}
 window.__valdoriaWebAppInit=true;})();
