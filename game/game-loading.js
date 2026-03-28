@@ -88,6 +88,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             tipInterval: 5000,
             timeoutMs: (typeof LOADING_TIMEOUT_MS !== 'undefined') ? LOADING_TIMEOUT_MS : 15000,
             retryDelayMs: 10000,
+            autoRetryMax: 2,
             hasRingAccel: true,
             hasGemPhase: true,
             onRetry: function() {
@@ -168,6 +169,14 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
         if (contextTips && ctrl.setTips) {
             ctrl.setTips(contextTips);
         }
+    };
+
+    /**
+     * Reset loading timers (call after health checks pass to give API call full budget).
+     */
+    window.resetLoadingTimers = function resetLoadingTimers() {
+        var ctrl = _ensureCtrl();
+        if (ctrl.resetTimers) ctrl.resetTimers();
     };
 
     /**

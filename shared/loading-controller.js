@@ -36,9 +36,11 @@ window.ValdoriaLoadingController = function(config) {
     var RETRY_DELAY_MS = config.retryDelayMs || 10000;
     var HAS_RING_ACCEL = config.hasRingAccel !== false;
     var HAS_GEM_PHASE = config.hasGemPhase !== false;
+    var AUTO_RETRY_MAX = config.autoRetryMax !== undefined ? config.autoRetryMax : 0;
     var onRetry = config.onRetry || function() { location.reload(); };
     var onTimeout = config.onTimeout || null;
 
+    var _autoRetryCount = 0;
     var tipIndex = Math.floor(Math.random() * tips.length);
     if (tipEl && tips.length) tipEl.textContent = tips[tipIndex];
     var _loadStart = Date.now();
@@ -119,13 +121,25 @@ window.ValdoriaLoadingController = function(config) {
         if (retryBtn) retryBtn.style.display = '';
     }, RETRY_DELAY_MS);
 
-    _timers.timeout = setTimeout(function() {
+    _timers.timeout = setTimeout(function() { _handleTimeout(); }, TIMEOUT_MS);
+
+    function _handleTimeout() {
         if (_state === 'hiding' || _state === 'hidden') return;
-        if(window._loadDbg)_loadDbg('state: TIMEOUT ('+TIMEOUT_MS+'ms)');
-        if (tipEl) tipEl.textContent = '\u26A0\uFE0F Tempo esgotado. Tente novamente.';
+        if (_autoRetryCount < AUTO_RETRY_MAX) {
+            _autoRetryCount++;
+            if(window._loadDbg)_loadDbg('AUTO_RETRY attempt ' + _autoRetryCount + '/' + AUTO_RETRY_MAX);
+            if (tipEl) {
+                tipEl.classList.remove('loading-tip-slow');
+                tipEl.textContent = 'Reconectando... (tentativa ' + (_autoRetryCount + 1) + '/' + (AUTO_RETRY_MAX + 1) + ')';
+            }
+            if (typeof onRetry === 'function') onRetry();
+            return;
+        }
+        if(window._loadDbg)_loadDbg('state: TIMEOUT after ' + AUTO_RETRY_MAX + ' auto-retries ('+TIMEOUT_MS+'ms)');
+        if (tipEl) tipEl.textContent = '⚠️ Tempo esgotado. Tente novamente.';
         if (retryBtn) retryBtn.style.display = '';
         if (typeof onTimeout === 'function') onTimeout();
-    }, TIMEOUT_MS);
+    }
 
     function _updateRingSpeed(pct) {
         if (!overlay) return;
@@ -311,12 +325,8 @@ window.ValdoriaLoadingController = function(config) {
                 if (_state === 'hiding' || _state === 'hidden') return;
                 if (retryBtn) retryBtn.style.display = '';
             }, RETRY_DELAY_MS);
-            _timers.timeout = setTimeout(function() {
-                if (_state === 'hiding' || _state === 'hidden') return;
-                if (tipEl) tipEl.textContent = '\u26A0\uFE0F Tempo esgotado. Tente novamente.';
-                if (retryBtn) retryBtn.style.display = '';
-                if (typeof onTimeout === 'function') onTimeout();
-            }, TIMEOUT_MS);
+            if (!isRetry) _autoRetryCount = 0;
+            _timers.timeout = setTimeout(function() { _handleTimeout(); }, TIMEOUT_MS);
             _timers.gemHint = setTimeout(function() {
                 if (_state === 'hiding' || _state === 'hidden') return;
                 var gemEl = overlay ? overlay.querySelector('.mc-gem') : null;
@@ -349,6 +359,40 @@ window.ValdoriaLoadingController = function(config) {
         },
 
         getState: function() { return _state; },
+
+        resetTimers: function() {
+            ['slow', 'verySlow', 'retry', 'timeout'].forEach(function(k) {
+                if (_timers[k]) { clearTimeout(_timers[k]); delete _timers[k]; }
+            });
+            _state = 'loading';
+            _autoRetryCount = 0;
+            if (tipEl) {
+                tipEl.classList.remove('loading-tip-slow');
+                if (tips.length) {
+                    tipIndex = Math.floor(Math.random() * tips.length);
+                    tipEl.textContent = tips[tipIndex];
+                }
+            }
+            if (retryBtn) retryBtn.style.display = 'none';
+            _timers.slow = setTimeout(function() {
+                if (_state !== 'loading') return;
+                _state = 'slow';
+                if(window._loadDbg)_loadDbg('state: loading->slow (8s) [reset]');
+                if (tipEl) { tipEl.classList.add('loading-tip-slow'); tipEl.textContent = 'Demorando um pouco mais que o esperado...'; }
+            }, 8000);
+            _timers.verySlow = setTimeout(function() {
+                if (_state !== 'slow' && _state !== 'loading') return;
+                _state = 'very_slow';
+                if(window._loadDbg)_loadDbg('state: slow->very_slow (12s) [reset]');
+                if (tipEl) tipEl.textContent = '⏳ Conexão lenta — verifique seu sinal ou tente novamente';
+            }, 12000);
+            _timers.retry = setTimeout(function() {
+                if (_state === 'hiding' || _state === 'hidden') return;
+                if (retryBtn) retryBtn.style.display = '';
+            }, RETRY_DELAY_MS);
+            _timers.timeout = setTimeout(function() { _handleTimeout(); }, TIMEOUT_MS);
+            if(window._loadDbg)_loadDbg('resetTimers() fresh '+TIMEOUT_MS+'ms budget');
+        },
 
         cleanup: _cleanup,
 
