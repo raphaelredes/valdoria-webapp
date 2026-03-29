@@ -32,23 +32,30 @@ body {
 }
 #hud {
   display: flex;
-  align-items: center;
-  gap: var(--v-space-sm);
-  padding: var(--v-space-sm) var(--v-space-lg);
-  background: linear-gradient(
-    180deg,
-    var(--v-bg-card-hover) 0%,
-    var(--v-bg) 100%
-  );
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--v-space-xs) var(--v-space-lg);
+  background: rgba(42, 36, 32, 0.92);
   border-bottom: 1px solid var(--v-brown-40);
   z-index: var(--nav-z-tooltip, 50);
   flex-shrink: 0;
+  border-radius: 0 0 var(--v-radius-sm) var(--v-radius-sm);
+}
+.hud-row-1 {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-sm);
+}
+.hud-row-2 {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-md);
 }
 .hud-name {
   font-size: var(--v-font-sm);
   font-weight: 700;
   color: var(--v-gold);
-  max-width: 90px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -57,17 +64,24 @@ body {
 .hud-level {
   font-size: var(--v-font-micro);
   color: var(--v-text-dim);
-  margin-right: auto;
+  font-family: "Cinzel", serif;
+}
+.hud-gold {
+  margin-left: auto;
+  font-size: var(--v-font-micro);
+  color: var(--v-gold);
   font-family: "Cinzel", serif;
 }
 .hud-bar-group {
   display: flex;
   align-items: center;
-  gap: var(--v-space-sm);
+  gap: var(--v-space-xs);
+  flex: 1;
 }
 .hud-bar {
-  width: 45px;
+  flex: 1;
   height: 10px;
+  min-width: 50px;
   background: var(--v-bg);
   border-radius: var(--v-radius-xs);
   overflow: hidden;
@@ -80,6 +94,20 @@ body {
   border-radius: var(--v-radius-xs);
   transition: transform var(--v-transition-base);
   transform-origin: left;
+}
+.hud-bar-value {
+  font-size: 9px;
+  color: var(--v-text-dim);
+  min-width: 28px;
+  text-align: right;
+  white-space: nowrap;
+  font-family: "Cinzel", serif;
+}
+.hud-weather {
+  font-size: var(--v-font-micro);
+  color: var(--v-text-dim);
+  white-space: nowrap;
+  margin-left: auto;
 }
 .hp-fill {
   background: linear-gradient(180deg, #c04040 0%, #a03030 40%, #7b2020 100%);
@@ -152,7 +180,7 @@ body {
     max(12px, env(safe-area-inset-bottom));
   z-index: var(--nav-z-overlay, 100);
   transform: translateY(100%);
-  transition: transform var(--v-transition-base);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), max-height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   max-height: calc(100vh - 100px);
   display: flex;
   flex-direction: column;
@@ -1586,15 +1614,30 @@ body.map-idle .fog-shimmer-line {
   text-align: center;
   white-space: nowrap;
 }
+/* ── Bottom Sheet 3 States: peek / half / full ── */
 #info-panel.peek {
-  max-height: 200px;
+  max-height: 180px;
   overflow: hidden;
 }
 #info-panel.peek .info-desc,
 #info-panel.peek .info-quests,
 #info-panel.peek .info-dungeons,
-#info-panel.peek .info-tags {
+#info-panel.peek .info-tags,
+#info-panel.peek .info-status-bars,
+#info-panel.peek .info-divider,
+#info-panel.peek .info-weather,
+#info-panel.peek .info-note {
   display: none;
+}
+#info-panel.half {
+  max-height: 55vh;
+  overflow: hidden;
+}
+#info-panel.half .info-status-bars {
+  display: none;
+}
+#info-panel.full {
+  max-height: calc(100vh - 100px);
 }
 #info-panel.dragging {
   transition: none !important;

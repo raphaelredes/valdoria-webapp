@@ -387,8 +387,8 @@ function handleLocationTap(locId) {
         if (headerTop) headerTop.insertBefore(goldBadge, document.getElementById('info-close'));
     }
 
-    // Open panel in peek mode (compact), swipe up for full
-    panel.classList.remove('full');
+    // Open panel in peek mode (compact), swipe up for half/full
+    panel.classList.remove('half', 'full');
     panel.classList.add('open', 'peek');
     var _mv2=document.getElementById('map-viewport');if(_mv2)_mv2.classList.add('panel-open');
     _haptic('open');
@@ -423,7 +423,7 @@ function createActionBtn(text, className, onClick) {
 // ── Close info panel ──
 function closeInfoPanel() {
     const panel = document.getElementById('info-panel');
-    panel.classList.remove('open', 'peek', 'full');
+    panel.classList.remove('open', 'peek', 'half', 'full');
     var _mv=document.getElementById('map-viewport');if(_mv)_mv.classList.remove('panel-open');
     S.selectedLoc = null;
     clearHighlight();
@@ -556,62 +556,88 @@ function bfsPath(fromId, toId) {
     return null;
 }
 
-// ── Swipe-to-dismiss info panel (drag down to close) ──
+// ── Swipe-to-dismiss info panel — 3-state bottom sheet (peek/half/full) ──
 function setupSwipeDismiss() {
-    const panel = document.getElementById('info-panel');
+    var panel = document.getElementById('info-panel');
     if (!panel) return;
-    let startY = 0, currentY = 0, dragging = false;
-    const threshold = 60;
+    var startY = 0, currentY = 0, dragging = false;
+    var DISMISS_THRESHOLD = 60;
+    var EXPAND_THRESHOLD = -25;
 
-    panel.addEventListener('touchstart', e => {
-        const rect = panel.getBoundingClientRect();
-        const touchY = e.touches[0].clientY - rect.top;
-        if (touchY > 50) return;
+    function _getSheetState() {
+        if (panel.classList.contains('full')) return 'full';
+        if (panel.classList.contains('half')) return 'half';
+        if (panel.classList.contains('peek')) return 'peek';
+        return 'closed';
+    }
+
+    function _setSheetState(state) {
+        panel.classList.remove('peek', 'half', 'full');
+        if (state === 'peek') panel.classList.add('peek');
+        else if (state === 'half') panel.classList.add('half');
+        else if (state === 'full') panel.classList.add('full');
+        if (state === 'half' || state === 'full') {
+            var scrollArea = panel.querySelector('.info-content-scroll');
+            if (scrollArea) scrollArea.scrollTop = 0;
+        }
+    }
+
+    panel.addEventListener('touchstart', function(e) {
+        var rect = panel.getBoundingClientRect();
+        var touchY = e.touches[0].clientY - rect.top;
+        if (touchY > 60) return;
         startY = e.touches[0].clientY;
         currentY = startY;
         dragging = true;
         panel.classList.add('dragging');
     }, { passive: true });
 
-    panel.addEventListener('touchmove', e => {
+    panel.addEventListener('touchmove', function(e) {
         if (!dragging) return;
         currentY = e.touches[0].clientY;
-        const dy = currentY - startY;
+        var dy = currentY - startY;
         if (dy > 0) {
-            panel.style.transform = `translateY(${dy}px)`;
-        } else if (dy < -20 && panel.classList.contains('peek')) {
-            // Swipe up: expand from peek to full
-            panel.style.transform = '';
-            panel.classList.remove('peek');
-            panel.classList.add('full');
-            dragging = false;
-            panel.classList.remove('dragging');
-            _haptic('tap');
-            // Scroll content to top when expanding
-            const scrollArea = panel.querySelector('.info-content-scroll');
-            if (scrollArea) scrollArea.scrollTop = 0;
+            panel.style.transform = 'translateY(' + dy + 'px)';
         }
     }, { passive: true });
 
-    panel.addEventListener('touchend', () => {
+    panel.addEventListener('touchend', function() {
         if (!dragging) return;
         dragging = false;
         panel.classList.remove('dragging');
-        const dy = currentY - startY;
-        if (dy > threshold) {
-            panel.style.transform = '';
-            closeInfoPanel();
+        var dy = currentY - startY;
+        panel.style.transform = '';
+        var state = _getSheetState();
+        if (dy > DISMISS_THRESHOLD) {
+            if (state === 'peek') { closeInfoPanel(); }
+            else if (state === 'half') { _setSheetState('peek'); }
+            else if (state === 'full') { _setSheetState('half'); }
             _haptic('tap');
-        } else {
-            panel.style.transform = '';
+        } else if (dy < EXPAND_THRESHOLD) {
+            if (state === 'peek') { _setSheetState('half'); }
+            else if (state === 'half') { _setSheetState('full'); }
+            _haptic('tap');
         }
     });
 
-    panel.addEventListener('touchcancel', () => {
+    panel.addEventListener('touchcancel', function() {
         dragging = false;
         panel.classList.remove('dragging');
         panel.style.transform = '';
     });
+
+    // Handle tap toggles sheet states
+    var _infoHandle = panel.querySelector('.info-handle');
+    if (_infoHandle) {
+        _infoHandle.addEventListener('click', function() {
+            if (!panel.classList.contains('open')) return;
+            var state = _getSheetState();
+            if (state === 'peek') _setSheetState('half');
+            else if (state === 'half') _setSheetState('full');
+            else if (state === 'full') _setSheetState('peek');
+            _haptic('tap');
+        });
+    }
 }
 
 // ── Hover tooltip (desktop only — shows name + distance without opening panel) ──

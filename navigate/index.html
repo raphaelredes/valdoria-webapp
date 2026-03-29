@@ -49,19 +49,27 @@
 
     <!-- HUD -->
     <div id="hud">
-        <span class="hud-name" id="hud-name">Aventureiro</span>
-        <span class="hud-level" id="hud-level">Nv.1</span>
-        <div class="hud-bar-group">
-            <span class="hud-bar-label">HP</span>
-            <div class="hud-bar">
-                <div class="hud-bar-fill hp-fill" id="hud-hp"></div>
-            </div>
+        <div class="hud-row-1">
+            <span class="hud-name" id="hud-name">Aventureiro</span>
+            <span class="hud-level" id="hud-level">Nv.1</span>
+            <span class="hud-gold" id="hud-gold" style="display:none"></span>
         </div>
-        <div class="hud-bar-group">
-            <span class="hud-bar-label">MP</span>
-            <div class="hud-bar">
-                <div class="hud-bar-fill mp-fill" id="hud-mp"></div>
+        <div class="hud-row-2">
+            <div class="hud-bar-group">
+                <span class="hud-bar-label">HP</span>
+                <div class="hud-bar">
+                    <div class="hud-bar-fill hp-fill" id="hud-hp"></div>
+                </div>
+                <span class="hud-bar-value" id="hud-hp-val"></span>
             </div>
+            <div class="hud-bar-group">
+                <span class="hud-bar-label">MP</span>
+                <div class="hud-bar">
+                    <div class="hud-bar-fill mp-fill" id="hud-mp"></div>
+                </div>
+                <span class="hud-bar-value" id="hud-mp-val"></span>
+            </div>
+            <span class="hud-weather" id="hud-weather" style="display:none"></span>
         </div>
     </div>
 

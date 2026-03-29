@@ -218,6 +218,8 @@ function _cvRenderFrame(now) {
     _cvDrawBanner(ctx, now);
     _cvDrawActiveRoads(ctx, now);
     _cvDrawSelection(ctx, now);
+    _cvDrawDiscoveryParticles(ctx, now);
+    _cvDrawDiscoveryRings(ctx, now);
     if (_cvTravelState) _cvDrawTravel(ctx, now);
     ctx.restore();
 
@@ -725,6 +727,40 @@ function _cvDrawShimmer(ctx, now) {
         }
     }
     ctx.setLineDash([]);
+
+    // Boundary glow — soft wide pass along fog edges (medium+ only)
+    if (_cvDetail >= 1) {
+        var bSegs = [];
+        for (var bLocId in fogState) {
+            if (fogState[bLocId] !== 'explored') continue;
+            var bConns = connectionGraph[bLocId] || [];
+            for (var bci = 0; bci < bConns.length; bci++) {
+                if (fogState[bConns[bci]] === 'explored') continue;
+                var bCoords = LOCATION_COORDS[bLocId];
+                var nbCoords = LOCATION_COORDS[bConns[bci]];
+                if (bCoords && nbCoords) {
+                    var bP = hexToPixel(bCoords.col, bCoords.row);
+                    var nbP = hexToPixel(nbCoords.col, nbCoords.row);
+                    var mx = (bP.x + nbP.x) / 2, my = (bP.y + nbP.y) / 2;
+                    bSegs.push([bP.x, bP.y, mx, my]);
+                }
+                break;
+            }
+        }
+        if (bSegs.length > 0) {
+            var bGlowAlpha = 0.03 + 0.02 * Math.sin(now * 0.002);
+            ctx.strokeStyle = CV_GOLD;
+            ctx.lineWidth = 8;
+            ctx.globalAlpha = bGlowAlpha;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            for (var gi = 0; gi < bSegs.length; gi++) {
+                ctx.moveTo(bSegs[gi][0], bSegs[gi][1]);
+                ctx.lineTo(bSegs[gi][2], bSegs[gi][3]);
+            }
+            ctx.stroke();
+        }
+    }
     ctx.restore();
 }
 
@@ -734,9 +770,17 @@ function _cvDrawShimmer(ctx, now) {
 
 var _cvSelLoc = null;
 var _cvSelPathIds = null;
+var _cvSelBurst = null;
 
 function cvSetSelection(locId) {
     _cvSelLoc = locId;
+    if (locId) {
+        var coords = LOCATION_COORDS[locId];
+        if (coords) {
+            var bp = hexToPixel(coords.col, coords.row);
+            _cvSelBurst = { x: bp.x, y: bp.y, t: performance.now() };
+        }
+    }
     if (locId && locId !== S.currentLoc) {
         _cvSelPathIds = bfsPath(S.currentLoc, locId);
     } else {
@@ -749,10 +793,82 @@ function cvClearSelection() {
     _cvSelPathIds = null;
 }
 
+// Discovery particle system
+var _cvDiscoveryParticles = [];
+
+function _cvSpawnDiscoveryParticles(x, y) {
+    var count = _cvDetail >= 2 ? 12 : (_cvDetail >= 1 ? 8 : 4);
+    var t = performance.now();
+    for (var i = 0; i < count; i++) {
+        var angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.3;
+        var speed = 0.5 + Math.random() * 1.0;
+        _cvDiscoveryParticles.push({
+            x: x, y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            alpha: 0.8,
+            size: 1.5 + Math.random() * 1.5,
+            born: t
+        });
+    }
+}
+
+function _cvDrawDiscoveryParticles(ctx, now) {
+    if (_cvDiscoveryParticles.length === 0) return;
+    var alive = [];
+    ctx.save();
+    for (var i = 0; i < _cvDiscoveryParticles.length; i++) {
+        var dp = _cvDiscoveryParticles[i];
+        var age = now - dp.born;
+        if (age > 1200) continue;
+        var progress = age / 1200;
+        dp.x += dp.vx;
+        dp.y += dp.vy;
+        dp.vy -= 0.01;
+        var alpha = dp.alpha * (1 - progress);
+        ctx.beginPath();
+        ctx.arc(dp.x, dp.y, dp.size * (1 - progress * 0.5), 0, Math.PI * 2);
+        ctx.fillStyle = CV_GOLD;
+        ctx.globalAlpha = alpha;
+        ctx.fill();
+        alive.push(dp);
+    }
+    ctx.restore();
+    _cvDiscoveryParticles = alive;
+}
+
+// Discovery reveal rings (golden expanding ring on new locations)
+function _cvDrawDiscoveryRings(ctx, now) {
+    for (var revLocId in _cvRevealAlpha) {
+        if (_cvRevealAlpha[revLocId] < 1) {
+            var rCoords = LOCATION_COORDS[revLocId];
+            if (rCoords) {
+                var rP = hexToPixel(rCoords.col, rCoords.row);
+                var revProgress = _cvRevealAlpha[revLocId];
+                var ringR = revProgress * 25;
+                var ringAlpha = (1 - revProgress) * 0.5;
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(rP.x, rP.y, ringR, 0, Math.PI * 2);
+                ctx.strokeStyle = CV_GOLD;
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = ringAlpha;
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    }
+}
+
 // Trigger dramatic fog reveal for a newly discovered location
 function cvTriggerReveal(locId) {
     _cvRevealAlpha[locId] = 0;
     _dirtyStatic = true;
+    var coords = LOCATION_COORDS[locId];
+    if (coords) {
+        var rp = hexToPixel(coords.col, coords.row);
+        _cvSpawnDiscoveryParticles(rp.x, rp.y);
+    }
 }
 
 // Danger-color lookup for path segments
@@ -770,17 +886,53 @@ function _cvDrawSelection(ctx, now) {
     var p = hexToPixel(coords.col, coords.row);
 
     ctx.save();
+
+    // Selection burst animation (expands and fades, 400ms)
+    if (_cvSelBurst) {
+        var elapsed = now - _cvSelBurst.t;
+        if (elapsed < 400) {
+            var progress = elapsed / 400;
+            var burstR = progress * 30;
+            var burstAlpha = (1 - progress) * 0.35;
+            ctx.beginPath();
+            ctx.arc(_cvSelBurst.x, _cvSelBurst.y, burstR, 0, Math.PI * 2);
+            ctx.strokeStyle = CV_GOLD;
+            ctx.lineWidth = 2.5 - progress * 1.5;
+            ctx.globalAlpha = burstAlpha;
+            ctx.stroke();
+            if (_cvDetail >= 1) {
+                ctx.beginPath();
+                ctx.arc(_cvSelBurst.x, _cvSelBurst.y, burstR * 0.6, 0, Math.PI * 2);
+                ctx.fillStyle = CV_GOLD;
+                ctx.globalAlpha = burstAlpha * 0.3;
+                ctx.fill();
+            }
+        } else {
+            _cvSelBurst = null;
+        }
+    }
+
     // Selection ring (pulsing) — colored by destination danger
     var destLd = S.locations ? S.locations[_cvSelLoc] : null;
     var destDanger = destLd ? (destLd.d || 0) : 0;
     var selColor = _cvDangerColor(destDanger);
-    var pulseAlpha = 0.4 + 0.2 * Math.sin(now * 0.004);
+    var pulseAlpha = 0.5 + 0.3 * Math.sin(now * 0.004);
     ctx.beginPath();
-    ctx.arc(p.x, p.y, HEX_RADIUS + 5, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, HEX_RADIUS + 8, 0, Math.PI * 2);
     ctx.strokeStyle = selColor;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.globalAlpha = pulseAlpha;
     ctx.stroke();
+
+    // Scale-up glow indicator (medium+ only)
+    if (_cvDetail >= 1) {
+        var scaleAlpha = 0.12 + 0.06 * Math.sin(now * 0.003);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, HEX_RADIUS + 2, 0, Math.PI * 2);
+        ctx.fillStyle = selColor;
+        ctx.globalAlpha = scaleAlpha;
+        ctx.fill();
+    }
 
     // Path highlight — each segment colored by destination node danger
     if (_cvSelPathIds && _cvSelPathIds.length >= 2) {
