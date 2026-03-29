@@ -9,6 +9,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <style>html{background:#2a2420}.loading-overlay{visibility:hidden}</style>
     <title>Mapa do Mundo - Lendas de Valdoria</title>
     <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../shared/fonts/cinzel.woff2" as="font" type="font/woff2" crossorigin>
@@ -49,28 +50,10 @@
 
     <!-- HUD -->
     <div id="hud">
-        <div class="hud-row-1">
-            <span class="hud-name" id="hud-name">Aventureiro</span>
-            <span class="hud-level" id="hud-level">Nv.1</span>
-            <span class="hud-gold" id="hud-gold" style="display:none"></span>
-        </div>
-        <div class="hud-row-2">
-            <div class="hud-bar-group">
-                <span class="hud-bar-label">HP</span>
-                <div class="hud-bar">
-                    <div class="hud-bar-fill hp-fill" id="hud-hp"></div>
-                </div>
-                <span class="hud-bar-value" id="hud-hp-val"></span>
-            </div>
-            <div class="hud-bar-group">
-                <span class="hud-bar-label">MP</span>
-                <div class="hud-bar">
-                    <div class="hud-bar-fill mp-fill" id="hud-mp"></div>
-                </div>
-                <span class="hud-bar-value" id="hud-mp-val"></span>
-            </div>
-            <span class="hud-weather" id="hud-weather" style="display:none"></span>
-        </div>
+        <span class="hud-name" id="hud-name">Aventureiro</span>
+        <span class="hud-level" id="hud-level">Nv.1</span>
+        <span class="hud-gold" id="hud-gold" style="display:none"></span>
+        <span class="hud-weather" id="hud-weather" style="display:none"></span>
     </div>
 
     <!-- Map Viewport -->
@@ -91,48 +74,17 @@
         <div id="compass-overlay">
             <svg id="compass-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"></svg>
         </div>
-        <div id="minimap" role="img" aria-label="Minimapa do mundo"><svg id="minimap-svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
         <!-- Zoom controls -->
         <div id="zoom-controls">
             <button type="button" class="zoom-btn" id="btn-zoom-in" aria-label="Aproximar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
-            <button type="button" class="zoom-btn zoom-btn-recenter" id="btn-recenter" aria-label="Recentrar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></button>
             <button type="button" class="zoom-btn" id="btn-zoom-out" aria-label="Afastar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
         </div>
         <div id="offscreen-indicator"><span class="osi-arrow"></span><br><span class="osi-label"></span></div>
         <div id="map-tooltip"><span class="tt-name"></span><span class="tt-dist"></span></div>
-        <div id="current-loc-badge">
-            <span class="badge-icon" id="badge-icon"></span>
-            <span class="badge-name" id="badge-name"></span>
-            <span class="badge-info" id="badge-info"></span>
-        </div>
-        <div id="legend" onclick="toggleLegendExpand()">
-            <span class="legend-item"><span class="legend-dot legend-current"></span> Atual</span>
-            <span class="legend-item"><span class="legend-dot legend-explored"></span> Explorado</span>
-            <span class="legend-item"><span class="legend-dot legend-mapped"></span> Mapeado</span>
-            <span class="legend-item"><span class="legend-dot legend-unknown"></span> Desconhecido</span>
-            <span class="legend-toggle">▼</span>
-        </div>
-        <div id="legend-biomes"></div>
-        <!-- Font Picker -->
-        <button type="button" id="font-picker-btn" onclick="toggleFontPicker()" title="Fonte">Aa</button>
-        <div id="font-picker-dropdown">
-            <div class="font-picker-title">Escolher Fonte</div>
-        </div>
-        <div id="scale-container">
-            <span id="scale-level">Região</span>
-            <div id="scale-bar-wrap">
-                <div id="scale-bar"></div>
-                <div id="scale-ticks">
-                    <span></span><span></span><span></span>
-                </div>
-            </div>
-            <span id="scale-turns">4 turnos</span>
-        </div>
     </div>
 
     <!-- Location Info Panel -->
     <div id="info-panel" role="dialog" aria-label="Detalhes do local">
-        <div class="info-handle"></div>
         <div class="info-header-top">
             <span class="info-icon" id="info-icon"></span>
             <span class="info-title" id="info-title"></span>
@@ -140,10 +92,6 @@
         </div>
         <div class="info-header-meta" id="info-header-meta">
             <span class="info-danger" id="info-danger"></span>
-            <div class="info-cycle" id="info-cycle">
-                <button type="button" class="cycle-btn" id="cycle-prev" aria-label="Anterior">◂</button>
-                <button type="button" class="cycle-btn" id="cycle-next" aria-label="Próximo">▸</button>
-            </div>
         </div>
         <div class="info-content-scroll">
             <div class="info-status-bars" id="info-status-bars" style="display:none"></div>
@@ -175,8 +123,6 @@
     <div id="gesture-tutorial">
         <div class="gt-hint"><span class="gt-icon">👆</span>Tocar para info<br><span class="gt-text">Toque em um local para ver detalhes e viajar</span></div>
         <div class="gt-hint"><span class="gt-icon">🤏</span>Pinçar para zoom<br><span class="gt-text">Use dois dedos para aproximar ou afastar</span></div>
-        <div class="gt-hint"><span class="gt-icon">🗺️</span>Leitura do mapa<br><span class="gt-text">Nítido = explorado · Névoa = desconhecido · ??? = sem mapa</span></div>
-        <div class="gt-hint"><span class="gt-icon">◂ ▸</span>Ciclar locais<br><span class="gt-text">Use as setas no painel para navegar entre locais</span></div>
         <div class="gt-dismiss">Toque em qualquer lugar para continuar</div>
     </div>
 
@@ -221,94 +167,6 @@
         scripts.forEach(function (s) { document.write('<script src="' + s + '?v=' + v + '"><\/script>'); });
     </script>
     <script>
-        // ═══ FONT PICKER — Player font preference ═══
-        var FONT_OPTIONS = [
-            { id: 'medievalsharp', name: 'MedievalSharp', family: "'MedievalSharp', serif", scale: 1.0 },
-            { id: 'cinzel',        name: 'Cinzel',        family: "'Cinzel', serif",        scale: 0.92 },
-            { id: 'imfell',        name: 'IM Fell English', family: "'IM Fell English', serif", scale: 1.0 },
-            { id: 'pirataone',     name: 'Pirata One',    family: "'Pirata One', cursive",  scale: 1.15 },
-            { id: 'almendra',      name: 'Almendra',      family: "'Almendra', serif",      scale: 1.05 },
-            { id: 'metamorphous',  name: 'Metamorphous',  family: "'Metamorphous', serif",  scale: 1.05 },
-        ];
-        var _fpOpen = false;
-        var _fpInitialized = false;
-
-        function initFontPicker() {
-            var saved = localStorage.getItem('valdoria_font') || 'medievalsharp';
-            // Migrate removed fonts
-            if (saved === 'uncial') { saved = 'medievalsharp'; localStorage.setItem('valdoria_font', saved); }
-            // Defer dropdown button creation until first open (avoids loading extra fonts)
-            applyFont(saved);
-        }
-
-        function _ensureFontPickerButtons() {
-            if (_fpInitialized) return;
-            _fpInitialized = true;
-            var dd = document.getElementById('font-picker-dropdown');
-            var saved = localStorage.getItem('valdoria_font') || 'medievalsharp';
-            FONT_OPTIONS.forEach(function(f) {
-                var btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'font-option' + (f.id === saved ? ' selected' : '');
-                btn.style.fontFamily = f.family;
-                btn.textContent = f.name;
-                btn.dataset.fontId = f.id;
-                btn.onclick = function() { selectFont(f.id); };
-                dd.appendChild(btn);
-            });
-        }
-
-        function toggleFontPicker() {
-            _ensureFontPickerButtons();
-            _fpOpen = !_fpOpen;
-            document.getElementById('font-picker-dropdown').classList.toggle('open', _fpOpen);
-        }
-
-        function selectFont(fontId) {
-            var opt = FONT_OPTIONS.find(function(f) { return f.id === fontId; });
-            if (!opt) return;
-            localStorage.setItem('valdoria_font', fontId);
-            applyFont(fontId);
-            // Update selected state
-            document.querySelectorAll('.font-option').forEach(function(btn) {
-                btn.classList.toggle('selected', btn.dataset.fontId === fontId);
-            });
-            _fpOpen = false;
-            document.getElementById('font-picker-dropdown').classList.remove('open');
-        }
-
-        function applyFont(fontId) {
-            var opt = FONT_OPTIONS.find(function(f) { return f.id === fontId; });
-            if (!opt) return;
-            // Set CSS variable for overrides + data attribute to activate selectors
-            document.body.style.setProperty('--user-font', opt.family);
-            document.body.dataset.font = fontId;
-            // Also set body font-family directly for non-overridden elements
-            document.body.style.fontFamily = opt.family;
-            // Scale SVG text for fonts that render smaller/larger
-            var s = opt.scale || 1;
-            document.querySelectorAll('#map-svg text, #compass-svg text').forEach(function(t) {
-                var base = parseFloat(t.getAttribute('data-base-size') || t.getAttribute('font-size') || '9.5');
-                if (!t.getAttribute('data-base-size')) t.setAttribute('data-base-size', base);
-                t.setAttribute('font-size', (base * s).toFixed(1) + 'px');
-            });
-        }
-
-        // Close dropdown when tapping outside
-        document.addEventListener('click', function(e) {
-            if (_fpOpen && !e.target.closest('#font-picker-dropdown') && !e.target.closest('#font-picker-btn')) {
-                _fpOpen = false;
-                document.getElementById('font-picker-dropdown').classList.remove('open');
-            }
-        });
-
-        // Init on load
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initFontPicker);
-        } else {
-            initFontPicker();
-        }
-
         // ── Idle detection: pause ALL decorative animations after 10s ──
         (function() {
             var _idleTimer = null;
