@@ -357,31 +357,43 @@ function _cvDrawMarkers(ctx, fogState) {
         ctx.save();
         ctx.globalAlpha = alpha;
 
+        // Platform backing for explored/current markers (pops against busy PNG bg)
+        if (isExp || isCurr) {
+            _cvCircle(ctx, x, y, 16, 'rgba(30,24,18,0.55)', 1, null, 0, 0);
+            if (_cvDetail >= 1) {
+                _cvCircle(ctx, x, y, 16, null, 0, CVI_GOLD, 0.6, 0.08);
+            }
+        }
+
         if (isCurr) {
             // Current location — pulsing ring
-            var pulseA = 0.3 + 0.1 * Math.sin((_bannerSwayTime || 0) * 0.003);
-            _cvCircle(ctx, x, y, R + 4, null, 0, CVI_GOLD, 1.5, pulseA);
+            var pulseA = 0.35 + 0.15 * Math.sin((_bannerSwayTime || 0) * 0.003);
+            _cvCircle(ctx, x, y, R + 6, null, 0, CVI_GOLD, 2.0, pulseA);
             // Breathing scale — just draw normally (subtle)
-            var iconOc = _cvGetIcon(biome, name, 14, isSett);
+            var iconOc = _cvGetIcon(biome, name, 18, isSett);
             ctx.drawImage(iconOc, x - iconOc.width/2, y + 4 - iconOc.height/2);
         } else if (isExp) {
-            var iconOc2 = _cvGetIcon(biome, name, isSett ? 12 : 12, isSett);
+            var iconOc2 = _cvGetIcon(biome, name, isSett ? 15 : 14, isSett);
             ctx.drawImage(iconOc2, x - iconOc2.width/2, y + (isSett ? 4 : 2) - iconOc2.height/2);
         } else if (fog === 'known_mapped') {
             ctx.globalAlpha = alpha * 0.45;
-            var iconOc3 = _cvGetIcon(biome, name, 7, isSett);
+            var iconOc3 = _cvGetIcon(biome, name, 9, isSett);
             ctx.drawImage(iconOc3, x - iconOc3.width/2, y + 2 - iconOc3.height/2);
             // Pulsing discover ring
-            var discAlpha = 0.2 + 0.15 * Math.sin((_bannerSwayTime || 0) * 0.004 + coords.col);
-            _cvCircle(ctx, x, y, R - 4, null, 0, CVI_GOLD, 1.2, discAlpha);
+            var discAlpha = 0.25 + 0.20 * Math.sin((_bannerSwayTime || 0) * 0.004 + coords.col);
+            _cvCircle(ctx, x, y, R - 2, null, 0, CVI_GOLD, 1.8, discAlpha);
+            // Dotted invitation circle
+            ctx.setLineDash([2, 2]);
+            _cvCircle(ctx, x, y, R - 8, null, 0, CVI_GOLD, 0.8, discAlpha * 0.5);
+            ctx.setLineDash([]);
         } else if (fog === 'known_unmapped') {
             ctx.globalAlpha = alpha * 0.3;
-            _cvCircle(ctx, x, y, 2.5, INK_DARK, 0.35, null, 0, 0);
-            _cvText(ctx, '?', x, y + 1, '6px ' + _cvFontFamily, INK_DARK, 0.5, 'center');
+            _cvCircle(ctx, x, y, 3, INK_DARK, 0.35, null, 0, 0);
+            _cvText(ctx, '?', x, y + 1, '8px ' + _cvFontFamily, INK_DARK, 0.5, 'center');
         } else {
-            // Frontier
-            ctx.globalAlpha = alpha * 0.2;
-            _cvCircle(ctx, x, y, 1.5, INK_DARK, 0.2, null, 0, 0);
+            // Frontier — slightly larger
+            ctx.globalAlpha = alpha * 0.25;
+            _cvCircle(ctx, x, y, 2.5, INK_DARK, 0.25, INK_DARK, 0.4, 0.15);
         }
 
         ctx.globalAlpha = alpha;

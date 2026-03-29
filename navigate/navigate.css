@@ -146,7 +146,7 @@ body {
     var(--v-bg-card-hover) 0%,
     var(--v-bg) 100%
   );
-  border-top: 2px solid var(--nav-sepia);
+  border-top: 1px solid rgba(196,149,58,0.25);
   border-radius: var(--v-radius-sm) var(--v-radius-sm) 0 0;
   padding: var(--v-space-lg) var(--v-space-lg)
     max(12px, env(safe-area-inset-bottom));
@@ -158,9 +158,17 @@ body {
   flex-direction: column;
   overflow: hidden;
   box-shadow:
+    inset 0 2px 16px rgba(196,149,58,0.06),
     inset 0 4px 16px rgba(40, 30, 15, 0.65),
     inset 0 -2px 8px rgba(40, 30, 15, 0.45),
     0 -4px 20px rgba(0, 0, 0, 0.5);
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(196,149,58,0.015) 3px,
+    rgba(196,149,58,0.015) 4px
+  );
 }
 #info-panel.open {
   transform: translateY(0) scale(1);
@@ -197,25 +205,22 @@ body {
   pointer-events: none;
 }
 #info-panel::before {
-  content: "";
+  content: "◆";
   position: absolute;
-  top: -3px;
-  left: 10px;
-  right: 10px;
-  height: 6px;
-  background: radial-gradient(
-    ellipse at center,
-    #4a3a28 0%,
-    var(--v-bg-card-hover) 50%,
-    transparent 100%
-  );
-  border-radius: 50%;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  color: var(--v-gold, #c4953a);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 1;
 }
 .info-handle {
-  width: 36px;
-  height: 3px;
-  background: var(--v-brown-40);
-  border-radius: 1px;
+  width: 40px;
+  height: 4px;
+  background: var(--v-gold-30, rgba(196,149,58,0.3));
+  border-radius: 2px;
   margin: 0 auto 4px;
   flex-shrink: 0;
 }
@@ -244,6 +249,7 @@ body {
   color: var(--v-gold);
   flex: 1;
   font-family: "Cinzel Decorative", "Cinzel", serif;
+  text-shadow: 0 0 12px rgba(196,149,58,0.15);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -377,6 +383,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 4px rgba(0,0,0,0.3);
 }
 .info-btn-travel {
   background: linear-gradient(180deg, #8a5a2a 0%, #704214 40%, #5a3210 100%);
@@ -661,9 +668,21 @@ body {
   padding: var(--v-space-sm) var(--v-space-lg)
     max(6px, env(safe-area-inset-bottom));
   background: linear-gradient(0deg, var(--v-bg-card) 0%, var(--v-bg-card-hover) 100%);
-  border-top: 2px solid var(--nav-sepia);
+  border-top: 1px solid rgba(196,149,58,0.25);
   z-index: var(--nav-z-quicklist);
   flex-shrink: 0;
+  position: relative;
+}
+#bottom-panel::before {
+  content: "◆";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 7px;
+  color: var(--v-gold, #c4953a);
+  opacity: 0.3;
+  pointer-events: none;
 }
 .bar-btn {
   flex: 1;

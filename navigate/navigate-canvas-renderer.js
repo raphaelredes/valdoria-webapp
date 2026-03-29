@@ -270,10 +270,10 @@ function _cvRoadSegment(ctx, aPx, bPx, seed) {
 
 function _cvDrawRoads(ctx, fogState) {
     var buckets = {
-        active:   { w: 2.2, op: 0.6,  dash: null },
-        explored: { w: 1.8, op: 0.45, dash: null },
-        partial:  { w: 1.3, op: 0.25, dash: [5, 4] },
-        frontier: { w: 1.0, op: 0.06, dash: [2, 4] },
+        active:   { w: 3.0, op: 0.75, dash: null },
+        explored: { w: 2.4, op: 0.55, dash: null },
+        partial:  { w: 1.8, op: 0.30, dash: [5, 4] },
+        frontier: { w: 1.2, op: 0.10, dash: [2, 4] },
         fog:      { w: 1.0, op: 0.08, dash: [2, 4] },
     };
     var segs = { active: [], explored: [], partial: [], frontier: [], fog: [] };
@@ -354,13 +354,27 @@ function _cvDrawRoads(ctx, fogState) {
 function _cvDrawActiveRoads(ctx, now) {
     if (_activeRoadSegs.length === 0) return;
     ctx.save();
-    ctx.strokeStyle = CV_GOLD;
-    ctx.lineWidth = 2.5;
-    ctx.globalAlpha = 0.35;
     ctx.lineCap = 'round';
+
+    // Glow pass (medium+ only)
+    if (_cvDetail >= 1) {
+        ctx.strokeStyle = CV_GOLD;
+        ctx.lineWidth = 8;
+        ctx.globalAlpha = 0.12;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        for (var g = 0; g < _activeRoadSegs.length; g++) {
+            _cvRoadSegment(ctx, _activeRoadSegs[g].aPx, _activeRoadSegs[g].bPx, _activeRoadSegs[g].seed);
+        }
+        ctx.stroke();
+    }
+
+    // Main ant-march
+    ctx.strokeStyle = CV_GOLD;
+    ctx.lineWidth = 3.5;
+    ctx.globalAlpha = 0.50;
     ctx.setLineDash([6, 4]);
     ctx.lineDashOffset = -_antMarchOffset;
-
     ctx.beginPath();
     for (var i = 0; i < _activeRoadSegs.length; i++) {
         _cvRoadSegment(ctx, _activeRoadSegs[i].aPx, _activeRoadSegs[i].bPx, _activeRoadSegs[i].seed);
@@ -471,15 +485,41 @@ function _cvDrawBanner(ctx, now) {
     if (!coords) return;
     var p = hexToPixel(coords.col, coords.row);
     var x = p.x, baseY = p.y - 3;
-    var poleH = 26;
+    var poleH = 28;
     var topY = baseY - poleH;
 
     ctx.save();
+
+    // Ground glow (all tiers)
+    _cvCircle(ctx, x, p.y, 6, CV_GOLD, 0.10, null, 0, 0);
+
+    // Outer beacon ring (pulsing)
+    var beaconAlpha = 0.12 + 0.10 * Math.sin(now * 0.003);
+    ctx.beginPath();
+    ctx.arc(x, p.y, 20, 0, Math.PI * 2);
+    ctx.strokeStyle = CV_GOLD;
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = beaconAlpha;
+    ctx.stroke();
+
+    // Inner glow (medium+ only)
+    if (_cvDetail >= 1) {
+        var glow = ctx.createRadialGradient(x, p.y, 2, x, p.y, 16);
+        glow.addColorStop(0, 'rgba(196,149,58,0.25)');
+        glow.addColorStop(1, 'rgba(196,149,58,0)');
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(x, p.y, 16, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
     // Pole
+    ctx.globalAlpha = 1;
     _cvLine(ctx, x, baseY, x, topY, INK_DARK, 1.2, 1);
 
-    // Flag with subtle wave
-    var fw = 13, fh = 10;
+    // Flag with subtle wave (larger)
+    var fw = 16, fh = 12;
     var waveAmt = _cvDetail >= 1 ? Math.sin(now * 0.002) * 1.5 : 0;
     ctx.beginPath();
     ctx.moveTo(x, topY);
@@ -494,6 +534,24 @@ function _cvDrawBanner(ctx, now) {
     ctx.strokeStyle = INK_DARK;
     ctx.lineWidth = 0.6;
     ctx.stroke();
+
+    // Gold diamond ornament at pole tip (full detail only)
+    if (_cvDetail >= 2) {
+        ctx.beginPath();
+        ctx.moveTo(x, topY - 4);
+        ctx.lineTo(x + 2.5, topY - 1);
+        ctx.lineTo(x, topY + 2);
+        ctx.lineTo(x - 2.5, topY - 1);
+        ctx.closePath();
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = CV_GOLD;
+        ctx.fill();
+        ctx.globalAlpha = 0.5;
+        ctx.strokeStyle = INK_DARK;
+        ctx.lineWidth = 0.3;
+        ctx.stroke();
+    }
+
     ctx.restore();
 }
 
@@ -642,12 +700,25 @@ function _cvDrawShimmer(ctx, now) {
             var coords = LOCATION_COORDS[locId];
             if (!coords) continue;
             var p = hexToPixel(coords.col, coords.row);
-            var shimAlpha = 0.06 + 0.04 * Math.sin(now * 0.001 + coords.col * 3 + coords.row * 7);
+            var shimAlpha = 0.10 + 0.06 * Math.sin(now * 0.001 + coords.col * 3 + coords.row * 7);
+
+            // Soft glow backdrop (medium+ only)
+            if (_cvDetail >= 1) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, HEX_RADIUS + 10, 0, Math.PI * 2);
+                ctx.setLineDash([]);
+                ctx.strokeStyle = CV_GOLD;
+                ctx.lineWidth = 5;
+                ctx.globalAlpha = 0.04 + 0.03 * Math.sin(now * 0.001 + coords.col * 3 + coords.row * 7);
+                ctx.stroke();
+            }
+
+            // Main shimmer ring
             ctx.beginPath();
             ctx.arc(p.x, p.y, HEX_RADIUS + 8, 0, Math.PI * 2);
             ctx.setLineDash([12, 8]);
             ctx.strokeStyle = CV_GOLD;
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1.5;
             ctx.globalAlpha = shimAlpha;
             ctx.stroke();
             break;  // One shimmer per location
