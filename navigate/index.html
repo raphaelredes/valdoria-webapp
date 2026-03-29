@@ -172,6 +172,10 @@
         <div class="gt-dismiss">Toque em qualquer lugar para continuar</div>
     </div>
 
+    <!-- Immersive toggle -->
+    <button id="immersive-toggle" class="immersive-toggle" style="display:none"
+        aria-label="Recolher menu">&middot;</button>
+
     <!-- Bottom Bar -->
     <div id="bottom-panel" class="bottom-panel" style="display:none">
         <button type="button" class="bar-btn bar-btn-return" id="btn-return" onclick="handleReturn()">
@@ -185,6 +189,9 @@
         </button>
     </div>
 
+    <!-- Immersive restore pill -->
+    <button id="immersive-restore" aria-label="Expandir menu" class="immersive-restore" style="display:none">&middot; Menu</button>
+
     <!-- Shared Popup Overlay -->
     <div id="v-popup-overlay" class="v-popup-overlay" style="display:none"><div class="v-popup-card"><div class="v-popup-header"></div><div class="v-popup-body"></div><div class="v-popup-actions"></div></div></div>
 
@@ -194,6 +201,8 @@
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
+        document.write('<link rel="stylesheet" href="../shared/connection-overlay.css?v=' + v + '">');
+        document.write('<script src="../shared/connection-overlay.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
