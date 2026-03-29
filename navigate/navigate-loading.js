@@ -38,6 +38,17 @@ if (window.__spaRevisit) {
     window._navLoadingCtrl = ValdoriaLoadingController({
         overlayId: 'loading',
         tips: TIPS,
+        autoRetryMax: 1,
+        onRetry: function() {
+            console.warn('[NAVIGATE] Loading retry - re-running initAsync');
+            if (window._navLoadingCtrl) window._navLoadingCtrl.show(true);
+            if (typeof initAsync === 'function') {
+                initAsync().catch(function(e) {
+                    console.error('[NAVIGATE] Retry initAsync failed:', e);
+                    if (window._navLoadingCtrl) window._navLoadingCtrl.forceHide();
+                });
+            }
+        },
         onTimeout: function() { console.error('[NAVIGATE] Loading timeout'); }
     });
 }
