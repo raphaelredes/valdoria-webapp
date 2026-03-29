@@ -1,0 +1,25 @@
+/* Rank-based battlefield grid -- Darkest Dungeon-style 4-rank display */
+.bf-grid{display:flex;align-items:stretch;gap:var(--v-space-xs,2px);padding:var(--v-space-xs,2px) var(--v-space-sm,4px);margin:var(--v-space-xs,2px) 0;border-radius:var(--v-radius-sm,6px);background:var(--v-bg-card,#2e2520);border:1px solid var(--v-border,#4a3828);min-height:52px;position:relative}
+.bf-side{display:flex;gap:var(--v-space-xs,2px);flex:1}
+.bf-side-enemy{flex-direction:row-reverse;justify-content:flex-start}
+.bf-side-player{flex-direction:row;justify-content:flex-start}
+.bf-divider{width:2px;background:linear-gradient(180deg,transparent,var(--v-gold,#c4952a) 30%,var(--v-gold,#c4952a) 70%,transparent);flex-shrink:0;margin:0 var(--v-space-xs,2px);position:relative}
+.bf-divider::after{content:'94\FE0F';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;background:var(--v-bg-card,#2e2520);padding:1px}
+.bf-rank{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:36px;flex:1;padding:2px 1px}
+.bf-rank-label{font-size:var(--v-font-micro,9px);color:var(--v-text-dim,#a09484);text-transform:uppercase;letter-spacing:0.5px;line-height:1;white-space:nowrap}
+.bf-token{display:flex;align-items:center;gap:2px;padding:1px 3px;border-radius:var(--v-radius-sm,6px);background:rgba(0,0,0,0.2);font-size:var(--v-font-xs,10px);white-space:nowrap;max-width:100%;overflow:hidden}
+.bf-token-enemy{border-left:2px solid var(--v-danger,#c0392b)}
+.bf-token-player{border-left:2px solid var(--v-gold,#c4952a)}
+.bf-token-ally{border-left:2px solid var(--v-info,#3498db)}
+.bf-token-dead{opacity:0.4;text-decoration:line-through}
+.bf-token-icon{font-size:12px;flex-shrink:0}
+.bf-token-name{overflow:hidden;text-overflow:ellipsis;color:var(--v-text,#d4c8b0);font-size:var(--v-font-micro,9px)}
+.bf-token-hp{width:20px;height:3px;background:rgba(0,0,0,0.3);border-radius:2px;flex-shrink:0}
+.bf-token-hp-fill{height:100%;border-radius:2px;transition:width var(--v-transition,0.2s)}
+.bf-token-hp-fill.hp-high{background:var(--v-hp-high,#27ae60)}
+.bf-token-hp-fill.hp-mid{background:var(--v-hp-mid,#f39c12)}
+.bf-token-hp-fill.hp-low{background:var(--v-hp-low,#c0392b)}
+.bf-move-row{display:flex;gap:var(--v-space-xs,2px);justify-content:center;margin-top:2px}
+.bf-move-btn{font-size:var(--v-font-micro,9px);padding:1px 6px;border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-sm,6px);background:var(--v-bg-raised,#332a22);color:var(--v-text-dim,#a09484);cursor:pointer;white-space:nowrap}
+.bf-move-btn:active{background:var(--v-gold,#c4952a);color:var(--v-bg,#2a2420)}
+body.perf-lite .bf-token{box-shadow:none}
