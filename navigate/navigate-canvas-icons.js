@@ -15,7 +15,8 @@ var _cvIconCacheCount = 0;
 function _cvGetIcon(biome, locName, sz, isSett) {
     var key = (isSett ? 'S_' : 'B_') + biome + '_' + (locName || '').substring(0, 10) + '_' + sz;
     if (_cvIconCache[key]) return _cvIconCache[key];
-    if (_cvIconCacheCount > 150) { _cvIconCache = {}; _cvIconCacheCount = 0; }
+    var _cacheLimit = _cvDetail >= 2 ? 150 : _cvDetail >= 1 ? 80 : 40;
+    if (_cvIconCacheCount > _cacheLimit) { _cvIconCache = {}; _cvIconCacheCount = 0; }
     var pad = 4;
     var oc = document.createElement('canvas');
     oc.width = sz * 4 + pad * 2;

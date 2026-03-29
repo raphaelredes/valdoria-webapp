@@ -35,7 +35,6 @@ var _cvDetail = 2;  // 0=lite, 1=medium, 2=full
 // ── Animation state ──
 var _antMarchOffset = 0;
 var _bannerSwayTime = 0;
-var _shimmerPhase = 0;
 var _selPulsePhase = 0;
 
 // ── Fog state cache ref ──
@@ -188,7 +187,6 @@ function _cvRenderFrame(now) {
     // Update animations
     _antMarchOffset = (_antMarchOffset + dt * 12) % 20;
     _bannerSwayTime = now;
-    _shimmerPhase = now * 0.001;
     _selPulsePhase = now * 0.003;
 
     // Update particles
