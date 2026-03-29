@@ -64,7 +64,8 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
 </head>
 
 <body style="background:#2a2420">
-    <script>document.write(ValdoriaLoadingHTML({ title: 'LENDAS DE VALDORIA', particleSet: 'full', defaultTip: 'Preparando sua aventura...' }));</script>
+    <!-- Dark placeholder — SVG content injected AFTER all CSS loads (prevents flash in Telegram WebView) -->
+    <div id="loading" class="loading-overlay" style="background:#1a1510" aria-busy="true"></div>
 
     <!-- Main screen container (scrollable content only) -->
     <div id="screen" class="screen" style="display:none">
@@ -411,13 +412,18 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         });
     </script>
     <script>
-        // Reveal loading overlay now that all CSS+JS are parsed
+        // Populate loading overlay now that all CSS+JS are parsed (prevents SVG flash in Telegram WebView)
         var _ld = document.getElementById('loading');
-        if (_ld) {
-            _ld.style.display = '';
-            _ld.style.animation = 'none';
-            void _ld.offsetHeight;
-            _ld.style.animation = '';
+        if (_ld && typeof ValdoriaLoadingHTML === 'function') {
+            var _tmp = document.createElement('div');
+            _tmp.innerHTML = ValdoriaLoadingHTML({
+                title: 'LENDAS DE VALDORIA',
+                particleSet: 'full',
+                defaultTip: 'Preparando sua aventura...'
+            });
+            var _overlay = _tmp.firstElementChild;
+            _overlay.style.background = '#1a1510';
+            _ld.parentNode.replaceChild(_overlay, _ld);
         }
     </script>
 <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("GAME")</script>

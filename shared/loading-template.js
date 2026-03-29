@@ -137,7 +137,7 @@ window.ValdoriaLoadingHTML = function(opts) {
     } // end icon conditional
 
     // ── Build HTML ──
-    var h = '<div id="' + id + '" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true">'
+    var h = '<div id="' + id + '" class="loading-overlay" style="background:#1a1510" aria-busy="true">'
       + iconHTML;
 
     // Flash (only for magic-circle)
