@@ -52,11 +52,11 @@ function conditionPreventsMovement(){for(const c of S.conditions){const fx=CONDI
 return false;}
 function conditionPPMod(){let mod=0;for(const c of S.conditions){const fx=CONDITION_EFFECTS[c.type];if(fx&&fx.ppMod)mod+=fx.ppMod;}
 return mod;}
-function addCondition(type,duration){const fx=CONDITION_EFFECTS[type];if(!fx){console.warn('[EXPLORE] Unknown condition:',type);return;}
+function addCondition(type,duration){const fx=CONDITION_EFFECTS[type];if(!fx){console.warn('[EXPLORE] Unknown condition:',type);return;}console.info('[EXPLORE] condition_added',{type:type,duration:duration,total:S.conditions?S.conditions.length+1:1});
 const existing=S.conditions.find(c=>c.type===type);if(existing){existing.stepsLeft=Math.max(existing.stepsLeft,duration||5);updateConditionHUD();return;}
 const defaultDurations={poisoned:8,prone:1,frightened:5,blinded:5,restrained:3,deafened:5,charmed:8,stunned:2,incapacitated:2,};const stepsLeft=duration||defaultDurations[type]||5;S.conditions.push({type:type,stepsLeft:stepsLeft});console.debug("[EXPLORE] addCondition",{type:type,duration:stepsLeft,total:S.conditions.length});updateConditionHUD();showTerrainToast(fx.icon+' '+fx.label+'! ('+stepsLeft+' passos)','condition');try{if(typeof tg!=='undefined'&&tg)tg.HapticFeedback.impactOccurred('medium');}catch(e){console.warn('[EXPLORE]',e);}
 saveState();}
-function removeCondition(type){console.debug("[EXPLORE] removeCondition",{type:type,before:S.conditions?S.conditions.length:0});S.conditions=S.conditions.filter(c=>c.type!==type);updateConditionHUD();saveState();}
+function removeCondition(type){console.info("[EXPLORE] condition_removed",{type:type,before:S.conditions?S.conditions.length:0});S.conditions=S.conditions.filter(c=>c.type!==type);updateConditionHUD();saveState();}
 function _setFatigueVisual(level){document.body.classList.remove('fatigue-1','fatigue-2','fatigue-3');if(level>0)document.body.classList.add('fatigue-'+level);}
 function updateFatigueHUD(){var badge=document.getElementById('fatigue-badge');if(!badge)return;var f=S._fatigue||0;if(f<=0){badge.style.display='none';_setFatigueVisual(0);}else{badge.style.display='inline';badge.textContent=f===1?'Fadiga':'Fadiga Severa';badge.className='fatigue-badge fatigue-lv'+f;}}
 function getFatigueMod(){return-(S._fatigue||0);}
