@@ -126,6 +126,10 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             return;
         }
         var ctrl = _ensureCtrl();
+        if (!isRetry && ctrl.getState() === 'loading') {
+            console.warn('[GAME-LOADING] showLoading() skipped — controller already loading');
+            return;
+        }
         ctrl.show(isRetry);
         var el = document.getElementById('loading');
         if (el) {

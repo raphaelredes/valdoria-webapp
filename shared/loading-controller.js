@@ -276,6 +276,13 @@ window.ValdoriaLoadingController = function(config) {
         show: function(isRetry) {
             console.warn('[LOADING] show(' + (isRetry ? 'retry' : 'init') + ') prevState=' + _state);
             if(window._loadDbg)_loadDbg('show('+(isRetry?'retry':'init')+')');
+            // Idempotent: if already loading and not a retry, skip reset to prevent
+            // animation restart (flash) and progress/timer reset (visual glitch)
+            if (_state === 'loading' && !isRetry) {
+                console.warn('[LOADING] show() skipped — already in loading state');
+                if(window._loadDbg)_loadDbg('show() SKIPPED (already loading)');
+                return;
+            }
             if (_state === 'hiding') this.forceHide();
             _cleanup();
             _state = 'loading';
