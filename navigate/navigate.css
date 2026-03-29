@@ -1780,10 +1780,12 @@ body.map-idle .fog-shimmer-line {
   border-left-color: var(--v-gold) !important;
 }
 .ql-biome-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 4px;
+  height: 28px;
+  border-radius: 2px;
   flex-shrink: 0;
+  opacity: 0.7;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 .ql-status-icon {
   font-size: var(--v-font-label);
@@ -1796,12 +1798,15 @@ body.map-idle .fog-shimmer-line {
   margin-left: 4px;
 }
 .ql-danger-pip {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   display: inline-block;
-  margin-right: 2px;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+  margin-right: 1px;
+  box-shadow:
+    0 0 3px rgba(0, 0, 0, 0.3),
+    0 0 4px currentColor;
+  border: 0.5px solid rgba(0, 0, 0, 0.2);
 }
 .map-deco-text {
   font-family: "MedievalSharp", serif;
@@ -2118,14 +2123,31 @@ body.zoom-out .distance-ring {
   right: 0;
   max-height: 55%;
   background: var(--v-bg-heavy);
-  border-top: 1px solid var(--v-brown-40);
-  border-radius: var(--v-radius) var(--v-radius) 0 0;
+  border-top: 2px solid var(--v-gold-30);
+  border-radius: var(--v-radius-lg) var(--v-radius-lg) 0 0;
   z-index: var(--nav-z-quicklist);
   overflow-y: auto;
   padding: 0;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 -4px 16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 var(--v-gold-12);
   transition: transform var(--v-transition-base);
 }
+/* Ornamental diamond corners */
+#quick-list::before,
+#quick-list::after {
+  content: "C6";
+  position: absolute;
+  top: -1px;
+  font-size: 8px;
+  color: var(--v-gold);
+  opacity: 0.5;
+  z-index: 2;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+#quick-list::before { left: 16px; }
+#quick-list::after { right: 16px; }
 #quick-list.open {
   display: block;
   animation: qlSlideUp 0.25s ease-out;
@@ -2150,6 +2172,15 @@ body.zoom-out .distance-ring {
   background: var(--v-bg-heavy);
   border-bottom: 1px solid var(--v-brown-18);
   z-index: 1;
+}
+.ql-header::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--v-gold-30), transparent);
 }
 .ql-title {
   font-family: "Cinzel", serif;
@@ -2201,7 +2232,9 @@ body.zoom-out .distance-ring {
   background: linear-gradient(135deg, #3a3220 0%, #332a1e 100%);
   box-shadow:
     0 0 8px var(--v-gold-12),
-    0 1px 3px rgba(0, 0, 0, 0.3);
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    inset 0 0 12px var(--v-gold-08);
+  border-color: var(--v-gold-30);
 }
 .ql-item-icon {
   font-size: var(--v-font-2xl);
@@ -2237,10 +2270,11 @@ body.zoom-out .distance-ring {
   font-size: var(--v-font-xs);
   padding: var(--v-space-2xs) var(--v-space-sm);
   border-radius: var(--v-radius-xs);
-  background: var(--v-brown-18);
-  border: 1px solid var(--v-brown-12);
-  color: var(--v-text-muted);
+  background: var(--v-gold-08);
+  border: 1px solid var(--v-gold-18);
+  color: var(--v-gold);
   font-family: "Cinzel", serif;
+  font-weight: 600;
 }
 .path-preview {
   stroke: var(--v-gold);

@@ -162,6 +162,7 @@ function initCanvasRenderer() {
     _cvFogState = computeFogState(true);
     _dirtyStatic = true;
     _cvInitParticles();
+    _cvInitWeather();
     _cvInited = true;
 
     // Start render loop
@@ -189,6 +190,7 @@ function _cvRenderFrame(now) {
 
     // Update particles
     if (_cvDetail >= 1) _cvUpdateParticles(dt);
+    if (_cvDetail >= 1) _cvUpdateWeather(dt);
 
     // Update reveal fade-ins
     for (var rid in _cvRevealAlpha) {
@@ -215,6 +217,7 @@ function _cvRenderFrame(now) {
     ctx.save();
     if (_cvDetail >= 2) _cvDrawShimmer(ctx, now);
     if (_cvDetail >= 1) _cvDrawParticles(ctx);
+    if (_cvDetail >= 1) _cvDrawWeather(ctx);
     _cvDrawBanner(ctx, now);
     _cvDrawActiveRoads(ctx, now);
     _cvDrawSelection(ctx, now);
@@ -612,19 +615,21 @@ function _cvInitParticles() {
         }
     }
 
-    // Clouds (3-4 large ellipses)
-    if (_cvDetail >= 2) {
+    // Clouds — medium: 4 static, full: 8 with shadow + varied drift
+    if (_cvDetail >= 1) {
         var cw = SVG_W || 733, ch = SVG_H || 720;
-        for (var ic = 0; ic < 4 && pCount < maxP; ic++) {
+        var cloudCount = _cvDetail >= 2 ? 8 : 4;
+        for (var ic = 0; ic < cloudCount; ic++) {
             _cvClouds.push({
                 x: Math.random() * cw,
                 y: 40 + Math.random() * (ch - 80),
-                rx: 30 + Math.random() * 40,
-                ry: 8 + Math.random() * 12,
-                speed: 0.3 + Math.random() * 0.5,
+                rx: 25 + Math.random() * 45,
+                ry: 6 + Math.random() * 14,
+                speed: 0.2 + Math.random() * 0.4,
+                dir: Math.random() < 0.3 ? -1 : 1,
+                drift: (Math.random() - 0.5) * 0.15,
                 phase: Math.random() * Math.PI * 2,
             });
-            pCount++;
         }
     }
 }
@@ -655,11 +660,16 @@ function _cvUpdateParticles(dt) {
                 break;
         }
     }
-    // Clouds drift
+    // Clouds drift with varied direction
     for (var j = 0; j < _cvClouds.length; j++) {
         var c = _cvClouds[j];
-        c.x += c.speed * dt * 3;
-        if (c.x - c.rx > (SVG_W || 733)) c.x = -c.rx;
+        c.x += c.speed * c.dir * dt * 3;
+        c.y += c.drift * dt * 2;
+        c.phase += dt * 0.3;
+        var cw2 = SVG_W || 733;
+        if (c.dir > 0 && c.x - c.rx > cw2) c.x = -c.rx;
+        if (c.dir < 0 && c.x + c.rx < 0) c.x = cw2 + c.rx;
+        if (c.y < 20 || c.y > (SVG_H || 720) - 20) c.drift = -c.drift;
     }
 }
 
@@ -673,10 +683,19 @@ function _cvDrawParticles(ctx) {
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
     }
-    // Clouds
+    // Clouds with varied opacity + shadow (full tier)
     for (var j = 0; j < _cvClouds.length; j++) {
         var c = _cvClouds[j];
-        ctx.globalAlpha = 0.06;
+        var cloudOp = 0.06 + 0.04 * Math.sin(c.phase);
+        // Shadow pass (full tier only)
+        if (_cvDetail >= 2) {
+            ctx.globalAlpha = cloudOp * 0.4;
+            ctx.fillStyle = '#1a1510';
+            ctx.beginPath();
+            ctx.ellipse(c.x + 3, c.y + 2, c.rx, c.ry, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = cloudOp;
         ctx.fillStyle = CV_TEXT;
         ctx.beginPath();
         ctx.ellipse(c.x, c.y, c.rx, c.ry, 0, 0, Math.PI * 2);
@@ -772,6 +791,8 @@ var _cvSelLoc = null;
 var _cvSelPathIds = null;
 var _cvSelBurst = null;
 
+var _cvSelAnimStart = 0;
+
 function cvSetSelection(locId) {
     _cvSelLoc = locId;
     if (locId) {
@@ -783,8 +804,10 @@ function cvSetSelection(locId) {
     }
     if (locId && locId !== S.currentLoc) {
         _cvSelPathIds = bfsPath(S.currentLoc, locId);
+        _cvSelAnimStart = performance.now();
     } else {
         _cvSelPathIds = null;
+        _cvSelAnimStart = 0;
     }
 }
 
@@ -861,8 +884,11 @@ function _cvDrawDiscoveryRings(ctx, now) {
 }
 
 // Trigger dramatic fog reveal for a newly discovered location
+var _cvNewLocTimers = {};
+
 function cvTriggerReveal(locId) {
     _cvRevealAlpha[locId] = 0;
+    _cvNewLocTimers[locId] = performance.now();
     _dirtyStatic = true;
     var coords = LOCATION_COORDS[locId];
     if (coords) {
@@ -934,13 +960,19 @@ function _cvDrawSelection(ctx, now) {
         ctx.fill();
     }
 
-    // Path highlight — each segment colored by destination node danger
+    // Path highlight — animated segment by segment (300ms each)
     if (_cvSelPathIds && _cvSelPathIds.length >= 2) {
         ctx.lineCap = 'round';
         ctx.setLineDash([8, 4]);
         ctx.lineDashOffset = -_antMarchOffset;
+        var routeElapsed = now - _cvSelAnimStart;
+        var segDur = _cvDetail >= 1 ? 300 : 0;
+        var totalSegs = _cvSelPathIds.length - 1;
 
-        for (var i = 0; i < _cvSelPathIds.length - 1; i++) {
+        for (var i = 0; i < totalSegs; i++) {
+            // Animated reveal: segment i visible after i*segDur ms
+            var segProgress = segDur > 0 ? Math.min(1, (routeElapsed - i * segDur) / segDur) : 1;
+            if (segProgress <= 0) break;
             var aC = LOCATION_COORDS[_cvSelPathIds[i]];
             var bC = LOCATION_COORDS[_cvSelPathIds[i + 1]];
             if (!aC || !bC) continue;
@@ -969,22 +1001,23 @@ function _cvDrawSelection(ctx, now) {
                 ctx.strokeStyle = segColor;
             }
 
+            var segAlpha = segProgress < 1 ? segProgress * 0.55 : 0.55;
             // Glow pass (medium/full only)
             if (_cvDetail >= 1) {
                 ctx.lineWidth = 8;
-                ctx.globalAlpha = 0.15;
+                ctx.globalAlpha = 0.15 * segProgress;
                 ctx.beginPath();
                 _cvRoadSegment(ctx, aP, bP, seed);
                 ctx.stroke();
             }
             ctx.lineWidth = 4;
-            ctx.globalAlpha = 0.55;
+            ctx.globalAlpha = segAlpha;
             ctx.beginPath();
             _cvRoadSegment(ctx, aP, bP, seed);
             ctx.stroke();
 
-            // Direction arrow at midpoint (medium+ only — expensive transform)
-            if (_cvDetail >= 1) {
+            // Direction arrow at midpoint (medium+ only)
+            if (_cvDetail >= 1 && segProgress >= 1) {
             var pathD = _buildRoadPath(aP, bP, seed);
             var midPt = _pointOnPath(pathD, 0.5);
             var preP = _pointOnPath(pathD, 0.45);
@@ -1001,6 +1034,25 @@ function _cvDrawSelection(ctx, now) {
             ctx.closePath();
             ctx.fill();
             ctx.restore();
+            }
+
+            // Waypoint dot at destination (medium+ only)
+            if (_cvDetail >= 1 && segProgress >= 1 && i < totalSegs - 1) {
+                ctx.beginPath();
+                ctx.arc(bP.x, bP.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = segColor;
+                ctx.globalAlpha = 0.5;
+                ctx.fill();
+                ctx.strokeStyle = CV_GOLD;
+                ctx.lineWidth = 0.8;
+                ctx.globalAlpha = 0.4;
+                ctx.stroke();
+            }
+            // Turn label at waypoint (full tier only)
+            if (_cvDetail >= 2 && segProgress >= 1 && i < totalSegs - 1) {
+                ctx.globalAlpha = 0.55;
+                _cvText(ctx, (i + 1) + 'T', bP.x + 6, bP.y - 6,
+                    '700 7px ' + _cvFontFamily, CV_GOLD, 0.55, 'left');
             }
         }
     }
@@ -1159,12 +1211,128 @@ function cvHitTest(canvasX, canvasY) {
 }
 
 // ═══════════════════════════════════════════════════════
+// WEATHER VISUAL EFFECTS
+// ═══════════════════════════════════════════════════════
+
+var _cvWeatherDrops = [];
+var _cvWeatherType = null;
+var _cvStormFlash = 0;
+
+function _cvDetectWeather() {
+    if (!S.weather || !S.weather.l) { _cvWeatherType = null; return; }
+    var lbl = (S.weather.l || '').toLowerCase();
+    if (lbl.indexOf('tempestade') >= 0) _cvWeatherType = 'storm';
+    else if (lbl.indexOf('chuva') >= 0 || lbl.indexOf('garoa') >= 0) _cvWeatherType = 'rain';
+    else if (lbl.indexOf('neve') >= 0 || lbl.indexOf('nevasca') >= 0) _cvWeatherType = 'snow';
+    else if (lbl.indexOf('neblina') >= 0 || lbl.indexOf('nevoa') >= 0 || lbl.indexOf('névoa') >= 0 || lbl.indexOf('bruma') >= 0) _cvWeatherType = 'fog';
+    else _cvWeatherType = null;
+}
+
+function _cvInitWeather() {
+    _cvDetectWeather();
+    _cvWeatherDrops = [];
+    if (!_cvWeatherType || _cvDetail < 1) return;
+    var cw = SVG_W || 733, ch = SVG_H || 720;
+    var count = _cvWeatherType === 'rain' ? (_cvDetail >= 2 ? 30 : 15) :
+                _cvWeatherType === 'snow' ? (_cvDetail >= 2 ? 25 : 12) :
+                _cvWeatherType === 'storm' ? (_cvDetail >= 2 ? 35 : 18) :
+                _cvWeatherType === 'fog' ? (_cvDetail >= 2 ? 6 : 3) : 0;
+    for (var i = 0; i < count; i++) {
+        _cvWeatherDrops.push({
+            x: Math.random() * cw,
+            y: Math.random() * ch,
+            speed: _cvWeatherType === 'snow' ? 0.3 + Math.random() * 0.5 :
+                   _cvWeatherType === 'fog' ? 0.1 + Math.random() * 0.15 :
+                   1.5 + Math.random() * 2,
+            size: _cvWeatherType === 'snow' ? 1 + Math.random() * 2 :
+                  _cvWeatherType === 'fog' ? 40 + Math.random() * 60 :
+                  8 + Math.random() * 12,
+            drift: (Math.random() - 0.5) * 0.5,
+            phase: Math.random() * Math.PI * 2,
+        });
+    }
+}
+
+function _cvUpdateWeather(dt) {
+    if (!_cvWeatherType || _cvWeatherDrops.length === 0) return;
+    var ch = SVG_H || 720, cw = SVG_W || 733;
+    for (var i = 0; i < _cvWeatherDrops.length; i++) {
+        var d = _cvWeatherDrops[i];
+        d.phase += dt;
+        if (_cvWeatherType === 'rain' || _cvWeatherType === 'storm') {
+            d.y += d.speed * dt * 120;
+            d.x += 0.8 * dt * 60;
+            if (d.y > ch) { d.y = -10; d.x = Math.random() * cw; }
+            if (d.x > cw) d.x = 0;
+        } else if (_cvWeatherType === 'snow') {
+            d.y += d.speed * dt * 40;
+            d.x += Math.sin(d.phase * 2) * dt * 15 + d.drift * dt * 20;
+            if (d.y > ch) { d.y = -5; d.x = Math.random() * cw; }
+        } else if (_cvWeatherType === 'fog') {
+            d.x += d.drift * dt * 8;
+            d.phase += dt * 0.2;
+            if (d.x > cw + d.size) d.x = -d.size;
+            if (d.x < -d.size) d.x = cw + d.size;
+        }
+    }
+    // Storm flash timing
+    if (_cvWeatherType === 'storm' && _cvDetail >= 2) {
+        _cvStormFlash = Math.max(0, _cvStormFlash - dt);
+        if (Math.random() < dt * 0.15) _cvStormFlash = 0.08;
+    }
+}
+
+function _cvDrawWeather(ctx) {
+    if (!_cvWeatherType || _cvWeatherDrops.length === 0) return;
+    var cw = SVG_W || 733, ch = SVG_H || 720;
+    ctx.save();
+    if (_cvWeatherType === 'rain' || _cvWeatherType === 'storm') {
+        ctx.strokeStyle = 'rgba(180,200,220,0.25)';
+        ctx.lineWidth = 0.8;
+        for (var i = 0; i < _cvWeatherDrops.length; i++) {
+            var d = _cvWeatherDrops[i];
+            ctx.globalAlpha = 0.15 + 0.1 * Math.sin(d.phase);
+            ctx.beginPath();
+            ctx.moveTo(d.x, d.y);
+            ctx.lineTo(d.x + 3, d.y + d.size);
+            ctx.stroke();
+        }
+    } else if (_cvWeatherType === 'snow') {
+        ctx.fillStyle = '#e8e4e0';
+        for (var j = 0; j < _cvWeatherDrops.length; j++) {
+            var s = _cvWeatherDrops[j];
+            ctx.globalAlpha = 0.3 + 0.15 * Math.sin(s.phase * 1.5);
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    } else if (_cvWeatherType === 'fog') {
+        ctx.fillStyle = CV_TEXT;
+        for (var k = 0; k < _cvWeatherDrops.length; k++) {
+            var fg = _cvWeatherDrops[k];
+            ctx.globalAlpha = 0.04 + 0.02 * Math.sin(fg.phase);
+            ctx.beginPath();
+            ctx.ellipse(fg.x, fg.y, fg.size, fg.size * 0.3, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    // Storm flash overlay
+    if (_cvStormFlash > 0) {
+        ctx.globalAlpha = _cvStormFlash;
+        ctx.fillStyle = '#f0ece8';
+        ctx.fillRect(0, 0, cw, ch);
+    }
+    ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════
 // PUBLIC API
 // ═══════════════════════════════════════════════════════
 
 function canvasSetDirty() {
     _dirtyStatic = true;
     _cvFogState = computeFogState(true);
+    _cvInitWeather();
 }
 
 function canvasUpdateFont(fontFamily) {

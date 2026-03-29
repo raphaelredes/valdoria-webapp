@@ -1001,7 +1001,7 @@ function openQuickList() {
                 '<span class="ql-item-name' + (isCurr ? ' current' : '') + '">' + name + '</span>' +
                 dangerHtml +
                 (badges ? '<span class="ql-item-badges">' + badges + '</span>' : '') +
-                (loc.dist > 0 ? '<span class="ql-item-dist">' + loc.dist + '\ud83d\udd50</span>' : '');
+                (loc.dist > 0 ? '<span class="ql-item-dist">' + loc.dist + ' turno' + (loc.dist !== 1 ? 's' : '') + '</span>' : '');
             div.addEventListener('click', () => {
                 closeQuickList();
                 if (loc.id !== S.currentLoc) {

@@ -503,6 +503,102 @@ function _cvDrawMarkers(ctx, fogState) {
             }
         }
 
+        // ── "NOVO" badge for recently discovered locations (5s fade) ──
+        if (isExp && typeof _cvNewLocTimers !== 'undefined' && _cvNewLocTimers[locId]) {
+            var newAge = (_bannerSwayTime || performance.now()) - _cvNewLocTimers[locId];
+            if (newAge < 5000) {
+                var newAlpha = newAge < 4000 ? 0.85 : 0.85 * (1 - (newAge - 4000) / 1000);
+                var nbx = x - R * 0.7, nby = y - R * 0.8;
+                ctx.save();
+                ctx.globalAlpha = newAlpha;
+                // Badge background
+                ctx.fillStyle = CVI_GOLD;
+                ctx.beginPath();
+                var nbw = 20, nbh = 10, nbr = 3;
+                ctx.moveTo(nbx - nbw/2 + nbr, nby - nbh/2);
+                ctx.lineTo(nbx + nbw/2 - nbr, nby - nbh/2);
+                ctx.quadraticCurveTo(nbx + nbw/2, nby - nbh/2, nbx + nbw/2, nby - nbh/2 + nbr);
+                ctx.lineTo(nbx + nbw/2, nby + nbh/2 - nbr);
+                ctx.quadraticCurveTo(nbx + nbw/2, nby + nbh/2, nbx + nbw/2 - nbr, nby + nbh/2);
+                ctx.lineTo(nbx - nbw/2 + nbr, nby + nbh/2);
+                ctx.quadraticCurveTo(nbx - nbw/2, nby + nbh/2, nbx - nbw/2, nby + nbh/2 - nbr);
+                ctx.lineTo(nbx - nbw/2, nby - nbh/2 + nbr);
+                ctx.quadraticCurveTo(nbx - nbw/2, nby - nbh/2, nbx - nbw/2 + nbr, nby - nbh/2);
+                ctx.closePath();
+                ctx.fill();
+                // Badge text
+                ctx.fillStyle = '#1a1510';
+                ctx.font = '700 6.5px ' + (_cvFontFamily || "Cinzel, serif");
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('NOVO', nbx, nby);
+                ctx.restore();
+            }
+        }
+
+        // ── Camp icon at current location (if S.canCamp) ──
+        if (isCurr && S.canCamp) {
+            var cx2 = x - R * 0.65, cy2 = y + R * 0.55;
+            ctx.save();
+            ctx.globalAlpha = 0.7;
+            // Tent shape
+            ctx.fillStyle = '#8b7355';
+            ctx.beginPath();
+            ctx.moveTo(cx2, cy2 - 4);
+            ctx.lineTo(cx2 - 4, cy2 + 3);
+            ctx.lineTo(cx2 + 4, cy2 + 3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = CVI_GOLD;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+            // Fire dot
+            ctx.fillStyle = '#e8a040';
+            ctx.beginPath();
+            ctx.arc(cx2, cy2 + 4.5, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // ── Progress ring for settlements (quest/dungeon completion %) ──
+        if (isExp && isSett && showBadges && (_cvDetail >= 1 || typeof _cvDetail === 'undefined')) {
+            var sqt = (S.quests || []).filter(function(q) { return q.loc === locId; });
+            var sdt = (S.dungeons || {})[locId] || [];
+            var totalItems = sqt.length + sdt.length;
+            if (totalItems > 0) {
+                var doneItems = 0;
+                for (var qi = 0; qi < sqt.length; qi++) { if (sqt[qi].done) doneItems++; }
+                for (var di3 = 0; di3 < sdt.length; di3++) { if (sdt[di3].done) doneItems++; }
+                var pct = doneItems / totalItems;
+                if (pct > 0 && pct < 1) {
+                    var prx = x + R * 0.7, pry = y + R * 0.7;
+                    var prR = 5;
+                    ctx.save();
+                    // Background circle
+                    ctx.beginPath();
+                    ctx.arc(prx, pry, prR, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(30,24,18,0.6)';
+                    ctx.globalAlpha = 0.7;
+                    ctx.fill();
+                    // Progress arc
+                    ctx.beginPath();
+                    ctx.arc(prx, pry, prR - 1, -Math.PI / 2, -Math.PI / 2 + pct * Math.PI * 2);
+                    ctx.strokeStyle = CVI_GOLD;
+                    ctx.lineWidth = 1.5;
+                    ctx.globalAlpha = 0.8;
+                    ctx.stroke();
+                    // Percentage text
+                    ctx.fillStyle = CVI_GOLD;
+                    ctx.font = '700 5px ' + (_cvFontFamily || "Cinzel, serif");
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.globalAlpha = 0.7;
+                    ctx.fillText(Math.round(pct * 100) + '%', prx, pry);
+                    ctx.restore();
+                }
+            }
+        }
+
         ctx.restore();
     }
 }
