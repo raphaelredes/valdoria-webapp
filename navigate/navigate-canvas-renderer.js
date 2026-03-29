@@ -144,6 +144,7 @@ function _cvText(ctx, text, x, y, font, color, op, align) {
 // ═══════════════════════════════════════════════════════
 
 function initCanvasRenderer() {
+  try {
     _mapCanvas = document.getElementById('map-canvas');
     if (!_mapCanvas) return;
     _mapCtx = _mapCanvas.getContext('2d');
@@ -168,6 +169,7 @@ function initCanvasRenderer() {
     // Start render loop
     _lastFrameTime = performance.now();
     _cvRenderFrame(performance.now());
+  } catch(e) { console.error('[NAVIGATE] Canvas init failed:', e); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -175,6 +177,7 @@ function initCanvasRenderer() {
 // ═══════════════════════════════════════════════════════
 
 function _cvRenderFrame(now) {
+  try {
     var dt = (now - _lastFrameTime) / 1000;
     _lastFrameTime = now;
     if (dt > 0.1) dt = 0.1;  // cap
@@ -225,7 +228,7 @@ function _cvRenderFrame(now) {
     _cvDrawDiscoveryRings(ctx, now);
     if (_cvTravelState) _cvDrawTravel(ctx, now);
     ctx.restore();
-
+  } catch(e) { console.error('[NAVIGATE] Render error:', e); }
     _animFrame = requestAnimationFrame(_cvRenderFrame);
 }
 
@@ -1229,6 +1232,7 @@ function _cvDetectWeather() {
 }
 
 function _cvInitWeather() {
+  try {
     _cvDetectWeather();
     _cvWeatherDrops = [];
     if (!_cvWeatherType || _cvDetail < 1) return;
@@ -1251,6 +1255,7 @@ function _cvInitWeather() {
             phase: Math.random() * Math.PI * 2,
         });
     }
+  } catch(e) { console.warn('[NAVIGATE] Weather init failed:', e); _cvWeatherType = null; _cvWeatherDrops = []; }
 }
 
 function _cvUpdateWeather(dt) {

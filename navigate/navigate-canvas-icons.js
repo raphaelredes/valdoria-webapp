@@ -21,6 +21,7 @@ function _cvGetIcon(biome, locName, sz, isSett) {
     oc.width = sz * 4 + pad * 2;
     oc.height = sz * 4 + pad * 2;
     var ctx = oc.getContext('2d');
+    if (!ctx) { console.warn('[NAVIGATE] Icon canvas ctx null'); return null; }
     ctx.translate(oc.width / 2, oc.height / 2 + sz * 0.3);
     if (isSett) _cvDrawSettlementIcon(ctx, 0, 0, sz);
     else _cvDrawBiomeIcon(ctx, 0, 0, biome, sz, locName);
