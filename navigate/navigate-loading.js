@@ -21,9 +21,24 @@ var TIPS = [
     '🛡️ Dica: Descanso longo restaura todos os HP e recursos gastos.',
 ];
 if(window._loadDbgSetApp)_loadDbgSetApp('NAVIGATE');
-window._navLoadingCtrl = ValdoriaLoadingController({
-    overlayId: 'loading',
-    tips: TIPS,
-    onTimeout: function() { console.error('[NAVIGATE] Loading timeout'); }
-});
+if (window.__spaRevisit) {
+    window._navLoadingCtrl = {
+        show: function(r) { if(window.vProcessing) vProcessing.show({text: r ? 'Reconectando...' : 'Carregando mapa...'}); },
+        hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 200); },
+        forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
+        setProgress: function() {},
+        setTips: function() {},
+        getState: function() { return (window.vProcessing && vProcessing.isActive()) ? 'loading' : 'hidden'; },
+        cleanup: function() { if(window.vProcessing) vProcessing.hide(); },
+        hideLoading: function(cb) { this.hide(cb); },
+        hideQuick: function() { this.forceHide(); },
+        resetTimers: function() {}
+    };
+} else {
+    window._navLoadingCtrl = ValdoriaLoadingController({
+        overlayId: 'loading',
+        tips: TIPS,
+        onTimeout: function() { console.error('[NAVIGATE] Loading timeout'); }
+    });
+}
 })();

@@ -111,6 +111,10 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * @param {boolean} [isRetry=false] - If true, shows reconnecting text instead of tips.
      */
     window.showLoading = function showLoading(isRetry) {
+        if (window.__spaRevisit && !isRetry) {
+            if (window.vProcessing) vProcessing.show({ text: 'Carregando...' });
+            return;
+        }
         var ctrl = _ensureCtrl();
         ctrl.show(isRetry);
         var el = document.getElementById('loading');
@@ -124,6 +128,10 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * Hide the loading overlay with cinematic exit, respecting VALDORIA_MIN_LOAD_MS.
      */
     window.hideLoading = function hideLoading() {
+        if (window.__spaRevisit && window.vProcessing && vProcessing.isActive()) {
+            vProcessing.hide();
+            return;
+        }
         if (!_ctrl) return;
         _ctrl.hide(function() {
             var el = document.getElementById('loading');
@@ -136,6 +144,10 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * Async version that awaits the remaining time before hiding.
      */
     window.hideLoadingWithDelay = async function hideLoadingWithDelay() {
+        if (window.__spaRevisit && window.vProcessing && vProcessing.isActive()) {
+            vProcessing.hide();
+            return;
+        }
         if (!_ctrl) return;
         return new Promise(function(resolve) {
             _ctrl.hide(function() {
@@ -150,6 +162,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * Force-hide the loading overlay immediately (no animation).
      */
     window.forceHideLoading = function forceHideLoading() {
+        if (window.vProcessing && vProcessing.isActive()) vProcessing.hide();
         if (!_ctrl) {
             var el = document.getElementById('loading');
             if (el) el.style.display = 'none';
