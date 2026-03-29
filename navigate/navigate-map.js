@@ -403,7 +403,7 @@ function _snapToZoomLevel(dir, focalX, focalY) {
     const oldZoom = S.zoom;
     _zoomIdx = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, _zoomIdx + dir));
     S.zoom = ZOOM_LEVELS[_zoomIdx].zoom;
-    _updateScaleBar();
+
     // Focal-point zoom: keep the screen point (focalX, focalY) over the same map point
     if (focalX !== undefined && focalY !== undefined) {
         // Map point under focal: mapX = (focalX - panX) / oldZoom
@@ -412,34 +412,12 @@ function _snapToZoomLevel(dir, focalX, focalY) {
         S.panX = focalX - mapX * S.zoom;
         S.panY = focalY - mapY * S.zoom;
     }
-    _updateMinimap();
+
     // Toggle zoom-out class for disabling animations on distant views
     document.body.classList.toggle('zoom-out', _zoomIdx <= 1);
     if (typeof window._zoomBtnUpdate === 'function') window._zoomBtnUpdate();
 }
 
-function _updateScaleBar() {
-    const bar = document.getElementById('scale-bar');
-    if (!bar) return;
-    const lvl = ZOOM_LEVELS[_zoomIdx];
-    const turnsLabel = document.getElementById('scale-turns');
-    const levelLabel = document.getElementById('scale-level');
-    if (levelLabel) levelLabel.textContent = lvl.label;
-    // Pulse scale bar on zoom change
-    var _sc = document.getElementById('scale-container');
-    if (_sc) { _sc.classList.add('pulse'); setTimeout(function() { _sc.classList.remove('pulse'); }, 400); }
-    // Fixed visual bar width (~60px), compute how many turns it represents
-    const BAR_PX = 60;
-    const ppt = _getAvgPxPerTurn();
-    const svgPx = BAR_PX / lvl.zoom; // bar width in SVG space
-    const turns = svgPx / ppt;        // how many turns the bar represents
-    // Round to nearest nice number
-    const niceT = turns < 0.8 ? '½' : turns < 1.5 ? '1' : turns < 2.5 ? '2' : turns < 4 ? '3' : turns < 6 ? '5' : Math.round(turns).toString();
-    if (turnsLabel) turnsLabel.textContent = `~${niceT} turno${niceT !== '1' && niceT !== '½' ? 's' : ''}`;
-    bar.style.width = BAR_PX + 'px';
-    const ticks = document.getElementById('scale-ticks');
-    if (ticks) ticks.style.width = BAR_PX + 'px';
-}
 
 var _panZoomInitialized = false;
 function setupPanZoom() {
@@ -454,7 +432,7 @@ function setupPanZoom() {
             if (d < bestDist) { bestDist = d; _zoomIdx = i; }
         }
         S.zoom = ZOOM_LEVELS[_zoomIdx].zoom;
-        _updateScaleBar();
+
         document.body.classList.toggle('zoom-out', _zoomIdx <= 1);
         wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
         if (typeof window._zoomBtnUpdate === 'function') window._zoomBtnUpdate();
@@ -469,12 +447,8 @@ function setupPanZoom() {
     let pan = false, moved = false, sx = 0, sy = 0, scx = 0, scy = 0, ipd = 0, iIdx = 0;
     // Velocity tracking for inertia
     let _velX = 0, _velY = 0, _lastMoveT = 0, _lastMoveX = 0, _lastMoveY = 0;
-    // Minimap debounce
-    let _mmDebounce = null;
-    function _debouncedMinimap() {
-        if (_mmDebounce) return;
-        _mmDebounce = setTimeout(() => { _mmDebounce = null; _updateMinimap(); }, 80);
-    }
+
+
     function apply() { wr.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`; saveViewport(); if (typeof _updateOffscreenIndicator === 'function') _updateOffscreenIndicator(); }
     function clamp() {
         const vpW = vp.clientWidth, vpH = vp.clientHeight;
@@ -497,7 +471,7 @@ function setupPanZoom() {
         if (d < bestDist) { bestDist = d; _zoomIdx = i; }
     }
     S.zoom = ZOOM_LEVELS[_zoomIdx].zoom;
-    _updateScaleBar();
+
 
     vp.addEventListener('pointerdown', e => {
         pan = true; moved = false;
@@ -523,7 +497,7 @@ function setupPanZoom() {
             }
             _lastMoveX = e.clientX; _lastMoveY = e.clientY; _lastMoveT = now;
             S.panX = e.clientX - sx; S.panY = e.clientY - sy;
-            clamp(); apply(); _debouncedMinimap();
+            clamp(); apply();
         }
     }, _sigPassive);
     vp.addEventListener('pointerup', () => {
@@ -538,7 +512,7 @@ function setupPanZoom() {
             clamp();
             wr.classList.add('inertia');
             apply();
-            _debouncedMinimap();
+
             setTimeout(() => wr.classList.remove('inertia'), 650);
         }
     }, _sig);
@@ -576,14 +550,14 @@ function setupPanZoom() {
     // --- Zoom +/- buttons ---
     const btnIn = document.getElementById('btn-zoom-in');
     const btnOut = document.getElementById('btn-zoom-out');
-    const btnRec = document.getElementById('btn-recenter');
+
     function _updateZoomBtns() {
         if (btnIn) btnIn.disabled = _zoomIdx >= ZOOM_LEVELS.length - 1;
         if (btnOut) btnOut.disabled = _zoomIdx <= 0;
     }
     if (btnIn) btnIn.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); btnIn.classList.add('flash'); setTimeout(() => btnIn.classList.remove('flash'), 300); }, _sig);
     if (btnOut) btnOut.addEventListener('click', e => { e.stopPropagation(); _snapToZoomLevel(-1); clamp(); apply(); _updateZoomBtns(); if (typeof _haptic === 'function') _haptic('tap'); btnOut.classList.add('flash'); setTimeout(() => btnOut.classList.remove('flash'), 300); }, _sig);
-    if (btnRec) btnRec.addEventListener('click', e => { e.stopPropagation(); centerOnLocation(S.currentLoc); apply(); _updateMinimap(); if (typeof _haptic === 'function') _haptic('tap'); }, _sig);
+
     _updateZoomBtns();
     // Update buttons on any zoom change
     const origSnap = _snapToZoomLevel;
@@ -627,81 +601,13 @@ function panToLocationSmooth(locId) {
 // MINIMAP — Compact overview (visible at zoom >= Área)
 // ===============================================================
 
-var _mmFadeTimer = null;
-var _mmClickBound = false;
+
 var _mapAbort = null;
 function _destroyMapListeners() { if (_mapAbort) { _mapAbort.abort(); _mapAbort = null; } }
 
-function _initMinimap() {
-    const mm = document.getElementById('minimap');
-    const svg = document.getElementById('minimap-svg');
-    if (!mm || !svg) return;
-    svg.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
-    // Draw landmass silhouette
-    svg.innerHTML = '';
-    svg.appendChild(_el('rect', { x: 0, y: 0, width: SVG_W, height: SVG_H, fill: MAP_BG }));
-    svg.appendChild(_el('path', { d: _landmassPath(), fill: PARCHMENT, 'fill-opacity': 0.4, stroke: 'none' }));
-    // Location dots
-    const discoveredSet = new Set(S.discoveredLocs || []);
-    for (const [locId, coords] of Object.entries(LOCATION_COORDS)) {
-        if (!S.knownLocs.includes(locId)) continue;
-        const { x, y } = hexToPixel(coords.col, coords.row);
-        const isCurr = locId === S.currentLoc;
-        const isExp = discoveredSet.has(locId);
-        svg.appendChild(_el('circle', {
-            cx: x, cy: y, r: isCurr ? 8 : 4,
-            fill: isCurr ? GOLD : isExp ? INK_LIGHT : INK_DARK,
-            'fill-opacity': isCurr ? 0.9 : isExp ? 0.5 : 0.25,
-        }));
-    }
-    // Viewport rectangle (updated dynamically)
-    svg.appendChild(_el('rect', { class: 'mm-viewport', x: 0, y: 0, width: 100, height: 100 }));
-    // Tap on minimap to recenter (AbortController handles cleanup)
-    mm.addEventListener('click', e => {
-        const r = svg.getBoundingClientRect();
-        const mx = (e.clientX - r.left) / r.width * SVG_W;
-        const my = (e.clientY - r.top) / r.height * SVG_H;
-        const vp = document.getElementById('map-viewport');
-        S.panX = (vp.clientWidth / 2) - mx * S.zoom;
-        S.panY = (vp.clientHeight / 2) - my * S.zoom;
-        const mw = SVG_W * S.zoom, mh = SVG_H * S.zoom;
-        if (mw > vp.clientWidth) S.panX = Math.max(vp.clientWidth - mw, Math.min(0, S.panX));
-        else S.panX = (vp.clientWidth - mw) / 2;
-        if (mh > vp.clientHeight) S.panY = Math.max(vp.clientHeight - mh, Math.min(0, S.panY));
-        else S.panY = (vp.clientHeight - mh) / 2;
-        document.getElementById('map-wrapper').style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;
-        saveViewport();
-        _updateMinimap();
-    }, _mapAbort ? { signal: _mapAbort.signal } : {});
-    _updateMinimap();
-}
 
 window.addEventListener('pagehide', function() { _destroyMapListeners(); });
 
-function _updateMinimap() {
-    const mm = document.getElementById('minimap');
-    if (!mm) return;
-    // Only show at zoom >= Área (index 2+)
-    const show = _zoomIdx >= 2;
-    mm.classList.toggle('visible', show);
-    if (!show) return;
-    // Update viewport rect
-    const vp = document.getElementById('map-viewport');
-    const vpRect = mm.querySelector('.mm-viewport');
-    if (!vpRect || !vp) return;
-    const rx = Math.max(0, -S.panX / S.zoom);
-    const ry = Math.max(0, -S.panY / S.zoom);
-    const rw = Math.min(vp.clientWidth / S.zoom, SVG_W - rx);
-    const rh = Math.min(vp.clientHeight / S.zoom, SVG_H - ry);
-    vpRect.setAttribute('x', rx);
-    vpRect.setAttribute('y', ry);
-    vpRect.setAttribute('width', Math.max(0, rw));
-    vpRect.setAttribute('height', Math.max(0, rh));
-    // Auto-fade after 3s of no interaction
-    mm.classList.remove('fading');
-    clearTimeout(_mmFadeTimer);
-    _mmFadeTimer = /*transition*/setTimeout(() => { mm.classList.add('fading'); }, 3000);
-}
 
 // ===============================================================
 // ARRIVAL ANIMATION — Zoom-out reveal on first load

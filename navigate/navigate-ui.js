@@ -130,8 +130,8 @@ function handleLocationTap(locId) {
 
     // Toggle header-meta row visibility (danger + cycle)
     const headerMeta = document.getElementById('info-header-meta');
-    const cycleList = _getCycleList();
-    const showMeta = (dangerEl.style.display !== 'none') || (cycleList.length > 1);
+
+    const showMeta = (dangerEl.style.display !== 'none');
     headerMeta.style.display = showMeta ? '' : 'none';
 
     // Weighted distance and connections (used by biome inline + tags)
@@ -390,17 +390,11 @@ function handleLocationTap(locId) {
     }
 
     // Open panel in peek mode (compact), swipe up for half/full
-    panel.classList.remove('half', 'full');
-    panel.classList.add('open', 'peek');
+
+    panel.classList.add('open');
     var _mv2=document.getElementById('map-viewport');if(_mv2)_mv2.classList.add('panel-open');
     _haptic('open');
-    // Check if content overflows in full mode
-    requestAnimationFrame(() => {
-        panel.classList.toggle('scrollable', panel.scrollHeight > panel.clientHeight + 8);
-    });
 
-    // Update cycle buttons
-    _updateCycleButtons();
 
     // Smooth pan to selected location + highlight
     if (typeof panToLocationSmooth === 'function') panToLocationSmooth(locId);
@@ -425,9 +419,9 @@ function createActionBtn(text, className, onClick) {
 // ── Close info panel ──
 function closeInfoPanel() {
     const panel = document.getElementById('info-panel');
-    panel.classList.remove('open', 'peek', 'half', 'full');
+    panel.classList.remove('open');
     var _mv=document.getElementById('map-viewport');if(_mv)_mv.classList.remove('panel-open');
-    var _fpdd=document.getElementById('font-picker-dropdown');if(_fpdd)_fpdd.classList.remove('open');
+
     S.selectedLoc = null;
     clearHighlight();
 }
@@ -560,92 +554,7 @@ function bfsPath(fromId, toId) {
 }
 
 // ── Swipe-to-dismiss info panel — 3-state bottom sheet (peek/half/full) ──
-function setupSwipeDismiss() {
-    var panel = document.getElementById('info-panel');
-    if (!panel) return;
-    var startY = 0, currentY = 0, dragging = false, _swipeStartTime = 0;
-    var DISMISS_THRESHOLD = 60;
-    var EXPAND_THRESHOLD = -25;
 
-    function _getSheetState() {
-        if (panel.classList.contains('full')) return 'full';
-        if (panel.classList.contains('half')) return 'half';
-        if (panel.classList.contains('peek')) return 'peek';
-        return 'closed';
-    }
-
-    function _setSheetState(state) {
-        panel.classList.remove('peek', 'half', 'full');
-        if (state === 'peek') panel.classList.add('peek');
-        else if (state === 'half') panel.classList.add('half');
-        else if (state === 'full') panel.classList.add('full');
-        if (state === 'half' || state === 'full') {
-            var scrollArea = panel.querySelector('.info-content-scroll');
-            if (scrollArea) scrollArea.scrollTop = 0;
-        }
-    }
-
-    panel.addEventListener('touchstart', function(e) {
-        var rect = panel.getBoundingClientRect();
-        var touchY = e.touches[0].clientY - rect.top;
-        if (touchY > 60) return;
-        startY = e.touches[0].clientY;
-        currentY = startY;
-        _swipeStartTime = Date.now();
-        dragging = true;
-        panel.classList.add('dragging');
-    }, { passive: true });
-
-    panel.addEventListener('touchmove', function(e) {
-        if (!dragging) return;
-        currentY = e.touches[0].clientY;
-        var dy = currentY - startY;
-        if (dy > 0) {
-            panel.style.transform = 'translateY(' + dy + 'px)';
-        }
-    }, { passive: true });
-
-    panel.addEventListener('touchend', function() {
-        if (!dragging) return;
-        dragging = false;
-        panel.classList.remove('dragging');
-        var dy = currentY - startY;
-        var dt = Math.max(1, Date.now() - _swipeStartTime);
-        var velocity = Math.abs(dy) / dt * 1000; // px/s
-        var fastSwipe = velocity > 300;
-        panel.style.transform = '';
-        var state = _getSheetState();
-        if (dy > (fastSwipe ? 20 : DISMISS_THRESHOLD)) {
-            if (state === 'peek') { closeInfoPanel(); }
-            else if (state === 'half') { _setSheetState('peek'); }
-            else if (state === 'full') { _setSheetState('half'); }
-            _haptic('tap');
-        } else if (dy < (fastSwipe ? -10 : EXPAND_THRESHOLD)) {
-            if (state === 'peek') { _setSheetState('half'); }
-            else if (state === 'half') { _setSheetState('full'); }
-            _haptic('tap');
-        }
-    });
-
-    panel.addEventListener('touchcancel', function() {
-        dragging = false;
-        panel.classList.remove('dragging');
-        panel.style.transform = '';
-    });
-
-    // Handle tap toggles sheet states
-    var _infoHandle = panel.querySelector('.info-handle');
-    if (_infoHandle) {
-        _infoHandle.addEventListener('click', function() {
-            if (!panel.classList.contains('open')) return;
-            var state = _getSheetState();
-            if (state === 'peek') _setSheetState('half');
-            else if (state === 'half') _setSheetState('full');
-            else if (state === 'full') _setSheetState('peek');
-            _haptic('tap');
-        });
-    }
-}
 
 // ── Hover tooltip (desktop only — shows name + distance without opening panel) ──
 function setupHoverTooltip() {
@@ -730,30 +639,7 @@ function _updateOffscreenIndicator() {
 }
 
 // ── Biome legend toggle ──
-var _legendOpen = false;
-function toggleLegendExpand() {
-    _haptic('tap');
-    _legendOpen = !_legendOpen;
-    const panel = document.getElementById('legend-biomes');
-    const toggle = document.querySelector('.legend-toggle');
-    if (!panel) return;
-    if (toggle) toggle.classList.toggle('open', _legendOpen);
-    if (_legendOpen) {
-        // Populate biomes
-        panel.innerHTML = '';
-        for (const [, info] of Object.entries(BIOME_INFO).sort((a, b) => a[1].label.localeCompare(b[1].label))) {
-            const item = document.createElement('span');
-            item.className = 'legend-item';
-            item.innerHTML = `<span class="legend-dot" style="background:${info.hexFill}"></span> ${info.label}`;
-            panel.appendChild(item);
-        }
-        panel.classList.remove('entering'); void panel.offsetWidth; panel.classList.add('open', 'entering');
-        if (toggle) toggle.textContent = '▲';
-    } else {
-        panel.classList.remove('open');
-        if (toggle) toggle.textContent = '▼';
-    }
-}
+
 
 // ── Long-press path preview (500ms hold shows BFS path, release clears) ──
 function setupLongPress() {
@@ -832,83 +718,14 @@ function _showPathPreview(toId) {
     // Path preview now handled by canvas selection
 }
 
-// ── Cycle adjacent locations (◂ ▸ arrows in info panel) ──
-function _setupCycleButtons() {
-    const prevBtn = document.getElementById('cycle-prev');
-    const nextBtn = document.getElementById('cycle-next');
-    if (!prevBtn || !nextBtn) return;
-    prevBtn.addEventListener('click', e => { e.stopPropagation(); _cycleLocation(-1); });
-    nextBtn.addEventListener('click', e => { e.stopPropagation(); _cycleLocation(1); });
-}
-
-// Build the cycleable list: ALL known locations sorted by distance (closest first)
-function _getCycleList() {
-    const locs = S.knownLocs.filter(id => id !== S.currentLoc && LOCATION_COORDS[id]);
-    // Sort by weighted distance (BFS hops), then alphabetically
-    locs.sort((a, b) => {
-        const da = cachedDist(S.currentLoc, a);
-        const db = cachedDist(S.currentLoc, b);
-        // Unreachable (-1) goes last
-        const sa = da < 0 ? 999 : da;
-        const sb = db < 0 ? 999 : db;
-        if (sa !== sb) return sa - sb;
-        const na = S.locations[a]?.n || '';
-        const nb = S.locations[b]?.n || '';
-        return na.localeCompare(nb);
-    });
-    return locs;
-}
-
-function _cycleLocation(dir) {
-    const list = _getCycleList();
-    if (list.length === 0) return;
-    const curIdx = list.indexOf(S.selectedLoc);
-    let nextIdx;
-    if (curIdx === -1) {
-        nextIdx = dir > 0 ? 0 : list.length - 1;
-    } else {
-        nextIdx = (curIdx + dir + list.length) % list.length;
-    }
-    handleLocationTap(list[nextIdx]);
-    _haptic('tap');
-}
-
-function _updateCycleButtons() {
-    const prevBtn = document.getElementById('cycle-prev');
-    const nextBtn = document.getElementById('cycle-next');
-    if (!prevBtn || !nextBtn) return;
-    const list = _getCycleList();
-    const hasMultiple = list.length > 1;
-    prevBtn.disabled = !hasMultiple;
-    nextBtn.disabled = !hasMultiple;
-    // Cycle counter
-    var counter = document.getElementById('cycle-counter');
-    if (!counter && hasMultiple) {
-        counter = document.createElement('span');
-        counter.id = 'cycle-counter';
-        counter.className = 'cycle-counter';
-        var row = prevBtn.parentElement;
-        if (row) row.insertBefore(counter, nextBtn);
-    }
-    if (counter) {
-        if (hasMultiple) {
-            var idx = list.indexOf(S.selectedLoc);
-            counter.textContent = (idx + 1) + '/' + list.length;
-            counter.style.display = '';
-        } else {
-            counter.style.display = 'none';
-        }
-    }
-}
 
 // ── Quick-list of known locations ──
 function openQuickList() {
     const ql = document.getElementById('quick-list');
     const items = document.getElementById('ql-items');
     if (!ql || !items) return;
-    var _fpdd=document.getElementById('font-picker-dropdown');if(_fpdd)_fpdd.classList.remove('open');
-    var _lb=document.getElementById('legend-biomes');if(_lb)_lb.classList.remove('open');
-    var _lt=document.querySelector('.legend-toggle');if(_lt&&_lt.classList.contains('open')){_lt.classList.remove('open');_lt.textContent='▼';}
+
+
     items.innerHTML = '';
     const discoveredSet = new Set(S.discoveredLocs || []);
 
@@ -1055,9 +872,9 @@ function showGestureTutorial() {
 // ── Init hover tooltip + off-screen indicator + swipe dismiss + new features ──
 function _initUIExtras() {
     setupHoverTooltip();
-    setupSwipeDismiss();
+
     setupLongPress();
-    _setupCycleButtons();
+
     // Off-screen indicator updated directly from apply() in navigate-map.js (no MutationObserver needed)
 }
 if (document.readyState === 'loading') {
