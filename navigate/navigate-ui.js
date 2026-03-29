@@ -950,13 +950,15 @@ function openQuickList() {
     const btnDist = document.createElement('button');
     btnDist.type = 'button';
     btnDist.className = 'ql-sort-btn' + (sortMode === 'dist' ? ' active' : '');
+    btnDist.setAttribute('aria-pressed', sortMode === 'dist' ? 'true' : 'false');
     btnDist.textContent = 'Por Dist\u00e2ncia';
     const btnName = document.createElement('button');
     btnName.type = 'button';
     btnName.className = 'ql-sort-btn' + (sortMode === 'name' ? ' active' : '');
+    btnName.setAttribute('aria-pressed', sortMode === 'name' ? 'true' : 'false');
     btnName.textContent = 'Por Nome';
-    btnDist.addEventListener('click', () => { sortMode = 'dist'; localStorage.setItem('valdoria_ql_sort', 'dist'); btnDist.classList.add('active'); btnName.classList.remove('active'); renderItems(); });
-    btnName.addEventListener('click', () => { sortMode = 'name'; localStorage.setItem('valdoria_ql_sort', 'name'); btnName.classList.add('active'); btnDist.classList.remove('active'); renderItems(); });
+    btnDist.addEventListener('click', () => { sortMode = 'dist'; localStorage.setItem('valdoria_ql_sort', 'dist'); btnDist.classList.add('active'); btnDist.setAttribute('aria-pressed','true'); btnName.classList.remove('active'); btnName.setAttribute('aria-pressed','false'); renderItems(); });
+    btnName.addEventListener('click', () => { sortMode = 'name'; localStorage.setItem('valdoria_ql_sort', 'name'); btnName.classList.add('active'); btnName.setAttribute('aria-pressed','true'); btnDist.classList.remove('active'); btnDist.setAttribute('aria-pressed','false'); renderItems(); });
     sortBar.appendChild(btnDist);
     sortBar.appendChild(btnName);
     items.appendChild(sortBar);
