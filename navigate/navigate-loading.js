@@ -23,7 +23,7 @@ var TIPS = [
 if(window._loadDbgSetApp)_loadDbgSetApp('NAVIGATE');
 if (window.__spaRevisit) {
     window._navLoadingCtrl = {
-        show: function(r) { if(window.vProcessing) vProcessing.show({text: r ? 'Reconectando...' : 'Carregando mapa...'}); },
+        show: function() { if(window.vProcessing) vProcessing.show({text: 'Carregando mapa...'}); },
         hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 200); },
         forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
         setProgress: function() {},
