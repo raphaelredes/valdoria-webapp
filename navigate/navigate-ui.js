@@ -235,7 +235,7 @@ function handleLocationTap(locId) {
         noteEl.style.display = 'none';
         // Side-by-side action row
         var actionRow = document.createElement('div');
-        actionRow.style.cssText = 'display:flex;gap:var(--v-space-sm,6px);width:100%';
+        actionRow.style.cssText = 'display:flex;gap:var(--v-space-sm,4px);width:100%';
         var exploreBtn = createActionBtn(
             '🔍 Explorar',
             'info-btn-explore',
@@ -257,8 +257,10 @@ function handleLocationTap(locId) {
 
         // Return to Eldoria button (when not at city_gates)
         if (S.currentLoc !== 'city_gates') {
+            var retDist = (typeof weightedDistance === 'function') ? weightedDistance(S.currentLoc, 'city_gates', connectionGraph) : 0;
+            var retLabel = '🏠 Retornar a Eldoria' + (retDist > 0 ? ' (' + retDist + ' turno' + (retDist > 1 ? 's' : '') + ')' : '');
             var returnBtn = createActionBtn(
-                '🏠 Retornar a Eldoria',
+                retLabel,
                 'info-btn-return',
                 function() { finishNavigation('return'); }
             );
@@ -561,7 +563,7 @@ function bfsPath(fromId, toId) {
 function setupSwipeDismiss() {
     var panel = document.getElementById('info-panel');
     if (!panel) return;
-    var startY = 0, currentY = 0, dragging = false;
+    var startY = 0, currentY = 0, dragging = false, _swipeStartTime = 0;
     var DISMISS_THRESHOLD = 60;
     var EXPAND_THRESHOLD = -25;
 
@@ -589,6 +591,7 @@ function setupSwipeDismiss() {
         if (touchY > 60) return;
         startY = e.touches[0].clientY;
         currentY = startY;
+        _swipeStartTime = Date.now();
         dragging = true;
         panel.classList.add('dragging');
     }, { passive: true });
@@ -607,14 +610,17 @@ function setupSwipeDismiss() {
         dragging = false;
         panel.classList.remove('dragging');
         var dy = currentY - startY;
+        var dt = Math.max(1, Date.now() - _swipeStartTime);
+        var velocity = Math.abs(dy) / dt * 1000; // px/s
+        var fastSwipe = velocity > 300;
         panel.style.transform = '';
         var state = _getSheetState();
-        if (dy > DISMISS_THRESHOLD) {
+        if (dy > (fastSwipe ? 20 : DISMISS_THRESHOLD)) {
             if (state === 'peek') { closeInfoPanel(); }
             else if (state === 'half') { _setSheetState('peek'); }
             else if (state === 'full') { _setSheetState('half'); }
             _haptic('tap');
-        } else if (dy < EXPAND_THRESHOLD) {
+        } else if (dy < (fastSwipe ? -10 : EXPAND_THRESHOLD)) {
             if (state === 'peek') { _setSheetState('half'); }
             else if (state === 'half') { _setSheetState('full'); }
             _haptic('tap');
