@@ -540,6 +540,120 @@ body {
     transform: scale(1.5);
   }
 }
+/* ── Status Bars (current location panel) ── */
+.info-status-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-xs);
+  padding: var(--v-space-xs) 0 var(--v-space-sm);
+}
+.info-status-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-sm);
+}
+.info-status-bar-label {
+  font-size: var(--v-font-xs);
+  color: var(--v-text-dim);
+  min-width: 16px;
+  text-align: center;
+  font-family: "Cinzel", serif;
+  flex-shrink: 0;
+}
+.info-status-bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--v-bg);
+  border-radius: var(--v-radius-xs);
+  overflow: hidden;
+  border: 1px solid var(--v-border);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.info-status-bar-fill {
+  height: 100%;
+  border-radius: var(--v-radius-xs);
+  transition: width var(--v-transition-base);
+}
+.info-status-bar-fill.hp-fill {
+  background: linear-gradient(180deg, #c04040 0%, #a03030 40%, #7b2020 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.info-status-bar-fill.mp-fill {
+  background: linear-gradient(180deg, #4080d0 0%, #3060b0 40%, #204080 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.info-status-bar-fill.hd-fill {
+  background: linear-gradient(180deg, #6a9a50 0%, #4a7a30 40%, #3a6a20 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.info-status-bar-text {
+  font-size: var(--v-font-xs);
+  color: var(--v-text-dim);
+  min-width: 54px;
+  text-align: right;
+  font-family: "Cinzel", serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+/* ── Dividers ── */
+.info-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--v-gold-12), transparent);
+  margin: var(--v-space-xs) 0;
+}
+/* ── Section Headers ── */
+.info-section-header {
+  font-size: var(--v-font-micro);
+  color: var(--v-gold-dim);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-family: "Cinzel", serif;
+  margin-bottom: var(--v-space-2xs);
+  margin-top: var(--v-space-2xs);
+}
+/* ── Weather Badge ── */
+.info-weather {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--v-space-xs);
+  font-size: var(--v-font-label);
+  color: var(--v-text-dim);
+  background: var(--v-brown-15);
+  padding: var(--v-space-2xs) var(--v-space-md);
+  border-radius: var(--v-radius-sm);
+  border: 1px solid var(--v-brown-25);
+  margin-bottom: var(--v-space-xs);
+  font-family: "MedievalSharp", serif;
+}
+/* ── Current location panel styling ── */
+#info-panel.current-loc .info-title {
+  text-shadow: 0 0 8px var(--v-gold-20);
+}
+/* ── Info-panel return button ── */
+.info-btn-return {
+  background: linear-gradient(180deg, #5a4a30 0%, #4a3a20 40%, #3a2a14 100%);
+  border: 1.5px solid var(--v-brown-40);
+  box-shadow:
+    inset 0 1px 0 rgba(180, 160, 120, 0.15),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.3);
+  font-size: var(--v-font-sm);
+  color: var(--v-text-dim);
+}
+.info-btn-return:active {
+  background: linear-gradient(180deg, #4a3a20 0%, #3a2a14 40%, #2a1a0a 100%);
+}
+/* ── Gold badge ── */
+.info-gold-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--v-space-2xs);
+  font-size: var(--v-font-label);
+  color: var(--v-gold);
+  font-family: "Cinzel", serif;
+  margin-left: auto;
+  white-space: nowrap;
+}
 #bottom-panel {
   display: flex;
   flex-wrap: wrap;

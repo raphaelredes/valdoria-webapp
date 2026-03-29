@@ -39,6 +39,32 @@ function _haptic(type) {
     } catch(e) { console.warn('[NAVIGATE] Haptic:', e); }
 }
 
+// ── Build status bars HTML for current location ──
+function _buildStatusBarsHTML() {
+    var c = S.charData;
+    if (!c) return '';
+    var hpPct = c.mh > 0 ? Math.min(100, (c.hp / c.mh) * 100) : 0;
+    var mpPct = c.mm > 0 ? Math.min(100, (c.mp / c.mm) * 100) : 0;
+    var hdPct = c.mhd > 0 ? Math.min(100, ((c.hd || 0) / c.mhd) * 100) : 0;
+    var html = '<div class="info-status-bar">' +
+        '<span class="info-status-bar-label">❤</span>' +
+        '<div class="info-status-bar-track"><div class="info-status-bar-fill hp-fill" style="width:' + hpPct + '%"></div></div>' +
+        '<span class="info-status-bar-text">' + (c.hp || 0) + '/' + (c.mh || 0) + '</span></div>';
+    html += '<div class="info-status-bar">' +
+        '<span class="info-status-bar-label">✨</span>' +
+        '<div class="info-status-bar-track"><div class="info-status-bar-fill mp-fill" style="width:' + mpPct + '%"></div></div>' +
+        '<span class="info-status-bar-text">' + (c.mp || 0) + '/' + (c.mm || 0) + '</span></div>';
+    if (c.mhd > 0) {
+        var hdLabel = (c.hd || 0) + '/' + c.mhd;
+        if (c.hdd) hdLabel += ' (' + c.hdd + ')';
+        html += '<div class="info-status-bar">' +
+            '<span class="info-status-bar-label">⚙</span>' +
+            '<div class="info-status-bar-track"><div class="info-status-bar-fill hd-fill" style="width:' + hdPct + '%"></div></div>' +
+            '<span class="info-status-bar-text">' + hdLabel + '</span></div>';
+    }
+    return html;
+}
+
 // ── Location tap handler ──
 function handleLocationTap(locId) {
     _haptic('tap');
@@ -207,20 +233,36 @@ function handleLocationTap(locId) {
 
     if (isCurrent) {
         noteEl.style.display = 'none';
-        const exploreBtn = createActionBtn(
+        // Side-by-side action row
+        var actionRow = document.createElement('div');
+        actionRow.style.cssText = 'display:flex;gap:var(--v-space-sm,6px);width:100%';
+        var exploreBtn = createActionBtn(
             '🔍 Explorar',
             'info-btn-explore',
-            () => finishNavigation('explore')
+            function() { finishNavigation('explore'); }
         );
-        actionsEl.appendChild(exploreBtn);
+        exploreBtn.style.flex = '1';
+        actionRow.appendChild(exploreBtn);
 
         if (S.canCamp) {
-            const campBtn = createActionBtn(
+            var campBtn = createActionBtn(
                 '🏕️ Acampar',
                 'info-btn-camp',
-                () => finishNavigation('camp')
+                function() { finishNavigation('camp'); }
             );
-            actionsEl.appendChild(campBtn);
+            campBtn.style.flex = '1';
+            actionRow.appendChild(campBtn);
+        }
+        actionsEl.appendChild(actionRow);
+
+        // Return to Eldoria button (when not at city_gates)
+        if (S.currentLoc !== 'city_gates') {
+            var returnBtn = createActionBtn(
+                '🏠 Retornar a Eldoria',
+                'info-btn-return',
+                function() { finishNavigation('return'); }
+            );
+            actionsEl.appendChild(returnBtn);
         }
     } else if (connected) {
         const edgeDist = getConnectionDistance(S.currentLoc, locId);
@@ -293,6 +335,56 @@ function handleLocationTap(locId) {
         }
         noteEl.style.display = 'block';
         noteEl.style.color = NV_COLOR_DANGER_HIGH;
+    }
+
+    // Current location class toggle
+    if (isCurrent) {
+        panel.classList.add('current-loc');
+    } else {
+        panel.classList.remove('current-loc');
+    }
+
+    // Status bars (only for current location)
+    var statusBarsEl = document.getElementById('info-status-bars');
+    var dividerStatusEl = document.getElementById('info-divider-status');
+    if (isCurrent && S.charData) {
+        statusBarsEl.innerHTML = _buildStatusBarsHTML();
+        statusBarsEl.style.display = '';
+        dividerStatusEl.style.display = '';
+    } else {
+        statusBarsEl.style.display = 'none';
+        dividerStatusEl.style.display = 'none';
+    }
+
+    // Weather badge
+    var weatherEl = document.getElementById('info-weather');
+    if (S.weather && S.weather.l) {
+        weatherEl.textContent = (S.weather.i || '') + ' ' + S.weather.l;
+        if (S.weather.d) weatherEl.title = S.weather.d;
+        weatherEl.style.display = '';
+    } else {
+        weatherEl.style.display = 'none';
+    }
+
+    // Section headers for quests/dungeons
+    var questsHeaderEl = document.getElementById('info-quests-header');
+    var dungeonsHeaderEl = document.getElementById('info-dungeons-header');
+    var dividerQuestsEl = document.getElementById('info-divider-quests');
+    var hasQuests = questsEl.style.display !== 'none';
+    var hasDungeons = dungeonsEl.style.display !== 'none';
+    if (questsHeaderEl) questsHeaderEl.style.display = hasQuests ? '' : 'none';
+    if (dungeonsHeaderEl) dungeonsHeaderEl.style.display = hasDungeons ? '' : 'none';
+    if (dividerQuestsEl) dividerQuestsEl.style.display = (hasQuests || hasDungeons) ? '' : 'none';
+
+    // Gold badge in header (compact)
+    var existingGold = panel.querySelector('.info-gold-badge');
+    if (existingGold) existingGold.remove();
+    if (isCurrent && S.charData && S.charData.gp > 0) {
+        var goldBadge = document.createElement('span');
+        goldBadge.className = 'info-gold-badge';
+        goldBadge.textContent = '💰 ' + S.charData.gp + ' GP';
+        var headerTop = document.querySelector('.info-header-top');
+        if (headerTop) headerTop.insertBefore(goldBadge, document.getElementById('info-close'));
     }
 
     // Open panel in peek mode (compact), swipe up for full
