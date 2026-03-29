@@ -92,10 +92,19 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             hasRingAccel: true,
             hasGemPhase: true,
             onRetry: function() {
+                if (window._gameRetryInProgress) {
+                    console.warn('[GAME-LOADING] onRetry: BLOCKED (retry already in progress)');
+                    return;
+                }
+                window._gameRetryInProgress = true;
+                console.warn('[GAME-LOADING] onRetry: retrying health+start (not full init)');
                 showLoading(true);
-                if (typeof init === 'function') {
-                    init();
+                if (typeof _retryHealthAndStart === 'function') {
+                    _retryHealthAndStart().finally(function() {
+                        window._gameRetryInProgress = false;
+                    });
                 } else {
+                    window._gameRetryInProgress = false;
                     window.location.reload();
                 }
             },
@@ -111,6 +120,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * @param {boolean} [isRetry=false] - If true, shows reconnecting text instead of tips.
      */
     window.showLoading = function showLoading(isRetry) {
+        console.warn('[GAME-LOADING] showLoading(' + (isRetry ? 'retry' : 'init') + ') spaRevisit=' + !!window.__spaRevisit);
         if (window.__spaRevisit && !isRetry) {
             if (window.vProcessing) vProcessing.show({ text: 'Carregando...' });
             return;
@@ -128,6 +138,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * Hide the loading overlay with cinematic exit, respecting VALDORIA_MIN_LOAD_MS.
      */
     window.hideLoading = function hideLoading() {
+        console.warn('[GAME-LOADING] hideLoading()');
         if (window.__spaRevisit && window.vProcessing && vProcessing.isActive()) {
             vProcessing.hide();
             return;
@@ -144,6 +155,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * Async version that awaits the remaining time before hiding.
      */
     window.hideLoadingWithDelay = async function hideLoadingWithDelay() {
+        console.warn('[GAME-LOADING] hideLoadingWithDelay()');
         if (window.__spaRevisit && window.vProcessing && vProcessing.isActive()) {
             vProcessing.hide();
             return;
@@ -162,6 +174,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * Force-hide the loading overlay immediately (no animation).
      */
     window.forceHideLoading = function forceHideLoading() {
+        console.warn('[GAME-LOADING] forceHideLoading()');
         if (window.vProcessing && vProcessing.isActive()) vProcessing.hide();
         if (!_ctrl) {
             var el = document.getElementById('loading');
@@ -177,6 +190,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * @param {string} destination - transition target: 'combat', 'explore', 'navigate', etc.
      */
     window.setLoadingContext = function setLoadingContext(destination) {
+        console.warn('[GAME-LOADING] setLoadingContext(' + destination + ')');
         var ctrl = _ensureCtrl();
         var contextTips = _CONTEXTUAL_TIPS[destination];
         if (contextTips && ctrl.setTips) {
@@ -188,6 +202,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * Reset loading timers (call after health checks pass to give API call full budget).
      */
     window.resetLoadingTimers = function resetLoadingTimers() {
+        console.warn('[GAME-LOADING] resetLoadingTimers()');
         var ctrl = _ensureCtrl();
         if (ctrl.resetTimers) ctrl.resetTimers();
     };

@@ -68,6 +68,14 @@ window.ValdoriaLoadingController = function(config) {
     if (retryBtn) {
         retryBtn.style.display = 'none';
         retryBtn.addEventListener('click', function() {
+            console.warn('[LOADING] Manual retry button clicked');
+            // Reset exhausted state visual
+            if (overlay) {
+                var _rings2 = overlay.querySelectorAll('.mc-ring');
+                _rings2.forEach(function(r) { r.style.animationPlayState = ''; });
+                var _gem2 = overlay.querySelector('.mc-gem');
+                if (_gem2) _gem2.classList.remove('gem-error');
+            }
             if (typeof onRetry === 'function') onRetry();
         });
     }
@@ -102,6 +110,7 @@ window.ValdoriaLoadingController = function(config) {
     _timers.slow = setTimeout(function() {
         if (_state !== 'loading') return;
         _state = 'slow';
+        console.warn('[LOADING] state: loading->slow (8s)');
         if(window._loadDbg)_loadDbg('state: loading->slow (8s)');
         if (tipEl) {
             tipEl.classList.add('loading-tip-slow');
@@ -112,6 +121,7 @@ window.ValdoriaLoadingController = function(config) {
     _timers.verySlow = setTimeout(function() {
         if (_state !== 'slow' && _state !== 'loading') return;
         _state = 'very_slow';
+        console.warn('[LOADING] state: slow->very_slow (12s)');
         if(window._loadDbg)_loadDbg('state: slow->very_slow (12s)');
         if (tipEl) tipEl.textContent = '\u23F3 Conex\u00e3o lenta \u2014 verifique seu sinal ou tente novamente';
     }, 12000);
@@ -127,6 +137,7 @@ window.ValdoriaLoadingController = function(config) {
         if (_state === 'hiding' || _state === 'hidden') return;
         if (_autoRetryCount < AUTO_RETRY_MAX) {
             _autoRetryCount++;
+            console.warn('[LOADING] AUTO_RETRY attempt ' + _autoRetryCount + '/' + AUTO_RETRY_MAX);
             if(window._loadDbg)_loadDbg('AUTO_RETRY attempt ' + _autoRetryCount + '/' + AUTO_RETRY_MAX);
             if (tipEl) {
                 tipEl.classList.remove('loading-tip-slow');
@@ -135,9 +146,18 @@ window.ValdoriaLoadingController = function(config) {
             if (typeof onRetry === 'function') onRetry();
             return;
         }
-        if(window._loadDbg)_loadDbg('state: TIMEOUT after ' + AUTO_RETRY_MAX + ' auto-retries ('+TIMEOUT_MS+'ms)');
-        if (tipEl) tipEl.textContent = '⚠️ Tempo esgotado. Tente novamente.';
+        _state = 'exhausted';
+        console.warn('[LOADING] EXHAUSTED after ' + AUTO_RETRY_MAX + ' auto-retries — manual retry only');
+        if(window._loadDbg)_loadDbg('state: EXHAUSTED after ' + AUTO_RETRY_MAX + ' auto-retries ('+TIMEOUT_MS+'ms)');
+        if (tipEl) tipEl.textContent = '⚠️ Servidor indisponível. Toque para tentar novamente.';
         if (retryBtn) retryBtn.style.display = '';
+        // Circuit breaker visual: stop rings, error gem
+        if (overlay) {
+            var _rings = overlay.querySelectorAll('.mc-ring');
+            _rings.forEach(function(r) { r.style.animationPlayState = 'paused'; });
+            var _gem = overlay.querySelector('.mc-gem');
+            if (_gem) _gem.classList.add('gem-error');
+        }
         if (typeof onTimeout === 'function') onTimeout();
     }
 
@@ -214,6 +234,7 @@ window.ValdoriaLoadingController = function(config) {
     return {
         hide: function(cb) {
             if (_state === 'hiding' || _state === 'hidden') { if (cb) cb(); return; }
+            console.warn('[LOADING] hide() state=' + _state + ' elapsed=' + (Date.now() - _loadStart) + 'ms');
             if(window._loadDbg){var _el=Date.now()-_loadStart;_loadDbg('hide() state='+_state+' elapsed='+_el+'ms remaining='+(MIN_LOAD_MS-_el)+'ms');}
             _cleanup();
             if (!overlay || overlay.classList.contains('hidden')) {
@@ -233,6 +254,7 @@ window.ValdoriaLoadingController = function(config) {
         },
 
         forceHide: function() {
+            console.warn('[LOADING] forceHide() total=' + (Date.now() - _loadStart) + 'ms');
             if(window._loadDbg)_loadDbg('forceHide() total='+(Date.now()-_loadStart)+'ms');
             _cleanup();
             _cinematicTimers.forEach(function(t) { clearTimeout(t); });
@@ -252,6 +274,7 @@ window.ValdoriaLoadingController = function(config) {
         },
 
         show: function(isRetry) {
+            console.warn('[LOADING] show(' + (isRetry ? 'retry' : 'init') + ') prevState=' + _state);
             if(window._loadDbg)_loadDbg('show('+(isRetry?'retry':'init')+')');
             if (_state === 'hiding') this.forceHide();
             _cleanup();
