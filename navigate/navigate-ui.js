@@ -425,6 +425,7 @@ function closeInfoPanel() {
     const panel = document.getElementById('info-panel');
     panel.classList.remove('open', 'peek', 'half', 'full');
     var _mv=document.getElementById('map-viewport');if(_mv)_mv.classList.remove('panel-open');
+    var _fpdd=document.getElementById('font-picker-dropdown');if(_fpdd)_fpdd.classList.remove('open');
     S.selectedLoc = null;
     clearHighlight();
 }
@@ -899,6 +900,9 @@ function openQuickList() {
     const ql = document.getElementById('quick-list');
     const items = document.getElementById('ql-items');
     if (!ql || !items) return;
+    var _fpdd=document.getElementById('font-picker-dropdown');if(_fpdd)_fpdd.classList.remove('open');
+    var _lb=document.getElementById('legend-biomes');if(_lb)_lb.classList.remove('open');
+    var _lt=document.querySelector('.legend-toggle');if(_lt&&_lt.classList.contains('open')){_lt.classList.remove('open');_lt.textContent='▼';}
     items.innerHTML = '';
     const discoveredSet = new Set(S.discoveredLocs || []);
 
