@@ -452,6 +452,10 @@ function _obTransitionToDungeon() {
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
+            if (data && data.status === 'displaced') {
+                if (window.SessionHeartbeat) SessionHeartbeat.handleDisplaced(data.device || '', data.from_device || '');
+                return;
+            }
             if (data && data.url) {
                 window.__valdoria_transitioning = true;
                 window.location.replace(data.url);
@@ -479,6 +483,10 @@ function _obFallbackToGame(apiBase, token) {
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
+        if (data && data.status === 'displaced') {
+            if (window.SessionHeartbeat) SessionHeartbeat.handleDisplaced(data.device || '', data.from_device || '');
+            return;
+        }
         if (data && data.url) {
             window.__valdoria_transitioning = true;
             window.location.replace(data.url);
