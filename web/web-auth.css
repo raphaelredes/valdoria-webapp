@@ -15,7 +15,7 @@
     /* Dramatic radial spotlight from above */
     background:
         radial-gradient(ellipse 80% 60% at 50% 15%, var(--v-gold-06) 0%, transparent 60%),
-        radial-gradient(ellipse 120% 80% at 50% 40%, #3a3028 0%, #2a2420 40%, #1a1510 100%);
+        radial-gradient(ellipse 120% 80% at 50% 40%, var(--v-bg-raised, #3a3028) 0%, var(--v-bg, #2a2420) 40%, #1a1510 100%);
     position: relative;
     overflow: hidden;
 }
