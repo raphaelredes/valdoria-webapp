@@ -10,7 +10,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <style>html{background:#2a2420}.loading-overlay{visibility:hidden}</style>
+    <style>html{background:#2a2420}</style>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
@@ -413,7 +413,12 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     <script>
         // Reveal loading overlay now that all CSS+JS are parsed
         var _ld = document.getElementById('loading');
-        if (_ld) _ld.style.visibility = '';
+        if (_ld) {
+            _ld.style.display = '';
+            _ld.style.animation = 'none';
+            void _ld.offsetHeight;
+            _ld.style.animation = '';
+        }
     </script>
 <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("GAME")</script>
 <script>(function(){var expected=["ValdoriaErrors","showLoading","hideLoading","renderScreen","SessionHeartbeat"];var missing=expected.filter(function(g){return typeof window[g]==="undefined";});if(missing.length)console.error("[GAME] Missing globals after script load:",missing.join(", "));})()</script>

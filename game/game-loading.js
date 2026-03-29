@@ -133,7 +133,6 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
         ctrl.show(isRetry);
         var el = document.getElementById('loading');
         if (el) {
-            el.style.visibility = '';
             el.style.display = '';
         }
     };

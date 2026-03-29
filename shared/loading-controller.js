@@ -290,6 +290,7 @@ window.ValdoriaLoadingController = function(config) {
             _progress = 0;
             _realProgress = -1;
             if (overlay) {
+                overlay.style.display = '';
                 overlay.classList.remove('hidden', 'exit-cinematic');
                 var waves = overlay.querySelectorAll('.mc-completion-wave');
                 waves.forEach(function(w) { w.classList.remove('active'); });
