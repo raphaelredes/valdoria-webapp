@@ -19,7 +19,7 @@
 
     // Haptic feedback fallback
     function _vibrate(ms) {
-        try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+        try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { console.warn('[COMPAT]', e.message || e); }
     }
 
     var polyfill = {
@@ -124,23 +124,23 @@
         // Cloud storage (localStorage fallback)
         CloudStorage: {
             setItem: function (k, v, cb) {
-                try { localStorage.setItem("tg_cloud_" + k, v); } catch (e) {}
+                try { localStorage.setItem("tg_cloud_" + k, v); } catch (e) { console.warn("[COMPAT]", e.message || e); }
                 if (cb) cb(null, true);
             },
             getItem: function (k, cb) {
                 var v = null;
-                try { v = localStorage.getItem("tg_cloud_" + k); } catch (e) {}
+                try { v = localStorage.getItem("tg_cloud_" + k); } catch (e) { console.warn("[COMPAT]", e.message || e); }
                 if (cb) cb(null, v);
             },
             getItems: function (keys, cb) {
                 var r = {};
                 keys.forEach(function (k) {
-                    try { r[k] = localStorage.getItem("tg_cloud_" + k); } catch (e) {}
+                    try { r[k] = localStorage.getItem("tg_cloud_" + k); } catch (e) { console.warn("[COMPAT]", e.message || e); }
                 });
                 if (cb) cb(null, r);
             },
             removeItem: function (k, cb) {
-                try { localStorage.removeItem("tg_cloud_" + k); } catch (e) {}
+                try { localStorage.removeItem("tg_cloud_" + k); } catch (e) { console.warn("[COMPAT]", e.message || e); }
                 if (cb) cb(null, true);
             },
             getKeys: function (cb) { if (cb) cb(null, []); }
