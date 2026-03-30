@@ -533,6 +533,7 @@ function _bfsNextStep(fromCol, fromRow, toCol, toRow) {
   while (queue.length > 0) {
     var cur = queue.shift();
     var cc = cur[0], cr = cur[1];
+    key = cc + ',' + cr;
     var offsets = (cr % 2 === 0) ? EVEN_OFFSETS : ODD_OFFSETS;
     for (var i = 0; i < offsets.length; i++) {
       var nc = cc + offsets[i][0];
@@ -556,7 +557,6 @@ function _bfsNextStep(fromCol, fromRow, toCol, toRow) {
       }
       queue.push([nc, nr]);
     }
-    key = cc + ',' + cr;
   }
   return null; /* No path found */
 }
