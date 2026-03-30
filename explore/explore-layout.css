@@ -261,13 +261,13 @@ body {
 /* --- Map Viewport --- */
 #map-viewport {
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
     position: relative;
     background: #1e1a16;
     background-image: linear-gradient(180deg, rgba(30,26,22,0.4) 0%, transparent 6%, transparent 94%, rgba(30,26,22,0.4) 100%);
-    -webkit-overflow-scrolling: touch;
     z-index: var(--ez-base);
 }
+#map-viewport::-webkit-scrollbar { display: none; }
 
 #iso-map {
     display: block;
@@ -487,14 +487,13 @@ body {
 /* --- Immersive Mode Toggle --- */
 .immersive-toggle {
     position: fixed;
-    bottom: var(--va-bottom-offset, 112px);
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 92px;
+    right: var(--v-space-md);
     z-index: var(--ez-float);
     width: 36px;
-    height: 20px;
+    height: 36px;
     border: 1px solid var(--v-gold-30);
-    border-radius: var(--v-radius-pill);
+    border-radius: 50%;
     background: rgba(42,36,32,0.85);
     color: var(--v-gold, #c4953a);
     font-size: var(--v-font-2xl);
@@ -504,6 +503,7 @@ body {
     align-items: center;
     justify-content: center;
     transition: opacity var(--v-transition) ease, bottom var(--v-transition-base) ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
 .immersive-toggle:active {
@@ -512,7 +512,7 @@ body {
 
 .immersive-restore {
     position: fixed;
-    bottom: var(--v-space-md);
+    bottom: var(--v-space-lg);
     left: 50%;
     transform: translateX(-50%);
     z-index: var(--ez-float);
@@ -526,6 +526,7 @@ body {
     cursor: pointer;
     white-space: nowrap;
     transition: opacity var(--v-transition) ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
 .immersive-restore:active {
