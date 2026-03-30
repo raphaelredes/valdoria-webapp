@@ -326,7 +326,8 @@ function handleLocationTap(locId) {
         noteEl.style.display = 'block';
         noteEl.style.color = '';
     } else {
-        // Fully inaccessible — explain why
+        // Fully inaccessible — explain why + diagnostic logging
+        console.warn('[NAVIGATE] INACCESSIBLE loc='+locId+' cur='+S.currentLoc+' knownN='+S.knownLocs.length+' curInKnown='+S.knownLocs.includes(S.currentLoc)+' tgtInKnown='+S.knownLocs.includes(locId)+' curConns='+JSON.stringify(connectionGraph[S.currentLoc]||[]));
         const hasAnyConn = (connectionGraph[locId] || []).length > 0;
         if (!hasAnyConn) {
             noteEl.innerHTML = '⛔ <b>Local Isolado</b> — Nenhuma rota conhecida leva até aqui';
