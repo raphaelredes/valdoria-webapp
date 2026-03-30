@@ -88,25 +88,12 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             tipInterval: 5000,
             timeoutMs: (typeof LOADING_TIMEOUT_MS !== 'undefined') ? LOADING_TIMEOUT_MS : 15000,
             retryDelayMs: 10000,
-            autoRetryMax: 2,
+            autoRetryMax: 0,
             hasRingAccel: true,
             hasGemPhase: true,
             onRetry: function() {
-                if (window._gameRetryInProgress) {
-                    console.warn('[GAME-LOADING] onRetry: BLOCKED (retry already in progress)');
-                    return;
-                }
-                window._gameRetryInProgress = true;
-                console.warn('[GAME-LOADING] onRetry: retrying health+start (not full init)');
-                showLoading(true);
-                if (typeof _retryHealthAndStart === 'function') {
-                    _retryHealthAndStart().finally(function() {
-                        window._gameRetryInProgress = false;
-                    });
-                } else {
-                    window._gameRetryInProgress = false;
-                    window.location.reload();
-                }
+                console.warn('[GAME-LOADING] onRetry: manual reload');
+                window.location.reload();
             },
             onTimeout: function() {
                 console.error('[GAME] Loading timeout \u2014 server did not respond in time');
@@ -120,6 +107,10 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      * @param {boolean} [isRetry=false] - If true, shows reconnecting text instead of tips.
      */
     window.showLoading = function showLoading(isRetry) {
+        if (window._initAborted && !isRetry) {
+            console.warn('[GAME-LOADING] showLoading BLOCKED — init was aborted');
+            return;
+        }
         console.warn('[GAME-LOADING] showLoading(' + (isRetry ? 'retry' : 'init') + ') spaRevisit=' + !!window.__spaRevisit);
         if (window.__spaRevisit && !isRetry) {
             if (window.vProcessing) vProcessing.show({ text: 'Carregando...' });
