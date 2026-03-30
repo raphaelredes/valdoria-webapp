@@ -1014,8 +1014,8 @@
     justify-content: center;
     background: radial-gradient(
       ellipse at 50% 40%,
-      rgba(30, 18, 12, 0.95) 0%,
-      rgba(10, 8, 5, 0.97) 100%
+      #1e120c 0%,
+      #0a0805 100%
     );
     z-index: 500;
   }
