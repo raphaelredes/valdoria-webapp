@@ -179,6 +179,9 @@
             var _overlay = _tmp.firstElementChild;
             _overlay.style.background = '#1a1510';
             _ld.parentNode.replaceChild(_overlay, _ld);
+            if (window._loadDbg) _loadDbg('loading overlay populated (deferred SVG)');
+        } else {
+            console.warn('[LOAD-DBG] [NAVIGATE] loading overlay populate FAILED: placeholder=' + !!_ld + ' template=' + (typeof ValdoriaLoadingHTML));
         }
     </script>
     <script>
