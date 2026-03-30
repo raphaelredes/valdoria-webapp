@@ -4,10 +4,11 @@
 
 // ── Danger pip colors (green→red, unified across all UI) ──
 var NV_DANGER_COLORS = ['#5a9a3a', '#9a9a2a', '#cc7a2a', '#cc3a2a', '#8a1a1a'];
-// ── Inline style colors for danger/risk context ──
-var NV_COLOR_DANGER_HIGH = '#8a4a3a';
+// ── Inline style colors — read from CSS custom properties when available ──
+var _cs = getComputedStyle(document.documentElement);
+var NV_COLOR_DANGER_HIGH = _cs.getPropertyValue('--v-crimson-light').trim() || '#8a4a3a';
 var NV_COLOR_DANGER_MED  = '#8a6a3a';
-var NV_COLOR_GOLD        = '#c4953a';
+var NV_COLOR_GOLD        = _cs.getPropertyValue('--v-gold').trim() || '#c4953a';
 var NV_COLOR_RISK_EXTREME = '#cc4040';
 var NV_COLOR_RISK_HIGH    = '#cc8844';
 var NV_COLOR_RISK_MODERATE = '#aa9a5a';

@@ -61,7 +61,7 @@ body {
 .hud-level {
     font-size: var(--v-font-xs);
     color: var(--v-text-dim, #a09484);
-    font-family: "Cinzel", serif;
+    font-family: var(--v-font-display, "Cinzel", serif);
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -76,12 +76,12 @@ body {
 }
 
 .condition-pill {
-    font-size: 9px;
+    font-size: 9px; /* HARDCODED: below xs(10px), compact HUD needs sub-minimum */
     padding: 1px var(--v-space-sm);
     border-radius: var(--v-radius-pill);
     background: rgba(180,60,60,0.2);
     border: 1px solid rgba(180,60,60,0.35);
-    color: #d08888;
+    color: #d08888; /* HARDCODED: condition pill red, --v-danger-light is #e08080, too bright */
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -106,7 +106,7 @@ body {
 }
 
 .hud-hp-label {
-    font-size: 9px;
+    font-size: 9px; /* HARDCODED: below xs(10px), compact HUD needs sub-minimum */
     color: var(--v-text-dim, #a09484);
     font-weight: 600;
     text-transform: uppercase;
@@ -133,7 +133,7 @@ body {
 .hp-bar {
     width: 56px;
     height: var(--v-bar-height-sm, 6px);
-    background: #1e1a16;
+    background: #1e1a16; /* HARDCODED: deepest dark, no token equivalent */
     border-radius: var(--v-radius-xs);
     overflow: hidden;
     border: 1px solid var(--v-bg-card-hover);
@@ -229,7 +229,7 @@ body {
     height: 50px;
     border: 2px solid var(--v-gold-55);
     border-radius: var(--v-radius-sm);
-    background: linear-gradient(135deg, #3a3028 0%, var(--v-bg) 100%);
+    background: linear-gradient(135deg, var(--v-bg-card-hover, #3a3028) 0%, var(--v-bg) 100%);
     box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 var(--v-gold-12), 0 0 6px var(--v-gold-08);
     z-index: var(--ez-hud);
     pointer-events: auto;
@@ -263,7 +263,7 @@ body {
     flex: 1;
     overflow: hidden;
     position: relative;
-    background: #1e1a16;
+    background: #1e1a16; /* HARDCODED: deepest dark, no token equivalent */
     background-image: linear-gradient(180deg, rgba(30,26,22,0.4) 0%, transparent 6%, transparent 94%, rgba(30,26,22,0.4) 100%);
     z-index: var(--ez-base);
 }
@@ -370,7 +370,7 @@ body {
     border-radius: var(--v-radius);
     background: linear-gradient(135deg, var(--v-gold-12) 0%, var(--v-gold-06) 100%);
     color: var(--v-gold, #c4953a);
-    font-family: "Cinzel", serif;
+    font-family: var(--v-font-display, "Cinzel", serif);
     font-size: var(--v-font-sm);
     font-weight: 600;
     cursor: pointer;
@@ -435,7 +435,7 @@ body {
 .action-btn-explore {
     background: linear-gradient(135deg, rgba(60,140,80,0.18) 0%, rgba(60,140,80,0.08) 100%) !important;
     border-color: rgba(60,140,80,0.45) !important;
-    color: #5aaa6a !important;
+    color: #5aaa6a !important; /* HARDCODED: explore-green, unique button variant */
 }
 .action-btn-explore:active {
     background: linear-gradient(135deg, rgba(60,140,80,0.28) 0%, rgba(60,140,80,0.14) 100%) !important;
@@ -451,7 +451,7 @@ body {
 .action-btn-return {
     background: linear-gradient(135deg, rgba(140,100,60,0.18) 0%, rgba(140,100,60,0.08) 100%) !important;
     border-color: rgba(140,100,60,0.45) !important;
-    color: #b89060 !important;
+    color: #b89060 !important; /* HARDCODED: return-brown, unique button variant */
 }
 .action-btn-return:active {
     background: linear-gradient(135deg, rgba(140,100,60,0.28) 0%, rgba(140,100,60,0.14) 100%) !important;
@@ -481,7 +481,7 @@ body {
     transform: scale(0.9);
     background: var(--v-gold-20);
 }
-.float-btn-help { bottom:140px; right:var(--v-space-md); font-family:"Cinzel",serif; font-weight:700; }
+.float-btn-help { bottom:140px; right:var(--v-space-md); font-family:var(--v-font-display,"Cinzel",serif); font-weight:700; }
 .float-btn-inventory { bottom:188px; right:var(--v-space-md); }
 
 /* --- Immersive Mode Toggle --- */
@@ -536,7 +536,7 @@ body {
 /* --- Danger Pips (diamond style) --- */
 .danger-pips {
     display: flex;
-    gap: 3px;
+    gap: 3px; /* HARDCODED: between xs(2px) and sm(4px), no exact token */
     align-items: center;
 }
 
@@ -544,8 +544,8 @@ body {
 .danger-pips .pip,
 .danger-pips .danger-pip,
 .danger-pips .exh-pip {
-    width: 8px;
-    height: 8px;
+    width: var(--v-space-md, 8px);
+    height: var(--v-space-md, 8px);
     transform: rotate(45deg);
     border: 1px solid rgba(255,255,255,0.18);
     background: rgba(255,255,255,0.08);
@@ -606,7 +606,7 @@ body {
 .danger-pips .pip.pulse,
 .danger-pips .danger-pip.pulse,
 .danger-pips .exh-pip.critical {
-    background: #a02020;
+    background: var(--v-crimson-light, #a03030);
     border-color: rgba(200,50,50,0.7);
     box-shadow: 0 0 6px rgba(200,50,50,0.6);
     animation: pipPulse 1.2s ease infinite;
