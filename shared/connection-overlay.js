@@ -1,5 +1,5 @@
 /**
- * Connection Overlay v1.0
+ * Connection Overlay v1.1
  * Semi-transparent overlay for temporary connection losses.
  * API: vConnection.show(opts), vConnection.hide(), vConnection.isActive()
  */
@@ -18,6 +18,13 @@ var _bgTimer = null;
 var _bgCount = 0;
 var _opts = {};
 var _active = false;
+
+function _log(msg) {
+    console.warn('[CONN]', msg);
+    if (window.ValdoriaErrors && ValdoriaErrors.log) {
+        ValdoriaErrors.log('CONN: ' + msg);
+    }
+}
 
 var _RUNE_SVG = '<svg class="v-conn-rune" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">'
   + '<circle cx="32" cy="32" r="28" fill="none" stroke="var(--v-gold-25,rgba(196,149,58,0.25))" stroke-width="2"/>'
@@ -48,10 +55,12 @@ function _ensureDOM() {
     _retryBtn = document.getElementById('v-conn-retry');
     _closeBtn = document.getElementById('v-conn-close');
     _retryBtn.addEventListener('click', function() {
+        _log('manual retry clicked (attempt ' + (_retryIdx + 1) + ')');
         _retryBtn.classList.remove('visible');
         _checkHealth();
     });
     _closeBtn.addEventListener('click', function() {
+        _log('user gave up (closed overlay)');
         _clearTimers();
         hide();
         if (_opts.onGiveUp) _opts.onGiveUp();
@@ -78,14 +87,18 @@ function _checkHealth() {
     var url = base + '/api/game/health';
     if (_opts.uid) url += '?uid=' + _opts.uid;
 
+    _log('health check start url=' + url + ' online=' + navigator.onLine);
     _statusEl.textContent = 'Verificando conex\u00e3o...';
     _detailEl.textContent = '';
 
     _fetchT(url, 5000).then(function(r) {
+        _log('health response status=' + r.status);
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
     }).then(function(data) {
+        _log('health OK data=' + JSON.stringify(data).substring(0, 120));
         if (data && data.new_base_url && data.new_base_url !== base) {
+            _log('API URL changed: ' + base + ' -> ' + data.new_base_url);
             _opts.apiBase = data.new_base_url;
         }
         _onSuccess();
@@ -98,8 +111,10 @@ function _checkHealth() {
         }
         if (_bgTimer) {
             _bgCount++;
+            _log('bg poll ' + _bgCount + '/' + _BG_MAX + ' failed');
             _detailEl.textContent = 'Aguardando servidor... (' + _bgCount + '/' + _BG_MAX + ')';
             if (_bgCount >= _BG_MAX) {
+                _log('bg polling exhausted (' + _BG_MAX + ' attempts) - giving up');
                 _clearTimers();
                 hide();
                 if (_opts.onGiveUp) _opts.onGiveUp();
@@ -109,6 +124,7 @@ function _checkHealth() {
             if (_retryIdx < _RETRY_DELAYS.length) {
                 _startRetryLoop();
             } else {
+                _log('all ' + _RETRY_DELAYS.length + ' retries exhausted - switching to bg polling');
                 _startBgPolling();
             }
         }
@@ -116,6 +132,7 @@ function _checkHealth() {
 }
 
 function _onSuccess() {
+    _log('connection restored after ' + _retryIdx + ' retries');
     _clearTimers();
     _statusEl.textContent = 'Conex\u00e3o restaurada!';
     _detailEl.textContent = '';
@@ -137,6 +154,7 @@ function _startRetryLoop() {
     var secs = Math.ceil(delay / 1000);
     var remaining = secs;
 
+    _log('retry ' + (_retryIdx + 1) + '/' + total + ' in ' + secs + 's');
     _statusEl.textContent = 'Reconectando...';
     _detailEl.textContent = 'Tentativa ' + (_retryIdx + 1) + '/' + total + ' \u2014 pr\u00f3xima em ' + remaining + 's';
     _fillEl.style.transition = 'width ' + delay + 'ms linear';
@@ -159,6 +177,7 @@ function _startRetryLoop() {
 
 function _startBgPolling() {
     _bgCount = 0;
+    _log('starting bg polling (interval=' + (_BG_INTERVAL/1000) + 's, max=' + _BG_MAX + ')');
     _statusEl.textContent = 'Servidor indispon\u00edvel';
     _detailEl.textContent = 'Tentando reconectar em segundo plano...';
     _fillEl.style.width = '100%';
@@ -178,6 +197,8 @@ function show(opts) {
     _ensureDOM();
     _clearTimers();
 
+    _log('show overlay api=' + (_opts.apiBase || '(none)') + ' uid=' + (_opts.uid || 0) + ' msg=' + (_opts.message || 'default'));
+
     if (window.vProcessing && vProcessing.isActive()) vProcessing.hide();
 
     _statusEl.textContent = _opts.message || 'Reconectando...';
@@ -195,6 +216,7 @@ function show(opts) {
 
 function hide() {
     if (!_el) return;
+    _log('hide overlay');
     _active = false;
     _el.classList.add('hiding');
     _el.classList.remove('active');
