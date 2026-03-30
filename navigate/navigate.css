@@ -2216,6 +2216,29 @@ body[data-font] .loading-text {
   background: var(--v-gold-15);
   border-left: 2px solid var(--v-gold);
 }
+.travel-journal-entry-departure {
+  background: rgba(60, 80, 140, 0.15);
+  border-left: 2px solid #5a7ab0;
+}
+.travel-journal-entry-weather {
+  background: rgba(100, 120, 160, 0.12);
+  border-left: 2px solid #6a7a98;
+}
+.travel-journal-entry-safe,
+.travel-journal-entry-forced_march_ok,
+.travel-journal-entry-weather_save_ok {
+  background: rgba(60, 140, 60, 0.15);
+  border-left: 2px solid #4a8a4a;
+}
+.travel-journal-entry-forced_march_fail,
+.travel-journal-entry-weather_save_fail {
+  background: rgba(180, 60, 40, 0.2);
+  border-left: 2px solid #b43c28;
+}
+.travel-journal-entry-arrival {
+  background: var(--v-gold-15);
+  border-left: 2px solid var(--v-gold);
+}
 .travel-journal-btn {
   display: block;
   width: 100%;
