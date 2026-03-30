@@ -70,7 +70,7 @@ function loadTelegramWidget() {
 /* ----- Auth Callbacks ----- */
 
 window.onTelegramAuth = async function(user) {
-    console.debug('[WEB-AUTH] Telegram auth:', user.first_name);
+    if(window._dbg)console.debug('[WEB-AUTH] Telegram auth:', user.first_name);
     showAuthLoading(true);
     hideAuthError();
     try {
@@ -102,7 +102,7 @@ window.onTelegramAuth = async function(user) {
 };
 
 window.onGoogleAuth = async function(response) {
-    console.debug('[WEB-AUTH] Google auth callback');
+    if(window._dbg)console.debug('[WEB-AUTH] Google auth callback');
     showAuthLoading(true);
     hideAuthError();
     try {

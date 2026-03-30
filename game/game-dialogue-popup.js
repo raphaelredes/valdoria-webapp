@@ -39,7 +39,7 @@ window.showDialoguePopup = function (data) {
 window.hideDialoguePopup = function () {
     _dlgStack = [];
     _skipBound = false;
-    console.debug('[DLG-POPUP] skipBound reset, stack cleared');
+    if(window._dbg)console.debug('[DLG-POPUP] skipBound reset, stack cleared');
     _hide();
     if (typeof clearMoodAmbient === 'function') clearMoodAmbient();
 };
@@ -213,5 +213,5 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-console.debug('[DLG-POPUP] loaded, showDialoguePopup=' + typeof window.showDialoguePopup);
+if(window._dbg)console.debug('[DLG-POPUP] loaded, showDialoguePopup=' + typeof window.showDialoguePopup);
 })();

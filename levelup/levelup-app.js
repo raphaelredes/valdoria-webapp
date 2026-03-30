@@ -48,7 +48,7 @@ const params = new URLSearchParams(location.search);
 var _isSpa = _spaP && Object.keys(_spaP).length > 0;
 if (_isSpa) { token = _spaP.token || ''; apiFallback = _spaP.api || ''; userId = _spaP.uid || ''; }
 else { token = params.get('token') || ''; apiFallback = params.get('api') || ''; userId = params.get('uid') || ''; }
-console.debug('[LEVELUP] INIT token=' + (token ? token.substring(0, 12) + '...' : '(empty)') + ' spaP.token=' + ((_spaP && _spaP.token) ? _spaP.token.substring(0, 12) + '...' : '(none)') + ' url.token=' + (new URLSearchParams(location.search).get('token') || '(none)').substring(0, 12) + ' spaP_keys=' + (_spaP ? Object.keys(_spaP).join(',') : 'null'));
+if(window._dbg)console.debug('[LEVELUP] INIT token=' + (token ? token.substring(0, 12) + '...' : '(empty)') + ' spaP.token=' + ((_spaP && _spaP.token) ? _spaP.token.substring(0, 12) + '...' : '(none)') + ' url.token=' + (new URLSearchParams(location.search).get('token') || '(none)').substring(0, 12) + ' spaP_keys=' + (_spaP ? Object.keys(_spaP).join(',') : 'null'));
 if (window.SessionHeartbeat && apiFallback && token && userId) {
 SessionHeartbeat.init({ apiBase: apiFallback, token: token, uid: parseInt(userId,10) || 0 });
 }
@@ -694,7 +694,7 @@ document.getElementById('loadingOverlay').classList.add('active');
 try {
 if (apiFallback) {
 payload.user_id = parseInt(userId,10);
-console.debug('[LEVELUP] SUBMIT token=' + (token ? token.substring(0, 12) + '...' : '(empty)') + ' api=' + apiFallback + ' uid=' + userId);
+if(window._dbg)console.debug('[LEVELUP] SUBMIT token=' + (token ? token.substring(0, 12) + '...' : '(empty)') + ' api=' + apiFallback + ' uid=' + userId);
 const _lh = {
 'Content-Type': 'application/json',
 'Authorization': 'Bearer ' + token
@@ -745,7 +745,7 @@ setTimeout(function() {
 if (document.visibilityState !== 'hidden') { resetSubmitState(); }
 }, 5000);
 } else {
-console.debug('Level-up payload:', JSON.stringify(payload, null, 2));
+if(window._dbg)console.debug('Level-up payload:', JSON.stringify(payload, null, 2));
 setTimeout(function() {
 resetSubmitState();
 alert('Evolucao confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
