@@ -57,6 +57,7 @@ function computeFogState(forceRecompute) {
     if (_cachedFogState && !forceRecompute) return _cachedFogState;
     // Save previous state for cascade animation
     if (_cachedFogState) _prevFogState = { ..._cachedFogState };
+    if(window._dbg)console.debug('[NAV] computeFogState recompute forced=%s', !!forceRecompute);
 
     const fog = {};
     const knownSet = new Set(S.knownLocs);
@@ -78,6 +79,7 @@ function computeFogState(forceRecompute) {
         }
     }
     _cachedFogState = fog;
+    if(window._dbg){var _fs=Object.values(fog),_rv=_fs.filter(function(s){return s!=='hidden'}).length;console.debug('[NAV] fogState total=%s revealed=%s hidden=%s',_fs.length,_rv,_fs.length-_rv)}
     return fog;
 }
 
@@ -238,6 +240,7 @@ function _renderFogOverlay(svg, fogState) {
 // show to player, then add expensive decorative layers (worn edges, aging,
 // SVG filters) in the background after loading screen hides.
 async function renderMapAsync(onProgress, onStage) {
+    if(window._dbg)console.debug('[NAV] renderMapAsync start, detail=%s', _mapDetail);
     // Hidden SVG for path math utilities (_pointOnPath)
     const svg = document.getElementById('map-svg');
     svg.setAttribute('width', SVG_W);
