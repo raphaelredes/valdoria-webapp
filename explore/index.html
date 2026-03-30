@@ -45,6 +45,9 @@
 
 <body>
 
+    <!-- Loading overlay (populated by ValdoriaLoadingHTML at bottom of body) -->
+    <div id="loading" class="loading-overlay" style="background:#1a1510" aria-busy="true"></div>
+
     <!-- Toast container (outside overflow:hidden body flow) -->
     <div id="toast-layer"></div>
 
@@ -127,6 +130,10 @@
                     <span class="reward-badge" id="badge-xp">XP 0</span>
                     <span class="reward-badge" id="badge-gold">GP 0</span>
                     <span class="reward-badge atmosphere-badge" id="badge-time"></span>
+                </div>
+                <div class="panel-bar-row" id="xp-bar-row" style="display:none">
+                    <span class="panel-bar-label" id="xp-label">Nv 1</span>
+                    <div class="panel-bar-track"><div class="panel-bar-fill" id="xp-fill" style="background:linear-gradient(180deg,#8a6a2a,#c4953a);width:0%;transform-origin:left;transition:transform var(--v-transition-slow) ease"></div></div>
                 </div>
                 <div id="condition-bar" class="condition-bar" role="status" aria-label="Condições ativas"></div>
                 <div id="exhaustion-panel" class="exhaustion-panel" style="display:none">
@@ -375,6 +382,15 @@
         });
     </script>
 <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("EXPLORE")</script>
+<script>
+var _ld=document.getElementById('loading');
+if(_ld&&typeof ValdoriaLoadingHTML==='function'){
+    var _tmp=document.createElement('div');
+    _tmp.innerHTML=ValdoriaLoadingHTML({title:'Explorar',subtitle:'Preparando o mapa...',theme:'explore'});
+    var _overlay=_tmp.firstElementChild;
+    if(_overlay){_overlay.style.background='#1a1510';_ld.parentNode.replaceChild(_overlay,_ld);}
+}
+</script>
 </body>
 
 </html>
