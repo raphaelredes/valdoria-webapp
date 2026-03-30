@@ -22,6 +22,7 @@ var TIPS = [
 ];
 if(window._loadDbgSetApp)_loadDbgSetApp('NAVIGATE');
 if (window.__spaRevisit) {
+    console.warn("[NAVIGATE] loading: SPA revisit mode (stub controller)");
     window._navLoadingCtrl = {
         show: function() { if(window.vProcessing) vProcessing.show({text: 'Carregando mapa...'}); },
         hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 200); },
@@ -35,6 +36,7 @@ if (window.__spaRevisit) {
         resetTimers: function() {}
     };
 } else {
+    console.warn("[NAVIGATE] loading: cold start mode (full controller, autoRetryMax=1)");
     window._navLoadingCtrl = ValdoriaLoadingController({
         overlayId: 'loading',
         tips: TIPS,
@@ -43,6 +45,7 @@ if (window.__spaRevisit) {
             console.warn('[NAVIGATE] Loading retry - re-running initAsync');
             if (window._navLoadingCtrl) window._navLoadingCtrl.show(true);
             if (typeof initAsync === 'function') {
+                console.warn('[NAVIGATE] retrying initAsync...');
                 initAsync().catch(function(e) {
                     console.error('[NAVIGATE] Retry initAsync failed:', e);
                     if (window._navLoadingCtrl) window._navLoadingCtrl.forceHide();
