@@ -63,37 +63,27 @@
 
 
 
-    <!-- HUD -->
+    <!-- HUD (Compact 32px bar - Navigate style) -->
     <div id="hud">
         <span class="hud-name" id="hud-name">Aventureiro</span>
-        <div class="hud-stat">
-            <span>HP</span>
+        <span class="hud-level" id="hud-level">Nv 1</span>
+        <div class="hud-conditions" id="hud-conditions"></div>
+        <span class="fatigue-badge" id="fatigue-badge" style="display:none"></span>
+        <span class="hud-weather" id="badge-weather"></span>
+        <div class="hud-hp">
+            <span class="hud-hp-label">HP</span>
             <div class="hp-bar">
                 <div class="hp-fill" id="hp-fill"></div>
             </div>
-            <span id="hp-text">10/10</span>
-        </div>
-        <div class="hud-xp-row" id="xp-bar-row" style="display:none">
-            <div class="xp-bar">
-                <div class="xp-fill" id="xp-fill" style="width:0%"></div>
-            </div>
-            <span class="xp-label" id="xp-label">Nv 1</span>
-        </div>
-        <div class="hud-rewards">
-            <span class="reward-badge" id="badge-xp">XP 0</span>
-            <span class="reward-badge" id="badge-gold">GP 0</span>
-            <span class="reward-badge atmosphere-badge" id="badge-time"></span>
-            <span class="reward-badge atmosphere-badge" id="badge-weather"></span>
-            <span id="watch-badge" class="watch-badge" style="display:none"></span>
+            <span class="hud-hp-text" id="hp-text">10/10</span>
         </div>
     </div>
 
     <!-- Minimap -->
     <canvas id="minimap" width="80" height="80" role="img" aria-label="Minimapa"></canvas>
 
-    <!-- Condition Bar (D&D 5e status effects) -->
-    <div id="condition-bar" class="condition-bar" role="status" aria-label="Condições ativas"></div>
-    <span class="fatigue-badge" id="fatigue-badge" style="display:none"></span>
+    <!-- Watch/Day badge (fixed top-right) -->
+    <span id="watch-badge" class="watch-badge" style="display:none"></span>
 
     <!-- Map Viewport -->
     <div id="map-viewport" role="application" aria-label="Mapa de exploração interativo">
@@ -106,44 +96,71 @@
         <div id="terrain-tooltip" class="terrain-tooltip"></div>
     </div>
 
-    <!-- Exhaustion HUD (D&D 5e PHB) -->
-    <div id="exhaustion-hud" class="exhaustion-hud" role="status" aria-label="Nível de exaustão" style="display:none">
-        <span class="exh-icon">⚠️</span>
-        <span class="exh-label" id="exh-label">Exaustão 0</span>
-        <div class="exh-pips" id="exh-pips">
-            <span class="exh-pip"></span><span class="exh-pip"></span><span class="exh-pip"></span>
-            <span class="exh-pip"></span><span class="exh-pip"></span><span class="exh-pip"></span>
-        </div>
-    </div>
+    <!-- Exhaustion HUD (legacy compat - hidden, real one in panel) -->
+    <div id="exhaustion-hud" style="display:none"></div>
 
     <!-- Immersive Mode Toggle -->
     <button id="immersive-toggle" class="immersive-toggle" style="display:none" aria-label="Recolher menu">&middot;</button>
 
-    <!-- Bottom Bar (2-row layout) -->
+    <!-- Bottom Panel (Navigate-style) -->
     <div id="bottom-panel" class="bottom-panel" style="display:none">
-    <div id="bottom-bar">
-        <div class="bar-actions">
-            <button class="btn-return" id="btn-return" onclick="showExitRiskAssessment()">&#x1f3d5;&#xfe0f; Retornar</button>
-            <button class="btn-explore" id="btn-explore" onclick="showExploreArea()">&#x1f50d; Buscar</button>
-            <button class="btn-camp-rest" id="btn-camp" onclick="showCampOverlay()" title="Acampar">&#x1f525;</button>
-            <button class="btn-help-tutorial" id="btn-help" onclick="showTutorialConfirm()" title="Tutorial">?</button>
-            <button class="btn-inventory" id="btn-inventory" onclick="transitionToInventory()"
-                style="display:none">&#x1f392; Itens</button>
-        </div>
-        <div class="bar-info">
-            <button class="pace-toggle" id="pace-toggle" onclick="cycleTravelPace()" title="Ritmo de viagem">&#x1f6b6;</button>
-            <span class="activity-badge" id="activity-badge" onclick="showActivitySelection()" style="display:none" title="Atividade de viagem"></span>
-            <span class="step-counter" id="step-counter">0</span>
-            <div class="danger-pips" id="danger-pips">
-                <span class="pip"></span>
-                <span class="pip"></span>
-                <span class="pip"></span>
-                <span class="pip"></span>
-                <span class="pip"></span>
+
+        <!-- Slide-up Info Panel -->
+        <div id="explore-panel" class="explore-panel">
+            <button class="panel-handle" id="panel-handle" onclick="toggleExplorePanel()" aria-label="Expandir painel">
+                <span class="panel-handle-diamond">&#x25C6;</span>
+            </button>
+            <div class="panel-content" id="panel-content">
+                <div class="panel-status-bars" id="panel-status-bars">
+                    <div class="panel-bar-row">
+                        <span class="panel-bar-label">HP</span>
+                        <div class="panel-bar-track"><div class="panel-bar-fill hp-panel-fill" id="panel-hp-fill"></div></div>
+                        <span class="panel-bar-text" id="panel-hp-text">10/10</span>
+                    </div>
+                    <div class="panel-bar-row">
+                        <span class="panel-bar-label">MP</span>
+                        <div class="panel-bar-track"><div class="panel-bar-fill mp-panel-fill" id="panel-mp-fill"></div></div>
+                        <span class="panel-bar-text" id="panel-mp-text">0/0</span>
+                    </div>
+                </div>
+                <div class="panel-rewards" id="panel-rewards">
+                    <span class="reward-badge" id="badge-xp">XP 0</span>
+                    <span class="reward-badge" id="badge-gold">GP 0</span>
+                    <span class="reward-badge atmosphere-badge" id="badge-time"></span>
+                </div>
+                <div id="condition-bar" class="condition-bar" role="status" aria-label="Condições ativas"></div>
+                <div id="exhaustion-panel" class="exhaustion-panel" style="display:none">
+                    <span class="exh-icon">⚠️</span>
+                    <span class="exh-label" id="exh-label-panel">Exaustão 0</span>
+                    <div class="exh-pips" id="exh-pips-panel">
+                        <span class="exh-pip"></span><span class="exh-pip"></span><span class="exh-pip"></span>
+                        <span class="exh-pip"></span><span class="exh-pip"></span><span class="exh-pip"></span>
+                    </div>
+                </div>
+                <div class="panel-meta">
+                    <button class="pace-toggle" id="pace-toggle" onclick="cycleTravelPace()" title="Ritmo de viagem">🚶</button>
+                    <span class="activity-badge" id="activity-badge" onclick="showActivitySelection()" style="display:none" title="Atividade de viagem"></span>
+                    <div class="danger-pips" id="danger-pips">
+                        <span class="danger-pip"></span><span class="danger-pip"></span><span class="danger-pip"></span>
+                        <span class="danger-pip"></span><span class="danger-pip"></span>
+                    </div>
+                    <span class="step-counter" id="step-counter">0</span>
+                    <span class="panel-location" id="location-info">Carregando...</span>
+                </div>
             </div>
-            <div class="location-info" id="location-info">Carregando...</div>
         </div>
-    </div>
+
+        <!-- Fixed Action Buttons -->
+        <div id="bottom-actions" class="bottom-actions">
+            <button class="action-btn action-btn-explore" id="btn-explore" onclick="showExploreArea()">🔍 Buscar</button>
+            <button class="action-btn action-btn-camp" id="btn-camp" onclick="showCampOverlay()">🔥 Acampar</button>
+            <button class="action-btn action-btn-return" id="btn-return" onclick="showExitRiskAssessment()">🏕️ Retornar</button>
+        </div>
+
+        <!-- Floating utility buttons -->
+        <button class="float-btn float-btn-help" id="btn-help" onclick="showTutorialConfirm()" title="Tutorial" style="display:none">?</button>
+        <button class="float-btn float-btn-inventory" id="btn-inventory" onclick="transitionToInventory()" style="display:none">🎒</button>
+
     </div>
 
     <!-- Immersive Mode Restore -->
