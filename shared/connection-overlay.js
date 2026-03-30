@@ -89,7 +89,13 @@ function _checkHealth() {
             _opts.apiBase = data.new_base_url;
         }
         _onSuccess();
-    }).catch(function() {
+    }).catch(function(err) {
+        var errType = err ? (err.name || 'Unknown') : 'Unknown';
+        var errMsg = err ? (err.message || '') : '';
+        console.error('[CONN] health check failed:', errType, errMsg, 'url=' + url);
+        if (window.ValdoriaErrors && ValdoriaErrors.log) {
+            ValdoriaErrors.log('CONN health fail: ' + errType + ' ' + errMsg + ' url=' + url);
+        }
         if (_bgTimer) {
             _bgCount++;
             _detailEl.textContent = 'Aguardando servidor... (' + _bgCount + '/' + _BG_MAX + ')';
