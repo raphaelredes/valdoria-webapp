@@ -108,11 +108,21 @@ body {
   right: 0;
   max-width: 430px;
   margin: 0 auto;
-  background: linear-gradient(
-    180deg,
-    var(--v-bg-card-hover) 0%,
-    var(--v-bg) 100%
-  );
+  /* IMMUTABLE: background-color MUST be opaque — panel over map must NEVER be see-through */
+  background-color: var(--v-bg);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      var(--v-gold-02) 3px,
+      var(--v-gold-02) 4px
+    ),
+    linear-gradient(
+      180deg,
+      var(--v-bg-card-hover) 0%,
+      var(--v-bg) 100%
+    );
   border-top: 1px solid var(--v-gold-25);
   border-radius: var(--v-radius-sm) var(--v-radius-sm) 0 0;
   padding: var(--v-space-lg) var(--v-space-lg)
@@ -129,13 +139,6 @@ body {
     inset 0 4px 16px rgba(40, 30, 15, 0.65),
     inset 0 -2px 8px rgba(40, 30, 15, 0.45),
     0 -4px 20px rgba(0, 0, 0, 0.5);
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 3px,
-    var(--v-gold-02) 3px,
-    var(--v-gold-02) 4px
-  );
 }
 #info-panel.open {
   transform: translateY(0) scale(1);
@@ -143,11 +146,9 @@ body {
 @keyframes panelEntrance {
   from {
     transform: translateY(100%) scale(0.95);
-    opacity: 0.7;
   }
   to {
     transform: translateY(0) scale(1);
-    opacity: 1;
   }
 }
 #info-panel.entering {
