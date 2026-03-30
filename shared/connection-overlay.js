@@ -1,5 +1,5 @@
 /**
- * Connection Overlay v1.1
+ * Connection Overlay v1.2
  * Semi-transparent overlay for temporary connection losses.
  * API: vConnection.show(opts), vConnection.hide(), vConnection.isActive()
  */
@@ -8,7 +8,7 @@
 
 var _RETRY_DELAYS = [2000, 4000, 6000, 8000, 8000, 8000];
 var _BG_INTERVAL = 15000;
-var _BG_MAX = 12;
+// bg polling has NO max — continues indefinitely until server responds
 
 var _el, _statusEl, _detailEl, _fillEl, _retryBtn, _closeBtn;
 var _retryIdx = 0;
@@ -111,13 +111,11 @@ function _checkHealth() {
         }
         if (_bgTimer) {
             _bgCount++;
-            _log('bg poll ' + _bgCount + '/' + _BG_MAX + ' failed');
-            _detailEl.textContent = 'Aguardando servidor... (' + _bgCount + '/' + _BG_MAX + ')';
-            if (_bgCount >= _BG_MAX) {
-                _log('bg polling exhausted (' + _BG_MAX + ' attempts) - giving up');
-                _clearTimers();
-                hide();
-                if (_opts.onGiveUp) _opts.onGiveUp();
+            _log('bg poll ' + _bgCount + ' failed');
+            if (_bgCount <= 4) {
+                _detailEl.textContent = 'Aguardando servidor... (tentativa ' + _bgCount + ')';
+            } else {
+                _detailEl.textContent = 'O servidor pode estar reiniciando. Isso pode levar até 2 minutos.';
             }
         } else {
             _retryIdx++;
@@ -177,7 +175,7 @@ function _startRetryLoop() {
 
 function _startBgPolling() {
     _bgCount = 0;
-    _log('starting bg polling (interval=' + (_BG_INTERVAL/1000) + 's, max=' + _BG_MAX + ')');
+    _log('starting bg polling (interval=' + (_BG_INTERVAL/1000) + 's, unlimited)');
     _statusEl.textContent = 'Servidor indispon\u00edvel';
     _detailEl.textContent = 'Tentando reconectar em segundo plano...';
     _fillEl.style.width = '100%';
