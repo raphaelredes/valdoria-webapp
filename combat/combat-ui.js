@@ -29,7 +29,7 @@ const isDead=e.hp<=0;const activeClass=isActiveTurn?' active-turn':'';const dead
 let intentBadge='';if(type==='enemy'&&e.it){const it=e.it;const intentCls=it.tp==='stun'||it.tp==='skip'?'intent-stun':it.tp==='skill'?'intent-skill':'intent-atk';const dmgLabel=it.dmg?' '+it.dmg:'';intentBadge='<span class="intent-badge '+intentCls+'">'+(it.ic||'')+dmgLabel+'</span>';}
 const acBadge=type==='enemy'&&e.ac?`<span class="ac-badge">🛡${e.ac}</span>`:'';return`<div class="entity ${type}${activeClass}${deadClass}${hpStateClass}" role="group" aria-label="${escHtml(e.n)}"${dataAttr}>
         <div class="entity-header">
-            <span class="entity-icon${e.img ? ' entity-thumb' : ''}">${e.img ? '<img src="' + escHtml(e.img) + '" loading="lazy" onerror="this.parentNode.textContent=this.dataset.fb" data-fb="' + (e.ico || (type === 'enemy' ? '👹' : '🛡️')) + '">' : (e.ico || (type === 'enemy' ? '👹' : '🛡️'))}</span>
+            <span class="entity-icon${e.img ? ' entity-thumb' : ''}">${e.img ? '<img src="' + escHtml(e.img) + '" loading="lazy" onerror="this.parentNode.textContent=this.dataset.fb" data-fb="' + escHtml(e.ico || (type === 'enemy' ? '👹' : '🛡️')) + '">' : (e.ico || (type === 'enemy' ? '👹' : '🛡️'))}</span>
             <span class="compact-name">${escHtml(e.n)}</span>
             ${acBadge}
             <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
