@@ -8,7 +8,7 @@
 
 var _RETRY_DELAYS = [2000, 4000, 6000, 8000, 8000, 8000];
 var _BG_INTERVAL = 15000;
-// bg polling has NO max — continues indefinitely until server responds
+var _BG_MAX = 48; // ~12 minutes max bg polling before giving up
 
 var _el, _statusEl, _detailEl, _fillEl, _retryBtn, _closeBtn;
 var _retryIdx = 0;
@@ -111,7 +111,16 @@ function _checkHealth() {
         }
         if (_bgTimer) {
             _bgCount++;
-            _log('bg poll ' + _bgCount + ' failed');
+            _log('bg poll ' + _bgCount + '/' + _BG_MAX + ' failed');
+            if (_bgCount >= _BG_MAX) {
+                _log('bg polling gave up after ' + _bgCount + ' attempts (~' + Math.round(_bgCount * _BG_INTERVAL / 60000) + 'min)');
+                _clearTimers();
+                _statusEl.textContent = 'Servidor indisponível';
+                _detailEl.textContent = 'Não foi possível reconectar. Feche e reabra o jogo.';
+                _retryBtn.classList.remove('visible');
+                _closeBtn.classList.add('visible');
+                return;
+            }
             if (_bgCount <= 4) {
                 _detailEl.textContent = 'Aguardando servidor... (tentativa ' + _bgCount + ')';
             } else {
