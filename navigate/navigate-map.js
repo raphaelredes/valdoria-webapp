@@ -21,104 +21,25 @@ var GOLD = '#c4953a';          // Gold accent (current loc, highlights)
 var FOG_STIPPLE = 'rgba(58, 40, 16, 0.04)';  // Fine dots on fog texture
 var FOG_HATCH = 'rgba(58, 40, 16, 0.03)';    // Crosshatch lines on fog
 
-// Parchment paper outline (roughly rectangular with worn/torn edges)
+// Full-canvas bounds — infinite map (no parchment border)
 var LANDMASS_POINTS = (() => {
-    const m = 18;
     const w = 733, h = 720;
-    const pts = [];
-    const N = 28; // more points = more detailed irregular edge
-
-    // Generate base rectangle points
-    for (let i = 0; i <= N; i++) pts.push([m + (i / N) * (w - 2 * m), m]); // Top
-    for (let i = 1; i <= N; i++) pts.push([w - m, m + (i / N) * (h - 2 * m)]); // Right
-    for (let i = 1; i <= N; i++) pts.push([w - m - (i / N) * (w - 2 * m), h - m]); // Bottom
-    for (let i = 1; i < N; i++) pts.push([m, h - m - (i / N) * (h - 2 * m)]); // Left
-
-    return pts.map(([x, y], i) => {
-        const s1 = srand(i * 17 + 3), s2 = srand(i * 23 + 7), s3 = srand(i * 31 + 11);
-        const s4 = srand(i * 43 + 19), s5 = srand(i * 53 + 29);
-        const isTop = y <= m + 5, isBot = y >= h - m - 5;
-        const isLeft = x <= m + 5, isRight = x >= w - m - 5;
-        const isHoriz = isTop || isBot;
-
-        // Multi-frequency wobble (small + medium irregularity)
-        let wx = (s1 - 0.5) * 6 + (s4 - 0.5) * 4;
-        let wy = (s2 - 0.5) * 6 + (s5 - 0.5) * 4;
-
-        // Deep tears/bites — 18% of edge points (was 10%)
-        if (s3 > 0.82) {
-            const tearDepth = 10 + s2 * 18; // deeper tears (10-28px)
-            if (isHoriz) wy += (isTop ? 1 : -1) * tearDepth;
-            else wx += (isLeft ? 1 : -1) * tearDepth;
-        }
-        // Medium notches — another 15% of points
-        else if (s3 > 0.67) {
-            const notch = 5 + s1 * 8;
-            if (isHoriz) wy += (isTop ? 1 : -1) * notch;
-            else wx += (isLeft ? 1 : -1) * notch;
-        }
-
-        // Corners: dramatic wear (large rounded bites)
-        const corners = [
-            [m, m], [w - m, m], [m, h - m], [w - m, h - m]
-        ];
-        for (const [cx, cy] of corners) {
-            const dx = x - cx, dy = y - cy;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 70) {
-                const pull = (1 - dist / 70) * (10 + s3 * 18);
-                wx += (cx < w / 2 ? pull : -pull);
-                wy += (cy < h / 2 ? pull : -pull);
-            }
-        }
-        return [x + wx, y + wy];
-    });
+    // Simple rectangle covering the entire canvas (no margin, no wobble)
+    return [[0,0],[w,0],[w,h],[0,h]];
 })();
 
-// Cache: landmass path string is deterministic and called 4+ times per render
+// Cache: landmass path string — full canvas rectangle (infinite map)
 var _cachedLandmassPath = null;
 function _landmassPath() {
     if (_cachedLandmassPath) return _cachedLandmassPath;
     const p = LANDMASS_POINTS;
-    let d = `M${p[0][0]},${p[0][1]}`;
-    for (let i = 1; i < p.length; i++) {
-        const prev = p[(i - 1 + p.length) % p.length];
-        const curr = p[i];
-        const next = p[(i + 1) % p.length];
-        const cpx1 = prev[0] + (curr[0] - p[(i - 2 + p.length) % p.length][0]) * 0.2;
-        const cpy1 = prev[1] + (curr[1] - p[(i - 2 + p.length) % p.length][1]) * 0.2;
-        const cpx2 = curr[0] - (next[0] - prev[0]) * 0.2;
-        const cpy2 = curr[1] - (next[1] - prev[1]) * 0.2;
-        d += ` C${cpx1},${cpy1} ${cpx2},${cpy2} ${curr[0]},${curr[1]}`;
-    }
-    d += ' Z';
-    _cachedLandmassPath = d;
-    return d;
+    _cachedLandmassPath = `M${p[0][0]},${p[0][1]} L${p[1][0]},${p[1][1]} L${p[2][0]},${p[2][1]} L${p[3][0]},${p[3][1]} Z`;
+    return _cachedLandmassPath;
 }
 
-// Grid-based cache for _pointInLandmass — avoids repeated ray-cast over 112 polygon vertices.
-// Grid cells are 10px wide; each cell is tested once and cached.
-var _landmassGrid = new Map();
-
+// Infinite map: every point is inside the landmass (full canvas)
 function _pointInLandmass(px, py) {
-    // Quantize to 10px grid for cache lookup
-    const key = (Math.floor(px / 10) << 16) | (Math.floor(py / 10) & 0xFFFF);
-    const cached = _landmassGrid.get(key);
-    if (cached !== undefined) return cached;
-    const result = _pointInLandmassRaw(px, py);
-    _landmassGrid.set(key, result);
-    return result;
-}
-
-function _pointInLandmassRaw(px, py) {
-    const pts = LANDMASS_POINTS;
-    let inside = false;
-    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
-        const [xi, yi] = pts[i], [xj, yj] = pts[j];
-        if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi)
-            inside = !inside;
-    }
-    return inside;
+    return px >= 0 && px <= 733 && py >= 0 && py <= 720;
 }
 
 // River paths

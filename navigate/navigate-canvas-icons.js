@@ -361,9 +361,9 @@ function _cvDrawMarkers(ctx, fogState) {
 
         // Platform backing for explored/current markers (pops against busy PNG bg)
         if (isExp || isCurr) {
-            _cvCircle(ctx, x, y, 16, 'rgba(30,24,18,0.55)', 1, null, 0, 0);
+            _cvCircle(ctx, x, y, 16, 'rgba(20,16,12,0.82)', 1, null, 0, 0);
             if (_cvDetail >= 1) {
-                _cvCircle(ctx, x, y, 16, null, 0, CVI_GOLD, 0.6, 0.08);
+                _cvCircle(ctx, x, y, 16, null, 0, CVI_GOLD, 0.6, 0.12);
             }
         }
 
