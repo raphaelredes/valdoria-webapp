@@ -133,7 +133,7 @@ body {
 .hp-bar {
     width: 56px;
     height: var(--v-bar-height-sm, 6px);
-    background: #1e1a16; /* HARDCODED: deepest dark, no token equivalent */
+    background: var(--v-bg-deep, #1e1a16); /* HARDCODED: deepest dark, no token equivalent */
     border-radius: var(--v-radius-xs);
     overflow: hidden;
     border: 1px solid var(--v-bg-card-hover);
@@ -263,7 +263,7 @@ body {
     flex: 1;
     overflow: hidden;
     position: relative;
-    background: #1e1a16; /* HARDCODED: deepest dark, no token equivalent */
+    background: var(--v-bg-deep, #1e1a16); /* HARDCODED: deepest dark, no token equivalent */
     background-image: linear-gradient(180deg, rgba(30,26,22,0.4) 0%, transparent 6%, transparent 94%, rgba(30,26,22,0.4) 100%);
     z-index: var(--ez-base);
 }
@@ -462,8 +462,8 @@ body {
 
 .float-btn {
     position: fixed;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid var(--v-gold-30);
     background: rgba(42,36,32,0.92);
@@ -490,8 +490,8 @@ body {
     bottom: 92px;
     right: var(--v-space-md);
     z-index: var(--ez-float);
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border: 1px solid var(--v-gold-30);
     border-radius: 50%;
     background: rgba(42,36,32,0.85);
