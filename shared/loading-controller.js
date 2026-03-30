@@ -81,8 +81,9 @@ window.ValdoriaLoadingController = function(config) {
     }
 
     _timers.progress = setInterval(function() {
-        if (_realProgress >= 0) return;
-        _progress += (90 - _progress) * 0.08;
+        var ceil = (_realProgress >= 0) ? Math.min(_realProgress + 15, 90) : 90;
+        if (_progress >= ceil) return;
+        _progress += (ceil - _progress) * 0.08;
         if (progressEl) { progressEl.style.width = _progress + '%'; progressEl.setAttribute('aria-valuenow', Math.round(_progress)); }
         if (HAS_RING_ACCEL) _updateRingSpeed(_progress);
         if (HAS_GEM_PHASE) _updateGemPhase(_progress);
@@ -315,8 +316,9 @@ window.ValdoriaLoadingController = function(config) {
                 if (circle) circle.removeAttribute('data-phase');
             }
             _timers.progress = setInterval(function() {
-                if (_realProgress >= 0) return;
-                _progress += (90 - _progress) * 0.08;
+                var ceil = (_realProgress >= 0) ? Math.min(_realProgress + 15, 90) : 90;
+                if (_progress >= ceil) return;
+                _progress += (ceil - _progress) * 0.08;
                 if (progressEl) { progressEl.style.width = _progress + '%'; progressEl.setAttribute('aria-valuenow', Math.round(_progress)); }
                 if (HAS_RING_ACCEL) _updateRingSpeed(_progress);
                 if (HAS_GEM_PHASE) _updateGemPhase(_progress);
