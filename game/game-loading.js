@@ -88,15 +88,23 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             tipInterval: 5000,
             timeoutMs: (typeof LOADING_TIMEOUT_MS !== 'undefined') ? LOADING_TIMEOUT_MS : 15000,
             retryDelayMs: 10000,
-            autoRetryMax: 0,
+            autoRetryMax: 1,
             hasRingAccel: true,
             hasGemPhase: true,
             onRetry: function() {
-                console.warn('[GAME-LOADING] onRetry: manual reload');
-                window.location.reload();
+                console.warn('[GAME-LOADING] onRetry: attempting recovery');
+                if (typeof window._retryHealthAndStart === 'function') {
+                    window._retryHealthAndStart();
+                } else {
+                    window.location.reload();
+                }
             },
             onTimeout: function() {
                 console.error('[GAME] Loading timeout \u2014 server did not respond in time');
+                if (typeof forceHideLoading === 'function') forceHideLoading();
+                if (typeof showError === 'function') {
+                    showError('O servidor não respondeu a tempo. Estamos tentando reconectar!');
+                }
             },
         });
         return _ctrl;

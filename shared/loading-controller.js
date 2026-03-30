@@ -160,6 +160,11 @@ window.ValdoriaLoadingController = function(config) {
             if (_gem) _gem.classList.add('gem-error');
         }
         if (typeof onTimeout === 'function') onTimeout();
+        else {
+            // Safety net: show actionable error when no onTimeout handler provided
+            if (tipEl) tipEl.textContent = '⚠️ Servidor indisponível. Toque para tentar novamente.';
+            if (retryBtn) retryBtn.style.display = '';
+        }
     }
 
     function _updateRingSpeed(pct) {
