@@ -174,7 +174,7 @@
     <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
 
     <!-- Activity Selection Overlay (D&D PHB Ch.8) -->
-    <div class="activity-overlay" id="activity-overlay">
+    <div class="activity-overlay" id="activity-overlay" role="dialog" aria-label="Atividade de viagem">
         <div class="dm-card">
             <div class="activity-header">
                 <span class="activity-header-icon">⚔️</span>
@@ -205,7 +205,7 @@
     </div>
 
     <!-- Stat Check Overlay -->
-    <div class="check-overlay" id="check-overlay">
+    <div class="check-overlay" id="check-overlay" role="dialog" aria-label="Teste de habilidade">
         <div class="dice3d-wrapper" id="dice3d-wrapper">
             <div class="dice3d-particles" id="dice3d-particles"></div>
             <div class="dice3d-canvas" id="dice3d-canvas"></div>
@@ -216,7 +216,7 @@
     </div>
 
     <!-- Outcome Overlay -->
-    <div class="outcome-overlay" id="outcome-overlay">
+    <div class="outcome-overlay" id="outcome-overlay" role="dialog" aria-label="Resultado do evento">
         <div class="dm-card">
             <div class="outcome-text" id="outcome-text"></div>
             <div class="outcome-rewards" id="outcome-rewards"></div>
@@ -225,7 +225,7 @@
     </div>
 
     <!-- Combat Warning Overlay -->
-    <div class="combat-overlay" id="combat-overlay">
+    <div class="combat-overlay" id="combat-overlay" role="dialog" aria-label="Combate">
         <div class="combat-icon" id="combat-icon"></div>
         <div class="combat-enemy" id="combat-enemy"></div>
         <div class="combat-text" id="combat-text"></div>
@@ -233,7 +233,7 @@
     </div>
 
     <!-- Portal Overlay (exit transition) -->
-    <div class="portal-overlay" id="portal-overlay">
+    <div class="portal-overlay" id="portal-overlay" role="dialog" aria-label="Portal de saída">
         <div class="portal-icon"></div>
         <div class="portal-title">EXPLORAÇÃO CONCLUÍDA</div>
         <div class="portal-summary" id="portal-summary"></div>
@@ -241,7 +241,7 @@
     </div>
 
     <!-- Random Encounter Overlay -->
-    <div class="encounter-overlay" id="encounter-overlay">
+    <div class="encounter-overlay" id="encounter-overlay" role="dialog" aria-label="Encontro">
         <div class="dm-card">
             <div class="dm-header">
                 <span class="dm-icon" id="enc-icon"></span>
@@ -257,7 +257,7 @@
     </div>
 
     <!-- Exit Risk Assessment Overlay -->
-    <div class="exit-risk-overlay" id="exit-risk-overlay">
+    <div class="exit-risk-overlay" id="exit-risk-overlay" role="dialog" aria-label="Risco de saída">
         <div class="dm-card">
             <div class="exit-risk-header">
                 <span class="exit-risk-icon"></span>
@@ -270,7 +270,7 @@
     </div>
 
     <!-- Camp Overlay (food selection) -->
-    <div class="camp-overlay" id="camp-overlay">
+    <div class="camp-overlay" id="camp-overlay" role="dialog" aria-label="Acampamento">
         <div class="dm-card">
             <div class="dm-header">
                 <span class="dm-icon"></span>
@@ -286,7 +286,7 @@
     </div>
 
     <!-- Heal Dice Overlay (3D animation for potion/consumable healing) -->
-    <div class="camp-dice-overlay" id="heal-dice-overlay">
+    <div class="camp-dice-overlay" id="heal-dice-overlay" role="dialog" aria-label="Dado de cura">
         <div class="dm-card camp-dice-card">
             <div class="camp-dice-title" id="heal-dice-title"></div>
             <div class="dice3d-canvas camp-dice-canvas" id="heal-dice-canvas"></div>
@@ -296,7 +296,7 @@
     </div>
 
     <!-- Camp Dice Roll Overlay (3D d8 animation before result) -->
-    <div class="camp-dice-overlay" id="camp-dice-overlay">
+    <div class="camp-dice-overlay" id="camp-dice-overlay" role="dialog" aria-label="Dado de acampamento">
         <div class="dm-card camp-dice-card">
             <div class="camp-dice-title">DESCANSO</div>
             <div class="dice3d-canvas camp-dice-canvas" id="camp-dice-canvas"></div>
@@ -305,7 +305,7 @@
     </div>
 
     <!-- Camp Result Overlay -->
-    <div class="camp-result-overlay" id="camp-result-overlay">
+    <div class="camp-result-overlay" id="camp-result-overlay" role="dialog" aria-label="Resultado do descanso">
         <div class="dm-card">
             <div class="camp-result-icon"></div>
             <div class="camp-result-text" id="camp-result-text"></div>
@@ -315,7 +315,7 @@
     </div>
 
     <!-- Low HP Alert Overlay -->
-    <div class="lowhp-overlay" id="lowhp-overlay">
+    <div class="lowhp-overlay" id="lowhp-overlay" role="dialog" aria-label="Vida baixa">
         <div class="dm-card">
             <div class="lowhp-header">
                 <span class="lowhp-icon"></span>
@@ -329,7 +329,7 @@
     </div>
 
     <!-- Return Journey Overlay -->
-    <div class="return-journey-overlay" id="return-journey-overlay">
+    <div class="return-journey-overlay" id="return-journey-overlay" role="dialog" aria-label="Jornada de retorno">
         <div class="dm-card return-journey-card">
             <div class="return-journey-header">
                 <span class="return-journey-icon" id="return-journey-icon"></span>
@@ -352,7 +352,7 @@
     </div>
 
     <!-- Death Overlay -->
-    <div class="death-overlay" id="death-overlay">
+    <div class="death-overlay" id="death-overlay" role="dialog" aria-label="Morte">
         <div class="death-icon"></div>
         <div class="death-title">DERROTADO</div>
         <div class="death-summary" id="death-summary"></div>

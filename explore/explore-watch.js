@@ -492,6 +492,7 @@ function updateFogLevels() {
   /* Ensure current area is visible */
   if (typeof revealFogAt === 'function') {
     revealFogAt(S.playerCol, S.playerRow, effectiveVis, S.fogState, S.grid, false);
+    if (typeof invalidateStatic === 'function') invalidateStatic();
   }
 }
 
