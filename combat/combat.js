@@ -116,7 +116,7 @@ catch(e){console.warn('[COMBAT] Dice3D init failed:',e);}}
 heroBtn.addEventListener('click',()=>{_animateInitiativeHero();});}
 bindActions(s);if(typeof _bindBattlefieldActions==='function')_bindBattlefieldActions();if(isOverlayOpen()){document.querySelectorAll('.skill-overlay, .target-overlay, .item-overlay').forEach(o=>o.classList.remove('active'));}
 bindExpandCollapse();bindFeedToggle();bindFeedDetail();_scrollTimelineToActive();const _feed=document.getElementById('combatFeed');if(_feed)_feed.scrollTop=_feed.scrollHeight;_animateHpBars(s);_checkPlayerDamage(s);_checkStatusChanges(s);if(activeTurn&&ph!=='init'&&ph!=='intro'){if(activeTurn.t!=='p'){const activeEl=document.querySelector('.entity.active-turn');if(activeEl&&!activeEl.classList.contains('dead'))activeEl.classList.add('expanded');}}
-if(ph==='active'&&s.timer>0){startTimer(s.timer);}else{stopTimer();}
+if(ph==='active'&&s.timer>0&&(!activeTurn||activeTurn.t==='p')){startTimer(s.timer);}else{stopTimer();}
 if(isApiMode&&(ph==='active'||ph==='init'||ph==='intro')){startPolling();}else{stopPolling();}}
 function renderTimerBar(s){if(!s.timer||s.timer<=0)return'';return`<div class="turn-timer">
         <div class="timer-bar" id="timerBar" style="width:100%"></div>
