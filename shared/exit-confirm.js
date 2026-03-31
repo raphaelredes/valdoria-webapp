@@ -4,9 +4,12 @@ if(!api&&typeof apiBase!=='undefined')api=apiBase;if(!tk&&typeof token!=='undefi
 function _show(){_ensureDOM();_overlay.style.display='';_popupVisible=true;if(window.vHaptic)vHaptic.medium();if(window.SessionHeartbeat){_savedHeartbeatCfg=_resolveHeartbeatCfg();SessionHeartbeat.stop();}}
 function _hide(){if(!_overlay)return;_overlay.style.display='none';_popupVisible=false;if(window.SessionHeartbeat&&_savedHeartbeatCfg){try{SessionHeartbeat.init(_savedHeartbeatCfg);}catch(e){console.warn('[EXIT-CONFIRM] Heartbeat reinit failed:',e);}
 _savedHeartbeatCfg=null;}}
-function _doExit(){if(window.__valdoriaExitAction){try{window.__valdoriaExitAction();}catch(e){console.warn('[EXIT-CONFIRM] custom exit failed:',e);}
+function _doExit(){var _exitAttempted=false;function _forceClose(){if(_exitAttempted)return;_exitAttempted=true;console.warn('[EXIT-CONFIRM] forceClose fallback');window.__valdoria_transitioning=true;var _tg=window.Telegram&&Telegram.WebApp;if(_tg&&_tg.close){try{_tg.close();}catch(e){console.warn('[EXIT-CONFIRM] tg.close fallback:',e);}}
+try{window.close();}catch(e){}
+try{if(_tg&&_tg.sendData){_tg.sendData(JSON.stringify({action:'webapp_error_close',webapp:'GAME'}));}}catch(e){}}
+setTimeout(_forceClose,3000);if(window.__valdoriaExitAction){try{var result=window.__valdoriaExitAction();if(result&&typeof result.then==='function'){result.then(function(){_exitAttempted=true;}).catch(function(e){console.warn('[EXIT-CONFIRM] custom exit rejected:',e);_forceClose();});}else{setTimeout(function(){_forceClose();},500);}}catch(e){console.warn('[EXIT-CONFIRM] custom exit failed:',e);_forceClose();}
 return;}
-if(tg){try{tg.close();}catch(e){console.warn('[EXIT-CONFIRM] tg.close:',e);}}}
+if(tg){try{tg.close();}catch(e){console.warn('[EXIT-CONFIRM] tg.close:',e);_forceClose();}}else{_forceClose();}}
 function showExitConfirm(){if(window.__valdoriaExitBypass){_doExit();return;}
 if(_popupVisible){_hide();return;}
 _show();}
