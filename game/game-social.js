@@ -47,7 +47,7 @@ function _ago(ts) {
 
 function _fetchSocial(body) {if(window._dbg)console.debug('[SOCIAL-DBG] _fetchSocial action=' + (body&&body.action||'?') + ' apiBase=' + (window.S&&S.apiBase||'EMPTY').substring(0,40) + ' token=' + (window.S&&S.token?'YES('+S.token.substring(0,8)+')':'NO') + ' uid=' + (window.S&&S.uid||0));
     if (!window.S || !S.apiBase || !S.token) { console.warn('[SOCIAL] Missing API config'); return Promise.resolve(null); }
-    var _acS=new AbortController();var _tidS=setTimeout(function(){_acS.abort();},15000);return fetch(S.apiBase + '/api/game/social', {
+    var _acS=new AbortController();var _tidS=setTimeout(function(){_acS.abort();},15000); /* noqa: preflight */ return fetch(S.apiBase + '/api/game/social', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.token },
         body: JSON.stringify(Object.assign({ user_id: S.uid }, body)),

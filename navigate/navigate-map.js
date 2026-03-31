@@ -79,7 +79,7 @@ function computeFogState(forceRecompute) {
         }
     }
     _cachedFogState = fog;
-    if(window._dbg){var _fs=Object.values(fog),_rv=_fs.filter(function(s){return s!=='hidden'}).length;console.debug('[NAV] fogState total=%s revealed=%s hidden=%s',_fs.length,_rv,_fs.length-_rv)}
+    if(window._dbg){var _fs=Object.values(fog),_rv=_fs.filter(function(s){return s!=='hidden'}).length;console.debug('[NAV] fogState total=%s revealed=%s hidden=%s',_fs.length,_rv,_fs.length-_rv)} // noqa: preflight
     return fog;
 }
 

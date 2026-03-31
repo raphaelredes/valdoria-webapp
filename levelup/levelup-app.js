@@ -208,13 +208,15 @@ return result;
 function _showValidation(msg) {
 console.warn('[LEVELUP]', msg);
 hapticNotify('error');
+var _words = msg.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length;
+var _dur = Math.max(2000, Math.min(5000, _words * 250));
 if (window.ValdoriaErrors) {
-ValdoriaErrors.showToast(msg, 3000);
+ValdoriaErrors.showToast(msg, _dur);
 } else {
 const t = document.getElementById('toast');
 t.textContent = msg;
 t.classList.add('show');
-setTimeout(() => t.classList.remove('show'), 3000);
+setTimeout(() => t.classList.remove('show'), _dur);
 }
 }
 function showFatalError(msg, err = null) {
