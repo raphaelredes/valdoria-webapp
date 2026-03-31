@@ -236,6 +236,7 @@ function checkNavigation(targetCol, targetRow) {
 
   /* Roll WIS (Survival) */
   var wisMod = 0;
+  if(!S.charData?.ab)console.warn('[EXPLORE] navCheck: charData.ab missing');
   if (S.charData && S.charData.ab) {
     wisMod = Math.floor(((S.charData.ab.wis || 10) - 10) / 2);
   }

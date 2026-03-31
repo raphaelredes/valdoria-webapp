@@ -4,7 +4,7 @@ function _seName(s){return typeof s==='object'?s.n:(STATUS_PT[s]||s);}
 function _seIsBuff(s){return typeof s==='object'?(s.cat==='buff'):STATUS_BUFFS.has(s);}
 function _seDcLabel(s){if(typeof s!=='object'||!s.dc||!s.sa)return '';var saShort={'strength':'FOR','dexterity':'DES','constitution':'CON','intelligence':'INT','wisdom':'SAB','charisma':'CAR'};return ' CD'+s.dc+(saShort[s.sa]||'');}
 function announce(msg){var el=document.getElementById('combatAnnouncer');if(el){el.textContent='';setTimeout(function(){el.textContent=msg;},50);}}
-function renderEntity(e,type,idx,isActiveTurn){const pct=e.mhp>0?(e.hp/e.mhp):0;const hpClass=pct>0.60?'hp-high':pct>0.25?'hp-mid':'hp-low';let statusIcons='';if(e.se&&e.se.length>0){if(e.se.length>3){statusIcons=e.se.slice(0,3).map(s=>_seIcon(s)).join('')+`<span class="status-overflow">+${e.se.length - 3}</span>`;}else{statusIcons=e.se.map(s=>_seIcon(s)).join('');}}
+function renderEntity(e,type,idx,isActiveTurn){var _rawPct=e.mhp>0?(e.hp/e.mhp):0;if(_rawPct>1||_rawPct<0)console.warn('[COMBAT] bar_overflow',{name:e.n,rawPct:_rawPct});const pct=Math.min(1,Math.max(0,_rawPct));const hpClass=pct>0.60?'hp-high':pct>0.25?'hp-mid':'hp-low';let statusIcons='';if(e.se&&e.se.length>0){if(e.se.length>3){statusIcons=e.se.slice(0,3).map(s=>_seIcon(s)).join('')+`<span class="status-overflow">+${e.se.length - 3}</span>`;}else{statusIcons=e.se.map(s=>_seIcon(s)).join('');}}
 let detailsHtml='';if(type==='enemy'){const atkLabel=ATK_TYPE_LABELS[e.at]||e.at||'';const dmgIcon=DMG_ICONS[e.dt]||'';detailsHtml+=`<div class="bar-container">
             <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
             <div class="bar-track"><div class="bar-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
@@ -18,7 +18,7 @@ if(e.se&&e.se.length>0){detailsHtml+='<div class="status-pills">'+e.se.map(s=>`<
 if(e.img&&typeof showImagePopup==='function'){detailsHtml+='<button class="entity-view-btn" data-img="'+escHtml(e.img)+'" data-name="'+escHtml(e.n)+'" data-desc="'+escHtml(e.desc||'')+'" data-ac="'+(e.ac||'')+'" data-atk="'+(e.atk||'')+'" data-dmg="'+escHtml(e.dmg||'')+'">🔍 Ver Criatura</button>';}}else{detailsHtml+=`<div class="bar-container">
             <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
             <div class="bar-track"><div class="bar-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
-        </div>`;if(e.mmp>0){const mpPct=e.mmp>0?(e.mp/e.mmp):0;detailsHtml+=`<div class="bar-container">
+        </div>`;if(e.mmp>0){var _rawMpPct=e.mmp>0?(e.mp/e.mmp):0;if(_rawMpPct>1||_rawMpPct<0)console.warn('[COMBAT] bar_overflow',{name:e.n,rawPct:_rawMpPct,bar:'mp'});const mpPct=Math.min(1,Math.max(0,_rawMpPct));detailsHtml+=`<div class="bar-container">
                 <div class="bar-label"><span>💧 MP</span><span>${e.mp}/${e.mmp}</span></div>
                 <div class="bar-track"><div class="bar-fill mp-bar" style="transform:scaleX(${mpPct})"></div></div>
             </div>`;}
@@ -41,7 +41,7 @@ const acBadge=type==='enemy'&&e.ac?`<span class="ac-badge">🛡${e.ac}</span>`:'
         </div>
         <div class="entity-details">${detailsHtml}</div>
     </div>`;}
-function renderPlayerCard(p,isCompact=false){const hpPct=p.mhp>0?(p.hp/p.mhp):0;const hpClass=hpPct>0.60?'hp-high':hpPct>0.25?'hp-mid':'hp-low';const mpPct=p.mmp>0?(p.mp/p.mmp):0;const resClass=RES_CLASS_MAP[p.res]||'mp';const resIcon=RES_ICON_MAP[p.res]||'💧';const resLowCls=mpPct<=0.10&&mpPct>0?' res-critical':mpPct<=0.25&&mpPct>0?' res-low':'';const badges=[];if(p.se&&p.se.length>0){p.se.forEach(s=>badges.push(`<span class="mini-badge status${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}</span>`));}
+function renderPlayerCard(p,isCompact=false){var _rawHpPct=p.mhp>0?(p.hp/p.mhp):0;if(_rawHpPct>1||_rawHpPct<0)console.warn('[COMBAT] bar_overflow',{name:p.n,rawPct:_rawHpPct,bar:'hp'});const hpPct=Math.min(1,Math.max(0,_rawHpPct));const hpClass=hpPct>0.60?'hp-high':hpPct>0.25?'hp-mid':'hp-low';var _rawMpPct2=p.mmp>0?(p.mp/p.mmp):0;if(_rawMpPct2>1||_rawMpPct2<0)console.warn('[COMBAT] bar_overflow',{name:p.n,rawPct:_rawMpPct2,bar:'mp'});const mpPct=Math.min(1,Math.max(0,_rawMpPct2));const resClass=RES_CLASS_MAP[p.res]||'mp';const resIcon=RES_ICON_MAP[p.res]||'💧';const resLowCls=mpPct<=0.10&&mpPct>0?' res-critical':mpPct<=0.25&&mpPct>0?' res-low':'';const badges=[];if(p.se&&p.se.length>0){p.se.forEach(s=>badges.push(`<span class="mini-badge status${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}</span>`));}
 if(p.cov){badges.push(`<span class="mini-badge cover">${p.cov.ico} +${p.cov.ac} CA</span>`);}
 if(p.conc){badges.push(`<span class="mini-badge conc">🔮 ${escHtml(p.conc)}</span>`);}
 const badgesHtml=badges.length>0?`<div class="player-badge-row">${badges.join('')}</div>`:'';const concClass=p.conc?' concentrating':'';const dangerClass=hpPct<=0.25&&hpPct>0?' hp-danger':'';return`<div class="entity player${concClass}${dangerClass}">
