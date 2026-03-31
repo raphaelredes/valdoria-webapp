@@ -1,4 +1,6 @@
-function _playCinematicResult(result,actionType){const isResolution=result.phase==='victory'||result.phase==='defeat'||result.phase==='ended'||result.phase==='fled';const hasRoll=result.lr&&(result.lr.r||result.lr.d||result.lr.t==='death_save');const isNonCombatAction=actionType==='initiative'||actionType==='proceed'||actionType==='restore';const oldPhase=currentState?.ph||currentState?.phase||'';if(!hasRoll||isNonCombatAction||oldPhase!=='active'){currentState=result;if(result.phase==='ended'){showCombatEnded();}
+function _playCinematicResult(result,actionType){/* Use player's action roll (plr) for cinematic when available — _last_roll
+gets overwritten by enemy turns that happen in the same turn cycle */if(result.plr){result.lr=result.plr;delete result.plr;}
+const isResolution=result.phase==='victory'||result.phase==='defeat'||result.phase==='ended'||result.phase==='fled';const hasRoll=result.lr&&(result.lr.r||result.lr.d||result.lr.t==='death_save');const isNonCombatAction=actionType==='initiative'||actionType==='proceed'||actionType==='restore';const oldPhase=currentState?.ph||currentState?.phase||'';if(!hasRoll||isNonCombatAction||oldPhase!=='active'){currentState=result;if(result.phase==='ended'){showCombatEnded();}
 else if(isResolution){if(result.phase==='defeat'&&result.ds_history&&result.ds_history.length>0){renderDeathSaveReplay(result,function(){renderResolution(result);});}else{renderResolution(result);}}
 else{renderArena(result);}
 return;}
