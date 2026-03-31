@@ -14,8 +14,8 @@ var ValdoriaDice = (function () {
     /** Canvas size for solo d20 (attack, save, check) */
     var D20_SIZE = 220;
 
-    /** Canvas size for advantage/disadvantage (2d20 compact) */
-    var D20_ADV_SIZE = 140;
+    /** Canvas size for advantage/disadvantage (2d20 — must match CSS .multi width) */
+    var D20_ADV_SIZE = 260;
 
     /** Standardized animation timing (ms) */
     var TIMING = {

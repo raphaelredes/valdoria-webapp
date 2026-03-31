@@ -73,18 +73,18 @@ function show(opts) {
     void _overlayEl.offsetWidth;
     _overlayEl.classList.add('active');
 
-    // Slow connection warning at 4s
+    // Slow connection warning at 8s
     _timers.slow = setTimeout(function() {
         if (_textEl) {
             _textEl.textContent = 'Demorando um pouco...';
             _textEl.classList.add('v-processing-text--slow');
         }
-    }, 4000);
+    }, 8000);
 
-    // Retry button at 8s
+    // Retry button at 12s
     _timers.retry = setTimeout(function() {
         if (_retryEl && _onRetry) _retryEl.classList.add('visible');
-    }, 8000);
+    }, 12000);
 
     // Timeout at configured time — auto-hide if no callback
     _timers.timeout = setTimeout(function() {

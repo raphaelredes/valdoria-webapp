@@ -72,6 +72,7 @@ function handleLocationTap(locId) {
     closeQuickList();
 
     S.selectedLoc = locId;
+    console.info('[NAVIGATE] location_tap loc=%s known=%s', locId, S.knownLocs && S.knownLocs.includes(locId));
     const locData = S.locations[locId];
     if (!locData) {
         console.warn('[NAVIGATE] No data for location:', locId);
@@ -421,6 +422,7 @@ function createActionBtn(text, className, onClick) {
 // ── Close info panel ──
 function closeInfoPanel() {
     const panel = document.getElementById('info-panel');
+    if (!panel) return;
     panel.classList.remove('open');
     var _mv=document.getElementById('map-viewport');if(_mv)_mv.classList.remove('panel-open');
 
