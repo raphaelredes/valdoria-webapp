@@ -45,7 +45,7 @@ function _renderRankCol(occupants,label,side){
   }else{
     occupants.forEach(function(o){
       var pct=o.mhp>0?o.hp/o.mhp:0;
-      var hpCls=pct>0.6?'hp-high':pct>0.25?'hp-mid':'hp-low';
+      var hpCls=pct>THRESHOLDS.HP_HIGH?'hp-high':pct>THRESHOLDS.HP_LOW?'hp-mid':'hp-low';
       var deadCls=o.dead?' bf-token-dead':'';
       var typeCls=' bf-token-'+o.type;
       html+='<div class="bf-token'+typeCls+deadCls+'">';
