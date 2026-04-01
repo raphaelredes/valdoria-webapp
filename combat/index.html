@@ -64,17 +64,17 @@
 
     <canvas id="vfxCanvas"></canvas>
     <div id="app"></div>
+    <div id="diceNarration" class="dice-narration"></div>
     <div class="skill-overlay" id="skillOverlay">
         <div class="skill-panel" id="skillPanel"></div>
     </div>
     <div class="target-overlay" id="targetOverlay">
         <div class="target-panel" id="targetPanel"></div>
     </div>
-    <div class="skill-overlay" id="itemOverlay">
+    <div class="skill-overlay item-overlay" id="itemOverlay">
         <div class="skill-panel" id="itemPanel"></div>
     </div>
     <script>
-        var v = Date.now();
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-roller.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-utils.js?v=' + v + '"><\/script>');

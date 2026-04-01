@@ -83,6 +83,12 @@ function _buildPopupBody(data) {
     var el = document.createElement('div');
     el.className = 'unified-popup-body';
 
+    // Inn redesign: structured data renderer
+    if (data._inn_screen && typeof renderInnConfirm === 'function') {
+        renderInnConfirm(el, data._inn_screen);
+        return el;
+    }
+
     // Image banner (if present)
     if (data.image_url) {
         var img = document.createElement('img');
