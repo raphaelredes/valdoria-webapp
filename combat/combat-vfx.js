@@ -42,7 +42,7 @@ break;}}
 if(ent.key==='player'||ent.key.startsWith('a')){let cleansed=false;for(const s of prev){if(!curSet.has(_seKey(s))&&!_seIsBuff(s)){cleansed=true;break;}}
 if(cleansed){const el=document.querySelector(ent.sel);if(el){if(typeof vfx.cleanse==='function')vfx.cleanse(el);else vfx.heal(el);}}}
 _prevStatusState.set(ent.key,[...ent.se]);}
-const prevConc=_prevStatusState.get('_conc')||'';const curConc=state.p?.conc||'';if(prevConc&&!curConc){const pEl=document.querySelector('.entity.player');if(pEl)vfx.debuff(pEl);vfx.flash('rgba(160,60,200,0.3)',400);const spellName=prevConc.replace(/_/g,' ');showNarration('💔 Concentração quebrada: '+spellName+'!','miss');vHaptic.heavy();}
+const prevConc=_prevStatusState.get('_conc')||'';const curConc=state.p?.conc||'';if(prevConc&&!curConc){const pEl=document.querySelector('.cell[data-unit-id="player"]');if(pEl)vfx.debuff(pEl);vfx.flash('rgba(160,60,200,0.3)',400);const spellName=prevConc.replace(/_/g,' ');showNarration('💔 Concentração quebrada: '+spellName+'!','miss');vHaptic.heavy();}
 _prevStatusState.set('_conc',curConc);}
 function _showViewportFlash(){let flash=document.getElementById('viewportFlash');if(!flash){flash=document.createElement('div');flash.id='viewportFlash';flash.className='viewport-flash';document.body.appendChild(flash);}
 flash.classList.remove('active');void flash.offsetWidth;flash.classList.add('active');setTimeout(()=>flash.classList.remove('active'),ValdoriaMotion.duration(400,200));}
