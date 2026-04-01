@@ -1,0 +1,56 @@
+/* Valdoria Coin Icon — CSS medieval coin with "V" */
+/* Usage: <span class="vi vi-coin"></span> or .sm / .lg variants */
+
+.vi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.vi-coin {
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 40% 35%, #e8c44a, #c4953a 60%, #8a6a20 100%);
+  border-radius: 50%;
+  border: 1.5px solid #a07828;
+  box-shadow:
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 220, 120, 0.3);
+  position: relative;
+}
+
+.vi-coin::after {
+  content: 'V';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: bold;
+  color: #5a3a10;
+  font-family: var(--v-font, 'Georgia', serif);
+  text-shadow: 0 0.5px 0 rgba(255, 220, 120, 0.4);
+}
+
+/* Small — inline text, costs */
+.vi-coin.sm {
+  width: 12px;
+  height: 12px;
+  border-width: 1px;
+}
+.vi-coin.sm::after {
+  font-size: 7px;
+}
+
+/* Large — totals, highlights */
+.vi-coin.lg {
+  width: 18px;
+  height: 18px;
+  border-width: 2px;
+}
+.vi-coin.lg::after {
+  font-size: 10px;
+}
