@@ -84,7 +84,9 @@ function _buildPopupBody(data) {
     el.className = 'unified-popup-body';
 
     // Inn redesign: structured data renderer
+    console.warn('[INN_DEBUG] _buildPopupBody called, _inn_screen=', !!data._inn_screen, 'renderInnConfirm=', typeof renderInnConfirm, 'data keys=', Object.keys(data).join(','));
     if (data._inn_screen && typeof renderInnConfirm === 'function') {
+        console.warn('[INN_DEBUG] rendering inn screen type=', data._inn_screen.type);
         renderInnConfirm(el, data._inn_screen);
         return el;
     }
