@@ -111,21 +111,21 @@ window.ValdoriaLoadingController = function(config) {
     _timers.slow = setTimeout(function() {
         if (_state !== 'loading') return;
         _state = 'slow';
-        console.warn('[LOADING] state: loading->slow (8s)');
-        if(window._loadDbg)_loadDbg('state: loading->slow (8s)');
+        console.warn('[LOADING] state: loading->slow (12s)');
+        if(window._loadDbg)_loadDbg('state: loading->slow (12s)');
         if (tipEl) {
             tipEl.classList.add('loading-tip-slow');
             tipEl.textContent = 'Demorando um pouco mais que o esperado...';
         }
-    }, 8000);
+    }, 12000);
 
     _timers.verySlow = setTimeout(function() {
         if (_state !== 'slow' && _state !== 'loading') return;
         _state = 'very_slow';
-        console.warn('[LOADING] state: slow->very_slow (12s)');
-        if(window._loadDbg)_loadDbg('state: slow->very_slow (12s)');
+        console.warn('[LOADING] state: slow->very_slow (18s)');
+        if(window._loadDbg)_loadDbg('state: slow->very_slow (18s)');
         if (tipEl) tipEl.textContent = '\u23F3 Conex\u00e3o lenta \u2014 verifique seu sinal ou tente novamente';
-    }, 12000);
+    }, 18000);
 
     _timers.retry = setTimeout(function() {
         if (_state === 'hiding' || _state === 'hidden') return;
@@ -353,12 +353,12 @@ window.ValdoriaLoadingController = function(config) {
                     tipEl.classList.add('loading-tip-slow');
                     tipEl.textContent = 'Demorando um pouco mais que o esperado...';
                 }
-            }, 8000);
+            }, 12000);
             _timers.verySlow = setTimeout(function() {
                 if (_state !== 'slow' && _state !== 'loading') return;
                 _state = 'very_slow';
                 if (tipEl) tipEl.textContent = '\u23F3 Conex\u00e3o lenta \u2014 verifique seu sinal ou tente novamente';
-            }, 12000);
+            }, 18000);
             _timers.retry = setTimeout(function() {
                 if (_state === 'hiding' || _state === 'hidden') return;
                 if (retryBtn) retryBtn.style.display = '';
@@ -415,15 +415,15 @@ window.ValdoriaLoadingController = function(config) {
             _timers.slow = setTimeout(function() {
                 if (_state !== 'loading') return;
                 _state = 'slow';
-                if(window._loadDbg)_loadDbg('state: loading->slow (8s) [reset]');
+                if(window._loadDbg)_loadDbg('state: loading->slow (12s) [reset]');
                 if (tipEl) { tipEl.classList.add('loading-tip-slow'); tipEl.textContent = 'Demorando um pouco mais que o esperado...'; }
-            }, 8000);
+            }, 12000);
             _timers.verySlow = setTimeout(function() {
                 if (_state !== 'slow' && _state !== 'loading') return;
                 _state = 'very_slow';
-                if(window._loadDbg)_loadDbg('state: slow->very_slow (12s) [reset]');
+                if(window._loadDbg)_loadDbg('state: slow->very_slow (18s) [reset]');
                 if (tipEl) tipEl.textContent = '⏳ Conexão lenta — verifique seu sinal ou tente novamente';
-            }, 12000);
+            }, 18000);
             _timers.retry = setTimeout(function() {
                 if (_state === 'hiding' || _state === 'hidden') return;
                 if (retryBtn) retryBtn.style.display = '';
