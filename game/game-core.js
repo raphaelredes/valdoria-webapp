@@ -102,7 +102,7 @@ if(data.quest_detail&&typeof showQuestPopup==='function'){hideLocationTransition
 if(data.quest_abandon&&window.vPopup){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestAbandonPopup(data.quest_abandon);return;}
 if(data.quest_board&&typeof showQuestBoard==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();showQuestBoard(data.quest_board);return;}
 if(data.daily_challenge&&data.daily_challenge.state&&typeof _showDailyChallengePopup==="function"){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showDailyChallengePopup(data);return;}
-if(data.popup&&window.vPopup){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showGamePopup(data);return;}
+if(data.popup&&window.vPopup&&!data._is_popup){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showGamePopup(data);return;}
 if(data.settings_data&&typeof isSettingsPopupOpen==='function'&&isSettingsPopupOpen()){hideLocationTransition();if(window.actionGuard)actionGuard.release();var _stEl=document.getElementById('settings-popup-content');if(_stEl){_stEl.innerHTML='';if(typeof injectGameSettings==='function')injectGameSettings(_stEl,data.settings_data);if(typeof injectFontPicker==='function')injectFontPicker(_stEl);if(typeof injectAudioSettings==='function')injectAudioSettings(_stEl);}if(data.toast)showToast(data.toast);return;}
 /* === NON-LOCATION POPUP INTERCEPTORS === */
 if(data.skills_data&&typeof _showSkillsPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showSkillsPopup(data);return;}
