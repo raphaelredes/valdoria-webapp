@@ -5,98 +5,10 @@ function _seIsBuff(s){return typeof s==='object'?(s.cat==='buff'):STATUS_BUFFS.h
 function _seDcLabel(s){if(typeof s!=='object'||!s.dc||!s.sa)return '';var saShort={'strength':'FOR','dexterity':'DES','constitution':'CON','intelligence':'INT','wisdom':'SAB','charisma':'CAR'};return ' CD'+s.dc+(saShort[s.sa]||'');}
 function _seDur(s){if(typeof s==='object'&&s.dur&&s.dur>0)return ' <span class="se-dur">'+s.dur+'r</span>';return '';}
 function announce(msg){var el=document.getElementById('combatAnnouncer');if(el){el.textContent='';setTimeout(function(){el.textContent=msg;},50);}}
-function renderEntity(e,type,idx,isActiveTurn){var _rawPct=e.mhp>0?(e.hp/e.mhp):0;if(_rawPct>1||_rawPct<0)console.warn('[COMBAT] bar_overflow',{name:e.n,rawPct:_rawPct});const pct=Math.min(1,Math.max(0,_rawPct));const hpClass=pct>0.60?'hp-high':pct>0.25?'hp-mid':'hp-low';let statusIcons='';if(e.se&&e.se.length>0){if(e.se.length>3){statusIcons=e.se.slice(0,3).map(s=>_seIcon(s)).join('')+`<span class="status-overflow">+${e.se.length - 3}</span>`;}else{statusIcons=e.se.map(s=>_seIcon(s)).join('');}}
-let detailsHtml='';if(type==='enemy'){const atkLabel=ATK_TYPE_LABELS[e.at]||e.at||'';const dmgIcon=DMG_ICONS[e.dt]||'';detailsHtml+=`<div class="bar-container">
-            <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
-            <div class="bar-track"><div class="bar-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
-        </div>`;detailsHtml+=`<div class="stats-row">
-            <span class="stat-item">🛡️ CA ${e.ac}</span>
-            <span class="stat-item">⚔️ +${e.atk}</span>
-            <span class="stat-item">${dmgIcon} ${e.dmg}</span>
-            <span class="entity-badge-sm">${atkLabel}</span>
-        </div>`;if(e.leg){detailsHtml+='<div class="legendary-row">';detailsHtml+='<span>👑 Boss</span>';if(e.leg.lrm>0)detailsHtml+=`<span title="Anula falha em salvaguarda">⭐ Resist. Lend. ${e.leg.lr}/${e.leg.lrm}</span>`;if(e.leg.lam>0)detailsHtml+=`<span>⚡ Ações ${e.leg.la}/${e.leg.lam}</span>`;detailsHtml+='</div>';}
-if(e.se&&e.se.length>0){detailsHtml+='<div class="status-pills">'+e.se.map(s=>`<span class="status-pill${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}${_seDur(s)}</span>`).join('')+'</div>';}
-if(e.img&&typeof showImagePopup==='function'){detailsHtml+='<button class="entity-view-btn" data-img="'+escHtml(e.img)+'" data-name="'+escHtml(e.n)+'" data-desc="'+escHtml(e.desc||'')+'" data-ac="'+(e.ac||'')+'" data-atk="'+(e.atk||'')+'" data-dmg="'+escHtml(e.dmg||'')+'">🔍 Ver Criatura</button>';}}else{detailsHtml+=`<div class="bar-container">
-            <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
-            <div class="bar-track"><div class="bar-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
-        </div>`;if(e.mmp>0){var _rawMpPct=e.mmp>0?(e.mp/e.mmp):0;if(_rawMpPct>1||_rawMpPct<0)console.warn('[COMBAT] bar_overflow',{name:e.n,rawPct:_rawMpPct,bar:'mp'});const mpPct=Math.min(1,Math.max(0,_rawMpPct));detailsHtml+=`<div class="bar-container">
-                <div class="bar-label"><span>💧 MP</span><span>${e.mp}/${e.mmp}</span></div>
-                <div class="bar-track"><div class="bar-fill mp-bar" style="transform:scaleX(${mpPct})"></div></div>
-            </div>`;}
-const allyStats=[];if(e.ac)allyStats.push(`🛡️ CA ${e.ac}`);if(e.atk)allyStats.push(`⚔️ +${e.atk}`);if(e.dmg)allyStats.push(`🗡️ ${e.dmg}`);if(e.pot>0)allyStats.push(`🧪 ${e.pot}`);if(allyStats.length>0){detailsHtml+='<div class="stats-row">'+allyStats.map(s=>`<span class="stat-item">${s}</span>`).join('')+'</div>';}
-if(e.conc){detailsHtml+=`<div class="stats-row"><span class="stat-item conc-badge">🔮 Conc.: ${escHtml(e.conc)}</span></div>`;}
-if(e.se&&e.se.length>0){detailsHtml+='<div class="status-pills">'+e.se.map(s=>`<span class="status-pill${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}${_seDur(s)}</span>`).join('')+'</div>';}}
-const isDead=e.hp<=0;const activeClass=isActiveTurn?' active-turn':'';const deadClass=isDead?' dead':'';const hpStateClass=pct>0.60?'':pct>0.25?' hp-wounded':' hp-critical' /* noqa: preflight */;const dataAttr=type==='enemy'?` data-enemy-idx="${idx}"`:'';let posBadge='';if(type==='enemy'&&_currentPositions){const pR=_currentPositions['player'];const eR=_currentPositions['enemy_'+idx];if(pR!==undefined&&eR!==undefined){const mel=(pR===0&&eR===2)||(pR===2&&eR===0);posBadge='<span class="pos-badge '+(mel?'near':'far')+'">'+(mel?'⚔ Corpo a corpo':'🏹 À distância')+'</span>';}}
-let intentBadge='';if(type==='enemy'&&e.it){const it=e.it;const intentCls=it.tp==='stun'||it.tp==='skip'?'intent-stun':it.tp==='skill'?'intent-skill':'intent-atk';const dmgLabel=it.dmg?' '+it.dmg:'';intentBadge='<span class="intent-badge '+intentCls+'">'+(it.ic||'')+dmgLabel+'</span>';}
-const acBadge=type==='enemy'&&e.ac?`<span class="ac-badge">🛡${e.ac}</span>`:'';return`<div class="entity ${type}${activeClass}${deadClass}${hpStateClass}" role="group" aria-label="${escHtml(e.n)}"${dataAttr}>
-        <div class="entity-header">
-            <span class="entity-icon${e.img ? ' entity-thumb' : ''}">${e.img ? '<img src="' + escHtml(e.img) + '" loading="lazy" onerror="this.parentNode.textContent=this.dataset.fb" data-fb="' + escHtml(e.ico || (type === 'enemy' ? '👹' : '🛡️')) + '">' : (e.ico || (type === 'enemy' ? '👹' : '🛡️'))}</span>
-            <span class="compact-name">${escHtml(e.n)}</span>
-            ${acBadge}
-            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
-            <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
-            ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
-            ${posBadge}
-            ${intentBadge}
-            <span class="expand-arrow">▸</span>
-        </div>
-        <div class="entity-details">${detailsHtml}</div>
-    </div>`;}
-function renderPlayerCard(p,isCompact=false){var _rawHpPct=p.mhp>0?(p.hp/p.mhp):0;if(_rawHpPct>1||_rawHpPct<0)console.warn('[COMBAT] bar_overflow',{name:p.n,rawPct:_rawHpPct,bar:'hp'});const hpPct=Math.min(1,Math.max(0,_rawHpPct));const hpClass=hpPct>0.60?'hp-high':hpPct>0.25?'hp-mid':'hp-low';var _rawMpPct2=p.mmp>0?(p.mp/p.mmp):0;if(_rawMpPct2>1||_rawMpPct2<0)console.warn('[COMBAT] bar_overflow',{name:p.n,rawPct:_rawMpPct2,bar:'mp'});const mpPct=Math.min(1,Math.max(0,_rawMpPct2));const resClass=RES_CLASS_MAP[p.res]||'mp';const resIcon=RES_ICON_MAP[p.res]||'💧';const resLowCls=mpPct<=0.10&&mpPct>0?' res-critical':mpPct<=0.25&&mpPct>0?' res-low':'';const badges=[];if(p.se&&p.se.length>0){p.se.forEach(s=>badges.push(`<span class="mini-badge status${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}${_seDur(s)}</span>`));}
-if(p.cov){badges.push(`<span class="mini-badge cover">${p.cov.ico} +${p.cov.ac} CA</span>`);}
-if(p.conc){badges.push(`<span class="mini-badge conc">🔮 ${escHtml(p.conc)}</span>`);}
-const badgesHtml=badges.length>0?`<div class="player-badge-row">${badges.join('')}</div>`:'';const concClass=p.conc?' concentrating':'';const dangerClass=hpPct<=0.25&&hpPct>0?' hp-danger':'';return`<div class="entity player${concClass}${dangerClass}">
-        <div class="entity-header">
-            <span class="entity-icon">${p.ico || '👤'}</span>
-            <span class="compact-name">${escHtml(p.n)}</span>
-            <span class="player-header-stats">🛡${p.ac} ⚔+${p.atk} 🗡${p.dmg}</span>
-        </div>
-        <div class="player-bars" style="${isCompact ? 'display:none;' : ''}">
-            <div class="bar-row">
-                <span class="bar-icon">❤️</span>
-                <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${hpPct * 100}%"></div></div>
-                <span class="bar-val">${p.hp}/${p.mhp}</span>
-            </div>
-            <div class="bar-row">
-                <span class="bar-icon">${resIcon}</span>
-                <div class="bar-track"><div class="bar-fill ${resClass}${resLowCls}" style="transform:scaleX(${mpPct})"></div></div>
-                <span class="bar-val">${p.mp}/${p.mmp}</span>
-            </div>
-            ${badgesHtml}
-        </div>
-    </div>`;}
-function renderActionBar(acts,enemies,player,toastHtml){if(!acts)return'';const hitChance=acts.hit||50;const fleeChance=acts.flee||50;const hasSkills=acts.skills&&acts.skills.length>0;const itemCount=acts.items||0;const hitCh=hitChance>=65?'ch-high':hitChance>=40?'ch-mid':'ch-low';const fleeCh=fleeChance>=65?'ch-high':fleeChance>=40?'ch-mid':'ch-low';let skillBtnText='🧠 Habilidade';if(hasSkills&&acts.skills.length===1){const sk=acts.skills[0];const skCh=sk.ch>=65?'ch-high':sk.ch>=40?'ch-mid':'ch-low';skillBtnText=`🧠 ${sk.n} <span class="action-chance ${skCh}">${sk.ch}%</span>`;}else if(!hasSkills){skillBtnText=`🚫 Sem ${player.res || 'Mana'}`;}
-return`<div class="action-bar">${toastHtml || ''}<div class="action-grid">
-        <button class="action-btn primary" data-action="attack">⚔️ Atacar <span class="action-chance ${hitCh}">${hitChance}%</span></button>
-        <button class="action-btn ${hasSkills ? '' : 'disabled'}" data-action="skill">${skillBtnText}</button>
-        <button class="action-btn ${itemCount > 0 ? '' : 'disabled'}" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
-        <button class="action-btn danger" data-action="flee">🏃 Fugir <span class="action-chance ${fleeCh}">${fleeChance}%</span></button>
-        </div><div class="action-grid action-grid-tactical">
-        <button class="action-btn tactical-btn" data-action="dodge">🛡️ Esquivar</button>
-        <button class="action-btn tactical-btn" data-action="disengage">💨 Desengajar</button>
-        <button class="action-btn pass-btn" data-action="pass">⏭️ Pular</button>
-    </div></div>`;}
-function renderBonusActionBar(acts,enemies,player,toastHtml){if(!acts)return'';const hasSkills=acts.skills&&acts.skills.length>0;const resName=player.res||'Mana';let skillsHtml='';if(hasSkills){if(acts.skills.length===1){const sk=acts.skills[0];skillsHtml=`<button class="action-btn ba-btn" data-action="bonus_use_single" data-skill-id="${sk.id}" data-tg="${sk.tg || 'single'}">⚡ ${escHtml(sk.n)} <span class="action-chance">${sk.c} ${resName} · ${sk.ch}%</span></button>`;}else{skillsHtml=`<button class="action-btn ba-btn" data-action="bonus_skill_pick">⚡ Habilidade Bonus <span class="action-chance">(${acts.skills.length})</span></button>`;}}
-return`<div class="action-bar">${toastHtml || ''}<div class="ba-header">
-        <div class="ba-label">⚡ AÇÃO BÔNUS</div>
-        <div class="ba-hint">Use uma habilidade bônus ou pule.</div>
-    </div><div class="action-grid">
-        ${skillsHtml}
-        <button class="action-btn" data-action="bonus_skip">⏭️ Pular</button>
-    </div></div>`;}
-function renderReactionBar(acts,player,toastHtml){if(!acts)return'';const hasSkills=acts.skills&&acts.skills.length>0;const dmg=acts.damage_taken||0;const resName=player.res||'Mana';let skillsHtml='';if(hasSkills){acts.skills.forEach(sk=>{const ico=sk.ico||'⚡';const effText=sk.eff?` · ${escHtml(sk.eff)}`:'';skillsHtml+=`<button class="action-btn reaction-btn" data-action="reaction_use" data-skill-id="${sk.id}">${ico} ${escHtml(sk.n)} <span class="action-chance">${sk.c} ${resName}${effText}</span></button>`;});}
-return`<div class="action-bar">${toastHtml || ''}<div class="ba-header reaction-header">
-        <div class="ba-label">⚡ REAÇÃO</div>
-        <div class="ba-hint">Você recebeu ${dmg} de dano. Reagir?</div>
-    </div><div class="action-grid">
-        ${skillsHtml}
-        <button class="action-btn" data-action="reaction_skip">⏭️ Não reagir</button>
-    </div></div>`;}
-var _expandDelegated=false;function bindExpandCollapse(){if(_expandDelegated)return;_expandDelegated=true;document.body.addEventListener('click',(ev)=>{const viewBtn=ev.target.closest('.entity-view-btn');if(viewBtn&&typeof showImagePopup==='function'){ev.stopPropagation();showImagePopup({src:viewBtn.dataset.img,title:viewBtn.dataset.name||'',desc:viewBtn.dataset.desc||'',stats:[{icon:'\u{1F6E1}\uFE0F',label:'CA',value:viewBtn.dataset.ac||''},{icon:'\u2694\uFE0F',label:'ATK',value:'+'+(viewBtn.dataset.atk||'')},{icon:'\u{1F5E1}\uFE0F',label:'Dano',value:viewBtn.dataset.dmg||''}],type:'enemy'});return;}
-const entity=ev.target.closest('.entity:not(.player)');if(!entity||ev.target.closest('.action-btn')||ev.target.closest('.skill-item')||ev.target.closest('.target-item')||ev.target.closest('.item-entry')||ev.target.closest('.entity-view-btn'))return;const wasExpanded=entity.classList.contains('expanded');document.querySelectorAll('.entity.expanded').forEach(e=>e.classList.remove('expanded'));if(!wasExpanded)entity.classList.add('expanded');});}
-function bindFeedToggle(){const toggle=document.getElementById('feedToggle');if(!toggle)return;toggle.addEventListener('click',()=>{const feed=document.getElementById('combatFeed');if(!feed)return;const expanded=feed.classList.toggle('feed-expanded');toggle.textContent=expanded?'▼ Recolher':toggle.dataset.label||'▲ Mostrar mais';});toggle.dataset.label=toggle.textContent;}
-var _feedDetailDelegated=false;function bindFeedDetail(){if(_feedDetailDelegated)return;_feedDetailDelegated=true;document.body.addEventListener('click',function(ev){var el=ev.target.closest('.feed-entry.has-detail');if(!el)return;ev.stopPropagation();var existing=el.querySelector('.feed-detail-expanded');if(existing){existing.remove();var arrow=el.querySelector('.feed-expand-icon');if(arrow)arrow.textContent='▸';return;}
-var detailText=el.getAttribute('data-detail')||'';if(!detailText)return;var div=document.createElement('div');div.className='feed-detail-expanded';detailText.split('\n').forEach(function(line){var p=document.createElement('div');p.textContent=line;div.appendChild(p);});el.appendChild(div);var arrow=el.querySelector('.feed-expand-icon');if(arrow)arrow.textContent='▾'});}
+/* renderEntity, renderPlayerCard, renderActionBar, renderBonusActionBar,
+ * renderReactionBar, bindExpandCollapse, bindFeedToggle, bindFeedDetail
+ * REMOVED — replaced by combat-grid.js and combat-actions-popup.js
+ */
 var _actionsDelegated=false;var _actionsState=null;function bindActions(state){_actionsState=state;if(_actionsDelegated)return;_actionsDelegated=true;document.body.addEventListener('click',(ev)=>{const btn=ev.target.closest('.action-btn');if(!btn)return;const state=_actionsState;if(!state)return;if(_actionSent||_cinematicInProgress){return;}
 (()=>{vHaptic.select();if(!_audioUnlocked){if(_audioCtx&&_audioCtx.state==='suspended'){_audioCtx.resume().then(()=>{_audioUnlocked=true;}).catch(e=>{if(window._dbg)console.debug('[COMBAT] audioCtx.resume:',e.name);});}else if(_audioCtx&&_audioCtx.state==='running'){_audioUnlocked=true;}}
 const action=btn.dataset.action;if(btn.classList.contains('disabled')){btn.classList.add('disabled-shake');setTimeout(()=>btn.classList.remove('disabled-shake'),ValdoriaMotion.duration(400,0));if(action==='skill')vToast('Sem recurso suficiente para habilidades','warn');else if(action==='items')vToast('Nenhum item utilizável em combate','warn');return;}
