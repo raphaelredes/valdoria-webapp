@@ -59,7 +59,10 @@ function _renderRankCol(occupants,label,side){
   return html;
 }
 
+var _bfDelegated=false;
 function _bindBattlefieldActions(){
+  if(_bfDelegated)return;
+  _bfDelegated=true;
   document.body.addEventListener('click',function(ev){
     var btn=ev.target.closest('.bf-move-btn');
     if(!btn)return;
