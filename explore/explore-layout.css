@@ -744,3 +744,11 @@ body.perf-medium .explore-panel {
 /* Hide old bottom panel and HUD bar */
 #bottom-panel,#bottom-actions,.bottom-panel{display:none!important}
 #hud{display:none!important}
+
+/* === Top Bar (Biome + Weather + Danger) === */
+.explore-top-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;flex-shrink:0;z-index:50;background:linear-gradient(180deg,#332a22 0%,#2e2520 100%);border-bottom:2px solid rgba(196,149,58,0.2)}
+.top-biome{font-size:14px;color:#c4953a;font-family:'Cinzel',serif;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.5)}
+.top-weather{font-size:12px;color:#c0b8a0;text-shadow:0 1px 2px rgba(0,0,0,0.4)}
+.top-danger{font-size:13px;text-shadow:0 1px 2px rgba(0,0,0,0.4)}
+.top-danger .pip-full{color:#e06050}
+.top-danger .pip-empty{color:#4a3828}

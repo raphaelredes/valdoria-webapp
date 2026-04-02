@@ -50,7 +50,29 @@ if(S._hiddenDetected>0){const delay=S.dmIntro?2000:600;setTimeout(()=>{if(typeof
 if(!restored&&!S.travelActivity&&typeof showActivitySelection==='function'){const actDelay=S.dmIntro?4000:800;setTimeout(()=>{if(!S.travelActivity&&!_tutorialActive)showActivitySelection();},actDelay);}
 if(S._hiddenDetected>0&&!restored){const delay=S.dmIntro?2000:600;setTimeout(()=>{if(typeof showTerrainToast==='function'){showTerrainToast(`Percepção Passiva (${S._passivePerception})`,'ranger');}},delay);}}
 if(typeof checkServerTutorialFlag==='function')checkServerTutorialFlag(S.charData);if(typeof autoShowTutorial==='function')autoShowTutorial();}
-function setupHUD(){const c=S.charData;if(!c)return;var _hn=document.getElementById('hud-name');if(_hn)_hn.textContent=c.nm||'Aventureiro';var _hl=document.getElementById('hud-level');if(_hl)_hl.textContent='Nv '+(c.lv||1);var currentHP=Math.max(0,(c.hp||10)+(S.hpChange||0));var maxHP=c.mh||10;updateHP(currentHP,maxHP);updatePanelBars();updateRewards();}
+/* Update top bar with biome, weather, danger */
+function updateTopBar() {
+  var topBiome = document.getElementById('top-biome');
+  if (topBiome) {
+    var biomeNames = {forest:'Floresta',plains:'Planície',desert:'Deserto',cave:'Caverna',mountain:'Montanha',snow:'Neve',swamp:'Pântano',graveyard:'Cemitério',volcanic:'Vulcânico',ruins:'Ruínas'};
+    var biomeIcons = {forest:'🌲',plains:'🌾',desert:'🏜️',cave:'🕳️',mountain:'⛰️',snow:'❄️',swamp:'🌿',graveyard:'💀',volcanic:'🌋',ruins:'🏛️'};
+    var b = S.biome || 'forest';
+    topBiome.textContent = (biomeIcons[b] || '🌲') + ' ' + (biomeNames[b] || b);
+  }
+  var topWeather = document.getElementById('top-weather');
+  if (topWeather) {
+    var wInfo = {s:'☀️ Limpo',c:'☀️ Claro',r:'🌧️ Chuva',f:'🌫️ Névoa',t:'⛈️ Tempestade'};
+    topWeather.textContent = wInfo[S.weather || 's'] || '☀️ Limpo';
+  }
+  var topDanger = document.getElementById('top-danger');
+  if (topDanger) {
+    var dl = S.dangerLevel || S.dl || 0;
+    var pips = '';
+    for (var i = 1; i <= 5; i++) pips += i <= dl ? '◆' : '◇';
+    topDanger.textContent = pips;
+  }
+}
+function setupHUD(){const c=S.charData;if(!c)return;var _hn=document.getElementById('hud-name');if(_hn)_hn.textContent=c.nm||'Aventureiro';var _hl=document.getElementById('hud-level');if(_hl)_hl.textContent='Nv '+(c.lv||1);var currentHP=Math.max(0,(c.hp||10)+(S.hpChange||0));var maxHP=c.mh||10;updateHP(currentHP,maxHP);updatePanelBars();updateRewards();updateTopBar();}
 function updatePanelBars(){var c=S.charData;if(!c)return;var currentHP=Math.max(0,(c.hp||10)+(S.hpChange||0));var maxHP=c.mh||10;var hpPct=Math.max(0,Math.min(100,(currentHP/maxHP)*100));var hpFill=document.getElementById('panel-hp-fill');if(hpFill){hpFill.style.width=hpPct+'%';hpFill.className='panel-bar-fill hp-panel-fill';if(hpPct>60)hpFill.style.background='linear-gradient(180deg,#2a6a2a,#358a35)';else if(hpPct>25)hpFill.style.background='linear-gradient(180deg,#7a5e18,#9a7a25)';else hpFill.style.background='linear-gradient(180deg,#6e1c1c,#922828)';}var hpText=document.getElementById('panel-hp-text');if(hpText)hpText.textContent=currentHP+'/'+maxHP;var currentMP=Math.max(0,(c.mp||0)+(S.mpChange||0));var maxMP=c.mm||0;var mpPct=maxMP>0?Math.max(0,Math.min(100,(currentMP/maxMP)*100)):0;var mpFill=document.getElementById('panel-mp-fill');if(mpFill)mpFill.style.width=mpPct+'%';var mpText=document.getElementById('panel-mp-text');if(mpText)mpText.textContent=currentMP+'/'+maxMP;}
 function updateHP(current,max){if(window._dbg)console.debug("[EXPLORE] updateHP",{current:current,max:max});const pct=Math.max(0,Math.min(100,(current/max)*100));const fill=document.getElementById('hp-fill');if(fill){fill.style.transform='scaleX('+(pct/100)+')';fill.classList.remove('hp-high','hp-mid','hp-low');fill.classList.add(pct>60?'hp-high':pct>25?'hp-mid':'hp-low');}var _ht=document.getElementById('hp-text');if(_ht)_ht.textContent=current+'/'+max;if(pct>25)S._lowHPAlertShown=false;updatePanelBars();}
 function updateXPBar(){var row=document.getElementById('xp-bar-row');var fill=document.getElementById('xp-fill');var label=document.getElementById('xp-label');if(!row||!fill||!label||!S.charData)return;var xp=(S.charData.xp||0)+(S.xpEarned||0);var nxp=S.charData.nxp||300;var prevXp=S.charData.pxp||0;var range=nxp-prevXp;var progress=range>0?Math.min(100,((xp-prevXp)/range)*100):0;fill.style.transform='scaleX('+(progress/100)+')';label.textContent='Nv '+(S.charData.lv||1);row.style.display='flex';}
