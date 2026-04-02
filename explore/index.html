@@ -82,6 +82,24 @@
         </div>
     </div>
 
+    <!-- Floating HUD: HP/MP top-left -->
+    <div id="hud-floating-hp" class="hud-float hud-float-tl">
+      <div class="hud-float-bar">❤️ <div class="hud-bar-track"><div id="hp-fill-float" class="fill fill-hp" style="width:100%"></div></div> <span id="hp-val-float" class="hud-float-val hp">--/--</span></div>
+      <div class="hud-float-bar">💧 <div class="hud-bar-track"><div id="mp-fill-float" class="fill fill-mp" style="width:100%"></div></div> <span id="mp-val-float" class="hud-float-val mp">--/--</span></div>
+    </div>
+
+    <!-- Floating HUD: Steps top-right -->
+    <div id="hud-floating-info" class="hud-float hud-float-tr">
+      <span id="badge-steps-float">👣 0/0</span>
+    </div>
+
+    <!-- Floating quick actions: bottom-right -->
+    <div id="hud-quick-actions" class="hud-float-quick">
+      <div class="hud-quick-btn" id="btn-camp-float" onclick="if(typeof handleCampAction==='function')handleCampAction();">🏕️</div>
+      <div class="hud-quick-btn" id="btn-inventory-float" onclick="if(typeof handleInventoryAction==='function')handleInventoryAction();">🎒</div>
+      <div class="hud-quick-btn" id="btn-torch" onclick="if(typeof toggleTorch==='function')toggleTorch();">🔥</div>
+    </div>
+
     <!-- Minimap -->
     <canvas id="minimap" width="80" height="80" role="img" aria-label="Minimapa"></canvas>
 
