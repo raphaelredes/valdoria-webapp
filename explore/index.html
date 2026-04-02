@@ -95,8 +95,8 @@
 
     <!-- Floating quick actions: bottom-right -->
     <div id="hud-quick-actions" class="hud-float-quick">
-      <div class="hud-quick-btn" id="btn-camp-float" onclick="if(typeof handleCampAction==='function')handleCampAction();">🏕️</div>
-      <div class="hud-quick-btn" id="btn-inventory-float" onclick="if(typeof handleInventoryAction==='function')handleInventoryAction();">🎒</div>
+      <div class="hud-quick-btn" id="btn-camp-float" onclick="if(typeof showCampOverlay==='function')showCampOverlay();">🏕️</div>
+      <div class="hud-quick-btn" id="btn-inventory-float" onclick="if(typeof transitionToInventory==='function')transitionToInventory();">🎒</div>
       <div class="hud-quick-btn" id="btn-torch" onclick="if(typeof toggleTorch==='function')toggleTorch();">🔥</div>
     </div>
 
