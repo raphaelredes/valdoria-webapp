@@ -1,5 +1,37 @@
 // MIN_LOAD_MS enforced by loading-guard.js
 var COLS=11,ROWS=13;var IMPASSABLE=new Set(['W','M','L','#','D']);var EVEN_OFFSETS=[[-1,-1],[0,-1],[-1,0],[1,0],[-1,1],[0,1]];var ODD_OFFSETS=[[0,-1],[1,-1],[-1,0],[1,0],[0,1],[1,1]];var STAT_NAMES={str:'Força',dex:'Destreza',con:'Constituição',int:'Inteligência',wis:'Sabedoria',cha:'Carisma',atl:'Atletismo',acr:'Acrobacia',slh:'Prestidigitação',stl:'Furtividade',arc:'Arcanismo',his:'História',inv:'Investigação',nat:'Natureza',rel:'Religião',anh:'Lid. Animais',ins:'Intuição',med:'Medicina',per:'Percepção',sur:'Sobrevivência',dec:'Enganação',itm:'Intimidação',prf:'Atuação',prs:'Persuasão',};var STAT_SHORT={str:'FOR',dex:'DES',con:'CON',int:'INT',wis:'SAB',cha:'CAR',atl:'ATL',acr:'ACR',slh:'PRE',stl:'FUR',arc:'ARC',his:'HIS',inv:'INV',nat:'NAT',rel:'REL',anh:'ANI',ins:'ITU',med:'MED',per:'PER',sur:'SOB',dec:'ENG',itm:'ITM',prf:'ATU',prs:'PRS',};var POI_TYPE_LABELS={dis:'Descoberta',sea:'Busca',dan:'Perigo',mys:'Mistério',npc:'Encontro'};var S={grid:[],pois:[],biome:'forest',playerCol:0,playerRow:0,exitCol:0,exitRow:0,visibility:3,visited:new Set(),fogState:{},xpEarned:0,goldEarned:0,hpChange:0,itemsFound:[],poisResolved:new Set(),checksPerformed:[],combatTrigger:null,charData:null,token:'',dmIntro:'',dangerLevel:1,randomEncounters:[],conditions:[],exhaustion:0,_stepsWithoutRest:0,_stepsForRation:0,_fatigue:0,_fatiguePeriods:0,_secondWindUsed:false,_healingSpringUsed:false,_longRestCount:0,mpChange:0,_hdUsed:0,_longRestAmbushSafe:false,_hazardsTriggered:new Set(),_watchUsed:false,_flavorSteps:0,travelPace:'normal',travelActivity:null,interactedHexes:new Set(),moveLog:[],_stepCount:0,inventory:[],inventoryUsed:[],_lowHPAlertShown:false,};
+/* Weather fog radius config (visual only) */
+var WEATHER_FOG_RADIUS = {
+  's': 3.2, 'c': 2.8, 'r': 2.4, 'f': 1.8, 't': 1.6
+};
+var NIGHT_FOG_RADIUS = 1.2;
+var TORCH_BONUS = { 's': 0.3, 'c': 0.3, 'r': 0.5, 'f': 0.7, 't': 0.7, 'night': 1.2 };
+S.torchActive = false;
+
+function getFogVisibilityRadius() {
+  var phase = typeof getDayPhase === 'function' ? getDayPhase() : 'day';
+  var baseRadius;
+  if (phase === 'night') {
+    baseRadius = NIGHT_FOG_RADIUS;
+  } else {
+    var wCode = S.weather || 's';
+    baseRadius = WEATHER_FOG_RADIUS[wCode] || WEATHER_FOG_RADIUS['s'];
+    if (phase === 'dusk') baseRadius *= 0.85;
+    if (phase === 'dawn') baseRadius *= 0.95;
+  }
+  if (S.torchActive) {
+    var torchKey = phase === 'night' ? 'night' : (S.weather || 's');
+    baseRadius += TORCH_BONUS[torchKey] || 0.3;
+  }
+  return baseRadius;
+}
+
+function toggleTorch() {
+  S.torchActive = !S.torchActive;
+  var btn = document.getElementById('btn-torch');
+  if (btn) btn.classList.toggle('active', S.torchActive);
+  if (typeof scheduleRender === 'function') scheduleRender();
+}
 function _buildSnap(){return{tk:S.token,pc:S.playerCol,pr:S.playerRow,vis:Array.from(S.visited),fog:S.fogState,xp:S.xpEarned,gp:S.goldEarned,hp:S.hpChange,it:S.itemsFound,pr2:Array.from(S.poisResolved),ck:S.checksPerformed,ct:S.combatTrigger,re:S.randomEncounters,cd:S.conditions,hz:Array.from(S._hazardsTriggered||new Set()),tt:Array.from(S._trapsTriggered||new Set()),ml:(S.moveLog||[]).slice(-200),sc:S._stepCount,inv:S.inventory,iu:S.inventoryUsed,bd:S._bossDefeated||false,cau:S._campAmbushUsed||false,wu:S._watchUsed||false,ex:S.exhaustion||0,swr:S._stepsWithoutRest||0,sfr:S._stepsForRation||0,ftg:S._fatigue||0,ftp:S._fatiguePeriods||0,lrc:S._longRestCount||0,mpc:S.mpChange||0,hdu:S._hdUsed||0,tp:S.travelPace||'normal',ta:S.travelActivity||null,wt:S.weather||'s',ih:Array.from(S.interactedHexes||new Set()),ccl:Array.from(S.chainClues||new Set()),gc:COLS,gr:ROWS,do2:Array.from(S._doorsOpened||new Set()),sr2:Array.from(S._secretsRevealed||new Set()),tp2:Array.from(S._terrainPassed||new Set()),trT:(S.traps||[]).filter(function(t){return t.triggered;}).map(function(t){return t.col+','+t.row;}),ldU:Array.from(S._chestsOpened||new Set()),isR:Array.from(S._inscriptionsRead||new Set()),ldK:(S.lockedDoors||[]).filter(function(d){return d.unlocked;}).map(function(d){return d.col+','+d.row;}),wsc:_watchStepCount||0,wcw:S._currentWatch||0,wcd:S._currentDay||0,wws:S._weatherSchedule||[],rum:S.rumors||[],lmr:Array.from(S._landmarksRevealed||new Set()),pur:S._pursuerData||null,fs:S._flavorSteps||0,msh:S._milestonesHit||{},ltt:typeof _lastTerrainType!=='undefined'?_lastTerrainType:null,lha:S._lowHPAlertShown||false,ts:Date.now()};}
 function saveState(){try{if(window._dbg)console.debug("[EXPLORE] saveState",{step:S._stepCount,hp:typeof getCurrentHP==="function"?getCurrentHP():"?",xp:S.xpEarned,gp:S.goldEarned,cond:S.conditions?S.conditions.length:0});const snap=_buildSnap();if(!S.apiBase||!S.uid||!S.token)return;const _sh={'Content-Type':'application/json','Authorization':'Bearer '+S.token};if(window.Telegram?.WebApp?.initData){_sh['X-Telegram-Init-Data']=Telegram.WebApp.initData;}
 if(window._saveDebounce)clearTimeout(window._saveDebounce);window._saveDebounce=setTimeout(function(){fetchT(S.apiBase+'/api/explore/save?user_id='+S.uid,{method:'POST',headers:_sh,body:JSON.stringify(snap)}).catch(function(e){console.error('[EXPLORE] API save error:',e);if(typeof showTerrainToast==='function')showTerrainToast('Falha ao salvar no servidor. Tentando novamente...','warn');setTimeout(function(){if(window._saveDebounce)clearTimeout(window._saveDebounce);saveState();},3000); /* noqa: preflight */ });},1500);}catch(e){console.error('[EXPLORE] saveState:',e);}}
