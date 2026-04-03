@@ -659,9 +659,10 @@ async function _executeTravelApi(locId) {
     if (data.travel_log && data.travel_log.length > 0 && typeof _showTravelJournal === 'function') {
       _showTravelJournal(data.travel_log, data.url);
     } else if (data.url) {
-      /* Direct transition to explore/combat */
+      /* Direct transition to explore/combat — use SPA nav to avoid full reload */
       window.__valdoria_transitioning = true;
-      window.location.replace(data.url);
+      if (typeof valdoriaSpaNav === 'function') valdoriaSpaNav(data.url);
+      else window.location.replace(data.url);
     } else {
       /* No URL — return to game */
       _transitionToGame();
@@ -681,7 +682,7 @@ function _transitionToGame() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ from: 'navigate', to: S.returnTo, token: S.token, uid: S.uid }),
     }).then(function(r) { return r.json(); }).then(function(d) {
-      if (d.url) window.location.replace(d.url);
+      if (d.url) { if (typeof valdoriaSpaNav === 'function') valdoriaSpaNav(d.url); else window.location.replace(d.url); }
     }).catch(function() {
       try { if (window.Telegram && Telegram.WebApp) Telegram.WebApp.close(); } catch(e) {}
     });
@@ -788,10 +789,12 @@ async function _executeAction(type) {
       if (data.travel_log && data.travel_log.length > 0 && typeof playTravelAnimation === 'function') {
         var biome = _findBiome(state.currentLoc) || 'plains';
         playTravelAnimation(biome, 'Eldoria', function() {
-          window.location.replace(data.url);
+          if (typeof valdoriaSpaNav === 'function') valdoriaSpaNav(data.url);
+          else window.location.replace(data.url);
         });
       } else {
-        window.location.replace(data.url);
+        if (typeof valdoriaSpaNav === 'function') valdoriaSpaNav(data.url);
+        else window.location.replace(data.url);
       }
     } else {
       /* No redirect — transition to game */
