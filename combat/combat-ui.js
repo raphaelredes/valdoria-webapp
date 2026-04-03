@@ -5,98 +5,10 @@ function _seIsBuff(s){return typeof s==='object'?(s.cat==='buff'):STATUS_BUFFS.h
 function _seDcLabel(s){if(typeof s!=='object'||!s.dc||!s.sa)return '';var saShort={'strength':'FOR','dexterity':'DES','constitution':'CON','intelligence':'INT','wisdom':'SAB','charisma':'CAR'};return ' CD'+s.dc+(saShort[s.sa]||'');}
 function _seDur(s){if(typeof s==='object'&&s.dur&&s.dur>0)return ' <span class="se-dur">'+s.dur+'r</span>';return '';}
 function announce(msg){var el=document.getElementById('combatAnnouncer');if(el){el.textContent='';setTimeout(function(){el.textContent=msg;},50);}}
-function renderEntity(e,type,idx,isActiveTurn){var _rawPct=e.mhp>0?(e.hp/e.mhp):0;if(_rawPct>1||_rawPct<0)console.warn('[COMBAT] bar_overflow',{name:e.n,rawPct:_rawPct});const pct=Math.min(1,Math.max(0,_rawPct));const hpClass=pct>THRESHOLDS.HP_HIGH?'hp-high':pct>THRESHOLDS.HP_LOW?'hp-mid':'hp-low';let statusIcons='';if(e.se&&e.se.length>0){if(e.se.length>3){statusIcons=e.se.slice(0,3).map(s=>_seIcon(s)).join('')+`<span class="status-overflow">+${e.se.length - 3}</span>`;}else{statusIcons=e.se.map(s=>_seIcon(s)).join('');}}
-let detailsHtml='';if(type==='enemy'){const atkLabel=ATK_TYPE_LABELS[e.at]||e.at||'';const dmgIcon=DMG_ICONS[e.dt]||'';detailsHtml+=`<div class="bar-container">
-            <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
-            <div class="bar-track"><div class="bar-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
-        </div>`;detailsHtml+=`<div class="stats-row">
-            <span class="stat-item">🛡️ CA ${e.ac}</span>
-            <span class="stat-item">⚔️ +${e.atk}</span>
-            <span class="stat-item">${dmgIcon} ${e.dmg}</span>
-            <span class="entity-badge-sm">${atkLabel}</span>
-        </div>`;if(e.leg){detailsHtml+='<div class="legendary-row">';detailsHtml+='<span>👑 Boss</span>';if(e.leg.lrm>0)detailsHtml+=`<span title="Anula falha em salvaguarda">⭐ Resist. Lend. ${e.leg.lr}/${e.leg.lrm}</span>`;if(e.leg.lam>0)detailsHtml+=`<span>⚡ Ações ${e.leg.la}/${e.leg.lam}</span>`;detailsHtml+='</div>';}
-if(e.se&&e.se.length>0){detailsHtml+='<div class="status-pills">'+e.se.map(s=>`<span class="status-pill${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}${_seDur(s)}</span>`).join('')+'</div>';}
-if(e.img&&typeof showImagePopup==='function'){detailsHtml+='<button class="entity-view-btn" data-img="'+escHtml(e.img)+'" data-name="'+escHtml(e.n)+'" data-desc="'+escHtml(e.desc||'')+'" data-ac="'+(e.ac||'')+'" data-atk="'+(e.atk||'')+'" data-dmg="'+escHtml(e.dmg||'')+'">🔍 Ver Criatura</button>';}}else{detailsHtml+=`<div class="bar-container">
-            <div class="bar-label"><span>❤️ HP</span><span>${e.hp}/${e.mhp}</span></div>
-            <div class="bar-track"><div class="bar-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
-        </div>`;if(e.mmp>0){var _rawMpPct=e.mmp>0?(e.mp/e.mmp):0;if(_rawMpPct>1||_rawMpPct<0)console.warn('[COMBAT] bar_overflow',{name:e.n,rawPct:_rawMpPct,bar:'mp'});const mpPct=Math.min(1,Math.max(0,_rawMpPct));detailsHtml+=`<div class="bar-container">
-                <div class="bar-label"><span>💧 MP</span><span>${e.mp}/${e.mmp}</span></div>
-                <div class="bar-track"><div class="bar-fill mp-bar" style="transform:scaleX(${mpPct})"></div></div>
-            </div>`;}
-const allyStats=[];if(e.ac)allyStats.push(`🛡️ CA ${e.ac}`);if(e.atk)allyStats.push(`⚔️ +${e.atk}`);if(e.dmg)allyStats.push(`🗡️ ${e.dmg}`);if(e.pot>0)allyStats.push(`🧪 ${e.pot}`);if(allyStats.length>0){detailsHtml+='<div class="stats-row">'+allyStats.map(s=>`<span class="stat-item">${s}</span>`).join('')+'</div>';}
-if(e.conc){detailsHtml+=`<div class="stats-row"><span class="stat-item conc-badge">🔮 Conc.: ${escHtml(e.conc)}</span></div>`;}
-if(e.se&&e.se.length>0){detailsHtml+='<div class="status-pills">'+e.se.map(s=>`<span class="status-pill${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}${_seDur(s)}</span>`).join('')+'</div>';}}
-const isDead=e.hp<=0;const activeClass=isActiveTurn?' active-turn':'';const deadClass=isDead?' dead':'';const hpStateClass=pct>THRESHOLDS.HP_HIGH?'':pct>THRESHOLDS.HP_LOW?' hp-wounded':' hp-critical' /* noqa: preflight */;const dataAttr=type==='enemy'?` data-enemy-idx="${idx}"`:'';let posBadge='';if(type==='enemy'&&_currentPositions){const pR=_currentPositions['player'];const eR=_currentPositions['enemy_'+idx];if(pR!==undefined&&eR!==undefined){const mel=(pR===0&&eR===2)||(pR===2&&eR===0);posBadge='<span class="pos-badge '+(mel?'near':'far')+'">'+(mel?'⚔ Corpo a corpo':'🏹 À distância')+'</span>';}}
-let intentBadge='';if(type==='enemy'&&e.it){const it=e.it;const intentCls=it.tp==='stun'||it.tp==='skip'?'intent-stun':it.tp==='skill'?'intent-skill':'intent-atk';const dmgLabel=it.dmg?' '+it.dmg:'';intentBadge='<span class="intent-badge '+intentCls+'">'+(it.ic||'')+dmgLabel+'</span>';}
-const acBadge=type==='enemy'&&e.ac?`<span class="ac-badge">🛡${e.ac}</span>`:'';return`<div class="entity ${type}${activeClass}${deadClass}${hpStateClass}" role="group" aria-label="${escHtml(e.n)}"${dataAttr}>
-        <div class="entity-header">
-            <span class="entity-icon${e.img ? ' entity-thumb' : ''}">${e.img ? '<img src="' + escHtml(e.img) + '" loading="lazy" onerror="this.parentNode.textContent=this.dataset.fb" data-fb="' + escHtml(e.ico || (type === 'enemy' ? '👹' : '🛡️')) + '">' : (e.ico || (type === 'enemy' ? '👹' : '🛡️'))}</span>
-            <span class="compact-name">${escHtml(e.n)}</span>
-            ${acBadge}
-            <div class="hp-mini"><div class="hp-mini-fill ${hpClass}" style="transform:scaleX(${pct})"></div></div>
-            <span class="hp-text-compact">${e.hp}/${e.mhp}</span>
-            ${statusIcons ? `<span class="status-icons-compact">${statusIcons}</span>` : ''}
-            ${posBadge}
-            ${intentBadge}
-            <span class="expand-arrow">▸</span>
-        </div>
-        <div class="entity-details">${detailsHtml}</div>
-    </div>`;}
-function renderPlayerCard(p,isCompact=false){var _rawHpPct=p.mhp>0?(p.hp/p.mhp):0;if(_rawHpPct>1||_rawHpPct<0)console.warn('[COMBAT] bar_overflow',{name:p.n,rawPct:_rawHpPct,bar:'hp'});const hpPct=Math.min(1,Math.max(0,_rawHpPct));const hpClass=hpPct>THRESHOLDS.HP_HIGH?'hp-high':hpPct>THRESHOLDS.HP_LOW?'hp-mid':'hp-low';var _rawMpPct2=p.mmp>0?(p.mp/p.mmp):0;if(_rawMpPct2>1||_rawMpPct2<0)console.warn('[COMBAT] bar_overflow',{name:p.n,rawPct:_rawMpPct2,bar:'mp'});const mpPct=Math.min(1,Math.max(0,_rawMpPct2));const resClass=RES_CLASS_MAP[p.res]||'mp';const resIcon=RES_ICON_MAP[p.res]||'💧';const resLowCls=mpPct<=THRESHOLDS.RESOURCE_CRITICAL&&mpPct>0?' res-critical':mpPct<=THRESHOLDS.RESOURCE_LOW&&mpPct>0?' res-low':'';const badges=[];if(p.se&&p.se.length>0){p.se.forEach(s=>badges.push(`<span class="mini-badge status${_seIsBuff(s) ? ' buff status-buff' : ' status-debuff'}">${_seIcon(s)} ${_seName(s)}${_seDcLabel(s)}${_seDur(s)}</span>`));}
-if(p.cov){badges.push(`<span class="mini-badge cover">${p.cov.ico} +${p.cov.ac} CA</span>`);}
-if(p.conc){badges.push(`<span class="mini-badge conc">🔮 ${escHtml(p.conc)}</span>`);}
-const badgesHtml=badges.length>0?`<div class="player-badge-row">${badges.join('')}</div>`:'';const concClass=p.conc?' concentrating':'';const dangerClass=hpPct<=THRESHOLDS.HP_LOW&&hpPct>0?' hp-danger':'';return`<div class="entity player${concClass}${dangerClass}">
-        <div class="entity-header">
-            <span class="entity-icon">${p.ico || '👤'}</span>
-            <span class="compact-name">${escHtml(p.n)}</span>
-            <span class="player-header-stats">🛡${p.ac} ⚔+${p.atk} 🗡${p.dmg}</span>
-        </div>
-        <div class="player-bars" style="${isCompact ? 'display:none;' : ''}">
-            <div class="bar-row">
-                <span class="bar-icon">❤️</span>
-                <div class="bar-track"><div class="bar-fill ${hpClass}" style="width:${hpPct * 100}%"></div></div>
-                <span class="bar-val">${p.hp}/${p.mhp}</span>
-            </div>
-            <div class="bar-row">
-                <span class="bar-icon">${resIcon}</span>
-                <div class="bar-track"><div class="bar-fill ${resClass}${resLowCls}" style="transform:scaleX(${mpPct})"></div></div>
-                <span class="bar-val">${p.mp}/${p.mmp}</span>
-            </div>
-            ${badgesHtml}
-        </div>
-    </div>`;}
-function renderActionBar(acts,enemies,player,toastHtml){if(!acts)return'';const hitChance=acts.hit||50;const fleeChance=acts.flee||50;const hasSkills=acts.skills&&acts.skills.length>0;const itemCount=acts.items||0;const hitCh=hitChance>=THRESHOLDS.CHANCE_HIGH?'ch-high':hitChance>=THRESHOLDS.CHANCE_MID?'ch-mid':'ch-low';const fleeCh=fleeChance>=THRESHOLDS.CHANCE_HIGH?'ch-high':fleeChance>=THRESHOLDS.CHANCE_MID?'ch-mid':'ch-low';let skillBtnText='🧠 Habilidade';if(hasSkills&&acts.skills.length===1){const sk=acts.skills[0];const skCh=sk.ch>=THRESHOLDS.CHANCE_HIGH?'ch-high':sk.ch>=THRESHOLDS.CHANCE_MID?'ch-mid':'ch-low';skillBtnText=`🧠 ${sk.n} <span class="action-chance ${skCh}">${sk.ch}%</span>`;}else if(!hasSkills){skillBtnText=`🚫 Sem ${player.res || 'Mana'}`;}
-return`<div class="action-bar">${toastHtml || ''}<div class="action-grid">
-        <button class="action-btn primary" data-action="attack">⚔️ Atacar <span class="action-chance ${hitCh}">${hitChance}%</span></button>
-        <button class="action-btn ${hasSkills ? '' : 'disabled'}" data-action="skill">${skillBtnText}</button>
-        <button class="action-btn ${itemCount > 0 ? '' : 'disabled'}" data-action="items">🎒 Itens <span class="action-chance">(${itemCount})</span></button>
-        <button class="action-btn danger" data-action="flee">🏃 Fugir <span class="action-chance ${fleeCh}">${fleeChance}%</span></button>
-        </div><div class="action-grid action-grid-tactical">
-        <button class="action-btn tactical-btn" data-action="dodge">🛡️ Esquivar</button>
-        <button class="action-btn tactical-btn" data-action="disengage">💨 Desengajar</button>
-        <button class="action-btn pass-btn" data-action="pass">⏭️ Pular</button>
-    </div></div>`;}
-function renderBonusActionBar(acts,enemies,player,toastHtml){if(!acts)return'';const hasSkills=acts.skills&&acts.skills.length>0;const resName=player.res||'Mana';let skillsHtml='';if(hasSkills){if(acts.skills.length===1){const sk=acts.skills[0];skillsHtml=`<button class="action-btn ba-btn" data-action="bonus_use_single" data-skill-id="${sk.id}" data-tg="${sk.tg || 'single'}">⚡ ${escHtml(sk.n)} <span class="action-chance">${sk.c} ${resName} · ${sk.ch}%</span></button>`;}else{skillsHtml=`<button class="action-btn ba-btn" data-action="bonus_skill_pick">⚡ Habilidade Bonus <span class="action-chance">(${acts.skills.length})</span></button>`;}}
-return`<div class="action-bar">${toastHtml || ''}<div class="ba-header">
-        <div class="ba-label">⚡ AÇÃO BÔNUS</div>
-        <div class="ba-hint">Use uma habilidade bônus ou pule.</div>
-    </div><div class="action-grid">
-        ${skillsHtml}
-        <button class="action-btn" data-action="bonus_skip">⏭️ Pular</button>
-    </div></div>`;}
-function renderReactionBar(acts,player,toastHtml){if(!acts)return'';const hasSkills=acts.skills&&acts.skills.length>0;const dmg=acts.damage_taken||0;const resName=player.res||'Mana';let skillsHtml='';if(hasSkills){acts.skills.forEach(sk=>{const ico=sk.ico||'⚡';const effText=sk.eff?` · ${escHtml(sk.eff)}`:'';skillsHtml+=`<button class="action-btn reaction-btn" data-action="reaction_use" data-skill-id="${sk.id}">${ico} ${escHtml(sk.n)} <span class="action-chance">${sk.c} ${resName}${effText}</span></button>`;});}
-return`<div class="action-bar">${toastHtml || ''}<div class="ba-header reaction-header">
-        <div class="ba-label">⚡ REAÇÃO</div>
-        <div class="ba-hint">Você recebeu ${dmg} de dano. Reagir?</div>
-    </div><div class="action-grid">
-        ${skillsHtml}
-        <button class="action-btn" data-action="reaction_skip">⏭️ Não reagir</button>
-    </div></div>`;}
-var _expandDelegated=false;function bindExpandCollapse(){if(_expandDelegated)return;_expandDelegated=true;document.body.addEventListener('click',(ev)=>{const viewBtn=ev.target.closest('.entity-view-btn');if(viewBtn&&typeof showImagePopup==='function'){ev.stopPropagation();showImagePopup({src:viewBtn.dataset.img,title:viewBtn.dataset.name||'',desc:viewBtn.dataset.desc||'',stats:[{icon:'\u{1F6E1}\uFE0F',label:'CA',value:viewBtn.dataset.ac||''},{icon:'\u2694\uFE0F',label:'ATK',value:'+'+(viewBtn.dataset.atk||'')},{icon:'\u{1F5E1}\uFE0F',label:'Dano',value:viewBtn.dataset.dmg||''}],type:'enemy'});return;}
-const entity=ev.target.closest('.entity:not(.player)');if(!entity||ev.target.closest('.action-btn')||ev.target.closest('.skill-item')||ev.target.closest('.target-item')||ev.target.closest('.item-entry')||ev.target.closest('.entity-view-btn'))return;const wasExpanded=entity.classList.contains('expanded');document.querySelectorAll('.entity.expanded').forEach(e=>e.classList.remove('expanded'));if(!wasExpanded)entity.classList.add('expanded');});}
-function bindFeedToggle(){const toggle=document.getElementById('feedToggle');if(!toggle)return;toggle.addEventListener('click',()=>{const feed=document.getElementById('combatFeed');if(!feed)return;const expanded=feed.classList.toggle('feed-expanded');toggle.textContent=expanded?'▼ Recolher':toggle.dataset.label||'▲ Mostrar mais';});toggle.dataset.label=toggle.textContent;}
-var _feedDetailDelegated=false;function bindFeedDetail(){if(_feedDetailDelegated)return;_feedDetailDelegated=true;document.body.addEventListener('click',function(ev){var el=ev.target.closest('.feed-entry.has-detail');if(!el)return;ev.stopPropagation();var existing=el.querySelector('.feed-detail-expanded');if(existing){existing.remove();var arrow=el.querySelector('.feed-expand-icon');if(arrow)arrow.textContent='▸';return;}
-var detailText=el.getAttribute('data-detail')||'';if(!detailText)return;var div=document.createElement('div');div.className='feed-detail-expanded';detailText.split('\n').forEach(function(line){var p=document.createElement('div');p.textContent=line;div.appendChild(p);});el.appendChild(div);var arrow=el.querySelector('.feed-expand-icon');if(arrow)arrow.textContent='▾'});}
+/* renderEntity, renderPlayerCard, renderActionBar, renderBonusActionBar,
+ * renderReactionBar, bindExpandCollapse, bindFeedToggle, bindFeedDetail
+ * REMOVED — replaced by combat-grid.js and combat-actions-popup.js
+ */
 var _actionsDelegated=false;var _actionsState=null;function bindActions(state){_actionsState=state;if(_actionsDelegated)return;_actionsDelegated=true;document.body.addEventListener('click',(ev)=>{const btn=ev.target.closest('.action-btn');if(!btn)return;const state=_actionsState;if(!state)return;if(_actionSent||_cinematicInProgress){return;}
 (()=>{vHaptic.select();if(!_audioUnlocked){if(_audioCtx&&_audioCtx.state==='suspended'){_audioCtx.resume().then(()=>{_audioUnlocked=true;}).catch(e=>{if(window._dbg)console.debug('[COMBAT] audioCtx.resume:',e.name);});}else if(_audioCtx&&_audioCtx.state==='running'){_audioUnlocked=true;}}
 const action=btn.dataset.action;if(btn.classList.contains('disabled')){btn.classList.add('disabled-shake');setTimeout(()=>btn.classList.remove('disabled-shake'),ValdoriaMotion.duration(400,0));if(action==='skill')vToast('Sem recurso suficiente para habilidades','warn');else if(action==='items')vToast('Nenhum item utilizável em combate','warn');return;}
@@ -113,13 +25,13 @@ function showSkillPicker(skills,enemies,actionType){if(!skills||skills.length===
             <div>
                 <div class="skill-name">${escHtml(sk.n)}</div>
                 ${effLine}
-                <div class="skill-meta">Custo: ${sk.c} · <span class="action-chance ${sk.ch>=THRESHOLDS.CHANCE_HIGH?'ch-high':sk.ch>=THRESHOLDS.CHANCE_MID?'ch-mid':'ch-low'}">${sk.ch}%</span>${typeBadge}${tgtBadge}</div>
+                <div class="skill-meta">Custo: ${sk.c} · <span class="action-chance ${sk.ch>=65?'ch-high':sk.ch>=40?'ch-mid':'ch-low'}">${sk.ch}%</span>${typeBadge}${tgtBadge}</div>
             </div>
         </div>`;});html+='<div class="skill-close" id="skillClose">Cancelar</div>';panel.innerHTML=html;panel.style.animation='none';panel.offsetHeight;panel.style.animation='';overlay.classList.add('active');const _firstItem=panel.querySelector('.skill-item');if(_firstItem)_firstItem.focus();overlay.onkeydown=(e)=>{if(e.key==='Escape')_closeOverlay(overlay);};panel.onclick=(e)=>{const item=e.target.closest('.skill-item');if(e.target.closest('#skillClose')){_closeOverlay(overlay);return;}
 if(!item||_actionSent)return;vHaptic.tap();const skillId=item.dataset.skillId;const tg=item.dataset.tg||'single';overlay.classList.remove('active');if(tg==='all'||tg==='self'){sendAction({type:actionType,skill_id:skillId,target:0});}else if(enemies.length>1){showTargetPicker(enemies,actionType,skillId);}else{sendAction({type:actionType,skill_id:skillId,target:0});}};overlay.onclick=(e)=>{if(e.target===overlay)_closeOverlay(overlay);};}
 var _COMBAT_OVERLAY_IDS=['skillOverlay','targetOverlay','itemOverlay'];function isOverlayOpen(){for(var i=0;i<_COMBAT_OVERLAY_IDS.length;i++){var el=document.getElementById(_COMBAT_OVERLAY_IDS[i]);if(el&&el.classList.contains('active'))return true;}return false;}function _closeOverlay(overlay){overlay.classList.remove('active');if(_pendingPollState&&!_cinematicInProgress&&!_diceAnimating&&!_actionSent){var _ps=_pendingPollState;_pendingPollState=null;var _newPh=_ps.ph||_ps.phase||'';currentState=_ps;if(_newPh==='victory'||_newPh==='defeat'||_newPh==='ended'){renderResolution(_ps);}else{renderArena(_ps);}}}
 function showTargetPicker(enemies,actionType,skillId){const panel=document.getElementById('targetPanel');const overlay=document.getElementById('targetOverlay');let html='<div class="skill-panel-title">Escolher Alvo</div>';enemies.forEach((e,i)=>{const pct=e.mhp>0?Math.round((e.hp/e.mhp)*100):0;let previewHtml='';const acts=currentState&&currentState.acts;if(acts){let chText='',dmgText='';if(actionType==='attack'){chText=`${acts.hit || '?'}%`;dmgText=currentState.p?currentState.p.dmg:'';}else if((actionType==='skill'||actionType==='bonus_use')&&skillId&&acts.skills){const sk=acts.skills.find(s=>s.id===skillId);if(sk){chText=`${sk.ch}%`;dmgText=sk.eff||'';}}
-if(chText){const chVal=parseInt(chText, 10);let chCls;if(isNaN(chVal)){chCls='prev-mid';}else if(chVal>=THRESHOLDS.CHANCE_HIGH){chCls='prev-hit';}else if(chVal>=THRESHOLDS.CHANCE_MID){chCls='prev-mid';}else{chCls='prev-miss';};const chLabel=isNaN(chVal)?'❓ Incerto':chVal>=THRESHOLDS.CHANCE_HIGH?'\u{1F3AF} Prov\u00e1vel':chVal>=THRESHOLDS.CHANCE_MID?'\u26A0\uFE0F Arriscado':'\u274C Dif\u00edcil';const barCls=chVal>=THRESHOLDS.CHANCE_HIGH?'bar-high':chVal>=THRESHOLDS.CHANCE_MID?'bar-mid':'bar-low';previewHtml=`<div class="target-preview"><span class="${chCls}">${chLabel} \u00b7 ${chText}</span>${dmgText ? `\u00b7 ${escHtml(dmgText)}` : ''}<div class="target-chance-bar ${barCls}"><div class="target-chance-fill" style="width:${chVal}%"></div></div></div>`;}}
+if(chText){const chVal=parseInt(chText, 10);let chCls;if(isNaN(chVal)){chCls='prev-mid';}else if(chVal>=65){chCls='prev-hit';}else if(chVal>=40){chCls='prev-mid';}else{chCls='prev-miss';};const chLabel=isNaN(chVal)?'❓ Incerto':chVal>=65?'\u{1F3AF} Prov\u00e1vel':chVal>=40?'\u26A0\uFE0F Arriscado':'\u274C Dif\u00edcil';const barCls=chVal>=65?'bar-high':chVal>=40?'bar-mid':'bar-low';previewHtml=`<div class="target-preview"><span class="${chCls}">${chLabel} \u00b7 ${chText}</span>${dmgText ? `\u00b7 ${escHtml(dmgText)}` : ''}<div class="target-chance-bar ${barCls}"><div class="target-chance-fill" style="width:${chVal}%"></div></div></div>`;}}
 const hpColor=pct>60?'var(--v-hp-high, #5a8a3c)':pct>25?'var(--v-hp-mid, #b88a2a)':'var(--v-hp-low, #a63a2a)';html+=`<div class="target-item" data-target="${i}">
             <div><span>${e.ico || '👹'}</span> <b>${escHtml(e.n)}</b>${previewHtml}</div>
             <div class="skill-meta">${e.hp}/${e.mhp} HP (${pct}%)</div>

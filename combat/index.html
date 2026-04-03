@@ -28,6 +28,11 @@
         document.write('<link rel="stylesheet" href="../shared/dice-roller.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="combat.css?v=' + v + '">');
     document.write('<link rel="stylesheet" href="combat-battlefield.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="combat-turn-queue.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="combat-grid.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="combat-actions-popup.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="combat-unit-popup.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="combat-log-popup.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
     </script>
@@ -91,6 +96,11 @@
         document.write('<link rel="stylesheet" href="../shared/image-popup.css?v=' + v + '">');
         document.write('<script src="../shared/image-popup.js?v=' + v + '"><\/script>');
         document.write('<script src="combat-battlefield.js?v=' + v + '"><\/script>');
+    document.write('<script src="combat-turn-queue.js?v=' + v + '"><\/script>');
+    document.write('<script src="combat-grid.js?v=' + v + '"><\/script>');
+    document.write('<script src="combat-actions-popup.js?v=' + v + '"><\/script>');
+    document.write('<script src="combat-unit-popup.js?v=' + v + '"><\/script>');
+    document.write('<script src="combat-log-popup.js?v=' + v + '"><\/script>');
     document.write('<script src="combat-ui.js?v=' + v + '"><\/script>');
         document.write('<script src="combat.js?v=' + v + '"><\/script>');
     </script>
@@ -103,6 +113,7 @@
     </div>
 </div>
 <div id="combatAnnouncer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+<div class="ud-overlay hidden" id="unitPopup"></div>
 <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("COMBAT")</script>
 </body>
 

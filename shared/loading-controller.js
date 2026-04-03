@@ -252,7 +252,9 @@ window.ValdoriaLoadingController = function(config) {
             var remaining = MIN_LOAD_MS - elapsed;
             if (remaining > 0) {
                 var self = this;
-                setTimeout(function() { self.hide(cb); }, remaining);
+                /* Content ready (progress=100%): only wait for bar fill animation (600ms), not full MIN_LOAD */
+                var wait = _progress >= 100 ? Math.min(remaining, 600) : remaining;
+                setTimeout(function() { self.hide(cb); }, wait);
                 return;
             }
             _state = 'hiding';

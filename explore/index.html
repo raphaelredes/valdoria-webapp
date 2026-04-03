@@ -82,11 +82,36 @@
         </div>
     </div>
 
+    <!-- Floating HUD: HP/MP top-left -->
+    <div id="hud-floating-hp" class="hud-float hud-float-tl">
+      <div class="hud-float-bar">❤️ <div class="hud-bar-track"><div id="hp-fill-float" class="fill fill-hp" style="width:100%"></div></div> <span id="hp-val-float" class="hud-float-val hp">--/--</span></div>
+      <div class="hud-float-bar">💧 <div class="hud-bar-track"><div id="mp-fill-float" class="fill fill-mp" style="width:100%"></div></div> <span id="mp-val-float" class="hud-float-val mp">--/--</span></div>
+    </div>
+
+    <!-- Floating HUD: Steps top-right -->
+    <div id="hud-floating-info" class="hud-float hud-float-tr">
+      <span id="badge-steps-float">👣 0/0</span>
+    </div>
+
+    <!-- Floating quick actions: bottom-right -->
+    <div id="hud-quick-actions" class="hud-float-quick">
+      <div class="hud-quick-btn" id="btn-camp-float" onclick="if(typeof showCampOverlay==='function')showCampOverlay();">🏕️</div>
+      <div class="hud-quick-btn" id="btn-inventory-float" onclick="if(typeof transitionToInventory==='function')transitionToInventory();">🎒</div>
+      <div class="hud-quick-btn" id="btn-torch" onclick="if(typeof toggleTorch==='function')toggleTorch();">🔥</div>
+    </div>
+
     <!-- Minimap -->
     <canvas id="minimap" width="80" height="80" role="img" aria-label="Minimapa"></canvas>
 
     <!-- Watch/Day badge (fixed top-right) -->
     <span id="watch-badge" class="watch-badge" style="display:none"></span>
+
+    <!-- Top Bar: Biome + Weather + Danger -->
+    <div id="explore-top-bar" class="explore-top-bar">
+      <span id="top-biome" class="top-biome">🌲 Floresta</span>
+      <span id="top-weather" class="top-weather">☀️ Limpo</span>
+      <span id="top-danger" class="top-danger"></span>
+    </div>
 
     <!-- Map Viewport -->
     <div id="map-viewport" role="application" aria-label="Mapa de exploração interativo">
@@ -170,8 +195,7 @@
 
     </div>
 
-    <!-- Immersive Mode Restore -->
-    <button id="immersive-restore" class="immersive-restore" style="display:none">&middot; Menu</button>
+    <!-- immersive-restore removed: bottom panel replaced by floating HUD -->
 
     <!-- Activity Selection Overlay (D&D PHB Ch.8) -->
     <div class="activity-overlay" id="activity-overlay" role="dialog" aria-label="Atividade de viagem">
