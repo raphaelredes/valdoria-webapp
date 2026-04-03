@@ -24,20 +24,37 @@ if (document.readyState === 'loading') {
 }
 
 function _parseParams() {
-  /* SPA router may pass params via __spaRouteParams */
-  var params = window.__spaRouteParams || new URLSearchParams(window.location.search);
+  /* SPA router passes params as plain object via __spaRouteParams
+     Standalone page uses URLSearchParams from URL */
+  var raw = window.__spaRouteParams;
+  var params;
+  if (raw && typeof raw === 'object' && typeof raw.get !== 'function') {
+    /* Plain object from SPA router — wrap for uniform access */
+    params = { get: function(k) { return raw[k] || ''; } };
+  } else if (raw && typeof raw.get === 'function') {
+    /* URLSearchParams */
+    params = raw;
+  } else {
+    params = new URLSearchParams(window.location.search);
+  }
   S.token = params.get('token') || '';
   S.api = decodeURIComponent(params.get('api') || '');
   S.uid = parseInt(params.get('uid') || '0', 10);
   S.returnTo = params.get('return') || 'game';
+  S._params = params;
+  console.log('[HUB] _parseParams token=%s api=%s uid=%s hasSpaParams=%s type=%s',
+    S.token ? S.token.substring(0, 8) + '...' : '(none)',
+    S.api ? 'yes' : 'no', S.uid,
+    !!window.__spaRouteParams,
+    raw ? typeof raw : 'url');
 }
 
 async function _loadPayload() {
-  var params = window.__spaRouteParams || new URLSearchParams(window.location.search);
+  var params = S._params || new URLSearchParams(window.location.search);
   var dataB64 = params.get('data') || '';
 
-  console.log('[HUB] _loadPayload hasData=%s hasApi=%s hasToken=%s spaParams=%s',
-    !!dataB64, !!S.api, !!S.token, !!window.__spaRouteParams);
+  console.log('[HUB] _loadPayload hasData=%s dataLen=%s hasApi=%s hasToken=%s',
+    !!dataB64, dataB64 ? dataB64.length : 0, !!S.api, !!S.token);
 
   if (dataB64) {
     /* Payload in URL — decompress */
