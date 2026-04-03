@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2a2420">
+<title>Teste - Diário de Viagem</title>
+<style>html{background:#1a1510;}</style>
+<script>
+var v = Date.now();
+document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
+document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
+document.write('<link rel="stylesheet" href="navigate.css?v=' + v + '">');
+document.write('<link rel="stylesheet" href="navigate-journal.css?v=' + v + '">');
+</script>
+<script>
+document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
+</script>
+</head>
+<body style="background:#2a2420;color:#d4c8b0;font-family:'MedievalSharp',serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+
+<div id="v-popup-overlay" class="v-popup-overlay"><div class="v-popup-card"><div class="v-popup-header"></div><div class="v-popup-body"></div><div class="v-popup-actions"></div></div></div>
+<div style="text-align:center;padding:20px;">
+  <div style="font-family:'Cinzel',serif;color:#c4953a;font-size:18px;margin-bottom:16px;">Teste do Diário de Viagem</div>
+  <button onclick="openJournal()" style="padding:14px 28px;background:rgba(196,149,58,0.15);border:1px solid rgba(196,149,58,0.3);border-radius:10px;color:#dbb668;font-family:'MedievalSharp',serif;font-size:16px;cursor:pointer;">Abrir Diário</button>
+</div>
+
+<script>
+function vEsc(s){if(!s)return '';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+var _testLog = [
+  { type: 'weather', icon: '\ud83c\udf27\ufe0f', text: 'Clima: Chuva forte', detail: 'Visibilidade reduzida, terreno escorregadio. A chuva dificulta a marcha e reduz a percep\u00e7\u00e3o passiva em -2.' },
+  { type: 'departure', icon: '\ud83d\udeb6', text: 'Partiu de Valdoria rumo a Bosque Sombrio', detail: 'Ritmo Cauteloso \u2014 6 turnos de viagem estimados. +5 Percep\u00e7\u00e3o Passiva.' },
+  { type: 'safe', icon: '\u2714\ufe0f', text: 'Trecho 1/5 seguro', detail: '' },
+  { type: 'safe', icon: '\u2714\ufe0f', text: 'Trecho 2/5 seguro', detail: '' },
+  { type: 'safe', icon: '\u2714\ufe0f', text: 'Trecho 3/5 seguro', detail: '' },
+  { type: 'encounter', icon: '\u2694\ufe0f', text: 'Encontro na estrada!', detail: 'Bandidos bloquearam o caminho. Voc\u00ea lutou bravamente e venceu ap\u00f3s 3 rodadas de combate!', xp: 80, gp: 15 },
+  { type: 'forage_ok', icon: '\ud83c\udf3f', text: 'Forrageamento bem-sucedido!', detail: 'Sobreviv\u00eancia: 15+3=18 vs DC 12 \u2014 Encontrou ervas medicinais e cogumelos', xp: 10 },
+  { type: 'lost', icon: '\ud83e\udded', text: 'Perdeu-se no caminho!', detail: 'Sobreviv\u00eancia: 8+2=10 vs DC 13 \u2014 Falha! Gastou 3 turnos extras vagando', hp_lost: 5 },
+  { type: 'safe', icon: '\u2714\ufe0f', text: 'Trecho 4/5 seguro', detail: '' },
+  { type: 'safe', icon: '\u2714\ufe0f', text: 'Trecho 5/5 seguro', detail: '' },
+  { type: 'cartograph_ok', icon: '\ud83d\uddfa\ufe0f', text: 'Cartografia: 2 locais revelados!', detail: 'P\u00e2ntano Negro e Ru\u00ednas Antigas agora aparecem no mapa', xp: 25 },
+  { type: 'discovery', icon: '\ud83c\udfe0', text: 'Descobriu um assentamento!', detail: 'Vila dos Pescadores \u2014 comunidade entre os pinheiros com taverna e mercado', xp: 50, gp: 10 },
+  { type: 'arrival_new', icon: '\u2728', text: 'Chegou a Bosque Sombrio pela primeira vez!', detail: 'Uma floresta densa e misteriosa onde a luz do sol mal penetra entre as copas antigas.', loc_id: 'dark_forest', xp: 30 }
+];
+
+function openJournal(){
+  var log = _testLog;
+  var _hasDeath=log.some(function(e){return e.type==='exhaustion_death';});
+  var _SAFE_TYPES={'safe':1,'forced_march_ok':1,'weather_save_ok':1};var compacted=[];var safeRun=0;
+  for(var _ci=0;_ci<log.length;_ci++){if(_SAFE_TYPES[log[_ci].type]){safeRun++;continue;}if(safeRun>0){compacted.push(safeRun===1?{type:'safe',icon:'\u2714\ufe0f',text:'Trecho seguro',detail:'',_compact:true}:{type:'safe',icon:'\u2714\ufe0f',text:safeRun+' trechos seguros',detail:'',_group:true});safeRun=0;}compacted.push(log[_ci]);}if(safeRun>0){compacted.push(safeRun===1?{type:'safe',icon:'\u2714\ufe0f',text:'Trecho seguro',detail:'',_compact:true}:{type:'safe',icon:'\u2714\ufe0f',text:safeRun+' trechos seguros',detail:'',_group:true});}
+  var _xpT=0,_gpT=0,_hpL=0,_safes=0,_enc=0,_disc=0;
+  for(var _si=0;_si<log.length;_si++){var _st=log[_si].type;if(log[_si].xp)_xpT+=log[_si].xp;if(log[_si].gp)_gpT+=log[_si].gp;if(log[_si].hp_lost)_hpL+=log[_si].hp_lost;if(_SAFE_TYPES[_st])_safes++;if(_st==='encounter')_enc++;if(_st==='arrival_new'||_st==='discovery'||_st==='cartograph_ok')_disc++;}
+  var PER_PAGE=5;var pages=[];for(var _pi=0;_pi<compacted.length;_pi+=PER_PAGE){pages.push(compacted.slice(_pi,_pi+PER_PAGE));}if(pages.length===0)pages.push([]);var totalPages=pages.length;
+  var bodyHtml='';
+  var _evData=[];for(var pg=0;pg<totalPages;pg++){bodyHtml+='<div class="tj-page'+(pg===0?' tj-page--active':'')+'" data-page="'+pg+'"><div class="tj-timeline">';var items=pages[pg];for(var i=0;i<items.length;i++){var e=items[i];var _cls='tj-event';if(e._compact)_cls+=' tj-event--compact';if(e._group)_cls+=' tj-event--group';var _hasDetail=e.detail&&e.detail.length>0&&!e._compact&&!e._group;if(_hasDetail){_evData.push({icon:e.icon,text:e.text,detail:e.detail});}bodyHtml+='<div class="'+_cls+'"><div class="tj-dot tj-dot--'+vEsc(e.type)+'">'+vEsc(e.icon)+'</div><div class="tj-card tj-card--'+vEsc(e.type)+'"'+(_hasDetail?' data-ev-idx="'+(_evData.length-1)+'"':'')+'><div class="tj-title">'+vEsc(e.text)+'</div>'+(_hasDetail?'<div class="tj-expand">\u25b8 Ver detalhes</div>':'')+'</div></div>';}bodyHtml+='</div></div>';}
+  bodyHtml+='<div class="tj-summary" data-summary>';bodyHtml+='<div class="tj-stat"><div class="tj-stat-val">'+log.length+'</div><div class="tj-stat-label">Eventos</div></div><div class="tj-stat-sep"></div>';
+  if(_xpT>0)bodyHtml+='<div class="tj-stat"><div class="tj-stat-val tj-stat-val--xp">+'+_xpT+'</div><div class="tj-stat-label">XP</div></div>';
+  if(_gpT>0)bodyHtml+='<div class="tj-stat"><div class="tj-stat-val tj-stat-val--gp">+'+_gpT+'</div><div class="tj-stat-label">Ouro</div></div>';
+  if(_hpL>0)bodyHtml+='<div class="tj-stat"><div class="tj-stat-val tj-stat-val--hp">-'+_hpL+'</div><div class="tj-stat-label">HP</div></div>';
+  if(!_xpT&&!_gpT&&!_hpL){if(_disc>0)bodyHtml+='<div class="tj-stat"><div class="tj-stat-val">'+_disc+'</div><div class="tj-stat-label">Descobertas</div></div>';if(_enc>0)bodyHtml+='<div class="tj-stat"><div class="tj-stat-val">'+_enc+'</div><div class="tj-stat-label">Encontros</div></div>';}
+  bodyHtml+='</div>';
+  if(totalPages>1){bodyHtml+='<div class="tj-pager" data-pager><button class="tj-pager-btn" data-pg-prev disabled>\u25c2</button><div class="tj-pager-dots">';for(var _di=0;_di<totalPages;_di++){bodyHtml+='<div class="tj-pager-dot'+(_di===0?' active':'')+'"></div>';}bodyHtml+='</div><button class="tj-pager-btn" data-pg-next>\u25b8</button></div>';}
+  /* ornament removed */
+  var _journalDone=false;var _btnLabel=_hasDeath?'Despertar no Templo \ud83c\udfdb\ufe0f':'Continuar Viagem \u27a1';var _curPage=0;
+  vPopup.show({id:'v-popup-overlay',header:'\ud83d\udcdc Di\u00e1rio de Viagem',body:bodyHtml,actions:[{label:_btnLabel,action:'continue_travel',cls:'v-popup-btn v-popup-btn--primary'}],onAction:function(action){if(action==='continue_travel'){if(_journalDone)return;_journalDone=true;vPopup.hide();return true;}},closeOnOutside:false,onReady:function(overlay){overlay.setAttribute('data-journal','1');
+    overlay.querySelectorAll('.tj-expand').forEach(function(el){el.addEventListener('click',function(){var card=el.closest('.tj-card');var idx=parseInt(card.getAttribute('data-ev-idx'),10);if(isNaN(idx)||!_evData[idx])return;var ev=_evData[idx];var detailOverlay=document.getElementById('tj-detail-overlay');if(!detailOverlay){detailOverlay=document.createElement('div');detailOverlay.id='tj-detail-overlay';detailOverlay.className='v-popup-overlay';var _c=document.createElement('div');_c.className='v-popup-card';['v-popup-header','v-popup-body','v-popup-actions'].forEach(function(cn){var d=document.createElement('div');d.className=cn;_c.appendChild(d);});detailOverlay.appendChild(_c);document.body.appendChild(detailOverlay);}vPopup.show({id:'tj-detail-overlay',header:ev.icon+' '+ev.text,body:'<div class="tj-detail-popup"><div class="tj-detail-icon">'+vEsc(ev.icon)+'</div><div class="tj-detail-title">'+vEsc(ev.text)+'</div><div class="tj-detail-sep"></div><div class="tj-detail-text">'+vEsc(ev.detail)+'</div></div>',actions:[{label:'Voltar ao Di\u00e1rio',action:'back',cls:'v-popup-btn v-popup-btn--cancel'}],onAction:function(a){if(a==='back'){vPopup.hide();return true;}}});});});
+    var _pages=overlay.querySelectorAll('.tj-page');var _dots=overlay.querySelectorAll('.tj-pager-dot');var _prev=overlay.querySelector('[data-pg-prev]');var _next=overlay.querySelector('[data-pg-next]');
+    function _goPage(n){if(n<0||n>=totalPages)return;_curPage=n;_pages.forEach(function(p,idx){p.classList.toggle('tj-page--active',idx===n);});_dots.forEach(function(d,idx){d.classList.toggle('active',idx===n);});if(_prev)_prev.disabled=(n===0);if(_next)_next.disabled=(n===totalPages-1);var newEvents=_pages[n].querySelectorAll('.tj-event');newEvents.forEach(function(el,idx){el.classList.remove('tj-revealed');setTimeout(function(){el.classList.add('tj-revealed');},80+idx*120);});}
+    if(_prev)_prev.addEventListener('click',function(){_goPage(_curPage-1);});if(_next)_next.addEventListener('click',function(){_goPage(_curPage+1);});
+    var firstEvents=overlay.querySelectorAll('.tj-page--active .tj-event');var summary=overlay.querySelector('[data-summary]');var continueBtn=overlay.querySelector('[data-action="continue_travel"]');if(continueBtn)continueBtn.style.opacity='0';
+    var _stagger=Math.min(280,1400/Math.max(1,firstEvents.length));firstEvents.forEach(function(el,idx){setTimeout(function(){el.classList.add('tj-revealed');},200+idx*_stagger);});
+    var totalDelay=Math.max(2000,200+firstEvents.length*_stagger+400);if(summary){setTimeout(function(){summary.classList.add('tj-revealed');},totalDelay-300);}
+    setTimeout(function(){if(continueBtn){continueBtn.style.transition='opacity 0.3s';continueBtn.style.opacity='1';}},totalDelay);
+  }});
+}
+</script>
+</body>
+</html>
