@@ -1,0 +1,858 @@
+/* ══════════════════════════════════════════════════════════
+   VISÃO DO ORÁCULO — Immersive Event Overlay System
+   Inspired by Hades, Darkest Dungeon, Disco Elysium
+   Applied to: dm-overlay, encounter-overlay, outcome-overlay
+   Other overlays (camp, exit-risk, activity, etc.) untouched
+   ══════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════
+   SHARED ANIMATIONS
+   ═══════════════════════════════════ */
+
+@keyframes oracleGlow {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+}
+
+@keyframes ornamentFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes iconReveal {
+  from { opacity: 0; transform: scale(0.6); filter: blur(4px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+@keyframes titleReveal {
+  from { opacity: 0; letter-spacing: 4px; }
+  to { opacity: 1; letter-spacing: 1px; }
+}
+
+@keyframes contentRise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes separatorGrow {
+  from { width: 0; opacity: 0; }
+  to { width: 60%; opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px var(--v-gold-08); }
+  50% { box-shadow: 0 0 35px var(--v-gold-15); }
+}
+
+
+/* ═══════════════════════════════════
+   DM OVERLAY (POI / Story Events)
+   ═══════════════════════════════════ */
+
+/* Full-screen warm radial gradient */
+.dm-overlay {
+  background: radial-gradient(
+    ellipse at 50% 36%,
+    rgba(55, 45, 28, 0.97) 0%,
+    rgba(32, 26, 18, 0.98) 55%,
+    rgba(18, 14, 10, 0.99) 100%
+  ) !important;
+}
+
+/* Mystical glow orb behind content */
+.dm-overlay::after {
+  content: '';
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--v-gold-06) 0%,
+    rgba(196, 149, 58, 0.025) 35%,
+    transparent 65%
+  );
+  pointer-events: none;
+  animation: oracleGlow 5s ease-in-out infinite;
+  z-index: 0;
+}
+
+/* Card becomes transparent centered container */
+.dm-overlay > .dm-card {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-align: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+  position: relative;
+  z-index: 1;
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 16px);
+}
+
+/* Top ornament (replaces colored line) */
+.dm-overlay > .dm-card::before {
+  content: '◆ ─── ◆ ─── ◆';
+  position: relative !important;
+  display: block;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  height: auto !important;
+  width: auto !important;
+  text-align: center;
+  color: var(--v-gold-20);
+  font-size: var(--v-font-sm, 12px);
+  letter-spacing: 5px;
+  margin-bottom: var(--v-space-md, 8px);
+  background: none !important;
+  border-radius: 0 !important;
+  opacity: 0;
+  animation: ornamentFade 0.6s ease 0.15s forwards;
+  flex-shrink: 0;
+}
+
+/* Bottom ornament */
+.dm-overlay > .dm-card::after {
+  content: '◆ ─── ◆ ─── ◆';
+  position: relative !important;
+  display: block;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  height: auto !important;
+  width: auto !important;
+  text-align: center;
+  color: var(--v-gold-20);
+  font-size: var(--v-font-sm, 12px);
+  letter-spacing: 5px;
+  margin-top: var(--v-space-lg, 16px);
+  background: none !important;
+  border-radius: 0 !important;
+  opacity: 0 !important;
+  animation: ornamentFade 0.6s ease 0.5s forwards !important;
+  flex-shrink: 0;
+}
+
+/* Header: centered vertically with large icon */
+.dm-overlay .dm-header {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--v-space-xs, 2px);
+  margin-bottom: var(--v-space-sm, 4px);
+}
+
+/* Icon: large, visible, with glow */
+.dm-overlay .dm-icon {
+  display: block !important;
+  font-size: clamp(36px, 10vw, 46px);
+  text-shadow: 0 0 28px var(--v-gold-30), 0 4px 8px rgba(0,0,0,0.4);
+  margin-bottom: var(--v-space-sm, 4px);
+  animation: iconReveal 0.5s var(--v-ease-spring, cubic-bezier(0.34,1.56,0.64,1)) both;
+  line-height: 1.2;
+}
+
+/* Title: dramatic centered */
+.dm-overlay .dm-title {
+  font-size: clamp(17px, 5vw, 21px) !important;
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: 1px;
+  text-shadow:
+    0 0 18px var(--v-gold-30),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  animation: titleReveal 0.5s ease 0.1s both;
+}
+
+/* Type badge centered below title */
+.dm-overlay .dm-type-badge {
+  text-align: center;
+  margin-top: var(--v-space-xs, 2px);
+  animation: contentRise 0.4s ease 0.2s both;
+}
+
+/* Event image: centered with subtle frame */
+.dm-overlay .dm-event-thumb {
+  max-width: 280px;
+  border-radius: var(--v-radius, 10px);
+  border: 1px solid var(--v-gold-20) !important;
+  margin: var(--v-space-md, 8px) auto;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* Gold separator line before narration */
+.dm-overlay .dm-narration::before {
+  content: '';
+  display: block;
+  width: 60%;
+  max-width: 180px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--v-gold-25), transparent);
+  margin: 0 auto var(--v-space-lg, 16px);
+  animation: separatorGrow 0.5s ease 0.3s both;
+}
+
+/* Narration: centered, enhanced */
+.dm-overlay .dm-narration {
+  text-align: center;
+  font-size: var(--v-font-body, 14px);
+  line-height: 1.75;
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: contentRise 0.5s ease 0.3s both;
+}
+
+/* Continue button: enhanced with glow */
+.dm-overlay .dm-continue-btn {
+  background: linear-gradient(180deg, var(--v-gold-10), var(--v-gold-03));
+  border: 1px solid var(--v-gold-20);
+  margin-top: var(--v-space-xl, 20px);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* Choices container centered */
+.dm-overlay .dm-choices {
+  width: 100%;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: contentRise 0.4s ease 0.35s both;
+}
+
+/* NPC dialogue line: enhanced in centered layout */
+.dm-overlay .npc-dialogue-line {
+  text-align: left;
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/* ═══════════════════════════════════
+   DM OVERLAY — AMBIENT VARIANT
+   ═══════════════════════════════════ */
+
+.dm-overlay.ambient-event {
+  background: radial-gradient(
+    ellipse at 50% 42%,
+    rgba(45, 40, 25, 0.95) 0%,
+    rgba(25, 20, 14, 0.97) 55%,
+    rgba(14, 12, 8, 0.99) 100%
+  ) !important;
+}
+
+.dm-overlay.ambient-event::after {
+  top: 40%;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(
+    circle,
+    var(--v-gold-04) 0%,
+    transparent 60%
+  );
+}
+
+.dm-overlay.ambient-event .dm-narration {
+  text-align: center;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: var(--v-font-lg, 16px);
+  line-height: 1.8;
+}
+
+/* Ambient continue button */
+.dm-overlay.ambient-event .ambient-continue-btn {
+  background: linear-gradient(180deg, var(--v-gold-08), var(--v-gold-02));
+  border: 1px solid var(--v-gold-15);
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+
+/* ═══════════════════════════════════
+   DM OVERLAY — EVENT TYPE VARIANTS
+   (data-event="danger|discovery|combat")
+   ═══════════════════════════════════ */
+
+/* Discovery: brighter gold glow */
+.dm-overlay[data-event="discovery"] {
+  background: radial-gradient(
+    ellipse at 50% 36%,
+    rgba(60, 50, 25, 0.97) 0%,
+    rgba(35, 28, 16, 0.98) 55%,
+    rgba(18, 14, 10, 0.99) 100%
+  ) !important;
+}
+
+.dm-overlay[data-event="discovery"]::after {
+  background: radial-gradient(
+    circle,
+    var(--v-gold-10) 0%,
+    var(--v-gold-04) 35%,
+    transparent 65%
+  );
+}
+
+.dm-overlay[data-event="discovery"] > .dm-card::before,
+.dm-overlay[data-event="discovery"] > .dm-card::after {
+  color: var(--v-gold-35);
+}
+
+/* Danger: crimson glow */
+.dm-overlay[data-event="danger"] {
+  background: radial-gradient(
+    ellipse at 50% 36%,
+    rgba(60, 30, 25, 0.97) 0%,
+    rgba(30, 18, 16, 0.98) 55%,
+    rgba(16, 10, 10, 0.99) 100%
+  ) !important;
+}
+
+.dm-overlay[data-event="danger"]::after {
+  background: radial-gradient(
+    circle,
+    rgba(180, 50, 50, 0.07) 0%,
+    rgba(180, 50, 50, 0.025) 35%,
+    transparent 65%
+  );
+}
+
+.dm-overlay[data-event="danger"] > .dm-card {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.dm-overlay[data-event="danger"] > .dm-card::before,
+.dm-overlay[data-event="danger"] > .dm-card::after {
+  color: rgba(180, 50, 50, 0.3) !important;
+  background: none !important;
+}
+
+.dm-overlay[data-event="danger"] .dm-type-badge {
+  background: rgba(200, 60, 60, 0.15);
+  color: #d88;
+}
+
+.dm-overlay[data-event="danger"] .dm-narration::before {
+  background: linear-gradient(90deg, transparent, rgba(180,50,50,0.3), transparent);
+}
+
+/* Combat: red glow */
+.dm-overlay[data-event="combat"] {
+  background: radial-gradient(
+    ellipse at 50% 36%,
+    rgba(55, 25, 25, 0.97) 0%,
+    rgba(28, 16, 16, 0.98) 55%,
+    rgba(14, 10, 10, 0.99) 100%
+  ) !important;
+}
+
+.dm-overlay[data-event="combat"]::after {
+  background: radial-gradient(
+    circle,
+    rgba(180, 50, 50, 0.08) 0%,
+    transparent 65%
+  );
+}
+
+.dm-overlay[data-event="combat"] > .dm-card {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.dm-overlay[data-event="combat"] > .dm-card::before,
+.dm-overlay[data-event="combat"] > .dm-card::after {
+  color: rgba(180, 50, 50, 0.25) !important;
+  background: none !important;
+}
+
+
+/* ═══════════════════════════════════
+   DM OVERLAY — BIOME VARIANTS
+   (Override biome CSS with radial gradients)
+   ═══════════════════════════════════ */
+
+/* Generic biome override: radial gradient from biome-bg */
+.dm-overlay[data-biome] {
+  background: radial-gradient(
+    ellipse at 50% 36%,
+    var(--biome-bg, rgba(55,45,28,0.97)) 0%,
+    rgba(22, 18, 14, 0.98) 60%,
+    rgba(14, 12, 10, 0.99) 100%
+  ) !important;
+}
+
+/* Biome card: transparent */
+.dm-overlay[data-biome] > .dm-card {
+  border-color: transparent !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* Biome ornaments use accent color */
+.dm-overlay[data-biome] > .dm-card::before {
+  content: '◆ ─── ◆ ─── ◆' !important;
+  position: relative !important;
+  display: block !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  height: auto !important;
+  width: auto !important;
+  text-align: center !important;
+  color: var(--biome-accent, rgba(196,149,58,0.22)) !important;
+  font-size: var(--v-font-sm, 12px) !important;
+  letter-spacing: 5px !important;
+  margin-bottom: var(--v-space-md, 8px) !important;
+  background: none !important;
+  border-radius: 0 !important;
+  opacity: 0 !important;
+  animation: ornamentFade 0.6s ease 0.15s forwards !important;
+}
+
+/* Biome glow uses accent color */
+.dm-overlay[data-biome]::after {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--biome-accent, #c4953a) 8%, transparent) 0%,
+    transparent 65%
+  );
+}
+
+/* Biome separator uses accent color */
+.dm-overlay[data-biome] .dm-narration::before {
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--biome-accent, #c4953a) 25%, transparent),
+    transparent
+  );
+}
+
+
+/* ═══════════════════════════════════
+   ENCOUNTER OVERLAY (Random Encounters)
+   ═══════════════════════════════════ */
+
+/* Full-screen crimson radial gradient */
+.encounter-overlay {
+  background: radial-gradient(
+    ellipse at 50% 36%,
+    rgba(65, 25, 22, 0.97) 0%,
+    rgba(30, 16, 14, 0.98) 55%,
+    rgba(16, 10, 8, 0.99) 100%
+  ) !important;
+}
+
+/* Crimson glow orb */
+.encounter-overlay::after {
+  content: '';
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(200, 50, 40, 0.07) 0%,
+    rgba(180, 40, 30, 0.025) 35%,
+    transparent 65%
+  );
+  pointer-events: none;
+  animation: oracleGlow 4s ease-in-out infinite;
+  z-index: 0;
+}
+
+/* Card transparent */
+.encounter-overlay > .dm-card {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-align: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+/* Crimson ornaments */
+.encounter-overlay > .dm-card::before {
+  content: '◆ ─── ◆ ─── ◆' !important;
+  position: relative !important;
+  display: block !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  height: auto !important;
+  width: auto !important;
+  text-align: center;
+  color: rgba(200, 60, 50, 0.25);
+  font-size: var(--v-font-sm, 12px);
+  letter-spacing: 5px;
+  margin-bottom: var(--v-space-md, 8px);
+  background: none !important;
+  border-radius: 0 !important;
+  opacity: 0;
+  animation: ornamentFade 0.6s ease 0.15s forwards;
+  flex-shrink: 0;
+}
+
+.encounter-overlay > .dm-card::after {
+  content: '◆ ─── ◆ ─── ◆';
+  position: relative !important;
+  display: block;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  height: auto !important;
+  width: auto !important;
+  text-align: center;
+  color: rgba(200, 60, 50, 0.25);
+  font-size: var(--v-font-sm, 12px);
+  letter-spacing: 5px;
+  margin-top: var(--v-space-lg, 16px);
+  background: none !important;
+  border-radius: 0 !important;
+  opacity: 0;
+  animation: ornamentFade 0.6s ease 0.5s forwards;
+  flex-shrink: 0;
+}
+
+/* Encounter header centered */
+.encounter-overlay .dm-header {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--v-space-xs, 2px);
+}
+
+/* Encounter icon: large, crimson glow */
+.encounter-overlay .dm-icon {
+  display: block !important;
+  font-size: clamp(36px, 10vw, 46px);
+  text-shadow: 0 0 28px rgba(200, 50, 40, 0.35), 0 4px 8px rgba(0,0,0,0.4);
+  animation: iconReveal 0.5s var(--v-ease-spring, cubic-bezier(0.34,1.56,0.64,1)) both;
+  line-height: 1.2;
+}
+
+/* Encounter title */
+.encounter-overlay .dm-title {
+  font-size: clamp(17px, 5vw, 21px) !important;
+  font-weight: 900;
+  text-align: center;
+  color: var(--v-text-bright, #e8dcc8);
+  text-shadow:
+    0 0 18px rgba(200, 60, 50, 0.35),
+    0 2px 4px rgba(0,0,0,0.5);
+  animation: titleReveal 0.5s ease 0.1s both;
+}
+
+/* Encounter narration centered */
+.encounter-overlay .dm-narration {
+  text-align: center;
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: contentRise 0.4s ease 0.25s both;
+}
+
+/* Crimson separator */
+.encounter-overlay .dm-narration::before {
+  content: '';
+  display: block;
+  width: 60%;
+  max-width: 180px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,60,50,0.3), transparent);
+  margin: 0 auto var(--v-space-lg, 16px);
+  animation: separatorGrow 0.5s ease 0.2s both;
+}
+
+/* Encounter choices centered */
+.encounter-overlay .dm-choices {
+  width: 100%;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: contentRise 0.4s ease 0.3s both;
+}
+
+
+/* ═══════════════════════════════════
+   OUTCOME OVERLAY (Results)
+   ═══════════════════════════════════ */
+
+/* Neutral outcome: warm glow */
+.outcome-overlay {
+  background: radial-gradient(
+    ellipse at 50% 38%,
+    rgba(45, 42, 30, 0.97) 0%,
+    rgba(24, 22, 16, 0.98) 60%,
+    rgba(14, 12, 10, 0.99) 100%
+  ) !important;
+}
+
+/* Outcome glow */
+.outcome-overlay::after {
+  content: '';
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--v-gold-5) 0%,
+    transparent 65%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Outcome card transparent */
+.outcome-overlay > .dm-card {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-align: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+/* Outcome ornaments */
+.outcome-overlay > .dm-card::before {
+  content: '◆ ─── ◆ ─── ◆';
+  display: block;
+  text-align: center;
+  color: rgba(196, 149, 58, 0.18);
+  font-size: var(--v-font-sm, 12px);
+  letter-spacing: 5px;
+  margin-bottom: var(--v-space-xl, 20px);
+  animation: ornamentFade 0.5s ease 0.1s both;
+}
+
+.outcome-overlay > .dm-card::after {
+  content: '◆ ─── ◆ ─── ◆';
+  display: block;
+  text-align: center;
+  color: rgba(196, 149, 58, 0.18);
+  font-size: var(--v-font-sm, 12px);
+  letter-spacing: 5px;
+  margin-top: var(--v-space-md, 8px);
+  animation: ornamentFade 0.5s ease 0.5s both;
+}
+
+/* Outcome icon (injected via JS) */
+.outcome-overlay .outcome-icon {
+  font-size: clamp(32px, 9vw, 42px);
+  text-shadow: 0 0 24px var(--v-gold-30);
+  margin-bottom: var(--v-space-md, 8px);
+  animation: iconReveal 0.5s var(--v-ease-spring, cubic-bezier(0.34,1.56,0.64,1)) both;
+  line-height: 1.2;
+}
+
+/* Outcome title (injected via JS) */
+.outcome-overlay .outcome-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: clamp(16px, 4.5vw, 19px);
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 1px;
+  text-shadow: 0 0 14px var(--v-gold-25), 0 2px 3px rgba(0,0,0,0.4);
+  margin-bottom: var(--v-space-sm, 4px);
+  animation: titleReveal 0.4s ease 0.15s both;
+}
+
+/* Outcome text centered */
+.outcome-overlay .outcome-text {
+  text-align: center;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: contentRise 0.4s ease 0.2s both;
+}
+
+/* Separator before text */
+.outcome-overlay .outcome-text::before {
+  content: '';
+  display: block;
+  width: 50%;
+  max-width: 140px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--v-gold-20), transparent);
+  margin: 0 auto var(--v-space-lg, 16px);
+  animation: separatorGrow 0.4s ease 0.25s both;
+}
+
+/* Continue button glow */
+.outcome-overlay .btn-continue {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+
+/* ─── Reward outcome: green tint ─── */
+.outcome-overlay[data-outcome="reward"] {
+  background: radial-gradient(
+    ellipse at 50% 38%,
+    rgba(30, 48, 30, 0.97) 0%,
+    rgba(18, 24, 16, 0.98) 60%,
+    rgba(10, 14, 10, 0.99) 100%
+  ) !important;
+}
+
+.outcome-overlay[data-outcome="reward"]::after {
+  background: radial-gradient(
+    circle,
+    rgba(68, 170, 100, 0.06) 0%,
+    transparent 65%
+  );
+}
+
+.outcome-overlay[data-outcome="reward"] > .dm-card::before,
+.outcome-overlay[data-outcome="reward"] > .dm-card::after {
+  color: rgba(68, 170, 100, 0.22);
+}
+
+.outcome-overlay[data-outcome="reward"] .outcome-text::before {
+  background: linear-gradient(90deg, transparent, rgba(68,170,100,0.25), transparent);
+}
+
+.outcome-overlay[data-outcome="reward"] .outcome-icon {
+  text-shadow: 0 0 24px rgba(68, 170, 100, 0.3);
+}
+
+.outcome-overlay[data-outcome="reward"] .outcome-title {
+  color: var(--v-gold-light, #dbb668);
+}
+
+
+/* ─── Danger outcome: crimson tint ─── */
+.outcome-overlay[data-outcome="danger"] {
+  background: radial-gradient(
+    ellipse at 50% 38%,
+    rgba(55, 25, 25, 0.97) 0%,
+    rgba(28, 14, 14, 0.98) 60%,
+    rgba(14, 8, 8, 0.99) 100%
+  ) !important;
+}
+
+.outcome-overlay[data-outcome="danger"]::after {
+  background: radial-gradient(
+    circle,
+    rgba(200, 60, 50, 0.06) 0%,
+    transparent 65%
+  );
+}
+
+.outcome-overlay[data-outcome="danger"] > .dm-card::before,
+.outcome-overlay[data-outcome="danger"] > .dm-card::after {
+  color: rgba(200, 60, 50, 0.22);
+}
+
+.outcome-overlay[data-outcome="danger"] .outcome-text {
+  color: #d4a0a0;
+}
+
+.outcome-overlay[data-outcome="danger"] .outcome-text::before {
+  background: linear-gradient(90deg, transparent, rgba(200,60,50,0.25), transparent);
+}
+
+.outcome-overlay[data-outcome="danger"] .outcome-icon {
+  text-shadow: 0 0 24px rgba(200, 60, 50, 0.3);
+}
+
+.outcome-overlay[data-outcome="danger"] .outcome-title {
+  color: #d88;
+}
+
+.outcome-overlay[data-outcome="danger"] .btn-continue {
+  border-color: rgba(200, 60, 50, 0.35);
+  color: #c88;
+}
+
+
+/* ═══════════════════════════════════
+   PERFORMANCE TIERS
+   ═══════════════════════════════════ */
+
+/* Lite: disable all animations */
+body.perf-lite .dm-overlay::after,
+body.perf-lite .encounter-overlay::after,
+body.perf-lite .outcome-overlay::after {
+  animation: none !important;
+  opacity: 0.6;
+}
+
+body.perf-lite .dm-overlay > .dm-card::before,
+body.perf-lite .dm-overlay > .dm-card::after,
+body.perf-lite .encounter-overlay > .dm-card::before,
+body.perf-lite .encounter-overlay > .dm-card::after,
+body.perf-lite .outcome-overlay > .dm-card::before,
+body.perf-lite .outcome-overlay > .dm-card::after,
+body.perf-lite .dm-overlay .dm-icon,
+body.perf-lite .encounter-overlay .dm-icon,
+body.perf-lite .dm-overlay .dm-title,
+body.perf-lite .encounter-overlay .dm-title,
+body.perf-lite .dm-overlay .dm-narration,
+body.perf-lite .encounter-overlay .dm-narration,
+body.perf-lite .dm-overlay .dm-choices,
+body.perf-lite .encounter-overlay .dm-choices,
+body.perf-lite .outcome-overlay .outcome-icon,
+body.perf-lite .outcome-overlay .outcome-title,
+body.perf-lite .outcome-overlay .outcome-text,
+body.perf-lite .dm-overlay .dm-continue-btn,
+body.perf-lite .dm-overlay.ambient-event .ambient-continue-btn,
+body.perf-lite .outcome-overlay .btn-continue {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+/* Medium: keep most but simplify glow */
+body.perf-medium .dm-overlay::after,
+body.perf-medium .encounter-overlay::after,
+body.perf-medium .outcome-overlay::after {
+  animation: none !important;
+  opacity: 0.8;
+}
+
+/* Reduced motion: disable all movement */
+@media (prefers-reduced-motion: reduce) {
+  .dm-overlay::after,
+  .encounter-overlay::after,
+  .outcome-overlay::after,
+  .dm-overlay > .dm-card::before,
+  .dm-overlay > .dm-card::after,
+  .encounter-overlay > .dm-card::before,
+  .encounter-overlay > .dm-card::after,
+  .outcome-overlay > .dm-card::before,
+  .outcome-overlay > .dm-card::after,
+  .dm-overlay .dm-icon,
+  .encounter-overlay .dm-icon,
+  .dm-overlay .dm-title,
+  .encounter-overlay .dm-title,
+  .dm-overlay .dm-narration,
+  .dm-overlay .dm-choices,
+  .encounter-overlay .dm-choices,
+  .outcome-overlay .outcome-icon,
+  .outcome-overlay .outcome-title,
+  .outcome-overlay .outcome-text,
+  .dm-overlay .dm-continue-btn,
+  .outcome-overlay .btn-continue {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
