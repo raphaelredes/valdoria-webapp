@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockups - Diário de Viagem Imersivo</title>
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700;900&family=Vollkorn:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #111;
+  color: #d4c8b0;
+  font-family: 'MedievalSharp', serif;
+  overflow-x: hidden;
+}
+.mockup-section {
+  width: 390px;
+  height: 760px;
+  margin: 40px auto;
+  position: relative;
+  border: 2px solid #4a3828;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #2a2420;
+}
+.mockup-label {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  color: #c4953a;
+  margin: 50px auto 8px;
+  letter-spacing: 2px;
+}
+.mockup-sublabel {
+  text-align: center;
+  font-size: 13px;
+  color: #a09484;
+  margin-bottom: 10px;
+  max-width: 390px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
+}
+.mockup-refs {
+  text-align: center;
+  font-size: 11px;
+  color: #7a6e5e;
+  margin-bottom: 6px;
+  font-style: italic;
+}
+
+/* ======= MAP BACKGROUND (shared) ======= */
+.map-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(60,80,40,0.3) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(40,60,80,0.2) 0%, transparent 40%),
+    linear-gradient(165deg, #2a2420 0%, #1e1a14 100%);
+}
+.hex-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+  background-image:
+    linear-gradient(30deg, #4a3828 1px, transparent 1px),
+    linear-gradient(150deg, #4a3828 1px, transparent 1px),
+    linear-gradient(270deg, #4a3828 1px, transparent 1px);
+  background-size: 28px 48px;
+}
+
+/* ======= OPTION 1: PERGAMINHO DO MESTRE ======= */
+.opt1-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(42,36,32,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.opt1-scroll {
+  width: 100%;
+  max-width: 358px;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(139,109,63,0.06) 24px, rgba(139,109,63,0.06) 25px),
+    linear-gradient(180deg, #3a2e1e 0%, #2e2418 40%, #342818 100%);
+  border: 2px solid rgba(196,149,58,0.5);
+  border-radius: 10px;
+  padding: 20px 18px;
+  position: relative;
+  box-shadow: 0 0 50px rgba(196,149,58,0.15), 0 12px 40px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.opt1-scroll::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c4953a, #e8c060, #c4953a, transparent);
+}
+.opt1-scroll::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 15%; right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #7b2020, transparent);
+  opacity: 0.4;
+}
+.opt1-wax-seal {
+  position: absolute;
+  top: -16px; right: 20px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #c44030, #8a1818);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,200,200,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  border: 1px solid rgba(200,80,60,0.6);
+}
+.opt1-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(196,149,58,0.2);
+}
+.opt1-icon { font-size: 28px; }
+.opt1-title {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #c4953a;
+  letter-spacing: 0.5px;
+}
+.opt1-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(196,149,58,0.15);
+  color: #9a7530;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.opt1-divider {
+  text-align: center;
+  color: rgba(196,149,58,0.3);
+  font-size: 11px;
+  letter-spacing: 6px;
+  margin: 10px 0;
+}
+.opt1-narration {
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.7;
+  color: #d4c8b0;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  margin-bottom: 14px;
+}
+.opt1-narration .highlight {
+  color: #dbb668;
+  font-weight: 700;
+}
+.opt1-dm-note {
+  font-size: 12px;
+  color: #a09484;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.2);
+  border-left: 2px solid rgba(196,149,58,0.3);
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.opt1-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.opt1-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(165deg, #3a3028 0%, #302820 100%);
+  border: 1px solid #4a3828;
+  border-radius: 8px;
+  color: #e8dcc8;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 44px;
+}
+.opt1-choice .check {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(196,149,58,0.2);
+  color: #c4953a;
+  white-space: nowrap;
+}
+.opt1-choice .check.high {
+  background: rgba(68,170,136,0.15);
+  color: #5cb88a;
+}
+
+/* ======= OPTION 2: DIÁRIO PESSOAL ======= */
+.opt2-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(42,36,32,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.opt2-diary {
+  width: 100%;
+  max-width: 358px;
+  background: linear-gradient(180deg, #3e3424 0%, #342a1e 100%);
+  border-radius: 4px 12px 12px 4px;
+  padding: 0;
+  position: relative;
+  box-shadow:
+    -4px 0 0 #6b4e2a,
+    -6px 0 0 #5a4020,
+    0 8px 32px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+.opt2-spine {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 8px;
+  background: linear-gradient(180deg, #8b6d3f, #6b4e2a, #8b6d3f);
+  border-right: 1px solid rgba(0,0,0,0.3);
+}
+.opt2-content {
+  padding: 22px 18px 18px 24px;
+}
+.opt2-date {
+  font-family: 'Vollkorn', serif;
+  font-size: 11px;
+  color: #8b7d6b;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.opt2-entry-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #c4953a;
+  margin-bottom: 12px;
+  position: relative;
+}
+.opt2-entry-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, #c4953a, transparent);
+  margin-top: 6px;
+}
+.opt2-text {
+  font-family: 'Vollkorn', serif;
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.8;
+  color: #c8b898;
+  margin-bottom: 14px;
+}
+.opt2-margin-note {
+  position: relative;
+  padding-left: 14px;
+  margin: 12px 0;
+  font-family: 'MedievalSharp', serif;
+  font-size: 12px;
+  color: #9a7530;
+  line-height: 1.5;
+  border-left: 2px dashed rgba(196,149,58,0.3);
+}
+.opt2-sketch {
+  width: 100%;
+  height: 80px;
+  background: rgba(0,0,0,0.15);
+  border: 1px dashed rgba(196,149,58,0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.opt2-sketch::after {
+  content: 'esboço do viajante';
+  position: absolute;
+  bottom: 4px;
+  font-size: 9px;
+  color: #6b5e4e;
+  letter-spacing: 1px;
+}
+.opt2-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.opt2-choice {
+  padding: 10px 14px;
+  background: rgba(196,149,58,0.06);
+  border: 1px solid rgba(196,149,58,0.15);
+  border-radius: 6px;
+  color: #d4c8b0;
+  font-family: 'Vollkorn', serif;
+  font-size: 13px;
+  font-style: italic;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.opt2-ink {
+  font-size: 14px;
+  color: #c4953a;
+}
+.opt2-page {
+  text-align: center;
+  font-size: 11px;
+  color: #6b5e4e;
+  margin-top: 12px;
+  letter-spacing: 3px;
+}
+
+/* ======= OPTION 3: CARTA DO DESTINO ======= */
+.opt3-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20,16,12,0.94);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.opt3-card {
+  width: 280px;
+  background: linear-gradient(180deg, #3a2e1e 0%, #2a2018 100%);
+  border: 3px solid rgba(196,149,58,0.6);
+  border-radius: 14px;
+  padding: 0;
+  position: relative;
+  box-shadow:
+    0 0 60px rgba(196,149,58,0.2),
+    0 16px 48px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.opt3-card-top {
+  padding: 16px 16px 0;
+  text-align: center;
+}
+.opt3-card-frame {
+  width: 100%;
+  height: 120px;
+  background:
+    radial-gradient(circle at 50% 60%, rgba(100,200,120,0.15) 0%, transparent 60%),
+    linear-gradient(180deg, #1e1a14 0%, #2a2420 100%);
+  border: 1px solid rgba(196,149,58,0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.opt3-card-frame::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(196,149,58,0.12);
+  border-radius: 6px;
+}
+.opt3-card-name {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 900;
+  color: #c4953a;
+  letter-spacing: 1px;
+  text-shadow: 0 0 12px rgba(196,149,58,0.4);
+  margin-bottom: 4px;
+}
+.opt3-card-type {
+  font-size: 11px;
+  color: #9a7530;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+.opt3-card-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c4953a, transparent);
+  margin: 0 16px;
+}
+.opt3-card-body {
+  padding: 12px 16px 16px;
+}
+.opt3-card-text {
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.6;
+  color: #c8b898;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.opt3-fate-choices {
+  display: flex;
+  gap: 8px;
+}
+.opt3-fate-choice {
+  flex: 1;
+  padding: 12px 6px;
+  background: linear-gradient(180deg, rgba(196,149,58,0.12), rgba(196,149,58,0.04));
+  border: 1px solid rgba(196,149,58,0.3);
+  border-radius: 8px;
+  text-align: center;
+  min-height: 60px;
+}
+.opt3-fate-icon { font-size: 20px; margin-bottom: 4px; }
+.opt3-fate-label {
+  font-size: 11px;
+  color: #d4c8b0;
+  font-weight: 600;
+}
+.opt3-fate-check {
+  font-size: 9px;
+  color: #9a7530;
+  margin-top: 2px;
+}
+.opt3-rarity {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #dbb668;
+  box-shadow: 0 0 8px rgba(219,182,104,0.6);
+}
+
+/* ======= OPTION 4: VISÃO DO ORÁCULO ======= */
+.opt4-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(60,50,30,0.95) 0%, rgba(20,16,12,0.97) 70%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.opt4-glow {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,149,58,0.08) 0%, transparent 70%);
+}
+.opt4-ornament-top, .opt4-ornament-bot {
+  text-align: center;
+  color: rgba(196,149,58,0.3);
+  font-size: 14px;
+  letter-spacing: 8px;
+  margin: 8px 0;
+}
+.opt4-icon {
+  font-size: 42px;
+  margin-bottom: 10px;
+  text-shadow: 0 0 20px rgba(196,149,58,0.4);
+}
+.opt4-title {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #c4953a;
+  letter-spacing: 1px;
+  text-shadow: 0 0 16px rgba(196,149,58,0.4), 0 2px 4px rgba(0,0,0,0.5);
+  margin-bottom: 4px;
+  text-align: center;
+}
+.opt4-subtitle {
+  font-size: 11px;
+  color: #9a7530;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.opt4-text {
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.75;
+  color: #d4c8b0;
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  margin-bottom: 16px;
+  max-width: 320px;
+}
+.opt4-text .vision { color: #dbb668; font-weight: 700; }
+.opt4-mechanic {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(196,149,58,0.08);
+  border: 1px solid rgba(196,149,58,0.2);
+  border-radius: 20px;
+  margin-bottom: 18px;
+}
+.opt4-mechanic .die { font-size: 16px; }
+.opt4-mechanic .dc {
+  font-size: 12px;
+  color: #c4953a;
+  font-weight: 700;
+}
+.opt4-mechanic .stat {
+  font-size: 11px;
+  color: #a09484;
+}
+.opt4-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+}
+.opt4-choice {
+  padding: 14px 16px;
+  background: linear-gradient(165deg, rgba(196,149,58,0.08) 0%, rgba(196,149,58,0.02) 100%);
+  border: 1px solid rgba(196,149,58,0.2);
+  border-radius: 8px;
+  color: #e8dcc8;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.opt4-choice .reward {
+  font-size: 11px;
+  color: #5cb88a;
+  margin-left: auto;
+}
+.opt4-choice .risk {
+  font-size: 11px;
+  color: #c66;
+  margin-left: auto;
+}
+
+/* ======= OPTION 5: CRÔNICAS DO AVENTUREIRO ======= */
+.opt5-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(42,36,32,0.96);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.opt5-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(196,149,58,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.opt5-header-title {
+  font-family: 'Cinzel', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #c4953a;
+  letter-spacing: 1px;
+}
+.opt5-header-close {
+  font-size: 18px;
+  color: #a09484;
+  cursor: pointer;
+}
+.opt5-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(196,149,58,0.12);
+  flex-shrink: 0;
+}
+.opt5-tab {
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #a09484;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+.opt5-tab.active {
+  color: #c4953a;
+}
+.opt5-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 8px; right: 8px;
+  height: 2px;
+  background: #c4953a;
+  border-radius: 1px;
+}
+.opt5-tab .count {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background: rgba(196,149,58,0.2);
+  color: #c4953a;
+  margin-left: 4px;
+}
+.opt5-timeline {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+.opt5-event {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.opt5-event::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 28px;
+  bottom: -14px;
+  width: 1px;
+  background: rgba(196,149,58,0.15);
+}
+.opt5-event:last-child::before { display: none; }
+.opt5-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  border: 2px solid rgba(196,149,58,0.3);
+  background: #2a2420;
+}
+.opt5-dot.discovery { border-color: rgba(219,182,104,0.5); background: rgba(196,149,58,0.1); }
+.opt5-dot.combat { border-color: rgba(200,80,80,0.5); background: rgba(200,80,80,0.1); }
+.opt5-dot.social { border-color: rgba(100,180,220,0.5); background: rgba(100,180,220,0.1); }
+.opt5-dot.rest { border-color: rgba(68,170,136,0.5); background: rgba(68,170,136,0.1); }
+.opt5-event-card {
+  flex: 1;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(196,149,58,0.12);
+  border-radius: 8px;
+  padding: 10px 12px;
+  position: relative;
+}
+.opt5-event-card.expanded {
+  border-color: rgba(196,149,58,0.3);
+  background: rgba(196,149,58,0.04);
+}
+.opt5-event-time {
+  font-size: 10px;
+  color: #6b5e4e;
+  margin-bottom: 4px;
+}
+.opt5-event-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e8dcc8;
+  margin-bottom: 4px;
+}
+.opt5-event-snippet {
+  font-size: 12px;
+  font-style: italic;
+  color: #a09484;
+  line-height: 1.5;
+}
+.opt5-event-badges {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.opt5-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.opt5-badge.xp { background: rgba(255,215,0,0.12); color: #dbb668; }
+.opt5-badge.gold { background: rgba(196,149,58,0.12); color: #c4953a; }
+.opt5-badge.success { background: rgba(68,170,136,0.12); color: #5cb88a; }
+.opt5-badge.fail { background: rgba(200,80,80,0.12); color: #c66; }
+.opt5-badge.item { background: rgba(150,100,200,0.12); color: #b8a0d0; }
+.opt5-expand {
+  font-size: 10px;
+  color: #9a7530;
+  margin-top: 6px;
+  letter-spacing: 0.5px;
+}
+.opt5-detail {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(196,149,58,0.1);
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.6;
+  color: #c8b898;
+}
+.opt5-summary {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(196,149,58,0.15);
+  display: flex;
+  justify-content: space-around;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.15);
+}
+.opt5-stat {
+  text-align: center;
+}
+.opt5-stat-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: #c4953a;
+  font-family: 'Cinzel', serif;
+}
+.opt5-stat-label {
+  font-size: 10px;
+  color: #6b5e4e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ======= SEPARATOR ======= */
+.separator {
+  width: 390px;
+  margin: 20px auto;
+  text-align: center;
+  color: rgba(196,149,58,0.2);
+  font-size: 12px;
+  letter-spacing: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- ============ OPTION 1: PERGAMINHO DO MESTRE ============ -->
+<div class="mockup-label">OPÇÃO 1 — PERGAMINHO DO MESTRE</div>
+<div class="mockup-sublabel">Inspirado em Darkest Dungeon + The Witcher 3. Cada evento é um pergaminho narrado pelo Mestre com selo de cera indicando o tipo.</div>
+<div class="mockup-refs">Refs: Darkest Dungeon (narrator overlay), Witcher 3 (bestiary), Sunless Skies (storylets)</div>
+<div class="mockup-section">
+  <div class="map-bg"></div>
+  <div class="hex-grid"></div>
+  <div class="opt1-overlay">
+    <div class="opt1-scroll">
+      <div class="opt1-wax-seal">🗝️</div>
+      <div class="opt1-header">
+        <div>
+          <div class="opt1-title">Santuário Esquecido</div>
+          <div class="opt1-badge">descoberta</div>
+        </div>
+      </div>
+      <div class="opt1-divider">◆ ◆ ◆</div>
+      <div class="opt1-narration">
+        Entre as raízes retorcidas de um carvalho milenar, uma passagem de pedra se revela. O ar carrega o <span class="highlight">aroma de incenso</span> e o brilho tênue de runas antigas pulsa nas paredes...
+      </div>
+      <div class="opt1-dm-note">
+        ⚔️ O santuário contém uma armadilha arcana. Um teste de Percepção pode revelá-la antes que seja acionada.
+      </div>
+      <div class="opt1-divider">— — —</div>
+      <div class="opt1-choices">
+        <div class="opt1-choice">
+          <span>🔍</span>
+          <span style="flex:1">Examinar as runas</span>
+          <span class="check high">Arcana CD 12</span>
+        </div>
+        <div class="opt1-choice">
+          <span>🚶</span>
+          <span style="flex:1">Entrar com cautela</span>
+          <span class="check">Percepção CD 14</span>
+        </div>
+        <div class="opt1-choice">
+          <span>🔥</span>
+          <span style="flex:1">Acender uma tocha e forçar passagem</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="separator">◆ ◆ ◆ ◆ ◆</div>
+
+<!-- ============ OPTION 2: DIÁRIO PESSOAL ============ -->
+<div class="mockup-label">OPÇÃO 2 — DIÁRIO PESSOAL</div>
+<div class="mockup-sublabel">Inspirado em Sunless Skies + Skyrim (Dear Diary mod). Cada evento é uma entrada escrita em primeira pessoa no diário do aventureiro.</div>
+<div class="mockup-refs">Refs: Sunless Skies (storylets), Morrowind (journal), Skyrim Dear Diary mod, Pillars of Eternity</div>
+<div class="mockup-section">
+  <div class="map-bg"></div>
+  <div class="hex-grid"></div>
+  <div class="opt2-overlay">
+    <div class="opt2-diary">
+      <div class="opt2-spine"></div>
+      <div class="opt2-content">
+        <div class="opt2-date">Dia 3 da Jornada — Floresta Sombria</div>
+        <div class="opt2-entry-title">Um Encontro Inesperado</div>
+        <div class="opt2-sketch">🏚️</div>
+        <div class="opt2-text">
+          Encontrei uma cabana abandonada entre os pinheiros. A porta rangia ao vento, mas dentro havia sinais de ocupação recente — cinzas mornas na lareira, migalhas de pão na mesa...
+        </div>
+        <div class="opt2-margin-note">
+          📝 Nota: As pegadas na lama pareciam de duas criaturas diferentes. Uma humanóide, outra... não.
+        </div>
+        <div class="opt2-text" style="font-size:13px;color:#a09484;">
+          O que fazer com esta descoberta?
+        </div>
+        <div class="opt2-choices">
+          <div class="opt2-choice">
+            <span class="opt2-ink">❖</span>
+            <span>Investigar as pegadas na lama</span>
+          </div>
+          <div class="opt2-choice">
+            <span class="opt2-ink">❖</span>
+            <span>Vasculhar a cabana por pistas</span>
+          </div>
+          <div class="opt2-choice">
+            <span class="opt2-ink">❖</span>
+            <span>Seguir adiante antes do anoitecer</span>
+          </div>
+        </div>
+        <div class="opt2-page">— 42 —</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="separator">◆ ◆ ◆ ◆ ◆</div>
+
+<!-- ============ OPTION 3: CARTA DO DESTINO ============ -->
+<div class="mockup-label">OPÇÃO 3 — CARTA DO DESTINO</div>
+<div class="mockup-sublabel">Inspirado em Slay the Spire + Inscryption + Hand of Fate. Cada evento é uma carta mística que o jogador "compra" do destino.</div>
+<div class="mockup-refs">Refs: Slay the Spire (event cards), Inscryption (card reveals), Hand of Fate (deck events)</div>
+<div class="mockup-section">
+  <div class="map-bg"></div>
+  <div class="hex-grid"></div>
+  <div class="opt3-overlay">
+    <div class="opt3-card">
+      <div class="opt3-rarity"></div>
+      <div class="opt3-card-top">
+        <div class="opt3-card-frame">🌿</div>
+        <div class="opt3-card-name">FONTE CRISTALINA</div>
+        <div class="opt3-card-type">Descoberta Mística</div>
+      </div>
+      <div class="opt3-card-divider"></div>
+      <div class="opt3-card-body">
+        <div class="opt3-card-text">
+          Uma fonte de águas prateadas brota de uma rocha coberta de musgo. A água brilha com uma luz interior que promete cura... ou maldição.
+        </div>
+        <div class="opt3-fate-choices">
+          <div class="opt3-fate-choice">
+            <div class="opt3-fate-icon">💧</div>
+            <div class="opt3-fate-label">Beber</div>
+            <div class="opt3-fate-check">CON CD 10</div>
+          </div>
+          <div class="opt3-fate-choice">
+            <div class="opt3-fate-icon">🔍</div>
+            <div class="opt3-fate-label">Examinar</div>
+            <div class="opt3-fate-check">Arcana CD 13</div>
+          </div>
+          <div class="opt3-fate-choice">
+            <div class="opt3-fate-icon">🚶</div>
+            <div class="opt3-fate-label">Ignorar</div>
+            <div class="opt3-fate-check">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="separator">◆ ◆ ◆ ◆ ◆</div>
+
+<!-- ============ OPTION 4: VISÃO DO ORÁCULO ============ -->
+<div class="mockup-label">OPÇÃO 4 — VISÃO DO ORÁCULO</div>
+<div class="mockup-sublabel">Inspirado em Hades + Darkest Dungeon. Evento como visão mística com tipografia dramática, ornamentos dourados, e mecânica D&D integrada.</div>
+<div class="mockup-refs">Refs: Hades (codex/boon screens), Darkest Dungeon (narrator), Disco Elysium (skill checks)</div>
+<div class="mockup-section">
+  <div class="map-bg"></div>
+  <div class="hex-grid"></div>
+  <div class="opt4-overlay">
+    <div class="opt4-glow"></div>
+    <div class="opt4-ornament-top">◆ ─── ◆ ─── ◆</div>
+    <div class="opt4-icon">⚔️</div>
+    <div class="opt4-title">Emboscada na Trilha</div>
+    <div class="opt4-subtitle">encontro · perigo</div>
+    <div class="opt4-text">
+      Sombras movem-se entre as árvores. O <span class="vision">estalo de galhos</span> revela três figuras encapuzadas bloqueando o caminho. Suas lâminas refletem a luz fraca da lua...
+    </div>
+    <div class="opt4-mechanic">
+      <span class="die">🎲</span>
+      <span class="dc">CD 14</span>
+      <span class="stat">· Percepção</span>
+    </div>
+    <div class="opt4-choices">
+      <div class="opt4-choice">
+        <span>⚔️</span>
+        <span style="flex:1">Sacar a arma e enfrentar</span>
+        <span class="risk">Combate</span>
+      </div>
+      <div class="opt4-choice">
+        <span>🗣️</span>
+        <span style="flex:1">Negociar passagem</span>
+        <span class="reward">Persuasão</span>
+      </div>
+      <div class="opt4-choice">
+        <span>🌑</span>
+        <span style="flex:1">Recuar pelas sombras</span>
+        <span class="reward">Furtividade</span>
+      </div>
+    </div>
+    <div class="opt4-ornament-bot">◆ ─── ◆ ─── ◆</div>
+  </div>
+</div>
+
+<div class="separator">◆ ◆ ◆ ◆ ◆</div>
+
+<!-- ============ OPTION 5: CRÔNICAS DO AVENTUREIRO ============ -->
+<div class="mockup-label">OPÇÃO 5 — CRÔNICAS DO AVENTUREIRO</div>
+<div class="mockup-sublabel">Inspirado em BG3 + Sunless Skies + Witcher 3. Timeline cronológica com cards expansíveis, categorias, badges de resultado, e resumo da jornada.</div>
+<div class="mockup-refs">Refs: Baldur's Gate 3 (journal), Witcher 3 (quest log), Sunless Skies (journal), Divinity: OS2 (log)</div>
+<div class="mockup-section">
+  <div class="opt5-overlay">
+    <div class="opt5-header">
+      <div class="opt5-header-title">📜 Crônicas da Jornada</div>
+      <div class="opt5-header-close">✕</div>
+    </div>
+    <div class="opt5-tabs">
+      <div class="opt5-tab active">Tudo <span class="count">7</span></div>
+      <div class="opt5-tab">Combate <span class="count">2</span></div>
+      <div class="opt5-tab">Descobertas <span class="count">3</span></div>
+      <div class="opt5-tab">Social <span class="count">2</span></div>
+    </div>
+    <div class="opt5-timeline">
+      <!-- Event 1 - expanded -->
+      <div class="opt5-event">
+        <div class="opt5-dot discovery">🗝️</div>
+        <div class="opt5-event-card expanded">
+          <div class="opt5-event-time">Passo 42 · Floresta Sombria</div>
+          <div class="opt5-event-title">Santuário Esquecido</div>
+          <div class="opt5-event-snippet">As runas nas paredes pulsavam com uma luz azulada enquanto você decifrava os símbolos arcanos...</div>
+          <div class="opt5-event-badges">
+            <span class="opt5-badge xp">+150 XP</span>
+            <span class="opt5-badge gold">+25 GP</span>
+            <span class="opt5-badge success">✓ Arcana CD 12</span>
+            <span class="opt5-badge item">📜 Pergaminho</span>
+          </div>
+          <div class="opt5-detail">
+            Você examinou as runas e descobriu um compartimento secreto contendo um pergaminho antigo e algumas moedas.
+          </div>
+        </div>
+      </div>
+      <!-- Event 2 -->
+      <div class="opt5-event">
+        <div class="opt5-dot combat">⚔️</div>
+        <div class="opt5-event-card">
+          <div class="opt5-event-time">Passo 38 · Clareira</div>
+          <div class="opt5-event-title">Emboscada de Goblins</div>
+          <div class="opt5-event-snippet">Três goblins surgiram das moitas. Vitória rápida.</div>
+          <div class="opt5-event-badges">
+            <span class="opt5-badge xp">+80 XP</span>
+            <span class="opt5-badge success">Vitória</span>
+          </div>
+          <div class="opt5-expand">▸ Ver detalhes</div>
+        </div>
+      </div>
+      <!-- Event 3 -->
+      <div class="opt5-event">
+        <div class="opt5-dot social">🗣️</div>
+        <div class="opt5-event-card">
+          <div class="opt5-event-time">Passo 31 · Trilha</div>
+          <div class="opt5-event-title">Mercador Andarilho</div>
+          <div class="opt5-event-snippet">Um mercador ofereceu informações sobre o caminho adiante.</div>
+          <div class="opt5-event-badges">
+            <span class="opt5-badge success">✓ Persuasão CD 10</span>
+          </div>
+          <div class="opt5-expand">▸ Ver detalhes</div>
+        </div>
+      </div>
+      <!-- Event 4 -->
+      <div class="opt5-event">
+        <div class="opt5-dot rest">🏕️</div>
+        <div class="opt5-event-card">
+          <div class="opt5-event-time">Passo 25 · Rio</div>
+          <div class="opt5-event-title">Descanso Curto</div>
+          <div class="opt5-event-snippet">Recuperou fôlego às margens do rio.</div>
+          <div class="opt5-event-badges">
+            <span class="opt5-badge success">+8 HP</span>
+          </div>
+        </div>
+      </div>
+      <!-- Event 5 -->
+      <div class="opt5-event">
+        <div class="opt5-dot discovery">🌿</div>
+        <div class="opt5-event-card">
+          <div class="opt5-event-time">Passo 18 · Planície</div>
+          <div class="opt5-event-title">Ervas Medicinais</div>
+          <div class="opt5-event-snippet">Encontrou ervas raras entre as pedras.</div>
+          <div class="opt5-event-badges">
+            <span class="opt5-badge item">🌿 Ervas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="opt5-summary">
+      <div class="opt5-stat">
+        <div class="opt5-stat-val">42</div>
+        <div class="opt5-stat-label">Passos</div>
+      </div>
+      <div class="opt5-stat">
+        <div class="opt5-stat-val">7</div>
+        <div class="opt5-stat-label">Eventos</div>
+      </div>
+      <div class="opt5-stat">
+        <div class="opt5-stat-val">230</div>
+        <div class="opt5-stat-label">XP Total</div>
+      </div>
+      <div class="opt5-stat">
+        <div class="opt5-stat-val">25</div>
+        <div class="opt5-stat-label">GP</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
