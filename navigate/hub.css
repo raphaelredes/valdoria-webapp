@@ -297,7 +297,7 @@ body {
   background: var(--v-gold-10, rgba(196,149,58,0.1));
   border-color: var(--v-gold-30, rgba(196,149,58,0.3));
 }
-.bottom-btn-icon { font-size: 16px }
+.bottom-btn-icon { font-size: var(--v-font-xl, 16px) }
 .bottom-btn-label { font-size: var(--v-font-sm, 11px) }
 
 /* ===== SUB-SCREENS ===== */
@@ -324,7 +324,7 @@ body {
 .sub-back {
   width: 36px; height: 36px; border-radius: var(--v-radius-sm, 6px);
   background: rgba(42,36,32,0.8); border: 1px solid rgba(74,56,40,0.3);
-  color: var(--v-gold, #c4953a); font-size: 18px;
+  color: var(--v-gold, #c4953a); font-size: var(--v-font-2xl, 18px);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 .sub-title {
@@ -367,7 +367,7 @@ body {
 .loc-card-pips {
   display: flex; gap: 2px; align-items: center; margin-top: 3px;
 }
-.loc-card-arrow { color: var(--v-gold-25, rgba(196,149,58,0.25)); font-size: 16px }
+.loc-card-arrow { color: var(--v-gold-25, rgba(196,149,58,0.25)); font-size: var(--v-font-xl, 16px) }
 .loc-card-badge {
   font-size: var(--v-font-sm, 11px); color: var(--v-gold, #c4953a);
   background: var(--v-gold-10, rgba(196,149,58,0.1));
@@ -545,7 +545,7 @@ body {
 .travel-anim-canvas {
   width: 100%; max-width: 430px; height: 200px;
   opacity: 0; transform: translateY(20px);
-  transition: all 0.5s ease 0.2s;
+  transition: all 0.5s ease 0.2s /* pflt-suppress: coordinated travel animation */;
   border-radius: var(--v-radius, 10px);
 }
 .travel-anim-overlay.visible .travel-anim-canvas {
@@ -554,7 +554,7 @@ body {
 .travel-anim-traveler {
   margin-top: var(--v-space-xl, 16px);
   opacity: 0; transform: translateX(-30px);
-  transition: all 0.6s ease 0.4s;
+  transition: all 0.6s ease 0.4s /* pflt-suppress: coordinated travel animation */;
   animation: travelerWalk 1s ease-in-out infinite 0.6s;
 }
 .travel-anim-overlay.visible .travel-anim-traveler {
@@ -582,7 +582,7 @@ body {
   color: var(--v-gold, #c4953a);
   margin-top: var(--v-space-xl, 16px);
   opacity: 0;
-  transition: opacity 0.4s ease 0.5s;
+  transition: opacity 0.4s ease 0.5s /* pflt-suppress: coordinated travel animation */;
 }
 .travel-anim-overlay.visible .travel-anim-text { opacity: 1 }
 .travel-anim-progress {
@@ -595,7 +595,7 @@ body {
   height: 100%; width: 0%;
   background: linear-gradient(90deg, var(--v-gold, #c4953a), var(--v-gold-light, #dbb668));
   border-radius: 2px;
-  transition: width 3.5s linear;
+  transition: width 3.5s linear /* pflt-suppress: travel progress bar */;
 }
 
 /* ===== PERF TIERS ===== */

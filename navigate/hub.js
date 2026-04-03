@@ -167,6 +167,27 @@ function _onDataReady() {
     setTimeout(function() { HubBiomeArt.initCards(); }, 50);
   }
 
+  /* Hide SPA loading overlay — hub has no loading controller, content renders instantly */
+  var _ld = document.getElementById('loading');
+  if (_ld && !_ld.classList.contains('hidden')) {
+    _ld.classList.add('hidden');
+    _ld.style.display = 'none';
+    console.log('[HUB] Loading overlay hidden');
+  }
+
+  /* Apply font preference */
+  if (typeof applyFont === 'function') {
+    var savedFont = localStorage.getItem('valdoria_font') || 'medievalsharp';
+    applyFont(savedFont);
+  }
+
+  /* Start audio for current biome */
+  if (typeof ValdoriaAudio !== 'undefined') {
+    var _curBiome = _findBiome(state.currentLoc);
+    if (_curBiome) ValdoriaAudio.playBiome(_curBiome);
+    else ValdoriaAudio.play('city');
+  }
+
   console.log('[HUB] Ready — %s regions, current: %s', Object.keys(state.regions).length, state.currentLoc);
 }
 
