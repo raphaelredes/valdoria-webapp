@@ -22,8 +22,8 @@
 }
 
 @keyframes tjPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(196,149,58,0.04); }
-  50% { box-shadow: 0 0 32px rgba(196,149,58,0.1); }
+  0%, 100% { box-shadow: 0 0 20px var(--v-gold-04); }
+  50% { box-shadow: 0 0 32px var(--v-gold-10); }
 }
 
 
@@ -50,8 +50,8 @@
   height: 320px;
   border-radius: 50%;
   background: radial-gradient(circle,
-    rgba(196,149,58,0.06) 0%,
-    rgba(196,149,58,0.02) 40%,
+    var(--v-gold-06) 0%,
+    var(--v-gold-02) 40%,
     transparent 70%);
   pointer-events: none;
   animation: tjGlow 6s ease-in-out infinite;
@@ -69,9 +69,9 @@
     rgba(50, 40, 30, 0.6) 0%,
     rgba(38, 30, 22, 0.5) 100%
   ) !important;
-  border: 1px solid rgba(196,149,58,0.12) !important;
+  border: 1px solid var(--v-gold-12) !important;
   box-shadow:
-    0 0 60px rgba(196,149,58,0.04),
+    0 0 60px var(--v-gold-04),
     0 12px 40px rgba(0,0,0,0.5),
     inset 0 1px 0 rgba(255,255,255,0.03) !important;
   animation: tjPulse 5s ease-in-out infinite;
@@ -85,7 +85,7 @@
   letter-spacing: 2px;
   text-transform: uppercase;
   text-shadow:
-    0 0 18px rgba(196,149,58,0.3),
+    0 0 18px var(--v-gold-30),
     0 2px 6px rgba(0,0,0,0.5);
   animation: tjHeaderIn 0.6s ease both;
   text-align: center;
@@ -103,9 +103,9 @@
   margin: var(--v-space-md, 8px) auto 0;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(196,149,58,0.35) 30%,
-    rgba(196,149,58,0.5) 50%,
-    rgba(196,149,58,0.35) 70%,
+    var(--v-gold-35) 30%,
+    var(--v-gold-50) 50%,
+    var(--v-gold-35) 70%,
     transparent 100%);
   animation: tjSepGrow 0.5s ease 0.3s both;
 }
@@ -121,19 +121,19 @@
 #v-popup-overlay[data-journal] .v-popup-btn--primary {
   background: linear-gradient(
     165deg,
-    rgba(196,149,58,0.12) 0%,
-    rgba(196,149,58,0.04) 100%
+    var(--v-gold-12) 0%,
+    var(--v-gold-04) 100%
   ) !important;
-  border: 1px solid rgba(196,149,58,0.3) !important;
+  border: 1px solid var(--v-gold-30) !important;
   color: var(--v-gold-light, #dbb668) !important;
   font-weight: 700;
   letter-spacing: 0.5px;
-  text-shadow: 0 0 8px rgba(196,149,58,0.2);
+  text-shadow: 0 0 8px var(--v-gold-20);
   animation: tjPulse 3s ease-in-out infinite;
 }
 
 #v-popup-overlay[data-journal] .v-popup-btn--primary:active {
-  background: rgba(196,149,58,0.2) !important;
+  background: var(--v-gold-20) !important;
 }
 
 
@@ -141,7 +141,7 @@
 
 .tj-ornament {
   text-align: center;
-  color: rgba(196, 149, 58, 0.15);
+  color: var(--v-gold-15);
   font-size: var(--v-font-xs, 10px);
   letter-spacing: 8px;
   margin: var(--v-space-xs, 2px) 0;
@@ -186,8 +186,8 @@
   bottom: -8px;
   width: 1px;
   background: linear-gradient(180deg,
-    rgba(196,149,58,0.12) 0%,
-    rgba(196,149,58,0.04) 100%);
+    var(--v-gold-12) 0%,
+    var(--v-gold-04) 100%);
 }
 
 .tj-event:last-child::before { display: none; }
@@ -203,8 +203,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  border: 2px solid rgba(196, 149, 58, 0.2);
+  font-size: var(--v-font-md, 13px);
+  border: 2px solid var(--v-gold-20);
   background: var(--v-bg, #2a2420);
   flex-shrink: 0;
   z-index: 1;
@@ -254,13 +254,13 @@
 }
 .tj-dot--arrival,
 .tj-dot--arrival_new {
-  border-color: rgba(196,149,58,0.5);
-  background: linear-gradient(135deg, rgba(196,149,58,0.15), rgba(160,120,40,0.08));
-  box-shadow: 0 0 14px rgba(196,149,58,0.12), 0 0 10px rgba(0,0,0,0.4);
+  border-color: var(--v-gold-50);
+  background: linear-gradient(135deg, var(--v-gold-15), rgba(160,120,40,0.08));
+  box-shadow: 0 0 14px var(--v-gold-12), 0 0 10px rgba(0,0,0,0.4);
 }
 .tj-dot--discovery {
   border-color: rgba(219,182,104,0.5);
-  background: linear-gradient(135deg, rgba(219,182,104,0.18), rgba(196,149,58,0.1));
+  background: linear-gradient(135deg, rgba(219,182,104,0.18), var(--v-gold-10));
   box-shadow: 0 0 14px rgba(219,182,104,0.12), 0 0 10px rgba(0,0,0,0.4);
 }
 .tj-dot--forced_march_ok,
@@ -285,7 +285,7 @@
 .tj-card {
   flex: 1;
   background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(196,149,58,0.06);
+  border: 1px solid var(--v-gold-06);
   border-radius: var(--v-radius-sm, 6px);
   padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
   min-width: 0;
@@ -307,8 +307,8 @@
 
 .tj-card--arrival_new,
 .tj-card--discovery {
-  border-left: 2px solid rgba(196,149,58,0.4);
-  background: rgba(196,149,58,0.04);
+  border-left: 2px solid var(--v-gold-40);
+  background: var(--v-gold-04);
 }
 
 .tj-card--forage_ok,
@@ -340,7 +340,7 @@
   line-height: 1.4;
   margin-top: var(--v-space-xs, 2px);
   padding-top: var(--v-space-xs, 2px);
-  border-top: 1px solid rgba(196,149,58,0.06);
+  border-top: 1px solid var(--v-gold-06);
   display: none;
 }
 
@@ -352,7 +352,7 @@
 /* "Ver detalhes" link */
 .tj-expand {
   font-size: var(--v-font-xs, 10px);
-  color: rgba(196,149,58,0.5);
+  color: var(--v-gold-50);
   margin-top: 2px;
   cursor: pointer;
   letter-spacing: 0.5px;
@@ -372,7 +372,7 @@
 /* Close button on expanded card */
 .tj-collapse {
   font-size: var(--v-font-xs, 10px);
-  color: rgba(196,149,58,0.4);
+  color: var(--v-gold-40);
   margin-top: var(--v-space-xs, 2px);
   cursor: pointer;
   text-align: right;
@@ -387,8 +387,8 @@
 
 /* Expanded card highlight */
 .tj-card.tj-expanded {
-  background: rgba(196,149,58,0.03) !important;
-  border-color: rgba(196,149,58,0.15) !important;
+  background: var(--v-gold-03) !important;
+  border-color: var(--v-gold-15) !important;
 }
 
 
@@ -404,7 +404,7 @@
   width: 24px;
   height: 24px;
   min-width: 24px;
-  font-size: 10px;
+  font-size: var(--v-font-xs, 10px);
   margin-top: 2px;
   border-width: 1px;
   opacity: 0.7;
@@ -453,8 +453,8 @@
   height: 36px;
   min-height: 36px;
   border-radius: 50%;
-  border: 1px solid rgba(196,149,58,0.2);
-  background: rgba(196,149,58,0.06);
+  border: 1px solid var(--v-gold-20);
+  background: var(--v-gold-06);
   color: var(--v-gold, #c4953a);
   font-size: var(--v-font-body, 14px);
   display: flex;
@@ -466,7 +466,7 @@
 }
 
 .tj-pager-btn:active {
-  background: rgba(196,149,58,0.15);
+  background: var(--v-gold-15);
 }
 
 .tj-pager-btn[disabled] {
@@ -484,7 +484,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: rgba(196,149,58,0.2);
+  background: var(--v-gold-20);
   transition: all var(--v-transition-fast, 0.15s);
 }
 
@@ -492,7 +492,7 @@
   width: 8px;
   height: 8px;
   background: var(--v-gold, #c4953a);
-  box-shadow: 0 0 6px rgba(196,149,58,0.3);
+  box-shadow: 0 0 6px var(--v-gold-30);
 }
 
 
@@ -504,7 +504,7 @@
   gap: var(--v-space-lg, 16px);
   padding: var(--v-space-md, 8px) 0 var(--v-space-xs, 2px);
   margin-top: var(--v-space-xs, 2px);
-  border-top: 1px solid rgba(196,149,58,0.08);
+  border-top: 1px solid var(--v-gold-08);
   opacity: 0;
 }
 
@@ -523,7 +523,7 @@
   font-size: var(--v-font-lg, 16px);
   font-weight: 700;
   color: var(--v-gold, #c4953a);
-  text-shadow: 0 0 10px rgba(196,149,58,0.15);
+  text-shadow: 0 0 10px var(--v-gold-15);
   line-height: 1.2;
 }
 
@@ -543,7 +543,7 @@
 .tj-stat-sep {
   width: 1px;
   align-self: stretch;
-  background: rgba(196,149,58,0.1);
+  background: var(--v-gold-10);
   margin: 4px 0;
 }
 
