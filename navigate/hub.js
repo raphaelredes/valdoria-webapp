@@ -296,6 +296,7 @@ function _closeFilterSheet() {
 }
 
 function _applyFilter() {
+  console.log('[HUB] filter_changed filter=%s', _activeFilter);
   var cards = document.querySelectorAll('.region-card');
   for (var i = 0; i < cards.length; i++) {
     var biome = cards[i].getAttribute('data-biome');
@@ -316,6 +317,7 @@ function _matchesFilter(biome, reg) {
 
 /* ===== EXPAND/COLLAPSE ===== */
 function toggleCard(el) {
+  console.log('[HUB] card_toggle biome=%s', el.getAttribute('data-biome'));
   var wasExpanded = el.classList.contains('expanded');
   var all = document.querySelectorAll('.region-card.expanded');
   for (var i = 0; i < all.length; i++) all[i].classList.remove('expanded');
@@ -327,6 +329,7 @@ function toggleCard(el) {
 
 /* ===== LOCATIONS SUB-SCREEN ===== */
 function openLocations(biome) {
+  console.log('[HUB] open_locations biome=%s', biome);
   var reg = state.regions[biome];
   var meta = BIOME_META[biome];
   if (!reg || !meta) return;
@@ -377,6 +380,7 @@ function _buildLocCard(loc, disc, isCurrent, meta, biome, idx) {
 
 /* ===== DETAIL SCREEN ===== */
 function openDetail(biome, idx) {
+  console.log('[HUB] open_detail biome=%s idx=%s', biome, idx);
   var reg = state.regions[biome];
   var meta = BIOME_META[biome];
   var loc = reg.locs[idx];
@@ -574,7 +578,11 @@ async function _executeTravelApi(locId) {
 
     var data = await resp.json();
 
+    console.log('[HUB] travel_response type=%s hasUrl=%s hasLog=%s error=%s',
+      data.type || '-', !!data.url, !!(data.travel_log && data.travel_log.length), data.error || '-');
+
     if (data.error) {
+      console.warn('[HUB] travel_error: %s %s', data.error, data.message || '');
       if (typeof vToast === 'function') vToast('Erro: ' + (data.message || data.error), 'err', 3000);
       return;
     }
@@ -662,7 +670,9 @@ function bindBottomNav() {
 }
 
 async function _executeAction(type) {
+  console.log('[HUB] action_start type=%s uid=%s loc=%s', type, S.uid, state.currentLoc);
   if (!S.api || !S.token) {
+    console.warn('[HUB] action_blocked: no API/token');
     if (typeof vToast === 'function') vToast('Conexao indisponivel', 'err', 2500);
     return;
   }
