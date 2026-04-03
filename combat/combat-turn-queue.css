@@ -1,8 +1,9 @@
+/* combat-turn-queue.css — Turn Queue top bar */
 .turn-queue {
   display: flex; align-items: center; justify-content: center;
   padding: 4px 10px 6px; gap: 3px;
   background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2e2520) 100%);
-  border-bottom: 2px solid rgba(196,149,58,0.2);
+  border-bottom: 2px solid var(--v-gold-20);
   z-index: 1; flex-shrink: 0; overflow: hidden;
 }
 .tq-entry {
@@ -13,22 +14,22 @@
 }
 .tq-entry.active {
   border-color: var(--v-gold, #c4953a);
-  background: rgba(196,149,58,0.12);
-  box-shadow: 0 0 10px rgba(196,149,58,0.3);
+  background: var(--v-gold-12);
+  box-shadow: 0 0 10px var(--v-gold-30);
 }
 .tq-entry.active::after {
-  content: '\25BC'; position: absolute; bottom: -7px; left: 50%;
-  transform: translateX(-50%); font-size: 7px; color: var(--v-gold, #c4953a);
+  content: 'BC'; position: absolute; bottom: -7px; left: 50%;
+  transform: translateX(-50%); font-size: var(--v-font-xs, 10px); color: var(--v-gold, #c4953a);
 }
 .tq-ico-wrap {
   width: 30px; height: 30px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px; border: 1px solid rgba(74,56,40,0.4);
+  font-size: var(--v-font-lg, 15px); border: 1px solid rgba(74,56,40,0.4);
   background: rgba(0,0,0,0.2);
 }
 .tq-entry.active .tq-ico-wrap {
   border-color: var(--v-gold, #c4953a);
-  background: rgba(196,149,58,0.08);
+  background: var(--v-gold-08);
 }
 .tq-entry.t-enemy .tq-ico-wrap {
   border-color: rgba(123,32,32,0.4);
