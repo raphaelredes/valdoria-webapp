@@ -10,10 +10,18 @@ var _activeFilter = 'todas';
 var S = { token: '', api: '', uid: 0, returnTo: 'game' };
 
 /* ===== INIT ===== */
-document.addEventListener('DOMContentLoaded', function() {
+/* In SPA context, DOMContentLoaded already fired. Run immediately if DOM ready, else listen. */
+function _hubInit() {
   _parseParams();
   _loadPayload();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _hubInit);
+} else {
+  /* SPA: DOM already loaded, run immediately */
+  _hubInit();
+}
 
 function _parseParams() {
   /* SPA router may pass params via __spaRouteParams */
