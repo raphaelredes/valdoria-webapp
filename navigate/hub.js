@@ -1,25 +1,127 @@
 /* hub.js — Navigate Hub de Regioes logic */
-/* globals: MOCK_STATE, BIOME_META, WEATHER_NAMES, DANGER_LABELS, TERRAIN_LABELS, FORAGE_LABELS */
+/* globals: BIOME_META, WEATHER_NAMES, DANGER_LABELS, TERRAIN_LABELS, FORAGE_LABELS (from hub-data.js) */
 /* Note: innerHTML usage here is safe — all data comes from trusted server payload, never user input */
 
 (function() {
 'use strict';
 
-var state = MOCK_STATE;
+var state = null;
 var _activeFilter = 'todas';
+var S = { token: '', api: '', uid: 0, returnTo: 'game' };
 
 /* ===== INIT ===== */
 document.addEventListener('DOMContentLoaded', function() {
+  _parseParams();
+  _loadPayload();
+});
+
+function _parseParams() {
+  /* SPA router may pass params via __spaRouteParams */
+  var params = window.__spaRouteParams || new URLSearchParams(window.location.search);
+  S.token = params.get('token') || '';
+  S.api = decodeURIComponent(params.get('api') || '');
+  S.uid = parseInt(params.get('uid') || '0', 10);
+  S.returnTo = params.get('return') || 'game';
+}
+
+async function _loadPayload() {
+  var params = window.__spaRouteParams || new URLSearchParams(window.location.search);
+  var dataB64 = params.get('data') || '';
+
+  if (dataB64) {
+    /* Payload in URL — decompress */
+    try {
+      var json = typeof decompressPayload === 'function'
+        ? await decompressPayload(dataB64)
+        : atob(dataB64);
+      state = JSON.parse(json);
+      _onDataReady();
+    } catch (e) {
+      console.error('[HUB] Payload decompress failed:', e);
+      _fetchFromApi();
+    }
+  } else if (S.api && S.token) {
+    /* No payload in URL — fetch via API */
+    _fetchFromApi();
+  } else {
+    /* No API, no payload — use mock data for development */
+    console.warn('[HUB] No payload or API — using mock data');
+    if (typeof MOCK_STATE !== 'undefined') {
+      state = _convertMockToHubFormat(MOCK_STATE);
+    }
+    _onDataReady();
+  }
+}
+
+async function _fetchFromApi() {
+  var url = S.api + '/api/navigate/state?token=' + encodeURIComponent(S.token) + '&uid=' + S.uid;
+  try {
+    var headers = { 'Content-Type': 'application/json' };
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+      headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    }
+    var resp = await fetch(url, { headers: headers });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var body = await resp.json();
+    if (body.data) {
+      var json = typeof decompressPayload === 'function'
+        ? await decompressPayload(body.data)
+        : atob(body.data);
+      state = JSON.parse(json);
+    } else {
+      throw new Error('No data in response');
+    }
+    _onDataReady();
+  } catch (e) {
+    console.error('[HUB] API fetch failed:', e);
+    if (typeof vToast === 'function') {
+      vToast('Erro ao carregar mapa. Tentando novamente...', 'err', 3000);
+    }
+    /* Retry once after 2s */
+    setTimeout(function() {
+      _fetchFromApi().catch(function() {
+        if (typeof MOCK_STATE !== 'undefined') {
+          state = _convertMockToHubFormat(MOCK_STATE);
+          _onDataReady();
+        }
+      });
+    }, 2000);
+  }
+}
+
+function _convertMockToHubFormat(mock) {
+  /* Convert MOCK_STATE (hub-data.js) to the format build_hub_payload() produces */
+  return {
+    cl: mock.currentLoc,
+    c: mock.charData,
+    rg: mock.regions,
+    wt: mock.weather,
+    q: [],
+    dd: {},
+    cc: 0,
+  };
+}
+
+function _onDataReady() {
+  if (!state) return;
+  /* Map payload keys to state object for compatibility */
+  if (!state.currentLoc) state.currentLoc = state.cl || 'city_gates';
+  if (!state.charData) state.charData = state.c || {};
+  if (!state.regions) state.regions = state.rg || {};
+  if (!state.weather) state.weather = state.wt || {};
+
   renderPlayerBar();
   renderRegionCards();
   bindFilterTabs();
   bindBottomNav();
   updateReturnVisibility();
-  /* Init canvas biome art in card panels */
+
   if (typeof HubBiomeArt !== 'undefined') {
     setTimeout(function() { HubBiomeArt.initCards(); }, 50);
   }
-});
+
+  console.log('[HUB] Ready — %s regions, current: %s', Object.keys(state.regions).length, state.currentLoc);
+}
 
 /* ===== PLAYER BAR ===== */
 function renderPlayerBar() {
@@ -414,9 +516,95 @@ function _startTravel(locId, biome, name) {
   }
 }
 
-function _executeTravelApi(locId) {
-  /* Placeholder — will POST to /api/navigate/action */
-  console.log('[HUB] Travel to', locId, 'pace:', _getSelectedPace(), 'activity:', _getSelectedActivity());
+async function _executeTravelApi(locId) {
+  if (!S.api || !S.token) {
+    console.warn('[HUB] No API configured, cannot travel');
+    if (typeof vToast === 'function') vToast('Conexao indisponivel', 'err', 2500);
+    return;
+  }
+
+  var pace = _getSelectedPace();
+  var activity = _getSelectedActivity();
+  var loc = _findLoc(locId);
+  var biome = _findBiome(locId);
+  var hasMap = state.regions[biome] ? state.regions[biome].hm : false;
+
+  console.log('[HUB] travel uid=%s target=%s pace=%s activity=%s noMap=%s', S.uid, locId, pace, activity, !hasMap);
+
+  if (typeof vProcessing !== 'undefined') vProcessing.show({ text: 'Preparando viagem...' });
+
+  try {
+    var headers = { 'Content-Type': 'application/json' };
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+      headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    }
+
+    var resp = await fetch(S.api + '/api/navigate/action', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        action: 'navigate_action',
+        token: S.token,
+        uid: S.uid,
+        type: 'travel',
+        target: locId,
+        pace: pace,
+        activity: activity,
+        noMap: !hasMap,
+      }),
+    });
+
+    if (typeof vProcessing !== 'undefined') vProcessing.hide();
+
+    if (!resp.ok) {
+      if (resp.status === 401 || resp.status === 403) {
+        if (typeof vToast === 'function') vToast('Sessao expirada. Retornando...', 'err', 2500);
+        setTimeout(_transitionToGame, 1500);
+        return;
+      }
+      throw new Error('HTTP ' + resp.status);
+    }
+
+    var data = await resp.json();
+
+    if (data.error) {
+      if (typeof vToast === 'function') vToast('Erro: ' + (data.message || data.error), 'err', 3000);
+      return;
+    }
+
+    /* Handle travel journal if present */
+    if (data.travel_log && data.travel_log.length > 0 && typeof _showTravelJournal === 'function') {
+      _showTravelJournal(data.travel_log, data.url);
+    } else if (data.url) {
+      /* Direct transition to explore/combat */
+      window.__valdoria_transitioning = true;
+      window.location.replace(data.url);
+    } else {
+      /* No URL — return to game */
+      _transitionToGame();
+    }
+  } catch (e) {
+    if (typeof vProcessing !== 'undefined') vProcessing.hide();
+    console.error('[HUB] Travel API error:', e);
+    if (typeof vToast === 'function') vToast('Erro na viagem. Tente novamente.', 'err', 3000);
+  }
+}
+
+function _transitionToGame() {
+  window.__valdoria_transitioning = true;
+  if (S.api && S.token) {
+    fetch(S.api + '/api/webapp/transition', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: 'navigate', to: S.returnTo, token: S.token, uid: S.uid }),
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.url) window.location.replace(d.url);
+    }).catch(function() {
+      try { if (window.Telegram && Telegram.WebApp) Telegram.WebApp.close(); } catch(e) {}
+    });
+  } else {
+    try { if (window.Telegram && Telegram.WebApp) Telegram.WebApp.close(); } catch(e) {}
+  }
 }
 
 function _getSelectedPace() {
