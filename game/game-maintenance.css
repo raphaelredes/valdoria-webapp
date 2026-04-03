@@ -1,0 +1,89 @@
+/* game-maintenance.css — Maintenance screen + warning toast styles */
+
+.maint-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: var(--v-space-xl, 16px);
+    text-align: center;
+}
+
+.maint-icon {
+    font-size: 48px;
+    margin-bottom: var(--v-space-lg, 12px);
+}
+
+.maint-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xl, 16px);
+    color: var(--v-gold, #c4953a);
+    margin-bottom: var(--v-space-md, 8px);
+}
+
+.maint-reason {
+    font-size: var(--v-font-body, 14px);
+    color: var(--v-text, #d4c8b0);
+    margin-bottom: var(--v-space-xl, 16px);
+    max-width: 300px;
+}
+
+.maint-progress-wrap {
+    width: 100%;
+    max-width: 280px;
+    margin-bottom: var(--v-space-lg, 12px);
+}
+
+.maint-progress-bar {
+    width: 100%;
+    height: var(--v-bar-height, 8px);
+    background: var(--v-bg-card, #2e2520);
+    border-radius: var(--v-radius, 10px);
+    overflow: hidden;
+    border: 1px solid var(--v-border, #4a3828);
+}
+
+.maint-progress-fill {
+    height: 100%;
+    background: var(--v-gold, #c4953a);
+    border-radius: var(--v-radius, 10px);
+    transition: width 1s linear;
+}
+
+.maint-countdown {
+    font-size: var(--v-font-sm, 13px);
+    color: var(--v-text-dim, #a09484);
+    margin-bottom: var(--v-space-xl, 16px);
+}
+
+.maint-retry-btn {
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-body, 14px);
+    color: var(--v-gold, #c4953a);
+    background: var(--v-bg-raised, #332a22);
+    border: 1px solid var(--v-gold-dim, #9a7530);
+    border-radius: var(--v-radius, 10px);
+    padding: var(--v-space-sm, 4px) var(--v-space-xl, 16px);
+    min-height: 44px;
+    min-width: 160px;
+    cursor: pointer;
+}
+
+.maint-retry-btn:active {
+    background: var(--v-bg-card, #2e2520);
+}
+
+.maint-retry-pulse {
+    animation: maintPulse 2s ease-in-out infinite;
+}
+
+@keyframes maintPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .maint-retry-pulse { animation: none; }
+    .maint-progress-fill { transition: none; }
+}
