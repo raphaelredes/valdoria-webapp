@@ -28,6 +28,9 @@ async function _loadPayload() {
   var params = window.__spaRouteParams || new URLSearchParams(window.location.search);
   var dataB64 = params.get('data') || '';
 
+  console.log('[HUB] _loadPayload hasData=%s hasApi=%s hasToken=%s spaParams=%s',
+    !!dataB64, !!S.api, !!S.token, !!window.__spaRouteParams);
+
   if (dataB64) {
     /* Payload in URL — decompress */
     try {
@@ -104,11 +107,30 @@ function _convertMockToHubFormat(mock) {
 
 function _onDataReady() {
   if (!state) return;
-  /* Map payload keys to state object for compatibility */
+  console.log('[HUB] _onDataReady raw keys:', Object.keys(state).join(','));
+
+  /* Map compact payload keys to readable names */
   if (!state.currentLoc) state.currentLoc = state.cl || 'city_gates';
   if (!state.charData) state.charData = state.c || {};
   if (!state.regions) state.regions = state.rg || {};
   if (!state.weather) state.weather = state.wt || {};
+
+  /* Map compact region field names from build_hub_payload() to what renderer expects */
+  for (var biome in state.regions) {
+    var reg = state.regions[biome];
+    if (reg.disc && !reg.discovered) reg.discovered = reg.disc;
+    if (!reg.discovered) reg.discovered = [];
+    if (typeof reg.q === 'number' && reg.quests === undefined) reg.quests = reg.q;
+    if (reg.quests === undefined) reg.quests = 0;
+    if (typeof reg.dg === 'number' && reg.dungeons === undefined) reg.dungeons = reg.dg;
+    if (reg.dungeons === undefined) reg.dungeons = 0;
+    if (reg.st && !reg.settlements) reg.settlements = reg.st;
+    if (!reg.settlements) reg.settlements = [];
+    if (!reg.locs) reg.locs = [];
+  }
+
+  console.log('[HUB] State mapped — %s regions, current: %s, charData: %s',
+    Object.keys(state.regions).length, state.currentLoc, state.charData.nm || '?');
 
   renderPlayerBar();
   renderRegionCards();
