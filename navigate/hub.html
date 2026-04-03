@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="theme-color" content="#2a2420">
+<title>Valdoria — Regioes</title>
+<style>html{background:#2a2420}</style>
+<script>
+/* Cache busting — pattern used across all WebApps (see CLAUDE.md Cache Busting rule) */
+var v = Date.now();
+</script>
+<script>document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');</script>
+<script>document.write('<link rel="stylesheet" href="../shared/fonts.css?v=' + v + '">');</script>
+<script>document.write('<link rel="stylesheet" href="../shared/tabs.css?v=' + v + '">');</script>
+<script>document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');</script>
+<script>document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v + '">');</script>
+<script>document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');</script>
+<script>document.write('<link rel="stylesheet" href="../shared/coin-icon.css?v=' + v + '">');</script>
+<script>document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');</script>
+<script>document.write('<link rel="stylesheet" href="../explore/explore-journey.css?v=' + v + '">');</script>
+<script>document.write('<link rel="stylesheet" href="hub.css?v=' + v + '">');</script>
+<script>document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');</script>
+</head>
+<body>
+<!-- ===== PLAYER BAR ===== -->
+<div class="player-bar" id="player-bar">
+  <div class="player-bar-loc">
+    <span class="player-bar-icon" id="pb-icon"></span>
+    <div class="player-bar-info">
+      <div class="player-bar-name" id="pb-name">Carregando...</div>
+      <div class="player-bar-meta" id="pb-meta"></div>
+    </div>
+  </div>
+  <div class="v-bar-group" id="pb-bars">
+    <div class="v-bar">
+      <span class="v-bar-icon">&hearts;</span>
+      <div class="v-bar-track v-bar-track--mini">
+        <div class="v-bar-fill hp" id="pb-hp"></div>
+      </div>
+      <span class="v-bar-label" id="pb-hp-label">0/0</span>
+    </div>
+    <div class="v-bar">
+      <span class="v-bar-icon">&starf;</span>
+      <div class="v-bar-track v-bar-track--mini">
+        <div class="v-bar-fill mp" id="pb-mp"></div>
+      </div>
+      <span class="v-bar-label" id="pb-mp-label">0/0</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FILTER BAR ===== -->
+<div class="filter-bar" id="filter-bar">
+  <button class="filter-trigger" id="filter-trigger">
+    <span class="filter-trigger-icon">&#x25BC;</span>
+    <span class="filter-trigger-label" id="filter-label">Todas as Regioes</span>
+  </button>
+  <span class="filter-active-badge" id="filter-badge" style="display:none"></span>
+  <!-- Dropdown positioned relative to filter-bar -->
+  <div class="filter-sheet-backdrop" id="filter-backdrop" style="display:none"></div>
+  <div class="filter-sheet" id="filter-sheet" style="display:none">
+  <div class="filter-sheet-handle"></div>
+  <div class="filter-sheet-title">Filtrar Regioes</div>
+  <div class="filter-sheet-options" id="filter-options">
+    <button class="filter-option active" data-filter="todas">
+      <span class="filter-option-icon">🗺️</span>
+      <span class="filter-option-text">Todas as Regioes</span>
+      <span class="filter-option-check">&#x2713;</span>
+    </button>
+    <button class="filter-option" data-filter="missoes">
+      <span class="filter-option-icon">📜</span>
+      <span class="filter-option-text">Com Missoes Ativas</span>
+      <span class="filter-option-check">&#x2713;</span>
+    </button>
+    <button class="filter-option" data-filter="masmorras">
+      <span class="filter-option-icon">💀</span>
+      <span class="filter-option-text">Com Masmorras</span>
+      <span class="filter-option-check">&#x2713;</span>
+    </button>
+    <button class="filter-option" data-filter="assentamentos">
+      <span class="filter-option-icon">🏘️</span>
+      <span class="filter-option-text">Com Assentamentos</span>
+      <span class="filter-option-check">&#x2713;</span>
+    </button>
+    <button class="filter-option" data-filter="descobertas">
+      <span class="filter-option-icon">✅</span>
+      <span class="filter-option-text">Ja Visitadas</span>
+      <span class="filter-option-check">&#x2713;</span>
+    </button>
+  </div>
+  </div>
+</div>
+
+<!-- ===== REGION CARDS ===== -->
+<div class="hub-scroll" id="hub-scroll"></div>
+
+<!-- ===== BOTTOM NAV ===== -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="bottom-btn" id="btn-position" aria-label="Posicao atual">
+    <span class="bottom-btn-icon">📍</span>
+    <span class="bottom-btn-label">Posicao</span>
+  </button>
+  <button class="bottom-btn" id="btn-journal" aria-label="Diario de viagem">
+    <span class="bottom-btn-icon">📜</span>
+    <span class="bottom-btn-label">Diario</span>
+  </button>
+  <button class="bottom-btn" id="btn-camp" aria-label="Acampar">
+    <span class="bottom-btn-icon">🏕️</span>
+    <span class="bottom-btn-label">Acampar</span>
+  </button>
+  <button class="bottom-btn" id="btn-return" aria-label="Retornar a cidade">
+    <span class="bottom-btn-icon">🏰</span>
+    <span class="bottom-btn-label">Retornar</span>
+  </button>
+</div>
+
+<!-- ===== LOCATION SUB-SCREEN ===== -->
+<div class="sub-screen" id="locations-screen" style="display:none">
+  <div class="sub-header">
+    <button class="sub-back" id="loc-back" aria-label="Voltar">&larr;</button>
+    <div class="sub-title" id="loc-title">Regiao</div>
+    <div class="sub-meta" id="loc-meta"></div>
+  </div>
+  <div class="sub-scroll" id="loc-list"></div>
+</div>
+
+<!-- ===== LOCATION DETAIL SCREEN ===== -->
+<div class="sub-screen" id="detail-screen" style="display:none">
+  <div class="sub-header">
+    <button class="sub-back" id="detail-back" aria-label="Voltar">&larr;</button>
+    <div class="sub-title" id="detail-title">Local</div>
+  </div>
+  <div class="sub-scroll" id="detail-content"></div>
+</div>
+
+<!-- ===== TRAVEL ANIMATION (reuses explore-travel.js) ===== -->
+<div id="travel-overlay">
+  <canvas id="travel-canvas"></canvas>
+  <button class="v-skip-btn" id="travel-skip-btn">Pular >></button>
+</div>
+
+<!-- ===== POPUP OVERLAY ===== -->
+<div id="v-popup-overlay" class="v-popup-overlay" style="display:none"></div>
+
+<script>document.write('<script src="hub-data.js?v=' + v + '"><\/script>');</script>
+<script>document.write('<script src="../explore/explore-travel.js?v=' + v + '"><\/script>');</script>
+<script>document.write('<script src="hub-biome-art.js?v=' + v + '"><\/script>');</script>
+<script>document.write('<script src="hub.js?v=' + v + '"><\/script>');</script>
+</body>
+</html>
