@@ -196,6 +196,7 @@ function _buildRegionCard(key, reg, meta) {
   h += '<div><div class="region-name">' + meta.name + '</div>';
   h += '<div class="region-meta">' + reg.locs.length + ' locais \u00B7 Nivel ' + minDanger + '-' + maxDanger + '</div></div>';
   h += '<div class="region-chips">';
+  if (!reg.hm) h += '<span class="chip chip-nomap">\u{1F5FA}\uFE0F Sem Mapa</span>';
   if (reg.quests > 0) h += '<span class="chip chip-quest">\u{1F4DC} ' + reg.quests + ' miss\u00F5es</span>';
   if (reg.dungeons > 0) h += '<span class="chip chip-dungeon">\u{1F480} ' + reg.dungeons + ' masmorras</span>';
   if (reg.settlements) {
@@ -411,6 +412,12 @@ function openDetail(biome, idx) {
 
   if (loc.ds) h += '<div class="detail-note">"' + loc.ds + '"</div>';
 
+  /* No map warning */
+  var regData = state.regions[biome];
+  if (regData && !regData.hm && !isCurrent) {
+    h += '<div class="detail-nomap-warn">\u{1F5FA}\uFE0F Voce nao possui mapa desta regiao. Risco maior de se perder durante a viagem.</div>';
+  }
+
   if (!isCurrent) {
     h += '<div class="detail-section-title">Ritmo de Viagem</div>';
     h += '<div class="detail-pace-row">';
@@ -625,6 +632,98 @@ function bindBottomNav() {
     var card = document.querySelector('.region-card[data-biome="' + currentBiome + '"]');
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
+
+  document.getElementById('btn-journal').addEventListener('click', function() {
+    /* Open travel journal modal (reuses navigate-core _showTravelJournal if available) */
+    var log = state.travelLog || [];
+    if (log.length === 0) {
+      if (typeof vToast === 'function') vToast('Nenhuma viagem registrada ainda.', 'ok', 2500);
+      return;
+    }
+    if (typeof _showTravelJournal === 'function') {
+      _showTravelJournal(log, null);
+    }
+  });
+
+  document.getElementById('btn-camp').addEventListener('click', function() {
+    if (!state.cc) {
+      if (typeof vToast === 'function') vToast('Nao e possivel acampar aqui.', 'warn', 2500);
+      return;
+    }
+    _executeAction('camp');
+  });
+
+  var btnReturn = document.getElementById('btn-return');
+  if (btnReturn) {
+    btnReturn.addEventListener('click', function() {
+      _executeAction('return');
+    });
+  }
+}
+
+async function _executeAction(type) {
+  if (!S.api || !S.token) {
+    if (typeof vToast === 'function') vToast('Conexao indisponivel', 'err', 2500);
+    return;
+  }
+
+  var labels = { camp: 'Montando acampamento...', return: 'Retornando a cidade...' };
+  if (typeof vProcessing !== 'undefined') vProcessing.show({ text: labels[type] || 'Processando...' });
+
+  try {
+    var headers = { 'Content-Type': 'application/json' };
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+      headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    }
+
+    var resp = await fetch(S.api + '/api/navigate/action', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        action: 'navigate_action',
+        token: S.token,
+        uid: S.uid,
+        type: type,
+      }),
+    });
+
+    if (typeof vProcessing !== 'undefined') vProcessing.hide();
+
+    if (!resp.ok) {
+      if (resp.status === 401 || resp.status === 403) {
+        if (typeof vToast === 'function') vToast('Sessao expirada. Retornando...', 'err', 2500);
+        setTimeout(_transitionToGame, 1500);
+        return;
+      }
+      throw new Error('HTTP ' + resp.status);
+    }
+
+    var data = await resp.json();
+    if (data.error) {
+      if (typeof vToast === 'function') vToast('Erro: ' + (data.message || data.error), 'err', 3000);
+      return;
+    }
+
+    if (data.url) {
+      /* Redirect (return journey → navigate reload, camp → game) */
+      window.__valdoria_transitioning = true;
+      if (data.travel_log && data.travel_log.length > 0 && typeof playTravelAnimation === 'function') {
+        var biome = _findBiome(state.currentLoc) || 'plains';
+        playTravelAnimation(biome, 'Eldoria', function() {
+          window.location.replace(data.url);
+        });
+      } else {
+        window.location.replace(data.url);
+      }
+    } else {
+      /* No redirect — transition to game */
+      _transitionToGame();
+    }
+  } catch (e) {
+    if (typeof vProcessing !== 'undefined') vProcessing.hide();
+    console.error('[HUB] Action error:', e);
+    if (typeof vToast === 'function') vToast('Erro. Tente novamente.', 'err', 3000);
+  }
 }
 
 /* ===== RETURN VISIBILITY ===== */

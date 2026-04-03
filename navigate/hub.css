@@ -215,6 +215,7 @@ body {
 .chip-quest { border-color: var(--v-gold-25, rgba(196,149,58,0.25)); color: var(--v-gold, #c4953a) }
 .chip-dungeon { border-color: var(--v-crimson-glow, rgba(123,32,32,0.35)); color: var(--v-danger-light, #e08080) }
 .chip-settlement { border-color: rgba(91,155,213,0.25); color: var(--v-info, #5b9bd5) }
+.chip-nomap { border-color: var(--v-crimson-glow, rgba(123,32,32,0.35)); color: var(--v-warning, #f39c12); background: rgba(243,156,18,0.06) }
 
 /* Progress bar */
 .region-prog { margin-top: var(--v-space-sm, 4px) }
@@ -462,6 +463,17 @@ body {
   background: var(--v-gold-10, rgba(196,149,58,0.1));
   border-color: var(--v-gold-40, rgba(196,149,58,0.4));
   color: var(--v-gold-light, #dbb668);
+}
+
+.detail-nomap-warn {
+  font-size: var(--v-font-md, 12px);
+  color: var(--v-warning, #f39c12);
+  background: rgba(243,156,18,0.06);
+  border: 1px solid rgba(243,156,18,0.2);
+  border-radius: var(--v-radius-sm, 6px);
+  padding: var(--v-space-md, 8px);
+  margin-bottom: var(--v-space-xl, 16px);
+  line-height: 1.5;
 }
 
 .detail-hint {
