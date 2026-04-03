@@ -257,8 +257,8 @@ function bindFilterTabs() {
   var sheet = document.getElementById('filter-sheet');
 
   trigger.addEventListener('click', function() {
-    var isOpen = sheet.style.display !== 'none';
-    if (isOpen) { _closeFilterSheet(); } else { _openFilterSheet(); }
+    var sheetVisible = sheet.style.display !== 'none';
+    if (sheetVisible) { _closeFilterSheet(); } else { _openFilterSheet(); }
   });
 
   backdrop.addEventListener('click', _closeFilterSheet);

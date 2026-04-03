@@ -50,7 +50,7 @@ body {
 /* Player bar uses shared v-bar components from status-bars.css */
 .player-bar .v-bar-group { gap: 0; padding: 0; width: 120px; flex-shrink: 0 }
 .player-bar .v-bar { gap: var(--v-space-xs, 2px); padding: 0 }
-.player-bar .v-bar-icon { font-size: 10px; width: 14px }
+.player-bar .v-bar-icon { font-size: var(--v-font-xs, 10px); width: 14px }
 .player-bar .v-bar-track { height: var(--v-bar-height-mini, 4px) }
 .player-bar .v-bar-label { font-size: var(--v-font-sm, 11px); min-width: 36px }
 
@@ -104,7 +104,7 @@ body {
   padding: var(--v-space-sm, 4px);
   z-index: calc(var(--v-z-dropdown, 200) + 1);
   box-shadow: var(--v-shadow-md, 0 4px 16px rgba(0,0,0,0.5));
-  animation: dropDown 0.2s cubic-bezier(0.22,1,0.36,1);
+  animation: dropDown var(--v-transition, 0.2s) cubic-bezier(0.22,1,0.36,1);
 }
 @keyframes dropDown { from { opacity: 0; transform: translateY(-4px) } to { opacity: 1; transform: translateY(0) } }
 
@@ -226,7 +226,7 @@ body {
 .prog-fill {
   height: 100%; border-radius: 2px;
   background: linear-gradient(90deg, var(--v-gold, #c4953a), var(--v-gold-light, #dbb668));
-  transition: width 0.4s ease;
+  transition: width var(--v-transition-slow, 0.4s) ease;
 }
 .prog-text {
   font-size: var(--v-font-sm, 11px); color: var(--v-text-dim, #a09484); margin-top: 2px;
@@ -308,7 +308,7 @@ body {
   background: var(--v-bg, #2a2420);
   z-index: var(--v-z-overlay, 500);
   display: flex; flex-direction: column;
-  animation: subEnter 0.25s ease;
+  animation: subEnter var(--v-transition-base, 0.25s) ease;
 }
 @keyframes subEnter {
   from { transform: translateX(100%); opacity: 0.5 }
