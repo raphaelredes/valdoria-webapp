@@ -15,21 +15,21 @@
     width: 100%;
     border-radius: 10px;
     background: linear-gradient(rgba(58,48,40,0.7), rgba(46,37,32,0.9));
-    border: 1px solid rgba(196,149,58,0.35);
-    font-size: 14px;
+    border: 1px solid var(--v-gold-35);
+    font-size: var(--v-font-body, 14px);
     color: #c4953a;
     font-family: 'Cinzel', serif;
     font-weight: bold;
     letter-spacing: 2px;
     text-align: center;
-    box-shadow: 0 0 8px rgba(196,149,58,0.1);
+    box-shadow: 0 0 8px var(--v-gold-10);
     cursor: pointer;
-    transition: transform 0.1s ease, background 0.1s ease;
+    transition: transform var(--v-transition-fast, 0.15s) ease, background var(--v-transition-fast, 0.15s) ease;
 }
 
 .actions-trigger:active {
     transform: scale(0.97);
-    background: rgba(196,149,58,0.15);
+    background: var(--v-gold-15);
 }
 
 /* ── Popup panel ─────────────────────────────────────────── */
@@ -38,8 +38,8 @@
     bottom: 46px;
     left: 50%;
     transform: translateX(-50%);
-    background: #2e2520;
-    border: 1.5px solid rgba(196,149,58,0.3);
+    background: var(--v-bg-card);
+    border: 1.5px solid var(--v-gold-30);
     border-radius: 14px;
     padding: 10px;
     box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
@@ -58,9 +58,9 @@
     transform: translateX(-50%) rotate(45deg);
     width: 10px;
     height: 10px;
-    background: #2e2520;
-    border-right: 1.5px solid rgba(196,149,58,0.3);
-    border-bottom: 1.5px solid rgba(196,149,58,0.3);
+    background: var(--v-bg-card);
+    border-right: 1.5px solid var(--v-gold-30);
+    border-bottom: 1.5px solid var(--v-gold-30);
 }
 
 @keyframes popUp {
@@ -92,27 +92,27 @@
     background: rgba(0,0,0,0.25);
     border: 1px solid rgba(74,56,40,0.35);
     cursor: pointer;
-    transition: transform 0.1s ease, background 0.1s ease;
+    transition: transform var(--v-transition-fast, 0.15s) ease, background var(--v-transition-fast, 0.15s) ease;
 }
 
 .ap-btn:active {
     transform: scale(0.96);
-    background: rgba(196,149,58,0.1);
+    background: var(--v-gold-10);
 }
 
 .ap-btn.ap-primary {
-    border-color: rgba(196,149,58,0.45);
-    box-shadow: 0 0 8px rgba(196,149,58,0.2);
+    border-color: var(--v-gold-45);
+    box-shadow: 0 0 8px var(--v-gold-20);
 }
 
 .ap-ico {
-    font-size: 22px;
+    font-size: 22px; /* noqa: preflight — emoji icon size, no design token */
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
     line-height: 1;
 }
 
 .ap-label {
-    font-size: 12px;
+    font-size: var(--v-font-label, 12px);
     color: #c8bca8;
     font-family: 'Cinzel', serif;
     white-space: nowrap;
@@ -120,7 +120,7 @@
 }
 
 .ap-chance {
-    font-size: 13px;
+    font-size: var(--v-font-md, 13px);
     color: #c4953a;
     font-family: 'Cinzel', serif;
     font-weight: bold;

@@ -13,7 +13,7 @@
 
 /* ── Row label (retaguarda / frente) ── */
 .row-label {
-    font-size: 10px;
+    font-size: var(--v-font-xs, 10px);
     color: #b0a488;
     text-align: center;
     text-transform: uppercase;
@@ -64,7 +64,7 @@
 
 /* Player cell */
 .cell.player {
-    border-color: rgba(196,149,58,0.35);
+    border-color: var(--v-gold-35);
 }
 
 /* Ally cell */
@@ -74,17 +74,17 @@
 
 /* Active turn cell */
 .cell.active-turn {
-    box-shadow: 0 0 12px rgba(196,149,58,0.35);
-    border-color: rgba(196,149,58,0.5);
+    box-shadow: 0 0 12px var(--v-gold-35);
+    border-color: var(--v-gold-50);
     animation: cellGlow 2s infinite;
 }
 
 @keyframes cellGlow {
     0%, 100% {
-        box-shadow: 0 0 8px rgba(196,149,58,0.35);
+        box-shadow: 0 0 8px var(--v-gold-35);
     }
     50% {
-        box-shadow: 0 0 16px rgba(196,149,58,0.55);
+        box-shadow: 0 0 16px var(--v-gold-55);
     }
 }
 
@@ -100,7 +100,7 @@
 .unit-ico {
     width: 26px;
     height: 26px;
-    font-size: 22px;
+    font-size: 22px; /* noqa: preflight — emoji icon size, no design token */
     line-height: 1;
     flex-shrink: 0;
     filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
@@ -125,11 +125,11 @@
 
 /* Individual status pip */
 .s-pip {
-    font-size: 10px;
+    font-size: var(--v-font-xs, 10px);
     background: rgba(0,0,0,0.4);
     padding: 1px 3px;
     border-radius: 3px;
-    color: #d4c8b0;
+    color: var(--v-text);
     text-shadow: 0 1px 2px rgba(0,0,0,0.4);
     line-height: 1.2;
     white-space: nowrap;
@@ -184,7 +184,7 @@
 
 /* Bar number labels */
 .bar-num {
-    font-size: 10px;
+    font-size: var(--v-font-xs, 10px);
     font-family: 'Cinzel', serif;
     font-weight: bold;
     text-shadow: 0 1px 2px rgba(0,0,0,0.6);
@@ -204,7 +204,7 @@
     position: absolute;
     top: 1px;
     right: 2px;
-    font-size: 10px;
+    font-size: var(--v-font-xs, 10px);
     background: rgba(140,30,30,0.7);
     padding: 1px 5px;
     border-radius: 4px;
@@ -222,7 +222,7 @@
     position: absolute;
     top: 1px;
     left: 2px;
-    font-size: 10px;
+    font-size: var(--v-font-xs, 10px);
     color: #c0b090;
     font-family: 'Cinzel', serif;
     text-shadow: 0 1px 2px rgba(0,0,0,0.4);
@@ -238,7 +238,7 @@
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(196,149,58,0.25),
+        var(--v-gold-25),
         transparent
     );
     flex-shrink: 0;
