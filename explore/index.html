@@ -293,23 +293,99 @@
         </div>
     </div>
 
-    <!-- Camp Overlay (food selection) -->
-    <div class="camp-overlay" id="camp-overlay" role="dialog" aria-label="Acampamento">
-        <div class="dm-card">
-            <div class="dm-header">
-                <span class="dm-icon"></span>
-                <div>
-                    <div class="dm-title">Montar Acampamento</div>
-                    <div class="dm-type-badge" style="background:rgba(68,170,100,0.2);color:#4a8">descanso curto</div>
-                </div>
+    <!-- ===== CAMP SCREEN (main campfire + action cards) ===== -->
+    <div class="camp-screen" id="camp-screen" role="dialog" aria-label="Acampamento">
+        <div class="camp-scene">
+            <div class="camp-hud">
+                <div class="camp-hud-bar"><span class="camp-hud-icon">❤️</span><div class="camp-hud-track"><div class="camp-hud-fill camp-hud-hp" id="camp-hp-bar"></div></div><span class="camp-hud-val camp-hud-val-hp" id="camp-hp-text"></span></div>
+                <div class="camp-hud-bar"><span class="camp-hud-icon">💧</span><div class="camp-hud-track"><div class="camp-hud-fill camp-hud-mp" id="camp-mp-bar"></div></div><span class="camp-hud-val camp-hud-val-mp" id="camp-mp-text"></span></div>
             </div>
-            <div class="camp-desc">Escolha uma refeição para acompanhar o descanso curto (1d8 + CON).</div>
-            <div class="camp-food-list" id="camp-food-list"></div>
-            <button class="btn-cancel camp-cancel" onclick="closeCampOverlay()">Voltar</button>
+            <div class="camp-sky"><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div></div>
+            <div class="camp-moon"></div>
+            <div class="camp-fire-area">
+                <div class="camp-ground-glow"></div>
+                <div class="camp-logs"><div class="camp-log"></div><div class="camp-log"></div><div class="camp-log"></div><div class="camp-log-ember"></div></div>
+                <canvas class="camp-fire-canvas" id="camp-fire-canvas" width="160" height="160"></canvas>
+                <div class="camp-embers"><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span></div>
+            </div>
+            <div class="camp-title-area">
+                <div class="camp-title-text">Acampamento</div>
+                <div class="camp-title-biome" id="camp-biome-text"></div>
+            </div>
+        </div>
+        <div class="camp-cards">
+            <div class="camp-card camp-card-short" id="camp-btn-short" onclick="openCampPopup('short')">
+                <div class="camp-card-icon">💤</div>
+                <div class="camp-card-info">
+                    <div class="camp-card-title camp-card-t-short">Descanso Curto</div>
+                    <div class="camp-card-sub">1 hora — Gasta Dados de Vida</div>
+                    <div class="camp-card-detail" id="camp-short-detail"></div>
+                </div>
+                <div class="camp-card-arrow camp-card-t-short">›</div>
+            </div>
+            <div class="camp-card camp-card-long" id="camp-btn-long" onclick="openCampPopup('long')">
+                <div class="camp-card-icon">🌙</div>
+                <div class="camp-card-info">
+                    <div class="camp-card-title camp-card-t-long">Descanso Longo</div>
+                    <div class="camp-card-sub">8 horas — Recuperação total</div>
+                    <div class="camp-card-detail" id="camp-long-detail"></div>
+                </div>
+                <div class="camp-card-arrow camp-card-t-long">›</div>
+            </div>
+            <div class="camp-card camp-card-guard" id="camp-btn-guard" onclick="openCampPopup('guard')">
+                <div class="camp-card-icon">🛡️</div>
+                <div class="camp-card-info">
+                    <div class="camp-card-title camp-card-t-guard">Montar Guarda</div>
+                    <div class="camp-card-sub">Percepção (WIS) — Protege o grupo</div>
+                    <div class="camp-card-detail" id="camp-guard-detail"></div>
+                </div>
+                <div class="camp-card-arrow camp-card-t-guard">›</div>
+            </div>
+            <div class="camp-continue" onclick="closeCampOverlay()">Continuar Explorando ›</div>
+            <div class="camp-footer-status" id="camp-footer-status"></div>
         </div>
     </div>
 
-    <!-- Heal Dice Overlay (3D animation for potion/consumable healing) -->
+    <!-- ===== CAMP POPUP: Short Rest ===== -->
+    <div class="camp-popup" id="camp-popup-short" role="dialog" aria-label="Descanso Curto">
+        <div class="camp-popup-header">
+            <div class="camp-popup-hi">💤</div>
+            <div class="camp-popup-ht camp-card-t-short">Descanso Curto</div>
+            <div class="camp-popup-close" onclick="closeCampPopup('short')">✕</div>
+        </div>
+        <div class="camp-popup-body" id="camp-popup-short-body"></div>
+        <div class="camp-popup-footer">
+            <button class="camp-btn-confirm camp-btn-green" id="camp-confirm-short" onclick="confirmShortRest()">🎲 Descansar (1 hora)</button>
+        </div>
+    </div>
+
+    <!-- ===== CAMP POPUP: Long Rest ===== -->
+    <div class="camp-popup" id="camp-popup-long" role="dialog" aria-label="Descanso Longo">
+        <div class="camp-popup-header">
+            <div class="camp-popup-hi">🌙</div>
+            <div class="camp-popup-ht camp-card-t-long">Descanso Longo</div>
+            <div class="camp-popup-close" onclick="closeCampPopup('long')">✕</div>
+        </div>
+        <div class="camp-popup-body" id="camp-popup-long-body"></div>
+        <div class="camp-popup-footer">
+            <button class="camp-btn-confirm camp-btn-gold" id="camp-confirm-long" onclick="confirmLongRest()">🌙 Descansar (8 horas)</button>
+        </div>
+    </div>
+
+    <!-- ===== CAMP POPUP: Guard ===== -->
+    <div class="camp-popup" id="camp-popup-guard" role="dialog" aria-label="Montar Guarda">
+        <div class="camp-popup-header">
+            <div class="camp-popup-hi">🛡️</div>
+            <div class="camp-popup-ht camp-card-t-guard">Montar Guarda</div>
+            <div class="camp-popup-close" onclick="closeCampPopup('guard')">✕</div>
+        </div>
+        <div class="camp-popup-body" id="camp-popup-guard-body"></div>
+        <div class="camp-popup-footer">
+            <button class="camp-btn-confirm camp-btn-blue" id="camp-confirm-guard" onclick="confirmGuard()">👁️ Montar Guarda</button>
+        </div>
+    </div>
+
+    <!-- Heal Dice Overlay (3D animation for potion/consumable healing — keep) -->
     <div class="camp-dice-overlay" id="heal-dice-overlay" role="dialog" aria-label="Dado de cura">
         <div class="dm-card camp-dice-card">
             <div class="camp-dice-title" id="heal-dice-title"></div>
@@ -319,10 +395,10 @@
         </div>
     </div>
 
-    <!-- Camp Dice Roll Overlay (3D d8 animation before result) -->
+    <!-- Camp Dice Roll Overlay (3D animation — reused by rest system) -->
     <div class="camp-dice-overlay" id="camp-dice-overlay" role="dialog" aria-label="Dado de acampamento">
         <div class="dm-card camp-dice-card">
-            <div class="camp-dice-title">DESCANSO</div>
+            <div class="camp-dice-title" id="camp-dice-title">DESCANSO</div>
             <div class="dice3d-canvas camp-dice-canvas" id="camp-dice-canvas"></div>
             <div class="camp-dice-label" id="camp-dice-label"></div>
         </div>
@@ -400,7 +476,7 @@
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
-            var scripts = ['explore-iso.js', 'explore-tiles.js', 'explore-fog.js', 'explore-travel.js', 'explore-movement.js', 'explore-renderer.js', 'explore-narrations.js', 'explore-stories.js', 'explore-tutorial.js', 'explore-core.js', 'explore-events.js', 'explore-events-pace.js', 'explore-watch.js', 'explore-events-hazards.js', 'explore-events-rest.js', 'explore-events-tiles.js', 'explore-particles.js', 'explore-outbound-travel.js'];
+            var scripts = ['explore-iso.js', 'explore-tiles.js', 'explore-fog.js', 'explore-travel.js', 'explore-movement.js', 'explore-renderer.js', 'explore-narrations.js', 'explore-stories.js', 'explore-tutorial.js', 'explore-core.js', 'explore-events.js', 'explore-events-pace.js', 'explore-watch.js', 'explore-events-hazards.js', 'explore-camp-fire.js', 'explore-events-rest.js', 'explore-events-tiles.js', 'explore-particles.js', 'explore-outbound-travel.js'];
         scripts.forEach(function (s) {
             document.write('<script src="' + s + '?v=' + v + '"><\/script>');
         });
