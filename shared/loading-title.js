@@ -89,9 +89,10 @@
 
     /* ── Inject into DOM ── */
     function show() {
-      if (_el) return;
+      if (_el) { console.log('[INTRO_TITLE] show() skipped — already visible'); return; }
       _el = _buildDOM();
       document.body.appendChild(_el);
+      console.log('[INTRO_TITLE] Title screen INJECTED into DOM (tier=' + tier + ')');
 
       /* Tap handler — entire screen is clickable */
       _el.addEventListener('click', _onTap);
@@ -103,8 +104,9 @@
 
     /* ── Tap handler ── */
     function _onTap() {
-      if (_started) return;
+      if (_started) { console.log('[INTRO_TITLE] _onTap ignored — already started'); return; }
       _started = true;
+      console.log('[INTRO_TITLE] User TAPPED — starting exit sequence');
 
       /* Haptic feedback */
       try {
@@ -134,6 +136,7 @@
     function hide() {
       if (_el && _el.parentNode) {
         _el.parentNode.removeChild(_el);
+        console.log('[INTRO_TITLE] Title screen REMOVED from DOM');
       }
       _el = null;
     }

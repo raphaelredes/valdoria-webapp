@@ -93,19 +93,23 @@
      * Called once on cold start — after that, _titleShown prevents re-showing.
      */
     function _showTitleScreen() {
-        if (_titleShown) return;
-        if (typeof ValdoriaTitleScreen !== 'function') return;
+        if (_titleShown) { console.log('[INTRO] _showTitleScreen skipped — already shown'); return; }
+        if (typeof ValdoriaTitleScreen !== 'function') { console.warn('[INTRO] ValdoriaTitleScreen not available'); return; }
         _titleShown = true;
+        console.log('[INTRO] Title screen created — waiting for user tap');
 
         _titleScreen = ValdoriaTitleScreen({
             onStart: function() {
-                console.log('[GAME-LOADING] Title screen tapped — unlocking audio');
+                console.log('[INTRO] Title screen TAPPED — unlocking audio');
                 /* Unlock audio: set pending track first, then unlock (which picks it up) */
                 if (typeof ValdoriaAudio !== 'undefined') {
                     ValdoriaAudio.play('intro');  /* sets _pendingTrack */
                     ValdoriaAudio.forceUnlock();  /* triggers _playTrack with pending */
                     /* Create analyser synchronously within tap gesture for AudioContext.resume() */
-                    ValdoriaAudio.getAnalyser();
+                    var an = ValdoriaAudio.getAnalyser();
+                    console.log('[INTRO] Audio unlock: play(intro) + forceUnlock() + getAnalyser()=' + (an ? 'OK' : 'null'));
+                } else {
+                    console.warn('[INTRO] ValdoriaAudio not available — no music');
                 }
 
                 /* Start audio-reactive effects (analyser created synchronously above) */
@@ -113,7 +117,10 @@
                     _startReactive();
                     /* If game already finished loading while title was up, show enter button */
                     if (_gameReady) {
+                        console.log('[INTRO] Game was already ready — showing enter button immediately');
                         _showEnterButton();
+                    } else {
+                        console.log('[INTRO] Game still loading — enter button will appear when ready');
                     }
                 }, 100);
             }
@@ -123,27 +130,30 @@
 
     /** Start audio-reactive loading effects */
     function _startReactive() {
-        if (_reactiveStarted) return;
-        if (typeof ValdoriaLoadingReactive === 'undefined') return;
-        if (typeof ValdoriaAudio === 'undefined') return;
+        if (_reactiveStarted) { console.log('[INTRO] _startReactive skipped — already running'); return; }
+        if (typeof ValdoriaLoadingReactive === 'undefined') { console.warn('[INTRO] ValdoriaLoadingReactive not available'); return; }
+        if (typeof ValdoriaAudio === 'undefined') { console.warn('[INTRO] ValdoriaAudio not available for reactive'); return; }
 
         var analyser = ValdoriaAudio.getAnalyser();
         if (analyser) {
             ValdoriaLoadingReactive.start(analyser);
             _reactiveStarted = true;
+            console.log('[INTRO] Audio-reactive effects STARTED (tier=' + (window._valdoriaPerformanceTier || 'unknown') + ')');
+        } else {
+            console.warn('[INTRO] getAnalyser() returned null — reactive effects disabled');
         }
     }
 
     /** Show "Aventurar-se" button when game is ready but user is enjoying music */
     function _showEnterButton() {
-        if (_enterBtn) return;
+        if (_enterBtn) { console.log('[INTRO] _showEnterButton skipped — already visible'); return; }
         var overlay = document.getElementById('loading');
-        if (!overlay) return;
+        if (!overlay) { console.warn('[INTRO] _showEnterButton — loading overlay not found!'); return; }
 
         /* CRITICAL: Disable loading controller timeout — game IS ready, user is choosing when to enter */
         if (_ctrl && _ctrl.resetTimers) {
             _ctrl.resetTimers();
-            console.log('[GAME-LOADING] Timers reset — game ready, no more timeouts');
+            console.log('[INTRO] Loading controller timers RESET — no more timeouts while user enjoys music');
         }
 
         _enterBtn = document.createElement('button');
@@ -181,14 +191,14 @@
             document.head.appendChild(style);
         }
 
-        console.log('[GAME-LOADING] Enter button shown — game ready, waiting for user');
+        console.log('[INTRO] "Aventurar-se" button SHOWN — game ready, user controls when to enter');
     }
 
     /** User clicked "Aventurar-se" — actually dismiss loading */
     function _onEnterGame() {
-        if (!_gameReady) return;
+        if (!_gameReady) { console.warn('[INTRO] _onEnterGame called but _gameReady=false — ignoring'); return; }
         _gameReady = false;
-        console.log('[GAME-LOADING] User chose to enter game');
+        console.log('[INTRO] User tapped "Aventurar-se" — entering game');
 
         /* Haptic */
         try {
@@ -199,6 +209,7 @@
 
         /* Stop reactive effects */
         _stopReactive();
+        console.log('[INTRO] Reactive effects stopped');
 
         /* Remove enter button */
         if (_enterBtn && _enterBtn.parentNode) {
@@ -208,24 +219,33 @@
 
         /* Actually hide loading */
         if (_ctrl) {
+            console.log('[INTRO] Calling _ctrl.hide() — cinematic exit begins');
             _ctrl.hide(function() {
                 var el = document.getElementById('loading');
                 if (el) el.style.display = 'none';
+                console.log('[INTRO] Loading overlay HIDDEN — game screen now visible');
                 if (_pendingHideCb) {
+                    console.log('[INTRO] Resolving pending hideLoadingWithDelay promise');
                     _pendingHideCb();
                     _pendingHideCb = null;
                 }
             });
+        } else {
+            console.warn('[INTRO] _onEnterGame — no loading controller, forcing hide');
+            var el = document.getElementById('loading');
+            if (el) el.style.display = 'none';
+            if (_pendingHideCb) { _pendingHideCb(); _pendingHideCb = null; }
         }
     }
 
     /** Stop audio-reactive effects */
     function _stopReactive() {
-        if (!_reactiveStarted) return;
+        if (!_reactiveStarted) { return; }
         if (typeof ValdoriaLoadingReactive !== 'undefined') {
             ValdoriaLoadingReactive.stop();
         }
         _reactiveStarted = false;
+        console.log('[INTRO] Audio-reactive effects STOPPED');
     }
 
     function _ensureCtrl() {
@@ -275,6 +295,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
         }
         /* ── Title screen on cold start (shows ON TOP of loading, not instead of) ── */
         if (!isRetry && !_titleShown) {
+            console.log('[INTRO] Cold start detected — showing title screen on top of loading');
             _showTitleScreen();
         }
         var ctrl = _ensureCtrl();
@@ -302,6 +323,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
         var _titleUp = _titleScreen && _titleScreen.isVisible();
         if (_titleShown && (_reactiveStarted || _titleUp) && !_gameReady) {
             _gameReady = true;
+            console.log('[INTRO] hideLoading DEFERRED — game ready, titleUp=' + _titleUp + ' reactive=' + _reactiveStarted);
             if (!_titleUp) _showEnterButton(); /* title gone, show button on loading */
             /* else: button will be shown after title tap (onStart checks _gameReady) */
             return;
@@ -328,6 +350,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
         var _titleUp = _titleScreen && _titleScreen.isVisible();
         if (_titleShown && (_reactiveStarted || _titleUp) && !_gameReady) {
             _gameReady = true;
+            console.log('[INTRO] hideLoadingWithDelay DEFERRED — game ready, titleUp=' + _titleUp + ' reactive=' + _reactiveStarted + ' — returning Promise');
             return new Promise(function(resolve) {
                 _pendingHideCb = resolve;
                 if (!_titleUp) _showEnterButton();
