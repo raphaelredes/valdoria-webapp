@@ -54,8 +54,21 @@
     </script>
 </head>
 <body>
-    <!-- Dark placeholder — SVG content injected AFTER all CSS loads (prevents flash in Telegram WebView) -->
-    <div id="loading" class="loading-overlay" style="background:#1a1510" aria-busy="true"></div>
+    <!-- Dark placeholder — starts HIDDEN; title screen covers until user taps -->
+    <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
+    <script>
+    /* ── Early title screen: show IMMEDIATELY to prevent loading flash ── */
+    (function(){
+        if(typeof ValdoriaTitleScreen!=='function')return;
+        window.__introTitle=ValdoriaTitleScreen({onStart:function(){
+            console.log('[INTRO] Early title TAPPED (app.html)');
+            if(typeof window.__onIntroTap==='function'){window.__onIntroTap();}
+            else{window.__introTapped=true;}
+        }});
+        window.__introTitle.show();
+        console.log('[INTRO] Early title screen injected (app.html)');
+    })();
+    </script>
 
     <!-- Route content container (swapped by router) -->
     <div id="route-root"></div>

@@ -43,6 +43,23 @@
       }
       root.appendChild(runesDiv);
 
+      /* Orb of Valdoria — central lore artifact (see LORE note in CSS) */
+      var orbWrap = document.createElement('div');
+      orbWrap.className = 'title-orb-wrap';
+      var orbGlow = document.createElement('div');
+      orbGlow.className = 'title-orb-glow';
+      orbWrap.appendChild(orbGlow);
+      var orb = document.createElement('div');
+      orb.className = 'title-orb';
+      var orbInner = document.createElement('div');
+      orbInner.className = 'title-orb-inner';
+      orb.appendChild(orbInner);
+      var orbFlare = document.createElement('div');
+      orbFlare.className = 'title-orb-flare';
+      orb.appendChild(orbFlare);
+      orbWrap.appendChild(orb);
+      root.appendChild(orbWrap);
+
       /* Brand */
       var brand = document.createElement('div');
       brand.className = 'title-brand';
