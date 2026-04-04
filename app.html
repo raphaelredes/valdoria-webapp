@@ -63,6 +63,7 @@
     <script>
     /* ── Early title screen: show IMMEDIATELY to prevent loading flash ── */
     (function(){
+        if(window.__introTitleSkip){console.log('[INTRO] Title screen SKIPPED (Walker)');return;}
         if(typeof ValdoriaTitleScreen!=='function')return;
         window.__introTitle=ValdoriaTitleScreen({onStart:function(){
             console.log('[INTRO] Early title TAPPED (app.html)');

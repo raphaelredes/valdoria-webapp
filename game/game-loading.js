@@ -139,6 +139,8 @@
      */
     function _showTitleScreen() {
         if (_titleShown) { console.log('[INTRO] _showTitleScreen skipped — already shown'); return false; }
+        /* Game Walker bypass: skip title screen entirely for automated testing */
+        if (window.__introTitleSkip) { console.log('[INTRO] _showTitleScreen skipped — __introTitleSkip=true (Walker)'); _titleShown = true; return false; }
 
         /* Check for early title screen (created by inline script in index.html) */
         if (window.__introTitle && window.__introTitle.isVisible()) {
