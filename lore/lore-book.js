@@ -106,22 +106,23 @@
 
         _currentPage = page;
         saveState();
+        playPageSound();
 
         /* show target */
         setTimeout(function () {
             var $target;
             if (page === -1) {
                 $target = $cover;
-                /* cover: no index button needed */
+                updateProgressBar(0, _totalPages);
             } else if (page === 0) {
                 $target = $pageIndex;
                 updatePageCounter($pageCounter, 0, _totalPages);
-                /* index btn now part of topbar, no show/hide needed */
+                updateProgressBar(0, _totalPages);
             } else {
                 $target = $pageFrag;
                 renderFragment(page - 1);
                 updatePageCounter($pageCounterFrag, page, _totalPages);
-                /* index btn now part of topbar, no show/hide needed */
+                updateProgressBar(page, _totalPages);
             }
             if ($target) {
                 $target.classList.add('active');
@@ -175,6 +176,9 @@
         if (f.condition) {
             $pageFrag.classList.add('condition-' + f.condition);
         }
+
+        /* paragraph separators for long fragments */
+        addParagraphSeparators();
 
         /* special effect for fragment #30 (last) */
         if (idx === _fragments.length - 1 && f.type === 'strange') {
@@ -305,6 +309,55 @@
         } catch (e) { /* noop */ }
         /* default: show cover */
         goToPage(-1);
+    }
+
+    /* ─── PAGE TURN SOUND ─── */
+    var _audioCtx = null;
+    function playPageSound() {
+        /* Respect reduced motion = no sound */
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        try {
+            if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            /* White noise burst (paper rustle) — synthesized, no file needed */
+            var bufSize = Math.floor(_audioCtx.sampleRate * 0.08); /* 80ms */
+            var buf = _audioCtx.createBuffer(1, bufSize, _audioCtx.sampleRate);
+            var ch = buf.getChannelData(0);
+            for (var i = 0; i < bufSize; i++) {
+                var env = 1 - (i / bufSize);
+                ch[i] = (Math.random() * 2 - 1) * env * 0.06;
+            }
+            var src = _audioCtx.createBufferSource();
+            src.buffer = buf;
+            var filt = _audioCtx.createBiquadFilter();
+            filt.type = 'bandpass';
+            filt.frequency.value = 3000;
+            filt.Q.value = 0.5;
+            src.connect(filt);
+            filt.connect(_audioCtx.destination);
+            src.start();
+        } catch (e) { /* audio not available — silent fallback */ }
+    }
+
+    /* ─── PROGRESS BAR ─── */
+    var $progressBar = document.getElementById('progress-bar');
+    function updateProgressBar(current, total) {
+        if (!$progressBar || total <= 0) return;
+        var pct = Math.round((current / total) * 100);
+        $progressBar.style.width = pct + '%';
+    }
+
+    /* ─── PARAGRAPH SEPARATORS ─── */
+    function addParagraphSeparators() {
+        var paragraphs = $fragContent.querySelectorAll('p');
+        if (paragraphs.length < 4) return;
+        /* Insert ornamental separator every 3 paragraphs */
+        for (var i = 3; i < paragraphs.length; i += 4) {
+            var sep = document.createElement('div');
+            sep.className = 'para-separator';
+            sep.textContent = '\u25C6 \u25C6 \u25C6';
+            /* safe: textContent with static chars, no user input */
+            paragraphs[i].parentNode.insertBefore(sep, paragraphs[i]);
+        }
     }
 
     /* ─── UTILS ─── */

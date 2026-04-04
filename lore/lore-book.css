@@ -844,6 +844,105 @@ body {
 .progressive-clarity-6 { opacity: 1; }
 
 /* ═══════════════════════════════════════════════════════
+   CANDLELIGHT GLOW — warm pulsing light on parchment edges
+   ═══════════════════════════════════════════════════════ */
+.fragment-page .page-parchment {
+    animation: candleGlow 5s ease-in-out infinite;
+}
+@keyframes candleGlow {
+    0%, 100% {
+        box-shadow:
+            inset 0 0 30px rgba(196, 149, 58, 0.04),
+            0 0 15px rgba(196, 149, 58, 0.03);
+    }
+    33% {
+        box-shadow:
+            inset 0 0 40px rgba(196, 149, 58, 0.07),
+            0 0 20px rgba(196, 149, 58, 0.05);
+    }
+    66% {
+        box-shadow:
+            inset 0 0 25px rgba(196, 149, 58, 0.03),
+            0 0 12px rgba(196, 149, 58, 0.02);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SVG FILIGREE BORDER — ornamental frame via border-image
+   ═══════════════════════════════════════════════════════ */
+.fragment-page .page-parchment {
+    border: 8px solid transparent;
+    border-image-source: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect x='1' y='1' width='38' height='38' rx='3' fill='none' stroke='rgba(196,149,58,0.12)' stroke-width='0.5'/%3E%3Cpath d='M4 1C2.5 1 1 2.5 1 4' fill='none' stroke='rgba(196,149,58,0.2)' stroke-width='1'/%3E%3Cpath d='M36 1c1.5 0 3 1.5 3 3' fill='none' stroke='rgba(196,149,58,0.2)' stroke-width='1'/%3E%3Cpath d='M4 39c-1.5 0-3-1.5-3-3' fill='none' stroke='rgba(196,149,58,0.2)' stroke-width='1'/%3E%3Cpath d='M36 39c1.5 0 3-1.5 3-3' fill='none' stroke='rgba(196,149,58,0.2)' stroke-width='1'/%3E%3Ccircle cx='4' cy='4' r='1.5' fill='rgba(196,149,58,0.15)'/%3E%3Ccircle cx='36' cy='4' r='1.5' fill='rgba(196,149,58,0.15)'/%3E%3Ccircle cx='4' cy='36' r='1.5' fill='rgba(196,149,58,0.15)'/%3E%3Ccircle cx='36' cy='36' r='1.5' fill='rgba(196,149,58,0.15)'/%3E%3C/svg%3E");
+    border-image-slice: 12 fill;
+    border-image-repeat: stretch;
+}
+
+/* ═══════════════════════════════════════════════════════
+   READING PARTICLES — golden dust motes floating over text
+   ═══════════════════════════════════════════════════════ */
+.reading-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 3;
+}
+.reading-particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(196, 149, 58, 0.25);
+    border-radius: 50%;
+    animation: readingDust linear infinite;
+}
+.reading-particle:nth-child(1) { left: 15%; animation-duration: 20s; animation-delay: 0s; }
+.reading-particle:nth-child(2) { left: 45%; animation-duration: 25s; animation-delay: -5s; width: 1.5px; height: 1.5px; opacity: 0.6; }
+.reading-particle:nth-child(3) { left: 75%; animation-duration: 18s; animation-delay: -10s; width: 1px; height: 1px; }
+.reading-particle:nth-child(4) { left: 60%; animation-duration: 22s; animation-delay: -3s; width: 2.5px; height: 2.5px; opacity: 0.15; }
+@keyframes readingDust {
+    0% { bottom: -5%; opacity: 0; transform: translateX(0); }
+    10% { opacity: 0.4; }
+    50% { opacity: 0.2; transform: translateX(15px); }
+    90% { opacity: 0.3; }
+    100% { bottom: 105%; opacity: 0; transform: translateX(-10px); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PARAGRAPH SEPARATORS — ornamental marks between sections
+   ═══════════════════════════════════════════════════════ */
+.para-separator {
+    text-align: center;
+    color: var(--v-gold, #c4953a);
+    opacity: 0.2;
+    font-size: 10px;
+    letter-spacing: 8px;
+    margin: 6px 0;
+    user-select: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PROGRESS BAR — reading progress in footer
+   ═══════════════════════════════════════════════════════ */
+.progress-bar-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(196, 149, 58, 0.08);
+}
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--v-gold, #c4953a), rgba(196, 149, 58, 0.6));
+    transition: width 0.4s ease;
+    border-radius: 0 1px 1px 0;
+    box-shadow: 0 0 4px rgba(196, 149, 58, 0.3);
+}
+.page-nav {
+    position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════
    PERFORMANCE TIERS
    ═══════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
@@ -851,8 +950,14 @@ body {
     .flickering { animation: none; opacity: 0.5; }
     .condition-glitched .page-parchment { animation: none; }
     .typewriter-line { animation: none; opacity: 1; }
+    .fragment-page .page-parchment { animation: none; }
+    .reading-particle { animation: none; display: none; }
+    .cover-particle { animation: none; display: none; }
 }
 body.perf-lite .cover-orb { animation: none; }
 body.perf-lite .flickering { animation: none; opacity: 0.5; }
 body.perf-lite .condition-glitched .page-parchment { animation: none; }
 body.perf-lite .page { transition: none; }
+body.perf-lite .fragment-page .page-parchment { animation: none; }
+body.perf-lite .reading-particle { display: none; }
+body.perf-lite .cover-particle { display: none; }
