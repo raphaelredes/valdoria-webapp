@@ -34,11 +34,26 @@
     var $fragNotes = document.getElementById('frag-notes');
     var $pageCounter = document.getElementById('page-counter');
     var $pageCounterFrag = document.getElementById('page-counter-frag');
+    /* Right page elements (for spread mode) */
+    var $parchmentR = document.getElementById('parchment-right');
+    var $fragTitleR = document.getElementById('frag-title-r');
+    var $fragAuthorR = document.getElementById('frag-author-r');
+    var $fragContentR = document.getElementById('frag-content-r');
+    var $fragNotesR = document.getElementById('frag-notes-r');
 
     /* ─── FRAGMENT TYPE CONFIG ─── */
     var _types = (typeof FRAGMENT_TYPES !== 'undefined') ? FRAGMENT_TYPES : {};
     var _fragments = (typeof FRAGMENTS !== 'undefined') ? FRAGMENTS : [];
     _totalPages = _fragments.length;
+
+    /* ─── SPREAD MODE DETECTION ─── */
+    function isSpreadMode() {
+        return window.innerWidth >= 768;
+    }
+    /* In spread mode, navigate by 2 pages at a time */
+    function getStep() {
+        return isSpreadMode() ? 2 : 1;
+    }
 
     /* ─── INIT ─── */
     function init() {
@@ -95,6 +110,10 @@
     function goToPage(page) {
         if (page < -1) page = -1;
         if (page > _totalPages) page = _totalPages;
+        /* In spread mode, align to odd pages so left page = odd, right = even */
+        if (isSpreadMode() && page > 0 && page % 2 === 0) {
+            page = page - 1;
+        }
 
         /* hide current */
         var $old = getActivePage();
@@ -141,12 +160,14 @@
 
     function nextPage() {
         if (_currentPage === -1) goToPage(0); /* cover -> index */
-        else if (_currentPage < _totalPages) goToPage(_currentPage + 1);
+        else if (_currentPage === 0) goToPage(1); /* index -> first fragment */
+        else if (_currentPage < _totalPages) goToPage(Math.min(_currentPage + getStep(), _totalPages));
     }
 
     function prevPage() {
         if (_currentPage === 0) goToPage(-1); /* index -> cover */
-        else if (_currentPage > 0) goToPage(_currentPage - 1);
+        else if (_currentPage === 1) goToPage(0); /* first fragment -> index */
+        else if (_currentPage > 1) goToPage(Math.max(_currentPage - getStep(), 1));
     }
 
     /* ��── RENDER FRAGMENT ─── */
@@ -184,6 +205,30 @@
         if (idx === _fragments.length - 1 && f.type === 'strange') {
             applyTypewriterEffect();
         }
+
+        /* ─── RIGHT PAGE (spread mode) ─── */
+        if (isSpreadMode() && $parchmentR) {
+            var nextIdx = idx + 1;
+            if (nextIdx < _fragments.length) {
+                var fr = _fragments[nextIdx];
+                var tiR = _types[fr.type] || { icon: '\u25C6', label: '???', font: 'MedievalSharp' };
+                $fragTitleR.textContent = fr.title;
+                $fragAuthorR.textContent = fr.author ? '\u2014 ' + fr.author : '';
+                /* safe: trusted first-party data */
+                $fragContentR.innerHTML = fr.content || '';
+                $fragContentR.setAttribute('data-font', tiR.font || 'MedievalSharp');
+                $fragNotesR.innerHTML = fr.notes || '';
+                $parchmentR.style.display = '';
+                /* condition on right page */
+                $parchmentR.className = 'page-parchment spread-right';
+                if (fr.condition) $parchmentR.classList.add('condition-' + fr.condition);
+            } else {
+                /* No more fragments — hide right page */
+                $parchmentR.style.display = 'none';
+            }
+        } else if ($parchmentR) {
+            $parchmentR.style.display = '';
+        }
     }
 
     /* ─── TYPEWRITER (Fragment #30) ─── */
@@ -206,6 +251,8 @@
         if (!$el) return;
         if (current === 0) {
             $el.textContent = '\u00cdndice';
+        } else if (isSpreadMode() && current < total) {
+            $el.textContent = current + '-' + (current + 1) + ' / ' + total;
         } else {
             $el.textContent = current + ' / ' + total;
         }

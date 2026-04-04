@@ -90,7 +90,7 @@
             </div>
         </div>
 
-        <!-- Fragment page (single, reused for all fragments) -->
+        <!-- Fragment spread (contains left + right pages for desktop, single for mobile) -->
         <div id="page-fragment" class="page fragment-page">
             <!-- Top bar: index button + type/era info -->
             <div class="fragment-topbar">
@@ -101,19 +101,37 @@
                 </div>
                 <span id="frag-era" class="fragment-era"></span>
             </div>
-            <div id="parchment" class="page-parchment">
-                <div class="reading-particles">
-                    <div class="reading-particle"></div>
-                    <div class="reading-particle"></div>
-                    <div class="reading-particle"></div>
-                    <div class="reading-particle"></div>
+            <div class="spread-container">
+                <!-- Left page (always visible) -->
+                <div id="parchment" class="page-parchment spread-left">
+                    <div class="reading-particles">
+                        <div class="reading-particle"></div>
+                        <div class="reading-particle"></div>
+                        <div class="reading-particle"></div>
+                        <div class="reading-particle"></div>
+                    </div>
+                    <h2 id="frag-title" class="fragment-title"></h2>
+                    <div class="fragment-meta">
+                        <span id="frag-author" class="fragment-author"></span>
+                    </div>
+                    <div id="frag-content" class="fragment-content"></div>
+                    <div id="frag-notes" class="fragment-notes"></div>
                 </div>
-                <h2 id="frag-title" class="fragment-title"></h2>
-                <div class="fragment-meta">
-                    <span id="frag-author" class="fragment-author"></span>
+                <!-- Spine shadow (desktop/tablet only) -->
+                <div class="book-spine"></div>
+                <!-- Right page (desktop/tablet only) -->
+                <div id="parchment-right" class="page-parchment spread-right">
+                    <div class="reading-particles">
+                        <div class="reading-particle"></div>
+                        <div class="reading-particle"></div>
+                    </div>
+                    <h2 id="frag-title-r" class="fragment-title"></h2>
+                    <div class="fragment-meta">
+                        <span id="frag-author-r" class="fragment-author"></span>
+                    </div>
+                    <div id="frag-content-r" class="fragment-content"></div>
+                    <div id="frag-notes-r" class="fragment-notes"></div>
                 </div>
-                <div id="frag-content" class="fragment-content"></div>
-                <div id="frag-notes" class="fragment-notes"></div>
             </div>
             <div class="page-nav">
                 <div class="progress-bar-track"><div id="progress-bar" class="progress-bar-fill" style="width:0%"></div></div>
