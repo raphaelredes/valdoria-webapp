@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self'; connect-src 'self' https: wss:; frame-src 'none'; object-src 'none'; base-uri 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1510">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>html{background:#1a1510}</style>
+    <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
+    <meta name="description" content="Fragmentos de Valdoria - Lore misteriosa sobre a Esfera Dourada">
+    <meta property="og:title" content="Fragmentos de Valdoria">
+    <meta property="og:description" content="Registros antigos sobre um artefato que ninguem compreende">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../shared/fonts.css">
+    <title>Fragmentos de Valdoria</title>
+    <script>
+        /* cache busting — project standard (see CLAUDE.md "Cache Busting" rule) */
+        var v = Date.now();
+    </script>
+    <script>
+        var _link = function(href) {
+            var l = document.createElement('link');
+            l.rel = 'stylesheet';
+            l.href = href + '?v=' + v;
+            document.head.appendChild(l);
+        };
+        _link('../valdoria-design.css');
+        _link('lore-book.css');
+    </script>
+</head>
+
+<body>
+    <div id="book-container" class="book-container">
+        <!-- Cover -->
+        <div id="cover" class="page cover active">
+            <div class="cover-inner">
+                <div class="cover-orb"></div>
+                <div class="cover-divider"></div>
+                <h1 class="cover-title">
+                    <span class="cover-title-sub">Fragmentos de</span>
+                    <span class="cover-title-main">Valdoria</span>
+                </h1>
+                <div class="cover-divider"></div>
+                <p class="cover-subtitle">Registros sobre a Esfera Dourada</p>
+                <p class="cover-subtitle dim">Coletados de fontes diversas ao longo das eras</p>
+                <button id="btn-start" class="cover-btn" aria-label="Abrir o livro">Abrir</button>
+            </div>
+        </div>
+
+        <!-- Index page -->
+        <div id="page-index" class="page index-page">
+            <div class="page-parchment">
+                <h2 class="index-title">Indice dos Fragmentos</h2>
+                <div id="index-list" class="index-list"></div>
+            </div>
+            <div class="page-nav">
+                <button class="nav-arrow nav-left" data-dir="prev" aria-label="Pagina anterior">&#9664;</button>
+                <span id="page-counter" class="page-counter"></span>
+                <button class="nav-arrow nav-right" data-dir="next" aria-label="Proxima pagina">&#9654;</button>
+            </div>
+        </div>
+
+        <!-- Fragment page (single, reused for all fragments) -->
+        <div id="page-fragment" class="page fragment-page">
+            <div id="parchment" class="page-parchment">
+                <div class="fragment-header">
+                    <span id="frag-icon" class="fragment-icon"></span>
+                    <span id="frag-type" class="fragment-type"></span>
+                    <span id="frag-era" class="fragment-era"></span>
+                </div>
+                <h2 id="frag-title" class="fragment-title"></h2>
+                <div class="fragment-meta">
+                    <span id="frag-author" class="fragment-author"></span>
+                </div>
+                <div id="frag-content" class="fragment-content"></div>
+                <div id="frag-notes" class="fragment-notes"></div>
+            </div>
+            <div class="page-nav">
+                <button class="nav-arrow nav-left" data-dir="prev" aria-label="Pagina anterior">&#9664;</button>
+                <span id="page-counter-frag" class="page-counter"></span>
+                <button class="nav-arrow nav-right" data-dir="next" aria-label="Proxima pagina">&#9654;</button>
+            </div>
+        </div>
+
+        <!-- Index toggle button -->
+        <button id="btn-index" class="btn-index" aria-label="Indice" title="Indice">&#9776;</button>
+    </div>
+
+    <script>
+    (function() {
+        var s = document.createElement('script');
+        s.src = 'fragments-data.js?v=' + v;
+        s.onload = function() {
+            var s2 = document.createElement('script');
+            s2.src = 'lore-book.js?v=' + v;
+            document.body.appendChild(s2);
+        };
+        document.body.appendChild(s);
+    })();
+    </script>
+</body>
+
+</html>
