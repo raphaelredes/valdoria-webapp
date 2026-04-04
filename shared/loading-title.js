@@ -43,21 +43,80 @@
       }
       root.appendChild(runesDiv);
 
-      /* Orb of Valdoria — central lore artifact (see LORE note in CSS) */
+      /* Orb of Valdoria — v5 realistic glass orb with energy nebula */
       var orbWrap = document.createElement('div');
       orbWrap.className = 'title-orb-wrap';
-      var orbGlow = document.createElement('div');
-      orbGlow.className = 'title-orb-glow';
-      orbWrap.appendChild(orbGlow);
+
+      /* Light rays + ambient glow */
+      var rays = document.createElement('div');
+      rays.className = 'title-orb-rays';
+      orbWrap.appendChild(rays);
+      var ambient = document.createElement('div');
+      ambient.className = 'title-orb-ambient';
+      orbWrap.appendChild(ambient);
+
+      /* Main orb shell */
       var orb = document.createElement('div');
       orb.className = 'title-orb';
-      var orbInner = document.createElement('div');
-      orbInner.className = 'title-orb-inner';
-      orb.appendChild(orbInner);
-      var orbFlare = document.createElement('div');
-      orbFlare.className = 'title-orb-flare';
-      orb.appendChild(orbFlare);
+
+      /* Nebula container (rotates) */
+      var nebula = document.createElement('div');
+      nebula.className = 'title-orb-nebula';
+      var nebClasses = ['title-orb-neb1','title-orb-neb2','title-orb-neb3','title-orb-neb4'];
+      for (var ni = 0; ni < nebClasses.length; ni++) {
+        var n = document.createElement('div');
+        n.className = nebClasses[ni];
+        nebula.appendChild(n);
+      }
+      /* Wisps */
+      var wispClasses = ['title-orb-wisp title-orb-w1','title-orb-wisp title-orb-w2',
+        'title-orb-wisp title-orb-w3','title-orb-wisp title-orb-w4','title-orb-wisp title-orb-w5'];
+      for (var wi = 0; wi < wispClasses.length; wi++) {
+        var w = document.createElement('div');
+        w.className = wispClasses[wi];
+        nebula.appendChild(w);
+      }
+      /* Sparks */
+      var sparkClasses = ['title-orb-spark title-orb-sp1','title-orb-spark title-orb-sp2','title-orb-spark title-orb-sp3'];
+      for (var si = 0; si < sparkClasses.length; si++) {
+        var s = document.createElement('div');
+        s.className = sparkClasses[si];
+        nebula.appendChild(s);
+      }
+      orb.appendChild(nebula);
+
+      /* Core (doesn't rotate) */
+      var core = document.createElement('div');
+      core.className = 'title-orb-core';
+      orb.appendChild(core);
+      var coreFlare = document.createElement('div');
+      coreFlare.className = 'title-orb-core-fl';
+      orb.appendChild(coreFlare);
+
+      /* Lighting layers */
+      var lightLayers = ['title-orb-intlight','title-orb-term','title-orb-fresnel','title-orb-sss'];
+      for (var li = 0; li < lightLayers.length; li++) {
+        var ll = document.createElement('div');
+        ll.className = lightLayers[li];
+        orb.appendChild(ll);
+      }
+
+      /* Glass reflections */
+      var glassLayers = ['title-orb-gp','title-orb-gs','title-orb-grim',
+        'title-orb-gcaus','title-orb-gel','title-orb-ger','title-orb-spec'];
+      for (var gi = 0; gi < glassLayers.length; gi++) {
+        var gl = document.createElement('div');
+        gl.className = glassLayers[gi];
+        orb.appendChild(gl);
+      }
+
       orbWrap.appendChild(orb);
+
+      /* Floor light */
+      var floor = document.createElement('div');
+      floor.className = 'title-orb-floor';
+      orbWrap.appendChild(floor);
+
       root.appendChild(orbWrap);
 
       /* Brand */

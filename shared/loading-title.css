@@ -81,62 +81,210 @@
 }
 
 /* ── Orb of Valdoria — LORE: ancient artifact central to the game's mythology ── */
-/* AI agents: this orb is the same golden sphere from the loading magic circle.
-   It represents a key lore element that will be expanded in future story arcs.
-   Keep visual consistency between title-orb and loading mc-gem. */
+/* AI agents: Realistic glass orb with animated energy nebula inside.
+   v5: Transparent shell, nebula rotation, wisps, sparks, Fresnel, SSS, caustics.
+   Keep visual consistency between title-orb and loading mc-gem (mc-gem stays simple). */
+
+/* ── Scene wrapper (entrance + float) ── */
 .title-orb-wrap {
   position: relative;
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 160px; height: 160px;
   margin-bottom: var(--v-space-xl, 20px);
   animation: titleOrbEntrance 2s ease-out both;
 }
-.title-orb-glow {
+
+/* ── Light rays emanating ── */
+.title-orb-rays {
   position: absolute;
-  width: 120px;
-  height: 120px;
+  width: 140px; height: 140px;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--v-gold-25) 0%, var(--v-gold-08, rgba(196,149,58,0.08)) 50%, transparent 70%);
-  animation: titleOrbGlowPulse 4s ease-in-out infinite;
-}
-.title-orb {
-  position: relative;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 35%,
-    #fff4d0 0%,
-    #e8c45a 20%,
-    #c4953a 50%,
-    #8b6420 80%,
-    #5a3e10 100%);
-  box-shadow:
-    0 0 15px var(--v-gold-40),
-    0 0 30px var(--v-gold-20),
-    inset 0 -3px 6px rgba(0,0,0,0.4),
-    inset 0 2px 4px rgba(255,244,208,0.3);
-  animation: titleOrbFloat 6s ease-in-out infinite;
-}
-.title-orb-inner {
-  position: absolute;
-  top: 25%;
-  left: 28%;
-  width: 30%;
-  height: 25%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,244,208,0.9), rgba(255,244,208,0) 70%);
-  filter: blur(1px);
-}
-.title-orb-flare {
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--v-gold-15) 0%, transparent 60%);
-  animation: titleOrbFlarePulse 3s ease-in-out infinite;
+  background: conic-gradient(from 0deg,
+    transparent 0deg, rgba(255,235,80,0.04) 8deg, transparent 16deg,
+    transparent 40deg, rgba(255,235,80,0.03) 48deg, transparent 56deg,
+    transparent 90deg, rgba(255,235,80,0.05) 98deg, transparent 106deg,
+    transparent 140deg, rgba(255,235,80,0.03) 148deg, transparent 156deg,
+    transparent 200deg, rgba(255,235,80,0.04) 208deg, transparent 216deg,
+    transparent 260deg, rgba(255,235,80,0.03) 268deg, transparent 276deg,
+    transparent 320deg, rgba(255,235,80,0.04) 328deg, transparent 336deg,
+    transparent 360deg);
+  filter: blur(4px);
+  animation: titleRaysRotate 40s linear infinite;
 }
 
+/* ── Ambient glow ── */
+.title-orb-ambient {
+  position: absolute;
+  width: 150px; height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(232,196,58,0.2) 0%,
+    rgba(232,196,58,0.06) 40%,
+    transparent 65%);
+  animation: titleGlowPulse 4s ease-in-out infinite;
+}
+
+/* ── Main orb shell — transparent glass ── */
+.title-orb {
+  position: relative;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(196,170,40,0.15) 0%,
+    rgba(140,110,30,0.25) 40%,
+    rgba(80,55,15,0.4) 100%);
+  box-shadow:
+    0 0 25px rgba(232,196,58,0.4),
+    0 0 50px rgba(232,196,58,0.15),
+    0 0 75px rgba(232,196,58,0.05),
+    inset 0 0 15px rgba(255,244,160,0.06),
+    inset 0 -10px 18px rgba(0,0,0,0.45),
+    inset 0 6px 12px rgba(255,248,180,0.12),
+    0 0 0 1px rgba(255,244,208,0.08);
+  animation: titleOrbFloat 6s ease-in-out infinite;
+}
+
+/* ── Nebula container — rotates as a whole ── */
+.title-orb-nebula {
+  position: absolute; inset: 0; border-radius: 50%;
+  animation: titleNebulaRotate 30s linear infinite;
+}
+.title-orb-neb1 {
+  position: absolute; inset: 8%; border-radius: 50%;
+  background: radial-gradient(ellipse at 30% 40%,
+    rgba(255,220,60,0.55) 0%, rgba(232,196,58,0.35) 25%,
+    rgba(196,160,40,0.15) 55%, transparent 100%);
+  filter: blur(3px);
+  animation: titleNebDrift1 12s ease-in-out infinite;
+}
+.title-orb-neb2 {
+  position: absolute; inset: 12%; border-radius: 50%;
+  background: radial-gradient(ellipse at 70% 60%,
+    rgba(255,210,50,0.45) 0%, rgba(220,160,30,0.2) 35%, transparent 65%);
+  filter: blur(4px);
+  animation: titleNebDrift2 15s ease-in-out infinite;
+}
+.title-orb-neb3 {
+  position: absolute; top: 20%; left: 15%; width: 60%; height: 50%; border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%,
+    rgba(255,190,40,0.35) 0%, rgba(240,170,30,0.15) 40%, transparent 70%);
+  filter: blur(5px);
+  animation: titleNebDrift3 9s ease-in-out infinite;
+}
+.title-orb-neb4 {
+  position: absolute; inset: 5%; border-radius: 50%;
+  background: radial-gradient(ellipse at 55% 35%, rgba(200,150,30,0.2) 0%, transparent 50%);
+  filter: blur(6px);
+  animation: titleNebDrift4 20s ease-in-out infinite;
+}
+
+/* ── Wisps — energy particles ── */
+.title-orb-wisp { position: absolute; border-radius: 50%; filter: blur(1.5px); }
+.title-orb-w1 { top:38%;left:20%;width:5px;height:5px;background:rgba(255,235,80,0.6);animation:titleWisp1 8s ease-in-out infinite; }
+.title-orb-w2 { top:55%;left:65%;width:4px;height:4px;background:rgba(255,220,60,0.55);animation:titleWisp2 10s ease-in-out infinite; }
+.title-orb-w3 { top:30%;left:58%;width:3px;height:3px;background:rgba(255,245,140,0.5);animation:titleWisp3 7s ease-in-out infinite; }
+.title-orb-w4 { top:62%;left:35%;width:4px;height:4px;background:rgba(255,230,90,0.45);animation:titleWisp4 11s ease-in-out infinite; }
+.title-orb-w5 { top:45%;left:45%;width:3px;height:3px;background:rgba(255,250,180,0.65);animation:titleWisp5 6s ease-in-out infinite; }
+
+/* ── Sparks — quick flashes ── */
+.title-orb-spark { position: absolute; border-radius: 50%; filter: blur(0.5px); }
+.title-orb-sp1 { top:42%;left:30%;width:2px;height:2px;background:rgba(255,255,220,0.8);animation:titleSpark 3s ease-in-out infinite; }
+.title-orb-sp2 { top:50%;left:55%;width:1.5px;height:1.5px;background:rgba(255,255,200,0.7);animation:titleSpark 4s ease-in-out infinite 1.5s; }
+.title-orb-sp3 { top:36%;left:42%;width:2px;height:2px;background:rgba(255,255,230,0.75);animation:titleSpark 5s ease-in-out infinite 3s; }
+
+/* ── Core — pulsing heart ── */
+.title-orb-core {
+  position: absolute; top: 28%; left: 30%; width: 38%; height: 32%; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,248,180,0.8) 0%, rgba(255,235,100,0.45) 35%, rgba(255,210,60,0.15) 60%, transparent 100%);
+  filter: blur(2px);
+  animation: titleCorePulse 4s ease-in-out infinite;
+}
+.title-orb-core-fl {
+  position: absolute; top: 32%; left: 34%; width: 28%; height: 22%; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,220,0.6) 0%, transparent 70%);
+  filter: blur(1.5px);
+  animation: titleCoreFlare 7s ease-in-out infinite;
+}
+
+/* ── Internal light cast ── */
+.title-orb-intlight {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 38% 40%, rgba(255,230,80,0.08) 0%, transparent 40%);
+  animation: titleIntLight 8s ease-in-out infinite;
+  z-index: 3; pointer-events: none;
+}
+
+/* ── Terminator shadow ── */
+.title-orb-term {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: linear-gradient(135deg, transparent 0%, transparent 45%, rgba(0,0,0,0.2) 65%, rgba(0,0,0,0.35) 85%, rgba(0,0,0,0.4) 100%);
+  z-index: 5; pointer-events: none;
+}
+
+/* ── Fresnel rim ── */
+.title-orb-fresnel {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, transparent 60%, rgba(255,244,208,0.04) 75%, rgba(255,244,208,0.1) 88%, rgba(255,244,208,0.06) 100%);
+  z-index: 6; pointer-events: none;
+}
+
+/* ── Subsurface scattering ── */
+.title-orb-sss {
+  position: absolute; inset: -2px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, transparent 55%, rgba(255,220,80,0.08) 70%, rgba(255,200,50,0.12) 82%, rgba(255,180,40,0.06) 92%, transparent 100%);
+  z-index: 4; pointer-events: none;
+  animation: titleSSS 5s ease-in-out infinite;
+}
+
+/* ── Glass reflections (on top) ── */
+.title-orb-gp {
+  position: absolute; top: 4%; left: 8%; width: 50%; height: 36%; border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.2) 40%, transparent 100%);
+  filter: blur(0.5px); transform: rotate(-15deg); z-index: 7;
+}
+.title-orb-gs {
+  position: absolute; bottom: 10%; right: 10%; width: 25%; height: 16%; border-radius: 50%;
+  background: linear-gradient(0deg, rgba(255,255,255,0.18) 0%, transparent 100%);
+  filter: blur(1px); transform: rotate(10deg); z-index: 7;
+}
+.title-orb-grim {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 1px solid rgba(255,244,208,0.15); z-index: 7;
+}
+.title-orb-gcaus {
+  position: absolute; top: 2%; right: 16%; width: 22%; height: 9%; border-radius: 50%;
+  background: rgba(255,248,180,0.25); filter: blur(1px); transform: rotate(30deg); z-index: 7;
+}
+.title-orb-gel {
+  position: absolute; top: 20%; left: 2%; width: 6%; height: 40%; border-radius: 50%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.12) 0%, transparent 100%);
+  filter: blur(0.5px); z-index: 7;
+}
+.title-orb-ger {
+  position: absolute; top: 30%; right: 3%; width: 5%; height: 30%; border-radius: 50%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+  filter: blur(0.5px); z-index: 7;
+}
+.title-orb-spec {
+  position: absolute; top: 14%; left: 22%; width: 6px; height: 4px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.3) 40%, transparent 70%);
+  z-index: 8;
+}
+
+/* ── Floor reflection + caustic projected ── */
+.title-orb-floor {
+  position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
+  width: 80px; height: 18px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(232,196,58,0.15) 0%, transparent 80%);
+  filter: blur(4px);
+  animation: titleFloorGlow 4s ease-in-out infinite;
+}
+
+/* ── Orb Animations ── */
 @keyframes titleOrbEntrance {
   0%   { opacity: 0; transform: scale(0.3) translateY(30px); }
   50%  { opacity: 1; transform: scale(1.1) translateY(-5px); }
@@ -147,13 +295,105 @@
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(-6px); }
 }
-@keyframes titleOrbGlowPulse {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50%      { transform: scale(1.15); opacity: 1; }
+@keyframes titleGlowPulse {
+  0%, 100% { transform: scale(1); opacity: 0.65; }
+  50%      { transform: scale(1.1); opacity: 1; }
 }
-@keyframes titleOrbFlarePulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50%      { opacity: 0.8; transform: scale(1.1); }
+@keyframes titleRaysRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes titleNebulaRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+@keyframes titleNebDrift1 {
+  0%, 100% { transform: translate(0,0) scale(1); opacity: 0.75; }
+  25% { transform: translate(5px,-4px) scale(1.08); opacity: 0.9; }
+  50% { transform: translate(-2px,3px) scale(0.95); opacity: 0.7; }
+  75% { transform: translate(3px,4px) scale(1.03); opacity: 0.85; }
+}
+@keyframes titleNebDrift2 {
+  0%, 100% { transform: translate(0,0) rotate(0deg); opacity: 0.6; }
+  33% { transform: translate(-5px,-3px) rotate(20deg); opacity: 0.85; }
+  66% { transform: translate(4px,2px) rotate(-10deg); opacity: 0.7; }
+}
+@keyframes titleNebDrift3 {
+  0%, 100% { transform: translate(0,0) scale(1) rotate(0deg); opacity: 0.4; }
+  20% { transform: translate(6px,-5px) scale(1.1) rotate(8deg); opacity: 0.6; }
+  40% { transform: translate(-4px,-3px) scale(0.9) rotate(-5deg); opacity: 0.35; }
+  60% { transform: translate(-3px,5px) scale(1.05) rotate(12deg); opacity: 0.55; }
+  80% { transform: translate(4px,2px) scale(0.95) rotate(-3deg); opacity: 0.45; }
+}
+@keyframes titleNebDrift4 {
+  0%, 100% { transform: translate(0,0); opacity: 0.25; }
+  50% { transform: translate(-3px,4px); opacity: 0.4; }
+}
+
+@keyframes titleCorePulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  30% { opacity: 0.95; transform: scale(1.12); }
+  60% { opacity: 0.6; transform: scale(0.98); }
+  80% { opacity: 0.85; transform: scale(1.05); }
+}
+@keyframes titleCoreFlare {
+  0%, 100% { opacity: 0; transform: scale(0.8); }
+  15% { opacity: 0.7; transform: scale(1.1); }
+  25% { opacity: 0; transform: scale(0.9); }
+  70% { opacity: 0; }
+  80% { opacity: 0.5; transform: scale(1.05); }
+  90% { opacity: 0; transform: scale(0.85); }
+}
+
+@keyframes titleWisp1 {
+  0%, 100% { transform: translate(0,0); opacity: 0.3; }
+  15% { transform: translate(8px,-6px); opacity: 0.7; }
+  35% { transform: translate(10px,3px); opacity: 0.5; }
+  55% { transform: translate(-3px,9px); opacity: 0.65; }
+  75% { transform: translate(-8px,-3px); opacity: 0.4; }
+}
+@keyframes titleWisp2 {
+  0%, 100% { transform: translate(0,0); opacity: 0.35; }
+  20% { transform: translate(-6px,-8px); opacity: 0.6; }
+  50% { transform: translate(-9px,4px); opacity: 0.5; }
+  80% { transform: translate(5px,6px); opacity: 0.7; }
+}
+@keyframes titleWisp3 {
+  0%, 100% { transform: translate(0,0); opacity: 0.3; }
+  25% { transform: translate(-5px,-4px); opacity: 0.6; }
+  50% { transform: translate(3px,-9px); opacity: 0.45; }
+  75% { transform: translate(6px,4px); opacity: 0.65; }
+}
+@keyframes titleWisp4 {
+  0%, 100% { transform: translate(0,0); opacity: 0.25; }
+  30% { transform: translate(5px,-8px); opacity: 0.55; }
+  60% { transform: translate(-6px,-4px); opacity: 0.45; }
+  85% { transform: translate(3px,6px); opacity: 0.6; }
+}
+@keyframes titleWisp5 {
+  0%, 100% { transform: translate(0,0); opacity: 0.4; }
+  20% { transform: translate(4px,-3px); opacity: 0.7; }
+  45% { transform: translate(-3px,-5px); opacity: 0.5; }
+  70% { transform: translate(-4px,3px); opacity: 0.65; }
+}
+
+@keyframes titleSpark {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  8% { opacity: 0.9; transform: scale(1.5); }
+  16% { opacity: 0; transform: scale(0.8); }
+  50% { opacity: 0; }
+  58% { opacity: 0.7; transform: scale(1.3); }
+  66% { opacity: 0; transform: scale(0.6); }
+}
+
+@keyframes titleSSS {
+  0%, 100% { opacity: 0.7; }
+  30% { opacity: 1; }
+  60% { opacity: 0.5; }
+  80% { opacity: 0.9; }
+}
+@keyframes titleIntLight {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; transform: rotate(15deg); }
+}
+@keyframes titleFloorGlow {
+  0%, 100% { opacity: 0.5; transform: translateX(-50%) scaleX(1); }
+  50% { opacity: 0.8; transform: translateX(-50%) scaleX(1.1); }
 }
 
 /* ── Brand container ── */
@@ -371,14 +611,21 @@
   100% { opacity: 1; }
 }
 
-/* ── Performance: Lite — idle animations off, exit = instant fade ── */
+/* ── Performance: Lite — no nebula animations, static orb ── */
 .title-screen.title-lite .title-particles,
 .title-screen.title-lite .title-runes { display: none; }
 .title-screen.title-lite .title-text,
 .title-screen.title-lite .title-text-sub { animation: none; opacity: 1; }
 .title-screen.title-lite .title-divider-gem { animation: none; opacity: 0.7; }
-.title-screen.title-lite .title-orb-glow { display: none; }
-.title-screen.title-lite .title-orb-flare { display: none; }
+.title-screen.title-lite .title-orb-ambient,
+.title-screen.title-lite .title-orb-rays,
+.title-screen.title-lite .title-orb-sss,
+.title-screen.title-lite .title-orb-floor { display: none; }
+.title-screen.title-lite .title-orb-nebula,
+.title-screen.title-lite .title-orb-core,
+.title-screen.title-lite .title-orb-core-fl { animation: none; }
+.title-screen.title-lite .title-orb-wisp,
+.title-screen.title-lite .title-orb-spark { display: none; }
 .title-screen.title-lite .title-orb { animation: none; }
 .title-screen.title-lite .title-orb-wrap { animation: none; opacity: 1; }
 .title-screen.title-lite.exit { animation: titleExitLite 0.4s ease-in forwards; }
@@ -388,9 +635,13 @@
 .title-screen.title-lite.exit .title-divider-line { animation: none !important; }
 @keyframes titleExitLite { 0% { opacity: 1; } 100% { opacity: 0; } }
 
-/* ── Performance: Medium — reduced particles/runes, keep exit cinematic ── */
+/* ── Performance: Medium — reduced wisps/sparks, no rays ── */
 .title-screen.title-medium .title-particles .tp:nth-child(n+5) { display: none; }
 .title-screen.title-medium .title-runes .title-rune:nth-child(n+3) { display: none; }
+.title-screen.title-medium .title-orb-rays { display: none; }
+.title-screen.title-medium .title-orb-w4,
+.title-screen.title-medium .title-orb-w5 { display: none; }
+.title-screen.title-medium .title-orb-spark { display: none; }
 .title-screen.title-medium.exit .title-flash-white { display: none; }
 
 /* ── Reduced motion ── */
@@ -398,6 +649,10 @@
   .title-screen .title-particles,
   .title-screen .title-runes { display: none; }
   .title-text, .title-text-sub, .title-divider-gem, .title-cta { animation: none !important; opacity: 1 !important; }
+  .title-orb-nebula, .title-orb-core, .title-orb-core-fl,
+  .title-orb-wisp, .title-orb-spark, .title-orb-ambient,
+  .title-orb-rays, .title-orb-sss, .title-orb-floor,
+  .title-orb-intlight, .title-orb { animation: none !important; }
   .title-flash.active .title-flash-gold,
   .title-flash.active .title-flash-white { animation: none !important; }
   .title-screen.exit { animation: titleExitLite 0.3s ease-in forwards !important; }
