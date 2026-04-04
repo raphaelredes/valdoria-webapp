@@ -140,6 +140,12 @@
         var overlay = document.getElementById('loading');
         if (!overlay) return;
 
+        /* CRITICAL: Disable loading controller timeout — game IS ready, user is choosing when to enter */
+        if (_ctrl && _ctrl.resetTimers) {
+            _ctrl.resetTimers();
+            console.log('[GAME-LOADING] Timers reset — game ready, no more timeouts');
+        }
+
         _enterBtn = document.createElement('button');
         _enterBtn.className = 'loading-enter-btn';
         _enterBtn.textContent = 'Aventurar-se';
@@ -156,11 +162,13 @@
         }, { passive: false });
         overlay.appendChild(_enterBtn);
 
-        /* Also hide the progress bar and stage text — game is ready */
+        /* Hide progress bar and update tip — game is ready */
         var prog = overlay.querySelector('.loading-progress-wrap');
-        if (prog) prog.style.opacity = '0';
+        if (prog) prog.style.transition = 'opacity 0.5s ease'; if (prog) prog.style.opacity = '0';
         var stage = overlay.querySelector('.loading-stage');
         if (stage) stage.textContent = '';
+        var tip = overlay.querySelector('.loading-tip');
+        if (tip) { tip.style.animation = 'none'; tip.style.opacity = '0.7'; tip.textContent = '\u266B Aprecie a trilha sonora \u266B'; }
 
         /* Inject fadeIn keyframe if not exists */
         if (!document.getElementById('le-enter-style')) {
