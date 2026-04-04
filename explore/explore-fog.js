@@ -7,16 +7,43 @@ if(_canFade&&(_prev==='hidden'||_prev==='dim'||!_prev)){_fogFadeTiles[key]={star
 fogState[key]='visible';}else if(dist<=radius+1&&fogState[key]!=='visible'){fogState[key]='dim';}}}}
 function updateFogAnimations(dt){if(_fogReveals.length===0)return false;for(let i=_fogReveals.length-1;i>=0;i--){_fogReveals[i].progress+=dt*1.4;if(_fogReveals[i].progress>=1){_fogReveals.splice(i,1);}}
 return _fogReveals.length>0;}
-function drawFogOverlay(mainCtx,canvasW,canvasH,fogState){var _weatherRadius = typeof getFogVisibilityRadius === 'function' ? getFogVisibilityRadius() : 3.0;
-var _weatherRadiusFactor = _weatherRadius / 3.0;
-if(!_fogCtx)return;var _now=performance.now();var _fadeKeys=Object.keys(_fogFadeTiles);for(var _fi=_fadeKeys.length-1;_fi>=0;_fi--){var _fe=_fogFadeTiles[_fadeKeys[_fi]];if(_now-_fe.start>=_fe.duration)delete _fogFadeTiles[_fadeKeys[_fi]];}_fogCtx.setTransform(1,0,0,1,0,0);_fogCtx.clearRect(0,0,_fogCanvas.width,_fogCanvas.height);_fogCtx.scale(_dpr,_dpr);_fogCtx.globalCompositeOperation='source-over';_fogCtx.fillStyle=FOG_COLOR;_fogCtx.fillRect(0,0,canvasW,canvasH);const playerC=S.playerCol;const playerR=S.playerRow;const reveals=[];for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){const key=`${c},${r}`;const state=fogState[key];if(!state||state==='hidden')continue;const distToPlayer=hexDist(c,r,playerC,playerR);const center=hexToScreen(c,r);const tile=S.grid[r]&&S.grid[r][c]?S.grid[r][c]:'.';const h=(TILE_HEIGHT[tile]||1)*UNIT_PX;const vy=center.y-h*0.3;let radius,strength,flatZone;if(distToPlayer===0){radius=HEX_W*1.8*_weatherRadiusFactor;strength=1.0;flatZone=0.6;}else if(distToPlayer===1){radius=HEX_W*1.4*_weatherRadiusFactor;strength=0.98;flatZone=0.55;}else if(distToPlayer===2&&state==='visible'){continue;}else if(state==='visible'){continue;}else if(state==='dim'){continue;}else{continue;}
-var _fade=_fogFadeTiles[key];if(_fade){var _elapsed=_now-_fade.start;var _fadeProgress=Math.min(1,_elapsed/_fade.duration);strength*=_fadeProgress;}
-reveals.push({x:center.x,y:vy,radius,strength,flatZone});}}
-/* Single large reveal centered on player — smooth lantern effect */var _pCenter=hexToScreen(playerC,playerR);var _pTile=S.grid[playerR]&&S.grid[playerR][playerC]?S.grid[playerR][playerC]:'.';var _pH=(TILE_HEIGHT[_pTile]||1)*UNIT_PX;var _visR=typeof getFogVisibilityRadius==='function'?getFogVisibilityRadius():3;reveals.push({x:_pCenter.x,y:_pCenter.y-_pH*0.3,radius:HEX_W*(_visR*0.65+0.4),strength:0.92,flatZone:0.4});if(typeof S!=='undefined'&&S.torches){for(const torch of S.torches){const fogKey=`${torch.col},${torch.row}`;if(fogState[fogKey]==='visible'||fogState[fogKey]==='dim'){const center=hexToScreen(torch.col,torch.row);const tRadius=torch.radius||2;reveals.push({x:center.x,y:center.y+HEX_H*0.15,radius:HEX_W*(tRadius*0.7+0.3),strength:0.85,flatZone:0.3});}}}
-var _fogRD=typeof _renderDetail!=='undefined'?_renderDetail:2;_fogCtx.globalCompositeOperation='destination-out';for(const{x,y,radius,strength,flatZone}of reveals){if(_fogRD>=1){const grad=_fogCtx.createRadialGradient(x,y,0,x,y,radius);grad.addColorStop(0,`rgba(0,0,0,${strength})`);grad.addColorStop(flatZone,`rgba(0,0,0,${strength * 0.9})`);var _mid1=Math.min(1,flatZone+0.15);var _mid2=Math.min(1,flatZone+0.3);grad.addColorStop(_mid1,`rgba(0,0,0,${strength * 0.5})`);grad.addColorStop(_mid2,`rgba(0,0,0,${strength * 0.15})`);grad.addColorStop(1,'rgba(0,0,0,0)');_fogCtx.fillStyle=grad;_fogCtx.beginPath();_fogCtx.arc(x,y,radius,0,Math.PI*2);_fogCtx.fill();}else{_fogCtx.fillStyle=`rgba(0,0,0,${strength})`;_fogCtx.beginPath();_fogCtx.arc(x,y,radius*0.7,0,Math.PI*2);_fogCtx.fill();}}
-for(const rev of _fogReveals){const eased=1-Math.pow(1-rev.progress,2.5);const currentR=rev.maxRadius*eased;if(_fogRD>=1){const grad=_fogCtx.createRadialGradient(rev.x,rev.y,0,rev.x,rev.y,currentR);grad.addColorStop(0,`rgba(0,0,0,${0.85 * eased})`);grad.addColorStop(1,'rgba(0,0,0,0)');_fogCtx.fillStyle=grad;_fogCtx.fillRect(rev.x-currentR,rev.y-currentR,currentR*2,currentR*2);}else{_fogCtx.fillStyle=`rgba(0,0,0,${0.85*eased})`;_fogCtx.beginPath();_fogCtx.arc(rev.x,rev.y,currentR*0.7,0,Math.PI*2);_fogCtx.fill();}}
-_fogCtx.globalCompositeOperation='destination-out';if(_fogRD>=1){for(let ri=0;ri<reveals.length;ri++){const{x,y,radius,strength,flatZone}=reveals[ri];if(strength<0.15)continue;const edgeR=radius*(flatZone+0.25);const nBlobs=Math.floor(8+strength*6);for(let j=0;j<nBlobs;j++){const angle=_fogSrand(x*100+y*200+j*37)*Math.PI*2;const dist=edgeR*(0.8+_fogSrand(y*300+x*400+j*53)*0.5);const bx=x+Math.cos(angle)*dist;const by=y+Math.sin(angle)*dist;const blobR=1.5+_fogSrand(x*500+j*71)*3;const blobAlpha=strength*0.12;_fogCtx.fillStyle=`rgba(0,0,0,${blobAlpha})`;_fogCtx.beginPath();const nPts=5+Math.floor(_fogSrand(j*97+x)*3);for(let k=0;k<nPts;k++){const a=(k/nPts)*Math.PI*2;const wobble=blobR*(0.4+_fogSrand(j*100+k*41+x)*0.8);const px=bx+Math.cos(a)*wobble;const py=by+Math.sin(a)*wobble;if(k===0)_fogCtx.moveTo(px,py);else _fogCtx.lineTo(px,py);}
-_fogCtx.closePath();_fogCtx.fill();}}}
-if(_fogRD>=2){_fogCtx.globalCompositeOperation='source-atop';_fogCtx.fillStyle='rgba(58, 40, 16, 0.04)';for(let i=0;i<150;i++){const nx=_fogSrand(i*73+11)*canvasW;const ny=_fogSrand(i*79+17)*canvasH;const cr=0.3+_fogSrand(i*83)*0.5;_fogCtx.beginPath();_fogCtx.arc(nx,ny,cr,0,Math.PI*2);_fogCtx.fill();}
-_fogCtx.strokeStyle='rgba(58, 40, 16, 0.03)';_fogCtx.lineWidth=0.5;for(let i=0;i<25;i++){const sx=_fogSrand(i*113+7)*canvasW;const sy=_fogSrand(i*127+13)*canvasH;const angle=_fogSrand(i*137+19)*Math.PI;const len=4+_fogSrand(i*149)*8;_fogCtx.beginPath();_fogCtx.moveTo(sx,sy);_fogCtx.lineTo(sx+Math.cos(angle)*len,sy+Math.sin(angle)*len);_fogCtx.stroke();}}
+/* ── Low-Res Upscale Fog (Riot Games / LoL technique) ──
+ * 1. Tiny canvas (1px per hex) with alpha = fog opacity
+ * 2. Upscale with bilinear smoothing → naturally smooth edges
+ * 3. Tint with fog color via source-in compositing
+ */
+var _fogMaskCanvas=null;var _fogMaskCtx=null;
+function drawFogOverlay(mainCtx,canvasW,canvasH,fogState){if(!_fogCtx)return;
+var _visR=typeof getFogVisibilityRadius==='function'?getFogVisibilityRadius():3;
+var _now=performance.now();var _fadeKeys=Object.keys(_fogFadeTiles);for(var _fi=_fadeKeys.length-1;_fi>=0;_fi--){var _fe=_fogFadeTiles[_fadeKeys[_fi]];if(_now-_fe.start>=_fe.duration)delete _fogFadeTiles[_fadeKeys[_fi]];}
+/* Step 1: Tiny mask — 1 pixel per hex cell */
+var mW=COLS+4,mH=ROWS+4;/* +4 for 2px border padding */
+if(!_fogMaskCanvas||_fogMaskCanvas.width!==mW||_fogMaskCanvas.height!==mH){_fogMaskCanvas=document.createElement('canvas');_fogMaskCanvas.width=mW;_fogMaskCanvas.height=mH;_fogMaskCtx=_fogMaskCanvas.getContext('2d');}
+var imgData=_fogMaskCtx.createImageData(mW,mH);var pC=S.playerCol,pR=S.playerRow;
+/* Fill border padding with full fog */
+for(var i=0;i<imgData.data.length;i+=4){imgData.data[i]=0;imgData.data[i+1]=0;imgData.data[i+2]=0;imgData.data[i+3]=255;}
+/* Write per-tile visibility */
+for(var r=0;r<ROWS;r++){for(var c=0;c<COLS;c++){var key=c+','+r;var state=fogState[key];var dist=hexDist(c,r,pC,pR);var alpha;if(state==='visible'){if(dist===0)alpha=0;else if(dist===1)alpha=5;else if(dist===2)alpha=80;else if(dist<=_visR)alpha=140;else alpha=200;}else if(state==='dim'){alpha=210;}else{alpha=255;}
+/* Apply fade-in animation */
+var _fade=_fogFadeTiles[key];if(_fade){var _elapsed=_now-_fade.start;var _fp=Math.min(1,_elapsed/_fade.duration);alpha=Math.round(255-(255-alpha)*_fp);}
+var idx=((r+2)*mW+(c+2))*4;/* +2 for border padding */
+imgData.data[idx]=0;imgData.data[idx+1]=0;imgData.data[idx+2]=0;imgData.data[idx+3]=alpha;}}
+_fogMaskCtx.putImageData(imgData,0,0);
+/* Step 2: Upscale with bilinear smoothing onto fog canvas */
+_fogCtx.setTransform(1,0,0,1,0,0);_fogCtx.clearRect(0,0,_fogCanvas.width,_fogCanvas.height);_fogCtx.scale(_dpr,_dpr);
+_fogCtx.imageSmoothingEnabled=true;_fogCtx.imageSmoothingQuality='high';
+/* Map mask pixels to hex grid screen positions */
+var gridLeft=MAP_OFFSET_X-HEX_W*0.5;var gridTop=MAP_OFFSET_Y-HEX_H*0.5;var gridW=COLS*HEX_W+HEX_W;var gridH=ROWS*ROW_STEP+HEX_H;
+/* Expand draw area to cover border padding */
+var padX=2*gridW/COLS;var padY=2*gridH/ROWS;
+_fogCtx.drawImage(_fogMaskCanvas,0,0,mW,mH,gridLeft-padX,gridTop-padY,gridW+padX*2,gridH+padY*2);
+/* Step 3: Tint alpha mask with fog color */
+_fogCtx.globalCompositeOperation='source-in';_fogCtx.fillStyle=FOG_COLOR;_fogCtx.fillRect(0,0,canvasW,canvasH);
+/* Step 4: Fill edges outside the grid that the mask doesn't cover */
+_fogCtx.globalCompositeOperation='source-over';_fogCtx.fillStyle=FOG_COLOR;
+var edgeL=gridLeft-padX;var edgeT=gridTop-padY;var edgeR2=gridLeft+gridW+padX;var edgeB=gridTop+gridH+padY;
+if(edgeL>0)_fogCtx.fillRect(0,0,edgeL,canvasH);if(edgeT>0)_fogCtx.fillRect(0,0,canvasW,edgeT);if(edgeR2<canvasW)_fogCtx.fillRect(edgeR2,0,canvasW-edgeR2,canvasH);if(edgeB<canvasH)_fogCtx.fillRect(0,edgeB,canvasW,canvasH-edgeB);
+/* Step 5: Torch glow reveals (additive, destination-out on fog) */
+if(typeof S!=='undefined'&&S.torches&&S.torches.length>0){_fogCtx.globalCompositeOperation='destination-out';for(var ti=0;ti<S.torches.length;ti++){var torch=S.torches[ti];var tKey=torch.col+','+torch.row;if(fogState[tKey]!=='visible'&&fogState[tKey]!=='dim')continue;var tCenter=hexToScreen(torch.col,torch.row);var tRad=HEX_W*((torch.radius||2)*0.7+0.3);var tGrad=_fogCtx.createRadialGradient(tCenter.x,tCenter.y,0,tCenter.x,tCenter.y,tRad);tGrad.addColorStop(0,'rgba(0,0,0,0.7)');tGrad.addColorStop(0.5,'rgba(0,0,0,0.3)');tGrad.addColorStop(1,'rgba(0,0,0,0)');_fogCtx.fillStyle=tGrad;_fogCtx.beginPath();_fogCtx.arc(tCenter.x,tCenter.y,tRad,0,Math.PI*2);_fogCtx.fill();}}
+/* Composite onto main canvas */
 _fogCtx.globalCompositeOperation='source-over';mainCtx.save();mainCtx.setTransform(1,0,0,1,0,0);mainCtx.drawImage(_fogCanvas,0,0);mainCtx.restore();}
