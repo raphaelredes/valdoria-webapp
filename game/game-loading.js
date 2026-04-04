@@ -89,10 +89,19 @@
 
     /**
      * Called when user taps title screen (early or late).
-     * Unlocks audio, shows loading, starts reactive effects.
+     * Unlocks audio, shows loading, starts reactive effects, checks version.
      */
     function _onTitleTap() {
         console.log('[INTRO] Title TAPPED — unlocking audio + starting loading');
+
+        /* Version check — non-blocking, fires in background */
+        if (typeof checkWebAppVersion === 'function') {
+            try {
+                var hashParams = new URLSearchParams(window.location.hash.replace('#', '?'));
+                var apiBase = hashParams.get('apiBase') || hashParams.get('api') || '';
+                if (apiBase) checkWebAppVersion(apiBase);
+            } catch(e) { console.warn('[VERSION] check skipped:', e); }
+        }
         /* Unlock audio: set pending track first, then unlock (which picks it up) */
         if (typeof ValdoriaAudio !== 'undefined') {
             ValdoriaAudio.play('intro');

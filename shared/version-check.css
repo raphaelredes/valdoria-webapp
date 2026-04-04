@@ -1,0 +1,68 @@
+/* ── Version Check — Update Available Overlay ── */
+.vc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--v-z-critical, 10000);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--v-bg-deep, #1a1510);
+  opacity: 0;
+  animation: vcFadeIn 0.4s ease-out forwards;
+}
+@keyframes vcFadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.vc-icon {
+  font-size: 48px;
+  margin-bottom: var(--v-space-lg, 16px);
+  animation: vcIconPulse 2s ease-in-out infinite;
+}
+@keyframes vcIconPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50%      { transform: scale(1.1); opacity: 1; }
+}
+
+.vc-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-2xl, 18px);
+  color: var(--v-gold, #c4953a);
+  margin-bottom: var(--v-space-md, 8px);
+  text-align: center;
+}
+
+.vc-msg {
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-text-dim, #a09484);
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.5;
+  margin-bottom: var(--v-space-xl, 20px);
+}
+
+.vc-btn {
+  padding: 14px 40px;
+  border: 1px solid var(--v-gold, #c4953a);
+  background: rgba(42, 36, 32, 0.85);
+  color: var(--v-gold, #c4953a);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-lg, 15px);
+  letter-spacing: 2px;
+  border-radius: var(--v-radius-pill, 20px);
+  cursor: pointer;
+  transition: var(--v-transition-base, 0.3s ease);
+}
+.vc-btn:active {
+  transform: scale(0.96);
+  background: var(--v-gold-20);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .vc-overlay { animation: none; opacity: 1; }
+  .vc-icon { animation: none; opacity: 1; }
+}
