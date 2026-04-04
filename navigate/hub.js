@@ -8,6 +8,47 @@
 var state = null;
 var _activeFilter = 'todas';
 var S = { token: '', api: '', uid: 0, returnTo: 'game' };
+var _hubConnGraph = {};
+
+/* Build adjacency list from CONNECTION_EDGES (map-layout.js global) */
+function _buildHubConnGraph() {
+  if (typeof CONNECTION_EDGES === 'undefined') return;
+  _hubConnGraph = {};
+  for (var i = 0; i < CONNECTION_EDGES.length; i++) {
+    var e = CONNECTION_EDGES[i];
+    if (!_hubConnGraph[e[0]]) _hubConnGraph[e[0]] = [];
+    if (!_hubConnGraph[e[1]]) _hubConnGraph[e[1]] = [];
+    _hubConnGraph[e[0]].push(e[1]);
+    _hubConnGraph[e[1]].push(e[0]);
+  }
+}
+
+function _hubIsConnected(fromId, toId) {
+  var neighbors = _hubConnGraph[fromId] || [];
+  return neighbors.indexOf(toId) !== -1;
+}
+
+/* BFS shortest path using _hubConnGraph — returns array of loc IDs or null */
+function _hubBfsPath(fromId, toId) {
+  if (fromId === toId) return [fromId];
+  var visited = {};
+  visited[fromId] = true;
+  var queue = [[fromId, [fromId]]];
+  while (queue.length > 0) {
+    var item = queue.shift();
+    var current = item[0], path = item[1];
+    var neighbors = _hubConnGraph[current] || [];
+    for (var i = 0; i < neighbors.length; i++) {
+      var nb = neighbors[i];
+      if (nb === toId) return path.concat([nb]);
+      if (!visited[nb]) {
+        visited[nb] = true;
+        queue.push([nb, path.concat([nb])]);
+      }
+    }
+  }
+  return null;
+}
 
 /* ===== INIT ===== */
 /* In SPA context, DOMContentLoaded already fired. Run immediately if DOM ready, else listen. */
@@ -132,6 +173,7 @@ function _convertMockToHubFormat(mock) {
 
 function _onDataReady() {
   if (!state) return;
+  _buildHubConnGraph();
   console.log('[HUB] _onDataReady raw keys:', Object.keys(state).join(','));
 
   /* Map compact payload keys to readable names */
@@ -472,8 +514,13 @@ function openDetail(biome, idx) {
   }
   h += '<span class="detail-pip-label">' + (DANGER_LABELS[loc.d] || 'Perigoso') + '</span></div>';
 
+  var isConnected = !isCurrent && _hubIsConnected(state.currentLoc, loc.id);
+  var edgeDist = isConnected ? getConnectionDistance(state.currentLoc, loc.id) : 0;
+  var totalDist = isCurrent ? 0 : (typeof weightedDistance === 'function' ? weightedDistance(state.currentLoc, loc.id, _hubConnGraph) : 0);
+  var distLabel = isCurrent ? 'Voce esta aqui' : (isConnected ? edgeDist + ' turnos' : (totalDist > 0 ? totalDist + ' turnos (via rota)' : '???'));
+
   h += '<div class="detail-stats">';
-  h += _statCell('Distancia', isCurrent ? 'Voce esta aqui' : (Math.floor(Math.random() * 4) + 1) + ' turnos');
+  h += _statCell('Distancia', distLabel);
   h += _statCell('Clima', wt ? WEATHER_NAMES[wt] : '\u2600\uFE0F Limpo');
   h += _statCell('Terreno', TERRAIN_LABELS[biome] || 'Normal');
   h += _statCell('Forragear', FORAGE_LABELS[biome] || 'Nenhum');
@@ -490,7 +537,7 @@ function openDetail(biome, idx) {
     h += '<div class="detail-nomap-warn">\u{1F5FA}\uFE0F Voce nao possui mapa desta regiao. Risco maior de se perder durante a viagem.</div>';
   }
 
-  if (!isCurrent) {
+  if (!isCurrent && isConnected) {
     h += '<div class="detail-section-title">Ritmo de Viagem</div>';
     h += '<div class="detail-pace-row">';
     h += '<button class="pace-btn" data-pace="fast" title="Mais rapido, mas -5 Percepcao e +10% encontros">Rapido</button>';
@@ -515,8 +562,21 @@ function openDetail(biome, idx) {
     if (isOutsideCity) {
       h += '<button class="action-btn">\u{1F3F0} Retornar</button>';
     }
+  } else if (isConnected) {
+    h += '<button class="action-btn action-btn-travel" data-travel-loc="' + loc.id + '" data-travel-biome="' + biome + '" data-travel-name="' + loc.n + '">\u2694\uFE0F Viajar (' + edgeDist + '\u{1F552})</button>';
   } else {
-    h += '<button class="action-btn action-btn-travel" data-travel-loc="' + loc.id + '" data-travel-biome="' + biome + '" data-travel-name="' + loc.n + '">\u2694\uFE0F Viajar</button>';
+    /* Unconnected — show route hint instead of travel button */
+    var routePath = _hubBfsPath(state.currentLoc, loc.id);
+    if (routePath && routePath.length > 2) {
+      var via = [];
+      for (var ri = 1; ri < routePath.length - 1; ri++) {
+        var rl = _findLoc(routePath[ri]);
+        if (rl) via.push(rl.n);
+      }
+      h += '<div class="detail-nomap-warn">\u{1F6E4}\uFE0F Sem caminho direto. Rota: via ' + via.join(' \u2192 ') + ' (' + totalDist + ' turnos)</div>';
+    } else {
+      h += '<div class="detail-nomap-warn">\u{1F6E4}\uFE0F Sem caminho direto para este local.</div>';
+    }
   }
   h += '</div>';
 
