@@ -53,6 +53,7 @@ function _hubBfsPath(fromId, toId) {
 /* ===== INIT ===== */
 /* In SPA context, DOMContentLoaded already fired. Run immediately if DOM ready, else listen. */
 function _hubInit() {
+  console.warn('[HUB] _hubInit() started');
   _parseParams();
   _loadPayload();
 }
@@ -83,7 +84,7 @@ function _parseParams() {
   S.uid = parseInt(params.get('uid') || '0', 10);
   S.returnTo = params.get('return') || 'game';
   S._params = params;
-  console.log('[HUB] _parseParams token=%s api=%s uid=%s hasSpaParams=%s type=%s',
+  console.warn('[HUB] _parseParams token=%s api=%s uid=%s hasSpaParams=%s type=%s',
     S.token ? S.token.substring(0, 8) + '...' : '(none)',
     S.api ? 'yes' : 'no', S.uid,
     !!window.__spaRouteParams,
@@ -94,7 +95,7 @@ async function _loadPayload() {
   var params = S._params || new URLSearchParams(window.location.search);
   var dataB64 = params.get('data') || '';
 
-  console.log('[HUB] _loadPayload hasData=%s dataLen=%s hasApi=%s hasToken=%s',
+  console.warn('[HUB] _loadPayload hasData=%s dataLen=%s hasApi=%s hasToken=%s',
     !!dataB64, dataB64 ? dataB64.length : 0, !!S.api, !!S.token);
 
   if (dataB64) {
@@ -114,7 +115,7 @@ async function _loadPayload() {
     _fetchFromApi();
   } else {
     /* No API, no payload — use mock data for development */
-    console.warn('[HUB] No payload or API — using mock data');
+    console.error('[HUB] No payload or API — falling back to mock data (token=%s api=%s)', !!S.token, !!S.api);
     if (typeof MOCK_STATE !== 'undefined') {
       state = _convertMockToHubFormat(MOCK_STATE);
     }
@@ -174,7 +175,7 @@ function _convertMockToHubFormat(mock) {
 function _onDataReady() {
   if (!state) return;
   _buildHubConnGraph();
-  console.log('[HUB] _onDataReady raw keys:', Object.keys(state).join(','));
+  console.warn('[HUB] _onDataReady raw keys:', Object.keys(state).join(','));
 
   /* Map compact payload keys to readable names */
   if (!state.currentLoc) state.currentLoc = state.cl || 'city_gates';
@@ -196,7 +197,7 @@ function _onDataReady() {
     if (!reg.locs) reg.locs = [];
   }
 
-  console.log('[HUB] State mapped — %s regions, current: %s, charData: %s',
+  console.warn('[HUB] State mapped — %s regions, current: %s, charData: %s',
     Object.keys(state.regions).length, state.currentLoc, state.charData.nm || '?');
 
   renderPlayerBar();
@@ -214,7 +215,7 @@ function _onDataReady() {
   if (_ld && !_ld.classList.contains('hidden')) {
     _ld.classList.add('hidden');
     _ld.style.display = 'none';
-    console.log('[HUB] Loading overlay hidden');
+    console.warn('[HUB] Loading overlay hidden');
   }
 
   /* Apply font preference */
