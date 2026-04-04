@@ -233,8 +233,6 @@ body {
             rgba(56, 46, 32, 0.92) 80%,
             rgba(62, 52, 38, 0.95) 100%);
     position: relative;
-    /* SVG paper grain filter — adds real fiber texture */
-    filter: url(#paper-grain);
 }
 /* Parchment edge darkening + vignette */
 .page-parchment::before {
@@ -571,8 +569,7 @@ body {
 
 /* ─── BURNED ─── realistic charred corners + ember glow + SVG displacement */
 .condition-burned .page-parchment {
-    /* SVG burn-edge filter warps the parchment edges organically */
-    filter: url(#paper-grain) url(#burn-edge);
+    filter: url(#burn-edge);
 }
 .condition-burned .page-parchment::before {
     background:
@@ -605,8 +602,7 @@ body {
 
 /* ─── TORN ─── jagged edge with SVG displacement + fiber effect */
 .condition-torn .page-parchment {
-    /* SVG torn-paper filter creates organic jagged edge */
-    filter: url(#paper-grain) url(#torn-paper);
+    filter: url(#torn-paper);
     mask-image:
         linear-gradient(to bottom, black 72%,
             rgba(0,0,0,0.85) 78%,
@@ -642,7 +638,7 @@ body {
 
 /* ─── STAINED ─── organic ink/liquid stains via SVG filter + gradients */
 .condition-stained .page-parchment {
-    filter: url(#paper-grain) url(#ink-stain);
+    /* Stains via CSS gradients only — no SVG filter */
 }
 .condition-stained .page-parchment::after {
     top: 0; left: 0; right: 0; bottom: 0;
@@ -683,11 +679,11 @@ body {
     animation: glitchText 8s ease-in-out infinite;
 }
 @keyframes glitchBg {
-    0%, 88%, 100% { filter: url(#paper-grain); }
-    90% { filter: url(#paper-grain) hue-rotate(8deg) brightness(1.08); }
-    92% { filter: url(#paper-grain) hue-rotate(-5deg) brightness(0.92) saturate(1.3); }
-    94% { filter: url(#paper-grain) hue-rotate(3deg) brightness(1.05); }
-    96% { filter: url(#paper-grain); }
+    0%, 88%, 100% { filter: none; }
+    90% { filter: hue-rotate(8deg) brightness(1.08); }
+    92% { filter: hue-rotate(-5deg) brightness(0.92) saturate(1.3); }
+    94% { filter: hue-rotate(3deg) brightness(1.05); }
+    96% { filter: none; }
 }
 @keyframes glitchText {
     0%, 85%, 100% { text-shadow: none; transform: none; }

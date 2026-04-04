@@ -36,45 +36,18 @@
 </head>
 
 <body>
-    <!-- SVG filters for realistic parchment textures (hidden, referenced by CSS) -->
+    <!-- SVG filters — only edge distortion effects (subtle, not texture) -->
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
         <defs>
-            <!-- Paper grain texture — fractal noise simulating real parchment fibers -->
-            <filter id="paper-grain" x="0%" y="0%" width="100%" height="100%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="4" seed="2" stitchTiles="stitch" result="grain"/>
-                <feColorMatrix type="saturate" values="0" in="grain" result="bw"/>
-                <feBlend in="SourceGraphic" in2="bw" mode="multiply" result="textured"/>
-                <feComponentTransfer in="textured">
-                    <feFuncA type="linear" slope="0.92"/>
-                </feComponentTransfer>
-            </filter>
-            <!-- Parchment surface — lighting on turbulence for 3D feel -->
-            <filter id="parchment-surface" x="-5%" y="-5%" width="110%" height="110%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" seed="8" result="noise"/>
-                <feDiffuseLighting in="noise" lighting-color="#d4c0a0" surfaceScale="1.5" result="lit">
-                    <feDistantLight azimuth="135" elevation="50"/>
-                </feDiffuseLighting>
-                <feComposite in="lit" in2="SourceGraphic" operator="in"/>
-            </filter>
-            <!-- Burn edge — turbulent mask for organic charred borders -->
+            <!-- Burn edge — organic displacement for charred borders -->
             <filter id="burn-edge" x="-2%" y="-2%" width="104%" height="104%">
                 <feTurbulence type="turbulence" baseFrequency="0.03" numOctaves="3" seed="15" result="warp"/>
-                <feDisplacementMap in="SourceGraphic" in2="warp" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+                <feDisplacementMap in="SourceGraphic" in2="warp" scale="4" xChannelSelector="R" yChannelSelector="G"/>
             </filter>
             <!-- Torn paper — jagged displacement for ripped edges -->
             <filter id="torn-paper" x="-2%" y="-2%" width="104%" height="104%">
                 <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="4" seed="42" result="tear"/>
-                <feDisplacementMap in="SourceGraphic" in2="tear" scale="8" xChannelSelector="R" yChannelSelector="G"/>
-            </filter>
-            <!-- Ink stain — very subtle organic discoloration -->
-            <filter id="ink-stain" x="0%" y="0%" width="100%" height="100%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="33" result="blob"/>
-                <feColorMatrix in="blob" type="matrix"
-                    values="0 0 0 0 0.25
-                            0 0 0 0 0.12
-                            0 0 0 0 0.05
-                            0 0 0 2.5 -1.8" result="stain"/>
-                <feBlend in="SourceGraphic" in2="stain" mode="multiply"/>
+                <feDisplacementMap in="SourceGraphic" in2="tear" scale="5" xChannelSelector="R" yChannelSelector="G"/>
             </filter>
         </defs>
     </svg>
