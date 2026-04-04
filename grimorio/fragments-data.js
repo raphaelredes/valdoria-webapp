@@ -85,12 +85,12 @@ var FRAGMENTS = [
         era: '???',
         condition: 'pristine',
         notes: 'Perturbadoramente bem preservado. O pergaminho parece novo.',
-        content: '<p>Sou Norien Calamus, escriba e descendente de Erindor Calamus, o cartografo. Pelo menos, e o que sempre acreditei.</p>'
-            + '<p>Hoje encontrei um fragmento em Serralume que carrega minha caligrafia. Reconheco cada floreio, cada maneira particular como faco o "s" e o "r". E sem duvida minha escrita.</p>'
-            + '<p>O fragmento data da Era da Aurora. <span class="faded">Tres mil anos</span> antes de meu nascimento.</p>'
-            + '<p>Erindor viveu na Fundação. Eu vivo agora, no Presente. Mas minha mao escreveu palavras na Aurora, antes de Erindor nascer. Antes de Valdoria existir. Antes de <span class="erased">[...]</span>.</p>'
-            + '<p>Não estou perturbado. Talvez devesse estar. Mas a Esfera me mostrou algo \u2014 ou talvez eu tenha sempre sabido: o tempo não é uma linha. E uma espiral. E no centro da espiral, <span class="faded">dourada e impossível</span>, ela aguarda.</p>'
-            + '<p>Ou talvez eu não exista. Talvez eu seja apenas a ideia de alguém que existira. Talvez minha mao escreveu aquelas palavras porque um dia elas precisarao ter sido escritas. A Esfera não se importa com a ordem. Ela se importa com o que precisa existir.</p>'
+        content: '<p>Sou Norien Calamus, escriba e descendente de Erindor Calamus, o cart\u00f3grafo. Pelo menos, \u00e9 o que sempre acreditei.</p>'
+            + '<p>Hoje encontrei um fragmento em Serralume que carrega minha caligrafia. Reconhe\u00e7o cada floreio, cada maneira particular como fa\u00e7o o "s" e o "r". \u00c9 sem d\u00favida minha escrita.</p>'
+            + '<p>O fragmento data da Era da Aurora. <span class="faded">Tr\u00eas mil anos</span> antes de meu nascimento.</p>'
+            + '<p>Coloquei meu manuscrito ao lado do fragmento da Aurora. A tinta antiga estava \u00famida. Passei o dedo \u2014 manchou. Tinta de tr\u00eas mil anos que ainda n\u00e3o secou. O pergaminho n\u00e3o cheirava a velho. Cheirava ao meu suor. \u00c0s nozes que comi ontem. Ao sal das minhas m\u00e3os.</p>'
+            + '<p>Erindor viveu na Funda\u00e7\u00e3o. Eu vivo agora, no Presente. Mas minha m\u00e3o escreveu palavras na Aurora, antes de Erindor nascer. Antes de Valdoria existir. Antes de <span class="erased">[...]</span>.</p>'
+            + '<p>H\u00e1 algo errado comigo. Deveria estar aterrorizado. N\u00e3o estou. E a aus\u00eancia de medo \u00e9 mais assustadora que qualquer medo que j\u00e1 senti. Como se a parte de mim que deveria gritar j\u00e1 soubesse \u2014 j\u00e1 tivesse <span class="faded">sempre sabido</span> \u2014 que o tempo n\u00e3o \u00e9 uma linha. Que eu j\u00e1 estive aqui antes. Que estarei de novo.</p>'
     },
     {
         id: 6,
@@ -130,12 +130,11 @@ var FRAGMENTS = [
         era: 'Expansão',
         condition: 'torn',
         notes: 'Borda inferior rasgada. Texto incompleto.',
-        content: '<p>A Esfera me mostrou o amanhã. E o amanhã ainda não sabe que vai existir.</p>'
-            + '<p>Vi <span class="faded">uma cidade que não existe</span> erguer-se sobre ruinas que ainda não cairam. Vi <span class="erased">[...]</span> caminhar por ruas que nenhum pedreiro construiu. Vi uma guilda daqueles que ousam cruzar além dos portoes, sem saber que os portoes existem para protege-los, não para convidar.</p>'
-            + '<p>Vi uma forja que arde com fogo dourado, alimentada por minério que pulsa como coração vivo. Vi o ferreiro que não sabe que sua arte e mais antiga do que sua linhagem.</p>'
-            + '<p>Vi as guerras travadas na beira do crepusculo, quando o sol hesitou entre nascer e morrer. Vi o pacto selado onde a luz não alcanca, entre vozes que prometem poder a quem aceita perder.</p>'
-            + '<p>Vi tudo isso, e sei que e verdade, porque a Esfera não mente. A Esfera não precisa mentir. A verdade já e terrível o suficiente.</p>'
-            + '<p><span class="torn-end">E vi, por fim, o momento em que alguém lerá estas palavras e\u2014</span></p>'
+        content: '<p>Cada profecia queima. N\u00e3o met\u00e1fora \u2014 queima como febre, como \u00e1cido na garganta. As vis\u00f5es n\u00e3o pedem permiss\u00e3o. Elas invadem.</p>'
+            + '<p>Vi <span class="faded">uma cidade que n\u00e3o existe</span> erguer-se sobre ru\u00ednas que ainda n\u00e3o ca\u00edram. Vi uma guilda daqueles que ousam cruzar al\u00e9m dos port\u00f5es, sem saber que os port\u00f5es existem para proteg\u00ea-los. Quando a imagem da forja me atingiu, senti gosto de ferro fundido na l\u00edngua. Minhas m\u00e3os formigaram como se segurassem o martelo. Vi uma forja que arde com fogo dourado, alimentada por min\u00e9rio que pulsa como cora\u00e7\u00e3o vivo.</p>'
+            + '<p>Vi as guerras travadas na beira do crep\u00fasculo, quando o sol hesitou entre nascer e morrer. Vi o pacto selado onde a luz n\u00e3o alcan\u00e7a, entre vozes que prometem poder a quem aceita perder. Cada vis\u00e3o deixava marcas \u2014 queimaduras sem fogo na palma das m\u00e3os. Contei ao conselho. Mostrei as marcas. Pararam de rir. Pararam de me ouvir.</p>'
+            + '<p>A pior vis\u00e3o foi a \u00faltima. Vi <span class="erased">[...]</span> e soube que n\u00e3o deveria ter visto. Algumas verdades s\u00e3o como faca \u2014 cortam quem segura, n\u00e3o quem \u00e9 apontado.</p>'
+            + '<p><span class="torn-end">E vi, por fim, o momento em que algu\u00e9m ler\u00e1 estas palavras e\u2014</span></p>'
     },
     {
         id: 9,
@@ -145,13 +144,13 @@ var FRAGMENTS = [
         era: 'Presente',
         condition: 'aged',
         notes: null,
-        content: '<p>Todas as noites, o mesmo sonho. Há <span class="faded">sete anos</span>.</p>'
-            + '<p>Estou em pé no escuro. Não há chão sob meus pes, mas não caio. Não há paredes, mas não posso me mover. O espaço e infinito e sufocante ao mesmo tempo.</p>'
-            + '<p>Entao, ela aparece. Não "aparece" como uma pessoa entra em um comodo. Ela simplesmente <em>passa a existir</em>, como se sempre tivesse estado lá e meus olhos finalmente a notassem.</p>'
-            + '<p>Dourada. Mas não é luz. Não e cor. E algo que não tem nome em nenhuma lingua que conheco.</p>'
-            + '<p>No sonho, sei que há outros. Dois. Não os vejo, mas sinto. Estao sonhando o mesmo sonho, em lugares que não conheco. Não sei quem sao. Não sei onde estao. Mas sei que existem.</p>'
-            + '<p>A Esfera não fala. Não no sentido de palavras. Mas algo muda em mim a cada noite. Como se o sonho me escrevesse por dentro, linha por linha, noite após noite, e quando terminar de escrever <span class="erased">[...]</span>.</p>'
-            + '<p>Ontem, pela primeira vez, o sonho mudou. Ela estava mais perto. Ou eu estava mais perto. E nos tres \u2014 senti isso com clareza \u2014 nos tres estavamos acordados dentro do sonho.</p>'
+        content: '<p>Sou padeiro. Amasso p\u00e3o desde os onze anos. Conhe\u00e7o o peso das coisas \u2014 farinha, massa, ferro de forno. E o que est\u00e1 no sonho pesa mais do que qualquer coisa que j\u00e1 segurei.</p>'
+            + '<p>Todas as noites, o mesmo sonho. H\u00e1 <span class="faded">sete anos</span>. Estou em p\u00e9 no escuro. O escuro tem textura \u2014 \u00e9 como enfiar a m\u00e3o em mel. Mel quente. Mel que brilha quando ningu\u00e9m olha. Tentei prov\u00e1-lo uma vez \u2014 acordei com gosto de metal e cinza na boca.</p>'
+            + '<p>Ent\u00e3o, ela aparece. N\u00e3o "aparece" como uma pessoa entra numa sala. Ela simplesmente <em>passa a existir</em>, como se sempre tivesse estado l\u00e1 e meus olhos finalmente a notassem.</p>'
+            + '<p>No sonho, sei que h\u00e1 outros. Dois. Sonham o mesmo sonho, em lugares que n\u00e3o conhe\u00e7o. Um deles chora \u2014 sinto a umidade mesmo sem v\u00ea-lo. O outro respira devagar demais, como quem mede o ar antes de mergulhar.</p>'
+            + '<p>Minha mulher diz que falo dormindo. Em l\u00edngua que ela n\u00e3o conhece. Fui ao templo perguntar ao sacerdote \u2014 ele ficou p\u00e1lido e mandou que eu parasse de falar. <em>"Essa l\u00edngua"</em>, disse ele, <em>"\u00e9 anterior \u00e0s palavras."</em></p>'
+            + '<p>Algo muda em mim a cada noite. Como se o sonho me escrevesse por dentro, linha por linha, e quando terminar de escrever <span class="erased">[...]</span>.</p>'
+            + '<p>Ontem o sonho mudou. Pela primeira vez em sete anos. Ela estava mais perto. E eu n\u00e3o queria fugir. Esse \u00e9 o horror \u2014 n\u00e3o o sonho, mas a parte de mim que quer ficar.</p>'
     },
     {
         id: 10,
@@ -218,12 +217,12 @@ var FRAGMENTS = [
         era: 'Presente',
         condition: 'stained',
         notes: 'Manchas que podem ser vinho. Ou sangue.',
-        content: '<p>Não sou homem de letras, então perdoem a escrita. Preciso contar isso a alguém antes que <span class="faded">esqueca</span>, porque todo dia a memória fica mais fraca, como se alguém estivesse apagando.</p>'
-            + '<p>Era turno da noite. Vigilia dos portoes, como faco há <span class="faded">doze anos</span>. Nada acontece nos portoes a noite. Ate aquela noite.</p>'
-            + '<p>Uma mulher que coleciona segredos como outros colecionam moedas, e os vende pelo preço de uma caneca \u2014 vocês sabem de quem falo \u2014 ela me avisou: "Nao olhe para fora dos portoes depois da meia-noite." Pensei que era mais uma de suas histórias. Não era.</p>'
-            + '<p>A meia-noite, vi. <span class="erased">[...]</span> do lado de fora dos portoes. Uma luz dourada, mas não era luz. Não tinha fonte. Não iluminava nada. Apenas... existia. No ar, como uma lembrança de algo que nunca aconteceu.</p>'
-            + '<p>E no centro da luz, vi uma forma. Não uma pessoa, não uma criatura. Uma <span class="faded">esfera</span>. Ou a lembrança de uma esfera. Ou o sonho de uma esfera. Durou <span class="erased">[...]</span> segundos. Ou horas. Não sei.</p>'
-            + '<p>Quando amanheceu, não lembrava de nada. Mas minhas mãos tremiam. Ainda tremem.</p>'
+        content: '<p>Eu... olha, vou contar de uma vez, t\u00e1? Antes que eu perca a coragem. Ou antes que eu esque\u00e7a mais. Porque todo dia a mem\u00f3ria fica mais fraca, como se algu\u00e9m estivesse <span class="faded">apagando</span>.</p>'
+            + '<p>Doze anos nos port\u00f5es. Doze. Nada acontece \u00e0 noite nos port\u00f5es. Nada. At\u00e9 que acontece.</p>'
+            + '<p>Uma mulher que coleciona segredos como outros colecionam moedas, e os vende pelo pre\u00e7o de uma caneca \u2014 voc\u00eas sabem de quem falo \u2014 ela me avisou: "N\u00e3o olhe para fora depois da meia-noite." Pensei que era mais uma de suas hist\u00f3rias. N\u00e3o era.</p>'
+            + '<p>\u00c0 meia-noite, o ar ficou seco. Seco como nunca senti \u2014 como se toda umidade do mundo tivesse sido sugada em um segundo. Minha boca colou. Os olhos arderam. Senti um cheiro \u2014 como quando um raio cai perto, aquele cheiro de ar queimado. Mas n\u00e3o havia tempestade. E um zumbido. N\u00e3o nos ouvidos \u2014 nos <span class="faded">dentes</span>. Como se algu\u00e9m passasse um arco de violino nos meus molares.</p>'
+            + '<p>Olhei pelo visor do port\u00e3o. Vi <span class="erased">[...]</span>. Uma forma no ar, do tamanho de uma cabe\u00e7a. Dourada. Sem ch\u00e3o, sem apoio. Durou <span class="erased">[...]</span> segundos. Ou horas. A mulher da taverna olhou pra mim na manh\u00e3 seguinte e disse s\u00f3: <em>"Agora voc\u00ea tamb\u00e9m viu."</em></p>'
+            + '<p>N\u00e3o s\u00e3o s\u00f3 as m\u00e3os que tremem. N\u00e3o consigo mais ficar no escuro. Acendo todas as velas da casa antes do sol se p\u00f4r. Minha filha acha que fiquei velho. Minha mulher olha as velas e n\u00e3o diz nada. Ela sabe.</p>'
     },
     {
         id: 15,
@@ -248,12 +247,11 @@ var FRAGMENTS = [
         era: 'Aurora',
         condition: 'aged',
         notes: 'Recitada nos templos de fronteira ao amanhecer e ao entardecer.',
-        content: '<p><em>Ouve-nos, Guardiao dos Limiares, que permaneces entre o que e e o que não deveria ser.</em></p>'
-            + '<p>Tu que foste o primeiro a estender a mao em direção a Esfera. Tu que foste transformado pelo toque que nenhum mortal suportaria. Tu que já não lembras do que eras antes, e carregas essa ausência como um manto.</p>'
-            + '<p>Guarda-nos na fronteira. Mantem o Véu que Virenor tece e que a Esfera desfaz. Não nos deixes cruzar para <span class="faded">o espaço exterior</span>, onde as leis que conhecemos perdem significado e os nomes perdem peso.</p>'
-            + '<p>Solvenar, que conheces o preço da curiosidade \u2014 pois pagaste com tudo o que eras \u2014 concede-nos a sabedoria de parar antes do limiar. De olhar sem tocar. De saber sem compreender.</p>'
-            + '<p><em>Pois há coisas que, uma vez cruzadas, não permitem retorno.</em></p>'
-            + '<p>E há limiares que existem não para serem cruzados, mas para nos lembrar de que além deles <span class="erased">[...]</span> aguarda.</p>'
+        content: '<p><em>Ouve-nos, Guardi\u00e3o dos Limiares, que permaneces entre o que \u00e9 e o que n\u00e3o deveria ser.</em></p>'
+            + '<p>Tu que foste o primeiro a estender a m\u00e3o em dire\u00e7\u00e3o \u00e0 Esfera. Tu que foste transformado pelo toque que nenhum mortal suportaria. Tu que j\u00e1 n\u00e3o lembras do que eras antes, e carregas essa aus\u00eancia como um manto.</p>'
+            + '<p>Lembra-nos de <span class="faded">Verath</span>, que cruzou. Verath, que era nosso irm\u00e3o, nossa voz mais clara, nosso cora\u00e7\u00e3o mais bravo. Verath, que voltou tr\u00eas dias depois sem os olhos \u2014 n\u00e3o cegos, Solvenar, <em>ausentes</em>. As \u00f3rbitas lisas como pedra polida. E quando lhe perguntamos o que vira do outro lado, ele sorriu. Verath nunca sorria.</p>'
+            + '<p>O V\u00e9u n\u00e3o se v\u00ea \u2014 sente-se. Como a press\u00e3o que antecede uma tempestade que nunca chega. Os pelos dos bra\u00e7os se eri\u00e7am. A saliva ganha sabor de ferro. O mundo fica mais fino \u2014 como se as paredes da realidade tivessem a espessura de um sussurro.</p>'
+            + '<p><em>Guarda-nos, Solvenar. N\u00e3o do que h\u00e1 al\u00e9m do V\u00e9u \u2014 de n\u00f3s mesmos. Da nossa curiosidade. Do desejo de cruzar que cresce a cada prece, a cada noite, a cada vez que o V\u00e9u <span class="erased">[...]</span>.</em></p>'
     },
     {
         id: 17,
@@ -263,12 +261,12 @@ var FRAGMENTS = [
         era: 'Fragmentação',
         condition: 'stained',
         notes: 'Encontrada no único templo de Issara que sobreviveu. As manchas cheiram a enxofre.',
-        content: '<p><em>Mae das Cinzas, que encerras para que o novo possa comecar:</em></p>'
-            + '<p>Tu tentaste o que nenhum outro deus ousou \u2014 destruir a Esfera para libertar o ciclo. O fogo que lancaste contra ela era o fogo que desfaz e refaz, o fogo que não consome mas transforma.</p>'
-            + '<p>E a Esfera não se moveu. Não resistiu. Não reagiu. Simplesmente... permaneceu. Como se o fogo não a alcancasse. Como se <span class="faded">a destruição não fosse um conceito que se aplicasse a ela</span>.</p>'
-            + '<p>Queimaste teus próprios templos em furia. Ou em vergonha. Ou em desespero. Os registros divergem \u2014 como todos os registros sobre a Esfera divergem.</p>'
-            + '<p>Mae, ouve nossa prece: se não podes destruir a Esfera, <span class="erased">[...]</span> o ciclo ao redor dela. Que o mundo renasca apesar da Esfera. Que as cinzas gerem algo novo, mesmo que o dourado permaneca inalterado no centro de tudo.</p>'
-            + '<p><em>Pois se não podemos mudar o que e eterno, podemos ao menos mudar o que gira ao redor.</em></p>'
+        content: '<p><em>M\u00e3e das Cinzas, que encerras para que o novo possa come\u00e7ar:</em></p>'
+            + '<p>Nossos ancestrais viram. Viram o fogo mais quente que o centro do mundo erguer-se como uma parede viva e envolver a Esfera. Viram-no queimar por sete dias. No s\u00e9timo dia, o fogo apagou. A Esfera brilhava como sempre. E notaram algo que os destruiu: a Esfera n\u00e3o estava quente. O fogo n\u00e3o a havia tocado. Havia <span class="faded">contornado</span> \u2014 como \u00e1gua contorna uma pedra \u2014 e queimado tudo ao redor <em>exceto</em> ela.</p>'
+            + '<p>Queimaste teus pr\u00f3prios templos ent\u00e3o. N\u00e3o de f\u00faria \u2014 de desespero. Porque se a Esfera n\u00e3o podia ser destru\u00edda, tudo que a cercava era dispens\u00e1vel. At\u00e9 os teus altares. At\u00e9 <span class="erased">[...]</span>.</p>'
+            + '<p>Este templo cheira a cinza. H\u00e1 s\u00e9culos cheira a cinza. Nenhuma erva, nenhum incenso cobre o cheiro. \u00c9 o cheiro da derrota de uma deusa, e ele nunca se dissipar\u00e1.</p>'
+            + '<p>Rezamos para uma deusa que falhou. Sabemos disso. Ela sabe disso. E mesmo assim, rezamos \u2014 porque a alternativa \u00e9 aceitar que nada no universo pode mudar o que a Esfera \u00e9.</p>'
+            + '<p><em>M\u00e3e, ouve-nos. N\u00e3o pedimos vit\u00f3ria. Pedimos for\u00e7a para continuar tentando.</em></p>'
     },
     {
         id: 18,
@@ -343,13 +341,11 @@ var FRAGMENTS = [
         era: 'Presente',
         condition: 'burned',
         notes: 'Gravado na própria bigorna com cinzel. Letras fundas e irregulares.',
-        content: '<p>NAO SOU PARENTE DO ANAO. Quero que isso fique claro antes de tudo. Meu nome e Ferrovoz porque meu avô era ferreiro e gritava demais. Nada a ver com <span class="faded">Duravar</span> e sua máquina maldita.</p>'
-            + '<p>Mas as armas que forjo cantam.</p>'
-            + '<p>Não e metafora. Quando martelo o metal, algo responde. Uma lamina que chora \u2014 não pela dor que causa, mas pelo nome que esqueceu. Um escudo que zumbe quando voltado para <span class="erased">[...]</span>. Machados que suspiram ao amanhecer.</p>'
-            + '<p>Fui a uma forja que arde com fogo dourado, alimentada por minério que pulsa como coração vivo. O ferreiro de lá \u2014 homem sombrio, marcado por cicatrizes de chama \u2014 olhou minhas armas e disse: "O dourado canta nelas também."</p>'
-            + '<p>Não sou parente do anao. Não busco a Esfera. Não quero saber o que e.</p>'
-            + '<p>Mas ela sabe meu nome. E isso me apavora mais do que qualquer coisa.</p>'
-            + '<p>Se você encontrar esta bigorna e ouvir o metal cantar: pare de forjar. Va embora. <span class="torn-end">Não cometa o mesmo erro que\u2014</span></p>'
+        content: '<p>A primeira vez que ouvi, estava temperando uma espada comum para um mercador. O martelo caiu no a\u00e7o vermelho e o a\u00e7o... respondeu. N\u00e3o um som \u2014 uma nota. Clara como voz de crian\u00e7a. Larguei o martelo. A nota continuou. Vinha de dentro do metal, como se a espada estivesse cantando o nome de algu\u00e9m que eu n\u00e3o conhe\u00e7o mas meu corpo reconhecia.</p>'
+            + '<p>N\u00e3o sou parente do an\u00e3o Duravar. Meu av\u00f4 era ferreiro e gritava demais \u2014 da\u00ed Ferrovoz. Nada a ver com <span class="faded">m\u00e1quinas que ouvem a Esfera</span>.</p>'
+            + '<p>Mas as armas que forjo cantam. Uma l\u00e2mina que chora \u2014 n\u00e3o pela dor que causa, mas pelo nome que esqueceu. Um escudo que zumbe quando voltado para <span class="erased">[...]</span>. Machados que suspiram ao amanhecer.</p>'
+            + '<p>O que me apavora n\u00e3o \u00e9 o canto. \u00c9 que eu gosto. Cada vez que forjo, espero ouvir. Cada vez que a bigorna responde, algo em mim <em>acorda</em> \u2014 algo que n\u00e3o sou eu, algo que sabe forjar coisas que n\u00e3o pertencem a este mundo. E eu deixo. Deixo porque o metal fica <span class="faded">mais bonito quando outra coisa guia minhas m\u00e3os</span>.</p>'
+            + '<p>Se voc\u00ea encontrar esta bigorna e ouvir o metal cantar: pare de forjar. V\u00e1 embora. <span class="torn-end">N\u00e3o cometa o mesmo erro que\u2014</span></p>'
     },
     {
         id: 23,
@@ -359,13 +355,13 @@ var FRAGMENTS = [
         era: '???',
         condition: 'torn',
         notes: 'O selo de cera e dourado mas não corresponde a nenhuma casa, guilda, ou ordem conhecida.',
-        content: '<p>De: <span class="erased">▮▮▮▮▮▮▮▮▮▮▮</span><br>Para: <span class="erased">▮▮▮▮▮▮▮▮▮▮▮</span></p>'
-            + '<p>Sei que você <span class="faded">encontrou o que procurava</span>. Sei também que agora desejaria nunca ter procurado. E o destino de todos que olham para dentro dela: ver o que não deveria ser visto e perceber que não há como des-ver.</p>'
-            + '<p>Voce me pediu conselhos. Não tenho nenhum. Apenas instrucoes:</p>'
-            + '<p>Primeiro: não fale sobre o que viu a <span class="erased">[...]</span>. O corvo negro que pousa em todas as janelas, mas pertence a uma sombra que não tem dono, já esta vigiando.</p>'
-            + '<p>Segundo: destrua o <span class="erased">[...]</span> que trouxe consigo. Não e um artefato. E um lembrete. E lembretes da Esfera tem o habito de <span class="faded">se tornarem mais do que objetos</span>.</p>'
-            + '<p>Terceiro: se ouvir a voz que não é som, não responda. Responder e consentir. E consentir e <span class="erased">[...]</span>.</p>'
-            + '<p><span class="torn-end">Quarto: quando o Véu de Virenor enfraquecer na próxima lua, você deve\u2014</span></p>'
+        content: '<p>Meu <span class="erased">\u25ae\u25ae\u25ae\u25ae</span>,</p>'
+            + '<p>Quando leres esta carta, j\u00e1 terei feito o que prometemos nunca fazer. Perdoa-me. Ou n\u00e3o perdoes. Depois do que vi, perd\u00e3o \u00e9 uma palavra pequena demais.</p>'
+            + '<p>Sei que voc\u00ea <span class="faded">encontrou o que procurava</span>. Sei tamb\u00e9m que agora desejaria nunca ter procurado. \u00c9 o destino de todos que olham para dentro dela: ver o que n\u00e3o deveria ser visto e perceber que n\u00e3o h\u00e1 como des-ver.</p>'
+            + '<p>N\u00e3o fale sobre o que viu \u2014 n\u00e3o porque seja proibido, mas porque EU ouvi o que acontece com quem fala. O corvo negro que pousa em todas as janelas j\u00e1 est\u00e1 vigiando. Vi na tua janela tamb\u00e9m \u2014 perdoa-me, n\u00e3o deveria ter ido verificar.</p>'
+            + '<p>Nosso amigo <span class="erased">\u25ae\u25ae\u25ae\u25ae</span> respondeu. Ouviu a voz que n\u00e3o \u00e9 som e respondeu em voz alta, no mercado, diante de testemunhas. No dia seguinte, ningu\u00e9m se lembrava dele. Nem a esposa. Nem os filhos. Apenas eu, que assisti. Agora carrego essa mem\u00f3ria como se fosse a \u00faltima prova de que ele existiu.</p>'
+            + '<p>Destr\u00f3i o <span class="erased">[...]</span> que trouxeste contigo. N\u00e3o \u00e9 um artefato. \u00c9 um lembrete. E lembretes da Esfera t\u00eam o h\u00e1bito de <span class="faded">se tornarem mais do que objetos</span>.</p>'
+            + '<p><span class="torn-end">Quando o V\u00e9u de Virenor enfraquecer na pr\u00f3xima lua, voc\u00ea deve\u2014</span></p>'
     },
     {
         id: 24,
@@ -405,13 +401,12 @@ var FRAGMENTS = [
         era: 'Fragmentação',
         condition: 'aged',
         notes: 'Folhas secas prensadas entre as páginas. Algumas brilham levemente no escuro.',
-        content: '<p>Inventário iniciado na lua cheia do <span class="faded">setimo ciclo</span>. Floresta designada informalmente como "Floresta de Mãelis" em honra a minha bisavo, que aqui trabalhou.</p>'
-            + '<p><strong>Anomalia 1:</strong> As árvores no perimetro externo crescem normalmente. A partir de 200 passos para dentro, os troncos se curvam em direção ao centro. Não por causa de vento \u2014 não há vento.</p>'
-            + '<p><strong>Anomalia 2:</strong> Agua corre para cima nos riachos entre <span class="erased">[...]</span> e a clareira central. Contra a gravidade. Sem explicacao.</p>'
-            + '<p><strong>Anomalia 3:</strong> Animais evitam a floresta interior. Passaros mudam de rota ao sobrevoar. Insetos formam espirais no ar.</p>'
-            + '<p><strong>Anomalia 4:</strong> Na clareira central \u2014 a mesma descrita por Erindor Calamus, com grama crescendo em espiral \u2014 encontrei restos do ritual de Mãelis. Pedras dispostas em circulo. Ervas calcinadas. E no centro, onde deveria haver terra, há <span class="faded">vidro</span>. Areia fundida por calor imenso. Mas o vidro e <span class="faded">dourado</span>.</p>'
-            + '<p><strong>Anomalia 5:</strong> Passo mais de tres horas na floresta interior e perco a nocao de <span class="erased">[...]</span>. Os sonhos que tenho dentro da floresta sao sempre os mesmos. Dourados. Sem forma. Com peso.</p>'
-            + '<p>Conclusao: Mãelis não falhou. Algo foi parcialmente contido. Mas o que foi contido ainda <span class="faded">respira</span>.</p>'
+        content: '<p>Ma\u00e9lis plantou estas \u00e1rvores em linha reta, retas como as preces que rezava a Issara. Agora crescem em espiral. N\u00e3o porque algo as moveu \u2014 porque algo as <em>convidou</em>. A floresta n\u00e3o est\u00e1 doente. A floresta est\u00e1 dan\u00e7ando. E eu, bisneta de quem come\u00e7ou a m\u00fasica, sou a \u00fanica que reconhece o ritmo.</p>'
+            + '<p><strong>Anomalia 1:</strong> A partir de 200 passos para dentro, os troncos se curvam em dire\u00e7\u00e3o ao centro. N\u00e3o por causa de vento \u2014 n\u00e3o h\u00e1 vento.</p>'
+            + '<p><strong>Anomalia 2:</strong> \u00c1gua corre para cima nos riachos entre <span class="erased">[...]</span> e a clareira central. Contra a gravidade. Sem explica\u00e7\u00e3o.</p>'
+            + '<p><strong>Anomalia 3:</strong> Os animais que evitam a clareira \u00e0s vezes param na borda e olham para dentro. N\u00e3o com medo \u2014 com algo parecido com saudade. Um cervo ficou duas horas parado, olhando. Depois partiu devagar, como quem sai de um vel\u00f3rio.</p>'
+            + '<p><strong>Anomalia 4:</strong> Na clareira central, onde deveria haver terra, h\u00e1 vidro. Areia fundida por calor que nenhum vulc\u00e3o produz. Ajoelhei e toquei. Morno \u2014 n\u00e3o do sol, que n\u00e3o alcan\u00e7a o centro da espiral. Morno de <em>dentro</em>. Como tocar a pele de algo adormecido. Retirei a m\u00e3o. A marca dos meus dedos ficou no vidro por tr\u00eas batidas de cora\u00e7\u00e3o \u2014 e depois <span class="faded">sumiu</span>, como se o vidro tivesse absorvido minha impress\u00e3o. E o vidro \u00e9 <span class="faded">dourado</span>.</p>'
+            + '<p>Conclus\u00e3o: Ma\u00e9lis n\u00e3o falhou. Algo foi parcialmente contido. Mas o que foi contido ainda <span class="faded">respira</span>.</p>'
     },
     {
         id: 27,
