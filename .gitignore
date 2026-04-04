@@ -13,3 +13,4 @@ desktop.ini
 # Node (if ever used)
 node_modules/
 .tmp.driveupload/
+.hash-manifest.json

@@ -79,6 +79,65 @@
     // Controller instance (created lazily on first showLoading)
     var _ctrl = null;
 
+    // ── Title Screen + Audio-Reactive integration ──
+    var _titleScreen = null;
+    var _titleShown = false;
+    var _reactiveStarted = false;
+
+    /** Show title screen on cold start (first load only) */
+    function _showTitleScreen() {
+        if (_titleShown) return false;
+        if (typeof ValdoriaTitleScreen !== 'function') return false;
+        _titleShown = true;
+
+        _titleScreen = ValdoriaTitleScreen({
+            onStart: function() {
+                console.log('[GAME-LOADING] Title screen tapped — unlocking audio');
+                /* Unlock audio: set pending track first, then unlock (which picks it up) */
+                if (typeof ValdoriaAudio !== 'undefined') {
+                    ValdoriaAudio.play('intro');  /* sets _pendingTrack */
+                    ValdoriaAudio.forceUnlock();  /* triggers _playTrack with pending */
+                    /* Create analyser synchronously within tap gesture for AudioContext.resume() */
+                    ValdoriaAudio.getAnalyser();
+                }
+                /* Show the actual loading screen */
+                var ctrl = _ensureCtrl();
+                ctrl.show(false);
+                var el = document.getElementById('loading');
+                if (el) el.style.display = '';
+
+                /* Start audio-reactive effects (analyser already created synchronously above) */
+                setTimeout(function() {
+                    _startReactive();
+                }, 100);
+            }
+        });
+        _titleScreen.show();
+        return true;
+    }
+
+    /** Start audio-reactive loading effects */
+    function _startReactive() {
+        if (_reactiveStarted) return;
+        if (typeof ValdoriaLoadingReactive === 'undefined') return;
+        if (typeof ValdoriaAudio === 'undefined') return;
+
+        var analyser = ValdoriaAudio.getAnalyser();
+        if (analyser) {
+            ValdoriaLoadingReactive.start(analyser);
+            _reactiveStarted = true;
+        }
+    }
+
+    /** Stop audio-reactive effects */
+    function _stopReactive() {
+        if (!_reactiveStarted) return;
+        if (typeof ValdoriaLoadingReactive !== 'undefined') {
+            ValdoriaLoadingReactive.stop();
+        }
+        _reactiveStarted = false;
+    }
+
     function _ensureCtrl() {
         if (_ctrl) return _ctrl;
 if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
@@ -124,6 +183,13 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             if (window.vProcessing) vProcessing.show({ text: 'Carregando...' });
             return;
         }
+        /* ── Title screen on cold start (first load, not retry) ── */
+        if (!isRetry && !_titleShown) {
+            if (_showTitleScreen()) {
+                console.log('[GAME-LOADING] Title screen shown — loading deferred until tap');
+                return; /* Loading will be triggered by title screen onStart */
+            }
+        }
         var ctrl = _ensureCtrl();
         if (!isRetry && ctrl.getState() === 'loading') {
             console.warn('[GAME-LOADING] showLoading() skipped — controller already loading');
@@ -141,6 +207,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      */
     window.hideLoading = function hideLoading() {
         console.warn('[GAME-LOADING] hideLoading()');
+        _stopReactive();
         if (window.__spaRevisit && window.vProcessing && vProcessing.isActive()) {
             vProcessing.hide();
             return;
@@ -158,6 +225,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      */
     window.hideLoadingWithDelay = async function hideLoadingWithDelay() {
         console.warn('[GAME-LOADING] hideLoadingWithDelay()');
+        _stopReactive();
         if (window.__spaRevisit && window.vProcessing && vProcessing.isActive()) {
             vProcessing.hide();
             return;
@@ -177,6 +245,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      */
     window.forceHideLoading = function forceHideLoading() {
         console.warn('[GAME-LOADING] forceHideLoading()');
+        _stopReactive();
         if (window.vProcessing && vProcessing.isActive()) vProcessing.hide();
         if (!_ctrl) {
             var el = document.getElementById('loading');

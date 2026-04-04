@@ -1,0 +1,222 @@
+/* ── Title Screen — Epic Entry ── */
+.title-screen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--v-z-critical, 10000);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--v-bg-deep, #1a1510);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+
+/* ── Vignette overlay ── */
+.title-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+}
+
+/* ── Embers (reuses loading particle style) ── */
+.title-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.title-particles .tp {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--v-gold, #c4953a);
+  opacity: 0;
+  animation: titleEmberFloat 12s ease-in infinite;
+}
+.title-particles .tp:nth-child(1) { left: 15%; bottom: -8px; width: 3px; height: 3px; animation-delay: 0s; }
+.title-particles .tp:nth-child(2) { left: 35%; bottom: -8px; width: 2px; height: 2px; animation-delay: 2.5s; }
+.title-particles .tp:nth-child(3) { left: 55%; bottom: -8px; width: 4px; height: 4px; animation-delay: 1.2s; }
+.title-particles .tp:nth-child(4) { left: 75%; bottom: -8px; width: 2px; height: 2px; animation-delay: 4s; }
+.title-particles .tp:nth-child(5) { left: 25%; bottom: -8px; width: 3px; height: 3px; animation-delay: 6s; }
+.title-particles .tp:nth-child(6) { left: 65%; bottom: -8px; width: 2px; height: 2px; animation-delay: 3.5s; }
+.title-particles .tp:nth-child(7) { left: 45%; bottom: -8px; width: 3px; height: 3px; animation-delay: 7s; }
+.title-particles .tp:nth-child(8) { left: 85%; bottom: -8px; width: 2px; height: 2px; animation-delay: 5s; }
+
+@keyframes titleEmberFloat {
+  0%   { opacity: 0; transform: translateY(0) translateX(0); }
+  10%  { opacity: 0.8; }
+  50%  { opacity: 0.6; transform: translateY(-45vh) translateX(15px); }
+  80%  { opacity: 0.2; }
+  100% { opacity: 0; transform: translateY(-90vh) translateX(-10px); }
+}
+
+/* ── Floating runes ── */
+.title-runes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.title-rune {
+  position: absolute;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  color: var(--v-gold, #c4953a);
+  opacity: 0.12;
+  font-size: var(--v-font-xl, 16px);
+  animation: titleRuneFloat 20s ease-in-out infinite;
+}
+.title-rune:nth-child(1) { top: 12%; left: 8%; animation-delay: 0s; }
+.title-rune:nth-child(2) { top: 18%; right: 10%; animation-delay: 5s; animation-duration: 24s; }
+.title-rune:nth-child(3) { bottom: 20%; left: 12%; animation-delay: 3s; animation-duration: 22s; }
+.title-rune:nth-child(4) { bottom: 15%; right: 8%; animation-delay: 8s; animation-duration: 18s; }
+
+@keyframes titleRuneFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.08; }
+  25%      { transform: translateY(-12px) rotate(3deg); opacity: 0.15; }
+  50%      { transform: translateY(-6px) rotate(-2deg); opacity: 0.12; }
+  75%      { transform: translateY(-18px) rotate(1deg); opacity: 0.10; }
+}
+
+/* ── Brand container ── */
+.title-brand {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  animation: titleBrandEntrance 1.5s ease-out both;
+}
+
+@keyframes titleBrandEntrance {
+  0%   { opacity: 0; transform: scale(0.9) translateY(20px); }
+  60%  { opacity: 1; transform: scale(1.02) translateY(-4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Title text ── */
+.title-text {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: clamp(22px, 7vw, 32px);
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  line-height: 1.3;
+  text-shadow: 0 0 20px var(--v-gold-40), 0 0 40px var(--v-gold-20);
+  animation: titleShimmer 4s ease-in-out infinite;
+}
+.title-text-sub {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: clamp(28px, 9vw, 42px);
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  line-height: 1.3;
+  text-shadow: 0 0 25px var(--v-gold-50), 0 0 50px var(--v-gold-25);
+  animation: titleShimmer 4s ease-in-out infinite 0.3s;
+}
+
+@keyframes titleShimmer {
+  0%, 100% { opacity: 0.85; text-shadow: 0 0 20px var(--v-gold-40), 0 0 40px var(--v-gold-20); }
+  50%      { opacity: 1; text-shadow: 0 0 30px var(--v-gold-60), 0 0 60px var(--v-gold-30); }
+}
+
+/* ── Divider ── */
+.title-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-md, 8px);
+  margin: var(--v-space-lg, 16px) 0;
+  color: var(--v-gold, #c4953a);
+  opacity: 0.6;
+}
+.title-divider-line {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--v-gold, #c4953a), transparent);
+}
+.title-divider-gem {
+  font-size: var(--v-font-lg, 16px);
+  animation: titleGemPulse 3s ease-in-out infinite;
+  text-shadow: 0 0 12px var(--v-gold-60);
+}
+
+@keyframes titleGemPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.15); text-shadow: 0 0 20px var(--v-gold-80, rgba(196,149,58,0.8)); }
+}
+
+/* ── CTA text ── */
+.title-cta {
+  position: relative;
+  z-index: 1;
+  margin-top: var(--v-space-2xl, 24px);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-text, #d4c8b0);
+  letter-spacing: 2px;
+  opacity: 0;
+  animation: titleCtaEntrance 1s ease-out 1.2s both, titleCtaBreathing 2.5s ease-in-out 2.2s infinite;
+}
+
+@keyframes titleCtaEntrance {
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 0.7; transform: translateY(0); }
+}
+
+@keyframes titleCtaBreathing {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.9; text-shadow: 0 0 10px var(--v-gold-30); }
+}
+
+/* ── Flash on tap ── */
+.title-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--v-gold-40), transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.title-flash.active {
+  animation: titleFlashBurst 0.4s ease-out forwards;
+}
+
+@keyframes titleFlashBurst {
+  0%   { opacity: 0; transform: scale(0.8); }
+  30%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* ── Exit animation ── */
+.title-screen.exit {
+  animation: titleExit 0.5s ease-in forwards;
+}
+
+@keyframes titleExit {
+  0%   { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.05); }
+}
+
+/* ── Performance: Lite ── */
+.title-screen.title-lite .title-particles,
+.title-screen.title-lite .title-runes { display: none; }
+.title-screen.title-lite .title-text,
+.title-screen.title-lite .title-text-sub { animation: none; opacity: 1; }
+.title-screen.title-lite .title-divider-gem { animation: none; opacity: 0.7; }
+
+/* ── Performance: Medium ── */
+.title-screen.title-medium .title-particles .tp:nth-child(n+5) { display: none; }
+.title-screen.title-medium .title-runes .title-rune:nth-child(n+3) { display: none; }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .title-screen .title-particles,
+  .title-screen .title-runes { display: none; }
+  .title-text, .title-text-sub, .title-divider-gem, .title-cta { animation: none !important; opacity: 1 !important; }
+  .title-flash.active { animation: none; opacity: 0; }
+  .title-screen.exit { animation: none; opacity: 0; }
+}

@@ -1,0 +1,81 @@
+/* ── Audio-Reactive Loading Effects (v1.0) ── */
+
+/* ── Screen tremor (bass drops) ── */
+.loading-overlay.lr-tremor {
+  animation: lrTremor 0.15s ease-out;
+}
+@keyframes lrTremor {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-2px, 1px); }
+  50%  { transform: translate(2px, -1px); }
+  75%  { transform: translate(-1px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ── Golden flash on beat ── */
+.lr-beat-flash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--v-gold-12), transparent 60%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: var(--v-z-loading, 9999);
+  transition: opacity 0.08s ease-out;
+}
+.lr-beat-flash.active {
+  opacity: 1;
+  transition: none;
+}
+
+/* ── Light rays from gem ── */
+.lr-rays {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  margin: -150px 0 0 -150px;
+  background: radial-gradient(ellipse at center, var(--v-gold-15), transparent 70%);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.1s ease-out;
+}
+
+/* ── Beat burst particles ── */
+.lr-burst {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--v-gold, #c4953a);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 1;
+}
+.lr-burst.active {
+  animation: lrBurstFly 0.6s ease-out forwards;
+}
+
+@keyframes lrBurstFly {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+  60%  { opacity: 0.6; }
+  100% { opacity: 0; transform: translate(var(--lr-dx, 40px), var(--lr-dy, -40px)) scale(0.3); }
+}
+
+/* ── Performance: Lite — disable expensive effects ── */
+body.perf-lite .lr-beat-flash,
+body.perf-lite .lr-rays,
+body.perf-lite .lr-burst { display: none; }
+body.perf-lite .loading-overlay.lr-tremor { animation: none; }
+
+/* ── Performance: Medium — reduce effects ── */
+body.perf-medium .lr-rays { display: none; }
+body.perf-medium .loading-overlay.lr-tremor { animation: none; }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .lr-beat-flash, .lr-rays, .lr-burst { display: none; }
+  .loading-overlay.lr-tremor { animation: none !important; }
+}
