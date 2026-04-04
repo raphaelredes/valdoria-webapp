@@ -85,16 +85,16 @@
             var $target;
             if (page === -1) {
                 $target = $cover;
-                $btnIndex.classList.remove('visible');
+                /* cover: no index button needed */
             } else if (page === 0) {
                 $target = $pageIndex;
                 updatePageCounter($pageCounter, 0, _totalPages);
-                $btnIndex.classList.add('visible');
+                /* index btn now part of topbar, no show/hide needed */
             } else {
                 $target = $pageFrag;
                 renderFragment(page - 1);
                 updatePageCounter($pageCounterFrag, page, _totalPages);
-                $btnIndex.classList.add('visible');
+                /* index btn now part of topbar, no show/hide needed */
             }
             if ($target) {
                 $target.classList.add('active');

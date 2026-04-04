@@ -68,12 +68,16 @@
 
         <!-- Fragment page (single, reused for all fragments) -->
         <div id="page-fragment" class="page fragment-page">
-            <div id="parchment" class="page-parchment">
-                <div class="fragment-header">
+            <!-- Top bar: index button + type/era info -->
+            <div class="fragment-topbar">
+                <button id="btn-index" class="btn-index" aria-label="Indice" title="Indice">&#9776;</button>
+                <div class="fragment-topbar-info">
                     <span id="frag-icon" class="fragment-icon"></span>
                     <span id="frag-type" class="fragment-type"></span>
-                    <span id="frag-era" class="fragment-era"></span>
                 </div>
+                <span id="frag-era" class="fragment-era"></span>
+            </div>
+            <div id="parchment" class="page-parchment">
                 <h2 id="frag-title" class="fragment-title"></h2>
                 <div class="fragment-meta">
                     <span id="frag-author" class="fragment-author"></span>
@@ -87,9 +91,6 @@
                 <button class="nav-arrow nav-right" data-dir="next" aria-label="Proxima pagina">&#9654;</button>
             </div>
         </div>
-
-        <!-- Index toggle button -->
-        <button id="btn-index" class="btn-index" aria-label="Indice" title="Indice">&#9776;</button>
     </div>
 
     <script>

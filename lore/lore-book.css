@@ -234,16 +234,27 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════
-   FRAGMENT PAGE
+   FRAGMENT TOP BAR (outside parchment)
    ═══════════════════════════════════════════════════════ */
-.fragment-header {
+.fragment-topbar {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-md, 8px);
+    padding: var(--v-space-sm, 4px) var(--v-space-lg, 12px);
+    background: rgba(18, 16, 12, 0.95);
+    border-bottom: 1px solid rgba(196, 149, 58, 0.1);
+    flex-shrink: 0;
+}
+.fragment-topbar-info {
     display: flex;
     align-items: center;
     gap: var(--v-space-sm, 4px);
-    margin-bottom: var(--v-space-md, 8px);
-    padding-bottom: var(--v-space-sm, 4px);
-    border-bottom: 1px solid rgba(196, 149, 58, 0.2);
+    flex: 1;
 }
+
+/* ═══════════════════════════════════════════════════════
+   FRAGMENT PAGE
+   ═══════════════════════════════════════════════════════ */
 .fragment-icon {
     font-size: var(--v-font-lg, 15px);
 }
@@ -256,11 +267,11 @@ body {
     opacity: 0.8;
 }
 .fragment-era {
-    margin-left: auto;
     font-family: var(--v-font, 'MedievalSharp', serif);
     font-size: var(--v-font-xs, 10px);
     color: var(--v-text-dim, #a09484);
     opacity: 0.6;
+    white-space: nowrap;
 }
 
 .fragment-title {
@@ -492,30 +503,24 @@ body {
     letter-spacing: 1px;
 }
 
-/* Index toggle button */
+/* Index toggle button (inside topbar, not absolute) */
 .btn-index {
-    position: absolute;
-    top: var(--v-space-md, 8px);
-    right: var(--v-space-md, 8px);
-    background: rgba(18, 16, 12, 0.7);
-    border: 1px solid rgba(196, 149, 58, 0.2);
+    background: transparent;
+    border: 1px solid rgba(196, 149, 58, 0.25);
     color: var(--v-gold, #c4953a);
-    font-size: var(--v-font-lg, 15px);
+    font-size: var(--v-font-body, 14px);
     width: 36px;
     height: 36px;
     border-radius: var(--v-radius-sm, 6px);
     cursor: pointer;
-    z-index: var(--v-z-sticky, 50);
-    display: none; /* shown after cover is dismissed */
+    display: flex;
     align-items: center;
     justify-content: center;
     transition: all var(--v-transition, 0.2s ease);
+    flex-shrink: 0;
 }
 .btn-index:hover, .btn-index:active {
     background: rgba(196, 149, 58, 0.15);
-}
-.btn-index.visible {
-    display: flex;
 }
 
 /* ═══════════════════════════════════════════════════════
