@@ -43,12 +43,26 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════
-   COVER
+   COVER — leather-bound grimoire with embossed details
    ═══════════════════════════════════════════════════════ */
 .cover {
-    background: linear-gradient(170deg, #2a1f15 0%, #1a1208 40%, #0f0c08 100%);
+    /* Leather texture via layered gradients */
+    background:
+        /* Subtle grain texture */
+        repeating-linear-gradient(135deg,
+            transparent 0px, rgba(60,40,20,0.03) 1px, transparent 2px, transparent 4px),
+        repeating-linear-gradient(45deg,
+            transparent 0px, rgba(50,35,15,0.02) 1px, transparent 2px, transparent 5px),
+        /* Leather color base with wear */
+        radial-gradient(ellipse at 50% 30%, rgba(45,32,18,0.9) 0%, rgba(25,18,10,0.95) 50%, rgba(15,10,6,1) 100%),
+        linear-gradient(170deg, #2a1f15 0%, #1a1208 40%, #0f0c08 100%);
     align-items: center;
     justify-content: center;
+    /* Embossed border frame */
+    border: 3px solid rgba(80,55,25,0.4);
+    box-shadow:
+        inset 0 0 40px rgba(0,0,0,0.5),
+        inset 0 0 4px rgba(196,149,58,0.08);
 }
 .cover-inner {
     display: flex;
@@ -56,6 +70,46 @@ body {
     align-items: center;
     gap: var(--v-space-lg, 12px);
     padding: var(--v-space-2xl, 24px);
+    position: relative;
+}
+
+/* Corner ornaments on cover */
+.cover::before, .cover::after {
+    content: '\2726';
+    position: absolute;
+    color: rgba(196, 149, 58, 0.2);
+    font-size: 24px;
+}
+.cover::before { top: 16px; left: 16px; }
+.cover::after { bottom: 16px; right: 16px; transform: rotate(180deg); }
+
+/* Dust particles floating on cover */
+.cover-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+.cover-particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(196, 149, 58, 0.3);
+    border-radius: 50%;
+    animation: dustFloat linear infinite;
+}
+.cover-particle:nth-child(1) { left: 20%; top: 80%; animation-duration: 12s; animation-delay: 0s; }
+.cover-particle:nth-child(2) { left: 50%; top: 90%; animation-duration: 15s; animation-delay: -3s; width: 1.5px; height: 1.5px; }
+.cover-particle:nth-child(3) { left: 75%; top: 85%; animation-duration: 10s; animation-delay: -6s; }
+.cover-particle:nth-child(4) { left: 35%; top: 95%; animation-duration: 18s; animation-delay: -2s; width: 1px; height: 1px; opacity: 0.5; }
+.cover-particle:nth-child(5) { left: 60%; top: 70%; animation-duration: 14s; animation-delay: -8s; width: 2.5px; height: 2.5px; opacity: 0.2; }
+.cover-particle:nth-child(6) { left: 10%; top: 75%; animation-duration: 16s; animation-delay: -4s; width: 1px; height: 1px; }
+@keyframes dustFloat {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    50% { opacity: 0.3; }
+    90% { opacity: 0.5; }
+    100% { transform: translateY(-300px) translateX(30px); opacity: 0; }
 }
 
 /* Orb on cover */
@@ -76,11 +130,24 @@ body {
     50% { box-shadow: 0 0 40px rgba(196,149,58,0.6), 0 0 80px rgba(196,149,58,0.3), inset 0 0 25px rgba(255,244,208,0.4); }
 }
 
+/* Ornamental divider with diamond center */
 .cover-divider {
-    width: 60px;
+    width: 120px;
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--v-gold, #c4953a), transparent);
     opacity: 0.5;
+    position: relative;
+}
+.cover-divider::after {
+    content: '\25C6';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+    color: var(--v-gold, #c4953a);
+    background: rgba(26, 21, 16, 0.9);
+    padding: 0 6px;
 }
 
 .cover-title {
@@ -204,7 +271,7 @@ body {
 }
 /* Decorative divider under title */
 .index-title::after {
-    content: '\u25C6';
+    content: '\25C6';
     display: block;
     margin-top: var(--v-space-md, 8px);
     font-size: 10px;
@@ -374,6 +441,55 @@ body {
     color: var(--v-gold, #c4953a);
     font-style: normal;
     font-weight: 700;
+}
+
+/* ─── DROP CAP — ornate first letter of each fragment ─── */
+.fragment-content p:first-of-type::first-letter {
+    font-family: 'Cinzel', var(--v-font-display, serif);
+    font-size: 3.2em;
+    float: left;
+    line-height: 0.8;
+    margin-right: 6px;
+    margin-top: 4px;
+    color: var(--v-gold, #c4953a);
+    text-shadow: 0 0 10px rgba(196, 149, 58, 0.25), 1px 1px 0 rgba(90, 62, 16, 0.4);
+    font-weight: 700;
+}
+
+/* ─── ORNAMENTAL BORDER on parchment ─── */
+.page-parchment {
+    /* Add inner border frame */
+    border: 1px solid rgba(196, 149, 58, 0.08);
+    outline: 1px solid rgba(196, 149, 58, 0.04);
+    outline-offset: 4px;
+}
+
+/* ─── ORNAMENTAL CORNERS on fragment pages ─── */
+.fragment-page .page-parchment::before {
+    /* Corner ornaments via box-shadow trickery */
+    box-shadow:
+        /* Top-left corner L */
+        inset 20px 0 0 -19px rgba(196,149,58,0.12),
+        inset 0 20px 0 -19px rgba(196,149,58,0.12),
+        /* Bottom-right corner L */
+        inset -20px 0 0 -19px rgba(196,149,58,0.1),
+        inset 0 -20px 0 -19px rgba(196,149,58,0.1);
+}
+
+/* ─── DECORATIVE SEPARATOR between title and content ─── */
+.fragment-title {
+    position: relative;
+}
+.fragment-title::after {
+    content: '\2014\00a0\25C6\00a0\2014';
+    display: block;
+    text-align: center;
+    margin-top: var(--v-space-sm, 4px);
+    font-size: 10px;
+    color: var(--v-gold, #c4953a);
+    opacity: 0.35;
+    letter-spacing: 4px;
+    border-bottom: none;
 }
 
 /* Font overrides by type — all normalized to 15px+ for readability */
