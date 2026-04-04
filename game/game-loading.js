@@ -330,7 +330,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
         }
         console.warn('[GAME-LOADING] showLoading(' + (isRetry ? 'retry' : 'init') + ') spaRevisit=' + !!window.__spaRevisit);
         if (window.__spaRevisit && !isRetry) {
-            if (window.vProcessing) vProcessing.show({ text: 'Carregando...' });
+            if (window.vProcessing) vProcessing.show({ text: 'Carregando...', contentCheck: '#content' });
             return;
         }
         /* ── Title screen on cold start: loading deferred until user taps ── */

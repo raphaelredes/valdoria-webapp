@@ -3,6 +3,7 @@
 if(window._loadDbgSetApp)_loadDbgSetApp('EXPLORE');
 (function(){
 var _defaultText = 'Gerando mapa...';
+var _contentSelector = '#explore-canvas';
 function _hideShellLoading() {
     var lo = document.getElementById('loading');
     if (lo && !lo.classList.contains('hidden')) {
@@ -12,7 +13,7 @@ function _hideShellLoading() {
     }
 }
 var _ctrl = {
-    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText}); },
+    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText, contentCheck: _contentSelector}); },
     hide: function(cb) { _hideShellLoading(); if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
     forceHide: function() { _hideShellLoading(); if(window.vProcessing) vProcessing.hide(); },
     setProgress: function(pct, label) { if(window.vProcessing && label) vProcessing.setText(label); },

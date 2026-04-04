@@ -3,7 +3,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('DUNGEON');
 (function(){
 var _defaultText = 'Entrando na masmorra...';
 var _ctrl = {
-    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText}); },
+    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText, contentCheck: '#dungeon-map'}); },
     hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
     forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
     setProgress: function(pct, label) { if(window.vProcessing && label) vProcessing.setText(label); },

@@ -3,7 +3,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('PROLOGUE');
 (function(){
 var _defaultText = 'O destino começa a tecer sua história...';
 var _ctrl = {
-    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText}); },
+    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText, contentCheck: '#viewport'}); },
     hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
     forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
     setProgress: function(pct, label) { if(window.vProcessing && label) vProcessing.setText(label); },

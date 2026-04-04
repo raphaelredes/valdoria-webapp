@@ -3,7 +3,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GUILD');
 (function(){
 var _defaultText = 'Abrindo o registro da guilda...';
 var _ctrl = {
-    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText}); },
+    show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText, contentCheck: '#guild-content'}); },
     hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
     forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
     setProgress: function(pct, label) { if(window.vProcessing && label) vProcessing.setText(label); },

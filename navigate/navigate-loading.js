@@ -24,7 +24,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('NAVIGATE');
 if (window.__spaRevisit) {
     console.warn("[NAVIGATE] loading: SPA revisit mode (stub controller)");
     window._navLoadingCtrl = {
-        show: function() { if(window.vProcessing) vProcessing.show({text: 'Carregando mapa...'}); },
+        show: function() { if(window.vProcessing) vProcessing.show({text: 'Carregando mapa...', contentCheck: '#map-wrapper'}); },
         hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 200); },
         forceHide: function() { if(window.vProcessing) vProcessing.hide(); },
         setProgress: function() {},
