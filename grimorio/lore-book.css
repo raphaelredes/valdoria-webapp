@@ -139,22 +139,16 @@ body {
     100% { transform: translateY(-300px) translateX(30px); opacity: 0; }
 }
 
-/* Orb on cover */
-.cover-orb {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%,
-        #fff4d0 0%, #e8c45a 20%, #c4953a 45%, #8b6420 70%, #5a3e10 100%);
-    box-shadow:
-        0 0 30px rgba(196, 149, 58, 0.4),
-        0 0 60px rgba(196, 149, 58, 0.2),
-        inset 0 0 20px rgba(255, 244, 208, 0.3);
-    animation: orbPulse 4s ease-in-out infinite;
+/* Logo 3D on cover */
+.cover-logo {
+    max-width: 280px;
+    height: auto;
+    filter: drop-shadow(0 0 20px rgba(196, 149, 58, 0.3));
+    animation: logoPulse 4s ease-in-out infinite;
 }
-@keyframes orbPulse {
-    0%, 100% { box-shadow: 0 0 30px rgba(196,149,58,0.4), 0 0 60px rgba(196,149,58,0.2), inset 0 0 20px rgba(255,244,208,0.3); }
-    50% { box-shadow: 0 0 40px rgba(196,149,58,0.6), 0 0 80px rgba(196,149,58,0.3), inset 0 0 25px rgba(255,244,208,0.4); }
+@keyframes logoPulse {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(196,149,58,0.3)); }
+    50% { filter: drop-shadow(0 0 35px rgba(196,149,58,0.5)); }
 }
 
 /* Ornamental divider with diamond center */
@@ -177,31 +171,7 @@ body {
     padding: 0 6px;
 }
 
-.cover-title {
-    text-align: center;
-    margin: 0;
-    line-height: 1.2;
-}
-.cover-title-sub {
-    display: block;
-    font-family: var(--v-font-display, 'Cinzel', serif);
-    font-weight: 700;
-    font-size: clamp(20px, 6vw, 28px);
-    letter-spacing: 3px;
-    color: var(--v-gold, #c4953a);
-    text-shadow: 0 0 20px rgba(196,149,58,0.4);
-    text-transform: uppercase;
-}
-.cover-title-main {
-    display: block;
-    font-family: var(--v-font-display, 'Cinzel', serif);
-    font-weight: 700;
-    font-size: clamp(28px, 9vw, 42px);
-    letter-spacing: 5px;
-    color: var(--v-gold, #c4953a);
-    text-shadow: 0 0 25px rgba(196,149,58,0.5), 0 0 50px rgba(196,149,58,0.25);
-    text-transform: uppercase;
-}
+/* cover-title removed — logo-3d.png includes the title */
 
 .cover-subtitle {
     font-family: var(--v-font, 'MedievalSharp', serif);
