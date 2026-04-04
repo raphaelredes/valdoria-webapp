@@ -201,6 +201,9 @@
         /* paragraph separators for long fragments */
         addParagraphSeparators();
 
+        /* "Read more" button if fragment has expanded text */
+        addReadMoreButton(idx);
+
         /* special effect for fragment #30 (last) */
         if (idx === _fragments.length - 1 && f.type === 'strange') {
             applyTypewriterEffect();
@@ -473,6 +476,81 @@
             /* safe: textContent with static chars, no user input */
             paragraphs[i].parentNode.insertBefore(sep, paragraphs[i]);
         }
+    }
+
+    /* ─── INTERACTIVE WORDS (tooltips) ─── */
+    var $tooltip = document.getElementById('lore-tooltip');
+    var $tooltipTitle = document.getElementById('tooltip-title');
+    var $tooltipText = document.getElementById('tooltip-text');
+    var $tooltipRefs = document.getElementById('tooltip-refs');
+    var $tooltipClose = document.querySelector('.lore-tooltip-close');
+
+    /* LORE_TOOLTIPS defined in fragments-data.js — trusted first-party data */
+    var _tooltips = (typeof LORE_TOOLTIPS !== 'undefined') ? LORE_TOOLTIPS : {};
+
+    function showTooltip(key) {
+        var data = _tooltips[key];
+        if (!data || !$tooltip) return;
+        $tooltipTitle.textContent = data.title || key;
+        $tooltipText.textContent = data.text || '';
+        $tooltipRefs.textContent = data.refs || '';
+        $tooltip.classList.add('visible');
+    }
+    function hideTooltip() {
+        if ($tooltip) $tooltip.classList.remove('visible');
+    }
+
+    /* Delegate click on .lore-link elements */
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest('.lore-link');
+        if (link) {
+            e.preventDefault();
+            showTooltip(link.getAttribute('data-lore'));
+            return;
+        }
+        if ($tooltip && $tooltip.classList.contains('visible') && !e.target.closest('.lore-tooltip')) {
+            hideTooltip();
+        }
+    });
+    if ($tooltipClose) $tooltipClose.addEventListener('click', hideTooltip);
+
+    /* ─── DRAWER (half-sheet for expanded text) ─── */
+    var $drawer = document.getElementById('lore-drawer');
+    var $drawerOverlay = document.getElementById('drawer-overlay');
+    var $drawerBody = document.getElementById('drawer-body');
+    var $drawerTitle = document.getElementById('drawer-title');
+    var $drawerClose = document.getElementById('drawer-close');
+
+    function openDrawer(fragmentIdx) {
+        var f = _fragments[fragmentIdx];
+        if (!f || !$drawer) return;
+        /* Use expanded content if available, otherwise full content.
+           SECURITY NOTE: content is from trusted first-party fragments-data.js,
+           not user input — contains only static HTML with <p>, <span class="faded">, etc. */
+        var expanded = f.expanded || f.content;
+        $drawerTitle.textContent = f.title;
+        $drawerBody.innerHTML = expanded; /* safe: trusted static data */
+        $drawer.classList.add('visible');
+        if ($drawerOverlay) $drawerOverlay.classList.add('visible');
+        $drawerBody.scrollTop = 0;
+    }
+    function closeDrawer() {
+        if ($drawer) $drawer.classList.remove('visible');
+        if ($drawerOverlay) $drawerOverlay.classList.remove('visible');
+    }
+
+    if ($drawerClose) $drawerClose.addEventListener('click', closeDrawer);
+    if ($drawerOverlay) $drawerOverlay.addEventListener('click', closeDrawer);
+
+    /* Add "Read more" button if fragment has expanded content */
+    function addReadMoreButton(idx) {
+        var f = _fragments[idx];
+        if (!f || !f.expanded) return;
+        var btn = document.createElement('button');
+        btn.className = 'read-more-btn';
+        btn.textContent = 'Continuar lendo \u25B8';
+        btn.addEventListener('click', function () { openDrawer(idx); });
+        $fragContent.appendChild(btn);
     }
 
     /* ─── UTILS ─── */

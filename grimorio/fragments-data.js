@@ -29,8 +29,15 @@ var FRAGMENTS = [
         author: 'Talric Cinéras',
         era: 'Fundação',
         condition: 'aged',
-        notes: 'Páginas adjacentes arrancadas. Marcas de unhas nas margens.',
-        content: '<p>Cheguei ao vale na terceira lua do ciclo. O que encontrei não e possível descrever com a precisão que a ciência exige, e no entanto, devo tentar.</p>'
+        notes: 'P\u00e1ginas adjacentes arrancadas. Marcas de unhas nas margens.',
+        expanded: '<p>Cheguei ao vale na terceira lua do ciclo. Trazia comigo seis homens, tr\u00eas mulas de carga, e a certeza inabal\u00e1vel de que o mundo podia ser medido. Todos os mist\u00e9rios, acreditava eu, s\u00e3o apenas perguntas que ainda n\u00e3o receberam instrumentos adequados.</p>'
+            + '<p>O vale n\u00e3o constava nos mapas de <span class="lore-link" data-lore="erindor">Erindor Calamus</span>. Ou constava \u2014 Erindor jura que sempre esteve l\u00e1, desenhado pela pr\u00f3pria m\u00e3o. Mas eu conhe\u00e7o os mapas de Erindor como conhe\u00e7o as linhas das minhas palmas, e aquele vale N\u00c3O EXISTIA antes de precisarmos encontr\u00e1-lo.</p>'
+            + '<p>A cratera n\u00e3o \u00e9 uma cratera. N\u00e3o h\u00e1 sinais de impacto \u2014 nenhuma pedra deslocada, nenhuma \u00e1rvore curvada pela for\u00e7a. O terreno simplesmente... <span class="faded">cede</span>. Como se a pr\u00f3pria terra tivesse se afastado. N\u00e3o por viol\u00eancia. Por rever\u00eancia. Ou por medo.</p>'
+            + '<p>No centro, o brilho. O brilho dourado que <em>n\u00e3o \u00e9 luz</em>. Tentei medi-lo com instrumentos \u00f3pticos \u2014 as lentes emba\u00e7aram. Tentei desenhar \u2014 o carv\u00e3o se desfez entre meus dedos como cinza molhada. Tentei descrever em palavras, ali mesmo, de joelhos na terra que n\u00e3o era terra \u2014 e as palavras sa\u00edram erradas. Todas erradas.</p>'
+            + '<p>O ar perto do centro tinha gosto. Met\u00e1lico, como sangue, mas com algo a mais \u2014 como mel antigo, como a mem\u00f3ria de um inc\u00eandio. Aravor, o mais corajoso, cuspiu e disse: <em>"Isso tem gosto de lembrar."</em> N\u00e3o fez sentido na hora. Faz agora.</p>'
+            + '<p>Medi o di\u00e2metro: <span class="faded">trezentos e quarenta e dois</span> passos. Na manh\u00e3 seguinte, <span class="faded">trezentos e cinquenta e sete</span>. O vale est\u00e1 crescendo. Ou eu estou encolhendo. Ou o conceito de "passo" est\u00e1 sendo reescrito enquanto eu me\u00e7o.</p>'
+            + '<p>Nota para a pr\u00f3xima expedi\u00e7\u00e3o: trazer mais <span class="erased">[...]</span>. O \u00faltimo assistente n\u00e3o voltou da margem norte. N\u00e3o encontramos rastros. N\u00e3o encontramos corpo. Encontramos suas botas \u2014 dispostas com cuidado, lado a lado, como se ele as tivesse tirado antes de caminhar descal\u00e7o para dentro de algo que n\u00e3o era o vale.</p>',
+        content: '<p>Cheguei ao vale na terceira lua do ciclo. O que encontrei n\u00e3o \u00e9 poss\u00edvel descrever com a precis\u00e3o que a ci\u00eancia exige, e no entanto, devo tentar.</p>'
             + '<p>A cratera não é uma cratera. Não há sinais de impacto \u2014 nenhuma pedra deslocada, nenhuma árvore curvada pela força. O terreno simplesmente... <span class="faded">cede</span>. Como se a própria terra tivesse se afastado por vontade própria. Ou por medo.</p>'
             + '<p>No centro, nada. E no entanto, tudo. Um brilho dourado que <em>não é luz</em> \u2014 não projeta sombras, não aquece, não ilumina. Ele simplesmente está lá, como uma ideia que você não consegue esquecer.</p>'
             + '<p>Medi o diâmetro do vale: <span class="faded">trezentos e quarenta e dois</span> passos. Quando medi novamente pela manhã, eram <span class="faded">trezentos e cinquenta e sete</span>. O vale está crescendo. Ou eu estou encolhendo.</p>'
@@ -972,6 +979,87 @@ var CHARACTERS = {
         },
         comportamento: 'Fala com sabedoria além da idade aparente. Nunca mente, mas a verdade que diz e mais estranha que qualquer mentira. Inspira conforto e inquietacao simultaneos. Criancas e animais a adoram. Adultos sentem algo "errado" sem saber o que.',
         voz_narrativa: 'Simples e profunda. Frases curtas que carregam peso imenso. "O dourado não é cor. E lembrança. Você esta lembrando de algo que ainda não aconteceu."'
+    }
+};
+
+/* ═══════════════════════════════════════════════════════
+   TOOLTIPS — dados para palavras interativas
+
+   No conteudo dos fragmentos, usar:
+   <span class="lore-link" data-lore="KEY">texto visivel</span>
+
+   EXTENSIBILIDADE: Adicione novas entradas ao objeto.
+   ═══════════════════════════════════════════════════════ */
+var LORE_TOOLTIPS = {
+    'talric': {
+        title: 'Talric Cin\u00e9ras',
+        text: 'Rei-erudito que fundou Valdoria sobre o local onde a Esfera supostamente caiu. Seus di\u00e1rios se contradizem \u2014 cada entrada descreve um evento diferente com a mesma certeza absoluta. Morreu louco de certeza, n\u00e3o de d\u00favida.',
+        refs: 'Ver fragmentos #1, #4, #12, #24'
+    },
+    'soraviel': {
+        title: 'Soraviel, a Or\u00e1cula Cega',
+        text: 'Perdeu os olhos ao "olhar" para a Esfera em uma vis\u00e3o. Desde ent\u00e3o, afirma ouvi-la. Chorava l\u00e1grimas douradas durante suas profecias. Suas palavras finais mencionam Cal\u00edria, a deusa que ningu\u00e9m lembra.',
+        refs: 'Ver fragmentos #7, #10'
+    },
+    'esfera': {
+        title: 'A Esfera de Valdoria',
+        text: 'Cinco interpreta\u00e7\u00f5es coexistem: Semente da Cria\u00e7\u00e3o, Pris\u00e3o, Ferida na realidade, Espelho, ou Ilus\u00e3o Coletiva. Nenhuma \u00e9 confirmada. Todas podem ser verdadeiras. O brilho dourado que n\u00e3o \u00e9 luz.',
+        refs: 'Mencionada em todos os 30 fragmentos'
+    },
+    'aurivath': {
+        title: 'Aurivath \u2014 A Primeira Luz',
+        text: 'Entidade primordial. Alguns dizem que \u00c9 a Esfera. Outros que foi destru\u00eddo para cri\u00e1-la. Outros que escolheu se transformar nela. A verdade \u00e9 amb\u00edgua por design \u2014 e sempre ser\u00e1.',
+        refs: 'Ver fragmentos #3, #7, #28'
+    },
+    'nevaris': {
+        title: 'Nevaris \u2014 A Aus\u00eancia',
+        text: 'Entidade-vazio no espa\u00e7o entre planos. Contraparte de Aurivath. N\u00e3o usa "eu" \u2014 usa "n\u00f3s". N\u00e3o distingue passado/presente/futuro. A escurid\u00e3o que a Esfera ilumina, ou o que a Esfera cont\u00e9m.',
+        refs: 'Ver fragmento #28'
+    },
+    'caliria': {
+        title: 'Cal\u00edria \u2014 A Deusa Esquecida',
+        text: 'Deusa do conhecimento que tentou estudar a Esfera. Perdeu algo de si \u2014 seu nome? Rosto? Sanidade? Seus seguidores rezam para uma presen\u00e7a que n\u00e3o conseguem descrever.',
+        refs: 'Ver fragmentos #10, #18'
+    },
+    'valdoria': {
+        title: 'Valdoria',
+        text: 'Cidade fundada por Talric Cin\u00e9ras sobre o local onde a Esfera supostamente caiu. O nome significa "vale dourado" na l\u00edngua antiga \u2014 embora nenhum ouro tenha sido encontrado. A vers\u00e3o oficial da funda\u00e7\u00e3o contradiz os di\u00e1rios pessoais de Talric.',
+        refs: 'Ver fragmentos #1, #24'
+    },
+    'serralume': {
+        title: 'Serralume',
+        text: 'Cidade acad\u00eamica ao norte. Abriga uma vasta biblioteca dedicada \u00e0 Esfera, mantida por um arquivista an\u00f4nimo que n\u00e3o se lembra do pr\u00f3prio nome. Ningu\u00e9m sabe h\u00e1 quanto tempo ele est\u00e1 l\u00e1.',
+        refs: 'Ver fragmentos #5, #6, #18, #21'
+    },
+    'solvenar': {
+        title: 'Solvenar \u2014 O Guardi\u00e3o dos Limiares',
+        text: 'Primeiro deus a se aproximar da Esfera. Foi transformado pelo toque \u2014 n\u00e3o lembra do que era antes. Agora guarda a fronteira entre os planos conhecidos e "o espa\u00e7o exterior".',
+        refs: 'Ver fragmento #16'
+    },
+    'issara': {
+        title: 'Issara \u2014 A M\u00e3e das Cinzas',
+        text: 'Deusa dos fins e renascimentos. Tentou destruir a Esfera com fogo divino por sete dias. O fogo contornou a Esfera sem toc\u00e1-la. Queimou seus pr\u00f3prios templos em desespero. Um sobreviveu.',
+        refs: 'Ver fragmento #17'
+    },
+    'veu': {
+        title: 'O V\u00e9u de Virenor',
+        text: 'Barreira que separa os planos conhecidos do que h\u00e1 al\u00e9m. Tecido por Virenor, O Tecel\u00e3o. A Esfera enfraquece o V\u00e9u. Sente-se como press\u00e3o antes de tempestade. Sabor de ferro na saliva.',
+        refs: 'Ver fragmentos #16, #23'
+    },
+    'duravar': {
+        title: 'Duravar Ferrovoz',
+        text: 'Artificeiro an\u00e3o que construiu um dispositivo para "ouvir" a Esfera. Funcionou. Desde ent\u00e3o, perdeu a capacidade de falar. O dispositivo desapareceu dos dep\u00f3sitos lacrados.',
+        refs: 'Ver fragmentos #22, #27'
+    },
+    'corte_palida': {
+        title: 'A Corte P\u00e1lida',
+        text: 'Civiliza\u00e7\u00e3o costeira que decretou a proibi\u00e7\u00e3o de mencionar a Esfera por nome. Caiu menos de uma gera\u00e7\u00e3o depois \u2014 o mar a reclamou, exatamente como Lysara profetizou.',
+        refs: 'Ver fragmentos #8, #11, #25'
+    },
+    'setima': {
+        title: 'A S\u00e9tima Testemunha',
+        text: 'Seis viram a Esfera surgir. A s\u00e9tima viu o que havia POR TR\u00c1S. Foi apagada da realidade \u2014 nome, exist\u00eancia, mem\u00f3ria removidos. Mas rastros permanecem nas contradi\u00e7\u00f5es entre fragmentos.',
+        refs: 'Ver fragmentos #15, #29'
     }
 };
 
