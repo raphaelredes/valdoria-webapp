@@ -7,7 +7,7 @@
 @keyframes tjGlow { 0%,100%{opacity:.4;transform:translate(-50%,-50%) scale(1)}50%{opacity:.7;transform:translate(-50%,-50%) scale(1.05)} }
 @keyframes tjHeaderIn { from{opacity:0;letter-spacing:6px}to{opacity:1;letter-spacing:3px} }
 @keyframes tjSepGrow { from{width:0;opacity:0}to{width:100%;opacity:1} }
-@keyframes tjPulse { 0%,100%{box-shadow:0 0 20px rgba(196,149,58,.03)}50%{box-shadow:0 0 28px rgba(196,149,58,.08)} }
+@keyframes tjPulse { 0%,100%{box-shadow:0 0 20px var(--v-gold-03)}50%{box-shadow:0 0 28px var(--v-gold-08)} }
 @keyframes tjIconFloat { from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)} }
 
 
@@ -18,7 +18,7 @@
 #v-popup-overlay[data-journal]::after {
   content:''; position:absolute; top:8%; left:50%; transform:translate(-50%,-50%);
   width:360px; height:360px; border-radius:50%; pointer-events:none; z-index:0;
-  background:radial-gradient(circle, rgba(196,149,58,.06) 0%, rgba(196,149,58,.02) 40%, transparent 70%);
+  background:radial-gradient(circle, var(--v-gold-06) 0%, var(--v-gold-02) 40%, transparent 70%);
   animation:tjGlow 6s ease-in-out infinite;
 }
 
@@ -28,8 +28,8 @@
   position:relative; z-index:1;
   min-height:88vh; max-height:94vh;
   background:linear-gradient(180deg, rgba(50,40,30,.5) 0%, rgba(36,28,20,.4) 100%) !important;
-  border:1px solid rgba(196,149,58,.08) !important;
-  box-shadow:0 0 50px rgba(196,149,58,.02), 0 10px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.02) !important;
+  border:1px solid var(--v-gold-08) !important;
+  box-shadow:0 0 50px var(--v-gold-02), 0 10px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.02) !important;
   animation:tjPulse 5s ease-in-out infinite;
 }
 
@@ -40,7 +40,7 @@
   font-size:clamp(var(--v-font-2xl,18px),5vw,22px); font-weight:900;
   letter-spacing:3px; text-transform:uppercase; text-align:center;
   color:var(--v-gold-light,#dbb668);
-  text-shadow:0 0 20px rgba(196,149,58,.3), 0 0 40px rgba(196,149,58,.1), 0 2px 4px rgba(0,0,0,.6);
+  text-shadow:0 0 20px var(--v-gold-30), 0 0 40px var(--v-gold-10), 0 2px 4px rgba(0,0,0,.6);
   animation:tjHeaderIn .6s ease both;
   padding:var(--v-space-xl,20px) var(--v-space-xl,20px) var(--v-space-xs,2px);
   border-bottom:none !important; background:none !important;
@@ -52,7 +52,7 @@
   content:'\25c6  \2500\2500\2500  \25c6  \2500\2500\2500  \25c6';
   display:block;
   font-size:var(--v-font-micro,8px); letter-spacing:3px;
-  color:rgba(196,149,58,.2);
+  color:var(--v-gold-20);
   margin-bottom:var(--v-space-sm,4px);
   font-family:serif;
 }
@@ -61,7 +61,7 @@
 #v-popup-overlay[data-journal] .v-popup-header::after {
   content:''; display:block; height:1px; max-width:180px;
   margin:var(--v-space-sm,4px) auto 0;
-  background:linear-gradient(90deg, transparent, rgba(196,149,58,.35) 20%, rgba(196,149,58,.6) 50%, rgba(196,149,58,.35) 80%, transparent);
+  background:linear-gradient(90deg, transparent, var(--v-gold-35) 20%, var(--v-gold-60) 50%, var(--v-gold-35) 80%, transparent);
   animation:tjSepGrow .5s ease .3s both;
 }
 
@@ -82,7 +82,7 @@
 /* Botão principal: BG3 Pedra Esculpida */
 #v-popup-overlay[data-journal] .v-popup-btn--primary { /* noqa: preflight — BG3 stone gradient */
   background:linear-gradient(180deg, #3a3028 0%, #2a2420 60%, #1e1a16 100%) !important;
-  border:1px solid rgba(196,149,58,.3) !important;
+  border:1px solid var(--v-gold-30) !important;
   border-radius:var(--v-radius-xs, 4px) !important;
   color:var(--v-text,#d4c8b0) !important;
   font-family:var(--v-font-display,'Cinzel',serif);
@@ -115,7 +115,7 @@
 .tj-ornament {
   text-align:center; height:1px; margin:var(--v-space-sm,4px) auto;
   width:55%; max-width:180px;
-  background:linear-gradient(90deg, transparent, rgba(196,149,58,.12) 30%, rgba(196,149,58,.2) 50%, rgba(196,149,58,.12) 70%, transparent);
+  background:linear-gradient(90deg, transparent, var(--v-gold-12) 30%, var(--v-gold-20) 50%, var(--v-gold-12) 70%, transparent);
 }
 
 
@@ -134,7 +134,7 @@
 .tj-event::before {
   content:''; position:absolute;
   left:15px; top:36px; bottom:-4px; width:1px;
-  background:linear-gradient(180deg, rgba(196,149,58,.1), rgba(196,149,58,.02));
+  background:linear-gradient(180deg, var(--v-gold-10), var(--v-gold-02));
 }
 .tj-event:last-child::before { display:none; }
 
@@ -161,10 +161,10 @@
 .tj-dot--cartograph_none { border-color:rgba(106,94,78,.3); background:rgba(80,70,58,.06); }
 .tj-dot--arrival, .tj-dot--arrival_new {
   border-color:rgba(196,149,58,.45); background:linear-gradient(135deg,rgba(196,149,58,.14),rgba(160,120,40,.06));
-  box-shadow:0 0 12px rgba(196,149,58,.1),0 2px 8px rgba(0,0,0,.4);
+  box-shadow:0 0 12px var(--v-gold-10),0 2px 8px rgba(0,0,0,.4);
 }
 .tj-dot--discovery {
-  border-color:rgba(219,182,104,.45); background:linear-gradient(135deg,rgba(219,182,104,.16),rgba(196,149,58,.08));
+  border-color:rgba(219,182,104,.45); background:linear-gradient(135deg,rgba(219,182,104,.16),var(--v-gold-08));
   box-shadow:0 0 12px rgba(219,182,104,.1),0 2px 8px rgba(0,0,0,.4);
 }
 .tj-dot--forced_march_ok, .tj-dot--weather_save_ok { border-color:rgba(74,138,74,.4); background:linear-gradient(135deg,rgba(60,140,60,.12),rgba(40,100,40,.06)); }
@@ -179,8 +179,8 @@
 .tj-card {
   flex:1; min-width:0;
   background:rgba(255,255,255,.015);
-  border:1px solid rgba(196,149,58,.06);
-  border-left:3px solid rgba(196,149,58,.12);
+  border:1px solid var(--v-gold-06);
+  border-left:3px solid var(--v-gold-12);
   border-radius:var(--v-radius-sm,6px);
   padding:var(--v-space-md,8px);
   box-shadow:0 2px 6px rgba(0,0,0,.15);
@@ -193,7 +193,7 @@
 }
 .tj-card--lost { border-left-color:rgba(180,90,40,.5); background:rgba(180,90,40,.03); }
 .tj-card--arrival_new, .tj-card--discovery {
-  border-left-color:rgba(196,149,58,.5); background:rgba(196,149,58,.04);
+  border-left-color:var(--v-gold-50); background:var(--v-gold-04);
 }
 .tj-card--forage_ok, .tj-card--cartograph_ok {
   border-left-color:rgba(74,138,74,.4); background:rgba(60,140,60,.02);
@@ -215,7 +215,7 @@
   color:var(--v-text-dim,#a09484);
   line-height:1.4; margin-top:var(--v-space-xs,2px);
   padding-top:var(--v-space-xs,2px);
-  border-top:1px solid rgba(196,149,58,.06);
+  border-top:1px solid var(--v-gold-06);
   display:none;
 }
 .tj-card.tj-expanded .tj-detail { display:block; }
@@ -242,7 +242,7 @@
 #tj-detail-overlay::after {
   content:''; position:absolute; top:25%; left:50%; transform:translate(-50%,-50%);
   width:280px; height:280px; border-radius:50%; pointer-events:none; z-index:0;
-  background:radial-gradient(circle, rgba(196,149,58,.05) 0%, transparent 65%);
+  background:radial-gradient(circle, var(--v-gold-5) 0%, transparent 65%);
   animation:tjGlow 5s ease-in-out infinite;
 }
 
@@ -278,7 +278,7 @@
 }
 #tj-detail-overlay .v-popup-btn--cancel { /* noqa: preflight — BG3 stone gradient */
   background:linear-gradient(180deg, #3a3028 0%, #2a2420 60%, #1e1a16 100%) !important;
-  border:1px solid rgba(196,149,58,.25) !important;
+  border:1px solid var(--v-gold-25) !important;
   border-radius:var(--v-radius-xs, 4px) !important;
   color:var(--v-text-dim,#a09484) !important;
   font-family:var(--v-font-display,'Cinzel',serif);
@@ -298,13 +298,13 @@
 .tj-detail-popup::before {
   content:'\25c6  \2500\2500\2500  \25c6  \2500\2500\2500  \25c6';
   font-size:var(--v-font-micro,8px); letter-spacing:3px;
-  color:rgba(196,149,58,.2);
+  color:var(--v-gold-20);
   font-family:serif;
 }
 
 .tj-detail-icon {
   font-size:clamp(var(--v-font-icon-lg,42px),12vw,56px);
-  text-shadow:0 0 24px rgba(196,149,58,.3), 0 4px 8px rgba(0,0,0,.4);
+  text-shadow:0 0 24px var(--v-gold-30), 0 4px 8px rgba(0,0,0,.4);
   line-height:1;
   animation:tjIconFloat .4s cubic-bezier(.34,1.56,.64,1) both;
 }
@@ -314,13 +314,13 @@
   font-size:clamp(var(--v-font-xl,16px),4.5vw,20px); font-weight:900;
   color:var(--v-gold-light,#dbb668);
   letter-spacing:1.5px; text-transform:uppercase;
-  text-shadow:0 0 16px rgba(196,149,58,.25), 0 2px 4px rgba(0,0,0,.5);
+  text-shadow:0 0 16px var(--v-gold-25), 0 2px 4px rgba(0,0,0,.5);
   line-height:1.3;
 }
 
 .tj-detail-sep {
   width:60%; max-width:140px; height:1px;
-  background:linear-gradient(90deg, transparent, rgba(196,149,58,.4) 30%, rgba(196,149,58,.55) 50%, rgba(196,149,58,.4) 70%, transparent);
+  background:linear-gradient(90deg, transparent, var(--v-gold-40) 30%, var(--v-gold-55) 50%, var(--v-gold-40) 70%, transparent);
 }
 
 .tj-detail-text {
@@ -334,7 +334,7 @@
 .tj-detail-popup::after {
   content:'\25c6  \2500\2500\2500  \25c6  \2500\2500\2500  \25c6';
   font-size:var(--v-font-micro,8px); letter-spacing:3px;
-  color:rgba(196,149,58,.15);
+  color:var(--v-gold-15);
   font-family:serif;
 }
 
@@ -365,7 +365,7 @@
   margin-top:var(--v-space-sm,4px);
   background:linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.06));
   border-radius:var(--v-radius-sm,6px);
-  border:1px solid rgba(196,149,58,.06);
+  border:1px solid var(--v-gold-06);
   opacity:0;
 }
 .tj-summary.tj-revealed { opacity:1; transition:opacity var(--v-transition-base,.3s); }
@@ -375,7 +375,7 @@
   font-family:var(--v-font-display,'Cinzel',serif);
   font-size:var(--v-font-lg,16px); font-weight:700;
   color:var(--v-gold,#c4953a);
-  text-shadow:0 0 8px rgba(196,149,58,.12);
+  text-shadow:0 0 8px var(--v-gold-12);
   line-height:1.2;
 }
 .tj-stat-val--xp { color:#dbb668; }
@@ -385,7 +385,7 @@
   font-size:var(--v-font-micro,9px); color:rgba(160,148,132,.6);
   text-transform:uppercase; letter-spacing:1px; line-height:1.2;
 }
-.tj-stat-sep { width:1px; align-self:stretch; background:rgba(196,149,58,.08); margin:4px 0; }
+.tj-stat-sep { width:1px; align-self:stretch; background:var(--v-gold-08); margin:4px 0; }
 
 
 /* ═══════ PAGER: BG3 Moldura Dourada ═══════ */
@@ -397,7 +397,7 @@
 .tj-pager-btn {
   width:44px; height:44px; min-height:44px;
   border-radius:50%;
-  border:2px solid rgba(196,149,58,.4);
+  border:2px solid var(--v-gold-40);
   background:linear-gradient(180deg, #3a3028, #2a2420); /* noqa: preflight — BG3 stone gradient */
   color:var(--v-gold,#c4953a); font-size:var(--v-font-2xl,18px);
   display:flex; align-items:center; justify-content:center;
@@ -415,13 +415,13 @@
 .tj-pager-dots { display:flex; gap:var(--v-space-md,8px); align-items:center; }
 .tj-pager-dot {
   width:6px; height:6px; border-radius:50%;
-  background:rgba(196,149,58,.2);
+  background:var(--v-gold-20);
   transition:all var(--v-transition,.2s);
 }
 .tj-pager-dot.active {
   width:8px; height:8px;
   background:var(--v-gold,#c4953a);
-  box-shadow:0 0 8px rgba(196,149,58,.4);
+  box-shadow:0 0 8px var(--v-gold-40);
 }
 
 
