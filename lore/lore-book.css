@@ -148,7 +148,7 @@ body {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px);
+    padding: var(--v-space-xl, 16px) var(--v-space-xl, 16px);
     background:
         linear-gradient(180deg,
             rgba(62, 52, 38, 0.95) 0%,
@@ -158,29 +158,32 @@ body {
             rgba(62, 52, 38, 0.95) 100%);
     position: relative;
 }
-/* Parchment edge darkening */
+/* Parchment edge darkening + vignette */
 .page-parchment::before {
     content: '';
     position: absolute;
     inset: 0;
     pointer-events: none;
     background:
-        linear-gradient(90deg, rgba(20,16,10,0.4) 0%, transparent 8%, transparent 92%, rgba(20,16,10,0.4) 100%),
-        linear-gradient(180deg, rgba(20,16,10,0.3) 0%, transparent 5%, transparent 95%, rgba(20,16,10,0.3) 100%);
+        radial-gradient(ellipse at center, transparent 50%, rgba(15,12,8,0.35) 100%),
+        linear-gradient(90deg, rgba(20,16,10,0.35) 0%, transparent 7%, transparent 93%, rgba(20,16,10,0.35) 100%),
+        linear-gradient(180deg, rgba(20,16,10,0.25) 0%, transparent 4%, transparent 96%, rgba(20,16,10,0.25) 100%);
     z-index: 1;
 }
-/* Subtle stain texture via pseudo */
+/* Base stain texture — organic aging spots */
 .page-parchment::after {
     content: '';
     position: absolute;
-    top: 15%;
-    right: 10%;
-    width: 80px;
-    height: 60px;
-    background: radial-gradient(ellipse, rgba(90,60,20,0.12) 0%, transparent 70%);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     pointer-events: none;
     z-index: 1;
-    border-radius: 50%;
+    background:
+        radial-gradient(ellipse at 15% 20%, rgba(90,60,20,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(80,55,18,0.06) 0%, transparent 45%);
+    border-radius: 0;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -276,11 +279,13 @@ body {
 
 .fragment-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: var(--v-font-lg, 15px);
+    font-size: 16px;
     color: var(--v-gold, #c4953a);
     margin: 0 0 var(--v-space-md, 8px) 0;
-    line-height: 1.4;
-    text-shadow: 0 0 12px rgba(196, 149, 58, 0.15);
+    line-height: 1.35;
+    text-shadow: 0 0 12px rgba(196, 149, 58, 0.2);
+    padding-bottom: var(--v-space-sm, 4px);
+    border-bottom: 1px solid rgba(196, 149, 58, 0.12);
 }
 
 .fragment-meta {
@@ -288,87 +293,172 @@ body {
 }
 .fragment-author {
     font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: var(--v-font-md, 12px);
+    font-size: 13px;
     color: var(--v-text-dim, #a09484);
 }
 
 /* Content typography — varies by fragment type (set via data-font) */
 .fragment-content {
     font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: var(--v-font-body, 14px);
-    color: var(--v-text, #d4c8b0);
-    line-height: 1.7;
+    font-size: 15px;
+    color: var(--v-text-bright, #e8dcc8);
+    line-height: 1.8;
     position: relative;
     z-index: 2;
+    letter-spacing: 0.2px;
 }
 .fragment-content p {
-    margin: 0 0 var(--v-space-lg, 12px) 0;
+    margin: 0 0 14px 0;
 }
 .fragment-content p:last-child {
     margin-bottom: 0;
 }
+.fragment-content em {
+    color: var(--v-gold, #c4953a);
+    font-style: normal;
+    font-weight: 700;
+}
 
-/* Font overrides by type */
-.fragment-content[data-font="Almendra"] { font-family: 'Almendra', var(--v-font, serif); }
-.fragment-content[data-font="IM Fell English"] { font-family: 'IM Fell English', var(--v-font, serif); }
-.fragment-content[data-font="Pirata One"] { font-family: 'Pirata One', var(--v-font, serif); }
-.fragment-content[data-font="Cinzel"] { font-family: 'Cinzel', var(--v-font, serif); font-size: var(--v-font-base, 13px); }
-.fragment-content[data-font="MedievalSharp"] { font-family: 'MedievalSharp', var(--v-font, serif); }
+/* Font overrides by type — all normalized to 15px+ for readability */
+.fragment-content[data-font="Almendra"] {
+    font-family: 'Almendra', var(--v-font, serif);
+    font-size: 15px; /* Almendra renders slightly small, keep at 15 */
+}
+.fragment-content[data-font="IM Fell English"] {
+    font-family: 'IM Fell English', var(--v-font, serif);
+    font-size: 16px; /* IM Fell renders small, bump up */
+    line-height: 1.75;
+}
+.fragment-content[data-font="Pirata One"] {
+    font-family: 'Pirata One', var(--v-font, serif);
+    font-size: 16px; /* Pirata One renders narrow, needs bigger */
+    line-height: 1.7;
+    letter-spacing: 0.3px;
+}
+.fragment-content[data-font="Cinzel"] {
+    font-family: 'Cinzel', var(--v-font, serif);
+    font-size: 14px; /* Cinzel is wider, can be slightly smaller */
+    line-height: 1.75;
+    letter-spacing: 0.3px;
+}
+.fragment-content[data-font="MedievalSharp"] {
+    font-family: 'MedievalSharp', var(--v-font, serif);
+    font-size: 15px;
+}
 
 /* Margin notes */
 .fragment-notes {
     margin-top: var(--v-space-lg, 12px);
-    padding-top: var(--v-space-md, 8px);
+    padding: var(--v-space-md, 8px) var(--v-space-sm, 4px);
     border-top: 1px solid rgba(196, 149, 58, 0.15);
+    border-left: 2px solid rgba(196, 149, 58, 0.2);
     font-family: 'Almendra', var(--v-font, serif);
-    font-size: var(--v-font-sm, 11px);
+    font-size: 13px;
     color: var(--v-text-dim, #a09484);
-    opacity: 0.7;
-    line-height: 1.5;
+    opacity: 0.75;
+    line-height: 1.6;
+    padding-left: var(--v-space-md, 8px);
 }
 .fragment-notes:empty {
     display: none;
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE CONDITIONS (whole-page effects)
+   PAGE CONDITIONS (immersive visual effects)
    ═══════════════════════════════════════════════════════ */
 
-/* Aged — yellowish, darkened edges */
+/* Aged — yellowed parchment with foxing spots and darkened edges */
 .condition-aged .page-parchment {
     background:
+        radial-gradient(ellipse at 20% 30%, rgba(90,70,30,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(80,60,25,0.06) 0%, transparent 40%),
+        radial-gradient(ellipse at 40% 80%, rgba(85,65,28,0.07) 0%, transparent 45%),
         linear-gradient(180deg,
             rgba(68, 56, 36, 0.95) 0%,
             rgba(60, 50, 32, 0.90) 50%,
             rgba(68, 56, 36, 0.95) 100%);
 }
 
-/* Burned — dark corners */
+/* Burned — realistic charred corners with ember glow at edges */
 .condition-burned .page-parchment::before {
     background:
-        radial-gradient(ellipse at top left, rgba(10,5,0,0.7) 0%, transparent 35%),
-        radial-gradient(ellipse at bottom right, rgba(10,5,0,0.6) 0%, transparent 30%),
-        linear-gradient(90deg, rgba(20,16,10,0.3) 0%, transparent 8%, transparent 92%, rgba(20,16,10,0.3) 100%);
+        radial-gradient(ellipse at -5% -5%, rgba(5,2,0,0.95) 0%, rgba(15,5,0,0.7) 15%, rgba(40,15,0,0.3) 25%, transparent 40%),
+        radial-gradient(ellipse at 105% 105%, rgba(5,2,0,0.9) 0%, rgba(15,5,0,0.6) 12%, rgba(40,15,0,0.25) 22%, transparent 35%),
+        radial-gradient(ellipse at 100% -5%, rgba(5,2,0,0.5) 0%, rgba(30,10,0,0.2) 10%, transparent 25%),
+        linear-gradient(90deg, rgba(20,10,0,0.25) 0%, transparent 6%, transparent 94%, rgba(20,10,0,0.25) 100%);
+}
+/* Ember glow line at burn edges */
+.condition-burned .page-parchment::after {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background:
+        radial-gradient(ellipse at -3% -3%, rgba(180,80,0,0.12) 0%, transparent 20%),
+        radial-gradient(ellipse at 103% 103%, rgba(180,80,0,0.10) 0%, transparent 18%),
+        radial-gradient(ellipse at 100% 0%, rgba(160,70,0,0.06) 0%, transparent 15%);
 }
 
-/* Torn — irregular bottom edge */
+/* Torn — jagged bottom edge with fiber-like tear effect */
 .condition-torn .page-parchment {
-    mask-image: linear-gradient(to bottom, black 85%, transparent 98%);
-    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 98%);
+    mask-image:
+        linear-gradient(to bottom, black 75%,
+            rgba(0,0,0,0.9) 80%,
+            rgba(0,0,0,0.6) 85%,
+            rgba(0,0,0,0.3) 88%,
+            rgba(0,0,0,0.1) 91%,
+            transparent 94%);
+    -webkit-mask-image:
+        linear-gradient(to bottom, black 75%,
+            rgba(0,0,0,0.9) 80%,
+            rgba(0,0,0,0.6) 85%,
+            rgba(0,0,0,0.3) 88%,
+            rgba(0,0,0,0.1) 91%,
+            transparent 94%);
 }
-
-/* Stained — ink/blood stains */
-.condition-stained .page-parchment::after {
-    top: 30%;
+/* Torn edge fiber texture */
+.condition-torn .page-parchment::after {
+    top: auto;
+    bottom: 8%;
     left: 5%;
-    width: 120px;
-    height: 80px;
-    background: radial-gradient(ellipse, rgba(100,40,20,0.18) 0%, transparent 65%);
+    right: 5%;
+    width: auto;
+    height: 40px;
+    border-radius: 0;
+    background:
+        repeating-linear-gradient(90deg,
+            transparent 0px,
+            rgba(90,70,40,0.15) 2px,
+            transparent 4px,
+            rgba(80,60,35,0.1) 6px,
+            transparent 8px);
+    opacity: 0.5;
 }
 
-/* Pristine — eerily clean */
+/* Stained — multiple organic stain layers (ink, liquid, age spots) */
+.condition-stained .page-parchment::after {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background:
+        radial-gradient(ellipse at 15% 25%, rgba(100,40,20,0.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 55%, rgba(80,50,15,0.10) 0%, transparent 40%),
+        radial-gradient(ellipse at 30% 75%, rgba(60,30,10,0.08) 0%, transparent 35%),
+        radial-gradient(ellipse at 85% 20%, rgba(90,45,18,0.06) 0%, transparent 30%),
+        radial-gradient(circle at 50% 45%, rgba(70,40,15,0.04) 0%, transparent 60%);
+}
+
+/* Pristine — eerily clean, faint golden inner glow (unsettling) */
 .condition-pristine .page-parchment {
     background:
+        radial-gradient(ellipse at center, rgba(196,149,58,0.03) 0%, transparent 70%),
         linear-gradient(180deg,
             rgba(72, 62, 46, 0.97) 0%,
             rgba(66, 56, 40, 0.95) 50%,
@@ -377,15 +467,27 @@ body {
 .condition-pristine .page-parchment::before { display: none; }
 .condition-pristine .page-parchment::after { display: none; }
 
-/* Glitched — unstable */
+/* Glitched — unstable reality, text shadow shifts, chromatic aberration */
 .condition-glitched .page-parchment {
-    animation: glitchBg 8s ease-in-out infinite;
+    animation: glitchBg 6s ease-in-out infinite;
+}
+.condition-glitched .fragment-content {
+    animation: glitchText 8s ease-in-out infinite;
 }
 @keyframes glitchBg {
-    0%, 90%, 100% { filter: none; }
-    92% { filter: hue-rotate(5deg) brightness(1.05); }
-    94% { filter: hue-rotate(-3deg) brightness(0.95); }
+    0%, 88%, 100% { filter: none; }
+    90% { filter: hue-rotate(8deg) brightness(1.08); }
+    92% { filter: hue-rotate(-5deg) brightness(0.92) saturate(1.3); }
+    94% { filter: hue-rotate(3deg) brightness(1.05); }
     96% { filter: none; }
+}
+@keyframes glitchText {
+    0%, 85%, 100% { text-shadow: none; }
+    87% { text-shadow: -1px 0 rgba(196,149,58,0.3), 1px 0 rgba(100,40,20,0.3); }
+    89% { text-shadow: 1px 0 rgba(196,149,58,0.2), -1px 0 rgba(100,40,20,0.2); }
+    91% { text-shadow: none; }
+    93% { text-shadow: 0 1px rgba(196,149,58,0.15); }
+    95% { text-shadow: none; }
 }
 
 /* ═══════════════════════════════════════════════════════
