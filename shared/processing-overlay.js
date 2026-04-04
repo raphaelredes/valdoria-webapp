@@ -128,6 +128,42 @@ function _clearTimers() {
     }
 }
 
+function _captureDOMState(selector, timeoutMs) {
+    try {
+        var el = typeof selector === 'string' ? document.querySelector(selector) : null;
+        var state = {
+            selector: selector,
+            exists: !!el,
+            display: el ? getComputedStyle(el).display : 'N/A',
+            height: el ? el.offsetHeight : 0,
+            visible: el ? (el.offsetHeight > 0 && getComputedStyle(el).visibility !== 'hidden') : false,
+        };
+        // Capture top-level visible elements for context
+        var bodyChildren = [];
+        var kids = document.body.children;
+        for (var i = 0; i < Math.min(kids.length, 15); i++) {
+            var kid = kids[i];
+            if (kid.id === 'v-processing') continue;
+            var tag = kid.tagName.toLowerCase();
+            var id = kid.id ? '#' + kid.id : '';
+            var cls = kid.className ? '.' + String(kid.className).split(' ')[0] : '';
+            var h = kid.offsetHeight;
+            bodyChildren.push(tag + id + cls + '(' + h + 'px)');
+        }
+        state.bodyChildren = bodyChildren.join(', ');
+        // Check for JS errors that might have prevented content rendering
+        var errBuf = window.__valdoria_getConsoleBuffer ? window.__valdoria_getConsoleBuffer() : [];
+        var recentErrors = errBuf.filter(function(e) { return e.level === 'E'; }).slice(-3);
+        if (recentErrors.length) {
+            state.recentErrors = recentErrors.map(function(e) { return e.msg; }).join(' | ');
+        }
+        console.error('[PROCESSING] TIMEOUT DIAGNOSTICS after ' + timeoutMs + 'ms: '
+            + JSON.stringify(state));
+    } catch (e) {
+        console.error('[PROCESSING] failed to capture DOM state: ' + e.message);
+    }
+}
+
 function show(opts) {
     opts = opts || {};
     _ensureDOM();
@@ -199,6 +235,10 @@ function show(opts) {
 
     // Timeout at configured time — auto-hide if no callback
     _timers.timeout = setTimeout(function() {
+        // Capture DOM state for diagnostics when content never appeared
+        if (_contentCheckDesc) {
+            _captureDOMState(_contentCheckDesc, timeoutMs);
+        }
         if (opts.onTimeout) {
             _log('warn', 'timeout reached (' + timeoutMs + 'ms) — calling onTimeout callback');
             opts.onTimeout();
