@@ -84,10 +84,14 @@
     var _titleShown = false;
     var _reactiveStarted = false;
 
-    /** Show title screen on cold start (first load only) */
+    /**
+     * Show title screen ON TOP of loading (z-index 10000 > loading 9999).
+     * Loading runs normally underneath. Title screen is just an audio-unlock overlay.
+     * Called once on cold start — after that, _titleShown prevents re-showing.
+     */
     function _showTitleScreen() {
-        if (_titleShown) return false;
-        if (typeof ValdoriaTitleScreen !== 'function') return false;
+        if (_titleShown) return;
+        if (typeof ValdoriaTitleScreen !== 'function') return;
         _titleShown = true;
 
         _titleScreen = ValdoriaTitleScreen({
@@ -100,20 +104,14 @@
                     /* Create analyser synchronously within tap gesture for AudioContext.resume() */
                     ValdoriaAudio.getAnalyser();
                 }
-                /* Show the actual loading screen */
-                var ctrl = _ensureCtrl();
-                ctrl.show(false);
-                var el = document.getElementById('loading');
-                if (el) el.style.display = '';
 
-                /* Start audio-reactive effects (analyser already created synchronously above) */
+                /* Start audio-reactive effects (analyser created synchronously above) */
                 setTimeout(function() {
                     _startReactive();
                 }, 100);
             }
         });
         _titleScreen.show();
-        return true;
     }
 
     /** Start audio-reactive loading effects */
@@ -183,12 +181,9 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             if (window.vProcessing) vProcessing.show({ text: 'Carregando...' });
             return;
         }
-        /* ── Title screen on cold start (first load, not retry) ── */
+        /* ── Title screen on cold start (shows ON TOP of loading, not instead of) ── */
         if (!isRetry && !_titleShown) {
-            if (_showTitleScreen()) {
-                console.log('[GAME-LOADING] Title screen shown — loading deferred until tap');
-                return; /* Loading will be triggered by title screen onStart */
-            }
+            _showTitleScreen();
         }
         var ctrl = _ensureCtrl();
         if (!isRetry && ctrl.getState() === 'loading') {
