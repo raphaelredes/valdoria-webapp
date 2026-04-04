@@ -47,19 +47,46 @@
         restoreState();
     }
 
-    /* ─── INDEX ─── */
+    /* ─── INDEX (grouped by type with section headers) ─── */
     function buildIndex() {
         if (!$indexList || !_fragments.length) return;
-        /* Content is from trusted first-party fragments-data.js, not user input */
-        var html = '';
+
+        /* Group fragments by type, preserving original order within each group */
+        var typeOrder = ['diary', 'prophecy', 'confession', 'religious', 'letter', 'record', 'strange'];
+        var groups = {};
+        for (var t = 0; t < typeOrder.length; t++) groups[typeOrder[t]] = [];
+
         for (var i = 0; i < _fragments.length; i++) {
             var f = _fragments[i];
-            var typeInfo = _types[f.type] || { icon: '\u25C6', label: '???' };
-            html += '<div class="index-item" data-idx="' + (i + 1) + '">'
-                + '<span class="index-item-num">' + (i + 1) + '.</span>'
-                + '<span class="index-item-icon">' + typeInfo.icon + '</span>'
-                + '<span class="index-item-title">' + escHtml(f.title) + '</span>'
+            var type = f.type || 'strange';
+            if (!groups[type]) groups[type] = [];
+            groups[type].push({ frag: f, idx: i + 1 });
+        }
+
+        /* Build HTML — trusted first-party data from fragments-data.js */
+        var html = '';
+        for (var g = 0; g < typeOrder.length; g++) {
+            var key = typeOrder[g];
+            var items = groups[key];
+            if (!items || !items.length) continue;
+
+            var typeInfo = _types[key] || { icon: '\u25C6', label: '???' };
+            html += '<div class="index-section">'
+                + '<div class="index-section-header">'
+                + '<span class="index-section-icon">' + typeInfo.icon + '</span>'
+                + '<span class="index-section-label">' + escHtml(typeInfo.label) + '</span>'
+                + '<span class="index-section-count">' + items.length + '</span>'
                 + '</div>';
+
+            for (var j = 0; j < items.length; j++) {
+                var item = items[j];
+                html += '<div class="index-item" data-idx="' + item.idx + '">'
+                    + '<span class="index-item-num">' + item.idx + '</span>'
+                    + '<span class="index-item-title">' + escHtml(item.frag.title) + '</span>'
+                    + '<span class="index-item-era">' + escHtml(item.frag.era || '') + '</span>'
+                    + '</div>';
+            }
+            html += '</div>';
         }
         $indexList.innerHTML = html; /* safe: built from trusted static data */
     }
