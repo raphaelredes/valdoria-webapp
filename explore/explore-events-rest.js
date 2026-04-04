@@ -179,18 +179,25 @@ function _updateCampHUD() {
  * ---------------------------------------------------------- */
 
 function showCampOverlay() {
-  if (window._dbg) console.debug('[EXPLORE] showCampOverlay', {
-    biome: S.biome,
-    hdRemaining: ((S.charData && S.charData.mhd) || 1) - (S._hdUsed || 0),
-    longRests: S._longRestCount || 0,
-    exhaustion: S.exhaustion || 0
-  });
+  var cd = S.charData || {};
+  var _hdRem = ((cd.mhd) || 1) - (S._hdUsed || 0);
+  console.info('[CAMP] showCampOverlay biome=%s hp=%d/%d mp=%d/%d hdRemain=%d/%d exhaustion=%d guard=%s weather=%s',
+    S.biome || '?', (cd.hp || 0) + (S.hpChange || 0), cd.mh || 0,
+    (cd.mp || 0) + (S.mpChange || 0), cd.mm || 0,
+    _hdRem, cd.mhd || 0, S.exhaustion || 0,
+    S._guardPosted ? 'yes' : 'no', S.weather || '?');
 
   var screen = document.getElementById('camp-screen');
-  if (!screen) { console.error('[EXPLORE] camp-screen not found'); return; }
+  if (!screen) { console.error('[CAMP] FATAL camp-screen element not found in DOM'); return; }
 
   /* Init campfire particles */
-  if (window.CampFire) CampFire.init(document.getElementById('camp-fire-canvas'));
+  var _fireCanvas = document.getElementById('camp-fire-canvas');
+  if (window.CampFire && _fireCanvas) {
+    CampFire.init(_fireCanvas);
+    console.info('[CAMP] fire_init canvas=%dx%d', _fireCanvas.width, _fireCanvas.height);
+  } else {
+    console.warn('[CAMP] fire_init_skipped CampFire=%s canvas=%s', !!window.CampFire, !!_fireCanvas);
+  }
 
   /* Update HUD */
   _updateCampHUD();
@@ -270,9 +277,10 @@ function showCampOverlay() {
 }
 
 function closeCampOverlay() {
+  console.info('[CAMP] closeCampOverlay');
   var screen = document.getElementById('camp-screen');
   if (screen) screen.classList.remove('active');
-  if (window.CampFire) CampFire.destroy();
+  if (window.CampFire) { CampFire.destroy(); console.info('[CAMP] fire_destroyed'); }
   if (typeof setCampfireActive === 'function') setCampfireActive(false);
 }
 
@@ -281,20 +289,27 @@ function closeCampOverlay() {
  * ---------------------------------------------------------- */
 
 function openCampPopup(type) {
+  console.info('[CAMP] openCampPopup type=%s', type);
   var popup = document.getElementById('camp-popup-' + type);
   var body = document.getElementById('camp-popup-' + type + '-body');
-  if (!popup || !body) { console.error('[EXPLORE] camp popup %s not found', type); return; }
+  if (!popup) { console.error('[CAMP] FATAL popup element not found id=camp-popup-%s', type); return; }
+  if (!body) { console.error('[CAMP] FATAL popup body not found id=camp-popup-%s-body', type); return; }
 
+  var t0 = Date.now();
   if (type === 'short') _buildShortRestPopup(body);
   else if (type === 'long') _buildLongRestPopup(body);
   else if (type === 'guard') _buildGuardPopup(body);
+  else { console.error('[CAMP] unknown popup type=%s', type); return; }
+  console.info('[CAMP] popup_built type=%s ms=%d bodyChildren=%d', type, Date.now() - t0, body.children.length);
 
   popup.classList.add('active');
 }
 
 function closeCampPopup(type) {
+  console.info('[CAMP] closeCampPopup type=%s', type);
   var popup = document.getElementById('camp-popup-' + type);
   if (popup) popup.classList.remove('active');
+  else console.warn('[CAMP] closeCampPopup element not found type=%s', type);
 }
 
 /* ----------------------------------------------------------
@@ -309,6 +324,8 @@ function _buildShortRestPopup(body) {
   var conMod = cd.con || 0;
   var conSign = conMod >= 0 ? '+' : '';
   var foods = _getCampFoodItems();
+  console.info('[CAMP] buildShortPopup hdType=%s hdRemain=%d/%d conMod=%d foods=%d charData=%s',
+    hdType, hdRemaining, maxHD, conMod, foods.length, cd.hp !== undefined ? 'ok' : 'MISSING');
   var narr = _pickCampNarration('short');
 
   var hp = cd.hp + (S.hpChange || 0);
@@ -403,6 +420,8 @@ function _buildLongRestPopup(body) {
   var cd = S.charData || {};
   var narr = _pickCampNarration('long');
   var ambush = _getCampAmbushChance();
+  console.info('[CAMP] buildLongPopup ambushFinal=%d%% hasAlly=%s guardPosted=%s exhaustion=%d',
+    ambush.final, cd.ally ? 'yes' : 'no', S._guardPosted ? 'yes' : 'no', S.exhaustion || 0);
   var maxHD = cd.mhd || 1;
   var hdRecov = Math.max(1, Math.floor(maxHD / 2));
   var mm = cd.mm || 0;
@@ -479,6 +498,8 @@ function _buildGuardPopup(body) {
   var profInPerception = cd.sp && cd.sp.includes('per');
   var profBonus = profInPerception ? (cd.pb || 2) : 0;
   var totalMod = wisMod + profBonus;
+  console.info('[CAMP] buildGuardPopup wisMod=%d prof=%s profBonus=%d totalMod=%d dangerLevel=%s',
+    wisMod, profInPerception ? 'yes' : 'no', profBonus, totalMod, S.dangerLevel || '?');
   var sign = totalMod >= 0 ? '+' : '';
   var ambush = _getCampAmbushChance();
   var dangerDC = 10 + Math.floor((S.dangerLevel || 1) * 2);
@@ -540,6 +561,9 @@ function confirmShortRest() {
     }
   }
 
+  console.info('[CAMP] confirmShortRest food=%s foodHp=%d foodMp=%d radioFound=%s',
+    foodName || 'none', food ? food.hp : 0, food ? food.mp : 0, !!selectedRadio);
+
   closeCampPopup('short');
   doCampRest(food);
 }
@@ -553,19 +577,24 @@ function confirmLongRest() {
   var selectedGuard = document.querySelector('input[name="camp-guard"]:checked');
   var guardType = selectedGuard ? selectedGuard.value : 'none';
 
+  console.info('[CAMP] confirmLongRest guardType=%s guardAlreadyPosted=%s radioFound=%s',
+    guardType, S._guardPosted ? 'yes' : 'no', !!selectedGuard);
+
   closeCampPopup('long');
 
   if (guardType === 'player' && !S._guardPosted) {
     /* Guard check first, then long rest */
+    console.info('[CAMP] longRest_route=guard_first (player watch)');
     _startGuardWatch();
   } else if (guardType === 'companion') {
     /* Companion guards — auto-success */
     S._guardPosted = true;
     S._guardSuccess = true;
-    console.info('[EXPLORE] companion_guard_posted');
+    console.info('[CAMP] longRest_route=companion_guard (auto-success)');
     doLongRest();
   } else {
     /* No guard */
+    console.info('[CAMP] longRest_route=no_guard');
     doLongRest();
   }
 }
@@ -575,6 +604,7 @@ function confirmLongRest() {
  * ---------------------------------------------------------- */
 
 function confirmGuard() {
+  console.info('[CAMP] confirmGuard (standalone guard watch)');
   closeCampPopup('guard');
   _startGuardWatch();
 }
@@ -586,9 +616,14 @@ function confirmGuard() {
 function doCampRest(food) {
   var _maxHD = (S.charData && S.charData.mhd) || 1;
   if ((S._hdUsed || 0) >= _maxHD) {
+    console.warn('[CAMP] shortRest_blocked reason=no_hd hdUsed=%d maxHD=%d', S._hdUsed || 0, _maxHD);
     if (typeof showTerrainToast === 'function') showTerrainToast('Sem dados de vida restantes!', 'condition');
     return;
   }
+
+  var hpBefore = S.charData ? S.charData.hp + (S.hpChange || 0) : 0;
+  var mpBefore = S.charData ? (S.charData.mp || 0) + (S.mpChange || 0) : 0;
+
   var hdType = (S.charData && S.charData.hdt) || '1d8';
   var hitDie = rollDiceFormula(hdType);
   var conMod = getAbilityMod('cn');
@@ -602,6 +637,7 @@ function doCampRest(food) {
     if (food.hp && food.hp !== '0') {
       foodBonus = typeof food.hp === 'number' ? food.hp : rollDiceFormula(String(food.hp));
     }
+    console.info('[CAMP] food_consumed name=%s hp=%d mp=%d qty=%d', food.n, food.hp || 0, food.mp || 0, food.q || 1);
     if (typeof useInventoryItem === 'function') useInventoryItem(food);
   }
 
@@ -620,7 +656,7 @@ function doCampRest(food) {
 
   var mpRecovered = 0;
   if (S.charData && S.charData.mm > 0) {
-    if (!S.charData.mpr && S.charData.mm > 0) console.warn('[EXPLORE] mpr_undefined — MP recovery disabled');
+    if (!S.charData.mpr && S.charData.mm > 0) console.warn('[CAMP] mpr_undefined class=%s — MP recovery disabled', S.charData.cn || '?');
     var mpr = S.charData.mpr || 'none';
     var maxMP = S.charData.mm;
     if (mpr === 'full') mpRecovered = maxMP;
@@ -632,11 +668,13 @@ function doCampRest(food) {
     }
   }
 
-  if (window._dbg) console.debug('[EXPLORE] shortRest', {
-    hitDie: hitDie, conMod: conMod, food: foodName,
-    foodBonus: foodBonus, totalHeal: totalHeal,
-    hdUsed: S._hdUsed, mp: mpRecovered
-  });
+  var hpAfter = S.charData ? S.charData.hp + S.hpChange : 0;
+  var mpAfter = S.charData ? (S.charData.mp || 0) + (S.mpChange || 0) : 0;
+
+  console.info('[CAMP] shortRest_complete hdType=%s dieRoll=%d con=%d foodBonus=%d totalHeal=%d food=%s hp=%d→%d mp=%d→%d hdUsed=%d/%d mpRecov=%d mpr=%s',
+    hdType, hitDie, conMod, foodBonus, totalHeal, foodName,
+    hpBefore, hpAfter, mpBefore, mpAfter,
+    S._hdUsed, _maxHD, mpRecovered, mpr || 'none');
 
   _showCampDiceRoll(hitDie, conMod, foodBonus, totalHeal, foodName, hdType, mpRecovered);
 }
@@ -662,10 +700,8 @@ function _startGuardWatch() {
   S._guardDC = dangerDC;
   S._guardSuccess = total >= dangerDC;
 
-  if (window._dbg) console.debug('[EXPLORE] guardWatch', {
-    roll: roll, totalMod: totalMod, dc: dangerDC,
-    total: total, success: total >= dangerDC, mode: mode
-  });
+  console.info('[CAMP] guardWatch d20=%d wisMod=%d profBonus=%d total=%d dc=%d success=%s mode=%s r1=%d r2=%d',
+    roll, wisMod, profBonus, total, dangerDC, total >= dangerDC ? 'yes' : 'no', mode, r1 || 0, r2 || 0);
 
   S._campfireStory = _getCampfireStory();
   _showGuardOverlay(roll, r1, r2, mode, totalMod, profInPerception, dangerDC, total >= dangerDC);
@@ -754,8 +790,10 @@ function _showGuardResult(overlay, resultEl, diceCanvas, roll, sign, totalMod, d
   }
 
   S._guardPosted = true;
+  console.info('[CAMP] guardResult success=%s total=%d dc=%d → proceeding to longRest', success ? 'yes' : 'no', total, dc);
 
   var readDelay = typeof calcReadTime === 'function' ? calcReadTime(postNarr + ' Vigil\u00e2ncia resultado', 'overlay') : 3500;
+  console.info('[CAMP] guardResult_delay ms=%d then→doLongRest', readDelay + 1000);
   setTimeout(function() {
     overlay.classList.remove('active');
     if (diceCanvas) diceCanvas.style.display = 'none';
@@ -769,12 +807,15 @@ function _showGuardResult(overlay, resultEl, diceCanvas, roll, sign, totalMod, d
  * ---------------------------------------------------------- */
 
 function doLongRest() {
-  if (window._dbg) console.debug('[EXPLORE] doLongRest', {
-    count: (S._longRestCount || 0) + 1,
-    prevExhaustion: S.exhaustion || 0,
-    weather: S.weather,
-    danger: S.dangerLevel
-  });
+  var cd = S.charData || {};
+  var hpBefore = (cd.hp || 0) + (S.hpChange || 0);
+  var mpBefore = (cd.mp || 0) + (S.mpChange || 0);
+  var hdUsedBefore = S._hdUsed || 0;
+
+  console.info('[CAMP] doLongRest_start count=%d hp=%d/%d mp=%d/%d hdUsed=%d exhaustion=%d weather=%s guard=%s guardSuccess=%s',
+    (S._longRestCount || 0) + 1, hpBefore, cd.mh || 0, mpBefore, cd.mm || 0,
+    hdUsedBefore, S.exhaustion || 0, S.weather || '?',
+    S._guardPosted ? 'yes' : 'no', S._guardSuccess ? 'yes' : 'no');
 
   S._longRestCount = (S._longRestCount || 0) + 1;
 
@@ -785,11 +826,14 @@ function doLongRest() {
     var healed = maxHP - currentHP;
     if (healed > 0) S.hpChange += healed;
     updateHP(maxHP, maxHP);
+    console.info('[CAMP] longRest_hp healed=%d newHP=%d/%d', healed > 0 ? healed : 0, maxHP, maxHP);
   }
 
   /* Clear conditions */
+  var condsBefore = (S.conditions || []).length;
   S.conditions = [];
   updateConditionHUD();
+  if (condsBefore > 0) console.info('[CAMP] longRest_conditions cleared=%d', condsBefore);
 
   /* MP full recovery */
   if (S.charData && S.charData.mm > 0) {
@@ -797,19 +841,23 @@ function doLongRest() {
     var currentMP = (S.charData.mp || 0) + (S.mpChange || 0);
     var mpRecov = maxMP - currentMP;
     if (mpRecov > 0) S.mpChange = (S.mpChange || 0) + mpRecov;
+    console.info('[CAMP] longRest_mp recovered=%d newMP=%d/%d', mpRecov > 0 ? mpRecov : 0, maxMP, maxMP);
   }
 
   /* HD recovery (half of max, minimum 1) */
   var maxHD = (S.charData && S.charData.mhd) || 1;
   var hdRecov = Math.max(1, Math.floor(maxHD / 2));
   S._hdUsed = Math.max(0, (S._hdUsed || 0) - hdRecov);
+  console.info('[CAMP] longRest_hd recovered=%d hdUsed=%d→%d max=%d', hdRecov, hdUsedBefore, S._hdUsed, maxHD);
 
   /* Exhaustion: clear to 0 */
   var prevExhaustion = S.exhaustion;
   S.exhaustion = 0;
+  console.info('[CAMP] longRest_exhaustion before=%d after=0', prevExhaustion);
 
   /* Weather effect: storm adds exhaustion AFTER clearing */
   if (S.weather === 't') {
+    console.info('[CAMP] longRest_storm adding +1 exhaustion after clear');
     if (typeof addExhaustion === 'function') addExhaustion(1, 'Tempestade durante descanso');
   }
 
@@ -846,9 +894,9 @@ function _checkLongRestAmbush() {
   var weatherBonus = S.weather === 't' ? 15 : S.weather === 'r' ? 5 : 0;
   var ambushChance = 20 + ((S._longRestCount - 1) * 15) + weatherBonus;
   var roll = Math.floor(Math.random() * 100) + 1;
-  if (window._dbg) console.debug('[EXPLORE] ambushCheck', {
-    chance: ambushChance, roll: roll, guardOK: S._guardSuccess
-  });
+  console.info('[CAMP] ambushCheck chance=%d%% d100=%d weatherBonus=%d guardSuccess=%s triggered=%s',
+    ambushChance, roll, weatherBonus, S._guardSuccess ? 'yes' : 'no',
+    roll <= ambushChance ? 'yes' : 'no');
   if (roll <= ambushChance && S.campAmbush && !S._campAmbushUsed) {
     if (S._guardSuccess) {
       var avoidRoll = Math.floor(Math.random() * 100) + 1;
@@ -875,6 +923,8 @@ function _showLongRestDice(summaryHtml) {
   var canvas = document.getElementById('camp-dice-canvas');
   var label = document.getElementById('camp-dice-label');
   if (!overlay || !canvas || typeof Dice3D === 'undefined') {
+    console.warn('[CAMP] longRestDice_skipped overlay=%s canvas=%s Dice3D=%s → showing summary directly',
+      !!overlay, !!canvas, typeof Dice3D !== 'undefined');
     _showLongRestSummary(summaryHtml);
     return;
   }
@@ -933,10 +983,13 @@ function _showLongRestSummary(summaryHtml) {
 var _campDice = null;
 
 function _showCampDiceRoll(roll, conMod, bonus, total, foodName, hdType, mpRecovered) {
+  console.info('[CAMP] showDiceRoll hdType=%s d=%d con=%d food=%d total=%d name=%s mp=%d',
+    hdType || '?', roll, conMod, bonus, total, foodName || 'none', mpRecovered || 0);
   var overlay = document.getElementById('camp-dice-overlay');
   var canvas = document.getElementById('camp-dice-canvas');
   var label = document.getElementById('camp-dice-label');
   if (!overlay || !canvas) {
+    console.warn('[CAMP] diceRoll_skipped overlay=%s canvas=%s → showing result directly', !!overlay, !!canvas);
     showCampResultOverlay(roll, conMod, bonus, total, foodName);
     return;
   }
@@ -978,11 +1031,12 @@ function _showCampDiceRoll(roll, conMod, bonus, total, foodName, hdType, mpRecov
  * ---------------------------------------------------------- */
 
 function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpRecovered) {
+  console.info('[CAMP] showResultOverlay heal=%d hdType=%s food=%s mp=%d', total, hdType || '?', foodName || 'none', mpRecovered || 0);
   var overlay = document.getElementById('camp-result-overlay');
   var resultText = document.getElementById('camp-result-text');
   var detailEl = document.getElementById('camp-result-detail');
   if (!overlay || !resultText || !detailEl) {
-    console.error('[EXPLORE] camp-result-overlay elements missing');
+    console.error('[CAMP] FATAL camp-result-overlay elements missing overlay=%s text=%s detail=%s', !!overlay, !!resultText, !!detailEl);
     return;
   }
 
@@ -1034,9 +1088,12 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpR
  * ---------------------------------------------------------- */
 
 function closeCampResult() {
+  console.info('[CAMP] closeCampResult ambush=%s ambushUsed=%s ambushSafe=%s returning=%s',
+    S.campAmbush ? 'pending' : 'none', S._campAmbushUsed ? 'yes' : 'no',
+    S._longRestAmbushSafe ? 'yes' : 'no', _returningToCity ? 'yes' : 'no');
   var campResultOverlay = document.getElementById('camp-result-overlay');
   if (!campResultOverlay) {
-    console.warn('[EXPLORE] camp-result-overlay not found');
+    console.warn('[CAMP] camp-result-overlay not found on close');
     return;
   }
   var bars = campResultOverlay.querySelectorAll('.camp-hp-bar-container');
@@ -1049,6 +1106,7 @@ function closeCampResult() {
   if (S.campAmbush && !S._campAmbushUsed && !S._longRestAmbushSafe) {
     S._campAmbushUsed = true;
     saveState();
+    console.info('[CAMP] ambush_triggered! combat=%s', JSON.stringify(S.campAmbush).substring(0, 100));
     showTerrainToast('Algo ataca durante seu descanso!', 'danger');
     setTimeout(function() {
       triggerCombat({ combat: S.campAmbush });
