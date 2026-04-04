@@ -358,29 +358,97 @@
         goToPage(-1);
     }
 
-    /* ─── PAGE TURN SOUND ─── */
+    /* ─── PAGE TURN SOUND — realistic paper flip synthesis ─── */
     var _audioCtx = null;
     function playPageSound() {
-        /* Respect reduced motion = no sound */
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         try {
             if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            /* White noise burst (paper rustle) — synthesized, no file needed */
-            var bufSize = Math.floor(_audioCtx.sampleRate * 0.08); /* 80ms */
-            var buf = _audioCtx.createBuffer(1, bufSize, _audioCtx.sampleRate);
+            var sr = _audioCtx.sampleRate;
+            var now = _audioCtx.currentTime;
+
+            /*
+             * Realistic page turn = 3 layers:
+             * 1. Initial lift "shh" (high-freq noise, quick attack)
+             * 2. Swoosh through air (mid-freq sweep, longer)
+             * 3. Soft landing "fwp" (low thud, quick decay)
+             */
+            var duration = 0.35; /* 350ms total */
+            var bufSize = Math.floor(sr * duration);
+            var buf = _audioCtx.createBuffer(1, bufSize, sr);
             var ch = buf.getChannelData(0);
+
             for (var i = 0; i < bufSize; i++) {
-                var env = 1 - (i / bufSize);
-                ch[i] = (Math.random() * 2 - 1) * env * 0.06;
+                var t = i / sr; /* time in seconds */
+                var p = i / bufSize; /* progress 0-1 */
+
+                /* Envelope: quick attack, sustained swoosh, soft landing */
+                var env;
+                if (p < 0.08) {
+                    env = p / 0.08; /* attack: 0 -> 1 in 28ms */
+                } else if (p < 0.15) {
+                    env = 1.0; /* peak: full amplitude */
+                } else if (p < 0.7) {
+                    env = 1.0 - (p - 0.15) * 0.7; /* slow decay during swoosh */
+                } else {
+                    env = 0.6 * (1.0 - (p - 0.7) / 0.3); /* final fade */
+                }
+
+                /* Layer 1: high-freq crinkle (paper fibers) */
+                var crinkle = (Math.random() * 2 - 1) * 0.4;
+                /* Shape: more crinkle at start (lifting paper) */
+                crinkle *= (1.0 - p * 0.6);
+
+                /* Layer 2: mid-freq swoosh (air movement) */
+                var swoosh = (Math.random() * 2 - 1) * 0.3;
+                /* Shape: peaks in middle (paper moving through air) */
+                var swooshEnv = Math.sin(p * Math.PI);
+                swoosh *= swooshEnv;
+
+                /* Layer 3: low thud at landing (paper settling) */
+                var thud = 0;
+                if (p > 0.65 && p < 0.85) {
+                    var tp = (p - 0.65) / 0.2;
+                    thud = Math.sin(tp * Math.PI * 3) * (1 - tp) * 0.5;
+                }
+
+                ch[i] = (crinkle + swoosh + thud) * env * 0.08;
             }
+
             var src = _audioCtx.createBufferSource();
             src.buffer = buf;
-            var filt = _audioCtx.createBiquadFilter();
-            filt.type = 'bandpass';
-            filt.frequency.value = 3000;
-            filt.Q.value = 0.5;
-            src.connect(filt);
-            filt.connect(_audioCtx.destination);
+
+            /* Filter chain for realistic paper texture */
+            /* Highpass: remove rumble */
+            var hp = _audioCtx.createBiquadFilter();
+            hp.type = 'highpass';
+            hp.frequency.value = 800;
+            hp.Q.value = 0.3;
+
+            /* Bandpass: paper resonance (1.5-6kHz range) */
+            var bp = _audioCtx.createBiquadFilter();
+            bp.type = 'bandpass';
+            bp.frequency.value = 2500;
+            bp.Q.value = 0.4;
+
+            /* Lowpass: smooth harsh edges */
+            var lp = _audioCtx.createBiquadFilter();
+            lp.type = 'lowpass';
+            lp.frequency.value = 8000;
+            lp.Q.value = 0.3;
+            /* Sweep lowpass down during the turn for realism */
+            lp.frequency.setValueAtTime(8000, now);
+            lp.frequency.linearRampToValueAtTime(3000, now + duration);
+
+            /* Gain control */
+            var gain = _audioCtx.createGain();
+            gain.gain.value = 0.25;
+
+            src.connect(hp);
+            hp.connect(bp);
+            bp.connect(lp);
+            lp.connect(gain);
+            gain.connect(_audioCtx.destination);
             src.start();
         } catch (e) { /* audio not available — silent fallback */ }
     }
