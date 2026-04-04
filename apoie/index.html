@@ -16,11 +16,11 @@
     <meta property="og:type" content="website">
     <meta property="og:locale" content="pt_BR">
     <meta property="og:url" content="https://apoie.lendasdevaldoria.com.br">
-    <meta property="og:image" content="https://raphaelredes.github.io/valdoria-webapp/apoie/img/og-image.jpg">
+    <meta property="og:image" content="https://jogo.lendasdevaldoria.com.br/apoie/img/og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://raphaelredes.github.io/valdoria-webapp/apoie/img/og-image.jpg">
+    <meta name="twitter:image" content="https://jogo.lendasdevaldoria.com.br/apoie/img/og-image.jpg">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="../shared/fonts.css">
@@ -56,7 +56,7 @@
     <!-- Navigation Bar -->
     <nav class="ap-nav" id="ap-nav">
         <div class="ap-nav-inner">
-            <a href="#hero" class="ap-nav-brand"><span>VALDORIA</span></a>
+            <a href="#hero" class="ap-nav-brand"><svg class="ap-nav-orb" width="20" height="20" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="no" cx="38%" cy="35%" r="55%"><stop offset="0%" stop-color="#fff4d0"/><stop offset="20%" stop-color="#e8c45a"/><stop offset="50%" stop-color="#c4953a"/><stop offset="80%" stop-color="#8b6420"/><stop offset="100%" stop-color="#5a3e10"/></radialGradient></defs><circle cx="14" cy="14" r="12" fill="url(#no)"/><ellipse cx="11" cy="10" rx="4" ry="3" fill="#fff4d0" opacity="0.3"/></svg><span>VALDORIA</span></a>
             <button class="ap-nav-toggle" id="nav-toggle" aria-label="Menu"
                 onclick="document.querySelector('.ap-nav-links').classList.toggle('open'); this.classList.toggle('active')">
                 <span></span><span></span><span></span>
@@ -72,24 +72,19 @@
 
     <button class="ap-back-top" id="back-top" aria-label="Voltar ao topo" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#x25B2;</button>
 
-    <!-- Parallax Hero -->
+    <!-- Minimalist Hero — Orb of Valdoria -->
     <section class="ap-hero ap-cinematic" id="hero">
-        <div class="ap-parallax-container">
-            <div class="ap-parallax-layer ap-layer-sky"></div>
-            <div class="ap-parallax-layer ap-layer-castle"></div>
-            <div class="ap-parallax-layer ap-layer-forest"></div>
-            <div class="ap-parallax-layer ap-layer-mist"></div>
-        </div>
-        <div class="ap-hero-particles">
-            <div class="ap-ember ap-e1"></div><div class="ap-ember ap-e2"></div>
-            <div class="ap-ember ap-e3"></div><div class="ap-ember ap-e4"></div>
-            <div class="ap-ember ap-e5"></div><div class="ap-ember ap-e6"></div>
-            <div class="ap-ember ap-e7"></div><div class="ap-ember ap-e8"></div>
-            <div class="ap-ember ap-e9"></div><div class="ap-ember ap-e10"></div>
-            <div class="ap-ember ap-e11"></div><div class="ap-ember ap-e12"></div>
-        </div>
+        <div class="ap-hero-vignette"></div>
         <div class="ap-hero-content">
-            <h1 class="ap-hero-title">Lendas de Valdoria</h1>
+            <div class="ap-hero-orb-wrap">
+                <div class="ap-hero-orb-glow"></div>
+                <div class="ap-hero-orb">
+                    <div class="ap-hero-orb-inner"></div>
+                </div>
+            </div>
+            <div class="ap-hero-pre-title">Lendas de</div>
+            <h1 class="ap-hero-title">Valdoria</h1>
+            <div class="ap-hero-divider"></div>
             <div class="ap-hero-subtitle">Um mundo inteiro precisa de você</div>
             <div class="ap-hero-stats" id="hero-stats">
                 <div class="ap-hero-stat">
