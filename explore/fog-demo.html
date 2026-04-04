@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fog of War — 3 Técnicas</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1510;color:#d4c8b0;font-family:'MedievalSharp',serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:20px}
+h1{color:#c4953a;font-size:20px;margin-bottom:8px;text-align:center}
+.subtitle{color:#a09484;font-size:13px;margin-bottom:20px;text-align:center}
+.demos{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;max-width:1200px}
+.demo{background:#2a2420;border:1px solid #4a3828;border-radius:10px;padding:16px;flex:1;min-width:350px;max-width:400px}
+.demo h2{color:#c4953a;font-size:16px;margin-bottom:4px;text-align:center}
+.demo .tag{color:#a09484;font-size:11px;text-align:center;margin-bottom:10px;display:block}
+canvas{display:block;margin:0 auto;border-radius:8px;border:1px solid #3a2e22}
+.pros{margin-top:10px;font-size:12px;line-height:1.6}
+.pros b{color:#c4953a}
+.controls{margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.controls button{background:linear-gradient(165deg,#3a3028,#302820);border:1px solid #4a3828;color:#d4c8b0;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit}
+.controls button:hover{border-color:#c4953a}
+.controls button.active{border-color:#c4953a;color:#c4953a;box-shadow:0 0 8px rgba(196,149,58,0.3)}
+</style>
+</head>
+<body>
+<h1>Fog of War — Comparativo de Técnicas</h1>
+<p class="subtitle">Clique em qualquer hex para "mover" o jogador. Compare a qualidade visual.</p>
+
+<div class="controls">
+  <button onclick="setBiome('cave')" id="btn-cave" class="active">Caverna</button>
+  <button onclick="setBiome('forest')" id="btn-forest">Floresta</button>
+  <button onclick="setBiome('desert')" id="btn-desert">Deserto</button>
+  <button onclick="setVisibility(2)" id="btn-v2">Visão 2</button>
+  <button onclick="setVisibility(3)" id="btn-v3" class="active">Visão 3</button>
+  <button onclick="setVisibility(4)" id="btn-v4">Visão 4</button>
+</div>
+
+<div class="demos">
+  <div class="demo">
+    <h2>1. Radial Gradients</h2>
+    <span class="tag">Atual (melhorado) — Civ V style</span>
+    <canvas id="c1" width="380" height="380"></canvas>
+    <div class="pros"><b>Como:</b> Preenche fog, apaga com gradientes radiais via destination-out.<br>
+    <b>Pro:</b> Simples, bordas suaves.<br><b>Con:</b> Círculos visíveis se raio pequeno.</div>
+  </div>
+  <div class="demo">
+    <h2>2. Low-Res Upscale</h2>
+    <span class="tag">Riot Games (LoL) — Bilinear filtering</span>
+    <canvas id="c2" width="380" height="380"></canvas>
+    <div class="pros"><b>Como:</b> Canvas 1px/hex, upscale com smoothing automático do browser.<br>
+    <b>Pro:</b> Ultra performático, suave natural.<br><b>Con:</b> Menos controle artístico.</div>
+  </div>
+  <div class="demo">
+    <h2>3. Pergaminho + Bordas</h2>
+    <span class="tag">Civ VI style — Parchment overlay</span>
+    <canvas id="c3" width="380" height="380"></canvas>
+    <div class="pros"><b>Como:</b> Textura de pergaminho onde há fog + bordas escuras de tinta.<br>
+    <b>Pro:</b> Visual premium, tema medieval.<br><b>Con:</b> Precisa textura, 3 passes.</div>
+  </div>
+</div>
+
+<script>
+/* ── Hex Grid Setup ── */
+var COLS = 9, ROWS = 9;
+var HEX_W = 38, HEX_H = 34, ROW_STEP = 28;
+var OX = 20, OY = 20;
+var playerCol = 4, playerRow = 4;
+var visibility = 3;
+var biome = 'cave';
+
+var BIOME_COLORS = {
+  cave:   { bg: '#1e1a16', floor: '#3a3228', wall: '#2a2420', fog: '#1e1a16' },
+  forest: { bg: '#1a2418', floor: '#2a3a22', wall: '#1e2a18', fog: '#1a2418' },
+  desert: { bg: '#2a2218', floor: '#4a3a28', wall: '#3a2e1e', fog: '#2a2218' }
+};
+
+/* ── Grid data ── */
+var grid = [];
+function genGrid() {
+  grid = [];
+  for (var r = 0; r < ROWS; r++) {
+    grid[r] = [];
+    for (var c = 0; c < COLS; c++) {
+      var edge = r === 0 || r === ROWS-1 || c === 0 || c === COLS-1;
+      grid[r][c] = edge ? '#' : (Math.random() < 0.15 ? '#' : '.');
+    }
+  }
+  grid[playerRow][playerCol] = '.';
+}
+genGrid();
+
+function hexToScreen(c, r) {
+  var offset = (r % 2 === 1) ? HEX_W / 2 : 0;
+  return { x: c * HEX_W + offset + OX + HEX_W/2, y: r * ROW_STEP + OY + HEX_H/2 };
+}
+function hexDist(c1,r1,c2,r2) {
+  var ac1 = c1 - Math.floor(r1/2), ac2 = c2 - Math.floor(r2/2);
+  var dq = ac1 - ac2, dr = r1 - r2;
+  return Math.max(Math.abs(dq), Math.abs(dr), Math.abs(dq + dr));
+}
+function screenToHex(sx, sy) {
+  var best = -1, bestR = -1, bestD = 999;
+  for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+    var p = hexToScreen(c, r);
+    var d = Math.hypot(sx - p.x, sy - p.y);
+    if (d < bestD) { bestD = d; best = c; bestR = r; }
+  }
+  return { col: best, row: bestR };
+}
+function hexVerts(cx, cy) {
+  var hw = HEX_W/2, hh = HEX_H/2;
+  return [{x:cx,y:cy-hh},{x:cx+hw,y:cy-hh/2},{x:cx+hw,y:cy+hh/2},
+          {x:cx,y:cy+hh},{x:cx-hw,y:cy+hh/2},{x:cx-hw,y:cy-hh/2}];
+}
+
+/* ── Parchment texture (procedural) ── */
+var parchTex = document.createElement('canvas');
+parchTex.width = 128; parchTex.height = 128;
+var ptx = parchTex.getContext('2d');
+ptx.fillStyle = '#3a2e1e';
+ptx.fillRect(0, 0, 128, 128);
+for (var i = 0; i < 800; i++) {
+  var px = Math.random()*128, py = Math.random()*128;
+  ptx.fillStyle = 'rgba(58,40,16,' + (0.05 + Math.random()*0.12) + ')';
+  ptx.beginPath(); ptx.arc(px, py, 0.5+Math.random()*1.5, 0, Math.PI*2); ptx.fill();
+}
+for (var i = 0; i < 40; i++) {
+  ptx.strokeStyle = 'rgba(80,60,30,' + (0.03 + Math.random()*0.06) + ')';
+  ptx.lineWidth = 0.3 + Math.random()*0.5;
+  ptx.beginPath();
+  ptx.moveTo(Math.random()*128, Math.random()*128);
+  ptx.lineTo(Math.random()*128, Math.random()*128);
+  ptx.stroke();
+}
+
+/* ── Simple noise for organic edges ── */
+function noise2D(x, y) {
+  var n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+  return (n - Math.floor(n)) * 2 - 1;
+}
+
+/* ── Draw base map ── */
+function drawMap(ctx, w, h) {
+  var col = BIOME_COLORS[biome];
+  ctx.fillStyle = col.bg;
+  ctx.fillRect(0, 0, w, h);
+  for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+    var p = hexToScreen(c, r);
+    var v = hexVerts(p.x, p.y);
+    var tile = grid[r][c];
+    ctx.beginPath();
+    ctx.moveTo(v[0].x, v[0].y);
+    for (var i = 1; i < v.length; i++) ctx.lineTo(v[i].x, v[i].y);
+    ctx.closePath();
+    ctx.fillStyle = tile === '#' ? col.wall : col.floor;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(196,149,58,0.08)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  }
+  /* Player token */
+  var pp = hexToScreen(playerCol, playerRow);
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath(); ctx.ellipse(pp.x, pp.y+2, 6, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(30,24,20,0.9)';
+  ctx.beginPath(); ctx.ellipse(pp.x, pp.y-6, 3, 5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(25,20,16,0.85)';
+  ctx.beginPath(); ctx.arc(pp.x, pp.y-12, 2.5, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = 'rgba(196,149,58,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.ellipse(pp.x, pp.y+1, 8, 4, 0, 0, Math.PI*2); ctx.stroke();
+  /* Adjacent highlights */
+  for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+    if (hexDist(c,r,playerCol,playerRow) !== 1) continue;
+    if (grid[r][c] === '#') continue;
+    var ap = hexToScreen(c, r);
+    var av = hexVerts(ap.x, ap.y);
+    ctx.beginPath();
+    ctx.moveTo(av[0].x, av[0].y);
+    for (var ai = 1; ai < av.length; ai++) ctx.lineTo(av[ai].x, av[ai].y);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(196,149,58,0.12)';
+    ctx.fill();
+  }
+}
+
+/* ══════════════════════════════════════════ */
+/* TECHNIQUE 1: Radial Gradients (dest-out)  */
+/* ══════════════════════════════════════════ */
+function drawFog1(mainCtx, w, h) {
+  var fogC = document.createElement('canvas');
+  fogC.width = w; fogC.height = h;
+  var fc = fogC.getContext('2d');
+  fc.fillStyle = BIOME_COLORS[biome].fog;
+  fc.fillRect(0, 0, w, h);
+  fc.globalCompositeOperation = 'destination-out';
+
+  /* Large player lantern */
+  var pp = hexToScreen(playerCol, playerRow);
+  var lanternR = HEX_W * (visibility * 0.65 + 0.4);
+  var lg = fc.createRadialGradient(pp.x, pp.y, 0, pp.x, pp.y, lanternR);
+  lg.addColorStop(0, 'rgba(0,0,0,1)');
+  lg.addColorStop(0.45, 'rgba(0,0,0,0.9)');
+  lg.addColorStop(0.65, 'rgba(0,0,0,0.4)');
+  lg.addColorStop(0.85, 'rgba(0,0,0,0.08)');
+  lg.addColorStop(1, 'rgba(0,0,0,0)');
+  fc.fillStyle = lg;
+  fc.beginPath(); fc.arc(pp.x, pp.y, lanternR, 0, Math.PI*2); fc.fill();
+
+  /* Per-hex reveals for dist 0-1 */
+  for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+    var d = hexDist(c, r, playerCol, playerRow);
+    if (d > 1) continue;
+    var p = hexToScreen(c, r);
+    var rad = d === 0 ? HEX_W * 1.6 : HEX_W * 1.2;
+    var str = d === 0 ? 1.0 : 0.95;
+    var flat = d === 0 ? 0.5 : 0.4;
+    var g = fc.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
+    g.addColorStop(0, 'rgba(0,0,0,' + str + ')');
+    g.addColorStop(flat, 'rgba(0,0,0,' + (str*0.85) + ')');
+    g.addColorStop(flat+0.2, 'rgba(0,0,0,' + (str*0.3) + ')');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    fc.fillStyle = g;
+    fc.beginPath(); fc.arc(p.x, p.y, rad, 0, Math.PI*2); fc.fill();
+  }
+
+  /* Organic edge blobs */
+  fc.globalCompositeOperation = 'destination-out';
+  for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+    var d = hexDist(c, r, playerCol, playerRow);
+    if (d > 1) continue;
+    var p = hexToScreen(c, r);
+    var edgeR = HEX_W * 0.8;
+    for (var j = 0; j < 10; j++) {
+      var angle = noise2D(c*100+j*37, r*200) * Math.PI * 2;
+      var dist = edgeR * (0.7 + Math.abs(noise2D(r*300+j*53, c*400)) * 0.6);
+      var bx = p.x + Math.cos(angle) * dist;
+      var by = p.y + Math.sin(angle) * dist;
+      fc.fillStyle = 'rgba(0,0,0,0.08)';
+      fc.beginPath(); fc.arc(bx, by, 2 + Math.abs(noise2D(j*71, c*500))*3, 0, Math.PI*2); fc.fill();
+    }
+  }
+
+  mainCtx.drawImage(fogC, 0, 0);
+}
+
+/* ══════════════════════════════════════════ */
+/* TECHNIQUE 2: Low-Res Mask + Upscale       */
+/* ══════════════════════════════════════════ */
+function drawFog2(mainCtx, w, h) {
+  /* Step 1: Create tiny mask (1 pixel per hex) */
+  var maskC = document.createElement('canvas');
+  maskC.width = COLS; maskC.height = ROWS;
+  var mc = maskC.getContext('2d');
+  var imgData = mc.createImageData(COLS, ROWS);
+
+  for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+    var d = hexDist(c, r, playerCol, playerRow);
+    var idx = (r * COLS + c) * 4;
+    var alpha;
+    if (d === 0) alpha = 0;       /* fully visible */
+    else if (d === 1) alpha = 10; /* nearly visible */
+    else if (d === 2) alpha = 160;
+    else if (d === 3) alpha = 220;
+    else alpha = 255;             /* fully fogged */
+    imgData.data[idx] = 0;
+    imgData.data[idx+1] = 0;
+    imgData.data[idx+2] = 0;
+    imgData.data[idx+3] = alpha;
+  }
+  mc.putImageData(imgData, 0, 0);
+
+  /* Step 2: Upscale with bilinear smoothing */
+  var fogC = document.createElement('canvas');
+  fogC.width = w; fogC.height = h;
+  var fc = fogC.getContext('2d');
+  fc.imageSmoothingEnabled = true;
+  fc.imageSmoothingQuality = 'high';
+  /* Map hex grid area to canvas, with padding */
+  var gridW = COLS * HEX_W + HEX_W/2;
+  var gridH = ROWS * ROW_STEP + HEX_H;
+  fc.drawImage(maskC, 0, 0, COLS, ROWS, OX - HEX_W*0.3, OY - HEX_H*0.3, gridW + HEX_W*0.6, gridH + HEX_H*0.6);
+
+  /* Step 3: Tint with fog color */
+  fc.globalCompositeOperation = 'source-in';
+  fc.fillStyle = BIOME_COLORS[biome].fog;
+  fc.fillRect(0, 0, w, h);
+  fc.globalCompositeOperation = 'source-over';
+
+  /* Fill edges that the mask doesn't cover */
+  fc.fillStyle = BIOME_COLORS[biome].fog;
+  fc.fillRect(0, 0, OX - HEX_W*0.3, h);
+  fc.fillRect(0, 0, w, OY - HEX_H*0.3);
+  var rightEdge = OX - HEX_W*0.3 + gridW + HEX_W*0.6;
+  fc.fillRect(rightEdge, 0, w - rightEdge, h);
+  var botEdge = OY - HEX_H*0.3 + gridH + HEX_H*0.6;
+  fc.fillRect(0, botEdge, w, h - botEdge);
+
+  mainCtx.drawImage(fogC, 0, 0);
+}
+
+/* ══════════════════════════════════════════ */
+/* TECHNIQUE 3: Parchment Overlay (Civ VI)   */
+/* ══════════════════════════════════════════ */
+function drawFog3(mainCtx, w, h) {
+  var fogC = document.createElement('canvas');
+  fogC.width = w; fogC.height = h;
+  var fc = fogC.getContext('2d');
+
+  /* Pass 1: White fog mask */
+  fc.fillStyle = 'white';
+  fc.fillRect(0, 0, w, h);
+  fc.globalCompositeOperation = 'destination-out';
+
+  /* Noise-distorted reveal shapes (organic edges) */
+  var pp = hexToScreen(playerCol, playerRow);
+  for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+    var d = hexDist(c, r, playerCol, playerRow);
+    if (d > visibility) continue;
+    var p = hexToScreen(c, r);
+    var str, rad;
+    if (d === 0) { str = 1.0; rad = HEX_W * 1.6; }
+    else if (d === 1) { str = 0.95; rad = HEX_W * 1.2; }
+    else if (d === 2) { str = 0.5; rad = HEX_W * 0.7; }
+    else { str = 0.2; rad = HEX_W * 0.5; }
+
+    /* Draw noise-distorted polygon instead of circle */
+    fc.fillStyle = 'rgba(0,0,0,' + str + ')';
+    fc.beginPath();
+    var pts = 32;
+    for (var i = 0; i <= pts; i++) {
+      var angle = (i / pts) * Math.PI * 2;
+      var n = noise2D(c * 3.7 + Math.cos(angle) * 2.1, r * 4.3 + Math.sin(angle) * 2.1);
+      var rr = rad * (0.82 + n * 0.25);
+      var px = p.x + Math.cos(angle) * rr;
+      var py = p.y + Math.sin(angle) * rr;
+      i === 0 ? fc.moveTo(px, py) : fc.lineTo(px, py);
+    }
+    fc.closePath();
+    fc.fill();
+  }
+
+  /* Pass 2: Fill fog areas with parchment texture */
+  fc.globalCompositeOperation = 'source-in';
+  var pattern = fc.createPattern(parchTex, 'repeat');
+  fc.fillStyle = pattern;
+  fc.fillRect(0, 0, w, h);
+
+  /* Pass 3: Dark sepia edge around visible area */
+  fc.globalCompositeOperation = 'source-atop';
+  for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+    var d = hexDist(c, r, playerCol, playerRow);
+    if (d < 1 || d > visibility + 1) continue;
+    var p = hexToScreen(c, r);
+    var eg = fc.createRadialGradient(p.x, p.y, HEX_W * 0.2, p.x, p.y, HEX_W * 0.9);
+    eg.addColorStop(0, 'rgba(0,0,0,0)');
+    eg.addColorStop(0.4, 'rgba(30,18,8,0.25)');
+    eg.addColorStop(1, 'rgba(0,0,0,0)');
+    fc.fillStyle = eg;
+    fc.fillRect(p.x - HEX_W, p.y - HEX_W, HEX_W*2, HEX_W*2);
+  }
+
+  /* Ensure fully-black borders */
+  fc.globalCompositeOperation = 'source-over';
+  fc.fillStyle = BIOME_COLORS[biome].fog;
+  /* Cover canvas edges beyond the parchment */
+  var padding = 4;
+  fc.fillRect(0, 0, padding, h);
+  fc.fillRect(0, 0, w, padding);
+  fc.fillRect(w - padding, 0, padding, h);
+  fc.fillRect(0, h - padding, w, padding);
+
+  mainCtx.drawImage(fogC, 0, 0);
+}
+
+/* ── Render all 3 ── */
+function renderAll() {
+  var canvases = [
+    { id: 'c1', fog: drawFog1 },
+    { id: 'c2', fog: drawFog2 },
+    { id: 'c3', fog: drawFog3 }
+  ];
+  for (var i = 0; i < canvases.length; i++) {
+    var cv = document.getElementById(canvases[i].id);
+    var ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    drawMap(ctx, cv.width, cv.height);
+    canvases[i].fog(ctx, cv.width, cv.height);
+  }
+}
+
+/* ── Click handling ── */
+['c1','c2','c3'].forEach(function(id) {
+  document.getElementById(id).addEventListener('click', function(e) {
+    var rect = this.getBoundingClientRect();
+    var sx = (e.clientX - rect.left) * (this.width / rect.width);
+    var sy = (e.clientY - rect.top) * (this.height / rect.height);
+    var hex = screenToHex(sx, sy);
+    if (hex.col >= 0 && hex.row >= 0 && grid[hex.row][hex.col] !== '#') {
+      playerCol = hex.col;
+      playerRow = hex.row;
+      renderAll();
+    }
+  });
+});
+
+function setBiome(b) {
+  biome = b;
+  document.querySelectorAll('.controls button').forEach(function(btn) {
+    if (btn.id.startsWith('btn-')) {
+      var isBiome = ['btn-cave','btn-forest','btn-desert'].indexOf(btn.id) >= 0;
+      if (isBiome) btn.classList.toggle('active', btn.id === 'btn-' + b);
+    }
+  });
+  renderAll();
+}
+function setVisibility(v) {
+  visibility = v;
+  document.querySelectorAll('.controls button').forEach(function(btn) {
+    if (btn.id.startsWith('btn-v')) btn.classList.toggle('active', btn.id === 'btn-v' + v);
+  });
+  renderAll();
+}
+
+renderAll();
+</script>
+</body>
+</html>
