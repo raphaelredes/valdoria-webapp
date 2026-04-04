@@ -32,6 +32,15 @@
         };
         _link('../valdoria-design.css');
         _link('lore-book.css');
+        /* Load shared error reporter + audio manager (project standard) */
+        var _scr = function(src) {
+            var s = document.createElement('script');
+            s.src = src + '?v=' + v;
+            document.head.appendChild(s);
+        };
+        _scr('../shared/console-collector.js');
+        _scr('../shared/error-reporter.js');
+        _scr('../shared/audio-manager.js');
     </script>
 </head>
 
