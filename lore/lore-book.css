@@ -463,24 +463,9 @@ body {
     font-weight: 700;
 }
 
-/* ─── ORNAMENTAL BORDER on parchment ─── */
+/* ─── SUBTLE EDGE WEAR on parchment ─── */
 .page-parchment {
-    /* Add inner border frame */
-    border: 1px solid rgba(196, 149, 58, 0.08);
-    outline: 1px solid rgba(196, 149, 58, 0.04);
-    outline-offset: 4px;
-}
-
-/* ─── ORNAMENTAL CORNERS on fragment pages ─── */
-.fragment-page .page-parchment::before {
-    /* Corner ornaments via box-shadow trickery */
-    box-shadow:
-        /* Top-left corner L */
-        inset 20px 0 0 -19px rgba(196,149,58,0.12),
-        inset 0 20px 0 -19px rgba(196,149,58,0.12),
-        /* Bottom-right corner L */
-        inset -20px 0 0 -19px rgba(196,149,58,0.1),
-        inset 0 -20px 0 -19px rgba(196,149,58,0.1);
+    border: none;
 }
 
 /* ─── DECORATIVE SEPARATOR between title and content ─── */
@@ -872,15 +857,7 @@ body {
     }
 }
 
-/* ═══════════════════════════════════════════════════════
-   SVG FILIGREE BORDER — ornamental frame via border-image
-   ═══════════════════════════════════════════════════════ */
-.fragment-page .page-parchment {
-    border: 8px solid transparent;
-    border-image-source: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect x='1' y='1' width='38' height='38' rx='3' fill='none' stroke='rgba(196,149,58,0.12)' stroke-width='0.5'/%3E%3Cpath d='M4 1C2.5 1 1 2.5 1 4' fill='none' stroke='rgba(196,149,58,0.2)' stroke-width='1'/%3E%3Cpath d='M36 1c1.5 0 3 1.5 3 3' fill='none' stroke='rgba(196,149,58,0.2)' stroke-width='1'/%3E%3Cpath d='M4 39c-1.5 0-3-1.5-3-3' fill='none' stroke='rgba(196,149,58,0.2)' stroke-width='1'/%3E%3Cpath d='M36 39c1.5 0 3-1.5 3-3' fill='none' stroke='rgba(196,149,58,0.2)' stroke-width='1'/%3E%3Ccircle cx='4' cy='4' r='1.5' fill='rgba(196,149,58,0.15)'/%3E%3Ccircle cx='36' cy='4' r='1.5' fill='rgba(196,149,58,0.15)'/%3E%3Ccircle cx='4' cy='36' r='1.5' fill='rgba(196,149,58,0.15)'/%3E%3Ccircle cx='36' cy='36' r='1.5' fill='rgba(196,149,58,0.15)'/%3E%3C/svg%3E");
-    border-image-slice: 12 fill;
-    border-image-repeat: stretch;
-}
+/* No elaborate borders — just natural edge wear via vignette (already in ::before) */
 
 /* ═══════════════════════════════════════════════════════
    READING PARTICLES — golden dust motes floating over text
