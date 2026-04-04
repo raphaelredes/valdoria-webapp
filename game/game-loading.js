@@ -83,6 +83,9 @@
     var _titleScreen = null;
     var _titleShown = false;
     var _reactiveStarted = false;
+    var _gameReady = false;        /* game finished loading, waiting for user */
+    var _pendingHideCb = null;     /* deferred hide callback */
+    var _enterBtn = null;          /* "Aventurar-se" button element */
 
     /**
      * Show title screen ON TOP of loading (z-index 10000 > loading 9999).
@@ -108,6 +111,10 @@
                 /* Start audio-reactive effects (analyser created synchronously above) */
                 setTimeout(function() {
                     _startReactive();
+                    /* If game already finished loading while title was up, show enter button */
+                    if (_gameReady) {
+                        _showEnterButton();
+                    }
                 }, 100);
             }
         });
@@ -124,6 +131,83 @@
         if (analyser) {
             ValdoriaLoadingReactive.start(analyser);
             _reactiveStarted = true;
+        }
+    }
+
+    /** Show "Aventurar-se" button when game is ready but user is enjoying music */
+    function _showEnterButton() {
+        if (_enterBtn) return;
+        var overlay = document.getElementById('loading');
+        if (!overlay) return;
+
+        _enterBtn = document.createElement('button');
+        _enterBtn.className = 'loading-enter-btn';
+        _enterBtn.textContent = 'Aventurar-se';
+        _enterBtn.style.cssText = 'position:absolute;bottom:18%;left:50%;transform:translateX(-50%);'
+            + 'z-index:10;padding:12px 32px;border:1px solid var(--v-gold,#c4953a);'
+            + 'background:rgba(42,36,32,0.85);color:var(--v-gold,#c4953a);'
+            + 'font-family:var(--v-font-display,Cinzel,serif);font-size:var(--v-font-lg,15px);'
+            + 'letter-spacing:2px;border-radius:var(--v-radius-pill,20px);cursor:pointer;'
+            + 'opacity:0;animation:leFadeIn 0.6s ease-out 0.3s forwards;';
+        _enterBtn.addEventListener('click', _onEnterGame);
+        _enterBtn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            _onEnterGame();
+        }, { passive: false });
+        overlay.appendChild(_enterBtn);
+
+        /* Also hide the progress bar and stage text — game is ready */
+        var prog = overlay.querySelector('.loading-progress-wrap');
+        if (prog) prog.style.opacity = '0';
+        var stage = overlay.querySelector('.loading-stage');
+        if (stage) stage.textContent = '';
+
+        /* Inject fadeIn keyframe if not exists */
+        if (!document.getElementById('le-enter-style')) {
+            var style = document.createElement('style');
+            style.id = 'le-enter-style';
+            style.textContent = '@keyframes leFadeIn{0%{opacity:0;transform:translateX(-50%) translateY(8px)}'
+                + '100%{opacity:1;transform:translateX(-50%) translateY(0)}}'
+                + '.loading-enter-btn:active{transform:translateX(-50%) scale(0.96);'
+                + 'background:rgba(196,149,58,0.2)}'; /* noqa: preflight — inline keyframe */
+            document.head.appendChild(style);
+        }
+
+        console.log('[GAME-LOADING] Enter button shown — game ready, waiting for user');
+    }
+
+    /** User clicked "Aventurar-se" — actually dismiss loading */
+    function _onEnterGame() {
+        if (!_gameReady) return;
+        _gameReady = false;
+        console.log('[GAME-LOADING] User chose to enter game');
+
+        /* Haptic */
+        try {
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            }
+        } catch(e) { /* noop */ }
+
+        /* Stop reactive effects */
+        _stopReactive();
+
+        /* Remove enter button */
+        if (_enterBtn && _enterBtn.parentNode) {
+            _enterBtn.parentNode.removeChild(_enterBtn);
+            _enterBtn = null;
+        }
+
+        /* Actually hide loading */
+        if (_ctrl) {
+            _ctrl.hide(function() {
+                var el = document.getElementById('loading');
+                if (el) el.style.display = 'none';
+                if (_pendingHideCb) {
+                    _pendingHideCb();
+                    _pendingHideCb = null;
+                }
+            });
         }
     }
 
@@ -202,11 +286,19 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      */
     window.hideLoading = function hideLoading() {
         console.warn('[GAME-LOADING] hideLoading()');
-        _stopReactive();
         if (window.__spaRevisit && window.vProcessing && vProcessing.isActive()) {
             vProcessing.hide();
             return;
         }
+        /* If title/intro is active, defer hide — show enter button when ready */
+        var _titleUp = _titleScreen && _titleScreen.isVisible();
+        if (_titleShown && (_reactiveStarted || _titleUp) && !_gameReady) {
+            _gameReady = true;
+            if (!_titleUp) _showEnterButton(); /* title gone, show button on loading */
+            /* else: button will be shown after title tap (onStart checks _gameReady) */
+            return;
+        }
+        _stopReactive();
         if (!_ctrl) return;
         _ctrl.hide(function() {
             var el = document.getElementById('loading');
@@ -220,11 +312,21 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      */
     window.hideLoadingWithDelay = async function hideLoadingWithDelay() {
         console.warn('[GAME-LOADING] hideLoadingWithDelay()');
-        _stopReactive();
         if (window.__spaRevisit && window.vProcessing && vProcessing.isActive()) {
             vProcessing.hide();
             return;
         }
+        /* If title/intro is active, defer hide — show enter button when ready */
+        var _titleUp = _titleScreen && _titleScreen.isVisible();
+        if (_titleShown && (_reactiveStarted || _titleUp) && !_gameReady) {
+            _gameReady = true;
+            return new Promise(function(resolve) {
+                _pendingHideCb = resolve;
+                if (!_titleUp) _showEnterButton();
+                /* else: button shown after title tap */
+            });
+        }
+        _stopReactive();
         if (!_ctrl) return;
         return new Promise(function(resolve) {
             _ctrl.hide(function() {
