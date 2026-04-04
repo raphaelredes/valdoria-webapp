@@ -79,9 +79,15 @@
       cta.textContent = 'Toque para Iniciar';
       root.appendChild(cta);
 
-      /* Flash overlay */
+      /* Flash overlay — two-layer (gold burst + white wash) */
       var flash = document.createElement('div');
       flash.className = 'title-flash';
+      var flashGold = document.createElement('div');
+      flashGold.className = 'title-flash-gold';
+      var flashWhite = document.createElement('div');
+      flashWhite.className = 'title-flash-white';
+      flash.appendChild(flashGold);
+      flash.appendChild(flashWhite);
       root.appendChild(flash);
 
       return root;
@@ -115,21 +121,21 @@
         }
       } catch(e) { /* noop */ }
 
-      /* Flash effect */
+      /* Phase 1: Flash burst (gold + white) */
       var flash = _el.querySelector('.title-flash');
       if (flash) flash.classList.add('active');
 
-      /* Callback immediately (unlocks audio) */
+      /* Callback immediately (unlocks audio — needs user gesture context) */
       onStart();
 
-      /* Exit animation after flash */
+      /* Phase 2: Cinematic element exit (staggered, 200ms after flash starts) */
       setTimeout(function() {
         if (_el) {
           _el.classList.add('exit');
-          /* Remove after animation */
-          setTimeout(function() { hide(); }, 500);
+          /* Phase 3: Remove from DOM after all animations complete (1.2s total) */
+          setTimeout(function() { hide(); }, 1000);
         }
-      }, 150);
+      }, 200);
     }
 
     /* ── Remove from DOM ── */

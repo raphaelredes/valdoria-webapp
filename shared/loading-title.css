@@ -172,51 +172,148 @@
   50%      { opacity: 0.9; text-shadow: 0 0 10px var(--v-gold-30); }
 }
 
-/* ── Flash on tap ── */
+/* ── Flash on tap — two-phase: golden burst then white wash ── */
 .title-flash {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, var(--v-gold-40), transparent 70%);
-  opacity: 0;
   pointer-events: none;
   z-index: 2;
+  opacity: 0;
 }
-.title-flash.active {
-  animation: titleFlashBurst 0.4s ease-out forwards;
+.title-flash-gold {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--v-gold-50), var(--v-gold-20) 40%, transparent 70%);
+  opacity: 0;
+}
+.title-flash-white {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(255,244,208,0.6), rgba(255,244,208,0.1) 50%, transparent 80%);
+  opacity: 0;
+}
+.title-flash.active .title-flash-gold {
+  animation: titleFlashGold 0.5s ease-out forwards;
+}
+.title-flash.active .title-flash-white {
+  animation: titleFlashWhite 0.8s ease-out 0.15s forwards;
 }
 
-@keyframes titleFlashBurst {
+@keyframes titleFlashGold {
+  0%   { opacity: 0; transform: scale(0.5); }
+  30%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2); }
+}
+@keyframes titleFlashWhite {
   0%   { opacity: 0; transform: scale(0.8); }
-  30%  { opacity: 1; }
-  100% { opacity: 0; transform: scale(1.5); }
+  25%  { opacity: 0.7; }
+  100% { opacity: 0; transform: scale(2.5); }
 }
 
-/* ── Exit animation ── */
+/* ── Cinematic exit — each element leaves independently ── */
 .title-screen.exit {
-  animation: titleExit 0.5s ease-in forwards;
+  pointer-events: none;
 }
 
-@keyframes titleExit {
-  0%   { opacity: 1; }
-  100% { opacity: 0; transform: scale(1.05); }
+/* Brand: rises and fades */
+.title-screen.exit .title-brand {
+  animation: titleBrandExit 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes titleBrandExit {
+  0%   { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
+  30%  { opacity: 1; transform: translateY(-5px) scale(1.03); filter: brightness(1.5); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.95); filter: brightness(2); }
 }
 
-/* ── Performance: Lite ── */
+/* CTA: fades fast */
+.title-screen.exit .title-cta {
+  animation: titleCtaExit 0.3s ease-in forwards;
+}
+@keyframes titleCtaExit {
+  0%   { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+/* Gem: explodes outward with glow */
+.title-screen.exit .title-divider-gem {
+  animation: titleGemExplode 0.6s ease-out forwards !important;
+}
+@keyframes titleGemExplode {
+  0%   { transform: scale(1); opacity: 1; text-shadow: 0 0 12px var(--v-gold-60); }
+  40%  { transform: scale(2.5); opacity: 1; text-shadow: 0 0 40px var(--v-gold-80, rgba(196,149,58,0.8)), 0 0 80px var(--v-gold-50); }
+  100% { transform: scale(4); opacity: 0; text-shadow: 0 0 60px var(--v-gold-80, rgba(196,149,58,0.8)); }
+}
+
+/* Divider lines: extend and fade */
+.title-screen.exit .title-divider-line {
+  animation: titleLineExit 0.5s ease-out forwards;
+}
+@keyframes titleLineExit {
+  0%   { width: 40px; opacity: 0.6; }
+  40%  { width: 80px; opacity: 0.8; }
+  100% { width: 120px; opacity: 0; }
+}
+
+/* Particles: accelerate upward */
+.title-screen.exit .title-particles .tp {
+  animation-duration: 2s !important;
+  animation-timing-function: ease-in !important;
+}
+
+/* Runes: scatter outward */
+.title-screen.exit .title-rune:nth-child(1) { animation: titleRuneScatter 0.6s ease-out forwards; --tr-x: -30px; --tr-y: -20px; }
+.title-screen.exit .title-rune:nth-child(2) { animation: titleRuneScatter 0.6s ease-out 0.05s forwards; --tr-x: 30px; --tr-y: -25px; }
+.title-screen.exit .title-rune:nth-child(3) { animation: titleRuneScatter 0.6s ease-out 0.1s forwards; --tr-x: -25px; --tr-y: 20px; }
+.title-screen.exit .title-rune:nth-child(4) { animation: titleRuneScatter 0.6s ease-out 0.08s forwards; --tr-x: 35px; --tr-y: 15px; }
+@keyframes titleRuneScatter {
+  0%   { opacity: 0.12; transform: translateX(0) translateY(0); }
+  30%  { opacity: 0.3; }
+  100% { opacity: 0; transform: translateX(var(--tr-x, 30px)) translateY(var(--tr-y, -20px)); }
+}
+
+/* Background: final fade to black */
+.title-screen.exit::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--v-bg-deep, #1a1510);
+  animation: titleBgFade 0.9s ease-in 0.3s forwards;
+  z-index: -1;
+}
+@keyframes titleBgFade {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* ── Performance: Lite — idle animations off, exit = instant fade ── */
 .title-screen.title-lite .title-particles,
 .title-screen.title-lite .title-runes { display: none; }
 .title-screen.title-lite .title-text,
 .title-screen.title-lite .title-text-sub { animation: none; opacity: 1; }
 .title-screen.title-lite .title-divider-gem { animation: none; opacity: 0.7; }
+.title-screen.title-lite.exit { animation: titleExitLite 0.4s ease-in forwards; }
+.title-screen.title-lite.exit .title-brand,
+.title-screen.title-lite.exit .title-cta,
+.title-screen.title-lite.exit .title-divider-gem,
+.title-screen.title-lite.exit .title-divider-line { animation: none !important; }
+@keyframes titleExitLite { 0% { opacity: 1; } 100% { opacity: 0; } }
 
-/* ── Performance: Medium ── */
+/* ── Performance: Medium — reduced particles/runes, keep exit cinematic ── */
 .title-screen.title-medium .title-particles .tp:nth-child(n+5) { display: none; }
 .title-screen.title-medium .title-runes .title-rune:nth-child(n+3) { display: none; }
+.title-screen.title-medium.exit .title-flash-white { display: none; }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   .title-screen .title-particles,
   .title-screen .title-runes { display: none; }
   .title-text, .title-text-sub, .title-divider-gem, .title-cta { animation: none !important; opacity: 1 !important; }
-  .title-flash.active { animation: none; opacity: 0; }
-  .title-screen.exit { animation: none; opacity: 0; }
+  .title-flash.active .title-flash-gold,
+  .title-flash.active .title-flash-white { animation: none !important; }
+  .title-screen.exit { animation: titleExitLite 0.3s ease-in forwards !important; }
+  .title-screen.exit .title-brand,
+  .title-screen.exit .title-cta,
+  .title-screen.exit .title-divider-gem,
+  .title-screen.exit .title-divider-line,
+  .title-screen.exit .title-rune { animation: none !important; }
 }
