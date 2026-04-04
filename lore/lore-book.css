@@ -157,6 +157,8 @@ body {
             rgba(56, 46, 32, 0.92) 80%,
             rgba(62, 52, 38, 0.95) 100%);
     position: relative;
+    /* SVG paper grain filter — adds real fiber texture */
+    filter: url(#paper-grain);
 }
 /* Parchment edge darkening + vignette */
 .page-parchment::before {
@@ -165,12 +167,12 @@ body {
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse at center, transparent 50%, rgba(15,12,8,0.35) 100%),
-        linear-gradient(90deg, rgba(20,16,10,0.35) 0%, transparent 7%, transparent 93%, rgba(20,16,10,0.35) 100%),
-        linear-gradient(180deg, rgba(20,16,10,0.25) 0%, transparent 4%, transparent 96%, rgba(20,16,10,0.25) 100%);
+        radial-gradient(ellipse at center, transparent 50%, rgba(15,12,8,0.4) 100%),
+        linear-gradient(90deg, rgba(20,16,10,0.4) 0%, transparent 8%, transparent 92%, rgba(20,16,10,0.4) 100%),
+        linear-gradient(180deg, rgba(20,16,10,0.3) 0%, transparent 5%, transparent 95%, rgba(20,16,10,0.3) 100%);
     z-index: 1;
 }
-/* Base stain texture — organic aging spots */
+/* Base stain texture — foxing spots */
 .page-parchment::after {
     content: '';
     position: absolute;
@@ -181,8 +183,9 @@ body {
     pointer-events: none;
     z-index: 1;
     background:
-        radial-gradient(ellipse at 15% 20%, rgba(90,60,20,0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 70%, rgba(80,55,18,0.06) 0%, transparent 45%);
+        radial-gradient(ellipse at 12% 18%, rgba(90,60,20,0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 78% 65%, rgba(80,55,18,0.08) 0%, transparent 40%),
+        radial-gradient(circle at 45% 40%, rgba(70,45,15,0.04) 0%, transparent 30%);
     border-radius: 0;
 }
 
@@ -364,101 +367,127 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE CONDITIONS (immersive visual effects)
+   PAGE CONDITIONS (immersive visual effects with SVG filters)
    ═══════════════════════════════════════════════════════ */
 
-/* Aged — yellowed parchment with foxing spots and darkened edges */
+/* Aged — yellowed parchment with heavy foxing and parchment-surface lighting */
 .condition-aged .page-parchment {
     background:
-        radial-gradient(ellipse at 20% 30%, rgba(90,70,30,0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 60%, rgba(80,60,25,0.06) 0%, transparent 40%),
-        radial-gradient(ellipse at 40% 80%, rgba(85,65,28,0.07) 0%, transparent 45%),
+        radial-gradient(ellipse at 20% 30%, rgba(90,70,30,0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(80,60,25,0.08) 0%, transparent 40%),
+        radial-gradient(ellipse at 40% 80%, rgba(85,65,28,0.09) 0%, transparent 45%),
+        radial-gradient(circle at 55% 15%, rgba(95,75,35,0.06) 0%, transparent 35%),
         linear-gradient(180deg,
             rgba(68, 56, 36, 0.95) 0%,
             rgba(60, 50, 32, 0.90) 50%,
             rgba(68, 56, 36, 0.95) 100%);
 }
+/* Aged has stronger vignette */
+.condition-aged .page-parchment::before {
+    background:
+        radial-gradient(ellipse at center, transparent 40%, rgba(15,12,8,0.5) 100%),
+        linear-gradient(90deg, rgba(20,16,10,0.45) 0%, transparent 9%, transparent 91%, rgba(20,16,10,0.45) 100%),
+        linear-gradient(180deg, rgba(20,16,10,0.35) 0%, transparent 6%, transparent 94%, rgba(20,16,10,0.35) 100%);
+}
 
-/* Burned — realistic charred corners with ember glow at edges */
+/* ─── BURNED ─── realistic charred corners + ember glow + SVG displacement */
+.condition-burned .page-parchment {
+    /* SVG burn-edge filter warps the parchment edges organically */
+    filter: url(#paper-grain) url(#burn-edge);
+}
 .condition-burned .page-parchment::before {
     background:
-        radial-gradient(ellipse at -5% -5%, rgba(5,2,0,0.95) 0%, rgba(15,5,0,0.7) 15%, rgba(40,15,0,0.3) 25%, transparent 40%),
-        radial-gradient(ellipse at 105% 105%, rgba(5,2,0,0.9) 0%, rgba(15,5,0,0.6) 12%, rgba(40,15,0,0.25) 22%, transparent 35%),
-        radial-gradient(ellipse at 100% -5%, rgba(5,2,0,0.5) 0%, rgba(30,10,0,0.2) 10%, transparent 25%),
-        linear-gradient(90deg, rgba(20,10,0,0.25) 0%, transparent 6%, transparent 94%, rgba(20,10,0,0.25) 100%);
+        /* Deep char at top-left corner */
+        radial-gradient(ellipse at -8% -8%, rgba(2,0,0,0.98) 0%, rgba(8,3,0,0.85) 8%, rgba(20,8,0,0.5) 18%, rgba(50,20,0,0.2) 28%, transparent 42%),
+        /* Deep char at bottom-right corner */
+        radial-gradient(ellipse at 108% 108%, rgba(2,0,0,0.95) 0%, rgba(8,3,0,0.8) 7%, rgba(20,8,0,0.45) 16%, rgba(50,20,0,0.15) 26%, transparent 38%),
+        /* Lighter scorch at top-right */
+        radial-gradient(ellipse at 105% -5%, rgba(5,2,0,0.6) 0%, rgba(30,12,0,0.25) 12%, transparent 28%),
+        /* Overall edge darkening */
+        linear-gradient(90deg, rgba(15,6,0,0.3) 0%, transparent 7%, transparent 93%, rgba(15,6,0,0.3) 100%);
 }
-/* Ember glow line at burn edges */
+/* Ember glow at char edges — warm orange-amber transition */
 .condition-burned .page-parchment::after {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: auto;
-    height: auto;
-    border-radius: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: auto; height: auto; border-radius: 0;
     background:
-        radial-gradient(ellipse at -3% -3%, rgba(180,80,0,0.12) 0%, transparent 20%),
-        radial-gradient(ellipse at 103% 103%, rgba(180,80,0,0.10) 0%, transparent 18%),
-        radial-gradient(ellipse at 100% 0%, rgba(160,70,0,0.06) 0%, transparent 15%);
+        /* Ember ring around top-left char */
+        radial-gradient(ellipse at -3% -3%, rgba(200,90,10,0.18) 10%, rgba(180,70,0,0.08) 22%, transparent 35%),
+        /* Ember ring around bottom-right char */
+        radial-gradient(ellipse at 103% 103%, rgba(200,90,10,0.15) 8%, rgba(180,70,0,0.06) 20%, transparent 32%),
+        /* Warm tint across scorched areas */
+        radial-gradient(ellipse at 100% 0%, rgba(160,70,0,0.08) 0%, transparent 20%),
+        /* Soot particles (tiny dark spots near burn zones) */
+        radial-gradient(circle at 8% 12%, rgba(0,0,0,0.12) 0%, transparent 3%),
+        radial-gradient(circle at 15% 5%, rgba(0,0,0,0.08) 0%, transparent 2%),
+        radial-gradient(circle at 90% 88%, rgba(0,0,0,0.1) 0%, transparent 3%),
+        radial-gradient(circle at 85% 95%, rgba(0,0,0,0.07) 0%, transparent 2%);
 }
 
-/* Torn — jagged bottom edge with fiber-like tear effect */
+/* ─── TORN ─── jagged edge with SVG displacement + fiber effect */
 .condition-torn .page-parchment {
+    /* SVG torn-paper filter creates organic jagged edge */
+    filter: url(#paper-grain) url(#torn-paper);
     mask-image:
-        linear-gradient(to bottom, black 75%,
-            rgba(0,0,0,0.9) 80%,
-            rgba(0,0,0,0.6) 85%,
-            rgba(0,0,0,0.3) 88%,
-            rgba(0,0,0,0.1) 91%,
-            transparent 94%);
+        linear-gradient(to bottom, black 72%,
+            rgba(0,0,0,0.85) 78%,
+            rgba(0,0,0,0.5) 84%,
+            rgba(0,0,0,0.15) 89%,
+            transparent 93%);
     -webkit-mask-image:
-        linear-gradient(to bottom, black 75%,
-            rgba(0,0,0,0.9) 80%,
-            rgba(0,0,0,0.6) 85%,
-            rgba(0,0,0,0.3) 88%,
-            rgba(0,0,0,0.1) 91%,
-            transparent 94%);
+        linear-gradient(to bottom, black 72%,
+            rgba(0,0,0,0.85) 78%,
+            rgba(0,0,0,0.5) 84%,
+            rgba(0,0,0,0.15) 89%,
+            transparent 93%);
 }
-/* Torn edge fiber texture */
+/* Torn edge — exposed fiber strands at tear line */
 .condition-torn .page-parchment::after {
     top: auto;
-    bottom: 8%;
-    left: 5%;
-    right: 5%;
+    bottom: 6%;
+    left: 3%;
+    right: 3%;
     width: auto;
-    height: 40px;
+    height: 60px;
     border-radius: 0;
     background:
-        repeating-linear-gradient(90deg,
-            transparent 0px,
-            rgba(90,70,40,0.15) 2px,
-            transparent 4px,
-            rgba(80,60,35,0.1) 6px,
-            transparent 8px);
-    opacity: 0.5;
+        /* Fiber strands — irregular vertical lines simulating torn paper */
+        repeating-linear-gradient(85deg,
+            transparent 0px, rgba(100,80,50,0.12) 1px, transparent 2px,
+            transparent 3px, rgba(90,70,40,0.08) 4px, transparent 5px,
+            transparent 7px, rgba(110,85,55,0.1) 8px, transparent 9px),
+        /* Slight discoloration at tear line */
+        linear-gradient(to bottom, rgba(80,60,30,0.15) 0%, transparent 100%);
+    opacity: 0.7;
 }
 
-/* Stained — multiple organic stain layers (ink, liquid, age spots) */
+/* ─── STAINED ─── organic ink/liquid stains via SVG filter + gradients */
+.condition-stained .page-parchment {
+    filter: url(#paper-grain) url(#ink-stain);
+}
 .condition-stained .page-parchment::after {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: auto;
-    height: auto;
-    border-radius: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: auto; height: auto; border-radius: 0;
     background:
-        radial-gradient(ellipse at 15% 25%, rgba(100,40,20,0.14) 0%, transparent 50%),
-        radial-gradient(ellipse at 75% 55%, rgba(80,50,15,0.10) 0%, transparent 40%),
-        radial-gradient(ellipse at 30% 75%, rgba(60,30,10,0.08) 0%, transparent 35%),
-        radial-gradient(ellipse at 85% 20%, rgba(90,45,18,0.06) 0%, transparent 30%),
-        radial-gradient(circle at 50% 45%, rgba(70,40,15,0.04) 0%, transparent 60%);
+        /* Large liquid spill — irregular shape via stacked ellipses */
+        radial-gradient(ellipse at 18% 28%, rgba(100,40,20,0.16) 0%, rgba(90,35,15,0.08) 30%, transparent 55%),
+        radial-gradient(ellipse at 22% 32%, rgba(85,30,12,0.1) 0%, transparent 40%),
+        /* Secondary drip mark */
+        radial-gradient(ellipse at 72% 52%, rgba(80,50,15,0.12) 0%, transparent 35%),
+        /* Age spots — small scattered discolorations */
+        radial-gradient(circle at 30% 72%, rgba(60,30,10,0.09) 0%, transparent 20%),
+        radial-gradient(circle at 85% 18%, rgba(90,45,18,0.07) 0%, transparent 18%),
+        radial-gradient(circle at 60% 90%, rgba(75,40,12,0.06) 0%, transparent 15%),
+        /* Ring mark — like a wet cup was placed on the document */
+        radial-gradient(circle at 65% 40%, transparent 22px, rgba(80,50,20,0.08) 23px, rgba(80,50,20,0.06) 26px, transparent 27px);
 }
 
-/* Pristine — eerily clean, faint golden inner glow (unsettling) */
+/* ─── PRISTINE ─── eerily clean, faint golden glow (no grain, no aging) */
 .condition-pristine .page-parchment {
+    /* Remove grain filter — pristine is unnaturally clean */
+    filter: none;
     background:
-        radial-gradient(ellipse at center, rgba(196,149,58,0.03) 0%, transparent 70%),
+        radial-gradient(ellipse at center, rgba(196,149,58,0.04) 0%, transparent 60%),
         linear-gradient(180deg,
             rgba(72, 62, 46, 0.97) 0%,
             rgba(66, 56, 40, 0.95) 50%,
@@ -467,7 +496,7 @@ body {
 .condition-pristine .page-parchment::before { display: none; }
 .condition-pristine .page-parchment::after { display: none; }
 
-/* Glitched — unstable reality, text shadow shifts, chromatic aberration */
+/* ─── GLITCHED ─── unstable reality, chromatic aberration, text distortion */
 .condition-glitched .page-parchment {
     animation: glitchBg 6s ease-in-out infinite;
 }
@@ -475,19 +504,19 @@ body {
     animation: glitchText 8s ease-in-out infinite;
 }
 @keyframes glitchBg {
-    0%, 88%, 100% { filter: none; }
-    90% { filter: hue-rotate(8deg) brightness(1.08); }
-    92% { filter: hue-rotate(-5deg) brightness(0.92) saturate(1.3); }
-    94% { filter: hue-rotate(3deg) brightness(1.05); }
-    96% { filter: none; }
+    0%, 88%, 100% { filter: url(#paper-grain); }
+    90% { filter: url(#paper-grain) hue-rotate(8deg) brightness(1.08); }
+    92% { filter: url(#paper-grain) hue-rotate(-5deg) brightness(0.92) saturate(1.3); }
+    94% { filter: url(#paper-grain) hue-rotate(3deg) brightness(1.05); }
+    96% { filter: url(#paper-grain); }
 }
 @keyframes glitchText {
-    0%, 85%, 100% { text-shadow: none; }
-    87% { text-shadow: -1px 0 rgba(196,149,58,0.3), 1px 0 rgba(100,40,20,0.3); }
-    89% { text-shadow: 1px 0 rgba(196,149,58,0.2), -1px 0 rgba(100,40,20,0.2); }
-    91% { text-shadow: none; }
-    93% { text-shadow: 0 1px rgba(196,149,58,0.15); }
-    95% { text-shadow: none; }
+    0%, 85%, 100% { text-shadow: none; transform: none; }
+    87% { text-shadow: -2px 0 rgba(196,149,58,0.4), 2px 0 rgba(100,40,20,0.4); transform: skewX(-0.3deg); }
+    89% { text-shadow: 2px 0 rgba(196,149,58,0.3), -2px 0 rgba(100,40,20,0.3); transform: skewX(0.2deg); }
+    91% { text-shadow: none; transform: none; }
+    93% { text-shadow: 0 2px rgba(196,149,58,0.2), 0 -1px rgba(100,40,20,0.15); transform: skewX(-0.1deg); }
+    95% { text-shadow: none; transform: none; }
 }
 
 /* ═══════════════════════════════════════════════════════
