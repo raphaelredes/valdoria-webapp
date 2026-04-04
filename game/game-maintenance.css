@@ -1,89 +1,142 @@
-/* game-maintenance.css — Maintenance screen + warning toast styles */
+/* game-maintenance.css — Bonfire maintenance screen */
 
 .maint-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: var(--v-z-modal, 500);
+    display: flex;
+    flex-direction: column;
+    background: #0a0808;
+}
+
+/* ── Scene (top zone: campfire + sky) ── */
+.maint-scene {
+    position: relative;
+    flex-shrink: 0;
+    height: 380px;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 60%, var(--v-gold-08) 0%, transparent 50%), #0a0808;
+}
+
+/* ── Content (bottom zone: info + controls) ── */
+.maint-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 60vh;
-    padding: var(--v-space-xl, 16px);
     text-align: center;
-}
-
-.maint-icon {
-    font-size: 48px;
-    margin-bottom: var(--v-space-lg, 12px);
+    padding: 0 24px;
+    margin-top: -40px;
+    position: relative;
+    background: linear-gradient(180deg, transparent 0%, rgba(10,8,6,0.85) 20%, rgba(10,8,6,0.95) 40%);
 }
 
 .maint-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: var(--v-font-xl, 16px);
+    font-size: var(--v-font-2xl, 18px);
     color: var(--v-gold, #c4953a);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px var(--v-gold-30), 0 2px 4px rgba(0,0,0,0.5);
     margin-bottom: var(--v-space-md, 8px);
 }
 
 .maint-reason {
-    font-size: var(--v-font-body, 14px);
-    color: var(--v-text, #d4c8b0);
-    margin-bottom: var(--v-space-xl, 16px);
+    font-size: var(--v-font-sm, 13px);
+    color: var(--v-text-dim, #a09484);
     max-width: 300px;
-}
-
-.maint-progress-wrap {
-    width: 100%;
-    max-width: 280px;
-    margin-bottom: var(--v-space-lg, 12px);
-}
-
-.maint-progress-bar {
-    width: 100%;
-    height: var(--v-bar-height, 8px);
-    background: var(--v-bg-card, #2e2520);
-    border-radius: var(--v-radius, 10px);
-    overflow: hidden;
-    border: 1px solid var(--v-border, #4a3828);
-}
-
-.maint-progress-fill {
-    height: 100%;
-    background: var(--v-gold, #c4953a);
-    border-radius: var(--v-radius, 10px);
-    transition: width 1s linear /* pflt-suppress: 1s matches countdown setInterval(1000) */;
+    line-height: 1.5;
+    margin-bottom: var(--v-space-xl, 16px);
 }
 
 .maint-countdown {
-    font-size: var(--v-font-sm, 13px);
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: 30px;
+    color: var(--v-gold, #c4953a);
+    letter-spacing: 4px;
+    text-shadow: 0 0 16px var(--v-gold-30), 0 2px 4px rgba(0,0,0,0.5);
+    margin-bottom: var(--v-space-xs, 2px);
+}
+
+.maint-countdown-label {
+    font-size: var(--v-font-xs, 10px);
     color: var(--v-text-dim, #a09484);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    opacity: 0.6;
     margin-bottom: var(--v-space-xl, 16px);
 }
 
+/* ── Tip box ── */
+.maint-tip {
+    background: var(--v-gold-5);
+    border: 1px solid var(--v-gold-10);
+    border-radius: var(--v-radius, 10px);
+    padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+    min-height: 64px;
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: var(--v-space-xl, 16px);
+}
+
+.maint-tip-label {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xs, 10px);
+    color: var(--v-gold, #c4953a);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: var(--v-space-xs, 2px);
+}
+
+.maint-tip-text {
+    font-size: var(--v-font-label, 12px);
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.5;
+    transition: opacity 0.4s ease;
+}
+
+/* ── Retry button ── */
 .maint-retry-btn {
     font-family: var(--v-font, 'MedievalSharp', serif);
     font-size: var(--v-font-body, 14px);
     color: var(--v-gold, #c4953a);
-    background: var(--v-bg-raised, #332a22);
-    border: 1px solid var(--v-gold-dim, #9a7530);
+    background: var(--v-gold-08);
+    border: 1px solid var(--v-gold-30);
     border-radius: var(--v-radius, 10px);
-    padding: var(--v-space-sm, 4px) var(--v-space-xl, 16px);
+    padding: var(--v-space-md, 8px) var(--v-space-xl, 16px);
     min-height: 44px;
-    min-width: 160px;
+    min-width: 200px;
     cursor: pointer;
+    margin-bottom: var(--v-space-lg, 12px);
 }
 
 .maint-retry-btn:active {
-    background: var(--v-bg-card, #2e2520);
+    background: var(--v-gold-10);
 }
 
 .maint-retry-pulse {
-    animation: maintPulse 2s ease-in-out infinite;
+    animation: maintPulse 2.5s ease-in-out infinite;
 }
 
 @keyframes maintPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+    0%, 100% { border-color: var(--v-gold-30); }
+    50% { border-color: var(--v-gold-50); }
 }
 
+/* ── Safe message ── */
+.maint-safe {
+    font-size: var(--v-font-label, 11px);
+    color: var(--v-text-dim, #a09484);
+    opacity: 0.5;
+    margin-top: auto;
+    padding-bottom: var(--v-space-xl, 16px);
+}
+
+/* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
     .maint-retry-pulse { animation: none; }
-    .maint-progress-fill { transition: none; }
+    .maint-tip-text { transition: none; }
 }
