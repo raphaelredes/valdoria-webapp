@@ -9,12 +9,26 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="theme-color" content="#2a2420">
-    <link rel="icon" type="image/svg+xml" href="/valdoria-webapp/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preload" href="/shared/fonts/medievalsharp.woff2" as="font" type="font/woff2"
+        crossorigin>
+    <link rel="stylesheet" href="/shared/fonts.css">
     <script>
         var v = Date.now();
-        document.write('<link rel="stylesheet" href="/valdoria-webapp/valdoria-design.css?v=' + v + '">');
+        var lk = document.createElement('link');
+        lk.rel = 'stylesheet';
+        lk.href = '/valdoria-design.css?v=' + v;
+        document.head.appendChild(lk);
+        var lk2 = document.createElement('link');
+        lk2.rel = 'stylesheet';
+        lk2.href = '/shared/loading-title.css?v=' + v;
+        document.head.appendChild(lk2);
     </script>
     <style>
+        html {
+            background: var(--v-bg-deep, #1a1510);
+        }
+
         body {
             display: flex;
             flex-direction: column;
@@ -22,59 +36,333 @@
             justify-content: center;
             height: 100%;
             text-align: center;
-            padding: 20px;
+            padding: var(--v-space-xl, 16px);
+            background: radial-gradient(ellipse at 50% 35%, #352818 0%, var(--v-bg, #2a2420) 55%, #1a1510 100%);
+            position: relative;
+            overflow: hidden;
         }
 
-        .lost-icon {
-            font-size: clamp(48px, 16vw, 64px);
-            margin-bottom: 12px;
-            animation: v-fadeIn 0.5s ease;
+        /* ── Vignette ── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 35%, rgba(0, 0, 0, 0.55) 100%);
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .lost-title {
-            font-size: clamp(36px, 12vw, 48px);
-            font-weight: 900;
-            color: var(--v-gold);
-            text-shadow: 0 0 20px rgba(196, 149, 58, 0.4);
-            margin-bottom: 8px;
+        /* ── Ember particles ── */
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
         }
 
-        .lost-subtitle {
-            font-size: 16px;
-            color: var(--v-text-dim);
-            margin-bottom: 24px;
-            max-width: 280px;
-            line-height: 1.5;
+        .particles .p {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--v-gold, #c4953a);
+            opacity: 0;
+            animation: emberFloat 14s ease-in infinite;
         }
 
-        .home-btn {
+        .particles .p:nth-child(1) { left: 12%; bottom: -6px; width: 3px; height: 3px; animation-delay: 0s; }
+        .particles .p:nth-child(2) { left: 30%; bottom: -6px; width: 2px; height: 2px; animation-delay: 2s; }
+        .particles .p:nth-child(3) { left: 50%; bottom: -6px; width: 4px; height: 4px; animation-delay: 1s; }
+        .particles .p:nth-child(4) { left: 70%; bottom: -6px; width: 2px; height: 2px; animation-delay: 3.5s; }
+        .particles .p:nth-child(5) { left: 88%; bottom: -6px; width: 3px; height: 3px; animation-delay: 5s; }
+        .particles .p:nth-child(6) { left: 40%; bottom: -6px; width: 2px; height: 2px; animation-delay: 7s; }
+
+        @keyframes emberFloat {
+            0% { opacity: 0; transform: translateY(0) translateX(0); }
+            8% { opacity: 0.7; }
+            50% { opacity: 0.5; transform: translateY(-50vh) translateX(12px); }
+            85% { opacity: 0.15; }
+            100% { opacity: 0; transform: translateY(-95vh) translateX(-8px); }
+        }
+
+        /* ── Floating runes ── */
+        .runes {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .rune {
+            position: absolute;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            color: var(--v-gold, #c4953a);
+            opacity: 0.08;
+            font-size: var(--v-font-xl, 16px);
+            animation: runeFloat 22s ease-in-out infinite;
+        }
+
+        .rune:nth-child(1) { top: 10%; left: 8%; animation-delay: 0s; }
+        .rune:nth-child(2) { top: 22%; right: 10%; animation-delay: 6s; animation-duration: 26s; }
+        .rune:nth-child(3) { bottom: 18%; left: 14%; animation-delay: 3s; animation-duration: 20s; }
+        .rune:nth-child(4) { bottom: 28%; right: 12%; animation-delay: 9s; animation-duration: 18s; }
+
+        @keyframes runeFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.06; }
+            25% { transform: translateY(-14px) rotate(3deg); opacity: 0.14; }
+            50% { transform: translateY(-6px) rotate(-2deg); opacity: 0.10; }
+            75% { transform: translateY(-20px) rotate(1deg); opacity: 0.08; }
+        }
+
+        /* ── Content wrapper ── */
+        .content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ── Override title-orb-wrap entrance for 404 page ── */
+        .content .title-orb-wrap {
+            animation: fadeSlideIn 1s ease 0.2s both, titleOrbFloat 6s ease-in-out 1.2s infinite;
+        }
+
+        /* ── Brand title ── */
+        .brand {
+            margin-bottom: var(--v-space-lg, 12px);
+            animation: fadeSlideIn 0.8s ease 0.5s both;
+        }
+
+        .brand-top {
+            display: block;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-weight: 700;
+            font-size: clamp(22px, 7vw, 32px);
+            color: var(--v-gold, #c4953a);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(196, 149, 58, 0.4), 0 0 40px rgba(196, 149, 58, 0.2);
+            line-height: 1.2;
+        }
+
+        .brand-sub {
+            display: block;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-weight: 700;
+            font-size: clamp(28px, 9vw, 42px);
+            color: var(--v-gold, #c4953a);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 25px rgba(196, 149, 58, 0.5), 0 0 50px rgba(196, 149, 58, 0.25);
+            line-height: 1.2;
+        }
+
+        /* ── Divider ── */
+        .divider {
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--v-gold-dim, #9a7530), transparent);
+            margin: 0 auto var(--v-space-xl, 16px);
+            position: relative;
+            animation: fadeSlideIn 0.8s ease 0.6s both;
+        }
+
+        .divider::after {
+            content: '\25C6';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8px;
+            color: var(--v-gold-dim, #9a7530);
+            background: transparent;
+            padding: 0 8px;
+        }
+
+        /* ── Error code ── */
+        .error-code {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-weight: 700;
+            font-size: clamp(56px, 16vw, 80px);
+            color: var(--v-gold, #c4953a);
+            opacity: 0.55;
+            text-shadow: 0 0 30px rgba(196, 149, 58, 0.3), 0 2px 4px rgba(0, 0, 0, 0.5);
+            line-height: 1;
+            margin-bottom: var(--v-space-md, 8px);
+            animation: fadeSlideIn 0.8s ease 0.7s both;
+        }
+
+        /* ── Message ── */
+        .error-msg {
+            font-size: var(--v-font-body, 14px);
+            color: var(--v-text-dim, #a09484);
+            max-width: 300px;
+            line-height: 1.6;
+            margin-bottom: var(--v-space-2xl, 24px);
+            animation: fadeSlideIn 0.8s ease 0.9s both;
+        }
+
+        /* ── CTA buttons ── */
+        .cta-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--v-space-lg, 12px);
+            animation: fadeSlideIn 0.8s ease 1.1s both;
+        }
+
+        .cta-primary {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, var(--v-gold), var(--v-gold-dim));
-            color: var(--v-bg);
+            gap: var(--v-space-md, 8px);
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530));
+            color: var(--v-bg, #2a2420);
             border: none;
-            border-radius: var(--v-radius);
+            border-radius: var(--v-radius, 10px);
+            font-family: var(--v-font-display, 'Cinzel', serif);
             font-size: 15px;
             font-weight: 700;
             text-decoration: none;
             cursor: pointer;
-            transition: transform var(--v-transition-fast);
-            box-shadow: 0 3px 12px rgba(196, 149, 58, 0.3);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: transform var(--v-transition-fast, 0.15s ease), box-shadow var(--v-transition-fast, 0.15s ease);
+            box-shadow: 0 4px 16px rgba(196, 149, 58, 0.3), 0 2px 8px rgba(0, 0, 0, 0.4);
         }
 
-        .home-btn:active {
+        .cta-primary:active {
             transform: scale(0.96);
+        }
+
+        .cta-secondary {
+            font-size: var(--v-font-sm, 11px);
+            color: var(--v-text-dim, #a09484);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            transition: color var(--v-transition-fast, 0.15s ease);
+        }
+
+        .cta-secondary:hover {
+            color: var(--v-gold, #c4953a);
+        }
+
+        /* ── Fade-slide animation ── */
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Reduced motion ── */
+        @media (prefers-reduced-motion: reduce) {
+            .particles .p,
+            .rune,
+            .title-orb,
+            .title-orb-wrap,
+            .title-orb-wrap::before,
+            .title-orb-nebula,
+            .title-orb-rays {
+                animation: none !important;
+            }
+
+            .content *,
+            .brand,
+            .divider,
+            .error-code,
+            .error-msg,
+            .cta-group {
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="lost-icon">🗺️</div>
-    <div class="lost-title">404</div>
-    <div class="lost-subtitle">Aventureiro, parece que você se perdeu nas terras de Valdoria...</div>
-    <a href="/valdoria-webapp/" class="home-btn">🏰 Voltar ao Portal</a>
+    <!-- Atmospheric particles -->
+    <div class="particles">
+        <div class="p"></div>
+        <div class="p"></div>
+        <div class="p"></div>
+        <div class="p"></div>
+        <div class="p"></div>
+        <div class="p"></div>
+    </div>
+
+    <!-- Floating runes -->
+    <div class="runes">
+        <div class="rune">&#5792;</div>
+        <div class="rune">&#5794;</div>
+        <div class="rune">&#5809;</div>
+        <div class="rune">&#5815;</div>
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+        <!-- 3D Orb of Valdoria (full animated version from loading-title.css) -->
+        <div class="title-orb-wrap">
+            <div class="title-orb-rays"></div>
+            <div class="title-orb-ambient"></div>
+            <div class="title-orb">
+                <div class="title-orb-nebula">
+                    <div class="title-orb-neb1"></div>
+                    <div class="title-orb-neb2"></div>
+                    <div class="title-orb-neb3"></div>
+                    <div class="title-orb-neb4"></div>
+                    <div class="title-orb-wisp title-orb-w1"></div>
+                    <div class="title-orb-wisp title-orb-w2"></div>
+                    <div class="title-orb-wisp title-orb-w3"></div>
+                    <div class="title-orb-wisp title-orb-w4"></div>
+                    <div class="title-orb-wisp title-orb-w5"></div>
+                    <div class="title-orb-spark title-orb-sp1"></div>
+                    <div class="title-orb-spark title-orb-sp2"></div>
+                    <div class="title-orb-spark title-orb-sp3"></div>
+                </div>
+                <div class="title-orb-core"></div>
+                <div class="title-orb-core-fl"></div>
+                <div class="title-orb-intlight"></div>
+                <div class="title-orb-term"></div>
+                <div class="title-orb-fresnel"></div>
+                <div class="title-orb-sss"></div>
+                <div class="title-orb-gp"></div>
+                <div class="title-orb-gs"></div>
+                <div class="title-orb-grim"></div>
+                <div class="title-orb-gcaus"></div>
+                <div class="title-orb-gel"></div>
+                <div class="title-orb-ger"></div>
+                <div class="title-orb-spec"></div>
+            </div>
+            <div class="title-orb-floor"></div>
+        </div>
+
+        <div class="brand">
+            <span class="brand-top">Lendas de</span>
+            <span class="brand-sub">Valdoria</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="error-code">404</div>
+
+        <div class="error-msg">
+            Aventureiro, parece que voce se perdeu nas terras de Valdoria...
+            Siga a luz do Orbe para encontrar o caminho de volta.
+        </div>
+
+        <div class="cta-group">
+            <a href="/" class="cta-primary">Voltar ao Portal</a>
+            <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener" class="cta-secondary">Jogar
+                no Telegram</a>
+        </div>
+    </div>
 </body>
 
 </html>

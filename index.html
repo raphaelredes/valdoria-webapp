@@ -21,9 +21,20 @@
     <script src="shared/font-apply.js"></script>
     <script>
         var v = Date.now();
-        document.write('<link rel="stylesheet" href="valdoria-design.css?v=' + v + '">');
+        var lk = document.createElement('link');
+        lk.rel = 'stylesheet';
+        lk.href = 'valdoria-design.css?v=' + v;
+        document.head.appendChild(lk);
+        var lk2 = document.createElement('link');
+        lk2.rel = 'stylesheet';
+        lk2.href = 'shared/loading-title.css?v=' + v;
+        document.head.appendChild(lk2);
     </script>
     <style>
+        html {
+            background: var(--v-bg-deep, #1a1510);
+        }
+
         body {
             display: flex;
             flex-direction: column;
@@ -34,10 +45,11 @@
         /* ─── Hero Header ─── */
         .hero {
             width: 100%;
-            padding: 24px 16px 20px;
+            padding: 28px 16px 24px;
             text-align: center;
-            background: linear-gradient(180deg, #3a3028 0%, var(--v-bg) 100%);
+            background: radial-gradient(ellipse at 50% 60%, #3a2e20 0%, var(--v-bg, #2a2420) 70%);
             position: relative;
+            overflow: hidden;
         }
 
         .hero::before {
@@ -47,73 +59,152 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, transparent, var(--v-crimson), var(--v-gold), var(--v-crimson), transparent);
+            background: linear-gradient(90deg, transparent, var(--v-crimson, #7b2020), var(--v-gold, #c4953a), var(--v-crimson, #7b2020), transparent);
         }
 
-        .hero-icon {
-            font-size: clamp(36px, 12vw, 48px);
-            margin-bottom: 8px;
-            animation: v-fadeIn 0.6s ease;
+        /* ── Hero particles ── */
+        .hero-particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
         }
 
-        .hero h1 {
-            font-size: clamp(18px, 5.5vw, 22px);
-            color: var(--v-gold);
-            letter-spacing: 4px;
+        .hero-particles .hp {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--v-gold, #c4953a);
+            opacity: 0;
+            animation: heroEmber 16s ease-in infinite;
+        }
+
+        .hero-particles .hp:nth-child(1) { left: 15%; bottom: -4px; width: 2px; height: 2px; animation-delay: 0s; }
+        .hero-particles .hp:nth-child(2) { left: 40%; bottom: -4px; width: 3px; height: 3px; animation-delay: 3s; }
+        .hero-particles .hp:nth-child(3) { left: 65%; bottom: -4px; width: 2px; height: 2px; animation-delay: 1.5s; }
+        .hero-particles .hp:nth-child(4) { left: 85%; bottom: -4px; width: 2px; height: 2px; animation-delay: 5s; }
+
+        @keyframes heroEmber {
+            0% { opacity: 0; transform: translateY(0) translateX(0); }
+            10% { opacity: 0.6; }
+            50% { opacity: 0.4; transform: translateY(-120px) translateX(10px); }
+            80% { opacity: 0.1; }
+            100% { opacity: 0; transform: translateY(-220px) translateX(-6px); }
+        }
+
+        /* ── Hero Orb — override title-orb-wrap for inline use ── */
+        .hero .title-orb-wrap {
+            margin: 0 auto var(--v-space-lg, 12px);
+            animation: fadeSlideIn 0.8s ease 0.1s both, titleOrbFloat 6s ease-in-out 0.9s infinite;
+        }
+
+        /* ── Hero title ── */
+        .hero-title {
+            margin: 0 0 var(--v-space-md, 8px);
+            animation: fadeSlideIn 0.6s ease 0.2s both;
+        }
+
+        .hero-title-top {
+            display: block;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-weight: 700;
+            font-size: clamp(22px, 7vw, 32px);
+            color: var(--v-gold, #c4953a);
             text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(196, 149, 58, 0.5), 0 2px 4px rgba(0, 0, 0, 0.6);
-            font-weight: 900;
-            margin-bottom: 6px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(196, 149, 58, 0.4), 0 0 40px rgba(196, 149, 58, 0.2);
+            line-height: 1.2;
+        }
+
+        .hero-title-sub {
+            display: block;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-weight: 700;
+            font-size: clamp(28px, 9vw, 42px);
+            color: var(--v-gold, #c4953a);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 25px rgba(196, 149, 58, 0.5), 0 0 50px rgba(196, 149, 58, 0.25);
+            line-height: 1.2;
         }
 
         .hero-subtitle {
-            font-size: 13px;
-            color: var(--v-text-dim);
+            font-size: var(--v-font-base, 13px);
+            color: var(--v-text-dim, #a09484);
             letter-spacing: 1px;
+            animation: fadeSlideIn 0.6s ease 0.3s both;
         }
 
-        /* ─── Decorative Divider ─── */
+        /* ── Hero divider ── */
         .hero-divider {
             width: 60%;
             max-width: 200px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--v-gold-dim), transparent);
-            margin: 16px auto 0;
+            background: linear-gradient(90deg, transparent, var(--v-gold-dim, #9a7530), transparent);
+            margin: var(--v-space-xl, 16px) auto 0;
             position: relative;
+            animation: fadeSlideIn 0.6s ease 0.35s both;
         }
 
         .hero-divider::after {
-            content: '\u25C6';
+            content: '\25C6';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 8px;
-            color: var(--v-gold-dim);
-            background: var(--v-bg);
+            color: var(--v-gold-dim, #9a7530);
+            background: var(--v-bg, #2a2420);
             padding: 0 8px;
         }
 
-        /* ─── Apps Grid ─── */
+        /* ── Hero CTA ── */
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--v-space-md, 8px);
+            margin-top: var(--v-space-xl, 16px);
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530));
+            color: var(--v-bg, #2a2420);
+            border: none;
+            border-radius: var(--v-radius, 10px);
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: transform var(--v-transition-fast, 0.15s ease), box-shadow var(--v-transition-fast, 0.15s ease);
+            box-shadow: 0 4px 16px rgba(196, 149, 58, 0.3), 0 2px 8px rgba(0, 0, 0, 0.4);
+            animation: fadeSlideIn 0.6s ease 0.45s both;
+        }
+
+        .hero-cta:active {
+            transform: scale(0.96);
+        }
+
+        /* ─── Apps Section ─── */
         .apps-section {
             width: 100%;
             max-width: 380px;
-            padding: 16px 12px;
+            padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px);
         }
 
         .section-label {
-            font-size: 11px;
-            color: var(--v-text-dim);
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: var(--v-font-sm, 11px);
+            color: var(--v-text-dim, #a09484);
             text-transform: uppercase;
             letter-spacing: 2px;
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: var(--v-space-lg, 12px);
         }
 
         .apps-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: var(--v-space-md-lg, 10px);
         }
 
         /* ─── App Card ─── */
@@ -122,15 +213,15 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 16px 10px 14px;
-            background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
-            border: 1px solid var(--v-border);
-            border-radius: var(--v-radius);
+            padding: var(--v-space-xl, 16px) var(--v-space-md-lg, 10px) var(--v-space-lg, 14px);
+            background: linear-gradient(165deg, var(--v-bg-card, #2e2520) 0%, #241e18 100%);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: var(--v-radius, 10px);
             text-decoration: none;
             cursor: pointer;
-            transition: all var(--v-transition-base);
+            transition: all var(--v-transition-base, 0.3s ease);
             position: relative;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--v-shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.3));
         }
 
         .app-card::before {
@@ -149,62 +240,135 @@
         }
 
         .app-card:hover {
-            border-color: var(--v-gold-dim);
-            box-shadow: 0 0 15px rgba(196, 149, 58, 0.15), 0 4px 16px rgba(0, 0, 0, 0.4);
+            border-color: var(--v-gold-dim, #9a7530);
+            box-shadow: var(--v-shadow-gold, 0 0 12px rgba(196, 149, 58, 0.25)), var(--v-shadow-md, 0 4px 16px rgba(0, 0, 0, 0.5));
         }
 
         .app-icon {
-            font-size: clamp(28px, 9vw, 36px);
-            margin-bottom: 8px;
+            font-size: var(--v-font-icon, 28px);
+            margin-bottom: var(--v-space-md, 8px);
         }
 
         .app-name {
-            font-size: 14px;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: var(--v-font-body, 14px);
             font-weight: 700;
-            color: var(--v-text-bright);
-            margin-bottom: 4px;
+            color: var(--v-text-bright, #e8dcc8);
+            margin-bottom: var(--v-space-sm, 4px);
             letter-spacing: 0.3px;
         }
 
         .app-desc {
-            font-size: 11px;
-            color: var(--v-text-dim);
+            font-size: var(--v-font-sm, 11px);
+            color: var(--v-text-dim, #a09484);
             line-height: 1.3;
         }
 
-        /* Staggered fade-in for cards */
-        .app-card:nth-child(1) {
-            animation: v-fadeIn 0.4s ease 0.1s both;
+        /* Staggered fade-in */
+        .app-card:nth-child(1) { animation: fadeSlideIn 0.4s ease 0.1s both; }
+        .app-card:nth-child(2) { animation: fadeSlideIn 0.4s ease 0.2s both; }
+        .app-card:nth-child(3) { animation: fadeSlideIn 0.4s ease 0.3s both; }
+        .app-card:nth-child(4) { animation: fadeSlideIn 0.4s ease 0.4s both; }
+
+        /* ─── Support Section ─── */
+        .support-section {
+            width: 100%;
+            max-width: 380px;
+            padding: 0 var(--v-space-lg, 12px) var(--v-space-xl, 16px);
         }
 
-        .app-card:nth-child(2) {
-            animation: v-fadeIn 0.4s ease 0.2s both;
+        .support-card {
+            display: flex;
+            align-items: center;
+            gap: var(--v-space-lg, 12px);
+            padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px);
+            background: linear-gradient(165deg, var(--v-bg-card, #2e2520) 0%, #241e18 100%);
+            border: 1px solid rgba(196, 149, 58, 0.25);
+            border-radius: var(--v-radius, 10px);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--v-transition-base, 0.3s ease);
+            box-shadow: var(--v-shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.3));
+            animation: fadeSlideIn 0.4s ease 0.5s both;
         }
 
-        .app-card:nth-child(3) {
-            animation: v-fadeIn 0.4s ease 0.3s both;
+        .support-card:active {
+            transform: scale(0.97);
         }
 
-        .app-card:nth-child(4) {
-            animation: v-fadeIn 0.4s ease 0.4s both;
+        .support-card:hover {
+            border-color: var(--v-gold-dim, #9a7530);
+            box-shadow: var(--v-shadow-gold, 0 0 12px rgba(196, 149, 58, 0.25));
         }
 
-        .app-card:nth-child(5) {
-            animation: v-fadeIn 0.4s ease 0.5s both;
+        .support-icon {
+            font-size: var(--v-font-icon, 28px);
+            flex-shrink: 0;
         }
 
-        .app-card:nth-child(6) {
-            animation: v-fadeIn 0.4s ease 0.6s both;
+        .support-info {
+            text-align: left;
         }
 
-        .app-card:nth-child(7) {
-            animation: v-fadeIn 0.4s ease 0.7s both;
+        .support-name {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: var(--v-font-body, 14px);
+            font-weight: 700;
+            color: var(--v-text-bright, #e8dcc8);
+            margin-bottom: var(--v-space-xs, 2px);
+        }
+
+        .support-desc {
+            font-size: var(--v-font-sm, 11px);
+            color: var(--v-text-dim, #a09484);
+            line-height: 1.3;
+        }
+
+        /* ─── Final CTA Block ─── */
+        .final-cta {
+            width: 100%;
+            padding: var(--v-space-2xl, 24px) var(--v-space-xl, 16px);
+            text-align: center;
+            background: linear-gradient(180deg, transparent 0%, rgba(26, 21, 16, 0.6) 100%);
+            margin-top: var(--v-space-md, 8px);
+        }
+
+        .final-cta-text {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: var(--v-font-lg, 15px);
+            color: var(--v-text-dim, #a09484);
+            letter-spacing: 1px;
+            margin-bottom: var(--v-space-lg, 12px);
+        }
+
+        .final-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--v-space-md, 8px);
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530));
+            color: var(--v-bg, #2a2420);
+            border: none;
+            border-radius: var(--v-radius, 10px);
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: var(--v-font-body, 14px);
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: transform var(--v-transition-fast, 0.15s ease);
+            box-shadow: 0 3px 12px rgba(196, 149, 58, 0.3);
+        }
+
+        .final-cta-btn:active {
+            transform: scale(0.96);
         }
 
         /* ─── Footer ─── */
         .hub-footer {
             margin-top: auto;
-            padding: 16px 12px 20px;
+            padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px) var(--v-space-2xl, 20px);
             text-align: center;
             width: 100%;
         }
@@ -213,25 +377,67 @@
             width: 40%;
             max-width: 120px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--v-border), transparent);
-            margin: 0 auto 12px;
+            background: linear-gradient(90deg, transparent, var(--v-border, #4a3828), transparent);
+            margin: 0 auto var(--v-space-lg, 12px);
         }
 
-        .footer-text {
-            font-size: 11px;
-            color: var(--v-text-dim);
-            letter-spacing: 0.5px;
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: var(--v-space-xl, 16px);
+            margin-bottom: var(--v-space-md, 8px);
         }
 
-        .footer-text a {
-            color: var(--v-gold-dim);
+        .footer-link {
+            font-size: var(--v-font-sm, 11px);
+            color: var(--v-gold-dim, #9a7530);
             text-decoration: none;
+            letter-spacing: 0.5px;
+            transition: color var(--v-transition-fast, 0.15s ease);
+        }
+
+        .footer-link:hover {
+            color: var(--v-gold, #c4953a);
         }
 
         .footer-version {
-            font-size: 10px;
-            color: var(--v-border);
-            margin-top: 4px;
+            font-size: var(--v-font-micro, 10px);
+            color: var(--v-border, #4a3828);
+            margin-top: var(--v-space-sm, 4px);
+        }
+
+        /* ── Fade-slide animation ── */
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Reduced motion ── */
+        @media (prefers-reduced-motion: reduce) {
+            .hero-particles .hp,
+            .title-orb,
+            .title-orb-wrap,
+            .title-orb-nebula,
+            .title-orb-rays {
+                animation: none !important;
+            }
+
+            .hero-title,
+            .hero-subtitle,
+            .hero-divider,
+            .hero-cta,
+            .app-card,
+            .support-card {
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
         }
     </style>
 </head>
@@ -239,14 +445,66 @@
 <body>
 
     <div class="hero">
-        <div class="hero-icon">🐉</div>
-        <h1>Lendas de Valdoria</h1>
-        <div class="hero-subtitle">RPG Medieval de Fantasia</div>
+        <!-- Particles -->
+        <div class="hero-particles">
+            <div class="hp"></div>
+            <div class="hp"></div>
+            <div class="hp"></div>
+            <div class="hp"></div>
+        </div>
+
+        <!-- 3D Orb of Valdoria -->
+        <div class="title-orb-wrap">
+            <div class="title-orb-rays"></div>
+            <div class="title-orb-ambient"></div>
+            <div class="title-orb">
+                <div class="title-orb-nebula">
+                    <div class="title-orb-neb1"></div>
+                    <div class="title-orb-neb2"></div>
+                    <div class="title-orb-neb3"></div>
+                    <div class="title-orb-neb4"></div>
+                    <div class="title-orb-wisp title-orb-w1"></div>
+                    <div class="title-orb-wisp title-orb-w2"></div>
+                    <div class="title-orb-wisp title-orb-w3"></div>
+                    <div class="title-orb-wisp title-orb-w4"></div>
+                    <div class="title-orb-wisp title-orb-w5"></div>
+                    <div class="title-orb-spark title-orb-sp1"></div>
+                    <div class="title-orb-spark title-orb-sp2"></div>
+                    <div class="title-orb-spark title-orb-sp3"></div>
+                </div>
+                <div class="title-orb-core"></div>
+                <div class="title-orb-core-fl"></div>
+                <div class="title-orb-intlight"></div>
+                <div class="title-orb-term"></div>
+                <div class="title-orb-fresnel"></div>
+                <div class="title-orb-sss"></div>
+                <div class="title-orb-gp"></div>
+                <div class="title-orb-gs"></div>
+                <div class="title-orb-grim"></div>
+                <div class="title-orb-gcaus"></div>
+                <div class="title-orb-gel"></div>
+                <div class="title-orb-ger"></div>
+                <div class="title-orb-spec"></div>
+            </div>
+            <div class="title-orb-floor"></div>
+        </div>
+
+        <!-- Title -->
+        <h1 class="hero-title">
+            <span class="hero-title-top">Lendas de</span>
+            <span class="hero-title-sub">Valdoria</span>
+        </h1>
+        <div class="hero-subtitle">RPG Medieval de Fantasia via Telegram</div>
         <div class="hero-divider"></div>
+
+        <!-- Primary CTA -->
+        <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener" class="hero-cta">Jogar no
+            Telegram</a>
     </div>
 
+    <!-- Game Tools -->
     <div class="apps-section">
-        <div class="section-label">Mini Apps</div>
+        <div class="section-label">Ferramentas de Jogo</div>
         <div class="apps-grid">
             <a href="dice/" class="app-card">
                 <div class="app-icon">🎲</div>
@@ -256,40 +514,50 @@
             <a href="character_creator/" class="app-card">
                 <div class="app-icon">⚔️</div>
                 <div class="app-name">Forjar Personagem</div>
-                <div class="app-desc">Crie seu personagem D&D 5e</div>
+                <div class="app-desc">Crie seu aventureiro D&D 5e</div>
             </a>
             <a href="workstation/" class="app-card">
                 <div class="app-icon">🔨</div>
                 <div class="app-name">Oficina</div>
                 <div class="app-desc">Fabrique itens e equipamentos</div>
             </a>
-            <a href="pix/" class="app-card">
-                <div class="app-icon">💰</div>
-                <div class="app-name">Pagamento PIX</div>
-                <div class="app-desc">QR Code para contribuicoes</div>
-            </a>
             <a href="explore/" class="app-card">
                 <div class="app-icon">🗺️</div>
                 <div class="app-name">Explorar</div>
                 <div class="app-desc">Mapa hexagonal interativo</div>
             </a>
-            <a href="wiki/" class="app-card">
-                <div class="app-icon">📖</div>
-                <div class="app-name">Wiki Dev</div>
-                <div class="app-desc">Documentacao tecnica interna</div>
-            </a>
-            <a href="apoie/" class="app-card">
-                <div class="app-icon">💎</div>
-                <div class="app-name">Apoiar Projeto</div>
-                <div class="app-desc">Contribua via PIX</div>
-            </a>
         </div>
     </div>
 
+    <!-- Support -->
+    <div class="support-section">
+        <div class="section-label">Apoio</div>
+        <a href="apoie/" class="support-card">
+            <div class="support-icon">💎</div>
+            <div class="support-info">
+                <div class="support-name">Apoiar o Projeto</div>
+                <div class="support-desc">Contribua para o desenvolvimento do jogo</div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Final CTA -->
+    <div class="final-cta">
+        <div class="final-cta-text">Comece sua aventura</div>
+        <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener"
+            class="final-cta-btn">Jogar no Telegram</a>
+    </div>
+
+    <!-- Footer -->
     <div class="hub-footer">
         <div class="footer-divider"></div>
-        <div class="footer-text">Jogue via <a href="https://t.me/">Telegram Bot</a></div>
-        <div class="footer-version">v4.0</div>
+        <div class="footer-links">
+            <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener"
+                class="footer-link">Telegram Bot</a>
+            <a href="https://t.me/lendasdevaldoria" target="_blank" rel="noopener"
+                class="footer-link">Canal de Noticias</a>
+        </div>
+        <div class="footer-version">v5.0</div>
     </div>
 </body>
 
