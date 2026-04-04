@@ -60,10 +60,11 @@ function _flush() {
     if (document.visibilityState === 'hidden' && _queue.length < _MAX_QUEUE) return;
 
     var entries = _queue.splice(0, _MAX_QUEUE);
+    var _uid = (window.S && window.S.uid) ? window.S.uid : 0;
     fetch(base + '/api/game/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entries: entries })
+        body: JSON.stringify({ entries: entries, uid: _uid })
     }).catch(function() {
         // Put entries back if fetch failed (will retry next interval)
         if (_queue.length < _MAX_QUEUE * 2) {
@@ -97,9 +98,10 @@ window.addEventListener('pagehide', function() {
     if (!base) return;
     var entries = _queue.splice(0, _MAX_QUEUE);
     try {
+        var _uid2 = (window.S && window.S.uid) ? window.S.uid : 0;
         navigator.sendBeacon(
             base + '/api/game/log',
-            new Blob([JSON.stringify({ entries: entries })], { type: 'application/json' })
+            new Blob([JSON.stringify({ entries: entries, uid: _uid2 })], { type: 'application/json' })
         );
     } catch (e) { /* sendBeacon not supported */ }
 });
