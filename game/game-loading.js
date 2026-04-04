@@ -88,31 +88,40 @@
     var _enterBtn = null;          /* "Aventurar-se" button element */
 
     /**
-     * Show title screen ON TOP of loading (z-index 10000 > loading 9999).
-     * Loading runs normally underneath. Title screen is just an audio-unlock overlay.
-     * Called once on cold start — after that, _titleShown prevents re-showing.
+     * Show title screen INSTEAD of loading. Loading only starts after user taps.
+     * Returns true if title screen was shown (caller should NOT show loading).
      */
     function _showTitleScreen() {
-        if (_titleShown) { console.log('[INTRO] _showTitleScreen skipped — already shown'); return; }
-        if (typeof ValdoriaTitleScreen !== 'function') { console.warn('[INTRO] ValdoriaTitleScreen not available'); return; }
+        if (_titleShown) { console.log('[INTRO] _showTitleScreen skipped — already shown'); return false; }
+        if (typeof ValdoriaTitleScreen !== 'function') { console.warn('[INTRO] ValdoriaTitleScreen not available'); return false; }
         _titleShown = true;
-        console.log('[INTRO] Title screen created — waiting for user tap');
+
+        /* Hide loading overlay — title screen replaces it */
+        var loadEl = document.getElementById('loading');
+        if (loadEl) loadEl.style.display = 'none';
+        console.log('[INTRO] Title screen created — loading HIDDEN until user taps');
 
         _titleScreen = ValdoriaTitleScreen({
             onStart: function() {
-                console.log('[INTRO] Title screen TAPPED — unlocking audio');
+                console.log('[INTRO] Title screen TAPPED — unlocking audio + starting loading');
                 /* Unlock audio: set pending track first, then unlock (which picks it up) */
                 if (typeof ValdoriaAudio !== 'undefined') {
-                    ValdoriaAudio.play('intro');  /* sets _pendingTrack */
-                    ValdoriaAudio.forceUnlock();  /* triggers _playTrack with pending */
-                    /* Create analyser synchronously within tap gesture for AudioContext.resume() */
+                    ValdoriaAudio.play('intro');
+                    ValdoriaAudio.forceUnlock();
                     var an = ValdoriaAudio.getAnalyser();
                     console.log('[INTRO] Audio unlock: play(intro) + forceUnlock() + getAnalyser()=' + (an ? 'OK' : 'null'));
                 } else {
                     console.warn('[INTRO] ValdoriaAudio not available — no music');
                 }
 
-                /* Start audio-reactive effects (analyser created synchronously above) */
+                /* NOW show the loading screen with reactive effects */
+                var ctrl = _ensureCtrl();
+                ctrl.show(false);
+                var el = document.getElementById('loading');
+                if (el) el.style.display = '';
+                console.log('[INTRO] Loading overlay NOW VISIBLE with music');
+
+                /* Start audio-reactive effects after brief delay */
                 setTimeout(function() {
                     _startReactive();
                     /* If game already finished loading while title was up, show enter button */
@@ -126,6 +135,7 @@
             }
         });
         _titleScreen.show();
+        return true;
     }
 
     /** Start audio-reactive loading effects */
@@ -293,10 +303,12 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             if (window.vProcessing) vProcessing.show({ text: 'Carregando...' });
             return;
         }
-        /* ── Title screen on cold start (shows ON TOP of loading, not instead of) ── */
+        /* ── Title screen on cold start: loading deferred until user taps ── */
         if (!isRetry && !_titleShown) {
-            console.log('[INTRO] Cold start detected — showing title screen on top of loading');
-            _showTitleScreen();
+            console.log('[INTRO] Cold start detected — showing title screen INSTEAD of loading');
+            if (_showTitleScreen()) {
+                return; /* Loading will start when user taps title screen */
+            }
         }
         var ctrl = _ensureCtrl();
         if (!isRetry && ctrl.getState() === 'loading') {
@@ -319,13 +331,14 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             vProcessing.hide();
             return;
         }
-        /* If title/intro is active, defer hide — show enter button when ready */
+        /* If title/intro is active, defer hide — enter button appears when loading is shown */
         var _titleUp = _titleScreen && _titleScreen.isVisible();
-        if (_titleShown && (_reactiveStarted || _titleUp) && !_gameReady) {
+        var _introActive = _titleShown && (_reactiveStarted || _titleUp);
+        if (_introActive && !_gameReady) {
             _gameReady = true;
             console.log('[INTRO] hideLoading DEFERRED — game ready, titleUp=' + _titleUp + ' reactive=' + _reactiveStarted);
-            if (!_titleUp) _showEnterButton(); /* title gone, show button on loading */
-            /* else: button will be shown after title tap (onStart checks _gameReady) */
+            if (!_titleUp) _showEnterButton(); /* title gone, music playing → show button */
+            /* else: title still visible → button shown after title tap (onStart checks _gameReady) */
             return;
         }
         _stopReactive();
@@ -346,15 +359,16 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             vProcessing.hide();
             return;
         }
-        /* If title/intro is active, defer hide — show enter button when ready */
+        /* If title/intro is active, defer hide — enter button appears when loading is shown */
         var _titleUp = _titleScreen && _titleScreen.isVisible();
-        if (_titleShown && (_reactiveStarted || _titleUp) && !_gameReady) {
+        var _introActive = _titleShown && (_reactiveStarted || _titleUp);
+        if (_introActive && !_gameReady) {
             _gameReady = true;
             console.log('[INTRO] hideLoadingWithDelay DEFERRED — game ready, titleUp=' + _titleUp + ' reactive=' + _reactiveStarted + ' — returning Promise');
             return new Promise(function(resolve) {
                 _pendingHideCb = resolve;
                 if (!_titleUp) _showEnterButton();
-                /* else: button shown after title tap */
+                /* else: title still visible → button shown after title tap */
             });
         }
         _stopReactive();
