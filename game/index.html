@@ -72,8 +72,21 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
 </head>
 
 <body style="background:#2a2420">
-    <!-- Dark placeholder — SVG content injected AFTER all CSS loads (prevents flash in Telegram WebView) -->
-    <div id="loading" class="loading-overlay" style="background:#1a1510" aria-busy="true"></div>
+    <!-- Dark placeholder — starts HIDDEN; title screen covers until user taps -->
+    <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
+    <script>
+    /* ── Early title screen: show IMMEDIATELY to prevent loading flash ── */
+    (function(){
+        if(typeof ValdoriaTitleScreen!=='function')return;
+        window.__introTitle=ValdoriaTitleScreen({onStart:function(){
+            console.log('[INTRO] Early title TAPPED');
+            if(typeof window.__onIntroTap==='function'){window.__onIntroTap();}
+            else{window.__introTapped=true;}
+        }});
+        window.__introTitle.show();
+        console.log('[INTRO] Early title screen injected into DOM');
+    })();
+    </script>
 
     <!-- Main screen container (scrollable content only) -->
     <div id="screen" class="screen" style="display:none">

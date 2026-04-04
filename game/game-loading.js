@@ -88,51 +88,72 @@
     var _enterBtn = null;          /* "Aventurar-se" button element */
 
     /**
-     * Show title screen INSTEAD of loading. Loading only starts after user taps.
-     * Returns true if title screen was shown (caller should NOT show loading).
+     * Called when user taps title screen (early or late).
+     * Unlocks audio, shows loading, starts reactive effects.
+     */
+    function _onTitleTap() {
+        console.log('[INTRO] Title TAPPED — unlocking audio + starting loading');
+        /* Unlock audio: set pending track first, then unlock (which picks it up) */
+        if (typeof ValdoriaAudio !== 'undefined') {
+            ValdoriaAudio.play('intro');
+            ValdoriaAudio.forceUnlock();
+            var an = ValdoriaAudio.getAnalyser();
+            console.log('[INTRO] Audio: play(intro) + forceUnlock() + getAnalyser()=' + (an ? 'OK' : 'null'));
+        } else {
+            console.warn('[INTRO] ValdoriaAudio not available — no music');
+        }
+
+        /* NOW show the loading screen with reactive effects */
+        var ctrl = _ensureCtrl();
+        ctrl.show(false);
+        var el = document.getElementById('loading');
+        if (el) el.style.display = '';
+        console.log('[INTRO] Loading overlay NOW VISIBLE with music');
+
+        /* Start audio-reactive effects after brief delay */
+        setTimeout(function() {
+            _startReactive();
+            /* If game already finished loading while title was up, show enter button */
+            if (_gameReady) {
+                console.log('[INTRO] Game was already ready — showing enter button immediately');
+                _showEnterButton();
+            } else {
+                console.log('[INTRO] Game still loading — enter button will appear when ready');
+            }
+        }, 100);
+    }
+
+    /**
+     * Detect or create title screen. Returns true if title is active (loading deferred).
      */
     function _showTitleScreen() {
         if (_titleShown) { console.log('[INTRO] _showTitleScreen skipped — already shown'); return false; }
+
+        /* Check for early title screen (created by inline script in index.html) */
+        if (window.__introTitle && window.__introTitle.isVisible()) {
+            _titleShown = true;
+            _titleScreen = window.__introTitle;
+            /* Wire up the real tap callback */
+            window.__onIntroTap = function() { _onTitleTap(); };
+            console.log('[INTRO] Adopted early title screen — callback wired');
+            /* Check if user already tapped (very fast) */
+            if (window.__introTapped) {
+                console.log('[INTRO] User already tapped early title — triggering now');
+                _onTitleTap();
+            }
+            return true;
+        }
+
+        /* Fallback: create title screen now (e.g. app.html SPA) */
         if (typeof ValdoriaTitleScreen !== 'function') { console.warn('[INTRO] ValdoriaTitleScreen not available'); return false; }
         _titleShown = true;
-
         /* Hide loading overlay — title screen replaces it */
         var loadEl = document.getElementById('loading');
         if (loadEl) loadEl.style.display = 'none';
-        console.log('[INTRO] Title screen created — loading HIDDEN until user taps');
+        console.log('[INTRO] Title screen created (fallback) — loading hidden');
 
         _titleScreen = ValdoriaTitleScreen({
-            onStart: function() {
-                console.log('[INTRO] Title screen TAPPED — unlocking audio + starting loading');
-                /* Unlock audio: set pending track first, then unlock (which picks it up) */
-                if (typeof ValdoriaAudio !== 'undefined') {
-                    ValdoriaAudio.play('intro');
-                    ValdoriaAudio.forceUnlock();
-                    var an = ValdoriaAudio.getAnalyser();
-                    console.log('[INTRO] Audio unlock: play(intro) + forceUnlock() + getAnalyser()=' + (an ? 'OK' : 'null'));
-                } else {
-                    console.warn('[INTRO] ValdoriaAudio not available — no music');
-                }
-
-                /* NOW show the loading screen with reactive effects */
-                var ctrl = _ensureCtrl();
-                ctrl.show(false);
-                var el = document.getElementById('loading');
-                if (el) el.style.display = '';
-                console.log('[INTRO] Loading overlay NOW VISIBLE with music');
-
-                /* Start audio-reactive effects after brief delay */
-                setTimeout(function() {
-                    _startReactive();
-                    /* If game already finished loading while title was up, show enter button */
-                    if (_gameReady) {
-                        console.log('[INTRO] Game was already ready — showing enter button immediately');
-                        _showEnterButton();
-                    } else {
-                        console.log('[INTRO] Game still loading — enter button will appear when ready');
-                    }
-                }, 100);
-            }
+            onStart: function() { _onTitleTap(); }
         });
         _titleScreen.show();
         return true;
