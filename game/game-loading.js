@@ -83,9 +83,8 @@
     var _titleScreen = null;
     var _titleShown = false;
     var _reactiveStarted = false;
-    var _gameReady = false;        /* game finished loading, waiting for user */
-    var _pendingHideCb = null;     /* deferred hide callback */
-    var _enterBtn = null;          /* "Aventurar-se" button element */
+    var _dataReady = false;         /* game data loaded while title was still visible */
+    var _pendingHideCb = null;      /* deferred hide callback from hideLoadingWithDelay */
 
     /**
      * Called when user taps title screen (early or late).
@@ -119,15 +118,18 @@
         if (el) el.style.display = '';
         console.log('[INTRO] Loading overlay NOW VISIBLE with music');
 
-        /* Start audio-reactive effects after brief delay */
+        /* Start audio-reactive effects after brief delay (eye candy during loading) */
         setTimeout(function() {
             _startReactive();
-            /* If game already finished loading while title was up, show enter button */
-            if (_gameReady) {
-                console.log('[INTRO] Game was already ready — showing enter button immediately');
-                _showEnterButton();
-            } else {
-                console.log('[INTRO] Game still loading — enter button will appear when ready');
+            /* If game data already loaded while title was up, auto-dismiss loading */
+            if (_dataReady) {
+                console.log('[INTRO] Game data was already ready — auto-hiding loading');
+                _stopReactive();
+                ctrl.hide(function() {
+                    var loadEl = document.getElementById('loading');
+                    if (loadEl) loadEl.style.display = 'none';
+                    if (_pendingHideCb) { _pendingHideCb(); _pendingHideCb = null; }
+                });
             }
         }, 100);
     }
@@ -181,100 +183,6 @@
             console.log('[INTRO] Audio-reactive effects STARTED (tier=' + (window._valdoriaPerformanceTier || 'unknown') + ')');
         } else {
             console.warn('[INTRO] getAnalyser() returned null — reactive effects disabled');
-        }
-    }
-
-    /** Show "Aventurar-se" button when game is ready but user is enjoying music */
-    function _showEnterButton() {
-        if (_enterBtn) { console.log('[INTRO] _showEnterButton skipped — already visible'); return; }
-        var overlay = document.getElementById('loading');
-        if (!overlay) { console.warn('[INTRO] _showEnterButton — loading overlay not found!'); return; }
-
-        /* CRITICAL: Disable loading controller timeout — game IS ready, user is choosing when to enter */
-        if (_ctrl && _ctrl.resetTimers) {
-            _ctrl.resetTimers();
-            console.log('[INTRO] Loading controller timers RESET — no more timeouts while user enjoys music');
-        }
-
-        _enterBtn = document.createElement('button');
-        _enterBtn.className = 'loading-enter-btn';
-        _enterBtn.textContent = 'Aventurar-se';
-        _enterBtn.style.cssText = 'position:absolute;bottom:18%;left:50%;transform:translateX(-50%);'
-            + 'z-index:10;padding:12px 32px;border:1px solid var(--v-gold,#c4953a);'
-            + 'background:rgba(42,36,32,0.85);color:var(--v-gold,#c4953a);'
-            + 'font-family:var(--v-font-display,Cinzel,serif);font-size:var(--v-font-lg,15px);'
-            + 'letter-spacing:2px;border-radius:var(--v-radius-pill,20px);cursor:pointer;'
-            + 'opacity:0;animation:leFadeIn 0.6s ease-out 0.3s forwards;';
-        _enterBtn.addEventListener('click', _onEnterGame);
-        _enterBtn.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            _onEnterGame();
-        }, { passive: false });
-        overlay.appendChild(_enterBtn);
-
-        /* Hide progress bar and update tip — game is ready */
-        var prog = overlay.querySelector('.loading-progress-wrap');
-        if (prog) prog.style.transition = 'opacity 0.5s ease'; if (prog) prog.style.opacity = '0';
-        var stage = overlay.querySelector('.loading-stage');
-        if (stage) stage.textContent = '';
-        var tip = overlay.querySelector('.loading-tip');
-        if (tip) { tip.style.animation = 'none'; tip.style.opacity = '0.7'; tip.textContent = '\u266B Aprecie a trilha sonora \u266B'; }
-
-        /* Inject fadeIn keyframe if not exists */
-        if (!document.getElementById('le-enter-style')) {
-            var style = document.createElement('style');
-            style.id = 'le-enter-style';
-            style.textContent = '@keyframes leFadeIn{0%{opacity:0;transform:translateX(-50%) translateY(8px)}'
-                + '100%{opacity:1;transform:translateX(-50%) translateY(0)}}'
-                + '.loading-enter-btn:active{transform:translateX(-50%) scale(0.96);'
-                + 'background:rgba(196,149,58,0.2)}'; /* noqa: preflight — inline keyframe */
-            document.head.appendChild(style);
-        }
-
-        console.log('[INTRO] "Aventurar-se" button SHOWN — game ready, user controls when to enter');
-    }
-
-    /** User clicked "Aventurar-se" — actually dismiss loading */
-    function _onEnterGame() {
-        if (!_gameReady) { console.warn('[INTRO] _onEnterGame called but _gameReady=false — ignoring'); return; }
-        _gameReady = false;
-        console.log('[INTRO] User tapped "Aventurar-se" — entering game');
-
-        /* Haptic */
-        try {
-            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-            }
-        } catch(e) { /* noop */ }
-
-        /* Stop reactive effects */
-        _stopReactive();
-        console.log('[INTRO] Reactive effects stopped');
-
-        /* Remove enter button */
-        if (_enterBtn && _enterBtn.parentNode) {
-            _enterBtn.parentNode.removeChild(_enterBtn);
-            _enterBtn = null;
-        }
-
-        /* Actually hide loading */
-        if (_ctrl) {
-            console.log('[INTRO] Calling _ctrl.hide() — cinematic exit begins');
-            _ctrl.hide(function() {
-                var el = document.getElementById('loading');
-                if (el) el.style.display = 'none';
-                console.log('[INTRO] Loading overlay HIDDEN — game screen now visible');
-                if (_pendingHideCb) {
-                    console.log('[INTRO] Resolving pending hideLoadingWithDelay promise');
-                    _pendingHideCb();
-                    _pendingHideCb = null;
-                }
-            });
-        } else {
-            console.warn('[INTRO] _onEnterGame — no loading controller, forcing hide');
-            var el = document.getElementById('loading');
-            if (el) el.style.display = 'none';
-            if (_pendingHideCb) { _pendingHideCb(); _pendingHideCb = null; }
         }
     }
 
@@ -361,14 +269,10 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             vProcessing.hide();
             return;
         }
-        /* If title/intro is active, defer hide — enter button appears when loading is shown */
-        var _titleUp = _titleScreen && _titleScreen.isVisible();
-        var _introActive = _titleShown && (_reactiveStarted || _titleUp);
-        if (_introActive && !_gameReady) {
-            _gameReady = true;
-            console.log('[INTRO] hideLoading DEFERRED — game ready, titleUp=' + _titleUp + ' reactive=' + _reactiveStarted);
-            if (!_titleUp) _showEnterButton(); /* title gone, music playing → show button */
-            /* else: title still visible → button shown after title tap (onStart checks _gameReady) */
+        /* If title screen is still visible (user hasn't tapped yet), mark ready for auto-dismiss on tap */
+        if (_titleScreen && _titleScreen.isVisible()) {
+            _dataReady = true;
+            console.log('[INTRO] hideLoading DEFERRED — title screen still visible, will auto-hide on tap');
             return;
         }
         _stopReactive();
@@ -389,16 +293,12 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             vProcessing.hide();
             return;
         }
-        /* If title/intro is active, defer hide — enter button appears when loading is shown */
-        var _titleUp = _titleScreen && _titleScreen.isVisible();
-        var _introActive = _titleShown && (_reactiveStarted || _titleUp);
-        if (_introActive && !_gameReady) {
-            _gameReady = true;
-            console.log('[INTRO] hideLoadingWithDelay DEFERRED — game ready, titleUp=' + _titleUp + ' reactive=' + _reactiveStarted + ' — returning Promise');
+        /* If title screen is still visible (user hasn't tapped yet), mark ready for auto-dismiss on tap */
+        if (_titleScreen && _titleScreen.isVisible()) {
+            _dataReady = true;
+            console.log('[INTRO] hideLoadingWithDelay DEFERRED — title screen still visible, will auto-hide on tap');
             return new Promise(function(resolve) {
                 _pendingHideCb = resolve;
-                if (!_titleUp) _showEnterButton();
-                /* else: title still visible → button shown after title tap */
             });
         }
         _stopReactive();
