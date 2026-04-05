@@ -211,13 +211,6 @@
             box-shadow: 0 0 12px rgba(196, 149, 58, 0.15);
         }
 
-        /* ─── Apps Section ─── */
-        .apps-section {
-            width: 100%;
-            max-width: 380px;
-            padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px);
-        }
-
         .section-label {
             font-family: var(--v-font-display, 'Cinzel', serif);
             font-size: var(--v-font-sm, 11px);
@@ -227,75 +220,6 @@
             text-align: center;
             margin-bottom: var(--v-space-lg, 12px);
         }
-
-        .apps-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--v-space-md-lg, 10px);
-        }
-
-        /* ─── App Card ─── */
-        .app-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: var(--v-space-xl, 16px) var(--v-space-md-lg, 10px) var(--v-space-lg, 14px);
-            background: linear-gradient(165deg, var(--v-bg-card, #2e2520) 0%, #241e18 100%);
-            border: 1px solid var(--v-border, #4a3828);
-            border-radius: var(--v-radius, 10px);
-            text-decoration: none;
-            cursor: pointer;
-            transition: all var(--v-transition-base, 0.3s ease);
-            position: relative;
-            box-shadow: var(--v-shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.3));
-        }
-
-        .app-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 10%;
-            right: 10%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(184, 196, 208, 0.12), transparent);
-            border-radius: 1px;
-        }
-
-        .app-card:active {
-            transform: scale(0.96);
-        }
-
-        .app-card:hover {
-            border-color: var(--v-gold-dim, #9a7530);
-            box-shadow: var(--v-shadow-gold, 0 0 12px rgba(196, 149, 58, 0.25)), var(--v-shadow-md, 0 4px 16px rgba(0, 0, 0, 0.5));
-        }
-
-        .app-icon {
-            font-size: var(--v-font-icon, 28px);
-            margin-bottom: var(--v-space-md, 8px);
-        }
-
-        .app-name {
-            font-family: var(--v-font-display, 'Cinzel', serif);
-            font-size: var(--v-font-body, 14px);
-            font-weight: 700;
-            color: var(--v-text-bright, #e8dcc8);
-            margin-bottom: var(--v-space-sm, 4px);
-            letter-spacing: 0.3px;
-        }
-
-        .app-desc {
-            font-size: var(--v-font-sm, 11px);
-            color: var(--v-text-dim, #a09484);
-            line-height: 1.3;
-        }
-
-        /* Staggered fade-in */
-        .app-card:nth-child(1) { animation: fadeSlideIn 0.4s ease 0.1s both; }
-        .app-card:nth-child(2) { animation: fadeSlideIn 0.4s ease 0.2s both; }
-        .app-card:nth-child(3) { animation: fadeSlideIn 0.4s ease 0.3s both; }
-        .app-card:nth-child(4) { animation: fadeSlideIn 0.4s ease 0.4s both; }
 
         /* ─── Support Section ─── */
         .support-section {
@@ -531,34 +455,16 @@
         </div>
     </div>
 
-    <!-- Game Tools -->
-    <div class="apps-section">
-        <div class="section-label">Ferramentas de Jogo</div>
-        <div class="apps-grid">
-            <a href="dice/" class="app-card">
-                <div class="app-icon">🎲</div>
-                <div class="app-name">Mesa de Dados</div>
-                <div class="app-desc">Role dados 3D interativos</div>
-            </a>
-            <a href="character_creator/" class="app-card">
-                <div class="app-icon">⚔️</div>
-                <div class="app-name">Forjar Personagem</div>
-                <div class="app-desc">Crie seu aventureiro D&D 5e</div>
-            </a>
-            <a href="workstation/" class="app-card">
-                <div class="app-icon">🔨</div>
-                <div class="app-name">Oficina</div>
-                <div class="app-desc">Fabrique itens e equipamentos</div>
-            </a>
-            <a href="explore/" class="app-card">
-                <div class="app-icon">🗺️</div>
-                <div class="app-name">Explorar</div>
-                <div class="app-desc">Mapa hexagonal interativo</div>
-            </a>
+    <!-- Comece sua aventura -->
+    <div class="final-cta">
+        <div class="final-cta-text">Comece sua aventura</div>
+        <div class="hero-cta-group">
+            <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener" class="final-cta-btn">Jogar no Telegram</a>
+            <a href="web/" class="final-cta-btn final-cta-alt">Jogar no Navegador</a>
         </div>
     </div>
 
-    <!-- Support -->
+    <!-- Apoio -->
     <div class="support-section">
         <div class="section-label">Apoio</div>
         <a href="apoie/" class="support-card">
@@ -568,15 +474,6 @@
                 <div class="support-desc">Contribua para o desenvolvimento do jogo</div>
             </div>
         </a>
-    </div>
-
-    <!-- Final CTA -->
-    <div class="final-cta">
-        <div class="final-cta-text">Comece sua aventura</div>
-        <div class="hero-cta-group">
-            <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener" class="final-cta-btn">Jogar no Telegram</a>
-            <a href="web/" class="final-cta-btn final-cta-alt">Jogar no Navegador</a>
-        </div>
     </div>
 
     <!-- Footer -->
