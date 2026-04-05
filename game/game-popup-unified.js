@@ -101,6 +101,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Temple redesign
+    if (data._temple_screen && typeof renderTempleHub === 'function') {
+        renderTempleHub(el, data._temple_screen);
+        return el;
+    }
+
     // Image banner (if present)
     if (data.image_url) {
         var img = document.createElement('img');
