@@ -4,9 +4,12 @@
    Lendas de Valdoria — Web Login (v2)
    ============================================= */
 
-var _isProd = (window.location.hostname === 'jogo.lendasdevaldoria.com.br');
+// Allow ?env=dev override to force DEV API (for testing on prod domain)
+var _envOverride = new URLSearchParams(window.location.search).get('env');
+var _isProd = _envOverride ? (_envOverride === 'prod') : (window.location.hostname === 'jogo.lendasdevaldoria.com.br');
 var BOT_USERNAME = _isProd ? 'LendasDeValdoriaBOT' : 'ValdoriaDevBot';
 var _envId = _isProd ? 'prod' : 'dev';
+if (_envOverride) console.info('[WEB-AUTH] env override=%s isProd=%s', _envOverride, _isProd);
 
 // Storage keys
 var WEB_TOKEN_KEY = 'valdoria_web_token';
