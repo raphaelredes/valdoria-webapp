@@ -83,9 +83,11 @@ function loadTelegramWidget() {
     script.setAttribute('data-userpic', 'true');
     container.appendChild(script);
 
+    console.info('[WEB-AUTH] Telegram widget script injected for bot:', BOT_USERNAME);
     /* Fallback: if widget doesn't render in 4s, show a styled button */
     setTimeout(function() {
-        if (container.querySelector('iframe')) return; /* widget loaded OK */
+        if (container.querySelector('iframe')) { console.info('[WEB-AUTH] Telegram widget iframe loaded OK'); return; }
+        console.warn('[WEB-AUTH] Telegram widget did NOT load in 4s, showing fallback button');
         var fallback = document.createElement('a');
         fallback.href = 'https://t.me/' + BOT_USERNAME;
         fallback.target = '_blank';
@@ -103,7 +105,7 @@ function loadTelegramWidget() {
 /* ----- Auth Callbacks ----- */
 
 window.onTelegramAuth = async function(user) {
-    if(window._dbg)console.debug('[WEB-AUTH] Telegram auth:', user.first_name);
+    console.info('[WEB-AUTH] Telegram auth callback:', user.first_name, 'id:', user.id);
     showAuthLoading(true);
     hideAuthError();
     try {
@@ -136,15 +138,17 @@ window.onTelegramAuth = async function(user) {
 };
 
 window.onGoogleAuth = async function(response) {
-    if(window._dbg)console.debug('[WEB-AUTH] Google auth callback');
+    console.info('[WEB-AUTH] Google auth callback received, credential length:', (response.credential || '').length);
     showAuthLoading(true);
     hideAuthError();
     try {
         var ok = await discoverApiBase();
+        console.info('[WEB-AUTH] API discovery result:', ok, 'apiBase:', _apiBase);
         if (!ok) {
             showAuthError('Não foi possível encontrar o servidor. Configure a URL manualmente.');
             return;
         }
+        console.info('[WEB-AUTH] Sending login to:', _apiBase + '/api/auth/login');
         var resp = await fetch(_apiBase + '/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -153,12 +157,15 @@ window.onGoogleAuth = async function(response) {
                 credential: response.credential
             })
         });
+        console.info('[WEB-AUTH] Login response status:', resp.status);
         if (_checkRateLimit(resp)) return;
         if (!resp.ok) {
             var err = await resp.json().catch(function() { return {}; });
+            console.error('[WEB-AUTH] Login failed:', resp.status, err);
             throw new Error(err.error || 'Erro na autenticação (' + resp.status + ')');
         }
         var data = await resp.json();
+        console.info('[WEB-AUTH] Login success: user_id=%s chars=%d', data.user_id, (data.characters || []).length);
         handleLoginSuccess(data);
     } catch (e) {
         console.error('[WEB-AUTH] Google login error:', e);
@@ -171,6 +178,8 @@ window.onGoogleAuth = async function(response) {
 /* ----- Login Success Handler ----- */
 
 function handleLoginSuccess(data) {
+    console.info('[WEB-AUTH] handleLoginSuccess user_id=%s token_len=%d chars=%d',
+        data.user_id, (data.token || '').length, (data.characters || []).length);
     _authToken = data.token || '';
     _userId = data.user_id || 0;
     _characters = data.characters || [];
@@ -301,7 +310,10 @@ function redirectToGame(charId, isNew, token) {
 
     var route = isNew && !charId ? 'character_creator' : 'game';
     params.set('route', route);
-    window.location.href = '../app.html?' + params.toString();
+    var url = '../app.html?' + params.toString();
+    console.info('[WEB-AUTH] redirect route=%s uid=%s char=%s env=%s api=%s',
+        route, _userId, charId || 'none', _envId, _apiBase);
+    window.location.href = url;
 }
 
 /* ----- Logout ----- */
@@ -446,6 +458,8 @@ function checkExistingSession() {
     var token = localStorage.getItem(WEB_TOKEN_KEY);
     var uid = localStorage.getItem(WEB_USER_KEY);
     var api = localStorage.getItem(WEB_API_KEY);
+    console.info('[WEB-AUTH] checkExistingSession token=%s uid=%s api=%s',
+        token ? 'present(' + token.length + ')' : 'none', uid || 'none', api || 'none');
     if (token && uid && api) {
         _authToken = token;
         _userId = parseInt(uid, 10);
@@ -548,6 +562,7 @@ window.onDevLogin = async function() {
 /* ----- Init ----- */
 
 function _initWebAuth() {
+    console.info('[WEB-AUTH] Init: isProd=%s bot=%s readyState=%s', _isProd, BOT_USERNAME, document.readyState);
     loadTelegramWidget();
     checkExistingSession();
 }
