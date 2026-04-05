@@ -120,6 +120,7 @@ window.onTelegramAuth = async function(user) {
                 telegram_data: user
             })
         });
+        if (_checkRateLimit(resp)) return;
         if (!resp.ok) {
             var err = await resp.json().catch(function() { return {}; });
             throw new Error(err.error || 'Erro na autenticação (' + resp.status + ')');
@@ -152,6 +153,7 @@ window.onGoogleAuth = async function(response) {
                 credential: response.credential
             })
         });
+        if (_checkRateLimit(resp)) return;
         if (!resp.ok) {
             var err = await resp.json().catch(function() { return {}; });
             throw new Error(err.error || 'Erro na autenticação (' + resp.status + ')');
@@ -313,6 +315,89 @@ function onLogout() {
     _selectedCharId = '';
     document.getElementById('screen-chars').classList.remove('wa-active');
     document.getElementById('screen-login').classList.add('wa-active');
+}
+
+/* ----- Blocked Screen (brute force detected) ----- */
+
+function showBlockedScreen(retryAfter) {
+    /* Hide both login and character screens */
+    var login = document.getElementById('screen-login');
+    var chars = document.getElementById('screen-chars');
+    if (login) login.classList.remove('wa-active');
+    if (chars) chars.classList.remove('wa-active');
+
+    /* Create or show the blocked screen */
+    var blocked = document.getElementById('screen-blocked');
+    if (!blocked) {
+        blocked = document.createElement('div');
+        blocked.id = 'screen-blocked';
+        blocked.className = 'wa-screen wa-active';
+
+        var card = document.createElement('div');
+        card.className = 'wa-blocked-card';
+
+        var shield = document.createElement('div');
+        shield.className = 'wa-blocked-icon';
+        shield.textContent = '\uD83D\uDEE1\uFE0F'; /* shield emoji */
+
+        var title = document.createElement('h2');
+        title.className = 'wa-blocked-title';
+        title.textContent = 'Acesso Bloqueado';
+
+        var msg = document.createElement('p');
+        msg.className = 'wa-blocked-msg';
+        msg.textContent = 'Detectamos tentativas suspeitas de acesso a esta conta. '
+            + 'Por segurança, o acesso foi temporariamente bloqueado.';
+
+        var timer = document.createElement('p');
+        timer.className = 'wa-blocked-timer';
+        timer.id = 'blocked-timer';
+
+        var note = document.createElement('p');
+        note.className = 'wa-blocked-note';
+        note.textContent = 'Se você é o dono da conta, aguarde o tempo indicado e tente novamente.';
+
+        card.appendChild(shield);
+        card.appendChild(title);
+        card.appendChild(msg);
+        card.appendChild(timer);
+        card.appendChild(note);
+        blocked.appendChild(card);
+        document.body.appendChild(blocked);
+    } else {
+        blocked.classList.add('wa-active');
+    }
+
+    /* Countdown timer */
+    var remaining = retryAfter || 60;
+    var timerEl = document.getElementById('blocked-timer');
+    function updateTimer() {
+        if (remaining <= 0) {
+            if (timerEl) timerEl.textContent = 'Tente novamente agora.';
+            /* Re-show login after cooldown */
+            blocked.classList.remove('wa-active');
+            if (login) login.classList.add('wa-active');
+            return;
+        }
+        var min = Math.floor(remaining / 60);
+        var sec = remaining % 60;
+        var timeStr = min > 0
+            ? min + ' min ' + (sec > 0 ? sec + 's' : '')
+            : sec + ' segundos';
+        if (timerEl) timerEl.textContent = 'Tente novamente em ' + timeStr;
+        remaining--;
+        setTimeout(updateTimer, 1000);
+    }
+    updateTimer();
+}
+
+function _checkRateLimit(resp) {
+    if (resp.status === 429) {
+        var retryAfter = parseInt(resp.headers.get('Retry-After') || '60', 10);
+        showBlockedScreen(retryAfter);
+        return true;
+    }
+    return false;
 }
 
 /* ----- UI Helpers ----- */

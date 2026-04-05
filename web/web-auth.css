@@ -647,6 +647,90 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* =============================================
+   Blocked Screen (brute force detected)
+   ============================================= */
+
+.wa-blocked-card {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background:
+        radial-gradient(ellipse 90% 50% at 50% 0%, rgba(120, 30, 30, 0.15) 0%, transparent 70%),
+        linear-gradient(170deg, #302018 0%, #261814 40%, #1c1210 100%);
+    border-radius: var(--v-radius, 10px);
+    border: 1px solid rgba(180, 50, 50, 0.3);
+    padding: 32px 24px;
+    z-index: 1;
+    box-shadow:
+        0 8px 40px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(180, 50, 50, 0.06),
+        inset 0 1px 0 rgba(180, 50, 50, 0.1);
+}
+
+/* Top red inlay line */
+.wa-blocked-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #7b2020 30%, #b03030 50%, #7b2020 70%, transparent);
+    border-radius: 2px;
+}
+
+.wa-blocked-icon {
+    font-size: 48px;
+    margin-bottom: var(--v-space-lg, 12px);
+    filter: drop-shadow(0 0 12px rgba(180, 50, 50, 0.4));
+    animation: wa-blocked-pulse 2s ease-in-out infinite;
+}
+
+@keyframes wa-blocked-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 1; }
+}
+
+.wa-blocked-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: clamp(18px, 5vw, 22px);
+    font-weight: 700;
+    color: #c44040;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0 0 var(--v-space-lg, 12px);
+    text-shadow: 0 0 15px rgba(180, 50, 50, 0.4);
+}
+
+.wa-blocked-msg {
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-body, 14px);
+    color: var(--v-text, #d4c8b0);
+    line-height: 1.6;
+    margin: 0 0 var(--v-space-xl, 16px);
+}
+
+.wa-blocked-timer {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-lg, 15px);
+    font-weight: 700;
+    color: #c44040;
+    margin: 0 0 var(--v-space-lg, 12px);
+    letter-spacing: 1px;
+}
+
+.wa-blocked-note {
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-sm, 11px);
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.5;
+    margin: 0;
+}
+
 /* ----- Reduced motion ----- */
 
 @media (prefers-reduced-motion: reduce) {
