@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Lendas de Valdoria</title>
+    <title>Lendas de Valdoria — Entrar</title>
     <meta name="theme-color" content="#2a2420">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -16,29 +16,81 @@
     <link rel="stylesheet" href="../shared/fonts.css">
     <script>
         var v = Date.now();
-        document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
-        document.write('<link rel="stylesheet" href="web-auth.css?v=' + v + '">');
+        var _loadCss = function(href) {
+            var lk = document.createElement('link');
+            lk.rel = 'stylesheet';
+            lk.href = href + '?v=' + v;
+            document.head.appendChild(lk);
+        };
+        _loadCss('../valdoria-design.css');
+        _loadCss('../shared/loading-title.css');
+        _loadCss('web-auth.css');
     </script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+    <!-- Ambient Particles -->
+    <div class="wa-hero-particles">
+        <div class="wa-ember"></div>
+        <div class="wa-ember"></div>
+        <div class="wa-ember"></div>
+        <div class="wa-ember"></div>
+    </div>
+
     <!-- Login Screen -->
     <div id="screen-login" class="wa-screen wa-active">
-        <div class="wa-wood-frame">
-            <div class="wa-rivet wa-rivet-tl"></div>
-            <div class="wa-rivet wa-rivet-tr"></div>
-            <div class="wa-rivet wa-rivet-bl"></div>
-            <div class="wa-rivet wa-rivet-br"></div>
-            <div class="wa-wood-inner">
-                <div class="wa-login-card">
-                    <div class="wa-logo">
-                <div class="wa-logo-icon"><svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="wo" cx="38%" cy="35%" r="55%"><stop offset="0%" stop-color="#fff4d0"/><stop offset="20%" stop-color="#e8c45a"/><stop offset="50%" stop-color="#c4953a"/><stop offset="80%" stop-color="#8b6420"/><stop offset="100%" stop-color="#5a3e10"/></radialGradient></defs><circle cx="14" cy="14" r="12" fill="url(#wo)"/><ellipse cx="11" cy="10" rx="4" ry="3" fill="#fff4d0" opacity="0.3"/></svg></div>
-                <h1 class="wa-title">Lendas de Valdoria</h1>
-                <p class="wa-subtitle">Aventure-se no mundo de Valdoria</p>
+        <div class="wa-login-card">
+            <!-- 3D Orb of Valdoria -->
+            <div class="wa-orb-wrap">
+                <div class="title-orb-wrap">
+                    <div class="title-orb-rays"></div>
+                    <div class="title-orb-ambient"></div>
+                    <div class="title-orb">
+                        <div class="title-orb-nebula">
+                            <div class="title-orb-neb1"></div>
+                            <div class="title-orb-neb2"></div>
+                            <div class="title-orb-neb3"></div>
+                            <div class="title-orb-neb4"></div>
+                            <div class="title-orb-wisp title-orb-w1"></div>
+                            <div class="title-orb-wisp title-orb-w2"></div>
+                            <div class="title-orb-wisp title-orb-w3"></div>
+                            <div class="title-orb-wisp title-orb-w4"></div>
+                            <div class="title-orb-wisp title-orb-w5"></div>
+                            <div class="title-orb-spark title-orb-sp1"></div>
+                            <div class="title-orb-spark title-orb-sp2"></div>
+                            <div class="title-orb-spark title-orb-sp3"></div>
+                        </div>
+                        <div class="title-orb-core"></div>
+                        <div class="title-orb-core-fl"></div>
+                        <div class="title-orb-intlight"></div>
+                        <div class="title-orb-term"></div>
+                        <div class="title-orb-fresnel"></div>
+                        <div class="title-orb-sss"></div>
+                        <div class="title-orb-gp"></div>
+                        <div class="title-orb-gs"></div>
+                        <div class="title-orb-grim"></div>
+                        <div class="title-orb-gcaus"></div>
+                        <div class="title-orb-gel"></div>
+                        <div class="title-orb-ger"></div>
+                        <div class="title-orb-spec"></div>
+                    </div>
+                    <div class="title-orb-floor"></div>
+                </div>
             </div>
 
-            <div class="wa-divider"></div>
+            <!-- Title -->
+            <h1 class="wa-title">
+                <span class="wa-title-top">Lendas de</span>
+                <span class="wa-title-sub">Valdoria</span>
+            </h1>
+            <p class="wa-subtitle">RPG Medieval de Fantasia</p>
 
+            <!-- Divider -->
+            <div class="wa-gold-divider">
+                <span class="wa-gold-divider-gem">&#9670;</span>
+            </div>
+
+            <!-- Auth Buttons -->
             <div class="wa-auth-buttons">
                 <!-- Telegram Login Widget -->
                 <div id="tg-widget" class="wa-tg-widget"></div>
@@ -72,58 +124,68 @@
                 <span>Autenticando...</span>
             </div>
 
-            <div class="wa-separator">
+            <!-- DEV Login (hidden in PROD via JS) -->
+            <div class="wa-separator wa-dev-only">
                 <span class="wa-separator-line"></span>
                 <span class="wa-separator-text">dev</span>
                 <span class="wa-separator-line"></span>
             </div>
-
-            <button class="wa-btn-dev" onclick="onDevLogin()">
-                🔧 Entrar (DEV)
+            <button class="wa-btn-dev wa-dev-only" onclick="onDevLogin()">
+                &#128295; Entrar (DEV)
             </button>
 
+            <!-- Footer -->
             <p class="wa-footer-note">
                 Jogue também pelo <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener">Telegram</a>
             </p>
-                </div>
-            </div>
         </div>
     </div>
 
     <!-- Character Selection Screen -->
     <div id="screen-chars" class="wa-screen">
-        <div class="wa-wood-frame">
-            <div class="wa-rivet wa-rivet-tl"></div>
-            <div class="wa-rivet wa-rivet-tr"></div>
-            <div class="wa-rivet wa-rivet-bl"></div>
-            <div class="wa-rivet wa-rivet-br"></div>
-            <div class="wa-wood-inner">
-                <div class="wa-chars-card">
-            <h2 class="wa-chars-title">📜 Selecione seu Personagem</h2>
+        <div class="wa-chars-card">
+            <!-- Mini orb -->
+            <div class="wa-chars-orb">
+                <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+                    <defs><radialGradient id="wo" cx="38%" cy="35%" r="55%">
+                        <stop offset="0%" stop-color="#fff4d0"/>
+                        <stop offset="20%" stop-color="#e8c45a"/>
+                        <stop offset="50%" stop-color="#c4953a"/>
+                        <stop offset="80%" stop-color="#8b6420"/>
+                        <stop offset="100%" stop-color="#5a3e10"/>
+                    </radialGradient></defs>
+                    <circle cx="14" cy="14" r="12" fill="url(#wo)"/>
+                    <ellipse cx="11" cy="10" rx="4" ry="3" fill="#fff4d0" opacity="0.3"/>
+                </svg>
+            </div>
+            <h2 class="wa-chars-title">Selecione seu Personagem</h2>
             <div id="char-list" class="wa-char-list"></div>
             <div id="char-error" class="wa-error" style="display:none"></div>
             <button id="btn-play" class="wa-btn-play" disabled onclick="onPlay()">
-                ◆ Jogar
+                &#9670; Jogar
             </button>
             <button class="wa-btn-logout" onclick="onLogout()">Sair</button>
-                </div>
-            </div>
         </div>
     </div>
 
-    <div class="wa-particle"></div>
-    <div class="wa-particle"></div>
-    <div class="wa-particle"></div>
-    <div class="wa-particle"></div>
-    <div class="wa-particle"></div>
-
     <script src="../shared/telegram-compat.js"></script>
     <script>
-    document.write('<link rel="stylesheet" href="../shared/connection-overlay.css?v=' + v + '">');
-    document.write('<script src="../shared/connection-overlay.js?v=' + v + '"><\/script>');
-    document.write('<script src="../shared/console-collector.js?v=' + v + '"><\/script>');
-    document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
-    document.write('<script src="web-auth.js?v=' + v + '"><\/script>');
+    var _loadScript = function(src) {
+        var s = document.createElement('script');
+        s.src = src + '?v=' + v;
+        document.body.appendChild(s);
+    };
+    var _loadCssBody = function(href) {
+        var lk = document.createElement('link');
+        lk.rel = 'stylesheet';
+        lk.href = href + '?v=' + v;
+        document.head.appendChild(lk);
+    };
+    _loadCssBody('../shared/connection-overlay.css');
+    _loadScript('../shared/connection-overlay.js');
+    _loadScript('../shared/console-collector.js');
+    _loadScript('../shared/error-reporter.js');
+    _loadScript('web-auth.js');
     </script>
 </body>
 </html>

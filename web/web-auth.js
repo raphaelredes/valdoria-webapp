@@ -4,7 +4,9 @@
    Lendas de Valdoria — Web Login (v2)
    ============================================= */
 
-var BOT_USERNAME = 'ValdoriaDevBot';
+var _isProd = (window.location.hostname === 'jogo.lendasdevaldoria.com.br');
+var BOT_USERNAME = _isProd ? 'LendasDeValdoriaBOT' : 'ValdoriaDevBot';
+var _envId = _isProd ? 'prod' : 'dev';
 
 // Storage keys
 var WEB_TOKEN_KEY = 'valdoria_web_token';
@@ -27,9 +29,10 @@ async function discoverApiBase() {
         _apiBase = stored;
         return true;
     }
-    // 2. Try api-url.json in same directory
+    // 2. Try environment-specific api-url file
+    var env = _isProd ? 'prod' : 'dev';
     try {
-        var resp = await fetch('api-url.json', { cache: 'no-store' });
+        var resp = await fetch('../api-url-' + env + '.json?t=' + Date.now(), { cache: 'no-store' });
         if (resp.ok) {
             var data = await resp.json();
             if (data.url) {
@@ -39,9 +42,23 @@ async function discoverApiBase() {
             }
         }
     } catch (e) {
-        console.warn('[WEB-AUTH] api-url.json not found', e);
+        console.warn('[WEB-AUTH] api-url-' + env + '.json not found', e);
     }
-    // 3. Prompt user
+    // 3. Fallback to local api-url.json
+    try {
+        var resp2 = await fetch('api-url.json?t=' + Date.now(), { cache: 'no-store' });
+        if (resp2.ok) {
+            var data2 = await resp2.json();
+            if (data2.url) {
+                _apiBase = data2.url.replace(/\/$/, '');
+                localStorage.setItem(WEB_API_KEY, _apiBase);
+                return true;
+            }
+        }
+    } catch (e2) {
+        console.warn('[WEB-AUTH] api-url.json not found', e2);
+    }
+    // 4. Prompt user (last resort)
     var url = prompt('URL do servidor Valdoria (ex: https://valdoria.example.com):');
     if (url) {
         _apiBase = url.replace(/\/$/, '');
@@ -260,10 +277,13 @@ function redirectToGame(charId, isNew, token) {
     params.set('token', t);
     params.set('uid', String(_userId));
     params.set('api', _apiBase);
+    params.set('env', _envId);
     if (charId) params.set('char', charId);
     if (isNew) params.set('new', '1');
 
-    window.location.href = '../game/index.html?' + params.toString();
+    var route = isNew && !charId ? 'character_creator' : 'game';
+    params.set('route', route);
+    window.location.href = '../app.html?' + params.toString();
 }
 
 /* ----- Logout ----- */
@@ -429,4 +449,12 @@ window.onDevLogin = async function() {
 document.addEventListener('DOMContentLoaded', function() {
     loadTelegramWidget();
     checkExistingSession();
+
+    // Hide DEV login in production
+    if (_isProd) {
+        var devEls = document.querySelectorAll('.wa-dev-only');
+        for (var i = 0; i < devEls.length; i++) {
+            devEls[i].style.display = 'none';
+        }
+    }
 });
