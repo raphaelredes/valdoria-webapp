@@ -547,8 +547,14 @@ window.onDevLogin = async function() {
 
 /* ----- Init ----- */
 
-document.addEventListener('DOMContentLoaded', function() {
+function _initWebAuth() {
     loadTelegramWidget();
     checkExistingSession();
+}
 
-});
+/* Script may load after DOMContentLoaded (dynamic createElement loading) */
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initWebAuth);
+} else {
+    _initWebAuth();
+}
