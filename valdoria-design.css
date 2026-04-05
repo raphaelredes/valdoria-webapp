@@ -244,6 +244,11 @@
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
     border-left: 1px solid rgba(74, 56, 40, 0.3);
     border-right: 1px solid rgba(74, 56, 40, 0.3);
+    /* CRITICAL: Makes html a containing block for position:fixed elements.
+     * Without this, fixed overlays (popups, loading, etc.) position relative
+     * to the viewport (e.g. 1920px) instead of the 430px game frame.
+     * This is essential for the web portal where viewport > 430px. */
+    transform: translateZ(0);
   }
   body {
     font-family: var(--v-font);
