@@ -280,19 +280,17 @@
     margin-top: 1px;
 }
 
-/* Hidden original widget — used for auth only */
+/* Telegram native widget — shown inline when user clicks custom button */
 .wa-tg-widget {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
+    display: none;
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--v-space-md, 8px);
 }
 
-/* Legacy fallback classes — kept for compat */
-.wa-tg-fallback { display: none; }
-.wa-tg-fallback-icon { display: none; }
+.wa-tg-widget iframe {
+    border-radius: var(--v-radius, 10px) !important;
+}
 
 /* ----- Separator ----- */
 

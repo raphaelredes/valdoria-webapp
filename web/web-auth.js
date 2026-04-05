@@ -86,7 +86,7 @@ function loadTelegramWidget() {
     script.setAttribute('data-size', 'large');
     script.setAttribute('data-onauth', 'onTelegramAuth(user)');
     script.setAttribute('data-request-access', 'write');
-    script.setAttribute('data-userpic', 'false');
+    script.setAttribute('data-userpic', 'true');
     container.appendChild(script);
 
     console.info('[WEB-AUTH] Telegram widget injected (hidden) for bot:', BOT_USERNAME);
@@ -110,84 +110,44 @@ function loadTelegramWidget() {
 
 /* ----- Custom Social Button Handlers ----- */
 
+/* Telegram click — just scroll to and highlight the native widget */
 window.onTelegramClick = function() {
     var container = document.getElementById('tg-widget');
     if (!container) return;
 
-    var iframe = container.querySelector('iframe');
-    if (iframe && _tgWidgetReady) {
-        /* Show dark overlay with widget centered inside it */
-        var overlay = document.getElementById('tg-auth-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'tg-auth-overlay';
-            /* Overlay only covers the game area (430px), not the debug panel */
-            overlay.style.cssText = 'position:fixed;top:0;left:0;width:430px;max-width:100vw;height:100vh;height:100dvh;background:rgba(10,8,5,0.88);z-index:9998;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px';
-            /* Slot for the widget */
-            var slot = document.createElement('div');
-            slot.id = 'tg-auth-slot';
-            slot.style.cssText = 'display:flex;align-items:center;justify-content:center';
-            overlay.appendChild(slot);
-            /* Hint below the button */
-            var hint = document.createElement('p');
-            hint.style.cssText = 'color:#a09484;font-family:MedievalSharp,serif;font-size:14px;margin:0;text-align:center';
-            hint.textContent = 'Confirme sua identidade';
-            overlay.appendChild(hint);
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) _hideTgOverlay();
-            });
-            document.body.appendChild(overlay);
-        }
-        /* Move widget INTO the overlay slot — style to blend with dark theme */
-        var slot = document.getElementById('tg-auth-slot');
-        if (slot) {
-            slot.appendChild(container);
-            container.style.cssText = 'position:static;width:auto;height:auto;overflow:visible;opacity:1;pointer-events:auto;background:#2aabee;border-radius:10px;padding:2px;box-shadow:0 4px 20px rgba(42,171,238,0.3)';
-        }
-        overlay.style.display = 'flex';
-        console.info('[WEB-AUTH] Showing Telegram widget for auth');
-
-        /* Auto-hide after 30s */
-        setTimeout(function() { _hideTgOverlay(); }, 30000);
+    if (_tgWidgetReady) {
+        /* Widget ready — show it inline below the custom button */
+        container.style.display = 'flex';
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        /* Hide the custom button since native widget is now visible */
+        var btn = document.getElementById('btn-telegram');
+        if (btn) btn.style.display = 'none';
+        console.info('[WEB-AUTH] Telegram native widget shown inline');
         return;
     }
 
-    /* Widget not ready yet — show loading and retry */
-    console.info('[WEB-AUTH] Telegram widget not ready yet, waiting...');
+    /* Widget not ready — show loading and poll */
+    console.info('[WEB-AUTH] Telegram widget not ready, waiting...');
     var btn = document.getElementById('btn-telegram');
-    var origText = btn ? btn.querySelector('.wa-social-label').textContent : '';
-    if (btn) btn.querySelector('.wa-social-label').textContent = 'Carregando...';
+    var label = btn ? btn.querySelector('.wa-social-label') : null;
+    var origText = label ? label.textContent : '';
+    if (label) label.textContent = 'Carregando...';
 
     var _retryCount = 0;
     var _retryTimer = setInterval(function() {
         _retryCount++;
-        var iframe2 = container.querySelector('iframe');
-        if (iframe2 && _tgWidgetReady) {
+        if (_tgWidgetReady) {
             clearInterval(_retryTimer);
-            if (btn) btn.querySelector('.wa-social-label').textContent = origText;
-            /* Now trigger the click again */
+            if (label) label.textContent = origText;
             window.onTelegramClick();
-        } else if (_retryCount >= 20) { /* 10s max wait */
+        } else if (_retryCount >= 20) {
             clearInterval(_retryTimer);
-            if (btn) btn.querySelector('.wa-social-label').textContent = origText;
-            /* Final fallback: open t.me */
-            console.warn('[WEB-AUTH] Telegram widget failed to load, opening t.me');
+            if (label) label.textContent = origText;
+            console.warn('[WEB-AUTH] Telegram widget failed after 10s');
             window.open('https://t.me/' + BOT_USERNAME, '_blank', 'noopener');
         }
     }, 500);
 };
-
-function _hideTgOverlay() {
-    /* Move widget back to its original parent */
-    var container = document.getElementById('tg-widget');
-    var authBtns = document.querySelector('.wa-auth-buttons');
-    if (container && authBtns) {
-        authBtns.appendChild(container);
-        container.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
-    }
-    var overlay = document.getElementById('tg-auth-overlay');
-    if (overlay) overlay.style.display = 'none';
-}
 
 window.onGoogleClick = function() {
     /* Trigger the hidden Google Sign-In prompt */
