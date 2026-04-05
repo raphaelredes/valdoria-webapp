@@ -91,19 +91,21 @@ function loadTelegramWidget() {
 
     console.info('[WEB-AUTH] Telegram widget injected (hidden) for bot:', BOT_USERNAME);
 
-    /* Check when widget iframe is ready */
-    setTimeout(function() {
+    /* Poll for widget iframe readiness (up to 15s, check every 500ms) */
+    var _pollCount = 0;
+    var _pollMax = 30; /* 30 x 500ms = 15s */
+    var _pollTimer = setInterval(function() {
+        _pollCount++;
         var iframe = container.querySelector('iframe');
         if (iframe) {
             _tgWidgetReady = true;
-            console.info('[WEB-AUTH] Telegram widget iframe ready');
-            /* Update button label if user is logged in to Telegram */
-            var label = document.getElementById('tg-btn-label');
-            if (label) label.textContent = 'Entrar com Telegram';
-        } else {
-            console.warn('[WEB-AUTH] Telegram widget did NOT load — button will open t.me link');
+            clearInterval(_pollTimer);
+            console.info('[WEB-AUTH] Telegram widget iframe ready (after %dms)', _pollCount * 500);
+        } else if (_pollCount >= _pollMax) {
+            clearInterval(_pollTimer);
+            console.warn('[WEB-AUTH] Telegram widget did NOT load after 15s');
         }
-    }, 4000);
+    }, 500);
 }
 
 /* ----- Custom Social Button Handlers ----- */
@@ -150,9 +152,29 @@ window.onTelegramClick = function() {
         return;
     }
 
-    /* Fallback: open Telegram directly */
-    console.info('[WEB-AUTH] Telegram widget not ready, opening t.me link');
-    window.open('https://t.me/' + BOT_USERNAME, '_blank', 'noopener');
+    /* Widget not ready yet — show loading and retry */
+    console.info('[WEB-AUTH] Telegram widget not ready yet, waiting...');
+    var btn = document.getElementById('btn-telegram');
+    var origText = btn ? btn.querySelector('.wa-social-label').textContent : '';
+    if (btn) btn.querySelector('.wa-social-label').textContent = 'Carregando...';
+
+    var _retryCount = 0;
+    var _retryTimer = setInterval(function() {
+        _retryCount++;
+        var iframe2 = container.querySelector('iframe');
+        if (iframe2 && _tgWidgetReady) {
+            clearInterval(_retryTimer);
+            if (btn) btn.querySelector('.wa-social-label').textContent = origText;
+            /* Now trigger the click again */
+            window.onTelegramClick();
+        } else if (_retryCount >= 20) { /* 10s max wait */
+            clearInterval(_retryTimer);
+            if (btn) btn.querySelector('.wa-social-label').textContent = origText;
+            /* Final fallback: open t.me */
+            console.warn('[WEB-AUTH] Telegram widget failed to load, opening t.me');
+            window.open('https://t.me/' + BOT_USERNAME, '_blank', 'noopener');
+        }
+    }, 500);
 };
 
 function _hideTgOverlay() {
