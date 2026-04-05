@@ -191,6 +191,7 @@
     align-items: center;
     gap: var(--v-space-lg, 12px);
     width: 100%;
+    max-width: 300px;
     animation: wa-fadeIn 0.6s ease 0.4s both;
 }
 
@@ -199,6 +200,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Telegram widget iframe — contain within card */
+.wa-tg-widget iframe {
+    max-width: 100% !important;
+    border-radius: var(--v-radius-sm, 6px);
 }
 
 /* Telegram fallback button (if widget doesn't load) */
@@ -543,10 +552,30 @@
 .g_id_signin {
     display: flex;
     justify-content: center;
+    width: 100%;
 }
 
-.g_id_signin iframe {
+.g_id_signin iframe,
+.g_id_signin > div {
     max-width: 100% !important;
+}
+
+/* Google button loading placeholder */
+.wa-google-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--v-space-md, 8px);
+    min-height: 44px;
+    padding: 10px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius, 10px);
+    color: var(--v-text-dim, #a09484);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-base, 13px);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* ----- DEV Login Button ----- */
@@ -627,17 +656,22 @@
     box-shadow: 0 0 6px rgba(196, 149, 58, 0.4), 0 0 12px rgba(196, 149, 58, 0.2);
 }
 
-.wa-ember:nth-child(1) { left: 15%; bottom: -4px; width: 2px; height: 2px; animation-delay: 0s; }
-.wa-ember:nth-child(2) { left: 40%; bottom: -4px; width: 3px; height: 3px; animation-delay: 3s; }
-.wa-ember:nth-child(3) { left: 65%; bottom: -4px; width: 2px; height: 2px; animation-delay: 1.5s; }
-.wa-ember:nth-child(4) { left: 85%; bottom: -4px; width: 2px; height: 2px; animation-delay: 5s; }
+.wa-ember:nth-child(1) { left: 10%; bottom: -4px; width: 2px; height: 2px; animation-delay: 0s; animation-duration: 14s; }
+.wa-ember:nth-child(2) { left: 30%; bottom: -4px; width: 3px; height: 3px; animation-delay: 2s; animation-duration: 18s; }
+.wa-ember:nth-child(3) { left: 55%; bottom: -4px; width: 2px; height: 2px; animation-delay: 1s; animation-duration: 15s; }
+.wa-ember:nth-child(4) { left: 75%; bottom: -4px; width: 2px; height: 2px; animation-delay: 4s; animation-duration: 17s; }
+.wa-ember:nth-child(5) { left: 20%; bottom: -4px; width: 2px; height: 2px; animation-delay: 6s; animation-duration: 20s; }
+.wa-ember:nth-child(6) { left: 50%; bottom: -4px; width: 3px; height: 3px; animation-delay: 8s; animation-duration: 16s; }
+.wa-ember:nth-child(7) { left: 90%; bottom: -4px; width: 2px; height: 2px; animation-delay: 3s; animation-duration: 19s; }
+.wa-ember:nth-child(8) { left: 45%; bottom: -4px; width: 2px; height: 2px; animation-delay: 10s; animation-duration: 22s; }
 
 @keyframes wa-emberFloat {
     0% { opacity: 0; transform: translateY(0) translateX(0); }
-    10% { opacity: 0.6; }
-    50% { opacity: 0.4; transform: translateY(-120px) translateX(10px); }
-    80% { opacity: 0.1; }
-    100% { opacity: 0; transform: translateY(-220px) translateX(-6px); }
+    8% { opacity: 0.7; }
+    30% { opacity: 0.5; transform: translateY(-150px) translateX(15px); }
+    60% { opacity: 0.3; transform: translateY(-350px) translateX(-8px); }
+    85% { opacity: 0.1; }
+    100% { opacity: 0; transform: translateY(-500px) translateX(5px); }
 }
 
 /* ----- Fade-in animation ----- */

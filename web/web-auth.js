@@ -138,38 +138,50 @@ window.onTelegramAuth = async function(user) {
 };
 
 window.onGoogleAuth = async function(response) {
-    console.info('[WEB-AUTH] Google auth callback received, credential length:', (response.credential || '').length);
+    console.info('[WEB-AUTH] Google auth callback received credential_len=%d', (response.credential || '').length);
+    if (!response.credential) {
+        console.error('[WEB-AUTH] Google auth callback WITHOUT credential — aborting');
+        showAuthError('Google não retornou credencial. Tente novamente.');
+        return;
+    }
     showAuthLoading(true);
     hideAuthError();
     try {
         var ok = await discoverApiBase();
-        console.info('[WEB-AUTH] API discovery result:', ok, 'apiBase:', _apiBase);
+        console.info('[WEB-AUTH] API discovery ok=%s apiBase=%s', ok, _apiBase);
         if (!ok) {
             showAuthError('Não foi possível encontrar o servidor. Configure a URL manualmente.');
             return;
         }
-        console.info('[WEB-AUTH] Sending login to:', _apiBase + '/api/auth/login');
+        console.info('[WEB-AUTH] POST %s/api/auth/login provider=google', _apiBase);
+        var controller = new AbortController();
+        var timeout = setTimeout(function() { controller.abort(); }, 15000);
         var resp = await fetch(_apiBase + '/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 provider: 'google',
                 credential: response.credential
-            })
+            }),
+            signal: controller.signal
         });
-        console.info('[WEB-AUTH] Login response status:', resp.status);
+        clearTimeout(timeout);
+        console.info('[WEB-AUTH] Login response status=%d', resp.status);
         if (_checkRateLimit(resp)) return;
         if (!resp.ok) {
             var err = await resp.json().catch(function() { return {}; });
-            console.error('[WEB-AUTH] Login failed:', resp.status, err);
+            console.error('[WEB-AUTH] Login failed status=%d error=%s', resp.status, err.error || '');
             throw new Error(err.error || 'Erro na autenticação (' + resp.status + ')');
         }
         var data = await resp.json();
-        console.info('[WEB-AUTH] Login success: user_id=%s chars=%d', data.user_id, (data.characters || []).length);
+        console.info('[WEB-AUTH] Login success user_id=%s chars=%d', data.user_id, (data.characters || []).length);
         handleLoginSuccess(data);
     } catch (e) {
         console.error('[WEB-AUTH] Google login error:', e);
-        showAuthError(e.message || 'Erro ao autenticar com Google');
+        var msg = e.name === 'AbortError'
+            ? 'Servidor não respondeu a tempo. Verifique sua conexão.'
+            : (e.message || 'Erro ao autenticar com Google');
+        showAuthError(msg);
     } finally {
         showAuthLoading(false);
     }
@@ -319,12 +331,7 @@ function redirectToGame(charId, isNew, token) {
 /* ----- Logout ----- */
 
 function onLogout() {
-    localStorage.removeItem(WEB_TOKEN_KEY);
-    localStorage.removeItem(WEB_USER_KEY);
-    _authToken = '';
-    _userId = 0;
-    _characters = [];
-    _selectedCharId = '';
+    _clearStoredSession();
     document.getElementById('screen-chars').classList.remove('wa-active');
     document.getElementById('screen-login').classList.add('wa-active');
 }
@@ -464,8 +471,10 @@ function checkExistingSession() {
         _authToken = token;
         _userId = parseInt(uid, 10);
         _apiBase = api;
-        // Try to fetch characters with existing token
+        // Try to fetch characters with existing token (validates session server-side)
         fetchCharacters();
+    } else {
+        console.info('[WEB-AUTH] No existing session — showing login buttons');
     }
 }
 
@@ -479,14 +488,15 @@ async function fetchCharacters() {
             }
         });
         if (!resp.ok) {
-            // Token expired or invalid — show login
-            console.warn('[WEB-AUTH] Existing session invalid, showing login');
-            localStorage.removeItem(WEB_TOKEN_KEY);
+            // Token expired or invalid — clear and show login
+            console.warn('[WEB-AUTH] Existing session invalid status=%d, clearing token', resp.status);
+            _clearStoredSession();
             showAuthLoading(false);
             return;
         }
         var data = await resp.json();
         _characters = data.characters || [];
+        console.info('[WEB-AUTH] fetchCharacters OK count=%d', _characters.length);
         if (_characters.length === 1) {
             _selectedCharId = _characters[0].id || _characters[0].char_id || '';
             redirectToGame(_selectedCharId, false);
@@ -496,11 +506,21 @@ async function fetchCharacters() {
             redirectToGame('', true);
         }
     } catch (e) {
-        console.warn('[WEB-AUTH] Session check failed:', e);
-        localStorage.removeItem(WEB_TOKEN_KEY);
+        // Network error (server unreachable) — clear token and show login
+        console.warn('[WEB-AUTH] Session check failed (network?):', e.message || e);
+        _clearStoredSession();
     } finally {
         showAuthLoading(false);
     }
+}
+
+function _clearStoredSession() {
+    localStorage.removeItem(WEB_TOKEN_KEY);
+    localStorage.removeItem(WEB_USER_KEY);
+    _authToken = '';
+    _userId = 0;
+    _characters = [];
+    _selectedCharId = '';
 }
 
 /* ----- DEV Login (bypass auth) ----- */
