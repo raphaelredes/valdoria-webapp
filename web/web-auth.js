@@ -115,16 +115,29 @@ window.onTelegramClick = function() {
     /* Try to click the hidden widget iframe button */
     var iframe = container.querySelector('iframe');
     if (iframe && _tgWidgetReady) {
-        /* The Telegram widget iframe has its own click handler.
-         * We can't click inside cross-origin iframe, so we make
-         * the widget temporarily visible and trigger it. */
+        /* Show dark overlay behind the widget popup */
+        var overlay = document.getElementById('tg-auth-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'tg-auth-overlay';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(10,8,5,0.85);z-index:9998;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px';
+            var hint = document.createElement('p');
+            hint.style.cssText = 'color:#a09484;font-family:MedievalSharp,serif;font-size:13px;margin-top:16px';
+            hint.textContent = 'Clique no bot\u00e3o acima para confirmar';
+            overlay.appendChild(hint);
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) _hideTgOverlay();
+            });
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'flex';
+
+        /* Make widget visible centered on the overlay */
         container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;overflow:visible;opacity:1;pointer-events:auto;z-index:9999';
-        /* Let user click the real widget, then hide after auth */
         console.info('[WEB-AUTH] Showing Telegram widget for auth');
-        /* Auto-hide after 30s if user doesn't complete */
-        setTimeout(function() {
-            container.style.cssText = '';
-        }, 30000);
+
+        /* Auto-hide after 30s */
+        setTimeout(function() { _hideTgOverlay(); }, 30000);
         return;
     }
 
@@ -132,6 +145,13 @@ window.onTelegramClick = function() {
     console.info('[WEB-AUTH] Telegram widget not ready, opening t.me link');
     window.open('https://t.me/' + BOT_USERNAME, '_blank', 'noopener');
 };
+
+function _hideTgOverlay() {
+    var container = document.getElementById('tg-widget');
+    if (container) container.style.cssText = '';
+    var overlay = document.getElementById('tg-auth-overlay');
+    if (overlay) overlay.style.display = 'none';
+}
 
 window.onGoogleClick = function() {
     /* Trigger the hidden Google Sign-In prompt */
@@ -154,9 +174,8 @@ window.onGoogleClick = function() {
 
 window.onTelegramAuth = async function(user) {
     console.info('[WEB-AUTH] Telegram auth callback:', user.first_name, 'id:', user.id);
-    /* Hide the temporarily-shown widget */
-    var tgc = document.getElementById('tg-widget');
-    if (tgc) tgc.style.cssText = '';
+    /* Hide the temporarily-shown widget + overlay */
+    _hideTgOverlay();
     showAuthLoading(true);
     hideAuthError();
     try {
