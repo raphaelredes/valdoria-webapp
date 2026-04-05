@@ -189,6 +189,38 @@ html.dev-panel-active #dev-log-panel {
     opacity: 0.3;
 }
 
+/* ---- Split view: both panels visible ---- */
+.dev-log-split {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.dev-log-pane {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    border-bottom: 1px solid var(--v-border, #4a3828);
+}
+
+.dev-log-pane:last-child {
+    border-bottom: none;
+}
+
+.dev-pane-label {
+    padding: 2px var(--v-space-md, 8px);
+    background: var(--v-bg, #2a2420);
+    border-bottom: 1px solid var(--v-border, #4a3828);
+    font-size: 9px;
+    color: var(--v-gold, #c4953a);
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
 /* ---- Log scroll area ---- */
 .dev-log-scroll {
     flex: 1;
@@ -196,6 +228,7 @@ html.dev-panel-active #dev-log-panel {
     overflow-x: hidden;
     padding: var(--v-space-xs, 2px) 0;
     scroll-behavior: auto;
+    min-height: 0;
 }
 
 /* Thin scrollbar for the log */
