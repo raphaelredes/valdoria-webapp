@@ -107,6 +107,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Bank redesign
+    if (data._bank_screen && typeof renderBankHub === 'function') {
+        renderBankHub(el, data._bank_screen);
+        return el;
+    }
+
     // Image banner (if present)
     if (data.image_url) {
         var img = document.createElement('img');
