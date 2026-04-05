@@ -19,26 +19,18 @@ html.dev-panel-active body {
     overflow: hidden;
 }
 
-/* Lock game frame at exactly 430px — target ALL children except the panel */
+/* Lock game frame at exactly 430px — target ALL children except the panel.
+   IMPORTANT: Do NOT use overflow:hidden or transform here — they break
+   position:fixed overlays (inventory, popups, title screen) by either
+   clipping them or converting fixed→absolute positioning.
+   overflow-x:clip clips horizontal overflow without creating a scroll
+   container or affecting fixed positioning. */
 html.dev-panel-active body > *:not(#dev-log-panel):not(#tg-auth-overlay) {
     width: 430px;
     min-width: 430px;
     max-width: 430px;
     flex-shrink: 0;
-    overflow: hidden;
-    /* transform creates a containing block for position:fixed descendants.
-       CSS spec: a transform other than none establishes a containing block
-       for all descendants, including fixed-position ones. This makes all
-       overlays render inside the 430px area. */
-    transform: translateZ(0);
 }
-
-/* The container has overflow:hidden + transform:translateZ(0), which:
-   1. Clips any content that overflows beyond 430px (overflow:hidden)
-   2. Contains position:fixed descendants within 430px (transform)
-   Elements using width:100vw will render at viewport width but be
-   CLIPPED by the container. This is the correct behavior — it lets
-   internal layouts work normally while visually constraining them. */
 
 /* The login page uses position:absolute children — wrap them in the 430px area */
 html.dev-panel-active body {
