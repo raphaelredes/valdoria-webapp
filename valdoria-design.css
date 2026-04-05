@@ -244,11 +244,9 @@
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
     border-left: 1px solid rgba(74, 56, 40, 0.3);
     border-right: 1px solid rgba(74, 56, 40, 0.3);
-    /* CRITICAL: Makes html a containing block for position:fixed elements.
-     * Without this, fixed overlays (popups, loading, etc.) position relative
-     * to the viewport (e.g. 1920px) instead of the 430px game frame.
-     * This is essential for the web portal where viewport > 430px. */
-    transform: translateZ(0);
+    /* NOTE: Do NOT add transform here — it would make html a containing block
+     * for position:fixed and break scroll behavior. Overlays are constrained
+     * via max-width + margin:auto instead (see bottom of this file). */
   }
   body {
     font-family: var(--v-font);
@@ -1622,13 +1620,18 @@ body::before {
   font-style: normal !important;
 }
 
-/* Ensure all fixed overlays respect the phone frame limits */
+/* Ensure all fixed overlays respect the phone frame limits.
+ * NEVER use left:50% + translateX(-50%) — it breaks when viewport > 430px
+ * (web portal, desktop browser, DEV panel). Use left:0; right:0; margin:auto
+ * which works at any viewport width. */
 .v-popup-overlay,
 .loading-overlay,
 .processing-overlay,
 #travel-overlay {
   max-width: min(100vw, 430px);
   max-height: min(100dvh, 932px);
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
 }
