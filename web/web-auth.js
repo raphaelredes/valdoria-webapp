@@ -110,7 +110,7 @@ window.onTelegramClick = function() {
     var origin = encodeURIComponent(window.location.origin);
     var returnTo = encodeURIComponent(window.location.href);
     /* bot_id must be numeric — map username to ID */
-    var botIds = { 'LendasDeValdoriaBOT': '7585008596', 'ValdoriaDevBot': '8074658054' };
+    var botIds = { 'LendasDeValdoriaBOT': '8511215729', 'ValdoriaDevBot': '8074658054' };
     var botId = botIds[BOT_USERNAME] || BOT_USERNAME;
     var authUrl = 'https://oauth.telegram.org/auth?bot_id=' + botId
         + '&origin=' + origin
