@@ -83,7 +83,7 @@
 /* ── Orb of Valdoria — LORE: ancient artifact central to the game's mythology ── */
 /* AI agents: Realistic glass orb with animated energy nebula inside.
    v5: Transparent shell, nebula rotation, wisps, sparks, Fresnel, SSS, caustics.
-   Keep visual consistency between title-orb and loading mc-gem (mc-gem stays simple). */
+   Loading mc-gem now uses the same 3D orb structure (mc-orb-* classes in loading.css). */
 
 /* ── Scene wrapper (entrance + float) ── */
 .title-orb-wrap {
