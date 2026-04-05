@@ -103,7 +103,8 @@
 
         async function discoverApi() {
             if (_apiBase) return;
-            var env = (location.hostname === 'jogo.lendasdevaldoria.com.br') ? 'prod' : 'dev';
+            /* Always use DEV API discovery — this is dev.html */
+            var env = 'dev';
             try {
                 var r = await fetch('../api-url-' + env + '.json?t=' + Date.now(), { cache: 'no-store' });
                 if (r.ok) { var d = await r.json(); if (d.url) _apiBase = d.url.replace(/\/$/, ''); }
