@@ -14,7 +14,7 @@
     justify-content: center;
     padding: 0;
     background:
-        radial-gradient(ellipse 80% 60% at 50% 15%, rgba(196,149,58,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 15%, var(--v-gold-06) 0%, transparent 60%),
         radial-gradient(ellipse 120% 80% at 50% 40%, var(--v-bg-raised, #3a3028) 0%, var(--v-bg, #2a2420) 40%, #1a1510 100%);
     position: relative;
     overflow: hidden;
@@ -68,8 +68,8 @@
     z-index: 1;
     box-shadow:
         0 8px 40px rgba(0, 0, 0, 0.6),
-        0 0 60px rgba(196, 149, 58, 0.05),
-        inset 0 1px 0 rgba(196, 149, 58, 0.08);
+        0 0 60px var(--v-gold-5),
+        inset 0 1px 0 var(--v-gold-08);
 }
 
 /* Top gold inlay line */
@@ -100,9 +100,9 @@
     height: 1px;
     background: linear-gradient(90deg,
         transparent,
-        rgba(196, 149, 58, 0.15) 30%,
-        rgba(196, 149, 58, 0.25) 50%,
-        rgba(196, 149, 58, 0.15) 70%,
+        var(--v-gold-15) 30%,
+        var(--v-gold-25) 50%,
+        var(--v-gold-15) 70%,
         transparent);
     border-radius: 2px;
 }
@@ -136,7 +136,7 @@
     letter-spacing: 3px;
     color: var(--v-gold, #c4953a);
     text-transform: uppercase;
-    text-shadow: 0 0 20px rgba(196, 149, 58, 0.4), 0 0 40px rgba(196, 149, 58, 0.2);
+    text-shadow: 0 0 20px var(--v-gold-40), 0 0 40px var(--v-gold-20);
 }
 
 .wa-title-sub {
@@ -147,7 +147,7 @@
     letter-spacing: 5px;
     color: var(--v-gold, #c4953a);
     text-transform: uppercase;
-    text-shadow: 0 0 25px rgba(196, 149, 58, 0.5), 0 0 50px rgba(196, 149, 58, 0.25);
+    text-shadow: 0 0 25px var(--v-gold-50), 0 0 50px var(--v-gold-25);
 }
 
 .wa-subtitle {
@@ -241,7 +241,7 @@
 }
 
 .wa-social-btn--google:hover {
-    border-color: rgba(196, 149, 58, 0.3);
+    border-color: var(--v-gold-30);
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
 }
 
@@ -367,7 +367,7 @@
 .wa-footer-note a {
     color: var(--v-gold, #c4953a);
     text-decoration: none;
-    border-bottom: 1px solid rgba(196, 149, 58, 0.3);
+    border-bottom: 1px solid var(--v-gold-30);
     transition: border-color var(--v-transition, 0.2s);
 }
 
@@ -396,7 +396,7 @@
     z-index: 1;
     box-shadow:
         0 8px 40px rgba(0, 0, 0, 0.6),
-        inset 0 1px 0 rgba(196, 149, 58, 0.08);
+        inset 0 1px 0 var(--v-gold-08);
 }
 
 .wa-chars-card::before {
@@ -417,7 +417,7 @@
 
 .wa-chars-orb {
     margin-bottom: var(--v-space-md, 8px);
-    filter: drop-shadow(0 0 12px rgba(196, 149, 58, 0.4));
+    filter: drop-shadow(0 0 12px var(--v-gold-40));
 }
 
 .wa-chars-title {
@@ -427,7 +427,7 @@
     color: var(--v-gold, #c4953a);
     text-align: center;
     margin: 0 0 var(--v-space-xl, 16px);
-    text-shadow: 0 0 10px rgba(196, 149, 58, 0.3);
+    text-shadow: 0 0 10px var(--v-gold-30);
     letter-spacing: 1px;
 }
 
@@ -455,8 +455,8 @@
 }
 
 .wa-char-card:hover {
-    border-color: rgba(196, 149, 58, 0.4);
-    box-shadow: 0 0 10px rgba(196, 149, 58, 0.08);
+    border-color: var(--v-gold-40);
+    box-shadow: 0 0 10px var(--v-gold-08);
 }
 
 .wa-char-card:active {
@@ -466,7 +466,7 @@
 .wa-char-card.selected {
     border-color: var(--v-gold, #c4953a);
     background: linear-gradient(165deg, #382a20 0%, #2a2018 100%);
-    box-shadow: 0 0 15px rgba(196, 149, 58, 0.2), inset 0 1px 0 rgba(196, 149, 58, 0.1);
+    box-shadow: 0 0 15px var(--v-gold-20), inset 0 1px 0 var(--v-gold-10);
 }
 
 .wa-char-icon {
@@ -477,7 +477,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(196, 149, 58, 0.06);
+    background: var(--v-gold-06);
     border-radius: var(--v-radius-sm, 6px);
     border: 1px solid var(--v-border, #4a3828);
 }
@@ -519,7 +519,7 @@
 .wa-char-card.selected .wa-char-check {
     border-color: var(--v-gold, #c4953a);
     background: var(--v-gold, #c4953a);
-    box-shadow: 0 0 8px rgba(196, 149, 58, 0.4);
+    box-shadow: 0 0 8px var(--v-gold-40);
 }
 
 .wa-char-card.selected .wa-char-check::after {
@@ -555,14 +555,14 @@
     font-weight: 700;
     letter-spacing: 1px;
     cursor: pointer;
-    box-shadow: 0 3px 12px rgba(196, 149, 58, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    box-shadow: 0 3px 12px var(--v-gold-30), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     transition: opacity var(--v-transition, 0.2s), transform var(--v-transition, 0.2s), box-shadow var(--v-transition, 0.2s);
     min-height: 48px;
     text-transform: uppercase;
 }
 
 .wa-btn-play:hover:not(:disabled) {
-    box-shadow: 0 4px 18px rgba(196, 149, 58, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 18px var(--v-gold-40), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .wa-btn-play:active:not(:disabled) {
@@ -619,8 +619,8 @@
     width: 100%;
     max-width: 300px;
     padding: 12px var(--v-space-xl, 16px);
-    background: rgba(196, 149, 58, 0.06);
-    border: 1px dashed rgba(196, 149, 58, 0.25);
+    background: var(--v-gold-06);
+    border: 1px dashed var(--v-gold-25);
     border-radius: var(--v-radius, 10px);
     font-family: var(--v-font, 'MedievalSharp', serif);
     font-size: var(--v-font-base, 13px);
@@ -633,7 +633,7 @@
 .wa-btn-dev:hover {
     border-color: var(--v-gold-dim, #9a7530);
     color: var(--v-gold, #c4953a);
-    background: rgba(196, 149, 58, 0.1);
+    background: var(--v-gold-10);
 }
 
 .wa-btn-dev:active {
@@ -644,34 +644,7 @@
    Ambient Floating Embers
    ============================================= */
 
-/* =============================================
-   Desktop Enhancement — background art margins
-   ============================================= */
-
-/* Decorative orb watermark in background (desktop only, outside phone frame) */
-@media (min-width: 500px) {
-    body::before {
-        content: '';
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -55%);
-        width: 600px;
-        height: 600px;
-        background: radial-gradient(circle, rgba(196, 149, 58, 0.03) 0%, transparent 60%);
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    /* Subtle border glow around the login card on desktop */
-    .wa-login-card {
-        box-shadow:
-            0 8px 40px rgba(0, 0, 0, 0.6),
-            0 0 80px rgba(196, 149, 58, 0.04),
-            0 0 1px rgba(196, 149, 58, 0.15),
-            inset 0 1px 0 rgba(196, 149, 58, 0.08);
-    }
-}
+/* Desktop decorative effects removed — Smartphone-Only Layout rule */
 
 .wa-hero-particles {
     position: fixed;
@@ -687,7 +660,7 @@
     background: var(--v-gold, #c4953a);
     opacity: 0;
     animation: wa-emberFloat 16s ease-in infinite;
-    box-shadow: 0 0 6px rgba(196, 149, 58, 0.4), 0 0 12px rgba(196, 149, 58, 0.2);
+    box-shadow: 0 0 6px var(--v-gold-40), 0 0 12px var(--v-gold-20);
 }
 
 .wa-ember:nth-child(1) { left: 10%; bottom: -4px; width: 2px; height: 2px; animation-delay: 0s; animation-duration: 14s; }
