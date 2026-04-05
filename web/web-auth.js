@@ -136,11 +136,11 @@ window.onTelegramClick = function() {
             });
             document.body.appendChild(overlay);
         }
-        /* Move widget INTO the overlay slot (centered on full screen) */
+        /* Move widget INTO the overlay slot — style to blend with dark theme */
         var slot = document.getElementById('tg-auth-slot');
         if (slot) {
             slot.appendChild(container);
-            container.style.cssText = 'position:static;width:auto;height:auto;overflow:visible;opacity:1;pointer-events:auto';
+            container.style.cssText = 'position:static;width:auto;height:auto;overflow:visible;opacity:1;pointer-events:auto;background:#2aabee;border-radius:10px;padding:2px;box-shadow:0 4px 20px rgba(42,171,238,0.3)';
         }
         overlay.style.display = 'flex';
         console.info('[WEB-AUTH] Showing Telegram widget for auth');
