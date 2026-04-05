@@ -79,7 +79,7 @@
   height: 8px;
   border-radius: 50%;
   background: var(--v-gold, #c4953a);
-  box-shadow: 0 0 4px rgba(196, 149, 58, 0.5);
+  box-shadow: 0 0 4px var(--v-gold-50);
 }
 
 /* New badge — sparkle */
@@ -98,7 +98,7 @@
   right: 4px;
   font-size: var(--v-font-xs, 10px);
   color: var(--v-gold-light, #dbb668);
-  background: rgba(196, 149, 58, 0.2);
+  background: var(--v-gold-20);
   padding: 1px 5px;
   border-radius: var(--v-radius-pill, 20px);
   font-family: var(--v-font, 'MedievalSharp', serif);
