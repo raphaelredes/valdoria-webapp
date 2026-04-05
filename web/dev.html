@@ -147,6 +147,11 @@
                 localStorage.setItem('valdoria_web_user_id', String(data.user_id || 0));
                 localStorage.setItem('valdoria_api_base', _apiBase);
 
+                /* Save dev_device_token for future auto-login (no PIN needed) */
+                if (data.dev_device_token) {
+                    localStorage.setItem('valdoria_dev_device', data.dev_device_token);
+                }
+
                 /* Fetch characters and redirect */
                 var charsResp = await fetch(_apiBase + '/api/game/characters?user_id=' + (data.user_id || 0), {
                     method: 'GET',
@@ -158,7 +163,8 @@
                     chars = cd.characters || [];
                 }
 
-                var env = (location.hostname === 'jogo.lendasdevaldoria.com.br') ? 'prod' : 'dev';
+                /* Always DEV when coming from dev.html */
+                var env = 'dev';
                 var params = new URLSearchParams();
                 params.set('token', data.token || '');
                 params.set('uid', String(data.user_id || 0));
