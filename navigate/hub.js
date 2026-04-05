@@ -668,12 +668,13 @@ function openDetail(biome, idx) {
     btn.addEventListener('click', function() {
       var action = this.getAttribute('data-nav-action');
       console.log('[HUB] nav-action click: %s', action);
-      if (action === 'explore' && typeof finishNavigation === 'function') {
-        finishNavigation('explore');
-      } else if (action === 'camp' && typeof finishNavigation === 'function') {
-        finishNavigation('camp');
-      } else if (action === 'return' && typeof handleReturn === 'function') {
-        handleReturn();
+      if (typeof finishNavigation === 'function') {
+        if (action === 'return') { handleReturn(); return; }
+        finishNavigation(action);
+      } else {
+        /* finishNavigation not available (navigate-core.js not loaded in hub SPA) */
+        console.warn('[HUB] finishNavigation unavailable, calling API directly type=%s', action);
+        _executeNavAction(action);
       }
     });
   });
@@ -682,6 +683,69 @@ function openDetail(biome, idx) {
   document.getElementById('detail-back').onclick = function() {
     document.getElementById('detail-screen').style.display = 'none';
   };
+}
+
+/* ===== NAV ACTION (explore/camp/return — fallback when navigate-core.js not loaded) ===== */
+async function _executeNavAction(type) {
+  if (!S.api || !S.token) {
+    console.warn('[HUB] No API/token for nav action');
+    if (typeof vToast === 'function') vToast('Sessao expirada. Reabra o mapa.', 'err', 2500);
+    return;
+  }
+  console.log('[HUB] _executeNavAction type=%s uid=%s', type, S.uid);
+
+  if (typeof vProcessing !== 'undefined') vProcessing.show({ text: type === 'explore' ? 'Explorando...' : type === 'camp' ? 'Montando acampamento...' : 'Retornando...' });
+
+  try {
+    var headers = { 'Content-Type': 'application/json' };
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+      headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    }
+    var resp = await fetch(S.api + '/api/navigate/action', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        action: 'navigate_action',
+        token: S.token,
+        uid: S.uid,
+        type: type,
+      }),
+    });
+    if (typeof vProcessing !== 'undefined') vProcessing.hide();
+
+    if (!resp.ok) {
+      console.error('[HUB] nav action HTTP %s', resp.status);
+      if (resp.status === 401 || resp.status === 403) {
+        if (typeof vToast === 'function') vToast('Sessao expirada. Retornando...', 'err', 2500);
+        setTimeout(_transitionToGame, 1500);
+      }
+      return;
+    }
+    var data = await resp.json();
+    console.log('[HUB] nav action response type=%s hasUrl=%s hasError=%s', type, !!data.url, !!data.error);
+
+    if (data.error) {
+      console.warn('[HUB] nav action error: %s', data.error);
+      if (typeof vToast === 'function') vToast(data.message || data.error, 'err', 3000);
+      return;
+    }
+    if (data.url) {
+      if (data.travel_log && data.travel_log.length > 0 && typeof _showTravelJournal === 'function') {
+        _showTravelJournal(data.travel_log, data.url);
+      } else {
+        window.__valdoria_transitioning = true;
+        if (typeof valdoriaSpaNav === 'function') valdoriaSpaNav(data.url);
+        else window.location.replace(data.url);
+      }
+      return;
+    }
+    /* No URL — return to game */
+    _transitionToGame();
+  } catch (e) {
+    if (typeof vProcessing !== 'undefined') vProcessing.hide();
+    console.error('[HUB] nav action error:', e);
+    if (typeof vToast === 'function') vToast('Erro: ' + e.message, 'err', 3000);
+  }
 }
 
 /* ===== TRAVEL ACTION ===== */
