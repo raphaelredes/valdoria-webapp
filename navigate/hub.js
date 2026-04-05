@@ -584,10 +584,10 @@ function openDetail(biome, idx) {
   var isOutsideCity = state.currentLoc !== 'city_gates';
   h += '<div class="detail-actions">';
   if (isCurrent) {
-    h += '<button class="action-btn">\u{1F50D} Explorar</button>';
-    h += '<button class="action-btn">\u{1F3D5}\uFE0F Acampar</button>';
+    h += '<button class="action-btn" data-nav-action="explore">\u{1F50D} Explorar</button>';
+    h += '<button class="action-btn" data-nav-action="camp">\u{1F3D5}\uFE0F Acampar</button>';
     if (isOutsideCity) {
-      h += '<button class="action-btn">\u{1F3F0} Retornar</button>';
+      h += '<button class="action-btn" data-nav-action="return">\u{1F3F0} Retornar</button>';
     }
   } else if (isConnected) {
     h += '<button class="action-btn action-btn-travel" data-travel-loc="' + loc.id + '" data-travel-biome="' + biome + '" data-travel-name="' + loc.n + '">\u2694\uFE0F Viajar (' + edgeDist + '\u{1F552})</button>';
@@ -643,6 +643,21 @@ function openDetail(biome, idx) {
       _startTravel(targetLoc, targetBiome, targetName);
     });
   }
+
+  /* Bind explore / camp / return buttons (current location) */
+  container.querySelectorAll('[data-nav-action]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var action = this.getAttribute('data-nav-action');
+      console.log('[HUB] nav-action click: %s', action);
+      if (action === 'explore' && typeof finishNavigation === 'function') {
+        finishNavigation('explore');
+      } else if (action === 'camp' && typeof finishNavigation === 'function') {
+        finishNavigation('camp');
+      } else if (action === 'return' && typeof handleReturn === 'function') {
+        handleReturn();
+      }
+    });
+  });
 
   document.getElementById('detail-screen').style.display = 'flex';
   document.getElementById('detail-back').onclick = function() {
