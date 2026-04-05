@@ -62,7 +62,7 @@
         linear-gradient(170deg, #302418 0%, #261e14 40%, #1c1610 100%);
     border-radius: var(--v-radius, 10px);
     border: 1px solid var(--v-border, #4a3828);
-    padding: 28px 24px 24px;
+    padding: 28px 16px 24px;
     text-align: center;
     position: relative;
     z-index: 1;
@@ -191,7 +191,6 @@
     align-items: center;
     gap: var(--v-space-lg, 12px);
     width: 100%;
-    max-width: 300px;
     animation: wa-fadeIn 0.6s ease 0.4s both;
 }
 
@@ -200,13 +199,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 100%;
+    width: 100%;
     overflow: hidden;
 }
 
-/* Telegram widget iframe — contain within card */
+/* Telegram widget iframe — scale to fit within card padding */
 .wa-tg-widget iframe {
     max-width: 100% !important;
+    transform-origin: center center;
     border-radius: var(--v-radius-sm, 6px);
 }
 
