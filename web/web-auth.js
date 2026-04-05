@@ -109,11 +109,14 @@ window.onTelegramClick = function() {
     /* Redirect to Telegram OAuth page — clean, no iframe, no widget */
     var origin = encodeURIComponent(window.location.origin);
     var returnTo = encodeURIComponent(window.location.href);
-    var authUrl = 'https://oauth.telegram.org/auth?bot_id=' + BOT_USERNAME
+    /* bot_id must be numeric — map username to ID */
+    var botIds = { 'LendasDeValdoriaBOT': '7585008596', 'ValdoriaDevBot': '8074658054' };
+    var botId = botIds[BOT_USERNAME] || BOT_USERNAME;
+    var authUrl = 'https://oauth.telegram.org/auth?bot_id=' + botId
         + '&origin=' + origin
         + '&return_to=' + returnTo
         + '&request_access=write';
-    console.info('[WEB-AUTH] Redirecting to Telegram OAuth: %s', BOT_USERNAME);
+    console.info('[WEB-AUTH] Redirecting to Telegram OAuth bot_id=%s', botId);
     window.location.href = authUrl;
 };
 
