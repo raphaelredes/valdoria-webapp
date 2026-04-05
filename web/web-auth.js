@@ -141,8 +141,6 @@ window.onGoogleClick = function() {
 
 window.onTelegramAuth = async function(user) {
     console.info('[WEB-AUTH] Telegram auth callback:', user.first_name, 'id:', user.id);
-    /* Hide the temporarily-shown widget + overlay */
-    _hideTgOverlay();
     showAuthLoading(true);
     hideAuthError();
     try {
