@@ -74,79 +74,47 @@ async function discoverApiBase() {
 
 /* ----- Telegram Login Widget (hidden, auth-only) ----- */
 
-var _tgWidgetReady = false;
+/* ----- Telegram OAuth Redirect (no widget/iframe) ----- */
 
 function loadTelegramWidget() {
-    var container = document.getElementById('tg-widget');
-    if (!container) return;
-    var script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://telegram.org/js/telegram-widget.js?23';
-    script.setAttribute('data-telegram-login', BOT_USERNAME);
-    script.setAttribute('data-size', 'large');
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    script.setAttribute('data-request-access', 'write');
-    script.setAttribute('data-userpic', 'true');
-    container.appendChild(script);
+    /* No widget needed — using redirect OAuth instead.
+     * Check if we're returning FROM a Telegram OAuth redirect. */
+    _checkTelegramOAuthReturn();
+}
 
-    console.info('[WEB-AUTH] Telegram widget injected (hidden) for bot:', BOT_USERNAME);
+function _checkTelegramOAuthReturn() {
+    /* Telegram OAuth redirect returns with hash fragment:
+     * #tgAuthResult=<base64 JSON> */
+    var hash = window.location.hash || '';
+    if (hash.indexOf('tgAuthResult=') === -1) return;
 
-    /* Poll for widget iframe readiness (up to 15s, check every 500ms) */
-    var _pollCount = 0;
-    var _pollMax = 30; /* 30 x 500ms = 15s */
-    var _pollTimer = setInterval(function() {
-        _pollCount++;
-        var iframe = container.querySelector('iframe');
-        if (iframe) {
-            _tgWidgetReady = true;
-            clearInterval(_pollTimer);
-            console.info('[WEB-AUTH] Telegram widget iframe ready (after %dms)', _pollCount * 500);
-        } else if (_pollCount >= _pollMax) {
-            clearInterval(_pollTimer);
-            console.warn('[WEB-AUTH] Telegram widget did NOT load after 15s');
-        }
-    }, 500);
+    console.info('[WEB-AUTH] Telegram OAuth redirect detected');
+    try {
+        var encoded = hash.split('tgAuthResult=')[1];
+        var jsonStr = atob(encoded);
+        var user = JSON.parse(jsonStr);
+        console.info('[WEB-AUTH] Telegram OAuth user: %s id=%s', user.first_name, user.id);
+        /* Clear the hash to avoid re-processing on reload */
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        /* Trigger the same auth callback as the widget */
+        window.onTelegramAuth(user);
+    } catch (e) {
+        console.error('[WEB-AUTH] Failed to parse Telegram OAuth result:', e);
+    }
 }
 
 /* ----- Custom Social Button Handlers ----- */
 
-/* Telegram click — just scroll to and highlight the native widget */
 window.onTelegramClick = function() {
-    var container = document.getElementById('tg-widget');
-    if (!container) return;
-
-    if (_tgWidgetReady) {
-        /* Widget ready — show it inline below the custom button */
-        container.style.display = 'flex';
-        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        /* Hide the custom button since native widget is now visible */
-        var btn = document.getElementById('btn-telegram');
-        if (btn) btn.style.display = 'none';
-        console.info('[WEB-AUTH] Telegram native widget shown inline');
-        return;
-    }
-
-    /* Widget not ready — show loading and poll */
-    console.info('[WEB-AUTH] Telegram widget not ready, waiting...');
-    var btn = document.getElementById('btn-telegram');
-    var label = btn ? btn.querySelector('.wa-social-label') : null;
-    var origText = label ? label.textContent : '';
-    if (label) label.textContent = 'Carregando...';
-
-    var _retryCount = 0;
-    var _retryTimer = setInterval(function() {
-        _retryCount++;
-        if (_tgWidgetReady) {
-            clearInterval(_retryTimer);
-            if (label) label.textContent = origText;
-            window.onTelegramClick();
-        } else if (_retryCount >= 20) {
-            clearInterval(_retryTimer);
-            if (label) label.textContent = origText;
-            console.warn('[WEB-AUTH] Telegram widget failed after 10s');
-            window.open('https://t.me/' + BOT_USERNAME, '_blank', 'noopener');
-        }
-    }, 500);
+    /* Redirect to Telegram OAuth page — clean, no iframe, no widget */
+    var origin = encodeURIComponent(window.location.origin);
+    var returnTo = encodeURIComponent(window.location.href);
+    var authUrl = 'https://oauth.telegram.org/auth?bot_id=' + BOT_USERNAME
+        + '&origin=' + origin
+        + '&return_to=' + returnTo
+        + '&request_access=write';
+    console.info('[WEB-AUTH] Redirecting to Telegram OAuth: %s', BOT_USERNAME);
+    window.location.href = authUrl;
 };
 
 window.onGoogleClick = function() {
