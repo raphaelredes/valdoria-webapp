@@ -19,13 +19,18 @@ html.dev-panel-active body {
     overflow: hidden;
 }
 
-/* Lock game frame at exactly 430px */
-html.dev-panel-active body > *:first-child {
+/* Lock game frame at exactly 430px — target ALL children except the panel */
+html.dev-panel-active body > *:not(#dev-log-panel):not(#tg-auth-overlay) {
     width: 430px;
     min-width: 430px;
     max-width: 430px;
     flex-shrink: 0;
     overflow: hidden;
+}
+
+/* The login page uses position:absolute children — wrap them in the 430px area */
+html.dev-panel-active body {
+    position: relative;
 }
 
 /* ---- Panel default (hidden) ---- */
