@@ -699,19 +699,8 @@ function _loadGoogleGSI() {
                 auto_select: false,
                 use_fedcm_for_prompt: false,
             });
-            var wrap = document.getElementById('google-wrap');
-            if (wrap) {
-                google.accounts.id.renderButton(wrap, {
-                    type: 'standard',
-                    shape: 'rectangular',
-                    theme: 'filled_black',
-                    text: 'signin_with',
-                    size: 'large',
-                    logo_alignment: 'left',
-                    width: 350,
-                });
-                console.info('[WEB-AUTH] Google Sign-In button rendered OK');
-            }
+            /* No renderButton — custom button triggers google.accounts.id.prompt() */
+            console.info('[WEB-AUTH] Google GSI initialized (custom button mode)');
         } catch (e) {
             console.error('[WEB-AUTH] Google GSI init error:', e);
         }

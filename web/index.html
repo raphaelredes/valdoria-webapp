@@ -108,8 +108,8 @@
                     </span>
                 </button>
 
-                <!-- Hidden Telegram widget (auth mechanism) -->
-                <div id="tg-widget" class="wa-tg-widget"></div>
+                <!-- Hidden Telegram widget (auth-only, never visible) -->
+                <div id="tg-widget" class="wa-tg-widget" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none"></div>
 
                 <div class="wa-separator">
                     <span class="wa-separator-line"></span>
@@ -133,8 +133,8 @@
                     </span>
                 </button>
 
-                <!-- Hidden Google widget (auth mechanism) -->
-                <div id="google-wrap"></div>
+                <!-- Hidden Google widget (auth-only, never visible) -->
+                <div id="google-wrap" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none"></div>
             </div>
 
             <div id="auth-error" class="wa-error" style="display:none"></div>
