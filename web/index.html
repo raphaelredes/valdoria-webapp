@@ -167,6 +167,11 @@
     _loadScript('../shared/console-collector.js');
     _loadScript('../shared/error-reporter.js');
     _loadScript('web-auth.js');
+    /* DEV debug panel */
+    if (new URLSearchParams(window.location.search).get('env') === 'dev') {
+        _loadCssBody('../shared/dev-debug-panel.css');
+        _loadScript('../shared/dev-debug-panel.js');
+    }
     </script>
 </body>
 </html>

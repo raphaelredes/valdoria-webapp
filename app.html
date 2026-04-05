@@ -57,6 +57,11 @@
     document.write('<link rel="stylesheet" href="shared/web-user-menu.css?v=' + v + '">');
     document.write('<script src="shared/web-user-menu.js?v=' + v + '"><\/script>');
     document.write('<script src="shared/version-check.js?v=' + v + '"><\/script>');
+    /* DEV debug panel — only when ?env=dev (safe: static paths, no user input) */
+    if (new URLSearchParams(window.location.search).get('env') === 'dev') {
+        var _lk = document.createElement('link'); _lk.rel = 'stylesheet'; _lk.href = 'shared/dev-debug-panel.css?v=' + v; document.head.appendChild(_lk);
+        var _sc = document.createElement('script'); _sc.src = 'shared/dev-debug-panel.js?v=' + v; document.head.appendChild(_sc);
+    }
     </script>
 </head>
 <body>
