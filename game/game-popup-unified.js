@@ -95,6 +95,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // City gates redesign
+    if (data._gates_screen && typeof renderGatesHub === 'function') {
+        renderGatesHub(el, data._gates_screen);
+        return el;
+    }
+
     // Image banner (if present)
     if (data.image_url) {
         var img = document.createElement('img');
