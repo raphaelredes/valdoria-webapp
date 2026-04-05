@@ -42,7 +42,7 @@
 
 /* Card icon — large emoji */
 .cloc-card-icon {
-  font-size: 24px;
+  font-size: var(--v-font-icon, 24px); /* HARDCODED: icon size, no exact token */
   line-height: 1;
   margin-bottom: var(--v-space-xs, 2px);
 }
@@ -87,7 +87,7 @@
   position: absolute;
   top: 3px;
   right: 3px;
-  font-size: 12px;
+  font-size: var(--v-font-sm, 12px);
   line-height: 1;
 }
 
