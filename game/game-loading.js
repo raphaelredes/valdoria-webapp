@@ -111,6 +111,13 @@
             console.warn('[INTRO] ValdoriaAudio not available — no music');
         }
 
+        /* If game already loaded while title was showing, skip loading entirely */
+        if (_dataReady) {
+            console.log('[INTRO] Game data already ready — skipping loading, proceeding directly');
+            if (_pendingHideCb) { _pendingHideCb(); _pendingHideCb = null; }
+            return;
+        }
+
         /* NOW show the loading screen with reactive effects */
         var ctrl = _ensureCtrl();
         ctrl.show(false);
@@ -121,9 +128,9 @@
         /* Start audio-reactive effects after brief delay (eye candy during loading) */
         setTimeout(function() {
             _startReactive();
-            /* If game data already loaded while title was up, auto-dismiss loading */
+            /* Double-check: data may have loaded during the 100ms delay */
             if (_dataReady) {
-                console.log('[INTRO] Game data was already ready — auto-hiding loading');
+                console.log('[INTRO] Game data ready during reactive start — auto-hiding loading');
                 _stopReactive();
                 ctrl.hide(function() {
                     var loadEl = document.getElementById('loading');
