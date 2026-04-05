@@ -495,19 +495,30 @@ function openLocations(biome) {
 
 function _buildLocCard(loc, disc, isCurrent, meta, biome, idx) {
   var card = document.createElement('div');
-  card.className = 'loc-card' + (isCurrent ? ' here' : '') + (disc ? '' : ' unknown');
-  if (disc) {
+  var isConnected = !isCurrent && _hubIsConnected(state.currentLoc, loc.id);
+  card.className = 'loc-card' + (isCurrent ? ' here' : '') + (disc ? '' : ' unknown') + (isConnected && !disc ? ' expedition' : '');
+  if (disc || isConnected) {
     card.addEventListener('click', function() { openDetail(biome, idx); });
   }
 
   var h = '<div class="loc-card-icon" style="background:' + meta.gradient + '">' + (disc ? loc.i : '\u2753') + '</div>';
   h += '<div class="loc-card-info">';
-  h += '<div class="loc-card-name">' + (disc ? loc.n : 'Local desconhecido') + '</div>';
-  h += '<div class="loc-card-meta">' + (disc ? meta.name + ' \u00B7 Nivel ' + loc.d : '???') + '</div>';
-  if (disc) h += '<div class="loc-card-pips">' + _buildPipsSmall(loc.d, 5) + '</div>';
+  if (disc) {
+    h += '<div class="loc-card-name">' + loc.n + '</div>';
+    h += '<div class="loc-card-meta">' + meta.name + ' \u00B7 Nivel ' + loc.d + '</div>';
+    h += '<div class="loc-card-pips">' + _buildPipsSmall(loc.d, 5) + '</div>';
+  } else if (isConnected) {
+    var edgeDist = typeof getConnectionDistance === 'function' ? getConnectionDistance(state.currentLoc, loc.id) : 0;
+    h += '<div class="loc-card-name">Local desconhecido</div>';
+    h += '<div class="loc-card-meta" style="color:var(--v-gold,#c4953a)">\u26a0\ufe0f Expedi\u00e7\u00e3o' + (edgeDist > 0 ? ' \u00B7 ' + edgeDist + ' turnos' : '') + '</div>';
+  } else {
+    h += '<div class="loc-card-name">Local desconhecido</div>';
+    h += '<div class="loc-card-meta">???</div>';
+  }
   h += '</div>';
   if (isCurrent) h += '<span class="loc-card-badge">Aqui</span>';
   else if (disc) h += '<span class="loc-card-arrow">\u203A</span>';
+  else if (isConnected) h += '<span class="loc-card-arrow" style="color:var(--v-gold,#c4953a)">\u203A</span>';
 
   var temp = document.createElement('div');
   temp.innerHTML = h; /* noqa: security — server-sourced data only */
@@ -523,15 +534,19 @@ function openDetail(biome, idx) {
   var loc = reg.locs[idx];
   if (!loc) return;
 
-  document.getElementById('detail-title').textContent = loc.n;
+  var disc = reg.discovered.indexOf(loc.id) !== -1;
+  var displayName = disc ? loc.n : 'Local Desconhecido';
+  var displayIcon = disc ? loc.i : '\u2753';
+
+  document.getElementById('detail-title').textContent = displayName;
   var isCurrent = loc.id === state.currentLoc;
   var wt = state.weather[biome];
 
   var h = '';
   h += '<div class="detail-icon-row">';
-  h += '<div class="detail-icon-big" style="background:' + meta.gradient + '">' + loc.i + '</div>';
-  h += '<div><div class="detail-name">' + loc.n + '</div>';
-  h += '<div class="detail-subtitle">' + meta.name + ' \u00B7 Nivel ' + loc.d + '</div></div></div>';
+  h += '<div class="detail-icon-big" style="background:' + meta.gradient + '">' + displayIcon + '</div>';
+  h += '<div><div class="detail-name">' + displayName + '</div>';
+  h += '<div class="detail-subtitle">' + meta.name + (disc ? ' \u00B7 Nivel ' + loc.d : ' \u00B7 ???') + '</div></div></div>';
 
   h += '<div class="detail-pips-row">';
   for (var p = 0; p < 5; p++) {
@@ -589,8 +604,11 @@ function openDetail(biome, idx) {
     if (isOutsideCity) {
       h += '<button class="action-btn" data-nav-action="return">\u{1F3F0} Retornar</button>';
     }
-  } else if (isConnected) {
+  } else if (isConnected && disc) {
     h += '<button class="action-btn action-btn-travel" data-travel-loc="' + loc.id + '" data-travel-biome="' + biome + '" data-travel-name="' + loc.n + '">\u2694\uFE0F Viajar (' + edgeDist + '\u{1F552})</button>';
+  } else if (isConnected && !disc) {
+    h += '<div class="detail-nomap-warn">\u26a0\ufe0f <b>Expedi\u00e7\u00e3o \u00e0s Cegas</b> \u2014 ' + edgeDist + ' turno' + (edgeDist !== 1 ? 's' : '') + ', sem mapa, alta chance de se perder</div>';
+    h += '<button class="action-btn action-btn-travel" data-travel-loc="' + loc.id + '" data-travel-biome="' + biome + '" data-travel-name="Local desconhecido" data-travel-nomap="1" data-travel-first="1">\u{1F9ED} Expedi\u00e7\u00e3o (' + edgeDist + '\u{1F552} Sem Mapa) \u26a0\ufe0f</button>';
   } else {
     /* Unconnected — show route hint instead of travel button */
     var routePath = _hubBfsPath(state.currentLoc, loc.id);
@@ -633,16 +651,17 @@ function openDetail(biome, idx) {
     });
   });
 
-  /* Bind travel button */
-  var travelBtn = container.querySelector('[data-travel-loc]');
-  if (travelBtn) {
+  /* Bind travel button(s) */
+  container.querySelectorAll('[data-travel-loc]').forEach(function(travelBtn) {
     travelBtn.addEventListener('click', function() {
       var targetLoc = this.getAttribute('data-travel-loc');
       var targetBiome = this.getAttribute('data-travel-biome');
       var targetName = this.getAttribute('data-travel-name');
-      _startTravel(targetLoc, targetBiome, targetName);
+      var noMap = this.hasAttribute('data-travel-nomap');
+      var firstVisit = this.hasAttribute('data-travel-first');
+      _startTravel(targetLoc, targetBiome, targetName, { noMap: noMap, firstVisit: firstVisit });
     });
-  }
+  });
 
   /* Bind explore / camp / return buttons (current location) */
   container.querySelectorAll('[data-nav-action]').forEach(function(btn) {
@@ -666,7 +685,9 @@ function openDetail(biome, idx) {
 }
 
 /* ===== TRAVEL ACTION ===== */
-function _startTravel(locId, biome, name) {
+function _startTravel(locId, biome, name, flags) {
+  /* Store flags for _executeTravelApi */
+  window._pendingTravelFlags = flags || {};
   /* Use the full explore-travel.js animation (parallax, silhouette, particles) */
   if (typeof playTravelAnimation === 'function') {
     /* Constrain canvas to 430px max / 932px max height — explore-travel.js uses window.innerWidth/Height */
@@ -720,6 +741,7 @@ async function _executeTravelApi(locId) {
       headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
     }
 
+    var _tf = window._pendingTravelFlags || {};
     var resp = await fetch(S.api + '/api/navigate/action', {
       method: 'POST',
       headers: headers,
@@ -731,9 +753,11 @@ async function _executeTravelApi(locId) {
         target: locId,
         pace: pace,
         activity: activity,
-        noMap: !hasMap,
+        noMap: _tf.noMap || !hasMap,
+        firstVisit: _tf.firstVisit || false,
       }),
     });
+    window._pendingTravelFlags = {};
 
     if (typeof vProcessing !== 'undefined') vProcessing.hide();
 
