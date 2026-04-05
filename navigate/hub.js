@@ -667,15 +667,10 @@ function openDetail(biome, idx) {
   container.querySelectorAll('[data-nav-action]').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var action = this.getAttribute('data-nav-action');
-      console.log('[HUB] nav-action click: %s', action);
-      if (typeof finishNavigation === 'function') {
-        if (action === 'return') { handleReturn(); return; }
-        finishNavigation(action);
-      } else {
-        /* finishNavigation not available (navigate-core.js not loaded in hub SPA) */
-        console.warn('[HUB] finishNavigation unavailable, calling API directly type=%s', action);
-        _executeNavAction(action);
-      }
+      console.warn('[HUB] nav-action action=' + action + ' finishNav=' + (typeof finishNavigation) + ' execNav=' + (typeof _executeNavAction));
+      /* Always use _executeNavAction — finishNavigation requires navigate-core.js
+         which is NOT loaded by the SPA navigate route */
+      _executeNavAction(action);
     });
   });
 
