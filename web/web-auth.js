@@ -112,28 +112,37 @@ window.onTelegramClick = function() {
     var container = document.getElementById('tg-widget');
     if (!container) return;
 
-    /* Try to click the hidden widget iframe button */
     var iframe = container.querySelector('iframe');
     if (iframe && _tgWidgetReady) {
-        /* Show dark overlay behind the widget popup */
+        /* Show dark overlay with widget centered inside it */
         var overlay = document.getElementById('tg-auth-overlay');
         if (!overlay) {
             overlay = document.createElement('div');
             overlay.id = 'tg-auth-overlay';
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(10,8,5,0.85);z-index:9998;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px';
+            /* Overlay only covers the game area (430px), not the debug panel */
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:430px;max-width:100vw;height:100vh;height:100dvh;background:rgba(10,8,5,0.88);z-index:9998;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px';
+            /* Slot for the widget */
+            var slot = document.createElement('div');
+            slot.id = 'tg-auth-slot';
+            slot.style.cssText = 'display:flex;align-items:center;justify-content:center';
+            overlay.appendChild(slot);
+            /* Hint below the button */
             var hint = document.createElement('p');
-            hint.style.cssText = 'color:#a09484;font-family:MedievalSharp,serif;font-size:13px;margin-top:16px';
-            hint.textContent = 'Clique no bot\u00e3o acima para confirmar';
+            hint.style.cssText = 'color:#a09484;font-family:MedievalSharp,serif;font-size:14px;margin:0;text-align:center';
+            hint.textContent = 'Confirme sua identidade';
             overlay.appendChild(hint);
             overlay.addEventListener('click', function(e) {
                 if (e.target === overlay) _hideTgOverlay();
             });
             document.body.appendChild(overlay);
         }
+        /* Move widget INTO the overlay slot (centered on full screen) */
+        var slot = document.getElementById('tg-auth-slot');
+        if (slot) {
+            slot.appendChild(container);
+            container.style.cssText = 'position:static;width:auto;height:auto;overflow:visible;opacity:1;pointer-events:auto';
+        }
         overlay.style.display = 'flex';
-
-        /* Make widget visible centered on the overlay */
-        container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;overflow:visible;opacity:1;pointer-events:auto;z-index:9999';
         console.info('[WEB-AUTH] Showing Telegram widget for auth');
 
         /* Auto-hide after 30s */
@@ -147,8 +156,13 @@ window.onTelegramClick = function() {
 };
 
 function _hideTgOverlay() {
+    /* Move widget back to its original parent */
     var container = document.getElementById('tg-widget');
-    if (container) container.style.cssText = '';
+    var authBtns = document.querySelector('.wa-auth-buttons');
+    if (container && authBtns) {
+        authBtns.appendChild(container);
+        container.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
+    }
     var overlay = document.getElementById('tg-auth-overlay');
     if (overlay) overlay.style.display = 'none';
 }
