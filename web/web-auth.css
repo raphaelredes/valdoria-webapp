@@ -194,60 +194,105 @@
     animation: wa-fadeIn 0.6s ease 0.4s both;
 }
 
-.wa-tg-widget {
-    min-height: 44px;
+/* ----- Social Login Buttons (unified style) ----- */
+
+.wa-social-btn {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: var(--v-space-lg, 12px);
     width: 100%;
-    overflow: hidden;
-    background: linear-gradient(135deg, #54a9eb, #3a8fd4);
-    border-radius: var(--v-radius, 10px);
-    padding: var(--v-space-xs, 2px);
-    box-shadow: 0 3px 12px rgba(84, 169, 235, 0.25);
-}
-
-/* Telegram widget iframe — fill the styled container */
-.wa-tg-widget iframe {
-    max-width: 100% !important;
-    border-radius: var(--v-radius-sm, 6px);
-    min-height: 40px;
-}
-
-/* Hide the Telegram container background when iframe loads its own styling */
-.wa-tg-widget:has(iframe[style]) {
-    background: transparent;
-    box-shadow: none;
-    padding: 0;
-}
-
-/* Telegram fallback button (if widget doesn't load) */
-.wa-tg-fallback {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--v-space-md, 8px);
-    padding: 10px 24px;
-    background: linear-gradient(135deg, #54a9eb, #2a8ad4);
-    color: #fff;
-    border: none;
+    padding: 12px var(--v-space-xl, 16px);
+    border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius, 10px);
     font-family: var(--v-font, 'MedievalSharp', serif);
     font-size: var(--v-font-body, 14px);
     font-weight: 700;
-    text-decoration: none;
     cursor: pointer;
-    transition: transform var(--v-transition, 0.2s), box-shadow var(--v-transition, 0.2s);
-    box-shadow: 0 3px 12px rgba(84, 169, 235, 0.3);
-    min-height: 44px;
+    transition: border-color var(--v-transition, 0.2s), box-shadow var(--v-transition, 0.2s), transform var(--v-transition, 0.2s);
+    min-height: 48px;
+    box-sizing: border-box;
+    text-decoration: none;
+    position: relative;
 }
 
-.wa-tg-fallback:active {
-    transform: scale(0.96);
+.wa-social-btn:active {
+    transform: scale(0.97);
 }
 
-.wa-tg-fallback-icon {
-    font-size: var(--v-font-xl, 16px);
+/* Telegram button — blue gradient */
+.wa-social-btn--telegram {
+    background: linear-gradient(135deg, #2aabee 0%, #229ed9 100%);
+    color: #fff;
+    border-color: rgba(42, 171, 238, 0.4);
+    box-shadow: 0 3px 14px rgba(42, 171, 238, 0.2);
 }
+
+.wa-social-btn--telegram:hover {
+    border-color: rgba(42, 171, 238, 0.7);
+    box-shadow: 0 4px 18px rgba(42, 171, 238, 0.3);
+}
+
+/* Google button — dark with subtle border (Google branding: filled_black) */
+.wa-social-btn--google {
+    background: linear-gradient(135deg, #302820 0%, #1c1610 100%);
+    color: var(--v-text, #d4c8b0);
+    border-color: var(--v-border, #4a3828);
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.3);
+}
+
+.wa-social-btn--google:hover {
+    border-color: rgba(196, 149, 58, 0.3);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+}
+
+/* Provider icon container */
+.wa-social-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wa-social-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Provider text */
+.wa-social-text {
+    flex: 1;
+    text-align: left;
+    line-height: 1.3;
+}
+
+.wa-social-label {
+    display: block;
+    font-size: var(--v-font-body, 14px);
+}
+
+.wa-social-sub {
+    display: block;
+    font-size: var(--v-font-xs, 10px);
+    font-weight: 400;
+    opacity: 0.7;
+    margin-top: 1px;
+}
+
+/* Hidden original widget — used for auth only */
+.wa-tg-widget {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Legacy fallback classes — kept for compat */
+.wa-tg-fallback { display: none; }
+.wa-tg-fallback-icon { display: none; }
 
 /* ----- Separator ----- */
 
@@ -558,27 +603,15 @@
     transform: scale(0.97);
 }
 
-/* ----- Google button override ----- */
+/* ----- Google widget (hidden — auth handled by custom button) ----- */
 
 #google-wrap {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    min-height: 44px;
-    border-radius: var(--v-radius, 10px);
+    position: absolute;
+    width: 1px;
+    height: 1px;
     overflow: hidden;
-}
-
-.g_id_signin {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-
-.g_id_signin iframe,
-.g_id_signin > div {
-    max-width: 100% !important;
-    border-radius: var(--v-radius, 10px) !important;
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* ----- DEV Login Button ----- */

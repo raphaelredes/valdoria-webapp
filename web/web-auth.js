@@ -72,7 +72,9 @@ async function discoverApiBase() {
     return false;
 }
 
-/* ----- Telegram Login Widget ----- */
+/* ----- Telegram Login Widget (hidden, auth-only) ----- */
+
+var _tgWidgetReady = false;
 
 function loadTelegramWidget() {
     var container = document.getElementById('tg-widget');
@@ -84,32 +86,77 @@ function loadTelegramWidget() {
     script.setAttribute('data-size', 'large');
     script.setAttribute('data-onauth', 'onTelegramAuth(user)');
     script.setAttribute('data-request-access', 'write');
-    script.setAttribute('data-userpic', 'true');
+    script.setAttribute('data-userpic', 'false');
     container.appendChild(script);
 
-    console.info('[WEB-AUTH] Telegram widget script injected for bot:', BOT_USERNAME);
-    /* Fallback: if widget doesn't render in 4s, show a styled button */
+    console.info('[WEB-AUTH] Telegram widget injected (hidden) for bot:', BOT_USERNAME);
+
+    /* Check when widget iframe is ready */
     setTimeout(function() {
-        if (container.querySelector('iframe')) { console.info('[WEB-AUTH] Telegram widget iframe loaded OK'); return; }
-        console.warn('[WEB-AUTH] Telegram widget did NOT load in 4s, showing fallback button');
-        var fallback = document.createElement('a');
-        fallback.href = 'https://t.me/' + BOT_USERNAME;
-        fallback.target = '_blank';
-        fallback.rel = 'noopener';
-        fallback.className = 'wa-tg-fallback';
-        var icon = document.createElement('span');
-        icon.className = 'wa-tg-fallback-icon';
-        icon.textContent = '\u2708'; /* plane icon */
-        fallback.appendChild(icon);
-        fallback.appendChild(document.createTextNode('Entrar com Telegram'));
-        container.appendChild(fallback);
+        var iframe = container.querySelector('iframe');
+        if (iframe) {
+            _tgWidgetReady = true;
+            console.info('[WEB-AUTH] Telegram widget iframe ready');
+            /* Update button label if user is logged in to Telegram */
+            var label = document.getElementById('tg-btn-label');
+            if (label) label.textContent = 'Entrar com Telegram';
+        } else {
+            console.warn('[WEB-AUTH] Telegram widget did NOT load — button will open t.me link');
+        }
     }, 4000);
 }
+
+/* ----- Custom Social Button Handlers ----- */
+
+window.onTelegramClick = function() {
+    var container = document.getElementById('tg-widget');
+    if (!container) return;
+
+    /* Try to click the hidden widget iframe button */
+    var iframe = container.querySelector('iframe');
+    if (iframe && _tgWidgetReady) {
+        /* The Telegram widget iframe has its own click handler.
+         * We can't click inside cross-origin iframe, so we make
+         * the widget temporarily visible and trigger it. */
+        container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;overflow:visible;opacity:1;pointer-events:auto;z-index:9999';
+        /* Let user click the real widget, then hide after auth */
+        console.info('[WEB-AUTH] Showing Telegram widget for auth');
+        /* Auto-hide after 30s if user doesn't complete */
+        setTimeout(function() {
+            container.style.cssText = '';
+        }, 30000);
+        return;
+    }
+
+    /* Fallback: open Telegram directly */
+    console.info('[WEB-AUTH] Telegram widget not ready, opening t.me link');
+    window.open('https://t.me/' + BOT_USERNAME, '_blank', 'noopener');
+};
+
+window.onGoogleClick = function() {
+    /* Trigger the hidden Google Sign-In prompt */
+    if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+        console.info('[WEB-AUTH] Triggering Google Sign-In prompt');
+        google.accounts.id.prompt();
+    } else {
+        console.warn('[WEB-AUTH] Google GSI not loaded, retrying in 1s');
+        setTimeout(function() {
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.prompt();
+            } else {
+                showAuthError('Google Sign-In não carregou. Recarregue a página.');
+            }
+        }, 1000);
+    }
+};
 
 /* ----- Auth Callbacks ----- */
 
 window.onTelegramAuth = async function(user) {
     console.info('[WEB-AUTH] Telegram auth callback:', user.first_name, 'id:', user.id);
+    /* Hide the temporarily-shown widget */
+    var tgc = document.getElementById('tg-widget');
+    if (tgc) tgc.style.cssText = '';
     showAuthLoading(true);
     hideAuthError();
     try {
