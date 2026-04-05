@@ -661,7 +661,7 @@ function _loadGoogleGSI() {
                     text: 'signin_with',
                     size: 'large',
                     logo_alignment: 'left',
-                    width: 330,
+                    width: 350,
                 });
                 console.info('[WEB-AUTH] Google Sign-In button rendered OK');
             }

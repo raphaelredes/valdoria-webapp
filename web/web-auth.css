@@ -195,19 +195,30 @@
 }
 
 .wa-tg-widget {
-    min-height: 40px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     overflow: hidden;
+    background: linear-gradient(135deg, #54a9eb, #3a8fd4);
+    border-radius: var(--v-radius, 10px);
+    padding: var(--v-space-xs, 2px);
+    box-shadow: 0 3px 12px rgba(84, 169, 235, 0.25);
 }
 
-/* Telegram widget iframe — scale to fit within card padding */
+/* Telegram widget iframe — fill the styled container */
 .wa-tg-widget iframe {
     max-width: 100% !important;
-    transform-origin: center center;
     border-radius: var(--v-radius-sm, 6px);
+    min-height: 40px;
+}
+
+/* Hide the Telegram container background when iframe loads its own styling */
+.wa-tg-widget:has(iframe[style]) {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
 }
 
 /* Telegram fallback button (if widget doesn't load) */
@@ -549,6 +560,15 @@
 
 /* ----- Google button override ----- */
 
+#google-wrap {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    border-radius: var(--v-radius, 10px);
+    overflow: hidden;
+}
+
 .g_id_signin {
     display: flex;
     justify-content: center;
@@ -558,24 +578,7 @@
 .g_id_signin iframe,
 .g_id_signin > div {
     max-width: 100% !important;
-}
-
-/* Google button loading placeholder */
-.wa-google-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--v-space-md, 8px);
-    min-height: 44px;
-    padding: 10px 24px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--v-border, #4a3828);
-    border-radius: var(--v-radius, 10px);
-    color: var(--v-text-dim, #a09484);
-    font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: var(--v-font-base, 13px);
-    width: 100%;
-    box-sizing: border-box;
+    border-radius: var(--v-radius, 10px) !important;
 }
 
 /* ----- DEV Login Button ----- */
