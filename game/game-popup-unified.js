@@ -89,6 +89,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // City locations redesign: structured card grid
+    if (data._city_locations && typeof renderCityLocations === 'function') {
+        renderCityLocations(el, data._city_locations);
+        return el;
+    }
+
     // Image banner (if present)
     if (data.image_url) {
         var img = document.createElement('img');

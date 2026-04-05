@@ -1,0 +1,123 @@
+/* game-city-locations.css — City locations popup card grid */
+/* Namespace: cloc- (city locations) */
+
+.cloc-hub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-md, 8px);
+}
+
+/* 2-column card grid */
+.cloc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--v-space-md, 8px);
+}
+
+/* Single location card */
+.cloc-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--v-space-xs, 2px);
+  padding: var(--v-space-md-lg, 10px) var(--v-space-md, 8px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  cursor: pointer;
+  transition: background var(--v-transition-fast, 0.15s) ease,
+              border-color var(--v-transition-fast, 0.15s) ease,
+              transform var(--v-transition-fast, 0.15s) ease;
+  position: relative;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+
+.cloc-card:active {
+  background: var(--v-bg-sel, #3a2e1a);
+  border-color: var(--v-gold-30, rgba(196, 149, 58, 0.3));
+  transform: scale(0.97);
+}
+
+/* Card icon — large emoji */
+.cloc-card-icon {
+  font-size: 24px;
+  line-height: 1;
+  margin-bottom: var(--v-space-xs, 2px);
+}
+
+/* Card info block */
+.cloc-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* Location name */
+.cloc-card-name {
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-text, #d4c8b0);
+  line-height: 1.2;
+}
+
+/* Brief description */
+.cloc-card-desc {
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-dim, #a09484);
+  line-height: 1.2;
+}
+
+/* Quest indicator — gold dot */
+.cloc-badge-quest {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--v-gold, #c4953a);
+  box-shadow: 0 0 4px rgba(196, 149, 58, 0.5);
+}
+
+/* New badge — sparkle */
+.cloc-badge-new {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* Count badge (travelers, etc.) */
+.cloc-badge-count {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-gold-light, #dbb668);
+  background: rgba(196, 149, 58, 0.2);
+  padding: 1px 5px;
+  border-radius: var(--v-radius-pill, 20px);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+}
+
+/* Separator between core and extra locations */
+.cloc-separator {
+  height: 1px;
+  background: var(--v-gold-12, rgba(196, 149, 58, 0.12));
+  margin: var(--v-space-xs, 2px) 0;
+}
+
+/* Performance: disable transitions on lite devices */
+body.perf-lite .cloc-card {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cloc-card {
+    transition: none;
+  }
+}
