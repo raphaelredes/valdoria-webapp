@@ -361,9 +361,25 @@ function _connectSSE() {
     }
 }
 
+function _injectLayoutFix() {
+    /* Inject critical layout CSS directly — never depend on CDN timing.
+     * This ensures game elements stay at 430px even if the external
+     * CSS file hasn't propagated yet. */
+    var s = document.createElement('style');
+    s.id = 'dev-panel-layout-fix';
+    s.textContent = [
+        'html.dev-panel-active{max-width:none!important;margin:0!important}',
+        'html.dev-panel-active body{display:flex!important;flex-direction:row!important;align-items:stretch!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important}',
+        'html.dev-panel-active body>*:not(#dev-log-panel):not(#tg-auth-overlay):not(script){width:430px!important;min-width:430px!important;max-width:430px!important;flex-shrink:0!important;overflow:hidden!important}',
+        'html.dev-panel-active body>script{display:none!important;width:0!important;min-width:0!important}',
+    ].join('\n');
+    document.head.appendChild(s);
+}
+
 function _init() {
     if (!_shouldActivate()) return;
     _active = true;
+    _injectLayoutFix();
     _panel = _buildPanel();
     document.body.appendChild(_panel);
     document.documentElement.classList.add('dev-panel-active');
