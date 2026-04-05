@@ -3,6 +3,7 @@
 
 function renderMarketHub(container, data) {
   if (!container || !data) return;
+  console.warn('[CITY-MARKET] renderMarketHub merchants=' + (data.merchants ? data.merchants.length : 0) + ' gold=' + (data.gold || 0));
   while (container.firstChild) container.removeChild(container.firstChild);
 
   var root = vCity.el('div', 'mkt-hub');

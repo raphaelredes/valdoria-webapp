@@ -3,6 +3,7 @@
 
 function renderGuildHub(container, data) {
   if (!container || !data) return;
+  console.warn('[CITY-GUILD] renderGuildHub party=' + (data.party_count || 0) + '/' + (data.party_max || 3) + ' services=' + (data.services ? data.services.length : 0));
   while (container.firstChild) container.removeChild(container.firstChild);
 
   var root = vCity.el('div', 'gld-hub');

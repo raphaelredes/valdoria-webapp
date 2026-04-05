@@ -3,6 +3,7 @@
 
 function renderTavernHub(container, data) {
   if (!container || !data) return;
+  console.warn('[CITY-TAVERN] renderTavernHub npcs=' + (data.npcs ? data.npcs.length : 0) + ' services=' + (data.services ? data.services.length : 0));
   while (container.firstChild) container.removeChild(container.firstChild);
 
   var root = vCity.el('div', 'tav-hub');

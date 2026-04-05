@@ -11,6 +11,7 @@
  */
 function renderCityLocations(container, data) {
   if (!container || !data) return;
+  console.warn('[CITY-LOCATIONS] renderCityLocations locations=' + (data.locations ? data.locations.length : 0) + ' extra=' + (data.extra ? data.extra.length : 0));
   while (container.firstChild) container.removeChild(container.firstChild);
 
   switch (data.type) {

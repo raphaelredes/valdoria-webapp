@@ -4,6 +4,7 @@
 
 function renderBankHub(container, data) {
   if (!container || !data) return;
+  console.warn('[CITY-BANK] renderBankHub gold=' + (data.gold || 0) + ' bank=' + (data.bank_gold || 0) + ' services=' + (data.services ? data.services.length : 0));
   while (container.firstChild) container.removeChild(container.firstChild);
 
   var root = vCity.el('div', 'bnk-hub');

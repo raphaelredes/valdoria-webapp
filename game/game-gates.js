@@ -4,6 +4,7 @@
 
 function renderGatesHub(container, data) {
   if (!container || !data) return;
+  console.warn('[CITY-GATES] renderGatesHub actions=' + (data.actions ? data.actions.length : 0) + ' wnpcs=' + (data.wandering_npcs ? data.wandering_npcs.length : 0));
   while (container.firstChild) container.removeChild(container.firstChild);
 
   var root = vCity.el('div', 'gts-hub');

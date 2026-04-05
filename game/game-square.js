@@ -3,6 +3,7 @@
 
 function renderSquareHub(container, data) {
   if (!container || !data) return;
+  console.warn('[CITY-SQUARE] renderSquareHub services=' + (data.services ? data.services.length : 0));
   while (container.firstChild) container.removeChild(container.firstChild);
 
   var root = vCity.el('div', 'sqr-hub');
