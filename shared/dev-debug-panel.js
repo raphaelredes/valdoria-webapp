@@ -15,7 +15,6 @@
 'use strict';
 
 var MAX_LINES = 500;
-var SSE_RETRY_MS = 5000;
 var LEVELS = ['error', 'warn', 'info', 'debug'];
 
 var _active = false;
@@ -24,8 +23,6 @@ var _filter = '';
 var _hiddenLevels = {};
 var _browserLines = [];
 var _serverLines = [];
-var _sseSource = null;
-var _sseRetryTimer = null;
 
 var _panel = null;
 var _iframe = null;
@@ -357,63 +354,63 @@ function _lvlFromStr(s) {
     return 'debug';
 }
 
-function _connectSSE() {
+/* ── Server log polling (SSE fails through Cloudflare tunnel) ── */
+
+var _pollTimer = null;
+var _pollPos = 0;
+var POLL_INTERVAL_MS = 2000;
+
+function _parseLine(raw) {
+    var level = 'info', text = raw;
+    var m = raw.match(_LOG_RE);
+    if (m) { level = _lvlFromStr(m[1]); text = m[2]; }
+    return { level: level, text: text };
+}
+
+function _startPolling() {
     var tok = null, api = null;
     try {
         tok = localStorage.getItem('valdoria_web_token');
         api = localStorage.getItem('valdoria_api_base');
     } catch (e) {}
-    if (!tok || !api) { _sseRetryTimer = setTimeout(_connectSSE, SSE_RETRY_MS); return; }
-    if (_sseSource) { try { _sseSource.close(); } catch (e) {} _sseSource = null; }
+    if (!tok || !api) { _pollTimer = setTimeout(_startPolling, POLL_INTERVAL_MS); return; }
     var uid = localStorage.getItem('valdoria_web_user_id') || '';
-    var url = api + '/api/game/logs/stream?token=' + encodeURIComponent(tok) + '&user_id=' + encodeURIComponent(uid);
-    try {
-        var src = new EventSource(url); /* noqa: security */
-        src.onopen = function() {
-            if (_sseStatusEl) {
+
+    if (_sseStatusEl) {
+        _sseStatusEl.className = 'dev-sse-status connected';
+        _sseStatusEl.title = 'Polling: active';
+    }
+    _addLine('server', 'info', '[POLL] Polling logs from ' + api);
+
+    function _poll() {
+        var url = api + '/api/game/logs/tail?token=' + encodeURIComponent(tok)
+            + '&user_id=' + encodeURIComponent(uid)
+            + '&since=' + _pollPos;
+        fetch(url).then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        }).then(function(data) {
+            if (_sseStatusEl && _sseStatusEl.className !== 'dev-sse-status connected') {
                 _sseStatusEl.className = 'dev-sse-status connected';
-                _sseStatusEl.title = 'SSE: connected';
+                _sseStatusEl.title = 'Polling: active';
             }
-            _addLine('server', 'info', '[SSE] Connected to ' + api);
-        };
-        src.onmessage = function(evt) {
-            var raw = evt.data;
-            if (!raw) return;
-            var level = 'info', text = raw;
-            try {
-                var p = JSON.parse(raw);
-                if (p && typeof p === 'string') {
-                    /* Server sends JSON-escaped strings: "line content" */
-                    text = p;
-                    var m = text.match(_LOG_RE);
-                    if (m) { level = _lvlFromStr(m[1]); text = m[2]; }
-                } else if (p && p.message) {
-                    level = _lvlFromStr(p.level || 'INFO');
-                    text = p.message;
-                }
-            } catch (e) {
-                var m2 = raw.match(_LOG_RE);
-                if (m2) { level = _lvlFromStr(m2[1]); text = m2[2]; }
+            if (data.pos) _pollPos = data.pos;
+            var lines = data.lines || [];
+            for (var i = 0; i < lines.length; i++) {
+                var parsed = _parseLine(lines[i]);
+                _addLine('server', parsed.level, parsed.text);
             }
-            _addLine('server', level, text);
-        };
-        src.onerror = function() {
+        }).catch(function(e) {
             if (_sseStatusEl) {
                 _sseStatusEl.className = 'dev-sse-status error';
-                _sseStatusEl.title = 'SSE: disconnected';
+                _sseStatusEl.title = 'Polling error: ' + e.message;
             }
-            try { src.close(); } catch (e) {}
-            _sseSource = null;
-            _sseRetryTimer = setTimeout(_connectSSE, SSE_RETRY_MS);
-        };
-        _sseSource = src;
-    } catch (e) {
-        if (_sseStatusEl) {
-            _sseStatusEl.className = 'dev-sse-status error';
-            _sseStatusEl.title = 'SSE error: ' + e.message;
-        }
-        _sseRetryTimer = setTimeout(_connectSSE, SSE_RETRY_MS);
+        }).finally(function() {
+            _pollTimer = setTimeout(_poll, POLL_INTERVAL_MS);
+        });
     }
+
+    _poll();
 }
 
 /* ── Iframe host mode: replace page content with iframe + panel ── */
@@ -466,8 +463,8 @@ function _initAsHost() {
     /* Watch for iframe navigations (cross-WebApp transitions) */
     _watchIframeNavigation();
 
-    /* Connect SSE for server logs */
-    _connectSSE();
+    /* Poll server logs (SSE fails through Cloudflare tunnel) */
+    _startPolling();
 }
 
 /* ── Init ── */
