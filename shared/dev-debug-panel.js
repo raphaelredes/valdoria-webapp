@@ -372,35 +372,17 @@ function _injectLayoutFix() {
        IMPORTANT: Do NOT use overflow:hidden on game children — it clips
        position:fixed overlays (inventory, title screen, volume button).
        Instead, constrain fixed overlays via explicit width:430px rules. */
-    /* Wrap ALL body children (except dev panel) in a 430px container.
-       This container uses width+overflow:hidden to clip content AND
-       transform:translateZ(0) to convert position:fixed→absolute so
-       overlays (inventory, title screen, popups) stay inside 430px.
-       The wrapper is a NEW element injected by JS — never modify the
-       existing DOM structure of the game. */
+    /* Simple layout: body flex row, game children at 430px, panel fills rest.
+       No overflow:hidden, no transform, no wrapper — these break position:fixed
+       overlays. Fixed overlays (inventory, title screen) will extend beyond
+       430px on desktop, but this is acceptable for the DEV testing tool. */
     s.textContent = [
         'html.dev-panel-active{max-width:none!important;margin:0!important}',
         'html.dev-panel-active body{display:flex!important;flex-direction:row!important;align-items:stretch!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important}',
-        '#dev-game-wrapper{width:430px;min-width:430px;max-width:430px;flex-shrink:0;position:relative;overflow:hidden;height:100dvh;transform:translateZ(0)}',
+        'html.dev-panel-active body>*:not(#dev-log-panel):not(#tg-auth-overlay):not(script){width:430px!important;min-width:430px!important;max-width:430px!important;flex-shrink:0!important}',
+        'html.dev-panel-active body>script{display:none!important;width:0!important;min-width:0!important}',
     ].join('\n');
     document.head.appendChild(s);
-}
-
-function _wrapGameContent() {
-    /* Create a wrapper div that contains ALL game elements (everything
-       except dev-log-panel). The wrapper has width:430px + overflow:hidden
-       + transform:translateZ(0) which clips content AND converts
-       position:fixed→absolute so overlays stay inside 430px. */
-    var wrapper = document.createElement('div');
-    wrapper.id = 'dev-game-wrapper';
-    var children = Array.from(document.body.children);
-    for (var i = 0; i < children.length; i++) {
-        var child = children[i];
-        if (child.id === 'dev-log-panel' || child.tagName === 'SCRIPT' || child.tagName === 'LINK') continue;
-        wrapper.appendChild(child);
-    }
-    /* Insert wrapper as first child of body (before dev panel) */
-    document.body.insertBefore(wrapper, document.body.firstChild);
 }
 
 function _init() {
@@ -409,7 +391,6 @@ function _init() {
     _injectLayoutFix();
     _panel = _buildPanel();
     document.body.appendChild(_panel);
-    _wrapGameContent();
     document.documentElement.classList.add('dev-panel-active');
     _addLine('browser', 'info', '[DEV Panel] Activated');
     _interceptConsole();
