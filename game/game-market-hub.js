@@ -3,8 +3,20 @@
 
 function renderMarketHub(container, data) {
   if (!container || !data) return;
-  console.warn('[CITY-MARKET] renderMarketHub merchants=' + (data.merchants ? data.merchants.length : 0) + ' gold=' + (data.gold || 0));
+  console.warn('[CITY-MARKET] renderMarketHub type=' + (data.type || '?') + ' merchants=' + (data.merchants ? data.merchants.length : 0) + ' gold=' + (data.gold || 0));
   while (container.firstChild) container.removeChild(container.firstChild);
+
+  /* Mercado fechado (noite) */
+  if (data.type === 'closed') {
+    var closed = vCity.el('div', 'mkt-hub');
+    closed.appendChild(vCity.statusAlert(data.message || 'Mercado fechado', 'warn'));
+    if (data.extras && data.extras.length) {
+      closed.appendChild(vCity.sectionLabel('Alternativas'));
+      closed.appendChild(vCity.serviceGrid(data.extras));
+    }
+    container.appendChild(closed);
+    return;
+  }
 
   var root = vCity.el('div', 'mkt-hub');
 
