@@ -27,11 +27,18 @@ html.dev-panel-active body > *:not(#dev-log-panel):not(#tg-auth-overlay) {
     flex-shrink: 0;
     overflow: hidden;
     /* transform creates a containing block for position:fixed descendants.
-       This forces ALL overlays (inventory, vPopup, loading, processing, etc.)
-       to be contained within the 430px game area instead of expanding to
-       the full viewport. CSS spec: a transform other than none establishes
-       a containing block for all descendants, including fixed-position ones. */
+       CSS spec: a transform other than none establishes a containing block
+       for all descendants, including fixed-position ones. This makes all
+       overlays render inside the 430px area. */
     transform: translateZ(0);
+}
+
+/* Force ALL descendants of the game frame to max 430px width.
+   WebApps use width:100vw, width:100%, or hardcoded widths that expand
+   beyond the phone frame on desktop. This universal rule catches them all
+   without needing per-class overrides. */
+html.dev-panel-active body > *:not(#dev-log-panel):not(#tg-auth-overlay) * {
+    max-width: 430px;
 }
 
 /* The login page uses position:absolute children — wrap them in the 430px area */
