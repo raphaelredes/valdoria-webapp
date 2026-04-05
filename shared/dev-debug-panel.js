@@ -1,7 +1,7 @@
 /**
- * DEV Debug Panel v1.0
+ * DEV Debug Panel v2.0
  * Lateral debug panel shown to the RIGHT of the 430px game frame.
- * Browser console tab + Server SSE log tab.
+ * Split view: Browser (top) + Server (bottom) — both always visible.
  *
  * Activates when: URL has ?env=dev AND (html.web-standalone OR path has /web/)
  * Uses var (project convention). Pure DOM manipulation (textContent + createElement).
@@ -14,7 +14,6 @@ var SSE_RETRY_MS = 5000;
 var LEVELS = ['error', 'warn', 'info', 'debug'];
 
 var _active = false;
-var _tab = 'browser';
 var _paused = false;
 var _filter = '';
 var _hiddenLevels = {};
@@ -24,11 +23,11 @@ var _sseSource = null;
 var _sseRetryTimer = null;
 
 var _panel = null;
-var _scrollEl = null;
+var _scrollBrowser = null;
+var _scrollServer = null;
 var _sseStatusEl = null;
 var _filterInput = null;
 var _pauseBtn = null;
-var _tabBtns = {};
 var _lvlBtns = {};
 
 function _shouldActivate() {
@@ -51,29 +50,39 @@ function _clearChildren(el) {
     while (el.firstChild) el.removeChild(el.firstChild);
 }
 
+function _buildPane(tabName, scrollId) {
+    var pane = document.createElement('div');
+    pane.className = 'dev-log-pane';
+
+    var lbl = document.createElement('div');
+    lbl.className = 'dev-pane-label';
+    lbl.textContent = tabName.toUpperCase();
+
+    if (tabName === 'server') {
+        var dot = document.createElement('span');
+        dot.id = 'dev-sse-status';
+        dot.className = 'dev-sse-status';
+        dot.title = 'SSE connection status';
+        _sseStatusEl = dot;
+        lbl.appendChild(dot);
+    }
+
+    var sc = document.createElement('div');
+    sc.id = scrollId;
+    sc.className = 'dev-log-scroll';
+    sc.appendChild(_emptyMsg());
+
+    pane.appendChild(lbl);
+    pane.appendChild(sc);
+    return pane;
+}
+
 function _buildPanel() {
     var panel = document.createElement('div');
     panel.id = 'dev-log-panel';
 
     var header = document.createElement('div');
     header.className = 'dev-panel-header';
-
-    ['browser', 'server'].forEach(function(t) {
-        var btn = document.createElement('button');
-        btn.className = 'dev-tab-btn' + (t === 'browser' ? ' active' : '');
-        btn.textContent = t[0].toUpperCase() + t.slice(1);
-        btn.setAttribute('data-tab', t);
-        btn.addEventListener('click', function() { _switchTab(t); });
-        _tabBtns[t] = btn;
-        header.appendChild(btn);
-    });
-
-    var dot = document.createElement('span');
-    dot.id = 'dev-sse-status';
-    dot.className = 'dev-sse-status';
-    dot.title = 'SSE connection status';
-    _sseStatusEl = dot;
-    header.appendChild(dot);
 
     var sp = document.createElement('span');
     sp.className = 'dev-panel-spacer';
@@ -121,13 +130,24 @@ function _buildPanel() {
 
     panel.appendChild(fb);
 
-    var sc = document.createElement('div');
-    sc.id = 'dev-log-scroll';
-    sc.className = 'dev-log-scroll';
-    _scrollEl = sc;
-    panel.appendChild(sc);
+    var split = document.createElement('div');
+    split.className = 'dev-log-split';
+
+    var browserPane = _buildPane('browser', 'dev-log-scroll-browser');
+    _scrollBrowser = browserPane.querySelector('#dev-log-scroll-browser');
+
+    var serverPane = _buildPane('server', 'dev-log-scroll-server');
+    _scrollServer = serverPane.querySelector('#dev-log-scroll-server');
+
+    split.appendChild(browserPane);
+    split.appendChild(serverPane);
+    panel.appendChild(split);
 
     return panel;
+}
+
+function _scrollElForTab(tab) {
+    return tab === 'server' ? _scrollServer : _scrollBrowser;
 }
 
 function _addLine(tab, level, msg) {
@@ -136,20 +156,22 @@ function _addLine(tab, level, msg) {
     buf.push(entry);
     if (buf.length > MAX_LINES) {
         buf.splice(0, buf.length - MAX_LINES);
-        if (tab === _tab) { _rerender(); return; }
+        _rerenderPane(tab);
+        return;
     }
-    if (tab === _tab) { _appendDOM(entry); }
+    _appendDOM(tab, entry);
 }
 
-function _appendDOM(entry) {
-    if (!_scrollEl) return;
+function _appendDOM(tab, entry) {
+    var sc = _scrollElForTab(tab);
+    if (!sc) return;
     if (_hiddenLevels[entry.level]) return;
     if (_filter && entry.msg.toLowerCase().indexOf(_filter) === -1) return;
     var el = _buildLineEl(entry);
-    var em = _scrollEl.querySelector('.dev-log-empty');
-    if (em) _scrollEl.removeChild(em);
-    _scrollEl.appendChild(el);
-    if (!_paused) _scrollEl.scrollTop = _scrollEl.scrollHeight;
+    var em = sc.querySelector('.dev-log-empty');
+    if (em) sc.removeChild(em);
+    sc.appendChild(el);
+    if (!_paused) sc.scrollTop = sc.scrollHeight;
 }
 
 function _buildLineEl(entry) {
@@ -183,32 +205,34 @@ function _emptyMsg() {
     return em;
 }
 
-function _rerender() {
-    if (!_scrollEl) return;
-    _clearChildren(_scrollEl);
-    var buf = _tab === 'server' ? _serverLines : _browserLines;
-    if (!buf.length) { _scrollEl.appendChild(_emptyMsg()); return; }
+function _rerenderPane(tab) {
+    var sc = _scrollElForTab(tab);
+    if (!sc) return;
+    _clearChildren(sc);
+    var buf = tab === 'server' ? _serverLines : _browserLines;
+    if (!buf.length) { sc.appendChild(_emptyMsg()); return; }
     buf.forEach(function(entry) {
         if (_hiddenLevels[entry.level]) return;
         if (_filter && entry.msg.toLowerCase().indexOf(_filter) === -1) return;
-        _scrollEl.appendChild(_buildLineEl(entry));
+        sc.appendChild(_buildLineEl(entry));
     });
-    if (!_paused) _scrollEl.scrollTop = _scrollEl.scrollHeight;
+    if (!_paused) sc.scrollTop = sc.scrollHeight;
 }
 
-function _switchTab(tab) {
-    _tab = tab;
-    Object.keys(_tabBtns).forEach(function(t) {
-        if (_tabBtns[t]) _tabBtns[t].classList.toggle('active', t === tab);
-    });
-    _rerender();
+function _rerender() {
+    _rerenderPane('browser');
+    _rerenderPane('server');
 }
 
 function _clear() {
-    if (_tab === 'server') _serverLines = []; else _browserLines = [];
-    if (!_scrollEl) return;
-    _clearChildren(_scrollEl);
-    _scrollEl.appendChild(_emptyMsg());
+    _browserLines = [];
+    _serverLines = [];
+    ['browser', 'server'].forEach(function(tab) {
+        var sc = _scrollElForTab(tab);
+        if (!sc) return;
+        _clearChildren(sc);
+        sc.appendChild(_emptyMsg());
+    });
 }
 
 function _togglePause() {
@@ -216,19 +240,23 @@ function _togglePause() {
     if (_pauseBtn) {
         _pauseBtn.textContent = _paused ? 'Resume' : 'Pause';
         _pauseBtn.classList.toggle('active', _paused);
-        if (!_paused && _scrollEl) _scrollEl.scrollTop = _scrollEl.scrollHeight;
+        if (!_paused) {
+            if (_scrollBrowser) _scrollBrowser.scrollTop = _scrollBrowser.scrollHeight;
+            if (_scrollServer)  _scrollServer.scrollTop  = _scrollServer.scrollHeight;
+        }
     }
 }
 
 function _toggleLevel(level) {
     _hiddenLevels[level] = !_hiddenLevels[level];
     if (_lvlBtns[level]) _lvlBtns[level].classList.toggle('hidden-level', !!_hiddenLevels[level]);
-    if (_scrollEl) {
-        var lines = _scrollEl.querySelectorAll('.dev-log-line[data-level="' + level + '"]');
+    [_scrollBrowser, _scrollServer].forEach(function(sc) {
+        if (!sc) return;
+        var lines = sc.querySelectorAll('.dev-log-line[data-level="' + level + '"]');
         for (var i = 0; i < lines.length; i++) {
             lines[i].classList.toggle('level-hidden', !!_hiddenLevels[level]);
         }
-    }
+    });
 }
 
 function _fmtArgs(args) {
@@ -351,10 +379,9 @@ if (document.readyState === 'loading') {
 }
 
 window.vDevPanel = {
-    addLine:   _addLine,
-    switchTab: _switchTab,
-    clear:     _clear,
-    isActive:  function() { return _active; }
+    addLine:  _addLine,
+    clear:    _clear,
+    isActive: function() { return _active; }
 };
 
 })();
