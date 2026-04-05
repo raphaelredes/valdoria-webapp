@@ -123,14 +123,22 @@ async function _loadPayload() {
   }
 }
 
+var _fetchAttempt = 0;
 async function _fetchFromApi() {
+  _fetchAttempt++;
+  var attempt = _fetchAttempt;
   var url = S.api + '/api/navigate/state?token=' + encodeURIComponent(S.token) + '&uid=' + S.uid;
+  console.warn('[HUB] _fetchFromApi attempt=%s url=%s', attempt, url.substring(0, 80));
   try {
     var headers = { 'Content-Type': 'application/json' };
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
       headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
     }
-    var resp = await fetch(url, { headers: headers });
+    var controller = new AbortController();
+    var tid = setTimeout(function() { controller.abort(); }, 12000);
+    var resp = await fetch(url, { headers: headers, signal: controller.signal });
+    clearTimeout(tid);
+    console.warn('[HUB] _fetchFromApi response status=%s attempt=%s', resp.status, attempt);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var body = await resp.json();
     if (body.data) {
@@ -143,19 +151,37 @@ async function _fetchFromApi() {
     }
     _onDataReady();
   } catch (e) {
-    console.error('[HUB] API fetch failed:', e);
-    if (typeof vToast === 'function') {
-      vToast('Erro ao carregar mapa. Tentando novamente...', 'err', 3000);
+    var errMsg = e.name === 'AbortError' ? 'timeout (12s)' : e.message;
+    console.error('[HUB] API fetch FAILED attempt=%s: %s', attempt, errMsg);
+    if (attempt < 2) {
+      console.warn('[HUB] Retrying in 2s...');
+      if (typeof vToast === 'function') {
+        vToast('Erro ao carregar mapa. Tentando novamente...', 'err', 3000);
+      }
+      setTimeout(function() {
+        _fetchFromApi().catch(function(e2) {
+          console.error('[HUB] Retry also failed:', e2.message || e2);
+          _showNavigateError(errMsg);
+        });
+      }, 2000);
+    } else {
+      _showNavigateError(errMsg);
     }
-    /* Retry once after 2s */
-    setTimeout(function() {
-      _fetchFromApi().catch(function() {
-        if (typeof MOCK_STATE !== 'undefined') {
-          state = _convertMockToHubFormat(MOCK_STATE);
-          _onDataReady();
-        }
-      });
-    }, 2000);
+  }
+}
+
+function _showNavigateError(reason) {
+  console.error('[HUB] FATAL: navigate cannot load. Reason: %s. Returning to game.', reason);
+  /* Hide loading overlay */
+  var _ld = document.getElementById('loading');
+  if (_ld) { _ld.style.display = 'none'; }
+  if (typeof vProcessing !== 'undefined' && vProcessing.isActive()) vProcessing.hide();
+  /* Return to game route via SPA */
+  if (window.SpaRouter && SpaRouter._routes && SpaRouter._routes.game) {
+    console.warn('[HUB] Redirecting to game route');
+    SpaRouter.navigate('game', {
+      token: S.token, api: S.api, uid: String(S.uid)
+    });
   }
 }
 
