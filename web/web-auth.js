@@ -15,6 +15,7 @@ if (_envOverride) console.info('[WEB-AUTH] env override=%s isProd=%s', _envOverr
 var WEB_TOKEN_KEY = 'valdoria_web_token';
 var WEB_USER_KEY = 'valdoria_web_user_id';
 var WEB_API_KEY = 'valdoria_api_base';
+var DEV_DEVICE_KEY = 'valdoria_dev_device';
 
 var _apiBase = '';
 var _authToken = '';
@@ -203,6 +204,12 @@ function handleLoginSuccess(data) {
     localStorage.setItem(WEB_TOKEN_KEY, _authToken);
     localStorage.setItem(WEB_USER_KEY, String(_userId));
     localStorage.setItem(WEB_API_KEY, _apiBase);
+
+    // DEV permanent auto-login: persist device token if provided
+    if (data.dev_device_token) {
+        localStorage.setItem(DEV_DEVICE_KEY, data.dev_device_token);
+        console.info('[WEB-AUTH] handleLoginSuccess: dev_device_token saved for future auto-login');
+    }
 
     if (_characters.length === 0) {
         // No characters — redirect to character creation
@@ -462,9 +469,55 @@ function _esc(str) {
     return d.innerHTML;
 }
 
+/* ----- DEV Permanent Auto-Login ----- */
+
+async function _devReauth(devToken) {
+    console.info('[WEB-AUTH] _devReauth: attempting auto-login with dev device token');
+    try {
+        var ok = await discoverApiBase();
+        if (!ok) {
+            console.warn('[WEB-AUTH] _devReauth: API discovery failed');
+            localStorage.removeItem(DEV_DEVICE_KEY);
+            showAuthLoading(false);
+            return false;
+        }
+        var resp = await fetch(_apiBase + '/api/game/_dev_reauth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dev_device_token: devToken })
+        });
+        if (!resp.ok) {
+            console.warn('[WEB-AUTH] _devReauth: server rejected token status=%d — clearing', resp.status);
+            localStorage.removeItem(DEV_DEVICE_KEY);
+            showAuthLoading(false);
+            return false;
+        }
+        var data = await resp.json();
+        console.info('[WEB-AUTH] _devReauth: success user_id=%s', data.user_id);
+        handleLoginSuccess(data);
+        return true;
+    } catch (e) {
+        console.warn('[WEB-AUTH] _devReauth: network error — clearing dev token', e.message || e);
+        localStorage.removeItem(DEV_DEVICE_KEY);
+        showAuthLoading(false);
+        return false;
+    }
+}
+
 /* ----- Auto-Login Check ----- */
 
 function checkExistingSession() {
+    // DEV auto-login: if a persistent device token exists, try to re-authenticate silently
+    if (_envId === 'dev') {
+        var devToken = localStorage.getItem(DEV_DEVICE_KEY);
+        if (devToken) {
+            console.info('[WEB-AUTH] checkExistingSession: DEV device token found, attempting reauth');
+            showAuthLoading(true);
+            _devReauth(devToken);
+            return;
+        }
+    }
+
     var token = localStorage.getItem(WEB_TOKEN_KEY);
     var uid = localStorage.getItem(WEB_USER_KEY);
     var api = localStorage.getItem(WEB_API_KEY);
