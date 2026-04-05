@@ -1,0 +1,41 @@
+/* game-market-hub.js — Market popup renderer */
+'use strict';
+
+function renderMarketHub(container, data) {
+  if (!container || !data) return;
+  while (container.firstChild) container.removeChild(container.firstChild);
+
+  var root = vCity.el('div', 'mkt-hub');
+
+  /* Gold + items */
+  var stats = vCity.el('div', 'mkt-stats');
+  var goldSpan = vCity.el('span', '');
+  goldSpan.textContent = String(data.gold || 0) + ' ';
+  goldSpan.appendChild(vCity.coin('sm'));
+  stats.appendChild(goldSpan);
+  var sep = document.createTextNode('  |  ');
+  stats.appendChild(sep);
+  var itemsSpan = vCity.el('span', '');
+  itemsSpan.textContent = '\uD83C\uDF92 Itens: ' + (data.item_count || 0);
+  stats.appendChild(itemsSpan);
+  root.appendChild(stats);
+
+  /* Merchants grid */
+  if (data.merchants && data.merchants.length) {
+    root.appendChild(vCity.sectionLabel('Mercadores'));
+    root.appendChild(vCity.serviceGrid(data.merchants));
+  }
+
+  /* Extras (transient, rune scribe, sell, rumors) */
+  if (data.extras && data.extras.length) {
+    root.appendChild(vCity.serviceGrid(data.extras));
+  }
+
+  /* Wandering NPCs */
+  if (data.wandering_npcs && data.wandering_npcs.length) {
+    root.appendChild(vCity.sectionLabel('Viajantes'));
+    root.appendChild(vCity.actionList(data.wandering_npcs));
+  }
+
+  container.appendChild(root);
+}

@@ -1,0 +1,14 @@
+/* game-guild.css — Guild styles */
+.gld-hub { display: flex; flex-direction: column; gap: var(--v-space-md, 8px); }
+.gld-flavor {
+  font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484);
+  line-height: 1.5; padding-left: var(--v-space-md, 8px);
+  border-left: 2px solid var(--v-gold-dim, rgba(196, 149, 58, 0.2));
+}
+.gld-party-row {
+  display: flex; align-items: center;
+  font-size: var(--v-font-sm, 12px); color: var(--v-text, #d4c8b0);
+  justify-content: center;
+}
+.gld-party-label { font-weight: 600; }
+.gld-fallen { color: #e07070; }

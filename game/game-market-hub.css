@@ -1,0 +1,7 @@
+/* game-market-hub.css — Market styles */
+.mkt-hub { display: flex; flex-direction: column; gap: var(--v-space-md, 8px); }
+.mkt-stats {
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--v-space-xs, 2px);
+  font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484);
+}

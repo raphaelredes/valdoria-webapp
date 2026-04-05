@@ -113,6 +113,30 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Square redesign
+    if (data._square_screen && typeof renderSquareHub === 'function') {
+        renderSquareHub(el, data._square_screen);
+        return el;
+    }
+
+    // Guild redesign
+    if (data._guild_screen && typeof renderGuildHub === 'function') {
+        renderGuildHub(el, data._guild_screen);
+        return el;
+    }
+
+    // Tavern redesign
+    if (data._tavern_screen && typeof renderTavernHub === 'function') {
+        renderTavernHub(el, data._tavern_screen);
+        return el;
+    }
+
+    // Market redesign
+    if (data._market_screen && typeof renderMarketHub === 'function') {
+        renderMarketHub(el, data._market_screen);
+        return el;
+    }
+
     // Image banner (if present)
     if (data.image_url) {
         var img = document.createElement('img');
