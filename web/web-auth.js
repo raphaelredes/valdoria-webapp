@@ -82,6 +82,22 @@ function loadTelegramWidget() {
     script.setAttribute('data-request-access', 'write');
     script.setAttribute('data-userpic', 'true');
     container.appendChild(script);
+
+    /* Fallback: if widget doesn't render in 4s, show a styled button */
+    setTimeout(function() {
+        if (container.querySelector('iframe')) return; /* widget loaded OK */
+        var fallback = document.createElement('a');
+        fallback.href = 'https://t.me/' + BOT_USERNAME;
+        fallback.target = '_blank';
+        fallback.rel = 'noopener';
+        fallback.className = 'wa-tg-fallback';
+        var icon = document.createElement('span');
+        icon.className = 'wa-tg-fallback-icon';
+        icon.textContent = '\u2708'; /* plane icon */
+        fallback.appendChild(icon);
+        fallback.appendChild(document.createTextNode('Entrar com Telegram'));
+        container.appendChild(fallback);
+    }, 4000);
 }
 
 /* ----- Auth Callbacks ----- */
@@ -450,11 +466,4 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTelegramWidget();
     checkExistingSession();
 
-    // Hide DEV login in production
-    if (_isProd) {
-        var devEls = document.querySelectorAll('.wa-dev-only');
-        for (var i = 0; i < devEls.length; i++) {
-            devEls[i].style.display = 'none';
-        }
-    }
 });

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR" style="opacity:1!important">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Valdoria DEV</title>
+    <meta name="theme-color" content="#2a2420">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        html { background: #1a1510; }
+        body {
+            margin: 0; padding: 24px;
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Courier New', monospace;
+            color: #a09484;
+            background: #1a1510;
+        }
+        .dev-card {
+            max-width: 360px; width: 100%;
+            background: #2a2420;
+            border: 1px solid #4a3828;
+            border-radius: 10px;
+            padding: 28px 24px;
+            text-align: center;
+        }
+        .dev-title {
+            color: #c4953a;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            letter-spacing: 2px;
+        }
+        .dev-subtitle {
+            font-size: 12px;
+            color: #6a5a48;
+            margin: 0 0 20px;
+        }
+        .dev-input {
+            width: 100%; box-sizing: border-box;
+            padding: 10px 14px;
+            background: #1a1510;
+            border: 1px solid #4a3828;
+            border-radius: 6px;
+            color: #d4c8b0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-align: center;
+            letter-spacing: 4px;
+            margin-bottom: 12px;
+        }
+        .dev-input:focus { outline: none; border-color: #c4953a; }
+        .dev-btn {
+            width: 100%;
+            padding: 10px;
+            background: #3a3028;
+            border: 1px solid #4a3828;
+            border-radius: 6px;
+            color: #a09484;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .dev-btn:hover { border-color: #c4953a; color: #c4953a; }
+        .dev-error {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+        .dev-back {
+            display: inline-block;
+            margin-top: 16px;
+            color: #6a5a48;
+            font-size: 11px;
+            text-decoration: none;
+        }
+        .dev-back:hover { color: #a09484; }
+    </style>
+</head>
+<body>
+    <div class="dev-card">
+        <h1 class="dev-title">VALDORIA DEV</h1>
+        <p class="dev-subtitle">Acesso restrito</p>
+        <input id="pin" class="dev-input" type="password" placeholder="PIN" maxlength="8" autofocus>
+        <button class="dev-btn" id="btn-enter" type="button">Entrar</button>
+        <div id="error" class="dev-error"></div>
+        <a href="./" class="dev-back">Voltar ao login</a>
+    </div>
+    <script>
+    (function() {
+        /* PIN is validated server-side via _dev_session endpoint.
+           The PIN acts as a shared secret — only people who know it can access DEV mode.
+           The actual PIN value is checked against DEV_ACCESS_PIN env var on the server. */
+        var pinEl = document.getElementById('pin');
+        var btnEl = document.getElementById('btn-enter');
+        var errEl = document.getElementById('error');
+
+        /* Discover API base (same logic as web-auth.js) */
+        var _apiBase = localStorage.getItem('valdoria_api_base') || '';
+
+        async function discoverApi() {
+            if (_apiBase) return;
+            var env = (location.hostname === 'jogo.lendasdevaldoria.com.br') ? 'prod' : 'dev';
+            try {
+                var r = await fetch('../api-url-' + env + '.json?t=' + Date.now(), { cache: 'no-store' });
+                if (r.ok) { var d = await r.json(); if (d.url) _apiBase = d.url.replace(/\/$/, ''); }
+            } catch(e) {}
+            if (!_apiBase) {
+                try {
+                    var r2 = await fetch('api-url.json?t=' + Date.now(), { cache: 'no-store' });
+                    if (r2.ok) { var d2 = await r2.json(); if (d2.url) _apiBase = d2.url.replace(/\/$/, ''); }
+                } catch(e) {}
+            }
+        }
+
+        async function doLogin() {
+            var pin = pinEl.value.trim();
+            if (!pin) { errEl.textContent = 'Digite o PIN'; errEl.style.display = 'block'; return; }
+            errEl.style.display = 'none';
+            btnEl.textContent = 'Entrando...';
+            btnEl.disabled = true;
+
+            await discoverApi();
+            if (!_apiBase) {
+                errEl.textContent = 'Servidor nao encontrado';
+                errEl.style.display = 'block';
+                btnEl.textContent = 'Entrar';
+                btnEl.disabled = false;
+                return;
+            }
+
+            try {
+                var resp = await fetch(_apiBase + '/api/game/_dev_session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: 7685169782, char_id: '', pin: pin })
+                });
+                if (!resp.ok) {
+                    var err = await resp.json().catch(function() { return {}; });
+                    throw new Error(err.error || 'Acesso negado (' + resp.status + ')');
+                }
+                var data = await resp.json();
+                localStorage.setItem('valdoria_web_token', data.token || '');
+                localStorage.setItem('valdoria_web_user_id', String(data.user_id || 0));
+                localStorage.setItem('valdoria_api_base', _apiBase);
+
+                /* Fetch characters and redirect */
+                var charsResp = await fetch(_apiBase + '/api/game/characters?user_id=' + (data.user_id || 0), {
+                    method: 'GET',
+                    headers: { 'Authorization': 'Bearer ' + (data.token || '') }
+                });
+                var chars = [];
+                if (charsResp.ok) {
+                    var cd = await charsResp.json();
+                    chars = cd.characters || [];
+                }
+
+                var env = (location.hostname === 'jogo.lendasdevaldoria.com.br') ? 'prod' : 'dev';
+                var params = new URLSearchParams();
+                params.set('token', data.token || '');
+                params.set('uid', String(data.user_id || 0));
+                params.set('api', _apiBase);
+                params.set('env', env);
+                if (chars.length === 1) {
+                    params.set('char', chars[0].id || chars[0].char_id || '');
+                    params.set('route', 'game');
+                } else if (chars.length === 0) {
+                    params.set('new', '1');
+                    params.set('route', 'character_creator');
+                } else {
+                    params.set('route', 'game');
+                }
+                window.location.href = '../app.html?' + params.toString();
+            } catch(e) {
+                errEl.textContent = e.message || 'Erro';
+                errEl.style.display = 'block';
+                btnEl.textContent = 'Entrar';
+                btnEl.disabled = false;
+            }
+        }
+
+        btnEl.addEventListener('click', doLogin);
+        pinEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doLogin();
+        });
+    })();
+    </script>
+</body>
+</html>

@@ -201,6 +201,34 @@
     justify-content: center;
 }
 
+/* Telegram fallback button (if widget doesn't load) */
+.wa-tg-fallback {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--v-space-md, 8px);
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #54a9eb, #2a8ad4);
+    color: #fff;
+    border: none;
+    border-radius: var(--v-radius, 10px);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-body, 14px);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform var(--v-transition, 0.2s), box-shadow var(--v-transition, 0.2s);
+    box-shadow: 0 3px 12px rgba(84, 169, 235, 0.3);
+    min-height: 44px;
+}
+
+.wa-tg-fallback:active {
+    transform: scale(0.96);
+}
+
+.wa-tg-fallback-icon {
+    font-size: var(--v-font-xl, 16px);
+}
+
 /* ----- Separator ----- */
 
 .wa-separator {
@@ -552,6 +580,35 @@
 /* =============================================
    Ambient Floating Embers
    ============================================= */
+
+/* =============================================
+   Desktop Enhancement — background art margins
+   ============================================= */
+
+/* Decorative orb watermark in background (desktop only, outside phone frame) */
+@media (min-width: 500px) {
+    body::before {
+        content: '';
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -55%);
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(196, 149, 58, 0.03) 0%, transparent 60%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* Subtle border glow around the login card on desktop */
+    .wa-login-card {
+        box-shadow:
+            0 8px 40px rgba(0, 0, 0, 0.6),
+            0 0 80px rgba(196, 149, 58, 0.04),
+            0 0 1px rgba(196, 149, 58, 0.15),
+            inset 0 1px 0 rgba(196, 149, 58, 0.08);
+    }
+}
 
 .wa-hero-particles {
     position: fixed;
