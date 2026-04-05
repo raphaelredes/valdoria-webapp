@@ -26,7 +26,7 @@
         _loadCss('../shared/loading-title.css');
         _loadCss('web-auth.css');
     </script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google GSI loaded programmatically by web-auth.js after callback is defined -->
 </head>
 <body>
     <!-- Ambient Particles -->
@@ -105,23 +105,8 @@
                     <span class="wa-separator-line"></span>
                 </div>
 
-                <!-- Google Sign-In -->
-                <div id="google-wrap">
-                    <div id="g_id_onload"
-                         data-client_id="717031857989-gu6hh4h9mgl3gikua705ov1fnbm57lg9.apps.googleusercontent.com"
-                         data-callback="onGoogleAuth"
-                         data-auto_prompt="false">
-                    </div>
-                    <div class="g_id_signin"
-                         data-type="standard"
-                         data-shape="rectangular"
-                         data-theme="filled_black"
-                         data-text="signin_with"
-                         data-size="large"
-                         data-logo_alignment="left"
-                         data-width="280">
-                    </div>
-                </div>
+                <!-- Google Sign-In (rendered programmatically by web-auth.js) -->
+                <div id="google-wrap"></div>
             </div>
 
             <div id="auth-error" class="wa-error" style="display:none"></div>

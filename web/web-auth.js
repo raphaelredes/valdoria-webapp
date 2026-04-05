@@ -582,11 +582,51 @@ window.onDevLogin = async function() {
     }
 };
 
+/* ----- Google GSI (programmatic init) ----- */
+
+var _GOOGLE_CLIENT_ID = '717031857989-gu6hh4h9mgl3gikua705ov1fnbm57lg9.apps.googleusercontent.com';
+
+function _loadGoogleGSI() {
+    var script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.onload = function() {
+        console.info('[WEB-AUTH] Google GSI script loaded, initializing...');
+        try {
+            google.accounts.id.initialize({
+                client_id: _GOOGLE_CLIENT_ID,
+                callback: window.onGoogleAuth,
+                auto_select: false,
+            });
+            var wrap = document.getElementById('google-wrap');
+            if (wrap) {
+                google.accounts.id.renderButton(wrap, {
+                    type: 'standard',
+                    shape: 'rectangular',
+                    theme: 'filled_black',
+                    text: 'signin_with',
+                    size: 'large',
+                    logo_alignment: 'left',
+                    width: 280,
+                });
+                console.info('[WEB-AUTH] Google Sign-In button rendered OK');
+            }
+        } catch (e) {
+            console.error('[WEB-AUTH] Google GSI init error:', e);
+        }
+    };
+    script.onerror = function() {
+        console.warn('[WEB-AUTH] Google GSI script failed to load');
+    };
+    document.head.appendChild(script);
+}
+
 /* ----- Init ----- */
 
 function _initWebAuth() {
-    console.info('[WEB-AUTH] Init: isProd=%s bot=%s readyState=%s', _isProd, BOT_USERNAME, document.readyState);
+    console.info('[WEB-AUTH] Init: isProd=%s bot=%s env=%s readyState=%s', _isProd, BOT_USERNAME, _envId, document.readyState);
     loadTelegramWidget();
+    _loadGoogleGSI();
     checkExistingSession();
 }
 
