@@ -319,6 +319,7 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
      */
     window.forceHideLoading = function forceHideLoading() {
         console.warn('[GAME-LOADING] forceHideLoading()');
+        _dataReady = true;
         _stopReactive();
         if (window.vProcessing && vProcessing.isActive()) vProcessing.hide();
         if (!_ctrl) {
