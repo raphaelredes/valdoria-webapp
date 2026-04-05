@@ -1,0 +1,152 @@
+/* =============================================
+   Web User Menu — Floating logout button
+   Only visible in web-standalone mode (browser)
+   ============================================= */
+
+/* Hidden by default — only visible in web-standalone mode */
+.wum-float {
+    display: none;
+}
+
+.web-standalone .wum-float {
+    display: block;
+    position: fixed;
+    top: var(--v-space-lg, 12px);
+    right: var(--v-space-lg, 12px);
+    z-index: var(--v-z-dropdown, 200);
+}
+
+/* ── Trigger Button ── */
+
+.wum-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--v-border, #4a3828);
+    background: var(--v-bg-card, #2e2520);
+    color: var(--v-text-dim, #a09484);
+    font-size: var(--v-font-body, 14px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    transition: opacity var(--v-transition, 0.2s), border-color var(--v-transition, 0.2s),
+                box-shadow var(--v-transition, 0.2s);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    padding: 0;
+    line-height: 1;
+}
+
+.wum-btn:hover {
+    opacity: 1;
+    border-color: var(--v-gold-dim, #9a7530);
+}
+
+.wum-btn.wum-open {
+    opacity: 1;
+    border-color: var(--v-gold, #c4953a);
+    box-shadow: 0 0 12px rgba(196, 149, 58, 0.2);
+}
+
+/* ── User icon SVG ── */
+
+.wum-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ── Dropdown Menu ── */
+
+.wum-menu {
+    position: absolute;
+    top: calc(100% + var(--v-space-sm, 4px));
+    right: 0;
+    min-width: 160px;
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius-sm, 6px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 8px rgba(196, 149, 58, 0.06);
+    opacity: 0;
+    transform: translateY(-4px) scale(0.95);
+    pointer-events: none;
+    transition: opacity var(--v-transition, 0.2s), transform var(--v-transition, 0.2s);
+    overflow: hidden;
+}
+
+.wum-menu.wum-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Gold top line */
+.wum-menu::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 12px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--v-gold-dim, #9a7530), transparent);
+}
+
+/* ── Menu Item ── */
+
+.wum-item {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-md, 8px);
+    width: 100%;
+    padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);
+    border: none;
+    background: transparent;
+    color: var(--v-text, #d4c8b0);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-base, 13px);
+    cursor: pointer;
+    transition: background var(--v-transition, 0.2s), color var(--v-transition, 0.2s);
+    text-align: left;
+}
+
+.wum-item:hover {
+    background: rgba(196, 149, 58, 0.08);
+    color: var(--v-gold, #c4953a);
+}
+
+.wum-item:active {
+    background: rgba(196, 149, 58, 0.14);
+}
+
+.wum-item-icon {
+    font-size: var(--v-font-body, 14px);
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+}
+
+/* ── Backdrop (click outside to close) ── */
+
+.wum-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--v-z-dropdown, 200) - 1);
+}
+
+.wum-backdrop.wum-visible {
+    display: block;
+}
+
+/* ── Reduced motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+    .wum-menu {
+        transition: none;
+    }
+}
