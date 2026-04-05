@@ -289,6 +289,10 @@ function _fmtArgs(args) {
 
 function _interceptIframeConsole(win) {
     try {
+        /* Guard: don't double-patch — causes duplicate log lines */
+        if (win.__devPanelPatched) return;
+        win.__devPanelPatched = true;
+
         var origLog   = win.console.log.bind(win.console);
         var origInfo  = win.console.info.bind(win.console);
         var origWarn  = win.console.warn.bind(win.console);
