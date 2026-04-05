@@ -319,7 +319,8 @@ function _connectSSE() {
     } catch (e) {}
     if (!tok || !api) { _sseRetryTimer = setTimeout(_connectSSE, SSE_RETRY_MS); return; }
     if (_sseSource) { try { _sseSource.close(); } catch (e) {} _sseSource = null; }
-    var url = api + '/api/game/logs/stream?token=' + encodeURIComponent(tok);
+    var uid = localStorage.getItem('valdoria_web_user_id') || '';
+    var url = api + '/api/game/logs/stream?token=' + encodeURIComponent(tok) + '&user_id=' + encodeURIComponent(uid);
     try {
         var src = new EventSource(url); /* noqa: security */
         src.onopen = function() {
@@ -376,8 +377,12 @@ function _injectLayoutFix() {
         'html.dev-panel-active body{display:flex!important;flex-direction:row!important;align-items:stretch!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important}',
         'html.dev-panel-active body>*:not(#dev-log-panel):not(#tg-auth-overlay):not(script){width:430px!important;min-width:430px!important;max-width:430px!important;flex-shrink:0!important}',
         'html.dev-panel-active body>script{display:none!important;width:0!important;min-width:0!important}',
-        /* Constrain all position:fixed overlays to 430px game area */
-        'html.dev-panel-active .v-popup-overlay,html.dev-panel-active #travel-prep-overlay,html.dev-panel-active .loading-overlay,html.dev-panel-active .connection-overlay,html.dev-panel-active .v-err-overlay,html.dev-panel-active #title-screen,html.dev-panel-active #inventory-overlay,html.dev-panel-active .processing-overlay,html.dev-panel-active .va-popup,html.dev-panel-active .va-backdrop,html.dev-panel-active .wum-float,html.dev-panel-active .wum-backdrop,html.dev-panel-active #connection-status,html.dev-panel-active .lp-tooltip{width:430px!important;max-width:430px!important;left:0!important;right:auto!important}',
+        /* #route-root is the containing block for overlays */
+        'html.dev-panel-active #route-root{position:relative!important;overflow:hidden!important}',
+        /* Convert fixed→absolute for overlays INSIDE #route-root (inset:0 = 430px) */
+        'html.dev-panel-active #inventory-overlay,html.dev-panel-active #title-screen,html.dev-panel-active .loading-overlay,html.dev-panel-active .processing-overlay,html.dev-panel-active .v-popup-overlay,html.dev-panel-active .v-err-overlay,html.dev-panel-active #travel-prep-overlay,html.dev-panel-active .connection-overlay{position:absolute!important}',
+        /* Body-level fixed elements: constrain width to 430px */
+        'html.dev-panel-active body>.wum-float,html.dev-panel-active body>.wum-backdrop,html.dev-panel-active body>.va-popup,html.dev-panel-active body>.va-backdrop,html.dev-panel-active body>.va-float,html.dev-panel-active body>#connection-status,html.dev-panel-active body>.lp-tooltip{max-width:430px!important;left:0!important;right:auto!important}',
     ].join('\n');
     document.head.appendChild(s);
 }
