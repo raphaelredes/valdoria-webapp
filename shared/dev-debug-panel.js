@@ -1,9 +1,14 @@
 /**
- * DEV Debug Panel v2.0
- * Lateral debug panel shown to the RIGHT of the 430px game frame.
- * Split view: Browser (top) + Server (bottom) — both always visible.
+ * DEV Debug Panel v3.0 — Iframe Architecture
+ * The game runs inside an <iframe> with a real 430px viewport.
+ * The debug panel sits beside the iframe in the parent window.
  *
- * Activates when: URL has ?env=dev AND (html.web-standalone OR path has /web/)
+ * Activation: URL has ?env=dev AND (html.web-standalone OR path has /web/)
+ *             AND URL does NOT have &nodevpanel=1
+ *
+ * Console capture: same-origin monkey-patch on iframe.contentWindow.console
+ * Server logs: SSE stream from /api/game/logs/stream (unchanged)
+ *
  * Uses var (project convention). Pure DOM manipulation (textContent + createElement).
  */
 (function() {
@@ -23,6 +28,7 @@ var _sseSource = null;
 var _sseRetryTimer = null;
 
 var _panel = null;
+var _iframe = null;
 var _scrollBrowser = null;
 var _scrollServer = null;
 var _sseStatusEl = null;
@@ -30,14 +36,20 @@ var _filterInput = null;
 var _pauseBtn = null;
 var _lvlBtns = {};
 
+/* ── Activation check ── */
+
 function _shouldActivate() {
     try {
         var s = window.location.search || '';
         if (!/[?&]env=dev(?:&|$)/.test(s)) return false;
+        /* nodevpanel=1 means we are INSIDE the iframe — don't activate */
+        if (/[?&]nodevpanel=1/.test(s)) return false;
         return document.documentElement.classList.contains('web-standalone')
             || /\/web\//.test(window.location.pathname);
     } catch (e) { return false; }
 }
+
+/* ── Helpers ── */
 
 function _ts() {
     var n = new Date();
@@ -49,6 +61,8 @@ function _ts() {
 function _clearChildren(el) {
     while (el.firstChild) el.removeChild(el.firstChild);
 }
+
+/* ── Build UI ── */
 
 function _buildPane(tabName, scrollId) {
     var pane = document.createElement('div');
@@ -146,6 +160,8 @@ function _buildPanel() {
     return panel;
 }
 
+/* ── Log management ── */
+
 function _scrollElForTab(tab) {
     return tab === 'server' ? _scrollServer : _scrollBrowser;
 }
@@ -188,7 +204,6 @@ function _buildLineEl(entry) {
     lv.className = 'dev-log-lvl';
     lv.textContent = '[' + entry.level.toUpperCase() + '] ';
 
-    /* Use textContent — safe plain-text display, no XSS risk */
     var mg = document.createElement('span');
     mg.textContent = entry.msg;
 
@@ -259,6 +274,8 @@ function _toggleLevel(level) {
     });
 }
 
+/* ── Format args for console capture ── */
+
 function _fmtArgs(args) {
     var parts = [];
     for (var i = 0; i < args.length; i++) {
@@ -271,36 +288,65 @@ function _fmtArgs(args) {
     return parts.join(' ');
 }
 
-function _interceptConsole() {
-    var origLog   = console.log.bind(console);
-    var origInfo  = console.info.bind(console);
-    var origWarn  = console.warn.bind(console);
-    var origError = console.error.bind(console);
+/* ── Console capture via same-origin contentWindow ── */
 
-    console.log   = function() { origLog.apply(console, arguments);   _addLine('browser', 'debug', _fmtArgs(arguments)); };
-    console.info  = function() { origInfo.apply(console, arguments);  _addLine('browser', 'info',  _fmtArgs(arguments)); };
-    console.warn  = function() { origWarn.apply(console, arguments);  _addLine('browser', 'warn',  _fmtArgs(arguments)); };
-    console.error = function() { origError.apply(console, arguments); _addLine('browser', 'error', _fmtArgs(arguments)); };
+function _interceptIframeConsole(win) {
+    try {
+        var origLog   = win.console.log.bind(win.console);
+        var origInfo  = win.console.info.bind(win.console);
+        var origWarn  = win.console.warn.bind(win.console);
+        var origError = win.console.error.bind(win.console);
 
-    window.addEventListener('error', function(evt) {
-        var msg = '[UncaughtError] ' + (evt.message || 'unknown');
-        if (evt.filename) msg += ' @ ' + evt.filename;
-        if (evt.lineno)   msg += ':' + evt.lineno;
-        _addLine('browser', 'error', msg);
-    });
+        win.console.log   = function() { origLog.apply(win.console, arguments);   _addLine('browser', 'debug', _fmtArgs(arguments)); };
+        win.console.info  = function() { origInfo.apply(win.console, arguments);  _addLine('browser', 'info',  _fmtArgs(arguments)); };
+        win.console.warn  = function() { origWarn.apply(win.console, arguments);  _addLine('browser', 'warn',  _fmtArgs(arguments)); };
+        win.console.error = function() { origError.apply(win.console, arguments); _addLine('browser', 'error', _fmtArgs(arguments)); };
 
-    window.addEventListener('unhandledrejection', function(evt) {
-        var r = evt.reason;
-        var msg = '[UnhandledRejection] ';
-        if (r && r.message) { msg += r.message; if (r.stack) msg += ' | ' + r.stack; }
-        else { try { msg += JSON.stringify(r); } catch (e2) { msg += String(r); } }
-        _addLine('browser', 'error', msg);
-    });
+        win.addEventListener('error', function(evt) {
+            var msg = '[UncaughtError] ' + (evt.message || 'unknown');
+            if (evt.filename) msg += ' @ ' + evt.filename;
+            if (evt.lineno)   msg += ':' + evt.lineno;
+            _addLine('browser', 'error', msg);
+        });
+
+        win.addEventListener('unhandledrejection', function(evt) {
+            var r = evt.reason;
+            var msg = '[UnhandledRejection] ';
+            if (r && r.message) { msg += r.message; if (r.stack) msg += ' | ' + r.stack; }
+            else { try { msg += JSON.stringify(r); } catch (e2) { msg += String(r); } }
+            _addLine('browser', 'error', msg);
+        });
+
+        _addLine('browser', 'info', '[DEV Panel] Console capture attached to iframe');
+    } catch (e) {
+        _addLine('browser', 'error', '[DEV Panel] Failed to attach console: ' + e.message);
+    }
 }
 
-/* SSE — server log stream.
- * Pattern: "2026-04-05 12:34:56,789 - ENV - module - LEVEL - message"
- */
+/* ── Re-attach console on iframe navigation ── */
+
+function _watchIframeNavigation() {
+    if (!_iframe) return;
+    /* When iframe navigates (cross-WebApp transitions), we need to re-attach
+       console capture. MutationObserver on contentWindow is not reliable,
+       so poll the contentWindow.location and re-attach when it changes. */
+    var _lastHref = '';
+    setInterval(function() {
+        try {
+            var href = _iframe.contentWindow.location.href;
+            if (href !== _lastHref) {
+                _lastHref = href;
+                /* Small delay to let the new page initialize its console */
+                setTimeout(function() {
+                    _interceptIframeConsole(_iframe.contentWindow);
+                }, 300);
+            }
+        } catch (e) { /* cross-origin or iframe not ready — ignore */ }
+    }, 500);
+}
+
+/* ── SSE — server log stream ── */
+
 var _LOG_RE = /^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d+\s+-\s+\S+\s+-\s+\S+\s+-\s+(\w+)\s+-\s+(.*)$/;
 
 function _lvlFromStr(s) {
@@ -336,10 +382,18 @@ function _connectSSE() {
             var level = 'info', text = raw;
             try {
                 var p = JSON.parse(raw);
-                if (p && p.message) { level = _lvlFromStr(p.level || 'INFO'); text = p.message; }
+                if (p && typeof p === 'string') {
+                    /* Server sends JSON-escaped strings: "line content" */
+                    text = p;
+                    var m = text.match(_LOG_RE);
+                    if (m) { level = _lvlFromStr(m[1]); text = m[2]; }
+                } else if (p && p.message) {
+                    level = _lvlFromStr(p.level || 'INFO');
+                    text = p.message;
+                }
             } catch (e) {
-                var m = raw.match(_LOG_RE);
-                if (m) { level = _lvlFromStr(m[1]); text = m[2]; }
+                var m2 = raw.match(_LOG_RE);
+                if (m2) { level = _lvlFromStr(m2[1]); text = m2[2]; }
             }
             _addLine('server', level, text);
         };
@@ -362,39 +416,66 @@ function _connectSSE() {
     }
 }
 
-function _injectLayoutFix() {
-    /* Inject critical layout CSS directly — never depend on CDN timing.
-     * This ensures game elements stay at 430px even if the external
-     * CSS file hasn't propagated yet. */
+/* ── Iframe host mode: replace page content with iframe + panel ── */
+
+function _buildIframeUrl() {
+    /* Pass all current URL params to the iframe, adding nodevpanel=1 */
+    var params = new URLSearchParams(window.location.search);
+    params.set('nodevpanel', '1');
+    return 'app.html?' + params.toString();
+}
+
+function _initAsHost() {
+    /* Stop all normal page loading — this page becomes the host shell */
+    /* Remove all body content (loading overlay, route-root, scripts) */
+    while (document.body.firstChild) {
+        document.body.removeChild(document.body.firstChild);
+    }
+
+    /* Inject host layout CSS */
     var s = document.createElement('style');
-    s.id = 'dev-panel-layout-fix';
-    /* Layout fix: body becomes flex row with game (430px) + panel (rest).
-       IMPORTANT: Do NOT use overflow:hidden on game children — it clips
-       position:fixed overlays (inventory, title screen, volume button).
-       Instead, constrain fixed overlays via explicit width:430px rules. */
-    /* Simple layout: body flex row, game children at 430px, panel fills rest.
-       No overflow:hidden, no transform, no wrapper — these break position:fixed
-       overlays. Fixed overlays (inventory, title screen) will extend beyond
-       430px on desktop, but this is acceptable for the DEV testing tool. */
+    s.id = 'dev-panel-host-css';
     s.textContent = [
-        'html.dev-panel-active{max-width:none!important;margin:0!important}',
-        'html.dev-panel-active body{display:flex!important;flex-direction:row!important;align-items:stretch!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important}',
-        'html.dev-panel-active body>*:not(#dev-log-panel):not(#tg-auth-overlay):not(script){width:430px!important;min-width:430px!important;max-width:430px!important;flex-shrink:0!important}',
-        'html.dev-panel-active body>script{display:none!important;width:0!important;min-width:0!important}',
+        'html.dev-panel-active{max-width:none!important;margin:0!important;height:100dvh!important;overflow:hidden!important}',
+        'html.dev-panel-active body{display:flex!important;flex-direction:row!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#0f0d0a!important}',
+        '#dev-game-iframe{width:430px;min-width:430px;max-width:430px;height:100dvh;border:none;flex-shrink:0;background:#1a1510}',
     ].join('\n');
     document.head.appendChild(s);
+
+    document.documentElement.classList.add('dev-panel-active');
+
+    /* Create iframe */
+    _iframe = document.createElement('iframe');
+    _iframe.id = 'dev-game-iframe';
+    _iframe.src = _buildIframeUrl();
+    _iframe.setAttribute('allow', 'autoplay; fullscreen');
+    document.body.appendChild(_iframe);
+
+    /* Create debug panel */
+    _panel = _buildPanel();
+    document.body.appendChild(_panel);
+
+    _addLine('browser', 'info', '[DEV Panel] v3.0 — Iframe host mode activated');
+
+    /* Attach console capture when iframe loads */
+    _iframe.addEventListener('load', function() {
+        _interceptIframeConsole(_iframe.contentWindow);
+        _addLine('browser', 'info', '[DEV Panel] Iframe loaded: ' + _iframe.contentWindow.location.href);
+    });
+
+    /* Watch for iframe navigations (cross-WebApp transitions) */
+    _watchIframeNavigation();
+
+    /* Connect SSE for server logs */
+    _connectSSE();
 }
+
+/* ── Init ── */
 
 function _init() {
     if (!_shouldActivate()) return;
     _active = true;
-    _injectLayoutFix();
-    _panel = _buildPanel();
-    document.body.appendChild(_panel);
-    document.documentElement.classList.add('dev-panel-active');
-    _addLine('browser', 'info', '[DEV Panel] Activated');
-    _interceptConsole();
-    _connectSSE();
+    _initAsHost();
 }
 
 if (document.readyState === 'loading') {

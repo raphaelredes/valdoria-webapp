@@ -1,28 +1,8 @@
-/* DEV Debug Panel v1.0
- * Lateral debug panel displayed to the RIGHT of the 430px game frame.
- * Only activates when <html class="dev-panel-active"> is set.
- * Requires: game container is first child of <body>.
+/* DEV Debug Panel v3.0 — Iframe Architecture
+ * Parent window contains: <iframe> (430px game) + #dev-log-panel (fills rest).
+ * Layout is injected by JS (_initAsHost) — this CSS only styles the panel itself.
+ * Only activates when <html class="dev-panel-active"> is set by JS.
  */
-
-/* ---- Layout: remove phone-frame lock so panel can sit beside game ---- */
-html.dev-panel-active {
-    max-width: none;
-    margin: 0;
-}
-
-html.dev-panel-active body {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    height: 100dvh;
-    max-height: 100dvh;
-    overflow: hidden;
-}
-
-/* Game wrapper (injected by dev-debug-panel.js) contains ALL game elements.
-   width:430px + overflow:hidden clips content, transform:translateZ(0)
-   converts position:fixed→absolute so overlays stay inside 430px.
-   CSS defined in JS _injectLayoutFix — this is just documentation. */
 
 /* ---- Panel default (hidden) ---- */
 #dev-log-panel {
@@ -54,32 +34,6 @@ html.dev-panel-active #dev-log-panel {
     background: var(--v-bg, #2a2420);
     border-bottom: 1px solid var(--v-border, #4a3828);
     flex-shrink: 0;
-}
-
-/* ---- Tab buttons ---- */
-.dev-tab-btn {
-    padding: 2px var(--v-space-md, 8px);
-    background: transparent;
-    border: 1px solid var(--v-border, #4a3828);
-    border-radius: var(--v-radius-sm, 6px);
-    color: var(--v-text-dim, #a09484);
-    font-family: var(--v-font-mono, "Courier New", monospace);
-    font-size: 10px;
-    cursor: pointer;
-    transition: color var(--v-transition-fast, 0.15s) ease, border-color var(--v-transition-fast, 0.15s) ease;
-    white-space: nowrap;
-    min-height: 22px;
-}
-
-.dev-tab-btn:hover {
-    color: var(--v-text, #d4c8b0);
-    border-color: var(--v-gold-25, rgba(196,149,58,0.25));
-}
-
-.dev-tab-btn.active {
-    color: var(--v-gold, #c4953a);
-    border-color: var(--v-gold, #c4953a);
-    background: var(--v-gold-10, rgba(196,149,58,0.1));
 }
 
 /* ---- SSE status dot ---- */
@@ -290,7 +244,6 @@ html.dev-panel-active #dev-log-panel {
 
 /* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
-    .dev-tab-btn,
     .dev-ctrl-btn,
     .dev-lvl-btn,
     .dev-sse-status {
