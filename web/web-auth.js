@@ -597,6 +597,7 @@ function _loadGoogleGSI() {
                 client_id: _GOOGLE_CLIENT_ID,
                 callback: window.onGoogleAuth,
                 auto_select: false,
+                use_fedcm_for_prompt: false,
             });
             var wrap = document.getElementById('google-wrap');
             if (wrap) {
