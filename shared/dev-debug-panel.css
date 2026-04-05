@@ -1,0 +1,270 @@
+/* DEV Debug Panel v1.0
+ * Lateral debug panel displayed to the RIGHT of the 430px game frame.
+ * Only activates when <html class="dev-panel-active"> is set.
+ * Requires: game container is first child of <body>.
+ */
+
+/* ---- Layout: remove phone-frame lock so panel can sit beside game ---- */
+html.dev-panel-active {
+    max-width: none;
+    margin: 0;
+}
+
+html.dev-panel-active body {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+}
+
+/* Lock game frame at exactly 430px */
+html.dev-panel-active body > *:first-child {
+    width: 430px;
+    min-width: 430px;
+    max-width: 430px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+/* ---- Panel default (hidden) ---- */
+#dev-log-panel {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    height: 100dvh;
+    min-width: 0;
+    background: #1a1510;
+    border-left: 1px solid var(--v-border, #4a3828);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--v-text, #d4c8b0);
+    overflow: hidden;
+}
+
+html.dev-panel-active #dev-log-panel {
+    display: flex;
+}
+
+/* ---- Header bar ---- */
+.dev-panel-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--v-space-sm, 4px);
+    padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
+    background: var(--v-bg, #2a2420);
+    border-bottom: 1px solid var(--v-border, #4a3828);
+    flex-shrink: 0;
+}
+
+/* ---- Tab buttons ---- */
+.dev-tab-btn {
+    padding: 2px var(--v-space-md, 8px);
+    background: transparent;
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius-sm, 6px);
+    color: var(--v-text-dim, #a09484);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    font-size: 10px;
+    cursor: pointer;
+    transition: color var(--v-transition-fast, 0.15s) ease, border-color var(--v-transition-fast, 0.15s) ease;
+    white-space: nowrap;
+    min-height: 22px;
+}
+
+.dev-tab-btn:hover {
+    color: var(--v-text, #d4c8b0);
+    border-color: var(--v-gold-25, rgba(196,149,58,0.25));
+}
+
+.dev-tab-btn.active {
+    color: var(--v-gold, #c4953a);
+    border-color: var(--v-gold, #c4953a);
+    background: var(--v-gold-10, rgba(196,149,58,0.1));
+}
+
+/* ---- SSE status dot ---- */
+.dev-sse-status {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--v-text-dim, #a09484);
+    flex-shrink: 0;
+    margin-left: var(--v-space-xs, 2px);
+    transition: background var(--v-transition, 0.2s) ease;
+}
+
+.dev-sse-status.connected {
+    background: var(--v-success, #4caf50);
+    box-shadow: 0 0 4px var(--v-success, #4caf50);
+}
+
+.dev-sse-status.error {
+    background: var(--v-danger, #e74c3c);
+    box-shadow: 0 0 4px var(--v-danger, #e74c3c);
+}
+
+/* ---- Spacer ---- */
+.dev-panel-spacer {
+    flex: 1;
+}
+
+/* ---- Control buttons ---- */
+.dev-ctrl-btn {
+    padding: 2px var(--v-space-md, 8px);
+    background: transparent;
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius-sm, 6px);
+    color: var(--v-text-dim, #a09484);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    font-size: 10px;
+    cursor: pointer;
+    transition: color var(--v-transition-fast, 0.15s) ease, border-color var(--v-transition-fast, 0.15s) ease;
+    white-space: nowrap;
+    min-height: 22px;
+}
+
+.dev-ctrl-btn:hover {
+    color: var(--v-text, #d4c8b0);
+    border-color: var(--v-text-dim, #a09484);
+}
+
+.dev-ctrl-btn.active {
+    color: var(--v-warning, #f39c12);
+    border-color: var(--v-warning, #f39c12);
+}
+
+/* ---- Filter bar ---- */
+.dev-panel-filter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--v-space-sm, 4px);
+    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+    background: var(--v-bg, #2a2420);
+    border-bottom: 1px solid var(--v-border, #4a3828);
+    flex-shrink: 0;
+}
+
+.dev-panel-filter input {
+    flex: 1;
+    min-width: 0;
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius-sm, 6px);
+    color: var(--v-text, #d4c8b0);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    font-size: 10px;
+    padding: 2px var(--v-space-sm, 4px);
+    outline: none;
+}
+
+.dev-panel-filter input:focus {
+    border-color: var(--v-gold-25, rgba(196,149,58,0.25));
+}
+
+/* ---- Level toggle buttons ---- */
+.dev-lvl-btn {
+    padding: 1px 5px;
+    background: transparent;
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius-xs, 4px);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    font-size: 9px;
+    cursor: pointer;
+    transition: opacity var(--v-transition-fast, 0.15s) ease;
+    min-height: 18px;
+    line-height: 1;
+}
+
+.dev-lvl-btn[data-level="error"]  { color: #e57373; border-color: #e57373; }
+.dev-lvl-btn[data-level="warn"]   { color: #ffd54f; border-color: #ffd54f; }
+.dev-lvl-btn[data-level="info"]   { color: var(--v-text, #d4c8b0); border-color: var(--v-border, #4a3828); }
+.dev-lvl-btn[data-level="debug"]  { color: #7a6e5e; border-color: #4a3828; }
+
+.dev-lvl-btn.hidden-level {
+    opacity: 0.3;
+}
+
+/* ---- Log scroll area ---- */
+.dev-log-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--v-space-xs, 2px) 0;
+    scroll-behavior: auto;
+}
+
+/* Thin scrollbar for the log */
+.dev-log-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+.dev-log-scroll::-webkit-scrollbar-track {
+    background: var(--v-bg, #2a2420);
+}
+.dev-log-scroll::-webkit-scrollbar-thumb {
+    background: var(--v-border, #4a3828);
+    border-radius: 2px;
+}
+
+/* ---- Log lines ---- */
+.dev-log-line {
+    display: block;
+    padding: 1px var(--v-space-md, 8px);
+    white-space: pre-wrap;
+    word-break: break-all;
+    border-bottom: none;
+}
+
+.dev-log-line:hover {
+    background: var(--v-bg-raised, #332a22);
+}
+
+.dev-log-line[data-level="error"] { color: #e57373; }
+.dev-log-line[data-level="warn"]  { color: #ffd54f; }
+.dev-log-line[data-level="info"]  { color: var(--v-text, #d4c8b0); }
+.dev-log-line[data-level="debug"] { color: #7a6e5e; }
+
+/* Hidden when level button is toggled off */
+.dev-log-line.level-hidden {
+    display: none;
+}
+
+/* ---- Timestamp and level label inside each line ---- */
+.dev-log-ts {
+    color: #5a4e3e;
+    margin-right: 3px;
+    user-select: none;
+}
+
+.dev-log-lvl {
+    margin-right: 4px;
+    font-weight: bold;
+    user-select: none;
+}
+
+.dev-log-line[data-level="error"] .dev-log-lvl { color: #e57373; }
+.dev-log-line[data-level="warn"]  .dev-log-lvl { color: #ffd54f; }
+.dev-log-line[data-level="info"]  .dev-log-lvl { color: var(--v-gold-dim, #9a7530); }
+.dev-log-line[data-level="debug"] .dev-log-lvl { color: #5a4e3e; }
+
+/* ---- Empty-state message ---- */
+.dev-log-empty {
+    padding: var(--v-space-xl, 16px);
+    color: #5a4e3e;
+    text-align: center;
+    font-style: normal;
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+    .dev-tab-btn,
+    .dev-ctrl-btn,
+    .dev-lvl-btn,
+    .dev-sse-status {
+        transition: none;
+    }
+}
