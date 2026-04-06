@@ -57,7 +57,7 @@
 .tg-gold{text-align:center;font-size:var(--v-font-md,13px);color:var(--v-text-dim,#a09484);padding:var(--v-space-xs,2px) 0}
 
 /* -- Streak Badge -- */
-.tg-streak{display:inline-flex;align-items:center;gap:var(--v-space-xs,2px);padding:var(--v-space-xs,2px) var(--v-space-md,8px);background:rgba(196,149,58,0.15);border:1px solid var(--v-gold-15);border-radius:var(--v-radius-pill,20px);font-size:var(--v-font-sm,12px);color:var(--v-gold,#c4953a)}
+.tg-streak{display:inline-flex;align-items:center;gap:var(--v-space-xs,2px);padding:var(--v-space-xs,2px) var(--v-space-md,8px);background:var(--v-gold-15);border:1px solid var(--v-gold-15);border-radius:var(--v-radius-pill,20px);font-size:var(--v-font-sm,12px);color:var(--v-gold,#c4953a)}
 
 /* -- Roll Comparison (Dice game) -- */
 .tg-versus{display:flex;align-items:center;justify-content:center;gap:var(--v-space-lg,12px);padding:var(--v-space-md,8px) 0}
@@ -78,7 +78,7 @@
 /* -- Dice Visual (Bones game) -- */
 .tg-dice-row{display:flex;justify-content:center;gap:var(--v-space-md,8px);padding:var(--v-space-md,8px) 0}
 .tg-die{width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:var(--v-font-2xl,18px);font-weight:700;font-family:var(--v-font-display,'Cinzel',serif);border-radius:var(--v-radius-sm,6px);border:2px solid var(--v-border,#4a3828);background:rgba(0,0,0,0.3);color:var(--v-text,#d4c8b0);cursor:pointer;transition:all var(--v-transition-fast,0.15s) ease}
-.tg-die--held{border-color:var(--v-gold,#c4953a);background:rgba(196,149,58,0.15);color:var(--v-gold-light,#dbb668)}
+.tg-die--held{border-color:var(--v-gold,#c4953a);background:var(--v-gold-15);color:var(--v-gold-light,#dbb668)}
 .tg-die--bust{border-color:rgba(180,60,60,0.4);color:#e07070;opacity:0.6}
 
 /* -- Cooldown -- */

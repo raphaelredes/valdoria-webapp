@@ -119,7 +119,7 @@ var info=document.createElement('div');info.className='ally-info';var nameRow=do
 var nameEl=document.createElement('span');nameEl.className='ally-name';nameEl.textContent=a.n;nameRow.appendChild(nameEl);if(a.l>0){var lvl=document.createElement('span');lvl.className='ally-lvl';lvl.textContent='Lv'+a.l;nameRow.appendChild(lvl);}
 if((a.type==='merc'||a.type==='adv')&&a.dur>0){var dur=document.createElement('span');dur.className='ally-dur'+(a.dur<=2?' ally-dur-warn':'');dur.textContent=(a.type==='adv'?'⏳ ':'📋 ')+a.dur;nameRow.appendChild(dur);}
 if(a.lu&&a.lu>0){var luBadge=document.createElement('span');luBadge.className='ally-lu';luBadge.textContent='\u2b06\ufe0f';nameRow.appendChild(luBadge);}
-info.appendChild(nameRow);var subRow=document.createElement('div');subRow.className='ally-sub';var subText=a.c||'';if(a.type==='player'){}
+info.appendChild(nameRow);var subRow=document.createElement('div');subRow.className='ally-sub';var subText=a.c||'';if(a.r&&a.type!=='familiar')subText=(a.r)+' \u00b7 '+subText;if(a.type==='player'){}
 else if(a.type==='merc')subText+=compact?'':' \u00b7 Mercen\u00e1rio';else if(a.type==='adv')subText+=compact?'':' \u00b7 Explorador';else if(a.type==='familiar')subText='Familiar';if(subText){subRow.textContent=subText;info.appendChild(subRow);}
 if(a.mhp>0&&!a.dead){info.appendChild(_makeAllyBar(a.hp,a.mhp,'hp'));}else if(a.dead){var deadLabel=document.createElement('div');deadLabel.className='ally-dead-label';deadLabel.textContent='\ud83d\udc80 Ca\u00eddo';info.appendChild(deadLabel);}
 if(a.mmp>0&&!a.dead){info.appendChild(_makeAllyBar(a.mp,a.mmp,'mp'));}

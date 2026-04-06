@@ -25,7 +25,7 @@ function _buildIndex(){
  }
 }
 
-function _build(){
+function _buildGuide(){
  if(_built)return;
  _buildIndex();
  _overlay=document.getElementById('guide-overlay');
@@ -247,7 +247,7 @@ function _findTopicForCtx(ctx){
 }
 
 window.showGuidePopup=function(ctx){
- _build();
+ _buildGuide();
  if(!_overlay)return;
  var bp=document.getElementById('bottom-panel');
  var it=document.getElementById('immersive-toggle');
