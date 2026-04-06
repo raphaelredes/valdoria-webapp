@@ -11,7 +11,7 @@
 .guild-tabs .v-tab { font-size: var(--v-font-xs); padding: var(--v-space-xs) var(--v-space-sm); min-width: 0; flex: 1; white-space: nowrap; }
 
 /* Content area */
-.guild-content { flex: 1; overflow-y: auto; padding: var(--v-space-sm) var(--v-space-md); padding-bottom: 140px; }
+.guild-content { flex: 1; overflow-y: auto; padding: var(--v-space-sm) var(--v-space-md); padding-bottom: 60px; }
 /* guild-panel rules removed - shared/tabs.css v-tab-panel handles this */
 
 /* Cards */
