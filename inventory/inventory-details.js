@@ -30,12 +30,12 @@ if(results.noProf.length>0){html+='<div style="font-size:12px;margin-bottom:6px;
 html+='<div class="detail-actions" style="margin-top:10px;">';html+='<button class="btn-equip" onclick="closeModal()">'+vi_f('check',13)+' OK</button>';html+='</div>';showModal(html);}
 function doDeleteLoadout(name){if(!D.ldout||!D.ldout[name])return;delete D.ldout[name];addOp({t:'delete_loadout',name});haptic('medium');toast(`${vi('trash', 13)} Equipamento '${esc(name)}' removido`,'ok');renderTab();updateBottomBar();}
 function renderBankTab(c){if(!D.bank)D.bank={g:0,i:[]};var bankGold=D.bank.g||0;var bankItems=D.bank.i||[];var html='<div class="vault-header">'
-+'<div class="vault-amount">'+vi('coin',22)+' '+bankGold+' 💰</div>'
++'<div class="vault-amount">'+vi('coin',22)+' '+bankGold+' <span class="vi vi-coin sm"></span></div>'
 +'<div class="vault-sub">Cofre da Guilda</div>'
 +'</div>';html+='<div style="display:flex;gap:6px;justify-content:center;margin:8px 0;">';if(localGold>=10){html+='<button class="btn-sell-junk" style="border-color:var(--v-gold-dim);" onclick="doBankGoldDeposit()">'
-+vi('coin',12)+' Depositar 10 💰</button>';}
++vi('coin',12)+' Depositar 10 <span class="vi vi-coin sm"></span></button>';}
 if(bankGold>=10){html+='<button class="btn-sell-junk" style="border-color:var(--v-success);" onclick="doBankGoldWithdraw()">'
-+vi('coin',12)+' Sacar 10 💰</button>';}
++vi('coin',12)+' Sacar 10 <span class="vi vi-coin sm"></span></button>';}
 html+='</div>';var depositableCount=_getDepositableItems().length;if(depositableCount>0){html+='<div style="text-align:right;margin-bottom:6px;">'
 +'<span class="btn-sell-junk" style="border-color:var(--v-info);" onclick="doBankDepositAll()">'
 +vi('vault',13)+' Guardar Tudo ('+depositableCount+')</span></div>';}
@@ -66,7 +66,7 @@ html+=`<div class="modal-title">${it.e || '📦'} ${esc(name)}</div>`;html+=`<di
                 ${getRarityLabel(rarity)}
             </span></div>`;if(it.desc)html+=`<div class="detail-desc">"${it.desc}"</div>`;if(it.s)html+=detailRow('Slot',SLOT_NAMES[it.s]||it.s);if(it.dd){let dmgStr=it.dd+(it.b?` +${it.b}`:'');if(it.dt)dmgStr+=` (${it.dt})`;html+=detailRow('Dano',dmgStr,it.b?'bonus':'');}
 if(it.vd)html+=detailRow('Versátil',it.vd);if(it.ac)html+=detailRow('CA',`+${it.ac}`,'bonus');if(it.hb)html+=detailRow('HP Bônus',`+${it.hb}`,'bonus');if(it.mb)html+=detailRow('MP Bônus',`+${it.mb}`,'bonus');if(it.ib)html+=detailRow('INT Bônus',`+${it.ib}`,'bonus');if(it.sb)html+=detailRow('Bônus de Salvaguarda',`+${it.sb}`,'bonus');if(it.sk)html+=detailRow('Engastes',`${it.sk} ${vi('gem', 13)}`);if(it.sr)html+=detailRow('Força Req.',it.sr);if(it.th)html+=detailRow('Duas Mãos','Sim');if(it.heal){const avg=avgDice(it.heal);const m=(it.heal||'').match(/(\d+)d(\d+)\+?(\d+)?/);const lo=m?parseInt(m[1],10)+parseInt(m[3]||0,10):avg;const hi=m?parseInt(m[1],10)*parseInt(m[2],10)+parseInt(m[3]||0,10):avg;const preview=Math.min(D.p.mhp,localHP+avg)-localHP;html+=detailRow('Cura',`${it.heal} (${lo}–${hi})`);if(preview>0)html+=detailRow('Preview',`${vi('heart', 12)} ${localHP} → ~${localHP + preview}`,'bonus');}
-if(it.v)html+=detailRow('Valor',`${it.v} 💰`);if(qty>1)html+=detailRow('Quantidade',`x${qty}`);if(it.gb){let parts=[];if(it.gb.hp_bonus)parts.push(`+${it.gb.hp_bonus} HP`);if(it.gb.mp_bonus)parts.push(`+${it.gb.mp_bonus} MP`);if(it.gb.ac_bonus)parts.push(`+${it.gb.ac_bonus} CA`);if(it.gb.save_bonus)parts.push(`+${it.gb.save_bonus} Salv.`);if(parts.length)html+=detailRow('Bônus Gema',parts.join(', '),'bonus');}
+if(it.v)html+=detailRow('Valor',`${it.v} <span class="vi vi-coin sm"></span>`);if(qty>1)html+=detailRow('Quantidade',`x${qty}`);if(it.gb){let parts=[];if(it.gb.hp_bonus)parts.push(`+${it.gb.hp_bonus} HP`);if(it.gb.mp_bonus)parts.push(`+${it.gb.mp_bonus} MP`);if(it.gb.ac_bonus)parts.push(`+${it.gb.ac_bonus} CA`);if(it.gb.save_bonus)parts.push(`+${it.gb.save_bonus} Salv.`);if(parts.length)html+=detailRow('Bônus Gema',parts.join(', '),'bonus');}
 if(it.re){html+=detailRow('Runa',`${it.re.tr}: ${it.re.ch}% ${it.re.ef}`);}
 if(it.si&&D.sets&&D.sets[it.si]){const sdef=D.sets[it.si];const owned=sdef.pcs.filter(p=>Object.values(localEq).includes(p)||localInv.some(i=>i.n===p&&i.q>0)).length;html+=detailRow('Conjunto',`${sdef.i} ${sdef.n} (${owned}/${sdef.pcs.length})`);}
 if(tags.length){html+='<div class="detail-tags">';tags.slice(0,8).forEach(t=>{html+=`<span class="detail-tag">${TAG_LABELS[t] || t}</span>`;});html+='</div>';}
@@ -226,5 +226,5 @@ function doBankWithdraw(name){if(!D.bank||!D.bank.i)return;var bi=D.bank.i.find(
 function doBankDepositAll(){var items=_getDepositableItems();if(!items.length)return;if(!D.bank)D.bank={g:0,i:[]};if(!D.bank.i)D.bank.i=[];var count=0;items.forEach(function(inv){for(var i=0;i<inv.q;i++){var existing=D.bank.i.find(function(bi){return bi.n===inv.n;});if(existing){existing.q++;}
 else{D.bank.i.push({n:inv.n,q:1});}
 addOp({t:'deposit',item:inv.n});count++;}});items.forEach(function(inv){localInv=localInv.filter(function(i){return i.n!==inv.n;});});haptic('heavy');toast(vi('vault',13)+' '+count+' itens guardados no cofre','ok');updateHeader();renderTab();updateBottomBar();}
-function doBankGoldDeposit(){var amount=10;if(localGold<amount)return;localGold-=amount;D.bank.g=(D.bank.g||0)+amount;addOp({t:'deposit_gold',amount:amount});haptic('medium');toast(vi('coin',13)+' '+amount+' 💰 depositados','ok');updateHeader();renderTab();updateBottomBar();}
-function doBankGoldWithdraw(){var amount=10;if(!D.bank||(D.bank.g||0)<amount)return;D.bank.g-=amount;localGold+=amount;addOp({t:'withdraw_gold',amount:amount});haptic('medium');toast(vi('coin',13)+' '+amount+' 💰 sacados','ok');updateHeader();renderTab();updateBottomBar();}
+function doBankGoldDeposit(){var amount=10;if(localGold<amount)return;localGold-=amount;D.bank.g=(D.bank.g||0)+amount;addOp({t:'deposit_gold',amount:amount});haptic('medium');toast(vi('coin',13)+' '+amount+' <span class="vi vi-coin sm"></span> depositados','ok');updateHeader();renderTab();updateBottomBar();}
+function doBankGoldWithdraw(){var amount=10;if(!D.bank||(D.bank.g||0)<amount)return;D.bank.g-=amount;localGold+=amount;addOp({t:'withdraw_gold',amount:amount});haptic('medium');toast(vi('coin',13)+' '+amount+' <span class="vi vi-coin sm"></span> sacados','ok');updateHeader();renderTab();updateBottomBar();}

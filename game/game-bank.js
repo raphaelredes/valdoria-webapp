@@ -12,7 +12,7 @@ function renderBankHub(container, data) {
   /* Loan overdue alert */
   if (data.loan_overdue && data.loan_debt > 0) {
     root.appendChild(vCity.statusAlert(
-      'Emprestimo vencido: ' + data.loan_debt + ' 💰 — servicos bloqueados',
+      'Emprestimo vencido: ' + data.loan_debt + ' <span class="vi vi-coin sm"></span> — servicos bloqueados',
       'danger'
     ));
   }
@@ -58,7 +58,7 @@ function renderBankHub(container, data) {
   /* Loan debt indicator */
   if (data.loan_debt > 0 && !data.loan_overdue) {
     root.appendChild(vCity.statusAlert(
-      'Emprestimo ativo: ' + data.loan_debt + ' 💰 restantes',
+      'Emprestimo ativo: ' + data.loan_debt + ' <span class="vi vi-coin sm"></span> restantes',
       'warn'
     ));
   }

@@ -70,14 +70,14 @@
   function _showGambleMenu(d) {
     if (!d.bets || !d.bets.length) { console.error("[PLAZA] _showGambleMenu: missing bets", d); }
     var body = "<div class=\"v-popup-desc\">" + vEsc(d.desc || "Escolha sua aposta para o jogo de dados.") + "</div>";
-    if (d.gold != null) body += "<div class=\"v-popup-row\">💰 Ouro: " + d.gold + " 💰</div>";
+    if (d.gold != null) body += "<div class=\"v-popup-row\"><span class=\"vi vi-coin sm\"></span> Ouro: " + d.gold + " <span class=\"vi vi-coin sm\"></span></div>";
     if (d.remaining != null) body += "<div class=\"v-popup-row\">🎲 Apostas restantes: " + d.remaining + "</div>";
     body += "<div class=\"v-popup-divider\"></div>";
     var actions = [];
     if (d.bets) {
       for (var i = 0; i < d.bets.length; i++) {
         var b = d.bets[i];
-        actions.push({ label: "🎲 " + b.amount + " 💰", action: b.cb, cls: "v-popup-btn" });
+        actions.push({ label: "🎲 " + b.amount + " <span class=\"vi vi-coin sm\"></span>", action: b.cb, cls: "v-popup-btn" });
       }
     }
     actions.push({ label: "🔙 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" });
@@ -134,14 +134,14 @@
     if (!d.items) { console.error("[PLAZA] _showVendor: missing items", d); }
     var body = "";
     if (d.greeting) body += "<div class=\"v-popup-desc\">" + vEsc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
-    if (d.gold != null) body += "<div class=\"v-popup-row\">💰 Ouro: " + d.gold + " 💰</div>";
+    if (d.gold != null) body += "<div class=\"v-popup-row\"><span class=\"vi vi-coin sm\"></span> Ouro: " + d.gold + " <span class=\"vi vi-coin sm\"></span></div>";
     if (d.items && d.items.length) {
       body += "<div class=\"v-popup-section-label\">🛒 Itens</div>";
       for (var i = 0; i < d.items.length; i++) {
         var it = d.items[i];
         var afford = (d.gold != null && it.price > d.gold) ? " class=\"v-popup-unaffordable\"" : "";
         body += "<div class=\"v-popup-row\"" + afford + ">";
-        body += (it.emoji || "📦") + " " + vEsc(it.name) + " — " + it.price + " 💰";
+        body += (it.emoji || "📦") + " " + vEsc(it.name) + " — " + it.price + " <span class=\"vi vi-coin sm\"></span>";
         body += "</div>";
       }
     } else {
@@ -164,7 +164,7 @@
     if (!d.narrative) { console.error("[PLAZA] _showVendorResult: missing narrative", d); }
     var cls = d.success ? "v-popup-header--success" : "v-popup-header--warning";
     var body = "<div class=\"v-popup-desc\">" + vEsc(d.narrative) + "</div>";
-    if (d.item_name) body += "<div class=\"v-popup-row\">📦 " + vEsc(d.item_name) + (d.price ? " — " + d.price + " 💰" : "") + "</div>";
+    if (d.item_name) body += "<div class=\"v-popup-row\">📦 " + vEsc(d.item_name) + (d.price ? " — " + d.price + " <span class=\"vi vi-coin sm\"></span>" : "") + "</div>";
     body += _renderRewards(d.rewards);
     vPopup.show({ id: "plaza-event", header: d.title || "Compra", headerClass: cls, body: body,
       actions: [{ label: "🔙 Voltar ao Vendedor", action: d.back_cb || "square_vendor", cls: "v-popup-btn" }], closeOnOutside: false });
@@ -217,7 +217,7 @@
     if (!d.tiers && !d.all_owned) { console.error("[PLAZA] _showCartographer: missing tiers/all_owned", d); }
     var body = "";
     if (d.greeting) body += "<div class=\"v-popup-desc\">" + vEsc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
-    body += "<div class=\"v-popup-row\">\ud83d\udcb0 Ouro: " + (d.gold || 0) + " 💰</div>";
+    body += "<div class=\"v-popup-row\">\ud83d\udcb0 Ouro: " + (d.gold || 0) + " <span class=\"vi vi-coin sm\"></span></div>";
 
     if (d.all_owned) {
       body += "<div class=\"v-popup-divider\"></div>";
@@ -251,7 +251,7 @@
               hint = " " + _diffDot(pct) + " <small>" + vEsc(it.stat_hint) + "</small>";
             }
             body += "<div class=\"v-popup-row\"" + afford + ">";
-            body += (it.emoji || "\ud83d\uddfa\ufe0f") + " " + vEsc(it.name) + " \u2014 " + it.price + " 💰" + hint;
+            body += (it.emoji || "\ud83d\uddfa\ufe0f") + " " + vEsc(it.name) + " \u2014 " + it.price + " <span class=\"vi vi-coin sm\"></span>" + hint;
             body += "</div>";
           }
         }
@@ -260,7 +260,7 @@
         body += "<div class=\"v-popup-divider\"></div>";
         body += "<div class=\"v-popup-section-label\">\ud83c\udf0d Mapa Mestre</div>";
         var mAfford = (!d.master.affordable) ? " class=\"v-popup-unaffordable\"" : "";
-        body += "<div class=\"v-popup-row\"" + mAfford + ">\ud83c\udf0d Mapa Mestre \u2014 " + d.master.price + " 💰</div>";
+        body += "<div class=\"v-popup-row\"" + mAfford + ">\ud83c\udf0d Mapa Mestre \u2014 " + d.master.price + " <span class=\"vi vi-coin sm\"></span></div>";
       }
     }
 
@@ -272,14 +272,14 @@
           for (var j = 0; j < tier.items.length; j++) {
             var it = tier.items[j];
             if (it.affordable) {
-              var lbl = (it.emoji || "\ud83d\uddfa\ufe0f") + " " + vEsc(it.name) + " (" + it.price + " 💰)";
+              var lbl = (it.emoji || "\ud83d\uddfa\ufe0f") + " " + vEsc(it.name) + " (" + it.price + " <span class=\"vi vi-coin sm\"></span>)";
               actions.push({ html: lbl, action: it.cb, cls: "v-popup-btn" });
             }
           }
         }
       }
       if (d.master && d.master.affordable) {
-        actions.push({ label: "\ud83c\udf0d Mapa Mestre (" + d.master.price + " 💰)", action: d.master.cb, cls: "v-popup-btn" });
+        actions.push({ label: "\ud83c\udf0d Mapa Mestre (" + d.master.price + " <span class=\"vi vi-coin sm\"></span>)", action: d.master.cb, cls: "v-popup-btn" });
       }
     }
     actions.push({ label: "\ud83d\udd19 Voltar", action: "cancel", cls: "v-popup-btn v-popup-btn--dim" });

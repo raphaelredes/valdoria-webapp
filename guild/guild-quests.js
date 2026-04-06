@@ -46,7 +46,7 @@ function _renderQuestBoard() {
             html += '<div class="guild-quest-title">&#x1F4DC; ' + _esc(q.n) + '</div>';
             html += '<div class="guild-quest-meta">';
             var rw = q.rewards || {};
-            if (rw.gold) html += rw.gold + ' 💰';
+            if (rw.gold) html += rw.gold + ' <span class="vi vi-coin sm"></span>';
             if (rw.xp) html += (rw.gold ? ' &middot; ' : '') + rw.xp + ' XP';
             if (q.diff) html += ' &middot; ' + _esc(q.diff);
             html += '</div></div>';
@@ -75,7 +75,7 @@ window.showQuestDetail = function(qid) {
     var rw = q.rewards || {};
     html += '<div class="guild-detail-section"><div class="guild-detail-section-title">Recompensas</div>';
     html += '<div class="guild-stats-grid">';
-    if (rw.gold) html += _statItem('Ouro', rw.gold + ' 💰');
+    if (rw.gold) html += _statItem('Ouro', rw.gold + ' <span class="vi vi-coin sm"></span>');
     if (rw.xp) html += _statItem('XP', rw.xp);
     if (rw.item) html += _statItem('Item', rw.item);
     html += '</div></div>';

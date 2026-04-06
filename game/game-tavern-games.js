@@ -91,7 +91,7 @@ function _renderPitFightResult(el, d) {
     /* Payout line */
     var pay = _tgEl('div', 'tg-payout');
     var amount = d.payout || 0;
-    var payText = amount >= 0 ? '+' + amount + ' 💰' : amount + ' 💰';
+    var payText = amount >= 0 ? '+' + amount + ' <span class="vi vi-coin sm"></span>' : amount + ' <span class="vi vi-coin sm"></span>';
     pay.appendChild(_tgEl('span', amount >= 0 ? 'tg-payout-gain' : 'tg-payout-loss', payText));
     if (d.injury) pay.appendChild(_tgEl('span', 'tg-injury', ' \u00b7 -1 HP'));
     if (d.reputation) pay.appendChild(_tgEl('span', 'tg-rep', ' \u00b7 +Reputa\u00e7\u00e3o'));
@@ -100,7 +100,7 @@ function _renderPitFightResult(el, d) {
 
 function _renderPitFightMenu(el, d) {
     /* Compact rules */
-    var info = _tgEl('div', 'tg-info', 'Taxa: ' + (d.entry_fee || 25) + ' 💰 + aposta \u00b7 3 testes: FOR \u00b7 DES \u00b7 CON vs DC sorteado');
+    var info = _tgEl('div', 'tg-info', 'Taxa: ' + (d.entry_fee || 25) + ' <span class="vi vi-coin sm"></span> + aposta \u00b7 3 testes: FOR \u00b7 DES \u00b7 CON vs DC sorteado');
     el.appendChild(info);
 
     /* Bet grid */
@@ -209,7 +209,7 @@ function _renderXgteResult(el, d) {
     _appendPayout(el, d.payout);
 
     if (d.debt && d.debt > 0) {
-        el.appendChild(_tgEl('div', 'tg-injury', '\u26a0 D\u00edvida: ' + d.debt + ' 💰'));
+        el.appendChild(_tgEl('div', 'tg-injury', '\u26a0 D\u00edvida: ' + d.debt + ' <span class="vi vi-coin sm"></span>'));
     }
 }
 
@@ -289,7 +289,7 @@ function _appendBetGrid(el, d) {
         bets.appendChild(btn);
     }
     el.appendChild(bets);
-    el.appendChild(_tgEl('div', 'tg-gold', '\ud83d\udcb0 ' + (d.gold || 0) + ' 💰 dispon\u00edvel'));
+    el.appendChild(_tgEl('div', 'tg-gold', '\ud83d\udcb0 ' + (d.gold || 0) + ' <span class="vi vi-coin sm"></span> dispon\u00edvel'));
 }
 
 function _appendRollBox(parent, label, value, isWinner) {
@@ -307,7 +307,7 @@ function _appendPayout(el, amount, neutralText) {
     } else {
         var a = amount || 0;
         pay.appendChild(_tgEl('span', a >= 0 ? 'tg-payout-gain' : 'tg-payout-loss',
-            a >= 0 ? '+' + a + ' 💰' : a + ' 💰'));
+            a >= 0 ? '+' + a + ' <span class="vi vi-coin sm"></span>' : a + ' <span class="vi vi-coin sm"></span>'));
     }
     el.appendChild(pay);
 }

@@ -66,7 +66,7 @@
         '⚔️ Dica: Encontros aleatórios são mais comuns em territórios perigosos.',
         '🛡️ Dica: Descanso longo restaura todos os HP e recursos gastos.',
         '🏰 Dica: A Guilda de Aventureiros oferece missões com boas recompensas.',
-        '💰 Dica: Venda itens que não usa no mercado da cidade.',
+        '<span class="vi vi-coin sm"></span> Dica: Venda itens que não usa no mercado da cidade.',
     ];
     var _CONTEXTUAL_TIPS = {
         combat: _TIPS_COMBAT,

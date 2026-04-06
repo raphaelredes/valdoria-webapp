@@ -7,7 +7,7 @@ function init(){const params=new URLSearchParams(window.location.search);const d
 try{const json=decodeBase64Utf8(dataB64);PAYLOAD=JSON.parse(json);}catch(e){console.error('[WORKSTATION] Erro ao decodificar dados',e);_showInitError('Erro ao decodificar dados.');return;}
 updateHeader();buildTabs();}
 function _showInitError(msg){console.error('[WORKSTATION]',msg);document.getElementById('mainContent').innerHTML=`<div class="empty-state"><div class="icon">⚠️</div><p>${msg}</p></div>`;}
-function updateHeader(){const stats=document.getElementById('headerStats');const matCount=Object.values(PAYLOAD.materials).reduce((a,b)=>a+b,0);stats.textContent=`💰 ${PAYLOAD.gold} 💰 · 📦 ${matCount} materiais · Lv.${PAYLOAD.level}`;}
+function updateHeader(){const stats=document.getElementById('headerStats');const matCount=Object.values(PAYLOAD.materials).reduce((a,b)=>a+b,0);stats.textContent=`<span class="vi vi-coin sm"></span> ${PAYLOAD.gold} <span class="vi vi-coin sm"></span> · 📦 ${matCount} materiais · Lv.${PAYLOAD.level}`;}
 function buildTabs(){const container=document.getElementById('tabsContainer');container.innerHTML='';const toolKeys=Object.keys(PAYLOAD.tools);toolKeys.forEach((tk,i)=>{const t=PAYLOAD.tools[tk];const tab=document.createElement('div');tab.className='tab'+(i===0?' active':'');tab.textContent=`${t.emoji} ${t.name}`;tab.onclick=()=>selectTab(tk,tab);container.appendChild(tab);});const matTab=document.createElement('div');matTab.className='tab';matTab.textContent='📦 Materiais';matTab.onclick=()=>selectTab('_materials',matTab);container.appendChild(matTab);if(toolKeys.length>0){selectTab(toolKeys[0],container.children[0]);}else{selectTab('_materials',matTab);}}
 function selectTab(key,tabEl){activeTab=key;selectedRecipe=null;updateCraftButton();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));tabEl.classList.add('active');if(key==='_materials'){renderMaterials();}else{renderRecipes(key);}}
 function renderRecipes(toolKey){const content=document.getElementById('mainContent');const recipes=PAYLOAD.recipes.filter(r=>r.tool===toolKey);if(!recipes.length){content.innerHTML='<div class="empty-state"><div class="icon">📜</div>'+'<p>Nenhuma receita disponível para esta ferramenta no seu nível.</p></div>';document.getElementById('craftBtnContainer').style.display='none';return;}
@@ -20,7 +20,7 @@ document.getElementById('craftBtnContainer').style.display='block';let html='';r
                 <div class="recipe-meta">
                     <span>Lv.${r.min_level}</span>
                     <span>DC ${r.dc}</span>
-                    <span>💰 ${r.cost_gp} 💰</span>
+                    <span><span class="vi vi-coin sm"></span> ${r.cost_gp} <span class="vi vi-coin sm"></span></span>
                     <span class="v-rarity-${r.rarity}">${RARITY_LABELS[r.rarity] || r.rarity}</span>
                 </div>
             </div>
@@ -41,7 +41,7 @@ function buildDetailHTML(recipe){let ingHTML='';recipe.ingredients.forEach(ing=>
             ${ingHTML}
             <div class="gold-row">
                 <span>${goldIcon} Custo</span>
-                <span>${recipe.cost_gp} 💰 (você: ${PAYLOAD.gold} 💰)</span>
+                <span>${recipe.cost_gp} <span class="vi vi-coin sm"></span> (você: ${PAYLOAD.gold} <span class="vi vi-coin sm"></span>)</span>
             </div>
         `;}
 function selectRecipeCard(recipeId){if(selectedRecipe===recipeId){selectedRecipe=null;}else{selectedRecipe=recipeId;}

@@ -408,7 +408,7 @@ function handleLocationTap(locId) {
     if (isCurrent && S.charData && S.charData.gp > 0) {
         var goldBadge = document.createElement('span');
         goldBadge.className = 'info-gold-badge';
-        goldBadge.textContent = '💰 ' + S.charData.gp;
+        goldBadge.textContent = '<span class="vi vi-coin sm"></span> ' + S.charData.gp;
         var headerTop = document.querySelector('.info-header-top');
         if (headerTop) headerTop.insertBefore(goldBadge, document.getElementById('info-close'));
     }
