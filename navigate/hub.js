@@ -563,7 +563,7 @@ function openDetail(biome, idx) {
 
   h += '<div class="detail-stats">';
   h += _statCell('Distancia', distLabel);
-  h += _statCell('Clima', wt ? WEATHER_NAMES[wt] : '\u2600\uFE0F Limpo');
+  h += _statCell('Clima', (wt && WEATHER_NAMES[wt]) ? WEATHER_NAMES[wt] : '\u2600\uFE0F Limpo');
   h += _statCell('Terreno', TERRAIN_LABELS[biome] || 'Normal');
   h += _statCell('Forragear', FORAGE_LABELS[biome] || 'Nenhum');
   if (reg.quests > 0) h += _statCell('Missoes', reg.quests + ' ativas');
