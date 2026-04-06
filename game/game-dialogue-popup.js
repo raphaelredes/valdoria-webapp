@@ -19,6 +19,11 @@ function _ensureDOM() {
 window.showDialoguePopup = function (data) {
     _ensureDOM();
     if (!_overlayEl) { console.error('[DLG-POPUP] overlay not found'); return; }
+    /* Hide unified popup underneath so dialogue takes full focus */
+    if (window.vPopup && typeof vPopup.hide === 'function' && typeof vPopup.isOpen === 'function' && vPopup.isOpen()) {
+        vPopup.hide();
+        console.info('[DLG-POPUP] hid vPopup before showing dialogue');
+    }
     if (_dlgStack.length > 0) {
         var top = _dlgStack[_dlgStack.length - 1];
         var sameScreen = top.screen_id && data.screen_id && top.screen_id === data.screen_id;

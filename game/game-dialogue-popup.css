@@ -1,6 +1,6 @@
 /* game-dialogue-popup.css -- Popup fullscreen para conversas NPC */
 
-.dlg-popup-overlay{position:fixed;inset:0;z-index:var(--v-z-overlay,1100);display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,12,8,0.92);opacity:0;transition:opacity var(--v-transition-base,0.2s) ease}
+.dlg-popup-overlay{position:fixed;inset:0;z-index:var(--v-z-modal,5000);display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,12,8,0.92);opacity:0;transition:opacity var(--v-transition-base,0.2s) ease}
 .dlg-popup-overlay.active{display:flex;opacity:1}
 .dlg-popup-overlay.hiding{opacity:0;pointer-events:none}
 
