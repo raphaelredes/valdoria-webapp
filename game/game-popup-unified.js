@@ -93,6 +93,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Tavern game: structured card renderer
+    if (data._tavern_game && typeof renderTavernGame === 'function') {
+        renderTavernGame(el, data._tavern_game);
+        return el;
+    }
+
     // Inn redesign: structured data renderer
     if (data._inn_screen && typeof renderInnConfirm === 'function') {
         renderInnConfirm(el, data._inn_screen);
