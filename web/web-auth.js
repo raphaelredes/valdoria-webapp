@@ -391,9 +391,14 @@ function redirectToGame(charId, isNew, token) {
     var params = new URLSearchParams();
     params.set('token', t);
     params.set('uid', String(_userId));
+    params.set('user_id', String(_userId));
     params.set('api', _apiBase);
+    params.set('api_base', _apiBase);
     params.set('env', _envId);
-    if (charId) params.set('char', charId);
+    if (charId) {
+        params.set('char', charId);
+        params.set('char_id', charId);
+    }
     if (isNew) params.set('new', '1');
 
     var route = isNew && !charId ? 'character_creator' : 'game';
