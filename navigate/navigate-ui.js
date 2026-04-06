@@ -13,6 +13,23 @@ var NV_COLOR_RISK_EXTREME = '#cc4040';
 var NV_COLOR_RISK_HIGH    = '#cc8844';
 var NV_COLOR_RISK_MODERATE = '#aa9a5a';
 
+// ── Relative difficulty — player level vs location danger ──
+var _DIFF_TIERS = [
+    { max: -3, label: 'Fácil',       color: '#4caf50', icon: '🟢' },
+    { max: -1, label: 'Normal',      color: '#c4953a', icon: '🟡' },
+    { max:  1, label: 'Perigoso',    color: '#f97316', icon: '🟠' },
+    { max:  3, label: 'Muito Perigoso', color: '#ef4444', icon: '🔴' },
+    { max:  5, label: 'Extremo',     color: '#dc2626', icon: '💀' },
+    { max: 99, label: 'Lendário',    color: '#9333ea', icon: '☠️' },
+];
+function getRelativeDifficulty(danger, playerLv) {
+    var diff = danger - playerLv;
+    for (var i = 0; i < _DIFF_TIERS.length; i++) {
+        if (diff <= _DIFF_TIERS[i].max) return { label: _DIFF_TIERS[i].label, color: _DIFF_TIERS[i].color, icon: _DIFF_TIERS[i].icon, tier: i };
+    }
+    return _DIFF_TIERS[_DIFF_TIERS.length - 1];
+}
+
 // ── Cached weighted distance — avoids repeated Dijkstra on same currentLoc ──
 var _distCache = {};
 var _distCacheLoc = null;
@@ -103,13 +120,16 @@ function handleLocationTap(locId) {
     if (isExplored && danger > 0) {
         const DANGER_PIPS_MAX = 5;
         const pips = Math.min(DANGER_PIPS_MAX, Math.ceil(danger / 2));
-        let html = '<span class="danger-meter" role="img" aria-label="Perigo: ' + pips + ' de ' + DANGER_PIPS_MAX + '">';
+        const _plv = S.charData?.lv || 1;
+        const _rd = getRelativeDifficulty(danger, _plv);
+        /* Build danger meter + relative difficulty badge (all static content, no user input) */
+        var _dHtml = '<span class="danger-meter" role="img" aria-label="Perigo: ' + pips + ' de ' + DANGER_PIPS_MAX + '">';
         for (let i = 0; i < 5; i++) {
             const cls = i < pips ? 'danger-pip filled-' + (i + 1) : 'danger-pip empty';
-            html += '<span class="' + cls + '"></span>';
+            _dHtml += '<span class="' + cls + '"></span>';
         }
-        html += '</span>';
-        dangerEl.innerHTML = html;
+        _dHtml += '</span> <span class="difficulty-badge" style="color:' + _rd.color + '">' + _rd.icon + ' ' + _rd.label + '</span>';
+        dangerEl.innerHTML = _dHtml; /* noqa: xss — all values from static _DIFF_TIERS, not user input */
         dangerEl.style.borderColor = 'transparent';
         dangerEl.style.display = '';
     } else if (isKnownMapped) {
@@ -174,19 +194,20 @@ function handleLocationTap(locId) {
     // Tags (danger hints — distance/routes now inline with biome)
     const tagsEl = document.getElementById('info-stats');
 
-    let tagsHtml = '';
-    // Mysterious danger hints
-    if (isExplored) {
-        const playerLv = S.charData?.lv || 1;
-        if (danger > playerLv + 2) {
-            tagsHtml += `<span class="info-tag info-tag-danger">💀 Um arrepio percorre sua espinha...</span>`;
-        } else if (danger > playerLv) {
-            tagsHtml += `<span class="info-tag info-tag-warn">⚠️ Algo inquietante paira no ar</span>`;
+    var tagsHtml = '';
+    // Relative difficulty tags
+    if (isExplored && danger > 0) {
+        var _plv2 = S.charData?.lv || 1;
+        var _rd2 = getRelativeDifficulty(danger, _plv2);
+        if (_rd2.tier >= 4) {
+            tagsHtml += '<span class="info-tag info-tag-danger">' + _rd2.icon + ' ' + _rd2.label + ' — Nivel recomendado: ' + Math.max(1, danger) + '+</span>';
+        } else if (_rd2.tier >= 2) {
+            tagsHtml += '<span class="info-tag info-tag-warn">' + _rd2.icon + ' ' + _rd2.label + '</span>';
         }
     } else if (isKnownMapped) {
-        tagsHtml += `<span class="info-tag">🌫️ Inexplorado</span>`;
+        tagsHtml += '<span class="info-tag">🌫️ Inexplorado</span>';
     } else {
-        tagsHtml += `<span class="info-tag">🌫️ Sem Mapa</span>`;
+        tagsHtml += '<span class="info-tag">🌫️ Sem Mapa</span>';
     }
 
     tagsEl.innerHTML = tagsHtml;

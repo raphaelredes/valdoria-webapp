@@ -20,6 +20,23 @@ var WEATHER_NAMES = {
 
 var DANGER_LABELS = ['Seguro', 'Baixo', 'Baixo', 'Moderado', 'Alto', 'Alto', 'Perigoso', 'Perigoso', 'Letal'];
 
+/* Relative difficulty tiers — player level vs location danger */
+var DIFF_TIERS = [
+    { max: -3, label: 'Fácil',          color: '#4caf50', icon: '🟢' },
+    { max: -1, label: 'Normal',         color: '#c4953a', icon: '🟡' },
+    { max:  1, label: 'Perigoso',       color: '#f97316', icon: '🟠' },
+    { max:  3, label: 'Muito Perigoso', color: '#ef4444', icon: '🔴' },
+    { max:  5, label: 'Extremo',        color: '#dc2626', icon: '💀' },
+    { max: 99, label: 'Lendário',       color: '#9333ea', icon: '☠️' },
+];
+function getRelativeDifficulty(danger, playerLv) {
+    var diff = danger - playerLv;
+    for (var i = 0; i < DIFF_TIERS.length; i++) {
+        if (diff <= DIFF_TIERS[i].max) return { label: DIFF_TIERS[i].label, color: DIFF_TIERS[i].color, icon: DIFF_TIERS[i].icon, tier: i };
+    }
+    return DIFF_TIERS[DIFF_TIERS.length - 1];
+}
+
 var TERRAIN_LABELS = {
   plains: 'Normal', forest: 'Dificil', swamp: 'Dificil',
   mountain: 'Normal', desert: 'Dificil', snow: 'Dificil',

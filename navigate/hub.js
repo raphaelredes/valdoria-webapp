@@ -330,8 +330,13 @@ function _buildRegionCard(key, reg, meta) {
   h += '</div>';
 
   h += '<div class="region-body">';
+  var _plvR = state.charData?.lv || 1;
+  var _rdR = typeof getRelativeDifficulty === 'function' ? getRelativeDifficulty(maxDanger, _plvR) : null;
   h += '<div><div class="region-name">' + meta.name + '</div>';
-  h += '<div class="region-meta">' + reg.locs.length + ' locais \u00B7 Nivel ' + minDanger + '-' + maxDanger + '</div></div>';
+  h += '<div class="region-meta">' + reg.locs.length + ' locais';
+  if (_rdR) h += ' \u00B7 <span style="color:' + _rdR.color + '">' + _rdR.icon + ' ' + _rdR.label + '</span>';
+  else h += ' \u00B7 Nivel ' + minDanger + '-' + maxDanger;
+  h += '</div></div>';
   h += '<div class="region-chips">';
   if (!reg.hm) h += '<span class="chip chip-nomap">\u{1F5FA}\uFE0F Sem Mapa</span>';
   if (reg.quests > 0) h += '<span class="chip chip-quest">\u{1F4DC} ' + reg.quests + ' miss\u00F5es</span>';
@@ -355,7 +360,12 @@ function _buildRegionCard(key, reg, meta) {
       h += '<div class="region-loc-item">';
       h += '<div class="loc-dot ' + (disc ? 'loc-dot-on' : 'loc-dot-off') + '"></div>';
       h += '<div class="loc-item-name' + (disc ? '' : ' unknown') + '">' + (disc ? loc.n : 'Local desconhecido') + '</div>';
-      h += '<div class="loc-item-danger">' + (disc ? 'Nivel ' + loc.d : '???') + '</div>';
+      if (disc && typeof getRelativeDifficulty === 'function') {
+        var _rdL = getRelativeDifficulty(loc.d, state.charData?.lv || 1);
+        h += '<div class="loc-item-danger" style="color:' + _rdL.color + '">' + _rdL.icon + ' ' + _rdL.label + '</div>';
+      } else {
+        h += '<div class="loc-item-danger">' + (disc ? 'Nivel ' + loc.d : '???') + '</div>';
+      }
       h += '</div>';
     }
     h += '</div>';
