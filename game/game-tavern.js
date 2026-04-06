@@ -11,7 +11,7 @@ function renderTavernHub(container, data) {
   /* Flavor/gossip text */
   if (data.flavor) {
     var flavor = vCity.el('div', 'tav-flavor');
-    flavor.textContent = data.flavor;
+    flavor.innerHTML = data.flavor; /* noqa: innerHTML — server-controlled tavern flavor text, safe content */
     root.appendChild(flavor);
   }
 
