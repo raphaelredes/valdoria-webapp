@@ -696,7 +696,7 @@ function _loadGoogleGSI() {
                 auto_select: false,
                 use_fedcm_for_prompt: false,
             });
-            /* Render real Google button as overlay — user's physical click goes to Google */
+            /* Render real Google button directly — user clicks Google's own button */
             var wrap = document.getElementById('google-wrap');
             if (wrap) {
                 google.accounts.id.renderButton(wrap, {
@@ -704,11 +704,14 @@ function _loadGoogleGSI() {
                     theme: 'filled_black',
                     size: 'large',
                     text: 'signin_with',
-                    width: 400
+                    width: 360
                 });
-                console.info('[WEB-AUTH] Google GSI initialized (overlay button mode)');
+                wrap.style.display = '';
+                console.info('[WEB-AUTH] Google GSI initialized (real button mode)');
             } else {
-                console.info('[WEB-AUTH] Google GSI initialized (prompt fallback)');
+                var fb = document.getElementById('btn-google-fallback');
+                if (fb) fb.style.display = '';
+                console.info('[WEB-AUTH] Google GSI initialized (fallback button)');
             }
         } catch (e) {
             console.error('[WEB-AUTH] Google GSI init error:', e);
@@ -716,6 +719,8 @@ function _loadGoogleGSI() {
     };
     script.onerror = function() {
         console.warn('[WEB-AUTH] Google GSI script failed to load');
+        var fb = document.getElementById('btn-google-fallback');
+        if (fb) fb.style.display = '';
     };
     document.head.appendChild(script);
 }

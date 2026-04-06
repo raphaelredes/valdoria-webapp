@@ -604,26 +604,18 @@
 
 /* ----- Google widget (hidden — auth handled by custom button) ----- */
 
-/* Google button wrapper — positions real Google button on top of custom button */
-.wa-google-wrapper {
-    position: relative;
+/* Real Google-rendered button — shown directly, styled to fit */
+.wa-google-real-btn {
     width: 100%;
-}
-
-.wa-google-overlay {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    opacity: 0.01;
-    cursor: pointer;
-    z-index: 2;
-}
-
-.wa-google-overlay iframe,
-.wa-google-overlay div {
-    width: 100% !important;
-    height: 100% !important;
     min-height: 48px;
+    border-radius: var(--v-radius, 10px);
+    overflow: hidden;
+}
+
+.wa-google-real-btn iframe {
+    border-radius: var(--v-radius, 10px) !important;
+    width: 100% !important;
+    min-height: 48px !important;
 }
 
 /* ----- DEV Login Button ----- */
