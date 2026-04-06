@@ -2,7 +2,7 @@
 if(window._loadDbgSetApp)_loadDbgSetApp('CREATOR');
 (function(){
 var _defaultText = 'Preparando a forja de aventureiros...';
-function _dismissFullLoading() { var lo = document.getElementById('loading'); if(lo && lo.style.display !== 'none') { lo.style.display = 'none'; } if(typeof hideLoading === 'function') { try { hideLoading(); } catch(e) { /* already hidden */ } } }
+function _dismissFullLoading() { window._loadingGuardBypass = true; var lo = document.getElementById('loading'); if(lo) { lo.style.display = 'none'; } var loOverlay = document.querySelector('.loading-overlay'); if(loOverlay) { loOverlay.style.display = 'none'; } if(typeof hideLoading === 'function') { try { hideLoading(); } catch(e) { /* already hidden */ } } }
 var _ctrl = {
     show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText, contentCheck: '.screen-viewport'}); },
     hide: function(cb) { _dismissFullLoading(); if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
