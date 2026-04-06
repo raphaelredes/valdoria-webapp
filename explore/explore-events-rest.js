@@ -874,8 +874,10 @@ function doLongRest() {
   var _lrText = '\uD83C\uDF19 <b>Descanso Longo</b><br><br>';
   _lrText += '\u2764\ufe0f HP totalmente recuperado<br>';
   _lrText += '\u2728 Condi\u00e7\u00f5es removidas<br>';
-  if (prevExhaustion > 0) _lrText += '\u26a0\ufe0f Exaust\u00e3o: ' + prevExhaustion + ' \u2192 ' + S.exhaustion + '<br>';
-  else _lrText += '\u2705 Sem exaust\u00e3o<br>';
+  if (prevExhaustion > 0) {
+    _lrText += '<span style="color:#4caf50;font-weight:bold">\u2705 Exaust\u00e3o removida! (' + prevExhaustion + ' \u2192 ' + S.exhaustion + ')</span><br>';
+    console.info('[EXPLORE:REST] longRest_exhaustion_removed prev=%d now=%d', prevExhaustion, S.exhaustion);
+  } else _lrText += '\u2705 Sem exaust\u00e3o<br>';
   if (S.charData && S.charData.mm > 0) _lrText += '\u2728 MP totalmente recuperado<br>';
   _lrText += '\uD83C\uDFB2 Dados de Vida: ' + _hdNow + '/' + maxHD + ' (+' + hdRecov + ' recuperados)<br>';
   if (S.weather === 't') _lrText += '<br>\u26a1 <span style="color:#dca028">Tempestade: descanso dif\u00edcil, +1 exaust\u00e3o.</span>';
@@ -1016,13 +1018,122 @@ function _showCampDiceRoll(roll, conMod, bonus, total, foodName, hdType, mpRecov
     var sign = conMod >= 0 ? '+' : '';
     label.textContent = (hdType || '1d8') + ' = ' + roll + ' ' + sign + conMod + ' (CON)';
     if (window.vHaptic) vHaptic.medium();
-    var _campResultText = (hdType || '1d8') + ' = ' + roll + ' ' + sign + conMod + ' (CON) = ' + (roll + conMod);
-    var _campDelay = typeof calcReadTime === 'function' ? calcReadTime(_campResultText, 'result') : 3000;
+
+    /* UNIFIED: append result content directly into dice overlay instead of opening separate overlay */
     setTimeout(function() {
-      overlay.classList.remove('active');
-      if (_campDice) { _campDice.dispose(); _campDice = null; }
-      showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpRecovered);
-    }, _campDelay);
+      console.info('[EXPLORE:REST] unifiedOverlay appending result to dice overlay heal=%d', total);
+      var card = overlay.querySelector('.camp-dice-card');
+      if (!card) { overlay.classList.remove('active'); if (_campDice) { _campDice.dispose(); _campDice = null; } showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpRecovered); return; }
+
+      /* Remove old unified results if any */
+      var old = card.querySelector('.camp-unified-result');
+      if (old) old.remove();
+
+      var _actualHeal = Math.max(0, Math.min(total, getMaxHP() - (getCurrentHP() - total)));
+      var resultDiv = document.createElement('div');
+      resultDiv.className = 'camp-unified-result';
+      resultDiv.style.cssText = 'margin-top:12px;animation:resultReveal 0.5s var(--v-ease-spring, cubic-bezier(0.34,1.56,0.64,1))';
+
+      /* HP restored text */
+      var hpText = document.createElement('div');
+      hpText.className = 'camp-result-text';
+      hpText.textContent = '+' + _actualHeal + ' HP Restaurados';
+      hpText.style.cssText = 'margin-bottom:8px';
+      resultDiv.appendChild(hpText);
+
+      /* Detail line */
+      var detSign = conMod >= 0 ? '+' : '';
+      var detailStr = (hdType || '1d8') + ' = ' + roll + ' ' + detSign + ' ' + conMod + ' (CON) = ' + (roll + conMod);
+      if (bonus > 0) detailStr += '\n' + foodName + ': +' + bonus + ' HP';
+      if (mpRecovered > 0) detailStr += '\n\u2728 +' + mpRecovered + ' MP recuperado';
+      var detailEl = document.createElement('div');
+      detailEl.className = 'camp-result-detail';
+      detailEl.textContent = detailStr;
+      resultDiv.appendChild(detailEl);
+
+      /* HP bar — built via DOM for safety */
+      var currentHP = getCurrentHP();
+      var maxHP = getMaxHP();
+      var hpPct = Math.max(2, Math.round((currentHP / maxHP) * 100));
+      var hpColor = hpPct > 60 ? '#4caf50' : hpPct > 25 ? '#f97316' : '#ef4444';
+      var maxHD = (S.charData && S.charData.mhd) || 1;
+      var hdRemaining = Math.max(0, maxHD - (S._hdUsed || 0));
+
+      var barContainer = document.createElement('div');
+      barContainer.style.cssText = 'margin-top:8px;padding:0 12px';
+      var barRow = document.createElement('div');
+      barRow.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:12px;color:#8a7a68';
+      var hpLabel = document.createElement('span');
+      hpLabel.textContent = 'HP';
+      barRow.appendChild(hpLabel);
+      var barTrack = document.createElement('div');
+      barTrack.style.cssText = 'flex:1;height:8px;background:rgba(0,0,0,0.3);border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,0.08)';
+      var barFill = document.createElement('div');
+      barFill.id = 'camp-unified-hp-fill';
+      barFill.style.cssText = 'height:100%;background:' + hpColor + ';border-radius:3px;transition:width 0.8s ease;width:0%';
+      barTrack.appendChild(barFill);
+      barRow.appendChild(barTrack);
+      var hpVal = document.createElement('span');
+      hpVal.style.color = hpColor;
+      hpVal.textContent = currentHP + '/' + maxHP;
+      barRow.appendChild(hpVal);
+      barContainer.appendChild(barRow);
+      var hdLine = document.createElement('div');
+      hdLine.style.cssText = 'text-align:center;font-size:11px;color:#8a7a68;margin-top:4px';
+      hdLine.textContent = 'Dados de Vida: ' + hdRemaining + '/' + maxHD;
+      barContainer.appendChild(hdLine);
+      resultDiv.appendChild(barContainer);
+
+      /* Exhaustion note for short rest */
+      var _exhLvl = S.exhaustion || 0;
+      if (_exhLvl > 0) {
+        var exhNote = document.createElement('div');
+        exhNote.style.cssText = 'color:#c88;font-size:12px;text-align:center;margin-top:6px;font-style:italic';
+        exhNote.textContent = '\u26a0\ufe0f Exaust\u00e3o ' + _exhLvl + ': Apenas descanso longo restaura';
+        resultDiv.appendChild(exhNote);
+        console.info('[EXPLORE:REST] unifiedOverlay_exhaustion_note lvl=%d', _exhLvl);
+      }
+
+      /* Close button */
+      var closeBtn = document.createElement('button');
+      closeBtn.className = 'btn-continue';
+      closeBtn.textContent = 'Fechar';
+      closeBtn.style.cssText = 'margin-top:12px';
+      var _closeDone = false;
+      closeBtn.onclick = function() {
+        if (_closeDone) return;
+        _closeDone = true;
+        overlay.classList.remove('active');
+        if (_campDice) { _campDice.dispose(); _campDice = null; }
+        var _ur = card.querySelector('.camp-unified-result');
+        if (_ur) _ur.remove();
+        closeCampResult();
+      };
+      resultDiv.appendChild(closeBtn);
+      card.appendChild(resultDiv);
+
+      if (window.vHaptic) vHaptic.success();
+      if (typeof flashScreen === 'function') flashScreen('rgba(68,170,136,0.15)');
+      setTimeout(function() {
+        var fill = document.getElementById('camp-unified-hp-fill');
+        if (fill) fill.style.width = hpPct + '%';
+      }, 200);
+
+      /* Auto-close safety net */
+      var _autoText = detailStr + ' +' + _actualHeal + ' HP';
+      var _autoMs = typeof calcReadTime === 'function' ? calcReadTime(_autoText, 'result') : 6000;
+      setTimeout(function() {
+        if (overlay.classList.contains('active') && !_closeDone) {
+          console.info('[EXPLORE:REST] unifiedOverlay auto-close after %dms', _autoMs);
+          _closeDone = true;
+          overlay.classList.remove('active');
+          if (_campDice) { _campDice.dispose(); _campDice = null; }
+          var _ur2 = card.querySelector('.camp-unified-result');
+          if (_ur2) _ur2.remove();
+          closeCampResult();
+        }
+      }, _autoMs);
+    }, 800);
   });
 }
 
@@ -1073,6 +1184,18 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpR
     + '</div>'
     + '<div style="text-align:center;font-size:11px;color:#8a7a68;margin-top:4px">Dados de Vida: ' + hdRemaining + '/' + maxHD + '</div>';
   detailEl.parentElement.appendChild(barContainer);
+
+  /* Exhaustion note for short rest — inform player only long rest removes it */
+  var _exhLvl = S.exhaustion || 0;
+  if (_exhLvl > 0) {
+    var exhNote = document.createElement('div');
+    exhNote.className = 'camp-result-exh-note';
+    exhNote.style.cssText = 'color:#c88;font-size:12px;text-align:center;margin-top:6px;font-style:italic';
+    exhNote.textContent = '\u26a0\ufe0f Exaust\u00e3o ' + _exhLvl + ': Apenas descanso longo restaura';
+    detailEl.parentElement.appendChild(exhNote);
+    console.info('[EXPLORE:REST] shortRest_exhaustion_note lvl=%d', _exhLvl);
+  }
+
   overlay.classList.add('active');
 
   if (window.vHaptic) vHaptic.success();
@@ -1109,6 +1232,8 @@ function closeCampResult() {
   }
   var bars = campResultOverlay.querySelectorAll('.camp-hp-bar-container');
   bars.forEach(function(b) { b.remove(); });
+  var exhNotes = campResultOverlay.querySelectorAll('.camp-result-exh-note');
+  exhNotes.forEach(function(n) { n.remove(); });
   campResultOverlay.classList.remove('active');
 
   if (typeof setCampfireActive === 'function') setCampfireActive(false);

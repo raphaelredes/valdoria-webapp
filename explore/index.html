@@ -169,6 +169,7 @@
                         <span class="exh-pip"></span><span class="exh-pip"></span><span class="exh-pip"></span>
                         <span class="exh-pip"></span><span class="exh-pip"></span><span class="exh-pip"></span>
                     </div>
+                    <span id="exh-effect" class="exh-effect"></span>
                 </div>
                 <div class="panel-meta">
                     <button class="pace-toggle" id="pace-toggle" onclick="cycleTravelPace()" title="Ritmo de viagem">🚶</button>
@@ -477,7 +478,7 @@
         document.write('<script src="../shared/api-discovery.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/device-id.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
-            var scripts = ['explore-iso.js', 'explore-tiles.js', 'explore-fog.js', 'explore-travel.js', 'explore-movement.js', 'explore-renderer.js', 'explore-narrations.js', 'explore-stories.js', 'explore-tutorial.js', 'explore-core.js', 'explore-events.js', 'explore-events-pace.js', 'explore-watch.js', 'explore-events-hazards.js', 'explore-camp-fire.js', 'explore-events-rest.js', 'explore-events-tiles.js', 'explore-particles.js', 'explore-outbound-travel.js'];
+            var scripts = ['explore-iso.js', 'explore-tiles.js', 'explore-fog.js', 'explore-travel.js', 'explore-movement.js', 'explore-pathfinding.js', 'explore-renderer.js', 'explore-narrations.js', 'explore-stories.js', 'explore-tutorial.js', 'explore-core.js', 'explore-events.js', 'explore-events-pace.js', 'explore-watch.js', 'explore-events-hazards.js', 'explore-camp-fire.js', 'explore-events-rest.js', 'explore-events-tiles.js', 'explore-particles.js', 'explore-outbound-travel.js'];
         scripts.forEach(function (s) {
             document.write('<script src="' + s + '?v=' + v + '"><\/script>');
         });

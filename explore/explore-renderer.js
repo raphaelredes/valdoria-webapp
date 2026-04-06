@@ -42,7 +42,11 @@ function _canvasCoords(e){var rect=_canvas.getBoundingClientRect();var clientX=e
  * is negative when scrolled, so (clientX - rect.left) already gives the
  * correct canvas-space coordinate. Adding scroll caused DOUBLE offset,
  * making screenToHex return wrong hex (e.g., (9,0) instead of (5,0)). */
-var result={x:sx*scaleX,y:sy*scaleY};if(window._dbg)console.debug('[EXPLORE:COORDS] _canvasCoords client=(%d,%d) scale=(%.2f,%.2f) canvas=(%.1f,%.1f)',clientX,clientY,scaleX,scaleY,result.x,result.y);return result;}var _tapRevealHexes=[];var _eventSprites=[];var EVENT_SPRITE_TYPES={npc:{draw:'_drawNPCSprite',color:CV_GOLD},npc_friendly:{draw:'_drawNPCSprite',color:CV_NPC_FRIENDLY},discovery:{draw:'_drawObjectSprite',color:CV_GOLD},search:{draw:'_drawObjectSprite',color:CV_SEARCH_COLOR},danger:{draw:'_drawDangerSprite',color:CV_DANGER},hazard:{draw:'_drawDangerSprite',color:CV_DANGER},trap:{draw:'_drawTrapSprite',color:CV_TRAP_COLOR},mystery:{draw:'_drawMysterySprite',color:CV_MYSTERY_COLOR},ambient:{draw:'_drawAmbientSprite',color:CV_AMBIENT_COLOR},encounter:{draw:'_drawEnemySprite',color:CV_ENCOUNTER_COLOR},};function revealEventSprite(col,row,type,icon){if(_eventSprites.find(s=>s.col===col&&s.row===row))return;_eventSprites.push({col,row,type:type||'discovery',icon:icon||null,revealTime:performance.now(),alpha:0});scheduleRender();}
+var result={x:sx*scaleX,y:sy*scaleY};if(window._dbg)console.debug('[EXPLORE:COORDS] _canvasCoords client=(%d,%d) scale=(%.2f,%.2f) canvas=(%.1f,%.1f)',clientX,clientY,scaleX,scaleY,result.x,result.y);return result;}var _tapRevealHexes=[];var _eventSprites=[];
+/* ── A* Pathfinding state (multi-hop movement) ── */
+var _multiHopPath = null;
+var _multiHopIndex = 0;
+var _lastClickTime = 0;var EVENT_SPRITE_TYPES={npc:{draw:'_drawNPCSprite',color:CV_GOLD},npc_friendly:{draw:'_drawNPCSprite',color:CV_NPC_FRIENDLY},discovery:{draw:'_drawObjectSprite',color:CV_GOLD},search:{draw:'_drawObjectSprite',color:CV_SEARCH_COLOR},danger:{draw:'_drawDangerSprite',color:CV_DANGER},hazard:{draw:'_drawDangerSprite',color:CV_DANGER},trap:{draw:'_drawTrapSprite',color:CV_TRAP_COLOR},mystery:{draw:'_drawMysterySprite',color:CV_MYSTERY_COLOR},ambient:{draw:'_drawAmbientSprite',color:CV_AMBIENT_COLOR},encounter:{draw:'_drawEnemySprite',color:CV_ENCOUNTER_COLOR},};function revealEventSprite(col,row,type,icon){if(_eventSprites.find(s=>s.col===col&&s.row===row))return;_eventSprites.push({col,row,type:type||'discovery',icon:icon||null,revealTime:performance.now(),alpha:0});scheduleRender();}
 function clearEventSprite(col,row){_eventSprites=_eventSprites.filter(s=>!(s.col===col&&s.row===row));scheduleRender();}
 var _floatingTexts=[];function spawnFloatingText(col,row,text,color,type){if(_floatingTexts.length>50){console.warn('[EXPLORE] floating_texts_culled count=%d',_floatingTexts.length);_floatingTexts=_floatingTexts.slice(-25);}const center=hexToScreen(col,row);const tile=S.grid[row]&&S.grid[row][col]?S.grid[row][col]:'.';const baseTile=tile.match(/[0-9@EC]/)?'.':tile;const h=(TILE_HEIGHT[baseTile]||1)*UNIT_PX;_floatingTexts.push({x:center.x+(Math.random()-0.5)*10,y:center.y-h-8,text:text,color:color||CV_TEXT,type:type||'flavor',birth:performance.now(),duration:3000,vy:-0.4,});scheduleRender();}
 function _drawFloatingTexts(ctx,timestamp){const now=performance.now();_floatingTexts=_floatingTexts.filter(ft=>(now-ft.birth)<ft.duration);for(const ft of _floatingTexts){const age=now-ft.birth;const t=age/ft.duration;const yOff=ft.vy*age*(1-t*0.5);const alpha=t<0.15?t/0.15:t<0.5?1.0:1.0-((t-0.5)/0.5)*((t-0.5)/0.5);const scale=1+t*0.15;ctx.save();ctx.globalAlpha=alpha*0.85;ctx.translate(ft.x,ft.y+yOff);ctx.scale(scale,scale);ctx.font=ft.type==='damage'?'bold 13px MedievalSharp, serif':ft.type==='big'?'bold 14px MedievalSharp, serif':'13px MedievalSharp, serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText(ft.text,0.5,0.5);ctx.fillStyle=ft.color;ctx.fillText(ft.text,0,0);ctx.restore();}}
@@ -51,10 +55,10 @@ var _pageHidden=false;window.addEventListener('pagehide',function(){_pageHidden=
 function scheduleRender(){_needsRender=true;if(!_rafId&&!_pageHidden){_rafId=requestAnimationFrame(renderLoop);}}
 function renderLoop(timestamp){if(_pageHidden){_rafId=null;return;}const dt=Math.min(0.05,(timestamp-_lastTimestamp)/1000);_lastTimestamp=timestamp;const movingActive=updateMovement(timestamp);const effectsActive=updateEffects(dt);const fogActive=updateFogAnimations(dt);const particlesActive=typeof updateParticles==='function'?updateParticles(dt):false;const weatherActive=typeof updateWeatherParticles==='function'?updateWeatherParticles(dt):false;const shakeActive=_updateShake(dt);const flashActive=_hexFlashes.length>0;const tapActive=_tapFeedbacks.length>0;const hasAnimations=movingActive||effectsActive||fogActive||particlesActive||flashActive||tapActive||shakeActive;renderFrame(timestamp);_applyShakeTransform();_needsRender=false;var _idleAnims=!S.inEvent&&!S.lockMovement;if(hasAnimations||weatherActive||_idleAnims){_rafId=requestAnimationFrame(renderLoop);}else{_rafId=null;}}
 function _drawAmbientLighting(ctx){if(_renderDetail<1)return;if(!S.grid||!S.fogState)return;const ROWS_L=S.grid.length;const COLS_L=S.grid[0]?S.grid[0].length:0;for(let r=0;r<ROWS_L;r++){for(let c=0;c<COLS_L;c++){const tile=S.grid[r][c];if(tile==='#'||tile==='D')continue;const fogKey=c+','+r;if(S.fogState[fogKey]!=='visible'&&S.fogState[fogKey]!=='dim')continue;const nbrs=typeof getNeighbors==='function'?getNeighbors(c,r):[];let glowColor=null;let glowAlpha=0;for(const[nc,nr]of nbrs){if(nr<0||nr>=ROWS_L||nc<0||nc>=COLS_L)continue;const adjTile=S.grid[nr][nc];if(adjTile==='L'){glowColor=CV_LAVA_GLOW;glowAlpha=Math.max(glowAlpha,0.08);}else if(adjTile==='R'){if(!glowColor||glowAlpha<0.06){glowColor=CV_RUIN_GLOW;glowAlpha=Math.max(glowAlpha,0.06);}}else if(adjTile==='W'||adjTile==='w'){if(!glowColor||glowAlpha<0.04){glowColor=CV_WATER_GLOW;glowAlpha=Math.max(glowAlpha,0.04);}}}
-if(S.torches){for(const torch of S.torches){const dist=typeof hexDist==='function'?hexDist(c,r,torch.col,torch.row):99;if(dist<=(torch.radius||2)){glowColor=CV_TORCH_GLOW;glowAlpha=Math.max(glowAlpha,0.07*(1-dist/3));}}}
+if(S.torches){for(const torch of S.torches){const dist=typeof hexDist==='function'?hexDist(c,r,torch.col,torch.row):99;if(dist<=(torch.radius||2)){glowColor=CV_TORCH_GLOW;glowAlpha=Math.max(glowAlpha,0.22*(1-dist/4));}}}
 if(!glowColor||glowAlpha<=0)continue;const pos=typeof hexToScreen==='function'?hexToScreen(c,r):null;if(!pos)continue;const grad=ctx.createRadialGradient(pos.x,pos.y,0,pos.x,pos.y,HEX_W*0.8);grad.addColorStop(0,'rgba('+glowColor+','+glowAlpha+')');grad.addColorStop(1,'rgba('+glowColor+',0)');ctx.fillStyle=grad;ctx.beginPath();ctx.arc(pos.x,pos.y,HEX_W*0.8,0,Math.PI*2);ctx.fill();}}}
 function renderFrame(timestamp){_ctx.clearRect(0,0,_canvasLogicalW,_canvasLogicalH);_ctx.fillStyle=CV_BG_DEEP;_ctx.fillRect(0,0,_canvasLogicalW,_canvasLogicalH);if(_staticDirty){renderStaticTiles(timestamp);_drawAmbientLighting(_staticCtx);_staticDirty=false;}
-_ctx.drawImage(_staticCanvas,0,0,_canvasLogicalW,_canvasLogicalH);drawAdjacentHighlights(_ctx,timestamp);drawDangerSignaling(_ctx,timestamp);drawRangeHighlight(_ctx,timestamp);drawAnimatedTiles(_ctx,timestamp);drawPOIMarkers(_ctx,timestamp);drawExitPortalGlow(_ctx,timestamp);_drawEventSprites(_ctx,timestamp);drawTileInteractionIndicators(_ctx,timestamp);drawExitWaypoint(_ctx,timestamp);drawVisitedTrail(_ctx,timestamp);_drawDangerMarkers(_ctx,timestamp);drawEffects(_ctx);drawHexFlashes(_ctx,timestamp);drawTapFeedback(_ctx,timestamp);drawHexHoverEffect(_ctx,timestamp);if(typeof drawCampfire==='function')drawCampfire(_ctx,timestamp);drawPlayerToken(_ctx,timestamp);_drawOcclusionFade(_ctx);if(typeof drawParticles==='function'){drawParticles(_ctx,timestamp);}
+_ctx.drawImage(_staticCanvas,0,0,_canvasLogicalW,_canvasLogicalH);drawAdjacentHighlights(_ctx,timestamp);drawDangerSignaling(_ctx,timestamp);drawRangeHighlight(_ctx,timestamp);if(typeof drawReachableHighlight==='function')drawReachableHighlight(_ctx,timestamp);if(typeof drawPathPreview==='function')drawPathPreview(_ctx,timestamp);drawAnimatedTiles(_ctx,timestamp);drawPOIMarkers(_ctx,timestamp);drawExitPortalGlow(_ctx,timestamp);_drawEventSprites(_ctx,timestamp);drawTileInteractionIndicators(_ctx,timestamp);drawExitWaypoint(_ctx,timestamp);drawVisitedTrail(_ctx,timestamp);_drawDangerMarkers(_ctx,timestamp);drawEffects(_ctx);drawHexFlashes(_ctx,timestamp);drawTapFeedback(_ctx,timestamp);drawHexHoverEffect(_ctx,timestamp);if(typeof drawCampfire==='function')drawCampfire(_ctx,timestamp);drawPlayerToken(_ctx,timestamp);_drawOcclusionFade(_ctx);if(typeof drawParticles==='function'){drawParticles(_ctx,timestamp);}
 if(typeof drawWeatherParticles==='function'){drawWeatherParticles(_ctx,timestamp);}
 _drawFloatingTexts(_ctx,timestamp);if(S.torches&&S.torches.length>0){for(const torch of S.torches){const fogKey=`${torch.col},${torch.row}`;const fogSt=S.fogState[fogKey];if(fogSt!=='visible'&&fogSt!=='dim')continue;const tPos=hexToScreen(torch.col,torch.row);const sx=(tPos.x-_cameraOffsetX)*_zoomLevel;const sy=(tPos.y-_cameraOffsetY)*_zoomLevel;_ctx.save();_ctx.translate(sx,sy);_ctx.scale(_zoomLevel,_zoomLevel);drawTorchOnWall(_ctx,0,0,timestamp);_ctx.restore();}}
 if (S.torchActive) {
@@ -113,13 +117,74 @@ function drawExitPortalGlow(ctx,timestamp){const key=`${S.exitCol},${S.exitRow}`
 function drawHexFlashes(ctx,timestamp){for(let idx=_hexFlashes.length-1;idx>=0;idx--){const f=_hexFlashes[idx];const elapsed=timestamp-f.start;if(elapsed>f.duration){_hexFlashes.splice(idx,1);continue;}
 const alpha=0.4*(1-elapsed/f.duration);const center=hexToScreen(f.col,f.row);const tile=S.grid[f.row]&&S.grid[f.row][f.col]?S.grid[f.row][f.col]:'.';const baseTile=tile.match(/[0-9@EC]/)?'.':tile;const h=(TILE_HEIGHT[baseTile]||1)*UNIT_PX;const topVerts=hexTopVertices(center.x,center.y-h);ctx.save();ctx.beginPath();ctx.moveTo(topVerts[0].x,topVerts[0].y);for(let v=1;v<topVerts.length;v++)ctx.lineTo(topVerts[v].x,topVerts[v].y);ctx.closePath();ctx.fillStyle=`rgba(196, 149, 58, ${alpha})`;ctx.fill();ctx.restore();}}
 function handleCanvasClick(e){if(typeof ValdoriaAudio!=='undefined'&&!ValdoriaAudio.isUnlocked()){ValdoriaAudio.forceUnlock();if(S.biome)ValdoriaAudio.playBiome(S.biome);}
-if(isMoving()){if(window._dbg)console.debug('[EXPLORE:CLICK] blocked_already_moving');return;}const cc=_canvasCoords(e);const hex=screenToHex(cc.x,cc.y,S.grid,ROWS,COLS);console.info('[EXPLORE:CLICK] handleCanvasClick canvas=(%.1f,%.1f) hex=(%d,%d) player=(%d,%d)',cc.x,cc.y,hex.col,hex.row,S.playerCol,S.playerRow);if(hex.col<0||hex.row<0){console.info('[EXPLORE:CLICK] rejected_invalid_hex col=%d row=%d',hex.col,hex.row);return;}if(!isAdjacent(S.playerCol,S.playerRow,hex.col,hex.row)){console.info('[EXPLORE:CLICK] rejected_not_adjacent target=(%d,%d) player=(%d,%d)',hex.col,hex.row,S.playerCol,S.playerRow);return;}const tile=S.grid[hex.row]&&S.grid[hex.row][hex.col]?S.grid[hex.row][hex.col]:'.';if(IMPASSABLE.has(tile)){console.info('[EXPLORE:CLICK] move_blocked_impassable tile=%s col=%d row=%d',tile,hex.col,hex.row);if(typeof handleTileInteraction==='function'){handleTileInteraction(hex.col,hex.row,tile);}
+/* Click debounce (200ms) */
+var _now = Date.now();
+if (_now - _lastClickTime < 200) return;
+_lastClickTime = _now;
+if(isMoving()){if(window._dbg)console.debug('[EXPLORE:CLICK] blocked_already_moving');return;}const cc=_canvasCoords(e);const hex=screenToHex(cc.x,cc.y,S.grid,ROWS,COLS);console.info('[EXPLORE:CLICK] handleCanvasClick canvas=(%.1f,%.1f) hex=(%d,%d) player=(%d,%d)',cc.x,cc.y,hex.col,hex.row,S.playerCol,S.playerRow);if(hex.col<0||hex.row<0){console.info('[EXPLORE:CLICK] rejected_invalid_hex col=%d row=%d',hex.col,hex.row);return;}
+/* Ignore click on player's own hex */
+if(hex.col===S.playerCol&&hex.row===S.playerRow){console.info('[EXPLORE:CLICK] rejected_same_hex');return;}
+var _isAdj=isAdjacent(S.playerCol,S.playerRow,hex.col,hex.row);
+if(!_isAdj){
+  /* Non-adjacent click: use A* pathfinding */
+  if(typeof findPath==='function'){
+    var _path=findPath(S.playerCol,S.playerRow,hex.col,hex.row);
+    if(_path&&_path.length>0){
+      var _preview=typeof getPathPreview==='function'?getPathPreview():null;
+      var _sameTarget=_preview&&_preview.length>0&&_preview[_preview.length-1].col===hex.col&&_preview[_preview.length-1].row===hex.row;
+      if(_sameTarget){
+        /* Second tap on same destination — execute multi-hop */
+        console.info('[EXPLORE:PATH] multi-hop confirmed to=(%d,%d) steps=%d',hex.col,hex.row,_path.length);
+        executeMultiHopPath(_path);
+      } else {
+        /* First tap — show path preview */
+        console.info('[EXPLORE:PATH] path_preview to=(%d,%d) steps=%d',hex.col,hex.row,_path.length);
+        if(typeof setPathPreview==='function')setPathPreview(_path);
+        spawnTapFeedback(hex.col,hex.row);
+        scheduleRender();
+      }
+    } else {
+      console.info('[EXPLORE:PATH] no_path to=(%d,%d)',hex.col,hex.row);
+      if(typeof showTerrainToast==='function')showTerrainToast('Caminho bloqueado','damage');
+    }
+  } else {
+    console.info('[EXPLORE:CLICK] rejected_not_adjacent target=(%d,%d) player=(%d,%d)',hex.col,hex.row,S.playerCol,S.playerRow);
+  }
+  return;
+}
+/* Clear any path preview when clicking adjacent hex */
+if(typeof clearPathfinding==='function')clearPathfinding();
+const tile=S.grid[hex.row]&&S.grid[hex.row][hex.col]?S.grid[hex.row][hex.col]:'.';if(IMPASSABLE.has(tile)){console.info('[EXPLORE:CLICK] move_blocked_impassable tile=%s col=%d row=%d',tile,hex.col,hex.row);if(typeof handleTileInteraction==='function'){handleTileInteraction(hex.col,hex.row,tile);}
 return;}
 if(typeof playerFacing!=='undefined'){const _fc=hexToScreen(hex.col,hex.row);const _fp=hexToScreen(S.playerCol,S.playerRow);playerFacing=Math.atan2(_fc.y-_fp.y,_fc.x-_fp.x);}
 spawnTapFeedback(hex.col,hex.row);
 // Navigation check (D&D 5e PHB Ch.8)
 if(typeof checkNavigation==="function"){var navResult=checkNavigation(hex.col,hex.row);if(navResult.veered){var veerTarget=getVeerTarget(S.playerCol,S.playerRow,hex.col,hex.row);hex.col=veerTarget[0];hex.row=veerTarget[1];}}
 console.info('[EXPLORE:CLICK] accepted_move from=(%d,%d) to=(%d,%d) tile=%s',S.playerCol,S.playerRow,hex.col,hex.row,tile);movePlayerCanvas(hex.col,hex.row);}
+/* ── Multi-hop path execution (A* pathfinding) ── */
+function executeMultiHopPath(path) {
+  if (!path || path.length === 0) return;
+  if (typeof clearPathfinding === 'function') clearPathfinding();
+  _multiHopPath = path;
+  _multiHopIndex = 0;
+  console.info('[EXPLORE:PATH] multi-hop start steps=%d', path.length);
+  _executeNextHop();
+}
+function _executeNextHop() {
+  if (!_multiHopPath || _multiHopIndex >= _multiHopPath.length) {
+    console.info('[EXPLORE:PATH] multi-hop complete at=(%d,%d)', S.playerCol, S.playerRow);
+    _multiHopPath = null;
+    /* Recalculate reachable highlight after full path */
+    if (typeof findReachable === 'function' && typeof setReachableHighlight === 'function') {
+      setReachableHighlight(findReachable(S.playerCol, S.playerRow, 6));
+    }
+    return;
+  }
+  var next = _multiHopPath[_multiHopIndex];
+  _multiHopIndex++;
+  console.info('[EXPLORE:PATH] multi-hop step %d/%d to=(%d,%d)', _multiHopIndex, _multiHopPath.length, next.col, next.row);
+  movePlayerCanvas(next.col, next.row);
+}
 function movePlayerCanvas(col,row){const tile=S.grid[row]&&S.grid[row][col]?S.grid[row][col]:'.';const baseTile=tile.match(/[0-9@EC]/)?'.':tile;const difficult=isDifficultTerrain(baseTile,S.biome);const ranger=isRanger();const isProne=hasCondition('prone');console.info('[EXPLORE:MOVE] movePlayerCanvas to=(%d,%d) tile=%s difficult=%s ranger=%s prone=%s exhaustion=%d',col,row,tile,difficult,ranger,isProne,S.exhaustion||0);if(S.exhaustion>=5){console.warn('[EXPLORE:MOVE] move_blocked_exhaustion level=5');showTerrainToast('Exaust\u00e3o extrema! Voc\u00ea n\u00e3o consegue se mover.','damage');return;}
 if(typeof conditionPreventsMovement==='function'&&conditionPreventsMovement()){console.warn('[EXPLORE] move_blocked_condition');showTerrainToast('Voc\u00ea n\u00e3o consegue se mover!','condition');return;}
 const exhHalf=S.exhaustion>=2;if((difficult&&!ranger)||isProne||exhHalf){setMoveDuration(MOVE_DURATION_DIFFICULT);}else{setMoveDuration(MOVE_DURATION_NORMAL);}
@@ -149,6 +214,21 @@ S._stepsSinceEncounter=(S._stepsSinceEncounter||0)+1;/* Auto-regenerate encounte
 if(S.ambientEvents&&S.ambientEvents.length>0&&Math.random()<0.10){const ambient=S.ambientEvents.shift();revealEventSprite(col,row,'ambient');spawnFloatingText(col,row,'...','#8a9a6a','flavor');setTimeout(()=>showAmbientEvent(ambient),200);return;}
 const neighbors=getNeighbors(col,row);const hasValidMove=neighbors.some(([c,r])=>{const t=S.grid[r]&&S.grid[r][c]?S.grid[r][c]:'.';return!IMPASSABLE.has(t);});if(!hasValidMove){showTerrainToast('Sem caminhos disponíveis!','damage');}
 if(typeof checkFlavorEvent==='function'){checkFlavorEvent();}
+/* Multi-hop continuation: if path active and no event triggered, proceed */
+if (_multiHopPath && _multiHopIndex < _multiHopPath.length) {
+  if (typeof isEventActive === 'function' && isEventActive()) {
+    console.info('[EXPLORE:PATH] multi-hop interrupted by event at (%d,%d)', col, row);
+    _multiHopPath = null;
+  } else {
+    logMoveEvent([{type:'move'}]);saveState();
+    setTimeout(_executeNextHop, 150);
+    return;
+  }
+}
+/* Update reachable highlight after movement */
+if (typeof findReachable === 'function' && typeof setReachableHighlight === 'function') {
+  setReachableHighlight(findReachable(S.playerCol, S.playerRow, 6));
+}
 logMoveEvent([{type:'move'}]);saveState();}
 function scrollCanvasToPlayer(smooth){const viewport=document.getElementById('map-viewport');if(!viewport)return;const center=hexToScreen(S.playerCol,S.playerRow);const tile=S.grid[S.playerRow]&&S.grid[S.playerRow][S.playerCol]?S.grid[S.playerRow][S.playerCol]:'.';const baseTile=tile.match(/[0-9@EC]/)?'.':tile;const h=(TILE_HEIGHT[baseTile]||1)*UNIT_PX;const targetX=center.x-viewport.clientWidth/2;const targetY=(center.y-h)-viewport.clientHeight/2;viewport.scrollTo({left:Math.max(0,targetX),top:Math.max(0,targetY),behavior:smooth?'smooth':'instant',});}
 function drawVisitedTrail(ctx,timestamp){if(!S.visited||S.visited.size===0)return;const pulse=0.4+Math.sin((timestamp||0)*0.002)*0.15;const visitedArr=Array.from(S.visited);const points=[];for(let vi=0;vi<visitedArr.length;vi++){const key=visitedArr[vi];const[c,r]=key.split(',').map(Number);if(S.fogState[key]!=='visible')continue;const tile=S.grid[r]&&S.grid[r][c]?S.grid[r][c]:'.';const baseTile=tile.match(/[0-9@EC]/)?'.':tile;const center=hexToScreen(c,r);const h=(TILE_HEIGHT[baseTile]||1)*UNIT_PX;const x=center.x;const y=center.y-h;const age=visitedArr.length-vi;const fadeFactor=Math.max(0.15,1.0-age*0.03);points.push({x,y,c,r,fadeFactor,age});}

@@ -3,7 +3,7 @@
 .camp-screen {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  z-index: var(--v-z-modal, 500);
+  z-index: var(--v-z-loading, 1000);
   display: none;
   flex-direction: column;
   background: #0a0808;
@@ -307,7 +307,7 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
 .camp-popup {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  z-index: calc(var(--v-z-modal, 500) + 10);
+  z-index: calc(var(--v-z-loading, 1000) + 10);
   display: none;
   flex-direction: column;
   background: var(--v-bg, #1a1510);
