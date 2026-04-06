@@ -137,6 +137,23 @@ window.onGoogleClick = function() {
     }
 };
 
+/* ----- Friendly Error Messages ----- */
+
+function _friendlyError(e) {
+    if (!e) return 'Erro desconhecido.';
+    var msg = e.message || String(e);
+    if (e.name === 'AbortError' || msg.indexOf('abort') !== -1) {
+        return 'Servidor não respondeu a tempo. Verifique sua conexão e tente novamente.';
+    }
+    if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1 || msg.indexOf('network') !== -1) {
+        return 'Servidor temporariamente indisponível. Tente novamente em alguns segundos.';
+    }
+    if (msg.indexOf('Load failed') !== -1) {
+        return 'Falha na conexão com o servidor. Verifique sua internet.';
+    }
+    return msg;
+}
+
 /* ----- Auth Callbacks ----- */
 
 window.onTelegramAuth = async function(user) {
@@ -166,7 +183,7 @@ window.onTelegramAuth = async function(user) {
         handleLoginSuccess(data);
     } catch (e) {
         console.error('[WEB-AUTH] Telegram login error:', e);
-        showAuthError(e.message || 'Erro ao autenticar com Telegram');
+        showAuthError(_friendlyError(e));
     } finally {
         showAuthLoading(false);
     }
@@ -213,10 +230,7 @@ window.onGoogleAuth = async function(response) {
         handleLoginSuccess(data);
     } catch (e) {
         console.error('[WEB-AUTH] Google login error:', e);
-        var msg = e.name === 'AbortError'
-            ? 'Servidor não respondeu a tempo. Verifique sua conexão.'
-            : (e.message || 'Erro ao autenticar com Google');
-        showAuthError(msg);
+        showAuthError(_friendlyError(e));
     } finally {
         showAuthLoading(false);
     }
@@ -345,7 +359,7 @@ async function onPlay() {
         redirectToGame(_selectedCharId, false, gameToken);
     } catch (e) {
         console.error('[WEB-AUTH] Select character error:', e);
-        showCharError(e.message || 'Erro ao entrar no jogo');
+        showCharError(_friendlyError(e));
         btn.disabled = false;
         btn.textContent = '⚔️ Jogar';
     }
@@ -660,7 +674,7 @@ window.onDevLogin = async function() {
         }
     } catch (e) {
         console.error('[WEB-AUTH] DEV login error:', e);
-        showAuthError(e.message || 'Erro no login DEV');
+        showAuthError(_friendlyError(e));
     } finally {
         showAuthLoading(false);
     }
