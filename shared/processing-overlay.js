@@ -1,7 +1,7 @@
 /**
- * Processing Overlay v2.0 — Runa Giratoria (Content-Aware)
+ * Processing Overlay v3.0 — Runa Giratoria + Enhanced Orb of Valdoria
  * Lightweight loading overlay for in-game transitions and API calls.
- * Now with content detection polling and comprehensive logging.
+ * v3.0: Orb 56px + wisps + sparks + ambient glow + perf tiers
  *
  * API:
  *   vProcessing.show(opts)   — opts: { text, contentCheck, onRetry, onTimeout, timeoutMs }
@@ -82,29 +82,71 @@ function _buildOverlay() {
 
     icon.appendChild(svg);
 
-    /* Mini Orb of Valdoria (replaces ◆ gem) */
+    /* Enhanced Orb of Valdoria v3.0 */
+    var isLite = document.body && document.body.classList.contains('perf-lite');
+    var isMed = document.body && document.body.classList.contains('perf-medium');
+
+    /* Ambient glow (behind orb) */
+    var orbAmbient = document.createElement('div');
+    orbAmbient.className = 'vpo-ambient';
+    icon.appendChild(orbAmbient);
+
     var orbWrap = document.createElement('div');
     orbWrap.className = 'v-processing-orb';
     var orbShell = document.createElement('div');
     orbShell.className = 'vpo-shell';
     var orbNeb = document.createElement('div');
     orbNeb.className = 'vpo-nebula';
-    var nebClasses = ['vpo-n1','vpo-n2','vpo-n3'];
+    var nebClasses = ['vpo-n1','vpo-n2','vpo-n3','vpo-n4'];
     for (var ni = 0; ni < nebClasses.length; ni++) {
         var nd = document.createElement('div');
         nd.className = nebClasses[ni];
         orbNeb.appendChild(nd);
     }
+    /* Wisps (skip on lite) */
+    if (!isLite) {
+        var wispClasses = ['vpo-w1','vpo-w2','vpo-w3'];
+        for (var wi = 0; wi < wispClasses.length; wi++) {
+            var wd = document.createElement('div');
+            wd.className = 'vpo-wisp ' + wispClasses[wi];
+            orbNeb.appendChild(wd);
+        }
+    }
+    /* Sparks (skip on lite + medium) */
+    if (!isLite && !isMed) {
+        var sparkClasses = ['vpo-sp1','vpo-sp2'];
+        for (var si = 0; si < sparkClasses.length; si++) {
+            var sd = document.createElement('div');
+            sd.className = 'vpo-spark ' + sparkClasses[si];
+            orbNeb.appendChild(sd);
+        }
+    }
     orbShell.appendChild(orbNeb);
     var orbCore = document.createElement('div');
     orbCore.className = 'vpo-core';
     orbShell.appendChild(orbCore);
+    /* Core flare (skip on lite) */
+    if (!isLite) {
+        var orbCoreFl = document.createElement('div');
+        orbCoreFl.className = 'vpo-core-fl';
+        orbShell.appendChild(orbCoreFl);
+    }
     var orbFresnel = document.createElement('div');
     orbFresnel.className = 'vpo-fresnel';
     orbShell.appendChild(orbFresnel);
+    /* SSS (skip on lite) */
+    if (!isLite) {
+        var orbSSS = document.createElement('div');
+        orbSSS.className = 'vpo-sss';
+        orbShell.appendChild(orbSSS);
+    }
     var orbHighlight = document.createElement('div');
     orbHighlight.className = 'vpo-highlight';
     orbShell.appendChild(orbHighlight);
+    /* Glass secondary reflection */
+    var orbGs = document.createElement('div');
+    orbGs.className = 'vpo-gs';
+    orbShell.appendChild(orbGs);
     orbWrap.appendChild(orbShell);
     icon.appendChild(orbWrap);
 
