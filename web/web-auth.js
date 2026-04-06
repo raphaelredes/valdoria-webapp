@@ -121,29 +121,18 @@ window.onTelegramClick = function() {
 };
 
 window.onGoogleClick = function() {
-    /* Click the hidden Google-rendered button (more reliable than prompt()) */
-    var wrap = document.getElementById('google-wrap');
-    if (wrap) {
-        var btn = wrap.querySelector('[role="button"]') || wrap.querySelector('div[style]') || wrap.querySelector('iframe');
-        if (btn) {
-            console.info('[WEB-AUTH] Clicking hidden Google rendered button');
-            btn.click();
-            return;
-        }
-    }
-    /* Fallback: try prompt() */
+    /* The real Google button is overlaid on top of our custom button.
+     * This function is a fallback — the real click goes to Google's iframe. */
+    console.info('[WEB-AUTH] onGoogleClick fallback triggered');
     if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-        console.info('[WEB-AUTH] Fallback: Google prompt()');
         google.accounts.id.prompt(function(notification) {
             if (notification.isNotDisplayed()) {
                 console.warn('[WEB-AUTH] Google prompt not displayed reason=%s', notification.getNotDisplayedReason());
-                showAuthError('Login Google bloqueado pelo navegador. Tente limpar cookies ou usar outro navegador.');
-            } else if (notification.isSkippedMoment()) {
-                console.warn('[WEB-AUTH] Google prompt skipped reason=%s', notification.getSkippedMomentReason());
+                showAuthError('Login Google bloqueado. Tente limpar cookies ou usar aba an\u00f4nima.');
             }
         });
     } else {
-        showAuthError('Google Sign-In não carregou. Recarregue a página.');
+        showAuthError('Google Sign-In n\u00e3o carregou. Recarregue a p\u00e1gina.');
     }
 };
 
@@ -705,9 +694,9 @@ function _loadGoogleGSI() {
                 client_id: _GOOGLE_CLIENT_ID,
                 callback: window.onGoogleAuth,
                 auto_select: false,
-                use_fedcm_for_prompt: true,
+                use_fedcm_for_prompt: false,
             });
-            /* Render hidden button for reliable click-based auth */
+            /* Render real Google button as overlay — user's physical click goes to Google */
             var wrap = document.getElementById('google-wrap');
             if (wrap) {
                 google.accounts.id.renderButton(wrap, {
@@ -715,9 +704,9 @@ function _loadGoogleGSI() {
                     theme: 'filled_black',
                     size: 'large',
                     text: 'signin_with',
-                    width: 300
+                    width: 400
                 });
-                console.info('[WEB-AUTH] Google GSI initialized (renderButton + click proxy)');
+                console.info('[WEB-AUTH] Google GSI initialized (overlay button mode)');
             } else {
                 console.info('[WEB-AUTH] Google GSI initialized (prompt fallback)');
             }

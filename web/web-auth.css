@@ -604,13 +604,26 @@
 
 /* ----- Google widget (hidden — auth handled by custom button) ----- */
 
-#google-wrap {
+/* Google button wrapper — positions real Google button on top of custom button */
+.wa-google-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.wa-google-overlay {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    inset: 0;
     overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0.01;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.wa-google-overlay iframe,
+.wa-google-overlay div {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 48px;
 }
 
 /* ----- DEV Login Button ----- */
