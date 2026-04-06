@@ -156,6 +156,7 @@
             /* Wire up the real tap callback */
             window.__onIntroTap = function() { _onTitleTap(); };
             console.log('[INTRO] Adopted early title screen — callback wired');
+            if (window.SpaWatchdog) SpaWatchdog.feed(); /* title screen IS valid content */
             /* Check if user already tapped (very fast) */
             if (window.__introTapped) {
                 console.log('[INTRO] User already tapped early title — triggering now');
@@ -171,6 +172,7 @@
         var loadEl = document.getElementById('loading');
         if (loadEl) loadEl.style.display = 'none';
         console.log('[INTRO] Title screen created (fallback) — loading hidden');
+        if (window.SpaWatchdog) SpaWatchdog.feed(); /* title screen IS valid content */
 
         _titleScreen = ValdoriaTitleScreen({
             onStart: function() { _onTitleTap(); }
