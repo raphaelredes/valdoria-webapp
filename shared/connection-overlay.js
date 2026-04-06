@@ -34,7 +34,7 @@ var _RUNE_SVG = '<svg class="v-conn-rune" viewBox="0 0 64 64" xmlns="http://www.
 function _buildHTML() {
     return '<div id="v-conn-overlay" class="v-conn-overlay">'
       + '<div class="v-conn-content">'
-      + '<div class="v-conn-icon">' + _RUNE_SVG + '<span class="v-conn-gem">\u25C6</span></div>'
+      + '<div class="v-conn-icon">' + _RUNE_SVG + '<div class="v-conn-orb"><div class="v-conn-orb-core"></div></div></div>'
       + '<div class="v-conn-status" id="v-conn-status">Reconectando...</div>'
       + '<div class="v-conn-detail" id="v-conn-detail"></div>'
       + '<div class="v-conn-progress"><div class="v-conn-progress-fill" id="v-conn-fill"></div></div>'
