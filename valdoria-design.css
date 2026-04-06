@@ -1640,3 +1640,11 @@ body::before {
   margin-left: auto;
   margin-right: auto;
 }
+
+/* Connection status pill — hidden by default, visible only on problems */
+.connection-status.collapsed {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(10px);
+  transition: opacity var(--v-transition-base, 0.3s) ease, transform var(--v-transition-base, 0.3s) ease;
+}
