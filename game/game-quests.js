@@ -12,20 +12,8 @@ if(data.failed&&data.failed.length>0){var failHdr=_questSectionHdr('\u274c','Mis
 +'<span class="quest-title quest-title--failed">\ud83d\udc80 '+vEsc(fq.title)+'</span></div>';if(fq.cb_retry){var retryBtn=document.createElement('button');retryBtn.className='quest-retry-btn';retryBtn.textContent='\ud83d\udd04 Tentar Novamente';(function(cb){retryBtn.onclick=function(e){e.stopPropagation();doAction(cb);};})(fq.cb_retry);failCard.appendChild(retryBtn);}
 wrap.appendChild(failCard);}}
 var totalQ=(data.story||[]).length+(data.daily||[]).length
-+(data.done||[]).length+(data.failed||[]).length;if(totalQ===0){var empty=document.createElement('div');empty.className='quest-empty';empty.innerHTML='<div class="quest-empty-scroll">'
-+'<svg class="quest-empty-svg" viewBox="0 0 120 100" width="120" height="100">'
-+'<path d="M20,15 Q60,5 100,15 L100,85 Q60,95 20,85 Z" fill="none" stroke="rgba(196,149,58,0.25)" stroke-width="1.5"/>'
-+'<path d="M15,12 Q15,8 20,8 L100,8 Q105,8 105,12 L105,18 Q60,8 15,18 Z" fill="rgba(196,149,58,0.1)" stroke="rgba(196,149,58,0.2)" stroke-width="0.8"/>'
-+'<path d="M15,88 Q15,92 20,92 L100,92 Q105,92 105,88 L105,82 Q60,92 15,82 Z" fill="rgba(196,149,58,0.1)" stroke="rgba(196,149,58,0.2)" stroke-width="0.8"/>'
-+'<text x="60" y="42" text-anchor="middle" fill="rgba(196,149,58,0.3)" font-size="28" font-family="serif">\u2620</text>'
-+'<line x1="35" y1="55" x2="85" y2="55" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>'
-+'<text x="60" y="68" text-anchor="middle" fill="rgba(196,149,58,0.2)" font-size="7" font-family="serif">NENHUMA MISS\u00c3O</text>'
-+'<line x1="35" y1="74" x2="85" y2="74" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>'
-+'</svg>'
-+'</div>'
-+'<div class="quest-empty-text">O pergaminho est\u00e1 em branco...</div>'
-+'<div class="quest-empty-hint">Converse com os habitantes de Eldoria ou visite o <b>Quadro de Miss\u00f5es</b> na Guilda dos Aventureiros.</div>'
-+'<div class="quest-empty-cta">\ud83c\udfe0 Visitar Locais</div>';var _cta=empty.querySelector('.quest-empty-cta');if(_cta)_cta.onclick=function(){doAction('action_city_locations');};wrap.appendChild(empty);}
++(data.done||[]).length+(data.failed||[]).length;if(totalQ===0){var empty=document.createElement('div');empty.className='quest-empty';var _eText=document.createElement('div');_eText.className='quest-empty-text';_eText.textContent='\ud83d\udcdc Nenhuma miss\u00e3o ativa';empty.appendChild(_eText);var _eHint=document.createElement('div');_eHint.className='quest-empty-hint';_eHint.textContent='Converse com os habitantes de Eld\u00f3ria ou visite o Quadro de Miss\u00f5es na Guilda dos Aventureiros.';
+empty.appendChild(_eHint);var _eCta=document.createElement('div');_eCta.className='quest-empty-cta';_eCta.textContent='\ud83c\udfe0 Visitar Locais';_eCta.onclick=function(){doAction('action_city_locations');};empty.appendChild(_eCta);wrap.appendChild(empty);}
 var emptyFilter=document.createElement('div');emptyFilter.className='quest-empty quest-empty-filter';emptyFilter.style.display='none';emptyFilter.innerHTML='<div class="quest-empty-text">Nenhuma miss\u00e3o nesta categoria.</div>';wrap.appendChild(emptyFilter);container.appendChild(wrap);}
 function _applyQuestFilter(wrap,filter,searchText){var query=(searchText||'').toLowerCase().trim();var sections=wrap.querySelectorAll('[data-qsection]');var visibleCount=0;for(var i=0;i<sections.length;i++){var el=sections[i];var section=el.getAttribute('data-qsection');var title=el.getAttribute('data-qtitle')||'';var showByTab=(filter==='all')||(filter==='story'&&section==='story')||(filter==='daily'&&section==='daily')||(filter==='done'&&section==='done')||section==='turnin';var showBySearch=!query||!title||title.indexOf(query)>=0;var isHeader=el.classList.contains('quest-section-hdr');if(isHeader){var hasVisible=false;var next=el.nextElementSibling;while(next&&next.getAttribute('data-qsection')===section&&!next.classList.contains('quest-section-hdr')){var nextTitle=next.getAttribute('data-qtitle')||'';var nextSearch=!query||!nextTitle||nextTitle.indexOf(query)>=0;if(showByTab&&nextSearch){hasVisible=true;break;}
 next=next.nextElementSibling;}
