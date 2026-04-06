@@ -256,6 +256,11 @@
     max-height: min(100dvh, 932px);
     overflow-y: auto;
     overflow-x: hidden;
+    /* contain: layout size — makes position:fixed children behave as position:absolute
+     * relative to body (430x932 frame), not the browser viewport (1920px+).
+     * This is the KEY rule that constrains ALL game UI to the phone-sized frame. */
+    contain: layout size;
+    position: relative;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     user-select: none;
