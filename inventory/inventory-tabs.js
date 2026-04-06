@@ -19,7 +19,7 @@ const counts=getFilterCounts();const filters=[{id:'all',label:'Todos',cnt:counts
 +'<span class="btn-sell-junk" style="border-color:var(--v-info);" onclick="showGemFusionModal()">'
 +vi('gem',13)+' Fundir Gemas ('+_fusions.length+')</span></div>';}}
 const _junkItems=getJunkItems();const junkCount=_junkItems.reduce((sum,j)=>sum+j.q,0);if(junkCount>0&&!searchQuery){let junkGP=0;_junkItems.forEach(inv=>{const jit=getItemData(inv.n);junkGP+=Math.max(1,Math.floor((jit.v||1)*0.6))*inv.q;});html+=`<div style="text-align:right;margin-bottom:6px;">
-                <span class="btn-sell-junk" onclick="doSellJunk()">${vi('coin', 13)} Vender Lixo (${junkCount}) · ${junkGP}gp</span>
+                <span class="btn-sell-junk" onclick="doSellJunk()">${vi('coin', 13)} Vender Lixo (${junkCount}) · ${junkGP} ${vi('coin', 11)}</span>
             </div>`;}
 if(localPotions>0&&(activeFilter==='all'||activeFilter==='use')&&(!searchQuery||'poção de cura'.includes(searchQuery))){html+=`<div style="margin-bottom:10px;"><div class="item-grid ${viewMode === 'compact' ? 'compact-grid' : ''}">
                 <div class="item-card rarity-common fade-in" onclick="showPotionConfirm()" style="grid-column: span ${viewMode === 'compact' ? 4 : 2};
