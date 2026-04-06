@@ -66,7 +66,7 @@ function _renderCurrentPopup() {
         return;
     }
 
-    vPopup.show({
+    var popupOpts = {
         id: _overlayId,
         header: data._popup_title || '',
         bodyEl: bodyEl,
@@ -76,12 +76,22 @@ function _renderCurrentPopup() {
         onHide: function () {
             _popupStack = [];
         }
-    });
+    };
+    if (data._is_error_fallback) {
+        popupOpts.headerClass = 'v-popup-header--error';
+    }
+    vPopup.show(popupOpts);
 }
 
 function _buildPopupBody(data) {
     var el = document.createElement('div');
     el.className = 'unified-popup-body';
+
+    // Error fallback: clear technical error styling
+    if (data._is_error_fallback) {
+        el.classList.add('unified-popup-error');
+        return el;
+    }
 
     // Inn redesign: structured data renderer
     if (data._inn_screen && typeof renderInnConfirm === 'function') {
