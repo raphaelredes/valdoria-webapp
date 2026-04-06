@@ -5,10 +5,12 @@ function _seIsBuff(s){return typeof s==='object'?(s.cat==='buff'):STATUS_BUFFS.h
 function _seDcLabel(s){if(typeof s!=='object'||!s.dc||!s.sa)return '';var saShort={'strength':'FOR','dexterity':'DES','constitution':'CON','intelligence':'INT','wisdom':'SAB','charisma':'CAR'};return ' CD'+s.dc+(saShort[s.sa]||'');}
 function _seDur(s){if(typeof s==='object'&&s.dur&&s.dur>0)return ' <span class="se-dur">'+s.dur+'r</span>';return '';}
 function announce(msg){var el=document.getElementById('combatAnnouncer');if(el){el.textContent='';setTimeout(function(){el.textContent=msg;},50);}}
-/* renderEntity, renderPlayerCard, renderActionBar, renderBonusActionBar,
- * renderReactionBar, bindExpandCollapse, bindFeedToggle, bindFeedDetail
- * REMOVED — replaced by combat-grid.js and combat-actions-popup.js
- */
+/* Stubs for removed functions — now in combat-grid.js / combat-actions-popup.js.
+ * combat.js still calls these by name; stubs prevent ReferenceError. */
+function bindExpandCollapse(){if(typeof _bindGridCollapse==='function')_bindGridCollapse();}
+function bindFeedToggle(){if(typeof _bindGridFeedToggle==='function')_bindGridFeedToggle();}
+function bindFeedDetail(){if(typeof _bindGridFeedDetail==='function')_bindGridFeedDetail();}
+function renderActionBar(acts,enemies,player,toast){return typeof renderActionsButton==='function'?renderActionsButton():'<div class="action-bar"><div class="action-loading">Carregando...</div></div>';}
 var _actionsDelegated=false;var _actionsState=null;function bindActions(state){_actionsState=state;if(_actionsDelegated)return;_actionsDelegated=true;document.body.addEventListener('click',(ev)=>{const btn=ev.target.closest('.action-btn');if(!btn)return;const state=_actionsState;if(!state)return;if(_actionSent||_cinematicInProgress){return;}
 (()=>{vHaptic.select();if(!_audioUnlocked){if(_audioCtx&&_audioCtx.state==='suspended'){_audioCtx.resume().then(()=>{_audioUnlocked=true;}).catch(e=>{if(window._dbg)console.debug('[COMBAT] audioCtx.resume:',e.name);});}else if(_audioCtx&&_audioCtx.state==='running'){_audioUnlocked=true;}}
 const action=btn.dataset.action;if(btn.classList.contains('disabled')){btn.classList.add('disabled-shake');setTimeout(()=>btn.classList.remove('disabled-shake'),ValdoriaMotion.duration(400,0));if(action==='skill')vToast('Sem recurso suficiente para habilidades','warn');else if(action==='items')vToast('Nenhum item utilizável em combate','warn');return;}
