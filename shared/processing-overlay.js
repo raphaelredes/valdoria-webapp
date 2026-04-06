@@ -82,10 +82,31 @@ function _buildOverlay() {
 
     icon.appendChild(svg);
 
-    var gem = document.createElement('div');
-    gem.className = 'v-processing-gem';
-    gem.textContent = '\u25C6';
-    icon.appendChild(gem);
+    /* Mini Orb of Valdoria (replaces ◆ gem) */
+    var orbWrap = document.createElement('div');
+    orbWrap.className = 'v-processing-orb';
+    var orbShell = document.createElement('div');
+    orbShell.className = 'vpo-shell';
+    var orbNeb = document.createElement('div');
+    orbNeb.className = 'vpo-nebula';
+    var nebClasses = ['vpo-n1','vpo-n2','vpo-n3'];
+    for (var ni = 0; ni < nebClasses.length; ni++) {
+        var nd = document.createElement('div');
+        nd.className = nebClasses[ni];
+        orbNeb.appendChild(nd);
+    }
+    orbShell.appendChild(orbNeb);
+    var orbCore = document.createElement('div');
+    orbCore.className = 'vpo-core';
+    orbShell.appendChild(orbCore);
+    var orbFresnel = document.createElement('div');
+    orbFresnel.className = 'vpo-fresnel';
+    orbShell.appendChild(orbFresnel);
+    var orbHighlight = document.createElement('div');
+    orbHighlight.className = 'vpo-highlight';
+    orbShell.appendChild(orbHighlight);
+    orbWrap.appendChild(orbShell);
+    icon.appendChild(orbWrap);
 
     el.appendChild(icon);
 
