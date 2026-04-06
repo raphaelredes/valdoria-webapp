@@ -19,7 +19,7 @@
 .v-processing-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px}
 .vpo-shell{width:100%;height:100%;border-radius:50%;position:relative;overflow:hidden;box-shadow:0 0 16px var(--v-gold-50,rgba(196,149,58,0.5)),0 0 32px var(--v-gold-20,rgba(196,149,58,0.2)),inset 0 0 10px var(--v-gold-25,rgba(196,149,58,0.25))}
 .vpo-nebula{position:absolute;inset:-10%;width:120%;height:120%;border-radius:50%;animation:vpoNebulaRot 12s linear infinite}
-.vpo-n1{position:absolute;width:70%;height:70%;top:15%;left:15%;border-radius:50%;background:radial-gradient(ellipse at 40% 40%,rgba(245,212,120,0.6),rgba(196,149,58,0.3) 50%,transparent 70%)}
+.vpo-n1{position:absolute;width:70%;height:70%;top:15%;left:15%;border-radius:50%;background:radial-gradient(ellipse at 40% 40%,rgba(245,212,120,0.6),rgba(196,149,58,0.3) 50%,transparent 70%)} /* noqa: preflight — gradient color stop, var() incompatível */
 .vpo-n2{position:absolute;width:60%;height:60%;top:25%;left:20%;border-radius:50%;background:radial-gradient(ellipse at 60% 50%,rgba(232,196,90,0.5),rgba(180,130,40,0.2) 60%,transparent 80%);animation:vpoPulse 3s ease-in-out infinite}
 .vpo-n3{position:absolute;width:50%;height:50%;top:30%;left:30%;border-radius:50%;background:radial-gradient(ellipse at 50% 50%,rgba(255,240,180,0.4),transparent 70%);animation:vpoPulse 4s ease-in-out infinite 1s}
 .vpo-n4{position:absolute;width:80%;height:80%;top:10%;left:10%;border-radius:50%;background:radial-gradient(ellipse at 55% 60%,rgba(200,160,60,0.15),transparent 60%);animation:vpoPulse 6s ease-in-out infinite 0.5s}
@@ -42,7 +42,7 @@
 .vpo-sp2{width:1.5px;height:1.5px;top:50%;left:58%;animation:vpoSpark2 5s ease-in-out infinite 1.5s}
 
 /* -- Ambient glow around orb -- */
-.vpo-ambient{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,rgba(196,149,58,0.15),rgba(196,149,58,0.05) 50%,transparent 70%);pointer-events:none;animation:vpoGlowPulse 3s ease-in-out infinite}
+.vpo-ambient{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,rgba(196,149,58,0.15),rgba(196,149,58,0.05) 50%,transparent 70%);pointer-events:none;animation:vpoGlowPulse 3s ease-in-out infinite} /* noqa: preflight — gradient color stop */
 
 /* -- Status text -- */
 .v-processing-text{font-family:var(--v-font,"MedievalSharp",serif);font-size:var(--v-font-body,14px);color:var(--v-text-dim,#a09484);text-align:center;max-width:280px;line-height:1.5;transition:opacity 0.2s ease}
