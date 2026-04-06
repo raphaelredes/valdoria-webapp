@@ -11,3 +11,6 @@
 .settings-loading{text-align:center;padding:28px 16px;color:var(--v-text-dim,#a09484);font-family:var(--v-font);font-size:var(--v-font-body,14px)}
 .settings-popup-close-bottom{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);padding:9px 28px;background:var(--v-bg-raised,#332a22);border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-pill,20px);color:var(--v-text,#d4c8b0);font-family:var(--v-font);font-size:var(--v-font-md,13px);cursor:pointer;z-index:calc(var(--v-z-popup,500) + 1);box-shadow:var(--v-shadow-md);min-height:44px;min-width:44px}
 .settings-popup-close-bottom:active{background:var(--v-bg-card-hover)}
+.settings-logout-btn{display:block;width:100%;margin-top:var(--v-space-xl,16px);padding:12px var(--v-space-xl,16px);background:rgba(180,50,50,0.12);border:1px solid rgba(180,50,50,0.3);border-radius:var(--v-radius,10px);color:var(--v-danger-light,#e57373);font-family:var(--v-font);font-size:var(--v-font-body,14px);cursor:pointer;min-height:44px;transition:background var(--v-transition,0.2s),border-color var(--v-transition,0.2s)}
+.settings-logout-btn:hover{background:rgba(180,50,50,0.2);border-color:rgba(180,50,50,0.5)}
+.settings-logout-btn:active{transform:scale(0.97)}

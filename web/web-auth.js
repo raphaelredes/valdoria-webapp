@@ -121,19 +121,29 @@ window.onTelegramClick = function() {
 };
 
 window.onGoogleClick = function() {
-    /* Trigger the hidden Google Sign-In prompt */
+    /* Click the hidden Google-rendered button (more reliable than prompt()) */
+    var wrap = document.getElementById('google-wrap');
+    if (wrap) {
+        var btn = wrap.querySelector('[role="button"]') || wrap.querySelector('div[style]') || wrap.querySelector('iframe');
+        if (btn) {
+            console.info('[WEB-AUTH] Clicking hidden Google rendered button');
+            btn.click();
+            return;
+        }
+    }
+    /* Fallback: try prompt() */
     if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-        console.info('[WEB-AUTH] Triggering Google Sign-In prompt');
-        google.accounts.id.prompt();
-    } else {
-        console.warn('[WEB-AUTH] Google GSI not loaded, retrying in 1s');
-        setTimeout(function() {
-            if (typeof google !== 'undefined' && google.accounts) {
-                google.accounts.id.prompt();
-            } else {
-                showAuthError('Google Sign-In não carregou. Recarregue a página.');
+        console.info('[WEB-AUTH] Fallback: Google prompt()');
+        google.accounts.id.prompt(function(notification) {
+            if (notification.isNotDisplayed()) {
+                console.warn('[WEB-AUTH] Google prompt not displayed reason=%s', notification.getNotDisplayedReason());
+                showAuthError('Login Google bloqueado pelo navegador. Tente limpar cookies ou usar outro navegador.');
+            } else if (notification.isSkippedMoment()) {
+                console.warn('[WEB-AUTH] Google prompt skipped reason=%s', notification.getSkippedMomentReason());
             }
-        }, 1000);
+        });
+    } else {
+        showAuthError('Google Sign-In não carregou. Recarregue a página.');
     }
 };
 
@@ -695,10 +705,22 @@ function _loadGoogleGSI() {
                 client_id: _GOOGLE_CLIENT_ID,
                 callback: window.onGoogleAuth,
                 auto_select: false,
-                use_fedcm_for_prompt: false,
+                use_fedcm_for_prompt: true,
             });
-            /* No renderButton — custom button triggers google.accounts.id.prompt() */
-            console.info('[WEB-AUTH] Google GSI initialized (custom button mode)');
+            /* Render hidden button for reliable click-based auth */
+            var wrap = document.getElementById('google-wrap');
+            if (wrap) {
+                google.accounts.id.renderButton(wrap, {
+                    type: 'standard',
+                    theme: 'filled_black',
+                    size: 'large',
+                    text: 'signin_with',
+                    width: 300
+                });
+                console.info('[WEB-AUTH] Google GSI initialized (renderButton + click proxy)');
+            } else {
+                console.info('[WEB-AUTH] Google GSI initialized (prompt fallback)');
+            }
         } catch (e) {
             console.error('[WEB-AUTH] Google GSI init error:', e);
         }

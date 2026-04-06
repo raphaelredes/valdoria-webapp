@@ -40,10 +40,25 @@ function _fetchSettings() {
     apiCall('/api/game/action', { cb: 'action_settings', sv: S.screenVersion }).then(function(data) {
         if (!data || !window.isSettingsPopupOpen || !isSettingsPopupOpen()) return;
         if (data.sv !== undefined) S.screenVersion = data.sv;
-        contentEl.innerHTML = '';
+        contentEl.textContent = '';
         if (data.settings_data && typeof injectGameSettings === 'function') injectGameSettings(contentEl, data.settings_data);
         if (typeof injectFontPicker === 'function') injectFontPicker(contentEl);
         if (typeof injectAudioSettings === 'function') injectAudioSettings(contentEl);
+        /* Web portal: add logout button (not shown in Telegram) */
+        var _isRealTelegram = window.Telegram && Telegram.WebApp && Telegram.WebApp.initData && Telegram.WebApp.initData.length > 10;
+        if (!_isRealTelegram) {
+            var logoutBtn = document.createElement('button');
+            logoutBtn.className = 'settings-logout-btn';
+            logoutBtn.textContent = '\uD83D\uDEAA Sair da Conta';
+            logoutBtn.onclick = function() {
+                localStorage.removeItem('valdoria_web_token');
+                localStorage.removeItem('valdoria_web_user_id');
+                localStorage.removeItem('valdoria_api_base');
+                localStorage.removeItem('valdoria_dev_device');
+                window.location.href = window.location.origin + '/web/';
+            };
+            contentEl.appendChild(logoutBtn);
+        }
     }).catch(function(e) {
         console.error('[GAME] Settings fetch error:', e);
         if (contentEl) contentEl.innerHTML = '<div class="settings-loading">Erro ao carregar configura\u00e7\u00f5es.</div>';
