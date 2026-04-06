@@ -48,7 +48,7 @@
 
     /* ─── SPREAD MODE DETECTION ─── */
     function isSpreadMode() {
-        return window.innerWidth >= 768;
+        return Math.min(430, window.innerWidth) >= 768;
     }
     /* In spread mode, navigate by 2 pages at a time */
     function getStep() {

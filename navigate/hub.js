@@ -749,21 +749,10 @@ function _startTravel(locId, biome, name, flags) {
   window._pendingTravelFlags = flags || {};
   /* Use the full explore-travel.js animation (parallax, silhouette, particles) */
   if (typeof playTravelAnimation === 'function') {
-    /* Constrain canvas to 430px max / 932px max height — explore-travel.js uses window.innerWidth/Height */
-    var _realW = Object.getOwnPropertyDescriptor(window, 'innerWidth') ||
-                 Object.getOwnPropertyDescriptor(Window.prototype, 'innerWidth');
-    var _realH = Object.getOwnPropertyDescriptor(window, 'innerHeight') ||
-                 Object.getOwnPropertyDescriptor(Window.prototype, 'innerHeight');
+    /* Constrain canvas to 430px max / 932px max height */
     var maxW = Math.min(window.innerWidth, 430);
     var maxH = Math.min(window.innerHeight, 932);
-    try {
-      Object.defineProperty(window, 'innerWidth', { get: function() { return maxW; }, configurable: true });
-      Object.defineProperty(window, 'innerHeight', { get: function() { return maxH; }, configurable: true });
-    } catch(e) { /* readonly in some browsers */ }
     playTravelAnimation(biome, name, function() {
-      /* Restore original dimensions */
-      if (_realW) { try { Object.defineProperty(window, 'innerWidth', _realW); } catch(e) {} }
-      if (_realH) { try { Object.defineProperty(window, 'innerHeight', _realH); } catch(e) {} }
       _executeTravelApi(locId);
     });
   } else {

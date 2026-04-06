@@ -44,7 +44,7 @@
     padding: 10px;
     box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
     width: 350px;
-    max-width: 96vw;
+    max-width: min(96vw, calc(100% - 20px));
     z-index: 20;
     animation: popUp 0.15s ease-out;
 }

@@ -50,6 +50,8 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 bottom: 0;
                 left: 0;
                 right: 0;
+                max-width: 430px;
+                margin: 0 auto;
                 z-index: var(--v-z-critical, 10000);
                 display: flex;
                 flex-direction: column;
@@ -194,10 +196,17 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 position: fixed;
                 bottom: var(--va-bottom-offset, 8px);
                 right: 8px;
+                left: 0;
+                max-width: 430px;
+                margin: 0 auto;
+                display: flex;
+                justify-content: flex-end;
+                pointer-events: none;
                 z-index: var(--v-z-dropdown, 200);
                 transition: bottom var(--v-transition-base);
             }
             .va-float-btn {
+                pointer-events: auto;
                 width: 36px;
                 height: 36px;
                 border-radius: 50%;
