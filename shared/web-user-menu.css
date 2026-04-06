@@ -1,152 +1,62 @@
 /* =============================================
-   Web User Menu — Floating logout button
+   Web User Menu — Logout button for browser mode
    Only visible in web-standalone mode (browser)
    ============================================= */
 
-/* Hidden by default — only visible in web-standalone mode */
-.wum-float {
+/* Hidden by default */
+.wum-footer-btn {
     display: none;
 }
 
-.web-standalone .wum-float {
-    display: block;
-    position: fixed;
-    top: var(--v-space-lg, 12px);
-    right: var(--v-space-lg, 12px);
-    z-index: var(--v-z-dropdown, 200);
-}
-
-/* ── Trigger Button ── */
-
-.wum-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--v-border, #4a3828);
-    background: var(--v-bg-card, #2e2520);
-    color: var(--v-text-dim, #a09484);
-    font-size: var(--v-font-body, 14px);
-    cursor: pointer;
-    display: flex;
+/* Visible only in web-standalone (browser) mode */
+.web-standalone .wum-footer-btn {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.6;
-    transition: opacity var(--v-transition, 0.2s), border-color var(--v-transition, 0.2s),
-                box-shadow var(--v-transition, 0.2s);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    padding: 0;
-    line-height: 1;
+    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius-sm, 6px);
+    background: var(--v-bg-card, #2e2520);
+    color: var(--v-text-dim, #a09484);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-label, 12px);
+    cursor: pointer;
+    transition: color var(--v-transition, 0.2s), border-color var(--v-transition, 0.2s);
+    white-space: nowrap;
+    gap: var(--v-space-xs, 2px);
 }
 
-.wum-btn:hover {
-    opacity: 1;
+.web-standalone .wum-footer-btn:hover {
+    color: var(--v-gold, #c4953a);
     border-color: var(--v-gold-dim, #9a7530);
 }
 
-.wum-btn.wum-open {
-    opacity: 1;
-    border-color: var(--v-gold, #c4953a);
-    box-shadow: 0 0 12px var(--v-gold-20);
-}
-
-/* ── User icon SVG ── */
-
-.wum-btn svg {
-    width: 16px;
-    height: 16px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-/* ── Dropdown Menu ── */
-
-.wum-menu {
-    position: absolute;
-    top: calc(100% + var(--v-space-sm, 4px));
-    right: 0;
-    min-width: 160px;
-    background: var(--v-bg-card, #2e2520);
-    border: 1px solid var(--v-border, #4a3828);
-    border-radius: var(--v-radius-sm, 6px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 8px var(--v-gold-06);
-    opacity: 0;
-    transform: translateY(-4px) scale(0.95);
-    pointer-events: none;
-    transition: opacity var(--v-transition, 0.2s), transform var(--v-transition, 0.2s);
-    overflow: hidden;
-}
-
-.wum-menu.wum-visible {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
-}
-
-/* Gold top line */
-.wum-menu::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 12px;
-    right: 12px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--v-gold-dim, #9a7530), transparent);
-}
-
-/* ── Menu Item ── */
-
-.wum-item {
-    display: flex;
-    align-items: center;
-    gap: var(--v-space-md, 8px);
-    width: 100%;
-    padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);
-    border: none;
-    background: transparent;
-    color: var(--v-text, #d4c8b0);
-    font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: var(--v-font-base, 13px);
-    cursor: pointer;
-    transition: background var(--v-transition, 0.2s), color var(--v-transition, 0.2s);
-    text-align: left;
-}
-
-.wum-item:hover {
+.web-standalone .wum-footer-btn:active {
     background: var(--v-gold-08);
-    color: var(--v-gold, #c4953a);
 }
 
-.wum-item:active {
-    background: var(--v-gold-15);
-}
-
-.wum-item-icon {
-    font-size: var(--v-font-body, 14px);
-    flex-shrink: 0;
-    width: 20px;
-    text-align: center;
-}
-
-/* ── Backdrop (click outside to close) ── */
-
-.wum-backdrop {
-    display: none;
+/* When NOT inside footer — fallback fixed position bottom-right */
+.web-standalone .wum-footer-btn:not(.wum-in-footer) {
     position: fixed;
-    inset: 0;
-    z-index: calc(var(--v-z-dropdown, 200) - 1);
+    bottom: max(var(--v-space-md, 8px), env(safe-area-inset-bottom, 0px));
+    right: var(--v-space-md, 8px);
+    z-index: var(--v-z-dropdown, 200);
+    opacity: 0.7;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
-.wum-backdrop.wum-visible {
-    display: block;
+.web-standalone .wum-footer-btn:not(.wum-in-footer):hover {
+    opacity: 1;
 }
 
-/* ── Reduced motion ── */
+/* When inside footer — blend with other footer buttons */
+.web-standalone .wum-footer-btn.wum-in-footer {
+    margin-left: auto; /* push to right side */
+}
 
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    .wum-menu {
+    .wum-footer-btn {
         transition: none;
     }
 }
