@@ -16,9 +16,9 @@
 .v-conn-icon{position:relative;width:64px;height:64px;margin-bottom:var(--v-space-lg,12px)}
 .v-conn-rune{width:64px;height:64px;animation:vProcSpin 6s linear infinite}
 /* Orb of Valdoria mini (replaces diamond gem) */
-.v-conn-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff4d0,#e8c45a 30%,#c4953a 60%,#8b6420 85%,#5a3e10);box-shadow:0 0 12px rgba(196,149,58,0.6),0 0 24px rgba(196,149,58,0.3),inset 0 -3px 6px rgba(90,62,16,0.5),inset 0 2px 4px rgba(255,244,208,0.4);animation:vConnOrbPulse 3s ease-in-out infinite}
+.v-conn-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff4d0,#e8c45a 30%,#c4953a 60%,#8b6420 85%,#5a3e10);box-shadow:0 0 12px var(--v-gold-60,rgba(196,149,58,0.6)),0 0 24px var(--v-gold-30,rgba(196,149,58,0.3)),inset 0 -3px 6px rgba(90,62,16,0.5),inset 0 2px 4px rgba(255,244,208,0.4);animation:vConnOrbPulse 3s ease-in-out infinite}
 .v-conn-orb-core{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,rgba(255,244,208,0.9),rgba(232,196,90,0.4));filter:blur(1px);animation:vConnCorePulse 2s ease-in-out infinite}
-@keyframes vConnOrbPulse{0%,100%{box-shadow:0 0 12px rgba(196,149,58,0.5),0 0 20px rgba(196,149,58,0.2)}50%{box-shadow:0 0 18px rgba(196,149,58,0.7),0 0 30px rgba(196,149,58,0.35)}}
+@keyframes vConnOrbPulse{0%,100%{box-shadow:0 0 12px var(--v-gold-50,rgba(196,149,58,0.5)),0 0 20px var(--v-gold-20,rgba(196,149,58,0.2))}50%{box-shadow:0 0 18px var(--v-gold-70,rgba(196,149,58,0.7)),0 0 30px var(--v-gold-35,rgba(196,149,58,0.35))}}
 @keyframes vConnCorePulse{0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(0.8)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
 body.perf-lite .v-conn-orb,body.perf-lite .v-conn-orb-core{animation:none!important}
 @media(prefers-reduced-motion:reduce){.v-conn-orb,.v-conn-orb-core{animation:none!important}}
