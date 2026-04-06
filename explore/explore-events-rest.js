@@ -1081,6 +1081,17 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpR
     var fill = document.getElementById('camp-hp-fill');
     if (fill) fill.style.width = hpPct + '%';
   }, 200);
+
+  /* Auto-close safety net — generous timeout so player can read */
+  var _autoCloseMs = typeof calcReadTime === 'function'
+    ? calcReadTime(detail + ' ' + resultText.textContent, 'result')
+    : 6000;
+  setTimeout(function() {
+    if (overlay.classList.contains('active')) {
+      console.info('[CAMP] auto-closing camp-result-overlay after %dms', _autoCloseMs);
+      closeCampResult();
+    }
+  }, _autoCloseMs);
 }
 
 /* ----------------------------------------------------------
