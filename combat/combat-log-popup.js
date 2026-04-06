@@ -90,12 +90,12 @@ function _buildLogEntries(state) {
         if (detail && typeof detail === 'object') {
             // Roll line: "d20+mod = total vs AC — Acerto/Erro"
             var rollLine = '';
-            if (detail.roll !== undefined) {
+            if (detail.d20 !== undefined) {
                 rollLine += 'd20';
                 if (detail.mod !== undefined && detail.mod !== 0) {
                     rollLine += (detail.mod >= 0 ? '+' : '') + detail.mod;
                 }
-                rollLine += ' = ' + detail.roll;
+                rollLine += ' = ' + (detail.tot || detail.d20);
                 if (detail.ac !== undefined) {
                     rollLine += ' vs CA ' + detail.ac;
                 }
@@ -109,16 +109,16 @@ function _buildLogEntries(state) {
             }
 
             // Damage line
-            if (detail.dmg !== undefined && detail.dmg !== null) {
-                var dtype = detail.dtype || 'slashing';
+            if (detail.dt !== undefined && detail.dt !== null) {
+                var dtype = detail.dtp || 'slashing';
                 var dcolor = _dmgTypeColor(dtype);
                 var dicon = _dmgTypeIcon(dtype);
                 var dmgFormula = '';
-                if (detail.dmgFormula) {
-                    dmgFormula = escHtml(detail.dmgFormula) + ' = ';
+                if (detail.df) {
+                    dmgFormula = escHtml(detail.df) + ' = ';
                 }
                 html += '<span class="log-dmg" style="color:' + dcolor + '">' +
-                    dicon + ' ' + dmgFormula + detail.dmg + ' de dano (' +
+                    dicon + ' ' + dmgFormula + detail.dt + ' de dano (' +
                     escHtml(dtype) + ')</span>';
             }
 
