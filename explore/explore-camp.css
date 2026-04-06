@@ -16,7 +16,7 @@
 .camp-scene {
   position: relative;
   flex-shrink: 0;
-  height: 420px;
+  height: clamp(200px, 35vh, 320px);
   overflow: hidden;
   background: radial-gradient(ellipse at 50% 60%, var(--v-gold-08) 0%, transparent 50%), #0a0808;
 }
