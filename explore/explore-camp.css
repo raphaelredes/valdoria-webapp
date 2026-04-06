@@ -351,9 +351,13 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
 .camp-popup-body {
   flex: 1;
   padding: 14px 20px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--v-gold-30, rgba(196,149,58,0.3)) transparent;
 }
 .camp-popup-footer {
   padding: 14px 20px;
