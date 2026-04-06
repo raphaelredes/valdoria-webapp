@@ -12,7 +12,7 @@ function renderGatesHub(container, data) {
   /* Flavor text (first visits only) */
   if (data.flavor) {
     var flavor = vCity.el('div', 'gts-flavor');
-    flavor.textContent = data.flavor;
+    flavor.textContent = vCity.stripTags(data.flavor);
     root.appendChild(flavor);
   }
 

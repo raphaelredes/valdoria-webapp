@@ -11,7 +11,7 @@ function renderGuildHub(container, data) {
   /* Flavor text (first visit) */
   if (data.flavor) {
     var flavor = vCity.el('div', 'gld-flavor');
-    flavor.textContent = data.flavor;
+    flavor.textContent = vCity.stripTags(data.flavor);
     root.appendChild(flavor);
   }
 

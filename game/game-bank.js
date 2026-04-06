@@ -20,7 +20,7 @@ function renderBankHub(container, data) {
   /* NPC greeting */
   if (data.greeting) {
     var greet = vCity.el('div', 'bnk-greeting');
-    greet.textContent = data.greeting;
+    greet.textContent = vCity.stripTags(data.greeting);
     root.appendChild(greet);
   }
 

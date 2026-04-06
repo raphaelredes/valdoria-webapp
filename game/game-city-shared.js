@@ -40,6 +40,12 @@ function act(cb) {
   if (typeof doAction === 'function' && cb) doAction(cb);
 }
 
+/** Strip HTML tags from NPC text (backend sends <i>, <b> etc. for inline Telegram) */
+function stripTags(str) {
+  if (!str) return '';
+  return String(str).replace(/<\/?[^>]+(>|$)/g, '');
+}
+
 /* ── NPC Banner ── */
 
 function npcBanner(npc) {
@@ -266,6 +272,7 @@ window.vCity = {
   el: el,
   coin: coin,
   act: act,
+  stripTags: stripTags,
   npcBanner: npcBanner,
   goldBalance: goldBalance,
   serviceGrid: serviceGrid,

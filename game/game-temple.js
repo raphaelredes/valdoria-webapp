@@ -20,7 +20,7 @@ function renderTempleHub(container, data) {
   /* Flavor text */
   if (data.flavor) {
     var flavor = vCity.el('div', 'tmp-flavor');
-    flavor.textContent = data.flavor;
+    flavor.textContent = vCity.stripTags(data.flavor);
     root.appendChild(flavor);
   }
 
