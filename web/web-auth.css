@@ -604,19 +604,7 @@
 
 /* ----- Google widget (hidden — auth handled by custom button) ----- */
 
-/* Real Google-rendered button — shown directly, styled to fit */
-.wa-google-real-btn {
-    width: 100%;
-    min-height: 48px;
-    border-radius: var(--v-radius, 10px);
-    overflow: hidden;
-}
-
-.wa-google-real-btn iframe {
-    border-radius: var(--v-radius, 10px) !important;
-    width: 100% !important;
-    min-height: 48px !important;
-}
+/* Google button — same style as other social buttons (handled by .wa-social-btn--google) */
 
 /* ----- DEV Login Button ----- */
 

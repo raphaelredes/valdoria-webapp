@@ -77,9 +77,9 @@ async function discoverApiBase() {
 /* ----- Telegram OAuth Redirect (no widget/iframe) ----- */
 
 function loadTelegramWidget() {
-    /* No widget needed — using redirect OAuth instead.
-     * Check if we're returning FROM a Telegram OAuth redirect. */
+    /* Check if we're returning FROM an OAuth redirect (Telegram or Google). */
     _checkTelegramOAuthReturn();
+    _checkGoogleOAuthReturn();
 }
 
 function _checkTelegramOAuthReturn() {
@@ -103,6 +103,27 @@ function _checkTelegramOAuthReturn() {
     }
 }
 
+function _checkGoogleOAuthReturn() {
+    /* Google OAuth implicit flow returns with hash fragment:
+     * #id_token=<JWT>&... */
+    var hash = window.location.hash || '';
+    if (hash.indexOf('id_token=') === -1) return;
+
+    console.info('[WEB-AUTH] Google OAuth redirect detected');
+    try {
+        var params = new URLSearchParams(hash.substring(1));
+        var idToken = params.get('id_token');
+        if (!idToken) return;
+        /* Clear hash to avoid re-processing */
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        /* Use same auth callback as GSI — id_token IS the credential */
+        window.onGoogleAuth({ credential: idToken });
+    } catch (e) {
+        console.error('[WEB-AUTH] Failed to parse Google OAuth result:', e);
+        showAuthError('Erro ao processar resposta do Google.');
+    }
+}
+
 /* ----- Custom Social Button Handlers ----- */
 
 window.onTelegramClick = function() {
@@ -121,19 +142,20 @@ window.onTelegramClick = function() {
 };
 
 window.onGoogleClick = function() {
-    /* The real Google button is overlaid on top of our custom button.
-     * This function is a fallback — the real click goes to Google's iframe. */
-    console.info('[WEB-AUTH] onGoogleClick fallback triggered');
-    if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-        google.accounts.id.prompt(function(notification) {
-            if (notification.isNotDisplayed()) {
-                console.warn('[WEB-AUTH] Google prompt not displayed reason=%s', notification.getNotDisplayedReason());
-                showAuthError('Login Google bloqueado. Tente limpar cookies ou usar aba an\u00f4nima.');
-            }
-        });
-    } else {
-        showAuthError('Google Sign-In n\u00e3o carregou. Recarregue a p\u00e1gina.');
-    }
+    /* Google OAuth 2.0 implicit flow — redirect, no popup.
+     * Returns id_token directly in URL hash fragment. */
+    var nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    sessionStorage.setItem('google_nonce', nonce);
+    var redirectUri = window.location.origin + '/web/';
+    var authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
+        + '?client_id=' + encodeURIComponent(_GOOGLE_CLIENT_ID)
+        + '&redirect_uri=' + encodeURIComponent(redirectUri)
+        + '&response_type=id_token'
+        + '&scope=' + encodeURIComponent('openid email profile')
+        + '&nonce=' + nonce
+        + '&prompt=select_account';
+    console.info('[WEB-AUTH] Redirecting to Google OAuth (implicit flow)');
+    window.location.href = authUrl;
 };
 
 /* ----- Friendly Error Messages ----- */
@@ -683,54 +705,13 @@ window.onDevLogin = async function() {
 
 var _GOOGLE_CLIENT_ID = '717031857989-gu6hh4h9mgl3gikua705ov1fnbm57lg9.apps.googleusercontent.com';
 
-function _loadGoogleGSI() {
-    var script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.onload = function() {
-        console.info('[WEB-AUTH] Google GSI script loaded, initializing...');
-        try {
-            google.accounts.id.initialize({
-                client_id: _GOOGLE_CLIENT_ID,
-                callback: window.onGoogleAuth,
-                auto_select: false,
-                use_fedcm_for_prompt: false,
-            });
-            /* Render real Google button directly — user clicks Google's own button */
-            var wrap = document.getElementById('google-wrap');
-            if (wrap) {
-                google.accounts.id.renderButton(wrap, {
-                    type: 'standard',
-                    theme: 'filled_black',
-                    size: 'large',
-                    text: 'signin_with',
-                    width: 360
-                });
-                wrap.style.display = '';
-                console.info('[WEB-AUTH] Google GSI initialized (real button mode)');
-            } else {
-                var fb = document.getElementById('btn-google-fallback');
-                if (fb) fb.style.display = '';
-                console.info('[WEB-AUTH] Google GSI initialized (fallback button)');
-            }
-        } catch (e) {
-            console.error('[WEB-AUTH] Google GSI init error:', e);
-        }
-    };
-    script.onerror = function() {
-        console.warn('[WEB-AUTH] Google GSI script failed to load');
-        var fb = document.getElementById('btn-google-fallback');
-        if (fb) fb.style.display = '';
-    };
-    document.head.appendChild(script);
-}
+/* Google GSI not needed — using OAuth redirect flow instead */
 
 /* ----- Init ----- */
 
 function _initWebAuth() {
     console.info('[WEB-AUTH] Init: isProd=%s bot=%s env=%s readyState=%s', _isProd, BOT_USERNAME, _envId, document.readyState);
     loadTelegramWidget();
-    _loadGoogleGSI();
     checkExistingSession();
 }
 
