@@ -209,7 +209,7 @@ function _renderPlayerInfo() {
     var el = document.getElementById('guild-player-info');
     if (!el || !G.data) return;
     var h = '';
-    if (G.data.gold != null) h += '<span class="guild-player-gold">' + G.data.gold + ' GP</span>';
+    if (G.data.gold != null) h += '<span class="guild-player-gold">' + G.data.gold + ' 💰</span>';
     if (G.data.rep != null) h += ' <span class="guild-player-rep">Rep: ' + G.data.rep + '</span>';
     el.innerHTML = h;
 }

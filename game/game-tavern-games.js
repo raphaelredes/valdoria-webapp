@@ -100,7 +100,7 @@ function _renderPitFightResult(el, d) {
 
 function _renderPitFightMenu(el, d) {
     /* Compact rules */
-    var info = _tgEl('div', 'tg-info', 'Taxa: ' + (d.entry_fee || 25) + ' GP + aposta \u00b7 3 testes: FOR \u00b7 DES \u00b7 CON vs DC sorteado');
+    var info = _tgEl('div', 'tg-info', 'Taxa: ' + (d.entry_fee || 25) + ' 💰 + aposta \u00b7 3 testes: FOR \u00b7 DES \u00b7 CON vs DC sorteado');
     el.appendChild(info);
 
     /* Bet grid */
@@ -289,7 +289,7 @@ function _appendBetGrid(el, d) {
         bets.appendChild(btn);
     }
     el.appendChild(bets);
-    el.appendChild(_tgEl('div', 'tg-gold', '\ud83d\udcb0 ' + (d.gold || 0) + ' GP dispon\u00edvel'));
+    el.appendChild(_tgEl('div', 'tg-gold', '\ud83d\udcb0 ' + (d.gold || 0) + ' 💰 dispon\u00edvel'));
 }
 
 function _appendRollBox(parent, label, value, isWinner) {

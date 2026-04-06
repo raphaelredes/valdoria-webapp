@@ -176,7 +176,7 @@ window._showInnSelectPopup = function(data) {
                 card.style.cursor = "pointer";
                 var label = opt.label || opt.name || opt.text || "";
                 var html = "<b>" + vEsc(label) + "</b>";
-                if (opt.price) html += ' <span class="v-popup-gold">' + vEsc(opt.price) + " GP</span>";
+                if (opt.price) html += ' <span class="v-popup-gold">' + vEsc(opt.price) + " 💰</span>";
                 if (opt.desc) html += '<div class="v-popup-subdesc">' + vEsc(opt.desc) + "</div>";
                 card.innerHTML = html;
                 (function(cb) {

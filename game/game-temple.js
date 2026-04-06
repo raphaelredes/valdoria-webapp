@@ -12,7 +12,7 @@ function renderTempleHub(container, data) {
   /* Debt alert */
   if (data.debt && data.debt > 0) {
     root.appendChild(vCity.statusAlert(
-      'Divida ativa: ' + data.debt + ' GP — servicos bloqueados',
+      'Divida ativa: ' + data.debt + ' 💰 — servicos bloqueados',
       'danger'
     ));
   }

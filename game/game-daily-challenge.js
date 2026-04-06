@@ -78,7 +78,7 @@ function _buildAvailable(body, d, t) {
 
     body.appendChild(_section(t.rewards_section || 'Recompensas Estimadas'));
     body.appendChild(_row('✨ ' + (t.xp_label || 'XP'), '~' + (d.xp_est || 0)));
-    body.appendChild(_row('💰 ' + (t.gold_label || 'GP'), '~' + (d.gold_est || 0) + ' GP'));
+    body.appendChild(_row('💰 ' + (t.gold_label || 'Ouro'), '~' + (d.gold_est || 0) + ' 💰'));
 
     body.appendChild(_divider());
 

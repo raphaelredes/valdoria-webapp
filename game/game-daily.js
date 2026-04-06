@@ -22,7 +22,7 @@ function renderDailyReward(screen) {
         var cls = d < r.day_in_cycle ? 'daily-dot done' : d === r.day_in_cycle ? 'daily-dot current' : 'daily-dot';
         dayDots += '<span class="' + cls + '">' + d + '</span>';
     }
-    var bodyHtml = '<div class="daily-popup">' + streakText + '<div class="daily-cycle">' + dayDots + '</div>' + '<div class="daily-gold">\uD83D\uDCB0 ' + r.gold + ' GP</div>' + itemsHtml + multiplierHtml + recordHtml + '</div>';
+    var bodyHtml = '<div class="daily-popup">' + streakText + '<div class="daily-cycle">' + dayDots + '</div>' + '<div class="daily-gold">\uD83D\uDCB0 ' + r.gold + ' 💰</div>' + itemsHtml + multiplierHtml + recordHtml + '</div>';
     if (window.vPopup) {
         vPopup.show({ header: '\uD83C\uDF81 Recompensa Di\u00E1ria', headerClass: 'daily-header', body: bodyHtml, actions: '<button class="v-popup-btn" data-action="claim_daily">Coletar!</button>' });
     }

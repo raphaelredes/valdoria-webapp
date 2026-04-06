@@ -28,7 +28,7 @@ function _renderTraining() {
         html += '<div class="guild-training-progress"><div class="guild-training-progress-fill" style="width:' + pct + '%"></div></div>';
         html += '</div>';
         var canPay = (G.data && G.data.gold || 0) >= (d.cost || 25);
-        html += '<button class="guild-action-btn primary"' + (!canPay ? ' disabled title="Ouro insuficiente"' : '') + ' onclick="_advanceTraining()">&#x23E9; Avançar (' + (d.cost || 25) + ' GP)</button>';
+        html += '<button class="guild-action-btn primary"' + (!canPay ? ' disabled title="Ouro insuficiente"' : '') + ' onclick="_advanceTraining()">&#x23E9; Avançar (' + (d.cost || 25) + ' 💰)</button>';
         html += '<button class="guild-action-btn danger" onclick="_abandonTraining()">&#x274C; Abandonar</button>';
         html += '</div>';
     }
@@ -55,7 +55,7 @@ function _renderTraining() {
                 var opt = available[j];
                 html += '<div class="guild-training-card" onclick="_startTraining(\'' + _esc(cat.key) + '\',\'' + _esc(opt.id) + '\',\'' + _esc(opt.n || opt.name || '') + '\')">';
                 html += '<div class="guild-training-name">&#x1F4DA; ' + _esc(opt.n || opt.name || '') + '</div>';
-                html += '<div class="guild-training-meta">' + (d.sessions_total || '?') + ' sessoes &middot; ' + (d.cost || 25) + ' GP/sessao</div>';
+                html += '<div class="guild-training-meta">' + (d.sessions_total || '?') + ' sessoes &middot; ' + (d.cost || 25) + ' 💰/sessao</div>';
                 html += '</div>';
             }
         }
@@ -84,7 +84,7 @@ window._startTraining = function(category, itemId, name) {
     if (typeof vPopup !== 'undefined') {
         vPopup.show({
             header: 'Iniciar Treinamento',
-            body: 'Treinar <b>' + _esc(name) + '</b>?<br>Sessoes: ' + (_trainingData && _trainingData.sessions_total || '?') + '<br>Custo por sessao: ' + (_trainingData && _trainingData.cost || 25) + ' GP',
+            body: 'Treinar <b>' + _esc(name) + '</b>?<br>Sessoes: ' + (_trainingData && _trainingData.sessions_total || '?') + '<br>Custo por sessao: ' + (_trainingData && _trainingData.cost || 25) + ' 💰',
             actions: '<button class="v-popup-btn v-popup-btn--success" data-action="confirm">Iniciar</button>'
                    + '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Cancelar</button>',
             onAction: function(action) {
