@@ -711,7 +711,7 @@ body: JSON.stringify(payload)
 if (res.status === 401 || res.status === 403) {
 console.error('[LEVELUP] Auth error on apply:', res.status);
 resetSubmitState();
-showFatalError('Sessão expirada. Feche e reabra o level up.');
+showFatalError('Sess\u00e3o expirada. Feche esta janela e reabra o jogo.');
 return null;
 }
 return res.json();
