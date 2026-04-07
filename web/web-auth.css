@@ -10,9 +10,9 @@
     min-height: 100vh;
     min-height: 100dvh;
     max-height: min(100dvh, 932px);
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    padding: clamp(40px, 8vh, 80px) 0 0;
+    padding: 0;
     background:
         radial-gradient(ellipse 80% 60% at 50% 15%, var(--v-gold-06) 0%, transparent 60%),
         radial-gradient(ellipse 120% 80% at 50% 40%, var(--v-bg-raised, #3a3028) 0%, var(--v-bg, #2a2420) 40%, #1a1510 100%);
