@@ -1,0 +1,591 @@
+/* ============================================================
+   game-hub.css  —  City Hub (medieval-themed)
+   All values reference valdoria-design.css tokens.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   1. Hub Top Bar  —  compact resource strip
+   ---------------------------------------------------------- */
+.hub-top {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  height: 42px;
+  padding: 0 var(--v-space-md, 8px);
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid var(--v-gold-20, rgba(196, 149, 58, 0.2));
+}
+
+/* -- avatar circle ---------------------------------------- */
+.hub-avatar {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--v-gold, #c4953a);
+  background: var(--v-bg-card, #2e2520);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--v-font-xl, 16px);
+  line-height: 1;
+}
+
+/* -- HP / MP mini bars ------------------------------------ */
+.hub-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-xs, 2px);
+  flex: 1;
+  min-width: 0;
+}
+
+.hub-bars .bar-track {
+  height: var(--v-bar-height-mini, 4px);
+  border-radius: var(--v-radius-xs, 4px);
+  background: var(--v-bar-track, #1e1810);
+  overflow: hidden;
+}
+
+.hub-bars .bar-fill {
+  height: 100%;
+  border-radius: var(--v-radius-xs, 4px);
+  transition: width var(--v-transition-base, 0.3s ease);
+}
+
+.hub-bars .bar-fill.hp {
+  background: var(--v-hp-high, linear-gradient(90deg, #2d8f2d, #4caf50));
+}
+
+.hub-bars .bar-fill.mp {
+  background: var(--v-mp, linear-gradient(90deg, #1565c0, #42a5f5));
+}
+
+/* -- gold pill badge -------------------------------------- */
+.hub-res {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-xs, 2px);
+  padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+  border-radius: var(--v-radius-pill, 20px);
+  background: var(--v-gold-10, rgba(196, 149, 58, 0.1));
+  border: 1px solid var(--v-gold-20, rgba(196, 149, 58, 0.2));
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-sm, 11px);
+  color: var(--v-gold, #c4953a);
+  white-space: nowrap;
+}
+
+
+/* ----------------------------------------------------------
+   2. Suggested Action Strip
+   ---------------------------------------------------------- */
+.hub-suggest {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-sm, 4px);
+  height: 28px;
+  padding: 0 var(--v-space-lg, 12px);
+  border: 1px dashed var(--v-gold-30, rgba(196, 149, 58, 0.3));
+  border-radius: var(--v-radius-sm, 6px);
+  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-size: var(--v-font-sm, 11px);
+  color: var(--v-gold, #c4953a);
+  background: var(--v-gold-04, rgba(196, 149, 58, 0.04));
+}
+
+
+/* ----------------------------------------------------------
+   3. CTA Button  —  primary "adventure" action
+   ---------------------------------------------------------- */
+.hub-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+  padding: 0 var(--v-space-xl, 16px);
+  border: 2px solid var(--v-gold, #c4953a);
+  border-image: linear-gradient(
+    135deg,
+    var(--v-gold-dim, #9a7530),
+    var(--v-gold-light, #dbb668),
+    var(--v-gold, #c4953a)
+  ) 1;
+  background: var(--v-gold-08, rgba(196, 149, 58, 0.08));
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-weight: 700;
+  font-size: var(--v-font-body, 14px);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--v-gold-light, #dbb668);
+  text-shadow: 0 0 10px var(--v-gold-30, rgba(196, 149, 58, 0.3)),
+               0 1px 2px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  transition: background var(--v-transition, 0.2s ease),
+              box-shadow var(--v-transition, 0.2s ease);
+}
+
+.hub-cta:active {
+  background: var(--v-gold-15, rgba(196, 149, 58, 0.15));
+  box-shadow: var(--v-shadow-gold, 0 0 12px rgba(196, 149, 58, 0.25));
+}
+
+
+/* ----------------------------------------------------------
+   4. HP Warning Strip
+   ---------------------------------------------------------- */
+.hub-alert {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-sm, 4px);
+  height: 24px;
+  padding: 0 var(--v-space-md, 8px);
+  background: rgba(183, 28, 28, 0.1);
+  border: 1px solid rgba(183, 28, 28, 0.25);
+  border-radius: var(--v-radius-sm, 6px);
+  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-danger-light, #e08080);
+}
+
+
+/* ----------------------------------------------------------
+   5. Party Grid  —  2-column ally cards
+   ---------------------------------------------------------- */
+.hub-party {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-sm, 4px);
+}
+
+/* -- individual ally card --------------------------------- */
+.hub-ally {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-sm, 4px);
+  padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
+  background: var(--v-bg-card, #2e2520);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  min-width: 0;
+}
+
+.hub-ally.player {
+  border-color: var(--v-gold-40, rgba(196, 149, 58, 0.4));
+}
+
+/* emoji icon */
+.hub-ally .ha-ico {
+  font-size: var(--v-font-xl, 16px);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* name + bars wrapper */
+.hub-ally .ha-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+/* name — 9px, truncated */
+.hub-ally .ha-name {
+  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-size: 9px;
+  color: var(--v-text-dim, #a09484);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* mini HP/MP bar */
+.hub-ally .ha-bar {
+  height: 3px;
+  border-radius: var(--v-radius-xs, 4px);
+  background: var(--v-bar-track, #1e1810);
+  overflow: hidden;
+}
+
+.hub-ally .ha-bar .fill {
+  height: 100%;
+  border-radius: var(--v-radius-xs, 4px);
+  transition: width var(--v-transition-base, 0.3s ease);
+}
+
+.hub-ally .ha-bar .fill.hp {
+  background: var(--v-hp-high, linear-gradient(90deg, #2d8f2d, #4caf50));
+}
+
+.hub-ally .ha-bar .fill.mp {
+  background: var(--v-mp, linear-gradient(90deg, #1565c0, #42a5f5));
+}
+
+/* empty ally slot */
+.hub-ally--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
+  background: transparent;
+  border: 1px dashed var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-size: 9px;
+  color: var(--v-text-muted, #7a6a5a);
+  min-height: 32px;
+}
+
+
+/* ----------------------------------------------------------
+   6. Ornamental Divider  —  lines + gem
+   ---------------------------------------------------------- */
+.hub-div {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-xs, 2px) 0;
+  opacity: 0.2;
+}
+
+.hub-div::before,
+.hub-div::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--v-gold, #c4953a);
+  max-width: 40px;
+}
+
+.hub-div .gem {
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-gold, #c4953a);
+  line-height: 1;
+}
+
+
+/* ----------------------------------------------------------
+   7. Location Grid  —  4-column icon tiles
+   ---------------------------------------------------------- */
+.hub-loc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  padding: 0 var(--v-space-md-lg, 10px);
+}
+
+/* individual location cell */
+.hub-loc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--v-space-xs, 2px);
+  padding: var(--v-space-md, 8px);
+  background: var(--v-bg-card, #2e2520);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--v-transition, 0.2s ease),
+              border-color var(--v-transition, 0.2s ease);
+}
+
+.hub-loc:active {
+  background: var(--v-gold-10, rgba(196, 149, 58, 0.1));
+  border-color: var(--v-gold-40, rgba(196, 149, 58, 0.4));
+}
+
+/* location emoji icon */
+.hub-loc .hl-ico {
+  font-size: 22px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* location label */
+.hub-loc .hl-nm {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: 8px;
+  color: var(--v-text-dim, #a09484);
+  text-align: center;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* notification badge */
+.hub-loc .hl-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--v-danger, #e74c3c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+
+/* ----------------------------------------------------------
+   8. Quest Mini Tracker
+   ---------------------------------------------------------- */
+.hub-quest {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
+  border: 1px solid var(--v-gold-10, rgba(196, 149, 58, 0.1));
+  border-radius: var(--v-radius-sm, 6px);
+  background: var(--v-gold-04, rgba(196, 149, 58, 0.04));
+  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-size: var(--v-font-sm, 11px);
+  color: var(--v-text, #d4c8b0);
+  min-height: 28px;
+}
+
+.hub-quest .hq-ico {
+  font-size: var(--v-font-body, 14px);
+  flex-shrink: 0;
+}
+
+.hub-quest .hq-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hub-quest .hq-status {
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-gold-dim, #9a7530);
+  flex-shrink: 0;
+}
+
+
+/* ----------------------------------------------------------
+   9. Progress Badges  —  3-column horizontal strip
+   ---------------------------------------------------------- */
+.hub-prog {
+  display: flex;
+  gap: var(--v-space-sm, 4px);
+}
+
+.hub-prog-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: var(--v-space-sm, 4px) var(--v-space-xs, 2px);
+  background: var(--v-bg-card, #2e2520);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+}
+
+.hub-prog-card .hp-val {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-body, 14px);
+  font-weight: 700;
+  color: var(--v-text-bright, #e8dcc8);
+  line-height: 1;
+}
+
+.hub-prog-card .hp-lbl {
+  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-size: 8px;
+  color: var(--v-text-muted, #7a6a5a);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+
+/* ----------------------------------------------------------
+   10. DM Narration Tip
+   ---------------------------------------------------------- */
+.hub-dm {
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+  border-left: 2px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px) 0;
+  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-dim, #a09484);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+
+/* ----------------------------------------------------------
+   11. Immersive Toggle
+   ---------------------------------------------------------- */
+.hub-imm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--v-space-sm, 4px) 0;
+  background: none;
+  border: none;
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-gold-dim, #9a7530);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--v-transition, 0.2s ease);
+}
+
+.hub-imm:active {
+  opacity: 1;
+}
+
+
+/* ----------------------------------------------------------
+   12. Bottom Tab Bar
+   ---------------------------------------------------------- */
+.hub-tabs {
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  /* HARDCODED: #1a1510 — deeper than --v-bg for visual separation */
+  background: #1a1510;
+  border-top: 1px solid var(--v-border, #4a3828);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* individual tab */
+.hub-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-xs, 2px);
+  min-width: 44px;
+  padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: opacity var(--v-transition, 0.2s ease);
+}
+
+/* tab emoji icon */
+.hub-tab .ht-ico {
+  font-size: var(--v-font-xl, 16px);
+  line-height: 1;
+  opacity: 0.4;
+  transition: opacity var(--v-transition, 0.2s ease);
+}
+
+/* tab label */
+.hub-tab .ht-nm {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: 7px;
+  color: var(--v-text-dim, #a09484);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1;
+  transition: color var(--v-transition, 0.2s ease);
+}
+
+/* active tab */
+.hub-tab.active .ht-ico {
+  opacity: 1;
+}
+
+.hub-tab.active .ht-nm {
+  color: var(--v-gold, #c4953a);
+}
+
+/* notification dot */
+.hub-tab .ht-dot {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--v-danger, #e74c3c);
+}
+
+
+/* ----------------------------------------------------------
+   13. Hub Screen Container
+   ---------------------------------------------------------- */
+.hub-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-sm, 4px) 0;
+}
+
+
+/* ----------------------------------------------------------
+   14. Section Label  —  compact header above groups
+   ---------------------------------------------------------- */
+.hub-section-label {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--v-text-muted, #7a6a5a);
+  padding: 0 var(--v-space-md, 8px);
+}
+
+
+/* ----------------------------------------------------------
+   15. Dead Ally Indicator
+   ---------------------------------------------------------- */
+.hub-ally .ha-dead {
+  font-size: 9px;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+.hub-ally.dead {
+  opacity: 0.5;
+}
+
+
+/* ----------------------------------------------------------
+   16. DM Tip Icon
+   ---------------------------------------------------------- */
+.hub-dm-ico {
+  margin-right: var(--v-space-xs, 2px);
+}
+
+
+/* ----------------------------------------------------------
+   Performance & Motion  —  disable animations on lite devices
+   ---------------------------------------------------------- */
+body.perf-lite .hub-cta,
+body.perf-lite .hub-loc,
+body.perf-lite .hub-tab,
+body.perf-lite .hub-imm,
+body.perf-lite .hub-ally .ha-bar .fill,
+body.perf-lite .hub-bars .bar-fill {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub-cta,
+  .hub-loc,
+  .hub-tab,
+  .hub-imm,
+  .hub-ally .ha-bar .fill,
+  .hub-bars .bar-fill {
+    transition: none;
+  }
+}
