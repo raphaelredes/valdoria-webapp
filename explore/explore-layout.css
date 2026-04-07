@@ -431,7 +431,7 @@ body {
     border-color: var(--v-border, #4a3828);
     color: var(--v-text-dim, #a09484);
 }
-.hex-nav-hidden { display: none !important; }
+/* hex-nav is always visible — overlays cover it naturally (higher z-index) */
 body.perf-lite .hex-dir { transition: none; }
 
 /* --- Action Buttons (Navigate gradient style) --- */
