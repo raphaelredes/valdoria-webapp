@@ -82,6 +82,13 @@ function _buildActionsGrid(popup) {
             slot.t,
             slot.primary
         );
+        // Wire click to action dispatch
+        (function(actionType) {
+            btn.addEventListener('click', function() {
+                toggleActionsPopup();
+                _dispatchAction(actionType);
+            });
+        })(slot.t);
         grid.appendChild(btn);
     });
 
@@ -103,6 +110,13 @@ function _buildActionsGrid(popup) {
                     openCombatLog();
                 }
             });
+        } else {
+            (function(actionType) {
+                btn.addEventListener('click', function() {
+                    toggleActionsPopup();
+                    _dispatchAction(actionType);
+                });
+            })(def.t);
         }
 
         grid.appendChild(btn);
@@ -148,6 +162,61 @@ function _makeActBtn(ico, label, chance, actType, primary) {
     }
 
     return btn;
+}
+
+/* ── Action dispatch ─────────────────────────────────────── */
+
+/**
+ * Dispatches a combat action from the popup buttons.
+ * Mirrors the logic in bindActions (combat-ui.js) but for .ap-btn elements.
+ */
+function _dispatchAction(actType) {
+    if (typeof _actionSent !== 'undefined' && _actionSent) return;
+    if (typeof _cinematicInProgress !== 'undefined' && _cinematicInProgress) return;
+    if (typeof vHaptic !== 'undefined') vHaptic.select();
+
+    var s = (typeof currentState !== 'undefined') ? currentState : null;
+    if (!s) return;
+
+    var enemies = s.e || [];
+    var skills = (s.acts && s.acts.skills) ? s.acts.skills : [];
+    var items = (s.acts && s.acts.item_list) ? s.acts.item_list : [];
+    var allies = s.a || [];
+
+    console.info('[COMBAT:POPUP] action=%s enemies=%d skills=%d items=%d', actType, enemies.length, skills.length, items.length);
+
+    switch (actType) {
+        case 'attack':
+            if (enemies.length > 1) showTargetPicker(enemies, 'attack');
+            else sendAction({type: 'attack', target: 0});
+            break;
+        case 'skill':
+            if (skills.length === 1) {
+                if (enemies.length > 1) showTargetPicker(enemies, 'skill', skills[0].id);
+                else sendAction({type: 'skill', skill_id: skills[0].id, target: 0});
+            } else if (skills.length > 1) {
+                showSkillPicker(skills, enemies, 'skill');
+            } else {
+                vToast('Sem recurso suficiente para habilidades', 'warn');
+            }
+            break;
+        case 'item':
+            if (items.length > 0) showItemPicker(items, enemies, allies);
+            else vToast('Nenhum item utilizável em combate', 'warn');
+            break;
+        case 'flee':
+            sendAction({type: 'flee'});
+            break;
+        case 'dodge':
+            sendAction({type: 'dodge'});
+            break;
+        case 'disengage':
+            sendAction({type: 'disengage'});
+            break;
+        case 'pass':
+            sendAction({type: 'pass'});
+            break;
+    }
 }
 
 /* ── Outside-click dismissal ─────────────────────────────── */
