@@ -127,4 +127,46 @@ window._tickAmbientFlavor = function() {
       showTerrainToast(text, 'flavor');
     }
   }
+
+  /* Biome threat profile: warn about biome-specific dangers */
+  if (!window._threatProfileShown) window._threatProfileShown = {};
+  var biome = S.biome || 'forest';
+  if (!window._threatProfileShown[biome] && S.visited && S.visited.size >= 3) {
+    window._threatProfileShown[biome] = true;
+    var threats = _BIOME_THREATS[biome];
+    if (threats && typeof showTerrainToast === 'function') {
+      showTerrainToast(threats, 'warn');
+    }
+  }
+
+  /* Chain clue hint: when player has collected clues, hint at connections */
+  if (S.chainClues && S.chainClues.size >= 2) {
+    if (!window._chainHintShown) window._chainHintShown = 0;
+    if (S.chainClues.size > window._chainHintShown) {
+      window._chainHintShown = S.chainClues.size;
+      var clueHints = [
+        'As pistas comecam a formar um padrao...',
+        'Voce sente que essas descobertas estao conectadas.',
+        'Uma imagem maior se revela a cada pista encontrada.',
+        'O quebra-cabeca esta quase completo...'
+      ];
+      var idx = Math.min(S.chainClues.size - 2, clueHints.length - 1);
+      if (typeof showTerrainToast === 'function') {
+        showTerrainToast('\uD83D\uDD17 ' + clueHints[idx], 'flavor');
+      }
+    }
+  }
+};
+
+/* Biome threat profiles — first-time warnings per biome */
+var _BIOME_THREATS = {
+  forest: '\u26A0 Cuidado com aranhas gigantes e emboscadas entre as arvores.',
+  plains: '\u26A0 Terreno aberto — sem cobertura contra predadores.',
+  swamp: '\u26A0 O pantano e traicoeiro. Cuidado com areias movedicas e veneno.',
+  cave: '\u26A0 Escuridao total adiante. Sem tocha, voce esta cego.',
+  desert: '\u26A0 Calor extremo. Leve agua e cuidado com tempestades de areia.',
+  mountain: '\u26A0 Altitude perigosa. Quedas de rocha sao comuns.',
+  snow: '\u26A0 Frio congelante. Hipotermia e uma ameaca real.',
+  volcanic: '\u26A0 Terreno vulcanico instavel. Gases toxicos e lava.',
+  graveyard: '\u26A0 Mortos-vivos espreitam. Nao baixe a guarda.'
 };
