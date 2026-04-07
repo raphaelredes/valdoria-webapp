@@ -1183,6 +1183,8 @@
   .v-err-msg {
     color: var(--v-text, #d4c8b0);
     font-size: var(--v-font-body, 14px);
+    white-space: pre-line;
+    text-align: left;
     margin-bottom: var(--v-space-sm, 4px);
     line-height: 1.5;
   }
