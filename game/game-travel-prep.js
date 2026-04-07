@@ -121,7 +121,7 @@
     h += '<div class="prep-supply-item">';
     h += '<span class="prep-supply-icon">\ud83e\ude99</span>';
     h += '<span class="prep-supply-name">Ouro</span>';
-    h += '<span class="prep-supply-qty v-popup-gold">' + d.gold + ' PO</span>';
+    h += '<span class="prep-supply-qty v-popup-gold">' + d.gold + ' Valdoritas</span>';
     h += '</div>';
 
     h += '</div>'; /* close prep-supply-grid */
@@ -139,11 +139,11 @@
         var lbl = it.name;
         if (it.qty && it.qty > 1) lbl += ' x' + it.qty;
         h += '<span class="v-popup-label">' + lbl + '</span>';
-        h += '<span class="v-popup-value v-popup-gold">' + it.cost + ' PO</span>';
+        h += '<span class="v-popup-value v-popup-gold">' + it.cost + ' Valdoritas</span>';
         h += '</div>';
       }
       if (qe.shortfall > 0) {
-        h += '<div class="v-popup-tip">Faltam ' + qe.shortfall + ' PO para comprar tudo</div>';
+        h += '<div class="v-popup-tip">Faltam ' + qe.shortfall + ' Valdoritas para comprar tudo</div>';
       }
     }
 
@@ -249,7 +249,7 @@
     /* Buy all button */
     if (qe.available && qe.affordable && items.length > 1) {
       actions.push({
-        label: 'Comprar Tudo (' + (qe.cost || 0) + ' PO)',
+        label: 'Comprar Tudo (' + (qe.cost || 0) + ' Valdoritas)',
         action: 'action_quick_equip',
         cls: 'v-popup-btn v-popup-btn--equip'
       });

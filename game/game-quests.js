@@ -55,7 +55,7 @@ var rewBlock=document.createElement('div');rewBlock.className='quest-turnin-rewa
 +'<span class="quest-turnin-reward-lbl">XP</span>';rewItems.appendChild(xpEl);delay+=0.2;}
 if(data.gold){var goldEl=document.createElement('div');goldEl.className='quest-turnin-reward-item quest-turnin-reveal';goldEl.style.animationDelay=delay+'s';goldEl.innerHTML='<span class="quest-turnin-reward-icon">\ud83d\udcb0</span>'
 +'<span class="quest-turnin-reward-val">+'+data.gold+'</span>'
-+'<span class="quest-turnin-reward-lbl">GP</span>';rewItems.appendChild(goldEl);delay+=0.2;}
++'<span class="quest-turnin-reward-lbl">Valdoritas</span>';rewItems.appendChild(goldEl);delay+=0.2;}
 if(data.items&&data.items.length>0){for(var ii=0;ii<data.items.length;ii++){var itemEl=document.createElement('div');itemEl.className='quest-turnin-reward-item quest-turnin-reveal';itemEl.style.animationDelay=delay+'s';itemEl.innerHTML='<span class="quest-turnin-reward-icon">\ud83c\udf81</span>'
 +'<span class="quest-turnin-reward-val">'+vEsc(data.items[ii])+'</span>';rewItems.appendChild(itemEl);delay+=0.2;}}
 rewBlock.appendChild(rewItems);wrap.appendChild(rewBlock);if(data.leveled){var lvl=document.createElement('div');lvl.className='quest-turnin-levelup quest-turnin-reveal';lvl.style.animationDelay=(delay+0.3)+'s';lvl.innerHTML='\ud83c\udf89 <b>LEVEL UP!</b> N\u00edvel '+data.level;wrap.appendChild(lvl);}
