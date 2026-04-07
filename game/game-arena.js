@@ -128,37 +128,59 @@ function _renderArenaHpWarning(el, d) {
     var frag = document.createDocumentFragment();
     var wrap = _div('arena-hp-warning');
 
-    /* Warning icon */
-    var ico = _div('arena-hp-icon');
-    ico.textContent = '\u26A0\uFE0F';
-    wrap.appendChild(ico);
+    /* Status panel: heart + bar + text */
+    var panel = _div('arena-hp-status-panel');
 
-    /* HP bar */
+    var heartIcon = document.createElement('div');
+    heartIcon.textContent = '\u2764\uFE0F';
+    heartIcon.style.fontSize = '36px';
+    heartIcon.style.lineHeight = '1';
+    panel.appendChild(heartIcon);
+
     var barWrap = _div('arena-hp-bar-wrap');
     var bar = _div('arena-hp-bar');
     var fill = _div('arena-hp-bar-fill ' + barClass);
     fill.style.width = Math.max(2, pct) + '%';
     bar.appendChild(fill);
     barWrap.appendChild(bar);
+    panel.appendChild(barWrap);
+
     var hpText = _div('arena-hp-text');
-    hpText.textContent = '\u2764\uFE0F HP: ' + (d.hp || 0) + '/' + (d.max_hp || 0) + ' (' + pct + '%)';
-    barWrap.appendChild(hpText);
-    wrap.appendChild(barWrap);
+    hpText.textContent = (d.hp || 0) + '/' + (d.max_hp || 0) + ' (' + pct + '%)';
+    panel.appendChild(hpText);
+
+    wrap.appendChild(panel);
 
     /* Message */
     var msg = _div('arena-hp-msg');
     msg.textContent = 'Entrar na arena com pouca vida \u00e9 arriscado! Considere se recuperar antes do combate.';
     wrap.appendChild(msg);
 
-    /* Buttons */
-    var actions = _div('arena-actions');
+    /* Choice cards */
+    var choices = _div('arena-hp-choices');
+
     if (d.has_potion) {
-        actions.appendChild(_makeBtn('\uD83E\uDDEA Usar Po\u00e7\u00e3o de Cura', 'action_use_potion_heal', ''));
+        var potionSub = d.potion_count ? d.potion_count + ' dispon\u00edvel(is)' : 'Recuperar HP';
+        choices.appendChild(_makeChoiceCard(
+            '\uD83E\uDDEA', 'Usar Po\u00e7\u00e3o de Cura', potionSub,
+            'action_use_potion_heal', 'choice-potion'
+        ));
     }
-    actions.appendChild(_makeBtn('\uD83C\uDFE8 Ir para Estalagem', 'open_inn', ''));
-    actions.appendChild(_makeBtn('\u2694\uFE0F Lutar Mesmo Assim!', 'arena_force_fight', 'arena-btn--warning'));
-    actions.appendChild(_makeBtn('\u2B05\uFE0F Voltar', 'arena_main', 'arena-btn--back'));
-    wrap.appendChild(actions);
+
+    choices.appendChild(_makeChoiceCard(
+        '\uD83C\uDFE8', 'Ir para Estalagem', 'Descansar e recuperar HP',
+        'open_inn', 'choice-inn'
+    ));
+
+    choices.appendChild(_makeChoiceCard(
+        '\u2694\uFE0F', 'Lutar Mesmo Assim!', 'Alto risco - HP baixo',
+        'arena_force_fight', 'choice-fight risky'
+    ));
+
+    wrap.appendChild(choices);
+
+    /* Back button */
+    wrap.appendChild(_makeBtn('\u2B05\uFE0F Voltar', 'arena_main', 'arena-btn--back'));
 
     frag.appendChild(wrap);
     el.appendChild(frag);
@@ -173,17 +195,18 @@ function _renderArenaResult(el, d) {
     var frag = document.createDocumentFragment();
     var wrap = _div('arena-result');
 
-    /* Header */
-    var header = _div('arena-result-header ' + (victory ? 'victory' : 'defeat'));
-    header.textContent = victory ? '\uD83C\uDFC6 VIT\u00d3RIA!' : '\uD83D\uDC80 DERROTA';
-    wrap.appendChild(header);
+    /* Crown — standalone emoji for independent CSS animation */
+    var crown = _div('arena-result-crown');
+    crown.textContent = victory ? '\uD83C\uDFC6' : '\uD83D\uDC80';
+    wrap.appendChild(crown);
 
-    /* Flavor */
-    if (d.flavor) {
-        var flav = _div('arena-result-flavor');
-        flav.textContent = d.flavor;
-        wrap.appendChild(flav);
-    }
+    /* Header with victory/defeat class — text only, no emoji */
+    var header = _div('arena-result-header ' + (victory ? 'victory' : 'defeat'));
+    var titleSpan = document.createElement('span');
+    titleSpan.className = 'arena-result-title';
+    titleSpan.textContent = victory ? 'VIT\u00d3RIA!' : 'DERROTA';
+    header.appendChild(titleSpan);
+    wrap.appendChild(header);
 
     /* Opponent */
     if (ch && ch.name) {
@@ -193,34 +216,48 @@ function _renderArenaResult(el, d) {
         wrap.appendChild(op);
     }
 
+    /* Flavor */
+    if (d.flavor) {
+        var flav = _div('arena-result-flavor');
+        flav.textContent = d.flavor;
+        wrap.appendChild(flav);
+    }
+
     /* Rewards (victory only) */
     if (victory) {
         var list = _div('arena-rewards-list');
 
         /* Gold */
-        var goldItem = _div('arena-reward-item');
-        var goldBonus = rewards.streak_bonus_gold > 0 ? ' (+' + rewards.streak_bonus_gold + ' b\u00f4nus)' : '';
-        goldItem.innerHTML = _arenaCoin() + ' +' + _esc(String(rewards.gold || 0)) + ' Valdoritas' /* noqa: safe — server data only */
-            + (goldBonus ? ' <span class="bonus">' + _esc(goldBonus) + '</span>' : '');
-        list.appendChild(goldItem);
+        var goldCard = _div('arena-reward-card');
+        var goldText = _arenaCoin() + ' +' + _esc(String(rewards.gold || 0)) + ' Valdoritas';
+        if (rewards.streak_bonus_gold > 0) {
+            goldText += ' <span class="arena-reward-bonus">+' + _esc(String(rewards.streak_bonus_gold)) + ' b\u00f4nus</span>';
+        }
+        goldCard.innerHTML = goldText; /* noqa: safe — server data only */
+        list.appendChild(goldCard);
 
         /* XP */
-        var xpItem = _div('arena-reward-item');
-        var xpBonus = rewards.streak_bonus_xp > 0 ? ' (+' + rewards.streak_bonus_xp + ' b\u00f4nus)' : '';
-        xpItem.textContent = '\u2728 +' + (rewards.xp || 0) + ' XP' + xpBonus;
-        list.appendChild(xpItem);
+        var xpCard = _div('arena-reward-card');
+        xpCard.textContent = '\u2728 +' + (rewards.xp || 0) + ' XP';
+        if (rewards.streak_bonus_xp > 0) {
+            var xpBonus = document.createElement('span');
+            xpBonus.className = 'arena-reward-bonus';
+            xpBonus.textContent = '+' + rewards.streak_bonus_xp + ' b\u00f4nus';
+            xpCard.appendChild(xpBonus);
+        }
+        list.appendChild(xpCard);
 
         /* Streak */
         if (stats.streak > 0) {
-            var streakItem = _div('arena-reward-item');
-            streakItem.textContent = '\uD83D\uDD25 Sequ\u00eancia: ' + stats.streak;
-            list.appendChild(streakItem);
+            var streakCard = _div('arena-reward-card streak');
+            streakCard.textContent = '\uD83D\uDD25 Sequ\u00eancia: ' + stats.streak;
+            list.appendChild(streakCard);
         }
 
         /* Daily wins */
-        var dailyItem = _div('arena-reward-item');
-        dailyItem.textContent = '\uD83D\uDCC5 Vit\u00f3rias hoje: ' + (stats.daily_wins || 0);
-        list.appendChild(dailyItem);
+        var dailyCard = _div('arena-reward-card');
+        dailyCard.textContent = '\uD83D\uDCC5 Vit\u00f3rias hoje: ' + (stats.daily_wins || 0);
+        list.appendChild(dailyCard);
 
         wrap.appendChild(list);
     }
@@ -356,6 +393,27 @@ function _makeBtn(text, cb, extraClass) {
         if (typeof doAction === 'function') doAction(cb);
     };
     return btn;
+}
+
+function _makeChoiceCard(icon, title, subtitle, cb, extraCls) {
+    var card = document.createElement('button');
+    card.className = 'arena-hp-choice' + (extraCls ? ' ' + extraCls : '');
+    var icoEl = _div('arena-hp-choice-icon');
+    icoEl.textContent = icon;
+    var textEl = _div('arena-hp-choice-text');
+    var titleEl = document.createElement('div');
+    titleEl.textContent = title;
+    var subEl = document.createElement('div');
+    subEl.textContent = subtitle;
+    textEl.appendChild(titleEl);
+    textEl.appendChild(subEl);
+    card.appendChild(icoEl);
+    card.appendChild(textEl);
+    card.addEventListener('click', function() {
+        if (typeof haptic === 'function') haptic('medium');
+        if (typeof doAction === 'function') doAction(cb);
+    });
+    return card;
 }
 
 function _esc(s) {
