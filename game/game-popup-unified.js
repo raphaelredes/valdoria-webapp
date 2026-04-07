@@ -153,6 +153,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Arena redesign
+    if (data.arena_screen && typeof renderArenaScreen === 'function') {
+        renderArenaScreen(el, data.arena_screen);
+        return el;
+    }
+
     // Image banner (if present)
     if (data.image_url) {
         var img = document.createElement('img');
