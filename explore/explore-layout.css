@@ -349,20 +349,32 @@ body {
 .panel-location { font-size:var(--v-font-sm); color:var(--v-text-dim,#a09484); margin-left:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px; }
 
 
-/* --- Hex Directional Navigation Buttons --- */
+/* --- Hex Directional Navigation Buttons (hexagonal layout) --- */
 .hex-nav {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--v-space-xs, 2px) var(--v-space-sm, 4px);
-    max-width: 260px;
+    position: relative;
+    width: 240px;
+    height: 120px;
     margin: 0 auto var(--v-space-sm, 4px);
-    padding: 0 var(--v-space-sm, 4px);
 }
-/* Row 2 (W, E) offset inward for honeycomb feel */
-.hex-dir[data-dir="2"],
-.hex-dir[data-dir="3"] {
-    margin: calc(var(--v-space-xs, 2px) * -1) 0;
+/* Center player dot */
+.hex-nav::after {
+    content: '\u25CF';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--v-gold, #c4953a);
+    font-size: 14px;
+    opacity: 0.6;
+    pointer-events: none;
 }
+/* Hexagonal absolute positions */
+.hex-dir[data-dir="0"] { position: absolute; top: 0; left: 12px; width: 100px; }       /* NW */
+.hex-dir[data-dir="1"] { position: absolute; top: 0; right: 12px; width: 100px; }      /* NE */
+.hex-dir[data-dir="2"] { position: absolute; top: 42px; left: 0; width: 90px; }        /* W */
+.hex-dir[data-dir="3"] { position: absolute; top: 42px; right: 0; width: 90px; }       /* E */
+.hex-dir[data-dir="4"] { position: absolute; bottom: 0; left: 12px; width: 100px; }    /* SW */
+.hex-dir[data-dir="5"] { position: absolute; bottom: 0; right: 12px; width: 100px; }   /* SE */
 .hex-dir {
     display: flex;
     align-items: center;
