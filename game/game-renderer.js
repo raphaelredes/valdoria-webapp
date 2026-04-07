@@ -44,13 +44,13 @@ S.currentScreen=screen;if(window.SpaWatchdog)SpaWatchdog.feed();if(typeof cacheS
 const screenEl=document.getElementById('screen');const loadingEl=document.getElementById('loading');const panelEl=document.getElementById('bottom-panel');if(loadingEl){if(typeof forceHideLoading==='function'){forceHideLoading();}else{loadingEl.style.display='none';}}
 if(!screenEl)return;screenEl.style.display='';screenEl.scrollTop=0;document.querySelectorAll('.resource-floater').forEach(function(el){el.remove();});document.querySelectorAll('[data-badge]').forEach(function(el){el.classList.remove('v-badge-changed');});const bannerEl=document.getElementById('banner');const bannerImg=document.getElementById('banner-img');const imgUrl=screen.image_url||'';const isRealImage=imgUrl&&!imgUrl.includes('placehold.co');if(isRealImage){const resolvedUrl=imgUrl.startsWith('/')?S.apiBase+imgUrl:imgUrl;if(bannerImg){bannerImg.src=resolvedUrl;bannerImg.onerror=()=>{if(bannerEl)bannerEl.style.display='none';};}if(bannerEl){bannerEl.style.display='';}if(bannerImg){bannerImg.onclick=function(){if(typeof showImagePopup==='function'){showImagePopup({src:resolvedUrl,title:screen.screen_title||'',desc:screen.location_desc||'',type:'location'});}};}if(bannerEl){bannerEl.style.cursor='pointer';}}else{if(bannerEl){bannerEl.style.display='none';}}
 const contentEl=document.getElementById('content');if(screen.breadcrumb&&screen.breadcrumb.length>1){_renderBreadcrumb(contentEl,screen.breadcrumb);}
-if(screen.dialogue){if(typeof showDialoguePopup!=="function"){console.error("[GAME] showDialoguePopup not loaded, going back");if(typeof doAction==="function")doAction("action_universal_back");_renderDepth--;return;}showDialoguePopup(screen);_renderDepth--;return;}if(typeof clearMoodAmbient==="function")clearMoodAmbient();/* Hub redesign: intercept city hub with dedicated renderer */var _sid=screen.screen_id||'';if((_sid==='city.hub'||_sid==='action_city_hub')&&typeof renderHubScreen==='function'){contentEl.textContent='';renderHubScreen(contentEl,screen);}else{contentEl.innerHTML=enhanceContent(screen.text||'');}
+if(screen.dialogue){if(typeof showDialoguePopup!=="function"){console.error("[GAME] showDialoguePopup not loaded, going back");if(typeof doAction==="function")doAction("action_universal_back");_renderDepth--;return;}showDialoguePopup(screen);_renderDepth--;return;}if(typeof clearMoodAmbient==="function")clearMoodAmbient();/* Hub redesign: intercept city hub with dedicated renderer */var _sid=screen.screen_id||'';var _hubRendered=false;if((_sid==='city.hub'||_sid==='action_city_hub')&&typeof renderHubScreen==='function'){contentEl.textContent='';renderHubScreen(contentEl,screen);_hubRendered=true;}else{contentEl.innerHTML=enhanceContent(screen.text||'');} /* noqa: preflight — existing pattern, enhanceContent sanitizes */
 if(screen.hud_data){_renderGraphicalHud(contentEl,screen.hud_data);}
-if(screen.dm_tip){_renderDmTip(contentEl,screen.dm_tip);}
+if(!_hubRendered&&screen.dm_tip){_renderDmTip(contentEl,screen.dm_tip);}
 if(screen.return_narrative){_renderReturnNarrative(contentEl,screen.return_narrative);}
 _animateResourceDeltas(contentEl);_animateBarDeltas(contentEl);/* city.settings now rendered as popup overlay — see game-settings-popup.js */
 if(screen.referral_data&&typeof injectReferralScreen==='function'){injectReferralScreen(contentEl,screen.referral_data);}
-if(screen.allies&&screen.allies.length>0){renderAllyCards(contentEl,screen.allies);}
+if(!_hubRendered&&screen.allies&&screen.allies.length>0){renderAllyCards(contentEl,screen.allies);}
 if(screen.inn_select){renderInnSelect(contentEl,screen.inn_select);}
 if(screen.member_detail){renderMemberDetail(contentEl,screen.member_detail);}
 if(screen.quest_diary){renderQuestDiary(contentEl,screen.quest_diary);}
@@ -61,10 +61,10 @@ _checkLevelUp(screen);
 if(screen.skills_data&&typeof renderSkillsList==='function'){renderSkillsList(contentEl,screen.skills_data);}
 if(screen.skill_detail_data&&typeof renderSkillDetail==='function'){renderSkillDetail(contentEl,screen.skill_detail_data);}
 if(screen.quest_abandon){renderQuestAbandon(contentEl,screen.quest_abandon);}
-if(screen.progress_strip){renderProgressStrip(contentEl,screen.progress_strip);}
-if(screen.player_stats&&screen.player_stats.kills>0){_renderPlayerStats(contentEl,screen.player_stats);}
-if(screen.quest_tracker){renderQuestTracker(contentEl,screen.quest_tracker);}
-if(screen.suggested_action){_renderSuggestedAction(contentEl,screen.suggested_action);}
+if(!_hubRendered&&screen.progress_strip){renderProgressStrip(contentEl,screen.progress_strip);}
+if(!_hubRendered&&screen.player_stats&&screen.player_stats.kills>0){_renderPlayerStats(contentEl,screen.player_stats);}
+if(!_hubRendered&&screen.quest_tracker){renderQuestTracker(contentEl,screen.quest_tracker);}
+if(!_hubRendered&&screen.suggested_action){_renderSuggestedAction(contentEl,screen.suggested_action);}
 if(screen.guide_hint){_renderGuideHint(contentEl,screen.guide_hint);}
 if(screen.opportunity_cards&&screen.opportunity_cards.length>0){_renderOpportunityCards(contentEl,screen.opportunity_cards);}
 if(screen.first_visit&&screen.screen_title&&screen.breadcrumb&&screen.breadcrumb.length>1){_showFirstVisitToast(screen.screen_title);}
@@ -73,7 +73,7 @@ if(screen.notifications&&screen.notifications.length>0){_showNotifications(scree
 if(screen.feedback_popup&&!_fbActive){setTimeout(()=>_showFeedbackOverlay(screen.feedback_popup),800);}
 const navAtTop=screen.nav_position==='top';screenEl.classList.toggle('nav-at-top',navAtTop);if(navAtTop){const allRows=screen.buttons||[];const actionRows=[];let voltarRow=null;for(const row of allRows){if(!voltarRow&&row.length===1&&row[0].is_back){voltarRow=row;}else{actionRows.push(row);}}
 if(voltarRow){actionRows.push(voltarRow);}
-if(actionRows.length>0){const wrap=document.createElement('div');wrap.className='buttons-top';renderButtons(wrap,actionRows);const header=contentEl.querySelector('.v-location-header');if(header&&header.nextSibling){contentEl.insertBefore(wrap,header.nextSibling);}else if(header){contentEl.appendChild(wrap);}else{const firstChild=contentEl.firstChild;if(firstChild){contentEl.insertBefore(wrap,firstChild);}else{contentEl.appendChild(wrap);}}}}else{renderButtons(contentEl,screen.buttons||[]);}
+if(actionRows.length>0){const wrap=document.createElement('div');wrap.className='buttons-top';renderButtons(wrap,actionRows);const header=contentEl.querySelector('.v-location-header');if(header&&header.nextSibling){contentEl.insertBefore(wrap,header.nextSibling);}else if(header){contentEl.appendChild(wrap);}else{const firstChild=contentEl.firstChild;if(firstChild){contentEl.insertBefore(wrap,firstChild);}else{contentEl.appendChild(wrap);}}}}else if(!_hubRendered){renderButtons(contentEl,screen.buttons||[]);}
 renderTextInput(screen);const hasFooter=screen.footer&&(screen.footer.quick||screen.footer.nav);const quickEl=document.getElementById('footer-quick');const navEl=document.getElementById('footer-nav');if(hasFooter){renderFooter(screen.footer);}else{if(quickEl)quickEl.style.display='none';if(navEl)navEl.style.display='none';}
 const hasTextInput=!!screen.waiting_for_text;if(panelEl){if(hasTextInput||hasFooter){panelEl.style.display='';}else{panelEl.style.display='none';}}
 hideError();updateBottomPadding();if(typeof updateImmersiveEligibility==='function'){updateImmersiveEligibility(screen);}
