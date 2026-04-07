@@ -64,7 +64,12 @@ var _LOC_MAP = {
     'square':           { ico: '\u26F2',               nm: 'Pra\u00e7a' },
     'praca':            { ico: '\u26F2',               nm: 'Pra\u00e7a' },
     'bank':             { ico: '\uD83C\uDFE6',         nm: 'Banco' },
-    'banco':            { ico: '\uD83C\uDFE6',         nm: 'Banco' }
+    'banco':            { ico: '\uD83C\uDFE6',         nm: 'Banco' },
+    'action_quests':    { ico: '\uD83D\uDCDC',         nm: 'Miss\u00f5es' },
+    'quests':           { ico: '\uD83D\uDCDC',         nm: 'Miss\u00f5es' },
+    'daily_challenge':  { ico: '\uD83D\uDC3A',         nm: 'Desafio' },
+    'action_codex':     { ico: '\uD83D\uDCD6',         nm: 'Comp\u00eandio' },
+    'codex':            { ico: '\uD83D\uDCD6',         nm: 'Comp\u00eandio' }
 };
 
 /** Classifica um callback de botao como localizacao conhecida */
