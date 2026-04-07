@@ -124,7 +124,11 @@ _lastClickTime = _now;
 if(isMoving()){if(window._dbg)console.debug('[EXPLORE:CLICK] blocked_already_moving');return;}
 if(typeof isEventActive==='function'&&isEventActive()){if(window._dbg)console.debug('[EXPLORE:CLICK] blocked_event_active');return;}
 if(S.lockMovement||S.inEvent){if(window._dbg)console.debug('[EXPLORE:CLICK] blocked_lock=%s inEvent=%s',!!S.lockMovement,!!S.inEvent);return;}
-const cc=_canvasCoords(e);const hex=screenToHex(cc.x,cc.y,S.grid,ROWS,COLS);console.info('[EXPLORE:CLICK] handleCanvasClick canvas=(%.1f,%.1f) hex=(%d,%d) player=(%d,%d)',cc.x,cc.y,hex.col,hex.row,S.playerCol,S.playerRow);if(hex.col<0||hex.row<0){console.info('[EXPLORE:CLICK] rejected_invalid_hex col=%d row=%d',hex.col,hex.row);return;}
+const cc=_canvasCoords(e);const hex=screenToHex(cc.x,cc.y,S.grid,ROWS,COLS);if(hex.col<0||hex.row<0)return;
+/* Canvas click = visual tap feedback only. Movement uses hex-nav buttons. */
+spawnTapFeedback(hex.col,hex.row);scheduleRender();return;
+/* --- DISABLED: direct canvas movement (replaced by hex-nav buttons) --- */
+if(false){
 /* Ignore click on player's own hex */
 if(hex.col===S.playerCol&&hex.row===S.playerRow){console.info('[EXPLORE:CLICK] rejected_same_hex');return;}
 var _isAdj=isAdjacent(S.playerCol,S.playerRow,hex.col,hex.row);
@@ -164,6 +168,7 @@ spawnTapFeedback(hex.col,hex.row);
 // Navigation check (D&D 5e PHB Ch.8)
 if(typeof checkNavigation==="function"){var navResult=checkNavigation(hex.col,hex.row);if(navResult.veered){var veerTarget=getVeerTarget(S.playerCol,S.playerRow,hex.col,hex.row);hex.col=veerTarget[0];hex.row=veerTarget[1];}}
 console.info('[EXPLORE:CLICK] accepted_move from=(%d,%d) to=(%d,%d) tile=%s',S.playerCol,S.playerRow,hex.col,hex.row,tile);movePlayerCanvas(hex.col,hex.row);}
+} /* end if(false) — disabled canvas movement */
 /* ── Multi-hop path execution (A* pathfinding) ── */
 function executeMultiHopPath(path) {
   if (!path || path.length === 0) return;
@@ -195,7 +200,7 @@ startMovement(S.playerCol,S.playerRow,col,row);S.playerCol=col;S.playerRow=row;S
 if(difficult||S._weatherDifficultAll){if(ranger&&difficult){showTerrainToast('Terreno Natural','ranger');}else if(S._weatherDifficultAll&&!difficult){}else{showTerrainToast('Terreno Difícil','difficult');}}
 try{if(typeof tg!=='undefined'&&tg)tg.HapticFeedback.impactOccurred('light');else if(navigator.vibrate)navigator.vibrate(10);}catch(e){console.warn('[EXPLORE] haptic:',e);}
 scheduleRender();if(!_rafId){_rafId=requestAnimationFrame(renderLoop);}}
-function onMoveComplete(col,row){console.info('[EXPLORE:ARRIVE] onMoveComplete col=%d row=%d tile=%s step=%d hp=%s visited=%d',col,row,S.grid[row]&&S.grid[row][col]?S.grid[row][col]:'?',S._stepCount||0,typeof getCurrentHP==='function'?getCurrentHP():'?',S.visited?S.visited.size:0);revealFogAt(col,row,S.visibility,S.fogState,S.grid,true);_staticDirty=true;scheduleRender();if(!_rafId){_rafId=requestAnimationFrame(renderLoop);}
+function onMoveComplete(col,row){console.info('[EXPLORE:ARRIVE] onMoveComplete col=%d row=%d tile=%s step=%d hp=%s visited=%d',col,row,S.grid[row]&&S.grid[row][col]?S.grid[row][col]:'?',S._stepCount||0,typeof getCurrentHP==='function'?getCurrentHP():'?',S.visited?S.visited.size:0);revealFogAt(col,row,S.visibility,S.fogState,S.grid,true);_staticDirty=true;if(typeof updateHexNav==='function')updateHexNav();scheduleRender();if(!_rafId){_rafId=requestAnimationFrame(renderLoop);}
 updateStepCounter();if(typeof updateLocationInfo==='function')updateLocationInfo();tickConditions();if(typeof tickWatch==='function')tickWatch();if(typeof ageRumors==='function')ageRumors();if(typeof updateFogLevels==='function')updateFogLevels();if(typeof checkLandmarkHints==='function')checkLandmarkHints(col,row);if(typeof _checkForageActivity==='function')_checkForageActivity();if(typeof _checkWeatherEffects==='function')_checkWeatherEffects();updateAtmosphere();updateMinimap();try{if(typeof tg!=='undefined'&&tg)tg.HapticFeedback.selectionChanged();}catch(e){console.warn('[EXPLORE]',e);}
 if(typeof _resetExploreButton==='function')_resetExploreButton();if(typeof updatePaceUI==='function')updatePaceUI();scrollCanvasToPlayer(true);if(typeof _checkDangerMarkerCollision==='function'&&_checkDangerMarkerCollision())return;if(typeof _moveDangerMarkers==='function')_moveDangerMarkers();if(typeof isEventActive==='function'&&isEventActive()){console.info('[EXPLORE:ARRIVE] event_already_active, skipping triggers');logMoveEvent([{type:'move'}]);saveState();return;}
 if(col===S.exitCol&&row===S.exitRow){console.info('[EXPLORE:ARRIVE] reached_exit_portal col=%d row=%d',col,row);if(typeof flashScreen==='function')flashScreen('rgba(196,149,58,0.2)');spawnFloatingText(col,row,'portal...',CV_GOLD,'big');try{if(typeof tg!=='undefined'&&tg)tg.HapticFeedback.notificationOccurred('success');}catch(e){console.warn('[EXPLORE]',e);}
