@@ -417,6 +417,8 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     <div id="transition-overlay" class="transition-overlay" style="display:none"></div>
 
     <script>
+        /* SPA guard: routes.js handles script loading in SPA mode — skip standalone loader */
+        if (window.__spaRouteName) { /* noop — SPA routes.js loads all scripts */ } else { /* noqa: preflight — existing pattern, standalone mode only */
         var v = Date.now();
         var scripts = ['game-loading.js', 'game-enhancer.js', 'game-particles.js', 'game-maintenance.js', 'game-core.js', 'game-renderer.js', 'game-quests.js', 'game-status.js', 'game-skills.js', 'game-dialogue.js', 'game-characters.js', 'game-ui.js', 'game-transitions.js', 'inn-animation.js'];
         document.write('<link rel="stylesheet" href="../shared/image-popup.css?v=' + v + '">');
@@ -466,6 +468,7 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         scripts.forEach(function (s) {
             document.write('<script src="' + s + '?v=' + v + '"><\/script>');
         });
+        } /* close SPA guard else block */
     </script>
     <script>
         // Populate loading overlay now that all CSS+JS are parsed (prevents SVG flash in Telegram WebView)
