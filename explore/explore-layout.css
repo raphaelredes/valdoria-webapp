@@ -363,7 +363,7 @@ body {
 }
 /* Center player dot */
 .hex-nav::after {
-    content: '\u25CF';
+    content: '\25CF';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -425,6 +425,7 @@ body {
     border-color: var(--v-border, #4a3828);
     color: var(--v-text-dim, #a09484);
 }
+.hex-nav-hidden { display: none !important; }
 body.perf-lite .hex-dir { transition: none; }
 
 /* --- Action Buttons (Navigate gradient style) --- */
