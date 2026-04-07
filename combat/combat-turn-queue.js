@@ -47,7 +47,7 @@ function renderTurnQueue(turnOrder, activeIdx) {
     }
   }
 
-  return parts.join('');
+  return '<div class="turn-queue">' + parts.join('') + '</div>';
 }
 
 /**
