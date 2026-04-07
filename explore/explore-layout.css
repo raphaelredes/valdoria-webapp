@@ -266,6 +266,7 @@ body {
     background: var(--v-bg-deep, #1e1a16); /* HARDCODED: deepest dark, no token equivalent */
     background-image: linear-gradient(180deg, rgba(30,26,22,0.4) 0%, transparent 6%, transparent 94%, rgba(30,26,22,0.4) 100%);
     z-index: var(--ez-base);
+    padding-bottom: 136px; /* Reserve space for hex-nav controls (120px + 16px margin) */
 }
 #map-viewport::-webkit-scrollbar { display: none; }
 
@@ -352,17 +353,20 @@ body {
 /* --- Hex Directional Navigation Buttons (hexagonal layout, fixed bottom) --- */
 .hex-nav {
     position: fixed;
-    bottom: 8px;
+    bottom: 0;
     left: 0;
     right: 0;
-    width: 240px;
-    height: 120px;
+    width: 100%;
+    max-width: 430px;
+    height: 136px;
     margin: 0 auto;
     z-index: var(--v-z-base, 1);
-    max-width: 430px;
+    background: linear-gradient(0deg, var(--v-bg-deep, #1e1a16) 60%, transparent);
+    padding: 8px calc((100% - 240px) / 2) 8px;
+    box-sizing: border-box;
 }
 /* Center player dot */
-.hex-nav::after {
+.hex-nav-inner::after {
     content: '\25CF';
     position: absolute;
     top: 50%;
@@ -373,6 +377,8 @@ body {
     opacity: 0.6;
     pointer-events: none;
 }
+/* Inner container for hex buttons (centered 240px area) */
+.hex-nav-inner { position: relative; width: 240px; height: 120px; margin: 0 auto; }
 /* Hexagonal absolute positions */
 .hex-dir[data-dir="0"] { position: absolute; top: 0; left: 12px; width: 100px; }       /* NW */
 .hex-dir[data-dir="1"] { position: absolute; top: 0; right: 12px; width: 100px; }      /* NE */
