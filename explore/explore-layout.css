@@ -349,12 +349,17 @@ body {
 .panel-location { font-size:var(--v-font-sm); color:var(--v-text-dim,#a09484); margin-left:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px; }
 
 
-/* --- Hex Directional Navigation Buttons (hexagonal layout) --- */
+/* --- Hex Directional Navigation Buttons (hexagonal layout, fixed bottom) --- */
 .hex-nav {
-    position: relative;
+    position: fixed;
+    bottom: 8px;
+    left: 0;
+    right: 0;
     width: 240px;
     height: 120px;
-    margin: 0 auto var(--v-space-sm, 4px);
+    margin: 0 auto;
+    z-index: var(--v-z-base, 1);
+    max-width: 430px;
 }
 /* Center player dot */
 .hex-nav::after {
