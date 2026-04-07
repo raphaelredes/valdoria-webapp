@@ -146,6 +146,8 @@
      */
     function _showTitleScreen() {
         if (_titleShown) { console.log('[INTRO] _showTitleScreen skipped — already shown'); return false; }
+        /* Already tapped (early title from app.html was dismissed) — never create another */
+        if (window.__introTapped) { console.log('[INTRO] _showTitleScreen skipped — already tapped from app.html'); _titleShown = true; return false; }
         /* Game Walker bypass: skip title screen entirely for automated testing */
         if (window.__introTitleSkip) { console.log('[INTRO] _showTitleScreen skipped — __introTitleSkip=true (Walker)'); _titleShown = true; return false; }
 
