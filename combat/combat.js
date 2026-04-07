@@ -113,7 +113,7 @@ _timerInterval=setInterval(()=>{_timerRemaining=Math.max(0,(_timerDeadline-Date.
 if(_timerRemaining<=0){if(b){b.style.transition='none';b.style.width='0%';b.classList.add('critical');}text.textContent='\u23F3 Turno perdido';_showTimerExpiredToast();stopTimer();if(isApiMode&&api){if(_cinematicInProgress||_diceAnimating||_actionSent){_timerExpiredPending=true;}else{setTimeout(()=>{_pollForTimerResult();},1500);}}
 return;}
 text.textContent=Math.ceil(_timerRemaining)+'s';if(_timerRemaining<=5){if(b){b.classList.remove('warning');b.classList.add('critical');}text.classList.add('critical');}else if(_timerRemaining/_timerMax<=0.4){if(b)b.classList.add('warning');}
-if(_timerRemaining<=3&&_timerRemaining>0){sfxTimerTick();vHaptic.tap();}},1000);}
+if(_timerRemaining<=5&&_timerRemaining>0){sfxTimerTick();vHaptic.tap();}else if(Math.ceil(_timerRemaining)===10){sfxTimerTick();}},1000);}
 function stopTimer(){if(_timerInterval){clearInterval(_timerInterval);_timerInterval=null;}}
 function _renderTimer(seconds){var pct=_timerMax>0?Math.round((seconds/_timerMax)*100):100;return'<div class="timer-wrap"><div class="timer-header"><span class="timer-text">\u23F1 Tempo do turno</span><span class="timer-countdown" id="timerCountdown">'+Math.ceil(seconds)+'s</span></div><div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:'+pct+'%"></div></div></div>';}
 var _timerPausedAt=null;function pauseTimer(){if(_timerInterval){clearInterval(_timerInterval);_timerInterval=null;}_timerPausedAt=_timerRemaining;}
