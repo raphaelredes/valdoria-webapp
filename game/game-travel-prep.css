@@ -1,4 +1,4 @@
-/* Travel Prep — tabbed layout styles */
+/* Travel Prep — tabbed layout styles (premium redesign) */
 
 /* Container for the tabbed body inside the popup */
 .prep-tabbed-body {
@@ -8,6 +8,11 @@
 /* Override shared v-tabs spacing for compact popup context */
 .prep-tabs {
   margin-bottom: var(--v-space-md);
+}
+.prep-tabs .v-tab {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-sm, 11px);
+  letter-spacing: 0.5px;
 }
 
 /* ---- Warning badges (Status tab) ---- */
@@ -43,9 +48,10 @@
   align-items: center;
   gap: var(--v-space-sm);
   padding: var(--v-space-md);
-  background: var(--v-gold-06);
-  border: 1px solid var(--v-border, #4a3828);
+  background: linear-gradient(135deg, var(--v-bg-raised, #332a22), var(--v-bg-card, #2e2520));
+  border: 1px solid var(--v-gold-15, rgba(196,149,58,0.15));
   border-radius: var(--v-radius-sm, 6px);
+  box-shadow: inset 0 1px 0 var(--v-gold-06, rgba(196,149,58,0.06));
 }
 
 .prep-supply-icon {
@@ -97,6 +103,7 @@
   font-family: var(--v-font, 'MedievalSharp', serif);
   font-size: var(--v-font-base, 13px);
   color: var(--v-text, #d4c8b0);
+  transition: background var(--v-transition-fast, 0.15s) ease;
 }
 
 .prep-gear-row:nth-child(odd) {
@@ -104,8 +111,12 @@
 }
 
 .prep-gear-missing {
-  background: rgba(180, 60, 60, 0.1);
+  background: rgba(180, 60, 60, 0.08);
   border: 1px solid rgba(180, 60, 60, 0.2);
+}
+
+.prep-gear-missing .prep-gear-name {
+  color: rgba(224, 120, 120, 0.9);
 }
 
 .prep-gear-check {
