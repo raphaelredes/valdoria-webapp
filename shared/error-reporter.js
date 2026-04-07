@@ -15,7 +15,7 @@ hintEl.textContent='O servidor pode estar sobrecarregado. Tentaremos reconectar 
 etaFriendly=secsLeft>10?'menos de 1 minuto':'alguns segundos';}else{etaFriendly='1 a 2 minutos';}
 hintEl.textContent='O servidor est\u00e1 reconectando (estimativa: '+etaFriendly+'). Se persistir, feche e toque em \u201cRetomar Jornada\u201d novamente.';}
 else if(msg.indexOf('ess\u00e3o n\u00e3o iniciada')>=0)
-hintEl.textContent='Abra o jogo pelo bot do Telegram e selecione seu personagem.';else if(msg.indexOf('expirada')>=0||msg.indexOf('Sess\u00e3o')>=0)
+hintEl.textContent='Abra o jogo pelo bot do Telegram tocando em "Aventurar-se".';else if(msg.indexOf('expirada')>=0||msg.indexOf('Sess\u00e3o')>=0)
 hintEl.textContent='Feche o mini app e selecione seu personagem novamente.';else if(msg.indexOf('Personagem não encontrado')>=0)
 hintEl.textContent='Feche o mini app e selecione um personagem novamente.';else if(msg.indexOf('Resposta inválida')>=0)
 hintEl.textContent='Resposta inesperada do servidor. O erro foi registrado e será analisado.';else
