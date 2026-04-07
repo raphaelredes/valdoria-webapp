@@ -89,13 +89,51 @@
   background: var(--v-gold-dim, #8b6a28);
 }
 
+/* ── Mini HP bar under icon ── */
+.tl-hp {
+  width: 28px;
+  height: 3px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 1px;
+}
+.tl-hp-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width var(--v-transition-base, 0.3s) ease;
+}
+.tl-hp-high { background: linear-gradient(90deg, #3a7a2a, #5a8a3c); }
+.tl-hp-mid { background: linear-gradient(90deg, #a07020, #b88a2a); }
+.tl-hp-low { background: linear-gradient(90deg, #8a2a2a, #a63a2a); }
+
+/* ── Round badge ── */
+.tl-round {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  padding: 2px 6px;
+  background: rgba(196,149,58,0.1);
+  border: 1px solid rgba(196,149,58,0.2);
+  border-radius: 4px;
+  margin-right: 4px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
 /* ── Performance ── */
 body.perf-lite .tl-node.active .tl-ico {
   box-shadow: none;
+}
+body.perf-lite .tl-hp-fill {
+  transition: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tl-node.active .tl-ico {
     box-shadow: none;
+  }
+  .tl-hp-fill {
+    transition: none;
   }
 }

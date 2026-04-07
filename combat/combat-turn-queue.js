@@ -17,6 +17,11 @@ function renderTurnQueue(turnOrder, activeIdx) {
 
   var parts = ['<div class="turn-queue">'];
 
+  /* Round badge at the start */
+  if (typeof window._currentRound !== 'undefined') {
+    parts.push('<span class="tl-round">R' + window._currentRound + '</span>');
+  }
+
   for (var i = 0; i < turnOrder.length; i++) {
     var entry = turnOrder[i];
 
@@ -33,10 +38,19 @@ function renderTurnQueue(turnOrder, activeIdx) {
     /* Name: truncate to 6 chars */
     var name = escHtml((entry.n || '').substring(0, 6));
 
+    /* HP mini bar (if HP data available) */
+    var hpHtml = '';
+    if (entry.hp !== undefined && entry.mhp > 0) {
+      var hpPct = Math.max(0, Math.min(100, (entry.hp / entry.mhp) * 100));
+      var hpCls = hpPct > 60 ? 'tl-hp-high' : hpPct > 25 ? 'tl-hp-mid' : 'tl-hp-low';
+      hpHtml = '<div class="tl-hp"><div class="tl-hp-fill ' + hpCls + '" style="width:' + hpPct + '%"></div></div>';
+    }
+
     /* Node HTML */
     parts.push(
       '<div class="' + cls + '">' +
         '<div class="tl-ico">' + ico + '</div>' +
+        hpHtml +
         '<div class="tl-nm">' + name + '</div>' +
       '</div>'
     );
