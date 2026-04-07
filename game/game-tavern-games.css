@@ -7,7 +7,8 @@
 .tg-card{display:flex;flex-direction:column;gap:var(--v-space-sm,4px);padding:var(--v-space-sm,4px) 0}
 
 /* -- Opponent / Title Badge -- */
-.tg-opponent{display:flex;align-items:center;justify-content:center;gap:var(--v-space-sm,4px);padding:var(--v-space-sm,4px) var(--v-space-md,8px);background:rgba(74,56,40,0.25);border-radius:var(--v-radius-sm,6px);font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-base,13px);color:var(--v-text,#d4c8b0);text-align:center}
+.tg-opponent{display:flex;align-items:center;justify-content:center;gap:var(--v-space-sm,4px);padding:var(--v-space-md,8px) var(--v-space-lg,12px);background:linear-gradient(135deg,var(--v-bg-raised,#332a22),var(--v-bg-card,#2e2520));border-radius:var(--v-radius,10px);border:1px solid var(--v-gold-20,rgba(196,149,58,0.2));box-shadow:inset 0 1px 0 var(--v-gold-08,rgba(196,149,58,0.08)),0 2px 8px rgba(0,0,0,0.2);font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-body,14px);color:var(--v-text,#d4c8b0);text-align:center;position:relative}
+.tg-opponent::before{content:'';position:absolute;inset:2px;border:1px solid var(--v-gold-08,rgba(196,149,58,0.08));border-radius:calc(var(--v-radius,10px) - 2px);pointer-events:none}
 .tg-opponent-name{font-weight:700;color:var(--v-gold-light,#dbb668)}
 .tg-dc{font-size:var(--v-font-sm,12px);color:var(--v-text-dim,#a09484);margin-left:var(--v-space-sm,4px)}
 
@@ -16,7 +17,11 @@
 .tg-checks--single{grid-template-columns:1fr}
 .tg-checks--two{grid-template-columns:1fr 1fr}
 
-.tg-check{display:flex;flex-direction:column;align-items:center;padding:var(--v-space-sm,4px);background:rgba(0,0,0,0.2);border-radius:var(--v-radius-sm,6px);border:1px solid transparent}
+.tg-check{display:flex;flex-direction:column;align-items:center;padding:var(--v-space-md,8px) var(--v-space-sm,4px);background:rgba(0,0,0,0.2);border-radius:var(--v-radius-sm,6px);border:1px solid transparent;opacity:0;animation:tgCheckReveal 0.4s ease forwards}
+.tg-check:nth-child(1){animation-delay:0.1s}
+.tg-check:nth-child(2){animation-delay:0.3s}
+.tg-check:nth-child(3){animation-delay:0.5s}
+@keyframes tgCheckReveal{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .tg-check--pass{border-color:rgba(80,180,80,0.3);background:rgba(45,107,30,0.15)}
 .tg-check--fail{border-color:rgba(180,60,60,0.3);background:rgba(139,0,0,0.12)}
 
@@ -25,8 +30,9 @@
 .tg-check-icon{font-size:var(--v-font-base,13px)}
 
 /* -- Outcome Badge -- */
-.tg-outcome{text-align:center;padding:var(--v-space-md,8px);border-radius:var(--v-radius-sm,6px);margin:var(--v-space-xs,2px) 0}
-.tg-outcome--win{background:linear-gradient(135deg,rgba(45,107,30,0.25),rgba(80,180,80,0.1));border:1px solid rgba(80,180,80,0.3)}
+.tg-outcome{text-align:center;padding:var(--v-space-lg,12px);border-radius:var(--v-radius,10px);margin:var(--v-space-sm,4px) 0;opacity:0;animation:tgOutcomeReveal 0.5s ease 0.7s forwards}
+@keyframes tgOutcomeReveal{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+.tg-outcome--win{background:linear-gradient(135deg,rgba(45,107,30,0.25),rgba(80,180,80,0.1));border:1px solid rgba(80,180,80,0.3);box-shadow:0 0 12px rgba(80,180,80,0.1)}
 .tg-outcome--loss{background:linear-gradient(135deg,rgba(139,0,0,0.2),rgba(180,60,60,0.08));border:1px solid rgba(180,60,60,0.25)}
 .tg-outcome--draw{background:rgba(74,56,40,0.2);border:1px solid var(--v-gold-15)}
 .tg-outcome-title{font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-lg,16px);font-weight:700;letter-spacing:0.5px}
@@ -45,7 +51,7 @@
 
 /* -- Bet Grid -- */
 .tg-bets{display:grid;grid-template-columns:1fr 1fr;gap:var(--v-space-sm,4px);margin:var(--v-space-sm,4px) 0}
-.tg-bet-btn{padding:var(--v-space-md,8px);min-height:44px;border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-sm,6px);background:var(--v-bg-raised,#332a22);color:var(--v-gold-light,#dbb668);font-family:var(--v-font,'MedievalSharp',serif);font-size:var(--v-font-body,14px);font-weight:600;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent;transition:all var(--v-transition-fast,0.15s) ease}
+.tg-bet-btn{padding:var(--v-space-md,8px) var(--v-space-lg,12px);min-height:48px;border:1px solid var(--v-gold-20,rgba(196,149,58,0.2));border-radius:var(--v-radius,10px);background:linear-gradient(135deg,var(--v-bg-raised,#332a22),var(--v-bg-card,#2e2520));color:var(--v-gold-light,#dbb668);font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-body,14px);font-weight:700;letter-spacing:0.5px;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent;transition:all var(--v-transition-fast,0.15s) ease;box-shadow:inset 0 1px 0 var(--v-gold-08,rgba(196,149,58,0.08))}
 .tg-bet-btn:active{transform:scale(0.97);opacity:0.9}
 .tg-bet-btn:disabled{opacity:0.4;pointer-events:none}
 .tg-bet-btn--locked::after{content:' 🔒';font-size:var(--v-font-sm,12px)}
@@ -87,4 +93,7 @@
 /* -- Perf: Lite -- */
 body.perf-lite .tg-bet-btn{transition:none}
 body.perf-lite .tg-die{transition:none}
-@media(prefers-reduced-motion:reduce){.tg-bet-btn,.tg-die{transition:none}}
+body.perf-lite .tg-check{animation:none;opacity:1;transform:none}
+body.perf-lite .tg-outcome{animation:none;opacity:1;transform:none}
+body.perf-lite .tg-opponent::before{display:none}
+@media(prefers-reduced-motion:reduce){.tg-bet-btn,.tg-die{transition:none}.tg-check,.tg-outcome{animation:none!important;opacity:1!important;transform:none!important}}
