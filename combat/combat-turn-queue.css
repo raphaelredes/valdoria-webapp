@@ -1,48 +1,101 @@
-/* combat-turn-queue.css — Turn Queue top bar */
+/* combat-turn-queue.css — Timeline Conectada turn queue */
+
 .turn-queue {
-  display: flex; align-items: center; justify-content: center;
-  padding: 4px 10px 6px; gap: 3px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 0;
   background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2e2520) 100%);
-  border-bottom: 2px solid var(--v-gold-20);
-  z-index: 1; flex-shrink: 0; overflow: hidden;
+  border-bottom: 2px solid var(--v-gold-20, rgba(196,149,58,0.2));
+  z-index: 1;
+  flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
 }
-.tq-entry {
-  display: flex; flex-direction: column; align-items: center;
-  min-width: 34px; padding: 2px 4px; border-radius: 8px;
-  border: 1.5px solid transparent; position: relative;
-  transition: all var(--v-transition, 0.2s);
+.turn-queue::-webkit-scrollbar { display: none; }
+
+/* ── Timeline Node ── */
+.tl-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
 }
-.tq-entry.active {
-  border-color: var(--v-gold, #c4953a);
-  background: var(--v-gold-12);
-  box-shadow: 0 0 10px var(--v-gold-30);
+
+.tl-ico {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--v-font-lg, 16px);
+  border: 2px solid var(--v-border, #4a3828);
+  background: var(--v-bg-card, #2e2520);
+  transition: all var(--v-transition, 0.2s) ease;
 }
-.tq-entry.active::after {
-  content: 'BC'; position: absolute; bottom: -7px; left: 50%;
-  transform: translateX(-50%); font-size: var(--v-font-xs, 10px); color: var(--v-gold, #c4953a);
-}
-.tq-ico-wrap {
-  width: 30px; height: 30px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--v-font-lg, 15px); border: 1px solid rgba(74,56,40,0.4);
-  background: rgba(0,0,0,0.2);
-}
-.tq-entry.active .tq-ico-wrap {
-  border-color: var(--v-gold, #c4953a);
-  background: var(--v-gold-08);
-}
-.tq-entry.t-enemy .tq-ico-wrap {
-  border-color: rgba(123,32,32,0.4);
-  background: rgba(123,32,32,0.08);
-}
-.tq-entry.t-ally .tq-ico-wrap {
-  border-color: rgba(100,140,180,0.4);
-  background: rgba(100,140,180,0.08);
-}
-.tq-entry.dead { opacity: 0.25; filter: grayscale(1); }
-.tq-name {
-  font-size: var(--v-font-xs, 10px); color: #c8bca8;
-  white-space: nowrap; margin-top: 2px;
+
+.tl-nm {
+  font-size: 8px;
+  color: var(--v-text-dim, #a09484);
+  margin-top: 2px;
+  white-space: nowrap;
   text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
-.tq-sep { color: #6a5a48; font-size: var(--v-font-xs, 10px); }
+
+/* Active node — gold highlight */
+.tl-node.active .tl-ico {
+  border-color: var(--v-gold, #c4953a);
+  background: rgba(196,149,58,0.15);
+  box-shadow: 0 0 12px rgba(196,149,58,0.4);
+}
+.tl-node.active .tl-nm {
+  color: var(--v-gold, #c4953a);
+  font-weight: 700;
+}
+
+/* Enemy nodes — subtle red border */
+.tl-node.t-enemy .tl-ico {
+  border-color: rgba(123,32,32,0.5);
+}
+
+/* Ally nodes — subtle blue border */
+.tl-node.t-ally .tl-ico {
+  border-color: rgba(100,140,180,0.5);
+}
+
+/* Dead nodes */
+.tl-node.dead {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+
+/* ── Connecting Line ── */
+.tl-line {
+  flex: 1;
+  height: 2px;
+  background: var(--v-border, #4a3828);
+  min-width: 12px;
+  margin-top: -14px; /* align with center of icon */
+  flex-shrink: 0;
+}
+
+/* Done line — turns already taken this round */
+.tl-line.done {
+  background: var(--v-gold-dim, #8b6a28);
+}
+
+/* ── Performance ── */
+body.perf-lite .tl-node.active .tl-ico {
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tl-node.active .tl-ico {
+    box-shadow: none;
+  }
+}

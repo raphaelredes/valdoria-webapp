@@ -1,62 +1,65 @@
 /**
  * combat-turn-queue.js
- * Turn queue component for the combat WebApp.
- * Renders the initiative order strip at the top of the combat screen.
+ * Turn queue component — Timeline Conectada style.
+ * Renders initiative order as connected nodes with lines between them.
  */
 
 /**
  * renderTurnQueue(turnOrder, activeIdx)
- * Returns an HTML string for the .turn-queue strip.
+ * Returns an HTML string for the .turn-queue timeline strip.
  *
  * @param {Array<{t:string, n:string, ico:string, dead:boolean}>} turnOrder
- *   - t: 'p' (player), 'e' (enemy), 'a' (ally)
- *   - n: display name
- *   - ico: emoji icon
- *   - dead: boolean
  * @param {number} activeIdx - index of the currently active entry
- * @returns {string} HTML string (empty if turnOrder is empty/null)
+ * @returns {string} HTML string
  */
 function renderTurnQueue(turnOrder, activeIdx) {
   if (!turnOrder || !turnOrder.length) return '';
 
-  var parts = [];
+  var parts = ['<div class="turn-queue">'];
+
   for (var i = 0; i < turnOrder.length; i++) {
     var entry = turnOrder[i];
 
-    // Build CSS classes
-    var classes = 'tq-entry';
-    if (entry.t === 'e') classes += ' t-enemy';
-    else if (entry.t === 'a') classes += ' t-ally';
-    if (i === activeIdx) classes += ' active';
-    if (entry.dead) classes += ' dead';
+    /* Node classes */
+    var cls = 'tl-node';
+    if (entry.t === 'e') cls += ' t-enemy';
+    else if (entry.t === 'a') cls += ' t-ally';
+    if (i === activeIdx) cls += ' active';
+    if (entry.dead) cls += ' dead';
 
-    // Truncate name to 5 chars
-    var name = escHtml((entry.n || '').substring(0, 5));
+    /* Icon */
     var ico = escHtml(entry.ico || '?');
 
+    /* Name: truncate to 6 chars */
+    var name = escHtml((entry.n || '').substring(0, 6));
+
+    /* Node HTML */
     parts.push(
-      '<div class="' + classes + '">' +
-        '<div class="tq-ico-wrap">' + ico + '</div>' +
-        '<div class="tq-name">' + name + '</div>' +
+      '<div class="' + cls + '">' +
+        '<div class="tl-ico">' + ico + '</div>' +
+        '<div class="tl-nm">' + name + '</div>' +
       '</div>'
     );
 
-    // Add separator between entries (not after the last one)
+    /* Connecting line between nodes (not after last) */
     if (i < turnOrder.length - 1) {
-      parts.push('<span class="tq-sep">\u203A</span>');
+      var lineCls = 'tl-line';
+      if (i < activeIdx) lineCls += ' done';
+      parts.push('<div class="' + lineCls + '"></div>');
     }
   }
 
-  return '<div class="turn-queue">' + parts.join('') + '</div>';
+  parts.push('</div>');
+  return parts.join('');
 }
 
 /**
  * scrollTurnQueueToActive()
- * Instantly centers the active .tq-entry within .turn-queue (no smooth scroll).
+ * Centers the active node within the .turn-queue container.
  */
 function scrollTurnQueueToActive() {
   var queue = document.querySelector('.turn-queue');
-  var active = document.querySelector('.tq-entry.active');
+  var active = document.querySelector('.tl-node.active');
   if (!queue || !active) return;
 
   var queueWidth = queue.offsetWidth;
