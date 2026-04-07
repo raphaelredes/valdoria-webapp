@@ -387,6 +387,18 @@ function _buildRegionCard(key, reg, meta) {
       openLocations(this.getAttribute('data-biome'));
     });
   }
+  /* Bind "Viajar" button — opens locations for the region */
+  var travelBtn = card.querySelector('[data-action="travel"]');
+  if (travelBtn) {
+    travelBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var biomeKey = card.querySelector('[data-action="locations"]');
+      var biome = biomeKey ? biomeKey.getAttribute('data-biome') : '';
+      if (biome) {
+        openLocations(biome);
+      }
+    });
+  }
 
   return card;
 }
