@@ -94,6 +94,10 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     <script>
     /* ── Early title screen: show IMMEDIATELY to prevent loading flash ── */
     (function(){
+        /* Skip if title was already shown by app.html (SPA shell) or user already tapped */
+        if(window.__introTapped||window.__introTitleSkip)return;
+        if(window.__introTitle&&window.__introTitle.isVisible&&window.__introTitle.isVisible())return;
+        if(document.getElementById('title-screen'))return;
         if(typeof ValdoriaTitleScreen!=='function')return;
         window.__introTitle=ValdoriaTitleScreen({onStart:function(){
             console.log('[INTRO] Early title TAPPED');
