@@ -98,7 +98,8 @@ function renderBattlefieldGrid(s) {
     var html = '<div class="battlefield">';
 
     for (var row = 0; row < 4; row++) {
-        html += '<div class="row-label">' + escHtml(ROW_LABELS[row]) + '</div>';
+        var _zoneClass = row < 2 ? ' enemy-zone' : ' ally-zone';
+        html += '<div class="row-label' + _zoneClass + '">' + escHtml(ROW_LABELS[row]) + '</div>';
         html += '<div class="bf-row">';
         for (var col = 0; col < 4; col++) {
             html += _buildCell(grid[row][col], activeTurnId);
