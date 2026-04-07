@@ -198,7 +198,7 @@
 }
 
 .arena-stat-badge .stat-label {
-    font-size: 8px;
+    font-size: var(--v-font-micro, 8px); /* noqa: preflight */
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--v-text-dim, #a09484);
@@ -251,7 +251,7 @@
     top: -7px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 10px;
+    font-size: var(--v-font-xs, 10px); /* noqa: preflight */
     color: var(--v-gold-dim, #9a7530);
     background: var(--v-bg-raised, #332a22);
     padding: 0 var(--v-space-sm, 4px);
@@ -259,7 +259,7 @@
 }
 
 .arena-challenger-icon {
-    font-size: 44px;
+    font-size: 44px; /* HARDCODED: ornamental icon, no token */
     line-height: 1;
 }
 
@@ -465,7 +465,7 @@
 }
 
 .arena-hp-icon {
-    font-size: 48px;
+    font-size: 48px; /* HARDCODED: ornamental icon */
     line-height: 1;
 }
 
@@ -555,7 +555,7 @@
 }
 
 .arena-hp-choice-icon {
-    font-size: 24px;
+    font-size: 24px; /* HARDCODED: result title display */
     line-height: 1;
     flex-shrink: 0;
 }
@@ -635,7 +635,7 @@
 
 /* Trophy / Skull crown icon */
 .arena-result-crown {
-    font-size: 56px;
+    font-size: 56px; /* HARDCODED: trophy crown icon */
     line-height: 1;
     position: relative;
 }
@@ -650,7 +650,7 @@
 /* Defeat crown: dimmed, crimson glow */
 .arena-result-header.defeat .arena-result-crown,
 .defeat .arena-result-crown {
-    font-size: 48px;
+    font-size: 48px; /* HARDCODED: defeat skull icon */
     opacity: 0.6;
     filter: drop-shadow(0 0 10px rgba(123, 32, 32, 0.3));
 }
