@@ -74,6 +74,13 @@
   flex-shrink: 0;
 }
 
+/* ---- Tab panel scroll limits (prevent popup overflow) ---- */
+.prep-tabbed-body .v-tab-panel {
+  max-height: clamp(280px, 50vh, 400px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* ---- Gear checklist (Equipamento tab) ---- */
 .prep-gear-list {
   display: flex;
