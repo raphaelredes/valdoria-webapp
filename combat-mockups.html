@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combat Mockups — Lendas de Valdoria</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #2a2420; --bg-raised: #332a22; --bg-card: #2e2520;
+  --text: #d4c8b0; --text-dim: #a09484; --text-bright: #e8dcc8;
+  --gold: #c4953a; --gold-dim: #8b6a28; --gold-light: #e0c070;
+  --border: #4a3828; --border-gold: rgba(196,149,58,0.25);
+  --crimson: #7b2020; --danger: #e74c3c; --success: #4caf50;
+  --font: 'MedievalSharp', 'Cinzel', serif;
+  --font-display: 'Cinzel', serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1510; color: var(--text); font-family: var(--font); display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; padding: 24px; }
+
+h1 { width: 100%; text-align: center; font-family: var(--font-display); color: var(--gold); font-size: 22px; letter-spacing: 2px; margin-bottom: 8px; }
+h1 small { display: block; font-size: 12px; color: var(--text-dim); font-weight: 400; letter-spacing: 0; margin-top: 4px; }
+
+.phone-frame {
+  width: 390px; height: 700px;
+  background: var(--bg); border: 2px solid #3a3028; border-radius: 16px;
+  overflow: hidden; position: relative;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  display: flex; flex-direction: column;
+}
+.phone-label {
+  position: absolute; top: -28px; left: 0; right: 0; text-align: center;
+  font-family: var(--font-display); font-size: 13px; color: var(--gold);
+  letter-spacing: 1px; font-weight: 700;
+}
+.phone-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; display: block; }
+
+/* ─── SHARED COMPONENTS ─── */
+.tq { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 10px; background: linear-gradient(180deg, var(--bg-raised), var(--bg)); border-bottom: 2px solid var(--border-gold); flex-shrink: 0; }
+.tq-e { display: flex; flex-direction: column; align-items: center; min-width: 36px; padding: 3px 5px; border-radius: 8px; border: 1.5px solid transparent; }
+.tq-e.active { border-color: var(--gold); background: rgba(196,149,58,0.12); box-shadow: 0 0 10px rgba(196,149,58,0.3); }
+.tq-e.enemy { }
+.tq-ico { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid rgba(74,56,40,0.4); background: rgba(0,0,0,0.2); }
+.tq-e.active .tq-ico { border-color: var(--gold); background: rgba(196,149,58,0.08); }
+.tq-e.enemy .tq-ico { border-color: rgba(123,32,32,0.4); background: rgba(123,32,32,0.08); }
+.tq-nm { font-size: 9px; color: #c8bca8; white-space: nowrap; margin-top: 2px; }
+.tq-sep { color: #6a5a48; font-size: 10px; }
+
+.hdr { padding: 4px 12px 3px; border-bottom: 1px solid var(--border-gold); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
+.hdr-title { font-size: 11px; font-weight: 700; color: var(--gold); font-family: var(--font-display); }
+.hdr-badge { font-size: 9px; padding: 2px 8px; border-radius: 12px; background: rgba(196,149,58,0.1); border: 1px solid var(--border-gold); color: var(--text-dim); }
+
+.bf { flex: 1; display: flex; flex-direction: column; padding: 4px 8px; gap: 2px; overflow: hidden; position: relative; }
+.bf-lbl { font-size: 9px; color: var(--text-dim); text-align: center; text-transform: uppercase; letter-spacing: 2px; font-family: var(--font-display); }
+.bf-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 4px; }
+.bf-div { height: 2px; margin: 2px 16px; background: linear-gradient(90deg, transparent, var(--border-gold), transparent); }
+.cell { min-height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 2px; border-radius: 6px; border: 1px solid transparent; gap: 2px; }
+.cell.occ { background: rgba(0,0,0,0.18); border-color: rgba(74,56,40,0.2); }
+.cell.occ.enemy { border-color: rgba(123,32,32,0.3); }
+.cell.occ.player { border-color: rgba(196,149,58,0.35); }
+.cell.occ.ally { border-color: rgba(100,140,180,0.3); }
+.cell.active { box-shadow: 0 0 12px rgba(196,149,58,0.35); border-color: rgba(196,149,58,0.5); }
+.unit-ico { font-size: 22px; line-height: 1; }
+.hp-bar { width: 85%; height: 4px; background: rgba(0,0,0,0.35); border-radius: 2px; overflow: hidden; }
+.hp-fill { height: 100%; border-radius: 2px; }
+.hp-fill.high { background: linear-gradient(90deg, #3a7a2a, #5a8a3c); }
+.hp-fill.mid { background: linear-gradient(90deg, #a07020, #b88a2a); }
+.hp-fill.low { background: linear-gradient(90deg, #8a2a2a, #a63a2a); }
+.hp-num { font-size: 9px; color: var(--text-dim); }
+.mp-bar { width: 85%; height: 3px; background: rgba(0,0,0,0.35); border-radius: 2px; overflow: hidden; }
+.mp-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #2a5a8a, #4080b0); }
+
+.timer-w { padding: 4px 12px 6px; flex-shrink: 0; }
+.timer-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.timer-lbl { font-size: 10px; color: #c0b8a0; }
+.timer-num { font-size: 12px; color: var(--gold); font-weight: 700; }
+.timer-bar { height: 5px; background: rgba(0,0,0,0.4); border-radius: 3px; overflow: hidden; }
+.timer-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); transition: width 0.5s linear; }
+.timer-fill.warn { background: linear-gradient(90deg, #e65100, #f9a825); }
+.timer-fill.crit { background: linear-gradient(90deg, var(--crimson), #e53935); }
+
+.toast { padding: 4px 10px; margin: 0 8px 4px; font-size: 12px; text-align: center; color: var(--text-dim); background: rgba(0,0,0,0.25); border-radius: 6px; border-left: 3px solid var(--border); flex-shrink: 0; }
+.toast.hit { border-left-color: var(--gold-dim); color: var(--text); }
+.toast.miss { border-left-color: #666; }
+.toast.crit { border-left-color: #ff9800; color: #ff9800; }
+.toast.heal { border-left-color: var(--success); color: #81c784; }
+
+.act-bar { flex-shrink: 0; background: linear-gradient(180deg, var(--bg-raised), var(--bg)); border-top: 1px solid var(--border-gold); padding: 6px 8px; }
+.act-grid { display: grid; gap: 4px; }
+.act-grid.g2 { grid-template-columns: 1fr 1fr; }
+.act-grid.g3 { grid-template-columns: 1fr 1fr 1fr; }
+.act-grid.g4 { grid-template-columns: 1fr 1fr; }
+.act-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; min-height: 44px; border-radius: 8px; border: 1px solid var(--border); background: linear-gradient(165deg, var(--bg-card), var(--bg)); color: var(--text); font-family: var(--font); font-size: 11px; cursor: pointer; }
+.act-btn .ico { font-size: 18px; }
+.act-btn.primary { border-color: rgba(196,149,58,0.4); color: var(--gold-light); box-shadow: 0 0 10px rgba(196,149,58,0.15); }
+.act-btn.danger { border-color: rgba(123,32,32,0.4); color: #e57373; }
+
+/* ─── MOCKUP-SPECIFIC ─── */
+.intent-badge { position: absolute; top: 2px; right: 2px; font-size: 8px; padding: 1px 4px; border-radius: 4px; background: rgba(140,30,30,0.7); color: #ff8a80; }
+.ac-badge { position: absolute; top: 2px; left: 2px; font-size: 8px; padding: 1px 4px; border-radius: 4px; background: rgba(0,0,0,0.5); color: #b0b8c0; }
+
+/* Mockup 2: Portrait strip */
+.tq-portrait { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: linear-gradient(180deg, var(--bg-raised), var(--bg)); border-bottom: 2px solid var(--border-gold); flex-shrink: 0; overflow-x: auto; }
+.tq-p { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 48px; }
+.tq-p-ring { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(0,0,0,0.3); position: relative; }
+.tq-p.active .tq-p-ring { border-color: var(--gold); box-shadow: 0 0 12px rgba(196,149,58,0.4); }
+.tq-p.enemy .tq-p-ring { border-color: rgba(123,32,32,0.5); }
+.tq-p-hp { position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%); width: 32px; height: 3px; background: rgba(0,0,0,0.5); border-radius: 2px; overflow: hidden; }
+.tq-p-hp-fill { height: 100%; border-radius: 2px; }
+.tq-p-nm { font-size: 8px; color: var(--text-dim); }
+
+/* Mockup 3: Compact battlefield */
+.bf-compact { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 8px; }
+.bf-zone { display: flex; flex-direction: column; gap: 4px; }
+.bf-zone-lbl { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--font-display); padding-left: 4px; }
+.bf-zone.enemy .bf-zone-lbl { color: rgba(229,115,115,0.6); }
+.bf-zone.ally .bf-zone-lbl { color: rgba(100,181,246,0.6); }
+.unit-card { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; }
+.unit-card.active { border-color: var(--gold); box-shadow: 0 0 8px rgba(196,149,58,0.2); }
+.unit-card .u-ico { font-size: 24px; }
+.unit-card .u-info { flex: 1; }
+.unit-card .u-name { font-size: 12px; color: var(--text); font-weight: 600; }
+.unit-card .u-sub { font-size: 9px; color: var(--text-dim); }
+.unit-card .u-bars { display: flex; flex-direction: column; gap: 2px; width: 60px; }
+.unit-card .u-bar { height: 4px; background: rgba(0,0,0,0.35); border-radius: 2px; overflow: hidden; }
+
+/* Mockup 5: Cinematic */
+.cin-bf { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.cin-enemies { display: flex; justify-content: center; gap: 16px; padding: 24px 16px 8px; }
+.cin-allies { display: flex; justify-content: center; gap: 16px; padding: 8px 16px 16px; }
+.cin-divider { height: 1px; margin: 0 24px; background: linear-gradient(90deg, transparent, var(--border-gold), transparent); }
+.cin-unit { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.cin-unit .ico-big { font-size: 36px; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid var(--border); background: rgba(0,0,0,0.3); }
+.cin-unit.active .ico-big { border-color: var(--gold); box-shadow: 0 0 16px rgba(196,149,58,0.4); }
+.cin-unit.enemy .ico-big { border-color: rgba(123,32,32,0.4); }
+.cin-unit .u-nm { font-size: 10px; color: var(--text); font-weight: 600; }
+.cin-unit .u-hp { width: 48px; }
+
+/* Mockup 6: Card-based */
+.card-bf { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 6px; overflow-y: auto; }
+.card-row { display: flex; gap: 6px; }
+.fight-card { flex: 1; display: flex; flex-direction: column; padding: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; min-height: 80px; }
+.fight-card.enemy { border-color: rgba(123,32,32,0.3); }
+.fight-card.player { border-color: rgba(196,149,58,0.3); }
+.fight-card .fc-top { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.fight-card .fc-ico { font-size: 20px; }
+.fight-card .fc-name { font-size: 11px; font-weight: 700; color: var(--text); flex: 1; }
+.fight-card .fc-ac { font-size: 9px; color: #b0b8c0; }
+.fight-card .fc-bars { display: flex; flex-direction: column; gap: 2px; }
+
+/* Mockup 7: Focus mode */
+.focus-bf { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 12px; }
+.focus-vs { font-family: var(--font-display); font-size: 14px; color: var(--gold); letter-spacing: 3px; text-transform: uppercase; }
+.focus-unit { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.focus-unit .f-ico { font-size: 44px; width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); }
+.focus-unit.active .f-ico { border-color: var(--gold); box-shadow: 0 0 20px rgba(196,149,58,0.3); }
+.focus-unit .f-name { font-size: 14px; font-weight: 700; color: var(--text-bright); }
+.focus-unit .f-stats { display: flex; gap: 12px; font-size: 10px; color: var(--text-dim); }
+.focus-unit .f-hp-wrap { width: 120px; }
+
+/* Mockup 8: Timeline */
+.timeline-tq { display: flex; align-items: center; padding: 8px 12px; gap: 0; background: linear-gradient(180deg, var(--bg-raised), var(--bg)); border-bottom: 2px solid var(--border-gold); flex-shrink: 0; overflow-x: auto; }
+.tl-node { display: flex; flex-direction: column; align-items: center; min-width: 40px; position: relative; z-index: 1; }
+.tl-node .tl-ico { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid var(--border); background: var(--bg-card); }
+.tl-node.active .tl-ico { border-color: var(--gold); background: rgba(196,149,58,0.15); box-shadow: 0 0 10px rgba(196,149,58,0.4); }
+.tl-node.enemy .tl-ico { border-color: rgba(123,32,32,0.4); }
+.tl-node .tl-nm { font-size: 8px; color: var(--text-dim); margin-top: 2px; }
+.tl-line { flex: 1; height: 2px; background: var(--border); min-width: 12px; margin-top: -20px; }
+.tl-line.done { background: var(--gold-dim); }
+
+/* Timer variants */
+.timer-ring { width: 44px; height: 44px; position: relative; }
+.timer-ring svg { transform: rotate(-90deg); }
+.timer-ring .ring-bg { fill: none; stroke: rgba(0,0,0,0.4); stroke-width: 3; }
+.timer-ring .ring-fill { fill: none; stroke: var(--gold); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 126; stroke-dashoffset: 42; transition: stroke-dashoffset 1s linear; }
+.timer-ring .ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--gold); }
+</style>
+</head>
+<body>
+
+<h1>Mockups de Combate — Lendas de Valdoria
+<small>8 estruturas visuais para o redesign do combate</small></h1>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- MOCKUP 1: Grid Polido (melhoria do atual) -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div style="position:relative;padding-top:32px">
+<div class="phone-label">1. Grid Tatico Polido<span class="phone-sub">Melhoria direta do layout atual</span></div>
+<div class="phone-frame">
+  <div class="tq">
+    <div class="tq-e enemy"><div class="tq-ico">🪓</div><div class="tq-nm">Thair</div></div>
+    <span class="tq-sep">›</span>
+    <div class="tq-e active"><div class="tq-ico">🎻</div><div class="tq-nm">Ryais</div></div>
+    <span class="tq-sep">›</span>
+    <div class="tq-e enemy"><div class="tq-ico">🗡️</div><div class="tq-nm">Orc</div></div>
+  </div>
+  <div class="hdr"><span class="hdr-title">Arena de Combate</span><span class="hdr-badge">R1 ☀️ Limpo</span></div>
+  <div class="bf">
+    <div class="bf-lbl" style="color:rgba(229,115,115,0.5)">retaguarda inimiga</div>
+    <div class="bf-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+    <div class="bf-lbl" style="color:rgba(229,115,115,0.5)">frente inimiga</div>
+    <div class="bf-row">
+      <div class="cell occ enemy" style="position:relative"><span class="ac-badge">AC 15</span><span class="intent-badge">⚔️ATK</span><div class="unit-ico">🪓</div><div class="hp-bar"><div class="hp-fill high" style="width:100%"></div></div><div class="hp-num">26/26</div></div>
+      <div class="cell"></div>
+      <div class="cell occ enemy" style="position:relative"><span class="ac-badge">AC 13</span><span class="intent-badge">🏹RNG</span><div class="unit-ico">🗡️</div><div class="hp-bar"><div class="hp-fill mid" style="width:60%"></div></div><div class="hp-num">12/20</div></div>
+      <div class="cell"></div>
+    </div>
+    <div class="bf-div"></div>
+    <div class="bf-lbl" style="color:rgba(100,181,246,0.5)">frente aliada</div>
+    <div class="bf-row">
+      <div class="cell occ player active" style="position:relative"><span class="ac-badge">AC 14</span><div class="unit-ico">🎻</div><div class="hp-bar"><div class="hp-fill high" style="width:80%"></div></div><div class="hp-num">20/25</div><div class="mp-bar"><div class="mp-fill" style="width:60%"></div></div></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+    <div class="bf-lbl" style="color:rgba(100,181,246,0.5)">retaguarda aliada</div>
+    <div class="bf-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+  </div>
+  <div class="toast hit">A espada de Thalric erra seu alvo! <span style="font-size:10px;color:var(--text-dim)">d20(8)+3=11 vs CA 14 ❌</span></div>
+  <div class="timer-w"><div class="timer-h"><span class="timer-lbl">⏱ Tempo do turno</span><span class="timer-num">22s</span></div><div class="timer-bar"><div class="timer-fill" style="width:73%"></div></div></div>
+  <div class="act-bar"><div class="act-grid g4">
+    <div class="act-btn primary"><span class="ico">⚔️</span>Atacar</div>
+    <div class="act-btn"><span class="ico">✨</span>Habilidades</div>
+    <div class="act-btn"><span class="ico">🎒</span>Itens</div>
+    <div class="act-btn danger"><span class="ico">🏃</span>Fugir</div>
+  </div></div>
+</div></div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- MOCKUP 2: Portrait Strip (Raid Shadow Legends style) -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div style="position:relative;padding-top:32px">
+<div class="phone-label">2. Portrait Strip<span class="phone-sub">Estilo Raid/Epic Seven — retratos circulares com HP</span></div>
+<div class="phone-frame">
+  <div class="tq-portrait">
+    <div class="tq-p enemy"><div class="tq-p-ring">🪓<div class="tq-p-hp"><div class="tq-p-hp-fill high" style="width:100%;background:#5a8a3c"></div></div></div><div class="tq-p-nm">Thair</div></div>
+    <div class="tq-p active"><div class="tq-p-ring">🎻<div class="tq-p-hp"><div class="tq-p-hp-fill" style="width:80%;background:#5a8a3c"></div></div></div><div class="tq-p-nm">Ryais</div></div>
+    <div class="tq-p enemy"><div class="tq-p-ring">🗡️<div class="tq-p-hp"><div class="tq-p-hp-fill" style="width:60%;background:#b88a2a"></div></div></div><div class="tq-p-nm">Orc</div></div>
+    <div class="tq-p"><div class="tq-p-ring">🛡️<div class="tq-p-hp"><div class="tq-p-hp-fill" style="width:90%;background:#5a8a3c"></div></div></div><div class="tq-p-nm">Bjorn</div></div>
+  </div>
+  <div class="hdr"><span class="hdr-title">Arena de Combate</span><span class="hdr-badge">R1 ☀️</span></div>
+  <div class="bf">
+    <div class="bf-lbl" style="color:rgba(229,115,115,0.5)">frente inimiga</div>
+    <div class="bf-row">
+      <div class="cell occ enemy"><div class="unit-ico">🪓</div><div class="hp-bar"><div class="hp-fill high" style="width:100%"></div></div><div class="hp-num">26</div></div>
+      <div class="cell"></div>
+      <div class="cell occ enemy"><div class="unit-ico">🗡️</div><div class="hp-bar"><div class="hp-fill mid" style="width:60%"></div></div><div class="hp-num">12</div></div>
+      <div class="cell"></div>
+    </div>
+    <div class="bf-div"></div>
+    <div class="bf-lbl" style="color:rgba(100,181,246,0.5)">frente aliada</div>
+    <div class="bf-row">
+      <div class="cell occ player active"><div class="unit-ico">🎻</div><div class="hp-bar"><div class="hp-fill high" style="width:80%"></div></div><div class="hp-num">20</div></div>
+      <div class="cell occ ally"><div class="unit-ico">🛡️</div><div class="hp-bar"><div class="hp-fill high" style="width:90%"></div></div><div class="hp-num">30</div></div>
+      <div class="cell"></div><div class="cell"></div>
+    </div>
+  </div>
+  <div class="toast crit">Golpe critico! Ryais causa 18 de dano!</div>
+  <div class="timer-w"><div class="timer-h"><span class="timer-lbl">⏱ Seu turno</span><span class="timer-num">25s</span></div><div class="timer-bar"><div class="timer-fill" style="width:83%"></div></div></div>
+  <div class="act-bar"><div class="act-grid g2">
+    <div class="act-btn primary"><span class="ico">⚔️</span>Atacar</div>
+    <div class="act-btn"><span class="ico">✨</span>Habilidades</div>
+  </div><div class="act-grid g3" style="margin-top:4px">
+    <div class="act-btn"><span class="ico">🎒</span>Itens</div>
+    <div class="act-btn"><span class="ico">🛡️</span>Esquivar</div>
+    <div class="act-btn danger"><span class="ico">🏃</span>Fugir</div>
+  </div></div>
+</div></div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- MOCKUP 3: Lista Compacta (Fire Emblem Heroes style) -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div style="position:relative;padding-top:32px">
+<div class="phone-label">3. Lista Compacta<span class="phone-sub">Estilo Fire Emblem — cards horizontais por unidade</span></div>
+<div class="phone-frame">
+  <div class="tq">
+    <div class="tq-e enemy"><div class="tq-ico">🪓</div><div class="tq-nm">Thair</div></div>
+    <span class="tq-sep">›</span>
+    <div class="tq-e active"><div class="tq-ico">🎻</div><div class="tq-nm">Ryais</div></div>
+    <span class="tq-sep">›</span>
+    <div class="tq-e enemy"><div class="tq-ico">🗡️</div><div class="tq-nm">Orc</div></div>
+  </div>
+  <div class="hdr"><span class="hdr-title">Arena</span><span class="hdr-badge">R1 ☀️</span></div>
+  <div class="bf-compact">
+    <div class="bf-zone enemy">
+      <div class="bf-zone-lbl">Inimigos</div>
+      <div class="unit-card">
+        <div class="u-ico">🪓</div>
+        <div class="u-info"><div class="u-name">Thalric Pedradura</div><div class="u-sub">Barbaro — AC 15 — ⚔️ Atacar</div></div>
+        <div class="u-bars"><div class="u-bar"><div class="hp-fill high" style="width:100%"></div></div><div style="font-size:8px;color:var(--text-dim);text-align:right">26/26</div></div>
+      </div>
+      <div class="unit-card">
+        <div class="u-ico">🗡️</div>
+        <div class="u-info"><div class="u-name">Orc Guerreiro</div><div class="u-sub">Guerreiro — AC 13 — 🏹 Ranged</div></div>
+        <div class="u-bars"><div class="u-bar"><div class="hp-fill mid" style="width:60%"></div></div><div style="font-size:8px;color:var(--text-dim);text-align:right">12/20</div></div>
+      </div>
+    </div>
+    <div style="height:1px;background:linear-gradient(90deg,transparent,var(--border-gold),transparent);margin:4px 0"></div>
+    <div class="bf-zone ally">
+      <div class="bf-zone-lbl">Aliados</div>
+      <div class="unit-card active">
+        <div class="u-ico">🎻</div>
+        <div class="u-info"><div class="u-name">Ryaiael</div><div class="u-sub">Bardo Nv.4 — AC 14</div></div>
+        <div class="u-bars"><div class="u-bar"><div class="hp-fill high" style="width:80%"></div></div><div style="font-size:8px;color:var(--text-dim);text-align:right">20/25</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="toast hit">Thalric ataca com machado — erra!</div>
+  <div class="timer-w"><div class="timer-h"><span class="timer-lbl">⏱ Seu turno</span><span class="timer-num">18s</span></div><div class="timer-bar"><div class="timer-fill" style="width:60%"></div></div></div>
+  <div class="act-bar"><div class="act-grid g4">
+    <div class="act-btn primary"><span class="ico">⚔️</span>Atacar</div>
+    <div class="act-btn"><span class="ico">✨</span>Skills</div>
+    <div class="act-btn"><span class="ico">🎒</span>Itens</div>
+    <div class="act-btn danger"><span class="ico">🏃</span>Fugir</div>
+  </div></div>
+</div></div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- MOCKUP 4: Timer Circular (Slay the Spire style) -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div style="position:relative;padding-top:32px">
+<div class="phone-label">4. Timer Circular + Grid<span class="phone-sub">Timer SVG circular integrado ao header</span></div>
+<div class="phone-frame">
+  <div style="display:flex;align-items:center;padding:6px 12px;gap:8px;background:var(--bg-raised);border-bottom:2px solid var(--border-gold);flex-shrink:0">
+    <div class="timer-ring"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="20"/><circle class="ring-fill" cx="22" cy="22" r="20"/></svg><div class="ring-text">22s</div></div>
+    <div style="flex:1">
+      <div class="tq" style="padding:0;background:none;border:none;justify-content:flex-start;gap:6px">
+        <div class="tq-e enemy" style="min-width:auto;padding:2px"><div class="tq-ico" style="width:24px;height:24px;font-size:14px">🪓</div></div>
+        <span class="tq-sep">›</span>
+        <div class="tq-e active" style="min-width:auto;padding:2px"><div class="tq-ico" style="width:24px;height:24px;font-size:14px">🎻</div></div>
+        <span class="tq-sep">›</span>
+        <div class="tq-e enemy" style="min-width:auto;padding:2px"><div class="tq-ico" style="width:24px;height:24px;font-size:14px">🗡️</div></div>
+      </div>
+      <div style="font-size:9px;color:var(--text-dim);margin-top:2px">Arena — Rodada 1 — ☀️ Limpo</div>
+    </div>
+  </div>
+  <div class="bf">
+    <div class="bf-lbl" style="color:rgba(229,115,115,0.5)">inimigos</div>
+    <div class="bf-row">
+      <div class="cell occ enemy"><div class="unit-ico">🪓</div><div class="hp-bar"><div class="hp-fill high" style="width:100%"></div></div><div class="hp-num">26</div></div>
+      <div class="cell"></div>
+      <div class="cell occ enemy"><div class="unit-ico">🗡️</div><div class="hp-bar"><div class="hp-fill mid" style="width:60%"></div></div><div class="hp-num">12</div></div>
+      <div class="cell"></div>
+    </div>
+    <div class="bf-div"></div>
+    <div class="bf-lbl" style="color:rgba(100,181,246,0.5)">aliados</div>
+    <div class="bf-row">
+      <div class="cell occ player active"><div class="unit-ico">🎻</div><div class="hp-bar"><div class="hp-fill high" style="width:80%"></div></div><div class="hp-num">20</div></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+  </div>
+  <div class="toast hit">Ryaiael ataca Thalric — 8 de dano!</div>
+  <div class="act-bar"><div class="act-grid g4">
+    <div class="act-btn primary"><span class="ico">⚔️</span>Atacar</div>
+    <div class="act-btn"><span class="ico">✨</span>Skills</div>
+    <div class="act-btn"><span class="ico">🎒</span>Itens</div>
+    <div class="act-btn danger"><span class="ico">🏃</span>Fugir</div>
+  </div></div>
+</div></div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- MOCKUP 5: Cinematico (Baldur's Gate 3 style) -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div style="position:relative;padding-top:32px">
+<div class="phone-label">5. Cinematico<span class="phone-sub">Estilo BG3 — unidades grandes, foco visual</span></div>
+<div class="phone-frame">
+  <div class="tq">
+    <div class="tq-e enemy"><div class="tq-ico">🪓</div><div class="tq-nm">Thair</div></div>
+    <span class="tq-sep">›</span>
+    <div class="tq-e active"><div class="tq-ico">🎻</div><div class="tq-nm">Ryais</div></div>
+  </div>
+  <div class="hdr"><span class="hdr-title">Arena de Combate</span><span class="hdr-badge">R1</span></div>
+  <div class="cin-bf">
+    <div class="cin-enemies">
+      <div class="cin-unit enemy">
+        <div class="ico-big">🪓</div>
+        <div class="u-nm">Thalric</div>
+        <div class="u-hp"><div class="hp-bar"><div class="hp-fill high" style="width:100%"></div></div></div>
+        <div style="font-size:9px;color:var(--text-dim)">26/26 — AC 15</div>
+        <div style="font-size:8px;padding:2px 6px;background:rgba(140,30,30,0.5);border-radius:4px;color:#ff8a80;margin-top:2px">⚔️ Atacar</div>
+      </div>
+    </div>
+    <div class="cin-divider"></div>
+    <div style="flex:1"></div>
+    <div class="cin-allies">
+      <div class="cin-unit active">
+        <div class="ico-big">🎻</div>
+        <div class="u-nm">Ryaiael</div>
+        <div class="u-hp"><div class="hp-bar"><div class="hp-fill high" style="width:80%"></div></div></div>
+        <div style="font-size:9px;color:var(--text-dim)">20/25 — AC 14</div>
+      </div>
+    </div>
+  </div>
+  <div class="toast crit">Ryaiael executa Inspiracao Bardica!</div>
+  <div class="timer-w"><div class="timer-h"><span class="timer-lbl">⏱ Seu turno</span><span class="timer-num">28s</span></div><div class="timer-bar"><div class="timer-fill" style="width:93%"></div></div></div>
+  <div class="act-bar"><div class="act-grid g2">
+    <div class="act-btn primary"><span class="ico">⚔️</span>Atacar</div>
+    <div class="act-btn"><span class="ico">✨</span>Habilidades</div>
+  </div><div class="act-grid g3" style="margin-top:4px">
+    <div class="act-btn"><span class="ico">🎒</span>Itens</div>
+    <div class="act-btn"><span class="ico">🛡️</span>Esquivar</div>
+    <div class="act-btn danger"><span class="ico">🏃</span>Fugir</div>
+  </div></div>
+</div></div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- MOCKUP 6: Cards Detalhados (Solasta style) -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div style="position:relative;padding-top:32px">
+<div class="phone-label">6. Cards Detalhados<span class="phone-sub">Estilo Solasta — cada unidade em card com info</span></div>
+<div class="phone-frame">
+  <div class="tq">
+    <div class="tq-e enemy"><div class="tq-ico">🪓</div><div class="tq-nm">Thair</div></div>
+    <span class="tq-sep">›</span>
+    <div class="tq-e active"><div class="tq-ico">🎻</div><div class="tq-nm">Ryais</div></div>
+  </div>
+  <div class="hdr"><span class="hdr-title">Arena — Rodada 1</span><span class="hdr-badge">☀️ Limpo</span></div>
+  <div class="card-bf">
+    <div style="font-size:9px;color:rgba(229,115,115,0.5);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-display)">Inimigos</div>
+    <div class="card-row">
+      <div class="fight-card enemy">
+        <div class="fc-top"><span class="fc-ico">🪓</span><span class="fc-name">Thalric</span><span class="fc-ac">🛡️15</span></div>
+        <div class="fc-bars"><div class="hp-bar" style="width:100%"><div class="hp-fill high" style="width:100%"></div></div></div>
+        <div style="font-size:9px;color:var(--text-dim);margin-top:2px">HP 26/26 — ⚔️ Atacar jogador</div>
+      </div>
+    </div>
+    <div style="height:1px;background:linear-gradient(90deg,transparent,var(--border-gold),transparent);margin:4px 0"></div>
+    <div style="font-size:9px;color:rgba(100,181,246,0.5);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-display)">Seu grupo</div>
+    <div class="card-row">
+      <div class="fight-card player" style="border-color:rgba(196,149,58,0.4);box-shadow:0 0 8px rgba(196,149,58,0.15)">
+        <div class="fc-top"><span class="fc-ico">🎻</span><span class="fc-name">Ryaiael</span><span class="fc-ac">🛡️14</span></div>
+        <div class="fc-bars">
+          <div class="hp-bar" style="width:100%"><div class="hp-fill high" style="width:80%"></div></div>
+          <div class="mp-bar" style="width:100%"><div class="mp-fill" style="width:60%"></div></div>
+        </div>
+        <div style="font-size:9px;color:var(--text-dim);margin-top:2px">HP 20/25 — MP 6/10</div>
+      </div>
+    </div>
+  </div>
+  <div class="toast hit">A defesa do inimigo resiste.</div>
+  <div class="timer-w"><div class="timer-h"><span class="timer-lbl">⏱ Seu turno</span><span class="timer-num">15s</span></div><div class="timer-bar"><div class="timer-fill warn" style="width:50%"></div></div></div>
+  <div class="act-bar"><div class="act-grid g4">
+    <div class="act-btn primary"><span class="ico">⚔️</span>Atacar</div>
+    <div class="act-btn"><span class="ico">✨</span>Skills</div>
+    <div class="act-btn"><span class="ico">🎒</span>Itens</div>
+    <div class="act-btn danger"><span class="ico">🏃</span>Fugir</div>
+  </div></div>
+</div></div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- MOCKUP 7: Foco 1v1 (Arena especifico) -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div style="position:relative;padding-top:32px">
+<div class="phone-label">7. Foco 1v1<span class="phone-sub">Layout especifico para duelos na Arena</span></div>
+<div class="phone-frame">
+  <div class="hdr"><span class="hdr-title">Arena de Combate — Tier Ferro</span><span class="hdr-badge">R1</span></div>
+  <div class="focus-bf">
+    <div class="focus-unit enemy">
+      <div class="f-ico">🪓</div>
+      <div class="f-name">Thalric Pedradura</div>
+      <div class="f-stats"><span>Barbaro</span><span>🛡️ AC 15</span><span>⚔️ +3</span></div>
+      <div class="f-hp-wrap"><div class="hp-bar" style="height:6px"><div class="hp-fill high" style="width:100%"></div></div></div>
+      <div style="font-size:11px;color:var(--text-dim)">HP 26/26</div>
+      <div style="font-size:9px;padding:3px 10px;background:rgba(140,30,30,0.4);border-radius:6px;color:#ff8a80;margin-top:4px">Intencao: ⚔️ Atacar</div>
+    </div>
+    <div class="focus-vs">— VS —</div>
+    <div class="focus-unit active">
+      <div class="f-ico" style="border-color:var(--gold);box-shadow:0 0 20px rgba(196,149,58,0.3)">🎻</div>
+      <div class="f-name" style="color:var(--gold-light)">Ryaiael</div>
+      <div class="f-stats"><span>Bardo Nv.4</span><span>🛡️ AC 14</span><span>⚔️ +4</span></div>
+      <div class="f-hp-wrap"><div class="hp-bar" style="height:6px"><div class="hp-fill high" style="width:80%"></div></div></div>
+      <div style="font-size:11px;color:var(--text-dim)">HP 20/25 — MP 6/10</div>
+    </div>
+  </div>
+  <div class="toast miss">Thalric balanca o machado — voce desvia!</div>
+  <div class="timer-w"><div class="timer-h"><span class="timer-lbl">⏱ Seu turno</span><span class="timer-num">20s</span></div><div class="timer-bar"><div class="timer-fill" style="width:67%"></div></div></div>
+  <div class="act-bar"><div class="act-grid g2">
+    <div class="act-btn primary"><span class="ico">⚔️</span>Atacar</div>
+    <div class="act-btn"><span class="ico">✨</span>Habilidades</div>
+  </div><div class="act-grid g3" style="margin-top:4px">
+    <div class="act-btn"><span class="ico">🎒</span>Itens</div>
+    <div class="act-btn"><span class="ico">🛡️</span>Esquivar</div>
+    <div class="act-btn danger"><span class="ico">🏃</span>Fugir</div>
+  </div></div>
+</div></div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- MOCKUP 8: Timeline Conectada (Into the Breach style) -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div style="position:relative;padding-top:32px">
+<div class="phone-label">8. Timeline Conectada<span class="phone-sub">Estilo Into the Breach — nos conectados por linha</span></div>
+<div class="phone-frame">
+  <div class="timeline-tq">
+    <div class="tl-node enemy"><div class="tl-ico">🪓</div><div class="tl-nm">Thair</div></div>
+    <div class="tl-line done"></div>
+    <div class="tl-node active"><div class="tl-ico">🎻</div><div class="tl-nm">Ryais</div></div>
+    <div class="tl-line"></div>
+    <div class="tl-node enemy"><div class="tl-ico">🗡️</div><div class="tl-nm">Orc</div></div>
+    <div class="tl-line"></div>
+    <div class="tl-node"><div class="tl-ico">🛡️</div><div class="tl-nm">Bjorn</div></div>
+  </div>
+  <div class="hdr"><span class="hdr-title">Arena de Combate</span><span class="hdr-badge">R1 ☀️</span></div>
+  <div class="bf">
+    <div class="bf-lbl" style="color:rgba(229,115,115,0.5)">inimigos</div>
+    <div class="bf-row">
+      <div class="cell occ enemy" style="position:relative"><span class="intent-badge">⚔️</span><div class="unit-ico">🪓</div><div class="hp-bar"><div class="hp-fill high" style="width:100%"></div></div><div class="hp-num">26</div></div>
+      <div class="cell"></div>
+      <div class="cell occ enemy" style="position:relative"><span class="intent-badge">🏹</span><div class="unit-ico">🗡️</div><div class="hp-bar"><div class="hp-fill mid" style="width:60%"></div></div><div class="hp-num">12</div></div>
+      <div class="cell"></div>
+    </div>
+    <div class="bf-div"></div>
+    <div class="bf-lbl" style="color:rgba(100,181,246,0.5)">aliados</div>
+    <div class="bf-row">
+      <div class="cell occ player active"><div class="unit-ico">🎻</div><div class="hp-bar"><div class="hp-fill high" style="width:80%"></div></div><div class="hp-num">20</div></div>
+      <div class="cell occ ally"><div class="unit-ico">🛡️</div><div class="hp-bar"><div class="hp-fill high" style="width:90%"></div></div><div class="hp-num">30</div></div>
+      <div class="cell"></div><div class="cell"></div>
+    </div>
+  </div>
+  <div class="toast heal">Bjorn usa Pocao de Cura — +8 HP!</div>
+  <div class="timer-w"><div class="timer-h"><span class="timer-lbl">⏱ Seu turno</span><span class="timer-num">30s</span></div><div class="timer-bar"><div class="timer-fill" style="width:100%"></div></div></div>
+  <div class="act-bar"><div class="act-grid g4">
+    <div class="act-btn primary"><span class="ico">⚔️</span>Atacar</div>
+    <div class="act-btn"><span class="ico">✨</span>Skills</div>
+    <div class="act-btn"><span class="ico">🎒</span>Itens</div>
+    <div class="act-btn danger"><span class="ico">🏃</span>Fugir</div>
+  </div></div>
+</div></div>
+
+</body>
+</html>
