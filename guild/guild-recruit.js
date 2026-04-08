@@ -45,9 +45,9 @@ function _renderRecruitList() {
         html += '<div class="guild-card-icon">' + (r.icon || '&#x1F9D1;') + '</div>';
         html += '<div class="guild-card-info">';
         html += '<div class="guild-card-name">' + _esc(r.name);
-        if (r.hired) html += ' <span style="color:var(--v-gold-dim);font-size:var(--v-font-xs)">(no grupo)</span>';
+        if (r.hired) html += ' <span style="color:var(--v-gold-dim);font-size:var(--v-font-xs)">(já no grupo)</span>';
         html += '</div>';
-        html += '<div class="guild-card-sub">' + _esc(r.class_name || '') + ' Nv.' + (r.level || 1) + ' &middot; ' + (r.cost || 0) + ' <span class="vi vi-coin sm"></span>';
+        html += '<div class="guild-card-sub">' + _esc(r.class_name || '') + ' · Nível ' + (r.level || 1) + ' &middot; ' + (r.cost || 0) + ' <span class="vi vi-coin sm"></span>';
         if (r.rehire) html += ' <span style="color:var(--v-gold)">&#x267B; Recontratar</span>';
         html += '</div></div>';
         html += '<div class="guild-card-arrow">&#x25B8;</div></div>';
@@ -86,18 +86,18 @@ window.showRecruitDetail = function(npcId) {
     html += '<div class="guild-detail-header">';
     html += '<div class="guild-detail-icon">' + (r.icon || '&#x1F9D1;') + '</div>';
     html += '<div class="guild-detail-name">' + _esc(r.name) + '</div>';
-    html += '<div class="guild-detail-role">' + _esc(r.class_name || '') + ' - Nivel ' + (r.level || 1) + '</div></div>';
+    html += '<div class="guild-detail-role">' + _esc(r.class_name || '') + ' · Nível ' + (r.level || 1) + '</div></div>';
 
     html += '<div class="guild-detail-section"><div class="guild-detail-section-title">Custo de Recrutamento</div>';
     html += '<div style="font-size:var(--v-font-body);color:var(--v-gold)">' + (r.cost || 0) + ' <span class="vi vi-coin sm"></span></div>';
-    if (r.rehire) html += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim);margin-top:4px">Desconto por recontratacao</div>';
+    if (r.rehire) html += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim);margin-top:4px">Desconto por recontratação</div>';
     html += '</div>';
 
     var gold = (G.data && G.data.gold) || 0;
     var canAfford = gold >= (r.cost || 0);
     var partyFull = (_recruitData.party_count || 0) >= (_recruitData.party_max || 3);
     var disabled = (!canAfford || partyFull || r.hired) ? ' disabled' : '';
-    var reason = r.hired ? 'Ja no grupo' : (partyFull ? 'Grupo cheio (3/3)' : (!canAfford ? 'Ouro insuficiente' : ''));
+    var reason = r.hired ? 'Já no grupo' : (partyFull ? 'Grupo cheio (3/3)' : (!canAfford ? 'Ouro insuficiente' : ''));
     html += '<button class="guild-action-btn primary"' + disabled + ' onclick="_hireRecruit(\'' + _esc(r.id) + '\')">&#x1F4B0; Contratar (' + (r.cost || 0) + ' <span class="vi vi-coin sm"></span>)</button>';
     if (reason) html += '<div style="text-align:center;color:var(--v-text-dim);font-size:var(--v-font-sm);margin-top:var(--v-space-sm)">' + _esc(reason) + '</div>';
 

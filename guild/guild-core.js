@@ -47,7 +47,7 @@ var _TIERS = [
     { max: -50, cls: 'hostile', label: 'Hostil' },
     { max: -25, cls: 'cold',    label: 'Frio' },
     { max:  25, cls: 'neutral', label: 'Neutro' },
-    { max:  50, cls: 'warm',    label: 'Amigavel' },
+    { max:  50, cls: 'warm',    label: 'Amigável' },
     { max:  75, cls: 'loyal',   label: 'Leal' }
 ];
 function _approvalTier(v) {
@@ -217,6 +217,18 @@ window._renderPlayerInfo = _renderPlayerInfo;
 
 function initGuild() {
     var S = window.S || {};
+    /* SPA: sessão pode vir só de __spaRouteParams (ex.: mapa mundo → Guilda) */
+    var _spa = window.__spaRouteParams || {};
+    if (_spa.token) S.token = _spa.token;
+    if (_spa.api) {
+        var ab = _spa.api;
+        if (typeof ab === 'string') {
+            try { ab = decodeURIComponent(ab); } catch (e) { /* keep raw */ }
+        }
+        S.apiBase = String(ab || '').replace(/\/$/, '');
+    }
+    if (_spa.uid) S.uid = parseInt(_spa.uid, 10) || S.uid || 0;
+    window.S = S;
     if (!S.apiBase || !S.token) {
         console.error('[GUILD] Parametros de sessao ausentes.');
         showGuildError('Erro de sessao. Tente reabrir a guilda.');

@@ -21,7 +21,7 @@ window.renderPartyTab = function() {
         html += '<div class="guild-card-icon">' + (m.icon || '&#x2694;') + '</div>';
         html += '<div class="guild-card-info">';
         html += '<div class="guild-card-name">' + _esc(m.name) + '</div>';
-        html += '<div class="guild-card-sub">' + _esc(m.class_name || '') + ' Nv.' + (m.level || 1);
+        html += '<div class="guild-card-sub">' + _esc(m.class_name || '') + ' · Nível ' + (m.level || 1);
         html += ' <span class="guild-approval-badge tier-' + tier.cls + '">' + tier.label + '</span></div>';
         html += '<div class="guild-card-hp">';
         html += '<div class="v-bar-track ' + hpCls + '"><div class="v-bar-fill" style="width:' + hpPct + '%;background:' + hpColor + '"></div></div>';
@@ -48,7 +48,7 @@ function _renderMemberDetail(m) {
     html += '<div class="guild-detail-header">';
     html += '<div class="guild-detail-icon">' + (m.icon || '&#x2694;') + '</div>';
     html += '<div class="guild-detail-name">' + _esc(m.name) + '</div>';
-    html += '<div class="guild-detail-role">' + _esc(m.class_name || '') + ' - Nivel ' + (m.level || 1) + '</div></div>';
+    html += '<div class="guild-detail-role">' + _esc(m.class_name || '') + ' · Nível ' + (m.level || 1) + '</div></div>';
 
     html += '<div class="guild-detail-section"><div class="guild-detail-section-title">Vitalidade</div>';
     html += '<div class="v-popup-text-dim">HP ' + (m.hp || 0) + '/' + (m.hp_max || 0) + '</div>';

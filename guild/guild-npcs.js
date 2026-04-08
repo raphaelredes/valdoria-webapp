@@ -43,7 +43,7 @@ function _renderBraunDetail() {
     html += '<div class="guild-detail-role">Veterano da Guilda &middot; ' + _esc(_braun.stage || '') + '</div></div>';
 
     html += '<div class="guild-npc-dialogue" id="npc-dialogue-box"></div>';
-    html += '<div class="guild-detail-section"><div class="guild-detail-section-title">Historias ouvidas: ' + (_braun.stories_heard || 0) + '</div></div>';
+    html += '<div class="guild-detail-section"><div class="guild-detail-section-title">Histórias ouvidas: ' + (_braun.stories_heard || 0) + '</div></div>';
 
     showGuildDetail(html);
     setTimeout(function() { _typewriteText(_braun.greeting || 'Hmm... mais um aventureiro.'); }, 200);

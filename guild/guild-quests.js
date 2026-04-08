@@ -24,10 +24,10 @@ function _renderQuestBoard() {
 
     var html = '';
     if (_questData.daily_max) {
-        html += '<div style="text-align:center;font-size:var(--v-font-sm);color:var(--v-text-dim);margin-bottom:var(--v-space-md)">Diarias: ' + (_questData.daily_done || 0) + '/' + _questData.daily_max + '</div>';
+        html += '<div style="text-align:center;font-size:var(--v-font-sm);color:var(--v-text-dim);margin-bottom:var(--v-space-md)">Diárias: ' + (_questData.daily_done || 0) + '/' + _questData.daily_max + '</div>';
     }
 
-    var catLabels = { daily: 'Diarias', side: 'Secundarias', story: 'Historia', guild: 'Da Guilda' };
+    var catLabels = { daily: 'Diárias', side: 'Secundárias', story: 'História', guild: 'Da Guilda' };
     var groups = {};
     for (var i = 0; i < quests.length; i++) {
         var cat = quests[i].cat || 'guild';
@@ -65,10 +65,10 @@ window.showQuestDetail = function(qid) {
     html += '<div class="guild-detail-header">';
     html += '<div class="guild-detail-icon">&#x1F4DC;</div>';
     html += '<div class="guild-detail-name">' + _esc(q.n) + '</div>';
-    html += '<div class="guild-detail-role">' + _esc(q.cat || 'Missao') + ' - Nv.' + (q.lvl || 1) + '</div></div>';
+    html += '<div class="guild-detail-role">' + _esc(q.cat || 'Missão') + ' · Nível ' + (q.lvl || 1) + '</div></div>';
 
     if (q.desc) {
-        html += '<div class="guild-detail-section"><div class="guild-detail-section-title">Descricao</div>';
+        html += '<div class="guild-detail-section"><div class="guild-detail-section-title">Descrição</div>';
         html += '<div style="font-size:var(--v-font-body);color:var(--v-text);line-height:1.6">' + _esc(q.desc) + '</div></div>';
     }
 

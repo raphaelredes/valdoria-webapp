@@ -66,7 +66,7 @@ function _renderTraining() {
             for (var k = 0; k < ki.length; k++) known.push({ label: cats[c2].label, item: ki[k] });
         }
         if (known.length) {
-            html += '<div class="guild-training-group-title v-popup-mt-lg">Ja aprendidos</div>';
+            html += '<div class="guild-training-group-title v-popup-mt-lg">Já aprendidos</div>';
             for (var kk = 0; kk < known.length; kk++) {
                 html += '<div class="guild-training-card v-popup-disabled">';
                 html += '<div class="guild-training-name">&#x2705; ' + _esc(known[kk].item.n || known[kk].item.name || '') + '</div>';
@@ -84,7 +84,7 @@ window._startTraining = function(category, itemId, name) {
     if (typeof vPopup !== 'undefined') {
         vPopup.show({
             header: 'Iniciar Treinamento',
-            body: 'Treinar <b>' + _esc(name) + '</b>?<br>Sessoes: ' + (_trainingData && _trainingData.sessions_total || '?') + '<br>Custo por sessao: ' + (_trainingData && _trainingData.cost || 25) + ' <span class="vi vi-coin sm"></span>',
+            body: 'Treinar <b>' + _esc(name) + '</b>?<br>Sessões: ' + (_trainingData && _trainingData.sessions_total || '?') + '<br>Custo por sessão: ' + (_trainingData && _trainingData.cost || 25) + ' <span class="vi vi-coin sm"></span>',
             actions: '<button class="v-popup-btn v-popup-btn--success" data-action="confirm">Iniciar</button>'
                    + '<button class="v-popup-btn v-popup-btn--cancel" data-action="cancel">Cancelar</button>',
             onAction: function(action) {

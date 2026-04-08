@@ -103,9 +103,13 @@ var v = Date.now();
     <span class="bottom-btn-icon">📍</span>
     <span class="bottom-btn-label">Posição</span>
   </button>
-  <button class="bottom-btn" id="btn-journal" aria-label="Diario de viagem">
+  <button class="bottom-btn" id="btn-party" aria-label="Ver grupo de aventureiros">
+    <span class="bottom-btn-icon">&#x1F465;</span>
+    <span class="bottom-btn-label">Grupo</span>
+  </button>
+  <button class="bottom-btn" id="btn-journal" aria-label="Diário de viagem">
     <span class="bottom-btn-icon">📜</span>
-    <span class="bottom-btn-label">Diario</span>
+    <span class="bottom-btn-label">Diário</span>
   </button>
   <button class="bottom-btn" id="btn-camp" aria-label="Acampar">
     <span class="bottom-btn-icon">🏕️</span>
@@ -115,6 +119,20 @@ var v = Date.now();
     <span class="bottom-btn-icon">🏰</span>
     <span class="bottom-btn-label">Retornar</span>
   </button>
+</div>
+
+<!-- ===== PARTY SUB-SCREEN ===== -->
+<div class="sub-screen" id="party-screen" style="display:none">
+  <div class="sub-header">
+    <button class="sub-back" id="party-back" aria-label="Voltar">&larr;</button>
+    <div class="sub-title">Grupo</div>
+    <div class="sub-meta" id="party-meta"></div>
+  </div>
+  <div class="sub-scroll" id="party-list"></div>
+  <div class="hub-party-footer">
+    <p class="hub-party-hint" id="party-hint">Recrutar ou dispensar aliados: Guilda na cidade.</p>
+    <button type="button" class="hub-party-guild-btn" id="party-goto-guild">Abrir Guilda</button>
+  </div>
 </div>
 
 <!-- ===== LOCATION SUB-SCREEN ===== -->

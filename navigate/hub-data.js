@@ -151,5 +151,19 @@ var MOCK_STATE = {
   weather: {
     plains: 'clear', forest: 'light_rain', swamp: 'fog', mountain: 'wind',
     desert: 'heat', snow: 'snow', cave: 'clear', volcanic: 'heat', graveyard: 'fog'
-  }
+  },
+  /* Mock aliados — mesmo esquema compacto do backend (pt) */
+  party: [
+    {
+      id: 'mock_ally_1',
+      n: 'Brenna',
+      c: 'Ladino',
+      l: 3,
+      ico: '\u{1F5E1}',
+      hp: 18,
+      mhp: 22,
+      apr: 12,
+      aff: 0
+    }
+  ]
 };

@@ -195,6 +195,7 @@ function _convertMockToHubFormat(mock) {
     q: [],
     dd: {},
     cc: 0,
+    pt: mock.party || [],
   };
 }
 
@@ -208,6 +209,8 @@ function _onDataReady() {
   if (!state.charData) state.charData = state.c || {};
   if (!state.regions) state.regions = state.rg || {};
   if (!state.weather) state.weather = state.wt || {};
+  /* Party roster: compact key pt — same schema as guild _compact_npc */
+  if (!state.partyMembers) state.partyMembers = Array.isArray(state.pt) ? state.pt : [];
 
   /* Map compact region field names from build_hub_payload() to what renderer expects */
   for (var biome in state.regions) {
@@ -920,7 +923,147 @@ function _getSelectedActivity() {
 }
 
 /* ===== BOTTOM NAV ===== */
+function _mapHubPartyMember(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  return {
+    id: raw.id,
+    name: raw.n,
+    className: raw.c,
+    level: raw.l,
+    icon: raw.ico,
+    hp: raw.hp,
+    hpMax: raw.mhp,
+    approval: raw.apr,
+    affinity: raw.aff
+  };
+}
+
+function _hubApprovalTier(v) {
+  v = v != null ? v : 0;
+  if (v < -50) return { label: 'Hostil' };
+  if (v < -25) return { label: 'Frio' };
+  if (v < 25) return { label: 'Neutro' };
+  if (v < 50) return { label: 'Amigável' };
+  if (v < 75) return { label: 'Leal' };
+  return { label: 'Devoto' };
+}
+
+function renderPartyScreen() {
+  var list = document.getElementById('party-list');
+  var meta = document.getElementById('party-meta');
+  var raw = state.partyMembers || [];
+  if (meta) meta.textContent = raw.length ? (raw.length + '/3') : '0/3';
+  if (!list) return;
+  list.textContent = '';
+  if (!raw.length) {
+    var empty = document.createElement('div');
+    empty.className = 'hub-party-empty';
+    empty.textContent = 'Nenhum aliado no grupo. Visite a Guilda na cidade para recrutar.';
+    list.appendChild(empty);
+    return;
+  }
+  for (var i = 0; i < raw.length; i++) {
+    var m = _mapHubPartyMember(raw[i]);
+    if (!m) continue;
+    var card = document.createElement('div');
+    card.className = 'hub-party-card';
+    var icon = document.createElement('div');
+    icon.className = 'hub-party-card-icon';
+    icon.textContent = m.icon || '\u2694';
+    var info = document.createElement('div');
+    info.className = 'hub-party-card-info';
+    var nameEl = document.createElement('div');
+    nameEl.className = 'hub-party-card-name';
+    nameEl.textContent = m.name || 'Aliado';
+    var sub = document.createElement('div');
+    sub.className = 'hub-party-card-sub';
+    sub.appendChild(document.createTextNode((m.className || '') + ' \u00B7 Nv.' + (m.level || 1) + ' '));
+    var tier = _hubApprovalTier(m.approval);
+    var appr = document.createElement('span');
+    appr.className = 'hub-party-approval';
+    appr.textContent = tier.label;
+    sub.appendChild(appr);
+    info.appendChild(nameEl);
+    info.appendChild(sub);
+    if (m.hpMax != null && m.hp != null) {
+      var row = document.createElement('div');
+      row.className = 'hub-party-bar-row';
+      var hpPct = m.hpMax > 0 ? Math.round((m.hp / m.hpMax) * 100) : 100;
+      var hpCls = typeof vBarHpClass === 'function' ? vBarHpClass(m.hp, m.hpMax) : 'hp';
+      var track = document.createElement('div');
+      track.className = 'v-bar-track ' + hpCls;
+      var fill = document.createElement('div');
+      fill.className = 'v-bar-fill';
+      fill.style.width = hpPct + '%';
+      track.appendChild(fill);
+      row.appendChild(track);
+      var hpLab = document.createElement('span');
+      hpLab.style.fontSize = 'var(--v-font-xs)';
+      hpLab.style.color = 'var(--v-text-dim)';
+      hpLab.style.display = 'block';
+      hpLab.style.marginTop = '4px';
+      hpLab.textContent = 'HP ' + m.hp + '/' + m.hpMax;
+      row.appendChild(hpLab);
+      info.appendChild(row);
+    }
+    card.appendChild(icon);
+    card.appendChild(info);
+    list.appendChild(card);
+  }
+}
+
+function openPartyScreen() {
+  renderPartyScreen();
+  var el = document.getElementById('party-screen');
+  if (el) el.style.display = 'flex';
+}
+
+function closePartyScreen() {
+  var el = document.getElementById('party-screen');
+  if (el) el.style.display = 'none';
+}
+
+function _navigateHubToGuild() {
+  if (!S.token || !S.api) {
+    if (typeof vToast === 'function') vToast('Abra a Guilda pelo hub da cidade.', 'warn', 2800);
+    return;
+  }
+  window.__valdoria_transitioning = true;
+  if (typeof window.S === 'object' && window.S) {
+    window.S.token = S.token;
+    window.S.apiBase = S.api.replace(/\/$/, '');
+    window.S.uid = S.uid;
+  }
+  if (window.SpaRouter && SpaRouter._routes && SpaRouter._routes.guild) {
+    SpaRouter.navigate('guild', {
+      token: S.token,
+      api: S.api,
+      uid: String(S.uid)
+    });
+  } else {
+    try {
+      var base = S.api.replace(/\/api\/?$/, '');
+      window.location.href = base + '/guild/index.html?token=' + encodeURIComponent(S.token)
+        + '&uid=' + encodeURIComponent(String(S.uid)) + '&api=' + encodeURIComponent(S.api);
+    } catch (e) {
+      console.error('[HUB] navigate guild failed', e);
+      if (typeof vToast === 'function') vToast('Não foi possível abrir a Guilda.', 'err', 2500);
+    }
+  }
+}
+
 function bindBottomNav() {
+  var btnParty = document.getElementById('btn-party');
+  if (btnParty) {
+    btnParty.addEventListener('click', function() {
+      openPartyScreen();
+    });
+  }
+  var partyBack = document.getElementById('party-back');
+  if (partyBack) partyBack.addEventListener('click', function() { closePartyScreen(); });
+  var partyGoto = document.getElementById('party-goto-guild');
+  if (partyGoto) partyGoto.addEventListener('click', function() { _navigateHubToGuild(); });
+
   document.getElementById('btn-position').addEventListener('click', function() {
     var currentBiome = _findBiome(state.currentLoc);
     if (!currentBiome) return;
