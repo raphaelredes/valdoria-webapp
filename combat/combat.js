@@ -41,25 +41,102 @@ closeCombat('victory');}
 async function transitionToInventoryFromArena(){const body={from:'combat',to:'inventory',user_id:userId,payload:{}};const _th={'Content-Type':'application/json','Authorization':`Bearer ${token}`};if(window.Telegram?.WebApp?.initData){_th['X-Telegram-Init-Data']=Telegram.WebApp.initData;}
 _th['X-Idempotency-Key']=crypto.randomUUID();try{const resp=await fetchT(`${apiBase}/api/webapp/transition`,{method:'POST',headers:_th,body:JSON.stringify(body)});if(resp.ok){const data=await resp.json();if(data.url){if(data.toast){try{localStorage.setItem('valdoria_pending_toast',data.toast);}catch(e){}}window.__valdoria_transitioning=true;valdoriaSpaNav(data.url);return;}}
 console.error('[COMBAT] Transition to inventory failed');}catch(e){console.error('[COMBAT] Transition to inventory error:',e);}}
-function renderDeathSaveReplay(state,onComplete){stopAllIntervals();var app=document.getElementById('app');var dsHist=state.ds_history||[];var ds=state.ds||{s:0,f:0};var stabilized=ds.s>=3;var _replaySkipped=false;var trackerHtml='<div class="ds-tracker">';trackerHtml+='<div class="ds-row ds-row-success"><span class="ds-row-label">\u2714</span>';for(var i=0;i<3;i++)trackerHtml+='<div class="ds-dot success-slot" data-idx="'+i+'"></div>';trackerHtml+='</div>';trackerHtml+='<div class="ds-row ds-row-failure"><span class="ds-row-label">\u2718</span>';for(var i=0;i<3;i++)trackerHtml+='<div class="ds-dot failure-slot" data-idx="'+i+'"></div>';trackerHtml+='</div></div>';app.innerHTML='<div class="death-save-replay">'+'<div class="ds-header">\u2696\uFE0F Salvaguardas contra Morte</div>'+
-trackerHtml+'<div class="ds-roll-display" id="dsRollDisplay"></div>'+'<div class="ds-roll-counter" id="dsRollCounter"></div>'+'<div class="ds-outcome" id="dsOutcome"></div>'+'<button class="v-skip-btn ds-skip" id="dsSkipBtn" style="display:none">Pular \u25B8</button>'+'</div>';if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('defeat');if(window._combatVfx)window._combatVfx.flash('rgba(120,20,20,0.35)',800);vHaptic.heavy();var skipBtn=document.getElementById('dsSkipBtn');setTimeout(function(){if(!_replaySkipped&&skipBtn)skipBtn.style.display='';},500);if(skipBtn)skipBtn.onclick=function(){if(_replaySkipped)return;_replaySkipped=true;skipBtn.style.display='none';_fillAllDotsInstant(dsHist);_showFinalOutcome();setTimeout(onComplete,1200);};function _fillAllDotsInstant(history){var si=0,fi=0;for(var h=0;h<history.length;h++){var roll=history[h];if(roll.crit){si++;}
-else if(roll.crit_fail){fi=Math.min(fi+2,3);}
-else if(roll.success){si++;}
-else{fi++;}}
-var sDots=document.querySelectorAll('.ds-dot.success-slot');var fDots=document.querySelectorAll('.ds-dot.failure-slot');for(var s=0;s<Math.min(si,3);s++){if(sDots[s])sDots[s].classList.add('filled');}
+var _DS_SUSPENSE_NARR=[
+'Vozes sussurram ao longe. Ser\u00e3o os deuses decidindo seu destino?',
+'O mundo escurece\u2026 mas algo te mant\u00e9m preso \u00e0 vida.',
+'Seu cora\u00e7\u00e3o bate fraco. Cada batida pode ser a \u00faltima.',
+'Entre a vida e a morte, voc\u00ea luta para respirar.',
+'Uma luz distante brilha\u2026 ser\u00e1 esperan\u00e7a ou o fim?',
+'As sombras se aproximam, mas uma chama interior resiste.',
+'O silencio \u00e9 absoluto. Apenas o eco do seu pulso persiste.',
+'Mem\u00f3rias passam como rel\u00e2mpagos. Sua jornada n\u00e3o pode acabar aqui.',
+];
+function renderDeathSaveReplay(state,onComplete){stopAllIntervals();var app=document.getElementById('app');var dsHist=state.ds_history||[];var ds=state.ds||{s:0,f:0};var stabilized=ds.s>=3;var _replaySkipped=false;var _replayDice=null;var _replaySafety=null;
+var trackerHtml='<div class="ds2-tracker" id="ds2Tracker">';
+trackerHtml+='<div class="ds2-row"><span class="ds2-row-icon ds2-row-success">\u2714</span>';
+for(var i=0;i<3;i++)trackerHtml+='<div class="ds2-dot ds2-dot-success" data-idx="'+i+'"></div>';
+trackerHtml+='</div><div class="ds2-row"><span class="ds2-row-icon ds2-row-failure">\u2718</span>';
+for(var i=0;i<3;i++)trackerHtml+='<div class="ds2-dot ds2-dot-failure" data-idx="'+i+'"></div>';
+trackerHtml+='</div></div>';
+app.innerHTML='<div class="ds2-screen">'
++'<div class="ds2-header">'
++'<div class="ds2-skull">\uD83D\uDC80</div>'
++'<div class="ds2-title">Salvaguardas contra a Morte</div>'
++'<div class="ds2-subtitle">d20 \u2265 10 para sobreviver</div>'
++'</div>'
++'<div class="ds2-dice-area">'
++'<div class="ds2-dice-particles" id="ds2Particles"></div>'
++'<div class="ds2-dice-canvas" id="ds2Canvas"></div>'
++'<div class="ds2-dice-label" id="ds2Label"></div>'
++'</div>'
++'<div class="ds2-result" id="ds2Result">'
++'<div class="ds2-result-value" id="ds2Value"></div>'
++'<div class="ds2-result-text" id="ds2Text"></div>'
++'<div class="ds2-result-counter" id="ds2Counter"></div>'
++'</div>'
++trackerHtml
++'<div class="ds2-narrative" id="ds2Narrative">'+_DS_SUSPENSE_NARR[Math.floor(Math.random()*_DS_SUSPENSE_NARR.length)]+'</div>'
++'<div class="ds2-outcome" id="ds2Outcome"></div>'
++'<button class="v-skip-btn ds2-skip" id="ds2Skip" style="display:none">Pular \u25B8</button>'
++'</div>';
+if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('defeat');
+if(window._combatVfx)window._combatVfx.flash('rgba(120,20,20,0.35)',800);
+vHaptic.heavy();
+var skipBtn=document.getElementById('ds2Skip');
+setTimeout(function(){if(!_replaySkipped&&skipBtn)skipBtn.style.display='';},800);
+if(skipBtn)skipBtn.onclick=function(){if(_replaySkipped)return;_replaySkipped=true;skipBtn.style.display='none';if(_replayDice){try{_replayDice.dispose();}catch(e){}}_replayDice=null;if(_replaySafety)clearTimeout(_replaySafety);_fillAllDotsInstant(dsHist);_showFinalOutcome();setTimeout(onComplete,1500);};
+function _fillAllDotsInstant(history){var si=0,fi=0;for(var h=0;h<history.length;h++){var roll=history[h];if(roll.crit)si++;else if(roll.crit_fail)fi=Math.min(fi+2,3);else if(roll.success)si++;else fi++;}
+var sDots=document.querySelectorAll('.ds2-dot-success');var fDots=document.querySelectorAll('.ds2-dot-failure');for(var s=0;s<Math.min(si,3);s++){if(sDots[s])sDots[s].classList.add('filled');}
 for(var f=0;f<Math.min(fi,3);f++){if(fDots[f])fDots[f].classList.add('filled');}}
-function _showFinalOutcome(){var outcomeEl=document.getElementById('dsOutcome');if(!outcomeEl)return;if(stabilized){outcomeEl.innerHTML='<span class="ds-outcome-text ds-stabilized">\u2728 Estabilizado! Voc\u00EA acorda com 1 HP.</span>';if(window._combatVfx)window._combatVfx.flash('rgba(68,170,136,0.3)',500);}else{outcomeEl.innerHTML='<span class="ds-outcome-text ds-death">\uD83D\uDC80 Sucumbiu aos ferimentos...</span>';if(window._combatVfx)window._combatVfx.flash('rgba(200,30,30,0.4)',600);}
-outcomeEl.classList.add('visible');}
-var successIdx=0,failIdx=0;var rollIdx=0;function _animateNextRoll(){if(_replaySkipped||rollIdx>=dsHist.length){if(!_replaySkipped){_showFinalOutcome();setTimeout(function(){if(!_replaySkipped)onComplete();},ValdoriaMotion.duration(2000,1000));}
-return;}
-var roll=dsHist[rollIdx];var rollDisplay=document.getElementById('dsRollDisplay');var rollCounter=document.getElementById('dsRollCounter');if(rollCounter)rollCounter.textContent='Rolagem '+(rollIdx+1);var lr={t:'death_save',r:roll.r,d:0,crit:roll.crit,crit_fail:roll.crit_fail,success:roll.success};_initDiceDeathSave(lr);setTimeout(function(){if(_replaySkipped)return;var dotFilled=false;if(roll.crit){var sDots=document.querySelectorAll('.ds-dot.success-slot');if(sDots[successIdx]){sDots[successIdx].classList.add('filled','pulse');dotFilled=true;}
-successIdx++;}else if(roll.crit_fail){var fDots=document.querySelectorAll('.ds-dot.failure-slot');for(var x=0;x<2&&failIdx<3;x++){if(fDots[failIdx]){fDots[failIdx].classList.add('filled','pulse');dotFilled=true;}
-failIdx++;}}else if(roll.success){var sDots2=document.querySelectorAll('.ds-dot.success-slot');if(sDots2[successIdx]){sDots2[successIdx].classList.add('filled','pulse');dotFilled=true;}
-successIdx++;}else{var fDots2=document.querySelectorAll('.ds-dot.failure-slot');if(fDots2[failIdx]){fDots2[failIdx].classList.add('filled','pulse');dotFilled=true;}
-failIdx++;}
-if(dotFilled)vHaptic.medium();if(rollDisplay){rollDisplay.textContent=roll.r;rollDisplay.className='ds-roll-display '+(roll.crit?'crit':roll.crit_fail?'crit-fail':roll.success?'success':'failure');}
-rollIdx++;setTimeout(_animateNextRoll,ValdoriaMotion.duration(800,400));},2500);}
-setTimeout(_animateNextRoll,ValdoriaMotion.duration(800,400));}
+function _showFinalOutcome(){var el=document.getElementById('ds2Outcome');if(!el)return;
+var narrEl=document.getElementById('ds2Narrative');if(narrEl)narrEl.style.display='none';
+var resultEl=document.getElementById('ds2Result');if(resultEl)resultEl.style.display='none';
+var diceArea=document.getElementById('ds2Canvas');if(diceArea)diceArea.style.display='none';
+if(stabilized){el.innerHTML='<div class="ds2-outcome-icon">\u2728</div><div class="ds2-outcome-title ds2-outcome-stable">Estabilizado!</div><div class="ds2-outcome-desc">Voc\u00ea acorda com 1 HP. A morte recuou\u2026 por agora.</div>';if(window._combatVfx)window._combatVfx.flash('rgba(68,170,136,0.3)',500);
+}else{el.innerHTML='<div class="ds2-outcome-icon">\uD83D\uDC80</div><div class="ds2-outcome-title ds2-outcome-death">Sucumbiu aos ferimentos</div><div class="ds2-outcome-desc">As sombras consumiram tudo. Sua jornada termina aqui.</div>';if(window._combatVfx)window._combatVfx.flash('rgba(200,30,30,0.4)',600);}
+el.classList.add('visible');}
+var successIdx=0,failIdx=0,rollIdx=0;
+function _updateNarrative(){var el=document.getElementById('ds2Narrative');if(!el)return;el.style.opacity='0';setTimeout(function(){if(_replaySkipped)return;el.textContent=_DS_SUSPENSE_NARR[Math.floor(Math.random()*_DS_SUSPENSE_NARR.length)];el.style.opacity='1';},300);}
+function _animateNextRoll(){if(_replaySkipped)return;
+if(rollIdx>=dsHist.length){_showFinalOutcome();setTimeout(function(){if(!_replaySkipped)onComplete();},ValdoriaMotion.duration(2500,1200));return;}
+var roll=dsHist[rollIdx];var counterEl=document.getElementById('ds2Counter');if(counterEl)counterEl.textContent='Rolagem '+(rollIdx+1)+' de '+dsHist.length;
+var valueEl=document.getElementById('ds2Value');var textEl=document.getElementById('ds2Text');var labelEl=document.getElementById('ds2Label');
+if(valueEl){valueEl.textContent='';valueEl.className='ds2-result-value';}
+if(textEl)textEl.textContent='';
+if(labelEl){labelEl.textContent='\uD83D\uDC80 Teste contra a Morte';labelEl.className='ds2-dice-label ds2-label-rolling';}
+var canvas=document.getElementById('ds2Canvas');var particles=document.getElementById('ds2Particles');
+var diceOk=false;
+if(canvas&&typeof Dice3D!=='undefined'){
+if(_replayDice){try{_replayDice.dispose();}catch(e){}}_replayDice=null;
+try{_replayDice=new Dice3D(canvas,{size:200,dieType:'d20',duration:typeof ValdoriaDice!=='undefined'?ValdoriaDice.TIMING.DEATH_SAVE_MS:1800,particlesContainer:particles});
+var faceValue=Math.min(roll.r,20);
+if(typeof sfxDiceRoll==='function')sfxDiceRoll();
+vHaptic.medium();
+_replayDice.roll(faceValue,function(){if(_replaySkipped)return;_showRollResult(roll);});
+diceOk=true;}catch(e){console.warn('[COMBAT] DS replay Dice3D failed:',e);}}
+if(!diceOk){setTimeout(function(){if(_replaySkipped)return;_showRollResult(roll);},800);}
+_replaySafety=setTimeout(function(){if(!_replaySkipped)_showRollResult(roll);},5000);}
+function _showRollResult(roll){if(_replaySkipped)return;if(_replaySafety){clearTimeout(_replaySafety);_replaySafety=null;}
+var valueEl=document.getElementById('ds2Value');var textEl=document.getElementById('ds2Text');var labelEl=document.getElementById('ds2Label');
+var cls='';var resultText='';var labelText='';
+if(roll.crit){cls='ds2-crit';resultText='\u2728 CR\u00cdTICO! Voc\u00ea desperta com 1 HP!';labelText='\uD83C\uDF1F NAT 20!';vHaptic.burst('crit');if(typeof sfxCrit==='function')sfxCrit();if(window._combatVfx)window._combatVfx.flash('rgba(255,215,0,0.4)',500);
+}else if(roll.crit_fail){cls='ds2-crit-fail';resultText='\uD83D\uDC80 FALHA CR\u00cdTICA! Duas falhas!';labelText='\u2620\uFE0F NAT 1!';vHaptic.error();if(window._combatVfx)window._combatVfx.flash('rgba(200,30,30,0.4)',500);
+}else if(roll.success){cls='ds2-success';resultText='\u2705 Sucesso! (precisa 10+)';labelText='\u2705 Sucesso';vHaptic.medium();
+}else{cls='ds2-failure';resultText='\u274C Falha! (precisa 10+)';labelText='\u274C Falha';vHaptic.tap();if(window._combatVfx)window._combatVfx.flash('rgba(200,30,30,0.2)',300);}
+if(valueEl){valueEl.textContent=roll.r;valueEl.className='ds2-result-value '+cls;}
+if(textEl)textEl.textContent=resultText;
+if(labelEl){labelEl.textContent=labelText;labelEl.className='ds2-dice-label '+cls;}
+setTimeout(function(){if(_replaySkipped)return;
+var dotFilled=false;
+if(roll.crit){var sDots=document.querySelectorAll('.ds2-dot-success');if(sDots[successIdx]){sDots[successIdx].classList.add('filled','pulse');dotFilled=true;}successIdx++;
+}else if(roll.crit_fail){var fDots=document.querySelectorAll('.ds2-dot-failure');for(var x=0;x<2&&failIdx<3;x++){if(fDots[failIdx]){fDots[failIdx].classList.add('filled','pulse');dotFilled=true;}failIdx++;}
+}else if(roll.success){var sDots2=document.querySelectorAll('.ds2-dot-success');if(sDots2[successIdx]){sDots2[successIdx].classList.add('filled','pulse');dotFilled=true;}successIdx++;
+}else{var fDots2=document.querySelectorAll('.ds2-dot-failure');if(fDots2[failIdx]){fDots2[failIdx].classList.add('filled','pulse');dotFilled=true;}failIdx++;}
+if(dotFilled)vHaptic.medium();
+_updateNarrative();rollIdx++;
+setTimeout(_animateNextRoll,ValdoriaMotion.duration(1800,900));
+},ValdoriaMotion.duration(1200,600));}
+setTimeout(_animateNextRoll,ValdoriaMotion.duration(1200,600));}
 function renderResolution(state){stopAllIntervals();_initDiceAnimated=false;const isVictory=state.phase==='victory';const isFled=state.phase==='fled';if(typeof ValdoriaAudio!=='undefined'){if(isVictory&&!isFled){ValdoriaAudio.play('victory');}else if(!isVictory&&!isFled){ValdoriaAudio.play('defeat');}}
 const rawText=state.result_text||state.action_result_text||'';const app=document.getElementById('app');let rewardsHtml='';let narrativeLines=[];const rewards=state.rewards;if(rewards&&isVictory&&!isFled){if(rewards.xp>0){rewardsHtml+=`<div class="res-reward"><span class="res-icon">⭐</span><span>+${rewards.xp} XP</span></div>`;}
 if(rewards.gold>0){rewardsHtml+=`<div class="res-reward"><span class="res-icon">🪙</span><span>+${rewards.gold} Valdoritas</span></div>`;}
