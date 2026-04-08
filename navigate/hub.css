@@ -375,6 +375,18 @@ body {
   border: 1px solid var(--v-gold-20, rgba(196,149,58,0.2));
 }
 
+/* PIN dourado (mapa) — substitui o texto "Aqui" */
+.hub-map-pin {
+  flex-shrink: 0;
+  background: center / contain no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 32'%3E%3Cpath d='M12 0C7 0 3 4 3 9c0 7 9 23 9 23s9-16 9-23c0-5-4-9-9-9z' fill='%23c4953a' stroke='%238b6420' stroke-width='1'/%3E%3Ccircle cx='12' cy='9' r='3' fill='%231a1510'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
+}
+.hub-map-pin--card { width: 20px; height: 24px; }
+.hub-map-pin--inline { width: 14px; height: 18px; margin-right: 2px; }
+.region-loc-item--here { align-items: center; }
+.region-loc-item--here .loc-item-name { color: var(--v-gold-light, #dbb668); font-weight: 600; }
+
 /* ===== DETAIL SCREEN ===== */
 .detail-icon-row {
   display: flex; align-items: center; gap: var(--v-space-md, 8px);

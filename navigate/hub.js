@@ -236,13 +236,23 @@ function _onDataReady() {
     setTimeout(function() { HubBiomeArt.initCards(); }, 50);
   }
 
-  /* Hide SPA loading overlay — hub has no loading controller, content renders instantly */
-  var _ld = document.getElementById('loading');
-  if (_ld && !_ld.classList.contains('hidden')) {
-    _ld.classList.add('hidden');
-    _ld.style.display = 'none';
-    console.warn('[HUB] Loading overlay hidden');
+  /* SPA: router _showLoading() usa vProcessing "Carregando..."; init retorna __loading_delegated__
+     então o shell NÃO chama _hideLoading — precisamos fechar vProcessing aqui após o primeiro paint. */
+  function _hideHubLoadingOverlays() {
+    var _ld = document.getElementById('loading');
+    if (_ld && !_ld.classList.contains('hidden')) {
+      _ld.classList.add('hidden');
+      _ld.style.display = 'none';
+      console.warn('[HUB] #loading overlay hidden');
+    }
+    if (typeof vProcessing !== 'undefined' && vProcessing.isActive && vProcessing.isActive()) {
+      vProcessing.hide();
+      console.warn('[HUB] vProcessing (transicao SPA) oculto — hub pronto');
+    }
   }
+  requestAnimationFrame(function() {
+    requestAnimationFrame(_hideHubLoadingOverlays);
+  });
 
   /* Apply font preference */
   if (typeof applyFont === 'function') {
@@ -357,8 +367,13 @@ function _buildRegionCard(key, reg, meta) {
     for (var l = 0; l < reg.locs.length; l++) {
       var loc = reg.locs[l];
       var disc = reg.discovered.indexOf(loc.id) !== -1;
-      h += '<div class="region-loc-item">';
-      h += '<div class="loc-dot ' + (disc ? 'loc-dot-on' : 'loc-dot-off') + '"></div>';
+      var isHere = loc.id === state.currentLoc;
+      h += '<div class="region-loc-item' + (isHere ? ' region-loc-item--here' : '') + '">';
+      if (isHere) {
+        h += '<span class="hub-map-pin hub-map-pin--inline" role="img" aria-label="Local atual"></span>';
+      } else {
+        h += '<div class="loc-dot ' + (disc ? 'loc-dot-on' : 'loc-dot-off') + '"></div>';
+      }
       h += '<div class="loc-item-name' + (disc ? '' : ' unknown') + '">' + (disc ? loc.n : 'Local desconhecido') + '</div>';
       if (disc && typeof getRelativeDifficulty === 'function') {
         var _rdL = getRelativeDifficulty(loc.d, state.charData?.lv || 1);
@@ -513,6 +528,13 @@ function openLocations(biome) {
   document.getElementById('loc-back').onclick = function() {
     document.getElementById('locations-screen').style.display = 'none';
   };
+
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      var here = document.querySelector('#loc-list .loc-card.here');
+      if (here) here.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
 }
 
 function _buildLocCard(loc, disc, isCurrent, meta, biome, idx) {
@@ -538,7 +560,7 @@ function _buildLocCard(loc, disc, isCurrent, meta, biome, idx) {
     h += '<div class="loc-card-meta">???</div>';
   }
   h += '</div>';
-  if (isCurrent) h += '<span class="loc-card-badge">Aqui</span>';
+  if (isCurrent) h += '<span class="hub-map-pin hub-map-pin--card" role="img" aria-label="Local atual"></span>';
   else if (disc) h += '<span class="loc-card-arrow">\u203A</span>';
   else if (isConnected) h += '<span class="loc-card-arrow" style="color:var(--v-gold,#c4953a)">\u203A</span>';
 
@@ -903,7 +925,16 @@ function bindBottomNav() {
     var currentBiome = _findBiome(state.currentLoc);
     if (!currentBiome) return;
     var card = document.querySelector('.region-card[data-biome="' + currentBiome + '"]');
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (!card) return;
+    var all = document.querySelectorAll('.region-card.expanded');
+    for (var i = 0; i < all.length; i++) all[i].classList.remove('expanded');
+    card.classList.add('expanded');
+    setTimeout(function() {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var hereRow = card.querySelector('.region-loc-item--here');
+      if (hereRow) hereRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      openLocations(currentBiome);
+    }, 60);
   });
 
   document.getElementById('btn-journal').addEventListener('click', function() {

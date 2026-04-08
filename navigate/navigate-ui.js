@@ -845,7 +845,7 @@ function openQuickList() {
             }
 
             let badges = '';
-            if (isCurr) badges += '<span class="ql-badge">Aqui</span>';
+            if (isCurr) badges += '<span class="ql-badge ql-badge-pin" role="img" aria-label="Local atual"></span>';
             const locQuests = (S.quests || []).filter(q => q.loc === loc.id);
             if (locQuests.length > 0) badges += '<span class="ql-badge">\ud83d\udcdc' + locQuests.length + '</span>';
             const locDungeons = (S.dungeons || {})[loc.id] || [];
