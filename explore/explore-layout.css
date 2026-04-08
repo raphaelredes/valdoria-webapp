@@ -20,7 +20,7 @@
 }
 
 /* --- Reset + Body --- */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*:not(html) { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     overflow: hidden;
     display: flex;
