@@ -3,16 +3,16 @@
 .initiative-order-overlay {
     position: fixed;
     inset: 0;
-    z-index: var(--v-z-overlay, 500);
+    z-index: var(--v-z-modal, 5000);
     display: none;
     align-items: center;
     justify-content: center;
     padding: var(--v-space-md);
     padding-bottom: max(var(--v-space-md), env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
-    background: rgba(15, 12, 8, 0.88);
-    -webkit-backdrop-filter: blur(2px);
-    backdrop-filter: blur(2px);
+    background: rgba(15, 12, 8, 0.94);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--v-transition-base, 0.2s) ease;
@@ -101,6 +101,34 @@
     padding: var(--v-space-lg);
     font-size: var(--v-font-body, 14px);
     color: var(--v-text-dim, #a09484);
+}
+
+/* Durante a ordem de iniciativa, o tabuleiro/timer ficam ocultos — só o modal importa */
+body.combat-init-order-active #app,
+body.combat-init-order-active #vfxCanvas {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--v-transition-base, 0.2s) ease;
+}
+
+/* Pular: fixo na base do ecrã, fora da lista de rolagens (evita sobreposição) */
+.initiative-order-overlay .initiative-order-skip {
+    position: fixed;
+    left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    z-index: 2;
+    min-height: 44px;
+    min-width: 44px;
+    padding: var(--v-space-sm) var(--v-space-xl);
+    font-family: var(--v-font, serif);
+    font-size: var(--v-font-base, 13px);
+    color: var(--v-text-dim, #a09484);
+    background: rgba(42, 36, 32, 0.92);
+    border: 1px solid var(--v-gold-25);
+    border-radius: var(--v-radius-sm, 6px);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body.perf-lite .initiative-order-card {
