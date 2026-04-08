@@ -78,11 +78,18 @@
     </div>
     <!-- Ordem de combate (iniciativa) — overlay centralizado; conteúdo preenchido por combat.js -->
     <div id="initiativeOrderOverlay" class="initiative-order-overlay" aria-hidden="true">
-        <div class="initiative-order-card" role="dialog" aria-modal="true" aria-labelledby="initiativeOrderTitle">
-            <div class="initiative-order-header" id="initiativeOrderTitle">📜 Ordem de combate</div>
+        <div class="initiative-order-card initiative-order-card--encounter" role="dialog" aria-modal="true" aria-labelledby="initiativeOrderTitle">
+            <div class="initiative-order-encounter-head">
+                <div class="initiative-order-divider" aria-hidden="true"></div>
+                <div class="initiative-order-icon" aria-hidden="true">⚔️</div>
+                <h2 class="initiative-order-kicker" id="initiativeOrderTitle">INICIATIVA</h2>
+                <span class="initiative-order-pill">COMBATE</span>
+                <div class="initiative-order-divider" aria-hidden="true"></div>
+            </div>
             <p class="initiative-order-sub">Rolagens de iniciativa e ordem dos turnos nesta rodada.</p>
             <div class="initiative-order-body">
-                <div id="init-waiting-msg" class="init-waiting-msg">⚔️ Aguardando início do combate…</div>
+                <div id="init-intro-slot" class="init-intro-slot" style="display:none"></div>
+                <div id="init-waiting-msg" class="init-waiting-msg">Aguardando início do combate…</div>
                 <div id="init-dice-area"></div>
             </div>
             <div class="initiative-order-actions">
