@@ -163,6 +163,44 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Ficha do personagem (dados estruturados — substitui texto com barras emoji)
+    if (data.char_details && typeof renderCharDetails === 'function') {
+        var sheetEl = document.createElement('div');
+        sheetEl.className = 'unified-popup-char-sheet';
+        renderCharDetails(sheetEl, data.char_details);
+        el.appendChild(sheetEl);
+        if (data.toast) {
+            var toastDiv = document.createElement('div');
+            toastDiv.className = 'unified-popup-toast';
+            toastDiv.textContent = data.toast;
+            el.appendChild(toastDiv);
+        }
+        if (data.buttons && data.buttons.length > 0) {
+            var _POPUP_SKIP_CBS = {"action_universal_back":1, "action_toggle_footer":1, "main_menu":1, "action_menu":1};
+            var btnsDiv = document.createElement('div');
+            btnsDiv.className = 'unified-popup-buttons';
+            for (var r = 0; r < data.buttons.length; r++) {
+                var row = data.buttons[r];
+                if (!row || row.length === 0) continue;
+                var rowDiv = document.createElement('div');
+                rowDiv.className = row.length >= 2 ? 'unified-popup-btn-row' : 'unified-popup-btn-row unified-popup-btn-row--single';
+                for (var b = 0; b < row.length; b++) {
+                    var btnData = row[b];
+                    if (btnData.is_back || _POPUP_SKIP_CBS[btnData.cb]) continue;
+                    var btn = document.createElement('button');
+                    btn.className = 'v-popup-btn';
+                    btn.textContent = btnData.text || '';
+                    if (btnData.cb) btn.setAttribute('data-action', btnData.cb);
+                    else if (btnData.url) btn.setAttribute('data-url', btnData.url);
+                    rowDiv.appendChild(btn);
+                }
+                btnsDiv.appendChild(rowDiv);
+            }
+            el.appendChild(btnsDiv);
+        }
+        return el;
+    }
+
     // Image banner (if present)
     if (data.image_url) {
         var img = document.createElement('img');

@@ -115,7 +115,7 @@ if(data.settings_data&&typeof isSettingsPopupOpen==='function'&&isSettingsPopupO
 /* === NON-LOCATION POPUP INTERCEPTORS === */
 if(data.skills_data&&typeof _showSkillsPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showSkillsPopup(data);return;}
 if(data.skill_detail_data&&typeof _showSkillDetailPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showSkillDetailPopup(data);return;}
-if(data.char_details&&typeof _showCharDetailsPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showCharDetailsPopup(data);return;}
+if(data.char_details&&typeof _showCharDetailsPopup==='function'&&!data._is_popup){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showCharDetailsPopup(data);return;}
 if(data.allies&&data.allies.length>0&&!(data.text&&data.text.length>50)&&typeof _showAlliesPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showAlliesPopup(data);return;}
 if(data.member_detail&&typeof _showMemberDetailPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showMemberDetailPopup(data);return;}
 if(data.inn_select&&typeof _showInnSelectPopup==='function'){hideLocationTransition();if(window.actionGuard)actionGuard.release();_showInnSelectPopup(data);return;}

@@ -7,6 +7,18 @@
     gap: var(--v-space-sm, 6px);
 }
 
+/* Ficha do personagem — área rolável dentro do popup */
+.unified-popup-char-sheet {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: min(58vh, 520px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: calc(-1 * var(--v-space-xs, 2px)) 0 var(--v-space-sm, 6px);
+    padding-right: var(--v-space-xs, 2px);
+    text-align: left;
+}
+
 /* Banner image inside popup */
 .unified-popup-banner {
     width: 100%;
