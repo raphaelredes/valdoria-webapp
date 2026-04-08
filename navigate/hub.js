@@ -635,7 +635,10 @@ function openDetail(biome, idx) {
   h += '<div class="detail-actions">';
   if (isCurrent) {
     h += '<button class="action-btn" data-nav-action="explore">\u{1F50D} Explorar</button>';
-    h += '<button class="action-btn" data-nav-action="camp">\u{1F3D5}\uFE0F Acampar</button>';
+    /* Mesma regra da barra inferior (state.cc): sem acampar nos portoes / onde payload proibe */
+    if (state.cc) {
+      h += '<button class="action-btn" data-nav-action="camp">\u{1F3D5}\uFE0F Acampar</button>';
+    }
     if (isOutsideCity) {
       h += '<button class="action-btn" data-nav-action="return">\u{1F3F0} Retornar</button>';
     }
@@ -752,11 +755,17 @@ async function _executeNavAction(type) {
       return;
     }
     var data = await resp.json();
-    console.log('[HUB] nav action response type=%s hasUrl=%s hasError=%s', type, !!data.url, !!data.error);
+    console.log('[HUB] nav action response type=%s hasUrl=%s hasCamp=%s hasError=%s',
+      type, !!data.url, !!(data.camp && data.type === 'camp'), !!data.error);
 
     if (data.error) {
       console.warn('[HUB] nav action error: %s', data.error);
       if (typeof vToast === 'function') vToast(data.message || data.error, 'err', 3000);
+      return;
+    }
+    /* Camp overlay — must match _executeAction (bottom nav); detail screen uses _executeNavAction */
+    if (data.camp && data.type === 'camp') {
+      _showCampOverlay(data.camp);
       return;
     }
     if (data.url) {
