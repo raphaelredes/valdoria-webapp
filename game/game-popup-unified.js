@@ -287,10 +287,14 @@ function _handlePopupAction(action) {
         return true; // prevent default close
     }
 
-    // Close all popups
+    // Close all popups — MUST return true so shared/popup.js does NOT call
+    // doAction('popup_close'). Returning false caused doAction → server error.
     if (action === 'popup_close') {
         _popupStack = [];
-        return false; // allow vPopup to close
+        if (typeof vPopup !== 'undefined') {
+            vPopup.hide();
+        }
+        return true;
     }
 
     // Regular game action — send to server via doAction
