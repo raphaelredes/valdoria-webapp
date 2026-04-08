@@ -3,6 +3,32 @@
    Epic medieval login with 3D Orb
    ============================================= */
 
+/*
+ * Portal usa valdoria-design.css (viewport tipo celular 430×932).
+ * No navegador desktop isso deixava a coluna colada ao topo.
+ * Preenchemos a altura real da janela e centralizamos o card verticalmente.
+ */
+html.wa-portal {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+}
+
+body.wa-portal {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  /* design system usa contain:size no body — impede o flex de preencher 100dvh no portal */
+  contain: layout;
+}
+
 /* ----- Screen / Full-page background ----- */
 
 .wa-screen {
@@ -22,6 +48,13 @@
 
 .wa-screen.wa-active {
     display: flex;
+}
+
+/* Dentro do portal: a tela ocupa o corpo flex e centraliza o card no espaço disponível */
+.wa-portal .wa-screen {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
 }
 
 /* Dark edge vignette */

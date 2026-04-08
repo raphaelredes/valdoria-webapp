@@ -25,7 +25,7 @@ function applyHazardEffect(hazard,onDone){if(window._dbg)console.debug("[EXPLORE
 showTerrainToast('Envenenado! (3 turnos)','condition');flashScreen('rgba(60,180,60,0.25)');if(window.vHaptic)vHaptic.notify('error');}
 if(hazard.failEffect==='prone'){if(typeof addCondition==='function')addCondition('prone');else{S.conditions.push({type:'prone',stepsLeft:1});}
 showTerrainToast('Escorregou!','condition');flashScreen('rgba(200,180,60,0.25)');if(window.vHaptic)vHaptic.notify('error');}
-updateConditionHUD();updateRewards();logMoveEvent([{type:'hazard',effect:hazard.failEffect,source:hazard.type}]);if(Math.random()<0.25&&S.randomEncounters&&S.randomEncounters.length>0){var enc=S.randomEncounters.pop();var combat=enc.cb||{en:'Criatura',ei:'',b:S.biome,d:S.dangerLevel};S._hazardCombatPending={combat};}
+updateConditionHUD();updateRewards();logMoveEvent([{type:'hazard',effect:hazard.failEffect,source:hazard.type}]);if(Math.random()<0.25&&S.randomEncounters&&S.randomEncounters.length>0){var enc=S.randomEncounters.pop();var combat=enc.combat||enc.cb||{en:'Criatura',ei:'',b:S.biome,d:S.dangerLevel};S._hazardCombatPending={combat};}
 if(onDone)onDone();};if(hazard.failEffect==='fire_damage'){showDamageDice('1d4','dano de fogo','fire',function(dmg){S.hpChange-=dmg;if(S.charData){var newHP=Math.max(0,S.charData.hp+S.hpChange);updateHP(newHP,S.charData.mh);}
 afterEffect();});return;}
 afterEffect();}
