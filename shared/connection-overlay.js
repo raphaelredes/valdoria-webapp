@@ -1,7 +1,13 @@
 /**
- * Connection Overlay v1.2
+ * Connection Overlay v1.4
  * Semi-transparent overlay for temporary connection losses.
  * API: vConnection.show(opts), vConnection.hide(), vConnection.isActive()
+ *
+ * v1.3: Apply health payload `api` for tunnel URL migration; optional
+ * /api/game/status probe when health fails (maintenance vs rede);
+ * clearer PT-BR hints for Failed to fetch / timeout.
+ * v1.4: Reset maintenance park on each health check so \u201cTentar Agora\u201d
+ * re-runs probe and retries (no dead-end after manuten\u00e7\u00e3o UI).
  */
 (function() {
 'use strict';
@@ -18,6 +24,7 @@ var _bgTimer = null;
 var _bgCount = 0;
 var _opts = {};
 var _active = false;
+var _maintenanceParked = false;
 
 function _log(msg) {
     console.warn('[CONN]', msg);
@@ -73,17 +80,125 @@ function _clearTimers() {
     if (_bgTimer)    { clearInterval(_bgTimer);    _bgTimer = null; }
 }
 
-function _fetchT(url, ms) {
+function _fetchT(url, ms, withAuth) {
     var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     var tid = ctrl ? setTimeout(function() { ctrl.abort(); }, ms) : null;
     var opts = { method: 'GET', cache: 'no-store' };
     if (ctrl) opts.signal = ctrl.signal;
-    if (_opts.token) opts.headers = { 'Authorization': 'Bearer ' + _opts.token };
+    if (withAuth !== false && _opts.token) {
+        opts.headers = { 'Authorization': 'Bearer ' + _opts.token };
+    }
     return fetch(url, opts).finally(function() { if (tid) clearTimeout(tid); });
 }
 
+/** Lightweight maintenance probe — no auth (same CORS rules as health). */
+function _probeMaintenanceStatus(cb) {
+    var base = (_opts.apiBase || '').replace(/\/$/, '');
+    if (!base) {
+        cb(false, null);
+        return;
+    }
+    var url = base + '/api/game/status';
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var tid = ctrl ? setTimeout(function() { ctrl.abort(); }, 4000) : null;
+    var opts = { method: 'GET', cache: 'no-store' };
+    if (ctrl) opts.signal = ctrl.signal;
+    fetch(url, opts)
+        .then(function(r) {
+            if (!r.ok) return null;
+            return r.json();
+        })
+        .then(function(data) {
+            if (tid) clearTimeout(tid);
+            if (data && data.maintenance === true) {
+                cb(true, data);
+            } else {
+                cb(false, data);
+            }
+        })
+        .catch(function() {
+            if (tid) clearTimeout(tid);
+            cb(false, null);
+        });
+}
+
+function _applyHealthPayload(data, prevBase) {
+    if (!data || typeof data !== 'object') return;
+    var nb = data.api || data.new_base_url;
+    if (nb && typeof nb === 'string') {
+        nb = nb.replace(/\/$/, '');
+        if (nb && nb !== prevBase) {
+            _log('API URL changed: ' + prevBase + ' -> ' + nb);
+            _opts.apiBase = nb;
+            if (window.ValdoriaErrors && ValdoriaErrors.updateApiBase) {
+                ValdoriaErrors.updateApiBase(nb);
+            }
+            if (window.ApiDiscovery && ApiDiscovery.updateBase) {
+                ApiDiscovery.updateBase(nb);
+            }
+        }
+    }
+}
+
+function _networkHint(errType, errMsg) {
+    var m = (errMsg || '').toLowerCase();
+    if (errType === 'AbortError' || m.indexOf('aborted') >= 0) {
+        return 'O servidor demorou para responder. Verifique sua internet ou tente outra rede (Wi-Fi/dados).';
+    }
+    if (m.indexOf('failed to fetch') >= 0 || m.indexOf('networkerror') >= 0) {
+        return 'Sem resposta do servidor. Confira sua conex\u00e3o. Se o problema continuar, feche o jogo e abra de novo pelo Telegram.';
+    }
+    if (m.indexOf('http 5') >= 0 || m.indexOf('503') >= 0 || m.indexOf('502') >= 0) {
+        return 'O servidor pode estar reiniciando ou sobrecarregado. Aguarde um minuto e use \u201cTentar Agora\u201d.';
+    }
+    return '';
+}
+
+function _parkMaintenanceUi(info) {
+    _maintenanceParked = true;
+    _clearTimers();
+    _statusEl.textContent = 'Servidor em manuten\u00e7\u00e3o';
+    var lines = ['O jogo est\u00e1 temporariamente indispon\u00edvel (manuten\u00e7\u00e3o ou atualiza\u00e7\u00e3o).'];
+    if (info && info.eta) lines.push('Previs\u00e3o: ~' + info.eta + '.');
+    if (info && info.start_time) lines.push('In\u00edcio: ' + info.start_time + '.');
+    if (info && info.reason) lines.push(info.reason);
+    lines.push('Feche esta tela e tente de novo pelo menu do Telegram em alguns minutos.');
+    _detailEl.textContent = lines.join(' ');
+    _fillEl.style.width = '100%';
+    _retryBtn.classList.add('visible');
+    _closeBtn.classList.add('visible');
+}
+
+function _continueRetryAfterFailure(errType, errMsg) {
+    var hint = _networkHint(errType, errMsg);
+    if (hint && _detailEl) _detailEl.textContent = hint;
+
+    function bumpRetry() {
+        _retryIdx++;
+        if (_retryIdx < _RETRY_DELAYS.length) {
+            _startRetryLoop();
+        } else {
+            _log('all ' + _RETRY_DELAYS.length + ' retries exhausted - switching to bg polling');
+            _startBgPolling();
+        }
+    }
+
+    if (_retryIdx >= 2 && !_maintenanceParked) {
+        _probeMaintenanceStatus(function(active, data) {
+            if (active) {
+                _parkMaintenanceUi(data || {});
+                return;
+            }
+            bumpRetry();
+        });
+        return;
+    }
+    bumpRetry();
+}
+
 function _checkHealth() {
-    var base = _opts.apiBase || '';
+    _maintenanceParked = false;
+    var base = (_opts.apiBase || '').replace(/\/$/, '');
     var url = base + '/api/game/health';
     if (_opts.uid) url += '?uid=' + _opts.uid;
 
@@ -91,16 +206,13 @@ function _checkHealth() {
     _statusEl.textContent = 'Verificando conex\u00e3o...';
     _detailEl.textContent = '';
 
-    _fetchT(url, 5000).then(function(r) {
+    _fetchT(url, 5000, true).then(function(r) {
         _log('health response status=' + r.status);
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
     }).then(function(data) {
         _log('health OK data=' + JSON.stringify(data).substring(0, 120));
-        if (data && data.new_base_url && data.new_base_url !== base) {
-            _log('API URL changed: ' + base + ' -> ' + data.new_base_url);
-            _opts.apiBase = data.new_base_url;
-        }
+        _applyHealthPayload(data, base);
         _onSuccess();
     }).catch(function(err) {
         var errType = err ? (err.name || 'Unknown') : 'Unknown';
@@ -116,7 +228,7 @@ function _checkHealth() {
                 _log('bg polling gave up after ' + _bgCount + ' attempts (~' + Math.round(_bgCount * _BG_INTERVAL / 60000) + 'min)');
                 _clearTimers();
                 _statusEl.textContent = 'Servidor indisponível';
-                _detailEl.textContent = 'Não foi possível reconectar. Feche e reabra o jogo.';
+                _detailEl.textContent = 'Não foi possível reconectar. Feche e reabra o jogo pelo Telegram.';
                 _retryBtn.classList.remove('visible');
                 _closeBtn.classList.add('visible');
                 return;
@@ -127,13 +239,7 @@ function _checkHealth() {
                 _detailEl.textContent = 'O servidor pode estar reiniciando. Isso pode levar até 2 minutos.';
             }
         } else {
-            _retryIdx++;
-            if (_retryIdx < _RETRY_DELAYS.length) {
-                _startRetryLoop();
-            } else {
-                _log('all ' + _RETRY_DELAYS.length + ' retries exhausted - switching to bg polling');
-                _startBgPolling();
-            }
+            _continueRetryAfterFailure(errType, errMsg);
         }
     });
 }
@@ -201,6 +307,7 @@ function show(opts) {
     _active = true;
     _retryIdx = 0;
     _bgCount = 0;
+    _maintenanceParked = false;
     _ensureDOM();
     _clearTimers();
 
