@@ -103,8 +103,8 @@ function _buildLogEntries(state) {
         html += '</div>';
     }
 
-    // Current turn indicator
-    html += '<div class="log-entry log-current"><span class="log-action">Seu turno — escolha uma ação</span></div>';
+    /* Dica de turno (não é botão — evita parecer CTA desativado) */
+    html += '<div class="log-turn-hint" role="note"><span class="log-turn-hint-text">Seu turno — toque em <strong>⚔ Ações</strong> na barra do combate para atacar ou usar habilidades.</span></div>';
 
     return html;
 }

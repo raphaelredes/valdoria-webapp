@@ -140,6 +140,8 @@ function _makeActBtn(ico, label, chance, actType, primary) {
     var btn = document.createElement('button');
     btn.className = 'ap-btn' + (primary ? ' ap-primary' : '');
     btn.setAttribute('data-act', actType);
+    /* data-action espelha data-act — bindActions usa .action-btn; walker/tests usam [data-action] */
+    btn.setAttribute('data-action', actType);
 
     // Icon
     var icoEl = document.createElement('span');

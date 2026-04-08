@@ -109,10 +109,34 @@
     margin-top: 2px;
 }
 
+/* Dica de turno — texto centralizado, sem caixa tipo botão desativado */
+.log-turn-hint {
+    margin-top: var(--v-space-md);
+    padding: var(--v-space-sm) var(--v-space-md);
+    text-align: center;
+    font-size: var(--v-font-xs, 11px);
+    font-style: normal;
+    line-height: 1.5;
+    color: var(--v-text-dim, #a09484);
+    border-top: 1px solid var(--v-gold-12);
+}
+
+.log-turn-hint-text {
+    display: block;
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+.log-turn-hint-text strong {
+    color: var(--v-gold, #c4953a);
+    font-weight: 700;
+}
+
+/* legado: entradas antigas .log-current */
 .log-entry.log-current {
     border-left-color: var(--v-border);
-    opacity: 0.6;
+    opacity: 0.85;
     text-align: center;
     font-style: italic;
-    color: #b0a488;
+    color: var(--v-text-dim, #a09484);
 }
