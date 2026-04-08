@@ -76,27 +76,28 @@
     <div class="skill-overlay item-overlay" id="itemOverlay">
         <div class="skill-panel" id="itemPanel"></div>
     </div>
-    <!-- Ordem de combate (iniciativa) — overlay centralizado; conteúdo preenchido por combat.js -->
+    <!-- Ordem de combate / iniciativa — overlay alinhado ao popup unificado (shared/popup.css) -->
     <div id="initiativeOrderOverlay" class="initiative-order-overlay" aria-hidden="true">
-        <div class="initiative-order-card initiative-order-card--encounter" role="dialog" aria-modal="true" aria-labelledby="initiativeOrderTitle">
-            <div class="initiative-order-encounter-head">
-                <div class="initiative-order-divider" aria-hidden="true"></div>
-                <div class="initiative-order-icon" aria-hidden="true">⚔️</div>
-                <h2 class="initiative-order-kicker" id="initiativeOrderTitle">INICIATIVA</h2>
-                <span class="initiative-order-pill">COMBATE</span>
-                <div class="initiative-order-divider" aria-hidden="true"></div>
-            </div>
-            <p class="initiative-order-sub">Rolagens de iniciativa e ordem dos turnos nesta rodada.</p>
+        <div class="initiative-order-card" role="dialog" aria-modal="true" aria-labelledby="initiativeOrderTitle">
+            <header class="initiative-order-head">
+                <div class="initiative-order-divider initiative-order-divider--top" aria-hidden="true"></div>
+                <div class="initiative-order-icon-wrap" aria-hidden="true">
+                    <span class="initiative-order-icon">⚔️</span>
+                </div>
+                <h2 class="initiative-order-kicker" id="initiativeOrderTitle">Iniciativa</h2>
+                <p class="initiative-order-badge" role="text">Combate</p>
+            </header>
+            <p class="initiative-order-lead">Rolagens de iniciativa e ordem dos turnos nesta rodada.</p>
             <div class="initiative-order-body">
                 <div id="init-intro-slot" class="init-intro-slot" style="display:none"></div>
                 <div id="init-waiting-msg" class="init-waiting-msg">Aguardando início do combate…</div>
-                <div id="init-dice-area"></div>
+                <div id="init-dice-area" class="init-dice-area"></div>
             </div>
-            <div class="initiative-order-actions">
+            <footer class="initiative-order-actions">
                 <div class="action-bar" id="init-proceed-bar" style="display:none">
-                    <button type="button" class="action-btn primary full-width" data-action="proceed" style="font-size:14px;padding:12px">⚔️ Prosseguir para o Combate</button>
+                    <button type="button" class="action-btn primary full-width initiative-order-proceed-btn" data-action="proceed">Prosseguir para o combate</button>
                 </div>
-            </div>
+            </footer>
         </div>
         <button type="button" id="initiativeOrderSkip" class="initiative-order-skip" style="display:none" aria-label="Pular animação da iniciativa">Pular ▸</button>
     </div>
