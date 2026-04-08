@@ -109,6 +109,421 @@ var CAMPFIRE_STORIES = {
 };
 
 /* ----------------------------------------------------------
+ *  CAMP LONG REST ANIMATION — Frame Data
+ * ---------------------------------------------------------- */
+
+var _CR_DAWN_NARRATIONS = {
+  forest:    ['A luz dourada da manh\u00e3 filtra-se entre as copas. O ar \u00e9 fresco e carregado de orvalho.',
+              'P\u00e1ssaros come\u00e7am a cantar. As \u00faltimas brasas da fogueira brilham entre as cinzas.',
+              'A n\u00e9voa da manh\u00e3 se dissipa lentamente entre as \u00e1rvores.'],
+  plains:    ['O horizonte se incendeia em tons de ouro e p\u00farpura. Um novo dia se abre vasto.',
+              'O orvalho brilha sobre a grama como mil diamantes ao sol nascente.',
+              'A brisa matinal traz cheiro de terra e liberdade.'],
+  desert:    ['O c\u00e9u se tinge de carmesim. O calor j\u00e1 come\u00e7a a se anunciar.',
+              'As estrelas desaparecem uma a uma. O deserto desperta em sil\u00eancio dourado.',
+              'A areia fria da manh\u00e3 logo se tornar\u00e1 escaldante.'],
+  snow:      ['O sol nasce p\u00e1lido sobre a neve intocada. O mundo \u00e9 branco e silencioso.',
+              'Cristais de gelo brilham como j\u00f3ias \u00e0 primeira luz. O ar \u00e9 cortante mas puro.',
+              'A neve reflete a aurora em tons de rosa e ouro.'],
+  swamp:     ['Uma luz esverdeada invade a n\u00e9voa do p\u00e2ntano. O dia come\u00e7a lento aqui.',
+              'O canto dos sapos cede lugar ao zumbido dos insetos. Mais um dia no p\u00e2ntano.',
+              'A n\u00e9voa se afina, revelando \u00e1guas escuras e \u00e1rvores retorcidas.'],
+  mountain:  ['O sol desponta entre os picos, banhando o vale em luz dourada.',
+              'A vista do alto \u00e9 deslumbrante ao amanhecer. As nuvens est\u00e3o abaixo de voc\u00ea.',
+              'O vento da montanha traz o frescor da manh\u00e3. A trilha continua.'],
+  volcanic:  ['O brilho das fissuras se confunde com o nascer do sol. Calor eterno.',
+              'Vapor sobe das rochas quentes enquanto o c\u00e9u clareia. A terra nunca dorme aqui.',
+              'Cinzas e luz se misturam no horizonte vulc\u00e2nico.'],
+  cave:      ['Um fraco brilho anuncia a sa\u00edda da caverna. O mundo l\u00e1 fora espera.',
+              'As sombras recuam conforme a tocha se renova. Hora de seguir adiante.',
+              'Gotas de \u00e1gua brilham como estrelas nas estalactites ao despertar.'],
+  graveyard: ['Uma luz p\u00e1lida e fria anuncia o amanhecer entre as l\u00e1pides.',
+              'As sombras da noite recuam. At\u00e9 os mortos parecem mais quietos ao amanhecer.',
+              'O nevoeiro se dissipa lentamente. Melhor partir antes que escure\u00e7a novamente.'],
+  _generic:  ['A aurora desponta lentamente. Seu corpo responde ao descanso \u2014 mais forte, mais \u00e1gil.',
+              'A luz do novo dia traz esperan\u00e7a. Os caminhos de Valdoria aguardam.',
+              'Voc\u00ea se espreguia ao p\u00e9 das cinzas da fogueira. Est\u00e1 renovado.']
+};
+
+var _CR_DIVIDER_NIGHT = '\u00b7 \u2726 \u00b7 \u2726 \u00b7 \u2726 \u00b7 \u2726 \u00b7';
+var _CR_DIVIDER_SLEEP = '\u00b7 \u00b7 \u2727 \u00b7 \u00b7 \u2727 \u00b7 \u00b7 \u2727 \u00b7 \u00b7';
+var _CR_DIVIDER_DAWN  = '\u00b7 \u2600 \u00b7 \u2600 \u00b7 \u2600 \u00b7 \u2600 \u00b7';
+
+var _CR_BIOME_BG = {
+  forest:    { night: 'radial-gradient(ellipse at 50% 40%, #0a1208 0%, #050805 100%)', sleep: 'radial-gradient(ellipse at 50% 40%, #060808 0%, #030404 100%)', dawn: 'radial-gradient(ellipse at 50% 40%, #2a2000 0%, #1a1200 100%)' },
+  plains:    { night: 'radial-gradient(ellipse at 50% 40%, #0a0a18 0%, #050508 100%)', sleep: 'radial-gradient(ellipse at 50% 40%, #080810 0%, #040408 100%)', dawn: 'radial-gradient(ellipse at 50% 40%, #302200 0%, #201500 100%)' },
+  desert:    { night: 'radial-gradient(ellipse at 50% 40%, #12100a 0%, #080604 100%)', sleep: 'radial-gradient(ellipse at 50% 40%, #0a0808 0%, #050404 100%)', dawn: 'radial-gradient(ellipse at 50% 40%, #3a2000 0%, #2a1400 100%)' },
+  snow:      { night: 'radial-gradient(ellipse at 50% 40%, #0a0a14 0%, #050510 100%)', sleep: 'radial-gradient(ellipse at 50% 40%, #080810 0%, #040408 100%)', dawn: 'radial-gradient(ellipse at 50% 40%, #1a1820 0%, #101018 100%)' },
+  swamp:     { night: 'radial-gradient(ellipse at 50% 40%, #080a06 0%, #040504 100%)', sleep: 'radial-gradient(ellipse at 50% 40%, #060806 0%, #030404 100%)', dawn: 'radial-gradient(ellipse at 50% 40%, #1a1a08 0%, #101008 100%)' },
+  mountain:  { night: 'radial-gradient(ellipse at 50% 40%, #0a0a12 0%, #050508 100%)', sleep: 'radial-gradient(ellipse at 50% 40%, #080808 0%, #040404 100%)', dawn: 'radial-gradient(ellipse at 50% 40%, #2a2010 0%, #1a1408 100%)' },
+  volcanic:  { night: 'radial-gradient(ellipse at 50% 40%, #1a0a04 0%, #0a0504 100%)', sleep: 'radial-gradient(ellipse at 50% 40%, #100804 0%, #080404 100%)', dawn: 'radial-gradient(ellipse at 50% 40%, #301808 0%, #201004 100%)' },
+  cave:      { night: 'radial-gradient(ellipse at 50% 40%, #0a0808 0%, #050404 100%)', sleep: 'radial-gradient(ellipse at 50% 40%, #080606 0%, #040303 100%)', dawn: 'radial-gradient(ellipse at 50% 40%, #1a1510 0%, #100c08 100%)' },
+  graveyard: { night: 'radial-gradient(ellipse at 50% 40%, #0a0810 0%, #050408 100%)', sleep: 'radial-gradient(ellipse at 50% 40%, #080608 0%, #040404 100%)', dawn: 'radial-gradient(ellipse at 50% 40%, #181418 0%, #100c10 100%)' },
+  _default:  { night: 'radial-gradient(ellipse at 50% 40%, #0a0a10 0%, #050508 100%)', sleep: 'radial-gradient(ellipse at 50% 40%, #080810 0%, #050508 100%)', dawn: 'radial-gradient(ellipse at 50% 40%, #2a2000 0%, #1a1200 100%)' }
+};
+
+var _CR_FRAME_ICONS = {
+  night: ['\uD83D\uDD6F\ufe0f  \uD83C\uDF19  \uD83D\uDD25', '\uD83C\uDF19  \uD83D\uDD25  \u2B50', '\uD83D\uDD25  \uD83C\uDF0C  \uD83D\uDD6F\ufe0f'],
+  sleep: ['\uD83D\uDCA4  \uD83D\uDCA4  \uD83D\uDCA4  \uD83D\uDCA4  \uD83D\uDCA4', '\uD83D\uDCA4 \u00b7 \u00b7 \u00b7 \uD83D\uDCA4 \u00b7 \u00b7 \uD83D\uDCA4'],
+  dawn:  ['\uD83C\uDF05  \u2600\ufe0f  \uD83D\uDD4A\ufe0f', '\u2600\ufe0f  \uD83C\uDF3F  \uD83D\uDD4A\ufe0f', '\u2600\ufe0f  \u2728  \uD83C\uDF05']
+};
+
+function _crPick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function _crCalcDelay(lines, category) {
+  var text = (Array.isArray(lines) ? lines.join(' ') : lines || '');
+  var words = text.trim().split(/\s+/).filter(Boolean).length;
+  var base = words * 0.35;
+  var ranges = {
+    narrative: { min: 3.5, max: 6.0 },
+    data:      { min: 4.0, max: 6.5 },
+    result:    { min: 5.0, max: 7.0 }
+  };
+  var r = ranges[category] || ranges.narrative;
+  return Math.max(r.min, Math.min(r.max, base)) * 1000;
+}
+
+function _crNightBar(phase, total) {
+  var pct = phase / Math.max(total - 1, 1);
+  var filled = Math.round(pct * 10);
+  var bar = '';
+  for (var i = 0; i < filled; i++) bar += '\u2593';
+  for (var j = filled; j < 10; j++) bar += '\u2591';
+  var icon = pct < 0.15 ? '\uD83C\uDF06' : pct < 0.35 ? '\uD83C\uDF03' : pct < 0.65 ? '\uD83C\uDF0C' : pct < 0.85 ? '\uD83C\uDF05' : '\u2600\ufe0f';
+  var endIcon = pct >= 0.85 ? '\u2600\ufe0f' : '\uD83C\uDF19';
+  return icon + ' ' + bar + ' ' + endIcon;
+}
+
+function _crBarHTML(emoji, current, max, type, isFull) {
+  var pct = max > 0 ? Math.round((current / max) * 100) : 0;
+  var fullClass = isFull ? ' full' : '';
+  var spark = isFull ? ' \u2728' : '';
+  return '<div class="cr-bar-wrap">'
+    + '<div class="cr-bar-track"><div class="cr-bar-fill ' + type + fullClass + '" data-target="' + pct + '" style="width:0%"></div></div>'
+    + '<span class="cr-bar-label">' + emoji + ' ' + current + '/' + max + spark + '</span>'
+    + '</div>';
+}
+
+function _crRecoveryHTML(data, pct) {
+  var hp = Math.min(Math.round(data.startHp + (data.maxHp - data.startHp) * pct), data.maxHp);
+  var mp = data.maxMp > 0 ? Math.min(Math.round(data.startMp + (data.maxMp - data.startMp) * pct), data.maxMp) : 0;
+  var isFull = pct >= 1.0;
+  var html = _crBarHTML('\u2764\ufe0f', hp, data.maxHp, 'hp', isFull);
+  if (data.maxMp > 0) {
+    html += _crBarHTML('\u2728', mp, data.maxMp, 'mp', isFull);
+  }
+  if (data.exhaustionBefore > 0 && isFull) {
+    html += '<div class="cr-exhaustion-line">\uD83D\uDE0C Exaust\u00e3o: ' + data.exhaustionBefore + ' \u2192 ' + data.exhaustionAfter + '</div>';
+  }
+  if (isFull && data.hdRecov > 0) {
+    html += '<div class="cr-hd-line">\uD83C\uDFB2 Dados de Vida: +' + data.hdRecov + ' recuperados (' + data.hdNow + '/' + data.maxHd + ')</div>';
+  }
+  return html;
+}
+
+function _crAnimateBarFills(container) {
+  requestAnimationFrame(function() {
+    var fills = container.querySelectorAll('.cr-bar-fill[data-target]');
+    for (var i = 0; i < fills.length; i++) {
+      (function(el, idx) {
+        setTimeout(function() { el.style.width = el.dataset.target + '%'; }, idx * 200);
+      })(fills[i], i);
+    }
+  });
+}
+
+function _crCreateParticles(container) {
+  container.innerHTML = ''; /* noqa: innerHTML — particles container, safe */
+  var starCount = 12;
+  for (var i = 0; i < starCount; i++) {
+    var p = document.createElement('div');
+    p.className = 'camp-rest-particle star';
+    p.style.left = (Math.random() * 100) + '%';
+    p.style.top = (Math.random() * 70) + '%';
+    p.style.setProperty('--dur', (2 + Math.random() * 4) + 's');
+    p.style.setProperty('--delay', (Math.random() * 3) + 's');
+    container.appendChild(p);
+  }
+  var emberCount = 5;
+  for (var j = 0; j < emberCount; j++) {
+    var e = document.createElement('div');
+    e.className = 'camp-rest-particle ember';
+    e.style.left = (20 + Math.random() * 60) + '%';
+    e.style.bottom = (Math.random() * 20) + '%';
+    e.style.setProperty('--dur', (4 + Math.random() * 4) + 's');
+    e.style.setProperty('--delay', (Math.random() * 5) + 's');
+    container.appendChild(e);
+  }
+}
+
+function _crCreateAmbient(overlay) {
+  var amb = overlay.querySelector('.camp-rest-ambient');
+  if (!amb) {
+    amb = document.createElement('div');
+    amb.className = 'camp-rest-ambient';
+    overlay.insertBefore(amb, overlay.firstChild);
+  }
+  amb.innerHTML = ''; /* noqa: innerHTML — ambient container, safe */
+  var glow = document.createElement('div');
+  glow.className = 'camp-rest-fire-glow';
+  amb.appendChild(glow);
+  var core = document.createElement('div');
+  core.className = 'camp-rest-fire-core';
+  amb.appendChild(core);
+}
+
+function _crGoldenBurst(overlay, particlesEl) {
+  var flash = document.createElement('div');
+  flash.className = 'cr-flash';
+  overlay.appendChild(flash);
+  setTimeout(function() { flash.remove(); }, 700);
+  var burst = document.createElement('div');
+  burst.className = 'cr-burst';
+  overlay.appendChild(burst);
+  setTimeout(function() { burst.remove(); }, 1300);
+  for (var i = 0; i < 6; i++) {
+    var p = document.createElement('div');
+    p.className = 'camp-rest-particle spark';
+    p.style.left = (30 + Math.random() * 40) + '%';
+    p.style.top = (35 + Math.random() * 30) + '%';
+    p.style.setProperty('--dur', (1.5 + Math.random() * 2) + 's');
+    p.style.setProperty('--delay', (Math.random() * 0.5) + 's');
+    p.style.setProperty('--drift-x', (-40 + Math.random() * 80) + 'px');
+    p.style.setProperty('--drift-y', (40 + Math.random() * 80) + 'px');
+    particlesEl.appendChild(p);
+  }
+}
+
+function _buildCampRestFrames(restData) {
+  var biome = restData.biome || '_generic';
+  var bgSet = _CR_BIOME_BG[biome] || _CR_BIOME_BG._default;
+
+  var atmoPool = CAMP_ATMOSPHERE[biome] || CAMP_ATMOSPHERE._generic || CAMP_ATMOSPHERE.forest;
+  var storyPool = (CAMPFIRE_STORIES[biome] || []).concat(CAMPFIRE_STORIES._generic || []);
+  var dawnPool = _CR_DAWN_NARRATIONS[biome] || _CR_DAWN_NARRATIONS._generic;
+
+  var atmoText = _crPick(atmoPool);
+  var storyText = _crPick(storyPool);
+  var dawnText = _crPick(dawnPool);
+
+  var weatherLine = '';
+  if (restData.weather === 't') weatherLine = '\u26a1 A tempestade ruge, mas a fogueira resiste.';
+  else if (restData.weather === 'r') weatherLine = '\uD83C\uDF27\ufe0f A chuva cai suavemente ao redor do acampamento.';
+  else if (restData.weather === 'f') weatherLine = '\uD83C\uDF2B\ufe0f A n\u00e9voa se fecha ao redor, abafando os sons.';
+  else if (restData.weather === 's') weatherLine = '\u2744\ufe0f Flocos de neve pousam silenciosamente ao redor.';
+
+  var nightLines = atmoText.match(/\.[^.]*$/g) ? [atmoText] : [atmoText];
+  if (weatherLine) nightLines.push(weatherLine);
+
+  var guardLine = '';
+  if (restData.guardPosted && restData.guardSuccess) guardLine = '\uD83D\uDEE1\ufe0f Sua vig\u00edlia protege o acampamento.';
+  else if (restData.guardPosted && !restData.guardSuccess) guardLine = '\u26a0\ufe0f Sua guarda falhou... a noite esconde perigos.';
+
+  var sleepLines = [storyText];
+  if (guardLine) sleepLines.push(guardLine);
+
+  var frames = [
+    {
+      title: 'A NOITE CAI',
+      icons: _crPick(_CR_FRAME_ICONS.night),
+      lines: nightLines,
+      bg: bgSet.night,
+      category: 'narrative',
+      recovery: 0,
+      divider: _CR_DIVIDER_NIGHT
+    },
+    {
+      title: 'SONO AO RELENTO',
+      icons: _crPick(_CR_FRAME_ICONS.sleep),
+      lines: sleepLines,
+      bg: bgSet.sleep,
+      category: 'data',
+      recovery: 0.6,
+      divider: _CR_DIVIDER_SLEEP
+    },
+    {
+      title: 'AMANHECER',
+      icons: _crPick(_CR_FRAME_ICONS.dawn),
+      lines: [dawnText],
+      bg: bgSet.dawn,
+      category: 'data',
+      recovery: 1.0,
+      divider: _CR_DIVIDER_DAWN
+    }
+  ];
+
+  for (var f = 0; f < frames.length; f++) {
+    frames[f].delay = _crCalcDelay(frames[f].lines, frames[f].category);
+  }
+
+  return frames;
+}
+
+/* ----------------------------------------------------------
+ *  _playCampRestAnimation — Inn-style cinematic for camp rest
+ * ---------------------------------------------------------- */
+
+function _playCampRestAnimation(restData, onDone) {
+  var overlay = document.getElementById('camp-rest-overlay');
+  var frameEl = document.getElementById('camp-rest-frame');
+  var titleEl = document.getElementById('camp-rest-title');
+  var iconsEl = document.getElementById('camp-rest-icons');
+  var dividerEl = document.getElementById('camp-rest-divider');
+  var textEl = document.getElementById('camp-rest-text');
+  var nightBarEl = document.getElementById('camp-rest-night-bar');
+  var recoveryEl = document.getElementById('camp-rest-recovery');
+  var skipBtn = document.getElementById('camp-rest-skip');
+  var advanceBtn = document.getElementById('camp-rest-advance');
+
+  if (!overlay || !frameEl) {
+    console.warn('[CAMP] campRestAnimation overlay not found, skipping');
+    onDone();
+    return;
+  }
+
+  console.info('[CAMP] campRestAnimation_start biome=%s weather=%s hp=%d/%d mp=%d/%d',
+    restData.biome, restData.weather, restData.startHp, restData.maxHp, restData.startMp, restData.maxMp);
+
+  var frames = _buildCampRestFrames(restData);
+  var totalFrames = frames.length;
+  var _done = false;
+  var _skipped = false;
+  var _frameTimer = null;
+
+  try { if (window.Telegram && Telegram.WebApp) Telegram.WebApp.HapticFeedback.impactOccurred('light'); } catch(e) { /* noop */ }
+
+  var finish = function(wasSkipped) {
+    if (_done) return;
+    _done = true;
+    _skipped = wasSkipped;
+    if (_frameTimer) clearTimeout(_frameTimer);
+    skipBtn.onclick = null;
+    skipBtn.style.display = 'none';
+    advanceBtn.onclick = null;
+    advanceBtn.style.display = 'none';
+    overlay.classList.add('hiding');
+    setTimeout(function() {
+      overlay.style.display = 'none';
+      overlay.classList.remove('hiding');
+      frameEl.classList.remove('active', 'exiting');
+      titleEl.classList.remove('shimmer');
+      var particlesEl = overlay.querySelector('.camp-rest-particles');
+      if (particlesEl) particlesEl.innerHTML = ''; /* noqa: innerHTML — cleanup */
+      var ambEl = overlay.querySelector('.camp-rest-ambient');
+      if (ambEl) ambEl.innerHTML = ''; /* noqa: innerHTML — cleanup */
+      onDone();
+    }, 500);
+  };
+
+  var restCount = restData.restCount || 0;
+  var skipDelay = restCount >= 3 ? 300 : 2500;
+  setTimeout(function() {
+    if (!_done) {
+      skipBtn.textContent = 'Acordar \u00bb';
+      skipBtn.style.display = '';
+      skipBtn.onclick = function() { finish(true); };
+    }
+  }, skipDelay);
+
+  overlay.style.display = '';
+  overlay.classList.remove('hiding');
+  overlay.style.background = frames[0].bg || '';
+
+  var particlesEl = overlay.querySelector('.camp-rest-particles');
+  if (!particlesEl) {
+    particlesEl = document.createElement('div');
+    particlesEl.className = 'camp-rest-particles';
+    overlay.insertBefore(particlesEl, overlay.firstChild);
+  }
+  _crCreateParticles(particlesEl);
+  _crCreateAmbient(overlay);
+
+  function showFrame(idx) {
+    if (_done || idx >= totalFrames) {
+      if (!_done) finish(false);
+      return;
+    }
+
+    var frame = frames[idx];
+    var isLast = idx === totalFrames - 1;
+
+    if (idx > 0) frameEl.classList.add('exiting');
+
+    var enterDelay = idx === 0 ? 50 : 550;
+    setTimeout(function() {
+      if (_done) return;
+
+      frameEl.classList.remove('active', 'exiting');
+      overlay.style.background = frame.bg;
+      nightBarEl.textContent = _crNightBar(idx, totalFrames);
+      titleEl.textContent = frame.title;
+
+      if (frame.recovery >= 1.0) {
+        titleEl.classList.add('shimmer');
+      } else {
+        titleEl.classList.remove('shimmer');
+      }
+
+      iconsEl.textContent = frame.icons;
+
+      if (dividerEl) {
+        dividerEl.textContent = frame.divider || '';
+        dividerEl.style.display = frame.divider ? '' : 'none';
+      }
+
+      textEl.innerHTML = frame.lines.map(function(l) { /* noqa: innerHTML — camp rest lines, safe data */
+        return '<div class="camp-rest-line">' + l + '</div>';
+      }).join('');
+
+      if (frame.recovery > 0) {
+        recoveryEl.innerHTML = _crRecoveryHTML(restData, frame.recovery); /* noqa: innerHTML — recovery bars, safe computed */
+        recoveryEl.style.display = '';
+        recoveryEl.style.animation = 'none';
+        recoveryEl.offsetHeight; /* reflow */
+        recoveryEl.style.animation = '';
+        _crAnimateBarFills(recoveryEl);
+      } else {
+        recoveryEl.style.display = 'none';
+      }
+
+      if (isLast && frame.recovery >= 1.0) {
+        _crGoldenBurst(overlay, particlesEl);
+      }
+
+      frameEl.classList.add('active');
+
+      try {
+        if (window.Telegram && Telegram.WebApp) {
+          var hf = Telegram.WebApp.HapticFeedback;
+          if (isLast && frame.recovery >= 1.0) hf.notificationOccurred('success');
+          else if (idx > 0) hf.impactOccurred('light');
+        }
+      } catch(e) { /* noop */ }
+
+      if (!isLast && advanceBtn) {
+        advanceBtn.style.display = '';
+        advanceBtn.textContent = 'Avan\u00e7ar \u203a';
+        advanceBtn.onclick = function() {
+          if (_done) return;
+          if (_frameTimer) clearTimeout(_frameTimer);
+          advanceBtn.style.display = 'none';
+          showFrame(idx + 1);
+        };
+      } else if (advanceBtn) {
+        advanceBtn.style.display = 'none';
+      }
+
+      _frameTimer = setTimeout(function() {
+        if (advanceBtn) advanceBtn.style.display = 'none';
+        showFrame(idx + 1);
+      }, frame.delay);
+    }, enterDelay);
+  }
+
+  showFrame(0);
+}
+
+/* ----------------------------------------------------------
  *  CAMP HELPERS
  * ---------------------------------------------------------- */
 
@@ -875,17 +1290,44 @@ function doLongRest() {
   _lrText += '\u2764\ufe0f HP totalmente recuperado<br>';
   _lrText += '\u2728 Condi\u00e7\u00f5es removidas<br>';
   if (prevExhaustion > 0) {
-    _lrText += '<span style="color:#4caf50;font-weight:bold">\u2705 Exaust\u00e3o removida! (' + prevExhaustion + ' \u2192 ' + S.exhaustion + ')</span><br>';
+    _lrText += '<span style="color:var(--v-hp-heal,#4caf50);font-weight:bold">\u2705 Exaust\u00e3o removida! (' + prevExhaustion + ' \u2192 ' + S.exhaustion + ')</span><br>';
     console.info('[EXPLORE:REST] longRest_exhaustion_removed prev=%d now=%d', prevExhaustion, S.exhaustion);
   } else _lrText += '\u2705 Sem exaust\u00e3o<br>';
   if (S.charData && S.charData.mm > 0) _lrText += '\u2728 MP totalmente recuperado<br>';
   _lrText += '\uD83C\uDFB2 Dados de Vida: ' + _hdNow + '/' + maxHD + ' (+' + hdRecov + ' recuperados)<br>';
-  if (S.weather === 't') _lrText += '<br>\u26a1 <span style="color:#dca028">Tempestade: descanso dif\u00edcil, +1 exaust\u00e3o.</span>';
-  else if (S.weather === 'r') _lrText += '<br>\uD83C\uDF27\ufe0f <span style="color:#8a7a68">Chuva: descanso desconfort\u00e1vel.</span>';
-  if (S._longRestCount > 1) _lrText += '<br>\u26a0\ufe0f <span style="color:#dca028">O perigo da regi\u00e3o aumentou.</span>';
+  if (S.weather === 't') _lrText += '<br>\u26a1 <span style="color:var(--v-gold,#dca028)">Tempestade: descanso dif\u00edcil, +1 exaust\u00e3o.</span>';
+  else if (S.weather === 'r') _lrText += '<br>\uD83C\uDF27\ufe0f <span style="color:var(--v-text-dim,#8a7a68)">Chuva: descanso desconfort\u00e1vel.</span>';
+  if (S._longRestCount > 1) _lrText += '<br>\u26a0\ufe0f <span style="color:var(--v-gold,#dca028)">O perigo da regi\u00e3o aumentou.</span>';
   _lrText += '<br><i>Voc\u00ea se sente revigorado.</i>';
 
-  _showLongRestDice(_lrText);
+  /* Cinematic animation data */
+  var _restData = {
+    startHp: hpBefore,
+    maxHp: cd.mh || 10,
+    startMp: mpBefore,
+    maxMp: cd.mm || 0,
+    hdRecov: hdRecov,
+    maxHd: maxHD,
+    hdNow: _hdNow,
+    hdUsed: S._hdUsed,
+    exhaustionBefore: prevExhaustion,
+    exhaustionAfter: S.exhaustion,
+    weather: S.weather,
+    biome: S.biome || 'forest',
+    playerName: (cd.nm || 'Aventureiro'),
+    guardPosted: S._guardPosted,
+    guardSuccess: S._guardSuccess,
+    restCount: S._longRestCount
+  };
+
+  var animOverlay = document.getElementById('camp-rest-overlay');
+  if (animOverlay) {
+    _playCampRestAnimation(_restData, function() {
+      _showLongRestSummary(_lrText);
+    });
+  } else {
+    _showLongRestDice(_lrText);
+  }
 }
 
 /* ----------------------------------------------------------

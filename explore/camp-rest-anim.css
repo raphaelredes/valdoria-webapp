@@ -1,0 +1,386 @@
+/* ============================================================
+ *  camp-rest-anim.css — Cinematic Camp Long Rest Animation
+ *  Architecture mirrors inn-animation.css for consistency
+ * ============================================================ */
+
+/* --- Overlay (fullscreen, z-critical) --- */
+.camp-rest-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--v-z-critical);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 50% 40%, #1a1510 0%, #0a0808 100%);
+  transition: background var(--v-transition-slow);
+  animation: crFadeIn 0.6s ease-out;
+  overflow: hidden;
+}
+@keyframes crFadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+.camp-rest-overlay.hiding {
+  animation: crFadeOut 0.5s ease-in forwards;
+}
+@keyframes crFadeOut {
+  0%   { opacity: 1 }
+  60%  { opacity: 0.2 }
+  100% { opacity: 0 }
+}
+
+/* --- Vignette --- */
+.camp-rest-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, transparent 25%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+  z-index: 0;
+  animation: crVignetteBreathe 6s ease-in-out infinite;
+}
+@keyframes crVignetteBreathe { 0%,100% { opacity: 1 } 50% { opacity: 0.7 } }
+
+/* --- Ambient campfire glow --- */
+.camp-rest-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.camp-rest-fire-glow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(200px, 60vw, 280px);
+  height: clamp(100px, 30vw, 140px);
+  background: radial-gradient(ellipse at 50% 100%, rgba(200,120,30,0.12) 0%, rgba(180,80,20,0.04) 50%, transparent 80%);
+  animation: crFireGlow 3s ease-in-out infinite;
+}
+@keyframes crFireGlow { 0%,100% { opacity: 0.7 } 50% { opacity: 1 } }
+
+.camp-rest-fire-core {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 16px;
+  border-radius: 50% 50% 20% 20%;
+  background: radial-gradient(ellipse at 50% 80%, #ff9030 0%, #e07020 60%, transparent 100%);
+  box-shadow: 0 0 10px 5px rgba(255,144,48,0.3), 0 0 24px 10px rgba(255,100,30,0.15);
+  animation: crFlameWobble 1.8s ease-in-out infinite;
+}
+@keyframes crFlameWobble {
+  0%,100% { transform: translateX(-50%) scaleX(1) scaleY(1) }
+  25%     { transform: translateX(-45%) scaleX(1.15) scaleY(0.9) }
+  50%     { transform: translateX(-55%) scaleX(0.9) scaleY(1.1) }
+  75%     { transform: translateX(-48%) scaleX(1.1) scaleY(0.95) }
+}
+
+/* --- Particles --- */
+.camp-rest-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  contain: layout style;
+}
+.camp-rest-particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.camp-rest-particle.star {
+  width: 2px;
+  height: 2px;
+  background: var(--v-gold-light, #dbb668);
+  box-shadow: 0 0 4px 1px rgba(219,182,104,0.4);
+  animation: crStarTwinkle var(--dur, 3s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes crStarTwinkle {
+  0%,100% { opacity: 0; transform: scale(0.5) }
+  20%     { opacity: 0.8; transform: scale(1) }
+  50%     { opacity: 0.3; transform: scale(0.7) }
+  80%     { opacity: 0.9; transform: scale(1.1) }
+}
+.camp-rest-particle.ember {
+  width: 3px;
+  height: 3px;
+  background: var(--v-gold, #c4953a);
+  box-shadow: 0 0 6px 2px var(--v-gold-30, rgba(196,149,58,0.3));
+  animation: crEmberFloat var(--dur, 5s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes crEmberFloat {
+  0%   { opacity: 0; transform: translateY(0) scale(0.5) }
+  10%  { opacity: 0.7; transform: translateY(-20px) scale(1) }
+  40%  { opacity: 0.5 }
+  80%  { opacity: 0.2 }
+  100% { opacity: 0; transform: translateY(-150px) scale(0.2) }
+}
+.camp-rest-particle.spark {
+  width: 2px;
+  height: 2px;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255,255,255,0.8), 0 0 12px rgba(219,182,104,0.5);
+  animation: crSparkRise var(--dur, 3s) ease-out var(--delay, 0s) forwards;
+}
+@keyframes crSparkRise {
+  0%  { opacity: 0; transform: translateY(0) scale(0) }
+  5%  { opacity: 1; transform: translateY(0) scale(1.5) }
+  30% { opacity: 0.7 }
+  100%{ opacity: 0; transform: translateY(calc(-100px - var(--drift-y, 80px))) translateX(var(--drift-x, 0px)) scale(0) }
+}
+
+/* --- Frame container --- */
+.camp-rest-frame {
+  position: relative;
+  z-index: var(--v-z-base, 1);
+  text-align: center;
+  max-width: clamp(280px, 85vw, 320px);
+  padding: 0 var(--v-space-xl, 20px);
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition: opacity var(--v-transition-slow, 0.5s) ease, transform var(--v-transition-slow, 0.5s) ease;
+}
+.camp-rest-frame.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.camp-rest-frame.exiting {
+  opacity: 0;
+  transform: translateY(-6px) scale(1.02);
+  transition: opacity var(--v-transition-slow, 0.5s) ease-in, transform var(--v-transition-slow, 0.5s) ease-in;
+}
+
+/* --- Night progress bar --- */
+.camp-rest-night-bar {
+  font-size: var(--v-font-base, 14px);
+  letter-spacing: 1px;
+  color: var(--v-text-dim, #8a7a68);
+  margin-bottom: var(--v-space-2xl, 24px);
+  font-family: monospace;
+  background: rgba(0,0,0,0.3);
+  padding: var(--v-space-sm, 4px) var(--v-space-lg, 16px);
+  border-radius: var(--v-radius, 10px);
+  border: 1px solid var(--v-gold-12, rgba(196,149,58,0.12));
+}
+
+/* --- Title --- */
+.camp-rest-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-xl, 18px);
+  font-weight: 700;
+  color: var(--v-gold-light, #dbb668);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px var(--v-gold-30, rgba(196,149,58,0.3));
+  margin-bottom: var(--v-space-xl, 20px);
+}
+.camp-rest-title.shimmer {
+  animation: crTitleShimmer 2s ease-in-out infinite;
+}
+@keyframes crTitleShimmer {
+  0%,100% { text-shadow: 0 1px 8px var(--v-gold-30, rgba(196,149,58,0.3)) }
+  50%     { text-shadow: 0 1px 20px rgba(219,182,104,0.7), 0 0 40px var(--v-gold-25, rgba(196,149,58,0.25)) }
+}
+
+/* --- Icons --- */
+.camp-rest-icons {
+  font-size: clamp(22px, 7vw, 28px);
+  margin-bottom: var(--v-space-md, 8px);
+  line-height: 1.4;
+  animation: crIconFloat 3s ease-in-out infinite;
+}
+@keyframes crIconFloat { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-5px) } }
+
+/* --- Divider --- */
+.camp-rest-divider {
+  font-size: var(--v-font-md, 13px);
+  color: var(--v-gold-dim, #a08050);
+  letter-spacing: 4px;
+  margin-bottom: var(--v-space-xl, 20px);
+  opacity: 0.5;
+  transition: opacity var(--v-transition-enter, 0.3s) ease;
+}
+
+/* --- Text lines --- */
+.camp-rest-text {
+  margin-bottom: var(--v-space-lg, 16px);
+  min-height: 64px;
+}
+.camp-rest-line {
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-body, 14px);
+  line-height: 1.7;
+  color: var(--v-text, #d4c8b0);
+  font-style: italic;
+  margin-bottom: var(--v-space-sm, 4px);
+  opacity: 0;
+  transform: translateY(5px);
+  animation: crLineReveal 0.5s ease-out forwards;
+}
+.camp-rest-line:nth-child(1) { animation-delay: 0.1s }
+.camp-rest-line:nth-child(2) { animation-delay: 0.35s }
+.camp-rest-line:nth-child(3) { animation-delay: 0.6s }
+.camp-rest-line:nth-child(4) { animation-delay: 0.85s }
+@keyframes crLineReveal { from { opacity: 0; transform: translateY(5px) } to { opacity: 1; transform: translateY(0) } }
+
+/* --- Recovery bars (mirrors inn-animation.css) --- */
+.camp-rest-recovery {
+  margin-top: var(--v-space-md, 8px);
+  padding: var(--v-space-md-lg, 12px) var(--v-space-xl, 20px);
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--v-gold-15, rgba(196,149,58,0.15));
+  border-radius: var(--v-radius, 10px);
+  opacity: 0;
+  animation: crRecoveryFadeIn 0.6s ease-out 0.3s forwards;
+}
+@keyframes crRecoveryFadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: translateY(0) } }
+
+.cr-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-sm, 4px);
+  margin: var(--v-space-xs, 2px) 0;
+}
+.cr-bar-track {
+  flex: 1;
+  height: 10px;
+  background: rgba(0,0,0,0.4);
+  border-radius: var(--v-radius-sm, 6px);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.cr-bar-fill {
+  height: 100%;
+  border-radius: var(--v-radius-sm, 6px);
+  transition: width var(--v-transition-slow, 0.5s);
+  box-shadow: 0 0 6px rgba(255,255,255,0.1);
+}
+.cr-bar-fill.hp {
+  background: linear-gradient(90deg, #8b2020 0%, #c43030 100%);
+}
+.cr-bar-fill.mp {
+  background: linear-gradient(90deg, #203880 0%, #3050c0 100%);
+}
+.cr-bar-fill.full {
+  box-shadow: 0 0 16px rgba(255,215,0,0.5), 0 0 4px rgba(255,215,0,0.8);
+  animation: crBarFullPulse 1.5s ease-in-out infinite;
+}
+@keyframes crBarFullPulse {
+  0%,100% { box-shadow: 0 0 12px rgba(255,215,0,0.4), 0 0 4px rgba(255,215,0,0.6) }
+  50%     { box-shadow: 0 0 20px rgba(255,215,0,0.6), 0 0 8px rgba(255,215,0,1) }
+}
+.cr-bar-label {
+  font-size: var(--v-font-md, 13px);
+  color: var(--v-text, #d4c8b0);
+  font-family: monospace;
+  min-width: 70px;
+  white-space: nowrap;
+}
+.cr-exhaustion-line {
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-md, 13px);
+  color: var(--v-gold-light, #dbb668);
+  text-align: center;
+  margin: var(--v-space-sm, 4px) 0;
+  opacity: 0;
+  animation: crLineReveal 0.5s ease-out 0.8s forwards;
+}
+.cr-hd-line {
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-md, 13px);
+  color: var(--v-text-dim, #8a7a68);
+  text-align: center;
+  margin: var(--v-space-xs, 2px) 0;
+  opacity: 0;
+  animation: crLineReveal 0.5s ease-out 1s forwards;
+}
+
+/* --- Golden burst (final frame) --- */
+.cr-burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(219,182,104,0.3) 0%, rgba(196,149,58,0.1) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: crBurstExpand 1.2s ease-out forwards;
+}
+@keyframes crBurstExpand {
+  0%  { width: 0; height: 0; opacity: 0.8 }
+  50% { width: 350px; height: 350px; opacity: 0.4 }
+  100%{ width: 500px; height: 500px; opacity: 0 }
+}
+.cr-flash {
+  position: absolute;
+  inset: 0;
+  background: rgba(219,182,104,0.15);
+  pointer-events: none;
+  z-index: var(--v-z-base, 1);
+  animation: crFlash 0.6s ease-out forwards;
+}
+@keyframes crFlash { 0% { opacity: 1 } 100% { opacity: 0 } }
+
+/* --- Advance / Skip buttons --- */
+#camp-rest-advance {
+  position: fixed;
+  bottom: 86px;
+  left: 0; right: 0;
+  max-width: 430px;
+  margin: 0 auto;
+  width: fit-content;
+  z-index: var(--v-z-critical, 10000);
+  background: rgba(42,36,32,0.7);
+  border: 1px solid var(--v-border, #4a3828);
+  color: var(--v-gold, #c4953a);
+  font-family: var(--v-font);
+  font-size: var(--v-font-body, 14px);
+  padding: var(--v-space-sm, 4px) var(--v-space-lg, 16px);
+  border-radius: var(--v-radius-pill, 20px);
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  animation: crBtnFadeIn 0.3s ease-out;
+  transition: background var(--v-transition, 0.2s), border-color var(--v-transition, 0.2s);
+}
+#camp-rest-advance:active {
+  background: var(--v-gold-20, rgba(196,149,58,0.2));
+  border-color: var(--v-gold, #c4953a);
+}
+#camp-rest-skip {
+  position: fixed;
+  bottom: 40px;
+  left: 0; right: 0;
+  max-width: 430px;
+  margin: 0 auto;
+  width: fit-content;
+  z-index: var(--v-z-critical, 10000);
+  animation: crBtnFadeIn 0.3s ease-out;
+}
+@keyframes crBtnFadeIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+
+/* --- Performance tiers --- */
+@media (prefers-reduced-motion: reduce) {
+  .camp-rest-overlay, .camp-rest-frame, .camp-rest-frame.exiting, .camp-rest-frame.active {
+    transition: none; animation: none;
+  }
+  .camp-rest-particle { animation: none !important; opacity: 0.4 !important }
+  .camp-rest-fire-glow, .camp-rest-fire-core { animation: none }
+  .camp-rest-vignette, .camp-rest-icons { animation: none }
+  .camp-rest-line { animation: none; opacity: 1; transform: none }
+  .cr-bar-fill { transition: none }
+  .camp-rest-title.shimmer { animation: none }
+  .camp-rest-particle { display: none !important }
+  .camp-rest-vignette { animation: none !important; opacity: 0.5 }
+}
+body.perf-medium .camp-rest-particle:nth-child(n+8) { display: none !important }
+body.perf-lite .camp-rest-particle { display: none !important }
+body.perf-lite .camp-rest-vignette { animation: none !important; opacity: 0.5 }
+body.perf-lite .camp-rest-fire-glow, body.perf-lite .camp-rest-fire-core { animation: none }
