@@ -75,6 +75,10 @@ function _renderCurrentPopup() {
         closeOnOutside: true,
         onHide: function () {
             _popupStack = [];
+            if (window._innRestRefreshPending) {
+                window._innRestRefreshPending = false;
+                if (typeof fetchState === 'function') fetchState(true);
+            }
         }
     };
     if (data._is_error_fallback) {
