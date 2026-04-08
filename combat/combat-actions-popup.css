@@ -131,3 +131,21 @@
 .hidden {
     display: none;
 }
+
+/* Barra quando não é turno do jogador (inimigo / aliado) */
+.waiting-turn-bar {
+    text-align: center;
+    padding: var(--v-space-md, 12px) var(--v-space-sm, 8px);
+}
+
+.waiting-turn-msg {
+    font-size: var(--v-font-body, 14px);
+    color: var(--v-text, #d4c8b0);
+    font-weight: 600;
+}
+
+.waiting-turn-hint {
+    font-size: var(--v-font-sm, 13px);
+    color: var(--v-text-dim, #a09484);
+    margin: var(--v-space-xs, 4px) 0 0;
+}

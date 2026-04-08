@@ -40,6 +40,44 @@ function toggleActionsPopup() {
 /* ── Grid builder ────────────────────────────────────────── */
 
 /**
+ * Server sends `acts` as a dict (hit, flee, skills, item_list, items) from _build_actions().
+ * Legacy/alternate format: array of { t, l, ch }. Normalize to the latter for the grid.
+ */
+function _normalizeActsForGrid(raw) {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw !== 'object') return [];
+    var out = [];
+    if (typeof raw.hit === 'number') {
+        out.push({ t: 'attack', l: 'Atacar', ch: raw.hit });
+    }
+    if (raw.skills && raw.skills.length) {
+        var maxCh = raw.skills.reduce(function (m, sk) {
+            return Math.max(m, typeof sk.ch === 'number' ? sk.ch : 0);
+        }, 0);
+        var singleSkill = raw.skills.length === 1;
+        out.push({
+            t: 'skill',
+            l: 'Habilidades',
+            ch: singleSkill && maxCh > 0 ? maxCh : null,
+        });
+    }
+    var itemCount = typeof raw.items === 'number' ? raw.items : 0;
+    var hasItems = itemCount > 0 || (raw.item_list && raw.item_list.length > 0);
+    if (hasItems) {
+        out.push({
+            t: 'item',
+            l: itemCount > 0 ? 'Itens (' + itemCount + ')' : 'Itens',
+            ch: null,
+        });
+    }
+    if (typeof raw.flee === 'number') {
+        out.push({ t: 'flee', l: 'Fugir', ch: raw.flee });
+    }
+    return out;
+}
+
+/**
  * Builds the 4-column × 2-row actions grid inside the popup.
  * Uses DOM methods (no innerHTML with user data) for XSS safety.
  *
@@ -58,7 +96,7 @@ function _buildActionsGrid(popup) {
     grid.className = 'ap-grid';
 
     // ── Row 1: dynamic actions from server state ──────────
-    var acts = (currentState && currentState.acts) ? currentState.acts : [];
+    var acts = _normalizeActsForGrid(currentState && currentState.acts);
 
     // Canonical slot order for row 1
     var row1Slots = [
