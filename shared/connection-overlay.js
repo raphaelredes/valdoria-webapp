@@ -106,7 +106,15 @@ function _probeMaintenanceStatus(cb) {
     fetch(url, opts)
         .then(function(r) {
             if (!r.ok) return null;
-            return r.json();
+            return r.text().then(function(text) {
+                var t = (text || '').trim();
+                if (!t || (t.charAt(0) !== '{' && t.charAt(0) !== '[')) return null;
+                try {
+                    return JSON.parse(t);
+                } catch (e) {
+                    return null;
+                }
+            });
         })
         .then(function(data) {
             if (tid) clearTimeout(tid);

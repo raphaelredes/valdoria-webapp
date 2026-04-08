@@ -282,6 +282,20 @@ function _rotateTip() {
  * Poll the server to check if maintenance has ended.
  * If ended, cleanup and reload.
  */
+function _parseStatusJson(resp) {
+    return resp.text().then(function (text) {
+        var t = (text || '').trim();
+        if (!t) return null;
+        /* Proxies / health pages may return 200 with plain text e.g. "Offline" — not JSON */
+        if (t.charAt(0) !== '{' && t.charAt(0) !== '[') return null;
+        try {
+            return JSON.parse(t);
+        } catch (e) {
+            return null;
+        }
+    });
+}
+
 function _pollMaintenanceStatus() {
     if (!S || !S.apiBase || !S.token) return;
 
@@ -292,7 +306,10 @@ function _pollMaintenanceStatus() {
             'Cache-Control': 'no-store'
         }
     })
-    .then(function (resp) { return resp.json(); })
+    .then(function (resp) {
+        if (!resp.ok) return null;
+        return _parseStatusJson(resp);
+    })
     .then(function (data) {
         if (data && data.maintenance === false) {
             _cleanup();
@@ -300,7 +317,7 @@ function _pollMaintenanceStatus() {
         }
     })
     .catch(function (err) {
-        console.warn('[MAINT] maintenance poll failed:', err);
+        console.warn('[MAINT] maintenance poll failed:', err && err.message ? err.message : err);
     });
 }
 
