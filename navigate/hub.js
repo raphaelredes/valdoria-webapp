@@ -388,8 +388,7 @@ function _buildRegionCard(key, reg, meta) {
     }
     h += '</div>';
     h += '<div class="region-detail-actions">';
-    h += '<button class="detail-btn" data-action="locations" data-biome="' + key + '">\u{1F5FA}\uFE0F Ver Locais</button>';
-    h += '<button class="detail-btn detail-btn-primary" data-action="travel">\u2694\uFE0F Viajar</button>';
+    h += '<button class="detail-btn detail-btn-primary" data-action="travel" data-biome="' + key + '">\u2694\uFE0F Viajar</button>';
     h += '</div></div>';
 
   /* Safe: all data from trusted server mock */
@@ -397,24 +396,13 @@ function _buildRegionCard(key, reg, meta) {
   temp.innerHTML = h; /* noqa: security — server-sourced data only */
   while (temp.firstChild) card.appendChild(temp.firstChild);
 
-  /* Bind detail buttons */
-  var locBtn = card.querySelector('[data-action="locations"]');
-  if (locBtn) {
-    locBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      openLocations(this.getAttribute('data-biome'));
-    });
-  }
   /* Bind "Viajar" button — opens locations for the region */
   var travelBtn = card.querySelector('[data-action="travel"]');
   if (travelBtn) {
     travelBtn.addEventListener('click', function(e) {
       e.stopPropagation();
-      var biomeKey = card.querySelector('[data-action="locations"]');
-      var biome = biomeKey ? biomeKey.getAttribute('data-biome') : '';
-      if (biome) {
-        openLocations(biome);
-      }
+      var biome = this.getAttribute('data-biome');
+      if (biome) openLocations(biome);
     });
   }
 
@@ -792,24 +780,29 @@ async function _executeNavAction(type) {
 
 /* ===== TRAVEL ACTION ===== */
 function _startTravel(locId, biome, name, flags) {
-  /* Store flags for _executeTravelApi */
-  window._pendingTravelFlags = flags || {};
-  /* Use the full explore-travel.js animation (parallax, silhouette, particles) */
-  if (typeof playTravelAnimation === 'function') {
-    /* Constrain canvas to 430px max / 932px max height */
-    var maxW = Math.min(window.innerWidth, 430);
-    var maxH = Math.min(window.innerHeight, 932);
-    playTravelAnimation(biome, name, function() {
-      _executeTravelApi(locId);
-    });
-  } else {
-    /* Fallback if explore-travel.js not loaded */
-    console.warn('[HUB] playTravelAnimation not available, using simple overlay');
-    if (typeof HubBiomeArt !== 'undefined') {
-      HubBiomeArt.showTravel(biome, name, function() { _executeTravelApi(locId); });
+  var c = state.charData;
+  var hpPct = c.mh > 0 ? c.hp / c.mh : 1;
+
+  var doTravel = function() {
+    window._pendingTravelFlags = flags || {};
+    if (typeof playTravelAnimation === 'function') {
+      playTravelAnimation(biome, name, function() {
+        _executeTravelApi(locId);
+      });
     } else {
-      _executeTravelApi(locId);
+      console.warn('[HUB] playTravelAnimation not available, using simple overlay');
+      if (typeof HubBiomeArt !== 'undefined') {
+        HubBiomeArt.showTravel(biome, name, function() { _executeTravelApi(locId); });
+      } else {
+        _executeTravelApi(locId);
+      }
     }
+  };
+
+  if (hpPct <= 0.4) {
+    _showLowHpWarning(doTravel);
+  } else {
+    doTravel();
   }
 }
 
@@ -1153,21 +1146,34 @@ async function _executeAction(type) {
       return;
     }
 
-    if (data.url) {
-      /* Redirect (return journey → navigate reload, camp → game) */
-      window.__valdoria_transitioning = true;
+    /* Camp overlay — show camp screen inside Navigate */
+    if (data.camp && data.type === 'camp') {
+      _showCampOverlay(data.camp);
+      return;
+    }
+
+    /* Return journey — show travel animation then go to Game Hub */
+    if (data.transition_to === 'game' || type === 'return') {
+      var biome = _findBiome(state.currentLoc) || 'plains';
       if (data.travel_log && data.travel_log.length > 0 && typeof playTravelAnimation === 'function') {
-        var biome = _findBiome(state.currentLoc) || 'plains';
         playTravelAnimation(biome, 'Eldoria', function() {
-          if (typeof valdoriaSpaNav === 'function') valdoriaSpaNav(data.url);
-          else window.location.replace(data.url);
+          if (typeof _showTravelJournal === 'function' && data.travel_log.length > 0) {
+            _showTravelJournal(data.travel_log, function() { _transitionToGame(); });
+          } else {
+            _transitionToGame();
+          }
         });
       } else {
-        if (typeof valdoriaSpaNav === 'function') valdoriaSpaNav(data.url);
-        else window.location.replace(data.url);
+        _transitionToGame();
       }
+      return;
+    }
+
+    if (data.url) {
+      window.__valdoria_transitioning = true;
+      if (typeof valdoriaSpaNav === 'function') valdoriaSpaNav(data.url);
+      else window.location.replace(data.url);
     } else {
-      /* No redirect — transition to game */
       _transitionToGame();
     }
   } catch (e) {
@@ -1182,6 +1188,104 @@ function updateReturnVisibility() {
   var isOutsideCity = state.currentLoc !== 'city_gates';
   var btnReturn = document.getElementById('btn-return');
   if (btnReturn) btnReturn.style.display = isOutsideCity ? '' : 'none';
+}
+
+/* ===== CAMP OVERLAY ===== */
+function _showCampOverlay(camp) {
+  var overlay = document.getElementById('camp-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'camp-overlay';
+    overlay.className = 'camp-overlay';
+    document.body.appendChild(overlay);
+  }
+  var h = '<div class="camp-card">';
+  h += '<div class="camp-text">' + (camp.text || '') + '</div>';
+  h += '<div class="camp-actions">';
+  if (camp.buttons && camp.buttons.length) {
+    for (var i = 0; i < camp.buttons.length; i++) {
+      h += '<button class="camp-btn" data-cb="' + camp.buttons[i].cb + '">' + camp.buttons[i].text + '</button>';
+    }
+  }
+  h += '<button class="camp-btn camp-btn-close">\u274C Fechar Acampamento</button>';
+  h += '</div></div>';
+  overlay.innerHTML = h;
+  overlay.style.display = 'flex';
+
+  overlay.querySelectorAll('.camp-btn[data-cb]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var cb = this.getAttribute('data-cb');
+      _executeCampAction(cb);
+    });
+  });
+  overlay.querySelector('.camp-btn-close').addEventListener('click', function() {
+    overlay.style.display = 'none';
+  });
+}
+
+async function _executeCampAction(cb) {
+  if (!S.api || !S.token) return;
+  if (typeof vProcessing !== 'undefined') vProcessing.show({ text: 'Processando...' });
+  try {
+    var headers = { 'Content-Type': 'application/json' };
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+      headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+    }
+    var resp = await fetch(S.api + '/api/navigate/action', {
+      method: 'POST', headers: headers,
+      body: JSON.stringify({ action: 'navigate_action', token: S.token, uid: S.uid, type: 'camp_action', cb: cb }),
+    });
+    if (typeof vProcessing !== 'undefined') vProcessing.hide();
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var data = await resp.json();
+    if (data.camp) {
+      _showCampOverlay(data.camp);
+    } else {
+      var overlay = document.getElementById('camp-overlay');
+      if (overlay) overlay.style.display = 'none';
+      if (typeof vToast === 'function') vToast('Acampamento desmontado.', 'info', 2000);
+    }
+  } catch (e) {
+    if (typeof vProcessing !== 'undefined') vProcessing.hide();
+    console.error('[HUB] Camp action error:', e);
+    if (typeof vToast === 'function') vToast('Erro. Tente novamente.', 'err', 3000);
+  }
+}
+
+/* ===== LOW HP WARNING ===== */
+function _showLowHpWarning(onConfirm) {
+  var overlay = document.getElementById('hp-warn-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'hp-warn-overlay';
+    overlay.className = 'camp-overlay';
+    document.body.appendChild(overlay);
+  }
+  var c = state.charData;
+  var pct = c.mh > 0 ? Math.round((c.hp / c.mh) * 100) : 100;
+  var h = '<div class="camp-card">';
+  h += '<div class="camp-text">';
+  h += '<b>\u26A0\uFE0F Vida Baixa (' + pct + '%)</b>\n\n';
+  h += 'Seu personagem esta com <b>' + c.hp + '/' + c.mh + ' HP</b>. ';
+  h += 'Viajar nessas condicoes e arriscado.\n\n';
+  h += '<b>Dicas para se aventurar com seguranca:</b>\n';
+  h += '\u{1F3D5}\uFE0F <b>Acampar</b> — descanse para recuperar vida\n';
+  h += '\u{1FA78} <b>Usar Pocoes</b> — verifique seu inventario\n';
+  h += '\u{1F3E5} <b>Retornar a cidade</b> — visite o Templo para cura';
+  h += '</div>';
+  h += '<div class="camp-actions">';
+  h += '<button class="camp-btn" id="hp-warn-go">\u2694\uFE0F Viajar mesmo assim</button>';
+  h += '<button class="camp-btn camp-btn-close" id="hp-warn-cancel">\u274C Cancelar</button>';
+  h += '</div></div>';
+  overlay.innerHTML = h;
+  overlay.style.display = 'flex';
+  document.getElementById('hp-warn-go').addEventListener('click', function() {
+    overlay.style.display = 'none';
+    onConfirm();
+  });
+  document.getElementById('hp-warn-cancel').addEventListener('click', function() {
+    overlay.style.display = 'none';
+  });
 }
 
 /* ===== HELPERS ===== */

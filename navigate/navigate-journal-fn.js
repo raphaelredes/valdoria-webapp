@@ -76,7 +76,9 @@ function _showTravelJournal(log,redirectUrl){
         var _rl=[];for(var _ri=0;_ri<log.length;_ri++){if(log[_ri].type==='arrival_new'&&log[_ri].loc_id)_rl.push(log[_ri].loc_id);}
         if(_rl.length)try{localStorage.setItem('valdoria_reveal_locs',JSON.stringify(_rl));}catch(e){console.warn('[NAVIGATE]',e);}
         window.__valdoria_transitioning=true;
-        if(typeof valdoriaSpaNav==='function')valdoriaSpaNav(redirectUrl);else window.location.replace(redirectUrl);
+        if(typeof redirectUrl==='function'){redirectUrl();}
+        else if(typeof valdoriaSpaNav==='function')valdoriaSpaNav(redirectUrl);
+        else window.location.replace(redirectUrl);
         return true;
       }
     },

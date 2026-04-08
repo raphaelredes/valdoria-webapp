@@ -688,6 +688,54 @@ body {
   transition: width 3.5s linear /* pflt-suppress: travel progress bar */;
 }
 
+/* ===== CAMP OVERLAY ===== */
+.camp-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  z-index: var(--v-z-popup, 800);
+  background: rgba(15, 12, 8, 0.92);
+  justify-content: center; align-items: center;
+  padding: var(--v-space-lg, 12px);
+}
+.camp-card {
+  background: var(--v-bg-card, #2e2520);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-lg, 14px);
+  padding: var(--v-space-xl, 16px);
+  max-width: 400px; width: 100%;
+  max-height: 85vh; overflow-y: auto;
+}
+.camp-text {
+  color: var(--v-text, #d4c8b0);
+  font-size: var(--v-font-body, 14px);
+  line-height: 1.6;
+  white-space: pre-line;
+  margin-bottom: var(--v-space-lg, 12px);
+}
+.camp-text b { color: var(--v-gold, #c4953a) }
+.camp-actions {
+  display: flex; flex-direction: column;
+  gap: var(--v-space-sm, 6px);
+}
+.camp-btn {
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius, 10px);
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font);
+  font-size: var(--v-font-body, 14px);
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+  cursor: pointer;
+  text-align: left;
+  min-height: 44px;
+}
+.camp-btn:active { background: var(--v-bg-card, #2e2520) }
+.camp-btn-close {
+  text-align: center;
+  color: var(--v-text-dim, #a09484);
+  margin-top: var(--v-space-sm, 6px);
+}
+
 /* ===== PERF TIERS ===== */
 body.perf-lite .region-card { transition: none }
 body.perf-lite .region-art-bg { background: var(--v-bg-card, #2e2520) !important }
