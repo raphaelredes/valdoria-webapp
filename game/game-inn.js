@@ -461,10 +461,10 @@ function _renderResult(ct, d) {
   hdr.appendChild(title);
   root.appendChild(hdr);
 
-  /* Narrative message */
+  /* Narrative message (backend sends HTML formatting) */
   if (d.message) {
     var msg = _el('div', 'inn-result-msg');
-    msg.textContent = d.message;
+    msg.innerHTML = d.message;
     root.appendChild(msg);
   }
 
