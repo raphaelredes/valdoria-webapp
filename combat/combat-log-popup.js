@@ -1,36 +1,11 @@
-/* combat-log-popup.js — Combat Log Popup (D&D roll details, timer pause 1x/turn) */
-
-var _logPauseUsed = false;
-var _logTimerPaused = false;
-var _lastLogTurnCount = -1;
+/* combat-log-popup.js — Combat Log Popup (D&D roll details). Timer pausa via _syncCombatOverlaysWithTimer (vPopup). */
 
 function openCombatLog() {
     var state = (typeof currentState !== 'undefined') ? currentState : null;
     if (!state) return;
 
-    // Reset pause flag on new turn
-    var tc = (state.tc !== undefined && state.tc !== null) ? state.tc : -1;
-    if (tc !== _lastLogTurnCount) {
-        _logPauseUsed = false;
-        _lastLogTurnCount = tc;
-    }
-
-    // Timer pause logic — only first open per turn pauses
-    if (!_logPauseUsed) {
-        _logPauseUsed = true;
-        if (typeof pauseTimer === 'function') pauseTimer();
-        _logTimerPaused = true;
-    } else {
-        _logTimerPaused = false;
-    }
-
-    // Timer badge HTML
-    var timerBadge;
-    if (_logTimerPaused) {
-        timerBadge = '<div class="log-timer-info"><span class="log-badge-paused">⏸ Timer pausado</span></div>';
-    } else {
-        timerBadge = '<div class="log-timer-info"><span class="log-badge-running">⏳ Timer continua contando</span></div>';
-    }
+    /* Timer do turno pausa enquanto qualquer overlay de combate estiver ativo (incl. este popup). */
+    var timerBadge = '<div class="log-timer-info"><span class="log-badge-paused">⏸ Timer do turno pausado com o registro aberto</span></div>';
 
     var entries = _buildLogEntries(state);
 
@@ -44,10 +19,7 @@ function openCombatLog() {
 }
 
 function closeCombatLog() {
-    if (_logTimerPaused) {
-        if (typeof resumeTimer === 'function') resumeTimer();
-        _logTimerPaused = false;
-    }
+    /* Pausa/retoma é centralizada em combat.js (_syncCombatOverlaysWithTimer). */
 }
 
 function _buildLogEntries(state) {
