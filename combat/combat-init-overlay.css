@@ -251,6 +251,89 @@
     padding-top: var(--v-space-xs);
 }
 
+/* Ordem de combate (DiceRoller .dr-*): textos centralizados neste overlay */
+.initiative-order-overlay .dr-container {
+    align-items: center;
+}
+
+.initiative-order-overlay .dr-title {
+    width: 100%;
+    text-align: center;
+}
+
+.initiative-order-overlay .dr-entry {
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+}
+
+.initiative-order-overlay .dr-name {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+}
+
+.initiative-order-overlay .dr-dice-box {
+    justify-content: center;
+}
+
+/* Fallback quando não há DiceRoller (_showInitiativeStatic) */
+.init-order-static {
+    padding: var(--v-space-xs) var(--v-space-md);
+    font-size: var(--v-font-xs, 11px);
+    color: var(--v-text-dim, #a09484);
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.init-order-static-title {
+    font-weight: 700;
+    color: var(--v-gold, #c4953a);
+    font-size: var(--v-font-sm, 12px);
+    margin-bottom: var(--v-space-xs);
+    text-align: center;
+}
+
+.init-order-static-row {
+    padding: var(--v-space-xs) 0;
+    text-align: center;
+    line-height: 1.45;
+}
+
+.init-order-static-row--player {
+    color: var(--v-gold, #c4953a);
+}
+
+.init-order-static-row--ally {
+    color: var(--v-silver);
+}
+
+.init-order-static-row--enemy {
+    color: var(--v-crimson, #c05050);
+}
+
+.init-surprise-wrap {
+    margin-top: var(--v-space-sm);
+    text-align: center;
+    width: 100%;
+}
+
+.init-surprise-msg {
+    margin-top: var(--v-space-xs);
+    font-size: var(--v-font-xs, 11px);
+    line-height: 1.4;
+    text-align: center;
+}
+
+.init-surprise-msg--player {
+    color: var(--v-crimson, #c62828);
+}
+
+.init-surprise-msg--enemy {
+    color: var(--v-gold, #c4953a);
+}
+
 .init-waiting-msg {
     display: none;
     text-align: center;
