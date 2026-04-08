@@ -89,6 +89,15 @@ function _parseParams() {
     S.api ? 'yes' : 'no', S.uid,
     !!window.__spaRouteParams,
     raw ? typeof raw : 'url');
+  /* Alinha heartbeat ao token do mapa mundo — evita falso "sessão transferida" ao ir para exploração */
+  var _apiHb = (S.api || '').replace(/\/$/, '');
+  if (window.SessionHeartbeat && _apiHb && S.token && S.uid) {
+    try {
+      SessionHeartbeat.init({ apiBase: _apiHb, token: S.token, uid: S.uid });
+    } catch (e) {
+      console.warn('[HUB] SessionHeartbeat.init failed:', e);
+    }
+  }
 }
 
 async function _loadPayload() {
