@@ -8,54 +8,40 @@
     display: none;
 }
 
-/* Visible only in web-standalone (browser) mode */
+/* Visible only in web-standalone (browser) mode — fixed bottom-right */
 .web-standalone .wum-footer-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+    position: fixed;
+    bottom: max(var(--v-space-sm, 4px), env(safe-area-inset-bottom, 0px));
+    right: var(--v-space-sm, 4px);
+    z-index: var(--v-z-dropdown, 200);
+    padding: 2px var(--v-space-sm, 4px);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius-sm, 6px);
     background: var(--v-bg-card, #2e2520);
     color: var(--v-text-dim, #a09484);
     font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: var(--v-font-label, 12px);
+    font-size: var(--v-font-xs, 10px);
     cursor: pointer;
-    transition: color var(--v-transition, 0.2s), border-color var(--v-transition, 0.2s);
+    transition: opacity var(--v-transition, 0.2s), color var(--v-transition, 0.2s);
     white-space: nowrap;
-    gap: var(--v-space-xs, 2px);
+    opacity: 0.4;
 }
 
 .web-standalone .wum-footer-btn:hover {
+    opacity: 0.8;
     color: var(--v-gold, #c4953a);
-    border-color: var(--v-gold-dim, #9a7530);
 }
 
 .web-standalone .wum-footer-btn:active {
-    background: var(--v-gold-08);
+    opacity: 1;
 }
 
-/* When NOT inside footer — small discrete button bottom-right */
-.web-standalone .wum-footer-btn:not(.wum-in-footer) {
-    position: fixed;
-    bottom: max(var(--v-space-sm, 4px), env(safe-area-inset-bottom, 0px));
-    right: var(--v-space-sm, 4px);
-    left: auto;
-    width: auto;
-    max-width: 430px;
-    z-index: var(--v-z-dropdown, 200);
-    opacity: 0.4;
-    font-size: var(--v-font-xs, 10px);
-    padding: 2px var(--v-space-sm, 4px);
-}
-
-.web-standalone .wum-footer-btn:not(.wum-in-footer):hover {
-    opacity: 0.8;
-}
-
-/* When inside footer — blend with other footer buttons */
-.web-standalone .wum-footer-btn.wum-in-footer {
-    margin-left: auto; /* push to right side */
+/* Hidden when game footer is active (game has Settings → Sair da Conta) */
+.wum-footer-btn.wum-hidden {
+    display: none !important;
 }
 
 /* Reduced motion */

@@ -57,16 +57,7 @@
             _doLogout();
         });
 
-        /* Try to find the game footer to insert there */
-        var footer = document.getElementById('footer-nav');
-        if (footer) {
-            /* Insert as last item in footer nav row */
-            footer.appendChild(_el);
-            _el.classList.add('wum-in-footer');
-        } else {
-            /* Fallback: fixed bottom-right, non-intrusive */
-            document.body.appendChild(_el);
-        }
+        document.body.appendChild(_el);
     }
 
     /* Initialize when DOM is ready */
@@ -76,15 +67,14 @@
         _init();
     }
 
-    /* Re-check footer after SPA navigation (footer may appear later) */
-    var _observer = new MutationObserver(function() {
-        if (_el && !_el.classList.contains('wum-in-footer')) {
-            var footer = document.getElementById('footer-nav');
-            if (footer && !footer.contains(_el)) {
-                footer.appendChild(_el);
-                _el.classList.add('wum-in-footer');
-            }
-        }
-    });
+    /* Hide floating button when game footer is active (game has Settings → Sair da Conta) */
+    function _syncVisibility() {
+        if (!_el) return;
+        var quick = document.getElementById('footer-quick');
+        var isGameFooterActive = quick && quick.style.display !== 'none' && quick.children.length > 0;
+        _el.classList.toggle('wum-hidden', !!isGameFooterActive);
+    }
+
+    var _observer = new MutationObserver(_syncVisibility);
     _observer.observe(document.body, { childList: true, subtree: true });
 })();
