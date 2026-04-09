@@ -2,9 +2,9 @@ function renderItemsTab(c){if(D.items_stripped){c.innerHTML='<div class="empty-s
 +'<p>Inventário muito grande para exibir aqui. Use o bot para gerenciar seus itens.</p></div>';return;}
 const counts=getFilterCounts();const filters=[{id:'all',label:'Todos',cnt:counts.all},{id:'fav',label:`${vi_f('star', 13)} Fav`,cnt:counts.fav},{id:'equip',label:`${vi('sword', 13)} Equip`,cnt:counts.equip},{id:'use',label:`${vi('flask', 13)} Consum.`,cnt:counts.use},{id:'gem',label:`${vi('gem', 13)} Gemas`,cnt:counts.gem},{id:'rune',label:`${vi('orb', 13)} Runas`,cnt:counts.rune},{id:'misc',label:`${vi('bag', 13)} Outros`,cnt:counts.misc},{id:'upgrade',label:'\u2B06 Melhoria',cnt:counts.upgrade},];let html='';const _viewIcon=viewMode==='compact'?vi('listView',14):vi('gridView',14);const _viewTitle=viewMode==='compact'?'Modo detalhado':'Modo compacto';html+=`<div class="search-bar">
             <div class="search-wrap">
-                <input type="text" placeholder="Buscar nome, tipo ou raridade..." value="${esc(searchQuery)}"
-                    oninput="onSearch(this.value)" id="searchInput">
-                <button class="search-clear ${searchQuery ? 'visible' : ''}" onclick="clearSearch()" id="searchClear">&times;</button>
+                <input type="text" placeholder="Buscar por nome, tags, raridade, slot ou descri\u00e7\u00e3o..." value="${esc(searchQuery)}"
+                    oninput="onSearch(this.value)" id="searchInput" aria-label="Buscar itens na mochila" autocomplete="off">
+                <button type="button" class="search-clear ${searchQuery ? 'visible' : ''}" onclick="clearSearch()" id="searchClear" aria-label="Limpar busca">&times;</button>
             </div>
             <div class="view-toggle-btn" onclick="toggleViewMode()" title="${_viewTitle}">
                 ${_viewIcon}
@@ -15,13 +15,13 @@ const counts=getFilterCounts();const filters=[{id:'all',label:'Todos',cnt:counts
             <div class="sort-btn ${sortMode !== 'default' ? 'active' : ''}" onclick="cycleSort()">
                 ${SORT_LABELS[sortMode]}
             </div>
-        </div>`;html+='<div class="filter-row">';html+='<div class="filter-select-wrap">';html+='<select class="filter-select" onchange="setFilter(this.value)">';filters.forEach(f=>{const sel=f.id===activeFilter?' selected':'';const cnt=f.cnt>0?` (${f.cnt})`:'';html+=`<option value="${f.id}"${sel}>${f.label}${cnt}</option>`;});html+='</select></div></div>';if((activeFilter==='all'||activeFilter==='gem')&&typeof getGemFusions==='function'){var _fusions=getGemFusions();if(_fusions.length>0){html+='<div style="text-align:right;margin-bottom:6px;">'
+        </div>`;html+='<div class="filter-row">';html+='<div class="filter-select-wrap">';html+='<select class="filter-select" onchange="setFilter(this.value)" aria-label="Filtrar por categoria de item">';filters.forEach(f=>{const sel=f.id===activeFilter?' selected':'';const cnt=f.cnt>0?` (${f.cnt})`:'';html+=`<option value="${f.id}"${sel}>${f.label}${cnt}</option>`;});html+='</select></div></div>';const items=getSortedFilteredItems();const _showPotionRow=localPotions>0&&(activeFilter==='all'||activeFilter==='use')&&(!searchQuery||'poção de cura'.includes(searchQuery));const _visibleRows=items.length+(_showPotionRow?1:0);html+='<div class="inv-list-meta" role="status" aria-live="polite">'+vi('listIcon',12)+' Mostrando '+_visibleRows+' '+(_visibleRows===1?'entrada':'entradas')+'</div>';if((activeFilter==='all'||activeFilter==='gem')&&typeof getGemFusions==='function'){var _fusions=getGemFusions();if(_fusions.length>0){html+='<div style="text-align:right;margin-bottom:6px;">'
 +'<span class="btn-sell-junk" style="border-color:var(--v-info);" onclick="showGemFusionModal()">'
 +vi('gem',13)+' Fundir Gemas ('+_fusions.length+')</span></div>';}}
 const _junkItems=getJunkItems();const junkCount=_junkItems.reduce((sum,j)=>sum+j.q,0);if(junkCount>0&&!searchQuery){let junkGP=0;_junkItems.forEach(inv=>{const jit=getItemData(inv.n);junkGP+=Math.max(1,Math.floor((jit.v||1)*0.6))*inv.q;});html+=`<div style="text-align:right;margin-bottom:6px;">
                 <span class="btn-sell-junk" onclick="doSellJunk()">${vi('coin', 13)} Vender Lixo (${junkCount}) · ${junkGP} ${vi('coin', 11)}</span>
             </div>`;}
-if(localPotions>0&&(activeFilter==='all'||activeFilter==='use')&&(!searchQuery||'poção de cura'.includes(searchQuery))){html+=`<div style="margin-bottom:10px;"><div class="item-grid ${viewMode === 'compact' ? 'compact-grid' : ''}">
+if(_showPotionRow){html+=`<div style="margin-bottom:10px;"><div class="item-grid ${viewMode === 'compact' ? 'compact-grid' : ''}">
                 <div class="item-card rarity-common fade-in" onclick="showPotionConfirm()" style="grid-column: span ${viewMode === 'compact' ? 4 : 2};
                     display:flex;align-items:center;gap:12px;padding:12px;">
                     <span style="font-size:clamp(22px,6vw,28px);">${vi('flask', 28)}</span>
@@ -35,7 +35,7 @@ if(localPotions>0&&(activeFilter==='all'||activeFilter==='use')&&(!searchQuery||
 if(D.trunc){html+=`<div style="background:rgba(255,152,0,0.1);border:1px solid var(--v-warning);border-radius:var(--v-radius);padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--v-warning);text-align:center;">
                 ${vi('warn', 13)} Mostrando 40 de ${D.trunc} itens. Use o bot para gerenciar os demais.
             </div>`;}
-const items=getSortedFilteredItems();if(!items.length&&localPotions<=0){const emptyMsg=searchQuery?'Nenhum item encontrado para a busca.':'Nenhum item encontrado.';html+=`<div class="empty-state"><div class="icon">${vi('bag', 32)}</div><p>${emptyMsg}</p></div>`;}else if(items.length){const isCompact=viewMode==='compact';html+='<div class="item-grid'+(isCompact?' compact-grid':'')+'">';let _lastRarGroup=null;items.forEach(inv=>{if(sortMode==='rarity'){const _rg=(getItemData(inv.n).r||'common');if(_rg!==_lastRarGroup){_lastRarGroup=_rg;const _rc=getRarityColor(_rg);html+=`<div class="rarity-separator"><span class="rs-dot" style="background:${_rc}"></span>${getRarityLabel(_rg)}</div>`;}}
+if(_visibleRows===0){const emptyMsg=searchQuery?'Nenhum item encontrado para a busca.':'Nenhum item encontrado.';html+=`<div class="empty-state"><div class="icon">${vi('bag', 32)}</div><p>${emptyMsg}</p></div>`;}else if(items.length){const isCompact=viewMode==='compact';html+='<div class="item-grid'+(isCompact?' compact-grid':'')+'">';let _lastRarGroup=null;items.forEach(inv=>{if(sortMode==='rarity'){const _rg=(getItemData(inv.n).r||'common');if(_rg!==_lastRarGroup){_lastRarGroup=_rg;const _rc=getRarityColor(_rg);html+=`<div class="rarity-separator"><span class="rs-dot" style="background:${_rc}"></span>${getRarityLabel(_rg)}</div>`;}}
 const it=getItemData(inv.n);const rarity=it.r||'common';const equipped=isEquippedAnywhere(inv.n);const setId=it.si||'';const tags=it.t||[];const canSelect=selectionMode&&!equipped&&!isProtected(tags)&&!isLocked(inv.n);const isSelected=selectedItems.has(inv.n);const hasSlot=!!it.s;const clickAction=canSelect?`toggleSelectItem('${esc(inv.n)}')`:(selectionMode?'':(hasSlot?`onItemTap('${esc(inv.n)}')`:`openItemDetail('${esc(inv.n)}')`));const locked=isLocked(inv.n);html+=`<div class="item-card rarity-${rarity} ${equipped ? 'equipped-marker' : ''} ${locked ? 'locked-marker' : ''} fade-in"
                     onclick="${clickAction}" ${selectionMode && !canSelect ? 'style="opacity:0.4;"' : ''}>
                     ${selectionMode ? `<div class="sel-check ${isSelected ? 'active' : ''}">${isSelected?vi_f('check',12):''}</div>` : ''}
