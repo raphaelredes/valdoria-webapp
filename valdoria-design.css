@@ -623,7 +623,8 @@
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     color: var(--v-text);
-    font-size: 14px;
+    /* B3: classe vence o seletor input do @layer — manter ≥16px */
+    font-size: max(16px, var(--v-font-body));
     font-family: var(--v-font);
     outline: none;
     transition:
@@ -643,7 +644,7 @@
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     color: var(--v-text);
-    font-size: 13px;
+    font-size: max(16px, var(--v-font-body));
     font-family: var(--v-font);
     outline: none;
     appearance: none;

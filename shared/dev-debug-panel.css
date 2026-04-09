@@ -107,13 +107,24 @@ html.dev-panel-active #dev-log-panel {
     border-radius: var(--v-radius-sm, 6px);
     color: var(--v-text, #d4c8b0);
     font-family: var(--v-font-mono, "Courier New", monospace);
-    font-size: 10px;
+    /* B3: mesmo no painel DEV — evita zoom iOS e alinha com design-system */
+    font-size: max(16px, var(--v-font-body));
     padding: 2px var(--v-space-sm, 4px);
     outline: none;
 }
 
 .dev-panel-filter input:focus {
     border-color: var(--v-gold-25, rgba(196,149,58,0.25));
+}
+
+/* B2: outline:none no estado base vence o bloco global — repetir foco teclado */
+.dev-panel-filter input:focus-visible {
+    outline: 2px solid var(--v-gold, #c4953a);
+    outline-offset: 2px;
+}
+
+.dev-panel-filter input:focus:not(:focus-visible) {
+    outline: none;
 }
 
 /* ---- Level toggle buttons ---- */
