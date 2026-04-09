@@ -2,7 +2,8 @@
  * A* pathfinding, BFS reachable hexes, path preview + reachable highlight rendering.
  * Depends on: explore-core.js (S, COLS, ROWS, IMPASSABLE, getNeighbors, hexDist, isDifficultTerrain),
  *             explore-iso.js (hexToScreen, HEX_W, HEX_H),
- *             explore-renderer.js (scheduleRender, CV_GOLD)
+ *             explore-renderer.js (scheduleRender, CV_GOLD).
+ * Fallbacks: _getHexDist / _getNeighbors if globals missing (load explore-core before this file).
  */
 
 /* ── State ── */
@@ -18,6 +19,55 @@ function _offsetToCube(col, row) {
   var q = col - (row - (row & 1)) / 2;
   var r = row;
   return { q: q, r: r, s: -q - r };
+}
+
+/** Cube hex distance (matches explore-core.js hexDist — Red Blob Games / Amit Patel). */
+function _hexDistHeuristic(c1, r1, c2, r2) {
+  var a = _offsetToCube(c1, r1);
+  var b = _offsetToCube(c2, r2);
+  return Math.max(Math.abs(a.q - b.q), Math.abs(a.r - b.r), Math.abs(a.s - b.s));
+}
+
+var _hexDistFallbackWarned = false;
+var _neighborsFallbackWarned = false;
+
+/** Prefer global hexDist from explore-core.js; same cube math if missing (e.g. script order). */
+function _getHexDist(c1, r1, c2, r2) {
+  if (typeof hexDist === 'function') {
+    return hexDist(c1, r1, c2, r2);
+  }
+  if (!_hexDistFallbackWarned) {
+    console.warn('[EXPLORE:PATH] hexDist missing — using cube heuristic (ensure explore-core.js loads before pathfinding)');
+    _hexDistFallbackWarned = true;
+  }
+  return _hexDistHeuristic(c1, r1, c2, r2);
+}
+
+/* Duplicated from explore-core EVEN_OFFSETS / ODD_OFFSETS for emergency fallback only */
+var _PF_EVEN = [[-1, -1], [0, -1], [-1, 0], [1, 0], [-1, 1], [0, 1]];
+var _PF_ODD = [[0, -1], [1, -1], [-1, 0], [1, 0], [0, 1], [1, 1]];
+
+function _getNeighbors(col, row) {
+  if (typeof getNeighbors === 'function') {
+    return getNeighbors(col, row);
+  }
+  if (typeof COLS !== 'number' || typeof ROWS !== 'number') {
+    return [];
+  }
+  if (!_neighborsFallbackWarned) {
+    console.warn('[EXPLORE:PATH] getNeighbors missing — using offset fallback (ensure explore-core.js loads before pathfinding)');
+    _neighborsFallbackWarned = true;
+  }
+  var offsets = row % 2 === 0 ? _PF_EVEN : _PF_ODD;
+  var out = [];
+  for (var i = 0; i < offsets.length; i++) {
+    var c = col + offsets[i][0];
+    var r = row + offsets[i][1];
+    if (c >= 0 && c < COLS && r >= 0 && r < ROWS) {
+      out.push([c, r]);
+    }
+  }
+  return out;
 }
 
 /** Movement cost for a tile. Returns Infinity if impassable or hidden fog. */
@@ -54,7 +104,7 @@ function findPath(startCol, startRow, goalCol, goalRow) {
     console.info('[EXPLORE:PATH] findPath rejected — goal impassable or hidden (%d,%d)', goalCol, goalRow);
     return null;
   }
-  var hDist = typeof hexDist === 'function' ? hexDist(startCol, startRow, goalCol, goalRow) : 99;
+  var hDist = _getHexDist(startCol, startRow, goalCol, goalRow);
   if (hDist > _pathMaxLen) {
     console.info('[EXPLORE:PATH] findPath rejected — hex dist %d exceeds max %d', hDist, _pathMaxLen);
     return null;
@@ -101,7 +151,7 @@ function findPath(startCol, startRow, goalCol, goalRow) {
     closedSet[current.key] = true;
 
     /* Expand neighbors */
-    var neighbors = typeof getNeighbors === 'function' ? getNeighbors(current.col, current.row) : [];
+    var neighbors = _getNeighbors(current.col, current.row);
     for (var ni = 0; ni < neighbors.length; ni++) {
       var nc = neighbors[ni][0];
       var nr = neighbors[ni][1];
@@ -121,7 +171,7 @@ function findPath(startCol, startRow, goalCol, goalRow) {
 
       cameFrom[nKey] = { col: current.col, row: current.row };
       gScore[nKey] = tentativeG;
-      var h = typeof hexDist === 'function' ? hexDist(nc, nr, goalCol, goalRow) : 0;
+      var h = _getHexDist(nc, nr, goalCol, goalRow);
       fScore[nKey] = tentativeG + h;
 
       /* Add to open if not already present */
@@ -161,7 +211,7 @@ function findReachable(startCol, startRow, budget) {
 
   while (qi < queue.length) {
     var node = queue[qi++];
-    var neighbors = typeof getNeighbors === 'function' ? getNeighbors(node.col, node.row) : [];
+    var neighbors = _getNeighbors(node.col, node.row);
 
     for (var ni = 0; ni < neighbors.length; ni++) {
       var nc = neighbors[ni][0];
