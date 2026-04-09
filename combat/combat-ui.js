@@ -26,7 +26,7 @@ function renderBonusActionBar(acts,enemies,player,toast){
     var skills=(acts&&acts.skills)?acts.skills:[];
     var html='<div class="action-bar subphase-bar bonus-action-bar" role="region" aria-label="Ação bônus">';
     html+='<div class="ba-header"><span class="ba-badge" aria-hidden="true">⚡</span><span class="ba-title">Ação bônus</span></div>';
-    html+='<p class="ba-rule-hint" title="D&D 5e: no máximo uma ação bônus por turno, só se uma habilidade ou efeito permitir.">No máximo uma ação bônus por turno, se uma habilidade permitir.</p>';
+    html+='<p class="ba-rule-hint" title="D&D 5e: no máximo uma ação bônus por turno, só se uma habilidade ou efeito permitir.">No máximo uma ação bônus por turno, se uma habilidade ou efeito permitir.</p>';
     html+='<p class="ba-hint">Escolha uma habilidade ou pule para seguir o combate (resolver inimigos e o restante do turno).</p>';
     if(toast)html+=toast;
     skills.forEach(function(sk){
@@ -52,8 +52,8 @@ function renderReactionBar(acts,player,toast,promptMs){
     var html='<div class="action-bar subphase-bar reaction-bar" role="region" aria-label="Reação">';
     html+='<div class="reaction-header"><span class="ba-badge" aria-hidden="true">⚡</span><span class="ba-title">Reação disponível</span></div>';
     html+='<p class="ba-rule-hint" title="D&D 5e SRD: no máximo uma reação por rodada, até o início do seu próximo turno.">No máximo uma reação até o início do seu próximo turno.</p>';
-    html+='<p class="ba-hint reaction-prompt-hint"><span class="reaction-ctx">'+(dmg!==''?'Você recebeu dano. Reagir?':'Uma reação está disponível.')+'</span> <span class="reaction-timer">('+sec+'s)</span></p>';
     if(dmg!=='')html+='<p class="ba-dmg-note">Dano recebido: <b>'+escHtml(String(dmg))+'</b></p>';
+    html+='<p class="ba-hint reaction-prompt-hint"><span class="reaction-ctx">'+(dmg!==''?'Escolha uma reação ou ignore.':'Uma reação está disponível.')+'</span> <span class="reaction-timer">('+sec+'s)</span></p>';
     if(toast)html+=toast;
     skills.forEach(function(sk){
         var sid=String(sk.id||'').replace(/["'<>]/g,'');
