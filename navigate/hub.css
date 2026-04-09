@@ -30,7 +30,7 @@ body {
 /* ===== PLAYER BAR ===== */
 .player-bar {
   display: flex; align-items: center; gap: var(--v-space-md, 8px);
-  padding: var(--v-space-md, 8px) var(--v-space-xl, 16px);
+  padding: calc(var(--v-space-md, 8px) + env(safe-area-inset-top, 0px)) calc(var(--v-space-xl, 16px) + env(safe-area-inset-right, 0px)) var(--v-space-md, 8px) calc(var(--v-space-xl, 16px) + env(safe-area-inset-left, 0px));
   background: var(--v-bg-deep-card, #241e18);
   border-bottom: 1px solid var(--v-border, #4a3828);
   flex-shrink: 0;
@@ -57,7 +57,7 @@ body {
 /* ===== FILTER BAR ===== */
 .filter-bar {
   display: flex; align-items: center; gap: var(--v-space-md, 8px);
-  padding: var(--v-space-sm, 4px) var(--v-space-xl, 16px);
+  padding: var(--v-space-sm, 4px) calc(var(--v-space-xl, 16px) + env(safe-area-inset-right, 0px)) var(--v-space-sm, 4px) calc(var(--v-space-xl, 16px) + env(safe-area-inset-left, 0px));
   border-bottom: 1px solid rgba(74,56,40,0.15);
   flex-shrink: 0;
   position: relative;
@@ -280,7 +280,7 @@ body {
   flex-shrink: 0;
   background: var(--v-bg-deep-card, #241e18);
   border-top: 1px solid rgba(74,56,40,0.2);
-  padding: var(--v-space-md, 8px);
+  padding: var(--v-space-md, 8px) var(--v-space-sm, 4px) calc(var(--v-space-md, 8px) + env(safe-area-inset-bottom, 0px));
   display: flex; gap: var(--v-space-sm, 4px);
   z-index: var(--v-z-sticky, 50);
 }
@@ -316,7 +316,7 @@ body {
 }
 .sub-header {
   display: flex; align-items: center; gap: var(--v-space-md, 8px);
-  padding: 12px var(--v-space-xl, 16px);
+  padding: calc(12px + env(safe-area-inset-top, 0px)) calc(var(--v-space-xl, 16px) + env(safe-area-inset-right, 0px)) 12px calc(var(--v-space-xl, 16px) + env(safe-area-inset-left, 0px));
   border-bottom: 1px solid var(--v-border, #4a3828);
   background: var(--v-bg-deep-card, #241e18);
   flex-shrink: 0;
