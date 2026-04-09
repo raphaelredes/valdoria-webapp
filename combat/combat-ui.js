@@ -51,7 +51,7 @@ function renderReactionBar(acts,player,toast,promptMs){
     var sec=typeof promptMs==='number'&&promptMs>0?Math.max(1,Math.ceil(promptMs/1000)):10;
     var html='<div class="action-bar subphase-bar reaction-bar" role="region" aria-label="Reação">';
     html+='<div class="reaction-header"><span class="ba-badge" aria-hidden="true">⚡</span><span class="ba-title">Reação disponível</span></div>';
-    html+='<p class="ba-rule-hint" title="D&D 5e SRD: no máximo uma reação por rodada, até o início do seu próximo turno.">No máximo uma reação até o início do seu próximo turno.</p>';
+    html+='<p class="ba-rule-hint" title="D&D 5e (SRD): no máximo uma reação até o início do seu próximo turno.">No máximo uma reação até o início do seu próximo turno.</p>';
     if(dmg!=='')html+='<p class="ba-dmg-note">Dano recebido: <b>'+escHtml(String(dmg))+'</b></p>';
     html+='<p class="ba-hint reaction-prompt-hint"><span class="reaction-ctx">'+(dmg!==''?'Escolha uma reação ou ignore.':'Uma reação está disponível.')+'</span> <span class="reaction-timer">('+sec+'s)</span></p>';
     if(toast)html+=toast;
