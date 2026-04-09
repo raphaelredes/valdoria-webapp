@@ -308,7 +308,7 @@
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(219,182,104,0.3) 0%, rgba(196,149,58,0.1) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(219,182,104,0.3) 0%, var(--v-gold-10) 40%, transparent 70%);
   pointer-events: none;
   z-index: 0;
   animation: crBurstExpand 1.2s ease-out forwards;

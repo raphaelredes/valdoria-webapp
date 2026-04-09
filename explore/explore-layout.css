@@ -373,7 +373,7 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     color: var(--v-gold, #c4953a);
-    font-size: 14px;
+    font-size: var(--v-font-body);
     opacity: 0.6;
     pointer-events: none;
 }

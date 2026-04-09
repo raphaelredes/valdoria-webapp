@@ -129,7 +129,7 @@
 
 .hub-cta:active {
   background: var(--v-gold-15, rgba(196, 149, 58, 0.15));
-  box-shadow: var(--v-shadow-gold, 0 0 12px rgba(196, 149, 58, 0.25));
+  box-shadow: var(--v-shadow-gold, 0 0 12px var(--v-gold-25));
 }
 
 
