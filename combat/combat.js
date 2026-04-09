@@ -145,7 +145,7 @@ function renderResolution(e){stopAllIntervals(),typeof _updateInitiativeOrderOve
 /** Índice na ordem de iniciativa (tc 1-based → índice ativo). */
 function _getTurnOrderIndex(s){if(!s||!s.to||!s.to.length)return 0;var tc=s.tc||0;if(tc<=0)return 0;return Math.max(0,(tc-1)%s.to.length);}
 /** Combatente ativo: prioriza active_turn do servidor; fallback tc+to. */
-function _resolveActiveTurn(s){if(!s||!s.to||!s.to.length)return null;if(s.active_turn&&s.active_turn.type){var at=s.active_turn;var t=at.type==='player'?'p':(at.type==='ally'?'a':'e');if(at.t&&typeof at.t==='string'&&at.t.length===1)t=at.t;return{n:at.name||'?',t:t,ico:at.icon||''};}
+function _resolveActiveTurn(s){if(!s||!s.to||!s.to.length)return null;var at=s.active_turn;if(at&&((at.type!=null&&at.type!=='')||at.t)){var t='e';if(at.t&&typeof at.t==='string'&&at.t.length===1){t=at.t;}else{var typ=String(at.type||'').toLowerCase();if(typ.length===1&&'pae'.indexOf(typ)>=0){t=typ;}else if(typ==='player'){t='p';}else if(typ==='ally'){t='a';}else if(typ==='enemy'){t='e';}}return{n:at.name||'?',t:t,ico:at.icon||at.ico||''};}
 var idx=_getTurnOrderIndex(s);return s.to[idx]||null;}
 function _turnNameKey(n){return String(n||'').substring(0,12);}
 function _resolveActiveIdx(s){if(!s||!s.to||!s.to.length)return 0;var at=_resolveActiveTurn(s);if(!at)return 0;var key=_turnNameKey(at.n);for(var i=0;i<s.to.length;i++){var e=s.to[i];if(e.t===at.t&&_turnNameKey(e.n)===key)return i;}return _getTurnOrderIndex(s);}

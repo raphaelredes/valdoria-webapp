@@ -231,6 +231,11 @@ function _dispatchAction(actType) {
 
     var s = (typeof currentState !== 'undefined') ? currentState : null;
     if (!s) return;
+    /* Log: só leitura — permitir com popup já aberto mesmo após transição para bônus/reação */
+    if (actType === 'log') {
+        if (typeof openCombatLog === 'function') openCombatLog();
+        return;
+    }
     var sp = s.sub_phase || '';
     if (sp === 'bonus_action' || sp === 'reaction') {
         if (typeof vToast === 'function') {
