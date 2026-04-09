@@ -28,7 +28,7 @@ localAC=D.p.ac+(newEqAC-origEqAC);_acCached=localAC;_acDirty=false;return localA
 function getSlotForItem(itemName,eq){for(const[slot,name]of Object.entries(eq||{})){if(name===itemName)return slot;}
 return'';}
 function updateHeader(){calcLocalAC();const s=document.getElementById('headerStats');const potStr=localPotions>0?`<span class="hs-hp hs-potion" onclick="quickUsePotion()" title="Usar Poção">${vi('flask', 12)} ${localPotions}</span>`:'';let buffsStr='';if(D.buffs&&D.buffs.length>0){buffsStr=D.buffs.map(b=>`<span style="font-size:10px;opacity:0.8;">${b.i}${b.c}</span>`).join('');}
-const combatBadge=_combatMode?'<span style="font-size:10px;color:#e44;font-weight:700">⚔️ COMBATE</span>':'';const _itemCount=localInv.reduce((s,i)=>s+(i.q>0?i.q:0),0)+localPotions;let _pwrScore=0;for(const[_ps,_pi]of Object.entries(localEq)){if(!_pi)continue;const _pd=getItemData(_pi);_pwrScore+=(_pd.ac||0)+(_pd.b||0)+(_pd.hb||0)+(_pd.mb||0);}
+const combatBadge=_combatMode?'<span style="font-size:10px;color:#e44;font-weight:700">⚔️ COMBATE</span>':'';const _stackTotal=localInv.reduce((s,i)=>s+(i.q>0?i.q:0),0)+localPotions;const _uniqueLines=localInv.filter(i=>i.q>0).length;const _itemCountLabel=_uniqueLines>1&&_stackTotal!==_uniqueLines?_stackTotal+' \u00b7 '+_uniqueLines+' tipos':String(_stackTotal);let _pwrScore=0;for(const[_ps,_pi]of Object.entries(localEq)){if(!_pi)continue;const _pd=getItemData(_pi);_pwrScore+=(_pd.ac||0)+(_pd.b||0)+(_pd.hb||0)+(_pd.mb||0);}
 const pwrStr=_pwrScore>0?`<span class="hs-power">${vi('sparkle', 12)} ${_pwrScore}</span>`:'';s.innerHTML=`
             <span>${D.p.n}</span>
             ${combatBadge}
@@ -37,7 +37,7 @@ const pwrStr=_pwrScore>0?`<span class="hs-power">${vi('sparkle', 12)} ${_pwrScor
             <span class="hs-gold">${vi('coin', 12)} ${localGold}</span>
             <span class="hs-ac">${vi('shield', 12)} ${localAC}</span>
             ${potStr}${pwrStr}
-            <span class="hs-count">${vi('backpack', 12)} ${_itemCount}</span>
+            <span class="hs-count" title="Total de unidades na mochila (empilh\u00e1veis contam cada c\u00f3pia).">${vi('backpack', 12)} ${_itemCountLabel}</span>
             ${buffsStr}
         `;}
 function quickUsePotion(){if(localPotions<=0)return;if(localHP>=D.p.mhp){toast(vi('heart',13)+' HP já está no máximo!','warn');return;}
