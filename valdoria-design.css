@@ -114,6 +114,8 @@
     --v-space-lg: 12px;
     --v-space-xl: 16px;
     --v-space-2xl: 24px;
+    /* Área mínima tocável (Apple ~44pt, WCAG AAA 44px, web.dev ~48px) — usar com .v-hit-min */
+    --v-touch-min: 44px;
     --v-font-xs: 10px;
     --v-font-sm: 11px;
     --v-font-md: 12px;
@@ -1830,12 +1832,31 @@ body::before {
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--v-transition-base, 0.3s) ease;
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #valdoria-orientation-gate {
+    transition: none;
+  }
 }
 
 #valdoria-orientation-gate.v-orientation-gate--active {
   display: flex;
   pointer-events: auto;
   opacity: 1;
+}
+
+#valdoria-orientation-gate.v-orientation-gate--active:focus-visible {
+  outline: 2px solid var(--v-gold);
+  outline-offset: 4px;
+}
+
+/* Touch: mais padding no texto (área tocável confortável; o overlay já cobre o ecrã) */
+@media (any-pointer: coarse) {
+  #valdoria-orientation-gate.v-orientation-gate--active .v-orientation-gate-inner {
+    padding: var(--v-space-lg);
+  }
 }
 
 .v-orientation-gate-inner {
@@ -1872,4 +1893,14 @@ body::before {
   font-size: var(--v-font-md);
   color: var(--v-text-dim);
   line-height: 1.4;
+}
+
+/* Utilitário: área tocável mínima (ícones pequenos, chips) — WCAG 2.5.5 / web.dev */
+.v-hit-min {
+  min-width: var(--v-touch-min);
+  min-height: var(--v-touch-min);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

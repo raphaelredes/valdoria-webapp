@@ -17,12 +17,12 @@
     return Math.min(window.innerWidth || 0, window.innerHeight || 0);
   }
 
-  /** Paisagem típica de telemóvel: largura > altura e menor dimensão “telefone”. */
+  /** Paisagem com menor dimensão até 600px (telemóvel + tablets compactos). */
   function isPhoneLandscapeLayout() {
     var w = window.innerWidth || 0;
     var h = window.innerHeight || 0;
     if (w <= h) return false;
-    return shortSide() <= 520;
+    return shortSide() <= 600;
   }
 
   /**
@@ -78,8 +78,25 @@
     var el = ensureGate();
     var on = shouldShowGate();
     el.setAttribute('aria-hidden', on ? 'false' : 'true');
-    if (on) el.classList.add('v-orientation-gate--active');
-    else el.classList.remove('v-orientation-gate--active');
+    if (on) {
+      el.classList.add('v-orientation-gate--active');
+      el.setAttribute('tabindex', '-1');
+      try {
+        el.focus({ preventScroll: true });
+      } catch (e) {
+        /* focus opcional em WebViews antigos */
+      }
+    } else {
+      el.classList.remove('v-orientation-gate--active');
+      el.removeAttribute('tabindex');
+      if (document.activeElement === el) {
+        try {
+          el.blur();
+        } catch (e2) {
+          /* intentionally silent */
+        }
+      }
+    }
   }
 
   function init() {
