@@ -6,15 +6,17 @@ var token=params.get('token')||'';var apiBase=params.get('api')||'';var userId=p
 /** Janela de UI para escolher reação (ms). Produto — não confundir com regra SRD; ver combate-economia-acoes-pesquisa.md */
 REACTION_PROMPT_MS:10000,};function _shakeApp(intensity){const app=document.getElementById('app');if(!app)return;const cls=intensity==='heavy'?'shake-heavy':'shake-light';const dur=intensity==='heavy'?450:300;app.classList.remove('shake-light','shake-heavy');void app.offsetWidth;app.classList.add(cls);setTimeout(()=>app.classList.remove(cls),ValdoriaMotion.duration(dur,0));}
 function _showImpactFlash(targetEl,isCrit){if(!targetEl)return;const rect=targetEl.getBoundingClientRect();const flash=document.createElement('div');flash.className='impact-flash'+(isCrit?' crit':'');flash.style.left=(rect.left+rect.width/2-(isCrit?35:25))+'px';flash.style.top=(rect.top+rect.height/2-(isCrit?35:25))+'px';flash.style.position='fixed';document.body.appendChild(flash);flash.addEventListener('animationend',()=>flash.remove());}
-var _timerInterval=null;var _timerRemaining=0;var _timerMax=0;var _timerExpiredPending=false;var _reactionAutoDeadline=0;var _reactionCountdownInterval=null;var _pendingPollState=null;var _pollInterval=null;var _heartbeatInterval=null;var CombatAPI=class{constructor(base,tok,uid){this.base=base.replace(/\/$/,'');this.token=tok;this.userId=uid;}
+var _timerInterval=null;var _timerRemaining=0;var _timerMax=0;var _timerExpiredPending=false;var _reactionAutoDeadline=0;var _reactionCountdownInterval=null;var _pendingPollState=null;var _pollInterval=null;var _heartbeatInterval=null;function _combatBackoffMs(err){if(!err||!err.retryAfterSec)return 0;return Math.min(60000,Math.max(500,err.retryAfterSec*1000));}
+function _attachRetryAfter(err,r,body){if(!err)return;const hdr=r&&r.headers?r.headers.get('Retry-After'):null;let sec=hdr?parseInt(hdr,10):0;if(!sec&&body&&body.retry_after!=null)sec=Number(body.retry_after)||0;if(sec>0)err.retryAfterSec=sec;return err;}
+var CombatAPI=class{constructor(base,tok,uid){this.base=base.replace(/\/$/,'');this.token=tok;this.userId=uid;}
 _baseHeaders(){const h={'Content-Type':'application/json','Authorization':`Bearer ${this.token}`};if(window.Telegram?.WebApp?.initData){h['X-Telegram-Init-Data']=Telegram.WebApp.initData;}
 return h;}
 async getState(){const r=await fetchT(`${this.base}/api/combat/state`,{method:'POST',headers:this._baseHeaders(),body:JSON.stringify({user_id:this.userId}),});if(!r.ok){const body=await r.json().catch(()=>({}));if(body.status==='displaced'&&window.SessionHeartbeat){SessionHeartbeat.handleDisplaced(body.device||'');throw new Error('displaced');}
-const err=new Error(body.error||`API ${r.status}`);err.status=r.status;throw err;}
+const err=new Error(body.error||`API ${r.status}`);err.status=r.status;_attachRetryAfter(err,r,body);throw err;}
 return r.json();}
 async checkHealth(){try{return await fetchJSON(`${this.base}/api/combat/health`,{method:'GET'});}catch(e){return{status:'unreachable'};}}
 async sendAction(data){const h=this._baseHeaders();h['X-Idempotency-Key']=crypto.randomUUID();const r=await fetchT(`${this.base}/api/combat/action`,{method:'POST',headers:h,body:JSON.stringify({user_id:this.userId,...data}),});if(!r.ok){const body=await r.json().catch(()=>({}));if(body.status==='displaced'&&window.SessionHeartbeat){SessionHeartbeat.handleDisplaced(body.device||'');throw new Error('displaced');}
-const err=new Error(body.error||`API ${r.status}`);err.status=r.status;throw err;}
+const err=new Error(body.error||`API ${r.status}`);err.status=r.status;_attachRetryAfter(err,r,body);throw err;}
 return r.json();}}
 var api=isApiMode?new CombatAPI(apiBase,token,userId):null;if(apiBase&&window.ApiDiscovery){ApiDiscovery.init(apiBase,function(newUrl){if(api)api.base=newUrl;});}
 function b64Decode(str){const std=str.replace(/-/g,'+').replace(/_/g,'/');const pad=std.length%4;const padded=pad?std+'='.repeat(4-pad):std;const binary=atob(padded);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new TextDecoder().decode(bytes);}
@@ -26,7 +28,7 @@ async function loadCombatState(retryCount=0){try{const state=await api.getState(
 if(state.error==='no_combat'||state.phase==='ended'){showCombatEnded();return;}
 if(!state.ph&&!state.phase){console.error('[COMBAT] Invalid state shape:',Object.keys(state));if(window._combatLoadingCtrl)window._combatLoadingCtrl.hide();showError('Estado inválido. Reconectando...');if(retryCount<2){setTimeout(()=>loadCombatState(retryCount+1),1500);}return;}
 currentState=state;if(state.phase&&!state.ph)state.ph=state.phase;if(window._combatLoadingCtrl){window._combatLoadingCtrl.hide(function(){renderArena(state);startHeartbeat();});}else{renderArena(state);startHeartbeat();}}catch(e){if(e.message==='displaced'){console.warn('[COMBAT] Displaced — overlay already shown, skipping retry');return;}
-if(retryCount<2){console.warn('[COMBAT] Load failed, retrying in 1.5s... (attempt '+(retryCount+1)+')');await new Promise(r=>setTimeout(r,1500));return loadCombatState(retryCount+1);}
+if(retryCount<2){var _ld=_combatBackoffMs(e)||1500;console.warn('[COMBAT] Load failed, retrying in '+Math.round(_ld/1000)+'s... (attempt '+(retryCount+1)+')');await new Promise(r=>setTimeout(r,_ld));return loadCombatState(retryCount+1);}
 console.error('[COMBAT]','Erro ao carregar',e);if(window._combatLoadingCtrl)window._combatLoadingCtrl.hide();const health=await api.checkHealth();if(health.api&&health.api!==api.base){api.base=health.api;if(window.ApiDiscovery)ApiDiscovery.updateBase(health.api);}
 if(health.status==='unreachable'){if(typeof showError==='function')showError('Servidor indisponível. Tente novamente em alguns segundos.');}else if(e.status===401||e.status===403){if(typeof showError==='function')showError('Sessão expirada. Feche esta janela e reabra o jogo.');}else{if(typeof showError==='function')showError('Erro de conexão. Não foi possível carregar o combate.');}
 var lo=document.getElementById('combatLoading');if(lo){lo.classList.add('exit-cinematic');setTimeout(function(){lo.classList.add('hidden');},ValdoriaMotion.duration(950,400));}}}
@@ -185,7 +187,7 @@ function _startReactionCountdown(){if(_reactionCountdownInterval)clearInterval(_
 async function _pollForTimerResult(){if(!isApiMode||!api)return;stopPolling();const maxRetries=5;const interval=2000;for(let i=0;i<maxRetries;i++){try{const state=await api.getState();if(!state||state.error){if(state&&(state.error==='no_combat'||state.phase==='ended')){showCombatEnded();return;}
 await new Promise(r=>setTimeout(r,interval));continue;}
 const newPh=state.ph||state.phase||'';const newTc=state.tc||0;const oldTc=currentState?(currentState.tc||0):0;if(newTc!==oldTc||newPh==='victory'||newPh==='defeat'||newPh==='ended'){currentState=state;if(newPh==='victory'||newPh==='defeat'||newPh==='ended'){renderResolution(state);}else{renderArena(state);}
-return;}}catch(e){console.warn('[COMBAT] Timer poll retry',i,e.message);}
+return;}}catch(e){console.warn('[COMBAT] Timer poll retry',i,e.message);await new Promise(r=>setTimeout(r,_combatBackoffMs(e)||interval));continue;}
 await new Promise(r=>setTimeout(r,interval));}
 startPolling();}
 function _getPollInterval(){if(!currentState)return 5000;if(currentState.unconscious||(currentState.p&&currentState.p.hp<=0))return 2000;var turn=(typeof _resolveActiveTurn==='function')?_resolveActiveTurn(currentState):null;if(!turn||!turn.t)return 5000;return turn.t==='p'?8000:2000;}
@@ -210,7 +212,7 @@ currentState=state;if(newPh==='victory'||newPh==='defeat'||newPh==='ended'){rend
 if(e.status===401||e.status===403||(e.message&&e.message.includes('401'))){showError('Sessão expirada — feche esta janela e reabra o jogo');stopPolling();return;}
 console.warn('[COMBAT] Poll error (silent)',e.message);_pollFailures++;if(_pollFailures>=3){console.warn('[COMBAT] 3+ consecutive poll failures — checking health');try{const health=await api.checkHealth();if(health.api&&health.api!==api.base){api.base=health.api;if(window.ApiDiscovery)ApiDiscovery.updateBase(health.api);}
 _pollFailures=0;if(health.status==='unreachable'){showError('Servidor indisponível. Tente novamente.');}}catch(he){console.warn('[COMBAT] Health check also failed',he.message);}}}
-_pollInterval=setTimeout(poll,_getPollInterval());};_pollInterval=setTimeout(poll,_getPollInterval());}
+_pollInterval=setTimeout(poll,_combatBackoffMs(e)||_getPollInterval());};_pollInterval=setTimeout(poll,_getPollInterval());}
 function stopPolling(){if(_pollInterval){clearTimeout(_pollInterval);_pollInterval=null;}}
 function _showPollUpdateIndicator(){const el=document.createElement('div');el.className='poll-update-indicator';el.textContent='🔄 Estado atualizado';document.body.appendChild(el);setTimeout(()=>el.classList.add('visible'),20);setTimeout(()=>{el.classList.remove('visible');setTimeout(()=>el.remove(),ValdoriaMotion.duration(300,0));},ValdoriaMotion.duration(1500,800));}
 function startHeartbeat(){stopHeartbeat();if(!isApiMode||!api)return;_heartbeatInterval=setInterval(async()=>{if(document.visibilityState==="hidden")return;try{const state=await api.getState();if(state&&state.error==='invalid_session'){showError('Sessão expirada — feche esta janela e reabra o jogo');stopHeartbeat();}}catch(e){if(e.message&&e.message.includes('401')){showError('Sessão expirada — feche esta janela e reabra o jogo');stopHeartbeat();}}},600000);}
