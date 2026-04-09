@@ -11,12 +11,23 @@ function bindExpandCollapse(){if(typeof _bindGridCollapse==='function')_bindGrid
 function bindFeedToggle(){if(typeof _bindGridFeedToggle==='function')_bindGridFeedToggle();}
 function bindFeedDetail(){if(typeof _bindGridFeedDetail==='function')_bindGridFeedDetail();}
 function renderActionBar(acts,enemies,player,toast){return typeof renderActionsButton==='function'?renderActionsButton():'<div class="action-bar"><div class="action-loading">Carregando...</div></div>';}
+/** Foca o primeiro botão útil da sub-fase (teclado / leitores de tela). */
+function focusFirstSubphaseButton(subPh){
+    requestAnimationFrame(function(){
+        var bar=document.querySelector(subPh==='reaction'?'.reaction-bar':'.bonus-action-bar');
+        if(!bar)return;
+        var btn=bar.querySelector(subPh==='reaction'?'.reaction-skill-btn':'.bonus-skill-btn');
+        if(!btn)btn=bar.querySelector('.action-btn');
+        if(btn&&typeof btn.focus==='function'){try{btn.focus({preventScroll:true});}catch(e){try{btn.focus();}catch(e2){}}}
+    });
+}
 /** Fase de ação bônus (D&D 5e) — só habilidades bônus + pular. Nunca reutilizar o grid principal. */
 function renderBonusActionBar(acts,enemies,player,toast){
     var skills=(acts&&acts.skills)?acts.skills:[];
     var html='<div class="action-bar subphase-bar bonus-action-bar" role="region" aria-label="Ação bônus">';
     html+='<div class="ba-header"><span class="ba-badge" aria-hidden="true">⚡</span><span class="ba-title">Ação bônus</span></div>';
-    html+='<p class="ba-hint">Escolha uma habilidade bônus ou pule para resolver o turno (incluindo inimigos).</p>';
+    html+='<p class="ba-rule-hint" title="D&D 5e: no máximo uma ação bônus por turno, só se uma habilidade ou efeito permitir.">No máximo uma ação bônus por turno, se uma habilidade permitir.</p>';
+    html+='<p class="ba-hint">Escolha uma habilidade ou pule para seguir o combate (resolver inimigos e o restante do turno).</p>';
     if(toast)html+=toast;
     skills.forEach(function(sk){
         var sid=String(sk.id||'').replace(/["'<>]/g,'');
@@ -33,13 +44,15 @@ function renderBonusActionBar(acts,enemies,player,toast){
     html+='</div>';
     return html;
 }
-/** Fase de reação — opções do servidor + não reagir. */
-function renderReactionBar(acts,player,toast){
+/** Fase de reação — opções do servidor + não reagir. promptMs: tempo de UI para decidir (produto; não é regra de mesa). */
+function renderReactionBar(acts,player,toast,promptMs){
     var skills=(acts&&acts.skills)?acts.skills:[];
     var dmg=(acts&&acts.damage_taken!=null)?acts.damage_taken:'';
+    var sec=typeof promptMs==='number'&&promptMs>0?Math.max(1,Math.ceil(promptMs/1000)):10;
     var html='<div class="action-bar subphase-bar reaction-bar" role="region" aria-label="Reação">';
-    html+='<div class="reaction-header"><span class="ba-badge" aria-hidden="true">⚡</span><span class="ba-title">Reação disponível</span>';
-    html+='<span class="ba-hint">Você recebeu dano. Reagir? (10s)</span></div>';
+    html+='<div class="reaction-header"><span class="ba-badge" aria-hidden="true">⚡</span><span class="ba-title">Reação disponível</span></div>';
+    html+='<p class="ba-rule-hint" title="D&D 5e SRD: no máximo uma reação por rodada, até o início do seu próximo turno.">No máximo uma reação até o início do seu próximo turno.</p>';
+    html+='<p class="ba-hint reaction-prompt-hint"><span class="reaction-ctx">'+(dmg!==''?'Você recebeu dano. Reagir?':'Uma reação está disponível.')+'</span> <span class="reaction-timer">('+sec+'s)</span></p>';
     if(dmg!=='')html+='<p class="ba-dmg-note">Dano recebido: <b>'+escHtml(String(dmg))+'</b></p>';
     if(toast)html+=toast;
     skills.forEach(function(sk){
@@ -65,7 +78,7 @@ else if(action==='reaction_skip'){sendAction({type:'reaction_skip'});}else if(ac
 else if(action==='continue_spectator'){sendAction({type:'continue_spectator'});}})();});}
 function _showActionLoading(show){let el=document.getElementById('actionLoading');if(show){if(!el){el=document.createElement('div');el.id='actionLoading';el.className='action-loading';el.innerHTML='<div class="loading-d20-icon"></div><span>Resolvendo<span class="loading-dots"></span></span>';const bar=document.querySelector('.action-bar');if(bar)bar.prepend(el);}
 el.style.display='flex';}else if(el){el.remove();}}
-var _actionSent=false;var _actionSentTimer=null;async function sendAction(actionData){console.info('[COMBAT:ACTION] sendAction type=%s target=%s skill=%s item=%s',actionData.type,actionData.target,actionData.skill_id||'-',actionData.item_key||'-');if(_actionSent||_cinematicInProgress){console.warn('[COMBAT:ACTION] BLOCKED actionSent=%s cinematic=%s',_actionSent,_cinematicInProgress);return;}if(typeof _clearReactionAutoTimers==='function')_clearReactionAutoTimers();vHaptic.medium();_actionSent=true;clearTimeout(_actionSentTimer);_actionSentTimer=setTimeout(()=>{if(_actionSent){console.warn('[COMBAT] Action safety timeout — force reset');_actionSent=false;_timerExpiredPending=false;_showActionLoading(false);document.querySelectorAll('#app .action-btn').forEach(b=>b.classList.remove('disabled'));startPolling();}},30000)/*_TIMEOUT*/;_lastAnimatedRoll=null;_initDiceAnimated=false;document.querySelectorAll('#app .action-btn').forEach(b=>b.classList.add('disabled'));_showActionLoading(true);stopTimer();stopPolling();if(isApiMode&&api){try{const result=await api.sendAction(actionData);clearTimeout(_actionSentTimer);_showActionLoading(false);_actionSent=false;if(!result){showError('Sem resposta do servidor. Verifique sua conex\u00e3o.');return;}
+var _actionSent=false;var _actionSentTimer=null;async function sendAction(actionData){console.info('[COMBAT:ACTION] sendAction type=%s target=%s skill=%s item=%s',actionData.type,actionData.target,actionData.skill_id||'-',actionData.item_key||'-');if(_actionSent||_cinematicInProgress){console.warn('[COMBAT:ACTION] BLOCKED actionSent=%s cinematic=%s',_actionSent,_cinematicInProgress);return;}if(typeof _clearReactionAutoTimers==='function')_clearReactionAutoTimers();vHaptic.medium();_actionSent=true;clearTimeout(_actionSentTimer);_actionSentTimer=setTimeout(()=>{if(_actionSent){console.warn('[COMBAT] Action safety timeout — force reset');_actionSent=false;_timerExpiredPending=false;_showActionLoading(false);document.querySelectorAll('#app .action-btn').forEach(b=>b.classList.remove('disabled'));startPolling();}},30000)/* produto: safety se a API não responder; não é o timer de turno do servidor */;_lastAnimatedRoll=null;_initDiceAnimated=false;document.querySelectorAll('#app .action-btn').forEach(b=>b.classList.add('disabled'));_showActionLoading(true);stopTimer();stopPolling();if(isApiMode&&api){try{const result=await api.sendAction(actionData);clearTimeout(_actionSentTimer);_showActionLoading(false);_actionSent=false;if(!result){showError('Sem resposta do servidor. Verifique sua conex\u00e3o.');return;}
 console.info('[COMBAT:API] response phase=%s hasLR=%s hasPLR=%s hasFeed=%s',result.phase,!!result.lr,!!result.plr,!!(result.feed&&result.feed.length));_playCinematicResult(result,actionData.type);}catch(e){clearTimeout(_actionSentTimer);_showActionLoading(false);_actionSent=false;console.error('[COMBAT:API] sendAction FAILED status=%s msg=%s',e.status||'?',e.message||e);const msg=(e.status===401||e.status===403)?'Sessão expirada.':e.status===429?'Muitas ações. Aguarde um momento.':'Erro de conexão. Tente novamente.';showError(msg);if(e.status===429){setTimeout(()=>{document.querySelectorAll('#app .action-btn').forEach(b=>b.classList.remove('disabled'));startPolling();},5000);}else{document.querySelectorAll('#app .action-btn').forEach(b=>b.classList.remove('disabled'));if(e.status!==401&&e.status!==403){startPolling();}}}}else{if(!tg){console.warn('[COMBAT] No Telegram WebApp',actionData);_actionSent=false;return;}
 const payload={action:'combat_action',token:token,...actionData,};window.__valdoria_transitioning=true;tg.sendData(JSON.stringify(payload)); /* pflt-suppress: fetch via api.sendAction() above */setTimeout(()=>{try{tg.close();}catch(e){console.warn('[COMBAT] tg.close() failed',e);}},1000);}}
 function showSkillPicker(skills,enemies,actionType){if(!skills||skills.length===0)return;actionType=actionType||'skill';const panel=document.getElementById('skillPanel');const overlay=document.getElementById('skillOverlay');const title=actionType==='bonus_use'?'⚡ Ação bônus':'Habilidades';let html=`<div class="skill-panel-title">${title}</div>`;skills.forEach(sk=>{const _sid=String(sk.id!=null?sk.id:'').replace(/["'<>]/g,'');if(!_sid)return;const _tg=String(sk.tg||'single').replace(/["'<>]/g,'');const _ch=(typeof sk.ch==='number'&&!isNaN(sk.ch))?sk.ch:0;const _cost=sk.c!=null?sk.c:0;const typeBadge=sk.tp==='saving_throw'?' · <span class="sk-type sk-type-st">ST</span>':sk.tp==='auto'?' · <span class="sk-type sk-type-auto">Auto</span>':sk.tp==='heal'?' · <span class="sk-type sk-type-heal">Cura</span>':'';const tgtBadge=sk.tg==='all'?' · <span class="sk-aoe">AOE</span>':sk.tg==='self'?' · <span class="sk-aoe">Próprio</span>':'';const effLine=sk.eff?`<div class="skill-effect">${escHtml(sk.eff)}</div>`:'';const skCls=sk.tp==='heal'?'sk-heal':sk.tp==='saving_throw'?'sk-save':sk.tp==='auto'?'sk-buff':'sk-damage';html+=`<div class="skill-item ${skCls}" data-skill-id="${_sid}" data-tg="${_tg}">
