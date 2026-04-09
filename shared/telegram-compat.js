@@ -13,9 +13,9 @@
     }
 
     // Ler token/session do localStorage
-    var _token = localStorage.getItem("valdoria_web_token") || "";
-    var _userId = parseInt(localStorage.getItem("valdoria_web_user_id") || "0", 10);
-    var _apiBase = localStorage.getItem("valdoria_api_base") || "";
+    var _token = localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_web_token')) || "";
+    var _userId = parseInt(localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_web_user_id')) || "0", 10);
+    var _apiBase = localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_api_base')) || "";
 
     // Haptic feedback fallback
     function _vibrate(ms) {

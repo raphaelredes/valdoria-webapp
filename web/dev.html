@@ -99,7 +99,7 @@
         var errEl = document.getElementById('error');
 
         /* Discover API base (same logic as web-auth.js) */
-        var _apiBase = localStorage.getItem('valdoria_api_base') || '';
+        var _apiBase = localStorage.getItem('valdoria_api_base_dev') || '';
 
         async function discoverApi() {
             if (_apiBase) return;
@@ -144,9 +144,9 @@
                     throw new Error(err.error || 'Acesso negado (' + resp.status + ')');
                 }
                 var data = await resp.json();
-                localStorage.setItem('valdoria_web_token', data.token || '');
-                localStorage.setItem('valdoria_web_user_id', String(data.user_id || 0));
-                localStorage.setItem('valdoria_api_base', _apiBase);
+                localStorage.setItem('valdoria_web_token_dev', data.token || '');
+                localStorage.setItem('valdoria_web_user_id_dev', String(data.user_id || 0));
+                localStorage.setItem('valdoria_api_base_dev', _apiBase);
 
                 /* Save dev_device_token for future auto-login (no PIN needed) */
                 if (data.dev_device_token) {

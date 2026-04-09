@@ -374,11 +374,11 @@ function _parseLine(raw) {
 function _startPolling() {
     var tok = null, api = null;
     try {
-        tok = localStorage.getItem('valdoria_web_token');
-        api = localStorage.getItem('valdoria_api_base');
+        tok = localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_web_token'));
+        api = localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_api_base'));
     } catch (e) {}
     if (!tok || !api) { _pollTimer = setTimeout(_startPolling, POLL_INTERVAL_MS); return; }
-    var uid = localStorage.getItem('valdoria_web_user_id') || '';
+    var uid = localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_web_user_id')) || '';
 
     if (_sseStatusEl) {
         _sseStatusEl.className = 'dev-sse-status connected';

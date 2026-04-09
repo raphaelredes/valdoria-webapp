@@ -12,9 +12,9 @@ var _envId = _isProd ? 'prod' : 'dev';
 if (_envOverride) console.info('[WEB-AUTH] env override=%s isProd=%s', _envOverride, _isProd);
 
 // Storage keys
-var WEB_TOKEN_KEY = 'valdoria_web_token';
-var WEB_USER_KEY = 'valdoria_web_user_id';
-var WEB_API_KEY = 'valdoria_api_base';
+var WEB_TOKEN_KEY = 'valdoria_web_token' + '_' + _envId;
+var WEB_USER_KEY = 'valdoria_web_user_id' + '_' + _envId;
+var WEB_API_KEY = 'valdoria_api_base' + '_' + _envId;
 var DEV_DEVICE_KEY = 'valdoria_dev_device';
 
 var _apiBase = '';
@@ -28,7 +28,7 @@ var _isDevLogin = false;
 
 async function discoverApiBase() {
     // 1. Check localStorage (env-specific key to prevent cross-env contamination)
-    var envApiKey = WEB_API_KEY + '_' + _envId;
+    var envApiKey = WEB_API_KEY;
     var stored = localStorage.getItem(envApiKey);
     if (stored) {
         _apiBase = stored;
@@ -44,7 +44,7 @@ async function discoverApiBase() {
             var data = await resp.json();
             if (data.url) {
                 _apiBase = data.url.replace(/\/$/, '');
-                localStorage.setItem(WEB_API_KEY + '_' + _envId, _apiBase);
+                localStorage.setItem(WEB_API_KEY, _apiBase);
                 return true;
             }
         }
@@ -58,7 +58,7 @@ async function discoverApiBase() {
             var data2 = await resp2.json();
             if (data2.url) {
                 _apiBase = data2.url.replace(/\/$/, '');
-                localStorage.setItem(WEB_API_KEY + '_' + _envId, _apiBase);
+                localStorage.setItem(WEB_API_KEY, _apiBase);
                 return true;
             }
         }
@@ -69,7 +69,7 @@ async function discoverApiBase() {
     var url = prompt('URL do servidor Valdoria (ex: https://valdoria.example.com):');
     if (url) {
         _apiBase = url.replace(/\/$/, '');
-        localStorage.setItem(WEB_API_KEY + '_' + _envId, _apiBase);
+        localStorage.setItem(WEB_API_KEY, _apiBase);
         return true;
     }
     return false;
@@ -272,7 +272,7 @@ function handleLoginSuccess(data) {
     // Persist credentials
     localStorage.setItem(WEB_TOKEN_KEY, _authToken);
     localStorage.setItem(WEB_USER_KEY, String(_userId));
-    localStorage.setItem(WEB_API_KEY + '_' + _envId, _apiBase);
+    localStorage.setItem(WEB_API_KEY, _apiBase);
 
     // DEV permanent auto-login: persist device token if provided
     if (data.dev_device_token) {
@@ -594,7 +594,7 @@ function checkExistingSession() {
 
     var token = localStorage.getItem(WEB_TOKEN_KEY);
     var uid = localStorage.getItem(WEB_USER_KEY);
-    var api = localStorage.getItem(WEB_API_KEY + '_' + _envId);
+    var api = localStorage.getItem(WEB_API_KEY);
     console.info('[WEB-AUTH] checkExistingSession token=%s uid=%s api=%s',
         token ? 'present(' + token.length + ')' : 'none', uid || 'none', api || 'none');
     if (token && uid && api) {
@@ -680,7 +680,7 @@ window.onDevLogin = async function() {
         _isDevLogin = true;
         localStorage.setItem(WEB_TOKEN_KEY, _authToken);
         localStorage.setItem(WEB_USER_KEY, String(_userId));
-        localStorage.setItem(WEB_API_KEY + '_' + _envId, _apiBase);
+        localStorage.setItem(WEB_API_KEY, _apiBase);
 
         // Step 2: Fetch character list
         var charsResp = await fetch(_apiBase + '/api/game/characters?user_id=' + _userId, {

@@ -12,9 +12,9 @@
 
     function _doLogout() {
         /* 1. Notify server (fire-and-forget) */
-        var api = localStorage.getItem('valdoria_api_base') || '';
-        var token = localStorage.getItem('valdoria_web_token') || '';
-        var uid = parseInt(localStorage.getItem('valdoria_web_user_id') || '0', 10);
+        var api = localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_api_base')) || '';
+        var token = localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_web_token')) || '';
+        var uid = parseInt(localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_web_user_id')) || '0', 10);
         if (api && token) {
             try {
                 fetch(api + '/api/game/close', {
@@ -29,9 +29,9 @@
         }
 
         /* 2. Clear auth storage */
-        localStorage.removeItem('valdoria_web_token');
-        localStorage.removeItem('valdoria_web_user_id');
-        localStorage.removeItem('valdoria_api_base');
+        localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_web_token'));
+        localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_web_user_id'));
+        localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_api_base'));
 
         /* 3. Redirect to login page */
         var base = window.location.pathname;

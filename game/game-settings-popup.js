@@ -51,9 +51,9 @@ function _fetchSettings() {
             logoutBtn.className = 'settings-logout-btn';
             logoutBtn.textContent = '\uD83D\uDEAA Sair da Conta';
             logoutBtn.onclick = function() {
-                localStorage.removeItem('valdoria_web_token');
-                localStorage.removeItem('valdoria_web_user_id');
-                localStorage.removeItem('valdoria_api_base');
+                localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_web_token'));
+                localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_web_user_id'));
+                localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_api_base'));
                 localStorage.removeItem('valdoria_dev_device');
                 window.location.href = window.location.origin + '/web/';
             };
