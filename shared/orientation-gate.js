@@ -5,6 +5,10 @@
  */
 (function () {
   'use strict';
+  if (window.__valdoriaOrientationGateInit) {
+    return;
+  }
+  window.__valdoriaOrientationGateInit = true;
 
   var GATE_ID = 'valdoria-orientation-gate';
   var _lockAttempted = false;
@@ -49,11 +53,12 @@
     el.id = GATE_ID;
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', 'valdoria-orientation-gate-title');
     el.setAttribute('aria-hidden', 'true');
     el.innerHTML =
       '<div class="v-orientation-gate-inner">' +
       '<div class="v-orientation-gate-icon" aria-hidden="true">&#8635;</div>' +
-      '<p class="v-orientation-gate-title">Modo retrato necessário</p>' +
+      '<p id="valdoria-orientation-gate-title" class="v-orientation-gate-title">Modo retrato necessário</p>' +
       '<p class="v-orientation-gate-text">Gire o dispositivo para a posição vertical para jogar.</p>' +
       '<p class="v-orientation-gate-hint">Toque para tentar fixar o retrato (se o dispositivo permitir).</p>' +
       '</div>';
