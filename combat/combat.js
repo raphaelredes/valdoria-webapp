@@ -184,7 +184,7 @@ const newPh=state.ph||state.phase||'';const newTc=state.tc||0;const oldTc=curren
 return;}}catch(e){console.warn('[COMBAT] Timer poll retry',i,e.message);}
 await new Promise(r=>setTimeout(r,interval));}
 startPolling();}
-function _getPollInterval(){if(!currentState||!currentState.active_turn)return 5000;if(currentState.unconscious||(currentState.p&&currentState.p.hp<=0))return 2000;return currentState.active_turn.type==='player'?8000:2000;}
+function _getPollInterval(){if(!currentState)return 5000;if(currentState.unconscious||(currentState.p&&currentState.p.hp<=0))return 2000;var turn=(typeof _resolveActiveTurn==='function')?_resolveActiveTurn(currentState):null;if(!turn||!turn.t)return 5000;return turn.t==='p'?8000:2000;}
 var _pollFailures=0;function startPolling(){stopPolling();if(!isApiMode||!api)return;const poll=async()=>{if(document.visibilityState==="hidden"){_pollInterval=setTimeout(poll,_getPollInterval());return;}try{const state=await api.getState();_pollFailures=0;if(state&&state.status==='displaced'&&window.SessionHeartbeat){SessionHeartbeat.handleDisplaced(state.device||'');stopPolling();return;}
 if(!state||state.error){if(state&&state.error==='invalid_session'){showError('Sessão expirada — feche esta janela e reabra o jogo');stopPolling();return;}
 if(state&&(state.error==='no_combat'||state.phase==='ended')){showCombatEnded();}
