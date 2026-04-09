@@ -1803,3 +1803,73 @@ body::before {
   transform: translateY(10px);
   transition: opacity var(--v-transition-base, 0.3s) ease, transform var(--v-transition-base, 0.3s) ease;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Orientação — bloqueio visual em paisagem (telemóvel). Ver shared/orientation-gate.js
+   Cobre o viewport inteiro (não só o frame 430px). z-index acima de modais/loading.
+   ═══════════════════════════════════════════════════════════════════ */
+#valdoria-orientation-gate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none !important;
+  margin: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 10050;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: max(var(--v-space-xl), env(safe-area-inset-top))
+    max(var(--v-space-xl), env(safe-area-inset-right))
+    max(var(--v-space-xl), env(safe-area-inset-bottom))
+    max(var(--v-space-xl), env(safe-area-inset-left));
+  background: rgba(15, 12, 8, 0.94);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--v-transition-base, 0.3s) ease;
+}
+
+#valdoria-orientation-gate.v-orientation-gate--active {
+  display: flex;
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.v-orientation-gate-inner {
+  text-align: center;
+  max-width: 22rem;
+}
+
+.v-orientation-gate-icon {
+  font-size: var(--v-font-icon, 28px);
+  color: var(--v-gold);
+  margin-bottom: var(--v-space-lg);
+  line-height: 1;
+  filter: drop-shadow(0 0 8px var(--v-gold-30));
+}
+
+.v-orientation-gate-title {
+  font-family: var(--v-font-display);
+  font-size: var(--v-font-xl);
+  font-weight: 700;
+  color: var(--v-gold);
+  margin-bottom: var(--v-space-md);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.v-orientation-gate-text {
+  font-size: var(--v-font-body);
+  color: var(--v-text);
+  line-height: 1.5;
+  margin-bottom: var(--v-space-md);
+}
+
+.v-orientation-gate-hint {
+  font-size: var(--v-font-md);
+  color: var(--v-text-dim);
+  line-height: 1.4;
+}
