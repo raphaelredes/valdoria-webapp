@@ -244,7 +244,8 @@
   }
   a:focus:not(:focus-visible),
   button:focus:not(:focus-visible),
-  [role="button"]:focus:not(:focus-visible) {
+  [role="button"]:focus:not(:focus-visible),
+  summary:focus:not(:focus-visible) {
     outline: none;
   }
   /* B3: evita zoom automático iOS ao focar campos (fonte abaixo de 16px) */
