@@ -234,6 +234,25 @@
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
+  /* B2: foco por teclado (WCAG 2.4.7) — não remover outline em :focus; usar :focus-visible */
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--v-gold);
+    outline-offset: 2px;
+  }
+  a:focus:not(:focus-visible),
+  button:focus:not(:focus-visible),
+  [role="button"]:focus:not(:focus-visible) {
+    outline: none;
+  }
+  /* B3: evita zoom automático iOS ao focar campos (fonte abaixo de 16px) */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  textarea,
+  select {
+    font-size: max(16px, var(--v-font-body));
+  }
   html {
     /* Viewport lock — widest phone: iPhone 15 Pro Max (430px), tallest: 932px */
     max-width: min(100vw, 430px);
@@ -1903,4 +1922,14 @@ body::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* A4: toggle imersivo era ~32px alto — em touch, altura mínima confortável */
+@media (any-pointer: coarse) {
+  button.immersive-toggle {
+    min-height: var(--v-touch-min);
+    height: auto;
+    padding-top: var(--v-space-md);
+    padding-bottom: var(--v-space-sm);
+  }
 }
