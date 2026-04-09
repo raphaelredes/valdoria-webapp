@@ -38,9 +38,9 @@
 
   function tryLockPortraitFromGesture() {
     if (_lockAttempted) return;
-    _lockAttempted = true;
     var so = window.screen && window.screen.orientation;
     if (!so || typeof so.lock !== 'function') return;
+    _lockAttempted = true;
     so.lock('portrait').catch(function () {
       _lockAttempted = false;
     });
