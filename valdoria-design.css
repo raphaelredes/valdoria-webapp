@@ -1947,4 +1947,10 @@ body::before {
     padding-top: var(--v-space-md);
     padding-bottom: var(--v-space-sm);
   }
+  /* Mesmo raciocínio: pill "· Menu" após recolher painel — alvo tocável confortável */
+  button.immersive-restore {
+    min-height: var(--v-touch-min);
+    padding-top: var(--v-space-md);
+    padding-bottom: var(--v-space-md);
+  }
 }
