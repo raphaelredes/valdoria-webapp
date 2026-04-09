@@ -69,7 +69,32 @@ var _LOC_MAP = {
     'quests':           { ico: '\uD83D\uDCDC',         nm: 'Miss\u00f5es' },
     'daily_challenge':  { ico: '\uD83D\uDC3A',         nm: 'Desafio' },
     'action_codex':     { ico: '\uD83D\uDCD6',         nm: 'Comp\u00eandio' },
-    'codex':            { ico: '\uD83D\uDCD6',         nm: 'Comp\u00eandio' }
+    'codex':            { ico: '\uD83D\uDCD6',         nm: 'Comp\u00eandio' },
+    /* Substrings para callbacks do screen_data / registry (audit: scripts/audit_hub_loc_map.py) */
+    'crime':            { ico: '\uD83D\uDD75\uFE0F', nm: 'Crime' },
+    'druid':            { ico: '\uD83C\uDF32',         nm: 'Druida' },
+    'festival':         { ico: '\uD83C\uDF89',         nm: 'Festival' },
+    'guard_':           { ico: '\uD83D\uDEE1\uFE0F', nm: 'Guarda' },
+    'help_':            { ico: '\u2753',               nm: 'Ajuda' },
+    'league_':          { ico: '\uD83C\uDFC6',         nm: 'Liga' },
+    'manage_':          { ico: '\uD83D\uDC65',         nm: 'Contas' },
+    'mural_':           { ico: '\uD83D\uDDBC\uFE0F', nm: 'Mural' },
+    'online':           { ico: '\uD83C\uDF10',         nm: 'Online' },
+    'open_workshop':    { ico: '\uD83D\uDD28',         nm: 'Oficina' },
+    'pix_':             { ico: '\uD83D\uDCB3',         nm: 'PIX' },
+    'rel_':             { ico: '\uD83D\uDC9D',         nm: 'Vinculos' },
+    'rune_scribe':      { ico: '\u2728',               nm: 'Runas' },
+    'settle_':          { ico: '\u26CF\uFE0F',         nm: 'Descoberta' },
+    'shadow_alley':     { ico: '\uD83C\uDF11',         nm: 'Beco' },
+    'social_do':        { ico: '\uD83D\uDCAC',         nm: 'Social' },
+    'social_':          { ico: '\uD83E\uDD1D',         nm: 'Social' },
+    'trade_':           { ico: '\uD83E\uDEA3',         nm: 'Troca' },
+    'wnpc_':            { ico: '\uD83E\uDDE4',         nm: 'NPC' },
+    'workshop_':        { ico: '\uD83D\uDD28',         nm: 'Oficina' },
+    /* Fallbacks por prefixo (por ultimo: _matchLocation usa primeira substring que bate) */
+    'action_':          { ico: '\uD83C\uDFD9\uFE0F', nm: 'Cidade' },
+    'ach_':             { ico: '\uD83C\uDFC6',         nm: 'Conquistas' },
+    'stl_':             { ico: '\u26CF\uFE0F',         nm: 'Assentamento' }
 };
 
 /** Classifica um callback de botao como localizacao conhecida */
