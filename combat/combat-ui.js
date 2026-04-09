@@ -11,9 +11,50 @@ function bindExpandCollapse(){if(typeof _bindGridCollapse==='function')_bindGrid
 function bindFeedToggle(){if(typeof _bindGridFeedToggle==='function')_bindGridFeedToggle();}
 function bindFeedDetail(){if(typeof _bindGridFeedDetail==='function')_bindGridFeedDetail();}
 function renderActionBar(acts,enemies,player,toast){return typeof renderActionsButton==='function'?renderActionsButton():'<div class="action-bar"><div class="action-loading">Carregando...</div></div>';}
-function renderBonusActionBar(acts,enemies,player,toast){return typeof renderActionsButton==='function'?renderActionsButton():'<div class="action-bar"><div class="action-loading">Ação Bônus...</div></div>';}
-function renderReactionBar(acts,player,toast){return typeof renderActionsButton==='function'?renderActionsButton():'<div class="action-bar"><div class="action-loading">Reação...</div></div>';}
+/** Fase de ação bônus (D&D 5e) — só habilidades bônus + pular. Nunca reutilizar o grid principal. */
+function renderBonusActionBar(acts,enemies,player,toast){
+    var skills=(acts&&acts.skills)?acts.skills:[];
+    var html='<div class="action-bar subphase-bar bonus-action-bar" role="region" aria-label="Ação bônus">';
+    html+='<div class="ba-header"><span class="ba-badge" aria-hidden="true">⚡</span><span class="ba-title">Ação bônus</span></div>';
+    html+='<p class="ba-hint">Escolha uma habilidade bônus ou pule para resolver o turno (incluindo inimigos).</p>';
+    if(toast)html+=toast;
+    skills.forEach(function(sk){
+        var ch=(typeof sk.ch==='number')?sk.ch:0;
+        var chCls=ch>=65?'ch-high':(ch>=40?'ch-mid':'ch-low');
+        var sid=String(sk.id||'').replace(/["'<>]/g,'');
+        var tg=String(sk.tg||'single').replace(/["'<>]/g,'');
+        html+='<button type="button" class="action-btn bonus-skill-btn" data-action="bonus_use_single" data-skill-id="'+sid+'" data-tg="'+tg+'">';
+        html+='<span class="ba-skill-name">'+escHtml(sk.n||'')+'</span>';
+        html+='<span class="ba-skill-meta">Custo '+escHtml(String(sk.c!=null?sk.c:0))+' · <span class="'+chCls+'">'+ch+'%</span></span>';
+        html+='</button>';
+    });
+    html+='<button type="button" class="action-btn primary full-width ba-skip" data-action="bonus_skip">⏭️ Pular ação bônus</button>';
+    html+='</div>';
+    return html;
+}
+/** Fase de reação — opções do servidor + não reagir. */
+function renderReactionBar(acts,player,toast){
+    var skills=(acts&&acts.skills)?acts.skills:[];
+    var dmg=(acts&&acts.damage_taken!=null)?acts.damage_taken:'';
+    var html='<div class="action-bar subphase-bar reaction-bar" role="region" aria-label="Reação">';
+    html+='<div class="reaction-header"><span class="ba-badge" aria-hidden="true">⚡</span><span class="ba-title">Reação disponível</span>';
+    html+='<span class="ba-hint">Você recebeu dano. Reagir? (10s)</span></div>';
+    if(dmg!=='')html+='<p class="ba-dmg-note">Dano recebido: <b>'+escHtml(String(dmg))+'</b></p>';
+    if(toast)html+=toast;
+    skills.forEach(function(sk){
+        var sid=String(sk.id||'').replace(/["'<>]/g,'');
+        var ico=sk.ico||'⚡';
+        html+='<button type="button" class="action-btn reaction-skill-btn" data-action="reaction_use" data-skill-id="'+sid+'">';
+        html+='<span class="ba-ico" aria-hidden="true">'+escHtml(ico)+'</span> <span class="ba-skill-name">'+escHtml(sk.n||'Reação')+'</span>';
+        html+='<span class="ba-skill-meta"> ('+escHtml(String(sk.c!=null?sk.c:0))+')</span>';
+        html+='</button>';
+    });
+    html+='<button type="button" class="action-btn secondary full-width" data-action="reaction_skip">Não reagir</button>';
+    html+='</div>';
+    return html;
+}
 var _actionsDelegated=false;var _actionsState=null;function bindActions(state){_actionsState=state;if(_actionsDelegated)return;_actionsDelegated=true;document.body.addEventListener('click',(ev)=>{const btn=ev.target.closest('.action-btn');if(!btn)return;const state=_actionsState;if(!state)return;if(_actionSent||_cinematicInProgress){return;}
+{var sp=state.sub_phase||'';var act=btn.dataset.action||'';if((sp==='bonus_action'||sp==='reaction')&&['attack','skill','items','item','flee','dodge','disengage','pass'].indexOf(act)>=0){vToast('Use os botões desta fase ou abra ⚔ Ações só após encerrar bônus/reação.','warn');return;}}
 (()=>{vHaptic.select();if(!_audioUnlocked){if(_audioCtx&&_audioCtx.state==='suspended'){_audioCtx.resume().then(()=>{_audioUnlocked=true;}).catch(e=>{if(window._dbg)console.debug('[COMBAT] audioCtx.resume:',e.name);});}else if(_audioCtx&&_audioCtx.state==='running'){_audioUnlocked=true;}}if(typeof ValdoriaAudio!=='undefined'&&!ValdoriaAudio.isUnlocked()){ValdoriaAudio.forceUnlock();}
 const action=btn.dataset.action;console.info('[COMBAT:CLICK] action=%s disabled=%s',action,btn.classList.contains('disabled'));if(btn.classList.contains('disabled')){btn.classList.add('disabled-shake');setTimeout(()=>btn.classList.remove('disabled-shake'),ValdoriaMotion.duration(400,0));if(action==='skill')vToast('Sem recurso suficiente para habilidades','warn');else if(action==='items')vToast('Nenhum item utilizável em combate','warn');return;}
 const enemies=state.e||[];const skills=state.acts?.skills||[];if(action==='attack'){if(enemies.length>1){showTargetPicker(enemies,'attack');}else{sendAction({type:'attack',target:0});}}else if(action==='skill'){if(skills.length===1){if(enemies.length>1){showTargetPicker(enemies,'skill',skills[0].id);}else{sendAction({type:'skill',skill_id:skills[0].id,target:0});}}else if(skills.length>1){showSkillPicker(skills,enemies,'skill');}}else if(action==='flee'){sendAction({type:'flee'});}else if(action==='dodge'){sendAction({type:'dodge'});}else if(action==='disengage'){sendAction({type:'disengage'});}else if(action==='pass'){sendAction({type:'pass'});}else if(action==='items'){const items=state.acts?.item_list||[];if(items.length>0){showItemPicker(items,enemies,state.a||[]);}}else if(action==='initiative'){sendAction({type:'initiative'});}else if(action==='proceed'){sendAction({type:'proceed'});}else if(action==='restore'){sendAction({type:'restore'});}

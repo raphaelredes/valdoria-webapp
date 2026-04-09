@@ -28,6 +28,15 @@ function toggleActionsPopup() {
     var popup = document.getElementById('actionsPopup');
     if (!popup) return;
 
+    var s = (typeof currentState !== 'undefined') ? currentState : null;
+    var sp = (s && s.sub_phase) ? s.sub_phase : '';
+    if (sp === 'bonus_action' || sp === 'reaction') {
+        if (typeof vToast === 'function') {
+            vToast('Termine a ação bônus ou a reação antes de abrir o painel de ações.', 'warn');
+        }
+        return;
+    }
+
     var isHidden = popup.classList.contains('hidden');
     if (isHidden) {
         _buildActionsGrid(popup);
@@ -217,6 +226,13 @@ function _dispatchAction(actType) {
 
     var s = (typeof currentState !== 'undefined') ? currentState : null;
     if (!s) return;
+    var sp = s.sub_phase || '';
+    if (sp === 'bonus_action' || sp === 'reaction') {
+        if (typeof vToast === 'function') {
+            vToast('Termine a ação bônus ou a reação antes de usar o painel de ações.', 'warn');
+        }
+        return;
+    }
 
     var enemies = s.e || [];
     var skills = (s.acts && s.acts.skills) ? s.acts.skills : [];
