@@ -32,7 +32,12 @@ function toggleActionsPopup() {
     var sp = (s && s.sub_phase) ? s.sub_phase : '';
     if (sp === 'bonus_action' || sp === 'reaction') {
         if (typeof vToast === 'function') {
-            vToast('Termine a ação bônus ou a reação antes de abrir o painel de ações.', 'warn');
+            vToast(
+                sp === 'reaction'
+                    ? 'Termine a reação antes de abrir o painel de ações.'
+                    : 'Termine a ação bônus antes de abrir o painel de ações.',
+                'warn'
+            );
         }
         return;
     }
@@ -229,7 +234,12 @@ function _dispatchAction(actType) {
     var sp = s.sub_phase || '';
     if (sp === 'bonus_action' || sp === 'reaction') {
         if (typeof vToast === 'function') {
-            vToast('Termine a ação bônus ou a reação antes de usar o painel de ações.', 'warn');
+            vToast(
+                sp === 'reaction'
+                    ? 'Termine a reação antes de usar o painel de ações.'
+                    : 'Termine a ação bônus antes de usar o painel de ações.',
+                'warn'
+            );
         }
         return;
     }
