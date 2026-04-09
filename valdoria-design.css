@@ -1783,6 +1783,19 @@
    These apply to ALL WebApps unconditionally.
    ═══════════════════════════════════════════════════════════════════ */
 
+/* B2 (complemento): foco teclado em campos — fora do @layer para vencer resets locais outline:none */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--v-gold);
+  outline-offset: 2px;
+}
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+  outline: none;
+}
+
 /* Dark background outside the phone frame (visible on desktop/tablet) */
 body::before {
   content: '';
