@@ -196,7 +196,7 @@
     padding: var(--v-space-md) var(--v-space-md-lg);
     color: var(--v-text);
     font-family: var(--v-font);
-    font-size: var(--v-font-base);
+    font-size: max(16px, var(--v-font-body));
     min-height: 44px;
     outline: none;
     transition: border-color var(--v-transition-base);
