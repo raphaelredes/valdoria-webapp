@@ -1,223 +1,36 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="wa-portal dev-dashboard" style="opacity:1!important">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Valdoria Portal — DEV Dashboard</title>
-    <meta name="theme-color" content="#2a2420">
+    <meta http-equiv="refresh" content="0;url=/web/?env=dev">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="theme-color" content="#2a2420">
     <meta name="robots" content="noindex, nofollow">
-
-    <!-- Design System & Debug Shell -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../shared/fonts.css">
-    <link rel="stylesheet" href="../valdoria-design.css">
-    <link rel="stylesheet" href="web-auth.css">
-    <link rel="stylesheet" href="../shared/dev-debug-panel.css">
-
-    <script>
-        // FORÇA AMBIENTE DEV (Protege contra vazamento para PROD baseada em hostname)
-        window._envOverride = 'dev';
-        var v = Date.now();
-    </script>
-
+    <title>Valdoria DEV — Redirecionando…</title>
     <style>
-        :root {
-            --dev-pane-width: 450px;
-        }
         html, body {
-            margin: 0; padding: 0 !important;
-            height: 100vh; width: 100vw;
-            overflow: hidden !important;
-            background: #0f0d0a;
-            font-family: 'Inter', sans-serif;
-            display: block !important;
-        }
-
-        /* DASHBOARD LAYOUT (FullHD Optimized) */
-        .dashboard-container {
-            display: flex;
-            flex-direction: row;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        /* Left: Game/Login Area */
-        .game-column {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            background: radial-gradient(circle at center, #1a1510 0%, #0f0d0a 100%);
-            border-right: 1px solid #4a3828;
-            min-width: 0;
-            overflow: hidden;
-        }
-
-        /* Right: Log Management Area */
-        .log-column {
-            flex: 0 0 var(--dev-pane-width);
-            display: flex;
-            flex-direction: column;
-            background: #15110d;
-            height: 100vh;
-            min-width: 320px;
-        }
-
-        /* Orb adjustments for Dashboard */
-        .v-orb-container {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 800px; height: 800px;
-            opacity: 0.1;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* Auth Card adjustment */
-        .wa-login-card {
-            z-index: 10;
-            position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            border: 1px solid #c4953a;
-            max-width: 380px;
-            width: 90%;
-        }
-
-        /* Log Panel Header Overrides */
-        #dev-log-panel {
-            display: flex !important; /* Force visibility */
-            height: 100%;
-            border-left: none; /* Already in column */
-        }
-
-        .dev-badge-fixed {
-            position: absolute;
-            top: 20px; left: 20px;
-            background: #c4953a;
-            color: #1a1510;
-            padding: 4px 12px;
+            background: #2a2420;
+            color: #d4c8b0;
             font-family: 'Cinzel', serif;
-            font-weight: 700;
-            font-size: 12px;
-            border-radius: 4px;
-            z-index: 100;
-            letter-spacing: 2px;
-            box-shadow: 0 0 15px rgba(196, 149, 58, 0.5);
+            margin: 0;
+            padding: 40px 20px;
+            text-align: center;
+            min-height: 100vh;
         }
-
-        /* Resgate das janelas duplas (Browser/Server) */
-        .dev-log-split {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Hide specific elements that interfere with the dash */
-        #dev-game-iframe { width: 100%; height: 100%; border: none; }
+        a { color: #c4953a; }
     </style>
-</head>
-<body class="dev-panel-active">
-
-    <div class="dashboard-container">
-        <!-- GAME/LOGIN COLUMN -->
-        <main class="game-column" id="game-host">
-            <div class="dev-badge-fixed">DEVELOPER CONSOLE</div>
-
-            <!-- 3D Orb Background -->
-            <div class="v-orb-container">
-                <div class="v-orb-core"></div>
-                <div class="v-orb-ring v-orb-ring-1"></div>
-                <div class="v-orb-ring v-orb-ring-2"></div>
-                <div class="v-orb-ring v-orb-ring-3"></div>
-            </div>
-
-            <!-- Login Section (Starts active) -->
-            <div id="screen-login" class="wa-screen wa-active" style="width:100%; display:flex; align-items:center; justify-content:center;">
-                <div class="wa-login-card">
-                    <h1 class="wa-login-title">Valdoria Developer</h1>
-                    <p class="wa-login-subtitle">Dashboard de Monitoramento (FullHD)</p>
-
-                    <div class="wa-social-buttons">
-                        <button class="wa-social-btn wa-telegram" onclick="onTelegramClick()">
-                            <span class="wa-social-icon"></span>
-                            <span class="wa-social-text">Login Bot DEV (gulirastudio)</span>
-                        </button>
-                    </div>
-
-                    <div class="wa-divider"><span>OU ACESSO MESTRE</span></div>
-
-                    <div class="wa-pin-section">
-                        <input id="inp-pin" class="wa-pin-input" type="password" placeholder="PIN" maxlength="8">
-                        <button id="btn-pin" class="wa-btn-play" onclick="onPinLogin()">Entrar com PIN</button>
-                    </div>
-
-                    <div id="auth-error" class="wa-error-msg"></div>
-                </div>
-            </div>
-        </main>
-
-        <!-- LOG COLUMN (Rescuing v3.0 logic via Embedded Mode) -->
-        <aside class="log-column">
-            <div id="dev-log-panel">
-                <!-- Inner Tools injected by shared/dev-debug-panel.js -->
-                <div style="padding:20px; color:#5a4e3e; text-align:center; font-family:monospace; font-size:12px;">
-                    Aguardando inicialização dos logs...
-                </div>
-            </div>
-        </aside>
-    </div>
-
-    <!-- Core Scripts (deferred, ordered, cache-busted) -->
-    <script src="../shared/env-utils.js"></script>
-    <script src="web-auth.js"></script>
-    <script src="../shared/console-collector.js"></script>
-    <script src="../shared/dev-debug-panel.js"></script>
-
     <script>
-        // Custom Dashboard Init
-        window.addEventListener('load', function() {
-            console.info('[DASHBOARD] Monitoramento ativo para gulirastudio');
-
-            // Re-bind console after debug panel load
-            if (window.vDevPanel && typeof vDevPanel.addLine === 'function') {
-                vDevPanel.addLine('browser', 'info', '[CONSOLE] Painel de logs sincronizado.');
-                vDevPanel.addLine('browser', 'warn', '[ENV] Modo DEV forçado (Bypass PROD ativo).');
-            }
-        });
-
-        // Redirect Success: Iframe Injection to maintain Dashboard layout
-        var _origSuccess = window.handleLoginSuccess;
-        window.handleLoginSuccess = function(data) {
-            console.info('[AUTH] Login bem-sucedido. Carregando shell do jogo...');
-
-            var host = document.getElementById('game-host');
-            var login = document.getElementById('screen-login');
-            login.style.display = 'none';
-
-            // Create Game Iframe (Maintains Split Layout)
-            var iframe = document.createElement('iframe');
-            iframe.id = 'dev-game-iframe';
-            // nodevpanel=1 prevents app.html from trying to spawn ITS OWN log panel!
-            iframe.src = '../app.html?token=' + (data.token || '') +
-                         '&uid=' + (data.user_id || 0) +
-                         '&api=' + encodeURIComponent(window._apiBase || '') +
-                         '&env=dev&nodevpanel=1';
-
-            host.appendChild(iframe);
-
-            // Allow the console capture to bridge into the iframe
-            if (window._interceptIframeConsole) {
-                iframe.addEventListener('load', function() {
-                    window._interceptIframeConsole(iframe.contentWindow);
-                    console.info('[DASHBOARD] Ponte de logs estabelecida com o jogo.');
-                });
-            }
-        };
+        /* Instant client-side redirect — keeps history clean via replace() */
+        window.location.replace('/web/?env=dev');
     </script>
+</head>
+<body>
+    <noscript>
+        <p>Redirecionando…</p>
+        <p><a href="/web/?env=dev">Clique aqui se não for redirecionado automaticamente</a></p>
+    </noscript>
 </body>
 </html>
