@@ -345,7 +345,7 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-family: sans-serif;
+  font-family: var(--v-font, 'MedievalSharp', serif);
 }
 
 .camp-popup-body {
