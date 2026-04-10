@@ -165,6 +165,8 @@ function updateHexNav(){
       if(typeof isEventActive==='function'&&isEventActive())return;
       if(typeof isMoving==='function'&&isMoving())return;
       console.info('[EXPLORE:HEXNAV] move_click dir to=(%d,%d)',c,r);
+      /* Haptic feedback on successful move (research §4.5: notificationOccurred cross-platform) */
+      if(window.vHaptic&&typeof window.vHaptic.tap==='function'){try{window.vHaptic.tap();}catch(_e){/* noqa: preflight */}}
       movePlayerCanvas(c,r);
     };})(col,row);
   }
