@@ -1143,8 +1143,8 @@ function _showGuardOverlay(roll, r1, r2, mode, totalMod, proficient, dc, success
 
   formulaEl.innerHTML = '<div style="font-size:13px;color:#c4953a;margin-bottom:6px">\uD83D\uDEE1\ufe0f Montando Guarda</div>' /* noqa: innerHTML — guard overlay formula, safe static content */
     + '<div style="font-size:12px;color:#a09484;font-style:italic;margin-bottom:8px;line-height:1.5">' + narr + '</div>'
-    + '<div style="font-size:11px;color:#8a7a68">Percep\u00e7\u00e3o (WIS)' + profText + disText + '</div>'
-    + '<div style="font-size:11px;color:#8a7a68;margin-top:2px">DC ' + dc + '</div>';
+    + '<div style="font-size:11px;color:var(--v-text-faint, #8a7a68)">Percep\u00e7\u00e3o (WIS)' + profText + disText + '</div>'
+    + '<div style="font-size:11px;color:var(--v-text-faint, #8a7a68);margin-top:2px">DC ' + dc + '</div>';
   resultEl.textContent = '';
 
   /* Keep dice3d-canvas intact — do NOT overwrite diceContainer with static HTML */
@@ -1196,11 +1196,11 @@ function _showGuardResult(overlay, resultEl, diceCanvas, roll, sign, totalMod, d
 
   if (success) {
     resultEl.innerHTML = '<div style="color:#6c8;font-size:16px;font-weight:700">\u2705 Vigil\u00e2ncia Alerta</div>' /* noqa: innerHTML — guard result, safe static content */
-      + '<div style="font-size:12px;color:#8a7a68;margin-top:4px">' + roll + ' ' + sign + totalMod + ' = ' + total + ' \u2265 DC ' + dc + '</div>'
+      + '<div style="font-size:12px;color:var(--v-text-faint, #8a7a68);margin-top:4px">' + roll + ' ' + sign + totalMod + ' = ' + total + ' \u2265 DC ' + dc + '</div>'
       + '<div style="font-size:12px;color:#a09484;font-style:italic;margin-top:8px;line-height:1.5">' + postNarr + '</div>';
   } else {
     resultEl.innerHTML = '<div style="color:#c44;font-size:16px;font-weight:700">\u274c Guarda Falha</div>' /* noqa: innerHTML — guard result fail, safe static content */
-      + '<div style="font-size:12px;color:#8a7a68;margin-top:4px">' + roll + ' ' + sign + totalMod + ' = ' + total + ' < DC ' + dc + '</div>'
+      + '<div style="font-size:12px;color:var(--v-text-faint, #8a7a68);margin-top:4px">' + roll + ' ' + sign + totalMod + ' = ' + total + ' < DC ' + dc + '</div>'
       + '<div style="font-size:12px;color:#a09484;font-style:italic;margin-top:8px;line-height:1.5">' + postNarr + '</div>';
   }
 
@@ -1296,7 +1296,7 @@ function doLongRest() {
   if (S.charData && S.charData.mm > 0) _lrText += '\u2728 MP totalmente recuperado<br>';
   _lrText += '\uD83C\uDFB2 Dados de Vida: ' + _hdNow + '/' + maxHD + ' (+' + hdRecov + ' recuperados)<br>';
   if (S.weather === 't') _lrText += '<br>\u26a1 <span style="color:var(--v-gold,#dca028)">Tempestade: descanso dif\u00edcil, +1 exaust\u00e3o.</span>';
-  else if (S.weather === 'r') _lrText += '<br>\uD83C\uDF27\ufe0f <span style="color:var(--v-text-dim,#8a7a68)">Chuva: descanso desconfort\u00e1vel.</span>';
+  else if (S.weather === 'r') _lrText += '<br>\uD83C\uDF27\ufe0f <span style="color:var(--v-text-faint, #8a7a68)">Chuva: descanso desconfort\u00e1vel.</span>';
   if (S._longRestCount > 1) _lrText += '<br>\u26a0\ufe0f <span style="color:var(--v-gold,#dca028)">O perigo da regi\u00e3o aumentou.</span>';
   _lrText += '<br><i>Voc\u00ea se sente revigorado.</i>';
 
@@ -1504,7 +1504,7 @@ function _showCampDiceRoll(roll, conMod, bonus, total, foodName, hdType, mpRecov
       var barContainer = document.createElement('div');
       barContainer.style.cssText = 'margin-top:8px;padding:0 12px';
       var barRow = document.createElement('div');
-      barRow.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:12px;color:#8a7a68';
+      barRow.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:12px;color:var(--v-text-faint, #8a7a68)';
       var hpLabel = document.createElement('span');
       hpLabel.textContent = 'HP';
       barRow.appendChild(hpLabel);
@@ -1521,7 +1521,7 @@ function _showCampDiceRoll(roll, conMod, bonus, total, foodName, hdType, mpRecov
       barRow.appendChild(hpVal);
       barContainer.appendChild(barRow);
       var hdLine = document.createElement('div');
-      hdLine.style.cssText = 'text-align:center;font-size:11px;color:#8a7a68;margin-top:4px';
+      hdLine.style.cssText = 'text-align:center;font-size:11px;color:var(--v-text-faint, #8a7a68);margin-top:4px';
       hdLine.textContent = 'Dados de Vida: ' + hdRemaining + '/' + maxHD;
       barContainer.appendChild(hdLine);
       resultDiv.appendChild(barContainer);
@@ -1617,14 +1617,14 @@ function showCampResultOverlay(roll, conMod, bonus, total, foodName, hdType, mpR
   var barContainer = document.createElement('div');
   barContainer.className = 'camp-hp-bar-container';
   barContainer.style.cssText = 'margin-top:8px;padding:0 12px';
-  barContainer.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#8a7a68">' /* noqa: innerHTML — camp result HP bar, safe computed content */
+  barContainer.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--v-text-faint, #8a7a68)">' /* noqa: innerHTML — camp result HP bar, safe computed content */
     + '<span>HP</span>'
     + '<div style="flex:1;height:8px;background:rgba(0,0,0,0.3);border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,0.08)">'
     + '<div id="camp-hp-fill" style="height:100%;background:' + hpColor + ';border-radius:3px;transition:width 0.8s ease;width:0%"></div>'
     + '</div>'
     + '<span style="color:' + hpColor + '">' + currentHP + '/' + maxHP + '</span>'
     + '</div>'
-    + '<div style="text-align:center;font-size:11px;color:#8a7a68;margin-top:4px">Dados de Vida: ' + hdRemaining + '/' + maxHD + '</div>';
+    + '<div style="text-align:center;font-size:11px;color:var(--v-text-faint, #8a7a68);margin-top:4px">Dados de Vida: ' + hdRemaining + '/' + maxHD + '</div>';
   detailEl.parentElement.appendChild(barContainer);
 
   /* Exhaustion note for short rest — inform player only long rest removes it */
@@ -1934,7 +1934,7 @@ function _showSecondWind() {
   formulaEl.innerHTML = '<div style="font-size:14px;color:#c44;margin-bottom:6px">\u2620\ufe0f Voc\u00ea cai...</div>' /* noqa: innerHTML — second wind formula, safe static content */
     + '<div style="font-size:12px;color:#a09484;line-height:1.5">Mas algo dentro de voc\u00ea se recusa a ceder.<br>'
     + '<span style="color:#c4953a">F\u00f4lego (1x por explora\u00e7\u00e3o)</span></div>'
-    + '<div style="font-size:11px;color:#8a7a68;margin-top:6px">d20 \u2265 10 para sobreviver</div>';
+    + '<div style="font-size:11px;color:var(--v-text-faint, #8a7a68);margin-top:6px">d20 \u2265 10 para sobreviver</div>';
   resultEl.textContent = '';
   resultEl.className = 'check-result';
   overlay.classList.add('active');
@@ -2023,7 +2023,7 @@ function showDeathSaves() {
       var color = roll === 20 ? '#ffd700' : roll === 1 ? '#ff3333' : roll >= 10 ? '#6a8' : '#a66';
       html += '<div style="text-align:center;margin:12px 0">'
         + '<div class="dice-result" style="font-size:clamp(22px,6vw,28px);color:' + color + '">' + roll + '</div>'
-        + '<div style="font-size:12px;color:#8a7a68;margin-top:4px">Rolagem ' + rollNum + '</div>'
+        + '<div style="font-size:12px;color:var(--v-text-faint, #8a7a68);margin-top:4px">Rolagem ' + rollNum + '</div>'
         + '</div>';
     }
     if (isResult) {

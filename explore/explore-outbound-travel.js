@@ -377,7 +377,7 @@ function _obAddActions(actionsEl, overlay, remaining) {
         remaining > 0
             ? remaining + ' etapa' + (remaining > 1 ? 's' : '') + ' restante' + (remaining > 1 ? 's' : '')
             : 'A entrada se revela à frente!',
-        remaining > 0 ? '#8a7a68' : '#c4953a',
+        remaining > 0 ? 'var(--v-text-faint, #8a7a68)' : 'var(--v-gold, #c4953a)',
         function() { _showOutboundStep(); }
     );
     if (typeof getHealingItems === 'function' && typeof getHPPercent === 'function') {

@@ -2,7 +2,7 @@
 
 .log-timer-info {
     padding: 6px 16px;
-    border-bottom: 1px solid rgba(74, 56, 40, 0.15);
+    border-bottom: 1px solid var(--v-border-15);
     font-size: var(--v-font-xs, 11px);
     display: flex;
     align-items: center;
@@ -40,7 +40,7 @@
     content: '';
     flex: 1;
     height: 1px;
-    background: rgba(74, 56, 40, 0.3);
+    background: var(--v-border-30);
 }
 
 .log-entry {

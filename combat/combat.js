@@ -56,6 +56,7 @@ var _DS_SUSPENSE_NARR=[
 'O silencio \u00e9 absoluto. Apenas o eco do seu pulso persiste.',
 'Mem\u00f3rias passam como rel\u00e2mpagos. Sua jornada n\u00e3o pode acabar aqui.',
 ];
+var DICE_REPLAY_SAFETY_MS=5000; /* fallback se Dice3D nao chamar callback */
 function renderDeathSaveReplay(state,onComplete){stopAllIntervals();var app=document.getElementById('app');var dsHist=state.ds_history||[];var ds=state.ds||{s:0,f:0};var stabilized=ds.s>=3;var _replaySkipped=false;var _replayDice=null;var _replaySafety=null;
 var trackerHtml='<div class="ds2-tracker" id="ds2Tracker">';
 trackerHtml+='<div class="ds2-row"><span class="ds2-row-icon ds2-row-success">\u2714</span>';
@@ -120,7 +121,7 @@ vHaptic.medium();
 _replayDice.roll(faceValue,function(){if(_replaySkipped)return;_showRollResult(roll);});
 diceOk=true;}catch(e){console.warn('[COMBAT] DS replay Dice3D failed:',e);}}
 if(!diceOk){setTimeout(function(){if(_replaySkipped)return;_showRollResult(roll);},800);}
-_replaySafety=setTimeout(function(){if(!_replaySkipped)_showRollResult(roll);},5000);}
+_replaySafety=setTimeout(function(){if(!_replaySkipped)_showRollResult(roll);},DICE_REPLAY_SAFETY_MS);}
 function _showRollResult(roll){if(_replaySkipped)return;if(_replaySafety){clearTimeout(_replaySafety);_replaySafety=null;}
 var valueEl=document.getElementById('ds2Value');var textEl=document.getElementById('ds2Text');var labelEl=document.getElementById('ds2Label');
 var cls='';var resultText='';var labelText='';

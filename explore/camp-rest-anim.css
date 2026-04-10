@@ -159,7 +159,7 @@
 .camp-rest-night-bar {
   font-size: var(--v-font-base, 14px);
   letter-spacing: 1px;
-  color: var(--v-text-dim, #8a7a68);
+  color: var(--v-text-faint, #8a7a68);
   margin-bottom: var(--v-space-2xl, 24px);
   font-family: monospace;
   background: rgba(0,0,0,0.3);
@@ -292,7 +292,7 @@
 .cr-hd-line {
   font-family: var(--v-font, 'MedievalSharp', serif);
   font-size: var(--v-font-md, 13px);
-  color: var(--v-text-dim, #8a7a68);
+  color: var(--v-text-faint, #8a7a68);
   text-align: center;
   margin: var(--v-space-xs, 2px) 0;
   opacity: 0;

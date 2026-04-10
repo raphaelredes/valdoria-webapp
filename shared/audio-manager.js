@@ -84,7 +84,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 border-radius: 50%;
                 border: 1px solid var(--v-border, #4a3828);
                 background: transparent;
-                color: var(--v-text-dim, #8a7a68);
+                color: var(--v-text-faint, #8a7a68);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -153,7 +153,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
             .va-popup-pct {
                 font-family: var(--v-font, 'MedievalSharp', serif);
                 font-size: 13px;
-                color: var(--v-text-dim, #8a7a68);
+                color: var(--v-text-faint, #8a7a68);
                 min-width: 32px;
                 text-align: right;
                 flex-shrink: 0;
@@ -176,7 +176,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 background: var(--v-bg-raised, #332a22);
                 border: 1px solid var(--v-border, #4a3828);
                 border-radius: 8px;
-                color: var(--v-text-dim, #8a7a68);
+                color: var(--v-text-faint, #8a7a68);
                 cursor: pointer;
                 padding: 8px 3px;
                 min-height: 40px;
@@ -212,7 +212,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
                 border-radius: 50%;
                 border: 1px solid var(--v-border, #4a3828);
                 background: var(--v-bg-raised, #332a22);
-                color: var(--v-text-dim, #8a7a68);
+                color: var(--v-text-faint, #8a7a68);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -239,7 +239,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
             .va-popup-label {
                 font-family: var(--v-font, 'MedievalSharp', serif);
                 font-size: 11px;
-                color: var(--v-text-dim, #8a7a68);
+                color: var(--v-text-faint, #8a7a68);
                 min-width: 44px;
                 text-align: center;
                 flex-shrink: 0;
@@ -249,7 +249,7 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
             .va-popup-track {
                 font-family: var(--v-font, 'MedievalSharp', serif);
                 font-size: 11px;
-                color: var(--v-text-dim, #8a7a68);
+                color: var(--v-text-faint, #8a7a68);
                 text-align: center;
                 padding: 0 4px 2px;
                 opacity: 0.7;

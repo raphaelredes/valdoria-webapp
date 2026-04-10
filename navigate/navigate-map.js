@@ -5,6 +5,9 @@
 
 var NS = 'http://www.w3.org/2000/svg';
 
+// Auto-fade delay para o mini-mapa apos ultima interacao
+var MINIMAP_FADE_DELAY_MS = 3000;
+
 function srand(seed) {
     let x = Math.sin(seed * 9301 + 49297) * 49297;
     return x - Math.floor(x);
@@ -224,15 +227,23 @@ function _renderFogOverlay(svg, fogState) {
 
     // ── Step 4: Punch reveal holes ──
     ctx.globalCompositeOperation = 'destination-out';
+    var _navMapDetail = document.body.classList.contains('perf-lite') ? 0 : 1;
     for (const { x, y, radius, strength, flatZone } of reveals) {
-        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
-        grad.addColorStop(0, `rgba(0,0,0,${strength})`);
-        grad.addColorStop(flatZone, `rgba(0,0,0,${strength})`);
-        grad.addColorStop(flatZone + 0.2, `rgba(0,0,0,${strength * 0.4})`);
-        grad.addColorStop(flatZone + 0.35, `rgba(0,0,0,${strength * 0.08})`);
-        grad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        if (_navMapDetail >= 1) {
+            const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            grad.addColorStop(0, `rgba(0,0,0,${strength})`);
+            grad.addColorStop(flatZone, `rgba(0,0,0,${strength})`);
+            grad.addColorStop(flatZone + 0.2, `rgba(0,0,0,${strength * 0.4})`);
+            grad.addColorStop(flatZone + 0.35, `rgba(0,0,0,${strength * 0.08})`);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+        } else {
+            /* lite: flat circle reveal (no gradient) */
+            ctx.fillStyle = `rgba(0,0,0,${strength * 0.6})`;
+        }
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
     }
 
     // ── Step 5: Organic edge splotches around reveal boundaries ──
@@ -681,7 +692,7 @@ function _updateMinimap() {
     // Auto-fade after 3s of no interaction
     mm.classList.remove('fading');
     clearTimeout(_mmFadeTimer);
-    _mmFadeTimer = setTimeout(() => { mm.classList.add('fading'); }, 3000);
+    _mmFadeTimer = setTimeout(() => { mm.classList.add('fading'); }, MINIMAP_FADE_DELAY_MS);
 }
 
 // ===============================================================

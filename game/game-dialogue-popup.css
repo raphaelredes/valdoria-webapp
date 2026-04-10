@@ -9,7 +9,7 @@
 @keyframes dlgPopupIn{from{opacity:0;transform:scale(0.92) translateY(16px)}60%{opacity:1;transform:scale(1.01) translateY(-2px)}to{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes dlgPopupOut{from{opacity:1;transform:scale(1) translateY(0)}to{opacity:0;transform:scale(0.94) translateY(10px)}}
 
-.dlg-popup-header{display:flex;align-items:center;gap:var(--v-space-md,8px);padding:var(--v-space-lg,12px) var(--v-space-xl,16px) var(--v-space-md,8px);border-bottom:1px solid var(--v-gold-15);background:linear-gradient(180deg,rgba(74,56,40,0.4) 0%,transparent 100%);flex-shrink:0}
+.dlg-popup-header{display:flex;align-items:center;gap:var(--v-space-md,8px);padding:var(--v-space-lg,12px) var(--v-space-xl,16px) var(--v-space-md,8px);border-bottom:1px solid var(--v-gold-15);background:linear-gradient(180deg,var(--v-border-40) 0%,transparent 100%);flex-shrink:0}
 .dlg-popup-mood-icon{font-size:clamp(20px,6vw,26px);flex-shrink:0;line-height:1}
 .dlg-popup-npc-info{flex:1;min-width:0}
 .dlg-popup-speaker{font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-xl,16px);font-weight:700;color:var(--v-gold-light,#dbb668);letter-spacing:0.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -35,7 +35,7 @@
 .dlg-popup-choice:focus-visible{outline:2px solid var(--v-gold-30);outline-offset:2px}
 
 .dlg-popup-footer{display:flex;flex-direction:column;gap:var(--v-space-sm,4px);padding:var(--v-space-sm,4px) var(--v-space-xl,16px) var(--v-space-lg,12px);border-top:1px solid var(--v-gold-12);background:rgba(30,24,18,0.4);flex-shrink:0}
-.dlg-popup-footer-btn{display:block;width:100%;min-height:40px;padding:var(--v-space-md,8px) var(--v-space-lg,12px);border:1px dashed var(--v-gold-12);border-radius:var(--v-radius,10px);background:transparent;color:var(--v-text-dim,#8a7a68);font-family:var(--v-font,'MedievalSharp',serif);font-size:var(--v-font-base,13px);text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;opacity:0.7;transition:opacity var(--v-transition-fast,0.15s)}
+.dlg-popup-footer-btn{display:block;width:100%;min-height:40px;padding:var(--v-space-md,8px) var(--v-space-lg,12px);border:1px dashed var(--v-gold-12);border-radius:var(--v-radius,10px);background:transparent;color:var(--v-text-faint, #8a7a68);font-family:var(--v-font,'MedievalSharp',serif);font-size:var(--v-font-base,13px);text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;opacity:0.7;transition:opacity var(--v-transition-fast,0.15s)}
 .dlg-popup-footer-btn:active{opacity:1}
 
 /* Mood: Happy */

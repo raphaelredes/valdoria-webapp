@@ -22,7 +22,7 @@
 
 .ud-card {
     background: var(--v-bg-card);
-    border: 1.5px solid rgba(74,56,40,0.6); /* overridden per-role by JS */
+    border: 1.5px solid var(--v-border-60); /* overridden per-role by JS */
     border-radius: 14px;
     padding: 18px 20px;
     width: 340px;
@@ -76,7 +76,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    border: 1px solid rgba(74,56,40,0.3);
+    border: 1px solid var(--v-border-30);
     background: rgba(0,0,0,0.3);
     color: #c0b8a0;
     font-size: var(--v-font-body, 14px);
@@ -89,7 +89,7 @@
 }
 
 .ud-close:hover {
-    background: rgba(74,56,40,0.4);
+    background: var(--v-border-40);
 }
 
 /* ── Resource bars ───────────────────────────────── */

@@ -86,8 +86,8 @@
     --v-transition-fast: 0.15s ease;
     --v-transition-base: 0.3s ease;
     --v-transition-slow: 0.5s;
-    --v-bg-overlay: rgba(74, 56, 40, 0.12);
-    --v-border-dim: rgba(74, 56, 40, 0.15);
+    --v-bg-overlay: var(--v-border-12);
+    --v-border-dim: var(--v-border-15);
     --v-border-gold: rgba(196, 149, 58, 0.3);
     --v-bar-bg: rgba(0, 0, 0, 0.3) ease-out;
     --v-transition-enter: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -193,6 +193,19 @@
     --v-brown-30: rgba(112, 66, 20, 0.3);
     --v-brown-40: rgba(112, 66, 20, 0.4);
     --v-brown-50: rgba(112, 66, 20, 0.5);
+    /* --v-border-XX: rgba(74, 56, 40, X) — sepia border color (matches --v-border #4a3828) with alpha */
+    --v-border-10: rgba(74, 56, 40, 0.1);
+    --v-border-12: rgba(74, 56, 40, 0.12);
+    --v-border-15: rgba(74, 56, 40, 0.15);
+    --v-border-20: rgba(74, 56, 40, 0.2);
+    --v-border-25: rgba(74, 56, 40, 0.25);
+    --v-border-30: rgba(74, 56, 40, 0.3);
+    --v-border-35: rgba(74, 56, 40, 0.35);
+    --v-border-40: rgba(74, 56, 40, 0.4);
+    --v-border-42: rgba(74, 56, 40, 0.42);
+    --v-border-50: rgba(74, 56, 40, 0.5);
+    --v-border-60: rgba(74, 56, 40, 0.6);
+    --v-border-80: rgba(74, 56, 40, 0.8);
     --v-bg-glass: rgba(42, 36, 32, 0.88);
     --v-bg-panel: rgba(42, 36, 32, 0.94);
     --v-bg-heavy: rgba(42, 36, 32, 0.96);
@@ -265,8 +278,8 @@
     background: #2a2420;
     /* Phone simulation frame on desktop/tablet */
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
-    border-left: 1px solid rgba(74, 56, 40, 0.3);
-    border-right: 1px solid rgba(74, 56, 40, 0.3);
+    border-left: 1px solid var(--v-border-30);
+    border-right: 1px solid var(--v-border-30);
     /* NOTE: Do NOT add transform here — it would make html a containing block
      * for position:fixed and break scroll behavior. Overlays are constrained
      * via max-width + margin:auto instead (see bottom of this file). */
@@ -407,7 +420,7 @@
     width: 28px;
     height: 4px;
     border-radius: 2px;
-    background: rgba(74, 56, 40, 0.8);
+    background: var(--v-border-80);
     transition:
       opacity 0.4s ease,
       transform 0.4s ease,
@@ -1143,7 +1156,7 @@
   .v-err-header {
     padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px) var(--v-space-md-lg, 10px);
     border-bottom: 1px solid var(--v-gold-15);
-    background: linear-gradient(180deg, rgba(74, 56, 40, 0.4) 0%, transparent 100%);
+    background: linear-gradient(180deg, var(--v-border-40) 0%, transparent 100%);
   }
   .v-err-icon {
     color: var(--v-gold, #c4953a);

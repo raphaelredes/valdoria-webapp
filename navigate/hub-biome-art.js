@@ -4,6 +4,9 @@
 (function() {
 'use strict';
 
+/* Detect perf tier to skip expensive gradients on lite devices */
+var _hbaDetail = (typeof document !== 'undefined' && document.body && document.body.classList && document.body.classList.contains('perf-lite')) ? 0 : 1;
+
 /* Render a static frame of the travel scene into a card canvas */
 function renderCardScene(canvas, biome) {
   if (!canvas || !canvas.getContext) return;
@@ -22,16 +25,21 @@ function renderCardScene(canvas, biome) {
   ctx.scale(dpr, dpr);
 
   /* Sky gradient */
-  var grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, cfg.bg[0]);
-  grad.addColorStop(0.45, cfg.bg[1]);
-  grad.addColorStop(0.7, cfg.ground);
-  grad.addColorStop(1, cfg.ground);
-  ctx.fillStyle = grad;
+  if (_hbaDetail >= 1) {
+    var grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, cfg.bg[0]);
+    grad.addColorStop(0.45, cfg.bg[1]);
+    grad.addColorStop(0.7, cfg.ground);
+    grad.addColorStop(1, cfg.ground);
+    ctx.fillStyle = grad;
+  } else {
+    /* lite: flat sky color (use mid bg as approximation) */
+    ctx.fillStyle = cfg.bg[1];
+  }
   ctx.fillRect(0, 0, w, h);
 
-  /* Horizon glow */
-  if (cfg.horizonGlow) {
+  /* Horizon glow (skipped on lite) */
+  if (cfg.horizonGlow && _hbaDetail >= 1) {
     var cy = h * 0.48;
     var glow = ctx.createRadialGradient(w * 0.5, cy, 0, w * 0.5, cy, w * 0.8);
     glow.addColorStop(0, 'rgba(' + cfg.horizonGlow + ',0.08)');
@@ -62,15 +70,17 @@ function renderCardScene(canvas, biome) {
   ctx.lineTo(w, groundY);
   ctx.stroke();
 
-  /* Subtle vignette */
-  var cx = w / 2, cyV = h / 2;
-  var outerR = Math.sqrt(cx * cx + cyV * cyV);
-  var vig = ctx.createRadialGradient(cx, cyV, outerR * 0.4, cx, cyV, outerR);
-  vig.addColorStop(0, 'rgba(0,0,0,0)');
-  vig.addColorStop(0.7, 'rgba(0,0,0,0)');
-  vig.addColorStop(1, 'rgba(0,0,0,0.4)');
-  ctx.fillStyle = vig;
-  ctx.fillRect(0, 0, w, h);
+  /* Subtle vignette (skipped on lite) */
+  if (_hbaDetail >= 1) {
+    var cx = w / 2, cyV = h / 2;
+    var outerR = Math.sqrt(cx * cx + cyV * cyV);
+    var vig = ctx.createRadialGradient(cx, cyV, outerR * 0.4, cx, cyV, outerR);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(0.7, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.4)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, w, h);
+  }
 }
 
 /* Init all card canvases */

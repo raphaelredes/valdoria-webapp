@@ -34,7 +34,7 @@
 @keyframes tgOutcomeReveal{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
 .tg-outcome--win{background:linear-gradient(135deg,rgba(45,107,30,0.25),rgba(80,180,80,0.1));border:1px solid rgba(80,180,80,0.3);box-shadow:0 0 12px rgba(80,180,80,0.1)}
 .tg-outcome--loss{background:linear-gradient(135deg,rgba(139,0,0,0.2),rgba(180,60,60,0.08));border:1px solid rgba(180,60,60,0.25)}
-.tg-outcome--draw{background:rgba(74,56,40,0.2);border:1px solid var(--v-gold-15)}
+.tg-outcome--draw{background:var(--v-border-20);border:1px solid var(--v-gold-15)}
 .tg-outcome-title{font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-lg,16px);font-weight:700;letter-spacing:0.5px}
 .tg-outcome--win .tg-outcome-title{color:#7cd47c}
 .tg-outcome--loss .tg-outcome-title{color:#e07070}

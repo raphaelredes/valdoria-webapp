@@ -13,7 +13,7 @@
 .opp-card-dismiss{background:none;border:none;color:var(--v-text-dim);font-size:var(--v-font-xl);cursor:pointer;padding:var(--v-space-xs) var(--v-space-sm);min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .opp-card-dismiss:active{color:var(--v-text)}
 /* Guide Hint Bubble */
-.guide-bubble{display:flex;gap:var(--v-space-md);padding:var(--v-space-md) var(--v-space-lg);background:rgba(74,56,40,0.3);border:1px solid var(--v-gold-15);border-radius:var(--v-radius);margin:var(--v-space-md) 0;position:relative;transition:opacity var(--v-transition)}
+.guide-bubble{display:flex;gap:var(--v-space-md);padding:var(--v-space-md) var(--v-space-lg);background:var(--v-border-30);border:1px solid var(--v-gold-15);border-radius:var(--v-radius);margin:var(--v-space-md) 0;position:relative;transition:opacity var(--v-transition)}
 .guide-npc{font-size:20px;flex-shrink:0;line-height:1}
 .guide-text{flex:1;font-size:var(--v-font-md);color:var(--v-text);font-style:italic;line-height:1.5}
 .guide-name{font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-sm);color:var(--v-gold-dim);display:block;margin-bottom:var(--v-space-xs);font-style:normal}

@@ -71,7 +71,7 @@
     padding: var(--v-space-lg) var(--v-space-xl) var(--v-space-md-lg);
     text-align: center;
     border-bottom: 1px solid var(--v-gold-15);
-    background: linear-gradient(180deg, rgba(74, 56, 40, 0.42) 0%, transparent 100%);
+    background: linear-gradient(180deg, var(--v-border-42) 0%, transparent 100%);
 }
 
 .initiative-order-head::after {
