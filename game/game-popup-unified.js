@@ -22,10 +22,14 @@ var _MAX_DEPTH = 8;
  * Called from doAction() when data._is_popup is true.
  */
 window._showUnifiedPopup = function (data) {
+    console.log("[POPUP] _showUnifiedPopup received:", data);
+    if (!data) return;
+
     if (_popupStack.length > 0) {
         var top = _popupStack[_popupStack.length - 1];
         // Same screen re-render (e.g. after using a consumable) — replace top
-        if (top._popup_title === data._popup_title && top.screen_id === data.screen_id) {
+        if (top._popup_title === data._popup_title && (top.screen_id === data.screen_id || (!top.screen_id && !data.screen_id))) {
+            console.log("[POPUP] Same screen detected, replacing top for refresh");
             _popupStack[_popupStack.length - 1] = data;
         } else if (_popupStack.length >= _MAX_DEPTH) {
             console.warn('[POPUP-UNIFIED] Max depth reached (' + _MAX_DEPTH + '), replacing top');
@@ -58,6 +62,12 @@ function _renderCurrentPopup() {
     if (_popupStack.length === 0) return;
 
     var data = _popupStack[_popupStack.length - 1];
+    // Clear previous if open
+    if (typeof vPopup !== 'undefined' && vPopup.isOpen() && vPopup.body) {
+        console.log("[POPUP] Pre-clearing body before vPopup.show");
+        vPopup.body.innerHTML = "";
+    }
+
     var bodyEl = _buildPopupBody(data);
     var actionsHtml = _buildPopupActions(data);
 
@@ -161,6 +171,60 @@ function _buildPopupBody(data) {
     if (data.arena_screen && typeof renderArenaScreen === 'function') {
         renderArenaScreen(el, data.arena_screen);
         return el;
+    }
+
+    // Achievements redesign
+    if (data.achievements_data) {
+        console.log("[POPUP] Achievements data found, calling renderer.");
+        if (typeof renderAchievementsData === 'function') {
+            try {
+                console.log("[POPUP] Calling renderAchievementsData with view:", data.achievements_data.view);
+                renderAchievementsData(el, data.achievements_data);
+                return el;
+            } catch (e) {
+                console.error('[POPUP] renderAchievementsData error:', e);
+                var errEl = document.createElement('div');
+                errEl.style.padding = "20px";
+                errEl.style.color = "var(--color-danger, red)";
+                errEl.innerHTML = "<b>Erro de Renderização (Conquistas):</b> " + e.message;
+                el.appendChild(errEl);
+                return el;
+            }
+        } else {
+            var errEl = document.createElement('div');
+            errEl.style.padding = "20px";
+            errEl.style.color = "var(--color-danger, red)";
+            errEl.style.textAlign = "center";
+            errEl.innerHTML = "<b>Aviso de Cache:</b> O script das Conquistas n\u00e3o foi carregado.<br>Por favor, FECHE O MINICLIENTE e abra novamente, ou limpe o cache.";
+            el.appendChild(errEl);
+            return el;
+        }
+    }
+
+    // League redesign
+    if (data.league_data) {
+        if (typeof renderLeagueData === 'function') {
+            try {
+                renderLeagueData(el, data.league_data);
+                return el;
+            } catch (e) {
+                console.error('[POPUP] renderLeagueData error:', e);
+                var errEl = document.createElement('div');
+                errEl.style.padding = "20px";
+                errEl.style.color = "var(--color-danger, red)";
+                errEl.innerHTML = "<b>Erro de Renderiza\u00e7\u00e3o (Ligas):</b> " + e.message;
+                el.appendChild(errEl);
+                return el;
+            }
+        } else {
+            var errEl = document.createElement('div');
+            errEl.style.padding = "20px";
+            errEl.style.color = "var(--color-danger, red)";
+            errEl.style.textAlign = "center";
+            errEl.innerHTML = "<b>Aviso de Cache:</b> O script das Ligas n\u00e3o foi carregado.<br>Por favor, FECHE O MINICLIENTE e abra novamente.";
+            el.appendChild(errEl);
+            return el;
+        }
     }
 
     // Ficha do personagem (dados estruturados — substitui texto com barras emoji)

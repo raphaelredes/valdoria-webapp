@@ -62,6 +62,8 @@ if(screen.skills_data&&typeof renderSkillsList==='function'){renderSkillsList(co
 if(screen.skill_detail_data&&typeof renderSkillDetail==='function'){renderSkillDetail(contentEl,screen.skill_detail_data);}
 if(screen.quest_abandon){renderQuestAbandon(contentEl,screen.quest_abandon);}
 if(!_hubRendered&&screen.progress_strip){renderProgressStrip(contentEl,screen.progress_strip);}
+if(screen.league_data&&typeof renderLeagueData==='function'){renderLeagueData(contentEl,screen.league_data);}
+if(screen.achievements_data&&typeof renderAchievementsData==='function'){renderAchievementsData(contentEl,screen.achievements_data);}
 if(!_hubRendered&&screen.player_stats&&screen.player_stats.kills>0){_renderPlayerStats(contentEl,screen.player_stats);}
 if(!_hubRendered&&screen.quest_tracker){renderQuestTracker(contentEl,screen.quest_tracker);}
 if(!_hubRendered&&screen.suggested_action){_renderSuggestedAction(contentEl,screen.suggested_action);}
