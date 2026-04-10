@@ -1,7 +1,10 @@
 (function(){'use strict';var _busy=false;var _zBase=1000;var _stack=[];function _escHandler(e){if(e.key==='Escape'&&_stack.length>0)hide();}
 function _el(id){return document.getElementById(id);}
 function _actionsToHtml(arr){var h='';for(var i=0;i<arr.length;i++){var a=arr[i];h+='<button class="'+(a.cls||'v-popup-btn')+'" data-action="'+(a.action||'cancel')+'">'+(a.html||a.label||'')+'</button>';}return h;}
+function _ensureCardStructure(overlay){if(overlay.querySelector('.v-popup-card'))return;console.warn('[POPUP] overlay '+overlay.id+' missing card structure \u2014 auto-injecting');var card=document.createElement('div');card.className='v-popup-card';var hdr=document.createElement('div');hdr.className='v-popup-header';var body=document.createElement('div');body.className='v-popup-body';var actions=document.createElement('div');actions.className='v-popup-actions';card.appendChild(hdr);card.appendChild(body);card.appendChild(actions);overlay.appendChild(card);}
 function show(opts){if(!opts)return;var overlayId=opts.id||'v-popup-overlay';var overlay=_el(overlayId);if(!overlay){console.warn('[POPUP] overlay not found:',overlayId);return;}
+/* Self-heal: if overlay has no card structure, build it via DOM (fix for #51). */
+_ensureCardStructure(overlay);
 var headerEl=overlay.querySelector('.v-popup-header');if(headerEl){headerEl.innerHTML=opts.header||'';headerEl.className='v-popup-header'+(opts.headerClass?' '+opts.headerClass:'');}
 var bodyEl=overlay.querySelector('.v-popup-body');if(bodyEl){if(opts.bodyEl){bodyEl.innerHTML='';bodyEl.appendChild(opts.bodyEl);}else{bodyEl.innerHTML=opts.body||'';}}var actionsEl=overlay.querySelector('.v-popup-actions');if(actionsEl){actionsEl.innerHTML=Array.isArray(opts.actions)?_actionsToHtml(opts.actions):(opts.actions||'');var btns=actionsEl.querySelectorAll('[data-action]');for(var i=0;i<btns.length;i++){btns[i].addEventListener('click',_makeHandler(opts.onAction));}}
 if(bodyEl){var bodyBtns=bodyEl.querySelectorAll('[data-action]');for(var j=0;j<bodyBtns.length;j++){bodyBtns[j].addEventListener('click',_makeHandler(opts.onAction));}}

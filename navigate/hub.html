@@ -162,8 +162,14 @@ var v = Date.now();
 </div>
 
 <!-- ===== POPUP OVERLAY ===== -->
-<div id="v-popup-overlay" class="v-popup-overlay" style="display:none"></div>
-<div id="tj-detail-overlay" class="v-popup-overlay" style="display:none"></div>
+<!-- Card structure required by shared/popup.js (querySelector .v-popup-header/.v-popup-body/.v-popup-actions).
+     Without inner card, vPopup.show() silently no-ops and user sees empty dark overlay. Fix for #51. -->
+<div id="v-popup-overlay" class="v-popup-overlay" style="display:none">
+    <div class="v-popup-card"><div class="v-popup-header"></div><div class="v-popup-body"></div><div class="v-popup-actions"></div></div>
+</div>
+<div id="tj-detail-overlay" class="v-popup-overlay" style="display:none">
+    <div class="v-popup-card"><div class="v-popup-header"></div><div class="v-popup-body"></div><div class="v-popup-actions"></div></div>
+</div>
 
 <script>document.write('<script src="hub-data.js?v=' + v + '"><\/script>');</script>
 <script>document.write('<script src="map-layout.js?v=' + v + '"><\/script>');</script>

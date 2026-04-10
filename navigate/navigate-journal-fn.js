@@ -14,6 +14,8 @@ function _hideTravelOverlay(){
 
 function _showTravelJournal(log,redirectUrl){
   _hideTravelOverlay();
+  /* Diagnostic log for #51 — helps debug empty popup cases in production */
+  console.info('[TRAVEL-JOURNAL]','showing',log.length,'events, redirectUrl=',(redirectUrl||'(none)').substring(0,60));
   var _hasDeath=log.some(function(e){return e.type==='exhaustion_death';});
   /* Compact consecutive safe passages */
   var compacted=[];var safeRun=0;
