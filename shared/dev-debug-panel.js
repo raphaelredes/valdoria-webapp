@@ -37,10 +37,10 @@ var _lvlBtns = {};
 
 function _shouldActivate() {
     try {
-        var s = window.location.search || '';
-        if (!/[?&]env=dev(?:&|$)/.test(s)) return false;
-        /* nodevpanel=1 means we are INSIDE the iframe — don't activate */
-        if (/[?&]nodevpanel=1/.test(s)) return false;
+        var env = window._envOverride || new URLSearchParams(window.location.search).get('env');
+        if (env !== 'dev') return false;
+        /* nodevpanel=1 means we are INSIDE the iframe - don't activate */
+        if (/[?&]nodevpanel=1/.test(window.location.search)) return false;
         return document.documentElement.classList.contains('web-standalone')
             || /\/web\//.test(window.location.pathname);
     } catch (e) { return false; }
@@ -88,9 +88,11 @@ function _buildPane(tabName, scrollId) {
     return pane;
 }
 
-function _buildPanel() {
+function _buildPanel(embedded) {
     var panel = document.createElement('div');
-    panel.id = 'dev-log-panel';
+    /* Only set id when standalone host mode — embedded mode reuses existing container */
+    if (!embedded) panel.id = 'dev-log-panel';
+    panel.className = 'dev-log-inner';
 
     var header = document.createElement('div');
     header.className = 'dev-panel-header';
@@ -346,6 +348,50 @@ function _watchIframeNavigation() {
     }, 500);
 }
 
+/* ── Embedded Mode: watch for iframe inserted by host page ── */
+
+function _watchForLateIframe() {
+    /* In Embedded Mode (dev.html), the iframe is created by handleLoginSuccess
+     * AFTER the panel loads. Poll the DOM until it appears, then attach console. */
+    var _attached = false;
+    var _poll = setInterval(function() {
+        if (_attached) { clearInterval(_poll); return; }
+        var ifr = document.getElementById('dev-game-iframe');
+        if (!ifr) return;
+        _iframe = ifr;
+        _attached = true;
+        clearInterval(_poll);
+        _addLine('browser', 'info', '[DEV Panel] Iframe detected — attaching console bridge');
+        /* The iframe may already be loaded or still loading */
+        if (ifr.contentDocument && ifr.contentDocument.readyState === 'complete') {
+            _interceptIframeConsole(ifr.contentWindow);
+        }
+        ifr.addEventListener('load', function() {
+            _interceptIframeConsole(ifr.contentWindow);
+            try {
+                _addLine('browser', 'info', '[DEV Panel] Iframe loaded: ' + ifr.contentWindow.location.href);
+            } catch (e) {}
+        });
+        _watchIframeNavigation();
+    }, 250);
+}
+
+/* ── postMessage bridge: listen for logs from iframe (cross-origin fallback) ── */
+
+function _installPostMessageBridge() {
+    window.addEventListener('message', function(ev) {
+        try {
+            var d = ev.data;
+            if (!d || typeof d !== 'object' || !d._devLog) return;
+            var log = d._devLog;
+            var lvl = log.level || 'info';
+            var txt = log.text || '';
+            if (LEVELS.indexOf(lvl) === -1) lvl = 'info';
+            _addLine('browser', lvl, txt);
+        } catch (e) { /* ignore malformed messages */ }
+    });
+}
+
 /* ── SSE — server log stream ── */
 
 var _LOG_RE = /^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d+\s+-\s+\S+\s+-\s+\S+\s+-\s+(\w+)\s+-\s+(.*)$/;
@@ -423,7 +469,8 @@ function _buildIframeUrl() {
     /* Pass all current URL params to the iframe, adding nodevpanel=1 */
     var params = new URLSearchParams(window.location.search);
     params.set('nodevpanel', '1');
-    return 'app.html?' + params.toString();
+    if (window._envOverride) params.set('env', window._envOverride);
+    return window.location.pathname + '?' + params.toString();
 }
 
 function _initAsHost() {
@@ -431,11 +478,18 @@ function _initAsHost() {
     var existingPanel = document.getElementById('dev-log-panel');
     if (existingPanel) {
         console.info('[DEV Panel] Using existing host container (Embedded Mode)');
-        _panel = _buildPanel();
+        _panel = _buildPanel(true);
         /* Empty the placeholder and inject the actual tools */
         while (existingPanel.firstChild) existingPanel.removeChild(existingPanel.firstChild);
+        /* Ensure the existing container has the inner structure needed for flex */
+        existingPanel.style.flexDirection = 'column';
         existingPanel.appendChild(_panel);
+        /* Install postMessage listener for iframe log bridge (safety fallback) */
+        _installPostMessageBridge();
+        /* Watch for iframe being inserted by the host page (dev.html creates it on login) */
+        _watchForLateIframe();
         _startPolling();
+        _addLine('browser', 'info', '[DEV Panel] Embedded Mode ready — waiting for iframe');
         return;
     }
 
@@ -452,6 +506,7 @@ function _initAsHost() {
         'html.dev-panel-active{max-width:none!important;margin:0!important;height:100dvh!important;overflow:hidden!important}',
         'html.dev-panel-active body{display:flex!important;flex-direction:row!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#0f0d0a!important}',
         '#dev-game-iframe{width:430px;min-width:430px;max-width:430px;height:100dvh;border:none;flex-shrink:0;background:#1a1510}',
+        '#dev-log-panel{flex: 1 !important; display: flex !important; min-width: 0 !important; background: #0f0d0a !important}'
     ].join('\n');
     document.head.appendChild(s);
 
@@ -500,7 +555,11 @@ if (document.readyState === 'loading') {
 window.vDevPanel = {
     addLine:  _addLine,
     clear:    _clear,
-    isActive: function() { return _active; }
+    isActive: function() { return _active; },
+    interceptIframeConsole: _interceptIframeConsole
 };
+
+/* Legacy global used by web/dev.html handleLoginSuccess override */
+window._interceptIframeConsole = _interceptIframeConsole;
 
 })();

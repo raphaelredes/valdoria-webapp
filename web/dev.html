@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Valoria Portal — DEV Dashboard</title>
+    <title>Valdoria Portal — DEV Dashboard</title>
     <meta name="theme-color" content="#2a2420">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="robots" content="noindex, nofollow">
-    
+
     <!-- Design System & Debug Shell -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -122,12 +122,12 @@
     </style>
 </head>
 <body class="dev-panel-active">
-    
+
     <div class="dashboard-container">
         <!-- GAME/LOGIN COLUMN -->
         <main class="game-column" id="game-host">
             <div class="dev-badge-fixed">DEVELOPER CONSOLE</div>
-            
+
             <!-- 3D Orb Background -->
             <div class="v-orb-container">
                 <div class="v-orb-core"></div>
@@ -141,7 +141,7 @@
                 <div class="wa-login-card">
                     <h1 class="wa-login-title">Valdoria Developer</h1>
                     <p class="wa-login-subtitle">Dashboard de Monitoramento (FullHD)</p>
-                    
+
                     <div class="wa-social-buttons">
                         <button class="wa-social-btn wa-telegram" onclick="onTelegramClick()">
                             <span class="wa-social-icon"></span>
@@ -152,7 +152,7 @@
                     <div class="wa-divider"><span>OU ACESSO MESTRE</span></div>
 
                     <div class="wa-pin-section">
-                        <input id="inp-pin" class="wa-pin-input" type="password" placeholder="••••" maxlength="8">
+                        <input id="inp-pin" class="wa-pin-input" type="password" placeholder="PIN" maxlength="8">
                         <button id="btn-pin" class="wa-btn-play" onclick="onPinLogin()">Entrar com PIN</button>
                     </div>
 
@@ -172,7 +172,8 @@
         </aside>
     </div>
 
-    <!-- Core Scripts -->
+    <!-- Core Scripts (deferred, ordered, cache-busted) -->
+    <script src="../shared/env-utils.js"></script>
     <script src="web-auth.js"></script>
     <script src="../shared/console-collector.js"></script>
     <script src="../shared/dev-debug-panel.js"></script>
@@ -181,7 +182,7 @@
         // Custom Dashboard Init
         window.addEventListener('load', function() {
             console.info('[DASHBOARD] Monitoramento ativo para gulirastudio');
-            
+
             // Re-bind console after debug panel load
             if (window.vDevPanel && typeof vDevPanel.addLine === 'function') {
                 vDevPanel.addLine('browser', 'info', '[CONSOLE] Painel de logs sincronizado.');
@@ -193,7 +194,7 @@
         var _origSuccess = window.handleLoginSuccess;
         window.handleLoginSuccess = function(data) {
             console.info('[AUTH] Login bem-sucedido. Carregando shell do jogo...');
-            
+
             var host = document.getElementById('game-host');
             var login = document.getElementById('screen-login');
             login.style.display = 'none';
@@ -202,13 +203,13 @@
             var iframe = document.createElement('iframe');
             iframe.id = 'dev-game-iframe';
             // nodevpanel=1 prevents app.html from trying to spawn ITS OWN log panel!
-            iframe.src = '../app.html?token=' + (data.token || '') + 
-                         '&uid=' + (data.user_id || 0) + 
-                         '&api=' + encodeURIComponent(window._apiBase || '') + 
+            iframe.src = '../app.html?token=' + (data.token || '') +
+                         '&uid=' + (data.user_id || 0) +
+                         '&api=' + encodeURIComponent(window._apiBase || '') +
                          '&env=dev&nodevpanel=1';
-            
+
             host.appendChild(iframe);
-            
+
             // Allow the console capture to bridge into the iframe
             if (window._interceptIframeConsole) {
                 iframe.addEventListener('load', function() {

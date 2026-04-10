@@ -144,10 +144,20 @@ function _buildCell(cell, activeTurnId) {
         inner += '<div class="cell-ac">' + escHtml(String(u.ac)) + '</div>';
     }
 
+    // Level badge (bottom-left, opposite corner from intent)
+    if (u.l !== undefined && u.l > 0) {
+        inner += '<div class="cell-level">Nv.' + escHtml(String(u.l)) + '</div>';
+    }
+
     // Intent badge (enemies only, top-right)
+    // Backend (combat_intent.py) sends {tp, ic, lb, dmg} — use 'ic' (icon) and 'lb' (label)
     if (utype === 'enemy' && u.it) {
-        var intentText = (u.it.ico || '') + (u.it.l || '');
-        inner += '<div class="intent">' + escHtml(intentText) + '</div>';
+        var _ic = u.it.ic || '';
+        var _lb = u.it.lb || '';
+        var intentText = _ic + (_ic && _lb ? ' ' : '') + _lb;
+        if (intentText) {
+            inner += '<div class="intent">' + escHtml(intentText) + '</div>';
+        }
     }
 
     // Status effect pips — alternate left/right sides, max 4 shown
@@ -194,8 +204,8 @@ function _buildCell(cell, activeTurnId) {
         inner += '</div>';
     }
 
-    // MP bar (player and allies only)
-    if ((utype === 'player' || utype === 'ally') && u.mp !== undefined && u.mmp) {
+    // MP bar (player, allies, and any entity with magic resources — mmp > 0)
+    if ((utype === 'player' || utype === 'ally' || (utype === 'enemy' && u.mmp > 0)) && u.mp !== undefined && u.mmp) {
         var mpPct = Math.max(0, Math.min(100, Math.round((u.mp / u.mmp) * 100)));
         inner += '<div class="bar-row">';
         inner += '<div class="mini-bar"><div class="fill fill-mp" style="width:' + mpPct + '%"></div></div>';

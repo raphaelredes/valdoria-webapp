@@ -24,6 +24,23 @@ html.dev-panel-active #dev-log-panel {
     display: flex;
 }
 
+/* ---- Embedded Mode: inner panel fills the host container ---- */
+.dev-log-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    background: var(--v-bg-deep, #1a1510);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--v-text, #d4c8b0);
+    overflow: hidden;
+}
+
 /* ---- Header bar ---- */
 .dev-panel-header {
     display: flex;

@@ -58,24 +58,24 @@
             var enemies = s.e || [];
             var e = enemies[idx];
             if (!e) return null;
-            // intent: s.e[N].it — may be string or object {ico, n}
+            // intent: s.e[N].it — backend (combat_intent.py) sends {tp, ic, lb, dmg}
             var intentText = null;
             if (e.it) {
                 if (typeof e.it === 'string') {
                     intentText = e.it;
-                } else if (e.it.n) {
-                    intentText = (e.it.ico ? e.it.ico + ' ' : '') + e.it.n;
+                } else if (e.it.lb || e.it.ic) {
+                    intentText = (e.it.ic ? e.it.ic + ' ' : '') + (e.it.lb || '');
                 }
             }
             return {
                 role:   'enemy',
                 n:      e.n   || 'Inimigo',
                 ico:    e.ico || '👹',
-                type:   e.t   || e.type || '',
+                type:   (e.t || e.type || '') + (e.l ? ' Nv.' + e.l : ''),
                 hp:     e.hp  != null ? e.hp  : e.mhp || 0,
                 mhp:    e.mhp || 0,
-                mp:     null,  // enemies do not show MP bar
-                mmp:    0,
+                mp:     (e.mp !== undefined ? e.mp : 0),
+                mmp:    e.mmp || 0,
                 ac:     e.ac  || 0,
                 atk:    e.atk != null ? (e.atk >= 0 ? '+' + e.atk : '' + e.atk) : null,
                 dmg:    e.dmg || '',
@@ -96,7 +96,7 @@
                 role:  'ally',
                 n:     a.n   || 'Aliado',
                 ico:   a.ico || '🛡️',
-                type:  a.t   || a.type || '',
+                type:  (a.t || a.type || '') + (a.l ? ' Nv.' + a.l : ''),
                 hp:    a.hp  != null ? a.hp  : a.mhp || 0,
                 mhp:   a.mhp || 0,
                 mp:    a.mp  != null ? a.mp  : a.mmp || 0,
@@ -249,8 +249,8 @@
         bars.className = 'ud-bars';
         bars.appendChild(_makeBarRow('HP', _hpFillClass(unit.hp, unit.mhp), unit.hp, unit.mhp));
 
-        // MP bar: player and allies only
-        if (unit.role !== 'enemy' && unit.mmp > 0) {
+        // MP bar: any entity with magic resources (mmp > 0)
+        if (unit.mmp > 0) {
             bars.appendChild(_makeBarRow('MP', 'fill-mp', unit.mp, unit.mmp));
         }
         card.appendChild(bars);
