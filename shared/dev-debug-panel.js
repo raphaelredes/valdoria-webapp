@@ -427,6 +427,18 @@ function _buildIframeUrl() {
 }
 
 function _initAsHost() {
+    /* Check if we already have a host container (Embedded Mode) */
+    var existingPanel = document.getElementById('dev-log-panel');
+    if (existingPanel) {
+        console.info('[DEV Panel] Using existing host container (Embedded Mode)');
+        _panel = _buildPanel();
+        /* Empty the placeholder and inject the actual tools */
+        while (existingPanel.firstChild) existingPanel.removeChild(existingPanel.firstChild);
+        existingPanel.appendChild(_panel);
+        _startPolling();
+        return;
+    }
+
     /* Stop all normal page loading — this page becomes the host shell */
     /* Remove all body content (loading overlay, route-root, scripts) */
     while (document.body.firstChild) {
