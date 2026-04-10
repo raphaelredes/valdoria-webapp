@@ -193,10 +193,10 @@
   flex: 1;
 }
 
-/* name — 9px, truncated */
+/* name — readable size, truncated (#58 fix) */
 .hub-ally .ha-name {
   font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
-  font-size: 9px;
+  font-size: var(--v-font-xs, 10px);
   color: var(--v-text-dim, #a09484);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -235,7 +235,7 @@
   border: 1px dashed var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
   font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
-  font-size: 9px;
+  font-size: var(--v-font-xs, 10px);
   color: var(--v-text-muted, #7a6a5a);
   min-height: 32px;
 }
@@ -306,10 +306,10 @@
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
-/* location label */
+/* location label — readable on mobile (#58 fix: was 8px, too small) */
 .hub-loc .hl-nm {
   font-family: var(--v-font-display, "Cinzel", serif);
-  font-size: 8px;
+  font-size: var(--v-font-sm, 11px);
   color: var(--v-text-dim, #a09484);
   text-align: center;
   line-height: 1.2;
@@ -319,19 +319,20 @@
   max-width: 100%;
 }
 
-/* notification badge */
+/* notification badge (#58 fix: was 7px, unreadable) */
 .hub-loc .hl-badge {
   position: absolute;
   top: -3px;
   right: -3px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: var(--v-radius-pill, 20px);
   background: var(--v-danger, #e74c3c);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 7px;
+  font-size: var(--v-font-xs, 10px);
   font-weight: 700;
   color: #fff;
   line-height: 1;
@@ -405,7 +406,7 @@
 
 .hub-prog-card .hp-lbl {
   font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
-  font-size: 8px;
+  font-size: var(--v-font-xs, 10px);
   color: var(--v-text-muted, #7a6a5a);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -489,10 +490,10 @@
   transition: opacity var(--v-transition, 0.2s ease);
 }
 
-/* tab label */
+/* tab label — readable on mobile (#58 fix: was 7px, unreadable) */
 .hub-tab .ht-nm {
   font-family: var(--v-font-display, "Cinzel", serif);
-  font-size: 7px;
+  font-size: var(--v-font-xs, 10px);
   color: var(--v-text-dim, #a09484);
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -537,7 +538,7 @@
    ---------------------------------------------------------- */
 .hub-section-label {
   font-family: var(--v-font-display, "Cinzel", serif);
-  font-size: 8px;
+  font-size: var(--v-font-xs, 10px);
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--v-text-muted, #7a6a5a);
@@ -549,7 +550,7 @@
    15. Dead Ally Indicator
    ---------------------------------------------------------- */
 .hub-ally .ha-dead {
-  font-size: 9px;
+  font-size: var(--v-font-xs, 10px);
   line-height: 1;
   opacity: 0.6;
 }
