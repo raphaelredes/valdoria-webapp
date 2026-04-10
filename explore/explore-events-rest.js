@@ -988,12 +988,34 @@ function confirmShortRest() {
  * ---------------------------------------------------------- */
 
 function confirmLongRest() {
+  /* D&D 5e PHB Ch.8: Long rest requer "at least 1 hour of light activity"
+   * — implementado como requisito mínimo de 5 passos desde o início da
+   * exploração ou desde o último long rest. Previne abuso de acampamento
+   * imediato ao entrar no mapa para recuperação full. */
+  var MIN_STEPS_BEFORE_LONG_REST = 5;
+  var stepsSinceLastRest = (S._stepCount || 0) - (S._stepsAtLastLongRest || 0);
+  if (stepsSinceLastRest < MIN_STEPS_BEFORE_LONG_REST) {
+    console.warn('[CAMP] longRest_blocked reason=too_soon stepsSince=%d required=%d',
+      stepsSinceLastRest, MIN_STEPS_BEFORE_LONG_REST);
+    if (typeof showTerrainToast === 'function') {
+      showTerrainToast('Voce precisa descansar brevemente antes de um longo descanso. Explore mais ' +
+        (MIN_STEPS_BEFORE_LONG_REST - stepsSinceLastRest) + ' hex(es).', 'info');
+    }
+    if (window.vHaptic && typeof window.vHaptic.warning === 'function') {
+      try { window.vHaptic.warning(); } catch (_e) { /* noqa: preflight */ }
+    }
+    return;
+  }
+
   /* Get selected guard option */
   var selectedGuard = document.querySelector('input[name="camp-guard"]:checked');
   var guardType = selectedGuard ? selectedGuard.value : 'none';
 
-  console.info('[CAMP] confirmLongRest guardType=%s guardAlreadyPosted=%s radioFound=%s',
-    guardType, S._guardPosted ? 'yes' : 'no', !!selectedGuard);
+  console.info('[CAMP] confirmLongRest guardType=%s guardAlreadyPosted=%s radioFound=%s stepsSinceLastRest=%d',
+    guardType, S._guardPosted ? 'yes' : 'no', !!selectedGuard, stepsSinceLastRest);
+
+  /* Track steps at this rest for next cooldown */
+  S._stepsAtLastLongRest = S._stepCount || 0;
 
   closeCampPopup('long');
 
