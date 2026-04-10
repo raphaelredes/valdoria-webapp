@@ -55,18 +55,72 @@
   }
 
   /**
+   * Detecta se o dispositivo é MOBILE (touch-primary, screen pequeno).
+   * Usa combinação de pointer:coarse + hover:none + physical screen size
+   * para ser confiável em smartphones/tablets reais (independente de user-agent).
+   */
+  function isMobileDevice() {
+    try {
+      var coarse = window.matchMedia('(pointer: coarse)').matches;
+      var noHover = window.matchMedia('(hover: none)').matches;
+      var screenShort = Math.min(
+        window.screen && window.screen.width || 9999,
+        window.screen && window.screen.height || 9999
+      );
+      // Mobile = ponteiro grosso (touch) + sem hover + screen física pequena
+      return coarse && noHover && screenShort <= 900;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * Detecta se estamos em contexto DEV (portal /web/ com ?env=dev).
+   * O portal DEV mostra logs BROWSER + SERVER em split view — landscape é ÚTIL em desktop.
+   */
+  function isDevContext() {
+    try {
+      // URL param ?env=dev OU path contém /web/ (portal DEV)
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('env') === 'dev') return true;
+      if (window.location.pathname.indexOf('/web/') === 0) return true;
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
    * Evitar falso positivo em janelas de desktop estreitas (dev tools) quando só há ponteiro fino.
+   *
+   * Exceção DEV+desktop: se estamos no portal DEV E é desktop, permitir landscape
+   * para o usuário ver os logs BROWSER/SERVER em split view. Mobile ainda é bloqueado
+   * mesmo em DEV.
    */
   function shouldShowGate() {
     if (!isPhoneLandscapeLayout()) return false;
+    // DEV em desktop: permitir landscape para ver logs
+    if (isDevContext() && !isMobileDevice()) return false;
+    // Fallback antigo: janela desktop estreita com pointer fino
     var fine = window.matchMedia('(pointer: fine)').matches;
     var coarse = window.matchMedia('(pointer: coarse)').matches;
     if (fine && !coarse && shortSide() > 420) return false;
     return true;
   }
 
+  /**
+   * Decide se deve tentar chamar as APIs de lock (Telegram + screen.orientation).
+   * Em DEV+desktop NÃO tentamos lock — queremos permitir landscape.
+   */
+  function shouldAttemptLock() {
+    // DEV em desktop: NÃO tentar lock, deixar o usuário girar livremente
+    if (isDevContext() && !isMobileDevice()) return false;
+    return true;
+  }
+
   // ── Layer 1: Telegram Mini App API (Bot API 8.0+) ──
   function tryTelegramLock() {
+    if (!shouldAttemptLock()) return false;  // DEV+desktop: skip lock
     try {
       var tg = window.Telegram && window.Telegram.WebApp;
       if (!tg) return false;
@@ -82,6 +136,7 @@
 
   // ── Layer 2: Screen Orientation API (Chrome Android/PWA) ──
   function tryScreenOrientationLock() {
+    if (!shouldAttemptLock()) return false;  // DEV+desktop: skip lock
     try {
       var so = window.screen && window.screen.orientation;
       if (!so || typeof so.lock !== 'function') return false;
