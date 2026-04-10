@@ -365,17 +365,44 @@ body {
     padding: 8px calc((100% - 240px) / 2) 8px;
     box-sizing: border-box;
 }
-/* Center player dot */
-.hex-nav-inner::after {
-    content: '\25CF';
+/* M5 — Center "you are here" button (toggles BFS reachable highlight) */
+.hex-nav-center {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    width: 28px;
+    height: 28px;
+    line-height: 1;
+    border-radius: 50%;
+    border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+    background: radial-gradient(circle at 30% 30%, var(--v-bg-card-hover, #3a3028), var(--v-bg-deep, #1e1a16));
     color: var(--v-gold, #c4953a);
-    font-size: var(--v-font-body);
-    opacity: 0.6;
-    pointer-events: none;
+    font-size: var(--v-font-body, 14px);
+    font-family: var(--v-font);
+    cursor: pointer;
+    z-index: var(--v-z-base, 1);
+    padding: 0;
+    transition:
+        border-color var(--v-transition, 0.2s),
+        box-shadow var(--v-transition, 0.2s),
+        transform var(--v-transition-fast, 0.1s);
+    box-shadow: 0 0 0 0 rgba(196, 149, 58, 0);
+}
+.hex-nav-center:hover,
+.hex-nav-center:focus-visible {
+    border-color: var(--v-gold, #c4953a);
+    box-shadow: 0 0 8px 0 var(--v-gold-30, rgba(196, 149, 58, 0.3));
+    outline: none;
+}
+.hex-nav-center:active {
+    transform: translate(-50%, -50%) scale(0.92);
+}
+.hex-nav-center.active {
+    border-color: var(--v-gold, #c4953a);
+    color: var(--v-text, #d4c8b0);
+    box-shadow: 0 0 10px 1px var(--v-gold-30, rgba(196, 149, 58, 0.3));
+    background: radial-gradient(circle at 30% 30%, var(--v-gold-15, rgba(196, 149, 58, 0.18)), var(--v-bg-deep, #1e1a16));
 }
 /* Inner container for hex buttons (centered 240px area) */
 .hex-nav-inner { position: relative; width: 240px; height: 120px; margin: 0 auto; }
@@ -401,10 +428,17 @@ body {
     font-size: var(--v-font-sm, 13px);
     font-weight: 600;
     cursor: pointer;
-    transition: border-color var(--v-transition, 0.2s), transform var(--v-transition-fast, 0.1s);
+    /* M3 — smoother transition (border + transform + background + box-shadow) */
+    transition:
+        border-color var(--v-transition, 0.2s),
+        transform var(--v-transition-fast, 0.1s),
+        background var(--v-transition, 0.2s),
+        box-shadow var(--v-transition, 0.2s);
     white-space: nowrap;
-    overflow: hidden;
+    overflow: visible;
     text-overflow: ellipsis;
+    /* Reserve space for absolutely-positioned cost/content badges */
+    position: relative;
 }
 .hex-dir:active {
     transform: scale(0.95);
@@ -433,6 +467,117 @@ body {
 }
 /* hex-nav is always visible — overlays cover it naturally (higher z-index) */
 body.perf-lite .hex-dir { transition: none; }
+
+/* M1 — Movement cost badge (small chip in the top-right corner) */
+.hex-dir-cost {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    min-width: 12px;
+    height: 12px;
+    line-height: 12px;
+    padding: 0 3px;
+    border-radius: var(--v-radius-pill, 20px);
+    background: var(--v-gold-15, rgba(196, 149, 58, 0.18));
+    color: var(--v-gold, #c4953a);
+    font-family: var(--v-font);
+    font-size: var(--v-font-xs, 10px);
+    font-weight: 700;
+    text-align: center;
+    pointer-events: none;
+    border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+}
+.hex-dir-cost.diff {
+    background: rgba(220, 140, 40, 0.22);
+    border-color: rgba(220, 140, 40, 0.5);
+    color: rgba(240, 180, 70, 0.95);
+}
+
+/* M2 — POI / threat / reward icon overlay (small badge in the top-left corner) */
+.hex-dir-content {
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    text-align: center;
+    font-size: var(--v-font-xs, 10px);
+    pointer-events: none;
+    border-radius: var(--v-radius-pill, 20px);
+    background: rgba(20, 16, 12, 0.6);
+    border: 1px solid var(--v-border, #4a3828);
+}
+.hex-dir-content.threat {
+    border-color: rgba(200, 60, 40, 0.7);
+    background: rgba(80, 20, 12, 0.7);
+    animation: hexThreatPulse 1.6s ease-in-out infinite;
+}
+.hex-dir-content.reward {
+    border-color: var(--v-gold, #c4953a);
+    background: rgba(60, 40, 12, 0.7);
+}
+.hex-dir-content.info {
+    border-color: rgba(120, 160, 200, 0.6);
+    background: rgba(20, 30, 50, 0.7);
+}
+
+/* M3 — Adjacent passable hex breathing halo (gentle gold glow on safe hexes) */
+.hex-dir.passable:not(.has-threat):not(:disabled) {
+    box-shadow: 0 0 0 0 var(--v-gold-15, rgba(196, 149, 58, 0.18));
+    animation: hexPassableBreath 3.2s ease-in-out infinite;
+}
+.hex-dir.passable.has-reward:not(:disabled) {
+    box-shadow: 0 0 0 0 var(--v-gold-30, rgba(196, 149, 58, 0.3));
+    animation: hexRewardBreath 2.4s ease-in-out infinite;
+    border-color: var(--v-gold-dim, #9a7530);
+}
+.hex-dir.passable.has-threat:not(:disabled) {
+    box-shadow: 0 0 0 0 rgba(200, 60, 40, 0.25);
+    animation: hexThreatBreath 1.8s ease-in-out infinite;
+    border-color: rgba(200, 60, 40, 0.6);
+}
+
+@keyframes hexPassableBreath {
+    0%, 100% { box-shadow: 0 0 0 0 var(--v-gold-02, rgba(196, 149, 58, 0.02)); }
+    50%      { box-shadow: 0 0 0 3px var(--v-gold-10, rgba(196, 149, 58, 0.10)); }
+}
+@keyframes hexRewardBreath {
+    0%, 100% { box-shadow: 0 0 0 0 var(--v-gold-10, rgba(196, 149, 58, 0.10)); }
+    50%      { box-shadow: 0 0 0 4px var(--v-gold-20, rgba(196, 149, 58, 0.20)); }
+}
+@keyframes hexThreatBreath {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(200, 60, 40, 0.1); }
+    50%      { box-shadow: 0 0 0 4px rgba(200, 60, 40, 0.28); }
+}
+@keyframes hexThreatPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.15); }
+}
+
+/* M4 — Long-press peek state (button held for ~420ms — terrain preview shown) */
+.hex-dir.peeking {
+    border-color: var(--v-gold, #c4953a);
+    background: linear-gradient(165deg, var(--v-gold-15) 0%, var(--v-gold-08) 100%);
+    box-shadow: 0 0 0 2px var(--v-gold-30, rgba(196, 149, 58, 0.3));
+}
+
+/* Performance: lite mode disables all hex-dir animations */
+body.perf-lite .hex-dir.passable,
+body.perf-lite .hex-dir.passable.has-reward,
+body.perf-lite .hex-dir.passable.has-threat,
+body.perf-lite .hex-dir-content.threat {
+    animation: none;
+}
+/* Reduced motion respect (OS preference) */
+@media (prefers-reduced-motion: reduce) {
+    .hex-dir.passable,
+    .hex-dir.passable.has-reward,
+    .hex-dir.passable.has-threat,
+    .hex-dir-content.threat {
+        animation: none;
+    }
+}
 
 /* --- Action Buttons (Navigate gradient style) --- */
 .bottom-actions {

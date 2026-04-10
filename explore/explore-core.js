@@ -5,8 +5,170 @@ var HEX_DIR_ARROWS=['\u2196','\u2197','\u2190','\u2192','\u2199','\u2198'];
 var TERRAIN_EMOJI={'.':'\ud83c\udf3f','g':'\ud83c\udf3e','f':'\ud83c\udf32','~':'\ud83d\udca7','m':'\ud83d\udfe4','r':'\ud83e\udea8','H':'\u26f0\ufe0f','s':'\ud83c\udfdc\ufe0f','i':'\u2744\ufe0f','L':'\ud83c\udf0b','W':'\ud83c\udf0a','#':'\ud83e\uddf1','D':'\ud83d\udeaa','C':'\u2728','@':'\ud83d\udccd','E':'\ud83d\udccd','S':'\ud83c\udf3f','R':'\ud83c\udfda\ufe0f','w':'\ud83d\udca7'};
 var TERRAIN_NAME={'.':'Aberto','g':'Grama','f':'Floresta','~':'Pantano','m':'Lama','r':'Rochoso','H':'Colina','s':'Areia','i':'Gelo','L':'Lava','W':'Agua','#':'Muro','D':'Porta','C':'Bau','@':'Entrada','E':'Saida','S':'Arbusto','R':'Ruinas','w':'Riacho'};
 var DIFFICULT_TILES=new Set(['~','m','i','s','S']);
-function updateHexNav(){var nav=document.getElementById('hex-nav');if(!nav)return;var btns=nav.querySelectorAll('.hex-dir');if(!btns.length)return;var offsets=S.playerRow%2===0?EVEN_OFFSETS:ODD_OFFSETS;for(var i=0;i<btns.length&&i<6;i++){var btn=btns[i];var col=S.playerCol+offsets[i][0],row=S.playerRow+offsets[i][1];var oob=col<0||col>=COLS||row<0||row>=ROWS;var tile=(!oob&&S.grid[row]&&S.grid[row][col])?S.grid[row][col]:null;var baseTile=tile&&tile.match(/[0-9@EC]/)?'.':tile;var impass=!tile||IMPASSABLE.has(baseTile);var fogKey=col+','+row;var fogSt=S.fogState[fogKey];var isVisible=fogSt==='visible'||fogSt==='dim';var isDifficult=!impass&&DIFFICULT_TILES.has(baseTile);btn.disabled=impass||oob;btn.className='hex-dir'+(isDifficult?' difficult':'')+((!isVisible&&!impass)?' fog-hidden':'');btn.textContent='';var arrow=document.createElement('span');arrow.className='hex-dir-arrow';arrow.textContent=HEX_DIR_ARROWS[i];btn.appendChild(arrow);var terrain=document.createElement('span');terrain.className='hex-dir-terrain';if(impass||oob){terrain.textContent='\ud83d\udeab';}else if(!isVisible){terrain.textContent='? Nevoa';}else{var emoji=TERRAIN_EMOJI[baseTile]||'\ud83c\udf3f';var name=TERRAIN_NAME[baseTile]||'Aberto';terrain.textContent=emoji+' '+name+(isDifficult?' x2':'');}
-btn.appendChild(terrain);btn.onclick=(function(c,r){return function(){if(typeof isEventActive==='function'&&isEventActive())return;if(typeof isMoving==='function'&&isMoving())return;movePlayerCanvas(c,r);};})(col,row);}}
+/* Detect interesting content at a hex (POI, encounter tile, chest, locked door, trap, exit). */
+function _hexHasContent(col,row){
+  if(!S.grid||row<0||row>=ROWS||col<0||col>=COLS)return null;
+  var tile=S.grid[row]&&S.grid[row][col]?S.grid[row][col]:'.';
+  /* Exit portal */
+  if(col===S.exitCol&&row===S.exitRow)return{type:'exit',icon:'\ud83c\udfd5\ufe0f'};
+  /* Tile-based content (chests, doors, encounter markers) */
+  if(tile==='C')return{type:'chest',icon:'\ud83d\udcb0'};
+  if(tile==='D')return{type:'door',icon:'\ud83d\udeaa'};
+  if(tile==='E')return{type:'event',icon:'\u2728'};
+  if(tile==='@')return{type:'event',icon:'\u2728'};
+  if(tile.match&&tile.match(/[0-9]/))return{type:'event',icon:'\u2728'};
+  /* POI overlays — only those visible to player (resolved or hidden are skipped) */
+  if(S.pois&&S.pois.length){
+    for(var i=0;i<S.pois.length;i++){
+      var p=S.pois[i];
+      if(p.col!==col||p.row!==row)continue;
+      if(S.poisResolved&&S.poisResolved.has(p.id))continue;
+      if(p.hidden)continue;
+      var icon='\u2728';
+      if(p.type==='dan'||p.type==='danger')icon='\u26a0\ufe0f';
+      else if(p.type==='npc')icon='\ud83d\udde3\ufe0f';
+      else if(p.type==='sea'||p.type==='search')icon='\ud83d\udd0d';
+      else if(p.type==='dis'||p.type==='discovery')icon='\ud83d\udddd\ufe0f';
+      return{type:p.type||'poi',icon:icon};
+    }
+  }
+  /* Visible chests on the tile */
+  if(S.chests&&S.chests.length){
+    for(var ci=0;ci<S.chests.length;ci++){
+      var ch=S.chests[ci];
+      if(ch.col===col&&ch.row===row&&!ch.opened)return{type:'chest',icon:'\ud83d\udcb0'};
+    }
+  }
+  /* Visible traps */
+  if(S.traps&&S.traps.length){
+    for(var ti=0;ti<S.traps.length;ti++){
+      var tr=S.traps[ti];
+      if(tr.col===col&&tr.row===row&&!tr.triggered&&!tr.hidden)return{type:'trap',icon:'\u26a1'};
+    }
+  }
+  return null;
+}
+/* Long-press timer/state per direction (M4: peek terrain) */
+var _hexNavLongPress={timer:null,fired:false,btn:null};
+function _hexNavCancelLongPress(){
+  if(_hexNavLongPress.timer){clearTimeout(_hexNavLongPress.timer);_hexNavLongPress.timer=null;}
+  if(_hexNavLongPress.btn){_hexNavLongPress.btn.classList.remove('peeking');}
+  _hexNavLongPress.btn=null;
+}
+function _hexNavLongPressFire(btn,col,row,terrainText){
+  _hexNavLongPress.fired=true;
+  if(btn)btn.classList.add('peeking');
+  console.info('[EXPLORE:HEXNAV] long_press_peek dir target=(%d,%d) terrain=%s',col,row,terrainText);
+  /* Light haptic + non-blocking toast */
+  try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.HapticFeedback){Telegram.WebApp.HapticFeedback.impactOccurred('light');}else if(navigator.vibrate){navigator.vibrate(8);}}catch(_e){console.warn('[EXPLORE:HEXNAV] haptic',_e);}
+  if(typeof showTerrainToast==='function'){showTerrainToast(terrainText,'flavor');}
+}
+function updateHexNav(){
+  var nav=document.getElementById('hex-nav');
+  if(!nav)return;
+  var btns=nav.querySelectorAll('.hex-dir');
+  if(!btns.length)return;
+  var offsets=S.playerRow%2===0?EVEN_OFFSETS:ODD_OFFSETS;
+  /* Movement budget for visual feedback (BFS-style; matches reachable highlight) */
+  for(var i=0;i<btns.length&&i<6;i++){
+    var btn=btns[i];
+    var col=S.playerCol+offsets[i][0],row=S.playerRow+offsets[i][1];
+    var oob=col<0||col>=COLS||row<0||row>=ROWS;
+    var tile=(!oob&&S.grid[row]&&S.grid[row][col])?S.grid[row][col]:null;
+    var baseTile=tile&&tile.match(/[0-9@EC]/)?'.':tile;
+    var impass=!tile||IMPASSABLE.has(baseTile);
+    var fogKey=col+','+row;
+    var fogSt=S.fogState[fogKey];
+    var isVisible=fogSt==='visible'||fogSt==='dim';
+    var isDifficult=!impass&&DIFFICULT_TILES.has(baseTile);
+    /* M2 — POI / threat detection at the target hex */
+    var contentInfo=(!impass&&isVisible)?_hexHasContent(col,row):null;
+    var hasThreat=contentInfo&&(contentInfo.type==='trap'||contentInfo.type==='dan'||contentInfo.type==='danger');
+    var hasReward=contentInfo&&(contentInfo.type==='chest'||contentInfo.type==='dis'||contentInfo.type==='discovery'||contentInfo.type==='exit');
+    /* Build CSS classes */
+    var cls='hex-dir';
+    if(isDifficult)cls+=' difficult';
+    if(!isVisible&&!impass)cls+=' fog-hidden';
+    if(contentInfo)cls+=' has-content';
+    if(hasThreat)cls+=' has-threat';
+    if(hasReward)cls+=' has-reward';
+    if(!impass&&isVisible)cls+=' passable';
+    btn.disabled=impass||oob;
+    btn.className=cls;
+    btn.textContent='';
+    btn.removeAttribute('data-cost');
+    /* Arrow indicator */
+    var arrow=document.createElement('span');
+    arrow.className='hex-dir-arrow';
+    arrow.textContent=HEX_DIR_ARROWS[i];
+    btn.appendChild(arrow);
+    /* Terrain label */
+    var terrain=document.createElement('span');
+    terrain.className='hex-dir-terrain';
+    var terrainLabel='';
+    if(impass||oob){
+      terrain.textContent='\ud83d\udeab';
+      terrainLabel='Bloqueado';
+    }else if(!isVisible){
+      terrain.textContent='? N\u00e9voa';
+      terrainLabel='N\u00e9voa';
+    }else{
+      var emoji=TERRAIN_EMOJI[baseTile]||'\ud83c\udf3f';
+      var name=TERRAIN_NAME[baseTile]||'Aberto';
+      terrain.textContent=emoji+' '+name;
+      terrainLabel=name+(isDifficult?' (terreno dif\u00edcil)':'');
+    }
+    btn.appendChild(terrain);
+    /* M1 — Movement cost badge (1 normal, 2 difficult) — only on passable visible hexes */
+    if(!impass&&isVisible){
+      var costBadge=document.createElement('span');
+      costBadge.className='hex-dir-cost'+(isDifficult?' diff':'');
+      costBadge.textContent=isDifficult?'2':'1';
+      costBadge.setAttribute('aria-label',isDifficult?'Custo 2 movimentos':'Custo 1 movimento');
+      btn.appendChild(costBadge);
+      btn.setAttribute('data-cost',isDifficult?'2':'1');
+    }
+    /* M2 — POI / Threat icon overlay */
+    if(contentInfo&&!impass&&isVisible){
+      var contentBadge=document.createElement('span');
+      contentBadge.className='hex-dir-content'+(hasThreat?' threat':hasReward?' reward':' info');
+      contentBadge.textContent=contentInfo.icon;
+      contentBadge.setAttribute('aria-label',hasThreat?'Perigo nesta dire\u00e7\u00e3o':hasReward?'Recompensa nesta dire\u00e7\u00e3o':'Algo de interesse');
+      btn.appendChild(contentBadge);
+    }
+    /* M4 — Long-press peek (terrain preview without moving) */
+    var peekText=terrainLabel+(contentInfo?(hasThreat?' \u2014 perigo \u00e0 vista':hasReward?' \u2014 algo valioso':' \u2014 algo interessante'):isDifficult?' \u2014 custo 2':'');
+    var _peekText=peekText;
+    var _peekCol=col,_peekRow=row,_peekBtn=btn;
+    var startPeek=function(c,r,b,txt){
+      return function(ev){
+        if(b.disabled)return;
+        if(ev&&ev.type==='touchstart'){/* Allow tap to fire — we just gate via fired flag */}
+        _hexNavCancelLongPress();
+        _hexNavLongPress.fired=false;
+        _hexNavLongPress.btn=b;
+        _hexNavLongPress.timer=setTimeout(function(){_hexNavLongPressFire(b,c,r,txt);_hexNavLongPress.timer=null;},420);
+      };
+    };
+    var endPeek=function(){
+      return function(){
+        _hexNavCancelLongPress();
+      };
+    };
+    btn.onpointerdown=startPeek(col,row,btn,_peekText);
+    btn.onpointerup=endPeek();
+    btn.onpointercancel=endPeek();
+    btn.onpointerleave=endPeek();
+    /* Click handler — guard against fired long-press to avoid double action */
+    btn.onclick=(function(c,r){return function(){
+      if(_hexNavLongPress.fired){_hexNavLongPress.fired=false;return;}
+      if(typeof isEventActive==='function'&&isEventActive())return;
+      if(typeof isMoving==='function'&&isMoving())return;
+      console.info('[EXPLORE:HEXNAV] move_click dir to=(%d,%d)',c,r);
+      movePlayerCanvas(c,r);
+    };})(col,row);
+  }
+}
 /* Weather fog radius config (visual only) */
 var WEATHER_FOG_RADIUS = {
   's': 3.2, 'c': 2.8, 'r': 2.4, 'f': 1.8, 't': 1.6
@@ -86,7 +248,37 @@ function updateHP(current,max){if(window._dbg)console.debug("[EXPLORE] updateHP"
 function updateXPBar(){var row=document.getElementById('xp-bar-row');var fill=document.getElementById('xp-fill');var label=document.getElementById('xp-label');if(!row||!fill||!label||!S.charData)return;var xp=(S.charData.xp||0)+(S.xpEarned||0);var nxp=S.charData.nxp||300;var prevXp=S.charData.pxp||0;var range=nxp-prevXp;var progress=range>0?Math.min(100,((xp-prevXp)/range)*100):0;fill.style.transform='scaleX('+(progress/100)+')';label.textContent='Nv '+(S.charData.lv||1);row.style.display='flex';}
 function updateRewards(){const xpBadge=document.getElementById('badge-xp');const goldBadge=document.getElementById('badge-gold');if(!xpBadge||!goldBadge)return;xpBadge.textContent='XP '+(Number(S.xpEarned)||0);goldBadge.innerHTML='<span class="vi vi-coin sm"></span> '+(Number(S.goldEarned)||0);[xpBadge,goldBadge].forEach(b=>{b.classList.remove('pop');void b.offsetHeight;b.classList.add('pop');});setTimeout(()=>{xpBadge.classList.remove('pop');goldBadge.classList.remove('pop');},800);updateStepCounter();updateXPBar();}
 var _STEP_MILESTONES={5:'Você encontra seu ritmo na trilha.',10:'Seus passos ganham confiança nesta terra.',15:'O terreno se torna familiar aos seus olhos.',20:'Você sente a marca de um verdadeiro explorador.',25:'A paisagem revela seus segredos a você.',30:'Poucos se aventuram tão longe dos muros.',35:'O horizonte parece sem fim... e cheio de promessas.',40:'Cada passo ecoa com a história deste lugar.',50:'Poucos exploradores chegam tão longe.',60:'Você já é lenda entre os que cruzam estas terras.',75:'O próprio terreno parece reconhecer sua presença.',100:'Um feito digno dos grandes aventureiros de Valdoria.',};function updateStepCounter(){const el=document.getElementById('step-counter');if(el)el.textContent=S.visited.size;/* Floating HUD */var _sf=document.getElementById('badge-steps-float');if(_sf)_sf.textContent='\uD83D\uDC63 '+S.visited.size+'/'+(S.maxSteps||20);const msg=_STEP_MILESTONES[S.visited.size];if(msg&&typeof showTerrainToast==='function'){S._milestonesHit=S._milestonesHit||{};if(!S._milestonesHit[S.visited.size]){S._milestonesHit[S.visited.size]=true;showTerrainToast(msg,'flavor');}}}
-function initBottomBar(){updateStepCounter();updateDangerPips();updateDangerTension();if(typeof initImmersive==='function')initImmersive();}
+function initBottomBar(){updateStepCounter();updateDangerPips();updateDangerTension();if(typeof initImmersive==='function')initImmersive();if(typeof initHexNavCenter==='function')initHexNavCenter();}
+/* M5 — Center hex-nav button: toggles BFS reachable highlight on the map.
+ * Uses existing findReachable / setReachableHighlight from explore-pathfinding.js. */
+var _hexNavRangeShown=false;
+function initHexNavCenter(){
+  var btn=document.getElementById('hex-nav-center');
+  if(!btn||btn._vBound)return;
+  btn._vBound=true;
+  btn.addEventListener('click',function(){
+    if(typeof isMoving==='function'&&isMoving())return;
+    if(typeof isEventActive==='function'&&isEventActive())return;
+    _hexNavRangeShown=!_hexNavRangeShown;
+    btn.classList.toggle('active',_hexNavRangeShown);
+    console.info('[EXPLORE:HEXNAV] center_toggle range_shown=%s',_hexNavRangeShown);
+    try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.HapticFeedback){Telegram.WebApp.HapticFeedback.impactOccurred('light');}else if(navigator.vibrate){navigator.vibrate(8);}}catch(_e){console.warn('[EXPLORE:HEXNAV] haptic',_e);}
+    if(_hexNavRangeShown){
+      if(typeof findReachable==='function'&&typeof setReachableHighlight==='function'){
+        var reachable=findReachable(S.playerCol,S.playerRow,6);
+        setReachableHighlight(reachable);
+        if(typeof showTerrainToast==='function'){
+          showTerrainToast('Alcance: '+(reachable?reachable.size-1:0)+' hex em 6 movimentos','flavor');
+        }
+      }else{
+        console.warn('[EXPLORE:HEXNAV] findReachable not available');
+      }
+    }else{
+      if(typeof setReachableHighlight==='function')setReachableHighlight(null);
+      if(typeof clearPathfinding==='function')clearPathfinding();
+    }
+  });
+}
 function updateDangerTension(){var viewport=document.getElementById('map-viewport');if(!viewport)return;var dl=S.dangerLevel||1;viewport.classList.remove('danger-high','danger-extreme');if(dl>=4)viewport.classList.add('danger-extreme');else if(dl>=3)viewport.classList.add('danger-high');}
 function isDifficultTerrain(tile,biome){if(tile==='m'||tile==='i')return true;if(tile==='s'&&biome==='desert')return true;if(S._weatherDifficultAll&&(tile==='.'||tile==='g'))return true;if(S._snowCoveredHexes&&S._snowCoveredHexes.has(tile))return true;return false;}
 function isRanger(){return S.charData&&S.charData.ci==='🏹';}

@@ -181,8 +181,8 @@ function _executeNextHop() {
   if (!_multiHopPath || _multiHopIndex >= _multiHopPath.length) {
     console.info('[EXPLORE:PATH] multi-hop complete at=(%d,%d)', S.playerCol, S.playerRow);
     _multiHopPath = null;
-    /* Recalculate reachable highlight after full path */
-    if (typeof findReachable === 'function' && typeof setReachableHighlight === 'function') {
+    /* Recalculate reachable highlight after full path — only if M5 toggle is on */
+    if (typeof _hexNavRangeShown !== 'undefined' && _hexNavRangeShown && typeof findReachable === 'function' && typeof setReachableHighlight === 'function') {
       setReachableHighlight(findReachable(S.playerCol, S.playerRow, 6));
     }
     return;
@@ -232,9 +232,11 @@ if (_multiHopPath && _multiHopIndex < _multiHopPath.length) {
     return;
   }
 }
-/* Update reachable highlight after movement */
-if (typeof findReachable === 'function' && typeof setReachableHighlight === 'function') {
+/* Update reachable highlight after movement — only if M5 toggle is on */
+if (typeof _hexNavRangeShown !== 'undefined' && _hexNavRangeShown && typeof findReachable === 'function' && typeof setReachableHighlight === 'function') {
   setReachableHighlight(findReachable(S.playerCol, S.playerRow, 6));
+} else if (typeof setReachableHighlight === 'function') {
+  setReachableHighlight(null);
 }
 logMoveEvent([{type:'move'}]);saveState();}
 function scrollCanvasToPlayer(smooth){const viewport=document.getElementById('map-viewport');if(!viewport)return;const center=hexToScreen(S.playerCol,S.playerRow);const tile=S.grid[S.playerRow]&&S.grid[S.playerRow][S.playerCol]?S.grid[S.playerRow][S.playerCol]:'.';const baseTile=tile.match(/[0-9@EC]/)?'.':tile;const h=(TILE_HEIGHT[baseTile]||1)*UNIT_PX;const targetX=center.x-viewport.clientWidth/2;const targetY=(center.y-h)-viewport.clientHeight/2;viewport.scrollTo({left:Math.max(0,targetX),top:Math.max(0,targetY),behavior:smooth?'smooth':'instant',});}
