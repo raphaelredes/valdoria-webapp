@@ -264,7 +264,16 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     <!-- Travel preparation overlay (uses shared popup system) -->
     <div id="travel-prep-overlay" class="v-popup-overlay" style="display:none">
         <div class="v-popup-card">
-            <div class="v-popup-header">⚠️ Preparação de Viagem</div>
+            <div class="v-popup-header">Preparação de Viagem</div>
+            <div class="v-popup-body"></div>
+            <div class="v-popup-actions"></div>
+        </div>
+    </div>
+
+    <!-- Travel prep detail sub-popup (supplies / gear / etc.) -->
+    <div id="travel-prep-detail-overlay" class="v-popup-overlay" style="display:none">
+        <div class="v-popup-card">
+            <div class="v-popup-header"></div>
             <div class="v-popup-body"></div>
             <div class="v-popup-actions"></div>
         </div>

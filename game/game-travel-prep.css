@@ -1,31 +1,53 @@
-/* Travel Prep — tabbed layout styles (premium redesign) */
+/* Travel Prep — Minimalist no-scroll design (demand #33)
+ * Main popup: compact vitals + warnings + tip + 3-4 actions
+ * Detail popups (nested): supplies, gear, recover HP
+ */
 
-/* Container for the tabbed body inside the popup */
-.prep-tabbed-body {
-  padding: var(--v-space-xs) 0;
+/* ===== Main popup body — minimalist, no-scroll ===== */
+.v-popup-body .prep-vitals,
+.prep-vitals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-xs, 4px);
+  margin-bottom: var(--v-space-md, 8px);
 }
 
-/* Override shared v-tabs spacing for compact popup context */
-.prep-tabs {
-  margin-bottom: var(--v-space-md);
+.prep-vital-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-base, 13px);
+  color: var(--v-text, #d4c8b0);
 }
-.prep-tabs .v-tab {
+
+.prep-vital-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--v-space-sm, 6px);
   font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: var(--v-font-sm, 11px);
+  font-weight: 600;
   letter-spacing: 0.5px;
+  color: var(--v-text-dim, #a09484);
 }
 
-/* ---- Warning badges (Status tab) ---- */
-.prep-warn-badges {
+.prep-vital-value {
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-weight: 700;
+  color: var(--v-text, #d4c8b0);
+}
+
+/* ===== Warning chips — single inline row ===== */
+.prep-warn-chip-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--v-space-sm);
-  margin-top: var(--v-space-md);
+  gap: var(--v-space-xs, 4px);
+  margin-top: var(--v-space-md, 8px);
 }
 
-.prep-warn-badge {
+.prep-warn-chip {
   display: inline-block;
-  padding: var(--v-space-xs) var(--v-space-md);
+  padding: var(--v-space-xs, 4px) var(--v-space-md, 8px);
   font-size: var(--v-font-sm, 11px);
   font-family: var(--v-font, 'MedievalSharp', serif);
   color: #e0a060;
@@ -36,18 +58,53 @@
   white-space: nowrap;
 }
 
-/* ---- Supply grid (Suprimentos tab) ---- */
+/* ===== Biome tip — single discreet line ===== */
+.prep-biome-tip {
+  margin-top: var(--v-space-md, 8px);
+  padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
+  font-size: var(--v-font-sm, 11px);
+  font-style: italic;
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  color: var(--v-text-dim, #a09484);
+  text-align: center;
+  border-left: 2px solid var(--v-gold-25, rgba(196,149,58,0.25));
+  background: var(--v-gold-04, rgba(196,149,58,0.04));
+  border-radius: var(--v-radius-xs, 4px);
+  line-height: 1.4;
+}
+
+/* ===== Detail row inside actions (Suprimentos / Equipamento side-by-side) ===== */
+.v-popup-actions .v-popup-btn-row {
+  display: flex;
+  gap: var(--v-space-sm, 6px);
+  margin-bottom: var(--v-space-sm, 6px);
+}
+
+.v-popup-actions .v-popup-btn-row .v-popup-btn {
+  flex: 1;
+  font-size: var(--v-font-md, 12px);
+  padding: var(--v-space-md, 8px) var(--v-space-sm, 6px);
+  min-height: 40px;
+}
+
+/* ===== Force main popup to NOT scroll (no-scroll constraint) ===== */
+#travel-prep-overlay .v-popup-body {
+  overflow: hidden;
+  max-height: none;
+}
+
+/* ===== Detail popups (nested) ===== */
 .prep-supply-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--v-space-md);
+  gap: var(--v-space-md, 8px);
 }
 
 .prep-supply-item {
   display: flex;
   align-items: center;
-  gap: var(--v-space-sm);
-  padding: var(--v-space-md);
+  gap: var(--v-space-sm, 6px);
+  padding: var(--v-space-md, 8px);
   background: linear-gradient(135deg, var(--v-bg-raised, #332a22), var(--v-bg-card, #2e2520));
   border: 1px solid var(--v-gold-15, rgba(196,149,58,0.15));
   border-radius: var(--v-radius-sm, 6px);
@@ -76,29 +133,38 @@
   color: var(--v-text, #d4c8b0);
   display: flex;
   align-items: center;
-  gap: var(--v-space-xs);
+  gap: var(--v-space-xs, 4px);
   flex-shrink: 0;
 }
 
-/* ---- Tab panel scroll limits (prevent popup overflow) ---- */
-.prep-tabbed-body .v-tab-panel {
-  max-height: clamp(280px, 50vh, 400px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+.prep-buylist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-xs, 4px);
+  margin-top: var(--v-space-sm, 6px);
 }
 
-/* ---- Gear checklist (Equipamento tab) ---- */
+.prep-shortfall-tip {
+  font-size: var(--v-font-sm, 11px);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  color: var(--v-text-dim, #a09484);
+  font-style: italic;
+  text-align: center;
+  margin-top: var(--v-space-sm, 6px);
+}
+
+/* ===== Gear checklist (detail popup) ===== */
 .prep-gear-list {
   display: flex;
   flex-direction: column;
-  gap: var(--v-space-xs);
+  gap: var(--v-space-xs, 4px);
 }
 
 .prep-gear-row {
   display: flex;
   align-items: center;
-  gap: var(--v-space-md);
-  padding: var(--v-space-sm) var(--v-space-md);
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
   border-radius: var(--v-radius-sm, 6px);
   font-family: var(--v-font, 'MedievalSharp', serif);
   font-size: var(--v-font-base, 13px);
@@ -107,7 +173,7 @@
 }
 
 .prep-gear-row:nth-child(odd) {
-  background: var(--v-gold-04);
+  background: var(--v-gold-04, rgba(196,149,58,0.04));
 }
 
 .prep-gear-missing {
@@ -134,4 +200,12 @@
 .prep-gear-relevant {
   flex-shrink: 0;
   font-size: var(--v-font-sm, 11px);
+}
+
+/* ===== Recover HP options (nested detail popup) ===== */
+.prep-recover-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-xs, 4px);
+  margin-top: var(--v-space-md, 8px);
 }
