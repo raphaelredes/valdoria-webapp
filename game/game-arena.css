@@ -1,25 +1,50 @@
 /* ═══════════════════════════════════════════════════════════════
-   Arena de Combate — Premium Visual Redesign
+   Arena de Combate — Gladiator/Coliseum Redesign (#41)
    Tokens: valdoria-design.css
+
+   Design references:
+   - Game UI Database: imposing tier badges, laurel wreaths, ornate frames
+   - Gladiator Arena assets: arches, columns, crowd silhouette, torches
+   - Medieval UI patterns: stone textures, embossed gold, scroll panels
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Tier palette (arena-local custom properties) ─────────── */
 :root {
     --arena-iron: #8a8a8a;
-    --arena-iron-glow: rgba(138, 138, 138, 0.25);
+    --arena-iron-light: #b8b8b8;
+    --arena-iron-dark: #555;
+    --arena-iron-glow: rgba(138, 138, 138, 0.3);
+
     --arena-bronze: #b87333;
-    --arena-bronze-glow: rgba(184, 115, 51, 0.25);
+    --arena-bronze-light: #d4944a;
+    --arena-bronze-dark: #6a4018;
+    --arena-bronze-glow: rgba(184, 115, 51, 0.35);
+
     --arena-silver: #b0b8c0;
-    --arena-silver-glow: rgba(176, 184, 192, 0.25);
+    --arena-silver-light: #dde2e8;
+    --arena-silver-dark: #6a7078;
+    --arena-silver-glow: rgba(176, 184, 192, 0.35);
+
     --arena-gold: var(--v-gold, #c4953a);
-    --arena-gold-glow: var(--v-gold-25, rgba(196, 149, 58, 0.25));
+    --arena-gold-light: var(--v-gold-light, #dbb668);
+    --arena-gold-dark: var(--v-gold-dim, #9a7530);
+    --arena-gold-glow: var(--v-gold-30, rgba(196, 149, 58, 0.3));
+
     --arena-mythril: #9b59b6;
-    --arena-mythril-glow: rgba(155, 89, 182, 0.25);
+    --arena-mythril-light: #c084e0;
+    --arena-mythril-dark: #5a2880;
+    --arena-mythril-glow: rgba(155, 89, 182, 0.35);
+
     --arena-streak: #ff8c00;
-    --arena-streak-glow: rgba(255, 140, 0, 0.15);
+    --arena-streak-glow: rgba(255, 140, 0, 0.18);
     --arena-cooldown: #ff9800;
-    --arena-crimson: #7b2020;
-    --arena-crimson-glow: rgba(123, 32, 32, 0.15);
+    --arena-crimson: var(--v-crimson, #7b2020);
+    --arena-crimson-glow: var(--v-crimson-glow, rgba(123, 32, 32, 0.35));
+
+    --arena-stone-1: #2a1f18;
+    --arena-stone-2: #352a20;
+    --arena-stone-3: #1e1610;
+    --arena-torch: #ff7a2a;
 }
 
 
@@ -32,20 +57,26 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes arenaPulseGlow {
-    0%, 100% { box-shadow: 0 0 8px var(--v-gold-20, rgba(196, 149, 58, 0.2)); }
-    50%      { box-shadow: 0 0 16px var(--v-gold-30, rgba(196, 149, 58, 0.3)); }
-}
-
 @keyframes arenaCardReveal {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes arenaMedallionPop {
+    0%   { opacity: 0; transform: scale(0.5) rotate(-8deg); }
+    70%  { opacity: 1; transform: scale(1.08) rotate(2deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes arenaMedallionGlow {
+    0%, 100% { box-shadow: 0 0 14px var(--v-gold-30), 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.22); }
+    50%      { box-shadow: 0 0 22px var(--v-gold-40), 0 4px 18px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.28); }
+}
+
 @keyframes arenaVictoryPop {
-    0%   { transform: scale(0.3); opacity: 0; }
-    70%  { transform: scale(1.15); opacity: 1; }
-    100% { transform: scale(1); }
+    0%   { transform: scale(0.3) rotate(-15deg); opacity: 0; }
+    60%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 @keyframes arenaVictoryShimmer {
@@ -54,35 +85,55 @@
 }
 
 @keyframes arenaVictoryGlow {
-    0%, 100% { box-shadow: 0 0 12px var(--v-gold-10, rgba(196, 149, 58, 0.1)),
-                           0 0 24px var(--v-gold-08, rgba(196, 149, 58, 0.08)); }
-    50%      { box-shadow: 0 0 20px var(--v-gold-30, rgba(196, 149, 58, 0.3)),
-                           0 0 40px var(--v-gold-15, rgba(196, 149, 58, 0.15)); }
+    0%, 100% { box-shadow: 0 0 18px var(--v-gold-15), 0 0 36px var(--v-gold-08); }
+    50%      { box-shadow: 0 0 28px var(--v-gold-30), 0 0 56px var(--v-gold-15); }
 }
 
 @keyframes arenaRewardCascade {
-    from { opacity: 0; transform: translateX(20px); }
+    from { opacity: 0; transform: translateX(24px); }
     to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes arenaDefeatPulse {
-    0%, 100% { box-shadow: 0 0 16px rgba(123, 32, 32, 0.08); }
-    50%      { box-shadow: 0 0 24px rgba(123, 32, 32, 0.2); }
+    0%, 100% { box-shadow: 0 0 18px rgba(123, 32, 32, 0.1); }
+    50%      { box-shadow: 0 0 26px rgba(123, 32, 32, 0.24); }
 }
 
 @keyframes arenaStreakPulse {
     0%, 100% { box-shadow: inset 0 0 8px rgba(255, 140, 0, 0.1); }
-    50%      { box-shadow: inset 0 0 14px rgba(255, 140, 0, 0.25); }
+    50%      { box-shadow: inset 0 0 14px rgba(255, 140, 0, 0.28); }
 }
 
 @keyframes arenaHpCritPulse {
-    0%, 100% { opacity: 0.75; }
+    0%, 100% { opacity: 0.78; }
     50%      { opacity: 1; }
 }
 
 @keyframes arenaRiskyPulse {
-    0%, 100% { border-color: rgba(183, 50, 50, 0.2); }
-    50%      { border-color: rgba(183, 50, 50, 0.4); }
+    0%, 100% { border-color: rgba(183, 50, 50, 0.25); }
+    50%      { border-color: rgba(183, 50, 50, 0.45); }
+}
+
+@keyframes arenaTorchFlicker {
+    0%, 100% { opacity: 0.75; transform: scaleY(1) scaleX(1); }
+    25%      { opacity: 0.9;  transform: scaleY(1.06) scaleX(0.96); }
+    50%      { opacity: 0.7;  transform: scaleY(0.95) scaleX(1.04); }
+    75%      { opacity: 0.85; transform: scaleY(1.03) scaleX(0.98); }
+}
+
+@keyframes arenaCrownFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
+}
+
+@keyframes arenaDefeatSlide {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 0.6; transform: translateY(0); }
+}
+
+@keyframes arenaPortraitPulse {
+    0%, 100% { box-shadow: 0 0 12px var(--v-gold-20), inset 0 2px 8px rgba(0, 0, 0, 0.35); }
+    50%      { box-shadow: 0 0 20px var(--v-gold-30), inset 0 2px 8px rgba(0, 0, 0, 0.35); }
 }
 
 
@@ -96,85 +147,374 @@
     gap: var(--v-space-lg, 12px);
     padding: var(--v-space-md, 8px) 0;
     text-align: center;
+    position: relative;
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   TIER BADGE
+   COLISEUM BACKDROP — arches, torches, crowd silhouette
    ═══════════════════════════════════════════════════════════════ */
 
-.arena-tier-header {
+.arena-backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    border-radius: var(--v-radius, 10px);
+    opacity: 0.65;
+}
+
+/* Crowd silhouette (bottom): subtle texture representing spectators */
+.arena-backdrop-crowd {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background:
+        radial-gradient(circle at 10% 100%, rgba(0, 0, 0, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 25% 100%, rgba(0, 0, 0, 0.35) 0%, transparent 35%),
+        radial-gradient(circle at 40% 100%, rgba(0, 0, 0, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 55% 100%, rgba(0, 0, 0, 0.35) 0%, transparent 35%),
+        radial-gradient(circle at 70% 100%, rgba(0, 0, 0, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 85% 100%, rgba(0, 0, 0, 0.35) 0%, transparent 35%),
+        linear-gradient(to top, rgba(0, 0, 0, 0.3) 0%, transparent 100%);
+}
+
+/* Stone arches on both sides — top corners */
+.arena-backdrop-arch {
+    position: absolute;
+    top: 0;
+    width: 60px;
+    height: 100px;
+    background:
+        radial-gradient(ellipse at top, transparent 40%, rgba(42, 31, 24, 0.35) 42%, rgba(42, 31, 24, 0.15) 70%, transparent 100%);
+}
+
+.arena-backdrop-arch.arch-left  { left: 0; }
+.arena-backdrop-arch.arch-right { right: 0; transform: scaleX(-1); }
+
+/* Torches flanking the content */
+.arena-backdrop-torch {
+    position: absolute;
+    top: 8px;
+    width: 6px;
+    height: 18px;
+    background: linear-gradient(180deg, var(--arena-torch) 0%, #8a3010 60%, #4a1a08 100%);
+    border-radius: 1px;
+    box-shadow: 0 0 12px var(--arena-torch), 0 0 24px rgba(255, 122, 42, 0.4);
+}
+
+.arena-backdrop-torch.torch-left  { left: 10px; }
+.arena-backdrop-torch.torch-right { right: 10px; }
+
+/* Torch flame animation */
+.arena-backdrop-torch .torch-flame {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 12px;
+    height: 14px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center bottom,
+        #ffd060 0%,
+        var(--arena-torch) 40%,
+        rgba(255, 122, 42, 0.5) 70%,
+        transparent 100%);
+    border-radius: 50% 50% 30% 30%;
+    animation: arenaTorchFlicker 1.2s ease-in-out infinite;
+    filter: blur(1px);
+}
+
+/* Ensure all content is above the backdrop */
+.arena-screen > *:not(.arena-backdrop) { position: relative; z-index: 1; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   TIER HERO — Imposing laurel wreath medallion
+   ═══════════════════════════════════════════════════════════════ */
+
+.arena-tier-hero {
+    display: flex;
+    justify-content: center;
+    padding: var(--v-space-md, 8px) 0 var(--v-space-sm, 4px);
+    animation: arenaCardReveal 0.4s ease-out both;
+}
+
+.arena-tier-laurel {
+    position: relative;
+    padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+}
+
+/* Left laurel wreath */
+.arena-tier-laurel::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 56px;
+    background-image:
+        radial-gradient(ellipse 4px 2px at 50% 10%, var(--arena-gold-light) 0%, transparent 70%),
+        radial-gradient(ellipse 4px 2px at 40% 25%, var(--arena-gold) 0%, transparent 70%),
+        radial-gradient(ellipse 4px 2px at 50% 40%, var(--arena-gold-light) 0%, transparent 70%),
+        radial-gradient(ellipse 4px 2px at 40% 55%, var(--arena-gold) 0%, transparent 70%),
+        radial-gradient(ellipse 4px 2px at 50% 70%, var(--arena-gold-light) 0%, transparent 70%),
+        radial-gradient(ellipse 4px 2px at 40% 85%, var(--arena-gold) 0%, transparent 70%);
+    opacity: 0.7;
+}
+
+/* Right laurel wreath (mirrored) */
+.arena-tier-laurel::after {
+    content: '';
+    position: absolute;
+    right: -24px;
+    top: 50%;
+    transform: translateY(-50%) scaleX(-1);
+    width: 28px;
+    height: 56px;
+    background-image:
+        radial-gradient(ellipse 4px 2px at 50% 10%, var(--arena-gold-light) 0%, transparent 70%),
+        radial-gradient(ellipse 4px 2px at 40% 25%, var(--arena-gold) 0%, transparent 70%),
+        radial-gradient(ellipse 4px 2px at 50% 40%, var(--arena-gold-light) 0%, transparent 70%),
+        radial-gradient(ellipse 4px 2px at 40% 55%, var(--arena-gold) 0%, transparent 70%),
+        radial-gradient(ellipse 4px 2px at 50% 70%, var(--arena-gold-light) 0%, transparent 70%),
+        radial-gradient(ellipse 4px 2px at 40% 85%, var(--arena-gold) 0%, transparent 70%);
+    opacity: 0.7;
+}
+
+/* Imposing circular medallion */
+.arena-tier-medallion {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--v-space-xs, 2px);
-    animation: arenaCardReveal 0.3s ease-out both;
+    justify-content: center;
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 25%,
+        var(--arena-gold-light) 0%,
+        var(--arena-gold) 40%,
+        var(--arena-gold-dark) 80%,
+        var(--arena-stone-3) 100%);
+    box-shadow: 0 0 14px var(--v-gold-30),
+                0 4px 14px rgba(0, 0, 0, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.22),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--arena-gold-dark);
+    animation: arenaMedallionPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+               arenaMedallionGlow 3.5s ease-in-out 0.5s infinite;
 }
 
-.arena-tier-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--v-space-sm, 4px);
-    padding: var(--v-space-sm, 4px) var(--v-space-xl, 16px);
-    border-radius: var(--v-radius-pill, 20px);
+/* Inner ring (embossed decoration) */
+.arena-tier-medallion::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.arena-tier-medallion::after {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.arena-tier-label {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: var(--v-font-sm, 12px);
+    font-size: var(--v-font-xs, 10px);
     font-weight: 700;
-    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(0, 0, 0, 0.55);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+    line-height: 1;
+}
+
+.arena-tier-name {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-2xl, 18px);
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.78);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
     letter-spacing: 1.5px;
-    color: var(--v-bg, #2a2420);
-    background: var(--arena-iron);
-    box-shadow: 0 2px 8px var(--arena-iron-glow),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.arena-tier-badge[data-tier="iron"] {
-    background: linear-gradient(135deg, #999 0%, var(--arena-iron) 50%, #777 100%);
-    box-shadow: 0 2px 8px var(--arena-iron-glow),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.arena-tier-badge[data-tier="bronze"] {
-    background: linear-gradient(135deg, #d4944a 0%, var(--arena-bronze) 50%, #8a5020 100%);
-    box-shadow: 0 2px 8px var(--arena-bronze-glow),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.arena-tier-badge[data-tier="silver"] {
-    background: linear-gradient(135deg, #d0d6dc 0%, var(--arena-silver) 50%, #8a9098 100%);
-    box-shadow: 0 2px 8px var(--arena-silver-glow),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.arena-tier-badge[data-tier="gold"] {
-    background: linear-gradient(135deg, var(--v-gold-light, #dbb668) 0%, var(--v-gold, #c4953a) 50%, var(--v-gold-dim, #9a7530) 100%);
-    box-shadow: 0 2px 10px var(--arena-gold-glow),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.arena-tier-badge[data-tier="mythril"] {
-    background: linear-gradient(135deg, #c084e0 0%, var(--arena-mythril) 50%, #6a3080 100%);
-    color: #fff;
-    box-shadow: 0 2px 10px var(--arena-mythril-glow),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    line-height: 1.1;
+    margin-top: 2px;
 }
 
 .arena-tier-range {
+    font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-xs, 10px);
-    color: var(--v-text-dim, #a09484);
+    color: rgba(0, 0, 0, 0.6);
     letter-spacing: 0.5px;
+    margin-top: 2px;
+    padding: 1px 6px;
+    border-radius: var(--v-radius-pill, 20px);
+    background: rgba(0, 0, 0, 0.15);
+}
+
+/* Tier variants — each more imposing than the last */
+.arena-tier-medallion[data-tier="iron"] {
+    background: radial-gradient(circle at 30% 25%,
+        var(--arena-iron-light) 0%,
+        var(--arena-iron) 45%,
+        var(--arena-iron-dark) 85%,
+        #222 100%);
+    box-shadow: 0 0 10px var(--arena-iron-glow),
+                0 4px 12px rgba(0, 0, 0, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.4);
+    border-color: var(--arena-iron-dark);
+    animation: arenaMedallionPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.arena-tier-medallion[data-tier="bronze"] {
+    background: radial-gradient(circle at 30% 25%,
+        var(--arena-bronze-light) 0%,
+        var(--arena-bronze) 45%,
+        var(--arena-bronze-dark) 85%,
+        #2a1608 100%);
+    box-shadow: 0 0 12px var(--arena-bronze-glow),
+                0 4px 14px rgba(0, 0, 0, 0.45),
+                inset 0 2px 4px rgba(255, 255, 255, 0.22),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.35);
+    border-color: var(--arena-bronze-dark);
+    animation: arenaMedallionPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.arena-tier-medallion[data-tier="silver"] {
+    background: radial-gradient(circle at 30% 25%,
+        var(--arena-silver-light) 0%,
+        var(--arena-silver) 45%,
+        var(--arena-silver-dark) 85%,
+        #2a3038 100%);
+    box-shadow: 0 0 14px var(--arena-silver-glow),
+                0 4px 16px rgba(0, 0, 0, 0.45),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.3);
+    border-color: var(--arena-silver-dark);
+    animation: arenaMedallionPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+               arenaMedallionGlow 3.5s ease-in-out 0.5s infinite;
+}
+
+.arena-tier-medallion[data-tier="gold"] {
+    /* Uses default gold — shimmer/glow */
+}
+
+.arena-tier-medallion[data-tier="mythril"] {
+    background: radial-gradient(circle at 30% 25%,
+        var(--arena-mythril-light) 0%,
+        var(--arena-mythril) 45%,
+        var(--arena-mythril-dark) 85%,
+        #1a0830 100%);
+    box-shadow: 0 0 16px var(--arena-mythril-glow),
+                0 4px 18px rgba(0, 0, 0, 0.5),
+                inset 0 2px 4px rgba(255, 255, 255, 0.28),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.4);
+    border-color: var(--arena-mythril-dark);
+    animation: arenaMedallionPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+               arenaMedallionGlow 3.5s ease-in-out 0.5s infinite;
+}
+
+.arena-tier-medallion[data-tier="mythril"] .arena-tier-label,
+.arena-tier-medallion[data-tier="mythril"] .arena-tier-name,
+.arena-tier-medallion[data-tier="mythril"] .arena-tier-range {
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   STATS ROW
+   ORNAMENTAL DIVIDER
    ═══════════════════════════════════════════════════════════════ */
+
+.arena-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--v-space-sm, 4px);
+    margin: var(--v-space-xs, 2px) auto;
+    max-width: 260px;
+}
+
+.arena-divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        var(--v-gold-35, rgba(196, 149, 58, 0.35)) 50%,
+        transparent 100%);
+}
+
+.arena-divider-gem {
+    font-size: var(--v-font-xs, 10px);
+    color: var(--v-gold-dim, #9a7530);
+    line-height: 1;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   RECORD TABLET — Stone tablet with stats
+   ═══════════════════════════════════════════════════════════════ */
+
+.arena-record-tablet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-sm, 4px);
+    padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+    background: linear-gradient(180deg,
+        var(--arena-stone-2) 0%,
+        var(--arena-stone-1) 100%);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius, 10px);
+    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08)),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.3),
+                0 2px 10px rgba(0, 0, 0, 0.2);
+    animation: arenaCardReveal 0.4s ease-out 0.1s both;
+    position: relative;
+}
+
+/* Ornamental corner diamonds */
+.arena-record-tablet::before,
+.arena-record-tablet::after {
+    content: '\u25C6';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--v-font-xs, 10px);
+    color: var(--v-gold-dim, #9a7530);
+    line-height: 1;
+    opacity: 0.6;
+}
+
+.arena-record-tablet::before { left: 6px; }
+.arena-record-tablet::after  { right: 6px; }
+
+.arena-record-header {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xs, 10px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--v-gold, #c4953a);
+    text-shadow: 0 0 8px var(--v-gold-20);
+    padding-bottom: var(--v-space-xs, 2px);
+    border-bottom: 1px solid var(--v-gold-12, rgba(196, 149, 58, 0.12));
+    width: 100%;
+}
 
 .arena-stats-row {
     display: flex;
     justify-content: center;
     gap: var(--v-space-md, 8px);
-    animation: arenaCardReveal 0.3s ease-out 0.05s both;
+    padding: var(--v-space-xs, 2px) 0;
 }
 
 .arena-stat-badge {
@@ -182,11 +522,14 @@
     flex-direction: column;
     align-items: center;
     padding: var(--v-space-sm, 4px) var(--v-space-lg, 12px);
-    background: var(--v-bg-card, #2e2520);
+    background: linear-gradient(180deg,
+        var(--v-bg-card, #2e2520) 0%,
+        var(--arena-stone-1) 100%);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius-sm, 6px);
     min-width: 64px;
-    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08));
+    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08)),
+                0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .arena-stat-badge .stat-value {
@@ -198,7 +541,7 @@
 }
 
 .arena-stat-badge .stat-label {
-    font-size: var(--v-font-micro, 8px); /* noqa: preflight */
+    font-size: var(--v-font-micro, 10px);
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--v-text-dim, #a09484);
@@ -214,9 +557,14 @@
     color: var(--v-text-dim, #a09484);
 }
 
+.arena-daily-wins strong {
+    color: var(--v-gold-light, #dbb668);
+    font-weight: 700;
+}
+
 
 /* ═══════════════════════════════════════════════════════════════
-   CHALLENGER CARD
+   CHALLENGER CARD — Portrait frame with ornate border
    ═══════════════════════════════════════════════════════════════ */
 
 .arena-challenger-card {
@@ -224,51 +572,105 @@
     flex-direction: column;
     align-items: center;
     gap: var(--v-space-sm, 4px);
-    padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px);
-    background: var(--v-bg-raised, #332a22);
+    padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px) var(--v-space-lg, 12px);
+    background: linear-gradient(180deg,
+        var(--v-bg-raised, #332a22) 0%,
+        var(--arena-stone-2) 100%);
     border: 1px solid var(--v-gold-25, rgba(196, 149, 58, 0.25));
     border-radius: var(--v-radius, 10px);
     position: relative;
-    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08)),
-                0 4px 16px rgba(0, 0, 0, 0.2);
-    animation: arenaCardReveal 0.3s ease-out 0.1s both;
+    box-shadow: inset 0 1px 0 var(--v-gold-12, rgba(196, 149, 58, 0.12)),
+                0 4px 18px rgba(0, 0, 0, 0.25);
+    animation: arenaCardReveal 0.4s ease-out 0.15s both;
 }
 
 /* Inner double-frame ornament */
 .arena-challenger-card::before {
     content: '';
     position: absolute;
-    inset: 3px;
-    border: 1px solid var(--v-gold-12, rgba(196, 149, 58, 0.12));
-    border-radius: calc(var(--v-radius, 10px) - 2px);
+    inset: 4px;
+    border: 1px solid var(--v-gold-15, rgba(196, 149, 58, 0.15));
+    border-radius: calc(var(--v-radius, 10px) - 3px);
     pointer-events: none;
 }
 
-/* Top diamond ornament */
-.arena-challenger-card::after {
+/* Challenger label with decorative diamonds */
+.arena-challenger-label {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xs, 10px);
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: var(--v-gold, #c4953a);
+    text-shadow: 0 0 10px var(--v-gold-30);
+    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+    background: var(--v-bg-raised, #332a22);
+    border-radius: var(--v-radius-pill, 20px);
+    margin-top: -24px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Portrait frame — elaborate ornamental border */
+.arena-challenger-portrait {
+    position: relative;
+    margin-top: var(--v-space-sm, 4px);
+}
+
+.arena-portrait-frame {
+    width: 86px;
+    height: 86px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center,
+        var(--arena-stone-1) 0%,
+        var(--arena-stone-3) 100%);
+    border: 3px solid var(--v-gold-dim, #9a7530);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 12px var(--v-gold-20),
+                inset 0 2px 8px rgba(0, 0, 0, 0.35);
+    animation: arenaPortraitPulse 3s ease-in-out infinite;
+}
+
+/* Outer ring (laurel-like) */
+.arena-portrait-frame::before {
+    content: '';
+    position: absolute;
+    inset: -7px;
+    border: 1px solid var(--v-gold-25, rgba(196, 149, 58, 0.25));
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Top crown diamond */
+.arena-portrait-frame::after {
     content: '\u25C6';
     position: absolute;
-    top: -7px;
+    top: -14px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: var(--v-font-xs, 10px); /* noqa: preflight */
-    color: var(--v-gold-dim, #9a7530);
+    font-size: var(--v-font-sm, 12px);
+    color: var(--v-gold, #c4953a);
     background: var(--v-bg-raised, #332a22);
-    padding: 0 var(--v-space-sm, 4px);
+    padding: 0 var(--v-space-xs, 2px);
     line-height: 1;
 }
 
 .arena-challenger-icon {
-    font-size: 44px; /* HARDCODED: ornamental icon, no token */
+    font-size: 44px; /* HARDCODED: ornamental portrait icon, no token */
     line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
 .arena-challenger-name {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: var(--v-font-lg, 16px);
+    font-size: var(--v-font-xl, 16px);
     font-weight: 700;
     color: var(--v-gold-light, #dbb668);
     letter-spacing: 0.5px;
+    text-shadow: 0 0 8px var(--v-gold-15);
+    margin-top: var(--v-space-sm, 4px);
 }
 
 .arena-challenger-class {
@@ -282,66 +684,135 @@
 
 .arena-challenger-flavor {
     font-size: var(--v-font-sm, 12px);
+    font-style: italic;
     color: var(--v-text-dim, #a09484);
     max-width: 280px;
     line-height: 1.5;
+    padding: 0 var(--v-space-sm, 4px);
 }
 
 .arena-challenger-stats {
     display: flex;
     gap: var(--v-space-md, 8px);
-    margin-top: var(--v-space-xs, 2px);
+    margin-top: var(--v-space-sm, 4px);
 }
 
 .arena-challenger-stats .c-stat {
-    font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: var(--v-font-xs, 10px);
-    font-weight: 600;
-    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
-    background: rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 52px;
+    padding: var(--v-space-xs, 2px) var(--v-space-sm, 4px);
+    background: linear-gradient(180deg,
+        rgba(0, 0, 0, 0.35) 0%,
+        rgba(0, 0, 0, 0.15) 100%);
     border-radius: var(--v-radius-sm, 6px);
-    color: var(--v-text, #d4c8b0);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--v-border, #4a3828);
+    box-shadow: inset 0 1px 0 var(--v-gold-08);
+}
+
+.arena-challenger-stats .c-stat-icon {
+    font-size: var(--v-font-sm, 12px);
+    line-height: 1;
+}
+
+.arena-challenger-stats .c-stat-value {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-body, 14px);
+    font-weight: 700;
+    color: var(--v-gold-light, #dbb668);
+    line-height: 1.1;
+    margin-top: 1px;
+}
+
+.arena-challenger-stats .c-stat-label {
+    font-size: var(--v-font-micro, 10px);
+    color: var(--v-text-dim, #a09484);
+    letter-spacing: 0.5px;
+    line-height: 1.2;
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   REWARD INFO + FEE (main screen)
+   REWARD SCROLL — Scroll-like panel for reward preview
    ═══════════════════════════════════════════════════════════════ */
 
-.arena-reward-info {
+.arena-reward-scroll {
     display: flex;
-    justify-content: center;
-    gap: var(--v-space-lg, 12px);
-    font-size: var(--v-font-sm, 12px);
-    color: var(--v-text-dim, #a09484);
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-sm, 4px);
+    padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+    background: linear-gradient(180deg,
+        var(--v-gold-04, rgba(196, 149, 58, 0.04)) 0%,
+        var(--v-bg-card, #2e2520) 100%);
+    border: 1px solid var(--v-gold-15, rgba(196, 149, 58, 0.15));
+    border-radius: var(--v-radius, 10px);
+    box-shadow: inset 0 1px 0 var(--v-gold-08);
+    animation: arenaCardReveal 0.4s ease-out 0.2s both;
 }
 
-.arena-reward-info .reward-item {
+.arena-reward-header {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xs, 10px);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--v-gold-dim, #9a7530);
+}
+
+.arena-reward-row {
     display: flex;
+    gap: var(--v-space-md, 8px);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.arena-reward-row .reward-item {
+    display: inline-flex;
     align-items: center;
     gap: var(--v-space-xs, 2px);
+    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: var(--v-radius-sm, 6px);
+    font-size: var(--v-font-sm, 12px);
+    color: var(--v-text, #d4c8b0);
+}
+
+.arena-reward-row .reward-item strong {
+    color: var(--v-gold-light, #dbb668);
 }
 
 .arena-fee {
-    font-size: var(--v-font-sm, 12px);
-    color: var(--v-text-dim, #a09484);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--v-space-xs, 2px);
+    font-size: var(--v-font-xs, 10px);
+    color: var(--v-text-dim, #a09484);
+    padding-top: var(--v-space-xs, 2px);
+    border-top: 1px dashed var(--v-border, #4a3828);
+    width: 100%;
 }
+
+.arena-fee .fee-label {
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-right: var(--v-space-sm, 4px);
+}
+
+.arena-fee strong { color: var(--v-danger-dim, #cc6666); }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   BUTTONS
+   BUTTONS — Ornate medieval style
    ═══════════════════════════════════════════════════════════════ */
 
 .arena-actions {
     display: flex;
     flex-direction: column;
     gap: var(--v-space-sm, 4px);
-    padding: 0 var(--v-space-sm, 4px);
+    padding: var(--v-space-xs, 2px) var(--v-space-sm, 4px) 0;
+    animation: arenaCardReveal 0.4s ease-out 0.25s both;
 }
 
 .arena-btn {
@@ -352,7 +823,9 @@
     padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius, 10px);
-    background: var(--v-bg-card, #2e2520);
+    background: linear-gradient(180deg,
+        var(--v-bg-card, #2e2520) 0%,
+        var(--arena-stone-1) 100%);
     color: var(--v-text, #d4c8b0);
     font-family: var(--v-font, 'MedievalSharp', serif);
     font-size: var(--v-font-body, 14px);
@@ -360,7 +833,8 @@
     cursor: pointer;
     transition: all var(--v-transition, 0.2s ease);
     -webkit-tap-highlight-color: transparent;
-    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08));
+    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08)),
+                0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .arena-btn:active {
@@ -368,30 +842,34 @@
     filter: brightness(0.92);
 }
 
-/* Primary CTA — Challenge */
+/* Primary CTA — CHALLENGE — imposing gold with glow */
 .arena-btn--challenge {
-    height: 48px;
+    min-height: 52px;
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-weight: 700;
-    font-size: var(--v-font-body, 14px);
+    font-size: var(--v-font-lg, 16px);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--v-gold, #c4953a);
+    letter-spacing: 2px;
+    color: var(--v-gold-light, #dbb668);
     background: linear-gradient(180deg,
         var(--v-gold-20, rgba(196, 149, 58, 0.2)) 0%,
+        var(--v-gold-10, rgba(196, 149, 58, 0.1)) 50%,
         var(--v-bg-card, #2e2520) 100%);
-    border: none;
+    border: 2px solid transparent;
     border-image: linear-gradient(135deg,
         var(--v-gold-dim, #9a7530),
         var(--v-gold-light, #dbb668),
-        var(--v-gold, #c4953a)) 1;
-    text-shadow: 0 0 12px var(--v-gold-30, rgba(196, 149, 58, 0.3));
-    box-shadow: 0 2px 10px var(--v-gold-10, rgba(196, 149, 58, 0.1)),
-                inset 0 1px 0 var(--v-gold-15, rgba(196, 149, 58, 0.15));
+        var(--v-gold, #c4953a),
+        var(--v-gold-light, #dbb668),
+        var(--v-gold-dim, #9a7530)) 1;
+    text-shadow: 0 0 14px var(--v-gold-40, rgba(196, 149, 58, 0.4));
+    box-shadow: 0 4px 14px var(--v-gold-15, rgba(196, 149, 58, 0.15)),
+                inset 0 1px 0 var(--v-gold-25, rgba(196, 149, 58, 0.25));
 }
 
 .arena-btn--challenge:active {
-    text-shadow: 0 0 8px var(--v-gold-20, rgba(196, 149, 58, 0.2));
+    text-shadow: 0 0 8px var(--v-gold-25);
+    box-shadow: 0 2px 8px var(--v-gold-10), inset 0 1px 0 var(--v-gold-15);
 }
 
 .arena-btn--disabled {
@@ -416,6 +894,13 @@
     box-shadow: none;
 }
 
+.arena-btn--back-main {
+    font-size: var(--v-font-sm, 12px);
+    background: transparent;
+    border-color: var(--v-border, #4a3828);
+    box-shadow: none;
+}
+
 .arena-btn--warning {
     border-color: rgba(183, 50, 50, 0.3);
     color: var(--arena-cooldown);
@@ -434,20 +919,27 @@
 .arena-cooldown {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: var(--v-space-xs, 2px);
-    padding: var(--v-space-xs, 2px) var(--v-space-lg, 12px);
+    padding: var(--v-space-sm, 4px) var(--v-space-lg, 12px);
     background: rgba(255, 152, 0, 0.08);
-    border: 1px solid rgba(255, 152, 0, 0.2);
+    border: 1px solid rgba(255, 152, 0, 0.22);
     border-radius: var(--v-radius-pill, 20px);
     color: var(--arena-cooldown);
-    font-size: var(--v-font-xs, 10px);
+    font-size: var(--v-font-sm, 12px);
     letter-spacing: 0.3px;
+}
+
+.arena-cooldown strong {
+    color: var(--v-gold-light, #dbb668);
+    margin: 0 2px;
 }
 
 .arena-insufficient {
     font-size: var(--v-font-xs, 10px);
     color: var(--v-danger, #e74c3c);
-    opacity: 0.8;
+    opacity: 0.85;
+    padding: var(--v-space-sm, 4px);
 }
 
 
@@ -459,43 +951,63 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--v-space-lg, 12px);
+    gap: var(--v-space-md, 8px);
     text-align: center;
+    padding: var(--v-space-md, 8px);
     animation: arenaCardReveal 0.3s ease-out both;
 }
 
-.arena-hp-icon {
-    font-size: 48px; /* HARDCODED: ornamental icon */
+.arena-hp-warn-icon {
+    font-size: 52px; /* HARDCODED: warning icon, no token */
     line-height: 1;
+    filter: drop-shadow(0 0 18px rgba(255, 152, 0, 0.3));
+    animation: arenaCrownFloat 2.5s ease-in-out infinite;
+}
+
+.arena-hp-warn-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xl, 16px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--arena-cooldown);
+    text-shadow: 0 0 12px rgba(255, 152, 0, 0.3);
 }
 
 /* HP status panel — groups bar + text */
 .arena-hp-status-panel {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: var(--v-space-xs, 2px);
+    gap: var(--v-space-md, 8px);
     width: 100%;
-    max-width: 280px;
-    padding: var(--v-space-md, 8px);
-    background: var(--v-bg-card, #2e2520);
+    max-width: 300px;
+    padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+    background: linear-gradient(180deg,
+        var(--v-bg-card, #2e2520) 0%,
+        var(--arena-stone-1) 100%);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius, 10px);
-    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08));
+    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08)),
+                0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.arena-hp-heart {
+    font-size: 28px; /* HARDCODED: heart icon size */
+    line-height: 1;
+    flex-shrink: 0;
 }
 
 .arena-hp-bar-wrap {
-    width: 100%;
-    max-width: 260px;
+    flex: 1;
 }
 
 .arena-hp-bar {
     height: 14px;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, 0.4);
     border-radius: var(--v-radius-sm, 6px);
     overflow: hidden;
     position: relative;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .arena-hp-bar-fill {
@@ -515,16 +1027,17 @@
 
 .arena-hp-text {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: var(--v-font-body, 14px);
+    font-size: var(--v-font-sm, 12px);
     font-weight: 700;
-    color: var(--v-text, #d4c8b0);
-    margin-top: var(--v-space-xs, 2px);
+    color: var(--v-gold-light, #dbb668);
+    flex-shrink: 0;
 }
 
 .arena-hp-msg {
     font-size: var(--v-font-sm, 12px);
+    font-style: italic;
     color: var(--v-text-dim, #a09484);
-    max-width: 280px;
+    max-width: 300px;
     line-height: 1.5;
 }
 
@@ -534,6 +1047,7 @@
     flex-direction: column;
     gap: var(--v-space-sm, 4px);
     width: 100%;
+    max-width: 340px;
 }
 
 .arena-hp-choice {
@@ -541,13 +1055,16 @@
     align-items: center;
     gap: var(--v-space-md, 8px);
     padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
-    background: var(--v-bg-card, #2e2520);
+    background: linear-gradient(180deg,
+        var(--v-bg-card, #2e2520) 0%,
+        var(--arena-stone-1) 100%);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius, 10px);
     cursor: pointer;
     transition: all var(--v-transition, 0.2s ease);
     -webkit-tap-highlight-color: transparent;
     text-align: left;
+    box-shadow: inset 0 1px 0 var(--v-gold-08), 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .arena-hp-choice:active {
@@ -555,7 +1072,7 @@
 }
 
 .arena-hp-choice-icon {
-    font-size: 24px; /* HARDCODED: result title display */
+    font-size: 28px; /* HARDCODED: choice icon */
     line-height: 1;
     flex-shrink: 0;
 }
@@ -563,14 +1080,15 @@
 .arena-hp-choice-text {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 2px;
 }
 
 .arena-hp-choice-text > div:first-child {
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-body, 14px);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--v-text, #d4c8b0);
+    letter-spacing: 0.5px;
 }
 
 .arena-hp-choice-text > div:last-child {
@@ -580,9 +1098,9 @@
 
 /* Colored variants for HP choices */
 .arena-hp-choice.choice-potion {
-    border-color: rgba(76, 175, 80, 0.25);
+    border-color: rgba(76, 175, 80, 0.3);
     background: linear-gradient(135deg,
-        rgba(76, 175, 80, 0.06) 0%,
+        rgba(76, 175, 80, 0.08) 0%,
         var(--v-bg-card, #2e2520) 100%);
 }
 .arena-hp-choice.choice-potion .arena-hp-choice-text > div:first-child {
@@ -590,9 +1108,9 @@
 }
 
 .arena-hp-choice.choice-inn {
-    border-color: rgba(66, 133, 244, 0.25);
+    border-color: rgba(66, 133, 244, 0.3);
     background: linear-gradient(135deg,
-        rgba(66, 133, 244, 0.06) 0%,
+        rgba(66, 133, 244, 0.08) 0%,
         var(--v-bg-card, #2e2520) 100%);
 }
 .arena-hp-choice.choice-inn .arena-hp-choice-text > div:first-child {
@@ -600,9 +1118,9 @@
 }
 
 .arena-hp-choice.choice-fight.risky {
-    border-color: rgba(183, 50, 50, 0.25);
+    border-color: rgba(183, 50, 50, 0.3);
     background: linear-gradient(135deg,
-        rgba(183, 50, 50, 0.06) 0%,
+        rgba(183, 50, 50, 0.08) 0%,
         var(--v-bg-card, #2e2520) 100%);
     animation: arenaRiskyPulse 2s ease-in-out infinite;
 }
@@ -610,49 +1128,62 @@
     color: var(--arena-cooldown);
 }
 
-.arena-hp-back {
-    background: transparent;
-    border: none;
-    color: var(--v-text-dim, #a09484);
-    font-family: var(--v-font, 'MedievalSharp', serif);
-    font-size: var(--v-font-sm, 12px);
-    padding: var(--v-space-sm, 4px);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-}
-
 
 /* ═══════════════════════════════════════════════════════════════
-   RESULT SCREEN
+   RESULT SCREEN — Victory/Defeat cinematic
    ═══════════════════════════════════════════════════════════════ */
 
 .arena-result {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--v-space-lg, 12px);
+    gap: var(--v-space-md, 8px);
+    position: relative;
+    padding: var(--v-space-md, 8px) var(--v-space-sm, 4px);
+}
+
+.arena-result-crown-wrap {
+    position: relative;
+    padding: var(--v-space-md, 8px) 0 0;
 }
 
 /* Trophy / Skull crown icon */
 .arena-result-crown {
-    font-size: 56px; /* HARDCODED: trophy crown icon */
+    font-size: 64px; /* HARDCODED: trophy crown icon — hero element */
     line-height: 1;
     position: relative;
+    display: inline-block;
 }
 
-/* Victory crown: gold radial glow + pop entrance */
-.arena-result-header.victory .arena-result-crown,
-.victory .arena-result-crown {
-    animation: arenaVictoryPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    filter: drop-shadow(0 0 16px var(--v-gold-30, rgba(196, 149, 58, 0.3)));
+/* Victory crown: gold radial glow + pop entrance + float */
+.arena-result.is-victory .arena-result-crown {
+    animation: arenaVictoryPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+               arenaCrownFloat 3s ease-in-out 0.6s infinite;
+    filter: drop-shadow(0 0 22px var(--v-gold-40, rgba(196, 149, 58, 0.4)))
+            drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
-/* Defeat crown: dimmed, crimson glow */
-.arena-result-header.defeat .arena-result-crown,
-.defeat .arena-result-crown {
-    font-size: 48px; /* HARDCODED: defeat skull icon */
-    opacity: 0.6;
-    filter: drop-shadow(0 0 10px rgba(123, 32, 32, 0.3));
+/* Victory: radial gold ray behind crown */
+.arena-result.is-victory .arena-result-crown-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(circle at center,
+        var(--v-gold-20, rgba(196, 149, 58, 0.2)) 0%,
+        var(--v-gold-08, rgba(196, 149, 58, 0.08)) 40%,
+        transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+    animation: arenaVictoryGlow 3s ease-in-out infinite;
+    border-radius: 50%;
+}
+
+/* Defeat crown: dimmed, crimson glow, slow slide */
+.arena-result.is-defeat .arena-result-crown {
+    opacity: 0.55;
+    filter: drop-shadow(0 0 12px rgba(123, 32, 32, 0.4))
+            grayscale(0.4);
+    animation: arenaDefeatSlide 0.6s ease-out both;
 }
 
 /* Result header container */
@@ -661,22 +1192,23 @@
     flex-direction: column;
     align-items: center;
     gap: var(--v-space-sm, 4px);
-    padding: var(--v-space-lg, 12px) var(--v-space-2xl, 24px);
+    padding: var(--v-space-md, 8px) var(--v-space-2xl, 24px);
     border-radius: var(--v-radius, 10px);
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
 }
 
 /* Victory header: shimmer text + golden glow */
 .arena-result-header.victory {
-    background: var(--v-gold-08, rgba(196, 149, 58, 0.08));
-    border: 1px solid var(--v-gold-20, rgba(196, 149, 58, 0.2));
+    background: linear-gradient(180deg,
+        var(--v-gold-10, rgba(196, 149, 58, 0.1)) 0%,
+        var(--v-gold-05, rgba(196, 149, 58, 0.05)) 100%);
+    border: 1px solid var(--v-gold-25, rgba(196, 149, 58, 0.25));
     animation: arenaVictoryGlow 2.5s ease-in-out infinite;
 }
 
 /* Victory title text with animated shimmer gradient */
-.arena-result-header.victory .arena-result-title,
-.arena-result-header.victory {
+.arena-result-header.victory .arena-result-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-2xl, 18px);
     font-weight: 700;
@@ -693,178 +1225,359 @@
     animation: arenaVictoryShimmer 3s linear infinite;
 }
 
-/* Defeat header: subtle crimson glow, amber text (NOT red) */
+/* Defeat header: subtle crimson glow, amber text */
 .arena-result-header.defeat {
     background: var(--arena-crimson-glow);
-    border: 1px solid rgba(123, 32, 32, 0.25);
+    border: 1px solid rgba(123, 32, 32, 0.3);
     animation: arenaDefeatPulse 3s ease-in-out infinite;
 }
 
-.arena-result-header.defeat,
 .arena-result-header.defeat .arena-result-title {
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-2xl, 18px);
     font-weight: 700;
     color: var(--v-text, #d4c8b0);
-    -webkit-text-fill-color: var(--v-text, #d4c8b0);
-    background: none;
+    opacity: 0.85;
 }
 
 .arena-result-opponent {
-    font-size: var(--v-font-sm, 12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-xs, 2px);
+    padding: var(--v-space-sm, 4px) var(--v-space-lg, 12px);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--v-radius-sm, 6px);
+    border: 1px solid var(--v-border, #4a3828);
+}
+
+.arena-result-opponent .opponent-label {
+    font-size: var(--v-font-xs, 10px);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
     color: var(--v-text-dim, #a09484);
+}
+
+.arena-result-opponent .opponent-name {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-body, 14px);
+    font-weight: 700;
+    color: var(--v-text, #d4c8b0);
 }
 
 .arena-result-flavor {
     font-size: var(--v-font-sm, 12px);
+    font-style: italic;
     color: var(--v-text-dim, #a09484);
-    max-width: 280px;
+    max-width: 300px;
     line-height: 1.5;
+    padding: 0 var(--v-space-sm, 4px);
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   REWARD CARDS (result screen)
+   REWARD CARDS (result screen) — cascade from right
    ═══════════════════════════════════════════════════════════════ */
+
+.arena-rewards-header {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xs, 10px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--v-gold, #c4953a);
+    text-shadow: 0 0 8px var(--v-gold-20);
+    margin-top: var(--v-space-sm, 4px);
+}
 
 .arena-rewards-list {
     display: flex;
     flex-direction: column;
     gap: var(--v-space-sm, 4px);
     width: 100%;
-    max-width: 300px;
+    max-width: 320px;
 }
 
-/* Reward items — cascade entrance from the right */
-.arena-reward-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--v-space-sm, 4px);
-    padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
-    background: var(--v-bg-card, #2e2520);
-    border: 1px solid var(--v-border, #4a3828);
-    border-radius: var(--v-radius-sm, 6px);
-    font-size: var(--v-font-body, 14px);
-    color: var(--v-text, #d4c8b0);
-    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08));
-    opacity: 0;
-    transform: translateX(20px);
-    animation: arenaRewardCascade 0.4s ease-out forwards;
-}
-
-/* NEW: reward-card class alias (same styles as reward-item) */
 .arena-reward-card {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: var(--v-space-sm, 4px);
+    gap: var(--v-space-md, 8px);
     padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
-    background: var(--v-bg-card, #2e2520);
+    background: linear-gradient(180deg,
+        var(--v-bg-card, #2e2520) 0%,
+        var(--arena-stone-1) 100%);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius-sm, 6px);
     font-size: var(--v-font-body, 14px);
     color: var(--v-text, #d4c8b0);
-    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08));
+    box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08)),
+                0 2px 4px rgba(0, 0, 0, 0.15);
     opacity: 0;
     transform: translateX(20px);
     animation: arenaRewardCascade 0.4s ease-out forwards;
+    text-align: left;
+}
+
+.arena-reward-card .reward-icon {
+    font-size: 20px; /* HARDCODED: reward card icon */
+    line-height: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+}
+
+.arena-reward-card .reward-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+}
+
+.arena-reward-card .reward-text strong {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    color: var(--v-gold-light, #dbb668);
+    font-weight: 700;
+}
+
+.arena-reward-card.reward-gold {
+    border-color: var(--v-gold-25, rgba(196, 149, 58, 0.25));
+}
+
+.arena-reward-card.reward-xp {
+    border-color: rgba(155, 89, 182, 0.2);
 }
 
 /* Streak reward card — pulsing orange glow */
-.arena-reward-item.streak,
 .arena-reward-card.streak {
-    border-color: rgba(255, 140, 0, 0.25);
+    border-color: rgba(255, 140, 0, 0.3);
     background: linear-gradient(135deg,
-        rgba(255, 140, 0, 0.06) 0%,
+        rgba(255, 140, 0, 0.08) 0%,
         var(--v-bg-card, #2e2520) 100%);
     animation: arenaRewardCascade 0.4s ease-out forwards,
                arenaStreakPulse 2s ease-in-out 0.4s infinite;
 }
 
-.arena-reward-item .bonus,
-.arena-reward-card .bonus,
-.arena-reward-bonus {
-    font-size: var(--v-font-xs, 10px);
-    font-weight: 700;
-    color: var(--v-gold, #c4953a);
+.arena-reward-card.streak .reward-text strong {
+    color: var(--arena-streak);
 }
 
-.arena-streak-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--v-space-xs, 2px);
-    color: var(--arena-streak);
-    font-weight: 700;
+.arena-reward-bonus {
+    font-size: var(--v-font-xs, 10px);
+    font-weight: 600;
+    color: var(--v-gold, #c4953a);
+    font-style: italic;
 }
 
 /* Stagger delays — cascade from right */
-.arena-reward-item:nth-child(1),
-.arena-reward-card:nth-child(1) { animation-delay: 0.15s; }
-
-.arena-reward-item:nth-child(2),
-.arena-reward-card:nth-child(2) { animation-delay: 0.35s; }
-
-.arena-reward-item:nth-child(3),
-.arena-reward-card:nth-child(3) { animation-delay: 0.55s; }
-
-.arena-reward-item:nth-child(4),
-.arena-reward-card:nth-child(4) { animation-delay: 0.75s; }
+.arena-reward-card:nth-child(1) { animation-delay: 0.2s; }
+.arena-reward-card:nth-child(2) { animation-delay: 0.4s; }
+.arena-reward-card:nth-child(3) { animation-delay: 0.6s; }
+.arena-reward-card:nth-child(4) { animation-delay: 0.8s; }
 
 /* Streak cards keep both animations; override animation-delay for cascade only */
-.arena-reward-item.streak:nth-child(1),
 .arena-reward-card.streak:nth-child(1) {
-    animation: arenaRewardCascade 0.4s ease-out 0.15s forwards,
-               arenaStreakPulse 2s ease-in-out 0.55s infinite;
+    animation: arenaRewardCascade 0.4s ease-out 0.2s forwards,
+               arenaStreakPulse 2s ease-in-out 0.6s infinite;
 }
-.arena-reward-item.streak:nth-child(2),
 .arena-reward-card.streak:nth-child(2) {
-    animation: arenaRewardCascade 0.4s ease-out 0.35s forwards,
-               arenaStreakPulse 2s ease-in-out 0.75s infinite;
+    animation: arenaRewardCascade 0.4s ease-out 0.4s forwards,
+               arenaStreakPulse 2s ease-in-out 0.8s infinite;
 }
-.arena-reward-item.streak:nth-child(3),
 .arena-reward-card.streak:nth-child(3) {
-    animation: arenaRewardCascade 0.4s ease-out 0.55s forwards,
-               arenaStreakPulse 2s ease-in-out 0.95s infinite;
+    animation: arenaRewardCascade 0.4s ease-out 0.6s forwards,
+               arenaStreakPulse 2s ease-in-out 1.0s infinite;
 }
-.arena-reward-item.streak:nth-child(4),
 .arena-reward-card.streak:nth-child(4) {
-    animation: arenaRewardCascade 0.4s ease-out 0.75s forwards,
-               arenaStreakPulse 2s ease-in-out 1.15s infinite;
+    animation: arenaRewardCascade 0.4s ease-out 0.8s forwards,
+               arenaStreakPulse 2s ease-in-out 1.2s infinite;
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   LEADERBOARD
+   LEADERBOARD — Hall of Champions
    ═══════════════════════════════════════════════════════════════ */
 
 .arena-leaderboard {
     display: flex;
     flex-direction: column;
-    gap: var(--v-space-sm, 4px);
-    text-align: left;
+    gap: var(--v-space-md, 8px);
     animation: arenaCardReveal 0.3s ease-out both;
+}
+
+.arena-lb-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-xs, 2px);
+    padding: var(--v-space-sm, 4px);
+}
+
+.arena-lb-trophy {
+    font-size: 36px; /* HARDCODED: hall trophy header */
+    line-height: 1;
+    filter: drop-shadow(0 0 16px var(--v-gold-30));
+    animation: arenaCrownFloat 3s ease-in-out infinite;
+}
+
+.arena-lb-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xl, 16px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg,
+        var(--v-gold-dim, #9a7530),
+        var(--v-gold-light, #dbb668),
+        var(--v-gold-dim, #9a7530));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: arenaVictoryShimmer 4s linear infinite;
 }
 
 .arena-lb-date {
     font-size: var(--v-font-xs, 10px);
     color: var(--v-text-dim, #a09484);
-    text-align: center;
-    margin-bottom: var(--v-space-sm, 4px);
     letter-spacing: 0.5px;
+    text-align: center;
 }
 
+/* Empty state */
 .arena-lb-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-xs, 2px);
     font-size: var(--v-font-sm, 12px);
     color: var(--v-text-dim, #a09484);
     text-align: center;
-    padding: var(--v-space-2xl, 24px) 0;
+    padding: var(--v-space-xl, 16px) 0;
+}
+
+.arena-lb-empty-icon {
+    font-size: 40px; /* HARDCODED: empty state icon */
+    line-height: 1;
+    opacity: 0.5;
+}
+
+.arena-lb-empty .empty-sub {
+    font-size: var(--v-font-xs, 10px);
+    font-style: italic;
+    margin-top: var(--v-space-xs, 2px);
+}
+
+/* Podium for top 3 — physical podium illustration */
+.arena-lb-podium {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--v-space-sm, 4px);
+    padding: var(--v-space-md, 8px) 0;
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.arena-lb-podium-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-xs, 2px);
+    flex: 1;
+    padding: var(--v-space-sm, 4px);
+    position: relative;
+}
+
+.arena-lb-podium-medal {
+    font-size: 26px; /* HARDCODED: podium medal */
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+.arena-lb-podium-name {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-sm, 12px);
+    font-weight: 700;
+    color: var(--v-text, #d4c8b0);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.arena-lb-podium-level {
+    font-size: var(--v-font-micro, 10px);
+    color: var(--v-text-dim, #a09484);
+    letter-spacing: 0.5px;
+}
+
+.arena-lb-podium-wins {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xs, 10px);
+    font-weight: 700;
+    color: var(--v-gold-light, #dbb668);
+}
+
+.arena-lb-podium-base {
+    width: 100%;
+    border-radius: var(--v-radius-sm, 6px) var(--v-radius-sm, 6px) 0 0;
+    border: 1px solid var(--v-border, #4a3828);
+    border-bottom: none;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.08),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Podium base heights — 1st tallest */
+.arena-lb-podium-base[data-pos="1"] {
+    height: 56px;
+    background: linear-gradient(180deg,
+        var(--arena-gold-light) 0%,
+        var(--arena-gold) 50%,
+        var(--arena-gold-dark) 100%);
+}
+
+.arena-lb-podium-base[data-pos="2"] {
+    height: 42px;
+    background: linear-gradient(180deg,
+        var(--arena-silver-light) 0%,
+        var(--arena-silver) 50%,
+        var(--arena-silver-dark) 100%);
+}
+
+.arena-lb-podium-base[data-pos="3"] {
+    height: 32px;
+    background: linear-gradient(180deg,
+        var(--arena-bronze-light) 0%,
+        var(--arena-bronze) 50%,
+        var(--arena-bronze-dark) 100%);
+}
+
+/* Highlight current player on podium */
+.arena-lb-podium-step.is-player .arena-lb-podium-name {
+    color: var(--v-gold-light, #dbb668);
+}
+
+/* Rest list (4-10) */
+.arena-lb-rest-header {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xs, 10px);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--v-gold-dim, #9a7530);
+    text-align: center;
+    padding: var(--v-space-sm, 4px) 0;
+    border-top: 1px solid var(--v-border, #4a3828);
+    border-bottom: 1px solid var(--v-border, #4a3828);
+    margin: 0 var(--v-space-lg, 12px);
 }
 
 .arena-lb-list {
     display: flex;
     flex-direction: column;
     gap: var(--v-space-xs, 2px);
+    padding: 0 var(--v-space-sm, 4px);
 }
 
 .arena-lb-entry {
@@ -874,46 +1587,21 @@
     padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
     border-radius: var(--v-radius-sm, 6px);
     transition: background var(--v-transition-fast, 0.15s ease);
-}
-
-/* Top-3 podium entries — subtle tier glow */
-.arena-lb-entry.top-1 {
-    background: linear-gradient(90deg,
-        var(--v-gold-10) 0%,
-        transparent 100%);
-    border-left: 2px solid var(--v-gold, #c4953a);
-}
-
-.arena-lb-entry.top-2 {
-    background: linear-gradient(90deg,
-        rgba(176, 184, 192, 0.08) 0%,
-        transparent 100%);
-    border-left: 2px solid var(--arena-silver);
-}
-
-.arena-lb-entry.top-3 {
-    background: linear-gradient(90deg,
-        rgba(184, 115, 51, 0.08) 0%,
-        transparent 100%);
-    border-left: 2px solid var(--arena-bronze);
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid transparent;
 }
 
 /* Current player highlight */
 .arena-lb-entry.is-player {
     background: var(--v-gold-10, rgba(196, 149, 58, 0.1));
-    border: 1px solid var(--v-gold-20, rgba(196, 149, 58, 0.2));
+    border-color: var(--v-gold-25, rgba(196, 149, 58, 0.25));
     box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08));
-}
-
-.arena-lb-medal {
-    font-size: var(--v-font-lg, 16px);
-    width: 28px;
-    text-align: center;
 }
 
 .arena-lb-rank {
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-sm, 12px);
+    font-weight: 700;
     color: var(--v-text-dim, #a09484);
     width: 28px;
     text-align: center;
@@ -921,7 +1609,7 @@
 
 .arena-lb-name {
     flex: 1;
-    font-size: var(--v-font-body, 14px);
+    font-size: var(--v-font-sm, 12px);
     color: var(--v-text, #d4c8b0);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -930,11 +1618,11 @@
 
 .arena-lb-entry.is-player .arena-lb-name {
     font-weight: 700;
-    color: var(--v-gold, #c4953a);
+    color: var(--v-gold-light, #dbb668);
 }
 
 .arena-lb-level {
-    font-size: var(--v-font-xs, 10px);
+    font-size: var(--v-font-micro, 10px);
     color: var(--v-text-dim, #a09484);
 }
 
@@ -942,35 +1630,21 @@
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-sm, 12px);
     font-weight: 700;
-    color: var(--v-text, #d4c8b0);
+    color: var(--v-gold-light, #dbb668);
     min-width: 32px;
     text-align: right;
 }
 
 .arena-lb-separator {
     border: none;
-    border-top: 1px solid var(--v-border, #4a3828);
-    margin: var(--v-space-sm, 4px) 0;
-    opacity: 0.6;
-}
-
-.arena-lb-divider {
-    border: none;
     border-top: 1px dashed var(--v-border, #4a3828);
-    margin: var(--v-space-sm, 4px) 0;
-    opacity: 0.4;
-}
-
-.arena-lb-player-rank {
-    font-size: var(--v-font-sm, 12px);
-    color: var(--v-text-dim, #a09484);
-    text-align: center;
-    padding: var(--v-space-xs, 2px) 0;
+    margin: var(--v-space-sm, 4px) var(--v-space-lg, 12px);
+    opacity: 0.6;
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   PERFORMANCE GUARDS
+   PERFORMANCE GUARDS — Lite devices & reduced motion
    ═══════════════════════════════════════════════════════════════ */
 
 /* Lite devices — strip all animations and heavy effects */
@@ -980,23 +1654,31 @@ body.perf-lite .arena-screen * {
     transition: none !important;
 }
 
-body.perf-lite .arena-reward-item,
+/* Remove decorative backdrops on lite */
+body.perf-lite .arena-backdrop { display: none; }
+
 body.perf-lite .arena-reward-card {
     opacity: 1;
     transform: none;
 }
 
-body.perf-lite .arena-challenger-card {
+body.perf-lite .arena-challenger-card,
+body.perf-lite .arena-record-tablet,
+body.perf-lite .arena-reward-scroll {
     box-shadow: none;
 }
 
-body.perf-lite .arena-challenger-card::before,
-body.perf-lite .arena-challenger-card::after {
+body.perf-lite .arena-challenger-card::before {
     display: none;
 }
 
-body.perf-lite .arena-tier-badge {
-    box-shadow: none;
+body.perf-lite .arena-tier-medallion {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.perf-lite .arena-tier-laurel::before,
+body.perf-lite .arena-tier-laurel::after {
+    display: none;
 }
 
 body.perf-lite .arena-result-header.victory,
@@ -1004,8 +1686,11 @@ body.perf-lite .arena-result-header.defeat {
     box-shadow: none;
 }
 
-body.perf-lite .arena-result-title,
-body.perf-lite .arena-result-header.victory {
+body.perf-lite .arena-result.is-victory .arena-result-crown-wrap::before {
+    display: none;
+}
+
+body.perf-lite .arena-result-header.victory .arena-result-title {
     background: none;
     -webkit-background-clip: unset;
     background-clip: unset;
@@ -1013,12 +1698,17 @@ body.perf-lite .arena-result-header.victory {
     color: var(--v-gold-light, #dbb668);
 }
 
-body.perf-lite .arena-lb-entry.top-1,
-body.perf-lite .arena-lb-entry.top-2,
-body.perf-lite .arena-lb-entry.top-3 {
+body.perf-lite .arena-lb-title {
     background: none;
-    border-left: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: var(--v-gold-light, #dbb668);
+    color: var(--v-gold-light, #dbb668);
 }
+
+/* Medium devices — keep animations but lighter */
+body.perf-medium .arena-backdrop { opacity: 0.35; }
+body.perf-medium .arena-backdrop-torch .torch-flame { animation-duration: 2s; }
 
 /* Reduced motion — same treatment as perf-lite */
 @media (prefers-reduced-motion: reduce) {
@@ -1028,7 +1718,8 @@ body.perf-lite .arena-lb-entry.top-3 {
         transition: none !important;
     }
 
-    .arena-reward-item,
+    .arena-backdrop { display: none; }
+
     .arena-reward-card {
         opacity: 1;
         transform: none;
@@ -1038,22 +1729,24 @@ body.perf-lite .arena-lb-entry.top-3 {
         box-shadow: inset 0 1px 0 var(--v-gold-08, rgba(196, 149, 58, 0.08));
     }
 
-    .arena-challenger-card::before,
-    .arena-challenger-card::after {
-        display: none;
+    .arena-challenger-card::before { display: none; }
+
+    .arena-tier-medallion {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
 
-    .arena-tier-badge {
-        box-shadow: none;
-    }
+    .arena-tier-laurel::before,
+    .arena-tier-laurel::after { display: none; }
 
     .arena-result-header.victory,
     .arena-result-header.defeat {
         box-shadow: none;
     }
 
-    .arena-result-title,
-    .arena-result-header.victory {
+    .arena-result.is-victory .arena-result-crown-wrap::before { display: none; }
+
+    .arena-result-header.victory .arena-result-title,
+    .arena-lb-title {
         background: none;
         -webkit-background-clip: unset;
         background-clip: unset;
