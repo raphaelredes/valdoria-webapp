@@ -435,6 +435,8 @@ document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/image-popup.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<link rel="stylesheet" href="../shared/connection-overlay.css?v=' + v + '">');
+        /* #53: network-diagnostic MUST load before connection-overlay */
+        var _ndSc = document.createElement('script'); _ndSc.src = '../shared/network-diagnostic.js?v=' + v; document.head.appendChild(_ndSc);
         document.write('<script src="../shared/connection-overlay.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/console-collector.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');

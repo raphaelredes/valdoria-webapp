@@ -323,8 +323,16 @@ function show(opts) {
 
     if (window.vProcessing && vProcessing.isActive()) vProcessing.hide();
 
-    _statusEl.textContent = _opts.message || 'Reconectando...';
-    _detailEl.textContent = '';
+    // #53: Use diagnosis result for user-friendly initial status/detail text
+    var diag = _opts.diagnosis || null;
+    if (diag && diag.category) {
+        _log('using diagnosis category=' + diag.category);
+        _statusEl.textContent = diag.title || _opts.message || 'Reconectando...';
+        _detailEl.textContent = diag.friendly || diag.detail || '';
+    } else {
+        _statusEl.textContent = _opts.message || 'Reconectando...';
+        _detailEl.textContent = '';
+    }
     _fillEl.style.width = '0';
     _fillEl.style.transition = 'none';
     _retryBtn.classList.remove('visible');
@@ -332,6 +340,15 @@ function show(opts) {
 
     _el.classList.remove('hiding');
     _el.classList.add('active');
+
+    // #53: If diagnosis says offline_local, don't start retry loop — wait for user action
+    if (diag && (diag.category === 'offline_local' || diag.category === 'offline_internet')) {
+        _log('offline_local/internet: skip retry loop, show manual retry button');
+        _retryBtn.classList.add('visible');
+        _closeBtn.classList.add('visible');
+        _fillEl.style.width = '100%';
+        return;
+    }
 
     _startRetryLoop();
 }
