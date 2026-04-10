@@ -1,199 +1,202 @@
 <!DOCTYPE html>
-<html lang="pt-BR" style="opacity:1!important">
+<html lang="pt-BR" class="wa-portal" style="opacity:1!important">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Valdoria DEV</title>
+    <title>Valdoria Portal — DEV</title>
     <meta name="theme-color" content="#2a2420">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="robots" content="noindex, nofollow">
+    <style>html{background:#1a1510;opacity:1!important}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../shared/fonts.css">
+    <script>
+        var v = Date.now();
+        var _loadCss = function(href) {
+            var lk = document.createElement('link');
+            lk.rel = 'stylesheet';
+            lk.href = href + '?v=' + v;
+            document.head.appendChild(lk);
+        };
+        _loadCss('../valdoria-design.css');
+        _loadCss('../shared/loading-title.css');
+        _loadCss('web-auth.css');
+    </script>
     <style>
-        html { background: #1a1510; }
-        body {
-            margin: 0; padding: 24px;
-            min-height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'Courier New', monospace;
-            color: #a09484;
-            background: #1a1510;
-        }
-        .dev-card {
-            max-width: 360px; width: 100%;
-            background: #2a2420;
-            border: 1px solid #4a3828;
-            border-radius: 10px;
-            padding: 28px 24px;
-            text-align: center;
-        }
-        .dev-title {
-            color: #c4953a;
-            font-size: 18px;
+        .dev-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #c4953a;
+            color: #1a1510;
+            padding: 2px 8px;
+            font-family: 'Cinzel', serif;
             font-weight: 700;
-            margin: 0 0 8px;
-            letter-spacing: 2px;
+            font-size: 10px;
+            border-radius: 4px;
+            z-index: 100;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(196, 149, 58, 0.4);
         }
-        .dev-subtitle {
-            font-size: 12px;
-            color: #6a5a48;
-            margin: 0 0 20px;
+        .pin-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--v-gold-20);
+            width: 100%;
         }
-        .dev-input {
-            width: 100%; box-sizing: border-box;
-            padding: 10px 14px;
+        .pin-input {
+            width: 100%;
             background: #1a1510;
-            border: 1px solid #4a3828;
+            border: 1px solid var(--v-gold-40);
             border-radius: 6px;
             color: #d4c8b0;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            text-align: center;
-            letter-spacing: 4px;
-            margin-bottom: 12px;
-        }
-        .dev-input:focus { outline: none; border-color: #c4953a; }
-        .dev-btn {
-            width: 100%;
             padding: 10px;
-            background: #3a3028;
-            border: 1px solid #4a3828;
-            border-radius: 6px;
-            color: #a09484;
+            text-align: center;
             font-family: 'Courier New', monospace;
-            font-size: 13px;
-            cursor: pointer;
-            margin-bottom: 8px;
+            font-size: 16px;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
         }
-        .dev-btn:hover { border-color: #c4953a; color: #c4953a; }
-        .dev-error {
-            color: #e74c3c;
-            font-size: 12px;
-            margin-top: 8px;
-            display: none;
-        }
-        .dev-back {
-            display: inline-block;
-            margin-top: 16px;
-            color: #6a5a48;
+        .pin-input:focus { border-color: var(--v-gold); outline: none; }
+        .uid-input {
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--v-border);
+            border-radius: 6px;
+            color: var(--v-text-dim);
+            padding: 6px;
             font-size: 11px;
-            text-decoration: none;
+            margin-bottom: 10px;
+            text-align: center;
         }
-        .dev-back:hover { color: #a09484; }
     </style>
 </head>
-<body>
-    <div class="dev-card">
-        <h1 class="dev-title">VALDORIA DEV</h1>
-        <p class="dev-subtitle">Acesso restrito</p>
-        <input id="pin" class="dev-input" type="password" placeholder="PIN" maxlength="8" autofocus>
-        <button class="dev-btn" id="btn-enter" type="button">Entrar</button>
-        <div id="error" class="dev-error"></div>
-        <a href="./" class="dev-back">Voltar ao login</a>
+<body class="wa-portal">
+    <div class="dev-badge">DEVELOPMENT PORTAL</div>
+
+    <div class="wa-hero-particles">
+        <div class="wa-ember"></div><div class="wa-ember"></div><div class="wa-ember"></div>
+        <div class="wa-ember"></div><div class="wa-ember"></div><div class="wa-ember"></div>
     </div>
+
+    <div id="screen-login" class="wa-screen wa-active">
+        <div class="wa-login-card">
+            <div class="wa-orb-wrap">
+                <div class="title-orb-wrap">
+                    <div class="title-orb-rays"></div>
+                    <div class="title-orb-ambient"></div>
+                    <div class="title-orb"><div class="title-orb-core"></div></div>
+                </div>
+            </div>
+
+            <h1 class="wa-title">
+                <span class="wa-title-top">Valdoria</span>
+                <span class="wa-title-sub">Developer</span>
+            </h1>
+
+            <div class="wa-auth-buttons">
+                <!-- Official Telegram DEV -->
+                <button id="btn-telegram" class="wa-social-btn wa-social-btn--telegram" onclick="onTelegramClick()">
+                    <span class="wa-social-icon">
+                        <svg viewBox="0 0 24 24" fill="white"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
+                    </span>
+                    <span class="wa-social-text">Social Login (Bot DEV)</span>
+                </button>
+
+                <div class="wa-separator">
+                    <span class="wa-separator-line"></span>
+                    <span class="wa-separator-text">ou use a chave mestra</span>
+                    <span class="wa-separator-line"></span>
+                </div>
+
+                <!-- PIN Bypass Section -->
+                <div class="pin-section">
+                    <input type="text" id="dev-uid" class="uid-input" placeholder="User ID (Opcional)" value="7685169782">
+                    <input type="password" id="dev-pin" class="pin-input" placeholder="PIN SECRETO" maxlength="32">
+                    <button id="btn-pin" class="wa-btn-play" onclick="onPinLogin()">Entrar com PIN</button>
+                    <div id="auth-error" class="wa-error" style="display:none"></div>
+                </div>
+            </div>
+
+            <div id="auth-loading" class="wa-loading" style="display:none">
+                <div class="wa-spinner"></div>
+                <span>Autenticando DEV...</span>
+            </div>
+            
+            <p class="wa-footer-note">Ambiente de Testes Isolado</p>
+        </div>
+    </div>
+
+    <!-- Characters Selection (Reuse standard UI) -->
+    <div id="screen-chars" class="wa-screen">
+        <div class="wa-chars-card">
+            <h2 class="wa-chars-title">Personagens DEV</h2>
+            <div id="char-list" class="wa-char-list"></div>
+            <button id="btn-play" class="wa-btn-play" disabled onclick="onPlay()">⚔️ Jogar</button>
+            <button class="wa-btn-logout" onclick="onLogout()">Voltar</button>
+        </div>
+    </div>
+
+    <script src="../shared/env-utils.js"></script>
+    <script src="../shared/telegram-compat.js"></script>
     <script>
-    (function() {
-        /* PIN is validated server-side via _dev_session endpoint.
-           The PIN acts as a shared secret — only people who know it can access DEV mode.
-           The actual PIN value is checked against DEV_ACCESS_PIN env var on the server. */
-        var pinEl = document.getElementById('pin');
-        var btnEl = document.getElementById('btn-enter');
-        var errEl = document.getElementById('error');
+        /* FORCE DEV ENVIRONMENT & BOT */
+        window._envOverride = 'dev';
+        window.BOT_USERNAME = 'ValdoriaDevBot';
+        
+        // Load main auth logic
+        const s = document.createElement('script');
+        s.src = 'web-auth.js?v=' + Date.now();
+        document.body.appendChild(s);
+    </script>
+    <script>
+        // Custom PIN handler
+        window.onPinLogin = async function() {
+            const pin = document.getElementById('dev-pin').value.trim();
+            const uid = document.getElementById('dev-uid').value.trim() || '7685169782';
+            const btn = document.getElementById('btn-pin');
+            const err = document.getElementById('auth-error');
+            const loading = document.getElementById('auth-loading');
 
-        /* Discover API base (same logic as web-auth.js) */
-        var _apiBase = localStorage.getItem('valdoria_api_base_dev') || '';
-
-        async function discoverApi() {
-            if (_apiBase) return;
-            /* Always use DEV API discovery — this is dev.html */
-            var env = 'dev';
+            if (!pin) { err.textContent = 'PIN necessário'; err.style.display = 'block'; return; }
+            
+            err.style.display = 'none';
+            loading.style.display = 'flex';
+            btn.disabled = true;
+            
             try {
-                var r = await fetch('../api-url-' + env + '.json?t=' + Date.now(), { cache: 'no-store' });
-                if (r.ok) { var d = await r.json(); if (d.url) _apiBase = d.url.replace(/\/$/, ''); }
-            } catch(e) {}
-            if (!_apiBase) {
-                try {
-                    var r2 = await fetch('api-url.json?t=' + Date.now(), { cache: 'no-store' });
-                    if (r2.ok) { var d2 = await r2.json(); if (d2.url) _apiBase = d2.url.replace(/\/$/, ''); }
-                } catch(e) {}
-            }
-        }
-
-        async function doLogin() {
-            var pin = pinEl.value.trim();
-            if (!pin) { errEl.textContent = 'Digite o PIN'; errEl.style.display = 'block'; return; }
-            errEl.style.display = 'none';
-            btnEl.textContent = 'Entrando...';
-            btnEl.disabled = true;
-
-            await discoverApi();
-            if (!_apiBase) {
-                errEl.textContent = 'Servidor nao encontrado';
-                errEl.style.display = 'block';
-                btnEl.textContent = 'Entrar';
-                btnEl.disabled = false;
-                return;
-            }
-
-            try {
-                var resp = await fetch(_apiBase + '/api/game/_dev_session', {
+                // apiBase comes from web-auth.js discoverApiBase
+                if (typeof discoverApiBase === 'function') await discoverApiBase();
+                if (!window._apiBase) throw new Error('Servidor não encontrado');
+                
+                const resp = await fetch(window._apiBase + '/api/game/_dev_session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: 7685169782, char_id: '', pin: pin })
+                    body: JSON.stringify({ user_id: parseInt(uid), char_id: '', pin: pin })
                 });
+
                 if (!resp.ok) {
-                    var err = await resp.json().catch(function() { return {}; });
-                    throw new Error(err.error || 'Acesso negado (' + resp.status + ')');
+                    const errD = await resp.json().catch(() => ({}));
+                    throw new Error(errD.error || 'Acesso negado');
                 }
-                var data = await resp.json();
-                localStorage.setItem('valdoria_web_token_dev', data.token || '');
-                localStorage.setItem('valdoria_web_user_id_dev', String(data.user_id || 0));
-                localStorage.setItem('valdoria_api_base_dev', _apiBase);
-
-                /* Save dev_device_token for future auto-login (no PIN needed) */
-                if (data.dev_device_token) {
-                    localStorage.setItem('valdoria_dev_device', data.dev_device_token);
-                }
-
-                /* Fetch characters and redirect */
-                var charsResp = await fetch(_apiBase + '/api/game/characters?user_id=' + (data.user_id || 0), {
-                    method: 'GET',
-                    headers: { 'Authorization': 'Bearer ' + (data.token || '') }
-                });
-                var chars = [];
-                if (charsResp.ok) {
-                    var cd = await charsResp.json();
-                    chars = cd.characters || [];
-                }
-
-                /* Always DEV when coming from dev.html */
-                var env = 'dev';
-                var params = new URLSearchParams();
-                params.set('token', data.token || '');
-                params.set('uid', String(data.user_id || 0));
-                params.set('api', _apiBase);
-                params.set('env', env);
-                if (chars.length === 1) {
-                    params.set('char', chars[0].id || chars[0].char_id || '');
-                    params.set('route', 'game');
-                } else if (chars.length === 0) {
-                    params.set('new', '1');
-                    params.set('route', 'character_creator');
-                } else {
-                    params.set('route', 'game');
-                }
-                window.location.href = '../app.html?' + params.toString();
+                
+                const data = await resp.json();
+                if (typeof handleLoginSuccess === 'function') handleLoginSuccess(data);
+                else throw new Error('Módulo de auth não carregado');
+                
             } catch(e) {
-                errEl.textContent = e.message || 'Erro';
-                errEl.style.display = 'block';
-                btnEl.textContent = 'Entrar';
-                btnEl.disabled = false;
+                err.textContent = e.message;
+                err.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                btn.disabled = false;
             }
-        }
+        };
 
-        btnEl.addEventListener('click', doLogin);
-        pinEl.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') doLogin();
-        });
-    })();
+        // UI link
+        document.querySelector('.wa-footer-note').onclick = () => window.location.href = './';
     </script>
 </body>
 </html>

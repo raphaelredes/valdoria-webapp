@@ -169,15 +169,12 @@
     console.info("[COMPAT] Telegram.WebApp polyfill active (web standalone)");
 
     // Redirect to login if no valid session (web-standalone only)
-    // Skip redirect if already on /web/ login page
     if (!_token && window.location.pathname.indexOf('/web/') < 0) {
-        var loginPath = window.location.pathname;
-        if (loginPath.indexOf('app.html') >= 0) {
-            loginPath = loginPath.replace(/app\.html.*$/, 'web/');
-        } else {
-            loginPath = loginPath.replace(/\/[^\/]+\/index\.html.*$/, '/web/');
-        }
-        console.warn('[COMPAT] No session token — redirecting to login');
-        window.location.replace(loginPath);
+        var isDev = window.location.search.indexOf('env=dev') >= 0 || window.location.hash.indexOf('env=dev') >= 0 || (window.ValdoriaEnv && ValdoriaEnv.getEnv() === 'dev');
+        var loginBase = '/web/';
+        if (isDev) loginBase = '/web/dev';
+
+        console.warn('[COMPAT] No session token — redirecting to login portal: ' + loginBase);
+        window.location.replace(loginBase);
     }
 })();
