@@ -35,6 +35,7 @@
     --v-silver-dim: #707880;
     --v-text: #d4c8b0;
     --v-text-dim: #a09484;
+    --v-text-faint: #8a7a68; /* Fainter than dim — for metadata, formulas, DC labels, hints */
     --v-text-bright: #e8dcc8;
     --v-success: #4caf50;
     --v-success-light: #66dd88;
@@ -1261,7 +1262,7 @@
   .v-err-btn-secondary {
     background: transparent;
     border-color: var(--v-gold-15);
-    color: var(--v-text-dim, #8a7a68);
+    color: var(--v-text-dim, #a09484);
     font-size: var(--v-font-base, 13px);
   }
   .v-err-retry-wrap {

@@ -211,26 +211,7 @@ function renderAchievementsData(container, data) {
             JSON.stringify(data, null, 2) + '</pre></div>';
     }
 
-    // DEBUG ALERT (Bulletproof test)
-    if (!window._debug_alert_shown) {
-        alert("Sincroniza\u00e7\u00e3o WebApp: v1.2 ATIVA\nView: " + data.view);
-        window._debug_alert_shown = true;
-    }
-
-    // DEBUG BANNER (Highly visible for validation)
-    var debugBanner = document.createElement('div');
-    debugBanner.style.background = '#ff0000';
-    debugBanner.style.color = '#fff';
-    debugBanner.style.fontSize = '12px';
-    debugBanner.style.fontWeight = 'bold';
-    debugBanner.style.textAlign = 'center';
-    debugBanner.style.padding = '8px';
-    debugBanner.style.marginBottom = '10px';
-    debugBanner.style.border = '2px solid yellow';
-    debugBanner.style.borderRadius = '4px';
-    debugBanner.innerText = "🚨 VERS\u00c3O DE TESTE: v1.2 (Sincronizada)";
-    root.insertBefore(debugBanner, root.firstChild);
-
+    // Debug alert + banner removed (2026-04-10 audit #61 - categoria D)
     container.innerHTML = ""; // Clear previous content
     container.appendChild(root);
 }
