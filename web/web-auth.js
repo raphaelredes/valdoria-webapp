@@ -15,7 +15,13 @@ if (_envOverride) console.info('[WEB-AUTH] environment FORCED to %s (isProd=%s)'
 var WEB_TOKEN_KEY = 'valdoria_web_token' + '_' + _envId;
 var WEB_USER_KEY = 'valdoria_web_user_id' + '_' + _envId;
 var WEB_API_KEY = 'valdoria_api_base' + '_' + _envId;
-var DEV_DEVICE_KEY = 'valdoria_dev_device';
+// BUG #3 fix (session-control-audit.md): env suffix for DEV_DEVICE_KEY
+// prevents cross-env contamination when user accesses both DEV and PROD
+// from the same browser. Server already rejects DEV tokens in PROD, but
+// this keeps localStorage isolation consistent with other storage keys.
+var DEV_DEVICE_KEY = 'valdoria_dev_device_' + _envId;
+// Legacy key cleanup — remove old unsuffixed key on any load
+try { localStorage.removeItem('valdoria_dev_device'); } catch (_) { /* noqa: preflight */ }
 
 var _apiBase = '';
 var _authToken = '';
