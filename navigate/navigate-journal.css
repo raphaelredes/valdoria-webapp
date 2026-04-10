@@ -81,7 +81,7 @@
 
 /* Botão principal: BG3 Pedra Esculpida */
 #v-popup-overlay[data-journal] .v-popup-btn--primary { /* noqa: preflight — BG3 stone gradient */
-  background:linear-gradient(180deg, #3a3028 0%, #2a2420 60%, #1e1a16 100%) !important;
+  background:linear-gradient(180deg, #3a3028 0%, var(--v-bg, #2a2420) 60%, #1e1a16 100%) !important;
   border:1px solid var(--v-gold-30) !important;
   border-radius:var(--v-radius-xs, 4px) !important;
   color:var(--v-text,#d4c8b0) !important;
@@ -94,7 +94,7 @@
   transition:all var(--v-transition-fast,.15s);
 }
 #v-popup-overlay[data-journal] .v-popup-btn--primary:active { /* noqa: preflight */
-  background:linear-gradient(180deg, #2a2420 0%, #1e1a16 100%) !important;
+  background:linear-gradient(180deg, var(--v-bg, #2a2420) 0%, #1e1a16 100%) !important;
   box-shadow:inset 0 2px 4px rgba(0,0,0,.6) !important;
   transform:scale(.98);
 }
@@ -277,7 +277,7 @@
   width:100%; max-width:320px;
 }
 #tj-detail-overlay .v-popup-btn--cancel { /* noqa: preflight — BG3 stone gradient */
-  background:linear-gradient(180deg, #3a3028 0%, #2a2420 60%, #1e1a16 100%) !important;
+  background:linear-gradient(180deg, #3a3028 0%, var(--v-bg, #2a2420) 60%, #1e1a16 100%) !important;
   border:1px solid var(--v-gold-25) !important;
   border-radius:var(--v-radius-xs, 4px) !important;
   color:var(--v-text-dim,#a09484) !important;
@@ -398,7 +398,7 @@
   width:44px; height:44px; min-height:44px;
   border-radius:50%;
   border:2px solid var(--v-gold-40);
-  background:linear-gradient(180deg, #3a3028, #2a2420); /* noqa: preflight — BG3 stone gradient */
+  background:linear-gradient(180deg, #3a3028, var(--v-bg, #2a2420)); /* noqa: preflight — BG3 stone gradient */
   color:var(--v-gold,#c4953a); font-size:var(--v-font-2xl,18px);
   display:flex; align-items:center; justify-content:center;
   cursor:pointer; -webkit-tap-highlight-color:transparent;
@@ -406,7 +406,7 @@
   transition:all var(--v-transition-fast,.15s);
 }
 .tj-pager-btn:active { /* noqa: preflight */
-  background:linear-gradient(180deg, #2a2420, #1e1a16);
+  background:linear-gradient(180deg, var(--v-bg, #2a2420), #1e1a16);
   box-shadow:inset 0 2px 4px rgba(0,0,0,.6);
   transform:scale(.95);
 }

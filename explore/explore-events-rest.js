@@ -189,7 +189,7 @@ function _crNightBar(phase, total) {
   var bar = '';
   for (var i = 0; i < filled; i++) bar += '\u2593';
   for (var j = filled; j < 10; j++) bar += '\u2591';
-  var icon = pct < 0.15 ? '\uD83C\uDF06' : pct < 0.35 ? '\uD83C\uDF03' : pct < 0.65 ? '\uD83C\uDF0C' : pct < 0.85 ? '\uD83C\uDF05' : '\u2600\ufe0f';
+  var icon = pct < 0.15 ? '\uD83C\uDF06' : pct < 0.35 ? '\uD83C\uDF03' : pct < 0.65 ? '\uD83C\uDF0C' : pct < 0.85 ? '\uD83C\uDF05' : '\u2600\ufe0f'; /* pflt-suppress night phase icon, not HP threshold */
   var endIcon = pct >= 0.85 ? '\u2600\ufe0f' : '\uD83C\uDF19';
   return icon + ' ' + bar + ' ' + endIcon;
 }
