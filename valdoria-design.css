@@ -1,6 +1,3 @@
-/* Portrait lock overlay (universal) — see shared/portrait-lock.js for JS API */
-@import url('./shared/portrait-lock.css');
-
 @layer valdoria {
   :root {
     --v-bg: #2a2420;
