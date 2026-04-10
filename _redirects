@@ -1,0 +1,8 @@
+# Cloudflare Pages redirects
+# Format: source destination status_code
+
+# /web/dev and /web/dev.html redirect server-side to /web/?env=dev
+# This bypasses browser cache of the old dev.html content (2026-04-10 fix #63/#64)
+/web/dev       /web/?env=dev  301
+/web/dev.html  /web/?env=dev  301
+/web/dev/      /web/?env=dev  301
