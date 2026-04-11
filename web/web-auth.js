@@ -680,6 +680,35 @@ function _tryWebTokenSession() {
     var token = localStorage.getItem(WEB_TOKEN_KEY);
     var uid = localStorage.getItem(WEB_USER_KEY);
     var api = localStorage.getItem(WEB_API_KEY);
+
+    /* BUG (2026-04-11): Session keys were migrated to use per-env suffix
+     * (_dev / _prod). Users who logged in BEFORE the migration have the
+     * legacy unsuffixed keys in localStorage. If the new keys are missing
+     * but the legacy keys exist, migrate them transparently so the player
+     * keeps their session instead of being forced back to the login screen. */
+    if (!token || !uid) {
+        var legacyToken = localStorage.getItem('valdoria_web_token');
+        var legacyUid = localStorage.getItem('valdoria_web_user_id');
+        if (legacyToken && legacyUid) {
+            console.info('[WEB-AUTH] Migrating legacy session keys -> env-suffixed keys (env=%s)', _envId);
+            token = legacyToken;
+            uid = legacyUid;
+            if (!api) {
+                api = localStorage.getItem(WEB_API_KEY) || '';
+            }
+            try {
+                localStorage.setItem(WEB_TOKEN_KEY, token);
+                localStorage.setItem(WEB_USER_KEY, uid);
+                if (api) localStorage.setItem(WEB_API_KEY, api);
+                /* Remove legacy keys so this migration runs only once */
+                localStorage.removeItem('valdoria_web_token');
+                localStorage.removeItem('valdoria_web_user_id');
+            } catch (e) {
+                console.warn('[WEB-AUTH] Legacy migration partial failure', e);
+            }
+        }
+    }
+
     console.info('[WEB-AUTH] checkExistingSession token=%s uid=%s api=%s',
         token ? 'present(' + token.length + ')' : 'none', uid || 'none', api || 'none');
     if (token && uid && api) {
