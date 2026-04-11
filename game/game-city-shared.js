@@ -153,7 +153,21 @@ function serviceCard(svc) {
 function statusAlert(text, type) {
   var alert = el('div', 'vc-alert');
   if (type) alert.classList.add('vc-alert--' + type);
-  alert.textContent = text;
+  /* BUG FIX 2026-04-11: support inline v-coin icon token in text */
+  /* Splits on <span class="vi vi-coin sm"></span> and inserts real nodes */
+  /* so the icon renders instead of appearing as literal HTML text. */
+  var coinToken = '<span class="vi vi-coin sm"></span>';
+  if (text && text.indexOf(coinToken) >= 0) {
+    var parts = text.split(coinToken);
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i]) alert.appendChild(document.createTextNode(parts[i]));
+      if (i < parts.length - 1) {
+        alert.appendChild(el('span', 'vi vi-coin sm'));
+      }
+    }
+  } else {
+    alert.textContent = text;
+  }
   return alert;
 }
 

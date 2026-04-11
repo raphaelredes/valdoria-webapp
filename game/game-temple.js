@@ -9,10 +9,10 @@ function renderTempleHub(container, data) {
 
   var root = vCity.el('div', 'tmp-hub');
 
-  /* Debt alert */
+  /* Debt alert — statusAlert now handles v-coin token inline (fix 2026-04-11) */
   if (data.debt && data.debt > 0) {
     root.appendChild(vCity.statusAlert(
-      'Divida ativa: ' + data.debt + ' <span class="vi vi-coin sm"></span> — servicos bloqueados',
+      'Dívida ativa: ' + data.debt + ' <span class="vi vi-coin sm"></span> — serviços bloqueados',
       'danger'
     ));
   }
