@@ -89,6 +89,14 @@
     <div id="hud-floating-hp" class="hud-float hud-float-tl">
       <div class="hud-float-bar">❤️ <div class="hud-bar-track"><div id="hp-fill-float" class="fill fill-hp" style="width:100%"></div></div> <span id="hp-val-float" class="hud-float-val hp">--/--</span></div>
       <div class="hud-float-bar">💧 <div class="hud-bar-track"><div id="mp-fill-float" class="fill fill-mp" style="width:100%"></div></div> <span id="mp-val-float" class="hud-float-val mp">--/--</span></div>
+      <!-- Exhaustion row: hidden when level=0, visible otherwise (PHB Ch.8 Exhaustion) -->
+      <div id="hud-float-exhaustion" class="hud-float-exh" style="display:none">
+        <span class="hud-float-exh-icon" aria-hidden="true">😩</span>
+        <div id="hud-float-exh-pips" class="hud-float-exh-pips">
+          <span class="hud-float-exh-pip"></span><span class="hud-float-exh-pip"></span><span class="hud-float-exh-pip"></span><span class="hud-float-exh-pip"></span><span class="hud-float-exh-pip"></span><span class="hud-float-exh-pip"></span>
+        </div>
+        <span id="hud-float-exh-label" class="hud-float-exh-label">0/6</span>
+      </div>
     </div>
 
     <!-- Floating HUD: Steps top-right -->
@@ -490,12 +498,77 @@
         </div>
     </div>
 
-    <!-- Death Overlay -->
-    <div class="death-overlay" id="death-overlay" role="dialog" aria-label="Morte">
-        <div class="death-icon"></div>
-        <div class="death-title">DERROTADO</div>
+    <!-- Pre-Move Risk Warning Overlay (exhaustion max OR HP critical) -->
+    <!-- Shown BEFORE the player tries to move when: -->
+    <!--   • Exhaustion >= 5 (PHB Ch.8 "Velocidade = 0") -->
+    <!--   • HP <= 25% of max (critical HP — moving into hazards kills) -->
+    <!-- Dynamic content filled by showRiskWarning(mode) in explore-core.js -->
+    <div class="exh-warn-overlay" id="exh-warn-overlay" role="dialog" aria-labelledby="exh-warn-title" aria-modal="true">
+      <div class="exh-warn-card">
+        <div class="exh-warn-seal" aria-hidden="true">
+          <div class="exh-warn-seal-ring"></div>
+          <div class="exh-warn-seal-icon" id="exh-warn-seal-icon">😩</div>
+        </div>
+        <div class="exh-warn-title" id="exh-warn-title">Aviso Fatal</div>
+        <div class="exh-warn-divider"><span>◆</span></div>
+        <div class="exh-warn-lead" id="exh-warn-lead">
+          Seu personagem está em perigo de morte.
+        </div>
+        <div class="exh-warn-pips-row" id="exh-warn-pips-row" aria-label="Nível de risco"></div>
+        <div class="exh-warn-pips-caption" id="exh-warn-pips-caption"></div>
+        <div class="exh-warn-sub-title">Como recuperar</div>
+        <ul class="exh-warn-steps" id="exh-warn-steps"></ul>
+        <div class="exh-warn-actions">
+          <button type="button" class="exh-warn-btn exh-warn-btn-primary" id="exh-warn-camp-btn">🏕️ Acampar Agora</button>
+          <button type="button" class="exh-warn-btn exh-warn-btn-secondary" id="exh-warn-close-btn">Entendi — Fechar</button>
+        </div>
+        <div class="exh-warn-hint" id="exh-warn-hint"></div>
+      </div>
+    </div>
+
+    <!-- Death Overlay (Redesigned 2026-04-11: proper medieval framing + death save roll) -->
+    <div class="death-overlay" id="death-overlay" role="dialog" aria-labelledby="death-title-label" aria-modal="true">
+      <div class="death-frame">
+        <div class="death-vignette-inner" aria-hidden="true"></div>
+        <div class="death-ornament death-ornament-top" aria-hidden="true">◆ ◆ ◆</div>
+        <div class="death-seal" aria-hidden="true">
+          <div class="death-seal-ring"></div>
+          <div class="death-seal-skull">☠</div>
+        </div>
+        <div class="death-title" id="death-title-label">DERROTADO</div>
+        <div class="death-divider"><span>◆</span></div>
+        <div class="death-phase" id="death-phase">Salvaguardas contra a Morte</div>
+
+        <!-- PHB Death Saves tracker -->
+        <div class="death-saves" id="death-saves">
+          <div class="death-saves-row death-saves-row-success">
+            <span class="death-saves-label">Sucessos</span>
+            <div class="death-saves-pips" id="death-saves-success-pips">
+              <span class="death-pip death-pip-success"></span>
+              <span class="death-pip death-pip-success"></span>
+              <span class="death-pip death-pip-success"></span>
+            </div>
+          </div>
+          <div class="death-saves-row death-saves-row-failure">
+            <span class="death-saves-label">Falhas</span>
+            <div class="death-saves-pips" id="death-saves-failure-pips">
+              <span class="death-pip death-pip-failure"></span>
+              <span class="death-pip death-pip-failure"></span>
+              <span class="death-pip death-pip-failure"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="death-narration" id="death-narration"></div>
+        <div class="death-dice-area" id="death-dice-area"></div>
         <div class="death-summary" id="death-summary"></div>
-        <button class="v-skip-btn" id="death-skip-btn">Retornar >></button>
+        <div class="death-outcome" id="death-outcome"></div>
+
+        <div class="death-actions">
+          <button type="button" class="death-btn death-btn-primary" id="death-skip-btn">Retornar à Cidade</button>
+        </div>
+        <div class="death-ornament death-ornament-bot" aria-hidden="true">◆ ◆ ◆</div>
+      </div>
     </div>
 
     <script>
@@ -517,7 +590,7 @@
         document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
             /* explore-core.js logo apos iso: COLS/ROWS/S/hexDist/getNeighbors antes de fog/movement/pathfinding/renderer */
             /* explore-hex-math.js loads right after iso so axial/cube helpers are available downstream (#7 hexmap modernization) */
-            var scripts = ['explore-iso.js', 'explore-hex-math.js', 'explore-core.js', 'explore-tiles.js', 'explore-fog.js', 'explore-travel.js', 'explore-movement.js', 'explore-pathfinding.js', 'explore-renderer.js', 'explore-narrations.js', 'explore-stories.js', 'explore-tutorial.js', 'explore-events.js', 'explore-events-pace.js', 'explore-watch.js', 'explore-events-hazards.js', 'explore-camp-fire.js', 'explore-events-rest.js', 'explore-events-tiles.js', 'explore-particles.js', 'explore-outbound-travel.js', 'explore-ambient.js'];
+            var scripts = ['explore-iso.js', 'explore-hex-math.js', 'explore-core.js', 'explore-tiles.js', 'explore-fog.js', 'explore-travel.js', 'explore-movement.js', 'explore-pathfinding.js', 'explore-renderer.js', 'explore-narrations.js', 'explore-stories.js', 'explore-tutorial.js', 'explore-events.js', 'explore-events-pace.js', 'explore-watch.js', 'explore-events-hazards.js', 'explore-camp-fire.js', 'explore-events-rest.js', 'explore-events-tiles.js', 'explore-particles.js', 'explore-outbound-travel.js', 'explore-ambient.js', 'explore-exhaustion.js'];
         scripts.forEach(function (s) {
             document.write('<script src="' + s + '?v=' + v + '"><\/script>');
         });

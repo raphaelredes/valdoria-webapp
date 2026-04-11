@@ -2029,35 +2029,33 @@ function showDeathSaves() {
   var successes = 0, failures = 0, rollNum = 0;
   var _done = false;
 
+  /* Clear legacy summary — new layout renders via structured DOM elements */
+  if (summary) {
+    while (summary.firstChild) summary.removeChild(summary.firstChild);
+  }
+
   function renderState(roll, isResult, narrText) {
-    var sMarks = '\u25cf'.repeat(successes) + '\u25cb'.repeat(3 - successes);
-    var fMarks = '\u25cf'.repeat(failures) + '\u25cb'.repeat(3 - failures);
-    var html = '<div style="text-align:center;margin-bottom:12px">'
-      + '<div style="font-size:18px;margin-bottom:8px">Salvaguardas contra Morte</div>'
-      + '<div style="font-size:14px;color:#6a8">\u2713 ' + sMarks + '</div>'
-      + '<div style="font-size:14px;color:#a66">\u2717 ' + fMarks + '</div>'
-      + '</div>';
-    if (narrText) {
-      html += '<div style="text-align:center;font-size:12px;color:#a09484;line-height:1.5;margin:8px 12px;font-style:italic">'
-        + narrText + '</div>';
-    }
-    if (roll !== null) {
-      var color = roll === 20 ? '#ffd700' : roll === 1 ? '#ff3333' : roll >= 10 ? '#6a8' : '#a66';
-      html += '<div style="text-align:center;margin:12px 0">'
-        + '<div class="dice-result" style="font-size:clamp(22px,6vw,28px);color:' + color + '">' + roll + '</div>'
-        + '<div style="font-size:12px;color:var(--v-text-faint, #8a7a68);margin-top:4px">Rolagem ' + rollNum + '</div>'
-        + '</div>';
-    }
+    /* Delegate to ValdoriaRisk.renderDeathSaves (explore-exhaustion.js) */
+    /* Builds pips, narration, dice result, and outcome via safe DOM methods */
+    var outcome = null;
     if (isResult) {
-      if (successes >= 3) {
-        html += '<div style="text-align:center;color:#6a8;font-size:16px;margin-top:12px">Estabilizado! Voc\u00ea acorda com 1 HP.</div>';
-      } else if (failures >= 3) {
-        html += '<div style="text-align:center;color:#a66;font-size:16px;margin-top:12px">Voc\u00ea sucumbe aos ferimentos...</div>';
-      } else if (roll === 20) {
-        html += '<div style="text-align:center;color:#ffd700;font-size:16px;margin-top:12px">Cr\u00edtico Natural! Voc\u00ea se levanta com 1 HP!</div>';
-      }
+      if (successes >= 3 || roll === 20) outcome = 'stabilized';
+      else if (failures >= 3) outcome = 'deceased';
     }
-    summary.innerHTML = html; /* noqa: innerHTML — death saves state render, safe computed content */
+    if (window.ValdoriaRisk && window.ValdoriaRisk.renderDeathSaves) {
+      window.ValdoriaRisk.renderDeathSaves({
+        successes: successes,
+        failures: failures,
+        rollNum: rollNum,
+        roll: roll,
+        narration: narrText || '',
+        final: !!isResult,
+        outcome: outcome,
+      });
+    } else {
+      /* Minimal fallback if exhaustion.js failed to load — log only */
+      console.warn('[EXPLORE] ValdoriaRisk not loaded — death save render skipped');
+    }
   }
 
   function rollDeathSave() {
@@ -2176,12 +2174,14 @@ function showDeathSaves() {
 
 function showDeathOverlay() {
   var overlay = document.getElementById('death-overlay');
-  var summary = document.getElementById('death-summary');
-  var html = '';
-  if (S.xpEarned > 0) html += '<div class="reward-line">+' + S.xpEarned + ' XP</div>';
-  if (S.goldEarned > 0) html += '<div class="reward-line">+' + S.goldEarned + ' Ouro</div>';
-  html += '<div class="reward-line">HP reduzido a 0</div>';
-  summary.innerHTML = html; /* noqa: innerHTML — death overlay summary, safe computed content */
+  /* Delegate to ValdoriaRisk.showDeathFinal for safe DOM-based summary */
+  if (window.ValdoriaRisk && window.ValdoriaRisk.showDeathFinal) {
+    window.ValdoriaRisk.showDeathFinal({
+      xpEarned: S.xpEarned || 0,
+      goldEarned: S.goldEarned || 0,
+      extraLines: ['HP reduzido a 0'],
+    });
+  }
   overlay.classList.add('active');
 
   var _deathDone = false;

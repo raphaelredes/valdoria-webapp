@@ -1,0 +1,709 @@
+/* ================================================================
+ * Exhaustion Visual System — Explore WebApp
+ * Added 2026-04-11 — addresses user feedback:
+ *   1. No visible exhaustion indicator on explore map HUD
+ *   2. Death from exhaustion was silent (toast only)
+ *   3. Death screen was bare (just red bg + title)
+ *
+ * Includes:
+ *   - .hud-float-exh       — floating HUD exhaustion row (6 pips)
+ *   - .exh-warn-overlay    — pre-move warning popup (level 5)
+ *   - .death-overlay       — redesigned PHB death screen with frame
+ * ================================================================ */
+
+/* =============================================================
+ * 1. FLOATING HUD — exhaustion pips
+ * ============================================================= */
+
+.hud-float-exh {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-xs, 4px);
+  padding: 2px var(--v-space-sm, 6px);
+  margin-top: 2px;
+  border-radius: var(--v-radius-sm, 6px);
+  background: rgba(40, 28, 20, 0.75);
+  border: 1px solid rgba(160, 100, 60, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.hud-float-exh-icon {
+  font-size: var(--v-font-sm, 11px);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.hud-float-exh-pips {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.hud-float-exh-pip {
+  width: 6px;
+  height: 9px;
+  border-radius: 1px;
+  background: rgba(180, 140, 100, 0.15);
+  border: 1px solid rgba(180, 140, 100, 0.35);
+  transition: background var(--v-transition-base, 0.2s ease),
+              border-color var(--v-transition-base, 0.2s ease);
+}
+
+.hud-float-exh-pip.filled {
+  background: linear-gradient(180deg, #d68040, #8f4818);
+  border-color: #a85a20;
+  box-shadow: inset 0 1px 0 rgba(255, 210, 170, 0.4);
+}
+
+.hud-float-exh-pip.filled.critical {
+  background: linear-gradient(180deg, #e04a2a, #8a1a08);
+  border-color: #c4402a;
+  box-shadow: inset 0 1px 0 rgba(255, 180, 140, 0.5),
+              0 0 4px rgba(220, 60, 30, 0.6);
+  animation: exh-pip-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes exh-pip-pulse {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 180, 140, 0.5), 0 0 4px rgba(220, 60, 30, 0.6); }
+  50%      { box-shadow: inset 0 1px 0 rgba(255, 180, 140, 0.5), 0 0 8px rgba(220, 60, 30, 0.9); }
+}
+
+.hud-float-exh-label {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: 9px; /* HARDCODED: sub-minimum for compact float HUD — matches .hud-hp-label */
+  color: var(--v-gold, #c4953a);
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Level 5/6 → paint full bar red to warn of move-block */
+.hud-float-exh.critical {
+  border-color: rgba(220, 70, 40, 0.7);
+  background: rgba(60, 20, 14, 0.9);
+  animation: exh-hud-pulse 2s ease-in-out infinite;
+}
+
+.hud-float-exh.critical .hud-float-exh-label {
+  color: #ff8050;
+  text-shadow: 0 0 4px rgba(220, 60, 30, 0.7);
+}
+
+@keyframes exh-hud-pulse {
+  0%, 100% { border-color: rgba(220, 70, 40, 0.7); }
+  50%      { border-color: rgba(220, 70, 40, 1); }
+}
+
+/* Reduced motion / perf lite — disable pulse */
+body.perf-lite .hud-float-exh.critical,
+body.perf-lite .hud-float-exh-pip.filled.critical {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-float-exh.critical,
+  .hud-float-exh-pip.filled.critical {
+    animation: none;
+  }
+}
+
+/* =============================================================
+ * 2. EXHAUSTION MAX WARNING — pre-move popup (level 5)
+ * ============================================================= */
+
+.exh-warn-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(40, 20, 10, 0.85), rgba(10, 5, 2, 0.96));
+  z-index: var(--v-z-popup, 9000);
+  display: none;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--v-transition-base, 0.25s ease);
+}
+
+.exh-warn-overlay.active {
+  display: flex;
+  opacity: 1;
+  pointer-events: all;
+}
+
+.exh-warn-card {
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: linear-gradient(180deg, #2a1a12 0%, #1a0f08 100%);
+  border: none;
+  padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  font-family: var(--v-font, "MedievalSharp", serif);
+  color: var(--v-text, #d4c8b0);
+  position: relative;
+  overflow-y: auto;
+}
+
+.exh-warn-card::before {
+  content: '';
+  position: absolute;
+  inset: var(--v-space-md, 8px);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: var(--v-radius, 10px);
+  pointer-events: none;
+}
+
+.exh-warn-seal {
+  width: 84px;
+  height: 84px;
+  position: relative;
+  margin-top: var(--v-space-lg, 12px);
+  flex-shrink: 0;
+}
+
+.exh-warn-seal-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--v-gold, #c4953a);
+  border-radius: 50%;
+  box-shadow: 0 0 18px rgba(196, 149, 58, 0.45),
+              inset 0 0 12px rgba(196, 149, 58, 0.25);
+}
+
+.exh-warn-seal-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
+}
+
+.exh-warn-title {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-2xl, 18px);
+  font-weight: 700;
+  color: #e08050;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(220, 90, 40, 0.55),
+               0 2px 4px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  margin: 0;
+}
+
+.exh-warn-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-md, 8px);
+  color: var(--v-gold, #c4953a);
+  font-size: var(--v-font-xs, 10px);
+  opacity: 0.75;
+  margin: var(--v-space-xs, 4px) 0;
+}
+
+.exh-warn-divider::before,
+.exh-warn-divider::after {
+  content: '';
+  flex: 0 0 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--v-gold, #c4953a), transparent);
+}
+
+.exh-warn-lead {
+  font-size: var(--v-font-base, 13px);
+  line-height: 1.55;
+  color: var(--v-text, #d4c8b0);
+  text-align: center;
+  padding: 0 var(--v-space-sm, 6px);
+}
+
+.exh-warn-lead strong {
+  color: #e08050;
+  font-weight: 700;
+}
+
+.exh-warn-pips-row {
+  display: flex;
+  gap: var(--v-space-xs, 4px);
+  justify-content: center;
+  margin: var(--v-space-sm, 6px) 0 0;
+}
+
+.exh-warn-pip {
+  width: 16px;
+  height: 22px;
+  border-radius: 2px;
+  background: rgba(180, 140, 100, 0.15);
+  border: 1px solid rgba(180, 140, 100, 0.4);
+}
+
+.exh-warn-pip.filled {
+  background: linear-gradient(180deg, #d68040, #8f4818);
+  border-color: #a85a20;
+}
+
+.exh-warn-pip.filled.critical {
+  background: linear-gradient(180deg, #e04a2a, #8a1a08);
+  border-color: #c4402a;
+  box-shadow: 0 0 8px rgba(220, 60, 30, 0.7);
+}
+
+.exh-warn-pips-caption {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-sm, 11px);
+  color: var(--v-text-dim, #a09484);
+  text-align: center;
+  margin-top: var(--v-space-xs, 4px);
+}
+
+.exh-warn-danger {
+  color: #ff6640;
+  font-weight: 700;
+}
+
+.exh-warn-sub-title {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-lg, 14px);
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: var(--v-space-md, 8px) 0 0;
+  text-align: center;
+}
+
+.exh-warn-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-sm, 6px);
+  align-self: stretch;
+}
+
+.exh-warn-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
+  background: rgba(196, 149, 58, 0.08);
+  border: 1px solid rgba(196, 149, 58, 0.25);
+  border-radius: var(--v-radius-sm, 6px);
+  font-size: var(--v-font-sm, 11px);
+  line-height: 1.5;
+  color: var(--v-text, #d4c8b0);
+}
+
+.exh-warn-steps li strong {
+  color: var(--v-gold, #c4953a);
+  font-weight: 700;
+}
+
+.exh-warn-step-icon {
+  font-size: var(--v-font-xl, 16px);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.exh-warn-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-sm, 6px);
+  margin-top: auto;
+  width: 100%;
+  padding-top: var(--v-space-md, 8px);
+}
+
+.exh-warn-btn {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-body, 14px);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+  border-radius: var(--v-radius, 10px);
+  border: 1px solid;
+  cursor: pointer;
+  transition: transform 0.1s ease, background var(--v-transition-base, 0.25s ease);
+  min-height: 48px; /* accessible touch target */
+}
+
+.exh-warn-btn:active {
+  transform: scale(0.97);
+}
+
+.exh-warn-btn-primary {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.35), rgba(140, 95, 30, 0.55));
+  border-color: var(--v-gold, #c4953a);
+  color: #fff4d0;
+  box-shadow: 0 0 12px rgba(196, 149, 58, 0.35),
+              inset 0 1px 0 rgba(255, 230, 170, 0.3);
+}
+
+.exh-warn-btn-secondary {
+  background: rgba(60, 48, 38, 0.65);
+  border-color: rgba(160, 120, 80, 0.45);
+  color: var(--v-text, #d4c8b0);
+}
+
+.exh-warn-hint {
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-dim, #a09484);
+  text-align: center;
+  font-style: italic;
+  padding: 0 var(--v-space-sm, 6px);
+  line-height: 1.4;
+}
+
+.exh-warn-hint strong {
+  color: var(--v-gold, #c4953a);
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* =============================================================
+ * 3. DEATH OVERLAY — Redesigned Derrotado / Death Saves
+ * ============================================================= */
+
+/* Override legacy rules in explore-events.css (keep background + activate) */
+.death-overlay {
+  display: none !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  background: radial-gradient(ellipse at center, rgba(60, 14, 10, 0.92), rgba(6, 2, 2, 0.98)) !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+}
+
+.death-overlay.active {
+  display: flex !important;
+}
+
+.death-frame {
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: linear-gradient(180deg, #1d0a08 0%, #0a0303 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px);
+  font-family: var(--v-font, "MedievalSharp", serif);
+  color: var(--v-text, #d4c8b0);
+  position: relative;
+  overflow-y: auto;
+}
+
+.death-vignette-inner {
+  position: absolute;
+  inset: var(--v-space-md, 8px);
+  border: 1px solid rgba(180, 40, 30, 0.55);
+  border-radius: var(--v-radius, 10px);
+  box-shadow: inset 0 0 40px rgba(150, 0, 0, 0.35),
+              inset 0 0 80px rgba(60, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.death-ornament {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  color: rgba(200, 80, 60, 0.55);
+  font-size: var(--v-font-sm, 11px);
+  letter-spacing: 8px;
+  text-align: center;
+  width: 100%;
+}
+
+.death-ornament-top {
+  margin-top: var(--v-space-sm, 6px);
+}
+
+.death-ornament-bot {
+  margin-top: auto;
+  margin-bottom: 0;
+}
+
+.death-seal {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  margin-top: var(--v-space-md, 8px);
+  flex-shrink: 0;
+}
+
+.death-seal-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(200, 60, 40, 0.75);
+  border-radius: 50%;
+  box-shadow: 0 0 28px rgba(200, 50, 30, 0.55),
+              inset 0 0 18px rgba(200, 50, 30, 0.35);
+}
+
+.death-seal-skull {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  color: rgba(240, 220, 200, 0.92);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85));
+}
+
+.death-title {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: clamp(20px, 6.5vw, 26px);
+  font-weight: 900;
+  color: #d44030;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  text-shadow: 0 0 18px rgba(200, 40, 30, 0.65),
+               0 2px 5px rgba(0, 0, 0, 0.9);
+  text-align: center;
+  margin: 0;
+}
+
+.death-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-md, 8px);
+  color: rgba(200, 80, 60, 0.75);
+  font-size: var(--v-font-sm, 11px);
+  margin: var(--v-space-xs, 4px) 0;
+}
+
+.death-divider::before,
+.death-divider::after {
+  content: '';
+  flex: 0 0 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200, 80, 60, 0.7), transparent);
+}
+
+.death-phase {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-lg, 14px);
+  color: var(--v-gold, #c4953a);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+/* --- PHB Death Saves (success / failure pips) --- */
+
+.death-saves {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-sm, 6px);
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+  background: rgba(30, 10, 8, 0.6);
+  border: 1px solid rgba(160, 60, 40, 0.45);
+  border-radius: var(--v-radius-sm, 6px);
+  margin: var(--v-space-sm, 6px) 0;
+  min-width: 260px;
+}
+
+.death-saves-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--v-space-md, 8px);
+}
+
+.death-saves-label {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-sm, 11px);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  flex: 0 0 auto;
+}
+
+.death-saves-row-success .death-saves-label { color: #8fc48f; }
+.death-saves-row-failure .death-saves-label { color: #c46060; }
+
+.death-saves-pips {
+  display: flex;
+  gap: var(--v-space-xs, 4px);
+}
+
+.death-pip {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid;
+  transition: background var(--v-transition-base, 0.25s ease),
+              transform var(--v-transition-base, 0.25s ease),
+              box-shadow var(--v-transition-base, 0.25s ease);
+}
+
+.death-pip-success { border-color: rgba(120, 180, 120, 0.45); }
+.death-pip-failure { border-color: rgba(180, 80, 80, 0.45); }
+
+.death-pip-success.filled {
+  background: radial-gradient(circle, #8fe090 30%, #5aa040 100%);
+  border-color: #8fe090;
+  box-shadow: 0 0 10px rgba(90, 220, 90, 0.7);
+  transform: scale(1.05);
+}
+
+.death-pip-failure.filled {
+  background: radial-gradient(circle, #e05a5a 30%, #8a1010 100%);
+  border-color: #e05a5a;
+  box-shadow: 0 0 10px rgba(220, 70, 70, 0.75);
+  transform: scale(1.05);
+}
+
+.death-narration {
+  font-size: var(--v-font-base, 13px);
+  font-style: italic;
+  color: var(--v-text-dim, #a09484);
+  line-height: 1.55;
+  text-align: center;
+  padding: 0 var(--v-space-md, 8px);
+  min-height: 3em; /* reserve space so layout doesn't shift */
+}
+
+.death-dice-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-2xl, 18px);
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+}
+
+.death-dice-area .dice-result {
+  font-size: clamp(32px, 9vw, 48px);
+  padding: var(--v-space-sm, 6px) var(--v-space-lg, 12px);
+  border-radius: var(--v-radius, 10px);
+  border: 2px solid currentColor;
+  background: rgba(0, 0, 0, 0.45);
+  text-shadow: 0 0 14px currentColor, 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.death-dice-area .dice-result.success { color: #90e090; }
+.death-dice-area .dice-result.failure { color: #e05a5a; }
+.death-dice-area .dice-result.crit    { color: #ffd700; }
+.death-dice-area .dice-result.fumble  { color: #ff4030; }
+
+.death-summary {
+  font-size: var(--v-font-base, 13px) !important;
+  line-height: 1.6 !important;
+  text-align: center;
+  color: var(--v-text, #d4c8b0);
+  padding: 0 var(--v-space-md, 8px);
+}
+
+.death-summary .reward-line {
+  color: var(--v-gold, #c4953a);
+  font-weight: 600;
+  margin: 2px 0;
+}
+
+.death-outcome {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-lg, 14px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+  padding: var(--v-space-sm, 6px);
+  min-height: 1.4em;
+}
+
+.death-outcome.stabilized {
+  color: #8fe090;
+  text-shadow: 0 0 12px rgba(100, 220, 100, 0.55);
+}
+
+.death-outcome.deceased {
+  color: #e05040;
+  text-shadow: 0 0 12px rgba(220, 60, 40, 0.55);
+}
+
+.death-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-sm, 6px);
+  margin-top: var(--v-space-md, 8px);
+  width: 100%;
+  padding: 0 var(--v-space-sm, 6px);
+}
+
+.death-btn {
+  font-family: var(--v-font-display, "Cinzel", serif);
+  font-size: var(--v-font-body, 14px);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+  border-radius: var(--v-radius, 10px);
+  border: 1px solid;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  min-height: 48px;
+  display: none; /* revealed after death save sequence completes */
+}
+
+.death-btn.visible {
+  display: block;
+  animation: fadeInUp 0.45s ease;
+}
+
+.death-btn:active { transform: scale(0.97); }
+
+.death-btn-primary {
+  background: linear-gradient(180deg, rgba(180, 40, 30, 0.55), rgba(100, 10, 5, 0.75));
+  border-color: #c43020;
+  color: #ffe0d0;
+  box-shadow: 0 0 14px rgba(200, 40, 30, 0.45),
+              inset 0 1px 0 rgba(255, 120, 90, 0.3);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Death-overlay pulse (override legacy animation from explore-events.css) */
+.death-overlay.active .death-seal-ring {
+  animation: death-seal-pulse 3s ease-in-out infinite;
+}
+
+@keyframes death-seal-pulse {
+  0%, 100% {
+    box-shadow: 0 0 28px rgba(200, 50, 30, 0.55),
+                inset 0 0 18px rgba(200, 50, 30, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 42px rgba(220, 60, 40, 0.75),
+                inset 0 0 22px rgba(220, 60, 40, 0.5);
+  }
+}
+
+body.perf-lite .death-seal-ring,
+body.perf-lite .death-overlay.active {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .death-seal-ring,
+  .death-overlay.active {
+    animation: none !important;
+  }
+}
