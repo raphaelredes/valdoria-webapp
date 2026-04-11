@@ -1082,10 +1082,24 @@ function doCampRest(food) {
   }
 
   var totalHeal = baseHeal + foodBonus;
+  /* BUG FIX 2026-04-11: defensive NaN check — prevents HP corruption */
+  /* if any upstream calculation (rollDiceFormula, conMod, foodBonus) returns NaN */
+  if (isNaN(totalHeal) || typeof totalHeal !== 'number') {
+    console.error('[CAMP] shortRest_totalHeal_NaN baseHeal=%s foodBonus=%s — clamping to 1',
+      baseHeal, foodBonus);
+    totalHeal = 1;
+  }
   S.hpChange += totalHeal;
   if (S.charData) {
-    var newHP = Math.min(S.charData.mh, S.charData.hp + S.hpChange);
-    updateHP(newHP, S.charData.mh);
+    var safeCurrentHp = (typeof S.charData.hp === 'number' && !isNaN(S.charData.hp)) ? S.charData.hp : 0;
+    var safeMaxHp = (typeof S.charData.mh === 'number' && !isNaN(S.charData.mh)) ? S.charData.mh : 10;
+    var safeHpChange = (typeof S.hpChange === 'number' && !isNaN(S.hpChange)) ? S.hpChange : 0;
+    var newHP = Math.min(safeMaxHp, safeCurrentHp + safeHpChange);
+    if (isNaN(newHP)) {
+      console.error('[CAMP] newHP_NaN safe=%d/%d change=%d — clamping to max', safeCurrentHp, safeMaxHp, safeHpChange);
+      newHP = safeMaxHp;
+    }
+    updateHP(newHP, safeMaxHp);
   }
 
   logMoveEvent([{ type: 'camp', heal: totalHeal, food: foodName }]);
