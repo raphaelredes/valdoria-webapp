@@ -155,6 +155,24 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Guild: adventurer detail (V1 Hero Portrait)
+    if (data._guild_adventurer && typeof renderGuildAdventurer === 'function') {
+        renderGuildAdventurer(el, data._guild_adventurer);
+        return el;
+    }
+
+    // Guild: hire confirm (V2 Quick Confirm)
+    if (data._guild_hire_confirm && typeof renderGuildHireConfirm === 'function') {
+        renderGuildHireConfirm(el, data._guild_hire_confirm);
+        return el;
+    }
+
+    // Guild: hire success (V2 NPC Welcome)
+    if (data._guild_hire_success && typeof renderGuildHireSuccess === 'function') {
+        renderGuildHireSuccess(el, data._guild_hire_success);
+        return el;
+    }
+
     // Tavern redesign
     if (data._tavern_screen && typeof renderTavernHub === 'function') {
         renderTavernHub(el, data._tavern_screen);
