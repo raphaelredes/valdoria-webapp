@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Mockups — Tela de Missao</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link rel="stylesheet" href="../valdoria-design.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=MedievalSharp&display=swap">
+<style>
+  html,body{max-width:none!important;background:var(--v-bg-deep,#1a1510)!important;height:auto!important;overflow:auto!important;margin:0;padding:0}
+  body{font-family:var(--v-font);color:var(--v-text)}
+  .mockups-shell{padding:var(--v-space-2xl);max-width:1800px;margin:0 auto}
+  .mockups-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:32px;font-weight:700;letter-spacing:3px;text-align:center;margin:0 0 var(--v-space-md);text-transform:uppercase}
+  .mockups-sub{font-family:var(--v-font);color:var(--v-text-dim);text-align:center;font-size:var(--v-font-body);margin:0 0 var(--v-space-2xl)}
+  .mockups-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:var(--v-space-2xl)}
+  .mockup-frame{display:flex;flex-direction:column;gap:var(--v-space-md)}
+  .mockup-label{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700;letter-spacing:2px;text-align:center;text-transform:uppercase;padding:var(--v-space-md);border:1px solid var(--v-border-gold);background:var(--v-gold-05);border-radius:var(--v-radius)}
+  .phone{width:430px;min-height:900px;margin:0 auto;background:var(--v-bg);border:1px solid var(--v-border);border-radius:var(--v-radius-lg);overflow:hidden;display:flex;flex-direction:column;position:relative;box-shadow:var(--v-shadow-md)}
+
+  /* ============ SHARED HEADER ============ */
+  .qd-header{display:flex;align-items:center;gap:var(--v-space-lg);padding:var(--v-space-lg) var(--v-space-xl);background:linear-gradient(180deg,var(--v-gold-10),transparent);border-bottom:1px solid var(--v-border-gold)}
+  .qd-header-back{color:var(--v-text);font-size:var(--v-font-xl);cursor:pointer;flex-shrink:0}
+  .qd-header-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-lg);font-weight:700;letter-spacing:1px;flex:1;text-align:center}
+  .qd-header-spacer{width:18px}
+
+  /* ============ VARIANT 1 — HERO TABLET ============ */
+  .v1-body{flex:1;padding:var(--v-space-xl);overflow-y:auto;background:var(--v-bg)}
+  .v1-hero{background:linear-gradient(135deg,var(--v-gold-15),var(--v-gold-04));border:1px solid var(--v-border-gold);border-radius:var(--v-radius-lg);padding:var(--v-space-xl);text-align:center;position:relative;overflow:hidden}
+  .v1-hero::before{content:"";position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:60px;height:60px;background:radial-gradient(circle,var(--v-gold-30),transparent 70%);filter:blur(12px)}
+  .v1-hero-icon{font-size:40px;display:block;position:relative;z-index:1}
+  .v1-hero-title{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:22px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin:var(--v-space-sm) 0 var(--v-space-xs);text-shadow:0 0 20px var(--v-gold-40);position:relative;z-index:1}
+  .v1-hero-chapter{font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-sm);letter-spacing:1px;position:relative;z-index:1}
+  .v1-hero-status-row{display:flex;gap:var(--v-space-md);justify-content:center;margin-top:var(--v-space-md);position:relative;z-index:1}
+  .v1-hero-chip{background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-pill);padding:4px 12px;font-size:var(--v-font-xs);color:var(--v-gold);font-family:var(--v-font);letter-spacing:1px;text-transform:uppercase}
+  .v1-desc{margin-top:var(--v-space-xl);padding:var(--v-space-lg);background:var(--v-bg-card);border-left:3px solid var(--v-gold);border-radius:var(--v-radius-sm);font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.6;font-style:italic}
+  .v1-objective{margin-top:var(--v-space-lg);padding:var(--v-space-lg);background:linear-gradient(90deg,var(--v-gold-10),transparent);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);position:relative}
+  .v1-objective-label{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-sm)}
+  .v1-objective-text{font-family:var(--v-font);color:var(--v-text-bright);font-size:var(--v-font-body);line-height:1.5}
+  .v1-progress-wrap{margin-top:var(--v-space-md)}
+  .v1-progress-bar{height:10px;background:var(--v-bar-track);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-pill);overflow:hidden;position:relative}
+  .v1-progress-fill{height:100%;width:33%;background:linear-gradient(90deg,var(--v-gold-dim),var(--v-gold),var(--v-gold-light));box-shadow:0 0 12px var(--v-gold-40);border-radius:var(--v-radius-pill);transition:width var(--v-transition-slow)}
+  .v1-progress-text{display:flex;justify-content:space-between;margin-top:var(--v-space-xs);font-family:var(--v-font);font-size:var(--v-font-xs);color:var(--v-text-dim)}
+  .v1-rewards{margin-top:var(--v-space-xl)}
+  .v1-section-label{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-md);text-align:center;position:relative}
+  .v1-section-label::before,.v1-section-label::after{content:"";position:absolute;top:50%;width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--v-gold-30))}
+  .v1-section-label::before{left:0}
+  .v1-section-label::after{right:0;background:linear-gradient(270deg,transparent,var(--v-gold-30))}
+  .v1-rewards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--v-space-md)}
+  .v1-reward-card{background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-md);text-align:center;transition:all var(--v-transition-base)}
+  .v1-reward-card:hover{border-color:var(--v-gold);transform:translateY(-2px);box-shadow:var(--v-shadow-gold)}
+  .v1-reward-icon{font-size:24px;display:block;margin-bottom:var(--v-space-xs)}
+  .v1-reward-value{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700}
+  .v1-reward-label{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase}
+  .v1-steps{margin-top:var(--v-space-xl);padding:var(--v-space-lg);background:var(--v-bg-card);border-radius:var(--v-radius)}
+  .v1-steps-label{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-md)}
+  .v1-step{display:flex;align-items:flex-start;gap:var(--v-space-md);padding:var(--v-space-sm) 0;position:relative}
+  .v1-step + .v1-step{border-top:1px dashed var(--v-border-gold)}
+  .v1-step-marker{width:24px;height:24px;border-radius:50%;background:var(--v-bg);border:2px solid var(--v-border-gold);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:var(--v-text-dim)}
+  .v1-step--done .v1-step-marker{background:var(--v-gold);border-color:var(--v-gold-light);color:var(--v-bg);box-shadow:0 0 10px var(--v-gold-40)}
+  .v1-step--current .v1-step-marker{border-color:var(--v-gold);color:var(--v-gold);animation:v1pulse 2s infinite}
+  .v1-step-text{font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.4;padding-top:2px}
+  .v1-step--done .v1-step-text{color:var(--v-text-dim);text-decoration:line-through}
+  .v1-step--future .v1-step-text{color:var(--v-text-faint);font-style:italic}
+  .v1-giver{margin-top:var(--v-space-lg);display:flex;align-items:center;gap:var(--v-space-md);padding:var(--v-space-md);background:var(--v-bg-raised);border-radius:var(--v-radius);border:1px solid var(--v-border)}
+  .v1-giver-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--v-gold-dim),var(--v-gold));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--v-gold-light)}
+  .v1-giver-info{flex:1}
+  .v1-giver-name{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-base);font-weight:600}
+  .v1-giver-loc{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);font-style:italic}
+  @keyframes v1pulse{0%,100%{box-shadow:0 0 0 0 var(--v-gold-40)}50%{box-shadow:0 0 0 6px transparent}}
+
+  /* ============ VARIANT 2 — PARCHMENT SCROLL ============ */
+  .v2-body{flex:1;overflow-y:auto;background:
+    radial-gradient(ellipse at top,rgba(196,149,58,0.06),transparent 60%),
+    var(--v-bg);padding:var(--v-space-xl)}
+  .v2-parchment{background:linear-gradient(180deg,rgba(245,240,224,0.03),rgba(245,240,224,0.01));border:1px solid var(--v-border-gold);border-radius:var(--v-radius-lg);padding:var(--v-space-2xl) var(--v-space-xl);position:relative}
+  .v2-parchment::before,.v2-parchment::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:80%;height:3px;background:linear-gradient(90deg,transparent,var(--v-gold-30),transparent)}
+  .v2-parchment::before{top:8px}
+  .v2-parchment::after{bottom:8px}
+  .v2-seal{position:absolute;top:-24px;left:50%;transform:translateX(-50%);width:48px;height:48px;background:radial-gradient(circle,var(--v-crimson),#5a1515);border:2px solid var(--v-gold-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:var(--v-shadow-gold)}
+  .v2-title{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:24px;font-weight:700;text-align:center;letter-spacing:2px;text-transform:uppercase;margin:var(--v-space-md) 0 var(--v-space-sm);text-shadow:0 0 16px var(--v-gold-30)}
+  .v2-subtitle{text-align:center;font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-xl)}
+  .v2-subtitle::before,.v2-subtitle::after{content:"◆";color:var(--v-gold-dim);margin:0 var(--v-space-md)}
+  .v2-desc{font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.8;font-style:italic;text-align:center;margin:0 var(--v-space-lg) var(--v-space-xl);padding:0 var(--v-space-md);position:relative}
+  .v2-desc::before{content:"“";position:absolute;left:-8px;top:-12px;font-size:48px;color:var(--v-gold-30);font-family:var(--v-font-display)}
+  .v2-desc::after{content:"”";position:absolute;right:-8px;bottom:-24px;font-size:48px;color:var(--v-gold-30);font-family:var(--v-font-display)}
+  .v2-divider{display:flex;align-items:center;gap:var(--v-space-md);margin:var(--v-space-xl) 0}
+  .v2-divider::before,.v2-divider::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--v-gold-30),transparent)}
+  .v2-divider-ic{color:var(--v-gold);font-size:14px}
+  .v2-section-head{text-align:center;font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-lg);font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:var(--v-space-lg)}
+  .v2-objective-block{background:var(--v-gold-05);border:1px dashed var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-lg);text-align:center}
+  .v2-objective-text{font-family:var(--v-font);color:var(--v-text-bright);font-size:var(--v-font-lg);line-height:1.5;margin-bottom:var(--v-space-md)}
+  .v2-progress{display:flex;align-items:center;gap:var(--v-space-md);justify-content:center}
+  .v2-progress-dot{width:14px;height:14px;border-radius:50%;background:var(--v-bar-track);border:2px solid var(--v-border-gold)}
+  .v2-progress-dot.done{background:var(--v-gold);border-color:var(--v-gold-light);box-shadow:0 0 8px var(--v-gold-40)}
+  .v2-progress-line{width:24px;height:1px;background:var(--v-border-gold)}
+  .v2-progress-line.done{background:var(--v-gold)}
+  .v2-progress-text{margin-left:var(--v-space-sm);font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-sm);font-weight:600}
+  .v2-rewards-row{display:flex;gap:var(--v-space-md);justify-content:center;flex-wrap:wrap}
+  .v2-reward{background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-md) var(--v-space-lg);min-width:110px;text-align:center}
+  .v2-reward-ic{font-size:20px;display:block;margin-bottom:var(--v-space-xs)}
+  .v2-reward-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-lg);font-weight:700;display:block}
+  .v2-reward-label{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase}
+  .v2-footer{text-align:center;margin-top:var(--v-space-xl);font-family:var(--v-font);color:var(--v-text-faint);font-size:var(--v-font-xs);font-style:italic;letter-spacing:1px}
+  .v2-footer b{color:var(--v-gold);font-weight:700;font-style:normal}
+
+  /* ============ VARIANT 3 — GRIMOIRE DUAL ============ */
+  .v3-body{flex:1;overflow-y:auto;padding:var(--v-space-lg)}
+  .v3-banner{background:linear-gradient(135deg,rgba(123,32,32,0.2),transparent 60%),var(--v-bg-card);border:1px solid var(--v-border-gold);border-top:3px solid var(--v-gold);border-radius:var(--v-radius);padding:var(--v-space-lg) var(--v-space-xl);margin-bottom:var(--v-space-lg);position:relative}
+  .v3-cat-badge{position:absolute;top:-10px;right:var(--v-space-lg);background:var(--v-crimson);color:var(--v-gold-light);padding:4px 12px;border-radius:var(--v-radius-pill);font-family:var(--v-font-display);font-size:var(--v-font-xs);letter-spacing:2px;font-weight:700;text-transform:uppercase;border:1px solid var(--v-gold-dim)}
+  .v3-banner-row{display:flex;align-items:center;gap:var(--v-space-lg)}
+  .v3-banner-ic{font-size:40px;filter:drop-shadow(0 0 8px var(--v-gold-40))}
+  .v3-banner-text{flex:1}
+  .v3-banner-title{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-2xl);font-weight:700;letter-spacing:1px;line-height:1.2;margin-bottom:4px}
+  .v3-banner-sub{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-sm);font-style:italic}
+  .v3-narrative{background:var(--v-gold-03);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-lg);margin-bottom:var(--v-space-lg);font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.6;font-style:italic;position:relative}
+  .v3-narrative::before{content:"✦";position:absolute;top:8px;right:12px;color:var(--v-gold-30);font-size:16px}
+  .v3-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--v-space-md);margin-bottom:var(--v-space-lg)}
+  .v3-panel{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-lg)}
+  .v3-panel-head{display:flex;align-items:center;gap:var(--v-space-sm);margin-bottom:var(--v-space-md);padding-bottom:var(--v-space-sm);border-bottom:1px solid var(--v-border-gold)}
+  .v3-panel-ic{color:var(--v-gold);font-size:16px}
+  .v3-panel-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+  .v3-panel-count{margin-left:auto;font-family:var(--v-font);color:var(--v-gold-light);font-size:var(--v-font-sm);font-weight:600}
+  .v3-obj{display:flex;align-items:flex-start;gap:var(--v-space-sm);padding:var(--v-space-sm) 0;font-family:var(--v-font);font-size:var(--v-font-sm);line-height:1.4}
+  .v3-obj-ic{color:var(--v-gold);flex-shrink:0;width:14px;text-align:center}
+  .v3-obj--done .v3-obj-ic{color:var(--v-success)}
+  .v3-obj--done{color:var(--v-text-dim);text-decoration:line-through}
+  .v3-obj--current{color:var(--v-text-bright);font-weight:600}
+  .v3-obj--future{color:var(--v-text-faint);font-style:italic}
+  .v3-reward-list{display:flex;flex-direction:column;gap:var(--v-space-sm)}
+  .v3-reward-row{display:flex;align-items:center;gap:var(--v-space-sm);padding:var(--v-space-sm) 0;font-family:var(--v-font);font-size:var(--v-font-sm);border-bottom:1px dashed var(--v-border-gold)}
+  .v3-reward-row:last-child{border-bottom:none}
+  .v3-reward-row-ic{font-size:16px;width:22px;text-align:center}
+  .v3-reward-row-name{flex:1;color:var(--v-text)}
+  .v3-reward-row-val{color:var(--v-gold-light);font-weight:700;font-family:var(--v-font-display)}
+  .v3-progress-wrap{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-lg)}
+  .v3-progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--v-space-sm);font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);letter-spacing:1px;text-transform:uppercase}
+  .v3-progress-bar{height:12px;background:var(--v-bar-track);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-sm);overflow:hidden}
+  .v3-progress-fill{height:100%;width:33%;background:repeating-linear-gradient(45deg,var(--v-gold),var(--v-gold) 10px,var(--v-gold-light) 10px,var(--v-gold-light) 20px);box-shadow:inset 0 0 8px var(--v-gold-40)}
+
+  /* ============ VARIANT 4 — MODERN COMPACT ============ */
+  .v4-body{flex:1;overflow-y:auto;background:var(--v-bg);padding:var(--v-space-lg)}
+  .v4-card{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius-lg);overflow:hidden;margin-bottom:var(--v-space-md)}
+  .v4-top{background:linear-gradient(90deg,var(--v-gold-15),transparent 70%);padding:var(--v-space-lg);border-bottom:1px solid var(--v-border-gold);display:flex;align-items:center;gap:var(--v-space-lg)}
+  .v4-top-ic{width:48px;height:48px;border-radius:var(--v-radius);background:var(--v-bg);border:1px solid var(--v-gold);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+  .v4-top-info{flex:1;min-width:0}
+  .v4-top-cat{font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px}
+  .v4-top-title{font-family:var(--v-font-display);color:var(--v-text-bright);font-size:var(--v-font-xl);font-weight:700;letter-spacing:1px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .v4-pct-ring{width:52px;height:52px;position:relative;flex-shrink:0}
+  .v4-pct-ring svg{transform:rotate(-90deg)}
+  .v4-pct-bg{stroke:var(--v-bar-track);fill:none;stroke-width:4}
+  .v4-pct-fill{stroke:url(#v4grad);fill:none;stroke-width:4;stroke-linecap:round;stroke-dasharray:62 188;transition:stroke-dasharray var(--v-transition-slow)}
+  .v4-pct-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-base);font-weight:700}
+  .v4-desc{padding:var(--v-space-lg);font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.5;font-style:italic;border-bottom:1px solid var(--v-border)}
+  .v4-body-section{padding:var(--v-space-lg)}
+  .v4-label{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-sm);display:flex;align-items:center;gap:var(--v-space-xs)}
+  .v4-timeline{position:relative;padding-left:var(--v-space-xl)}
+  .v4-timeline::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--v-gold-30),var(--v-gold),var(--v-gold-30))}
+  .v4-t-step{position:relative;padding:var(--v-space-sm) 0;font-family:var(--v-font);font-size:var(--v-font-base);line-height:1.4}
+  .v4-t-step::before{content:"";position:absolute;left:-24px;top:10px;width:12px;height:12px;border-radius:50%;background:var(--v-bg);border:2px solid var(--v-border-gold)}
+  .v4-t-step--done::before{background:var(--v-gold);border-color:var(--v-gold-light);box-shadow:0 0 8px var(--v-gold-40)}
+  .v4-t-step--current::before{background:var(--v-bg);border-color:var(--v-gold);box-shadow:0 0 12px var(--v-gold-60);animation:v4pulse 1.8s infinite}
+  .v4-t-step--done{color:var(--v-text-dim)}
+  .v4-t-step--current{color:var(--v-text-bright);font-weight:600}
+  .v4-t-step--future{color:var(--v-text-faint)}
+  .v4-rewards-strip{display:flex;gap:var(--v-space-sm);background:var(--v-bg-raised);padding:var(--v-space-md);border-radius:var(--v-radius);border:1px solid var(--v-border)}
+  .v4-reward-pill{flex:1;display:flex;align-items:center;gap:var(--v-space-sm);background:var(--v-bg-card);padding:var(--v-space-sm) var(--v-space-md);border-radius:var(--v-radius-pill);border:1px solid var(--v-border-gold);min-width:0}
+  .v4-r-ic{font-size:16px;flex-shrink:0}
+  .v4-r-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-sm);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .v4-giver-row{display:flex;align-items:center;gap:var(--v-space-md);padding:var(--v-space-md);background:var(--v-bg-raised);border:1px solid var(--v-border);border-radius:var(--v-radius);margin-top:var(--v-space-md)}
+  .v4-giver-ic{width:32px;height:32px;border-radius:50%;background:var(--v-gold-15);border:1px solid var(--v-gold);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .v4-giver-text{flex:1;min-width:0}
+  .v4-giver-name{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-base);font-weight:600}
+  .v4-giver-loc{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs)}
+  @keyframes v4pulse{0%,100%{box-shadow:0 0 0 0 var(--v-gold-60)}50%{box-shadow:0 0 0 8px transparent}}
+
+  /* ============ VARIANT 5 — EPIC HERO BANNER ============ */
+  .v5-body{flex:1;overflow-y:auto;background:var(--v-bg)}
+  .v5-hero{height:220px;background:
+    radial-gradient(ellipse at center top,var(--v-gold-25),transparent 60%),
+    radial-gradient(ellipse at center bottom,var(--v-crimson-glow),transparent 60%),
+    linear-gradient(180deg,#1a1510,var(--v-bg));position:relative;border-bottom:2px solid var(--v-gold-dim);display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:var(--v-space-xl)}
+  .v5-hero::before,.v5-hero::after{content:"";position:absolute;top:0;bottom:0;width:2px;background:linear-gradient(180deg,transparent,var(--v-gold-50),transparent)}
+  .v5-hero::before{left:20px}
+  .v5-hero::after{right:20px}
+  .v5-hero-badge{position:absolute;top:16px;left:50%;transform:translateX(-50%);background:var(--v-crimson);color:var(--v-gold-light);padding:3px 14px;border-radius:var(--v-radius-pill);font-family:var(--v-font-display);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;font-weight:700;border:1px solid var(--v-gold);box-shadow:0 4px 12px rgba(0,0,0,0.5)}
+  .v5-hero-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--v-gold-dim),var(--v-gold),var(--v-gold-light));border:3px solid var(--v-gold-light);display:flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:var(--v-space-md);box-shadow:0 0 30px var(--v-gold-40),0 6px 16px rgba(0,0,0,0.5)}
+  .v5-hero-title{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:26px;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-align:center;text-shadow:0 2px 4px rgba(0,0,0,0.8),0 0 24px var(--v-gold-50);margin-bottom:var(--v-space-xs)}
+  .v5-hero-chapter{font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:3px;text-transform:uppercase;text-align:center}
+  .v5-content{padding:var(--v-space-xl)}
+  .v5-giver-card{display:flex;gap:var(--v-space-md);padding:var(--v-space-lg);background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);margin-bottom:var(--v-space-lg);align-items:flex-start}
+  .v5-giver-av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#5a3e10,#c4953a);border:2px solid var(--v-gold-light);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .v5-giver-quote{flex:1;font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.5;font-style:italic;position:relative}
+  .v5-giver-quote::before{content:"“";font-family:var(--v-font-display);color:var(--v-gold-30);font-size:40px;position:absolute;left:-6px;top:-18px;line-height:1}
+  .v5-giver-name{display:block;margin-top:var(--v-space-md);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-sm);font-weight:700;font-style:normal;letter-spacing:1px}
+  .v5-objective-card{background:linear-gradient(135deg,var(--v-gold-15),transparent 80%);border-left:4px solid var(--v-gold);border-radius:0 var(--v-radius) var(--v-radius) 0;padding:var(--v-space-lg);margin-bottom:var(--v-space-lg)}
+  .v5-obj-label{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-sm);display:flex;align-items:center;gap:var(--v-space-sm)}
+  .v5-obj-label::before{content:"";width:8px;height:8px;background:var(--v-gold);border-radius:50%;box-shadow:0 0 8px var(--v-gold);animation:v5blink 1.5s infinite}
+  .v5-obj-text{font-family:var(--v-font);color:var(--v-text-bright);font-size:var(--v-font-lg);line-height:1.4;margin-bottom:var(--v-space-md)}
+  .v5-obj-bar-wrap{background:var(--v-bar-track);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-pill);height:14px;overflow:hidden;position:relative}
+  .v5-obj-bar-fill{height:100%;width:33%;background:linear-gradient(90deg,var(--v-gold-dim),var(--v-gold),var(--v-gold-light));box-shadow:0 0 12px var(--v-gold-50);transition:width var(--v-transition-slow);position:relative}
+  .v5-obj-bar-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:v5shine 2.5s infinite}
+  .v5-obj-count{margin-top:var(--v-space-sm);text-align:right;font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);font-weight:700;letter-spacing:1px}
+  .v5-treasure{background:
+    radial-gradient(ellipse at center top,var(--v-gold-10),transparent 70%),
+    var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-lg);padding:var(--v-space-xl);margin-bottom:var(--v-space-lg);position:relative;overflow:hidden}
+  .v5-treasure-head{text-align:center;font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:var(--v-space-lg);position:relative}
+  .v5-treasure-head::before,.v5-treasure-head::after{content:"";position:absolute;top:50%;width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--v-gold))}
+  .v5-treasure-head::before{left:10px}
+  .v5-treasure-head::after{right:10px;background:linear-gradient(270deg,transparent,var(--v-gold))}
+  .v5-treasure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--v-space-md)}
+  .v5-tres-cell{text-align:center;padding:var(--v-space-md);background:var(--v-bg);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);transition:all var(--v-transition-base);position:relative}
+  .v5-tres-cell::before{content:"";position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:8px;height:8px;background:var(--v-gold);border-radius:50%;box-shadow:0 0 8px var(--v-gold)}
+  .v5-tres-ic{font-size:28px;display:block;margin-bottom:var(--v-space-xs);filter:drop-shadow(0 0 6px var(--v-gold-40))}
+  .v5-tres-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-lg);font-weight:700;display:block}
+  .v5-tres-lbl{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase}
+  .v5-journey{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-lg)}
+  .v5-j-head{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-md);text-align:center;padding-bottom:var(--v-space-sm);border-bottom:1px solid var(--v-border-gold)}
+  .v5-j-list{display:flex;flex-direction:column;gap:var(--v-space-sm)}
+  .v5-j-step{display:flex;align-items:center;gap:var(--v-space-md);padding:var(--v-space-sm) var(--v-space-md);background:var(--v-bg);border-radius:var(--v-radius-sm);border-left:2px solid var(--v-border)}
+  .v5-j-step--done{border-left-color:var(--v-gold);opacity:0.7}
+  .v5-j-step--current{border-left-color:var(--v-gold-light);background:var(--v-gold-05);box-shadow:inset 0 0 12px var(--v-gold-10)}
+  .v5-j-step--future{border-left-color:var(--v-border);opacity:0.5}
+  .v5-j-step-ic{width:20px;text-align:center;color:var(--v-gold);font-weight:700}
+  .v5-j-step--done .v5-j-step-ic{color:var(--v-success)}
+  .v5-j-step--future .v5-j-step-ic{color:var(--v-text-faint)}
+  .v5-j-step-text{flex:1;font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-sm);line-height:1.4}
+  .v5-j-step--done .v5-j-step-text{text-decoration:line-through;color:var(--v-text-dim)}
+  .v5-j-step--future .v5-j-step-text{color:var(--v-text-faint);font-style:italic}
+  @keyframes v5blink{0%,100%{opacity:1}50%{opacity:0.3}}
+  @keyframes v5shine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+  /* shared bottom CTA */
+  .qd-cta{padding:var(--v-space-lg);background:linear-gradient(180deg,transparent,var(--v-bg));border-top:1px solid var(--v-border)}
+  .qd-btn{width:100%;padding:var(--v-space-lg);background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));color:var(--v-bg);border:1px solid var(--v-gold-light);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-lg);font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4),inset 0 1px 0 var(--v-gold-light);transition:all var(--v-transition-base)}
+  .qd-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,0.5),inset 0 1px 0 var(--v-gold-light),0 0 24px var(--v-gold-40)}
+</style>
+</head>
+<body>
+<div class="mockups-shell">
+  <h1 class="mockups-title">◆ Mockups — Tela de Missão ◆</h1>
+  <p class="mockups-sub">5 propostas usando o design system Valdoria. Todas em viewport 430×900 (smartphone).</p>
+
+  <div class="mockups-grid">
+
+    <!-- ============ VARIANT 1 ============ -->
+    <div class="mockup-frame">
+      <div class="mockup-label">V1 — Hero Tablet</div>
+      <div class="phone">
+        <div class="qd-header">
+          <div class="qd-header-back">◀</div>
+          <div class="qd-header-title">MISSÕES</div>
+          <div class="qd-header-spacer"></div>
+        </div>
+        <div class="v1-body">
+          <div class="v1-hero">
+            <span class="v1-hero-icon">📜</span>
+            <div class="v1-hero-title">Problemas no Porão</div>
+            <div class="v1-hero-chapter">Capítulo 1 de 4</div>
+            <div class="v1-hero-status-row">
+              <span class="v1-hero-chip">● ATIVA</span>
+              <span class="v1-hero-chip">HISTÓRIA</span>
+            </div>
+          </div>
+          <div class="v1-desc">Martha está ouvindo barulhos estranhos e perdendo estoque no porão da estalagem.</div>
+          <div class="v1-objective">
+            <div class="v1-objective-label">◆ Objetivo Atual</div>
+            <div class="v1-objective-text">Elimine a infestação de ratos gigantes.</div>
+            <div class="v1-progress-wrap">
+              <div class="v1-progress-bar"><div class="v1-progress-fill"></div></div>
+              <div class="v1-progress-text"><span>1 de 3 ratos abatidos</span><span>33%</span></div>
+            </div>
+          </div>
+          <div class="v1-rewards">
+            <div class="v1-section-label">Recompensas</div>
+            <div class="v1-rewards-grid">
+              <div class="v1-reward-card">
+                <span class="v1-reward-icon">✨</span>
+                <div class="v1-reward-value">150</div>
+                <div class="v1-reward-label">XP</div>
+              </div>
+              <div class="v1-reward-card">
+                <span class="v1-reward-icon">💰</span>
+                <div class="v1-reward-value">50</div>
+                <div class="v1-reward-label">Valdoritas</div>
+              </div>
+              <div class="v1-reward-card">
+                <span class="v1-reward-icon">🗝️</span>
+                <div class="v1-reward-value" style="font-size:var(--v-font-sm)">Chave do Porão</div>
+                <div class="v1-reward-label">Item</div>
+              </div>
+            </div>
+          </div>
+          <div class="v1-steps">
+            <div class="v1-steps-label">▸ Etapas</div>
+            <div class="v1-step v1-step--done">
+              <div class="v1-step-marker">✓</div>
+              <div class="v1-step-text">Entre no porão da Estalagem Descanso do Viajante.</div>
+            </div>
+            <div class="v1-step v1-step--current">
+              <div class="v1-step-marker">●</div>
+              <div class="v1-step-text">Elimine a infestação de ratos gigantes.</div>
+            </div>
+            <div class="v1-step v1-step--future">
+              <div class="v1-step-marker">○</div>
+              <div class="v1-step-text">Relate o sucesso para Martha.</div>
+            </div>
+          </div>
+          <div class="v1-giver">
+            <div class="v1-giver-avatar">🧙</div>
+            <div class="v1-giver-info">
+              <div class="v1-giver-name">Martha</div>
+              <div class="v1-giver-loc">Estalagem Descanso do Viajante</div>
+            </div>
+          </div>
+        </div>
+        <div class="qd-cta"><button class="qd-btn">◆ Partir para Aventura</button></div>
+      </div>
+    </div>
+
+    <!-- ============ VARIANT 2 ============ -->
+    <div class="mockup-frame">
+      <div class="mockup-label">V2 — Pergaminho Selado</div>
+      <div class="phone">
+        <div class="qd-header">
+          <div class="qd-header-back">◀</div>
+          <div class="qd-header-title">MISSÕES</div>
+          <div class="qd-header-spacer"></div>
+        </div>
+        <div class="v2-body">
+          <div class="v2-parchment">
+            <div class="v2-seal">✉</div>
+            <h2 class="v2-title">Problemas no Porão</h2>
+            <div class="v2-subtitle">Capítulo 1 de 4</div>
+            <p class="v2-desc">Martha está ouvindo barulhos estranhos e perdendo estoque no porão da estalagem.</p>
+            <div class="v2-divider"><span class="v2-divider-ic">◆</span></div>
+            <div class="v2-section-head">Objetivo Atual</div>
+            <div class="v2-objective-block">
+              <div class="v2-objective-text">Elimine a infestação de <b style="color:var(--v-gold-light)">ratos gigantes</b></div>
+              <div class="v2-progress">
+                <span class="v2-progress-dot done"></span>
+                <span class="v2-progress-line done"></span>
+                <span class="v2-progress-dot"></span>
+                <span class="v2-progress-line"></span>
+                <span class="v2-progress-dot"></span>
+                <span class="v2-progress-text">1 / 3</span>
+              </div>
+            </div>
+            <div class="v2-divider"><span class="v2-divider-ic">◆</span></div>
+            <div class="v2-section-head">Recompensas</div>
+            <div class="v2-rewards-row">
+              <div class="v2-reward">
+                <span class="v2-reward-ic">✨</span>
+                <span class="v2-reward-val">+150</span>
+                <span class="v2-reward-label">XP</span>
+              </div>
+              <div class="v2-reward">
+                <span class="v2-reward-ic">💰</span>
+                <span class="v2-reward-val">+50</span>
+                <span class="v2-reward-label">Ouro</span>
+              </div>
+              <div class="v2-reward">
+                <span class="v2-reward-ic">🗝️</span>
+                <span class="v2-reward-val" style="font-size:var(--v-font-sm)">Chave</span>
+                <span class="v2-reward-label">do Porão</span>
+              </div>
+            </div>
+            <div class="v2-footer">— Dado por <b>Martha na Estalagem</b> —</div>
+          </div>
+        </div>
+        <div class="qd-cta"><button class="qd-btn">◆ Partir para Aventura</button></div>
+      </div>
+    </div>
+
+    <!-- ============ VARIANT 3 ============ -->
+    <div class="mockup-frame">
+      <div class="mockup-label">V3 — Grimório Dual</div>
+      <div class="phone">
+        <div class="qd-header">
+          <div class="qd-header-back">◀</div>
+          <div class="qd-header-title">MISSÕES</div>
+          <div class="qd-header-spacer"></div>
+        </div>
+        <div class="v3-body">
+          <div class="v3-banner">
+            <div class="v3-cat-badge">História</div>
+            <div class="v3-banner-row">
+              <div class="v3-banner-ic">📜</div>
+              <div class="v3-banner-text">
+                <div class="v3-banner-title">Problemas no Porão</div>
+                <div class="v3-banner-sub">Capítulo 1 de 4 • Em andamento</div>
+              </div>
+            </div>
+          </div>
+          <div class="v3-narrative">Martha está ouvindo barulhos estranhos e perdendo estoque no porão da estalagem.</div>
+          <div class="v3-progress-wrap" style="margin-bottom:var(--v-space-md)">
+            <div class="v3-progress-top"><span>Progresso</span><span>1 / 3 ratos</span></div>
+            <div class="v3-progress-bar"><div class="v3-progress-fill"></div></div>
+          </div>
+          <div class="v3-grid">
+            <div class="v3-panel">
+              <div class="v3-panel-head">
+                <span class="v3-panel-ic">⚔</span>
+                <span class="v3-panel-title">Etapas</span>
+                <span class="v3-panel-count">1/3</span>
+              </div>
+              <div class="v3-obj v3-obj--done"><span class="v3-obj-ic">✓</span>Entrar no porão</div>
+              <div class="v3-obj v3-obj--current"><span class="v3-obj-ic">●</span>Eliminar ratos gigantes</div>
+              <div class="v3-obj v3-obj--future"><span class="v3-obj-ic">○</span>Relatar a Martha</div>
+            </div>
+            <div class="v3-panel">
+              <div class="v3-panel-head">
+                <span class="v3-panel-ic">💎</span>
+                <span class="v3-panel-title">Recompensas</span>
+              </div>
+              <div class="v3-reward-list">
+                <div class="v3-reward-row">
+                  <span class="v3-reward-row-ic">✨</span>
+                  <span class="v3-reward-row-name">Experiência</span>
+                  <span class="v3-reward-row-val">150</span>
+                </div>
+                <div class="v3-reward-row">
+                  <span class="v3-reward-row-ic">💰</span>
+                  <span class="v3-reward-row-name">Valdoritas</span>
+                  <span class="v3-reward-row-val">50</span>
+                </div>
+                <div class="v3-reward-row">
+                  <span class="v3-reward-row-ic">🗝️</span>
+                  <span class="v3-reward-row-name">Chave Porão</span>
+                  <span class="v3-reward-row-val">+1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="v3-panel">
+            <div class="v3-panel-head">
+              <span class="v3-panel-ic">🧙</span>
+              <span class="v3-panel-title">Contratante</span>
+            </div>
+            <div style="font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.5;font-style:italic">
+              "Martha na Estalagem aguarda notícias suas..."
+            </div>
+            <div style="margin-top:var(--v-space-sm);font-family:var(--v-font);color:var(--v-gold-light);font-size:var(--v-font-sm);font-weight:600">
+              — Martha, Estalagem Descanso do Viajante
+            </div>
+          </div>
+        </div>
+        <div class="qd-cta"><button class="qd-btn">◆ Partir para Aventura</button></div>
+      </div>
+    </div>
+
+    <!-- ============ VARIANT 4 ============ -->
+    <div class="mockup-frame">
+      <div class="mockup-label">V4 — Modern Compact</div>
+      <div class="phone">
+        <div class="qd-header">
+          <div class="qd-header-back">◀</div>
+          <div class="qd-header-title">MISSÕES</div>
+          <div class="qd-header-spacer"></div>
+        </div>
+        <div class="v4-body">
+          <div class="v4-card">
+            <div class="v4-top">
+              <div class="v4-top-ic">📜</div>
+              <div class="v4-top-info">
+                <div class="v4-top-cat">◆ História · Cap. 1/4</div>
+                <div class="v4-top-title">Problemas no Porão</div>
+              </div>
+              <div class="v4-pct-ring">
+                <svg width="52" height="52" viewBox="0 0 52 52">
+                  <defs><linearGradient id="v4grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="var(--v-gold-dim)"/>
+                    <stop offset="100%" stop-color="var(--v-gold-light)"/>
+                  </linearGradient></defs>
+                  <circle class="v4-pct-bg" cx="26" cy="26" r="22"/>
+                  <circle class="v4-pct-fill" cx="26" cy="26" r="22"/>
+                </svg>
+                <div class="v4-pct-text">33%</div>
+              </div>
+            </div>
+            <div class="v4-desc">Martha está ouvindo barulhos estranhos e perdendo estoque no porão da estalagem.</div>
+            <div class="v4-body-section">
+              <div class="v4-label">▸ Sua Jornada</div>
+              <div class="v4-timeline">
+                <div class="v4-t-step v4-t-step--done">Entre no porão da Estalagem Descanso do Viajante.</div>
+                <div class="v4-t-step v4-t-step--current">Elimine a infestação de ratos gigantes. <b style="color:var(--v-gold)">(1/3)</b></div>
+                <div class="v4-t-step v4-t-step--future">Relate o sucesso para Martha.</div>
+              </div>
+            </div>
+            <div class="v4-body-section" style="padding-top:0">
+              <div class="v4-label">◆ Recompensas Prometidas</div>
+              <div class="v4-rewards-strip">
+                <div class="v4-reward-pill"><span class="v4-r-ic">✨</span><span class="v4-r-val">150 XP</span></div>
+                <div class="v4-reward-pill"><span class="v4-r-ic">💰</span><span class="v4-r-val">50</span></div>
+                <div class="v4-reward-pill"><span class="v4-r-ic">🗝️</span><span class="v4-r-val">Chave</span></div>
+              </div>
+              <div class="v4-giver-row">
+                <div class="v4-giver-ic">🧙</div>
+                <div class="v4-giver-text">
+                  <div class="v4-giver-name">Martha</div>
+                  <div class="v4-giver-loc">Estalagem • "aguarda notícias suas..."</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="qd-cta"><button class="qd-btn">◆ Partir para Aventura</button></div>
+      </div>
+    </div>
+
+    <!-- ============ VARIANT 5 ============ -->
+    <div class="mockup-frame">
+      <div class="mockup-label">V5 — Epic Hero Banner</div>
+      <div class="phone">
+        <div class="qd-header">
+          <div class="qd-header-back">◀</div>
+          <div class="qd-header-title">MISSÕES</div>
+          <div class="qd-header-spacer"></div>
+        </div>
+        <div class="v5-body">
+          <div class="v5-hero">
+            <div class="v5-hero-badge">◆ História</div>
+            <div class="v5-hero-avatar">📜</div>
+            <div class="v5-hero-title">Problemas no Porão</div>
+            <div class="v5-hero-chapter">✦ Capítulo 1 de 4 ✦</div>
+          </div>
+          <div class="v5-content">
+            <div class="v5-giver-card">
+              <div class="v5-giver-av">🧙</div>
+              <div class="v5-giver-quote">
+                Martha está ouvindo barulhos estranhos e perdendo estoque no porão da estalagem.
+                <span class="v5-giver-name">— Martha, Estalagem</span>
+              </div>
+            </div>
+            <div class="v5-objective-card">
+              <div class="v5-obj-label">Objetivo Atual</div>
+              <div class="v5-obj-text">Elimine a infestação de ratos gigantes.</div>
+              <div class="v5-obj-bar-wrap"><div class="v5-obj-bar-fill"></div></div>
+              <div class="v5-obj-count">1 / 3 ABATIDOS</div>
+            </div>
+            <div class="v5-treasure">
+              <div class="v5-treasure-head">Recompensas Prometidas</div>
+              <div class="v5-treasure-grid">
+                <div class="v5-tres-cell">
+                  <span class="v5-tres-ic">✨</span>
+                  <span class="v5-tres-val">+150</span>
+                  <span class="v5-tres-lbl">Experiência</span>
+                </div>
+                <div class="v5-tres-cell">
+                  <span class="v5-tres-ic">💰</span>
+                  <span class="v5-tres-val">+50</span>
+                  <span class="v5-tres-lbl">Valdoritas</span>
+                </div>
+                <div class="v5-tres-cell">
+                  <span class="v5-tres-ic">🗝️</span>
+                  <span class="v5-tres-val" style="font-size:var(--v-font-sm)">Chave</span>
+                  <span class="v5-tres-lbl">do Porão</span>
+                </div>
+              </div>
+            </div>
+            <div class="v5-journey">
+              <div class="v5-j-head">✦ Sua Jornada ✦</div>
+              <div class="v5-j-list">
+                <div class="v5-j-step v5-j-step--done">
+                  <span class="v5-j-step-ic">✓</span>
+                  <span class="v5-j-step-text">Entrou no porão da Estalagem</span>
+                </div>
+                <div class="v5-j-step v5-j-step--current">
+                  <span class="v5-j-step-ic">●</span>
+                  <span class="v5-j-step-text">Eliminar infestação de ratos gigantes</span>
+                </div>
+                <div class="v5-j-step v5-j-step--future">
+                  <span class="v5-j-step-ic">○</span>
+                  <span class="v5-j-step-text">Relatar o sucesso para Martha</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="qd-cta"><button class="qd-btn">◆ Partir para Aventura</button></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
