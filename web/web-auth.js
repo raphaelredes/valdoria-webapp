@@ -42,12 +42,22 @@ async function discoverApiBase() {
     }
     // Clear old generic key if exists (migration)
     localStorage.removeItem(WEB_API_KEY);
-    // 2. Try environment-specific api-url file
+    // 2. Try environment-specific api-url file (ONLY source of truth)
+    // CROSS-ENV ISOLATION FIX 2026-04-11:
+    // Removed: fallback to generic api-url.json (would cause @raphaelrego
+    // on DEV to see PROD characters when env-specific file was missing).
+    // Now: if api-url-{env}.json fails, we FAIL FAST with an error shown
+    // to the user — never silently mix environments.
     var env = _isProd ? 'prod' : 'dev';
     try {
         var resp = await fetch('../api-url-' + env + '.json?t=' + Date.now(), { cache: 'no-store' });
         if (resp.ok) {
             var data = await resp.json();
+            // Defensive: verify the env field matches (if present) — prevents cross-env contamination
+            if (data.env && data.env !== env) {
+                console.error('[WEB-AUTH] api-url-' + env + '.json has wrong env field: ' + data.env + ' (expected ' + env + ')');
+                return false;
+            }
             if (data.url) {
                 _apiBase = data.url.replace(/\/$/, '');
                 localStorage.setItem(WEB_API_KEY, _apiBase);
@@ -57,27 +67,8 @@ async function discoverApiBase() {
     } catch (e) {
         console.warn('[WEB-AUTH] api-url-' + env + '.json not found', e);
     }
-    // 3. Fallback to local api-url.json
-    try {
-        var resp2 = await fetch('api-url.json?t=' + Date.now(), { cache: 'no-store' });
-        if (resp2.ok) {
-            var data2 = await resp2.json();
-            if (data2.url) {
-                _apiBase = data2.url.replace(/\/$/, '');
-                localStorage.setItem(WEB_API_KEY, _apiBase);
-                return true;
-            }
-        }
-    } catch (e2) {
-        console.warn('[WEB-AUTH] api-url.json not found', e2);
-    }
-    // 4. Prompt user (last resort)
-    var url = prompt('URL do servidor Valdoria (ex: https://valdoria.example.com):');
-    if (url) {
-        _apiBase = url.replace(/\/$/, '');
-        localStorage.setItem(WEB_API_KEY, _apiBase);
-        return true;
-    }
+    // 3. No fallback — show explicit env-isolation error
+    console.error('[WEB-AUTH] api-url-' + env + '.json missing or invalid — aborting discovery (no generic fallback to preserve env isolation)');
     return false;
 }
 
