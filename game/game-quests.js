@@ -7,7 +7,7 @@ if(data.story&&data.story.length>0){var storyHdr=_questSectionHdr('\u2694\ufe0f'
 if(data.daily&&data.daily.length>0){var dailyHdr=_questSectionHdr('\ud83d\udd04','Tarefas do Dia');dailyHdr.setAttribute('data-qsection','daily');wrap.appendChild(dailyHdr);for(var di=0;di<data.daily.length;di++){var dCard=_renderQCard(data.daily[di],true);dCard.setAttribute('data-qsection','daily');dCard.setAttribute('data-qtitle',(data.daily[di].title||'').toLowerCase());wrap.appendChild(dCard);}}
 if(data.done&&data.done.length>0){var doneHdr=_questSectionHdr('\u2705','Feitos Realizados');doneHdr.setAttribute('data-qsection','done');wrap.appendChild(doneHdr);for(var ci=0;ci<data.done.length;ci++){var d=data.done[ci];var doneCard=document.createElement('div');doneCard.className='quest-card quest-card--done';doneCard.setAttribute('data-qsection','done');doneCard.setAttribute('data-qtitle',(d.title||'').toLowerCase());doneCard.innerHTML='<div class="quest-card-header">'
 +'<span class="quest-title quest-title--done">'+vEsc(d.title)+'</span></div>'
-+'<div class="quest-rewards-mini">\u2728 '+d.xp+' XP \u00b7 \ud83d\udcb0 '+d.gold+' <span class="vi vi-coin sm"></span></div>';wrap.appendChild(doneCard);}}
++'<div class="quest-rewards-mini">\u2728 '+d.xp+' XP \u00b7 <span class="vi vi-coin sm"></span> '+d.gold+' Valdoritas</div>';wrap.appendChild(doneCard);}}
 if(data.failed&&data.failed.length>0){var failHdr=_questSectionHdr('\u274c','Miss\u00f5es Perdidas');failHdr.setAttribute('data-qsection','done');wrap.appendChild(failHdr);for(var fi=0;fi<data.failed.length;fi++){var fq=data.failed[fi];var failCard=document.createElement('div');failCard.className='quest-card quest-card--failed';failCard.setAttribute('data-qsection','done');failCard.setAttribute('data-qtitle',(fq.title||'').toLowerCase());failCard.innerHTML='<div class="quest-card-header">'
 +'<span class="quest-title quest-title--failed">\ud83d\udc80 '+vEsc(fq.title)+'</span></div>';if(fq.cb_retry){var retryBtn=document.createElement('button');retryBtn.className='quest-retry-btn';retryBtn.textContent='\ud83d\udd04 Tentar Novamente';(function(cb){retryBtn.onclick=function(e){e.stopPropagation();doAction(cb);};})(fq.cb_retry);failCard.appendChild(retryBtn);}
 wrap.appendChild(failCard);}}
@@ -48,9 +48,16 @@ function _qdMakePanelHead(iconText, titleText, countText) {
     if (countText != null) head.appendChild(_qdMakeEl('span', 'v3-panel-count', countText));
     return head;
 }
-function _qdMakeRewardRow(iconText, nameText, valText) {
+function _qdMakeRewardRow(iconText, nameText, valText, useVCoin) {
     var row = _qdMakeEl('div', 'v3-reward-row');
-    row.appendChild(_qdMakeEl('span', 'v3-reward-row-ic', iconText));
+    var icEl = _qdMakeEl('span', 'v3-reward-row-ic');
+    if (useVCoin) {
+        /* Money display: use Valdoria v-coin icon (NEVER money-bag emoji) */
+        icEl.appendChild(_qdMakeEl('span', 'vi vi-coin sm'));
+    } else {
+        icEl.textContent = iconText;
+    }
+    row.appendChild(icEl);
     row.appendChild(_qdMakeEl('span', 'v3-reward-row-name', nameText));
     row.appendChild(_qdMakeEl('span', 'v3-reward-row-val', valText));
     return row;
@@ -125,7 +132,7 @@ function renderQuestDetail(container, q) {
             rewPanel.appendChild(_qdMakePanelHead('💎', 'Recompensas'));
             var rewList = _qdMakeEl('div', 'v3-reward-list');
             if (q.xp) rewList.appendChild(_qdMakeRewardRow('✨', 'Experiência', String(q.xp)));
-            if (q.gold) rewList.appendChild(_qdMakeRewardRow('💰', 'Valdoritas', String(q.gold)));
+            if (q.gold) rewList.appendChild(_qdMakeRewardRow('', 'Valdoritas', String(q.gold), true));
             if (q.items && q.items.length > 0) {
                 for (var ii = 0; ii < q.items.length; ii++) {
                     rewList.appendChild(_qdMakeRewardRow('🎁', q.items[ii], '+1'));
@@ -156,13 +163,13 @@ wrap.appendChild(qList);}
 var rewBlock=document.createElement('div');rewBlock.className='quest-turnin-rewards';rewBlock.innerHTML='<div class="quest-turnin-rewards-label">\ud83d\udc8e Recompensas</div>';var rewItems=document.createElement('div');rewItems.className='quest-turnin-rewards-grid';var delay=(data.quests?data.quests.length:0)*0.15+0.3;if(data.xp){var xpEl=document.createElement('div');xpEl.className='quest-turnin-reward-item quest-turnin-reveal';xpEl.style.animationDelay=delay+'s';xpEl.innerHTML='<span class="quest-turnin-reward-icon">\u2728</span>'
 +'<span class="quest-turnin-reward-val">+'+data.xp+'</span>'
 +'<span class="quest-turnin-reward-lbl">XP</span>';rewItems.appendChild(xpEl);delay+=0.2;}
-if(data.gold){var goldEl=document.createElement('div');goldEl.className='quest-turnin-reward-item quest-turnin-reveal';goldEl.style.animationDelay=delay+'s';goldEl.innerHTML='<span class="quest-turnin-reward-icon">\ud83d\udcb0</span>'
+if(data.gold){var goldEl=document.createElement('div');goldEl.className='quest-turnin-reward-item quest-turnin-reveal';goldEl.style.animationDelay=delay+'s';goldEl.innerHTML='<span class="quest-turnin-reward-icon"><span class="vi vi-coin lg"></span></span>'
 +'<span class="quest-turnin-reward-val">+'+data.gold+'</span>'
 +'<span class="quest-turnin-reward-lbl">Valdoritas</span>';rewItems.appendChild(goldEl);delay+=0.2;}
 if(data.items&&data.items.length>0){for(var ii=0;ii<data.items.length;ii++){var itemEl=document.createElement('div');itemEl.className='quest-turnin-reward-item quest-turnin-reveal';itemEl.style.animationDelay=delay+'s';itemEl.innerHTML='<span class="quest-turnin-reward-icon">\ud83c\udf81</span>'
 +'<span class="quest-turnin-reward-val">'+vEsc(data.items[ii])+'</span>';rewItems.appendChild(itemEl);delay+=0.2;}}
 rewBlock.appendChild(rewItems);wrap.appendChild(rewBlock);if(data.leveled){var lvl=document.createElement('div');lvl.className='quest-turnin-levelup quest-turnin-reveal';lvl.style.animationDelay=(delay+0.3)+'s';lvl.innerHTML='\ud83c\udf89 <b>LEVEL UP!</b> N\u00edvel '+data.level;wrap.appendChild(lvl);}
-if(data.current_gold!==undefined){var goldLine=document.createElement('div');goldLine.className='quest-turnin-gold';goldLine.innerHTML='\ud83d\udcb0 <b>Seu Ouro:</b> '+data.current_gold+' <span class="vi vi-coin sm"><\/span>';wrap.appendChild(goldLine);}
+if(data.current_gold!==undefined){var goldLine=document.createElement('div');goldLine.className='quest-turnin-gold';goldLine.innerHTML='<span class="vi vi-coin sm"></span> <b>Valdoritas:</b> '+data.current_gold;wrap.appendChild(goldLine);}
 container.appendChild(wrap);}
 function renderQuestAbandon(container,data){container.innerHTML='';var wrap=document.createElement('div');wrap.className='quest-abandon';var iconEl=document.createElement('div');iconEl.className='quest-abandon-icon';iconEl.textContent='\u26a0\ufe0f';wrap.appendChild(iconEl);var titleEl=document.createElement('div');titleEl.className='quest-abandon-title';titleEl.textContent='Abandonar Miss\u00e3o?';wrap.appendChild(titleEl);var nameEl=document.createElement('div');nameEl.className='quest-abandon-name';nameEl.innerHTML='\ud83d\udcdc '+vEsc(data.title);wrap.appendChild(nameEl);var warnEl=document.createElement('div');warnEl.className='quest-abandon-warn';warnEl.textContent=data.is_daily?'Ao desistir, tudo que foi feito se perder\u00e1. Tarefas di\u00e1rias abandonadas contam para o limite do dia.':'Ao desistir, voc\u00ea perder\u00e1 tudo que conquistou nesta jornada. Poder\u00e1 retom\u00e1-la mais tarde.';wrap.appendChild(warnEl);container.appendChild(wrap);}
 function renderQuestTracker(container,data){if(!data.quests||data.quests.length===0)return;var wrap=document.createElement('div');wrap.className='quest-tracker';wrap.innerHTML='<div class="quest-tracker-hdr">\ud83d\udcdc Missões</div>';for(var i=0;i<data.quests.length;i++){var q=data.quests[i];var row=document.createElement('div');row.className='quest-tracker-row'+(q.ready?' quest-tracker-row--ready':'');row.onclick=(function(cb){return function(){doAction(cb);};})(q.cb);var statusText=q.ready?'Conclu\u00edda':(q.obj||'...');row.innerHTML='<span class="quest-tracker-title">'+vEsc(q.title)+'</span>'

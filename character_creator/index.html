@@ -2871,8 +2871,8 @@
             html += `<div class="detail-row" style="color:var(--v-text-dim);font-size:10px">Adicionadas automaticamente — não contam nas escolhas de classe.</div></div>`;
 
             // Gold
-            html += `<div class="detail-section"><div class="detail-section-title">💰 Recursos Iniciais</div>`;
-            html += `<div class="detail-row"><b>Ouro adicional:</b> ${bg.gold}g</div>`;
+            html += `<div class="detail-section"><div class="detail-section-title"><span class="vi vi-coin sm"></span> Recursos Iniciais</div>`;
+            html += `<div class="detail-row"><b>Valdoritas adicionais:</b> ${bg.gold}</div>`;
             if (bg.gold >= 20) html += `<div class="detail-row" style="color:var(--v-text-dim);font-size:10px">Bônus acima da média — mais opções de compra no início.</div>`;
             else if (bg.gold <= 5) html += `<div class="detail-row" style="color:var(--v-text-dim);font-size:10px">Bônus baixo — compense com escolhas de equipamento inteligentes.</div>`;
             html += `</div>`;
@@ -3261,7 +3261,7 @@
                 html += `<div class="sheet-name" style="font-size:20px">${fullName}</div>`;
             }
             html += `<div class="sheet-subtitle">${race.icon} ${raceName} | ${cls.icon} ${cls.name} | 📖 ${bg.name}${alignText}</div>`;
-            html += `<div class="sheet-subtitle">${g ? g.icon + ' ' + g.name : ''} | Nível 1 | 💰 +${bg.gold}g</div></div>`;
+            html += `<div class="sheet-subtitle">${g ? g.icon + ' ' + g.name : ''} | Nível 1 | <span class="vi vi-coin sm"></span> +${bg.gold} Valdoritas</div></div>`;
 
             // --- Combat Stats Grid (always visible) ---
             html += `<div class="combat-stats" style="margin-bottom:8px">`;

@@ -289,7 +289,10 @@ function _appendBetGrid(el, d) {
         bets.appendChild(btn);
     }
     el.appendChild(bets);
-    el.appendChild(_tgEl('div', 'tg-gold', '\ud83d\udcb0 ' + (d.gold || 0) + ' <span class="vi vi-coin sm"></span> dispon\u00edvel'));
+    var goldDiv = _tgEl('div', 'tg-gold');
+    goldDiv.appendChild(_tgEl('span', 'vi vi-coin sm'));
+    goldDiv.appendChild(document.createTextNode(' ' + (d.gold || 0) + ' Valdoritas disponíveis'));
+    el.appendChild(goldDiv);
 }
 
 function _appendRollBox(parent, label, value, isWinner) {

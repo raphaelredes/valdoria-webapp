@@ -863,13 +863,13 @@
             'Tecidos coloridos balançam ao vento, atraindo olhares curiosos...',
             'O brilho de armas polidas reflete a luz do sol entre as tendas...',
             'Um anão examina gemas com uma lupa, murmurando valores...',
-            '💰 Dica: Preços variam conforme seu Carisma e reputação com o NPC.',
+            '🏪 Dica: Preços variam conforme seu Carisma e reputação com o NPC.',
             '🛡️ Dica: Equipamentos mágicos são raros — quando encontrar, considere investir.',
-            '💰 Dica: Itens vendidos rendem metade do valor de compra.',
+            '🏪 Dica: Itens vendidos rendem metade do valor de compra.',
             '🛡️ Dica: Poções de cura são essenciais antes de aventuras perigosas.',
-            '💰 Dica: Gemas e materiais raros podem ser usados na oficina de artesanato.',
+            '🏪 Dica: Gemas e materiais raros podem ser usados na oficina de artesanato.',
             '🛡️ Dica: Verifique as ofertas de todos os NPCs antes de comprar.',
-            '💰 Dica: Alguns NPCs aparecem temporariamente — aproveite suas ofertas únicas.',
+            '🏪 Dica: Alguns NPCs aparecem temporariamente — aproveite suas ofertas únicas.',
             '🛡️ Dica: Equipar itens melhores pode fazer toda a diferença no combate.',
         ];
         window._marketLoadingCtrl = ValdoriaLoadingController({
@@ -882,7 +882,7 @@
     <div class="header">
         <h1>🏪 MERCADO</h1>
         <div class="header-stats">
-            <span class="hs-gold" id="headerGold">💰 0 GP</span>
+            <span class="hs-gold" id="headerGold"><span class="vi vi-coin sm"></span> 0 Valdoritas</span>
             <span id="headerLevel"></span>
         </div>
     </div>
@@ -1077,7 +1077,13 @@
         }
 
         function updateHeader() {
-            document.getElementById('headerGold').textContent = `💰 ${localGold} GP`;
+            /* Rebuild gold display via DOM: v-coin icon + Valdoritas (never emoji or "GP") */
+            const gEl = document.getElementById('headerGold');
+            gEl.textContent = '';
+            const coin = document.createElement('span');
+            coin.className = 'vi vi-coin sm';
+            gEl.appendChild(coin);
+            gEl.appendChild(document.createTextNode(` ${localGold} Valdoritas`));
             const lvl = document.getElementById('headerLevel');
             if (D && D.p.n) lvl.textContent = `${esc(D.p.n)} (Nv.${D.p.l})`;
         }
@@ -1089,7 +1095,7 @@
             const bar = document.getElementById('tabsBar');
             bar.innerHTML = [
                 { id: 'buy', label: '🛒 Comprar', badge: buyCount },
-                { id: 'sell', label: '💰 Vender', badge: sellCount },
+                { id: 'sell', label: '🏪 Vender', badge: sellCount },
             ].map(t => {
                 const badge = t.badge > 0 ? `<span class="tab-badge">${t.badge}</span>` : '';
                 return `<div class="tab ${t.id === activeTab ? 'active' : ''}" onclick="switchTab('${t.id}')">${t.label}${badge}</div>`;
@@ -1213,7 +1219,7 @@
             <span class="sc-stock ${stockClass}">${stockText}</span>
             <div class="sc-emoji">${item.img ? '<img class="sc-thumb" src="' + item.img + '" alt="" onerror="this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'\\'"><span style="display:none">' + (item.e || '📦') + '</span>' : (item.e || '📦')}</div>
             <div class="sc-name">${esc(item.n)}</div>
-            <div class="sc-price${priceClass}">💰 ${item.p} GP</div>
+            <div class="sc-price${priceClass}"><span class="vi vi-coin sm"></span> ${item.p} Valdoritas</div>
             ${meta ? `<div class="sc-meta">${meta}</div>` : ''}
             ${cartQty > 0 ? `<span class="sc-cart-badge">🛒 x${cartQty}</span>` : ''}
         </div>`;
@@ -1528,10 +1534,10 @@
             const summary = document.getElementById('cartSummary');
             const btn = document.getElementById('confirmBtn');
             let parts = [];
-            if (buyCount > 0) parts.push(`<span class="cs-buy">🛒 ${buyCount} compra(s): -${buyTotal} GP</span>`);
-            if (sellCount > 0) parts.push(`<span class="cs-sell">💰 ${sellCount} venda(s): +${sellTotal} GP</span>`);
+            if (buyCount > 0) parts.push(`<span class="cs-buy">🛒 ${buyCount} compra(s): -${buyTotal} <span class="vi vi-coin sm"></span></span>`);
+            if (sellCount > 0) parts.push(`<span class="cs-sell">🏪 ${sellCount} venda(s): +${sellTotal} <span class="vi vi-coin sm"></span></span>`);
             if (buyCount > 0 || sellCount > 0) {
-                parts.push(`<span class="cs-balance">Saldo: ${balance} GP</span>`);
+                parts.push(`<span class="cs-balance">Saldo: ${balance} <span class="vi vi-coin sm"></span></span>`);
             }
 
             summary.innerHTML = parts.join('<br>');
@@ -1573,7 +1579,7 @@
             html += '<div class="modal-title">📋 Confirmar Transação</div>';
 
             if (sellOps.length) {
-                html += '<div class="section-title">💰 Vendas</div>';
+                html += '<div class="section-title">🏪 Vendas</div>';
                 sellOps.forEach(op => {
                     html += `<div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--v-border);">
                     ${esc(op.name)} x${op.qty}: <span style="color:var(--v-success)">+${op.earn} GP</span>

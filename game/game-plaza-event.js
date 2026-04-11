@@ -217,7 +217,7 @@
     if (!d.tiers && !d.all_owned) { console.error("[PLAZA] _showCartographer: missing tiers/all_owned", d); }
     var body = "";
     if (d.greeting) body += "<div class=\"v-popup-desc\">" + vEsc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
-    body += "<div class=\"v-popup-row\">\ud83d\udcb0 Ouro: " + (d.gold || 0) + " <span class=\"vi vi-coin sm\"></span></div>";
+    body += "<div class=\"v-popup-row\"><span class=\"vi vi-coin sm\"></span> Valdoritas: " + (d.gold || 0) + "</div>";
 
     if (d.all_owned) {
       body += "<div class=\"v-popup-divider\"></div>";

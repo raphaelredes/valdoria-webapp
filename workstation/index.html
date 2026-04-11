@@ -442,7 +442,12 @@
         function updateHeader() {
             const stats = document.getElementById('headerStats');
             const matCount = Object.values(PAYLOAD.materials).reduce((a, b) => a + b, 0);
-            stats.textContent = `💰 ${PAYLOAD.gold} GP · 📦 ${matCount} materiais · Lv.${PAYLOAD.level}`;
+            /* Rebuild via DOM: v-coin + Valdoritas (never emoji or "GP") */
+            stats.textContent = '';
+            const coin = document.createElement('span');
+            coin.className = 'vi vi-coin sm';
+            stats.appendChild(coin);
+            stats.appendChild(document.createTextNode(` ${PAYLOAD.gold} Valdoritas · 📦 ${matCount} materiais · Lv.${PAYLOAD.level}`));
         }
 
         // ── Tabs ──
@@ -519,7 +524,7 @@
                 <div class="recipe-meta">
                     <span>Lv.${r.min_level}</span>
                     <span>DC ${r.dc}</span>
-                    <span>💰 ${r.cost_gp} GP</span>
+                    <span><span class="vi vi-coin sm"></span> ${r.cost_gp} Valdoritas</span>
                     <span class="v-rarity-${r.rarity}">${RARITY_LABELS[r.rarity] || r.rarity}</span>
                 </div>
             </div>

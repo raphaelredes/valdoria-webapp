@@ -19,7 +19,7 @@
     var _TIPS_MECHANICS = [
         '\u2694\ufe0f Dica: Rolagens de ataque 20 s\u00e3o acertos cr\u00edticos \u2014 dano dobrado!',
         '\ud83d\udee1\ufe0f Dica: Descansar na estalagem recupera todos os dados de vida.',
-        '\ud83d\udcb0 Dica: Venda itens que n\u00e3o usa no mercado da cidade.',
+        '\ud83c\udfea Dica: Venda itens que n\u00e3o usa no mercado da cidade.',
         '\ud83d\udcdc Dica: Converse com NPCs para descobrir quests escondidas.',
         '\ud83c\udff0 Dica: A Guilda de Aventureiros oferece miss\u00f5es com boas recompensas.',
         '\ud83e\uddea Dica: Po\u00e7\u00f5es podem ser usadas durante o combate como a\u00e7\u00e3o b\u00f4nus.',
