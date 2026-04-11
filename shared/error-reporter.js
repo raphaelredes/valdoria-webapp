@@ -47,8 +47,30 @@ hintEl.textContent='O servidor pode estar sobrecarregado. Tentaremos reconectar 
 etaFriendly=secsLeft>10?'menos de 1 minuto':'alguns segundos';}else{etaFriendly='1 a 2 minutos';}
 hintEl.textContent='O servidor est\u00e1 reconectando (estimativa: '+etaFriendly+'). Se persistir, feche esta janela e reabra o jogo.';}
 else if(msg.indexOf('iniciar sua sess')>=0){
-var _techParts=[];if(err&&err.technical){var _t=err.technical;if(_t.missing)_techParts.push('faltando: '+_t.missing);if(_t.env)_techParts.push('ambiente: '+_t.env);if(_t.telegram!==undefined)_techParts.push('Telegram: '+(_t.telegram?'sim':'n\u00e3o'));if(_t.localStorage!==undefined)_techParts.push('cache local: '+(_t.localStorage?'sim':'n\u00e3o'));if(_t.charId&&_t.charId!=='(none)')_techParts.push('personagem: '+_t.charId);}
-var _techStr=_techParts.length?' \u00b7 '+_techParts.join(' \u00b7 '):'';hintEl.textContent='Abra o chat com @ValdoriaBot no Telegram e toque em Jogar novamente.'+_techStr;}else if(msg.indexOf('restaurar sua sess')>=0)
+/* #43: Structured technical diagnosis. The audit flagged the single-line
+ * middot-separated hint as hard to parse when the user needs to troubleshoot.
+ * Now: friendly line first, then a second line with actionable context. */
+var _hintLines=['Abra o chat com @ValdoriaBot no Telegram e toque em Jogar novamente.'];
+if(err&&err.technical){
+    var _t=err.technical;
+    var _diagParts=[];
+    /* The MOST ACTIONABLE info: what specifically is missing */
+    if(_t.missing){
+        var _missingLabels={'token':'token de sess\u00e3o','uid':'ID do usu\u00e1rio','apiBase':'URL do servidor','charId':'personagem'};
+        var _m=_t.missing.split(',').map(function(k){return _missingLabels[k.trim()]||k.trim();});
+        _diagParts.push('Faltam: '+_m.join(', '));
+    }
+    /* Secondary context: environment + platform */
+    var _ctxParts=[];
+    if(_t.env)_ctxParts.push('Ambiente: '+_t.env);
+    if(_t.telegram===false)_ctxParts.push('Telegram n\u00e3o detectado');
+    else if(_t.telegram===true)_ctxParts.push('Telegram OK');
+    if(_t.localStorage===false)_ctxParts.push('cache local bloqueado');
+    if(_t.charId&&_t.charId!=='(none)')_ctxParts.push('personagem: '+_t.charId);
+    if(_ctxParts.length)_diagParts.push(_ctxParts.join(' \u00b7 '));
+    if(_diagParts.length)_hintLines.push(_diagParts.join(' \u2014 '));
+}
+hintEl.textContent=_hintLines.join('\n');hintEl.style.whiteSpace='pre-line';}else if(msg.indexOf('restaurar sua sess')>=0)
 hintEl.textContent='Se o problema persistir, limpe o cache do navegador e tente novamente.';else if(msg.indexOf('expirada')>=0||msg.indexOf('Sess\u00e3o')>=0)
 hintEl.textContent='Feche esta janela e reabra o jogo.';else if(msg.indexOf('Personagem não encontrado')>=0)
 hintEl.textContent='Feche esta janela e reabra o jogo.';else if(msg.indexOf('Resposta inválida')>=0)
