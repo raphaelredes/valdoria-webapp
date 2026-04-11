@@ -477,11 +477,22 @@ function redirectToGame(charId, isNew, token) {
     }
     if (isNew) params.set('new', '1');
 
+    /* BUG (2026-04-11): when this web-auth.js is running inside the DEV
+     * panel iframe (URL has nodevpanel=1), the redirect to /app must also
+     * carry nodevpanel=1 — otherwise /app reloads dev-debug-panel.js,
+     * detects ?env=dev and tries to activate host mode a second time,
+     * creating a recursive iframe-inside-iframe tree. */
+    var _currentParams = new URLSearchParams(window.location.search);
+    if (_currentParams.get('nodevpanel') === '1') {
+        params.set('nodevpanel', '1');
+    }
+
     var route = isNew && !charId ? 'character_creator' : 'game';
     params.set('route', route);
     var url = '../app.html?' + params.toString();
-    console.info('[WEB-AUTH] redirect route=%s uid=%s char=%s env=%s api=%s',
-        route, _userId, charId || 'none', _envId, _apiBase);
+    console.info('[WEB-AUTH] redirect route=%s uid=%s char=%s env=%s api=%s nodevpanel=%s',
+        route, _userId, charId || 'none', _envId, _apiBase,
+        params.get('nodevpanel') || '0');
     window.location.href = url;
 }
 
