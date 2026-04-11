@@ -450,6 +450,23 @@ body {
     pointer-events: none;
     filter: grayscale(0.6);
 }
+/* A1 (hexmap FRICÇÃO-2): blocked state keeps pointer-events so click
+ * handler can show feedback toast; visuals match :disabled. */
+.hex-dir.blocked[aria-disabled="true"] {
+    opacity: 0.35;
+    filter: grayscale(0.5);
+    cursor: pointer;
+}
+.hex-dir.blocked[aria-disabled="true"]:active {
+    transform: scale(0.97);
+}
+/* Distinct tints per blocked reason for quick visual recognition */
+.hex-dir.blocked[data-blocked-reason="nevoeiro"] { border-color: rgba(128, 128, 140, 0.3); }
+.hex-dir.blocked[data-blocked-reason="parede"],
+.hex-dir.blocked[data-blocked-reason="montanha"] { border-color: rgba(100, 80, 60, 0.4); }
+.hex-dir.blocked[data-blocked-reason="agua_profunda"] { border-color: rgba(60, 100, 160, 0.4); }
+.hex-dir.blocked[data-blocked-reason="lava"] { border-color: rgba(200, 80, 40, 0.4); }
+.hex-dir.blocked[data-blocked-reason="porta"] { border-color: rgba(160, 120, 50, 0.4); }
 .hex-dir.difficult {
     border-color: rgba(220, 160, 40, 0.4);
 }

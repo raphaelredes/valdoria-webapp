@@ -23,7 +23,11 @@ var imgData=_fogMaskCtx.createImageData(mW,mH);var pC=S.playerCol,pR=S.playerRow
 /* Fill border padding with full fog */
 for(var i=0;i<imgData.data.length;i+=4){imgData.data[i]=0;imgData.data[i+1]=0;imgData.data[i+2]=0;imgData.data[i+3]=255;}
 /* Write per-tile visibility */
-for(var r=0;r<ROWS;r++){for(var c=0;c<COLS;c++){var key=c+','+r;var state=fogState[key];var dist=hexDist(c,r,pC,pR);var alpha;if(state==='visible'){if(dist===0)alpha=0;else if(dist===1)alpha=5;else if(dist===2)alpha=80;else if(dist<=_visR)alpha=140;else alpha=200;}else if(state==='dim'){alpha=210;}else{alpha=255;}
+/* A3 (hexmap FRICÇÃO-6): dim vs hidden must be visually distinguishable.
+ * Previous: dim=210, hidden=255 — only 45 alpha difference, barely visible.
+ * New: dim=175 (memory of explored tile), hidden=255 (completely unknown).
+ * The 80-point gap makes "already been here" tiles clearly distinct. */
+for(var r=0;r<ROWS;r++){for(var c=0;c<COLS;c++){var key=c+','+r;var state=fogState[key];var dist=hexDist(c,r,pC,pR);var alpha;if(state==='visible'){if(dist===0)alpha=0;else if(dist===1)alpha=5;else if(dist===2)alpha=80;else if(dist<=_visR)alpha=140;else alpha=200;}else if(state==='dim'){alpha=175;}else{alpha=255;}
 /* Apply fade-in animation */
 var _fade=_fogFadeTiles[key];if(_fade){var _elapsed=_now-_fade.start;var _fp=Math.min(1,_elapsed/_fade.duration);alpha=Math.round(255-(255-alpha)*_fp);}
 var idx=((r+2)*mW+(c+2))*4;/* +2 for border padding */

@@ -37,6 +37,24 @@
     font-family: "Cinzel", serif;
 }
 
+/* --- A4 (hexmap FRICÇÃO-8): Passive Perception badge (permanent HUD) --- */
+.pp-badge {
+    font-size: var(--v-font-xs, 10px);
+    color: var(--v-gold, #c4953a);
+    font-weight: 600;
+    font-family: "Cinzel", serif;
+    padding: 1px 6px;
+    border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+    border-radius: var(--v-radius-xs, 4px);
+    background: var(--v-gold-08, rgba(196, 149, 58, 0.08));
+    letter-spacing: 0.5px;
+    cursor: help;
+}
+.pp-badge.pp-active {
+    background: var(--v-gold-15, rgba(196, 149, 58, 0.15));
+    border-color: var(--v-gold-40, rgba(196, 149, 58, 0.4));
+}
+
 /* --- XP Bar (legacy compat, hidden by default) --- */
 .hud-xp-row {
     display: none;

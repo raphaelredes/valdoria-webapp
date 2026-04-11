@@ -93,7 +93,24 @@ function updateHexNav(){
     if(hasThreat)cls+=' has-threat';
     if(hasReward)cls+=' has-reward';
     if(!impass&&isVisible)cls+=' passable';
-    btn.disabled=impass||oob;
+    /* A1: Use data-blocked-reason + aria-disabled instead of btn.disabled,
+     * so onclick still fires and we can show feedback toast to player
+     * (hexmap audit FRICÇÃO-2: "Botões nav desabilitados sem feedback de causa"). */
+    var blockedReason='';
+    if(oob){blockedReason='fora_do_mapa';}
+    else if(!isVisible&&!impass){blockedReason='nevoeiro';}
+    else if(impass){
+      if(baseTile==='#')blockedReason='parede';
+      else if(baseTile==='W')blockedReason='agua_profunda';
+      else if(baseTile==='M')blockedReason='montanha';
+      else if(baseTile==='L')blockedReason='lava';
+      else if(baseTile==='D')blockedReason='porta';
+      else blockedReason='bloqueado';
+    }
+    btn.removeAttribute('disabled');
+    btn.setAttribute('aria-disabled',blockedReason?'true':'false');
+    if(blockedReason){btn.setAttribute('data-blocked-reason',blockedReason);cls+=' blocked';}
+    else{btn.removeAttribute('data-blocked-reason');}
     btn.className=cls;
     btn.textContent='';
     btn.removeAttribute('data-cost');
@@ -159,16 +176,34 @@ function updateHexNav(){
     btn.onpointerup=endPeek();
     btn.onpointercancel=endPeek();
     btn.onpointerleave=endPeek();
-    /* Click handler — guard against fired long-press to avoid double action */
-    btn.onclick=(function(c,r){return function(){
+    /* Click handler — guard against fired long-press + blocked feedback */
+    btn.onclick=(function(c,r,b){return function(){
       if(_hexNavLongPress.fired){_hexNavLongPress.fired=false;return;}
+      /* A1 (hexmap FRICÇÃO-2): blocked tile feedback */
+      var blocked=b.getAttribute('data-blocked-reason');
+      if(blocked){
+        var _msgs={
+          fora_do_mapa:'Voce esta na borda do mapa.',
+          nevoeiro:'Voce nao consegue ver essa direcao.',
+          parede:'Uma parede bloqueia o caminho.',
+          agua_profunda:'Aguas profundas bloqueiam o caminho.',
+          montanha:'Uma montanha intransponivel.',
+          lava:'Lava fervente bloqueia o caminho.',
+          porta:'Ha uma porta fechada no caminho.',
+          bloqueado:'Caminho bloqueado.',
+        };
+        if(typeof showTerrainToast==='function'){showTerrainToast(_msgs[blocked]||_msgs.bloqueado,'flavor');}
+        if(window.vHaptic&&typeof window.vHaptic.warning==='function'){try{window.vHaptic.warning();}catch(_e){/* noqa: preflight */}}
+        console.info('[EXPLORE:HEXNAV] blocked click reason=%s',blocked);
+        return;
+      }
       if(typeof isEventActive==='function'&&isEventActive())return;
       if(typeof isMoving==='function'&&isMoving())return;
       console.info('[EXPLORE:HEXNAV] move_click dir to=(%d,%d)',c,r);
       /* Haptic feedback on successful move (research §4.5: notificationOccurred cross-platform) */
       if(window.vHaptic&&typeof window.vHaptic.tap==='function'){try{window.vHaptic.tap();}catch(_e){/* noqa: preflight */}}
       movePlayerCanvas(c,r);
-    };})(col,row);
+    };})(col,row,btn);
   }
 }
 /* Weather fog radius config (visual only) */
@@ -244,7 +279,11 @@ function updateTopBar() {
     topDanger.textContent = pips;
   }
 }
-function setupHUD(){const c=S.charData;if(!c)return;var _hn=document.getElementById('hud-name');if(_hn)_hn.textContent=c.nm||'Aventureiro';var _hl=document.getElementById('hud-level');if(_hl)_hl.textContent='Nv '+(c.lv||1);var currentHP=Math.max(0,(c.hp||10)+(S.hpChange||0));var maxHP=c.mh||10;updateHP(currentHP,maxHP);updatePanelBars();updateRewards();updateTopBar();}
+function setupHUD(){const c=S.charData;if(!c)return;var _hn=document.getElementById('hud-name');if(_hn)_hn.textContent=c.nm||'Aventureiro';var _hl=document.getElementById('hud-level');if(_hl)_hl.textContent='Nv '+(c.lv||1);var currentHP=Math.max(0,(c.hp||10)+(S.hpChange||0));var maxHP=c.mh||10;updateHP(currentHP,maxHP);updatePanelBars();updateRewards();updateTopBar();
+/* A4 (hexmap FRICÇÃO-8): update Passive Perception permanent HUD badge */
+var _ppBadge=document.getElementById('pp-badge');
+if(_ppBadge&&S._passivePerception){_ppBadge.textContent='PP: '+S._passivePerception;_ppBadge.classList.toggle('pp-active',(S._hiddenDetected||0)>0);_ppBadge.title='Percepção Passiva '+S._passivePerception+' — detecta POIs ocultos'+((S._hiddenDetected||0)>0?' (algum detectado neste mapa)':'');}
+}
 function updatePanelBars(){var c=S.charData;if(!c)return;var currentHP=Math.max(0,(c.hp||10)+(S.hpChange||0));var maxHP=c.mh||10;var hpPct=Math.max(0,Math.min(100,(currentHP/maxHP)*100));var hpFill=document.getElementById('panel-hp-fill');if(hpFill){hpFill.style.width=hpPct+'%';hpFill.className='panel-bar-fill hp-panel-fill';if(hpPct>60)hpFill.style.background='linear-gradient(180deg,#2a6a2a,#358a35)';else if(hpPct>25)hpFill.style.background='linear-gradient(180deg,#7a5e18,#9a7a25)';else hpFill.style.background='linear-gradient(180deg,#6e1c1c,#922828)';}var hpText=document.getElementById('panel-hp-text');if(hpText)hpText.textContent=currentHP+'/'+maxHP;var currentMP=Math.max(0,(c.mp||0)+(S.mpChange||0));var maxMP=c.mm||0;var mpPct=maxMP>0?Math.max(0,Math.min(100,(currentMP/maxMP)*100)):0;var mpFill=document.getElementById('panel-mp-fill');if(mpFill)mpFill.style.width=mpPct+'%';var mpText=document.getElementById('panel-mp-text');if(mpText)mpText.textContent=currentMP+'/'+maxMP;/* Floating HUD MP */var _mff=document.getElementById('mp-fill-float');if(_mff)_mff.style.width=mpPct+'%';var _mvf=document.getElementById('mp-val-float');if(_mvf)_mvf.textContent=currentMP+'/'+maxMP;}
 function updateHP(current,max){if(window._dbg)console.debug("[EXPLORE] updateHP",{current:current,max:max});const pct=Math.max(0,Math.min(100,(current/max)*100));const fill=document.getElementById('hp-fill');if(fill){fill.style.transform='scaleX('+(pct/100)+')';fill.classList.remove('hp-high','hp-mid','hp-low');fill.classList.add(pct>60?'hp-high':pct>25?'hp-mid':'hp-low');}var _ht=document.getElementById('hp-text');if(_ht)_ht.textContent=current+'/'+max;/* Floating HUD */var _hff=document.getElementById('hp-fill-float');if(_hff)_hff.style.width=pct+'%';var _hvf=document.getElementById('hp-val-float');if(_hvf)_hvf.textContent=current+'/'+max;if(pct>25)S._lowHPAlertShown=false;updatePanelBars();}
 function updateXPBar(){var row=document.getElementById('xp-bar-row');var fill=document.getElementById('xp-fill');var label=document.getElementById('xp-label');if(!row||!fill||!label||!S.charData)return;var xp=(S.charData.xp||0)+(S.xpEarned||0);var nxp=S.charData.nxp||300;var prevXp=S.charData.pxp||0;var range=nxp-prevXp;var progress=range>0?Math.min(100,((xp-prevXp)/range)*100):0;fill.style.transform='scaleX('+(progress/100)+')';label.textContent='Nv '+(S.charData.lv||1);row.style.display='flex';}
@@ -338,7 +377,12 @@ function updateExhaustionHUD(){var panel=document.getElementById('exhaustion-pan
 /* Auto-regenerate encounter pool when depleted (safety net — skills must use short codes per, atl; combat payload required for cmb_direct / cmb_on_fail) */
 function _regenSkillMod(skillShort){if(!S.charData||typeof getAbilityMod!=='function')return 0;var ab=getAbilityMod(skillShort);var pb=S.charData.pb||2;var prof=S.charData.sp&&S.charData.sp.includes(skillShort);var expert=S.charData.ex&&S.charData.ex.includes(skillShort);if(expert)return ab+pb;if(prof)return ab+pb;return ab;}
 function _regenPickEnemy(biome){var POOL={forest:[['Lobo','\u2694\ufe0f'],['Goblin','\u2694\ufe0f'],['Urso Negro','\u2694\ufe0f'],['Aranha Gigante','\u2694\ufe0f'],['Javali','\u2694\ufe0f']],plains:[['Bandido','\u2694\ufe0f'],['Javali','\u2694\ufe0f'],['Orc','\u2694\ufe0f']],swamp:[['Sapo Gigante','\u2694\ufe0f'],['Homem-Lagarto','\u2694\ufe0f'],['Limo Cinzento','\u2694\ufe0f']],cave:[['Rato Gigante','\u2694\ufe0f'],['Kobold','\u2694\ufe0f'],['Aranha Gigante','\u2694\ufe0f']],desert:[['Gnoll','\u2694\ufe0f'],['Bandido','\u2694\ufe0f'],['Cocatrice','\u2694\ufe0f']],mountain:[['Gnoll','\u2694\ufe0f'],['Ogro','\u2694\ufe0f'],['Bico de Machado','\u2694\ufe0f']],snow:[['Lobo','\u2694\ufe0f'],['Worg','\u2694\ufe0f'],['Urso Negro','\u2694\ufe0f']],volcanic:[['Kobold','\u2694\ufe0f'],['Ogro','\u2694\ufe0f'],['Grimlock','\u2694\ufe0f']],graveyard:[['Esqueleto Guerreiro','\u2694\ufe0f'],['Zumbi','\u2694\ufe0f'],['Espectro','\u2694\ufe0f']]};var p=POOL[biome]||POOL.forest;var pair=p[Math.floor(Math.random()*p.length)];return {en:pair[0],ei:pair[1],b:biome,d:S.dangerLevel||1};}
-function _regenerateEncounterPool(){if(!S.randomEncounters)S.randomEncounters=[];if(S.randomEncounters.length>0)return;var dl=S.dangerLevel||1;var count=6+dl;var types=['amb','amb','trp','hid','snd','amb','hid','snd'];var skPool=['per','sur','atl','acr','stl','inv'];var _FULL={amb:'ambush',trp:'trap',hid:'hidden',snd:'sound'};var _rn=function(a){return a[Math.floor(Math.random()*a.length)];};var biome=S.biome||'forest';for(var i=0;i<count;i++){var t=_rn(types);var sk=_rn(skPool);var dc=8+dl*2+Math.floor(Math.random()*4);var dmg=Math.max(1,dl+Math.floor(Math.random()*3));var xpOk=2+dl*2;var gpOk=dl*4;var cmb=Object.assign({},_regenPickEnemy(biome),{narrative:'Hostilidade revelada.'});if(t==='trp'){var trapSk=_rn(['dex','con']);var trapDmgSides=Math.min(12,4+dl*2);var trapMod=0;if(S.charData){var _scoreKey=trapSk==='dex'?'dx':'co';trapMod=Math.floor(((S.charData[_scoreKey]||10)-10)/2);}var trapPool=(typeof ENCOUNTER_NARRATIONS!=='undefined'&&ENCOUNTER_NARRATIONS.trap)?(ENCOUNTER_NARRATIONS.trap[biome]||ENCOUNTER_NARRATIONS.trap.forest||[]):[];var trapNarr=trapPool.length>0?trapPool[Math.floor(Math.random()*trapPool.length)]:'';S.randomEncounters.push({type:'trp',title:'Armadilha',tt:'Armadilha',narration:trapNarr,combat:cmb,autoSave:{s:trapSk,dc:dc,dmg:'1d'+trapDmgSides,dt:trapSk==='con'?'poison':'piercing',m:trapMod},ch:[]});}else if(t==='amb'){var fullN=_FULL[t];var nPool=(typeof ENCOUNTER_NARRATIONS!=='undefined'&&ENCOUNTER_NARRATIONS[fullN])?(ENCOUNTER_NARRATIONS[fullN][biome]||ENCOUNTER_NARRATIONS[fullN].forest||[]):[];var nAmb=nPool.length>0?nPool[Math.floor(Math.random()*nPool.length)]:'';var dcF=Math.max(8,dc-1);S.randomEncounters.push({type:'amb',title:'Emboscada',tt:'Emboscada',narration:nAmb,combat:cmb,choices:[{t:'Fugir',l:'Fugir',i:'\ud83c\udfc3',k:{s:'atl',dc:dcF,m:_regenSkillMod('atl')},o:{t:'Você rompe o cerco por um fio de tempo.',x:xpOk},f:{t:'O terreno trai seus passos; a ameaça se fecha.',x:1},cmb_on_fail:true},{t:'Atacar',l:'Atacar',i:'\u2694\ufe0f',cmb_direct:true,o:{t:'Combate.'}},{t:'Esquivar',l:'Esquivar',k:{s:'acr',dc:dc,m:_regenSkillMod('acr')},o:{t:'Você rola para fora do alcance no último instante.',x:xpOk},f:{t:'O impacto te atinge em cheio.',x:2,d:dmg}}]});}else{var full=_FULL[t]||'sound';var encNarrPool=(typeof ENCOUNTER_NARRATIONS!=='undefined'&&ENCOUNTER_NARRATIONS[full])?(ENCOUNTER_NARRATIONS[full][biome]||ENCOUNTER_NARRATIONS[full].forest||[]):[];var encNarr=encNarrPool.length>0?encNarrPool[Math.floor(Math.random()*encNarrPool.length)]:'';var ttl=t==='hid'?'Sinal oculto':'Ruído suspeito';S.randomEncounters.push({type:t,title:ttl,tt:ttl,narration:encNarr,combat:cmb,choices:[{t:'Investigar com cautela',l:'Investigar',i:'\ud83d\udd0d',k:{s:sk,dc:dc,m:_regenSkillMod(sk)},o:{t:'Você reúne pistas e evita o pior.',x:xpOk,g:gpOk},f:{t:'Era uma armadilha — ou você alertou quem não devia.',x:2,d:dmg},cmb_on_fail:true},{t:'Atacar de imediato',l:'Atacar',i:'\u2694\ufe0f',cmb_direct:true,o:{t:'Confronto.'}},{t:'Ignorar e seguir',l:'Ignorar',i:'\u27a1\ufe0f',o:{x:1}}]});}}console.info('[EXPLORE] regenerated '+count+' encounters (pool was depleted)');if(typeof traceExploreCombat==='function')traceExploreCombat('pool_regen',{generated:count,biome:biome,danger:dl});}
+function _regenerateEncounterPool(){if(!S.randomEncounters)S.randomEncounters=[];if(S.randomEncounters.length>0)return;var dl=S.dangerLevel||1;var count=6+dl;
+/* A2 (hexmap FRICÇÃO-4): DM bark when pool regenerates to inform player
+ * that new dangers are being spawned in the region. */
+var _poolBarks=['Novos perigos emergem nesta regiao...','Voce sente novas ameacas se aproximando.','O ar se torna pesado com nova inquietacao.','Algo novo desperta nas profundezas desta terra.'];
+var _poolBark=_poolBarks[Math.floor(Math.random()*_poolBarks.length)];
+if(typeof showTerrainToast==='function'){setTimeout(function(){showTerrainToast(_poolBark,'flavor');},200);}var types=['amb','amb','trp','hid','snd','amb','hid','snd'];var skPool=['per','sur','atl','acr','stl','inv'];var _FULL={amb:'ambush',trp:'trap',hid:'hidden',snd:'sound'};var _rn=function(a){return a[Math.floor(Math.random()*a.length)];};var biome=S.biome||'forest';for(var i=0;i<count;i++){var t=_rn(types);var sk=_rn(skPool);var dc=8+dl*2+Math.floor(Math.random()*4);var dmg=Math.max(1,dl+Math.floor(Math.random()*3));var xpOk=2+dl*2;var gpOk=dl*4;var cmb=Object.assign({},_regenPickEnemy(biome),{narrative:'Hostilidade revelada.'});if(t==='trp'){var trapSk=_rn(['dex','con']);var trapDmgSides=Math.min(12,4+dl*2);var trapMod=0;if(S.charData){var _scoreKey=trapSk==='dex'?'dx':'co';trapMod=Math.floor(((S.charData[_scoreKey]||10)-10)/2);}var trapPool=(typeof ENCOUNTER_NARRATIONS!=='undefined'&&ENCOUNTER_NARRATIONS.trap)?(ENCOUNTER_NARRATIONS.trap[biome]||ENCOUNTER_NARRATIONS.trap.forest||[]):[];var trapNarr=trapPool.length>0?trapPool[Math.floor(Math.random()*trapPool.length)]:'';S.randomEncounters.push({type:'trp',title:'Armadilha',tt:'Armadilha',narration:trapNarr,combat:cmb,autoSave:{s:trapSk,dc:dc,dmg:'1d'+trapDmgSides,dt:trapSk==='con'?'poison':'piercing',m:trapMod},ch:[]});}else if(t==='amb'){var fullN=_FULL[t];var nPool=(typeof ENCOUNTER_NARRATIONS!=='undefined'&&ENCOUNTER_NARRATIONS[fullN])?(ENCOUNTER_NARRATIONS[fullN][biome]||ENCOUNTER_NARRATIONS[fullN].forest||[]):[];var nAmb=nPool.length>0?nPool[Math.floor(Math.random()*nPool.length)]:'';var dcF=Math.max(8,dc-1);S.randomEncounters.push({type:'amb',title:'Emboscada',tt:'Emboscada',narration:nAmb,combat:cmb,choices:[{t:'Fugir',l:'Fugir',i:'\ud83c\udfc3',k:{s:'atl',dc:dcF,m:_regenSkillMod('atl')},o:{t:'Você rompe o cerco por um fio de tempo.',x:xpOk},f:{t:'O terreno trai seus passos; a ameaça se fecha.',x:1},cmb_on_fail:true},{t:'Atacar',l:'Atacar',i:'\u2694\ufe0f',cmb_direct:true,o:{t:'Combate.'}},{t:'Esquivar',l:'Esquivar',k:{s:'acr',dc:dc,m:_regenSkillMod('acr')},o:{t:'Você rola para fora do alcance no último instante.',x:xpOk},f:{t:'O impacto te atinge em cheio.',x:2,d:dmg}}]});}else{var full=_FULL[t]||'sound';var encNarrPool=(typeof ENCOUNTER_NARRATIONS!=='undefined'&&ENCOUNTER_NARRATIONS[full])?(ENCOUNTER_NARRATIONS[full][biome]||ENCOUNTER_NARRATIONS[full].forest||[]):[];var encNarr=encNarrPool.length>0?encNarrPool[Math.floor(Math.random()*encNarrPool.length)]:'';var ttl=t==='hid'?'Sinal oculto':'Ruído suspeito';S.randomEncounters.push({type:t,title:ttl,tt:ttl,narration:encNarr,combat:cmb,choices:[{t:'Investigar com cautela',l:'Investigar',i:'\ud83d\udd0d',k:{s:sk,dc:dc,m:_regenSkillMod(sk)},o:{t:'Você reúne pistas e evita o pior.',x:xpOk,g:gpOk},f:{t:'Era uma armadilha — ou você alertou quem não devia.',x:2,d:dmg},cmb_on_fail:true},{t:'Atacar de imediato',l:'Atacar',i:'\u2694\ufe0f',cmb_direct:true,o:{t:'Confronto.'}},{t:'Ignorar e seguir',l:'Ignorar',i:'\u27a1\ufe0f',o:{x:1}}]});}}console.info('[EXPLORE] regenerated '+count+' encounters (pool was depleted)');if(typeof traceExploreCombat==='function')traceExploreCombat('pool_regen',{generated:count,biome:biome,danger:dl});}
 function updateCompass(){const el=document.getElementById('exit-compass');if(!el)return;if(S.exitCol==null||S.exitRow==null){el.style.display='none';return;}
 el.style.display='flex';const dx=S.exitCol-S.playerCol;const dy=S.exitRow-S.playerRow;const dist=typeof hexDist==='function'?hexDist(S.playerCol,S.playerRow,S.exitCol,S.exitRow):Math.round(Math.sqrt(dx*dx+dy*dy));const angle=Math.atan2(dy,dx)*(180/Math.PI)-90;const arrow=document.getElementById('compass-arrow');const distEl=document.getElementById('compass-dist');if(!arrow||!distEl)return;arrow.style.transform=`rotate(${angle}deg)`;arrow.style.setProperty('--compass-angle',angle+'deg');distEl.textContent=dist+'h';el.classList.toggle('nearby',dist<=3);}
 /* Quest compass — points to nearest unresolved quest POI (chainId) or NPC POI */
