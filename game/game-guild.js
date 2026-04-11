@@ -155,17 +155,19 @@ function renderGuildAdventurer(container, data) {
 
   var root = _gldEl('div', 'gld-adv-v1');
 
-  /* Hero scene: avatar + name + class + chips */
+  /* Hero scene: avatar (left) + text block (right) — horizontal compact */
   var hero = _gldEl('div', 'gld-adv-hero');
   var av = _gldEl('div', 'gld-adv-avatar ' + _gldClassSlug(data.class_name));
   av.textContent = data.class_icon || '⚔';
   hero.appendChild(av);
-  hero.appendChild(_gldEl('div', 'gld-adv-name', data.name || ''));
-  hero.appendChild(_gldEl('div', 'gld-adv-cls', '✧ ' + (data.class_name || '') + ' ✧'));
+  var heroText = _gldEl('div', 'gld-adv-hero-text');
+  heroText.appendChild(_gldEl('div', 'gld-adv-name', data.name || ''));
+  heroText.appendChild(_gldEl('div', 'gld-adv-cls', '✧ ' + (data.class_name || '') + ' ✧'));
   var chips = _gldEl('div', 'gld-adv-chips');
   chips.appendChild(_gldEl('span', 'gld-adv-chip', 'Nv. ' + (data.level || 1)));
   if (data.race) chips.appendChild(_gldEl('span', 'gld-adv-chip', data.race));
-  hero.appendChild(chips);
+  heroText.appendChild(chips);
+  hero.appendChild(heroText);
   root.appendChild(hero);
 
   /* Content body */
@@ -342,7 +344,7 @@ function renderGuildHireSuccess(container, data) {
 
   var root = _gldEl('div', 'gld-success-v2');
 
-  /* Scene: confetti + NPC + wave */
+  /* Scene: confetti + NPC + wave (horizontal compact layout) */
   var scene = _gldEl('div', 'gld-success-scene');
   scene.appendChild(_gldEl('div', 'gld-success-confetti'));
   var avWrap = _gldEl('div', 'gld-success-av-wrap');
@@ -351,7 +353,11 @@ function renderGuildHireSuccess(container, data) {
   avWrap.appendChild(av);
   avWrap.appendChild(_gldEl('span', 'gld-success-wave', '👋'));
   scene.appendChild(avWrap);
-  scene.appendChild(_gldEl('div', 'gld-success-name', data.name || ''));
+  var headerText = _gldEl('div', 'gld-success-header-text');
+  headerText.appendChild(_gldEl('div', 'gld-success-title', '✓ Novo Aliado'));
+  headerText.appendChild(_gldEl('div', 'gld-success-name', data.name || ''));
+  headerText.appendChild(_gldEl('div', 'gld-success-sub', (data.class_name || '') + ' • ' + (data.race || '') + ' • Nv ' + (data.level || 1)));
+  scene.appendChild(headerText);
   root.appendChild(scene);
 
   /* Content */

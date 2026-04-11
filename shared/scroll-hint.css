@@ -1,0 +1,170 @@
+/* Scroll Hint — Global Reusable Scroll Indicator (2026-04-11)
+ *
+ * Adds visual cues to any scroll container when content overflows:
+ * 1. Bottom fade mask — subtle indication more content below
+ * 2. Top fade mask — when scrolled away from top
+ * 3. Animated chevron arrow — clear "swipe to see more" hint,
+ *    auto-hides after first scroll interaction
+ * 4. Thin gold scrollbar — for desktop users
+ *
+ * Usage: add class `v-scroll` to any element. JS (scroll-hint.js)
+ * auto-instruments .has-scroll, .at-top, .at-bottom state flags.
+ *
+ * Works with .v-popup-body, .screen-content, .v-scroll, or any
+ * custom selector registered via ValdoriaScrollHint.register(el).
+ */
+
+/* ===== Base: scroll container prep ===== */
+.v-scroll,
+.v-popup-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--v-gold-30, rgba(196, 149, 58, 0.3)) transparent;
+  -webkit-overflow-scrolling: touch; /* momentum on iOS */
+  position: relative;
+}
+.v-scroll::-webkit-scrollbar,
+.v-popup-body::-webkit-scrollbar {
+  width: 4px;
+}
+.v-scroll::-webkit-scrollbar-track,
+.v-popup-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.v-scroll::-webkit-scrollbar-thumb,
+.v-popup-body::-webkit-scrollbar-thumb {
+  background: var(--v-gold-30, rgba(196, 149, 58, 0.3));
+  border-radius: 2px;
+}
+.v-scroll::-webkit-scrollbar-thumb:hover,
+.v-popup-body::-webkit-scrollbar-thumb:hover {
+  background: var(--v-gold-50, rgba(196, 149, 58, 0.5));
+}
+
+/* ===== Fade masks — content fades under the edge ===== */
+/* Bottom fade: applied when .has-scroll AND NOT .at-bottom */
+.v-scroll.has-scroll:not(.at-bottom),
+.v-popup-body.has-scroll:not(.at-bottom) {
+  -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+}
+/* Top fade: applied when .has-scroll AND NOT .at-top */
+.v-scroll.has-scroll.scrolled:not(.at-top),
+.v-popup-body.has-scroll.scrolled:not(.at-top) {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+}
+/* Both top and bottom shown — edge case (middle of scroll) */
+.v-scroll.has-scroll.scrolled.at-bottom,
+.v-popup-body.has-scroll.scrolled.at-bottom {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 100%);
+}
+
+/* ===== Animated scroll indicator (external — placed after the scroll container) ===== */
+.v-scroll-indicator {
+  position: absolute;
+  bottom: var(--v-space-md, 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity var(--v-transition-base, 0.3s ease);
+  will-change: opacity, transform;
+}
+/* Show only when container has scroll AND we haven't scrolled yet AND not at bottom */
+.v-scroll-container.has-scroll.show-hint .v-scroll-indicator {
+  opacity: 1;
+}
+.v-scroll-indicator-chevron {
+  width: 24px;
+  height: 14px;
+  position: relative;
+  color: var(--v-gold, #c4953a);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+.v-scroll-indicator-chevron::before,
+.v-scroll-indicator-chevron::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 12px;
+  height: 2px;
+  background: var(--v-gold, #c4953a);
+  border-radius: 1px;
+  transform-origin: center;
+}
+.v-scroll-indicator-chevron::before {
+  top: 3px;
+  transform: translateX(-9px) rotate(35deg);
+}
+.v-scroll-indicator-chevron::after {
+  top: 3px;
+  transform: translateX(-3px) rotate(-35deg);
+}
+.v-scroll-indicator-label {
+  font-family: var(--v-font, "MedievalSharp", serif);
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+/* Bouncing animation — two chevrons offset */
+.v-scroll-container.has-scroll.show-hint .v-scroll-indicator-chevron {
+  animation: v-scroll-bounce 1.8s ease-in-out infinite;
+}
+@keyframes v-scroll-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 1;
+  }
+}
+
+/* ===== Edge glow — extra attention-grabbing pulse on the bottom edge ===== */
+.v-scroll-container.has-scroll.show-hint::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 24px;
+  background: linear-gradient(to top, var(--v-gold-20, rgba(196, 149, 58, 0.2)), transparent);
+  pointer-events: none;
+  z-index: 4;
+  animation: v-scroll-edge-pulse 2.4s ease-in-out infinite;
+}
+@keyframes v-scroll-edge-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* Reduced motion: freeze animation, keep fade mask + static arrow */
+@media (prefers-reduced-motion: reduce) {
+  .v-scroll-container.has-scroll.show-hint .v-scroll-indicator-chevron {
+    animation: none;
+  }
+  .v-scroll-container.has-scroll.show-hint::after {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* Performance lite: disable pulse animation, keep only fade mask */
+body.perf-lite .v-scroll-container.has-scroll.show-hint::after {
+  animation: none;
+  opacity: 0.4;
+}
+body.perf-lite .v-scroll-container.has-scroll.show-hint .v-scroll-indicator-chevron {
+  animation: none;
+}
