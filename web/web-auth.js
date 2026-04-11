@@ -853,8 +853,18 @@ function _initWebAuth() {
     var _isIframe = _params.get('nodevpanel') === '1';
     var _isDevPortalHost = _isDevEnv && !_isIframe;
     if (_isDevPortalHost) {
-        console.info('[WEB-AUTH] Dev portal host mode — deferring checkExistingSession to iframe');
-        loadTelegramWidget();
+        /* Defer EVERYTHING to the iframe: no checkExistingSession AND no
+         * loadTelegramWidget. loadTelegramWidget() calls
+         * _checkTelegramOAuthReturn() which, if an #tgAuthResult hash is
+         * present, fires onTelegramAuth -> handleLoginSuccess ->
+         * redirectToGame -> window.location.href = '/app.html?...'.
+         * That navigation happens on the TOP window and wipes the
+         * tab away from the dev portal before dev-debug-panel.js can
+         * build the host shell. The iframe (nodevpanel=1) runs the
+         * same code and _getOAuthReturnHash() explicitly looks at
+         * window.top.location.hash, so OAuth returns land inside the
+         * iframe without us duplicating the work here. */
+        console.info('[WEB-AUTH] Dev portal host mode — deferring all auth (checkExistingSession + OAuth return) to iframe');
         return;
     }
 
