@@ -52,7 +52,7 @@
 .maint-countdown {
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: 30px;
-    color: var(--v-gold, #c4953a);
+    color: var(--v-gold, var(--v-gold, #c4953a));
     letter-spacing: 4px;
     text-shadow: 0 0 16px var(--v-gold-30), 0 2px 4px rgba(0,0,0,0.5);
     margin-bottom: var(--v-space-xs, 2px);
@@ -93,7 +93,7 @@
 
 .maint-tip-text {
     font-size: var(--v-font-label, 12px);
-    color: var(--v-text-dim, #a09484);
+    color: var(--v-text-dim, var(--v-text-dim, #a09484));
     line-height: 1.5;
     transition: opacity var(--v-transition-enter);
 }
@@ -129,7 +129,7 @@
 /* ── Safe message ── */
 .maint-safe {
     font-size: var(--v-font-label, 11px);
-    color: var(--v-text-dim, #a09484);
+    color: var(--v-text-dim, var(--v-text-dim, #a09484));
     opacity: 0.5;
     margin-top: auto;
     padding-bottom: var(--v-space-xl, 16px);

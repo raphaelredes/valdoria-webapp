@@ -8,7 +8,7 @@
   align-items: center;
   gap: var(--v-space-md, 8px);
   padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);
-  background: var(--v-bg-raised, #332a22);
+  background: var(--v-bg-raised, var(--v-bg-raised, #332a22));
   border: 1px solid var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
   margin-bottom: var(--v-space-sm, 6px);
@@ -23,7 +23,7 @@
 .vc-npc-name {
   font-family: var(--v-font-display, 'Cinzel', serif);
   font-size: var(--v-font-body, 14px);
-  color: var(--v-gold-light, #dbb668);
+  color: var(--v-gold-light, var(--v-gold-light, #dbb668));
   font-weight: 600;
 }
 .vc-npc-mood {
@@ -51,9 +51,9 @@
   padding: var(--v-space-sm, 6px) 0;
   font-size: var(--v-font-sm, 12px);
 }
-.vc-gold-label { color: var(--v-text-dim, #a09484); }
+.vc-gold-label { color: var(--v-text-dim, var(--v-text-dim, #a09484)); }
 .vc-gold-value {
-  color: var(--v-gold, #c4953a);
+  color: var(--v-gold, var(--v-gold, #c4953a));
   font-weight: 600;
 }
 
@@ -70,7 +70,7 @@
   align-items: center;
   gap: var(--v-space-xs, 2px);
   padding: var(--v-space-md, 8px) var(--v-space-sm, 6px);
-  background: var(--v-bg-raised, #332a22);
+  background: var(--v-bg-raised, var(--v-bg-raised, #332a22));
   border: 1px solid var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
   cursor: pointer;
@@ -109,7 +109,7 @@
   font-size: var(--v-font-sm, 12px);
   line-height: 1.4;
   margin-bottom: var(--v-space-sm, 6px);
-  border-left: 3px solid var(--v-gold, #c4953a);
+  border-left: 3px solid var(--v-gold, var(--v-gold, #c4953a));
   background: var(--v-gold-08);
   color: var(--v-text, #d4c8b0);
 }
@@ -255,7 +255,7 @@
   background: var(--v-gold, #c4953a);
   box-shadow: 0 0 4px var(--v-gold-50);
 }
-.vc-badge--new { color: var(--v-gold, #c4953a); background: transparent; }
+.vc-badge--new { color: var(--v-gold, var(--v-gold, #c4953a)); background: transparent; }
 .vc-badge--danger { background: rgba(231, 76, 60, 0.2); color: #e07070; }
 
 /* ── Performance ── */

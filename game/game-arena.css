@@ -25,9 +25,9 @@
     --arena-silver-dark: #6a7078;
     --arena-silver-glow: rgba(176, 184, 192, 0.35);
 
-    --arena-gold: var(--v-gold, #c4953a);
-    --arena-gold-light: var(--v-gold-light, #dbb668);
-    --arena-gold-dark: var(--v-gold-dim, #9a7530);
+    --arena-gold: var(--v-gold, var(--v-gold, #c4953a));
+    --arena-gold-light: var(--v-gold-light, var(--v-gold-light, #dbb668));
+    --arena-gold-dark: var(--v-gold-dim, var(--v-gold-dim, #9a7530));
     --arena-gold-glow: var(--v-gold-30, rgba(196, 149, 58, 0.3));
 
     --arena-mythril: #9b59b6;
@@ -536,7 +536,7 @@
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-lg, 16px);
     font-weight: 700;
-    color: var(--v-text, #d4c8b0);
+    color: var(--v-text, var(--v-text, #d4c8b0));
     line-height: 1.2;
 }
 
@@ -603,7 +603,7 @@
     color: var(--v-gold, #c4953a);
     text-shadow: 0 0 10px var(--v-gold-30);
     padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
-    background: var(--v-bg-raised, #332a22);
+    background: var(--v-bg-raised, var(--v-bg-raised, #332a22));
     border-radius: var(--v-radius-pill, 20px);
     margin-top: -24px;
     position: relative;
@@ -625,7 +625,7 @@
     background: radial-gradient(circle at center,
         var(--arena-stone-1) 0%,
         var(--arena-stone-3) 100%);
-    border: 3px solid var(--v-gold-dim, #9a7530);
+    border: 3px solid var(--v-gold-dim, var(--v-gold-dim, #9a7530));
     border-radius: 50%;
     position: relative;
     box-shadow: 0 0 12px var(--v-gold-20),
@@ -652,7 +652,7 @@
     transform: translateX(-50%);
     font-size: var(--v-font-sm, 12px);
     color: var(--v-gold, #c4953a);
-    background: var(--v-bg-raised, #332a22);
+    background: var(--v-bg-raised, var(--v-bg-raised, #332a22));
     padding: 0 var(--v-space-xs, 2px);
     line-height: 1;
 }
@@ -727,7 +727,7 @@
 
 .arena-challenger-stats .c-stat-label {
     font-size: var(--v-font-micro, 10px);
-    color: var(--v-text-dim, #a09484);
+    color: var(--v-text-dim, var(--v-text-dim, #a09484));
     letter-spacing: 0.5px;
     line-height: 1.2;
 }
@@ -745,7 +745,7 @@
     padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
     background: linear-gradient(180deg,
         var(--v-gold-04, rgba(196, 149, 58, 0.04)) 0%,
-        var(--v-bg-card, #2e2520) 100%);
+        var(--v-bg-card, var(--v-bg-card, #2e2520)) 100%);
     border: 1px solid var(--v-gold-15, rgba(196, 149, 58, 0.15));
     border-radius: var(--v-radius, 10px);
     box-shadow: inset 0 1px 0 var(--v-gold-08);
@@ -826,7 +826,7 @@
     background: linear-gradient(180deg,
         var(--v-bg-card, #2e2520) 0%,
         var(--arena-stone-1) 100%);
-    color: var(--v-text, #d4c8b0);
+    color: var(--v-text, var(--v-text, #d4c8b0));
     font-family: var(--v-font, 'MedievalSharp', serif);
     font-size: var(--v-font-body, 14px);
     font-weight: 600;
@@ -854,14 +854,14 @@
     background: linear-gradient(180deg,
         var(--v-gold-20, rgba(196, 149, 58, 0.2)) 0%,
         var(--v-gold-10, rgba(196, 149, 58, 0.1)) 50%,
-        var(--v-bg-card, #2e2520) 100%);
+        var(--v-bg-card, var(--v-bg-card, #2e2520)) 100%);
     border: 2px solid transparent;
     border-image: linear-gradient(135deg,
         var(--v-gold-dim, #9a7530),
-        var(--v-gold-light, #dbb668),
+        var(--v-gold-light, var(--v-gold-light, #dbb668)),
         var(--v-gold, #c4953a),
         var(--v-gold-light, #dbb668),
-        var(--v-gold-dim, #9a7530)) 1;
+        var(--v-gold-dim, var(--v-gold-dim, #9a7530))) 1;
     text-shadow: 0 0 14px var(--v-gold-40, rgba(196, 149, 58, 0.4));
     box-shadow: 0 4px 14px var(--v-gold-15, rgba(196, 149, 58, 0.15)),
                 inset 0 1px 0 var(--v-gold-25, rgba(196, 149, 58, 0.25));
@@ -1087,7 +1087,7 @@
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-body, 14px);
     font-weight: 700;
-    color: var(--v-text, #d4c8b0);
+    color: var(--v-text, var(--v-text, #d4c8b0));
     letter-spacing: 0.5px;
 }
 
@@ -1214,10 +1214,10 @@
     font-weight: 700;
     background: linear-gradient(90deg,
         var(--v-gold-dim, #9a7530),
-        var(--v-gold-light, #dbb668),
+        var(--v-gold-light, var(--v-gold-light, #dbb668)),
         var(--v-gold, #c4953a),
         var(--v-gold-light, #dbb668),
-        var(--v-gold-dim, #9a7530));
+        var(--v-gold-dim, var(--v-gold-dim, #9a7530)));
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -1236,7 +1236,7 @@
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-2xl, 18px);
     font-weight: 700;
-    color: var(--v-text, #d4c8b0);
+    color: var(--v-text, var(--v-text, #d4c8b0));
     opacity: 0.85;
 }
 
@@ -1262,7 +1262,7 @@
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-body, 14px);
     font-weight: 700;
-    color: var(--v-text, #d4c8b0);
+    color: var(--v-text, var(--v-text, #d4c8b0));
 }
 
 .arena-result-flavor {
@@ -1337,7 +1337,7 @@
 
 .arena-reward-card .reward-text strong {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    color: var(--v-gold-light, #dbb668);
+    color: var(--v-gold-light, var(--v-gold-light, #dbb668));
     font-weight: 700;
 }
 
@@ -1366,7 +1366,7 @@
 .arena-reward-bonus {
     font-size: var(--v-font-xs, 10px);
     font-weight: 600;
-    color: var(--v-gold, #c4953a);
+    color: var(--v-gold, var(--v-gold, #c4953a));
     font-style: italic;
 }
 
@@ -1428,8 +1428,8 @@
     letter-spacing: 2px;
     background: linear-gradient(90deg,
         var(--v-gold-dim, #9a7530),
-        var(--v-gold-light, #dbb668),
-        var(--v-gold-dim, #9a7530));
+        var(--v-gold-light, var(--v-gold-light, #dbb668)),
+        var(--v-gold-dim, var(--v-gold-dim, #9a7530)));
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -1499,7 +1499,7 @@
     font-family: var(--v-font-display, 'Cinzel', serif);
     font-size: var(--v-font-sm, 12px);
     font-weight: 700;
-    color: var(--v-text, #d4c8b0);
+    color: var(--v-text, var(--v-text, #d4c8b0));
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1509,7 +1509,7 @@
 
 .arena-lb-podium-level {
     font-size: var(--v-font-micro, 10px);
-    color: var(--v-text-dim, #a09484);
+    color: var(--v-text-dim, var(--v-text-dim, #a09484));
     letter-spacing: 0.5px;
 }
 
@@ -1623,7 +1623,7 @@
 
 .arena-lb-level {
     font-size: var(--v-font-micro, 10px);
-    color: var(--v-text-dim, #a09484);
+    color: var(--v-text-dim, var(--v-text-dim, #a09484));
 }
 
 .arena-lb-wins {
@@ -1695,7 +1695,7 @@ body.perf-lite .arena-result-header.victory .arena-result-title {
     -webkit-background-clip: unset;
     background-clip: unset;
     -webkit-text-fill-color: var(--v-gold-light, #dbb668);
-    color: var(--v-gold-light, #dbb668);
+    color: var(--v-gold-light, var(--v-gold-light, #dbb668));
 }
 
 body.perf-lite .arena-lb-title {
@@ -1703,7 +1703,7 @@ body.perf-lite .arena-lb-title {
     -webkit-background-clip: unset;
     background-clip: unset;
     -webkit-text-fill-color: var(--v-gold-light, #dbb668);
-    color: var(--v-gold-light, #dbb668);
+    color: var(--v-gold-light, var(--v-gold-light, #dbb668));
 }
 
 /* Medium devices — keep animations but lighter */
@@ -1751,6 +1751,6 @@ body.perf-medium .arena-backdrop-torch .torch-flame { animation-duration: 2s; }
         -webkit-background-clip: unset;
         background-clip: unset;
         -webkit-text-fill-color: var(--v-gold-light, #dbb668);
-        color: var(--v-gold-light, #dbb668);
+        color: var(--v-gold-light, var(--v-gold-light, #dbb668));
     }
 }

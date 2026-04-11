@@ -23,7 +23,7 @@
   min-width: 34px;
   border-radius: 50%;
   border: 2px solid var(--v-gold, #c4953a);
-  background: var(--v-bg-card, #2e2520);
+  background: var(--v-bg-card, var(--v-bg-card, #2e2520));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,7 +106,7 @@
   width: 100%;
   height: 48px;
   padding: 0 var(--v-space-xl, 16px);
-  border: 2px solid var(--v-gold, #c4953a);
+  border: 2px solid var(--v-gold, var(--v-gold, #c4953a));
   border-image: linear-gradient(
     135deg,
     var(--v-gold-dim, #9a7530),
@@ -167,7 +167,7 @@
   align-items: center;
   gap: var(--v-space-sm, 4px);
   padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
-  background: var(--v-bg-card, #2e2520);
+  background: var(--v-bg-card, var(--v-bg-card, #2e2520));
   border: 1px solid var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
   min-width: 0;
@@ -285,7 +285,7 @@
   align-items: center;
   gap: var(--v-space-xs, 2px);
   padding: var(--v-space-md, 8px);
-  background: var(--v-bg-card, #2e2520);
+  background: var(--v-bg-card, var(--v-bg-card, #2e2520));
   border: 1px solid var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
   cursor: pointer;
@@ -328,7 +328,7 @@
   height: 14px;
   padding: 0 3px;
   border-radius: var(--v-radius-pill, 20px);
-  background: var(--v-danger, #e74c3c);
+  background: var(--v-danger, var(--v-danger, #e74c3c));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -391,7 +391,7 @@
   align-items: center;
   gap: 1px;
   padding: var(--v-space-sm, 4px) var(--v-space-xs, 2px);
-  background: var(--v-bg-card, #2e2520);
+  background: var(--v-bg-card, var(--v-bg-card, #2e2520));
   border: 1px solid var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
 }
@@ -460,8 +460,8 @@
   display: flex;
   justify-content: space-around;
   align-items: stretch;
-  /* HARDCODED: #1a1510 — deeper than --v-bg for visual separation */
-  background: #1a1510;
+  /* HARDCODED: var(--v-bg-deep, #1a1510) — deeper than --v-bg for visual separation */
+  background: var(--v-bg-deep, #1a1510);
   border-top: 1px solid var(--v-border, #4a3828);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }

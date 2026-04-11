@@ -12,7 +12,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at 50% 40%, #1a1510 0%, #0a0808 100%);
+  background: radial-gradient(ellipse at 50% 40%, var(--v-bg-deep, #1a1510) 0%, #0a0808 100%);
   transition: background var(--v-transition-slow);
   animation: crFadeIn 0.6s ease-out;
   overflow: hidden;
@@ -215,7 +215,7 @@
   font-family: var(--v-font, 'MedievalSharp', serif);
   font-size: var(--v-font-body, 14px);
   line-height: 1.7;
-  color: var(--v-text, #d4c8b0);
+  color: var(--v-text, var(--v-text, #d4c8b0));
   font-style: italic;
   margin-bottom: var(--v-space-sm, 4px);
   opacity: 0;
@@ -352,7 +352,7 @@
 }
 #camp-rest-advance:active {
   background: var(--v-gold-20, rgba(196,149,58,0.2));
-  border-color: var(--v-gold, #c4953a);
+  border-color: var(--v-gold, var(--v-gold, #c4953a));
 }
 #camp-rest-skip {
   position: fixed;
