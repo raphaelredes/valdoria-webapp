@@ -17,16 +17,22 @@ function renderTempleHub(container, data) {
     ));
   }
 
-  /* Pay Debt button — render inline buttons from data.buttons (fix 2026-04-11) */
-  /* Backend sends "Pagar Dívida" button when debt > 0, but renderer ignored it */
-  /* before this fix, leaving the player stuck (couldn't use services OR pay). */
+  /* Pay Debt button — render ONLY special action buttons (fix 2026-04-11) */
+  /* Backend sends data.buttons with all interactions (services + pay debt). */
+  /* Services are already rendered by serviceGrid, so filter to special ones */
+  /* (temple_confirm_debt, temple_pay_*) that don't have service cards. */
   if (data.buttons && Array.isArray(data.buttons) && data.buttons.length > 0) {
-    var btnRow = vCity.el('div', 'tmp-pay-debt-row');
+    var _SPECIAL_CBS = {
+      'temple_confirm_debt': true,
+      'temple_pay_debt': true,
+    };
+    var btnRow = null;
     for (var bi = 0; bi < data.buttons.length; bi++) {
       var b = data.buttons[bi];
       if (!b || !b.cb) continue;
+      if (!_SPECIAL_CBS[b.cb]) continue; /* skip service interactions */
+      if (!btnRow) btnRow = vCity.el('div', 'tmp-pay-debt-row');
       var btn = vCity.el('button', 'v-popup-btn v-popup-btn--primary tmp-pay-btn');
-      /* Parse text for v-coin token to render icon correctly */
       var txt = b.text || '';
       var coinToken = '<span class="vi vi-coin sm"></span>';
       if (txt.indexOf(coinToken) >= 0) {
@@ -45,7 +51,7 @@ function renderTempleHub(container, data) {
       })(b.cb);
       btnRow.appendChild(btn);
     }
-    root.appendChild(btnRow);
+    if (btnRow) root.appendChild(btnRow);
   }
 
   /* Flavor text */
