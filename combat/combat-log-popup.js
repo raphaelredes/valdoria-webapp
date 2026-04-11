@@ -32,6 +32,16 @@ function _buildLogEntries(state) {
     }
 
     var html = '';
+    /* Combat audit 7.3: feed pagination hint. When the server trims entries
+     * from the in-memory feed (MAX_FEED_ENTRIES=100), state.feed_total
+     * reports the TRUE count. Show a truncation notice at the top so the
+     * player knows older entries exist only in server-side combat_logs. */
+    if (typeof state.feed_total === 'number' && state.feed_total > feed.length) {
+        var dropped = state.feed_total - feed.length;
+        html += '<div class="log-round-sep log-truncated">' +
+                '(+' + dropped + ' entradas antigas omitidas — registro completo no servidor)' +
+                '</div>';
+    }
     var lastRound = -1;
 
     for (var i = 0; i < feed.length; i++) {
