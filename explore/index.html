@@ -106,9 +106,10 @@
 
     <!-- Floating quick actions: bottom-right -->
     <div id="hud-quick-actions" class="hud-float-quick">
-      <div class="hud-quick-btn" id="btn-camp-float" onclick="if(typeof showCampOverlay==='function')showCampOverlay();">🏕️</div>
-      <div class="hud-quick-btn" id="btn-inventory-float" onclick="if(typeof transitionToInventory==='function')transitionToInventory();">🎒</div>
-      <div class="hud-quick-btn" id="btn-torch" onclick="if(typeof toggleTorch==='function')toggleTorch();">🔥</div>
+      <div class="hud-quick-btn" id="btn-camp-float" onclick="if(typeof showCampOverlay==='function')showCampOverlay();" title="Acampar">🏕️</div>
+      <div class="hud-quick-btn" id="btn-inventory-float" onclick="if(typeof transitionToInventory==='function')transitionToInventory();" title="Mochila">🎒</div>
+      <div class="hud-quick-btn" id="btn-torch" onclick="if(typeof toggleTorch==='function')toggleTorch();" title="Tocha">🔥</div>
+      <div class="hud-quick-btn" id="btn-return-float" onclick="if(typeof showExitRiskAssessment==='function')showExitRiskAssessment();" title="Retornar à cidade">🏠</div>
     </div>
 
     <!-- Minimap -->
