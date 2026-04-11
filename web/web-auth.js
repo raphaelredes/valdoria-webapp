@@ -654,17 +654,29 @@ async function _devReauth(devToken) {
 /* ----- Auto-Login Check ----- */
 
 function checkExistingSession() {
-    // DEV auto-login: if a persistent device token exists, try to re-authenticate silently
+    // DEV auto-login: if a persistent device token exists, try to re-authenticate silently.
+    // Fix (2026-04-11): if _devReauth fails (expired token, 401), fall through to the
+    // normal WEB_TOKEN_KEY flow instead of stopping on the login screen. Previously the
+    // failed _devReauth left the user stuck on login even though a valid Telegram session
+    // token existed in WEB_TOKEN_KEY from an earlier OAuth flow.
     if (_envId === 'dev') {
         var devToken = localStorage.getItem(DEV_DEVICE_KEY);
         if (devToken) {
             console.info('[WEB-AUTH] checkExistingSession: DEV device token found, attempting reauth');
             showAuthLoading(true);
-            _devReauth(devToken);
+            _devReauth(devToken).then(function(succeeded) {
+                if (!succeeded) {
+                    console.info('[WEB-AUTH] _devReauth failed — falling back to WEB_TOKEN_KEY flow');
+                    _tryWebTokenSession();
+                }
+            });
             return;
         }
     }
+    _tryWebTokenSession();
+}
 
+function _tryWebTokenSession() {
     var token = localStorage.getItem(WEB_TOKEN_KEY);
     var uid = localStorage.getItem(WEB_USER_KEY);
     var api = localStorage.getItem(WEB_API_KEY);
