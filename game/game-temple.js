@@ -17,50 +17,38 @@ function renderTempleHub(container, data) {
     ));
   }
 
-  /* Pay Debt button — render ONLY special action buttons (fix 2026-04-11) */
-  /* Backend sends data.buttons as array-of-arrays (InlineKeyboardMarkup rows). */
-  /* Flatten first, then filter to whitelist of special callbacks. */
-  if (data.buttons && Array.isArray(data.buttons) && data.buttons.length > 0) {
-    var _SPECIAL_CBS = {
-      'temple_confirm_debt': true,
-      'temple_pay_debt': true,
-    };
-    /* Flatten array-of-arrays (InlineKeyboardMarkup format from backend) */
-    var flatBtns = [];
-    for (var ri = 0; ri < data.buttons.length; ri++) {
-      var row = data.buttons[ri];
-      if (Array.isArray(row)) {
-        for (var ci = 0; ci < row.length; ci++) flatBtns.push(row[ci]);
-      } else if (row && typeof row === 'object') {
-        flatBtns.push(row);
-      }
+  /* Pay Debt button — uses structured data.pay_debt (fix 2026-04-11) */
+  /* Backend (temple.py) sends a dedicated `pay_debt` field on the */
+  /* _temple_screen payload: {icon, label, cb, disabled, cost, primary}. */
+  /* Previously the button was only in the InlineKeyboardMarkup fallback */
+  /* at the top level (data.buttons), which renderTempleHub ignored — */
+  /* players with debt were stuck (services disabled, no pay option). */
+  if (data.pay_debt && data.pay_debt.cb) {
+    var pd = data.pay_debt;
+    var payBtn = vCity.el('button', 'v-popup-btn v-popup-btn--primary tmp-pay-btn');
+    if (pd.disabled) payBtn.classList.add('disabled');
+    if (pd.icon) {
+      var iconSpan = vCity.el('span', 'tmp-pay-icon');
+      iconSpan.textContent = pd.icon + ' ';
+      payBtn.appendChild(iconSpan);
     }
-    var btnRow = null;
-    for (var bi = 0; bi < flatBtns.length; bi++) {
-      var b = flatBtns[bi];
-      if (!b || !b.cb) continue;
-      if (!_SPECIAL_CBS[b.cb]) continue; /* skip service interactions */
-      if (!btnRow) btnRow = vCity.el('div', 'tmp-pay-debt-row');
-      var btn = vCity.el('button', 'v-popup-btn v-popup-btn--primary tmp-pay-btn');
-      var txt = b.text || '';
-      var coinToken = '<span class="vi vi-coin sm"></span>';
-      if (txt.indexOf(coinToken) >= 0) {
-        var parts = txt.split(coinToken);
-        for (var pi = 0; pi < parts.length; pi++) {
-          if (parts[pi]) btn.appendChild(document.createTextNode(parts[pi]));
-          if (pi < parts.length - 1) btn.appendChild(vCity.el('span', 'vi vi-coin sm'));
-        }
-      } else {
-        btn.textContent = txt;
-      }
-      (function(cb) {
-        btn.addEventListener('click', function() {
-          if (typeof doAction === 'function') doAction(cb);
-        });
-      })(b.cb);
-      btnRow.appendChild(btn);
+    var labelSpan = vCity.el('span', 'tmp-pay-label');
+    labelSpan.textContent = pd.label || 'Pagar Dívida';
+    payBtn.appendChild(labelSpan);
+    if (pd.disabled) {
+      var warn = vCity.el('span', 'tmp-pay-warn');
+      warn.textContent = ' — Ouro insuficiente';
+      payBtn.appendChild(warn);
     }
-    if (btnRow) root.appendChild(btnRow);
+    (function(cb, disabled) {
+      payBtn.addEventListener('click', function() {
+        if (disabled) return;
+        if (typeof doAction === 'function') doAction(cb);
+      });
+    })(pd.cb, !!pd.disabled);
+    var btnRow = vCity.el('div', 'tmp-pay-debt-row');
+    btnRow.appendChild(payBtn);
+    root.appendChild(btnRow);
   }
 
   /* Flavor text */
